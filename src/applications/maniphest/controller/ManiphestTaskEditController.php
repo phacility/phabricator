@@ -81,7 +81,7 @@ final class ManiphestTaskEditController extends ManiphestController {
             $default_projects = mpull($default_projects, 'getPHID');
 
             if ($default_projects) {
-              $task->setProjectPHIDs($default_projects);
+              $task->attachProjectPHIDs($default_projects);
             }
           }
         }
@@ -215,7 +215,7 @@ final class ManiphestTaskEditController extends ManiphestController {
         $task->setPriority($request->getInt('priority'));
         $task->setOwnerPHID($owner_phid);
         $task->setCCPHIDs($request->getArr('cc'));
-        $task->setProjectPHIDs($request->getArr('projects'));
+        $task->attachProjectPHIDs($request->getArr('projects'));
       } else {
 
         if ($can_edit_priority) {
@@ -438,7 +438,7 @@ final class ManiphestTaskEditController extends ManiphestController {
             ->executeOne();
           if ($template_task) {
             $task->setCCPHIDs($template_task->getCCPHIDs());
-            $task->setProjectPHIDs($template_task->getProjectPHIDs());
+            $task->attachProjectPHIDs($template_task->getProjectPHIDs());
             $task->setOwnerPHID($template_task->getOwnerPHID());
             $task->setPriority($template_task->getPriority());
             $task->setViewPolicy($template_task->getViewPolicy());

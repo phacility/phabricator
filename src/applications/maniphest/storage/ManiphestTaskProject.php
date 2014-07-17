@@ -19,13 +19,15 @@ final class ManiphestTaskProject extends ManiphestDAO {
     );
   }
 
-  public static function updateTaskProjects(ManiphestTask $task) {
+  public static function updateTaskProjects(
+    ManiphestTask $task,
+    array $new_phids) {
+
     $edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
 
     $old_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $task->getPHID(),
       $edge_type);
-    $new_phids = $task->getProjectPHIDs();
 
     $add_phids = array_diff($new_phids, $old_phids);
     $rem_phids = array_diff($old_phids, $new_phids);
@@ -33,7 +35,6 @@ final class ManiphestTaskProject extends ManiphestDAO {
     if (!$add_phids && !$rem_phids) {
       return;
     }
-
 
     $editor = new PhabricatorEdgeEditor();
     foreach ($add_phids as $phid) {

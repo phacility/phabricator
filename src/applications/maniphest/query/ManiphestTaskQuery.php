@@ -331,6 +331,27 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $tasks;
   }
 
+  protected function didFilterPage(array $tasks) {
+    // TODO: Eventually, we should make this optional and introduce a
+    // needProjectPHIDs() method, but for now there's a lot of code which
+    // assumes the data is always populated.
+
+    $edge_query = id(new PhabricatorEdgeQuery())
+      ->withSourcePHIDs(mpull($tasks, 'getPHID'))
+      ->withEdgeTypes(
+        array(
+          PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+        ));
+    $edge_query->execute();
+
+    foreach ($tasks as $task) {
+      $phids = $edge_query->getDestinationPHIDs(array($task->getPHID()));
+      $task->attachProjectPHIDs($phids);
+    }
+
+    return $tasks;
+  }
+
   private function buildTaskIDsWhereClause(AphrontDatabaseConnection $conn) {
     if (!$this->taskIDs) {
       return null;

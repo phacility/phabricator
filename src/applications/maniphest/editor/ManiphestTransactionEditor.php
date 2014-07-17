@@ -150,8 +150,9 @@ final class ManiphestTransactionEditor
       case ManiphestTransaction::TYPE_CCS:
         return $object->setCCPHIDs($xaction->getNewValue());
       case ManiphestTransaction::TYPE_PROJECTS:
-        $object->setProjectPHIDs($xaction->getNewValue());
-        ManiphestTaskProject::updateTaskProjects($object);
+        ManiphestTaskProject::updateTaskProjects(
+          $object,
+          $xaction->getNewValue());
         return $object;
       case ManiphestTransaction::TYPE_SUBPRIORITY:
         $data = $xaction->getNewValue();

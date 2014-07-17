@@ -37,6 +37,7 @@ final class ManiphestTask extends ManiphestDAO
 
   private $groupByProjectPHID = self::ATTACHABLE;
   private $customFields = self::ATTACHABLE;
+  private $edgeProjectPHIDs = self::ATTACHABLE;
 
   public static function initializeNewTask(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -52,7 +53,8 @@ final class ManiphestTask extends ManiphestDAO
       ->setPriority(ManiphestTaskPriority::getDefaultPriority())
       ->setAuthorPHID($actor->getPHID())
       ->setViewPolicy($view_policy)
-      ->setEditPolicy($edit_policy);
+      ->setEditPolicy($edit_policy)
+      ->attachProjectPHIDs(array());
   }
 
   public function getConfiguration() {
@@ -90,13 +92,13 @@ final class ManiphestTask extends ManiphestDAO
     return array_values(nonempty($this->ccPHIDs, array()));
   }
 
-  public function setProjectPHIDs(array $phids) {
-    $this->projectPHIDs = array_values($phids);
-    return $this;
+  public function getProjectPHIDs() {
+    return $this->assertAttached($this->edgeProjectPHIDs);
   }
 
-  public function getProjectPHIDs() {
-    return array_values(nonempty($this->projectPHIDs, array()));
+  public function attachProjectPHIDs(array $phids) {
+    $this->edgeProjectPHIDs = $phids;
+    return $this;
   }
 
   public function setCCPHIDs(array $phids) {
