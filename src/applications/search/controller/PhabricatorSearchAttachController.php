@@ -57,45 +57,32 @@ final class PhabricatorSearchAttachController
       $phids = array_values($phids);
 
       if ($edge_type) {
-        $do_txn = $object instanceof PhabricatorApplicationTransactionInterface;
+        if (!$object instanceof PhabricatorApplicationTransactionInterface) {
+          throw new Exception(
+            pht(
+              'Expected object ("%s") to implement interface "%s".',
+              get_class($object),
+              'PhabricatorApplicationTransactionInterface'));
+        }
+
         $old_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
           $this->phid,
           $edge_type);
         $add_phids = $phids;
         $rem_phids = array_diff($old_phids, $add_phids);
 
-        if ($do_txn) {
-
-          $txn_editor = $object->getApplicationTransactionEditor()
-            ->setActor($user)
-            ->setContentSourceFromRequest($request);
-          $txn_template = $object->getApplicationTransactionTemplate()
-            ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-            ->setMetadataValue('edge:type', $edge_type)
-            ->setNewValue(array(
-              '+' => array_fuse($add_phids),
-              '-' => array_fuse($rem_phids)));
-          $txn_editor->applyTransactions(
-            $object->getApplicationTransactionObject(),
-            array($txn_template));
-
-        } else {
-
-          $editor = id(new PhabricatorEdgeEditor());
-          $editor->setActor($user);
-          foreach ($add_phids as $phid) {
-            $editor->addEdge($this->phid, $edge_type, $phid);
-          }
-          foreach ($rem_phids as $phid) {
-            $editor->removeEdge($this->phid, $edge_type, $phid);
-          }
-
-          try {
-            $editor->save();
-          } catch (PhabricatorEdgeCycleException $ex) {
-            $this->raiseGraphCycleException($ex);
-          }
-        }
+        $txn_editor = $object->getApplicationTransactionEditor()
+          ->setActor($user)
+          ->setContentSourceFromRequest($request);
+        $txn_template = $object->getApplicationTransactionTemplate()
+          ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+          ->setMetadataValue('edge:type', $edge_type)
+          ->setNewValue(array(
+            '+' => array_fuse($add_phids),
+            '-' => array_fuse($rem_phids)));
+        $txn_editor->applyTransactions(
+          $object->getApplicationTransactionObject(),
+          array($txn_template));
 
         return id(new AphrontReloadResponse())->setURI($handle->getURI());
       } else {

@@ -9,6 +9,7 @@ final class ManiphestTransactionEditor
     $types = parent::getTransactionTypes();
 
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
+    $types[] = PhabricatorTransactions::TYPE_EDGE;
     $types[] = ManiphestTransaction::TYPE_PRIORITY;
     $types[] = ManiphestTransaction::TYPE_STATUS;
     $types[] = ManiphestTransaction::TYPE_TITLE;
@@ -16,7 +17,6 @@ final class ManiphestTransactionEditor
     $types[] = ManiphestTransaction::TYPE_OWNER;
     $types[] = ManiphestTransaction::TYPE_CCS;
     $types[] = ManiphestTransaction::TYPE_PROJECTS;
-    $types[] = ManiphestTransaction::TYPE_EDGE;
     $types[] = ManiphestTransaction::TYPE_SUBPRIORITY;
     $types[] = ManiphestTransaction::TYPE_PROJECT_COLUMN;
     $types[] = ManiphestTransaction::TYPE_UNBLOCK;
@@ -57,7 +57,6 @@ final class ManiphestTransactionEditor
         return array_values(array_unique($object->getCCPHIDs()));
       case ManiphestTransaction::TYPE_PROJECTS:
         return array_values(array_unique($object->getProjectPHIDs()));
-      case ManiphestTransaction::TYPE_EDGE:
       case ManiphestTransaction::TYPE_PROJECT_COLUMN:
         // These are pre-populated.
         return $xaction->getOldValue();
@@ -82,7 +81,6 @@ final class ManiphestTransactionEditor
       case ManiphestTransaction::TYPE_STATUS:
       case ManiphestTransaction::TYPE_TITLE:
       case ManiphestTransaction::TYPE_DESCRIPTION:
-      case ManiphestTransaction::TYPE_EDGE:
       case ManiphestTransaction::TYPE_SUBPRIORITY:
       case ManiphestTransaction::TYPE_PROJECT_COLUMN:
       case ManiphestTransaction::TYPE_UNBLOCK:
@@ -155,10 +153,6 @@ final class ManiphestTransactionEditor
         $object->setProjectPHIDs($xaction->getNewValue());
         ManiphestTaskProject::updateTaskProjects($object);
         return $object;
-      case ManiphestTransaction::TYPE_EDGE:
-        // These are a weird, funky mess and are already being applied by the
-        // time we reach this.
-        return;
       case ManiphestTransaction::TYPE_SUBPRIORITY:
         $data = $xaction->getNewValue();
         $new_sub = $this->getNextSubpriority(

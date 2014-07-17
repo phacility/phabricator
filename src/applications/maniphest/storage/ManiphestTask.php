@@ -8,7 +8,8 @@ final class ManiphestTask extends ManiphestDAO
     PhabricatorFlaggableInterface,
     PhrequentTrackableInterface,
     PhabricatorCustomFieldInterface,
-    PhabricatorDestructableInterface {
+    PhabricatorDestructableInterface,
+    PhabricatorApplicationTransactionInterface {
 
   const MARKUP_FIELD_DESCRIPTION = 'markup:desc';
 
@@ -301,6 +302,22 @@ final class ManiphestTask extends ManiphestDAO
 
       $this->delete();
     $this->saveTransaction();
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new ManiphestTransactionEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new ManiphestTransaction();
   }
 
 }
