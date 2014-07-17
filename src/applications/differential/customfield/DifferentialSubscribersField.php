@@ -44,7 +44,7 @@ final class DifferentialSubscribersField
   public function renderEditControl(array $handles) {
     return id(new AphrontFormTokenizerControl())
       ->setName($this->getFieldKey())
-      ->setDatasource('/typeahead/common/mailable/')
+      ->setDatasource(new PhabricatorMetaMTAMailableDatasource())
       ->setValue($handles)
       ->setError($this->getFieldError())
       ->setLabel($this->getFieldName());

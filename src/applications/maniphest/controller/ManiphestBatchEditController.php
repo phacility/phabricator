@@ -62,6 +62,7 @@ final class ManiphestBatchEditController extends ManiphestController {
     $template = $template->render();
 
     $projects_source = new PhabricatorProjectDatasource();
+    $mailable_source = new PhabricatorMetaMTAMailableDatasource();
 
     require_celerity_resource('maniphest-batch-editor');
     Javelin::initBehavior(
@@ -81,8 +82,8 @@ final class ManiphestBatchEditController extends ManiphestController {
             'limit'         => 1,
           ),
           'cc'    => array(
-            'src'           => '/typeahead/common/mailable/',
-            'placeholder'   => pht('Type a user name...'),
+            'src'           => $mailable_source->getDatasourceURI(),
+            'placeholder'   => $mailable_source->getPlaceholderText(),
           )
         ),
         'input' => 'batch-form-actions',

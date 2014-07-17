@@ -613,7 +613,7 @@ final class ManiphestTaskEditController extends ManiphestController {
           ->setName('cc')
           ->setValue($cc_value)
           ->setUser($user)
-          ->setDatasource('/typeahead/common/mailable/'));
+          ->setDatasource(new PhabricatorMetaMTAMailableDatasource()));
 
     if ($can_edit_priority) {
       $form

@@ -24,7 +24,6 @@ final class PhabricatorTypeaheadCommonDatasourceController
     $need_users = false;
     $need_agents = false;
     $need_applications = false;
-    $need_lists = false;
     $need_projs = false;
     $need_packages = false;
     $need_upforgrabs = false;
@@ -47,12 +46,6 @@ final class PhabricatorTypeaheadCommonDatasourceController
       case 'searchproject':
         $need_projs = true;
         $need_noproject = true;
-        break;
-      case 'mailable':
-      case 'allmailable':
-        $need_users = true;
-        $need_lists = true;
-        $need_projs = true;
         break;
       case 'usersorprojects':
       case 'accountsorprojects':
@@ -176,18 +169,6 @@ final class PhabricatorTypeaheadCommonDatasourceController
           $result->setImageURI($handles[$user->getPHID()]->getImageURI());
         }
         $results[] = $result;
-      }
-    }
-
-    if ($need_lists) {
-      $lists = id(new PhabricatorMailingListQuery())
-        ->setViewer($viewer)
-        ->execute();
-      foreach ($lists as $list) {
-        $results[] = id(new PhabricatorTypeaheadResult())
-          ->setName($list->getName())
-          ->setURI($list->getURI())
-          ->setPHID($list->getPHID());
       }
     }
 

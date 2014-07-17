@@ -354,7 +354,7 @@ final class PholioMockEditController extends PholioController {
           ->setName('cc')
           ->setValue($handles)
           ->setUser($user)
-          ->setDatasource('/typeahead/common/mailable/'))
+          ->setDatasource(new PhabricatorMetaMTAMailableDatasource()))
       ->appendChild(
         id(new AphrontFormPolicyControl())
           ->setUser($user)

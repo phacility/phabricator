@@ -365,7 +365,7 @@ final class ManiphestTaskSearchEngine
           ->setValue($author_handles))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/mailable/')
+          ->setDatasource(new PhabricatorMetaMTAMailableDatasource())
           ->setName('subscribers')
           ->setLabel(pht('Subscribers'))
           ->setValue($subscriber_handles))

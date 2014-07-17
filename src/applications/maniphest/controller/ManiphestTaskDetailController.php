@@ -284,6 +284,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $projects_source = new PhabricatorProjectDatasource();
     $users_source = new PhabricatorPeopleDatasource();
+    $mailable_source = new PhabricatorMetaMTAMailableDatasource();
 
     $tokenizer_map = array(
       ManiphestTransaction::TYPE_PROJECTS => array(
@@ -300,8 +301,8 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ),
       ManiphestTransaction::TYPE_CCS => array(
         'id'          => 'cc-tokenizer',
-        'src'         => '/typeahead/common/mailable/',
-        'placeholder' => pht('Type a user or mailing list...'),
+        'src'         => $mailable_source->getDatasourceURI(),
+        'placeholder' => $mailable_source->getPlaceholderText(),
       ),
     );
 

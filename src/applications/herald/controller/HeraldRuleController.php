@@ -597,11 +597,11 @@ final class HeraldRuleController extends HeraldController {
       'package' => new PhabricatorOwnersPackageDatasource(),
       'project' => new PhabricatorProjectDatasource(),
       'user' => new PhabricatorPeopleDatasource(),
+      'email' => new PhabricatorMetaMTAMailableDatasource(),
     );
 
     $sources = mpull($sources, 'getDatasourceURI');
     $sources += array(
-      'email'         => '/typeahead/common/mailable/',
       'userorproject' => '/typeahead/common/accountsorprojects/',
     );
 

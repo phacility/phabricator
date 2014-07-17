@@ -161,7 +161,7 @@ final class DifferentialRevisionSearchEngine
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Subscribers'))
           ->setName('subscribers')
-          ->setDatasource('/typeahead/common/allmailable/')
+          ->setDatasource(new PhabricatorMetaMTAMailableDatasource())
           ->setValue(array_select_keys($handles, $subscriber_phids)))
       ->appendChild(
         id(new AphrontFormTokenizerControl())

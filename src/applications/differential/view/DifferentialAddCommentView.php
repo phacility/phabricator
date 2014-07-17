@@ -108,6 +108,8 @@ final class DifferentialAddCommentView extends AphrontView {
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Submit')));
 
+    $mailable_source = new PhabricatorMetaMTAMailableDatasource();
+
     Javelin::initBehavior(
       'differential-add-reviewers-and-ccs',
       array(
@@ -126,10 +128,10 @@ final class DifferentialAddCommentView extends AphrontView {
           ),
           'add-ccs-tokenizer' => array(
             'actions' => array('add_ccs' => 1),
-            'src' => '/typeahead/common/mailable/',
+            'src' => $mailable_source->getDatasourceURI(),
             'value' => $this->ccs,
             'row' => 'add-ccs',
-            'placeholder' => pht('Type a user or mailing list...'),
+            'placeholder' => $mailable_source->getPlaceholderText(),
           ),
         ),
         'select' => 'comment-action',
