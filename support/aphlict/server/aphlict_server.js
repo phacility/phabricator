@@ -180,6 +180,10 @@ var receive_server = http.createServer(function(request, response) {
 
         response.writeHead(200, {'Content-Type': 'text/plain'});
       } catch (err) {
+        debug.log(
+          '<%s> Bad Request! %s',
+          request.socket.remoteAddress,
+          err);
         response.statusCode = 400;
         response.write('400 Bad Request');
       } finally {

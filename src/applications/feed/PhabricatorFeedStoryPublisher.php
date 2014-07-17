@@ -176,7 +176,7 @@ final class PhabricatorFeedStoryPublisher {
     $data = array(
       'key'         => (string)$chrono_key,
       'type'        => 'notification',
-      'subscribers' => $this->subscribedPHIDs,
+      'subscribers' => array_values($this->subscribedPHIDs),
     );
 
     PhabricatorNotificationClient::tryToPostMessage($data);
