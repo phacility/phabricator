@@ -19,24 +19,12 @@ final class PhabricatorTypeaheadCommonDatasourceController
     $query = $request->getStr('q');
     $raw_query = $request->getStr('raw');
 
-    $need_rich_data = false;
-
     $need_users = false;
-    $need_applications = false;
     $need_projs = false;
     $need_upforgrabs = false;
     $need_noproject = false;
-    $need_symbols = false;
-    $need_jump_objects = false;
+    $need_rich_data = false;
     switch ($this->type) {
-      case 'mainsearch':
-        $need_users = true;
-        $need_applications = true;
-        $need_rich_data = true;
-        $need_symbols = true;
-        $need_projs = true;
-        $need_jump_objects = true;
-        break;
       case 'searchowner':
         $need_users = true;
         $need_upforgrabs = true;
@@ -183,74 +171,6 @@ final class PhabricatorTypeaheadCommonDatasourceController
         $proj_result->setImageURI($proj->getProfileImageURI());
 
         $results[] = $proj_result;
-      }
-    }
-
-    if ($need_applications) {
-      $applications = PhabricatorApplication::getAllInstalledApplications();
-      foreach ($applications as $application) {
-        $uri = $application->getTypeaheadURI();
-        if (!$uri) {
-          continue;
-        }
-        $name = $application->getName().' '.$application->getShortDescription();
-        $img = 'apps-'.$application->getIconName().'-dark-large';
-        $results[] = id(new PhabricatorTypeaheadResult())
-          ->setName($name)
-          ->setURI($uri)
-          ->setPHID($application->getPHID())
-          ->setPriorityString($application->getName())
-          ->setDisplayName($application->getName())
-          ->setDisplayType($application->getShortDescription())
-          ->setImageuRI($application->getIconURI())
-          ->setPriorityType('apps')
-          ->setImageSprite('phabricator-search-icon sprite-apps-large '.$img);
-      }
-    }
-
-    if ($need_symbols) {
-      $symbols = id(new DiffusionSymbolQuery())
-        ->setNamePrefix($query)
-        ->setLimit(15)
-        ->needArcanistProjects(true)
-        ->needRepositories(true)
-        ->needPaths(true)
-        ->execute();
-      foreach ($symbols as $symbol) {
-        $lang = $symbol->getSymbolLanguage();
-        $name = $symbol->getSymbolName();
-        $type = $symbol->getSymbolType();
-        $proj = $symbol->getArcanistProject()->getName();
-
-        $results[] = id(new PhabricatorTypeaheadResult())
-          ->setName($name)
-          ->setURI($symbol->getURI())
-          ->setPHID(md5($symbol->getURI())) // Just needs to be unique.
-          ->setDisplayName($name)
-          ->setDisplayType(strtoupper($lang).' '.ucwords($type).' ('.$proj.')')
-          ->setPriorityType('symb');
-      }
-    }
-
-    if ($need_jump_objects) {
-      $objects = id(new PhabricatorObjectQuery())
-        ->setViewer($viewer)
-        ->withNames(array($raw_query))
-        ->execute();
-      if ($objects) {
-        $handles = id(new PhabricatorHandleQuery())
-          ->setViewer($viewer)
-          ->withPHIDs(mpull($objects, 'getPHID'))
-          ->execute();
-        $handle = head($handles);
-        if ($handle) {
-          $results[] = id(new PhabricatorTypeaheadResult())
-            ->setName($handle->getFullName())
-            ->setDisplayType($handle->getTypeName())
-            ->setURI($handle->getURI())
-            ->setPHID($handle->getPHID())
-            ->setPriorityType('jump');
-        }
       }
     }
 

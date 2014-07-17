@@ -3,6 +3,18 @@
 final class PhabricatorPeopleDatasource
   extends PhabricatorTypeaheadDatasource {
 
+  private $enrichResults;
+
+  /**
+   * Controls enriched rendering, for global search. This is a bit hacky and
+   * should probably be handled in a more general way, but is fairly reasonable
+   * for now.
+   */
+  public function setEnrichResults($enrich) {
+    $this->enrichResults = $enrich;
+    return $this;
+  }
+
   public function getPlaceholderText() {
     return pht('Type a username...');
   }
@@ -71,15 +83,13 @@ final class PhabricatorPeopleDatasource
       }
     }
 
-    // TODO: Restore this when mainsearch moves here.
-    /*
-
-    if ($need_rich_data) {
+    if ($this->enrichResults && $users) {
       $phids = mpull($users, 'getPHID');
-      $handles = $this->loadViewerHandles($phids);
+      $handles = id(new PhabricatorHandleQuery())
+        ->setViewer($viewer)
+        ->withPHIDs($phids)
+        ->execute();
     }
-
-    */
 
     foreach ($users as $user) {
       $closed = null;
@@ -98,10 +108,7 @@ final class PhabricatorPeopleDatasource
         ->setPriorityType('user')
         ->setClosed($closed);
 
-      // TODO: Restore this too.
-      /*
-
-      if ($need_rich_data) {
+      if ($this->enrichResults) {
         $display_type = 'User';
         if ($user->getIsAdmin()) {
           $display_type = 'Administrator';
@@ -109,8 +116,6 @@ final class PhabricatorPeopleDatasource
         $result->setDisplayType($display_type);
         $result->setImageURI($handles[$user->getPHID()]->getImageURI());
       }
-
-      */
 
       $results[] = $result;
     }

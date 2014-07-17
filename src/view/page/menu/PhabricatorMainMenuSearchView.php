@@ -35,13 +35,15 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
       ),
       '');
 
+    $search_datasource = new PhabricatorSearchDatasource();
+
     Javelin::initBehavior(
       'phabricator-search-typeahead',
       array(
         'id'          => $target_id,
         'input'       => $search_id,
         'button'      => $button_id,
-        'src'         => '/typeahead/common/mainsearch/',
+        'src'         => $search_datasource->getDatasourceURI(),
         'limit'       => 10,
         'placeholder' => pht('Search'),
       ));
