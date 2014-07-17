@@ -269,7 +269,7 @@ final class ConduitAPI_diffusion_getcommits_Method
    * Enhances the commits list with Maniphest information.
    */
   private function addManiphestInformation(array $commits) {
-    $task_type = PhabricatorEdgeConfig::TYPE_COMMIT_HAS_TASK;
+    $task_type = DiffusionCommitHasTaskEdgeType::EDGECONST;
 
     $commit_phids = ipull($commits, 'commitPHID');
 

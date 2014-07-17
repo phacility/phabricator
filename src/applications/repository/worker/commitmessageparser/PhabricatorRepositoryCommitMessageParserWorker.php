@@ -448,28 +448,16 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     foreach ($tasks as $task_id => $task) {
       $xactions = array();
 
-      // TODO: Swap this for a real edge transaction once the weirdness in
-      // Maniphest edges is sorted out. Currently, Maniphest reacts to an edge
-      // edit on this edge.
-      id(new PhabricatorEdgeEditor())
-        ->addEdge(
-          $task->getPHID(),
-          PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT,
-          $commit->getPHID())
-        ->save();
-
-      /* TODO: Do this instead of the above.
-
+      $edge_type = ManiphestTaskHasCommitEdgeType::EDGECONST;
       $xactions[] = id(new ManiphestTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-        ->setMetadataValue('edge:type', $edge_task_has_commit)
+        ->setMetadataValue('edge:type', $edge_type)
         ->setNewValue(
           array(
             '+' => array(
               $commit->getPHID() => $commit->getPHID(),
             ),
           ));
-      */
 
       $status = $task_statuses[$task_id];
       if ($status) {

@@ -51,7 +51,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ->setViewer($user)
       ->readFieldsFromStorage($task);
 
-    $e_commit = PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT;
+    $e_commit = ManiphestTaskHasCommitEdgeType::EDGECONST;
     $e_dep_on = PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK;
     $e_dep_by = PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK;
     $e_rev    = ManiphestTaskHasRevisionEdgeType::EDGECONST;
@@ -603,7 +603,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $handles = $this->getLoadedHandles();
 
     $commit_phids = array_keys(
-      $edges[PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT]);
+      $edges[ManiphestTaskHasCommitEdgeType::EDGECONST]);
     if ($commit_phids) {
       $commit_drev = PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV;
       $drev_edges = id(new PhabricatorEdgeQuery())

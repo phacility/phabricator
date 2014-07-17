@@ -420,7 +420,7 @@ final class DiffusionCommitController extends DiffusionController {
     $edge_query = id(new PhabricatorEdgeQuery())
       ->withSourcePHIDs(array($commit_phid))
       ->withEdgeTypes(array(
-        PhabricatorEdgeConfig::TYPE_COMMIT_HAS_TASK,
+        DiffusionCommitHasTaskEdgeType::EDGECONST,
         PhabricatorEdgeConfig::TYPE_COMMIT_HAS_PROJECT,
         PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV,
       ));
@@ -428,7 +428,7 @@ final class DiffusionCommitController extends DiffusionController {
     $edges = $edge_query->execute();
 
     $task_phids = array_keys(
-      $edges[$commit_phid][PhabricatorEdgeConfig::TYPE_COMMIT_HAS_TASK]);
+      $edges[$commit_phid][DiffusionCommitHasTaskEdgeType::EDGECONST]);
     $proj_phids = array_keys(
       $edges[$commit_phid][PhabricatorEdgeConfig::TYPE_COMMIT_HAS_PROJECT]);
     $revision_phid = key(

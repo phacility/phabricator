@@ -290,10 +290,10 @@ final class PhabricatorSearchAttachController
 
     $map = array(
       $t_cmit => array(
-        $t_task => PhabricatorEdgeConfig::TYPE_COMMIT_HAS_TASK,
+        $t_task => DiffusionCommitHasTaskEdgeType::EDGECONST,
       ),
       $t_task => array(
-        $t_cmit => PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT,
+        $t_cmit => ManiphestTaskHasCommitEdgeType::EDGECONST,
         $t_task => PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK,
         $t_drev => ManiphestTaskHasRevisionEdgeType::EDGECONST,
         $t_mock => PhabricatorEdgeConfig::TYPE_TASK_HAS_MOCK,
