@@ -8,7 +8,7 @@
 return array(
   'names' => array(
     'core.pkg.css' => 'c2c68e64',
-    'core.pkg.js' => '0095fb2c',
+    'core.pkg.js' => 'dc4959a8',
     'darkconsole.pkg.js' => 'df001cab',
     'differential.pkg.css' => '4a93db37',
     'differential.pkg.js' => '7528cfc9',
@@ -212,7 +212,7 @@ return array(
     'rsrc/externals/javelin/lib/__tests__/behavior.js' => '1ea62783',
     'rsrc/externals/javelin/lib/behavior.js' => '61cbc29a',
     'rsrc/externals/javelin/lib/control/tokenizer/Tokenizer.js' => 'a5b67173',
-    'rsrc/externals/javelin/lib/control/typeahead/Typeahead.js' => '61f72a3d',
+    'rsrc/externals/javelin/lib/control/typeahead/Typeahead.js' => 'e614d22b',
     'rsrc/externals/javelin/lib/control/typeahead/normalizer/TypeaheadNormalizer.js' => 'aa93c7b0',
     'rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadCompositeSource.js' => '503e17fd',
     'rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadOnDemandSource.js' => '8b3fd187',
@@ -683,7 +683,7 @@ return array(
     'javelin-router' => '29274e2b',
     'javelin-stratcom' => '8b0ad945',
     'javelin-tokenizer' => 'a5b67173',
-    'javelin-typeahead' => '61f72a3d',
+    'javelin-typeahead' => 'e614d22b',
     'javelin-typeahead-composite-source' => '503e17fd',
     'javelin-typeahead-normalizer' => 'aa93c7b0',
     'javelin-typeahead-ondemand-source' => '8b3fd187',
@@ -1244,12 +1244,6 @@ return array(
     '61cbc29a' => array(
       0 => 'javelin-magical-init',
       1 => 'javelin-util',
-    ),
-    '61f72a3d' => array(
-      0 => 'javelin-install',
-      1 => 'javelin-dom',
-      2 => 'javelin-vector',
-      3 => 'javelin-util',
     ),
     '6453c869' => array(
       0 => 'javelin-install',
@@ -1834,6 +1828,12 @@ return array(
       0 => 'javelin-install',
       1 => 'javelin-dom',
       2 => 'javelin-view-visitor',
+      3 => 'javelin-util',
+    ),
+    'e614d22b' => array(
+      0 => 'javelin-install',
+      1 => 'javelin-dom',
+      2 => 'javelin-vector',
       3 => 'javelin-util',
     ),
     'e9581f08' => array(
