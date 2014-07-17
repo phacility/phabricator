@@ -63,6 +63,7 @@ final class ManiphestBatchEditController extends ManiphestController {
 
     $projects_source = new PhabricatorProjectDatasource();
     $mailable_source = new PhabricatorMetaMTAMailableDatasource();
+    $owner_source = new PhabricatorTypeaheadOwnerDatasource();
 
     require_celerity_resource('maniphest-batch-editor');
     Javelin::initBehavior(
@@ -76,9 +77,8 @@ final class ManiphestBatchEditController extends ManiphestController {
             'placeholder'   => $projects_source->getPlaceholderText(),
           ),
           'owner' => array(
-            'src'           => '/typeahead/common/searchowner/',
-            'placeholder'   => pht(
-              'Type a user name or "upforgrabs" to unassign...'),
+            'src'           => $owner_source->getDatasourceURI(),
+            'placeholder'   => $owner_source->getPlaceholderText(),
             'limit'         => 1,
           ),
           'cc'    => array(

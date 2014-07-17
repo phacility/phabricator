@@ -7,7 +7,7 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
   private $limit;
   private $placeholder;
 
-  public function setDatasource($datasource) {
+  public function setDatasource(PhabricatorTypeaheadDatasource $datasource) {
     $this->datasource = $datasource;
     return $this;
   }
@@ -43,8 +43,11 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
       $id = celerity_generate_unique_node_id();
     }
 
+    $placeholder = null;
     if (!strlen($this->placeholder)) {
-      $placeholder = $this->getDefaultPlaceholder();
+      if ($this->datasource) {
+        $placeholder = $this->datasource->getPlaceholderText();
+      }
     } else {
       $placeholder = $this->placeholder;
     }
@@ -59,10 +62,9 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
       $username = $this->user->getUsername();
     }
 
-    if ($this->datasource instanceof PhabricatorTypeaheadDatasource) {
+    $datasource_uri = null;
+    if ($this->datasource) {
       $datasource_uri = $this->datasource->getDatasourceURI();
-    } else {
-      $datasource_uri = $this->datasource;
     }
 
     if (!$this->disableBehavior) {
@@ -79,27 +81,5 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
 
     return $template->render();
   }
-
-  private function getDefaultPlaceholder() {
-    $datasource = $this->datasource;
-
-    if ($datasource instanceof PhabricatorTypeaheadDatasource) {
-      return $datasource->getPlaceholderText();
-    }
-
-    $matches = null;
-    if (!preg_match('@^/typeahead/common/(.*)/$@', $datasource, $matches)) {
-      return null;
-    }
-
-    $request = $matches[1];
-
-    $map = array(
-      'searchowner'     => pht('Type a user name...'),
-    );
-
-    return idx($map, $request);
-  }
-
 
 }
