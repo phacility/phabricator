@@ -20,30 +20,29 @@ final class ManiphestTaskProject extends ManiphestDAO {
   }
 
   public static function updateTaskProjects(ManiphestTask $task) {
-    $dao = new ManiphestTaskProject();
-    $conn = $dao->establishConnection('w');
+    $edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
 
-    $sql = array();
-    foreach ($task->getProjectPHIDs() as $project_phid) {
-      $sql[] = qsprintf(
-        $conn,
-        '(%s, %s)',
-        $task->getPHID(),
-        $project_phid);
+    $old_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $task->getPHID(),
+      $edge_type);
+    $new_phids = $task->getProjectPHIDs();
+
+    $add_phids = array_diff($new_phids, $old_phids);
+    $rem_phids = array_diff($old_phids, $new_phids);
+
+    if (!$add_phids && !$rem_phids) {
+      return;
     }
 
-    queryfx(
-      $conn,
-      'DELETE FROM %T WHERE taskPHID = %s',
-      $dao->getTableName(),
-      $task->getPHID());
-    if ($sql) {
-      queryfx(
-        $conn,
-        'INSERT INTO %T (taskPHID, projectPHID) VALUES %Q',
-        $dao->getTableName(),
-        implode(', ', $sql));
+
+    $editor = new PhabricatorEdgeEditor();
+    foreach ($add_phids as $phid) {
+      $editor->addEdge($task->getPHID(), $edge_type, $phid);
     }
+    foreach ($rem_phids as $phid) {
+      $editor->remEdge($task->getPHID(), $edge_type, $phid);
+    }
+    $editor->save();
   }
 
 }
