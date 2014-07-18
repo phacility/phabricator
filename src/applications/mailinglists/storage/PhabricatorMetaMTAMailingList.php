@@ -1,7 +1,9 @@
 <?php
 
 final class PhabricatorMetaMTAMailingList extends PhabricatorMetaMTADAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorDestructableInterface {
 
   protected $name;
   protected $email;
@@ -38,6 +40,18 @@ final class PhabricatorMetaMTAMailingList extends PhabricatorMetaMTADAO
 
   public function describeAutomaticCapability($capability) {
     return null;
+  }
+
+
+/* -(  PhabricatorDestructableInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+    $this->delete();
+    $this->saveTransaction();
   }
 
 }
