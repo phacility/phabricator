@@ -2342,8 +2342,7 @@ abstract class PhabricatorApplicationTransactionEditor
       return;
     }
 
-    $editor = id(new PhabricatorEdgeEditor())
-      ->setActor($this->getActor());
+    $editor = new PhabricatorEdgeEditor();
 
     $src = $object->getPHID();
     $type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_FILE;
