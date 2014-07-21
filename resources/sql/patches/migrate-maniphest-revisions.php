@@ -15,11 +15,10 @@ foreach (new LiskMigrationIterator($table) as $task) {
   }
 
   $editor = new PhabricatorEdgeEditor();
-  $editor->setSuppressEvents(true);
   foreach ($revs as $rev) {
     $editor->addEdge(
       $task->getPHID(),
-      PhabricatorEdgeConfig::TYPE_TASK_HAS_RELATED_DREV,
+      ManiphestTaskHasRevisionEdgeType::EDGECONST,
       $rev);
   }
   $editor->save();

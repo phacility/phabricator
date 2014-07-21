@@ -31,6 +31,7 @@ final class ConduitAPI_phrequent_tracking_Method
     $times = id(new PhrequentUserTimeQuery())
       ->setViewer($user)
       ->needPreemptingEvents(true)
+      ->withEnded(PhrequentUserTimeQuery::ENDED_NO)
       ->withUserPHIDs(array($user->getPHID()))
       ->execute();
 

@@ -24,13 +24,13 @@
     "jshint": {
       "type": "jshint",
       "include": "(\\.js$)",
-      "jshint.jshintrc": "support/jshint/jshintconfig"
+      "jshint.jshintrc": "support/lint/jshintrc"
     },
     "json": {
       "type": "json",
       "include": [
         "(^src/docs/book/.*\\.book$)",
-        "(^support/jshint/jshintconfig$)",
+        "(^support/lint/jshintrc$)",
         "(^\\.arcconfig$)",
         "(^\\.arclint$)",
         "(\\.json$)"

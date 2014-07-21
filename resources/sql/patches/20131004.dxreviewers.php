@@ -25,9 +25,7 @@ foreach (new LiskMigrationIterator($table) as $revision) {
     continue;
   }
 
-  $editor = id(new PhabricatorEdgeEditor())
-    ->setActor(PhabricatorUser::getOmnipotentUser());
-
+  $editor = new PhabricatorEdgeEditor();
   foreach ($reviewer_phids as $dst) {
     if (phid_get_type($dst) == PhabricatorPHIDConstants::PHID_TYPE_UNKNOWN) {
       // At least one old install ran into some issues here. Skip the row if we

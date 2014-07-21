@@ -18,7 +18,7 @@ final class PhabricatorStandardCustomFieldUsers
     $control = id(new AphrontFormTokenizerControl())
       ->setLabel($this->getFieldName())
       ->setName($this->getFieldKey())
-      ->setDatasource('/typeahead/common/accounts/')
+      ->setDatasource(new PhabricatorPeopleDatasource())
       ->setCaption($this->getCaption())
       ->setValue($control_value);
 
@@ -39,7 +39,7 @@ final class PhabricatorStandardCustomFieldUsers
     $control = id(new AphrontFormTokenizerControl())
       ->setLabel($this->getFieldName())
       ->setName($this->getFieldKey())
-      ->setDatasource('/typeahead/common/accounts/')
+      ->setDatasource(new PhabricatorPeopleDatasource())
       ->setValue($handles);
 
     $form->appendChild($control);

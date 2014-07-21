@@ -16,9 +16,6 @@ final class PhabricatorEventType extends PhutilEventType {
   const TYPE_DIFFUSION_DIDDISCOVERCOMMIT    = 'diffusion.didDiscoverCommit';
   const TYPE_DIFFUSION_LOOKUPUSER           = 'diffusion.lookupUser';
 
-  const TYPE_EDGE_WILLEDITEDGES             = 'edge.willEditEdges';
-  const TYPE_EDGE_DIDEDITEDGES              = 'edge.didEditEdges';
-
   const TYPE_TEST_DIDRUNTEST                = 'test.didRunTest';
 
   const TYPE_UI_DIDRENDERACTIONS            = 'ui.didRenderActions';

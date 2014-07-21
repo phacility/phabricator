@@ -4,10 +4,6 @@ final class PhrictionPHIDTypeDocument extends PhabricatorPHIDType {
 
   const TYPECONST = 'WIKI';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Wiki Document');
   }

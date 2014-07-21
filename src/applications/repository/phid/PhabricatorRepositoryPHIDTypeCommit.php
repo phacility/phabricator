@@ -4,10 +4,6 @@ final class PhabricatorRepositoryPHIDTypeCommit extends PhabricatorPHIDType {
 
   const TYPECONST = 'CMIT';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Commit');
   }

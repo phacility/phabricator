@@ -8,7 +8,8 @@ final class ManiphestTask extends ManiphestDAO
     PhabricatorFlaggableInterface,
     PhrequentTrackableInterface,
     PhabricatorCustomFieldInterface,
-    PhabricatorDestructableInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorApplicationTransactionInterface {
 
   const MARKUP_FIELD_DESCRIPTION = 'markup:desc';
 
@@ -30,13 +31,13 @@ final class ManiphestTask extends ManiphestDAO
 
   protected $attached = array();
   protected $projectPHIDs = array();
-  private $projectsNeedUpdate;
   private $subscribersNeedUpdate;
 
   protected $ownerOrdering;
 
   private $groupByProjectPHID = self::ATTACHABLE;
   private $customFields = self::ATTACHABLE;
+  private $edgeProjectPHIDs = self::ATTACHABLE;
 
   public static function initializeNewTask(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -52,7 +53,8 @@ final class ManiphestTask extends ManiphestDAO
       ->setPriority(ManiphestTaskPriority::getDefaultPriority())
       ->setAuthorPHID($actor->getPHID())
       ->setViewPolicy($view_policy)
-      ->setEditPolicy($edit_policy);
+      ->setEditPolicy($edit_policy)
+      ->attachProjectPHIDs(array());
   }
 
   public function getConfiguration() {
@@ -90,14 +92,13 @@ final class ManiphestTask extends ManiphestDAO
     return array_values(nonempty($this->ccPHIDs, array()));
   }
 
-  public function setProjectPHIDs(array $phids) {
-    $this->projectPHIDs = array_values($phids);
-    $this->projectsNeedUpdate = true;
-    return $this;
+  public function getProjectPHIDs() {
+    return $this->assertAttached($this->edgeProjectPHIDs);
   }
 
-  public function getProjectPHIDs() {
-    return array_values(nonempty($this->projectPHIDs, array()));
+  public function attachProjectPHIDs(array $phids) {
+    $this->edgeProjectPHIDs = $phids;
+    return $this;
   }
 
   public function setCCPHIDs(array $phids) {
@@ -139,13 +140,6 @@ final class ManiphestTask extends ManiphestDAO
     }
 
     $result = parent::save();
-
-    if ($this->projectsNeedUpdate) {
-      // If we've changed the project PHIDs for this task, update the link
-      // table.
-      ManiphestTaskProject::updateTaskProjects($this);
-      $this->projectsNeedUpdate = false;
-    }
 
     if ($this->subscribersNeedUpdate) {
       // If we've changed the subscriber PHIDs for this task, update the link
@@ -291,7 +285,7 @@ final class ManiphestTask extends ManiphestDAO
   }
 
 
-/* -(  PhabricatorDestructableInterface  )----------------------------------- */
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 
 
   public function destroyObjectPermanently(
@@ -310,6 +304,22 @@ final class ManiphestTask extends ManiphestDAO
 
       $this->delete();
     $this->saveTransaction();
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new ManiphestTransactionEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new ManiphestTransaction();
   }
 
 }

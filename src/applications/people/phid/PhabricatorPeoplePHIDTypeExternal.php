@@ -4,10 +4,6 @@ final class PhabricatorPeoplePHIDTypeExternal extends PhabricatorPHIDType {
 
   const TYPECONST = 'XUSR';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('External Account');
   }

@@ -859,8 +859,6 @@ final class PhabricatorFile extends PhabricatorFileDAO
     $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_FILE;
 
     id(new PhabricatorEdgeEditor())
-      ->setActor($actor)
-      ->setSuppressEvents(true)
       ->addEdge($phid, $edge_type, $this->getPHID())
       ->save();
 

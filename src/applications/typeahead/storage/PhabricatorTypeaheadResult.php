@@ -79,7 +79,7 @@ final class PhabricatorTypeaheadResult {
       $this->displayType,
       $this->imageURI ? (string)$this->imageURI : null,
       $this->priorityType,
-      $this->icon,
+      ($this->icon === null) ? $this->getDefaultIcon() : $this->icon,
       $this->closed,
       $this->imageSprite ? (string)$this->imageSprite : null,
     );
@@ -87,6 +87,34 @@ final class PhabricatorTypeaheadResult {
       array_pop($data);
     }
     return $data;
+  }
+
+  /**
+   * If the datasource did not specify an icon explicitly, try to select a
+   * default based on PHID type.
+   */
+  private function getDefaultIcon() {
+    static $icon_map;
+    if ($icon_map === null) {
+      $types = PhabricatorPHIDType::getAllTypes();
+
+      $map = array();
+      foreach ($types as $type) {
+        $icon = $type->getTypeIcon();
+        if ($icon !== null) {
+          $map[$type->getTypeConstant()] = "{$icon} bluegrey";
+        }
+      }
+
+      $icon_map = $map;
+    }
+
+    $phid_type = phid_get_type($this->phid);
+    if (isset($icon_map[$phid_type])) {
+      return $icon_map[$phid_type];
+    }
+
+    return null;
   }
 
 }

@@ -11,13 +11,10 @@ Phabricator includes applications for:
   - also some other things.
 
 You can learn more about the project (and find links to documentation and
-resources) here:
+resources) [[http://phabricator.org/ | here]].
 
-  http://phabricator.org/
+Phabricator is developed and maintained by [[http://phacility.com/ |
+Phacility]]. The first version of Phabricator was originally built at Facebook.
 
-Phabricator is developed and maintained by Phacility. The first version of
-Phabricator was originally built at Facebook.
-
-LICENSE
-
+= LICENSE =
 Phabricator is released under the Apache 2.0 license except as otherwise noted.

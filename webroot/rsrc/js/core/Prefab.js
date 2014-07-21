@@ -31,6 +31,7 @@ JX.install('Prefab', {
       return select;
     },
 
+
     /**
      * Build a Phabricator tokenizer out of a configuration with application
      * sorting, datasource and placeholder rules.
@@ -142,82 +143,9 @@ JX.install('Prefab', {
         });
       };
 
-      var render_icon = function(icon) {
-        return JX.$N(
-          'span',
-          {className: 'phui-icon-view phui-font-fa ' + icon});
-      };
-
       datasource.setSortHandler(JX.bind(datasource, sort_handler));
-
-      // Don't show any closed objects until the query is specific enough that
-      // it only selects closed objects. Specifically, if the result list had
-      // any open objects, remove all the closed objects from the list.
-      var filter_handler = function(value, list) {
-        // Look for any open result.
-        var has_open = false;
-        var ii;
-        for (ii = 0; ii < list.length; ii++) {
-          if (!list[ii].closed) {
-            has_open = true;
-            break;
-          }
-        }
-
-        if (!has_open) {
-          // Everything is closed, so just use it as-is.
-          return list;
-        }
-
-        // Otherwise, only display the open results.
-        var results = [];
-        for (ii = 0; ii < list.length; ii++) {
-          if (!list[ii].closed) {
-            results.push(list[ii]);
-          }
-        }
-
-        return results;
-      };
-
-      datasource.setFilterHandler(filter_handler);
-
-      datasource.setTransformer(
-        function(object) {
-          var closed = object[9];
-          var closed_ui;
-          if (closed) {
-            closed_ui = JX.$N(
-              'div',
-              {className: 'tokenizer-closed'},
-              closed);
-          }
-
-          var icon = object[8];
-          var icon_ui;
-          if (icon) {
-            icon_ui = render_icon(icon);
-          }
-
-          var display = JX.$N(
-            'div',
-            {className: 'tokenizer-result'},
-            [icon_ui, object[0], closed_ui]);
-          if (closed) {
-            JX.DOM.alterClass(display, 'tokenizer-result-closed', true);
-          }
-
-          return {
-            name: object[0],
-            display: display,
-            uri: object[1],
-            id: object[2],
-            priority: object[3],
-            priorityType: object[7],
-            icon: icon,
-            closed: closed
-          };
-        });
+      datasource.setFilterHandler(JX.Prefab.filterClosedResults);
+      datasource.setTransformer(JX.Prefab.transformDatasourceResults);
 
       var typeahead = new JX.Typeahead(
         root,
@@ -227,18 +155,19 @@ JX.install('Prefab', {
       var tokenizer = new JX.Tokenizer(root);
       tokenizer.setTypeahead(typeahead);
       tokenizer.setRenderTokenCallback(function(value, key) {
-        var icon = datasource.getResult(key);
-        if (icon) {
-          icon = icon.icon;
+        var result = datasource.getResult(key);
+
+        var icon;
+        if (result) {
+          icon = result.icon;
+          value = result.displayName;
         } else {
           icon = config.icons[key];
         }
 
-        if (!icon) {
-          return value;
+        if (icon) {
+          icon = JX.Prefab._renderIcon(icon);
         }
-
-        icon = render_icon(icon);
 
         // TODO: Maybe we should render these closed tags in grey? Figure out
         // how we're going to use color.
@@ -263,7 +192,89 @@ JX.install('Prefab', {
       return {
         tokenizer: tokenizer
       };
+    },
+
+    /**
+     * Filter callback for tokenizers and typeaheads which filters out closed
+     * or disabled objects unless they are the only options.
+     */
+    filterClosedResults: function(value, list) {
+      // Look for any open result.
+      var has_open = false;
+      var ii;
+      for (ii = 0; ii < list.length; ii++) {
+        if (!list[ii].closed) {
+          has_open = true;
+          break;
+        }
+      }
+
+      if (!has_open) {
+        // Everything is closed, so just use it as-is.
+        return list;
+      }
+
+      // Otherwise, only display the open results.
+      var results = [];
+      for (ii = 0; ii < list.length; ii++) {
+        if (!list[ii].closed) {
+          results.push(list[ii]);
+        }
+      }
+
+      return results;
+    },
+
+    /**
+     * Transform results from a wire format into a usable format in a standard
+     * way.
+     */
+    transformDatasourceResults: function(fields) {
+      var closed = fields[9];
+      var closed_ui;
+      if (closed) {
+        closed_ui = JX.$N(
+          'div',
+          {className: 'tokenizer-closed'},
+          closed);
+      }
+
+      var icon = fields[8];
+      var icon_ui;
+      if (icon) {
+        icon_ui = JX.Prefab._renderIcon(icon);
+      }
+
+      var display = JX.$N(
+        'div',
+        {className: 'tokenizer-result'},
+        [icon_ui, fields[4] || fields[0], closed_ui]);
+      if (closed) {
+        JX.DOM.alterClass(display, 'tokenizer-result-closed', true);
+      }
+
+      return {
+        name: fields[0],
+        displayName: fields[4] || fields[0],
+        display: display,
+        uri: fields[1],
+        id: fields[2],
+        priority: fields[3],
+        priorityType: fields[7],
+        imageURI: fields[6],
+        icon: icon,
+        closed: closed,
+        type: fields[5],
+        sprite: fields[10]
+      };
+    },
+
+    _renderIcon: function(icon) {
+      return JX.$N(
+        'span',
+        {className: 'phui-icon-view phui-font-fa ' + icon});
     }
+
   }
 
 });

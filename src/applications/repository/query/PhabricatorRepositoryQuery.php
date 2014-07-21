@@ -208,7 +208,7 @@ final class PhabricatorRepositoryQuery
 
   public function didFilterPage(array $repositories) {
     if ($this->needProjectPHIDs) {
-      $type_project = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT;
+      $type_project = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
 
       $edge_query = id(new PhabricatorEdgeQuery())
         ->withSourcePHIDs(mpull($repositories, 'getPHID'))

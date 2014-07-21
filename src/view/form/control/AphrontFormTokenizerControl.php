@@ -7,7 +7,7 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
   private $limit;
   private $placeholder;
 
-  public function setDatasource($datasource) {
+  public function setDatasource(PhabricatorTypeaheadDatasource $datasource) {
     $this->datasource = $datasource;
     return $this;
   }
@@ -43,8 +43,11 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
       $id = celerity_generate_unique_node_id();
     }
 
+    $placeholder = null;
     if (!strlen($this->placeholder)) {
-      $placeholder = $this->getDefaultPlaceholder();
+      if ($this->datasource) {
+        $placeholder = $this->datasource->getPlaceholderText();
+      }
     } else {
       $placeholder = $this->placeholder;
     }
@@ -59,10 +62,9 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
       $username = $this->user->getUsername();
     }
 
-    if ($this->datasource instanceof PhabricatorTypeaheadDatasource) {
+    $datasource_uri = null;
+    if ($this->datasource) {
       $datasource_uri = $this->datasource->getDatasourceURI();
-    } else {
-      $datasource_uri = $this->datasource;
     }
 
     if (!$this->disableBehavior) {
@@ -79,42 +81,5 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
 
     return $template->render();
   }
-
-  private function getDefaultPlaceholder() {
-    $datasource = $this->datasource;
-
-    if ($datasource instanceof PhabricatorTypeaheadDatasource) {
-      return $datasource->getPlaceholderText();
-    }
-
-    $matches = null;
-    if (!preg_match('@^/typeahead/common/(.*)/$@', $datasource, $matches)) {
-      return null;
-    }
-
-    $request = $matches[1];
-
-    $map = array(
-      'users'           => pht('Type a user name...'),
-      'authors'         => pht('Type a user name...'),
-      'usersorprojects' => pht('Type a user or project name...'),
-      'searchowner'     => pht('Type a user name...'),
-      'accounts'        => pht('Type a user name...'),
-      'mailable'        => pht('Type a user, project, or mailing list...'),
-      'allmailable'     => pht('Type a user, project, or mailing list...'),
-      'searchproject'   => pht('Type a project name...'),
-      'projects'        => pht('Type a project name...'),
-      'repositories'    => pht('Type a repository name...'),
-      'packages'        => pht('Type a package name...'),
-      'macros'          => pht('Type a macro name...'),
-      'arcanistproject' => pht('Type an arc project name...'),
-      'accountsorprojects' => pht('Type a user or project name...'),
-      'usersprojectsorpackages' =>
-        pht('Type a user, project, or package name...'),
-    );
-
-    return idx($map, $request);
-  }
-
 
 }

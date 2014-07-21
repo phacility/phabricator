@@ -4,10 +4,6 @@ final class PonderPHIDTypeQuestion extends PhabricatorPHIDType {
 
   const TYPECONST = 'QUES';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Question');
   }

@@ -2,8 +2,9 @@
 
 final class PhabricatorProjectColumn
   extends PhabricatorProjectDAO
-  implements PhabricatorPolicyInterface,
-  PhabricatorDestructableInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorDestructibleInterface {
 
   const STATUS_ACTIVE = 0;
   const STATUS_HIDDEN = 1;
@@ -99,7 +100,7 @@ final class PhabricatorProjectColumn
   }
 
 
-/* -(  PhabricatorDestructableInterface  )----------------------------------- */
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 
   public function destroyObjectPermanently(
     PhabricatorDestructionEngine $engine) {

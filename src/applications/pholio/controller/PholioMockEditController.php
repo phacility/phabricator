@@ -49,7 +49,7 @@ final class PholioMockEditController extends PholioController {
     } else {
       $v_projects = PhabricatorEdgeQuery::loadDestinationPHIDs(
         $mock->getPHID(),
-        PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT);
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
       $v_projects = array_reverse($v_projects);
     }
 
@@ -205,7 +205,7 @@ final class PholioMockEditController extends PholioController {
       }
 
       if (!$errors) {
-        $proj_edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT;
+        $proj_edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
         $xactions[] = id(new PholioTransaction())
           ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
           ->setMetadataValue('edge:type', $proj_edge_type)
@@ -354,7 +354,7 @@ final class PholioMockEditController extends PholioController {
           ->setName('cc')
           ->setValue($handles)
           ->setUser($user)
-          ->setDatasource('/typeahead/common/mailable/'))
+          ->setDatasource(new PhabricatorMetaMTAMailableDatasource()))
       ->appendChild(
         id(new AphrontFormPolicyControl())
           ->setUser($user)

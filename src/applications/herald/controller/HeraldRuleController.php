@@ -596,14 +596,17 @@ final class HeraldRuleController extends HeraldController {
       'arcanistprojects' => new DiffusionArcanistProjectDatasource(),
       'package' => new PhabricatorOwnersPackageDatasource(),
       'project' => new PhabricatorProjectDatasource(),
+      'user' => new PhabricatorPeopleDatasource(),
+      'email' => new PhabricatorMetaMTAMailableDatasource(),
+      'userorproject' => new PhabricatorProjectOrUserDatasource(),
     );
 
-    $sources = mpull($sources, 'getDatasourceURI');
-    $sources += array(
-      'email'         => '/typeahead/common/mailable/',
-      'user'          => '/typeahead/common/accounts/',
-      'userorproject' => '/typeahead/common/accountsorprojects/',
-    );
+    foreach ($sources as $key => $source) {
+      $sources[$key] = array(
+        'uri' => $source->getDatasourceURI(),
+        'placeholder' => $source->getPlaceholderText(),
+      );
+    }
 
     return array(
       'source' => $sources,

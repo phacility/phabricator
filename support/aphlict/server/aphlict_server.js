@@ -163,29 +163,48 @@ var start_time = new Date().getTime();
 
 var receive_server = http.createServer(function(request, response) {
   // Publishing a notification.
-  if (request.method == 'POST') {
-    var body = '';
+  if (request.url == '/') {
+    if (request.method == 'POST') {
+      var body = '';
 
-    request.on('data', function(data) {
-      body += data;
-    });
+      request.on('data', function(data) {
+        body += data;
+      });
 
-    request.on('end', function() {
-      try {
-        var msg = JSON.parse(body);
+      request.on('end', function() {
+        try {
+          var msg = JSON.parse(body);
 
-        debug.log('notification: ' + JSON.stringify(msg));
-        ++messages_in;
-        transmit(msg);
+          debug.log('notification: ' + JSON.stringify(msg));
+          ++messages_in;
 
-        response.writeHead(200, {'Content-Type': 'text/plain'});
-      } catch (err) {
-        response.statusCode = 400;
-        response.write('400 Bad Request');
-      } finally {
-        response.end();
-      }
-    });
+          try {
+            transmit(msg);
+            response.writeHead(200, {'Content-Type': 'text/plain'});
+          } catch (err) {
+            debug.log(
+              '<%s> Internal Server Error! %s',
+              request.socket.remoteAddress,
+              err);
+            response.statusCode = 500;
+            response.write('500 Internal Server Error\n');
+          }
+        } catch (err) {
+          debug.log(
+            '<%s> Bad Request! %s',
+            request.socket.remoteAddress,
+            err);
+          response.statusCode = 400;
+          response.write('400 Bad Request\n');
+        } finally {
+          response.end();
+        }
+      });
+    } else {
+      response.statusCode = 405;
+      response.write('405 Method Not Allowed\n');
+      response.end();
+    }
   } else if (request.url == '/status/') {
     request.on('data', function() {
       // We just ignore the request data, but newer versions of Node don't
@@ -208,8 +227,8 @@ var receive_server = http.createServer(function(request, response) {
       response.end();
     });
   } else {
-    response.statusCode = 400;
-    response.write('400 Bad Request');
+    response.statusCode = 404;
+    response.write('404 Not Found\n');
     response.end();
   }
 }).listen(config.admin, config.host);

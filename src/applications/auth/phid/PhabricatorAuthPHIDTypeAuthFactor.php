@@ -4,10 +4,6 @@ final class PhabricatorAuthPHIDTypeAuthFactor extends PhabricatorPHIDType {
 
   const TYPECONST = 'AFTR';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Auth Factor');
   }

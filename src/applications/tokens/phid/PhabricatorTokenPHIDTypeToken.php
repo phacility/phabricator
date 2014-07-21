@@ -4,10 +4,6 @@ final class PhabricatorTokenPHIDTypeToken extends PhabricatorPHIDType {
 
   const TYPECONST = 'TOKN';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Token');
   }

@@ -4,7 +4,7 @@ final class PhabricatorDestructionEngine extends Phobject {
 
   private $rootLogID;
 
-  public function destroyObject(PhabricatorDestructableInterface $object) {
+  public function destroyObject(PhabricatorDestructibleInterface $object) {
     $log = id(new PhabricatorSystemDestructionLog())
       ->setEpoch(time())
       ->setObjectClass(get_class($object));
@@ -62,8 +62,7 @@ final class PhabricatorDestructionEngine extends Phobject {
       return;
     }
 
-    $editor = id(new PhabricatorEdgeEditor())
-      ->setSuppressEvents(true);
+    $editor = new PhabricatorEdgeEditor();
     foreach ($edges as $type => $type_edges) {
       foreach ($type_edges as $src => $src_edges) {
         foreach ($src_edges as $dst => $edge) {

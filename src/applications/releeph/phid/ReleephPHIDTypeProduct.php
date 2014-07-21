@@ -4,10 +4,6 @@ final class ReleephPHIDTypeProduct extends PhabricatorPHIDType {
 
   const TYPECONST = 'REPR';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Releeph Product');
   }

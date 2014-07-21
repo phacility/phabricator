@@ -5,10 +5,6 @@ final class NuancePHIDTypeQueue
 
   const TYPECONST = 'NUAQ';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Queue');
   }

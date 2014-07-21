@@ -4,12 +4,12 @@ final class PhabricatorOwnersPHIDTypePackage extends PhabricatorPHIDType {
 
   const TYPECONST = 'OPKG';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Owners Package');
+  }
+
+  public function getTypeIcon() {
+    return 'fa-list-alt';
   }
 
   public function newObject() {

@@ -136,13 +136,13 @@ final class PhabricatorSearchApplicationSearchEngine
         id(new AphrontFormTokenizerControl())
           ->setName('authorPHIDs')
           ->setLabel('Authors')
-          ->setDatasource('/typeahead/common/users/')
+          ->setDatasource(new PhabricatorPeopleDatasource())
           ->setValue($author_handles))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
           ->setName('ownerPHIDs')
           ->setLabel('Owners')
-          ->setDatasource('/typeahead/common/searchowner/')
+          ->setDatasource(new PhabricatorTypeaheadOwnerDatasource())
           ->setValue($owner_handles))
       ->appendChild(
         id(new AphrontFormCheckboxControl())
@@ -155,7 +155,7 @@ final class PhabricatorSearchApplicationSearchEngine
         id(new AphrontFormTokenizerControl())
           ->setName('subscriberPHIDs')
           ->setLabel('Subscribers')
-          ->setDatasource('/typeahead/common/users/')
+          ->setDatasource(new PhabricatorPeopleDatasource())
           ->setValue($subscriber_handles))
       ->appendChild(
         id(new AphrontFormTokenizerControl())

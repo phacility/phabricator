@@ -4,10 +4,6 @@ final class PholioPHIDTypeImage extends PhabricatorPHIDType {
 
   const TYPECONST = 'PIMG';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Image');
   }

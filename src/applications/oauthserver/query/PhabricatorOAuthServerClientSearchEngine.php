@@ -45,7 +45,7 @@ final class PhabricatorOAuthServerClientSearchEngine
     $form
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/users/')
+          ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('creators')
           ->setLabel(pht('Creators'))
           ->setValue($creator_handles));

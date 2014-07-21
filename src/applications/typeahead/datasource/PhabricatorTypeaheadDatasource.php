@@ -51,4 +51,15 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
   abstract public function getDatasourceApplicationClass();
   abstract public function loadResults();
 
+  public static function tokenizeString($string) {
+    $string = phutil_utf8_strtolower($string);
+    $string = trim($string);
+    if (!strlen($string)) {
+      return array();
+    }
+
+    $tokens = preg_split('/\s+/', $string);
+    return array_unique($tokens);
+  }
+
 }

@@ -1,6 +1,6 @@
 <?php
 
-interface PhabricatorDestructableInterface {
+interface PhabricatorDestructibleInterface {
 
   public function destroyObjectPermanently(
     PhabricatorDestructionEngine $engine);

@@ -28,7 +28,7 @@ final class DifferentialHovercardEventListener
 
     $rev->loadRelationships();
     $reviewer_phids = $rev->getReviewers();
-    $e_task = PhabricatorEdgeConfig::TYPE_DREV_HAS_RELATED_TASK;
+    $e_task = DifferentialRevisionHasTaskEdgeType::EDGECONST;
     $edge_query = id(new PhabricatorEdgeQuery())
       ->withSourcePHIDs(array($phid))
       ->withEdgeTypes(

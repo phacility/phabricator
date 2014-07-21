@@ -199,7 +199,7 @@ final class PhrequentUserTimeQuery
           $u_start = $u_event->getDateStarted();
           $u_end = $u_event->getDateEnded();
 
-          if (($u_start >= $e_start) && ($u_end <= $e_end) &&
+          if (($u_start >= $e_start) &&
               ($u_end === null || $u_end > $e_start)) {
             $select[] = $u_event;
           }

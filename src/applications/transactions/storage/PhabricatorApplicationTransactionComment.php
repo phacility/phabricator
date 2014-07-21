@@ -5,7 +5,7 @@ abstract class PhabricatorApplicationTransactionComment
   implements
     PhabricatorMarkupInterface,
     PhabricatorPolicyInterface,
-    PhabricatorDestructableInterface {
+    PhabricatorDestructibleInterface {
 
   const MARKUP_FIELD_COMMENT  = 'markup:comment';
 
@@ -135,7 +135,7 @@ abstract class PhabricatorApplicationTransactionComment
   }
 
 
-/* -(  PhabricatorDestructableInterface  )----------------------------------- */
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 
   public function destroyObjectPermanently(
     PhabricatorDestructionEngine $engine) {

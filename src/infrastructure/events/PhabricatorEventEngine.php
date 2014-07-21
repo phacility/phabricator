@@ -25,7 +25,6 @@ final class PhabricatorEventEngine {
 
     // Add builtin listeners.
     $listeners[] = new DarkConsoleEventPluginAPI();
-    $listeners[] = new ManiphestEdgeEventListener();
 
     // Add application listeners.
     $applications = PhabricatorApplication::getAllInstalledApplications();

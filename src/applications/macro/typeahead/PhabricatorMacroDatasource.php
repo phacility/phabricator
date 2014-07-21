@@ -25,8 +25,7 @@ final class PhabricatorMacroDatasource
     foreach ($macros as $macro) {
       $results[] = id(new PhabricatorTypeaheadResult())
         ->setPHID($macro->getPHID())
-        ->setName($macro->getName())
-        ->setIcon('fa-meh-o bluegrey');
+        ->setName($macro->getName());
     }
 
     return $results;

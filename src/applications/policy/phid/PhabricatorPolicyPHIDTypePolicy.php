@@ -1,13 +1,8 @@
 <?php
 
-final class PhabricatorPolicyPHIDTypePolicy
-  extends PhabricatorPHIDType {
+final class PhabricatorPolicyPHIDTypePolicy extends PhabricatorPHIDType {
 
   const TYPECONST = 'PLCY';
-
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
 
   public function getTypeName() {
     return pht('Policy');

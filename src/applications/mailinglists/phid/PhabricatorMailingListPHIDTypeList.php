@@ -4,12 +4,12 @@ final class PhabricatorMailingListPHIDTypeList extends PhabricatorPHIDType {
 
   const TYPECONST = 'MLST';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Mailing List');
+  }
+
+  public function getTypeIcon() {
+    return 'fa-envelope-o';
   }
 
   public function newObject() {

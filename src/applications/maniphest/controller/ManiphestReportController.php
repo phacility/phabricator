@@ -83,9 +83,10 @@ final class ManiphestReportController extends ManiphestController {
       $joins = qsprintf(
         $conn,
         'JOIN %T t ON x.objectPHID = t.phid
-          JOIN %T p ON p.taskPHID = t.phid AND p.projectPHID = %s',
+          JOIN %T p ON p.src = t.phid AND p.type = %d AND p.dst = %s',
         id(new ManiphestTask())->getTableName(),
-        id(new ManiphestTaskProject())->getTableName(),
+        PhabricatorEdgeConfig::TABLE_NAME_EDGE,
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
         $project_phid);
     }
 
@@ -320,7 +321,7 @@ final class ManiphestReportController extends ManiphestController {
       ->setUser($user)
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/searchproject/')
+          ->setDatasource(new PhabricatorProjectDatasource())
           ->setLabel(pht('Project'))
           ->setLimit(1)
           ->setName('set_project')

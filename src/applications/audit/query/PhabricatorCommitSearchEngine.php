@@ -85,13 +85,13 @@ final class PhabricatorCommitSearchEngine
     $form
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/usersprojectsorpackages/')
+          ->setDatasource(new DiffusionAuditorDatasource())
           ->setName('auditorPHIDs')
           ->setLabel(pht('Auditors'))
           ->setValue(array_select_keys($handles, $auditor_phids)))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/users/')
+          ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('authors')
           ->setLabel(pht('Commit Authors'))
           ->setValue(array_select_keys($handles, $commit_author_phids)))

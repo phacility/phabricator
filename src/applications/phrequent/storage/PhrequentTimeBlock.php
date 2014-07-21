@@ -10,17 +10,16 @@ final class PhrequentTimeBlock extends Phobject {
   }
 
   public function getTimeSpentOnObject($phid, $now) {
-    $ranges = idx($this->getObjectTimeRanges($now), $phid, array());
+    $slices = idx($this->getObjectTimeRanges(), $phid);
 
-    $sum = 0;
-    foreach ($ranges as $range) {
-      $sum += ($range[1] - $range[0]);
+    if (!$slices) {
+      return null;
     }
 
-    return $sum;
+    return $slices->getDuration($now);
   }
 
-  public function getObjectTimeRanges($now) {
+  public function getObjectTimeRanges() {
     $ranges = array();
 
     $range_start = time();
@@ -29,6 +28,7 @@ final class PhrequentTimeBlock extends Phobject {
     }
 
     $object_ranges = array();
+    $object_ongoing = array();
     foreach ($this->events as $event) {
 
       // First, convert each event's preempting stack into a linear timeline
@@ -42,14 +42,16 @@ final class PhrequentTimeBlock extends Phobject {
       );
       $timeline[] = array(
         'event' => $event,
-        'at' => (int)nonempty($event->getDateEnded(), $now),
+        'at' => (int)nonempty($event->getDateEnded(), PHP_INT_MAX),
         'type' => 'end',
       );
 
       $base_phid = $event->getObjectPHID();
+      if (!$event->getDateEnded()) {
+        $object_ongoing[$base_phid] = true;
+      }
 
       $preempts = $event->getPreemptingEvents();
-
       foreach ($preempts as $preempt) {
         $same_object = ($preempt->getObjectPHID() == $base_phid);
         $timeline[] = array(
@@ -59,7 +61,7 @@ final class PhrequentTimeBlock extends Phobject {
         );
         $timeline[] = array(
           'event' => $preempt,
-          'at' => (int)nonempty($preempt->getDateEnded(), $now),
+          'at' => (int)nonempty($preempt->getDateEnded(), PHP_INT_MAX),
           'type' => $same_object ? 'end' : 'pop',
         );
       }
@@ -88,7 +90,6 @@ final class PhrequentTimeBlock extends Phobject {
 
       $stratum = null;
       $strata = array();
-
 
       $ranges = array();
       foreach ($timeline as $timeline_event) {
@@ -173,14 +174,38 @@ final class PhrequentTimeBlock extends Phobject {
         }
       }
 
+      // Filter out ranges with an indefinite start time. These occur when
+      // popping the stack when there are multiple ongoing events.
+      foreach ($ranges as $key => $range) {
+        if ($range[0] == PHP_INT_MAX) {
+          unset($ranges[$key]);
+        }
+      }
+
       $object_ranges[$base_phid][] = $ranges;
     }
 
-    // Finally, collapse all the ranges so we don't double-count time.
-
+    // Collapse all the ranges so we don't double-count time.
     foreach ($object_ranges as $phid => $ranges) {
       $object_ranges[$phid] = self::mergeTimeRanges(array_mergev($ranges));
     }
+
+    foreach ($object_ranges as $phid => $ranges) {
+      foreach ($ranges as $key => $range) {
+        if ($range[1] == PHP_INT_MAX) {
+          $ranges[$key][1] = null;
+        }
+      }
+
+      $object_ranges[$phid] = new PhrequentTimeSlices(
+        $phid,
+        isset($object_ongoing[$phid]),
+        $ranges);
+    }
+
+    // Reorder the ranges to be more stack-like, so the first item is the
+    // top of the stack.
+    $object_ranges = array_reverse($object_ranges, $preserve_keys = true);
 
     return $object_ranges;
   }
@@ -189,33 +214,22 @@ final class PhrequentTimeBlock extends Phobject {
    * Returns the current list of work.
    */
   public function getCurrentWorkStack($now, $include_inactive = false) {
-    $ranges = $this->getObjectTimeRanges($now);
+    $ranges = $this->getObjectTimeRanges();
 
     $results = array();
-    foreach ($ranges as $phid => $blocks) {
-      $total = 0;
-      foreach ($blocks as $block) {
-        $total += $block[1] - $block[0];
-      }
-
-      $type = 'inactive';
-      foreach ($blocks as $block) {
-        if ($block[1] === $now) {
-          if ($block[0] === $block[1]) {
-            $type = 'suspended';
-          } else {
-            $type = 'active';
-          }
-          break;
+    $active = null;
+    foreach ($ranges as $phid => $slices) {
+      if (!$include_inactive) {
+        if (!$slices->getIsOngoing()) {
+          continue;
         }
       }
 
-      if ($include_inactive || $type !== 'inactive') {
-        $results[] = array(
-          'phid' => $phid,
-          'time' => $total,
-          'type' => $type);
-      }
+      $results[] = array(
+        'phid' => $phid,
+        'time' => $slices->getDuration($now),
+        'ongoing' => $slices->getIsOngoing(),
+      );
     }
 
     return $results;

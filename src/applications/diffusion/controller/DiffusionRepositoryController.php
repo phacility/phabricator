@@ -231,7 +231,7 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $project_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $repository->getPHID(),
-      PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT);
+      PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
     if ($project_phids) {
       $this->loadHandles($project_phids);
       $view->addProperty(

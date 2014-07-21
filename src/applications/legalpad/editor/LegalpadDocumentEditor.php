@@ -105,7 +105,6 @@ final class LegalpadDocumentEditor
       $type = PhabricatorEdgeConfig::TYPE_CONTRIBUTED_TO_OBJECT;
       id(new PhabricatorEdgeEditor())
         ->addEdge($actor->getPHID(), $type, $object->getPHID())
-        ->setActor($actor)
         ->save();
 
       $type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_CONTRIBUTOR;

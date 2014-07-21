@@ -40,6 +40,8 @@ final class PhabricatorNotificationClient {
 
   private static function postMessage(array $data) {
     $server_uri = PhabricatorEnv::getEnvConfig('notification.server-uri');
+    $server_uri = id(new PhutilURI($server_uri))
+      ->setPath('/');
 
     id(new HTTPSFuture($server_uri, json_encode($data)))
       ->setMethod('POST')

@@ -4,10 +4,6 @@ final class PhabricatorConpherencePHIDTypeThread extends PhabricatorPHIDType {
 
   const TYPECONST = 'CONP';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Conpherence Thread');
   }

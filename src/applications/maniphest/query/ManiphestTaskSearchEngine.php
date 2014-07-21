@@ -309,7 +309,7 @@ final class ManiphestTaskSearchEngine
     $form
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/accounts/')
+          ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('assigned')
           ->setLabel(pht('Assigned To'))
           ->setValue($assigned_handles))
@@ -353,19 +353,19 @@ final class ManiphestTaskSearchEngine
           ->setValue($exclude_project_handles))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/accounts/')
+          ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('userProjects')
           ->setLabel(pht('In Users\' Projects'))
           ->setValue($user_project_handles))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/accounts/')
+          ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('authors')
           ->setLabel(pht('Authors'))
           ->setValue($author_handles))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/mailable/')
+          ->setDatasource(new PhabricatorMetaMTAMailableDatasource())
           ->setName('subscribers')
           ->setLabel(pht('Subscribers'))
           ->setValue($subscriber_handles))

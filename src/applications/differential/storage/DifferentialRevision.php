@@ -10,7 +10,7 @@ final class DifferentialRevision extends DifferentialDAO
     PhabricatorSubscribableInterface,
     PhabricatorCustomFieldInterface,
     PhabricatorApplicationTransactionInterface,
-    PhabricatorDestructableInterface,
+    PhabricatorDestructibleInterface,
     PhabricatorProjectInterface {
 
   protected $title = '';
@@ -449,7 +449,7 @@ final class DifferentialRevision extends DifferentialDAO
   }
 
 
-/* -(  PhabricatorDestructableInterface  )----------------------------------- */
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 
 
   public function destroyObjectPermanently(

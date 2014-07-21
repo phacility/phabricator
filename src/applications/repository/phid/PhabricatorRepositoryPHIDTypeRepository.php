@@ -5,10 +5,6 @@ final class PhabricatorRepositoryPHIDTypeRepository
 
   const TYPECONST = 'REPO';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Repository');
   }

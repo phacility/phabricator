@@ -4,10 +4,6 @@ final class PhabricatorConfigPHIDTypeConfig extends PhabricatorPHIDType {
 
   const TYPECONST = 'CONF';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Config');
   }

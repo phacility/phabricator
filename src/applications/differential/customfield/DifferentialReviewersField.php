@@ -69,7 +69,7 @@ final class DifferentialReviewersField
   public function renderEditControl(array $handles) {
     return id(new AphrontFormTokenizerControl())
       ->setName($this->getFieldKey())
-      ->setDatasource('/typeahead/common/usersorprojects/')
+      ->setDatasource(new PhabricatorProjectOrUserDatasource())
       ->setValue($handles)
       ->setError($this->getFieldError())
       ->setLabel($this->getFieldName());

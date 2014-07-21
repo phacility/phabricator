@@ -73,7 +73,7 @@ final class DiffusionRepositoryEditBasicController
           ->setTransactionType($type_edge)
           ->setMetadataValue(
             'edge:type',
-            PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT)
+            PhabricatorProjectObjectHasProjectEdgeType::EDGECONST)
           ->setNewValue(
             array(
               '=' => array_fuse($v_projects),

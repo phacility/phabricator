@@ -34,7 +34,6 @@ final class PonderVoteEditor extends PhabricatorEditor {
     // prepare vote add, or update if this user is amending an
     // earlier vote
     $editor = id(new PhabricatorEdgeEditor())
-      ->setActor($actor)
       ->addEdge(
         $actor->getPHID(),
         $votable->getUserVoteEdgeType(),

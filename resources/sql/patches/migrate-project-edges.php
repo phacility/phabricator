@@ -22,7 +22,6 @@ foreach (new LiskMigrationIterator($table) as $proj) {
   $members = ipull($members, 'userPHID');
 
   $editor = new PhabricatorEdgeEditor();
-  $editor->setSuppressEvents(true);
   foreach ($members as $user_phid) {
     $editor->addEdge(
       $proj->getPHID(),

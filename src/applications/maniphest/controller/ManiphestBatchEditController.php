@@ -62,6 +62,8 @@ final class ManiphestBatchEditController extends ManiphestController {
     $template = $template->render();
 
     $projects_source = new PhabricatorProjectDatasource();
+    $mailable_source = new PhabricatorMetaMTAMailableDatasource();
+    $owner_source = new PhabricatorTypeaheadOwnerDatasource();
 
     require_celerity_resource('maniphest-batch-editor');
     Javelin::initBehavior(
@@ -75,14 +77,13 @@ final class ManiphestBatchEditController extends ManiphestController {
             'placeholder'   => $projects_source->getPlaceholderText(),
           ),
           'owner' => array(
-            'src'           => '/typeahead/common/searchowner/',
-            'placeholder'   => pht(
-              'Type a user name or "upforgrabs" to unassign...'),
+            'src'           => $owner_source->getDatasourceURI(),
+            'placeholder'   => $owner_source->getPlaceholderText(),
             'limit'         => 1,
           ),
           'cc'    => array(
-            'src'           => '/typeahead/common/mailable/',
-            'placeholder'   => pht('Type a user name...'),
+            'src'           => $mailable_source->getDatasourceURI(),
+            'placeholder'   => $mailable_source->getPlaceholderText(),
           )
         ),
         'input' => 'batch-form-actions',
@@ -323,6 +324,18 @@ final class ManiphestBatchEditController extends ManiphestController {
           $xaction->attachComment(
             id(new ManiphestTransactionComment())
               ->setContent($value));
+          break;
+        case ManiphestTransaction::TYPE_PROJECTS:
+
+          // TODO: Clean this mess up.
+          $project_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
+          $xaction
+            ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+            ->setMetadataValue('edge:type', $project_type)
+            ->setNewValue(
+              array(
+                '=' => array_fuse($value),
+              ));
           break;
         default:
           $xaction->setNewValue($value);

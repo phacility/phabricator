@@ -9,7 +9,7 @@ final class PholioMock extends PholioDAO
     PhabricatorFlaggableInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorProjectInterface,
-    PhabricatorDestructableInterface {
+    PhabricatorDestructibleInterface {
 
   const MARKUP_FIELD_DESCRIPTION  = 'markup:description';
 
@@ -258,7 +258,7 @@ final class PholioMock extends PholioDAO
   }
 
 
-/* -(  PhabricatorDestructableInterface  )----------------------------------- */
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 
 
   public function destroyObjectPermanently(

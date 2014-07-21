@@ -4,10 +4,6 @@ final class PhabricatorPhamePHIDTypePost extends PhabricatorPHIDType {
 
   const TYPECONST = 'POST';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Phame Post');
   }

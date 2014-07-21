@@ -5,7 +5,8 @@ final class PhrictionDocument extends PhrictionDAO
     PhabricatorPolicyInterface,
     PhabricatorSubscribableInterface,
     PhabricatorFlaggableInterface,
-    PhabricatorTokenReceiverInterface {
+    PhabricatorTokenReceiverInterface,
+    PhabricatorDestructibleInterface {
 
   protected $slug;
   protected $depth;
@@ -180,4 +181,26 @@ final class PhrictionDocument extends PhrictionDAO
   public function getUsersToNotifyOfTokenGiven() {
     return PhabricatorSubscribersQuery::loadSubscribersForPHID($this->phid);
   }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+
+      $this->delete();
+
+      $contents = id(new PhrictionContent())->loadAllWhere(
+        'documentID = %d',
+        $this->getID());
+      foreach ($contents as $content) {
+        $content->delete();
+      }
+
+    $this->saveTransaction();
+  }
+
 }

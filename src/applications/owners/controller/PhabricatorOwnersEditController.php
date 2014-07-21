@@ -181,7 +181,7 @@ final class PhabricatorOwnersEditController
           ->setError($e_name))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/usersorprojects/')
+          ->setDatasource(new PhabricatorProjectOrUserDatasource())
           ->setLabel(pht('Primary Owner'))
           ->setName('primary')
           ->setLimit(1)
@@ -189,7 +189,7 @@ final class PhabricatorOwnersEditController
           ->setError($e_primary))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/usersorprojects/')
+          ->setDatasource(new PhabricatorProjectOrUserDatasource())
           ->setLabel(pht('Owners'))
           ->setName('owners')
           ->setValue($handles_all_owners))

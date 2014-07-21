@@ -23,7 +23,6 @@ final class LegalpadDocumentDatasource
     foreach ($documents as $document) {
       $results[] = id(new PhabricatorTypeaheadResult())
         ->setPHID($document->getPHID())
-        ->setIcon('fa-file-text-o')
         ->setName($document->getMonogram().' '.$document->getTitle());
     }
 

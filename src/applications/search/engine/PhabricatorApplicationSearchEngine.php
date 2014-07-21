@@ -244,7 +244,7 @@ abstract class PhabricatorApplicationSearchEngine {
   }
 
   protected function getApplicationClassName() {
-    throw new Exception(pht('Not implemented for this SearchEngine yet!'));
+    throw new PhutilMethodNotImplementedException();
   }
 
 

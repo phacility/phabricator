@@ -3,7 +3,7 @@
 echo "Migrating differential.revisionPHID to edges...\n";
 $commit_table = new PhabricatorRepositoryCommit();
 $data_table = new PhabricatorRepositoryCommitData();
-$editor = id(new PhabricatorEdgeEditor())->setSuppressEvents(true);
+$editor = new PhabricatorEdgeEditor();
 $commit_table->establishConnection('w');
 $edges = 0;
 
@@ -24,7 +24,7 @@ foreach (new LiskMigrationIterator($commit_table) as $commit) {
   if ($edges % 256 == 0) {
     echo '.';
     $editor->save();
-    $editor = id(new PhabricatorEdgeEditor())->setSuppressEvents(true);
+    $editor = new PhabricatorEdgeEditor();
   }
 }
 

@@ -30,8 +30,6 @@ final class PhabricatorManiphestTaskTestDataGenerator
       $this->generateTaskPriority();
     $changes[ManiphestTransaction::TYPE_CCS] =
       $this->getCCPHIDs();
-    $changes[ManiphestTransaction::TYPE_PROJECTS] =
-      $this->getProjectPHIDs();
     $transactions = array();
     foreach ($changes as $type => $value) {
       $transaction = clone $template;

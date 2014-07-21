@@ -4,10 +4,6 @@ final class ManiphestPHIDTypeTask extends PhabricatorPHIDType {
 
   const TYPECONST = 'TASK';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Task');
   }

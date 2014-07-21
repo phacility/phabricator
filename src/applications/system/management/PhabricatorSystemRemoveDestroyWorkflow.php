@@ -45,12 +45,12 @@ final class PhabricatorSystemRemoveDestroyWorkflow
     }
 
     foreach ($named_objects as $object_name => $object) {
-      if (!($object instanceof PhabricatorDestructableInterface)) {
+      if (!($object instanceof PhabricatorDestructibleInterface)) {
         throw new PhutilArgumentUsageException(
           pht(
             'Object "%s" can not be destroyed (it does not implement %s).',
             $object_name,
-            'PhabricatorDestructableInterface'));
+            'PhabricatorDestructibleInterface'));
       }
     }
 

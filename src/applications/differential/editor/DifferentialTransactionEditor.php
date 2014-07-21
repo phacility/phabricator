@@ -254,7 +254,7 @@ final class DifferentialTransactionEditor
     $status_plan = ArcanistDifferentialRevisionStatus::CHANGES_PLANNED;
 
     $edge_reviewer = PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER;
-    $edge_ref_task = PhabricatorEdgeConfig::TYPE_DREV_HAS_RELATED_TASK;
+    $edge_ref_task = DifferentialRevisionHasTaskEdgeType::EDGECONST;
 
     $is_sticky_accept = PhabricatorEnv::getEnvConfig(
       'differential.sticky-accept');
@@ -1250,7 +1250,7 @@ final class DifferentialTransactionEditor
         ->execute();
 
       if ($tasks) {
-        $edge_related = PhabricatorEdgeConfig::TYPE_DREV_HAS_RELATED_TASK;
+        $edge_related = DifferentialRevisionHasTaskEdgeType::EDGECONST;
         $edges[$edge_related] = mpull($tasks, 'getPHID', 'getPHID');
       }
     }

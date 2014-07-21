@@ -4,10 +4,6 @@ final class DrydockPHIDTypeResource extends PhabricatorPHIDType {
 
   const TYPECONST = 'DRYR';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Drydock Resource');
   }

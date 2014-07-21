@@ -4,10 +4,6 @@ final class PhabricatorProjectPHIDTypeColumn extends PhabricatorPHIDType {
 
   const TYPECONST = 'PCOL';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Project Column');
   }

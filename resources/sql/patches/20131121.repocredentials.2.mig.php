@@ -121,7 +121,6 @@ foreach ($map as $credential_type => $credential_usernames) {
         $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_USES_CREDENTIAL;
 
         id(new PhabricatorEdgeEditor())
-          ->setActor($viewer)
           ->addEdge($repository->getPHID(), $edge_type, $credential->getPHID())
           ->save();
       }

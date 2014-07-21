@@ -86,14 +86,17 @@ final class PhabricatorTypeaheadModularDatasourceController
     $table = new AphrontTableView($content);
     $table->setHeaders(
       array(
-        'Name',
-        'URI',
-        'PHID',
-        'Priority',
-        'Display Name',
-        'Display Type',
-        'Image URI',
-        'Priority Type',
+        pht('Name'),
+        pht('URI'),
+        pht('PHID'),
+        pht('Priority'),
+        pht('Display Name'),
+        pht('Display Type'),
+        pht('Image URI'),
+        pht('Priority Type'),
+        pht('Icon'),
+        pht('Closed'),
+        pht('Sprite'),
       ));
 
     $result_box = id(new PHUIObjectBoxView())

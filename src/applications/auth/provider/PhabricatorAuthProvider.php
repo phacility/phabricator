@@ -180,7 +180,7 @@ abstract class PhabricatorAuthProvider {
   protected function renderLoginForm(
     AphrontRequest $request,
     $mode) {
-    throw new Exception('Not implemented!');
+    throw new PhutilMethodNotImplementedException();
   }
 
   public function createProviders() {
@@ -295,7 +295,7 @@ abstract class PhabricatorAuthProvider {
   }
 
   public function getDefaultExternalAccount() {
-    throw new Exception('Not implemented!');
+    throw new PhutilMethodNotImplementedException();
   }
 
   public function getLoginOrder() {

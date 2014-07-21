@@ -4,10 +4,6 @@ final class HarbormasterPHIDTypeBuildLog extends PhabricatorPHIDType {
 
   const TYPECONST = 'HMCL';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Build Log');
   }

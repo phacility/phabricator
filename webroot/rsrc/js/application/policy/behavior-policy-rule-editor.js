@@ -5,9 +5,6 @@
  *           javelin-dom
  *           javelin-util
  *           phabricator-prefab
- *           javelin-tokenizer
- *           javelin-typeahead
- *           javelin-typeahead-preloaded-source
  *           javelin-json
  */
 JX.behavior('policy-rule-editor', function(config) {
@@ -124,15 +121,14 @@ JX.behavior('policy-rule-editor', function(config) {
         node = JX.$H(template.markup).getNode();
         node.id = '';
 
-        var datasource = new JX.TypeaheadPreloadedSource(template.uri);
+        var options = {
+          root: node,
+          src: template.uri,
+          placeholder: template.placeholder,
+          limit: template.limit
+        };
 
-        var typeahead = new JX.Typeahead(node);
-        typeahead.setDatasource(datasource);
-
-        var tokenizer = new JX.Tokenizer(node);
-        tokenizer.setLimit(template.limit);
-        tokenizer.setTypeahead(typeahead);
-        tokenizer.setPlaceholder(template.placeholder);
+        var tokenizer = JX.Prefab.buildTokenizer(options).tokenizer;
         tokenizer.start();
 
         get_fn = function() { return JX.keys(tokenizer.getTokens()); };

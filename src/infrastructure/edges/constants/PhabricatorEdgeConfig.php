@@ -5,9 +5,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TABLE_NAME_EDGE       = 'edge';
   const TABLE_NAME_EDGEDATA   = 'edgedata';
 
-  const TYPE_TASK_HAS_COMMIT            = 1;
-  const TYPE_COMMIT_HAS_TASK            = 2;
-
   const TYPE_TASK_DEPENDS_ON_TASK       = 3;
   const TYPE_TASK_DEPENDED_ON_BY_TASK   = 4;
 
@@ -18,9 +15,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TYPE_POST_HAS_BLOG              = 8;
   const TYPE_BLOG_HAS_BLOGGER           = 9;
   const TYPE_BLOGGER_HAS_BLOG           = 10;
-
-  const TYPE_TASK_HAS_RELATED_DREV      = 11;
-  const TYPE_DREV_HAS_RELATED_TASK      = 12;
 
   const TYPE_PROJ_MEMBER                = 13;
   const TYPE_MEMBER_OF_PROJ             = 14;
@@ -63,9 +57,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TYPE_OBJECT_USES_CREDENTIAL     = 39;
   const TYPE_CREDENTIAL_USED_BY_OBJECT  = 40;
 
-  const TYPE_OBJECT_HAS_PROJECT         = 41;
-  const TYPE_PROJECT_HAS_OBJECT         = 42;
-
   const TYPE_OBJECT_HAS_COLUMN          = 43;
   const TYPE_COLUMN_HAS_OBJECT          = 44;
 
@@ -78,6 +69,13 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TYPE_OBJECT_NEEDS_SIGNATURE     = 49;
   const TYPE_SIGNATURE_NEEDED_BY_OBJECT = 50;
 
+/* !!!! STOP !!!! STOP !!!! STOP !!!! STOP !!!! STOP !!!! STOP !!!! STOP !!!! */
+
+  // HEY! DO NOT ADD NEW CONSTANTS HERE!
+  // Instead, subclass PhabricatorEdgeType.
+
+/* !!!! STOP !!!! STOP !!!! STOP !!!! STOP !!!! STOP !!!! STOP !!!! STOP !!!! */
+
   const TYPE_TEST_NO_CYCLE              = 9000;
 
   const TYPE_PHOB_HAS_ASANATASK         = 80001;
@@ -89,11 +87,49 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TYPE_PHOB_HAS_JIRAISSUE         = 80004;
   const TYPE_JIRAISSUE_HAS_PHOB         = 80005;
 
-  public static function getInverse($edge_type) {
-    static $map = array(
-      self::TYPE_TASK_HAS_COMMIT => self::TYPE_COMMIT_HAS_TASK,
-      self::TYPE_COMMIT_HAS_TASK => self::TYPE_TASK_HAS_COMMIT,
 
+  /**
+   * Build @{class:PhabricatorLegacyEdgeType} objects for edges which have not
+   * yet been modernized. This allows code to act as though we've completed
+   * the edge type migration before we actually do all the work, by building
+   * these fake type objects.
+   *
+   * @param list<const> List of edge types that objects should not be built for.
+   *   This is used to avoid constructing duplicate objects for edge constants
+   *   which have migrated and already have a real object.
+   * @return list<PhabricatorLegacyEdgeType> Real-looking edge type objects for
+   *   unmigrated edge types.
+   */
+  public static function getLegacyTypes(array $exclude) {
+    $consts = array_merge(
+      range(1, 50),
+      array(9000),
+      range(80000, 80005));
+    $consts = array_diff($consts, $exclude);
+
+    $map = array();
+    foreach ($consts as $const) {
+      $prevent_cycles = self::shouldPreventCycles($const);
+      $inverse_constant = self::getInverse($const);
+
+      $map[$const] = id(new PhabricatorLegacyEdgeType())
+        ->setEdgeConstant($const)
+        ->setShouldPreventCycles($prevent_cycles)
+        ->setInverseEdgeConstant($inverse_constant)
+        ->setStrings(
+          array(
+            self::getAddStringForEdgeType($const),
+            self::getRemoveStringForEdgeType($const),
+            self::getEditStringForEdgeType($const),
+            self::getFeedStringForEdgeType($const),
+          ));
+    }
+
+    return $map;
+  }
+
+  private static function getInverse($edge_type) {
+    static $map = array(
       self::TYPE_TASK_DEPENDS_ON_TASK => self::TYPE_TASK_DEPENDED_ON_BY_TASK,
       self::TYPE_TASK_DEPENDED_ON_BY_TASK => self::TYPE_TASK_DEPENDS_ON_TASK,
 
@@ -104,9 +140,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       self::TYPE_POST_HAS_BLOG    => self::TYPE_BLOG_HAS_POST,
       self::TYPE_BLOG_HAS_BLOGGER => self::TYPE_BLOGGER_HAS_BLOG,
       self::TYPE_BLOGGER_HAS_BLOG => self::TYPE_BLOG_HAS_BLOGGER,
-
-      self::TYPE_TASK_HAS_RELATED_DREV => self::TYPE_DREV_HAS_RELATED_TASK,
-      self::TYPE_DREV_HAS_RELATED_TASK => self::TYPE_TASK_HAS_RELATED_DREV,
 
       self::TYPE_PROJ_MEMBER => self::TYPE_MEMBER_OF_PROJ,
       self::TYPE_MEMBER_OF_PROJ => self::TYPE_PROJ_MEMBER,
@@ -136,7 +169,7 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       self::TYPE_DREV_HAS_COMMIT => self::TYPE_COMMIT_HAS_DREV,
       self::TYPE_COMMIT_HAS_DREV => self::TYPE_DREV_HAS_COMMIT,
 
-      self::TYPE_OBJECT_HAS_CONTRIBUTOR => self::TYPE_SUBSCRIBED_TO_OBJECT,
+      self::TYPE_OBJECT_HAS_CONTRIBUTOR => self::TYPE_CONTRIBUTED_TO_OBJECT,
       self::TYPE_CONTRIBUTED_TO_OBJECT => self::TYPE_OBJECT_HAS_CONTRIBUTOR,
 
       self::TYPE_TASK_HAS_MOCK => self::TYPE_MOCK_HAS_TASK,
@@ -157,9 +190,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       self::TYPE_OBJECT_USES_CREDENTIAL => self::TYPE_CREDENTIAL_USED_BY_OBJECT,
       self::TYPE_CREDENTIAL_USED_BY_OBJECT => self::TYPE_OBJECT_USES_CREDENTIAL,
 
-      self::TYPE_OBJECT_HAS_PROJECT => self::TYPE_PROJECT_HAS_OBJECT,
-      self::TYPE_PROJECT_HAS_OBJECT => self::TYPE_OBJECT_HAS_PROJECT,
-
       self::TYPE_OBJECT_HAS_COLUMN => self::TYPE_COLUMN_HAS_OBJECT,
       self::TYPE_COLUMN_HAS_OBJECT => self::TYPE_OBJECT_HAS_COLUMN,
 
@@ -178,7 +208,7 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
     return idx($map, $edge_type);
   }
 
-  public static function shouldPreventCycles($edge_type) {
+  private static function shouldPreventCycles($edge_type) {
     static $map = array(
       self::TYPE_TEST_NO_CYCLE          => true,
       self::TYPE_TASK_DEPENDS_ON_TASK   => true,
@@ -217,19 +247,15 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
   public static function getEditStringForEdgeType($type) {
     switch ($type) {
-      case self::TYPE_TASK_HAS_COMMIT:
       case self::TYPE_PROJECT_HAS_COMMIT:
       case self::TYPE_DREV_HAS_COMMIT:
         return '%s edited commit(s), added %d: %s; removed %d: %s.';
-      case self::TYPE_COMMIT_HAS_TASK:
       case self::TYPE_TASK_DEPENDS_ON_TASK:
       case self::TYPE_TASK_DEPENDED_ON_BY_TASK:
-      case self::TYPE_DREV_HAS_RELATED_TASK:
       case self::TYPE_MOCK_HAS_TASK:
         return '%s edited task(s), added %d: %s; removed %d: %s.';
       case self::TYPE_DREV_DEPENDS_ON_DREV:
       case self::TYPE_DREV_DEPENDED_ON_BY_DREV:
-      case self::TYPE_TASK_HAS_RELATED_DREV:
       case self::TYPE_COMMIT_HAS_DREV:
       case self::TYPE_REVIEWER_FOR_DREV:
         return '%s edited revision(s), added %d: %s; removed %d: %s.';
@@ -244,7 +270,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s edited member(s), added %d: %s; removed %d: %s.';
       case self::TYPE_MEMBER_OF_PROJ:
       case self::TYPE_COMMIT_HAS_PROJECT:
-      case self::TYPE_OBJECT_HAS_PROJECT:
         return '%s edited project(s), added %d: %s; removed %d: %s.';
       case self::TYPE_QUESTION_HAS_VOTING_USER:
       case self::TYPE_ANSWER_HAS_VOTING_USER:
@@ -259,7 +284,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       case self::TYPE_UNSUBSCRIBED_FROM_OBJECT:
       case self::TYPE_FILE_HAS_OBJECT:
       case self::TYPE_CONTRIBUTED_TO_OBJECT:
-      case self::TYPE_PROJECT_HAS_OBJECT:
         return '%s edited object(s), added %d: %s; removed %d: %s.';
       case self::TYPE_OBJECT_HAS_UNSUBSCRIBER:
         return '%s edited unsubcriber(s), added %d: %s; removed %d: %s.';
@@ -295,7 +319,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
   public static function getAddStringForEdgeType($type) {
     switch ($type) {
-      case self::TYPE_TASK_HAS_COMMIT:
       case self::TYPE_PROJECT_HAS_COMMIT:
       case self::TYPE_DREV_HAS_COMMIT:
         return '%s added %d commit(s): %s.';
@@ -305,12 +328,9 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s added %d dependencie(s): %s.';
       case self::TYPE_TASK_DEPENDED_ON_BY_TASK:
         return '%s added %d blocked task(s): %s.';
-      case self::TYPE_COMMIT_HAS_TASK:
-      case self::TYPE_DREV_HAS_RELATED_TASK:
       case self::TYPE_MOCK_HAS_TASK:
         return '%s added %d task(s): %s.';
       case self::TYPE_DREV_DEPENDED_ON_BY_DREV:
-      case self::TYPE_TASK_HAS_RELATED_DREV:
       case self::TYPE_COMMIT_HAS_DREV:
       case self::TYPE_REVIEWER_FOR_DREV:
         return '%s added %d revision(s): %s.';
@@ -325,7 +345,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s added %d member(s): %s.';
       case self::TYPE_MEMBER_OF_PROJ:
       case self::TYPE_COMMIT_HAS_PROJECT:
-      case self::TYPE_OBJECT_HAS_PROJECT:
         return '%s added %d project(s): %s.';
       case self::TYPE_QUESTION_HAS_VOTING_USER:
       case self::TYPE_ANSWER_HAS_VOTING_USER:
@@ -366,7 +385,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       case self::TYPE_UNSUBSCRIBED_FROM_OBJECT:
       case self::TYPE_FILE_HAS_OBJECT:
       case self::TYPE_CONTRIBUTED_TO_OBJECT:
-      case self::TYPE_PROJECT_HAS_OBJECT:
       default:
         return '%s added %d object(s): %s.';
 
@@ -375,7 +393,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
   public static function getRemoveStringForEdgeType($type) {
     switch ($type) {
-      case self::TYPE_TASK_HAS_COMMIT:
       case self::TYPE_PROJECT_HAS_COMMIT:
       case self::TYPE_DREV_HAS_COMMIT:
         return '%s removed %d commit(s): %s.';
@@ -383,13 +400,10 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s removed %d blocking task(s): %s.';
       case self::TYPE_TASK_DEPENDED_ON_BY_TASK:
         return '%s removed %d blocked task(s): %s.';
-      case self::TYPE_COMMIT_HAS_TASK:
-      case self::TYPE_DREV_HAS_RELATED_TASK:
       case self::TYPE_MOCK_HAS_TASK:
         return '%s removed %d task(s): %s.';
       case self::TYPE_DREV_DEPENDS_ON_DREV:
       case self::TYPE_DREV_DEPENDED_ON_BY_DREV:
-      case self::TYPE_TASK_HAS_RELATED_DREV:
       case self::TYPE_COMMIT_HAS_DREV:
       case self::TYPE_REVIEWER_FOR_DREV:
         return '%s removed %d revision(s): %s.';
@@ -404,7 +418,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s removed %d member(s): %s.';
       case self::TYPE_MEMBER_OF_PROJ:
       case self::TYPE_COMMIT_HAS_PROJECT:
-      case self::TYPE_OBJECT_HAS_PROJECT:
         return '%s removed %d project(s): %s.';
       case self::TYPE_QUESTION_HAS_VOTING_USER:
       case self::TYPE_ANSWER_HAS_VOTING_USER:
@@ -443,7 +456,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       case self::TYPE_UNSUBSCRIBED_FROM_OBJECT:
       case self::TYPE_FILE_HAS_OBJECT:
       case self::TYPE_CONTRIBUTED_TO_OBJECT:
-      case self::TYPE_PROJECT_HAS_OBJECT:
       default:
         return '%s removed %d object(s): %s.';
 
@@ -452,19 +464,15 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
   public static function getFeedStringForEdgeType($type) {
     switch ($type) {
-      case self::TYPE_TASK_HAS_COMMIT:
       case self::TYPE_PROJECT_HAS_COMMIT:
       case self::TYPE_DREV_HAS_COMMIT:
         return '%s updated commits of %s.';
-      case self::TYPE_COMMIT_HAS_TASK:
       case self::TYPE_TASK_DEPENDS_ON_TASK:
       case self::TYPE_TASK_DEPENDED_ON_BY_TASK:
-      case self::TYPE_DREV_HAS_RELATED_TASK:
       case self::TYPE_MOCK_HAS_TASK:
         return '%s updated tasks of %s.';
       case self::TYPE_DREV_DEPENDS_ON_DREV:
       case self::TYPE_DREV_DEPENDED_ON_BY_DREV:
-      case self::TYPE_TASK_HAS_RELATED_DREV:
       case self::TYPE_COMMIT_HAS_DREV:
       case self::TYPE_REVIEWER_FOR_DREV:
         return '%s updated revisions of %s.';
@@ -479,7 +487,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s updated members of %s.';
       case self::TYPE_MEMBER_OF_PROJ:
       case self::TYPE_COMMIT_HAS_PROJECT:
-      case self::TYPE_OBJECT_HAS_PROJECT:
         return '%s updated projects of %s.';
       case self::TYPE_QUESTION_HAS_VOTING_USER:
       case self::TYPE_ANSWER_HAS_VOTING_USER:
@@ -518,7 +525,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       case self::TYPE_UNSUBSCRIBED_FROM_OBJECT:
       case self::TYPE_FILE_HAS_OBJECT:
       case self::TYPE_CONTRIBUTED_TO_OBJECT:
-      case self::TYPE_PROJECT_HAS_OBJECT:
       default:
         return '%s updated objects of %s.';
 

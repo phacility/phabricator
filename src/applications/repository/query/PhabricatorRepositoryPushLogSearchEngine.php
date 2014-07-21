@@ -80,7 +80,7 @@ final class PhabricatorRepositoryPushLogSearchEngine
           ->setValue($repository_handles))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/accounts/')
+          ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('pushers')
           ->setLabel(pht('Pushers'))
           ->setValue($pusher_handles));

@@ -125,6 +125,8 @@ final class PhabricatorProjectTransactionEditor
           ->setProjectPHID($object->getPHID())
           ->save();
 
+        $object->updateDatasourceTokens();
+
         // TODO -- delete all of the below once we sever automagical project
         // to phriction stuff
         if ($xaction->getOldValue() === null) {
@@ -182,6 +184,9 @@ final class PhabricatorProjectTransactionEditor
             $rem_slug->delete();
           }
         }
+
+        $object->updateDatasourceTokens();
+
         return;
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
@@ -231,8 +236,7 @@ final class PhabricatorProjectTransactionEditor
 
             if ($rem) {
               // When removing members, also remove any watches on the project.
-              $edge_editor = id(new PhabricatorEdgeEditor())
-                ->setSuppressEvents(true);
+              $edge_editor = new PhabricatorEdgeEditor();
               foreach ($rem as $rem_phid) {
                 $edge_editor->removeEdge(
                   $object->getPHID(),

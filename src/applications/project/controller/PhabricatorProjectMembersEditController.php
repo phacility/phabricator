@@ -83,7 +83,7 @@ final class PhabricatorProjectMembersEditController
         id(new AphrontFormTokenizerControl())
           ->setName('phids')
           ->setLabel(pht('Add Members'))
-          ->setDatasource('/typeahead/common/accounts/'))
+          ->setDatasource(new PhabricatorPeopleDatasource()))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton('/project/view/'.$project->getID().'/')

@@ -4,10 +4,6 @@ final class PhabricatorLegalpadPHIDTypeDocument extends PhabricatorPHIDType {
 
   const TYPECONST = 'LEGD';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Legalpad Document');
   }

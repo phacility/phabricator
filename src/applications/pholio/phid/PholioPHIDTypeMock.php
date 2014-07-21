@@ -4,10 +4,6 @@ final class PholioPHIDTypeMock extends PhabricatorPHIDType {
 
   const TYPECONST = 'MOCK';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Mock');
   }

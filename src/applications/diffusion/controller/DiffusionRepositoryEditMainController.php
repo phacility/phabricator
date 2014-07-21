@@ -265,7 +265,7 @@ final class DiffusionRepositoryEditMainController
 
     $project_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $repository->getPHID(),
-      PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT);
+      PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
     if ($project_phids) {
       $this->loadHandles($project_phids);
       $project_text = $this->renderHandlesForPHIDs($project_phids);

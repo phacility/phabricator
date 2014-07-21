@@ -103,7 +103,7 @@ final class HeraldPholioMockAdapter extends HeraldAdapter {
       case self::FIELD_PROJECTS:
         return PhabricatorEdgeQuery::loadDestinationPHIDs(
           $this->getMock()->getPHID(),
-          PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT);
+          PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
     }
 
     return parent::getHeraldField($field);

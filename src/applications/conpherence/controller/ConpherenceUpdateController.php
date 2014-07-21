@@ -206,7 +206,7 @@ final class ConpherenceUpdateController
         id(new AphrontFormTokenizerControl())
         ->setName('add_person')
         ->setUser($user)
-        ->setDatasource('/typeahead/common/users/'));
+        ->setDatasource(new PhabricatorPeopleDatasource()));
 
     require_celerity_resource('conpherence-update-css');
     return id(new AphrontDialogView())

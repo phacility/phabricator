@@ -23,7 +23,6 @@ final class PhabricatorOwnersPackageDatasource
 
     foreach ($packages as $package) {
       $results[] = id(new PhabricatorTypeaheadResult())
-        ->setIcon('fa-list-alt bluegrey')
         ->setName($package->getName())
         ->setURI('/owners/package/'.$package->getID().'/')
         ->setPHID($package->getPHID());

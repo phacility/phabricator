@@ -2,7 +2,28 @@
 
 abstract class PhabricatorPHIDType {
 
-  abstract public function getTypeConstant();
+  final public function getTypeConstant() {
+    $class = new ReflectionClass($this);
+
+    $const = $class->getConstant('TYPECONST');
+    if ($const === false) {
+      throw new Exception(
+        pht(
+          'PHIDType class "%s" must define an TYPECONST property.',
+          get_class($this)));
+    }
+
+    if (!is_string($const) || !preg_match('/^[A-Z]{4}$/', $const)) {
+      throw new Exception(
+        pht(
+          'PHIDType class "%s" has an invalid TYPECONST property. PHID '.
+          'constants must be a four character uppercase string.',
+          get_class($this)));
+    }
+
+    return $const;
+  }
+
   abstract public function getTypeName();
 
   public function newObject() {
@@ -114,7 +135,7 @@ abstract class PhabricatorPHIDType {
   public function loadNamedObjects(
     PhabricatorObjectQuery $query,
     array $names) {
-    throw new Exception('Not implemented!');
+    throw new PhutilMethodNotImplementedException();
   }
 
 

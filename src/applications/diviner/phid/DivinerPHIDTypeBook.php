@@ -4,10 +4,6 @@ final class DivinerPHIDTypeBook extends PhabricatorPHIDType {
 
   const TYPECONST = 'BOOK';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Book');
   }

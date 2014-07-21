@@ -4,10 +4,6 @@ final class HarbormasterPHIDTypeBuildPlan extends PhabricatorPHIDType {
 
   const TYPECONST = 'HMCP';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Build Plan');
   }

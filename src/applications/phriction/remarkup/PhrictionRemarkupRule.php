@@ -3,7 +3,7 @@
 final class PhrictionRemarkupRule extends PhutilRemarkupRule {
 
   public function getPriority() {
-    return 350.0;
+    return 175.0;
   }
 
   public function apply($text) {

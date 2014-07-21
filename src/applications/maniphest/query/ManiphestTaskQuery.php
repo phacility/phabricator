@@ -206,28 +206,28 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     if ($this->dateCreatedAfter) {
       $where[] = qsprintf(
         $conn,
-        'dateCreated >= %d',
+        'task.dateCreated >= %d',
         $this->dateCreatedAfter);
     }
 
     if ($this->dateCreatedBefore) {
       $where[] = qsprintf(
         $conn,
-        'dateCreated <= %d',
+        'task.dateCreated <= %d',
         $this->dateCreatedBefore);
     }
 
     if ($this->dateModifiedAfter) {
       $where[] = qsprintf(
         $conn,
-        'dateModified >= %d',
+        'task.dateModified >= %d',
         $this->dateModifiedAfter);
     }
 
     if ($this->dateModifiedBefore) {
       $where[] = qsprintf(
         $conn,
-        'dateModified <= %d',
+        'task.dateModified <= %d',
         $this->dateModifiedBefore);
     }
 
@@ -243,7 +243,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       // query. We sum the project count and require it be the same as the
       // number of projects we're searching for.
 
-      $count = ', COUNT(project.projectPHID) projectCount';
+      $count = ', COUNT(project.dst) projectCount';
       $having = qsprintf(
         $conn,
         'HAVING projectCount = %d',
@@ -326,6 +326,27 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
           unset($tasks[$key]);
         }
       }
+    }
+
+    return $tasks;
+  }
+
+  protected function didFilterPage(array $tasks) {
+    // TODO: Eventually, we should make this optional and introduce a
+    // needProjectPHIDs() method, but for now there's a lot of code which
+    // assumes the data is always populated.
+
+    $edge_query = id(new PhabricatorEdgeQuery())
+      ->withSourcePHIDs(mpull($tasks, 'getPHID'))
+      ->withEdgeTypes(
+        array(
+          PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+        ));
+    $edge_query->execute();
+
+    foreach ($tasks as $task) {
+      $phids = $edge_query->getDestinationPHIDs(array($task->getPHID()));
+      $task->attachProjectPHIDs($phids);
     }
 
     return $tasks;
@@ -496,13 +517,13 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     if ($this->projectPHIDs) {
       $parts[] = qsprintf(
         $conn,
-        'project.projectPHID in (%Ls)',
+        'project.dst in (%Ls)',
         $this->projectPHIDs);
     }
     if ($this->includeNoProject) {
       $parts[] = qsprintf(
         $conn,
-        'project.projectPHID IS NULL');
+        'project.dst IS NULL');
     }
 
     return '('.implode(') OR (', $parts).')';
@@ -515,7 +536,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
     return qsprintf(
       $conn,
-      'anyproject.projectPHID IN (%Ls)',
+      'anyproject.dst IN (%Ls)',
       $this->anyProjectPHIDs);
   }
 
@@ -536,7 +557,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
     return qsprintf(
       $conn,
-      'anyproject.projectPHID IN (%Ls)',
+      'anyproject.dst IN (%Ls)',
       $any_user_project_phids);
   }
 
@@ -547,7 +568,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
     return qsprintf(
       $conn,
-      'xproject.projectPHID IS NULL');
+      'xproject.dst IS NULL');
   }
 
   private function buildCustomOrderClause(AphrontDatabaseConnection $conn) {
@@ -636,31 +657,37 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   }
 
   private function buildJoinsClause(AphrontDatabaseConnection $conn_r) {
-    $project_dao = new ManiphestTaskProject();
+    $edge_table = PhabricatorEdgeConfig::TABLE_NAME_EDGE;
 
     $joins = array();
 
     if ($this->projectPHIDs || $this->includeNoProject) {
       $joins[] = qsprintf(
         $conn_r,
-        '%Q JOIN %T project ON project.taskPHID = task.phid',
+        '%Q JOIN %T project ON project.src = task.phid
+          AND project.type = %d',
         ($this->includeNoProject ? 'LEFT' : ''),
-        $project_dao->getTableName());
+        $edge_table,
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
     }
 
     if ($this->anyProjectPHIDs || $this->anyUserProjectPHIDs) {
       $joins[] = qsprintf(
         $conn_r,
-        'JOIN %T anyproject ON anyproject.taskPHID = task.phid',
-        $project_dao->getTableName());
+        'JOIN %T anyproject ON anyproject.src = task.phid
+          AND anyproject.type = %d',
+        $edge_table,
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
     }
 
     if ($this->xprojectPHIDs) {
       $joins[] = qsprintf(
         $conn_r,
-        'LEFT JOIN %T xproject ON xproject.taskPHID = task.phid
-          AND xproject.projectPHID IN (%Ls)',
-        $project_dao->getTableName(),
+        'LEFT JOIN %T xproject ON xproject.src = task.phid
+          AND xproject.type = %d
+          AND xproject.dst IN (%Ls)',
+        $edge_table,
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
         $this->xprojectPHIDs);
     }
 
@@ -678,20 +705,24 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         if ($ignore_group_phids) {
           $joins[] = qsprintf(
             $conn_r,
-            'LEFT JOIN %T projectGroup ON task.phid = projectGroup.taskPHID
-              AND projectGroup.projectPHID NOT IN (%Ls)',
-            $project_dao->getTableName(),
+            'LEFT JOIN %T projectGroup ON task.phid = projectGroup.src
+              AND projectGroup.type = %d
+              AND projectGroup.dst NOT IN (%Ls)',
+            $edge_table,
+            PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
             $ignore_group_phids);
         } else {
           $joins[] = qsprintf(
             $conn_r,
-            'LEFT JOIN %T projectGroup ON task.phid = projectGroup.taskPHID',
-            $project_dao->getTableName());
+            'LEFT JOIN %T projectGroup ON task.phid = projectGroup.src
+              AND projectGroup.type = %d',
+            $edge_table,
+            PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
         }
         $joins[] = qsprintf(
           $conn_r,
           'LEFT JOIN %T projectGroupName
-            ON projectGroup.projectPHID = projectGroupName.indexedObjectPHID',
+            ON projectGroup.dst = projectGroupName.indexedObjectPHID',
           id(new ManiphestNameIndex())->getTableName());
         break;
     }
@@ -712,7 +743,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     // task IDs.
     if ($joined_multiple_rows) {
       if ($joined_project_name) {
-        return 'GROUP BY task.phid, projectGroup.projectPHID';
+        return 'GROUP BY task.phid, projectGroup.dst';
       } else {
         return 'GROUP BY task.phid';
       }
