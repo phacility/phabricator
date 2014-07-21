@@ -59,7 +59,7 @@ Other options include:
     @{class@arcanist:ArcanistLintEngine}, which should be used to apply lint
     rules to this project. See @{article:Arcanist User Guide: Lint}.
   - **unit.engine**: the name of a subclass of
-    @{class@arcanist:ArcanistBaseUnitTestEngine}, which should be used to apply
+    @{class@arcanist:ArcanistUnitTestEngine}, which should be used to apply
     unit test rules to this project. See
     @{article:Arcanist User Guide: Customizing Lint, Unit Tests and Workflows}.
 

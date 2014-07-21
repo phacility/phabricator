@@ -91,7 +91,7 @@ Arcanist event constants are listed in @{class@arcanist:ArcanistEventType}.
 
 All Arcanist events have this data available:
 
-  - `workflow` The active @{class@arcanist:ArcanistBaseWorkflow}.
+  - `workflow` The active @{class@arcanist:ArcanistWorkflow}.
 
 == Arcanist: Commit: Will Commit SVN ==
 
