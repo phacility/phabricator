@@ -155,18 +155,19 @@ JX.install('Prefab', {
       var tokenizer = new JX.Tokenizer(root);
       tokenizer.setTypeahead(typeahead);
       tokenizer.setRenderTokenCallback(function(value, key) {
-        var icon = datasource.getResult(key);
-        if (icon) {
-          icon = icon.icon;
+        var result = datasource.getResult(key);
+
+        var icon;
+        if (result) {
+          icon = result.icon;
+          value = result.displayName;
         } else {
           icon = config.icons[key];
         }
 
-        if (!icon) {
-          return value;
+        if (icon) {
+          icon = JX.Prefab._renderIcon(icon);
         }
-
-        icon = JX.Prefab._renderIcon(icon);
 
         // TODO: Maybe we should render these closed tags in grey? Figure out
         // how we're going to use color.

@@ -4610,6 +4610,7 @@ phutil_register_library_map(array(
     'PhabricatorMetaMTAMailingList' => array(
       0 => 'PhabricatorMetaMTADAO',
       1 => 'PhabricatorPolicyInterface',
+      2 => 'PhabricatorDestructableInterface',
     ),
     'PhabricatorMetaMTAMemberQuery' => 'PhabricatorQuery',
     'PhabricatorMetaMTAPermanentFailureException' => 'Exception',
