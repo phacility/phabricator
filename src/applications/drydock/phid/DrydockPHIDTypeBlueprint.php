@@ -4,10 +4,6 @@ final class DrydockPHIDTypeBlueprint extends PhabricatorPHIDType {
 
   const TYPECONST = 'DRYB';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Blueprint');
   }

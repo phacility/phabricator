@@ -4,10 +4,6 @@ final class PhabricatorPastePHIDTypePaste extends PhabricatorPHIDType {
 
   const TYPECONST = 'PSTE';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Paste');
   }

@@ -4,10 +4,6 @@ final class DifferentialPHIDTypeDiff extends PhabricatorPHIDType {
 
   const TYPECONST = 'DIFF';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Differential Diff');
   }

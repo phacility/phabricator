@@ -4,10 +4,6 @@ final class PhabricatorFilePHIDTypeFile extends PhabricatorPHIDType {
 
   const TYPECONST = 'FILE';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('File');
   }

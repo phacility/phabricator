@@ -1,13 +1,8 @@
 <?php
 
-final class NuancePHIDTypeItem
-  extends PhabricatorPHIDType {
+final class NuancePHIDTypeItem extends PhabricatorPHIDType {
 
   const TYPECONST = 'NUAI';
-
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
 
   public function getTypeName() {
     return pht('Item');

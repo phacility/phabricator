@@ -1,13 +1,8 @@
 <?php
 
-final class PhabricatorRepositoryPHIDTypeMirror
-  extends PhabricatorPHIDType {
+final class PhabricatorRepositoryPHIDTypeMirror extends PhabricatorPHIDType {
 
   const TYPECONST = 'RMIR';
-
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
 
   public function getTypeName() {
     return pht('Repository Mirror');

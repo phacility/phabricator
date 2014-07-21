@@ -4,10 +4,6 @@ final class PhabricatorCalendarPHIDTypeEvent extends PhabricatorPHIDType {
 
   const TYPECONST = 'CEVT';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Event');
   }

@@ -1,13 +1,8 @@
 <?php
 
-final class PhragmentPHIDTypeFragmentVersion
-  extends PhabricatorPHIDType {
+final class PhragmentPHIDTypeFragmentVersion extends PhabricatorPHIDType {
 
   const TYPECONST = 'PHRV';
-
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
 
   public function getTypeName() {
     return pht('Fragment Version');

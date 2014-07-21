@@ -4,10 +4,6 @@ final class PhabricatorPeoplePHIDTypeUser extends PhabricatorPHIDType {
 
   const TYPECONST = 'USER';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('User');
   }

@@ -1,13 +1,8 @@
 <?php
 
-final class PhabricatorRepositoryPHIDTypePushLog
-  extends PhabricatorPHIDType {
+final class PhabricatorRepositoryPHIDTypePushLog extends PhabricatorPHIDType {
 
   const TYPECONST = 'PSHL';
-
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
 
   public function getTypeName() {
     return pht('Push Log');

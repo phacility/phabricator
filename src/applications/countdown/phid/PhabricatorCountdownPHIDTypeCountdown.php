@@ -4,10 +4,6 @@ final class PhabricatorCountdownPHIDTypeCountdown extends PhabricatorPHIDType {
 
   const TYPECONST = 'CDWN';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Countdown');
   }

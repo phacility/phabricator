@@ -5,10 +5,6 @@ final class PhabricatorApplicationTransactionPHIDTypeTransaction
 
   const TYPECONST = 'XACT';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Transaction');
   }

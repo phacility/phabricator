@@ -4,10 +4,6 @@ final class PhabricatorMacroPHIDTypeMacro extends PhabricatorPHIDType {
 
   const TYPECONST = 'MCRO';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Image Macro');
   }

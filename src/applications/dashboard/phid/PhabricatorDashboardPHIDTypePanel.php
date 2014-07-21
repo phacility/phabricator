@@ -4,10 +4,6 @@ final class PhabricatorDashboardPHIDTypePanel extends PhabricatorPHIDType {
 
   const TYPECONST = 'DSHP';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Panel');
   }

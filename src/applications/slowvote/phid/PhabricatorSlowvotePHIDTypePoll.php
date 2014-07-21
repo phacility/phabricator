@@ -4,10 +4,6 @@ final class PhabricatorSlowvotePHIDTypePoll extends PhabricatorPHIDType {
 
   const TYPECONST = 'POLL';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Slowvote Poll');
   }

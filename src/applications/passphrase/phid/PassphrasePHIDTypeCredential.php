@@ -4,10 +4,6 @@ final class PassphrasePHIDTypeCredential extends PhabricatorPHIDType {
 
   const TYPECONST = 'CDTL';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Credential');
   }

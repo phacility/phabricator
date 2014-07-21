@@ -4,10 +4,6 @@ final class ReleephPHIDTypeRequest extends PhabricatorPHIDType {
 
   const TYPECONST = 'RERQ';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Releeph Request');
   }

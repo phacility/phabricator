@@ -5,10 +5,6 @@ final class PhabricatorApplicationPHIDTypeApplication
 
   const TYPECONST = 'APPS';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Application');
   }

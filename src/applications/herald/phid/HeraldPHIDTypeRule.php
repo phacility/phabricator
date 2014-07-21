@@ -4,10 +4,6 @@ final class HeraldPHIDTypeRule extends PhabricatorPHIDType {
 
   const TYPECONST = 'HRUL';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Herald Rule');
   }

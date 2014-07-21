@@ -5,10 +5,6 @@ final class PhabricatorOAuthServerPHIDTypeClientAuthorization
 
   const TYPECONST = 'OASA';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('OAuth Authorization');
   }

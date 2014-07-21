@@ -4,10 +4,6 @@ final class HarbormasterPHIDTypeBuildTarget extends PhabricatorPHIDType {
 
   const TYPECONST = 'HMBT';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Build Target');
   }

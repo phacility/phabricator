@@ -4,10 +4,6 @@ final class DrydockPHIDTypeLease extends PhabricatorPHIDType {
 
   const TYPECONST = 'DRYL';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Drydock Lease');
   }

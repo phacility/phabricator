@@ -4,10 +4,6 @@ final class DivinerPHIDTypeAtom extends PhabricatorPHIDType {
 
   const TYPECONST = 'ATOM';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Atom');
   }

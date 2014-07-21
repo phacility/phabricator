@@ -4,10 +4,6 @@ final class PhabricatorDashboardPHIDTypeDashboard extends PhabricatorPHIDType {
 
   const TYPECONST = 'DSHB';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Dashboard');
   }

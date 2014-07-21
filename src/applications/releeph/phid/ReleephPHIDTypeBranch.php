@@ -4,10 +4,6 @@ final class ReleephPHIDTypeBranch extends PhabricatorPHIDType {
 
   const TYPECONST = 'REBR';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Releeph Branch');
   }

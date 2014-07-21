@@ -4,10 +4,6 @@ final class PonderPHIDTypeAnswer extends PhabricatorPHIDType {
 
   const TYPECONST = 'ANSW';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Answer');
   }

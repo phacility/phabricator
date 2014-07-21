@@ -4,10 +4,6 @@ final class PhabricatorProjectPHIDTypeProject extends PhabricatorPHIDType {
 
   const TYPECONST = 'PROJ';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Project');
   }

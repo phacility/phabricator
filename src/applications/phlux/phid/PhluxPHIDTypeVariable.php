@@ -4,10 +4,6 @@ final class PhluxPHIDTypeVariable extends PhabricatorPHIDType {
 
   const TYPECONST = 'PVAR';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Variable');
   }

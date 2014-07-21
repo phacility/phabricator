@@ -4,10 +4,6 @@ final class DifferentialPHIDTypeRevision extends PhabricatorPHIDType {
 
   const TYPECONST = 'DREV';
 
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
-
   public function getTypeName() {
     return pht('Revision');
   }

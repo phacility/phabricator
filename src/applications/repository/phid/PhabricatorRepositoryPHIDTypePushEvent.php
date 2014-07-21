@@ -1,13 +1,8 @@
 <?php
 
-final class PhabricatorRepositoryPHIDTypePushEvent
-  extends PhabricatorPHIDType {
+final class PhabricatorRepositoryPHIDTypePushEvent extends PhabricatorPHIDType {
 
   const TYPECONST = 'PSHE';
-
-  public function getTypeConstant() {
-    return self::TYPECONST;
-  }
 
   public function getTypeName() {
     return pht('Push Event');
