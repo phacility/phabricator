@@ -206,28 +206,28 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     if ($this->dateCreatedAfter) {
       $where[] = qsprintf(
         $conn,
-        'dateCreated >= %d',
+        'task.dateCreated >= %d',
         $this->dateCreatedAfter);
     }
 
     if ($this->dateCreatedBefore) {
       $where[] = qsprintf(
         $conn,
-        'dateCreated <= %d',
+        'task.dateCreated <= %d',
         $this->dateCreatedBefore);
     }
 
     if ($this->dateModifiedAfter) {
       $where[] = qsprintf(
         $conn,
-        'dateModified >= %d',
+        'task.dateModified >= %d',
         $this->dateModifiedAfter);
     }
 
     if ($this->dateModifiedBefore) {
       $where[] = qsprintf(
         $conn,
-        'dateModified <= %d',
+        'task.dateModified <= %d',
         $this->dateModifiedBefore);
     }
 
