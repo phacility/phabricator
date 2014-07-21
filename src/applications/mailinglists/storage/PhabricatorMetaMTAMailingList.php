@@ -3,7 +3,7 @@
 final class PhabricatorMetaMTAMailingList extends PhabricatorMetaMTADAO
   implements
     PhabricatorPolicyInterface,
-    PhabricatorDestructableInterface {
+    PhabricatorDestructibleInterface {
 
   protected $name;
   protected $email;
@@ -43,7 +43,7 @@ final class PhabricatorMetaMTAMailingList extends PhabricatorMetaMTADAO
   }
 
 
-/* -(  PhabricatorDestructableInterface  )----------------------------------- */
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 
 
   public function destroyObjectPermanently(

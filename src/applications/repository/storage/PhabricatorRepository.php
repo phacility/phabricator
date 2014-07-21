@@ -8,7 +8,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     PhabricatorPolicyInterface,
     PhabricatorFlaggableInterface,
     PhabricatorMarkupInterface,
-    PhabricatorDestructableInterface,
+    PhabricatorDestructibleInterface,
     PhabricatorProjectInterface {
 
   /**
@@ -1387,7 +1387,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
 
-/* -(  PhabricatorDestructableInterface  )----------------------------------- */
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 
   public function destroyObjectPermanently(
     PhabricatorDestructionEngine $engine) {

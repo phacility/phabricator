@@ -6,7 +6,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     PhabricatorPolicyInterface,
     PhabricatorSubscribableInterface,
     PhabricatorCustomFieldInterface,
-    PhabricatorDestructableInterface {
+    PhabricatorDestructibleInterface {
 
   protected $name;
   protected $status = PhabricatorProjectStatus::STATUS_ACTIVE;
@@ -308,7 +308,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   }
 
 
-/* -(  PhabricatorDestructableInterface  )----------------------------------- */
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 
   public function destroyObjectPermanently(
     PhabricatorDestructionEngine $engine) {

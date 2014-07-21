@@ -5,7 +5,7 @@ final class LegalpadDocument extends LegalpadDAO
     PhabricatorPolicyInterface,
     PhabricatorSubscribableInterface,
     PhabricatorApplicationTransactionInterface,
-    PhabricatorDestructableInterface {
+    PhabricatorDestructibleInterface {
 
   protected $title;
   protected $contributorCount;
@@ -201,7 +201,7 @@ final class LegalpadDocument extends LegalpadDAO
   }
 
 
-/* -(  PhabricatorDestructableInterface  )----------------------------------- */
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 
 
   public function destroyObjectPermanently(

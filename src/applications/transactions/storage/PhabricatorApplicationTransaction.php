@@ -4,7 +4,7 @@ abstract class PhabricatorApplicationTransaction
   extends PhabricatorLiskDAO
   implements
     PhabricatorPolicyInterface,
-    PhabricatorDestructableInterface {
+    PhabricatorDestructibleInterface {
 
   const TARGET_TEXT = 'text';
   const TARGET_HTML = 'html';
@@ -1026,7 +1026,7 @@ abstract class PhabricatorApplicationTransaction
   }
 
 
-/* -(  PhabricatorDestructableInterface  )----------------------------------- */
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 
 
   public function destroyObjectPermanently(

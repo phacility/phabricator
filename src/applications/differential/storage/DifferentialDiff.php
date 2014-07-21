@@ -6,7 +6,7 @@ final class DifferentialDiff
     PhabricatorPolicyInterface,
     HarbormasterBuildableInterface,
     PhabricatorApplicationTransactionInterface,
-    PhabricatorDestructableInterface {
+    PhabricatorDestructibleInterface {
 
   protected $revisionID;
   protected $authorPHID;
@@ -392,7 +392,7 @@ final class DifferentialDiff
   }
 
 
-/* -(  PhabricatorDestructableInterface  )----------------------------------- */
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 
 
   public function destroyObjectPermanently(
