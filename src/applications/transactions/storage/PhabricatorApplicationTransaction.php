@@ -76,7 +76,7 @@ abstract class PhabricatorApplicationTransaction
   }
 
   public function getApplicationTransactionCommentObject() {
-    throw new Exception('Not implemented!');
+    throw new PhutilMethodNotImplementedException();
   }
 
   public function getApplicationTransactionViewObject() {

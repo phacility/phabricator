@@ -327,7 +327,7 @@ abstract class PhabricatorApplicationTransactionEditor
   protected function applyInitialEffects(
     PhabricatorLiskDAO $object,
     array $xactions) {
-    throw new Exception('Not implemented.');
+    throw new PhutilMethodNotImplementedException();
   }
 
   private function applyInternalEffects(
