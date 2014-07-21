@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorOAuthClientViewController
-  extends PhabricatorOAuthClientBaseController {
+  extends PhabricatorOAuthClientController {
 
   public function processRequest() {
     $request = $this->getRequest();

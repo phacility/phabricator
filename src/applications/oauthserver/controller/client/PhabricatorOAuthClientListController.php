@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorOAuthClientListController
-  extends PhabricatorOAuthClientBaseController {
+  extends PhabricatorOAuthClientController {
 
   private $queryKey;
 

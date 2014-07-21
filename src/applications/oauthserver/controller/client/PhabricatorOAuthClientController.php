@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorOAuthClientBaseController
+abstract class PhabricatorOAuthClientController
   extends PhabricatorOAuthServerController {
 
   private $clientPHID;
