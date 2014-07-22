@@ -1,7 +1,7 @@
 <?php
 
-final class PhabricatorAuthProviderOAuth1Bitbucket
-  extends PhabricatorAuthProviderOAuth1 {
+final class PhabricatorBitbucketAuthProvider
+  extends PhabricatorOAuth1AuthProvider {
 
   public function getProviderName() {
     return pht('Bitbucket');
@@ -17,7 +17,7 @@ final class PhabricatorAuthProviderOAuth1Bitbucket
   }
 
   protected function newOAuthAdapter() {
-    return new PhutilAuthAdapterOAuthBitbucket();
+    return new PhutilBitbucketAuthAdapter();
   }
 
   protected function getLoginIcon() {

@@ -1,7 +1,7 @@
 <?php
 
-final class PhabricatorAuthProviderOAuthAmazon
-  extends PhabricatorAuthProviderOAuth2 {
+final class PhabricatorAmazonAuthProvider
+  extends PhabricatorOAuth2AuthProvider {
 
   public function getProviderName() {
     return pht('Amazon');
@@ -36,7 +36,7 @@ final class PhabricatorAuthProviderOAuthAmazon
   }
 
   protected function newOAuthAdapter() {
-    return new PhutilAuthAdapterOAuthAmazon();
+    return new PhutilAmazonAuthAdapter();
   }
 
   protected function getLoginIcon() {

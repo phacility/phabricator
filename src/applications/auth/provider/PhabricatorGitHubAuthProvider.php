@@ -1,10 +1,10 @@
 <?php
 
-final class PhabricatorAuthProviderOAuthWordPress
-  extends PhabricatorAuthProviderOAuth2 {
+final class PhabricatorGitHubAuthProvider
+  extends PhabricatorOAuth2AuthProvider {
 
   public function getProviderName() {
-    return pht('WordPress.com');
+    return pht('GitHub');
   }
 
   protected function getProviderConfigurationHelp() {
@@ -12,15 +12,15 @@ final class PhabricatorAuthProviderOAuthWordPress
     $callback_uri = PhabricatorEnv::getURI($this->getLoginURI());
 
     return pht(
-      "To configure WordPress.com OAuth, create a new WordPress.com ".
-      "Application here:\n\n".
-      "https://developer.wordpress.com/apps/new/.".
+      "To configure GitHub OAuth, create a new GitHub Application here:".
+      "\n\n".
+      "https://github.com/settings/applications/new".
       "\n\n".
       "You should use these settings in your application:".
       "\n\n".
       "  - **URL:** Set this to your full domain with protocol. For this ".
       "    Phabricator install, the correct value is: `%s`\n".
-      "  - **Redirect URL**: Set this to: `%s`\n".
+      "  - **Callback URL**: Set this to: `%s`\n".
       "\n\n".
       "Once you've created an application, copy the **Client ID** and ".
       "**Client Secret** into the fields above.",
@@ -29,10 +29,16 @@ final class PhabricatorAuthProviderOAuthWordPress
   }
 
   protected function newOAuthAdapter() {
-    return new PhutilAuthAdapterOAuthWordPress();
+    return new PhutilGitHubAuthAdapter();
   }
 
   protected function getLoginIcon() {
-    return 'WordPressCOM';
+    return 'Github';
   }
+
+  public function getLoginURI() {
+    // TODO: Clean this up. See PhabricatorAuthOldOAuthRedirectController.
+    return '/oauth/github/login/';
+  }
+
 }

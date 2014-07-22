@@ -1,7 +1,7 @@
 <?php
 
-final class PhabricatorAuthProviderOAuthTwitch
-  extends PhabricatorAuthProviderOAuth2 {
+final class PhabricatorTwitchAuthProvider
+  extends PhabricatorOAuth2AuthProvider {
 
   public function getProviderName() {
     return pht('Twitch.tv');
@@ -26,7 +26,7 @@ final class PhabricatorAuthProviderOAuthTwitch
   }
 
   protected function newOAuthAdapter() {
-    return new PhutilAuthAdapterOAuthTwitch();
+    return new PhutilTwitchAuthAdapter();
   }
 
   protected function getLoginIcon() {

@@ -1,7 +1,7 @@
 <?php
 
-abstract class PhabricatorAuthProviderOAuth1
-  extends PhabricatorAuthProviderOAuth {
+abstract class PhabricatorOAuth1AuthProvider
+  extends PhabricatorOAuthAuthProvider {
 
   protected $adapter;
 
@@ -19,7 +19,7 @@ abstract class PhabricatorAuthProviderOAuth1
     return self::PROPERTY_CONSUMER_SECRET;
   }
 
-  protected function configureAdapter(PhutilAuthAdapterOAuth1 $adapter) {
+  protected function configureAdapter(PhutilOAuth1AuthAdapter $adapter) {
     $config = $this->getProviderConfig();
     $adapter->setConsumerKey($config->getProperty(self::PROPERTY_CONSUMER_KEY));
     $secret = $config->getProperty(self::PROPERTY_CONSUMER_SECRET);

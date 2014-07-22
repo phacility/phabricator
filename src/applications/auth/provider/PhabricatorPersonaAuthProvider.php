@@ -1,7 +1,6 @@
 <?php
 
-final class PhabricatorAuthProviderPersona
-  extends PhabricatorAuthProvider {
+final class PhabricatorPersonaAuthProvider extends PhabricatorAuthProvider {
 
   private $adapter;
 
@@ -16,7 +15,7 @@ final class PhabricatorAuthProviderPersona
 
   public function getAdapter() {
     if (!$this->adapter) {
-      $adapter = new PhutilAuthAdapterPersona();
+      $adapter = new PhutilPersonaAuthAdapter();
       $this->adapter = $adapter;
     }
     return $this->adapter;

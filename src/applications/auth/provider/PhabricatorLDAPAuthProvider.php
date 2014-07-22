@@ -1,7 +1,6 @@
 <?php
 
-final class PhabricatorAuthProviderLDAP
-  extends PhabricatorAuthProvider {
+final class PhabricatorLDAPAuthProvider extends PhabricatorAuthProvider {
 
   private $adapter;
 
@@ -34,7 +33,7 @@ final class PhabricatorAuthProviderLDAP
       $search_attributes = phutil_split_lines($search_attributes, false);
       $search_attributes = array_filter($search_attributes);
 
-      $adapter = id(new PhutilAuthAdapterLDAP())
+      $adapter = id(new PhutilLDAPAuthAdapter())
         ->setHostname(
           $conf->getProperty(self::KEY_HOSTNAME))
         ->setPort(
@@ -160,7 +159,7 @@ final class PhabricatorAuthProviderLDAP
           $adapter->setLoginPassword($password);
 
           // TODO: This calls ldap_bind() eventually, which dumps cleartext
-          // passwords to the error log. See note in PhutilAuthAdapterLDAP.
+          // passwords to the error log. See note in PhutilLDAPAuthAdapter.
           // See T3351.
 
           DarkConsoleErrorLogPluginAPI::enableDiscardMode();

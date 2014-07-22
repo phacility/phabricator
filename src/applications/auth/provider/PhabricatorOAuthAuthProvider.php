@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorAuthProviderOAuth extends PhabricatorAuthProvider {
+abstract class PhabricatorOAuthAuthProvider extends PhabricatorAuthProvider {
 
   const PROPERTY_NOTE = 'oauth:app:note';
 

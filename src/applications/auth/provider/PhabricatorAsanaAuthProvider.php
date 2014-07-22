@@ -1,7 +1,6 @@
 <?php
 
-final class PhabricatorAuthProviderOAuthAsana
-  extends PhabricatorAuthProviderOAuth2 {
+final class PhabricatorAsanaAuthProvider extends PhabricatorOAuth2AuthProvider {
 
   public function getProviderName() {
     return pht('Asana');
@@ -28,7 +27,7 @@ final class PhabricatorAuthProviderOAuthAsana
   }
 
   protected function newOAuthAdapter() {
-    return new PhutilAuthAdapterOAuthAsana();
+    return new PhutilAsanaAuthAdapter();
   }
 
   protected function getLoginIcon() {
@@ -39,7 +38,7 @@ final class PhabricatorAuthProviderOAuthAsana
     $providers = self::getAllEnabledProviders();
 
     foreach ($providers as $provider) {
-      if ($provider instanceof PhabricatorAuthProviderOAuthAsana) {
+      if ($provider instanceof PhabricatorAsanaAuthProvider) {
         return $provider;
       }
     }

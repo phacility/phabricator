@@ -1,7 +1,7 @@
 <?php
 
-final class PhabricatorAuthProviderOAuthDisqus
-  extends PhabricatorAuthProviderOAuth2 {
+final class PhabricatorDisqusAuthProvider
+  extends PhabricatorOAuth2AuthProvider {
 
   public function getProviderName() {
     return pht('Disqus');
@@ -26,7 +26,7 @@ final class PhabricatorAuthProviderOAuthDisqus
   }
 
   protected function newOAuthAdapter() {
-    return new PhutilAuthAdapterOAuthDisqus();
+    return new PhutilDisqusAuthAdapter();
   }
 
   protected function getLoginIcon() {

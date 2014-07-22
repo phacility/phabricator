@@ -1,7 +1,6 @@
 <?php
 
-final class PhabricatorAuthProviderPassword
-  extends PhabricatorAuthProvider {
+final class PhabricatorPasswordAuthProvider extends PhabricatorAuthProvider {
 
   private $adapter;
 

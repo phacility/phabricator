@@ -1,7 +1,7 @@
 <?php
 
-abstract class PhabricatorAuthProviderOAuth2
-  extends PhabricatorAuthProviderOAuth {
+abstract class PhabricatorOAuth2AuthProvider
+  extends PhabricatorOAuthAuthProvider {
 
   const PROPERTY_APP_ID = 'oauth:app:id';
   const PROPERTY_APP_SECRET = 'oauth:app:secret';
@@ -15,7 +15,7 @@ abstract class PhabricatorAuthProviderOAuth2
   }
 
 
-  protected function configureAdapter(PhutilAuthAdapterOAuth $adapter) {
+  protected function configureAdapter(PhutilOAuthAuthAdapter $adapter) {
     $config = $this->getProviderConfig();
     $adapter->setClientID($config->getProperty(self::PROPERTY_APP_ID));
     $adapter->setClientSecret(

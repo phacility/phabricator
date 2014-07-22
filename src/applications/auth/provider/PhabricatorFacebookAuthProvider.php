@@ -1,7 +1,7 @@
 <?php
 
-final class PhabricatorAuthProviderOAuthFacebook
-  extends PhabricatorAuthProviderOAuth2 {
+final class PhabricatorFacebookAuthProvider
+  extends PhabricatorOAuth2AuthProvider {
 
   const KEY_REQUIRE_SECURE = 'oauth:facebook:require-secure';
 
@@ -39,7 +39,7 @@ final class PhabricatorAuthProviderOAuthFacebook
     $require_secure = $this->getProviderConfig()->getProperty(
       self::KEY_REQUIRE_SECURE);
 
-    return id(new PhutilAuthAdapterOAuthFacebook())
+    return id(new PhutilFacebookAuthAdapter())
       ->setRequireSecureBrowsing($require_secure);
   }
 

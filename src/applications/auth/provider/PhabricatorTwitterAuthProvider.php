@@ -1,7 +1,7 @@
 <?php
 
-final class PhabricatorAuthProviderOAuth1Twitter
-  extends PhabricatorAuthProviderOAuth1 {
+final class PhabricatorTwitterAuthProvider
+  extends PhabricatorOAuth1AuthProvider {
 
   public function getProviderName() {
     return pht('Twitter');
@@ -25,7 +25,7 @@ final class PhabricatorAuthProviderOAuth1Twitter
   }
 
   protected function newOAuthAdapter() {
-    return new PhutilAuthAdapterOAuthTwitter();
+    return new PhutilTwitterAuthAdapter();
   }
 
   protected function getLoginIcon() {

@@ -1,7 +1,6 @@
 <?php
 
-final class PhabricatorAuthProviderOAuth1JIRA
-  extends PhabricatorAuthProviderOAuth1 {
+final class PhabricatorJIRAAuthProvider extends PhabricatorOAuth1AuthProvider {
 
   public function getJIRABaseURI() {
     return $this->getProviderConfig()->getProperty(self::PROPERTY_JIRA_URI);
@@ -58,7 +57,7 @@ final class PhabricatorAuthProviderOAuth1JIRA
   protected function newOAuthAdapter() {
     $config = $this->getProviderConfig();
 
-    return id(new PhutilAuthAdapterOAuthJIRA())
+    return id(new PhutilJIRAAuthAdapter())
       ->setAdapterDomain($config->getProviderDomain())
       ->setJIRABaseURI($config->getProperty(self::PROPERTY_JIRA_URI))
       ->setPrivateKey(
@@ -143,7 +142,7 @@ final class PhabricatorAuthProviderOAuth1JIRA
       $config->setProviderDomain($values[$key_name]);
 
       $consumer_key = 'phjira.'.Filesystem::readRandomCharacters(16);
-      list($public, $private) = PhutilAuthAdapterOAuthJIRA::newJIRAKeypair();
+      list($public, $private) = PhutilJIRAAuthAdapter::newJIRAKeypair();
 
       $config->setProperty(self::PROPERTY_PUBLIC_KEY, $public);
       $config->setProperty(self::PROPERTY_PRIVATE_KEY, $private);

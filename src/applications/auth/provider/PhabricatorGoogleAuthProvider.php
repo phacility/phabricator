@@ -1,7 +1,7 @@
 <?php
 
-final class PhabricatorAuthProviderOAuthGoogle
-  extends PhabricatorAuthProviderOAuth2 {
+final class PhabricatorGoogleAuthProvider
+  extends PhabricatorOAuth2AuthProvider {
 
   public function getProviderName() {
     return pht('Google');
@@ -33,7 +33,7 @@ final class PhabricatorAuthProviderOAuthGoogle
   }
 
   protected function newOAuthAdapter() {
-    return new PhutilAuthAdapterOAuthGoogle();
+    return new PhutilGoogleAuthAdapter();
   }
 
   protected function getLoginIcon() {
