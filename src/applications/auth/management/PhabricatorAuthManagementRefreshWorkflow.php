@@ -101,7 +101,7 @@ final class PhabricatorAuthManagementRefreshWorkflow
       }
 
       $provider = $providers[$key];
-      if (!($provider instanceof PhabricatorAuthProviderOAuth2)) {
+      if (!($provider instanceof PhabricatorOAuth2AuthProvider)) {
         $console->writeOut(
           "> %s\n",
           pht('Skipping, provider is not an OAuth2 provider.'));

@@ -465,7 +465,7 @@ final class PhabricatorLDAPAuthProvider extends PhabricatorAuthProvider {
     $providers = self::getAllEnabledProviders();
 
     foreach ($providers as $provider) {
-      if ($provider instanceof PhabricatorAuthProviderLDAP) {
+      if ($provider instanceof PhabricatorLDAPAuthProvider) {
         return $provider;
       }
     }

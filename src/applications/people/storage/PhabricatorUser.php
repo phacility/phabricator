@@ -550,7 +550,7 @@ EOBODY;
     $new_username = $this->getUserName();
 
     $password_instructions = null;
-    if (PhabricatorAuthProviderPassword::getPasswordProvider()) {
+    if (PhabricatorPasswordAuthProvider::getPasswordProvider()) {
       $engine = new PhabricatorAuthSessionEngine();
       $uri = $engine->getOneTimeLoginURI(
         $this,

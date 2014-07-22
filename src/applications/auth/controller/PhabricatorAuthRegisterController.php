@@ -494,7 +494,7 @@ final class PhabricatorAuthRegisterController
   }
 
   private function loadSetupAccount() {
-    $provider = new PhabricatorAuthProviderPassword();
+    $provider = new PhabricatorPasswordAuthProvider();
     $provider->attachProviderConfig(
       id(new PhabricatorAuthProviderConfig())
         ->setShouldAllowRegistration(1)

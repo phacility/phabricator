@@ -265,7 +265,7 @@ final class PhabricatorJIRAAuthProvider extends PhabricatorOAuth1AuthProvider {
     $providers = self::getAllEnabledProviders();
 
     foreach ($providers as $provider) {
-      if ($provider instanceof PhabricatorAuthProviderOAuth1JIRA) {
+      if ($provider instanceof PhabricatorJIRAAuthProvider) {
         return $provider;
       }
     }

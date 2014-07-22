@@ -104,7 +104,7 @@ final class PhabricatorPasswordAuthProvider extends PhabricatorAuthProvider {
 
   public function getAdapter() {
     if (!$this->adapter) {
-      $adapter = new PhutilAuthAdapterEmpty();
+      $adapter = new PhutilEmptyAuthAdapter();
       $adapter->setAdapterType('password');
       $adapter->setAdapterDomain('self');
       $this->adapter = $adapter;
@@ -330,7 +330,7 @@ final class PhabricatorPasswordAuthProvider extends PhabricatorAuthProvider {
     $providers = self::getAllEnabledProviders();
 
     foreach ($providers as $provider) {
-      if ($provider instanceof PhabricatorAuthProviderPassword) {
+      if ($provider instanceof PhabricatorPasswordAuthProvider) {
         return $provider;
       }
     }

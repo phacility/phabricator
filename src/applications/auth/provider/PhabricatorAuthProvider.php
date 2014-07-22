@@ -149,7 +149,7 @@ abstract class PhabricatorAuthProvider {
   /**
    * Should we allow the adapter to be marked as "trusted"
    * This is true for all adapters except those that allow the user to type in
-   * emails (@see PhabricatorAuthProviderPassword)
+   * emails (@see PhabricatorPasswordAuthProvider)
    */
   public function shouldAllowEmailTrustConfiguration() {
     return true;
