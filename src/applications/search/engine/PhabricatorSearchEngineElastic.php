@@ -219,7 +219,7 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
 
     try {
       $response = $this->executeRequest($uri, $this->buildSpec($query));
-    } catch (HTTPFutureResponseStatusHTTP $ex) {
+    } catch (HTTPFutureHTTPResponseStatus $ex) {
       // elasticsearch probably uses Lucene query syntax:
       // http://lucene.apache.org/core/3_6_1/queryparsersyntax.html
       // Try literal search if operator search fails.
