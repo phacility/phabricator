@@ -120,6 +120,7 @@ class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
     switch ($command) {
       case 'unsubscribe':
         id(new PhabricatorSubscriptionsEditor())
+          ->setActor($actor)
           ->setObject($this->getMailReceiver())
           ->unsubscribe(array($actor->getPHID()))
           ->save();
