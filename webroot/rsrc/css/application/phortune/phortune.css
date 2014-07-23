@@ -15,3 +15,12 @@
   margin: 4px 0;
   width: 100%;
 }
+
+.phortune-payment-onetime-list {
+  width: 280px;
+}
+
+.phortune-payment-onetime-list button {
+  margin: 0 0 8px 0;
+  width: 100%;
+}

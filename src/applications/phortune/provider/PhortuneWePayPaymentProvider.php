@@ -22,13 +22,12 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
   }
 
   public function getPaymentMethodIcon() {
-    return 'rsrc/phortune/wepay.png';
+    return celerity_get_resource_uri('/rsrc/image/phortune/wepay.png');
   }
 
   public function getPaymentMethodProviderDescription() {
     return 'WePay';
   }
-
 
   public function canHandlePaymentMethod(PhortunePaymentMethod $method) {
     $type = $method->getMetadataValue('type');
@@ -62,32 +61,6 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
 
   public function canProcessOneTimePayments() {
     return true;
-  }
-
-  public function renderOneTimePaymentButton(
-    PhortuneAccount $account,
-    PhortuneCart $cart,
-    PhabricatorUser $user) {
-
-    $uri = $this->getControllerURI(
-      'checkout',
-      array(
-        'cartID' => $cart->getID(),
-      ));
-
-    return phabricator_form(
-      $user,
-      array(
-        'action' => $uri,
-        'method' => 'POST',
-      ),
-      phutil_tag(
-        'button',
-        array(
-          'class' => 'green',
-          'type'  => 'submit',
-        ),
-        pht('Pay with WePay')));
   }
 
 

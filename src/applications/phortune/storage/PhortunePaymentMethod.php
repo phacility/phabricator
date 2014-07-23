@@ -48,7 +48,8 @@ final class PhortunePaymentMethod extends PhortuneDAO
   }
 
   public function getDescription() {
-    return '...';
+    $provider = $this->buildPaymentProvider();
+    return $provider->getPaymentMethodProviderDescription();
   }
 
   public function getMetadataValue($key, $default = null) {

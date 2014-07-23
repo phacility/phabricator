@@ -181,7 +181,37 @@ abstract class PhortunePaymentProvider {
     PhortuneAccount $account,
     PhortuneCart $cart,
     PhabricatorUser $user) {
-    throw new PhortuneNotImplementedException($this);
+
+    require_celerity_resource('phortune-css');
+
+    $icon_uri = $this->getPaymentMethodIcon();
+    $description = $this->getPaymentMethodProviderDescription();
+    $details = $this->getPaymentMethodDescription();
+
+    $icon = id(new PHUIIconView())
+      ->setImage($icon_uri)
+      ->addClass('phortune-payment-icon');
+
+    $button = id(new PHUIButtonView())
+      ->setSize(PHUIButtonView::BIG)
+      ->setColor(PHUIButtonView::GREY)
+      ->setIcon($icon)
+      ->setText($description)
+      ->setSubtext($details);
+
+    $uri = $this->getControllerURI(
+      'checkout',
+      array(
+        'cartID' => $cart->getID(),
+      ));
+
+    return phabricator_form(
+      $user,
+      array(
+        'action' => $uri,
+        'method' => 'POST',
+      ),
+      $button);
   }
 
 
