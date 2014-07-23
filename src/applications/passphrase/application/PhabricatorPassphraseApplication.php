@@ -2,6 +2,10 @@
 
 final class PhabricatorPassphraseApplication extends PhabricatorApplication {
 
+  public function getName() {
+    return pht('Passphrase');
+  }
+
   public function getBaseURI() {
     return '/passphrase/';
   }

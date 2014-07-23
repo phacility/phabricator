@@ -2,6 +2,10 @@
 
 final class PhabricatorPholioApplication extends PhabricatorApplication {
 
+  public function getName() {
+    return pht('Pholio');
+  }
+
   public function getBaseURI() {
     return '/pholio/';
   }

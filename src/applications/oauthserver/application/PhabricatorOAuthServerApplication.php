@@ -2,6 +2,10 @@
 
 final class PhabricatorOAuthServerApplication extends PhabricatorApplication {
 
+  public function getName() {
+    return pht('OAuth Server');
+  }
+
   public function getBaseURI() {
     return '/oauthserver/';
   }

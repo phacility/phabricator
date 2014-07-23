@@ -2,6 +2,10 @@
 
 final class PhabricatorPhluxApplication extends PhabricatorApplication {
 
+  public function getName() {
+    return pht('Phlux');
+  }
+
   public function getBaseURI() {
     return '/phlux/';
   }

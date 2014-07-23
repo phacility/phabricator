@@ -2,6 +2,10 @@
 
 final class PhabricatorPHPASTApplication extends PhabricatorApplication {
 
+  public function getName() {
+    return pht('PHPAST');
+  }
+
   public function getBaseURI() {
     return '/xhpast/';
   }

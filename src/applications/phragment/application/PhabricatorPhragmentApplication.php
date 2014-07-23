@@ -2,6 +2,10 @@
 
 final class PhabricatorPhragmentApplication extends PhabricatorApplication {
 
+  public function getName() {
+    return pht('Phragment');
+  }
+
   public function getBaseURI() {
     return '/phragment/';
   }

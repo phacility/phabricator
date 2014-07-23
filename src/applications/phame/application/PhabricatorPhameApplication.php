@@ -2,6 +2,10 @@
 
 final class PhabricatorPhameApplication extends PhabricatorApplication {
 
+  public function getName() {
+    return pht('Phame');
+  }
+
   public function getBaseURI() {
     return '/phame/';
   }

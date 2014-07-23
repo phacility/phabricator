@@ -2,6 +2,10 @@
 
 final class PhabricatorOwnersApplication extends PhabricatorApplication {
 
+  public function getName() {
+    return pht('Owners');
+  }
+
   public function getBaseURI() {
     return '/owners/';
   }

@@ -2,6 +2,10 @@
 
 final class PhabricatorMetaMTAApplication extends PhabricatorApplication {
 
+  public function getName() {
+    return pht('MetaMTA');
+  }
+
   public function getIconName() {
     return 'metamta';
   }

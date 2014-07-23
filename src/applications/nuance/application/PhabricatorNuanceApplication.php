@@ -2,6 +2,10 @@
 
 final class PhabricatorNuanceApplication extends PhabricatorApplication {
 
+  public function getName() {
+    return pht('Nuance');
+  }
+
   public function getIconName() {
     return 'nuance';
   }

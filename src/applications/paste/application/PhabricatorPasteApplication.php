@@ -2,6 +2,10 @@
 
 final class PhabricatorPasteApplication extends PhabricatorApplication {
 
+  public function getName() {
+    return pht('Paste');
+  }
+
   public function getBaseURI() {
     return '/paste/';
   }

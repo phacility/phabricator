@@ -2,6 +2,10 @@
 
 final class PhabricatorNotificationsApplication extends PhabricatorApplication {
 
+  public function getName() {
+    return pht('Notifications');
+  }
+
   public function getBaseURI() {
     return '/notification/';
   }

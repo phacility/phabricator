@@ -2,6 +2,10 @@
 
 final class PhabricatorPhortuneApplication extends PhabricatorApplication {
 
+  public function getName() {
+    return pht('Phortune');
+  }
+
   public function getBaseURI() {
     return '/phortune/';
   }
