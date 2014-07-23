@@ -3,8 +3,13 @@
 final class PhortuneCart extends PhortuneDAO
   implements PhabricatorPolicyInterface {
 
+  const STATUS_READY = 'cart:ready';
+  const STATUS_PURCHASING = 'cart:purchasing';
+  const STATUS_PURCHASED = 'cart:purchased';
+
   protected $accountPHID;
   protected $authorPHID;
+  protected $status;
   protected $metadata;
 
   private $account = self::ATTACHABLE;
@@ -22,10 +27,6 @@ final class PhortuneCart extends PhortuneDAO
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
       PhabricatorPHIDConstants::PHID_TYPE_CART);
-  }
-
-  public function getTotalInCents() {
-    return 123;
   }
 
   public function attachPurchases(array $purchases) {

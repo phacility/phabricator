@@ -1,7 +1,7 @@
 <?php
 
-final class PhortuneAccountBuyController
-  extends PhortuneController {
+final class PhortuneCartCheckoutController
+  extends PhortuneCartController {
 
   private $id;
 
@@ -64,60 +64,23 @@ final class PhortuneAccountBuyController
         $charge->openTransaction();
           $charge->save();
 
-          // TODO: We should be setting some kind of status on the cart here.
+          $cart->setStatus(PhortuneCart::STATUS_PURCHASING);
           $cart->save();
         $charge->saveTransaction();
 
         $provider->applyCharge($method, $charge);
 
-        throw new Exception('Executed a charge! Your money is gone forever!');
+        $cart->setStatus(PhortuneCart::STATUS_PURCHASED);
+        $cart->save();
+
+        $view_uri = $this->getApplicationURI('cart/'.$cart->getID().'/');
+
+        return id(new AphrontRedirectResponse())->setURI($view_uri);
       }
     }
 
-
-    $rows = array();
-    $total = 0;
-    foreach ($cart->getPurchases() as $purchase) {
-      $rows[] = array(
-        pht('A Purchase'),
-        PhortuneCurrency::newFromUSDCents($purchase->getBasePriceInCents())
-          ->formatForDisplay(),
-        $purchase->getQuantity(),
-        PhortuneCurrency::newFromUSDCents($purchase->getTotalPriceInCents())
-          ->formatForDisplay(),
-      );
-
-      $total += $purchase->getTotalPriceInCents();
-    }
-
-    $rows[] = array(
-      phutil_tag('strong', array(), pht('Total')),
-      '',
-      '',
-      phutil_tag('strong', array(),
-        PhortuneCurrency::newFromUSDCents($total)->formatForDisplay()),
-    );
-
-    $table = new AphrontTableView($rows);
-    $table->setHeaders(
-      array(
-        pht('Item'),
-        pht('Price'),
-        pht('Qty.'),
-        pht('Total'),
-      ));
-    $table->setColumnClasses(
-      array(
-        'wide',
-        'right',
-        'right',
-        'right',
-      ));
-
-    $cart_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Your Cart'))
-      ->setFormErrors($errors)
-      ->appendChild($table);
+    $cart_box = $this->buildCartContents($cart);
+    $cart_box->setFormErrors($errors);
 
     $title = pht('Buy Stuff');
 

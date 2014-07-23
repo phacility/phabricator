@@ -18,6 +18,7 @@ final class PhortuneCharge extends PhortuneDAO
   protected $accountPHID;
   protected $authorPHID;
   protected $cartPHID;
+  protected $paymentProviderKey;
   protected $paymentMethodPHID;
   protected $amountInCents;
   protected $status;

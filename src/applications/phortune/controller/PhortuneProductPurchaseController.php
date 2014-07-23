@@ -39,6 +39,7 @@ final class PhortuneProductPurchaseController
       $cart = new PhortuneCart();
       $cart->openTransaction();
 
+        $cart->setStatus(PhortuneCart::STATUS_READY);
         $cart->setAccountPHID($account->getPHID());
         $cart->setAuthorPHID($user->getPHID());
         $cart->save();
@@ -57,7 +58,8 @@ final class PhortuneProductPurchaseController
 
       $cart->saveTransaction();
 
-      $cart_uri = $this->getApplicationURI('/cart/'.$cart->getID().'/');
+      $cart_id = $cart->getID();
+      $cart_uri = $this->getApplicationURI('/cart/'.$cart_id.'/checkout/');
       return id(new AphrontRedirectResponse())->setURI($cart_uri);
     }
 
