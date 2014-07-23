@@ -110,8 +110,9 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
     $customer = Stripe_Customer::create($params, $secret_key);
 
     $card = $info->card;
+
     $method
-      ->setBrand($card->type)
+      ->setBrand($card->brand)
       ->setLastFourDigits($card->last4)
       ->setExpires($card->exp_year, $card->exp_month)
       ->setMetadata(

@@ -211,7 +211,8 @@ final class PhortunePaymentMethodEditController
             'as a payment method.');
           break;
         default:
-          $message = $provider->getCreatePaymentErrorMessage($client_error);
+          $message = $provider->getCreatePaymentMethodErrorMessage(
+            $client_error);
           if (!$message) {
             $message = pht(
               "There was an unexpected error ('%s') processing payment ".

@@ -46,7 +46,7 @@ final class PhortuneProductViewController extends PhortuneController {
           ->setName(pht('Purchase'))
           ->setHref($cart_uri)
           ->setIcon('fa-shopping-cart')
-          ->setRenderAsForm(true));
+          ->setWorkflow(true));
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->setActionList($actions);

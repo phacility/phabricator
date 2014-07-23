@@ -3,11 +3,9 @@
 final class PhortuneAccountBuyController
   extends PhortuneController {
 
-  private $accountID;
   private $id;
 
   public function willProcessRequest(array $data) {
-    $this->accountID = $data['accountID'];
     $this->id = $data['id'];
   }
 
@@ -15,47 +13,23 @@ final class PhortuneAccountBuyController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $account = id(new PhortuneAccountQuery())
-      ->setViewer($user)
-      ->withIDs(array($this->accountID))
-      ->executeOne();
-    if (!$account) {
-      return new Aphront404Response();
-    }
-
-    $account_uri = $this->getApplicationURI($account->getID().'/');
-
-    $product = id(new PhortuneProductQuery())
+    $cart = id(new PhortuneCartQuery())
       ->setViewer($user)
       ->withIDs(array($this->id))
+      ->needPurchases(true)
       ->executeOne();
-    if (!$product) {
+    if (!$cart) {
       return new Aphront404Response();
     }
 
-    $purchase = new PhortunePurchase();
-    $purchase->setProductPHID($product->getPHID());
-    $purchase->setAccountPHID($account->getPHID());
-    $purchase->setPurchaseName($product->getProductName());
-    $purchase->setBasePriceInCents($product->getPriceInCents());
-    $purchase->setQuantity(1);
-    $purchase->setTotalPriceInCents(
-      $purchase->getBasePriceInCents() * $purchase->getQuantity());
-    $purchase->setStatus(PhortunePurchase::STATUS_PENDING);
-
-    $cart = new PhortuneCart();
-    $cart->setAccountPHID($account->getPHID());
-    $cart->setOwnerPHID($user->getPHID());
-    $cart->attachPurchases(
-      array(
-        $purchase,
-      ));
+    $account = $cart->getAccount();
+    $account_uri = $this->getApplicationURI($account->getID().'/');
 
     $rows = array();
     $total = 0;
     foreach ($cart->getPurchases() as $purchase) {
       $rows[] = array(
-        $purchase->getPurchaseName(),
+        pht('A Purchase'),
         PhortuneCurrency::newFromUSDCents($purchase->getBasePriceInCents())
           ->formatForDisplay(),
         $purchase->getQuantity(),

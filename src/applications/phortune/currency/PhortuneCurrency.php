@@ -54,7 +54,8 @@ final class PhortuneCurrency {
 
   public static function newFromUSDCents($cents) {
     if (!is_int($cents)) {
-      throw new Exception('USDCents value is not an integer!');
+      throw new Exception(
+        pht('USDCents value "%s" is not an integer!', $cents));
     }
 
     $obj = new PhortuneCurrency();
