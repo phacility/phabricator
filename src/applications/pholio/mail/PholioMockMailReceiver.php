@@ -3,7 +3,7 @@
 final class PholioMockMailReceiver extends PhabricatorObjectMailReceiver {
 
   public function isEnabled() {
-    $app_class = 'PhabricatorApplicationPholio';
+    $app_class = 'PhabricatorPholioApplication';
     return PhabricatorApplication::isClassInstalled($app_class);
   }
 

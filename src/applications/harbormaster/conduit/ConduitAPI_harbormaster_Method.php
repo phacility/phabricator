@@ -4,7 +4,7 @@ abstract class ConduitAPI_harbormaster_Method extends ConduitAPIMethod {
 
   public function getApplication() {
     return PhabricatorApplication::getByClass(
-      'PhabricatorApplicationHarbormaster');
+      'PhabricatorHarbormasterApplication');
   }
 
   public function getMethodStatus() {

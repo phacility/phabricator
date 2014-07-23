@@ -90,7 +90,7 @@ final class PhabricatorTokenGivenQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationTokens';
+    return 'PhabricatorTokensApplication';
   }
 
 }

@@ -3,8 +3,7 @@
 abstract class ConduitAPI_nuance_Method extends ConduitAPIMethod {
 
   public function getApplication() {
-    return PhabricatorApplication::getByClass(
-      'PhabricatorApplicationNuance');
+    return PhabricatorApplication::getByClass('PhabricatorNuanceApplication');
   }
 
   public function getMethodStatus() {

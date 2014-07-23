@@ -8,7 +8,7 @@ final class DiffusionRepositoryDatasource
   }
 
   public function getDatasourceApplicationClass() {
-    return 'PhabricatorApplicationDiffusion';
+    return 'PhabricatorDiffusionApplication';
   }
 
   public function loadResults() {

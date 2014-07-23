@@ -35,7 +35,7 @@ final class ManiphestTaskSearchEngine
   }
 
   public function getApplicationClassName() {
-    return 'PhabricatorApplicationManiphest';
+    return 'PhabricatorManiphestApplication';
   }
 
   public function getCustomFieldObject() {
@@ -499,9 +499,9 @@ final class ManiphestTaskSearchEngine
   private function getOrderValues() {
     return array(
       'priority' => ManiphestTaskQuery::ORDER_PRIORITY,
-      'updated' => ManiphestTaskQuery::ORDER_MODIFIED,
-      'created' => ManiphestTaskQuery::ORDER_CREATED,
-      'title' => ManiphestTaskQuery::ORDER_TITLE,
+      'updated'  => ManiphestTaskQuery::ORDER_MODIFIED,
+      'created'  => ManiphestTaskQuery::ORDER_CREATED,
+      'title'    => ManiphestTaskQuery::ORDER_TITLE,
     );
   }
 
@@ -509,9 +509,9 @@ final class ManiphestTaskSearchEngine
     return array(
       'priority' => pht('Priority'),
       'assigned' => pht('Assigned'),
-      'status' => pht('Status'),
-      'project' => pht('Project'),
-      'none' => pht('None'),
+      'status'   => pht('Status'),
+      'project'  => pht('Project'),
+      'none'     => pht('None'),
     );
   }
 
@@ -519,9 +519,9 @@ final class ManiphestTaskSearchEngine
     return array(
       'priority' => ManiphestTaskQuery::GROUP_PRIORITY,
       'assigned' => ManiphestTaskQuery::GROUP_OWNER,
-      'status' => ManiphestTaskQuery::GROUP_STATUS,
-      'project' => ManiphestTaskQuery::GROUP_PROJECT,
-      'none' => ManiphestTaskQuery::GROUP_NONE,
+      'status'   => ManiphestTaskQuery::GROUP_STATUS,
+      'project'  => ManiphestTaskQuery::GROUP_PROJECT,
+      'none'     => ManiphestTaskQuery::GROUP_NONE,
     );
   }
 

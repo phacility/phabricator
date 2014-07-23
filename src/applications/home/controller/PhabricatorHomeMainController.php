@@ -1,7 +1,6 @@
 <?php
 
-final class PhabricatorHomeMainController
-  extends PhabricatorHomeController {
+final class PhabricatorHomeMainController extends PhabricatorHomeController {
 
   private $only;
   private $minipanels = array();
@@ -25,7 +24,7 @@ final class PhabricatorHomeMainController
     if (!$dashboard) {
       $dashboard = PhabricatorDashboardInstall::getDashboard(
         $user,
-        PhabricatorApplicationHome::DASHBOARD_DEFAULT,
+        PhabricatorHomeApplication::DASHBOARD_DEFAULT,
         get_class($this->getCurrentApplication()));
     }
 
@@ -65,15 +64,15 @@ final class PhabricatorHomeMainController
     $viewer = $this->getRequest()->getUser();
 
     $has_maniphest = PhabricatorApplication::isClassInstalledForViewer(
-      'PhabricatorApplicationManiphest',
+      'PhabricatorManiphestApplication',
       $viewer);
 
     $has_audit = PhabricatorApplication::isClassInstalledForViewer(
-      'PhabricatorApplicationAudit',
+      'PhabricatorAuditApplication',
       $viewer);
 
     $has_differential = PhabricatorApplication::isClassInstalledForViewer(
-      'PhabricatorApplicationDifferential',
+      'PhabricatorDifferentialApplication',
       $viewer);
 
     if ($has_maniphest) {

@@ -288,7 +288,7 @@ final class ConpherenceThreadQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationConpherence';
+    return 'PhabricatorConpherenceApplication';
   }
 
 }

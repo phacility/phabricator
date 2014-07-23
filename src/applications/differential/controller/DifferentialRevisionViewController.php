@@ -179,7 +179,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
           }
         }
       }
-
     } else {
       $warning = null;
       $visible_changesets = $changesets;
@@ -519,7 +518,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ->setWorkflow(true)
       ->setDisabled(!$can_edit);
 
-    $maniphest = 'PhabricatorApplicationManiphest';
+    $maniphest = 'PhabricatorManiphestApplication';
     if (PhabricatorApplication::isClassInstalled($maniphest)) {
       $actions[] = id(new PhabricatorActionView())
         ->setIcon('fa-anchor')
@@ -539,7 +538,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
   }
 
   private function getRevisionCommentActions(DifferentialRevision $revision) {
-
     $actions = array(
       DifferentialAction::ACTION_COMMENT => true,
     );
@@ -921,7 +919,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
     unset($unguarded);
 
     return id(new AphrontRedirectResponse())->setURI($file->getBestURI());
-
   }
 
   private function buildTransactions(
@@ -929,6 +926,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     DifferentialDiff $left_diff,
     DifferentialDiff $right_diff,
     array $changesets) {
+
     $viewer = $this->getRequest()->getUser();
 
     $xactions = id(new DifferentialTransactionQuery())

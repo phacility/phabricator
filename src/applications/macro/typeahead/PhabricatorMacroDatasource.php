@@ -1,14 +1,13 @@
 <?php
 
-final class PhabricatorMacroDatasource
-  extends PhabricatorTypeaheadDatasource {
+final class PhabricatorMacroDatasource extends PhabricatorTypeaheadDatasource {
 
   public function getPlaceholderText() {
     return pht('Type a macro name...');
   }
 
   public function getDatasourceApplicationClass() {
-    return 'PhabricatorApplicationMacro';
+    return 'PhabricatorMacroApplication';
   }
 
   public function loadResults() {

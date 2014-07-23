@@ -1,7 +1,6 @@
 <?php
 
-final class PhabricatorAccessControlTestCase
-  extends PhabricatorTestCase {
+final class PhabricatorAccessControlTestCase extends PhabricatorTestCase {
 
   protected function getPhabricatorTestCaseConfiguration() {
     return array(
@@ -201,7 +200,7 @@ final class PhabricatorAccessControlTestCase
     $env->overrideEnvConfig('policy.allow-public', false);
 
 
-    $app = PhabricatorApplication::getByClass('PhabricatorApplicationTest');
+    $app = PhabricatorApplication::getByClass('PhabricatorTestApplication');
     $app->reset();
     $app->setPolicy(
       PhabricatorPolicyCapability::CAN_VIEW,

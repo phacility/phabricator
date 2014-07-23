@@ -8,7 +8,7 @@ final class PhabricatorPeopleLogSearchEngine
   }
 
   public function getApplicationClassName() {
-    return 'PhabricatorApplicationPeople';
+    return 'PhabricatorPeopleApplication';
   }
 
   public function getPageSize(PhabricatorSavedQuery $saved) {

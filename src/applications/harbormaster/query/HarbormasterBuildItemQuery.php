@@ -54,7 +54,7 @@ final class HarbormasterBuildItemQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationHarbormaster';
+    return 'PhabricatorHarbormasterApplication';
   }
 
 }

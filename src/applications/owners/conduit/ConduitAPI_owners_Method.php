@@ -1,11 +1,9 @@
 <?php
 
-abstract class ConduitAPI_owners_Method
-  extends ConduitAPIMethod {
+abstract class ConduitAPI_owners_Method extends ConduitAPIMethod {
 
   public function getApplication() {
-    return PhabricatorApplication::getByClass(
-      'PhabricatorApplicationOwners');
+    return PhabricatorApplication::getByClass('PhabricatorOwnersApplication');
   }
 
 }

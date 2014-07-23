@@ -33,7 +33,7 @@ abstract class PhabricatorHomeController extends PhabricatorController {
       $user);
 
     // Force "Applications" to appear at the bottom.
-    $meta_app = 'PhabricatorApplicationApplications';
+    $meta_app = 'PhabricatorApplicationsApplication';
     $pinned = array_fuse($pinned);
     unset($pinned[$meta_app]);
     $pinned[$meta_app] = $meta_app;
@@ -41,7 +41,7 @@ abstract class PhabricatorHomeController extends PhabricatorController {
 
     $tiles = array();
 
-    $home_app = new PhabricatorApplicationHome();
+    $home_app = new PhabricatorHomeApplication();
 
     $tiles[] = id(new PhabricatorApplicationLaunchView())
       ->setApplication($home_app)

@@ -8,7 +8,7 @@ final class DrydockResourceSearchEngine
   }
 
   public function getApplicationClassName() {
-    return 'PhabricatorApplicationDrydock';
+    return 'PhabricatorDrydockApplication';
   }
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
@@ -50,7 +50,6 @@ final class DrydockResourceSearchEngine
 
     $form
       ->appendChild($status_control);
-
   }
 
   protected function getURI($path) {
@@ -58,12 +57,10 @@ final class DrydockResourceSearchEngine
   }
 
   public function getBuiltinQueryNames() {
-    $names = array(
+    return array(
       'active' => pht('Active Resources'),
       'all' => pht('All Resources'),
     );
-
-    return $names;
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Parses commit messages (containing relaively freeform text with textual
+ * Parses commit messages (containing relatively freeform text with textual
  * field labels) into a dictionary of fields.
  *
  *   $parser = id(new DifferentialCommitMessageParser())

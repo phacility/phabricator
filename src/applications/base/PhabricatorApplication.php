@@ -28,7 +28,22 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
 
 
   public function getName() {
-    return substr(get_class($this), strlen('PhabricatorApplication'));
+
+    // TODO: This is sort of gross.
+
+    $match = null;
+
+    $regex = '/^Phabricator([A-Z][a-zA-Z]*)Application$/';
+    if (preg_match($regex, get_class($this), $match)) {
+      return $match[1];
+    }
+
+    $regex = '/^PhabricatorApplication([A-Z][a-zA-Z]*)$/';
+    if (preg_match($regex, get_class($this), $match)) {
+      return $match[1];
+    }
+
+    throw new Exception('Unable to determine application name automagically.');
   }
 
   public function getShortDescription() {

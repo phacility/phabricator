@@ -105,7 +105,7 @@ final class PhabricatorCalendarEventQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationCalendar';
+    return 'PhabricatorCalendarApplication';
   }
 
 }

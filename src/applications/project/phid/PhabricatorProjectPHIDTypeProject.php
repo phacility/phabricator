@@ -9,7 +9,7 @@ final class PhabricatorProjectPHIDTypeProject extends PhabricatorPHIDType {
   }
 
   public function getPHIDTypeApplicationClass() {
-    return 'PhabricatorApplicationProject';
+    return 'PhabricatorProjectApplication';
   }
 
   public function getTypeIcon() {
@@ -106,6 +106,5 @@ final class PhabricatorProjectPHIDTypeProject extends PhabricatorPHIDType {
 
     return phutil_utf8_strtolower($slug);
   }
-
 
 }

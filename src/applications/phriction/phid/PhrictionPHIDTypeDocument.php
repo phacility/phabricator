@@ -9,7 +9,7 @@ final class PhrictionPHIDTypeDocument extends PhabricatorPHIDType {
   }
 
   public function getPHIDTypeApplicationClass() {
-    return 'PhabricatorApplicationPhriction';
+    return 'PhabricatorPhrictionApplication';
   }
 
   public function newObject() {

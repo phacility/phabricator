@@ -3,14 +3,13 @@
 final class PhabricatorMacroMailReceiver extends PhabricatorObjectMailReceiver {
 
   public function isEnabled() {
-    $app_class = 'PhabricatorApplicationManiphest';
+    $app_class = 'PhabricatorManiphestApplication';
     return PhabricatorApplication::isClassInstalled($app_class);
   }
 
   protected function getObjectPattern() {
     return 'MCRO[1-9]\d*';
   }
-
 
   protected function loadObject($pattern, PhabricatorUser $viewer) {
     $id = (int)substr($pattern, 4);
@@ -29,6 +28,5 @@ final class PhabricatorMacroMailReceiver extends PhabricatorObjectMailReceiver {
     // TODO: For now, we just drop this mail on the floor.
 
   }
-
 
 }

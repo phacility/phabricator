@@ -91,8 +91,7 @@ abstract class PhortunePaymentProvider {
   /**
    * Determine of a provider can handle a payment method.
    *
-   * @return bool True if this provider can apply charges to the payment
-   *              method.
+   * @return bool True if this provider can apply charges to the payment method.
    */
   abstract public function canHandlePaymentMethod(
     PhortunePaymentMethod $method);
@@ -182,7 +181,7 @@ abstract class PhortunePaymentProvider {
 
     $digest = PhabricatorHash::digestForIndex($this->getProviderKey());
 
-    $app = PhabricatorApplication::getByClass('PhabricatorApplicationPhortune');
+    $app = PhabricatorApplication::getByClass('PhabricatorPhortuneApplication');
     $path = $app->getBaseURI().'provider/'.$digest.'/'.$action.'/';
 
     $uri = new PhutilURI($path);

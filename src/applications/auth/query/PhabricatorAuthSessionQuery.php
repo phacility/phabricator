@@ -106,7 +106,7 @@ final class PhabricatorAuthSessionQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationAuth';
+    return 'PhabricatorAuthApplication';
   }
 
 }

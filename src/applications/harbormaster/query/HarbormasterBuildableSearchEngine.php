@@ -8,7 +8,7 @@ final class HarbormasterBuildableSearchEngine
   }
 
   public function getApplicationClassName() {
-    return 'PhabricatorApplicationHarbormaster';
+    return 'PhabricatorHarbormasterApplication';
   }
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
@@ -160,15 +160,12 @@ final class HarbormasterBuildableSearchEngine
   }
 
   public function getBuiltinQueryNames() {
-    $names = array(
+    return array(
       'all' => pht('All Buildables'),
     );
-
-    return $names;
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
-
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
 
@@ -220,4 +217,5 @@ final class HarbormasterBuildableSearchEngine
 
     return $list;
   }
+
 }

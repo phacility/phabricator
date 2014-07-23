@@ -5,7 +5,7 @@ final class PhabricatorSettingsPanelConpherencePreferences
 
   public function isEnabled() {
     return PhabricatorApplication::isClassInstalled(
-      'PhabricatorApplicationConpherence');
+      'PhabricatorConpherenceApplication');
   }
 
   public function getPanelKey() {
@@ -65,4 +65,5 @@ final class PhabricatorSettingsPanelConpherencePreferences
       $form_box,
     );
   }
+
 }

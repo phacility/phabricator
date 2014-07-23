@@ -9,7 +9,7 @@ final class PonderPHIDTypeQuestion extends PhabricatorPHIDType {
   }
 
   public function getPHIDTypeApplicationClass() {
-    return 'PhabricatorApplicationPonder';
+    return 'PhabricatorPonderApplication';
   }
 
   public function newObject() {

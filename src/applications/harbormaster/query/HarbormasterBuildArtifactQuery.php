@@ -113,7 +113,7 @@ final class HarbormasterBuildArtifactQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationHarbormaster';
+    return 'PhabricatorHarbormasterApplication';
   }
 
 }

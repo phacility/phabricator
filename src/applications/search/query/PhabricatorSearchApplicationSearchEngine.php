@@ -8,7 +8,7 @@ final class PhabricatorSearchApplicationSearchEngine
   }
 
   public function getApplicationClassName() {
-    return 'PhabricatorApplicationSearch';
+    return 'PhabricatorSearchApplication';
   }
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
@@ -170,17 +170,14 @@ final class PhabricatorSearchApplicationSearchEngine
   }
 
   public function getBuiltinQueryNames() {
-    $names = array(
+    return array(
       'all' => pht('All Documents'),
       'open' => pht('Open Documents'),
       'open-tasks' => pht('Open Tasks'),
     );
-
-    return $names;
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
-
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
 

@@ -51,7 +51,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   public static function initializeNewRepository(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
       ->setViewer($actor)
-      ->withClasses(array('PhabricatorApplicationDiffusion'))
+      ->withClasses(array('PhabricatorDiffusionApplication'))
       ->executeOne();
 
     $view_policy = $app->getPolicy(DiffusionCapabilityDefaultView::CAPABILITY);

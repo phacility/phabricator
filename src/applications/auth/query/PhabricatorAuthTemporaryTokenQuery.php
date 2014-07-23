@@ -100,7 +100,7 @@ final class PhabricatorAuthTemporaryTokenQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationAuth';
+    return 'PhabricatorAuthApplication';
   }
 
 }

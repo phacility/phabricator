@@ -35,7 +35,7 @@ final class PhabricatorTokenReceiverQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationTokens';
+    return 'PhabricatorTokensApplication';
   }
 
 }

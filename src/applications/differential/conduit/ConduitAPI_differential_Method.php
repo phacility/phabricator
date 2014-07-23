@@ -4,7 +4,7 @@ abstract class ConduitAPI_differential_Method extends ConduitAPIMethod {
 
   public function getApplication() {
     return PhabricatorApplication::getByClass(
-      'PhabricatorApplicationDifferential');
+      'PhabricatorDifferentialApplication');
   }
 
   protected function buildDiffInfoDictionary(DifferentialDiff $diff) {

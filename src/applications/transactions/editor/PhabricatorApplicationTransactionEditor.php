@@ -716,7 +716,7 @@ abstract class PhabricatorApplicationTransactionEditor
         // Herald application) as the author of record, so that transactions
         // will render in a reasonable way ("Herald assigned this task ...").
         $herald_actor = PhabricatorUser::getOmnipotentUser();
-        $herald_phid = id(new PhabricatorApplicationHerald())->getPHID();
+        $herald_phid = id(new PhabricatorHeraldApplication())->getPHID();
 
         // TODO: It would be nice to give transactions a more specific source
         // which points at the rule which generated them. You can figure this

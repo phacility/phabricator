@@ -12,7 +12,7 @@ final class PhabricatorCountdown
   public static function initializeNewCountdown(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
       ->setViewer($actor)
-      ->withClasses(array('PhabricatorApplicationCountdown'))
+      ->withClasses(array('PhabricatorCountdownApplication'))
       ->executeOne();
 
     $view_policy = $app->getPolicy(

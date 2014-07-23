@@ -8,7 +8,7 @@ final class DrydockLeaseSearchEngine
   }
 
   public function getApplicationClassName() {
-    return 'PhabricatorApplicationDrydock';
+    return 'PhabricatorDrydockApplication';
   }
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
@@ -58,12 +58,10 @@ final class DrydockLeaseSearchEngine
   }
 
   public function getBuiltinQueryNames() {
-    $names = array(
+    return array(
       'active' => pht('Active Leases'),
       'all' => pht('All Leases'),
     );
-
-    return $names;
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {

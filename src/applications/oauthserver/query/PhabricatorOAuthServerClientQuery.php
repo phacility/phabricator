@@ -26,7 +26,6 @@ final class PhabricatorOAuthServerClientQuery
     $table  = new PhabricatorOAuthServerClient();
     $conn_r = $table->establishConnection('r');
 
-
     $data = queryfx_all(
       $conn_r,
       'SELECT * FROM %T client %Q %Q %Q',
@@ -68,7 +67,7 @@ final class PhabricatorOAuthServerClientQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationOAuthServer';
+    return 'PhabricatorOAuthServerApplication';
   }
 
 }

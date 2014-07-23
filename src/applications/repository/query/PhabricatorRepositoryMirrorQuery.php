@@ -63,7 +63,6 @@ final class PhabricatorRepositoryMirrorQuery
     return $mirrors;
   }
 
-
   private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
@@ -93,9 +92,8 @@ final class PhabricatorRepositoryMirrorQuery
     return $this->formatWhereClause($where);
   }
 
-
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationDiffusion';
+    return 'PhabricatorDiffusionApplication';
   }
 
 }

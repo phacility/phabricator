@@ -8,19 +8,15 @@ final class PhabricatorDashboardSearchEngine
   }
 
   public function getApplicationClassName() {
-    return 'PhabricatorApplicationDashboard';
+    return 'PhabricatorDashboardApplication';
   }
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
-
-    return $saved;
+    return new PhabricatorSavedQuery();
   }
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new PhabricatorDashboardQuery());
-
-    return $query;
+    return new PhabricatorDashboardQuery();
   }
 
   public function buildSearchForm(
@@ -34,11 +30,9 @@ final class PhabricatorDashboardSearchEngine
   }
 
   public function getBuiltinQueryNames() {
-    $names = array(
+    return array(
       'all' => pht('All Dashboards'),
     );
-
-    return $names;
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
@@ -53,7 +47,6 @@ final class PhabricatorDashboardSearchEngine
 
     return parent::buildSavedQueryFromBuiltin($query_key);
   }
-
 
   protected function renderResultList(
     array $dashboards,

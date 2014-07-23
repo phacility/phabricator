@@ -37,10 +37,8 @@ abstract class DiffusionBrowseController extends DiffusionController {
         break;
     }
 
-
     $filter = new AphrontListFilterView();
     $filter->appendChild($forms);
-
 
     if ($collapsed) {
       $filter->setCollapsed(
@@ -112,7 +110,7 @@ abstract class DiffusionBrowseController extends DiffusionController {
     // TODO: Ideally, this should live in Owners and be event-triggered, but
     // there's no reasonable object for it to react to right now.
 
-    $owners = 'PhabricatorApplicationOwners';
+    $owners = 'PhabricatorOwnersApplication';
     if (PhabricatorApplication::isClassInstalled($owners)) {
       $owners_uri = id(new PhutilURI('/owners/view/search/'))
         ->setQueryParams(
@@ -220,7 +218,6 @@ abstract class DiffusionBrowseController extends DiffusionController {
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Pending Differential Revisions'))
       ->appendChild($view);
-
   }
 
 }

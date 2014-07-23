@@ -4,7 +4,7 @@ final class ConpherenceThreadMailReceiver
   extends PhabricatorObjectMailReceiver {
 
   public function isEnabled() {
-    $app_class = 'PhabricatorApplicationConpherence';
+    $app_class = 'PhabricatorConpherenceApplication';
     return PhabricatorApplication::isClassInstalled($app_class);
   }
 

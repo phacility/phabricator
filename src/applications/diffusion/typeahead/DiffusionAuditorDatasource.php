@@ -8,7 +8,7 @@ final class DiffusionAuditorDatasource
   }
 
   public function getDatasourceApplicationClass() {
-    return 'PhabricatorApplicationDiffusion';
+    return 'PhabricatorDiffusionApplication';
   }
 
   public function getComponentDatasources() {

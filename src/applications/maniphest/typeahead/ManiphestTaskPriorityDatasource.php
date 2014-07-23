@@ -8,7 +8,7 @@ final class ManiphestTaskPriorityDatasource
   }
 
   public function getDatasourceApplicationClass() {
-    return 'PhabricatorApplicationManiphest';
+    return 'PhabricatorManiphestApplication';
   }
 
   public function loadResults() {
@@ -19,7 +19,7 @@ final class ManiphestTaskPriorityDatasource
 
     $priority_map = ManiphestTaskPriority::getTaskPriorityMap();
     foreach ($priority_map as $value => $name) {
-      // NOTE: $value is not a phid but is unique. This'll work.
+      // NOTE: $value is not a PHID but is unique. This'll work.
       $results[] = id(new PhabricatorTypeaheadResult())
         ->setPHID($value)
         ->setName($name);

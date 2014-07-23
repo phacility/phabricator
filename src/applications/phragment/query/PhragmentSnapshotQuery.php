@@ -105,6 +105,7 @@ final class PhragmentSnapshotQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationPhragment';
+    return 'PhabricatorPhragmentApplication';
   }
+
 }

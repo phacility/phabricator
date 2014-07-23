@@ -3,8 +3,7 @@
 abstract class ConduitAPI_token_Method extends ConduitAPIMethod {
 
   public function getApplication() {
-    return PhabricatorApplication::getByClass(
-      'PhabricatorApplicationTokens');
+    return PhabricatorApplication::getByClass('PhabricatorTokensApplication');
   }
 
   public function getMethodStatus() {
@@ -41,6 +40,5 @@ abstract class ConduitAPI_token_Method extends ConduitAPIMethod {
 
     return $list;
   }
-
 
 }

@@ -221,7 +221,7 @@ final class PhabricatorMacroQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationMacro';
+    return 'PhabricatorMacroApplication';
   }
 
 }

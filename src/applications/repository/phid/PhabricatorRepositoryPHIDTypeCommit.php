@@ -9,7 +9,7 @@ final class PhabricatorRepositoryPHIDTypeCommit extends PhabricatorPHIDType {
   }
 
   public function getPHIDTypeApplicationClass() {
-    return 'PhabricatorApplicationDiffusion';
+    return 'PhabricatorDiffusionApplication';
   }
 
   public function newObject() {
@@ -60,7 +60,6 @@ final class PhabricatorRepositoryPHIDTypeCommit extends PhabricatorPHIDType {
       '|'.
       '[a-f0-9]{'.$min_unqualified.',40}';
   }
-
 
   public function canLoadNamedObject($name) {
     $pattern = self::getCommitObjectNamePattern();

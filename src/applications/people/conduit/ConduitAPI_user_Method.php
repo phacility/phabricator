@@ -4,7 +4,7 @@ abstract class ConduitAPI_user_Method extends ConduitAPIMethod {
 
   public function getApplication() {
     return PhabricatorApplication::getByClass(
-      'PhabricatorApplicationPeople');
+      'PhabricatorPeopleApplication');
   }
 
   protected function buildUserInformationDictionary(

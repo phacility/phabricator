@@ -97,7 +97,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
    *
    * This is used by boards to supplement queries.
    *
-   * @param list<phid> List of project PHIDs to add to any existing constriant.
+   * @param list<phid> List of project PHIDs to add to any existing constraint.
    * @return this
    */
   public function addWithAllProjects(array $projects) {
@@ -967,7 +967,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationManiphest';
+    return 'PhabricatorManiphestApplication';
   }
 
 }

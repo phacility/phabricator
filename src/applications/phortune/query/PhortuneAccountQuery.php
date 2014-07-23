@@ -95,9 +95,8 @@ final class PhortuneAccountQuery
     return implode(' ', $joins);
   }
 
-
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationPhortune';
+    return 'PhabricatorPhortuneApplication';
   }
 
 }

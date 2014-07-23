@@ -8,19 +8,15 @@ final class DrydockBlueprintSearchEngine
   }
 
   public function getApplicationClassName() {
-    return 'PhabricatorApplicationDrydock';
+    return 'PhabricatorDrydockApplication';
   }
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
-
-    return $saved;
+    return new PhabricatorSavedQuery();
   }
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new DrydockBlueprintQuery());
-
-    return $query;
+    return new DrydockBlueprintQuery();
   }
 
   public function buildSearchForm(
@@ -34,11 +30,9 @@ final class DrydockBlueprintSearchEngine
   }
 
   public function getBuiltinQueryNames() {
-    $names = array(
+    return array(
       'all' => pht('All Blueprints'),
     );
-
-    return $names;
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {

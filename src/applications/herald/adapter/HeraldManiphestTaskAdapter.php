@@ -13,12 +13,11 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
   }
 
   public function getAdapterApplicationClass() {
-    return 'PhabricatorApplicationManiphest';
+    return 'PhabricatorManiphestApplication';
   }
 
   public function getAdapterContentDescription() {
-    return pht(
-      'React to tasks being created or updated.');
+    return pht('React to tasks being created or updated.');
   }
 
   public function getRepetitionOptions() {

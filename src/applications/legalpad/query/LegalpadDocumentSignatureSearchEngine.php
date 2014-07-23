@@ -10,7 +10,7 @@ final class LegalpadDocumentSignatureSearchEngine
   }
 
   public function getApplicationClassName() {
-    return 'PhabricatorApplicationLegalpad';
+    return 'PhabricatorLegalpadApplication';
   }
 
   public function setDocument(LegalpadDocument $document) {

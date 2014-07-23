@@ -102,7 +102,6 @@ final class PhabricatorRepositoryQuery
     return $this;
   }
 
-
   protected function loadPage() {
     $table = new PhabricatorRepository();
     $conn_r = $table->establishConnection('r');
@@ -237,7 +236,6 @@ final class PhabricatorRepositoryQuery
   }
 
   protected function getPagingColumn() {
-
     $order = $this->order;
     switch ($order) {
       case self::ORDER_CREATED:
@@ -424,7 +422,7 @@ final class PhabricatorRepositoryQuery
 
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationDiffusion';
+    return 'PhabricatorDiffusionApplication';
   }
 
   private function getNormalizedPaths() {

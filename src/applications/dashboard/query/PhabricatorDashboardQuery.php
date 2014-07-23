@@ -96,7 +96,7 @@ final class PhabricatorDashboardQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationDashboard';
+    return 'PhabricatorDashboardApplication';
   }
 
 }

@@ -53,12 +53,12 @@ final class PhabricatorSettingsPanelEmailPreferences
       $mailtags = $preferences->getPreference('mailtags', array());
       $all_tags = $this->getMailTags();
 
-      $maniphest = 'PhabricatorApplicationManiphest';
+      $maniphest = 'PhabricatorManiphestApplication';
       if (!PhabricatorApplication::isClassInstalled($maniphest)) {
         $all_tags = array_diff_key($all_tags, $this->getManiphestMailTags());
       }
 
-      $pholio = 'PhabricatorApplicationPholio';
+      $pholio = 'PhabricatorPholioApplication';
       if (!PhabricatorApplication::isClassInstalled($pholio)) {
         $all_tags = array_diff_key($all_tags, $this->getPholioMailTags());
       }
@@ -186,7 +186,7 @@ final class PhabricatorSettingsPanelEmailPreferences
         '**Phabricator will send an email to your primary account when:**'));
 
     if (PhabricatorApplication::isClassInstalledForViewer(
-      'PhabricatorApplicationDifferential', $user)) {
+      'PhabricatorDifferentialApplication', $user)) {
       $form
         ->appendChild(
           $this->buildMailTagCheckboxes(
@@ -196,7 +196,7 @@ final class PhabricatorSettingsPanelEmailPreferences
     }
 
     if (PhabricatorApplication::isClassInstalledForViewer(
-      'PhabricatorApplicationManiphest', $user)) {
+      'PhabricatorManiphestApplication', $user)) {
       $form->appendChild(
         $this->buildMailTagCheckboxes(
           $this->getManiphestMailTags(),
@@ -205,7 +205,7 @@ final class PhabricatorSettingsPanelEmailPreferences
     }
 
     if (PhabricatorApplication::isClassInstalledForViewer(
-      'PhabricatorApplicationPholio', $user)) {
+      'PhabricatorPholioApplication', $user)) {
       $form->appendChild(
         $this->buildMailTagCheckboxes(
           $this->getPholioMailTags(),

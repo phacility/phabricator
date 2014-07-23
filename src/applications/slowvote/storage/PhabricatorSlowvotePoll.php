@@ -31,7 +31,7 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
   public static function initializeNewPoll(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
       ->setViewer($actor)
-      ->withClasses(array('PhabricatorApplicationSlowvote'))
+      ->withClasses(array('PhabricatorSlowvoteApplication'))
       ->executeOne();
 
     $view_policy = $app->getPolicy(

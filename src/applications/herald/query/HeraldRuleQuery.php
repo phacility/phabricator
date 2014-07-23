@@ -1,7 +1,6 @@
 <?php
 
-final class HeraldRuleQuery
-  extends PhabricatorCursorPagedPolicyAwareQuery {
+final class HeraldRuleQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $ids;
   private $phids;
@@ -233,7 +232,6 @@ final class HeraldRuleQuery
   }
 
   private function validateRuleAuthors(array $rules) {
-
     // "Global" and "Object" rules always have valid authors.
     foreach ($rules as $key => $rule) {
       if ($rule->isGlobalRule() || $rule->isObjectRule()) {
@@ -271,9 +269,8 @@ final class HeraldRuleQuery
     }
   }
 
-
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationHerald';
+    return 'PhabricatorHeraldApplication';
   }
 
 }

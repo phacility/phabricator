@@ -9,7 +9,7 @@ final class PholioPHIDTypeMock extends PhabricatorPHIDType {
   }
 
   public function getPHIDTypeApplicationClass() {
-    return 'PhabricatorApplicationPholio';
+    return 'PhabricatorPholioApplication';
   }
 
   public function newObject() {

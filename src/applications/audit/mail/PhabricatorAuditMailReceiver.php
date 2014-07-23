@@ -3,7 +3,7 @@
 final class PhabricatorAuditMailReceiver extends PhabricatorObjectMailReceiver {
 
   public function isEnabled() {
-    $app_class = 'PhabricatorApplicationAudit';
+    $app_class = 'PhabricatorAuditApplication';
     return PhabricatorApplication::isClassInstalled($app_class);
   }
 

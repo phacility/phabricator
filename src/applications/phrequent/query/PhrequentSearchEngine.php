@@ -1,14 +1,13 @@
 <?php
 
-final class PhrequentSearchEngine
-  extends PhabricatorApplicationSearchEngine {
+final class PhrequentSearchEngine extends PhabricatorApplicationSearchEngine {
 
   public function getResultTypeDescription() {
     return pht('Phrequent Time');
   }
 
   public function getApplicationClassName() {
-    return 'PhabricatorApplicationPhrequent';
+    return 'PhabricatorPhrequentApplication';
   }
 
   public function getPageSize(PhabricatorSavedQuery $saved) {
@@ -92,16 +91,13 @@ final class PhrequentSearchEngine
   }
 
   public function getBuiltinQueryNames() {
-    $names = array(
+    return array(
       'tracking' => pht('Currently Tracking'),
       'all' => pht('All Tracked'),
     );
-
-    return $names;
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
-
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
 
@@ -203,4 +199,5 @@ final class PhrequentSearchEngine
 
     return $view;
   }
+
 }

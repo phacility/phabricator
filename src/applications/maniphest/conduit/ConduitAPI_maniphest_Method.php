@@ -4,12 +4,12 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
 
   public function getApplication() {
     return PhabricatorApplication::getByClass(
-      'PhabricatorApplicationManiphest');
+      'PhabricatorManiphestApplication');
   }
 
   public function defineErrorTypes() {
     return array(
-      'ERR-INVALID-PARAMETER' => 'Missing or malformed parameter.'
+      'ERR-INVALID-PARAMETER' => 'Missing or malformed parameter.',
     );
   }
 
@@ -23,8 +23,8 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
 
     if (!$is_new) {
       $fields += array(
-        'id'        => 'optional int',
-        'phid'      => 'optional int',
+        'id'    => 'optional int',
+        'phid'  => 'optional int',
       );
     }
 
@@ -279,19 +279,18 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
   }
 
   /**
-   * Note this is a temporary stop gap since its easy to make malformed Tasks.
+   * NOTE: This is a temporary stop gap since its easy to make malformed tasks.
    * Long-term, the values set in @{method:defineParamTypes} will be used to
    * validate data implicitly within the larger Conduit application.
    *
-   * TODO -- remove this in favor of generalized Conduit hotness
+   * TODO: Remove this in favor of generalized Conduit hotness.
    */
   private function validatePHIDList(array $phid_list, $phid_type, $field) {
     $phid_groups = phid_group_by_type($phid_list);
     unset($phid_groups[$phid_type]);
     if (!empty($phid_groups)) {
       throw id(new ConduitException('ERR-INVALID-PARAMETER'))
-        ->setErrorDescription(
-          'One or more PHIDs were invalid for '.$field.'.');
+        ->setErrorDescription('One or more PHIDs were invalid for '.$field.'.');
     }
 
     return true;

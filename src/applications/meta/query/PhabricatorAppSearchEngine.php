@@ -8,7 +8,7 @@ final class PhabricatorAppSearchEngine
   }
 
   public function getApplicationClassName() {
-    return 'PhabricatorApplicationApplications';
+    return 'PhabricatorApplicationsApplication';
   }
 
   public function getPageSize(PhabricatorSavedQuery $saved) {
@@ -123,7 +123,6 @@ final class PhabricatorAppSearchEngine
               'true' => pht('Show Launchable Applications'),
               'false' => pht('Show Non-Launchable Applications'),
             )));
-
   }
 
   protected function getURI($path) {
@@ -131,16 +130,13 @@ final class PhabricatorAppSearchEngine
   }
 
   public function getBuiltinQueryNames() {
-    $names = array(
+    return array(
       'launcher' => pht('Launcher'),
       'all' => pht('All Applications'),
     );
-
-    return $names;
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
-
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
 

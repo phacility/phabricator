@@ -159,7 +159,7 @@ abstract class PhabricatorController extends AphrontController {
       return $this->delegateToController($checker_controller);
     }
 
-    $auth_class = 'PhabricatorApplicationAuth';
+    $auth_class = 'PhabricatorAuthApplication';
     $auth_application = PhabricatorApplication::getByClass($auth_class);
 
     // Require partial sessions to finish login before doing anything.
@@ -231,7 +231,6 @@ abstract class PhabricatorController extends AphrontController {
     if ($this->shouldRequireAdmin() && !$user->getIsAdmin()) {
       return new Aphront403Response();
     }
-
   }
 
   public function buildStandardPageView() {
@@ -319,7 +318,6 @@ abstract class PhabricatorController extends AphrontController {
 
     $seen = array();
     while ($response instanceof AphrontProxyResponse) {
-
       $hash = spl_object_hash($response);
       if (isset($seen[$hash])) {
         $seen[] = get_class($response);
@@ -403,7 +401,6 @@ abstract class PhabricatorController extends AphrontController {
       ->execute();
   }
 
-
   /**
    * Render a list of links to handles, identified by PHIDs. The handles must
    * already be loaded.
@@ -433,7 +430,6 @@ abstract class PhabricatorController extends AphrontController {
   }
 
   protected function buildApplicationCrumbs() {
-
     $crumbs = array();
 
     $application = $this->getCurrentApplication();
@@ -515,7 +511,6 @@ abstract class PhabricatorController extends AphrontController {
   public function getDefaultResourceSource() {
     return 'phabricator';
   }
-
 
   /**
    * Create a new @{class:AphrontDialogView} with defaults filled in.

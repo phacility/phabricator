@@ -9,7 +9,7 @@ final class PhabricatorPeoplePHIDTypeUser extends PhabricatorPHIDType {
   }
 
   public function getPHIDTypeApplicationClass() {
-    return 'PhabricatorApplicationPeople';
+    return 'PhabricatorPeopleApplication';
   }
 
   public function getTypeIcon() {

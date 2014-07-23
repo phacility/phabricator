@@ -8,14 +8,12 @@ final class PhabricatorDashboardPanelSearchEngine
   }
 
   public function getApplicationClassName() {
-    return 'PhabricatorApplicationDashboard';
+    return 'PhabricatorDashboardApplication';
   }
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
-
     $saved->setParameter('status', $request->getStr('status'));
-
     return $saved;
   }
 
@@ -62,16 +60,13 @@ final class PhabricatorDashboardPanelSearchEngine
   }
 
   public function getBuiltinQueryNames() {
-    $names = array(
+    return array(
       'active' => pht('Active Panels'),
-      'all' => pht('All Panels'),
+      'all'    => pht('All Panels'),
     );
-
-    return $names;
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
-
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
 

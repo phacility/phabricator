@@ -297,7 +297,7 @@ final class PhabricatorPeopleQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationPeople';
+    return 'PhabricatorPeopleApplication';
   }
 
 }

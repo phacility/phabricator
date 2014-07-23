@@ -3,7 +3,7 @@
 final class PasteCreateMailReceiver extends PhabricatorMailReceiver {
 
   public function isEnabled() {
-    $app_class = 'PhabricatorApplicationPaste';
+    $app_class = 'PhabricatorPasteApplication';
     return PhabricatorApplication::isClassInstalled($app_class);
   }
 

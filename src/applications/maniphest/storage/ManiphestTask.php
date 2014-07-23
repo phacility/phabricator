@@ -42,7 +42,7 @@ final class ManiphestTask extends ManiphestDAO
   public static function initializeNewTask(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
       ->setViewer($actor)
-      ->withClasses(array('PhabricatorApplicationManiphest'))
+      ->withClasses(array('PhabricatorManiphestApplication'))
       ->executeOne();
 
     $view_policy = $app->getPolicy(ManiphestCapabilityDefaultView::CAPABILITY);
@@ -231,7 +231,6 @@ final class ManiphestTask extends ManiphestDAO
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $user) {
-
     // The owner of a task can always view and edit it.
     $owner_phid = $this->getOwnerPHID();
     if ($owner_phid) {
@@ -245,8 +244,7 @@ final class ManiphestTask extends ManiphestDAO
   }
 
   public function describeAutomaticCapability($capability) {
-    return pht(
-      'The owner of a task can always view and edit it.');
+    return pht('The owner of a task can always view and edit it.');
   }
 
 

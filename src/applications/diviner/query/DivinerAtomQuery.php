@@ -1,7 +1,6 @@
 <?php
 
-final class DivinerAtomQuery
-  extends PhabricatorCursorPagedPolicyAwareQuery {
+final class DivinerAtomQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $ids;
   private $phids;
@@ -103,7 +102,6 @@ final class DivinerAtomQuery
     $this->includeGhosts = $include;
     return $this;
   }
-
 
   public function needExtends($need) {
     $this->needExtends = $need;
@@ -415,7 +413,7 @@ final class DivinerAtomQuery
    * Attach child atoms to existing atoms. In recursive mode, also attach child
    * atoms to atoms that these atoms extend.
    *
-   * @param list<DivinerLiveSymbol> List of symbols to attach childeren to.
+   * @param list<DivinerLiveSymbol> List of symbols to attach children to.
    * @param map<string, DivinerLiveSymbol> Map of symbols, keyed by node hash.
    * @param bool True to attach children to extended atoms, as well.
    * @return void
@@ -443,7 +441,7 @@ final class DivinerAtomQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationDiviner';
+    return 'PhabricatorDivinerApplication';
   }
 
 }

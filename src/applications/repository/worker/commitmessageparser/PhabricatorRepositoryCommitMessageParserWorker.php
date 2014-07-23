@@ -409,7 +409,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     PhabricatorRepositoryCommit $commit,
     $message) {
 
-    $maniphest = 'PhabricatorApplicationManiphest';
+    $maniphest = 'PhabricatorManiphestApplication';
     if (!PhabricatorApplication::isClassInstalled($maniphest)) {
       return;
     }

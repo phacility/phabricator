@@ -22,7 +22,7 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
   public static function initializeNewPaste(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
       ->setViewer($actor)
-      ->withClasses(array('PhabricatorApplicationPaste'))
+      ->withClasses(array('PhabricatorPasteApplication'))
       ->executeOne();
 
     $view_policy = $app->getPolicy(PasteCapabilityDefaultView::CAPABILITY);
@@ -130,6 +130,5 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
   public function describeAutomaticCapability($capability) {
     return pht('The author of a paste can always view and edit it.');
   }
-
 
 }

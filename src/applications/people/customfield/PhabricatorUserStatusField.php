@@ -23,7 +23,7 @@ final class PhabricatorUserStatusField
 
   public function isFieldEnabled() {
     return PhabricatorApplication::isClassInstalled(
-      'PhabricatorApplicationCalendar');
+      'PhabricatorCalendarApplication');
   }
 
   public function renderPropertyViewValue(array $handles) {

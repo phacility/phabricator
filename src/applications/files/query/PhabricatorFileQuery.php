@@ -245,9 +245,8 @@ final class PhabricatorFileQuery
     return 'f.id';
   }
 
-
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationFiles';
+    return 'PhabricatorFilesApplication';
   }
 
 }

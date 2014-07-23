@@ -259,7 +259,7 @@ final class LegalpadDocumentQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationLegalpad';
+    return 'PhabricatorLegalpadApplication';
   }
 
 }
