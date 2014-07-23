@@ -2,7 +2,7 @@
 
 $map = array(
   'PhabricatorAuthProviderOAuthAmazon' => 'PhabricatorAmazonAuthProvider',
-  'PhabricatorAsanaAuthProvider' => 'PhabricatorAsanaAuthProvider',
+  'PhabricatorAuthProviderOAuthAsana' => 'PhabricatorAsanaAuthProvider',
   'PhabricatorAuthProviderOAuth1Bitbucket'
     => 'PhabricatorBitbucketAuthProvider',
   'PhabricatorAuthProviderOAuthDisqus' => 'PhabricatorDisqusAuthProvider',
