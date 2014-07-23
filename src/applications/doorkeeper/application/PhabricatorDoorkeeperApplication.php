@@ -10,6 +10,10 @@ final class PhabricatorDoorkeeperApplication extends PhabricatorApplication {
     return false;
   }
 
+  public function getName() {
+    return pht('Doorkeeper');
+  }
+
   public function getShortDescription() {
     return pht('Connect to Other Software');
   }

@@ -6,6 +6,10 @@ final class PhabricatorDrydockApplication extends PhabricatorApplication {
     return '/drydock/';
   }
 
+  public function getName() {
+    return pht('Drydock');
+  }
+
   public function getShortDescription() {
     return pht('Allocate Software Resources');
   }

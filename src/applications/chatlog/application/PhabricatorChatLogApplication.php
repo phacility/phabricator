@@ -6,6 +6,10 @@ final class PhabricatorChatLogApplication extends PhabricatorApplication {
     return '/chatlog/';
   }
 
+  public function getName() {
+    return pht('ChatLog');
+  }
+
   public function getShortDescription() {
     return pht('IRC Logs');
   }

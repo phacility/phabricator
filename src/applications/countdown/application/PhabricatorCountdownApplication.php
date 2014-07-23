@@ -10,6 +10,10 @@ final class PhabricatorCountdownApplication extends PhabricatorApplication {
     return 'countdown';
   }
 
+  public function getName() {
+    return pht('Countdown');
+  }
+
   public function getShortDescription() {
     return pht('Countdown to Events');
   }

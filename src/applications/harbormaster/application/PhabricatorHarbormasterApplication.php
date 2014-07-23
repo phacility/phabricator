@@ -6,6 +6,10 @@ final class PhabricatorHarbormasterApplication extends PhabricatorApplication {
     return '/harbormaster/';
   }
 
+  public function getName() {
+    return pht('Harbormaster');
+  }
+
   public function getShortDescription() {
     return pht('Build/CI');
   }

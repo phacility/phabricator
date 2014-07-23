@@ -2,6 +2,10 @@
 
 final class PhabricatorSubscriptionsApplication extends PhabricatorApplication {
 
+  public function getName() {
+    return pht('Subscriptions');
+  }
+
   public function isLaunchable() {
     return false;
   }

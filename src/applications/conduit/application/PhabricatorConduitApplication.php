@@ -18,6 +18,10 @@ final class PhabricatorConduitApplication extends PhabricatorApplication {
     return PhabricatorEnv::getDoclink('Conduit Technical Documentation');
   }
 
+  public function getName() {
+    return pht('Conduit');
+  }
+
   public function getShortDescription() {
     return pht('Developer API');
   }

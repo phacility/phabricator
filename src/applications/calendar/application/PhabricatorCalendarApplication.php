@@ -2,6 +2,10 @@
 
 final class PhabricatorCalendarApplication extends PhabricatorApplication {
 
+  public function getName() {
+    return pht('Calendar');
+  }
+
   public function getShortDescription() {
     return pht('Upcoming Events');
   }

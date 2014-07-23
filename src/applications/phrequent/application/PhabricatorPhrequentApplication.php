@@ -2,6 +2,10 @@
 
 final class PhabricatorPhrequentApplication extends PhabricatorApplication {
 
+  public function getName() {
+    return pht('Phrequent');
+  }
+
   public function getShortDescription() {
     return pht('Track Time Spent');
   }

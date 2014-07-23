@@ -6,6 +6,10 @@ final class PhabricatorFeedApplication extends PhabricatorApplication {
     return '/feed/';
   }
 
+  public function getName() {
+    return pht('Feed');
+  }
+
   public function getShortDescription() {
     return pht('Review Recent Activity');
   }

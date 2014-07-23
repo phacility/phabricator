@@ -2,6 +2,10 @@
 
 final class PhabricatorSystemApplication extends PhabricatorApplication {
 
+  public function getName() {
+    return pht('System');
+  }
+
   public function canUninstall() {
     return false;
   }

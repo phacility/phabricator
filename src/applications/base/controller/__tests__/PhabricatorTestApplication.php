@@ -4,6 +4,10 @@ final class PhabricatorTestApplication extends PhabricatorApplication {
 
   private $policies = array();
 
+  public function getName() {
+    return pht('Test');
+  }
+
   public function isUnlisted() {
     return true;
   }

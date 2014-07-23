@@ -6,6 +6,10 @@ final class PhabricatorMacroApplication extends PhabricatorApplication {
     return '/macro/';
   }
 
+  public function getName() {
+    return pht('Macro');
+  }
+
   public function getShortDescription() {
     return pht('Image Macros and Memes');
   }

@@ -6,6 +6,10 @@ final class PhabricatorXHProfApplication extends PhabricatorApplication {
     return '/xhprof/';
   }
 
+  public function getName() {
+    return pht('XHProf');
+  }
+
   public function getShortDescription() {
     return pht('PHP Profiling Tool');
   }

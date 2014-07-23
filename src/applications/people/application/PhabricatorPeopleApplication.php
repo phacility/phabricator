@@ -2,6 +2,10 @@
 
 final class PhabricatorPeopleApplication extends PhabricatorApplication {
 
+  public function getName() {
+    return pht('People');
+  }
+
   public function getShortDescription() {
     return pht('User Accounts and Profiles');
   }

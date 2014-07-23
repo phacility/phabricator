@@ -10,6 +10,10 @@ final class PhabricatorDivinerApplication extends PhabricatorApplication {
     return 'diviner';
   }
 
+  public function getName() {
+    return pht('Diviner');
+  }
+
   public function getShortDescription() {
     return pht('Documentation');
   }

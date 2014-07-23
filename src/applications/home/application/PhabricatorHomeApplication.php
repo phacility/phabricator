@@ -8,6 +8,10 @@ final class PhabricatorHomeApplication extends PhabricatorApplication {
     return '/home/';
   }
 
+  public function getName() {
+    return pht('Home');
+  }
+
   public function getShortDescription() {
     return pht('Command Center');
   }

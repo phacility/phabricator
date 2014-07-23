@@ -27,23 +27,21 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
 /* -(  Application Information  )-------------------------------------------- */
 
 
+  /**
+   * TODO: This should be abstract, but is not for historical reasons.
+   */
   public function getName() {
-
-    // TODO: This is sort of gross.
+    phutil_deprecated(
+      'Automatic naming of `PhabricatorApplication` classes.',
+      'You should override the `getName` method.');
 
     $match = null;
-
-    $regex = '/^Phabricator([A-Z][a-zA-Z]*)Application$/';
-    if (preg_match($regex, get_class($this), $match)) {
-      return $match[1];
-    }
-
     $regex = '/^PhabricatorApplication([A-Z][a-zA-Z]*)$/';
     if (preg_match($regex, get_class($this), $match)) {
       return $match[1];
     }
 
-    throw new Exception('Unable to determine application name automagically.');
+    throw new PhutilMethodNotImplementedException();
   }
 
   public function getShortDescription() {

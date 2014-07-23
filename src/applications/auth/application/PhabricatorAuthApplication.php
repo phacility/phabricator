@@ -18,6 +18,10 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
     return $viewer->getIsAdmin();
   }
 
+  public function getName() {
+    return pht('Auth');
+  }
+
   public function getShortDescription() {
     return pht('Login/Registration');
   }

@@ -6,6 +6,10 @@ final class PhabricatorDifferentialApplication extends PhabricatorApplication {
     return '/differential/';
   }
 
+  public function getName() {
+    return pht('Differential');
+  }
+
   public function getShortDescription() {
     return pht('Review Code');
   }

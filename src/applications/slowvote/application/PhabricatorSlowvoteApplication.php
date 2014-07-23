@@ -10,8 +10,12 @@ final class PhabricatorSlowvoteApplication extends PhabricatorApplication {
     return 'slowvote';
   }
 
+  public function getName() {
+    return pht('Slowvote');
+  }
+
   public function getShortDescription() {
-    return 'Conduct Polls';
+    return pht('Conduct Polls');
   }
 
   public function getTitleGlyph() {

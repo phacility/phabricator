@@ -10,6 +10,10 @@ final class PhabricatorAuditApplication extends PhabricatorApplication {
     return 'audit';
   }
 
+  public function getName() {
+    return pht('Audit');
+  }
+
   public function getShortDescription() {
     return pht('Browse and Audit Commits');
   }

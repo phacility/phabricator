@@ -6,6 +6,10 @@ final class PhabricatorSettingsApplication extends PhabricatorApplication {
     return '/settings/';
   }
 
+  public function getName() {
+    return pht('Settings');
+  }
+
   public function getShortDescription() {
     return pht('User Preferences');
   }

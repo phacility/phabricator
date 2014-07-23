@@ -2,6 +2,10 @@
 
 final class PhabricatorTypeaheadApplication extends PhabricatorApplication {
 
+  public function getName() {
+    return pht('Typeahead');
+  }
+
   public function getRoutes() {
     return array(
       '/typeahead/' => array(

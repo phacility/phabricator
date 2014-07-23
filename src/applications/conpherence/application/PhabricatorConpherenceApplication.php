@@ -6,6 +6,10 @@ final class PhabricatorConpherenceApplication extends PhabricatorApplication {
     return '/conpherence/';
   }
 
+  public function getName() {
+    return pht('Conpherence');
+  }
+
   public function getShortDescription() {
     return pht('Send Messages');
   }

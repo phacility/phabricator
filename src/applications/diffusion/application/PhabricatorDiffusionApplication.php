@@ -2,6 +2,10 @@
 
 final class PhabricatorDiffusionApplication extends PhabricatorApplication {
 
+  public function getName() {
+    return pht('Diffusion');
+  }
+
   public function getShortDescription() {
     return pht('Host and Browse Repositories');
   }

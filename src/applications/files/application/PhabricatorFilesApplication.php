@@ -6,6 +6,10 @@ final class PhabricatorFilesApplication extends PhabricatorApplication {
     return '/file/';
   }
 
+  public function getName() {
+    return pht('Files');
+  }
+
   public function getShortDescription() {
     return 'Store and Share Files';
   }

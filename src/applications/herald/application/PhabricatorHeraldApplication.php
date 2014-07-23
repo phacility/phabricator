@@ -10,6 +10,10 @@ final class PhabricatorHeraldApplication extends PhabricatorApplication {
     return 'herald';
   }
 
+  public function getName() {
+    return pht('Herald');
+  }
+
   public function getShortDescription() {
     return pht('Create Notification Rules');
   }

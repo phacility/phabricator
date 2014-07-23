@@ -2,6 +2,10 @@
 
 final class PhabricatorFlagsApplication extends PhabricatorApplication {
 
+  public function getName() {
+    return pht('Flags');
+  }
+
   public function getShortDescription() {
     return pht('Personal Bookmarks');
   }

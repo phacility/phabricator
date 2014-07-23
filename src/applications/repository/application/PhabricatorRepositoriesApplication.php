@@ -10,6 +10,10 @@ final class PhabricatorRepositoriesApplication extends PhabricatorApplication {
     return 'repositories';
   }
 
+  public function getName() {
+    return pht('Repositories');
+  }
+
   public function getShortDescription() {
     return pht('(Deprecated)');
   }

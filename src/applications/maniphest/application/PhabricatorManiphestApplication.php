@@ -2,8 +2,12 @@
 
 final class PhabricatorManiphestApplication extends PhabricatorApplication {
 
+  public function getName() {
+    return pht('Maniphest');
+  }
+
   public function getShortDescription() {
-    return 'Tasks and Bugs';
+    return pht('Tasks and Bugs');
   }
 
   public function getBaseURI() {
