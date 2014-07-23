@@ -38,16 +38,18 @@ final class PhortunePurchaseQuery
   }
 
   protected function willFilterPage(array $purchases) {
-    $carts = id(new PhabricatorObjectQuery())
+    $carts = id(new PhortuneCartQuery())
       ->setViewer($this->getViewer())
       ->setParentQuery($this)
       ->withPHIDs(mpull($purchases, 'getCartPHID'))
       ->execute();
+    $carts = mpull($carts, null, 'getPHID');
 
     foreach ($purchases as $key => $purchase) {
       $cart = idx($carts, $purchase->getCartPHID());
       if (!$cart) {
         unset($purchases[$key]);
+        continue;
       }
       $purchase->attachCart($cart);
     }

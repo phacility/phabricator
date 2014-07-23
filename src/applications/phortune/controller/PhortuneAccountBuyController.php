@@ -11,10 +11,10 @@ final class PhortuneAccountBuyController
 
   public function processRequest() {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $request->getUser();
 
     $cart = id(new PhortuneCartQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withIDs(array($this->id))
       ->needPurchases(true)
       ->executeOne();
@@ -24,6 +24,56 @@ final class PhortuneAccountBuyController
 
     $account = $cart->getAccount();
     $account_uri = $this->getApplicationURI($account->getID().'/');
+
+    $methods = id(new PhortunePaymentMethodQuery())
+      ->setViewer($viewer)
+      ->withAccountPHIDs(array($account->getPHID()))
+      ->withStatus(PhortunePaymentMethodQuery::STATUS_OPEN)
+      ->execute();
+
+    $e_method = null;
+    $errors = array();
+
+    if ($request->isFormPost()) {
+
+      // Require CAN_EDIT on the cart to actually make purchases.
+
+      PhabricatorPolicyFilter::requireCapability(
+        $viewer,
+        $cart,
+        PhabricatorPolicyCapability::CAN_EDIT);
+
+      $method_id = $request->getInt('paymentMethodID');
+      $method = idx($methods, $method_id);
+      if (!$method) {
+        $e_method = pht('Required');
+        $errors[] = pht('You must choose a payment method.');
+      }
+
+      if (!$errors) {
+        $provider = $method->buildPaymentProvider();
+
+        $charge = id(new PhortuneCharge())
+          ->setAccountPHID($account->getPHID())
+          ->setCartPHID($cart->getPHID())
+          ->setAuthorPHID($viewer->getPHID())
+          ->setPaymentMethodPHID($method->getPHID())
+          ->setAmountInCents($cart->getTotalPriceInCents())
+          ->setStatus(PhortuneCharge::STATUS_PENDING);
+
+        $charge->openTransaction();
+          $charge->save();
+
+          // TODO: We should be setting some kind of status on the cart here.
+          $cart->save();
+        $charge->saveTransaction();
+
+        $provider->applyCharge($method, $charge);
+
+        throw new Exception('Executed a charge! Your money is gone forever!');
+      }
+    }
+
 
     $rows = array();
     $total = 0;
@@ -66,19 +116,10 @@ final class PhortuneAccountBuyController
 
     $cart_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Your Cart'))
+      ->setFormErrors($errors)
       ->appendChild($table);
 
     $title = pht('Buy Stuff');
-
-
-    $methods = id(new PhortunePaymentMethodQuery())
-      ->setViewer($user)
-      ->withAccountPHIDs(array($account->getPHID()))
-      ->withStatus(PhortunePaymentMethodQuery::STATUS_OPEN)
-      ->execute();
-
-    $method_control = id(new AphrontFormRadioButtonControl())
-      ->setLabel(pht('Payment Method'));
 
     if (!$methods) {
       $method_control = id(new AphrontFormStaticControl())
@@ -98,11 +139,13 @@ final class PhortuneAccountBuyController
       }
     }
 
+    $method_control->setError($e_method);
+
     $payment_method_uri = $this->getApplicationURI(
       $account->getID().'/paymentmethod/edit/');
 
     $form = id(new AphrontFormView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->appendChild($method_control);
 
     $add_providers = PhortunePaymentProvider::getProvidersForAddPaymentMethod();
@@ -137,7 +180,7 @@ final class PhortuneAccountBuyController
         $one_time_options[] = $provider->renderOneTimePaymentButton(
           $account,
           $cart,
-          $user);
+          $viewer);
       }
 
       $provider_form = new PHUIFormLayoutView();

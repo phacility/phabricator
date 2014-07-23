@@ -47,6 +47,16 @@ final class PhortuneCart extends PhortuneDAO
     return $this->assertAttached($this->account);
   }
 
+  public function getTotalPriceInCents() {
+    $prices = array();
+    foreach ($this->getPurchases() as $purchase) {
+      $prices[] = PhortuneCurrency::newFromUSDCents(
+        $purchase->getTotalPriceInCents());
+    }
+
+    return PhortuneCurrency::newFromList($prices)->getValue();
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

@@ -40,6 +40,9 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
     PhortunePaymentMethod $method,
     PhortuneCharge $charge) {
 
+    $root = dirname(phutil_get_library_root('phabricator'));
+    require_once $root.'/externals/stripe-php/lib/Stripe.php';
+
     $secret_key = $this->getSecretKey();
     $params = array(
       'amount'      => $charge->getAmountInCents(),

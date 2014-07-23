@@ -96,6 +96,19 @@ abstract class PhortunePaymentProvider {
   abstract public function canHandlePaymentMethod(
     PhortunePaymentMethod $method);
 
+  final public function applyCharge(
+    PhortunePaymentMethod $payment_method,
+    PhortuneCharge $charge) {
+
+    $charge->setStatus(PhortuneCharge::STATUS_CHARGING);
+    $charge->save();
+
+    $this->executeCharge($payment_method, $charge);
+
+    $charge->setStatus(PhortuneCharge::STATUS_CHARGED);
+    $charge->save();
+  }
+
   abstract protected function executeCharge(
     PhortunePaymentMethod $payment_method,
     PhortuneCharge $charge);

@@ -1,12 +1,11 @@
 <?php
 
-final class PhortuneCartQuery
+final class PhortuneChargeQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $ids;
   private $phids;
-
-  private $needPurchases;
+  private $accountPHIDs;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -18,18 +17,18 @@ final class PhortuneCartQuery
     return $this;
   }
 
-  public function needPurchases($need_purchases) {
-    $this->needPurchases = $need_purchases;
+  public function withAccountPHIDs(array $account_phids) {
+    $this->accountPHIDs = $account_phids;
     return $this;
   }
 
   protected function loadPage() {
-    $table = new PhortuneCart();
+    $table = new PhortuneCharge();
     $conn = $table->establishConnection('r');
 
     $rows = queryfx_all(
       $conn,
-      'SELECT cart.* FROM %T cart %Q %Q %Q',
+      'SELECT charge.* FROM %T charge %Q %Q %Q',
       $table->getTableName(),
       $this->buildWhereClause($conn),
       $this->buildOrderClause($conn),
@@ -38,40 +37,24 @@ final class PhortuneCartQuery
     return $table->loadAllFromArray($rows);
   }
 
-  protected function willFilterPage(array $carts) {
+  protected function willFilterPage(array $charges) {
     $accounts = id(new PhortuneAccountQuery())
       ->setViewer($this->getViewer())
-      ->withPHIDs(mpull($carts, 'getAccountPHID'))
+      ->setParentQuery($this)
+      ->withPHIDs(mpull($charges, 'getAccountPHID'))
       ->execute();
     $accounts = mpull($accounts, null, 'getPHID');
 
-    foreach ($carts as $key => $cart) {
-      $account = idx($accounts, $cart->getAccountPHID());
+    foreach ($charges as $key => $charge) {
+      $account = idx($accounts, $charge->getAccountPHID());
       if (!$account) {
-        unset($carts[$key]);
+        unset($charges[$key]);
         continue;
       }
-      $cart->attachAccount($account);
+      $charge->attachAccount($account);
     }
 
-    return $carts;
-  }
-
-  protected function didFilterPage(array $carts) {
-    if ($this->needPurchases) {
-      $purchases = id(new PhortunePurchaseQuery())
-        ->setViewer($this->getViewer())
-        ->setParentQuery($this)
-        ->withCartPHIDs(mpull($carts, 'getPHID'))
-        ->execute();
-
-      $purchases = mgroup($purchases, 'getCartPHID');
-      foreach ($carts as $cart) {
-        $cart->attachPurchases(idx($purchases, $cart->getPHID(), array()));
-      }
-    }
-
-    return $carts;
+    return $charges;
   }
 
   private function buildWhereClause(AphrontDatabaseConnection $conn) {
@@ -82,15 +65,22 @@ final class PhortuneCartQuery
     if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
-        'cart.id IN (%Ld)',
+        'charge.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
-        'cart.phid IN (%Ls)',
+        'charge.phid IN (%Ls)',
         $this->phids);
+    }
+
+    if ($this->accountPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'charge.accountPHID IN (%Ls)',
+        $this->accountPHIDs);
     }
 
     return $this->formatWhereClause($where);
