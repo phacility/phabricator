@@ -97,7 +97,7 @@ final class PhortuneCartQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationPhortune';
+    return 'PhabricatorPhortuneApplication';
   }
 
 }
