@@ -277,7 +277,7 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
     // the '_top' target for framed feeds.
 
     $class = null;
-    if ($handle->getType() == PhabricatorPeoplePHIDTypeUser::TYPECONST) {
+    if ($handle->getType() == PhabricatorPeopleUserPHIDType::TYPECONST) {
       $class = 'phui-link-person';
     }
 

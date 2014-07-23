@@ -12,7 +12,7 @@ final class HarbormasterBuildItem extends HarbormasterDAO {
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      HarbormasterPHIDTypeBuildItem::TYPECONST);
+      HarbormasterBuildItemPHIDType::TYPECONST);
   }
 
 }

@@ -1124,7 +1124,7 @@ final class DifferentialRevisionQuery
 
     // Find all the project reviewers which the user may have authority over.
     $project_phids = array();
-    $project_type = PhabricatorProjectPHIDTypeProject::TYPECONST;
+    $project_type = PhabricatorProjectProjectPHIDType::TYPECONST;
     $edge_type = PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER;
     foreach ($edges as $src => $types) {
       if (!$allow_self) {

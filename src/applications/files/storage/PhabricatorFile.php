@@ -43,7 +43,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorFilePHIDTypeFile::TYPECONST);
+      PhabricatorFileFilePHIDType::TYPECONST);
   }
 
   public function save() {

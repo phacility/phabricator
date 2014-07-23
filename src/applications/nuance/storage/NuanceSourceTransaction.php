@@ -6,7 +6,7 @@ final class NuanceSourceTransaction
   const TYPE_NAME   = 'name-source';
 
   public function getApplicationTransactionType() {
-    return NuancePHIDTypeSource::TYPECONST;
+    return NuanceSourcePHIDType::TYPECONST;
   }
 
   public function getApplicationTransactionCommentObject() {

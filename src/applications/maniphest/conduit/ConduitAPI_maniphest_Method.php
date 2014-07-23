@@ -102,7 +102,7 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
     if ($owner_phid !== null) {
       $this->validatePHIDList(
         array($owner_phid),
-        PhabricatorPeoplePHIDTypeUser::TYPECONST,
+        PhabricatorPeopleUserPHIDType::TYPECONST,
         'ownerPHID');
       $changes[ManiphestTransaction::TYPE_OWNER] = $owner_phid;
     }
@@ -111,7 +111,7 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
     if ($ccs !== null) {
       $this->validatePHIDList(
         $ccs,
-        PhabricatorPeoplePHIDTypeUser::TYPECONST,
+        PhabricatorPeopleUserPHIDType::TYPECONST,
         'ccPHIDS');
       $changes[ManiphestTransaction::TYPE_CCS] = $ccs;
     }
@@ -122,7 +122,7 @@ abstract class ConduitAPI_maniphest_Method extends ConduitAPIMethod {
     if ($project_phids !== null) {
       $this->validatePHIDList(
         $project_phids,
-        PhabricatorProjectPHIDTypeProject::TYPECONST,
+        PhabricatorProjectProjectPHIDType::TYPECONST,
         'projectPHIDS');
 
       $project_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;

@@ -59,7 +59,7 @@ final class LegalpadDocument extends LegalpadDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorLegalpadPHIDTypeDocument::TYPECONST);
+      PhabricatorLegalpadDocumentPHIDType::TYPECONST);
   }
 
   public function getDocumentBody() {

@@ -42,7 +42,7 @@ final class PhabricatorCalendarEvent
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorCalendarPHIDTypeEvent::TYPECONST);
+      PhabricatorCalendarEventPHIDType::TYPECONST);
   }
 
   public function getTerseSummary(PhabricatorUser $viewer) {

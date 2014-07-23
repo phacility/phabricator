@@ -70,8 +70,7 @@ final class PonderAnswer extends PonderDAO
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(
-      PonderPHIDTypeAnswer::TYPECONST);
+    return PhabricatorPHID::generateNewPHID(PonderAnswerPHIDType::TYPECONST);
   }
 
   public function setContentSource(PhabricatorContentSource $content_source) {

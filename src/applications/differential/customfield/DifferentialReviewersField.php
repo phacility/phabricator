@@ -142,8 +142,8 @@ final class DifferentialReviewersField
     return $this->parseObjectList(
       $value,
       array(
-        PhabricatorPeoplePHIDTypeUser::TYPECONST,
-        PhabricatorProjectPHIDTypeProject::TYPECONST,
+        PhabricatorPeopleUserPHIDType::TYPECONST,
+        PhabricatorProjectProjectPHIDType::TYPECONST,
       ));
   }
 

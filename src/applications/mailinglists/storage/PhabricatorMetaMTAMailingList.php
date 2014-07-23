@@ -11,7 +11,7 @@ final class PhabricatorMetaMTAMailingList extends PhabricatorMetaMTADAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorMailingListPHIDTypeList::TYPECONST);
+      PhabricatorMailingListListPHIDType::TYPECONST);
   }
 
   public function getConfiguration() {

@@ -1145,7 +1145,7 @@ abstract class PhabricatorApplicationTransactionEditor
         }
       }
 
-      $project_type = PhabricatorProjectPHIDTypeProject::TYPECONST;
+      $project_type = PhabricatorProjectProjectPHIDType::TYPECONST;
       foreach ($phids as $key => $phid) {
         if (phid_get_type($phid) != $project_type) {
           unset($phids[$key]);

@@ -21,7 +21,7 @@ final class PholioSearchIndexer extends PhabricatorSearchDocumentIndexer {
     $doc->addRelationship(
       PhabricatorSearchRelationship::RELATIONSHIP_AUTHOR,
       $mock->getAuthorPHID(),
-      PhabricatorPeoplePHIDTypeUser::TYPECONST,
+      PhabricatorPeopleUserPHIDType::TYPECONST,
       $mock->getDateCreated());
 
     $this->indexTransactions(

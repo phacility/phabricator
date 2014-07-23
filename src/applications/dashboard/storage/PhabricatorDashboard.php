@@ -43,7 +43,7 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorDashboardPHIDTypeDashboard::TYPECONST);
+      PhabricatorDashboardDashboardPHIDType::TYPECONST);
   }
 
   public function getLayoutConfigObject() {

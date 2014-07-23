@@ -20,7 +20,7 @@ final class NuanceSource extends NuanceDAO
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(NuancePHIDTypeSource::TYPECONST);
+    return PhabricatorPHID::generateNewPHID(NuanceSourcePHIDType::TYPECONST);
   }
 
   public function save() {

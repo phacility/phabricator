@@ -8,7 +8,7 @@ final class NuanceItemTransaction
   const TYPE_SOURCE = 'item-source';
 
   public function getApplicationTransactionType() {
-    return NuancePHIDTypeItem::TYPECONST;
+    return NuanceItemPHIDType::TYPECONST;
   }
 
   public function getApplicationTransactionCommentObject() {

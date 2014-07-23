@@ -31,7 +31,7 @@ final class LegalpadDocumentSignatureSearchEngine
         $request,
         'documents',
         array(
-          PhabricatorLegalpadPHIDTypeDocument::TYPECONST,
+          PhabricatorLegalpadDocumentPHIDType::TYPECONST,
         )));
 
     $saved->setParameter('nameContains', $request->getStr('nameContains'));

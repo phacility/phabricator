@@ -39,7 +39,7 @@ final class DrydockBlueprint extends DrydockDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      DrydockPHIDTypeBlueprint::TYPECONST);
+      DrydockBlueprintPHIDType::TYPECONST);
   }
 
   public function getImplementation() {

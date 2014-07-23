@@ -38,7 +38,7 @@ final class PassphraseCredential extends PassphraseDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PassphrasePHIDTypeCredential::TYPECONST);
+      PassphraseCredentialPHIDType::TYPECONST);
   }
 
   public function attachSecret(PhutilOpaqueEnvelope $secret = null) {

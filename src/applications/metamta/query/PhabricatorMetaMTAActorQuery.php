@@ -33,13 +33,13 @@ final class PhabricatorMetaMTAActorQuery extends PhabricatorQuery {
 
     foreach ($type_map as $type => $phids) {
       switch ($type) {
-        case PhabricatorPeoplePHIDTypeUser::TYPECONST:
+        case PhabricatorPeopleUserPHIDType::TYPECONST:
           $this->loadUserActors($actors, $phids);
           break;
-        case PhabricatorPeoplePHIDTypeExternal::TYPECONST:
+        case PhabricatorPeopleExternalPHIDType::TYPECONST:
           $this->loadExternalUserActors($actors, $phids);
           break;
-        case PhabricatorMailingListPHIDTypeList::TYPECONST:
+        case PhabricatorMailingListListPHIDType::TYPECONST:
           $this->loadMailingListActors($actors, $phids);
           break;
         default:

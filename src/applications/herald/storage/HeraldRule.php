@@ -35,7 +35,7 @@ final class HeraldRule extends HeraldDAO
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(HeraldPHIDTypeRule::TYPECONST);
+    return PhabricatorPHID::generateNewPHID(HeraldRulePHIDType::TYPECONST);
   }
 
   public function getRuleApplied($phid) {

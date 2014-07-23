@@ -91,7 +91,7 @@ final class DifferentialManiphestTasksField
     return $this->parseObjectList(
       $value,
       array(
-        ManiphestPHIDTypeTask::TYPECONST,
+        ManiphestTaskPHIDType::TYPECONST,
       ));
   }
 

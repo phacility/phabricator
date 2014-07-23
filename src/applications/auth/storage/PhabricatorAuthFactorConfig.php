@@ -19,7 +19,7 @@ final class PhabricatorAuthFactorConfig extends PhabricatorAuthDAO {
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorAuthPHIDTypeAuthFactor::TYPECONST);
+      PhabricatorAuthAuthFactorPHIDType::TYPECONST);
   }
 
   public function getImplementation() {

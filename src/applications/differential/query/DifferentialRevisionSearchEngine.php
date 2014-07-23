@@ -35,7 +35,7 @@ final class DifferentialRevisionSearchEngine
         $request,
         'reviewers',
         array(
-          PhabricatorProjectPHIDTypeProject::TYPECONST,
+          PhabricatorProjectProjectPHIDType::TYPECONST,
         )));
 
     $saved->setParameter(

@@ -10,7 +10,7 @@ final class DrydockBlueprintTransaction
   }
 
   public function getApplicationTransactionType() {
-    return DrydockPHIDTypeBlueprint::TYPECONST;
+    return DrydockBlueprintPHIDType::TYPECONST;
   }
 
   public function getTitle() {

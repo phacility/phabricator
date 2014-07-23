@@ -38,13 +38,13 @@ final class PhabricatorOwnersOwner extends PhabricatorOwnersDAO {
     $all_phids = phid_group_by_type(mpull($owners, 'getUserPHID'));
 
     $user_phids = idx($all_phids,
-      PhabricatorPeoplePHIDTypeUser::TYPECONST,
+      PhabricatorPeopleUserPHIDType::TYPECONST,
       array());
 
     $users_in_project_phids = array();
     $project_phids = idx(
       $all_phids,
-      PhabricatorProjectPHIDTypeProject::TYPECONST);
+      PhabricatorProjectProjectPHIDType::TYPECONST);
     if ($project_phids) {
       $query = id(new PhabricatorEdgeQuery())
         ->withSourcePHIDs($project_phids)

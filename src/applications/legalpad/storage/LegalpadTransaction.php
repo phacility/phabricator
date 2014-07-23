@@ -7,7 +7,7 @@ final class LegalpadTransaction extends PhabricatorApplicationTransaction {
   }
 
   public function getApplicationTransactionType() {
-    return PhabricatorLegalpadPHIDTypeDocument::TYPECONST;
+    return PhabricatorLegalpadDocumentPHIDType::TYPECONST;
   }
 
   public function getApplicationTransactionCommentObject() {

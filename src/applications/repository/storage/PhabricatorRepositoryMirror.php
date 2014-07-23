@@ -22,7 +22,7 @@ final class PhabricatorRepositoryMirror extends PhabricatorRepositoryDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorRepositoryPHIDTypeMirror::TYPECONST);
+      PhabricatorRepositoryMirrorPHIDType::TYPECONST);
   }
 
   public function attachRepository(PhabricatorRepository $repository) {

@@ -8,7 +8,7 @@ foreach (new LiskMigrationIterator($table) as $task) {
   $id = $task->getID();
   echo "Task {$id}: ";
 
-  $deps = $task->getAttachedPHIDs(ManiphestPHIDTypeTask::TYPECONST);
+  $deps = $task->getAttachedPHIDs(ManiphestTaskPHIDType::TYPECONST);
   if (!$deps) {
     echo "-\n";
     continue;

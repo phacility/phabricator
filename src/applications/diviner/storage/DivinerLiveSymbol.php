@@ -31,8 +31,7 @@ final class DivinerLiveSymbol extends DivinerDAO
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(
-      DivinerPHIDTypeAtom::TYPECONST);
+    return PhabricatorPHID::generateNewPHID(DivinerAtomPHIDType::TYPECONST);
   }
 
   public function getBook() {

@@ -18,14 +18,14 @@ final class HarbormasterBuildableSearchEngine
       $request,
       'revisions',
       array(
-        DifferentialPHIDTypeRevision::TYPECONST,
+        DifferentialRevisionPHIDType::TYPECONST,
       ));
 
     $repositories = $this->readPHIDsFromRequest(
       $request,
       'repositories',
       array(
-        PhabricatorRepositoryPHIDTypeRepository::TYPECONST,
+        PhabricatorRepositoryRepositoryPHIDType::TYPECONST,
       ));
 
     $container_phids = array_merge($revisions, $repositories);
@@ -35,7 +35,7 @@ final class HarbormasterBuildableSearchEngine
       $request,
       'commits',
       array(
-        PhabricatorRepositoryPHIDTypeCommit::TYPECONST,
+        PhabricatorRepositoryCommitPHIDType::TYPECONST,
       ));
 
     $diffs = $this->readListFromRequest($request, 'diffs');

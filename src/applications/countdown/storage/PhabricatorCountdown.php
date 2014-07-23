@@ -32,7 +32,7 @@ final class PhabricatorCountdown
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorCountdownPHIDTypeCountdown::TYPECONST);
+      PhabricatorCountdownCountdownPHIDType::TYPECONST);
   }
 
 

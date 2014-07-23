@@ -8,7 +8,7 @@ final class PhabricatorFileTransaction
   }
 
   public function getApplicationTransactionType() {
-    return PhabricatorFilePHIDTypeFile::TYPECONST;
+    return PhabricatorFileFilePHIDType::TYPECONST;
   }
 
   public function getApplicationTransactionCommentObject() {

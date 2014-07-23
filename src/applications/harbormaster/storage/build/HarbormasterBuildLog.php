@@ -35,7 +35,7 @@ final class HarbormasterBuildLog extends HarbormasterDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      HarbormasterPHIDTypeBuildLog::TYPECONST);
+      HarbormasterBuildLogPHIDType::TYPECONST);
   }
 
   public function attachBuildTarget(HarbormasterBuildTarget $build_target) {

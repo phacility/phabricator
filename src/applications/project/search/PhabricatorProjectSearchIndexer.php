@@ -12,7 +12,7 @@ final class PhabricatorProjectSearchIndexer
 
     $doc = new PhabricatorSearchAbstractDocument();
     $doc->setPHID($project->getPHID());
-    $doc->setDocumentType(PhabricatorProjectPHIDTypeProject::TYPECONST);
+    $doc->setDocumentType(PhabricatorProjectProjectPHIDType::TYPECONST);
     $doc->setDocumentTitle($project->getName());
     $doc->setDocumentCreated($project->getDateCreated());
     $doc->setDocumentModified($project->getDateModified());
@@ -22,7 +22,7 @@ final class PhabricatorProjectSearchIndexer
         ? PhabricatorSearchRelationship::RELATIONSHIP_CLOSED
         : PhabricatorSearchRelationship::RELATIONSHIP_OPEN,
       $project->getPHID(),
-      PhabricatorProjectPHIDTypeProject::TYPECONST,
+      PhabricatorProjectProjectPHIDType::TYPECONST,
       time());
 
     // NOTE: This could be more full-featured, but for now we're mostly
@@ -30,4 +30,5 @@ final class PhabricatorProjectSearchIndexer
 
     return $doc;
   }
+
 }

@@ -189,7 +189,7 @@ final class PhabricatorSearchApplicationSearchEngine
       case 'open-tasks':
         return $query
           ->setParameter('statuses', array('open'))
-          ->setParameter('types', array(ManiphestPHIDTypeTask::TYPECONST));
+          ->setParameter('types', array(ManiphestTaskPHIDType::TYPECONST));
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
@@ -228,7 +228,7 @@ final class PhabricatorSearchApplicationSearchEngine
     $results = array_select_keys(
       $results,
       array(
-        ManiphestPHIDTypeTask::TYPECONST,
+        ManiphestTaskPHIDType::TYPECONST,
       )) + $results;
 
     return $results;

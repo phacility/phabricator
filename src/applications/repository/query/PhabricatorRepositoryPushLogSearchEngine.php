@@ -20,7 +20,7 @@ final class PhabricatorRepositoryPushLogSearchEngine
         $request,
         'repositories',
         array(
-          PhabricatorRepositoryPHIDTypeRepository::TYPECONST,
+          PhabricatorRepositoryRepositoryPHIDType::TYPECONST,
         )));
 
     $saved->setParameter(

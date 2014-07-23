@@ -255,19 +255,19 @@ final class PHUIFeedStoryView extends AphrontView {
 
   public function setAppIconFromPHID($phid) {
     switch (phid_get_type($phid)) {
-      case PholioPHIDTypeMock::TYPECONST:
+      case PholioMockPHIDType::TYPECONST:
         $this->setAppIcon('pholio-dark');
         break;
-      case PhabricatorMacroPHIDTypeMacro::TYPECONST:
+      case PhabricatorMacroMacroPHIDType::TYPECONST:
         $this->setAppIcon('macro-dark');
         break;
-      case ManiphestPHIDTypeTask::TYPECONST:
+      case ManiphestTaskPHIDType::TYPECONST:
         $this->setAppIcon('maniphest-dark');
         break;
-      case DifferentialPHIDTypeRevision::TYPECONST:
+      case DifferentialRevisionPHIDType::TYPECONST:
         $this->setAppIcon('differential-dark');
         break;
-      case PhabricatorCalendarPHIDTypeEvent::TYPECONST:
+      case PhabricatorCalendarEventPHIDType::TYPECONST:
         $this->setAppIcon('calendar-dark');
         break;
     }

@@ -124,7 +124,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorProjectPHIDTypeProject::TYPECONST);
+      PhabricatorProjectProjectPHIDType::TYPECONST);
   }
 
   public function attachMemberPHIDs(array $phids) {

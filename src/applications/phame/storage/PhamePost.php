@@ -93,7 +93,7 @@ final class PhamePost extends PhameDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPhamePHIDTypePost::TYPECONST);
+      PhabricatorPhamePostPHIDType::TYPECONST);
   }
 
   public function toDictionary() {

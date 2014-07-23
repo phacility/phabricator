@@ -19,7 +19,7 @@ final class PhragmentFragment extends PhragmentDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhragmentPHIDTypeFragment::TYPECONST);
+      PhragmentFragmentPHIDType::TYPECONST);
   }
 
   public function getURI() {

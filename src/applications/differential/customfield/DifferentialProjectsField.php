@@ -106,7 +106,7 @@ final class DifferentialProjectsField
     return $this->parseObjectList(
       $value,
       array(
-        PhabricatorProjectPHIDTypeProject::TYPECONST,
+        PhabricatorProjectProjectPHIDType::TYPECONST,
       ));
   }
 

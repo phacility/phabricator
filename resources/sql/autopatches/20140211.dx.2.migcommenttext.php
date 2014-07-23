@@ -27,12 +27,12 @@ foreach ($rows as $row) {
   $dst_table = 'differential_inline_comment';
 
   $xaction_phid = PhabricatorPHID::generateNewPHID(
-    PhabricatorApplicationTransactionPHIDTypeTransaction::TYPECONST,
-    DifferentialPHIDTypeRevision::TYPECONST);
+    PhabricatorApplicationTransactionTransactionPHIDType::TYPECONST,
+    DifferentialRevisionPHIDType::TYPECONST);
 
   $comment_phid = PhabricatorPHID::generateNewPHID(
     PhabricatorPHIDConstants::PHID_TYPE_XCMT,
-    DifferentialPHIDTypeRevision::TYPECONST);
+    DifferentialRevisionPHIDType::TYPECONST);
 
   queryfx(
     $conn_w,

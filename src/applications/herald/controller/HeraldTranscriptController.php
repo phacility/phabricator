@@ -297,7 +297,7 @@ final class HeraldTranscriptController extends HeraldController {
       $object_xscript = $xscript->getObjectTranscript();
       $handle = $handles[$object_xscript->getPHID()];
       if ($handle->getType() ==
-          PhabricatorRepositoryPHIDTypeCommit::TYPECONST) {
+          PhabricatorRepositoryCommitPHIDType::TYPECONST) {
         $commit = id(new DiffusionCommitQuery())
           ->setViewer($request->getUser())
           ->withPHIDs(array($handle->getPHID()))

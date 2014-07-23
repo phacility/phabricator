@@ -58,7 +58,7 @@ final class ManiphestTaskEditController extends ManiphestController {
           if ($projects) {
             $tokens = $request->getStrList('projects');
 
-            $type_project = PhabricatorProjectPHIDTypeProject::TYPECONST;
+            $type_project = PhabricatorProjectProjectPHIDType::TYPECONST;
             foreach ($tokens as $key => $token) {
               if (phid_get_type($token) == $type_project) {
                 // If this is formatted like a PHID, leave it as-is.

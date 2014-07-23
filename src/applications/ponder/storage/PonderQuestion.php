@@ -36,7 +36,7 @@ final class PonderQuestion extends PonderDAO
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(PonderPHIDTypeQuestion::TYPECONST);
+    return PhabricatorPHID::generateNewPHID(PonderQuestionPHIDType::TYPECONST);
   }
 
   public function setContentSource(PhabricatorContentSource $content_source) {

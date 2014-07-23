@@ -11,7 +11,7 @@ final class PhabricatorDashboardPanelTransaction
   }
 
   public function getApplicationTransactionType() {
-    return PhabricatorDashboardPHIDTypePanel::TYPECONST;
+    return PhabricatorDashboardPanelPHIDType::TYPECONST;
   }
 
   public function getTitle() {

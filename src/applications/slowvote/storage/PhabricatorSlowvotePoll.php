@@ -50,7 +50,7 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorSlowvotePHIDTypePoll::TYPECONST);
+      PhabricatorSlowvotePollPHIDType::TYPECONST);
   }
 
   public function getOptions() {

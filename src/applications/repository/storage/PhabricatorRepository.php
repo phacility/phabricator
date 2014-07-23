@@ -75,7 +75,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorRepositoryPHIDTypeRepository::TYPECONST);
+      PhabricatorRepositoryRepositoryPHIDType::TYPECONST);
   }
 
   public function toDictionary() {
