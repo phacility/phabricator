@@ -41,9 +41,9 @@ final class NuanceSource extends NuanceDAO
       ->executeOne();
 
     $view_policy = $app->getPolicy(
-      NuanceCapabilitySourceDefaultView::CAPABILITY);
+      NuanceSourceDefaultViewCapability::CAPABILITY);
     $edit_policy = $app->getPolicy(
-      NuanceCapabilitySourceDefaultEdit::CAPABILITY);
+      NuanceSourceDefaultEditCapability::CAPABILITY);
 
     $definitions = NuanceSourceDefinition::getAllDefinitions();
     $lucky_definition = head($definitions);

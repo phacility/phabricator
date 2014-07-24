@@ -144,7 +144,7 @@ final class DiffusionServeController extends DiffusionController {
           $can_push = PhabricatorPolicyFilter::hasCapability(
             $viewer,
             $repository,
-            DiffusionCapabilityPush::CAPABILITY);
+            DiffusionPushCapability::CAPABILITY);
           if (!$can_push) {
             if ($viewer->isLoggedIn()) {
               return new PhabricatorVCSResponse(

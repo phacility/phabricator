@@ -57,7 +57,7 @@ final class DifferentialRevision extends DifferentialDAO
       ->executeOne();
 
     $view_policy = $app->getPolicy(
-      DifferentialCapabilityDefaultView::CAPABILITY);
+      DifferentialDefaultViewCapability::CAPABILITY);
 
     return id(new DifferentialRevision())
       ->setViewPolicy($view_policy)

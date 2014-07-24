@@ -58,7 +58,7 @@ final class PhabricatorOAuthServerApplication extends PhabricatorApplication {
 
   protected function getCustomCapabilities() {
     return array(
-      PhabricatorOAuthServerCapabilityCreateClients::CAPABILITY => array(
+      PhabricatorOAuthServerCreateClientsCapability::CAPABILITY => array(
         'default' => PhabricatorPolicies::POLICY_ADMIN,
       ),
     );

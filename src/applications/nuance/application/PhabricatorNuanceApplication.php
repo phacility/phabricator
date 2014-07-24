@@ -64,13 +64,13 @@ final class PhabricatorNuanceApplication extends PhabricatorApplication {
 
   protected function getCustomCapabilities() {
     return array(
-      NuanceCapabilitySourceDefaultView::CAPABILITY => array(
+      NuanceSourceDefaultViewCapability::CAPABILITY => array(
         'caption' => pht('Default view policy for newly created sources.'),
       ),
-      NuanceCapabilitySourceDefaultEdit::CAPABILITY => array(
+      NuanceSourceDefaultEditCapability::CAPABILITY => array(
         'caption' => pht('Default edit policy for newly created sources.'),
       ),
-      NuanceCapabilitySourceManage::CAPABILITY => array(),
+      NuanceSourceManageCapability::CAPABILITY => array(),
     );
   }
 

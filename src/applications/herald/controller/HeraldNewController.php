@@ -251,7 +251,7 @@ final class HeraldNewController extends HeraldController {
       )) + $rule_type_map;
 
     list($can_global, $global_link) = $this->explainApplicationCapability(
-      HeraldCapabilityManageGlobalRules::CAPABILITY,
+      HeraldManageGlobalRulesCapability::CAPABILITY,
       pht('You have permission to create and manage global rules.'),
       pht('You do not have permission to create or manage global rules.'));
 
@@ -313,4 +313,5 @@ final class HeraldNewController extends HeraldController {
 
     return $radio;
   }
+
 }

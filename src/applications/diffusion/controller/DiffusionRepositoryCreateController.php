@@ -38,7 +38,7 @@ final class DiffusionRepositoryCreateController
       case 'import':
       case 'create':
         $this->requireApplicationCapability(
-          DiffusionCapabilityCreateRepositories::CAPABILITY);
+          DiffusionCreateRepositoriesCapability::CAPABILITY);
 
         $cancel_uri = $this->getApplicationURI('new/');
         break;
@@ -671,7 +671,7 @@ final class DiffusionRepositoryCreateController
 
     $push_policy = id(new AphrontFormPolicyControl())
       ->setUser($viewer)
-      ->setCapability(DiffusionCapabilityPush::CAPABILITY)
+      ->setCapability(DiffusionPushCapability::CAPABILITY)
       ->setPolicyObject($repository)
       ->setPolicies($policies)
       ->setName('pushPolicy');
@@ -848,6 +848,5 @@ final class DiffusionRepositoryCreateController
   private function getRepository() {
     return $this->repository;
   }
-
 
 }

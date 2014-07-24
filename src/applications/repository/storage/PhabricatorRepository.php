@@ -54,9 +54,9 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       ->withClasses(array('PhabricatorDiffusionApplication'))
       ->executeOne();
 
-    $view_policy = $app->getPolicy(DiffusionCapabilityDefaultView::CAPABILITY);
-    $edit_policy = $app->getPolicy(DiffusionCapabilityDefaultEdit::CAPABILITY);
-    $push_policy = $app->getPolicy(DiffusionCapabilityDefaultPush::CAPABILITY);
+    $view_policy = $app->getPolicy(DiffusionDefaultViewCapability::CAPABILITY);
+    $edit_policy = $app->getPolicy(DiffusionDefaultEditCapability::CAPABILITY);
+    $push_policy = $app->getPolicy(DiffusionDefaultPushCapability::CAPABILITY);
 
     return id(new PhabricatorRepository())
       ->setViewPolicy($view_policy)
@@ -1319,8 +1319,6 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
 
-
-
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
 
@@ -1328,7 +1326,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
       PhabricatorPolicyCapability::CAN_EDIT,
-      DiffusionCapabilityPush::CAPABILITY,
+      DiffusionPushCapability::CAPABILITY,
     );
   }
 
@@ -1338,7 +1336,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         return $this->getViewPolicy();
       case PhabricatorPolicyCapability::CAN_EDIT:
         return $this->getEditPolicy();
-      case DiffusionCapabilityPush::CAPABILITY:
+      case DiffusionPushCapability::CAPABILITY:
         return $this->getPushPolicy();
     }
   }

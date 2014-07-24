@@ -1,7 +1,6 @@
 <?php
 
-final class PhabricatorMacroAudioController
-  extends PhabricatorMacroController {
+final class PhabricatorMacroAudioController extends PhabricatorMacroController {
 
   private $id;
 
@@ -10,9 +9,8 @@ final class PhabricatorMacroAudioController
   }
 
   public function processRequest() {
-
     $this->requireApplicationCapability(
-      PhabricatorMacroCapabilityManage::CAPABILITY);
+      PhabricatorMacroManageCapability::CAPABILITY);
 
     $request = $this->getRequest();
     $viewer = $request->getUser();
@@ -157,4 +155,5 @@ final class PhabricatorMacroAudioController
         'title' => $title,
       ));
   }
+
 }

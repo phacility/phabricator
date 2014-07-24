@@ -50,7 +50,7 @@ final class PhabricatorMacroApplication extends PhabricatorApplication {
 
   protected function getCustomCapabilities() {
     return array(
-      PhabricatorMacroCapabilityManage::CAPABILITY => array(
+      PhabricatorMacroManageCapability::CAPABILITY => array(
         'caption' => pht('Allows creating and editing macros.'),
       ),
     );

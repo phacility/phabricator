@@ -14,7 +14,7 @@ final class HarbormasterPlanDisableController
     $viewer = $request->getUser();
 
     $this->requireApplicationCapability(
-      HarbormasterCapabilityManagePlans::CAPABILITY);
+      HarbormasterManagePlansCapability::CAPABILITY);
 
     $plan = id(new HarbormasterBuildPlanQuery())
       ->setViewer($viewer)

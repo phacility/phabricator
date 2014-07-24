@@ -26,7 +26,7 @@ final class LegalpadDocumentListController extends LegalpadController {
     $crumbs = parent::buildApplicationCrumbs();
 
     $can_create = $this->hasApplicationCapability(
-      LegalpadCapabilityCreateDocuments::CAPABILITY);
+      LegalpadCreateDocumentsCapability::CAPABILITY);
 
     $crumbs->addAction(
       id(new PHUIListItemView())

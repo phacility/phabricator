@@ -16,7 +16,7 @@ final class PhabricatorCountdown
       ->executeOne();
 
     $view_policy = $app->getPolicy(
-      PhabricatorCountdownCapabilityDefaultView::CAPABILITY);
+      PhabricatorCountdownDefaultViewCapability::CAPABILITY);
 
     return id(new PhabricatorCountdown())
       ->setAuthorPHID($actor->getPHID())

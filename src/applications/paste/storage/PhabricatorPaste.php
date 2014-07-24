@@ -25,7 +25,7 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
       ->withClasses(array('PhabricatorPasteApplication'))
       ->executeOne();
 
-    $view_policy = $app->getPolicy(PasteCapabilityDefaultView::CAPABILITY);
+    $view_policy = $app->getPolicy(PasteDefaultViewCapability::CAPABILITY);
 
     return id(new PhabricatorPaste())
       ->setTitle('')

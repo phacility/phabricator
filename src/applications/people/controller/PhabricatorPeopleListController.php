@@ -22,7 +22,7 @@ final class PhabricatorPeopleListController
     $viewer = $request->getUser();
 
     $this->requireApplicationCapability(
-      PeopleCapabilityBrowseUserDirectory::CAPABILITY);
+      PeopleBrowseUserDirectoryCapability::CAPABILITY);
 
     $controller = id(new PhabricatorApplicationSearchController($request))
       ->setQueryKey($this->key)

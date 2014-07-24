@@ -24,7 +24,7 @@ final class DrydockBlueprintListController extends DrydockBlueprintController {
 
   public function buildApplicationCrumbs() {
     $can_create = $this->hasApplicationCapability(
-      DrydockCapabilityCreateBlueprints::CAPABILITY);
+      DrydockCreateBlueprintsCapability::CAPABILITY);
 
     $crumbs = parent::buildApplicationCrumbs();
     $crumbs->addAction(

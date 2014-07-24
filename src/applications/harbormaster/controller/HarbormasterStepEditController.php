@@ -1,7 +1,6 @@
 <?php
 
-final class HarbormasterStepEditController
-  extends HarbormasterController {
+final class HarbormasterStepEditController extends HarbormasterController {
 
   private $id;
   private $planID;
@@ -18,7 +17,7 @@ final class HarbormasterStepEditController
     $viewer = $request->getUser();
 
     $this->requireApplicationCapability(
-      HarbormasterCapabilityManagePlans::CAPABILITY);
+      HarbormasterManagePlansCapability::CAPABILITY);
 
     if ($this->id) {
       $step = id(new HarbormasterBuildStepQuery())
@@ -199,6 +198,5 @@ final class HarbormasterStepEditController
       ->setHeaderText(pht('Build Variables'))
       ->appendChild($form);
   }
-
 
 }

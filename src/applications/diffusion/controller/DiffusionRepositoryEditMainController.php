@@ -372,7 +372,7 @@ final class DiffusionRepositoryEditMainController
       $descriptions[PhabricatorPolicyCapability::CAN_EDIT]);
 
     $pushable = $repository->isHosted()
-      ? $descriptions[DiffusionCapabilityPush::CAPABILITY]
+      ? $descriptions[DiffusionPushCapability::CAPABILITY]
       : phutil_tag('em', array(), pht('Not a Hosted Repository'));
     $view->addProperty(pht('Pushable By'), $pushable);
 

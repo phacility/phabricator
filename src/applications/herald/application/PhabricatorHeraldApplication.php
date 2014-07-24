@@ -63,7 +63,7 @@ final class PhabricatorHeraldApplication extends PhabricatorApplication {
 
   protected function getCustomCapabilities() {
     return array(
-      HeraldCapabilityManageGlobalRules::CAPABILITY => array(
+      HeraldManageGlobalRulesCapability::CAPABILITY => array(
         'caption' => pht('Global rules can bypass access controls.'),
         'default' => PhabricatorPolicies::POLICY_ADMIN,
       ),

@@ -18,9 +18,9 @@ final class DrydockBlueprint extends DrydockDAO
       ->executeOne();
 
     $view_policy = $app->getPolicy(
-      DrydockCapabilityDefaultView::CAPABILITY);
+      DrydockDefaultViewCapability::CAPABILITY);
     $edit_policy = $app->getPolicy(
-      DrydockCapabilityDefaultEdit::CAPABILITY);
+      DrydockDefaultEditCapability::CAPABILITY);
 
     return id(new DrydockBlueprint())
       ->setViewPolicy($view_policy)

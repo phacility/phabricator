@@ -29,7 +29,7 @@ final class PhabricatorOAuthClientEditController
       $is_new = false;
     } else {
       $this->requireApplicationCapability(
-        PhabricatorOAuthServerCapabilityCreateClients::CAPABILITY);
+        PhabricatorOAuthServerCreateClientsCapability::CAPABILITY);
 
       $client = PhabricatorOAuthServerClient::initializeNewClient($viewer);
 

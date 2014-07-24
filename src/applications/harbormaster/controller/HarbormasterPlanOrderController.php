@@ -15,7 +15,7 @@ final class HarbormasterPlanOrderController extends HarbormasterController {
     $request->validateCSRF();
 
     $this->requireApplicationCapability(
-      HarbormasterCapabilityManagePlans::CAPABILITY);
+      HarbormasterManagePlansCapability::CAPABILITY);
 
     $plan = id(new HarbormasterBuildPlanQuery())
       ->setViewer($user)

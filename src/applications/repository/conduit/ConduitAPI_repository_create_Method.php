@@ -64,7 +64,7 @@ final class ConduitAPI_repository_create_Method
     PhabricatorPolicyFilter::requireCapability(
       $request->getUser(),
       $application,
-      DiffusionCapabilityCreateRepositories::CAPABILITY);
+      DiffusionCreateRepositoriesCapability::CAPABILITY);
 
     // TODO: This has some duplication with (and lacks some of the validation
     // of) the web workflow; refactor things so they can share more code as this

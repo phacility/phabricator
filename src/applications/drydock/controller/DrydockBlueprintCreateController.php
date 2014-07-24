@@ -8,7 +8,7 @@ final class DrydockBlueprintCreateController
     $viewer = $request->getUser();
 
     $this->requireApplicationCapability(
-      DrydockCapabilityCreateBlueprints::CAPABILITY);
+      DrydockCreateBlueprintsCapability::CAPABILITY);
 
     $implementations =
       DrydockBlueprintImplementation::getAllBlueprintImplementations();

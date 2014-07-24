@@ -35,8 +35,8 @@ final class PholioMock extends PholioDAO
       ->withClasses(array('PhabricatorPholioApplication'))
       ->executeOne();
 
-    $view_policy = $app->getPolicy(PholioCapabilityDefaultView::CAPABILITY);
-    $edit_policy = $app->getPolicy(PholioCapabilityDefaultEdit::CAPABILITY);
+    $view_policy = $app->getPolicy(PholioDefaultViewCapability::CAPABILITY);
+    $edit_policy = $app->getPolicy(PholioDefaultEditCapability::CAPABILITY);
 
     return id(new PholioMock())
       ->setAuthorPHID($actor->getPHID())

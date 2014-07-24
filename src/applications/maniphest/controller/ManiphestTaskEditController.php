@@ -9,21 +9,20 @@ final class ManiphestTaskEditController extends ManiphestController {
   }
 
   public function processRequest() {
-
     $request = $this->getRequest();
     $user = $request->getUser();
     $response_type = $request->getStr('responseType', 'task');
 
     $can_edit_assign = $this->hasApplicationCapability(
-      ManiphestCapabilityEditAssign::CAPABILITY);
+      ManiphestEditAssignCapability::CAPABILITY);
     $can_edit_policies = $this->hasApplicationCapability(
-      ManiphestCapabilityEditPolicies::CAPABILITY);
+      ManiphestEditPoliciesCapability::CAPABILITY);
     $can_edit_priority = $this->hasApplicationCapability(
-      ManiphestCapabilityEditPriority::CAPABILITY);
+      ManiphestEditPriorityCapability::CAPABILITY);
     $can_edit_projects = $this->hasApplicationCapability(
-      ManiphestCapabilityEditProjects::CAPABILITY);
+      ManiphestEditProjectsCapability::CAPABILITY);
     $can_edit_status = $this->hasApplicationCapability(
-      ManiphestCapabilityEditStatus::CAPABILITY);
+      ManiphestEditStatusCapability::CAPABILITY);
 
     $parent_task = null;
     $template_id = null;
@@ -750,4 +749,5 @@ final class ManiphestTaskEditController extends ManiphestController {
         'pageObjects' => $page_objects,
       ));
   }
+
 }
