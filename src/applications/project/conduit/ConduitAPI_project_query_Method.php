@@ -20,6 +20,7 @@ final class ConduitAPI_project_query_Method extends ConduitAPI_project_Method {
 
     return array(
       'ids'               => 'optional list<int>',
+      'names'              => 'optional list<string>',
       'phids'             => 'optional list<phid>',
       'slugs'             => 'optional list<string>',
       'status'            => 'optional '.$status_const,
@@ -48,6 +49,11 @@ final class ConduitAPI_project_query_Method extends ConduitAPI_project_Method {
     $ids = $request->getValue('ids');
     if ($ids) {
       $query->withIDs($ids);
+    }
+
+    $names = $request->getValue('names');
+    if ($names) {
+      $query->withNames($names);
     }
 
     $status = $request->getValue('status');
