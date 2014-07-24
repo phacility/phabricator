@@ -28,7 +28,7 @@ final class PhabricatorOAuthClientAuthorization
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorOAuthServerPHIDTypeClientAuthorization::TYPECONST);
+      PhabricatorOAuthServerClientAuthorizationPHIDType::TYPECONST);
   }
 
   public function getClient() {

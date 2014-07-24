@@ -29,7 +29,7 @@ final class PhrictionDocument extends PhrictionDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhrictionPHIDTypeDocument::TYPECONST);
+      PhrictionDocumentPHIDType::TYPECONST);
   }
 
   public static function getSlugURI($slug, $type = 'document') {

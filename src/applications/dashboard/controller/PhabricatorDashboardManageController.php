@@ -125,7 +125,7 @@ final class PhabricatorDashboardManageController
       ->loadOneWhere(
         'objectPHID = %s AND applicationClass = %s',
         $viewer->getPHID(),
-        'PhabricatorApplicationHome');
+        'PhabricatorHomeApplication');
     if ($installed_dashboard &&
         $installed_dashboard->getDashboardPHID() == $dashboard->getPHID()) {
       $title_install = pht('Uninstall Dashboard');
@@ -174,4 +174,5 @@ final class PhabricatorDashboardManageController
 
     return $properties;
   }
+
 }

@@ -30,7 +30,7 @@ final class PhabricatorProjectColumn
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorProjectPHIDTypeColumn::TYPECONST);
+      PhabricatorProjectColumnPHIDType::TYPECONST);
   }
 
   public function attachProject(PhabricatorProject $project) {

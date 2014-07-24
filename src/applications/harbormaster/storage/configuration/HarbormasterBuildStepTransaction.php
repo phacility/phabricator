@@ -11,7 +11,7 @@ final class HarbormasterBuildStepTransaction
   }
 
   public function getApplicationTransactionType() {
-    return HarbormasterPHIDTypeBuildStep::TYPECONST;
+    return HarbormasterBuildStepPHIDType::TYPECONST;
   }
 
   public function getTitle() {

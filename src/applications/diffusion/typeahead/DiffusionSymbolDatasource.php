@@ -8,7 +8,7 @@ final class DiffusionSymbolDatasource
   }
 
   public function getDatasourceApplicationClass() {
-    return 'PhabricatorApplicationDiffusion';
+    return 'PhabricatorDiffusionApplication';
   }
 
   public function loadResults() {

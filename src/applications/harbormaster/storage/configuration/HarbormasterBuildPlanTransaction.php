@@ -11,7 +11,7 @@ final class HarbormasterBuildPlanTransaction
   }
 
   public function getApplicationTransactionType() {
-    return HarbormasterPHIDTypeBuildPlan::TYPECONST;
+    return HarbormasterBuildPlanPHIDType::TYPECONST;
   }
 
   public function getApplicationTransactionCommentObject() {

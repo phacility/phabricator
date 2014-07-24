@@ -76,7 +76,7 @@ final class PhabricatorRepositoryPushLog
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorRepositoryPHIDTypePushLog::TYPECONST);
+      PhabricatorRepositoryPushLogPHIDType::TYPECONST);
   }
 
   public function attachPushEvent(PhabricatorRepositoryPushEvent $push_event) {

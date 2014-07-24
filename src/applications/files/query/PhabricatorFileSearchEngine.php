@@ -8,7 +8,7 @@ final class PhabricatorFileSearchEngine
   }
 
   public function getApplicationClassName() {
-    return 'PhabricatorApplicationFiles';
+    return 'PhabricatorFilesApplication';
   }
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
@@ -94,14 +94,13 @@ final class PhabricatorFileSearchEngine
     }
 
     $names += array(
-      'all'     => pht('All'),
+      'all' => pht('All'),
     );
 
     return $names;
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
-
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
 

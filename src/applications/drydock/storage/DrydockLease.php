@@ -56,7 +56,7 @@ final class DrydockLease extends DrydockDAO
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(DrydockPHIDTypeLease::TYPECONST);
+    return PhabricatorPHID::generateNewPHID(DrydockLeasePHIDType::TYPECONST);
   }
 
   public function getInterface($type) {

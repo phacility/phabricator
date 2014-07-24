@@ -93,7 +93,7 @@ final class PhamePost extends PhameDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPhamePHIDTypePost::TYPECONST);
+      PhabricatorPhamePostPHIDType::TYPECONST);
   }
 
   public function toDictionary() {
@@ -124,7 +124,7 @@ final class PhamePost extends PhameDAO
     $options = array();
 
     if ($current == 'facebook' ||
-        PhabricatorAuthProviderOAuthFacebook::getFacebookApplicationID()) {
+        PhabricatorFacebookAuthProvider::getFacebookApplicationID()) {
       $options['facebook'] = 'Facebook';
     }
     if ($current == 'disqus' ||

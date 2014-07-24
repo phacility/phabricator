@@ -108,7 +108,7 @@ final class HeraldTranscriptQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationHerald';
+    return 'PhabricatorHeraldApplication';
   }
 
 }

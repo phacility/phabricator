@@ -52,5 +52,52 @@ abstract class PhortuneController extends PhabricatorController {
     return $account;
   }
 
+  protected function buildChargesTable(array $charges) {
+    $request = $this->getRequest();
+    $viewer = $request->getUser();
+
+    $rows = array();
+    foreach ($charges as $charge) {
+      $rows[] = array(
+        $charge->getID(),
+        $charge->getCartPHID(),
+        $charge->getPaymentProviderKey(),
+        $charge->getPaymentMethodPHID(),
+        PhortuneCurrency::newFromUSDCents($charge->getAmountInCents())
+          ->formatForDisplay(),
+        $charge->getStatus(),
+        phabricator_datetime($charge->getDateCreated(), $viewer),
+      );
+    }
+
+    $charge_table = id(new AphrontTableView($rows))
+      ->setHeaders(
+        array(
+          pht('Charge ID'),
+          pht('Cart'),
+          pht('Provider'),
+          pht('Method'),
+          pht('Amount'),
+          pht('Status'),
+          pht('Created'),
+        ))
+      ->setColumnClasses(
+        array(
+          '',
+          '',
+          '',
+          '',
+          'wide right',
+          '',
+          '',
+        ));
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Charge History'));
+
+    return id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->appendChild($charge_table);
+  }
 
 }

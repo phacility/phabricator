@@ -31,7 +31,7 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
   public static function initializeNewPoll(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
       ->setViewer($actor)
-      ->withClasses(array('PhabricatorApplicationSlowvote'))
+      ->withClasses(array('PhabricatorSlowvoteApplication'))
       ->executeOne();
 
     $view_policy = $app->getPolicy(
@@ -50,7 +50,7 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorSlowvotePHIDTypePoll::TYPECONST);
+      PhabricatorSlowvotePollPHIDType::TYPECONST);
   }
 
   public function getOptions() {

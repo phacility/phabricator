@@ -33,7 +33,7 @@ final class NuanceItem
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      NuancePHIDTypeItem::TYPECONST);
+      NuanceItemPHIDType::TYPECONST);
   }
 
   public function save() {

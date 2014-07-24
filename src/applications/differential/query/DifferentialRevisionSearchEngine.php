@@ -8,7 +8,7 @@ final class DifferentialRevisionSearchEngine
   }
 
   public function getApplicationClassName() {
-    return 'PhabricatorApplicationDifferential';
+    return 'PhabricatorDifferentialApplication';
   }
 
   public function getPageSize(PhabricatorSavedQuery $saved) {
@@ -35,7 +35,7 @@ final class DifferentialRevisionSearchEngine
         $request,
         'reviewers',
         array(
-          PhabricatorProjectPHIDTypeProject::TYPECONST,
+          PhabricatorProjectProjectPHIDType::TYPECONST,
         )));
 
     $saved->setParameter(
@@ -194,7 +194,6 @@ final class DifferentialRevisionSearchEngine
           ->setName('order')
           ->setOptions($this->getOrderOptions())
           ->setValue($saved->getParameter('order')));
-
   }
 
   protected function getURI($path) {

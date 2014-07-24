@@ -40,6 +40,9 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
     PhortunePaymentMethod $method,
     PhortuneCharge $charge) {
 
+    $root = dirname(phutil_get_library_root('phabricator'));
+    require_once $root.'/externals/stripe-php/lib/Stripe.php';
+
     $secret_key = $this->getSecretKey();
     $params = array(
       'amount'      => $charge->getAmountInCents(),
@@ -110,8 +113,9 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
     $customer = Stripe_Customer::create($params, $secret_key);
 
     $card = $info->card;
+
     $method
-      ->setBrand($card->type)
+      ->setBrand($card->brand)
       ->setLastFourDigits($card->last4)
       ->setExpires($card->exp_year, $card->exp_month)
       ->setMetadata(

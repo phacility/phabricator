@@ -23,7 +23,7 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
   private $haveHunks;
 
   public function getAdapterApplicationClass() {
-    return 'PhabricatorApplicationDifferential';
+    return 'PhabricatorDifferentialApplication';
   }
 
   public function getObject() {
@@ -506,4 +506,5 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
     }
     return $result;
   }
+
 }

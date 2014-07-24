@@ -27,7 +27,7 @@ final class PhabricatorRepositoryArcanistProject
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorRepositoryPHIDTypeArcanistProject::TYPECONST);
+      PhabricatorRepositoryArcanistProjectPHIDType::TYPECONST);
   }
 
   // TODO: Remove. Also, T603.

@@ -8,7 +8,7 @@ final class HarbormasterBuildPlanDatasource
   }
 
   public function getDatasourceApplicationClass() {
-    return 'PhabricatorApplicationHarbormaster';
+    return 'PhabricatorHarbormasterApplication';
   }
 
   public function loadResults() {

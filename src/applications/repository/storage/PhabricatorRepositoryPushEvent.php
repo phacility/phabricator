@@ -33,7 +33,7 @@ final class PhabricatorRepositoryPushEvent
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorRepositoryPHIDTypePushEvent::TYPECONST);
+      PhabricatorRepositoryPushEventPHIDType::TYPECONST);
   }
 
   public function attachRepository(PhabricatorRepository $repository) {

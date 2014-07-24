@@ -32,7 +32,7 @@ final class PhameBlog extends PhameDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPhamePHIDTypeBlog::TYPECONST);
+      PhabricatorPhameBlogPHIDType::TYPECONST);
   }
 
   public function getSkinRenderer(AphrontRequest $request) {

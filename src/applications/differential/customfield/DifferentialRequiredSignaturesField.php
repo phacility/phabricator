@@ -28,7 +28,7 @@ final class DifferentialRequiredSignaturesField
   }
 
   public static function loadForRevision($revision) {
-    $app_legalpad = 'PhabricatorApplicationLegalpad';
+    $app_legalpad = 'PhabricatorLegalpadApplication';
     if (!PhabricatorApplication::isClassInstalled($app_legalpad)) {
       return array();
     }
@@ -141,6 +141,5 @@ final class DifferentialRequiredSignaturesField
         'agreements have been signed.'),
     );
   }
-
 
 }

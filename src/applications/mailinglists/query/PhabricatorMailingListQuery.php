@@ -80,7 +80,7 @@ final class PhabricatorMailingListQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationMailingLists';
+    return 'PhabricatorMailingListsApplication';
   }
 
 }

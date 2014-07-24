@@ -18,7 +18,7 @@ abstract class PhabricatorFilesManagementWorkflow
       $query = id(new PhabricatorObjectQuery())
         ->setViewer($this->getViewer())
         ->withNames($names)
-        ->withTypes(array(PhabricatorFilePHIDTypeFile::TYPECONST));
+        ->withTypes(array(PhabricatorFileFilePHIDType::TYPECONST));
 
       $query->execute();
       $files = $query->getNamedResults();

@@ -1,14 +1,13 @@
 <?php
 
-final class HeraldRuleSearchEngine
-  extends PhabricatorApplicationSearchEngine {
+final class HeraldRuleSearchEngine extends PhabricatorApplicationSearchEngine {
 
   public function getResultTypeDescription() {
     return pht('Herald Rules');
   }
 
   public function getApplicationClassName() {
-    return 'PhabricatorApplicationHerald';
+    return 'PhabricatorHeraldApplication';
   }
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
@@ -118,7 +117,6 @@ final class HeraldRuleSearchEngine
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
-
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
 
@@ -163,6 +161,7 @@ final class HeraldRuleSearchEngine
   protected function getRequiredHandlePHIDsForResultList(
     array $rules,
     PhabricatorSavedQuery $query) {
+
     return mpull($rules, 'getAuthorPHID');
   }
 

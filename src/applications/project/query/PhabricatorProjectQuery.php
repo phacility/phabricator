@@ -350,9 +350,8 @@ final class PhabricatorProjectQuery
     return implode(' ', $joins);
   }
 
-
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationProject';
+    return 'PhabricatorProjectApplication';
   }
 
   protected function getApplicationSearchObjectPHIDColumn() {

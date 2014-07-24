@@ -57,7 +57,7 @@ final class PhabricatorChatLogChannelQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationChatLog';
+    return 'PhabricatorChatLogApplication';
   }
 
 }

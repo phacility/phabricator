@@ -8,7 +8,7 @@ final class PhabricatorOAuthServerClientSearchEngine
   }
 
   public function getApplicationClassName() {
-    return 'PhabricatorApplicationOAuthServer';
+    return 'PhabricatorOAuthServerApplication';
   }
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
@@ -49,7 +49,6 @@ final class PhabricatorOAuthServerClientSearchEngine
           ->setName('creators')
           ->setLabel(pht('Creators'))
           ->setValue($creator_handles));
-
   }
 
   protected function getURI($path) {
@@ -83,7 +82,6 @@ final class PhabricatorOAuthServerClientSearchEngine
 
     return parent::buildSavedQueryFromBuiltin($query_key);
   }
-
 
   protected function getRequiredHandlePHIDsForResultList(
     array $clients,

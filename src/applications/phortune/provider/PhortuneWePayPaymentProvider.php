@@ -22,13 +22,12 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
   }
 
   public function getPaymentMethodIcon() {
-    return 'rsrc/phortune/wepay.png';
+    return celerity_get_resource_uri('/rsrc/image/phortune/wepay.png');
   }
 
   public function getPaymentMethodProviderDescription() {
     return 'WePay';
   }
-
 
   public function canHandlePaymentMethod(PhortunePaymentMethod $method) {
     $type = $method->getMetadataValue('type');
@@ -64,32 +63,6 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
     return true;
   }
 
-  public function renderOneTimePaymentButton(
-    PhortuneAccount $account,
-    PhortuneCart $cart,
-    PhabricatorUser $user) {
-
-    $uri = $this->getControllerURI(
-      'checkout',
-      array(
-        'cartID' => $cart->getID(),
-      ));
-
-    return phabricator_form(
-      $user,
-      array(
-        'action' => $uri,
-        'method' => 'POST',
-      ),
-      phutil_tag(
-        'button',
-        array(
-          'class' => 'green',
-          'type'  => 'submit',
-        ),
-        pht('Pay with WePay')));
-  }
-
 
 /* -(  Controllers  )-------------------------------------------------------- */
 
@@ -111,10 +84,14 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
     PhortuneProviderController $controller,
     AphrontRequest $request) {
 
+    $viewer = $request->getUser();
+
     $cart = $controller->loadCart($request->getInt('cartID'));
     if (!$cart) {
       return new Aphront404Response();
     }
+
+    $cart_uri = '/phortune/cart/'.$cart->getID().'/';
 
     $root = dirname(phutil_get_library_root('phabricator'));
     require_once $root.'/externals/wepay/wepay.php';
@@ -139,7 +116,7 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
             'cartID' => $cart->getID(),
           ));
 
-        $total_in_cents = $cart->getTotalInCents();
+        $total_in_cents = $cart->getTotalPriceInCents();
         $price = PhortuneCurrency::newFromUSDCents($total_in_cents);
 
         $params = array(
@@ -153,7 +130,12 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
           'fee_payer'         => 'Payee',
           'redirect_uri'      => $return_uri,
           'fallback_uri'      => $cancel_uri,
-          'auto_capture'      => false,
+
+          // NOTE: If we don't `auto_capture`, we might get a result back in
+          // either an "authorized" or a "reserved" state. We can't capture
+          // an "authorized" result, so just autocapture.
+
+          'auto_capture'      => true,
           'require_shipping'  => 0,
           'shipping_fee'      => 0,
           'charge_tax'        => 0,
@@ -163,18 +145,57 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
 
         $result = $wepay->request('checkout/create', $params);
 
-        // NOTE: We might want to store "$result->checkout_id" on the Cart.
+        // TODO: We must store "$result->checkout_id" on the Cart since the
+        // user might not end up back here. Really this needs a bunch of junk.
 
         $uri = new PhutilURI($result->checkout_uri);
         return id(new AphrontRedirectResponse())->setURI($uri);
       case 'charge':
+        $checkout_id = $request->getInt('checkout_id');
+        $params = array(
+          'checkout_id' => $checkout_id,
+        );
 
-        // NOTE: We get $_REQUEST['checkout_id'] here, but our parameters are
-        // dropped so we should stop depending on them or shove them into the
-        // URI.
+        $checkout = $wepay->request('checkout', $params);
+        if ($checkout->reference_id != $cart->getPHID()) {
+          throw new Exception(
+            pht('Checkout reference ID does not match cart PHID!'));
+        }
 
-        var_dump($_REQUEST);
-        break;
+        switch ($checkout->state) {
+          case 'authorized':
+          case 'reserved':
+          case 'captured':
+            break;
+          default:
+            throw new Exception(
+              pht(
+                'Checkout is in bad state "%s"!',
+                $result->state));
+        }
+
+        $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+
+          $charge = id(new PhortuneCharge())
+            ->setAmountInCents((int)$checkout->gross * 100)
+            ->setAccountPHID($cart->getAccount()->getPHID())
+            ->setAuthorPHID($viewer->getPHID())
+            ->setPaymentProviderKey($this->getProviderKey())
+            ->setCartPHID($cart->getPHID())
+            ->setStatus(PhortuneCharge::STATUS_CHARGING)
+            ->save();
+
+          $cart->openTransaction();
+            $charge->setStatus(PhortuneCharge::STATUS_CHARGED);
+            $charge->save();
+
+            $cart->setStatus(PhortuneCart::STATUS_PURCHASED);
+            $cart->save();
+          $cart->saveTransaction();
+
+        unset($unguarded);
+
+        return id(new AphrontRedirectResponse())->setURI($cart_uri);
       case 'cancel':
         var_dump($_REQUEST);
         break;

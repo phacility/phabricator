@@ -8,7 +8,7 @@ final class ReleephBranchTransaction
   }
 
   public function getApplicationTransactionType() {
-    return ReleephPHIDTypeBranch::TYPECONST;
+    return ReleephBranchPHIDType::TYPECONST;
   }
 
 }

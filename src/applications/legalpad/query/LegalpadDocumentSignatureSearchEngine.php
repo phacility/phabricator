@@ -10,7 +10,7 @@ final class LegalpadDocumentSignatureSearchEngine
   }
 
   public function getApplicationClassName() {
-    return 'PhabricatorApplicationLegalpad';
+    return 'PhabricatorLegalpadApplication';
   }
 
   public function setDocument(LegalpadDocument $document) {
@@ -31,7 +31,7 @@ final class LegalpadDocumentSignatureSearchEngine
         $request,
         'documents',
         array(
-          PhabricatorLegalpadPHIDTypeDocument::TYPECONST,
+          PhabricatorLegalpadDocumentPHIDType::TYPECONST,
         )));
 
     $saved->setParameter('nameContains', $request->getStr('nameContains'));

@@ -3,7 +3,7 @@
 final class ReleephRequestMailReceiver extends PhabricatorObjectMailReceiver {
 
   public function isEnabled() {
-    $app_class = 'PhabricatorApplicationReleeph';
+    $app_class = 'PhabricatorReleephApplication';
     return PhabricatorApplication::isClassInstalled($app_class);
   }
 

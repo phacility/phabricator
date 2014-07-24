@@ -8,7 +8,7 @@ final class PhabricatorCountdownSearchEngine
   }
 
   public function getApplicationClassName() {
-    return 'PhabricatorApplicationCountdown';
+    return 'PhabricatorCountdownApplication';
   }
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
@@ -62,7 +62,6 @@ final class PhabricatorCountdownSearchEngine
             1,
             pht('Show only countdowns that are still counting down.'),
             $upcoming));
-
   }
 
   protected function getURI($path) {
@@ -83,7 +82,6 @@ final class PhabricatorCountdownSearchEngine
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
-
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
 
@@ -101,10 +99,10 @@ final class PhabricatorCountdownSearchEngine
     return parent::buildSavedQueryFromBuiltin($query_key);
   }
 
-
   protected function getRequiredHandlePHIDsForResultList(
     array $countdowns,
     PhabricatorSavedQuery $query) {
+
     return mpull($countdowns, 'getAuthorPHID');
   }
 
@@ -112,6 +110,7 @@ final class PhabricatorCountdownSearchEngine
     array $countdowns,
     PhabricatorSavedQuery $query,
     array $handles) {
+
     assert_instances_of($countdowns, 'PhabricatorCountdown');
 
     $viewer = $this->requireViewer();
@@ -147,4 +146,5 @@ final class PhabricatorCountdownSearchEngine
 
     return $list;
   }
+
 }

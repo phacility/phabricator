@@ -38,7 +38,7 @@ final class PhabricatorDashboardUninstallController
 
     $application_class = $request->getStr(
       'applicationClass',
-      'PhabricatorApplicationHome');
+      'PhabricatorHomeApplication');
 
     $dashboard_install = id(new PhabricatorDashboardInstall())
       ->loadOneWhere(
@@ -85,7 +85,7 @@ final class PhabricatorDashboardUninstallController
 
     $body = array();
     switch ($application_class) {
-      case 'PhabricatorApplicationHome':
+      case 'PhabricatorHomeApplication':
         if ($installer_phid == $object_phid) {
           $body[] = phutil_tag(
             'p',
@@ -116,7 +116,7 @@ final class PhabricatorDashboardUninstallController
   private function getCancelURI($application_class, $object_phid) {
     $uri = null;
     switch ($application_class) {
-      case 'PhabricatorApplicationHome':
+      case 'PhabricatorHomeApplication':
         $uri = '/dashboard/view/'.$this->id.'/';
         break;
     }
@@ -126,7 +126,7 @@ final class PhabricatorDashboardUninstallController
   private function getRedirectURI($application_class, $object_phid) {
     $uri = null;
     switch ($application_class) {
-      case 'PhabricatorApplicationHome':
+      case 'PhabricatorHomeApplication':
         $uri = '/';
         break;
     }

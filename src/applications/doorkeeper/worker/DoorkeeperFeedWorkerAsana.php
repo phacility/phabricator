@@ -445,7 +445,7 @@ final class DoorkeeperFeedWorkerAsana extends DoorkeeperFeedWorker {
 
   private function getProvider() {
     if (!$this->provider) {
-      $provider = PhabricatorAuthProviderOAuthAsana::getAsanaProvider();
+      $provider = PhabricatorAsanaAuthProvider::getAsanaProvider();
       if (!$provider) {
         throw new PhabricatorWorkerPermanentFailureException(
           'No Asana provider configured.');
@@ -515,7 +515,7 @@ final class DoorkeeperFeedWorkerAsana extends DoorkeeperFeedWorker {
       return $phid_map;
     }
 
-    $provider = PhabricatorAuthProviderOAuthAsana::getAsanaProvider();
+    $provider = PhabricatorAsanaAuthProvider::getAsanaProvider();
 
     $accounts = id(new PhabricatorExternalAccountQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())

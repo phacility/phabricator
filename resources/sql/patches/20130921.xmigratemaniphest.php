@@ -62,8 +62,8 @@ foreach ($rows as $row) {
   // a comment in addition to an action) we'll insert that below.
   if ($row['transactionType'] != 'comment') {
     $xaction_phid = PhabricatorPHID::generateNewPHID(
-      PhabricatorApplicationTransactionPHIDTypeTransaction::TYPECONST,
-      ManiphestPHIDTypeTask::TYPECONST);
+      PhabricatorApplicationTransactionTransactionPHIDType::TYPECONST,
+      ManiphestTaskPHIDType::TYPECONST);
 
     queryfx(
       $conn_w,
@@ -93,12 +93,12 @@ foreach ($rows as $row) {
   if ($has_comment) {
     $comment_phid = PhabricatorPHID::generateNewPHID(
       PhabricatorPHIDConstants::PHID_TYPE_XCMT,
-      ManiphestPHIDTypeTask::TYPECONST);
+      ManiphestTaskPHIDType::TYPECONST);
     $comment_version = 1;
 
     $comment_xaction_phid = PhabricatorPHID::generateNewPHID(
-      PhabricatorApplicationTransactionPHIDTypeTransaction::TYPECONST,
-      ManiphestPHIDTypeTask::TYPECONST);
+      PhabricatorApplicationTransactionTransactionPHIDType::TYPECONST,
+      ManiphestTaskPHIDType::TYPECONST);
 
     // Insert the comment data.
     queryfx(

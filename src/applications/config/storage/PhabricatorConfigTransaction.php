@@ -10,7 +10,7 @@ final class PhabricatorConfigTransaction
   }
 
   public function getApplicationTransactionType() {
-    return PhabricatorConfigPHIDTypeConfig::TYPECONST;
+    return PhabricatorConfigConfigPHIDType::TYPECONST;
   }
 
   public function getApplicationTransactionCommentObject() {

@@ -106,7 +106,7 @@ final class PhabricatorUser
    *              a normal session.
    */
   public function getIsStandardUser() {
-    $type_user = PhabricatorPeoplePHIDTypeUser::TYPECONST;
+    $type_user = PhabricatorPeopleUserPHIDType::TYPECONST;
     return $this->getPHID() && (phid_get_type($this->getPHID()) == $type_user);
   }
 
@@ -118,7 +118,7 @@ final class PhabricatorUser
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPeoplePHIDTypeUser::TYPECONST);
+      PhabricatorPeopleUserPHIDType::TYPECONST);
   }
 
   public function setPassword(PhutilOpaqueEnvelope $envelope) {
@@ -550,7 +550,7 @@ EOBODY;
     $new_username = $this->getUserName();
 
     $password_instructions = null;
-    if (PhabricatorAuthProviderPassword::getPasswordProvider()) {
+    if (PhabricatorPasswordAuthProvider::getPasswordProvider()) {
       $engine = new PhabricatorAuthSessionEngine();
       $uri = $engine->getOneTimeLoginURI(
         $this,

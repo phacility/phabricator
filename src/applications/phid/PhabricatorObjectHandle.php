@@ -262,7 +262,7 @@ final class PhabricatorObjectHandle
       $title = pht('Disabled'); // Overwrite status.
     }
 
-    if ($this->getType() == PhabricatorPeoplePHIDTypeUser::TYPECONST) {
+    if ($this->getType() == PhabricatorPeopleUserPHIDType::TYPECONST) {
       $classes[] = 'phui-link-person';
     }
 
@@ -295,7 +295,7 @@ final class PhabricatorObjectHandle
 
   public function getLinkName() {
     switch ($this->getType()) {
-      case PhabricatorPeoplePHIDTypeUser::TYPECONST:
+      case PhabricatorPeopleUserPHIDType::TYPECONST:
         $name = $this->getName();
         break;
       default:

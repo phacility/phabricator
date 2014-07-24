@@ -8,7 +8,7 @@ final class PhabricatorProjectDatasource
   }
 
   public function getDatasourceApplicationClass() {
-    return 'PhabricatorApplicationProject';
+    return 'PhabricatorProjectApplication';
   }
 
   public function loadResults() {

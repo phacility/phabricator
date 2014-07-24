@@ -58,7 +58,7 @@ final class HarbormasterBuildable extends HarbormasterDAO
         return 'bluegrey';
     }
   }
-  
+
   public static function initializeNewBuildable(PhabricatorUser $actor) {
     return id(new HarbormasterBuildable())
       ->setIsManualBuildable(0)
@@ -110,7 +110,7 @@ final class HarbormasterBuildable extends HarbormasterDAO
     // Skip all of this logic if the Harbormaster application
     // isn't currently installed.
 
-    $harbormaster_app = 'PhabricatorApplicationHarbormaster';
+    $harbormaster_app = 'PhabricatorHarbormasterApplication';
     if (!PhabricatorApplication::isClassInstalled($harbormaster_app)) {
       return;
     }
@@ -160,7 +160,7 @@ final class HarbormasterBuildable extends HarbormasterDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      HarbormasterPHIDTypeBuildable::TYPECONST);
+      HarbormasterBuildablePHIDType::TYPECONST);
   }
 
   public function attachBuildableObject($buildable_object) {

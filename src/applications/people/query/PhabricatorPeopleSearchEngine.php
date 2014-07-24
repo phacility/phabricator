@@ -8,7 +8,7 @@ final class PhabricatorPeopleSearchEngine
   }
 
   public function getApplicationClassName() {
-    return 'PhabricatorApplicationPeople';
+    return 'PhabricatorPeopleApplication';
   }
 
   public function getCustomFieldObject() {

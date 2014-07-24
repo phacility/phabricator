@@ -124,9 +124,8 @@ final class PhabricatorRepositoryPushEventQuery
     return $this->formatWhereClause($where);
   }
 
-
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationDiffusion';
+    return 'PhabricatorDiffusionApplication';
   }
 
 }

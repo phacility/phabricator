@@ -1,6 +1,6 @@
 <?php
 
-final class PhortuneCurrency {
+final class PhortuneCurrency extends Phobject {
 
   private $value;
   private $currency;
@@ -52,9 +52,22 @@ final class PhortuneCurrency {
     return $obj;
   }
 
+  public static function newFromList(array $list) {
+    assert_instances_of($list, 'PhortuneCurrency');
+
+    $total = 0;
+    foreach ($list as $item) {
+      // TODO: This should check for integer overflows, etc.
+      $total += $item->getValue();
+    }
+
+    return PhortuneCurrency::newFromUSDCents($total);
+  }
+
   public static function newFromUSDCents($cents) {
     if (!is_int($cents)) {
-      throw new Exception('USDCents value is not an integer!');
+      throw new Exception(
+        pht('USDCents value "%s" is not an integer!', $cents));
     }
 
     $obj = new PhortuneCurrency();

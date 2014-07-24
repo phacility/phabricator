@@ -244,7 +244,7 @@ final class HarbormasterBuildEngine extends Phobject {
     }
 
     // Identify all the steps which are ready to run (because all their
-    // depdendencies are complete).
+    // dependencies are complete).
 
     $previous_step = null;
     $runnable = array();
@@ -428,7 +428,7 @@ final class HarbormasterBuildEngine extends Phobject {
             ->setOldValue($old_status)
             ->setNewValue($new_status);
 
-          $harbormaster_phid = id(new PhabricatorApplicationHarbormaster())
+          $harbormaster_phid = id(new PhabricatorHarbormasterApplication())
             ->getPHID();
 
           $daemon_source = PhabricatorContentSource::newForSource(
@@ -448,7 +448,6 @@ final class HarbormasterBuildEngine extends Phobject {
         }
       }
     }
-
   }
 
 }

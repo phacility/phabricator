@@ -82,7 +82,7 @@ final class PhabricatorCountdownQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationCountdown';
+    return 'PhabricatorCountdownApplication';
   }
 
 }

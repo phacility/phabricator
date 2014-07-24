@@ -17,7 +17,7 @@ final class NuanceQueue
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      NuancePHIDTypeQueue::TYPECONST);
+      NuanceQueuePHIDType::TYPECONST);
   }
 
   public function save() {

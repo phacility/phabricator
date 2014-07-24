@@ -27,7 +27,7 @@ final class DoorkeeperBridgeAsana extends DoorkeeperBridge {
     $id_map = mpull($refs, 'getObjectID', 'getObjectKey');
     $viewer = $this->getViewer();
 
-    $provider = PhabricatorAuthProviderOAuthAsana::getAsanaProvider();
+    $provider = PhabricatorAsanaAuthProvider::getAsanaProvider();
     if (!$provider) {
       return;
     }

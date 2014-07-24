@@ -8,7 +8,7 @@ final class PhabricatorOwnersPackageDatasource
   }
 
   public function getDatasourceApplicationClass() {
-    return 'PhabricatorApplicationOwners';
+    return 'PhabricatorOwnersApplication';
   }
 
   public function loadResults() {

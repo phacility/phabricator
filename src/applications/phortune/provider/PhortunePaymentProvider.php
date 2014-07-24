@@ -91,11 +91,23 @@ abstract class PhortunePaymentProvider {
   /**
    * Determine of a provider can handle a payment method.
    *
-   * @return bool True if this provider can apply charges to the payment
-   *              method.
+   * @return bool True if this provider can apply charges to the payment method.
    */
   abstract public function canHandlePaymentMethod(
     PhortunePaymentMethod $method);
+
+  final public function applyCharge(
+    PhortunePaymentMethod $payment_method,
+    PhortuneCharge $charge) {
+
+    $charge->setStatus(PhortuneCharge::STATUS_CHARGING);
+    $charge->save();
+
+    $this->executeCharge($payment_method, $charge);
+
+    $charge->setStatus(PhortuneCharge::STATUS_CHARGED);
+    $charge->save();
+  }
 
   abstract protected function executeCharge(
     PhortunePaymentMethod $payment_method,
@@ -169,7 +181,37 @@ abstract class PhortunePaymentProvider {
     PhortuneAccount $account,
     PhortuneCart $cart,
     PhabricatorUser $user) {
-    throw new PhortuneNotImplementedException($this);
+
+    require_celerity_resource('phortune-css');
+
+    $icon_uri = $this->getPaymentMethodIcon();
+    $description = $this->getPaymentMethodProviderDescription();
+    $details = $this->getPaymentMethodDescription();
+
+    $icon = id(new PHUIIconView())
+      ->setImage($icon_uri)
+      ->addClass('phortune-payment-icon');
+
+    $button = id(new PHUIButtonView())
+      ->setSize(PHUIButtonView::BIG)
+      ->setColor(PHUIButtonView::GREY)
+      ->setIcon($icon)
+      ->setText($description)
+      ->setSubtext($details);
+
+    $uri = $this->getControllerURI(
+      'checkout',
+      array(
+        'cartID' => $cart->getID(),
+      ));
+
+    return phabricator_form(
+      $user,
+      array(
+        'action' => $uri,
+        'method' => 'POST',
+      ),
+      $button);
   }
 
 
@@ -182,7 +224,7 @@ abstract class PhortunePaymentProvider {
 
     $digest = PhabricatorHash::digestForIndex($this->getProviderKey());
 
-    $app = PhabricatorApplication::getByClass('PhabricatorApplicationPhortune');
+    $app = PhabricatorApplication::getByClass('PhabricatorPhortuneApplication');
     $path = $app->getBaseURI().'provider/'.$digest.'/'.$action.'/';
 
     $uri = new PhutilURI($path);

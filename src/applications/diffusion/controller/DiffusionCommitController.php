@@ -999,7 +999,7 @@ final class DiffusionCommitController extends DiffusionController {
     require_celerity_resource('phabricator-object-selector-css');
     require_celerity_resource('javelin-behavior-phabricator-object-selector');
 
-    $maniphest = 'PhabricatorApplicationManiphest';
+    $maniphest = 'PhabricatorManiphestApplication';
     if (PhabricatorApplication::isClassInstalled($maniphest)) {
       $action = id(new PhabricatorActionView())
         ->setName(pht('Edit Maniphest Tasks'))
@@ -1175,6 +1175,5 @@ final class DiffusionCommitController extends DiffusionController {
 
     return $parser->processCorpus($corpus);
   }
-
 
 }

@@ -304,8 +304,8 @@ final class PhabricatorRepositoryCommitHeraldWorker
       ->setAllowPartialResults(true)
       ->setAllowedTypes(
         array(
-          PhabricatorPeoplePHIDTypeUser::TYPECONST,
-          PhabricatorProjectPHIDTypeProject::TYPECONST,
+          PhabricatorPeopleUserPHIDType::TYPECONST,
+          PhabricatorProjectProjectPHIDType::TYPECONST,
         ))
       ->setObjectList($matches[1])
       ->execute();

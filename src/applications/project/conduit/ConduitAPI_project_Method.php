@@ -3,8 +3,7 @@
 abstract class ConduitAPI_project_Method extends ConduitAPIMethod {
 
   public function getApplication() {
-    return PhabricatorApplication::getByClass(
-      'PhabricatorApplicationProject');
+    return PhabricatorApplication::getByClass('PhabricatorProjectApplication');
   }
 
   protected function buildProjectInfoDictionary(PhabricatorProject $project) {

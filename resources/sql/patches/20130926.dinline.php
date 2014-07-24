@@ -34,15 +34,15 @@ foreach ($rows as $row) {
 
   if ($row['commentID']) {
     $xaction_phid = PhabricatorPHID::generateNewPHID(
-      PhabricatorApplicationTransactionPHIDTypeTransaction::TYPECONST,
-      DifferentialPHIDTypeRevision::TYPECONST);
+      PhabricatorApplicationTransactionTransactionPHIDType::TYPECONST,
+      DifferentialRevisionPHIDType::TYPECONST);
   } else {
     $xaction_phid = null;
   }
 
   $comment_phid = PhabricatorPHID::generateNewPHID(
     PhabricatorPHIDConstants::PHID_TYPE_XCMT,
-    DifferentialPHIDTypeRevision::TYPECONST);
+    DifferentialRevisionPHIDType::TYPECONST);
 
   queryfx(
     $conn_w,

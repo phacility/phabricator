@@ -17,7 +17,7 @@ foreach (new LiskMigrationIterator(new HeraldRule()) as $rule) {
     $conn_w,
     'UPDATE %T SET phid = %s WHERE id = %d',
     $table->getTableName(),
-    PhabricatorPHID::generateNewPHID(HeraldPHIDTypeRule::TYPECONST),
+    PhabricatorPHID::generateNewPHID(HeraldRulePHIDType::TYPECONST),
     $rule->getID());
 }
 

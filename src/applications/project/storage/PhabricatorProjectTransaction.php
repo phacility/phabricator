@@ -18,7 +18,7 @@ final class PhabricatorProjectTransaction
   }
 
   public function getApplicationTransactionType() {
-    return PhabricatorProjectPHIDTypeProject::TYPECONST;
+    return PhabricatorProjectProjectPHIDType::TYPECONST;
   }
 
   public function getRequiredHandlePHIDs() {

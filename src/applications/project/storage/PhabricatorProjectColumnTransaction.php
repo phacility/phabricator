@@ -11,7 +11,7 @@ final class PhabricatorProjectColumnTransaction
   }
 
   public function getApplicationTransactionType() {
-    return PhabricatorProjectPHIDTypeColumn::TYPECONST;
+    return PhabricatorProjectColumnPHIDType::TYPECONST;
   }
 
   public function getTitle() {

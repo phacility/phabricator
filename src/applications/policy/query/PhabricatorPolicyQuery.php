@@ -228,9 +228,8 @@ final class PhabricatorPolicyQuery
     return true;
   }
 
-
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationPolicy';
+    return 'PhabricatorPolicyApplication';
   }
 
 }

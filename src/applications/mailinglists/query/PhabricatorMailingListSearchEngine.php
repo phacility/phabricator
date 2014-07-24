@@ -8,7 +8,7 @@ final class PhabricatorMailingListSearchEngine
   }
 
   public function getApplicationClassName() {
-    return 'PhabricatorApplicationMailingLists';
+    return 'PhabricatorMailingListsApplication';
   }
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
@@ -39,15 +39,12 @@ final class PhabricatorMailingListSearchEngine
   }
 
   public function getBuiltinQueryNames() {
-    $names = array(
+    return array(
       'all' => pht('All Lists'),
     );
-
-    return $names;
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
-
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
 

@@ -37,7 +37,7 @@ final class PhabricatorRepositoryTransaction
   }
 
   public function getApplicationTransactionType() {
-    return PhabricatorRepositoryPHIDTypeRepository::TYPECONST;
+    return PhabricatorRepositoryRepositoryPHIDType::TYPECONST;
   }
 
   public function getApplicationTransactionCommentObject() {

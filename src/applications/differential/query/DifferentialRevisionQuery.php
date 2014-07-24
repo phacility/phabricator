@@ -99,7 +99,7 @@ final class DifferentialRevisionQuery
   }
 
   /**
-   * Filter results to revisions with comments authored bythe given PHIDs
+   * Filter results to revisions with comments authored by the given PHIDs.
    *
    * @param array List of PHIDs of authors
    * @return this
@@ -155,7 +155,7 @@ final class DifferentialRevisionQuery
 
   /**
    * Filter results to revisions with a given status. Provide a class constant,
-   * such as ##DifferentialRevisionQuery::STATUS_OPEN##.
+   * such as `DifferentialRevisionQuery::STATUS_OPEN`.
    *
    * @param const Class STATUS constant, like STATUS_OPEN.
    * @return this
@@ -241,7 +241,7 @@ final class DifferentialRevisionQuery
 
   /**
    * Set result ordering. Provide a class constant, such as
-   * ##DifferentialRevisionQuery::ORDER_CREATED##.
+   * `DifferentialRevisionQuery::ORDER_CREATED`.
    *
    * @task config
    */
@@ -749,7 +749,7 @@ final class DifferentialRevisionQuery
           $conn_r,
           'r.status IN (%Ld)',
           array(
-               ArcanistDifferentialRevisionStatus::NEEDS_REVIEW,
+            ArcanistDifferentialRevisionStatus::NEEDS_REVIEW,
           ));
         break;
       case self::STATUS_NEEDS_REVISION:
@@ -757,7 +757,7 @@ final class DifferentialRevisionQuery
           $conn_r,
           'r.status IN (%Ld)',
           array(
-               ArcanistDifferentialRevisionStatus::NEEDS_REVISION,
+            ArcanistDifferentialRevisionStatus::NEEDS_REVISION,
           ));
         break;
       case self::STATUS_ACCEPTED:
@@ -1068,7 +1068,6 @@ final class DifferentialRevisionQuery
 
       $revision->attachReviewerStatus($reviewers);
     }
-
   }
 
 
@@ -1125,7 +1124,7 @@ final class DifferentialRevisionQuery
 
     // Find all the project reviewers which the user may have authority over.
     $project_phids = array();
-    $project_type = PhabricatorProjectPHIDTypeProject::TYPECONST;
+    $project_type = PhabricatorProjectProjectPHIDType::TYPECONST;
     $edge_type = PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER;
     foreach ($edges as $src => $types) {
       if (!$allow_self) {
@@ -1164,7 +1163,7 @@ final class DifferentialRevisionQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationDifferential';
+    return 'PhabricatorDifferentialApplication';
   }
 
 }

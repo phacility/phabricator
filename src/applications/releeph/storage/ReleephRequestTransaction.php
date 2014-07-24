@@ -16,7 +16,7 @@ final class ReleephRequestTransaction
   }
 
   public function getApplicationTransactionType() {
-    return ReleephPHIDTypeRequest::TYPECONST;
+    return ReleephRequestPHIDType::TYPECONST;
   }
 
   public function getApplicationTransactionCommentObject() {

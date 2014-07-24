@@ -8,7 +8,7 @@ final class PhabricatorMacroSearchEngine
   }
 
   public function getApplicationClassName() {
-    return 'PhabricatorApplicationMacro';
+    return 'PhabricatorMacroApplication';
   }
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
@@ -141,7 +141,6 @@ final class PhabricatorMacroSearchEngine
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
-
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
 

@@ -8,7 +8,7 @@ final class PhabricatorSearchDatasource
   }
 
   public function getDatasourceApplicationClass() {
-    return 'PhabricatorApplicationSearch';
+    return 'PhabricatorSearchApplication';
   }
 
   public function getComponentDatasources() {

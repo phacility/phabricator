@@ -8,7 +8,7 @@ final class ReleephProductSearchEngine
   }
 
   public function getApplicationClassName() {
-    return 'PhabricatorApplicationReleeph';
+    return 'PhabricatorReleephApplication';
   }
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
@@ -43,7 +43,6 @@ final class ReleephProductSearchEngine
         ->setLabel(pht('Show Products'))
         ->setValue($saved_query->getParameter('active'))
         ->setOptions($this->getActiveOptions()));
-
   }
 
   protected function getURI($path) {
@@ -51,16 +50,13 @@ final class ReleephProductSearchEngine
   }
 
   public function getBuiltinQueryNames() {
-    $names = array(
+    return array(
       'active' => pht('Active'),
       'all' => pht('All'),
     );
-
-    return $names;
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
-
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
 
@@ -133,6 +129,5 @@ final class ReleephProductSearchEngine
 
     return $list;
   }
-
 
 }

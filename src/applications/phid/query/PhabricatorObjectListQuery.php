@@ -144,7 +144,7 @@ final class PhabricatorObjectListQuery {
     }
 
     $mailing_list_app = PhabricatorApplication::getByClass(
-      'PhabricatorApplicationMailingLists');
+      'PhabricatorMailingListsApplication');
     if ($mailing_list_app->isInstalled()) {
       if ($names) {
         // We still haven't been able to resolve everything; try mailing lists

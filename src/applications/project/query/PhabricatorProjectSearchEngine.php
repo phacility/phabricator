@@ -8,7 +8,7 @@ final class PhabricatorProjectSearchEngine
   }
 
   public function getApplicationClassName() {
-    return 'PhabricatorApplicationProject';
+    return 'PhabricatorProjectApplication';
   }
 
   public function getCustomFieldObject() {
@@ -108,7 +108,6 @@ final class PhabricatorProjectSearchEngine
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
-
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
 

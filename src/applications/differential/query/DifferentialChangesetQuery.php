@@ -57,7 +57,6 @@ final class DifferentialChangesetQuery
   }
 
   public function willFilterPage(array $changesets) {
-
     // First, attach all the diffs we already have. We can just do this
     // directly without worrying about querying for them. When we don't have
     // a diff, record that we need to load it.
@@ -148,7 +147,7 @@ final class DifferentialChangesetQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationDifferential';
+    return 'PhabricatorDifferentialApplication';
   }
 
   protected function getReversePaging() {

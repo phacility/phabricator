@@ -115,7 +115,6 @@ final class PonderAnswerQuery
       }
     }
 
-
     return $answers;
   }
 
@@ -123,9 +122,8 @@ final class PonderAnswerQuery
     return true;
   }
 
-
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationPonder';
+    return 'PhabricatorPonderApplication';
   }
 
 }

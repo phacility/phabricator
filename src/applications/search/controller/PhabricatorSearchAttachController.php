@@ -240,19 +240,19 @@ final class PhabricatorSearchAttachController
 
   private function getStrings() {
     switch ($this->type) {
-      case DifferentialPHIDTypeRevision::TYPECONST:
+      case DifferentialRevisionPHIDType::TYPECONST:
         $noun = 'Revisions';
         $selected = 'created';
         break;
-      case ManiphestPHIDTypeTask::TYPECONST:
+      case ManiphestTaskPHIDType::TYPECONST:
         $noun = 'Tasks';
         $selected = 'assigned';
         break;
-      case PhabricatorRepositoryPHIDTypeCommit::TYPECONST:
+      case PhabricatorRepositoryCommitPHIDType::TYPECONST:
         $noun = 'Commits';
         $selected = 'created';
         break;
-      case PholioPHIDTypeMock::TYPECONST:
+      case PholioMockPHIDType::TYPECONST:
         $noun = 'Mocks';
         $selected = 'created';
         break;
@@ -299,7 +299,7 @@ final class PhabricatorSearchAttachController
   }
 
   private function getFilters(array $strings) {
-    if ($this->type == PholioPHIDTypeMock::TYPECONST) {
+    if ($this->type == PholioMockPHIDType::TYPECONST) {
       $filters = array(
         'created' => 'Created By Me',
         'all' => 'All '.$strings['target_plural_noun'],
@@ -317,10 +317,10 @@ final class PhabricatorSearchAttachController
   }
 
   private function getEdgeType($src_type, $dst_type) {
-    $t_cmit = PhabricatorRepositoryPHIDTypeCommit::TYPECONST;
-    $t_task = ManiphestPHIDTypeTask::TYPECONST;
-    $t_drev = DifferentialPHIDTypeRevision::TYPECONST;
-    $t_mock = PholioPHIDTypeMock::TYPECONST;
+    $t_cmit = PhabricatorRepositoryCommitPHIDType::TYPECONST;
+    $t_task = ManiphestTaskPHIDType::TYPECONST;
+    $t_drev = DifferentialRevisionPHIDType::TYPECONST;
+    $t_mock = PholioMockPHIDType::TYPECONST;
 
     $map = array(
       $t_cmit => array(

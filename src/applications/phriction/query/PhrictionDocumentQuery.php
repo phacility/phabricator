@@ -267,9 +267,8 @@ final class PhrictionDocumentQuery
     }
   }
 
-
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationPhriction';
+    return 'PhabricatorPhrictionApplication';
   }
 
 }

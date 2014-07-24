@@ -1,14 +1,13 @@
 <?php
 
-final class PholioMockSearchEngine
-  extends PhabricatorApplicationSearchEngine {
+final class PholioMockSearchEngine extends PhabricatorApplicationSearchEngine {
 
   public function getResultTypeDescription() {
     return pht('Pholio Mocks');
   }
 
   public function getApplicationClassName() {
-    return 'PhabricatorApplicationPholio';
+    return 'PhabricatorPholioApplication';
   }
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
@@ -85,7 +84,6 @@ final class PholioMockSearchEngine
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
-
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
 

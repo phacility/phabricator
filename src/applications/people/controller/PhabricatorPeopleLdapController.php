@@ -130,7 +130,7 @@ final class PhabricatorPeopleLdapController
 
     $search = $request->getStr('query');
 
-    $ldap_provider = PhabricatorAuthProviderLDAP::getLDAPProvider();
+    $ldap_provider = PhabricatorLDAPAuthProvider::getLDAPProvider();
     if (!$ldap_provider) {
       throw new Exception('No LDAP provider enabled!');
     }

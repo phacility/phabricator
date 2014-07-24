@@ -12,7 +12,7 @@ final class PhabricatorPasteTransaction
   }
 
   public function getApplicationTransactionType() {
-    return PhabricatorPastePHIDTypePaste::TYPECONST;
+    return PhabricatorPastePastePHIDType::TYPECONST;
   }
 
   public function getApplicationTransactionCommentObject() {

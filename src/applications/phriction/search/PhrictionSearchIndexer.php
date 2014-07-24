@@ -17,7 +17,7 @@ final class PhrictionSearchIndexer
 
     $doc = new PhabricatorSearchAbstractDocument();
     $doc->setPHID($document->getPHID());
-    $doc->setDocumentType(PhrictionPHIDTypeDocument::TYPECONST);
+    $doc->setDocumentType(PhrictionDocumentPHIDType::TYPECONST);
     $doc->setDocumentTitle($content->getTitle());
 
     // TODO: This isn't precisely correct, denormalize into the Document table?
@@ -31,7 +31,7 @@ final class PhrictionSearchIndexer
     $doc->addRelationship(
       PhabricatorSearchRelationship::RELATIONSHIP_AUTHOR,
       $content->getAuthorPHID(),
-      PhabricatorPeoplePHIDTypeUser::TYPECONST,
+      PhabricatorPeopleUserPHIDType::TYPECONST,
       $content->getDateCreated());
 
     $doc->addRelationship(
@@ -39,7 +39,7 @@ final class PhrictionSearchIndexer
         ? PhabricatorSearchRelationship::RELATIONSHIP_OPEN
         : PhabricatorSearchRelationship::RELATIONSHIP_CLOSED,
       $document->getPHID(),
-      PhrictionPHIDTypeDocument::TYPECONST,
+      PhrictionDocumentPHIDType::TYPECONST,
       time());
 
     return $doc;

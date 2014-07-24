@@ -16,6 +16,7 @@ final class DiffusionCommitQuery
   private $auditorPHIDs;
   private $auditAwaitingUser;
   private $auditStatus;
+
   const AUDIT_STATUS_ANY       = 'audit-status-any';
   const AUDIT_STATUS_OPEN      = 'audit-status-open';
   const AUDIT_STATUS_CONCERN   = 'audit-status-concern';
@@ -88,15 +89,14 @@ final class DiffusionCommitQuery
   }
 
   /**
-   * Retuns true if we should join the audit table, either because we're
-   * interested in the information if it's available or because matching
-   * rows must always have it.
+   * Returns true if we should join the audit table, either because we're
+   * interested in the information if it's available or because matching rows
+   * must always have it.
    */
   private function shouldJoinAudits() {
     return $this->auditStatus ||
            $this->rowsMustHaveAudits();
   }
-
 
   /**
    * Return true if we should `JOIN` (vs `LEFT JOIN`) the audit table, because
@@ -194,7 +194,7 @@ final class DiffusionCommitQuery
             $result[$prefix.$suffix][] = $commit;
           }
         } else {
-          // This awkward contruction is so we can link the commits up in O(N)
+          // This awkward construction is so we can link the commits up in O(N)
           // time instead of O(N^2).
           for ($ii = $min_qualified; $ii <= strlen($suffix); $ii++) {
             $part = substr($suffix, 0, $ii);
@@ -225,7 +225,6 @@ final class DiffusionCommitQuery
   }
 
   protected function didFilterPage(array $commits) {
-
     if ($this->needCommitData) {
       $data = id(new PhabricatorRepositoryCommitData())->loadAllWhere(
         'commitID in (%Ld)',
@@ -508,7 +507,7 @@ final class DiffusionCommitQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationDiffusion';
+    return 'PhabricatorDiffusionApplication';
   }
 
 }

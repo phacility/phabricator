@@ -83,7 +83,6 @@ final class ReleephProductQuery
   }
 
   public function didFilterPage(array $products) {
-
     if ($this->needArcanistProjects) {
       $project_ids = array_filter(mpull($products, 'getArcanistProjectID'));
       if ($project_ids) {
@@ -103,7 +102,6 @@ final class ReleephProductQuery
 
     return $products;
   }
-
 
   private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
@@ -169,7 +167,7 @@ final class ReleephProductQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationReleeph';
+    return 'PhabricatorReleephApplication';
   }
 
 }

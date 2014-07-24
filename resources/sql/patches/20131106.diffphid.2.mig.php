@@ -20,7 +20,7 @@ foreach ($chunk_iter as $chunk) {
       continue;
     }
 
-    $type_diff = DifferentialPHIDTypeDiff::TYPECONST;
+    $type_diff = DifferentialDiffPHIDType::TYPECONST;
     $new_phid = PhabricatorPHID::generateNewPHID($type_diff);
 
     $sql[] = qsprintf(

@@ -16,7 +16,7 @@ final class PhragmentSnapshot extends PhragmentDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhragmentPHIDTypeSnapshot::TYPECONST);
+      PhragmentSnapshotPHIDType::TYPECONST);
   }
 
   public function getURI() {

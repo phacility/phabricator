@@ -60,7 +60,6 @@ final class ManiphestTransactionEditor
       case ManiphestTransaction::TYPE_SUBPRIORITY:
         return $object->getSubpriority();
     }
-
   }
 
   protected function getCustomTransactionNewValue(
@@ -83,7 +82,6 @@ final class ManiphestTransactionEditor
         return $xaction->getNewValue();
     }
   }
-
 
   protected function transactionHasEffect(
     PhabricatorLiskDAO $object,
@@ -156,7 +154,6 @@ final class ManiphestTransactionEditor
         // these do external (edge) updates
         return;
     }
-
   }
 
   protected function expandTransaction(
@@ -285,7 +282,6 @@ final class ManiphestTransactionEditor
 
     return $xactions;
   }
-
 
   protected function shouldSendMail(
     PhabricatorLiskDAO $object,
@@ -464,7 +460,7 @@ final class ManiphestTransactionEditor
     if ($app_capability) {
       $app = id(new PhabricatorApplicationQuery())
         ->setViewer($this->getActor())
-        ->withClasses(array('PhabricatorApplicationManiphest'))
+        ->withClasses(array('PhabricatorManiphestApplication'))
         ->executeOne();
       PhabricatorPolicyFilter::requireCapability(
         $this->getActor(),
@@ -492,7 +488,6 @@ final class ManiphestTransactionEditor
   }
 
   private function getNextSubpriority($pri, $sub, $dir = '>') {
-
     switch ($dir) {
       case '>':
         $order = 'ASC';

@@ -51,7 +51,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   public static function initializeNewRepository(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
       ->setViewer($actor)
-      ->withClasses(array('PhabricatorApplicationDiffusion'))
+      ->withClasses(array('PhabricatorDiffusionApplication'))
       ->executeOne();
 
     $view_policy = $app->getPolicy(DiffusionCapabilityDefaultView::CAPABILITY);
@@ -75,7 +75,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorRepositoryPHIDTypeRepository::TYPECONST);
+      PhabricatorRepositoryRepositoryPHIDType::TYPECONST);
   }
 
   public function toDictionary() {

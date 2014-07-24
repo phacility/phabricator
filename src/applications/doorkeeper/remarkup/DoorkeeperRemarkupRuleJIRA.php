@@ -15,7 +15,7 @@ final class DoorkeeperRemarkupRuleJIRA
     $match_issue = $matches[2];
 
     // TODO: When we support multiple instances, deal with them here.
-    $provider = PhabricatorAuthProviderOAuth1JIRA::getJIRAProvider();
+    $provider = PhabricatorJIRAAuthProvider::getJIRAProvider();
     if (!$provider) {
       return $matches[0];
     }

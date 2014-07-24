@@ -19,7 +19,7 @@ final class PhabricatorConfigEntry extends PhabricatorConfigEntryDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorConfigPHIDTypeConfig::TYPECONST);
+      PhabricatorConfigConfigPHIDType::TYPECONST);
   }
 
   public static function loadConfigEntry($key) {

@@ -16,22 +16,22 @@ foreach ($rows as $row) {
 
   $type = phid_get_type($row['targetPHID']);
   switch ($type) {
-    case PonderPHIDTypeQuestion::TYPECONST:
+    case PonderQuestionPHIDType::TYPECONST:
       $table_obj = $qtable;
       $comment_obj = new PonderQuestionTransactionComment();
       break;
-    case PonderPHIDTypeAnswer::TYPECONST:
+    case PonderAnswerPHIDType::TYPECONST:
       $table_obj = $atable;
       $comment_obj = new PonderAnswerTransactionComment();
       break;
   }
 
   $comment_phid = PhabricatorPHID::generateNewPHID(
-    PhabricatorApplicationTransactionPHIDTypeTransaction::TYPECONST,
+    PhabricatorApplicationTransactionTransactionPHIDType::TYPECONST,
     $type);
 
   $xaction_phid = PhabricatorPHID::generateNewPHID(
-    PhabricatorApplicationTransactionPHIDTypeTransaction::TYPECONST,
+    PhabricatorApplicationTransactionTransactionPHIDType::TYPECONST,
     $type);
 
   queryfx(

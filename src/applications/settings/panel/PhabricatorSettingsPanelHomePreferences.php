@@ -42,7 +42,7 @@ final class PhabricatorSettingsPanelHomePreferences
       }
       asort($options);
 
-      unset($options['PhabricatorApplicationApplications']);
+      unset($options['PhabricatorApplicationsApplication']);
 
       if ($request->isFormPost()) {
         $pin = $request->getStr('pin');
@@ -137,7 +137,7 @@ final class PhabricatorSettingsPanelHomePreferences
       ));
 
     foreach ($app_list as $key => $application) {
-      if ($key == 'PhabricatorApplicationApplications') {
+      if ($key == 'PhabricatorApplicationsApplication') {
         continue;
       }
 
@@ -194,4 +194,5 @@ final class PhabricatorSettingsPanelHomePreferences
 
     return $box;
   }
+
 }

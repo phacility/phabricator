@@ -1,9 +1,9 @@
 <?php
 
 /**
- * NOTE: When loading ExternalAccounts for use in an authetication context (that
- * is, you're going to act as the account or link identities or anything like
- * that) you should require CAN_EDIT capability even if you aren't actually
+ * NOTE: When loading ExternalAccounts for use in an authentication context
+ * (that is, you're going to act as the account or link identities or anything
+ * like that) you should require CAN_EDIT capability even if you aren't actually
  * editing the ExternalAccount.
  *
  * ExternalAccounts have a permissive CAN_VIEW policy (like users) because they
@@ -174,7 +174,7 @@ final class PhabricatorExternalAccountQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationPeople';
+    return 'PhabricatorPeopleApplication';
   }
 
   /**

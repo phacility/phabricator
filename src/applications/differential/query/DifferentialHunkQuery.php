@@ -66,7 +66,6 @@ final class DifferentialHunkQuery
   }
 
   public function willFilterPage(array $hunks) {
-
     $changesets = mpull($this->changesets, null, 'getID');
     foreach ($hunks as $key => $hunk) {
       $changeset = idx($changesets, $hunk->getChangesetID());
@@ -110,7 +109,7 @@ final class DifferentialHunkQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationDifferential';
+    return 'PhabricatorDifferentialApplication';
   }
 
   protected function getReversePaging() {

@@ -43,8 +43,8 @@ foreach ($comments as $comment) {
   $comment_phid = PhabricatorPHID::generateNewPHID(
     PhabricatorPHIDConstants::PHID_TYPE_XCMT);
   $xaction_phid = PhabricatorPHID::generateNewPHID(
-    PhabricatorApplicationTransactionPHIDTypeTransaction::TYPECONST,
-    PhabricatorSlowvotePHIDTypePoll::TYPECONST);
+    PhabricatorApplicationTransactionTransactionPHIDType::TYPECONST,
+    PhabricatorSlowvotePollPHIDType::TYPECONST);
 
   $source = PhabricatorContentSource::newForSource(
     PhabricatorContentSource::SOURCE_LEGACY,

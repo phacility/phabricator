@@ -6,7 +6,7 @@ final class HeraldPholioMockAdapter extends HeraldAdapter {
   private $ccPHIDs = array();
 
   public function getAdapterApplicationClass() {
-    return 'PhabricatorApplicationPholio';
+    return 'PhabricatorPholioApplication';
   }
 
   public function getAdapterContentDescription() {
@@ -148,4 +148,5 @@ final class HeraldPholioMockAdapter extends HeraldAdapter {
     }
     return $result;
   }
+
 }

@@ -19,7 +19,7 @@ final class PhabricatorHovercardExample extends PhabricatorUIExample {
 
     $diff_handle = $this->createBasicDummyHandle(
       'D123',
-      DifferentialPHIDTypeRevision::TYPECONST,
+      DifferentialRevisionPHIDType::TYPECONST,
       'Introduce cooler Differential Revisions');
 
     $panel = $this->createPanel('Differential Hovercard');
@@ -33,7 +33,7 @@ final class PhabricatorHovercardExample extends PhabricatorUIExample {
 
     $task_handle = $this->createBasicDummyHandle(
       'T123',
-      ManiphestPHIDTypeTask::TYPECONST,
+      ManiphestTaskPHIDType::TYPECONST,
       'Improve Mobile Experience for Phabricator');
 
     $tag = id(new PHUITagView())
@@ -52,7 +52,7 @@ final class PhabricatorHovercardExample extends PhabricatorUIExample {
 
     $user_handle = $this->createBasicDummyHandle(
       'gwashington',
-      PhabricatorPeoplePHIDTypeUser::TYPECONST,
+      PhabricatorPeopleUserPHIDType::TYPECONST,
       'George Washington');
     $user_handle->setImageURI(
       celerity_get_resource_uri('/rsrc/image/people/washington.png'));

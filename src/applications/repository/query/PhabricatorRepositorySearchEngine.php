@@ -8,7 +8,7 @@ final class PhabricatorRepositorySearchEngine
   }
 
   public function getApplicationClassName() {
-    return 'PhabricatorApplicationDiffusion';
+    return 'PhabricatorDiffusionApplication';
   }
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {

@@ -47,7 +47,7 @@ final class DifferentialDiff
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      DifferentialPHIDTypeDiff::TYPECONST);
+      DifferentialDiffPHIDType::TYPECONST);
   }
 
   public function addUnsavedChangeset(DifferentialChangeset $changeset) {

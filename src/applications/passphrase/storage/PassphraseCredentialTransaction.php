@@ -16,7 +16,7 @@ final class PassphraseCredentialTransaction
   }
 
   public function getApplicationTransactionType() {
-    return PassphrasePHIDTypeCredential::TYPECONST;
+    return PassphraseCredentialPHIDType::TYPECONST;
   }
 
   public function getApplicationTransactionCommentObject() {

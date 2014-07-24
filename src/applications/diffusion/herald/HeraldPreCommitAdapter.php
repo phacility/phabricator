@@ -21,7 +21,7 @@ abstract class HeraldPreCommitAdapter extends HeraldAdapter {
   }
 
   public function getAdapterApplicationClass() {
-    return 'PhabricatorApplicationDiffusion';
+    return 'PhabricatorDiffusionApplication';
   }
 
   public function getObject() {
@@ -56,8 +56,7 @@ abstract class HeraldPreCommitAdapter extends HeraldAdapter {
   }
 
   public function explainValidTriggerObjects() {
-    return pht(
-      'This rule can trigger for **repositories** or **projects**.');
+    return pht('This rule can trigger for **repositories** or **projects**.');
   }
 
   public function getTriggerObjectPHIDs() {

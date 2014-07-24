@@ -8,7 +8,7 @@ final class PonderQuestionSearchEngine
   }
 
   public function getApplicationClassName() {
-    return 'PhabricatorApplicationPonder';
+    return 'PhabricatorPonderApplication';
   }
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {

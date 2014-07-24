@@ -68,7 +68,7 @@ final class PhabricatorRepositoryCommit
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorRepositoryPHIDTypeCommit::TYPECONST);
+      PhabricatorRepositoryCommitPHIDType::TYPECONST);
   }
 
   public function loadCommitData() {

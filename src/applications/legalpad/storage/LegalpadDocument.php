@@ -30,7 +30,7 @@ final class LegalpadDocument extends LegalpadDAO
   public static function initializeNewDocument(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
       ->setViewer($actor)
-      ->withClasses(array('PhabricatorApplicationLegalpad'))
+      ->withClasses(array('PhabricatorLegalpadApplication'))
       ->executeOne();
 
     $view_policy = $app->getPolicy(LegalpadCapabilityDefaultView::CAPABILITY);
@@ -59,7 +59,7 @@ final class LegalpadDocument extends LegalpadDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorLegalpadPHIDTypeDocument::TYPECONST);
+      PhabricatorLegalpadDocumentPHIDType::TYPECONST);
   }
 
   public function getDocumentBody() {

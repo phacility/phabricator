@@ -3,7 +3,7 @@
 final class LegalpadMockMailReceiver extends PhabricatorObjectMailReceiver {
 
   public function isEnabled() {
-    $app_class = 'PhabricatorApplicationLegalpad';
+    $app_class = 'PhabricatorLegalpadApplication';
     return PhabricatorApplication::isClassInstalled($app_class);
   }
 

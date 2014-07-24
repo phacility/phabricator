@@ -69,7 +69,6 @@ final class ReleephBranchQuery
     }
   }
 
-
   public function willFilterPage(array $branches) {
     $project_ids = mpull($branches, 'getReleephProjectID');
 
@@ -146,9 +145,8 @@ final class ReleephBranchQuery
     return $this->formatWhereClause($where);
   }
 
-
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationReleeph';
+    return 'PhabricatorReleephApplication';
   }
 
 }

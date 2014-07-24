@@ -8,7 +8,7 @@ final class PhabricatorMailingListDatasource
   }
 
   public function getDatasourceApplicationClass() {
-    return 'PhabricatorApplicationMailingLists';
+    return 'PhabricatorMailingListsApplication';
   }
 
   public function loadResults() {

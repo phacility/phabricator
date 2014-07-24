@@ -167,7 +167,6 @@ final class DifferentialTransactionEditor
     return parent::transactionHasEffect($object, $xaction);
   }
 
-
   protected function applyCustomInternalTransaction(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
@@ -350,7 +349,7 @@ final class DifferentialTransactionEditor
         // "T123" or similar, automatically associate the commit with the
         // task that the branch names.
 
-        $maniphest = 'PhabricatorApplicationManiphest';
+        $maniphest = 'PhabricatorManiphestApplication';
         if (PhabricatorApplication::isClassInstalled($maniphest)) {
           $diff = $this->requireDiff($xaction->getNewValue());
           $branch = $diff->getBranch();
@@ -572,8 +571,6 @@ final class DifferentialTransactionEditor
     return $result;
   }
 
-
-
   protected function applyFinalEffects(
     PhabricatorLiskDAO $object,
     array $xactions) {
@@ -692,7 +689,6 @@ final class DifferentialTransactionEditor
 
     return $xactions;
   }
-
 
   protected function validateTransaction(
     PhabricatorLiskDAO $object,
@@ -1205,8 +1201,7 @@ final class DifferentialTransactionEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
-    switch ($xaction->getTransactionType()) {
-    }
+    switch ($xaction->getTransactionType()) {}
 
     return parent::extractFilePHIDsFromCustomTransaction($object, $xaction);
   }
@@ -1216,7 +1211,6 @@ final class DifferentialTransactionEditor
     array $xactions,
     $blocks,
     PhutilMarkupEngine $engine) {
-
 
     $flat_blocks = array_mergev($blocks);
     $huge_block = implode("\n\n", $flat_blocks);
@@ -1648,7 +1642,6 @@ final class DifferentialTransactionEditor
         implode(', ', $chunk));
     }
   }
-
 
   /**
    * Update the table connecting revisions to DVCS local hashes, so we can

@@ -14,7 +14,7 @@ final class PonderAnswerTransaction
   }
 
   public function getApplicationTransactionType() {
-    return PonderPHIDTypeAnswer::TYPECONST;
+    return PonderAnswerPHIDType::TYPECONST;
   }
 
   public function getApplicationTransactionCommentObject() {

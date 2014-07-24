@@ -131,7 +131,7 @@ final class PassphraseCredentialQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationPassphrase';
+    return 'PhabricatorPassphraseApplication';
   }
 
 }

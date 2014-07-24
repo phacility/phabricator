@@ -17,7 +17,7 @@ you need to build new classes. For instance:
   - if you want to configure linters, or add new linters, you need to create a
     new class which extends @{class@arcanist:ArcanistLintEngine}.
   - if you want to integrate with a unit testing framework, you need to create a
-    new class which extends @{class@arcanist:ArcanistBaseUnitTestEngine}.
+    new class which extends @{class@arcanist:ArcanistUnitTestEngine}.
   - if you you want to change how workflows behave, or add new workflows, you
     need to create a new class which extends
     @{class@arcanist:ArcanistConfiguration}.

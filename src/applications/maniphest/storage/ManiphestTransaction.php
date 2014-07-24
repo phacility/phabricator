@@ -25,7 +25,7 @@ final class ManiphestTransaction
   }
 
   public function getApplicationTransactionType() {
-    return ManiphestPHIDTypeTask::TYPECONST;
+    return ManiphestTaskPHIDType::TYPECONST;
   }
 
   public function getApplicationTransactionCommentObject() {

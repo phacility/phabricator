@@ -109,7 +109,7 @@ final class PhabricatorAuthOneTimeLoginController
       unset($unguarded);
 
       $next = '/';
-      if (!PhabricatorAuthProviderPassword::getPasswordProvider()) {
+      if (!PhabricatorPasswordAuthProvider::getPasswordProvider()) {
         $next = '/settings/panel/external/';
       } else if (PhabricatorEnv::getEnvConfig('account.editable')) {
 

@@ -49,7 +49,7 @@ final class PhabricatorAsanaConfigOptions
 
     $viewer = $request->getUser();
 
-    $provider = PhabricatorAuthProviderOAuthAsana::getAsanaProvider();
+    $provider = PhabricatorAsanaAuthProvider::getAsanaProvider();
     if (!$provider) {
       return null;
     }

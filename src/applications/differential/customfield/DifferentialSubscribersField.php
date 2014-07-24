@@ -79,9 +79,9 @@ final class DifferentialSubscribersField
     return $this->parseObjectList(
       $value,
       array(
-        PhabricatorPeoplePHIDTypeUser::TYPECONST,
-        PhabricatorProjectPHIDTypeProject::TYPECONST,
-        PhabricatorMailingListPHIDTypeList::TYPECONST,
+        PhabricatorPeopleUserPHIDType::TYPECONST,
+        PhabricatorProjectProjectPHIDType::TYPECONST,
+        PhabricatorMailingListListPHIDType::TYPECONST,
       ));
   }
 

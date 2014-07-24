@@ -12,7 +12,7 @@ final class PhabricatorUserSearchIndexer
 
     $doc = new PhabricatorSearchAbstractDocument();
     $doc->setPHID($user->getPHID());
-    $doc->setDocumentType(PhabricatorPeoplePHIDTypeUser::TYPECONST);
+    $doc->setDocumentType(PhabricatorPeopleUserPHIDType::TYPECONST);
     $doc->setDocumentTitle($user->getFullName());
     $doc->setDocumentCreated($user->getDateCreated());
     $doc->setDocumentModified($user->getDateModified());
@@ -22,7 +22,7 @@ final class PhabricatorUserSearchIndexer
         ? PhabricatorSearchRelationship::RELATIONSHIP_OPEN
         : PhabricatorSearchRelationship::RELATIONSHIP_CLOSED,
       $user->getPHID(),
-      PhabricatorPeoplePHIDTypeUser::TYPECONST,
+      PhabricatorPeopleUserPHIDType::TYPECONST,
       time());
 
     return $doc;

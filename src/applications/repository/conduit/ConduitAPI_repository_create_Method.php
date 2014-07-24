@@ -58,7 +58,7 @@ final class ConduitAPI_repository_create_Method
   protected function execute(ConduitAPIRequest $request) {
     $application = id(new PhabricatorApplicationQuery())
       ->setViewer($request->getUser())
-      ->withClasses(array('PhabricatorApplicationDiffusion'))
+      ->withClasses(array('PhabricatorDiffusionApplication'))
       ->executeOne();
 
     PhabricatorPolicyFilter::requireCapability(

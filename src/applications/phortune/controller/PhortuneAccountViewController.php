@@ -56,6 +56,7 @@ final class PhortuneAccountViewController extends PhortuneController {
 
     $payment_methods = $this->buildPaymentMethodsSection($account);
     $purchase_history = $this->buildPurchaseHistorySection($account);
+    $charge_history = $this->buildChargeHistorySection($account);
     $account_history = $this->buildAccountHistorySection($account);
 
     $object_box = id(new PHUIObjectBoxView())
@@ -68,6 +69,7 @@ final class PhortuneAccountViewController extends PhortuneController {
         $object_box,
         $payment_methods,
         $purchase_history,
+        $charge_history,
         $account_history,
       ),
       array(
@@ -139,6 +141,18 @@ final class PhortuneAccountViewController extends PhortuneController {
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header);
+  }
+
+  private function buildChargeHistorySection(PhortuneAccount $account) {
+    $request = $this->getRequest();
+    $viewer = $request->getUser();
+
+    $charges = id(new PhortuneChargeQuery())
+      ->setViewer($viewer)
+      ->withAccountPHIDs(array($account->getPHID()))
+      ->execute();
+
+    return $this->buildChargesTable($charges);
   }
 
   private function buildAccountHistorySection(PhortuneAccount $account) {

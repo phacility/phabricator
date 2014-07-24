@@ -247,7 +247,7 @@ abstract class PhabricatorMailReplyHandler {
     PhabricatorObjectHandle $handle,
     $prefix) {
 
-    if ($handle->getType() != PhabricatorPeoplePHIDTypeUser::TYPECONST) {
+    if ($handle->getType() != PhabricatorPeopleUserPHIDType::TYPECONST) {
       // You must be a real user to get a private reply handler address.
       return null;
     }

@@ -8,7 +8,7 @@ final class LegalpadDocumentSearchEngine
   }
 
   public function getApplicationClassName() {
-    return 'PhabricatorApplicationLegalpad';
+    return 'PhabricatorLegalpadApplication';
   }
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
@@ -133,7 +133,6 @@ final class LegalpadDocumentSearchEngine
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
-
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
 

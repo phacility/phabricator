@@ -17,17 +17,16 @@ final class PhortunePaypalPaymentProvider extends PhortunePaymentProvider {
   }
 
   public function getPaymentMethodDescription() {
-    return 'Paypal Account';
+    return pht('Credit Card or Paypal Account');
   }
 
   public function getPaymentMethodIcon() {
-    return 'rsrc/phortune/paypal.png';
+    return celerity_get_resource_uri('rsrc/image/phortune/paypal.png');
   }
 
   public function getPaymentMethodProviderDescription() {
     return 'Paypal';
   }
-
 
   public function canHandlePaymentMethod(PhortunePaymentMethod $method) {
     $type = $method->getMetadataValue('type');
@@ -57,33 +56,6 @@ final class PhortunePaypalPaymentProvider extends PhortunePaymentProvider {
   public function canProcessOneTimePayments() {
     return true;
   }
-
-  public function renderOneTimePaymentButton(
-    PhortuneAccount $account,
-    PhortuneCart $cart,
-    PhabricatorUser $user) {
-
-    $uri = $this->getControllerURI(
-      'checkout',
-      array(
-        'cartID' => $cart->getID(),
-      ));
-
-    return phabricator_form(
-      $user,
-      array(
-        'action' => $uri,
-        'method' => 'POST',
-      ),
-      phutil_tag(
-        'button',
-        array(
-          'class' => 'green',
-          'type'  => 'submit',
-        ),
-        pht('Pay with Paypal')));
-  }
-
 
 /* -(  Controllers  )-------------------------------------------------------- */
 
@@ -121,7 +93,7 @@ final class PhortunePaypalPaymentProvider extends PhortunePaymentProvider {
             'cartID' => $cart->getID(),
           ));
 
-        $total_in_cents = $cart->getTotalInCents();
+        $total_in_cents = $cart->getTotalPriceInCents();
         $price = PhortuneCurrency::newFromUSDCents($total_in_cents);
 
         $result = $this

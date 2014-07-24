@@ -48,7 +48,7 @@ final class PhabricatorFileImageMacro extends PhabricatorFileDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorMacroPHIDTypeMacro::TYPECONST);
+      PhabricatorMacroMacroPHIDType::TYPECONST);
   }
 
 

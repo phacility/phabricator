@@ -20,7 +20,7 @@ final class PhabricatorPeopleDatasource
   }
 
   public function getDatasourceApplicationClass() {
-    return 'PhabricatorApplicationPeople';
+    return 'PhabricatorPeopleApplication';
   }
 
   public function loadResults() {

@@ -8,7 +8,7 @@ final class PhabricatorRepositoryPushLogSearchEngine
   }
 
   public function getApplicationClassName() {
-    return 'PhabricatorApplicationDiffusion';
+    return 'PhabricatorDiffusionApplication';
   }
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
@@ -20,7 +20,7 @@ final class PhabricatorRepositoryPushLogSearchEngine
         $request,
         'repositories',
         array(
-          PhabricatorRepositoryPHIDTypeRepository::TYPECONST,
+          PhabricatorRepositoryRepositoryPHIDType::TYPECONST,
         )));
 
     $saved->setParameter(
@@ -91,15 +91,12 @@ final class PhabricatorRepositoryPushLogSearchEngine
   }
 
   public function getBuiltinQueryNames() {
-    $names = array(
+    return array(
       'all' => pht('All Push Logs'),
     );
-
-    return $names;
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
-
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
 

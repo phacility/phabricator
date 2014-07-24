@@ -20,7 +20,7 @@ final class HeraldRule extends HeraldDAO
 
   protected $configVersion = 37;
 
-  // phids for which this rule has been applied
+  // PHIDs for which this rule has been applied
   private $ruleApplied = self::ATTACHABLE;
   private $validAuthor = self::ATTACHABLE;
   private $author = self::ATTACHABLE;
@@ -35,7 +35,7 @@ final class HeraldRule extends HeraldDAO
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(HeraldPHIDTypeRule::TYPECONST);
+    return PhabricatorPHID::generateNewPHID(HeraldRulePHIDType::TYPECONST);
   }
 
   public function getRuleApplied($phid) {
@@ -221,7 +221,7 @@ final class HeraldRule extends HeraldDAO
         case PhabricatorPolicyCapability::CAN_VIEW:
           return PhabricatorPolicies::POLICY_USER;
         case PhabricatorPolicyCapability::CAN_EDIT:
-          $app = 'PhabricatorApplicationHerald';
+          $app = 'PhabricatorHeraldApplication';
           $herald = PhabricatorApplication::getByClass($app);
           $global = HeraldCapabilityManageGlobalRules::CAPABILITY;
           return $herald->getPolicy($global);

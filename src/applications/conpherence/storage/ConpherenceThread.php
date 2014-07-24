@@ -32,7 +32,7 @@ final class ConpherenceThread extends ConpherenceDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorConpherencePHIDTypeThread::TYPECONST);
+      PhabricatorConpherenceThreadPHIDType::TYPECONST);
   }
 
   public function save() {

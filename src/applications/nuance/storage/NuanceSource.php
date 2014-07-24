@@ -1,7 +1,6 @@
 <?php
 
-final class NuanceSource
-  extends NuanceDAO
+final class NuanceSource extends NuanceDAO
   implements PhabricatorPolicyInterface {
 
   protected $name;
@@ -21,8 +20,7 @@ final class NuanceSource
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(
-      NuancePHIDTypeSource::TYPECONST);
+    return PhabricatorPHID::generateNewPHID(NuanceSourcePHIDType::TYPECONST);
   }
 
   public function save() {
@@ -39,7 +37,7 @@ final class NuanceSource
   public static function initializeNewSource(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
       ->setViewer($actor)
-      ->withClasses(array('PhabricatorApplicationNuance'))
+      ->withClasses(array('PhabricatorNuanceApplication'))
       ->executeOne();
 
     $view_policy = $app->getPolicy(
@@ -54,7 +52,6 @@ final class NuanceSource
       ->setViewPolicy($view_policy)
       ->setEditPolicy($edit_policy)
       ->setType($lucky_definition->getSourceTypeConstant());
-
   }
 
   public function getCapabilities() {
@@ -80,6 +77,5 @@ final class NuanceSource
   public function describeAutomaticCapability($capability) {
     return null;
   }
-
 
 }

@@ -24,7 +24,7 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
   }
 
   public function getApplicationTransactionType() {
-    return DifferentialPHIDTypeRevision::TYPECONST;
+    return DifferentialRevisionPHIDType::TYPECONST;
   }
 
   public function getApplicationTransactionCommentObject() {
@@ -42,7 +42,7 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
         // the new value is a PHID, indicating that this is a newer style
         // transaction.
         if ($old === null) {
-          if (phid_get_type($new) == DifferentialPHIDTypeDiff::TYPECONST) {
+          if (phid_get_type($new) == DifferentialDiffPHIDType::TYPECONST) {
             return true;
           }
         }
@@ -218,7 +218,7 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
       case self::TYPE_UPDATE:
         if ($new) {
           // TODO: Migrate to PHIDs and use handles here?
-          if (phid_get_type($new) == DifferentialPHIDTypeDiff::TYPECONST) {
+          if (phid_get_type($new) == DifferentialDiffPHIDType::TYPECONST) {
             return pht(
               '%s updated this revision to %s.',
               $author_handle,

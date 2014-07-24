@@ -11,7 +11,7 @@ final class ManiphestSearchIndexer extends PhabricatorSearchDocumentIndexer {
 
     $doc = new PhabricatorSearchAbstractDocument();
     $doc->setPHID($task->getPHID());
-    $doc->setDocumentType(ManiphestPHIDTypeTask::TYPECONST);
+    $doc->setDocumentType(ManiphestTaskPHIDType::TYPECONST);
     $doc->setDocumentTitle($task->getTitle());
     $doc->setDocumentCreated($task->getDateCreated());
     $doc->setDocumentModified($task->getDateModified());
@@ -23,7 +23,7 @@ final class ManiphestSearchIndexer extends PhabricatorSearchDocumentIndexer {
     $doc->addRelationship(
       PhabricatorSearchRelationship::RELATIONSHIP_AUTHOR,
       $task->getAuthorPHID(),
-      PhabricatorPeoplePHIDTypeUser::TYPECONST,
+      PhabricatorPeopleUserPHIDType::TYPECONST,
       $task->getDateCreated());
 
     $doc->addRelationship(
@@ -31,7 +31,7 @@ final class ManiphestSearchIndexer extends PhabricatorSearchDocumentIndexer {
         ? PhabricatorSearchRelationship::RELATIONSHIP_CLOSED
         : PhabricatorSearchRelationship::RELATIONSHIP_OPEN,
       $task->getPHID(),
-      ManiphestPHIDTypeTask::TYPECONST,
+      ManiphestTaskPHIDType::TYPECONST,
       time());
 
     $this->indexTransactions(
@@ -43,7 +43,7 @@ final class ManiphestSearchIndexer extends PhabricatorSearchDocumentIndexer {
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_PROJECT,
         $phid,
-        PhabricatorProjectPHIDTypeProject::TYPECONST,
+        PhabricatorProjectProjectPHIDType::TYPECONST,
         $task->getDateModified()); // Bogus.
     }
 
@@ -52,7 +52,7 @@ final class ManiphestSearchIndexer extends PhabricatorSearchDocumentIndexer {
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_OWNER,
         $owner,
-        PhabricatorPeoplePHIDTypeUser::TYPECONST,
+        PhabricatorPeopleUserPHIDType::TYPECONST,
         time());
     } else {
       $doc->addRelationship(

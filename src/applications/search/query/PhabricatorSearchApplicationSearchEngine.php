@@ -8,7 +8,7 @@ final class PhabricatorSearchApplicationSearchEngine
   }
 
   public function getApplicationClassName() {
-    return 'PhabricatorApplicationSearch';
+    return 'PhabricatorSearchApplication';
   }
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
@@ -170,17 +170,14 @@ final class PhabricatorSearchApplicationSearchEngine
   }
 
   public function getBuiltinQueryNames() {
-    $names = array(
+    return array(
       'all' => pht('All Documents'),
       'open' => pht('Open Documents'),
       'open-tasks' => pht('Open Tasks'),
     );
-
-    return $names;
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
-
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
 
@@ -192,7 +189,7 @@ final class PhabricatorSearchApplicationSearchEngine
       case 'open-tasks':
         return $query
           ->setParameter('statuses', array('open'))
-          ->setParameter('types', array(ManiphestPHIDTypeTask::TYPECONST));
+          ->setParameter('types', array(ManiphestTaskPHIDType::TYPECONST));
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
@@ -231,7 +228,7 @@ final class PhabricatorSearchApplicationSearchEngine
     $results = array_select_keys(
       $results,
       array(
-        ManiphestPHIDTypeTask::TYPECONST,
+        ManiphestTaskPHIDType::TYPECONST,
       )) + $results;
 
     return $results;

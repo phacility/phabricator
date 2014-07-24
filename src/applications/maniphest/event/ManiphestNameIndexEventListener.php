@@ -11,7 +11,7 @@ final class ManiphestNameIndexEventListener extends PhabricatorEventListener {
     $type = phid_get_type($phid);
 
     // For now, we only index projects.
-    if ($type != PhabricatorProjectPHIDTypeProject::TYPECONST) {
+    if ($type != PhabricatorProjectProjectPHIDType::TYPECONST) {
       return;
     }
 
