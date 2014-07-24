@@ -5,10 +5,6 @@ final class ManiphestEditPriorityCapability
 
   const CAPABILITY = 'maniphest.edit.priority';
 
-  public function getCapabilityKey() {
-    return self::CAPABILITY;
-  }
-
   public function getCapabilityName() {
     return pht('Can Prioritize Tasks');
   }

@@ -4,10 +4,6 @@ final class ManiphestEditAssignCapability extends PhabricatorPolicyCapability {
 
   const CAPABILITY = 'maniphest.edit.assign';
 
-  public function getCapabilityKey() {
-    return self::CAPABILITY;
-  }
-
   public function getCapabilityName() {
     return pht('Can Assign Tasks');
   }

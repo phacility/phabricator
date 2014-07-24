@@ -5,10 +5,6 @@ final class ProjectCreateProjectsCapability
 
   const CAPABILITY = 'project.create';
 
-  public function getCapabilityKey() {
-    return self::CAPABILITY;
-  }
-
   public function getCapabilityName() {
     return pht('Can Create Projects');
   }

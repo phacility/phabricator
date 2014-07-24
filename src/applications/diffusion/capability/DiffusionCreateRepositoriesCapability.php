@@ -5,10 +5,6 @@ final class DiffusionCreateRepositoriesCapability
 
   const CAPABILITY = 'diffusion.create';
 
-  public function getCapabilityKey() {
-    return self::CAPABILITY;
-  }
-
   public function getCapabilityName() {
     return pht('Can Create Repositories');
   }

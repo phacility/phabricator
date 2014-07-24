@@ -5,10 +5,6 @@ final class HeraldManageGlobalRulesCapability
 
   const CAPABILITY = 'herald.global';
 
-  public function getCapabilityKey() {
-    return self::CAPABILITY;
-  }
-
   public function getCapabilityName() {
     return pht('Can Manage Global Rules');
   }

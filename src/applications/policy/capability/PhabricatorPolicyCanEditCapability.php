@@ -3,9 +3,7 @@
 final class PhabricatorPolicyCanEditCapability
   extends PhabricatorPolicyCapability {
 
-  public function getCapabilityKey() {
-    return self::CAN_EDIT;
-  }
+  const CAPABILITY = self::CAN_EDIT;
 
   public function getCapabilityName() {
     return pht('Can Edit');

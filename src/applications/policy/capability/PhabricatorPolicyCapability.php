@@ -14,7 +14,27 @@ abstract class PhabricatorPolicyCapability extends Phobject {
    *
    * @return string Globally unique capability key.
    */
-  abstract public function getCapabilityKey();
+  final public function getCapabilityKey() {
+    $class = new ReflectionClass($this);
+
+    $const = $class->getConstant('CAPABILITY');
+    if ($const === false) {
+      throw new Exception(
+        pht(
+          'PolicyCapability class "%s" must define an CAPABILITY property.',
+          get_class($this)));
+    }
+
+    if (!is_string($const)) {
+      throw new Exception(
+        pht(
+          'PolicyCapability class "%s" has an invalid CAPABILITY '.
+          'property. Capability constants must be a string.',
+          get_class($this)));
+    }
+
+    return $const;
+  }
 
 
   /**

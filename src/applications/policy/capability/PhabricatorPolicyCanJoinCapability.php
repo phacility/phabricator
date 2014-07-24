@@ -3,9 +3,7 @@
 final class PhabricatorPolicyCanJoinCapability
   extends PhabricatorPolicyCapability {
 
-  public function getCapabilityKey() {
-    return self::CAN_JOIN;
-  }
+  const CAPABILITY = self::CAN_JOIN;
 
   public function getCapabilityName() {
     return pht('Can Join');

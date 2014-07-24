@@ -5,10 +5,6 @@ final class ManiphestEditPoliciesCapability
 
   const CAPABILITY = 'maniphest.edit.policies';
 
-  public function getCapabilityKey() {
-    return self::CAPABILITY;
-  }
-
   public function getCapabilityName() {
     return pht('Can Edit Task Policies');
   }

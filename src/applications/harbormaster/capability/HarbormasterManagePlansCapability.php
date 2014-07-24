@@ -5,10 +5,6 @@ final class HarbormasterManagePlansCapability
 
   const CAPABILITY = 'harbormaster.plans';
 
-  public function getCapabilityKey() {
-    return self::CAPABILITY;
-  }
-
   public function getCapabilityName() {
     return pht('Can Manage Build Plans');
   }

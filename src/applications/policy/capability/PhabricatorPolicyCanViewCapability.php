@@ -3,9 +3,7 @@
 final class PhabricatorPolicyCanViewCapability
   extends PhabricatorPolicyCapability {
 
-  public function getCapabilityKey() {
-    return self::CAN_VIEW;
-  }
+  const CAPABILITY = self::CAN_VIEW;
 
   public function getCapabilityName() {
     return pht('Can View');

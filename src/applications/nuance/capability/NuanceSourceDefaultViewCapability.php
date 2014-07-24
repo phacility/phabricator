@@ -5,10 +5,6 @@ final class NuanceSourceDefaultViewCapability
 
   const CAPABILITY = 'nuance.source.default.view';
 
-  public function getCapabilityKey() {
-    return self::CAPABILITY;
-  }
-
   public function getCapabilityName() {
     return pht('Default Source View Policy');
   }

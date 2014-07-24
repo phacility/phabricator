@@ -5,10 +5,6 @@ final class ManiphestEditProjectsCapability
 
   const CAPABILITY = 'maniphest.edit.projects';
 
-  public function getCapabilityKey() {
-    return self::CAPABILITY;
-  }
-
   public function getCapabilityName() {
     return pht('Can Edit Task Projects');
   }

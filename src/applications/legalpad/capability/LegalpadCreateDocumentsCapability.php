@@ -5,10 +5,6 @@ final class LegalpadCreateDocumentsCapability
 
   const CAPABILITY = 'legalpad.create';
 
-  public function getCapabilityKey() {
-    return self::CAPABILITY;
-  }
-
   public function getCapabilityName() {
     return pht('Can Create Documents');
   }

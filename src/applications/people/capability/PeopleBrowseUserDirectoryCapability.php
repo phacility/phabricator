@@ -5,10 +5,6 @@ final class PeopleBrowseUserDirectoryCapability
 
   const CAPABILITY = 'people.browse';
 
-  public function getCapabilityKey() {
-    return self::CAPABILITY;
-  }
-
   public function getCapabilityName() {
     return pht('Can Browse User Directory');
   }

@@ -4,10 +4,6 @@ final class PhragmentCanCreateCapability extends PhabricatorPolicyCapability {
 
   const CAPABILITY = 'phragment.create';
 
-  public function getCapabilityKey() {
-    return self::CAPABILITY;
-  }
-
   public function getCapabilityName() {
     return pht('Can Create Fragments');
   }

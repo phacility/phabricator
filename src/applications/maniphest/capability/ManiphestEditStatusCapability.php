@@ -4,10 +4,6 @@ final class ManiphestEditStatusCapability extends PhabricatorPolicyCapability {
 
   const CAPABILITY = 'maniphest.edit.status';
 
-  public function getCapabilityKey() {
-    return self::CAPABILITY;
-  }
-
   public function getCapabilityName() {
     return pht('Can Edit Task Status');
   }
