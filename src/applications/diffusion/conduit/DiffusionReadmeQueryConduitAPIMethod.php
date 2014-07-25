@@ -32,6 +32,7 @@ final class DiffusionReadmeQueryConduitAPIMethod
       $paths[] = DiffusionRepositoryPath::newFromDictionary($dict);
     }
 
+    $best = -1;
     $readme = '';
     foreach ($paths as $result_path) {
       $file_type = $result_path->getFileType();
@@ -41,11 +42,35 @@ final class DiffusionReadmeQueryConduitAPIMethod
         continue;
       }
 
-      $path = $result_path->getPath();
+      $path = strtolower($result_path->getPath());
 
-      if (preg_match('/^readme(|\.txt|\.remarkup|\.rainbow|\.md)$/i', $path)) {
+      if ($path === 'readme') {
+        $path .= '.txt';
+      }
+
+      if (strncmp($path, 'readme.', 7) !== 0) {
+        continue;
+      }
+
+      $priority = 0;
+      switch (substr($path, 7)) {
+        case 'remarkup':
+          $priority = 100;
+          break;
+        case 'rainbow':
+          $priority = 90;
+          break;
+        case 'md':
+          $priority = 50;
+          break;
+        case 'txt':
+          $priority = 10;
+          break;
+      }
+
+      if ($priority > $best) {
+        $best = $priority;
         $readme = $result_path;
-        break;
       }
     }
 
