@@ -17,6 +17,7 @@ final class PHUITagView extends AphrontTagView {
   const COLOR_BLACK         = 'black';
   const COLOR_GREY          = 'grey';
   const COLOR_WHITE         = 'white';
+  const COLOR_PINK          = 'pink';
   const COLOR_BLUEGREY      = 'bluegrey';
   const COLOR_CHECKERED     = 'checkered';
   const COLOR_DISABLED      = 'disabled';
@@ -229,6 +230,7 @@ final class PHUITagView extends AphrontTagView {
       self::COLOR_VIOLET => pht('Violet'),
       self::COLOR_GREEN => pht('Green'),
       self::COLOR_GREY => pht('Grey'),
+      self::COLOR_PINK => pht('Pink'),
       self::COLOR_CHECKERED => pht('Checkered'),
       self::COLOR_DISABLED => pht('Disabled'),
     );

@@ -275,11 +275,11 @@ final class CelerityResourceTransformer {
       'sh-bluebackground'     => '#dee7f8',
 
       // Shade Indigo
-      'sh-lightindigoborder'  => '#f6d5ef',
-      'sh-indigoborder'       => '#d5aecd',
-      'sh-indigoicon'         => '#e26fcb',
-      'sh-indigotext'         => '#da49be',
-      'sh-indigobackground'   => '#fbeaf8',
+      'sh-lightindigoborder'  => '#d1c9ee',
+      'sh-indigoborder'       => '#bcb4da',
+      'sh-indigoicon'         => '#8672d4',
+      'sh-indigotext'         => '#6e5cb6',
+      'sh-indigobackground'   => '#eae6f7',
 
       // Shade Violet
       'sh-lightvioletborder'  => '#e0d1e7',
@@ -287,6 +287,13 @@ final class CelerityResourceTransformer {
       'sh-violeticon'         => '#9260ad',
       'sh-violettext'         => '#69427f',
       'sh-violetbackground'   => '#efe8f3',
+
+      // Shade Pink
+      'sh-lightpinkborder'  => '#f6d5ef',
+      'sh-pinkborder'       => '#d5aecd',
+      'sh-pinkicon'         => '#e26fcb',
+      'sh-pinktext'         => '#da49be',
+      'sh-pinkbackground'   => '#fbeaf8',
 
       // Shade Grey
       'sh-lightgreyborder'    => '#d8d8d8',
