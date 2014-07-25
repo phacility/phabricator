@@ -643,8 +643,8 @@ final class DiffusionCommitController extends DiffusionController {
 
   private function buildComments(PhabricatorRepositoryCommit $commit) {
     $user = $this->getRequest()->getUser();
-    $comments = id(new PhabricatorAuditComment())->loadAllWhere(
-      'targetPHID = %s ORDER BY dateCreated ASC',
+    $comments = PhabricatorAuditComment::loadComments(
+      $user,
       $commit->getPHID());
 
     $inlines = PhabricatorAuditInlineComment::loadPublishedComments(

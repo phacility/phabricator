@@ -15,6 +15,15 @@ final class PhabricatorAuditComment extends PhabricatorAuditDAO
   protected $content;
   protected $metadata = array();
 
+  public static function loadComments(
+    PhabricatorUser $viewer,
+    $commit_phid) {
+
+    return id(new PhabricatorAuditComment())->loadAllWhere(
+      'targetPHID = %s',
+      $commit_phid);
+  }
+
   public function getConfiguration() {
     return array(
       self::CONFIG_SERIALIZATION => array(

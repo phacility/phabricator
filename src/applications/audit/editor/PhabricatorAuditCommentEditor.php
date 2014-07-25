@@ -40,8 +40,8 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
     $commit = $this->commit;
     $actor = $this->getActor();
 
-    $other_comments = id(new PhabricatorAuditComment())->loadAllWhere(
-      'targetPHID = %s',
+    $other_comments = PhabricatorAuditComment::loadComments(
+      $actor,
       $commit->getPHID());
 
     $inline_comments = array();

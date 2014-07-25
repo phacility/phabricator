@@ -66,8 +66,8 @@ final class PhabricatorRepositoryCommitSearchIndexer
       PhabricatorRepositoryRepositoryPHIDType::TYPECONST,
       $date_created);
 
-    $comments = id(new PhabricatorAuditComment())->loadAllWhere(
-      'targetPHID = %s',
+    $comments = PhabricatorAuditComment::loadComments(
+      $this->getViewer(),
       $commit->getPHID());
     foreach ($comments as $comment) {
       if (strlen($comment->getContent())) {
