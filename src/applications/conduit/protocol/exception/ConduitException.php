@@ -1,6 +1,9 @@
 <?php
 
-final class ConduitException extends Exception {
+/**
+ * @concrete-extensible
+ */
+class ConduitException extends Exception {
 
   private $errorDescription;
 
@@ -12,7 +15,7 @@ final class ConduitException extends Exception {
    * @param string Detailed error description.
    * @return this
    */
-  public function setErrorDescription($error_description) {
+  final public function setErrorDescription($error_description) {
     $this->errorDescription = $error_description;
     return $this;
   }
@@ -22,7 +25,7 @@ final class ConduitException extends Exception {
    *
    * @return string|null Error description, if one is available.
    */
-  public function getErrorDescription() {
+  final public function getErrorDescription() {
     return $this->errorDescription;
   }
 

@@ -172,16 +172,13 @@ final class ConduitCall {
     $method = ConduitAPIMethod::getConduitMethod($method_name);
 
     if (!$method) {
-      throw new ConduitException(
-        "Conduit method '{$method_name}' does not exist.");
+      throw new ConduitMethodNotFoundException($method);
     }
 
     $application = $method->getApplication();
     if ($application && !$application->isInstalled()) {
       $app_name = $application->getName();
-      throw new ConduitException(
-        "Method '{$method_name}' belongs to application '{$app_name}', ".
-        "which is not installed.");
+      throw new ConduitApplicationNotInstalledException($method, $app_name);
     }
 
     return $method;
