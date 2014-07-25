@@ -4,7 +4,7 @@ final class DiffusionResolveRefsConduitAPIMethod
   extends DiffusionQueryConduitAPIMethod {
 
   public function getAPIMethodName() {
-    return 'differential.resolverefsquery';
+    return 'diffusion.resolverefs';
   }
 
   public function getMethodDescription() {

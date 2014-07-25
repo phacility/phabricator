@@ -96,7 +96,6 @@ abstract class ConduitAPIMethod
     if ($method_map === null) {
       $methods = id(new PhutilSymbolLoader())
         ->setAncestorClass(__CLASS__)
-        ->setConcreteOnly(true)
         ->loadObjects();
 
       foreach ($methods as $method) {

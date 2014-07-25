@@ -172,7 +172,7 @@ final class ConduitCall {
     $method = ConduitAPIMethod::getConduitMethod($method_name);
 
     if (!$method) {
-      throw new ConduitMethodNotFoundException($method);
+      throw new ConduitMethodNotFoundException($method_name);
     }
 
     $application = $method->getApplication();

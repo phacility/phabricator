@@ -4,7 +4,7 @@ final class DiffusionTagsQueryConduitAPIMethod
   extends DiffusionQueryConduitAPIMethod {
 
   public function getAPIMethodName() {
-    return 'differential.tagsquery';
+    return 'diffusion.tagsquery';
   }
 
   public function getMethodDescription() {

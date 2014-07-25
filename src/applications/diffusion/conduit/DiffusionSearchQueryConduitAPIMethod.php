@@ -4,7 +4,7 @@ final class DiffusionSearchQueryConduitAPIMethod
   extends DiffusionQueryConduitAPIMethod {
 
   public function getAPIMethodName() {
-    return 'differential.searchquery';
+    return 'diffusion.searchquery';
   }
 
   public function getMethodDescription() {
