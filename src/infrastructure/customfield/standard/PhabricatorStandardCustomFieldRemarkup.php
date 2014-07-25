@@ -32,7 +32,9 @@ final class PhabricatorStandardCustomFieldRemarkup
 
     $viewer = $this->getViewer();
     return PhabricatorMarkupEngine::renderOneObject(
-      id(new PhabricatorMarkupOneOff())->setContent($value),
+      id(new PhabricatorMarkupOneOff())
+        ->setContent($value)
+        ->setPReserveLinebreaks(true),
       'default',
       $viewer);
   }
