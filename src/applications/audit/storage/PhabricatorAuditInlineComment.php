@@ -33,7 +33,8 @@ final class PhabricatorAuditInlineComment
     $commit_phid) {
 
     $inlines = id(new PhabricatorAuditTransactionComment())->loadAllWhere(
-      'authorPHID = %s AND commitPHID = %s AND transactionPHID IS NULL',
+      'authorPHID = %s AND commitPHID = %s AND transactionPHID IS NULL
+        AND pathID IS NOT NULL',
       $viewer->getPHID(),
       $commit_phid);
 
@@ -45,7 +46,8 @@ final class PhabricatorAuditInlineComment
     $commit_phid) {
 
     $inlines = id(new PhabricatorAuditTransactionComment())->loadAllWhere(
-      'commitPHID = %s AND transactionPHID IS NOT NULL',
+      'commitPHID = %s AND transactionPHID IS NOT NULL
+        AND pathID IS NOT NULL',
       $commit_phid);
 
     return self::buildProxies($inlines);
@@ -58,7 +60,8 @@ final class PhabricatorAuditInlineComment
 
     if ($path_id === null) {
       $inlines = id(new PhabricatorAuditTransactionComment())->loadAllWhere(
-        'commitPHID = %s AND (transactionPHID IS NOT NULL OR authorPHID = %s)',
+        'commitPHID = %s AND (transactionPHID IS NOT NULL OR authorPHID = %s)
+          AND pathID IS NOT NULL',
         $commit_phid,
         $viewer->getPHID());
     } else {
