@@ -3932,10 +3932,7 @@ phutil_register_library_map(array(
     'PhabricatorAuditCommentEditor' => 'PhabricatorEditor',
     'PhabricatorAuditController' => 'PhabricatorController',
     'PhabricatorAuditDAO' => 'PhabricatorLiskDAO',
-    'PhabricatorAuditInlineComment' => array(
-      'PhabricatorAuditDAO',
-      'PhabricatorInlineCommentInterface',
-    ),
+    'PhabricatorAuditInlineComment' => 'PhabricatorInlineCommentInterface',
     'PhabricatorAuditListController' => 'PhabricatorAuditController',
     'PhabricatorAuditListView' => 'AphrontView',
     'PhabricatorAuditMailReceiver' => 'PhabricatorObjectMailReceiver',
