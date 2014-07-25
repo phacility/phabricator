@@ -168,41 +168,19 @@ final class ConduitCall {
     return $servers[array_rand($servers)];
   }
 
-  protected function buildMethodHandler($method) {
-    $method_class = ConduitAPIMethod::getClassNameFromAPIMethodName($method);
+  protected function buildMethodHandler($method_name) {
+    $method = ConduitAPIMethod::getConduitMethod($method_name);
 
-    // Test if the method exists.
-    $ok = false;
-    try {
-      $ok = class_exists($method_class);
-    } catch (Exception $ex) {
-      // Discard, we provide a more specific exception below.
-    }
-    if (!$ok) {
+    if (!$method) {
       throw new ConduitException(
-        "Conduit method '{$method}' does not exist.");
-    }
-
-    $class_info = new ReflectionClass($method_class);
-    if ($class_info->isAbstract()) {
-      throw new ConduitException(
-        "Method '{$method}' is not valid; the implementation is an abstract ".
-        "base class.");
-    }
-
-    $method = newv($method_class, array());
-
-    if (!($method instanceof ConduitAPIMethod)) {
-      throw new ConduitException(
-        "Method '{$method_class}' is not valid; the implementation must be ".
-        "a subclass of ConduitAPIMethod.");
+        "Conduit method '{$method_name}' does not exist.");
     }
 
     $application = $method->getApplication();
     if ($application && !$application->isInstalled()) {
       $app_name = $application->getName();
       throw new ConduitException(
-        "Method '{$method_class}' belongs to application '{$app_name}', ".
+        "Method '{$method_name}' belongs to application '{$app_name}', ".
         "which is not installed.");
     }
 

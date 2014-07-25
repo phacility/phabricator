@@ -98,5 +98,5 @@ information.
 
   - Use ##lint.xhpast.naminghook## in ##.arcconfig## to override naming
     convention rules. See @{class@arcanist:ArcanistXHPASTLintNamingHook}
-    for details, and @{class:PhabricatorSymbolNameLinter} for an example.
+    for details.
   - Use ##getXHPASTTreeForPath()## to reuse the AAST in other linters.
