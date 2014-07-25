@@ -27,15 +27,15 @@ final class ConduitQueryConduitAPIMethod extends ConduitAPIMethod {
       ->setAncestorClass('ConduitAPIMethod')
       ->setType('class')
       ->setConcreteOnly(true)
-      ->selectSymbolsWithoutLoading();
+      ->loadObjects();
 
     $names_to_params = array();
     foreach ($classes as $class) {
-      $method_name = $class['name'];
-      $obj = newv($method_name, array());
-      $names_to_params[$this->getAPIMethodNameFromClassName($method_name)] =
-        array('params' => $obj->defineParamTypes());
+      $names_to_params[$class->getAPIMethodName()] = array(
+        'params' => $class->defineParamTypes(),
+      );
     }
+
     return $names_to_params;
   }
 
