@@ -17,6 +17,45 @@ final class PhabricatorAuditInlineComment
 
   private $syntheticAuthor;
 
+  public static function loadDraftComments(
+    PhabricatorUser $viewer,
+    $commit_phid) {
+
+    return id(new PhabricatorAuditInlineComment())->loadAllWhere(
+      'authorPHID = %s AND commitPHID = %s AND auditCommentID IS NULL',
+      $viewer->getPHID(),
+      $commit_phid);
+  }
+
+  public static function loadPublishedComments(
+    PhabricatorUser $viewer,
+    $commit_phid) {
+
+    return id(new PhabricatorAuditInlineComment())->loadAllWhere(
+      'commitPHID = %s AND auditCommentID IS NOT NULL',
+      $commit_phid);
+  }
+
+  public static function loadDraftAndPublishedComments(
+    PhabricatorUser $viewer,
+    $commit_phid,
+    $path_id = null) {
+
+    if ($path_id === null) {
+      return id(new PhabricatorAuditInlineComment())->loadAllWhere(
+        'commitPHID = %s AND (auditCommentID IS NOT NULL OR authorPHID = %s)',
+        $commit_phid,
+        $viewer->getPHID());
+    } else {
+      return id(new PhabricatorAuditInlineComment())->loadAllWhere(
+        'commitPHID = %s AND pathID = %d AND
+          (authorPHID = %s OR auditCommentID IS NOT NULL)',
+        $commit_phid,
+        $path_id,
+        $viewer->getPHID());
+    }
+  }
+
   public function setSyntheticAuthor($synthetic_author) {
     $this->syntheticAuthor = $synthetic_author;
     return $this;

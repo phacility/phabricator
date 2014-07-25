@@ -86,12 +86,10 @@ final class DiffusionDiffController extends DiffusionController {
     $parser->setWhitespaceMode(
       DifferentialChangesetParser::WHITESPACE_SHOW_ALL);
 
-    $inlines = id(new PhabricatorAuditInlineComment())->loadAllWhere(
-      'commitPHID = %s AND pathID = %d AND
-        (authorPHID = %s OR auditCommentID IS NOT NULL)',
+    $inlines = PhabricatorAuditInlineComment::loadDraftAndPublishedComments(
+      $user,
       $drequest->loadCommit()->getPHID(),
-      $path_id,
-      $user->getPHID());
+      $path_id);
 
     if ($inlines) {
       foreach ($inlines as $inline) {

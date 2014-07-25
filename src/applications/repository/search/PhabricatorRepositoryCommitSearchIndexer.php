@@ -77,8 +77,8 @@ final class PhabricatorRepositoryCommitSearchIndexer
       }
     }
 
-    $inlines = id(new PhabricatorAuditInlineComment())->loadAllWhere(
-      'commitPHID = %s AND (auditCommentID IS NOT NULL)',
+    $inlines = PhabricatorAuditInlineComment::loadPublishedComments(
+      $this->getViewer(),
       $commit->getPHID());
     foreach ($inlines as $inline) {
       if (strlen($inline->getContent())) {

@@ -46,10 +46,8 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
 
     $inline_comments = array();
     if ($this->attachInlineComments) {
-      $inline_comments = id(new PhabricatorAuditInlineComment())->loadAllWhere(
-        'authorPHID = %s AND commitPHID = %s
-          AND auditCommentID IS NULL',
-        $actor->getPHID(),
+      $inline_comments = PhabricatorAuditInlineComment::loadDraftComments(
+        $actor,
         $commit->getPHID());
     }
 
