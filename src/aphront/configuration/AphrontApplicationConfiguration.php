@@ -113,16 +113,33 @@ abstract class AphrontApplicationConfiguration {
       array(
         $base_uri,
         $prod_uri,
-        $file_uri,
       ),
       $conduit_uris,
       $allowed_uris);
+
+    $cdn_routes = array(
+      '/res/',
+      '/file/data/',
+      '/file/xform/',
+      '/phame/r/',
+      );
 
     $host_match = false;
     foreach ($uris as $uri) {
       if ($host === id(new PhutilURI($uri))->getDomain()) {
         $host_match = true;
         break;
+      }
+    }
+
+    if (!$host_match) {
+      if ($host === id(new PhutilURI($file_uri))->getDomain()) {
+        foreach ($cdn_routes as $route) {
+          if (strncmp($path, $route, strlen($route)) == 0) {
+            $host_match = true;
+            break;
+          }
+        }
       }
     }
 
