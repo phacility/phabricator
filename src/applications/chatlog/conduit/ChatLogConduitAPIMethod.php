@@ -3,7 +3,7 @@
 abstract class ChatLogConduitAPIMethod extends ConduitAPIMethod {
 
   final public function getApplication() {
-    return PhabricatorApplication::getByClass('PhabricatorApplicationChatLog');
+    return PhabricatorApplication::getByClass('PhabricatorChatLogApplication');
   }
 
 }

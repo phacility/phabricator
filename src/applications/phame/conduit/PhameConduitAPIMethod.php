@@ -3,7 +3,7 @@
 abstract class PhameConduitAPIMethod extends ConduitAPIMethod {
 
   final public function getApplication() {
-    return PhabricatorApplication::getByClass('PhabricatorApplicationPhame');
+    return PhabricatorApplication::getByClass('PhabricatorPhameApplication');
   }
 
 }

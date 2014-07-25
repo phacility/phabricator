@@ -4,7 +4,7 @@ abstract class DiffusionConduitAPIMethod extends ConduitAPIMethod {
 
   final public function getApplication() {
     return PhabricatorApplication::getByClass(
-      'PhabricatorApplicationDiffusion');
+      'PhabricatorDiffusionApplication');
   }
 
 }
