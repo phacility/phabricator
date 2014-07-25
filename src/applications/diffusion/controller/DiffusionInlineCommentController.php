@@ -40,7 +40,7 @@ final class DiffusionInlineCommentController
   }
 
   protected function loadComment($id) {
-    return id(new PhabricatorAuditInlineComment())->load($id);
+    return PhabricatorAuditInlineComment::loadID($id);
   }
 
   protected function loadCommentForEdit($id) {

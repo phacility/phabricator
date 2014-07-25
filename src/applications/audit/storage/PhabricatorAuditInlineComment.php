@@ -28,6 +28,17 @@ final class PhabricatorAuditInlineComment
     return $this->proxy;
   }
 
+  public static function loadID($id) {
+    $inlines = id(new PhabricatorAuditTransactionComment())->loadAllWhere(
+      'id = %d',
+      $id);
+    if (!$inlines) {
+      return null;
+    }
+
+    return head(self::buildProxies($inlines));
+  }
+
   public static function loadDraftComments(
     PhabricatorUser $viewer,
     $commit_phid) {
