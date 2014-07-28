@@ -3,25 +3,11 @@
 final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
 
   private $commit;
-
   private $attachInlineComments;
-  private $auditors = array();
-  private $ccs = array();
-
   private $noEmail;
 
   public function __construct(PhabricatorRepositoryCommit $commit) {
     $this->commit = $commit;
-    return $this;
-  }
-
-  public function addAuditors(array $auditor_phids) {
-    $this->auditors = array_merge($this->auditors, $auditor_phids);
-    return $this;
-  }
-
-  public function addCCs(array $cc_phids) {
-    $this->ccs = array_merge($this->ccs, $cc_phids);
     return $this;
   }
 
@@ -35,7 +21,8 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
     return $this;
   }
 
-  public function addComment(PhabricatorAuditComment $comment) {
+  public function addComments(array $comments) {
+    assert_instances_of($comments, 'PhabricatorAuditComment');
 
     $commit = $this->commit;
     $actor = $this->getActor();
@@ -51,38 +38,26 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
         $commit->getPHID());
     }
 
-    $comment
-      ->setActorPHID($actor->getPHID())
-      ->setTargetPHID($commit->getPHID())
-      ->save();
+    $content_blocks = array();
+    foreach ($comments as $comment) {
+      $content_blocks[] = $comment->getContent();
+    }
 
-    $content_blocks = array($comment->getContent());
     foreach ($inline_comments as $inline) {
       $content_blocks[] = $inline->getContent();
     }
-
-    $ccs = $this->ccs;
-    $auditors = $this->auditors;
-
-    $metadata = $comment->getMetadata();
-    $metacc = array();
 
     // Find any "@mentions" in the content blocks.
     $mention_ccs = PhabricatorMarkupEngine::extractPHIDsFromMentions(
       $this->getActor(),
       $content_blocks);
     if ($mention_ccs) {
-      $metacc = idx(
-        $metadata,
-        PhabricatorAuditComment::METADATA_ADDED_CCS,
-        array());
-      foreach ($mention_ccs as $cc_phid) {
-        $metacc[] = $cc_phid;
-      }
-    }
-
-    if ($metacc) {
-      $ccs = array_merge($ccs, $metacc);
+      $comments[] = id(new PhabricatorAuditComment())
+        ->setAction(PhabricatorAuditActionConstants::ADD_CCS)
+        ->setMetadata(
+          array(
+            PhabricatorAuditComment::METADATA_ADDED_CCS => $mention_ccs,
+          ));
     }
 
     // When an actor submits an audit comment, we update all the audit requests
@@ -101,17 +76,28 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
 
     $action = $comment->getAction();
 
-
     // TODO: We should validate the action, currently we allow anyone to, e.g.,
     // close an audit if they muck with form parameters. I'll followup with this
     // and handle the no-effect cases (e.g., closing and already-closed audit).
 
-
     $actor_is_author = ($actor->getPHID() == $commit->getAuthorPHID());
+
+    // Pick a meaningful action, if we have one.
+    $action = PhabricatorAuditActionConstants::COMMENT;
+    foreach ($comments as $comment) {
+      switch ($comment->getAction()) {
+        case PhabricatorAuditActionConstants::CLOSE:
+        case PhabricatorAuditActionConstants::RESIGN:
+        case PhabricatorAuditActionConstants::ACCEPT:
+        case PhabricatorAuditActionConstants::CONCERN:
+          $action = $comment->getAction();
+          break;
+      }
+    }
 
     if ($action == PhabricatorAuditActionConstants::CLOSE) {
       if (!PhabricatorEnv::getEnvConfig('audit.can-author-close-audit')) {
-          throw new Exception('Cannot Close Audit without enabling'.
+        throw new Exception('Cannot Close Audit without enabling'.
           'audit.can-author-close-audit');
       }
       // "Close" means wipe out all the concerns.
@@ -219,32 +205,33 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
       }
     }
 
+    $auditors = array();
+    $ccs = array();
+    foreach ($comments as $comment) {
+      $meta = $comment->getMetadata();
+
+      $auditor_phids = idx(
+        $meta,
+        PhabricatorAuditComment::METADATA_ADDED_AUDITORS,
+        array());
+      foreach ($auditor_phids as $phid) {
+        $auditors[] = $phid;
+      }
+
+      $cc_phids = idx(
+        $meta,
+        PhabricatorAuditComment::METADATA_ADDED_CCS,
+        array());
+      foreach ($cc_phids as $phid) {
+        $ccs[] = $phid;
+      }
+    }
+
     $requests_by_auditor = mpull($requests, null, 'getAuditorPHID');
     $requests_phids = array_keys($requests_by_auditor);
 
     $ccs = array_diff($ccs, $requests_phids);
     $auditors = array_diff($auditors, $requests_phids);
-
-    if ($action == PhabricatorAuditActionConstants::ADD_CCS) {
-      if ($ccs) {
-        $metadata[PhabricatorAuditComment::METADATA_ADDED_CCS] = $ccs;
-        $comment->setMetaData($metadata);
-      } else {
-        $comment->setAction(PhabricatorAuditActionConstants::COMMENT);
-      }
-    }
-
-    if ($action == PhabricatorAuditActionConstants::ADD_AUDITORS) {
-      if ($auditors) {
-        $metadata[PhabricatorAuditComment::METADATA_ADDED_AUDITORS]
-          = $auditors;
-        $comment->setMetaData($metadata);
-      } else {
-        $comment->setAction(PhabricatorAuditActionConstants::COMMENT);
-      }
-    }
-
-    $comment->save();
 
     if ($auditors) {
       foreach ($auditors as $auditor_phid) {
@@ -275,7 +262,13 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
     $commit->updateAuditStatus($requests);
     $commit->save();
 
-    $comments = array($comment);
+    foreach ($comments as $comment) {
+      $comment
+        ->setActorPHID($actor->getPHID())
+        ->setTargetPHID($commit->getPHID())
+        ->save();
+    }
+
     foreach ($inline_comments as $inline) {
       $xaction = id(new PhabricatorAuditComment())
         ->setAction(PhabricatorAuditActionConstants::INLINE)
@@ -307,7 +300,9 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
     $feed_dont_publish_phids = array_keys($feed_dont_publish_phids);
 
     $feed_phids = array_diff($requests_phids, $feed_dont_publish_phids);
-    $this->publishFeedStory($comment, $feed_phids);
+    foreach ($comments as $comment) {
+      $this->publishFeedStory($comment, $feed_phids);
+    }
 
     id(new PhabricatorSearchIndexer())
       ->queueDocumentForIndexing($commit->getPHID());

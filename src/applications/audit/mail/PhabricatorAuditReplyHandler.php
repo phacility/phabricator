@@ -45,7 +45,7 @@ final class PhabricatorAuditReplyHandler extends PhabricatorMailReplyHandler {
     $editor->setActor($actor);
     $editor->setExcludeMailRecipientPHIDs(
       $this->getExcludeMailRecipientPHIDs());
-    $editor->addComment($comment);
+    $editor->addComments(array($comment));
   }
 
 }

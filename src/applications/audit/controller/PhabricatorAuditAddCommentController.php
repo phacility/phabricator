@@ -15,41 +15,55 @@ final class PhabricatorAuditAddCommentController
     $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
       'phid = %s',
       $commit_phid);
-
     if (!$commit) {
       return new Aphront404Response();
     }
 
     $phids = array($commit_phid);
 
-    $action = $request->getStr('action');
-
-    $comment = id(new PhabricatorAuditComment())
-      ->setAction($action)
-      ->setContent($request->getStr('content'));
+    $comments = array();
 
     // make sure we only add auditors or ccs if the action matches
+    $action = $request->getStr('action');
     switch ($action) {
-      case 'add_auditors':
+      case PhabricatorAuditActionConstants::ADD_AUDITORS:
         $auditors = $request->getArr('auditors');
-        $ccs = array();
+        $comments[] = id(new PhabricatorAuditComment())
+          ->setAction(PhabricatorAuditActionConstants::ADD_AUDITORS)
+          ->setMetadata(
+            array(
+              PhabricatorAuditComment::METADATA_ADDED_AUDITORS => $auditors,
+            ));
         break;
-      case 'add_ccs':
-        $auditors = array();
+      case PhabricatorAuditActionConstants::ADD_CCS:
         $ccs = $request->getArr('ccs');
+        $comments[] = id(new PhabricatorAuditComment())
+          ->setAction(PhabricatorAuditActionConstants::ADD_CCS)
+          ->setMetadata(
+            array(
+              PhabricatorAuditComment::METADATA_ADDED_CCS => $ccs,
+            ));
+        break;
+      case PhabricatorAuditActionConstants::COMMENT:
+        // We'll deal with this below.
         break;
       default:
-        $auditors = array();
-        $ccs = array();
+        $comments[] = id(new PhabricatorAuditComment())
+          ->setAction($action);
         break;
+    }
+
+    $content = $request->getStr('content');
+    if (strlen($content)) {
+      $comments[] = id(new PhabricatorAuditComment())
+        ->setAction(PhabricatorAuditActionConstants::COMMENT)
+        ->setContent($content);
     }
 
     id(new PhabricatorAuditCommentEditor($commit))
       ->setActor($user)
       ->setAttachInlineComments(true)
-      ->addAuditors($auditors)
-      ->addCCs($ccs)
-      ->addComment($comment);
+      ->addComments($comments);
 
     $handles = $this->loadViewerHandles($phids);
     $uri = $handles[$commit_phid]->getURI();
