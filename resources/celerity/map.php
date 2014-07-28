@@ -12,7 +12,7 @@ return array(
     'darkconsole.pkg.js' => 'df001cab',
     'differential.pkg.css' => '4a93db37',
     'differential.pkg.js' => '7528cfc9',
-    'diffusion.pkg.css' => '471bc9eb',
+    'diffusion.pkg.css' => '591664fa',
     'diffusion.pkg.js' => 'bfc0737b',
     'maniphest.pkg.css' => 'f5d89daf',
     'maniphest.pkg.js' => 'df4aa49f',
@@ -62,7 +62,6 @@ return array(
     'rsrc/css/application/differential/revision-history.css' => '0e8eb855',
     'rsrc/css/application/differential/revision-list.css' => 'f3c47d33',
     'rsrc/css/application/differential/table-of-contents.css' => '6bf8e1d2',
-    'rsrc/css/application/diffusion/commit-view.css' => '92d1e8f9',
     'rsrc/css/application/diffusion/diffusion-icons.css' => '9c5828da',
     'rsrc/css/application/diffusion/diffusion-source.css' => '66fdf661',
     'rsrc/css/application/feed/feed.css' => '4e544db4',
@@ -534,7 +533,6 @@ return array(
     'differential-revision-history-css' => '0e8eb855',
     'differential-revision-list-css' => 'f3c47d33',
     'differential-table-of-contents-css' => '6bf8e1d2',
-    'diffusion-commit-view-css' => '92d1e8f9',
     'diffusion-icons-css' => '9c5828da',
     'diffusion-source-css' => '66fdf661',
     'diviner-shared-css' => '38813222',
@@ -2137,7 +2135,6 @@ return array(
       'javelin-behavior-aphront-more',
     ),
     'diffusion.pkg.css' => array(
-      'diffusion-commit-view-css',
       'diffusion-icons-css',
     ),
     'diffusion.pkg.js' => array(

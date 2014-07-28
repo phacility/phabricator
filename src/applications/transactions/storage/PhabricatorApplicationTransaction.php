@@ -264,9 +264,10 @@ abstract class PhabricatorApplicationTransaction
     if (empty($this->handles[$phid])) {
       throw new Exception(
         pht(
-          'Transaction ("%s") requires a handle ("%s") that it did not '.
-          'load.',
+          'Transaction ("%s", of type "%s") requires a handle ("%s") that it '.
+          'did not load.',
           $this->getPHID(),
+          $this->getTransactionType(),
           $phid));
     }
     return $this->handles[$phid];

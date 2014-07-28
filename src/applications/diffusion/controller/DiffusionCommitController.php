@@ -100,7 +100,6 @@ final class DiffusionCommitController extends DiffusionController {
       $engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine();
       $engine->setConfig('viewer', $user);
 
-      require_celerity_resource('diffusion-commit-view-css');
       require_celerity_resource('phabricator-remarkup-css');
 
       $parents = $this->callConduitWithDiffusionRequest(
@@ -642,16 +641,23 @@ final class DiffusionCommitController extends DiffusionController {
   }
 
   private function buildComments(PhabricatorRepositoryCommit $commit) {
-    $user = $this->getRequest()->getUser();
-    $comments = PhabricatorAuditComment::loadComments(
-      $user,
-      $commit->getPHID());
+    $viewer = $this->getRequest()->getUser();
 
-    $inlines = PhabricatorAuditInlineComment::loadPublishedComments(
-      $user,
-      $commit->getPHID());
+    $xactions = id(new PhabricatorAuditTransactionQuery())
+      ->setViewer($viewer)
+      ->withObjectPHIDs(array($commit->getPHID()))
+      ->needComments(true)
+      ->execute();
 
-    $path_ids = mpull($inlines, 'getPathID');
+    $path_ids = array();
+    foreach ($xactions as $xaction) {
+      if ($xaction->hasComment()) {
+        $path_id = $xaction->getComment()->getPathID();
+        if ($path_id) {
+          $path_ids[] = $path_id;
+        }
+      }
+    }
 
     $path_map = array();
     if ($path_ids) {
@@ -661,35 +667,11 @@ final class DiffusionCommitController extends DiffusionController {
       $path_map = ipull($path_map, 'path', 'id');
     }
 
-    $engine = new PhabricatorMarkupEngine();
-    $engine->setViewer($user);
-
-    foreach ($comments as $comment) {
-      $engine->addObject(
-        $comment,
-        PhabricatorAuditComment::MARKUP_FIELD_BODY);
-    }
-
-    foreach ($inlines as $inline) {
-      $engine->addObject(
-        $inline,
-        PhabricatorInlineCommentInterface::MARKUP_FIELD_BODY);
-    }
-
-    $engine->process();
-
-    $view = new DiffusionCommentListView();
-    $view->setMarkupEngine($engine);
-    $view->setUser($user);
-    $view->setComments($comments);
-    $view->setInlineComments($inlines);
-    $view->setPathMap($path_map);
-
-    $phids = $view->getRequiredHandlePHIDs();
-    $handles = $this->loadViewerHandles($phids);
-    $view->setHandles($handles);
-
-    return $view;
+    return id(new PhabricatorAuditTransactionView())
+      ->setUser($viewer)
+      ->setObjectPHID($commit->getPHID())
+      ->setPathMap($path_map)
+      ->setTransactions($xactions);
   }
 
   private function renderAddCommentPanel(
