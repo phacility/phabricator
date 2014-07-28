@@ -66,27 +66,10 @@ final class PhabricatorRepositoryCommitSearchIndexer
       PhabricatorRepositoryRepositoryPHIDType::TYPECONST,
       $date_created);
 
-    $comments = PhabricatorAuditComment::loadComments(
-      $this->getViewer(),
-      $commit->getPHID());
-    foreach ($comments as $comment) {
-      if (strlen($comment->getContent())) {
-        $doc->addField(
-          PhabricatorSearchField::FIELD_COMMENT,
-          $comment->getContent());
-      }
-    }
-
-    $inlines = PhabricatorAuditInlineComment::loadPublishedComments(
-      $this->getViewer(),
-      $commit->getPHID());
-    foreach ($inlines as $inline) {
-      if (strlen($inline->getContent())) {
-        $doc->addField(
-          PhabricatorSearchField::FIELD_COMMENT,
-          $inline->getContent());
-      }
-    }
+    $this->indexTransactions(
+      $doc,
+      new PhabricatorAuditTransactionQuery(),
+      array($commit->getPHID()));
 
     return $doc;
   }
