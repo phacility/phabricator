@@ -65,14 +65,14 @@ final class DiffusionCommentListView extends AphrontView {
 
   public function render() {
 
-    $inline_comments = mgroup($this->inlineComments, 'getAuditCommentID');
+    $inline_comments = mgroup($this->inlineComments, 'getTransactionPHID');
 
     $num = 1;
 
     $comments = array();
     foreach ($this->comments as $comment) {
 
-      $inlines = idx($inline_comments, $comment->getID(), array());
+      $inlines = idx($inline_comments, $comment->getPHID(), array());
 
       $view = id(new DiffusionCommentView())
         ->setMarkupEngine($this->getMarkupEngine())

@@ -14,6 +14,10 @@ final class PhabricatorAuditInlineComment
     $this->proxy = clone $this->proxy;
   }
 
+  public function getTransactionPHID() {
+    return $this->proxy->getTransactionPHID();
+  }
+
   public function getTransactionCommentForSave() {
     $content_source = PhabricatorContentSource::newForSource(
       PhabricatorContentSource::SOURCE_LEGACY,

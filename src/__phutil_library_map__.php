@@ -3929,10 +3929,7 @@ phutil_register_library_map(array(
     'PhabricatorAsanaConfigOptions' => 'PhabricatorApplicationConfigOptions',
     'PhabricatorAuditAddCommentController' => 'PhabricatorAuditController',
     'PhabricatorAuditApplication' => 'PhabricatorApplication',
-    'PhabricatorAuditComment' => array(
-      'PhabricatorAuditDAO',
-      'PhabricatorMarkupInterface',
-    ),
+    'PhabricatorAuditComment' => 'PhabricatorMarkupInterface',
     'PhabricatorAuditCommentEditor' => 'PhabricatorEditor',
     'PhabricatorAuditController' => 'PhabricatorController',
     'PhabricatorAuditDAO' => 'PhabricatorLiskDAO',

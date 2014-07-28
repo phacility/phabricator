@@ -262,22 +262,26 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
     $commit->updateAuditStatus($requests);
     $commit->save();
 
+    $content_source = PhabricatorContentSource::newForSource(
+      PhabricatorContentSource::SOURCE_LEGACY,
+      array());
+
     foreach ($comments as $comment) {
       $comment
         ->setActorPHID($actor->getPHID())
         ->setTargetPHID($commit->getPHID())
+        ->setContentSource($content_source)
         ->save();
     }
 
     foreach ($inline_comments as $inline) {
       $xaction = id(new PhabricatorAuditComment())
+        ->setProxyComment($inline->getTransactionCommentForSave())
         ->setAction(PhabricatorAuditActionConstants::INLINE)
         ->setActorPHID($actor->getPHID())
         ->setTargetPHID($commit->getPHID())
+        ->setContentSource($content_source)
         ->save();
-
-      $inline->setAuditCommentID($xaction->getID());
-      $inline->save();
 
       $comments[] = $xaction;
     }

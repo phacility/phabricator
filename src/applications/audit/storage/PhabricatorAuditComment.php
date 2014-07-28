@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorAuditComment extends PhabricatorAuditDAO
+final class PhabricatorAuditComment
   implements PhabricatorMarkupInterface {
 
   const METADATA_ADDED_AUDITORS  = 'added-auditors';
@@ -8,71 +8,91 @@ final class PhabricatorAuditComment extends PhabricatorAuditDAO
 
   const MARKUP_FIELD_BODY        = 'markup:body';
 
-  protected $phid;
-  protected $actorPHID;
-  protected $targetPHID;
-  protected $action;
-  protected $content = '';
-  protected $metadata = array();
-
   private $proxyComment;
+  private $proxy;
+
+  public function __construct() {
+    $this->proxy = new PhabricatorAuditTransaction();
+  }
+
+  public function __clone() {
+    $this->proxy = clone $this->proxy;
+    if ($this->proxyComment) {
+      $this->proxyComment = clone $this->proxyComment;
+    }
+  }
+
+  public static function newFromModernTransaction(
+    PhabricatorAuditTransaction $xaction) {
+
+    $obj = new PhabricatorAuditComment();
+    $obj->proxy = $xaction;
+
+    if ($xaction->hasComment()) {
+      $obj->proxyComment = $xaction->getComment();
+    }
+
+    return $obj;
+  }
 
   public static function loadComments(
     PhabricatorUser $viewer,
     $commit_phid) {
 
-    $comments = id(new PhabricatorAuditComment())->loadAllWhere(
-      'targetPHID = %s',
-      $commit_phid);
+    $xactions = id(new PhabricatorAuditTransactionQuery())
+      ->setViewer($viewer)
+      ->withObjectPHIDs(array($commit_phid))
+      ->needComments(true)
+      ->execute();
 
-    if ($comments) {
-      $table = new PhabricatorAuditTransactionComment();
-      $conn_r = $table->establishConnection('r');
-
-      $data = queryfx_all(
-        $conn_r,
-        'SELECT * FROM %T WHERE legacyCommentID IN (%Ld) AND pathID IS NULL',
-        $table->getTableName(),
-        mpull($comments, 'getID'));
-      $texts = $table->loadAllFromArray($data);
-      $texts = mpull($texts, null, 'getLegacyCommentID');
-
-      foreach ($comments as $comment) {
-        $text = idx($texts, $comment->getID());
-        if ($text) {
-          $comment->setProxyComment($text);
-        }
-      }
+    $comments = array();
+    foreach ($xactions as $xaction) {
+      $comments[] = self::newFromModernTransaction($xaction);
     }
 
     return $comments;
   }
 
-  public function getConfiguration() {
-    return array(
-      self::CONFIG_SERIALIZATION => array(
-        'metadata' => self::SERIALIZATION_JSON,
-      ),
-      self::CONFIG_AUX_PHID => true,
-    ) + parent::getConfiguration();
+  public function getPHID() {
+    return $this->proxy->getPHID();
   }
 
-  public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID('ACMT');
+  public function getActorPHID() {
+    return $this->proxy->getAuthorPHID();
   }
 
+  public function setActorPHID($actor_phid) {
+    $this->proxy->setAuthorPHID($actor_phid);
+    return $this;
+  }
+
+  public function setTargetPHID($target_phid) {
+    $this->getProxyComment()->setCommitPHID($target_phid);
+    $this->proxy->setObjectPHID($target_phid);
+    return $this;
+  }
+
+  public function getTargetPHID() {
+    return $this->proxy->getObjectPHID();
+  }
 
   public function getContent() {
     return $this->getProxyComment()->getContent();
   }
 
   public function setContent($content) {
-    // NOTE: We no longer read this field, but there's no cost to continuing
-    // to write it in case something goes horribly wrong, since it makes it
-    // far easier to back out of this.
-    $this->content = $content;
     $this->getProxyComment()->setContent($content);
     return $this;
+  }
+
+  public function setContentSource($content_source) {
+    $this->proxy->setContentSource($content_source);
+    $this->proxyComment->setContentSource($content_source);
+    return $this;
+  }
+
+  public function getContentSource() {
+    return $this->proxy->getContentSource();
   }
 
   private function getProxyComment() {
@@ -90,39 +110,116 @@ final class PhabricatorAuditComment extends PhabricatorAuditDAO
     return $this;
   }
 
-  public function setTargetPHID($target_phid) {
-    $this->getProxyComment()->setCommitPHID($target_phid);
-    return parent::setTargetPHID($target_phid);
+  public function setAction($action) {
+    switch ($action) {
+      case PhabricatorAuditActionConstants::INLINE:
+      case PhabricatorAuditActionConstants::ADD_CCS:
+      case PhabricatorAuditActionConstants::ADD_AUDITORS:
+        $this->proxy->setTransactionType($action);
+        break;
+      case PhabricatorAuditActionConstants::COMMENT:
+        $this->proxy->setTransactionType(PhabricatorTransactions::TYPE_COMMENT);
+        break;
+      default:
+        $this->proxy
+          ->setTransactionType(PhabricatorAuditActionConstants::ACTION)
+          ->setNewValue($action);
+        break;
+    }
+
+    return $this;
+  }
+
+  public function getAction() {
+    $type = $this->proxy->getTransactionType();
+    switch ($type) {
+      case PhabricatorTransactions::TYPE_COMMENT:
+        return PhabricatorAuditActionConstants::COMMENT;
+      case PhabricatorAuditActionConstants::INLINE:
+      case PhabricatorAuditActionConstants::ADD_CCS:
+      case PhabricatorAuditActionConstants::ADD_AUDITORS:
+        return $type;
+      default:
+        return $this->proxy->getNewValue();
+    }
+  }
+
+  public function setMetadata(array $metadata) {
+    if (!$this->proxy->getTransactionType()) {
+      throw new Exception(pht('Call setAction() before getMetadata()!'));
+    }
+
+    $type = $this->proxy->getTransactionType();
+    switch ($type) {
+      case PhabricatorAuditActionConstants::ADD_CCS:
+        $raw_phids = idx($metadata, self::METADATA_ADDED_CCS, array());
+        break;
+      case PhabricatorAuditActionConstants::ADD_AUDITORS:
+        $raw_phids = idx($metadata, self::METADATA_ADDED_AUDITORS, array());
+        break;
+      default:
+        throw new Exception(pht('No metadata expected!'));
+    }
+
+    $this->proxy->setOldValue(array());
+    $this->proxy->setNewValue(array_fuse($raw_phids));
+
+    return $this;
+  }
+
+  public function getMetadata() {
+    if (!$this->proxy->getTransactionType()) {
+      throw new Exception(pht('Call setAction() before getMetadata()!'));
+    }
+
+    $type = $this->proxy->getTransactionType();
+    $new_value = $this->proxy->getNewValue();
+    switch ($type) {
+      case PhabricatorAuditActionConstants::ADD_CCS:
+        return array(
+          self::METADATA_ADDED_CCS => array_keys($new_value),
+        );
+      case PhabricatorAuditActionConstants::ADD_AUDITORS:
+        return array(
+          self::METADATA_ADDED_AUDITORS => array_keys($new_value),
+        );
+    }
+
+    return array();
   }
 
   public function save() {
-    $this->openTransaction();
-      $result = parent::save();
+    $this->proxy->openTransaction();
+      $this->proxy
+        ->setViewPolicy('public')
+        ->setEditPolicy($this->getActorPHID())
+        ->save();
 
       if (strlen($this->getContent())) {
-        $content_source = PhabricatorContentSource::newForSource(
-          PhabricatorContentSource::SOURCE_LEGACY,
-          array());
-
-        $xaction_phid = PhabricatorPHID::generateNewPHID(
-          PhabricatorApplicationTransactionTransactionPHIDType::TYPECONST,
-          PhabricatorRepositoryCommitPHIDType::TYPECONST);
-
-        $proxy = $this->getProxyComment();
-        $proxy
+        $this->getProxyComment()
           ->setAuthorPHID($this->getActorPHID())
           ->setViewPolicy('public')
           ->setEditPolicy($this->getActorPHID())
-          ->setContentSource($content_source)
           ->setCommentVersion(1)
-          ->setLegacyCommentID($this->getID())
-          ->setTransactionPHID($xaction_phid)
+          ->setTransactionPHID($this->proxy->getPHID())
+          ->save();
+
+        $this->proxy
+          ->setCommentVersion(1)
+          ->setCommentPHID($this->getProxyComment()->getPHID())
           ->save();
       }
+    $this->proxy->saveTransaction();
 
-    $this->saveTransaction();
+    return $this;
+  }
 
-    return $result;
+  public function getDateCreated() {
+    return $this->proxy->getDateCreated();
+  }
+
+  public function getDateModified() {
+    return $this->proxy->getDateModified();
   }
 
 
@@ -130,7 +227,7 @@ final class PhabricatorAuditComment extends PhabricatorAuditDAO
 
 
   public function getMarkupFieldKey($field) {
-    return 'AC:'.$this->getID();
+    return 'AC:'.$this->getPHID();
   }
 
   public function newMarkupEngine($field) {
@@ -146,7 +243,7 @@ final class PhabricatorAuditComment extends PhabricatorAuditDAO
   }
 
   public function shouldUseMarkupCache($field) {
-    return (bool)$this->getID();
+    return (bool)$this->getPHID();
   }
 
 }
