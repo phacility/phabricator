@@ -10,9 +10,8 @@ final class PhabricatorMacroDisableController
   }
 
   public function processRequest() {
-
     $this->requireApplicationCapability(
-      PhabricatorMacroCapabilityManage::CAPABILITY);
+      PhabricatorMacroManageCapability::CAPABILITY);
 
     $request = $this->getRequest();
     $user = $request->getUser();
@@ -55,4 +54,5 @@ final class PhabricatorMacroDisableController
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }
+
 }

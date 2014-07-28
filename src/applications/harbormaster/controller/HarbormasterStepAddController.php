@@ -1,7 +1,6 @@
 <?php
 
-final class HarbormasterStepAddController
-  extends HarbormasterController {
+final class HarbormasterStepAddController extends HarbormasterController {
 
   private $id;
 
@@ -14,12 +13,12 @@ final class HarbormasterStepAddController
     $viewer = $request->getUser();
 
     $this->requireApplicationCapability(
-      HarbormasterCapabilityManagePlans::CAPABILITY);
+      HarbormasterManagePlansCapability::CAPABILITY);
 
     $plan = id(new HarbormasterBuildPlanQuery())
-        ->setViewer($viewer)
-        ->withIDs(array($this->id))
-        ->executeOne();
+      ->setViewer($viewer)
+      ->withIDs(array($this->id))
+      ->executeOne();
     if (!$plan) {
       return new Aphront404Response();
     }
@@ -31,8 +30,7 @@ final class HarbormasterStepAddController
     if ($request->isFormPost()) {
       $class = $request->getStr('class');
       if (!HarbormasterBuildStepImplementation::getImplementation($class)) {
-        $errors[] = pht(
-          'Choose the type of build step you want to add.');
+        $errors[] = pht('Choose the type of build step you want to add.');
       }
       if (!$errors) {
         $new_uri = $this->getApplicationURI("step/new/{$plan_id}/{$class}/");

@@ -1,14 +1,13 @@
 <?php
 
-final class DiffusionRepositoryNewController
-  extends DiffusionController {
+final class DiffusionRepositoryNewController extends DiffusionController {
 
   public function processRequest() {
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
     $this->requireApplicationCapability(
-      DiffusionCapabilityCreateRepositories::CAPABILITY);
+      DiffusionCreateRepositoriesCapability::CAPABILITY);
 
     if ($request->isFormPost()) {
       if ($request->getStr('type')) {

@@ -104,18 +104,18 @@ final class PhabricatorManiphestApplication extends PhabricatorApplication {
 
   protected function getCustomCapabilities() {
     return array(
-      ManiphestCapabilityDefaultView::CAPABILITY => array(
+      ManiphestDefaultViewCapability::CAPABILITY => array(
         'caption' => pht('Default view policy for newly created tasks.'),
       ),
-      ManiphestCapabilityDefaultEdit::CAPABILITY => array(
+      ManiphestDefaultEditCapability::CAPABILITY => array(
         'caption' => pht('Default edit policy for newly created tasks.'),
       ),
-      ManiphestCapabilityEditStatus::CAPABILITY => array(),
-      ManiphestCapabilityEditAssign::CAPABILITY => array(),
-      ManiphestCapabilityEditPolicies::CAPABILITY => array(),
-      ManiphestCapabilityEditPriority::CAPABILITY => array(),
-      ManiphestCapabilityEditProjects::CAPABILITY => array(),
-      ManiphestCapabilityBulkEdit::CAPABILITY => array(),
+      ManiphestEditStatusCapability::CAPABILITY => array(),
+      ManiphestEditAssignCapability::CAPABILITY => array(),
+      ManiphestEditPoliciesCapability::CAPABILITY => array(),
+      ManiphestEditPriorityCapability::CAPABILITY => array(),
+      ManiphestEditProjectsCapability::CAPABILITY => array(),
+      ManiphestBulkEditCapability::CAPABILITY => array(),
     );
   }
 

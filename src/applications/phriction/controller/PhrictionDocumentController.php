@@ -208,6 +208,7 @@ final class PhrictionDocumentController
 
     $page_content = id(new PHUIDocumentView())
       ->setOffset(true)
+      ->setFontKit(PHUIDocumentView::FONT_SOURCE_SANS)
       ->setHeader($header)
       ->appendChild(
         array(

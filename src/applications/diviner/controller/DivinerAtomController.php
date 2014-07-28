@@ -121,6 +121,7 @@ final class DivinerAtomController extends DivinerController {
     $document = id(new PHUIDocumentView())
       ->setBook($book->getTitle(), $group_name)
       ->setHeader($header)
+      ->addClass('diviner-view')
       ->setFontKit(PHUIDocumentView::FONT_SOURCE_SANS)
       ->appendChild($properties)
       ->appendChild($warnings)

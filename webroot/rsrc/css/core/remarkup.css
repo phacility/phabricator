@@ -225,6 +225,12 @@
   background: {$lightred};
 }
 
+.phabricator-remarkup .remarkup-note .remarkup-monospaced,
+.phabricator-remarkup .remarkup-important .remarkup-monospaced,
+.phabricator-remarkup .remarkup-warning .remarkup-monospaced {
+  background-color: rgba(150,150,150,.2);
+}
+
 .phabricator-remarkup .remarkup-note-word {
   font-weight: bold;
   color: {$darkbluetext};
@@ -232,15 +238,15 @@
 
 .phabricator-remarkup-toc {
   float: right;
-  border: 1px solid {$lightblueborder};
-  background: {$lightgreybackground};
-  padding: 8px;
-  width: 180px;
+  border-left: 1px solid {$lightblueborder};
+  background: #fff;
+  width: 160px;
+  padding-left: 8px;
   margin: 0 0 4px 8px;
 }
 
 .phabricator-remarkup-toc-header {
-  font-size: 12px;
+  font-size: 13px;
   line-height: 12px;
   color: {$darkbluetext};
   font-weight: bold;
@@ -255,13 +261,16 @@
 }
 
 .phabricator-remarkup-toc ul ul {
-  margin: 0 0 0 10px;
+  margin: 0 0 0 8px;
 }
 
 .phabricator-remarkup-toc ul li {
   padding: 0;
   margin: 0;
-  font-size: 11px;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .phabricator-remarkup-embed-layout-right {

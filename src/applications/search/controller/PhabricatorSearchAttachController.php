@@ -106,7 +106,9 @@ final class PhabricatorSearchAttachController
 
           $txn_editor = $object->getApplicationTransactionEditor()
             ->setActor($user)
-            ->setContentSourceFromRequest($request);
+            ->setContentSourceFromRequest($request)
+            ->setContinueOnMissingFields(true);
+
           $txn_template = $object->getApplicationTransactionTemplate()
             ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
             ->setMetadataValue('edge:type', $edge_type)

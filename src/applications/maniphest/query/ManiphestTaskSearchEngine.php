@@ -539,12 +539,12 @@ final class ManiphestTaskSearchEngine
       $can_edit_priority = PhabricatorPolicyFilter::hasCapability(
         $viewer,
         $this->getApplication(),
-        ManiphestCapabilityEditPriority::CAPABILITY);
+        ManiphestEditPriorityCapability::CAPABILITY);
 
       $can_bulk_edit = PhabricatorPolicyFilter::hasCapability(
         $viewer,
         $this->getApplication(),
-        ManiphestCapabilityBulkEdit::CAPABILITY);
+        ManiphestBulkEditCapability::CAPABILITY);
     }
 
     return id(new ManiphestTaskResultListView())

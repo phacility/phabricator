@@ -140,7 +140,9 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
       case self::FIELD_CC:
         return $this->getTask()->getCCPHIDs();
       case self::FIELD_PROJECTS:
-        return $this->getTask()->getProjectPHIDs();
+        return PhabricatorEdgeQuery::loadDestinationPHIDs(
+          $this->getTask()->getPHID(),
+          PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
       case self::FIELD_TASK_PRIORITY:
         return $this->getTask()->getPriority();
     }

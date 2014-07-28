@@ -270,6 +270,20 @@ a.phui-tag-view:hover.phui-tag-shade-violet .phui-tag-core {
   border-color: {$sh-violetborder};
 }
 
+.phui-tag-shade-pink .phui-tag-core {
+  background-color: {$sh-pinkbackground};
+  border-color: {$sh-lightpinkborder};
+  color: {$sh-pinktext};
+}
+
+.phui-tag-shade-pink .phui-icon-view {
+  color: {$sh-pinkicon};
+}
+
+a.phui-tag-view:hover.phui-tag-shade-pink .phui-tag-core {
+  border-color: {$sh-pinkborder};
+}
+
 .phui-tag-shade-grey .phui-tag-core {
   background-color: {$sh-greybackground};
   border-color: {$sh-lightgreyborder};

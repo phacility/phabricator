@@ -50,7 +50,7 @@ final class PhabricatorCountdownApplication extends PhabricatorApplication {
 
   public function getCustomCapabilities() {
     return array(
-      PhabricatorCountdownCapabilityDefaultView::CAPABILITY => array(
+      PhabricatorCountdownDefaultViewCapability::CAPABILITY => array(
         'caption' => pht('Default view policy for new countdowns.'),
       ),
     );

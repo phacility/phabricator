@@ -45,8 +45,8 @@ final class ManiphestTask extends ManiphestDAO
       ->withClasses(array('PhabricatorManiphestApplication'))
       ->executeOne();
 
-    $view_policy = $app->getPolicy(ManiphestCapabilityDefaultView::CAPABILITY);
-    $edit_policy = $app->getPolicy(ManiphestCapabilityDefaultEdit::CAPABILITY);
+    $view_policy = $app->getPolicy(ManiphestDefaultViewCapability::CAPABILITY);
+    $edit_policy = $app->getPolicy(ManiphestDefaultEditCapability::CAPABILITY);
 
     return id(new ManiphestTask())
       ->setStatus(ManiphestTaskStatus::getDefaultStatus())

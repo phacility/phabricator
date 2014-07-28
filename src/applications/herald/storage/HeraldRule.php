@@ -223,7 +223,7 @@ final class HeraldRule extends HeraldDAO
         case PhabricatorPolicyCapability::CAN_EDIT:
           $app = 'PhabricatorHeraldApplication';
           $herald = PhabricatorApplication::getByClass($app);
-          $global = HeraldCapabilityManageGlobalRules::CAPABILITY;
+          $global = HeraldManageGlobalRulesCapability::CAPABILITY;
           return $herald->getPolicy($global);
       }
     } else if ($this->isObjectRule()) {

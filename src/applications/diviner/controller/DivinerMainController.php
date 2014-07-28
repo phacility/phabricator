@@ -33,6 +33,7 @@ final class DivinerMainController extends DivinerController {
     $document = new PHUIDocumentView();
     $document->setHeader($header);
     $document->setFontKit(PHUIDocumentView::FONT_SOURCE_SANS);
+    $document->addClass('diviner-view');
 
     if ($books) {
       $books = msort($books, 'getTitle');

@@ -27,7 +27,7 @@ final class PhabricatorProjectListController
     $crumbs = parent::buildApplicationCrumbs();
 
     $can_create = $this->hasApplicationCapability(
-      ProjectCapabilityCreateProjects::CAPABILITY);
+      ProjectCreateProjectsCapability::CAPABILITY);
 
     $crumbs->addAction(
       id(new PHUIListItemView())

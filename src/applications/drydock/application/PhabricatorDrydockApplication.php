@@ -67,11 +67,11 @@ final class PhabricatorDrydockApplication extends PhabricatorApplication {
 
   protected function getCustomCapabilities() {
     return array(
-      DrydockCapabilityDefaultView::CAPABILITY => array(),
-      DrydockCapabilityDefaultEdit::CAPABILITY => array(
+      DrydockDefaultViewCapability::CAPABILITY => array(),
+      DrydockDefaultEditCapability::CAPABILITY => array(
         'default' => PhabricatorPolicies::POLICY_ADMIN,
       ),
-      DrydockCapabilityCreateBlueprints::CAPABILITY => array(
+      DrydockCreateBlueprintsCapability::CAPABILITY => array(
         'default' => PhabricatorPolicies::POLICY_ADMIN,
       ),
     );

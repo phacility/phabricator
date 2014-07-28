@@ -40,16 +40,14 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
     $commit = $this->commit;
     $actor = $this->getActor();
 
-    $other_comments = id(new PhabricatorAuditComment())->loadAllWhere(
-      'targetPHID = %s',
+    $other_comments = PhabricatorAuditComment::loadComments(
+      $actor,
       $commit->getPHID());
 
     $inline_comments = array();
     if ($this->attachInlineComments) {
-      $inline_comments = id(new PhabricatorAuditInlineComment())->loadAllWhere(
-        'authorPHID = %s AND commitPHID = %s
-          AND auditCommentID IS NULL',
-        $actor->getPHID(),
+      $inline_comments = PhabricatorAuditInlineComment::loadDraftComments(
+        $actor,
         $commit->getPHID());
     }
 
@@ -306,7 +304,11 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
       ->queueDocumentForIndexing($commit->getPHID());
 
     if (!$this->noEmail) {
-      $this->sendMail($comment, $other_comments, $inline_comments, $requests);
+      $this->sendMail(
+        array($comment),
+        $other_comments,
+        $inline_comments,
+        $requests);
     }
   }
 
@@ -376,13 +378,16 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
   }
 
   private function sendMail(
-    PhabricatorAuditComment $comment,
+    array $comments,
     array $other_comments,
     array $inline_comments,
     array $requests) {
 
+    assert_instances_of($comments, 'PhabricatorAuditComment');
     assert_instances_of($other_comments, 'PhabricatorAuditComment');
     assert_instances_of($inline_comments, 'PhabricatorInlineCommentInterface');
+
+    $any_comment = head($comments);
 
     $commit = $this->commit;
 
@@ -407,7 +412,7 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
       PhabricatorAuditActionConstants::ADD_CCS => 'Added CCs',
       PhabricatorAuditActionConstants::ADD_AUDITORS => 'Added Auditors',
     );
-    $verb = idx($map, $comment->getAction(), 'Commented On');
+    $verb = idx($map, $any_comment->getAction(), 'Commented On');
 
     $reply_handler = self::newReplyHandlerForCommit($commit);
 
@@ -421,7 +426,7 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
     list($thread_id, $thread_topic) = $threading;
 
     $body = $this->renderMailBody(
-      $comment,
+      $comments,
       "{$name}: {$summary}",
       $handle,
       $reply_handler,
@@ -430,7 +435,7 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
     $email_to = array();
     $email_cc = array();
 
-    $email_to[$comment->getActorPHID()] = true;
+    $email_to[$any_comment->getActorPHID()] = true;
 
     $author_phid = $data->getCommitDetail('authorPHID');
     if ($author_phid) {
@@ -474,7 +479,7 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
       ->setSubject("{$name}: {$summary}")
       ->setSubjectPrefix($prefix)
       ->setVarySubjectPrefix("[{$verb}]")
-      ->setFrom($comment->getActorPHID())
+      ->setFrom($any_comment->getActorPHID())
       ->setThreadID($thread_id, $is_new)
       ->addHeader('Thread-Topic', $thread_topic)
       ->setRelatedPHID($commit->getPHID())
@@ -510,23 +515,31 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
   }
 
   private function renderMailBody(
-    PhabricatorAuditComment $comment,
+    array $comments,
     $cname,
     PhabricatorObjectHandle $handle,
     PhabricatorMailReplyHandler $reply_handler,
     array $inline_comments) {
+
+    assert_instances_of($comments, 'PhabricatorAuditComment');
     assert_instances_of($inline_comments, 'PhabricatorInlineCommentInterface');
 
     $commit = $this->commit;
     $actor = $this->getActor();
     $name = $actor->getUsername();
 
-    $verb = PhabricatorAuditActionConstants::getActionPastTenseVerb(
-      $comment->getAction());
-
     $body = new PhabricatorMetaMTAMailBody();
-    $body->addRawSection("{$name} {$verb} commit {$cname}.");
-    $body->addRawSection($comment->getContent());
+    foreach ($comments as $comment) {
+      $verb = PhabricatorAuditActionConstants::getActionPastTenseVerb(
+        $comment->getAction());
+
+      $body->addRawSection("{$name} {$verb} commit {$cname}.");
+
+      $content = $comment->getContent();
+      if (strlen($content)) {
+        $body->addRawSection($comment->getContent());
+      }
+    }
 
     if ($inline_comments) {
       $block = array();

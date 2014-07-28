@@ -63,7 +63,7 @@ final class PhabricatorPhragmentApplication extends PhabricatorApplication {
 
   protected function getCustomCapabilities() {
     return array(
-      PhragmentCapabilityCanCreate::CAPABILITY => array(),
+      PhragmentCanCreateCapability::CAPABILITY => array(),
     );
   }
 

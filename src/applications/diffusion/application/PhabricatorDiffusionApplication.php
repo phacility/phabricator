@@ -130,12 +130,12 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
 
   protected function getCustomCapabilities() {
     return array(
-      DiffusionCapabilityDefaultView::CAPABILITY => array(),
-      DiffusionCapabilityDefaultEdit::CAPABILITY => array(
+      DiffusionDefaultViewCapability::CAPABILITY => array(),
+      DiffusionDefaultEditCapability::CAPABILITY => array(
         'default' => PhabricatorPolicies::POLICY_ADMIN,
       ),
-      DiffusionCapabilityDefaultPush::CAPABILITY => array(),
-      DiffusionCapabilityCreateRepositories::CAPABILITY => array(
+      DiffusionDefaultPushCapability::CAPABILITY => array(),
+      DiffusionCreateRepositoriesCapability::CAPABILITY => array(
         'default' => PhabricatorPolicies::POLICY_ADMIN,
       ),
     );

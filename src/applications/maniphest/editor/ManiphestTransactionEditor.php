@@ -432,15 +432,15 @@ final class ManiphestTransactionEditor
 
     $app_capability_map = array(
       ManiphestTransaction::TYPE_PRIORITY =>
-        ManiphestCapabilityEditPriority::CAPABILITY,
+        ManiphestEditPriorityCapability::CAPABILITY,
       ManiphestTransaction::TYPE_STATUS =>
-        ManiphestCapabilityEditStatus::CAPABILITY,
+        ManiphestEditStatusCapability::CAPABILITY,
       ManiphestTransaction::TYPE_OWNER =>
-        ManiphestCapabilityEditAssign::CAPABILITY,
+        ManiphestEditAssignCapability::CAPABILITY,
       PhabricatorTransactions::TYPE_EDIT_POLICY =>
-        ManiphestCapabilityEditPolicies::CAPABILITY,
+        ManiphestEditPoliciesCapability::CAPABILITY,
       PhabricatorTransactions::TYPE_VIEW_POLICY =>
-        ManiphestCapabilityEditPolicies::CAPABILITY,
+        ManiphestEditPoliciesCapability::CAPABILITY,
     );
 
 
@@ -450,7 +450,7 @@ final class ManiphestTransactionEditor
     if ($transaction_type == PhabricatorTransactions::TYPE_EDGE) {
       switch ($xaction->getMetadataValue('edge:type')) {
         case PhabricatorProjectObjectHasProjectEdgeType::EDGECONST:
-          $app_capability = ManiphestCapabilityEditProjects::CAPABILITY;
+          $app_capability = ManiphestEditProjectsCapability::CAPABILITY;
           break;
       }
     } else {

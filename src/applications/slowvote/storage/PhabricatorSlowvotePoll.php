@@ -35,7 +35,7 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
       ->executeOne();
 
     $view_policy = $app->getPolicy(
-      PhabricatorSlowvoteCapabilityDefaultView::CAPABILITY);
+      PhabricatorSlowvoteDefaultViewCapability::CAPABILITY);
 
     return id(new PhabricatorSlowvotePoll())
       ->setAuthorPHID($actor->getPHID())
@@ -111,8 +111,7 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
   }
 
   public function describeAutomaticCapability($capability) {
-    return pht(
-      'The author of a poll can always view and edit it.');
+    return pht('The author of a poll can always view and edit it.');
   }
 
 
@@ -139,6 +138,5 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
   public function getUsersToNotifyOfTokenGiven() {
     return array($this->getAuthorPHID());
   }
-
 
 }

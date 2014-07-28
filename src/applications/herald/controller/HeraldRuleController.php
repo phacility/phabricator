@@ -10,7 +10,6 @@ final class HeraldRuleController extends HeraldController {
   }
 
   public function processRequest() {
-
     $request = $this->getRequest();
     $user = $request->getUser();
 
@@ -83,7 +82,7 @@ final class HeraldRuleController extends HeraldController {
 
     if ($rule->isGlobalRule()) {
       $this->requireApplicationCapability(
-        HeraldCapabilityManageGlobalRules::CAPABILITY);
+        HeraldManageGlobalRulesCapability::CAPABILITY);
     }
 
     $adapter = HeraldAdapter::getAdapterForContentType($rule->getContentType());
@@ -665,6 +664,5 @@ final class HeraldRuleController extends HeraldController {
 
     return $all_rules;
   }
-
 
 }

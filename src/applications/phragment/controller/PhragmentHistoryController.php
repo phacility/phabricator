@@ -26,7 +26,7 @@ final class PhragmentHistoryController extends PhragmentController {
 
     $crumbs = $this->buildApplicationCrumbsWithPath($parents);
     if ($this->hasApplicationCapability(
-      PhragmentCapabilityCanCreate::CAPABILITY)) {
+      PhragmentCanCreateCapability::CAPABILITY)) {
       $crumbs->addAction(
         id(new PHUIListItemView())
           ->setName(pht('Create Fragment'))

@@ -133,7 +133,7 @@ EOTEXT
 
   protected function getCustomCapabilities() {
     return array(
-      DifferentialCapabilityDefaultView::CAPABILITY => array(
+      DifferentialDefaultViewCapability::CAPABILITY => array(
         'caption' => pht('Default view policy for newly created revisions.'),
       ),
     );

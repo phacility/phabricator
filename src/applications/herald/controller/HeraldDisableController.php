@@ -30,7 +30,7 @@ final class HeraldDisableController extends HeraldController {
 
     if ($rule->isGlobalRule()) {
       $this->requireApplicationCapability(
-        HeraldCapabilityManageGlobalRules::CAPABILITY);
+        HeraldManageGlobalRulesCapability::CAPABILITY);
     }
 
     $view_uri = $this->getApplicationURI("rule/{$id}/");

@@ -12,9 +12,8 @@ final class DiffusionInlineCommentPreviewController
   protected function loadInlineComments() {
     $user = $this->getRequest()->getUser();
 
-    $inlines = id(new PhabricatorAuditInlineComment())->loadAllWhere(
-      'authorPHID = %s AND commitPHID = %s AND auditCommentID IS NULL',
-      $user->getPHID(),
+    $inlines = PhabricatorAuditInlineComment::loadDraftComments(
+      $user,
       $this->commitPHID);
 
     return $inlines;

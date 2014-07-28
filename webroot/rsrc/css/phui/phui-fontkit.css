@@ -28,7 +28,7 @@
   padding: 1px 3px 2px;
 }
 
-.phui-font-source-sans .phui-property-list-section {
+.diviner-view .phui-font-source-sans .phui-property-list-section {
   border-bottom: 1px solid {$thinblueborder};
   margin-bottom: 8px;
   background: {$lightgreybackground};
@@ -41,6 +41,13 @@
 
 .phui-font-source-sans .phui-property-list-container {
   padding-bottom: 6px;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 13px;
+  line-height: 16px;
+}
+
+.phui-font-source-sans .phabricator-action-view {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
 }
 
 .phui-font-source-sans a.remarkup-link {

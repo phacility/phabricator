@@ -118,7 +118,7 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
         $can_push = PhabricatorPolicyFilter::hasCapability(
           $viewer,
           $repository,
-          DiffusionCapabilityPush::CAPABILITY);
+          DiffusionPushCapability::CAPABILITY);
         if (!$can_push) {
           throw new Exception(
             pht('You do not have permission to push to this repository.'));

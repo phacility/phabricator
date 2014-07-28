@@ -124,8 +124,8 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
     if ($user) {
       $default_img_uri =
-        PhabricatorEnv::getCDNURI(
-          '/rsrc/image/icon/fatcow/document_black.png');
+        celerity_get_resource_uri(
+          'rsrc/image/icon/fatcow/document_black.png');
       $download_form = phabricator_form(
         $user,
         array(

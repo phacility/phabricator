@@ -13,7 +13,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
   }
 
   public function processRequest() {
-
     $request = $this->getRequest();
     $user = $request->getUser();
 
@@ -162,13 +161,13 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $requires = array(
       ManiphestTransaction::TYPE_OWNER =>
-        ManiphestCapabilityEditAssign::CAPABILITY,
+        ManiphestEditAssignCapability::CAPABILITY,
       ManiphestTransaction::TYPE_PRIORITY =>
-        ManiphestCapabilityEditPriority::CAPABILITY,
+        ManiphestEditPriorityCapability::CAPABILITY,
       ManiphestTransaction::TYPE_PROJECTS =>
-        ManiphestCapabilityEditProjects::CAPABILITY,
+        ManiphestEditProjectsCapability::CAPABILITY,
       ManiphestTransaction::TYPE_STATUS =>
-        ManiphestCapabilityEditStatus::CAPABILITY,
+        ManiphestEditStatusCapability::CAPABILITY,
     );
 
     foreach ($transaction_types as $type => $name) {

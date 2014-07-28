@@ -76,10 +76,9 @@ final class PhabricatorPeopleApplication extends PhabricatorApplication {
     );
   }
 
-
   protected function getCustomCapabilities() {
     return array(
-      PeopleCapabilityBrowseUserDirectory::CAPABILITY => array(),
+      PeopleBrowseUserDirectoryCapability::CAPABILITY => array(),
     );
   }
 

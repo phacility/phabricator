@@ -41,7 +41,7 @@ final class DiffusionRepositoryListController extends DiffusionController {
     $crumbs = parent::buildApplicationCrumbs();
 
     $can_create = $this->hasApplicationCapability(
-      DiffusionCapabilityCreateRepositories::CAPABILITY);
+      DiffusionCreateRepositoriesCapability::CAPABILITY);
 
     $crumbs->addAction(
       id(new PHUIListItemView())

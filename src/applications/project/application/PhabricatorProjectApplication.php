@@ -90,7 +90,7 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
 
   protected function getCustomCapabilities() {
     return array(
-      ProjectCapabilityCreateProjects::CAPABILITY => array(),
+      ProjectCreateProjectsCapability::CAPABILITY => array(),
     );
   }
 

@@ -1,7 +1,6 @@
 <?php
 
-final class HarbormasterStepDeleteController
-  extends HarbormasterController {
+final class HarbormasterStepDeleteController extends HarbormasterController {
 
   private $id;
 
@@ -14,7 +13,7 @@ final class HarbormasterStepDeleteController
     $viewer = $request->getUser();
 
     $this->requireApplicationCapability(
-      HarbormasterCapabilityManagePlans::CAPABILITY);
+      HarbormasterManagePlansCapability::CAPABILITY);
 
     $id = $this->id;
 

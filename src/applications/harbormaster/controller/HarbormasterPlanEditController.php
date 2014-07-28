@@ -1,7 +1,6 @@
 <?php
 
-final class HarbormasterPlanEditController
-  extends HarbormasterPlanController {
+final class HarbormasterPlanEditController extends HarbormasterPlanController {
 
   private $id;
 
@@ -14,7 +13,7 @@ final class HarbormasterPlanEditController
     $viewer = $request->getUser();
 
     $this->requireApplicationCapability(
-      HarbormasterCapabilityManagePlans::CAPABILITY);
+      HarbormasterManagePlansCapability::CAPABILITY);
 
     if ($this->id) {
       $plan = id(new HarbormasterBuildPlanQuery())

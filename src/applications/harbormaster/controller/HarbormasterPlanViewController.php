@@ -1,7 +1,6 @@
 <?php
 
-final class HarbormasterPlanViewController
-  extends HarbormasterPlanController {
+final class HarbormasterPlanViewController extends HarbormasterPlanController {
 
   private $id;
 
@@ -85,7 +84,7 @@ final class HarbormasterPlanViewController
       ->execute();
 
     $can_edit = $this->hasApplicationCapability(
-      HarbormasterCapabilityManagePlans::CAPABILITY);
+      HarbormasterManagePlansCapability::CAPABILITY);
 
     $i = 1;
     $step_list = id(new PHUIObjectItemListView())
@@ -215,7 +214,7 @@ final class HarbormasterPlanViewController
       ->setObjectURI($this->getApplicationURI("plan/{$id}/"));
 
     $can_edit = $this->hasApplicationCapability(
-      HarbormasterCapabilityManagePlans::CAPABILITY);
+      HarbormasterManagePlansCapability::CAPABILITY);
 
     $list->addAction(
       id(new PhabricatorActionView())

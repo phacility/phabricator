@@ -66,8 +66,8 @@ final class PhabricatorRepositoryCommitSearchIndexer
       PhabricatorRepositoryRepositoryPHIDType::TYPECONST,
       $date_created);
 
-    $comments = id(new PhabricatorAuditComment())->loadAllWhere(
-      'targetPHID = %s',
+    $comments = PhabricatorAuditComment::loadComments(
+      $this->getViewer(),
       $commit->getPHID());
     foreach ($comments as $comment) {
       if (strlen($comment->getContent())) {
@@ -77,8 +77,8 @@ final class PhabricatorRepositoryCommitSearchIndexer
       }
     }
 
-    $inlines = id(new PhabricatorAuditInlineComment())->loadAllWhere(
-      'commitPHID = %s AND (auditCommentID IS NOT NULL)',
+    $inlines = PhabricatorAuditInlineComment::loadPublishedComments(
+      $this->getViewer(),
       $commit->getPHID());
     foreach ($inlines as $inline) {
       if (strlen($inline->getContent())) {

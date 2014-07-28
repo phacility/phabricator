@@ -18,9 +18,7 @@ abstract class ConduitAPIMethod
   abstract public function defineErrorTypes();
   abstract protected function execute(ConduitAPIRequest $request);
 
-  public function __construct() {
-
-  }
+  public function __construct() {}
 
   /**
    * This is mostly for compatibility with
@@ -67,9 +65,7 @@ abstract class ConduitAPIMethod
     return $this->execute($request);
   }
 
-  public function getAPIMethodName() {
-    return self::getAPIMethodNameFromClassName(get_class($this));
-  }
+  public abstract function getAPIMethodName();
 
   /**
    * Return a key which sorts methods by application name, then method status,
@@ -94,9 +90,32 @@ abstract class ConduitAPIMethod
     return head(explode('.', $this->getAPIMethodName(), 2));
   }
 
-  public static function getClassNameFromAPIMethodName($method_name) {
-    $method_fragment = str_replace('.', '_', $method_name);
-    return 'ConduitAPI_'.$method_fragment.'_Method';
+  public static function getConduitMethod($method_name) {
+    static $method_map = null;
+
+    if ($method_map === null) {
+      $methods = id(new PhutilSymbolLoader())
+        ->setAncestorClass(__CLASS__)
+        ->loadObjects();
+
+      foreach ($methods as $method) {
+        $name = $method->getAPIMethodName();
+
+        if (empty($method_map[$name])) {
+          $method_map[$name] = $method;
+          continue;
+        }
+
+        $orig_class = get_class($method_map[$name]);
+        $this_class = get_class($method);
+        throw new Exception(
+          "Two Conduit API method classes ({$orig_class}, {$this_class}) ".
+          "both have the same method name ({$name}). API methods ".
+          "must have unique method names.");
+      }
+    }
+
+    return idx($method_map, $method_name);
   }
 
   public function shouldRequireAuthentication() {
@@ -122,20 +141,6 @@ abstract class ConduitAPIMethod
     return null;
   }
 
-  public static function getAPIMethodNameFromClassName($class_name) {
-    $match = null;
-    $is_valid = preg_match(
-      '/^ConduitAPI_(.*)_Method$/',
-      $class_name,
-      $match);
-    if (!$is_valid) {
-      throw new Exception(
-        "Parameter '{$class_name}' is not a valid Conduit API method class.");
-    }
-    $method_fragment = $match[1];
-    return str_replace('_', '.', $method_fragment);
-  }
-
   protected function formatStringConstants($constants) {
     foreach ($constants as $key => $value) {
       $constants[$key] = '"'.$value.'"';
@@ -153,9 +158,9 @@ abstract class ConduitAPIMethod
    */
   protected function getPagerParamTypes() {
     return array(
-      'before'            => 'optional string',
-      'after'             => 'optional string',
-      'limit'             => 'optional int (default = 100)',
+      'before' => 'optional string',
+      'after'  => 'optional string',
+      'limit'  => 'optional int (default = 100)',
     );
   }
 
@@ -229,7 +234,7 @@ abstract class ConduitAPIMethod
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
     if (!$this->shouldRequireAuthentication()) {
-      // Make unauthenticated methods univerally visible.
+      // Make unauthenticated methods universally visible.
       return true;
     }
 
@@ -239,6 +244,5 @@ abstract class ConduitAPIMethod
   public function describeAutomaticCapability($capability) {
     return null;
   }
-
 
 }
