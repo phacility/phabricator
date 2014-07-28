@@ -225,6 +225,12 @@
   background: {$lightred};
 }
 
+.phabricator-remarkup .remarkup-note .remarkup-monospaced,
+.phabricator-remarkup .remarkup-important .remarkup-monospaced,
+.phabricator-remarkup .remarkup-warning .remarkup-monospaced {
+  background-color: rgba(150,150,150,.2);
+}
+
 .phabricator-remarkup .remarkup-note-word {
   font-weight: bold;
   color: {$darkbluetext};
