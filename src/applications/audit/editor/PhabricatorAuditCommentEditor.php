@@ -57,13 +57,8 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
       ->save();
 
     $content_blocks = array($comment->getContent());
-
-    if ($inline_comments) {
-      foreach ($inline_comments as $inline) {
-        $inline->setAuditCommentID($comment->getID());
-        $inline->save();
-        $content_blocks[] = $inline->getContent();
-      }
+    foreach ($inline_comments as $inline) {
+      $content_blocks[] = $inline->getContent();
     }
 
     $ccs = $this->ccs;
@@ -280,6 +275,20 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
     $commit->updateAuditStatus($requests);
     $commit->save();
 
+    $comments = array($comment);
+    foreach ($inline_comments as $inline) {
+      $xaction = id(new PhabricatorAuditComment())
+        ->setAction(PhabricatorAuditActionConstants::INLINE)
+        ->setActorPHID($actor->getPHID())
+        ->setTargetPHID($commit->getPHID())
+        ->save();
+
+      $inline->setAuditCommentID($xaction->getID());
+      $inline->save();
+
+      $comments[] = $xaction;
+    }
+
     $feed_dont_publish_phids = array();
     foreach ($requests as $request) {
       $status = $request->getAuditStatus();
@@ -305,7 +314,7 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
 
     if (!$this->noEmail) {
       $this->sendMail(
-        array($comment),
+        $comments,
         $other_comments,
         $inline_comments,
         $requests);
@@ -530,6 +539,10 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
 
     $body = new PhabricatorMetaMTAMailBody();
     foreach ($comments as $comment) {
+      if ($comment->getAction() == PhabricatorAuditActionConstants::INLINE) {
+        continue;
+      }
+
       $verb = PhabricatorAuditActionConstants::getActionPastTenseVerb(
         $comment->getAction());
 

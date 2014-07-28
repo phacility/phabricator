@@ -9,6 +9,7 @@ final class PhabricatorAuditActionConstants {
   const CLOSE     = 'close';
   const ADD_CCS = 'add_ccs';
   const ADD_AUDITORS = 'add_auditors';
+  const INLINE = 'audit:inline';
 
   public static function getActionNameMap() {
     $map = array(
