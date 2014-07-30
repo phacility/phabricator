@@ -74,8 +74,6 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
         'commitPHID = %s',
         $commit->getPHID());
 
-    $action = $comment->getAction();
-
     // TODO: We should validate the action, currently we allow anyone to, e.g.,
     // close an audit if they muck with form parameters. I'll followup with this
     // and handle the no-effect cases (e.g., closing and already-closed audit).
