@@ -159,6 +159,7 @@ final class ManiphestTask extends ManiphestDAO
     return array(
       $this->getPriority(),
       -$this->getSubpriority(),
+      $this->getID(),
     );
   }
 
