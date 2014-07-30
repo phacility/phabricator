@@ -7,15 +7,16 @@ final class Aphront404Response extends AphrontHTMLResponse {
   }
 
   public function buildResponseString() {
-    $failure = new AphrontRequestFailureView();
-    $failure->setHeader('404 Not Found');
-    $failure->appendChild(phutil_tag('p', array(), pht(
+    $failure = id(new AphrontRequestFailureView())
+      ->setHeader(pht('404 Not Found'))
+      ->appendChild(phutil_tag('p', array(), pht(
       'The page you requested was not found.')));
 
-    $view = new PhabricatorStandardPageView();
-    $view->setTitle('404 Not Found');
-    $view->setRequest($this->getRequest());
-    $view->appendChild($failure);
+    $view = id(new PhabricatorStandardPageView())
+      ->setTitle('404 Not Found')
+      ->setRequest($this->getRequest())
+      ->setDeviceReady(true)
+      ->appendChild($failure);
 
     return $view->render();
   }
