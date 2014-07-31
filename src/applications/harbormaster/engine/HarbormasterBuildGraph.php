@@ -46,7 +46,8 @@ final class HarbormasterBuildGraph extends AbstractDirectedGraph {
   protected function loadEdges(array $nodes) {
     $map = array();
     foreach ($nodes as $node) {
-      $deps = $this->stepMap[$node]->getDetail('dependsOn', array());
+      $step = $this->stepMap[$node];
+      $deps = $step->getStepImplementation()->getDependencies($step);
 
       $map[$node] = array();
       foreach ($deps as $dep) {

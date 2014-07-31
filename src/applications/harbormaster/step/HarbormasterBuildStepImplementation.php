@@ -99,7 +99,28 @@ abstract class HarbormasterBuildStepImplementation {
   }
 
   public function getDependencies(HarbormasterBuildStep $build_step) {
-    return $build_step->getDetail('dependsOn', array());
+    $dependencies = $build_step->getDetail('dependsOn', array());
+
+    $inputs = $build_step->getStepImplementation()->getArtifactInputs();
+    $inputs = ipull($inputs, null, 'key');
+
+    $artifacts = $this->getAvailableArtifacts(
+      $build_step->getBuildPlan(),
+      $build_step,
+      null);
+
+    foreach ($artifacts as $key => $type) {
+      if (!array_key_exists($key, $inputs)) {
+        unset($artifacts[$key]);
+      }
+    }
+
+    $artifact_steps = ipull($artifacts, 'step');
+    $artifact_steps = mpull($artifact_steps, 'getPHID');
+
+    $dependencies = array_merge($dependencies, $artifact_steps);
+
+    return $dependencies;
   }
 
   /**
@@ -115,6 +136,8 @@ abstract class HarbormasterBuildStepImplementation {
       ->withBuildPlanPHIDs(array($build_plan->getPHID()))
       ->execute();
 
+    $artifacts = array();
+
     $artifact_arrays = array();
     foreach ($steps as $step) {
       if ($current_build_step !== null &&
@@ -124,19 +147,16 @@ abstract class HarbormasterBuildStepImplementation {
       }
 
       $implementation = $step->getStepImplementation();
-      $artifact_arrays[] = $implementation->getArtifactOutputs();
-    }
-
-    $artifacts = array();
-    foreach ($artifact_arrays as $array) {
+      $array = $implementation->getArtifactOutputs();
       $array = ipull($array, 'type', 'key');
       foreach ($array as $name => $type) {
         if ($type !== $artifact_type && $artifact_type !== null) {
           continue;
         }
-        $artifacts[$name] = $type;
+        $artifacts[$name] = array('type' => $type, 'step' => $step);
       }
     }
+
     return $artifacts;
   }
 

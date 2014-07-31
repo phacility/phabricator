@@ -180,6 +180,7 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
             $plan,
             $step,
             null);
+        $available_artifacts = ipull($available_artifacts, 'type');
 
         list($depends_ui, $has_conflicts) = $this->buildDependsOnList(
             $depends,
