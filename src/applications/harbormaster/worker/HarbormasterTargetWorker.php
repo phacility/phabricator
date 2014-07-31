@@ -56,6 +56,10 @@ final class HarbormasterTargetWorker extends HarbormasterWorker {
       // If the target wants to yield, let that escape without further
       // processing. We'll resume after the task retries.
       throw $ex;
+    } catch (HarbormasterBuildFailureException $ex) {
+      // A build step wants to fail explicitly.
+      $target->setTargetStatus(HarbormasterBuildTarget::STATUS_FAILED);
+      $target->save();
     } catch (Exception $ex) {
       phlog($ex);
 

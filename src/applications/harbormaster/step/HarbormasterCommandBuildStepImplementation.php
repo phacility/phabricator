@@ -68,7 +68,7 @@ final class HarbormasterCommandBuildStepImplementation
     $log_stderr->finalize($start_stderr);
 
     if ($err) {
-      throw new Exception(pht('Command failed with error %d.', $err));
+      throw new HarbormasterBuildFailureException();
     }
   }
 
