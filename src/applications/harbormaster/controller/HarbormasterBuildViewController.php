@@ -353,11 +353,27 @@ final class HarbormasterBuildViewController
   }
 
   private function getStatus(HarbormasterBuild $build) {
+    $status_view = new PHUIStatusListView();
+
+    $item = new PHUIStatusItemView();
+
     if ($build->isStopping()) {
-      return pht('Stopping');
+      $status_name = pht('Stopping');
+      $icon = PHUIStatusItemView::ICON_RIGHT;
+      $color = 'dark';
+    } else {
+      $status = $build->getBuildStatus();
+      $status_name =
+        HarbormasterBuild::getBuildStatusName($status);
+      $icon = HarbormasterBuild::getBuildStatusIcon($status);
+      $color = HarbormasterBuild::getBuildStatusColor($status);
     }
 
-    return HarbormasterBuild::getBuildStatusName($build->getBuildStatus());
+    $item->setTarget($status_name);
+    $item->setIcon($icon, $color);
+    $status_view->addItem($item);
+
+    return $status_view;
   }
 
   private function buildMessages(array $messages) {
