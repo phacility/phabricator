@@ -258,9 +258,9 @@ final class ManiphestTransactionEditor
         $new = $unblock_xaction->getNewValue();
 
         foreach ($blocked_tasks as $blocked_task) {
-          $xactions = array();
+          $unblock_xactions = array();
 
-          $xactions[] = id(new ManiphestTransaction())
+          $unblock_xactions[] = id(new ManiphestTransaction())
             ->setTransactionType(ManiphestTransaction::TYPE_UNBLOCK)
             ->setOldValue(array($object->getPHID() => $old))
             ->setNewValue(array($object->getPHID() => $new));
@@ -275,7 +275,7 @@ final class ManiphestTransactionEditor
             ->setContentSource($this->getContentSource())
             ->setContinueOnNoEffect(true)
             ->setContinueOnMissingFields(true)
-            ->applyTransactions($blocked_task, $xactions);
+            ->applyTransactions($blocked_task, $unblock_xactions);
         }
       }
     }
