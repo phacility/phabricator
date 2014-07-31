@@ -97,7 +97,9 @@ final class HarbormasterBuildViewController
         ->addPropertyList($properties);
 
       $build_messages = idx($messages, $build_target->getPHID(), array());
-      $targets[] = $this->buildMessages($build_messages);
+      if ($build_messages) {
+        $targets[] = $this->buildMessages($build_messages);
+      }
 
       $targets[] = $this->buildArtifacts($build_target);
       $targets[] = $this->buildLog($build, $build_target);
