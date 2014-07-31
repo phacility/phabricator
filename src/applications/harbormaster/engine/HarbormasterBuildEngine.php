@@ -246,22 +246,14 @@ final class HarbormasterBuildEngine extends Phobject {
     // Identify all the steps which are ready to run (because all their
     // dependencies are complete).
 
-    $previous_step = null;
     $runnable = array();
     foreach ($steps as $step) {
-      // TODO: For now, we're hard coding sequential dependencies into build
-      // steps. In the future, we can be smart about this instead.
-
-      if ($previous_step) {
-        $dependencies = array($previous_step);
-      } else {
-        $dependencies = array();
-      }
+      $dependencies = $step->getStepImplementation()->getDependencies($step);
 
       if (isset($queued[$step->getPHID()])) {
         $can_run = true;
         foreach ($dependencies as $dependency) {
-          if (empty($complete[$dependency->getPHID()])) {
+          if (empty($complete[$dependency])) {
             $can_run = false;
             break;
           }
@@ -271,14 +263,12 @@ final class HarbormasterBuildEngine extends Phobject {
           $runnable[] = $step;
         }
       }
-
-      $previous_step = $step;
     }
 
     if (!$runnable && !$waiting && !$underway) {
-      // TODO: This means the build is deadlocked, probably? It should not
-      // normally be possible yet, but we should communicate it more clearly.
-      $build->setBuildStatus(HarbormasterBuild::STATUS_FAILED);
+      // This means the build is deadlocked, and the user has configured
+      // circular dependencies.
+      $build->setBuildStatus(HarbormasterBuild::STATUS_DEADLOCKED);
       $build->save();
       return;
     }
@@ -292,7 +282,6 @@ final class HarbormasterBuildEngine extends Phobject {
 
       $this->queueNewBuildTarget($target);
     }
-
   }
 
 
@@ -378,7 +367,8 @@ final class HarbormasterBuildEngine extends Phobject {
         $all_pass = false;
       }
       if ($build->getBuildStatus() == HarbormasterBuild::STATUS_FAILED ||
-          $build->getBuildStatus() == HarbormasterBuild::STATUS_ERROR) {
+          $build->getBuildStatus() == HarbormasterBuild::STATUS_ERROR ||
+          $build->getBuildStatus() == HarbormasterBuild::STATUS_DEADLOCKED) {
         $any_fail = true;
       }
     }

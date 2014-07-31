@@ -65,12 +65,21 @@ final class HarbormasterStepEditController extends HarbormasterController {
 
     $e_name = true;
     $v_name = $step->getName();
+    $e_depends_on = true;
+    $raw_depends_on = $step->getDetail('dependsOn', array());
+
+    $v_depends_on = id(new PhabricatorHandleQuery())
+      ->setViewer($viewer)
+      ->withPHIDs($raw_depends_on)
+      ->execute();
 
     $errors = array();
     $validation_exception = null;
     if ($request->isFormPost()) {
       $e_name = null;
       $v_name = $request->getStr('name');
+      $e_depends_on = null;
+      $v_depends_on = $request->getArr('dependsOn');
 
       $xactions = $field_list->buildFieldTransactionsFromRequest(
         new HarbormasterBuildStepTransaction(),
@@ -86,12 +95,13 @@ final class HarbormasterStepEditController extends HarbormasterController {
         ->setNewValue($v_name);
       array_unshift($xactions, $name_xaction);
 
-      if ($is_new) {
-        // This is okay, but a little iffy. We should move it inside the editor
-        // if we create plans elsewhere.
-        $steps = $plan->loadOrderedBuildSteps();
-        $step->setSequence(count($steps) + 1);
+      $depends_on_xaction = id(new HarbormasterBuildStepTransaction())
+        ->setTransactionType(
+          HarbormasterBuildStepTransaction::TYPE_DEPENDS_ON)
+        ->setNewValue($v_depends_on);
+      array_unshift($xactions, $depends_on_xaction);
 
+      if ($is_new) {
         // When creating a new step, make sure we have a create transaction
         // so we'll apply the transactions even if the step has no
         // configurable options.
@@ -116,6 +126,19 @@ final class HarbormasterStepEditController extends HarbormasterController {
           ->setLabel(pht('Name'))
           ->setError($e_name)
           ->setValue($v_name));
+
+    $form
+      ->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setDatasource(id(new HarbormasterBuildDependencyDatasource())
+            ->setParameters(array(
+              'planPHID' => $plan->getPHID(),
+              'stepPHID' => $is_new ? null : $step->getPHID(),
+            )))
+          ->setName('dependsOn')
+          ->setLabel(pht('Depends On'))
+          ->setError($e_depends_on)
+          ->setValue($v_depends_on));
 
     $field_list->appendFieldsToForm($form);
 

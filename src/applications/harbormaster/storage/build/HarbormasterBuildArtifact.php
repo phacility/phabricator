@@ -13,6 +13,7 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
 
   const TYPE_FILE = 'file';
   const TYPE_HOST = 'host';
+  const TYPE_BUILD_STATE = 'buildstate';
 
   public static function initializeNewBuildArtifact(
     HarbormasterBuildTarget $build_target) {

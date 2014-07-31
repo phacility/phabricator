@@ -98,41 +98,35 @@ abstract class HarbormasterBuildStepImplementation {
     return array();
   }
 
-  /**
-   * Returns a list of all artifacts made available by previous build steps.
-   */
-  public static function loadAvailableArtifacts(
-    HarbormasterBuildPlan $build_plan,
-    HarbormasterBuildStep $current_build_step,
-    $artifact_type) {
-
-    $build_steps = $build_plan->loadOrderedBuildSteps();
-
-    return self::getAvailableArtifacts(
-      $build_plan,
-      $build_steps,
-      $current_build_step,
-      $artifact_type);
+  public function getDependencies(HarbormasterBuildStep $build_step) {
+    return $build_step->getDetail('dependsOn', array());
   }
 
   /**
-   * Returns a list of all artifacts made available by previous build steps.
+   * Returns a list of all artifacts made available in the build plan.
    */
   public static function getAvailableArtifacts(
     HarbormasterBuildPlan $build_plan,
-    array $build_steps,
-    HarbormasterBuildStep $current_build_step,
+    $current_build_step,
     $artifact_type) {
 
-    $previous_implementations = array();
-    foreach ($build_steps as $build_step) {
-      if ($build_step->getPHID() === $current_build_step->getPHID()) {
-        break;
+    $steps = id(new HarbormasterBuildStepQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withBuildPlanPHIDs(array($build_plan->getPHID()))
+      ->execute();
+
+    $artifact_arrays = array();
+    foreach ($steps as $step) {
+      if ($current_build_step !== null &&
+        $step->getPHID() === $current_build_step->getPHID()) {
+
+        continue;
       }
-      $previous_implementations[] = $build_step->getStepImplementation();
+
+      $implementation = $step->getStepImplementation();
+      $artifact_arrays[] = $implementation->getArtifactOutputs();
     }
 
-    $artifact_arrays = mpull($previous_implementations, 'getArtifactOutputs');
     $artifacts = array();
     foreach ($artifact_arrays as $array) {
       $array = ipull($array, 'type', 'key');

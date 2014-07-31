@@ -6,6 +6,7 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
   private $query;
   private $rawQuery;
   private $limit;
+  private $parameters = array();
 
   public function setLimit($limit) {
     $this->limit = $limit;
@@ -43,8 +44,23 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
     return $this->query;
   }
 
+  public function setParameters(array $params) {
+    $this->parameters = $params;
+    return $this;
+  }
+
+  public function getParameters() {
+    return $this->parameters;
+  }
+
+  public function getParameter($name, $default = null) {
+    return idx($this->parameters, $name, $default);
+  }
+
   public function getDatasourceURI() {
-    return '/typeahead/class/'.get_class($this).'/';
+    $uri = new PhutilURI('/typeahead/class/'.get_class($this).'/');
+    $uri->setQueryParams($this->parameters);
+    return (string)$uri;
   }
 
   abstract public function getPlaceholderText();

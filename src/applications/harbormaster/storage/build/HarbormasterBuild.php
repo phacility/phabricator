@@ -47,6 +47,11 @@ final class HarbormasterBuild extends HarbormasterDAO
    */
   const STATUS_STOPPED = 'stopped';
 
+  /**
+   * The build has been deadlocked.
+   */
+  const STATUS_DEADLOCKED = 'deadlocked';
+
 
   /**
    * Get a human readable name for a build status constant.
@@ -70,6 +75,8 @@ final class HarbormasterBuild extends HarbormasterDAO
         return pht('Unexpected Error');
       case self::STATUS_STOPPED:
         return pht('Stopped');
+      case self::STATUS_DEADLOCKED:
+        return pht('Deadlocked');
       default:
         return pht('Unknown');
     }
@@ -90,6 +97,8 @@ final class HarbormasterBuild extends HarbormasterDAO
         return PHUIStatusItemView::ICON_MINUS;
       case self::STATUS_STOPPED:
         return PHUIStatusItemView::ICON_MINUS;
+      case self::STATUS_DEADLOCKED:
+        return PHUIStatusItemView::ICON_WARNING;
       default:
         return PHUIStatusItemView::ICON_QUESTION;
     }
@@ -106,6 +115,7 @@ final class HarbormasterBuild extends HarbormasterDAO
         return 'green';
       case self::STATUS_FAILED:
       case self::STATUS_ERROR:
+      case self::STATUS_DEADLOCKED:
         return 'red';
       case self::STATUS_STOPPED:
         return 'dark';

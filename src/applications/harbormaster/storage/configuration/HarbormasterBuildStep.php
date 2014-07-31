@@ -9,7 +9,7 @@ final class HarbormasterBuildStep extends HarbormasterDAO
   protected $buildPlanPHID;
   protected $className;
   protected $details = array();
-  protected $sequence;
+  protected $sequence = 0;
 
   private $buildPlan = self::ATTACHABLE;
   private $customFields = self::ATTACHABLE;
