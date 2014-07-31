@@ -331,10 +331,6 @@ final class HarbormasterBuildViewController
       ->setActionList($actions);
     $box->addPropertyList($properties);
 
-    $properties->addProperty(
-      pht('Status'),
-      $this->getStatus($build));
-
     $handles = id(new PhabricatorHandleQuery())
       ->setViewer($viewer)
       ->withPHIDs(array(
@@ -349,6 +345,10 @@ final class HarbormasterBuildViewController
     $properties->addProperty(
       pht('Build Plan'),
       $handles[$build->getBuildPlanPHID()]->renderLink());
+
+    $properties->addProperty(
+      pht('Status'),
+      $this->getStatus($build));
 
   }
 
