@@ -52,6 +52,7 @@ final class HarbormasterBuildViewController
 
     $build_targets = id(new HarbormasterBuildTargetQuery())
       ->setViewer($viewer)
+      ->needBuildSteps(true)
       ->withBuildPHIDs(array($build->getPHID()))
       ->execute();
 
@@ -69,32 +70,68 @@ final class HarbormasterBuildViewController
     $targets = array();
     foreach ($build_targets as $build_target) {
       $header = id(new PHUIHeaderView())
-        ->setHeader(pht(
-          'Build Target %d (%s)',
-          $build_target->getID(),
-          $build_target->getName()))
+        ->setHeader($build_target->getName())
         ->setUser($viewer);
+
+      $target_box = id(new PHUIObjectBoxView())
+        ->setHeader($header);
+
       $properties = new PHUIPropertyListView();
+      $status_view = new PHUIStatusListView();
+
+      $item = new PHUIStatusItemView();
+
+      $status = $build_target->getTargetStatus();
+      $status_name =
+        HarbormasterBuildTarget::getBuildTargetStatusName($status);
+      $icon = HarbormasterBuildTarget::getBuildTargetStatusIcon($status);
+      $color = HarbormasterBuildTarget::getBuildTargetStatusColor($status);
+
+      $item->setTarget($status_name);
+      $item->setIcon($icon, $color);
+      $status_view->addItem($item);
+
+      $properties->addProperty(pht('Name'), $build_target->getName());
+      $properties->addProperty(pht('Status'), $status_view);
+
+      $target_box->addPropertyList($properties, pht('Overview'));
+
+      $description = $build_target->getBuildStep()->getDescription();
+      if ($description) {
+        $rendered = PhabricatorMarkupEngine::renderOneObject(
+          id(new PhabricatorMarkupOneOff())
+            ->setContent($description)
+            ->setPreserveLinebreaks(true),
+          'default',
+          $viewer);
+
+        $properties->addSectionHeader(pht('Description'));
+        $properties->addTextContent($rendered);
+      }
 
       $details = $build_target->getDetails();
       if ($details) {
-        $properties->addSectionHeader(pht('Configuration Details'));
+        $properties = new PHUIPropertyListView();
         foreach ($details as $key => $value) {
           $properties->addProperty($key, $value);
         }
+        $target_box->addPropertyList($properties, pht('Configuration'));
       }
 
       $variables = $build_target->getVariables();
       if ($variables) {
-        $properties->addSectionHeader(pht('Variables'));
+        $properties = new PHUIPropertyListView();
         foreach ($variables as $key => $value) {
           $properties->addProperty($key, $value);
         }
+        $target_box->addPropertyList($properties, pht('Variables'));
       }
 
-      $targets[] = id(new PHUIObjectBoxView())
-        ->setHeader($header)
-        ->addPropertyList($properties);
+      $properties = new PHUIPropertyListView();
+      $properties->addProperty('Build Target ID', $build_target->getID());
+      $target_box->addPropertyList($properties, pht('Metadata'));
+
+      $targets[] = $target_box;
 
       $build_messages = idx($messages, $build_target->getPHID(), array());
       if ($build_messages) {

@@ -6,6 +6,7 @@ final class HarbormasterBuildTargetQuery
   private $ids;
   private $phids;
   private $buildPHIDs;
+  private $needBuildSteps;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -19,6 +20,11 @@ final class HarbormasterBuildTargetQuery
 
   public function withBuildPHIDs(array $build_phids) {
     $this->buildPHIDs = $build_phids;
+    return $this;
+  }
+
+  public function needBuildSteps($need_build_steps) {
+    $this->needBuildSteps = $need_build_steps;
     return $this;
   }
 
@@ -64,6 +70,31 @@ final class HarbormasterBuildTargetQuery
     $where[] = $this->buildPagingClause($conn_r);
 
     return $this->formatWhereClause($where);
+  }
+
+  protected function didFilterPage(array $page) {
+    if ($this->needBuildSteps) {
+      $step_phids = array();
+
+      foreach ($page as $target) {
+        $step_phids[] = $target->getBuildStepPHID();
+      }
+
+      $steps = id(new HarbormasterBuildStepQuery())
+        ->setViewer($this->getViewer())
+        ->setParentQuery($this)
+        ->withPHIDs($step_phids)
+        ->execute();
+
+      $steps = mpull($steps, null, 'getPHID');
+
+      foreach ($page as $target) {
+        $target->attachBuildStep(
+          $steps[$target->getBuildStepPHID()]);
+      }
+    }
+
+    return $page;
   }
 
   protected function willFilterPage(array $page) {

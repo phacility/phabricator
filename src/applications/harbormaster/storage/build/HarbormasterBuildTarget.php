@@ -21,6 +21,54 @@ final class HarbormasterBuildTarget extends HarbormasterDAO
   private $buildStep = self::ATTACHABLE;
   private $implementation;
 
+  public static function getBuildTargetStatusName($status) {
+    switch ($status) {
+      case self::STATUS_PENDING:
+        return pht('Pending');
+      case self::STATUS_BUILDING:
+        return pht('Building');
+      case self::STATUS_WAITING:
+        return pht('Waiting for Message');
+      case self::STATUS_PASSED:
+        return pht('Passed');
+      case self::STATUS_FAILED:
+        return pht('Failed');
+      default:
+        return pht('Unknown');
+    }
+  }
+
+  public static function getBuildTargetStatusIcon($status) {
+    switch ($status) {
+      case self::STATUS_PENDING:
+        return PHUIStatusItemView::ICON_OPEN;
+      case self::STATUS_BUILDING:
+      case self::STATUS_WAITING:
+        return PHUIStatusItemView::ICON_RIGHT;
+      case self::STATUS_PASSED:
+        return PHUIStatusItemView::ICON_ACCEPT;
+      case self::STATUS_FAILED:
+        return PHUIStatusItemView::ICON_REJECT;
+      default:
+        return PHUIStatusItemView::ICON_QUESTION;
+    }
+  }
+
+  public static function getBuildTargetStatusColor($status) {
+    switch ($status) {
+      case self::STATUS_PENDING:
+      case self::STATUS_BUILDING:
+      case self::STATUS_WAITING:
+        return 'blue';
+      case self::STATUS_PASSED:
+        return 'green';
+      case self::STATUS_FAILED:
+        return 'red';
+      default:
+        return 'bluegrey';
+    }
+  }
+
   public static function initializeNewBuildTarget(
     HarbormasterBuild $build,
     HarbormasterBuildStep $build_step,
