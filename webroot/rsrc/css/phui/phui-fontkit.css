@@ -28,7 +28,8 @@
   padding: 1px 3px 2px;
 }
 
-.diviner-view .phui-font-source-sans .phui-property-list-section {
+.diviner-view .phui-font-source-sans .phui-property-list-section,
+.legalpad .phui-font-source-sans .phui-property-list-section {
   border-bottom: 1px solid {$thinblueborder};
   margin-bottom: 8px;
   background: {$lightgreybackground};

@@ -30,6 +30,7 @@ final class PhabricatorTypeaheadModularDatasourceController
 
     if (isset($sources[$this->class])) {
       $source = $sources[$this->class];
+      $source->setParameters($request->getRequestData());
 
       $composite = new PhabricatorTypeaheadRuntimeCompositeDatasource();
       $composite->addDatasource($source);

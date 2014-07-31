@@ -27,6 +27,10 @@ final class HarbormasterBuildStepPHIDType extends PhabricatorPHIDType {
 
     foreach ($handles as $phid => $handle) {
       $build_step = $objects[$phid];
+
+      $name = $build_step->getName();
+
+      $handle->setName($name);
     }
   }
 

@@ -164,7 +164,6 @@ return array(
     'javelin-behavior-aphront-more',
   ),
   'diffusion.pkg.css' => array(
-    'diffusion-commit-view-css',
     'diffusion-icons-css',
   ),
   'diffusion.pkg.js' => array(

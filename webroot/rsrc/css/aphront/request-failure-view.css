@@ -3,9 +3,13 @@
  */
 
 .aphront-request-failure-view {
-  margin: 2em auto;
+  margin: 16px auto;
   background: #eff2f7;
   width: 600px;
+}
+
+.device .aphront-request-failure-view {
+  width: 90%;
 }
 
 .aphront-request-failure-view .aphront-request-failure-head {

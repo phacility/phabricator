@@ -495,26 +495,26 @@ final class PHUITimelineEventView extends AphrontView {
     $xaction_phid = $this->getTransactionPHID();
 
     $items = array();
-    if ($this->getQuoteTargetID()) {
 
+    if ($this->getIsEditable()) {
+      $items[] = id(new PhabricatorActionView())
+        ->setIcon('fa-pencil')
+        ->setHref('/transactions/edit/'.$xaction_phid.'/')
+        ->setName(pht('Edit Comment'))
+        ->addSigil('transaction-edit')
+        ->setMetadata(
+          array(
+            'anchor' => $anchor,
+          ));
+    }
+
+    if ($this->getQuoteTargetID()) {
       $ref = null;
       if ($this->getQuoteRef()) {
         $ref = $this->getQuoteRef();
         if ($anchor) {
           $ref = $ref.'#'.$anchor;
         }
-      }
-
-      if ($this->getIsEditable()) {
-        $items[] = id(new PhabricatorActionView())
-          ->setIcon('fa-pencil')
-          ->setHref('/transactions/edit/'.$xaction_phid.'/')
-          ->setName(pht('Edit Comment'))
-          ->addSigil('transaction-edit')
-          ->setMetadata(
-            array(
-              'anchor' => $anchor,
-            ));
       }
 
       $items[] = id(new PhabricatorActionView())

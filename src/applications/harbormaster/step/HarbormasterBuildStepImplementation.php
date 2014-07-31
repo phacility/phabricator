@@ -98,51 +98,65 @@ abstract class HarbormasterBuildStepImplementation {
     return array();
   }
 
-  /**
-   * Returns a list of all artifacts made available by previous build steps.
-   */
-  public static function loadAvailableArtifacts(
-    HarbormasterBuildPlan $build_plan,
-    HarbormasterBuildStep $current_build_step,
-    $artifact_type) {
+  public function getDependencies(HarbormasterBuildStep $build_step) {
+    $dependencies = $build_step->getDetail('dependsOn', array());
 
-    $build_steps = $build_plan->loadOrderedBuildSteps();
+    $inputs = $build_step->getStepImplementation()->getArtifactInputs();
+    $inputs = ipull($inputs, null, 'key');
 
-    return self::getAvailableArtifacts(
-      $build_plan,
-      $build_steps,
-      $current_build_step,
-      $artifact_type);
+    $artifacts = $this->getAvailableArtifacts(
+      $build_step->getBuildPlan(),
+      $build_step,
+      null);
+
+    foreach ($artifacts as $key => $type) {
+      if (!array_key_exists($key, $inputs)) {
+        unset($artifacts[$key]);
+      }
+    }
+
+    $artifact_steps = ipull($artifacts, 'step');
+    $artifact_steps = mpull($artifact_steps, 'getPHID');
+
+    $dependencies = array_merge($dependencies, $artifact_steps);
+
+    return $dependencies;
   }
 
   /**
-   * Returns a list of all artifacts made available by previous build steps.
+   * Returns a list of all artifacts made available in the build plan.
    */
   public static function getAvailableArtifacts(
     HarbormasterBuildPlan $build_plan,
-    array $build_steps,
-    HarbormasterBuildStep $current_build_step,
+    $current_build_step,
     $artifact_type) {
 
-    $previous_implementations = array();
-    foreach ($build_steps as $build_step) {
-      if ($build_step->getPHID() === $current_build_step->getPHID()) {
-        break;
-      }
-      $previous_implementations[] = $build_step->getStepImplementation();
-    }
+    $steps = id(new HarbormasterBuildStepQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withBuildPlanPHIDs(array($build_plan->getPHID()))
+      ->execute();
 
-    $artifact_arrays = mpull($previous_implementations, 'getArtifactOutputs');
     $artifacts = array();
-    foreach ($artifact_arrays as $array) {
+
+    $artifact_arrays = array();
+    foreach ($steps as $step) {
+      if ($current_build_step !== null &&
+        $step->getPHID() === $current_build_step->getPHID()) {
+
+        continue;
+      }
+
+      $implementation = $step->getStepImplementation();
+      $array = $implementation->getArtifactOutputs();
       $array = ipull($array, 'type', 'key');
       foreach ($array as $name => $type) {
         if ($type !== $artifact_type && $artifact_type !== null) {
           continue;
         }
-        $artifacts[$name] = $type;
+        $artifacts[$name] = array('type' => $type, 'step' => $step);
       }
     }
+
     return $artifacts;
   }
 

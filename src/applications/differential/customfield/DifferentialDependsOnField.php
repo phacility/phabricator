@@ -44,7 +44,7 @@ final class DifferentialDependsOnField
   public function getProTips() {
     return array(
       pht(
-        'Create a dependendency between revisions by writing '.
+        'Create a dependency between revisions by writing '.
         '"Depends on D123" in your summary.'),
     );
   }

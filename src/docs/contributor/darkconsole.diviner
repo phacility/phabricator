@@ -24,7 +24,7 @@ it in production may compromise the integrity of an install.
 = Enabling DarkConsole =
 
 You enable DarkConsole in your configuration, by setting `darkconsole.enabled`
-to `true`, and then turning it on in `Settings` -> `Display Preferences`. Once
+to `true`, and then turning it on in `Settings` -> `Developer Settings`. Once
 DarkConsole is enabled, you can show or hide it by pressing ##`## on your
 keyboard.
 

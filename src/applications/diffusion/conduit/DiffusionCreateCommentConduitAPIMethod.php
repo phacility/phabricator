@@ -69,14 +69,23 @@ final class DiffusionCreateCommentConduitAPIMethod
       throw new ConduitException('ERR_BAD_ACTION');
     }
 
-    $comment = id(new PhabricatorAuditComment())
-      ->setAction($action)
-      ->setContent($message);
+    $comments = array();
+
+    if ($action != PhabricatorAuditActionConstants::COMMENT) {
+      $comments[] = id(new PhabricatorAuditComment())
+        ->setAction($action);
+    }
+
+    if (strlen($message)) {
+      $comments[] = id(new PhabricatorAuditComment())
+        ->setAction(PhabricatorAuditActionConstants::COMMENT)
+        ->setContent($message);
+    }
 
     id(new PhabricatorAuditCommentEditor($commit))
       ->setActor($request->getUser())
       ->setNoEmail($request->getValue('silent'))
-      ->addComment($comment);
+      ->addComments($comments);
 
     return true;
     // get the full uri of the comment?

@@ -101,7 +101,6 @@ abstract class PhabricatorSearchDocumentIndexer {
     $xactions = id(clone $query)
       ->setViewer($this->getViewer())
       ->withObjectPHIDs($phids)
-      ->withTransactionTypes(array(PhabricatorTransactions::TYPE_COMMENT))
       ->execute();
 
     foreach ($xactions as $xaction) {

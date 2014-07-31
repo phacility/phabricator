@@ -124,7 +124,9 @@ final class PhabricatorRemarkupRuleImageMacro extends PhutilRemarkupRule {
 
       $id = null;
       $audio = idx($files, $macro->getAudioPHID());
-      if ($audio) {
+      $should_play = ($audio && $macro->getAudioBehavior() !=
+        PhabricatorFileImageMacro::AUDIO_BEHAVIOR_NONE);
+      if ($should_play) {
         $id = celerity_generate_unique_node_id();
 
         $loop = null;

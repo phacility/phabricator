@@ -159,17 +159,7 @@ class PhabricatorApplicationTransactionView extends AphrontView {
     }
 
     if ($this->getShowEditActions()) {
-      $list_id = celerity_generate_unique_node_id();
-
-      $view->setID($list_id);
-
-      Javelin::initBehavior(
-        'phabricator-transaction-list',
-        array(
-          'listID'          => $list_id,
-          'objectPHID'      => $this->getObjectPHID(),
-          'nextAnchor'      => $this->anchorOffset + count($events),
-        ));
+      Javelin::initBehavior('phabricator-transaction-list');
     }
 
     return $view->render();

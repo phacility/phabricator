@@ -5,6 +5,7 @@ final class HarbormasterBuildStepTransaction
 
   const TYPE_CREATE = 'harbormaster:step:create';
   const TYPE_NAME = 'harbormaster:step:name';
+  const TYPE_DEPENDS_ON = 'harbormaster:step:depends';
 
   public function getApplicationName() {
     return 'harbormaster';
