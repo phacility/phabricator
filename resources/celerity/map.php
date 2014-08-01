@@ -491,7 +491,7 @@ return array(
     'rsrc/js/core/behavior-watch-anchor.js' => '06e05112',
     'rsrc/js/core/behavior-workflow.js' => '0a3f3021',
     'rsrc/js/core/phtize.js' => 'd254d646',
-    'rsrc/js/phui/behavior-phui-object-box-tabs.js' => 'a3e2244e',
+    'rsrc/js/phui/behavior-phui-object-box-tabs.js' => '2bfa2836',
     'rsrc/js/phui/behavior-phui-timeline-dropdown-menu.js' => '4d94d9c3',
     'rsrc/js/phuix/PHUIXActionListView.js' => 'b5c256b8',
     'rsrc/js/phuix/PHUIXActionView.js' => '6e8cefa4',
@@ -634,7 +634,7 @@ return array(
     'javelin-behavior-phame-post-preview' => 'be807912',
     'javelin-behavior-pholio-mock-edit' => '9c2623f4',
     'javelin-behavior-pholio-mock-view' => '152178f0',
-    'javelin-behavior-phui-object-box-tabs' => 'a3e2244e',
+    'javelin-behavior-phui-object-box-tabs' => '2bfa2836',
     'javelin-behavior-phui-timeline-dropdown-menu' => '4d94d9c3',
     'javelin-behavior-policy-control' => 'f3fef818',
     'javelin-behavior-policy-rule-editor' => 'fe9a552f',
@@ -1006,6 +1006,11 @@ return array(
       'javelin-util',
       'javelin-workflow',
       'javelin-json',
+    ),
+    '2bfa2836' => array(
+      'javelin-behavior',
+      'javelin-stratcom',
+      'javelin-dom',
     ),
     '2cad29d1' => array(
       'javelin-install',
@@ -1472,11 +1477,6 @@ return array(
       'javelin-install',
       'javelin-dom',
       'javelin-reactor-dom',
-    ),
-    'a3e2244e' => array(
-      'javelin-behavior',
-      'javelin-stratcom',
-      'javelin-dom',
     ),
     'a4ae61bf' => array(
       'javelin-install',
