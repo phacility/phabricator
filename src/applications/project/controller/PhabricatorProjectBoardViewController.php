@@ -40,6 +40,7 @@ final class PhabricatorProjectBoardViewController
     }
 
     $this->setProject($project);
+    $this->id = $project->getID();
 
     $column_query = id(new PhabricatorProjectColumnQuery())
       ->setViewer($viewer)
