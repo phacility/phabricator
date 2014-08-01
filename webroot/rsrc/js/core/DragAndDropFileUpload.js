@@ -66,6 +66,20 @@ JX.install('PhabricatorDragAndDropFileUpload', {
         return false;
       }
 
+      // Firefox has some issues sometimes; implement this click handler so
+      // the user can recover. See T5188.
+      JX.DOM.listen(
+        this._node,
+        'click',
+        null,
+        JX.bind(this, function (e) {
+          if (this._depth) {
+            e.kill();
+            // Force depth to 0.
+            this._updateDepth(-this._depth);
+          }
+        }));
+
       // We track depth so that the _node may have children inside of it and
       // not become unselected when they are dragged over.
       JX.DOM.listen(
