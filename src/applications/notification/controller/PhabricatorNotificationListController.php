@@ -39,32 +39,36 @@ final class PhabricatorNotificationListController
         break;
     }
 
-    $notifications = $query->executeWithOffsetPager($pager);
+    $image = id(new PHUIIconView())
+      ->setIconFont('fa-eye-slash');
+    $button = id(new PHUIButtonView())
+      ->setTag('a')
+      ->addSigil('workflow')
+      ->setColor(PHUIButtonView::SIMPLE)
+      ->setIcon($image)
+      ->setText(pht('Mark All Read'));
 
+    $notifications = $query->executeWithOffsetPager($pager);
+    $clear_uri = id(new PhutilURI('/notification/clear/'));
     if ($notifications) {
       $builder = new PhabricatorNotificationBuilder($notifications);
       $builder->setUser($user);
       $view = $builder->buildView()->render();
+      $clear_uri->setQueryParam(
+        'chronoKey',
+        head($notifications)->getChronologicalKey());
     } else {
       $view = phutil_tag_div(
         'phabricator-notification no-notifications',
         $no_data);
+      $button->setDisabled(true);
     }
+    $button->setHref((string) $clear_uri);
 
     $view = id(new PHUIBoxView())
       ->addPadding(PHUI::PADDING_MEDIUM)
       ->addClass('phabricator-notification-list')
       ->appendChild($view);
-
-    $image = id(new PHUIIconView())
-        ->setIconFont('fa-eye-slash');
-    $button = id(new PHUIButtonView())
-        ->setTag('a')
-        ->setColor(PHUIButtonView::SIMPLE)
-        ->setHref('/notification/clear/')
-        ->addSigil('workflow')
-        ->setIcon($image)
-        ->setText(pht('Mark All Read'));
 
     $notif_header = id(new PHUIHeaderView())
       ->setHeader($header)
