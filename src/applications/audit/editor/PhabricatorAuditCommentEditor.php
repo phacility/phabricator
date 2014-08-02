@@ -69,42 +69,13 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
     }
 
     if ($action == PhabricatorAuditActionConstants::CLOSE) {
-      if (!PhabricatorEnv::getEnvConfig('audit.can-author-close-audit')) {
-        throw new Exception('Cannot Close Audit without enabling'.
-          'audit.can-author-close-audit');
-      }
-      // "Close" means wipe out all the concerns.
-      $concerned_status = PhabricatorAuditStatusConstants::CONCERNED;
-      foreach ($requests as $request) {
-        if ($request->getAuditStatus() == $concerned_status) {
-          $request->setAuditStatus(PhabricatorAuditStatusConstants::CLOSED);
-          $request->save();
-        }
-      }
+
+      // This is now applied by the transaction Editor.
+
     } else if ($action == PhabricatorAuditActionConstants::RESIGN) {
-      // "Resign" has unusual rules for writing user rows, only affects the
-      // user row (never package/project rows), and always affects the user
-      // row (other actions don't, if they were able to affect a package/project
-      // row).
-      $actor_request = null;
-      foreach ($requests as $request) {
-        if ($request->getAuditorPHID() == $actor->getPHID()) {
-          $actor_request = $request;
-          break;
-        }
-      }
-      if (!$actor_request) {
-        $actor_request = id(new PhabricatorRepositoryAuditRequest())
-          ->setCommitPHID($commit->getPHID())
-          ->setAuditorPHID($actor->getPHID())
-          ->setAuditReasons(array('Resigned'));
-      }
 
-      $actor_request
-        ->setAuditStatus(PhabricatorAuditStatusConstants::RESIGNED)
-        ->save();
+      // This is now applied by the transaction Editor.
 
-      $requests[] = $actor_request;
     } else {
       $have_any_requests = false;
       foreach ($requests as $request) {

@@ -119,13 +119,59 @@ final class PhabricatorAuditEditor
             ->save();
         }
 
-        $object->updateAuditStatus($requests);
         $object->attachAudits($requests);
-        $object->save();
         return;
     }
 
     return parent::applyCustomExternalTransaction($object, $xaction);
+  }
+
+  protected function applyFinalEffects(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $status_concerned = PhabricatorAuditStatusConstants::CONCERNED;
+    $status_closed = PhabricatorAuditStatusConstants::CLOSED;
+    $status_resigned = PhabricatorAuditStatusConstants::RESIGNED;
+
+    $actor_phid = $this->requireActor()->getPHID();
+
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case PhabricatorAuditActionConstants::ACTION:
+          switch ($xaction->getNewValue()) {
+            case PhabricatorAuditActionConstants::CLOSE:
+              // "Close" means wipe out all the concerns.
+              $requests = $object->getAudits();
+              foreach ($requests as $request) {
+                if ($request->getAuditStatus() == $status_concerned) {
+                  $request
+                    ->setAuditStatus($status_closed)
+                    ->save();
+                }
+              }
+              break;
+            case PhabricatorAuditActionConstants::RESIGN:
+              $requests = $object->getAudits();
+              $requests = mpull($requests, null, 'getAuditorPHID');
+              $actor_request = idx($requests, $actor_phid);
+
+              if ($actor_request) {
+                $actor_request
+                  ->setAuditStatus($status_resigned)
+                  ->save();
+              }
+              break;
+          }
+          break;
+      }
+    }
+
+    $requests = $object->getAudits();
+    $object->updateAuditStatus($requests);
+    $object->save();
+
+    return $xactions;
   }
 
   protected function sortTransactions(array $xactions) {
@@ -145,6 +191,69 @@ final class PhabricatorAuditEditor
 
     return array_values(array_merge($head, $tail));
   }
+
+  protected function validateTransaction(
+    PhabricatorLiskDAO $object,
+    $type,
+    array $xactions) {
+
+    $errors = parent::validateTransaction($object, $type, $xactions);
+
+    foreach ($xactions as $xaction) {
+      switch ($type) {
+        case PhabricatorAuditActionConstants::ACTION:
+          $error = $this->validateAuditAction(
+            $object,
+            $type,
+            $xaction,
+            $xaction->getNewValue());
+          if ($error) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              $error,
+              $xaction);
+          }
+          break;
+      }
+    }
+
+    return $errors;
+  }
+
+  private function validateAuditAction(
+    PhabricatorLiskDAO $object,
+    $type,
+    PhabricatorAuditTransaction $xaction,
+    $action) {
+
+    $can_author_close_key = 'audit.can-author-close-audit';
+    $can_author_close = PhabricatorEnv::getEnvConfig($can_author_close_key);
+
+    $actor_is_author = ($object->getAuthorPHID()) &&
+      ($object->getAuthorPHID() == $this->requireActor()->getPHID());
+
+    switch ($action) {
+      case PhabricatorAuditActionConstants::CLOSE:
+        if (!$actor_is_author) {
+          return pht(
+            'You can not close this audit because you are not the author '.
+            'of the commit.');
+        }
+
+        if (!$can_author_close) {
+          return pht(
+            'You can not close this audit because "%s" is disabled in '.
+            'the Phabricator configuration.',
+            $can_author_close_key);
+        }
+
+        break;
+    }
+
+    return null;
+  }
+
 
   protected function supportsSearch() {
     return true;
