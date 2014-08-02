@@ -4,11 +4,15 @@ final class PhabricatorFileUploadController extends PhabricatorFileController {
 
   public function processRequest() {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $request->getUser();
+
+    $file = new PhabricatorFile();
 
     $e_file = true;
     $errors = array();
     if ($request->isFormPost()) {
+      $view_policy = $request->getStr('viewPolicy');
+
       if (!$request->getFileExists('file')) {
         $e_file = pht('Required');
         $errors[] = pht('You must select a file to upload.');
@@ -17,7 +21,8 @@ final class PhabricatorFileUploadController extends PhabricatorFileController {
           idx($_FILES, 'file'),
           array(
             'name'        => $request->getStr('name'),
-            'authorPHID'  => $user->getPHID(),
+            'authorPHID'  => $viewer->getPHID(),
+            'viewPolicy'  => $view_policy,
             'isExplicitUpload' => true,
           ));
       }
@@ -25,6 +30,8 @@ final class PhabricatorFileUploadController extends PhabricatorFileController {
       if (!$errors) {
         return id(new AphrontRedirectResponse())->setURI($file->getInfoURI());
       }
+
+      $file->setViewPolicy($view_policy);
     }
 
     $support_id = celerity_generate_unique_node_id();
@@ -38,8 +45,13 @@ final class PhabricatorFileUploadController extends PhabricatorFileController {
           'You can also upload files by dragging and dropping them from your '.
           'desktop onto this page or the Phabricator home page.')));
 
+    $policies = id(new PhabricatorPolicyQuery())
+      ->setViewer($viewer)
+      ->setObject($file)
+      ->execute();
+
     $form = id(new AphrontFormView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setEncType('multipart/form-data')
       ->appendChild(
         id(new AphrontFormFileControl())
@@ -51,8 +63,14 @@ final class PhabricatorFileUploadController extends PhabricatorFileController {
         id(new AphrontFormTextControl())
           ->setLabel(pht('Name'))
           ->setName('name')
-          ->setValue($request->getStr('name'))
-          ->setCaption(pht('Optional file display name.')))
+          ->setValue($request->getStr('name')))
+      ->appendChild(
+        id(new AphrontFormPolicyControl())
+          ->setUser($viewer)
+          ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
+          ->setPolicyObject($file)
+          ->setPolicies($policies)
+          ->setName('viewPolicy'))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Upload'))
@@ -65,7 +83,7 @@ final class PhabricatorFileUploadController extends PhabricatorFileController {
     $title = pht('Upload File');
 
     $global_upload = id(new PhabricatorGlobalUploadTargetView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setShowIfSupportedID($support_id);
 
     $form_box = id(new PHUIObjectBoxView())
