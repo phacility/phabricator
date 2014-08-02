@@ -85,7 +85,7 @@ JX.behavior('aphront-form-disable-on-submit', function() {
   });
 
   JX.Stratcom.listen('unload', null, function() {
-    // Reenable everything on page unload so we don't bfcache back to a page
+    // Re-enable everything on page unload so we don't bfcache back to a page
     // that has disabled forms.
     for (var ii = 0; ii < restore.length; ii++) {
       restore[ii].disabled = '';

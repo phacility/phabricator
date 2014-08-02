@@ -107,5 +107,3 @@ function phabricator_format_local_time($epoch, $user, $format) {
 
   return PhutilTranslator::getInstance()->translateDate($format, $date);
 }
-
-
