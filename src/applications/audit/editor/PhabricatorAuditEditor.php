@@ -133,13 +133,18 @@ final class PhabricatorAuditEditor
     $status_concerned = PhabricatorAuditStatusConstants::CONCERNED;
     $status_closed = PhabricatorAuditStatusConstants::CLOSED;
     $status_resigned = PhabricatorAuditStatusConstants::RESIGNED;
+    $status_accepted = PhabricatorAuditStatusConstants::ACCEPTED;
+    $status_concerned = PhabricatorAuditStatusConstants::CONCERNED;
 
     $actor_phid = $this->requireActor()->getPHID();
+    $actor_is_author = ($object->getAuthorPHID()) &&
+      ($actor_phid == $object->getAuthorPHID());
 
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
         case PhabricatorAuditActionConstants::ACTION:
-          switch ($xaction->getNewValue()) {
+          $new = $xaction->getNewValue();
+          switch ($new) {
             case PhabricatorAuditActionConstants::CLOSE:
               // "Close" means wipe out all the concerns.
               $requests = $object->getAudits();
@@ -162,6 +167,58 @@ final class PhabricatorAuditEditor
                   ->save();
               }
               break;
+            case PhabricatorAuditActionConstants::ACCEPT:
+            case PhabricatorAuditActionConstants::CONCERN:
+              if ($new == PhabricatorAuditActionConstants::ACCEPT) {
+                $new_status = $status_accepted;
+              } else {
+                $new_status = $status_concerned;
+              }
+
+              $requests = $object->getAudits();
+              $requests = mpull($requests, null, 'getAuditorPHID');
+
+              // Figure out which requests the actor has authority over: these
+              // are user requests where they are the auditor, and packages
+              // and projects they are a member of.
+
+              if ($actor_is_author) {
+                // When modifying your own commits, you act only on behalf of
+                // yourself, not your packages/projects -- the idea being that
+                // you can't accept your own commits.
+                $authority_phids = array($actor_phid);
+              } else {
+                $authority_phids =
+                  PhabricatorAuditCommentEditor::loadAuditPHIDsForUser(
+                    $this->requireActor());
+              }
+
+              $authority = array_select_keys(
+                $requests,
+                $authority_phids);
+
+              if (!$authority) {
+                // If the actor has no authority over any existing requests,
+                // create a new request for them.
+
+                $actor_request = id(new PhabricatorRepositoryAuditRequest())
+                  ->setCommitPHID($object->getPHID())
+                  ->setAuditorPHID($actor_phid)
+                  ->setAuditStatus($new_status)
+                  ->save();
+
+                $requests[$actor_phid] = $actor_request;
+                $object->attachAudits($requests);
+              } else {
+                // Otherwise, update the audit status of the existing requests.
+                foreach ($authority as $request) {
+                  $request
+                    ->setAuditStatus($new_status)
+                    ->save();
+                }
+              }
+              break;
+
           }
           break;
       }
