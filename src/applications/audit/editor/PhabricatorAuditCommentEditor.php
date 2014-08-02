@@ -245,27 +245,6 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
       ->setExcludeMailRecipientPHIDs($this->getExcludeMailRecipientPHIDs())
       ->setDisableEmail($this->noEmail)
       ->applyTransactions($commit, $xactions);
-
-    $feed_dont_publish_phids = array();
-    foreach ($requests as $request) {
-      $status = $request->getAuditStatus();
-      switch ($status) {
-        case PhabricatorAuditStatusConstants::RESIGNED:
-        case PhabricatorAuditStatusConstants::NONE:
-        case PhabricatorAuditStatusConstants::AUDIT_NOT_REQUIRED:
-          $feed_dont_publish_phids[$request->getAuditorPHID()] = 1;
-          break;
-        default:
-          unset($feed_dont_publish_phids[$request->getAuditorPHID()]);
-          break;
-      }
-    }
-    $feed_dont_publish_phids = array_keys($feed_dont_publish_phids);
-
-    $feed_phids = array_diff($requests_phids, $feed_dont_publish_phids);
-    foreach ($comments as $comment) {
-      $this->publishFeedStory($comment, $feed_phids);
-    }
   }
 
 
@@ -303,34 +282,6 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
     }
 
     return array_keys($phids);
-  }
-
-  private function publishFeedStory(
-    PhabricatorAuditComment $comment,
-    array $more_phids) {
-
-    $commit = $this->commit;
-    $actor = $this->getActor();
-
-    $related_phids = array_merge(
-      array(
-        $actor->getPHID(),
-        $commit->getPHID(),
-      ),
-      $more_phids);
-
-    id(new PhabricatorFeedStoryPublisher())
-      ->setRelatedPHIDs($related_phids)
-      ->setStoryAuthorPHID($actor->getPHID())
-      ->setStoryTime(time())
-      ->setStoryType(PhabricatorFeedStoryTypeConstants::STORY_AUDIT)
-      ->setStoryData(
-        array(
-          'commitPHID'    => $commit->getPHID(),
-          'action'        => $comment->getAction(),
-          'content'       => $comment->getContent(),
-        ))
-      ->publish();
   }
 
 }

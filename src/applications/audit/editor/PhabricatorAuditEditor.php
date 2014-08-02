@@ -234,4 +234,10 @@ final class PhabricatorAuditEditor
     return implode("\n", $block);
   }
 
+  protected function shouldPublishFeedStory(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return true;
+  }
+
 }

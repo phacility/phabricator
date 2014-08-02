@@ -30,7 +30,7 @@ class PhabricatorApplicationTransactionFeedStory
     return head($this->getValue('transactionPHIDs'));
   }
 
-  protected function getPrimaryTransaction() {
+  public function getPrimaryTransaction() {
     return $this->getObject($this->getPrimaryTransactionPHID());
   }
 
