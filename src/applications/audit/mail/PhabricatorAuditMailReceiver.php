@@ -17,6 +17,7 @@ final class PhabricatorAuditMailReceiver extends PhabricatorObjectMailReceiver {
     return id(new DiffusionCommitQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
+      ->needAuditRequests(true)
       ->executeOne();
   }
 

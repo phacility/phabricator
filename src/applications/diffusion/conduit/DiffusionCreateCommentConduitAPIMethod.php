@@ -43,6 +43,7 @@ final class DiffusionCreateCommentConduitAPIMethod
     $commit = id(new DiffusionCommitQuery())
       ->setViewer($request->getUser())
       ->withPHIDs(array($commit_phid))
+      ->needAuditRequests(true)
       ->executeOne();
     if (!$commit) {
       throw new ConduitException('ERR_BAD_COMMIT');

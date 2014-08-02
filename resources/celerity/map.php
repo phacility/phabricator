@@ -8,7 +8,7 @@
 return array(
   'names' => array(
     'core.pkg.css' => '66ada2ec',
-    'core.pkg.js' => 'c3965034',
+    'core.pkg.js' => '8cd3cd8c',
     'darkconsole.pkg.js' => 'df001cab',
     'differential.pkg.css' => '4a93db37',
     'differential.pkg.js' => '79503aa4',
@@ -463,7 +463,7 @@ return array(
     'rsrc/js/core/behavior-error-log.js' => 'a5d7cf86',
     'rsrc/js/core/behavior-fancy-datepicker.js' => 'a5573bcd',
     'rsrc/js/core/behavior-file-tree.js' => '88236f00',
-    'rsrc/js/core/behavior-form.js' => '3b1557b3',
+    'rsrc/js/core/behavior-form.js' => '5c54cbf3',
     'rsrc/js/core/behavior-gesture.js' => '3ab51e2c',
     'rsrc/js/core/behavior-global-drag-and-drop.js' => '3672899b',
     'rsrc/js/core/behavior-high-security-warning.js' => '8fc1c918',
@@ -551,7 +551,7 @@ return array(
     'javelin-behavior-aphront-basic-tokenizer' => 'b3a4b884',
     'javelin-behavior-aphront-crop' => 'fa0f4fc2',
     'javelin-behavior-aphront-drag-and-drop-textarea' => '92eb531d',
-    'javelin-behavior-aphront-form-disable-on-submit' => '3b1557b3',
+    'javelin-behavior-aphront-form-disable-on-submit' => '5c54cbf3',
     'javelin-behavior-aphront-more' => 'a80d0378',
     'javelin-behavior-audio-source' => '59b251eb',
     'javelin-behavior-audit-preview' => 'd835b03a',
@@ -1069,11 +1069,6 @@ return array(
       'javelin-dom',
       'javelin-magical-init',
     ),
-    '3b1557b3' => array(
-      'javelin-behavior',
-      'javelin-stratcom',
-      'javelin-dom',
-    ),
     '3b3e1664' => array(
       'javelin-behavior',
       'javelin-dom',
@@ -1213,6 +1208,11 @@ return array(
     '5bc2cb21' => array(
       'javelin-behavior',
       'javelin-stratcom',
+    ),
+    '5c54cbf3' => array(
+      'javelin-behavior',
+      'javelin-stratcom',
+      'javelin-dom',
     ),
     '5fefb143' => array(
       'javelin-behavior',

@@ -15,6 +15,7 @@ final class PhabricatorAuditAddCommentController
     $commit = id(new DiffusionCommitQuery())
       ->setViewer($user)
       ->withPHIDs(array($commit_phid))
+      ->needAuditRequests(true)
       ->executeOne();
     if (!$commit) {
       return new Aphront404Response();
@@ -31,10 +32,7 @@ final class PhabricatorAuditAddCommentController
         $auditors = $request->getArr('auditors');
         $comments[] = id(new PhabricatorAuditComment())
           ->setAction(PhabricatorAuditActionConstants::ADD_AUDITORS)
-          ->setMetadata(
-            array(
-              PhabricatorAuditComment::METADATA_ADDED_AUDITORS => $auditors,
-            ));
+          ->setNewValue(array_fuse($auditors));
         break;
       case PhabricatorAuditActionConstants::ADD_CCS:
         $comments[] = id(new PhabricatorAuditComment())

@@ -47,10 +47,7 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
     $audit_phids = self::loadAuditPHIDsForUser($actor);
     $audit_phids = array_fill_keys($audit_phids, true);
 
-    $requests = id(new PhabricatorRepositoryAuditRequest())
-      ->loadAllWhere(
-        'commitPHID = %s',
-        $commit->getPHID());
+    $requests = $commit->getAudits();
 
     // TODO: We should validate the action, currently we allow anyone to, e.g.,
     // close an audit if they muck with form parameters. I'll followup with this
@@ -179,38 +176,6 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
             ->save();
           $requests[] = $request;
         }
-      }
-    }
-
-    $auditors = array();
-
-    foreach ($comments as $comment) {
-      $meta = $comment->getMetadata();
-
-      $auditor_phids = idx(
-        $meta,
-        PhabricatorAuditComment::METADATA_ADDED_AUDITORS,
-        array());
-      foreach ($auditor_phids as $phid) {
-        $auditors[] = $phid;
-      }
-    }
-
-    $requests_by_auditor = mpull($requests, null, 'getAuditorPHID');
-    $requests_phids = array_keys($requests_by_auditor);
-
-    $auditors = array_diff($auditors, $requests_phids);
-
-    if ($auditors) {
-      foreach ($auditors as $auditor_phid) {
-        $audit_requested = PhabricatorAuditStatusConstants::AUDIT_REQUESTED;
-        $requests[] = id (new PhabricatorRepositoryAuditRequest())
-          ->setCommitPHID($commit->getPHID())
-          ->setAuditorPHID($auditor_phid)
-          ->setAuditStatus($audit_requested)
-          ->setAuditReasons(
-            array('Added by '.$actor->getUsername()))
-          ->save();
       }
     }
 

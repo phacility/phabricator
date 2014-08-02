@@ -3,8 +3,6 @@
 final class PhabricatorAuditComment
   implements PhabricatorMarkupInterface {
 
-  const METADATA_ADDED_AUDITORS  = 'added-auditors';
-
   const MARKUP_FIELD_BODY        = 'markup:body';
 
   private $proxyComment;
@@ -143,42 +141,6 @@ final class PhabricatorAuditComment
       default:
         return $this->proxy->getNewValue();
     }
-  }
-
-  public function setMetadata(array $metadata) {
-    if (!$this->proxy->getTransactionType()) {
-      throw new Exception(pht('Call setAction() before getMetadata()!'));
-    }
-
-    $type = $this->proxy->getTransactionType();
-    switch ($type) {
-      case PhabricatorAuditActionConstants::ADD_AUDITORS:
-        $raw_phids = idx($metadata, self::METADATA_ADDED_AUDITORS, array());
-        break;
-      default:
-        throw new Exception(pht('No metadata expected!'));
-    }
-
-    $this->proxy->setNewValue(array_fuse($raw_phids));
-
-    return $this;
-  }
-
-  public function getMetadata() {
-    if (!$this->proxy->getTransactionType()) {
-      throw new Exception(pht('Call setAction() before getMetadata()!'));
-    }
-
-    $type = $this->proxy->getTransactionType();
-    $new_value = $this->proxy->getNewValue();
-    switch ($type) {
-      case PhabricatorAuditActionConstants::ADD_AUDITORS:
-        return array(
-          self::METADATA_ADDED_AUDITORS => array_keys($new_value),
-        );
-    }
-
-    return array();
   }
 
   public function save() {

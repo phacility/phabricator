@@ -86,7 +86,42 @@ final class PhabricatorAuditEditor
       case PhabricatorAuditActionConstants::INLINE:
         return;
       case PhabricatorAuditActionConstants::ADD_AUDITORS:
-        // TODO: For now, these are applied externally.
+        $new = $xaction->getNewValue();
+        if (!is_array($new)) {
+          $new = array();
+        }
+
+        $old = $xaction->getOldValue();
+        if (!is_array($old)) {
+          $old = array();
+        }
+
+        $add = array_diff_key($new, $old);
+
+        $actor = $this->requireActor();
+
+        $requests = $object->getAudits();
+        $requests = mpull($requests, null, 'getAuditorPHID');
+        foreach ($add as $phid) {
+          if (isset($requests[$phid])) {
+            continue;
+          }
+
+          $audit_requested = PhabricatorAuditStatusConstants::AUDIT_REQUESTED;
+          $requests[] = id (new PhabricatorRepositoryAuditRequest())
+            ->setCommitPHID($object->getPHID())
+            ->setAuditorPHID($phid)
+            ->setAuditStatus($audit_requested)
+            ->setAuditReasons(
+              array(
+                'Added by '.$actor->getUsername(),
+              ))
+            ->save();
+        }
+
+        $object->updateAuditStatus($requests);
+        $object->attachAudits($requests);
+        $object->save();
         return;
     }
 
