@@ -572,6 +572,8 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   }
 
   private function buildCustomOrderClause(AphrontDatabaseConnection $conn) {
+    $reverse = ($this->getBeforeID() xor $this->getReversePaging());
+
     $order = array();
 
     switch ($this->groupBy) {
@@ -593,32 +595,34 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         throw new Exception("Unknown group query '{$this->groupBy}'!");
     }
 
-    switch ($this->orderBy) {
-      case self::ORDER_PRIORITY:
-        $order[] = 'priority';
-        $order[] = 'subpriority';
-        $order[] = 'dateModified';
-        break;
-      case self::ORDER_CREATED:
-        $order[] = 'id';
-        break;
-      case self::ORDER_MODIFIED:
-        $order[] = 'dateModified';
-        break;
-      case self::ORDER_TITLE:
-        $order[] = 'title';
-        break;
-      default:
-        throw new Exception("Unknown order query '{$this->orderBy}'!");
+    $app_order = $this->buildApplicationSearchOrders($conn, $reverse);
+
+    if (!$app_order) {
+      switch ($this->orderBy) {
+        case self::ORDER_PRIORITY:
+          $order[] = 'priority';
+          $order[] = 'subpriority';
+          $order[] = 'dateModified';
+          break;
+        case self::ORDER_CREATED:
+          $order[] = 'id';
+          break;
+        case self::ORDER_MODIFIED:
+          $order[] = 'dateModified';
+          break;
+        case self::ORDER_TITLE:
+          $order[] = 'title';
+          break;
+        default:
+          throw new Exception("Unknown order query '{$this->orderBy}'!");
+      }
     }
 
     $order = array_unique($order);
 
-    if (empty($order)) {
+    if (empty($order) && empty($app_order)) {
       return null;
     }
-
-    $reverse = ($this->getBeforeID() xor $this->getReversePaging());
 
     foreach ($order as $k => $column) {
       switch ($column) {
@@ -650,6 +654,18 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
             $order[$k] = "task.{$column} DESC";
           }
           break;
+      }
+    }
+
+    if ($app_order) {
+      foreach ($app_order as $order_by) {
+        $order[] = $order_by;
+      }
+
+      if ($reverse) {
+        $order[] = 'task.id ASC';
+      } else {
+        $order[] = 'task.id DESC';
       }
     }
 
@@ -903,55 +919,65 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         throw new Exception("Unknown group query '{$this->groupBy}'!");
     }
 
-    switch ($this->orderBy) {
-      case self::ORDER_PRIORITY:
-        if ($this->groupBy != self::GROUP_PRIORITY) {
+    $app_columns = $this->buildApplicationSearchPagination($conn_r, $cursor);
+    if ($app_columns) {
+      $columns = array_merge($columns, $app_columns);
+      $columns[] = array(
+        'name' => 'task.id',
+        'value' => (int)$cursor->getID(),
+        'type' => 'int',
+      );
+    } else {
+      switch ($this->orderBy) {
+        case self::ORDER_PRIORITY:
+          if ($this->groupBy != self::GROUP_PRIORITY) {
+            $columns[] = array(
+              'name' => 'task.priority',
+              'value' => (int)$cursor->getPriority(),
+              'type' => 'int',
+            );
+          }
           $columns[] = array(
-            'name' => 'task.priority',
-            'value' => (int)$cursor->getPriority(),
+            'name' => 'task.subpriority',
+            'value' => (int)$cursor->getSubpriority(),
+            'type' => 'int',
+            'reverse' => true,
+          );
+          $columns[] = array(
+            'name' => 'task.dateModified',
+            'value' => (int)$cursor->getDateModified(),
             'type' => 'int',
           );
-        }
-        $columns[] = array(
-          'name' => 'task.subpriority',
-          'value' => (int)$cursor->getSubpriority(),
-          'type' => 'int',
-          'reverse' => true,
-        );
-        $columns[] = array(
-          'name' => 'task.dateModified',
-          'value' => (int)$cursor->getDateModified(),
-          'type' => 'int',
-        );
-        break;
-      case self::ORDER_CREATED:
-        $columns[] = array(
-          'name' => 'task.id',
-          'value' => (int)$cursor->getID(),
-          'type' => 'int',
-        );
-        break;
-      case self::ORDER_MODIFIED:
-        $columns[] = array(
-          'name' => 'task.dateModified',
-          'value' => (int)$cursor->getDateModified(),
-          'type' => 'int',
-        );
-        break;
-      case self::ORDER_TITLE:
-        $columns[] = array(
-          'name' => 'task.title',
-          'value' => $cursor->getTitle(),
-          'type' => 'string',
-        );
-        $columns[] = array(
-          'name' => 'task.id',
-          'value' => $cursor->getID(),
-          'type' => 'int',
-        );
-        break;
-      default:
-        throw new Exception("Unknown order query '{$this->orderBy}'!");
+          break;
+        case self::ORDER_CREATED:
+          $columns[] = array(
+            'name' => 'task.id',
+            'value' => (int)$cursor->getID(),
+            'type' => 'int',
+          );
+          break;
+        case self::ORDER_MODIFIED:
+          $columns[] = array(
+            'name' => 'task.dateModified',
+            'value' => (int)$cursor->getDateModified(),
+            'type' => 'int',
+          );
+          break;
+        case self::ORDER_TITLE:
+          $columns[] = array(
+            'name' => 'task.title',
+            'value' => $cursor->getTitle(),
+            'type' => 'string',
+          );
+          $columns[] = array(
+            'name' => 'task.id',
+            'value' => $cursor->getID(),
+            'type' => 'int',
+          );
+          break;
+        default:
+          throw new Exception("Unknown order query '{$this->orderBy}'!");
+      }
     }
 
     return $this->buildPagingClauseFromMultipleColumns(

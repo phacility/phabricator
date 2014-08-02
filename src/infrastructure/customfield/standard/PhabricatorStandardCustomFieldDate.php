@@ -18,6 +18,10 @@ final class PhabricatorStandardCustomFieldDate
     return $indexes;
   }
 
+  public function buildOrderIndex() {
+    return $this->newNumericIndex(0);
+  }
+
   public function getValueForStorage() {
     $value = $this->getFieldValue();
     if (strlen($value)) {

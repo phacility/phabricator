@@ -764,6 +764,65 @@ abstract class PhabricatorApplicationSearchEngine {
     }
   }
 
+  protected function applyOrderByToQuery(
+    PhabricatorCursorPagedPolicyAwareQuery $query,
+    array $standard_values,
+    $order) {
+
+    if (substr($order, 0, 7) === 'custom:') {
+      $list = $this->getCustomFieldList();
+      if (!$list) {
+        $query->setOrderBy(head($standard_values));
+        return;
+      }
+
+      foreach ($list->getFields() as $field) {
+        $key = $this->getKeyForCustomField($field);
+
+        if ($key === $order) {
+          $index = $field->buildOrderIndex();
+
+          if ($index === null) {
+            $query->setOrderBy(head($standard_values));
+            return;
+          }
+
+          $query->withApplicationSearchOrder(
+            $field,
+            $index,
+            false);
+          break;
+        }
+      }
+    } else {
+      $order = idx($standard_values, $order);
+      if ($order) {
+        $query->setOrderBy($order);
+      } else {
+        $query->setOrderBy(head($standard_values));
+      }
+    }
+  }
+
+
+  protected function getCustomFieldOrderOptions() {
+    $list = $this->getCustomFieldList();
+    if (!$list) {
+      return;
+    }
+
+    $custom_order = array();
+    foreach ($list->getFields() as $field) {
+      if ($field->shouldAppearInApplicationSearch()) {
+        if ($field->buildOrderIndex() !== null) {
+          $key = $this->getKeyForCustomField($field);
+          $custom_order[$key] = $field->getFieldName();
+        }
+      }
+    }
+
+    return $custom_order;
+  }
 
   /**
    * Get a unique key identifying a field.
