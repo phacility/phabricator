@@ -93,6 +93,8 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
       }
     }
 
+    $add_self_cc = false;
+
     if ($action == PhabricatorAuditActionConstants::CLOSE) {
       if (!PhabricatorEnv::getEnvConfig('audit.can-author-close-audit')) {
         throw new Exception('Cannot Close Audit without enabling'.
@@ -177,9 +179,9 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
         $new_status = null;
         switch ($action) {
           case PhabricatorAuditActionConstants::COMMENT:
-          case PhabricatorAuditActionConstants::ADD_CCS:
           case PhabricatorAuditActionConstants::ADD_AUDITORS:
-            $new_status = PhabricatorAuditStatusConstants::AUDIT_NOT_REQUIRED;
+          case PhabricatorAuditActionConstants::ADD_CCS:
+            $add_self_cc = true;
             break;
           case PhabricatorAuditActionConstants::ACCEPT:
             $new_status = PhabricatorAuditStatusConstants::ACCEPTED;
@@ -193,18 +195,25 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
             throw new Exception("Unknown or invalid action '{$action}'!");
         }
 
-        $request = id(new PhabricatorRepositoryAuditRequest())
-          ->setCommitPHID($commit->getPHID())
-          ->setAuditorPHID($actor->getPHID())
-          ->setAuditStatus($new_status)
-          ->setAuditReasons(array('Voluntary Participant'))
-          ->save();
-        $requests[] = $request;
+        if ($new_status !== null) {
+          $request = id(new PhabricatorRepositoryAuditRequest())
+            ->setCommitPHID($commit->getPHID())
+            ->setAuditorPHID($actor->getPHID())
+            ->setAuditStatus($new_status)
+            ->setAuditReasons(array('Voluntary Participant'))
+            ->save();
+          $requests[] = $request;
+        }
       }
     }
 
     $auditors = array();
     $ccs = array();
+
+    if ($add_self_cc) {
+      $ccs[] = $actor->getPHID();
+    }
+
     foreach ($comments as $comment) {
       $meta = $comment->getMetadata();
 
@@ -244,21 +253,16 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
       }
     }
 
-    if ($ccs) {
-      foreach ($ccs as $cc_phid) {
-        $audit_cc = PhabricatorAuditStatusConstants::CC;
-        $requests[] = id (new PhabricatorRepositoryAuditRequest())
-          ->setCommitPHID($commit->getPHID())
-          ->setAuditorPHID($cc_phid)
-          ->setAuditStatus($audit_cc)
-          ->setAuditReasons(
-            array('Added by '.$actor->getUsername()))
-          ->save();
-      }
-    }
-
     $commit->updateAuditStatus($requests);
     $commit->save();
+
+    if ($ccs) {
+      id(new PhabricatorSubscriptionsEditor())
+        ->setActor($actor)
+        ->setObject($commit)
+        ->subscribeExplicit($ccs)
+        ->save();
+    }
 
     $content_source = PhabricatorContentSource::newForSource(
       PhabricatorContentSource::SOURCE_LEGACY,
@@ -288,15 +292,14 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
     foreach ($requests as $request) {
       $status = $request->getAuditStatus();
       switch ($status) {
-      case PhabricatorAuditStatusConstants::RESIGNED:
-      case PhabricatorAuditStatusConstants::NONE:
-      case PhabricatorAuditStatusConstants::AUDIT_NOT_REQUIRED:
-      case PhabricatorAuditStatusConstants::CC:
-        $feed_dont_publish_phids[$request->getAuditorPHID()] = 1;
-        break;
-      default:
-        unset($feed_dont_publish_phids[$request->getAuditorPHID()]);
-        break;
+        case PhabricatorAuditStatusConstants::RESIGNED:
+        case PhabricatorAuditStatusConstants::NONE:
+        case PhabricatorAuditStatusConstants::AUDIT_NOT_REQUIRED:
+          $feed_dont_publish_phids[$request->getAuditorPHID()] = 1;
+          break;
+        default:
+          unset($feed_dont_publish_phids[$request->getAuditorPHID()]);
+          break;
       }
     }
     $feed_dont_publish_phids = array_keys($feed_dont_publish_phids);
@@ -452,9 +455,14 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
       $email_cc[$other_comment->getActorPHID()] = true;
     }
 
+    $subscribers = PhabricatorSubscribersQuery::loadSubscribersForPHID(
+      $commit->getPHID());
+    foreach ($subscribers as $subscriber) {
+      $email_cc[$subscriber] = true;
+    }
+
     foreach ($requests as $request) {
       switch ($request->getAuditStatus()) {
-        case PhabricatorAuditStatusConstants::CC:
         case PhabricatorAuditStatusConstants::AUDIT_REQUIRED:
           $email_cc[$request->getAuditorPHID()] = true;
           break;

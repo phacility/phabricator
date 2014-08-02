@@ -69,10 +69,6 @@ final class DiffusionDoorkeeperCommitFeedStoryPublisher
 
     foreach ($requests as $request) {
       $status = $request->getAuditStatus();
-      if ($status == PhabricatorAuditStatusConstants::CC) {
-        // We handle these specially below.
-        continue;
-      }
 
       $object = idx($objects, $request->getAuditorPHID());
       if (!$object) {
@@ -133,13 +129,8 @@ final class DiffusionDoorkeeperCommitFeedStoryPublisher
   }
 
   public function getCCUserPHIDs($object) {
-    $ccs = array();
-    foreach ($this->getAuditRequests() as $request) {
-      if ($request->getAuditStatus() == PhabricatorAuditStatusConstants::CC) {
-        $ccs[] = $request->getAuditorPHID();
-      }
-    }
-    return $ccs;
+    return PhabricatorSubscribersQuery::loadSubscribersForPHID(
+      $object->getPHID());
   }
 
   public function getObjectTitle($object) {

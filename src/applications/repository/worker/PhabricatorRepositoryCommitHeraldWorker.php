@@ -244,7 +244,6 @@ final class PhabricatorRepositoryCommitHeraldWorker
 
     $maps = array(
       PhabricatorAuditStatusConstants::AUDIT_REQUIRED => $map,
-      PhabricatorAuditStatusConstants::CC => $ccmap,
     );
 
     foreach ($maps as $status => $map) {
@@ -281,6 +280,14 @@ final class PhabricatorRepositoryCommitHeraldWorker
 
     $commit->updateAuditStatus($requests);
     $commit->save();
+
+    if ($ccmap) {
+      id(new PhabricatorSubscriptionsEditor())
+        ->setActor(PhabricatorUser::getOmnipotentUser())
+        ->setObject($commit)
+        ->subscribeExplicit(array_keys($ccmap))
+        ->save();
+    }
   }
 
 

@@ -6,6 +6,7 @@ final class PhabricatorRepositoryCommit
     PhabricatorPolicyInterface,
     PhabricatorFlaggableInterface,
     PhabricatorTokenReceiverInterface,
+    PhabricatorSubscribableInterface,
     HarbormasterBuildableInterface,
     PhabricatorCustomFieldInterface {
 
@@ -328,6 +329,26 @@ final class PhabricatorRepositoryCommit
   public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
     $this->customFields = $fields;
     return $this;
+  }
+
+
+/* -(  PhabricatorSubscribableInterface  )----------------------------------- */
+
+
+  public function isAutomaticallySubscribed($phid) {
+
+    // TODO: This should also list auditors, but handling that is a bit messy
+    // right now because we are not guaranteed to have the data.
+
+    return ($phid == $this->getAuthorPHID());
+  }
+
+  public function shouldShowSubscribersProperty() {
+    return true;
+  }
+
+  public function shouldAllowSubscription($phid) {
+    return true;
   }
 
 }

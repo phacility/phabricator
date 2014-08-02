@@ -1100,12 +1100,6 @@ final class DiffusionCommitController extends DiffusionController {
             'blue',
             pht('Closed'));
           break;
-        case PhabricatorAuditStatusConstants::CC:
-          $item->setIcon(
-            PHUIStatusItemView::ICON_INFO,
-            'dark',
-            pht('Subscribed'));
-          break;
         default:
           $item->setIcon(
             PHUIStatusItemView::ICON_QUESTION,

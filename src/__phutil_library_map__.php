@@ -4847,6 +4847,7 @@ phutil_register_library_map(array(
       'PhabricatorPolicyInterface',
       'PhabricatorFlaggableInterface',
       'PhabricatorTokenReceiverInterface',
+      'PhabricatorSubscribableInterface',
       'HarbormasterBuildableInterface',
       'PhabricatorCustomFieldInterface',
     ),
