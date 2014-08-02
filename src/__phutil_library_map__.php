@@ -1538,6 +1538,7 @@ phutil_register_library_map(array(
     'PhabricatorFileDataController' => 'applications/files/controller/PhabricatorFileDataController.php',
     'PhabricatorFileDeleteController' => 'applications/files/controller/PhabricatorFileDeleteController.php',
     'PhabricatorFileDropUploadController' => 'applications/files/controller/PhabricatorFileDropUploadController.php',
+    'PhabricatorFileEditController' => 'applications/files/controller/PhabricatorFileEditController.php',
     'PhabricatorFileEditor' => 'applications/files/editor/PhabricatorFileEditor.php',
     'PhabricatorFileFilePHIDType' => 'applications/files/phid/PhabricatorFileFilePHIDType.php',
     'PhabricatorFileImageMacro' => 'applications/macro/storage/PhabricatorFileImageMacro.php',
@@ -4354,6 +4355,7 @@ phutil_register_library_map(array(
     'PhabricatorFileDataController' => 'PhabricatorFileController',
     'PhabricatorFileDeleteController' => 'PhabricatorFileController',
     'PhabricatorFileDropUploadController' => 'PhabricatorFileController',
+    'PhabricatorFileEditController' => 'PhabricatorFileController',
     'PhabricatorFileEditor' => 'PhabricatorApplicationTransactionEditor',
     'PhabricatorFileFilePHIDType' => 'PhabricatorPHIDType',
     'PhabricatorFileImageMacro' => array(

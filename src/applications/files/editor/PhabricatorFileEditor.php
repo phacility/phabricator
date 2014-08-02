@@ -7,6 +7,7 @@ final class PhabricatorFileEditor
     $types = parent::getTransactionTypes();
 
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
+    $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
 
     return $types;
   }
@@ -26,6 +27,12 @@ final class PhabricatorFileEditor
   protected function applyCustomInternalTransaction(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+        $object->setViewPolicy($xaction->getNewValue());
+        break;
+    }
   }
 
   protected function applyCustomExternalTransaction(

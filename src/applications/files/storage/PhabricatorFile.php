@@ -56,6 +56,10 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return parent::save();
   }
 
+  public function getMonogram() {
+    return 'F'.$this->getID();
+  }
+
   public static function readUploadedFileData($spec) {
     if (!$spec) {
       throw new Exception('No file was uploaded!');

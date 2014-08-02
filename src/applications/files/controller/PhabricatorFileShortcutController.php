@@ -18,7 +18,7 @@ final class PhabricatorFileShortcutController
       return new Aphront404Response();
     }
 
-    return id(new AphrontRedirectResponse())->setURI($file->getBestURI());
+    return id(new AphrontRedirectResponse())->setURI($file->getInfoURI());
   }
 
 }
