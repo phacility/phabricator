@@ -42,6 +42,28 @@ final class PhabricatorAuditTransaction
     return $phids;
   }
 
+  public function getActionName() {
+
+    switch ($this->getTransactionType()) {
+      case PhabricatorAuditActionConstants::ACTION:
+        switch ($this->getNewValue()) {
+          case PhabricatorAuditActionConstants::CONCERN:
+            return pht('Raised Concern');
+          case PhabricatorAuditActionConstants::ACCEPT:
+            return pht('Accepted');
+          case PhabricatorAuditActionConstants::RESIGN:
+            return pht('Resigned');
+          case PhabricatorAuditActionConstants::CLOSE:
+            return pht('Clsoed');
+        }
+        break;
+      case PhabricatorAuditActionConstants::ADD_AUDITORS:
+        return pht('Added Auditors');
+    }
+
+    return parent::getActionName();
+  }
+
   public function getColor() {
 
     $type = $this->getTransactionType();
@@ -63,7 +85,7 @@ final class PhabricatorAuditTransaction
     $old = $this->getOldValue();
     $new = $this->getNewValue();
 
-    $author_handle = $this->getHandle($this->getAuthorPHID())->renderLink();
+    $author_handle = $this->renderHandleLink($this->getAuthorPHID());
 
     $type = $this->getTransactionType();
 
@@ -155,6 +177,33 @@ final class PhabricatorAuditTransaction
     }
 
     return parent::getTitle();
+  }
+
+  // TODO: These two mail methods can likely be abstracted by introducing a
+  // formal concept of "inline comment" transactions.
+
+  public function shouldHideForMail(array $xactions) {
+    $type_inline = PhabricatorAuditActionConstants::INLINE;
+    switch ($this->getTransactionType()) {
+      case $type_inline:
+        foreach ($xactions as $xaction) {
+          if ($xaction->getTransactionType() != $type_inline) {
+            return true;
+          }
+        }
+        return ($this !== head($xactions));
+    }
+
+    return parent::shouldHideForMail($xactions);
+  }
+
+  public function getBodyForMail() {
+    switch ($this->getTransactionType()) {
+      case PhabricatorAuditActionConstants::INLINE:
+        return null;
+    }
+
+    return parent::getBodyForMail();
   }
 
 }

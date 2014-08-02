@@ -217,6 +217,8 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
     $commit->updateAuditStatus($requests);
     $commit->save();
 
+    $commit->attachAudits($requests);
+
     // Convert old comments into real transactions and apply them with a
     // normal editor.
 
@@ -240,6 +242,8 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
       ->setContinueOnNoEffect(true)
       ->setContinueOnMissingFields(true)
       ->setContentSource($content_source)
+      ->setExcludeMailRecipientPHIDs($this->getExcludeMailRecipientPHIDs())
+      ->setDisableEmail($this->noEmail)
       ->applyTransactions($commit, $xactions);
 
     $feed_dont_publish_phids = array();
@@ -261,14 +265,6 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
     $feed_phids = array_diff($requests_phids, $feed_dont_publish_phids);
     foreach ($comments as $comment) {
       $this->publishFeedStory($comment, $feed_phids);
-    }
-
-    if (!$this->noEmail) {
-      $this->sendMail(
-        $comments,
-        $other_comments,
-        $inline_comments,
-        $requests);
     }
   }
 
@@ -335,219 +331,6 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
           'content'       => $comment->getContent(),
         ))
       ->publish();
-  }
-
-  private function sendMail(
-    array $comments,
-    array $other_comments,
-    array $inline_comments,
-    array $requests) {
-
-    assert_instances_of($comments, 'PhabricatorAuditComment');
-    assert_instances_of($other_comments, 'PhabricatorAuditComment');
-    assert_instances_of($inline_comments, 'PhabricatorInlineCommentInterface');
-
-    $commit = $this->commit;
-
-    $data = $commit->loadCommitData();
-    $summary = $data->getSummary();
-
-    $commit_phid = $commit->getPHID();
-    $phids = array($commit_phid);
-    $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->getActor())
-      ->withPHIDs($phids)
-      ->execute();
-    $handle = $handles[$commit_phid];
-
-    $name = $handle->getName();
-
-    $map = array(
-      PhabricatorAuditActionConstants::CONCERN  => 'Raised Concern',
-      PhabricatorAuditActionConstants::ACCEPT   => 'Accepted',
-      PhabricatorAuditActionConstants::RESIGN   => 'Resigned',
-      PhabricatorAuditActionConstants::CLOSE    => 'Closed',
-      PhabricatorAuditActionConstants::ADD_CCS => 'Added CCs',
-      PhabricatorAuditActionConstants::ADD_AUDITORS => 'Added Auditors',
-    );
-    if ($comments) {
-      $any_action = head($comments)->getAction();
-    } else {
-      $any_action = null;
-    }
-    $verb = idx($map, $any_action, 'Commented On');
-
-    $reply_handler = self::newReplyHandlerForCommit($commit);
-
-    $prefix = PhabricatorEnv::getEnvConfig('metamta.diffusion.subject-prefix');
-
-    $repository = id(new PhabricatorRepositoryQuery())
-      ->setViewer($this->getActor())
-      ->withIDs(array($commit->getRepositoryID()))
-      ->executeOne();
-    $threading = self::getMailThreading($repository, $commit);
-    list($thread_id, $thread_topic) = $threading;
-
-    $body = $this->renderMailBody(
-      $comments,
-      "{$name}: {$summary}",
-      $handle,
-      $reply_handler,
-      $inline_comments);
-
-    $email_to = array();
-    $email_cc = array();
-
-    $email_to[$this->getActor()->getPHID()] = true;
-
-    $author_phid = $data->getCommitDetail('authorPHID');
-    if ($author_phid) {
-      $email_to[$author_phid] = true;
-    }
-
-    foreach ($other_comments as $other_comment) {
-      $email_cc[$other_comment->getActorPHID()] = true;
-    }
-
-    $subscribers = PhabricatorSubscribersQuery::loadSubscribersForPHID(
-      $commit->getPHID());
-    foreach ($subscribers as $subscriber) {
-      $email_cc[$subscriber] = true;
-    }
-
-    foreach ($requests as $request) {
-      switch ($request->getAuditStatus()) {
-        case PhabricatorAuditStatusConstants::AUDIT_REQUIRED:
-          $email_cc[$request->getAuditorPHID()] = true;
-          break;
-        case PhabricatorAuditStatusConstants::RESIGNED:
-          unset($email_cc[$request->getAuditorPHID()]);
-          break;
-        case PhabricatorAuditStatusConstants::CONCERNED:
-        case PhabricatorAuditStatusConstants::AUDIT_REQUESTED:
-          $email_to[$request->getAuditorPHID()] = true;
-          break;
-      }
-    }
-
-    $email_to = array_keys($email_to);
-    $email_cc = array_keys($email_cc);
-
-    $phids = array_merge($email_to, $email_cc);
-    $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->getActor())
-      ->withPHIDs($phids)
-      ->execute();
-
-    // NOTE: Always set $is_new to false, because the "first" mail in the
-    // thread is the Herald notification of the commit.
-    $is_new = false;
-
-    $template = id(new PhabricatorMetaMTAMail())
-      ->setSubject("{$name}: {$summary}")
-      ->setSubjectPrefix($prefix)
-      ->setVarySubjectPrefix("[{$verb}]")
-      ->setFrom($this->getActor()->getPHID())
-      ->setThreadID($thread_id, $is_new)
-      ->addHeader('Thread-Topic', $thread_topic)
-      ->setRelatedPHID($commit->getPHID())
-      ->setExcludeMailRecipientPHIDs($this->getExcludeMailRecipientPHIDs())
-      ->setIsBulk(true)
-      ->setBody($body);
-
-    $mails = $reply_handler->multiplexMail(
-      $template,
-      array_select_keys($handles, $email_to),
-      array_select_keys($handles, $email_cc));
-
-    foreach ($mails as $mail) {
-      $mail->saveAndSend();
-    }
-  }
-
-  public static function getMailThreading(
-    PhabricatorRepository $repository,
-    PhabricatorRepositoryCommit $commit) {
-
-    return array(
-      'diffusion-audit-'.$commit->getPHID(),
-      'Commit r'.$repository->getCallsign().$commit->getCommitIdentifier(),
-    );
-  }
-
-  public static function newReplyHandlerForCommit($commit) {
-    $reply_handler = PhabricatorEnv::newObjectFromConfig(
-      'metamta.diffusion.reply-handler');
-    $reply_handler->setMailReceiver($commit);
-    return $reply_handler;
-  }
-
-  private function renderMailBody(
-    array $comments,
-    $cname,
-    PhabricatorObjectHandle $handle,
-    PhabricatorMailReplyHandler $reply_handler,
-    array $inline_comments) {
-
-    assert_instances_of($comments, 'PhabricatorAuditComment');
-    assert_instances_of($inline_comments, 'PhabricatorInlineCommentInterface');
-
-    $commit = $this->commit;
-    $actor = $this->getActor();
-    $name = $actor->getUsername();
-
-    $body = new PhabricatorMetaMTAMailBody();
-    foreach ($comments as $comment) {
-      if ($comment->getAction() == PhabricatorAuditActionConstants::INLINE) {
-        continue;
-      }
-
-      $verb = PhabricatorAuditActionConstants::getActionPastTenseVerb(
-        $comment->getAction());
-
-      $body->addRawSection("{$name} {$verb} commit {$cname}.");
-
-      $content = $comment->getContent();
-      if (strlen($content)) {
-        $body->addRawSection($comment->getContent());
-      }
-    }
-
-    if ($inline_comments) {
-      $block = array();
-
-      $path_map = id(new DiffusionPathQuery())
-        ->withPathIDs(mpull($inline_comments, 'getPathID'))
-        ->execute();
-      $path_map = ipull($path_map, 'path', 'id');
-
-      foreach ($inline_comments as $inline) {
-        $path = idx($path_map, $inline->getPathID());
-        if ($path === null) {
-          continue;
-        }
-
-        $start = $inline->getLineNumber();
-        $len   = $inline->getLineLength();
-        if ($len) {
-          $range = $start.'-'.($start + $len);
-        } else {
-          $range = $start;
-        }
-
-        $content = $inline->getContent();
-        $block[] = "{$path}:{$range} {$content}";
-      }
-
-      $body->addTextSection(pht('INLINE COMMENTS'), implode("\n", $block));
-    }
-
-    $body->addTextSection(
-      pht('COMMIT'),
-      PhabricatorEnv::getProductionURI($handle->getURI()));
-    $body->addReplySection($reply_handler->getReplyHandlerInstructions());
-
-    return $body->render();
   }
 
 }

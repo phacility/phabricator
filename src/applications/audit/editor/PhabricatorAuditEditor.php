@@ -115,4 +115,123 @@ final class PhabricatorAuditEditor
     return true;
   }
 
+  protected function shouldSendMail(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return true;
+  }
+
+  protected function buildReplyHandler(PhabricatorLiskDAO $object) {
+    $reply_handler = PhabricatorEnv::newObjectFromConfig(
+      'metamta.diffusion.reply-handler');
+    $reply_handler->setMailReceiver($object);
+    return $reply_handler;
+  }
+
+  protected function getMailSubjectPrefix() {
+    return PhabricatorEnv::getEnvConfig('metamta.diffusion.subject-prefix');
+  }
+
+  protected function getMailThreadID(PhabricatorLiskDAO $object) {
+    // For backward compatibility, use this legacy thread ID.
+    return 'diffusion-audit-'.$object->getPHID();
+  }
+
+  protected function buildMailTemplate(PhabricatorLiskDAO $object) {
+    $identifier = $object->getCommitIdentifier();
+    $repository = $object->getRepository();
+    $monogram = $repository->getMonogram();
+
+    $summary = $object->getSummary();
+    $name = $repository->formatCommitName($identifier);
+
+    $subject = "{$name}: {$summary}";
+    $thread_topic = "Commit {$monogram}{$identifier}";
+
+    return id(new PhabricatorMetaMTAMail())
+      ->setSubject($subject)
+      ->addHeader('Thread-Topic', $thread_topic);
+  }
+
+  protected function getMailTo(PhabricatorLiskDAO $object) {
+    $phids = array();
+    if ($object->getAuthorPHID()) {
+      $phids[] = $object->getAuthorPHID();
+    }
+
+    $status_resigned = PhabricatorAuditStatusConstants::RESIGNED;
+    foreach ($object->getAudits() as $audit) {
+      if ($audit->getAuditStatus() != $status_resigned) {
+        $phids[] = $audit->getAuditorPHID();
+      }
+    }
+
+    return $phids;
+  }
+
+  protected function buildMailBody(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $body = parent::buildMailBody($object, $xactions);
+
+    $type_inline = PhabricatorAuditActionConstants::INLINE;
+
+    $inlines = array();
+    foreach ($xactions as $xaction) {
+      if ($xaction->getTransactionType() == $type_inline) {
+        $inlines[] = $xaction;
+      }
+    }
+
+    if ($inlines) {
+      $body->addTextSection(
+        pht('INLINE COMMENTS'),
+        $this->renderInlineCommentsForMail($object, $inlines));
+    }
+
+    $monogram = $object->getRepository()->formatCommitName(
+      $object->getCommitIdentifier());
+
+    $body->addTextSection(
+      pht('COMMIT'),
+      PhabricatorEnv::getProductionURI('/'.$monogram));
+
+    return $body;
+  }
+
+  private function renderInlineCommentsForMail(
+    PhabricatorLiskDAO $object,
+    array $inline_xactions) {
+
+    $inlines = mpull($inline_xactions, 'getComment');
+
+    $block = array();
+
+    $path_map = id(new DiffusionPathQuery())
+      ->withPathIDs(mpull($inlines, 'getPathID'))
+      ->execute();
+    $path_map = ipull($path_map, 'path', 'id');
+
+    foreach ($inlines as $inline) {
+      $path = idx($path_map, $inline->getPathID());
+      if ($path === null) {
+        continue;
+      }
+
+      $start = $inline->getLineNumber();
+      $len   = $inline->getLineLength();
+      if ($len) {
+        $range = $start.'-'.($start + $len);
+      } else {
+        $range = $start;
+      }
+
+      $content = $inline->getContent();
+      $block[] = "{$path}:{$range} {$content}";
+    }
+
+    return implode("\n", $block);
+  }
+
 }
