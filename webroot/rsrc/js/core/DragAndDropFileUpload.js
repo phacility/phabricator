@@ -174,8 +174,13 @@ JX.install('PhabricatorDragAndDropFileUpload', {
 
       var up_uri = JX.$U(this.getURI())
         .setQueryParam('name', file.getName())
-        .setQueryParam('__upload__', 1)
-        .toString();
+        .setQueryParam('__upload__', 1);
+
+      if (this.getViewPolicy()) {
+        up_uri.setQueryParam('viewPolicy', this.getViewPolicy());
+      }
+
+      up_uri = up_uri.toString();
 
       var onupload = JX.bind(this, function(r) {
         if (r.error) {
@@ -235,6 +240,7 @@ JX.install('PhabricatorDragAndDropFileUpload', {
   },
   properties: {
     URI : null,
-    activatedClass : null
+    activatedClass : null,
+    viewPolicy : null
   }
 });
