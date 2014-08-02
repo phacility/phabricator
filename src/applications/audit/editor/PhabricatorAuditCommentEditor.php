@@ -4,7 +4,6 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
 
   private $commit;
   private $attachInlineComments;
-  private $noEmail;
 
   public function __construct(PhabricatorRepositoryCommit $commit) {
     $this->commit = $commit;
@@ -13,11 +12,6 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
 
   public function setAttachInlineComments($attach_inline_comments) {
     $this->attachInlineComments = $attach_inline_comments;
-    return $this;
-  }
-
-  public function setNoEmail($no_email) {
-    $this->noEmail = $no_email;
     return $this;
   }
 
@@ -62,7 +56,6 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
       ->setContinueOnMissingFields(true)
       ->setContentSource($content_source)
       ->setExcludeMailRecipientPHIDs($this->getExcludeMailRecipientPHIDs())
-      ->setDisableEmail($this->noEmail)
       ->applyTransactions($commit, $xactions);
   }
 
