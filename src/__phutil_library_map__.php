@@ -405,7 +405,7 @@ phutil_register_library_map(array(
     'DiffusionGitRequest' => 'applications/diffusion/request/DiffusionGitRequest.php',
     'DiffusionGitResponse' => 'applications/diffusion/response/DiffusionGitResponse.php',
     'DiffusionHistoryController' => 'applications/diffusion/controller/DiffusionHistoryController.php',
-    'DiffusionHistoryQueryConduitAPIMethod' => 'applications/diffusion/conduit/DiffusionHistoryConduitAPIMethod.php',
+    'DiffusionHistoryQueryConduitAPIMethod' => 'applications/diffusion/conduit/DiffusionHistoryQueryConduitAPIMethod.php',
     'DiffusionHistoryTableView' => 'applications/diffusion/view/DiffusionHistoryTableView.php',
     'DiffusionHovercardEventListener' => 'applications/diffusion/events/DiffusionHovercardEventListener.php',
     'DiffusionInlineCommentController' => 'applications/diffusion/controller/DiffusionInlineCommentController.php',
