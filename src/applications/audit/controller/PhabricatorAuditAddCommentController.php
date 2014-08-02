@@ -12,9 +12,10 @@ final class PhabricatorAuditAddCommentController
     }
 
     $commit_phid = $request->getStr('commit');
-    $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
-      'phid = %s',
-      $commit_phid);
+    $commit = id(new DiffusionCommitQuery())
+      ->setViewer($user)
+      ->withPHIDs(array($commit_phid))
+      ->executeOne();
     if (!$commit) {
       return new Aphront404Response();
     }
@@ -36,12 +37,11 @@ final class PhabricatorAuditAddCommentController
             ));
         break;
       case PhabricatorAuditActionConstants::ADD_CCS:
-        $ccs = $request->getArr('ccs');
         $comments[] = id(new PhabricatorAuditComment())
-          ->setAction(PhabricatorAuditActionConstants::ADD_CCS)
-          ->setMetadata(
+          ->setAction(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+          ->setNewValue(
             array(
-              PhabricatorAuditComment::METADATA_ADDED_CCS => $ccs,
+              '+' => $request->getArr('ccs'),
             ));
         break;
       case PhabricatorAuditActionConstants::COMMENT:

@@ -40,10 +40,10 @@ final class DiffusionCreateCommentConduitAPIMethod
 
   protected function execute(ConduitAPIRequest $request) {
     $commit_phid = $request->getValue('phid');
-    $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
-      'phid = %s',
-      $commit_phid);
-
+    $commit = id(new DiffusionCommitQuery())
+      ->setViewer($request->getUser())
+      ->withPHIDs(array($commit_phid))
+      ->executeOne();
     if (!$commit) {
       throw new ConduitException('ERR_BAD_COMMIT');
     }

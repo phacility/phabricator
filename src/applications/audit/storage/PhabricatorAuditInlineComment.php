@@ -18,6 +18,10 @@ final class PhabricatorAuditInlineComment
     return $this->proxy->getTransactionPHID();
   }
 
+  public function getTransactionComment() {
+    return $this->proxy;
+  }
+
   public function getTransactionCommentForSave() {
     $content_source = PhabricatorContentSource::newForSource(
       PhabricatorContentSource::SOURCE_LEGACY,

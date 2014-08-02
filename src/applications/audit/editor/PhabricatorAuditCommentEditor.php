@@ -38,28 +38,6 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
         $commit->getPHID());
     }
 
-    $content_blocks = array();
-    foreach ($comments as $comment) {
-      $content_blocks[] = $comment->getContent();
-    }
-
-    foreach ($inline_comments as $inline) {
-      $content_blocks[] = $inline->getContent();
-    }
-
-    // Find any "@mentions" in the content blocks.
-    $mention_ccs = PhabricatorMarkupEngine::extractPHIDsFromMentions(
-      $this->getActor(),
-      $content_blocks);
-    if ($mention_ccs) {
-      $comments[] = id(new PhabricatorAuditComment())
-        ->setAction(PhabricatorAuditActionConstants::ADD_CCS)
-        ->setMetadata(
-          array(
-            PhabricatorAuditComment::METADATA_ADDED_CCS => $mention_ccs,
-          ));
-    }
-
     // When an actor submits an audit comment, we update all the audit requests
     // they have authority over to reflect the most recent status. The general
     // idea here is that if audit has triggered for, e.g., several packages, but
@@ -92,8 +70,6 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
           break;
       }
     }
-
-    $add_self_cc = false;
 
     if ($action == PhabricatorAuditActionConstants::CLOSE) {
       if (!PhabricatorEnv::getEnvConfig('audit.can-author-close-audit')) {
@@ -181,7 +157,6 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
           case PhabricatorAuditActionConstants::COMMENT:
           case PhabricatorAuditActionConstants::ADD_AUDITORS:
           case PhabricatorAuditActionConstants::ADD_CCS:
-            $add_self_cc = true;
             break;
           case PhabricatorAuditActionConstants::ACCEPT:
             $new_status = PhabricatorAuditStatusConstants::ACCEPTED;
@@ -208,11 +183,6 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
     }
 
     $auditors = array();
-    $ccs = array();
-
-    if ($add_self_cc) {
-      $ccs[] = $actor->getPHID();
-    }
 
     foreach ($comments as $comment) {
       $meta = $comment->getMetadata();
@@ -224,20 +194,11 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
       foreach ($auditor_phids as $phid) {
         $auditors[] = $phid;
       }
-
-      $cc_phids = idx(
-        $meta,
-        PhabricatorAuditComment::METADATA_ADDED_CCS,
-        array());
-      foreach ($cc_phids as $phid) {
-        $ccs[] = $phid;
-      }
     }
 
     $requests_by_auditor = mpull($requests, null, 'getAuditorPHID');
     $requests_phids = array_keys($requests_by_auditor);
 
-    $ccs = array_diff($ccs, $requests_phids);
     $auditors = array_diff($auditors, $requests_phids);
 
     if ($auditors) {
@@ -256,37 +217,30 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
     $commit->updateAuditStatus($requests);
     $commit->save();
 
-    if ($ccs) {
-      id(new PhabricatorSubscriptionsEditor())
-        ->setActor($actor)
-        ->setObject($commit)
-        ->subscribeExplicit($ccs)
-        ->save();
+    // Convert old comments into real transactions and apply them with a
+    // normal editor.
+
+    $xactions = array();
+    foreach ($comments as $comment) {
+      $xactions[] = $comment->getTransactionForSave();
+    }
+
+    foreach ($inline_comments as $inline) {
+      $xactions[] = id(new PhabricatorAuditTransaction())
+        ->setTransactionType(PhabricatorAuditActionConstants::INLINE)
+        ->attachComment($inline->getTransactionComment());
     }
 
     $content_source = PhabricatorContentSource::newForSource(
       PhabricatorContentSource::SOURCE_LEGACY,
       array());
 
-    foreach ($comments as $comment) {
-      $comment
-        ->setActorPHID($actor->getPHID())
-        ->setTargetPHID($commit->getPHID())
-        ->setContentSource($content_source)
-        ->save();
-    }
-
-    foreach ($inline_comments as $inline) {
-      $xaction = id(new PhabricatorAuditComment())
-        ->setProxyComment($inline->getTransactionCommentForSave())
-        ->setAction(PhabricatorAuditActionConstants::INLINE)
-        ->setActorPHID($actor->getPHID())
-        ->setTargetPHID($commit->getPHID())
-        ->setContentSource($content_source)
-        ->save();
-
-      $comments[] = $xaction;
-    }
+    $editor = id(new PhabricatorAuditEditor())
+      ->setActor($actor)
+      ->setContinueOnNoEffect(true)
+      ->setContinueOnMissingFields(true)
+      ->setContentSource($content_source)
+      ->applyTransactions($commit, $xactions);
 
     $feed_dont_publish_phids = array();
     foreach ($requests as $request) {
@@ -396,8 +350,6 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
     assert_instances_of($other_comments, 'PhabricatorAuditComment');
     assert_instances_of($inline_comments, 'PhabricatorInlineCommentInterface');
 
-    $any_comment = head($comments);
-
     $commit = $this->commit;
 
     $data = $commit->loadCommitData();
@@ -421,7 +373,12 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
       PhabricatorAuditActionConstants::ADD_CCS => 'Added CCs',
       PhabricatorAuditActionConstants::ADD_AUDITORS => 'Added Auditors',
     );
-    $verb = idx($map, $any_comment->getAction(), 'Commented On');
+    if ($comments) {
+      $any_action = head($comments)->getAction();
+    } else {
+      $any_action = null;
+    }
+    $verb = idx($map, $any_action, 'Commented On');
 
     $reply_handler = self::newReplyHandlerForCommit($commit);
 
@@ -444,7 +401,7 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
     $email_to = array();
     $email_cc = array();
 
-    $email_to[$any_comment->getActorPHID()] = true;
+    $email_to[$this->getActor()->getPHID()] = true;
 
     $author_phid = $data->getCommitDetail('authorPHID');
     if ($author_phid) {
@@ -493,7 +450,7 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
       ->setSubject("{$name}: {$summary}")
       ->setSubjectPrefix($prefix)
       ->setVarySubjectPrefix("[{$verb}]")
-      ->setFrom($any_comment->getActorPHID())
+      ->setFrom($this->getActor()->getPHID())
       ->setThreadID($thread_id, $is_new)
       ->addHeader('Thread-Topic', $thread_topic)
       ->setRelatedPHID($commit->getPHID())

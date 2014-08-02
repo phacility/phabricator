@@ -37,8 +37,13 @@ final class PhabricatorAuditPreviewController
 
       $ccs = $request->getStrList('ccs');
       if ($action == PhabricatorAuditActionConstants::ADD_CCS && $ccs) {
-        $action_xaction->setTransactionType($action);
-        $action_xaction->setNewValue(array_fuse($ccs));
+        $action_xaction->setTransactionType(
+          PhabricatorTransactions::TYPE_SUBSCRIBERS);
+
+        // NOTE: This doesn't get processed before use, so just provide fake
+        // values.
+        $action_xaction->setOldValue(array());
+        $action_xaction->setNewValue($ccs);
       }
 
       $xactions[] = $action_xaction;

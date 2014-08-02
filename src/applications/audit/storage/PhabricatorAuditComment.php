@@ -4,7 +4,6 @@ final class PhabricatorAuditComment
   implements PhabricatorMarkupInterface {
 
   const METADATA_ADDED_AUDITORS  = 'added-auditors';
-  const METADATA_ADDED_CCS       = 'added-ccs';
 
   const MARKUP_FIELD_BODY        = 'markup:body';
 
@@ -114,6 +113,7 @@ final class PhabricatorAuditComment
     switch ($action) {
       case PhabricatorAuditActionConstants::INLINE:
       case PhabricatorAuditActionConstants::ADD_CCS:
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
       case PhabricatorAuditActionConstants::ADD_AUDITORS:
         $this->proxy->setTransactionType($action);
         break;
@@ -137,6 +137,7 @@ final class PhabricatorAuditComment
         return PhabricatorAuditActionConstants::COMMENT;
       case PhabricatorAuditActionConstants::INLINE:
       case PhabricatorAuditActionConstants::ADD_CCS:
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
       case PhabricatorAuditActionConstants::ADD_AUDITORS:
         return $type;
       default:
@@ -151,9 +152,6 @@ final class PhabricatorAuditComment
 
     $type = $this->proxy->getTransactionType();
     switch ($type) {
-      case PhabricatorAuditActionConstants::ADD_CCS:
-        $raw_phids = idx($metadata, self::METADATA_ADDED_CCS, array());
-        break;
       case PhabricatorAuditActionConstants::ADD_AUDITORS:
         $raw_phids = idx($metadata, self::METADATA_ADDED_AUDITORS, array());
         break;
@@ -161,7 +159,6 @@ final class PhabricatorAuditComment
         throw new Exception(pht('No metadata expected!'));
     }
 
-    $this->proxy->setOldValue(array());
     $this->proxy->setNewValue(array_fuse($raw_phids));
 
     return $this;
@@ -175,10 +172,6 @@ final class PhabricatorAuditComment
     $type = $this->proxy->getTransactionType();
     $new_value = $this->proxy->getNewValue();
     switch ($type) {
-      case PhabricatorAuditActionConstants::ADD_CCS:
-        return array(
-          self::METADATA_ADDED_CCS => array_keys($new_value),
-        );
       case PhabricatorAuditActionConstants::ADD_AUDITORS:
         return array(
           self::METADATA_ADDED_AUDITORS => array_keys($new_value),
@@ -189,28 +182,21 @@ final class PhabricatorAuditComment
   }
 
   public function save() {
-    $this->proxy->openTransaction();
-      $this->proxy
-        ->setViewPolicy('public')
-        ->setEditPolicy($this->getActorPHID())
-        ->save();
+    throw new Exception(
+      pht('This object can no longer be written to directly!'));
+  }
 
-      if (strlen($this->getContent())) {
-        $this->getProxyComment()
-          ->setAuthorPHID($this->getActorPHID())
-          ->setViewPolicy('public')
-          ->setEditPolicy($this->getActorPHID())
-          ->setCommentVersion(1)
-          ->setTransactionPHID($this->proxy->getPHID())
-          ->save();
+  public function getTransactionForSave() {
+    $xaction = $this->proxy;
+    if (strlen($this->getContent())) {
+      $xaction->attachComment($this->getProxyComment());
+    }
 
-        $this->proxy
-          ->setCommentVersion(1)
-          ->setCommentPHID($this->getProxyComment()->getPHID())
-          ->save();
-      }
-    $this->proxy->saveTransaction();
+    return $xaction;
+  }
 
+  public function setNewValue($value) {
+    $this->proxy->setNewValue($value);
     return $this;
   }
 

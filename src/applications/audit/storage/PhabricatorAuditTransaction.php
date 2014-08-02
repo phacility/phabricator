@@ -83,7 +83,9 @@ final class PhabricatorAuditTransaction
 
     switch ($type) {
       case PhabricatorAuditActionConstants::INLINE:
-        break;
+        return pht(
+          '%s added inline comments.',
+          $author_handle);
       case PhabricatorAuditActionConstants::ADD_CCS:
         if ($add && $rem) {
           return pht(
