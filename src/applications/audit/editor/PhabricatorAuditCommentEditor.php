@@ -291,4 +291,14 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
     return $reply_handler;
   }
 
+  public static function getMailThreading(
+    PhabricatorRepository $repository,
+    PhabricatorRepositoryCommit $commit) {
+
+    return array(
+      'diffusion-audit-'.$commit->getPHID(),
+      'Commit r'.$repository->getCallsign().$commit->getCommitIdentifier(),
+    );
+  }
+
 }
