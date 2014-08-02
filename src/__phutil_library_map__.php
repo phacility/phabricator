@@ -2674,7 +2674,7 @@ phutil_register_library_map(array(
     'ReleephProject' => 'applications/releeph/storage/ReleephProject.php',
     'ReleephProjectInfoConduitAPIMethod' => 'applications/releeph/conduit/ReleephProjectInfoConduitAPIMethod.php',
     'ReleephQueryBranchesConduitAPIMethod' => 'applications/releeph/conduit/ReleephQueryBranchesConduitAPIMethod.php',
-    'ReleephQueryProductsConduitAPIMethod' => 'applications/releeph/conduit/ReleephQueryProdutsConduitAPIMethod.php',
+    'ReleephQueryProductsConduitAPIMethod' => 'applications/releeph/conduit/ReleephQueryProductsConduitAPIMethod.php',
     'ReleephQueryRequestsConduitAPIMethod' => 'applications/releeph/conduit/ReleephQueryRequestsConduitAPIMethod.php',
     'ReleephReasonFieldSpecification' => 'applications/releeph/field/specification/ReleephReasonFieldSpecification.php',
     'ReleephRequest' => 'applications/releeph/storage/ReleephRequest.php',
