@@ -570,7 +570,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
       $joins[] = qsprintf(
         $conn_r,
-        'JOIN %T %T ON %T.objectPHID = %Q
+        'LEFT JOIN %T %T ON %T.objectPHID = %Q
           AND %T.indexKey = %s',
         $table,
         $alias,
