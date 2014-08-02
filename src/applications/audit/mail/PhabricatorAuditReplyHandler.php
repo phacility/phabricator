@@ -52,7 +52,7 @@ final class PhabricatorAuditReplyHandler extends PhabricatorMailReplyHandler {
           ->setCommitPHID($commit->getPHID())
           ->setContent($message));
 
-    $editor = id(new PhabricatorAuditEditor($commit))
+    $editor = id(new PhabricatorAuditEditor())
       ->setActor($actor)
       ->setContentSource($content_source)
       ->setExcludeMailRecipientPHIDs($this->getExcludeMailRecipientPHIDs())

@@ -2,64 +2,6 @@
 
 final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
 
-  private $commit;
-  private $attachInlineComments;
-
-  public function __construct(PhabricatorRepositoryCommit $commit) {
-    $this->commit = $commit;
-    return $this;
-  }
-
-  public function setAttachInlineComments($attach_inline_comments) {
-    $this->attachInlineComments = $attach_inline_comments;
-    return $this;
-  }
-
-  public function addComments(array $comments) {
-    assert_instances_of($comments, 'PhabricatorAuditComment');
-
-    $commit = $this->commit;
-    $actor = $this->getActor();
-
-    $other_comments = PhabricatorAuditComment::loadComments(
-      $actor,
-      $commit->getPHID());
-
-    $inline_comments = array();
-    if ($this->attachInlineComments) {
-      $inline_comments = PhabricatorAuditInlineComment::loadDraftComments(
-        $actor,
-        $commit->getPHID());
-    }
-
-    // Convert old comments into real transactions and apply them with a
-    // normal editor.
-
-    $xactions = array();
-    foreach ($comments as $comment) {
-      $xactions[] = $comment->getTransactionForSave();
-    }
-
-    foreach ($inline_comments as $inline) {
-      $xactions[] = id(new PhabricatorAuditTransaction())
-        ->setTransactionType(PhabricatorAuditActionConstants::INLINE)
-        ->attachComment($inline->getTransactionComment());
-    }
-
-    $content_source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_LEGACY,
-      array());
-
-    $editor = id(new PhabricatorAuditEditor())
-      ->setActor($actor)
-      ->setContinueOnNoEffect(true)
-      ->setContinueOnMissingFields(true)
-      ->setContentSource($content_source)
-      ->setExcludeMailRecipientPHIDs($this->getExcludeMailRecipientPHIDs())
-      ->applyTransactions($commit, $xactions);
-  }
-
-
   /**
    * Load the PHIDs for all objects the user has the authority to act as an
    * audit for. This includes themselves, and any packages they are an owner
