@@ -111,4 +111,8 @@ final class PhabricatorAuditEditor
     return array_values(array_merge($head, $tail));
   }
 
+  protected function supportsSearch() {
+    return true;
+  }
+
 }

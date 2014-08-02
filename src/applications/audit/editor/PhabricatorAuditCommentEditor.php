@@ -263,9 +263,6 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
       $this->publishFeedStory($comment, $feed_phids);
     }
 
-    id(new PhabricatorSearchIndexer())
-      ->queueDocumentForIndexing($commit->getPHID());
-
     if (!$this->noEmail) {
       $this->sendMail(
         $comments,
