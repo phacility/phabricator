@@ -1,7 +1,6 @@
 <?php
 
-abstract class DoorkeeperRemarkupRule
-  extends PhutilRemarkupRule {
+abstract class DoorkeeperRemarkupRule extends PhutilRemarkupRule {
 
   const KEY_TAGS = 'doorkeeper.tags';
 

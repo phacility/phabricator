@@ -1,7 +1,7 @@
 <?php
 
-final class PhabricatorRemarkupRuleEmbedFile
-  extends PhabricatorRemarkupRuleObject {
+final class PhabricatorEmbedFileRemarkupRule
+  extends PhabricatorObjectRemarkupRule {
 
   const KEY_EMBED_FILE_PHIDS = 'phabricator.embedded-file-phids';
 

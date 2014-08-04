@@ -1,7 +1,6 @@
 <?php
 
-final class LegalpadDocumentRemarkupRule
-  extends PhabricatorRemarkupRuleObject {
+final class LegalpadDocumentRemarkupRule extends PhabricatorObjectRemarkupRule {
 
   protected function getObjectNamePrefix() {
     return 'L';

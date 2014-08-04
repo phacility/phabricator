@@ -125,8 +125,7 @@ final class DiffusionReadmeQueryConduitAPIMethod
         ->getOutput($markup_object, $markup_field);
 
       $engine = $markup_object->newMarkupEngine($markup_field);
-      $toc = PhutilRemarkupEngineRemarkupHeaderBlockRule::renderTableOfContents(
-        $engine);
+      $toc = PhutilRemarkupHeaderBlockRule::renderTableOfContents($engine);
       if ($toc) {
         $toc = phutil_tag_div(
           'phabricator-remarkup-toc',

@@ -69,7 +69,7 @@ final class PhrictionContent extends PhrictionDAO
     $output,
     PhutilMarkupEngine $engine) {
 
-    $toc = PhutilRemarkupEngineRemarkupHeaderBlockRule::renderTableOfContents(
+    $toc = PhutilRemarkupHeaderBlockRule::renderTableOfContents(
       $engine);
 
     if ($toc) {

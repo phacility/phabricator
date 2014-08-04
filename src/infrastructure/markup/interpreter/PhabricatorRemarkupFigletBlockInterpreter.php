@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorRemarkupBlockInterpreterFiglet
+final class PhabricatorRemarkupFigletBlockInterpreter
   extends PhutilRemarkupBlockInterpreter {
 
   public function getInterpreterName() {

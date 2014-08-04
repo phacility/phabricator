@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorRemarkupRuleYoutube extends PhutilRemarkupRule {
+final class PhabricatorYoutubeRemarkupRule extends PhutilRemarkupRule {
 
   public function getPriority() {
     return 350.0;

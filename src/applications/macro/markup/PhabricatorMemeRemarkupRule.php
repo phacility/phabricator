@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorRemarkupRuleMeme extends PhutilRemarkupRule {
+final class PhabricatorMemeRemarkupRule extends PhutilRemarkupRule {
 
   private $images;
 

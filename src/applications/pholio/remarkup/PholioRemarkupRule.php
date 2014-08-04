@@ -1,7 +1,6 @@
 <?php
 
-final class PholioRemarkupRule
-  extends PhabricatorRemarkupRuleObject {
+final class PholioRemarkupRule extends PhabricatorObjectRemarkupRule {
 
   protected function getObjectNamePrefix() {
     return 'M';

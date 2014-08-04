@@ -1,7 +1,6 @@
 <?php
 
-final class ProjectRemarkupRule
-  extends PhabricatorRemarkupRuleObject {
+final class ProjectRemarkupRule extends PhabricatorObjectRemarkupRule {
 
   protected function getObjectNamePrefix() {
     return '#';

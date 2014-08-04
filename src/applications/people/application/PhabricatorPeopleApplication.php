@@ -72,7 +72,7 @@ final class PhabricatorPeopleApplication extends PhabricatorApplication {
 
   public function getRemarkupRules() {
     return array(
-      new PhabricatorRemarkupRuleMention(),
+      new PhabricatorMentionRemarkupRule(),
     );
   }
 

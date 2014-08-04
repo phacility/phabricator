@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorPasteRemarkupRule extends PhabricatorRemarkupRuleObject {
+final class PhabricatorPasteRemarkupRule extends PhabricatorObjectRemarkupRule {
 
   protected function getObjectNamePrefix() {
     return 'P';

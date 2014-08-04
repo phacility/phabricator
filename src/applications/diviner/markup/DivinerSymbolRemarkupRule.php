@@ -1,6 +1,6 @@
 <?php
 
-final class DivinerRemarkupRuleSymbol extends PhutilRemarkupRule {
+final class DivinerSymbolRemarkupRule extends PhutilRemarkupRule {
 
   const KEY_RULE_ATOM_REF = 'rule.diviner.atomref';
 

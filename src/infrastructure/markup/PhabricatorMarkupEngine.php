@@ -440,14 +440,14 @@ final class PhabricatorMarkupEngine {
       $options['syntax-highlighter.engine']);
 
     $rules = array();
-    $rules[] = new PhutilRemarkupRuleEscapeRemarkup();
-    $rules[] = new PhutilRemarkupRuleMonospace();
+    $rules[] = new PhutilRemarkupEscapeRemarkupRule();
+    $rules[] = new PhutilRemarkupMonospaceRule();
 
 
-    $rules[] = new PhutilRemarkupRuleDocumentLink();
+    $rules[] = new PhutilRemarkupDocumentLinkRule();
 
     if ($options['youtube']) {
-      $rules[] = new PhabricatorRemarkupRuleYoutube();
+      $rules[] = new PhabricatorYoutubeRemarkupRule();
     }
 
     $applications = PhabricatorApplication::getAllInstalledApplications();
@@ -457,35 +457,35 @@ final class PhabricatorMarkupEngine {
       }
     }
 
-    $rules[] = new PhutilRemarkupRuleHyperlink();
+    $rules[] = new PhutilRemarkupHyperlinkRule();
 
     if ($options['macros']) {
-      $rules[] = new PhabricatorRemarkupRuleImageMacro();
-      $rules[] = new PhabricatorRemarkupRuleMeme();
+      $rules[] = new PhabricatorImageMacroRemarkupRule();
+      $rules[] = new PhabricatorMemeRemarkupRule();
     }
 
-    $rules[] = new PhutilRemarkupRuleBold();
-    $rules[] = new PhutilRemarkupRuleItalic();
-    $rules[] = new PhutilRemarkupRuleDel();
-    $rules[] = new PhutilRemarkupRuleUnderline();
+    $rules[] = new PhutilRemarkupBoldRule();
+    $rules[] = new PhutilRemarkupItalicRule();
+    $rules[] = new PhutilRemarkupDelRule();
+    $rules[] = new PhutilRemarkupUnderlineRule();
 
     foreach (self::loadCustomInlineRules() as $rule) {
       $rules[] = $rule;
     }
 
     $blocks = array();
-    $blocks[] = new PhutilRemarkupEngineRemarkupQuotesBlockRule();
-    $blocks[] = new PhutilRemarkupEngineRemarkupReplyBlockRule();
-    $blocks[] = new PhutilRemarkupEngineRemarkupLiteralBlockRule();
-    $blocks[] = new PhutilRemarkupEngineRemarkupHeaderBlockRule();
-    $blocks[] = new PhutilRemarkupEngineRemarkupHorizontalRuleBlockRule();
-    $blocks[] = new PhutilRemarkupEngineRemarkupListBlockRule();
-    $blocks[] = new PhutilRemarkupEngineRemarkupCodeBlockRule();
-    $blocks[] = new PhutilRemarkupEngineRemarkupNoteBlockRule();
-    $blocks[] = new PhutilRemarkupEngineRemarkupTableBlockRule();
-    $blocks[] = new PhutilRemarkupEngineRemarkupSimpleTableBlockRule();
-    $blocks[] = new PhutilRemarkupEngineRemarkupInterpreterRule();
-    $blocks[] = new PhutilRemarkupEngineRemarkupDefaultBlockRule();
+    $blocks[] = new PhutilRemarkupQuotesBlockRule();
+    $blocks[] = new PhutilRemarkupReplyBlockRule();
+    $blocks[] = new PhutilRemarkupLiteralBlockRule();
+    $blocks[] = new PhutilRemarkupHeaderBlockRule();
+    $blocks[] = new PhutilRemarkupHorizontalRuleBlockRule();
+    $blocks[] = new PhutilRemarkupListBlockRule();
+    $blocks[] = new PhutilRemarkupCodeBlockRule();
+    $blocks[] = new PhutilRemarkupNoteBlockRule();
+    $blocks[] = new PhutilRemarkupTableBlockRule();
+    $blocks[] = new PhutilRemarkupSimpleTableBlockRule();
+    $blocks[] = new PhutilRemarkupInterpreterBlockRule();
+    $blocks[] = new PhutilRemarkupDefaultBlockRule();
 
     foreach (self::loadCustomBlockRules() as $rule) {
       $blocks[] = $rule;
@@ -512,7 +512,7 @@ final class PhabricatorMarkupEngine {
     foreach ($content_blocks as $content_block) {
       $engine->markupText($content_block);
       $phids = $engine->getTextMetadata(
-        PhabricatorRemarkupRuleMention::KEY_MENTIONED,
+        PhabricatorMentionRemarkupRule::KEY_MENTIONED,
         array());
       $mentions += $phids;
     }
@@ -531,7 +531,7 @@ final class PhabricatorMarkupEngine {
     foreach ($content_blocks as $content_block) {
       $engine->markupText($content_block);
       $ids = $engine->getTextMetadata(
-        PhabricatorRemarkupRuleEmbedFile::KEY_EMBED_FILE_PHIDS,
+        PhabricatorEmbedFileRemarkupRule::KEY_EMBED_FILE_PHIDS,
         array());
       $files += $ids;
     }

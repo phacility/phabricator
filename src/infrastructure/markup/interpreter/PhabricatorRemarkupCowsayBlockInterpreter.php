@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorRemarkupBlockInterpreterCowsay
+final class PhabricatorRemarkupCowsayBlockInterpreter
   extends PhutilRemarkupBlockInterpreter {
 
   public function getInterpreterName() {

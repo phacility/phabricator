@@ -1140,7 +1140,7 @@ abstract class PhabricatorApplicationTransactionEditor
         foreach ($xaction_blocks as $block) {
           $engine->markupText($block);
           $phids += $engine->getTextMetadata(
-            PhabricatorRemarkupRuleObject::KEY_MENTIONED_OBJECTS,
+            PhabricatorObjectRemarkupRule::KEY_MENTIONED_OBJECTS,
             array());
         }
       }

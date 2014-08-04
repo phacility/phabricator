@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorRemarkupBlockInterpreterGraphviz
+final class PhabricatorRemarkupGraphvizBlockInterpreter
   extends PhutilRemarkupBlockInterpreter {
 
   public function getInterpreterName() {
@@ -47,7 +47,7 @@ final class PhabricatorRemarkupBlockInterpreterGraphviz
       ));
   }
 
-  // TODO: This is duplicated from PhabricatorRemarkupRuleEmbedFile since they
+  // TODO: This is duplicated from PhabricatorEmbedFileRemarkupRule since they
   // do not share a base class.
   private function parseDimension($string) {
     $string = trim($string);

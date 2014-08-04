@@ -1,7 +1,6 @@
 <?php
 
-abstract class PhabricatorRemarkupRuleObject
-  extends PhutilRemarkupRule {
+abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
 
   const KEY_RULE_OBJECT = 'rule.object';
   const KEY_MENTIONED_OBJECTS = 'rule.object.mentioned';

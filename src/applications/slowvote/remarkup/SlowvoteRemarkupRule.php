@@ -1,6 +1,6 @@
 <?php
 
-final class SlowvoteRemarkupRule extends PhabricatorRemarkupRuleObject {
+final class SlowvoteRemarkupRule extends PhabricatorObjectRemarkupRule {
 
   protected function getObjectNamePrefix() {
     return 'V';
