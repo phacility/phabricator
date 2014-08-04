@@ -165,6 +165,9 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     // TTL back up to the full duration. The idea here is that sessions are
     // good forever if used regularly, but get GC'd when they fall out of use.
 
+    // NOTE: If we begin rotating session keys when extending sessions, the
+    // CSRF code needs to be updated so CSRF tokens survive session rotation.
+
     if (time() + (0.80 * $ttl) > $session->getSessionExpires()) {
       $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
         $conn_w = $session_table->establishConnection('w');

@@ -339,6 +339,10 @@ final class PhabricatorUser
       $vec = $this->getAlternateCSRFString();
     }
 
+    if ($this->hasSession()) {
+      $vec = $vec.$this->getSession()->getSessionKey();
+    }
+
     $time_block = floor($epoch / $frequency);
     $vec = $vec.$key.$time_block;
 
