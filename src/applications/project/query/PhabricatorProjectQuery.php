@@ -266,10 +266,15 @@ final class PhabricatorProjectQuery
     }
 
     if ($this->slugs) {
+      $slugs = array();
+      foreach ($this->slugs as $slug) {
+        $slugs[] = rtrim(PhabricatorSlug::normalize($slug), '/');
+      }
+
       $where[] = qsprintf(
         $conn_r,
         'slug.slug IN (%Ls)',
-        $this->slugs);
+        $slugs);
     }
 
     if ($this->phrictionSlugs) {
