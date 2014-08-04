@@ -427,6 +427,8 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
       $user->endWriteLocking();
     $user->saveTransaction();
 
+    $this->revokePasswordResetLinks($user);
+
     return $this;
   }
 
@@ -489,6 +491,9 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
       $old_primary->sendOldPrimaryEmail($user, $email);
     }
     $email->sendNewPrimaryEmail($user);
+
+
+    $this->revokePasswordResetLinks($user);
 
     return $this;
   }
@@ -573,6 +578,21 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
     if (!PhabricatorUserEmail::isAllowedAddress($email->getAddress())) {
       throw new Exception(PhabricatorUserEmail::describeAllowedAddresses());
     }
+  }
+
+  private function revokePasswordResetLinks(PhabricatorUser $user) {
+    // Revoke any outstanding password reset links. If an attacker compromises
+    // an account, changes the email address, and sends themselves a password
+    // reset link, it could otherwise remain live for a short period of time
+    // and allow them to compromise the account again later.
+
+    PhabricatorAuthTemporaryToken::revokeTokens(
+      $user,
+      array($user->getPHID()),
+      array(
+        PhabricatorAuthSessionEngine::ONETIME_TEMPORARY_TOKEN_TYPE,
+        PhabricatorAuthSessionEngine::PASSWORD_TEMPORARY_TOKEN_TYPE,
+      ));
   }
 
 }

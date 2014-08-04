@@ -44,6 +44,30 @@ final class PhabricatorAuthTemporaryToken extends PhabricatorAuthDAO
     return false;
   }
 
+  public function revokeToken() {
+    if ($this->isRevocable()) {
+      $this->setTokenExpires(PhabricatorTime::getNow() - 1)->save();
+    }
+    return $this;
+  }
+
+  public static function revokeTokens(
+    PhabricatorUser $viewer,
+    array $object_phids,
+    array $token_types) {
+
+    $tokens = id(new PhabricatorAuthTemporaryTokenQuery())
+      ->setViewer($viewer)
+      ->withObjectPHIDs($object_phids)
+      ->withTokenTypes($token_types)
+      ->withExpired(false)
+      ->execute();
+
+    foreach ($tokens as $token) {
+      $token->revokeToken();
+    }
+  }
+
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
 

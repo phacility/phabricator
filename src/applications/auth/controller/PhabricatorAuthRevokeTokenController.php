@@ -46,7 +46,7 @@ final class PhabricatorAuthRevokeTokenController
 
     if ($request->isDialogFormPost()) {
       foreach ($tokens as $token) {
-        $token->setTokenExpires(PhabricatorTime::getNow() - 1)->save();
+        $token->revokeToken();
       }
       return id(new AphrontRedirectResponse())->setURI($panel_uri);
     }
