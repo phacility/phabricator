@@ -4851,6 +4851,7 @@ phutil_register_library_map(array(
       'PhabricatorSubscribableInterface',
       'HarbormasterBuildableInterface',
       'PhabricatorCustomFieldInterface',
+      'PhabricatorApplicationTransactionInterface',
     ),
     'PhabricatorRepositoryCommitChangeParserWorker' => 'PhabricatorRepositoryCommitParserWorker',
     'PhabricatorRepositoryCommitData' => 'PhabricatorRepositoryDAO',

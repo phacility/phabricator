@@ -8,7 +8,8 @@ final class PhabricatorRepositoryCommit
     PhabricatorTokenReceiverInterface,
     PhabricatorSubscribableInterface,
     HarbormasterBuildableInterface,
-    PhabricatorCustomFieldInterface {
+    PhabricatorCustomFieldInterface,
+    PhabricatorApplicationTransactionInterface {
 
   protected $repositoryID;
   protected $phid;
@@ -349,6 +350,22 @@ final class PhabricatorRepositoryCommit
 
   public function shouldAllowSubscription($phid) {
     return true;
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhabricatorAuditEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhabricatorAuditTransaction();
   }
 
 }

@@ -5,9 +5,11 @@ final class ManiphestTaskHasCommitEdgeType extends PhabricatorEdgeType {
   const EDGECONST = 1;
 
   public function shouldWriteInverseTransactions() {
-    // TODO: This should happen after T4896, but Diffusion does not support
-    // transactions yet.
-    return false;
+    return true;
+  }
+
+  public function getInverseEdgeConstant() {
+    return DiffusionCommitHasTaskEdgeType::EDGECONST;
   }
 
   public function getTransactionAddString(
