@@ -161,11 +161,23 @@ final class PhabricatorAuditEditor
               $requests = mpull($requests, null, 'getAuditorPHID');
               $actor_request = idx($requests, $actor_phid);
 
-              if ($actor_request) {
-                $actor_request
-                  ->setAuditStatus($status_resigned)
-                  ->save();
+              // If the actor doesn't currently have a relationship to the
+              // commit, add one explicitly. For example, this allows members
+              // of a project to resign from a commit and have it drop out of
+              // their queue.
+
+              if (!$actor_request) {
+                $actor_request = id(new PhabricatorRepositoryAuditRequest())
+                  ->setCommitPHID($object->getPHID())
+                  ->setAuditorPHID($actor_phid);
+
+                $requests[] = $actor_request;
+                $object->attachAudits($requests);
               }
+
+              $actor_request
+                ->setAuditStatus($status_resigned)
+                ->save();
               break;
             case PhabricatorAuditActionConstants::ACCEPT:
             case PhabricatorAuditActionConstants::CONCERN:
