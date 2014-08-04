@@ -116,6 +116,10 @@ final class PhabricatorSettingsPanelPassword
           $next = $this->getPanelURI('?saved=true');
         }
 
+        id(new PhabricatorAuthSessionEngine())->terminateLoginSessions(
+          $user,
+          $request->getCookie(PhabricatorCookies::COOKIE_SESSION));
+
         return id(new AphrontRedirectResponse())->setURI($next);
       }
     }
@@ -177,6 +181,11 @@ final class PhabricatorSettingsPanelPassword
         ->setLabel(pht('Best Available Algorithm'))
         ->setValue(PhabricatorPasswordHasher::getBestAlgorithmName()));
 
+    $form->appendRemarkupInstructions(
+      pht(
+        'NOTE: Changing your password will terminate any other outstanding '.
+        'login sessions.'));
+
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Change Password'))
       ->setFormSaved($request->getStr('saved'))
@@ -187,4 +196,6 @@ final class PhabricatorSettingsPanelPassword
       $form_box,
     );
   }
+
+
 }
