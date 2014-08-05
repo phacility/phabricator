@@ -16,7 +16,7 @@ final class DifferentialDraft extends DifferentialDAO {
         ->setAuthorPHID($author_phid)
         ->setDraftKey($draft_key)
         ->save();
-    } catch (AphrontQueryDuplicateKeyException $ex) {
+    } catch (AphrontDuplicateKeyQueryException $ex) {
       // no worries
     }
   }

@@ -103,7 +103,7 @@ final class PhabricatorSettingsPanelSSHKeys
           $key->save();
           return id(new AphrontRedirectResponse())
             ->setURI($this->getPanelURI());
-        } catch (AphrontQueryDuplicateKeyException $ex) {
+        } catch (AphrontDuplicateKeyQueryException $ex) {
           $e_key = pht('Duplicate');
           $errors[] = pht('This public key is already associated with a user '.
                       'account.');

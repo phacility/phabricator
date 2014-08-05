@@ -333,7 +333,7 @@ final class HeraldRuleController extends HeraldController {
           $rule->logEdit($request->getUser()->getPHID(), $edit_action);
         $rule->saveTransaction();
 
-      } catch (AphrontQueryDuplicateKeyException $ex) {
+      } catch (AphrontDuplicateKeyQueryException $ex) {
         $e_name = pht('Not Unique');
         $errors[] = pht('Rule name is not unique. Choose a unique name.');
       }

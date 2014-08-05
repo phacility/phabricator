@@ -304,7 +304,7 @@ final class PhabricatorAuthRegisterController
           }
 
           return $this->loginUser($user);
-        } catch (AphrontQueryDuplicateKeyException $exception) {
+        } catch (AphrontDuplicateKeyQueryException $exception) {
           $same_username = id(new PhabricatorUser())->loadOneWhere(
             'userName = %s',
             $user->getUserName());

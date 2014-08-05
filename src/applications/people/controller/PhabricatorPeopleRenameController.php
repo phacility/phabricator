@@ -56,7 +56,7 @@ final class PhabricatorPeopleRenameController
           $new_uri = '/p/'.$v_username.'/';
 
           return id(new AphrontRedirectResponse())->setURI($new_uri);
-        } catch (AphrontQueryDuplicateKeyException $ex) {
+        } catch (AphrontDuplicateKeyQueryException $ex) {
           $e_username = pht('Not Unique');
           $errors[] = pht('Another user already has that username.');
         }

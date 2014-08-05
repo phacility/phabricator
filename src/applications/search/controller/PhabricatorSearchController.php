@@ -59,7 +59,7 @@ final class PhabricatorSearchController
           $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
             try {
               $saved->setID(null)->save();
-            } catch (AphrontQueryDuplicateKeyException $ex) {
+            } catch (AphrontDuplicateKeyQueryException $ex) {
               // Ignore, this is just a repeated search.
             }
           unset($unguarded);

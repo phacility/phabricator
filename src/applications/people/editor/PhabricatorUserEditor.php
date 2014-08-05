@@ -54,7 +54,7 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
         $user->save();
         $email->setUserPHID($user->getPHID());
         $email->save();
-      } catch (AphrontQueryDuplicateKeyException $ex) {
+      } catch (AphrontDuplicateKeyQueryException $ex) {
         // We might have written the user but failed to write the email; if
         // so, erase the IDs we attached.
         $user->setID(null);
@@ -155,7 +155,7 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
 
       try {
         $user->save();
-      } catch (AphrontQueryDuplicateKeyException $ex) {
+      } catch (AphrontDuplicateKeyQueryException $ex) {
         $user->setUsername($old_username);
         $user->killTransaction();
         throw $ex;
@@ -365,7 +365,7 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
 
         try {
           $email->save();
-        } catch (AphrontQueryDuplicateKeyException $ex) {
+        } catch (AphrontDuplicateKeyQueryException $ex) {
           $user->endWriteLocking();
           $user->killTransaction();
 

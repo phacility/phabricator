@@ -52,7 +52,7 @@ abstract class PhabricatorApplicationSearchEngine {
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
     try {
       $query->save();
-    } catch (AphrontQueryDuplicateKeyException $ex) {
+    } catch (AphrontDuplicateKeyQueryException $ex) {
       // Ignore, this is just a repeated search.
     }
     unset($unguarded);

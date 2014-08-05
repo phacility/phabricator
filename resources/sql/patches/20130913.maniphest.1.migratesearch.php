@@ -187,7 +187,7 @@ foreach ($rows as $row) {
 
   try {
     $saved->save();
-  } catch (AphrontQueryDuplicateKeyException $ex) {
+  } catch (AphrontDuplicateKeyQueryException $ex) {
     // Ignore this, we just have duplicate saved queries.
   }
 

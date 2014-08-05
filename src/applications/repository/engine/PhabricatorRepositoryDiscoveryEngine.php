@@ -632,7 +632,7 @@ final class PhabricatorRepositoryDiscoveryEngine
 
 
 
-    } catch (AphrontQueryDuplicateKeyException $ex) {
+    } catch (AphrontDuplicateKeyQueryException $ex) {
       $commit->killTransaction();
       // Ignore. This can happen because we discover the same new commit
       // more than once when looking at history, or because of races or

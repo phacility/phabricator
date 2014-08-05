@@ -125,7 +125,7 @@ final class PhabricatorMacroEditController extends PhabricatorMacroController {
 
           $view_uri = $this->getApplicationURI('/view/'.$original->getID().'/');
           return id(new AphrontRedirectResponse())->setURI($view_uri);
-        } catch (AphrontQueryDuplicateKeyException $ex) {
+        } catch (AphrontDuplicateKeyQueryException $ex) {
           throw $ex;
           $errors[] = pht('Macro name is not unique!');
           $e_name = pht('Duplicate');

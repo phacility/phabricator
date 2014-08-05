@@ -210,7 +210,7 @@ final class PhabricatorSettingsPanelEmailAddresses
             ->addSubmitButton(pht('Done'));
 
           return id(new AphrontDialogResponse())->setDialog($dialog);
-        } catch (AphrontQueryDuplicateKeyException $ex) {
+        } catch (AphrontDuplicateKeyQueryException $ex) {
           $email = pht('Duplicate');
           $errors[] = pht('Another user already has this email.');
         }

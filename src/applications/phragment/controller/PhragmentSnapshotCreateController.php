@@ -52,7 +52,7 @@ final class PhragmentSnapshotCreateController extends PhragmentController {
             ->setPrimaryFragmentPHID($fragment->getPHID())
             ->setName($v_name)
             ->save();
-        } catch (AphrontQueryDuplicateKeyException $e) {
+        } catch (AphrontDuplicateKeyQueryException $e) {
           $errors[] = pht('A snapshot with this name already exists.');
         }
 

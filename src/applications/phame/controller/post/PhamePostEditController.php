@@ -82,7 +82,7 @@ final class PhamePostEditController extends PhameController {
 
           $uri = $this->getApplicationURI('/post/view/'.$post->getID().'/');
           return id(new AphrontRedirectResponse())->setURI($uri);
-        } catch (AphrontQueryDuplicateKeyException $e) {
+        } catch (AphrontDuplicateKeyQueryException $e) {
           $e_phame_title = pht('Not Unique');
           $errors[]      = pht('Another post already uses this slug. '.
                            'Each post must have a unique slug.');

@@ -250,7 +250,7 @@ class AphrontDefaultApplicationConfiguration
     $class    = get_class($ex);
     $message  = $ex->getMessage();
 
-    if ($ex instanceof AphrontQuerySchemaException) {
+    if ($ex instanceof AphrontSchemaQueryException) {
       $message .=
         "\n\n".
         "NOTE: This usually indicates that the MySQL schema has not been ".
