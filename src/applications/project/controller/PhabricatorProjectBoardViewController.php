@@ -54,16 +54,27 @@ final class PhabricatorProjectBoardViewController
     $columns = $column_query->execute();
     $columns = mpull($columns, null, 'getSequence');
 
-    // If there's no default column, create one now.
     if (empty($columns[0])) {
-      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-        $column = PhabricatorProjectColumn::initializeNewColumn($viewer)
-          ->setSequence(0)
-          ->setProjectPHID($project->getPHID())
-          ->save();
-        $column->attachProject($project);
-        $columns[0] = $column;
-      unset($unguarded);
+      switch ($request->getStr('initialize-type')) {
+        case 'backlog-only':
+          $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+            $column = PhabricatorProjectColumn::initializeNewColumn($viewer)
+              ->setSequence(0)
+              ->setProjectPHID($project->getPHID())
+              ->save();
+            $column->attachProject($project);
+            $columns[0] = $column;
+          unset($unguarded);
+          break;
+        case 'import':
+          return id(new AphrontRedirectResponse())
+            ->setURI(
+              $this->getApplicationURI('board/'.$project->getID().'/import/'));
+          break;
+        default:
+          return $this->initializeWorkboardDialog($project);
+          break;
+      }
     }
 
     ksort($columns);
@@ -406,5 +417,31 @@ final class PhabricatorProjectBoardViewController
     return $manage_button;
   }
 
+  private function initializeWorkboardDialog(PhabricatorProject $project) {
+
+    $instructions = pht('This workboard has not been setup yet.');
+    $new_selector = id(new AphrontFormRadioButtonControl())
+      ->setName('initialize-type')
+      ->setValue('backlog-only')
+      ->addButton(
+        'backlog-only',
+        pht('New Empty Board'),
+        pht('Create a new board with just a backlog column.'))
+      ->addButton(
+        'import',
+        pht('Import Columns'),
+        pht('Import board columns from another project.'));
+
+    $dialog = id(new AphrontDialogView())
+      ->setUser($this->getRequest()->getUser())
+      ->setTitle(pht('New Workboard'))
+      ->addSubmitButton('Continue')
+      ->addCancelButton($this->getApplicationURI('view/'.$project->getID().'/'))
+      ->appendParagraph($instructions)
+      ->appendChild($new_selector);
+
+    return id(new AphrontDialogResponse())
+      ->setDialog($dialog);
+  }
 
 }

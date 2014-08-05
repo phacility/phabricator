@@ -71,6 +71,8 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
             => 'PhabricatorProjectBoardDeleteController',
           'column/(?:(?P<id>\d+)/)?'
             => 'PhabricatorProjectColumnDetailController',
+          'import/'
+            => 'PhabricatorProjectBoardImportController',
           'reorder/'
             => 'PhabricatorProjectBoardReorderController',
         ),
