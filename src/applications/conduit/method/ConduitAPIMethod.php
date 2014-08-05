@@ -245,4 +245,35 @@ abstract class ConduitAPIMethod
     return null;
   }
 
+  protected function hasApplicationCapability(
+    $capability,
+    PhabricatorUser $viewer) {
+
+    $application = $this->getApplication();
+
+    if (!$application) {
+      return false;
+    }
+
+    return PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $application,
+      $capability);
+  }
+
+  protected function requireApplicationCapability(
+    $capability,
+    PhabricatorUser $viewer) {
+
+    $application = $this->getApplication();
+    if (!$application) {
+      return;
+    }
+
+    PhabricatorPolicyFilter::requireCapability(
+      $viewer,
+      $this->getApplication(),
+      $capability);
+  }
+
 }
