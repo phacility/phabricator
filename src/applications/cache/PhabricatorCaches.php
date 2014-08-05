@@ -54,7 +54,7 @@ final class PhabricatorCaches {
   private static function buildImmutableCaches() {
     $caches = array();
 
-    $apc = new PhutilKeyValueCacheAPC();
+    $apc = new PhutilAPCKeyValueCache();
     if ($apc->isAvailable()) {
       $caches[] = $apc;
     }
@@ -80,11 +80,11 @@ final class PhabricatorCaches {
   private static function buildRepositoryGraphL1Caches() {
     $caches = array();
 
-    $request = new PhutilKeyValueCacheInRequest();
+    $request = new PhutilInRequestKeyValueCache();
     $request->setLimit(32);
     $caches[] = $request;
 
-    $apc = new PhutilKeyValueCacheAPC();
+    $apc = new PhutilAPCKeyValueCache();
     if ($apc->isAvailable()) {
       $caches[] = $apc;
     }
@@ -141,7 +141,7 @@ final class PhabricatorCaches {
   private static function buildSetupCaches() {
     // In most cases, we should have APC. This is an ideal cache for our
     // purposes -- it's fast and empties on server restart.
-    $apc = new PhutilKeyValueCacheAPC();
+    $apc = new PhutilAPCKeyValueCache();
     if ($apc->isAvailable()) {
       return array($apc);
     }
@@ -150,7 +150,7 @@ final class PhabricatorCaches {
     // much better than nothing; some setup steps are quite slow.
     $disk_path = self::getSetupCacheDiskCachePath();
     if ($disk_path) {
-      $disk = new PhutilKeyValueCacheOnDisk();
+      $disk = new PhutilOnDiskKeyValueCache();
       $disk->setCacheFile($disk_path);
       $disk->setWait(0.1);
       if ($disk->isAvailable()) {
