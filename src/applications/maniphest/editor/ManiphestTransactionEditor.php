@@ -184,43 +184,45 @@ final class ManiphestTransactionEditor
 
     switch ($xaction->getTransactionType()) {
       case ManiphestTransaction::TYPE_PROJECT_COLUMN:
-        $new = $xaction->getNewValue();
-        $old = $xaction->getOldValue();
-        $src = $object->getPHID();
-        $dst = head($new['columnPHIDs']);
-        $edges = $old['columnPHIDs'];
-        $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_COLUMN;
-        // NOTE: Normally, we expect only one edge to exist, but this works in
-        // a general way so it will repair any stray edges.
-        $remove = array();
-        $edge_missing = true;
-        foreach ($edges as $phid) {
-          if ($phid == $dst) {
-            $edge_missing = false;
-          } else {
-            $remove[] = $phid;
+        $board_phid = idx($xaction->getNewValue(), 'projectPHID');
+        if (!$board_phid) {
+          throw new Exception(
+            pht("Expected 'projectPHID' in column transaction."));
+        }
+
+        $new_phids = idx($xaction->getNewValue(), 'columnPHIDs', array());
+        if (count($new_phids) !== 1) {
+          throw new Exception(
+            pht("Expected exactly one 'columnPHIDs' in column transaction."));
+        }
+
+        $positions = id(new PhabricatorProjectColumnPositionQuery())
+          ->setViewer($this->requireActor())
+          ->withObjectPHIDs(array($object->getPHID()))
+          ->withBoardPHIDs(array($board_phid))
+          ->execute();
+
+        // Remove all existing column positions on the board.
+
+        foreach ($positions as $position) {
+          if (!$position->getID()) {
+            // This is an ephemeral position, so don't try to destroy it.
+            continue;
           }
+          $position->delete();
         }
 
-        $add = array();
-        if ($edge_missing) {
-          $add[] = $dst;
-        }
+        // Add the new column position.
 
-        // This should never happen because of the code in
-        // transactionHasEffect, but keep it for maximum conservativeness
-        if (!$add && !$remove) {
-          return;
+        foreach ($new_phids as $phid) {
+          id(new PhabricatorProjectColumnPosition())
+            ->setBoardPHID($board_phid)
+            ->setColumnPHID($phid)
+            ->setObjectPHID($object->getPHID())
+            // TODO: Do real sequence stuff.
+            ->setSequence(0)
+            ->save();
         }
-
-        $editor = new PhabricatorEdgeEditor();
-        foreach ($add as $phid) {
-          $editor->addEdge($src, $edge_type, $phid);
-        }
-        foreach ($remove as $phid) {
-          $editor->removeEdge($src, $edge_type, $phid);
-        }
-        $editor->save();
         break;
       default:
         break;

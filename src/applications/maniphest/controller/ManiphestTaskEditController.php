@@ -339,6 +339,7 @@ final class ManiphestTaskEditController extends ManiphestController {
 
 
         if ($parent_task) {
+          // TODO: This should be transactional now.
           id(new PhabricatorEdgeEditor())
             ->addEdge(
               $parent_task->getPHID(),
@@ -364,46 +365,25 @@ final class ManiphestTaskEditController extends ManiphestController {
                 ->setOwner($owner)
                 ->setCanEdit(true)
                 ->getItem();
-              $column_phid = $request->getStr('columnPHID');
+
               $column = id(new PhabricatorProjectColumnQuery())
                 ->setViewer($user)
-                ->withPHIDs(array($column_phid))
+                ->withPHIDs(array($request->getStr('columnPHID')))
                 ->executeOne();
-              if ($column->isDefaultColumn()) {
-                $column_tasks = array();
-                $potential_col_tasks = id(new ManiphestTaskQuery())
-                  ->setViewer($user)
-                  ->withAllProjects(array($column->getProjectPHID()))
-                  ->execute();
-                $potential_col_tasks = mpull(
-                  $potential_col_tasks,
-                  null,
-                  'getPHID');
-                $potential_task_phids = array_keys($potential_col_tasks);
-                if ($potential_task_phids) {
-                  $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_COLUMN;
-                  $edge_query = id(new PhabricatorEdgeQuery())
-                    ->withSourcePHIDs($potential_task_phids)
-                    ->withEdgeTypes(array($edge_type));
-                  $edges = $edge_query->execute();
-                  foreach ($potential_col_tasks as $task_phid => $curr_task) {
-                    $curr_column_phids = $edges[$task_phid][$edge_type];
-                    $curr_column_phid = head_key($curr_column_phids);
-                    if (!$curr_column_phid ||
-                        $curr_column_phid == $column_phid) {
-                      $column_tasks[] = $curr_task;
-                    }
-                  }
-                }
-              } else {
-                $column_task_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
-                  $column_phid,
-                  PhabricatorEdgeConfig::TYPE_COLUMN_HAS_OBJECT);
-                $column_tasks = id(new ManiphestTaskQuery())
-                  ->setViewer($user)
-                  ->withPHIDs($column_task_phids)
-                  ->execute();
+              if (!$column) {
+                return new Aphront404Response();
               }
+
+              $positions = id(new PhabricatorProjectColumnPositionQuery())
+                ->setViewer($user)
+                ->withColumns(array($column))
+                ->execute();
+              $task_phids = mpull($positions, 'getObjectPHID');
+
+              $column_tasks = id(new ManiphestTaskQuery())
+                ->setViewer($user)
+                ->withPHIDs($task_phids)
+                ->execute();
 
               $sort_map = mpull(
                 $column_tasks,

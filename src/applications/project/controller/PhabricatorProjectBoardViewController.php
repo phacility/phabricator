@@ -135,26 +135,28 @@ final class PhabricatorProjectBoardViewController
       ->setOrderBy(ManiphestTaskQuery::ORDER_PRIORITY)
       ->setViewer($viewer)
       ->execute();
-
     $tasks = mpull($tasks, null, 'getPHID');
-    $task_phids = array_keys($tasks);
 
-    if ($task_phids) {
-      $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_COLUMN;
-      $edge_query = id(new PhabricatorEdgeQuery())
-        ->withSourcePHIDs($task_phids)
-        ->withEdgeTypes(array($edge_type))
-        ->withDestinationPHIDs(mpull($columns, 'getPHID'));
-      $edge_query->execute();
+    if ($tasks) {
+      $positions = id(new PhabricatorProjectColumnPositionQuery())
+        ->setViewer($viewer)
+        ->withObjectPHIDs(mpull($tasks, 'getPHID'))
+        ->withColumns($columns)
+        ->execute();
+      $positions = mpull($positions, null, 'getObjectPHID');
+    } else {
+      $positions = array();
     }
 
     $task_map = array();
     $default_phid = $columns[0]->getPHID();
     foreach ($tasks as $task) {
       $task_phid = $task->getPHID();
-      $column_phids = $edge_query->getDestinationPHIDs(array($task_phid));
 
-      $column_phid = head($column_phids);
+      $column_phid = null;
+      if (isset($positions[$task_phid])) {
+        $column_phid = $positions[$task_phid]->getColumnPHID();
+      }
       $column_phid = nonempty($column_phid, $default_phid);
 
       $task_map[$column_phid][] = $task_phid;

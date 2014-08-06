@@ -534,27 +534,13 @@ final class ManiphestTaskDetailController extends ManiphestController {
     if ($project_phids) {
       require_celerity_resource('maniphest-task-summary-css');
 
-      // If we end up with real-world projects with many hundreds of columns, it
-      // might be better to just load all the edges, then load those columns and
-      // work backward that way, or denormalize this data more.
-
-      $columns = id(new PhabricatorProjectColumnQuery())
+      $positions = id(new PhabricatorProjectColumnPositionQuery())
         ->setViewer($viewer)
-        ->withProjectPHIDs($project_phids)
+        ->withBoardPHIDs($project_phids)
+        ->withObjectPHIDs(array($task->getPHID()))
+        ->needColumns(true)
         ->execute();
-      $columns = mpull($columns, null, 'getPHID');
-
-      $column_edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_COLUMN;
-      $all_column_phids = array_keys($columns);
-
-      $column_edge_query = id(new PhabricatorEdgeQuery())
-        ->withSourcePHIDs(array($task->getPHID()))
-        ->withEdgeTypes(array($column_edge_type))
-        ->withDestinationPHIDs($all_column_phids);
-      $column_edge_query->execute();
-      $in_column_phids = array_fuse($column_edge_query->getDestinationPHIDs());
-
-      $column_groups = mgroup($columns, 'getProjectPHID');
+      $positions = mpull($positions, null, 'getBoardPHID');
 
       $project_handles = array();
       $project_annotations = array();
@@ -562,9 +548,10 @@ final class ManiphestTaskDetailController extends ManiphestController {
         $handle = $this->getHandle($project_phid);
         $project_handles[] = $handle;
 
-        $columns = idx($column_groups, $project_phid, array());
-        $column = head(array_intersect_key($columns, $in_column_phids));
-        if ($column) {
+        $position = idx($positions, $project_phid);
+        if ($position) {
+          $column = $position->getColumn();
+
           $column_name = pht('(%s)', $column->getDisplayName());
           $column_link = phutil_tag(
             'a',
