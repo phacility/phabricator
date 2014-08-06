@@ -23,6 +23,8 @@ final class HarbormasterBuildViewController
       return new Aphront404Response();
     }
 
+    require_celerity_resource('harbormaster-css');
+
     $title = pht('Build %d', $id);
 
     $header = id(new PHUIHeaderView())
@@ -127,18 +129,26 @@ final class HarbormasterBuildViewController
         $target_box->addPropertyList($properties, pht('Variables'));
       }
 
+      $artifacts = $this->buildArtifacts($build_target);
+      if ($artifacts) {
+        $properties = new PHUIPropertyListView();
+        $properties->addRawContent($artifacts);
+        $target_box->addPropertyList($properties, pht('Artifacts'));
+      }
+
+      $build_messages = idx($messages, $build_target->getPHID(), array());
+      if ($build_messages) {
+        $properties = new PHUIPropertyListView();
+        $properties->addRawContent($this->buildMessages($build_messages));
+        $target_box->addPropertyList($properties, pht('Messages'));
+      }
+
       $properties = new PHUIPropertyListView();
       $properties->addProperty('Build Target ID', $build_target->getID());
       $target_box->addPropertyList($properties, pht('Metadata'));
 
       $targets[] = $target_box;
 
-      $build_messages = idx($messages, $build_target->getPHID(), array());
-      if ($build_messages) {
-        $targets[] = $this->buildMessages($build_messages);
-      }
-
-      $targets[] = $this->buildArtifacts($build_target);
       $targets[] = $this->buildLog($build, $build_target);
     }
 
@@ -163,7 +173,9 @@ final class HarbormasterBuildViewController
       ));
   }
 
-  private function buildArtifacts(HarbormasterBuildTarget $build_target) {
+  private function buildArtifacts(
+    HarbormasterBuildTarget $build_target) {
+
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
@@ -176,20 +188,14 @@ final class HarbormasterBuildViewController
       return null;
     }
 
-    $list = new PHUIObjectItemListView();
+    $list = id(new PHUIObjectItemListView())
+      ->setFlush(true);
 
     foreach ($artifacts as $artifact) {
       $list->addItem($artifact->getObjectItemView($viewer));
     }
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Build Artifacts'))
-      ->setUser($viewer);
-
-    $box = id(new PHUIObjectBoxView())
-      ->setHeader($header);
-
-    return array($box, $list);
+    return $list;
   }
 
   private function buildLog(
@@ -247,8 +253,6 @@ final class HarbormasterBuildViewController
         ->setForm($log_view);
 
       if ($is_empty) {
-        require_celerity_resource('harbormaster-css');
-
         $log_box = phutil_tag(
           'div',
           array(
@@ -475,11 +479,7 @@ final class HarbormasterBuildViewController
         'date',
       ));
 
-    $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Build Target Messages'))
-      ->appendChild($table);
-
-    return $box;
+    return $table;
   }
 
 
