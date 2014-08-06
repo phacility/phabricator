@@ -205,6 +205,8 @@ final class HarbormasterBuildViewController
       ->withBuildTargetPHIDs(array($build_target->getPHID()))
       ->execute();
 
+    $empty_logs = array();
+
     $log_boxes = array();
     foreach ($logs as $log) {
       $start = 1;
@@ -217,6 +219,16 @@ final class HarbormasterBuildViewController
           $start = 1;
         }
       }
+
+      $id = null;
+      $is_empty = false;
+      if (count($lines) === 1 && trim($lines[0]) === '') {
+        // Prevent Harbormaster from showing empty build logs.
+        $id = celerity_generate_unique_node_id();
+        $empty_logs[] = $id;
+        $is_empty = true;
+      }
+
       $log_view = new ShellLogView();
       $log_view->setLines($lines);
       $log_view->setStart($start);
@@ -230,9 +242,54 @@ final class HarbormasterBuildViewController
         ->setSubheader($this->createLogHeader($build, $log))
         ->setUser($viewer);
 
-      $log_boxes[] = id(new PHUIObjectBoxView())
+      $log_box = id(new PHUIObjectBoxView())
         ->setHeader($header)
         ->setForm($log_view);
+
+      if ($is_empty) {
+        require_celerity_resource('harbormaster-css');
+
+        $log_box = phutil_tag(
+          'div',
+          array(
+            'style' => 'display: none',
+            'id' => $id),
+          $log_box);
+      }
+
+      $log_boxes[] = $log_box;
+    }
+
+    if ($empty_logs) {
+      $hide_id = celerity_generate_unique_node_id();
+
+      Javelin::initBehavior('phabricator-reveal-content');
+
+      $expand = phutil_tag(
+        'div',
+        array(
+          'id' => $hide_id,
+          'class' => 'harbormaster-empty-logs-are-hidden mlr mlt mll',
+        ),
+        array(
+          pht(
+            '%s empty logs are hidden.',
+            new PhutilNumber(count($empty_logs))),
+          ' ',
+          javelin_tag(
+            'a',
+            array(
+              'href' => '#',
+              'sigil' => 'reveal-content',
+              'meta' => array(
+                'showIDs' => $empty_logs,
+                'hideIDs' => array($hide_id),
+              ),
+            ),
+            pht('Show all logs.')),
+        ));
+
+      array_unshift($log_boxes, $expand);
     }
 
     return $log_boxes;
