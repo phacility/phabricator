@@ -9,6 +9,10 @@ final class PhabricatorMacroViewController
     $this->id = $data['id'];
   }
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
