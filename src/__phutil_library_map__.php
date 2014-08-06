@@ -5055,6 +5055,7 @@ phutil_register_library_map(array(
       'PhabricatorFlaggableInterface',
       'PhabricatorTokenReceiverInterface',
       'PhabricatorProjectInterface',
+      'PhabricatorDestructibleInterface',
     ),
     'PhabricatorSlowvotePollController' => 'PhabricatorSlowvoteController',
     'PhabricatorSlowvotePollPHIDType' => 'PhabricatorPHIDType',
