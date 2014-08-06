@@ -46,7 +46,7 @@ appropriate references to CSS and JS resources. It uses
 resources (so you only have to explicitly include what you're actually using,
 and not all of its dependencies) and any packaging rules (so it may be able to
 generate fewer resource requests, improving performance). It then generates
-##<script />## and ##<link />## references to these resources.
+`<script />` and `<link />` references to these resources.
 
 These references point at ##/res/## URIs, which are handled by
 @{class:CelerityResourceController}. It responds to these requests and delivers

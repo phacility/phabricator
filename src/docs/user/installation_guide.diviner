@@ -73,7 +73,7 @@ document for you:
 
 If those work for you, you can skip directly to the
 @{article:Configuration Guide}. These scripts are also available in the
-##scripts/install## directory in the project itself.
+`scripts/install` directory in the project itself.
 
 Otherwise, here's a general description of what you need to install:
 

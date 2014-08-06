@@ -44,7 +44,7 @@ administrative user.
 = Managing Accounts with the Web Console =
 
 To manage accounts from the web, login as an administrator account and go to
-##/people/## or click "People" on the homepage. Provided you're an admin,
+`/people/` or click "People" on the homepage. Provided you're an admin,
 you'll see options to create or edit accounts.
 
 = Manually Creating New Accounts =

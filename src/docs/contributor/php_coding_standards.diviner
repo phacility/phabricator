@@ -112,7 +112,7 @@ visually and react better to "Find Next..." in editors.
       break;
   }
 
-##break## statements should be indented to block level.
+`break` statements should be indented to block level.
 
 **array literals:**
 

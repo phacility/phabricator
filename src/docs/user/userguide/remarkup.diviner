@@ -213,7 +213,7 @@ This produces a block like this:
   }
 
 You can use ##lines=N## to limit the vertical size of a chunk of code, and
-##name=some_name.ext## to give it a name. For example, this:
+`name=some_name.ext` to give it a name. For example, this:
 
   lang=text
   lang=html, name=example.html, lines=12, counterexample

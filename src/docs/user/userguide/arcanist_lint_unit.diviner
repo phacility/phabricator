@@ -57,13 +57,13 @@ When you run ##arc list --trace##, you should see a message to the effect that
 it has loaded your library.
 
 For debugging or testing, you can also run Arcanist with the
-##--load-phutil-library## flag:
+`--load-phutil-library` flag:
 
   arc --load-phutil-library=/path/to/library <command>
 
 You can specify this flag more than once to load several libraries. Note that
 if you use this flag, Arcanist will ignore any libraries listed in
-##.arcconfig##.
+`.arcconfig`.
 
 = Use the Class =
 

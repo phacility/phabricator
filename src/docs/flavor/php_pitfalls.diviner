@@ -153,13 +153,13 @@ Strongly prefer the ##key## varieties.
 = array_uintersect() and array_udiff() are Definitely Slow Too =
 
 These functions have the problems of both the ##usort()## family and the
-##array_diff()## family. Avoid them.
+`array_diff()` family. Avoid them.
 
 = foreach() Does Not Create Scope =
 
 Variables survive outside of the scope of foreach(). More problematically,
 references survive outside of the scope of foreach(). This code mutates
-##$array## because the reference leaks from the first loop to the second:
+`$array` because the reference leaks from the first loop to the second:
 
   COUNTEREXAMPLE
   $array = range(1, 3);
@@ -276,7 +276,7 @@ This doesn't do what you'd expect it to do in C:
 
 This is because the successor to 'z' is 'aa', which is "less than" 'z'. The
 loop will run for ~700 iterations until it reaches 'zz' and terminates. That is,
-##$c## will take on these values:
+`$c` will take on these values:
 
   a
   b

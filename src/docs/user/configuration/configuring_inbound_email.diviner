@@ -179,7 +179,7 @@ If you get a linker error like this:
 
 ...you need to edit your php.ini file so that mbstring.so is loaded **before**
 mailparse.so. This is not the default if you have individual files in
-##php.d/##.
+`php.d/`.
 
 = Local MTA: Configuring Sendmail =
 
@@ -197,13 +197,13 @@ probably means something like this:
   - restart sendmail.
 
 Now, you can actually configure sendmail to deliver to Phabricator. In
-##/etc/aliases##, add an entry like this:
+`/etc/aliases`, add an entry like this:
 
   phabricator: "| /path/to/phabricator/scripts/mail/mail_handler.php <ENV>"
 
 ...where <ENV> is the PHABRICATOR_ENV the script should run under. Run
-##sudo newaliases##. Now you likely need to symlink this script into
-##/etc/smrsh/##:
+`sudo newaliases`. Now you likely need to symlink this script into
+`/etc/smrsh/`:
 
   sudo ln -s /path/to/phabricator/scripts/mail/mail_handler.php /etc/smrsh/
 
@@ -213,7 +213,7 @@ Finally, edit ##/etc/mail/virtusertable## and add an entry like this:
 
 That will forward all mail to @yourdomain.com to the Phabricator processing
 script. Run ##sudo /etc/mail/make## or similar and then restart sendmail with
-##sudo /etc/init.d/sendmail restart##.
+`sudo /etc/init.d/sendmail restart`.
 
 = Local MTA: Configuring Lamson =
 

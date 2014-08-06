@@ -67,7 +67,7 @@ servers and in different languages.
 
 To allow the bot to access Conduit, you need to create a user that it can login
 with. To do this, login to Phabricator as an administrator and go to
-##People -> Create New Account##. Create a new account and flag them as a
+`People -> Create New Account`. Create a new account and flag them as a
 "Bot/Script". Then in your configuration file, set these parameters:
 
   - ##conduit.uri## The URI for your Phabricator install, like
