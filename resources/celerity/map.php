@@ -8,7 +8,7 @@
 return array(
   'names' => array(
     'core.pkg.css' => '519e8478',
-    'core.pkg.js' => '4c28870b',
+    'core.pkg.js' => 'eb8d4f82',
     'darkconsole.pkg.js' => 'df001cab',
     'differential.pkg.css' => '4a93db37',
     'differential.pkg.js' => 'eb182ccd',
@@ -425,7 +425,7 @@ return array(
     'rsrc/js/application/search/behavior-reorder-queries.js' => 'e9581f08',
     'rsrc/js/application/slowvote/behavior-slowvote-embed.js' => 'd6f54db0',
     'rsrc/js/application/transactions/behavior-transaction-comment-form.js' => '9f7309fb',
-    'rsrc/js/application/transactions/behavior-transaction-list.js' => '71f66c08',
+    'rsrc/js/application/transactions/behavior-transaction-list.js' => '13c739ea',
     'rsrc/js/application/uiexample/JavelinViewExample.js' => 'd4a14807',
     'rsrc/js/application/uiexample/ReactorButtonExample.js' => 'd19198c8',
     'rsrc/js/application/uiexample/ReactorCheckboxExample.js' => '519705ea',
@@ -629,7 +629,7 @@ return array(
     'javelin-behavior-phabricator-show-all-transactions' => '7c273581',
     'javelin-behavior-phabricator-tooltips' => '3ee3408b',
     'javelin-behavior-phabricator-transaction-comment-form' => '9f7309fb',
-    'javelin-behavior-phabricator-transaction-list' => '71f66c08',
+    'javelin-behavior-phabricator-transaction-list' => '13c739ea',
     'javelin-behavior-phabricator-watch-anchor' => '06e05112',
     'javelin-behavior-phame-post-preview' => 'be807912',
     'javelin-behavior-pholio-mock-edit' => '9c2623f4',
@@ -924,6 +924,14 @@ return array(
       'javelin-request',
       'javelin-util',
       'phabricator-shaped-request',
+    ),
+    '13c739ea' => array(
+      'javelin-behavior',
+      'javelin-stratcom',
+      'javelin-workflow',
+      'javelin-dom',
+      'javelin-uri',
+      'phabricator-textareautils',
     ),
     '14a827de' => array(
       'javelin-behavior',
@@ -1279,14 +1287,6 @@ return array(
       'phuix-action-view',
       'phabricator-phtize',
       'changeset-view-manager',
-    ),
-    '71f66c08' => array(
-      'javelin-behavior',
-      'javelin-stratcom',
-      'javelin-workflow',
-      'javelin-dom',
-      'javelin-uri',
-      'phabricator-textareautils',
     ),
     '7319e029' => array(
       'javelin-behavior',

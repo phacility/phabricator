@@ -528,6 +528,17 @@ final class PHUITimelineEventView extends AphrontView {
             'uri' => '/transactions/quote/'.$xaction_phid.'/',
             'ref' => $ref,
           ));
+
+      // if there is something to quote then there is something to view raw
+      $items[] = id(new PhabricatorActionView())
+        ->setIcon('fa-cutlery')
+        ->setHref('/transactions/raw/'.$xaction_phid.'/')
+        ->setName(pht('View Raw'))
+        ->addSigil('transaction-raw')
+        ->setMetadata(
+          array(
+            'anchor' => $anchor,
+          ));
     }
 
     if ($this->getIsRemovable()) {
