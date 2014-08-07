@@ -11,7 +11,7 @@ interface PhabricatorDestructibleInterface {
 // TEMPLATE IMPLEMENTATION /////////////////////////////////////////////////////
 
 
-/* -(  PhabricatorDestructableInterface  )----------------------------------- */
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 /*
 
   public function destroyObjectPermanently(
