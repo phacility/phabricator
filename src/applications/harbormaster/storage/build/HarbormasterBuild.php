@@ -74,7 +74,7 @@ final class HarbormasterBuild extends HarbormasterDAO
       case self::STATUS_ERROR:
         return pht('Unexpected Error');
       case self::STATUS_STOPPED:
-        return pht('Stopped');
+        return pht('Paused');
       case self::STATUS_DEADLOCKED:
         return pht('Deadlocked');
       default:
