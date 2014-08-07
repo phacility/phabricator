@@ -530,52 +530,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
           $source));
     }
 
-    $project_phids = $task->getProjectPHIDs();
-    if ($project_phids) {
-      require_celerity_resource('maniphest-task-summary-css');
-
-      $positions = id(new PhabricatorProjectColumnPositionQuery())
-        ->setViewer($viewer)
-        ->withBoardPHIDs($project_phids)
-        ->withObjectPHIDs(array($task->getPHID()))
-        ->needColumns(true)
-        ->execute();
-      $positions = mpull($positions, null, 'getBoardPHID');
-
-      $project_handles = array();
-      $project_annotations = array();
-      foreach ($project_phids as $project_phid) {
-        $handle = $this->getHandle($project_phid);
-        $project_handles[] = $handle;
-
-        $position = idx($positions, $project_phid);
-        if ($position) {
-          $column = $position->getColumn();
-
-          $column_name = pht('(%s)', $column->getDisplayName());
-          $column_link = phutil_tag(
-            'a',
-            array(
-              'href' => $handle->getURI().'board/',
-              'class' => 'maniphest-board-link',
-            ),
-            $column_name);
-
-          $project_annotations[$project_phid] = array(
-            ' ',
-            $column_link);
-        }
-      }
-
-      $project_rows = id(new PHUIHandleTagListView())
-        ->setHandles($project_handles)
-        ->setAnnotations($project_annotations);
-    } else {
-      $project_rows = phutil_tag('em', array(), pht('None'));
-    }
-
-    $view->addProperty(pht('Projects'), $project_rows);
-
     $edge_types = array(
       PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK
         => pht('Blocks'),

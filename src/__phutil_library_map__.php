@@ -3670,6 +3670,7 @@ phutil_register_library_map(array(
       'PhabricatorCustomFieldInterface',
       'PhabricatorDestructibleInterface',
       'PhabricatorApplicationTransactionInterface',
+      'PhabricatorProjectInterface',
     ),
     'ManiphestTaskDescriptionPreviewController' => 'ManiphestController',
     'ManiphestTaskDetailController' => 'ManiphestController',

@@ -1959,18 +1959,10 @@ abstract class PhabricatorApplicationTransactionEditor
       $has_support = true;
     }
 
-    // TODO: The Maniphest legacy stuff should get cleaned up here.
-
-    if (($object instanceof ManiphestTask) ||
-        ($object instanceof PhabricatorProjectInterface)) {
-
-      if ($object instanceof PhabricatorProjectInterface) {
-        $project_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
-          $object->getPHID(),
-          PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
-      } else {
-        $project_phids = $object->getProjectPHIDs();
-      }
+    if ($object instanceof PhabricatorProjectInterface) {
+      $project_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+        $object->getPHID(),
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
 
       if ($project_phids) {
         $watcher_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_WATCHER;
