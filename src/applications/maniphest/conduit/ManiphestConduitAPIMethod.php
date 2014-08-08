@@ -109,10 +109,6 @@ abstract class ManiphestConduitAPIMethod extends ConduitAPIMethod {
 
     $ccs = $request->getValue('ccPHIDs');
     if ($ccs !== null) {
-      $this->validatePHIDList(
-        $ccs,
-        PhabricatorPeopleUserPHIDType::TYPECONST,
-        'ccPHIDS');
       $changes[ManiphestTransaction::TYPE_CCS] = $ccs;
     }
 
