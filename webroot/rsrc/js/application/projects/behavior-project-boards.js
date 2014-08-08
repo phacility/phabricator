@@ -163,7 +163,11 @@ JX.behavior('project-boards', function(config) {
     'click',
     ['column-add-task'],
     function (e) {
-      e.kill();
+
+      // We want the 'boards-dropdown-menu' behavior to see this event and
+      // close the dropdown, but don't want to follow the link.
+      e.prevent();
+
       var column_phid = e.getNodeData('column-add-task').columnPHID;
       var request_data = {
         responseType: 'card',

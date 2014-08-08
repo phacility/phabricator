@@ -223,14 +223,8 @@ final class PhabricatorProjectBoardViewController
         ->setHeader($column->getDisplayName())
         ->setHeaderColor($column->getHeaderColor());
 
-      $panel->setEditURI($board_uri.'column/'.$column->getID().'/');
-
-      $panel->setHeaderAction(id(new PHUIIconView())
-        ->setIconFont('fa-plus')
-        ->setHref('/maniphest/task/create/')
-        ->addSigil('column-add-task')
-        ->setMetadata(
-          array('columnPHID' => $column->getPHID())));
+      $column_menu = $this->buildColumnMenu($project, $column);
+      $panel->addHeaderAction($column_menu);
 
       $cards = id(new PHUIObjectItemListView())
         ->setUser($viewer)
@@ -509,6 +503,59 @@ final class PhabricatorProjectBoardViewController
         ));
 
     return $manage_button;
+  }
+
+  private function buildColumnMenu(
+    PhabricatorProject $project,
+    PhabricatorProjectColumn $column) {
+
+    $request = $this->getRequest();
+    $viewer = $request->getUser();
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $project,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $column_items = array();
+
+    $column_items[] = id(new PhabricatorActionView())
+      ->setIcon('fa-plus')
+      ->setName(pht('Create Task...'))
+      ->setHref('/maniphest/task/create/')
+      ->addSigil('column-add-task')
+      ->setMetadata(
+        array(
+          'columnPHID' => $column->getPHID(),
+        ))
+      ->setDisabled(!$can_edit);
+
+    $edit_uri = $this->getApplicationURI(
+      'board/'.$this->id.'/column/'.$column->getID().'/');
+
+    $column_items[] = id(new PhabricatorActionView())
+      ->setIcon('fa-pencil')
+      ->setName(pht('Edit Column'))
+      ->setHref($edit_uri)
+      ->setDisabled(!$can_edit)
+      ->setWorkflow(!$can_edit);
+
+    $column_menu = id(new PhabricatorActionListView())
+      ->setUser($viewer);
+    foreach ($column_items as $item) {
+      $column_menu->addAction($item);
+    }
+
+    $column_button = id(new PHUIIconView())
+      ->setIconFont('fa-caret-down')
+      ->setHref('#')
+      ->addSigil('boards-dropdown-menu')
+      ->setMetadata(
+        array(
+          'items' => hsprintf('%s', $column_menu),
+        ));
+
+    return $column_button;
   }
 
   private function initializeWorkboardDialog(PhabricatorProject $project) {

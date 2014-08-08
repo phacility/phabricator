@@ -4,15 +4,9 @@ final class PHUIWorkpanelView extends AphrontTagView {
 
   private $cards = array();
   private $header;
-  private $editURI;
-  private $headerAction;
   private $footerAction;
   private $headerColor = PHUIActionHeaderView::HEADER_GREY;
-
-  public function setHeaderAction(PHUIIconView $header_action) {
-    $this->headerAction = $header_action;
-    return $this;
-  }
+  private $headerActions = array();
 
   public function setCards(PHUIObjectItemListView $cards) {
     $this->cards[] = $cards;
@@ -24,11 +18,6 @@ final class PHUIWorkpanelView extends AphrontTagView {
     return $this;
   }
 
-  public function setEditURI($edit_uri) {
-    $this->editURI = $edit_uri;
-    return $this;
-  }
-
   public function setFooterAction(PHUIListItemView $footer_action) {
     $this->footerAction = $footer_action;
     return $this;
@@ -36,6 +25,11 @@ final class PHUIWorkpanelView extends AphrontTagView {
 
   public function setHeaderColor($header_color) {
     $this->headerColor = $header_color;
+    return $this;
+  }
+
+  public function addHeaderAction(PHUIIconView $action) {
+    $this->headerActions[] = $action;
     return $this;
   }
 
@@ -61,20 +55,12 @@ final class PHUIWorkpanelView extends AphrontTagView {
           $footer_tag);
     }
 
-    $header_edit = null;
-    if ($this->editURI) {
-      $header_edit = id(new PHUIIconView())
-        ->setIconFont('fa-pencil')
-        ->setHref($this->editURI);
-    }
     $header = id(new PHUIActionHeaderView())
       ->setHeaderTitle($this->header)
       ->setHeaderColor($this->headerColor);
-    if ($header_edit) {
-      $header->addAction($header_edit);
-    }
-    if ($this->headerAction) {
-      $header->addAction($this->headerAction);
+
+    foreach ($this->headerActions as $action) {
+      $header->addAction($action);
     }
 
     $classes[] = 'phui-workpanel-'.$this->headerColor;
