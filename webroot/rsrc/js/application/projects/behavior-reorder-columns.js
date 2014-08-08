@@ -37,7 +37,7 @@ JX.behavior('reorder-columns', function(config) {
 
     var parameters = {
       columnPHID: node_data.columnPHID,
-      sequence: (sequence === null) ? 1 : (parseInt(sequence, 10) + 1)
+      sequence: (sequence === null) ? 0 : (parseInt(sequence, 10) + 1)
     };
 
     new JX.Workflow(config.reorderURI, parameters)

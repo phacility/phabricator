@@ -54,11 +54,9 @@ final class PhabricatorProjectBoardReorderController
         return new Aphront404Response();
       }
 
-      // TODO: We could let you move the backlog column around if you really
-      // want, but for now we use sequence position 0 as magic.
       $target_column = $columns[$column_phid];
       $new_sequence = $request->getInt('sequence');
-      if ($target_column->isDefaultColumn() || $new_sequence < 1) {
+      if ($new_sequence < 0) {
         return new Aphront404Response();
       }
 
@@ -101,11 +99,6 @@ final class PhabricatorProjectBoardReorderController
 
     $list_id = celerity_generate_unique_node_id();
 
-    $static_list = id(new PHUIObjectItemListView())
-      ->setUser($viewer)
-      ->setFlush(true)
-      ->setStackable(true);
-
     $list = id(new PHUIObjectItemListView())
       ->setUser($viewer)
       ->setID($list_id)
@@ -120,21 +113,15 @@ final class PhabricatorProjectBoardReorderController
         $item->setDisabled(true);
       }
 
-      if ($column->isDefaultColumn()) {
-        $item->setDisabled(true);
-        $static_list->addItem($item);
-      } else {
-        $item->setGrippable(true);
-        $item->addSigil('board-column');
-        $item->setMetadata(
-          array(
-            'columnPHID' => $column->getPHID(),
-            'columnSequence' => $column->getSequence(),
-          ));
+      $item->setGrippable(true);
+      $item->addSigil('board-column');
+      $item->setMetadata(
+        array(
+          'columnPHID' => $column->getPHID(),
+          'columnSequence' => $column->getSequence(),
+        ));
 
-        $list->addItem($item);
-      }
-
+      $list->addItem($item);
     }
 
     Javelin::initBehavior(
@@ -147,9 +134,7 @@ final class PhabricatorProjectBoardReorderController
     return $this->newDialog()
       ->setTitle(pht('Reorder Columns'))
       ->setWidth(AphrontDialogView::WIDTH_FORM)
-      ->appendParagraph(pht('This column can not be moved:'))
-      ->appendChild($static_list)
-      ->appendParagraph(pht('Drag and drop these columns to reorder them:'))
+      ->appendParagraph(pht('Drag and drop columns to reorder them.'))
       ->appendChild($list)
       ->addSubmitButton(pht('Done'));
   }

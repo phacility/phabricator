@@ -17,6 +17,7 @@ final class PhabricatorProjectColumn
   protected $status;
   protected $projectPHID;
   protected $sequence;
+  protected $properties = array();
 
   private $project = self::ATTACHABLE;
 
@@ -29,6 +30,9 @@ final class PhabricatorProjectColumn
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_SERIALIZATION => array(
+        'properties' => self::SERIALIZATION_JSON,
+      ),
     ) + parent::getConfiguration();
   }
 
@@ -47,7 +51,7 @@ final class PhabricatorProjectColumn
   }
 
   public function isDefaultColumn() {
-    return ($this->getSequence() == 0);
+    return (bool)$this->getProperty('isDefault');
   }
 
   public function isHidden() {
@@ -75,7 +79,17 @@ final class PhabricatorProjectColumn
     if ($this->isDefaultColumn()) {
       return PHUIActionHeaderView::HEADER_DARK_GREY;
     }
+
     return PHUIActionHeaderView::HEADER_GREY;
+  }
+
+  public function getProperty($key, $default = null) {
+    return idx($this->properties, $key, $default);
+  }
+
+  public function setProperty($key, $value) {
+    $this->properties[$key] = $value;
+    return $this;
   }
 
 

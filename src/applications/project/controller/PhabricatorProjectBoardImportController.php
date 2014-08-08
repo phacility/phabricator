@@ -60,6 +60,7 @@ final class PhabricatorProjectBoardImportController
           ->setSequence($import_column->getSequence())
           ->setProjectPHID($project->getPHID())
           ->setName($import_column->getName())
+          ->setProperties($import_column->getProperties())
           ->save();
       }
       $table->saveTransaction();

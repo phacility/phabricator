@@ -74,6 +74,7 @@ final class PhabricatorProjectBoardViewController
           $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
             $column = PhabricatorProjectColumn::initializeNewColumn($viewer)
               ->setSequence(0)
+              ->setProperty('isDefault', true)
               ->setProjectPHID($project->getPHID())
               ->save();
             $column->attachProject($project);
