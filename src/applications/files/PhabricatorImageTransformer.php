@@ -16,6 +16,7 @@ final class PhabricatorImageTransformer {
       array(
         'name' => 'meme-'.$file->getName(),
         'ttl' => time() + 60 * 60 * 24,
+        'canCDN' => true,
       ));
   }
 
@@ -30,6 +31,7 @@ final class PhabricatorImageTransformer {
       $image,
       array(
         'name' => 'thumb-'.$file->getName(),
+        'canCDN' => true,
       ));
   }
 
@@ -45,6 +47,7 @@ final class PhabricatorImageTransformer {
       $image,
       array(
         'name' => 'profile-'.$file->getName(),
+        'canCDN' => true,
       ));
   }
 
@@ -58,6 +61,7 @@ final class PhabricatorImageTransformer {
       $image,
       array(
         'name' => 'preview-'.$file->getName(),
+        'canCDN' => true,
       ));
   }
 
@@ -79,6 +83,7 @@ final class PhabricatorImageTransformer {
       $image,
       array(
         'name' => 'conpherence-'.$file->getName(),
+        'canCDN' => true,
       ));
   }
 

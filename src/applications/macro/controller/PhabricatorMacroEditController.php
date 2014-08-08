@@ -64,6 +64,7 @@ final class PhabricatorMacroEditController extends PhabricatorMacroController {
             'name' => $request->getStr('name'),
             'authorPHID' => $user->getPHID(),
             'isExplicitUpload' => true,
+            'canCDN' => true,
           ));
       } else if ($request->getStr('url')) {
         try {
@@ -73,6 +74,7 @@ final class PhabricatorMacroEditController extends PhabricatorMacroController {
               'name' => $request->getStr('name'),
               'authorPHID' => $user->getPHID(),
               'isExplicitUpload' => true,
+              'canCDN' => true,
             ));
         } catch (Exception $ex) {
           $errors[] = pht('Could not fetch URL: %s', $ex->getMessage());

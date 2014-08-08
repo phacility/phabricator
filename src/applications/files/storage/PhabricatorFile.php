@@ -7,10 +7,12 @@ final class PhabricatorFile extends PhabricatorFileDAO
     PhabricatorFlaggableInterface,
     PhabricatorPolicyInterface {
 
+  const ONETIME_TEMPORARY_TOKEN_TYPE = 'file:onetime';
   const STORAGE_FORMAT_RAW  = 'raw';
 
   const METADATA_IMAGE_WIDTH  = 'width';
   const METADATA_IMAGE_HEIGHT = 'height';
+  const METADATA_CAN_CDN = 'cancdn';
 
   protected $name;
   protected $mimeType;
@@ -202,7 +204,6 @@ final class PhabricatorFile extends PhabricatorFileDAO
   }
 
   private static function buildFromFileData($data, array $params = array()) {
-    $selector = PhabricatorEnv::newObjectFromConfig('storage.engine-selector');
 
     if (isset($params['storageEngines'])) {
       $engines = $params['storageEngines'];
@@ -268,6 +269,10 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
     if (idx($params, 'viewPolicy')) {
       $file->setViewPolicy($params['viewPolicy']);
+    }
+
+    if (idx($params, 'canCDN')) {
+      $file->setCanCDN(true);
     }
 
     $file->setStorageEngine($engine_identifier);
@@ -851,6 +856,63 @@ final class PhabricatorFile extends PhabricatorFileDAO
     }
     return idx($this->metadata, self::METADATA_IMAGE_WIDTH);
   }
+
+  public function getCanCDN() {
+    if (!$this->isViewableImage()) {
+      return false;
+    }
+    return idx($this->metadata, self::METADATA_CAN_CDN);
+  }
+
+  public function setCanCDN($can_cdn) {
+    $this->metadata[self::METADATA_CAN_CDN] = $can_cdn ? 1 : 0;
+    return $this;
+  }
+
+  protected function generateOneTimeToken() {
+    $key = Filesystem::readRandomCharacters(16);
+
+    // Save the new secret.
+    return id(new PhabricatorAuthTemporaryToken())
+      ->setObjectPHID($this->getPHID())
+      ->setTokenType(self::ONETIME_TEMPORARY_TOKEN_TYPE)
+      ->setTokenExpires(time() + phutil_units('1 hour in seconds'))
+      ->setTokenCode(PhabricatorHash::digest($key))
+      ->save();
+  }
+
+  public function validateOneTimeToken($token_code) {
+    $token = id(new PhabricatorAuthTemporaryTokenQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withObjectPHIDs(array($this->getPHID()))
+      ->withTokenTypes(array(self::ONETIME_TEMPORARY_TOKEN_TYPE))
+      ->withExpired(false)
+      ->withTokenCodes(array($token_code))
+      ->executeOne();
+
+    return $token;
+  }
+
+  /** Get the CDN uri for this file
+   * This will generate a one-time-use token if
+   * security.alternate_file_domain is set in the config.
+   */
+  public function getCDNURIWithToken() {
+    if (!$this->getPHID()) {
+      throw new Exception(
+        'You must save a file before you can generate a CDN URI.');
+    }
+    $name = phutil_escape_uri($this->getName());
+
+    $path = '/file/data'
+          .'/'.$this->getSecretKey()
+          .'/'.$this->getPHID()
+          .'/'.$this->generateOneTimeToken()
+          .'/'.$name;
+    return PhabricatorEnv::getCDNURI($path);
+  }
+
+
 
   /**
    * Write the policy edge between this file and some object.
