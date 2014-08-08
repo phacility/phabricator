@@ -189,7 +189,7 @@ final class CelerityResourceTransformer {
       'violet'        => '#8e44ad',
       'lightviolet'   => '#ecdff1',
       'charcoal'      => '#4b4d51',
-      'backdrop'      => '#c4cde0',
+      'backdrop'      => '#dadee7',
       'hovergrey'     => '#c5cbcf',
       'hoverblue'     => '#eceff5',
       'hoverborder'   => '#dfe1e9',
