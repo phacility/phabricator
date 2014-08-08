@@ -166,17 +166,17 @@ final class PhabricatorProjectBoardViewController
     }
 
     $task_map = array();
-    $default_phid = $columns[0]->getPHID();
     foreach ($tasks as $task) {
       $task_phid = $task->getPHID();
-
-      $column_phid = null;
-      if (isset($positions[$task_phid])) {
-        $column_phid = $positions[$task_phid]->getColumnPHID();
+      if (empty($positions[$task_phid])) {
+        // This shouldn't normally be possible because we create positions on
+        // demand, but we might have raced as an object was removed from the
+        // board. Just drop the task if we don't have a position for it.
+        continue;
       }
-      $column_phid = nonempty($column_phid, $default_phid);
 
-      $task_map[$column_phid][] = $task_phid;
+      $position = $positions[$task_phid];
+      $task_map[$position->getColumnPHID()][] = $task_phid;
     }
 
     // If we're showing the board in "natural" order, sort columns by their
