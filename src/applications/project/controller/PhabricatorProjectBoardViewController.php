@@ -8,6 +8,8 @@ final class PhabricatorProjectBoardViewController
   private $handles;
   private $queryKey;
   private $filter;
+  private $sortKey;
+  private $showHidden;
 
   public function shouldAllowPublic() {
     return true;
@@ -25,6 +27,7 @@ final class PhabricatorProjectBoardViewController
     $viewer = $request->getUser();
 
     $show_hidden = $request->getBool('hidden');
+    $this->showHidden = $show_hidden;
 
     $project = id(new PhabricatorProjectQuery())
       ->setViewer($viewer)
@@ -41,6 +44,17 @@ final class PhabricatorProjectBoardViewController
 
     $this->setProject($project);
     $this->id = $project->getID();
+
+    $sort_key = $request->getStr('order');
+    switch ($sort_key) {
+      case PhabricatorProjectColumn::ORDER_NATURAL:
+      case PhabricatorProjectColumn::ORDER_PRIORITY:
+        break;
+      default:
+        $sort_key = PhabricatorProjectColumn::DEFAULT_ORDER;
+        break;
+    }
+    $this->sortKey = $sort_key;
 
     $column_query = id(new PhabricatorProjectColumnQuery())
       ->setViewer($viewer)
@@ -90,13 +104,15 @@ final class PhabricatorProjectBoardViewController
       $saved = $engine->buildSavedQueryFromRequest($request);
       $engine->saveQuery($saved);
       return id(new AphrontRedirectResponse())->setURI(
-        $engine->getQueryResultsPageURI($saved->getQueryKey()));
+        $this->getURIWithState(
+          $engine->getQueryResultsPageURI($saved->getQueryKey())));
     }
 
     $query_key = $this->queryKey;
     if (!$query_key) {
       $query_key = 'open';
     }
+    $this->queryKey = $query_key;
 
     $custom_query = null;
     if ($engine->isBuiltinQuery($query_key)) {
@@ -180,6 +196,7 @@ final class PhabricatorProjectBoardViewController
         'projectPHID' => $project->getPHID(),
         'moveURI' => $this->getApplicationURI('move/'.$project->getID().'/'),
         'createURI' => '/maniphest/task/create/',
+        'order' => $this->sortKey,
       ));
 
     $this->handles = ManiphestTaskListView::loadTaskHandles($viewer, $tasks);
@@ -235,6 +252,10 @@ final class PhabricatorProjectBoardViewController
       'boards-dropdown',
       array());
 
+    $sort_menu = $this->buildSortMenu(
+      $viewer,
+      $sort_key);
+
     $filter_menu = $this->buildFilterMenu(
       $viewer,
       $custom_query,
@@ -256,6 +277,7 @@ final class PhabricatorProjectBoardViewController
       ->setNoBackground(true)
       ->setImage($project->getProfileImageURI())
       ->setImageURL($this->getApplicationURI('view/'.$project->getID().'/'))
+      ->addActionLink($sort_menu)
       ->addActionLink($filter_menu)
       ->addActionLink($manage_menu)
       ->setPolicyObject($project);
@@ -274,6 +296,57 @@ final class PhabricatorProjectBoardViewController
       ));
   }
 
+  private function buildSortMenu(
+    PhabricatorUser $viewer,
+    $sort_key) {
+
+    $sort_icon = id(new PHUIIconView())
+      ->setIconFont('fa-sort-amount-asc bluegrey');
+
+    $named = array(
+      PhabricatorProjectColumn::ORDER_NATURAL => pht('Natural'),
+      PhabricatorProjectColumn::ORDER_PRIORITY => pht('Sort by Priority'),
+    );
+
+    $base_uri = $this->getURIWithState();
+
+    $items = array();
+    foreach ($named as $key => $name) {
+      $is_selected = ($key == $sort_key);
+      if ($is_selected) {
+        $active_order = $name;
+      }
+
+      $item = id(new PhabricatorActionView())
+        ->setIcon('fa-sort-amount-asc')
+        ->setSelected($is_selected)
+        ->setName($name);
+
+      $uri = $base_uri->alter('order', $key);
+      $item->setHref($uri);
+
+      $items[] = $item;
+    }
+
+    $sort_menu = id(new PhabricatorActionListView())
+      ->setUser($viewer);
+    foreach ($items as $item) {
+      $sort_menu->addAction($item);
+    }
+
+    $sort_button = id(new PHUIButtonView())
+      ->setText(pht('Sort: %s', $active_order))
+      ->setIcon($sort_icon)
+      ->setTag('a')
+      ->setHref('#')
+      ->addSigil('boards-dropdown-menu')
+      ->setMetadata(
+        array(
+          'items' => hsprintf('%s', $sort_menu),
+        ));
+
+    return $sort_button;
+  }
   private function buildFilterMenu(
     PhabricatorUser $viewer,
     $custom_query,
@@ -314,13 +387,15 @@ final class PhabricatorProjectBoardViewController
         ->setName($name);
 
       if ($is_custom) {
-        $item->setHref(
-          $this->getApplicationURI(
-          'board/'.$this->id.'/filter/query/'.$key.'/'));
+        $uri = $this->getApplicationURI(
+          'board/'.$this->id.'/filter/query/'.$key.'/');
         $item->setWorkflow(true);
       } else {
-        $item->setHref($engine->getQueryResultsPageURI($key));
+        $uri = $engine->getQueryResultsPageURI($key);
       }
+
+      $uri = $this->getURIWithState($uri);
+      $item->setHref($uri);
 
       $items[] = $item;
     }
@@ -383,12 +458,12 @@ final class PhabricatorProjectBoardViewController
       ->setWorkflow(true);
 
     if ($show_hidden) {
-      $hidden_uri = $request->getRequestURI()
+      $hidden_uri = $this->getURIWithState()
         ->setQueryParam('hidden', null);
       $hidden_icon = 'fa-eye-slash';
       $hidden_text = pht('Hide Hidden Columns');
     } else {
-      $hidden_uri = $request->getRequestURI()
+      $hidden_uri = $this->getURIWithState()
         ->setQueryParam('hidden', 'true');
       $hidden_icon = 'fa-eye';
       $hidden_text = pht('Show Hidden Columns');
@@ -444,6 +519,36 @@ final class PhabricatorProjectBoardViewController
 
     return id(new AphrontDialogResponse())
       ->setDialog($dialog);
+  }
+
+
+  /**
+   * Add current state parameters (like order and the visibility of hidden
+   * columns) to a URI.
+   *
+   * This allows actions which toggle or adjust one piece of state to keep
+   * the rest of the board state persistent. If no URI is provided, this method
+   * starts with the request URI.
+   *
+   * @param string|null   URI to add state parameters to.
+   * @return PhutilURI    URI with state parameters.
+   */
+  private function getURIWithState($base = null) {
+    if ($base === null) {
+      $base = $this->getRequest()->getRequestURI();
+    }
+
+    $base = new PhutilURI($base);
+
+    if ($this->sortKey != PhabricatorProjectColumn::DEFAULT_ORDER) {
+      $base->setQueryParam('order', $this->sortKey);
+    } else {
+      $base->setQueryParam('order', null);
+    }
+
+    $base->setQueryParam('hidden', $this->showHidden ? 'true' : null);
+
+    return $base;
   }
 
 }

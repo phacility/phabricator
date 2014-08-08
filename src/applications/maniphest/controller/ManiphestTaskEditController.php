@@ -11,7 +11,9 @@ final class ManiphestTaskEditController extends ManiphestController {
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
+
     $response_type = $request->getStr('responseType', 'task');
+    $order = $request->getStr('order', PhabricatorProjectColumn::DEFAULT_ORDER);
 
     $can_edit_assign = $this->hasApplicationCapability(
       ManiphestEditAssignCapability::CAPABILITY);
@@ -531,6 +533,7 @@ final class ManiphestTaskEditController extends ManiphestController {
       ->setUser($user)
       ->addHiddenInput('template', $template_id)
       ->addHiddenInput('responseType', $response_type)
+      ->addHiddenInput('order', $order)
       ->addHiddenInput('columnPHID', $request->getStr('columnPHID'));
 
     if ($parent_task) {

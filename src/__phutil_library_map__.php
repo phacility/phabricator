@@ -3831,6 +3831,7 @@ phutil_register_library_map(array(
     'PassphraseCredential' => array(
       'PassphraseDAO',
       'PhabricatorPolicyInterface',
+      'PhabricatorDestructibleInterface',
     ),
     'PassphraseCredentialControl' => 'AphrontFormControl',
     'PassphraseCredentialCreateController' => 'PassphraseController',

@@ -81,6 +81,8 @@ JX.behavior('project-boards', function(config) {
       data.beforePHID = before_phid;
     }
 
+    data.order = config.order;
+
     var workflow = new JX.Workflow(config.moveURI, data)
       .setHandler(function(response) {
         onresponse(response, item, list);
@@ -148,11 +150,13 @@ JX.behavior('project-boards', function(config) {
       e.kill();
       var column = e.getNode('project-column');
       var request_data = {
-        'responseType' : 'card',
-        'columnPHID'   : JX.Stratcom.getData(column).columnPHID };
+        responseType: 'card',
+        columnPHID: JX.Stratcom.getData(column).columnPHID,
+        order: config.order
+      };
       new JX.Workflow(e.getNode('tag:a').href, request_data)
-      .setHandler(JX.bind(null, onedit, column))
-      .start();
+        .setHandler(JX.bind(null, onedit, column))
+        .start();
     });
 
   JX.Stratcom.listen(
@@ -162,9 +166,11 @@ JX.behavior('project-boards', function(config) {
       e.kill();
       var column_phid = e.getNodeData('column-add-task').columnPHID;
       var request_data = {
-        'responseType' : 'card',
-        'columnPHID'   : column_phid,
-        'projects'     : config.projectPHID };
+        responseType: 'card',
+        columnPHID: column_phid,
+        projects: config.projectPHID,
+        order: config.order
+      };
       var cols = JX.DOM.scry(JX.$(config.boardID), 'ul', 'project-column');
       var ii;
       var column;
@@ -175,7 +181,7 @@ JX.behavior('project-boards', function(config) {
         }
       }
       new JX.Workflow(config.createURI, request_data)
-      .setHandler(JX.bind(null, onedit, column))
-      .start();
+        .setHandler(JX.bind(null, onedit, column))
+        .start();
     });
 });
