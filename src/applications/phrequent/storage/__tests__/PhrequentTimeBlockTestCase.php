@@ -282,6 +282,30 @@ final class PhrequentTimeBlockTestCase extends PhabricatorTestCase {
       $ranges);
   }
 
+  public function testSumTimeSlices() {
+    // This block has multiple closed slices.
+    $block = new PhrequentTimeBlock(
+      array(
+        $this->newEvent('T1', 3456, 4456)->attachPreemptingEvents(array()),
+        $this->newEvent('T1', 8000, 9000)->attachPreemptingEvents(array()),
+      ));
+
+    $this->assertEqual(
+      2000,
+      $block->getTimeSpentOnObject('T1', 10000));
+
+    // This block has an open slice.
+    $block = new PhrequentTimeBlock(
+      array(
+        $this->newEvent('T1', 3456, 4456)->attachPreemptingEvents(array()),
+        $this->newEvent('T1', 8000, null)->attachPreemptingEvents(array()),
+      ));
+
+    $this->assertEqual(
+      3000,
+      $block->getTimeSpentOnObject('T1', 10000));
+  }
+
   private function newEvent($object_phid, $start_time, $end_time) {
     static $id = 0;
 

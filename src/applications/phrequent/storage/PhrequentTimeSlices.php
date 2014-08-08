@@ -17,13 +17,15 @@ final class PhrequentTimeSlices extends Phobject {
   }
 
   public function getDuration($now) {
+    $total = 0;
     foreach ($this->ranges as $range) {
       if ($range[1] === null) {
-        return $now - $range[0];
+        $total += $now - $range[0];
       } else {
-        return $range[1] - $range[0];
+        $total += $range[1] - $range[0];
       }
     }
+    return $total;
   }
 
   public function getIsOngoing() {
