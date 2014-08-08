@@ -205,10 +205,6 @@ final class ManiphestTransactionEditor
         // Remove all existing column positions on the board.
 
         foreach ($positions as $position) {
-          if (!$position->getID()) {
-            // This is an ephemeral position, so don't try to destroy it.
-            continue;
-          }
           $position->delete();
         }
 
