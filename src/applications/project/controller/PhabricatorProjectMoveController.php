@@ -17,6 +17,8 @@ final class PhabricatorProjectMoveController
     $object_phid = $request->getStr('objectPHID');
     $after_phid = $request->getStr('afterPHID');
     $before_phid = $request->getStr('beforePHID');
+    $order = $request->getStr('order', PhabricatorProjectColumn::DEFAULT_ORDER);
+
 
     $project = id(new PhabricatorProjectQuery())
       ->setViewer($viewer)
@@ -65,13 +67,22 @@ final class PhabricatorProjectMoveController
 
     $xactions = array();
 
+    if ($order == PhabricatorProjectColumn::ORDER_NATURAL) {
+      $order_params = array(
+        'afterPHID' => $after_phid,
+        'beforePHID' => $before_phid,
+      );
+    } else {
+      $order_params = array();
+    }
+
     $xactions[] = id(new ManiphestTransaction())
       ->setTransactionType(ManiphestTransaction::TYPE_PROJECT_COLUMN)
       ->setNewValue(
         array(
           'columnPHIDs' => array($column->getPHID()),
           'projectPHID' => $column->getProjectPHID(),
-        ))
+        ) + $order_params)
       ->setOldValue(
         array(
           'columnPHIDs' => mpull($positions, 'getColumnPHID'),
@@ -86,7 +97,7 @@ final class PhabricatorProjectMoveController
       $task_phids[] = $before_phid;
     }
 
-    if ($task_phids) {
+    if ($task_phids && ($order == PhabricatorProjectColumn::ORDER_PRIORITY)) {
       $tasks = id(new ManiphestTaskQuery())
         ->setViewer($viewer)
         ->withPHIDs($task_phids)

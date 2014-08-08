@@ -125,6 +125,16 @@ final class ManiphestTransaction
         break;
       case self::TYPE_SUBPRIORITY:
         return true;
+      case self::TYPE_PROJECT_COLUMN:
+        $old_cols = idx($this->getOldValue(), 'columnPHIDs');
+        $new_cols = idx($this->getNewValue(), 'columnPHIDs');
+
+        $old_cols = array_values($old_cols);
+        $new_cols = array_values($new_cols);
+        sort($old_cols);
+        sort($new_cols);
+
+        return ($old_cols === $new_cols);
     }
 
     return parent::shouldHide();

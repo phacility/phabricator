@@ -178,6 +178,23 @@ final class PhabricatorProjectBoardViewController
       $task_map[$column_phid][] = $task_phid;
     }
 
+    // If we're showing the board in "natural" order, sort columns by their
+    // column positions.
+    if ($this->sortKey == PhabricatorProjectColumn::ORDER_NATURAL) {
+      foreach ($task_map as $column_phid => $task_phids) {
+        $order = array();
+        foreach ($task_phids as $task_phid) {
+          if (isset($positions[$task_phid])) {
+            $order[$task_phid] = $positions[$task_phid]->getOrderingKey();
+          } else {
+            $order[$task_phid] = 0;
+          }
+        }
+        asort($order);
+        $task_map[$column_phid] = array_keys($order);
+      }
+    }
+
     $task_can_edit_map = id(new PhabricatorPolicyFilter())
       ->setViewer($viewer)
       ->requireCapabilities(array(PhabricatorPolicyCapability::CAN_EDIT))

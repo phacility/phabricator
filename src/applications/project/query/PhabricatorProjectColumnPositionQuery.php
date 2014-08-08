@@ -9,6 +9,7 @@ final class PhabricatorProjectColumnPositionQuery
   private $columns;
 
   private $needColumns;
+  private $skipImplicitCreate;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -43,6 +44,21 @@ final class PhabricatorProjectColumnPositionQuery
 
   public function needColumns($need_columns) {
     $this->needColumns = true;
+    return $this;
+  }
+
+
+  /**
+   * Skip implicit creation of column positions which are implied but do not
+   * yet exist.
+   *
+   * This is primarily useful internally.
+   *
+   * @param bool  True to skip implicit creation of column positions.
+   * @return this
+   */
+  public function setSkipImplicitCreate($skip) {
+    $this->skipImplicitCreate = $skip;
     return $this;
   }
 
@@ -93,7 +109,7 @@ final class PhabricatorProjectColumnPositionQuery
     // column and put it in the default column.
 
     $must_type_filter = false;
-    if ($this->columns) {
+    if ($this->columns && !$this->skipImplicitCreate) {
       $default_map = array();
       foreach ($this->columns as $column) {
         if ($column->isDefaultColumn()) {
