@@ -297,6 +297,35 @@ JX.install('Vector', {
       );
     },
 
+
+    /**
+     * Get the aggregate scroll offsets for a node and all of its parents.
+     *
+     * Note that this excludes scroll at the document level, because it does
+     * not normally impact operations in document coordinates, which everything
+     * on this class returns. Use @{method:getScroll} to get the document scroll
+     * position.
+     *
+     * @param   Node        Node to determine offsets for.
+     * @return  JX.Vector   New vector with aggregate scroll offsets.
+     */
+    getAggregateScrollForNode: function(node) {
+      var x = 0;
+      var y = 0;
+
+      do {
+        if (node == document.body || node == document.documentElement) {
+          break;
+        }
+
+        x += node.scrollLeft || 0;
+        y += node.scrollTop || 0;
+        node = node.parentNode;
+      } while (node);
+
+      return new JX.$V(x, y);
+    },
+
     /**
      * Determine the size of the viewport (basically, the browser window) by
      * building a new vector where the 'x' component corresponds to the width
