@@ -55,13 +55,18 @@ final class PhabricatorDashboardSearchEngine
 
     $dashboards = mpull($dashboards, null, 'getPHID');
     $viewer = $this->requireViewer();
-    $installs = id(new PhabricatorDashboardInstall())
-      ->loadAllWhere(
-        'objectPHID IN (%Ls) AND dashboardPHID IN (%Ls)',
-        array(PhabricatorHomeApplication::DASHBOARD_DEFAULT,
-              $viewer->getPHID()),
-        array_keys($dashboards));
-    $installs = mpull($installs, null, 'getDashboardPHID');
+
+    if ($dashboards) {
+      $installs = id(new PhabricatorDashboardInstall())
+        ->loadAllWhere(
+          'objectPHID IN (%Ls) AND dashboardPHID IN (%Ls)',
+          array(PhabricatorHomeApplication::DASHBOARD_DEFAULT,
+                $viewer->getPHID()),
+          array_keys($dashboards));
+      $installs = mpull($installs, null, 'getDashboardPHID');
+    } else {
+      $installs = array();
+    }
 
     $list = new PHUIObjectItemListView();
     $list->setUser($viewer);
