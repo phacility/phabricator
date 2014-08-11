@@ -157,13 +157,62 @@ final class PhortuneAccountViewController extends PhortuneController {
 
   private function buildPurchaseHistorySection(PhortuneAccount $account) {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $request->getUser();
+
+    $carts = id(new PhortuneCartQuery())
+      ->setViewer($viewer)
+      ->withAccountPHIDs(array($account->getPHID()))
+      ->needPurchases(true)
+      ->withStatuses(
+        array(
+          PhortuneCart::STATUS_PURCHASING,
+          PhortuneCart::STATUS_PURCHASED,
+        ))
+      ->execute();
+
+    $rows = array();
+    $rowc = array();
+    foreach ($carts as $cart) {
+      $rowc[] = 'highlighted';
+      $rows[] = array(
+        $cart->getPHID(),
+        '',
+        '',
+      );
+      foreach ($cart->getPurchases() as $purchase) {
+        $price = $purchase->getTotalPriceInCents();
+        $price = PhortuneCurrency::newFromUSDCents($price)->formatForDisplay();
+
+        $rowc[] = '';
+        $rows[] = array(
+          '',
+          $purchase->getPHID(),
+          $price,
+        );
+      }
+    }
+
+    $table = id(new AphrontTableView($rows))
+      ->setRowClasses($rowc)
+      ->setHeaders(
+        array(
+          pht('Cart'),
+          pht('Purchase'),
+          pht('Amount'),
+        ))
+      ->setColumnClasses(
+        array(
+          '',
+          'wide',
+          'right',
+        ));
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Purchase History'));
 
     return id(new PHUIObjectBoxView())
-      ->setHeader($header);
+      ->setHeader($header)
+      ->appendChild($table);
   }
 
   private function buildChargeHistorySection(PhortuneAccount $account) {
