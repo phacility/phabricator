@@ -66,6 +66,9 @@ final class HarbormasterBuildEngine extends Phobject {
       $build->save();
 
       $lock->unlock();
+
+      $this->releaseAllArtifacts($build);
+
       throw $ex;
     }
 
@@ -86,6 +89,11 @@ final class HarbormasterBuildEngine extends Phobject {
     $new_status = $build->getBuildStatus();
     if ($new_status != $old_status || $this->shouldForceBuildableUpdate()) {
       $this->updateBuildable($build->getBuildable());
+    }
+
+    // If we are no longer building for any reason, release all artifacts.
+    if (!$build->isBuilding()) {
+      $this->releaseAllArtifacts($build);
     }
   }
 
@@ -115,6 +123,8 @@ final class HarbormasterBuildEngine extends Phobject {
   }
 
   private function destroyBuildTargets(HarbormasterBuild $build) {
+    $this->releaseAllArtifacts($build);
+
     $targets = id(new HarbormasterBuildTargetQuery())
       ->setViewer($this->getViewer())
       ->withBuildPHIDs(array($build->getPHID()))
@@ -438,6 +448,29 @@ final class HarbormasterBuildEngine extends Phobject {
         }
       }
     }
+  }
+
+  private function releaseAllArtifacts(HarbormasterBuild $build) {
+    $targets = id(new HarbormasterBuildTargetQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withBuildPHIDs(array($build->getPHID()))
+      ->execute();
+
+    if (count($targets) === 0) {
+      return;
+    }
+
+    $target_phids = mpull($targets, 'getPHID');
+
+    $artifacts = id(new HarbormasterBuildArtifactQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withBuildTargetPHIDs($target_phids)
+      ->execute();
+
+    foreach ($artifacts as $artifact) {
+      $artifact->release();
+    }
+
   }
 
 }

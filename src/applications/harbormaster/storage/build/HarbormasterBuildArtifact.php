@@ -125,6 +125,24 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
     return $file;
   }
 
+  public function release() {
+    switch ($this->getArtifactType()) {
+      case self::TYPE_HOST:
+        $this->releaseDrydockLease();
+        break;
+    }
+  }
+
+  public function releaseDrydockLease() {
+    $lease = $this->loadDrydockLease();
+    $resource = $lease->getResource();
+    $blueprint = $resource->getBlueprint();
+
+    if ($lease->isActive()) {
+      $blueprint->releaseLease($resource, $lease);
+    }
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
