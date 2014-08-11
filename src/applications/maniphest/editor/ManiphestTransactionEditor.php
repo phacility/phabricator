@@ -380,6 +380,7 @@ final class ManiphestTransactionEditor
 
           id(new ManiphestTransactionEditor())
             ->setActor($this->getActor())
+            ->setActingAsPHID($this->getActingAsPHID())
             ->setContentSource($this->getContentSource())
             ->setContinueOnNoEffect(true)
             ->setContinueOnMissingFields(true)
