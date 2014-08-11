@@ -4,35 +4,19 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
 
   private $phid;
   private $key;
+  private $token;
 
   public function willProcessRequest(array $data) {
     $this->phid = $data['phid'];
     $this->key  = $data['key'];
+    $this->token = idx($data, 'token');
   }
 
   public function shouldRequireLogin() {
     return false;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-
-    $alt = PhabricatorEnv::getEnvConfig('security.alternate-file-domain');
-    $uri = new PhutilURI($alt);
-    $alt_domain = $uri->getDomain();
-    if ($alt_domain && ($alt_domain != $request->getHost())) {
-      return id(new AphrontRedirectResponse())
-        ->setURI($uri->setPath($request->getPath()));
-    }
-
-    // NOTE: This endpoint will ideally be accessed via CDN or otherwise on
-    // a non-credentialed domain. Knowing the file's secret key gives you
-    // access, regardless of authentication on the request itself.
-
-    $file = id(new PhabricatorFileQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withPHIDs(array($this->phid))
-      ->executeOne();
+  protected function checkFileAndToken($file) {
     if (!$file) {
       return new Aphront404Response();
     }
@@ -41,10 +25,97 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
       return new Aphront403Response();
     }
 
+    return null;
+  }
+
+  public function processRequest() {
+    $request = $this->getRequest();
+
+    $alt = PhabricatorEnv::getEnvConfig('security.alternate-file-domain');
+    $base_uri = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
+    $alt_uri = new PhutilURI($alt);
+    $alt_domain = $alt_uri->getDomain();
+    $req_domain = $request->getHost();
+    $main_domain = id(new PhutilURI($base_uri))->getDomain();
+
+    $cache_response = true;
+
+    if (empty($alt) || $main_domain == $alt_domain) {
+      // Alternate files domain isn't configured or it's set
+      // to the same as the default domain
+
+      // load the file with permissions checks;
+      $file = id(new PhabricatorFileQuery())
+        ->setViewer($request->getUser())
+        ->withPHIDs(array($this->phid))
+        ->executeOne();
+
+      $error_response = $this->checkFileAndToken($file);
+      if ($error_response) {
+        return $error_response;
+      }
+
+      // when the file is not CDNable, don't allow cache
+      $cache_response = $file->getCanCDN();
+    } else if ($req_domain != $alt_domain) {
+      // Alternate domain is configured but this request isn't using it
+
+      // load the file with permissions checks;
+      $file = id(new PhabricatorFileQuery())
+        ->setViewer($request->getUser())
+        ->withPHIDs(array($this->phid))
+        ->executeOne();
+
+      $error_response = $this->checkFileAndToken($file);
+      if ($error_response) {
+        return $error_response;
+      }
+
+      // if the user can see the file, generate a token;
+      // redirect to the alt domain with the token;
+      return id(new AphrontRedirectResponse())
+        ->setURI($file->getCDNURIWithToken());
+
+    } else {
+      // We are using the alternate domain
+
+      // load the file, bypassing permission checks;
+      $file = id(new PhabricatorFileQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withPHIDs(array($this->phid))
+        ->executeOne();
+
+      $error_response = $this->checkFileAndToken($file);
+      if ($error_response) {
+        return $error_response;
+      }
+
+      if ($this->token) {
+        // validate the token, if it is valid, continue
+        $validated_token = $file->validateOneTimeToken($this->token);
+
+        if (!$validated_token) {
+          return new Aphront403Response();
+        }
+        // return the file data without cache headers
+        $cache_response = false;
+      } else if (!$file->getCanCDN()) {
+        // file cannot be served via cdn, and no token given
+        // redirect to the main domain to aquire a token
+        $file_uri = id(new PhutilURI($file->getViewURI()))
+            ->setDomain($main_domain);
+
+        return id(new AphrontRedirectResponse())
+          ->setURI($file_uri);
+      }
+    }
+
     $data = $file->loadFileData();
     $response = new AphrontFileResponse();
     $response->setContent($data);
-    $response->setCacheDurationInSeconds(60 * 60 * 24 * 30);
+    if ($cache_response) {
+      $response->setCacheDurationInSeconds(60 * 60 * 24 * 30);
+    }
 
     // NOTE: It's important to accept "Range" requests when playing audio.
     // If we don't, Safari has difficulty figuring out how long sounds are
@@ -58,6 +129,11 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
         $response->setHTTPResponseCode(206);
         $response->setRange((int)$matches[1], (int)$matches[2]);
       }
+    } else if (isset($validated_token)) {
+      // consume the one-time token if we have one.
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+        $validated_token->delete();
+      unset($unguarded);
     }
 
     $is_viewable = $file->isViewableInBrowser();
