@@ -8,8 +8,7 @@ final class PhortunePaymentMethod extends PhortuneDAO
   implements PhabricatorPolicyInterface {
 
   const STATUS_ACTIVE     = 'payment:active';
-  const STATUS_FAILED     = 'payment:failed';
-  const STATUS_REMOVED    = 'payment:removed';
+  const STATUS_DISABLED   = 'payment:disabled';
 
   protected $name = '';
   protected $status;
@@ -82,9 +81,34 @@ final class PhortunePaymentMethod extends PhortuneDAO
     return head($accept);
   }
 
+
+  public function getDisplayName() {
+    if (strlen($this->name)) {
+      return $this->name;
+    }
+
+    $provider = $this->buildPaymentProvider();
+    return $provider->getDefaultPaymentMethodDisplayName($this);
+  }
+
+  public function getFullDisplayName() {
+    return pht('%s (%s)', $this->getDisplayName(), $this->getSummary());
+  }
+
+  public function getSummary() {
+    return pht('%s %s', $this->getBrand(), $this->getLastFourDigits());
+  }
+
   public function setExpires($year, $month) {
     $this->expires = $year.'-'.$month;
     return $this;
+  }
+
+  public function getDisplayExpires() {
+    list($year, $month) = explode('-', $this->getExpires());
+    $month = sprintf('%02d', $month);
+    $year = substr($year, -2);
+    return $month.'/'.$year;
   }
 
 

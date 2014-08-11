@@ -169,6 +169,11 @@ abstract class PhortunePaymentProvider {
     throw new PhortuneNotImplementedException($this);
   }
 
+  public function getDefaultPaymentMethodDisplayName(
+    PhortunePaymentMethod $method) {
+    throw new PhortuneNotImplementedException($this);
+  }
+
 
 /* -(  One-Time Payments  )-------------------------------------------------- */
 

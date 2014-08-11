@@ -79,7 +79,12 @@ final class PhortuneAccountViewController extends PhortuneController {
 
   private function buildPaymentMethodsSection(PhortuneAccount $account) {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $request->getUser();
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $account,
+      PhabricatorPolicyCapability::CAN_EDIT);
 
     $id = $account->getID();
 
@@ -88,19 +93,18 @@ final class PhortuneAccountViewController extends PhortuneController {
       ->addActionLink(
         id(new PHUIButtonView())
           ->setTag('a')
-          ->setHref($this->getApplicationURI($id.'/paymentmethod/edit/'))
+          ->setHref($this->getApplicationURI($id.'/card/new/'))
           ->setText(pht('Add Payment Method'))
           ->setIcon(id(new PHUIIconView())->setIconFont('fa-plus')));
 
     $list = id(new PHUIObjectItemListView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setNoDataString(
         pht('No payment methods associated with this account.'));
 
     $methods = id(new PhortunePaymentMethodQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withAccountPHIDs(array($account->getPHID()))
-      ->withStatus(PhortunePaymentMethodQuery::STATUS_OPEN)
       ->execute();
 
     if ($methods) {
@@ -108,21 +112,40 @@ final class PhortuneAccountViewController extends PhortuneController {
     }
 
     foreach ($methods as $method) {
+      $id = $method->getID();
+
       $item = new PHUIObjectItemView();
-      $item->setHeader($method->getBrand().' / '.$method->getLastFourDigits());
+      $item->setHeader($method->getFullDisplayName());
 
       switch ($method->getStatus()) {
         case PhortunePaymentMethod::STATUS_ACTIVE:
-          $item->addAttribute(pht('Active'));
           $item->setBarColor('green');
+
+          $disable_uri = $this->getApplicationURI('card/'.$id.'/disable/');
+          $item->addAction(
+            id(new PHUIListItemView())
+              ->setIcon('fa-times')
+              ->setHref($disable_uri)
+              ->setDisabled(!$can_edit)
+              ->setWorkflow(true));
+          break;
+        case PhortunePaymentMethod::STATUS_DISABLED:
+          $item->setDisabled(true);
           break;
       }
 
-      $item->addAttribute(
-        pht(
-          'Added %s by %s',
-          phabricator_datetime($method->getDateCreated(), $user),
-          $this->getHandle($method->getAuthorPHID())->renderLink()));
+      $provider = $method->buildPaymentProvider();
+      $item->addAttribute($provider->getPaymentMethodProviderDescription());
+      $item->setImageURI($provider->getPaymentMethodIcon());
+
+      $edit_uri = $this->getApplicationURI('card/'.$id.'/edit/');
+
+      $item->addAction(
+        id(new PHUIListItemView())
+          ->setIcon('fa-pencil')
+          ->setHref($edit_uri)
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(!$can_edit));
 
       $list->addItem($item);
     }
