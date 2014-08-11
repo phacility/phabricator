@@ -10,6 +10,8 @@ final class HarbormasterBuildTarget extends HarbormasterDAO
   protected $details;
   protected $variables;
   protected $targetStatus;
+  protected $dateStarted;
+  protected $dateCompleted;
 
   const STATUS_PENDING = 'target/pending';
   const STATUS_BUILDING = 'target/building';

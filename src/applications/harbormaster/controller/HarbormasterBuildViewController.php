@@ -94,6 +94,28 @@ final class HarbormasterBuildViewController
       $status_view->addItem($item);
 
       $properties->addProperty(pht('Name'), $build_target->getName());
+
+      if ($build_target->getDateStarted() !== null) {
+        $properties->addProperty(
+          pht('Started'),
+          phabricator_datetime($build_target->getDateStarted(), $viewer));
+        if ($build_target->isComplete()) {
+          $properties->addProperty(
+            pht('Completed'),
+            phabricator_datetime($build_target->getDateCompleted(), $viewer));
+          $properties->addProperty(
+            pht('Duration'),
+            phutil_format_relative_time_detailed(
+              $build_target->getDateCompleted() -
+              $build_target->getDateStarted()));
+        } else {
+          $properties->addProperty(
+            pht('Elapsed'),
+            phutil_format_relative_time_detailed(
+              time() - $build_target->getDateStarted()));
+        }
+      }
+
       $properties->addProperty(pht('Status'), $status_view);
 
       $target_box->addPropertyList($properties, pht('Overview'));
@@ -192,7 +214,10 @@ final class HarbormasterBuildViewController
       ->setFlush(true);
 
     foreach ($artifacts as $artifact) {
-      $list->addItem($artifact->getObjectItemView($viewer));
+      $item = $artifact->getObjectItemView($viewer);
+      if ($item !== null) {
+        $list->addItem($item);
+      }
     }
 
     return $list;
