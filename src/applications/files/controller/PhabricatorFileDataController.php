@@ -90,23 +90,46 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
         return $error_response;
       }
 
+      $acquire_token_uri = id(new PhutilURI($file->getViewURI()))
+        ->setDomain($main_domain);
+
+
       if ($this->token) {
         // validate the token, if it is valid, continue
         $validated_token = $file->validateOneTimeToken($this->token);
 
         if (!$validated_token) {
-          return new Aphront403Response();
+          $dialog = $this->newDialog()
+            ->setShortTitle(pht('Expired File'))
+            ->setTitle(pht('File Link Has Expired'))
+            ->appendParagraph(
+              pht(
+                'The link you followed to view this file is invalid or '.
+                'expired.'))
+            ->appendParagraph(
+              pht(
+                'Continue to generate a new link to the file. You may be '.
+                'required to log in.'))
+            ->addCancelButton(
+              $acquire_token_uri,
+              pht('Continue'));
+
+          // Build an explicit response so we can respond with HTTP/403 instead
+          // of HTTP/200.
+          $response = id(new AphrontDialogResponse())
+            ->setDialog($dialog)
+            ->setHTTPResponseCode(403);
+
+          return $response;
         }
         // return the file data without cache headers
         $cache_response = false;
       } else if (!$file->getCanCDN()) {
         // file cannot be served via cdn, and no token given
         // redirect to the main domain to aquire a token
-        $file_uri = id(new PhutilURI($file->getViewURI()))
-            ->setDomain($main_domain);
 
         return id(new AphrontRedirectResponse())
-          ->setURI($file_uri);
+          ->setURI($acquire_token_uri);
       }
     }
 
