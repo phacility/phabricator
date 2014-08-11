@@ -56,6 +56,14 @@ abstract class DrydockBlueprintImplementation {
     return $this;
   }
 
+  public function getFieldSpecifications() {
+    return array();
+  }
+
+  public function getDetail($key, $default = null) {
+    return $this->getInstance()->getDetail($key, $default);
+  }
+
 
 /* -(  Lease Acquisition  )-------------------------------------------------- */
 
