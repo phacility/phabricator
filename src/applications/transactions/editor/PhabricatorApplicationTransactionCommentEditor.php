@@ -4,6 +4,19 @@ final class PhabricatorApplicationTransactionCommentEditor
   extends PhabricatorEditor {
 
   private $contentSource;
+  private $actingAsPHID;
+
+  public function setActingAsPHID($acting_as_phid) {
+    $this->actingAsPHID = $acting_as_phid;
+    return $this;
+  }
+
+  public function getActingAsPHID() {
+    if ($this->actingAsPHID) {
+      return $this->actingAsPHID;
+    }
+    return $this->getActor()->getPHID();
+  }
 
   public function setContentSource(PhabricatorContentSource $content_source) {
     $this->contentSource = $content_source;
@@ -27,11 +40,11 @@ final class PhabricatorApplicationTransactionCommentEditor
     $actor = $this->requireActor();
 
     $comment->setContentSource($this->getContentSource());
-    $comment->setAuthorPHID($actor->getPHID());
+    $comment->setAuthorPHID($this->getActingAsPHID());
 
     // TODO: This needs to be more sophisticated once we have meta-policies.
     $comment->setViewPolicy(PhabricatorPolicies::POLICY_PUBLIC);
-    $comment->setEditPolicy($actor->getPHID());
+    $comment->setEditPolicy($this->getActingAsPHID());
 
     $xaction->openTransaction();
       $xaction->beginReadLocking();

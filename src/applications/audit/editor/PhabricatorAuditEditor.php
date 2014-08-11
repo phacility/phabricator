@@ -153,7 +153,7 @@ final class PhabricatorAuditEditor
     $status_accepted = PhabricatorAuditStatusConstants::ACCEPTED;
     $status_concerned = PhabricatorAuditStatusConstants::CONCERNED;
 
-    $actor_phid = $this->requireActor()->getPHID();
+    $actor_phid = $this->getActingAsPHID();
     $actor_is_author = ($object->getAuthorPHID()) &&
       ($actor_phid == $object->getAuthorPHID());
 
@@ -317,7 +317,7 @@ final class PhabricatorAuditEditor
     $can_author_close = PhabricatorEnv::getEnvConfig($can_author_close_key);
 
     $actor_is_author = ($object->getAuthorPHID()) &&
-      ($object->getAuthorPHID() == $this->requireActor()->getPHID());
+      ($object->getAuthorPHID() == $this->getActingAsPHID());
 
     switch ($action) {
       case PhabricatorAuditActionConstants::CLOSE:
@@ -348,7 +348,7 @@ final class PhabricatorAuditEditor
   protected function shouldSendMail(
     PhabricatorLiskDAO $object,
     array $xactions) {
-    return true;
+    return $this->isCommitMostlyImported($object);
   }
 
   protected function buildReplyHandler(PhabricatorLiskDAO $object) {
@@ -467,7 +467,20 @@ final class PhabricatorAuditEditor
   protected function shouldPublishFeedStory(
     PhabricatorLiskDAO $object,
     array $xactions) {
-    return true;
+    return $this->isCommitMostlyImported($object);
+  }
+
+  private function isCommitMostlyImported(PhabricatorLiskDAO $object) {
+    $has_message = PhabricatorRepositoryCommit::IMPORTED_MESSAGE;
+    $has_changes = PhabricatorRepositoryCommit::IMPORTED_CHANGE;
+
+    // Don't publish feed stories or email about events which occur during
+    // import. In particular, this affects tasks being attached when they are
+    // closed by "Fixes Txxxx" in a commit message. See T5851.
+
+    $mask = ($has_message | $has_changes);
+
+    return $object->isPartiallyImported($mask);
   }
 
 }

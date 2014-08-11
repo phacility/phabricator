@@ -410,7 +410,7 @@ final class ManiphestTransactionEditor
   protected function getMailTo(PhabricatorLiskDAO $object) {
     return array(
       $object->getOwnerPHID(),
-      $this->requireActor()->getPHID(),
+      $this->getActingAsPHID(),
     );
   }
 

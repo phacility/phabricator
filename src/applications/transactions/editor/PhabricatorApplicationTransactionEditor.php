@@ -479,7 +479,7 @@ abstract class PhabricatorApplicationTransactionEditor
     if ($actor->isOmnipotent()) {
       $xaction->setEditPolicy(PhabricatorPolicies::POLICY_NOONE);
     } else {
-      $xaction->setEditPolicy($actor->getPHID());
+      $xaction->setEditPolicy($this->getActingAsPHID());
     }
 
     $xaction->setAuthorPHID($this->getActingAsPHID());
@@ -644,6 +644,7 @@ abstract class PhabricatorApplicationTransactionEditor
 
     $comment_editor = id(new PhabricatorApplicationTransactionCommentEditor())
       ->setActor($actor)
+      ->setActingAsPHID($this->getActingAsPHID())
       ->setContentSource($this->getContentSource());
 
     if (!$transaction_open) {
@@ -1717,7 +1718,15 @@ abstract class PhabricatorApplicationTransactionEditor
       return $xactions;
     }
 
-    $actor_phid = $this->requireActor()->getPHID();
+    $actor_phid = $this->getActingAsPHID();
+
+    $type_user = PhabricatorPeopleUserPHIDType::TYPECONST;
+    if (phid_get_type($actor_phid) != $type_user) {
+      // Transactions by application actors like Herald, Harbormaster and
+      // Diffusion should not CC the applications.
+      return $xactions;
+    }
+
     if ($object->isAutomaticallySubscribed($actor_phid)) {
       // If they're auto-subscribed, don't CC them.
       return $xactions;
@@ -1827,7 +1836,7 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     $template
-      ->setFrom($this->requireActor()->getPHID())
+      ->setFrom($this->getActingAsPHID())
       ->setSubjectPrefix($this->getMailSubjectPrefix())
       ->setVarySubjectPrefix('['.$action.']')
       ->setThreadID($this->getMailThreadID($object), $this->getIsNewObject())
@@ -2089,7 +2098,7 @@ abstract class PhabricatorApplicationTransactionEditor
 
     return array(
       $object->getPHID(),
-      $this->requireActor()->getPHID(),
+      $this->getActingAsPHID(),
     );
   }
 
@@ -2148,7 +2157,7 @@ abstract class PhabricatorApplicationTransactionEditor
       ->setStoryType($story_type)
       ->setStoryData($story_data)
       ->setStoryTime(time())
-      ->setStoryAuthorPHID($this->requireActor()->getPHID())
+      ->setStoryAuthorPHID($this->getActingAsPHID())
       ->setRelatedPHIDs($related_phids)
       ->setPrimaryObjectPHID($object->getPHID())
       ->setSubscribedPHIDs($subscribed_phids)
@@ -2394,6 +2403,7 @@ abstract class PhabricatorApplicationTransactionEditor
         ->setParentMessageID($this->getParentMessageID())
         ->setIsInverseEdgeEditor(true)
         ->setActor($this->requireActor())
+        ->setActingAsPHID($this->getActingAsPHID())
         ->setContentSource($this->getContentSource());
 
       $editor->applyTransactions($target, array($template));
