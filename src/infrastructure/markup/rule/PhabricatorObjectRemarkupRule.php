@@ -9,7 +9,7 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
   abstract protected function loadObjects(array $ids);
 
   public function getPriority() {
-    return 200.0;
+    return 450.0;
   }
 
   protected function getObjectNamePrefixBeginsWithWordCharacter() {
@@ -116,13 +116,11 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
     }
 
     // NOTE: The "(?<!#)" prevents us from linking "#abcdef" or similar.
-    // The "(?<!/)" prevents us from linking things in URIs.
-    // The "(?<!;)" prevents linking Diffusion URIs to commits.
     // The "\b" allows us to link "(abcdef)" or similar without linking things
     // in the middle of words.
 
     $text = preg_replace_callback(
-      '((?<!#)(?<!/)(?<!;)'.$boundary.$prefix.'('.$id.')(?:#([-\w\d]+))?\b)',
+      '((?<!#)'.$boundary.$prefix.'('.$id.')(?:#([-\w\d]+))?\b)',
       array($this, 'markupObjectReference'),
       $text);
 
