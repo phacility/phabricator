@@ -3,6 +3,7 @@
 final class DrydockSSHCommandInterface extends DrydockCommandInterface {
 
   private $passphraseSSHKey;
+  private $connectTimeout;
 
   private function openCredentialsIfNotOpen() {
     if ($this->passphraseSSHKey !== null) {
@@ -25,6 +26,11 @@ final class DrydockSSHCommandInterface extends DrydockCommandInterface {
       PhabricatorUser::getOmnipotentUser());
   }
 
+  public function setConnectTimeout($timeout) {
+    $this->connectTimeout = $timeout;
+    return $this;
+  }
+
   public function getExecFuture($command) {
     $this->openCredentialsIfNotOpen();
 
@@ -44,8 +50,19 @@ final class DrydockSSHCommandInterface extends DrydockCommandInterface {
       $full_command = 'C:\\Windows\\system32\\cmd.exe /C '.$full_command;
     }
 
+    $command_timeout = '';
+    if ($this->connectTimeout !== null) {
+      $command_timeout = csprintf(
+        '-o %s',
+        'ConnectTimeout='.$this->connectTimeout);
+    }
+
     return new ExecFuture(
-      'ssh -o StrictHostKeyChecking=no -p %s -i %P %P@%s -- %s',
+      'ssh '.
+      '-o StrictHostKeyChecking=no '.
+      '-o BatchMode=yes '.
+      '%C -p %s -i %P %P@%s -- %s',
+      $command_timeout,
       $this->getConfig('port'),
       $this->passphraseSSHKey->getKeyfileEnvelope(),
       $this->passphraseSSHKey->getUsernameEnvelope(),
