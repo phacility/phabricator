@@ -108,12 +108,9 @@ Phabricator
 EOBODY;
           }
 
-          // NOTE: Don't set the user as 'from', or they may not receive the
-          // mail if they have the "don't send me email about my own actions"
-          // preference set.
-
           $mail = id(new PhabricatorMetaMTAMail())
             ->setSubject(pht('[Phabricator] Password Reset'))
+            ->setForceDelivery(true)
             ->addRawTos(array($target_email->getAddress()))
             ->setBody($body)
             ->saveAndSend();

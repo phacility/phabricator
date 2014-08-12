@@ -243,6 +243,25 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
   }
 
   /**
+   * Force delivery of a message, even if recipients have preferences which
+   * would otherwise drop the message.
+   *
+   * This is primarily intended to let users who don't want any email still
+   * receive things like password resets.
+   *
+   * @param bool  True to force delivery despite user preferences.
+   * @return this
+   */
+  public function setForceDelivery($force) {
+    $this->setParam('force', $force);
+    return $this;
+  }
+
+  public function getForceDelivery() {
+    return $this->getParam('force', false);
+  }
+
+  /**
    * Flag that this is an auto-generated bulk message and should have bulk
    * headers added to it if appropriate. Broadly, this means some flavor of
    * "Precedence: bulk" or similar, but is implementation and configuration
@@ -794,6 +813,11 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       return array();
     }
 
+    if ($this->getForceDelivery()) {
+      // If we're forcing delivery, skip all the opt-out checks.
+      return $actors;
+    }
+
     // Exclude explicit recipients.
     foreach ($this->getExcludeMailRecipientPHIDs() as $phid) {
       $actor = idx($actors, $phid);
@@ -834,17 +858,29 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       }
     }
 
+    $all_prefs = id(new PhabricatorUserPreferences())->loadAllWhere(
+      'userPHID in (%Ls)',
+      $actor_phids);
+    $all_prefs = mpull($all_prefs, null, 'getUserPHID');
+
+    // Exclude recipients who don't want any mail.
+    foreach ($all_prefs as $phid => $prefs) {
+      $exclude = $prefs->getPreference(
+        PhabricatorUserPreferences::PREFERENCE_NO_MAIL,
+        false);
+      if ($exclude) {
+        $actors[$phid]->setUndeliverable(
+          pht(
+            'This recipient has disabled all email notifications '.
+            '(Settings > Email Preferences > Email Notifications).'));
+      }
+    }
 
     // Exclude all recipients who have set preferences to not receive this type
     // of email (for example, a user who says they don't want emails about task
     // CC changes).
     $tags = $this->getParam('mailtags');
     if ($tags) {
-      $all_prefs = id(new PhabricatorUserPreferences())->loadAllWhere(
-        'userPHID in (%Ls)',
-        $actor_phids);
-      $all_prefs = mpull($all_prefs, null, 'getUserPHID');
-
       foreach ($all_prefs as $phid => $prefs) {
         $user_mailtags = $prefs->getPreference(
           PhabricatorUserPreferences::PREFERENCE_MAILTAGS,

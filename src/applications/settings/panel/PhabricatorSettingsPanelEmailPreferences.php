@@ -20,10 +20,15 @@ final class PhabricatorSettingsPanelEmailPreferences
 
     $preferences = $user->loadPreferences();
 
+    $pref_no_mail = PhabricatorUserPreferences::PREFERENCE_NO_MAIL;
     $pref_no_self_mail = PhabricatorUserPreferences::PREFERENCE_NO_SELF_MAIL;
 
     $errors = array();
     if ($request->isFormPost()) {
+      $preferences->setPreference(
+        $pref_no_mail,
+        $request->getStr($pref_no_mail));
+
       $preferences->setPreference(
         $pref_no_self_mail,
         $request->getStr($pref_no_self_mail));
@@ -56,6 +61,33 @@ final class PhabricatorSettingsPanelEmailPreferences
     $form = new AphrontFormView();
     $form
       ->setUser($user)
+      ->appendRemarkupInstructions(
+        pht(
+          'These settings let you control how Phabricator notifies you about '.
+          'events. You can configure Phabricator to send you an email, '.
+          'just send a web notification, or not notify you at all.'))
+      ->appendRemarkupInstructions(
+        pht(
+          'If you disable **Email Notifications**, Phabricator will never '.
+          'send email to notify you about events. This preference overrides '.
+          'all your other settings.'.
+          "\n\n".
+          "//You may still receive some administrative email, like password ".
+          "reset email.//"))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setLabel(pht('Email Notifications'))
+          ->setName($pref_no_mail)
+          ->setOptions(
+            array(
+              '0' => pht('Send me email notifications'),
+              '1' => pht('Never send email notifications'),
+            ))
+          ->setValue($preferences->getPreference($pref_no_mail, 0)))
+      ->appendRemarkupInstructions(
+        pht(
+          'If you disable **Self Actions**, Phabricator will not notify '.
+          'you about actions you take.'))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel(pht('Self Actions'))
@@ -65,7 +97,6 @@ final class PhabricatorSettingsPanelEmailPreferences
               '0' => pht('Send me an email when I take an action'),
               '1' => pht('Do not send me an email when I take an action'),
             ))
-          ->setCaption(pht('You can disable email about your own actions.'))
           ->setValue($preferences->getPreference($pref_no_self_mail, 0)));
 
     $mailtags = $preferences->getPreference('mailtags', array());

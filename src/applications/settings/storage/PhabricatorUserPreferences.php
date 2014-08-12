@@ -12,6 +12,7 @@ final class PhabricatorUserPreferences extends PhabricatorUserDAO {
 
   const PREFERENCE_RE_PREFIX            = 're-prefix';
   const PREFERENCE_NO_SELF_MAIL         = 'self-mail';
+  const PREFERENCE_NO_MAIL              = 'no-mail';
   const PREFERENCE_MAILTAGS             = 'mailtags';
   const PREFERENCE_VARY_SUBJECT         = 'vary-subject';
 

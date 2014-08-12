@@ -631,6 +631,7 @@ EOBODY;
     id(new PhabricatorMetaMTAMail())
       ->addRawTos(array($email->getAddress()))
       ->setSubject(pht('[Legalpad] Signature Verification'))
+      ->setForceDelivery(true)
       ->setBody($body)
       ->setRelatedPHID($signature->getDocumentPHID())
       ->saveAndSend();

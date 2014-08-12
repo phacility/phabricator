@@ -173,6 +173,7 @@ EOBODY;
 
     id(new PhabricatorMetaMTAMail())
       ->addRawTos(array($address))
+      ->setForceDelivery(true)
       ->setSubject('[Phabricator] Email Verification')
       ->setBody($body)
       ->setRelatedPHID($user->getPHID())
@@ -210,6 +211,7 @@ EOBODY;
 
     id(new PhabricatorMetaMTAMail())
       ->addRawTos(array($old_address))
+      ->setForceDelivery(true)
       ->setSubject('[Phabricator] Primary Address Changed')
       ->setBody($body)
       ->setFrom($user->getPHID())
@@ -241,6 +243,7 @@ EOBODY;
 
     id(new PhabricatorMetaMTAMail())
       ->addRawTos(array($new_address))
+      ->setForceDelivery(true)
       ->setSubject('[Phabricator] Primary Address Changed')
       ->setBody($body)
       ->setFrom($user->getPHID())
