@@ -32,6 +32,8 @@ abstract class ManiphestConduitAPIMethod extends ConduitAPIMethod {
       'title'         => $is_new ? 'required string' : 'optional string',
       'description'   => 'optional string',
       'ownerPHID'     => 'optional phid',
+      'viewPolicy'    => 'optional phid or policy string',
+      'editPolicy'    => 'optional phid or policy string',
       'ccPHIDs'       => 'optional list<phid>',
       'priority'      => 'optional int',
       'projectPHIDs'  => 'optional list<phid>',
@@ -113,6 +115,20 @@ abstract class ManiphestConduitAPIMethod extends ConduitAPIMethod {
     }
 
     $transactions = array();
+
+    $view_policy = $request->getValue('viewPolicy');
+    if ($view_policy !== null) {
+      $transactions[] = id(new ManiphestTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
+        ->setNewValue($view_policy);
+    }
+
+    $edit_policy = $request->getValue('editPolicy');
+    if ($edit_policy !== null) {
+      $transactions[] = id(new ManiphestTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
+        ->setNewValue($edit_policy);
+    }
 
     $project_phids = $request->getValue('projectPHIDs');
     if ($project_phids !== null) {
