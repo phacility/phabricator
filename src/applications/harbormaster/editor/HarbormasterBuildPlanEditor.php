@@ -3,6 +3,14 @@
 final class HarbormasterBuildPlanEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  public function getEditorApplicationClass() {
+    return 'PhabricatorHarbormasterApplication';
+  }
+
+  public function getEditorObjectsDescription() {
+    return pht('Harbormaster Build Plans');
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
     $types[] = HarbormasterBuildPlanTransaction::TYPE_NAME;

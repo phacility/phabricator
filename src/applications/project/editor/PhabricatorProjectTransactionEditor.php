@@ -3,6 +3,14 @@
 final class PhabricatorProjectTransactionEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  public function getEditorApplicationClass() {
+    return 'PhabricatorProjectApplication';
+  }
+
+  public function getEditorObjectsDescription() {
+    return pht('Projects');
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 

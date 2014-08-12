@@ -3,6 +3,14 @@
 final class PhabricatorFileEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  public function getEditorApplicationClass() {
+    return 'PhabricatorFilesApplication';
+  }
+
+  public function getEditorObjectsDescription() {
+    return pht('Files');
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 

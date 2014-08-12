@@ -4,6 +4,14 @@
 final class PhortuneProductEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  public function getEditorApplicationClass() {
+    return 'PhabricatorPhortuneApplication';
+  }
+
+  public function getEditorObjectsDescription() {
+    return pht('Phortune Products');
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 

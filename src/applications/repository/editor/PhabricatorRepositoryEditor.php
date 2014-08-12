@@ -3,6 +3,14 @@
 final class PhabricatorRepositoryEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  public function getEditorApplicationClass() {
+    return 'PhabricatorDiffusionApplication';
+  }
+
+  public function getEditorObjectsDescription() {
+    return pht('Repositories');
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 

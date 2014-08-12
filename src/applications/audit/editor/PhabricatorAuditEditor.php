@@ -3,6 +3,14 @@
 final class PhabricatorAuditEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  public function getEditorApplicationClass() {
+    return 'PhabricatorAuditApplication';
+  }
+
+  public function getEditorObjectsDescription() {
+    return pht('Audits');
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 

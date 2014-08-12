@@ -3,6 +3,14 @@
 final class PhabricatorMacroEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  public function getEditorApplicationClass() {
+    return 'PhabricatorMacroApplication';
+  }
+
+  public function getEditorObjectsDescription() {
+    return pht('Macros');
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 

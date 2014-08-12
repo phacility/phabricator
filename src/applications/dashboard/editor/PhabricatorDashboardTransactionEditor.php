@@ -3,6 +3,14 @@
 final class PhabricatorDashboardTransactionEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  public function getEditorApplicationClass() {
+    return 'PhabricatorDashboardApplication';
+  }
+
+  public function getEditorObjectsDescription() {
+    return pht('Dashboards');
+  }
+
   public static function addPanelToDashboard(
     PhabricatorUser $actor,
     PhabricatorContentSource $content_source,

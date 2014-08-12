@@ -3,6 +3,14 @@
 final class PhluxVariableEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  public function getEditorApplicationClass() {
+    return 'PhabricatorPhluxApplication';
+  }
+
+  public function getEditorObjectsDescription() {
+    return pht('Phlux Variables');
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
     $types[] = PhluxTransaction::TYPE_EDIT_KEY;

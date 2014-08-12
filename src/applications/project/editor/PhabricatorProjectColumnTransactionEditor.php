@@ -3,6 +3,14 @@
 final class PhabricatorProjectColumnTransactionEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  public function getEditorApplicationClass() {
+    return 'PhabricatorProjectApplication';
+  }
+
+  public function getEditorObjectsDescription() {
+    return pht('Workboard Columns');
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 

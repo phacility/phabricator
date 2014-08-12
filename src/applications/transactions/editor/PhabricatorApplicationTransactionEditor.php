@@ -28,6 +28,26 @@ abstract class PhabricatorApplicationTransactionEditor
   private $actingAsPHID;
   private $disableEmail;
 
+
+  /**
+   * Get the class name for the application this editor is a part of.
+   *
+   * Uninstalling the application will disable the editor.
+   *
+   * @return string Editor's application class name.
+   */
+  abstract public function getEditorApplicationClass();
+
+
+  /**
+   * Get a description of the objects this editor edits, like "Differential
+   * Revisions".
+   *
+   * @return string Human readable description of edited objects.
+   */
+  abstract public function getEditorObjectsDescription();
+
+
   public function setActingAsPHID($acting_as_phid) {
     $this->actingAsPHID = $acting_as_phid;
     return $this;
@@ -39,6 +59,7 @@ abstract class PhabricatorApplicationTransactionEditor
     }
     return $this->getActor()->getPHID();
   }
+
 
   /**
    * When the editor tries to apply transactions that have no effect, should
@@ -1929,6 +1950,15 @@ abstract class PhabricatorApplicationTransactionEditor
 
     return array_mergev($tags);
   }
+
+  /**
+   * @task mail
+   */
+  public function getMailTagsMap() {
+    // TODO: We should move shared mail tags, like "comment", here.
+    return array();
+  }
+
 
   /**
    * @task mail

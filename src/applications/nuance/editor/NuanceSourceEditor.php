@@ -3,6 +3,14 @@
 final class NuanceSourceEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  public function getEditorApplicationClass() {
+    return 'PhabricatorNuanceApplication';
+  }
+
+  public function getEditorObjectsDescription() {
+    return pht('Nuance Sources');
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 

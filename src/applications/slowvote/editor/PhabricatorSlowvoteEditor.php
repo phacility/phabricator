@@ -3,6 +3,14 @@
 final class PhabricatorSlowvoteEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  public function getEditorApplicationClass() {
+    return 'PhabricatorSlowvoteApplication';
+  }
+
+  public function getEditorObjectsDescription() {
+    return pht('Slowvotes');
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 

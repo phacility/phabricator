@@ -7,6 +7,14 @@ final class DifferentialTransactionEditor
   private $changedPriorToCommitURI;
   private $isCloseByCommit;
 
+  public function getEditorApplicationClass() {
+    return 'PhabricatorDifferentialApplication';
+  }
+
+  public function getEditorObjectsDescription() {
+    return pht('Differential Revisions');
+  }
+
   public function getDiffUpdateTransaction(array $xactions) {
     $type_update = DifferentialTransaction::TYPE_UPDATE;
 
@@ -1190,6 +1198,25 @@ final class DifferentialTransactionEditor
     }
 
     return $body;
+  }
+
+  public function getMailTagsMap() {
+    return array(
+      MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEW_REQUEST =>
+        pht('A revision is created.'),
+      MetaMTANotificationType::TYPE_DIFFERENTIAL_UPDATED =>
+        pht('A revision is updated.'),
+      MetaMTANotificationType::TYPE_DIFFERENTIAL_COMMENT =>
+        pht('Someone comments on a revision.'),
+      MetaMTANotificationType::TYPE_DIFFERENTIAL_CLOSED =>
+        pht('A revision is closed.'),
+      MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEWERS =>
+        pht("A revision's reviewers change."),
+      MetaMTANotificationType::TYPE_DIFFERENTIAL_CC =>
+        pht("A revision's CCs change."),
+      MetaMTANotificationType::TYPE_DIFFERENTIAL_OTHER =>
+        pht('Other revision activity not listed above occurs.'),
+    );
   }
 
   protected function supportsSearch() {

@@ -35,17 +35,7 @@ final class PhabricatorSettingsPanelEmailPreferences
 
       $new_tags = $request->getArr('mailtags');
       $mailtags = $preferences->getPreference('mailtags', array());
-      $all_tags = $this->getMailTags();
-
-      $maniphest = 'PhabricatorManiphestApplication';
-      if (!PhabricatorApplication::isClassInstalled($maniphest)) {
-        $all_tags = array_diff_key($all_tags, $this->getManiphestMailTags());
-      }
-
-      $pholio = 'PhabricatorPholioApplication';
-      if (!PhabricatorApplication::isClassInstalled($pholio)) {
-        $all_tags = array_diff_key($all_tags, $this->getPholioMailTags());
-      }
+      $all_tags = $this->getAllTags($user);
 
       foreach ($all_tags as $key => $label) {
         $mailtags[$key] = (bool)idx($new_tags, $key, false);
@@ -125,34 +115,51 @@ final class PhabricatorSettingsPanelEmailPreferences
         'CC\'d on). To receive email alerts when other objects are created, '.
         'configure [[ /herald/ | Herald Rules ]].'.
         "\n\n".
-        '**Phabricator will send an email to your primary account when:**'));
+        'Phabricator will send an email to your primary account when:'));
 
-    if (PhabricatorApplication::isClassInstalledForViewer(
-      'PhabricatorDifferentialApplication', $user)) {
-      $form
-        ->appendChild(
-          $this->buildMailTagCheckboxes(
-            $this->getDifferentialMailTags(),
-            $mailtags)
-            ->setLabel(pht('Differential')));
+    $editors = $this->getAllEditorsWithTags($user);
+
+    // Find all the tags shared by more than one application, and put them
+    // in a "common" group.
+    $all_tags = array();
+    foreach ($editors as $editor) {
+      foreach ($editor->getMailTagsMap() as $tag => $name) {
+        if (empty($all_tags[$tag])) {
+          $all_tags[$tag] = array(
+            'count' => 0,
+            'name' => $name,
+          );
+        }
+        $all_tags[$tag]['count'];
+      }
     }
 
-    if (PhabricatorApplication::isClassInstalledForViewer(
-      'PhabricatorManiphestApplication', $user)) {
-      $form->appendChild(
-        $this->buildMailTagCheckboxes(
-          $this->getManiphestMailTags(),
-          $mailtags)
-          ->setLabel(pht('Maniphest')));
+    $common_tags = array();
+    foreach ($all_tags as $tag => $info) {
+      if ($info['count'] > 1) {
+        $common_tags[$tag] = $info['name'];
+      }
     }
 
-    if (PhabricatorApplication::isClassInstalledForViewer(
-      'PhabricatorPholioApplication', $user)) {
-      $form->appendChild(
-        $this->buildMailTagCheckboxes(
-          $this->getPholioMailTags(),
-          $mailtags)
-          ->setLabel(pht('Pholio')));
+    // Build up the groups of application-specific options.
+    $tag_groups = array();
+    foreach ($editors as $editor) {
+      $tag_groups[] = array(
+        $editor->getEditorObjectsDescription(),
+        array_diff_key($editor->getMailTagsMap(), $common_tags));
+    }
+
+    // Sort them, then put "Common" at the top.
+    $tag_groups = isort($tag_groups, 0);
+    if ($common_tags) {
+      array_unshift($tag_groups, array(pht('Common'), $common_tags));
+    }
+
+    // Finally, build the controls.
+    foreach ($tag_groups as $spec) {
+      list($label, $map) = $spec;
+      $control = $this->buildMailTagControl($label, $map, $mailtags);
+      $form->appendChild($control);
     }
 
     $form
@@ -173,91 +180,44 @@ final class PhabricatorSettingsPanelEmailPreferences
         ));
   }
 
-  private function getMailTags() {
-    return array(
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEW_REQUEST =>
-        pht('A revision is created.'),
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_UPDATED =>
-        pht('A revision is updated.'),
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_COMMENT =>
-        pht('Someone comments on a revision.'),
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEWERS =>
-        pht("A revision's reviewers change."),
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_CLOSED =>
-        pht('A revision is closed.'),
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_CC =>
-        pht("A revision's CCs change."),
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_OTHER =>
-        pht('Other revision activity not listed above occurs.'),
-      MetaMTANotificationType::TYPE_MANIPHEST_STATUS =>
-        pht("A task's status changes."),
-      MetaMTANotificationType::TYPE_MANIPHEST_OWNER =>
-        pht("A task's owner changes."),
-      MetaMTANotificationType::TYPE_MANIPHEST_COMMENT =>
-        pht('Someone comments on a task.'),
-      MetaMTANotificationType::TYPE_MANIPHEST_PRIORITY =>
-        pht("A task's priority changes."),
-      MetaMTANotificationType::TYPE_MANIPHEST_CC =>
-        pht("A task's CCs change."),
-      MetaMTANotificationType::TYPE_MANIPHEST_PROJECTS =>
-        pht("A task's associated projects change."),
-      MetaMTANotificationType::TYPE_MANIPHEST_OTHER =>
-        pht('Other task activity not listed above occurs.'),
-      MetaMTANotificationType::TYPE_PHOLIO_STATUS =>
-        pht("A mock's status changes."),
-      MetaMTANotificationType::TYPE_PHOLIO_COMMENT =>
-        pht('Someone comments on a mock.'),
-      MetaMTANotificationType::TYPE_PHOLIO_UPDATED =>
-        pht('Mock images or descriptions change.'),
-      MetaMTANotificationType::TYPE_PHOLIO_OTHER =>
-        pht('Other mock activity not listed above occurs.'),
-    );
+  private function getAllEditorsWithTags(PhabricatorUser $user) {
+    $editors = id(new PhutilSymbolLoader())
+      ->setAncestorClass('PhabricatorApplicationTransactionEditor')
+      ->loadObjects();
+
+    foreach ($editors as $key => $editor) {
+      // Remove editors which do not support mail tags.
+      if (!$editor->getMailTagsMap()) {
+        unset($editors[$key]);
+      }
+
+      // Remove editors for applications which are not installed.
+      $app = $editor->getEditorApplicationClass();
+      if ($app !== null) {
+        if (!PhabricatorApplication::isClassInstalledForViewer($app, $user)) {
+          unset($editors[$key]);
+        }
+      }
+    }
+
+    return $editors;
   }
 
-  private function getManiphestMailTags() {
-    return array_select_keys(
-      $this->getMailTags(),
-      array(
-        MetaMTANotificationType::TYPE_MANIPHEST_STATUS,
-        MetaMTANotificationType::TYPE_MANIPHEST_OWNER,
-        MetaMTANotificationType::TYPE_MANIPHEST_PRIORITY,
-        MetaMTANotificationType::TYPE_MANIPHEST_CC,
-        MetaMTANotificationType::TYPE_MANIPHEST_PROJECTS,
-        MetaMTANotificationType::TYPE_MANIPHEST_COMMENT,
-        MetaMTANotificationType::TYPE_MANIPHEST_OTHER,
-      ));
+  private function getAllTags(PhabricatorUser $user) {
+    $tags = array();
+    foreach ($this->getAllEditorsWithTags($user) as $editor) {
+      $tags += $editor->getMailTagsMap();
+    }
+    return $tags;
   }
 
-  private function getDifferentialMailTags() {
-    return array_select_keys(
-      $this->getMailTags(),
-      array(
-        MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEW_REQUEST,
-        MetaMTANotificationType::TYPE_DIFFERENTIAL_UPDATED,
-        MetaMTANotificationType::TYPE_DIFFERENTIAL_COMMENT,
-        MetaMTANotificationType::TYPE_DIFFERENTIAL_CLOSED,
-        MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEWERS,
-        MetaMTANotificationType::TYPE_DIFFERENTIAL_CC,
-        MetaMTANotificationType::TYPE_DIFFERENTIAL_OTHER,
-      ));
-  }
-
-  private function getPholioMailTags() {
-    return array_select_keys(
-      $this->getMailTags(),
-      array(
-        MetaMTANotificationType::TYPE_PHOLIO_STATUS,
-        MetaMTANotificationType::TYPE_PHOLIO_COMMENT,
-        MetaMTANotificationType::TYPE_PHOLIO_UPDATED,
-        MetaMTANotificationType::TYPE_PHOLIO_OTHER,
-      ));
-  }
-
-  private function buildMailTagCheckboxes(
+  private function buildMailTagControl(
+    $control_label,
     array $tags,
     array $prefs) {
 
     $control = new AphrontFormCheckboxControl();
+    $control->setLabel($control_label);
     foreach ($tags as $key => $label) {
       $control->addCheckbox(
         'mailtags['.$key.']',

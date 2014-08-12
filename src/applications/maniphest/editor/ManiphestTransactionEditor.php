@@ -5,6 +5,14 @@ final class ManiphestTransactionEditor
 
   private $heraldEmailPHIDs = array();
 
+  public function getEditorApplicationClass() {
+    return 'PhabricatorManiphestApplication';
+  }
+
+  public function getEditorObjectsDescription() {
+    return pht('Maniphest Tasks');
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
@@ -426,6 +434,25 @@ final class ManiphestTransactionEditor
     }
 
     return $phids;
+  }
+
+  public function getMailTagsMap() {
+    return array(
+      MetaMTANotificationType::TYPE_MANIPHEST_STATUS =>
+        pht("A task's status changes."),
+      MetaMTANotificationType::TYPE_MANIPHEST_OWNER =>
+        pht("A task's owner changes."),
+      MetaMTANotificationType::TYPE_MANIPHEST_PRIORITY =>
+        pht("A task's priority changes."),
+      MetaMTANotificationType::TYPE_MANIPHEST_CC =>
+        pht("A task's CCs change."),
+      MetaMTANotificationType::TYPE_MANIPHEST_PROJECTS =>
+        pht("A task's associated projects change."),
+      MetaMTANotificationType::TYPE_MANIPHEST_COMMENT =>
+        pht('Someone comments on a task.'),
+      MetaMTANotificationType::TYPE_MANIPHEST_OTHER =>
+        pht('Other task activity not listed above occurs.'),
+    );
   }
 
   protected function buildReplyHandler(PhabricatorLiskDAO $object) {

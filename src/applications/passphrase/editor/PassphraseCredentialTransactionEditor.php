@@ -3,6 +3,14 @@
 final class PassphraseCredentialTransactionEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  public function getEditorApplicationClass() {
+    return 'PhabricatorPassphraseApplication';
+  }
+
+  public function getEditorObjectsDescription() {
+    return pht('Passphrase Credentials');
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
