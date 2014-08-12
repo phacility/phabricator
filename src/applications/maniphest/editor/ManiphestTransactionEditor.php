@@ -373,11 +373,6 @@ final class ManiphestTransactionEditor
             ->setOldValue(array($object->getPHID() => $old))
             ->setNewValue(array($object->getPHID() => $new));
 
-          // TODO: We should avoid notifiying users about these indirect
-          // changes if they are getting a notification about the current
-          // change, so you don't get a pile of extra notifications if you are
-          // subscribed to this task.
-
           id(new ManiphestTransactionEditor())
             ->setActor($this->getActor())
             ->setActingAsPHID($this->getActingAsPHID())

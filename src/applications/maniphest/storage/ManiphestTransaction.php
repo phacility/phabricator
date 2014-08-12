@@ -632,14 +632,40 @@ final class ManiphestTransaction
         }
 
       case self::TYPE_UNBLOCK:
+        $blocker_phid = key($new);
+        $old_status = head($old);
+        $new_status = head($new);
 
-        // TODO: We should probably not show these in feed; they're highly
-        // redundant. For now, just use the normal titles. Right now, we can't
-        // publish something to noficiations without also publishing it to feed.
-        // Fix that, then stop these from rendering in feed only.
+        $old_closed = ManiphestTaskStatus::isClosedStatus($old_status);
+        $new_closed = ManiphestTaskStatus::isClosedStatus($new_status);
 
-        break;
+        $old_name = ManiphestTaskStatus::getTaskStatusName($old_status);
+        $new_name = ManiphestTaskStatus::getTaskStatusName($new_status);
 
+        if ($old_closed && !$new_closed) {
+          return pht(
+            '%s reopened %s, a task blocking %s, as "%s".',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($blocker_phid),
+            $this->renderHandleLink($object_phid),
+            $new_name);
+        } else if (!$old_closed && $new_closed) {
+          return pht(
+            '%s closed %s, a task blocking %s, as "%s".',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($blocker_phid),
+            $this->renderHandleLink($object_phid),
+            $new_name);
+        } else {
+          return pht(
+            '%s changed the status of %s, a task blocking %s, '.
+            'from "%s" to "%s".',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($blocker_phid),
+            $this->renderHandleLink($object_phid),
+            $old_name,
+            $new_name);
+        }
 
       case self::TYPE_OWNER:
         if ($author_phid == $new) {
