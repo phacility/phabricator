@@ -31,7 +31,7 @@ final class PhabricatorBotMacroHandler extends PhabricatorBotHandler {
     foreach ($macros as $macro_name => $macro) {
       $regexp[] = preg_quote($macro_name, '/');
     }
-    $regexp = '/('.implode('|', $regexp).')/';
+    $regexp = '/^('.implode('|', $regexp).')\z/';
 
     $this->macros = $macros;
     $this->regexp = $regexp;
@@ -49,7 +49,7 @@ final class PhabricatorBotMacroHandler extends PhabricatorBotHandler {
         $message_body = $message->getBody();
 
         $matches = null;
-        if (!preg_match($this->regexp, $message_body, $matches)) {
+        if (!preg_match($this->regexp, trim($message_body), $matches)) {
           return;
         }
 
