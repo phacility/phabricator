@@ -438,19 +438,23 @@ final class ManiphestTransactionEditor
 
   public function getMailTagsMap() {
     return array(
-      MetaMTANotificationType::TYPE_MANIPHEST_STATUS =>
+      ManiphestTransaction::MAILTAG_STATUS =>
         pht("A task's status changes."),
-      MetaMTANotificationType::TYPE_MANIPHEST_OWNER =>
+      ManiphestTransaction::MAILTAG_OWNER =>
         pht("A task's owner changes."),
-      MetaMTANotificationType::TYPE_MANIPHEST_PRIORITY =>
+      ManiphestTransaction::MAILTAG_PRIORITY =>
         pht("A task's priority changes."),
-      MetaMTANotificationType::TYPE_MANIPHEST_CC =>
-        pht("A task's CCs change."),
-      MetaMTANotificationType::TYPE_MANIPHEST_PROJECTS =>
+      ManiphestTransaction::MAILTAG_CC =>
+        pht("A task's subscribers change."),
+      ManiphestTransaction::MAILTAG_PROJECTS =>
         pht("A task's associated projects change."),
-      MetaMTANotificationType::TYPE_MANIPHEST_COMMENT =>
+      ManiphestTransaction::MAILTAG_UNBLOCK =>
+        pht('One of the tasks a task is blocked by changes status.'),
+      ManiphestTransaction::MAILTAG_COLUMN =>
+        pht('A task is moved between columns on a workboard.'),
+      ManiphestTransaction::MAILTAG_COMMENT =>
         pht('Someone comments on a task.'),
-      MetaMTANotificationType::TYPE_MANIPHEST_OTHER =>
+      ManiphestTransaction::MAILTAG_OTHER =>
         pht('Other task activity not listed above occurs.'),
     );
   }

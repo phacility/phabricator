@@ -20,6 +20,18 @@ final class ManiphestTransaction
   // so any transactions render correctly.
   const TYPE_ATTACH = 'attach';
 
+
+  const MAILTAG_STATUS = 'maniphest-status';
+  const MAILTAG_OWNER = 'maniphest-owner';
+  const MAILTAG_PRIORITY = 'maniphest-priority';
+  const MAILTAG_CC = 'maniphest-cc';
+  const MAILTAG_PROJECTS = 'maniphest-projects';
+  const MAILTAG_COMMENT = 'maniphest-comment';
+  const MAILTAG_COLUMN = 'maniphest-column';
+  const MAILTAG_UNBLOCK = 'maniphest-unblock';
+  const MAILTAG_OTHER = 'maniphest-other';
+
+
   public function getApplicationName() {
     return 'maniphest';
   }
@@ -828,32 +840,38 @@ final class ManiphestTransaction
     $tags = array();
     switch ($this->getTransactionType()) {
       case self::TYPE_STATUS:
-        $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_STATUS;
+        $tags[] = self::MAILTAG_STATUS;
         break;
       case self::TYPE_OWNER:
-        $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_OWNER;
+        $tags[] = self::MAILTAG_OWNER;
         break;
       case self::TYPE_CCS:
-        $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_CC;
+        $tags[] = self::MAILTAG_CC;
         break;
       case PhabricatorTransactions::TYPE_EDGE:
         switch ($this->getMetadataValue('edge:type')) {
           case PhabricatorProjectObjectHasProjectEdgeType::EDGECONST:
-            $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_PROJECTS;
+            $tags[] = self::MAILTAG_PROJECTS;
             break;
           default:
-            $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_OTHER;
+            $tags[] = self::MAILTAG_OTHER;
             break;
         }
         break;
       case self::TYPE_PRIORITY:
-        $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_PRIORITY;
+        $tags[] = self::MAILTAG_PRIORITY;
+        break;
+      case self::TYPE_UNBLOCK:
+        $tags[] = self::MAILTAG_UNBLOCK;
+        break;
+      case self::TYPE_PROJECT_COLUMN:
+        $tags[] = self::MAILTAG_COLUMN;
         break;
       case PhabricatorTransactions::TYPE_COMMENT:
-        $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_COMMENT;
+        $tags[] = self::MAILTAG_COMMENT;
         break;
       default:
-        $tags[] = MetaMTANotificationType::TYPE_MANIPHEST_OTHER;
+        $tags[] = self::MAILTAG_OTHER;
         break;
     }
     return $tags;
