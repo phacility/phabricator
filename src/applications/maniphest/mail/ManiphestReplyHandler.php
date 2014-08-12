@@ -57,17 +57,19 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
 
     $is_unsub = false;
     if ($is_new_task) {
-      // If this is a new task, create a "User created this task." transaction
-      // and then set the title and description.
-      $xaction = clone $template;
-      $xaction->setTransactionType(ManiphestTransaction::TYPE_STATUS);
-      $xaction->setNewValue(ManiphestTaskStatus::getDefaultStatus());
-      $xactions[] = $xaction;
+      $task = ManiphestTask::initializeNewTask($user);
 
-      $task->setAuthorPHID($user->getPHID());
-      $task->setTitle(nonempty($mail->getSubject(), 'Untitled Task'));
-      $task->setDescription($body);
-      $task->setPriority(ManiphestTaskPriority::getDefaultPriority());
+      $xactions[] = id(new ManiphestTransaction())
+        ->setTransactionType(ManiphestTransaction::TYPE_STATUS)
+        ->setNewValue(ManiphestTaskStatus::getDefaultStatus());
+
+      $xactions[] = id(new ManiphestTransaction())
+        ->setTransactionType(ManiphestTransaction::TYPE_TITLE)
+        ->setNewValue(nonempty($mail->getSubject(), pht('Untitled Task')));
+
+      $xactions[] = id(new ManiphestTransaction())
+        ->setTransactionType(ManiphestTransaction::TYPE_DESCRIPTION)
+        ->setNewValue($body);
 
     } else {
 
