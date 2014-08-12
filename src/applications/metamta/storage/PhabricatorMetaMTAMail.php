@@ -876,6 +876,8 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       }
     }
 
+    $value_email = PhabricatorUserPreferences::MAILTAG_PREFERENCE_EMAIL;
+
     // Exclude all recipients who have set preferences to not receive this type
     // of email (for example, a user who says they don't want emails about task
     // CC changes).
@@ -890,7 +892,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
         // of the mailtags.
         $send = false;
         foreach ($tags as $tag) {
-          if (idx($user_mailtags, $tag, true)) {
+          if (((int)idx($user_mailtags, $tag, $value_email)) == $value_email) {
             $send = true;
             break;
           }

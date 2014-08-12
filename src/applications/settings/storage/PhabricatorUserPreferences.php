@@ -31,6 +31,11 @@ final class PhabricatorUserPreferences extends PhabricatorUserDAO {
 
   const PREFERENCE_CONPH_NOTIFICATIONS  = 'conph-notifications';
 
+  // These are in an unusual order for historic reasons.
+  const MAILTAG_PREFERENCE_NOTIFY       = 0;
+  const MAILTAG_PREFERENCE_EMAIL        = 1;
+  const MAILTAG_PREFERENCE_IGNORE       = 2;
+
   protected $userPHID;
   protected $preferences = array();
 

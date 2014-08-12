@@ -2203,6 +2203,7 @@ abstract class PhabricatorApplicationTransactionEditor
       ->setPrimaryObjectPHID($object->getPHID())
       ->setSubscribedPHIDs($subscribed_phids)
       ->setMailRecipientPHIDs($mailed_phids)
+      ->setMailTags($this->getMailTags($object, $xactions))
       ->publish();
   }
 

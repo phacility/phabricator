@@ -23,6 +23,8 @@ final class PhabricatorSettingsPanelEmailPreferences
     $pref_no_mail = PhabricatorUserPreferences::PREFERENCE_NO_MAIL;
     $pref_no_self_mail = PhabricatorUserPreferences::PREFERENCE_NO_SELF_MAIL;
 
+    $value_email = PhabricatorUserPreferences::MAILTAG_PREFERENCE_EMAIL;
+
     $errors = array();
     if ($request->isFormPost()) {
       $preferences->setPreference(
@@ -38,7 +40,7 @@ final class PhabricatorSettingsPanelEmailPreferences
       $all_tags = $this->getAllTags($user);
 
       foreach ($all_tags as $key => $label) {
-        $mailtags[$key] = (bool)idx($new_tags, $key, false);
+        $mailtags[$key] = (int)idx($new_tags, $key, $value_email);
       }
       $preferences->setPreference('mailtags', $mailtags);
 
@@ -96,26 +98,24 @@ final class PhabricatorSettingsPanelEmailPreferences
 
     $form->appendRemarkupInstructions(
       pht(
-        'You can customize which kinds of events you receive email for '.
-        'here. If you turn off email for a certain type of event, you '.
-        'will receive an unread notification in Phabricator instead.'.
+        'You can adjust **Application Settings** here to customize when '.
+        'you are emailed and notified.'.
         "\n\n".
-        'Phabricator notifications (shown in the menu bar) which you receive '.
-        'an email for are marked read by default in Phabricator. If you turn '.
-        'off email for a certain type of event, the corresponding '.
-        'notification will not be marked read.'.
+        "| Setting | Effect\n".
+        "| ------- | -------\n".
+        "| Email | You will receive an email and a notification, but the ".
+        "notification will be marked \"read\".\n".
+        "| Notify | You will receive an unread notification only.\n".
+        "| Ignore | You will receive nothing.\n".
         "\n\n".
-        'Note that if an update makes several changes (like adding CCs to a '.
-        'task, closing it, and adding a comment) you will still receive '.
-        'an email as long as at least one of the changes is set to notify '.
-        'you.'.
+        'If an update makes several changes (like adding CCs to a task, '.
+        'closing it, and adding a comment) you will receive the strongest '.
+        'notification any of the changes is configured to deliver.'.
         "\n\n".
         'These preferences **only** apply to objects you are connected to '.
         '(for example, Revisions where you are a reviewer or tasks you are '.
         'CC\'d on). To receive email alerts when other objects are created, '.
-        'configure [[ /herald/ | Herald Rules ]].'.
-        "\n\n".
-        'Phabricator will send an email to your primary account when:'));
+        'configure [[ /herald/ | Herald Rules ]].'));
 
     $editors = $this->getAllEditorsWithTags($user);
 
@@ -216,15 +216,38 @@ final class PhabricatorSettingsPanelEmailPreferences
     array $tags,
     array $prefs) {
 
-    $control = new AphrontFormCheckboxControl();
-    $control->setLabel($control_label);
+    $value_email = PhabricatorUserPreferences::MAILTAG_PREFERENCE_EMAIL;
+    $value_notify = PhabricatorUserPreferences::MAILTAG_PREFERENCE_NOTIFY;
+    $value_ignore = PhabricatorUserPreferences::MAILTAG_PREFERENCE_IGNORE;
+
+    $content = array();
     foreach ($tags as $key => $label) {
-      $control->addCheckbox(
-        'mailtags['.$key.']',
-        1,
-        $label,
-        idx($prefs, $key, 1));
+      $select = AphrontFormSelectControl::renderSelectTag(
+        (int)idx($prefs, $key, $value_email),
+        array(
+          $value_email => pht("\xE2\x9A\xAB Email"),
+          $value_notify => pht("\xE2\x97\x90 Notify"),
+          $value_ignore => pht("\xE2\x9A\xAA Ignore"),
+        ),
+        array(
+          'name' => 'mailtags['.$key.']',
+        ));
+
+      $content[] = phutil_tag(
+        'div',
+        array(
+          'class' => 'psb',
+        ),
+        array(
+          $select,
+          ' ',
+          $label,
+        ));
     }
+
+    $control = new AphrontFormStaticControl();
+    $control->setLabel($control_label);
+    $control->setValue($content);
 
     return $control;
   }
