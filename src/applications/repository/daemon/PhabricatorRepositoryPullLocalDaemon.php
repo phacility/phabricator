@@ -71,7 +71,7 @@ final class PhabricatorRepositoryPullLocalDaemon
     $futures = array();
     $queue = array();
 
-    while (true) {
+    while (!$this->shouldExit()) {
       $pullable = $this->loadPullableRepositories($include, $exclude);
 
       // If any repositories have the NEEDS_UPDATE flag set, pull them
@@ -422,6 +422,12 @@ final class PhabricatorRepositoryPullLocalDaemon
           new PhutilNumber($sleep_duration)));
 
       $this->sleep(1);
+
+      if ($this->shouldExit()) {
+        $this->log(pht('Awakened from sleep by graceful shutdown!'));
+        return;
+      }
+
       if ($this->loadRepositoryUpdateMessages()) {
         $this->log(pht('Awakened from sleep by pending updates!'));
         break;

@@ -13,6 +13,14 @@ final class PhabricatorDaemonManagementStopWorkflow
       ->setArguments(
         array(
           array(
+            'name' => 'graceful',
+            'param' => 'seconds',
+            'help' => pht(
+              'Grace period for daemons to attempt a clean shutdown, in '.
+              'seconds. Defaults to __15__ seconds.'),
+            'default' => 15,
+          ),
+          array(
             'name' => 'pids',
             'wildcard' => true,
           ),
@@ -21,7 +29,8 @@ final class PhabricatorDaemonManagementStopWorkflow
 
   public function execute(PhutilArgumentParser $args) {
     $pids = $args->getArg('pids');
-    return $this->executeStopCommand($pids);
+    $graceful = $args->getArg('graceful');
+    return $this->executeStopCommand($pids, $graceful);
   }
 
 }

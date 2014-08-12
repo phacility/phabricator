@@ -67,6 +67,7 @@ final class PhabricatorDaemonLogQuery
     $status_running = PhabricatorDaemonLog::STATUS_RUNNING;
     $status_unknown = PhabricatorDaemonLog::STATUS_UNKNOWN;
     $status_wait = PhabricatorDaemonLog::STATUS_WAIT;
+    $status_exiting = PhabricatorDaemonLog::STATUS_EXITING;
     $status_exited = PhabricatorDaemonLog::STATUS_EXITED;
     $status_dead = PhabricatorDaemonLog::STATUS_DEAD;
 
@@ -77,7 +78,8 @@ final class PhabricatorDaemonLogQuery
       $seen = $daemon->getDateModified();
 
       $is_running = ($status == $status_running) ||
-                    ($status == $status_wait);
+                    ($status == $status_wait) ||
+                    ($status == $status_exiting);
 
       // If we haven't seen the daemon recently, downgrade its status to
       // unknown.
@@ -160,6 +162,7 @@ final class PhabricatorDaemonLogQuery
           PhabricatorDaemonLog::STATUS_UNKNOWN,
           PhabricatorDaemonLog::STATUS_RUNNING,
           PhabricatorDaemonLog::STATUS_WAIT,
+          PhabricatorDaemonLog::STATUS_EXITING,
         );
       default:
         throw new Exception("Unknown status '{$status}'!");

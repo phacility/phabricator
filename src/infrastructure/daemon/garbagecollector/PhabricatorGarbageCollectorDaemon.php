@@ -31,7 +31,7 @@ final class PhabricatorGarbageCollectorDaemon extends PhabricatorDaemon {
       // scans just to delete a handful of rows; wake up in a few hours.
       $this->log(pht('All caught up, waiting for more garbage.'));
       $this->sleep(4 * (60 * 60));
-    } while (true);
+    } while (!$this->shouldExit());
 
   }
 

@@ -103,7 +103,7 @@ final class PhabricatorBot extends PhabricatorDaemon {
       foreach ($this->handlers as $handler) {
         $handler->runBackgroundTasks();
       }
-    } while (true);
+    } while (!$this->shouldExit());
   }
 
   public function writeMessage(PhabricatorBotMessage $message) {

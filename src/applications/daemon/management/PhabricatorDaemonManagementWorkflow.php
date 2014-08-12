@@ -286,7 +286,7 @@ abstract class PhabricatorDaemonManagementWorkflow
     return 0;
   }
 
-  protected final function executeStopCommand(array $pids) {
+  protected final function executeStopCommand(array $pids, $grace_period) {
     $console = PhutilConsole::getConsole();
 
     $daemons = $this->loadRunningDaemons();
@@ -325,39 +325,20 @@ abstract class PhabricatorDaemonManagementWorkflow
     }
 
     $all_daemons = $running;
-    foreach ($running as $key => $daemon) {
-      $pid = $daemon->getPID();
-      $name = $daemon->getName();
 
-      $console->writeErr(pht("Stopping daemon '%s' (%s)...", $name, $pid)."\n");
-      if (!$daemon->isRunning()) {
-        $console->writeErr(pht('Daemon is not running.')."\n");
-        unset($running[$key]);
-        $daemon->updateStatus(PhabricatorDaemonLog::STATUS_EXITED);
-      } else {
-        posix_kill($pid, SIGINT);
-      }
+    // If we're doing a graceful shutdown, try SIGINT first.
+    if ($grace_period) {
+      $running = $this->sendSignal($running, SIGINT, $grace_period);
     }
 
-    $start = time();
-    do {
-      foreach ($running as $key => $daemon) {
-        $pid = $daemon->getPID();
-        if (!$daemon->isRunning()) {
-          $console->writeOut(pht('Daemon %s exited normally.', $pid)."\n");
-          unset($running[$key]);
-        }
-      }
-      if (empty($running)) {
-        break;
-      }
-      usleep(100000);
-    } while (time() < $start + 15);
+    // If we still have daemons, SIGTERM them.
+    if ($running) {
+      $running = $this->sendSignal($running, SIGTERM, 15);
+    }
 
-    foreach ($running as $key => $daemon) {
-      $pid = $daemon->getPID();
-      $console->writeErr(pht('Sending daemon %s a SIGKILL.', $pid)."\n");
-      posix_kill($pid, SIGKILL);
+    // If the overseer is still alive, SIGKILL it.
+    if ($running) {
+      $this->sendSignal($running, SIGKILL, 0);
     }
 
     foreach ($all_daemons as $daemon) {
@@ -367,6 +348,49 @@ abstract class PhabricatorDaemonManagementWorkflow
     }
 
     return 0;
+  }
+
+  private function sendSignal(array $daemons, $signo, $wait) {
+    $console = PhutilConsole::getConsole();
+
+    foreach ($daemons as $key => $daemon) {
+      $pid = $daemon->getPID();
+      $name = $daemon->getName();
+
+      switch ($signo) {
+        case SIGINT:
+          $message = pht("Interrupting daemon '%s' (%s)...", $name, $pid);
+          break;
+        case SIGTERM:
+          $message = pht("Terminating daemon '%s' (%s)...", $name, $pid);
+          break;
+        case SIGKILL:
+          $message = pht("Killing daemon '%s' (%s)...", $name, $pid);
+          break;
+      }
+
+      $console->writeOut("%s\n", $message);
+      posix_kill($pid, $signo);
+    }
+
+    if ($wait) {
+      $start = PhabricatorTime::getNow();
+      do {
+        foreach ($daemons as $key => $daemon) {
+          $pid = $daemon->getPID();
+          if (!$daemon->isRunning()) {
+            $console->writeOut(pht('Daemon %s exited.', $pid)."\n");
+            unset($daemons[$key]);
+          }
+        }
+        if (empty($daemons)) {
+          break;
+        }
+        usleep(100000);
+      } while (PhabricatorTime::getNow() < $start + $wait);
+    }
+
+    return $daemons;
   }
 
   private function freeActiveLeases() {

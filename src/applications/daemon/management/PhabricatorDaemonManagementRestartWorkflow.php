@@ -9,11 +9,22 @@ final class PhabricatorDaemonManagementRestartWorkflow
       ->setSynopsis(
         pht(
           'Stop, then start the standard daemon loadout.'))
-      ->setArguments(array());
+      ->setArguments(
+        array(
+          array(
+            'name' => 'graceful',
+            'param' => 'seconds',
+            'help' => pht(
+              'Grace period for daemons to attempt a clean shutdown, in '.
+              'seconds. Defaults to __15__ seconds.'),
+            'default' => 15,
+          ),
+        ));
   }
 
   public function execute(PhutilArgumentParser $args) {
-    $err = $this->executeStopCommand(array());
+    $graceful = $args->getArg('graceful');
+    $err = $this->executeStopCommand(array(), $graceful);
     if ($err) {
       return $err;
     }

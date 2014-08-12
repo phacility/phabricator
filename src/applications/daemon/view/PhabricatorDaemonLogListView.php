@@ -17,8 +17,7 @@ final class PhabricatorDaemonLogListView extends AphrontView {
       throw new Exception('Call setUser() before rendering!');
     }
 
-    $list = id(new PHUIObjectItemListView())
-      ->setFlush(true);
+    $list = new PHUIObjectItemListView();
     foreach ($this->daemonLogs as $log) {
       $id = $log->getID();
       $epoch = $log->getDateCreated();
@@ -42,6 +41,10 @@ final class PhabricatorDaemonLogListView extends AphrontView {
               'This daemon is lost or exited uncleanly, and is presumed '.
               'dead.'));
           $item->addIcon('fa-times grey', pht('Dead'));
+          break;
+        case PhabricatorDaemonLog::STATUS_EXITING:
+          $item->addAttribute(pht('This daemon is exiting.'));
+          $item->addIcon('fa-check', pht('Exiting'));
           break;
         case PhabricatorDaemonLog::STATUS_EXITED:
           $item->setDisabled(true);
