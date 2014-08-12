@@ -2096,10 +2096,21 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    return array(
+    $phids = array(
       $object->getPHID(),
       $this->getActingAsPHID(),
     );
+
+    if ($object instanceof PhabricatorProjectInterface) {
+      $project_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+        $object->getPHID(),
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
+      foreach ($project_phids as $project_phid) {
+        $phids[] = $project_phid;
+      }
+    }
+
+    return $phids;
   }
 
 
