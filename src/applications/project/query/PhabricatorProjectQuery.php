@@ -10,6 +10,8 @@ final class PhabricatorProjectQuery
   private $phrictionSlugs;
   private $names;
   private $datasourceQuery;
+  private $icons;
+  private $colors;
 
   private $status       = 'status-any';
   const STATUS_ANY      = 'status-any';
@@ -60,6 +62,16 @@ final class PhabricatorProjectQuery
 
   public function withDatasourceQuery($string) {
     $this->datasourceQuery = $string;
+    return $this;
+  }
+
+  public function withIcons(array $icons) {
+    $this->icons = $icons;
+    return $this;
+  }
+
+  public function withColors(array $colors) {
+    $this->colors = $colors;
     return $this;
   }
 
@@ -244,28 +256,28 @@ final class PhabricatorProjectQuery
         $filter);
     }
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn_r,
         'id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn_r,
         'phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->memberPHIDs) {
+    if ($this->memberPHIDs !== null) {
       $where[] = qsprintf(
         $conn_r,
         'e.dst IN (%Ls)',
         $this->memberPHIDs);
     }
 
-    if ($this->slugs) {
+    if ($this->slugs !== null) {
       $slugs = array();
       foreach ($this->slugs as $slug) {
         $slugs[] = rtrim(PhabricatorSlug::normalize($slug), '/');
@@ -277,18 +289,32 @@ final class PhabricatorProjectQuery
         $slugs);
     }
 
-    if ($this->phrictionSlugs) {
+    if ($this->phrictionSlugs !== null) {
       $where[] = qsprintf(
         $conn_r,
         'phrictionSlug IN (%Ls)',
         $this->phrictionSlugs);
     }
 
-    if ($this->names) {
+    if ($this->names !== null) {
       $where[] = qsprintf(
         $conn_r,
         'name IN (%Ls)',
         $this->names);
+    }
+
+    if ($this->icons !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'icon IN (%Ls)',
+        $this->icons);
+    }
+
+    if ($this->colors !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'color IN (%Ls)',
+        $this->colors);
     }
 
     $where[] = $this->buildPagingClause($conn_r);

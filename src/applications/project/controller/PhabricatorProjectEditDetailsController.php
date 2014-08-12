@@ -144,11 +144,7 @@ final class PhabricatorProjectEditDetailsController
           ->setError($e_name));
     $field_list->appendFieldsToForm($form);
 
-    $shades = PHUITagView::getShadeMap();
-    $shades = array_select_keys(
-      $shades,
-      array(PhabricatorProject::DEFAULT_COLOR)) + $shades;
-    unset($shades[PHUITagView::COLOR_DISABLED]);
+    $shades = PhabricatorProjectIcon::getColorMap();
 
     $icon_uri = $this->getApplicationURI('icon/'.$project->getID().'/');
     $icon_display = PhabricatorProjectIcon::renderIconForChooser($v_icon);
