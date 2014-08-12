@@ -117,7 +117,6 @@ final class PhabricatorMailManagementSendTestWorkflow
       ->addCCs($ccs)
       ->setSubject($subject)
       ->setBody($body)
-      ->setOverrideNoSelfMailPreference(true)
       ->setIsHTML($is_html)
       ->setIsBulk($is_bulk)
       ->setMailTags($tags);
