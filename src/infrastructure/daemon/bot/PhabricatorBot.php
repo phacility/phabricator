@@ -83,6 +83,8 @@ final class PhabricatorBot extends PhabricatorDaemon {
       ->connect();
 
     $this->runLoop();
+
+    $this->protocolAdapter->disconnect();
   }
 
   public function getConfig($key, $default = null) {
@@ -104,6 +106,7 @@ final class PhabricatorBot extends PhabricatorDaemon {
         $handler->runBackgroundTasks();
       }
     } while (!$this->shouldExit());
+
   }
 
   public function writeMessage(PhabricatorBotMessage $message) {

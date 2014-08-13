@@ -71,8 +71,13 @@ final class PhabricatorIRCProtocolAdapter
 
     $ok = @stream_select($read, $write, $except, $timeout_sec = 1);
     if ($ok === false) {
-      throw new Exception(
-        'socket_select() failed: '.socket_strerror(socket_last_error()));
+      // We may have been interrupted by a signal, like a SIGINT. Try
+      // selecting again. If the second select works, conclude that the failure
+      // was most likely because we were signaled.
+      $ok = @stream_select($read, $write, $except, $timeout_sec = 0);
+      if ($ok === false) {
+        throw new Exception('stream_select() failed!');
+      }
     }
 
     if ($read) {
@@ -102,6 +107,8 @@ final class PhabricatorIRCProtocolAdapter
         $len = fwrite($this->socket, $this->writeBuffer);
         if ($len === false) {
           throw new Exception('fwrite() failed!');
+        } else if ($len === 0) {
+          break;
         } else {
           $messages[] = id(new PhabricatorBotMessage())
             ->setCommand('LOG')
@@ -250,8 +257,22 @@ final class PhabricatorIRCProtocolAdapter
       $data);
   }
 
-  public function __destruct() {
-    $this->write('QUIT Goodbye.');
-    fclose($this->socket);
+  public function disconnect() {
+    // NOTE: FreeNode doesn't show quit messages if you've recently joined a
+    // channel, presumably to prevent some kind of abuse. If you're testing
+    // this, you may need to stay connected to the network for a few minutes
+    // before it works. If you disconnect too quickly, the server will replace
+    // your message with a "Client Quit" message.
+
+    $quit = $this->getConfig('quit', pht('Shutting down.'));
+    $this->write("QUIT :{$quit}");
+
+    // Flush the write buffer.
+    while (strlen($this->writeBuffer)) {
+      $this->getNextMessages(0);
+    }
+
+    @fclose($this->socket);
+    $this->socket = null;
   }
 }
