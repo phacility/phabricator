@@ -36,18 +36,44 @@ final class DrydockSSHCommandInterface extends DrydockCommandInterface {
 
     $argv = func_get_args();
 
-    // This assumes there's a UNIX shell living at the other
-    // end of the connection, which isn't the case for Windows machines.
-    if ($this->getConfig('platform') !== 'windows') {
-      $argv = $this->applyWorkingDirectoryToArgv($argv);
-    }
-
-    $full_command = call_user_func_array('csprintf', $argv);
-
     if ($this->getConfig('platform') === 'windows') {
-      // On Windows platforms we need to execute cmd.exe explicitly since
-      // most commands are not really executables.
-      $full_command = 'C:\\Windows\\system32\\cmd.exe /C '.$full_command;
+      // Handle Windows by executing the command under PowerShell.
+      $command = id(new PhutilCommandString($argv))
+        ->setEscapingMode(PhutilCommandString::MODE_POWERSHELL);
+
+      $change_directory = '';
+      if ($this->getWorkingDirectory() !== null) {
+        $change_directory .= 'cd '.$this->getWorkingDirectory();
+      }
+
+      $script = <<<EOF
+$change_directory
+$command
+if (\$LastExitCode -ne 0) {
+  exit \$LastExitCode
+}
+EOF;
+
+      // When Microsoft says "Unicode" they don't mean UTF-8.
+      $script = mb_convert_encoding($script, 'UTF-16LE');
+
+      $script = base64_encode($script);
+
+      $powershell =
+        'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe';
+      $powershell .=
+        ' -ExecutionPolicy Bypass'.
+        ' -NonInteractive'.
+        ' -InputFormat Text'.
+        ' -OutputFormat Text'.
+        ' -EncodedCommand '.$script;
+
+      $full_command = $powershell;
+    } else {
+      // Handle UNIX by executing under the native shell.
+      $argv = $this->applyWorkingDirectoryToArgv($argv);
+
+      $full_command = call_user_func_array('csprintf', $argv);
     }
 
     $command_timeout = '';

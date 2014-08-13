@@ -3,6 +3,8 @@
 final class HarbormasterCommandBuildStepImplementation
   extends HarbormasterBuildStepImplementation {
 
+  private $platform;
+
   public function getName() {
     return pht('Run Command');
   }
@@ -18,6 +20,18 @@ final class HarbormasterCommandBuildStepImplementation
       $this->formatSettingForDescription('hostartifact'));
   }
 
+  public function escapeCommand($pattern, array $args) {
+    array_unshift($args, $pattern);
+
+    $mode = PhutilCommandString::MODE_DEFAULT;
+    if ($this->platform == 'windows') {
+      $mode = PhutilCommandString::MODE_POWERSHELL;
+    }
+
+    return id(new PhutilCommandString($args))
+      ->setEscapingMode($mode);
+  }
+
   public function execute(
     HarbormasterBuild $build,
     HarbormasterBuildTarget $build_target) {
@@ -25,14 +39,18 @@ final class HarbormasterCommandBuildStepImplementation
     $settings = $this->getSettings();
     $variables = $build_target->getVariables();
 
-    $command = $this->mergeVariables(
-      'vcsprintf',
-      $settings['command'],
-      $variables);
-
     $artifact = $build->loadArtifact($settings['hostartifact']);
 
     $lease = $artifact->loadDrydockLease();
+
+    $this->platform = $lease->getAttribute('platform');
+
+    $command = $this->mergeVariables(
+      array($this, 'escapeCommand'),
+      $settings['command'],
+      $variables);
+
+    $this->platform = null;
 
     $interface = $lease->getInterface('command');
 
@@ -88,6 +106,9 @@ final class HarbormasterCommandBuildStepImplementation
         'name' => pht('Command'),
         'type' => 'text',
         'required' => true,
+        'caption' => pht(
+          'Under Windows, this is executed under PowerShell.'.
+          'Under UNIX, this is executed using the user\'s shell.'),
       ),
       'hostartifact' => array(
         'name' => pht('Host'),
