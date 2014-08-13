@@ -23,8 +23,7 @@ abstract class DifferentialChangesetTestRenderer
 
   protected function renderPropertyChangeHeader() {
     $changeset = $this->getChangeset();
-    $old = $changeset->getOldProperties();
-    $new = $changeset->getNewProperties();
+    list($old, $new) = $this->getChangesetProperties($changeset);
 
     if (!$old && !$new) {
       return null;
