@@ -1886,14 +1886,18 @@ abstract class PhabricatorApplicationTransactionEditor
       $template->addHeader('X-Herald-Rules', $herald_header);
     }
 
+    if ($object instanceof PhabricatorProjectInterface) {
+      $this->addMailProjectMetadata($object, $template);
+    }
+
     if ($this->getParentMessageID()) {
       $template->setParentMessageID($this->getParentMessageID());
     }
 
     $mails = $reply_handler->multiplexMail(
-        $template,
-        array_select_keys($handles, $email_to),
-        array_select_keys($handles, $email_cc));
+      $template,
+      array_select_keys($handles, $email_to),
+      array_select_keys($handles, $email_cc));
 
     foreach ($mails as $mail) {
       $mail->saveAndSend();
@@ -1904,6 +1908,44 @@ abstract class PhabricatorApplicationTransactionEditor
 
     return $template;
   }
+
+  private function addMailProjectMetadata(
+    PhabricatorLiskDAO $object,
+    PhabricatorMetaMTAMail $template) {
+
+    $project_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $object->getPHID(),
+      PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
+
+    if (!$project_phids) {
+      return;
+    }
+
+    // TODO: This viewer isn't quite right. It would be slightly better to use
+    // the mail recipient, but that's not very easy given the way rendering
+    // works today.
+
+    $handles = id(new PhabricatorHandleQuery())
+      ->setViewer($this->requireActor())
+      ->withPHIDs($project_phids)
+      ->execute();
+
+    $project_tags = array();
+    foreach ($handles as $handle) {
+      if (!$handle->isComplete()) {
+        continue;
+      }
+      $project_tags[] = '<'.$handle->getObjectName().'>';
+    }
+
+    if (!$project_tags) {
+      return;
+    }
+
+    $project_tags = implode(', ', $project_tags);
+    $template->addHeader('X-Phabricator-Projects', $project_tags);
+  }
+
 
   protected function getMailThreadID(PhabricatorLiskDAO $object) {
     return $object->getPHID();
