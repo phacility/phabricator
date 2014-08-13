@@ -86,6 +86,7 @@ EOF;
     return new ExecFuture(
       'ssh '.
       '-o StrictHostKeyChecking=no '.
+      '-o UserKnownHostsFile=/dev/null '.
       '-o BatchMode=yes '.
       '%C -p %s -i %P %P@%s -- %s',
       $command_timeout,
