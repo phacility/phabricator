@@ -155,12 +155,14 @@ final class PhabricatorSettingsPanelPassword
     $form
       ->appendChild(
         id(new AphrontFormPasswordControl())
+          ->setDisableAutocomplete(true)
           ->setLabel(pht('New Password'))
           ->setError($e_new)
           ->setName('new_pw'));
     $form
       ->appendChild(
         id(new AphrontFormPasswordControl())
+          ->setDisableAutocomplete(true)
           ->setLabel(pht('Confirm Password'))
           ->setCaption($len_caption)
           ->setError($e_conf)

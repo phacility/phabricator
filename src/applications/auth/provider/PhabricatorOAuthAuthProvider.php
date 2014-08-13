@@ -113,13 +113,14 @@ abstract class PhabricatorOAuthAuthProvider extends PhabricatorAuthProvider {
     $form
       ->appendChild(
         id(new AphrontFormTextControl())
-        ->setLabel($id_label)
+          ->setLabel($id_label)
           ->setName($key_id)
           ->setValue($v_id)
           ->setError($e_id))
       ->appendChild(
         id(new AphrontFormPasswordControl())
-        ->setLabel($secret_label)
+          ->setLabel($secret_label)
+          ->setDisableAutocomplete(true)
           ->setName($key_secret)
           ->setValue($v_secret)
           ->setError($e_secret))

@@ -125,6 +125,7 @@ final class DiffusionSetPasswordPanel extends PhabricatorSettingsPanel {
       $form
         ->appendChild(
           id(new AphrontFormPasswordControl())
+            ->setDisableAutocomplete(true)
             ->setLabel(pht('Current Password'))
             ->setDisabled(true)
             ->setValue('********************'));
@@ -139,11 +140,13 @@ final class DiffusionSetPasswordPanel extends PhabricatorSettingsPanel {
     $form
       ->appendChild(
         id(new AphrontFormPasswordControl())
+          ->setDisableAutocomplete(true)
           ->setName('password')
           ->setLabel(pht('New VCS Password'))
           ->setError($e_password))
       ->appendChild(
         id(new AphrontFormPasswordControl())
+          ->setDisableAutocomplete(true)
           ->setName('confirm')
           ->setLabel(pht('Confirm VCS Password'))
           ->setError($e_confirm))

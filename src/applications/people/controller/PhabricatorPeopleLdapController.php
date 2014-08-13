@@ -16,20 +16,21 @@ final class PhabricatorPeopleLdapController
       ->setUser($admin)
       ->appendChild(
         id(new AphrontFormTextControl())
-        ->setLabel(pht('LDAP username'))
-        ->setName('username'))
+          ->setLabel(pht('LDAP username'))
+          ->setName('username'))
       ->appendChild(
         id(new AphrontFormPasswordControl())
-        ->setLabel(pht('Password'))
-        ->setName('password'))
+          ->setDisableAutocomplete(true)
+          ->setLabel(pht('Password'))
+          ->setName('password'))
       ->appendChild(
         id(new AphrontFormTextControl())
-        ->setLabel(pht('LDAP query'))
-        ->setCaption(pht('A filter such as (objectClass=*)'))
-        ->setName('query'))
+          ->setLabel(pht('LDAP query'))
+          ->setCaption(pht('A filter such as (objectClass=*)'))
+          ->setName('query'))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-        ->setValue(pht('Search')));
+          ->setValue(pht('Search')));
 
     $panel = id(new AphrontPanelView())
       ->setHeader(pht('Import LDAP Users'))

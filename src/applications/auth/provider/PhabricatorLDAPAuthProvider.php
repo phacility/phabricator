@@ -388,6 +388,7 @@ final class PhabricatorLDAPAuthProvider extends PhabricatorAuthProvider {
             ->setName($key)
             ->setLabel($label)
             ->setCaption($caption)
+            ->setDisableAutocomplete(true)
             ->setValue($value);
           break;
         case 'textarea':
