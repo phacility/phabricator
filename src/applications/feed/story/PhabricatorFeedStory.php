@@ -16,8 +16,9 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
   private $hovercard = false;
   private $renderingTarget = PhabricatorApplicationTransaction::TARGET_HTML;
 
-  private $handles  = array();
-  private $objects  = array();
+  private $handles = array();
+  private $objects = array();
+  private $projectPHIDs = array();
 
 /* -(  Loading Stories  )---------------------------------------------------- */
 
@@ -93,6 +94,30 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
       $stories[$key]->setObjects($story_objects);
     }
 
+    // If stories are about PhabricatorProjectInterface objects, load the
+    // projects the objects are a part of so we can render project tags
+    // on the stories.
+
+    $project_phids = array();
+    foreach ($objects as $object) {
+      if ($object instanceof PhabricatorProjectInterface) {
+        $project_phids[$object->getPHID()] = array();
+      }
+    }
+
+    if ($project_phids) {
+      $edge_query = id(new PhabricatorEdgeQuery())
+        ->withSourcePHIDs(array_keys($project_phids))
+        ->withEdgeTypes(
+          array(
+            PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+          ));
+      $edge_query->execute();
+      foreach ($project_phids as $phid => $ignored) {
+        $project_phids[$phid] = $edge_query->getDestinationPHIDs(array($phid));
+      }
+    }
+
     $handle_phids = array();
     foreach ($stories as $key => $story) {
       foreach ($story->getRequiredHandlePHIDs() as $phid) {
@@ -101,6 +126,14 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
       if ($story->getAuthorPHID()) {
         $key_phids[$key][$story->getAuthorPHID()] = true;
       }
+
+      $object_phid = $story->getPrimaryObjectPHID();
+      $object_project_phids = idx($project_phids, $object_phid, array());
+      $story->setProjectPHIDs($object_project_phids);
+      foreach ($object_project_phids as $dst) {
+        $key_phids[$key][$dst] = true;
+      }
+
       $handle_phids += $key_phids[$key];
     }
 
@@ -319,10 +352,26 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
   }
 
   protected function newStoryView() {
-    return id(new PHUIFeedStoryView())
+    $view = id(new PHUIFeedStoryView())
       ->setChronologicalKey($this->getChronologicalKey())
       ->setEpoch($this->getEpoch())
       ->setViewed($this->getHasViewed());
+
+    $project_phids = $this->getProjectPHIDs();
+    if ($project_phids) {
+      $view->setTags($this->renderHandleList($project_phids));
+    }
+
+    return $view;
+  }
+
+  public function setProjectPHIDs(array $phids) {
+    $this->projectPHIDs = $phids;
+    return $this;
+  }
+
+  public function getProjectPHIDs() {
+    return $this->projectPHIDs;
   }
 
 
