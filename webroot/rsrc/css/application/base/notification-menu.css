@@ -25,7 +25,7 @@
 
 .device-desktop .phabricator-notification-menu,
 .device-tablet .phabricator-notification-menu {
-  position: fixed;
+  position: absolute;
   width: 360px;
   top: 42px;
 }
