@@ -94,7 +94,8 @@ final class PhabricatorSetupCheckMySQL extends PhabricatorSetupCheck {
           "%s\n".
           "(You can also use a different file if you prefer. The file ".
           "suggested above has about 50 of the most common English words.)\n\n".
-          "Finally, run this command:\n\n".
+          "Finally, run this command to rebuild indexes using the new ".
+          "rules:\n\n".
           "%s",
           phutil_tag('tt', array(), 'my.cnf'),
           phutil_tag('tt', array(), '[mysqld]'),
@@ -111,6 +112,53 @@ final class PhabricatorSetupCheckMySQL extends PhabricatorSetupCheck {
           ->setMessage($message);
       }
     }
+
+
+    $min_len = queryfx_one($conn_raw, 'SELECT @@ft_min_word_len');
+    $min_len = $min_len['@@ft_min_word_len'];
+    if ($min_len == 4) {
+      if (!PhabricatorDefaultSearchEngineSelector::shouldUseElasticSearch()) {
+        $namespace = PhabricatorEnv::getEnvConfig('storage.default-namespace');
+
+        $summary = pht(
+          'MySQL is configured to only index words with at least 4 '.
+          'characters.');
+
+        $message = pht(
+          "Your MySQL instance is configured to use the default minimum word ".
+          "length when building search indexes, which is 4. This means words ".
+          "which are only 3 characters long will not be indexed and can not ".
+          "be searched for.\n\n".
+          "For example, you will not be able to find search results for words ".
+          "like 'SMS', 'web', or 'DOS'.\n\n".
+          "You can change this setting to 3 to allow these words to be ".
+          "indexed. Alternatively, you can ignore this warning if you are ".
+          "not concerned about searching for 3-letter words. If you later ".
+          "plan to configure ElasticSearch, you can also ignore this warning: ".
+          "only MySQL fulltext search is affected.\n\n".
+          "To reduce the minimum word length to 3, add this to your %s file ".
+          "(in the %s section) and then restart %s:\n\n".
+          "%s\n".
+          "Finally, run this command to rebuild indexes using the new ".
+          "rules:\n\n".
+          "%s",
+          phutil_tag('tt', array(), 'my.cnf'),
+          phutil_tag('tt', array(), '[mysqld]'),
+          phutil_tag('tt', array(), 'mysqld'),
+          phutil_tag('pre', array(), 'ft_min_word_len=3'),
+          phutil_tag(
+            'pre',
+            array(),
+            "mysql> REPAIR TABLE {$namespace}_search.search_documentfield;"));
+
+        $this->newIssue('mysql.ft_min_word_len')
+          ->setName(pht('MySQL is Using Default Minimum Word Length'))
+          ->setSummary($summary)
+          ->setMessage($message);
+      }
+    }
+
+
   }
 
 }
