@@ -59,6 +59,58 @@ final class PhabricatorSetupCheckMySQL extends PhabricatorSetupCheck {
         ->setSummary($summary)
         ->setMessage($message);
     }
+
+    $stopword_file = queryfx_one($conn_raw, 'SELECT @@ft_stopword_file');
+    $stopword_file = $stopword_file['@@ft_stopword_file'];
+    if ($stopword_file == '(built-in)') {
+      if (!PhabricatorDefaultSearchEngineSelector::shouldUseElasticSearch()) {
+
+        $root = dirname(phutil_get_library_root('phabricator'));
+        $stopword_path = $root.'/resources/sql/stopwords.txt';
+        $stopword_path = Filesystem::resolvePath($stopword_path);
+
+        $namespace = PhabricatorEnv::getEnvConfig('storage.default-namespace');
+
+        $summary = pht(
+          'MySQL is using a default stopword file, which will prevent '.
+          'searching for many common words.');
+
+        $message = pht(
+          "Your MySQL instance is using the builtin stopword file for ".
+          "building search indexes. This can make Phabricator's search ".
+          "feature less useful.\n\n".
+          "Stopwords are common words which are not indexed and thus can not ".
+          "be searched for. The default stopword file has about 500 words, ".
+          "including various words which you are likely to wish to search ".
+          "for, such as 'various', 'likely', 'wish', and 'zero'.\n\n".
+          "To make search more useful, you can use an alternate stopword ".
+          "file with fewer words. Alternatively, if you aren't concerned ".
+          "about searching for common words, you can ignore this warning. ".
+          "If you later plan to configure ElasticSearch, you can also ignore ".
+          "this warning: this stopword file only affects MySQL fulltext ".
+          "indexes.\n\n".
+          "To choose a different stopword file, add this to your %s file ".
+          "(in the %s section) and then restart %s:\n\n".
+          "%s\n".
+          "(You can also use a different file if you prefer. The file ".
+          "suggested above has about 50 of the most common English words.)\n\n".
+          "Finally, run this command:\n\n".
+          "%s",
+          phutil_tag('tt', array(), 'my.cnf'),
+          phutil_tag('tt', array(), '[mysqld]'),
+          phutil_tag('tt', array(), 'mysqld'),
+          phutil_tag('pre', array(), 'ft_stopword_file='.$stopword_path),
+          phutil_tag(
+            'pre',
+            array(),
+            "mysql> REPAIR TABLE {$namespace}_search.search_documentfield;"));
+
+        $this->newIssue('mysql.ft_stopword_file')
+          ->setName(pht('MySQL is Using Default Stopword File'))
+          ->setSummary($summary)
+          ->setMessage($message);
+      }
+    }
   }
 
 }
