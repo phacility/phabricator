@@ -213,9 +213,17 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
         pht('%s px', new PhutilNumber($height)));
     }
 
-    $finfo->addProperty(
-      pht('Cacheable'),
-      $file->getCanCDN() ? pht('Yes') : pht('No'));
+    $is_image = $file->isViewableImage();
+    if ($is_image) {
+      $image_string = pht('Yes');
+      $cache_string = $file->getCanCDN() ? pht('Yes') : pht('No');
+    } else {
+      $image_string = pht('No');
+      $cache_string = pht('Not Applicable');
+    }
+
+    $finfo->addProperty(pht('Viewable Image'), $image_string);
+    $finfo->addProperty(pht('Cacheable'), $cache_string);
 
     $storage_properties = new PHUIPropertyListView();
     $box->addPropertyList($storage_properties, pht('Storage'));

@@ -28,7 +28,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
   const METADATA_IMAGE_WIDTH  = 'width';
   const METADATA_IMAGE_HEIGHT = 'height';
-  const METADATA_CAN_CDN = 'cancdn';
+  const METADATA_CAN_CDN = 'canCDN';
 
   protected $name;
   protected $mimeType;
@@ -848,6 +848,12 @@ final class PhabricatorFile extends PhabricatorFileDAO
     if (!$this->isViewableImage()) {
       return false;
     }
+
+    // TODO: Migrate away this old constant and remove this check.
+    if (idx($this->metadata, 'cancdn')) {
+      return true;
+    }
+
     return idx($this->metadata, self::METADATA_CAN_CDN);
   }
 
