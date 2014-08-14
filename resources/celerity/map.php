@@ -8,7 +8,7 @@
 return array(
   'names' => array(
     'core.pkg.css' => 'f8054294',
-    'core.pkg.js' => '14887b3d',
+    'core.pkg.js' => '7c8455ef',
     'darkconsole.pkg.js' => 'df001cab',
     'differential.pkg.css' => '4a93db37',
     'differential.pkg.js' => 'eb182ccd',
@@ -212,7 +212,7 @@ return array(
     'rsrc/externals/javelin/lib/behavior.js' => '61cbc29a',
     'rsrc/externals/javelin/lib/control/tokenizer/Tokenizer.js' => 'a5b67173',
     'rsrc/externals/javelin/lib/control/typeahead/Typeahead.js' => 'e614d22b',
-    'rsrc/externals/javelin/lib/control/typeahead/normalizer/TypeaheadNormalizer.js' => 'aa93c7b0',
+    'rsrc/externals/javelin/lib/control/typeahead/normalizer/TypeaheadNormalizer.js' => '1c22377d',
     'rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadCompositeSource.js' => '503e17fd',
     'rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadOnDemandSource.js' => '8b3fd187',
     'rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadPreloadedSource.js' => '54f314a0',
@@ -681,7 +681,7 @@ return array(
     'javelin-tokenizer' => 'a5b67173',
     'javelin-typeahead' => 'e614d22b',
     'javelin-typeahead-composite-source' => '503e17fd',
-    'javelin-typeahead-normalizer' => 'aa93c7b0',
+    'javelin-typeahead-normalizer' => '1c22377d',
     'javelin-typeahead-ondemand-source' => '8b3fd187',
     'javelin-typeahead-preloaded-source' => '54f314a0',
     'javelin-typeahead-source' => 'fcba4ecc',
@@ -966,6 +966,9 @@ return array(
       'javelin-install',
       'javelin-util',
       'phabricator-keyboard-shortcut-manager',
+    ),
+    '1c22377d' => array(
+      'javelin-install',
     ),
     '1def2711' => array(
       'javelin-install',
@@ -1514,9 +1517,6 @@ return array(
       'javelin-dom',
       'javelin-util',
       'phabricator-prefab',
-    ),
-    'aa93c7b0' => array(
-      'javelin-install',
     ),
     'ab836011' => array(
       'javelin-behavior',
