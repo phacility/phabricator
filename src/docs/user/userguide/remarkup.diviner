@@ -297,8 +297,8 @@ Markdown-style links are also supported:
 
 = Linking to Objects =
 
-You can link to Differential revisions, Diffusion commits and Maniphest tasks
-by mentioning the name of an object:
+You can link to Phabricator objects, such as Differential revisions, Diffusion
+commits and Maniphest tasks, by mentioning the name of an object:
 
   D123          # Link to Differential revision D123
   rX123         # Link to SVN commit 123 from the "X" repository
@@ -309,6 +309,9 @@ by mentioning the name of an object:
 You can also link directly to a comment in Maniphest and Differential:
 
   T123#4        # Link to comment #4 of T123
+
+See the Phabricator configuraton setting `remarkup.ignored-object-names` to
+modify this behavior.
 
 = Embedding Objects
 
@@ -411,8 +414,7 @@ If you set a configuration flag, you can embed media directly in text:
     and have them render inline.
 
 This option is disabled by default because it has security and/or
-silliness implications. Read the description in `default.conf.php` before
-enabling it.
+silliness implications. Carefully read the description before enabling it.
 
 = Image Macros =
 

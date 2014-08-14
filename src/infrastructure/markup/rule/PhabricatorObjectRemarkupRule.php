@@ -158,6 +158,12 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
       return $params['original'];
     }
 
+    $regex = trim(
+      PhabricatorEnv::getEnvConfig('remarkup.ignored-object-names'));
+    if ($regex && preg_match($regex, $params['original'])) {
+      return $params['original'];
+    }
+
     $engine = $this->getEngine();
     $token = $engine->storeText('x');
 

@@ -120,7 +120,17 @@ final class PhabricatorCoreConfigOptions
             'Maniphest. If you\'d prefer more traditional UI strings like '.
             '"Add Comment", you can set this flag to disable most of the '.
             'extra flavor.')),
-       $this->newOption('environment.append-paths', 'list<string>', $paths)
+      $this->newOption('remarkup.ignored-object-names', 'string', '/^(Q|V)\d$/')
+        ->setSummary(
+          pht('Text values that match this regex and are also object names '.
+          'will not be linked.'))
+        ->setDescription(
+          pht(
+            'By default, Phabricator links object names in Remarkup fields '.
+            'to the corresponding object. This regex can be used to modify '.
+            'this behavior; object names that match this regex will not be '.
+            'linked.')),
+      $this->newOption('environment.append-paths', 'list<string>', $paths)
         ->setSummary(
           pht('These paths get appended to your \$PATH envrionment variable.'))
         ->setDescription(
