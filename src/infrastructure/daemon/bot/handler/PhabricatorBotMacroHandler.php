@@ -68,6 +68,11 @@ final class PhabricatorBotMacroHandler extends PhabricatorBotHandler {
           $ascii = $this->macros[$macro]['ascii'];
         }
 
+        if ($ascii === false) {
+          // If we failed to rasterize the macro, bail out.
+          return;
+        }
+
         $target_name = $message->getTarget()->getName();
         foreach ($ascii as $line) {
           $this->replyTo($message, $line);
