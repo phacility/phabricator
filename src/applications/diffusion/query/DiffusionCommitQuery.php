@@ -60,6 +60,25 @@ final class DiffusionCommitQuery
   }
 
   /**
+   * Look up commits in a specific repository. Prefer
+   * @{method:withRepositoryIDs}; the underyling table is keyed by ID such
+   * that this method requires a separate initial query to map PHID to ID.
+   * Furthermore, this method requires calling @{method:setViewer} in
+   * advance due to the separate query.
+   */
+  public function withRepositoryPHIDs(array $phids) {
+    $repositories = id (new PhabricatorRepositoryQuery())
+      ->setViewer($this->getViewer())
+      ->withPHIDs($phids)
+      ->execute();
+
+    if (!$repositories) {
+      throw new PhabricatorEmptyQueryException();
+    }
+    $this->withRepositoryIDs(mpull($repositories, 'getID'));
+  }
+
+  /**
    * If a default repository is provided, ambiguous commit identifiers will
    * be assumed to belong to the default repository.
    *

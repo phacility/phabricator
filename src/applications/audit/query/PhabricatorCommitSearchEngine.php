@@ -59,6 +59,14 @@ final class PhabricatorCommitSearchEngine
       $query->withAuditAwaitingUser($this->requireViewer());
     }
 
+    $repository_phids = $saved->getParameter('repositoryPHIDs', array());
+    if ($repository_phids) {
+      // $repository_phids need to be mapped to $repository_ids via a subquery
+      // so make sure $viewer is set...!
+      $query->setViewer($this->requireViewer());
+      $query->withRepositoryPHIDs($repository_phids);
+    }
+
     return $query;
   }
 
@@ -71,11 +79,13 @@ final class PhabricatorCommitSearchEngine
       'commitAuthorPHIDs',
       array());
     $audit_status = $saved->getParameter('auditStatus', null);
+    $repository_phids = $saved->getParameter('repositoryPHIDs', array());
 
     $phids = array_mergev(
       array(
         $auditor_phids,
-        $commit_author_phids));
+        $commit_author_phids,
+        $repository_phids));
 
     $handles = id(new PhabricatorHandleQuery())
       ->setViewer($this->requireViewer())
@@ -100,7 +110,14 @@ final class PhabricatorCommitSearchEngine
          ->setName('auditStatus')
          ->setLabel(pht('Audit Status'))
          ->setOptions($this->getAuditStatusOptions())
-         ->setValue($audit_status));
+         ->setValue($audit_status))
+       ->appendChild(
+         id(new AphrontFormTokenizerControl())
+         ->setLabel(pht('Repositories'))
+         ->setName('repositoryPHIDs')
+         ->setDatasource(new DiffusionRepositoryDatasource())
+         ->setValue(array_select_keys($handles, $repository_phids)));
+
   }
 
   protected function getURI($path) {
