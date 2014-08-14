@@ -61,9 +61,6 @@ final class PhabricatorCommitSearchEngine
 
     $repository_phids = $saved->getParameter('repositoryPHIDs', array());
     if ($repository_phids) {
-      // $repository_phids need to be mapped to $repository_ids via a subquery
-      // so make sure $viewer is set...!
-      $query->setViewer($this->requireViewer());
       $query->withRepositoryPHIDs($repository_phids);
     }
 

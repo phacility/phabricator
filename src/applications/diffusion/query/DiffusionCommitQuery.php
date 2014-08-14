@@ -9,6 +9,7 @@ final class DiffusionCommitQuery
   private $defaultRepository;
   private $identifiers;
   private $repositoryIDs;
+  private $repositoryPHIDs;
   private $identifierMap;
 
   private $needAuditRequests;
@@ -63,19 +64,9 @@ final class DiffusionCommitQuery
    * Look up commits in a specific repository. Prefer
    * @{method:withRepositoryIDs}; the underyling table is keyed by ID such
    * that this method requires a separate initial query to map PHID to ID.
-   * Furthermore, this method requires calling @{method:setViewer} in
-   * advance due to the separate query.
    */
   public function withRepositoryPHIDs(array $phids) {
-    $repositories = id (new PhabricatorRepositoryQuery())
-      ->setViewer($this->getViewer())
-      ->withPHIDs($phids)
-      ->execute();
-
-    if (!$repositories) {
-      throw new PhabricatorEmptyQueryException();
-    }
-    $this->withRepositoryIDs(mpull($repositories, 'getID'));
+    $this->repositoryPHIDs = $phids;
   }
 
   /**
@@ -281,6 +272,22 @@ final class DiffusionCommitQuery
 
   private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
+
+    if ($this->repositoryPHIDs !== null) {
+      $map_repositories = id (new PhabricatorRepositoryQuery())
+        ->setViewer($this->getViewer())
+        ->withPHIDs($this->repositoryPHIDs)
+        ->execute();
+
+      if (!$map_repositories) {
+        throw new PhabricatorEmptyQueryException();
+      }
+      $repository_ids = mpull($map_repositories, 'getID');
+      if ($this->repositoryIDs !== null) {
+        $repository_ids = array_merge($repository_ids, $this->repositoryIDs);
+      }
+      $this->withRepositoryIDs($repository_ids);
+    }
 
     if ($this->ids !== null) {
       $where[] = qsprintf(
