@@ -38,10 +38,36 @@ final class PhabricatorApplicationTransactionCommentRawController
       ->withPHIDs(array($obj_phid))
       ->executeOne();
 
+    $title = pht('Raw Comment');
+    $body = $xaction->getComment()->getContent();
+    $addendum = null;
+    if ($request->getExists('email')) {
+      $content_source = $xaction->getContentSource();
+      $source_email = PhabricatorContentSource::SOURCE_EMAIL;
+      if ($content_source->getSource() == $source_email) {
+        $source_id = $content_source->getParam('id');
+        if ($source_id) {
+          $message = id(new PhabricatorMetaMTAReceivedMail())->loadOneWhere(
+            'id = %d',
+            $source_id);
+          if ($message) {
+            $title = pht('Email Body Text');
+            $body = $message->getRawTextBody();
+            $details_text = pht(
+              'For full details, run `/bin/mail show-outbound --id %d`',
+              $source_id);
+            $addendum = PhabricatorMarkupEngine::renderOneObject(
+              id(new PhabricatorMarkupOneOff())->setContent($details_text),
+              'default',
+              $user);
+          }
+        }
+      }
+    }
     $dialog = id(new AphrontDialogView())
       ->setUser($user)
       ->addCancelButton($obj_handle->getURI())
-      ->setTitle(pht('Raw Comment'));
+      ->setTitle($title);
 
     $dialog
       ->addHiddenInput('anchor', $request->getStr('anchor'))
@@ -51,7 +77,10 @@ final class PhabricatorApplicationTransactionCommentRawController
         ->appendChild(
           id(new AphrontFormTextAreaControl())
           ->setReadOnly(true)
-          ->setValue($xaction->getComment()->getContent())));
+          ->setValue($body)));
+    if ($addendum) {
+      $dialog->appendParagraph($addendum);
+    }
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }
