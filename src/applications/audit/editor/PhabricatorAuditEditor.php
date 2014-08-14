@@ -428,6 +428,49 @@ final class PhabricatorAuditEditor
         $this->renderInlineCommentsForMail($object, $inlines));
     }
 
+    // Reload the commit to pull commit data.
+    $commit = id(new DiffusionCommitQuery())
+      ->setViewer($this->requireActor())
+      ->withIDs(array($object->getID()))
+      ->needCommitData(true)
+      ->executeOne();
+    $data = $commit->getCommitData();
+
+    $user_phids = array();
+
+    $author_phid = $commit->getAuthorPHID();
+    if ($author_phid) {
+      $user_phids[$commit->getAuthorPHID()][] = pht('Author');
+    }
+
+    $committer_phid = $data->getCommitDetail('committerPHID');
+    if ($committer_phid && ($committer_phid != $author_phid)) {
+      $user_phids[$committer_phid][] = pht('Committer');
+    }
+
+    // TODO: It would be nice to show pusher here too, but that information
+    // is a little tricky to get at right now.
+
+    if ($user_phids) {
+      $handle_phids = array_keys($user_phids);
+      $handles = id(new PhabricatorHandleQuery())
+        ->setViewer($this->requireActor())
+        ->withPHIDs($handle_phids)
+        ->execute();
+
+      $user_info = array();
+      foreach ($user_phids as $phid => $roles) {
+        $user_info[] = pht(
+          '%s (%s)',
+          $handles[$phid]->getName(),
+          implode(', ', $roles));
+      }
+
+      $body->addTextSection(
+        pht('USERS'),
+        implode("\n", $user_info));
+    }
+
     $monogram = $object->getRepository()->formatCommitName(
       $object->getCommitIdentifier());
 
