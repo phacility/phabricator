@@ -331,7 +331,7 @@ EODOC
             'in bytes.'))
         ->setSummary(pht('Global cap for size of generated emails (bytes).'))
         ->addExample(524288, pht('Truncate at 512KB'))
-        ->addExample(1048576, pht('Truncate at 1MB'))
+        ->addExample(1048576, pht('Truncate at 1MB')),
     );
   }
 

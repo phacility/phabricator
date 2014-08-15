@@ -1179,20 +1179,21 @@ final class DifferentialTransactionEditor
       $config_attach = PhabricatorEnv::getEnvConfig($config_key_attach);
 
       if ($config_inline || $config_attach) {
-        $patch = $this->renderPatchForMail($diff);
-        $lines = count(phutil_split_lines($patch));
+        $patch_section = $this->renderPatchForMail($diff);
+        $lines = count(phutil_split_lines($patch_section->getPlaintext()));
 
         if ($config_inline && ($lines <= $config_inline)) {
           $body->addTextSection(
             pht('CHANGE DETAILS'),
-            $patch);
+            $patch_section);
         }
 
         if ($config_attach) {
           $name = pht('D%s.%s.patch', $object->getID(), $diff->getID());
           $mime_type = 'text/x-patch; charset=utf-8';
           $body->addAttachment(
-            new PhabricatorMetaMTAAttachment($patch, $name, $mime_type));
+            new PhabricatorMetaMTAAttachment(
+              $patch_section->getPlaintext(), $name, $mime_type));
         }
       }
     }
@@ -1330,7 +1331,7 @@ final class DifferentialTransactionEditor
       $hunk_parser = new DifferentialHunkParser();
     }
 
-    $result = array();
+    $section = new PhabricatorMetaMTAMailSection();
     foreach ($inline_groups as $changeset_id => $group) {
       $changeset = idx($changesets, $changeset_id);
       if (!$changeset) {
@@ -1351,25 +1352,27 @@ final class DifferentialTransactionEditor
         $inline_content = $comment->getContent();
 
         if (!$show_context) {
-          $result[] = "{$file}:{$range} {$inline_content}";
+          $section->addFragment("{$file}:{$range} {$inline_content}");
         } else {
-          $result[] = '================';
-          $result[] = 'Comment at: '.$file.':'.$range;
-          $result[] = $hunk_parser->makeContextDiff(
+          $patch = $hunk_parser->makeContextDiff(
             $changeset->getHunks(),
             $comment->getIsNewFile(),
             $comment->getLineNumber(),
             $comment->getLineLength(),
             1);
-          $result[] = '----------------';
 
-          $result[] = $inline_content;
-          $result[] = null;
+          $section->addFragment('================')
+                  ->addFragment('Comment at: '.$file.':'.$range)
+                  ->addPlaintextFragment($patch)
+                  ->addHTMLFragment($this->renderPatchHTMLForMail($patch))
+                  ->addFragment('----------------')
+                  ->addFragment($inline_content)
+                  ->addFragment(null);
         }
       }
     }
 
-    return implode("\n", $result);
+    return $section;
   }
 
   private function loadDiff($phid, $need_changesets = false) {
@@ -1762,14 +1765,25 @@ final class DifferentialTransactionEditor
     return implode("\n", $filenames);
   }
 
+  private function renderPatchHTMLForMail($patch) {
+    return phutil_tag('pre',
+      array('style' => 'font-family: monospace;'), $patch);
+  }
+
   private function renderPatchForMail(DifferentialDiff $diff) {
     $format = PhabricatorEnv::getEnvConfig('metamta.differential.patch-format');
 
-    return id(new DifferentialRawDiffRenderer())
+    $patch = id(new DifferentialRawDiffRenderer())
       ->setViewer($this->getActor())
       ->setFormat($format)
       ->setChangesets($diff->getChangesets())
       ->buildPatch();
+
+    $section = new PhabricatorMetaMTAMailSection();
+    $section->addHTMLFragment($this->renderPatchHTMLForMail($patch));
+    $section->addPlaintextFragment($patch);
+
+    return $section;
   }
 
 }

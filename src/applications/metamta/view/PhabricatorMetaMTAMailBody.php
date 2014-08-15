@@ -9,6 +9,7 @@
 final class PhabricatorMetaMTAMailBody {
 
   private $sections = array();
+  private $htmlSections = array();
   private $attachments = array();
 
 
@@ -24,8 +25,24 @@ final class PhabricatorMetaMTAMailBody {
    */
   public function addRawSection($text) {
     if (strlen($text)) {
-      $this->sections[] = rtrim($text);
+      $text = rtrim($text);
+      $this->sections[] = $text;
+      $this->htmlSections[] = phutil_escape_html_newlines(
+        phutil_tag('div', array(), $text));
     }
+    return $this;
+  }
+
+  public function addRawPlaintextSection($text) {
+    if (strlen($text)) {
+      $text = rtrim($text);
+      $this->sections[] = $text;
+    }
+    return $this;
+  }
+
+  public function addRawHTMLSection($html) {
+    $this->htmlSections[] = phutil_safe_html($html);
     return $this;
   }
 
@@ -41,11 +58,32 @@ final class PhabricatorMetaMTAMailBody {
    * @return this
    * @task compose
    */
-  public function addTextSection($header, $text) {
+  public function addTextSection($header, $section) {
+    if ($section instanceof PhabricatorMetaMTAMailSection) {
+      $plaintext = $section->getPlaintext();
+      $html = $section->getHTML();
+    } else {
+      $plaintext = $section;
+      $html = phutil_escape_html_newlines(phutil_tag('div', array(), $section));
+    }
+
+    $this->addPlaintextSection($header, $plaintext);
+    $this->addHTMLSection($header, $html);
+    return $this;
+  }
+
+  public function addPlaintextSection($header, $text) {
     $this->sections[] = $header."\n".$this->indent($text);
     return $this;
   }
 
+  public function addHTMLSection($header, $html_fragment) {
+    $this->htmlSections[] = array(
+      phutil_tag('div', array('style' => 'font-weight:800;'), $header),
+      $html_fragment);
+
+    return $this;
+  }
 
   /**
    * Add a Herald section with a rule management URI and a transcript URI.
@@ -114,6 +152,11 @@ final class PhabricatorMetaMTAMailBody {
     return implode("\n\n", $this->sections)."\n";
   }
 
+  public function renderHTML() {
+    $br = phutil_tag('br');
+    $body = phutil_implode_html(array($br, $br), $this->htmlSections);
+    return (string)hsprintf('%s', array($body, $br));
+  }
 
   /**
    * Retrieve attachments.

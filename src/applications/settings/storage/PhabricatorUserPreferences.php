@@ -15,6 +15,7 @@ final class PhabricatorUserPreferences extends PhabricatorUserDAO {
   const PREFERENCE_NO_MAIL              = 'no-mail';
   const PREFERENCE_MAILTAGS             = 'mailtags';
   const PREFERENCE_VARY_SUBJECT         = 'vary-subject';
+  const PREFERENCE_HTML_EMAILS          = 'html-emails';
 
   const PREFERENCE_SEARCHBAR_JUMP       = 'searchbar-jump';
   const PREFERENCE_SEARCH_SHORTCUT      = 'search-shortcut';

@@ -1865,7 +1865,8 @@ abstract class PhabricatorApplicationTransactionEditor
       ->setExcludeMailRecipientPHIDs($this->getExcludeMailRecipientPHIDs())
       ->setMailTags($mail_tags)
       ->setIsBulk(true)
-      ->setBody($body->render());
+      ->setBody($body->render())
+      ->setHTMLBody($body->renderHTML());
 
     foreach ($body->getAttachments() as $attachment) {
       $template->addAttachment($attachment);

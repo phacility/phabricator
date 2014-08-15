@@ -1728,6 +1728,7 @@ phutil_register_library_map(array(
     'PhabricatorMetaMTAMail' => 'applications/metamta/storage/PhabricatorMetaMTAMail.php',
     'PhabricatorMetaMTAMailBody' => 'applications/metamta/view/PhabricatorMetaMTAMailBody.php',
     'PhabricatorMetaMTAMailBodyTestCase' => 'applications/metamta/view/__tests__/PhabricatorMetaMTAMailBodyTestCase.php',
+    'PhabricatorMetaMTAMailSection' => 'applications/metamta/view/PhabricatorMetaMTAMailSection.php',
     'PhabricatorMetaMTAMailTestCase' => 'applications/metamta/storage/__tests__/PhabricatorMetaMTAMailTestCase.php',
     'PhabricatorMetaMTAMailableDatasource' => 'applications/metamta/typeahead/PhabricatorMetaMTAMailableDatasource.php',
     'PhabricatorMetaMTAMailgunReceiveController' => 'applications/metamta/controller/PhabricatorMetaMTAMailgunReceiveController.php',

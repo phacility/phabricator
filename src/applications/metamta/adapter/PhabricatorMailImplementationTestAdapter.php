@@ -64,13 +64,13 @@ final class PhabricatorMailImplementationTestAdapter
     return $this;
   }
 
-  public function setSubject($subject) {
-    $this->guts['subject'] = $subject;
+  public function setHTMLBody($html_body) {
+    $this->guts['html-body'] = $html_body;
     return $this;
   }
 
-  public function setIsHTML($is_html) {
-    $this->guts['is-html'] = $is_html;
+  public function setSubject($subject) {
+    $this->guts['subject'] = $subject;
     return $this;
   }
 

@@ -212,13 +212,13 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     return $this;
   }
 
-  public function getBody() {
-    return $this->getParam('body');
+  public function setHTMLBody($html) {
+    $this->setParam('html-body', $html);
+    return $this;
   }
 
-  public function setIsHTML($html) {
-    $this->setParam('is-html', $html);
-    return $this;
+  public function getBody() {
+    return $this->getParam('body');
   }
 
   public function setIsErrorEmail($is_error) {
@@ -377,6 +377,32 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       $add_cc = array();
       $add_to = array();
 
+      // Only try to use preferences if everything is multiplexed, so we
+      // get consistent behavior.
+      $use_prefs = self::shouldMultiplexAllMail();
+
+      $prefs = null;
+      if ($use_prefs) {
+
+        // If multiplexing is enabled, some recipients will be in "Cc"
+        // rather than "To". We'll move them to "To" later (or supply a
+        // dummy "To") but need to look for the recipient in either the
+        // "To" or "Cc" fields here.
+        $target_phid = head(idx($params, 'to', array()));
+        if (!$target_phid) {
+          $target_phid = head(idx($params, 'cc', array()));
+        }
+
+        if ($target_phid) {
+          $user = id(new PhabricatorUser())->loadOneWhere(
+            'phid = %s',
+            $target_phid);
+          if ($user) {
+            $prefs = $user->loadPreferences();
+          }
+        }
+      }
+
       foreach ($params as $key => $value) {
         switch ($key) {
           case 'from':
@@ -444,42 +470,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
                 $attachment->getMimeType());
             }
             break;
-          case 'body':
-            $max = PhabricatorEnv::getEnvConfig('metamta.email-body-limit');
-            if (strlen($value) > $max) {
-              $value = phutil_utf8_shorten($value, $max);
-              $value .= "\n";
-              $value .= pht('(This email was truncated at %d bytes.)', $max);
-            }
-            $mailer->setBody($value);
-            break;
           case 'subject':
-            // Only try to use preferences if everything is multiplexed, so we
-            // get consistent behavior.
-            $use_prefs = self::shouldMultiplexAllMail();
-
-            $prefs = null;
-            if ($use_prefs) {
-
-              // If multiplexing is enabled, some recipients will be in "Cc"
-              // rather than "To". We'll move them to "To" later (or supply a
-              // dummy "To") but need to look for the recipient in either the
-              // "To" or "Cc" fields here.
-              $target_phid = head(idx($params, 'to', array()));
-              if (!$target_phid) {
-                $target_phid = head(idx($params, 'cc', array()));
-              }
-
-              if ($target_phid) {
-                $user = id(new PhabricatorUser())->loadOneWhere(
-                  'phid = %s',
-                  $target_phid);
-                if ($user) {
-                  $prefs = $user->loadPreferences();
-                }
-              }
-            }
-
             $subject = array();
 
             if ($is_threaded) {
@@ -517,11 +508,6 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
             $subject[] = $value;
 
             $mailer->setSubject(implode(' ', array_filter($subject)));
-            break;
-          case 'is-html':
-            if ($value) {
-              $mailer->setIsHTML(true);
-            }
             break;
           case 'is-bulk':
             if ($value) {
@@ -568,6 +554,26 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
           default:
             // Just discard.
         }
+      }
+
+      $body = idx($params, 'body', '');
+      $max = PhabricatorEnv::getEnvConfig('metamta.email-body-limit');
+      if (strlen($body) > $max) {
+        $body = phutil_utf8_shorten($body, $max);
+        $body .= "\n";
+        $body .= pht('(This email was truncated at %d bytes.)', $max);
+      }
+      $mailer->setBody($body);
+
+      $html_emails = false;
+      if ($use_prefs && $prefs) {
+        $html_emails = $prefs->getPreference(
+          PhabricatorUserPreferences::PREFERENCE_HTML_EMAILS,
+          $html_emails);
+      }
+
+      if ($html_emails && isset($params['html-body'])) {
+        $mailer->setHTMLBody($params['html-body']);
       }
 
       if (!$add_to && !$add_cc) {

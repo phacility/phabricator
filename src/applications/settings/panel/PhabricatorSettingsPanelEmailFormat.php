@@ -22,6 +22,7 @@ final class PhabricatorSettingsPanelEmailFormat
 
     $pref_re_prefix = PhabricatorUserPreferences::PREFERENCE_RE_PREFIX;
     $pref_vary = PhabricatorUserPreferences::PREFERENCE_VARY_SUBJECT;
+    $prefs_html_email = PhabricatorUserPreferences::PREFERENCE_HTML_EMAILS;
 
     $errors = array();
     if ($request->isFormPost()) {
@@ -42,6 +43,14 @@ final class PhabricatorSettingsPanelEmailFormat
             $pref_vary,
             $request->getBool($pref_vary));
         }
+
+        if ($request->getStr($prefs_html_email) == 'default') {
+          $preferences->unsetPreference($prefs_html_email);
+        } else {
+          $preferences->setPreference(
+            $prefs_html_email,
+            $request->getBool($prefs_html_email));
+        }
       }
 
       $preferences->save();
@@ -57,6 +66,8 @@ final class PhabricatorSettingsPanelEmailFormat
     $vary_default = PhabricatorEnv::getEnvConfig('metamta.vary-subjects')
       ? pht('Vary')
       : pht('Do Not Vary');
+
+    $html_emails_default = 'Plain Text';
 
     $re_prefix_value = $preferences->getPreference($pref_re_prefix);
     if ($re_prefix_value === null) {
@@ -76,11 +87,30 @@ final class PhabricatorSettingsPanelEmailFormat
         : 'false';
     }
 
+    $html_emails_value = $preferences->getPreference($prefs_html_email);
+    if ($html_emails_value === null) {
+      $html_emails_value = 'default';
+    } else {
+      $html_emails_value = $html_emails_value
+        ? 'true'
+        : 'false';
+    }
+
     $form = new AphrontFormView();
     $form
       ->setUser($user);
 
     if (PhabricatorMetaMTAMail::shouldMultiplexAllMail()) {
+      $html_email_control = id(new AphrontFormSelectControl())
+        ->setName($prefs_html_email)
+        ->setOptions(
+          array(
+            'default'   => pht('Default (%s)', $html_emails_default),
+            'true'      => pht('Send HTML Email'),
+            'false'     => pht('Send Plain Text Email'),
+          ))
+        ->setValue($html_emails_value);
+
       $re_control = id(new AphrontFormSelectControl())
         ->setName($pref_re_prefix)
         ->setOptions(
@@ -101,6 +131,9 @@ final class PhabricatorSettingsPanelEmailFormat
           ))
         ->setValue($vary_value);
     } else {
+      $html_email_control = id(new AphrontFormStaticControl())
+        ->setValue('Server Default ('.$html_emails_default.')');
+
       $re_control = id(new AphrontFormStaticControl())
         ->setValue('Server Default ('.$re_prefix_default.')');
 
@@ -124,6 +157,18 @@ final class PhabricatorSettingsPanelEmailFormat
     }
 
     $form
+      ->appendRemarkupInstructions(
+        pht(
+          "You can use the **HTML Email** setting to control whether ".
+          "Phabricator send you HTML email (which has more color and ".
+          "formatting) or plain text email (which is more compatible).\n".
+          "\n".
+          "WARNING: This feature is new and experimental! If you enable ".
+          "it, mail may not render properly and replying to mail may not ".
+          "work as well."))
+      ->appendChild(
+        $html_email_control
+          ->setLabel(pht('HTML Email')))
       ->appendRemarkupInstructions('')
       ->appendRemarkupInstructions(
         pht(

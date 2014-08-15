@@ -57,13 +57,13 @@ final class PhabricatorMailImplementationMailgunAdapter
     return $this;
   }
 
-  public function setSubject($subject) {
-    $this->params['subject'] = $subject;
+  public function setHTMLBody($html_body) {
+    $this->params['html-body'] = $html_body;
     return $this;
   }
 
-  public function setIsHTML($is_html) {
-    $this->params['is-html'] = $is_html;
+  public function setSubject($subject) {
+    $this->params['subject'] = $subject;
     return $this;
   }
 
@@ -78,11 +78,10 @@ final class PhabricatorMailImplementationMailgunAdapter
 
     $params['to'] = implode(', ', idx($this->params, 'tos', array()));
     $params['subject'] = idx($this->params, 'subject');
+    $params['text'] = idx($this->params, 'body');
 
-    if (idx($this->params, 'is-html')) {
-      $params['html'] = idx($this->params, 'body');
-    } else {
-      $params['text'] = idx($this->params, 'body');
+    if (idx($this->params, 'html-body')) {
+      $params['html'] = idx($this->params, 'html-body');
     }
 
     $from = idx($this->params, 'from');

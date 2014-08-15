@@ -105,7 +105,6 @@ final class PhabricatorMailManagementSendTestWorkflow
     $subject = $args->getArg('subject');
     $tags = $args->getArg('tag');
     $attach = $args->getArg('attach');
-    $is_html = $args->getArg('html');
     $is_bulk = $args->getArg('bulk');
 
     $console->writeErr("%s\n", pht('Reading message body from stdin...'));
@@ -117,9 +116,18 @@ final class PhabricatorMailManagementSendTestWorkflow
       ->addCCs($ccs)
       ->setSubject($subject)
       ->setBody($body)
-      ->setIsHTML($is_html)
       ->setIsBulk($is_bulk)
       ->setMailTags($tags);
+
+    if ($args->getArg('html')) {
+      $mail->setBody(
+        pht('(This is a placeholder plaintext email body for a test message '.
+            'sent with --html.)'));
+
+      $mail->setHTMLBody($body);
+    } else {
+      $mail->setBody($body);
+    }
 
     if ($from) {
       $mail->setFrom($from->getPHID());
