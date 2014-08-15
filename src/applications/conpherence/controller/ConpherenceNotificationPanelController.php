@@ -75,21 +75,14 @@ final class ConpherenceNotificationPanelController
 
     $content = hsprintf(
       '<div class="phabricator-notification-header">%s</div>'.
-      '%s'.
-      '<div class="phabricator-notification-view-all">%s</div>',
+      '%s',
       phutil_tag(
         'a',
         array(
           'href' => '/conpherence/',
         ),
         pht('Messages')),
-      $content,
-      phutil_tag(
-        'a',
-        array(
-          'href' => '/conpherence/',
-        ),
-        'View All Conpherences'));
+      $content);
 
     $unread = id(new ConpherenceParticipantCountQuery())
       ->withParticipantPHIDs(array($user->getPHID()))
