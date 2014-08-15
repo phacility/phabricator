@@ -82,7 +82,17 @@ final class PhabricatorBotMacroHandler extends PhabricatorBotHandler {
   }
 
   public function rasterize($macro, $size, $aspect) {
-    $image = HTTPSFuture::loadContent($macro['uri']);
+    try {
+      $image = $this->getConduit()->callMethodSynchronous(
+        'file.download',
+        array(
+          'phid' => $macro['filePHID'],
+        ));
+      $image = base64_decode($image);
+    } catch (Exception $ex) {
+      return false;
+    }
+
     if (!$image) {
       return false;
     }

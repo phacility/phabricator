@@ -72,7 +72,8 @@ final class MacroQueryConduitAPIMethod extends MacroConduitAPIMethod {
         'uri' => $file->getBestURI(),
         'phid' => $macro->getPHID(),
         'authorPHID' => $file->getAuthorPHID(),
-        'dateCreated'   => $file->getDateCreated(),
+        'dateCreated' => $file->getDateCreated(),
+        'filePHID' => $file->getPHID(),
       );
     }
 
