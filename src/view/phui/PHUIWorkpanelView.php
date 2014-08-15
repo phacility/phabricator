@@ -7,6 +7,7 @@ final class PHUIWorkpanelView extends AphrontTagView {
   private $footerAction;
   private $headerColor = PHUIActionHeaderView::HEADER_GREY;
   private $headerActions = array();
+  private $headerTag;
 
   public function setCards(PHUIObjectItemListView $cards) {
     $this->cards[] = $cards;
@@ -30,6 +31,11 @@ final class PHUIWorkpanelView extends AphrontTagView {
 
   public function addHeaderAction(PHUIIconView $action) {
     $this->headerActions[] = $action;
+    return $this;
+  }
+
+  public function setHeaderTag(PHUITagView $tag) {
+    $this->headerTag = $tag;
     return $this;
   }
 
@@ -58,6 +64,10 @@ final class PHUIWorkpanelView extends AphrontTagView {
     $header = id(new PHUIActionHeaderView())
       ->setHeaderTitle($this->header)
       ->setHeaderColor($this->headerColor);
+
+    if ($this->headerTag) {
+      $header->setTag($this->headerTag);
+    }
 
     foreach ($this->headerActions as $action) {
       $header->addAction($action);

@@ -14,14 +14,47 @@ JX.behavior('project-boards', function(config) {
     return JX.DOM.scry(col, 'li', 'project-card');
   }
 
-  function onupdate(node) {
-    JX.DOM.alterClass(node, 'project-column-empty', !this.findItems().length);
+  function onupdate(col) {
+    var data = JX.Stratcom.getData(col);
+    var cards = finditems(col);
+
+    // Add the "empty" CSS class if the column has nothing in it.
+    JX.DOM.alterClass(col, 'project-column-empty', !cards.length);
+
+    // Update the count of tasks in the column header.
+    if (!data.countTagNode) {
+      data.countTagNode = JX.$(data.countTagID);
+      JX.DOM.show(data.countTagNode);
+    }
+
+    var sum = 0;
+    for (var ii = 0; ii < cards.length; ii++) {
+      // TODO: Allow this to be computed in some more clever way.
+      sum += 1;
+    }
+
+    JX.DOM.setContent(JX.$(data.countTagContentID), sum);
+
+    // TODO: This is a little bit hacky, but we don't have a PHUIX version of
+    // this element yet.
+
+    var color_map = {
+      'phui-tag-shade-disabled': (sum === 0),
+      'phui-tag-shade-blue': (sum > 0)
+    };
+    for (var k in color_map) {
+      JX.DOM.alterClass(data.countTagNode, k, color_map[k]);
+    }
   }
 
   function onresponse(response, item, list) {
     list.unlock();
     JX.DOM.alterClass(item, 'drag-sending', false);
     JX.DOM.replace(item, JX.$H(response.task));
+  }
+
+  function getcolumns() {
+    return JX.DOM.scry(JX.$(config.boardID), 'ul', 'project-column');
   }
 
   function colsort(u, v) {
@@ -93,7 +126,7 @@ JX.behavior('project-boards', function(config) {
 
   var lists = [];
   var ii;
-  var cols = JX.DOM.scry(JX.$(config.boardID), 'ul', 'project-column');
+  var cols = getcolumns();
 
   for (ii = 0; ii < cols.length; ii++) {
     var list = new JX.DraggableList('project-card', cols[ii])
@@ -105,6 +138,8 @@ JX.behavior('project-boards', function(config) {
     list.listen('didDrop', JX.bind(null, ondrop, list));
 
     lists.push(list);
+
+    onupdate(cols[ii]);
   }
 
   for (ii = 0; ii < lists.length; ii++) {
@@ -141,6 +176,8 @@ JX.behavior('project-boards', function(config) {
     items.sort(colsort);
 
     JX.DOM.setContent(column, items);
+
+    onupdate(column);
   };
 
   JX.Stratcom.listen(
@@ -175,7 +212,7 @@ JX.behavior('project-boards', function(config) {
         projects: config.projectPHID,
         order: config.order
       };
-      var cols = JX.DOM.scry(JX.$(config.boardID), 'ul', 'project-column');
+      var cols = getcolumns();
       var ii;
       var column;
       for (ii = 0; ii < cols.length; ii++) {
@@ -188,4 +225,5 @@ JX.behavior('project-boards', function(config) {
         .setHandler(JX.bind(null, onedit, column))
         .start();
     });
+
 });

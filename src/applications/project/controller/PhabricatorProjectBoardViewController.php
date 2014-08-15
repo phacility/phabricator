@@ -220,12 +220,27 @@ final class PhabricatorProjectBoardViewController
     $this->handles = ManiphestTaskListView::loadTaskHandles($viewer, $tasks);
 
     foreach ($columns as $column) {
+      $task_phids = idx($task_map, $column->getPHID(), array());
+      $column_tasks = array_select_keys($tasks, $task_phids);
+
       $panel = id(new PHUIWorkpanelView())
         ->setHeader($column->getDisplayName())
         ->setHeaderColor($column->getHeaderColor());
 
       $column_menu = $this->buildColumnMenu($project, $column);
       $panel->addHeaderAction($column_menu);
+
+      $tag_id = celerity_generate_unique_node_id();
+      $tag_content_id = celerity_generate_unique_node_id();
+
+      $count_tag = id(new PHUITagView())
+        ->setType(PHUITagView::TYPE_SHADE)
+        ->setShade(PHUITagView::COLOR_BLUE)
+        ->setID($tag_id)
+        ->setName(phutil_tag('span', array('id' => $tag_content_id), '-'))
+        ->setStyle('display: none');
+
+      $panel->setHeaderTag($count_tag);
 
       $cards = id(new PHUIObjectItemListView())
         ->setUser($viewer)
@@ -235,10 +250,11 @@ final class PhabricatorProjectBoardViewController
         ->setMetadata(
           array(
             'columnPHID' => $column->getPHID(),
+            'countTagID' => $tag_id,
+            'countTagContentID' => $tag_content_id,
           ));
 
-      $task_phids = idx($task_map, $column->getPHID(), array());
-      foreach (array_select_keys($tasks, $task_phids) as $task) {
+      foreach ($column_tasks as $task) {
         $owner = null;
         if ($task->getOwnerPHID()) {
           $owner = $this->handles[$task->getOwnerPHID()];
@@ -253,7 +269,7 @@ final class PhabricatorProjectBoardViewController
       }
       $panel->setCards($cards);
 
-      if (!$task_phids) {
+      if (!$column_tasks) {
         $cards->addClass('project-column-empty');
       }
 
