@@ -221,6 +221,10 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     return $this->getParam('body');
   }
 
+  public function getHTMLBody() {
+    return $this->getParam('html-body');
+  }
+
   public function setIsErrorEmail($is_error) {
     $this->setParam('is-error', $is_error);
     return $this;
