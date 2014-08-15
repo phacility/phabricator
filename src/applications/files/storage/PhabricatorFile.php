@@ -849,11 +849,6 @@ final class PhabricatorFile extends PhabricatorFileDAO
       return false;
     }
 
-    // TODO: Migrate away this old constant and remove this check.
-    if (idx($this->metadata, 'cancdn')) {
-      return true;
-    }
-
     return idx($this->metadata, self::METADATA_CAN_CDN);
   }
 
