@@ -49,8 +49,8 @@ final class PHUIActionHeaderView extends AphrontView {
     return $this;
   }
 
-  public function setHeaderIcon($minicon) {
-    $this->headerIcon = $minicon;
+  public function setHeaderIcon(PHUIIconView $icon) {
+    $this->headerIcon = $icon;
     return $this;
   }
 
@@ -116,13 +116,7 @@ final class PHUIActionHeaderView extends AphrontView {
 
     $header_icon = null;
     if ($this->headerIcon) {
-      require_celerity_resource('sprite-minicons-css');
-      $header_icon = phutil_tag(
-        'span',
-          array(
-            'class' => 'sprite-minicons minicons-'.$this->headerIcon
-          ),
-          '');
+      $header_icon = $this->headerIcon;
     }
 
     $header_title = $this->headerTitle;

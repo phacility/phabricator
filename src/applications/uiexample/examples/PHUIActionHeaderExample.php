@@ -55,36 +55,48 @@ final class PHUIActionHeaderExample extends PhabricatorUIExample {
 
 /* Policy Icons */
     $title2 = id(new PHUIHeaderView())
-      ->setHeader(pht('With Policy Icons'));
+      ->setHeader(pht('With Icons'));
 
     $header1 = id(new PHUIActionHeaderView())
-      ->setHeaderTitle('Company')
-      ->setHeaderIcon('company-dark');
+      ->setHeaderTitle('Quack')
+      ->setHeaderIcon(
+        id(new PHUIIconView())
+          ->setIconFont('fa-coffee'));
 
     $header2 = id(new PHUIActionHeaderView())
-      ->setHeaderTitle('Public')
+      ->setHeaderTitle('Moo')
       ->setHeaderColor(PHUIActionHeaderView::HEADER_GREY)
-      ->setHeaderIcon('public-dark');
+      ->setHeaderIcon(
+        id(new PHUIIconView())
+          ->setIconFont('fa-magic'));
 
     $header3 = id(new PHUIActionHeaderView())
-      ->setHeaderTitle('Restricted')
+      ->setHeaderTitle('Woof')
       ->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTBLUE)
-      ->setHeaderIcon('restricted-white');
+      ->setHeaderIcon(
+        id(new PHUIIconView())
+          ->setIconFont('fa-fighter-jet'));
 
     $header4 = id(new PHUIActionHeaderView())
-      ->setHeaderTitle('Company')
+      ->setHeaderTitle('Buzz')
       ->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTGREEN)
-      ->setHeaderIcon('company-white');
+      ->setHeaderIcon(
+        id(new PHUIIconView())
+          ->setIconFont('fa-child'));
 
     $header5 = id(new PHUIActionHeaderView())
-      ->setHeaderTitle('Public')
+      ->setHeaderTitle('Fizz')
       ->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTRED)
-      ->setHeaderIcon('public-white');
+      ->setHeaderIcon(
+        id(new PHUIIconView())
+          ->setIconFont('fa-car'));
 
     $header6 = id(new PHUIActionHeaderView())
-      ->setHeaderTitle('Restricted')
+      ->setHeaderTitle('Blarp')
       ->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTVIOLET)
-      ->setHeaderIcon('restriced-white');
+      ->setHeaderIcon(
+        id(new PHUIIconView())
+          ->setIconFont('fa-truck'));
 
     $layout2 = id(new AphrontMultiColumnView())
       ->addColumn($header1)
