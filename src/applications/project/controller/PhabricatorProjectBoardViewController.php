@@ -225,7 +225,16 @@ final class PhabricatorProjectBoardViewController
 
       $panel = id(new PHUIWorkpanelView())
         ->setHeader($column->getDisplayName())
-        ->setHeaderColor($column->getHeaderColor());
+        ->addSigil('workpanel');
+
+      $header_icon = $column->getHeaderIcon();
+      if ($header_icon) {
+        $panel->setHeaderIcon($header_icon);
+      }
+
+      if ($column->isHidden()) {
+        $panel->addClass('project-panel-hidden');
+      }
 
       $column_menu = $this->buildColumnMenu($project, $column);
       $panel->addHeaderAction($column_menu);
@@ -252,6 +261,7 @@ final class PhabricatorProjectBoardViewController
             'columnPHID' => $column->getPHID(),
             'countTagID' => $tag_id,
             'countTagContentID' => $tag_content_id,
+            'pointLimit' => $column->getPointLimit(),
           ));
 
       foreach ($column_tasks as $task) {
@@ -268,11 +278,6 @@ final class PhabricatorProjectBoardViewController
           ->getItem());
       }
       $panel->setCards($cards);
-
-      if (!$column_tasks) {
-        $cards->addClass('project-column-empty');
-      }
-
       $board->addPanel($panel);
     }
 

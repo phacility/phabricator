@@ -71,16 +71,30 @@ final class PhabricatorProjectColumn
     return pht('Unnamed Column');
   }
 
-  public function getHeaderColor() {
+  public function getHeaderIcon() {
+    $icon = null;
+
     if ($this->isHidden()) {
-      return PHUIActionHeaderView::HEADER_LIGHTRED;
+      $icon = 'fa-eye-slash';
+      $text = pht('Hidden');
     }
 
     if ($this->isDefaultColumn()) {
-      return PHUIActionHeaderView::HEADER_DARK_GREY;
+      $icon = 'fa-archive';
+      $text = pht('Default');
     }
 
-    return PHUIActionHeaderView::HEADER_GREY;
+    if ($icon) {
+      return id(new PHUIIconView())
+        ->setIconFont($icon)
+        ->addSigil('has-tooltip')
+        ->setMetadata(
+          array(
+            'tip' => $text,
+          ));;
+    }
+
+    return null;
   }
 
   public function getProperty($key, $default = null) {
@@ -89,6 +103,15 @@ final class PhabricatorProjectColumn
 
   public function setProperty($key, $value) {
     $this->properties[$key] = $value;
+    return $this;
+  }
+
+  public function getPointLimit() {
+    return $this->getProperty('pointLimit');
+  }
+
+  public function setPointLimit($limit) {
+    $this->setProperty('pointLimit', $limit);
     return $this;
   }
 

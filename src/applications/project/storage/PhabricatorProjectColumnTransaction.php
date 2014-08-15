@@ -5,6 +5,7 @@ final class PhabricatorProjectColumnTransaction
 
   const TYPE_NAME       = 'project:col:name';
   const TYPE_STATUS     = 'project:col:status';
+  const TYPE_LIMIT      = 'project:col:limit';
 
   public function getApplicationName() {
     return 'project';
@@ -43,6 +44,24 @@ final class PhabricatorProjectColumnTransaction
               $author_handle);
           }
         }
+      case PhabricatorProjectColumnTransaction::TYPE_LIMIT:
+        if (!$old) {
+          return pht(
+            '%s set the point limit for this column to %s.',
+            $author_handle,
+            $new);
+        } else if (!$new) {
+          return pht(
+            '%s removed the point limit for this column.',
+            $author_handle);
+        } else {
+          return pht(
+            '%s changed point limit for this column from %s to %s.',
+            $author_handle,
+            $old,
+            $new);
+        }
+
       case PhabricatorProjectColumnTransaction::TYPE_STATUS:
         switch ($new) {
           case PhabricatorProjectColumn::STATUS_ACTIVE:

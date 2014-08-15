@@ -18,9 +18,6 @@ JX.behavior('project-boards', function(config) {
     var data = JX.Stratcom.getData(col);
     var cards = finditems(col);
 
-    // Add the "empty" CSS class if the column has nothing in it.
-    JX.DOM.alterClass(col, 'project-column-empty', !cards.length);
-
     // Update the count of tasks in the column header.
     if (!data.countTagNode) {
       data.countTagNode = JX.$(data.countTagID);
@@ -33,17 +30,34 @@ JX.behavior('project-boards', function(config) {
       sum += 1;
     }
 
-    JX.DOM.setContent(JX.$(data.countTagContentID), sum);
-
     // TODO: This is a little bit hacky, but we don't have a PHUIX version of
     // this element yet.
 
+    var over_limit = (data.pointLimit && (sum > data.pointLimit));
+
+    var display_value = sum;
+    if (data.pointLimit) {
+      display_value = sum + ' / ' + data.pointLimit;
+    }
+    JX.DOM.setContent(JX.$(data.countTagContentID), display_value);
+
+
+    var panel_map = {
+      'project-panel-empty': !cards.length,
+      'project-panel-over-limit': over_limit
+    };
+    var panel = JX.DOM.findAbove(col, 'div', 'workpanel');
+    for (var k in panel_map) {
+      JX.DOM.alterClass(panel, k, !!panel_map[k]);
+    }
+
     var color_map = {
       'phui-tag-shade-disabled': (sum === 0),
-      'phui-tag-shade-blue': (sum > 0)
+      'phui-tag-shade-blue': (sum > 0 && !over_limit),
+      'phui-tag-shade-red': (over_limit)
     };
     for (var k in color_map) {
-      JX.DOM.alterClass(data.countTagNode, k, color_map[k]);
+      JX.DOM.alterClass(data.countTagNode, k, !!color_map[k]);
     }
   }
 

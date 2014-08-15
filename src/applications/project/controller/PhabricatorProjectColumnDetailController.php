@@ -160,6 +160,12 @@ final class PhabricatorProjectColumnDetailController
       pht('Editable By'),
       $descriptions[PhabricatorPolicyCapability::CAN_EDIT]);
 
+
+    $limit = $column->getPointLimit();
+    $properties->addProperty(
+      pht('Point Limit'),
+      $limit ? $limit : pht('No Limit'));
+
     return $properties;
   }
 

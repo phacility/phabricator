@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorProjectBoardEditController
+final class PhabricatorProjectColumnEditController
   extends PhabricatorProjectBoardController {
 
   private $id;
@@ -50,6 +50,11 @@ final class PhabricatorProjectBoardEditController
     }
 
     $e_name = null;
+    $e_limit = null;
+
+    $v_limit = $column->getPointLimit();
+    $v_name = $column->getName();
+
     $validation_exception = null;
     $base_uri = '/board/'.$this->projectID.'/';
     if ($is_new) {
@@ -60,7 +65,8 @@ final class PhabricatorProjectBoardEditController
     }
 
     if ($request->isFormPost()) {
-      $new_name = $request->getStr('name');
+      $v_name = $request->getStr('name');
+      $v_limit = $request->getStr('limit');
 
       if ($is_new) {
         $column->setProjectPHID($project->getPHID());
@@ -79,10 +85,17 @@ final class PhabricatorProjectBoardEditController
         $column->setSequence($new_sequence);
       }
 
+      $xactions = array();
+
       $type_name = PhabricatorProjectColumnTransaction::TYPE_NAME;
-      $xactions = array(id(new PhabricatorProjectColumnTransaction())
+      $xactions[] = id(new PhabricatorProjectColumnTransaction())
         ->setTransactionType($type_name)
-        ->setNewValue($new_name));
+        ->setNewValue($v_name);
+
+      $type_limit = PhabricatorProjectColumnTransaction::TYPE_LIMIT;
+      $xactions[] = id(new PhabricatorProjectColumnTransaction())
+        ->setTransactionType($type_limit)
+        ->setNewValue($v_limit);
 
       try {
         $editor = id(new PhabricatorProjectColumnTransactionEditor())
@@ -93,20 +106,31 @@ final class PhabricatorProjectBoardEditController
         return id(new AphrontRedirectResponse())->setURI($view_uri);
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
         $e_name = $ex->getShortMessage($type_name);
+        $e_limit = $ex->getShortMessage($type_limit);
         $validation_exception = $ex;
       }
     }
 
     $form = new AphrontFormView();
-    $form->setUser($request->getUser())
+    $form
+      ->setUser($request->getUser())
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setValue($column->getName())
+          ->setValue($v_name)
           ->setLabel(pht('Name'))
           ->setName('name')
           ->setError($e_name)
           ->setCaption(
-            pht('This will be displayed as the header of the column.')));
+            pht('This will be displayed as the header of the column.')))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setValue($v_limit)
+          ->setLabel(pht('Point Limit'))
+          ->setName('limit')
+          ->setError($e_limit)
+          ->setCaption(
+            pht('Maximum number of points of tasks allowed in the column.')));
+
 
     if ($is_new) {
       $title = pht('Create Column');

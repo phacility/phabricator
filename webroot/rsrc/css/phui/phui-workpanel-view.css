@@ -93,25 +93,30 @@
   width: auto;
 }
 
-.project-column-empty {
+.project-panel-hidden {
+  opacity: 0.75;
+}
+
+.project-panel-empty .phui-object-item-list-view {
   background: rgba(255,255,255,.4);
   border-radius: 3px;
   margin-bottom: 4px;
   border: 1px dashed #fff;
 }
 
-.project-column-empty .drag-ghost {
+.project-panel-empty .phui-object-item-list-view .drag-ghost {
   display: none;
 }
 
-.project-column-empty.drag-target-list {
+.project-panel-empty .phui-object-item-list-view.drag-target-list {
   background: rgba(255,255,255,.7);
 }
 
-.phui-workpanel-view .phui-workpanel-lightred .phui-action-header {
+.project-panel-over-limit .phui-action-header {
   border-top: 1px solid {$redborder};
   border-left: 1px solid {$redborder};
   border-right: 1px solid {$redborder};
+  background: {$lightredbackground};
 }
 
 /* - Workpanel Cards -----------------------------------------------------------
