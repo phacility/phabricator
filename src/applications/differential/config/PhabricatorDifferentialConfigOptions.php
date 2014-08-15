@@ -293,7 +293,7 @@ final class PhabricatorDifferentialConfigOptions
           pht(
             'Normally, inline comments in emails are shown with a file and '.
             'line but without any diff context. Enabling this option adds '.
-            'diff context.')),
+            'diff context and the comment thread.')),
     );
   }
 

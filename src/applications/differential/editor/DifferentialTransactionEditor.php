@@ -1304,6 +1304,38 @@ final class DifferentialTransactionEditor
     return $result;
   }
 
+  protected function indentForMail(array $lines) {
+    $indented = array();
+    foreach ($lines as $line) {
+      $indented[] = '> '.$line;
+    }
+    return $indented;
+  }
+
+  protected function nestCommentHistory(
+    DifferentialTransactionComment $comment, array $comments_by_line_number,
+    array $users_by_phid) {
+
+    $nested = array();
+    $previous_comments = $comments_by_line_number[$comment->getChangesetID()]
+                                                 [$comment->getLineNumber()];
+    foreach ($previous_comments as $previous_comment) {
+      if ($previous_comment->getID() >= $comment->getID())
+        break;
+      $nested = $this->indentForMail(
+        array_merge(
+          $nested,
+          explode("\n", $previous_comment->getContent())));
+      $user = idx($users_by_phid, $previous_comment->getAuthorPHID(), null);
+      if ($user) {
+        array_unshift($nested, pht('%s wrote:', $user->getUserName()));
+      }
+    }
+
+    $nested = array_merge($nested, explode("\n", $comment->getContent()));
+    return implode("\n", $nested);
+  }
+
   private function renderInlineCommentsForMail(
     PhabricatorLiskDAO $object,
     array $inlines) {
@@ -1312,9 +1344,12 @@ final class DifferentialTransactionEditor
     $show_context = PhabricatorEnv::getEnvConfig($context_key);
 
     $changeset_ids = array();
+    $line_numbers_by_changeset = array();
     foreach ($inlines as $inline) {
       $id = $inline->getComment()->getChangesetID();
       $changeset_ids[$id] = $id;
+      $line_numbers_by_changeset[$id][] =
+        $inline->getComment()->getLineNumber();
     }
 
     $changesets = id(new DifferentialChangesetQuery())
@@ -1329,6 +1364,30 @@ final class DifferentialTransactionEditor
 
     if ($show_context) {
       $hunk_parser = new DifferentialHunkParser();
+      $table = new DifferentialTransactionComment();
+      $conn_r = $table->establishConnection('r');
+      $queries = array();
+      foreach ($line_numbers_by_changeset as $id => $line_numbers) {
+        $queries[] = qsprintf(
+          $conn_r,
+          '(changesetID = %d AND lineNumber IN (%Ld))',
+          $id, $line_numbers);
+      }
+      $all_comments = id(new DifferentialTransactionComment())->loadAllWhere(
+        'transactionPHID IS NOT NULL AND (%Q)', implode(' OR ', $queries));
+      $comments_by_line_number = array();
+      foreach ($all_comments as $comment) {
+        $comments_by_line_number
+          [$comment->getChangesetID()]
+          [$comment->getLineNumber()]
+          [$comment->getID()] = $comment;
+      }
+      $author_phids = mpull($all_comments, 'getAuthorPHID');
+      $authors = id(new PhabricatorPeopleQuery())
+        ->setViewer($this->getActor())
+        ->withPHIDs($author_phids)
+        ->execute();
+      $authors_by_phid = mpull($authors, null, 'getPHID');
     }
 
     $section = new PhabricatorMetaMTAMailSection();
@@ -1360,13 +1419,15 @@ final class DifferentialTransactionEditor
             $comment->getLineNumber(),
             $comment->getLineLength(),
             1);
+          $nested_comments = $this->nestCommentHistory(
+            $inline->getComment(), $comments_by_line_number, $authors_by_phid);
 
           $section->addFragment('================')
                   ->addFragment('Comment at: '.$file.':'.$range)
                   ->addPlaintextFragment($patch)
                   ->addHTMLFragment($this->renderPatchHTMLForMail($patch))
                   ->addFragment('----------------')
-                  ->addFragment($inline_content)
+                  ->addFragment($nested_comments)
                   ->addFragment(null);
         }
       }
