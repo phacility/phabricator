@@ -547,6 +547,7 @@ final class ManiphestTaskEditController extends ManiphestController {
       ->addHiddenInput('template', $template_id)
       ->addHiddenInput('responseType', $response_type)
       ->addHiddenInput('order', $order)
+      ->addHiddenInput('ungrippable', $request->getStr('ungrippable'))
       ->addHiddenInput('columnPHID', $request->getStr('columnPHID'));
 
     if ($parent_task) {
