@@ -10,6 +10,7 @@ final class PassphraseCredentialTransaction
   const TYPE_DESTROY = 'passphrase:destroy';
   const TYPE_LOOKEDATSECRET = 'passphrase:lookedAtSecret';
   const TYPE_LOCK = 'passphrase:lock';
+  const TYPE_CONDUIT = 'passphrase:conduit';
 
   public function getApplicationName() {
     return 'passphrase';
@@ -91,6 +92,17 @@ final class PassphraseCredentialTransaction
         return pht(
           '%s locked this credential.',
           $this->renderHandleLink($author_phid));
+      case self::TYPE_CONDUIT:
+        if ($old) {
+          return pht(
+            '%s disallowed Conduit API access to this credential.',
+            $this->renderHandleLink($author_phid));
+        } else {
+          return pht(
+            '%s allowed Conduit API access to this credential.',
+            $this->renderHandleLink($author_phid));
+        }
+        break;
     }
 
     return parent::getTitle();

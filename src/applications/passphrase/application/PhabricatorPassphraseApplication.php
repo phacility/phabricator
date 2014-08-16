@@ -46,6 +46,7 @@ final class PhabricatorPassphraseApplication extends PhabricatorApplication {
         'reveal/(?P<id>\d+)/' => 'PassphraseCredentialRevealController',
         'public/(?P<id>\d+)/' => 'PassphraseCredentialPublicController',
         'lock/(?P<id>\d+)/' => 'PassphraseCredentialLockController',
+        'conduit/(?P<id>\d+)/' => 'PassphraseCredentialConduitController',
       ));
   }
 
