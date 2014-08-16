@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => '1733ae8f',
+    'core.pkg.css' => '5e4bb6d1',
     'core.pkg.js' => '7c8455ef',
     'darkconsole.pkg.js' => 'df001cab',
     'differential.pkg.css' => '4a93db37',
@@ -127,7 +127,7 @@ return array(
     'rsrc/css/phui/phui-document.css' => 'a5615198',
     'rsrc/css/phui/phui-feed-story.css' => 'e2c9bc83',
     'rsrc/css/phui/phui-fontkit.css' => 'fff25cfa',
-    'rsrc/css/phui/phui-form-view.css' => 'ebac1b1d',
+    'rsrc/css/phui/phui-form-view.css' => 'a2d72756',
     'rsrc/css/phui/phui-form.css' => 'b78ec020',
     'rsrc/css/phui/phui-header-view.css' => '39594ac0',
     'rsrc/css/phui/phui-icon.css' => 'b4963a4f',
@@ -458,7 +458,7 @@ return array(
     'rsrc/js/core/behavior-device.js' => '03d6ed07',
     'rsrc/js/core/behavior-drag-and-drop-textarea.js' => '92eb531d',
     'rsrc/js/core/behavior-error-log.js' => 'a5d7cf86',
-    'rsrc/js/core/behavior-fancy-datepicker.js' => 'a5573bcd',
+    'rsrc/js/core/behavior-fancy-datepicker.js' => 'c51ae228',
     'rsrc/js/core/behavior-file-tree.js' => '88236f00',
     'rsrc/js/core/behavior-form.js' => '5c54cbf3',
     'rsrc/js/core/behavior-gesture.js' => '3ab51e2c',
@@ -585,7 +585,7 @@ return array(
     'javelin-behavior-diffusion-pull-lastmodified' => '2b228192',
     'javelin-behavior-doorkeeper-tag' => 'e5822781',
     'javelin-behavior-error-log' => 'a5d7cf86',
-    'javelin-behavior-fancy-datepicker' => 'a5573bcd',
+    'javelin-behavior-fancy-datepicker' => 'c51ae228',
     'javelin-behavior-global-drag-and-drop' => '07f199d8',
     'javelin-behavior-herald-rule-editor' => '7ebaeed3',
     'javelin-behavior-high-security-warning' => '8fc1c918',
@@ -775,7 +775,7 @@ return array(
     'phui-font-icon-base-css' => 'eb84f033',
     'phui-fontkit-css' => 'fff25cfa',
     'phui-form-css' => 'b78ec020',
-    'phui-form-view-css' => 'ebac1b1d',
+    'phui-form-view-css' => 'a2d72756',
     'phui-header-view-css' => '39594ac0',
     'phui-icon-view-css' => 'b4963a4f',
     'phui-image-mask-css' => '5a8b09c8',
@@ -1455,13 +1455,6 @@ return array(
       'javelin-dom',
       'phabricator-notification',
     ),
-    'a5573bcd' => array(
-      'javelin-behavior',
-      'javelin-util',
-      'javelin-dom',
-      'javelin-stratcom',
-      'javelin-vector',
-    ),
     'a5b67173' => array(
       'javelin-dom',
       'javelin-util',
@@ -1644,6 +1637,13 @@ return array(
       'javelin-util',
       'javelin-vector',
       'javelin-stratcom',
+    ),
+    'c51ae228' => array(
+      'javelin-behavior',
+      'javelin-util',
+      'javelin-dom',
+      'javelin-stratcom',
+      'javelin-vector',
     ),
     'c60f4327' => array(
       'javelin-stratcom',

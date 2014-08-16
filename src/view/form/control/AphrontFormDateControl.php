@@ -237,6 +237,9 @@ final class AphrontFormDateControl extends AphrontFormControl {
         'disabled' => $disabled,
       ));
 
+    $cicon = id(new PHUIIconView())
+      ->setIconFont('fa-calendar');
+
     $cal_icon = javelin_tag(
       'a',
       array(
@@ -244,7 +247,7 @@ final class AphrontFormDateControl extends AphrontFormControl {
         'class' => 'calendar-button',
         'sigil' => 'calendar-button',
       ),
-      '');
+      $cicon);
 
     $time_sel = javelin_tag(
       'input',
