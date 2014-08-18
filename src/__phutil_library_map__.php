@@ -4231,6 +4231,7 @@ phutil_register_library_map(array(
     'PhabricatorDashboard' => array(
       'PhabricatorDashboardDAO',
       'PhabricatorPolicyInterface',
+      'PhabricatorDestructibleInterface',
     ),
     'PhabricatorDashboardAddPanelController' => 'PhabricatorDashboardController',
     'PhabricatorDashboardApplication' => 'PhabricatorApplication',
@@ -4249,6 +4250,7 @@ phutil_register_library_map(array(
       'PhabricatorDashboardDAO',
       'PhabricatorPolicyInterface',
       'PhabricatorCustomFieldInterface',
+      'PhabricatorDestructibleInterface',
     ),
     'PhabricatorDashboardPanelArchiveController' => 'PhabricatorDashboardController',
     'PhabricatorDashboardPanelCoreCustomField' => array(

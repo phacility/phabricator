@@ -7,7 +7,8 @@ final class PhabricatorDashboardPanel
   extends PhabricatorDashboardDAO
   implements
     PhabricatorPolicyInterface,
-    PhabricatorCustomFieldInterface {
+    PhabricatorCustomFieldInterface,
+    PhabricatorDestructibleInterface {
 
   protected $name;
   protected $panelType;
@@ -129,6 +130,18 @@ final class PhabricatorDashboardPanel
   public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
     $this->customFields = $fields;
     return $this;
+  }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+      $this->delete();
+    $this->saveTransaction();
   }
 
 }
