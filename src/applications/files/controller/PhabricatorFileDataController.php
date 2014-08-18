@@ -74,6 +74,7 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
       // if the user can see the file, generate a token;
       // redirect to the alt domain with the token;
       return id(new AphrontRedirectResponse())
+        ->setIsExternal(true)
         ->setURI($file->getCDNURIWithToken());
 
     } else {
@@ -128,7 +129,9 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
         // file cannot be served via cdn, and no token given
         // redirect to the main domain to aquire a token
 
+        // This is marked as an "external" URI because it is fully qualified.
         return id(new AphrontRedirectResponse())
+          ->setIsExternal(true)
           ->setURI($acquire_token_uri);
       }
     }
@@ -171,7 +174,10 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
         // authenticate users on the file domain. This should blunt any
         // attacks based on iframes, script tags, applet tags, etc., at least.
         // Send the user to the "info" page if they're using some other method.
+
+        // This is marked as "external" because it is fully qualified.
         return id(new AphrontRedirectResponse())
+          ->setIsExternal(true)
           ->setURI(PhabricatorEnv::getProductionURI($file->getBestURI()));
       }
       $response->setMimeType($file->getMimeType());

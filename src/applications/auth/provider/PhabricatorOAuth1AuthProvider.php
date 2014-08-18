@@ -62,7 +62,9 @@ abstract class PhabricatorOAuth1AuthProvider
         $client_code,
         $adapter->getTokenSecret());
 
-      $response = id(new AphrontRedirectResponse())->setURI($uri);
+      $response = id(new AphrontRedirectResponse())
+        ->setIsExternal(true)
+        ->setURI($uri);
       return array($account, $response);
     }
 

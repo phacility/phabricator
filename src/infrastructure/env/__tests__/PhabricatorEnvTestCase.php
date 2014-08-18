@@ -13,6 +13,7 @@ final class PhabricatorEnvTestCase extends PhabricatorTestCase {
       'javascript:lol'        => false,
       ''                      => false,
       null                    => false,
+      '/\\evil.com'           => false,
     );
 
     foreach ($map as $uri => $expect) {

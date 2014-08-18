@@ -462,6 +462,21 @@ final class PhabricatorEnv {
       return false;
     }
 
+    // Chrome (at a minimum) interprets backslashes in Location headers and the
+    // URL bar as forward slashes. This is probably intended to reduce user
+    // error caused by confusion over which key is "forward slash" vs "back
+    // slash".
+    //
+    // However, it means a URI like "/\evil.com" is interpreted like
+    // "//evil.com", which is a protocol relative remote URI.
+    //
+    // Since we currently never generate URIs with backslashes in them, reject
+    // these unconditionally rather than trying to figure out how browsers will
+    // interpret them.
+    if (preg_match('/\\\\/', $uri)) {
+      return false;
+    }
+
     // Valid URIs must begin with '/', followed by the end of the string or some
     // other non-'/' character. This rejects protocol-relative URIs like
     // "//evil.com/evil_stuff/".
