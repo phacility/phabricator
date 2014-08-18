@@ -54,6 +54,10 @@ final class PhortunePurchase extends PhortuneDAO
     $this->totalPriceInCents = (int)$this->totalPriceInCents;
   }
 
+  public function getFullDisplayName() {
+    return pht('Goods and/or Services');
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

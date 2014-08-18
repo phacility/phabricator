@@ -27,14 +27,16 @@ final class PhortuneCartViewController
     $charges = id(new PhortuneChargeQuery())
       ->setViewer($viewer)
       ->withCartPHIDs(array($cart->getPHID()))
+      ->needCarts(true)
       ->execute();
 
-    $charges_table = $this->buildChargesTable($charges);
+    $charges_table = $this->buildChargesTable($charges, false);
 
     $account = $cart->getAccount();
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('Cart'));
+    $this->addAccountCrumb($crumbs, $cart->getAccount());
+    $crumbs->addTextCrumb(pht('Cart %d', $cart->getID()));
 
     return $this->buildApplicationPage(
       array(

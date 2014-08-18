@@ -173,20 +173,36 @@ final class PhortuneAccountViewController extends PhortuneController {
     $rows = array();
     $rowc = array();
     foreach ($carts as $cart) {
+      $cart_link = phutil_tag(
+        'a',
+        array(
+          'href' => $this->getApplicationURI('cart/'.$cart->getID().'/'),
+        ),
+        pht('Cart %d', $cart->getID()));
+
       $rowc[] = 'highlighted';
       $rows[] = array(
-        $cart->getPHID(),
+        phutil_tag('strong', array(), $cart_link),
         '',
         '',
       );
       foreach ($cart->getPurchases() as $purchase) {
+        $id = $purchase->getID();
+
         $price = $purchase->getTotalPriceInCents();
         $price = PhortuneCurrency::newFromUSDCents($price)->formatForDisplay();
+
+        $purchase_link = phutil_tag(
+          'a',
+          array(
+            'href' => $this->getApplicationURI('purchase/'.$id.'/'),
+          ),
+          $purchase->getFullDisplayName());
 
         $rowc[] = '';
         $rows[] = array(
           '',
-          $purchase->getPHID(),
+          $purchase_link,
           $price,
         );
       }
@@ -222,6 +238,7 @@ final class PhortuneAccountViewController extends PhortuneController {
     $charges = id(new PhortuneChargeQuery())
       ->setViewer($viewer)
       ->withAccountPHIDs(array($account->getPHID()))
+      ->needCarts(true)
       ->execute();
 
     return $this->buildChargesTable($charges);

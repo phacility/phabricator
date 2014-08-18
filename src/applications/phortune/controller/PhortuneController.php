@@ -52,15 +52,25 @@ abstract class PhortuneController extends PhabricatorController {
     return $account;
   }
 
-  protected function buildChargesTable(array $charges) {
+  protected function buildChargesTable(array $charges, $show_cart = true) {
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
     $rows = array();
     foreach ($charges as $charge) {
+      $cart = $charge->getCart();
+      $cart_id = $cart->getID();
+      $cart_uri = $this->getApplicationURI("cart/{$cart_id}/");
+      $cart_href = phutil_tag(
+        'a',
+        array(
+          'href' => $cart_uri,
+        ),
+        pht('Cart %d', $cart_id));
+
       $rows[] = array(
         $charge->getID(),
-        $charge->getCartPHID(),
+        $cart_href,
         $charge->getPaymentProviderKey(),
         $charge->getPaymentMethodPHID(),
         PhortuneCurrency::newFromUSDCents($charge->getAmountInCents())
@@ -73,7 +83,7 @@ abstract class PhortuneController extends PhabricatorController {
     $charge_table = id(new AphrontTableView($rows))
       ->setHeaders(
         array(
-          pht('Charge ID'),
+          pht('ID'),
           pht('Cart'),
           pht('Provider'),
           pht('Method'),
@@ -84,12 +94,17 @@ abstract class PhortuneController extends PhabricatorController {
       ->setColumnClasses(
         array(
           '',
-          '',
+          'strong',
           '',
           '',
           'wide right',
           '',
           '',
+        ))
+      ->setColumnVisibility(
+        array(
+          true,
+          $show_cart,
         ));
 
     $header = id(new PHUIHeaderView())
@@ -98,6 +113,22 @@ abstract class PhortuneController extends PhabricatorController {
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->appendChild($charge_table);
+  }
+
+  protected function addAccountCrumb(
+    $crumbs,
+    PhortuneAccount $account,
+    $link = true) {
+
+    $name = pht('Account');
+    $href = null;
+
+    if ($link) {
+      $href = $this->getApplicationURI($account->getID().'/');
+      $crumbs->addTextCrumb($name, $href);
+    } else {
+      $crumbs->addTextCrumb($name);
+    }
   }
 
 }

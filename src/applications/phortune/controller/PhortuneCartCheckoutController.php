@@ -98,7 +98,7 @@ final class PhortuneCartCheckoutController
       foreach ($methods as $method) {
         $method_control->addButton(
           $method->getID(),
-          $method->getBrand().' / '.$method->getLastFourDigits(),
+          $method->getFullDisplayName(),
           $method->getDescription());
       }
     }
