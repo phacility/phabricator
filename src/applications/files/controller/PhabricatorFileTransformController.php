@@ -149,7 +149,21 @@ final class PhabricatorFileTransformController
     // TODO: We could just delegate to the file view controller instead,
     // which would save the client a roundtrip, but is slightly more complex.
     $uri = $file->getBestURI();
-    return id(new AphrontRedirectResponse())->setURI($uri);
+
+    // TODO: This is a bit iffy. Sometimes, getBestURI() returns a CDN URI
+    // (if the file is a viewable image) and sometimes a local URI (if not).
+    // For now, just detect which one we got and configure the response
+    // appropriately. In the long run, if this endpoint is served from a CDN
+    // domain, we can't issue a local redirect to an info URI (which is not
+    // present on the CDN domain). We probably never actually issue local
+    // redirects here anyway, since we only ever transform viewable images
+    // right now.
+
+    $is_external = strlen(id(new PhutilURI($uri))->getDomain());
+
+    return id(new AphrontRedirectResponse())
+      ->setIsExternal($is_external)
+      ->setURI($uri);
   }
 
   private function executePreviewTransform(PhabricatorFile $file, $size) {
