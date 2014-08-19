@@ -4381,6 +4381,7 @@ phutil_register_library_map(array(
       'PhabricatorSubscribableInterface',
       'PhabricatorFlaggableInterface',
       'PhabricatorPolicyInterface',
+      'PhabricatorDestructibleInterface',
     ),
     'PhabricatorFileCommentController' => 'PhabricatorFileController',
     'PhabricatorFileComposeController' => 'PhabricatorFileController',

@@ -887,7 +887,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
 
   private function buildRawResponse($path, $data) {
     $file = $this->loadFileForData($path, $data);
-    return id(new AphrontRedirectResponse())->setURI($file->getBestURI());
+    return $file->getRedirectResponse();
   }
 
   private function buildImageCorpus($file_uri) {

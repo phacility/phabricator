@@ -1042,7 +1042,7 @@ final class DiffusionCommitController extends DiffusionController {
         $drequest->getRepository()->getPHID());
     unset($unguarded);
 
-    return id(new AphrontRedirectResponse())->setURI($file->getBestURI());
+    return $file->getRedirectResponse();
   }
 
   private function renderAuditStatusView(array $audit_requests) {
