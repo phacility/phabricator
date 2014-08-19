@@ -21,6 +21,8 @@ final class DiffusionCommitQuery
   const AUDIT_STATUS_ANY       = 'audit-status-any';
   const AUDIT_STATUS_OPEN      = 'audit-status-open';
   const AUDIT_STATUS_CONCERN   = 'audit-status-concern';
+  const AUDIT_STATUS_ACCEPTED  = 'audit-status-accepted';
+  const AUDIT_STATUS_PARTIAL   = 'audit-status-partial';
 
   private $needCommitData;
 
@@ -437,6 +439,18 @@ final class DiffusionCommitQuery
     $status = $this->auditStatus;
     if ($status !== null) {
       switch ($status) {
+        case self::AUDIT_STATUS_PARTIAL:
+          $where[] = qsprintf(
+            $conn_r,
+            'commit.auditStatus = %d',
+            PhabricatorAuditCommitStatusConstants::PARTIALLY_AUDITED);
+          break;
+        case self::AUDIT_STATUS_ACCEPTED:
+          $where[] = qsprintf(
+            $conn_r,
+            'commit.auditStatus = %d',
+            PhabricatorAuditCommitStatusConstants::FULLY_AUDITED);
+          break;
         case self::AUDIT_STATUS_CONCERN:
           $where[] = qsprintf(
             $conn_r,
@@ -462,6 +476,8 @@ final class DiffusionCommitQuery
             self::AUDIT_STATUS_ANY,
             self::AUDIT_STATUS_OPEN,
             self::AUDIT_STATUS_CONCERN,
+            self::AUDIT_STATUS_ACCEPTED,
+            self::AUDIT_STATUS_PARTIAL,
           );
           throw new Exception(
             "Unknown audit status '{$status}'! Valid statuses are: ".
