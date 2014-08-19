@@ -21,7 +21,8 @@ final class PhabricatorFile extends PhabricatorFileDAO
     PhabricatorTokenReceiverInterface,
     PhabricatorSubscribableInterface,
     PhabricatorFlaggableInterface,
-    PhabricatorPolicyInterface {
+    PhabricatorPolicyInterface,
+    PhabricatorDestructibleInterface {
 
   const ONETIME_TEMPORARY_TOKEN_TYPE = 'file:onetime';
   const STORAGE_FORMAT_RAW  = 'raw';
@@ -1044,5 +1045,16 @@ final class PhabricatorFile extends PhabricatorFileDAO
     );
   }
 
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+      $this->delete();
+    $this->saveTransaction();
+  }
 
 }
