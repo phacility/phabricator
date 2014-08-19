@@ -605,7 +605,6 @@ phutil_register_library_map(array(
     'DrydockLeaseStatus' => 'applications/drydock/constants/DrydockLeaseStatus.php',
     'DrydockLeaseViewController' => 'applications/drydock/controller/DrydockLeaseViewController.php',
     'DrydockLocalCommandInterface' => 'applications/drydock/interface/command/DrydockLocalCommandInterface.php',
-    'DrydockLocalHostBlueprintImplementation' => 'applications/drydock/blueprint/DrydockLocalHostBlueprintImplementation.php',
     'DrydockLog' => 'applications/drydock/storage/DrydockLog.php',
     'DrydockLogController' => 'applications/drydock/controller/DrydockLogController.php',
     'DrydockLogListController' => 'applications/drydock/controller/DrydockLogListController.php',
@@ -3357,7 +3356,6 @@ phutil_register_library_map(array(
     'DrydockLeaseStatus' => 'DrydockConstants',
     'DrydockLeaseViewController' => 'DrydockLeaseController',
     'DrydockLocalCommandInterface' => 'DrydockCommandInterface',
-    'DrydockLocalHostBlueprintImplementation' => 'DrydockBlueprintImplementation',
     'DrydockLog' => array(
       'DrydockDAO',
       'PhabricatorPolicyInterface',
