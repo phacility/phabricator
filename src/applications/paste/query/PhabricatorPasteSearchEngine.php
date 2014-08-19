@@ -27,7 +27,7 @@ final class PhabricatorPasteSearchEngine
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new PhabricatorPasteQuery())
-      ->needRawContent(true)
+      ->needContent(true)
       ->withAuthorPHIDs($saved->getParameter('authorPHIDs', array()))
       ->withLanguages($saved->getParameter('languages', array()));
 
@@ -149,7 +149,7 @@ final class PhabricatorPasteSearchEngine
       $created = phabricator_date($paste->getDateCreated(), $viewer);
       $author = $handles[$paste->getAuthorPHID()]->renderLink();
 
-      $lines = phutil_split_lines($paste->getRawContent());
+      $lines = phutil_split_lines($paste->getContent());
 
       $preview = id(new PhabricatorSourceCodeView())
         ->setLimit(5)
