@@ -325,26 +325,31 @@ abstract class DifferentialChangesetHTMLRenderer
 
         $readable_key = idx($key_map, $key, $key);
 
-        $rows[] = phutil_tag('tr', array(), array(
-          phutil_tag('th', array(), $readable_key),
-          phutil_tag('td', array('class' => 'oval'), $oval),
-          phutil_tag('td', array('class' => 'nval'), $nval),
-        ));
+        $row = array(
+          $readable_key,
+          $oval,
+          $nval
+        );
+        $rows[] = $row;
+
       }
     }
 
-    array_unshift(
-      $rows,
-      phutil_tag('tr', array('class' => 'property-table-header'), array(
-        phutil_tag('th', array(), pht('Property Changes')),
-        phutil_tag('td', array('class' => 'oval'), pht('Old Value')),
-        phutil_tag('td', array('class' => 'nval'), pht('New Value')),
-      )));
-
+    $classes = array('', 'oval', 'nval');
+    $headers = array(
+      pht('Property'),
+      pht('Old Value'),
+      pht('New Value'),
+    );
+    $table = id(new AphrontTableView($rows))
+      ->setHeaders($headers)
+      ->setColumnClasses($classes);
     return phutil_tag(
-      'table',
-      array('class' => 'differential-property-table'),
-      $rows);
+      'div',
+      array(
+        'class' => 'differential-property-table',
+      ),
+      $table);
   }
 
   public function renderShield($message, $force = 'default') {
