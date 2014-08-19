@@ -217,7 +217,7 @@ td.cov-I {
 }
 
 .differential-image-stage {
-  overflow: scroll;
+  overflow: auto;
 }
 
 .differential-meta-notice {
