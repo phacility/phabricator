@@ -92,7 +92,6 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
             'a',
             array(
               'class' => 'login-to-comment button',
-              'sigil' => 'workflow',
               'href' => $uri
             ),
             pht('Login to Comment')));
