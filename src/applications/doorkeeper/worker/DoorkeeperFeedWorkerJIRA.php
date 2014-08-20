@@ -55,6 +55,15 @@ final class DoorkeeperFeedWorkerJIRA extends DoorkeeperFeedWorker {
     }
 
     $story_text = $this->renderStoryText();
+    if (!strstr($story_text, "created")
+        && !strstr($story_text, "updated D")  // if someone attaches a JIRA issue
+        && !strstr($story_text, "reclaimed")
+        && !strstr($story_text, "abandoned")
+        && !strstr($story_text, "closed")
+        && !strstr($story_text, "commandeered")) {
+      $this->log("Skipping an uninteresting update\n");
+      return;
+    }
 
     $xobjs = mgroup($xobjs, 'getApplicationDomain');
     foreach ($xobjs as $domain => $xobj_list) {
