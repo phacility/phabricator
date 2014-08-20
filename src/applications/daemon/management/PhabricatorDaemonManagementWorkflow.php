@@ -357,6 +357,12 @@ abstract class PhabricatorDaemonManagementWorkflow
       $pid = $daemon->getPID();
       $name = $daemon->getName();
 
+      if (!$pid) {
+        $console->writeOut("%s\n", pht("Daemon '%s' has no PID!", $name));
+        unset($daemons[$key]);
+        continue;
+      }
+
       switch ($signo) {
         case SIGINT:
           $message = pht("Interrupting daemon '%s' (%s)...", $name, $pid);
