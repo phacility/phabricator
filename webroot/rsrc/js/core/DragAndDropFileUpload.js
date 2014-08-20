@@ -158,7 +158,13 @@ JX.install('PhabricatorDragAndDropFileUpload', {
               if (!/^image\//.test(item.type)) {
                 continue;
               }
-              this._sendRequest(item.getAsFile());
+              var spec = item.getAsFile();
+              // pasted files don't have a name; see
+              // https://code.google.com/p/chromium/issues/detail?id=361145
+              if (!spec.name) {
+                spec.name = 'pasted_file';
+              }
+              this._sendRequest(spec);
             }
           }));
       }
