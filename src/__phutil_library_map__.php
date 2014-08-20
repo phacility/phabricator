@@ -3575,6 +3575,7 @@ phutil_register_library_map(array(
     'HeraldTranscript' => array(
       'HeraldDAO',
       'PhabricatorPolicyInterface',
+      'PhabricatorDestructibleInterface',
     ),
     'HeraldTranscriptController' => 'HeraldController',
     'HeraldTranscriptGarbageCollector' => 'PhabricatorGarbageCollector',
