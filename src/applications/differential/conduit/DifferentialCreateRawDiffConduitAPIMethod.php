@@ -59,7 +59,11 @@ final class DifferentialCreateRawDiffConduitAPIMethod
       $diff->setRepositoryPHID($repository->getPHID());
     }
 
-    $diff->save();
+    id(new DifferentialDiffEditor())
+      ->setActor($viewer)
+      ->setContentSource(
+        PhabricatorContentSource::newFromConduitRequest($request))
+      ->saveDiff($diff);
 
     return $this->buildDiffInfoDictionary($diff);
   }

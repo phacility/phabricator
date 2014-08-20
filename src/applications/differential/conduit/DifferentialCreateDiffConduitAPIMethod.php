@@ -162,7 +162,11 @@ final class DifferentialCreateDiffConduitAPIMethod
         break;
     }
 
-    $diff->save();
+    id(new DifferentialDiffEditor())
+      ->setActor($viewer)
+      ->setContentSource(
+        PhabricatorContentSource::newFromConduitRequest($request))
+      ->saveDiff($diff);
 
     // If we didn't get an explicit `repositoryPHID` (which means the client is
     // old, or couldn't figure out which repository the working copy belongs
