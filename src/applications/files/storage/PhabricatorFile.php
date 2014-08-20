@@ -318,13 +318,17 @@ final class PhabricatorFile extends PhabricatorFileDAO
       $params);
 
     $old_engine = $this->instantiateStorageEngine();
+    $old_identifier = $this->getStorageEngine();
     $old_handle = $this->getStorageHandle();
 
     $this->setStorageEngine($new_identifier);
     $this->setStorageHandle($new_handle);
     $this->save();
 
-    $old_engine->deleteFile($old_handle);
+    $this->deleteFileDataIfUnused(
+      $old_engine,
+      $old_identifier,
+      $old_handle);
 
     return $this;
   }
@@ -438,29 +442,42 @@ final class PhabricatorFile extends PhabricatorFileDAO
       $ret = parent::delete();
     $this->saveTransaction();
 
-    // Check to see if other files are using storage
-    $other_file = id(new PhabricatorFile())->loadAllWhere(
-      'storageEngine = %s AND storageHandle = %s AND
-      storageFormat = %s AND id != %d LIMIT 1',
+    $this->deleteFileDataIfUnused(
+      $this->instantiateStorageEngine(),
       $this->getStorageEngine(),
-      $this->getStorageHandle(),
-      $this->getStorageFormat(),
-      $this->getID());
-
-    // If this is the only file using the storage, delete storage
-    if (!$other_file) {
-      $engine = $this->instantiateStorageEngine();
-      try {
-        $engine->deleteFile($this->getStorageHandle());
-      } catch (Exception $ex) {
-        // In the worst case, we're leaving some data stranded in a storage
-        // engine, which is fine.
-        phlog($ex);
-      }
-    }
+      $this->getStorageHandle());
 
     return $ret;
   }
+
+
+  /**
+   * Destroy stored file data if there are no remaining files which reference
+   * it.
+   */
+  private function deleteFileDataIfUnused(
+    PhabricatorFileStorageEngine $engine,
+    $engine_identifier,
+    $handle) {
+
+    // Check to see if any files are using storage.
+    $usage = id(new PhabricatorFile())->loadAllWhere(
+      'storageEngine = %s AND storageHandle = %s LIMIT 1',
+      $engine_identifier,
+      $handle);
+
+    // If there are no files using the storage, destroy the actual storage.
+    if (!$usage) {
+      try {
+        $engine->deleteFile($handle);
+      } catch (Exception $ex) {
+        // In the worst case, we're leaving some data stranded in a storage
+        // engine, which is not a big deal.
+        phlog($ex);
+      }
+    }
+  }
+
 
   public static function hashFileContent($data) {
     return sha1($data);
