@@ -291,7 +291,7 @@ final class PhabricatorSettingsPanelSSHKeys
         array(
           'name' => 'id_rsa_phabricator.key',
           'ttl' => time() + (60 * 10),
-          'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
+          'viewPolicy' => $viewer->getPHID(),
         ));
 
       list($type, $body, $comment) = self::parsePublicKey($public_key);
