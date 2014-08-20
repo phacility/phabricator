@@ -495,7 +495,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
   }
 
   public function getInfoURI() {
-    return '/file/info/'.$this->getPHID().'/';
+    return '/'.$this->getMonogram();
   }
 
   public function getBestURI() {

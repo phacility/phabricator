@@ -3,20 +3,36 @@
 final class PhabricatorFileInfoController extends PhabricatorFileController {
 
   private $phid;
+  private $id;
+
+  public function shouldAllowPublic() {
+    return true;
+  }
 
   public function willProcessRequest(array $data) {
-    $this->phid = $data['phid'];
+    $this->phid = idx($data, 'phid');
+    $this->id = idx($data, 'id');
   }
 
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
 
+    if ($this->phid) {
+      $file = id(new PhabricatorFileQuery())
+        ->setViewer($user)
+        ->withPHIDs(array($this->phid))
+        ->executeOne();
+
+      if (!$file) {
+        return new Aphront404Response();
+      }
+      return id(new AphrontRedirectResponse())->setURI($file->getInfoURI());
+    }
     $file = id(new PhabricatorFileQuery())
       ->setViewer($user)
-      ->withPHIDs(array($this->phid))
+      ->withIDs(array($this->id))
       ->executeOne();
-
     if (!$file) {
       return new Aphront404Response();
     }
