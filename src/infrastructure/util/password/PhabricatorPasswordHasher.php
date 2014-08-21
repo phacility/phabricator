@@ -407,7 +407,9 @@ abstract class PhabricatorPasswordHasher extends Phobject {
       $current_hasher = PhabricatorPasswordHasher::getHasherForHash($hash);
       return $current_hasher->getHumanReadableName();
     } catch (Exception $ex) {
-      return pht('Unknown');
+      $info = self::parseHashFromStorage($hash);
+      $name = $info['name'];
+      return pht('Unknown ("%s")', $name);
     }
   }
 

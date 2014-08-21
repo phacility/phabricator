@@ -126,7 +126,28 @@ final class PhabricatorSettingsPanelPassword
 
     $hash_envelope = new PhutilOpaqueEnvelope($user->getPasswordHash());
     if (strlen($hash_envelope->openEnvelope())) {
-      if (PhabricatorPasswordHasher::canUpgradeHash($hash_envelope)) {
+      try {
+        $can_upgrade = PhabricatorPasswordHasher::canUpgradeHash(
+          $hash_envelope);
+      } catch (PhabricatorPasswordHasherUnavailableException $ex) {
+        $can_upgrade = false;
+
+        // Only show this stuff if we aren't on the reset workflow. We can
+        // do resets regardless of the old hasher's availability.
+        if (!$token) {
+          $errors[] = pht(
+            'Your password is currently hashed using an algorithm which is '.
+            'no longer available on this install.');
+          $errors[] = pht(
+            'Because the algorithm implementation is missing, your password '.
+            'can not be used or updated.');
+          $errors[] = pht(
+            'To set a new password, request a password reset link from the '.
+            'login screen and then follow the instructions.');
+        }
+      }
+
+      if ($can_upgrade) {
         $errors[] = pht(
           'The strength of your stored password hash can be upgraded. '.
           'To upgrade, either: log out and log in using your password; or '.
