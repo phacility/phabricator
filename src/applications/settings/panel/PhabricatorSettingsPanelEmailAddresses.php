@@ -211,7 +211,7 @@ final class PhabricatorSettingsPanelEmailAddresses
 
           return id(new AphrontDialogResponse())->setDialog($dialog);
         } catch (AphrontDuplicateKeyQueryException $ex) {
-          $email = pht('Duplicate');
+          $e_email = pht('Duplicate');
           $errors[] = pht('Another user already has this email.');
         }
       }
