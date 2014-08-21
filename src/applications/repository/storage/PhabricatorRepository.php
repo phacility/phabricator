@@ -1319,6 +1319,69 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
 
+  /**
+   * Load the pull frequency for this repository, based on the time since the
+   * last activity.
+   *
+   * We pull rarely used repositories less frequently. This finds the most
+   * recent commit which is older than the current time (which prevents us from
+   * spinning on repositories with a silly commit post-dated to some time in
+   * 2037). We adjust the pull frequency based on when the most recent commit
+   * occurred.
+   *
+   * @param   int   The minimum update interval to use, in seconds.
+   * @return  int   Repository update interval, in seconds.
+   */
+  public function loadUpdateInterval($minimum = 15) {
+    // If a repository is still importing, always pull it as frequently as
+    // possible. This prevents us from hanging for a long time at 99.9% when
+    // importing an inactive repository.
+    if ($this->isImporting()) {
+      return $minimum;
+    }
+
+    $window_start = (PhabricatorTime::getNow() + $minimum);
+
+    $table = id(new PhabricatorRepositoryCommit());
+    $last_commit = queryfx_one(
+      $table->establishConnection('r'),
+      'SELECT epoch FROM %T
+        WHERE repositoryID = %d AND epoch <= %d
+        ORDER BY epoch DESC LIMIT 1',
+      $table->getTableName(),
+      $this->getID(),
+      $window_start);
+    if ($last_commit) {
+      $time_since_commit = ($window_start - $last_commit['epoch']);
+
+      $last_few_days = phutil_units('3 days in seconds');
+
+      if ($time_since_commit <= $last_few_days) {
+        // For repositories with activity in the recent past, we wait one
+        // extra second for every 10 minutes since the last commit. This
+        // shorter backoff is intended to handle weekends and other short
+        // breaks from development.
+        $smart_wait = ($time_since_commit / 600);
+      } else {
+        // For repositories without recent activity, we wait one extra second
+        // for every 4 minutes since the last commit. This longer backoff
+        // handles rarely used repositories, up to the maximum.
+        $smart_wait = ($time_since_commit / 240);
+      }
+
+      // We'll never wait more than 6 hours to pull a repository.
+      $longest_wait = phutil_units('6 hours in seconds');
+      $smart_wait = min($smart_wait, $longest_wait);
+
+      $smart_wait = max($minimum, $smart_wait);
+    } else {
+      $smart_wait = $minimum;
+    }
+
+    return $smart_wait;
+  }
+
+
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
 

@@ -207,6 +207,14 @@ final class DiffusionRepositoryEditMainController
       ->setHref($this->getRepositoryControllerURI($repository, 'edit/basic/'));
     $view->addAction($edit);
 
+    $edit = id(new PhabricatorActionView())
+      ->setIcon('fa-refresh')
+      ->setName(pht('Update Now'))
+      ->setWorkflow(true)
+      ->setHref(
+        $this->getRepositoryControllerURI($repository, 'edit/update/'));
+    $view->addAction($edit);
+
     $activate = id(new PhabricatorActionView())
       ->setHref(
         $this->getRepositoryControllerURI($repository, 'edit/activate/'))
@@ -279,6 +287,10 @@ final class DiffusionRepositoryEditMainController
     $view->addProperty(
       pht('Status'),
       $this->buildRepositoryStatus($repository));
+
+    $view->addProperty(
+      pht('Update Frequency'),
+      $this->buildRepositoryUpdateInterval($repository));
 
     $description = $repository->getDetail('description');
     $view->addSectionHeader(pht('Description'));
@@ -942,14 +954,16 @@ final class DiffusionRepositoryEditMainController
               ->setNote($message->getParameter('message')));
           return $view;
         case PhabricatorRepositoryStatusMessage::CODE_OKAY:
+          $ago = (PhabricatorTime::getNow() - $message->getEpoch());
           $view->addItem(
             id(new PHUIStatusItemView())
               ->setIcon(PHUIStatusItemView::ICON_ACCEPT, 'green')
               ->setTarget(pht('Updates OK'))
               ->setNote(
                 pht(
-                  'Last updated %s.',
-                  phabricator_datetime($message->getEpoch(), $viewer))));
+                  'Last updated %s (%s ago).',
+                  phabricator_datetime($message->getEpoch(), $viewer),
+                  phutil_format_relative_time_detailed($ago))));
           break;
       }
     } else {
@@ -1020,11 +1034,33 @@ final class DiffusionRepositoryEditMainController
         id(new PHUIStatusItemView())
           ->setIcon(PHUIStatusItemView::ICON_UP, 'indigo')
           ->setTarget(pht('Prioritized'))
-          ->setNote(pht('This repository will be updated soon.')));
+          ->setNote(pht('This repository will be updated soon!')));
     }
 
     return $view;
   }
+
+  private function buildRepositoryUpdateInterval(
+    PhabricatorRepository $repository) {
+
+    $smart_wait = $repository->loadUpdateInterval();
+
+    $doc_href = PhabricatorEnv::getDoclink(
+      'Diffusion User Guide: Repository Updates');
+
+    return array(
+      phutil_format_relative_time_detailed($smart_wait),
+      " \xC2\xB7 ",
+      phutil_tag(
+        'a',
+        array(
+          'href' => $doc_href,
+          'target' => '_blank',
+        ),
+        pht('Learn More')),
+    );
+  }
+
 
   private function buildMirrorActions(
     PhabricatorRepository $repository) {

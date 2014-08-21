@@ -92,6 +92,7 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
             'delete/' => 'DiffusionRepositoryEditDeleteController',
             'hosting/' => 'DiffusionRepositoryEditHostingController',
             '(?P<serve>serve)/' => 'DiffusionRepositoryEditHostingController',
+            'update/' => 'DiffusionRepositoryEditUpdateController',
           ),
           'pathtree/(?P<dblob>.*)' => 'DiffusionPathTreeController',
           'mirror/' => array(
