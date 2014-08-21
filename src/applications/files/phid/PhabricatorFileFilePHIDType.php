@@ -30,7 +30,7 @@ final class PhabricatorFileFilePHIDType extends PhabricatorPHIDType {
 
       $id = $file->getID();
       $name = $file->getName();
-      $uri = $file->getBestURI();
+      $uri = $file->getInfoURI();
 
       $handle->setName("F{$id}");
       $handle->setFullName("F{$id}: {$name}");
