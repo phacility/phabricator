@@ -100,7 +100,7 @@ final class HarbormasterBuildEngine extends Phobject {
   private function updateBuild(HarbormasterBuild $build) {
     if (($build->getBuildStatus() == HarbormasterBuild::STATUS_PENDING) ||
         ($build->isRestarting())) {
-      $this->destroyBuildTargets($build);
+      $this->restartBuild($build);
       $build->setBuildStatus(HarbormasterBuild::STATUS_BUILDING);
       $build->save();
     }
@@ -122,38 +122,28 @@ final class HarbormasterBuildEngine extends Phobject {
     }
   }
 
-  private function destroyBuildTargets(HarbormasterBuild $build) {
+  private function restartBuild(HarbormasterBuild $build) {
+
+    // We're restarting the build, so release all previous artifacts.
     $this->releaseAllArtifacts($build);
 
-    $targets = id(new HarbormasterBuildTargetQuery())
-      ->setViewer($this->getViewer())
-      ->withBuildPHIDs(array($build->getPHID()))
-      ->execute();
+    // Increment the build generation counter on the build.
+    $build->setBuildGeneration($build->getBuildGeneration() + 1);
 
-    if (!$targets) {
-      return;
-    }
+    // TODO: Currently running targets should periodically check their build
+    // generation (which won't have changed) against the build's generation.
+    // If it is different, they should automatically stop what they're doing
+    // and abort.
 
-    $target_phids = mpull($targets, 'getPHID');
-
-    $artifacts = id(new HarbormasterBuildArtifactQuery())
-      ->setViewer($this->getViewer())
-      ->withBuildTargetPHIDs($target_phids)
-      ->execute();
-
-    foreach ($artifacts as $artifact) {
-      $artifact->delete();
-    }
-
-    foreach ($targets as $target) {
-      $target->delete();
-    }
+    // Previously we used to delete targets, logs and artifacts here.  Instead
+    // leave them around so users can view previous generations of this build.
   }
 
   private function updateBuildSteps(HarbormasterBuild $build) {
     $targets = id(new HarbormasterBuildTargetQuery())
       ->setViewer($this->getViewer())
       ->withBuildPHIDs(array($build->getPHID()))
+      ->withBuildGenerations(array($build->getBuildGeneration()))
       ->execute();
 
     $this->updateWaitingTargets($targets);
@@ -454,6 +444,7 @@ final class HarbormasterBuildEngine extends Phobject {
     $targets = id(new HarbormasterBuildTargetQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withBuildPHIDs(array($build->getPHID()))
+      ->withBuildGenerations(array($build->getBuildGeneration()))
       ->execute();
 
     if (count($targets) === 0) {

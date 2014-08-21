@@ -6,6 +6,7 @@ final class HarbormasterBuild extends HarbormasterDAO
   protected $buildablePHID;
   protected $buildPlanPHID;
   protected $buildStatus;
+  protected $buildGeneration;
 
   private $buildable = self::ATTACHABLE;
   private $buildPlan = self::ATTACHABLE;

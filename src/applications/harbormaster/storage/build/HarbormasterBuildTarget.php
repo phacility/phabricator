@@ -12,6 +12,7 @@ final class HarbormasterBuildTarget extends HarbormasterDAO
   protected $targetStatus;
   protected $dateStarted;
   protected $dateCompleted;
+  protected $buildGeneration;
 
   const STATUS_PENDING = 'target/pending';
   const STATUS_BUILDING = 'target/building';
@@ -82,7 +83,8 @@ final class HarbormasterBuildTarget extends HarbormasterDAO
       ->setClassName($build_step->getClassName())
       ->setDetails($build_step->getDetails())
       ->setTargetStatus(self::STATUS_PENDING)
-      ->setVariables($variables);
+      ->setVariables($variables)
+      ->setBuildGeneration($build->getBuildGeneration());
   }
 
   public function getConfiguration() {

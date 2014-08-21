@@ -14,6 +14,7 @@ final class HarbormasterBuildViewController
     $viewer = $request->getUser();
 
     $id = $this->id;
+    $generation = $request->getInt('g');
 
     $build = id(new HarbormasterBuildQuery())
       ->setViewer($viewer)
@@ -52,12 +53,17 @@ final class HarbormasterBuildViewController
       '/'.$build->getBuildable()->getMonogram());
     $crumbs->addTextCrumb($title);
 
+    if ($generation === null || $generation > $build->getBuildGeneration() ||
+      $generation < 0) {
+      $generation = $build->getBuildGeneration();
+    }
+
     $build_targets = id(new HarbormasterBuildTargetQuery())
       ->setViewer($viewer)
       ->needBuildSteps(true)
       ->withBuildPHIDs(array($build->getPHID()))
+      ->withBuildGenerations(array($generation))
       ->execute();
-
 
     if ($build_targets) {
       $messages = id(new HarbormasterBuildMessageQuery())
@@ -435,9 +441,12 @@ final class HarbormasterBuildViewController
       $handles[$build->getBuildPlanPHID()]->renderLink());
 
     $properties->addProperty(
+      pht('Restarts'),
+      $build->getBuildGeneration());
+
+    $properties->addProperty(
       pht('Status'),
       $this->getStatus($build));
-
   }
 
   private function getStatus(HarbormasterBuild $build) {
