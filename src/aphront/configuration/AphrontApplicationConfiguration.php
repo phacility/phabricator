@@ -14,7 +14,7 @@ abstract class AphrontApplicationConfiguration {
   abstract public function getURIMap();
   abstract public function buildRequest();
   abstract public function build404Controller();
-  abstract public function buildRedirectController($uri);
+  abstract public function buildRedirectController($uri, $external);
 
   final public function setRequest(AphrontRequest $request) {
     $this->request = $request;
@@ -96,7 +96,10 @@ abstract class AphrontApplicationConfiguration {
         $https_uri = $request->getRequestURI();
         $https_uri->setDomain($request->getHost());
         $https_uri->setProtocol('https');
-        return $this->buildRedirectController($https_uri);
+
+        // In this scenario, we'll be redirecting to HTTPS using an absolute
+        // URI, so we need to permit an external redirect.
+        return $this->buildRedirectController($https_uri, true);
       }
     }
 
@@ -188,7 +191,9 @@ abstract class AphrontApplicationConfiguration {
 
         if ($controller && !$request->isHTTPPost()) {
           $slash_uri = $request->getRequestURI()->setPath($path.'/');
-          return $this->buildRedirectController($slash_uri);
+
+          $external = strlen($request->getRequestURI()->getDomain());
+          return $this->buildRedirectController($slash_uri, $external);
         }
       }
       return $this->build404Controller();
