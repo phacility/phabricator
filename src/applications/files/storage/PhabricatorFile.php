@@ -455,7 +455,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
    * Destroy stored file data if there are no remaining files which reference
    * it.
    */
-  private function deleteFileDataIfUnused(
+  public function deleteFileDataIfUnused(
     PhabricatorFileStorageEngine $engine,
     $engine_identifier,
     $handle) {
@@ -644,7 +644,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return $supported;
   }
 
-  protected function instantiateStorageEngine() {
+  public function instantiateStorageEngine() {
     return self::buildEngine($this->getStorageEngine());
   }
 
