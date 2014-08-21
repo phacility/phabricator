@@ -120,7 +120,7 @@ final class PhabricatorAuthOneTimeLoginController
       $next = '/';
       if (!PhabricatorPasswordAuthProvider::getPasswordProvider()) {
         $next = '/settings/panel/external/';
-      } else if (PhabricatorEnv::getEnvConfig('account.editable')) {
+      } else {
 
         // We're going to let the user reset their password without knowing
         // the old one. Generate a one-time token for that.

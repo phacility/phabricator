@@ -16,15 +16,8 @@ final class PhabricatorSettingsPanelPassword
   }
 
   public function isEnabled() {
-    // There's no sense in showing a change password panel if the user
-    // can't change their password...
-
-    if (!PhabricatorEnv::getEnvConfig('account.editable')) {
-      return false;
-    }
-
-    // ...or this install doesn't support password authentication at all.
-
+    // There's no sense in showing a change password panel if this install
+    // doesn't support password authentication.
     if (!PhabricatorPasswordAuthProvider::getPasswordProvider()) {
       return false;
     }
