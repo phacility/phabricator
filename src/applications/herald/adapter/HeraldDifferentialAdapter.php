@@ -27,7 +27,7 @@ abstract class HeraldDifferentialAdapter extends HeraldAdapter {
           ->needProjectPHIDs(true)
           ->executeOne();
       }
-      $this->repository = false;
+      $this->repository = $repository;
     }
 
     return $this->repository;
