@@ -15,6 +15,7 @@ final class PhabricatorDaemonLog extends PhabricatorDaemonDAO
   protected $pid;
   protected $argv;
   protected $explicitArgv = array();
+  protected $envHash;
   protected $status;
 
   public function getConfiguration() {

@@ -221,6 +221,15 @@ final class PhabricatorEnv {
     return $env;
   }
 
+  public static function calculateEnvironmentHash() {
+    $keys = array_keys(self::getAllConfigKeys());
+    $values = array();
+    foreach ($keys as $key) {
+      $values[$key] = self::getEnvConfigIfExists($key);
+    }
+    return PhabricatorHash::digest(json_encode($values));
+  }
+
 
 /* -(  Reading Configuration  )---------------------------------------------- */
 
