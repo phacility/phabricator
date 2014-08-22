@@ -34,6 +34,7 @@ final class DiffusionReadmeQueryConduitAPIMethod
 
     $best = -1;
     $readme = '';
+    $best_render_type = 'plain';
     foreach ($paths as $result_path) {
       $file_type = $result_path->getFileType();
       if (($file_type != ArcanistDiffChangeType::FILE_NORMAL) &&
@@ -45,7 +46,7 @@ final class DiffusionReadmeQueryConduitAPIMethod
       $path = strtolower($result_path->getPath());
 
       if ($path === 'readme') {
-        $path .= '.txt';
+        $path .= '.remarkup';
       }
 
       if (strncmp($path, 'readme.', 7) !== 0) {
@@ -56,21 +57,30 @@ final class DiffusionReadmeQueryConduitAPIMethod
       switch (substr($path, 7)) {
         case 'remarkup':
           $priority = 100;
+          $render_type = 'remarkup';
           break;
         case 'rainbow':
           $priority = 90;
+          $render_type = 'rainbow';
           break;
         case 'md':
           $priority = 50;
+          $render_type = 'remarkup';
           break;
         case 'txt':
           $priority = 10;
+          $render_type = 'plain';
+          break;
+        default:
+          $priority = 0;
+          $render_type = 'plain';
           break;
       }
 
       if ($priority > $best) {
         $best = $priority;
         $readme = $result_path;
+        $best_render_type = $render_type;
       }
     }
 
@@ -98,47 +108,50 @@ final class DiffusionReadmeQueryConduitAPIMethod
         )));
     $readme_content = $file_content->getCorpus();
 
-    if (preg_match('/\\.txt$/', $readme->getPath())) {
-      $readme_content = phutil_escape_html_newlines($readme_content);
+    switch ($best_render_type) {
+      case 'plain':
+        $readme_content = phutil_escape_html_newlines($readme_content);
+        $class = null;
+        break;
+      case 'rainbow':
+        $highlighter = new PhutilRainbowSyntaxHighlighter();
+        $readme_content = $highlighter
+          ->getHighlightFuture($readme_content)
+          ->resolve();
+        $readme_content = phutil_escape_html_newlines($readme_content);
 
-      $class = null;
-    } else if (preg_match('/\\.rainbow$/', $readme->getPath())) {
-      $highlighter = new PhutilRainbowSyntaxHighlighter();
-      $readme_content = $highlighter
-        ->getHighlightFuture($readme_content)
-        ->resolve();
-      $readme_content = phutil_escape_html_newlines($readme_content);
+        require_celerity_resource('syntax-highlighting-css');
+        $class = 'remarkup-code';
+        break;
+      case 'remarkup':
+        // TODO: This is sketchy, but make sure we hit the markup cache.
+        $markup_object = id(new PhabricatorMarkupOneOff())
+          ->setEngineRuleset('diffusion-readme')
+          ->setContent($readme_content);
+        $markup_field = 'default';
 
-      require_celerity_resource('syntax-highlighting-css');
-      $class = 'remarkup-code';
-    } else {
-      // TODO: This is sketchy, but make sure we hit the markup cache.
-      $markup_object = id(new PhabricatorMarkupOneOff())
-        ->setEngineRuleset('diffusion-readme')
-        ->setContent($readme_content);
-      $markup_field = 'default';
+        $readme_content = id(new PhabricatorMarkupEngine())
+          ->setViewer($request->getUser())
+          ->addObject($markup_object, $markup_field)
+          ->process()
+          ->getOutput($markup_object, $markup_field);
 
-      $readme_content = id(new PhabricatorMarkupEngine())
-        ->setViewer($request->getUser())
-        ->addObject($markup_object, $markup_field)
-        ->process()
-        ->getOutput($markup_object, $markup_field);
+        $engine = $markup_object->newMarkupEngine($markup_field);
+        $toc = PhutilRemarkupHeaderBlockRule::renderTableOfContents($engine);
+        if ($toc) {
+          $toc = phutil_tag_div(
+            'phabricator-remarkup-toc',
+            array(
+              phutil_tag_div(
+                'phabricator-remarkup-toc-header',
+                pht('Table of Contents')),
+              $toc,
+            ));
+          $readme_content = array($toc, $readme_content);
+        }
 
-      $engine = $markup_object->newMarkupEngine($markup_field);
-      $toc = PhutilRemarkupHeaderBlockRule::renderTableOfContents($engine);
-      if ($toc) {
-        $toc = phutil_tag_div(
-          'phabricator-remarkup-toc',
-          array(
-            phutil_tag_div(
-              'phabricator-remarkup-toc-header',
-              pht('Table of Contents')),
-            $toc,
-          ));
-        $readme_content = array($toc, $readme_content);
-      }
-
-      $class = 'phabricator-remarkup';
+        $class = 'phabricator-remarkup';
+        break;
     }
 
     $readme_content = phutil_tag(
