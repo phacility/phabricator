@@ -530,13 +530,15 @@ final class PhabricatorMarkupEngine {
 
     foreach ($content_blocks as $content_block) {
       $engine->markupText($content_block);
-      $ids = $engine->getTextMetadata(
+      $phids = $engine->getTextMetadata(
         PhabricatorEmbedFileRemarkupRule::KEY_EMBED_FILE_PHIDS,
         array());
-      $files += $ids;
+      foreach ($phids as $phid) {
+        $files[$phid] = $phid;
+      }
     }
 
-    return $files;
+    return array_values($files);
   }
 
   /**
