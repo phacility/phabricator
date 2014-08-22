@@ -163,6 +163,7 @@ final class PhabricatorPasteSearchEngine
         ),
         $preview);
 
+      $created = phabricator_datetime($paste->getDateCreated(), $viewer);
       $line_count = count($lines);
       $line_count = pht(
         '%s Line(s)',
@@ -176,6 +177,7 @@ final class PhabricatorPasteSearchEngine
         ->setHref('/P'.$paste->getID())
         ->setObject($paste)
         ->addByline(pht('Author: %s', $author))
+        ->addIcon('none', $created)
         ->addIcon('none', $line_count)
         ->appendChild($source_code);
 
