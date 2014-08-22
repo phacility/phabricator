@@ -20,13 +20,17 @@ abstract class HeraldDifferentialAdapter extends HeraldAdapter {
   public function loadRepository() {
     if ($this->repository === false) {
       $repository_phid = $this->getObject()->getRepositoryPHID();
+
       if ($repository_phid) {
         $repository = id(new PhabricatorRepositoryQuery())
           ->setViewer(PhabricatorUser::getOmnipotentUser())
           ->withPHIDs(array($repository_phid))
           ->needProjectPHIDs(true)
           ->executeOne();
+      } else {
+        $repository = null;
       }
+
       $this->repository = $repository;
     }
 
