@@ -61,7 +61,7 @@ value of `maniphest.custom-field-definitions`):
     },
     "mycompany:company-jobs": {
       "name": "Job Role",
-      "type: "select",
+      "type": "select",
       "options": {
         "mycompany:engineer": "Engineer",
         "mycompany:nonengineer": "Other"
@@ -70,7 +70,7 @@ value of `maniphest.custom-field-definitions`):
     "mycompany:favorite-dinosaur": {
       "name": "Favorite Dinosaur",
       "type": "text"
-    },
+    }
   }
 
 The fields will then appear in the other config option for the application
