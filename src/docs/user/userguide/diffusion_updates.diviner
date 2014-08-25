@@ -101,3 +101,15 @@ as responsive as a hosted repository.
 If a repository has an update scheduled, the Diffusion > (Choose a
 Repository) > Edit Repository interface will show that the the repository is
 prioritized and will be updated soon.
+
+
+Troubleshooting Updates
+=======================
+
+You can manually run a repository update from the command line to troubleshoot
+issues, using the `--trace` flag to get full details:
+
+  phabricator/ $ ./bin/repository update --trace <callsign>
+
+To catch potential issues with permissions, run this command as the same user
+that the daemons run as.
