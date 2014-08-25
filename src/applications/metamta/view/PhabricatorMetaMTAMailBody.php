@@ -154,7 +154,7 @@ final class PhabricatorMetaMTAMailBody {
 
   public function renderHTML() {
     $br = phutil_tag('br');
-    $body = phutil_implode_html(array($br, $br), $this->htmlSections);
+    $body = phutil_implode_html($br, $this->htmlSections);
     return (string)hsprintf('%s', array($body, $br));
   }
 
