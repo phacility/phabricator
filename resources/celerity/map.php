@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => '740b85f8',
+    'core.pkg.css' => 'f1325aa6',
     'core.pkg.js' => 'f67c8265',
     'darkconsole.pkg.js' => 'df001cab',
     'differential.pkg.css' => '36884139',
@@ -112,7 +112,7 @@ return array(
     'rsrc/css/font/font-source-sans-pro.css' => '91d53463',
     'rsrc/css/font/phui-font-icon-base.css' => 'eb84f033',
     'rsrc/css/layout/phabricator-action-header-view.css' => '83e2cc86',
-    'rsrc/css/layout/phabricator-crumbs-view.css' => '7fbf25b8',
+    'rsrc/css/layout/phabricator-crumbs-view.css' => 'a49339de',
     'rsrc/css/layout/phabricator-filetree-view.css' => 'fccf9f82',
     'rsrc/css/layout/phabricator-hovercard-view.css' => '893f4783',
     'rsrc/css/layout/phabricator-side-menu-view.css' => 'a2ccd7bd',
@@ -710,7 +710,7 @@ return array(
     'phabricator-content-source-view-css' => '4b8b05d4',
     'phabricator-core-css' => '40151074',
     'phabricator-countdown-css' => '86b7b0a0',
-    'phabricator-crumbs-view-css' => '7fbf25b8',
+    'phabricator-crumbs-view-css' => 'a49339de',
     'phabricator-dashboard-css' => 'a2bfdcbf',
     'phabricator-drag-and-drop-file-upload' => '8c49f386',
     'phabricator-draggable-list' => 'bfccc644',
