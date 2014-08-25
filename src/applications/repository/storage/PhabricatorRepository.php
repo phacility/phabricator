@@ -1,7 +1,8 @@
 <?php
 
 /**
- * @task uri Repository URI Management
+ * @task uri        Repository URI Management
+ * @task autoclose  Autoclose
  */
 final class PhabricatorRepository extends PhabricatorRepositoryDAO
   implements
@@ -32,6 +33,12 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   const SERVE_OFF = 'off';
   const SERVE_READONLY = 'readonly';
   const SERVE_READWRITE = 'readwrite';
+
+  const BECAUSE_REPOSITORY_IMPORTING = 'auto/importing';
+  const BECAUSE_AUTOCLOSE_DISABLED = 'auto/disabled';
+  const BECAUSE_NOT_ON_AUTOCLOSE_BRANCH = 'auto/nobranch';
+  const BECAUSE_BRANCH_UNTRACKED = 'auto/notrack';
+  const BECAUSE_BRANCH_NOT_AUTOCLOSE = 'auto/noclose';
 
   protected $name;
   protected $callsign;
@@ -586,59 +593,6 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return $this->isBranchInFilter($branch, 'branch-filter');
   }
 
-  public function shouldAutocloseBranch($branch) {
-    if ($this->isImporting()) {
-      return false;
-    }
-
-    if ($this->getDetail('disable-autoclose', false)) {
-      return false;
-    }
-
-    if (!$this->shouldTrackBranch($branch)) {
-      return false;
-    }
-
-    return $this->isBranchInFilter($branch, 'close-commits-filter');
-  }
-
-  public function shouldAutocloseCommit(
-    PhabricatorRepositoryCommit $commit,
-    PhabricatorRepositoryCommitData $data) {
-
-    if ($this->getDetail('disable-autoclose', false)) {
-      return false;
-    }
-
-    switch ($this->getVersionControlSystem()) {
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        return true;
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        break;
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        return true;
-      default:
-        throw new Exception('Unrecognized version control system.');
-    }
-
-    $closeable_flag = PhabricatorRepositoryCommit::IMPORTED_CLOSEABLE;
-    if ($commit->isPartiallyImported($closeable_flag)) {
-      return true;
-    }
-
-    // TODO: Remove this eventually, it's no longer written to by the import
-    // pipeline (however, old tasks may still be queued which don't reflect
-    // the new data format).
-    $branches = $data->getCommitDetail('seenOnBranches', array());
-    foreach ($branches as $branch) {
-      if ($this->shouldAutocloseBranch($branch)) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
   public function formatCommitName($commit_identifier) {
     $vcs = $this->getVersionControlSystem();
 
@@ -658,6 +612,125 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   public function isImporting() {
     return (bool)$this->getDetail('importing', false);
+  }
+
+
+/* -(  Autoclose  )---------------------------------------------------------- */
+
+
+  /**
+   * Determine if autoclose is active for a branch.
+   *
+   * For more details about why, use @{method:shouldSkipAutocloseBranch}.
+   *
+   * @param string Branch name to check.
+   * @return bool True if autoclose is active for the branch.
+   * @task autoclose
+   */
+  public function shouldAutocloseBranch($branch) {
+    return ($this->shouldSkipAutocloseBranch($branch) === null);
+  }
+
+  /**
+   * Determine if autoclose is active for a commit.
+   *
+   * For more details about why, use @{method:shouldSkipAutocloseCommit}.
+   *
+   * @param PhabricatorRepositoryCommit Commit to check.
+   * @return bool True if autoclose is active for the commit.
+   * @task autoclose
+   */
+  public function shouldAutocloseCommit(PhabricatorRepositoryCommit $commit) {
+    return ($this->shouldSkipAutocloseCommit($commit) === null);
+  }
+
+
+  /**
+   * Determine why autoclose should be skipped for a branch.
+   *
+   * This method gives a detailed reason why autoclose will be skipped. To
+   * perform a simple test, use @{method:shouldAutocloseBranch}.
+   *
+   * @param string Branch name to check.
+   * @return const|null Constant identifying reason to skip this branch, or null
+   *   if autoclose is active.
+   * @task autoclose
+   */
+  public function shouldSkipAutocloseBranch($branch) {
+    $all_reason = $this->shouldSkipAllAutoclose();
+    if ($all_reason) {
+      return $all_reason;
+    }
+
+    if (!$this->shouldTrackBranch($branch)) {
+      return self::BECAUSE_BRANCH_UNTRACKED;
+    }
+
+    if (!$this->isBranchInFilter($branch, 'close-commits-filter')) {
+      return self::BECAUSE_BRANCH_NOT_AUTOCLOSE;
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Determine why autoclose should be skipped for a commit.
+   *
+   * This method gives a detailed reason why autoclose will be skipped. To
+   * perform a simple test, use @{method:shouldAutocloseCommit}.
+   *
+   * @param PhabricatorRepositoryCommit Commit to check.
+   * @return const|null Constant identifying reason to skip this commit, or null
+   *   if autoclose is active.
+   * @task autoclose
+   */
+  public function shouldSkipAutocloseCommit(
+    PhabricatorRepositoryCommit $commit) {
+
+    $all_reason = $this->shouldSkipAllAutoclose();
+    if ($all_reason) {
+      return $all_reason;
+    }
+
+    switch ($this->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        return null;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        break;
+      default:
+        throw new Exception('Unrecognized version control system.');
+    }
+
+    $closeable_flag = PhabricatorRepositoryCommit::IMPORTED_CLOSEABLE;
+    if (!$commit->isPartiallyImported($closeable_flag)) {
+      return self::BECAUSE_NOT_ON_AUTOCLOSE_BRANCH;
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Determine why all autoclose operations should be skipped for this
+   * repository.
+   *
+   * @return const|null Constant identifying reason to skip all autoclose
+   *   operations, or null if autoclose operations are not blocked at the
+   *   repository level.
+   * @task autoclose
+   */
+  private function shouldSkipAllAutoclose() {
+    if ($this->isImporting()) {
+      return self::BECAUSE_REPOSITORY_IMPORTING;
+    }
+
+    if ($this->getDetail('disable-autoclose', false)) {
+      return self::BECAUSE_AUTOCLOSE_DISABLED;
+    }
+
+    return null;
   }
 
 

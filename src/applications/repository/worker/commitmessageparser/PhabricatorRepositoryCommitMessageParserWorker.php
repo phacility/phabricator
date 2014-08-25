@@ -68,6 +68,16 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     $commit->setSummary($data->getSummary());
     $commit->save();
 
+    // Figure out if we're going to try to "autoclose" related objects (e.g.,
+    // close linked tasks and related revisions) and, if not, record why we
+    // aren't. Autoclose can be disabled for various reasons at the repository
+    // or commit levels.
+
+    $autoclose_reason = $repository->shouldSkipAutocloseCommit($commit);
+    $data->setCommitDetail('autocloseReason', $autoclose_reason);
+    $should_autoclose = $repository->shouldAutocloseCommit($commit);
+
+
     // When updating related objects, we'll act under an omnipotent user to
     // ensure we can see them, but take actions as either the committer or
     // author (if we recognize their accounts) or the Diffusion application
@@ -90,8 +100,6 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     // someone probably did something very silly, though.)
 
     $revision = null;
-    $should_autoclose = $repository->shouldAutocloseCommit($commit, $data);
-
     if ($revision_id) {
       $revision_query = id(new DifferentialRevisionQuery())
         ->withIDs(array($revision_id))
