@@ -60,11 +60,35 @@ final class PhabricatorSetupCheckMySQL extends PhabricatorSetupCheck {
         ->setMessage($message);
     }
 
-    $stopword_file = queryfx_one($conn_raw, 'SELECT @@ft_stopword_file');
-    $stopword_file = $stopword_file['@@ft_stopword_file'];
-    if ($stopword_file == '(built-in)') {
-      if (!PhabricatorDefaultSearchEngineSelector::shouldUseElasticSearch()) {
+    try {
+      $stopword_file = queryfx_one($conn_raw, 'SELECT @@ft_stopword_file');
+      $stopword_file = $stopword_file['@@ft_stopword_file'];
+    } catch (AphrontQueryException $ex) {
+      $stopword_file = null;
+    }
 
+    if (!PhabricatorDefaultSearchEngineSelector::shouldUseElasticSearch()) {
+      if ($stopword_file === null) {
+        $summary = pht(
+          'Your version of MySQL does not support configuration of a '.
+          'stopword file. You will not be able to find search results for '.
+          'common words.');
+
+        $message = pht(
+          "Your MySQL instance does not support the %s option. You will not ".
+          "be able to find search results for common words. You can gain ".
+          "access to this option by upgrading MySQL to a more recent ".
+          "version.\n\n".
+          "You can ignore this warning if you plan to configure ElasticSearch ".
+          "later, or aren't concerned about searching for common words.",
+          phutil_tag('tt', array(), 'ft_stopword_file'));
+
+        $this->newIssue('mysql.ft_stopword_file')
+          ->setName(pht('MySQL ft_stopword_file Not Supported'))
+          ->setSummary($summary)
+          ->setMessage($message);
+
+      } else if ($stopword_file == '(built-in)') {
         $root = dirname(phutil_get_library_root('phabricator'));
         $stopword_path = $root.'/resources/sql/stopwords.txt';
         $stopword_path = Filesystem::resolvePath($stopword_path);
