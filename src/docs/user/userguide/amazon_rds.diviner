@@ -1,0 +1,27 @@
+@title User Guide: Amazon RDS
+@group config
+
+Discusses using Amazon RDS as a database.
+
+Overview
+========
+
+Phabricator works with Amazon RDS. However, most of our documentation and setup
+checks assume you are using local MySQL, and upstream support is less available
+for RDS.
+
+If you use RDS, you'll need to do a few things a bit differently than you would
+with local MySQL, especially when configuring RDS. This document documents some
+of the differences you'll encounter when using RDS.
+
+Configuration
+=============
+
+The documentation and various setup warnings will sometimes direct you to make
+configuration changes in `my.cnf`. In Amazon RDS, you don't have direct access
+to `my.cnf` and thus can not make these changes in the configuration file.
+
+Instead, you can use [[ http://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithParamGroups.html | DB Parameter Groups ]].
+You can access these from your AWS console and use the web interface to make
+necessary changes. The web UI will give you a user-friendly key-value table:
+just identify the option you need to change, then select a new value for it.

@@ -2,15 +2,21 @@
 
 final class PhabricatorSetupCheckMySQL extends PhabricatorSetupCheck {
 
-  protected function executeChecks() {
+  public static function loadRawConfigValue($key) {
     $conn_raw = id(new PhabricatorUser())->establishConnection('w');
 
-    $max_allowed_packet = queryfx_one(
-      $conn_raw,
-      'SHOW VARIABLES LIKE %s',
-      'max_allowed_packet');
-    $max_allowed_packet = idx($max_allowed_packet, 'Value', PHP_INT_MAX);
+    try {
+      $value = queryfx_one($conn_raw, 'SELECT @@%Q', $key);
+      $value = $value['@@'.$key];
+    } catch (AphrontQueryException $ex) {
+      $value = null;
+    }
 
+    return $value;
+  }
+
+  protected function executeChecks() {
+    $max_allowed_packet = self::loadRawConfigValue('max_allowed_packet');
     $recommended_minimum = 1024 * 1024;
     if ($max_allowed_packet < $recommended_minimum) {
       $message = pht(
@@ -22,11 +28,12 @@ final class PhabricatorSetupCheckMySQL extends PhabricatorSetupCheck {
 
       $this->newIssue('mysql.max_allowed_packet')
         ->setName(pht('Small MySQL "max_allowed_packet"'))
-        ->setMessage($message);
+        ->setMessage($message)
+        ->addMySQLConfig('max_allowed_packet');
     }
 
-    $mode_string = queryfx_one($conn_raw, 'SELECT @@sql_mode');
-    $modes = explode(',', $mode_string['@@sql_mode']);
+    $modes = self::loadRawConfigValue('sql_mode');
+    $modes = explode(',', $modes);
     if (!in_array('STRICT_ALL_TABLES', $modes)) {
       $summary = pht(
         'MySQL is not in strict mode, but using strict mode is strongly '.
@@ -57,16 +64,11 @@ final class PhabricatorSetupCheckMySQL extends PhabricatorSetupCheck {
       $this->newIssue('mysql.mode')
         ->setName(pht('MySQL STRICT_ALL_TABLES Mode Not Set'))
         ->setSummary($summary)
-        ->setMessage($message);
+        ->setMessage($message)
+        ->addMySQLConfig('sql_mode');
     }
 
-    try {
-      $stopword_file = queryfx_one($conn_raw, 'SELECT @@ft_stopword_file');
-      $stopword_file = $stopword_file['@@ft_stopword_file'];
-    } catch (AphrontQueryException $ex) {
-      $stopword_file = null;
-    }
-
+    $stopword_file = self::loadRawConfigValue('ft_stopword_file');
     if (!PhabricatorDefaultSearchEngineSelector::shouldUseElasticSearch()) {
       if ($stopword_file === null) {
         $summary = pht(
@@ -86,7 +88,8 @@ final class PhabricatorSetupCheckMySQL extends PhabricatorSetupCheck {
         $this->newIssue('mysql.ft_stopword_file')
           ->setName(pht('MySQL ft_stopword_file Not Supported'))
           ->setSummary($summary)
-          ->setMessage($message);
+          ->setMessage($message)
+          ->addMySQLConfig('ft_stopword_file');
 
       } else if ($stopword_file == '(built-in)') {
         $root = dirname(phutil_get_library_root('phabricator'));
@@ -133,20 +136,20 @@ final class PhabricatorSetupCheckMySQL extends PhabricatorSetupCheck {
         $this->newIssue('mysql.ft_stopword_file')
           ->setName(pht('MySQL is Using Default Stopword File'))
           ->setSummary($summary)
-          ->setMessage($message);
+          ->setMessage($message)
+          ->addMySQLConfig('ft_stopword_file');
       }
     }
 
-
-    $min_len = queryfx_one($conn_raw, 'SELECT @@ft_min_word_len');
-    $min_len = $min_len['@@ft_min_word_len'];
-    if ($min_len == 4) {
+    $min_len = self::loadRawConfigValue('ft_min_word_len');
+    if ($min_len >= 4) {
       if (!PhabricatorDefaultSearchEngineSelector::shouldUseElasticSearch()) {
         $namespace = PhabricatorEnv::getEnvConfig('storage.default-namespace');
 
         $summary = pht(
-          'MySQL is configured to only index words with at least 4 '.
-          'characters.');
+          'MySQL is configured to only index words with at least %d '.
+          'characters.',
+          $min_len);
 
         $message = pht(
           "Your MySQL instance is configured to use the default minimum word ".
@@ -178,7 +181,8 @@ final class PhabricatorSetupCheckMySQL extends PhabricatorSetupCheck {
         $this->newIssue('mysql.ft_min_word_len')
           ->setName(pht('MySQL is Using Default Minimum Word Length'))
           ->setSummary($summary)
-          ->setMessage($message);
+          ->setMessage($message)
+          ->addMySQLConfig('ft_min_word_len');
       }
     }
 

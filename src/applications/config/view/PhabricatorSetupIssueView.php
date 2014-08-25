@@ -29,6 +29,11 @@ final class PhabricatorSetupIssueView extends AphrontView {
       $description[] = $this->renderPHPConfig($configs);
     }
 
+    $configs = $issue->getMySQLConfig();
+    if ($configs) {
+      $description[] = $this->renderMySQLConfig($configs);
+    }
+
     $configs = $issue->getPhabricatorConfig();
     if ($configs) {
       $description[] = $this->renderPhabricatorConfig($configs);
@@ -347,6 +352,58 @@ final class PhabricatorSetupIssueView extends AphrontView {
       ));
   }
 
+  private function renderMySQLConfig(array $config) {
+    $values = array();
+    foreach ($config as $key) {
+      $value = PhabricatorSetupCheckMySQL::loadRawConfigValue($key);
+      if ($value === null) {
+        $value = phutil_tag(
+          'em',
+          array(),
+          pht('(Not Supported)'));
+      }
+      $values[$key] = $value;
+    }
+
+    $table = $this->renderValueTable($values);
+
+    $doc_href = PhabricatorEnv::getDoclink('User Guide: Amazon RDS');
+    $doc_link = phutil_tag(
+      'a',
+      array(
+        'href' => $doc_href,
+        'target' => '_blank',
+      ),
+      pht('User Guide: Amazon RDS'));
+
+    $info = array();
+    $info[] = phutil_tag(
+      'p',
+      array(),
+      pht(
+        'If you are using Amazon RDS, some of the instructions above may '.
+        'not apply to you. See %s for discussion of Amazon RDS.',
+        $doc_link));
+
+    $table_info = phutil_tag(
+      'p',
+      array(),
+      pht(
+        'The current MySQL configuration has these %d value(s):',
+        count($config)));
+
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'setup-issue-config',
+      ),
+      array(
+        $table_info,
+        $table,
+        $info,
+      ));
+  }
+
   private function renderValueTable(array $dict, array $hidden = array()) {
     $rows = array();
     foreach ($dict as $key => $value) {
@@ -374,6 +431,8 @@ final class PhabricatorSetupIssueView extends AphrontView {
       return phutil_tag('em', array(), 'true');
     } else if ($value === '') {
       return phutil_tag('em', array(), 'empty string');
+    } else if ($value instanceof PhutilSafeHTML) {
+      return $value;
     } else {
       return PhabricatorConfigJSON::prettyPrintJSON($value);
     }

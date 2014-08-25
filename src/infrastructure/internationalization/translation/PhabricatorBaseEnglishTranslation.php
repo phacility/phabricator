@@ -674,6 +674,11 @@ abstract class PhabricatorBaseEnglishTranslation
         'The current Phabricator configuration has these values:',
       ),
 
+      'The current MySQL configuration has these %d value(s):' => array(
+        'The current MySQL configuration has this value:',
+        'The current MySQL configuration has these values:',
+      ),
+
       'To update these %d value(s), run these command(s) from the command line:'
       => array(
         'To update this value, run this command from the command line:',
