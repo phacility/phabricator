@@ -19,12 +19,19 @@ final class PhabricatorDaemonManagementRestartWorkflow
               'seconds. Defaults to __15__ seconds.'),
             'default' => 15,
           ),
+          array(
+            'name' => 'force',
+            'help' => pht(
+              'Also stop running processes that look like daemons but do '.
+              'not have corresponding PID files.'),
+          ),
         ));
   }
 
   public function execute(PhutilArgumentParser $args) {
     $graceful = $args->getArg('graceful');
-    $err = $this->executeStopCommand(array(), $graceful);
+    $force = $args->getArg('force');
+    $err = $this->executeStopCommand(array(), $graceful, $force);
     if ($err) {
       return $err;
     }

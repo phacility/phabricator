@@ -41,6 +41,21 @@ final class PhabricatorDaemonReference {
     return $ref;
   }
 
+  /**
+   * Appropriate for getting @{class:PhabricatorDaemonReference} objects from
+   * the data from @{class:PhabricatorDaemonManagementWorkflow}'s method
+   * @{method:findRunningDaemons}.
+   *
+   * NOTE: the objects are not fully featured and should be used with caution.
+   */
+  public static function newFromRogueDictionary(array $dict) {
+    $ref = new PhabricatorDaemonReference();
+    $ref->name = pht('Rogue %s', idx($dict, 'type'));
+    $ref->pid = idx($dict, 'pid');
+
+    return $ref;
+  }
+
   public function updateStatus($new_status) {
     try {
       if (!$this->daemonLog) {
