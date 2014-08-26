@@ -8,7 +8,10 @@
  * @task load     Loading Stories
  * @task policy   Policy Implementation
  */
-abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
+abstract class PhabricatorFeedStory
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorMarkupInterface {
 
   private $data;
   private $hasViewed;
@@ -19,6 +22,7 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
   private $handles = array();
   private $objects = array();
   private $projectPHIDs = array();
+  private $markupFieldOutput = array();
 
 /* -(  Loading Stories  )---------------------------------------------------- */
 
@@ -150,7 +154,44 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
       $stories[$key]->setHandles($story_handles);
     }
 
+    // Load and process story markup blocks.
+
+    $engine = new PhabricatorMarkupEngine();
+    $engine->setViewer($viewer);
+    foreach ($stories as $story) {
+      foreach ($story->getFieldStoryMarkupFields() as $field) {
+        $engine->addObject($story, $field);
+      }
+    }
+
+    $engine->process();
+
+    foreach ($stories as $story) {
+      foreach ($story->getFieldStoryMarkupFields() as $field) {
+        $story->setMarkupFieldOutput(
+          $field,
+          $engine->getOutput($story, $field));
+      }
+    }
+
     return $stories;
+  }
+
+  public function setMarkupFieldOutput($field, $output) {
+    $this->markupFieldOutput[$field] = $output;
+    return $this;
+  }
+
+  public function getMarkupFieldOutput($field) {
+    if (!array_key_exists($field, $this->markupFieldOutput)) {
+      throw new Exception(
+        pht(
+          'Trying to retrieve markup field key "%s", but this feed story '.
+          'did not request it be rendered.',
+          $field));
+    }
+
+    return $this->markupFieldOutput[$field];
   }
 
   public function setHovercard($hover) {
@@ -374,6 +415,10 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
     return $this->projectPHIDs;
   }
 
+  public function getFieldStoryMarkupFields() {
+    return array();
+  }
+
 
 /* -(  PhabricatorPolicyInterface Implementation  )-------------------------- */
 
@@ -423,6 +468,33 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
 
   public function describeAutomaticCapability($capability) {
     return null;
+  }
+
+
+/* -(  PhabricatorMarkupInterface Implementation )--------------------------- */
+
+
+  public function getMarkupFieldKey($field) {
+    return 'feed:'.$this->getChronologicalKey().':'.$field;
+  }
+
+  public function newMarkupEngine($field) {
+    return PhabricatorMarkupEngine::newMarkupEngine(array());
+  }
+
+  public function getMarkupText($field) {
+    throw new PhutilMethodNotImplementedException();
+  }
+
+  public function didMarkupText(
+    $field,
+    $output,
+    PhutilMarkupEngine $engine) {
+    return $output;
+  }
+
+  public function shouldUseMarkupCache($field) {
+    return true;
   }
 
 }

@@ -4376,7 +4376,10 @@ phutil_register_library_map(array(
     'PhabricatorFeedPublicStreamController' => 'PhabricatorFeedController',
     'PhabricatorFeedQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorFeedSearchEngine' => 'PhabricatorApplicationSearchEngine',
-    'PhabricatorFeedStory' => 'PhabricatorPolicyInterface',
+    'PhabricatorFeedStory' => array(
+      'PhabricatorPolicyInterface',
+      'PhabricatorMarkupInterface',
+    ),
     'PhabricatorFeedStoryAggregate' => 'PhabricatorFeedStory',
     'PhabricatorFeedStoryAudit' => 'PhabricatorFeedStory',
     'PhabricatorFeedStoryCommit' => 'PhabricatorFeedStory',

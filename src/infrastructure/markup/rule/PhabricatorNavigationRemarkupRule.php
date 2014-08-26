@@ -8,7 +8,7 @@ final class PhabricatorNavigationRemarkupRule extends PhutilRemarkupRule {
 
   public function apply($text) {
     return preg_replace_callback(
-      '@{nav\b((?:[^}\\\\]+|\\\\.)+)}$@m',
+      '@{nav\b((?:[^}\\\\]+|\\\\.)*)}@m',
       array($this, 'markupNavigation'),
       $text);
   }
@@ -98,6 +98,5 @@ final class PhabricatorNavigationRemarkupRule extends PhutilRemarkupRule {
 
     return $this->getEngine()->storeText($out);
   }
-
 
 }
