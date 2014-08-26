@@ -654,6 +654,7 @@ phutil_register_library_map(array(
     'FlagEditConduitAPIMethod' => 'applications/flag/conduit/FlagEditConduitAPIMethod.php',
     'FlagQueryConduitAPIMethod' => 'applications/flag/conduit/FlagQueryConduitAPIMethod.php',
     'HarbormasterBuild' => 'applications/harbormaster/storage/build/HarbormasterBuild.php',
+    'HarbormasterBuildAbortedException' => 'applications/harbormaster/exception/HarbormasterBuildAbortedException.php',
     'HarbormasterBuildActionController' => 'applications/harbormaster/controller/HarbormasterBuildActionController.php',
     'HarbormasterBuildArtifact' => 'applications/harbormaster/storage/build/HarbormasterBuildArtifact.php',
     'HarbormasterBuildArtifactQuery' => 'applications/harbormaster/query/HarbormasterBuildArtifactQuery.php',
@@ -3419,6 +3420,7 @@ phutil_register_library_map(array(
       'HarbormasterDAO',
       'PhabricatorPolicyInterface',
     ),
+    'HarbormasterBuildAbortedException' => 'Exception',
     'HarbormasterBuildActionController' => 'HarbormasterController',
     'HarbormasterBuildArtifact' => array(
       'HarbormasterDAO',

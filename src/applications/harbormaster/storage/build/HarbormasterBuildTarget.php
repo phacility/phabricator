@@ -19,6 +19,7 @@ final class HarbormasterBuildTarget extends HarbormasterDAO
   const STATUS_WAITING = 'target/waiting';
   const STATUS_PASSED = 'target/passed';
   const STATUS_FAILED = 'target/failed';
+  const STATUS_ABORTED = 'target/aborted';
 
   private $build = self::ATTACHABLE;
   private $buildStep = self::ATTACHABLE;
@@ -36,6 +37,8 @@ final class HarbormasterBuildTarget extends HarbormasterDAO
         return pht('Passed');
       case self::STATUS_FAILED:
         return pht('Failed');
+      case self::STATUS_ABORTED:
+        return pht('Aborted');
       default:
         return pht('Unknown');
     }
@@ -52,6 +55,8 @@ final class HarbormasterBuildTarget extends HarbormasterDAO
         return PHUIStatusItemView::ICON_ACCEPT;
       case self::STATUS_FAILED:
         return PHUIStatusItemView::ICON_REJECT;
+      case self::STATUS_ABORTED:
+        return PHUIStatusItemView::ICON_MINUS;
       default:
         return PHUIStatusItemView::ICON_QUESTION;
     }
@@ -66,6 +71,7 @@ final class HarbormasterBuildTarget extends HarbormasterDAO
       case self::STATUS_PASSED:
         return 'green';
       case self::STATUS_FAILED:
+      case self::STATUS_ABORTED:
         return 'red';
       default:
         return 'bluegrey';
@@ -179,6 +185,7 @@ final class HarbormasterBuildTarget extends HarbormasterDAO
     switch ($this->getTargetStatus()) {
       case self::STATUS_PASSED:
       case self::STATUS_FAILED:
+      case self::STATUS_ABORTED:
         return true;
     }
 

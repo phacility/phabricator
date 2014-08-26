@@ -130,9 +130,9 @@ final class HarbormasterBuildEngine extends Phobject {
     // Increment the build generation counter on the build.
     $build->setBuildGeneration($build->getBuildGeneration() + 1);
 
-    // TODO: Currently running targets should periodically check their build
+    // Currently running targets should periodically check their build
     // generation (which won't have changed) against the build's generation.
-    // If it is different, they should automatically stop what they're doing
+    // If it is different, they will automatically stop what they're doing
     // and abort.
 
     // Previously we used to delete targets, logs and artifacts here.  Instead

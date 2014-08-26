@@ -38,6 +38,10 @@ final class HarbormasterTargetWorker extends HarbormasterWorker {
     $target->setDateStarted(time());
 
     try {
+      if ($target->getBuildGeneration() !== $build->getBuildGeneration()) {
+        throw new HarbormasterBuildAbortedException();
+      }
+
       $status_pending = HarbormasterBuildTarget::STATUS_PENDING;
       if ($target->getTargetStatus() == $status_pending) {
         $target->setTargetStatus(HarbormasterBuildTarget::STATUS_BUILDING);
@@ -66,6 +70,11 @@ final class HarbormasterTargetWorker extends HarbormasterWorker {
     } catch (HarbormasterBuildFailureException $ex) {
       // A build step wants to fail explicitly.
       $target->setTargetStatus(HarbormasterBuildTarget::STATUS_FAILED);
+      $target->setDateCompleted(time());
+      $target->save();
+    } catch (HarbormasterBuildAbortedException $ex) {
+      // A build step is aborting because the build has been restarted.
+      $target->setTargetStatus(HarbormasterBuildTarget::STATUS_ABORTED);
       $target->setDateCompleted(time());
       $target->save();
     } catch (Exception $ex) {
