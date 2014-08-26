@@ -115,8 +115,7 @@ final class DrydockPreallocatedHostBlueprintImplementation
           ->setConfiguration(array(
             'host' => $resource->getAttribute('host'),
             'port' => $resource->getAttribute('port'),
-            'credential' => $resource->getAttribute('credential')))
-          ->setWorkingDirectory($lease->getAttribute('path'));
+            'credential' => $resource->getAttribute('credential')));
     }
 
     throw new Exception("No interface of type '{$type}'.");
