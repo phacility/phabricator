@@ -577,16 +577,47 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     $is_git = ($vcs == PhabricatorRepositoryType::REPOSITORY_TYPE_GIT);
 
     $use_filter = ($is_git);
+    if (!$use_filter) {
+      // If this VCS doesn't use filters, pass everything through.
+      return true;
+    }
 
-    if ($use_filter) {
-      $filter = $this->getDetail($filter_key, array());
-      if ($filter && empty($filter[$branch])) {
-        return false;
+
+    $filter = $this->getDetail($filter_key, array());
+
+    // If there's no filter set, let everything through.
+    if (!$filter) {
+      return true;
+    }
+
+    // If this branch isn't literally named `regexp(...)`, and it's in the
+    // filter list, let it through.
+    if (isset($filter[$branch])) {
+      if (self::extractBranchRegexp($branch) === null) {
+        return true;
       }
     }
 
-    // By default, all branches pass.
-    return true;
+    // If the branch matches a regexp, let it through.
+    foreach ($filter as $pattern => $ignored) {
+      $regexp = self::extractBranchRegexp($pattern);
+      if ($regexp !== null) {
+        if (preg_match($regexp, $branch)) {
+          return true;
+        }
+      }
+    }
+
+    // Nothing matched, so filter this branch out.
+    return false;
+  }
+
+  public static function extractBranchRegexp($pattern) {
+    $matches = null;
+    if (preg_match('/^regexp\\((.*)\\)\z/', $pattern, $matches)) {
+      return $matches[1];
+    }
+    return null;
   }
 
   public function shouldTrackBranch($branch) {
