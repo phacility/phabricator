@@ -466,6 +466,7 @@ For a list of available icons and colors, check the UIExamples application.
 [[ http://fortawesome.github.io/Font-Awesome/ | FontAwesome ]], so you can also
 browse the collection there.)
 
+
 = Phriction Documents =
 
 You can link to Phriction documents with a name or path:
@@ -557,6 +558,36 @@ Some general notes about this syntax:
     not);
   - you can use other Remarkup rules (like **bold**, //italics//, etc.) inside
     table cells.
+
+Navigation Sequences
+====================
+
+You can use `{nav ...}` to render a stylized navigation sequence when helping
+someone to locate something. This can be useful when writing documentation.
+For example, you could give someone directions to purchase lemons:
+
+{nav icon=home, name=Home >
+Grocery Store >
+Produce Section >
+icon=lemon-o, name=Lemons}
+
+To render this example, use this markup:
+
+```
+{nav icon=home, name=Home >
+Grocery Store >
+Produce Section >
+icon=lemon-o, name=Lemons}
+```
+
+In general:
+
+  - Separate sections with `>`.
+  - Each section can just have a name to add an element to the navigation
+    sequence, or a list of key-value pairs.
+  - Supported keys are `icon`, `name`, `type` and `href`.
+  - The `type` option can be set to `instructions` to indicate that an element
+    is asking the user to make a choice or follow specific instructions.
 
 = Fullscreen Mode =
 

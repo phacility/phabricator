@@ -466,3 +466,7 @@ var.remarkup-assist-textarea {
   margin: auto;
   max-width: 95%;
 }
+
+.remarkup-nav-sequence-arrow {
+  color: {$lightgreytext};
+}

@@ -445,6 +445,7 @@ final class PhabricatorMarkupEngine {
 
 
     $rules[] = new PhutilRemarkupDocumentLinkRule();
+    $rules[] = new PhabricatorNavigationRemarkupRule();
 
     if ($options['youtube']) {
       $rules[] = new PhabricatorYoutubeRemarkupRule();
