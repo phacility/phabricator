@@ -123,6 +123,7 @@ final class PhragmentZIPController extends PhragmentController {
     }
 
     return id(new AphrontRedirectResponse())
+      ->setIsExternal(true)
       ->setURI($file->getDownloadURI($return));
   }
 
