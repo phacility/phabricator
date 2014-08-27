@@ -1042,7 +1042,7 @@ final class DiffusionCommitController extends DiffusionController {
         $drequest->getRepository()->getPHID());
     unset($unguarded);
 
-    return id(new AphrontRedirectResponse())->setURI($file->getBestURI());
+    return $file->getRedirectResponse();
   }
 
   private function renderAuditStatusView(array $audit_requests) {
@@ -1099,12 +1099,6 @@ final class DiffusionCommitController extends DiffusionController {
             PHUIStatusItemView::ICON_ACCEPT,
             'blue',
             pht('Closed'));
-          break;
-        case PhabricatorAuditStatusConstants::CC:
-          $item->setIcon(
-            PHUIStatusItemView::ICON_INFO,
-            'dark',
-            pht('Subscribed'));
           break;
         default:
           $item->setIcon(

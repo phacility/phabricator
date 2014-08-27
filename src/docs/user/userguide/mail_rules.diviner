@@ -35,7 +35,7 @@ Phabricator sends a variety of mail headers that can be useful in crafting rules
 to route and manage mail.
 
 Headers in plural contain lists. A list containing two items, ##1## and
-##15## will generally be formatted like this:
+`15` will generally be formatted like this:
 
   X-Header: <1>, <15>
 

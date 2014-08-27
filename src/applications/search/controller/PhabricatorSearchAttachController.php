@@ -57,68 +57,34 @@ final class PhabricatorSearchAttachController
       $phids = array_values($phids);
 
       if ($edge_type) {
-        if ($object instanceof PhabricatorRepositoryCommit) {
-          // TODO: Remove this entire branch of special cased grossness
-          // after T4896.
-
-          $old_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
-            $this->phid,
-            $edge_type);
-          $add_phids = $phids;
-          $rem_phids = array_diff($old_phids, $add_phids);
-
-          // Doing this correctly (in a way that writes edge transactions) would
-          // be a huge mess and we don't get the commit half of the transaction
-          // anyway until T4896, so just write the edges themselves and skip
-          // the transactions for now.
-
-          $editor = new PhabricatorEdgeEditor();
-          foreach ($add_phids as $phid) {
-            $editor->addEdge(
-              $object->getPHID(),
-              DiffusionCommitHasTaskEdgeType::EDGECONST,
-              $phid);
-          }
-
-          foreach ($rem_phids as $phid) {
-            $editor->removeEdge(
-              $object->getPHID(),
-              DiffusionCommitHasTaskEdgeType::EDGECONST,
-              $phid);
-          }
-
-          $editor->save();
-
-        } else {
-          if (!$object instanceof PhabricatorApplicationTransactionInterface) {
-            throw new Exception(
-              pht(
-                'Expected object ("%s") to implement interface "%s".',
-                get_class($object),
-                'PhabricatorApplicationTransactionInterface'));
-          }
-
-          $old_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
-            $this->phid,
-            $edge_type);
-          $add_phids = $phids;
-          $rem_phids = array_diff($old_phids, $add_phids);
-
-          $txn_editor = $object->getApplicationTransactionEditor()
-            ->setActor($user)
-            ->setContentSourceFromRequest($request)
-            ->setContinueOnMissingFields(true);
-
-          $txn_template = $object->getApplicationTransactionTemplate()
-            ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-            ->setMetadataValue('edge:type', $edge_type)
-            ->setNewValue(array(
-              '+' => array_fuse($add_phids),
-              '-' => array_fuse($rem_phids)));
-          $txn_editor->applyTransactions(
-            $object->getApplicationTransactionObject(),
-            array($txn_template));
+        if (!$object instanceof PhabricatorApplicationTransactionInterface) {
+          throw new Exception(
+            pht(
+              'Expected object ("%s") to implement interface "%s".',
+              get_class($object),
+              'PhabricatorApplicationTransactionInterface'));
         }
+
+        $old_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+          $this->phid,
+          $edge_type);
+        $add_phids = $phids;
+        $rem_phids = array_diff($old_phids, $add_phids);
+
+        $txn_editor = $object->getApplicationTransactionEditor()
+          ->setActor($user)
+          ->setContentSourceFromRequest($request)
+          ->setContinueOnMissingFields(true);
+
+        $txn_template = $object->getApplicationTransactionTemplate()
+          ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+          ->setMetadataValue('edge:type', $edge_type)
+          ->setNewValue(array(
+            '+' => array_fuse($add_phids),
+            '-' => array_fuse($rem_phids)));
+        $txn_editor->applyTransactions(
+          $object->getApplicationTransactionObject(),
+          array($txn_template));
 
         return id(new AphrontReloadResponse())->setURI($handle->getURI());
       } else {

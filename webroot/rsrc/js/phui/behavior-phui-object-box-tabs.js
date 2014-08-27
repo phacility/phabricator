@@ -11,6 +11,7 @@ JX.behavior('phui-object-box-tabs', function() {
     'click',
     'phui-object-box-tab',
     function (e) {
+      e.kill();
       var key = e.getNodeData('phui-object-box-tab').tabKey;
       var map = e.getNodeData('phui-object-box').tabMap;
       var tab = e.getNode('phui-object-box-tab');

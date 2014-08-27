@@ -276,6 +276,7 @@ final class PassphraseCredentialEditController extends PassphraseController {
     if ($type->shouldShowPasswordField()) {
       $form->appendChild(
         id(new AphrontFormPasswordControl())
+          ->setDisableAutocomplete(true)
           ->setName('password')
           ->setLabel($type->getPasswordLabel())
           ->setDisabled($credential_is_locked)

@@ -153,7 +153,8 @@ final class PhabricatorApplicationSearchController
       'query/advanced');
 
     $form = id(new AphrontFormView())
-      ->setUser($user);
+      ->setUser($user)
+      ->setAction($request->getPath());
 
     $engine->buildSearchForm($form, $saved_query);
 

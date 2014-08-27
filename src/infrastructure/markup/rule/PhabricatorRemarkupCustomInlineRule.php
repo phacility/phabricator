@@ -1,7 +1,6 @@
 <?php
 
-abstract class PhabricatorRemarkupCustomInlineRule
-  extends PhutilRemarkupRule {
+abstract class PhabricatorRemarkupCustomInlineRule extends PhutilRemarkupRule {
 
   public function getRuleVersion() {
     return 1;

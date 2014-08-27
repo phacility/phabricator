@@ -13,7 +13,7 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
 
   const TYPE_FILE = 'file';
   const TYPE_HOST = 'host';
-  const TYPE_BUILD_STATE = 'buildstate';
+  const TYPE_URI = 'uri';
 
   public static function initializeNewBuildArtifact(
     HarbormasterBuildTarget $build_target) {
@@ -69,6 +69,11 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
           ->setObjectName(pht('Drydock Lease'))
           ->setHeader($lease->getID())
           ->setHref('/drydock/lease/'.$lease->getID());
+      case self::TYPE_URI:
+        return id(new PHUIObjectItemView())
+          ->setObjectName($data['name'])
+          ->setHeader($data['uri'])
+          ->setHref($data['uri']);
       default:
         return null;
     }
@@ -118,6 +123,24 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
       throw new Exception('Associated file not found!');
     }
     return $file;
+  }
+
+  public function release() {
+    switch ($this->getArtifactType()) {
+      case self::TYPE_HOST:
+        $this->releaseDrydockLease();
+        break;
+    }
+  }
+
+  public function releaseDrydockLease() {
+    $lease = $this->loadDrydockLease();
+    $resource = $lease->getResource();
+    $blueprint = $resource->getBlueprint();
+
+    if ($lease->isActive()) {
+      $blueprint->releaseLease($resource, $lease);
+    }
   }
 
 

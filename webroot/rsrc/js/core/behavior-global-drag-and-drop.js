@@ -21,7 +21,8 @@ JX.behavior('global-drag-and-drop', function(config) {
   }
 
   var drop = new JX.PhabricatorDragAndDropFileUpload(document.documentElement)
-    .setURI(config.uploadURI);
+    .setURI(config.uploadURI)
+    .setViewPolicy(config.viewPolicy);
 
   drop.listen('didBeginDrag', function() {
     JX.Mask.show();

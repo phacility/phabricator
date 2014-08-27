@@ -28,6 +28,7 @@ final class PhabricatorGlobalUploadTargetView extends AphrontView {
       'instructions'  => $instructions_id,
       'uploadURI'     => '/file/dropupload/',
       'browseURI'     => '/file/query/authored/',
+      'viewPolicy'    => PhabricatorPolicies::getMostOpenPolicy(),
     ));
 
     return phutil_tag(

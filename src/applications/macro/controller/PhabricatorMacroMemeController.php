@@ -15,7 +15,9 @@ final class PhabricatorMacroMemeController
     if ($uri === false) {
       return new Aphront404Response();
     }
-    return id(new AphrontRedirectResponse())->setURI($uri);
+    return id(new AphrontRedirectResponse())
+      ->setIsExternal(true)
+      ->setURI($uri);
   }
 
   public static function generateMacro($user, $macro_name, $upper_text,

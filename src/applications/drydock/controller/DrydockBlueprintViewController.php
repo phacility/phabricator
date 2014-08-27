@@ -61,6 +61,18 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
       ->withObjectPHIDs(array($blueprint->getPHID()))
       ->execute();
 
+    $field_list = PhabricatorCustomField::getObjectFields(
+      $blueprint,
+      PhabricatorCustomField::ROLE_VIEW);
+    $field_list
+      ->setViewer($viewer)
+      ->readFieldsFromStorage($blueprint);
+
+    $field_list->appendFieldsToPropertyList(
+      $blueprint,
+      $viewer,
+      $properties);
+
     $engine = id(new PhabricatorMarkupEngine())
       ->setViewer($viewer);
 

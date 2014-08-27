@@ -29,13 +29,21 @@
 abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
 
   private $viewer;
-  private $raisePolicyExceptions;
   private $parentQuery;
   private $rawResultLimit;
   private $capabilities;
   private $workspace = array();
   private $policyFilteredPHIDs = array();
   private $canUseApplication;
+
+  /**
+   * Should we continue or throw an exception when a query result is filtered
+   * by policy rules?
+   *
+   * Values are `true` (raise exceptions), `false` (do not raise exceptions)
+   * and `null` (inherit from parent query, with no exceptions by default).
+   */
+  private $raisePolicyExceptions;
 
 
 /* -(  Query Configuration  )------------------------------------------------ */
@@ -186,7 +194,7 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
     }
 
     $parent_query = $this->getParentQuery();
-    if ($parent_query) {
+    if ($parent_query && ($this->raisePolicyExceptions === null)) {
       $this->setRaisePolicyExceptions(
         $parent_query->shouldRaisePolicyExceptions());
     }

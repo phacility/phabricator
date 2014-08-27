@@ -108,7 +108,8 @@ final class DrydockPreallocatedHostBlueprintImplementation
             'host' => $resource->getAttribute('host'),
             'port' => $resource->getAttribute('port'),
             'credential' => $resource->getAttribute('credential'),
-            'platform' => $resource->getAttribute('platform')));
+            'platform' => $resource->getAttribute('platform')))
+          ->setWorkingDirectory($lease->getAttribute('path'));
       case 'filesystem':
         return id(new DrydockSFTPFilesystemInterface())
           ->setConfiguration(array(

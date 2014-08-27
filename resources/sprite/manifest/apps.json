@@ -251,6 +251,11 @@
       "rule" : ".apps-phriction-dark",
       "hash" : "964db3a34c3fea0b0416769a080bdb26"
     },
+    "apps-phund-dark"          : {
+      "name" : "apps-phund-dark",
+      "rule" : ".apps-phund-dark",
+      "hash" : "50b438bab64a6f9160000440845d6d67"
+    },
     "apps-policy-dark"         : {
       "name" : "apps-policy-dark",
       "rule" : ".apps-policy-dark",

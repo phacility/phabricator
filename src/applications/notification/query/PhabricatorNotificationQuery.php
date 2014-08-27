@@ -7,7 +7,7 @@
 final class PhabricatorNotificationQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
-  private $userPHID;
+  private $userPHIDs;
   private $keys;
   private $unread;
 
@@ -15,8 +15,8 @@ final class PhabricatorNotificationQuery
 /* -(  Configuring the Query  )---------------------------------------------- */
 
 
-  public function setUserPHID($user_phid) {
-    $this->userPHID = $user_phid;
+  public function withUserPHIDs(array $user_phids) {
+    $this->userPHIDs = $user_phids;
     return $this;
   }
 
@@ -46,10 +46,6 @@ final class PhabricatorNotificationQuery
 
 
   protected function loadPage() {
-    if (!$this->userPHID) {
-      throw new Exception('Call setUser() before executing the query');
-    }
-
     $story_table = new PhabricatorFeedStoryData();
     $notification_table = new PhabricatorFeedStoryNotification();
 
@@ -83,11 +79,11 @@ final class PhabricatorNotificationQuery
   private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
-    if ($this->userPHID) {
+    if ($this->userPHIDs !== null) {
       $where[] = qsprintf(
         $conn_r,
-        'notif.userPHID = %s',
-        $this->userPHID);
+        'notif.userPHID IN (%Ls)',
+        $this->userPHIDs);
     }
 
     if ($this->unread !== null) {

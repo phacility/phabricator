@@ -1,9 +1,9 @@
 <?php
 
-final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
+final class HeraldDifferentialRevisionAdapter
+  extends HeraldDifferentialAdapter {
 
   protected $revision;
-  protected $diff;
 
   protected $explicitCCs;
   protected $explicitReviewers;
@@ -17,7 +17,6 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
   protected $buildPlans = array();
   protected $requiredSignatureDocumentPHIDs = array();
 
-  protected $repository;
   protected $affectedPackages;
   protected $changesets;
   private $haveHunks;
@@ -160,25 +159,6 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
     return $this->revision->getTitle();
   }
 
-  public function loadRepository() {
-    if ($this->repository === null) {
-      $this->repository = false;
-      $repository_phid = $this->getObject()->getRepositoryPHID();
-      if ($repository_phid) {
-        $repository = id(new PhabricatorRepositoryQuery())
-          ->setViewer(PhabricatorUser::getOmnipotentUser())
-          ->withPHIDs(array($repository_phid))
-          ->needProjectPHIDs(true)
-          ->executeOne();
-        if ($repository) {
-          $this->repository = $repository;
-        }
-      }
-    }
-
-    return $this->repository;
-  }
-
   protected function loadChangesets() {
     if ($this->changesets === null) {
       $this->changesets = $this->diff->loadChangesets();
@@ -186,7 +166,7 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
     return $this->changesets;
   }
 
-  private function loadChangesetsWithHunks() {
+  protected function loadChangesetsWithHunks() {
     $changesets = $this->loadChangesets();
 
     if ($changesets && !$this->haveHunks) {
@@ -200,61 +180,6 @@ final class HeraldDifferentialRevisionAdapter extends HeraldAdapter {
     }
 
     return $changesets;
-  }
-
-  protected function loadAffectedPaths() {
-    $changesets = $this->loadChangesets();
-
-    $paths = array();
-    foreach ($changesets as $changeset) {
-      $paths[] = $this->getAbsoluteRepositoryPathForChangeset($changeset);
-    }
-    return $paths;
-  }
-
-  protected function getAbsoluteRepositoryPathForChangeset(
-    DifferentialChangeset $changeset) {
-
-    $repository = $this->loadRepository();
-    if (!$repository) {
-      return '/'.ltrim($changeset->getFilename(), '/');
-    }
-
-    $diff = $this->diff;
-
-    return $changeset->getAbsoluteRepositoryPath($repository, $diff);
-  }
-
-  protected function loadContentDictionary() {
-    $add_lines = DifferentialHunk::FLAG_LINES_ADDED;
-    $rem_lines = DifferentialHunk::FLAG_LINES_REMOVED;
-    $mask = ($add_lines | $rem_lines);
-    return $this->loadContentWithMask($mask);
-  }
-
-  protected function loadAddedContentDictionary() {
-    return $this->loadContentWithMask(DifferentialHunk::FLAG_LINES_ADDED);
-  }
-
-  protected function loadRemovedContentDictionary() {
-    return $this->loadContentWithMask(DifferentialHunk::FLAG_LINES_REMOVED);
-  }
-
-  private function loadContentWithMask($mask) {
-    $changesets = $this->loadChangesetsWithHunks();
-
-    $dict = array();
-    foreach ($changesets as $changeset) {
-      $content = array();
-      foreach ($changeset->getHunks() as $hunk) {
-        $content[] = $hunk->getContentWithMask($mask);
-      }
-
-      $path = $this->getAbsoluteRepositoryPathForChangeset($changeset);
-      $dict[$path] = implode("\n", $content);
-    }
-
-    return $dict;
   }
 
   public function loadAffectedPackages() {

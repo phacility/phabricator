@@ -44,9 +44,17 @@ final class DrydockBlueprintEditController extends DrydockBlueprintController {
       $cancel_uri = $this->getApplicationURI('blueprint/');
     }
 
+    $field_list = PhabricatorCustomField::getObjectFields(
+      $blueprint,
+      PhabricatorCustomField::ROLE_EDIT);
+    $field_list
+      ->setViewer($viewer)
+      ->readFieldsFromStorage($blueprint);
+
     $v_name = $blueprint->getBlueprintName();
     $e_name = true;
     $errors = array();
+    $validation_exception = null;
 
     if ($request->isFormPost()) {
       $v_view_policy = $request->getStr('viewPolicy');
@@ -59,6 +67,10 @@ final class DrydockBlueprintEditController extends DrydockBlueprintController {
 
       if (!$errors) {
         $xactions = array();
+
+        $xactions = $field_list->buildFieldTransactionsFromRequest(
+          new DrydockBlueprintTransaction(),
+          $request);
 
         $xactions[] = id(new DrydockBlueprintTransaction())
           ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
@@ -77,12 +89,16 @@ final class DrydockBlueprintEditController extends DrydockBlueprintController {
           ->setContentSourceFromRequest($request)
           ->setContinueOnNoEffect(true);
 
-        $editor->applyTransactions($blueprint, $xactions);
+        try {
+          $editor->applyTransactions($blueprint, $xactions);
 
-        $id = $blueprint->getID();
-        $save_uri = $this->getApplicationURI("blueprint/{$id}/");
+          $id = $blueprint->getID();
+          $save_uri = $this->getApplicationURI("blueprint/{$id}/");
 
-        return id(new AphrontRedirectResponse())->setURI($save_uri);
+          return id(new AphrontRedirectResponse())->setURI($save_uri);
+        } catch (PhabricatorApplicationTransactionValidationException $ex) {
+          $validation_exception = $ex;
+        }
       }
     }
 
@@ -117,6 +133,8 @@ final class DrydockBlueprintEditController extends DrydockBlueprintController {
           ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
           ->setPolicies($policies));
 
+    $field_list->appendFieldsToForm($form);
+
     $crumbs = $this->buildApplicationCrumbs();
 
     if ($blueprint->getID()) {
@@ -139,6 +157,7 @@ final class DrydockBlueprintEditController extends DrydockBlueprintController {
 
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText($header)
+      ->setValidationException($validation_exception)
       ->setFormErrors($errors)
       ->setForm($form);
 

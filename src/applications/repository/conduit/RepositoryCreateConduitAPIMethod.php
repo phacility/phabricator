@@ -134,7 +134,7 @@ final class RepositoryCreateConduitAPIMethod
 
     try {
       $repository->save();
-    } catch (AphrontQueryDuplicateKeyException $ex) {
+    } catch (AphrontDuplicateKeyQueryException $ex) {
       throw new ConduitException('ERR-DUPLICATE');
     }
 

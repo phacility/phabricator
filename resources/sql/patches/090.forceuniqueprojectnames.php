@@ -58,7 +58,7 @@ while ($update) {
         $project->getID());
       unset($update[$key]);
       echo "okay.\n";
-    } catch (AphrontQueryDuplicateKeyException $ex) {
+    } catch (AphrontDuplicateKeyQueryException $ex) {
       echo "failed, will retry.\n";
     }
   }

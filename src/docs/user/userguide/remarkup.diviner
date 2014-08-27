@@ -18,7 +18,7 @@ formatting text in Remarkup.
 
 These are inline styles, and can be applied to most text:
 
-  **bold** //italic// ##monospaced## `monospaced` ~~deleted~~ __underlined__
+  **bold** //italic// `monospaced` ##monospaced## ~~deleted~~ __underlined__
   D123 T123 rX123           # Link to Objects
   {D123} {T123}             # Link to Objects (Full Name)
   {F123}                    # Embed Images
@@ -59,13 +59,13 @@ Format **basic text styles** like this:
 
   **bold text**
   //italic text//
-  ##monospaced text##
   `monospaced text`
+  ##monospaced text##
   ~~deleted text~~
   __underlined text__
 
-Those produce **bold text**, //italic text//, ##monospaced text##,
-`monospaced text`, ~~deleted text~~, and __underlined text__, respectively.
+Those produce **bold text**, //italic text//, `monospaced text`, ##monospaced
+text##, ~~deleted text~~, and __underlined text__, respectively.
 
 = Layout =
 
@@ -212,8 +212,8 @@ This produces a block like this:
     global $$variable_variable;
   }
 
-You can use ##lines=N## to limit the vertical size of a chunk of code, and
-##name=some_name.ext## to give it a name. For example, this:
+You can use `lines=N` to limit the vertical size of a chunk of code, and
+`name=some_name.ext` to give it a name. For example, this:
 
   lang=text
   lang=html, name=example.html, lines=12, counterexample
@@ -279,7 +279,7 @@ the rendered result. For example
 URIs are automatically linked: http://phabricator.org/
 
 If you have a URI with problematic characters in it, like
-"##http://comma.org/,##", you can surround it with angle brackets:
+"`http://comma.org/,`", you can surround it with angle brackets:
 
   <http://comma.org/,>
 
@@ -297,8 +297,8 @@ Markdown-style links are also supported:
 
 = Linking to Objects =
 
-You can link to Differential revisions, Diffusion commits and Maniphest tasks
-by mentioning the name of an object:
+You can link to Phabricator objects, such as Differential revisions, Diffusion
+commits and Maniphest tasks, by mentioning the name of an object:
 
   D123          # Link to Differential revision D123
   rX123         # Link to SVN commit 123 from the "X" repository
@@ -309,6 +309,9 @@ by mentioning the name of an object:
 You can also link directly to a comment in Maniphest and Differential:
 
   T123#4        # Link to comment #4 of T123
+
+See the Phabricator configuraton setting `remarkup.ignored-object-names` to
+modify this behavior.
 
 = Embedding Objects
 
@@ -411,8 +414,7 @@ If you set a configuration flag, you can embed media directly in text:
     and have them render inline.
 
 This option is disabled by default because it has security and/or
-silliness implications. Read the description in ##default.conf.php## before
-enabling it.
+silliness implications. Carefully read the description before enabling it.
 
 = Image Macros =
 
@@ -464,13 +466,14 @@ For a list of available icons and colors, check the UIExamples application.
 [[ http://fortawesome.github.io/Font-Awesome/ | FontAwesome ]], so you can also
 browse the collection there.)
 
+
 = Phriction Documents =
 
 You can link to Phriction documents with a name or path:
 
   Make sure you sign and date your [[legal/Letter of Marque and Reprisal]]!
 
-With a pipe (##|##), you can retitle the link. Use this to mislead your
+With a pipe (`|`), you can retitle the link. Use this to mislead your
 opponents:
 
   Check out these [[legal/boring_documents/ | exciting legal documents]]!
@@ -555,6 +558,36 @@ Some general notes about this syntax:
     not);
   - you can use other Remarkup rules (like **bold**, //italics//, etc.) inside
     table cells.
+
+Navigation Sequences
+====================
+
+You can use `{nav ...}` to render a stylized navigation sequence when helping
+someone to locate something. This can be useful when writing documentation.
+For example, you could give someone directions to purchase lemons:
+
+{nav icon=home, name=Home >
+Grocery Store >
+Produce Section >
+icon=lemon-o, name=Lemons}
+
+To render this example, use this markup:
+
+```
+{nav icon=home, name=Home >
+Grocery Store >
+Produce Section >
+icon=lemon-o, name=Lemons}
+```
+
+In general:
+
+  - Separate sections with `>`.
+  - Each section can just have a name to add an element to the navigation
+    sequence, or a list of key-value pairs.
+  - Supported keys are `icon`, `name`, `type` and `href`.
+  - The `type` option can be set to `instructions` to indicate that an element
+    is asking the user to make a choice or follow specific instructions.
 
 = Fullscreen Mode =
 

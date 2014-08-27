@@ -25,6 +25,7 @@ final class PhortuneCharge extends PhortuneDAO
   protected $metadata = array();
 
   private $account = self::ATTACHABLE;
+  private $cart = self::ATTACHABLE;
 
   public function getConfiguration() {
     return array(
@@ -60,6 +61,15 @@ final class PhortuneCharge extends PhortuneDAO
 
   public function attachAccount(PhortuneAccount $account) {
     $this->account = $account;
+    return $this;
+  }
+
+  public function getCart() {
+    return $this->assertAttached($this->cart);
+  }
+
+  public function attachCart(PhortuneCart $cart = null) {
+    $this->cart = $cart;
     return $this;
   }
 

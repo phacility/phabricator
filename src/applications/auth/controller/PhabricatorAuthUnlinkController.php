@@ -57,6 +57,11 @@ final class PhabricatorAuthUnlinkController
 
     if ($request->isDialogFormPost()) {
       $account->delete();
+
+      id(new PhabricatorAuthSessionEngine())->terminateLoginSessions(
+        $viewer,
+        $request->getCookie(PhabricatorCookies::COOKIE_SESSION));
+
       return id(new AphrontRedirectResponse())->setURI($this->getDoneURI());
     }
 
@@ -130,7 +135,11 @@ final class PhabricatorAuthUnlinkController
     $dialog = id(new AphrontDialogView())
       ->setUser($this->getRequest()->getUser())
       ->setTitle($title)
-      ->appendChild($body)
+      ->appendParagraph($body)
+      ->appendParagraph(
+        pht(
+          'Note: Unlinking an authentication provider will terminate any '.
+          'other active login sessions.'))
       ->addSubmitButton(pht('Unlink Account'))
       ->addCancelButton($this->getDoneURI());
 

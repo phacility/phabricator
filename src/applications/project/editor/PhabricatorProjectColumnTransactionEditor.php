@@ -3,11 +3,20 @@
 final class PhabricatorProjectColumnTransactionEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  public function getEditorApplicationClass() {
+    return 'PhabricatorProjectApplication';
+  }
+
+  public function getEditorObjectsDescription() {
+    return pht('Workboard Columns');
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
     $types[] = PhabricatorProjectColumnTransaction::TYPE_NAME;
     $types[] = PhabricatorProjectColumnTransaction::TYPE_STATUS;
+    $types[] = PhabricatorProjectColumnTransaction::TYPE_LIMIT;
 
     return $types;
   }
@@ -21,6 +30,9 @@ final class PhabricatorProjectColumnTransactionEditor
         return $object->getName();
       case PhabricatorProjectColumnTransaction::TYPE_STATUS:
         return $object->getStatus();
+      case PhabricatorProjectColumnTransaction::TYPE_LIMIT:
+        return $object->getPointLimit();
+
     }
 
     return parent::getCustomTransactionOldValue($object, $xaction);
@@ -34,6 +46,11 @@ final class PhabricatorProjectColumnTransactionEditor
       case PhabricatorProjectColumnTransaction::TYPE_NAME:
       case PhabricatorProjectColumnTransaction::TYPE_STATUS:
         return $xaction->getNewValue();
+      case PhabricatorProjectColumnTransaction::TYPE_LIMIT:
+        if ($xaction->getNewValue()) {
+          return (int)$xaction->getNewValue();
+        }
+        return null;
     }
 
     return parent::getCustomTransactionNewValue($object, $xaction);
@@ -50,6 +67,9 @@ final class PhabricatorProjectColumnTransactionEditor
       case PhabricatorProjectColumnTransaction::TYPE_STATUS:
         $object->setStatus($xaction->getNewValue());
         return;
+      case PhabricatorProjectColumnTransaction::TYPE_LIMIT:
+        $object->setPointLimit($xaction->getNewValue());
+        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -62,6 +82,7 @@ final class PhabricatorProjectColumnTransactionEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorProjectColumnTransaction::TYPE_NAME:
       case PhabricatorProjectColumnTransaction::TYPE_STATUS:
+      case PhabricatorProjectColumnTransaction::TYPE_LIMIT:
         return;
     }
 
@@ -76,6 +97,18 @@ final class PhabricatorProjectColumnTransactionEditor
     $errors = parent::validateTransaction($object, $type, $xactions);
 
     switch ($type) {
+      case PhabricatorProjectColumnTransaction::TYPE_LIMIT:
+        foreach ($xactions as $xaction) {
+          $value = $xaction->getNewValue();
+          if (strlen($value) && !preg_match('/^\d+\z/', $value)) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht('Column point limit must be empty, or a positive integer.'),
+              $xaction);
+          }
+        }
+        break;
       case PhabricatorProjectColumnTransaction::TYPE_NAME:
         $missing = $this->validateIsEmptyTextField(
           $object->getName(),

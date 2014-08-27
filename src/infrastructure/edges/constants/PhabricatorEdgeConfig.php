@@ -57,9 +57,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TYPE_OBJECT_USES_CREDENTIAL     = 39;
   const TYPE_CREDENTIAL_USED_BY_OBJECT  = 40;
 
-  const TYPE_OBJECT_HAS_COLUMN          = 43;
-  const TYPE_COLUMN_HAS_OBJECT          = 44;
-
   const TYPE_DASHBOARD_HAS_PANEL        = 45;
   const TYPE_PANEL_HAS_DASHBOARD        = 46;
 
@@ -105,6 +102,10 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       range(1, 50),
       array(9000),
       range(80000, 80005));
+
+    $exclude[] = 43; // Was TYPE_OBJECT_HAS_COLUMN
+    $exclude[] = 44; // Was TYPE_COLUMN_HAS_OBJECT
+
     $consts = array_diff($consts, $exclude);
 
     $map = array();
@@ -189,9 +190,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
       self::TYPE_OBJECT_USES_CREDENTIAL => self::TYPE_CREDENTIAL_USED_BY_OBJECT,
       self::TYPE_CREDENTIAL_USED_BY_OBJECT => self::TYPE_OBJECT_USES_CREDENTIAL,
-
-      self::TYPE_OBJECT_HAS_COLUMN => self::TYPE_COLUMN_HAS_OBJECT,
-      self::TYPE_COLUMN_HAS_OBJECT => self::TYPE_OBJECT_HAS_COLUMN,
 
       self::TYPE_PANEL_HAS_DASHBOARD => self::TYPE_DASHBOARD_HAS_PANEL,
       self::TYPE_DASHBOARD_HAS_PANEL => self::TYPE_PANEL_HAS_DASHBOARD,

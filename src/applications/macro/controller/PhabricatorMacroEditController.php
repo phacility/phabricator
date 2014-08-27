@@ -64,6 +64,7 @@ final class PhabricatorMacroEditController extends PhabricatorMacroController {
             'name' => $request->getStr('name'),
             'authorPHID' => $user->getPHID(),
             'isExplicitUpload' => true,
+            'canCDN' => true,
           ));
       } else if ($request->getStr('url')) {
         try {
@@ -73,6 +74,7 @@ final class PhabricatorMacroEditController extends PhabricatorMacroController {
               'name' => $request->getStr('name'),
               'authorPHID' => $user->getPHID(),
               'isExplicitUpload' => true,
+              'canCDN' => true,
             ));
         } catch (Exception $ex) {
           $errors[] = pht('Could not fetch URL: %s', $ex->getMessage());
@@ -125,7 +127,7 @@ final class PhabricatorMacroEditController extends PhabricatorMacroController {
 
           $view_uri = $this->getApplicationURI('/view/'.$original->getID().'/');
           return id(new AphrontRedirectResponse())->setURI($view_uri);
-        } catch (AphrontQueryDuplicateKeyException $ex) {
+        } catch (AphrontDuplicateKeyQueryException $ex) {
           throw $ex;
           $errors[] = pht('Macro name is not unique!');
           $e_name = pht('Duplicate');

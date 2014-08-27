@@ -347,8 +347,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
       unset($unguard);
     }
 
-    return id(new AphrontRedirectResponse())
-      ->setURI($file->getBestURI());
+    return $file->getRedirectResponse();
   }
 
   private function buildLintInlineComments($changeset) {

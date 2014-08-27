@@ -53,6 +53,7 @@ final class PhabricatorPeopleProfilePictureController
             $_FILES['picture'],
             array(
               'authorPHID' => $viewer->getPHID(),
+              'canCDN' => true,
             ));
         } else {
           $e_file = pht('Required');

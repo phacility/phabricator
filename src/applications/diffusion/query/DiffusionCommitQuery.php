@@ -9,6 +9,7 @@ final class DiffusionCommitQuery
   private $defaultRepository;
   private $identifiers;
   private $repositoryIDs;
+  private $repositoryPHIDs;
   private $identifierMap;
 
   private $needAuditRequests;
@@ -20,6 +21,8 @@ final class DiffusionCommitQuery
   const AUDIT_STATUS_ANY       = 'audit-status-any';
   const AUDIT_STATUS_OPEN      = 'audit-status-open';
   const AUDIT_STATUS_CONCERN   = 'audit-status-concern';
+  const AUDIT_STATUS_ACCEPTED  = 'audit-status-accepted';
+  const AUDIT_STATUS_PARTIAL   = 'audit-status-partial';
 
   private $needCommitData;
 
@@ -57,6 +60,15 @@ final class DiffusionCommitQuery
     $this->withDefaultRepository($repository);
     $this->withRepositoryIDs(array($repository->getID()));
     return $this;
+  }
+
+  /**
+   * Look up commits in a specific repository. Prefer
+   * @{method:withRepositoryIDs}; the underyling table is keyed by ID such
+   * that this method requires a separate initial query to map PHID to ID.
+   */
+  public function withRepositoryPHIDs(array $phids) {
+    $this->repositoryPHIDs = $phids;
   }
 
   /**
@@ -263,6 +275,22 @@ final class DiffusionCommitQuery
   private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
+    if ($this->repositoryPHIDs !== null) {
+      $map_repositories = id (new PhabricatorRepositoryQuery())
+        ->setViewer($this->getViewer())
+        ->withPHIDs($this->repositoryPHIDs)
+        ->execute();
+
+      if (!$map_repositories) {
+        throw new PhabricatorEmptyQueryException();
+      }
+      $repository_ids = mpull($map_repositories, 'getID');
+      if ($this->repositoryIDs !== null) {
+        $repository_ids = array_merge($repository_ids, $this->repositoryIDs);
+      }
+      $this->withRepositoryIDs($repository_ids);
+    }
+
     if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn_r,
@@ -411,6 +439,18 @@ final class DiffusionCommitQuery
     $status = $this->auditStatus;
     if ($status !== null) {
       switch ($status) {
+        case self::AUDIT_STATUS_PARTIAL:
+          $where[] = qsprintf(
+            $conn_r,
+            'commit.auditStatus = %d',
+            PhabricatorAuditCommitStatusConstants::PARTIALLY_AUDITED);
+          break;
+        case self::AUDIT_STATUS_ACCEPTED:
+          $where[] = qsprintf(
+            $conn_r,
+            'commit.auditStatus = %d',
+            PhabricatorAuditCommitStatusConstants::FULLY_AUDITED);
+          break;
         case self::AUDIT_STATUS_CONCERN:
           $where[] = qsprintf(
             $conn_r,
@@ -436,6 +476,8 @@ final class DiffusionCommitQuery
             self::AUDIT_STATUS_ANY,
             self::AUDIT_STATUS_OPEN,
             self::AUDIT_STATUS_CONCERN,
+            self::AUDIT_STATUS_ACCEPTED,
+            self::AUDIT_STATUS_PARTIAL,
           );
           throw new Exception(
             "Unknown audit status '{$status}'! Valid statuses are: ".

@@ -27,6 +27,10 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
     return pht('Processed by Stripe');
   }
 
+  public function getDefaultPaymentMethodDisplayName(
+    PhortunePaymentMethod $method) {
+    return pht('Credit/Debit Card');
+  }
 
   public function canHandlePaymentMethod(PhortunePaymentMethod $method) {
     $type = $method->getMetadataValue('type');

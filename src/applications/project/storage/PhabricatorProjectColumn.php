@@ -9,10 +9,15 @@ final class PhabricatorProjectColumn
   const STATUS_ACTIVE = 0;
   const STATUS_HIDDEN = 1;
 
+  const DEFAULT_ORDER = 'natural';
+  const ORDER_NATURAL = 'natural';
+  const ORDER_PRIORITY = 'priority';
+
   protected $name;
   protected $status;
   protected $projectPHID;
   protected $sequence;
+  protected $properties = array();
 
   private $project = self::ATTACHABLE;
 
@@ -25,6 +30,9 @@ final class PhabricatorProjectColumn
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_SERIALIZATION => array(
+        'properties' => self::SERIALIZATION_JSON,
+      ),
     ) + parent::getConfiguration();
   }
 
@@ -43,7 +51,7 @@ final class PhabricatorProjectColumn
   }
 
   public function isDefaultColumn() {
-    return ($this->getSequence() == 0);
+    return (bool)$this->getProperty('isDefault');
   }
 
   public function isHidden() {
@@ -63,15 +71,48 @@ final class PhabricatorProjectColumn
     return pht('Unnamed Column');
   }
 
-  public function getHeaderColor() {
+  public function getHeaderIcon() {
+    $icon = null;
+
     if ($this->isHidden()) {
-      return PHUIActionHeaderView::HEADER_LIGHTRED;
+      $icon = 'fa-eye-slash';
+      $text = pht('Hidden');
     }
 
     if ($this->isDefaultColumn()) {
-      return PHUIActionHeaderView::HEADER_DARK_GREY;
+      $icon = 'fa-archive';
+      $text = pht('Default');
     }
-    return PHUIActionHeaderView::HEADER_GREY;
+
+    if ($icon) {
+      return id(new PHUIIconView())
+        ->setIconFont($icon)
+        ->addSigil('has-tooltip')
+        ->setMetadata(
+          array(
+            'tip' => $text,
+          ));;
+    }
+
+    return null;
+  }
+
+  public function getProperty($key, $default = null) {
+    return idx($this->properties, $key, $default);
+  }
+
+  public function setProperty($key, $value) {
+    $this->properties[$key] = $value;
+    return $this;
+  }
+
+  public function getPointLimit() {
+    return $this->getProperty('pointLimit');
+  }
+
+  public function setPointLimit($limit) {
+    $this->setProperty('pointLimit', $limit);
+    return $this;
   }
 
 

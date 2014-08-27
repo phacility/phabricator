@@ -44,7 +44,8 @@ abstract class ManiphestController extends PhabricatorController {
   }
 
   protected function renderSingleTask(ManiphestTask $task) {
-    $user = $this->getRequest()->getUser();
+    $request = $this->getRequest();
+    $user = $request->getUser();
 
     $phids = $task->getProjectPHIDs();
     if ($task->getOwnerPHID()) {
@@ -58,7 +59,7 @@ abstract class ManiphestController extends PhabricatorController {
 
     $view = id(new ManiphestTaskListView())
       ->setUser($user)
-      ->setShowSubpriorityControls(true)
+      ->setShowSubpriorityControls(!$request->getStr('ungrippable'))
       ->setShowBatchControls(true)
       ->setHandles($handles)
       ->setTasks(array($task));

@@ -475,9 +475,7 @@ final class HeraldCommitAdapter extends HeraldAdapter {
         $refs = DiffusionRepositoryRef::loadAllFromDictionaries($result);
         return mpull($refs, 'getShortName');
       case self::FIELD_REPOSITORY_AUTOCLOSE_BRANCH:
-        return $this->repository->shouldAutocloseCommit(
-          $this->commit,
-          $this->commitData);
+        return $this->repository->shouldAutocloseCommit($this->commit);
     }
 
     return parent::getHeraldField($field);

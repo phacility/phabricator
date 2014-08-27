@@ -17,8 +17,6 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
   protected $message;
   protected $relatedPHID;
 
-  private $excludePHIDs = array();
-  private $overrideNoSelfMail = false;
   private $recipientExpansionMap;
 
   public function __construct() {
@@ -96,6 +94,15 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
   }
 
   public function addRawTos(array $raw_email) {
+
+    // Strip addresses down to bare emails, since the MailAdapter API currently
+    // requires we pass it just the address (like `alincoln@logcabin.org`), not
+    // a full string like `"Abraham Lincoln" <alincoln@logcabin.org>`.
+    foreach ($raw_email as $key => $email) {
+      $object = new PhutilEmailAddress($email);
+      $raw_email[$key] = $object->getAddress();
+    }
+
     $this->setParam('raw-to', $raw_email);
     return $this;
   }
@@ -106,21 +113,13 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     return $this;
   }
 
-  public function setExcludeMailRecipientPHIDs($exclude) {
-    $this->excludePHIDs = $exclude;
+  public function setExcludeMailRecipientPHIDs(array $exclude) {
+    $this->setParam('exclude', $exclude);
     return $this;
   }
+
   private function getExcludeMailRecipientPHIDs() {
-    return $this->excludePHIDs;
-  }
-
-  public function getOverrideNoSelfMailPreference() {
-    return $this->overrideNoSelfMail;
-  }
-
-  public function setOverrideNoSelfMailPreference($override) {
-    $this->overrideNoSelfMail = $override;
-    return $this;
+    return $this->getParam('exclude', array());
   }
 
   public function getTranslation(array $objects) {
@@ -213,13 +212,17 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     return $this;
   }
 
+  public function setHTMLBody($html) {
+    $this->setParam('html-body', $html);
+    return $this;
+  }
+
   public function getBody() {
     return $this->getParam('body');
   }
 
-  public function setIsHTML($html) {
-    $this->setParam('is-html', $html);
-    return $this;
+  public function getHTMLBody() {
+    return $this->getParam('html-body');
   }
 
   public function setIsErrorEmail($is_error) {
@@ -241,6 +244,25 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
 
   public function getCcPHIDs() {
     return $this->getParam('cc', array());
+  }
+
+  /**
+   * Force delivery of a message, even if recipients have preferences which
+   * would otherwise drop the message.
+   *
+   * This is primarily intended to let users who don't want any email still
+   * receive things like password resets.
+   *
+   * @param bool  True to force delivery despite user preferences.
+   * @return this
+   */
+  public function setForceDelivery($force) {
+    $this->setParam('force', $force);
+    return $this;
+  }
+
+  public function getForceDelivery() {
+    return $this->getParam('force', false);
   }
 
   /**
@@ -359,6 +381,32 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       $add_cc = array();
       $add_to = array();
 
+      // Only try to use preferences if everything is multiplexed, so we
+      // get consistent behavior.
+      $use_prefs = self::shouldMultiplexAllMail();
+
+      $prefs = null;
+      if ($use_prefs) {
+
+        // If multiplexing is enabled, some recipients will be in "Cc"
+        // rather than "To". We'll move them to "To" later (or supply a
+        // dummy "To") but need to look for the recipient in either the
+        // "To" or "Cc" fields here.
+        $target_phid = head(idx($params, 'to', array()));
+        if (!$target_phid) {
+          $target_phid = head(idx($params, 'cc', array()));
+        }
+
+        if ($target_phid) {
+          $user = id(new PhabricatorUser())->loadOneWhere(
+            'phid = %s',
+            $target_phid);
+          if ($user) {
+            $prefs = $user->loadPreferences();
+          }
+        }
+      }
+
       foreach ($params as $key => $value) {
         switch ($key) {
           case 'from':
@@ -426,42 +474,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
                 $attachment->getMimeType());
             }
             break;
-          case 'body':
-            $max = PhabricatorEnv::getEnvConfig('metamta.email-body-limit');
-            if (strlen($value) > $max) {
-              $value = phutil_utf8_shorten($value, $max);
-              $value .= "\n";
-              $value .= pht('(This email was truncated at %d bytes.)', $max);
-            }
-            $mailer->setBody($value);
-            break;
           case 'subject':
-            // Only try to use preferences if everything is multiplexed, so we
-            // get consistent behavior.
-            $use_prefs = self::shouldMultiplexAllMail();
-
-            $prefs = null;
-            if ($use_prefs) {
-
-              // If multiplexing is enabled, some recipients will be in "Cc"
-              // rather than "To". We'll move them to "To" later (or supply a
-              // dummy "To") but need to look for the recipient in either the
-              // "To" or "Cc" fields here.
-              $target_phid = head(idx($params, 'to', array()));
-              if (!$target_phid) {
-                $target_phid = head(idx($params, 'cc', array()));
-              }
-
-              if ($target_phid) {
-                $user = id(new PhabricatorUser())->loadOneWhere(
-                  'phid = %s',
-                  $target_phid);
-                if ($user) {
-                  $prefs = $user->loadPreferences();
-                }
-              }
-            }
-
             $subject = array();
 
             if ($is_threaded) {
@@ -499,11 +512,6 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
             $subject[] = $value;
 
             $mailer->setSubject(implode(' ', array_filter($subject)));
-            break;
-          case 'is-html':
-            if ($value) {
-              $mailer->setIsHTML(true);
-            }
             break;
           case 'is-bulk':
             if ($value) {
@@ -550,6 +558,26 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
           default:
             // Just discard.
         }
+      }
+
+      $body = idx($params, 'body', '');
+      $max = PhabricatorEnv::getEnvConfig('metamta.email-body-limit');
+      if (strlen($body) > $max) {
+        $body = phutil_utf8_shorten($body, $max);
+        $body .= "\n";
+        $body .= pht('(This email was truncated at %d bytes.)', $max);
+      }
+      $mailer->setBody($body);
+
+      $html_emails = false;
+      if ($use_prefs && $prefs) {
+        $html_emails = $prefs->getPreference(
+          PhabricatorUserPreferences::PREFERENCE_HTML_EMAILS,
+          $html_emails);
+      }
+
+      if ($html_emails && isset($params['html-body'])) {
+        $mailer->setHTMLBody($params['html-body']);
       }
 
       if (!$add_to && !$add_cc) {
@@ -795,6 +823,11 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       return array();
     }
 
+    if ($this->getForceDelivery()) {
+      // If we're forcing delivery, skip all the opt-out checks.
+      return $actors;
+    }
+
     // Exclude explicit recipients.
     foreach ($this->getExcludeMailRecipientPHIDs() as $phid) {
       $actor = idx($actors, $phid);
@@ -819,7 +852,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
         ->withPHIDs(array($from_phid))
         ->execute();
       $from_user = head($from_user);
-      if ($from_user && !$this->getOverrideNoSelfMailPreference()) {
+      if ($from_user) {
         $pref_key = PhabricatorUserPreferences::PREFERENCE_NO_SELF_MAIL;
         $exclude_self = $from_user
           ->loadPreferences()
@@ -835,17 +868,31 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       }
     }
 
+    $all_prefs = id(new PhabricatorUserPreferences())->loadAllWhere(
+      'userPHID in (%Ls)',
+      $actor_phids);
+    $all_prefs = mpull($all_prefs, null, 'getUserPHID');
+
+    // Exclude recipients who don't want any mail.
+    foreach ($all_prefs as $phid => $prefs) {
+      $exclude = $prefs->getPreference(
+        PhabricatorUserPreferences::PREFERENCE_NO_MAIL,
+        false);
+      if ($exclude) {
+        $actors[$phid]->setUndeliverable(
+          pht(
+            'This recipient has disabled all email notifications '.
+            '(Settings > Email Preferences > Email Notifications).'));
+      }
+    }
+
+    $value_email = PhabricatorUserPreferences::MAILTAG_PREFERENCE_EMAIL;
 
     // Exclude all recipients who have set preferences to not receive this type
     // of email (for example, a user who says they don't want emails about task
     // CC changes).
     $tags = $this->getParam('mailtags');
     if ($tags) {
-      $all_prefs = id(new PhabricatorUserPreferences())->loadAllWhere(
-        'userPHID in (%Ls)',
-        $actor_phids);
-      $all_prefs = mpull($all_prefs, null, 'getUserPHID');
-
       foreach ($all_prefs as $phid => $prefs) {
         $user_mailtags = $prefs->getPreference(
           PhabricatorUserPreferences::PREFERENCE_MAILTAGS,
@@ -855,7 +902,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
         // of the mailtags.
         $send = false;
         foreach ($tags as $tag) {
-          if (idx($user_mailtags, $tag, true)) {
+          if (((int)idx($user_mailtags, $tag, $value_email)) == $value_email) {
             $send = true;
             break;
           }

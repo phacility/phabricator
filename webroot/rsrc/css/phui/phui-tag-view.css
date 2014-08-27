@@ -339,9 +339,5 @@ a.phui-tag-view:hover.phui-tag-shade-disabled .phui-tag-core {
 
 .phui-object-item .phabricator-handle-tag-list-item {
   display: inline-block;
-}
-
-.phui-object-item .phabricator-handle-tag-list-item +
-  .phabricator-handle-tag-list-item {
-  margin: 0 0 0 4px;
+  margin: 0 4px 2px 0;
 }

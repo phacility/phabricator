@@ -94,7 +94,7 @@ final class PhabricatorAuthLoginController
       } else {
         return $this->renderError(
           pht(
-            'The external account ("%s") you just used to login is alerady '.
+            'The external account ("%s") you just used to login is already '.
             'associated with another Phabricator user account. Login to the '.
             'other Phabricator account and unlink the external account before '.
             'linking it to a new Phabricator account.',

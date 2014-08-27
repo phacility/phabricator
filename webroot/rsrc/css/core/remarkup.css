@@ -339,9 +339,27 @@
   border-top-color: {$thinblueborder};
   border-radius: 0;
 
+  box-shadow: none;
+  -webkit-box-shadow: none;
+
+  /* Set line height explicitly so the metrics <var /> and the real textarea
+     are forced to the same value. */
+  line-height: 1.25em;
+
   /* Prevent Safari and Chrome users from dragging the textarea any wider,
      because the top bar won't resize along with it. */
   resize: vertical;
+}
+
+var.remarkup-assist-textarea {
+  /* This is an invisible element used to measure the size of text in the
+     textarea so we can float typeaheads over the cursor position. */
+  display: block;
+  border-color: orange;
+  box-sizing: border-box;
+  padding: 4px 6px;
+  white-space: pre-wrap;
+  visibility: hidden;
 }
 
 .remarkup-assist-textarea:focus {
@@ -424,11 +442,6 @@
   opacity: 1.0;
 }
 
-.remarkup-assist-textarea {
-  box-shadow: none;
-  -webkit-box-shadow: none;
-}
-
 .remarkup-control-fullscreen-mode {
   position: fixed;
   top: -1px;
@@ -452,4 +465,8 @@
 .phabricator-image-macro-hero {
   margin: auto;
   max-width: 95%;
+}
+
+.remarkup-nav-sequence-arrow {
+  color: {$lightgreytext};
 }

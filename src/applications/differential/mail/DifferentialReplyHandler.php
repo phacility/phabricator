@@ -146,21 +146,15 @@ class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
             ->setContent($body));
     }
 
-    // NOTE: We have to be careful about this because Facebook's
-    // implementation jumps straight into handleAction() and will not have
-    // a PhabricatorMetaMTAReceivedMail object.
-    if ($this->receivedMail) {
-      $exclude = $this->receivedMail->getExcludeMailRecipientPHIDs();
-    } else {
-      $exclude = $this->getExcludeMailRecipientPHIDs();
-    }
-
     $editor = id(new DifferentialTransactionEditor())
       ->setActor($actor)
-      ->setExcludeMailRecipientPHIDs($exclude)
+      ->setExcludeMailRecipientPHIDs($this->getExcludeMailRecipientPHIDs())
       ->setContinueOnMissingFields(true)
       ->setContinueOnNoEffect(true);
 
+    // NOTE: We have to be careful about this because Facebook's
+    // implementation jumps straight into handleAction() and will not have
+    // a PhabricatorMetaMTAReceivedMail object.
     if ($this->receivedMail) {
       $content_source = PhabricatorContentSource::newForSource(
         PhabricatorContentSource::SOURCE_EMAIL,

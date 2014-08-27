@@ -613,7 +613,6 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
 
       foreach ($this->lintMessages as $message) {
         $inline = id(new PhabricatorAuditInlineComment())
-          ->setID($message['id'])
           ->setSyntheticAuthor(
             ArcanistLintSeverity::getStringForSeverity($message['severity']).
             ' '.$message['code'].' ('.$message['name'].')')
@@ -888,7 +887,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
 
   private function buildRawResponse($path, $data) {
     $file = $this->loadFileForData($path, $data);
-    return id(new AphrontRedirectResponse())->setURI($file->getBestURI());
+    return $file->getRedirectResponse();
   }
 
   private function buildImageCorpus($file_uri) {

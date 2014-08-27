@@ -36,10 +36,14 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
         '' => 'PhortuneLandingController',
         '(?P<accountID>\d+)/' => array(
           '' => 'PhortuneAccountViewController',
-          'paymentmethod/' => array(
-            'edit/' => 'PhortunePaymentMethodEditController',
+          'card/' => array(
+            'new/' => 'PhortunePaymentMethodCreateController',
           ),
           'buy/(?P<productID>\d+)/' => 'PhortuneProductPurchaseController',
+        ),
+        'card/(?P<id>\d+)/' => array(
+          'edit/' => 'PhortunePaymentMethodEditController',
+          'disable/' => 'PhortunePaymentMethodDisableController',
         ),
         'cart/(?P<id>\d+)/' => array(
           '' => 'PhortuneCartViewController',
@@ -53,6 +57,9 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
           '' => 'PhortuneProductListController',
           'view/(?P<id>\d+)/' => 'PhortuneProductViewController',
           'edit/(?:(?P<id>\d+)/)?' => 'PhortuneProductEditController',
+        ),
+        'purchase/(?P<id>\d+)/' => array(
+          '' => 'PhortunePurchaseViewController',
         ),
         'provider/(?P<digest>[^/]+)/(?P<action>[^/]+)/'
           => 'PhortuneProviderController',

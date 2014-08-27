@@ -5,6 +5,14 @@ final class PhabricatorPasteEditor
 
   private $pasteFile;
 
+  public function getEditorApplicationClass() {
+    return 'PhabricatorPasteApplication';
+  }
+
+  public function getEditorObjectsDescription() {
+    return pht('Pastes');
+  }
+
   public static function initializeFileForPaste(
     PhabricatorUser $actor,
     $name,

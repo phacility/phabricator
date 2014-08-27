@@ -788,6 +788,31 @@ abstract class PhabricatorApplicationTransaction
     return $this->getTitle();
   }
 
+  public function getMarkupFieldsForFeed(PhabricatorFeedStory $story) {
+    $fields = array();
+
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_COMMENT:
+        $text = $this->getComment()->getContent();
+        if (strlen($text)) {
+          $fields[] = 'comment/'.$this->getID();
+        }
+        break;
+    }
+
+    return $fields;
+  }
+
+  public function getMarkupTextForFeed(PhabricatorFeedStory $story, $field) {
+    switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_COMMENT:
+        $text = $this->getComment()->getContent();
+        return PhabricatorMarkupEngine::summarize($text);
+    }
+
+    return null;
+  }
+
   public function getBodyForFeed(PhabricatorFeedStory $story) {
     $old = $this->getOldValue();
     $new = $this->getNewValue();
@@ -797,10 +822,12 @@ abstract class PhabricatorApplicationTransaction
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_COMMENT:
         $text = $this->getComment()->getContent();
-        $body = phutil_escape_html_newlines(
-          phutil_utf8_shorten($text, 128));
+        if (strlen($text)) {
+          $body = $story->getMarkupFieldOutput('comment/'.$this->getID());
+        }
         break;
     }
+
     return $body;
   }
 

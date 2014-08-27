@@ -29,7 +29,6 @@ $generator = new CeleritySpriteGenerator();
 $sheets = array(
   'menu' => $generator->buildMenuSheet(),
   'apps' => $generator->buildAppsSheet(),
-  'minicons' => $generator->buildMiniconsSheet(),
   'conpherence' => $generator->buildConpherenceSheet(),
   'apps-large' => $generator->buildAppsLargeSheet(),
   'payments' => $generator->buildPaymentsSheet(),

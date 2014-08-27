@@ -58,6 +58,26 @@ final class PhabricatorEmailLoginController
           $e_email = pht('Invalid');
         }
 
+        // If this address is unverified, only send a reset link to it if
+        // the account has no verified addresses. This prevents an opportunistic
+        // attacker from compromising an account if a user adds an email
+        // address but mistypes it and doesn't notice.
+
+        // (For a newly created account, all the addresses may be unverified,
+        // which is why we'll send to an unverified address in that case.)
+
+        if ($target_email && !$target_email->getIsVerified()) {
+          $verified_addresses = id(new PhabricatorUserEmail())->loadAllWhere(
+            'userPHID = %s AND isVerified = 1',
+            $target_email->getUserPHID());
+          if ($verified_addresses) {
+            $errors[] = pht(
+              'That email addess is not verified. You can only send '.
+              'password reset links to a verified address.');
+            $e_email = pht('Unverified');
+          }
+        }
+
         if (!$errors) {
           $engine = new PhabricatorAuthSessionEngine();
           $uri = $engine->getOneTimeLoginURI(
@@ -88,12 +108,9 @@ Phabricator
 EOBODY;
           }
 
-          // NOTE: Don't set the user as 'from', or they may not receive the
-          // mail if they have the "don't send me email about my own actions"
-          // preference set.
-
           $mail = id(new PhabricatorMetaMTAMail())
             ->setSubject(pht('[Phabricator] Password Reset'))
+            ->setForceDelivery(true)
             ->addRawTos(array($target_email->getAddress()))
             ->setBody($body)
             ->saveAndSend();

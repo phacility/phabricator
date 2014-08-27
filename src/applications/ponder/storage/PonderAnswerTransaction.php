@@ -54,16 +54,10 @@ final class PonderAnswerTransaction
 
     switch ($this->getTransactionType()) {
       case self::TYPE_CONTENT:
-        $answer = $story->getObject($object_phid);
-        $question = $answer->getQuestion();
-        $answer_handle = $this->getHandle($object_phid);
-        $link = $answer_handle->renderLink(
-          $question->getFullTitle());
-
         return pht(
-          '%s updated their answer to %s',
+          '%s updated %s.',
           $this->renderHandleLink($author_phid),
-          $link);
+          $this->renderHandleLink($object_phid));
     }
 
     return parent::getTitleForFeed($story);

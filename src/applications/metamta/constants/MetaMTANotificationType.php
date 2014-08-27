@@ -11,14 +11,6 @@ final class MetaMTANotificationType
   const TYPE_DIFFERENTIAL_REVIEW_REQUEST = 'differential-review-request';
   const TYPE_DIFFERENTIAL_OTHER          = 'differential-other';
 
-  const TYPE_MANIPHEST_STATUS         = 'maniphest-status';
-  const TYPE_MANIPHEST_OWNER          = 'maniphest-owner';
-  const TYPE_MANIPHEST_PRIORITY       = 'maniphest-priority';
-  const TYPE_MANIPHEST_CC             = 'maniphest-cc';
-  const TYPE_MANIPHEST_PROJECTS       = 'maniphest-projects';
-  const TYPE_MANIPHEST_COMMENT        = 'maniphest-comment';
-  const TYPE_MANIPHEST_OTHER          = 'maniphest-other';
-
   const TYPE_PHOLIO_STATUS            = 'pholio-status';
   const TYPE_PHOLIO_COMMENT           = 'pholio-comment';
   const TYPE_PHOLIO_UPDATED           = 'pholio-updated';

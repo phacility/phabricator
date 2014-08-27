@@ -165,6 +165,9 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     // TTL back up to the full duration. The idea here is that sessions are
     // good forever if used regularly, but get GC'd when they fall out of use.
 
+    // NOTE: If we begin rotating session keys when extending sessions, the
+    // CSRF code needs to be updated so CSRF tokens survive session rotation.
+
     if (time() + (0.80 * $ttl) > $session->getSessionExpires()) {
       $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
         $conn_w = $session_table->establishConnection('w');
@@ -247,6 +250,43 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     unset($unguarded);
 
     return $session_key;
+  }
+
+
+  /**
+   * Terminate all of a user's login sessions.
+   *
+   * This is used when users change passwords, linked accounts, or add
+   * multifactor authentication.
+   *
+   * @param PhabricatorUser User whose sessions should be terminated.
+   * @param string|null Optionally, one session to keep. Normally, the current
+   *   login session.
+   *
+   * @return void
+   */
+  public function terminateLoginSessions(
+    PhabricatorUser $user,
+    $except_session = null) {
+
+    $sessions = id(new PhabricatorAuthSessionQuery())
+      ->setViewer($user)
+      ->withIdentityPHIDs(array($user->getPHID()))
+      ->execute();
+
+    if ($except_session !== null) {
+      $except_session = PhabricatorHash::digest($except_session);
+    }
+
+    foreach ($sessions as $key => $session) {
+      if ($except_session !== null) {
+        if ($except_session == $session->getSessionKey()) {
+          continue;
+        }
+      }
+
+      $session->delete();
+    }
   }
 
 

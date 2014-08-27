@@ -222,4 +222,29 @@ abstract class HarbormasterBuildStepImplementation {
     return (bool)$target->getDetail('builtin.wait-for-message');
   }
 
+  protected function shouldAbort(
+    HarbormasterBuild $build,
+    HarbormasterBuildTarget $target) {
+
+    return $build->getBuildGeneration() !== $target->getBuildGeneration();
+  }
+
+  protected function resolveFuture(
+    HarbormasterBuild $build,
+    HarbormasterBuildTarget $target,
+    Future $future) {
+
+    $futures = Futures(array($future));
+    foreach ($futures->setUpdateInterval(5) as $key => $future) {
+      if ($future === null) {
+        $build->reload();
+        if ($this->shouldAbort($build, $target)) {
+          throw new HarbormasterBuildAbortedException();
+        }
+      } else {
+        return $future->resolve();
+      }
+    }
+  }
+
 }

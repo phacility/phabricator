@@ -103,7 +103,7 @@ final class PhabricatorSettingsPanelSSHKeys
           $key->save();
           return id(new AphrontRedirectResponse())
             ->setURI($this->getPanelURI());
-        } catch (AphrontQueryDuplicateKeyException $ex) {
+        } catch (AphrontDuplicateKeyQueryException $ex) {
           $e_key = pht('Duplicate');
           $errors[] = pht('This public key is already associated with a user '.
                       'account.');
@@ -291,7 +291,7 @@ final class PhabricatorSettingsPanelSSHKeys
         array(
           'name' => 'id_rsa_phabricator.key',
           'ttl' => time() + (60 * 10),
-          'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
+          'viewPolicy' => $viewer->getPHID(),
         ));
 
       list($type, $body, $comment) = self::parsePublicKey($public_key);

@@ -104,7 +104,7 @@ final class PhabricatorPeopleNewController
           $response = id(new AphrontRedirectResponse())
             ->setURI('/p/'.$user->getUsername().'/');
           return $response;
-        } catch (AphrontQueryDuplicateKeyException $ex) {
+        } catch (AphrontDuplicateKeyQueryException $ex) {
           $errors[] = pht('Username and email must be unique.');
 
           $same_username = id(new PhabricatorUser())

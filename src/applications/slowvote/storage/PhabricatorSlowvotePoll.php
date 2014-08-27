@@ -6,7 +6,8 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
     PhabricatorSubscribableInterface,
     PhabricatorFlaggableInterface,
     PhabricatorTokenReceiverInterface,
-    PhabricatorProjectInterface {
+    PhabricatorProjectInterface,
+    PhabricatorDestructibleInterface {
 
   const RESPONSES_VISIBLE = 0;
   const RESPONSES_VOTERS  = 1;
@@ -137,6 +138,28 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
 
   public function getUsersToNotifyOfTokenGiven() {
     return array($this->getAuthorPHID());
+  }
+
+/* -(  PhabricatorDestructableInterface  )----------------------------------- */
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+      $choices = id(new PhabricatorSlowvoteChoice())->loadAllWhere(
+        'pollID = %d',
+        $this->getID());
+      foreach ($choices as $choice) {
+        $choice->delete();
+      }
+      $options = id(new PhabricatorSlowvoteOption())->loadAllWhere(
+        'pollID = %d',
+        $this->getID());
+      foreach ($options as $option) {
+        $option->delete();
+      }
+      $this->delete();
+    $this->saveTransaction();
   }
 
 }

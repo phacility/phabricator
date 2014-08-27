@@ -67,7 +67,7 @@ final class PhabricatorMailingListsEditController
           $list->save();
           return id(new AphrontRedirectResponse())
             ->setURI($this->getApplicationURI());
-        } catch (AphrontQueryDuplicateKeyException $ex) {
+        } catch (AphrontDuplicateKeyQueryException $ex) {
           $e_email = pht('Duplicate');
           $errors[] = pht('Another mailing list already uses that address.');
         }

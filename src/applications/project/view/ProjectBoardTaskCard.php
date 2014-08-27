@@ -35,6 +35,7 @@ final class ProjectBoardTaskCard {
     $this->canEdit = $can_edit;
     return $this;
   }
+
   public function getCanEdit() {
     return $this->canEdit;
   }

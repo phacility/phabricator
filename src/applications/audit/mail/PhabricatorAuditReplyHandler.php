@@ -33,19 +33,31 @@ final class PhabricatorAuditReplyHandler extends PhabricatorMailReplyHandler {
   protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
     $commit = $this->getMailReceiver();
     $actor = $this->getActor();
+    $message = $mail->getCleanTextBody();
+
+    $content_source = PhabricatorContentSource::newForSource(
+      PhabricatorContentSource::SOURCE_EMAIL,
+      array(
+        'id' => $mail->getID(),
+      ));
 
     // TODO: Support !raise, !accept, etc.
-    // TODO: Content sources.
 
-    $comment = id(new PhabricatorAuditComment())
-      ->setAction(PhabricatorAuditActionConstants::COMMENT)
-      ->setContent($mail->getCleanTextBody());
+    $xactions = array();
 
-    $editor = new PhabricatorAuditCommentEditor($commit);
-    $editor->setActor($actor);
-    $editor->setExcludeMailRecipientPHIDs(
-      $this->getExcludeMailRecipientPHIDs());
-    $editor->addComments(array($comment));
+    $xactions[] = id(new PhabricatorAuditTransaction())
+      ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
+      ->attachComment(
+        id(new PhabricatorAuditTransactionComment())
+          ->setCommitPHID($commit->getPHID())
+          ->setContent($message));
+
+    $editor = id(new PhabricatorAuditEditor())
+      ->setActor($actor)
+      ->setContentSource($content_source)
+      ->setExcludeMailRecipientPHIDs($this->getExcludeMailRecipientPHIDs())
+      ->setContinueOnMissingFields(true)
+      ->applyTransactions($commit, $xactions);
   }
 
 }

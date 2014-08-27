@@ -1,7 +1,7 @@
 <?php
 
 abstract class PhabricatorRemarkupCustomBlockRule
-  extends PhutilRemarkupEngineBlockRule {
+  extends PhutilRemarkupBlockRule {
 
   public function getRuleVersion() {
     return 1;

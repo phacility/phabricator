@@ -3,7 +3,7 @@
 final class LegalpadDocumentDoneController extends LegalpadController {
 
   public function shouldAllowPublic() {
-    return false;
+    return true;
   }
 
   public function processRequest() {

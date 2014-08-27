@@ -90,11 +90,15 @@ final class ManiphestTaskListView extends ManiphestView {
         ));
 
       if ($this->showBatchControls) {
+        $href = new PhutilURI('/maniphest/task/edit/'.$task->getID().'/');
+        if (!$this->showSubpriorityControls) {
+          $href->setQueryParam('ungrippable', 'true');
+        }
         $item->addAction(
           id(new PHUIListItemView())
             ->setIcon('fa-pencil')
             ->addSigil('maniphest-edit-task')
-            ->setHref('/maniphest/task/edit/'.$task->getID().'/'));
+            ->setHref($href));
       }
 
       $list->addItem($item);

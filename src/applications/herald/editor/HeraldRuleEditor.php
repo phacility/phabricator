@@ -3,6 +3,14 @@
 final class HeraldRuleEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  public function getEditorApplicationClass() {
+    return 'PhabricatorHeraldApplication';
+  }
+
+  public function getEditorObjectsDescription() {
+    return pht('Herald Rules');
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 

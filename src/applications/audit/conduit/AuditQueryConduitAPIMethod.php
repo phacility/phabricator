@@ -12,15 +12,19 @@ final class AuditQueryConduitAPIMethod extends AuditConduitAPIMethod {
 
   public function defineParamTypes() {
     $statuses = array(
-      'status-any',
-      'status-open',
+      DiffusionCommitQuery::AUDIT_STATUS_ANY,
+      DiffusionCommitQuery::AUDIT_STATUS_OPEN,
+      DiffusionCommitQuery::AUDIT_STATUS_CONCERN,
+      DiffusionCommitQuery::AUDIT_STATUS_ACCEPTED,
+      DiffusionCommitQuery::AUDIT_STATUS_PARTIAL,
     );
     $status_const = $this->formatStringConstants($statuses);
 
     return array(
       'auditorPHIDs'  => 'optional list<phid>',
       'commitPHIDs'   => 'optional list<phid>',
-      'status'        => 'optional '.$status_const.' (default = "status-any")',
+      'status'        => ('optional '.$status_const.
+                          ' (default = "audit-status-any")'),
       'offset'        => 'optional int',
       'limit'         => 'optional int (default = 100)',
     );

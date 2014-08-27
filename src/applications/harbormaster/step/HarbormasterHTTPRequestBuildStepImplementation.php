@@ -66,7 +66,10 @@ final class HarbormasterHTTPRequestBuildStepImplementation
         $key->getPasswordEnvelope());
     }
 
-    list($status, $body, $headers) = $future->resolve();
+    list($status, $body, $headers) = $this->resolveFuture(
+      $build,
+      $build_target,
+      $future);
 
     $log_body->append($body);
     $log_body->finalize($start);

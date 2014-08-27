@@ -74,16 +74,23 @@ final class DiffusionSetPasswordPanel extends PhabricatorSettingsPanel {
       if (!$errors) {
         $envelope = new PhutilOpaqueEnvelope($new_password);
 
+        try {
+          // NOTE: This test is against $viewer (not $user), so that the error
+          // message below makes sense in the case that the two are different,
+          // and because an admin reusing their own password is bad, while
+          // system agents generally do not have passwords anyway.
+
+          $same_password = $viewer->comparePassword($envelope);
+        } catch (PhabricatorPasswordHasherUnavailableException $ex) {
+          // If we're missing the hasher, just let the user continue.
+          $same_password = false;
+        }
+
         if ($new_password !== $confirm) {
           $e_password = pht('Does Not Match');
           $e_confirm = pht('Does Not Match');
           $errors[] = pht('Password and confirmation do not match.');
-        } else if ($viewer->comparePassword($envelope)) {
-          // NOTE: The above test is against $viewer (not $user), so that the
-          // error message below makes sense in the case that the two are
-          // different, and because an admin reusing their own password is bad,
-          // while system agents generally do not have passwords anyway.
-
+        } else if ($same_password) {
           $e_password = pht('Not Unique');
           $e_confirm = pht('Not Unique');
           $errors[] = pht(
@@ -125,6 +132,7 @@ final class DiffusionSetPasswordPanel extends PhabricatorSettingsPanel {
       $form
         ->appendChild(
           id(new AphrontFormPasswordControl())
+            ->setDisableAutocomplete(true)
             ->setLabel(pht('Current Password'))
             ->setDisabled(true)
             ->setValue('********************'));
@@ -139,11 +147,13 @@ final class DiffusionSetPasswordPanel extends PhabricatorSettingsPanel {
     $form
       ->appendChild(
         id(new AphrontFormPasswordControl())
+          ->setDisableAutocomplete(true)
           ->setName('password')
           ->setLabel(pht('New VCS Password'))
           ->setError($e_password))
       ->appendChild(
         id(new AphrontFormPasswordControl())
+          ->setDisableAutocomplete(true)
           ->setName('confirm')
           ->setLabel(pht('Confirm VCS Password'))
           ->setError($e_confirm))
@@ -194,7 +204,22 @@ final class DiffusionSetPasswordPanel extends PhabricatorSettingsPanel {
         ->setValue(PhabricatorPasswordHasher::getBestAlgorithmName()));
 
     if (strlen($hash_envelope->openEnvelope())) {
-      if (PhabricatorPasswordHasher::canUpgradeHash($hash_envelope)) {
+      try {
+        $can_upgrade = PhabricatorPasswordHasher::canUpgradeHash(
+          $hash_envelope);
+      } catch (PhabricatorPasswordHasherUnavailableException $ex) {
+        $can_upgrade = false;
+        $errors[] = pht(
+          'Your VCS password is currently hashed using an algorithm which is '.
+          'no longer available on this install.');
+        $errors[] = pht(
+          'Because the algorithm implementation is missing, your password '.
+          'can not be used.');
+        $errors[] = pht(
+          'You can set a new password to replace the old password.');
+      }
+
+      if ($can_upgrade) {
         $errors[] = pht(
           'The strength of your stored VCS password hash can be upgraded. '.
           'To upgrade, either: use the password to authenticate with a '.

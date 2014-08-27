@@ -3,6 +3,14 @@
 final class PhabricatorRepositoryEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  public function getEditorApplicationClass() {
+    return 'PhabricatorDiffusionApplication';
+  }
+
+  public function getEditorObjectsDescription() {
+    return pht('Repositories');
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
@@ -317,6 +325,52 @@ final class PhabricatorRepositoryEditor
     $errors = parent::validateTransaction($object, $type, $xactions);
 
     switch ($type) {
+      case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE:
+      case PhabricatorRepositoryTransaction::TYPE_TRACK_ONLY:
+        foreach ($xactions as $xaction) {
+          foreach ($xaction->getNewValue() as $pattern) {
+            // Check for invalid regular expressions.
+            $regexp = PhabricatorRepository::extractBranchRegexp($pattern);
+            if ($regexp !== null) {
+              $ok = @preg_match($regexp, '');
+              if ($ok === false) {
+                $error = new PhabricatorApplicationTransactionValidationError(
+                  $type,
+                  pht('Invalid'),
+                  pht(
+                    'Expression "%s" is not a valid regular expression. Note '.
+                    'that you must include delimiters.',
+                    $regexp),
+                  $xaction);
+                $errors[] = $error;
+                continue;
+              }
+            }
+
+            // Check for formatting mistakes like `regex(...)` instead of
+            // `regexp(...)`.
+            $matches = null;
+            if (preg_match('/^([^(]+)\\(.*\\)\z/', $pattern, $matches)) {
+              switch ($matches[1]) {
+                case 'regexp':
+                  break;
+                default:
+                  $error = new PhabricatorApplicationTransactionValidationError(
+                    $type,
+                    pht('Invalid'),
+                    pht(
+                      'Matching function "%s(...)" is not recognized. Valid '.
+                      'functions are: regexp(...).',
+                      $matches[1]),
+                    $xaction);
+                  $errors[] = $error;
+                  break;
+              }
+            }
+          }
+        }
+        break;
+
       case PhabricatorRepositoryTransaction::TYPE_REMOTE_URI:
         foreach ($xactions as $xaction) {
           $new_uri = $xaction->getNewValue();

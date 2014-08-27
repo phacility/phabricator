@@ -339,6 +339,10 @@ final class PhabricatorUser
       $vec = $this->getAlternateCSRFString();
     }
 
+    if ($this->hasSession()) {
+      $vec = $vec.$this->getSession()->getSessionKey();
+    }
+
     $time_block = floor($epoch / $frequency);
     $vec = $vec.$key.$time_block;
 
@@ -536,6 +540,7 @@ EOBODY;
 
     $mail = id(new PhabricatorMetaMTAMail())
       ->addTos(array($this->getPHID()))
+      ->setForceDelivery(true)
       ->setSubject('[Phabricator] Welcome to Phabricator')
       ->setBody($body)
       ->saveAndSend();
@@ -579,6 +584,7 @@ EOBODY;
 
     $mail = id(new PhabricatorMetaMTAMail())
       ->addTos(array($this->getPHID()))
+      ->setForceDelivery(true)
       ->setSubject('[Phabricator] Username Changed')
       ->setBody($body)
       ->saveAndSend();

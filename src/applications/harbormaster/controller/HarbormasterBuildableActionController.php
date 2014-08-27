@@ -54,7 +54,7 @@ final class HarbormasterBuildableActionController
       }
     }
 
-    $return_uri = $buildable->getMonogram();
+    $return_uri = '/'.$buildable->getMonogram();
     if ($request->isDialogFormPost() && $issuable) {
       $editor = id(new HarbormasterBuildableTransactionEditor())
         ->setActor($viewer)

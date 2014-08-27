@@ -22,4 +22,15 @@ final class PhabricatorFileListController extends PhabricatorFileController {
     return $this->delegateToController($controller);
   }
 
+  public function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
+    $crumbs->addAction(
+      id(new PHUIListItemView())
+        ->setName(pht('Upload File'))
+        ->setIcon('fa-upload')
+        ->setHref($this->getApplicationURI('/upload/')));
+
+    return $crumbs;
+  }
+
 }

@@ -84,7 +84,6 @@ abstract class PhameController extends PhabricatorController {
 
         $story->addAction(id(new PHUIIconView())
           ->setHref($this->getApplicationURI('post/edit/'.$post->getID().'/'))
-          ->setText(pht('Edit'))
           ->setIconFont('fa-pencil'));
       }
 

@@ -25,7 +25,7 @@
 
 .device-desktop .phabricator-notification-menu,
 .device-tablet .phabricator-notification-menu {
-  position: fixed;
+  position: absolute;
   width: 360px;
   top: 42px;
 }
@@ -81,26 +81,35 @@
   color: {$darkgreytext};
 }
 
+.phabricator-notification-header a:hover {
+  text-decoration: underline;
+}
+
 .phabricator-notification-header .phabricator-notification-clear-all {
   color: #18559D;
   float: right;
   font-weight: normal;
 }
 
-.phabricator-notification-view-all {
-  text-align: center;
-  font-weight: bold;
+.phabricator-notification-footer {
   background: {$greybackground};
   border-top: 1px solid {$thinblueborder};
   border-bottom-left-radius: 3px;
   border-bottom-right-radius: 3px;
   padding: 8px;
   font-size: 12px;
+  color: {$darkgreytext};
+}
+
+.phabricator-notification-footer a {
+  color: {$darkgreytext};
+}
+
+.phabricator-notification-footer a:hover {
+  text-decoration: underline;
 }
 
 .phabricator-notification-menu .aphlict-connection-status {
-  float: right;
-  font-weight: normal;
   color: {$lightgreytext};
 }
 

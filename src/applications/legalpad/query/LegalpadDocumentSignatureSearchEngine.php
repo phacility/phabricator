@@ -87,7 +87,7 @@ final class LegalpadDocumentSignatureSearchEngine
       $form
         ->appendChild(
           id(new AphrontFormTokenizerControl())
-            ->setDatasource('/typeahead/common/legalpaddocuments/')
+            ->setDatasource(new LegalpadDocumentDatasource())
             ->setName('documents')
             ->setLabel(pht('Documents'))
             ->setValue(array_select_keys($handles, $document_phids)));

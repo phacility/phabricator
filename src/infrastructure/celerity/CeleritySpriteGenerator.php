@@ -2,58 +2,6 @@
 
 final class CeleritySpriteGenerator {
 
-  public function buildMiniconsSheet() {
-    $icons = $this->getDirectoryList('minicons_white_1x');
-
-    $colors = array(
-      'white',
-      'dark',
-    );
-
-    $scales = array(
-      '1x'  => 1,
-      '2x'  => 2,
-    );
-
-    $template = id(new PhutilSprite())
-      ->setSourceSize(16, 16);
-
-    $sprites = array();
-    foreach ($colors as $color) {
-      foreach ($icons as $icon) {
-        $prefix = 'minicons_';
-        if (strlen($color)) {
-          $prefix .= $color.'_';
-        }
-
-        $suffix = '';
-        if (strlen($color)) {
-          $suffix = '-'.$color;
-        }
-
-        $sprite = id(clone $template)
-          ->setName('minicons-'.$icon.$suffix);
-
-        $sprite->setTargetCSS('.minicons-'.$icon.$suffix);
-
-        foreach ($scales as $scale_key => $scale) {
-          $path = $this->getPath($prefix.$scale_key.'/'.$icon.'.png');
-          $sprite->setSourceFile($path, $scale);
-        }
-        $sprites[] = $sprite;
-      }
-    }
-
-    $sheet = $this->buildSheet('minicons', true);
-    $sheet->setScales($scales);
-    foreach ($sprites as $sprite) {
-      $sheet->addSprite($sprite);
-    }
-
-    return $sheet;
-  }
-
-
   public function buildMenuSheet() {
     $sprites = array();
 

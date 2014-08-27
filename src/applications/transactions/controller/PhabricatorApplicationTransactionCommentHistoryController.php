@@ -73,6 +73,7 @@ final class PhabricatorApplicationTransactionCommentHistoryController
     $dialog = id(new AphrontDialogView())
       ->setUser($user)
       ->setWidth(AphrontDialogView::WIDTH_FULL)
+      ->setFlush(true)
       ->setTitle(pht('Comment History'));
 
     $dialog->appendChild($view);

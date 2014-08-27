@@ -15,6 +15,7 @@ class PhabricatorMailImplementationPHPMailerLiteAdapter
     require_once $root.'/externals/phpmailer/class.phpmailer-lite.php';
     $this->mailer = new PHPMailerLite($use_exceptions = true);
     $this->mailer->CharSet = 'utf-8';
+    $this->mailer->Encoding = 'quoted-printable';
 
     // By default, PHPMailerLite sends one mail per recipient. We handle
     // multiplexing higher in the stack, so tell it to send mail exactly
@@ -70,16 +71,24 @@ class PhabricatorMailImplementationPHPMailerLiteAdapter
 
   public function setBody($body) {
     $this->mailer->Body = $body;
+    $this->mailer->IsHTML(false);
+    return $this;
+  }
+
+
+  /**
+   * Note: phpmailer-lite does NOT support sending messages with mixed version
+   * (plaintext and html). So for now lets just use HTML if it's available.
+   * @param $html
+   */
+  public function setHTMLBody($html_body) {
+    $this->mailer->Body = $html_body;
+    $this->mailer->IsHTML(true);
     return $this;
   }
 
   public function setSubject($subject) {
     $this->mailer->Subject = $subject;
-    return $this;
-  }
-
-  public function setIsHTML($is_html) {
-    $this->mailer->IsHTML($is_html);
     return $this;
   }
 

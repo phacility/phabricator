@@ -49,7 +49,7 @@
 }
 
 .phabricator-crumb-view {
-  display: inline-block;
+  float: left;
   height: 31px;
   line-height: 31px;
 }

@@ -65,6 +65,8 @@ final class HarbormasterStepEditController extends HarbormasterController {
 
     $e_name = true;
     $v_name = $step->getName();
+    $e_description = true;
+    $v_description = $step->getDescription();
     $e_depends_on = true;
     $raw_depends_on = $step->getDetail('dependsOn', array());
 
@@ -78,6 +80,8 @@ final class HarbormasterStepEditController extends HarbormasterController {
     if ($request->isFormPost()) {
       $e_name = null;
       $v_name = $request->getStr('name');
+      $e_description = null;
+      $v_description = $request->getStr('description');
       $e_depends_on = null;
       $v_depends_on = $request->getArr('dependsOn');
 
@@ -100,6 +104,12 @@ final class HarbormasterStepEditController extends HarbormasterController {
           HarbormasterBuildStepTransaction::TYPE_DEPENDS_ON)
         ->setNewValue($v_depends_on);
       array_unshift($xactions, $depends_on_xaction);
+
+      $description_xaction = id(new HarbormasterBuildStepTransaction())
+        ->setTransactionType(
+          HarbormasterBuildStepTransaction::TYPE_DESCRIPTION)
+        ->setNewValue($v_description);
+      array_unshift($xactions, $description_xaction);
 
       if ($is_new) {
         // When creating a new step, make sure we have a create transaction
@@ -141,6 +151,14 @@ final class HarbormasterStepEditController extends HarbormasterController {
           ->setValue($v_depends_on));
 
     $field_list->appendFieldsToForm($form);
+
+    $form
+      ->appendChild(
+        id(new PhabricatorRemarkupControl())
+          ->setName('description')
+          ->setLabel(pht('Description'))
+          ->setError($e_description)
+          ->setValue($v_description));
 
     if ($is_new) {
       $submit = pht('Create Build Step');

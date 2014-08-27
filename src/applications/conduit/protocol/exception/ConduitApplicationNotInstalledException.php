@@ -3,11 +3,11 @@
 final class ConduitApplicationNotInstalledException
   extends ConduitMethodNotFoundException {
 
-  public function __construct($method, $application) {
+  public function __construct(ConduitAPIMethod $method, $application) {
     parent::__construct(
       pht(
         "Method '%s' belongs to application '%s', which is not installed.",
-        $method,
+        $method->getAPIMethodName(),
         $application));
   }
 

@@ -116,7 +116,9 @@ final class PhortunePaypalPaymentProvider extends PhortunePaymentProvider {
             'token' => $result['TOKEN'],
           ));
 
-        return id(new AphrontRedirectResponse())->setURI($uri);
+        return id(new AphrontRedirectResponse())
+          ->setIsExternal(true)
+          ->setURI($uri);
       case 'charge':
         var_dump($_REQUEST);
         break;

@@ -118,6 +118,12 @@
   padding: 8px;
 }
 
+.phui-property-list-raw-content {
+  padding: 0px;
+  background: #fff;
+  overflow: hidden;
+}
+
 /* In the common case where we immediately follow a header, move back up 30px
    so we snuggle next to the header. */
 .device-desktop .phui-header-view

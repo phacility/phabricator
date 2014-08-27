@@ -279,28 +279,27 @@ JX.id = function(any) {
 };
 
 
-JX.log = JX.bag;
+if (!window.console || !window.console.log) {
+  if (window.opera && window.opera.postError) {
+    window.console = {log: function(m) { window.opera.postError(m); }};
+  } else {
+    window.console = {log: function(m) { }};
+  }
+}
+
+
+/**
+ * Print a message to the browser debugging console (like Firebug).
+ *
+ * @param  string Message to print to the browser debugging console.
+ * @return void
+ */
+JX.log = function(message) {
+  window.console.log(message);
+};
+
 
 if (__DEV__) {
-  if (!window.console || !window.console.log) {
-    if (window.opera && window.opera.postError) {
-      window.console = {log: function(m) { window.opera.postError(m); }};
-    } else {
-      window.console = {log: function(m) { }};
-    }
-  }
-
-  /**
-   * Print a message to the browser debugging console (like Firebug). This
-   * method exists only in ##__DEV__##.
-   *
-   * @param  string Message to print to the browser debugging console.
-   * @return void
-   */
-  JX.log = function(message) {
-    window.console.log(message);
-  };
-
   window.alert = (function(native_alert) {
     var recent_alerts = [];
     var in_alert = false;

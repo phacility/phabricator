@@ -92,7 +92,7 @@ final class PhluxEditController extends PhluxController {
           $editor->applyTransactions($var, $xactions);
           $view_uri = $this->getApplicationURI('/view/'.$key.'/');
           return id(new AphrontRedirectResponse())->setURI($view_uri);
-        } catch (AphrontQueryDuplicateKeyException $ex) {
+        } catch (AphrontDuplicateKeyQueryException $ex) {
           $e_key = pht('Not Unique');
           $errors[] = pht('Variable key must be unique.');
         }

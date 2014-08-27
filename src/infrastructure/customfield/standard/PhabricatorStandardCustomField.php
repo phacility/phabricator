@@ -260,6 +260,10 @@ abstract class PhabricatorStandardCustomField
     return array();
   }
 
+  public function buildOrderIndex() {
+    return null;
+  }
+
   public function readApplicationSearchValueFromRequest(
     PhabricatorApplicationSearchEngine $engine,
     AphrontRequest $request) {

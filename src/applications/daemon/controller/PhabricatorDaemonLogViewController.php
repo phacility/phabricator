@@ -53,6 +53,10 @@ final class PhabricatorDaemonLogViewController
         $tag->setBackgroundColor(PHUITagView::COLOR_BLUE);
         $tag->setName(pht('Waiting'));
         break;
+      case PhabricatorDaemonLog::STATUS_EXITING:
+        $tag->setBackgroundColor(PHUITagView::COLOR_YELLOW);
+        $tag->setName(pht('Exiting'));
+        break;
       case PhabricatorDaemonLog::STATUS_EXITED:
         $tag->setBackgroundColor(PHUITagView::COLOR_GREY);
         $tag->setName(pht('Exited'));
@@ -135,6 +139,10 @@ final class PhabricatorDaemonLogViewController
           'resuming work to avoid overloading services.',
           phutil_format_relative_time($unknown_time),
           phutil_format_relative_time($wait_time));
+        break;
+      case PhabricatorDaemonLog::STATUS_EXITING:
+        $details = pht(
+          'This daemon is shutting down gracefully.');
         break;
       case PhabricatorDaemonLog::STATUS_EXITED:
         $details = pht(

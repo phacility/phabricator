@@ -93,28 +93,28 @@ final class HarbormasterBuildActionController
         break;
       case HarbormasterBuildCommand::COMMAND_STOP:
         if ($can_issue) {
-          $title = pht('Really stop build?');
+          $title = pht('Really pause build?');
           $body = pht(
-            'If you stop this build, work will halt once the current steps '.
+            'If you pause this build, work will halt once the current steps '.
             'complete. You can resume the build later.');
-          $submit = pht('Stop Build');
+          $submit = pht('Pause Build');
         } else {
-          $title = pht('Unable to Stop Build');
+          $title = pht('Unable to Pause Build');
           if ($build->isComplete()) {
             $body = pht(
-              'This build is already complete. You can not stop a completed '.
+              'This build is already complete. You can not pause a completed '.
               'build.');
           } else if ($build->isStopped()) {
             $body = pht(
-              'This build is already stopped. You can not stop a build which '.
-              'has already been stopped.');
+              'This build is already paused. You can not pause a build which '.
+              'has already been paused.');
           } else if ($build->isStopping()) {
             $body = pht(
-              'This build is already stopping. You can not reissue a stop '.
-              'command to a stopping build.');
+              'This build is already pausing. You can not reissue a pause '.
+              'command to a pausing build.');
           } else {
             $body = pht(
-              'This build can not be stopped.');
+              'This build can not be paused.');
           }
         }
         break;

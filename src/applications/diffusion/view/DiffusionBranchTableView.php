@@ -20,6 +20,11 @@ final class DiffusionBranchTableView extends DiffusionView {
   public function render() {
     $drequest = $this->getDiffusionRequest();
     $current_branch = $drequest->getBranch();
+    $repository = $drequest->getRepository();
+
+    Javelin::initBehavior('phabricator-tooltips');
+
+    $doc_href = PhabricatorEnv::getDoclink('Diffusion User Guide: Autoclose');
 
     $rows = array();
     $rowc = array();
@@ -32,6 +37,43 @@ final class DiffusionBranchTableView extends DiffusionView {
         $datetime = null;
         $details = null;
       }
+
+      switch ($repository->shouldSkipAutocloseBranch($branch->getShortName())) {
+        case PhabricatorRepository::BECAUSE_REPOSITORY_IMPORTING:
+          $icon = 'fa-times bluegrey';
+          $tip = pht('Repository Importing');
+          break;
+        case PhabricatorRepository::BECAUSE_AUTOCLOSE_DISABLED:
+          $icon = 'fa-times bluegrey';
+          $tip = pht('Repository Autoclose Disabled');
+          break;
+        case PhabricatorRepository::BECAUSE_BRANCH_UNTRACKED:
+          $icon = 'fa-times bluegrey';
+          $tip = pht('Branch Untracked');
+          break;
+        case PhabricatorRepository::BECAUSE_BRANCH_NOT_AUTOCLOSE:
+          $icon = 'fa-times bluegrey';
+          $tip = pht('Branch Autoclose Disabled');
+          break;
+        case null:
+          $icon = 'fa-check bluegrey';
+          $tip = pht('Autoclose Enabled');
+          break;
+        default:
+          $icon = 'fa-question';
+          $tip = pht('Status Unknown');
+          break;
+      }
+
+      $status_icon = id(new PHUIIconView())
+        ->setIconFont($icon)
+        ->addSigil('has-tooltip')
+        ->setHref($doc_href)
+        ->setMetadata(
+          array(
+            'tip' => $tip,
+            'size' => 200,
+          ));
 
       $rows[] = array(
         phutil_tag(
@@ -57,6 +99,7 @@ final class DiffusionBranchTableView extends DiffusionView {
         self::linkCommit(
           $drequest->getRepository(),
           $branch->getCommitIdentifier()),
+        $status_icon,
         $datetime,
         AphrontTableView::renderSingleDisplayLine($details),
       );
@@ -73,6 +116,7 @@ final class DiffusionBranchTableView extends DiffusionView {
         pht('History'),
         pht('Branch'),
         pht('Head'),
+        pht(''),
         pht('Modified'),
         pht('Details'),
       ));
@@ -80,6 +124,7 @@ final class DiffusionBranchTableView extends DiffusionView {
       array(
         '',
         'pri',
+        '',
         '',
         '',
         'wide',

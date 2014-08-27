@@ -17,16 +17,21 @@ final class PassphraseSSHKey extends PassphraseAbstractKey {
 
     $file_type = PassphraseCredentialTypeSSHPrivateKeyFile::CREDENTIAL_TYPE;
     if ($credential->getCredentialType() != $file_type) {
-      // If the credential does not store a file, write the key txt out to a
+      // If the credential does not store a file, write the key text out to a
       // temporary file so we can pass it to `ssh`.
       if (!$this->keyFile) {
+        $secret = $credential->getSecret();
+        if (!$secret) {
+          throw new Exception(
+            pht(
+              'Attempting to use a credential ("%s") but the credential '.
+              'secret has been destroyed!',
+              $credential->getMonogram()));
+        }
+
         $temporary_file = new TempFile('passphrase-ssh-key');
-
         Filesystem::changePermissions($temporary_file, 0600);
-
-        Filesystem::writeFile(
-          $temporary_file,
-          $credential->getSecret()->openEnvelope());
+        Filesystem::writeFile($temporary_file, $secret->openEnvelope());
 
         $this->keyFile = $temporary_file;
       }

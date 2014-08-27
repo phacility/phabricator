@@ -26,9 +26,14 @@ final class PhortuneTestPaymentProvider extends PhortunePaymentProvider {
     return pht('Infinite Free Money');
   }
 
+  public function getDefaultPaymentMethodDisplayName(
+    PhortunePaymentMethod $method) {
+    return pht('Vast Wealth');
+  }
+
   public function canHandlePaymentMethod(PhortunePaymentMethod $method) {
     $type = $method->getMetadataValue('type');
-    return ($type === 'test.cash' || $type === 'test.multiple');
+    return ($type === 'test.wealth' || $type == 'test.multiple');
   }
 
   protected function executeCharge(
@@ -69,8 +74,13 @@ final class PhortuneTestPaymentProvider extends PhortunePaymentProvider {
     $method
       ->setExpires('2050', '01')
       ->setBrand('FreeMoney')
-      ->setLastFourDigits('9999');
+      ->setLastFourDigits('9999')
+      ->setMetadata(
+        array(
+          'type' => 'test.wealth',
+        ));
 
+    return array();
   }
 
 

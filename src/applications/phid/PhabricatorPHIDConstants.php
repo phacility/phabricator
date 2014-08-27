@@ -6,7 +6,6 @@ final class PhabricatorPHIDConstants {
   const PHID_TYPE_UNKNOWN = '????';
   const PHID_TYPE_MAGIC   = '!!!!';
   const PHID_TYPE_STRY    = 'STRY';
-  const PHID_TYPE_ACMT    = 'ACMT';
   const PHID_TYPE_TOBJ    = 'TOBJ';
   const PHID_TYPE_ACNT    = 'ACNT';
   const PHID_TYPE_PDCT    = 'PDCT';

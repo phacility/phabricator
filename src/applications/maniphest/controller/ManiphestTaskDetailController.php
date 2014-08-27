@@ -530,65 +530,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
           $source));
     }
 
-    $project_phids = $task->getProjectPHIDs();
-    if ($project_phids) {
-      require_celerity_resource('maniphest-task-summary-css');
-
-      // If we end up with real-world projects with many hundreds of columns, it
-      // might be better to just load all the edges, then load those columns and
-      // work backward that way, or denormalize this data more.
-
-      $columns = id(new PhabricatorProjectColumnQuery())
-        ->setViewer($viewer)
-        ->withProjectPHIDs($project_phids)
-        ->execute();
-      $columns = mpull($columns, null, 'getPHID');
-
-      $column_edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_COLUMN;
-      $all_column_phids = array_keys($columns);
-
-      $column_edge_query = id(new PhabricatorEdgeQuery())
-        ->withSourcePHIDs(array($task->getPHID()))
-        ->withEdgeTypes(array($column_edge_type))
-        ->withDestinationPHIDs($all_column_phids);
-      $column_edge_query->execute();
-      $in_column_phids = array_fuse($column_edge_query->getDestinationPHIDs());
-
-      $column_groups = mgroup($columns, 'getProjectPHID');
-
-      $project_handles = array();
-      $project_annotations = array();
-      foreach ($project_phids as $project_phid) {
-        $handle = $this->getHandle($project_phid);
-        $project_handles[] = $handle;
-
-        $columns = idx($column_groups, $project_phid, array());
-        $column = head(array_intersect_key($columns, $in_column_phids));
-        if ($column) {
-          $column_name = pht('(%s)', $column->getDisplayName());
-          $column_link = phutil_tag(
-            'a',
-            array(
-              'href' => $handle->getURI().'board/',
-              'class' => 'maniphest-board-link',
-            ),
-            $column_name);
-
-          $project_annotations[$project_phid] = array(
-            ' ',
-            $column_link);
-        }
-      }
-
-      $project_rows = id(new PHUIHandleTagListView())
-        ->setHandles($project_handles)
-        ->setAnnotations($project_annotations);
-    } else {
-      $project_rows = phutil_tag('em', array(), pht('None'));
-    }
-
-    $view->addProperty(pht('Projects'), $project_rows);
-
     $edge_types = array(
       PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK
         => pht('Blocks'),

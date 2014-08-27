@@ -12,7 +12,9 @@ final class DiffusionDoorkeeperCommitFeedStoryPublisher
   }
 
   public function canPublishStory(PhabricatorFeedStory $story, $object) {
-    return ($object instanceof PhabricatorRepositoryCommit);
+    return
+      ($story instanceof PhabricatorApplicationTransactionFeedStory) &&
+      ($object instanceof PhabricatorRepositoryCommit);
   }
 
   public function isStoryAboutObjectCreation($object) {
@@ -29,17 +31,21 @@ final class DiffusionDoorkeeperCommitFeedStoryPublisher
     // After ApplicationTransactions, we could annotate feed stories more
     // explicitly.
 
-    $story = $this->getFeedStory();
-    $action = $story->getStoryData()->getValue('action');
-
-    if ($action == PhabricatorAuditActionConstants::CLOSE) {
-      return true;
-    }
-
     $fully_audited = PhabricatorAuditCommitStatusConstants::FULLY_AUDITED;
-    if (($action == PhabricatorAuditActionConstants::ACCEPT) &&
-        $object->getAuditStatus() == $fully_audited) {
-      return true;
+
+    $story = $this->getFeedStory();
+    $xaction = $story->getPrimaryTransaction();
+    switch ($xaction->getTransactionType()) {
+      case PhabricatorAuditActionConstants::ACTION:
+        switch ($xaction->getNewValue()) {
+          case PhabricatorAuditActionConstants::CLOSE:
+            return true;
+          case PhabricatorAuditActionConstants::ACCEPT:
+            if ($object->getAuditStatus() == $fully_audited) {
+              return true;
+            }
+            break;
+        }
     }
 
     return false;
@@ -69,10 +75,6 @@ final class DiffusionDoorkeeperCommitFeedStoryPublisher
 
     foreach ($requests as $request) {
       $status = $request->getAuditStatus();
-      if ($status == PhabricatorAuditStatusConstants::CC) {
-        // We handle these specially below.
-        continue;
-      }
 
       $object = idx($objects, $request->getAuditorPHID());
       if (!$object) {
@@ -133,13 +135,8 @@ final class DiffusionDoorkeeperCommitFeedStoryPublisher
   }
 
   public function getCCUserPHIDs($object) {
-    $ccs = array();
-    foreach ($this->getAuditRequests() as $request) {
-      if ($request->getAuditStatus() == PhabricatorAuditStatusConstants::CC) {
-        $ccs[] = $request->getAuditorPHID();
-      }
-    }
-    return $ccs;
+    return PhabricatorSubscribersQuery::loadSubscribersForPHID(
+      $object->getPHID());
   }
 
   public function getObjectTitle($object) {

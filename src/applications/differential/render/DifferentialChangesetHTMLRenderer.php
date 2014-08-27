@@ -289,12 +289,22 @@ abstract class DifferentialChangesetHTMLRenderer
 
   protected function renderPropertyChangeHeader() {
     $changeset = $this->getChangeset();
+    list($old, $new) = $this->getChangesetProperties($changeset);
 
-    $old = $changeset->getOldProperties();
-    $new = $changeset->getNewProperties();
+    // If we don't have any property changes, don't render this table.
+    if ($old === $new) {
+      return null;
+    }
 
     $keys = array_keys($old + $new);
     sort($keys);
+
+    $key_map = array(
+      'unix:filemode' => pht('File Mode'),
+      'file:dimensions' => pht('Image Dimensions'),
+      'file:mimetype' => pht('MIME Type'),
+      'file:size' => pht('File Size'),
+    );
 
     $rows = array();
     foreach ($keys as $key) {
@@ -313,26 +323,33 @@ abstract class DifferentialChangesetHTMLRenderer
           $nval = phutil_escape_html_newlines($nval);
         }
 
-        $rows[] = phutil_tag('tr', array(), array(
-          phutil_tag('th', array(), $key),
-          phutil_tag('td', array('class' => 'oval'), $oval),
-          phutil_tag('td', array('class' => 'nval'), $nval),
-        ));
+        $readable_key = idx($key_map, $key, $key);
+
+        $row = array(
+          $readable_key,
+          $oval,
+          $nval
+        );
+        $rows[] = $row;
+
       }
     }
 
-    array_unshift(
-      $rows,
-      phutil_tag('tr', array('class' => 'property-table-header'), array(
-        phutil_tag('th', array(), pht('Property Changes')),
-        phutil_tag('td', array('class' => 'oval'), pht('Old Value')),
-        phutil_tag('td', array('class' => 'nval'), pht('New Value')),
-      )));
-
+    $classes = array('', 'oval', 'nval');
+    $headers = array(
+      pht('Property'),
+      pht('Old Value'),
+      pht('New Value'),
+    );
+    $table = id(new AphrontTableView($rows))
+      ->setHeaders($headers)
+      ->setColumnClasses($classes);
     return phutil_tag(
-      'table',
-      array('class' => 'differential-property-table'),
-      $rows);
+      'div',
+      array(
+        'class' => 'differential-property-table',
+      ),
+      $table);
   }
 
   public function renderShield($message, $force = 'default') {

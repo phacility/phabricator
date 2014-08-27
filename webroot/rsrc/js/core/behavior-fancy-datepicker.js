@@ -47,8 +47,8 @@ JX.behavior('fancy-datepicker', function() {
     var p = JX.$V(button);
     var d = JX.Vector.getDim(picker);
 
-    picker.style.left = (p.x - d.x + 2) + 'px';
-    picker.style.top = (p.y - 10) + 'px';
+    picker.style.left = (p.x - d.x - 2) + 'px';
+    picker.style.top = (p.y) + 'px';
 
     JX.DOM.alterClass(root, 'picker-open', true);
 
@@ -205,6 +205,7 @@ JX.behavior('fancy-datepicker', function() {
                       today.getDate() == date.getDate());
 
       var classes = [];
+      classes.push('day');
       if (is_today) {
         classes.push('today');
       }

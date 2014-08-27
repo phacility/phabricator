@@ -149,7 +149,9 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
         // user might not end up back here. Really this needs a bunch of junk.
 
         $uri = new PhutilURI($result->checkout_uri);
-        return id(new AphrontRedirectResponse())->setURI($uri);
+        return id(new AphrontRedirectResponse())
+          ->setIsExternal(true)
+          ->setURI($uri);
       case 'charge':
         $checkout_id = $request->getInt('checkout_id');
         $params = array(
@@ -195,7 +197,9 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
 
         unset($unguarded);
 
-        return id(new AphrontRedirectResponse())->setURI($cart_uri);
+        return id(new AphrontRedirectResponse())
+          ->setIsExternal(true)
+          ->setURI($cart_uri);
       case 'cancel':
         var_dump($_REQUEST);
         break;

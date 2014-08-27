@@ -40,7 +40,7 @@
   overflow: hidden;
   border-radius: 3px;
   border-left-width: 6px;
-  background: #f0f0f0 url('/rsrc/image/texture/card-gradient.png') repeat-x;
+  background: #fff;
   margin-bottom: 4px;
 }
 
@@ -51,7 +51,6 @@
 .phui-object-item-frame {
   border-style: solid;
   border-color: {$lightgreyborder};
-  border-bottom-color: {$greyborder};
   border-width: 1px 1px 1px 0;
   position: relative;
   min-height: 29px;
@@ -61,7 +60,7 @@
 }
 
 .device-desktop .phui-object-item {
-  margin: 0 0 5px 0;
+  margin: 0 0 4px 0;
 }
 
 .phui-object-item-name {

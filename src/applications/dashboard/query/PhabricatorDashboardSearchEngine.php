@@ -53,11 +53,27 @@ final class PhabricatorDashboardSearchEngine
     PhabricatorSavedQuery $query,
     array $handles) {
 
+    $dashboards = mpull($dashboards, null, 'getPHID');
     $viewer = $this->requireViewer();
+
+    if ($dashboards) {
+      $installs = id(new PhabricatorDashboardInstall())
+        ->loadAllWhere(
+          'objectPHID IN (%Ls) AND dashboardPHID IN (%Ls)',
+          array(PhabricatorHomeApplication::DASHBOARD_DEFAULT,
+                $viewer->getPHID()),
+          array_keys($dashboards));
+      $installs = mpull($installs, null, 'getDashboardPHID');
+    } else {
+      $installs = array();
+    }
 
     $list = new PHUIObjectItemListView();
     $list->setUser($viewer);
-    foreach ($dashboards as $dashboard) {
+    $list->initBehavior('phabricator-tooltips', array());
+    $list->requireResource('aphront-tooltip-css');
+
+    foreach ($dashboards as $dashboard_phid => $dashboard) {
       $id = $dashboard->getID();
 
       $item = id(new PHUIObjectItemView())
@@ -65,6 +81,21 @@ final class PhabricatorDashboardSearchEngine
         ->setHeader($dashboard->getName())
         ->setHref($this->getApplicationURI("view/{$id}/"))
         ->setObject($dashboard);
+
+      if (isset($installs[$dashboard_phid])) {
+        $install = $installs[$dashboard_phid];
+        if ($install->getObjectPHID() == $viewer->getPHID()) {
+          $attrs = array(
+            'tip' => pht(
+              'This dashboard is installed to your personal homepage.'));
+          $item->addIcon('fa-user', pht('Installed'), $attrs);
+        } else {
+          $attrs = array(
+            'tip' => pht(
+              'This dashboard is the default homepage for all users.'));
+          $item->addIcon('fa-globe', pht('Installed'), $attrs);
+        }
+      }
 
       $list->addItem($item);
     }

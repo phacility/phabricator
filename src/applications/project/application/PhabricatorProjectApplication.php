@@ -66,11 +66,13 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
         'move/(?P<id>[1-9]\d*)/' => 'PhabricatorProjectMoveController',
         'board/(?P<projectID>[1-9]\d*)/' => array(
           'edit/(?:(?P<id>\d+)/)?'
-            => 'PhabricatorProjectBoardEditController',
+            => 'PhabricatorProjectColumnEditController',
           'delete/(?:(?P<id>\d+)/)?'
             => 'PhabricatorProjectBoardDeleteController',
           'column/(?:(?P<id>\d+)/)?'
             => 'PhabricatorProjectColumnDetailController',
+          'import/'
+            => 'PhabricatorProjectBoardImportController',
           'reorder/'
             => 'PhabricatorProjectBoardReorderController',
         ),

@@ -246,6 +246,7 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
         case 'exec':
           $info = $row['command'];
           break;
+        case 's3':
         case 'conduit':
           $info = $row['method'];
           break;

@@ -198,6 +198,13 @@ final class PhabricatorSettingsPanelMultiFactor
 
         $user->updateMultiFactorEnrollment();
 
+        // Terminate other sessions so they must log in and survive the
+        // multi-factor auth check.
+
+        id(new PhabricatorAuthSessionEngine())->terminateLoginSessions(
+          $user,
+          $request->getCookie(PhabricatorCookies::COOKIE_SESSION));
+
         return id(new AphrontRedirectResponse())
           ->setURI($this->getPanelURI('?id='.$config->getID()));
       }

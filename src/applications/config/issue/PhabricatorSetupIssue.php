@@ -15,6 +15,7 @@ final class PhabricatorSetupIssue {
   private $relatedPhabricatorConfig = array();
   private $phpConfig = array();
   private $commands = array();
+  private $mysqlConfig = array();
 
   public function addCommand($command) {
     $this->commands[] = $command;
@@ -83,6 +84,15 @@ final class PhabricatorSetupIssue {
 
   public function getPHPConfig() {
     return $this->phpConfig;
+  }
+
+  public function addMySQLConfig($mysql_config) {
+    $this->mysqlConfig[] = $mysql_config;
+    return $this;
+  }
+
+  public function getMySQLConfig() {
+    return $this->mysqlConfig;
   }
 
   public function addPhabricatorConfig($phabricator_config) {

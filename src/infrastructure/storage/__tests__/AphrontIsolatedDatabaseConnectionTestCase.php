@@ -134,7 +134,7 @@ final class AphrontIsolatedDatabaseConnectionTestCase
         null,
         $row,
         'Expect fake row to exist only in isolation.');
-    } catch (AphrontQueryConnectionException $ex) {
+    } catch (AphrontConnectionQueryException $ex) {
       // If we can't connect to the database, conclude that the isolated
       // connection actually is isolated. Philosophically, this perhaps allows
       // us to claim this test does not depend on the database?

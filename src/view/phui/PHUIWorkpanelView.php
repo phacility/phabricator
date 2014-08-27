@@ -4,14 +4,19 @@ final class PHUIWorkpanelView extends AphrontTagView {
 
   private $cards = array();
   private $header;
-  private $editURI;
-  private $headerAction;
   private $footerAction;
   private $headerColor = PHUIActionHeaderView::HEADER_GREY;
+  private $headerActions = array();
+  private $headerTag;
+  private $headerIcon;
 
-  public function setHeaderAction(PHUIIconView $header_action) {
-    $this->headerAction = $header_action;
+  public function setHeaderIcon(PHUIIconView $header_icon) {
+    $this->headerIcon = $header_icon;
     return $this;
+  }
+
+  public function getHeaderIcon() {
+    return $this->headerIcon;
   }
 
   public function setCards(PHUIObjectItemListView $cards) {
@@ -24,11 +29,6 @@ final class PHUIWorkpanelView extends AphrontTagView {
     return $this;
   }
 
-  public function setEditURI($edit_uri) {
-    $this->editURI = $edit_uri;
-    return $this;
-  }
-
   public function setFooterAction(PHUIListItemView $footer_action) {
     $this->footerAction = $footer_action;
     return $this;
@@ -36,6 +36,16 @@ final class PHUIWorkpanelView extends AphrontTagView {
 
   public function setHeaderColor($header_color) {
     $this->headerColor = $header_color;
+    return $this;
+  }
+
+  public function addHeaderAction(PHUIIconView $action) {
+    $this->headerActions[] = $action;
+    return $this;
+  }
+
+  public function setHeaderTag(PHUITagView $tag) {
+    $this->headerTag = $tag;
     return $this;
   }
 
@@ -61,20 +71,20 @@ final class PHUIWorkpanelView extends AphrontTagView {
           $footer_tag);
     }
 
-    $header_edit = null;
-    if ($this->editURI) {
-      $header_edit = id(new PHUIIconView())
-        ->setIconFont('fa-pencil')
-        ->setHref($this->editURI);
-    }
     $header = id(new PHUIActionHeaderView())
       ->setHeaderTitle($this->header)
       ->setHeaderColor($this->headerColor);
-    if ($header_edit) {
-      $header->addAction($header_edit);
+
+    if ($this->headerIcon) {
+      $header->setHeaderIcon($this->headerIcon);
     }
-    if ($this->headerAction) {
-      $header->addAction($this->headerAction);
+
+    if ($this->headerTag) {
+      $header->setTag($this->headerTag);
+    }
+
+    foreach ($this->headerActions as $action) {
+      $header->addAction($action);
     }
 
     $classes[] = 'phui-workpanel-'.$this->headerColor;

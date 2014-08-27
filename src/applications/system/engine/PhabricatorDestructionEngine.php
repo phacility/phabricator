@@ -48,6 +48,19 @@ final class PhabricatorDestructionEngine extends Phobject {
       }
     }
 
+    // Nuke any Herald transcripts of the object, because they may contain
+    // field data.
+
+    // TODO: Define an interface so we don't have to do this for transactions
+    // and other objects with no Herald adapters?
+    $transcripts = id(new HeraldTranscript())->loadAllWhere(
+      'objectPHID = %s',
+      $object_phid);
+    foreach ($transcripts as $transcript) {
+      $transcript->destroyObjectPermanently($this);
+    }
+
+    // TODO: Remove stuff from search indexes?
     // TODO: PhabricatorFlaggableInterface
     // TODO: PhabricatorTokenReceiverInterface
   }

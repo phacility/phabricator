@@ -51,6 +51,8 @@ final class HeraldTestConsoleController extends HeraldController {
             throw new Exception('Can not build adapter for object!');
           }
 
+          $adapter->setIsNewObject(false);
+
           $rules = id(new HeraldRuleQuery())
             ->setViewer($user)
             ->withContentTypes(array($adapter->getAdapterContentType()))

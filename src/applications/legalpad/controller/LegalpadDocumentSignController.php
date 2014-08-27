@@ -5,7 +5,7 @@ final class LegalpadDocumentSignController extends LegalpadController {
   private $id;
 
   public function shouldAllowPublic() {
-    return false;
+    return true;
   }
 
   public function willProcessRequest(array $data) {
@@ -631,6 +631,7 @@ EOBODY;
     id(new PhabricatorMetaMTAMail())
       ->addRawTos(array($email->getAddress()))
       ->setSubject(pht('[Legalpad] Signature Verification'))
+      ->setForceDelivery(true)
       ->setBody($body)
       ->setRelatedPHID($signature->getDocumentPHID())
       ->saveAndSend();

@@ -10,16 +10,73 @@ final class HarbormasterBuildTarget extends HarbormasterDAO
   protected $details;
   protected $variables;
   protected $targetStatus;
+  protected $dateStarted;
+  protected $dateCompleted;
+  protected $buildGeneration;
 
   const STATUS_PENDING = 'target/pending';
   const STATUS_BUILDING = 'target/building';
   const STATUS_WAITING = 'target/waiting';
   const STATUS_PASSED = 'target/passed';
   const STATUS_FAILED = 'target/failed';
+  const STATUS_ABORTED = 'target/aborted';
 
   private $build = self::ATTACHABLE;
   private $buildStep = self::ATTACHABLE;
   private $implementation;
+
+  public static function getBuildTargetStatusName($status) {
+    switch ($status) {
+      case self::STATUS_PENDING:
+        return pht('Pending');
+      case self::STATUS_BUILDING:
+        return pht('Building');
+      case self::STATUS_WAITING:
+        return pht('Waiting for Message');
+      case self::STATUS_PASSED:
+        return pht('Passed');
+      case self::STATUS_FAILED:
+        return pht('Failed');
+      case self::STATUS_ABORTED:
+        return pht('Aborted');
+      default:
+        return pht('Unknown');
+    }
+  }
+
+  public static function getBuildTargetStatusIcon($status) {
+    switch ($status) {
+      case self::STATUS_PENDING:
+        return PHUIStatusItemView::ICON_OPEN;
+      case self::STATUS_BUILDING:
+      case self::STATUS_WAITING:
+        return PHUIStatusItemView::ICON_RIGHT;
+      case self::STATUS_PASSED:
+        return PHUIStatusItemView::ICON_ACCEPT;
+      case self::STATUS_FAILED:
+        return PHUIStatusItemView::ICON_REJECT;
+      case self::STATUS_ABORTED:
+        return PHUIStatusItemView::ICON_MINUS;
+      default:
+        return PHUIStatusItemView::ICON_QUESTION;
+    }
+  }
+
+  public static function getBuildTargetStatusColor($status) {
+    switch ($status) {
+      case self::STATUS_PENDING:
+      case self::STATUS_BUILDING:
+      case self::STATUS_WAITING:
+        return 'blue';
+      case self::STATUS_PASSED:
+        return 'green';
+      case self::STATUS_FAILED:
+      case self::STATUS_ABORTED:
+        return 'red';
+      default:
+        return 'bluegrey';
+    }
+  }
 
   public static function initializeNewBuildTarget(
     HarbormasterBuild $build,
@@ -32,7 +89,8 @@ final class HarbormasterBuildTarget extends HarbormasterDAO
       ->setClassName($build_step->getClassName())
       ->setDetails($build_step->getDetails())
       ->setTargetStatus(self::STATUS_PENDING)
-      ->setVariables($variables);
+      ->setVariables($variables)
+      ->setBuildGeneration($build->getBuildGeneration());
   }
 
   public function getConfiguration() {
@@ -127,6 +185,7 @@ final class HarbormasterBuildTarget extends HarbormasterDAO
     switch ($this->getTargetStatus()) {
       case self::STATUS_PASSED:
       case self::STATUS_FAILED:
+      case self::STATUS_ABORTED:
         return true;
     }
 

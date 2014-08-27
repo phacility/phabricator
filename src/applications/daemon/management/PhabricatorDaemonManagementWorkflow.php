@@ -286,13 +286,37 @@ abstract class PhabricatorDaemonManagementWorkflow
     return 0;
   }
 
-  protected final function executeStopCommand(array $pids) {
+  protected final function executeStopCommand(
+    array $pids,
+    $grace_period,
+    $force) {
+
     $console = PhutilConsole::getConsole();
 
     $daemons = $this->loadRunningDaemons();
+    $rogue_daemons = PhutilDaemonOverseer::findRunningDaemons();
     if (!$daemons) {
-      $console->writeErr(pht('There are no running Phabricator daemons.')."\n");
+      if ($force && $rogue_daemons) {
+        $stop_rogue_daemons = $this->buildRogueDaemons($rogue_daemons);
+        $this->sendStopSignals($stop_rogue_daemons, $grace_period);
+      } else {
+        $console->writeErr(pht(
+          'There are no running Phabricator daemons.')."\n");
+        if ($rogue_daemons) {
+          $console->writeErr($this->getForceStopHint($rogue_daemons)."\n");
+        }
+      }
       return 0;
+    }
+
+    if ($rogue_daemons) {
+      if ($force) {
+        $daemons = array_merge(
+          $daemons,
+          $this->buildRogueDaemons($rogue_daemons));
+      } else {
+        $console->writeErr($this->getForceStopHint($rogue_daemons)."\n");
+      }
     }
 
     $daemons = mpull($daemons, null, 'getPID');
@@ -325,40 +349,7 @@ abstract class PhabricatorDaemonManagementWorkflow
     }
 
     $all_daemons = $running;
-    foreach ($running as $key => $daemon) {
-      $pid = $daemon->getPID();
-      $name = $daemon->getName();
-
-      $console->writeErr(pht("Stopping daemon '%s' (%s)...", $name, $pid)."\n");
-      if (!$daemon->isRunning()) {
-        $console->writeErr(pht('Daemon is not running.')."\n");
-        unset($running[$key]);
-        $daemon->updateStatus(PhabricatorDaemonLog::STATUS_EXITED);
-      } else {
-        posix_kill($pid, SIGINT);
-      }
-    }
-
-    $start = time();
-    do {
-      foreach ($running as $key => $daemon) {
-        $pid = $daemon->getPID();
-        if (!$daemon->isRunning()) {
-          $console->writeOut(pht('Daemon %s exited normally.', $pid)."\n");
-          unset($running[$key]);
-        }
-      }
-      if (empty($running)) {
-        break;
-      }
-      usleep(100000);
-    } while (time() < $start + 15);
-
-    foreach ($running as $key => $daemon) {
-      $pid = $daemon->getPID();
-      $console->writeErr(pht('Sending daemon %s a SIGKILL.', $pid)."\n");
-      posix_kill($pid, SIGKILL);
-    }
+    $this->sendStopSignals($running, $grace_period);
 
     foreach ($all_daemons as $daemon) {
       if ($daemon->getPIDFile()) {
@@ -367,6 +358,90 @@ abstract class PhabricatorDaemonManagementWorkflow
     }
 
     return 0;
+  }
+
+  private function getForceStopHint($rogue_daemons) {
+    return pht(
+      'There are processes running that look like Phabricator daemons but '.
+      'have no corresponding PID files:'."\n\n".'%s'."\n\n".
+      'Stop these processes by re-running this command with the --force '.
+      'parameter.',
+      implode("\n", ipull($rogue_daemons, 'command')));
+  }
+
+  private function buildRogueDaemons(array $daemons) {
+    $rogue_daemons = array();
+    foreach ($daemons as $pid => $data) {
+      $rogue_daemons[] =
+        PhabricatorDaemonReference::newFromRogueDictionary($data);
+    }
+    return $rogue_daemons;
+  }
+
+  private function sendStopSignals($daemons, $grace_period) {
+    // If we're doing a graceful shutdown, try SIGINT first.
+    if ($grace_period) {
+      $daemons = $this->sendSignal($daemons, SIGINT, $grace_period);
+    }
+
+    // If we still have daemons, SIGTERM them.
+    if ($daemons) {
+      $daemons = $this->sendSignal($daemons, SIGTERM, 15);
+    }
+
+    // If the overseer is still alive, SIGKILL it.
+    if ($daemons) {
+      $this->sendSignal($daemons, SIGKILL, 0);
+    }
+  }
+
+  private function sendSignal(array $daemons, $signo, $wait) {
+    $console = PhutilConsole::getConsole();
+
+    foreach ($daemons as $key => $daemon) {
+      $pid = $daemon->getPID();
+      $name = $daemon->getName();
+
+      if (!$pid) {
+        $console->writeOut("%s\n", pht("Daemon '%s' has no PID!", $name));
+        unset($daemons[$key]);
+        continue;
+      }
+
+      switch ($signo) {
+        case SIGINT:
+          $message = pht("Interrupting daemon '%s' (%s)...", $name, $pid);
+          break;
+        case SIGTERM:
+          $message = pht("Terminating daemon '%s' (%s)...", $name, $pid);
+          break;
+        case SIGKILL:
+          $message = pht("Killing daemon '%s' (%s)...", $name, $pid);
+          break;
+      }
+
+      $console->writeOut("%s\n", $message);
+      posix_kill($pid, $signo);
+    }
+
+    if ($wait) {
+      $start = PhabricatorTime::getNow();
+      do {
+        foreach ($daemons as $key => $daemon) {
+          $pid = $daemon->getPID();
+          if (!$daemon->isRunning()) {
+            $console->writeOut(pht('Daemon %s exited.', $pid)."\n");
+            unset($daemons[$key]);
+          }
+        }
+        if (empty($daemons)) {
+          break;
+        }
+        usleep(100000);
+      } while (PhabricatorTime::getNow() < $start + $wait);
+    }
+
+    return $daemons;
   }
 
   private function freeActiveLeases() {

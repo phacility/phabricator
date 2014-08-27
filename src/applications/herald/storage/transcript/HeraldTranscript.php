@@ -1,7 +1,9 @@
 <?php
 
 final class HeraldTranscript extends HeraldDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorDestructibleInterface {
 
   protected $objectTranscript;
   protected $ruleTranscripts = array();
@@ -193,6 +195,18 @@ final class HeraldTranscript extends HeraldDAO
     return pht(
       'To view a transcript, you must be able to view the object the '.
       'transcript is about.');
+  }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+      $this->delete();
+    $this->saveTransaction();
   }
 
 

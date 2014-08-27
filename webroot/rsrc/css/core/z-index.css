@@ -88,14 +88,6 @@
   z-index: 7;
 }
 
-.fancy-datepicker {
-  z-index: 7;
-}
-
-.calendar-button {
-  z-index: 8;
-}
-
 .differential-haunt-mode-1 .differential-add-comment-panel,
 .differential-haunt-mode-2 .differential-add-comment-panel {
   z-index: 8;
@@ -125,8 +117,16 @@ div.jx-typeahead-results {
   z-index: 14;
 }
 
-.jx-hovercard-container {
+.fancy-datepicker {
+  z-index: 15;
+}
+
+.calendar-button {
   z-index: 16;
+}
+
+.jx-hovercard-container {
+  z-index: 17;
 }
 
 .pholio-device-lightbox {

@@ -31,6 +31,7 @@ final class PhabricatorSetupCheckDaemons extends PhabricatorSetupCheck {
           'a',
           array(
             'href' => $doc_href,
+            'target' => '_blank'
           ),
           pht('Managing Daemons with phd')));
 
@@ -42,5 +43,44 @@ final class PhabricatorSetupCheckDaemons extends PhabricatorSetupCheck {
         ->addCommand('phabricator/ $ ./bin/phd start');
     }
 
+    $environment_hash = PhabricatorEnv::calculateEnvironmentHash();
+    $all_daemons = id(new PhabricatorDaemonLogQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withStatus(PhabricatorDaemonLogQuery::STATUS_ALIVE)
+      ->execute();
+    foreach ($all_daemons as $daemon) {
+      if ($daemon->getEnvHash() != $environment_hash) {
+        $doc_href = PhabricatorEnv::getDocLink(
+          'Managing Daemons with phd');
+
+        $summary = pht(
+          'You should restart the daemons. Their configuration is out of '.
+          'date.');
+
+        $message = pht(
+          'The Phabricator daemons are running with an out of date '.
+          'configuration. If you are making multiple configuration changes, '.
+          'you only need to restart the daemons once after the last change.'.
+          "\n\n".
+          'Use %s to restart daemons. See %s for more information.',
+          phutil_tag('tt', array(), 'bin/phd restart'),
+          phutil_tag(
+            'a',
+            array(
+              'href' => $doc_href,
+              'target' => '_blank'
+            ),
+            pht('Managing Daemons with phd')));
+
+        $this->newIssue('daemons.need-restarting')
+          ->setShortName(pht('Daemons Need Restarting'))
+          ->setName(pht('Phabricator Daemons Need Restarting'))
+          ->setSummary($summary)
+          ->setMessage($message)
+          ->addCommand('phabricator/ $ ./bin/phd restart');
+        break;
+      }
+    }
   }
+
 }

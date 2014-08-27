@@ -27,7 +27,8 @@ final class PassphraseCredentialTypePassword
   }
 
   public function newSecretControl() {
-    return new AphrontFormPasswordControl();
+    return id(new AphrontFormPasswordControl())
+      ->setDisableAutocomplete(true);
   }
 
 }

@@ -8,7 +8,8 @@ final class PonderQuestion extends PonderDAO
     PhabricatorFlaggableInterface,
     PhabricatorPolicyInterface,
     PhabricatorTokenReceiverInterface,
-    PhabricatorProjectInterface {
+    PhabricatorProjectInterface,
+    PhabricatorDestructibleInterface {
 
   const MARKUP_FIELD_CONTENT = 'markup:content';
 
@@ -245,6 +246,24 @@ final class PonderQuestion extends PonderDAO
     return array(
       $this->getAuthorPHID(),
     );
+  }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+      $answers = id(new PonderAnswer())->loadAllWhere(
+        'questionID = %d',
+        $this->getID());
+      foreach ($answers as $answer) {
+        $engine->destroyObject($answer);
+      }
+
+      $this->delete();
+    $this->saveTransaction();
   }
 
 }

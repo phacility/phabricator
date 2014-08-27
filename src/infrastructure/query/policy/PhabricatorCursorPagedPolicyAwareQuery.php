@@ -12,6 +12,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   private $afterID;
   private $beforeID;
   private $applicationSearchConstraints = array();
+  private $applicationSearchOrders = array();
   private $internalPaging;
 
   protected function getPagingColumn() {
@@ -360,6 +361,32 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
 
   /**
+   * Order the results by an ApplicationSearch index.
+   *
+   * @param PhabricatorCustomField Field to which the index belongs.
+   * @param PhabricatorCustomFieldIndexStorage Table where the index is stored.
+   * @param bool True to sort ascending.
+   * @return this
+   * @task appsearch
+   */
+  public function withApplicationSearchOrder(
+    PhabricatorCustomField $field,
+    PhabricatorCustomFieldIndexStorage $index,
+    $ascending) {
+
+    $this->applicationSearchOrders[] = array(
+      'key' => $field->getFieldKey(),
+      'type' => $index->getIndexValueType(),
+      'table' => $index->getTableName(),
+      'index' => $index->getIndexKey(),
+      'ascending' => $ascending,
+    );
+
+    return $this;
+  }
+
+
+  /**
    * Get the name of the query's primary object PHID column, for constructing
    * JOIN clauses. Normally (and by default) this is just `"phid"`, but if the
    * query construction requires a table alias it may be something like
@@ -535,7 +562,72 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       }
     }
 
+    foreach ($this->applicationSearchOrders as $key => $order) {
+      $table = $order['table'];
+      $alias = 'appsearch_order_'.$key;
+      $index = $order['index'];
+      $phid_column = $this->getApplicationSearchObjectPHIDColumn();
+
+      $joins[] = qsprintf(
+        $conn_r,
+        'LEFT JOIN %T %T ON %T.objectPHID = %Q
+          AND %T.indexKey = %s',
+        $table,
+        $alias,
+        $alias,
+        $phid_column,
+        $alias,
+        $index);
+    }
+
     return implode(' ', $joins);
+  }
+
+  protected function buildApplicationSearchOrders(
+    AphrontDatabaseConnection $conn_r,
+    $reverse) {
+
+    $orders = array();
+    foreach ($this->applicationSearchOrders as $key => $order) {
+      $alias = 'appsearch_order_'.$key;
+
+      if ($order['ascending'] xor $reverse) {
+        $orders[] = qsprintf($conn_r, '%T.indexValue ASC', $alias);
+      } else {
+        $orders[] = qsprintf($conn_r, '%T.indexValue DESC', $alias);
+      }
+    }
+
+    return $orders;
+  }
+
+  protected function buildApplicationSearchPagination(
+    AphrontDatabaseConnection $conn_r,
+    $cursor) {
+
+    // We have to get the current field values on the cursor object.
+    $fields = PhabricatorCustomField::getObjectFields(
+      $cursor,
+      PhabricatorCustomField::ROLE_APPLICATIONSEARCH);
+    $fields->setViewer($this->getViewer());
+    $fields->readFieldsFromStorage($cursor);
+
+    $fields = mpull($fields->getFields(), null, 'getFieldKey');
+
+    $columns = array();
+    foreach ($this->applicationSearchOrders as $key => $order) {
+      $alias = 'appsearch_order_'.$key;
+
+      $field = idx($fields, $order['key']);
+
+      $columns[] = array(
+        'name' => $alias.'.indexValue',
+        'value' => $field->getValueForStorage(),
+        'type' => $order['type'],
+      );
+    }
+
+    return $columns;
   }
 
 }

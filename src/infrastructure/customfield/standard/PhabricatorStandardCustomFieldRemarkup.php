@@ -19,6 +19,13 @@ final class PhabricatorStandardCustomFieldRemarkup
     return 'block';
   }
 
+  public function getApplicationTransactionRemarkupBlocks(
+    PhabricatorApplicationTransaction $xaction) {
+    return array(
+      $xaction->getNewValue(),
+    );
+  }
+
   public function renderPropertyViewValue(array $handles) {
     $value = $this->getFieldValue();
 

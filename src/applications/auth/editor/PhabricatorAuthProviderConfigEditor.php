@@ -3,6 +3,14 @@
 final class PhabricatorAuthProviderConfigEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  public function getEditorApplicationClass() {
+    return 'PhabricatorAuthApplication';
+  }
+
+  public function getEditorObjectsDescription() {
+    return pht('Auth Providers');
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 

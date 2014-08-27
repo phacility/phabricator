@@ -460,7 +460,7 @@ abstract class LiskDAO {
       $args);
 
     if (count($data) > 1) {
-      throw new AphrontQueryCountException(
+      throw new AphrontCountQueryException(
         'More than 1 result from loadOneWhere()!');
     }
 
@@ -517,7 +517,7 @@ abstract class LiskDAO {
       $this->getID());
 
     if (!$result) {
-      throw new AphrontQueryObjectMissingException();
+      throw new AphrontObjectMissingQueryException();
     }
 
     return $this;
@@ -771,7 +771,7 @@ abstract class LiskDAO {
     }
 
     if (count($relatives) > 1) {
-      throw new AphrontQueryCountException(
+      throw new AphrontCountQueryException(
         'More than 1 result from loadOneRelative()!');
     }
 
@@ -855,7 +855,7 @@ abstract class LiskDAO {
    *
    * @task   info
    */
-  protected function getProperties() {
+  protected function getAllLiskProperties() {
     static $properties = null;
     if (!isset($properties)) {
       $class = new ReflectionClass(get_class($this));
@@ -893,7 +893,7 @@ abstract class LiskDAO {
   protected function checkProperty($property) {
     static $properties = null;
     if ($properties === null) {
-      $properties = $this->getProperties();
+      $properties = $this->getAllLiskProperties();
     }
 
     $property = strtolower($property);
@@ -980,9 +980,9 @@ abstract class LiskDAO {
    *
    * @task   info
    */
-  protected function getPropertyValues() {
+  protected function getAllLiskPropertyValues() {
     $map = array();
-    foreach ($this->getProperties() as $p) {
+    foreach ($this->getAllLiskProperties() as $p) {
       // We may receive a warning here for properties we've implicitly added
       // through configuration; squelch it.
       $map[$p] = @$this->$p;
@@ -1070,7 +1070,7 @@ abstract class LiskDAO {
     $this->isEphemeralCheck();
 
     $this->willSaveObject();
-    $data = $this->getPropertyValues();
+    $data = $this->getAllLiskPropertyValues();
     $this->willWriteData($data);
 
     $map = array();
@@ -1139,7 +1139,7 @@ abstract class LiskDAO {
    */
   protected function insertRecordIntoDatabase($mode) {
     $this->willSaveObject();
-    $data = $this->getPropertyValues();
+    $data = $this->getAllLiskPropertyValues();
 
     $conn = $this->establishConnection('w');
 
@@ -1183,7 +1183,7 @@ abstract class LiskDAO {
         } else {
           $data[$key] = qsprintf($conn, '%ns', $value);
         }
-      } catch (AphrontQueryParameterException $parameter_exception) {
+      } catch (AphrontParameterQueryException $parameter_exception) {
         throw new PhutilProxyException(
           pht(
             "Unable to insert or update object of class %s, field '%s' ".

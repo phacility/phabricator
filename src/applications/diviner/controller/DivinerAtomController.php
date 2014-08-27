@@ -115,7 +115,7 @@ final class DivinerAtomController extends DivinerController {
     $toc = $engine->getEngineMetadata(
       $symbol,
       $field,
-      PhutilRemarkupEngineRemarkupHeaderBlockRule::KEY_HEADER_TOC,
+      PhutilRemarkupHeaderBlockRule::KEY_HEADER_TOC,
       array());
 
     $document = id(new PHUIDocumentView())

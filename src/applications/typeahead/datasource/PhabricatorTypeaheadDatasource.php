@@ -74,7 +74,7 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
       return array();
     }
 
-    $tokens = preg_split('/\s+/', $string);
+    $tokens = preg_split('/\s+|-/', $string);
     return array_unique($tokens);
   }
 

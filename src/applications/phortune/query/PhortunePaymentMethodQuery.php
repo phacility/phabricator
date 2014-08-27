@@ -6,10 +6,7 @@ final class PhortunePaymentMethodQuery
   private $ids;
   private $phids;
   private $accountPHIDs;
-
-  const STATUS_ANY = 'status-any';
-  const STATUS_OPEN = 'status-open';
-  private $status = self::STATUS_ANY;
+  private $statuses;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -26,8 +23,8 @@ final class PhortunePaymentMethodQuery
     return $this;
   }
 
-  public function withStatus($status) {
-    $this->status = $status;
+  public function withStatuses(array $statuses) {
+    $this->statuses = $statuses;
     return $this;
   }
 
@@ -77,41 +74,32 @@ final class PhortunePaymentMethodQuery
   private function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->accountPHIDs) {
+    if ($this->accountPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
         'accountPHID IN (%Ls)',
         $this->accountPHIDs);
     }
 
-    switch ($this->status) {
-      case self::STATUS_ANY;
-        break;
-      case self::STATUS_OPEN:
-        $where[] = qsprintf(
-          $conn,
-          'status in (%Ls)',
-          array(
-            PhortunePaymentMethod::STATUS_ACTIVE,
-            PhortunePaymentMethod::STATUS_FAILED,
-          ));
-        break;
-      default:
-        throw new Exception("Unknown status '{$this->status}'!");
+    if ($this->statuses !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'status IN (%Ls)',
+        $this->statuses);
     }
 
     $where[] = $this->buildPagingClause($conn);

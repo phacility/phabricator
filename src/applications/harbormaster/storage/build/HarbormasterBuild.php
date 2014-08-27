@@ -6,6 +6,7 @@ final class HarbormasterBuild extends HarbormasterDAO
   protected $buildablePHID;
   protected $buildPlanPHID;
   protected $buildStatus;
+  protected $buildGeneration;
 
   private $buildable = self::ATTACHABLE;
   private $buildPlan = self::ATTACHABLE;
@@ -74,7 +75,7 @@ final class HarbormasterBuild extends HarbormasterDAO
       case self::STATUS_ERROR:
         return pht('Unexpected Error');
       case self::STATUS_STOPPED:
-        return pht('Stopped');
+        return pht('Paused');
       case self::STATUS_DEADLOCKED:
         return pht('Deadlocked');
       default:
@@ -126,7 +127,8 @@ final class HarbormasterBuild extends HarbormasterDAO
 
   public static function initializeNewBuild(PhabricatorUser $actor) {
     return id(new HarbormasterBuild())
-      ->setBuildStatus(self::STATUS_INACTIVE);
+      ->setBuildStatus(self::STATUS_INACTIVE)
+      ->setBuildGeneration(0);
   }
 
   public function delete() {

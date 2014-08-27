@@ -66,6 +66,9 @@ final class HarbormasterBuildEngine extends Phobject {
       $build->save();
 
       $lock->unlock();
+
+      $this->releaseAllArtifacts($build);
+
       throw $ex;
     }
 
@@ -87,12 +90,17 @@ final class HarbormasterBuildEngine extends Phobject {
     if ($new_status != $old_status || $this->shouldForceBuildableUpdate()) {
       $this->updateBuildable($build->getBuildable());
     }
+
+    // If we are no longer building for any reason, release all artifacts.
+    if (!$build->isBuilding()) {
+      $this->releaseAllArtifacts($build);
+    }
   }
 
   private function updateBuild(HarbormasterBuild $build) {
     if (($build->getBuildStatus() == HarbormasterBuild::STATUS_PENDING) ||
         ($build->isRestarting())) {
-      $this->destroyBuildTargets($build);
+      $this->restartBuild($build);
       $build->setBuildStatus(HarbormasterBuild::STATUS_BUILDING);
       $build->save();
     }
@@ -114,36 +122,28 @@ final class HarbormasterBuildEngine extends Phobject {
     }
   }
 
-  private function destroyBuildTargets(HarbormasterBuild $build) {
-    $targets = id(new HarbormasterBuildTargetQuery())
-      ->setViewer($this->getViewer())
-      ->withBuildPHIDs(array($build->getPHID()))
-      ->execute();
+  private function restartBuild(HarbormasterBuild $build) {
 
-    if (!$targets) {
-      return;
-    }
+    // We're restarting the build, so release all previous artifacts.
+    $this->releaseAllArtifacts($build);
 
-    $target_phids = mpull($targets, 'getPHID');
+    // Increment the build generation counter on the build.
+    $build->setBuildGeneration($build->getBuildGeneration() + 1);
 
-    $artifacts = id(new HarbormasterBuildArtifactQuery())
-      ->setViewer($this->getViewer())
-      ->withBuildTargetPHIDs($target_phids)
-      ->execute();
+    // Currently running targets should periodically check their build
+    // generation (which won't have changed) against the build's generation.
+    // If it is different, they will automatically stop what they're doing
+    // and abort.
 
-    foreach ($artifacts as $artifact) {
-      $artifact->delete();
-    }
-
-    foreach ($targets as $target) {
-      $target->delete();
-    }
+    // Previously we used to delete targets, logs and artifacts here.  Instead
+    // leave them around so users can view previous generations of this build.
   }
 
   private function updateBuildSteps(HarbormasterBuild $build) {
     $targets = id(new HarbormasterBuildTargetQuery())
       ->setViewer($this->getViewer())
       ->withBuildPHIDs(array($build->getPHID()))
+      ->withBuildGenerations(array($build->getBuildGeneration()))
       ->execute();
 
     $this->updateWaitingTargets($targets);
@@ -438,6 +438,30 @@ final class HarbormasterBuildEngine extends Phobject {
         }
       }
     }
+  }
+
+  private function releaseAllArtifacts(HarbormasterBuild $build) {
+    $targets = id(new HarbormasterBuildTargetQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withBuildPHIDs(array($build->getPHID()))
+      ->withBuildGenerations(array($build->getBuildGeneration()))
+      ->execute();
+
+    if (count($targets) === 0) {
+      return;
+    }
+
+    $target_phids = mpull($targets, 'getPHID');
+
+    $artifacts = id(new HarbormasterBuildArtifactQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withBuildTargetPHIDs($target_phids)
+      ->execute();
+
+    foreach ($artifacts as $artifact) {
+      $artifact->release();
+    }
+
   }
 
 }

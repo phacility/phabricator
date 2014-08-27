@@ -42,6 +42,7 @@ final class PhabricatorRepositoryManagementUpdateWorkflow
 
   public function execute(PhutilArgumentParser $args) {
     $this->setVerbose($args->getArg('verbose'));
+    $console = PhutilConsole::getConsole();
 
     $repos = $this->loadRepositories($args, 'repos');
     if (count($repos) !== 1) {
@@ -102,6 +103,11 @@ final class PhabricatorRepositoryManagementUpdateWorkflow
     }
 
     $lock->unlock();
+
+    $console->writeOut(
+      pht(
+        'Updated repository **%s**.',
+        $repository->getMonogram())."\n");
 
     return 0;
   }

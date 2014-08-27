@@ -2,7 +2,7 @@
 
 final class PhabricatorDataNotAttachedException extends Exception {
 
-  public function __construct(PhabricatorLiskDAO $dao) {
+  public function __construct($object) {
     $stack = debug_backtrace();
 
     // Shift off `PhabricatorDataNotAttachedException::__construct()`.
@@ -19,7 +19,7 @@ final class PhabricatorDataNotAttachedException extends Exception {
       }
     }
 
-    $class = get_class($dao);
+    $class = get_class($object);
 
     $message =
       "Attempting to access attached data on {$class}{$via}, but the data is ".

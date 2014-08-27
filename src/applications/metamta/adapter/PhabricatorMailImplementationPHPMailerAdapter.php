@@ -13,6 +13,11 @@ final class PhabricatorMailImplementationPHPMailerAdapter
     $this->mailer = new PHPMailer($use_exceptions = true);
     $this->mailer->CharSet = 'utf-8';
 
+    // NOTE: This works around what seems to be a bug in SendGrid, see
+    // D10278. This affects other SMTP mailers too, but as long as they
+    // don't have an opposite bug to SendGrid's bug that should be OK.
+    $this->mailer->Encoding = 'quoted-printable';
+
     // By default, PHPMailer sends one mail per recipient. We handle
     // multiplexing higher in the stack, so tell it to send mail exactly
     // like we ask.
@@ -91,17 +96,19 @@ final class PhabricatorMailImplementationPHPMailerAdapter
   }
 
   public function setBody($body) {
+    $this->mailer->IsHTML(false);
     $this->mailer->Body = $body;
+    return $this;
+  }
+
+  public function setHTMLBody($html_body) {
+    $this->mailer->IsHTML(true);
+    $this->mailer->Body = $html_body;
     return $this;
   }
 
   public function setSubject($subject) {
     $this->mailer->Subject = $subject;
-    return $this;
-  }
-
-  public function setIsHTML($is_html) {
-    $this->mailer->IsHTML($is_html);
     return $this;
   }
 

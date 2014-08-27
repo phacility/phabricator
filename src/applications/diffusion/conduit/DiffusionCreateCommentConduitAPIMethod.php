@@ -40,10 +40,11 @@ final class DiffusionCreateCommentConduitAPIMethod
 
   protected function execute(ConduitAPIRequest $request) {
     $commit_phid = $request->getValue('phid');
-    $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
-      'phid = %s',
-      $commit_phid);
-
+    $commit = id(new DiffusionCommitQuery())
+      ->setViewer($request->getUser())
+      ->withPHIDs(array($commit_phid))
+      ->needAuditRequests(true)
+      ->executeOne();
     if (!$commit) {
       throw new ConduitException('ERR_BAD_COMMIT');
     }
@@ -58,7 +59,7 @@ final class DiffusionCreateCommentConduitAPIMethod
       $action = PhabricatorAuditActionConstants::COMMENT;
     }
 
-    // Disallow ADD_CCS, ADD_AUDITORS for now
+    // Disallow ADD_CCS, ADD_AUDITORS forever.
     if (!in_array($action, array(
       PhabricatorAuditActionConstants::CONCERN,
       PhabricatorAuditActionConstants::ACCEPT,
@@ -69,27 +70,31 @@ final class DiffusionCreateCommentConduitAPIMethod
       throw new ConduitException('ERR_BAD_ACTION');
     }
 
-    $comments = array();
+    $xactions = array();
 
     if ($action != PhabricatorAuditActionConstants::COMMENT) {
-      $comments[] = id(new PhabricatorAuditComment())
-        ->setAction($action);
+      $xactions[] = id(new PhabricatorAuditTransaction())
+        ->setTransactionType(PhabricatorAuditActionConstants::ACTION)
+        ->setNewValue($action);
     }
 
     if (strlen($message)) {
-      $comments[] = id(new PhabricatorAuditComment())
-        ->setAction(PhabricatorAuditActionConstants::COMMENT)
-        ->setContent($message);
+      $xactions[] = id(new PhabricatorAuditTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
+        ->attachComment(
+          id(new PhabricatorAuditTransactionComment())
+            ->setCommitPHID($commit->getPHID())
+            ->setContent($message));
     }
 
-    id(new PhabricatorAuditCommentEditor($commit))
+    id(new PhabricatorAuditEditor())
       ->setActor($request->getUser())
-      ->setNoEmail($request->getValue('silent'))
-      ->addComments($comments);
+      ->setContentSourceFromConduitRequest($request)
+      ->setDisableEmail($request->getValue('silent'))
+      ->setContinueOnMissingFields(true)
+      ->applyTransactions($commit, $xactions);
 
     return true;
-    // get the full uri of the comment?
-    // i.e, PhabricatorEnv::getURI(rXX01ab23cd#comment-9)
   }
 
 }

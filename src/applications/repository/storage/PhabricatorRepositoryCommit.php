@@ -6,8 +6,10 @@ final class PhabricatorRepositoryCommit
     PhabricatorPolicyInterface,
     PhabricatorFlaggableInterface,
     PhabricatorTokenReceiverInterface,
+    PhabricatorSubscribableInterface,
     HarbormasterBuildableInterface,
-    PhabricatorCustomFieldInterface {
+    PhabricatorCustomFieldInterface,
+    PhabricatorApplicationTransactionInterface {
 
   protected $repositoryID;
   protected $phid;
@@ -328,6 +330,42 @@ final class PhabricatorRepositoryCommit
   public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
     $this->customFields = $fields;
     return $this;
+  }
+
+
+/* -(  PhabricatorSubscribableInterface  )----------------------------------- */
+
+
+  public function isAutomaticallySubscribed($phid) {
+
+    // TODO: This should also list auditors, but handling that is a bit messy
+    // right now because we are not guaranteed to have the data.
+
+    return ($phid == $this->getAuthorPHID());
+  }
+
+  public function shouldShowSubscribersProperty() {
+    return true;
+  }
+
+  public function shouldAllowSubscription($phid) {
+    return true;
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhabricatorAuditEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhabricatorAuditTransaction();
   }
 
 }

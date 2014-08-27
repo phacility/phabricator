@@ -113,11 +113,11 @@ final class PhabricatorInfrastructureTestCase extends PhabricatorTestCase {
     $caught = null;
     try {
       qsprintf($conn_r, 'SELECT %s', $gclef);
-    } catch (AphrontQueryCharacterSetException $ex) {
+    } catch (AphrontCharacterSetQueryException $ex) {
       $caught = $ex;
     }
 
-    $this->assertTrue($caught instanceof AphrontQueryCharacterSetException);
+    $this->assertTrue($caught instanceof AphrontCharacterSetQueryException);
   }
 
 }

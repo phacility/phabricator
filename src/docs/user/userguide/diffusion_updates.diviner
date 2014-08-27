@@ -1,0 +1,115 @@
+@title Diffusion User Guide: Repository Updates
+@group userguide
+
+Explains how Diffusion updates repositories to discover new changes.
+
+Overview
+========
+
+When Phabricator is configured to import repositories which are hosted
+elsewhere, it needs to poll those repositories for changes. If it polls too
+frequently, it can create too much load locally and on remote services. If it
+polls too rarely, it may take a long time for commits to show up in the web
+interface.
+
+This document describes the rules around polling and how to understand and
+adjust the behavior. In general:
+
+  - Phabricator chooses a default poll interval based on repository
+    activity. These intervals range from every 15 seconds (for active
+    repositories) to every 6 hours (for repositories with no commits in two
+    months).
+  - If you use `arc` to push commits, or you host repositories on Phabricator,
+    repositories automatically update after changes are pushed.
+  - If you don't use `arc` and your repository is hosted elsewhere, this
+    document describes ways you can make polling more responsive.
+
+
+Default Behavior
+================
+
+By default, Phabricator determines how frequently to poll repositories by
+examining how long it has been since the last commit. In most cases this is
+fairly accurate and produces good behavior. In particular, it automatically
+reduces the polling frequency for rarely-used repositories. This dramatically
+reduces load for installs with a large number of inactive repositories, which
+is common.
+
+For repositories with activity in the last 3 days, we wait 1 second for every
+10 minutes without activity. The table below has some examples.
+
+| Time Since Commit | Poll Interval    |
+|-------------------|------------------|
+| //Minimum//       | 15 seconds       |
+| 6h                | about 30 seconds |
+| 12h               | about 1 minute   |
+| 1 day             | about 2 minutes  |
+| 2 days            | about 5 minutes  |
+| 3 days            | about 7 minutes  |
+
+This means that you may need to wait about 2 minutes for the first commit to
+be imported in the morning, and about 5 minutes after a long weekend, but other
+commits to active repositories should usually be recognized in 30 seconds or
+less.
+
+For repositories with no activity in the last 3 days, we wait longer between
+updates (1 second for every 4 minutes without activity). The table below has
+some examples.
+
+| Time Since Commit | Poll Interval    |
+|-------------------|------------------|
+| 4 days            | about 30 minutes |
+| 7 days            | about 45 minutes |
+| 10 days           | about 1 hour     |
+| 20 days           | about 2 hours    |
+| 30 days           | about 3 hours    |
+| //Maximum//       | 6 hours          |
+
+You can find the exact default poll frequency of a repository in
+Diffusion > (Choose a Repository) > Edit Repository, under "Update Frequency".
+You can also see the time when the repository was last updated in this
+interface.
+
+Repositories that are currently importing are always updated at the minimum
+update frequency so the import finishes as quickly as possible.
+
+
+Triggering Repository Updates
+=============================
+
+If you want Phabricator to update a repository more quickly than the default
+update frequency (for example, because you just pushed a commit to it), you can
+tell Phabricator that it should schedule an update as soon as possible.
+
+There are several ways to do this:
+
+  - If you push changes with `arc land` or `arc commit`, this will be done
+    for you automatically. These commits should normally be recognized within
+    a few seconds.
+  - If your repository is hosted on Phabricator, this will also be done for you
+    automatically.
+  - You can schedule an update from the web interface, in Diffusion >
+    (Choose a Repository) > Edit Repository > Update Now.
+  - You can make a call to the Conduit API method `diffusion.looksoon`. This
+    hints to Phabricator that it should poll a repository as soon as it can.
+    All of the other mechanisms do this under the hood.
+
+In particular, you may be able to add a commit hook to your external repository
+which calls `diffusion.looksoon`. This should make an external repository about
+as responsive as a hosted repository.
+
+If a repository has an update scheduled, the Diffusion > (Choose a
+Repository) > Edit Repository interface will show that the the repository is
+prioritized and will be updated soon.
+
+
+Troubleshooting Updates
+=======================
+
+You can manually run a repository update from the command line to troubleshoot
+issues, using the `--trace` flag to get full details:
+
+  phabricator/ $ ./bin/repository update --trace <callsign>
+
+To catch potential issues with permissions, run this command as the same user
+that the daemons run as.

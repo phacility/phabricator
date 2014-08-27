@@ -148,8 +148,8 @@ final class PhabricatorFileTransformController
 
     // TODO: We could just delegate to the file view controller instead,
     // which would save the client a roundtrip, but is slightly more complex.
-    $uri = $file->getBestURI();
-    return id(new AphrontRedirectResponse())->setURI($uri);
+
+    return $file->getRedirectResponse();
   }
 
   private function executePreviewTransform(PhabricatorFile $file, $size) {

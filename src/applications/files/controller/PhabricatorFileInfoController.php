@@ -3,20 +3,36 @@
 final class PhabricatorFileInfoController extends PhabricatorFileController {
 
   private $phid;
+  private $id;
+
+  public function shouldAllowPublic() {
+    return true;
+  }
 
   public function willProcessRequest(array $data) {
-    $this->phid = $data['phid'];
+    $this->phid = idx($data, 'phid');
+    $this->id = idx($data, 'id');
   }
 
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
 
+    if ($this->phid) {
+      $file = id(new PhabricatorFileQuery())
+        ->setViewer($user)
+        ->withPHIDs(array($this->phid))
+        ->executeOne();
+
+      if (!$file) {
+        return new Aphront404Response();
+      }
+      return id(new AphrontRedirectResponse())->setURI($file->getInfoURI());
+    }
     $file = id(new PhabricatorFileQuery())
       ->setViewer($user)
-      ->withPHIDs(array($this->phid))
+      ->withIDs(array($this->id))
       ->executeOne();
-
     if (!$file) {
       return new Aphront404Response();
     }
@@ -115,12 +131,17 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
 
   private function buildActionView(PhabricatorFile $file) {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $request->getUser();
 
     $id = $file->getID();
 
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $file,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
     $view = id(new PhabricatorActionListView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setObjectURI($this->getRequest()->getRequestURI())
       ->setObject($file);
 
@@ -133,7 +154,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
     } else {
       $view->addAction(
         id(new PhabricatorActionView())
-          ->setUser($user)
+          ->setUser($viewer)
           ->setRenderAsForm(true)
           ->setDownload(true)
           ->setName(pht('Download File'))
@@ -143,10 +164,19 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
 
     $view->addAction(
       id(new PhabricatorActionView())
+        ->setName(pht('Edit File'))
+        ->setIcon('fa-pencil')
+        ->setHref($this->getApplicationURI("/edit/{$id}/"))
+        ->setWorkflow(!$can_edit)
+        ->setDisabled(!$can_edit));
+
+    $view->addAction(
+      id(new PhabricatorActionView())
         ->setName(pht('Delete File'))
         ->setIcon('fa-times')
         ->setHref($this->getApplicationURI("/delete/{$id}/"))
-        ->setWorkflow(true));
+        ->setWorkflow(true)
+        ->setDisabled(!$can_edit));
 
     return $view;
   }
@@ -199,6 +229,17 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
         pht('%s px', new PhutilNumber($height)));
     }
 
+    $is_image = $file->isViewableImage();
+    if ($is_image) {
+      $image_string = pht('Yes');
+      $cache_string = $file->getCanCDN() ? pht('Yes') : pht('No');
+    } else {
+      $image_string = pht('No');
+      $cache_string = pht('Not Applicable');
+    }
+
+    $finfo->addProperty(pht('Viewable Image'), $image_string);
+    $finfo->addProperty(pht('Cacheable'), $cache_string);
 
     $storage_properties = new PHUIPropertyListView();
     $box->addPropertyList($storage_properties, pht('Storage'));

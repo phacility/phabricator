@@ -28,7 +28,7 @@ final class PhortuneCartCheckoutController
     $methods = id(new PhortunePaymentMethodQuery())
       ->setViewer($viewer)
       ->withAccountPHIDs(array($account->getPHID()))
-      ->withStatus(PhortunePaymentMethodQuery::STATUS_OPEN)
+      ->withStatuses(array(PhortunePaymentMethod::STATUS_ACTIVE))
       ->execute();
 
     $e_method = null;
@@ -57,6 +57,7 @@ final class PhortuneCartCheckoutController
           ->setAccountPHID($account->getPHID())
           ->setCartPHID($cart->getPHID())
           ->setAuthorPHID($viewer->getPHID())
+          ->setPaymentProviderKey($provider->getProviderKey())
           ->setPaymentMethodPHID($method->getPHID())
           ->setAmountInCents($cart->getTotalPriceInCents())
           ->setStatus(PhortuneCharge::STATUS_PENDING);
@@ -97,7 +98,7 @@ final class PhortuneCartCheckoutController
       foreach ($methods as $method) {
         $method_control->addButton(
           $method->getID(),
-          $method->getBrand().' / '.$method->getLastFourDigits(),
+          $method->getFullDisplayName(),
           $method->getDescription());
       }
     }
@@ -105,7 +106,7 @@ final class PhortuneCartCheckoutController
     $method_control->setError($e_method);
 
     $payment_method_uri = $this->getApplicationURI(
-      $account->getID().'/paymentmethod/edit/');
+      $account->getID().'/card/new/');
 
     $form = id(new AphrontFormView())
       ->setUser($viewer)

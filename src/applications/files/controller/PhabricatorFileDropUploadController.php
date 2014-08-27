@@ -8,7 +8,7 @@ final class PhabricatorFileDropUploadController
    */
   public function processRequest() {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $request->getUser();
 
     // NOTE: Throws if valid CSRF token is not present in the request.
     $request->validateCSRF();
@@ -16,11 +16,21 @@ final class PhabricatorFileDropUploadController
     $data = PhabricatorStartup::getRawInput();
     $name = $request->getStr('name');
 
+    // If there's no explicit view policy, make it very restrictive by default.
+    // This is the correct policy for files dropped onto objects during
+    // creation, comment and edit flows.
+
+    $view_policy = $request->getStr('viewPolicy');
+    if (!$view_policy) {
+      $view_policy = $viewer->getPHID();
+    }
+
     $file = PhabricatorFile::newFromXHRUpload(
       $data,
       array(
         'name' => $request->getStr('name'),
-        'authorPHID' => $user->getPHID(),
+        'authorPHID' => $viewer->getPHID(),
+        'viewPolicy' => $view_policy,
         'isExplicitUpload' => true,
       ));
 

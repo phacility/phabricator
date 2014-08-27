@@ -38,6 +38,16 @@ final class PhabricatorManiphestTaskTestDataGenerator
       $transactions[] = $transaction;
     }
 
+    $transactions[] = id(new ManiphestTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+        ->setMetadataValue(
+          'edge:type',
+          PhabricatorProjectObjectHasProjectEdgeType::EDGECONST)
+        ->setNewValue(
+          array(
+            '=' => array_fuse($this->getProjectPHIDs()),
+          ));
+
     // Apply Transactions
     $editor = id(new ManiphestTransactionEditor())
       ->setActor($author)

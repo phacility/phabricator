@@ -92,7 +92,7 @@ final class PhabricatorOwnersEditController
           $package->save();
           return id(new AphrontRedirectResponse())
             ->setURI('/owners/package/'.$package->getID().'/');
-        } catch (AphrontQueryDuplicateKeyException $ex) {
+        } catch (AphrontDuplicateKeyQueryException $ex) {
           $e_name = pht('Duplicate');
           $errors[] = pht('Package name must be unique.');
         }

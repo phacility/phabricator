@@ -20,30 +20,16 @@ final class PhabricatorSettingsPanelEmailPreferences
 
     $preferences = $user->loadPreferences();
 
-    $pref_re_prefix = PhabricatorUserPreferences::PREFERENCE_RE_PREFIX;
-    $pref_vary = PhabricatorUserPreferences::PREFERENCE_VARY_SUBJECT;
+    $pref_no_mail = PhabricatorUserPreferences::PREFERENCE_NO_MAIL;
     $pref_no_self_mail = PhabricatorUserPreferences::PREFERENCE_NO_SELF_MAIL;
+
+    $value_email = PhabricatorUserPreferences::MAILTAG_PREFERENCE_EMAIL;
 
     $errors = array();
     if ($request->isFormPost()) {
-
-      if (PhabricatorMetaMTAMail::shouldMultiplexAllMail()) {
-        if ($request->getStr($pref_re_prefix) == 'default') {
-          $preferences->unsetPreference($pref_re_prefix);
-        } else {
-          $preferences->setPreference(
-            $pref_re_prefix,
-            $request->getBool($pref_re_prefix));
-        }
-
-        if ($request->getStr($pref_vary) == 'default') {
-          $preferences->unsetPreference($pref_vary);
-        } else {
-          $preferences->setPreference(
-            $pref_vary,
-            $request->getBool($pref_vary));
-        }
-      }
+      $preferences->setPreference(
+        $pref_no_mail,
+        $request->getStr($pref_no_mail));
 
       $preferences->setPreference(
         $pref_no_self_mail,
@@ -51,20 +37,10 @@ final class PhabricatorSettingsPanelEmailPreferences
 
       $new_tags = $request->getArr('mailtags');
       $mailtags = $preferences->getPreference('mailtags', array());
-      $all_tags = $this->getMailTags();
-
-      $maniphest = 'PhabricatorManiphestApplication';
-      if (!PhabricatorApplication::isClassInstalled($maniphest)) {
-        $all_tags = array_diff_key($all_tags, $this->getManiphestMailTags());
-      }
-
-      $pholio = 'PhabricatorPholioApplication';
-      if (!PhabricatorApplication::isClassInstalled($pholio)) {
-        $all_tags = array_diff_key($all_tags, $this->getPholioMailTags());
-      }
+      $all_tags = $this->getAllTags($user);
 
       foreach ($all_tags as $key => $label) {
-        $mailtags[$key] = (bool)idx($new_tags, $key, false);
+        $mailtags[$key] = (int)idx($new_tags, $key, $value_email);
       }
       $preferences->setPreference('mailtags', $mailtags);
 
@@ -74,35 +50,36 @@ final class PhabricatorSettingsPanelEmailPreferences
         ->setURI($this->getPanelURI('?saved=true'));
     }
 
-    $re_prefix_default = PhabricatorEnv::getEnvConfig('metamta.re-prefix')
-      ? pht('Enabled')
-      : pht('Disabled');
-
-    $vary_default = PhabricatorEnv::getEnvConfig('metamta.vary-subjects')
-      ? pht('Vary')
-      : pht('Do Not Vary');
-
-    $re_prefix_value = $preferences->getPreference($pref_re_prefix);
-    if ($re_prefix_value === null) {
-      $re_prefix_value = 'default';
-    } else {
-      $re_prefix_value = $re_prefix_value
-        ? 'true'
-        : 'false';
-    }
-
-    $vary_value = $preferences->getPreference($pref_vary);
-    if ($vary_value === null) {
-      $vary_value = 'default';
-    } else {
-      $vary_value = $vary_value
-        ? 'true'
-        : 'false';
-    }
-
     $form = new AphrontFormView();
     $form
       ->setUser($user)
+      ->appendRemarkupInstructions(
+        pht(
+          'These settings let you control how Phabricator notifies you about '.
+          'events. You can configure Phabricator to send you an email, '.
+          'just send a web notification, or not notify you at all.'))
+      ->appendRemarkupInstructions(
+        pht(
+          'If you disable **Email Notifications**, Phabricator will never '.
+          'send email to notify you about events. This preference overrides '.
+          'all your other settings.'.
+          "\n\n".
+          "//You may still receive some administrative email, like password ".
+          "reset email.//"))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setLabel(pht('Email Notifications'))
+          ->setName($pref_no_mail)
+          ->setOptions(
+            array(
+              '0' => pht('Send me email notifications'),
+              '1' => pht('Never send email notifications'),
+            ))
+          ->setValue($preferences->getPreference($pref_no_mail, 0)))
+      ->appendRemarkupInstructions(
+        pht(
+          'If you disable **Self Actions**, Phabricator will not notify '.
+          'you about actions you take.'))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel(pht('Self Actions'))
@@ -112,50 +89,7 @@ final class PhabricatorSettingsPanelEmailPreferences
               '0' => pht('Send me an email when I take an action'),
               '1' => pht('Do not send me an email when I take an action'),
             ))
-          ->setCaption(pht('You can disable email about your own actions.'))
           ->setValue($preferences->getPreference($pref_no_self_mail, 0)));
-
-    if (PhabricatorMetaMTAMail::shouldMultiplexAllMail()) {
-      $re_control = id(new AphrontFormSelectControl())
-        ->setName($pref_re_prefix)
-        ->setOptions(
-          array(
-            'default'   => pht('Use Server Default (%s)', $re_prefix_default),
-            'true'      => pht('Enable "Re:" prefix'),
-            'false'     => pht('Disable "Re:" prefix'),
-          ))
-        ->setValue($re_prefix_value);
-
-      $vary_control = id(new AphrontFormSelectControl())
-        ->setName($pref_vary)
-        ->setOptions(
-          array(
-            'default'   => pht('Use Server Default (%s)', $vary_default),
-            'true'      => pht('Vary Subjects'),
-            'false'     => pht('Do Not Vary Subjects'),
-          ))
-        ->setValue($vary_value);
-    } else {
-      $re_control = id(new AphrontFormStaticControl())
-        ->setValue('Server Default ('.$re_prefix_default.')');
-
-      $vary_control = id(new AphrontFormStaticControl())
-        ->setValue('Server Default ('.$vary_default.')');
-    }
-
-    $form
-      ->appendChild(
-        $re_control
-          ->setLabel(pht('Add "Re:" Prefix'))
-          ->setCaption(
-            pht('Enable this option to fix threading in Mail.app on OS X Lion,'.
-            ' or if you like "Re:" in your email subjects.')))
-      ->appendChild(
-        $vary_control
-          ->setLabel(pht('Vary Subjects'))
-          ->setCaption(
-            pht('This option adds more information to email subjects, but may '.
-            'break threading in some clients.')));
 
     $mailtags = $preferences->getPreference('mailtags', array());
 
@@ -164,53 +98,68 @@ final class PhabricatorSettingsPanelEmailPreferences
 
     $form->appendRemarkupInstructions(
       pht(
-        'You can customize which kinds of events you receive email for '.
-        'here. If you turn off email for a certain type of event, you '.
-        'will receive an unread notification in Phabricator instead.'.
+        'You can adjust **Application Settings** here to customize when '.
+        'you are emailed and notified.'.
         "\n\n".
-        'Phabricator notifications (shown in the menu bar) which you receive '.
-        'an email for are marked read by default in Phabricator. If you turn '.
-        'off email for a certain type of event, the corresponding '.
-        'notification will not be marked read.'.
+        "| Setting | Effect\n".
+        "| ------- | -------\n".
+        "| Email | You will receive an email and a notification, but the ".
+        "notification will be marked \"read\".\n".
+        "| Notify | You will receive an unread notification only.\n".
+        "| Ignore | You will receive nothing.\n".
         "\n\n".
-        'Note that if an update makes several changes (like adding CCs to a '.
-        'task, closing it, and adding a comment) you will still receive '.
-        'an email as long as at least one of the changes is set to notify '.
-        'you.'.
+        'If an update makes several changes (like adding CCs to a task, '.
+        'closing it, and adding a comment) you will receive the strongest '.
+        'notification any of the changes is configured to deliver.'.
         "\n\n".
         'These preferences **only** apply to objects you are connected to '.
         '(for example, Revisions where you are a reviewer or tasks you are '.
         'CC\'d on). To receive email alerts when other objects are created, '.
-        'configure [[ /herald/ | Herald Rules ]].'.
-        "\n\n".
-        '**Phabricator will send an email to your primary account when:**'));
+        'configure [[ /herald/ | Herald Rules ]].'));
 
-    if (PhabricatorApplication::isClassInstalledForViewer(
-      'PhabricatorDifferentialApplication', $user)) {
-      $form
-        ->appendChild(
-          $this->buildMailTagCheckboxes(
-            $this->getDifferentialMailTags(),
-            $mailtags)
-            ->setLabel(pht('Differential')));
+    $editors = $this->getAllEditorsWithTags($user);
+
+    // Find all the tags shared by more than one application, and put them
+    // in a "common" group.
+    $all_tags = array();
+    foreach ($editors as $editor) {
+      foreach ($editor->getMailTagsMap() as $tag => $name) {
+        if (empty($all_tags[$tag])) {
+          $all_tags[$tag] = array(
+            'count' => 0,
+            'name' => $name,
+          );
+        }
+        $all_tags[$tag]['count'];
+      }
     }
 
-    if (PhabricatorApplication::isClassInstalledForViewer(
-      'PhabricatorManiphestApplication', $user)) {
-      $form->appendChild(
-        $this->buildMailTagCheckboxes(
-          $this->getManiphestMailTags(),
-          $mailtags)
-          ->setLabel(pht('Maniphest')));
+    $common_tags = array();
+    foreach ($all_tags as $tag => $info) {
+      if ($info['count'] > 1) {
+        $common_tags[$tag] = $info['name'];
+      }
     }
 
-    if (PhabricatorApplication::isClassInstalledForViewer(
-      'PhabricatorPholioApplication', $user)) {
-      $form->appendChild(
-        $this->buildMailTagCheckboxes(
-          $this->getPholioMailTags(),
-          $mailtags)
-          ->setLabel(pht('Pholio')));
+    // Build up the groups of application-specific options.
+    $tag_groups = array();
+    foreach ($editors as $editor) {
+      $tag_groups[] = array(
+        $editor->getEditorObjectsDescription(),
+        array_diff_key($editor->getMailTagsMap(), $common_tags));
+    }
+
+    // Sort them, then put "Common" at the top.
+    $tag_groups = isort($tag_groups, 0);
+    if ($common_tags) {
+      array_unshift($tag_groups, array(pht('Common'), $common_tags));
+    }
+
+    // Finally, build the controls.
+    foreach ($tag_groups as $spec) {
+      list($label, $map) = $spec;
+      $control = $this->buildMailTagControl($label, $map, $mailtags);
+      $form->appendChild($control);
     }
 
     $form
@@ -231,98 +180,74 @@ final class PhabricatorSettingsPanelEmailPreferences
         ));
   }
 
-  private function getMailTags() {
-    return array(
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEW_REQUEST =>
-        pht('A revision is created.'),
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_UPDATED =>
-        pht('A revision is updated.'),
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_COMMENT =>
-        pht('Someone comments on a revision.'),
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEWERS =>
-        pht("A revision's reviewers change."),
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_CLOSED =>
-        pht('A revision is closed.'),
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_CC =>
-        pht("A revision's CCs change."),
-      MetaMTANotificationType::TYPE_DIFFERENTIAL_OTHER =>
-        pht('Other revision activity not listed above occurs.'),
-      MetaMTANotificationType::TYPE_MANIPHEST_STATUS =>
-        pht("A task's status changes."),
-      MetaMTANotificationType::TYPE_MANIPHEST_OWNER =>
-        pht("A task's owner changes."),
-      MetaMTANotificationType::TYPE_MANIPHEST_COMMENT =>
-        pht('Someone comments on a task.'),
-      MetaMTANotificationType::TYPE_MANIPHEST_PRIORITY =>
-        pht("A task's priority changes."),
-      MetaMTANotificationType::TYPE_MANIPHEST_CC =>
-        pht("A task's CCs change."),
-      MetaMTANotificationType::TYPE_MANIPHEST_PROJECTS =>
-        pht("A task's associated projects change."),
-      MetaMTANotificationType::TYPE_MANIPHEST_OTHER =>
-        pht('Other task activity not listed above occurs.'),
-      MetaMTANotificationType::TYPE_PHOLIO_STATUS =>
-        pht("A mock's status changes."),
-      MetaMTANotificationType::TYPE_PHOLIO_COMMENT =>
-        pht('Someone comments on a mock.'),
-      MetaMTANotificationType::TYPE_PHOLIO_UPDATED =>
-        pht('Mock images or descriptions change.'),
-      MetaMTANotificationType::TYPE_PHOLIO_OTHER =>
-        pht('Other mock activity not listed above occurs.'),
-    );
+  private function getAllEditorsWithTags(PhabricatorUser $user) {
+    $editors = id(new PhutilSymbolLoader())
+      ->setAncestorClass('PhabricatorApplicationTransactionEditor')
+      ->loadObjects();
+
+    foreach ($editors as $key => $editor) {
+      // Remove editors which do not support mail tags.
+      if (!$editor->getMailTagsMap()) {
+        unset($editors[$key]);
+      }
+
+      // Remove editors for applications which are not installed.
+      $app = $editor->getEditorApplicationClass();
+      if ($app !== null) {
+        if (!PhabricatorApplication::isClassInstalledForViewer($app, $user)) {
+          unset($editors[$key]);
+        }
+      }
+    }
+
+    return $editors;
   }
 
-  private function getManiphestMailTags() {
-    return array_select_keys(
-      $this->getMailTags(),
-      array(
-        MetaMTANotificationType::TYPE_MANIPHEST_STATUS,
-        MetaMTANotificationType::TYPE_MANIPHEST_OWNER,
-        MetaMTANotificationType::TYPE_MANIPHEST_PRIORITY,
-        MetaMTANotificationType::TYPE_MANIPHEST_CC,
-        MetaMTANotificationType::TYPE_MANIPHEST_PROJECTS,
-        MetaMTANotificationType::TYPE_MANIPHEST_COMMENT,
-        MetaMTANotificationType::TYPE_MANIPHEST_OTHER,
-      ));
+  private function getAllTags(PhabricatorUser $user) {
+    $tags = array();
+    foreach ($this->getAllEditorsWithTags($user) as $editor) {
+      $tags += $editor->getMailTagsMap();
+    }
+    return $tags;
   }
 
-  private function getDifferentialMailTags() {
-    return array_select_keys(
-      $this->getMailTags(),
-      array(
-        MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEW_REQUEST,
-        MetaMTANotificationType::TYPE_DIFFERENTIAL_UPDATED,
-        MetaMTANotificationType::TYPE_DIFFERENTIAL_COMMENT,
-        MetaMTANotificationType::TYPE_DIFFERENTIAL_CLOSED,
-        MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEWERS,
-        MetaMTANotificationType::TYPE_DIFFERENTIAL_CC,
-        MetaMTANotificationType::TYPE_DIFFERENTIAL_OTHER,
-      ));
-  }
-
-  private function getPholioMailTags() {
-    return array_select_keys(
-      $this->getMailTags(),
-      array(
-        MetaMTANotificationType::TYPE_PHOLIO_STATUS,
-        MetaMTANotificationType::TYPE_PHOLIO_COMMENT,
-        MetaMTANotificationType::TYPE_PHOLIO_UPDATED,
-        MetaMTANotificationType::TYPE_PHOLIO_OTHER,
-      ));
-  }
-
-  private function buildMailTagCheckboxes(
+  private function buildMailTagControl(
+    $control_label,
     array $tags,
     array $prefs) {
 
-    $control = new AphrontFormCheckboxControl();
+    $value_email = PhabricatorUserPreferences::MAILTAG_PREFERENCE_EMAIL;
+    $value_notify = PhabricatorUserPreferences::MAILTAG_PREFERENCE_NOTIFY;
+    $value_ignore = PhabricatorUserPreferences::MAILTAG_PREFERENCE_IGNORE;
+
+    $content = array();
     foreach ($tags as $key => $label) {
-      $control->addCheckbox(
-        'mailtags['.$key.']',
-        1,
-        $label,
-        idx($prefs, $key, 1));
+      $select = AphrontFormSelectControl::renderSelectTag(
+        (int)idx($prefs, $key, $value_email),
+        array(
+          $value_email => pht("\xE2\x9A\xAB Email"),
+          $value_notify => pht("\xE2\x97\x90 Notify"),
+          $value_ignore => pht("\xE2\x9A\xAA Ignore"),
+        ),
+        array(
+          'name' => 'mailtags['.$key.']',
+        ));
+
+      $content[] = phutil_tag(
+        'div',
+        array(
+          'class' => 'psb',
+        ),
+        array(
+          $select,
+          ' ',
+          $label,
+        ));
     }
+
+    $control = new AphrontFormStaticControl();
+    $control->setLabel($control_label);
+    $control->setValue($content);
 
     return $control;
   }

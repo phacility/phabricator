@@ -59,6 +59,14 @@ value of `maniphest.custom-field-definitions`):
       "type": "int",
       "caption": "Actual number of hours this took."
     },
+    "mycompany:company-jobs": {
+      "name": "Job Role",
+      "type": "select",
+      "options": {
+        "mycompany:engineer": "Engineer",
+        "mycompany:nonengineer": "Other"
+      }
+    },
     "mycompany:favorite-dinosaur": {
       "name": "Favorite Dinosaur",
       "type": "text"
@@ -82,8 +90,8 @@ When defining custom fields using a configuration option like
     - **int**: An integer, rendered as a text field.
     - **text**: A string, rendered as a text field.
     - **bool**: A boolean value, rendered as a checkbox.
-    - **select**: Allows the user to select from several options, rendered
-      as a dropdown.
+    - **select**: Allows the user to select from several options as defined
+      by **options**, rendered as a dropdown.
     - **remarkup**: A text area which allows the user to enter markup.
     - **users**: A typeahead which allows multiple users to be input.
     - **date**: A date/time picker.

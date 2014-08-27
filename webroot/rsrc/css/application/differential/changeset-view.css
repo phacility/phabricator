@@ -212,6 +212,14 @@ td.cov-I {
   background-image: url(/rsrc/image/checker_dark.png);
 }
 
+.differential-diff .differential-image-diff td {
+  padding: 8px;
+}
+
+.differential-image-stage {
+  overflow: auto;
+}
+
 .differential-meta-notice {
   border-top: 1px solid {$yellow};
   border-bottom: 1px solid {$yellow};
@@ -324,51 +332,24 @@ td.cov-I {
 }
 
 .differential-property-table {
-  width: auto;
-  margin: 12px auto;
-  background: #e3e3e3;
-}
-
-.differential-property-table th {
-  text-align: right;
-  width: 10em;
-  font-weight: bold;
-  color: {$greytext};
-  white-space: nowrap;
-  padding: 4px 8px;
-  border-right: 1px solid {$greytext};
-}
-
-.differential-property-table td {
-  padding: 4px 8px;
-  width: 35em;
+  margin: 12px;
+  background: {$lightgreybackground};
+  border: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$blueborder};
 }
 
 .differential-property-table td em {
   color: {$lightgreytext};
 }
 
-.differential-property-table tr.property-table-header th,
-.differential-property-table tr.property-table-header td {
-  text-align: center;
-  font-weight: bold;
-  border-bottom: 1px solid {$greytext};
-}
-
 .differential-property-table td.oval {
   background: #ffd0d0;
+  width: 50%;
 }
 
 .differential-property-table td.nval {
   background: #d0ffd0;
-}
-
-.differential-property-table tr.property-table-header td.oval {
-  background: #ffaaaa;
-}
-
-.differential-property-table tr.property-table-header td.nval {
-  background: #aaffaa;
+  width: 50%;
 }
 
 .differential-inline-undo {

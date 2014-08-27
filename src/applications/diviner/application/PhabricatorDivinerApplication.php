@@ -45,7 +45,7 @@ final class PhabricatorDivinerApplication extends PhabricatorApplication {
 
   public function getRemarkupRules() {
     return array(
-      new DivinerRemarkupRuleSymbol(),
+      new DivinerSymbolRemarkupRule(),
     );
   }
 

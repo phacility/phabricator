@@ -221,6 +221,15 @@ final class PhabricatorEnv {
     return $env;
   }
 
+  public static function calculateEnvironmentHash() {
+    $keys = array_keys(self::getAllConfigKeys());
+    $values = array();
+    foreach ($keys as $key) {
+      $values[$key] = self::getEnvConfigIfExists($key);
+    }
+    return PhabricatorHash::digest(json_encode($values));
+  }
+
 
 /* -(  Reading Configuration  )---------------------------------------------- */
 
@@ -459,6 +468,21 @@ final class PhabricatorEnv {
     if (preg_match('/\s/', $uri)) {
       // PHP hasn't been vulnerable to header injection attacks for a bunch of
       // years, but we can safely reject these anyway since they're never valid.
+      return false;
+    }
+
+    // Chrome (at a minimum) interprets backslashes in Location headers and the
+    // URL bar as forward slashes. This is probably intended to reduce user
+    // error caused by confusion over which key is "forward slash" vs "back
+    // slash".
+    //
+    // However, it means a URI like "/\evil.com" is interpreted like
+    // "//evil.com", which is a protocol relative remote URI.
+    //
+    // Since we currently never generate URIs with backslashes in them, reject
+    // these unconditionally rather than trying to figure out how browsers will
+    // interpret them.
+    if (preg_match('/\\\\/', $uri)) {
       return false;
     }
 

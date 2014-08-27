@@ -251,11 +251,25 @@ final class PhabricatorLDAPAuthProvider extends PhabricatorAuthProvider {
     return array($errors, $issues, $values);
   }
 
+  public static function assertLDAPExtensionInstalled() {
+    if (!function_exists('ldap_bind')) {
+      throw new Exception(
+        pht(
+          'Before you can set up or use LDAP, you need to install the PHP '.
+          'LDAP extension. It is not currently installed, so PHP can not '.
+          'talk to LDAP. Usually you can install it with '.
+          '`yum install php-ldap`, `apt-get install php5-ldap`, or a '.
+          'similar package manager command.'));
+    }
+  }
+
   public function extendEditForm(
     AphrontRequest $request,
     AphrontFormView $form,
     array $values,
     array $issues) {
+
+    self::assertLDAPExtensionInstalled();
 
     $labels = $this->getPropertyLabels();
 
@@ -388,6 +402,7 @@ final class PhabricatorLDAPAuthProvider extends PhabricatorAuthProvider {
             ->setName($key)
             ->setLabel($label)
             ->setCaption($caption)
+            ->setDisableAutocomplete(true)
             ->setValue($value);
           break;
         case 'textarea':

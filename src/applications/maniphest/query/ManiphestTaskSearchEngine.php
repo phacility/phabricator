@@ -151,13 +151,10 @@ final class ManiphestTaskSearchEngine
       $query->withPriorities($priorities);
     }
 
-    $order = $saved->getParameter('order');
-    $order = idx($this->getOrderValues(), $order);
-    if ($order) {
-      $query->setOrderBy($order);
-    } else {
-      $query->setOrderBy(head($this->getOrderValues()));
-    }
+    $this->applyOrderByToQuery(
+      $query,
+      $this->getOrderValues(),
+      $saved->getParameter('order'));
 
     $group = $saved->getParameter('group');
     $group = idx($this->getGroupValues(), $group);
@@ -306,6 +303,10 @@ final class ManiphestTaskSearchEngine
 
     $ids = $saved->getParameter('ids', array());
 
+    $builtin_orders = $this->getOrderOptions();
+    $custom_orders = $this->getCustomFieldOrderOptions();
+    $all_orders = $builtin_orders + $custom_orders;
+
     $form
       ->appendChild(
         id(new AphrontFormTokenizerControl())
@@ -385,7 +386,7 @@ final class ManiphestTaskSearchEngine
             ->setName('order')
             ->setLabel(pht('Order By'))
             ->setValue($saved->getParameter('order'))
-            ->setOptions($this->getOrderOptions()));
+            ->setOptions($all_orders));
     }
 
     $form

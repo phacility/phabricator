@@ -64,10 +64,11 @@ final class PonderQuestionTransaction
       case self::TYPE_ANSWERS:
         $answer_handle = $this->getHandle($this->getNewAnswerPHID());
         $question_handle = $this->getHandle($object_phid);
+
         return pht(
           '%s answered %s',
           $this->renderHandleLink($author_phid),
-          $answer_handle->renderLink($question_handle->getFullName()));
+          $this->renderHandleLink($object_phid));
       case self::TYPE_STATUS:
         switch ($new) {
           case PonderQuestionStatus::STATUS_OPEN:

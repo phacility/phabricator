@@ -98,8 +98,17 @@ final class PhabricatorAuthOneTimeLoginController
       // to go through a second round of email verification.
 
       $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-        // Nuke the token so that this URI is one-time only.
-        $token->delete();
+        // Nuke the token and all other outstanding password reset tokens.
+        // There is no particular security benefit to destroying them all, but
+        // it should reduce HackerOne reports of nebulous harm.
+
+        PhabricatorAuthTemporaryToken::revokeTokens(
+          $target_user,
+          array($target_user->getPHID()),
+          array(
+            PhabricatorAuthSessionEngine::ONETIME_TEMPORARY_TOKEN_TYPE,
+            PhabricatorAuthSessionEngine::PASSWORD_TEMPORARY_TOKEN_TYPE,
+          ));
 
         if ($target_email) {
           id(new PhabricatorUserEditor())
@@ -111,7 +120,7 @@ final class PhabricatorAuthOneTimeLoginController
       $next = '/';
       if (!PhabricatorPasswordAuthProvider::getPasswordProvider()) {
         $next = '/settings/panel/external/';
-      } else if (PhabricatorEnv::getEnvConfig('account.editable')) {
+      } else {
 
         // We're going to let the user reset their password without knowing
         // the old one. Generate a one-time token for that.

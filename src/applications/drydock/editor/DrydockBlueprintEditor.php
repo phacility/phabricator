@@ -3,6 +3,14 @@
 final class DrydockBlueprintEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  public function getEditorApplicationClass() {
+    return 'PhabricatorDrydockApplication';
+  }
+
+  public function getEditorObjectsDescription() {
+    return pht('Drydock Blueprints');
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 

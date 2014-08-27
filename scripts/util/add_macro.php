@@ -52,6 +52,7 @@ $file = PhabricatorFile::newFromFileData(
   $data,
   array(
     'name' => basename($path),
+    'canCDN' => true,
   ));
 
 $macro = id(new PhabricatorFileImageMacro())

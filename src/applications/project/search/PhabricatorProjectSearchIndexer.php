@@ -9,6 +9,7 @@ final class PhabricatorProjectSearchIndexer
 
   protected function buildAbstractDocumentByPHID($phid) {
     $project = $this->loadDocumentByPHID($phid);
+    $project->updateDatasourceTokens();
 
     $doc = new PhabricatorSearchAbstractDocument();
     $doc->setPHID($project->getPHID());

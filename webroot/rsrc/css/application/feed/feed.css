@@ -87,7 +87,7 @@
 }
 
 .dashboard-panel .phabricator-feed-frame .phui-feed-story-body {
-  padding: 8px 0;
+  margin: 8px 0;
 }
 
 .dashboard-panel .phabricator-feed-frame .phui-feed-story-foot {

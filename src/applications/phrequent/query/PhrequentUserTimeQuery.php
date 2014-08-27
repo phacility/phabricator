@@ -199,10 +199,31 @@ final class PhrequentUserTimeQuery
           $u_start = $u_event->getDateStarted();
           $u_end = $u_event->getDateEnded();
 
-          if (($u_start >= $e_start) &&
-              ($u_end === null || $u_end > $e_start)) {
-            $select[] = $u_event;
+          if ($u_start < $e_start) {
+            // This event started before our event started, so it's not
+            // preempting us.
+            continue;
           }
+
+          if ($u_start == $e_start) {
+            if ($u_event->getID() < $event->getID()) {
+              // This event started at the same time as our event started,
+              // but has a lower ID, so it's not preempting us.
+              continue;
+            }
+          }
+
+          if (($e_end !== null) && ($u_start > $e_end)) {
+            // Our event has ended, and this event started after it ended.
+            continue;
+          }
+
+          if (($u_end !== null) && ($u_end < $e_start)) {
+            // This event ended before our event began.
+            continue;
+          }
+
+          $select[] = $u_event;
         }
 
         $event->attachPreemptingEvents($select);

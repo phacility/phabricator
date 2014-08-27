@@ -81,6 +81,14 @@ final class PHUIPropertyListView extends AphrontView {
     return $this;
   }
 
+  public function addRawContent($content) {
+    $this->parts[] = array(
+      'type'    => 'raw',
+      'content' => $content,
+    );
+    return $this;
+  }
+
   public function addImageContent($content) {
     $this->parts[] = array(
       'type'    => 'image',
@@ -142,6 +150,9 @@ final class PHUIPropertyListView extends AphrontView {
         case 'text':
         case 'image':
           $items[] = $this->renderTextPart($part);
+          break;
+        case 'raw':
+          $items[] = $this->renderRawPart($part);
           break;
         default:
           throw new Exception(pht("Unknown part type '%s'!", $type));
@@ -255,6 +266,17 @@ final class PHUIPropertyListView extends AphrontView {
     if ($part['type'] == 'image') {
       $classes[] = 'phui-property-list-image-content';
     }
+    return phutil_tag(
+      'div',
+      array(
+        'class' => implode($classes, ' '),
+      ),
+      $part['content']);
+  }
+
+  private function renderRawPart(array $part) {
+    $classes = array();
+    $classes[] = 'phui-property-list-raw-content';
     return phutil_tag(
       'div',
       array(

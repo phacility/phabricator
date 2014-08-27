@@ -61,7 +61,7 @@ write such a script, and run this command to see its output:
   $ find . -type f -name '*.php' | ./scripts/symbols/generate_php_symbols.php
 
 To actually build the symbol index, pipe this data to the
-##import_project_symbols.php## script, providing the project name:
+`import_project_symbols.php` script, providing the project name:
 
   $ ./scripts/symbols/import_project_symbols.php yourproject < symbols_data
 
@@ -77,7 +77,7 @@ configuration.
 To configure Differential integration, you need to tell Phabricator which
 projects have symbol indexes you want to use, and which other projects they
 should pull symbols from. To do this, go to
-##Repositories -> Arcanist Projects -> Edit## as an administrator. You need to
+`Repositories -> Arcanist Projects -> Edit` as an administrator. You need to
 fill out these fields:
 
   - **Repository**: Associate the project with a tracked repository.

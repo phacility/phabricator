@@ -8,42 +8,50 @@ final class PhabricatorBotFlowdockProtocolAdapter
   }
 
   protected function buildStreamingUrl($channel) {
-    $organization = $this->getConfig('organization');
+    $organization = $this->getConfig('flowdock.organization');
+    if (empty($organization)) {
+      $this->getConfig('organization');
+    }
+    if (empty($organization)) {
+      throw new Exception(
+        '"flowdock.organization" configuration variable not set');
+    }
+
+
     $ssl = $this->getConfig('ssl');
 
     $url = ($ssl) ? 'https://' : 'http://';
-    $url .= "stream.flowdock.com/flows/{$organization}/{$channel}";
-
+    $url .= "{$this->authtoken}@stream.flowdock.com/flows/{$organization}/{$channel}";
     return $url;
   }
 
   protected function processMessage($m_obj) {
-      $command = null;
-      switch ($m_obj['event']) {
-        case 'message':
-          $command = 'MESSAGE';
-          break;
-        default:
-          // For now, ignore anything which we don't otherwise know about.
-          break;
-      }
+    $command = null;
+    switch ($m_obj['event']) {
+      case 'message':
+        $command = 'MESSAGE';
+        break;
+      default:
+        // For now, ignore anything which we don't otherwise know about.
+        break;
+    }
 
-      if ($command === null) {
-        return false;
-      }
+    if ($command === null) {
+      return false;
+    }
 
-      // TODO: These should be usernames, not user IDs.
-      $sender = id(new PhabricatorBotUser())
-        ->setName($m_obj['user']);
+    // TODO: These should be usernames, not user IDs.
+    $sender = id(new PhabricatorBotUser())
+      ->setName($m_obj['user']);
 
-      $target = id(new PhabricatorBotChannel())
-        ->setName($m_obj['flow']);
+    $target = id(new PhabricatorBotChannel())
+      ->setName($m_obj['flow']);
 
-      return id(new PhabricatorBotMessage())
-        ->setCommand($command)
-        ->setSender($sender)
-        ->setTarget($target)
-        ->setBody($m_obj['content']);
+    return id(new PhabricatorBotMessage())
+      ->setCommand($command)
+      ->setSender($sender)
+      ->setTarget($target)
+      ->setBody($m_obj['content']);
   }
 
   public function writeMessage(PhabricatorBotMessage $message) {
@@ -59,15 +67,16 @@ final class PhabricatorBotFlowdockProtocolAdapter
   private function speak(
     $body,
     PhabricatorBotTarget $flow) {
-
-    list($organization, $room_id) = explode(':', $flow->getName());
-
-    $this->performPost(
-      "/flows/{$organization}/{$room_id}/messages",
-      array(
-        'event' => 'message',
-        'content' => $body));
-  }
+      // The $flow->getName() returns the flow's UUID,
+      // as such, the Flowdock API does not require the organization
+      // to be specified in the URI
+      $this->performPost(
+        '/messages',
+        array(
+          'flow' => $flow->getName(),
+          'event' => 'message',
+          'content' => $body));
+    }
 
   public function __destruct() {
     if ($this->readHandles) {

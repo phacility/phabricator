@@ -296,15 +296,11 @@ table.aphront-form-control-checkbox-layout th {
   left: 0px;
 }
 
-
 .calendar-button {
   display: inline;
-  background: url(/rsrc/image/icon/fatcow/calendar_edit.png)
-    no-repeat center center;
-  padding: 8px 12px;
+  padding: 8px 4px;
   margin: 2px 8px 2px 2px;
   position: relative;
-  border: 1px solid transparent;
 }
 
 .aphront-form-date-container {
@@ -335,8 +331,7 @@ table.aphront-form-control-checkbox-layout th {
 
 .fancy-datepicker-core {
   padding: 1px;
-  font-size: 11px;
-  font-family: Verdana;
+  font-size: 12px;
   text-align: center;
 }
 
@@ -350,31 +345,39 @@ table.aphront-form-control-checkbox-layout th {
 
 .fancy-datepicker-core .month-table {
   margin-bottom: 6px;
+  font-size: 13px;
+  background-color: {$hoverblue};
+  border-radius: 2px;
 }
 
 .fancy-datepicker-core .month-table td.lrbutton {
-  width: 20%;
+  width: 18%;
+  color: {$lightbluetext};
 }
 
 .fancy-datepicker-core .month-table td {
   padding: 4px;
   font-weight: bold;
-  color: {$darkgreytext};
+  color: {$bluetext};
 }
 
-.fancy-datepicker-core .month-table td.lrbutton {
-  background: #e6e6e6;
-  border: 1px solid;
-  border-color: #a6a6a6 #969696 #868686 #a6a6a6;
+.fancy-datepicker-core .month-table td.lrbutton:hover {
+  border-radius: 2px;
+  background: {$hoverselectedblue};
+  color: {$darkbluetext};
 }
 
 .fancy-datepicker-core .day-table td {
   overflow: hidden;
-  background: #f6f6f6;
   vertical-align: center;
   text-align: center;
-  border: 1px solid #d6d6d6;
+  border: 1px solid {$thinblueborder};
   padding: 4px 0;
+}
+
+.fancy-datepicker .fancy-datepicker-core .day-table td.day:hover {
+  background-color: {$hoverblue};
+  border-color: {$lightblueborder};
 }
 
 .fancy-datepicker-core .day-table td.day-placeholder {
@@ -383,8 +386,9 @@ table.aphront-form-control-checkbox-layout th {
 }
 
 .fancy-datepicker-core .day-table td.weekend {
-  color: {$greytext};
-  border-color: #e6e6e6;
+  color: {$lightgreytext};
+  border-color: {$lightgreyborder};
+  background: {$lightgreybackground};
 }
 
 .fancy-datepicker-core .day-table td.day-name {
@@ -395,13 +399,16 @@ table.aphront-form-control-checkbox-layout th {
 }
 
 .fancy-datepicker-core .day-table td.today {
-  background: #eeee99;
-  border-color: #aaaa66;
+  background: {$greybackground};
+  border-color: {$greyborder};
+  color: {$darkgreytext};
+  font-weight: bold;
 }
 
 .fancy-datepicker-core .day-table td.datepicker-selected {
-  background: #0099ff;
-  border-color: #0066cc;
+  background: {$lightgreen};
+  border-color: {$green};
+  color: {$green};
 }
 
 .fancy-datepicker-core td {
@@ -412,16 +419,16 @@ table.aphront-form-control-checkbox-layout th {
   cursor: inherit;
 }
 
-.picker-open .calendar-button,
-.fancy-datepicker-core {
-  background-color: white;
-  border: 1px solid {$greytext};
-
-  box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.25);
+.picker-open .calendar-button .phui-icon-view {
+  color: {$sky};
 }
 
-.picker-open .calendar-button {
-  border-left: 1px solid white;
+.fancy-datepicker-core {
+  background-color: white;
+  border: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$blueborder};
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+  border-radius: 3px;
 }
 
 .login-to-comment {

@@ -243,6 +243,7 @@ abstract class PhabricatorAuthProvider {
             $image_uri,
             array(
               'name' => $name,
+              'canCDN' => true
             ));
         unset($unguarded);
 

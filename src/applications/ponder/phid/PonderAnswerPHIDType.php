@@ -29,8 +29,10 @@ final class PonderAnswerPHIDType extends PhabricatorPHIDType {
       $answer = $objects[$phid];
 
       $id = $answer->getID();
+      $question = $answer->getQuestion();
+      $question_title = $question->getFullTitle();
 
-      $handle->setName("Answer {$id}");
+      $handle->setName("{$question_title} (Answer {$id})");
       $handle->setURI($answer->getURI());
     }
   }

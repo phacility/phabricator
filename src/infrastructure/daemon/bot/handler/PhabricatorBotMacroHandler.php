@@ -31,7 +31,7 @@ final class PhabricatorBotMacroHandler extends PhabricatorBotHandler {
     foreach ($macros as $macro_name => $macro) {
       $regexp[] = preg_quote($macro_name, '/');
     }
-    $regexp = '/('.implode('|', $regexp).')/';
+    $regexp = '/^('.implode('|', $regexp).')\z/';
 
     $this->macros = $macros;
     $this->regexp = $regexp;
@@ -49,7 +49,7 @@ final class PhabricatorBotMacroHandler extends PhabricatorBotHandler {
         $message_body = $message->getBody();
 
         $matches = null;
-        if (!preg_match($this->regexp, $message_body, $matches)) {
+        if (!preg_match($this->regexp, trim($message_body), $matches)) {
           return;
         }
 
@@ -68,6 +68,11 @@ final class PhabricatorBotMacroHandler extends PhabricatorBotHandler {
           $ascii = $this->macros[$macro]['ascii'];
         }
 
+        if ($ascii === false) {
+          // If we failed to rasterize the macro, bail out.
+          return;
+        }
+
         $target_name = $message->getTarget()->getName();
         foreach ($ascii as $line) {
           $this->replyTo($message, $line);
@@ -77,7 +82,17 @@ final class PhabricatorBotMacroHandler extends PhabricatorBotHandler {
   }
 
   public function rasterize($macro, $size, $aspect) {
-    $image = HTTPSFuture::loadContent($macro['uri']);
+    try {
+      $image = $this->getConduit()->callMethodSynchronous(
+        'file.download',
+        array(
+          'phid' => $macro['filePHID'],
+        ));
+      $image = base64_decode($image);
+    } catch (Exception $ex) {
+      return false;
+    }
+
     if (!$image) {
       return false;
     }

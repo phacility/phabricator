@@ -12,61 +12,68 @@ final class PhabricatorAuditAddCommentController
     }
 
     $commit_phid = $request->getStr('commit');
-    $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
-      'phid = %s',
-      $commit_phid);
+    $commit = id(new DiffusionCommitQuery())
+      ->setViewer($user)
+      ->withPHIDs(array($commit_phid))
+      ->needAuditRequests(true)
+      ->executeOne();
     if (!$commit) {
       return new Aphront404Response();
     }
 
-    $phids = array($commit_phid);
-
-    $comments = array();
+    $xactions = array();
 
     // make sure we only add auditors or ccs if the action matches
     $action = $request->getStr('action');
     switch ($action) {
       case PhabricatorAuditActionConstants::ADD_AUDITORS:
         $auditors = $request->getArr('auditors');
-        $comments[] = id(new PhabricatorAuditComment())
-          ->setAction(PhabricatorAuditActionConstants::ADD_AUDITORS)
-          ->setMetadata(
-            array(
-              PhabricatorAuditComment::METADATA_ADDED_AUDITORS => $auditors,
-            ));
+        $xactions[] = id(new PhabricatorAuditTransaction())
+          ->setTransactionType(PhabricatorAuditActionConstants::ADD_AUDITORS)
+          ->setNewValue(array_fuse($auditors));
         break;
       case PhabricatorAuditActionConstants::ADD_CCS:
-        $ccs = $request->getArr('ccs');
-        $comments[] = id(new PhabricatorAuditComment())
-          ->setAction(PhabricatorAuditActionConstants::ADD_CCS)
-          ->setMetadata(
+        $xactions[] = id(new PhabricatorAuditTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+          ->setNewValue(
             array(
-              PhabricatorAuditComment::METADATA_ADDED_CCS => $ccs,
+              '+' => $request->getArr('ccs'),
             ));
         break;
       case PhabricatorAuditActionConstants::COMMENT:
         // We'll deal with this below.
         break;
       default:
-        $comments[] = id(new PhabricatorAuditComment())
-          ->setAction($action);
+        $xactions[] = id(new PhabricatorAuditTransaction())
+          ->setTransactionType(PhabricatorAuditActionConstants::ACTION)
+          ->setNewValue($action);
         break;
     }
 
     $content = $request->getStr('content');
     if (strlen($content)) {
-      $comments[] = id(new PhabricatorAuditComment())
-        ->setAction(PhabricatorAuditActionConstants::COMMENT)
-        ->setContent($content);
+      $xactions[] = id(new PhabricatorAuditTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
+        ->attachComment(
+          id(new PhabricatorAuditTransactionComment())
+            ->setCommitPHID($commit->getPHID())
+            ->setContent($content));
     }
 
-    id(new PhabricatorAuditCommentEditor($commit))
-      ->setActor($user)
-      ->setAttachInlineComments(true)
-      ->addComments($comments);
+    $inlines = PhabricatorAuditInlineComment::loadDraftComments(
+      $user,
+      $commit->getPHID());
+    foreach ($inlines as $inline) {
+      $xactions[] = id(new PhabricatorAuditTransaction())
+        ->setTransactionType(PhabricatorAuditActionConstants::INLINE)
+        ->attachComment($inline->getTransactionComment());
+    }
 
-    $handles = $this->loadViewerHandles($phids);
-    $uri = $handles[$commit_phid]->getURI();
+    id(new PhabricatorAuditEditor())
+      ->setActor($user)
+      ->setContentSourceFromRequest($request)
+      ->setContinueOnMissingFields(true)
+      ->applyTransactions($commit, $xactions);
 
     $draft = id(new PhabricatorDraft())->loadOneWhere(
       'authorPHID = %s AND draftKey = %s',
@@ -75,6 +82,10 @@ final class PhabricatorAuditAddCommentController
     if ($draft) {
       $draft->delete();
     }
+
+    $monogram = $commit->getRepository()->getMonogram();
+    $identifier = $commit->getCommitIdentifier();
+    $uri = '/'.$monogram.$identifier;
 
     return id(new AphrontRedirectResponse())->setURI($uri);
   }

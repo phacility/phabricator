@@ -40,11 +40,18 @@ final class PhabricatorS3FileStorageEngine
     $name = 'phabricator/'.implode('/', $parts);
 
     AphrontWriteGuard::willWrite();
+    $profiler = PhutilServiceProfiler::getInstance();
+    $call_id = $profiler->beginServiceCall(
+      array(
+        'type' => 's3',
+        'method' => 'putObject',
+      ));
     $s3->putObject(
       $data,
       $this->getBucketName(),
       $name,
       $acl = 'private');
+    $profiler->endServiceCall($call_id, array());
 
     return $name;
   }
@@ -54,9 +61,17 @@ final class PhabricatorS3FileStorageEngine
    * Load a stored blob from Amazon S3.
    */
   public function readFile($handle) {
-    $result = $this->newS3API()->getObject(
+    $s3 = $this->newS3API();
+    $profiler = PhutilServiceProfiler::getInstance();
+    $call_id = $profiler->beginServiceCall(
+      array(
+        'type' => 's3',
+        'method' => 'getObject',
+      ));
+    $result = $s3->getObject(
       $this->getBucketName(),
       $handle);
+    $profiler->endServiceCall($call_id, array());
 
     // NOTE: The implementation of the API that we're using may respond with
     // a successful result that has length 0 and no body property.
@@ -73,9 +88,17 @@ final class PhabricatorS3FileStorageEngine
    */
   public function deleteFile($handle) {
     AphrontWriteGuard::willWrite();
-    $this->newS3API()->deleteObject(
+    $s3 = $this->newS3API();
+    $profiler = PhutilServiceProfiler::getInstance();
+    $call_id = $profiler->beginServiceCall(
+      array(
+        'type' => 's3',
+        'method' => 'deleteObject',
+      ));
+    $s3->deleteObject(
       $this->getBucketName(),
       $handle);
+    $profiler->endServiceCall($call_id, array());
   }
 
 

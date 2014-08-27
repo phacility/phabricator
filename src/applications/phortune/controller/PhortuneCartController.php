@@ -9,7 +9,7 @@ abstract class PhortuneCartController
     $total = 0;
     foreach ($cart->getPurchases() as $purchase) {
       $rows[] = array(
-        pht('A Purchase'),
+        $purchase->getFullDisplayName(),
         PhortuneCurrency::newFromUSDCents($purchase->getBasePriceInCents())
           ->formatForDisplay(),
         $purchase->getQuantity(),

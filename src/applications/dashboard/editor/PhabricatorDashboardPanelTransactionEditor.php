@@ -3,6 +3,14 @@
 final class PhabricatorDashboardPanelTransactionEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  public function getEditorApplicationClass() {
+    return 'PhabricatorDashboardApplication';
+  }
+
+  public function getEditorObjectsDescription() {
+    return pht('Dashboard Panels');
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 

@@ -56,13 +56,14 @@ final class PhabricatorMailImplementationSendGridAdapter
     return $this;
   }
 
-  public function setSubject($subject) {
-    $this->params['subject'] = $subject;
+  public function setHTMLBody($body) {
+    $this->params['html-body'] = $body;
     return $this;
   }
 
-  public function setIsHTML($is_html) {
-    $this->params['is-html'] = $is_html;
+
+  public function setSubject($subject) {
+    $this->params['subject'] = $subject;
     return $this;
   }
 
@@ -89,10 +90,10 @@ final class PhabricatorMailImplementationSendGridAdapter
     }
 
     $params['subject'] = idx($this->params, 'subject');
-    if (idx($this->params, 'is-html')) {
-      $params['html'] = idx($this->params, 'body');
-    } else {
-      $params['text'] = idx($this->params, 'body');
+    $params['text'] = idx($this->params, 'body');
+
+    if (idx($this->params, 'html-body')) {
+      $params['html'] = idx($this->params, 'html-body');
     }
 
     $params['from'] = idx($this->params, 'from');

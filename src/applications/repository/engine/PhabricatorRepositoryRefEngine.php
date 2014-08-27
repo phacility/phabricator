@@ -63,6 +63,7 @@ final class PhabricatorRepositoryRefEngine
       }
     }
     $all_closing_heads = array_unique($all_closing_heads);
+    $all_closing_heads = $this->removeMissingCommits($all_closing_heads);
 
     foreach ($maps as $type => $refs) {
       $cursor_group = idx($cursor_groups, $type, array());
@@ -103,6 +104,35 @@ final class PhabricatorRepositoryRefEngine
       $this->closeCommits[$identifier] = $identifier;
     }
     return $this;
+  }
+
+  /**
+   * Remove commits which no longer exist in the repository from a list.
+   *
+   * After a force push and garbage collection, we may have branch cursors which
+   * point at commits which no longer exist. This can make commands issued later
+   * fail. See T5839 for discussion.
+   *
+   * @param list<string>    List of commit identifiers.
+   * @return list<string>   List with nonexistent identifiers removed.
+   */
+  private function removeMissingCommits(array $identifiers) {
+    if (!$identifiers) {
+      return array();
+    }
+
+    $resolved = id(new DiffusionLowLevelResolveRefsQuery())
+      ->setRepository($this->getRepository())
+      ->withRefs($identifiers)
+      ->execute();
+
+    foreach ($identifiers as $key => $identifier) {
+      if (empty($resolved[$identifier])) {
+        unset($identifiers[$key]);
+      }
+    }
+
+    return $identifiers;
   }
 
   private function updateCursors(

@@ -210,7 +210,7 @@ abstract class PhragmentController extends PhabricatorController {
         ->appendChild(phutil_tag('p', array(), pht(
           'Because Phragment generates files (such as ZIP archives and '.
           'patches) as they are requested, it requires that you configure '.
-          'the `security.alterate-file-domain` option. This option on it\'s '.
+          'the `security.alternate-file-domain` option. This option on it\'s '.
           'own will also provide additional security when serving files '.
           'across Phabricator.')));
     }

@@ -5,6 +5,14 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
   const ERROR_EMPTY_PARTICIPANTS = 'error-empty-participants';
   const ERROR_EMPTY_MESSAGE = 'error-empty-message';
 
+  public function getEditorApplicationClass() {
+    return 'PhabricatorConpherenceApplication';
+  }
+
+  public function getEditorObjectsDescription() {
+    return pht('Conpherence Threads');
+  }
+
   public static function createConpherence(
     PhabricatorUser $creator,
     array $participant_phids,

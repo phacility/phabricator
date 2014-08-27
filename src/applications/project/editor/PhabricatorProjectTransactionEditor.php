@@ -3,6 +3,14 @@
 final class PhabricatorProjectTransactionEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  public function getEditorApplicationClass() {
+    return 'PhabricatorProjectApplication';
+  }
+
+  public function getEditorObjectsDescription() {
+    return pht('Projects');
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
@@ -125,8 +133,6 @@ final class PhabricatorProjectTransactionEditor
           ->setProjectPHID($object->getPHID())
           ->save();
 
-        $object->updateDatasourceTokens();
-
         // TODO -- delete all of the below once we sever automagical project
         // to phriction stuff
         if ($xaction->getOldValue() === null) {
@@ -184,8 +190,6 @@ final class PhabricatorProjectTransactionEditor
             $rem_slug->delete();
           }
         }
-
-        $object->updateDatasourceTokens();
 
         return;
       case PhabricatorTransactions::TYPE_VIEW_POLICY:

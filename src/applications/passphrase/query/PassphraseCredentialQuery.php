@@ -8,6 +8,7 @@ final class PassphraseCredentialQuery
   private $credentialTypes;
   private $providesTypes;
   private $isDestroyed;
+  private $allowConduit;
 
   private $needSecrets;
 
@@ -33,6 +34,11 @@ final class PassphraseCredentialQuery
 
   public function withIsDestroyed($destroyed) {
     $this->isDestroyed = $destroyed;
+    return $this;
+  }
+
+  public function withAllowConduit($allow_conduit) {
+    $this->allowConduit = $allow_conduit;
     return $this;
   }
 
@@ -125,6 +131,13 @@ final class PassphraseCredentialQuery
         $conn_r,
         'isDestroyed = %d',
         (int)$this->isDestroyed);
+    }
+
+    if ($this->allowConduit !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'allowConduit = %d',
+        (int)$this->allowConduit);
     }
 
     return $this->formatWhereClause($where);

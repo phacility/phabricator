@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorDashboardRemarkupRule
-  extends PhabricatorRemarkupRuleObject {
+  extends PhabricatorObjectRemarkupRule {
 
   protected function getObjectNamePrefix() {
     return 'W';

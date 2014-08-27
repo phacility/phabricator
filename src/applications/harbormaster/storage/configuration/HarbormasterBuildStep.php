@@ -6,6 +6,7 @@ final class HarbormasterBuildStep extends HarbormasterDAO
     PhabricatorCustomFieldInterface {
 
   protected $name;
+  protected $description;
   protected $buildPlanPHID;
   protected $className;
   protected $details = array();

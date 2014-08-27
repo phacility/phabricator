@@ -12,7 +12,7 @@ JX.behavior('phabricator-transaction-list', function() {
 
   JX.Stratcom.listen(
     'click',
-    [['transaction-edit'], ['transaction-remove']],
+    [['transaction-edit'], ['transaction-remove'], ['transaction-raw']],
     function(e) {
       if (!e.isNormalClick()) {
         return;

@@ -3,6 +3,14 @@
 final class ReleephRequestTransactionalEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  public function getEditorApplicationClass() {
+    return 'PhabricatorReleephApplication';
+  }
+
+  public function getEditorObjectsDescription() {
+    return pht('Releeph Requests');
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 

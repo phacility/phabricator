@@ -4,8 +4,8 @@
 
 .phui-workpanel-view .phui-action-header {
   border: 1px solid #b3b5b6;
-  border-top-left-radius: 5px;
-  border-top-right-radius: 5px;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
 }
 
 .phui-workpanel-view .phui-action-header .phui-action-header-title {
@@ -53,10 +53,10 @@
 
 .phui-workpanel-view .phui-workpanel-body {
   background: {$backdrop};
-  padding: 5px 5px 1px 5px;
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
-  box-shadow: inset 0 0px 5px rgba(0,0,0,.4);
+  padding: 5px 5px 2px 5px;
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
+  box-shadow: inset 0 0px 5px rgba(0,0,0,.2);
 }
 
 .phui-workpanel-view .phui-workpanel-footer-action a {
@@ -85,7 +85,7 @@
 }
 
 .phui-workpanel-body .phui-object-item-list-view {
-  min-height: 54px;
+  min-height: 49px;
 }
 
 .device .aphront-multi-column-outer
@@ -93,25 +93,30 @@
   width: auto;
 }
 
-.project-column-empty {
+.project-panel-hidden {
+  opacity: 0.75;
+}
+
+.project-panel-empty .phui-object-item-list-view {
   background: rgba(255,255,255,.4);
   border-radius: 3px;
   margin-bottom: 4px;
   border: 1px dashed #fff;
 }
 
-.project-column-empty .drag-ghost {
+.project-panel-empty .phui-object-item-list-view .drag-ghost {
   display: none;
 }
 
-.project-column-empty.drag-target-list {
+.project-panel-empty .phui-object-item-list-view.drag-target-list {
   background: rgba(255,255,255,.7);
 }
 
-.phui-workpanel-view .phui-workpanel-lightred .phui-action-header {
+.project-panel-over-limit .phui-action-header {
   border-top: 1px solid {$redborder};
   border-left: 1px solid {$redborder};
   border-right: 1px solid {$redborder};
+  background: {$lightredbackground};
 }
 
 /* - Workpanel Cards -----------------------------------------------------------

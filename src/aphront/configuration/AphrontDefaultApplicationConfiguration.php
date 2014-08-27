@@ -250,7 +250,7 @@ class AphrontDefaultApplicationConfiguration
     $class    = get_class($ex);
     $message  = $ex->getMessage();
 
-    if ($ex instanceof AphrontQuerySchemaException) {
+    if ($ex instanceof AphrontSchemaQueryException) {
       $message .=
         "\n\n".
         "NOTE: This usually indicates that the MySQL schema has not been ".
@@ -300,11 +300,12 @@ class AphrontDefaultApplicationConfiguration
     return array(new Phabricator404Controller($this->getRequest()), array());
   }
 
-  public function buildRedirectController($uri) {
+  public function buildRedirectController($uri, $external) {
     return array(
       new PhabricatorRedirectController($this->getRequest()),
       array(
         'uri' => $uri,
+        'external' => $external,
       ));
   }
 

@@ -17,7 +17,7 @@ final class PhabricatorNotificationsApplication extends PhabricatorApplication {
   public function getRoutes() {
     return array(
       '/notification/' => array(
-        '(?:(?P<filter>all|unread)/)?'
+        '(?:query/(?P<queryKey>[^/]+)/)?'
           => 'PhabricatorNotificationListController',
         'panel/' => 'PhabricatorNotificationPanelController',
         'individual/' => 'PhabricatorNotificationIndividualController',
