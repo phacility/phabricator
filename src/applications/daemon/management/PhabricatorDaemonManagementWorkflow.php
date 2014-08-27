@@ -294,29 +294,19 @@ abstract class PhabricatorDaemonManagementWorkflow
     $console = PhutilConsole::getConsole();
 
     $daemons = $this->loadRunningDaemons();
-    $rogue_daemons = PhutilDaemonOverseer::findRunningDaemons();
     if (!$daemons) {
+      $rogue_daemons = PhutilDaemonOverseer::findRunningDaemons();
       if ($force && $rogue_daemons) {
         $stop_rogue_daemons = $this->buildRogueDaemons($rogue_daemons);
         $this->sendStopSignals($stop_rogue_daemons, $grace_period);
       } else {
         $console->writeErr(pht(
           'There are no running Phabricator daemons.')."\n");
-        if ($rogue_daemons) {
+        if ($rogue_daemons && !$pids) {
           $console->writeErr($this->getForceStopHint($rogue_daemons)."\n");
         }
       }
       return 0;
-    }
-
-    if ($rogue_daemons) {
-      if ($force) {
-        $daemons = array_merge(
-          $daemons,
-          $this->buildRogueDaemons($rogue_daemons));
-      } else {
-        $console->writeErr($this->getForceStopHint($rogue_daemons)."\n");
-      }
     }
 
     $daemons = mpull($daemons, null, 'getPID');
@@ -357,16 +347,30 @@ abstract class PhabricatorDaemonManagementWorkflow
       }
     }
 
+    $rogue_daemons = PhutilDaemonOverseer::findRunningDaemons();
+    if ($rogue_daemons) {
+      if ($force) {
+        $stop_rogue_daemons = $this->buildRogueDaemons($rogue_daemons);
+        $this->sendStopSignals($stop_rogue_daemons, $grace_period);
+      } else if (!$pids) {
+        $console->writeErr($this->getForceStopHint($rogue_daemons)."\n");
+      }
+    }
+
     return 0;
   }
 
   private function getForceStopHint($rogue_daemons) {
+    $debug_output = '';
+    foreach ($rogue_daemons as $rogue) {
+      $debug_output .= $rogue['pid'].' '.$rogue['command']."\n";
+    }
     return pht(
       'There are processes running that look like Phabricator daemons but '.
       'have no corresponding PID files:'."\n\n".'%s'."\n\n".
       'Stop these processes by re-running this command with the --force '.
       'parameter.',
-      implode("\n", ipull($rogue_daemons, 'command')));
+      $debug_output);
   }
 
   private function buildRogueDaemons(array $daemons) {
