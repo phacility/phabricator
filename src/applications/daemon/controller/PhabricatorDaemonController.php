@@ -9,7 +9,6 @@ abstract class PhabricatorDaemonController extends PhabricatorController {
     $nav->addLabel(pht('Daemons'));
     $nav->addFilter('/', pht('Console'));
     $nav->addFilter('log', pht('All Daemons'));
-    $nav->addFilter('log/combined', pht('Combined Log'));
 
     return $nav;
   }
