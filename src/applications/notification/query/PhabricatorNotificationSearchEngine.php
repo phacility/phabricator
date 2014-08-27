@@ -136,4 +136,8 @@ final class PhabricatorNotificationSearchEngine
       ->appendChild($view);
   }
 
+  public function shouldUseOffsetPaging() {
+    return true;
+  }
+
 }
