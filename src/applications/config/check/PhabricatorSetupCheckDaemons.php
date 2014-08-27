@@ -62,8 +62,15 @@ final class PhabricatorSetupCheckDaemons extends PhabricatorSetupCheck {
           'configuration. If you are making multiple configuration changes, '.
           'you only need to restart the daemons once after the last change.'.
           "\n\n".
-          'Use %s to restart daemons. See %s for more information.',
+          'Use %s to restart daemons. See the %s or %s for more information.',
           phutil_tag('tt', array(), 'bin/phd restart'),
+          phutil_tag(
+            'a',
+            array(
+              'href' => '/daemon/',
+              'target' => '_blank'
+            ),
+            pht('Daemon Console')),
           phutil_tag(
             'a',
             array(
