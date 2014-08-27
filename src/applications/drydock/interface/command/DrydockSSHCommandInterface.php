@@ -85,6 +85,7 @@ EOF;
 
     return new ExecFuture(
       'ssh '.
+      '-o LogLevel=quiet '.
       '-o StrictHostKeyChecking=no '.
       '-o UserKnownHostsFile=/dev/null '.
       '-o BatchMode=yes '.
