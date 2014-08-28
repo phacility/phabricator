@@ -55,11 +55,11 @@ final class DiffusionQueryPathsConduitAPIMethod
     $path = $request->getValue('path');
     $commit = $request->getValue('commit');
 
-    // Adapted from diffusion.browsequery.
-    list($entire_manifest) = $repository->execxLocalCommand(
-      'manifest --rev %s',
-      hgsprintf('%s', $commit));
-    $entire_manifest = explode("\n", $entire_manifest);
+    $entire_manifest = id(new DiffusionLowLevelMercurialPathsQuery())
+      ->setRepository($repository)
+      ->withCommit($commit)
+      ->withPath($path)
+      ->execute();
 
     $match_against = trim($path, '/');
     $match_len = strlen($match_against);

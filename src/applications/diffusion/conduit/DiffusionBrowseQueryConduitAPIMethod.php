@@ -198,18 +198,16 @@ final class DiffusionBrowseQueryConduitAPIMethod
     $commit = $request->getValue('commit');
     $result = $this->getEmptyResultSet();
 
-    $match_against = trim($path, '/');
 
-    $prefix = trim('./'.$match_against, '/');
-
-    list($entire_manifest) = $repository->execxLocalCommand(
-      'locate --print0 --rev %s -I %s',
-      hgsprintf('%s', $commit),
-      $prefix);
-    $entire_manifest = explode("\0", $entire_manifest);
+    $entire_manifest = id(new DiffusionLowLevelMercurialPathsQuery())
+      ->setRepository($repository)
+      ->withCommit($commit)
+      ->withPath($path)
+      ->execute();
 
     $results = array();
 
+    $match_against = trim($path, '/');
     $match_len = strlen($match_against);
 
     // For the root, don't trim. For other paths, trim the "/" after we match.
