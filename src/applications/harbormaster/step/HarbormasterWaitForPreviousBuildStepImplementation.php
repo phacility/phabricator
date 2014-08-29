@@ -28,14 +28,23 @@ final class HarbormasterWaitForPreviousBuildStepImplementation
     // finished.
     $plan = $build->getBuildPlan();
 
-    $log = $build->createLog($build_target, 'waiting', 'blockers');
-    $log_start = $log->start();
+    $existing_logs = id(new HarbormasterBuildLogQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withBuildTargetPHIDs(array($build_target->getPHID()))
+      ->execute();
+
+    if ($existing_logs) {
+      $log = head($existing_logs);
+    } else {
+      $log = $build->createLog($build_target, 'waiting', 'blockers');
+    }
 
     $blockers = $this->getBlockers($object, $plan, $build);
     if ($blockers) {
+      $log->start();
       $log->append("Blocked by: ".implode(',', $blockers)."\n");
+      $log->finalize();
     }
-    $log->finalize($log_start);
 
     if ($blockers) {
       throw new PhabricatorWorkerYieldException(15);
