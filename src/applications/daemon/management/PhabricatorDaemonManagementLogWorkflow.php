@@ -52,9 +52,14 @@ final class PhabricatorDaemonManagementLogWorkflow
     }
 
     $console = PhutilConsole::getConsole();
+
+    $limit = $args->getArg('limit');
+
     $logs = id(new PhabricatorDaemonLogEvent())->loadAllWhere(
-      'logID IN (%Ld) ORDER BY id ASC',
-      mpull($daemons, 'getID'));
+      'logID IN (%Ld) ORDER BY id DESC LIMIT %d',
+      mpull($daemons, 'getID'),
+      $limit);
+    $logs = array_reverse($logs);
 
     $lines = array();
     foreach ($logs as $log) {
@@ -68,6 +73,11 @@ final class PhabricatorDaemonManagementLogWorkflow
         );
       }
     }
+
+    // Each log message may be several lines. Limit the number of lines we
+    // output so that `--limit 123` means "show 123 lines", which is the most
+    // easily understandable behavior.
+    $lines = array_slice($lines, -$limit);
 
     foreach ($lines as $line) {
       $id = $line['id'];
