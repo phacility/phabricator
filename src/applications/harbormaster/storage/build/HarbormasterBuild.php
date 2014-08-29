@@ -196,7 +196,9 @@ final class HarbormasterBuild extends HarbormasterDAO
     $log_source,
     $log_type) {
 
-    $log_source = phutil_utf8_shorten($log_source, 250);
+    $log_source = id(new PhutilUTF8StringTruncator())
+      ->setMaximumCodepoints(250)
+      ->truncateString($log_source);
 
     $log = HarbormasterBuildLog::initializeNewBuildLog($build_target)
       ->setLogSource($log_source)

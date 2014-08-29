@@ -69,7 +69,9 @@ final class DifferentialHovercardEventListener
 
     if ($rev->getSummary()) {
       $hovercard->addField(pht('Summary'),
-        phutil_utf8_shorten($rev->getSummary(), 120));
+        id(new PhutilUTF8StringTruncator())
+        ->setMaximumGlyphs(120)
+        ->truncateString($rev->getSummary()));
     }
 
     $hovercard->addTag(

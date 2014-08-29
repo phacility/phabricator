@@ -104,7 +104,9 @@ final class ManiphestExcelDefaultFormat extends ManiphestExcelFormat {
         $task->getTitle(),
         $projects,
         PhabricatorEnv::getProductionURI('/T'.$task->getID()),
-        phutil_utf8_shorten($task->getDescription(), 512),
+        id(new PhutilUTF8StringTruncator())
+        ->setMaximumBytes(512)
+        ->truncateString($task->getDescription()),
       );
     }
 

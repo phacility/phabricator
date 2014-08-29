@@ -684,7 +684,10 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
                 'size'  => 600,
               ),
             ),
-            phutil_utf8_shorten($line['commit'], 9, ''));
+            id(new PhutilUTF8StringTruncator())
+            ->setMaximumGlyphs(9)
+            ->setTerminator('')
+            ->truncateString($line['commit']));
 
           $revision_id = null;
           if (idx($commits, $commit)) {

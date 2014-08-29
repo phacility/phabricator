@@ -20,7 +20,9 @@ final class ConpherenceFileWidgetView extends ConpherenceWidgetView {
         '');
       $file_view = id(new PhabricatorFileLinkView())
         ->setFilePHID($file->getPHID())
-        ->setFileName(phutil_utf8_shorten($file->getName(), 28))
+        ->setFileName(id(new PhutilUTF8StringTruncator())
+          ->setMaximumGlyphs(28)
+          ->truncateString($file->getName()))
         ->setFileViewable($file->isViewableImage())
         ->setFileViewURI($file->getBestURI())
         ->setCustomClass('file-title');

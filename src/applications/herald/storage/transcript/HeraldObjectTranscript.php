@@ -52,7 +52,7 @@ final class HeraldObjectTranscript {
       if (strlen($value) <= $length) {
         return $value;
       } else {
-        // NOTE: phutil_utf8_shorten() has huge runtime for giant strings.
+        // NOTE: PhutilUTF8StringTruncator has huge runtime for giant strings.
         return phutil_utf8ize(substr($value, 0, $length)."\n<...>");
       }
     } else if (is_array($value)) {

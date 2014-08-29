@@ -62,8 +62,10 @@ final class DifferentialDiffViewController extends DifferentialController {
             array(
               'value' => $revision->getID(),
             ),
-            phutil_utf8_shorten(
-              'D'.$revision->getID().' '.$revision->getTitle(), 128));
+            id(new PhutilUTF8StringTruncator())
+            ->setMaximumGlyphs(128)
+            ->truncateString(
+              'D'.$revision->getID().' '.$revision->getTitle()));
         }
         $select[] = hsprintf('</optgroup>');
       }

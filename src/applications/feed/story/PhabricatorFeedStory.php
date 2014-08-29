@@ -378,7 +378,9 @@ abstract class PhabricatorFeedStory
 
   final protected function renderSummary($text, $len = 128) {
     if ($len) {
-      $text = phutil_utf8_shorten($text, $len);
+      $text = id(new PhutilUTF8StringTruncator())
+        ->setMaximumGlyphs($len)
+        ->truncateString($text);
     }
     switch ($this->getRenderingTarget()) {
       case PhabricatorApplicationTransaction::TARGET_HTML:

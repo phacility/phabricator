@@ -563,7 +563,9 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       $body = idx($params, 'body', '');
       $max = PhabricatorEnv::getEnvConfig('metamta.email-body-limit');
       if (strlen($body) > $max) {
-        $body = phutil_utf8_shorten($body, $max);
+        $body = id(new PhutilUTF8StringTruncator())
+          ->setMaximumBytes($max)
+          ->truncateString($body);
         $body .= "\n";
         $body .= pht('(This email was truncated at %d bytes.)', $max);
       }

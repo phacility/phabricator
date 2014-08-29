@@ -90,7 +90,9 @@ final class PhameCreatePostConduitAPIMethod extends PhameConduitAPIMethod {
     $post->setTitle($title);
     $phame_title = $request->getValue(
       'phameTitle',
-      phutil_utf8_shorten($title, 64));
+      id(new PhutilUTF8StringTruncator())
+      ->setMaximumCodepoints(64)
+      ->truncateString($title));
     $post->setPhameTitle(PhabricatorSlug::normalize($phame_title));
     $post->setBody($body);
     $post->save();
