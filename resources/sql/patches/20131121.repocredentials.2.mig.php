@@ -67,9 +67,14 @@ foreach ($map as $credential_type => $credential_usernames) {
   foreach ($credential_usernames as $username => $credential_secrets) {
     foreach ($credential_secrets as $secret_plaintext => $repositories) {
       $callsigns = mpull($repositories, 'getCallsign');
+
+      $signs = implode(', ', $callsigns);
+
       $name = pht(
         'Migrated Repository Credential (%s)',
-        phutil_utf8_shorten(implode(', ', $callsigns), 128));
+        id(new PhutilUTF8StringTruncator())
+          ->setMaximumGlyphs(128)
+          ->truncateString($signs));
 
       echo "Creating: {$name}...\n";
 

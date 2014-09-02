@@ -108,7 +108,9 @@ final class PhabricatorChatLogChannelLogController
     $out = array();
     foreach ($blocks as $block) {
       $author = $block['author'];
-      $author = phutil_utf8_shorten($author, 18);
+      $author = id(new PhutilUTF8StringTruncator())
+        ->setMaximumGlyphs(18)
+        ->truncateString($author);
       $author = phutil_tag('td', array('class' => 'author'), $author);
 
       $href = $uri->alter('at', $block['id']);

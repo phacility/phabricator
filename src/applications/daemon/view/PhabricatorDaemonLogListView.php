@@ -17,6 +17,7 @@ final class PhabricatorDaemonLogListView extends AphrontView {
       throw new Exception('Call setUser() before rendering!');
     }
 
+    $env_hash = PhabricatorEnv::calculateEnvironmentHash();
     $list = new PHUIObjectItemListView();
     foreach ($this->daemonLogs as $log) {
       $id = $log->getID();
@@ -31,8 +32,15 @@ final class PhabricatorDaemonLogListView extends AphrontView {
       $status = $log->getStatus();
       switch ($status) {
         case PhabricatorDaemonLog::STATUS_RUNNING:
-          $item->setBarColor('green');
-          $item->addAttribute(pht('This daemon is running.'));
+          if ($env_hash != $log->getEnvHash()) {
+            $item->setBarColor('yellow');
+            $item->addAttribute(pht(
+              'This daemon is running with an out of date configuration and '.
+              'should be restarted.'));
+          } else {
+            $item->setBarColor('green');
+            $item->addAttribute(pht('This daemon is running.'));
+          }
           break;
         case PhabricatorDaemonLog::STATUS_DEAD:
           $item->setBarColor('red');

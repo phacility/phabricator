@@ -58,9 +58,12 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
           continue;
         }
       }
+      $policy_short_name = id(new PhutilUTF8StringTruncator())
+        ->setMaximumGlyphs(28)
+        ->truncateString($policy->getName());
 
       $options[$policy->getType()][$policy->getPHID()] = array(
-        'name' => phutil_utf8_shorten($policy->getName(), 28),
+        'name' => $policy_short_name,
         'full' => $policy->getName(),
         'icon' => $policy->getIcon(),
       );

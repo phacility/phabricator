@@ -117,7 +117,7 @@ final class HarbormasterBuildTarget extends HarbormasterDAO
     return $this->assertAttached($this->build);
   }
 
-  public function attachBuildStep(HarbormasterBuildStep $step) {
+  public function attachBuildStep(HarbormasterBuildStep $step = null) {
     $this->buildStep = $step;
     return $this;
   }

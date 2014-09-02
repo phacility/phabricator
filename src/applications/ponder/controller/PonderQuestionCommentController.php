@@ -28,7 +28,7 @@ final class PonderQuestionCommentController extends PonderController {
 //    $draft = PhabricatorDraft::buildFromRequest($request);
 
     $qid = $question->getID();
-    $view_uri = "Q{$qid}";
+    $view_uri = "/Q{$qid}";
 
     $xactions = array();
     $xactions[] = id(new PonderQuestionTransaction())

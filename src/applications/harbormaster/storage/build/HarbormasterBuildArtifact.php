@@ -38,9 +38,9 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
     return $this->assertAttached($this->buildTarget);
   }
 
-  public function setArtifactKey($build_phid, $key) {
+  public function setArtifactKey($build_phid, $build_gen, $key) {
     $this->artifactIndex =
-      PhabricatorHash::digestForIndex($build_phid.$key);
+      PhabricatorHash::digestForIndex($build_phid.$build_gen.$key);
     $this->artifactKey = $key;
     return $this;
   }

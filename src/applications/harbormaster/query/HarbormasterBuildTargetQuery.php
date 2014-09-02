@@ -103,7 +103,7 @@ final class HarbormasterBuildTargetQuery
 
       foreach ($page as $target) {
         $target->attachBuildStep(
-          $steps[$target->getBuildStepPHID()]);
+          idx($steps, $target->getBuildStepPHID()));
       }
     }
 

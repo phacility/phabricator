@@ -139,7 +139,9 @@ final class HeraldPholioMockAdapter extends HeraldAdapter {
         default:
           $custom_result = parent::handleCustomHeraldEffect($effect);
           if ($custom_result === null) {
-            throw new Exception("No rules to handle action '{$action}'.");
+            throw new Exception(pht(
+              "No rules to handle action '%s'.",
+              $action));
           }
 
           $result[] = $custom_result;

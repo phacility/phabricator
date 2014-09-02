@@ -30,7 +30,9 @@ final class PhabricatorRepositoryCommitData extends PhabricatorRepositoryDAO {
   public static function summarizeCommitMessage($message) {
     $summary = phutil_split_lines($message, $retain_endings = false);
     $summary = head($summary);
-    $summary = phutil_utf8_shorten($summary, self::SUMMARY_MAX_LENGTH);
+    $summary = id(new PhutilUTF8StringTruncator())
+      ->setMaximumCodepoints(self::SUMMARY_MAX_LENGTH)
+      ->truncateString($summary);
 
     return $summary;
   }

@@ -252,14 +252,18 @@ final class PonderQuestionTransaction
         if ($old === null) {
           $question = $story->getObject($this->getObjectPHID());
           return phutil_escape_html_newlines(
-            phutil_utf8_shorten($question->getContent(), 128));
+            id(new PhutilUTF8StringTruncator())
+            ->setMaximumGlyphs(128)
+            ->truncateString($question->getContent()));
         }
         break;
       case self::TYPE_ANSWERS:
         $answer = $this->getNewAnswerObject($story);
         if ($answer) {
           return phutil_escape_html_newlines(
-            phutil_utf8_shorten($answer->getContent(), 128));
+            id(new PhutilUTF8StringTruncator())
+            ->setMaximumGlyphs(128)
+            ->truncateString($answer->getContent()));
         }
         break;
     }

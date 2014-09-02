@@ -297,7 +297,9 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
 
     if ($text) {
       return phutil_escape_html_newlines(
-        phutil_utf8_shorten($text, 128));
+        id(new PhutilUTF8StringTruncator())
+        ->setMaximumGlyphs(128)
+        ->truncateString($text));
     }
 
     return parent::getBodyForFeed($story);

@@ -71,7 +71,9 @@ final class PonderAnswerTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_CONTENT:
         return phutil_escape_html_newlines(
-          phutil_utf8_shorten($new, 128));
+          id(new PhutilUTF8StringTruncator())
+          ->setMaximumGlyphs(128)
+          ->truncateString($new));
         break;
     }
     return parent::getBodyForFeed($story);

@@ -126,17 +126,28 @@ final class HarbormasterBuildViewController
 
       $target_box->addPropertyList($properties, pht('Overview'));
 
-      $description = $build_target->getBuildStep()->getDescription();
-      if ($description) {
-        $rendered = PhabricatorMarkupEngine::renderOneObject(
-          id(new PhabricatorMarkupOneOff())
-            ->setContent($description)
-            ->setPreserveLinebreaks(true),
-          'default',
-          $viewer);
+      $step = $build_target->getBuildStep();
 
-        $properties->addSectionHeader(pht('Description'));
-        $properties->addTextContent($rendered);
+      if ($step) {
+        $description = $step->getDescription();
+        if ($description) {
+          $rendered = PhabricatorMarkupEngine::renderOneObject(
+            id(new PhabricatorMarkupOneOff())
+              ->setContent($description)
+              ->setPreserveLinebreaks(true),
+            'default',
+            $viewer);
+
+          $properties->addSectionHeader(pht('Description'));
+          $properties->addTextContent($rendered);
+        }
+      } else {
+        $target_box->setFormErrors(
+          array(
+            pht(
+              'This build step has since been deleted on the build plan.  '.
+              'Some information may be omitted.'),
+          ));
       }
 
       $details = $build_target->getDetails();

@@ -9,6 +9,10 @@ abstract class PhabricatorBaseEnglishTranslation
 
   public function getTranslations() {
     return array(
+      'No daemon(s) with id(s) "%s" exist!' => array(
+        'No daemon with id %s exists!',
+        'No daemons with ids %s exist!',
+      ),
       'These %d configuration value(s) are related:' => array(
         'This configuration value is related:',
         'These configuration values are related:',

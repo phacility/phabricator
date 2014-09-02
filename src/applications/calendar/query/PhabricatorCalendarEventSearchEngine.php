@@ -214,8 +214,9 @@ final class PhabricatorCalendarEventSearchEngine
         ->setBarColor($color)
         ->addByline(pht('Creator: %s', $creator_handle->renderLink()))
         ->addAttribute(pht('From %s to %s', $from, $to))
-        ->addAttribute(
-            phutil_utf8_shorten($event->getDescription(), 64));
+        ->addAttribute(id(new PhutilUTF8StringTruncator())
+          ->setMaximumGlyphs(64)
+          ->truncateString($event->getDescription()));
 
       $list->addItem($item);
     }

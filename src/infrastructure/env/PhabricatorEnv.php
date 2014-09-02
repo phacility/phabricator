@@ -223,6 +223,8 @@ final class PhabricatorEnv {
 
   public static function calculateEnvironmentHash() {
     $keys = array_keys(self::getAllConfigKeys());
+    ksort($keys);
+
     $values = array();
     foreach ($keys as $key) {
       $values[$key] = self::getEnvConfigIfExists($key);

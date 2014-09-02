@@ -141,7 +141,11 @@ final class DifferentialCommitMessageParser {
     if (isset($fields[$key_title])) {
       $terminal = '...';
       $title = $fields[$key_title];
-      $short = phutil_utf8_shorten($title, 250, $terminal);
+      $short = id(new PhutilUTF8StringTruncator())
+        ->setMaximumGlyphs(250)
+        ->setTerminator($terminal)
+        ->truncateString($title);
+
       if ($short != $title) {
 
         // If we shortened the title, split the rest into the summary, so

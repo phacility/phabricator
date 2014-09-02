@@ -82,12 +82,15 @@ try {
         implode(', ', $workflow_names)));
   }
 
+  $log_argv = implode(' ', array_slice($original_argv, 1));
+  $log_argv = id(new PhutilUTF8StringTruncator())
+    ->setMaximumCodepoints(128)
+    ->truncateString($log_argv);
+
   $ssh_log->setData(
     array(
       'C' => $original_argv[0],
-      'U' => phutil_utf8_shorten(
-        implode(' ', array_slice($original_argv, 1)),
-        128),
+      'U' => $log_argv,
     ));
 
   $command = head($original_argv);

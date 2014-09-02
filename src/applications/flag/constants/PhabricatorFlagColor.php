@@ -40,7 +40,7 @@ final class PhabricatorFlagColor extends PhabricatorFlagConstants {
       self::COLOR_GREEN     => 'fa-flag green',
       self::COLOR_BLUE      => 'fa-flag blue',
       self::COLOR_PINK      => 'fa-flag indigo', // whhaaaa
-      self::COLOR_PURPLE    => 'fa-flag purple',
+      self::COLOR_PURPLE    => 'fa-flag violet',
       self::COLOR_CHECKERED => 'fa-flag-checkered',
     );
     return idx($map, $color);

@@ -59,7 +59,9 @@ final class PhabricatorPeopleHovercardEventListener
 
     if ($profile->getBlurb()) {
       $hovercard->addField(pht('Blurb'),
-        phutil_utf8_shorten($profile->getBlurb(), 120));
+        id(new PhutilUTF8StringTruncator())
+        ->setMaximumGlyphs(120)
+        ->truncateString($profile->getBlurb()));
     }
 
     $event->setValue('hovercard', $hovercard);
