@@ -190,7 +190,7 @@ final class PhabricatorDaemonLogViewController
       phutil_tag(
         'tt',
         array(),
-        "phabricator/ $ ./bin/phd log {$id}"));
+        "phabricator/ $ ./bin/phd log --id {$id}"));
 
 
     return $view;
