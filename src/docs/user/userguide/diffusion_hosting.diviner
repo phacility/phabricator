@@ -335,7 +335,7 @@ is probably an issue with your `sudoers` configuration. Check:
 
 It may also be helpful to run `sshd` in debug mode:
 
- $ /path/to/sshd -d -d -d -f /path/to/sshd_config.phabricator
+  $ /path/to/sshd -d -d -d -f /path/to/sshd_config.phabricator
 
 This will run it in the foreground and emit a large amount of debugging
 information.
