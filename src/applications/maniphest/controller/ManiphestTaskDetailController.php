@@ -606,12 +606,12 @@ final class ManiphestTaskDetailController extends ManiphestController {
         $file_view->render());
     }
 
+    $view->invokeWillRenderEvent();
+
     $field_list->appendFieldsToPropertyList(
       $task,
       $viewer,
       $view);
-
-    $view->invokeWillRenderEvent();
 
     return $view;
   }
