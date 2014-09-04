@@ -26,7 +26,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
 
     $configs = $issue->getPHPConfig();
     if ($configs) {
-      $description[] = $this->renderPHPConfig($configs);
+      $description[] = $this->renderPHPConfig($configs, $issue);
     }
 
     $configs = $issue->getMySQLConfig();
@@ -243,7 +243,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
       ));
   }
 
-  private function renderPHPConfig(array $configs) {
+  private function renderPHPConfig(array $configs, $issue) {
     $table_info = phutil_tag(
       'p',
       array(),
@@ -253,7 +253,9 @@ final class PhabricatorSetupIssueView extends AphrontView {
 
     $dict = array();
     foreach ($configs as $key) {
-      $dict[$key] = ini_get($key);
+      $dict[$key] = $issue->getPHPConfigOriginalValue(
+        $key,
+        ini_get($key));
     }
 
     $table = $this->renderValueTable($dict);
