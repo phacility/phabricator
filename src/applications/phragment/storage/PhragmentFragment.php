@@ -119,7 +119,7 @@ final class PhragmentFragment extends PhragmentDAO
       $this->save();
     $this->saveTransaction();
 
-    $file->attachToObject($viewer, $version->getPHID());
+    $file->attachToObject($version->getPHID());
   }
 
   /**

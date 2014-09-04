@@ -913,9 +913,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ));
 
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-      $file->attachToObject(
-        $this->getRequest()->getUser(),
-        $revision->getPHID());
+      $file->attachToObject($revision->getPHID());
     unset($unguarded);
 
     return $file->getRedirectResponse();

@@ -60,7 +60,7 @@ final class PhabricatorFileTestCase extends PhabricatorTestCase {
     // Attach the file to the object and test that the association opens a
     // policy exception for the non-author viewer.
 
-    $file->attachToObject($author, $object->getPHID());
+    $file->attachToObject($object->getPHID());
 
     // Test the attached file's visibility.
     $this->assertEqual(

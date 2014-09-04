@@ -944,11 +944,10 @@ final class PhabricatorFile extends PhabricatorFileDAO
   /**
    * Write the policy edge between this file and some object.
    *
-   * @param PhabricatorUser Acting user.
    * @param phid Object PHID to attach to.
    * @return this
    */
-  public function attachToObject(PhabricatorUser $actor, $phid) {
+  public function attachToObject($phid) {
     $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_FILE;
 
     id(new PhabricatorEdgeEditor())

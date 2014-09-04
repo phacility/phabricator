@@ -111,7 +111,7 @@ final class PhabricatorMacroEditor
 
         $new_file = idx($files, $new);
         if ($new_file) {
-          $new_file->attachToObject($this->requireActor(), $object->getPHID());
+          $new_file->attachToObject($object->getPHID());
         }
         break;
     }

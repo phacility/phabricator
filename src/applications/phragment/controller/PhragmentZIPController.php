@@ -114,7 +114,7 @@ final class PhragmentZIPController extends PhragmentController {
       ));
 
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-      $file->attachToObject($viewer, $fragment->getPHID());
+      $file->attachToObject($fragment->getPHID());
     unset($unguarded);
 
     $return = $fragment->getURI();

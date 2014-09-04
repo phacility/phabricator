@@ -94,7 +94,7 @@ final class PhragmentPatchController extends PhragmentController {
       ));
 
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-      $result->attachToObject($viewer, $version_b->getFragmentPHID());
+      $result->attachToObject($version_b->getFragmentPHID());
     unset($unguarded);
 
     return id(new AphrontRedirectResponse())
