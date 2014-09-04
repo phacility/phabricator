@@ -5,7 +5,7 @@ final class PhabricatorNotificationClearController
 
   public function processRequest() {
     $request = $this->getRequest();
-    $chrono_key = $request->getInt('chronoKey');
+    $chrono_key = $request->getStr('chronoKey');
     $user = $request->getUser();
 
     if ($request->isDialogFormPost()) {
@@ -14,7 +14,7 @@ final class PhabricatorNotificationClearController
       queryfx(
         $table->establishConnection('w'),
         'UPDATE %T SET hasViewed = 1 '.
-        'WHERE userPHID = %s AND hasViewed = 0 and chronologicalKey <= %d',
+        'WHERE userPHID = %s AND hasViewed = 0 and chronologicalKey <= %s',
         $table->getTableName(),
         $user->getPHID(),
         $chrono_key);
