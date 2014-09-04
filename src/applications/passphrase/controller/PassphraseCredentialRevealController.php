@@ -46,16 +46,19 @@ final class PassphraseCredentialRevealController
     }
 
     if ($request->isFormPost()) {
-      if ($credential->getSecret()) {
+      $secret = $credential->getSecret();
+      if (!$secret) {
+        $body = pht('This credential has no associated secret.');
+      } else if (!strlen($secret->openEnvelope())) {
+        $body = pht('This credential has an empty secret.');
+      } else {
         $body = id(new PHUIFormLayoutView())
           ->appendChild(
             id(new AphrontFormTextAreaControl())
               ->setLabel(pht('Plaintext'))
               ->setReadOnly(true)
               ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
-              ->setValue($credential->getSecret()->openEnvelope()));
-      } else {
-        $body = pht('This credential has no associated secret.');
+              ->setValue($secret->openEnvelope()));
       }
 
       // NOTE: Disable workflow on the cancel button to reload the page so
