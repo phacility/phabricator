@@ -119,26 +119,6 @@ final class PhabricatorProjectColumnDetailController
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
-    $can_hide = ($can_edit && !$column->isDefaultColumn());
-
-    if (!$column->isHidden()) {
-      $actions->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Hide Column'))
-          ->setIcon('fa-eye-slash')
-          ->setHref($this->getApplicationURI($base_uri.'delete/'.$id.'/'))
-          ->setDisabled(!$can_hide)
-          ->setWorkflow(true));
-    } else {
-      $actions->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Show Column'))
-          ->setIcon('fa-eye')
-          ->setHref($this->getApplicationURI($base_uri.'delete/'.$id.'/'))
-          ->setDisabled(!$can_hide)
-          ->setWorkflow(true));
-    }
-
     return $actions;
   }
 

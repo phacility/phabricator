@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorProjectBoardDeleteController
+final class PhabricatorProjectColumnHideController
   extends PhabricatorProjectBoardController {
 
   private $id;
@@ -42,8 +42,12 @@ final class PhabricatorProjectBoardDeleteController
     }
 
     $column_phid = $column->getPHID();
-    $view_uri = $this->getApplicationURI(
-      '/board/'.$this->projectID.'/column/'.$this->id.'/');
+
+    $view_uri = $this->getApplicationURI('/board/'.$this->projectID.'/');
+    $view_uri = new PhutilURI($view_uri);
+    foreach ($request->getPassthroughRequestData() as $key => $value) {
+      $view_uri->setQueryParam($key, $value);
+    }
 
     if ($column->isDefaultColumn()) {
       return $this->newDialog()
@@ -96,6 +100,10 @@ final class PhabricatorProjectBoardDeleteController
       ->setDisableWorkflowOnCancel(true)
       ->addCancelButton($view_uri)
       ->addSubmitButton($title);
+
+    foreach ($request->getPassthroughRequestData() as $key => $value) {
+      $dialog->addHiddenInput($key, $value);
+    }
 
     return $dialog;
   }
