@@ -21,6 +21,7 @@ JX.install('DraggableList', {
 
     JX.DOM.listen(this._root, 'mousedown', sigil, JX.bind(this, this._ondrag));
     JX.Stratcom.listen('mousemove', null, JX.bind(this, this._onmove));
+    JX.Stratcom.listen('scroll', null, JX.bind(this, this._onmove));
     JX.Stratcom.listen('mouseup', null, JX.bind(this, this._ondrop));
   },
 
@@ -51,6 +52,7 @@ JX.install('DraggableList', {
     _ghostHandler : null,
     _ghostNode : null,
     _group : null,
+    _lastMousePosition: null,
 
     getRootNode : function() {
       return this._root;
@@ -329,11 +331,24 @@ JX.install('DraggableList', {
     },
 
     _onmove : function(e) {
+      // We'll get a callback here for "mousemove" (and can determine the
+      // location of the cursor) and also for "scroll" (and can not). If this
+      // is a move, save the mouse position, so if we get a scroll next we can
+      // reuse the known position.
+
+      if (e.getType() == 'mousemove') {
+        this._lastMousePosition = JX.$V(e);
+      }
+
       if (!this._dragging) {
         return;
       }
 
-      var p = JX.$V(e);
+      if (!this._lastMousePosition) {
+        return;
+      }
+
+      var p = JX.$V(this._lastMousePosition.x, this._lastMousePosition.y);
 
       var group = this._group;
       var target_list = this._getTargetList(p);
