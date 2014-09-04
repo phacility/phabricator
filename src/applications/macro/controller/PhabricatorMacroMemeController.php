@@ -3,6 +3,10 @@
 final class PhabricatorMacroMemeController
   extends PhabricatorMacroController {
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function processRequest() {
     $request = $this->getRequest();
     $macro_name = $request->getStr('macro');

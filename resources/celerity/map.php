@@ -8,7 +8,7 @@
 return array(
   'names' => array(
     'core.pkg.css' => '974635bb',
-    'core.pkg.js' => '4e529147',
+    'core.pkg.js' => 'cebacb31',
     'darkconsole.pkg.js' => 'df001cab',
     'differential.pkg.css' => '36884139',
     'differential.pkg.js' => '73337d1d',
@@ -438,7 +438,7 @@ return array(
     'rsrc/js/application/uiexample/notification-example.js' => '7a9677fc',
     'rsrc/js/core/Busy.js' => '6453c869',
     'rsrc/js/core/DragAndDropFileUpload.js' => '8c49f386',
-    'rsrc/js/core/DraggableList.js' => '98d13594',
+    'rsrc/js/core/DraggableList.js' => '2a6a1041',
     'rsrc/js/core/FileUpload.js' => 'a4ae61bf',
     'rsrc/js/core/Hovercard.js' => '7e8468ae',
     'rsrc/js/core/KeyboardShortcut.js' => '1ae869f2',
@@ -713,7 +713,7 @@ return array(
     'phabricator-crumbs-view-css' => 'a49339de',
     'phabricator-dashboard-css' => 'a2bfdcbf',
     'phabricator-drag-and-drop-file-upload' => '8c49f386',
-    'phabricator-draggable-list' => '98d13594',
+    'phabricator-draggable-list' => '2a6a1041',
     'phabricator-fatal-config-template-css' => '25d446d6',
     'phabricator-feed-css' => '7bfc6f12',
     'phabricator-file-upload' => 'a4ae61bf',
@@ -986,6 +986,14 @@ return array(
     '29274e2b' => array(
       'javelin-install',
       'javelin-util',
+    ),
+    '2a6a1041' => array(
+      'javelin-install',
+      'javelin-dom',
+      'javelin-stratcom',
+      'javelin-util',
+      'javelin-vector',
+      'javelin-magical-init',
     ),
     '2b228192' => array(
       'javelin-behavior',
@@ -1436,14 +1444,6 @@ return array(
       'javelin-install',
       'javelin-dom',
       'javelin-reactor-dom',
-    ),
-    '98d13594' => array(
-      'javelin-install',
-      'javelin-dom',
-      'javelin-stratcom',
-      'javelin-util',
-      'javelin-vector',
-      'javelin-magical-init',
     ),
     '9c2623f4' => array(
       'javelin-behavior',
