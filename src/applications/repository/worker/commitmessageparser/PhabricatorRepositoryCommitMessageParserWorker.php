@@ -18,6 +18,10 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     }
     $data->setCommitID($commit->getID());
     $data->setAuthorName((string)$author);
+
+    $data->setCommitDetail('authorName', $ref->getAuthorName());
+    $data->setCommitDetail('authorEmail', $ref->getAuthorEmail());
+
     $data->setCommitDetail(
       'authorPHID',
       $this->resolveUserPHID($commit, $author));
@@ -26,6 +30,10 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
     if (strlen($committer)) {
       $data->setCommitDetail('committer', $committer);
+
+      $data->setCommitDetail('committerName', $ref->getCommitterName());
+      $data->setCommitDetail('committerEmail', $ref->getCommitterEmail());
+
       $data->setCommitDetail(
         'committerPHID',
         $this->resolveUserPHID($commit, $committer));
