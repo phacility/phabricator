@@ -264,7 +264,7 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
     }
 
     if ($feed_action) {
-      $content = id(new PhutilUTF8StringTruncator())
+      $content_str = id(new PhutilUTF8StringTruncator())
         ->setMaximumGlyphs(140)
         ->truncateString($new_content->getContent());
       id(new PhabricatorFeedStoryPublisher())
@@ -276,7 +276,7 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
           array(
             'phid'      => $document->getPHID(),
             'action'    => $feed_action,
-            'content'   => $content,
+            'content'   => $content_str,
             'project'   => $project_phid,
             'movedFromPHID' => $this->fromDocumentPHID,
           ))
