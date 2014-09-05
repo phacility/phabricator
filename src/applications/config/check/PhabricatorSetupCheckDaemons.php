@@ -23,7 +23,7 @@ final class PhabricatorSetupCheckDaemons extends PhabricatorSetupCheck {
         'The Phabricator daemons are not running, so Phabricator will not '.
         'be able to perform background processing (including sending email, '.
         'rebuilding search indexes, importing commits, cleaning up old data, '.
-        'running builds, etc.).'.
+        'and running builds).'.
         "\n\n".
         'Use %s to start daemons. See %s for more information.',
         phutil_tag('tt', array(), 'bin/phd start'),

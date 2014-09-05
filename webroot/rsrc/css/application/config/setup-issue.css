@@ -87,6 +87,25 @@
   background-repeat: repeat-x;
 }
 
+.setup-issue-tail {
+  margin-top: 12px;
+}
+
+.setup-issue-status {
+  padding: 12px;
+  background: #f3f3f3;
+  color: #666666;
+  border-bottom: 1px solid #dfdfdf;
+  font-style: italic;
+}
+
+.setup-issue-actions {
+  padding: 12px;
+  background: #f3f3f3;
+  border-top: 1px solid #dfdfdf;
+  overflow: hidden;
+}
+
 .setup-issue-next {
   padding: 12px;
   border-top: 1px solid #BFCFDA;
@@ -94,7 +113,6 @@
   text-align: center;
   font-size: 15px;
   color: #2980b9;
-  margin-top: 12px;
 }
 
 .setup-issue-config {
