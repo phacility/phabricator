@@ -50,6 +50,14 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
   private $objects = self::ATTACHABLE;
   private $objectPHIDs = self::ATTACHABLE;
+  private $originalFile = self::ATTACHABLE;
+
+  public static function initializeNewFile() {
+    return id(new PhabricatorFile())
+      ->attachOriginalFile(null)
+      ->attachObjects(array())
+      ->attachObjectPHIDs(array());
+  }
 
   public function getConfiguration() {
     return array(
@@ -190,7 +198,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
       $copy_of_byteSize = $file->getByteSize();
       $copy_of_mimeType = $file->getMimeType();
 
-      $new_file = new PhabricatorFile();
+      $new_file = PhabricatorFile::initializeNewFile();
 
       $new_file->setByteSize($copy_of_byteSize);
 
@@ -226,7 +234,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
       throw new Exception('No valid storage engines are available!');
     }
 
-    $file = new PhabricatorFile();
+    $file = PhabricatorFile::initializeNewFile();
 
     $data_handle = null;
     $engine_identifier = null;
@@ -848,6 +856,15 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return $this;
   }
 
+  public function getOriginalFile() {
+    return $this->assertAttached($this->originalFile);
+  }
+
+  public function attachOriginalFile(PhabricatorFile $file = null) {
+    $this->originalFile = $file;
+    return $this;
+  }
+
   public function getImageHeight() {
     if (!$this->isViewableImage()) {
       return null;
@@ -927,15 +944,31 @@ final class PhabricatorFile extends PhabricatorFileDAO
   /**
    * Write the policy edge between this file and some object.
    *
-   * @param PhabricatorUser Acting user.
    * @param phid Object PHID to attach to.
    * @return this
    */
-  public function attachToObject(PhabricatorUser $actor, $phid) {
+  public function attachToObject($phid) {
     $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_FILE;
 
     id(new PhabricatorEdgeEditor())
       ->addEdge($phid, $edge_type, $this->getPHID())
+      ->save();
+
+    return $this;
+  }
+
+
+  /**
+   * Remove the policy edge between this file and some object.
+   *
+   * @param phid Object PHID to detach from.
+   * @return this
+   */
+  public function detachFromObject($phid) {
+    $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_FILE;
+
+    id(new PhabricatorEdgeEditor())
+      ->removeEdge($phid, $edge_type, $this->getPHID())
       ->save();
 
     return $this;
@@ -1033,6 +1066,12 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
+        // If you can see the file this file is a transform of, you can see
+        // this file.
+        if ($this->getOriginalFile()) {
+          return true;
+        }
+
         // If you can see any object this file is attached to, you can see
         // the file.
         return (count($this->getObjects()) > 0);
@@ -1049,6 +1088,9 @@ final class PhabricatorFile extends PhabricatorFileDAO
         $out[] = pht(
           'Files attached to objects are visible to users who can view '.
           'those objects.');
+        $out[] = pht(
+          'Thumbnails are visible only to users who can view the original '.
+          'file.');
         break;
     }
 

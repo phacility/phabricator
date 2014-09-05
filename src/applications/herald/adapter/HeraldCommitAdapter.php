@@ -443,7 +443,10 @@ final class HeraldCommitAdapter extends HeraldAdapter {
           return null;
         }
 
-        switch ($revision->getStatus()) {
+        $status = $data->getCommitDetail(
+          'precommitRevisionStatus',
+          $revision->getStatus());
+        switch ($status) {
           case ArcanistDifferentialRevisionStatus::ACCEPTED:
           case ArcanistDifferentialRevisionStatus::CLOSED:
             return $revision->getPHID();

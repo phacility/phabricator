@@ -562,6 +562,27 @@ final class PhabricatorProjectBoardViewController
       ->setDisabled(!$can_edit)
       ->setWorkflow(!$can_edit);
 
+    $can_hide = ($can_edit && !$column->isDefaultColumn());
+    $hide_uri = 'board/'.$this->id.'/hide/'.$column->getID().'/';
+    $hide_uri = $this->getApplicationURI($hide_uri);
+    $hide_uri = $this->getURIWithState($hide_uri);
+
+    if (!$column->isHidden()) {
+      $column_items[] = id(new PhabricatorActionView())
+        ->setName(pht('Hide Column'))
+        ->setIcon('fa-eye-slash')
+        ->setHref($hide_uri)
+        ->setDisabled(!$can_hide)
+        ->setWorkflow(true);
+    } else {
+      $column_items[] = id(new PhabricatorActionView())
+        ->setName(pht('Show Column'))
+        ->setIcon('fa-eye')
+        ->setHref($hide_uri)
+        ->setDisabled(!$can_hide)
+        ->setWorkflow(true);
+    }
+
     $column_menu = id(new PhabricatorActionListView())
       ->setUser($viewer);
     foreach ($column_items as $item) {

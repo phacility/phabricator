@@ -881,7 +881,6 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
 
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
       $file->attachToObject(
-        $this->getRequest()->getUser(),
         $this->getDiffusionRequest()->getRepository()->getPHID());
     unset($unguarded);
 

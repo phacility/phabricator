@@ -41,6 +41,7 @@ final class PhabricatorStartup {
   private static $globals = array();
   private static $capturingOutput;
   private static $rawInput;
+  private static $oldMemoryLimit;
 
   // TODO: For now, disable rate limiting entirely by default. We need to
   // iterate on it a bit for Conduit, some of the specific score levels, and
@@ -310,12 +311,21 @@ final class PhabricatorStartup {
    */
   private static function setupPHP() {
     error_reporting(E_ALL | E_STRICT);
+    self::$oldMemoryLimit = ini_get('memory_limit');
     ini_set('memory_limit', -1);
 
     // If we have libxml, disable the incredibly dangerous entity loader.
     if (function_exists('libxml_disable_entity_loader')) {
       libxml_disable_entity_loader(true);
     }
+  }
+
+
+  /**
+   * @task validation
+   */
+  public static function getOldMemoryLimit() {
+    return self::$oldMemoryLimit;
   }
 
   /**

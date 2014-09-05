@@ -1037,9 +1037,7 @@ final class DiffusionCommitController extends DiffusionController {
       ));
 
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-      $file->attachToObject(
-        $this->getRequest()->getUser(),
-        $drequest->getRepository()->getPHID());
+      $file->attachToObject($drequest->getRepository()->getPHID());
     unset($unguarded);
 
     return $file->getRedirectResponse();

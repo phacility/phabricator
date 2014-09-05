@@ -442,7 +442,10 @@ final class ManiphestTaskEditController extends ManiphestController {
             ->withIDs(array($template_id))
             ->executeOne();
           if ($template_task) {
-            $task->setCCPHIDs($template_task->getCCPHIDs());
+            $cc_phids = array_unique(array_merge(
+              $template_task->getCCPHIDs(),
+              array($user->getPHID())));
+            $task->setCCPHIDs($cc_phids);
             $task->attachProjectPHIDs($template_task->getProjectPHIDs());
             $task->setOwnerPHID($template_task->getOwnerPHID());
             $task->setPriority($template_task->getPriority());

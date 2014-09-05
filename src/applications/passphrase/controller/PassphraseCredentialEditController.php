@@ -155,8 +155,13 @@ final class PassphraseCredentialEditController extends PassphraseController {
             ->setTransactionType($type_username)
             ->setNewValue($v_username);
 
-          $min_secret = str_replace($bullet, '', trim($v_decrypt));
-          if (strlen($min_secret)) {
+          // If some value other than a sequence of bullets was provided for
+          // the credential, update it. In particular, note that we are
+          // explicitly allowing empty secrets: one use case is HTTP auth where
+          // the username is a secret token which covers both identity and
+          // authentication.
+
+          if (!preg_match('/^('.$bullet.')+$/', trim($v_decrypt))) {
             // If the credential was previously destroyed, restore it when it is
             // edited if a secret is provided.
             $xactions[] = id(new PassphraseCredentialTransaction())
