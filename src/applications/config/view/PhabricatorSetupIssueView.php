@@ -107,12 +107,66 @@ final class PhabricatorSetupIssueView extends AphrontView {
 
     }
 
-    $next = phutil_tag(
-      'div',
-      array(
-        'class' => 'setup-issue-next',
-      ),
-      pht('To continue, resolve this problem and reload the page.'));
+    $actions = array();
+    if (!$issue->getIsFatal()) {
+      if ($issue->getIsIgnored()) {
+        $actions[] = javelin_tag(
+          'a',
+          array(
+            'href' => '/config/unignore/'.$issue->getIssueKey().'/',
+            'sigil' => 'workflow',
+            'class' => 'button grey',
+          ),
+          pht('Unignore Setup Issue'));
+      } else {
+        $actions[] = javelin_tag(
+          'a',
+          array(
+            'href' => '/config/ignore/'.$issue->getIssueKey().'/',
+            'sigil' => 'workflow',
+            'class' => 'button grey',
+          ),
+          pht('Ignore Setup Issue'));
+      }
+
+      $actions[] = javelin_tag(
+        'a',
+        array(
+          'href' => '/config/issue/'.$issue->getIssueKey().'/',
+          'class' => 'button grey',
+          'style' => 'float: right',
+        ),
+        pht('Reload Page'));
+    }
+
+    if ($actions) {
+      $actions = phutil_tag(
+        'div',
+        array(
+          'class' => 'setup-issue-actions',
+        ),
+        $actions);
+    }
+
+    if ($issue->getIsIgnored()) {
+      $status = phutil_tag(
+        'div',
+        array(
+          'class' => 'setup-issue-status',
+        ),
+        pht(
+          'This issue is currently ignored, and does not show a global '.
+          'warning.'));
+      $next = null;
+    } else {
+      $status = null;
+      $next = phutil_tag(
+        'div',
+        array(
+          'class' => 'setup-issue-next',
+        ),
+        pht('To continue, resolve this problem and reload the page.'));
+    }
 
     $name = phutil_tag(
       'div',
@@ -121,15 +175,29 @@ final class PhabricatorSetupIssueView extends AphrontView {
       ),
       $issue->getName());
 
+    $head = phutil_tag(
+      'div',
+      array(
+        'class' => 'setup-issue-head',
+      ),
+      array($name, $status));
+
+    $tail = phutil_tag(
+      'div',
+      array(
+        'class' => 'setup-issue-tail',
+      ),
+      array($actions, $next));
+
     $issue = phutil_tag(
       'div',
       array(
         'class' => 'setup-issue',
       ),
       array(
-        $name,
+        $head,
         $description,
-        $next,
+        $tail,
       ));
 
     $debug_info = phutil_tag(

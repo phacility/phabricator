@@ -46,6 +46,12 @@ final class PhabricatorApplicationTransactionCommentEditor
     $comment->setViewPolicy(PhabricatorPolicies::POLICY_PUBLIC);
     $comment->setEditPolicy($this->getActingAsPHID());
 
+    $file_phids = PhabricatorMarkupEngine::extractFilePHIDsFromEmbeddedFiles(
+      $actor,
+      array(
+        $comment->getContent(),
+      ));
+
     $xaction->openTransaction();
       $xaction->beginReadLocking();
         if ($xaction->getID()) {
@@ -67,10 +73,19 @@ final class PhabricatorApplicationTransactionCommentEditor
       $xaction->endReadLocking();
     $xaction->saveTransaction();
 
-    $xaction->attachComment($comment);
+    // Add links to any files newly referenced by the edit.
+    if ($file_phids) {
+      $editor = new PhabricatorEdgeEditor();
+      foreach ($file_phids as $file_phid) {
+        $editor->addEdge(
+          $xaction->getObjectPHID(),
+          PhabricatorEdgeConfig::TYPE_OBJECT_HAS_FILE,
+          $file_phid);
+      }
+      $editor->save();
+    }
 
-    // TODO: Emit an event for notifications/feed? Can we handle them
-    // generically?
+    $xaction->attachComment($comment);
 
     return $this;
   }

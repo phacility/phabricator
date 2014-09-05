@@ -55,22 +55,10 @@ final class PhabricatorConfigIssueListController
           ->addAttribute($issue->getSummary());
       if (!$issue->getIsIgnored()) {
         $item->setBarColor('yellow');
-        $item->addAction(
-          id(new PHUIListItemView())
-            ->setIcon('fa-eye-slash')
-            ->setWorkflow(true)
-            ->setName(pht('Ignore'))
-            ->setHref('/config/ignore/'.$issue->getIssueKey().'/'));
         $list->addItem($item);
       } else {
-        $item->addIcon('none', pht('Ignored'));
+        $item->addIcon('fa-eye-slash', pht('Ignored'));
         $item->setDisabled(true);
-        $item->addAction(
-          id(new PHUIListItemView())
-            ->setIcon('fa-eye')
-            ->setWorkflow(true)
-            ->setName(pht('Unignore'))
-            ->setHref('/config/unignore/'.$issue->getIssueKey().'/'));
         $item->setBarColor('none');
         $ignored_items[] = $item;
       }

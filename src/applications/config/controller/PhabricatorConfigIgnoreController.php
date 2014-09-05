@@ -13,7 +13,7 @@ final class PhabricatorConfigIgnoreController
 
   public function processRequest() {
     $request = $this->getRequest();
-    $issue_uri = $this->getApplicationURI('issue');
+    $issue_uri = $this->getApplicationURI('issue/'.$this->issue.'/');
 
     if ($request->isDialogFormPost()) {
       $this->manageApplication();
