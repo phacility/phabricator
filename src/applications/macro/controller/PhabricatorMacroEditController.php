@@ -19,6 +19,7 @@ final class PhabricatorMacroEditController extends PhabricatorMacroController {
       $macro = id(new PhabricatorMacroQuery())
         ->setViewer($user)
         ->withIDs(array($this->id))
+        ->needFiles(true)
         ->executeOne();
       if (!$macro) {
         return new Aphront404Response();

@@ -12,6 +12,8 @@ final class PhabricatorMacroQuery
   private $dateCreatedBefore;
   private $flagColor;
 
+  private $needFiles;
+
   private $status = 'status-any';
   const STATUS_ANY = 'status-any';
   const STATUS_ACTIVE = 'status-active';
@@ -80,6 +82,11 @@ final class PhabricatorMacroQuery
 
   public function withFlagColor($flag_color) {
     $this->flagColor = $flag_color;
+    return $this;
+  }
+
+  public function needFiles($need_files) {
+    $this->needFiles = $need_files;
     return $this;
   }
 
@@ -196,21 +203,23 @@ final class PhabricatorMacroQuery
   }
 
   protected function didFilterPage(array $macros) {
-    $file_phids = mpull($macros, 'getFilePHID');
-    $files = id(new PhabricatorFileQuery())
-      ->setViewer($this->getViewer())
-      ->setParentQuery($this)
-      ->withPHIDs($file_phids)
-      ->execute();
-    $files = mpull($files, null, 'getPHID');
+    if ($this->needFiles) {
+      $file_phids = mpull($macros, 'getFilePHID');
+      $files = id(new PhabricatorFileQuery())
+        ->setViewer($this->getViewer())
+        ->setParentQuery($this)
+        ->withPHIDs($file_phids)
+        ->execute();
+      $files = mpull($files, null, 'getPHID');
 
-    foreach ($macros as $key => $macro) {
-      $file = idx($files, $macro->getFilePHID());
-      if (!$file) {
-        unset($macros[$key]);
-        continue;
+      foreach ($macros as $key => $macro) {
+        $file = idx($files, $macro->getFilePHID());
+        if (!$file) {
+          unset($macros[$key]);
+          continue;
+        }
+        $macro->attachFile($file);
       }
-      $macro->attachFile($file);
     }
 
     return $macros;

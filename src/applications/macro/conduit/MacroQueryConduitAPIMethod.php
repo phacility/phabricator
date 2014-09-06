@@ -30,8 +30,9 @@ final class MacroQueryConduitAPIMethod extends MacroConduitAPIMethod {
   }
 
   protected function execute(ConduitAPIRequest $request) {
-    $query = new PhabricatorMacroQuery();
-    $query->setViewer($request->getUser());
+    $query = id(new PhabricatorMacroQuery())
+      ->setViewer($request->getUser())
+      ->needFiles(true);
 
     $author_phids = $request->getValue('authorPHIDs');
     $phids = $request->getValue('phids');
