@@ -29,6 +29,7 @@ final class PhabricatorMacroSearchEngine
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new PhabricatorMacroQuery())
+      ->needFiles(true)
       ->withIDs($saved->getParameter('ids', array()))
       ->withPHIDs($saved->getParameter('phids', array()))
       ->withAuthorPHIDs($saved->getParameter('authorPHIDs', array()));

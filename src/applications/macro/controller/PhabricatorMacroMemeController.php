@@ -29,6 +29,7 @@ final class PhabricatorMacroMemeController
     $macro = id(new PhabricatorMacroQuery())
       ->setViewer($user)
       ->withNames(array($macro_name))
+      ->needFiles(true)
       ->executeOne();
     if (!$macro) {
       return false;
