@@ -136,7 +136,10 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
       $pchar =
         ($changeset->getOldProperties() === $changeset->getNewProperties())
           ? ''
-          : phutil_tag('span', array('title' => pht('Properties Changed')), 'M');
+          : phutil_tag(
+              'span',
+              array('title' => pht('Properties Changed')),
+              'M');
 
       $fname = $changeset->getFilename();
       $cov  = $this->renderCoverage($coverage, $fname);

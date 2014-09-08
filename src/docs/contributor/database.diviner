@@ -155,7 +155,8 @@ There are three simple steps to update the schema:
     such as PHID columns. Otherwise, use `COLLATE utf8_general_ci`.
    - Name all indexes so it is possible to delete them later.
 # Edit `src/infrastructure/storage/patch/PhabricatorBuiltinPatchList.php` and
-  add your patch to @{method@phabricator:PhabricatorBuiltinPatchList::getPatches}.
+  add your patch to
+  @{method@phabricator:PhabricatorBuiltinPatchList::getPatches}.
 # Run `bin/storage upgrade`.
 
 It is also possible to create more complex patches in PHP for data migration
