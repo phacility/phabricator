@@ -88,7 +88,7 @@ JX.install('Tokenizer', {
 
       JX.DOM.listen(
         focus,
-        ['click', 'focus', 'blur', 'keydown', 'keypress'],
+        ['click', 'focus', 'blur', 'keydown', 'keypress', 'paste'],
         null,
         JX.bind(this, this.handleEvent));
 
@@ -222,7 +222,10 @@ JX.install('Tokenizer', {
         this._typeahead.updatePlaceholder();
       } else if (e.getType() == 'focus') {
         this._didfocus();
+      } else if (e.getType() == 'paste') {
+        setTimeout(JX.bind(this, this._redraw), 0);
       }
+
     },
 
     refresh : function() {
