@@ -341,6 +341,20 @@ abstract class PhabricatorBaseEnglishTranslation
         ),
       ),
 
+      '%s merged %d task(s): %s.' => array(
+        array(
+          '%s merged a task: %3$s.',
+          '%s merged tasks: %3$s.',
+        ),
+      ),
+
+      '%s merged %d task(s) %s into %s.' => array(
+        array(
+          '%s merged %3$s into %4$s.',
+          '%s merged tasks %3$s into %4$s.',
+        ),
+      ),
+
       '%s edited voting user(s), added %d: %s; removed %d: %s.' =>
         '%s edited voting users, added: %3$s; removed: %5$s',
 
