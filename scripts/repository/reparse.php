@@ -218,6 +218,9 @@ if ($all_from_repo && !$force_local) {
   echo "QUEUEING TASKS (".number_format(count($commits))." Commits):\n";
 }
 
+$progress = new PhutilConsoleProgressBar();
+$progress->setTotal(count($commits));
+
 $tasks = array();
 foreach ($commits as $commit) {
   $classes = array();
@@ -271,20 +274,18 @@ foreach ($commits as $commit) {
         $class,
         $spec,
         PhabricatorWorker::PRIORITY_IMPORT);
-
-      $commit_name = 'r'.$callsign.$commit->getCommitIdentifier();
-      echo "  Queued '{$class}' for commit '{$commit_name}'.\n";
     }
   } else {
     foreach ($classes as $class) {
       $worker = newv($class, array($spec));
-      echo "Running '{$class}'...\n";
       $worker->executeTask();
     }
   }
+
+  $progress->update(1);
 }
 
-echo "\nDone.\n";
+$progress->done();
 
 function usage($message) {
   echo phutil_console_format(
