@@ -54,7 +54,7 @@ final class PhabricatorAuditTransaction
           case PhabricatorAuditActionConstants::RESIGN:
             return pht('Resigned');
           case PhabricatorAuditActionConstants::CLOSE:
-            return pht('Clsoed');
+            return pht('Closed');
         }
         break;
       case PhabricatorAuditActionConstants::ADD_AUDITORS:
