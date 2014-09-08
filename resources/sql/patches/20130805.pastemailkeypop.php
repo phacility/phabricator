@@ -17,7 +17,7 @@ foreach (new LiskMigrationIterator($table) as $paste) {
       $paste->getTableName(),
       Filesystem::readRandomCharacters(20),
       $id);
-    echo("Generated Key\n");
+    echo "Generated Key\n";
   } else {
     echo "-\n";
   }
