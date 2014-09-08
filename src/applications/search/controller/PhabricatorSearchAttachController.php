@@ -154,10 +154,6 @@ final class PhabricatorSearchAttachController
       ->setContinueOnNoEffect(true)
       ->setContinueOnMissingFields(true);
 
-    $task_names = array();
-
-    $merge_into_name = 'T'.$task->getID();
-
     $cc_vector = array();
     $cc_vector[] = $task->getCCPHIDs();
     foreach ($targets as $target) {
@@ -166,42 +162,30 @@ final class PhabricatorSearchAttachController
         $target->getAuthorPHID(),
         $target->getOwnerPHID());
 
-      $close_task = id(new ManiphestTransaction())
-        ->setTransactionType(ManiphestTransaction::TYPE_STATUS)
-        ->setNewValue(ManiphestTaskStatus::getDuplicateStatus());
-
-      $merge_comment = id(new ManiphestTransaction())
-        ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
-        ->attachComment(
-          id(new ManiphestTransactionComment())
-            ->setContent("\xE2\x9C\x98 Merged into {$merge_into_name}."));
+      $merged_into_txn = id(new ManiphestTransaction())
+        ->setTransactionType(ManiphestTransaction::TYPE_MERGED_INTO)
+        ->setNewValue($task->getPHID());
 
       $editor->applyTransactions(
         $target,
-        array(
-          $close_task,
-          $merge_comment,
-        ));
+        array($merged_into_txn));
 
-      $task_names[] = 'T'.$target->getID();
     }
     $all_ccs = array_mergev($cc_vector);
     $all_ccs = array_filter($all_ccs);
     $all_ccs = array_unique($all_ccs);
 
-    $task_names = implode(', ', $task_names);
-
     $add_ccs = id(new ManiphestTransaction())
       ->setTransactionType(ManiphestTransaction::TYPE_CCS)
       ->setNewValue($all_ccs);
 
-    $merged_comment = id(new ManiphestTransaction())
-      ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
-      ->attachComment(
-        id(new ManiphestTransactionComment())
-          ->setContent("\xE2\x97\x80 Merged tasks: {$task_names}."));
+    $merged_from_txn = id(new ManiphestTransaction())
+      ->setTransactionType(ManiphestTransaction::TYPE_MERGED_FROM)
+      ->setNewValue(mpull($targets, 'getPHID'));
 
-    $editor->applyTransactions($task, array($add_ccs, $merged_comment));
+    $editor->applyTransactions(
+      $task,
+      array($add_ccs, $merged_from_txn));
 
     return $response;
   }

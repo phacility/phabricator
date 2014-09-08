@@ -26,6 +26,8 @@ final class ManiphestTransactionEditor
     $types[] = ManiphestTransaction::TYPE_CCS;
     $types[] = ManiphestTransaction::TYPE_SUBPRIORITY;
     $types[] = ManiphestTransaction::TYPE_PROJECT_COLUMN;
+    $types[] = ManiphestTransaction::TYPE_MERGED_INTO;
+    $types[] = ManiphestTransaction::TYPE_MERGED_FROM;
     $types[] = ManiphestTransaction::TYPE_UNBLOCK;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
@@ -67,6 +69,9 @@ final class ManiphestTransactionEditor
         return $xaction->getOldValue();
       case ManiphestTransaction::TYPE_SUBPRIORITY:
         return $object->getSubpriority();
+      case ManiphestTransaction::TYPE_MERGED_INTO:
+      case ManiphestTransaction::TYPE_MERGED_FROM:
+        return null;
     }
   }
 
@@ -86,6 +91,8 @@ final class ManiphestTransactionEditor
       case ManiphestTransaction::TYPE_DESCRIPTION:
       case ManiphestTransaction::TYPE_SUBPRIORITY:
       case ManiphestTransaction::TYPE_PROJECT_COLUMN:
+      case ManiphestTransaction::TYPE_MERGED_INTO:
+      case ManiphestTransaction::TYPE_MERGED_FROM:
       case ManiphestTransaction::TYPE_UNBLOCK:
         return $xaction->getNewValue();
     }
@@ -160,6 +167,11 @@ final class ManiphestTransactionEditor
         return;
       case ManiphestTransaction::TYPE_PROJECT_COLUMN:
         // these do external (edge) updates
+        return;
+      case ManiphestTransaction::TYPE_MERGED_INTO:
+        $object->setStatus(ManiphestTaskStatus::getDuplicateStatus());
+        return;
+      case ManiphestTransaction::TYPE_MERGED_FROM:
         return;
     }
   }
