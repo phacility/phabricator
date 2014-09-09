@@ -5,6 +5,7 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
     PhabricatorSubscribableInterface,
     PhabricatorTokenReceiverInterface,
     PhabricatorFlaggableInterface,
+    PhabricatorMentionableInterface,
     PhabricatorPolicyInterface,
     PhabricatorProjectInterface {
 

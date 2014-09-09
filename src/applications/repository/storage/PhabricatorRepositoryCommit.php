@@ -7,6 +7,7 @@ final class PhabricatorRepositoryCommit
     PhabricatorFlaggableInterface,
     PhabricatorTokenReceiverInterface,
     PhabricatorSubscribableInterface,
+    PhabricatorMentionableInterface,
     HarbormasterBuildableInterface,
     PhabricatorCustomFieldInterface,
     PhabricatorApplicationTransactionInterface {
