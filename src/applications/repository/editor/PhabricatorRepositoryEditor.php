@@ -257,8 +257,7 @@ final class PhabricatorRepositoryEditor
     PhabricatorApplicationTransaction $v) {
 
     $type = $u->getTransactionType();
-    switch ($type) {
-    }
+    switch ($type) {}
 
     return parent::mergeTransactions($u, $v);
   }
@@ -271,9 +270,7 @@ final class PhabricatorRepositoryEditor
     $new = $xaction->getNewValue();
 
     $type = $xaction->getTransactionType();
-    switch ($type) {
-
-    }
+    switch ($type) {}
 
     return parent::transactionHasEffect($object, $xaction);
   }

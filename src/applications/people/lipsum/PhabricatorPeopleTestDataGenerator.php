@@ -25,8 +25,7 @@ final class PhabricatorPeopleTestDataGenerator
           ->createNewUser($user, $email_object);
 
         return $user;
-      } catch (AphrontDuplicateKeyQueryException $ex) {
-      }
+      } catch (AphrontDuplicateKeyQueryException $ex) {}
     }
   }
 

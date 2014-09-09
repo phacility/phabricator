@@ -1,5 +1,3 @@
 <?php
 
-abstract class PhabricatorObjectHandleConstants {
-
-}
+abstract class PhabricatorObjectHandleConstants {}

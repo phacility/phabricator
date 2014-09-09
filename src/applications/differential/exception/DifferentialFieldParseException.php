@@ -1,5 +1,3 @@
 <?php
 
-final class DifferentialFieldParseException extends Exception {
-
-}
+final class DifferentialFieldParseException extends Exception {}

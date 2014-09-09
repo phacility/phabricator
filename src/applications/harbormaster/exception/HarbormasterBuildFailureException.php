@@ -1,5 +1,3 @@
 <?php
 
-final class HarbormasterBuildFailureException extends Exception {
-
-}
+final class HarbormasterBuildFailureException extends Exception {}

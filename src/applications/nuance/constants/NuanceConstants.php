@@ -1,5 +1,3 @@
 <?php
 
-abstract class NuanceConstants {
-
-}
+abstract class NuanceConstants {}

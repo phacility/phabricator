@@ -1,5 +1,3 @@
 <?php
 
-abstract class PhabricatorProjectConstants {
-
-}
+abstract class PhabricatorProjectConstants {}

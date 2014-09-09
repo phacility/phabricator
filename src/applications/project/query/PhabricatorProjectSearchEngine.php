@@ -193,13 +193,9 @@ final class PhabricatorProjectSearchEngine
     );
   }
 
-  private function getColorValues() {
+  private function getColorValues() {}
 
-  }
-
-  private function getIconValues() {
-
-  }
+  private function getIconValues() {}
 
   protected function getRequiredHandlePHIDsForResultList(
     array $projects,

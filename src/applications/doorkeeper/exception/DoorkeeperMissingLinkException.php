@@ -1,5 +1,3 @@
 <?php
 
-final class DoorkeeperMissingLinkException extends Exception {
-
-}
+final class DoorkeeperMissingLinkException extends Exception {}

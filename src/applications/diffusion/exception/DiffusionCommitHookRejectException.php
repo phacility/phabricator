@@ -1,5 +1,3 @@
 <?php
 
-final class DiffusionCommitHookRejectException extends Exception {
-
-}
+final class DiffusionCommitHookRejectException extends Exception {}

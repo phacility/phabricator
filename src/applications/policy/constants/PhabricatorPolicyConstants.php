@@ -1,5 +1,3 @@
 <?php
 
-abstract class PhabricatorPolicyConstants {
-
-}
+abstract class PhabricatorPolicyConstants {}

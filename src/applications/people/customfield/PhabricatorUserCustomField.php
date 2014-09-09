@@ -1,7 +1,4 @@
 <?php
 
 abstract class PhabricatorUserCustomField
-  extends PhabricatorCustomField {
-
-
-}
+  extends PhabricatorCustomField {}

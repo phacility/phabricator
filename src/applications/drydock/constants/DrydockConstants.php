@@ -1,5 +1,3 @@
 <?php
 
-abstract class DrydockConstants {
-
-}
+abstract class DrydockConstants {}

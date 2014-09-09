@@ -1,5 +1,3 @@
 <?php
 
-abstract class PhabricatorChatLogConstants {
-
-}
+abstract class PhabricatorChatLogConstants {}

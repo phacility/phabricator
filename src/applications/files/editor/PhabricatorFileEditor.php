@@ -22,15 +22,11 @@ final class PhabricatorFileEditor
 
   protected function getCustomTransactionOldValue(
     PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-  }
+    PhabricatorApplicationTransaction $xaction) {}
 
   protected function getCustomTransactionNewValue(
     PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-
-  }
+    PhabricatorApplicationTransaction $xaction) {}
 
   protected function applyCustomInternalTransaction(
     PhabricatorLiskDAO $object,
@@ -45,8 +41,7 @@ final class PhabricatorFileEditor
 
   protected function applyCustomExternalTransaction(
     PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-  }
+    PhabricatorApplicationTransaction $xaction) {}
 
   protected function shouldSendMail(
     PhabricatorLiskDAO $object,

@@ -1,5 +1,3 @@
 <?php
 
-abstract class PhabricatorFeedConstants {
-
-}
+abstract class PhabricatorFeedConstants {}

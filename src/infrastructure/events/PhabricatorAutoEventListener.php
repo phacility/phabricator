@@ -12,6 +12,4 @@
  * startup. This allows it to be used with custom one-offs that can be dropped
  * into `phabricator/src/extensions/`.
  */
-abstract class PhabricatorAutoEventListener extends PhabricatorEventListener {
-
-}
+abstract class PhabricatorAutoEventListener extends PhabricatorEventListener {}

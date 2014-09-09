@@ -1,5 +1,3 @@
 <?php
 
-final class DifferentialFieldValidationException extends Exception {
-
-}
+final class DifferentialFieldValidationException extends Exception {}

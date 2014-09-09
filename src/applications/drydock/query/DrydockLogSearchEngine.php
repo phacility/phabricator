@@ -20,9 +20,7 @@ final class DrydockLogSearchEngine extends PhabricatorApplicationSearchEngine {
 
   public function buildSearchForm(
     AphrontFormView $form,
-    PhabricatorSavedQuery $saved) {
-
-  }
+    PhabricatorSavedQuery $saved) {}
 
   protected function getURI($path) {
     return '/drydock/log/'.$path;

@@ -1,4 +1,3 @@
 <?php
 
-abstract class PonderConstants {
-}
+abstract class PonderConstants {}
