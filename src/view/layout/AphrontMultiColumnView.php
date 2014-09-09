@@ -139,11 +139,14 @@ final class AphrontMultiColumnView extends AphrontView {
         ->addPadding(PHUI::PADDING_MEDIUM_BOTTOM);
     }
 
-    return phutil_tag(
+    return javelin_tag(
       'div',
         array(
           'class' => 'aphront-multi-column-view',
           'id' => $this->getID(),
+          // TODO: It would be nice to convert this to an AphrontTagView and
+          // use addSigil() from Workboards instead of hard-coding this.
+          'sigil' => 'aphront-multi-column-view',
         ),
         $board);
   }
