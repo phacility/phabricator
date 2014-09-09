@@ -255,9 +255,10 @@ EOTEXT
         ->setSummary(pht('Default task priority for create flows.'))
         ->setDescription(
           pht(
-            "What should the default task priority be in create flows? See ".
-            "the constants in @{class:ManiphestTaskPriority} for valid ".
-            "values. Defaults to 'needs triage'.")),
+            'Choose a default priority for newly created tasks. You can '.
+            'review and adjust available priorities by using the '.
+            '{{maniphest.priorities}} configuration option. The default value '.
+            '(`90`) corresponds to the default "Needs Triage" priority.')),
       $this->newOption(
         'metamta.maniphest.reply-handler-domain',
         'string',
