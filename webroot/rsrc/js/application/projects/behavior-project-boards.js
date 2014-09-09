@@ -3,6 +3,7 @@
  * @requires javelin-behavior
  *           javelin-dom
  *           javelin-util
+ *           javelin-vector
  *           javelin-stratcom
  *           javelin-workflow
  *           phabricator-draggable-list
@@ -88,6 +89,41 @@ JX.behavior('project-boards', function(config) {
     return 0;
   }
 
+  function getcontainer() {
+    return JX.DOM.find(
+      JX.$(config.boardID),
+      'div',
+      'aphront-multi-column-view');
+  }
+
+  function onbegindrag(item) {
+    // If the longest column on the board is taller than the window, the board
+    // will scroll vertically. Dragging an item to the longest column may
+    // make it longer, by the total height of the board, plus the height of
+    // the drop target.
+
+    // If this happens, the scrollbar will jump around and the scroll position
+    // can be adjusted in a disorienting way. To reproduce this, drag a task
+    // to the bottom of the longest column on a scrolling board and wave the
+    // task in and out of the column. The scroll bar will jump around and
+    // it will be hard to lock onto a target.
+
+    // To fix this, set the minimum board height to the current board height
+    // plus the size of the drop target (which is the size of the item plus
+    // a bit of margin). This makes sure the scroll bar never needs to
+    // recalculate.
+
+    var item_size = JX.Vector.getDim(item);
+    var container = getcontainer();
+    var container_size = JX.Vector.getDim(container);
+
+    container.style.minHeight = (item_size.y + container_size.y + 12) + 'px';
+  }
+
+  function onenddrag() {
+    getcontainer().style.minHeight = '';
+  }
+
   function ondrop(list, item, after) {
     list.lock();
     JX.DOM.alterClass(item, 'drag-sending', true);
@@ -150,6 +186,9 @@ JX.behavior('project-boards', function(config) {
     list.listen('didReceive', JX.bind(list, onupdate, cols[ii]));
 
     list.listen('didDrop', JX.bind(null, ondrop, list));
+
+    list.listen('didBeginDrag', JX.bind(null, onbegindrag));
+    list.listen('didEndDrag', JX.bind(null, onenddrag));
 
     lists.push(list);
 

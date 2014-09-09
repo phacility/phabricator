@@ -53,6 +53,7 @@ JX.install('DraggableList', {
     _ghostNode : null,
     _group : null,
     _lastMousePosition: null,
+    _lastAdjust: null,
 
     getRootNode : function() {
       return this._root;
@@ -174,7 +175,6 @@ JX.install('DraggableList', {
 
       for (var ii = 0; ii < this._group.length; ii++) {
         this._group[ii]._clearTarget();
-        this._group[ii]._generateTargets();
       }
 
       if (!this.invoke('didBeginDrag', this._dragging).getPrevented()) {
@@ -189,17 +189,48 @@ JX.install('DraggableList', {
       }
     },
 
-    _generateTargets : function() {
-      var targets = [];
-      var items = this.findItems();
-      for (var ii = 0; ii < items.length; ii++) {
-        targets.push({
-          item: items[ii],
-          y: JX.$V(items[ii]).y + (JX.Vector.getDim(items[ii]).y / 2)
-        });
+    _getTargets : function() {
+      if (this._targets === null) {
+        var targets = [];
+        var items = this.findItems();
+        for (var ii = 0; ii < items.length; ii++) {
+          var item = items[ii];
+
+          var ipos = JX.$V(item);
+          if (item == this._dragging) {
+            // If the item we're measuring is also the item we're dragging,
+            // we need to measure its position as though it was still in the
+            // list, not its current position in the document (which is
+            // under the cursor). To do this, adjust the measured position by
+            // removing the offsets we added to put the item underneath the
+            // cursor.
+            if (this._lastAdjust) {
+              ipos.x -= this._lastAdjust.x;
+              ipos.y -= this._lastAdjust.y;
+            }
+          }
+
+          targets.push({
+            item: items[ii],
+            y: ipos.y + (JX.Vector.getDim(items[ii]).y / 2)
+          });
+        }
+        targets.sort(function(u, v) { return v.y - u.y; });
+        this._targets = targets;
       }
-      targets.sort(function(u, v) { return v.y - u.y; });
-      this._targets = targets;
+
+      return this._targets;
+    },
+
+    _dirtyTargetCache: function() {
+      if (this._hasGroup()) {
+        var group = this._group;
+        for (var ii = 0; ii < group.length; ii++) {
+          group[ii]._targets = null;
+        }
+      } else {
+        this._targets = null;
+      }
 
       return this;
     },
@@ -264,7 +295,7 @@ JX.install('DraggableList', {
 
     _getCurrentTarget : function(p) {
       var ghost = this.getGhostNode();
-      var targets = this._targets;
+      var targets = this._getTargets();
       var dragging = this._dragging;
 
       var adjust_h = JX.Vector.getDim(ghost).y;
@@ -348,6 +379,12 @@ JX.install('DraggableList', {
         return;
       }
 
+      if (e.getType() == 'scroll') {
+        // If this is a scroll event, the positions of drag targets may have
+        // changed.
+        this._dirtyTargetCache();
+      }
+
       var p = JX.$V(this._lastMousePosition.x, this._lastMousePosition.y);
 
       var group = this._group;
@@ -402,6 +439,7 @@ JX.install('DraggableList', {
       }
 
       p.y -= origin.y;
+      this._lastAdjust = new JX.Vector(p.x, p.y);
       p.setPos(this._dragging);
 
       e.kill();
@@ -442,6 +480,8 @@ JX.install('DraggableList', {
       for (var ii = 0; ii < group.length; ii++) {
         JX.DOM.alterClass(group[ii].getRootNode(), 'drag-target-list', false);
         group[ii]._clearTarget();
+        group[ii]._dirtyTargetCache();
+        group[ii]._lastAdjust = null;
       }
 
       if (!this.invoke('didEndDrag', dragging).getPrevented()) {
