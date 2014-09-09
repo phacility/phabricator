@@ -21,9 +21,7 @@ final class DrydockBlueprintSearchEngine
 
   public function buildSearchForm(
     AphrontFormView $form,
-    PhabricatorSavedQuery $saved) {
-
-  }
+    PhabricatorSavedQuery $saved) {}
 
   protected function getURI($path) {
     return '/drydock/blueprint/'.$path;

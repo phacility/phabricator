@@ -1,5 +1,3 @@
 <?php
 
-abstract class DiffusionPushLogController extends DiffusionController {
-
-}
+abstract class DiffusionPushLogController extends DiffusionController {}

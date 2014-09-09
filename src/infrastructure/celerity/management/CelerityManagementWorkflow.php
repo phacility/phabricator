@@ -1,6 +1,4 @@
 <?php
 
 abstract class CelerityManagementWorkflow
-  extends PhabricatorManagementWorkflow {
-
-}
+  extends PhabricatorManagementWorkflow {}

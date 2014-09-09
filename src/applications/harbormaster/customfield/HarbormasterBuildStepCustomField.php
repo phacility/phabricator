@@ -1,6 +1,4 @@
 <?php
 
 abstract class HarbormasterBuildStepCustomField
-  extends PhabricatorCustomField {
-
-}
+  extends PhabricatorCustomField {}

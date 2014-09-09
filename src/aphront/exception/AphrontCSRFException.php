@@ -1,5 +1,3 @@
 <?php
 
-final class AphrontCSRFException extends AphrontException {
-
-}
+final class AphrontCSRFException extends AphrontException {}

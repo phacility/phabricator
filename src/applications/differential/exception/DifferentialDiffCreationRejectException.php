@@ -1,5 +1,3 @@
 <?php
 
-final class DifferentialDiffCreationRejectException extends Exception {
-
-}
+final class DifferentialDiffCreationRejectException extends Exception {}

@@ -1,5 +1,3 @@
 <?php
 
-final class PhabricatorEmptyQueryException extends Exception {
-
-}
+final class PhabricatorEmptyQueryException extends Exception {}

@@ -1,5 +1,3 @@
 <?php
 
-abstract class NuanceController extends PhabricatorController {
-
-}
+abstract class NuanceController extends PhabricatorController {}

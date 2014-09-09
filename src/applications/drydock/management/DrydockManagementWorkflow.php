@@ -1,6 +1,4 @@
 <?php
 
 abstract class DrydockManagementWorkflow
-  extends PhabricatorManagementWorkflow {
-
-}
+  extends PhabricatorManagementWorkflow {}

@@ -1040,8 +1040,7 @@ final class DifferentialTransactionEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
-    switch ($xaction->getTransactionType()) {
-    }
+    switch ($xaction->getTransactionType()) {}
 
     return parent::requireCapabilities($object, $xaction);
   }

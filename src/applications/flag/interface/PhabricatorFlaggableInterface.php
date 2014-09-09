@@ -1,5 +1,3 @@
 <?php
 
-interface PhabricatorFlaggableInterface extends PhabricatorPHIDInterface {
-
-}
+interface PhabricatorFlaggableInterface extends PhabricatorPHIDInterface {}

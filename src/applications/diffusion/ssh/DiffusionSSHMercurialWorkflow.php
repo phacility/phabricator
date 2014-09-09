@@ -1,5 +1,3 @@
 <?php
 
-abstract class DiffusionSSHMercurialWorkflow extends DiffusionSSHWorkflow {
-
-}
+abstract class DiffusionSSHMercurialWorkflow extends DiffusionSSHWorkflow {}

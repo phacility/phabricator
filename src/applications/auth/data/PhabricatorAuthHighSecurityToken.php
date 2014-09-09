@@ -1,5 +1,3 @@
 <?php
 
-final class PhabricatorAuthHighSecurityToken {
-
-}
+final class PhabricatorAuthHighSecurityToken {}

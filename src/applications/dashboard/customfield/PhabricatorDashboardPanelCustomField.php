@@ -1,6 +1,4 @@
 <?php
 
 abstract class PhabricatorDashboardPanelCustomField
-  extends PhabricatorCustomField {
-
-}
+  extends PhabricatorCustomField {}

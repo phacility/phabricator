@@ -1,5 +1,3 @@
 <?php
 
-abstract class PhabricatorMetaMTAController extends PhabricatorController {
-
-}
+abstract class PhabricatorMetaMTAController extends PhabricatorController {}

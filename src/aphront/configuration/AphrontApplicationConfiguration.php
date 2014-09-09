@@ -52,8 +52,7 @@ abstract class AphrontApplicationConfiguration {
     return $this->path;
   }
 
-  public function willBuildRequest() {
-  }
+  public function willBuildRequest() {}
 
 
 /* -(  URI Routing  )-------------------------------------------------------- */

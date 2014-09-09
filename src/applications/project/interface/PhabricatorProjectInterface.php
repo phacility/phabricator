@@ -1,5 +1,3 @@
 <?php
 
-interface PhabricatorProjectInterface {
-
-}
+interface PhabricatorProjectInterface {}

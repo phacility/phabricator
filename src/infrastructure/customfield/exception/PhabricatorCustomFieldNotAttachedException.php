@@ -1,6 +1,4 @@
 <?php
 
 final class PhabricatorCustomFieldNotAttachedException
-  extends Exception {
-
-}
+  extends Exception {}

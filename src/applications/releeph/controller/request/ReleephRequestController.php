@@ -1,5 +1,3 @@
 <?php
 
-abstract class ReleephRequestController extends ReleephController {
-
-}
+abstract class ReleephRequestController extends ReleephController {}

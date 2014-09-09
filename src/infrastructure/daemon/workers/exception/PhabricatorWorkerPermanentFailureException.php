@@ -1,5 +1,3 @@
 <?php
 
-final class PhabricatorWorkerPermanentFailureException extends Exception {
-
-}
+final class PhabricatorWorkerPermanentFailureException extends Exception {}

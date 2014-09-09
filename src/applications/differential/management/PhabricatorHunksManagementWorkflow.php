@@ -1,6 +1,4 @@
 <?php
 
 abstract class PhabricatorHunksManagementWorkflow
-  extends PhabricatorManagementWorkflow {
-
-}
+  extends PhabricatorManagementWorkflow {}

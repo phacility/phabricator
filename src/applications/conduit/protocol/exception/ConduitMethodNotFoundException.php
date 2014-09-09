@@ -1,5 +1,3 @@
 <?php
 
-abstract class ConduitMethodNotFoundException extends ConduitException {
-
-}
+abstract class ConduitMethodNotFoundException extends ConduitException {}
