@@ -438,6 +438,19 @@ abstract class PhabricatorApplicationTransaction
         if ($field) {
           return $field->shouldHideInApplicationTransactions($this);
         }
+      case PhabricatorTransactions::TYPE_EDGE:
+        $edge_type = $this->getMetadataValue('edge:type');
+        switch ($edge_type) {
+          case PhabricatorObjectMentionsObject::EDGECONST:
+            return true;
+            break;
+          case PhabricatorObjectMentionedByObject::EDGECONST:
+            return false;
+            break;
+          default:
+            break;
+        }
+        break;
     }
 
     return false;
@@ -456,6 +469,17 @@ abstract class PhabricatorApplicationTransaction
             return false;
         }
         return true;
+     case PhabricatorTransactions::TYPE_EDGE:
+        $edge_type = $this->getMetadataValue('edge:type');
+        switch ($edge_type) {
+          case PhabricatorObjectMentionsObject::EDGECONST:
+          case PhabricatorObjectMentionedByObject::EDGECONST:
+            return true;
+            break;
+          default:
+            break;
+        }
+        break;
     }
 
     return $this->shouldHide();
@@ -475,6 +499,17 @@ abstract class PhabricatorApplicationTransaction
             return false;
         }
         return true;
+     case PhabricatorTransactions::TYPE_EDGE:
+        $edge_type = $this->getMetadataValue('edge:type');
+        switch ($edge_type) {
+          case PhabricatorObjectMentionsObject::EDGECONST:
+          case PhabricatorObjectMentionedByObject::EDGECONST:
+            return true;
+            break;
+          default:
+            break;
+        }
+        break;
     }
 
     return $this->shouldHide();

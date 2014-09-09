@@ -21,6 +21,7 @@ abstract class PhabricatorApplicationTransactionEditor
   private $heraldAdapter;
   private $heraldTranscript;
   private $subscribers;
+  private $unmentionablePHIDMap = array();
 
   private $isPreview;
   private $isHeraldEditor;
@@ -173,6 +174,15 @@ abstract class PhabricatorApplicationTransactionEditor
 
   public function getDisableEmail() {
     return $this->disableEmail;
+  }
+
+  public function setUnmentionablePHIDMap(array $map) {
+    $this->unmentionablePHIDMap = $map;
+    return $this;
+  }
+
+  public function getUnmentionablePHIDMap() {
+    return $this->unmentionablePHIDMap;
   }
 
   public function getTransactionTypes() {
@@ -1013,7 +1023,7 @@ abstract class PhabricatorApplicationTransactionEditor
     }
   }
 
-  private function buildMentionTransaction(
+  private function buildSubscribeTransaction(
     PhabricatorLiskDAO $object,
     array $xactions,
     array $blocks) {
@@ -1119,12 +1129,12 @@ abstract class PhabricatorApplicationTransactionEditor
       $blocks[$key] = $this->getRemarkupBlocksFromTransaction($xaction);
     }
 
-    $mention_xaction = $this->buildMentionTransaction(
+    $subscribe_xaction = $this->buildSubscribeTransaction(
       $object,
       $xactions,
       $blocks);
-    if ($mention_xaction) {
-      $xactions[] = $mention_xaction;
+    if ($subscribe_xaction) {
+      $xactions[] = $subscribe_xaction;
     }
 
     // TODO: For now, this is just a placeholder.
@@ -1156,17 +1166,22 @@ abstract class PhabricatorApplicationTransactionEditor
       $blocks,
       $engine);
 
-    if ($object instanceof PhabricatorProjectInterface) {
-      $phids = array();
-      foreach ($blocks as $key => $xaction_blocks) {
-        foreach ($xaction_blocks as $block) {
-          $engine->markupText($block);
-          $phids += $engine->getTextMetadata(
-            PhabricatorObjectRemarkupRule::KEY_MENTIONED_OBJECTS,
-            array());
-        }
+    $mentioned_phids = array();
+    foreach ($blocks as $key => $xaction_blocks) {
+      foreach ($xaction_blocks as $block) {
+        $engine->markupText($block);
+        $mentioned_phids += $engine->getTextMetadata(
+          PhabricatorObjectRemarkupRule::KEY_MENTIONED_OBJECTS,
+          array());
       }
+    }
 
+    if (!$mentioned_phids) {
+      return $block_xactions;
+    }
+
+    if ($object instanceof PhabricatorProjectInterface) {
+      $phids = $mentioned_phids;
       $project_type = PhabricatorProjectProjectPHIDType::TYPECONST;
       foreach ($phids as $key => $phid) {
         if (phid_get_type($phid) != $project_type) {
@@ -1182,6 +1197,29 @@ abstract class PhabricatorApplicationTransactionEditor
           ->setMetadataValue('edge:type', $edge_type)
           ->setNewValue(array('+' => $phids));
       }
+    }
+
+    $objects = id(new PhabricatorObjectQuery())
+      ->setViewer($this->getActor())
+      ->withPHIDs($mentioned_phids)
+      ->execute();
+
+    $mentionable_phids = array();
+    foreach ($objects as $object) {
+      if ($object instanceof PhabricatorMentionableInterface) {
+        if (idx($this->getUnmentionablePHIDMap(), $object->getPHID())) {
+          continue;
+        }
+        $mentionable_phids[$object->getPHID()] = $object->getPHID();
+      }
+    }
+    if ($mentionable_phids) {
+      $edge_type = PhabricatorObjectMentionsObject::EDGECONST;
+      $block_xactions[] = newv(get_class(head($xactions)), array())
+        ->setIgnoreOnNoEffect(true)
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+        ->setMetadataValue('edge:type', $edge_type)
+        ->setNewValue(array('+' => $mentionable_phids));
     }
 
     return $block_xactions;
