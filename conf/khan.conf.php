@@ -14,6 +14,12 @@ return array(
   // Use "https://" if you have SSL. See below for some notes.
   'phabricator.base-uri' => 'http://phabricator.khanacademy.org/',
 
+  // Where we put things on local disks (logs, files, etc)
+  'log.access.path' => '/home/ubuntu/logs/phabricator.log',
+  'phd.log-directory' => '/home/ubuntu/logs/phd-daemons',
+  'repository.default-local-path' => '/home/ubuntu/phabricator/repositories/git',
+  'storage.local-disk.path' => '/home/ubuntu/phabricator/files',
+
   // We trust our code-authors to not close an audit unless there's
   // a good reason.
   'audit.can-author-close-audit' => true,
@@ -23,12 +29,18 @@ return array(
     'khanacademy.org',
   ),
 
+  // Let people debug if they want (though don't profile by default).
+  'darkconsole.enabled' => true,
+  'debug.profile-rate' => 0,
+
   // Allow, but don't require, a user to say how they did testing.
   'differential.require-test-plan-field' => false,
   'differential.allow-reopen' => true,
 
-  // Logging.
-  'log.access.path'             => '/home/ubuntu/logs/phabricator.log',
+  // Tell hipchat about phabricator reviews being created, and the like.
+  'feed.http-hooks' => array(
+     'http://khan-webhooks.appspot.com/phabricator-feed',
+  ),
 
   // Custom Maniphest fields
   'maniphest.custom-field-definitions' => array(
@@ -44,6 +56,7 @@ return array(
   'metamta.default-address' => 'noreply@phabricator.khanacademy.org',
   'metamta.domain'          => 'phabricator.khanacademy.org',
   'metamta.can-send-as-user'    => true,
+  'metamta.user-address-format' => 'short',
   // gmail threading will break if the subject changes.
   'metamta.vary-subjects' => false,
 
@@ -52,7 +65,8 @@ return array(
   'mysql.user' => 'phabricator',
   'mysql.pass' => 'codereview',
 
-  // Timezone for khan academy.
+  // Global phabricator options, such as the timezone for khan academy.
+  'phabricator.show-beta-applications' => true,
   'phabricator.timezone'    => 'America/Los_Angeles',
   'phabricator.csrf-key'    => '0016ee009c31da52bc9044dd5a989ff1ec6da80',
 
@@ -64,12 +78,12 @@ return array(
   // Docs say this is "pretty silly (but sort of awesome)". Good enough for me.
   'remarkup.enable-embedded-youtube' => true,
 
-  // This enables beta applications on the application dashboard and also
-  // Pholio, a tool for critiquing & discussing lolcats and other pixels.
-  'phabricator.show-beta-applications' => true,
-
   // This apparently avoids some cookie-based attacks.
   'security.alternate-file-domain'  => 'http://phabricator-files.khanacademy.org/',
+
+  // Let people upload giant files.
+  'storage.mysql-engine.max-size' => 0,
+  'storage.upload-size-limit' => '20M',
 
   // pygments doesn't know .q files are sql or that jsx is javascript(-ish).
   // We add that.  (The .arcconfig comes default.conf; I'm not sure if
@@ -79,6 +93,20 @@ return array(
     '@\.arcconfig$@' => 'js',
     '@\.q$@' => 'mysql',
     '@\.jsx$@' => 'js',
+  ),
+
+  // We use phabricator as a mini-LDAP system.
+  'user.custom-field-definitions' => array(
+    'khan:github-username' => array(
+      'name' => 'Github username',
+      'type' => 'text',
+      'caption' => 'Your username on GitHub',
+     ),
+    'khan:hipchat-username' => array(
+      'name' => 'Hipchat username',
+      'type' => 'text',
+      'caption' => 'Your username on Hipchat (do not include the `@`)',
+    ),
   ),
 
 ) + phabricator_read_config_file('production');
