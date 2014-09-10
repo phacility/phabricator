@@ -13,6 +13,14 @@
   border-width:         0px;
 }
 
+.phabricator-standard-page-footer {
+  text-align: right;
+  margin: 0 16px;
+  padding: 8px 0;
+  border-top: 1px solid {$lightgreyborder};
+  color: {$lightgreytext};
+}
+
 .keyboard-shortcut-help td,
 .keyboard-shortcut-help th {
   padding: 8px;
