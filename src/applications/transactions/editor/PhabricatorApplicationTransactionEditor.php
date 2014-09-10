@@ -1199,18 +1199,23 @@ abstract class PhabricatorApplicationTransactionEditor
       }
     }
 
-    $objects = id(new PhabricatorObjectQuery())
+    $mentioned_objects = id(new PhabricatorObjectQuery())
       ->setViewer($this->getActor())
       ->withPHIDs($mentioned_phids)
       ->execute();
 
     $mentionable_phids = array();
-    foreach ($objects as $object) {
-      if ($object instanceof PhabricatorMentionableInterface) {
-        if (idx($this->getUnmentionablePHIDMap(), $object->getPHID())) {
+    foreach ($mentioned_objects as $mentioned_object) {
+      if ($mentioned_object instanceof PhabricatorMentionableInterface) {
+        $mentioned_phid = $mentioned_object->getPHID();
+        if (idx($this->getUnmentionablePHIDMap(), $mentioned_phid)) {
           continue;
         }
-        $mentionable_phids[$object->getPHID()] = $object->getPHID();
+        // don't let objects mention themselves
+        if ($object->getPHID() && $mentioned_phid == $object->getPHID()) {
+          continue;
+        }
+        $mentionable_phids[$mentioned_phid] = $mentioned_phid;
       }
     }
     if ($mentionable_phids) {
