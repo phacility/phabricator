@@ -16,6 +16,12 @@ try {
   PhabricatorStartup::loadCoreLibraries();
 
   PhabricatorEnv::initializeWebEnvironment();
+
+  $debug_time_limit = PhabricatorEnv::getEnvConfig('debug.time-limit');
+  if ($debug_time_limit) {
+    PhabricatorStartup::setDebugTimeLimit($debug_time_limit);
+  }
+
   $show_unexpected_traces = PhabricatorEnv::getEnvConfig(
     'phabricator.developer-mode');
 

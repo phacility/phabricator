@@ -46,6 +46,31 @@ final class PhabricatorDeveloperConfigOptions
             "enable this option in production.\n\n".
             "You must enable DarkConsole by setting {{darkconsole.enabled}} ".
             "before this option will have any effect.")),
+      $this->newOption('debug.time-limit', 'int', null)
+        ->setSummary(
+          pht(
+            'Limit page execution time to debug hangs.'))
+        ->setDescription(
+          pht(
+            "This option can help debug pages which are taking a very ".
+            "long time (more than 30 seconds) to render.\n\n".
+            "If a page is slow to render (but taking less than 30 seconds), ".
+            "the best tools to use to figure out why it is slow are usually ".
+            "the DarkConsole service call profiler and XHProf.\n\n".
+            "However, if a request takes a very long time to return, some ".
+            "components (like Apache, nginx, or PHP itself) may abort the ".
+            "request before it finishes. This can prevent you from using ".
+            "profiling tools to understand page performance in detail.\n\n".
+            "In these cases, you can use this option to force the page to ".
+            "abort after a smaller number of seconds (for example, 10), and ".
+            "dump a useful stack trace. This can provide useful information ".
+            "about why a page is hanging.\n\n".
+            "To use this option, set it to a small number (like 10), and ".
+            "reload a hanging page. The page should exit after 10 seconds ".
+            "and give you a stack trace.\n\n".
+            "You should turn this option off (set it to 0) when you are ".
+            "done with it. Leaving it on creates a small amount of overhead ".
+            "for all requests, even if they do not hit the time limit.")),
       $this->newOption('debug.stop-on-redirect', 'bool', false)
         ->setBoolOptions(
           array(
