@@ -42,8 +42,11 @@ final class PhabricatorFundApplication extends PhabricatorApplication {
       '/fund/' => array(
         '(?:query/(?P<queryKey>[^/]+)/)?' => 'FundInitiativeListController',
         'create/' => 'FundInitiativeEditController',
-        'edit/(?:(?P<id>[^/]+)/)?' => 'FundInitiativeEditController',
-        'close/(?P<id>[^/]+)/' => 'FundInitiativeCloseController',
+        'edit/(?:(?P<id>\d+)/)?' => 'FundInitiativeEditController',
+        'close/(?P<id>\d+)/' => 'FundInitiativeCloseController',
+        'back/(?P<id>\d+)/' => 'FundInitiativeBackController',
+        'backers/(?:(?P<id>\d+)/)?(?:query/(?P<queryKey>[^/]+)/)?'
+          => 'FundBackerListController',
       ),
     );
   }

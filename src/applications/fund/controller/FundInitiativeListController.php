@@ -28,6 +28,10 @@ final class FundInitiativeListController
     id(new FundInitiativeSearchEngine())
       ->setViewer($user)
       ->addNavigationItems($nav->getMenu());
+
+    $nav->addLabel(pht('Backers'));
+    $nav->addFilter('backers/', pht('Find Backers'));
+
     $nav->selectFilter(null);
 
     return $nav;
