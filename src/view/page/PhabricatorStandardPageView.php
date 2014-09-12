@@ -15,6 +15,16 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
   private $disableConsole;
   private $pageObjects = array();
   private $applicationMenu;
+  private $showFooter = true;
+
+  public function setShowFooter($show_footer) {
+    $this->showFooter = $show_footer;
+    return $this;
+  }
+
+  public function getShowFooter() {
+    return $this->showFooter;
+  }
 
   public function setApplicationMenu(PHUIListView $application_menu) {
     $this->applicationMenu = $application_menu;
@@ -329,23 +339,23 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       }
     }
 
-    return
-      phutil_tag(
-        'div',
-        array(
-          'id' => 'base-page',
-          'class' => 'phabricator-standard-page',
-        ),
-        array(
-          $developer_warning,
-          $setup_warning,
-          $header_chrome,
-          phutil_tag_div('phabricator-standard-page-body', array(
-            ($console ? hsprintf('<darkconsole />') : null),
-            parent::getBody(),
-            phutil_tag('div', array('style' => 'clear: both;')),
-          )),
-        ));
+    return phutil_tag(
+      'div',
+      array(
+        'id' => 'base-page',
+        'class' => 'phabricator-standard-page',
+      ),
+      array(
+        $developer_warning,
+        $setup_warning,
+        $header_chrome,
+        phutil_tag_div('phabricator-standard-page-body', array(
+          ($console ? hsprintf('<darkconsole />') : null),
+          parent::getBody(),
+          phutil_tag('div', array('style' => 'clear: both;')),
+          $this->renderFooter(),
+        )),
+      ));
   }
 
   protected function getTail() {
@@ -455,6 +465,52 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       return null;
     }
     return $this->getRequest()->getApplicationConfiguration()->getConsole();
+  }
+
+  private function renderFooter() {
+    if (!$this->getShowChrome()) {
+      return null;
+    }
+
+    if (!$this->getShowFooter()) {
+      return null;
+    }
+
+    $items = PhabricatorEnv::getEnvConfig('ui.footer-items');
+    if (!$items) {
+      return null;
+    }
+
+    $foot = array();
+    foreach ($items as $item) {
+      $name = idx($item, 'name', pht('Unnamed Footer Item'));
+
+      $href = idx($item, 'href');
+      if (!PhabricatorEnv::isValidWebResource($href)) {
+        $href = null;
+      }
+
+      if ($href !== null) {
+        $tag = 'a';
+      } else {
+        $tag = 'span';
+      }
+
+      $foot[] = phutil_tag(
+        $tag,
+        array(
+          'href' => $href,
+        ),
+        $name);
+    }
+    $foot = phutil_implode_html(" \xC2\xB7 ", $foot);
+
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'phabricator-standard-page-footer',
+      ),
+      $foot);
   }
 
 }

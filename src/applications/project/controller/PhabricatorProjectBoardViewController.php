@@ -326,6 +326,7 @@ final class PhabricatorProjectBoardViewController
       ),
       array(
         'title' => pht('%s Board', $project->getName()),
+        'showFooter' => false,
       ));
   }
 
