@@ -102,6 +102,18 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
+      case self::TYPE_ACTION:
+        if ($new == DifferentialAction::ACTION_CLOSE &&
+            $this->getMetadataValue('isCommitClose')) {
+          $phids[] = $this->getMetadataValue('commitPHID');
+          if ($this->getMetadataValue('committerPHID')) {
+            $phids[] = $this->getMetadataValue('committerPHID');
+          }
+          if ($this->getMetadataValue('authorPHID')) {
+            $phids[] = $this->getMetadataValue('authorPHID');
+          }
+        }
+        break;
       case self::TYPE_UPDATE:
         if ($new) {
           $phids[] = $new;
@@ -216,7 +228,11 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
           '%s added inline comments.',
           $author_handle);
       case self::TYPE_UPDATE:
-        if ($new) {
+        if ($this->getMetadataValue('isCommitUpdate')) {
+          return pht(
+            'This revision was automatically updated to reflect the '.
+            'committed changes.');
+        } else if ($new) {
           // TODO: Migrate to PHIDs and use handles here?
           if (phid_get_type($new) == DifferentialDiffPHIDType::TYPECONST) {
             return pht(
@@ -234,7 +250,45 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
             $author_handle);
         }
       case self::TYPE_ACTION:
-        return DifferentialAction::getBasicStoryText($new, $author_handle);
+        switch ($new) {
+          case DifferentialAction::ACTION_CLOSE:
+            if (!$this->getMetadataValue('isCommitClose')) {
+              return DifferentialAction::getBasicStoryText(
+                $new,
+                $author_handle);
+            }
+            $commit_name = $this->renderHandleLink(
+              $this->getMetadataValue('commitPHID'));
+            $committer_phid = $this->getMetadataValue('committerPHID');
+            $author_phid = $this->getMetadataValue('authorPHID');
+            if ($this->getHandleIfExists($committer_phid)) {
+              $committer_name = $this->renderHandleLink($committer_phid);
+            } else {
+              $committer_name = $this->getMetadataValue('committerName');
+            }
+            if ($this->getHandleIfExists($author_phid)) {
+              $author_name = $this->renderHandleLink($author_phid);
+            } else {
+              $author_name = $this->getMetadataValue('authorName');
+            }
+
+            if ($committer_name && ($committer_name != $author_name)) {
+              return pht(
+                'Closed by commit %s (authored by %s, committed by %s).',
+                $commit_name,
+                $author_name,
+                $committer_name);
+            } else {
+              return pht(
+                'Closed by commit %s (authored by %s).',
+                $commit_name,
+                $author_name);
+            }
+            break;
+          default:
+            return DifferentialAction::getBasicStoryText($new, $author_handle);
+        }
+        break;
       case self::TYPE_STATUS:
         switch ($this->getNewValue()) {
           case ArcanistDifferentialRevisionStatus::ACCEPTED:
@@ -296,10 +350,44 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
               $author_link,
               $object_link);
           case DifferentialAction::ACTION_CLOSE:
-            return pht(
-              '%s closed %s.',
-              $author_link,
-              $object_link);
+            if (!$this->getMetadataValue('isCommitClose')) {
+              return pht(
+                '%s closed %s.',
+                $author_link,
+                $object_link);
+            } else {
+              $commit_name = $this->renderHandleLink(
+                $this->getMetadataValue('commitPHID'));
+              $committer_phid = $this->getMetadataValue('committerPHID');
+              $author_phid = $this->getMetadataValue('authorPHID');
+              if ($this->getHandleIfExists($committer_phid)) {
+                $committer_name = $this->renderHandleLink($committer_phid);
+              } else {
+                $committer_name = $this->getMetadataValue('committerName');
+              }
+              if ($this->getHandleIfExists($author_phid)) {
+                $author_name = $this->renderHandleLink($author_phid);
+              } else {
+                $author_name = $this->getMetadataValue('authorName');
+              }
+
+              if ($committer_name && ($committer_name != $author_name)) {
+                return pht(
+                  '%s closed %s by commit %s (authored by %s).',
+                  $author_link,
+                  $object_link,
+                  $commit_name,
+                  $author_name);
+              } else {
+                return pht(
+                  '%s closed %s by commit %s.',
+                  $author_link,
+                  $object_link,
+                  $commit_name);
+              }
+            }
+            break;
+
           case DifferentialAction::ACTION_REQUEST:
             return pht(
               '%s requested review of %s.',
