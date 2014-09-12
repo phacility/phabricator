@@ -143,6 +143,20 @@ final class FundInitiativeViewController
         ->setWorkflow(true)
         ->setHref($this->getApplicationURI("/close/{$id}/")));
 
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Back Initiative'))
+        ->setIcon('fa-money')
+        ->setDisabled($initiative->isClosed())
+        ->setWorkflow(true)
+        ->setHref($this->getApplicationURI("/back/{$id}/")));
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('View Backers'))
+        ->setIcon('fa-bank')
+        ->setHref($this->getApplicationURI("/backers/{$id}/")));
+
     return $view;
   }
 

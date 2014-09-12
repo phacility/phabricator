@@ -93,11 +93,12 @@ final class FundInitiative extends FundDAO
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    return false;
+    return ($viewer->getPHID() == $this->getOwnerPHID());
   }
 
   public function describeAutomaticCapability($capability) {
-    return null;
+    return pht(
+      'The owner of an initiative can always view and edit it.');
   }
 
 

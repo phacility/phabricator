@@ -1,10 +1,10 @@
 <?php
 
-final class FundBackingTransactionQuery
+final class FundBackerTransactionQuery
   extends PhabricatorApplicationTransactionQuery {
 
   public function getTemplateApplicationTransaction() {
-    return new FundBackingTransaction();
+    return new FundBackerTransaction();
   }
 
 }

@@ -1,27 +1,43 @@
 <?php
 
-final class FundBacking extends FundDAO
+final class FundBacker extends FundDAO
   implements
     PhabricatorPolicyInterface,
     PhabricatorApplicationTransactionInterface {
 
   protected $initiativePHID;
   protected $backerPHID;
-  protected $purchasePHID;
   protected $amountInCents;
   protected $status;
   protected $properties = array();
 
   private $initiative = self::ATTACHABLE;
 
+  const STATUS_NEW = 'new';
+  const STATUS_IN_CART = 'in-cart';
+
+  public static function initializeNewBacker(PhabricatorUser $actor) {
+    return id(new FundBacker())
+      ->setBackerPHID($actor->getPHID())
+      ->setStatus(self::STATUS_NEW);
+  }
+
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_SERIALIZATION => array(
+        'properties' => self::SERIALIZATION_JSON,
+      ),
     ) + parent::getConfiguration();
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(FundBackingPHIDType::TYPECONST);
+    return PhabricatorPHID::generateNewPHID(FundBackerPHIDType::TYPECONST);
+  }
+
+  protected function didReadData() {
+    // The payment processing code is strict about types.
+    $this->amountInCents = (int)$this->amountInCents;
   }
 
   public function getProperty($key, $default = null) {
@@ -30,6 +46,15 @@ final class FundBacking extends FundDAO
 
   public function setProperty($key, $value) {
     $this->properties[$key] = $value;
+    return $this;
+  }
+
+  public function getInitiative() {
+    return $this->assertAttached($this->initiative);
+  }
+
+  public function attachInitiative(FundInitiative $initiative = null) {
+    $this->initiative = $initiative;
     return $this;
   }
 
@@ -48,7 +73,7 @@ final class FundBacking extends FundDAO
       case PhabricatorPolicyCapability::CAN_VIEW:
         // If we have the initiative, use the initiative's policy.
         // Otherwise, return NOONE. This allows the backer to continue seeing
-        // a backing even if they're no longer allowed to see the initiative.
+        // a backer even if they're no longer allowed to see the initiative.
 
         $initiative = $this->getInitiative();
         if ($initiative) {
@@ -71,7 +96,7 @@ final class FundBacking extends FundDAO
 
 
   public function getApplicationTransactionEditor() {
-    return new FundBackingEditor();
+    return new FundBackerEditor();
   }
 
   public function getApplicationTransactionObject() {
@@ -79,7 +104,7 @@ final class FundBacking extends FundDAO
   }
 
   public function getApplicationTransactionTemplate() {
-    return new FundBackingTransaction();
+    return new FundBackerTransaction();
   }
 
 }

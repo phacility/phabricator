@@ -55,7 +55,9 @@ final class FundInitiativeCloseController
 
     if ($is_close) {
       $title = pht('Close Initiative?');
-      $body = pht('Really close this initiative?');
+      $body = pht(
+        'Really close this initiative? Users will no longer be able to '.
+        'back it.');
       $button_text = pht('Close Initiative');
     } else {
       $title = pht('Reopen Initiative?');

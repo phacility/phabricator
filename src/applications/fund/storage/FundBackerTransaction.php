@@ -1,14 +1,16 @@
 <?php
 
-final class FundBackingTransaction
+final class FundBackerTransaction
   extends PhabricatorApplicationTransaction {
+
+  const TYPE_STATUS = 'fund:backer:status';
 
   public function getApplicationName() {
     return 'fund';
   }
 
   public function getApplicationTransactionType() {
-    return FundBackingPHIDType::TYPECONST;
+    return FundBackerPHIDType::TYPECONST;
   }
 
   public function getApplicationTransactionCommentObject() {

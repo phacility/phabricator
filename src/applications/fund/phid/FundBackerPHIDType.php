@@ -1,6 +1,6 @@
 <?php
 
-final class FundBackingPHIDType extends PhabricatorPHIDType {
+final class FundBackerPHIDType extends PhabricatorPHIDType {
 
   const TYPECONST = 'FBAK';
 
