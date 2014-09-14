@@ -11,7 +11,6 @@ final class DifferentialTransactionComment
   protected $fixedState;
   protected $hasReplies = 0;
   protected $replyToCommentPHID;
-  protected $legacyCommentID;
 
   public function getApplicationTransactionObject() {
     return new DifferentialTransaction();
