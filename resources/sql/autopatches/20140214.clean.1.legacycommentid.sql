@@ -1,2 +1,2 @@
 ALTER TABLE {$NAMESPACE}_differential.differential_transaction_comment
-  DROP COLUMN legacyCommmentID;
+  DROP COLUMN legacyCommentID;
