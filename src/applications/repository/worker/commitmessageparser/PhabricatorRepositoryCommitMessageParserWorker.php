@@ -140,31 +140,29 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
                         $should_autoclose;
 
         if ($should_close) {
-          $commit_name = $repository->formatCommitName(
-            $commit->getCommitIdentifier());
+           $commit_close_xaction = id(new DifferentialTransaction())
+            ->setTransactionType(DifferentialTransaction::TYPE_ACTION)
+            ->setNewValue(DifferentialAction::ACTION_CLOSE)
+            ->setMetadataValue('isCommitClose', true);
 
-          $committer_name = $this->loadUserName(
-            $committer_phid,
-            $data->getCommitDetail('committer'),
-            $actor);
-
-          $author_name = $this->loadUserName(
-            $author_phid,
-            $data->getAuthorName(),
-            $actor);
-
-          if ($committer_name && ($committer_name != $author_name)) {
-            $revision_update_comment = pht(
-              'Closed by commit %s (authored by %s, committed by %s).',
-              $commit_name,
-              $author_name,
-              $committer_name);
-          } else {
-            $revision_update_comment = pht(
-              'Closed by commit %s (authored by %s).',
-              $commit_name,
-              $author_name);
-          }
+          $commit_close_xaction->setMetadataValue(
+            'commitPHID',
+            $commit->getPHID());
+          $commit_close_xaction->setMetadataValue(
+            'committerPHID',
+            $committer_phid);
+          $commit_close_xaction->setMetadataValue(
+            'committerName',
+            $data->getCommitDetail('committer'));
+          $commit_close_xaction->setMetadataValue(
+            'authorPHID',
+            $author_phid);
+          $commit_close_xaction->setMetadataValue(
+            'authorName',
+            $data->getAuthorName());
+          $commit_close_xaction->setMetadataValue(
+            'commitHashes',
+            $hashes);
 
           $diff = $this->generateFinalDiff($revision, $acting_as_phid);
 
@@ -181,22 +179,12 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
           }
 
           $xactions = array();
-
-          $xactions[] = id(new DifferentialTransaction())
-            ->setTransactionType(DifferentialTransaction::TYPE_ACTION)
-            ->setNewValue(DifferentialAction::ACTION_CLOSE);
-
           $xactions[] = id(new DifferentialTransaction())
             ->setTransactionType(DifferentialTransaction::TYPE_UPDATE)
             ->setIgnoreOnNoEffect(true)
-            ->setNewValue($diff->getPHID());
-
-          $xactions[] = id(new DifferentialTransaction())
-            ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
-            ->setIgnoreOnNoEffect(true)
-            ->attachComment(
-              id(new DifferentialTransactionComment())
-                ->setContent($revision_update_comment));
+            ->setNewValue($diff->getPHID())
+            ->setMetadataValue('isCommitUpdate', true);
+          $xactions[] = $commit_close_xaction;
 
           $content_source = PhabricatorContentSource::newForSource(
             PhabricatorContentSource::SOURCE_DAEMON,
@@ -235,18 +223,6 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
     $commit->writeImportStatusFlag(
       PhabricatorRepositoryCommit::IMPORTED_MESSAGE);
-  }
-
-  private function loadUserName($user_phid, $default, PhabricatorUser $actor) {
-    if (!$user_phid) {
-      return $default;
-    }
-    $handle = id(new PhabricatorHandleQuery())
-      ->setViewer($actor)
-      ->withPHIDs(array($user_phid))
-      ->executeOne();
-
-    return '@'.$handle->getName();
   }
 
   private function generateFinalDiff(
@@ -521,6 +497,8 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
         ->setActingAsPHID($acting_as)
         ->setContinueOnNoEffect(true)
         ->setContinueOnMissingFields(true)
+        ->setUnmentionablePHIDMap(
+          array($commit->getPHID() => $commit->getPHID()))
         ->setContentSource($content_source);
 
       $editor->applyTransactions($task, $xactions);
