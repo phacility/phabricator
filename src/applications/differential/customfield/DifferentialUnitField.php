@@ -209,6 +209,8 @@ final class DifferentialUnitField
     $warnings = array();
     if ($status < DifferentialUnitStatus::UNIT_WARN) {
       // Don't show any warnings.
+    } else if ($status == DifferentialUnitStatus::UNIT_AUTO_SKIP) {
+      // Don't show any warnings.
     } else if ($status == DifferentialUnitStatus::UNIT_POSTPONED) {
       $warnings[] = pht(
         'Background tests have not finished executing on these changes.');
