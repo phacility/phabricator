@@ -81,8 +81,7 @@ final class PholioMockCommentController extends PholioController {
         ->setViewer($user)
         ->setTransactions($xactions)
         ->setTransactionView($xaction_view)
-        ->setIsPreview($is_preview)
-        ->setAnchorOffset($request->getStr('anchor'));
+        ->setIsPreview($is_preview);
     } else {
       return id(new AphrontRedirectResponse())->setURI($mock_uri);
     }
