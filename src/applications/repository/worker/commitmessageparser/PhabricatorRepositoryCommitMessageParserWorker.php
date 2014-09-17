@@ -261,8 +261,8 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       ->setAuthorPHID($actor_phid)
       ->setCreationMethod('commit')
       ->setSourceControlSystem($this->repository->getVersionControlSystem())
-      ->setLintStatus(DifferentialLintStatus::LINT_SKIP)
-      ->setUnitStatus(DifferentialUnitStatus::UNIT_SKIP)
+      ->setLintStatus(DifferentialLintStatus::LINT_AUTO_SKIP)
+      ->setUnitStatus(DifferentialUnitStatus::UNIT_AUTO_SKIP)
       ->setDateCreated($this->commit->getEpoch())
       ->setDescription(
         'Commit r'.

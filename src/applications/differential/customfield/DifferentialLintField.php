@@ -239,6 +239,9 @@ final class DifferentialLintField
     if ($status < DifferentialLintStatus::LINT_WARN) {
       return array();
     }
+    if ($status == DifferentialLintStatus::LINT_AUTO_SKIP) {
+      return array();
+    }
 
     $warnings = array();
     if ($status == DifferentialLintStatus::LINT_SKIP) {

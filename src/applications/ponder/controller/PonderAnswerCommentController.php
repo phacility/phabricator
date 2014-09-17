@@ -60,8 +60,7 @@ final class PonderAnswerCommentController extends PonderController {
       return id(new PhabricatorApplicationTransactionResponse())
         ->setViewer($viewer)
         ->setTransactions($xactions)
-        ->setIsPreview($is_preview)
-        ->setAnchorOffset($request->getStr('anchor'));
+        ->setIsPreview($is_preview);
     } else {
       return id(new AphrontRedirectResponse())
         ->setURI($view_uri);

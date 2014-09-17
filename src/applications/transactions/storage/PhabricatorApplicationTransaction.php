@@ -445,6 +445,14 @@ abstract class PhabricatorApplicationTransaction
             return true;
             break;
           case PhabricatorObjectMentionedByObject::EDGECONST:
+            $new = ipull($this->getNewValue(), 'dst');
+            $old = ipull($this->getOldValue(), 'dst');
+            $add = array_diff($new, $old);
+            $add_value = reset($add);
+            $add_handle = $this->getHandle($add_value);
+            if ($add_handle->getPolicyFiltered()) {
+              return true;
+            }
             return false;
             break;
           default:

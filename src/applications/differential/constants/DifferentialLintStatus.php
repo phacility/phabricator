@@ -8,5 +8,6 @@ final class DifferentialLintStatus {
   const LINT_FAIL             = 3;
   const LINT_SKIP             = 4;
   const LINT_POSTPONED        = 5;
+  const LINT_AUTO_SKIP        = 6;
 
 }
