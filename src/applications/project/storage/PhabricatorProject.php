@@ -20,6 +20,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   protected $viewPolicy;
   protected $editPolicy;
   protected $joinPolicy;
+  protected $isMembershipLocked;
 
   private $memberPHIDs = self::ATTACHABLE;
   private $watcherPHIDs = self::ATTACHABLE;
@@ -43,6 +44,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
       ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
       ->setEditPolicy(PhabricatorPolicies::POLICY_USER)
       ->setJoinPolicy(PhabricatorPolicies::POLICY_USER)
+      ->setIsMembershipLocked(0)
       ->attachMemberPHIDs(array());
   }
 

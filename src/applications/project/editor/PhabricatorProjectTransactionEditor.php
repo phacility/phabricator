@@ -25,6 +25,7 @@ final class PhabricatorProjectTransactionEditor
     $types[] = PhabricatorProjectTransaction::TYPE_IMAGE;
     $types[] = PhabricatorProjectTransaction::TYPE_ICON;
     $types[] = PhabricatorProjectTransaction::TYPE_COLOR;
+    $types[] = PhabricatorProjectTransaction::TYPE_LOCKED;
 
     return $types;
   }
@@ -49,6 +50,8 @@ final class PhabricatorProjectTransactionEditor
         return $object->getIcon();
       case PhabricatorProjectTransaction::TYPE_COLOR:
         return $object->getColor();
+      case PhabricatorProjectTransaction::TYPE_LOCKED:
+        return (int) $object->getIsMembershipLocked();
     }
 
     return parent::getCustomTransactionOldValue($object, $xaction);
@@ -65,6 +68,7 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorProjectTransaction::TYPE_IMAGE:
       case PhabricatorProjectTransaction::TYPE_ICON:
       case PhabricatorProjectTransaction::TYPE_COLOR:
+      case PhabricatorProjectTransaction::TYPE_LOCKED:
         return $xaction->getNewValue();
     }
 
@@ -93,6 +97,9 @@ final class PhabricatorProjectTransactionEditor
         return;
       case PhabricatorProjectTransaction::TYPE_COLOR:
         $object->setColor($xaction->getNewValue());
+        return;
+      case PhabricatorProjectTransaction::TYPE_LOCKED:
+        $object->setIsMembershipLocked($xaction->getNewValue());
         return;
       case PhabricatorTransactions::TYPE_EDGE:
         return;
@@ -199,6 +206,7 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorProjectTransaction::TYPE_IMAGE:
       case PhabricatorProjectTransaction::TYPE_ICON:
       case PhabricatorProjectTransaction::TYPE_COLOR:
+      case PhabricatorProjectTransaction::TYPE_LOCKED:
         return;
       case PhabricatorTransactions::TYPE_EDGE:
         $edge_type = $xaction->getMetadataValue('edge:type');
@@ -360,6 +368,7 @@ final class PhabricatorProjectTransactionEditor
         }
 
         break;
+
     }
 
     return $errors;
@@ -380,6 +389,12 @@ final class PhabricatorProjectTransactionEditor
           $this->requireActor(),
           $object,
           PhabricatorPolicyCapability::CAN_EDIT);
+        return;
+      case PhabricatorProjectTransaction::TYPE_LOCKED:
+        PhabricatorPolicyFilter::requireCapability(
+          $this->requireActor(),
+          newv($this->getEditorApplicationClass(), array()),
+          ProjectCanLockProjectsCapability::CAPABILITY);
         return;
       case PhabricatorTransactions::TYPE_EDGE:
         switch ($xaction->getMetadataValue('edge:type')) {
@@ -402,7 +417,14 @@ final class PhabricatorProjectTransactionEditor
                 $object,
                 PhabricatorPolicyCapability::CAN_JOIN);
             } else if ($is_leave) {
-              // You don't need any capabilities to leave a project.
+              // You usually don't need any capabilities to leave a project.
+              if ($object->getIsMembershipLocked()) {
+                // you must be able to edit though to leave locked projects
+                PhabricatorPolicyFilter::requireCapability(
+                  $this->requireActor(),
+                  $object,
+                  PhabricatorPolicyCapability::CAN_EDIT);
+              }
             } else {
               // You need CAN_EDIT to change members other than yourself.
               PhabricatorPolicyFilter::requireCapability(
