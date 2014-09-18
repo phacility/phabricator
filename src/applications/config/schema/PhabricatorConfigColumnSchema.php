@@ -67,6 +67,11 @@ final class PhabricatorConfigColumnSchema
       return ((int)$matches[1]) * 4;
     }
 
+    switch ($type) {
+      case 'int(10) unsigned':
+        return 4;
+    }
+
     // TODO: Build this out to catch overlong indexes.
 
     return 0;
@@ -86,6 +91,10 @@ final class PhabricatorConfigColumnSchema
 
     if ($this->getColumnType() != $expect->getColumnType()) {
       $issues[] = self::ISSUE_COLUMNTYPE;
+    }
+
+    if ($this->getNullable() !== $expect->getNullable()) {
+      $issues[] = self::ISSUE_NULLABLE;
     }
 
     return $issues;

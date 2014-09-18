@@ -6,7 +6,7 @@ final class PhabricatorConfigKeySchema
   private $columnNames;
 
   public function setColumnNames(array $column_names) {
-    $this->columnNames = $column_names;
+    $this->columnNames = array_values($column_names);
     return $this;
   }
 

@@ -170,6 +170,7 @@ abstract class LiskDAO {
   const CONFIG_SERIALIZATION        = 'col-serialization';
   const CONFIG_BINARY               = 'binary';
   const CONFIG_COLUMN_SCHEMA        = 'col-schema';
+  const CONFIG_KEY_SCHEMA           = 'key-schema';
 
   const SERIALIZATION_NONE          = 'id';
   const SERIALIZATION_JSON          = 'json';
@@ -346,6 +347,9 @@ abstract class LiskDAO {
    *
    * CONFIG_COLUMN_SCHEMA
    * Provide a map of columns to schema column types.
+   *
+   * CONFIG_KEY_SCHEMA
+   * Provide a map of key names to key specifications.
    *
    * @return dictionary  Map of configuration options to values.
    *
@@ -1736,6 +1740,8 @@ abstract class LiskDAO {
     $builtin = array(
       'id' => 'id',
       'phid' => 'phid',
+      'viewPolicy' => 'policy',
+      'editPolicy' => 'policy',
       'dateCreated' => 'epoch',
       'dateModified' => 'epoch',
     );
@@ -1783,6 +1789,31 @@ abstract class LiskDAO {
     }
 
     return $map;
+  }
+
+  public function getSchemaKeys() {
+    $custom_map = $this->getConfigOption(self::CONFIG_KEY_SCHEMA);
+    if (!$custom_map) {
+      $custom_map = array();
+    }
+
+    $default_map = array();
+    foreach ($this->getAllLiskProperties() as $property) {
+      switch ($property) {
+        case 'id':
+          $default_map['PRIMARY'] = array(
+            'columns' => array('id'),
+          );
+          break;
+        case 'phid':
+          $default_map['key_phid'] = array(
+            'columns' => array('phid'),
+          );
+          break;
+      }
+    }
+
+    return $custom_map + $default_map;
   }
 
 }

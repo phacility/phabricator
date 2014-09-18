@@ -107,6 +107,12 @@ abstract class PhabricatorApplicationTransaction
         'newValue' => self::SERIALIZATION_JSON,
         'metadata' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'commentPHID' => 'phid?',
+        'commentVersion' => 'uint32',
+        'contentSource' => 'text',
+        'transactionType' => 'text32',
+      ),
     ) + parent::getConfiguration();
   }
 

@@ -42,26 +42,49 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
       ->loadObjects();
 
     foreach ($objects as $object) {
-      $database = $this->getDatabase($object->getApplicationName());
-
-      $table = $this->newTable($object->getTableName());
-
-      $cols = $object->getSchemaColumns();
-      foreach ($cols as $name => $type) {
-        $details = $this->getDetailsForDataType($type);
-        list($column_type, $charset, $collation) = $details;
-
-        $column = $this->newColumn($name)
-          ->setDataType($type)
-          ->setColumnType($column_type)
-          ->setCharacterSet($charset)
-          ->setCollation($collation);
-
-        $table->addColumn($column);
-      }
-
-      $database->addTable($table);
+      $this->buildLiskObjectSchema($object);
     }
+  }
+
+  protected function buildTransactionSchema(
+    PhabricatorApplicationTransaction $xaction,
+    PhabricatorApplicationTransactionComment $comment = null) {
+
+    $this->buildLiskObjectSchema($xaction);
+    if ($comment) {
+      $this->buildLiskObjectSchema($comment);
+    }
+  }
+
+  private function buildLiskObjectSchema(PhabricatorLiskDAO $object) {
+    $database = $this->getDatabase($object->getApplicationName());
+
+    $table = $this->newTable($object->getTableName());
+
+    $cols = $object->getSchemaColumns();
+    foreach ($cols as $name => $type) {
+      $details = $this->getDetailsForDataType($type);
+      list($column_type, $charset, $collation, $nullable) = $details;
+
+      $column = $this->newColumn($name)
+        ->setDataType($type)
+        ->setColumnType($column_type)
+        ->setCharacterSet($charset)
+        ->setCollation($collation)
+        ->setNullable($nullable);
+
+      $table->addColumn($column);
+    }
+
+    $keys = $object->getSchemaKeys();
+    foreach ($keys as $key_name => $key_spec) {
+      $key = $this->newKey($key_name)
+        ->setColumnNames(idx($key_spec, 'columns', array()));
+
+      $table->addKey($key);
+    }
+
+    $database->addTable($table);
   }
 
   protected function buildEdgeSchemata(PhabricatorLiskDAO $object) {}
@@ -101,17 +124,31 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
       ->setName($name);
   }
 
+  protected function newKey($name) {
+    return id(new PhabricatorConfigKeySchema())
+      ->setName($name);
+  }
+
   private function getDetailsForDataType($data_type) {
     $column_type = null;
     $charset = null;
     $collation = null;
 
+    // If the type ends with "?", make the column nullable.
+    $nullable = false;
+    if (preg_match('/\?$/', $data_type)) {
+      $nullable = true;
+      $data_type = substr($data_type, 0, -1);
+    }
+
     switch ($data_type) {
       case 'id':
       case 'epoch':
+      case 'uint32':
         $column_type = 'int(10) unsigned';
         break;
       case 'phid':
+      case 'policy';
         $column_type = 'varchar(64)';
         $charset = 'binary';
         $collation = 'binary';
@@ -121,10 +158,33 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
         $charset = 'binary';
         $collation = 'binary';
         break;
+      case 'text128':
+        $column_type = 'varchar(128)';
+        $charset = $this->getUTF8Charset();
+        $collation = $this->getUTF8Collation();
+        break;
+      case 'text64':
+        $column_type = 'varchar(64)';
+        $charset = $this->getUTF8Charset();
+        $collation = $this->getUTF8Collation();
+        break;
+      case 'text32':
+        $column_type = 'varchar(32)';
+        $charset = $this->getUTF8Charset();
+        $collation = $this->getUTF8Collation();
+        break;
+      case 'text12':
+        $column_type = 'varchar(12)';
+        $charset = $this->getUTF8Charset();
+        $collation = $this->getUTF8Collation();
+        break;
       case 'text':
         $column_type = 'longtext';
         $charset = $this->getUTF8Charset();
         $collation = $this->getUTF8Collation();
+        break;
+      case 'bool':
+        $column_type = 'tinyint(1)';
         break;
       default:
         $column_type = pht('<unknown>');
@@ -133,7 +193,7 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
         break;
     }
 
-    return array($column_type, $charset, $collation);
+    return array($column_type, $charset, $collation, $nullable);
   }
 
 }

@@ -95,9 +95,9 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
       case self::ISSUE_SURPLUS:
         return pht('Surplus');
       case self::ISSUE_CHARSET:
-        return pht('Wrong Character Set');
+        return pht('Better Character Set Available');
       case self::ISSUE_COLLATION:
-        return pht('Wrong Collation');
+        return pht('Better Collation Available');
       case self::ISSUE_COLUMNTYPE:
         return pht('Wrong Column Type');
       case self::ISSUE_NULLABLE:
@@ -149,6 +149,7 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
       case self::ISSUE_COLUMNTYPE:
       case self::ISSUE_SUBWARN:
       case self::ISSUE_KEYCOLUMNS:
+      case self::ISSUE_NULLABLE:
         return self::STATUS_WARN;
       default:
         throw new Exception(pht('Unknown schema issue "%s"!', $issue));

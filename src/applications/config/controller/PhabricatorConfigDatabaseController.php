@@ -525,10 +525,12 @@ final class PhabricatorConfigDatabaseController
       $actual_coltype = $actual_column->getColumnType();
       $actual_charset = $actual_column->getCharacterSet();
       $actual_collation = $actual_column->getCollation();
+      $actual_nullable = $actual_column->getNullable();
     } else {
       $actual_coltype = null;
       $actual_charset = null;
       $actual_collation = null;
+      $actual_nullable = null;
     }
 
     if ($expect_column) {
@@ -536,11 +538,13 @@ final class PhabricatorConfigDatabaseController
       $expect_coltype = $expect_column->getColumnType();
       $expect_charset = $expect_column->getCharacterSet();
       $expect_collation = $expect_column->getCollation();
+      $expect_nullable = $expect_column->getNullable();
     } else {
       $data_type = null;
       $expect_coltype = null;
       $expect_charset = null;
       $expect_collation = null;
+      $expect_nullable = null;
     }
 
 
@@ -579,6 +583,14 @@ final class PhabricatorConfigDatabaseController
         array(
           pht('Expected Collation'),
           $expect_collation,
+        ),
+        array(
+          pht('Nullable'),
+          $this->getNullableString($actual_nullable),
+        ),
+        array(
+          pht('Expected Nullable'),
+          $this->getNullableString($expect_nullable),
         ),
       ),
       $column->getIssues());
@@ -745,6 +757,16 @@ final class PhabricatorConfigDatabaseController
     $view->addProperty(pht('Schema Status'), $status_view);
 
     return $view;
+  }
+
+  private function getNullableString($value) {
+    if ($value === null) {
+      return '';
+    } else if ($value === true) {
+      return pht('Yes');
+    } else {
+      return pht('No');
+    }
   }
 
 }
