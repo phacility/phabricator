@@ -158,11 +158,17 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
         $column_type = 'int(10) unsigned';
         break;
       case 'id64':
+      case 'uint64':
         $column_type = 'bigint(20) unsigned';
         break;
       case 'phid':
       case 'policy';
         $column_type = 'varchar(64)';
+        $charset = 'binary';
+        $collation = 'binary';
+        break;
+      case 'bytes40':
+        $column_type = 'char(40)';
         $charset = 'binary';
         $collation = 'binary';
         break;
@@ -175,6 +181,11 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
         $column_type = 'longblob';
         $charset = 'binary';
         $collation = 'binary';
+        break;
+      case 'text255':
+        $column_type = 'varchar(255)';
+        $charset = $this->getUTF8Charset();
+        $collation = $this->getUTF8Collation();
         break;
       case 'text128':
         $column_type = 'varchar(128)';
@@ -198,6 +209,16 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
         break;
       case 'text12':
         $column_type = 'varchar(12)';
+        $charset = $this->getUTF8Charset();
+        $collation = $this->getUTF8Collation();
+        break;
+      case 'text8':
+        $column_type = 'varchar(8)';
+        $charset = $this->getUTF8Charset();
+        $collation = $this->getUTF8Collation();
+        break;
+      case 'text4':
+        $column_type = 'varchar(4)';
         $charset = $this->getUTF8Charset();
         $collation = $this->getUTF8Collation();
         break;

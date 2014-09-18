@@ -1742,6 +1742,7 @@ abstract class LiskDAO {
       'phid' => 'phid',
       'viewPolicy' => 'policy',
       'editPolicy' => 'policy',
+      'epoch' => 'epoch',
       'dateCreated' => 'epoch',
       'dateModified' => 'epoch',
     );
