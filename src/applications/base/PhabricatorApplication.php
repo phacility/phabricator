@@ -53,8 +53,8 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
       return true;
     }
 
-    $beta = PhabricatorEnv::getEnvConfig('phabricator.show-beta-applications');
-    if (!$beta && $this->isBeta()) {
+    $prototypes = PhabricatorEnv::getEnvConfig('phabricator.show-prototypes');
+    if (!$prototypes && $this->isPrototype()) {
       return false;
     }
 
@@ -65,7 +65,7 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
   }
 
 
-  public function isBeta() {
+  public function isPrototype() {
     return false;
   }
 

@@ -41,7 +41,7 @@ final class PhabricatorPonderApplication extends PhabricatorApplication {
     );
   }
 
-  public function isBeta() {
+  public function isPrototype() {
     return true;
   }
 

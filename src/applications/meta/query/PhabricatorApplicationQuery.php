@@ -4,7 +4,7 @@ final class PhabricatorApplicationQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $installed;
-  private $beta;
+  private $prototypes;
   private $firstParty;
   private $nameContains;
   private $unlisted;
@@ -27,8 +27,8 @@ final class PhabricatorApplicationQuery
     return $this;
   }
 
-  public function withBeta($beta) {
-    $this->beta = $beta;
+  public function withPrototypes($prototypes) {
+    $this->prototypes = $prototypes;
     return $this;
   }
 
@@ -99,9 +99,9 @@ final class PhabricatorApplicationQuery
       }
     }
 
-    if ($this->beta !== null) {
+    if ($this->prototypes !== null) {
       foreach ($apps as $key => $app) {
-        if ($app->isBeta() != $this->beta) {
+        if ($app->isPrototype() != $this->prototypes) {
           unset($apps[$key]);
         }
       }

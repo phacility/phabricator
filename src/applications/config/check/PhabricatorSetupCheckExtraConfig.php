@@ -190,6 +190,10 @@ final class PhabricatorSetupCheckExtraConfig extends PhabricatorSetupCheck {
       'differential.show-host-field' => $differential_field_reason,
       'differential.show-test-plan-field' => $differential_field_reason,
       'differential.field-selector' => $differential_field_reason,
+      'phabricator.show-beta-applications' => pht(
+        'This option has been renamed to `phabricator.show-prototypes` '.
+        'to emphasize the unfinished nature of many prototype applications. '.
+        'Your existing setting has been migrated.'),
     );
 
     return $ancient_config;

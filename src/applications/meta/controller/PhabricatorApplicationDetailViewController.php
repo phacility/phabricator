@@ -77,10 +77,22 @@ final class PhabricatorApplicationDetailViewController
         phutil_tag('em', array(), $application->getFlavorText()));
     }
 
-    if ($application->isBeta()) {
+    if ($application->isPrototype()) {
+      $proto_href = PhabricatorEnv::getDoclink(
+        'User Guide: Prototype Applications');
+      $learn_more = phutil_tag(
+        'a',
+        array(
+          'href' => $proto_href,
+          'target' => '_blank',
+        ),
+        pht('Learn More'));
+
       $properties->addProperty(
-        pht('Release'),
-        pht('Beta'));
+        pht('Prototype'),
+        pht(
+          'This application is a prototype. %s',
+          $learn_more));
     }
 
     $overview = $application->getOverview();
@@ -160,9 +172,9 @@ final class PhabricatorApplicationDetailViewController
           ->setHref(
              $this->getApplicationURI(get_class($selected).'/install/'));
 
-        $beta_enabled = PhabricatorEnv::getEnvConfig(
-          'phabricator.show-beta-applications');
-        if ($selected->isBeta() && !$beta_enabled) {
+        $prototypes_enabled = PhabricatorEnv::getEnvConfig(
+          'phabricator.show-prototypes');
+        if ($selected->isPrototype() && !$prototypes_enabled) {
           $action->setDisabled(true);
         }
 

@@ -14,7 +14,7 @@ final class PhabricatorPhrequentApplication extends PhabricatorApplication {
     return '/phrequent/';
   }
 
-  public function isBeta() {
+  public function isPrototype() {
     return true;
   }
 

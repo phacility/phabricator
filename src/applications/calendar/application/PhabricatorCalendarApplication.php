@@ -28,7 +28,7 @@ final class PhabricatorCalendarApplication extends PhabricatorApplication {
     return "\xE2\x8C\xA8";
   }
 
-  public function isBeta() {
+  public function isPrototype() {
     return true;
   }
 

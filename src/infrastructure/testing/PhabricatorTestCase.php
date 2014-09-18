@@ -102,7 +102,7 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
       'phabricator.uninstalled-applications',
       array());
     $this->env->overrideEnvConfig(
-      'phabricator.show-beta-applications',
+      'phabricator.show-prototypes',
       true);
 
     // Reset application settings to defaults, particularly policies.

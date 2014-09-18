@@ -630,9 +630,6 @@ return array(
   // be enabled in production.
   'phabricator.developer-mode' => false,
 
-  // Should Phabricator show beta applications on the homepage
-  'phabricator.show-beta-applications' => false,
-
   // Contains a list of uninstalled applications
   'phabricator.uninstalled-applications' => array(),
 
