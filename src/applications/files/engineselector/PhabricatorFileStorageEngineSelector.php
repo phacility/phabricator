@@ -23,7 +23,7 @@ abstract class PhabricatorFileStorageEngineSelector {
    * Phabricator when it needs to store a file permanently. It must return a
    * list of valid @{class:PhabricatorFileStorageEngine}s.
    *
-   * If you are are extending this class to provide a custom selector, you
+   * If you are extending this class to provide a custom selector, you
    * probably just want it to look like this:
    *
    *   return array(new MyCustomFileStorageEngine());
