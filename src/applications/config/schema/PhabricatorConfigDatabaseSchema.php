@@ -1,8 +1,8 @@
 <?php
 
-final class PhabricatorConfigDatabaseSchema extends Phobject {
+final class PhabricatorConfigDatabaseSchema
+  extends PhabricatorConfigStorageSchema {
 
-  private $name;
   private $characterSet;
   private $collation;
   private $tables = array();
@@ -25,16 +25,29 @@ final class PhabricatorConfigDatabaseSchema extends Phobject {
     return idx($this->tables, $key);
   }
 
-  public function isSameSchema(PhabricatorConfigDatabaseSchema $expect) {
-    return ($this->toDictionary() === $expect->toDictionary());
+  protected function getSubschemata() {
+    return $this->getTables();
   }
 
-  public function toDictionary() {
-    return array(
-      'name' => $this->getName(),
-      'characterSet' => $this->getCharacterSet(),
-      'collation' => $this->getCollation(),
-    );
+  public function compareToSimilarSchema(
+    PhabricatorConfigStorageSchema $expect) {
+
+    $issues = array();
+    if ($this->getCharacterSet() != $expect->getCharacterSet()) {
+      $issues[] = self::ISSUE_CHARSET;
+    }
+
+    if ($this->getCollation() != $expect->getCollation()) {
+      $issues[] = self::ISSUE_COLLATION;
+    }
+
+    return $issues;
+  }
+
+  public function newEmptyClone() {
+    $clone = clone $this;
+    $clone->tables = array();
+    return $clone;
   }
 
   public function setCollation($collation) {
@@ -53,15 +66,6 @@ final class PhabricatorConfigDatabaseSchema extends Phobject {
 
   public function getCharacterSet() {
     return $this->characterSet;
-  }
-
-  public function setName($name) {
-    $this->name = $name;
-    return $this;
-  }
-
-  public function getName() {
-    return $this->name;
   }
 
 }

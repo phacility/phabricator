@@ -92,7 +92,6 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
     return $server_schema;
   }
 
-
   public function loadExpectedSchema() {
     $databases = $this->getDatabaseNames();
 
@@ -119,17 +118,101 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
       $utf8_collate = 'binary';
     }
 
-    $server_schema = new PhabricatorConfigServerSchema();
-    foreach ($databases as $database_name) {
-      $database_schema = id(new PhabricatorConfigDatabaseSchema())
-        ->setName($database_name)
-        ->setCharacterSet($utf8_charset)
-        ->setCollation($utf8_collate);
+    $specs = id(new PhutilSymbolLoader())
+      ->setAncestorClass('PhabricatorConfigSchemaSpec')
+      ->loadObjects();
 
-      $server_schema->addDatabase($database_schema);
+    $server_schema = new PhabricatorConfigServerSchema();
+    foreach ($specs as $spec) {
+      $spec->setUTF8Charset($utf8_charset);
+      $spec->setUTF8Collate($utf8_collate);
+
+      $spec->buildSchemata($server_schema);
     }
 
     return $server_schema;
   }
+
+  public function buildComparisonSchema(
+    PhabricatorConfigServerSchema $expect,
+    PhabricatorConfigServerSchema $actual) {
+
+    $comp_server = $actual->newEmptyClone();
+
+    $all_databases = $actual->getDatabases() + $expect->getDatabases();
+    foreach ($all_databases as $database_name => $database_template) {
+      $actual_database = $actual->getDatabase($database_name);
+      $expect_database = $expect->getDatabase($database_name);
+
+      $issues = $this->compareSchemata($expect_database, $actual_database);
+
+      $comp_database = $database_template->newEmptyClone()
+        ->setIssues($issues);
+
+      if (!$actual_database) {
+        $actual_database = $expect_database->newEmptyClone();
+      }
+      if (!$expect_database) {
+        $expect_database = $actual_database->newEmptyClone();
+      }
+
+      $all_tables =
+        $actual_database->getTables() +
+        $expect_database->getTables();
+      foreach ($all_tables as $table_name => $table_template) {
+        $actual_table = $actual_database->getTable($table_name);
+        $expect_table = $expect_database->getTable($table_name);
+
+        $issues = $this->compareSchemata($expect_table, $actual_table);
+
+        $comp_table = $table_template->newEmptyClone()
+          ->setIssues($issues);
+
+        if (!$actual_table) {
+          $actual_table = $expect_table->newEmptyClone();
+        }
+        if (!$expect_table) {
+          $expect_table = $actual_table->newEmptyClone();
+        }
+
+        $all_columns =
+          $actual_table->getColumns() +
+          $expect_table->getColumns();
+        foreach ($all_columns as $column_name => $column_template) {
+          $actual_column = $actual_table->getColumn($column_name);
+          $expect_column = $expect_table->getColumn($column_name);
+
+          $issues = $this->compareSchemata($expect_column, $actual_column);
+
+          $comp_column = $column_template->newEmptyClone()
+            ->setIssues($issues);
+
+          $comp_table->addColumn($comp_column);
+        }
+        $comp_database->addTable($comp_table);
+      }
+      $comp_server->addDatabase($comp_database);
+    }
+
+    return $comp_server;
+  }
+
+  private function compareSchemata(
+    PhabricatorConfigStorageSchema $expect = null,
+    PhabricatorConfigStorageSchema $actual = null) {
+
+    if (!$expect && !$actual) {
+      throw new Exception(pht('Can not compare two missing schemata!'));
+    } else if ($expect && !$actual) {
+      $issues = array(PhabricatorConfigStorageSchema::ISSUE_MISSING);
+    } else if ($actual && !$expect) {
+      $issues = array(PhabricatorConfigStorageSchema::ISSUE_SURPLUS);
+    } else {
+      $issues = $actual->compareTo($expect);
+    }
+
+    return $issues;
+  }
+
 
 }

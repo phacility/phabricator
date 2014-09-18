@@ -1,8 +1,8 @@
 <?php
 
-final class PhabricatorConfigTableSchema extends Phobject {
+final class PhabricatorConfigTableSchema
+  extends PhabricatorConfigStorageSchema {
 
-  private $name;
   private $collation;
   private $columns = array();
 
@@ -20,6 +20,14 @@ final class PhabricatorConfigTableSchema extends Phobject {
     return $this->columns;
   }
 
+  public function getColumn($key) {
+    return idx($this->getColumns(), $key);
+  }
+
+  protected function getSubschemata() {
+    return $this->getColumns();
+  }
+
   public function setCollation($collation) {
     $this->collation = $collation;
     return $this;
@@ -29,13 +37,21 @@ final class PhabricatorConfigTableSchema extends Phobject {
     return $this->collation;
   }
 
-  public function setName($name) {
-    $this->name = $name;
-    return $this;
+  public function compareToSimilarSchema(
+    PhabricatorConfigStorageSchema $expect) {
+
+    $issues = array();
+    if ($this->getCollation() != $expect->getCollation()) {
+      $issues[] = self::ISSUE_COLLATION;
+    }
+
+    return $issues;
   }
 
-  public function getName() {
-    return $this->name;
+  public function newEmptyClone() {
+    $clone = clone $this;
+    $clone->columns = array();
+    return $clone;
   }
 
 }

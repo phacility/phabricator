@@ -1,6 +1,7 @@
 <?php
 
-final class PhabricatorConfigServerSchema extends Phobject {
+final class PhabricatorConfigServerSchema
+  extends PhabricatorConfigStorageSchema {
 
   private $databases = array();
 
@@ -20,6 +21,21 @@ final class PhabricatorConfigServerSchema extends Phobject {
 
   public function getDatabase($key) {
     return idx($this->getDatabases(), $key);
+  }
+
+  protected function getSubschemata() {
+    return $this->getDatabases();
+  }
+
+  public function compareToSimilarSchema(
+    PhabricatorConfigStorageSchema $expect) {
+    return array();
+  }
+
+  public function newEmptyClone() {
+    $clone = clone $this;
+    $clone->databases = array();
+    return $clone;
   }
 
 }

@@ -5,10 +5,12 @@ final class PhabricatorConfigDatabaseController
 
   private $database;
   private $table;
+  private $column;
 
   public function willProcessRequest(array $data) {
     $this->database = idx($data, 'database');
     $this->table = idx($data, 'table');
+    $this->column = idx($data, 'column');
   }
 
   public function processRequest() {
@@ -31,22 +33,34 @@ final class PhabricatorConfigDatabaseController
 
     $actual = $query->loadActualSchema();
     $expect = $query->loadExpectedSchema();
+    $comp = $query->buildComparisonSchema($expect, $actual);
 
-    if ($this->table) {
-      return $this->renderTable(
-        $actual,
+    if ($this->column) {
+      return $this->renderColumn(
+        $comp,
         $expect,
+        $actual,
+        $this->database,
+        $this->table,
+        $this->column);
+    } else if ($this->table) {
+      return $this->renderTable(
+        $comp,
+        $expect,
+        $actual,
         $this->database,
         $this->table);
     } else if ($this->database) {
       return $this->renderDatabase(
-        $actual,
+        $comp,
         $expect,
+        $actual,
         $this->database);
     } else {
       return $this->renderServer(
-        $actual,
-        $expect);
+        $comp,
+        $expect,
+        $actual);
     }
   }
 
@@ -83,41 +97,29 @@ final class PhabricatorConfigDatabaseController
 
 
   private function renderServer(
-    PhabricatorConfigServerSchema $schema,
-    PhabricatorConfigServerSchema $expect) {
+    PhabricatorConfigServerSchema $comp,
+    PhabricatorConfigServerSchema $expect,
+    PhabricatorConfigServerSchema $actual) {
 
-    $icon_ok = id(new PHUIIconView())
-      ->setIconFont('fa-check-circle green');
-
-    $icon_warn = id(new PHUIIconView())
-      ->setIconFont('fa-exclamation-circle yellow');
+    $charset_issue = PhabricatorConfigStorageSchema::ISSUE_CHARSET;
+    $collation_issue = PhabricatorConfigStorageSchema::ISSUE_COLLATION;
 
     $rows = array();
-    foreach ($schema->getDatabases() as $database_name => $database) {
-
-      $expect_database = $expect->getDatabase($database_name);
-      if ($expect_database) {
-        $expect_set = $expect_database->getCharacterSet();
-        $expect_collation = $expect_database->getCollation();
-
-        if ($database->isSameSchema($expect_database)) {
-          $icon = $icon_ok;
-        } else {
-          $icon = $icon_warn;
-        }
+    foreach ($comp->getDatabases() as $database_name => $database) {
+      $actual_database = $actual->getDatabase($database_name);
+      if ($actual_database) {
+        $charset = $actual_database->getCharacterSet();
+        $collation = $actual_database->getCollation();
       } else {
-        $expect_set = null;
-        $expect_collation = null;
-        $icon = $icon_warn;
+        $charset = null;
+        $collation = null;
       }
 
-      $actual_set = $database->getCharacterSet();
-      $actual_collation = $database->getCollation();
-
-
+      $status = $database->getStatus();
+      $issues = $database->getIssues();
 
       $rows[] = array(
-        $icon,
+        $this->renderIcon($status),
         phutil_tag(
           'a',
           array(
@@ -125,10 +127,8 @@ final class PhabricatorConfigDatabaseController
               '/database/'.$database_name.'/'),
           ),
           $database_name),
-        $actual_set,
-        $expect_set,
-        $actual_collation,
-        $expect_collation,
+        $this->renderAttr($charset, $database->hasIssue($charset_issue)),
+        $this->renderAttr($collation, $database->hasIssue($collation_issue)),
       );
     }
 
@@ -138,13 +138,11 @@ final class PhabricatorConfigDatabaseController
           null,
           pht('Database'),
           pht('Charset'),
-          pht('Expected Charset'),
           pht('Collation'),
-          pht('Expected Collation'),
         ))
       ->setColumnClasses(
         array(
-          '',
+          null,
           'wide pri',
           null,
           null,
@@ -152,26 +150,38 @@ final class PhabricatorConfigDatabaseController
 
     $title = pht('Database Status');
 
+    $properties = $this->buildProperties(
+      array(
+      ),
+      $comp->getIssues());
+
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
+      ->addPropertyList($properties)
       ->appendChild($table);
 
     return $this->buildResponse($title, $box);
   }
 
   private function renderDatabase(
-    PhabricatorConfigServerSchema $schema,
+    PhabricatorConfigServerSchema $comp,
     PhabricatorConfigServerSchema $expect,
+    PhabricatorConfigServerSchema $actual,
     $database_name) {
 
-    $database = $schema->getDatabase($database_name);
+    $database = $comp->getDatabase($database_name);
     if (!$database) {
       return new Aphront404Response();
     }
 
     $rows = array();
     foreach ($database->getTables() as $table_name => $table) {
+
+      $status = $table->getStatus();
+      $issues = $table->getIssues();
+
       $rows[] = array(
+        $this->renderIcon($status),
         phutil_tag(
           'a',
           array(
@@ -186,31 +196,74 @@ final class PhabricatorConfigDatabaseController
     $table = id(new AphrontTableView($rows))
       ->setHeaders(
         array(
+          null,
           pht('Table'),
           pht('Collation'),
         ))
       ->setColumnClasses(
         array(
+          null,
           'wide pri',
           null,
         ));
 
     $title = pht('Database Status: %s', $database_name);
 
+    $actual_database = $actual->getDatabase($database_name);
+    if ($actual_database) {
+      $actual_charset = $actual_database->getCharacterSet();
+      $actual_collation = $actual_database->getCollation();
+    } else {
+      $actual_charset = null;
+      $actual_collation = null;
+    }
+
+    $expect_database = $expect->getDatabase($database_name);
+    if ($expect_database) {
+      $expect_charset = $expect_database->getCharacterSet();
+      $expect_collation = $expect_database->getCollation();
+    } else {
+      $expect_charset = null;
+      $expect_collation = null;
+    }
+
+    $properties = $this->buildProperties(
+      array(
+        array(
+          pht('Character Set'),
+          $actual_charset,
+        ),
+        array(
+          pht('Expected Character Set'),
+          $expect_charset,
+        ),
+        array(
+          pht('Collation'),
+          $actual_collation,
+        ),
+        array(
+          pht('Expected Collation'),
+          $expect_collation,
+        ),
+      ),
+      $database->getIssues());
+
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
+      ->addPropertyList($properties)
       ->appendChild($table);
 
     return $this->buildResponse($title, $box);
   }
 
   private function renderTable(
-    PhabricatorConfigServerSchema $schema,
+    PhabricatorConfigServerSchema $comp,
     PhabricatorConfigServerSchema $expect,
+    PhabricatorConfigServerSchema $actual,
     $database_name,
     $table_name) {
 
-    $database = $schema->getDatabase($database_name);
+    $database = $comp->getDatabase($database_name);
     if (!$database) {
       return new Aphront404Response();
     }
@@ -222,17 +275,30 @@ final class PhabricatorConfigDatabaseController
 
     $rows = array();
     foreach ($table->getColumns() as $column_name => $column) {
+      $status = $column->getStatus();
+
       $rows[] = array(
-        $column_name,
+        $this->renderIcon($status),
+        phutil_tag(
+          'a',
+          array(
+            'href' => $this->getApplicationURI(
+              'database/'.
+              $database_name.'/'.
+              $table_name.'/'.
+              $column_name.'/'),
+          ),
+          $column_name),
         $column->getColumnType(),
         $column->getCharacterSet(),
         $column->getCollation(),
       );
     }
 
-    $table = id(new AphrontTableView($rows))
+    $table_view = id(new AphrontTableView($rows))
       ->setHeaders(
         array(
+          null,
           pht('Table'),
           pht('Column Type'),
           pht('Character Set'),
@@ -240,6 +306,7 @@ final class PhabricatorConfigDatabaseController
         ))
       ->setColumnClasses(
         array(
+          null,
           'wide pri',
           null,
           null,
@@ -248,11 +315,133 @@ final class PhabricatorConfigDatabaseController
 
     $title = pht('Database Status: %s.%s', $database_name, $table_name);
 
+    $properties = $this->buildProperties(
+      array(
+      ),
+      $table->getIssues());
+
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->appendChild($table);
+      ->addPropertyList($properties)
+      ->appendChild($table_view);
 
     return $this->buildResponse($title, $box);
+  }
+
+  private function renderColumn(
+    PhabricatorConfigServerSchema $comp,
+    PhabricatorConfigServerSchema $expect,
+    PhabricatorConfigServerSchema $actual,
+    $database_name,
+    $table_name,
+    $column_name) {
+
+    $database = $comp->getDatabase($database_name);
+    if (!$database) {
+      return new Aphront404Response();
+    }
+
+    $table = $database->getTable($table_name);
+    if (!$table) {
+      return new Aphront404Response();
+    }
+
+    $column = $table->getColumn($column_name);
+    if (!$table) {
+      return new Aphront404Response();
+    }
+
+    $title = pht(
+      'Database Status: %s.%s.%s',
+      $database_name,
+      $table_name,
+      $column_name);
+
+    $properties = $this->buildProperties(
+      array(
+      ),
+      $column->getIssues());
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText($title)
+      ->addPropertyList($properties);
+
+    return $this->buildResponse($title, $box);
+  }
+  private function renderIcon($status) {
+    switch ($status) {
+      case PhabricatorConfigStorageSchema::STATUS_OKAY:
+        $icon = 'fa-check-circle green';
+        break;
+      case PhabricatorConfigStorageSchema::STATUS_WARN:
+        $icon = 'fa-exclamation-circle yellow';
+        break;
+      case PhabricatorConfigStorageSchema::STATUS_FAIL:
+      default:
+        $icon = 'fa-times-circle red';
+        break;
+    }
+
+    return id(new PHUIIconView())
+      ->setIconFont($icon);
+  }
+
+  private function renderAttr($attr, $issue) {
+    if ($issue) {
+      return phutil_tag(
+        'span',
+        array(
+          'style' => 'color: #aa0000;',
+        ),
+        $attr);
+    } else {
+      return $attr;
+    }
+  }
+
+  private function buildProperties(array $properties, array $issues) {
+    $view = id(new PHUIPropertyListView())
+      ->setUser($this->getRequest()->getUser());
+
+    foreach ($properties as $property) {
+      list($key, $value) = $property;
+      $view->addProperty($key, $value);
+    }
+
+    $status_view = new PHUIStatusListView();
+    if (!$issues) {
+      $status_view->addItem(
+        id(new PHUIStatusItemView())
+          ->setIcon(PHUIStatusItemView::ICON_ACCEPT, 'green')
+          ->setTarget(pht('No Schema Issues')));
+    } else {
+      foreach ($issues as $issue) {
+        $note = PhabricatorConfigStorageSchema::getIssueDescription($issue);
+
+        $status = PhabricatorConfigStorageSchema::getIssueStatus($issue);
+        switch ($status) {
+          case PhabricatorConfigStorageSchema::STATUS_WARN:
+            $icon = PHUIStatusItemView::ICON_WARNING;
+            $color = 'yellow';
+            break;
+          case PhabricatorConfigStorageSchema::STATUS_FAIL:
+          default:
+            $icon = PHUIStatusItemView::ICON_REJECT;
+            $color = 'red';
+            break;
+        }
+
+        $item = id(new PHUIStatusItemView())
+          ->setTarget(PhabricatorConfigStorageSchema::getIssueName($issue))
+          ->setIcon($icon, $color)
+          ->setNote($note);
+
+        $status_view->addItem($item);
+      }
+    }
+    $view->addProperty(pht('Schema Status'), $status_view);
+
+    return $view;
   }
 
 }

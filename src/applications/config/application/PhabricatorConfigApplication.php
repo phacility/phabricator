@@ -42,7 +42,10 @@ final class PhabricatorConfigApplication extends PhabricatorApplication {
         'edit/(?P<key>[\w\.\-]+)/' => 'PhabricatorConfigEditController',
         'group/(?P<key>[^/]+)/' => 'PhabricatorConfigGroupController',
         'welcome/' => 'PhabricatorConfigWelcomeController',
-        'database/(?:(?P<database>[^/]+)/(?:(?P<table>[^/]+)/)?)?'
+        'database/'.
+          '(?:(?P<database>[^/]+)/'.
+          '(?:(?P<table>[^/]+)/'.
+          '(?:(?P<column>[^/]+)/)?)?)?'
           => 'PhabricatorConfigDatabaseController',
         '(?P<verb>ignore|unignore)/(?P<key>[^/]+)/'
           => 'PhabricatorConfigIgnoreController',

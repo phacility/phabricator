@@ -1,8 +1,8 @@
 <?php
 
-final class PhabricatorConfigColumnSchema extends Phobject {
+final class PhabricatorConfigColumnSchema
+  extends PhabricatorConfigStorageSchema {
 
-  private $name;
   private $characterSet;
   private $collation;
   private $columnType;
@@ -14,6 +14,10 @@ final class PhabricatorConfigColumnSchema extends Phobject {
 
   public function getColumnType() {
     return $this->columnType;
+  }
+
+  protected function getSubschemata() {
+    return array();
   }
 
   public function setCollation($collation) {
@@ -34,13 +38,28 @@ final class PhabricatorConfigColumnSchema extends Phobject {
     return $this->characterSet;
   }
 
-  public function setName($name) {
-    $this->name = $name;
-    return $this;
+  public function compareToSimilarSchema(
+    PhabricatorConfigStorageSchema $expect) {
+
+    $issues = array();
+    if ($this->getCharacterSet() != $expect->getCharacterSet()) {
+      $issues[] = self::ISSUE_CHARSET;
+    }
+
+    if ($this->getCollation() != $expect->getCollation()) {
+      $issues[] = self::ISSUE_COLLATION;
+    }
+
+    if ($this->getColumnType() != $expect->getColumnType()) {
+      $issues[] = self::ISSUE_COLUMNTYPE;
+    }
+
+    return $issues;
   }
 
-  public function getName() {
-    return $this->name;
+  public function newEmptyClone() {
+    $clone = clone $this;
+    return $clone;
   }
 
 }
