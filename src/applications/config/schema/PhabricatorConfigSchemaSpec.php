@@ -74,6 +74,10 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
     $table = $this->newTable($table_name);
 
     foreach ($columns as $name => $type) {
+      if ($type === null) {
+        continue;
+      }
+
       $details = $this->getDetailsForDataType($type);
       list($column_type, $charset, $collation, $nullable) = $details;
 

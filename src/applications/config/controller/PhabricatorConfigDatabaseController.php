@@ -688,6 +688,9 @@ final class PhabricatorConfigDatabaseController
       case PhabricatorConfigStorageSchema::STATUS_OKAY:
         $icon = 'fa-check-circle green';
         break;
+      case PhabricatorConfigStorageSchema::STATUS_NOTE:
+        $icon = 'fa-info-circle blue';
+        break;
       case PhabricatorConfigStorageSchema::STATUS_WARN:
         $icon = 'fa-exclamation-circle yellow';
         break;
@@ -735,6 +738,10 @@ final class PhabricatorConfigDatabaseController
 
         $status = PhabricatorConfigStorageSchema::getIssueStatus($issue);
         switch ($status) {
+          case PhabricatorConfigStorageSchema::STATUS_NOTE:
+            $icon = PHUIStatusItemView::ICON_INFO;
+            $color = 'blue';
+            break;
           case PhabricatorConfigStorageSchema::STATUS_WARN:
             $icon = PHUIStatusItemView::ICON_WARNING;
             $color = 'yellow';

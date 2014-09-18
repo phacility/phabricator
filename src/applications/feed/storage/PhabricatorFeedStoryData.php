@@ -15,6 +15,19 @@ final class PhabricatorFeedStoryData extends PhabricatorFeedDAO {
       self::CONFIG_SERIALIZATION  => array(
         'storyData'  => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'chronologicalKey' => 'uint64',
+        'storyType' => 'text64',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_phid' => null,
+        'phid' => array(
+          'columns' => array('phid'),
+        ),
+        'chronologicalKey' => array(
+          'columns' => array('chronologicalKey'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

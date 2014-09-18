@@ -9,10 +9,12 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
   const ISSUE_COLUMNTYPE = 'columntype';
   const ISSUE_NULLABLE = 'nullable';
   const ISSUE_KEYCOLUMNS = 'keycolumns';
+  const ISSUE_SUBNOTE = 'subnote';
   const ISSUE_SUBWARN = 'subwarn';
   const ISSUE_SUBFAIL = 'subfail';
 
   const STATUS_OKAY = 'okay';
+  const STATUS_NOTE = 'note';
   const STATUS_WARN = 'warn';
   const STATUS_FAIL = 'fail';
 
@@ -55,6 +57,9 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
 
     foreach ($this->getSubschemata() as $sub) {
       switch ($sub->getStatus()) {
+        case self::STATUS_NOTE:
+          $issues[self::ISSUE_SUBNOTE] = self::ISSUE_SUBNOTE;
+          break;
         case self::STATUS_WARN:
           $issues[self::ISSUE_SUBWARN] = self::ISSUE_SUBWARN;
           break;
@@ -104,6 +109,8 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
         return pht('Wrong Nullable Setting');
       case self::ISSUE_KEYCOLUMNS:
         return pht('Key on Wrong Columns');
+      case self::ISSUE_SUBNOTE:
+        return pht('Subschemata Have Notices');
       case self::ISSUE_SUBWARN:
         return pht('Subschemata Have Warnings');
       case self::ISSUE_SUBFAIL:
@@ -129,6 +136,8 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
         return pht('This schema has the wrong nullable setting.');
       case self::ISSUE_KEYCOLUMNS:
         return pht('This schema is on the wrong columns.');
+      case self::ISSUE_SUBNOTE:
+        return pht('Subschemata have setup notices.');
       case self::ISSUE_SUBWARN:
         return pht('Subschemata have setup warnings.');
       case self::ISSUE_SUBFAIL:
@@ -144,13 +153,15 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
       case self::ISSUE_SUBFAIL:
         return self::STATUS_FAIL;
       case self::ISSUE_SURPLUS:
-      case self::ISSUE_CHARSET:
-      case self::ISSUE_COLLATION:
       case self::ISSUE_COLUMNTYPE:
       case self::ISSUE_SUBWARN:
       case self::ISSUE_KEYCOLUMNS:
       case self::ISSUE_NULLABLE:
         return self::STATUS_WARN;
+      case self::ISSUE_SUBNOTE:
+      case self::ISSUE_CHARSET:
+      case self::ISSUE_COLLATION:
+        return self::STATUS_NOTE;
       default:
         throw new Exception(pht('Unknown schema issue "%s"!', $issue));
     }
@@ -159,8 +170,10 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
   public static function getStatusSeverity($status) {
     switch ($status) {
       case self::STATUS_FAIL:
-        return 2;
+        return 3;
       case self::STATUS_WARN:
+        return 2;
+      case self::STATUS_NOTE:
         return 1;
       case self::STATUS_OKAY:
         return 0;

@@ -1750,9 +1750,8 @@ abstract class LiskDAO {
     $map = array();
     foreach ($this->getAllLiskProperties() as $property) {
       // First, use types specified explicitly in the table configuration.
-      $type = idx($custom_map, $property);
-      if ($type) {
-        $map[$property] = $type;
+      if (array_key_exists($property, $custom_map)) {
+        $map[$property] = $custom_map[$property];
         continue;
       }
 
@@ -1786,7 +1785,7 @@ abstract class LiskDAO {
       }
 
       // We don't know the type of this column.
-      $map[$property] = null;
+      $map[$property] = '<unknown>';
     }
 
     return $map;

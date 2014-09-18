@@ -23,6 +23,18 @@ final class DrydockResource extends DrydockDAO
         'attributes'    => self::SERIALIZATION_JSON,
         'capabilities'  => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'name' => 'text255',
+        'ownerPHID' => 'phid?',
+        'status' => 'uint32',
+        'type' => 'text64',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_phid' => null,
+        'phid' => array(
+          'columns' => array('phid'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 
