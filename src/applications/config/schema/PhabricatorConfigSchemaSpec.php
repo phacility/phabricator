@@ -88,6 +88,11 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
     }
 
     foreach ($keys as $key_name => $key_spec) {
+      if ($key_spec === null) {
+        // This is a subclass removing a key which Lisk expects.
+        continue;
+      }
+
       $key = $this->newKey($key_name)
         ->setColumnNames(idx($key_spec, 'columns', array()));
 
@@ -97,7 +102,37 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
     $database->addTable($table);
   }
 
-  protected function buildEdgeSchemata(PhabricatorLiskDAO $object) {}
+  protected function buildEdgeSchemata(PhabricatorLiskDAO $object) {
+    $this->buildRawSchema(
+      $object->getApplicationName(),
+      PhabricatorEdgeConfig::TABLE_NAME_EDGE,
+      array(
+        'src' => 'phid',
+        'type' => 'uint32',
+        'dst' => 'phid',
+        'dateCreated' => 'epoch',
+        'seq' => 'uint32',
+        'dataID' => 'id?',
+      ),
+      array(
+        'PRIMARY' => array(
+          'columns' => array('src', 'type', 'dst'),
+        ),
+      ));
+
+    $this->buildRawSchema(
+      $object->getApplicationName(),
+      PhabricatorEdgeConfig::TABLE_NAME_EDGEDATA,
+      array(
+        'id' => 'id',
+        'data' => 'text',
+      ),
+      array(
+        'PRIMARY' => array(
+          'columns' => array('id'),
+        ),
+      ));
+  }
 
   protected function getDatabase($name) {
     $server = $this->getServer();
@@ -199,6 +234,11 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
         break;
       case 'text32':
         $column_type = 'varchar(32)';
+        $charset = $this->getUTF8Charset();
+        $collation = $this->getUTF8Collation();
+        break;
+      case 'text20':
+        $column_type = 'varchar(20)';
         $charset = $this->getUTF8Charset();
         $collation = $this->getUTF8Collation();
         break;
