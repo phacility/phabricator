@@ -77,7 +77,15 @@ final class PhabricatorConfigDatabaseController
         $crumbs->addTextCrumb(
           $this->database,
           $this->getApplicationURI('database/'.$this->database.'/'));
-        $crumbs->addTextCrumb($this->table);
+        if ($this->column) {
+          $crumbs->addTextCrumb(
+            $this->table,
+            $this->getApplicationURI(
+              'database/'.$this->database.'/'.$this->table.'/'));
+          $crumbs->addTextCrumb($this->column);
+        } else {
+          $crumbs->addTextCrumb($this->table);
+        }
       } else {
         $crumbs->addTextCrumb($this->database);
       }
@@ -169,6 +177,8 @@ final class PhabricatorConfigDatabaseController
     PhabricatorConfigServerSchema $actual,
     $database_name) {
 
+    $collation_issue = PhabricatorConfigStorageSchema::ISSUE_COLLATION;
+
     $database = $comp->getDatabase($database_name);
     if (!$database) {
       return new Aphront404Response();
@@ -176,9 +186,7 @@ final class PhabricatorConfigDatabaseController
 
     $rows = array();
     foreach ($database->getTables() as $table_name => $table) {
-
       $status = $table->getStatus();
-      $issues = $table->getIssues();
 
       $rows[] = array(
         $this->renderIcon($status),
@@ -189,7 +197,9 @@ final class PhabricatorConfigDatabaseController
               '/database/'.$database_name.'/'.$table_name.'/'),
           ),
           $table_name),
-        $table->getCollation(),
+        $this->renderAttr(
+          $table->getCollation(),
+          $table->hasIssue($collation_issue)),
       );
     }
 
@@ -263,6 +273,10 @@ final class PhabricatorConfigDatabaseController
     $database_name,
     $table_name) {
 
+    $type_issue = PhabricatorConfigStorageSchema::ISSUE_COLUMNTYPE;
+    $charset_issue = PhabricatorConfigStorageSchema::ISSUE_CHARSET;
+    $collation_issue = PhabricatorConfigStorageSchema::ISSUE_COLLATION;
+
     $database = $comp->getDatabase($database_name);
     if (!$database) {
       return new Aphront404Response();
@@ -273,9 +287,31 @@ final class PhabricatorConfigDatabaseController
       return new Aphront404Response();
     }
 
+    $actual_database = $actual->getDatabase($database_name);
+    $actual_table = null;
+    if ($actual_database) {
+      $actual_table = $actual_database->getTable($table_name);
+    }
+
+    $expect_database = $expect->getDatabase($database_name);
+    $expect_table = null;
+    if ($expect_database) {
+      $expect_table = $expect_database->getTable($table_name);
+    }
+
     $rows = array();
     foreach ($table->getColumns() as $column_name => $column) {
+      $expect_column = null;
+      if ($expect_table) {
+        $expect_column = $expect_table->getColumn($column_name);
+      }
+
       $status = $column->getStatus();
+
+      $data_type = null;
+      if ($expect_column) {
+        $data_type = $expect_column->getDataType();
+      }
 
       $rows[] = array(
         $this->renderIcon($status),
@@ -289,9 +325,16 @@ final class PhabricatorConfigDatabaseController
               $column_name.'/'),
           ),
           $column_name),
-        $column->getColumnType(),
-        $column->getCharacterSet(),
-        $column->getCollation(),
+        $data_type,
+        $this->renderAttr(
+          $column->getColumnType(),
+          $column->hasIssue($type_issue)),
+        $this->renderAttr(
+          $column->getCharacterSet(),
+          $column->hasIssue($charset_issue)),
+        $this->renderAttr(
+          $column->getCollation(),
+          $column->hasIssue($collation_issue)),
       );
     }
 
@@ -300,6 +343,7 @@ final class PhabricatorConfigDatabaseController
         array(
           null,
           pht('Table'),
+          pht('Data Type'),
           pht('Column Type'),
           pht('Character Set'),
           pht('Collation'),
@@ -310,13 +354,34 @@ final class PhabricatorConfigDatabaseController
           'wide pri',
           null,
           null,
+          null,
           null
         ));
 
     $title = pht('Database Status: %s.%s', $database_name, $table_name);
 
+    if ($actual_table) {
+      $actual_collation = $actual_table->getCollation();
+    } else {
+      $actual_collation = null;
+    }
+
+    if ($expect_table) {
+      $expect_collation = $expect_table->getCollation();
+    } else {
+      $expect_collation = null;
+    }
+
     $properties = $this->buildProperties(
       array(
+        array(
+          pht('Collation'),
+          $actual_collation,
+        ),
+        array(
+          pht('Expected Collation'),
+          $expect_collation,
+        ),
       ),
       $table->getIssues());
 
@@ -351,6 +416,49 @@ final class PhabricatorConfigDatabaseController
       return new Aphront404Response();
     }
 
+    $actual_database = $actual->getDatabase($database_name);
+    $actual_table = null;
+    $actual_column = null;
+    if ($actual_database) {
+      $actual_table = $actual_database->getTable($table_name);
+      if ($actual_table) {
+        $actual_column = $actual_table->getColumn($column_name);
+      }
+    }
+
+    $expect_database = $expect->getDatabase($database_name);
+    $expect_table = null;
+    $expect_column = null;
+    if ($expect_database) {
+      $expect_table = $expect_database->getTable($table_name);
+      if ($expect_table) {
+        $expect_column = $expect_table->getColumn($column_name);
+      }
+    }
+
+    if ($actual_column) {
+      $actual_coltype = $actual_column->getColumnType();
+      $actual_charset = $actual_column->getCharacterSet();
+      $actual_collation = $actual_column->getCollation();
+    } else {
+      $actual_coltype = null;
+      $actual_charset = null;
+      $actual_collation = null;
+    }
+
+    if ($expect_column) {
+      $data_type = $expect_column->getDataType();
+      $expect_coltype = $expect_column->getColumnType();
+      $expect_charset = $expect_column->getCharacterSet();
+      $expect_collation = $expect_column->getCollation();
+    } else {
+      $data_type = null;
+      $expect_coltype = null;
+      $expect_charset = null;
+      $expect_collation = null;
+    }
+
+
     $title = pht(
       'Database Status: %s.%s.%s',
       $database_name,
@@ -359,6 +467,34 @@ final class PhabricatorConfigDatabaseController
 
     $properties = $this->buildProperties(
       array(
+        array(
+          pht('Data Type'),
+          $data_type,
+        ),
+        array(
+          pht('Column Type'),
+          $actual_coltype,
+        ),
+        array(
+          pht('Expected Column Type'),
+          $expect_coltype,
+        ),
+        array(
+          pht('Character Set'),
+          $actual_charset,
+        ),
+        array(
+          pht('Expected Character Set'),
+          $expect_charset,
+        ),
+        array(
+          pht('Collation'),
+          $actual_collation,
+        ),
+        array(
+          pht('Expected Collation'),
+          $expect_collation,
+        ),
       ),
       $column->getIssues());
 

@@ -6,6 +6,7 @@ final class PhabricatorConfigColumnSchema
   private $characterSet;
   private $collation;
   private $columnType;
+  private $dataType;
 
   public function setColumnType($column_type) {
     $this->columnType = $column_type;
@@ -18,6 +19,15 @@ final class PhabricatorConfigColumnSchema
 
   protected function getSubschemata() {
     return array();
+  }
+
+  public function setDataType($data_type) {
+    $this->dataType = $data_type;
+    return $this;
+  }
+
+  public function getDataType() {
+    return $this->dataType;
   }
 
   public function setCollation($collation) {
