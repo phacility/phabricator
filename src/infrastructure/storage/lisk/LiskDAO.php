@@ -1734,7 +1734,7 @@ abstract class LiskDAO {
 
     $serialization_map = array(
       self::SERIALIZATION_JSON => 'text',
-      self::SERIALIZATION_PHP => 'blob',
+      self::SERIALIZATION_PHP => 'bytes',
     );
 
     $builtin = array(

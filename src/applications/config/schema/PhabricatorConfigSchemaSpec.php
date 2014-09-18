@@ -57,12 +57,23 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
   }
 
   private function buildLiskObjectSchema(PhabricatorLiskDAO $object) {
-    $database = $this->getDatabase($object->getApplicationName());
+    $this->buildRawSchema(
+      $object->getApplicationName(),
+      $object->getTableName(),
+      $object->getSchemaColumns(),
+      $object->getSchemaKeys());
+  }
 
-    $table = $this->newTable($object->getTableName());
+  protected function buildRawSchema(
+    $database_name,
+    $table_name,
+    array $columns,
+    array $keys) {
+    $database = $this->getDatabase($database_name);
 
-    $cols = $object->getSchemaColumns();
-    foreach ($cols as $name => $type) {
+    $table = $this->newTable($table_name);
+
+    foreach ($columns as $name => $type) {
       $details = $this->getDetailsForDataType($type);
       list($column_type, $charset, $collation, $nullable) = $details;
 
@@ -76,7 +87,6 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
       $table->addColumn($column);
     }
 
-    $keys = $object->getSchemaKeys();
     foreach ($keys as $key_name => $key_spec) {
       $key = $this->newKey($key_name)
         ->setColumnNames(idx($key_spec, 'columns', array()));
@@ -147,13 +157,21 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
       case 'uint32':
         $column_type = 'int(10) unsigned';
         break;
+      case 'id64':
+        $column_type = 'bigint(20) unsigned';
+        break;
       case 'phid':
       case 'policy';
         $column_type = 'varchar(64)';
         $charset = 'binary';
         $collation = 'binary';
         break;
-      case 'blob':
+      case 'bytes12':
+        $column_type = 'char(12)';
+        $charset = 'binary';
+        $collation = 'binary';
+        break;
+      case 'bytes':
         $column_type = 'longblob';
         $charset = 'binary';
         $collation = 'binary';
@@ -170,6 +188,11 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
         break;
       case 'text32':
         $column_type = 'varchar(32)';
+        $charset = $this->getUTF8Charset();
+        $collation = $this->getUTF8Collation();
+        break;
+      case 'text16':
+        $column_type = 'varchar(16)';
         $charset = $this->getUTF8Charset();
         $collation = $this->getUTF8Collation();
         break;

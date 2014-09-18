@@ -67,6 +67,13 @@ final class PhabricatorConfigColumnSchema
       return ((int)$matches[1]) * 4;
     }
 
+    $matches = null;
+    if (preg_match('/^char\((\d+)\)$/', $type, $matches)) {
+      // We use char() only for fixed-length binary data, so its size
+      // is always the column size.
+      return ((int)$matches[1]);
+    }
+
     switch ($type) {
       case 'int(10) unsigned':
         return 4;
