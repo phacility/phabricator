@@ -7,6 +7,8 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
   const ISSUE_CHARSET = 'charset';
   const ISSUE_COLLATION = 'collation';
   const ISSUE_COLUMNTYPE = 'columntype';
+  const ISSUE_NULLABLE = 'nullable';
+  const ISSUE_KEYCOLUMNS = 'keycolumns';
   const ISSUE_SUBWARN = 'subwarn';
   const ISSUE_SUBFAIL = 'subfail';
 
@@ -98,6 +100,10 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
         return pht('Wrong Collation');
       case self::ISSUE_COLUMNTYPE:
         return pht('Wrong Column Type');
+      case self::ISSUE_NULLABLE:
+        return pht('Wrong Nullable Setting');
+      case self::ISSUE_KEYCOLUMNS:
+        return pht('Key on Wrong Columns');
       case self::ISSUE_SUBWARN:
         return pht('Subschemata Have Warnings');
       case self::ISSUE_SUBFAIL:
@@ -119,6 +125,10 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
         return pht('This schema can use a better collation.');
       case self::ISSUE_COLUMNTYPE:
         return pht('This schema can use a better column type.');
+      case self::ISSUE_NULLABLE:
+        return pht('This schema has the wrong nullable setting.');
+      case self::ISSUE_KEYCOLUMNS:
+        return pht('This schema is on the wrong columns.');
       case self::ISSUE_SUBWARN:
         return pht('Subschemata have setup warnings.');
       case self::ISSUE_SUBFAIL:
@@ -138,6 +148,7 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
       case self::ISSUE_COLLATION:
       case self::ISSUE_COLUMNTYPE:
       case self::ISSUE_SUBWARN:
+      case self::ISSUE_KEYCOLUMNS:
         return self::STATUS_WARN;
       default:
         throw new Exception(pht('Unknown schema issue "%s"!', $issue));

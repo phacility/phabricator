@@ -7,6 +7,16 @@ final class PhabricatorConfigColumnSchema
   private $collation;
   private $columnType;
   private $dataType;
+  private $nullable;
+
+  public function setNullable($nullable) {
+    $this->nullable = $nullable;
+    return $this;
+  }
+
+  public function getNullable() {
+    return $this->nullable;
+  }
 
   public function setColumnType($column_type) {
     $this->columnType = $column_type;
@@ -46,6 +56,20 @@ final class PhabricatorConfigColumnSchema
 
   public function getCharacterSet() {
     return $this->characterSet;
+  }
+
+  public function getKeyByteLength() {
+    $type = $this->getColumnType();
+
+    $matches = null;
+    if (preg_match('/^varchar\((\d+)\)$/', $type, $matches)) {
+      // For utf8mb4, each character requires 4 bytes.
+      return ((int)$matches[1]) * 4;
+    }
+
+    // TODO: Build this out to catch overlong indexes.
+
+    return 0;
   }
 
   public function compareToSimilarSchema(

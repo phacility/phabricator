@@ -5,6 +5,7 @@ final class PhabricatorConfigTableSchema
 
   private $collation;
   private $columns = array();
+  private $keys = array();
 
   public function addColumn(PhabricatorConfigColumnSchema $column) {
     $key = $column->getName();
@@ -16,6 +17,16 @@ final class PhabricatorConfigTableSchema
     return $this;
   }
 
+  public function addKey(PhabricatorConfigKeySchema $key) {
+    $name = $key->getName();
+    if (isset($this->keys[$name])) {
+      throw new Exception(
+        pht('Trying to add duplicate key "%s"!', $name));
+    }
+    $this->keys[$name] = $key;
+    return $this;
+  }
+
   public function getColumns() {
     return $this->columns;
   }
@@ -24,8 +35,16 @@ final class PhabricatorConfigTableSchema
     return idx($this->getColumns(), $key);
   }
 
+  public function getKeys() {
+    return $this->keys;
+  }
+
+  public function getKey($key) {
+    return idx($this->getKeys(), $key);
+  }
+
   protected function getSubschemata() {
-    return $this->getColumns();
+    return array_merge($this->getColumns(), $this->getKeys());
   }
 
   public function setCollation($collation) {
@@ -51,6 +70,7 @@ final class PhabricatorConfigTableSchema
   public function newEmptyClone() {
     $clone = clone $this;
     $clone->columns = array();
+    $clone->keys = array();
     return $clone;
   }
 

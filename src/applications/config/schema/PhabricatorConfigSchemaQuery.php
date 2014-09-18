@@ -47,6 +47,41 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
       $databases);
     $database_info = ipull($database_info, null, 'SCHEMA_NAME');
 
+    $sql = array();
+    foreach ($tables as $table) {
+      $sql[] = qsprintf(
+        $conn,
+        '(TABLE_SCHEMA = %s AND TABLE_NAME = %s)',
+        $table['TABLE_SCHEMA'],
+        $table['TABLE_NAME']);
+    }
+
+    if ($sql) {
+      $column_info = queryfx_all(
+        $conn,
+        'SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, CHARACTER_SET_NAME,
+            COLLATION_NAME, COLUMN_TYPE, IS_NULLABLE
+          FROM INFORMATION_SCHEMA.COLUMNS
+          WHERE (%Q)',
+        '('.implode(') OR (', $sql).')');
+      $column_info = igroup($column_info, 'TABLE_SCHEMA');
+    } else {
+      $column_info = array();
+    }
+
+    if ($sql) {
+      $key_info = queryfx_all(
+        $conn,
+        'SELECT CONSTRAINT_NAME, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME,
+            ORDINAL_POSITION, POSITION_IN_UNIQUE_CONSTRAINT
+          FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+          WHERE (%Q)',
+        '('.implode(') OR (', $sql).')');
+      $key_info = igroup($key_info, 'TABLE_SCHEMA');
+    } else {
+      $key_info = array();
+    }
+
     $server_schema = new PhabricatorConfigServerSchema();
 
     $tables = igroup($tables, 'TABLE_SCHEMA');
@@ -58,6 +93,11 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
         ->setCharacterSet($info['DEFAULT_CHARACTER_SET_NAME'])
         ->setCollation($info['DEFAULT_COLLATION_NAME']);
 
+      $database_column_info = idx($column_info, $database_name, array());
+      $database_column_info = igroup($database_column_info, 'TABLE_NAME');
+      $database_key_info = idx($key_info, $database_name, array());
+      $database_key_info = igroup($database_key_info, 'TABLE_NAME');
+
       foreach ($database_tables as $table) {
         $table_name = $table['TABLE_NAME'];
 
@@ -65,22 +105,27 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
           ->setName($table_name)
           ->setCollation($table['TABLE_COLLATION']);
 
-        $columns = queryfx_all(
-          $conn,
-          'SELECT COLUMN_NAME, CHARACTER_SET_NAME, COLLATION_NAME, COLUMN_TYPE
-            FROM INFORMATION_SCHEMA.COLUMNS
-            WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s',
-          $database_name,
-          $table_name);
-
+        $columns = idx($database_column_info, $table_name, array());
         foreach ($columns as $column) {
           $column_schema = id(new PhabricatorConfigColumnSchema())
             ->setName($column['COLUMN_NAME'])
             ->setCharacterSet($column['CHARACTER_SET_NAME'])
             ->setCollation($column['COLLATION_NAME'])
-            ->setColumnType($column['COLUMN_TYPE']);
+            ->setColumnType($column['COLUMN_TYPE'])
+            ->setNullable($column['IS_NULLABLE'] == 'YES');
 
           $table_schema->addColumn($column_schema);
+        }
+
+        $key_parts = idx($database_key_info, $table_name, array());
+        $keys = igroup($key_parts, 'CONSTRAINT_NAME');
+        foreach ($keys as $key_name => $key_pieces) {
+          $key_pieces = isort($key_pieces, 'ORDINAL_POSITION');
+          $key_schema = id(new PhabricatorConfigKeySchema())
+            ->setName($key_name)
+            ->setColumnNames(ipull($key_pieces, 'COLUMN_NAME'));
+
+          $table_schema->addKey($key_schema);
         }
 
         $database_schema->addTable($table_schema);
@@ -190,6 +235,22 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
 
           $comp_table->addColumn($comp_column);
         }
+
+        $all_keys =
+          $actual_table->getKeys() +
+          $expect_table->getKeys();
+        foreach ($all_keys as $key_name => $key_template) {
+          $actual_key = $actual_table->getKey($key_name);
+          $expect_key = $expect_table->getKey($key_name);
+
+          $issues = $this->compareSchemata($expect_key, $actual_key);
+
+          $comp_key = $key_template->newEmptyClone()
+            ->setIssues($issues);
+
+          $comp_table->addKey($comp_key);
+        }
+
         $comp_database->addTable($comp_table);
       }
       $comp_server->addDatabase($comp_database);

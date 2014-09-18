@@ -3,14 +3,18 @@
 final class PhabricatorConfigDatabaseController
   extends PhabricatorConfigController {
 
+  const MAX_INNODB_KEY_LENGTH = 767;
+
   private $database;
   private $table;
   private $column;
+  private $key;
 
   public function willProcessRequest(array $data) {
     $this->database = idx($data, 'database');
     $this->table = idx($data, 'table');
     $this->column = idx($data, 'column');
+    $this->key = idx($data, 'key');
   }
 
   public function processRequest() {
@@ -43,6 +47,14 @@ final class PhabricatorConfigDatabaseController
         $this->database,
         $this->table,
         $this->column);
+    } else if ($this->key) {
+      return $this->renderKey(
+        $comp,
+        $expect,
+        $actual,
+        $this->database,
+        $this->table,
+        $this->key);
     } else if ($this->table) {
       return $this->renderTable(
         $comp,
@@ -77,12 +89,16 @@ final class PhabricatorConfigDatabaseController
         $crumbs->addTextCrumb(
           $this->database,
           $this->getApplicationURI('database/'.$this->database.'/'));
-        if ($this->column) {
+        if ($this->column || $this->key) {
           $crumbs->addTextCrumb(
             $this->table,
             $this->getApplicationURI(
               'database/'.$this->database.'/'.$this->table.'/'));
-          $crumbs->addTextCrumb($this->column);
+          if ($this->column) {
+            $crumbs->addTextCrumb($this->column);
+          } else {
+            $crumbs->addTextCrumb($this->key);
+          }
         } else {
           $crumbs->addTextCrumb($this->table);
         }
@@ -276,6 +292,7 @@ final class PhabricatorConfigDatabaseController
     $type_issue = PhabricatorConfigStorageSchema::ISSUE_COLUMNTYPE;
     $charset_issue = PhabricatorConfigStorageSchema::ISSUE_CHARSET;
     $collation_issue = PhabricatorConfigStorageSchema::ISSUE_COLLATION;
+    $nullable_issue = PhabricatorConfigStorageSchema::ISSUE_NULLABLE;
 
     $database = $comp->getDatabase($database_name);
     if (!$database) {
@@ -322,6 +339,7 @@ final class PhabricatorConfigDatabaseController
               'database/'.
               $database_name.'/'.
               $table_name.'/'.
+              'col/'.
               $column_name.'/'),
           ),
           $column_name),
@@ -329,6 +347,11 @@ final class PhabricatorConfigDatabaseController
         $this->renderAttr(
           $column->getColumnType(),
           $column->hasIssue($type_issue)),
+        $this->renderAttr(
+          $column->getNullable()
+            ? pht('Yes')
+            : pht('No'),
+          $column->hasIssue($nullable_issue)),
         $this->renderAttr(
           $column->getCharacterSet(),
           $column->hasIssue($charset_issue)),
@@ -342,9 +365,10 @@ final class PhabricatorConfigDatabaseController
       ->setHeaders(
         array(
           null,
-          pht('Table'),
+          pht('Column'),
           pht('Data Type'),
           pht('Column Type'),
+          pht('Nullable'),
           pht('Character Set'),
           pht('Collation'),
         ))
@@ -356,6 +380,66 @@ final class PhabricatorConfigDatabaseController
           null,
           null,
           null
+        ));
+
+    $key_rows = array();
+    foreach ($table->getKeys() as $key_name => $key) {
+      $expect_key = null;
+      if ($expect_table) {
+        $expect_key = $expect_table->getKey($key_name);
+      }
+
+      $status = $key->getStatus();
+
+      $size = 0;
+      foreach ($key->getColumnNames() as $column_name) {
+        $column = $table->getColumn($column_name);
+        if (!$column) {
+          $size = 0;
+          break;
+        }
+        $size += $column->getKeyByteLength();
+      }
+
+      $size_formatted = null;
+      if ($size) {
+        $size_formatted = $this->renderAttr(
+          $size,
+          ($size > self::MAX_INNODB_KEY_LENGTH));
+      }
+
+      $key_rows[] = array(
+        $this->renderIcon($status),
+        phutil_tag(
+          'a',
+          array(
+            'href' => $this->getApplicationURI(
+              'database/'.
+              $database_name.'/'.
+              $table_name.'/'.
+              'key/'.
+              $key_name.'/'),
+          ),
+          $key_name),
+        implode(', ', $key->getColumnNames()),
+        $size_formatted,
+      );
+    }
+
+    $keys_view = id(new AphrontTableView($key_rows))
+      ->setHeaders(
+        array(
+          null,
+          pht('Key'),
+          pht('Columns'),
+          pht('Size'),
+        ))
+      ->setColumnClasses(
+        array(
+          null,
+          'wide pri',
+          null,
+          null,
         ));
 
     $title = pht('Database Status: %s.%s', $database_name, $table_name);
@@ -388,7 +472,8 @@ final class PhabricatorConfigDatabaseController
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->addPropertyList($properties)
-      ->appendChild($table_view);
+      ->appendChild($table_view)
+      ->appendChild($keys_view);
 
     return $this->buildResponse($title, $box);
   }
@@ -412,7 +497,7 @@ final class PhabricatorConfigDatabaseController
     }
 
     $column = $table->getColumn($column_name);
-    if (!$table) {
+    if (!$column) {
       return new Aphront404Response();
     }
 
@@ -504,6 +589,88 @@ final class PhabricatorConfigDatabaseController
 
     return $this->buildResponse($title, $box);
   }
+
+  private function renderKey(
+    PhabricatorConfigServerSchema $comp,
+    PhabricatorConfigServerSchema $expect,
+    PhabricatorConfigServerSchema $actual,
+    $database_name,
+    $table_name,
+    $key_name) {
+
+    $database = $comp->getDatabase($database_name);
+    if (!$database) {
+      return new Aphront404Response();
+    }
+
+    $table = $database->getTable($table_name);
+    if (!$table) {
+      return new Aphront404Response();
+    }
+
+    $key = $table->getKey($key_name);
+    if (!$key) {
+      return new Aphront404Response();
+    }
+
+    $actual_database = $actual->getDatabase($database_name);
+    $actual_table = null;
+    $actual_key = null;
+    if ($actual_database) {
+      $actual_table = $actual_database->getTable($table_name);
+      if ($actual_table) {
+        $actual_key = $actual_table->getKey($key_name);
+      }
+    }
+
+    $expect_database = $expect->getDatabase($database_name);
+    $expect_table = null;
+    $expect_key = null;
+    if ($expect_database) {
+      $expect_table = $expect_database->getTable($table_name);
+      if ($expect_table) {
+        $expect_key = $expect_table->getKey($key_name);
+      }
+    }
+
+    if ($actual_key) {
+      $actual_columns = $actual_key->getColumnNames();
+    } else {
+      $actual_columns = array();
+    }
+
+    if ($expect_key) {
+      $expect_columns = $expect_key->getColumnNames();
+    } else {
+      $expect_columns = array();
+    }
+
+    $title = pht(
+      'Database Status: %s.%s (%s)',
+      $database_name,
+      $table_name,
+      $key_name);
+
+    $properties = $this->buildProperties(
+      array(
+        array(
+          pht('Columns'),
+          implode(', ', $actual_columns),
+        ),
+        array(
+          pht('Expected Columns'),
+          implode(', ', $expect_columns),
+        ),
+      ),
+      $key->getIssues());
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText($title)
+      ->addPropertyList($properties);
+
+    return $this->buildResponse($title, $box);
+  }
+
   private function renderIcon($status) {
     switch ($status) {
       case PhabricatorConfigStorageSchema::STATUS_OKAY:
