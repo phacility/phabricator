@@ -43,6 +43,19 @@ final class PhabricatorFileImageMacro extends PhabricatorFileDAO
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID  => true,
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'name' => 'text255',
+        'authorPHID' => 'phid?',
+        'isDisabled' => 'bool',
+        'audioPHID' => 'phid?',
+        'audioBehavior' => 'text64',
+        'mailKey' => 'bytes20',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'name' => array(
+          'columns' => array('name'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

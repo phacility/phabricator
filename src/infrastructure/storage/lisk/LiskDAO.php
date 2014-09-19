@@ -1737,6 +1737,8 @@ abstract class LiskDAO {
       self::SERIALIZATION_PHP => 'bytes',
     );
 
+    $binary_map = $this->getBinaryColumns();
+
     $builtin = array(
       'id' => 'id',
       'phid' => 'phid',
@@ -1770,6 +1772,11 @@ abstract class LiskDAO {
           $map[$property] = $type;
           continue;
         }
+      }
+
+      if (isset($binary_map[$property])) {
+        $map[$property] = 'bytes';
+        continue;
       }
 
       // If the column is named `somethingPHID`, infer it is a PHID.

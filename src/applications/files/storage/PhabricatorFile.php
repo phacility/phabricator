@@ -65,6 +65,26 @@ final class PhabricatorFile extends PhabricatorFileDAO
       self::CONFIG_SERIALIZATION => array(
         'metadata' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'name' => 'text255?',
+        'mimeType' => 'text255?',
+        'byteSize' => 'uint64?',
+        'storageEngine' => 'text32',
+        'storageFormat' => 'text32',
+        'storageHandle' => 'text255',
+        'authorPHID' => 'phid?',
+        'secretKey' => 'bytes20?',
+        'contentHash' => 'bytes40?',
+        'ttl' => 'epoch?',
+        'isExplicitUpload' => 'bool?',
+        'mailKey' => 'bytes20',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_phid' => null,
+        'phid' => array(
+          'columns' => array('phid'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 
