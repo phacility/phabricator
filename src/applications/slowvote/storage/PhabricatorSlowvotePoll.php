@@ -46,6 +46,20 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'question' => 'text255',
+        'responseVisibility' => 'uint32',
+        'shuffle' => 'uint32',
+        'method' => 'uint32',
+        'description' => 'text',
+        'isClosed' => 'bool',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_phid' => null,
+        'phid' => array(
+          'columns' => array('phid'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

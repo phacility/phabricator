@@ -196,4 +196,16 @@ final class PhabricatorStorageManagementAPI {
     require_once $script;
   }
 
+  public function isCharacterSetAvailable($character_set) {
+    $conn = $this->getConn(null);
+
+    $result = queryfx_one(
+      $conn,
+      'SELECT CHARACTER_SET_NAME FROM INFORMATION_SCHEMA.CHARACTER_SETS
+        WHERE CHARACTER_SET_NAME = %s',
+      $character_set);
+
+    return (bool)$result;
+  }
+
 }

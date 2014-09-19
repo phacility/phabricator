@@ -29,6 +29,17 @@ final class PhabricatorAuthProviderConfig extends PhabricatorAuthDAO
       self::CONFIG_SERIALIZATION => array(
         'properties' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'isEnabled' => 'bool',
+        'providerClass' => 'text128',
+        'providerType' => 'text64',
+        'providerDomain' => 'text128',
+        'shouldAllowLogin' => 'bool',
+        'shouldAllowRegistration' => 'bool',
+        'shouldAllowLink' => 'bool',
+        'shouldAllowUnlink' => 'bool',
+        'shouldTrustEmails' => 'bool',
+      ),
     ) + parent::getConfiguration();
   }
 

@@ -72,14 +72,6 @@ div.phabricator-application-launch-container {
   display: inline-block;
 }
 
-.phabricator-application-beta {
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  color: {$bluetext};
-  font-size: 11px;
-}
-
 .phabricator-application-launch-attention {
   position: absolute;
   top: 8px;

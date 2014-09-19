@@ -30,7 +30,7 @@ final class PhabricatorOAuthServerApplication extends PhabricatorApplication {
     return self::GROUP_ADMIN;
   }
 
-  public function isBeta() {
+  public function isPrototype() {
     return true;
   }
 

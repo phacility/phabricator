@@ -43,6 +43,11 @@ final class PhabricatorDashboardPanel
       self::CONFIG_SERIALIZATION => array(
         'properties' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'name' => 'text255',
+        'panelType' => 'text64',
+        'isArchived' => 'bool',
+      ),
     ) + parent::getConfiguration();
   }
 

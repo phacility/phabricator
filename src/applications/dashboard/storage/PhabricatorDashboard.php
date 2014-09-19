@@ -39,7 +39,11 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
-        'layoutConfig' => self::SERIALIZATION_JSON),
+        'layoutConfig' => self::SERIALIZATION_JSON,
+      ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'name' => 'text255',
+      ),
     ) + parent::getConfiguration();
   }
 

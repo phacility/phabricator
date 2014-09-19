@@ -82,12 +82,18 @@ final class PhabricatorProjectUpdateController
       case 'leave':
         $dialog = new AphrontDialogView();
         $dialog->setUser($user);
-        $dialog->setTitle(pht('Really leave project?'));
-        $dialog->appendChild(phutil_tag('p', array(), pht(
-          'Your tremendous contributions to this project will be sorely '.
-          'missed. Are you sure you want to leave?')));
+        if ($this->userCannotLeave($project)) {
+         $dialog->setTitle(pht('You can not leave this project.'));
+          $body = pht('The membership is locked for this project.');
+        } else {
+          $dialog->setTitle(pht('Really leave project?'));
+          $body = pht(
+            'Your tremendous contributions to this project will be sorely '.
+            'missed. Are you sure you want to leave?');
+          $dialog->addSubmitButton(pht('Leave Project'));
+        }
+        $dialog->appendParagraph($body);
         $dialog->addCancelButton($project_uri);
-        $dialog->addSubmitButton(pht('Leave Project'));
         break;
       default:
         return new Aphront404Response();
@@ -96,4 +102,18 @@ final class PhabricatorProjectUpdateController
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }
 
+  /**
+   * This is enforced in @{class:PhabricatorProjectTransactionEditor}. We use
+   * this logic to render a better form for users hitting this case.
+   */
+  private function userCannotLeave(PhabricatorProject $project) {
+    $user = $this->getRequest()->getUser();
+
+    return
+      $project->getIsMembershipLocked() &&
+      !PhabricatorPolicyFilter::hasCapability(
+        $user,
+        $project,
+        PhabricatorPolicyCapability::CAN_EDIT);
+  }
 }

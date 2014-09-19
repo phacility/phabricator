@@ -28,6 +28,10 @@ final class FundBacker extends FundDAO
       self::CONFIG_SERIALIZATION => array(
         'properties' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'status' => 'text32',
+        'amountInCents' => 'uint32',
+      ),
     ) + parent::getConfiguration();
   }
 

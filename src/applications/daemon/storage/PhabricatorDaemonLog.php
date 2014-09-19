@@ -24,6 +24,13 @@ final class PhabricatorDaemonLog extends PhabricatorDaemonDAO
         'argv' => self::SERIALIZATION_JSON,
         'explicitArgv' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'daemon' => 'text255',
+        'host' => 'text255',
+        'pid' => 'uint32',
+        'envHash' => 'bytes40',
+        'status' => 'text8',
+      ),
     ) + parent::getConfiguration();
   }
 

@@ -16,6 +16,11 @@ final class PhabricatorChatLogEvent
   public function getConfiguration() {
     return array(
       self::CONFIG_TIMESTAMPS => false,
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'author' => 'text64',
+        'type' => 'text4',
+        'message' => 'text',
+      ),
     ) + parent::getConfiguration();
   }
 

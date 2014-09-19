@@ -14,7 +14,7 @@ final class PhabricatorNuanceApplication extends PhabricatorApplication {
     return "\xE2\x98\x8E";
   }
 
-  public function isBeta() {
+  public function isPrototype() {
     return true;
   }
 

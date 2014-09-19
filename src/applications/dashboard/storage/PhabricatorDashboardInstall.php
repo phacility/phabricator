@@ -14,6 +14,19 @@ final class PhabricatorDashboardInstall
   protected $applicationClass;
   protected $dashboardPHID;
 
+  public function getConfiguration() {
+    return array(
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'applicationClass' => 'text64',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'objectPHID' => array(
+          'columns' => array('objectPHID', 'applicationClass'),
+        ),
+      ),
+    ) + parent::getConfiguration();
+  }
+
   public static function getDashboard(
     PhabricatorUser $viewer,
     $object_phid,

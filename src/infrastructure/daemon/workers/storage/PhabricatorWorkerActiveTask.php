@@ -11,6 +11,11 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
     return array(
       self::CONFIG_IDS => self::IDS_COUNTER,
       self::CONFIG_TIMESTAMPS => false,
+      self::CONFIG_KEY_SCHEMA => array(
+        'dataID' => array(
+          'columns' => array('dataID'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

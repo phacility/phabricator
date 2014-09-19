@@ -26,7 +26,7 @@ final class PhabricatorPhluxApplication extends PhabricatorApplication {
     return self::GROUP_UTILITIES;
   }
 
-  public function isBeta() {
+  public function isPrototype() {
     return true;
   }
 

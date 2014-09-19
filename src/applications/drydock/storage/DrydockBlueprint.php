@@ -36,7 +36,11 @@ final class DrydockBlueprint extends DrydockDAO
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
         'details' => self::SERIALIZATION_JSON,
-      )
+      ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'className' => 'text255',
+        'blueprintName' => 'text255',
+      ),
     ) + parent::getConfiguration();
   }
 

@@ -10,6 +10,10 @@ final class PhabricatorDaemonLogEvent extends PhabricatorDaemonDAO {
   public function getConfiguration() {
     return array(
       self::CONFIG_TIMESTAMPS => false,
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'logType' => 'text4',
+        'message' => 'text',
+      ),
     ) + parent::getConfiguration();
   }
 

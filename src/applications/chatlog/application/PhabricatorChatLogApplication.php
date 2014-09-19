@@ -18,7 +18,7 @@ final class PhabricatorChatLogApplication extends PhabricatorApplication {
     return 'chatlog';
   }
 
-  public function isBeta() {
+  public function isPrototype() {
     return true;
   }
 

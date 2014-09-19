@@ -93,6 +93,9 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
   protected function getCustomCapabilities() {
     return array(
       ProjectCreateProjectsCapability::CAPABILITY => array(),
+      ProjectCanLockProjectsCapability::CAPABILITY => array(
+        'default' => PhabricatorPolicies::POLICY_ADMIN,
+      ),
     );
   }
 

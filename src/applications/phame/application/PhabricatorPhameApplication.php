@@ -26,7 +26,7 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
     return PhabricatorEnv::getDoclink('Phame User Guide');
   }
 
-  public function isBeta() {
+  public function isPrototype() {
     return true;
   }
 

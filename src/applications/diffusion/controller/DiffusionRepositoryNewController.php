@@ -47,8 +47,7 @@ final class DiffusionRepositoryNewController extends DiffusionController {
             array(
               pht(
                 'Create a new, empty repository which Phabricator will host. '.
-                'For instructions on configuring repository hosting, see %s. '.
-                'This feature is new and in beta!',
+                'For instructions on configuring repository hosting, see %s.',
                 $doc_link),
             ))
           ->addButton(

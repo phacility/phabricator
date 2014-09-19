@@ -14,6 +14,11 @@ final class DrydockLog extends DrydockDAO
   public function getConfiguration() {
     return array(
       self::CONFIG_TIMESTAMPS => false,
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'resourceID' => 'id?',
+        'leaseID' => 'id?',
+        'message' => 'text',
+      ),
     ) + parent::getConfiguration();
   }
 
