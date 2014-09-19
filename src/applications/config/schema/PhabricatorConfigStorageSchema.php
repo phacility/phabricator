@@ -9,6 +9,7 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
   const ISSUE_COLUMNTYPE = 'columntype';
   const ISSUE_NULLABLE = 'nullable';
   const ISSUE_KEYCOLUMNS = 'keycolumns';
+  const ISSUE_UNIQUE = 'unique';
   const ISSUE_SUBNOTE = 'subnote';
   const ISSUE_SUBWARN = 'subwarn';
   const ISSUE_SUBFAIL = 'subfail';
@@ -72,6 +73,10 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
     return $issues;
   }
 
+  public function getLocalIssues() {
+    return $this->issues;
+  }
+
   public function hasIssue($issue) {
     return (bool)idx($this->getIssues(), $issue);
   }
@@ -109,6 +114,8 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
         return pht('Wrong Nullable Setting');
       case self::ISSUE_KEYCOLUMNS:
         return pht('Key on Wrong Columns');
+      case self::ISSUE_UNIQUE:
+        return pht('Key has Wrong Uniqueness');
       case self::ISSUE_SUBNOTE:
         return pht('Subschemata Have Notices');
       case self::ISSUE_SUBWARN:
@@ -136,6 +143,8 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
         return pht('This schema has the wrong nullable setting.');
       case self::ISSUE_KEYCOLUMNS:
         return pht('This schema is on the wrong columns.');
+      case self::ISSUE_UNIQUE:
+        return pht('This key has the wrong uniqueness setting.');
       case self::ISSUE_SUBNOTE:
         return pht('Subschemata have setup notices.');
       case self::ISSUE_SUBWARN:
@@ -157,6 +166,7 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
       case self::ISSUE_SUBWARN:
       case self::ISSUE_KEYCOLUMNS:
       case self::ISSUE_NULLABLE:
+      case self::ISSUE_UNIQUE:
         return self::STATUS_WARN;
       case self::ISSUE_SUBNOTE:
       case self::ISSUE_CHARSET:

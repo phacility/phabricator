@@ -100,6 +100,8 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
       $key = $this->newKey($key_name)
         ->setColumnNames(idx($key_spec, 'columns', array()));
 
+      $key->setUnique((bool)idx($key_spec, 'unique'));
+
       $table->addKey($key);
     }
 
