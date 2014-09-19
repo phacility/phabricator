@@ -280,6 +280,7 @@ final class PhabricatorConfigDatabaseStatusController
     $collation_issue = PhabricatorConfigStorageSchema::ISSUE_COLLATION;
     $nullable_issue = PhabricatorConfigStorageSchema::ISSUE_NULLABLE;
     $unique_issue = PhabricatorConfigStorageSchema::ISSUE_UNIQUE;
+    $columns_issue = PhabricatorConfigStorageSchema::ISSUE_KEYCOLUMNS;
 
     $database = $comp->getDatabase($database_name);
     if (!$database) {
@@ -377,13 +378,14 @@ final class PhabricatorConfigDatabaseStatusController
       $status = $key->getStatus();
 
       $size = 0;
-      foreach ($key->getColumnNames() as $column_name) {
+      foreach ($key->getColumnNames() as $column_spec) {
+        list($column_name, $prefix) = $key->getKeyColumnAndPrefix($column_spec);
         $column = $table->getColumn($column_name);
         if (!$column) {
           $size = 0;
           break;
         }
-        $size += $column->getKeyByteLength();
+        $size += $column->getKeyByteLength($prefix);
       }
 
       $size_formatted = null;
@@ -406,7 +408,9 @@ final class PhabricatorConfigDatabaseStatusController
               $key_name.'/'),
           ),
           $key_name),
-        implode(', ', $key->getColumnNames()),
+        $this->renderAttr(
+          implode(', ', $key->getColumnNames()),
+          $key->hasIssue($columns_issue)),
         $this->renderAttr(
           $this->renderBoolean($key->getUnique()),
           $key->hasIssue($unique_issue)),

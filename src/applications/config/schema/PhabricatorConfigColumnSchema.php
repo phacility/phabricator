@@ -58,20 +58,47 @@ final class PhabricatorConfigColumnSchema
     return $this->characterSet;
   }
 
-  public function getKeyByteLength() {
+  public function getKeyByteLength($prefix = null) {
     $type = $this->getColumnType();
 
     $matches = null;
     if (preg_match('/^varchar\((\d+)\)$/', $type, $matches)) {
       // For utf8mb4, each character requires 4 bytes.
-      return ((int)$matches[1]) * 4;
+      $size = (int)$matches[1];
+      if ($prefix && $prefix < $size) {
+        $size = $prefix;
+      }
+      return $size * 4;
     }
 
     $matches = null;
     if (preg_match('/^char\((\d+)\)$/', $type, $matches)) {
       // We use char() only for fixed-length binary data, so its size
       // is always the column size.
-      return ((int)$matches[1]);
+      $size = (int)$matches[1];
+      if ($prefix && $prefix < $size) {
+        $size = $prefix;
+      }
+      return $size;
+    }
+
+    // The "long..." types are arbitrarily long, so just use a big number to
+    // get the point across. In practice, these should always index only a
+    // prefix.
+    if ($type == 'longtext') {
+      $size = (1 << 16);
+      if ($prefix && $prefix < $size) {
+        $size = $prefix;
+      }
+      return $size * 4;
+    }
+
+    if ($type == 'longblob') {
+      $size = (1 << 16);
+      if ($prefix && $prefix < $size) {
+        $size = $prefix;
+      }
+      return $size * 1;
     }
 
     switch ($type) {

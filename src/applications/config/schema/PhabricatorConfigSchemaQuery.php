@@ -115,9 +115,20 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
         foreach ($keys as $key_name => $key_pieces) {
           $key_pieces = isort($key_pieces, 'Seq_in_index');
           $head = head($key_pieces);
+
+          // This handles string indexes which index only a prefix of a field.
+          $column_names = array();
+          foreach ($key_pieces as $piece) {
+            $name = $piece['Column_name'];
+            if ($piece['Sub_part']) {
+              $name = $name.'('.$piece['Sub_part'].')';
+            }
+            $column_names[] = $name;
+          }
+
           $key_schema = id(new PhabricatorConfigKeySchema())
             ->setName($key_name)
-            ->setColumnNames(ipull($key_pieces, 'Column_name'))
+            ->setColumnNames($column_names)
             ->setUnique(!$head['Non_unique']);
 
           $table_schema->addKey($key_schema);

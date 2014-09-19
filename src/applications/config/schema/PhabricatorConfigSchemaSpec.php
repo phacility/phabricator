@@ -56,6 +56,16 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
     }
   }
 
+  protected function buildCustomFieldSchemata(
+    PhabricatorLiskDAO $storage,
+    array $indexes) {
+
+    $this->buildLiskObjectSchema($storage);
+    foreach ($indexes as $index) {
+      $this->buildLiskObjectSchema($index);
+    }
+  }
+
   private function buildLiskObjectSchema(PhabricatorLiskDAO $object) {
     $this->buildRawSchema(
       $object->getApplicationName(),
@@ -123,6 +133,10 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
       array(
         'PRIMARY' => array(
           'columns' => array('src', 'type', 'dst'),
+          'unique' => true,
+        ),
+        'src' => array(
+          'columns' => array('src', 'type', 'dateCreated', 'seq'),
         ),
       ));
 
@@ -136,6 +150,7 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
       array(
         'PRIMARY' => array(
           'columns' => array('id'),
+          'unique' => true,
         ),
       ));
   }
@@ -216,6 +231,9 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
       case 'id64':
       case 'uint64':
         $column_type = 'bigint(20) unsigned';
+        break;
+      case 'sint64':
+        $column_type = 'bigint(20)';
         break;
       case 'phid':
       case 'policy';

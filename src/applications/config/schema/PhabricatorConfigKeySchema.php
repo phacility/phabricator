@@ -28,6 +28,15 @@ final class PhabricatorConfigKeySchema
     return array();
   }
 
+  public function getKeyColumnAndPrefix($column_name) {
+    $matches = null;
+    if (preg_match('/^(.*)\((\d+)\)\z/', $column_name, $matches)) {
+      return array($matches[1], (int)$matches[2]);
+    } else {
+      return array($column_name, null);
+    }
+  }
+
   public function compareToSimilarSchema(
     PhabricatorConfigStorageSchema $expect) {
 

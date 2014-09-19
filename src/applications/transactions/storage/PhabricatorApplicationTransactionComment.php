@@ -38,6 +38,7 @@ abstract class PhabricatorApplicationTransactionComment
       self::CONFIG_KEY_SCHEMA => array(
         'key_version' => array(
           'columns' => array('transactionPHID', 'commentVersion'),
+          'unique' => true,
         ),
       ),
     ) + parent::getConfiguration();
