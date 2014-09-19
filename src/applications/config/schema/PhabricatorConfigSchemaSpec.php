@@ -138,6 +138,21 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
       ));
   }
 
+  public function buildCounterSchema(PhabricatorLiskDAO $object) {
+    $this->buildRawSchema(
+      $object->getApplicationName(),
+      PhabricatorLiskDAO::COUNTER_TABLE_NAME,
+      array(
+        'counterName' => 'text32',
+        'counterValue' => 'id64',
+      ),
+      array(
+        'PRIMARY' => array(
+          'columns' => array('counterName'),
+        ),
+      ));
+  }
+
   protected function getDatabase($name) {
     $server = $this->getServer();
 
@@ -273,6 +288,9 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
         break;
       case 'bool':
         $column_type = 'tinyint(1)';
+        break;
+      case 'double':
+        $column_type = 'double';
         break;
       default:
         $column_type = pht('<unknown>');

@@ -14,6 +14,19 @@ abstract class PhabricatorWorkerTask extends PhabricatorWorkerDAO {
   private $data;
   private $executionException;
 
+  public function getConfiguration() {
+    return array(
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'taskClass' => 'text255',
+        'leaseOwner' => 'text255?',
+        'leaseExpires' => 'epoch?',
+        'failureCount' => 'uint32',
+        'failureTime' => 'epoch?',
+        'priority' => 'uint32',
+      ),
+    ) + parent::getConfiguration();
+  }
+
   final public function setExecutionException(Exception $execution_exception) {
     $this->executionException = $execution_exception;
     return $this;

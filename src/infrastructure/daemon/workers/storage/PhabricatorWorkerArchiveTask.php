@@ -9,6 +9,15 @@ final class PhabricatorWorkerArchiveTask extends PhabricatorWorkerTask {
   protected $duration;
   protected $result;
 
+  public function getConfiguration() {
+    $config = parent::getConfiguration();
+    $config[self::CONFIG_COLUMN_SCHEMA] = array(
+      'result' => 'uint32',
+      'duration' => 'uint64',
+    ) + $config[self::CONFIG_COLUMN_SCHEMA];
+    return $config;
+  }
+
   public function save() {
     if ($this->getID() === null) {
       throw new Exception('Trying to archive a task with no ID.');
