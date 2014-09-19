@@ -292,6 +292,9 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
       case 'double':
         $column_type = 'double';
         break;
+      case 'date':
+        $column_type = 'date';
+        break;
       default:
         $column_type = pht('<unknown>');
         $charset = pht('<unknown>');
