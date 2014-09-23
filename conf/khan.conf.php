@@ -66,7 +66,6 @@ return array(
   'mysql.pass' => 'codereview',
 
   // Global phabricator options, such as the timezone for khan academy.
-  'phabricator.show-beta-applications' => true,
   'phabricator.timezone'    => 'America/Los_Angeles',
   'phabricator.csrf-key'    => '0016ee009c31da52bc9044dd5a989ff1ec6da80',
 
