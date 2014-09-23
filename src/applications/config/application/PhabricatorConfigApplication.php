@@ -46,7 +46,8 @@ final class PhabricatorConfigApplication extends PhabricatorApplication {
           '(?:(?P<database>[^/]+)/'.
           '(?:(?P<table>[^/]+)/'.
           '(?:(?:col/(?P<column>[^/]+)|key/(?P<key>[^/]+))/)?)?)?'
-          => 'PhabricatorConfigDatabaseController',
+          => 'PhabricatorConfigDatabaseStatusController',
+        'dbissue/' => 'PhabricatorConfigDatabaseIssueController',
         '(?P<verb>ignore|unignore)/(?P<key>[^/]+)/'
           => 'PhabricatorConfigIgnoreController',
         'issue/' => array(

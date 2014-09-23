@@ -113,6 +113,11 @@ abstract class PhabricatorApplicationTransaction
         'contentSource' => 'text',
         'transactionType' => 'text32',
       ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_object' => array(
+          'columns' => array('objectPHID'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

@@ -69,18 +69,9 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
       $column_info = array();
     }
 
-    if ($sql) {
-      $key_info = queryfx_all(
-        $conn,
-        'SELECT CONSTRAINT_NAME, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME,
-            ORDINAL_POSITION, POSITION_IN_UNIQUE_CONSTRAINT
-          FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
-          WHERE (%Q)',
-        '('.implode(') OR (', $sql).')');
-      $key_info = igroup($key_info, 'TABLE_SCHEMA');
-    } else {
-      $key_info = array();
-    }
+    // NOTE: Tables like KEY_COLUMN_USAGE and TABLE_CONSTRAINTS only contain
+    // primary, unique, and foreign keys, so we can't use them here. We pull
+    // indexes later on using SHOW INDEXES.
 
     $server_schema = new PhabricatorConfigServerSchema();
 
@@ -95,8 +86,6 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
 
       $database_column_info = idx($column_info, $database_name, array());
       $database_column_info = igroup($database_column_info, 'TABLE_NAME');
-      $database_key_info = idx($key_info, $database_name, array());
-      $database_key_info = igroup($database_key_info, 'TABLE_NAME');
 
       foreach ($database_tables as $table) {
         $table_name = $table['TABLE_NAME'];
@@ -117,13 +106,30 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
           $table_schema->addColumn($column_schema);
         }
 
-        $key_parts = idx($database_key_info, $table_name, array());
-        $keys = igroup($key_parts, 'CONSTRAINT_NAME');
+        $key_parts = queryfx_all(
+          $conn,
+          'SHOW INDEXES FROM %T.%T',
+          $database_name,
+          $table_name);
+        $keys = igroup($key_parts, 'Key_name');
         foreach ($keys as $key_name => $key_pieces) {
-          $key_pieces = isort($key_pieces, 'ORDINAL_POSITION');
+          $key_pieces = isort($key_pieces, 'Seq_in_index');
+          $head = head($key_pieces);
+
+          // This handles string indexes which index only a prefix of a field.
+          $column_names = array();
+          foreach ($key_pieces as $piece) {
+            $name = $piece['Column_name'];
+            if ($piece['Sub_part']) {
+              $name = $name.'('.$piece['Sub_part'].')';
+            }
+            $column_names[] = $name;
+          }
+
           $key_schema = id(new PhabricatorConfigKeySchema())
             ->setName($key_name)
-            ->setColumnNames(ipull($key_pieces, 'COLUMN_NAME'));
+            ->setColumnNames($column_names)
+            ->setUnique(!$head['Non_unique']);
 
           $table_schema->addKey($key_schema);
         }

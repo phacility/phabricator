@@ -1810,11 +1810,13 @@ abstract class LiskDAO {
         case 'id':
           $default_map['PRIMARY'] = array(
             'columns' => array('id'),
+            'unique' => true,
           );
           break;
         case 'phid':
           $default_map['key_phid'] = array(
             'columns' => array('phid'),
+            'unique' => true,
           );
           break;
       }
