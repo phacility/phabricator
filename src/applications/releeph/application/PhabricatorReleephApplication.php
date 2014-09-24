@@ -18,11 +18,8 @@ final class PhabricatorReleephApplication extends PhabricatorApplication {
     return 'releeph';
   }
 
-  public function isInstalled() {
-    if (PhabricatorEnv::getEnvConfig('releeph.installed')) {
-      return parent::isInstalled();
-    }
-    return false;
+  public function isPrototype() {
+    return true;
   }
 
   public function getRoutes() {
