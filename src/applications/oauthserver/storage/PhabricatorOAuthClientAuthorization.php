@@ -23,6 +23,20 @@ final class PhabricatorOAuthClientAuthorization
       self::CONFIG_SERIALIZATION => array(
         'scope' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'scope' => 'text',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_phid' => null,
+        'phid' => array(
+          'columns' => array('phid'),
+          'unique' => true,
+        ),
+        'userPHID' => array(
+          'columns' => array('userPHID', 'clientPHID'),
+          'unique' => true,
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

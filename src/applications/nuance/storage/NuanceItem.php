@@ -22,11 +22,30 @@ final class NuanceItem
       ->setDateNuanced(time())
       ->setStatus(NuanceItem::STATUS_OPEN);
   }
+
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
         'data' => self::SERIALIZATION_JSON,
+      ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'ownerPHID' => 'phid?',
+        'sourceLabel' => 'text255?',
+        'status' => 'uint32',
+        'mailKey' => 'bytes20',
+        'dateNuanced' => 'epoch',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_source' => array(
+          'columns' => array('sourcePHID', 'status', 'dateNuanced'),
+        ),
+        'key_owner' => array(
+          'columns' => array('ownerPHID', 'status', 'dateNuanced'),
+        ),
+        'key_contacter' => array(
+          'columns' => array('requestorPHID', 'status', 'dateNuanced'),
+        ),
       ),
     ) + parent::getConfiguration();
   }

@@ -16,6 +16,16 @@ final class NuanceSource extends NuanceDAO
       self::CONFIG_SERIALIZATION => array(
         'data' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'name' => 'text255?',
+        'type' => 'text32',
+        'mailKey' => 'bytes20',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_type' => array(
+          'columns' => array('type', 'dateModified'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

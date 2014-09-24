@@ -271,6 +271,11 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
         $charset = $this->getUTF8Charset();
         $collation = $this->getUTF8Collation();
         break;
+      case 'text40':
+        $column_type = 'varchar(40)';
+        $charset = $this->getUTF8Charset();
+        $collation = $this->getUTF8Collation();
+        break;
       case 'text32':
         $column_type = 'varchar(32)';
         $charset = $this->getUTF8Charset();
