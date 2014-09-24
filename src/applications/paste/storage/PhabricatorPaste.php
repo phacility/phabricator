@@ -41,6 +41,26 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'title' => 'text255',
+        'language' => 'text64',
+        'mailKey' => 'bytes20',
+        'parentPHID' => 'phid?',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'parentPHID' => array(
+          'columns' => array('parentPHID'),
+        ),
+        'authorPHID' => array(
+          'columns' => array('authorPHID'),
+        ),
+        'key_dateCreated' => array(
+          'columns' => array('dateCreated'),
+        ),
+        'key_language' => array(
+          'columns' => array('language'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

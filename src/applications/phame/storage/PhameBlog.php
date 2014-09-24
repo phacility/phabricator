@@ -27,6 +27,23 @@ final class PhameBlog extends PhameDAO
       self::CONFIG_SERIALIZATION => array(
         'configData' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'name' => 'text64',
+        'description' => 'text',
+        'domain' => 'text255?',
+        'joinPolicy' => 'policy',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_phid' => null,
+        'phid' => array(
+          'columns' => array('phid'),
+          'unique' => true,
+        ),
+        'domain' => array(
+          'columns' => array('domain'),
+          'unique' => true,
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

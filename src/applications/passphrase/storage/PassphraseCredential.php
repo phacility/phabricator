@@ -35,6 +35,29 @@ final class PassphraseCredential extends PassphraseDAO
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'name' => 'text255',
+        'credentialType' => 'text64',
+        'providesType' => 'text64',
+        'description' => 'text',
+        'username' => 'text255',
+        'secretID' => 'id?',
+        'isDestroyed' => 'bool',
+        'isLocked' => 'bool',
+        'allowConduit' => 'bool',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_secret' => array(
+          'columns' => array('secretID'),
+          'unique' => true,
+        ),
+        'key_type' => array(
+          'columns' => array('credentialType'),
+        ),
+        'key_provides' => array(
+          'columns' => array('providesType'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 
