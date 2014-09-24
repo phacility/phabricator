@@ -15,10 +15,14 @@
 
 .phabricator-standard-page-footer {
   text-align: right;
-  margin: 0 16px;
-  padding: 8px 0;
+  margin: 4px 16px;
+  padding: 12px 0;
   border-top: 1px solid {$lightgreyborder};
   color: {$lightgreytext};
+}
+
+.has-local-nav + .phabricator-standard-page-footer {
+  margin-left: 221px;
 }
 
 .keyboard-shortcut-help td,
