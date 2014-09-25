@@ -7,7 +7,9 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
     PhabricatorFlaggableInterface,
     PhabricatorMentionableInterface,
     PhabricatorPolicyInterface,
-    PhabricatorProjectInterface {
+    PhabricatorProjectInterface,
+    PhabricatorDestructibleInterface,
+    PhabricatorApplicationTransactionInterface {
 
   protected $title;
   protected $authorPHID;
@@ -150,6 +152,42 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
 
   public function describeAutomaticCapability($capability) {
     return pht('The author of a paste can always view and edit it.');
+  }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    if ($this->filePHID) {
+      $file = id(new PhabricatorFileQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withPHIDs(array($this->filePHID))
+        ->executeOne();
+      if ($file) {
+        $engine->destroyObject($file);
+      }
+    }
+
+    $this->delete();
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhabricatorPasteEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhabricatorPasteTransaction();
   }
 
 }
