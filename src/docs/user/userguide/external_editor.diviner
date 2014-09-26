@@ -10,8 +10,8 @@ and Diffusion in your preferred text editor.
 
 = Configuring Editors =
 
-To configure an external editor, go to Settings -> Application Settings ->
-Display Preferences and set "Editor Link" to a URI pattern (see below). This
+To configure an external editor, go to {nav Settings > Application Settings >
+Display Preferences} and set "Editor Link" to a URI pattern (see below). This
 will enable an "Open in Editor" link in Differential, and an "Edit" button in
 Diffusion.
 

@@ -352,7 +352,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
         phutil_tag_div('phabricator-standard-page-body', array(
           ($console ? hsprintf('<darkconsole />') : null),
           parent::getBody(),
-          phutil_tag('div', array('style' => 'clear: both;')),
           $this->renderFooter(),
         )),
       ));
@@ -508,7 +507,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     return phutil_tag(
       'div',
       array(
-        'class' => 'phabricator-standard-page-footer',
+        'class' => 'phabricator-standard-page-footer grouped',
       ),
       $foot);
   }

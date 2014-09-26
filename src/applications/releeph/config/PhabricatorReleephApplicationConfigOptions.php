@@ -42,19 +42,6 @@ final class PhabricatorReleephApplicationConfigOptions
     $custom_field_type = 'custom:PhabricatorCustomFieldConfigOptionType';
 
     return array(
-      $this->newOption('releeph.installed', 'bool', false)
-        ->setSummary(pht('Enable the Releeph application.'))
-        ->setDescription(
-          pht(
-            'Releeph, a tool for managing release branches, will eventually '.
-            'fit in to the Phabricator suite as a general purpose tool. '.
-            'However Releeph is currently unstable in multiple ways that may '.
-            'not migrate properly for you: the code is still in alpha stage '.
-            'of design, the storage format is likely to change in unexpected '.
-            'ways, and the workflows presented are very specific to a core '.
-            'set of alpha testers at Facebook.  For the time being you are '.
-            'strongly discouraged from relying on Releeph being at all '.
-            'stable.')),
       $this->newOption('releeph.fields', $custom_field_type, $default)
         ->setCustomData('ReleephFieldSpecification'),
       $this->newOption(

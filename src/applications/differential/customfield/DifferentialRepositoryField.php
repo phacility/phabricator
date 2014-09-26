@@ -107,19 +107,25 @@ final class DifferentialRepositoryField
     $old = $xaction->getOldValue();
     $new = $xaction->getNewValue();
 
-    if ($old) {
+    if ($old && $new) {
       return pht(
         '%s updated the repository for %s from %s to %s.',
         $xaction->renderHandleLink($author_phid),
         $xaction->renderHandleLink($object_phid),
         $xaction->renderHandleLink($old),
         $xaction->renderHandleLink($new));
-    } else {
+    } else if ($new) {
       return pht(
         '%s set the repository for %s to %s.',
         $xaction->renderHandleLink($author_phid),
         $xaction->renderHandleLink($object_phid),
         $xaction->renderHandleLink($new));
+    } else {
+      return pht(
+        '%s removed the repository for %s. (Repository was %s.)',
+        $xaction->renderHandleLink($author_phid),
+        $xaction->renderHandleLink($object_phid),
+        $xaction->renderHandleLink($old));
     }
   }
 

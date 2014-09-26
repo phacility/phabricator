@@ -32,6 +32,22 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       self::CONFIG_SERIALIZATION => array(
         'parameters'  => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'status' => 'text255',
+        'message' => 'text',
+        'relatedPHID' => 'phid?',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'status' => array(
+          'columns' => array('status'),
+        ),
+        'relatedPHID' => array(
+          'columns' => array('relatedPHID'),
+        ),
+        'key_created' => array(
+          'columns' => array('dateCreated'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

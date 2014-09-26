@@ -158,7 +158,7 @@ several sources:
   # User can specify the settings in `~/.arcrc` (JSON) through the `config` key.
     This file can be modified also by `arc set-config --global`.
   # Machine can specify the settings with `/etc/arcconfig` (JSON). On Windows,
-    the file path is 'C:\ProgramData\Phabricator\Arcanist\config`.
+    the file path is `C:\ProgramData\Phabricator\Arcanist\config`.
 
 The first place where the setting is defined wins.
 

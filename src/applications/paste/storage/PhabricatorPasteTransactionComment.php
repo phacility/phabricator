@@ -15,4 +15,13 @@ final class PhabricatorPasteTransactionComment
     return ($this->getTransactionPHID() != null);
   }
 
+  public function getConfiguration() {
+    $config = parent::getConfiguration();
+    $config[self::CONFIG_COLUMN_SCHEMA] = array(
+      'lineNumber' => 'uint32?',
+      'lineLength' => 'uint32?',
+    ) + $config[self::CONFIG_COLUMN_SCHEMA];
+    return $config;
+  }
+
 }

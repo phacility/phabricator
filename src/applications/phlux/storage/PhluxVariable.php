@@ -16,6 +16,15 @@ final class PhluxVariable extends PhluxDAO
       self::CONFIG_SERIALIZATION => array(
         'variableValue' => self::SERIALIZATION_JSON
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'variableKey' => 'text64',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_key' => array(
+          'columns' => array('variableKey'),
+          'unique' => true,
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

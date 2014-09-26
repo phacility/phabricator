@@ -1030,7 +1030,7 @@ abstract class PhabricatorBaseEnglishTranslation
       '%s added %s revision(s): %s.' => array(
         array(
           '%s added a revision: %3$s.',
-          '%s added revisionss: %3$s.',
+          '%s added revisions: %3$s.',
         ),
       ),
 

@@ -43,6 +43,25 @@ final class PhabricatorSMS
       ->setProviderSMSID(Filesystem::readRandomCharacters(40));
   }
 
+  public function getConfiguration() {
+    return array(
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'providerShortName' => 'text16',
+        'providerSMSID' => 'text40',
+        'toNumber' => 'text20',
+        'fromNumber' => 'text20?',
+        'body' => 'text',
+        'sendStatus' => 'text16?',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_provider' => array(
+          'columns' => array('providerSMSID', 'providerShortName'),
+          'unique' => true,
+        ),
+      ),
+    ) + parent::getConfiguration();
+  }
+
   public function getTableName() {
     // Slightly non-standard, but otherwise this class needs "MetaMTA" in its
     // name. :/

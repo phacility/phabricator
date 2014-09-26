@@ -4,6 +4,10 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
 
   private $lease;
 
+  public function getRequiredLeaseTime() {
+    return 3600 * 24;
+  }
+
   public function getMaximumRetryCount() {
     // TODO: Allow Drydock allocations to retry. For now, every failure is
     // permanent and most of them are because I am bad at programming, so fail

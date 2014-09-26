@@ -30,6 +30,21 @@ final class PhabricatorOAuthServerClient
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'name' => 'text255',
+        'secret' => 'text32',
+        'redirectURI' => 'text255',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_phid' => null,
+        'phid' => array(
+          'columns' => array('phid'),
+          'unique' => true,
+        ),
+        'creatorPHID' => array(
+          'columns' => array('creatorPHID'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

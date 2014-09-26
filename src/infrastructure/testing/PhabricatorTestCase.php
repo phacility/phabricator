@@ -116,9 +116,6 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
       'notification.enabled',
       false);
 
-    // TODO: Remove this when we remove "releeph.installed".
-    $this->env->overrideEnvConfig('releeph.installed', true);
-
     $this->env->overrideEnvConfig(
       'phabricator.base-uri',
       'http://phabricator.example.com');
