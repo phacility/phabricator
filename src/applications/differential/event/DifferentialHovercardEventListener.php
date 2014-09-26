@@ -56,9 +56,6 @@ final class DifferentialHovercardEventListener
     $hovercard->addField(pht('Author'),
       $handles[$rev->getAuthorPHID()]->renderLink());
 
-    $hovercard->addField(pht('Date'),
-      phabricator_datetime($rev->getDateModified(), $viewer));
-
     $hovercard->addField(pht('Reviewers'),
       implode_selected_handle_links(', ', $handles, $reviewer_phids));
 
