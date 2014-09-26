@@ -30,6 +30,10 @@
 }
 
 .profile-activity-view .profile-feed {
+  margin-left: 16px;
+}
+
+.profile-activity-view.profile-has-calendar .profile-feed {
   margin-left: 332px;
 }
 
