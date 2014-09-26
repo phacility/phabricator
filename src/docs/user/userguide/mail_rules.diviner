@@ -16,7 +16,7 @@ write sophisticated rules to route, categorize, or delete email.
 = Reducing Email =
 
 You can reduce the amount of email you receive by turning off some types of
-email in ##Settings -> Email Preferences##. For example, you can turn off email
+email in {nav Settings > Email Preferences}. For example, you can turn off email
 produced by your own actions (like when you comment on a revision), and some
 types of less-important notifications about events.
 

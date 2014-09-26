@@ -77,7 +77,7 @@ configuration.
 To configure Differential integration, you need to tell Phabricator which
 projects have symbol indexes you want to use, and which other projects they
 should pull symbols from. To do this, go to
-`Repositories -> Arcanist Projects -> Edit` as an administrator. You need to
+{nav Repositories > Arcanist Projects > Edit} as an administrator. You need to
 fill out these fields:
 
   - **Repository**: Associate the project with a tracked repository.
