@@ -14,16 +14,11 @@ final class PhabricatorDisabledUserController
       return new Aphront404Response();
     }
 
-    $failure_view = new AphrontRequestFailureView();
-    $failure_view->setHeader(pht('Account Disabled'));
-    $failure_view->appendChild(phutil_tag('p', array(), pht(
-      'Your account has been disabled.')));
-
-    return $this->buildStandardPageResponse(
-      $failure_view,
-      array(
-        'title' => pht('Account Disabled'),
-      ));
+    return id(new AphrontDialogView())
+      ->setUser($user)
+      ->setTitle(pht('Account Disabled'))
+      ->addCancelButton('/logout/', pht('Okay'))
+      ->appendParagraph(pht('Your account has been disabled.'));
   }
 
 }

@@ -19,16 +19,23 @@ final class Aphront403Response extends AphrontHTMLResponse {
     $forbidden_text = $this->getForbiddenText();
     if (!$forbidden_text) {
       $forbidden_text =
-        'You do not have privileges to access the requested page.';
+        pht('You do not have privileges to access the requested page.');
     }
-    $failure = new AphrontRequestFailureView();
-    $failure->setHeader('403 Forbidden');
-    $failure->appendChild(phutil_tag('p', array(), $forbidden_text));
 
-    $view = new PhabricatorStandardPageView();
-    $view->setTitle('403 Forbidden');
-    $view->setRequest($this->getRequest());
-    $view->appendChild($failure);
+    $request = $this->getRequest();
+    $user = $request->getUser();
+
+    $dialog = id(new AphrontDialogView())
+      ->setUser($user)
+      ->setTitle(pht('403 Forbidden'))
+      ->addCancelButton('/', pht('Peace Out'))
+      ->appendParagraph($forbidden_text);
+
+    $view = id(new PhabricatorStandardPageView())
+      ->setTitle(pht('403 Forbidden'))
+      ->setRequest($request)
+      ->setDeviceReady(true)
+      ->appendChild($dialog);
 
     return $view->render();
   }
