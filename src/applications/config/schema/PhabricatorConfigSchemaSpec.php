@@ -138,6 +138,10 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
         'src' => array(
           'columns' => array('src', 'type', 'dateCreated', 'seq'),
         ),
+        'key_dst' => array(
+          'columns' => array('dst', 'type', 'src'),
+          'unique' => true,
+        ),
       ));
 
     $this->buildRawSchema(
@@ -251,15 +255,23 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
         $charset = 'binary';
         $collation = 'binary';
         break;
+      case 'bytes20':
+        $column_type = 'char(20)';
+        $charset = 'binary';
+        $collation = 'binary';
+        break;
       case 'bytes12':
         $column_type = 'char(12)';
         $charset = 'binary';
         $collation = 'binary';
         break;
-      case 'bytes':
-        $column_type = 'longblob';
+      case 'bytes4':
+        $column_type = 'char(4)';
         $charset = 'binary';
         $collation = 'binary';
+        break;
+      case 'bytes':
+        $column_type = 'longblob';
         break;
       case 'text255':
         $column_type = 'varchar(255)';
