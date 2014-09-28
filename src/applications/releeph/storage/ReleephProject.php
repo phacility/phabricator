@@ -29,6 +29,17 @@ final class ReleephProject extends ReleephDAO
       self::CONFIG_SERIALIZATION => array(
         'details' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'name' => 'text255',
+        'trunkBranch' => 'text255',
+        'isActive' => 'bool',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'projectName' => array(
+          'columns' => array('name'),
+          'unique' => true,
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 
