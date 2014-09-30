@@ -17,6 +17,17 @@ final class PhabricatorRepositoryAuditRequest
       self::CONFIG_SERIALIZATION => array(
         'auditReasons' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'auditStatus' => 'text64',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'commitPHID' => array(
+          'columns' => array('commitPHID'),
+        ),
+        'auditorPHID' => array(
+          'columns' => array('auditorPHID', 'auditStatus'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

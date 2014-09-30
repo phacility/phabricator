@@ -29,6 +29,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   const TABLE_BADCOMMIT = 'repository_badcommit';
   const TABLE_LINTMESSAGE = 'repository_lintmessage';
   const TABLE_PARENTS = 'repository_parents';
+  const TABLE_COVERAGE = 'repository_coverage';
 
   const SERVE_OFF = 'off';
   const SERVE_READONLY = 'readonly';
@@ -76,6 +77,31 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
         'details' => self::SERIALIZATION_JSON,
+      ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'name' => 'text255',
+        'callsign' => 'text32',
+        'versionControlSystem' => 'text32',
+        'uuid' => 'text64?',
+        'pushPolicy' => 'policy',
+        'credentialPHID' => 'phid?',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_phid' => null,
+        'phid' => array(
+          'columns' => array('phid'),
+          'unique' => true,
+        ),
+        'callsign' => array(
+          'columns' => array('callsign'),
+          'unique' => true,
+        ),
+        'key_name' => array(
+          'columns' => array('name'),
+        ),
+        'key_vcs' => array(
+          'columns' => array('versionControlSystem'),
+        ),
       ),
     ) + parent::getConfiguration();
   }

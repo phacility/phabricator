@@ -16,6 +16,32 @@ final class DifferentialTransactionComment
     return new DifferentialTransaction();
   }
 
+  public function getConfiguration() {
+    $config = parent::getConfiguration();
+    $config[self::CONFIG_COLUMN_SCHEMA] = array(
+      'revisionPHID' => 'phid?',
+      'changesetID' => 'id?',
+      'isNewFile' => 'bool',
+      'lineNumber' => 'uint32',
+      'lineLength' => 'uint32',
+      'fixedState' => 'text12?',
+      'hasReplies' => 'bool',
+      'replyToCommentPHID' => 'phid?',
+    ) + $config[self::CONFIG_COLUMN_SCHEMA];
+    $config[self::CONFIG_KEY_SCHEMA] = array(
+      'key_draft' => array(
+        'columns' => array('authorPHID', 'transactionPHID'),
+      ),
+      'key_changeset' => array(
+        'columns' => array('changesetID'),
+      ),
+      'key_revision' => array(
+        'columns' => array('revisionPHID'),
+      ),
+    ) + $config[self::CONFIG_KEY_SCHEMA];
+    return $config;
+  }
+
   public function shouldUseMarkupCache($field) {
     // Only cache submitted comments.
     return ($this->getTransactionPHID() != null);

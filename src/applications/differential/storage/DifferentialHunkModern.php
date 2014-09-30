@@ -25,6 +25,23 @@ final class DifferentialHunkModern extends DifferentialHunk {
       self::CONFIG_BINARY => array(
         'data' => true,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'dataType' => 'bytes4',
+        'dataEncoding' => 'text16?',
+        'dataFormat' => 'bytes4',
+        'oldOffset' => 'uint32',
+        'oldLen' => 'uint32',
+        'newOffset' => 'uint32',
+        'newLen' => 'uint32',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_changeset' => array(
+          'columns' => array('changesetID'),
+        ),
+        'key_created' => array(
+          'columns' => array('dateCreated'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

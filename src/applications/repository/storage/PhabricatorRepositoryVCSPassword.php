@@ -6,6 +6,20 @@ final class PhabricatorRepositoryVCSPassword extends PhabricatorRepositoryDAO {
   protected $userPHID;
   protected $passwordHash;
 
+  public function getConfiguration() {
+    return array(
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'passwordHash' => 'text128',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_phid' => array(
+          'columns' => array('userPHID'),
+          'unique' => true,
+        ),
+      ),
+    ) + parent::getConfiguration();
+  }
+
   public function setPassword(
     PhutilOpaqueEnvelope $password,
     PhabricatorUser $user) {

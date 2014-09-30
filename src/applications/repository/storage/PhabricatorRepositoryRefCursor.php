@@ -27,6 +27,17 @@ final class PhabricatorRepositoryRefCursor extends PhabricatorRepositoryDAO
       self::CONFIG_BINARY => array(
         'refNameRaw' => true,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'refType' => 'text32',
+        'refNameHash' => 'bytes12',
+        'refNameEncoding' => 'text16',
+        'commitIdentifier' => 'text40',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_cursor' => array(
+          'columns' => array('repositoryPHID', 'refType', 'refNameHash'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 
