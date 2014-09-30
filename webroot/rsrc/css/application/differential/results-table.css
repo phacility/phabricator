@@ -18,6 +18,10 @@ table.differential-results-table {
   background: #f7f7f7;
 }
 
+.device .differential-results-table th {
+  white-space: normal;
+}
+
 .differential-results-table td {
   padding: 0 8px;
   margin: 0;
