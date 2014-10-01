@@ -596,5 +596,59 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
     return parent::getNoEffectDescription();
   }
 
+  public function renderAsTextForDoorkeeper(
+    DoorkeeperFeedStoryPublisher $publisher,
+    PhabricatorFeedStory $story,
+    array $xactions) {
+
+    $body = parent::renderAsTextForDoorkeeper($publisher, $story, $xactions);
+
+    $inlines = array();
+    foreach ($xactions as $xaction) {
+      if ($xaction->getTransactionType() == self::TYPE_INLINE) {
+        $inlines[] = $xaction;
+      }
+    }
+
+    // TODO: This is a bit gross, but far less bad than it used to be. It
+    // could be further cleaned up at some point.
+
+    if ($inlines) {
+      $engine = PhabricatorMarkupEngine::newMarkupEngine(array())
+        ->setConfig('viewer', new PhabricatorUser())
+        ->setMode(PhutilRemarkupEngine::MODE_TEXT);
+
+      $body .= "\n\n";
+      $body .= pht('Inline Comments');
+      $body .= "\n";
+
+      $changeset_ids = array();
+      foreach ($inlines as $inline) {
+        $changeset_ids[] = $inline->getComment()->getChangesetID();
+      }
+
+      $changesets = id(new DifferentialChangeset())->loadAllWhere(
+        'id IN (%Ld)',
+        $changeset_ids);
+
+      foreach ($inlines as $inline) {
+        $comment = $inline->getComment();
+        $changeset = idx($changesets, $comment->getChangesetID());
+        if (!$changeset) {
+          continue;
+        }
+
+        $filename = $changeset->getDisplayFilename();
+        $linenumber = $comment->getLineNumber();
+        $inline_text = $engine->markupText($comment->getContent());
+        $inline_text = rtrim($inline_text);
+
+        $body .= "{$filename}:{$linenumber} {$inline_text}\n";
+      }
+    }
+
+    return $body;
+  }
+
 
 }

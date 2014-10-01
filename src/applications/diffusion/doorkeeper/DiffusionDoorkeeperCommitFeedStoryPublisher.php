@@ -180,18 +180,6 @@ final class DiffusionDoorkeeperCommitFeedStoryPublisher
     return pht('%s Audit', $prefix);
   }
 
-  public function getStoryText($object) {
-    $implied_context = $this->getRenderWithImpliedContext();
-
-    $story = $this->getFeedStory();
-    if ($story instanceof PhabricatorFeedStoryAudit) {
-      $text = $story->renderForAsanaBridge($implied_context);
-    } else {
-      $text = $story->renderText();
-    }
-    return $text;
-  }
-
   private function getTitlePrefix(PhabricatorRepositoryCommit $commit) {
     $prefix_key = 'metamta.diffusion.subject-prefix';
     return PhabricatorEnv::getEnvConfig($prefix_key);

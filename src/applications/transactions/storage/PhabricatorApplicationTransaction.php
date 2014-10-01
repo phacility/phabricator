@@ -1078,6 +1078,44 @@ abstract class PhabricatorApplicationTransaction
     return null;
   }
 
+  public function renderAsTextForDoorkeeper(
+    DoorkeeperFeedStoryPublisher $publisher,
+    PhabricatorFeedStory $story,
+    array $xactions) {
+
+    $text = array();
+    $body = array();
+
+    foreach ($xactions as $xaction) {
+      $xaction_body = $xaction->getBodyForMail();
+      if ($xaction_body !== null) {
+        $body[] = $xaction_body;
+      }
+
+      if ($xaction->shouldHideForMail($xactions)) {
+        continue;
+      }
+
+      $old_target = $xaction->getRenderingTarget();
+      $new_target = PhabricatorApplicationTransaction::TARGET_TEXT;
+      $xaction->setRenderingTarget($new_target);
+
+      if ($publisher->getRenderWithImpliedContext()) {
+        $text[] = $xaction->getTitle();
+      } else {
+        $text[] = $xaction->getTitleForFeed($story);
+      }
+
+      $xaction->setRenderingTarget($old_target);
+    }
+
+    $text = implode("\n", $text);
+    $body = implode("\n\n", $body);
+
+    return rtrim($text."\n\n".$body);
+  }
+
+
 
 /* -(  PhabricatorPolicyInterface Implementation  )-------------------------- */
 

@@ -86,18 +86,6 @@ final class DifferentialDoorkeeperRevisionFeedStoryPublisher
     return pht('%s Review Request', $prefix);
   }
 
-  public function getStoryText($object) {
-    $implied_context = $this->getRenderWithImpliedContext();
-
-    $story = $this->getFeedStory();
-    if ($story instanceof PhabricatorFeedStoryDifferential) {
-      $text = $story->renderForAsanaBridge($implied_context);
-    } else {
-      $text = $story->renderText();
-    }
-    return $text;
-  }
-
   private function getTitlePrefix(DifferentialRevision $revision) {
     $prefix_key = 'metamta.differential.subject-prefix';
     return PhabricatorEnv::getEnvConfig($prefix_key);
