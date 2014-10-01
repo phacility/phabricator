@@ -17,7 +17,7 @@ final class PhabricatorNamedQuery extends PhabricatorSearchDAO
       self::CONFIG_COLUMN_SCHEMA => array(
         'engineClassName' => 'text128',
         'queryName' => 'text255',
-        'queryKey' => 'bytes12',
+        'queryKey' => 'text12',
         'isBuiltin' => 'bool',
         'isDisabled' => 'bool',
         'sequence' => 'uint32',

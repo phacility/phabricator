@@ -14,7 +14,7 @@ final class PhabricatorSavedQuery extends PhabricatorSearchDAO
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'engineClassName' => 'text255',
-        'queryKey' => 'bytes12',
+        'queryKey' => 'text12',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_queryKey' => array(
