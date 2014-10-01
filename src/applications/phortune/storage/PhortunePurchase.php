@@ -31,6 +31,18 @@ final class PhortunePurchase extends PhortuneDAO
       self::CONFIG_SERIALIZATION => array(
         'metadata' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'cartPHID' => 'phid?',
+        'basePriceInCents' => 'sint32',
+        'quantity' => 'uint32',
+        'totalPriceInCents' => 'sint32',
+        'status' => 'text32',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_cart' => array(
+          'columns' => array('cartPHID'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

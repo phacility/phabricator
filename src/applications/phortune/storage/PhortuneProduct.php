@@ -27,6 +27,19 @@ final class PhortuneProduct extends PhortuneDAO
       self::CONFIG_SERIALIZATION => array(
         'metadata' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'productName' => 'text255',
+        'productType' => 'text64',
+        'status' => 'text64',
+        'priceInCents' => 'sint64',
+        'billingIntervalInMonths' => 'uint32?',
+        'trialPeriodInDays' => 'uint32?',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_status' => array(
+          'columns' => array('status'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

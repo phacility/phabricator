@@ -22,6 +22,24 @@ final class PholioImage extends PholioDAO
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'mockID' => 'id?',
+        'name' => 'text128',
+        'description' => 'text',
+        'sequence' => 'uint32',
+        'isObsolete' => 'bool',
+        'replacesImagePHID' => 'phid?',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_phid' => null,
+        'keyPHID' => array(
+          'columns' => array('phid'),
+          'unique' => true,
+        ),
+        'mockID' => array(
+          'columns' => array('mockID', 'isObsolete', 'sequence'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

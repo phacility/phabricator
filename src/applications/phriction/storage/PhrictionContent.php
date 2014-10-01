@@ -28,6 +28,32 @@ final class PhrictionContent extends PhrictionDAO
       $viewer);
   }
 
+  public function getConfiguration() {
+    return array(
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'version' => 'uint32',
+        'title' => 'text',
+        'slug' => 'text128',
+        'content' => 'text',
+        'description' => 'text',
+        'changeType' => 'uint32',
+        'changeRef' => 'uint32?',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'documentID' => array(
+          'columns' => array('documentID', 'version'),
+          'unique' => true,
+        ),
+        'authorPHID' => array(
+          'columns' => array('authorPHID'),
+        ),
+        'slug' => array(
+          'columns' => array('slug(255)'),
+        ),
+      ),
+    ) + parent::getConfiguration();
+  }
+
 
 /* -(  Markup Interface  )--------------------------------------------------- */
 

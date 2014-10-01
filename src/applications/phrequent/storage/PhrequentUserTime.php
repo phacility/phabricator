@@ -11,6 +11,17 @@ final class PhrequentUserTime extends PhrequentDAO
 
   private $preemptingEvents = self::ATTACHABLE;
 
+  public function getConfiguration() {
+    return array(
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'objectPHID' => 'phid?',
+        'note' => 'text?',
+        'dateStarted' => 'epoch',
+        'dateEnded' => 'epoch?',
+      ),
+    ) + parent::getConfiguration();
+  }
+
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
