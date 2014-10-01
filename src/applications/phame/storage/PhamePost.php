@@ -106,7 +106,12 @@ final class PhamePost extends PhameDAO
           'unique' => true,
         ),
         'bloggerPosts' => array(
-          'columns' => array('bloggerPHID', 'visibility', 'datePublished'),
+          'columns' => array(
+            'bloggerPHID',
+            'visibility',
+            'datePublished',
+            'id',
+          ),
         ),
       ),
     ) + parent::getConfiguration();
