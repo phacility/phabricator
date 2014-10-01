@@ -15,7 +15,7 @@ final class PhabricatorRepositorySchemaSpec
       id(new PhabricatorRepository())->getApplicationName(),
       PhabricatorRepository::TABLE_BADCOMMIT,
       array(
-        'fullCommitName' => 'text255',
+        'fullCommitName' => 'text64',
         'description' => 'text',
       ),
       array(

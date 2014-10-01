@@ -15,7 +15,7 @@ final class PhabricatorConduitMethodCallLog
       self::CONFIG_COLUMN_SCHEMA => array(
         'id' => 'id64',
         'connectionID' => 'id64?',
-        'method' => 'text255',
+        'method' => 'text64',
         'error' => 'text255',
         'duration' => 'uint64',
         'callerPHID' => 'phid?',

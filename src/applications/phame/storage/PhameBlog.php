@@ -30,7 +30,7 @@ final class PhameBlog extends PhameDAO
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'text64',
         'description' => 'text',
-        'domain' => 'text255?',
+        'domain' => 'text128?',
 
         // T6203/NULLABILITY
         // These policies should always be non-null.

@@ -15,7 +15,7 @@ final class PhragmentFragment extends PhragmentDAO
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
-        'path' => 'text255',
+        'path' => 'text128',
         'depth' => 'uint32',
         'latestVersionPHID' => 'phid?',
       ),

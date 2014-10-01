@@ -20,16 +20,13 @@ final class PhabricatorRepositoryCommitData extends PhabricatorRepositoryDAO {
         'commitDetails' => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
-        'authorName' => 'text255',
+        'authorName' => 'text',
         'commitMessage' => 'text',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'commitID' => array(
           'columns' => array('commitID'),
           'unique' => true,
-        ),
-        'authorName' => array(
-          'columns' => array('authorName'),
         ),
       ),
     ) + parent::getConfiguration();

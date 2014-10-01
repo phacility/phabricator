@@ -44,7 +44,7 @@ final class PhabricatorExternalAccount extends PhabricatorUserDAO
         'accountType' => 'text16',
         'accountDomain' => 'text64',
         'accountSecret' => 'text?',
-        'accountID' => 'text160',
+        'accountID' => 'text64',
         'displayName' => 'text255?',
         'username' => 'text255?',
         'realName' => 'text255?',

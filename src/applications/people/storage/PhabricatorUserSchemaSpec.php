@@ -26,7 +26,7 @@ final class PhabricatorUserSchemaSpec extends PhabricatorConfigSchemaSpec {
       ),
       array(
         'token' => array(
-          'columns' => array('token'),
+          'columns' => array('token(128)'),
         ),
         'userID' => array(
           'columns' => array('userID'),

@@ -51,7 +51,7 @@ final class PhrictionContent extends PhrictionDAO
           'columns' => array('authorPHID'),
         ),
         'slug' => array(
-          'columns' => array('slug(255)'),
+          'columns' => array('slug'),
         ),
       ),
     ) + parent::getConfiguration();

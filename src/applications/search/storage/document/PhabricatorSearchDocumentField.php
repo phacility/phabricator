@@ -22,10 +22,9 @@ final class PhabricatorSearchDocumentField extends PhabricatorSearchDAO {
         'phid' => array(
           'columns' => array('phid'),
         ),
-
-        // NOTE: This is a fulltext index! Be careful!
         'corpus' => array(
           'columns' => array('corpus'),
+          'type' => 'FULLTEXT',
         ),
       ),
     ) + parent::getConfiguration();

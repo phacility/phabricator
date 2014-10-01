@@ -122,7 +122,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
         'subprojectPHIDs' => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
-        'name' => 'text255',
+        'name' => 'text128',
         'status' => 'text32',
         'phrictionSlug' => 'text128?',
         'isMembershipLocked' => 'bool',

@@ -14,8 +14,10 @@ final class PhabricatorStorageManagementAdjustWorkflow
   }
 
   public function execute(PhutilArgumentParser $args) {
+    $force = $args->getArg('force');
+
     $this->requireAllPatchesApplied();
-    $this->adjustSchemata();
+    $this->adjustSchemata($force);
     return 0;
   }
 
@@ -58,7 +60,7 @@ final class PhabricatorStorageManagementAdjustWorkflow
     return array($comp, $expect, $actual);
   }
 
-  private function adjustSchemata() {
+  private function adjustSchemata($force) {
     $console = PhutilConsole::getConsole();
 
     $console->writeOut(
@@ -98,26 +100,28 @@ final class PhabricatorStorageManagementAdjustWorkflow
 
     $table->draw();
 
-    $console->writeOut(
-      "\n%s\n",
-      pht(
-        "Found %s issues(s) with schemata, detailed above.\n\n".
-        "You can review issues in more detail from the web interface, ".
-        "in Config > Database Status.\n\n".
-        "MySQL needs to copy table data to make some adjustments, so these ".
-        "migrations may take some time.".
+    if (!$force) {
+      $console->writeOut(
+        "\n%s\n",
+        pht(
+          "Found %s issues(s) with schemata, detailed above.\n\n".
+          "You can review issues in more detail from the web interface, ".
+          "in Config > Database Status.\n\n".
+          "MySQL needs to copy table data to make some adjustments, so these ".
+          "migrations may take some time.".
 
-        // TODO: Remove warning once this stabilizes.
-        "\n\n".
-        "WARNING: This workflow is new and unstable. If you continue, you ".
-        "may unrecoverably destory data. Make sure you have a backup before ".
-        "you proceed.",
+          // TODO: Remove warning once this stabilizes.
+          "\n\n".
+          "WARNING: This workflow is new and unstable. If you continue, you ".
+          "may unrecoverably destory data. Make sure you have a backup before ".
+          "you proceed.",
 
-        new PhutilNumber(count($adjustments))));
+          new PhutilNumber(count($adjustments))));
 
-    $prompt = pht('Fix these schema issues?');
-    if (!phutil_console_confirm($prompt, $default_no = true)) {
-      return;
+      $prompt = pht('Fix these schema issues?');
+      if (!phutil_console_confirm($prompt, $default_no = true)) {
+        return;
+      }
     }
 
     $console->writeOut(
@@ -194,22 +198,47 @@ final class PhabricatorStorageManagementAdjustWorkflow
               break;
             case 'key':
               if (($phase == 0) && $adjust['exists']) {
+                if ($adjust['name'] == 'PRIMARY') {
+                  $key_name = 'PRIMARY KEY';
+                } else {
+                  $key_name = qsprintf($conn, 'KEY %T', $adjust['name']);
+                }
+
                 queryfx(
                   $conn,
-                  'ALTER TABLE %T.%T DROP KEY %T',
+                  'ALTER TABLE %T.%T DROP %Q',
                   $adjust['database'],
                   $adjust['table'],
-                  $adjust['name']);
+                  $key_name);
               }
 
               if (($phase == 2) && $adjust['keep']) {
+                // Different keys need different creation syntax. Notable
+                // special cases are primary keys and fulltext keys.
+                if ($adjust['name'] == 'PRIMARY') {
+                  $key_name = 'PRIMARY KEY';
+                } else if ($adjust['indexType'] == 'FULLTEXT') {
+                  $key_name = qsprintf($conn, 'FULLTEXT %T', $adjust['name']);
+                } else {
+                  if ($adjust['unique']) {
+                    $key_name = qsprintf(
+                      $conn,
+                      'UNIQUE KEY %T',
+                      $adjust['name']);
+                  } else {
+                    $key_name = qsprintf(
+                      $conn,
+                      '/* NONUNIQUE */ KEY %T',
+                      $adjust['name']);
+                  }
+                }
+
                 queryfx(
                   $conn,
-                  'ALTER TABLE %T.%T ADD %Q KEY %T (%Q)',
+                  'ALTER TABLE %T.%T ADD %Q (%Q)',
                   $adjust['database'],
                   $adjust['table'],
-                  $adjust['unique'] ? 'UNIQUE' : '/* NONUNIQUE */',
-                  $adjust['name'],
+                  $key_name,
                   implode(', ', $adjust['columns']));
               }
               break;
@@ -239,7 +268,7 @@ final class PhabricatorStorageManagementAdjustWorkflow
     foreach ($failed as $failure) {
       list($adjust, $ex) = $failure;
 
-      $pieces = array_select_keys($adjust, array('database', 'table', 'naeme'));
+      $pieces = array_select_keys($adjust, array('database', 'table', 'name'));
       $pieces = array_filter($pieces);
       $target = implode('.', $pieces);
 
@@ -269,7 +298,7 @@ final class PhabricatorStorageManagementAdjustWorkflow
     $issue_missingkey = PhabricatorConfigStorageSchema::ISSUE_MISSINGKEY;
     $issue_columns = PhabricatorConfigStorageSchema::ISSUE_KEYCOLUMNS;
     $issue_unique = PhabricatorConfigStorageSchema::ISSUE_UNIQUE;
-
+    $issue_longkey = PhabricatorConfigStorageSchema::ISSUE_LONGKEY;
 
     $adjustments = array();
     foreach ($comp->getDatabases() as $database_name => $database) {
@@ -393,6 +422,16 @@ final class PhabricatorStorageManagementAdjustWorkflow
             $issues[] = $issue_unique;
           }
 
+          // NOTE: We can't really fix this, per se, but we may need to remove
+          // the key to change the column type. In the best case, the new
+          // column type won't be overlong and recreating the key really will
+          // fix the issue. In the worst case, we get the right column type and
+          // lose the key, which is still better than retaining the key having
+          // the wrong column type.
+          if ($key->hasIssue($issue_longkey)) {
+            $issues[] = $issue_longkey;
+          }
+
           if ($issues) {
             $adjustment = array(
               'kind' => 'key',
@@ -408,6 +447,7 @@ final class PhabricatorStorageManagementAdjustWorkflow
               $adjustment += array(
                 'columns' => $expect_key->getColumnNames(),
                 'unique' => $expect_key->getUnique(),
+                'indexType' => $expect_key->getIndexType(),
               );
             }
 

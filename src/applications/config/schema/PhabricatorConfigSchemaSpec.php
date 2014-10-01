@@ -114,6 +114,7 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
         ->setColumnNames(idx($key_spec, 'columns', array()));
 
       $key->setUnique((bool)idx($key_spec, 'unique'));
+      $key->setIndexType(idx($key_spec, 'type', 'BTREE'));
 
       $table->addKey($key);
     }

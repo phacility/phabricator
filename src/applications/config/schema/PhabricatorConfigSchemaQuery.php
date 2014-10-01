@@ -129,7 +129,8 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
           $key_schema = id(new PhabricatorConfigKeySchema())
             ->setName($key_name)
             ->setColumnNames($column_names)
-            ->setUnique(!$head['Non_unique']);
+            ->setUnique(!$head['Non_unique'])
+            ->setIndexType($head['Index_type']);
 
           $table_schema->addKey($key_schema);
         }

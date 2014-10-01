@@ -281,6 +281,7 @@ final class PhabricatorConfigDatabaseStatusController
     $nullable_issue = PhabricatorConfigStorageSchema::ISSUE_NULLABLE;
     $unique_issue = PhabricatorConfigStorageSchema::ISSUE_UNIQUE;
     $columns_issue = PhabricatorConfigStorageSchema::ISSUE_KEYCOLUMNS;
+    $longkey_issue = PhabricatorConfigStorageSchema::ISSUE_LONGKEY;
 
     $database = $comp->getDatabase($database_name);
     if (!$database) {
@@ -392,7 +393,7 @@ final class PhabricatorConfigDatabaseStatusController
       if ($size) {
         $size_formatted = $this->renderAttr(
           $size,
-          ($size > self::MAX_INNODB_KEY_LENGTH));
+          $key->hasIssue($longkey_issue));
       }
 
       $key_rows[] = array(

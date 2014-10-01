@@ -3,8 +3,6 @@
 abstract class PhabricatorConfigDatabaseController
   extends PhabricatorConfigController {
 
-  const MAX_INNODB_KEY_LENGTH = 767;
-
   protected function buildSchemaQuery() {
     $conf = PhabricatorEnv::newObjectFromConfig(
       'mysql.configuration-provider',

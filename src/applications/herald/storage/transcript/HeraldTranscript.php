@@ -106,6 +106,7 @@ final class HeraldTranscript extends HeraldDAO
         'host' => 'text255',
         'duration' => 'double',
         'dryRun' => 'bool',
+        'garbageCollected' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,

@@ -36,7 +36,7 @@ final class HeraldRule extends HeraldDAO
         'contentType' => 'text255',
         'mustMatchAll' => 'bool',
         'configVersion' => 'uint32',
-        'ruleType' => 'text255',
+        'ruleType' => 'text32',
         'isDisabled' => 'uint32',
         'triggerObjectPHID' => 'phid?',
 
@@ -45,16 +45,10 @@ final class HeraldRule extends HeraldDAO
         'repetitionPolicy' => 'uint32?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'key_phid' => null,
-        'phid' => array(
-          'columns' => array('phid'),
-          'unique' => true,
+        'key_author' => array(
+          'columns' => array('authorPHID'),
         ),
-        'authorPHID' => array(
-          'columns' => array('authorPHID', 'name'),
-          'unique' => true,
-        ),
-        'IDX_RULE_TYPE' => array(
+        'key_ruletype' => array(
           'columns' => array('ruleType'),
         ),
         'key_trigger' => array(

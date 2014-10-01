@@ -12,6 +12,7 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
   const ISSUE_NULLABLE = 'nullable';
   const ISSUE_KEYCOLUMNS = 'keycolumns';
   const ISSUE_UNIQUE = 'unique';
+  const ISSUE_LONGKEY = 'longkey';
   const ISSUE_SUBWARN = 'subwarn';
   const ISSUE_SUBFAIL = 'subfail';
 
@@ -117,6 +118,8 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
         return pht('Key on Wrong Columns');
       case self::ISSUE_UNIQUE:
         return pht('Key has Wrong Uniqueness');
+      case self::ISSUE_LONGKEY:
+        return pht('Key is Too Long');
       case self::ISSUE_SUBWARN:
         return pht('Subschemata Have Warnings');
       case self::ISSUE_SUBFAIL:
@@ -145,9 +148,11 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
       case self::ISSUE_NULLABLE:
         return pht('This schema has the wrong nullable setting.');
       case self::ISSUE_KEYCOLUMNS:
-        return pht('This schema is on the wrong columns.');
+        return pht('This key is on the wrong columns.');
       case self::ISSUE_UNIQUE:
         return pht('This key has the wrong uniqueness setting.');
+      case self::ISSUE_LONGKEY:
+        return pht('This key is too long for utf8mb4.');
       case self::ISSUE_SUBWARN:
         return pht('Subschemata have setup warnings.');
       case self::ISSUE_SUBFAIL:
@@ -172,6 +177,7 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
       case self::ISSUE_SURPLUSKEY:
       case self::ISSUE_UNIQUE:
       case self::ISSUE_KEYCOLUMNS:
+      case self::ISSUE_LONGKEY:
         return self::STATUS_WARN;
       default:
         throw new Exception(pht('Unknown schema issue "%s"!', $issue));

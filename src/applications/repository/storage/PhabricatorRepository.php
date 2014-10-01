@@ -97,7 +97,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
           'unique' => true,
         ),
         'key_name' => array(
-          'columns' => array('name'),
+          'columns' => array('name(128)'),
         ),
         'key_vcs' => array(
           'columns' => array('versionControlSystem'),

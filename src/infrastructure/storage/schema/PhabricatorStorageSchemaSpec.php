@@ -8,7 +8,7 @@ final class PhabricatorStorageSchemaSpec
       'meta_data',
       'patch_status',
       array(
-        'patch' => 'text255',
+        'patch' => 'text128',
         'applied' => 'uint32',
       ),
       array(

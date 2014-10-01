@@ -23,7 +23,7 @@ final class PhabricatorRepositoryArcanistProject
         'symbolIndexProjects'  => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
-        'name' => 'text255',
+        'name' => 'text128',
         'repositoryID' => 'id?',
       ),
       self::CONFIG_KEY_SCHEMA => array(

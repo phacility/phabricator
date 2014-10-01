@@ -9,7 +9,7 @@ final class PhabricatorRepositoryBranch extends PhabricatorRepositoryDAO {
   public function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
-        'name' => 'text255',
+        'name' => 'text128',
         'lintCommit' => 'text40?',
       ),
       self::CONFIG_KEY_SCHEMA => array(

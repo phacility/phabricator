@@ -69,7 +69,7 @@ final class DivinerLiveSymbol extends DivinerDAO
           ),
         ),
         'name' => array(
-          'columns' => array('name'),
+          'columns' => array('name(64)'),
         ),
         'key_slug' => array(
           'columns' => array('titleSlugHash'),
