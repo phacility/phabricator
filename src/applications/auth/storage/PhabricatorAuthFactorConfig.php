@@ -19,6 +19,11 @@ final class PhabricatorAuthFactorConfig extends PhabricatorAuthDAO {
         'factorName' => 'text',
         'factorSecret' => 'text',
       ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_user' => array(
+          'columns' => array('userPHID'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

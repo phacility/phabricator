@@ -53,6 +53,14 @@ final class FundInitiative extends FundDAO
         'description' => 'text',
         'status' => 'text32',
       ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_status' => array(
+          'columns' => array('status'),
+        ),
+        'key_owner' => array(
+          'columns' => array('ownerPHID'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

@@ -89,10 +89,17 @@ final class PhabricatorConfigDatabaseIssueController
     foreach ($issues as $issue) {
       $const = $issue[4];
 
+      $database_link = phutil_tag(
+        'a',
+        array(
+          'href' => $this->getApplicationURI('/database/'.$issue[0].'/'),
+        ),
+        $issue[0]);
+
       $rows[] = array(
         $this->renderIcon(
           PhabricatorConfigStorageSchema::getIssueStatus($const)),
-        $issue[0],
+        $database_link,
         $issue[1],
         $issue[2],
         $issue[3],

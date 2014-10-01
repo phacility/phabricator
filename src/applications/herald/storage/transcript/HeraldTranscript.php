@@ -16,6 +16,7 @@ final class HeraldTranscript extends HeraldDAO
 
   protected $objectPHID;
   protected $dryRun;
+  protected $garbageCollected = 0;
 
   const TABLE_SAVED_HEADER = 'herald_savedheader';
 

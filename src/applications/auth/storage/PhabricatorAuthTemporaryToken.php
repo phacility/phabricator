@@ -22,6 +22,10 @@ final class PhabricatorAuthTemporaryToken extends PhabricatorAuthDAO
       self::CONFIG_KEY_SCHEMA => array(
         'key_token' => array(
           'columns' => array('objectPHID', 'tokenType', 'tokenCode'),
+          'unique' => true,
+        ),
+        'key_expires' => array(
+          'columns' => array('tokenExpires'),
         ),
       ),
     ) + parent::getConfiguration();

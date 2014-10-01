@@ -58,6 +58,7 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
         'key_phid' => null,
         'phid' => array(
           'columns' => array('phid'),
+          'unique' => true,
         ),
       ),
     ) + parent::getConfiguration();

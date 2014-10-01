@@ -28,6 +28,7 @@ final class PholioTransactionComment
     $config[self::CONFIG_KEY_SCHEMA] = array(
       'key_draft' => array(
         'columns' => array('authorPHID', 'imageID', 'transactionPHID'),
+        'unique' => true,
       ),
     ) + $config[self::CONFIG_KEY_SCHEMA];
 

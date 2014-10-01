@@ -15,6 +15,7 @@ final class PhabricatorCalendarHoliday extends PhabricatorCalendarDAO {
       self::CONFIG_KEY_SCHEMA => array(
         'day' => array(
           'columns' => array('day'),
+          'unique' => true,
         ),
       ),
     ) + parent::getConfiguration();

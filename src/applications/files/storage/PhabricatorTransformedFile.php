@@ -14,6 +14,10 @@ final class PhabricatorTransformedFile extends PhabricatorFileDAO {
       self::CONFIG_KEY_SCHEMA => array(
         'originalPHID' => array(
           'columns' => array('originalPHID', 'transform'),
+          'unique' => true,
+        ),
+        'transformedPHID' => array(
+          'columns' => array('transformedPHID'),
         ),
       ),
     ) + parent::getConfiguration();

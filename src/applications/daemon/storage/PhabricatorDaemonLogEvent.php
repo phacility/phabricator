@@ -14,6 +14,11 @@ final class PhabricatorDaemonLogEvent extends PhabricatorDaemonDAO {
         'logType' => 'text4',
         'message' => 'text',
       ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'logID' => array(
+          'columns' => array('logID', 'epoch'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

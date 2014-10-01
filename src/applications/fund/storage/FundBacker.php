@@ -32,6 +32,14 @@ final class FundBacker extends FundDAO
         'status' => 'text32',
         'amountInCents' => 'uint32',
       ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_initiative' => array(
+          'columns' => array('initiativePHID'),
+        ),
+        'key_backer' => array(
+          'columns' => array('backerPHID'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

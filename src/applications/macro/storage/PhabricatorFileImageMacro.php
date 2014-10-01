@@ -54,6 +54,13 @@ final class PhabricatorFileImageMacro extends PhabricatorFileDAO
       self::CONFIG_KEY_SCHEMA => array(
         'name' => array(
           'columns' => array('name'),
+          'unique' => true,
+        ),
+        'key_disabled' => array(
+          'columns' => array('isDisabled'),
+        ),
+        'key_dateCreated' => array(
+          'columns' => array('dateCreated'),
         ),
       ),
     ) + parent::getConfiguration();

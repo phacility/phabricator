@@ -23,9 +23,11 @@ final class PhabricatorFeedStoryData extends PhabricatorFeedDAO {
         'key_phid' => null,
         'phid' => array(
           'columns' => array('phid'),
+          'unique' => true,
         ),
         'chronologicalKey' => array(
           'columns' => array('chronologicalKey'),
+          'unique' => true,
         ),
       ),
     ) + parent::getConfiguration();

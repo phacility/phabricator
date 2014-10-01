@@ -31,6 +31,15 @@ final class DoorkeeperExternalObject extends DoorkeeperDAO
       self::CONFIG_KEY_SCHEMA => array(
         'key_object' => array(
           'columns' => array('objectKey'),
+          'unique' => true,
+        ),
+        'key_full' => array(
+          'columns' => array(
+            'applicationType',
+            'applicationDomain',
+            'objectType',
+            'objectID',
+          ),
         ),
       ),
     ) + parent::getConfiguration();

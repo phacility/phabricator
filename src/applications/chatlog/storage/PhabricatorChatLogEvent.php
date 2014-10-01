@@ -21,6 +21,11 @@ final class PhabricatorChatLogEvent
         'type' => 'text4',
         'message' => 'text',
       ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'channel' => array(
+          'columns' => array('epoch'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

@@ -20,6 +20,17 @@ final class PhabricatorConduitMethodCallLog
         'duration' => 'uint64',
         'callerPHID' => 'phid?',
       ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_date' => array(
+          'columns' => array('dateCreated'),
+        ),
+        'key_method' => array(
+          'columns' => array('method'),
+        ),
+        'key_callermethod' => array(
+          'columns' => array('callerPHID', 'method'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

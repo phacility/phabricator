@@ -17,6 +17,7 @@ final class PhabricatorFileTransactionComment
     $config[self::CONFIG_KEY_SCHEMA] = array(
       'key_draft' => array(
         'columns' => array('authorPHID', 'transactionPHID'),
+        'unique' => true,
       ),
     ) + $config[self::CONFIG_KEY_SCHEMA];
     return $config;

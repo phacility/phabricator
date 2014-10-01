@@ -17,6 +17,14 @@ final class PhabricatorSystemActionLog extends PhabricatorSystemDAO {
         'action' => 'text32',
         'score' => 'double',
       ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_epoch' => array(
+          'columns' => array('epoch'),
+        ),
+        'key_action' => array(
+          'columns' => array('actorHash', 'action', 'epoch'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

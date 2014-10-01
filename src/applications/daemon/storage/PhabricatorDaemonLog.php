@@ -31,6 +31,14 @@ final class PhabricatorDaemonLog extends PhabricatorDaemonDAO
         'envHash' => 'bytes40',
         'status' => 'text8',
       ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'status' => array(
+          'columns' => array('status'),
+        ),
+        'dateCreated' => array(
+          'columns' => array('dateCreated'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

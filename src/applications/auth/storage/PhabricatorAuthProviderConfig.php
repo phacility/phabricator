@@ -40,6 +40,15 @@ final class PhabricatorAuthProviderConfig extends PhabricatorAuthDAO
         'shouldAllowUnlink' => 'bool',
         'shouldTrustEmails' => 'bool',
       ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_provider' => array(
+          'columns' => array('providerType', 'providerDomain'),
+          'unique' => true,
+        ),
+        'key_class' => array(
+          'columns' => array('providerClass'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

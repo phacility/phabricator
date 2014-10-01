@@ -23,6 +23,10 @@ final class PhabricatorFlag extends PhabricatorFlagDAO
       self::CONFIG_KEY_SCHEMA => array(
         'ownerPHID' => array(
           'columns' => array('ownerPHID', 'type', 'objectPHID'),
+          'unique' => true,
+        ),
+        'objectPHID' => array(
+          'columns' => array('objectPHID'),
         ),
       ),
     ) + parent::getConfiguration();

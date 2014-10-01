@@ -37,6 +37,17 @@ final class LegalpadDocumentSignature
         'isExemption' => 'bool',
         'exemptionPHID' => 'phid?',
       ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_signer' => array(
+          'columns' => array('signerPHID', 'dateModified'),
+        ),
+        'secretKey' => array(
+          'columns' => array('secretKey'),
+        ),
+        'key_document' => array(
+          'columns' => array('documentPHID', 'signerPHID', 'documentVersion'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

@@ -169,20 +169,20 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
   public static function getIssueStatus($issue) {
     switch ($issue) {
       case self::ISSUE_MISSING:
-      case self::ISSUE_MISSINGKEY:
       case self::ISSUE_SUBFAIL:
-        return self::STATUS_FAIL;
       case self::ISSUE_SURPLUS:
-      case self::ISSUE_SURPLUSKEY:
+        return self::STATUS_FAIL;
       case self::ISSUE_SUBWARN:
       case self::ISSUE_COLUMNTYPE:
       case self::ISSUE_KEYCOLUMNS:
-      case self::ISSUE_UNIQUE:
       case self::ISSUE_NULLABLE:
         return self::STATUS_WARN;
       case self::ISSUE_SUBNOTE:
       case self::ISSUE_CHARSET:
       case self::ISSUE_COLLATION:
+      case self::ISSUE_MISSINGKEY:
+      case self::ISSUE_SURPLUSKEY:
+      case self::ISSUE_UNIQUE:
         return self::STATUS_NOTE;
       default:
         throw new Exception(pht('Unknown schema issue "%s"!', $issue));

@@ -20,9 +20,17 @@ final class PhabricatorCacheSchemaSpec extends PhabricatorConfigSchemaSpec {
       array(
         'PRIMARY' => array(
           'columns' => array('id'),
+          'unique' => true,
         ),
         'key_cacheKeyHash' => array(
           'columns' => array('cacheKeyHash'),
+          'unique' => true,
+        ),
+        'key_cacheCreated' => array(
+          'columns' => array('cacheCreated'),
+        ),
+        'key_ttl' => array(
+          'columns' => array('cacheExpires'),
         ),
       ));
 

@@ -15,6 +15,10 @@ final class PhabricatorTokenCount extends PhabricatorTokenDAO {
       self::CONFIG_KEY_SCHEMA => array(
         'key_objectPHID' => array(
           'columns' => array('objectPHID'),
+          'unique' => true,
+        ),
+        'key_count' => array(
+          'columns' => array('tokenCount'),
         ),
       ),
     ) + parent::getConfiguration();

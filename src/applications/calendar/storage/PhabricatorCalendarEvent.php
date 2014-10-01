@@ -43,6 +43,11 @@ final class PhabricatorCalendarEvent
         'status' => 'uint32',
         'description' => 'text',
       ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'userPHID_dateFrom' => array(
+          'columns' => array('userPHID', 'dateTo'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 
