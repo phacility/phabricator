@@ -129,56 +129,99 @@ final class PhabricatorStorageManagementAdjustWorkflow
 
     $failed = array();
 
+    // We make changes in three phases:
+    //
+    // Phase 0: Drop all keys which we're going to adjust. This prevents them
+    // from interfering with column changes.
+    //
+    // Phase 1: Apply all database, table, and column changes.
+    //
+    // Phase 2: Restore adjusted keys.
+    $phases = 3;
+
     $bar = id(new PhutilConsoleProgressBar())
-      ->setTotal(count($adjustments));
-    foreach ($adjustments as $adjust) {
-      try {
-        switch ($adjust['kind']) {
-          case 'database':
-            queryfx(
-              $conn,
-              'ALTER DATABASE %T CHARACTER SET = %s COLLATE = %s',
-              $adjust['database'],
-              $adjust['charset'],
-              $adjust['collation']);
-            break;
-          case 'table':
-            queryfx(
-              $conn,
-              'ALTER TABLE %T.%T COLLATE = %s',
-              $adjust['database'],
-              $adjust['table'],
-              $adjust['collation']);
-            break;
-          case 'column':
-            $parts = array();
-            if ($adjust['charset']) {
-              $parts[] = qsprintf(
+      ->setTotal(count($adjustments) * $phases);
+
+    for ($phase = 0; $phase < $phases; $phase++) {
+      foreach ($adjustments as $adjust) {
+        try {
+          switch ($adjust['kind']) {
+            case 'database':
+              if ($phase != 1) {
+                break;
+              }
+              queryfx(
                 $conn,
-                'CHARACTER SET %Q COLLATE %Q',
+                'ALTER DATABASE %T CHARACTER SET = %s COLLATE = %s',
+                $adjust['database'],
                 $adjust['charset'],
                 $adjust['collation']);
-            }
+              break;
+            case 'table':
+              if ($phase != 1) {
+                break;
+              }
+              queryfx(
+                $conn,
+                'ALTER TABLE %T.%T COLLATE = %s',
+                $adjust['database'],
+                $adjust['table'],
+                $adjust['collation']);
+              break;
+            case 'column':
+              if ($phase != 1) {
+                break;
+              }
+              $parts = array();
+              if ($adjust['charset']) {
+                $parts[] = qsprintf(
+                  $conn,
+                  'CHARACTER SET %Q COLLATE %Q',
+                  $adjust['charset'],
+                  $adjust['collation']);
+              }
 
-            queryfx(
-              $conn,
-              'ALTER TABLE %T.%T MODIFY %T %Q %Q %Q',
-              $adjust['database'],
-              $adjust['table'],
-              $adjust['name'],
-              $adjust['type'],
-              implode(' ', $parts),
-              $adjust['nullable'] ? 'NULL' : 'NOT NULL');
+              queryfx(
+                $conn,
+                'ALTER TABLE %T.%T MODIFY %T %Q %Q %Q',
+                $adjust['database'],
+                $adjust['table'],
+                $adjust['name'],
+                $adjust['type'],
+                implode(' ', $parts),
+                $adjust['nullable'] ? 'NULL' : 'NOT NULL');
 
-            break;
-          default:
-            throw new Exception(
-              pht('Unknown schema adjustment kind "%s"!', $adjust['kind']));
+              break;
+            case 'key':
+              if (($phase == 0) && $adjust['exists']) {
+                queryfx(
+                  $conn,
+                  'ALTER TABLE %T.%T DROP KEY %T',
+                  $adjust['database'],
+                  $adjust['table'],
+                  $adjust['name']);
+              }
+
+              if (($phase == 2) && $adjust['keep']) {
+                queryfx(
+                  $conn,
+                  'ALTER TABLE %T.%T ADD %Q KEY %T (%Q)',
+                  $adjust['database'],
+                  $adjust['table'],
+                  $adjust['unique'] ? 'UNIQUE' : '/* NONUNIQUE */',
+                  $adjust['name'],
+                  implode(', ', $adjust['columns']));
+              }
+              break;
+            default:
+              throw new Exception(
+                pht('Unknown schema adjustment kind "%s"!', $adjust['kind']));
+          }
+        } catch (AphrontQueryException $ex) {
+          $failed[] = array($adjust, $ex);
         }
-      } catch (AphrontQueryException $ex) {
-        $failed[] = array($adjust, $ex);
+        $bar->update(1);
       }
-      $bar->update(1);
     }
     $bar->done();
 
@@ -222,6 +265,11 @@ final class PhabricatorStorageManagementAdjustWorkflow
     $issue_charset = PhabricatorConfigStorageSchema::ISSUE_CHARSET;
     $issue_collation = PhabricatorConfigStorageSchema::ISSUE_COLLATION;
     $issue_columntype = PhabricatorConfigStorageSchema::ISSUE_COLUMNTYPE;
+    $issue_surpluskey = PhabricatorConfigStorageSchema::ISSUE_SURPLUSKEY;
+    $issue_missingkey = PhabricatorConfigStorageSchema::ISSUE_MISSINGKEY;
+    $issue_columns = PhabricatorConfigStorageSchema::ISSUE_KEYCOLUMNS;
+    $issue_unique = PhabricatorConfigStorageSchema::ISSUE_UNIQUE;
+
 
     $adjustments = array();
     foreach ($comp->getDatabases() as $database_name => $database) {
@@ -319,6 +367,51 @@ final class PhabricatorStorageManagementAdjustWorkflow
               // dangerous, so always use the current nullability.
               'nullable' => $actual_column->getNullable(),
             );
+          }
+        }
+
+        foreach ($table->getKeys() as $key_name => $key) {
+          $expect_key = $expect_table->getKey($key_name);
+          $actual_key = $actual_table->getKey($key_name);
+
+          $issues = array();
+          $keep_key = true;
+          if ($key->hasIssue($issue_surpluskey)) {
+            $issues[] = $issue_surpluskey;
+            $keep_key = false;
+          }
+
+          if ($key->hasIssue($issue_missingkey)) {
+            $issues[] = $issue_missingkey;
+          }
+
+          if ($key->hasIssue($issue_columns)) {
+            $issues[] = $issue_columns;
+          }
+
+          if ($key->hasIssue($issue_unique)) {
+            $issues[] = $issue_unique;
+          }
+
+          if ($issues) {
+            $adjustment = array(
+              'kind' => 'key',
+              'database' => $database_name,
+              'table' => $table_name,
+              'name' => $key_name,
+              'issues' => $issues,
+              'exists' => (bool)$actual_key,
+              'keep' => $keep_key,
+            );
+
+            if ($keep_key) {
+              $adjustment += array(
+                'columns' => $expect_key->getColumnNames(),
+                'unique' => $expect_key->getUnique(),
+              );
+            }
+
+            $adjustments[] = $adjustment;
           }
         }
       }
