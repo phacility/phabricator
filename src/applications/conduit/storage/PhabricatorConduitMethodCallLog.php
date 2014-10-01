@@ -13,7 +13,7 @@ final class PhabricatorConduitMethodCallLog
   public function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
-        'id' => 'id64',
+        'id' => 'auto64',
         'connectionID' => 'id64?',
         'method' => 'text64',
         'error' => 'text255',

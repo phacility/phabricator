@@ -24,7 +24,7 @@ final class PhabricatorProjectSchemaSpec extends PhabricatorConfigSchemaSpec {
       id(new PhabricatorProject())->getApplicationName(),
       PhabricatorProject::TABLE_DATASOURCE_TOKEN,
       array(
-        'id' => 'id',
+        'id' => 'auto',
         'projectID' => 'id',
         'token' => 'text128',
       ),

@@ -29,7 +29,7 @@ final class PhabricatorRepositorySchemaSpec
       id(new PhabricatorRepository())->getApplicationName(),
       PhabricatorRepository::TABLE_COVERAGE,
       array(
-        'id' => 'id',
+        'id' => 'auto',
         'branchID' => 'id',
         'commitID' => 'id',
         'pathID' => 'id',
@@ -70,7 +70,7 @@ final class PhabricatorRepositorySchemaSpec
       id(new PhabricatorRepository())->getApplicationName(),
       PhabricatorRepository::TABLE_LINTMESSAGE,
       array(
-        'id' => 'id',
+        'id' => 'auto',
         'branchID' => 'id',
         'path' => 'text',
         'line' => 'uint32',
@@ -100,7 +100,7 @@ final class PhabricatorRepositorySchemaSpec
       id(new PhabricatorRepository())->getApplicationName(),
       PhabricatorRepository::TABLE_PARENTS,
       array(
-        'id' => 'id',
+        'id' => 'auto',
         'childCommitID' => 'id',
         'parentCommitID' => 'id',
       ),
@@ -122,7 +122,7 @@ final class PhabricatorRepositorySchemaSpec
       id(new PhabricatorRepository())->getApplicationName(),
       PhabricatorRepository::TABLE_PATH,
       array(
-        'id' => 'id',
+        'id' => 'auto',
         'path' => 'text',
         'pathHash' => 'bytes32',
       ),

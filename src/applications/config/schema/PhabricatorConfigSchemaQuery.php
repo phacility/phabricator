@@ -60,7 +60,7 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
       $column_info = queryfx_all(
         $conn,
         'SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, CHARACTER_SET_NAME,
-            COLLATION_NAME, COLUMN_TYPE, IS_NULLABLE
+            COLLATION_NAME, COLUMN_TYPE, IS_NULLABLE, EXTRA
           FROM INFORMATION_SCHEMA.COLUMNS
           WHERE (%Q)',
         '('.implode(') OR (', $sql).')');
@@ -96,12 +96,19 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
 
         $columns = idx($database_column_info, $table_name, array());
         foreach ($columns as $column) {
+          if (strpos($column['EXTRA'], 'auto_increment') === false) {
+            $auto_increment = false;
+          } else {
+            $auto_increment = true;
+          }
+
           $column_schema = id(new PhabricatorConfigColumnSchema())
             ->setName($column['COLUMN_NAME'])
             ->setCharacterSet($column['CHARACTER_SET_NAME'])
             ->setCollation($column['COLLATION_NAME'])
             ->setColumnType($column['COLUMN_TYPE'])
-            ->setNullable($column['IS_NULLABLE'] == 'YES');
+            ->setNullable($column['IS_NULLABLE'] == 'YES')
+            ->setAutoIncrement($auto_increment);
 
           $table_schema->addColumn($column_schema);
         }

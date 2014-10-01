@@ -1744,8 +1744,15 @@ abstract class LiskDAO {
 
     $binary_map = $this->getBinaryColumns();
 
+    $id_mechanism = $this->getConfigOption(self::CONFIG_IDS);
+    if ($id_mechanism == self::IDS_AUTOINCREMENT) {
+      $id_type = 'auto';
+    } else {
+      $id_type = 'id';
+    }
+
     $builtin = array(
-      'id' => 'id',
+      'id' => $id_type,
       'phid' => 'phid',
       'viewPolicy' => 'policy',
       'editPolicy' => 'policy',

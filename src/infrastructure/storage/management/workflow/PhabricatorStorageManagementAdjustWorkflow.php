@@ -132,68 +132,103 @@ final class PhabricatorStorageManagementAdjustWorkflow
 
     $failed = array();
 
-    // We make changes in three phases:
-    //
-    // Phase 0: Drop all keys which we're going to adjust. This prevents them
-    // from interfering with column changes.
-    //
-    // Phase 1: Apply all database, table, and column changes.
-    //
-    // Phase 2: Restore adjusted keys.
-    $phases = 3;
+    // We make changes in several phases.
+    $phases = array(
+      // Drop surplus autoincrements. This allows us to drop primary keys on
+      // autoincrement columns.
+      'drop_auto',
+
+      // Drop all keys we're going to adjust. This prevents them from
+      // interfering with column changes.
+      'drop_keys',
+
+      // Apply all database, table, and column changes.
+      'main',
+
+      // Restore adjusted keys.
+      'add_keys',
+
+      // Add missing autoincrements.
+      'add_auto',
+    );
 
     $bar = id(new PhutilConsoleProgressBar())
-      ->setTotal(count($adjustments) * $phases);
+      ->setTotal(count($adjustments) * count($phases));
 
-    for ($phase = 0; $phase < $phases; $phase++) {
+    foreach ($phases as $phase) {
       foreach ($adjustments as $adjust) {
         try {
           switch ($adjust['kind']) {
             case 'database':
-              if ($phase != 1) {
-                break;
-              }
-              queryfx(
-                $conn,
-                'ALTER DATABASE %T CHARACTER SET = %s COLLATE = %s',
-                $adjust['database'],
-                $adjust['charset'],
-                $adjust['collation']);
-              break;
-            case 'table':
-              if ($phase != 1) {
-                break;
-              }
-              queryfx(
-                $conn,
-                'ALTER TABLE %T.%T COLLATE = %s',
-                $adjust['database'],
-                $adjust['table'],
-                $adjust['collation']);
-              break;
-            case 'column':
-              if ($phase != 1) {
-                break;
-              }
-              $parts = array();
-              if ($adjust['charset']) {
-                $parts[] = qsprintf(
+              if ($phase == 'main') {
+                queryfx(
                   $conn,
-                  'CHARACTER SET %Q COLLATE %Q',
+                  'ALTER DATABASE %T CHARACTER SET = %s COLLATE = %s',
+                  $adjust['database'],
                   $adjust['charset'],
                   $adjust['collation']);
               }
+              break;
+            case 'table':
+              if ($phase == 'main') {
+                queryfx(
+                  $conn,
+                  'ALTER TABLE %T.%T COLLATE = %s',
+                  $adjust['database'],
+                  $adjust['table'],
+                  $adjust['collation']);
+              }
+              break;
+            case 'column':
+              $apply = false;
+              $auto = false;
+              $new_auto = idx($adjust, 'auto');
+              if ($phase == 'drop_auto') {
+                if ($new_auto === false) {
+                  $apply = true;
+                  $auto = false;
+                }
+              } else if ($phase == 'main') {
+                $apply = true;
+                if ($new_auto === false) {
+                  $auto = false;
+                } else {
+                  $auto = $adjust['is_auto'];
+                }
+              } else if ($phase == 'add_auto') {
+                if ($new_auto === true) {
+                  $apply = true;
+                  $auto = true;
+                }
+              }
 
-              queryfx(
-                $conn,
-                'ALTER TABLE %T.%T MODIFY %T %Q %Q %Q',
-                $adjust['database'],
-                $adjust['table'],
-                $adjust['name'],
-                $adjust['type'],
-                implode(' ', $parts),
-                $adjust['nullable'] ? 'NULL' : 'NOT NULL');
+              if ($apply) {
+                $parts = array();
 
+                if ($auto) {
+                  $parts[] = qsprintf(
+                    $conn,
+                    'AUTO_INCREMENT');
+                }
+
+                if ($adjust['charset']) {
+                  $parts[] = qsprintf(
+                    $conn,
+                    'CHARACTER SET %Q COLLATE %Q',
+                    $adjust['charset'],
+                    $adjust['collation']);
+                }
+
+                queryfx(
+                  $conn,
+                  'ALTER TABLE %T.%T MODIFY %T %Q %Q %Q',
+                  $adjust['database'],
+                  $adjust['table'],
+                  $adjust['name'],
+                  $adjust['type'],
+                  implode(' ', $parts),
+                  $adjust['nullable'] ? 'NULL' : 'NOT NULL');
+              }
               break;
             case 'key':
               if (($phase == 0) && $adjust['exists']) {
@@ -298,6 +333,7 @@ final class PhabricatorStorageManagementAdjustWorkflow
     $issue_columns = PhabricatorConfigStorageSchema::ISSUE_KEYCOLUMNS;
     $issue_unique = PhabricatorConfigStorageSchema::ISSUE_UNIQUE;
     $issue_longkey = PhabricatorConfigStorageSchema::ISSUE_LONGKEY;
+    $issue_auto = PhabricatorConfigStorageSchema::ISSUE_AUTOINCREMENT;
 
     $adjustments = array();
     foreach ($comp->getDatabases() as $database_name => $database) {
@@ -368,6 +404,9 @@ final class PhabricatorStorageManagementAdjustWorkflow
           if ($column->hasIssue($issue_columntype)) {
             $issues[] = $issue_columntype;
           }
+          if ($column->hasIssue($issue_auto)) {
+            $issues[] = $issue_auto;
+          }
 
           if ($issues) {
             if ($expect_column->getCharacterSet() === null) {
@@ -380,8 +419,7 @@ final class PhabricatorStorageManagementAdjustWorkflow
               $collation = $expect_column->getCollation();
             }
 
-
-            $adjustments[] = array(
+            $adjustment = array(
               'kind' => 'column',
               'database' => $database_name,
               'table' => $table_name,
@@ -394,7 +432,17 @@ final class PhabricatorStorageManagementAdjustWorkflow
               // NOTE: We don't adjust column nullability because it is
               // dangerous, so always use the current nullability.
               'nullable' => $actual_column->getNullable(),
+
+              // NOTE: This always stores the current value, because we have
+              // to make these updates separately.
+              'is_auto' => $actual_column->getAutoIncrement(),
             );
+
+            if ($column->hasIssue($issue_auto)) {
+              $adjustment['auto'] = $expect_column->getAutoIncrement();
+            }
+
+            $adjustments[] = $adjustment;
           }
         }
 

@@ -9,7 +9,7 @@ final class PhabricatorCacheSchemaSpec extends PhabricatorConfigSchemaSpec {
       'cache',
       id(new PhabricatorKeyValueDatabaseCache())->getTableName(),
       array(
-        'id' => 'id64',
+        'id' => 'auto64',
         'cacheKeyHash' => 'bytes12',
         'cacheKey' => 'text128',
         'cacheFormat' => 'text16',

@@ -8,6 +8,16 @@ final class PhabricatorConfigColumnSchema
   private $columnType;
   private $dataType;
   private $nullable;
+  private $autoIncrement;
+
+  public function setAutoIncrement($auto_increment) {
+    $this->autoIncrement = $auto_increment;
+    return $this;
+  }
+
+  public function getAutoIncrement() {
+    return $this->autoIncrement;
+  }
 
   public function setNullable($nullable) {
     $this->nullable = $nullable;
@@ -129,6 +139,10 @@ final class PhabricatorConfigColumnSchema
 
     if ($this->getNullable() !== $expect->getNullable()) {
       $issues[] = self::ISSUE_NULLABLE;
+    }
+
+    if ($this->getAutoIncrement() !== $expect->getAutoIncrement()) {
+      $issues[] = self::ISSUE_AUTOINCREMENT;
     }
 
     return $issues;

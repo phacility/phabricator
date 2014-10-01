@@ -24,7 +24,7 @@ final class HarbormasterSchemaSpec extends PhabricatorConfigSchemaSpec {
       id(new HarbormasterBuildable())->getApplicationName(),
       'harbormaster_buildlogchunk',
       array(
-        'id' => 'id',
+        'id' => 'auto',
         'logID' => 'id',
         'encoding' => 'text32',
 

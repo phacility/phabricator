@@ -102,14 +102,15 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
       }
 
       $details = $this->getDetailsForDataType($type);
-      list($column_type, $charset, $collation, $nullable) = $details;
+      list($column_type, $charset, $collation, $nullable, $auto) = $details;
 
       $column = $this->newColumn($name)
         ->setDataType($type)
         ->setColumnType($column_type)
         ->setCharacterSet($charset)
         ->setCollation($collation)
-        ->setNullable($nullable);
+        ->setNullable($nullable)
+        ->setAutoIncrement($auto);
 
       $table->addColumn($column);
     }
@@ -162,7 +163,7 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
       $object->getApplicationName(),
       PhabricatorEdgeConfig::TABLE_NAME_EDGEDATA,
       array(
-        'id' => 'id',
+        'id' => 'auto',
         'data' => 'text',
       ),
       array(
@@ -233,6 +234,7 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
     $column_type = null;
     $charset = null;
     $collation = null;
+    $auto = false;
 
     // If the type ends with "?", make the column nullable.
     $nullable = false;
@@ -246,6 +248,14 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
     // totally disallowed in a MODIFY statement vs a CREATE TABLE statement.
 
     switch ($data_type) {
+      case 'auto':
+        $column_type = 'int(10) unsigned';
+        $auto = true;
+        break;
+      case 'auto64':
+        $column_type = 'bigint(20) unsigned';
+        $auto = true;
+        break;
       case 'id':
       case 'epoch':
       case 'uint32':
@@ -392,7 +402,7 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
         break;
     }
 
-    return array($column_type, $charset, $collation, $nullable);
+    return array($column_type, $charset, $collation, $nullable, $auto);
   }
 
 }
