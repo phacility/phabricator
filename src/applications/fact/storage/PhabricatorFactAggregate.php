@@ -9,12 +9,11 @@ final class PhabricatorFactAggregate extends PhabricatorFactDAO {
   public function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
-        'id' => null,
+        'id' => 'id64',
         'factType' => 'text32',
         'valueX' => 'uint64',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'PRIMARY' => null,
         'factType' => array(
           'columns' => array('factType', 'objectPHID'),
           'unique' => true,

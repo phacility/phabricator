@@ -15,14 +15,13 @@ final class PhabricatorFactRaw extends PhabricatorFactDAO {
   public function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
-        'id' => null,
+        'id' => 'id64',
         'factType' => 'text32',
         'objectA' => 'phid',
         'valueX' => 'sint64',
         'valueY' => 'sint64',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'PRIMARY' => null,
         'objectPHID' => array(
           'columns' => array('objectPHID'),
         ),

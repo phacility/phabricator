@@ -149,28 +149,8 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
 
     $api = $this->getAPI();
 
-    if ($api->isCharacterSetAvailable('utf8mb4')) {
-      // If utf8mb4 is available, we use it with the utf8mb4_unicode_ci
-      // collation. This is most correct, and will sort properly.
-
-      $utf8_charset = 'utf8mb4';
-      $utf8_binary_collation = 'utf8mb4_bin';
-      $utf8_sorting_collation = 'utf8mb4_unicode_ci';
-    } else {
-      // If utf8mb4 is not available, we use binary. This allows us to store
-      // 4-byte unicode characters. This has some tradeoffs:
-      //
-      // Unicode characters won't sort correctly. There's nothing we can do
-      // about this while still supporting 4-byte characters.
-      //
-      // It's possible that strings will be truncated in the middle of a
-      // character on insert. We encourage users to set STRICT_ALL_TABLES
-      // to prevent this.
-
-      $utf8_charset = 'binary';
-      $utf8_binary_collation = 'binary';
-      $utf8_sorting_collation = 'binary';
-    }
+    $charset_info = $api->getCharsetInfo();
+    list($charset, $collate_text, $collate_sort) = $charset_info;
 
     $specs = id(new PhutilSymbolLoader())
       ->setAncestorClass('PhabricatorConfigSchemaSpec')
@@ -179,9 +159,9 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
     $server_schema = new PhabricatorConfigServerSchema();
     foreach ($specs as $spec) {
       $spec
-        ->setUTF8Charset($utf8_charset)
-        ->setUTF8BinaryCollation($utf8_binary_collation)
-        ->setUTF8SortingCollation($utf8_sorting_collation)
+        ->setUTF8Charset($charset)
+        ->setUTF8BinaryCollation($collate_text)
+        ->setUTF8SortingCollation($collate_sort)
         ->setServer($server_schema)
         ->buildSchemata($server_schema);
     }

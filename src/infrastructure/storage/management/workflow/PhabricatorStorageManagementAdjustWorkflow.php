@@ -17,8 +17,7 @@ final class PhabricatorStorageManagementAdjustWorkflow
     $force = $args->getArg('force');
 
     $this->requireAllPatchesApplied();
-    $this->adjustSchemata($force);
-    return 0;
+    return $this->adjustSchemata($force);
   }
 
   private function requireAllPatchesApplied() {
@@ -258,7 +257,7 @@ final class PhabricatorStorageManagementAdjustWorkflow
       $console->writeOut(
         "%s\n",
         pht('Completed fixing all schema issues.'));
-      return;
+      return 0;
     }
 
     $table = id(new PhutilConsoleTable())
