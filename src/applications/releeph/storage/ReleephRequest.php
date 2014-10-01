@@ -154,8 +154,7 @@ final class ReleephRequest extends ReleephDAO
         'userIntents' => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
-        'summary' => 'text',
-        'requstCommitPHID' => 'phid?',
+        'requestCommitPHID' => 'phid?',
         'commitIdentifier' => 'text40',
         'pickStatus' => 'uint32',
         'inBranch' => 'bool',
