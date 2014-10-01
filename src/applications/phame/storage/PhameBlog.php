@@ -31,7 +31,12 @@ final class PhameBlog extends PhameDAO
         'name' => 'text64',
         'description' => 'text',
         'domain' => 'text255?',
-        'joinPolicy' => 'policy',
+
+        // T6203/NULLABILITY
+        // These policies should always be non-null.
+        'joinPolicy' => 'policy?',
+        'editPolicy' => 'policy?',
+        'viewPolicy' => 'policy?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,

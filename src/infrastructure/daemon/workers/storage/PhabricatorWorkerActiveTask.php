@@ -36,6 +36,13 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
       ),
     );
 
+    $config[self::CONFIG_COLUMN_SCHEMA] = array(
+      // T6203/NULLABILITY
+      // This isn't nullable in the archive table, so at a minimum these
+      // should be the same.
+      'dataID' => 'uint32?',
+    ) + $parent[self::CONFIG_COLUMN_SCHEMA];
+
     return $config + $parent;
   }
 

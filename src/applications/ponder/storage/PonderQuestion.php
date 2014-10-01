@@ -38,10 +38,13 @@ final class PonderQuestion extends PonderDAO
         'voteCount' => 'sint32',
         'status' => 'uint32',
         'content' => 'text',
-        'contentSource' => 'text',
         'heat' => 'double',
         'answerCount' => 'uint32',
         'mailKey' => 'bytes20',
+
+        // T6203/NULLABILITY
+        // This should always exist.
+        'contentSource' => 'text?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,

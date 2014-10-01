@@ -27,7 +27,11 @@ final class HarbormasterSchemaSpec extends PhabricatorConfigSchemaSpec {
         'id' => 'id',
         'logID' => 'id',
         'encoding' => 'text32',
-        'size' => 'uint32',
+
+        // T6203/NULLABILITY
+        // Both the type and nullability of this column are crazily wrong.
+        'size' => 'uint32?',
+
         'chunk' => 'bytes',
       ),
       array(

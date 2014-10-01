@@ -8,7 +8,7 @@ final class HarbormasterObject extends HarbormasterDAO {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
-        'name' => 'text255',
+        'name' => 'text255?',
       ),
     ) + parent::getConfiguration();
   }

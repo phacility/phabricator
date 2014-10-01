@@ -12,11 +12,14 @@ final class PhabricatorUserSSHKey extends PhabricatorUserDAO {
   public function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
-        'name' => 'text255',
-        'keyType' => 'text255',
-        'keyBody' => 'text',
         'keyHash' => 'bytes32',
         'keyComment' => 'text255?',
+
+        // T6203/NULLABILITY
+        // These seem like they should not be nullable.
+        'name' => 'text255?',
+        'keyType' => 'text255?',
+        'keyBody' => 'text?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'userPHID' => array(

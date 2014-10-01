@@ -70,7 +70,10 @@ final class PonderAnswer extends PonderDAO
       self::CONFIG_COLUMN_SCHEMA => array(
         'voteCount' => 'sint32',
         'content' => 'text',
-        'contentSource' => 'text',
+
+        // T6203/NULLABILITY
+        // This should always exist.
+        'contentSource' => 'text?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,

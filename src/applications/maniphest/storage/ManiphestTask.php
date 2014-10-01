@@ -78,6 +78,11 @@ final class ManiphestTask extends ManiphestDAO
         'ownerOrdering' => 'text64?',
         'originalEmailSource' => 'text255?',
         'subpriority' => 'double',
+
+        // T6203/NULLABILITY
+        // This should not be nullable. It's going away soon anyway.
+        'ccPHIDs' => 'text?',
+
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,

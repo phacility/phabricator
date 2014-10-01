@@ -91,9 +91,17 @@ final class PhamePost extends PhameDAO
       self::CONFIG_COLUMN_SCHEMA => array(
         'title' => 'text255',
         'phameTitle' => 'text64',
-        'body' => 'text',
         'visibility' => 'uint32',
-        'datePublished' => 'epoch?',
+
+        // T6203/NULLABILITY
+        // These seem like they should always be non-null?
+        'blogPHID' => 'phid?',
+        'body' => 'text?',
+        'configData' => 'text?',
+
+        // T6203/NULLABILITY
+        // This one probably should be nullable?
+        'datePublished' => 'epoch',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,

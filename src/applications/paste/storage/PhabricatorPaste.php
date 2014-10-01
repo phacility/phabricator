@@ -48,6 +48,10 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
         'language' => 'text64',
         'mailKey' => 'bytes20',
         'parentPHID' => 'phid?',
+
+        // T6203/NULLABILITY
+        // Pastes should always have a view policy.
+        'viewPolicy' => 'policy?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'parentPHID' => array(

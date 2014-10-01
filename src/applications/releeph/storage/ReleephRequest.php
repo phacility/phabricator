@@ -155,10 +155,12 @@ final class ReleephRequest extends ReleephDAO
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'requestCommitPHID' => 'phid?',
-        'commitIdentifier' => 'text40',
-        'pickStatus' => 'uint32',
+        'commitIdentifier' => 'text40?',
+        'commitPHID' => 'phid?',
+        'pickStatus' => 'uint32?',
         'inBranch' => 'bool',
         'mailKey' => 'bytes20',
+        'userIntents' => 'text?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,

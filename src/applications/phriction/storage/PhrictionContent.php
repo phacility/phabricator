@@ -35,9 +35,12 @@ final class PhrictionContent extends PhrictionDAO
         'title' => 'text',
         'slug' => 'text128',
         'content' => 'text',
-        'description' => 'text',
         'changeType' => 'uint32',
         'changeRef' => 'uint32?',
+
+        // T6203/NULLABILITY
+        // This should just be empty if not provided?
+        'description' => 'text?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'documentID' => array(

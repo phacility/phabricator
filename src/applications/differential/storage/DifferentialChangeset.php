@@ -36,6 +36,14 @@ final class DifferentialChangeset extends DifferentialDAO
         'fileType' => 'uint32',
         'addLines' => 'uint32',
         'delLines' => 'uint32',
+
+        // T6203/NULLABILITY
+        // These should all be non-nullable, and store reasonable default
+        // JSON values if empty.
+        'awayPaths' => 'text?',
+        'metadata' => 'text?',
+        'oldProperties' => 'text?',
+        'newProperties' => 'text?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'diffID' => array(

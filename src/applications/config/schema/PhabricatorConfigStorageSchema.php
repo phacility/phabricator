@@ -171,10 +171,10 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
       case self::ISSUE_MISSING:
       case self::ISSUE_SURPLUS:
       case self::ISSUE_SUBFAIL:
+      case self::ISSUE_NULLABLE:
         return self::STATUS_FAIL;
       case self::ISSUE_SUBWARN:
       case self::ISSUE_COLUMNTYPE:
-      case self::ISSUE_NULLABLE:
         return self::STATUS_WARN;
       case self::ISSUE_SUBNOTE:
       case self::ISSUE_CHARSET:

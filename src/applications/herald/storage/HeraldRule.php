@@ -36,10 +36,13 @@ final class HeraldRule extends HeraldDAO
         'contentType' => 'text255',
         'mustMatchAll' => 'bool',
         'configVersion' => 'uint32',
-        'repetitionPolicy' => 'uint32',
         'ruleType' => 'text255',
         'isDisabled' => 'uint32',
         'triggerObjectPHID' => 'phid?',
+
+        // T6203/NULLABILITY
+        // This should not be nullable.
+        'repetitionPolicy' => 'uint32?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
