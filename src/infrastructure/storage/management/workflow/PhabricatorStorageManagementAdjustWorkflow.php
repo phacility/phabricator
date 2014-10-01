@@ -127,38 +127,93 @@ final class PhabricatorStorageManagementAdjustWorkflow
     $api = $this->getAPI();
     $conn = $api->getConn(null);
 
+    $failed = array();
+
     $bar = id(new PhutilConsoleProgressBar())
       ->setTotal(count($adjustments));
     foreach ($adjustments as $adjust) {
-      switch ($adjust['kind']) {
-        case 'database':
-          queryfx(
-            $conn,
-            'ALTER DATABASE %T CHARACTER SET = %s COLLATE = %s',
-            $adjust['database'],
-            $adjust['charset'],
-            $adjust['collation']);
-          break;
-        case 'table':
-          queryfx(
-            $conn,
-            'ALTER TABLE %T.%T COLLATE = %s',
-            $adjust['database'],
-            $adjust['table'],
-            $adjust['collation']);
-          break;
-        default:
-          throw new Exception(
-            pht('Unknown schema adjustment kind "%s"!', $adjust['kind']));
-      }
+      try {
+        switch ($adjust['kind']) {
+          case 'database':
+            queryfx(
+              $conn,
+              'ALTER DATABASE %T CHARACTER SET = %s COLLATE = %s',
+              $adjust['database'],
+              $adjust['charset'],
+              $adjust['collation']);
+            break;
+          case 'table':
+            queryfx(
+              $conn,
+              'ALTER TABLE %T.%T COLLATE = %s',
+              $adjust['database'],
+              $adjust['table'],
+              $adjust['collation']);
+            break;
+          case 'column':
+            $parts = array();
+            if ($adjust['charset']) {
+              $parts[] = qsprintf(
+                $conn,
+                'CHARACTER SET %Q COLLATE %Q',
+                $adjust['charset'],
+                $adjust['collation']);
+            }
 
+            queryfx(
+              $conn,
+              'ALTER TABLE %T.%T MODIFY %T %Q %Q %Q',
+              $adjust['database'],
+              $adjust['table'],
+              $adjust['name'],
+              $adjust['type'],
+              implode(' ', $parts),
+              $adjust['nullable'] ? 'NULL' : 'NOT NULL');
+
+            break;
+          default:
+            throw new Exception(
+              pht('Unknown schema adjustment kind "%s"!', $adjust['kind']));
+        }
+      } catch (AphrontQueryException $ex) {
+        $failed[] = array($adjust, $ex);
+      }
       $bar->update(1);
     }
     $bar->done();
 
+    if (!$failed) {
+      $console->writeOut(
+        "%s\n",
+        pht('Completed fixing all schema issues.'));
+      return;
+    }
+
+    $table = id(new PhutilConsoleTable())
+      ->addColumn('target', array('title' => pht('Target')))
+      ->addColumn('error', array('title' => pht('Error')));
+
+    foreach ($failed as $failure) {
+      list($adjust, $ex) = $failure;
+
+      $pieces = array_select_keys($adjust, array('database', 'table', 'naeme'));
+      $pieces = array_filter($pieces);
+      $target = implode('.', $pieces);
+
+      $table->addRow(
+        array(
+          'target' => $target,
+          'error' => $ex->getMessage(),
+        ));
+    }
+
+    $console->writeOut("\n");
+    $table->draw();
     $console->writeOut(
-      "%s\n",
-      pht('Completed fixing all schema issues.'));
+      "\n%s\n",
+      pht('Failed to make some schema adjustments, detailed above.'));
+
+    return 1;
   }
 
   private function findAdjustments() {
@@ -166,6 +221,7 @@ final class PhabricatorStorageManagementAdjustWorkflow
 
     $issue_charset = PhabricatorConfigStorageSchema::ISSUE_CHARSET;
     $issue_collation = PhabricatorConfigStorageSchema::ISSUE_COLLATION;
+    $issue_columntype = PhabricatorConfigStorageSchema::ISSUE_COLUMNTYPE;
 
     $adjustments = array();
     foreach ($comp->getDatabases() as $database_name => $database) {
@@ -216,6 +272,54 @@ final class PhabricatorStorageManagementAdjustWorkflow
             'issues' => $issues,
             'collation' => $expect_table->getCollation(),
           );
+        }
+
+        foreach ($table->getColumns() as $column_name => $column) {
+          $expect_column = $expect_table->getColumn($column_name);
+          $actual_column = $actual_table->getColumn($column_name);
+
+          if (!$expect_column || !$actual_column) {
+            continue;
+          }
+
+          $issues = array();
+          if ($column->hasIssue($issue_collation)) {
+            $issues[] = $issue_collation;
+          }
+          if ($column->hasIssue($issue_charset)) {
+            $issues[] = $issue_charset;
+          }
+          if ($column->hasIssue($issue_columntype)) {
+            $issues[] = $issue_columntype;
+          }
+
+          if ($issues) {
+            if ($expect_column->getCharacterSet() === null) {
+              // For non-text columns, we won't be specifying a collation or
+              // character set.
+              $charset = null;
+              $collation = null;
+            } else {
+              $charset = $expect_column->getCharacterSet();
+              $collation = $expect_column->getCollation();
+            }
+
+
+            $adjustments[] = array(
+              'kind' => 'column',
+              'database' => $database_name,
+              'table' => $table_name,
+              'name' => $column_name,
+              'issues' => $issues,
+              'collation' => $collation,
+              'charset' => $charset,
+              'type' => $expect_column->getColumnType(),
+
+              // NOTE: We don't adjust column nullability because it is
+              // dangerous, so always use the current nullability.
+              'nullable' => $actual_column->getNullable(),
+            );
+          }
         }
       }
     }

@@ -230,6 +230,10 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
       $data_type = substr($data_type, 0, -1);
     }
 
+    // NOTE: MySQL allows fragments like "VARCHAR(32) CHARACTER SET binary",
+    // but just interprets that to mean "VARBINARY(32)". The fragment is
+    // totally disallowed in a MODIFY statement vs a CREATE TABLE statement.
+
     switch ($data_type) {
       case 'id':
       case 'epoch':
@@ -248,39 +252,25 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
         break;
       case 'phid':
       case 'policy';
-        $column_type = 'varchar(64)';
-        $charset = 'binary';
-        $collation = 'binary';
+        $column_type = 'varbinary(64)';
         break;
       case 'bytes64':
-        $column_type = 'char(64)';
-        $charset = 'binary';
-        $collation = 'binary';
+        $column_type = 'binary(64)';
         break;
       case 'bytes40':
-        $column_type = 'char(40)';
-        $charset = 'binary';
-        $collation = 'binary';
+        $column_type = 'binary(40)';
         break;
       case 'bytes32':
-        $column_type = 'char(32)';
-        $charset = 'binary';
-        $collation = 'binary';
+        $column_type = 'binary(32)';
         break;
       case 'bytes20':
-        $column_type = 'char(20)';
-        $charset = 'binary';
-        $collation = 'binary';
+        $column_type = 'binary(20)';
         break;
       case 'bytes12':
-        $column_type = 'char(12)';
-        $charset = 'binary';
-        $collation = 'binary';
+        $column_type = 'binary(12)';
         break;
       case 'bytes4':
-        $column_type = 'char(4)';
-        $charset = 'binary';
-        $collation = 'binary';
+        $column_type = 'binary(4)';
         break;
       case 'bytes':
         $column_type = 'longblob';
