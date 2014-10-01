@@ -233,6 +233,9 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
       case 'uint32':
         $column_type = 'int(10) unsigned';
         break;
+      case 'sint32':
+        $column_type = 'int(10)';
+        break;
       case 'id64':
       case 'uint64':
         $column_type = 'bigint(20) unsigned';

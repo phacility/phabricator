@@ -33,6 +33,32 @@ final class PonderQuestion extends PonderDAO
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'title' => 'text255',
+        'voteCount' => 'sint32',
+        'status' => 'uint32',
+        'content' => 'text',
+        'contentSource' => 'text',
+        'heat' => 'double',
+        'answerCount' => 'uint32',
+        'mailKey' => 'bytes20',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_phid' => null,
+        'phid' => array(
+          'columns' => array('phid'),
+          'unique' => true,
+        ),
+        'authorPHID' => array(
+          'columns' => array('authorPHID'),
+        ),
+        'heat' => array(
+          'columns' => array('heat'),
+        ),
+        'status' => array(
+          'columns' => array('status'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 
@@ -47,27 +73,6 @@ final class PonderQuestion extends PonderDAO
 
   public function getContentSource() {
     return PhabricatorContentSource::newFromSerialized($this->contentSource);
-  }
-
-  public function attachRelated() {
-    $this->answers = $this->loadRelatives(new PonderAnswer(), 'questionID');
-    $qa_phids = mpull($this->answers, 'getPHID') + array($this->getPHID());
-
-    if ($qa_phids) {
-      $comments = id(new PonderCommentQuery())
-        ->withTargetPHIDs($qa_phids)
-        ->execute();
-
-      $comments = mgroup($comments, 'getTargetPHID');
-    } else {
-      $comments = array();
-    }
-
-    $this->setComments(idx($comments, $this->getPHID(), array()));
-    foreach ($this->answers as $answer) {
-      $answer->attachQuestion($this);
-      $answer->setComments(idx($comments, $answer->getPHID(), array()));
-    }
   }
 
   public function attachVotes($user_phid) {

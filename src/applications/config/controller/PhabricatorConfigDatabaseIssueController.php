@@ -144,8 +144,10 @@ final class PhabricatorConfigDatabaseIssueController
         new PhutilNumber($counts[PhabricatorConfigStorageSchema::STATUS_NOTE]));
     }
 
+    $title = pht('Database Issues');
+
     $table_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Database Issues'))
+      ->setHeaderText($title)
       ->setFormErrors($errors)
       ->appendChild($table);
 
@@ -160,7 +162,7 @@ final class PhabricatorConfigDatabaseIssueController
     return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => 'all',
+        'title' => $title,
       ));
   }
 
