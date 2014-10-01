@@ -11,10 +11,21 @@ final class PhabricatorWorkerArchiveTask extends PhabricatorWorkerTask {
 
   public function getConfiguration() {
     $config = parent::getConfiguration();
+
     $config[self::CONFIG_COLUMN_SCHEMA] = array(
       'result' => 'uint32',
       'duration' => 'uint64',
     ) + $config[self::CONFIG_COLUMN_SCHEMA];
+
+    $config[self::CONFIG_KEY_SCHEMA] = array(
+      'dateCreated' => array(
+        'columns' => array('dateCreated'),
+      ),
+      'leaseOwner' => array(
+        'columns' => array('leaseOwner', 'priority', 'id'),
+      ),
+    );
+
     return $config;
   }
 

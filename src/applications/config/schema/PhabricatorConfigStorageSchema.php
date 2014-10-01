@@ -3,7 +3,9 @@
 abstract class PhabricatorConfigStorageSchema extends Phobject {
 
   const ISSUE_MISSING = 'missing';
+  const ISSUE_MISSINGKEY = 'missingkey';
   const ISSUE_SURPLUS = 'surplus';
+  const ISSUE_SURPLUSKEY = 'surpluskey';
   const ISSUE_CHARSET = 'charset';
   const ISSUE_COLLATION = 'collation';
   const ISSUE_COLUMNTYPE = 'columntype';
@@ -102,8 +104,12 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
     switch ($issue) {
       case self::ISSUE_MISSING:
         return pht('Missing');
+      case self::ISSUE_MISSINGKEY:
+        return pht('Missing Key');
       case self::ISSUE_SURPLUS:
         return pht('Surplus');
+      case self::ISSUE_SURPLUSKEY:
+        return pht('Surplus Key');
       case self::ISSUE_CHARSET:
         return pht('Better Character Set Available');
       case self::ISSUE_COLLATION:
@@ -131,8 +137,12 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
     switch ($issue) {
       case self::ISSUE_MISSING:
         return pht('This schema is expected to exist, but does not.');
+      case self::ISSUE_MISSINGKEY:
+        return pht('This key is expected to exist, but does not.');
       case self::ISSUE_SURPLUS:
         return pht('This schema is not expected to exist.');
+      case self::ISSUE_SURPLUSKEY:
+        return pht('This key is not expected to exist.');
       case self::ISSUE_CHARSET:
         return pht('This schema can use a better character set.');
       case self::ISSUE_COLLATION:
@@ -159,14 +169,16 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
   public static function getIssueStatus($issue) {
     switch ($issue) {
       case self::ISSUE_MISSING:
+      case self::ISSUE_MISSINGKEY:
       case self::ISSUE_SUBFAIL:
         return self::STATUS_FAIL;
       case self::ISSUE_SURPLUS:
-      case self::ISSUE_COLUMNTYPE:
+      case self::ISSUE_SURPLUSKEY:
       case self::ISSUE_SUBWARN:
+      case self::ISSUE_COLUMNTYPE:
       case self::ISSUE_KEYCOLUMNS:
-      case self::ISSUE_NULLABLE:
       case self::ISSUE_UNIQUE:
+      case self::ISSUE_NULLABLE:
         return self::STATUS_WARN;
       case self::ISSUE_SUBNOTE:
       case self::ISSUE_CHARSET:

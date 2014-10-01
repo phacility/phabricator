@@ -269,12 +269,23 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
     PhabricatorConfigStorageSchema $expect = null,
     PhabricatorConfigStorageSchema $actual = null) {
 
+    $expect_is_key = ($expect instanceof PhabricatorConfigKeySchema);
+    $actual_is_key = ($actual instanceof PhabricatorConfigKeySchema);
+
+    if ($expect_is_key || $actual_is_key) {
+      $missing_issue = PhabricatorConfigStorageSchema::ISSUE_MISSINGKEY;
+      $surplus_issue = PhabricatorConfigStorageSchema::ISSUE_SURPLUSKEY;
+    } else {
+      $missing_issue = PhabricatorConfigStorageSchema::ISSUE_MISSING;
+      $surplus_issue = PhabricatorConfigStorageSchema::ISSUE_SURPLUS;
+    }
+
     if (!$expect && !$actual) {
       throw new Exception(pht('Can not compare two missing schemata!'));
     } else if ($expect && !$actual) {
-      $issues = array(PhabricatorConfigStorageSchema::ISSUE_MISSING);
+      $issues = array($missing_issue);
     } else if ($actual && !$expect) {
-      $issues = array(PhabricatorConfigStorageSchema::ISSUE_SURPLUS);
+      $issues = array($surplus_issue);
     } else {
       $issues = $actual->compareTo($expect);
     }
