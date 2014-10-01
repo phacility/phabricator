@@ -9,6 +9,19 @@ final class ManiphestTaskSubscriber extends ManiphestDAO {
     return array(
       self::CONFIG_IDS          => self::IDS_MANUAL,
       self::CONFIG_TIMESTAMPS   => false,
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'id' => null,
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'PRIMARY' => array(
+          'columns' => array('subscriberPHID', 'taskPHID'),
+          'unique' => true,
+        ),
+        'taskPHID' => array(
+          'columns' => array('taskPHID', 'subscriberPHID'),
+          'unique' => true,
+        ),
+      ),
     );
   }
 

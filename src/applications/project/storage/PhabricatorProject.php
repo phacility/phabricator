@@ -121,6 +121,37 @@ final class PhabricatorProject extends PhabricatorProjectDAO
       self::CONFIG_SERIALIZATION => array(
         'subprojectPHIDs' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'name' => 'text255',
+        'status' => 'text32',
+        'phrictionSlug' => 'text128?',
+        'joinPolicy' => 'policy',
+        'isMembershipLocked' => 'bool',
+        'profileImagePHID' => 'phid?',
+        'icon' => 'text32',
+        'color' => 'text32',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_phid' => null,
+        'phid' => array(
+          'columns' => array('phid'),
+          'unique' => true,
+        ),
+        'key_icon' => array(
+          'columns' => array('icon'),
+        ),
+        'key_color' => array(
+          'columns' => array('color'),
+        ),
+        'phrictionSlug' => array(
+          'columns' => array('phrictionSlug'),
+          'unique' => true,
+        ),
+        'name' => array(
+          'columns' => array('name'),
+          'unique' => true,
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

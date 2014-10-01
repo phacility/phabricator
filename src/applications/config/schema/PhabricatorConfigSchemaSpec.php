@@ -170,6 +170,7 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
       array(
         'PRIMARY' => array(
           'columns' => array('counterName'),
+          'unique' => true,
         ),
       ));
   }
