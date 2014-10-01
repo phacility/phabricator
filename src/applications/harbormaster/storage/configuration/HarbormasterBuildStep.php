@@ -25,7 +25,18 @@ final class HarbormasterBuildStep extends HarbormasterDAO
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
         'details' => self::SERIALIZATION_JSON,
-      )
+      ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'className' => 'text255',
+        'sequence' => 'uint32',
+        'name' => 'text255',
+        'description' => 'text',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_plan' => array(
+          'columns' => array('buildPlanPHID'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

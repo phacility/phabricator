@@ -99,7 +99,20 @@ final class HarbormasterBuildTarget extends HarbormasterDAO
       self::CONFIG_SERIALIZATION => array(
         'details' => self::SERIALIZATION_JSON,
         'variables' => self::SERIALIZATION_JSON,
-      )
+      ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'className' => 'text255',
+        'targetStatus' => 'text64',
+        'name' => 'text255',
+        'dateStarted' => 'epoch?',
+        'dateCompleted' => 'epoch?',
+        'buildGeneration' => 'uint32',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_build' => array(
+          'columns' => array('buildPHID', 'buildStepPHID'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

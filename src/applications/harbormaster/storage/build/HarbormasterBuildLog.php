@@ -30,6 +30,17 @@ final class HarbormasterBuildLog extends HarbormasterDAO
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'logSource' => 'text255',
+        'logType' => 'text255',
+        'duration' => 'uint32',
+        'live' => 'bool',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_buildtarget' => array(
+          'columns' => array('buildTargetPHID'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

@@ -42,6 +42,9 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
       ->loadObjects();
 
     foreach ($objects as $object) {
+      if ($object->getConfigOption(LiskDAO::CONFIG_NO_TABLE)) {
+        continue;
+      }
       $this->buildLiskObjectSchema($object);
     }
   }

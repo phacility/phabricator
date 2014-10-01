@@ -14,10 +14,6 @@ final class HarbormasterBuildPlanTransaction
     return HarbormasterBuildPlanPHIDType::TYPECONST;
   }
 
-  public function getApplicationTransactionCommentObject() {
-    return new HarbormasterBuildPlanTransactionComment();
-  }
-
   public function getIcon() {
     $old = $this->getOldValue();
     $new = $this->getNewValue();

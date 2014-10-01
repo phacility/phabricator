@@ -171,6 +171,7 @@ abstract class LiskDAO {
   const CONFIG_BINARY               = 'binary';
   const CONFIG_COLUMN_SCHEMA        = 'col-schema';
   const CONFIG_KEY_SCHEMA           = 'key-schema';
+  const CONFIG_NO_TABLE             = 'no-table';
 
   const SERIALIZATION_NONE          = 'id';
   const SERIALIZATION_JSON          = 'json';
@@ -350,6 +351,10 @@ abstract class LiskDAO {
    *
    * CONFIG_KEY_SCHEMA
    * Provide a map of key names to key specifications.
+   *
+   * CONFIG_NO_TABLE
+   * Allows you to specify that this object does not actually have a table in
+   * the database.
    *
    * @return dictionary  Map of configuration options to values.
    *
