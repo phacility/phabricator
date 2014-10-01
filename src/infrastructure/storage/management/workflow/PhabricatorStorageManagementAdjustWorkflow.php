@@ -231,7 +231,7 @@ final class PhabricatorStorageManagementAdjustWorkflow
               }
               break;
             case 'key':
-              if (($phase == 0) && $adjust['exists']) {
+              if (($phase == 'drop_keys') && $adjust['exists']) {
                 if ($adjust['name'] == 'PRIMARY') {
                   $key_name = 'PRIMARY KEY';
                 } else {
@@ -246,7 +246,7 @@ final class PhabricatorStorageManagementAdjustWorkflow
                   $key_name);
               }
 
-              if (($phase == 2) && $adjust['keep']) {
+              if (($phase == 'add_keys') && $adjust['keep']) {
                 // Different keys need different creation syntax. Notable
                 // special cases are primary keys and fulltext keys.
                 if ($adjust['name'] == 'PRIMARY') {
