@@ -710,10 +710,6 @@ final class PhabricatorConfigDatabaseStatusController
 
         $status = PhabricatorConfigStorageSchema::getIssueStatus($issue);
         switch ($status) {
-          case PhabricatorConfigStorageSchema::STATUS_NOTE:
-            $icon = PHUIStatusItemView::ICON_INFO;
-            $color = 'blue';
-            break;
           case PhabricatorConfigStorageSchema::STATUS_WARN:
             $icon = PHUIStatusItemView::ICON_WARNING;
             $color = 'yellow';

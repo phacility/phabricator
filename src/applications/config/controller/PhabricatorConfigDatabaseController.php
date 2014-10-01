@@ -28,9 +28,6 @@ abstract class PhabricatorConfigDatabaseController
       case PhabricatorConfigStorageSchema::STATUS_OKAY:
         $icon = 'fa-check-circle green';
         break;
-      case PhabricatorConfigStorageSchema::STATUS_NOTE:
-        $icon = 'fa-info-circle blue';
-        break;
       case PhabricatorConfigStorageSchema::STATUS_WARN:
         $icon = 'fa-exclamation-circle yellow';
         break;

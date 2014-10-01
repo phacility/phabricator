@@ -145,12 +145,6 @@ final class PhabricatorConfigDatabaseIssueController
         new PhutilNumber($counts[PhabricatorConfigStorageSchema::STATUS_WARN]));
     }
 
-    if (isset($counts[PhabricatorConfigStorageSchema::STATUS_NOTE])) {
-      $errors[] = pht(
-        'Detected %s minor issue(s) with the scheamata.',
-        new PhutilNumber($counts[PhabricatorConfigStorageSchema::STATUS_NOTE]));
-    }
-
     $title = pht('Database Issues');
 
     $table_box = id(new PHUIObjectBoxView())
