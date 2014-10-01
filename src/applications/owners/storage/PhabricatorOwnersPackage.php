@@ -38,6 +38,24 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
       // This information is better available from the history table.
       self::CONFIG_TIMESTAMPS => false,
       self::CONFIG_AUX_PHID   => true,
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'name' => 'text255',
+        'originalName' => 'text255',
+        'description' => 'text',
+        'primaryOwnerPHID' => 'phid?',
+        'auditingEnabled' => 'bool',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_phid' => null,
+        'phid' => array(
+          'columns' => array('phid'),
+          'unique' => true,
+        ),
+        'name' => array(
+          'columns' => array('name'),
+          'unique' => true,
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

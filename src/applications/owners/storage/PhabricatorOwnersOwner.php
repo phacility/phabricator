@@ -12,6 +12,15 @@ final class PhabricatorOwnersOwner extends PhabricatorOwnersDAO {
   public function getConfiguration() {
     return array(
       self::CONFIG_TIMESTAMPS => false,
+      self::CONFIG_KEY_SCHEMA => array(
+        'packageID' => array(
+          'columns' => array('packageID', 'userPHID'),
+          'unique' => true,
+        ),
+        'userPHID' => array(
+          'columns' => array('userPHID'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

@@ -100,6 +100,25 @@ final class HeraldTranscript extends HeraldDAO
         'conditionTranscripts'  => true,
         'applyTranscripts'      => true,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'time' => 'epoch',
+        'host' => 'text255',
+        'duration' => 'double',
+        'dryRun' => 'bool',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_phid' => null,
+        'phid' => array(
+          'columns' => array('phid'),
+          'unique' => true,
+        ),
+        'objectPHID' => array(
+          'columns' => array('objectPHID'),
+        ),
+        'garbageCollected' => array(
+          'columns' => array('garbageCollected', 'time'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

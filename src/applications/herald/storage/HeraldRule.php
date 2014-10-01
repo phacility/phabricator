@@ -31,6 +31,33 @@ final class HeraldRule extends HeraldDAO
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'name' => 'text255',
+        'contentType' => 'text255',
+        'mustMatchAll' => 'bool',
+        'configVersion' => 'uint32',
+        'repetitionPolicy' => 'uint32',
+        'ruleType' => 'text255',
+        'isDisabled' => 'uint32',
+        'triggerObjectPHID' => 'phid?',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_phid' => null,
+        'phid' => array(
+          'columns' => array('phid'),
+          'unique' => true,
+        ),
+        'authorPHID' => array(
+          'columns' => array('authorPHID', 'name'),
+          'unique' => true,
+        ),
+        'IDX_RULE_TYPE' => array(
+          'columns' => array('ruleType'),
+        ),
+        'key_trigger' => array(
+          'columns' => array('triggerObjectPHID'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 
