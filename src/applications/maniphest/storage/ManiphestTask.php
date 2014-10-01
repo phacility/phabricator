@@ -71,7 +71,7 @@ final class ManiphestTask extends ManiphestDAO
         'ownerPHID' => 'phid?',
         'status' => 'text12',
         'priority' => 'uint32',
-        'title' => 'text',
+        'title' => 'sort',
         'originalTitle' => 'text',
         'description' => 'text',
         'mailKey' => 'bytes20',
@@ -113,6 +113,9 @@ final class ManiphestTask extends ManiphestDAO
         ),
         'key_dateModified' => array(
           'columns' => array('dateModified'),
+        ),
+        'key_title' => array(
+          'columns' => array('title(64)'),
         ),
       ),
     ) + parent::getConfiguration();

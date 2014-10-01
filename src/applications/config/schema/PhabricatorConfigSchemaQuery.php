@@ -154,7 +154,8 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
       // collation. This is most correct, and will sort properly.
 
       $utf8_charset = 'utf8mb4';
-      $utf8_collation = 'utf8mb4_unicode_ci';
+      $utf8_binary_collation = 'utf8mb4_bin';
+      $utf8_sorting_collation = 'utf8mb4_unicode_ci';
     } else {
       // If utf8mb4 is not available, we use binary. This allows us to store
       // 4-byte unicode characters. This has some tradeoffs:
@@ -167,7 +168,8 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
       // to prevent this.
 
       $utf8_charset = 'binary';
-      $utf8_collation = 'binary';
+      $utf8_binary_collation = 'binary';
+      $utf8_sorting_collation = 'binary';
     }
 
     $specs = id(new PhutilSymbolLoader())
@@ -177,8 +179,9 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
     $server_schema = new PhabricatorConfigServerSchema();
     foreach ($specs as $spec) {
       $spec
-        ->setUTF8Collation($utf8_collation)
         ->setUTF8Charset($utf8_charset)
+        ->setUTF8BinaryCollation($utf8_binary_collation)
+        ->setUTF8SortingCollation($utf8_sorting_collation)
         ->setServer($server_schema)
         ->buildSchemata($server_schema);
     }

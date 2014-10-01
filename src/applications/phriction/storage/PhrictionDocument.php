@@ -25,7 +25,7 @@ final class PhrictionDocument extends PhrictionDAO
       self::CONFIG_AUX_PHID   => true,
       self::CONFIG_TIMESTAMPS => false,
       self::CONFIG_COLUMN_SCHEMA => array(
-        'slug' => 'text128',
+        'slug' => 'sort128',
         'depth' => 'uint32',
         'contentID' => 'id?',
         'status' => 'uint32',

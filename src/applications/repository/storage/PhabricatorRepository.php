@@ -79,8 +79,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         'details' => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
-        'name' => 'text255',
-        'callsign' => 'text32',
+        'name' => 'sort255',
+        'callsign' => 'sort32',
         'versionControlSystem' => 'text32',
         'uuid' => 'text64?',
         'pushPolicy' => 'policy',

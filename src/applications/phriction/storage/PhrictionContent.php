@@ -32,7 +32,7 @@ final class PhrictionContent extends PhrictionDAO
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'version' => 'uint32',
-        'title' => 'text',
+        'title' => 'sort',
         'slug' => 'text128',
         'content' => 'text',
         'changeType' => 'uint32',

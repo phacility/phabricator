@@ -4,15 +4,25 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
 
   private $server;
   private $utf8Charset;
-  private $utf8Collation;
+  private $utf8BinaryCollation;
+  private $utf8SortingCollation;
 
-  public function setUTF8Collation($utf8_collation) {
-    $this->utf8Collation = $utf8_collation;
+  public function setUTF8SortingCollation($utf8_sorting_collation) {
+    $this->utf8SortingCollation = $utf8_sorting_collation;
     return $this;
   }
 
-  public function getUTF8Collation() {
-    return $this->utf8Collation;
+  public function getUTF8SortingCollation() {
+    return $this->utf8SortingCollation;
+  }
+
+  public function setUTF8BinaryCollation($utf8_binary_collation) {
+    $this->utf8BinaryCollation = $utf8_binary_collation;
+    return $this;
+  }
+
+  public function getUTF8BinaryCollation() {
+    return $this->utf8BinaryCollation;
   }
 
   public function setUTF8Charset($utf8_charset) {
@@ -195,7 +205,7 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
     return id(new PhabricatorConfigDatabaseSchema())
       ->setName($this->getNamespacedDatabase($name))
       ->setCharacterSet($this->getUTF8Charset())
-      ->setCollation($this->getUTF8Collation());
+      ->setCollation($this->getUTF8BinaryCollation());
   }
 
   protected function getNamespacedDatabase($name) {
@@ -206,7 +216,7 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
   protected function newTable($name) {
     return id(new PhabricatorConfigTableSchema())
       ->setName($name)
-      ->setCollation($this->getUTF8Collation());
+      ->setCollation($this->getUTF8BinaryCollation());
   }
 
   protected function newColumn($name) {
@@ -276,70 +286,95 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
       case 'bytes':
         $column_type = 'longblob';
         break;
+      case 'sort255':
+        $column_type = 'varchar(255)';
+        $charset = $this->getUTF8Charset();
+        $collation = $this->getUTF8SortingCollation();
+        break;
+      case 'sort128':
+        $column_type = 'varchar(128)';
+        $charset = $this->getUTF8Charset();
+        $collation = $this->getUTF8SortingCollation();
+        break;
+      case 'sort64':
+        $column_type = 'varchar(64)';
+        $charset = $this->getUTF8Charset();
+        $collation = $this->getUTF8SortingCollation();
+        break;
+      case 'sort32':
+        $column_type = 'varchar(32)';
+        $charset = $this->getUTF8Charset();
+        $collation = $this->getUTF8SortingCollation();
+        break;
+      case 'sort':
+        $column_type = 'longtext';
+        $charset = $this->getUTF8Charset();
+        $collation = $this->getUTF8SortingCollation();
+        break;
       case 'text255':
         $column_type = 'varchar(255)';
         $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8Collation();
+        $collation = $this->getUTF8BinaryCollation();
         break;
       case 'text160':
         $column_type = 'varchar(160)';
         $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8Collation();
+        $collation = $this->getUTF8BinaryCollation();
         break;
       case 'text128':
         $column_type = 'varchar(128)';
         $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8Collation();
+        $collation = $this->getUTF8BinaryCollation();
         break;
       case 'text80':
         $column_type = 'varchar(80)';
         $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8Collation();
+        $collation = $this->getUTF8BinaryCollation();
         break;
       case 'text64':
         $column_type = 'varchar(64)';
         $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8Collation();
+        $collation = $this->getUTF8BinaryCollation();
         break;
       case 'text40':
         $column_type = 'varchar(40)';
         $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8Collation();
+        $collation = $this->getUTF8BinaryCollation();
         break;
       case 'text32':
         $column_type = 'varchar(32)';
         $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8Collation();
+        $collation = $this->getUTF8BinaryCollation();
         break;
       case 'text20':
         $column_type = 'varchar(20)';
         $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8Collation();
+        $collation = $this->getUTF8BinaryCollation();
         break;
       case 'text16':
         $column_type = 'varchar(16)';
         $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8Collation();
+        $collation = $this->getUTF8BinaryCollation();
         break;
       case 'text12':
         $column_type = 'varchar(12)';
         $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8Collation();
+        $collation = $this->getUTF8BinaryCollation();
         break;
       case 'text8':
         $column_type = 'varchar(8)';
         $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8Collation();
+        $collation = $this->getUTF8BinaryCollation();
         break;
       case 'text4':
         $column_type = 'varchar(4)';
         $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8Collation();
+        $collation = $this->getUTF8BinaryCollation();
         break;
       case 'text':
         $column_type = 'longtext';
         $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8Collation();
+        $collation = $this->getUTF8BinaryCollation();
         break;
       case 'bool':
         $column_type = 'tinyint(1)';

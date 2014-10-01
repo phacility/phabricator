@@ -7,7 +7,7 @@ abstract class PhabricatorCustomFieldStringIndexStorage
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'indexKey' => 'bytes12',
-        'indexValue' => 'text',
+        'indexValue' => 'sort',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_join' => array(

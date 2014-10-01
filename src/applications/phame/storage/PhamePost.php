@@ -90,7 +90,7 @@ final class PhamePost extends PhameDAO
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'title' => 'text255',
-        'phameTitle' => 'text64',
+        'phameTitle' => 'sort64',
         'visibility' => 'uint32',
 
         // T6203/NULLABILITY
