@@ -71,13 +71,18 @@ final class ManiphestTask extends ManiphestDAO
         'ownerPHID' => 'phid?',
         'status' => 'text12',
         'priority' => 'uint32',
-        'title' => 'text',
+        'title' => 'sort',
         'originalTitle' => 'text',
         'description' => 'text',
         'mailKey' => 'bytes20',
         'ownerOrdering' => 'text64?',
         'originalEmailSource' => 'text255?',
         'subpriority' => 'double',
+
+        // T6203/NULLABILITY
+        // This should not be nullable. It's going away soon anyway.
+        'ccPHIDs' => 'text?',
+
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
@@ -108,6 +113,9 @@ final class ManiphestTask extends ManiphestDAO
         ),
         'key_dateModified' => array(
           'columns' => array('dateModified'),
+        ),
+        'key_title' => array(
+          'columns' => array('title(64)'),
         ),
       ),
     ) + parent::getConfiguration();

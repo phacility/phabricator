@@ -14,6 +14,26 @@ final class PhabricatorUserEmail extends PhabricatorUserDAO {
 
   const MAX_ADDRESS_LENGTH = 128;
 
+  public function getConfiguration() {
+    return array(
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'address' => 'text128',
+        'isVerified' => 'bool',
+        'isPrimary' => 'bool',
+        'verificationCode' => 'text64?',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'address' => array(
+          'columns' => array('address'),
+          'unique' => true,
+        ),
+        'userPHID' => array(
+          'columns' => array('userPHID', 'isPrimary'),
+        ),
+      ),
+    ) + parent::getConfiguration();
+  }
+
   public function getVerificationURI() {
     return '/emailverify/'.$this->getVerificationCode().'/';
   }

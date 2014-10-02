@@ -10,11 +10,27 @@ final class PhabricatorWorkerArchiveTask extends PhabricatorWorkerTask {
   protected $result;
 
   public function getConfiguration() {
-    $config = parent::getConfiguration();
+    $config = array(
+      // We manage the IDs in this table; they are allocated in the ActiveTask
+      // table and moved here without alteration.
+      self::CONFIG_IDS => self::IDS_MANUAL,
+    ) + parent::getConfiguration();
+
+
     $config[self::CONFIG_COLUMN_SCHEMA] = array(
       'result' => 'uint32',
       'duration' => 'uint64',
     ) + $config[self::CONFIG_COLUMN_SCHEMA];
+
+    $config[self::CONFIG_KEY_SCHEMA] = array(
+      'dateCreated' => array(
+        'columns' => array('dateCreated'),
+      ),
+      'leaseOwner' => array(
+        'columns' => array('leaseOwner', 'priority', 'id'),
+      ),
+    );
+
     return $config;
   }
 

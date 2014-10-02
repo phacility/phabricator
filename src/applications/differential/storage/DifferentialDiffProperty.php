@@ -12,7 +12,7 @@ final class DifferentialDiffProperty extends DifferentialDAO {
         'data' => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
-        'name' => 'text255',
+        'name' => 'text128',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'diffID' => array(

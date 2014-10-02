@@ -38,13 +38,13 @@ final class NuanceItem
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_source' => array(
-          'columns' => array('sourcePHID', 'status', 'dateNuanced'),
+          'columns' => array('sourcePHID', 'status', 'dateNuanced', 'id'),
         ),
         'key_owner' => array(
-          'columns' => array('ownerPHID', 'status', 'dateNuanced'),
+          'columns' => array('ownerPHID', 'status', 'dateNuanced', 'id'),
         ),
         'key_contacter' => array(
-          'columns' => array('requestorPHID', 'status', 'dateNuanced'),
+          'columns' => array('requestorPHID', 'status', 'dateNuanced', 'id'),
         ),
       ),
     ) + parent::getConfiguration();

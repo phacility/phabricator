@@ -19,6 +19,17 @@ final class DrydockLog extends DrydockDAO
         'leaseID' => 'id?',
         'message' => 'text',
       ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'resourceID' => array(
+          'columns' => array('resourceID', 'epoch'),
+        ),
+        'leaseID' => array(
+          'columns' => array('leaseID', 'epoch'),
+        ),
+        'epoch' => array(
+          'columns' => array('epoch'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

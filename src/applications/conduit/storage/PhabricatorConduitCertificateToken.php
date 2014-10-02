@@ -13,9 +13,11 @@ final class PhabricatorConduitCertificateToken extends PhabricatorConduitDAO {
       self::CONFIG_KEY_SCHEMA => array(
         'userPHID' => array(
           'columns' => array('userPHID'),
+          'unique' => true,
         ),
         'token' => array(
           'columns' => array('token'),
+          'unique' => true,
         ),
       ),
     ) + parent::getConfiguration();

@@ -21,7 +21,7 @@
   color: {$lightgreytext};
 }
 
-.has-local-nav + .phabricator-standard-page-footer {
+.device-desktop .has-local-nav + .phabricator-standard-page-footer {
   margin-left: 221px;
 }
 

@@ -62,6 +62,11 @@ final class LegalpadDocument extends LegalpadDAO
         'signatureType' => 'text4',
         'preamble' => 'text',
       ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_creator' => array(
+          'columns' => array('creatorPHID', 'dateModified'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

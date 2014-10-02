@@ -10,6 +10,11 @@ final class PhabricatorSlowvoteOption extends PhabricatorSlowvoteDAO {
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'text255',
       ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'pollID' => array(
+          'columns' => array('pollID'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

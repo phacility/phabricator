@@ -18,8 +18,8 @@ final class PhabricatorMetaMTAMailingList extends PhabricatorMetaMTADAO
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
-        'name' => 'text255',
-        'email' => 'text255',
+        'name' => 'text128',
+        'email' => 'text128',
         'uri' => 'text255?',
       ),
       self::CONFIG_KEY_SCHEMA => array(

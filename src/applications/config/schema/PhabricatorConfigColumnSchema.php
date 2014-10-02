@@ -8,6 +8,16 @@ final class PhabricatorConfigColumnSchema
   private $columnType;
   private $dataType;
   private $nullable;
+  private $autoIncrement;
+
+  public function setAutoIncrement($auto_increment) {
+    $this->autoIncrement = $auto_increment;
+    return $this;
+  }
+
+  public function getAutoIncrement() {
+    return $this->autoIncrement;
+  }
 
   public function setNullable($nullable) {
     $this->nullable = $nullable;
@@ -62,7 +72,7 @@ final class PhabricatorConfigColumnSchema
     $type = $this->getColumnType();
 
     $matches = null;
-    if (preg_match('/^varchar\((\d+)\)$/', $type, $matches)) {
+    if (preg_match('/^(?:var)?char\((\d+)\)$/', $type, $matches)) {
       // For utf8mb4, each character requires 4 bytes.
       $size = (int)$matches[1];
       if ($prefix && $prefix < $size) {
@@ -72,8 +82,8 @@ final class PhabricatorConfigColumnSchema
     }
 
     $matches = null;
-    if (preg_match('/^char\((\d+)\)$/', $type, $matches)) {
-      // We use char() only for fixed-length binary data, so its size
+    if (preg_match('/^(?:var)?binary\((\d+)\)$/', $type, $matches)) {
+      // binary()/varbinary() store fixed-length binary data, so their size
       // is always the column size.
       $size = (int)$matches[1];
       if ($prefix && $prefix < $size) {
@@ -129,6 +139,10 @@ final class PhabricatorConfigColumnSchema
 
     if ($this->getNullable() !== $expect->getNullable()) {
       $issues[] = self::ISSUE_NULLABLE;
+    }
+
+    if ($this->getAutoIncrement() !== $expect->getAutoIncrement()) {
+      $issues[] = self::ISSUE_AUTOINCREMENT;
     }
 
     return $issues;

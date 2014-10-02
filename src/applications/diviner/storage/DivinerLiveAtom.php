@@ -13,6 +13,12 @@ final class DivinerLiveAtom extends DivinerDAO {
         'content'  => self::SERIALIZATION_JSON,
         'atomData' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'symbolPHID' => array(
+          'columns' => array('symbolPHID'),
+          'unique' => true,
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

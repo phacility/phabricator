@@ -24,6 +24,7 @@ final class PhabricatorAuditTransactionComment
 
   public function getConfiguration() {
     $config = parent::getConfiguration();
+
     $config[self::CONFIG_COLUMN_SCHEMA] = array(
       'commitPHID' => 'phid?',
       'pathID' => 'id?',
@@ -35,6 +36,22 @@ final class PhabricatorAuditTransactionComment
       'replyToCommentPHID' => 'phid?',
       'legacyCommentID' => 'id?',
     ) + $config[self::CONFIG_COLUMN_SCHEMA];
+
+    $config[self::CONFIG_KEY_SCHEMA] = array(
+      'key_path' => array(
+        'columns' => array('pathID'),
+      ),
+      'key_draft' => array(
+        'columns' => array('authorPHID', 'transactionPHID'),
+      ),
+      'key_commit' => array(
+        'columns' => array('commitPHID'),
+      ),
+      'key_legacy' => array(
+        'columns' => array('legacyCommentID'),
+      ),
+    ) + $config[self::CONFIG_KEY_SCHEMA];
+
     return $config;
   }
 

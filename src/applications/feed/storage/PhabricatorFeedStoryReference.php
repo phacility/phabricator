@@ -17,6 +17,10 @@ final class PhabricatorFeedStoryReference extends PhabricatorFeedDAO {
         'PRIMARY' => null,
         'objectPHID' => array(
           'columns' => array('objectPHID', 'chronologicalKey'),
+          'unique' => true,
+        ),
+        'chronologicalKey' => array(
+          'columns' => array('chronologicalKey'),
         ),
       ),
     ) + parent::getConfiguration();

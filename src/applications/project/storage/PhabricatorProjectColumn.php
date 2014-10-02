@@ -33,6 +33,19 @@ final class PhabricatorProjectColumn
       self::CONFIG_SERIALIZATION => array(
         'properties' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'name' => 'text255',
+        'status' => 'uint32',
+        'sequence' => 'uint32',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_status' => array(
+          'columns' => array('projectPHID', 'status', 'sequence'),
+        ),
+        'key_sequence' => array(
+          'columns' => array('projectPHID', 'sequence'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

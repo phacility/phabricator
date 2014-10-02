@@ -104,4 +104,17 @@ class PhabricatorApplicationTransactionFeedStory
     return $text;
   }
 
+  public function renderAsTextForDoorkeeper(
+    DoorkeeperFeedStoryPublisher $publisher) {
+
+    $xactions = array();
+    $xaction_phids = $this->getValue('transactionPHIDs');
+    foreach ($xaction_phids as $xaction_phid) {
+      $xactions[] = $this->getObject($xaction_phid);
+    }
+
+    $primary = $this->getPrimaryTransaction();
+    return $primary->renderAsTextForDoorkeeper($publisher, $this, $xactions);
+  }
+
 }

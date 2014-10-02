@@ -29,6 +29,20 @@ final class PhortunePaymentMethod extends PhortuneDAO
       self::CONFIG_SERIALIZATION => array(
         'metadata' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'name' => 'text255',
+        'status' => 'text64',
+        'brand' => 'text64',
+        'expires' => 'text16',
+        'providerType' => 'text16',
+        'providerDomain' => 'text64',
+        'lastFourDigits' => 'text16',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_account' => array(
+          'columns' => array('accountPHID', 'status'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

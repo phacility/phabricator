@@ -155,6 +155,22 @@ final class HarbormasterBuildable extends HarbormasterDAO
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'containerPHID' => 'phid?',
+        'buildableStatus' => 'text32',
+        'isManualBuildable' => 'bool',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_buildable' => array(
+          'columns' => array('buildablePHID'),
+        ),
+        'key_container' => array(
+          'columns' => array('containerPHID'),
+        ),
+        'key_manual' => array(
+          'columns' => array('isManualBuildable'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

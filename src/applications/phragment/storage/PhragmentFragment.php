@@ -14,6 +14,17 @@ final class PhragmentFragment extends PhragmentDAO
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'path' => 'text128',
+        'depth' => 'uint32',
+        'latestVersionPHID' => 'phid?',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_path' => array(
+          'columns' => array('path'),
+          'unique' => true,
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

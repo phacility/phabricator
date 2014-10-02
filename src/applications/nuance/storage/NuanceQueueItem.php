@@ -20,7 +20,12 @@ final class NuanceQueueItem
           'unique' => true,
         ),
         'key_queue' => array(
-          'columns' => array('queuePHID', 'itemStatus', 'itemDateNuanced'),
+          'columns' => array(
+            'queuePHID',
+            'itemStatus',
+            'itemDateNuanced',
+            'id',
+          ),
         ),
       ),
     ) + parent::getConfiguration();

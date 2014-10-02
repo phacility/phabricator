@@ -4,7 +4,7 @@ CREATE TABLE {$NAMESPACE}_user.user_sshkey (
   key (userPHID),
   name varchar(255),
   keyType varchar(255),
-  keyBody varchar(32768) BINARY,
+  keyBody LONGBLOB,
   unique key (keyBody(128)),
   keyComment varchar(255),
   dateCreated INT UNSIGNED NOT NULL,

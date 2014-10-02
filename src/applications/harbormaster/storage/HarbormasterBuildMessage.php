@@ -22,6 +22,20 @@ final class HarbormasterBuildMessage extends HarbormasterDAO
       ->setIsConsumed(0);
   }
 
+  public function getConfiguration() {
+    return array(
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'type' => 'text16',
+        'isConsumed' => 'bool',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_buildtarget' => array(
+          'columns' => array('buildTargetPHID'),
+        ),
+      ),
+    ) + parent::getConfiguration();
+  }
+
   public function getBuildTarget() {
     return $this->assertAttached($this->buildTarget);
   }

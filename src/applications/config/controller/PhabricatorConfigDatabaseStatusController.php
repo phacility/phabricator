@@ -281,6 +281,8 @@ final class PhabricatorConfigDatabaseStatusController
     $nullable_issue = PhabricatorConfigStorageSchema::ISSUE_NULLABLE;
     $unique_issue = PhabricatorConfigStorageSchema::ISSUE_UNIQUE;
     $columns_issue = PhabricatorConfigStorageSchema::ISSUE_KEYCOLUMNS;
+    $longkey_issue = PhabricatorConfigStorageSchema::ISSUE_LONGKEY;
+    $auto_issue = PhabricatorConfigStorageSchema::ISSUE_AUTOINCREMENT;
 
     $database = $comp->getDatabase($database_name);
     if (!$database) {
@@ -339,6 +341,9 @@ final class PhabricatorConfigDatabaseStatusController
           $this->renderBoolean($column->getNullable()),
           $column->hasIssue($nullable_issue)),
         $this->renderAttr(
+          $this->renderBoolean($column->getAutoIncrement()),
+          $column->hasIssue($auto_issue)),
+        $this->renderAttr(
           $column->getCharacterSet(),
           $column->hasIssue($charset_issue)),
         $this->renderAttr(
@@ -355,6 +360,7 @@ final class PhabricatorConfigDatabaseStatusController
           pht('Data Type'),
           pht('Column Type'),
           pht('Nullable'),
+          pht('Autoincrement'),
           pht('Character Set'),
           pht('Collation'),
         ))
@@ -362,6 +368,7 @@ final class PhabricatorConfigDatabaseStatusController
         array(
           null,
           'wide pri',
+          null,
           null,
           null,
           null,
@@ -392,7 +399,7 @@ final class PhabricatorConfigDatabaseStatusController
       if ($size) {
         $size_formatted = $this->renderAttr(
           $size,
-          ($size > self::MAX_INNODB_KEY_LENGTH));
+          $key->hasIssue($longkey_issue));
       }
 
       $key_rows[] = array(
@@ -520,11 +527,13 @@ final class PhabricatorConfigDatabaseStatusController
       $actual_charset = $actual_column->getCharacterSet();
       $actual_collation = $actual_column->getCollation();
       $actual_nullable = $actual_column->getNullable();
+      $actual_auto = $actual_column->getAutoIncrement();
     } else {
       $actual_coltype = null;
       $actual_charset = null;
       $actual_collation = null;
       $actual_nullable = null;
+      $actual_auto = null;
     }
 
     if ($expect_column) {
@@ -533,12 +542,14 @@ final class PhabricatorConfigDatabaseStatusController
       $expect_charset = $expect_column->getCharacterSet();
       $expect_collation = $expect_column->getCollation();
       $expect_nullable = $expect_column->getNullable();
+      $expect_auto = $expect_column->getAutoIncrement();
     } else {
       $data_type = null;
       $expect_coltype = null;
       $expect_charset = null;
       $expect_collation = null;
       $expect_nullable = null;
+      $expect_auto = null;
     }
 
 
@@ -585,6 +596,14 @@ final class PhabricatorConfigDatabaseStatusController
         array(
           pht('Expected Nullable'),
           $this->renderBoolean($expect_nullable),
+        ),
+        array(
+          pht('Autoincrement'),
+          $this->renderBoolean($actual_auto),
+        ),
+        array(
+          pht('Expected Autoincrement'),
+          $this->renderBoolean($expect_auto),
         ),
       ),
       $column->getIssues());
@@ -710,10 +729,6 @@ final class PhabricatorConfigDatabaseStatusController
 
         $status = PhabricatorConfigStorageSchema::getIssueStatus($issue);
         switch ($status) {
-          case PhabricatorConfigStorageSchema::STATUS_NOTE:
-            $icon = PHUIStatusItemView::ICON_INFO;
-            $color = 'blue';
-            break;
           case PhabricatorConfigStorageSchema::STATUS_WARN:
             $icon = PHUIStatusItemView::ICON_WARNING;
             $color = 'yellow';

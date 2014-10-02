@@ -36,6 +36,7 @@ final class ConpherenceThread extends ConpherenceDAO
         'key_phid' => null,
         'phid' => array(
           'columns' => array('phid'),
+          'unique' => true,
         ),
       ),
     ) + parent::getConfiguration();

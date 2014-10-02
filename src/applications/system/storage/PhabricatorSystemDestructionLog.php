@@ -17,6 +17,11 @@ final class PhabricatorSystemDestructionLog extends PhabricatorSystemDAO {
         'objectPHID' => 'phid?',
         'objectMonogram' => 'text64?',
       ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_epoch' => array(
+          'columns' => array('epoch'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

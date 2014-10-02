@@ -3,19 +3,21 @@
 abstract class PhabricatorConfigStorageSchema extends Phobject {
 
   const ISSUE_MISSING = 'missing';
+  const ISSUE_MISSINGKEY = 'missingkey';
   const ISSUE_SURPLUS = 'surplus';
+  const ISSUE_SURPLUSKEY = 'surpluskey';
   const ISSUE_CHARSET = 'charset';
   const ISSUE_COLLATION = 'collation';
   const ISSUE_COLUMNTYPE = 'columntype';
   const ISSUE_NULLABLE = 'nullable';
   const ISSUE_KEYCOLUMNS = 'keycolumns';
   const ISSUE_UNIQUE = 'unique';
-  const ISSUE_SUBNOTE = 'subnote';
+  const ISSUE_LONGKEY = 'longkey';
   const ISSUE_SUBWARN = 'subwarn';
   const ISSUE_SUBFAIL = 'subfail';
+  const ISSUE_AUTOINCREMENT = 'autoincrement';
 
   const STATUS_OKAY = 'okay';
-  const STATUS_NOTE = 'note';
   const STATUS_WARN = 'warn';
   const STATUS_FAIL = 'fail';
 
@@ -58,9 +60,6 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
 
     foreach ($this->getSubschemata() as $sub) {
       switch ($sub->getStatus()) {
-        case self::STATUS_NOTE:
-          $issues[self::ISSUE_SUBNOTE] = self::ISSUE_SUBNOTE;
-          break;
         case self::STATUS_WARN:
           $issues[self::ISSUE_SUBWARN] = self::ISSUE_SUBWARN;
           break;
@@ -102,8 +101,12 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
     switch ($issue) {
       case self::ISSUE_MISSING:
         return pht('Missing');
+      case self::ISSUE_MISSINGKEY:
+        return pht('Missing Key');
       case self::ISSUE_SURPLUS:
         return pht('Surplus');
+      case self::ISSUE_SURPLUSKEY:
+        return pht('Surplus Key');
       case self::ISSUE_CHARSET:
         return pht('Better Character Set Available');
       case self::ISSUE_COLLATION:
@@ -116,12 +119,14 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
         return pht('Key on Wrong Columns');
       case self::ISSUE_UNIQUE:
         return pht('Key has Wrong Uniqueness');
-      case self::ISSUE_SUBNOTE:
-        return pht('Subschemata Have Notices');
+      case self::ISSUE_LONGKEY:
+        return pht('Key is Too Long');
       case self::ISSUE_SUBWARN:
         return pht('Subschemata Have Warnings');
       case self::ISSUE_SUBFAIL:
         return pht('Subschemata Have Failures');
+      case self::ISSUE_AUTOINCREMENT:
+        return pht('Column has Wrong Autoincrement');
       default:
         throw new Exception(pht('Unknown schema issue "%s"!', $issue));
     }
@@ -131,8 +136,12 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
     switch ($issue) {
       case self::ISSUE_MISSING:
         return pht('This schema is expected to exist, but does not.');
+      case self::ISSUE_MISSINGKEY:
+        return pht('This key is expected to exist, but does not.');
       case self::ISSUE_SURPLUS:
         return pht('This schema is not expected to exist.');
+      case self::ISSUE_SURPLUSKEY:
+        return pht('This key is not expected to exist.');
       case self::ISSUE_CHARSET:
         return pht('This schema can use a better character set.');
       case self::ISSUE_COLLATION:
@@ -142,15 +151,17 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
       case self::ISSUE_NULLABLE:
         return pht('This schema has the wrong nullable setting.');
       case self::ISSUE_KEYCOLUMNS:
-        return pht('This schema is on the wrong columns.');
+        return pht('This key is on the wrong columns.');
       case self::ISSUE_UNIQUE:
         return pht('This key has the wrong uniqueness setting.');
-      case self::ISSUE_SUBNOTE:
-        return pht('Subschemata have setup notices.');
+      case self::ISSUE_LONGKEY:
+        return pht('This key is too long for utf8mb4.');
       case self::ISSUE_SUBWARN:
         return pht('Subschemata have setup warnings.');
       case self::ISSUE_SUBFAIL:
         return pht('Subschemata have setup failures.');
+      case self::ISSUE_AUTOINCREMENT:
+        return pht('This column has the wrong autoincrement setting.');
       default:
         throw new Exception(pht('Unknown schema issue "%s"!', $issue));
     }
@@ -159,19 +170,21 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
   public static function getIssueStatus($issue) {
     switch ($issue) {
       case self::ISSUE_MISSING:
+      case self::ISSUE_SURPLUS:
+      case self::ISSUE_NULLABLE:
       case self::ISSUE_SUBFAIL:
         return self::STATUS_FAIL;
-      case self::ISSUE_SURPLUS:
-      case self::ISSUE_COLUMNTYPE:
       case self::ISSUE_SUBWARN:
-      case self::ISSUE_KEYCOLUMNS:
-      case self::ISSUE_NULLABLE:
-      case self::ISSUE_UNIQUE:
-        return self::STATUS_WARN;
-      case self::ISSUE_SUBNOTE:
+      case self::ISSUE_COLUMNTYPE:
       case self::ISSUE_CHARSET:
       case self::ISSUE_COLLATION:
-        return self::STATUS_NOTE;
+      case self::ISSUE_MISSINGKEY:
+      case self::ISSUE_SURPLUSKEY:
+      case self::ISSUE_UNIQUE:
+      case self::ISSUE_KEYCOLUMNS:
+      case self::ISSUE_LONGKEY:
+      case self::ISSUE_AUTOINCREMENT:
+        return self::STATUS_WARN;
       default:
         throw new Exception(pht('Unknown schema issue "%s"!', $issue));
     }
@@ -180,10 +193,8 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
   public static function getStatusSeverity($status) {
     switch ($status) {
       case self::STATUS_FAIL:
-        return 3;
-      case self::STATUS_WARN:
         return 2;
-      case self::STATUS_NOTE:
+      case self::STATUS_WARN:
         return 1;
       case self::STATUS_OKAY:
         return 0;

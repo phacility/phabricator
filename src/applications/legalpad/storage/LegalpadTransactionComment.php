@@ -32,6 +32,7 @@ final class LegalpadTransactionComment
     $config[self::CONFIG_KEY_SCHEMA] = array(
       'key_draft' => array(
         'columns' => array('authorPHID', 'documentID', 'transactionPHID'),
+        'unique' => true,
       ),
     ) + $config[self::CONFIG_KEY_SCHEMA];
     return $config;

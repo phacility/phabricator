@@ -31,6 +31,30 @@ final class HeraldRule extends HeraldDAO
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'name' => 'text255',
+        'contentType' => 'text255',
+        'mustMatchAll' => 'bool',
+        'configVersion' => 'uint32',
+        'ruleType' => 'text32',
+        'isDisabled' => 'uint32',
+        'triggerObjectPHID' => 'phid?',
+
+        // T6203/NULLABILITY
+        // This should not be nullable.
+        'repetitionPolicy' => 'uint32?',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_author' => array(
+          'columns' => array('authorPHID'),
+        ),
+        'key_ruletype' => array(
+          'columns' => array('ruleType'),
+        ),
+        'key_trigger' => array(
+          'columns' => array('triggerObjectPHID'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 
@@ -202,6 +226,42 @@ final class HeraldRule extends HeraldDAO
 
   public function getTriggerObject() {
     return $this->assertAttached($this->triggerObject);
+  }
+
+  /**
+   * Get a sortable key for rule execution order.
+   *
+   * Rules execute in a well-defined order: personal rules first, then object
+   * rules, then global rules. Within each rule type, rules execute from lowest
+   * ID to highest ID.
+   *
+   * This ordering allows more powerful rules (like global rules) to override
+   * weaker rules (like personal rules) when multiple rules exist which try to
+   * affect the same field. Executing from low IDs to high IDs makes
+   * interactions easier to understand when adding new rules, because the newest
+   * rules always happen last.
+   *
+   * @return string A sortable key for this rule.
+   */
+  public function getRuleExecutionOrderSortKey() {
+
+    $rule_type = $this->getRuleType();
+
+    switch ($rule_type) {
+      case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
+        $type_order = 1;
+        break;
+      case HeraldRuleTypeConfig::RULE_TYPE_OBJECT:
+        $type_order = 2;
+        break;
+      case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
+        $type_order = 3;
+        break;
+      default:
+        throw new Exception(pht('Unknown rule type "%s"!', $rule_type));
+    }
+
+    return sprintf('~%d%010d', $type_order, $this->getID());
   }
 
 

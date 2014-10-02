@@ -60,7 +60,7 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
       $column_info = queryfx_all(
         $conn,
         'SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, CHARACTER_SET_NAME,
-            COLLATION_NAME, COLUMN_TYPE, IS_NULLABLE
+            COLLATION_NAME, COLUMN_TYPE, IS_NULLABLE, EXTRA
           FROM INFORMATION_SCHEMA.COLUMNS
           WHERE (%Q)',
         '('.implode(') OR (', $sql).')');
@@ -96,12 +96,19 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
 
         $columns = idx($database_column_info, $table_name, array());
         foreach ($columns as $column) {
+          if (strpos($column['EXTRA'], 'auto_increment') === false) {
+            $auto_increment = false;
+          } else {
+            $auto_increment = true;
+          }
+
           $column_schema = id(new PhabricatorConfigColumnSchema())
             ->setName($column['COLUMN_NAME'])
             ->setCharacterSet($column['CHARACTER_SET_NAME'])
             ->setCollation($column['COLLATION_NAME'])
             ->setColumnType($column['COLUMN_TYPE'])
-            ->setNullable($column['IS_NULLABLE'] == 'YES');
+            ->setNullable($column['IS_NULLABLE'] == 'YES')
+            ->setAutoIncrement($auto_increment);
 
           $table_schema->addColumn($column_schema);
         }
@@ -129,7 +136,8 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
           $key_schema = id(new PhabricatorConfigKeySchema())
             ->setName($key_name)
             ->setColumnNames($column_names)
-            ->setUnique(!$head['Non_unique']);
+            ->setUnique(!$head['Non_unique'])
+            ->setIndexType($head['Index_type']);
 
           $table_schema->addKey($key_schema);
         }
@@ -148,26 +156,8 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
 
     $api = $this->getAPI();
 
-    if ($api->isCharacterSetAvailable('utf8mb4')) {
-      // If utf8mb4 is available, we use it with the utf8mb4_unicode_ci
-      // collation. This is most correct, and will sort properly.
-
-      $utf8_charset = 'utf8mb4';
-      $utf8_collation = 'utf8mb4_unicode_ci';
-    } else {
-      // If utf8mb4 is not available, we use binary. This allows us to store
-      // 4-byte unicode characters. This has some tradeoffs:
-      //
-      // Unicode characters won't sort correctly. There's nothing we can do
-      // about this while still supporting 4-byte characters.
-      //
-      // It's possible that strings will be truncated in the middle of a
-      // character on insert. We encourage users to set STRICT_ALL_TABLES
-      // to prevent this.
-
-      $utf8_charset = 'binary';
-      $utf8_collation = 'binary';
-    }
+    $charset_info = $api->getCharsetInfo();
+    list($charset, $collate_text, $collate_sort) = $charset_info;
 
     $specs = id(new PhutilSymbolLoader())
       ->setAncestorClass('PhabricatorConfigSchemaSpec')
@@ -176,8 +166,9 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
     $server_schema = new PhabricatorConfigServerSchema();
     foreach ($specs as $spec) {
       $spec
-        ->setUTF8Collation($utf8_collation)
-        ->setUTF8Charset($utf8_charset)
+        ->setUTF8Charset($charset)
+        ->setUTF8BinaryCollation($collate_text)
+        ->setUTF8SortingCollation($collate_sort)
         ->setServer($server_schema)
         ->buildSchemata($server_schema);
     }
@@ -269,12 +260,23 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
     PhabricatorConfigStorageSchema $expect = null,
     PhabricatorConfigStorageSchema $actual = null) {
 
+    $expect_is_key = ($expect instanceof PhabricatorConfigKeySchema);
+    $actual_is_key = ($actual instanceof PhabricatorConfigKeySchema);
+
+    if ($expect_is_key || $actual_is_key) {
+      $missing_issue = PhabricatorConfigStorageSchema::ISSUE_MISSINGKEY;
+      $surplus_issue = PhabricatorConfigStorageSchema::ISSUE_SURPLUSKEY;
+    } else {
+      $missing_issue = PhabricatorConfigStorageSchema::ISSUE_MISSING;
+      $surplus_issue = PhabricatorConfigStorageSchema::ISSUE_SURPLUS;
+    }
+
     if (!$expect && !$actual) {
       throw new Exception(pht('Can not compare two missing schemata!'));
     } else if ($expect && !$actual) {
-      $issues = array(PhabricatorConfigStorageSchema::ISSUE_MISSING);
+      $issues = array($missing_issue);
     } else if ($actual && !$expect) {
-      $issues = array(PhabricatorConfigStorageSchema::ISSUE_SURPLUS);
+      $issues = array($surplus_issue);
     } else {
       $issues = $actual->compareTo($expect);
     }

@@ -28,6 +28,35 @@ final class PhrictionContent extends PhrictionDAO
       $viewer);
   }
 
+  public function getConfiguration() {
+    return array(
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'version' => 'uint32',
+        'title' => 'sort',
+        'slug' => 'text128',
+        'content' => 'text',
+        'changeType' => 'uint32',
+        'changeRef' => 'uint32?',
+
+        // T6203/NULLABILITY
+        // This should just be empty if not provided?
+        'description' => 'text?',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'documentID' => array(
+          'columns' => array('documentID', 'version'),
+          'unique' => true,
+        ),
+        'authorPHID' => array(
+          'columns' => array('authorPHID'),
+        ),
+        'slug' => array(
+          'columns' => array('slug'),
+        ),
+      ),
+    ) + parent::getConfiguration();
+  }
+
 
 /* -(  Markup Interface  )--------------------------------------------------- */
 

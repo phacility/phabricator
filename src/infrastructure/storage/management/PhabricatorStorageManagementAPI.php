@@ -182,8 +182,14 @@ final class PhabricatorStorageManagementAPI {
 
     $conn = $this->getConn(null);
 
+    $charset_info = $this->getCharsetInfo();
+    list($charset, $collate_text, $collate_sort) = $charset_info;
+
     foreach ($queries as $query) {
       $query = str_replace('{$NAMESPACE}', $this->namespace, $query);
+      $query = str_replace('{$CHARSET}', $charset, $query);
+      $query = str_replace('{$COLLATE_TEXT}', $collate_text, $query);
+      $query = str_replace('{$COLLATE_SORT}', $collate_sort, $query);
       queryfx(
         $conn,
         '%Q',
@@ -206,6 +212,33 @@ final class PhabricatorStorageManagementAPI {
       $character_set);
 
     return (bool)$result;
+  }
+
+  public function getCharsetInfo() {
+    if ($this->isCharacterSetAvailable('utf8mb4')) {
+      // If utf8mb4 is available, we use it with the utf8mb4_unicode_ci
+      // collation. This is most correct, and will sort properly.
+
+      $charset = 'utf8mb4';
+      $collate_text = 'utf8mb4_bin';
+      $collate_sort = 'utf8mb4_unicode_ci';
+    } else {
+      // If utf8mb4 is not available, we use binary. This allows us to store
+      // 4-byte unicode characters. This has some tradeoffs:
+      //
+      // Unicode characters won't sort correctly. There's nothing we can do
+      // about this while still supporting 4-byte characters.
+      //
+      // It's possible that strings will be truncated in the middle of a
+      // character on insert. We encourage users to set STRICT_ALL_TABLES
+      // to prevent this.
+
+      $charset = 'binary';
+      $collate_text = 'binary';
+      $collate_sort = 'binary';
+    }
+
+    return array($charset, $collate_text, $collate_sort);
   }
 
 }

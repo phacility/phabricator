@@ -21,6 +21,7 @@ final class PhabricatorDraft extends PhabricatorDraftDAO {
       self::CONFIG_KEY_SCHEMA => array(
         'authorPHID' => array(
           'columns' => array('authorPHID', 'draftKey'),
+          'unique' => true,
         ),
       ),
     ) + parent::getConfiguration();

@@ -12,6 +12,16 @@ final class PhabricatorSavedQuery extends PhabricatorSearchDAO
       self::CONFIG_SERIALIZATION => array(
         'parameters' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'engineClassName' => 'text255',
+        'queryKey' => 'text12',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_queryKey' => array(
+          'columns' => array('queryKey'),
+          'unique' => true,
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

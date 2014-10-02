@@ -3,8 +3,6 @@
 abstract class PhabricatorConfigDatabaseController
   extends PhabricatorConfigController {
 
-  const MAX_INNODB_KEY_LENGTH = 767;
-
   protected function buildSchemaQuery() {
     $conf = PhabricatorEnv::newObjectFromConfig(
       'mysql.configuration-provider',
@@ -27,9 +25,6 @@ abstract class PhabricatorConfigDatabaseController
     switch ($status) {
       case PhabricatorConfigStorageSchema::STATUS_OKAY:
         $icon = 'fa-check-circle green';
-        break;
-      case PhabricatorConfigStorageSchema::STATUS_NOTE:
-        $icon = 'fa-info-circle blue';
         break;
       case PhabricatorConfigStorageSchema::STATUS_WARN:
         $icon = 'fa-exclamation-circle yellow';

@@ -68,7 +68,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'text255?',
         'mimeType' => 'text255?',
-        'byteSize' => 'uint64?',
+        'byteSize' => 'uint64',
         'storageEngine' => 'text32',
         'storageFormat' => 'text32',
         'storageHandle' => 'text255',
@@ -83,6 +83,19 @@ final class PhabricatorFile extends PhabricatorFileDAO
         'key_phid' => null,
         'phid' => array(
           'columns' => array('phid'),
+          'unique' => true,
+        ),
+        'authorPHID' => array(
+          'columns' => array('authorPHID'),
+        ),
+        'contentHash' => array(
+          'columns' => array('contentHash'),
+        ),
+        'key_ttl' => array(
+          'columns' => array('ttl'),
+        ),
+        'key_dateCreated' => array(
+          'columns' => array('dateCreated'),
         ),
       ),
     ) + parent::getConfiguration();

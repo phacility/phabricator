@@ -23,6 +23,13 @@ final class ConpherenceParticipant extends ConpherenceDAO {
       self::CONFIG_KEY_SCHEMA => array(
         'conpherencePHID' => array(
           'columns' => array('conpherencePHID', 'participantPHID'),
+          'unique' => true,
+        ),
+        'unreadCount' => array(
+          'columns' => array('participantPHID', 'participationStatus'),
+        ),
+        'participationIndex' => array(
+          'columns' => array('participantPHID', 'dateTouched', 'id'),
         ),
       ),
     ) + parent::getConfiguration();

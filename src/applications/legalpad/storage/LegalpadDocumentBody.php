@@ -24,6 +24,7 @@ final class LegalpadDocumentBody extends LegalpadDAO
       self::CONFIG_KEY_SCHEMA => array(
         'key_document' => array(
           'columns' => array('documentPHID', 'version'),
+          'unique' => true,
         ),
       ),
     ) + parent::getConfiguration();

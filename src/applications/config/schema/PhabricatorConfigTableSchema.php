@@ -23,6 +23,7 @@ final class PhabricatorConfigTableSchema
       throw new Exception(
         pht('Trying to add duplicate key "%s"!', $name));
     }
+    $key->setTable($this);
     $this->keys[$name] = $key;
     return $this;
   }
@@ -44,7 +45,12 @@ final class PhabricatorConfigTableSchema
   }
 
   protected function getSubschemata() {
-    return array_merge($this->getColumns(), $this->getKeys());
+    // NOTE: Keys and columns may have the same name, so make sure we return
+    // everything.
+
+    return array_merge(
+      array_values($this->columns),
+      array_values($this->keys));
   }
 
   public function setCollation($collation) {

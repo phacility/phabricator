@@ -11,6 +11,15 @@ final class PhragmentSnapshot extends PhragmentDAO
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'name' => 'text128',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_name' => array(
+          'columns' => array('primaryFragmentPHID', 'name'),
+          'unique' => true,
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

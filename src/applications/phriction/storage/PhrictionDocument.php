@@ -24,6 +24,27 @@ final class PhrictionDocument extends PhrictionDAO
     return array(
       self::CONFIG_AUX_PHID   => true,
       self::CONFIG_TIMESTAMPS => false,
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'slug' => 'sort128',
+        'depth' => 'uint32',
+        'contentID' => 'id?',
+        'status' => 'uint32',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_phid' => null,
+        'phid' => array(
+          'columns' => array('phid'),
+          'unique' => true,
+        ),
+        'slug' => array(
+          'columns' => array('slug'),
+          'unique' => true,
+        ),
+        'depth' => array(
+          'columns' => array('depth', 'slug'),
+          'unique' => true,
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

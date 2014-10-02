@@ -22,6 +22,7 @@ final class PhabricatorConfigEntry extends PhabricatorConfigEntryDAO
       self::CONFIG_KEY_SCHEMA => array(
         'key_name' => array(
           'columns' => array('namespace', 'configKey'),
+          'unique' => true,
         ),
       ),
     ) + parent::getConfiguration();

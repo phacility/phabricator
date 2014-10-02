@@ -81,6 +81,11 @@ abstract class DoorkeeperFeedStoryPublisher {
     return $object;
   }
 
+
+  public function getStoryText($object) {
+    return $this->getFeedStory()->renderAsTextForDoorkeeper($this);
+  }
+
   abstract public function isStoryAboutObjectCreation($object);
   abstract public function isStoryAboutObjectClosure($object);
   abstract public function getOwnerPHID($object);
@@ -92,6 +97,5 @@ abstract class DoorkeeperFeedStoryPublisher {
   abstract public function getObjectDescription($object);
   abstract public function isObjectClosed($object);
   abstract public function getResponsibilityTitle($object);
-  abstract public function getStoryText($object);
 
 }

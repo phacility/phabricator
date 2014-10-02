@@ -22,6 +22,7 @@ final class PhabricatorDashboardInstall
       self::CONFIG_KEY_SCHEMA => array(
         'objectPHID' => array(
           'columns' => array('objectPHID', 'applicationClass'),
+          'unique' => true,
         ),
       ),
     ) + parent::getConfiguration();

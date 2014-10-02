@@ -322,21 +322,14 @@ final class HeraldRuleController extends HeraldController {
     $rule->attachActions($actions);
 
     if (!$errors) {
-      try {
+      $edit_action = $rule->getID() ? 'edit' : 'create';
 
-        $edit_action = $rule->getID() ? 'edit' : 'create';
-
-        $rule->openTransaction();
-          $rule->save();
-          $rule->saveConditions($conditions);
-          $rule->saveActions($actions);
-          $rule->logEdit($request->getUser()->getPHID(), $edit_action);
-        $rule->saveTransaction();
-
-      } catch (AphrontDuplicateKeyQueryException $ex) {
-        $e_name = pht('Not Unique');
-        $errors[] = pht('Rule name is not unique. Choose a unique name.');
-      }
+      $rule->openTransaction();
+        $rule->save();
+        $rule->saveConditions($conditions);
+        $rule->saveActions($actions);
+        $rule->logEdit($request->getUser()->getPHID(), $edit_action);
+      $rule->saveTransaction();
     }
 
     return array($e_name, $errors);

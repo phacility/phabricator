@@ -4,15 +4,25 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
 
   private $server;
   private $utf8Charset;
-  private $utf8Collation;
+  private $utf8BinaryCollation;
+  private $utf8SortingCollation;
 
-  public function setUTF8Collation($utf8_collation) {
-    $this->utf8Collation = $utf8_collation;
+  public function setUTF8SortingCollation($utf8_sorting_collation) {
+    $this->utf8SortingCollation = $utf8_sorting_collation;
     return $this;
   }
 
-  public function getUTF8Collation() {
-    return $this->utf8Collation;
+  public function getUTF8SortingCollation() {
+    return $this->utf8SortingCollation;
+  }
+
+  public function setUTF8BinaryCollation($utf8_binary_collation) {
+    $this->utf8BinaryCollation = $utf8_binary_collation;
+    return $this;
+  }
+
+  public function getUTF8BinaryCollation() {
+    return $this->utf8BinaryCollation;
   }
 
   public function setUTF8Charset($utf8_charset) {
@@ -35,38 +45,7 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
 
   abstract public function buildSchemata();
 
-  protected function buildLiskSchemata($base) {
-
-    $objects = id(new PhutilSymbolLoader())
-      ->setAncestorClass($base)
-      ->loadObjects();
-
-    foreach ($objects as $object) {
-      $this->buildLiskObjectSchema($object);
-    }
-  }
-
-  protected function buildTransactionSchema(
-    PhabricatorApplicationTransaction $xaction,
-    PhabricatorApplicationTransactionComment $comment = null) {
-
-    $this->buildLiskObjectSchema($xaction);
-    if ($comment) {
-      $this->buildLiskObjectSchema($comment);
-    }
-  }
-
-  protected function buildCustomFieldSchemata(
-    PhabricatorLiskDAO $storage,
-    array $indexes) {
-
-    $this->buildLiskObjectSchema($storage);
-    foreach ($indexes as $index) {
-      $this->buildLiskObjectSchema($index);
-    }
-  }
-
-  private function buildLiskObjectSchema(PhabricatorLiskDAO $object) {
+  protected function buildLiskObjectSchema(PhabricatorLiskDAO $object) {
     $this->buildRawSchema(
       $object->getApplicationName(),
       $object->getTableName(),
@@ -89,14 +68,15 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
       }
 
       $details = $this->getDetailsForDataType($type);
-      list($column_type, $charset, $collation, $nullable) = $details;
+      list($column_type, $charset, $collation, $nullable, $auto) = $details;
 
       $column = $this->newColumn($name)
         ->setDataType($type)
         ->setColumnType($column_type)
         ->setCharacterSet($charset)
         ->setCollation($collation)
-        ->setNullable($nullable);
+        ->setNullable($nullable)
+        ->setAutoIncrement($auto);
 
       $table->addColumn($column);
     }
@@ -111,6 +91,7 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
         ->setColumnNames(idx($key_spec, 'columns', array()));
 
       $key->setUnique((bool)idx($key_spec, 'unique'));
+      $key->setIndexType(idx($key_spec, 'type', 'BTREE'));
 
       $table->addKey($key);
     }
@@ -148,28 +129,13 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
       $object->getApplicationName(),
       PhabricatorEdgeConfig::TABLE_NAME_EDGEDATA,
       array(
-        'id' => 'id',
+        'id' => 'auto',
         'data' => 'text',
       ),
       array(
         'PRIMARY' => array(
           'columns' => array('id'),
           'unique' => true,
-        ),
-      ));
-  }
-
-  public function buildCounterSchema(PhabricatorLiskDAO $object) {
-    $this->buildRawSchema(
-      $object->getApplicationName(),
-      PhabricatorLiskDAO::COUNTER_TABLE_NAME,
-      array(
-        'counterName' => 'text32',
-        'counterValue' => 'id64',
-      ),
-      array(
-        'PRIMARY' => array(
-          'columns' => array('counterName'),
         ),
       ));
   }
@@ -190,7 +156,7 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
     return id(new PhabricatorConfigDatabaseSchema())
       ->setName($this->getNamespacedDatabase($name))
       ->setCharacterSet($this->getUTF8Charset())
-      ->setCollation($this->getUTF8Collation());
+      ->setCollation($this->getUTF8BinaryCollation());
   }
 
   protected function getNamespacedDatabase($name) {
@@ -201,7 +167,7 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
   protected function newTable($name) {
     return id(new PhabricatorConfigTableSchema())
       ->setName($name)
-      ->setCollation($this->getUTF8Collation());
+      ->setCollation($this->getUTF8BinaryCollation());
   }
 
   protected function newColumn($name) {
@@ -218,6 +184,7 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
     $column_type = null;
     $charset = null;
     $collation = null;
+    $auto = false;
 
     // If the type ends with "?", make the column nullable.
     $nullable = false;
@@ -226,11 +193,26 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
       $data_type = substr($data_type, 0, -1);
     }
 
+    // NOTE: MySQL allows fragments like "VARCHAR(32) CHARACTER SET binary",
+    // but just interprets that to mean "VARBINARY(32)". The fragment is
+    // totally disallowed in a MODIFY statement vs a CREATE TABLE statement.
+
     switch ($data_type) {
+      case 'auto':
+        $column_type = 'int(10) unsigned';
+        $auto = true;
+        break;
+      case 'auto64':
+        $column_type = 'bigint(20) unsigned';
+        $auto = true;
+        break;
       case 'id':
       case 'epoch':
       case 'uint32':
         $column_type = 'int(10) unsigned';
+        break;
+      case 'sint32':
+        $column_type = 'int(10)';
         break;
       case 'id64':
       case 'uint64':
@@ -241,97 +223,118 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
         break;
       case 'phid':
       case 'policy';
-        $column_type = 'varchar(64)';
-        $charset = 'binary';
-        $collation = 'binary';
+        $column_type = 'varbinary(64)';
+        break;
+      case 'bytes64':
+        $column_type = 'binary(64)';
         break;
       case 'bytes40':
-        $column_type = 'char(40)';
-        $charset = 'binary';
-        $collation = 'binary';
+        $column_type = 'binary(40)';
         break;
       case 'bytes32':
-        $column_type = 'char(32)';
-        $charset = 'binary';
-        $collation = 'binary';
+        $column_type = 'binary(32)';
         break;
       case 'bytes20':
-        $column_type = 'char(20)';
-        $charset = 'binary';
-        $collation = 'binary';
+        $column_type = 'binary(20)';
         break;
       case 'bytes12':
-        $column_type = 'char(12)';
-        $charset = 'binary';
-        $collation = 'binary';
+        $column_type = 'binary(12)';
         break;
       case 'bytes4':
-        $column_type = 'char(4)';
-        $charset = 'binary';
-        $collation = 'binary';
+        $column_type = 'binary(4)';
         break;
       case 'bytes':
         $column_type = 'longblob';
         break;
+      case 'sort255':
+        $column_type = 'varchar(255)';
+        $charset = $this->getUTF8Charset();
+        $collation = $this->getUTF8SortingCollation();
+        break;
+      case 'sort128':
+        $column_type = 'varchar(128)';
+        $charset = $this->getUTF8Charset();
+        $collation = $this->getUTF8SortingCollation();
+        break;
+      case 'sort64':
+        $column_type = 'varchar(64)';
+        $charset = $this->getUTF8Charset();
+        $collation = $this->getUTF8SortingCollation();
+        break;
+      case 'sort32':
+        $column_type = 'varchar(32)';
+        $charset = $this->getUTF8Charset();
+        $collation = $this->getUTF8SortingCollation();
+        break;
+      case 'sort':
+        $column_type = 'longtext';
+        $charset = $this->getUTF8Charset();
+        $collation = $this->getUTF8SortingCollation();
+        break;
       case 'text255':
         $column_type = 'varchar(255)';
         $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8Collation();
+        $collation = $this->getUTF8BinaryCollation();
+        break;
+      case 'text160':
+        $column_type = 'varchar(160)';
+        $charset = $this->getUTF8Charset();
+        $collation = $this->getUTF8BinaryCollation();
         break;
       case 'text128':
         $column_type = 'varchar(128)';
         $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8Collation();
+        $collation = $this->getUTF8BinaryCollation();
         break;
       case 'text80':
         $column_type = 'varchar(80)';
         $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8Collation();
+        $collation = $this->getUTF8BinaryCollation();
         break;
       case 'text64':
         $column_type = 'varchar(64)';
         $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8Collation();
+        $collation = $this->getUTF8BinaryCollation();
         break;
       case 'text40':
         $column_type = 'varchar(40)';
         $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8Collation();
+        $collation = $this->getUTF8BinaryCollation();
         break;
       case 'text32':
         $column_type = 'varchar(32)';
         $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8Collation();
+        $collation = $this->getUTF8BinaryCollation();
         break;
       case 'text20':
         $column_type = 'varchar(20)';
         $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8Collation();
+        $collation = $this->getUTF8BinaryCollation();
         break;
       case 'text16':
         $column_type = 'varchar(16)';
         $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8Collation();
+        $collation = $this->getUTF8BinaryCollation();
         break;
       case 'text12':
         $column_type = 'varchar(12)';
         $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8Collation();
+        $collation = $this->getUTF8BinaryCollation();
         break;
       case 'text8':
         $column_type = 'varchar(8)';
         $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8Collation();
+        $collation = $this->getUTF8BinaryCollation();
         break;
       case 'text4':
         $column_type = 'varchar(4)';
         $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8Collation();
+        $collation = $this->getUTF8BinaryCollation();
         break;
       case 'text':
         $column_type = 'longtext';
         $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8Collation();
+        $collation = $this->getUTF8BinaryCollation();
         break;
       case 'bool':
         $column_type = 'tinyint(1)';
@@ -349,7 +352,7 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
         break;
     }
 
-    return array($column_type, $charset, $collation, $nullable);
+    return array($column_type, $charset, $collation, $nullable, $auto);
   }
 
 }

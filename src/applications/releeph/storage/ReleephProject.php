@@ -30,7 +30,7 @@ final class ReleephProject extends ReleephDAO
         'details' => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
-        'name' => 'text255',
+        'name' => 'text128',
         'trunkBranch' => 'text255',
         'isActive' => 'bool',
       ),

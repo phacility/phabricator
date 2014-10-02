@@ -30,8 +30,11 @@ final class PhabricatorRepositoryRefCursor extends PhabricatorRepositoryDAO
       self::CONFIG_COLUMN_SCHEMA => array(
         'refType' => 'text32',
         'refNameHash' => 'bytes12',
-        'refNameEncoding' => 'text16',
         'commitIdentifier' => 'text40',
+
+        // T6203/NULLABILITY
+        // This probably should not be nullable; refNameRaw is not nullable.
+        'refNameEncoding' => 'text16?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_cursor' => array(

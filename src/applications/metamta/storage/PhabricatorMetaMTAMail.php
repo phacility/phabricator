@@ -33,9 +33,12 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
         'parameters'  => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
-        'status' => 'text255',
-        'message' => 'text',
+        'status' => 'text32',
         'relatedPHID' => 'phid?',
+
+        // T6203/NULLABILITY
+        // This should just be empty if there's no body.
+        'message' => 'text?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'status' => array(

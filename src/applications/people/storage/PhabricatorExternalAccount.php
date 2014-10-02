@@ -39,6 +39,31 @@ final class PhabricatorExternalAccount extends PhabricatorUserDAO
       self::CONFIG_SERIALIZATION => array(
         'properties' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'userPHID' => 'phid?',
+        'accountType' => 'text16',
+        'accountDomain' => 'text64',
+        'accountSecret' => 'text?',
+        'accountID' => 'text64',
+        'displayName' => 'text255?',
+        'username' => 'text255?',
+        'realName' => 'text255?',
+        'email' => 'text255?',
+        'emailVerified' => 'bool',
+        'profileImagePHID' => 'phid?',
+        'accountURI' => 'text255?',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_phid' => null,
+        'phid' => array(
+          'columns' => array('phid'),
+          'unique' => true,
+        ),
+        'account_details' => array(
+          'columns' => array('accountType', 'accountDomain', 'accountID'),
+          'unique' => true,
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

@@ -10,6 +10,7 @@ final class PhabricatorToken extends PhabricatorTokenDAO
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_NO_TABLE => true,
     ) + parent::getConfiguration();
   }
 

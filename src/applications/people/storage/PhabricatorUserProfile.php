@@ -7,4 +7,20 @@ final class PhabricatorUserProfile extends PhabricatorUserDAO {
   protected $blurb;
   protected $profileImagePHID;
 
+  public function getConfiguration() {
+    return array(
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'title' => 'text255',
+        'blurb' => 'text',
+        'profileImagePHID' => 'phid?',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'userPHID' => array(
+          'columns' => array('userPHID'),
+          'unique' => true,
+        ),
+      ),
+    ) + parent::getConfiguration();
+  }
+
 }

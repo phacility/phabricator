@@ -4,18 +4,13 @@ final class PhabricatorRepositorySchemaSpec
   extends PhabricatorConfigSchemaSpec {
 
   public function buildSchemata() {
-    $this->buildLiskSchemata('PhabricatorRepositoryDAO');
-
     $this->buildEdgeSchemata(new PhabricatorRepository());
-
-    $this->buildTransactionSchema(
-      new PhabricatorRepositoryTransaction());
 
     $this->buildRawSchema(
       id(new PhabricatorRepository())->getApplicationName(),
       PhabricatorRepository::TABLE_BADCOMMIT,
       array(
-        'fullCommitName' => 'text255',
+        'fullCommitName' => 'text64',
         'description' => 'text',
       ),
       array(
@@ -29,7 +24,7 @@ final class PhabricatorRepositorySchemaSpec
       id(new PhabricatorRepository())->getApplicationName(),
       PhabricatorRepository::TABLE_COVERAGE,
       array(
-        'id' => 'id',
+        'id' => 'auto',
         'branchID' => 'id',
         'commitID' => 'id',
         'pathID' => 'id',
@@ -70,7 +65,7 @@ final class PhabricatorRepositorySchemaSpec
       id(new PhabricatorRepository())->getApplicationName(),
       PhabricatorRepository::TABLE_LINTMESSAGE,
       array(
-        'id' => 'id',
+        'id' => 'auto',
         'branchID' => 'id',
         'path' => 'text',
         'line' => 'uint32',
@@ -100,7 +95,7 @@ final class PhabricatorRepositorySchemaSpec
       id(new PhabricatorRepository())->getApplicationName(),
       PhabricatorRepository::TABLE_PARENTS,
       array(
-        'id' => 'id',
+        'id' => 'auto',
         'childCommitID' => 'id',
         'parentCommitID' => 'id',
       ),
@@ -122,7 +117,7 @@ final class PhabricatorRepositorySchemaSpec
       id(new PhabricatorRepository())->getApplicationName(),
       PhabricatorRepository::TABLE_PATH,
       array(
-        'id' => 'id',
+        'id' => 'auto',
         'path' => 'text',
         'pathHash' => 'bytes32',
       ),

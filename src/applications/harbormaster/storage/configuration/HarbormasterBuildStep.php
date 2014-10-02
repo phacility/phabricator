@@ -25,7 +25,23 @@ final class HarbormasterBuildStep extends HarbormasterDAO
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
         'details' => self::SERIALIZATION_JSON,
-      )
+      ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'className' => 'text255',
+        'sequence' => 'uint32',
+        'description' => 'text',
+
+        // T6203/NULLABILITY
+        // This should not be nullable. Current `null` values indicate steps
+        // which predated editable names. These should be backfilled with
+        // default names, then the code for handling `null` shoudl be removed.
+        'name' => 'text255?',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_plan' => array(
+          'columns' => array('buildPlanPHID'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

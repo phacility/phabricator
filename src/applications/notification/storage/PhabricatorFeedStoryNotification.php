@@ -20,6 +20,10 @@ final class PhabricatorFeedStoryNotification extends PhabricatorFeedDAO {
         'PRIMARY' => null,
         'userPHID' => array(
           'columns' => array('userPHID', 'chronologicalKey'),
+          'unique' => true,
+        ),
+        'userPHID_2' => array(
+          'columns' => array('userPHID', 'hasViewed', 'primaryObjectPHID'),
         ),
       ),
     ) + parent::getConfiguration();

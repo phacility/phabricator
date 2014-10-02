@@ -44,7 +44,7 @@ final class PhabricatorFileImageMacro extends PhabricatorFileDAO
     return array(
       self::CONFIG_AUX_PHID  => true,
       self::CONFIG_COLUMN_SCHEMA => array(
-        'name' => 'text255',
+        'name' => 'text128',
         'authorPHID' => 'phid?',
         'isDisabled' => 'bool',
         'audioPHID' => 'phid?',
@@ -54,6 +54,13 @@ final class PhabricatorFileImageMacro extends PhabricatorFileDAO
       self::CONFIG_KEY_SCHEMA => array(
         'name' => array(
           'columns' => array('name'),
+          'unique' => true,
+        ),
+        'key_disabled' => array(
+          'columns' => array('isDisabled'),
+        ),
+        'key_dateCreated' => array(
+          'columns' => array('dateCreated'),
         ),
       ),
     ) + parent::getConfiguration();

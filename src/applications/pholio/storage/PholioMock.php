@@ -52,6 +52,23 @@ final class PholioMock extends PholioDAO
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'name' => 'text128',
+        'description' => 'text',
+        'originalName' => 'text128',
+        'mailKey' => 'bytes20',
+        'status' => 'text12',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_phid' => null,
+        'phid' => array(
+          'columns' => array('phid'),
+          'unique' => true,
+        ),
+        'authorPHID' => array(
+          'columns' => array('authorPHID'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

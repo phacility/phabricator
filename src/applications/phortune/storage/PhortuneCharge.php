@@ -33,6 +33,20 @@ final class PhortuneCharge extends PhortuneDAO
       self::CONFIG_SERIALIZATION => array(
         'metadata' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'paymentProviderKey' => 'text128',
+        'paymentMethodPHID' => 'phid?',
+        'amountInCents' => 'sint32',
+        'status' => 'text32',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_cart' => array(
+          'columns' => array('cartPHID'),
+        ),
+        'key_account' => array(
+          'columns' => array('accountPHID'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

@@ -57,9 +57,13 @@ final class DifferentialDiff
         'branch' => 'text255?',
         'bookmark' => 'text255?',
         'arcanistProjectPHID' => 'phid?',
-        'creationMethod' => 'text255',
-        'description' => 'text255',
         'repositoryUUID' => 'text64?',
+
+        // T6203/NULLABILITY
+        // These should be non-null; all diffs should have a creation method
+        // and the description should just be empty.
+        'creationMethod' => 'text255?',
+        'description' => 'text255?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'revisionID' => array(

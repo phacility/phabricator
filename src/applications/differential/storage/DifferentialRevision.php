@@ -84,7 +84,7 @@ final class DifferentialRevision extends DifferentialDAO
         'lastReviewerPHID' => 'phid?',
         'lineCount' => 'uint32?',
         'mailKey' => 'bytes40',
-        'branchName' => 'text255',
+        'branchName' => 'text255?',
         'arcanistProjectPHID' => 'phid?',
         'repositoryPHID' => 'phid?',
       ),

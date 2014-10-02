@@ -30,6 +30,21 @@ final class HarbormasterBuildLog extends HarbormasterDAO
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_COLUMN_SCHEMA => array(
+        // T6203/NULLABILITY
+        // It seems like these should be non-nullable? All logs should have a
+        // source, etc.
+        'logSource' => 'text255?',
+        'logType' => 'text255?',
+        'duration' => 'uint32?',
+
+        'live' => 'bool',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_buildtarget' => array(
+          'columns' => array('buildTargetPHID'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

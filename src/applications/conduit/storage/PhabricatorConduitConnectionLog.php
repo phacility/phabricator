@@ -15,6 +15,11 @@ final class PhabricatorConduitConnectionLog extends PhabricatorConduitDAO {
         'clientDescription' => 'text255?',
         'username' => 'text255?',
       ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_created' => array(
+          'columns' => array('dateCreated'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

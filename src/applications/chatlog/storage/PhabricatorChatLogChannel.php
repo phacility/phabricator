@@ -20,6 +20,7 @@ final class PhabricatorChatLogChannel
       self::CONFIG_KEY_SCHEMA => array(
         'key_channel' => array(
           'columns' => array('channelName', 'serviceType', 'serviceName'),
+          'unique' => true,
         ),
       ),
     ) + parent::getConfiguration();

@@ -23,6 +23,7 @@ final class PhabricatorXHProfSample extends PhabricatorXHProfDAO {
       self::CONFIG_KEY_SCHEMA => array(
         'filePHID' => array(
           'columns' => array('filePHID'),
+          'unique' => true,
         ),
       ),
     ) + parent::getConfiguration();
