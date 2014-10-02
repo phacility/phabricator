@@ -186,6 +186,55 @@ final class PhabricatorSetupCheckMySQL extends PhabricatorSetupCheck {
       }
     }
 
+    $innodb_pool = self::loadRawConfigValue('innodb_buffer_pool_size');
+    $innodb_bytes = phutil_parse_bytes($innodb_pool);
+    $innodb_readable = phutil_format_bytes($innodb_bytes);
+
+    // This is arbitrary and just trying to detect values that the user
+    // probably didn't set themselves. The Mac OS X default is 128MB and
+    // 40% of an AWS EC2 Micro instance is 245MB, so keeping it somewhere
+    // between those two values seems like a reasonable approximation.
+    $minimum_readable = '225MB';
+
+    $minimum_bytes = phutil_parse_bytes($minimum_readable);
+    if ($innodb_bytes < $minimum_bytes) {
+      $summary = pht(
+        'MySQL is configured with a very small innodb_buffer_pool_size, '.
+        'which may impact performance.');
+
+      $message = pht(
+        "Your MySQL instance is configured with a very small %s (%s). ".
+        "This may cause poor database performance and lock exhaustion.\n\n".
+        "There are no hard-and-fast rules to setting an appropriate value, ".
+        "but a reasonable starting point for a standard install is something ".
+        "like 40%% of the total memory on the machine. For example, if you ".
+        "have 4GB of RAM on the machine you have installed Phabricator on, ".
+        "you might set this value to %s.\n\n".
+        "You can read more about this option in the MySQL documentation to ".
+        "help you make a decision about how to configure it for your use ".
+        "case. There are no concerns specific to Phabricator which make it ".
+        "different from normal workloads with respect to this setting.\n\n".
+        "To adjust the setting, add something like this to your %s file (in ".
+        "the %s section), replacing %s with an appropriate value for your ".
+        "host and use case. Then restart %s:\n\n".
+        "%s\n".
+        "If you're satisfied with the current setting, you can safely ".
+        "ignore this setup warning.",
+        phutil_tag('tt', array(), 'innodb_buffer_pool_size'),
+        phutil_tag('tt', array(), $innodb_readable),
+        phutil_tag('tt', array(), '1600M'),
+        phutil_tag('tt', array(), 'my.cnf'),
+        phutil_tag('tt', array(), '[mysqld]'),
+        phutil_tag('tt', array(), '1600M'),
+        phutil_tag('tt', array(), 'mysqld'),
+        phutil_tag('pre', array(), 'innodb_buffer_pool_size=1600M'));
+
+      $this->newIssue('mysql.innodb_buffer_pool_size')
+        ->setName(pht('MySQL May Run Slowly'))
+        ->setSummary($summary)
+        ->setMessage($message)
+        ->addMySQLConfig('innodb_buffer_pool_size');
+    }
 
   }
 
