@@ -3,22 +3,7 @@
 final class HarbormasterSchemaSpec extends PhabricatorConfigSchemaSpec {
 
   public function buildSchemata() {
-    $this->buildLiskSchemata('HarbormasterDAO');
-
     $this->buildEdgeSchemata(new HarbormasterBuildable());
-    $this->buildCounterSchema(new HarbormasterBuildable());
-
-    $this->buildTransactionSchema(
-      new HarbormasterBuildableTransaction());
-
-    $this->buildTransactionSchema(
-      new HarbormasterBuildTransaction());
-
-    $this->buildTransactionSchema(
-      new HarbormasterBuildPlanTransaction());
-
-    $this->buildTransactionSchema(
-      new HarbormasterBuildStepTransaction());
 
     $this->buildRawSchema(
       id(new HarbormasterBuildable())->getApplicationName(),

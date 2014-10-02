@@ -45,41 +45,7 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
 
   abstract public function buildSchemata();
 
-  protected function buildLiskSchemata($base) {
-
-    $objects = id(new PhutilSymbolLoader())
-      ->setAncestorClass($base)
-      ->loadObjects();
-
-    foreach ($objects as $object) {
-      if ($object->getConfigOption(LiskDAO::CONFIG_NO_TABLE)) {
-        continue;
-      }
-      $this->buildLiskObjectSchema($object);
-    }
-  }
-
-  protected function buildTransactionSchema(
-    PhabricatorApplicationTransaction $xaction,
-    PhabricatorApplicationTransactionComment $comment = null) {
-
-    $this->buildLiskObjectSchema($xaction);
-    if ($comment) {
-      $this->buildLiskObjectSchema($comment);
-    }
-  }
-
-  protected function buildCustomFieldSchemata(
-    PhabricatorLiskDAO $storage,
-    array $indexes) {
-
-    $this->buildLiskObjectSchema($storage);
-    foreach ($indexes as $index) {
-      $this->buildLiskObjectSchema($index);
-    }
-  }
-
-  private function buildLiskObjectSchema(PhabricatorLiskDAO $object) {
+  protected function buildLiskObjectSchema(PhabricatorLiskDAO $object) {
     $this->buildRawSchema(
       $object->getApplicationName(),
       $object->getTableName(),
@@ -169,22 +135,6 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
       array(
         'PRIMARY' => array(
           'columns' => array('id'),
-          'unique' => true,
-        ),
-      ));
-  }
-
-  public function buildCounterSchema(PhabricatorLiskDAO $object) {
-    $this->buildRawSchema(
-      $object->getApplicationName(),
-      PhabricatorLiskDAO::COUNTER_TABLE_NAME,
-      array(
-        'counterName' => 'text32',
-        'counterValue' => 'id64',
-      ),
-      array(
-        'PRIMARY' => array(
-          'columns' => array('counterName'),
           'unique' => true,
         ),
       ));

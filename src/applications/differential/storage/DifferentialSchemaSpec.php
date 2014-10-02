@@ -3,20 +3,7 @@
 final class DifferentialSchemaSpec extends PhabricatorConfigSchemaSpec {
 
   public function buildSchemata() {
-    $this->buildLiskSchemata('DifferentialDAO');
-
     $this->buildEdgeSchemata(new DifferentialRevision());
-
-    $this->buildTransactionSchema(
-      new DifferentialTransaction(),
-      new DifferentialTransactionComment());
-
-    $this->buildCustomFieldSchemata(
-      new DifferentialCustomFieldStorage(),
-      array(
-        new DifferentialCustomFieldNumericIndex(),
-        new DifferentialCustomFieldStringIndex(),
-      ));
 
     $this->buildRawSchema(
       id(new DifferentialRevision())->getApplicationName(),

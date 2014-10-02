@@ -3,22 +3,7 @@
 final class PhabricatorProjectSchemaSpec extends PhabricatorConfigSchemaSpec {
 
   public function buildSchemata() {
-    $this->buildLiskSchemata('PhabricatorProjectDAO');
-
     $this->buildEdgeSchemata(new PhabricatorProject());
-
-    $this->buildTransactionSchema(
-      new PhabricatorProjectTransaction());
-
-    $this->buildCustomFieldSchemata(
-      new PhabricatorProjectCustomFieldStorage(),
-      array(
-        new PhabricatorProjectCustomFieldNumericIndex(),
-        new PhabricatorProjectCustomFieldStringIndex(),
-      ));
-
-    $this->buildTransactionSchema(
-      new PhabricatorProjectColumnTransaction());
 
     $this->buildRawSchema(
       id(new PhabricatorProject())->getApplicationName(),

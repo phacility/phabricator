@@ -4,12 +4,7 @@ final class PhabricatorRepositorySchemaSpec
   extends PhabricatorConfigSchemaSpec {
 
   public function buildSchemata() {
-    $this->buildLiskSchemata('PhabricatorRepositoryDAO');
-
     $this->buildEdgeSchemata(new PhabricatorRepository());
-
-    $this->buildTransactionSchema(
-      new PhabricatorRepositoryTransaction());
 
     $this->buildRawSchema(
       id(new PhabricatorRepository())->getApplicationName(),

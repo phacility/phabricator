@@ -3,8 +3,6 @@
 final class PhabricatorCacheSchemaSpec extends PhabricatorConfigSchemaSpec {
 
   public function buildSchemata() {
-    $this->buildLiskSchemata('PhabricatorCacheDAO');
-
     $this->buildRawSchema(
       'cache',
       id(new PhabricatorKeyValueDatabaseCache())->getTableName(),

@@ -3,12 +3,6 @@
 final class HeraldSchemaSpec extends PhabricatorConfigSchemaSpec {
 
   public function buildSchemata() {
-    $this->buildLiskSchemata('HeraldDAO');
-
-    $this->buildTransactionSchema(
-      new HeraldRuleTransaction(),
-      new HeraldRuleTransactionComment());
-
     $this->buildRawSchema(
       id(new HeraldRule())->getApplicationName(),
       HeraldRule::TABLE_RULE_APPLIED,
