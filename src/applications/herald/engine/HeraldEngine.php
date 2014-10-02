@@ -49,6 +49,8 @@ final class HeraldEngine {
     assert_instances_of($rules, 'HeraldRule');
     $t_start = microtime(true);
 
+    // Rules execute in a well-defined order: sort them into execution order.
+    $rules = msort($rules, 'getRuleExecutionOrderSortKey');
     $rules = mpull($rules, null, 'getPHID');
 
     $this->transcript = new HeraldTranscript();
