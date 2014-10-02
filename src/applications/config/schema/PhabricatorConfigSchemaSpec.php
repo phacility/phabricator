@@ -197,159 +197,138 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
     // but just interprets that to mean "VARBINARY(32)". The fragment is
     // totally disallowed in a MODIFY statement vs a CREATE TABLE statement.
 
-    switch ($data_type) {
-      case 'auto':
-        $column_type = 'int(10) unsigned';
-        $auto = true;
-        break;
-      case 'auto64':
-        $column_type = 'bigint(20) unsigned';
-        $auto = true;
-        break;
-      case 'id':
-      case 'epoch':
-      case 'uint32':
-        $column_type = 'int(10) unsigned';
-        break;
-      case 'sint32':
-        $column_type = 'int(10)';
-        break;
-      case 'id64':
-      case 'uint64':
-        $column_type = 'bigint(20) unsigned';
-        break;
-      case 'sint64':
-        $column_type = 'bigint(20)';
-        break;
-      case 'phid':
-      case 'policy';
-        $column_type = 'varbinary(64)';
-        break;
-      case 'bytes64':
-        $column_type = 'binary(64)';
-        break;
-      case 'bytes40':
-        $column_type = 'binary(40)';
-        break;
-      case 'bytes32':
-        $column_type = 'binary(32)';
-        break;
-      case 'bytes20':
-        $column_type = 'binary(20)';
-        break;
-      case 'bytes12':
-        $column_type = 'binary(12)';
-        break;
-      case 'bytes4':
-        $column_type = 'binary(4)';
-        break;
-      case 'bytes':
-        $column_type = 'longblob';
-        break;
-      case 'sort255':
-        $column_type = 'varchar(255)';
+    $is_binary = ($this->getUTF8Charset() == 'binary');
+    $matches = null;
+    if (preg_match('/^(fulltext|sort|text)(\d+)?\z/', $data_type, $matches)) {
+
+      // Limit the permitted column lengths under the theory that it would
+      // be nice to eventually reduce this to a small set of standard lengths.
+
+      static $valid_types = array(
+        'text255' => true,
+        'text160' => true,
+        'text128' => true,
+        'text80' => true,
+        'text64' => true,
+        'text40' => true,
+        'text32' => true,
+        'text20' => true,
+        'text16' => true,
+        'text12' => true,
+        'text8' => true,
+        'text4' => true,
+        'text' => true,
+        'sort255' => true,
+        'sort128' => true,
+        'sort64' => true,
+        'sort32' => true,
+        'sort' => true,
+        'fulltext' => true,
+      );
+
+      if (empty($valid_types[$data_type])) {
+        throw new Exception(pht('Unknown column type "%s"!', $data_type));
+      }
+
+      $type = $matches[1];
+      $size = idx($matches, 2);
+
+      if ($is_binary) {
+        if ($size) {
+          $column_type = 'varbinary('.$size.')';
+        } else {
+          $column_type = 'longblob';
+        }
+
+        // MySQL (at least, under MyISAM) refuses to create a FULLTEXT index
+        // on a LONGBLOB column. We'd also lose case insensitivity in search.
+        // Force this column to utf8 collation. This will truncate results with
+        // 4-byte UTF characters in their text, but work reasonably in the
+        // majority of cases.
+
+        if ($type == 'fulltext') {
+          $column_type = 'longtext';
+          $charset = 'utf8';
+          $collation = 'utf8_general_ci';
+        }
+      } else {
+        if ($size) {
+          $column_type = 'varchar('.$size.')';
+        } else {
+          $column_type = 'longtext';
+        }
         $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8SortingCollation();
-        break;
-      case 'sort128':
-        $column_type = 'varchar(128)';
-        $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8SortingCollation();
-        break;
-      case 'sort64':
-        $column_type = 'varchar(64)';
-        $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8SortingCollation();
-        break;
-      case 'sort32':
-        $column_type = 'varchar(32)';
-        $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8SortingCollation();
-        break;
-      case 'sort':
-        $column_type = 'longtext';
-        $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8SortingCollation();
-        break;
-      case 'text255':
-        $column_type = 'varchar(255)';
-        $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8BinaryCollation();
-        break;
-      case 'text160':
-        $column_type = 'varchar(160)';
-        $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8BinaryCollation();
-        break;
-      case 'text128':
-        $column_type = 'varchar(128)';
-        $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8BinaryCollation();
-        break;
-      case 'text80':
-        $column_type = 'varchar(80)';
-        $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8BinaryCollation();
-        break;
-      case 'text64':
-        $column_type = 'varchar(64)';
-        $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8BinaryCollation();
-        break;
-      case 'text40':
-        $column_type = 'varchar(40)';
-        $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8BinaryCollation();
-        break;
-      case 'text32':
-        $column_type = 'varchar(32)';
-        $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8BinaryCollation();
-        break;
-      case 'text20':
-        $column_type = 'varchar(20)';
-        $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8BinaryCollation();
-        break;
-      case 'text16':
-        $column_type = 'varchar(16)';
-        $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8BinaryCollation();
-        break;
-      case 'text12':
-        $column_type = 'varchar(12)';
-        $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8BinaryCollation();
-        break;
-      case 'text8':
-        $column_type = 'varchar(8)';
-        $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8BinaryCollation();
-        break;
-      case 'text4':
-        $column_type = 'varchar(4)';
-        $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8BinaryCollation();
-        break;
-      case 'text':
-        $column_type = 'longtext';
-        $charset = $this->getUTF8Charset();
-        $collation = $this->getUTF8BinaryCollation();
-        break;
-      case 'bool':
-        $column_type = 'tinyint(1)';
-        break;
-      case 'double':
-        $column_type = 'double';
-        break;
-      case 'date':
-        $column_type = 'date';
-        break;
-      default:
-        $column_type = pht('<unknown>');
-        $charset = pht('<unknown>');
-        $collation = pht('<unknown>');
-        break;
+        if ($type == 'sort' || $type == 'fulltext') {
+          $collation = $this->getUTF8SortingCollation();
+        } else {
+          $collation = $this->getUTF8BinaryCollation();
+        }
+      }
+    } else {
+      switch ($data_type) {
+        case 'auto':
+          $column_type = 'int(10) unsigned';
+          $auto = true;
+          break;
+        case 'auto64':
+          $column_type = 'bigint(20) unsigned';
+          $auto = true;
+          break;
+        case 'id':
+        case 'epoch':
+        case 'uint32':
+          $column_type = 'int(10) unsigned';
+          break;
+        case 'sint32':
+          $column_type = 'int(10)';
+          break;
+        case 'id64':
+        case 'uint64':
+          $column_type = 'bigint(20) unsigned';
+          break;
+        case 'sint64':
+          $column_type = 'bigint(20)';
+          break;
+        case 'phid':
+        case 'policy';
+          $column_type = 'varbinary(64)';
+          break;
+        case 'bytes64':
+          $column_type = 'binary(64)';
+          break;
+        case 'bytes40':
+          $column_type = 'binary(40)';
+          break;
+        case 'bytes32':
+          $column_type = 'binary(32)';
+          break;
+        case 'bytes20':
+          $column_type = 'binary(20)';
+          break;
+        case 'bytes12':
+          $column_type = 'binary(12)';
+          break;
+        case 'bytes4':
+          $column_type = 'binary(4)';
+          break;
+        case 'bytes':
+          $column_type = 'longblob';
+          break;
+        case 'bool':
+          $column_type = 'tinyint(1)';
+          break;
+        case 'double':
+          $column_type = 'double';
+          break;
+        case 'date':
+          $column_type = 'date';
+          break;
+        default:
+          $column_type = pht('<unknown>');
+          $charset = pht('<unknown>');
+          $collation = pht('<unknown>');
+          break;
+      }
     }
 
     return array($column_type, $charset, $collation, $nullable, $auto);

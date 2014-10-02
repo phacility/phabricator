@@ -15,7 +15,7 @@ final class PhabricatorSearchDocumentField extends PhabricatorSearchDAO {
         'phidType' => 'text4',
         'field' => 'text4',
         'auxPHID' => 'phid?',
-        'corpus' => 'sort?',
+        'corpus' => 'fulltext?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
