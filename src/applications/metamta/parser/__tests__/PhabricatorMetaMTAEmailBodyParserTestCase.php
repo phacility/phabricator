@@ -66,6 +66,7 @@ EOEMAIL;
 
   private function getEmailBodies() {
     $trailing_space = ' ';
+    $emdash = "\xE2\x80\x94";
 
     return array(
 <<<EOEMAIL
@@ -176,6 +177,11 @@ OKAY
 > -----Original Message-----
 >
 > ...
+EOMAIL
+,
+<<<EOMAIL
+OKAY {$emdash}{$trailing_space}
+Sent from Mailbox
 EOMAIL
     );
   }
