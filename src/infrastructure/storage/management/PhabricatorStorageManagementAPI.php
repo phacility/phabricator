@@ -109,10 +109,14 @@ final class PhabricatorStorageManagementAPI {
   }
 
   public function createDatabase($fragment) {
+    $info = $this->getCharsetInfo();
+    list($charset, $collate_text, $collate_sort) = $info;
+
     queryfx(
       $this->getConn(null),
-      'CREATE DATABASE IF NOT EXISTS %T COLLATE utf8_general_ci',
-      $this->getDatabaseName($fragment));
+      'CREATE DATABASE IF NOT EXISTS %T COLLATE %Q',
+      $this->getDatabaseName($fragment),
+      $collate_text);
   }
 
   public function createTable($fragment, $table, array $cols) {
