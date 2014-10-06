@@ -47,6 +47,7 @@ final class FundInitiativeBackController
           $currency = PhortuneCurrency::newFromUserInput(
             $viewer,
             $v_amount);
+          $currency->assertInRange('1.00 USD', null);
         } catch (Exception $ex) {
           $errors[] = $ex->getMessage();
           $e_amount = pht('Invalid');
@@ -72,7 +73,10 @@ final class FundInitiativeBackController
         $cart = $account->newCart($viewer);
 
         $purchase = $cart->newPurchase($viewer, $product);
-        $purchase->setBasePriceAsCurrency($currency)->save();
+        $purchase
+          ->setBasePriceAsCurrency($currency)
+          ->setMetadataValue('backerPHID', $backer->getPHID())
+          ->save();
 
         $xactions = array();
 
@@ -85,6 +89,8 @@ final class FundInitiativeBackController
           ->setContentSourceFromRequest($request);
 
         $editor->applyTransactions($backer, $xactions);
+
+        $cart->activateCart();
 
         return id(new AphrontRedirectResponse())
           ->setURI($cart->getCheckoutURI());

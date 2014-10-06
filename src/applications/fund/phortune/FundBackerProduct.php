@@ -4,13 +4,27 @@ final class FundBackerProduct extends PhortuneProductImplementation {
 
   private $initiativePHID;
   private $initiative;
+  private $viewer;
+
+  public function setViewer(PhabricatorUser $viewer) {
+    $this->viewer = $viewer;
+    return $this;
+  }
+
+  public function getViewer() {
+    return $this->viewer;
+  }
 
   public function getRef() {
     return $this->getInitiativePHID();
   }
 
   public function getName(PhortuneProduct $product) {
-    return pht('Back Initiative %s', $this->initiativePHID);
+    $initiative = $this->getInitiative();
+    return pht(
+      'Back Initiative %s %s',
+      $initiative->getMonogram(),
+      $initiative->getName());
   }
 
   public function getPriceAsCurrency(PhortuneProduct $product) {
@@ -48,6 +62,7 @@ final class FundBackerProduct extends PhortuneProductImplementation {
     $objects = array();
     foreach ($refs as $ref) {
       $object = id(new FundBackerProduct())
+        ->setViewer($viewer)
         ->setInitiativePHID($ref);
 
       $initiative = idx($initiatives, $ref);
@@ -59,6 +74,45 @@ final class FundBackerProduct extends PhortuneProductImplementation {
     }
 
     return $objects;
+  }
+
+  public function didPurchaseProduct(
+    PhortuneProduct $product,
+    PhortunePurchase $purchase) {
+    $viewer = $this->getViewer();
+
+    $backer = id(new FundBackerQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($purchase->getMetadataValue('backerPHID')))
+      ->executeOne();
+    if (!$backer) {
+      throw new Exception(pht('Unable to load FundBacker!'));
+    }
+
+    $xactions = array();
+    $xactions[] = id(new FundBackerTransaction())
+      ->setTransactionType(FundBackerTransaction::TYPE_STATUS)
+      ->setNewValue(FundBacker::STATUS_PURCHASED);
+
+    $editor = id(new FundBackerEditor())
+      ->setActor($viewer)
+      ->setContentSource($this->getContentSource());
+
+    $editor->applyTransactions($backer, $xactions);
+
+
+    $xactions = array();
+    $xactions[] = id(new FundInitiativeTransaction())
+      ->setTransactionType(FundInitiativeTransaction::TYPE_BACKER)
+      ->setNewValue($backer->getPHID());
+
+    $editor = id(new FundInitiativeEditor())
+      ->setActor($viewer)
+      ->setContentSource($this->getContentSource());
+
+    $editor->applyTransactions($this->getInitiative(), $xactions);
+
+    return;
   }
 
 }

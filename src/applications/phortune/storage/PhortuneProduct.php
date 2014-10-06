@@ -70,6 +70,14 @@ final class PhortuneProduct extends PhortuneDAO
     return $this->getImplementation()->getName($this);
   }
 
+  public function getPurchaseName(PhortunePurchase $purchase) {
+    return $this->getImplementation()->getPurchaseName($this, $purchase);
+  }
+
+  public function didPurchaseProduct(PhortunePurchase $purchase) {
+    return $this->getImplementation()->didPurchaseProduct($this, $purchase);
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

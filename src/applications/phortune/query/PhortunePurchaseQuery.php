@@ -54,6 +54,23 @@ final class PhortunePurchaseQuery
       $purchase->attachCart($cart);
     }
 
+    $products = id(new PhortuneProductQuery())
+      ->setViewer($this->getViewer())
+      ->setParentQuery($this)
+      ->withPHIDs(mpull($purchases, 'getProductPHID'))
+      ->execute();
+    $products = mpull($products, null, 'getPHID');
+
+    foreach ($purchases as $key => $purchase) {
+      $product = idx($products, $purchase->getProductPHID());
+      if (!$product) {
+        unset($purchases[$key]);
+        continue;
+      }
+      $purchase->attachProduct($product);
+    }
+
+
     return $purchases;
   }
 

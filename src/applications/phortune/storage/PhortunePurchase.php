@@ -1,7 +1,7 @@
 <?php
 
 /**
- * A purchase represents a user buying something or a subscription to a plan.
+ * A purchase represents a user buying something.
  */
 final class PhortunePurchase extends PhortuneDAO
   implements PhabricatorPolicyInterface {
@@ -23,6 +23,7 @@ final class PhortunePurchase extends PhortuneDAO
   protected $metadata = array();
 
   private $cart = self::ATTACHABLE;
+  private $product = self::ATTACHABLE;
 
   public static function initializeNewPurchase(
     PhabricatorUser $actor,
@@ -72,12 +73,30 @@ final class PhortunePurchase extends PhortuneDAO
     return $this->assertAttached($this->cart);
   }
 
+  public function attachProduct(PhortuneProduct $product) {
+    $this->product = $product;
+    return $this;
+  }
+
+  public function getProduct() {
+    return $this->assertAttached($this->product);
+  }
+
   public function getFullDisplayName() {
-    return pht('Goods and/or Services');
+    return $this->getProduct()->getPurchaseName($this);
   }
 
   public function getTotalPriceAsCurrency() {
     return $this->getBasePriceAsCurrency();
+  }
+
+  public function getMetadataValue($key, $default = null) {
+    return idx($this->metadata, $key, $default);
+  }
+
+  public function setMetadataValue($key, $value) {
+    $this->metadata[$key] = $value;
+    return $this;
   }
 
 

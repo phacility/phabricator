@@ -14,6 +14,7 @@ final class PhabricatorContentSource {
   const SOURCE_LEGACY   = 'legacy';
   const SOURCE_DAEMON   = 'daemon';
   const SOURCE_LIPSUM   = 'lipsum';
+  const SOURCE_PHORTUNE = 'phortune';
 
   private $source;
   private $params = array();
@@ -77,6 +78,7 @@ final class PhabricatorContentSource {
       self::SOURCE_DAEMON   => pht('Daemons'),
       self::SOURCE_LIPSUM   => pht('Lipsum'),
       self::SOURCE_UNKNOWN  => pht('Old World'),
+      self::SOURCE_PHORTUNE => pht('Phortune'),
     );
   }
 

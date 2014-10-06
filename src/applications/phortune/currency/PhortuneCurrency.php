@@ -125,6 +125,54 @@ final class PhortuneCurrency extends Phobject {
     throw new Exception("Invalid currency format ('{$string}').");
   }
 
+  /**
+   * Assert that a currency value lies within a range.
+   *
+   * Throws if the value is not between the minimum and maximum, inclusive.
+   *
+   * In particular, currency values can be negative (to represent a debt or
+   * credit), so checking against zero may be useful to make sure a value
+   * has the expected sign.
+   *
+   * @param string|null Currency string, or null to skip check.
+   * @param string|null Currency string, or null to skip check.
+   * @return this
+   */
+  public function assertInRange($minimum, $maximum) {
+    if ($minimum !== null && $maximum !== null) {
+      $min = PhortuneCurrency::newFromString($minimum);
+      $max = PhortuneCurrency::newFromString($maximum);
+      if ($min->value > $max->value) {
+        throw new Exception(
+          pht(
+            'Range (%s - %s) is not valid!',
+            $min->formatForDisplay(),
+            $max->formatForDisplay()));
+      }
+    }
+
+    if ($minimum !== null) {
+      $min = PhortuneCurrency::newFromString($minimum);
+      if ($min->value > $this->value) {
+        throw new Exception(
+          pht(
+            'Minimum allowed amount is %s.',
+            $min->formatForDisplay()));
+      }
+    }
+
+    if ($maximum !== null) {
+      $max = PhortuneCurrency::newFromString($maximum);
+      if ($max->value < $this->value) {
+        throw new Exception(
+          pht(
+            'Maximum allowed amount is %s.',
+            $max->formatForDisplay()));
+      }
+    }
+
+    return $this;
+  }
 
 
 }

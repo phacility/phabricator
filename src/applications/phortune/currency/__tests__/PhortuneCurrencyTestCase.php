@@ -86,4 +86,60 @@ final class PhortuneCurrencyTestCase extends PhabricatorTestCase {
     }
   }
 
+  public function testCurrencyRanges() {
+    $value = PhortuneCurrency::newFromString('3.00 USD');
+
+    $value->assertInRange('2.00 USD', '4.00 USD');
+    $value->assertInRange('2.00 USD', null);
+    $value->assertInRange(null, '4.00 USD');
+    $value->assertInRange(null, null);
+
+    $caught = null;
+    try {
+      $value->assertInRange('4.00 USD', null);
+    } catch (Exception $ex) {
+      $caught = $ex;
+    }
+    $this->assertTrue($caught instanceof Exception);
+
+    $caught = null;
+    try {
+      $value->assertInRange(null, '2.00 USD');
+    } catch (Exception $ex) {
+      $caught = $ex;
+    }
+    $this->assertTrue($caught instanceof Exception);
+
+    $caught = null;
+    try {
+      // Minimum and maximum are reversed here.
+      $value->assertInRange('4.00 USD', '2.00 USD');
+    } catch (Exception $ex) {
+      $caught = $ex;
+    }
+    $this->assertTrue($caught instanceof Exception);
+
+    $credit = PhortuneCurrency::newFromString('-3.00 USD');
+    $credit->assertInRange('-4.00 USD', '-2.00 USD');
+    $credit->assertInRange('-4.00 USD', null);
+    $credit->assertInRange(null, '-2.00 USD');
+    $credit->assertInRange(null, null);
+
+    $caught = null;
+    try {
+      $credit->assertInRange('-2.00 USD', null);
+    } catch (Exception $ex) {
+      $caught = $ex;
+    }
+    $this->assertTrue($caught instanceof Exception);
+
+    $caught = null;
+    try {
+      $credit->assertInRange(null, '-4.00 USD');
+    } catch (Exception $ex) {
+      $caught = $ex;
+    }
+    $this->assertTrue($caught instanceof Exception);
+  }
+
 }

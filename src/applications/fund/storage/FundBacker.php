@@ -15,6 +15,7 @@ final class FundBacker extends FundDAO
 
   const STATUS_NEW = 'new';
   const STATUS_IN_CART = 'in-cart';
+  const STATUS_PURCHASED = 'purchased';
 
   public static function initializeNewBacker(PhabricatorUser $actor) {
     return id(new FundBacker())

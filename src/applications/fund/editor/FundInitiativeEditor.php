@@ -17,6 +17,7 @@ final class FundInitiativeEditor
     $types[] = FundInitiativeTransaction::TYPE_NAME;
     $types[] = FundInitiativeTransaction::TYPE_DESCRIPTION;
     $types[] = FundInitiativeTransaction::TYPE_STATUS;
+    $types[] = FundInitiativeTransaction::TYPE_BACKER;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
@@ -33,6 +34,8 @@ final class FundInitiativeEditor
         return $object->getDescription();
       case FundInitiativeTransaction::TYPE_STATUS:
         return $object->getStatus();
+      case FundInitiativeTransaction::TYPE_BACKER:
+        return null;
     }
 
     return parent::getCustomTransactionOldValue($object, $xaction);
@@ -46,6 +49,7 @@ final class FundInitiativeEditor
       case FundInitiativeTransaction::TYPE_NAME:
       case FundInitiativeTransaction::TYPE_DESCRIPTION:
       case FundInitiativeTransaction::TYPE_STATUS:
+      case FundInitiativeTransaction::TYPE_BACKER:
         return $xaction->getNewValue();
     }
 
@@ -66,6 +70,9 @@ final class FundInitiativeEditor
       case FundInitiativeTransaction::TYPE_STATUS:
         $object->setStatus($xaction->getNewValue());
         return;
+      case FundInitiativeTransaction::TYPE_BACKER:
+        // TODO: Calculate total funding / backers / etc.
+        return;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
       case PhabricatorTransactions::TYPE_EDGE:
         return;
@@ -82,6 +89,9 @@ final class FundInitiativeEditor
       case FundInitiativeTransaction::TYPE_NAME:
       case FundInitiativeTransaction::TYPE_DESCRIPTION:
       case FundInitiativeTransaction::TYPE_STATUS:
+      case FundInitiativeTransaction::TYPE_BACKER:
+        // TODO: Maybe we should apply the backer transaction from here?
+        return;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
       case PhabricatorTransactions::TYPE_EDGE:
         return;

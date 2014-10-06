@@ -6,6 +6,7 @@ final class FundInitiativeTransaction
   const TYPE_NAME = 'fund:name';
   const TYPE_DESCRIPTION = 'fund:description';
   const TYPE_STATUS = 'fund:status';
+  const TYPE_BACKER = 'fund:backer';
 
   public function getApplicationName() {
     return 'fund';
@@ -57,6 +58,10 @@ final class FundInitiativeTransaction
               $this->renderHandleLink($author_phid));
         }
         break;
+      case FundInitiativeTransaction::TYPE_BACKER:
+        return pht(
+          '%s backed this initiative.',
+          $this->renderHandleLink($author_phid));
     }
 
     return parent::getTitle();
@@ -104,6 +109,11 @@ final class FundInitiativeTransaction
               $this->renderHandleLink($object_phid));
         }
         break;
+      case FundInitiativeTransaction::TYPE_BACKER:
+        return pht(
+          '%s backed %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid));
     }
 
     return parent::getTitleForFeed($story);
