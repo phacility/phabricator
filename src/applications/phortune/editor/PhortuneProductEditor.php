@@ -16,7 +16,6 @@ final class PhortuneProductEditor
     $types = parent::getTransactionTypes();
 
     $types[] = PhortuneProductTransaction::TYPE_NAME;
-    $types[] = PhortuneProductTransaction::TYPE_TYPE;
     $types[] = PhortuneProductTransaction::TYPE_PRICE;
 
     return $types;
@@ -29,10 +28,8 @@ final class PhortuneProductEditor
     switch ($xaction->getTransactionType()) {
       case PhortuneProductTransaction::TYPE_NAME:
         return $object->getProductName();
-      case PhortuneProductTransaction::TYPE_TYPE:
-        return $object->getProductType();
       case PhortuneProductTransaction::TYPE_PRICE:
-        return $object->getPriceInCents();
+        return $object->getPriceAsCurrency()->serializeForStorage();
     }
     return parent::getCustomTransactionOldValue($object, $xaction);
   }
@@ -42,7 +39,6 @@ final class PhortuneProductEditor
     PhabricatorApplicationTransaction $xaction) {
     switch ($xaction->getTransactionType()) {
       case PhortuneProductTransaction::TYPE_NAME:
-      case PhortuneProductTransaction::TYPE_TYPE:
       case PhortuneProductTransaction::TYPE_PRICE:
         return $xaction->getNewValue();
     }
@@ -56,11 +52,9 @@ final class PhortuneProductEditor
       case PhortuneProductTransaction::TYPE_NAME:
         $object->setProductName($xaction->getNewValue());
         return;
-      case PhortuneProductTransaction::TYPE_TYPE:
-        $object->setProductType($xaction->getNewValue());
-        return;
       case PhortuneProductTransaction::TYPE_PRICE:
-        $object->setPriceInCents($xaction->getNewValue());
+        $object->setPriceAsCurrency(
+          PhortuneCurrency::newFromString($xaction->getNewValue()));
         return;
     }
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -71,7 +65,6 @@ final class PhortuneProductEditor
     PhabricatorApplicationTransaction $xaction) {
     switch ($xaction->getTransactionType()) {
       case PhortuneProductTransaction::TYPE_NAME:
-      case PhortuneProductTransaction::TYPE_TYPE:
       case PhortuneProductTransaction::TYPE_PRICE:
         return;
     }

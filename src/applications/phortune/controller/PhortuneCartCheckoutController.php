@@ -59,7 +59,7 @@ final class PhortuneCartCheckoutController
           ->setAuthorPHID($viewer->getPHID())
           ->setPaymentProviderKey($provider->getProviderKey())
           ->setPaymentMethodPHID($method->getPHID())
-          ->setAmountInCents($cart->getTotalPriceInCents())
+          ->setAmountAsCurrency($cart->getTotalPriceAsCurrency())
           ->setStatus(PhortuneCharge::STATUS_PENDING);
 
         $charge->openTransaction();

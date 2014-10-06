@@ -49,10 +49,9 @@ final class PhortuneProductPurchaseController
         $purchase->setAccountPHID($account->getPHID());
         $purchase->setAuthorPHID($user->getPHID());
         $purchase->setCartPHID($cart->getPHID());
-        $purchase->setBasePriceInCents($product->getPriceInCents());
+        $purchase->setBasePriceAsCurrency($product->getPriceAsCurrency());
         $purchase->setQuantity(1);
-        $purchase->setTotalPriceInCents(
-          $purchase->getBasePriceInCents() * $purchase->getQuantity());
+
         $purchase->setStatus(PhortunePurchase::STATUS_PENDING);
         $purchase->save();
 

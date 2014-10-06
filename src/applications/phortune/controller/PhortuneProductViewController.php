@@ -60,11 +60,9 @@ final class PhortuneProductViewController extends PhortuneController {
     $properties = id(new PHUIPropertyListView())
       ->setUser($user)
       ->setActionList($actions)
-      ->addProperty(pht('Type'), $product->getTypeName())
       ->addProperty(
         pht('Price'),
-        PhortuneCurrency::newFromUSDCents($product->getPriceInCents())
-          ->formatForDisplay());
+        $product->getPriceAsCurrency()->formatForDisplay());
 
     $xactions = id(new PhortuneProductTransactionQuery())
       ->setViewer($user)

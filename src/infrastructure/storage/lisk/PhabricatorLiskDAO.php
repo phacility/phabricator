@@ -8,6 +8,7 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
   private static $namespaceStack = array();
 
   const ATTACHABLE = '<attachable>';
+  const CONFIG_APPLICATION_SERIALIZERS = 'phabricator/serializers';
 
 /* -(  Configuring Storage  )------------------------------------------------ */
 
@@ -209,14 +210,35 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
     return phutil_utf8ize($string);
   }
 
-  public function delete() {
+  protected function willReadData(array &$data) {
+    parent::willReadData($data);
 
-    // TODO: We should make some reasonable effort to destroy related
-    // infrastructure objects here, like edges, transactions, custom field
-    // storage, flags, Phrequent tracking, tokens, etc. This doesn't need to
-    // be exhaustive, but we can get a lot of it pretty easily.
+    static $custom;
+    if ($custom === null) {
+      $custom = $this->getConfigOption(self::CONFIG_APPLICATION_SERIALIZERS);
+    }
 
-    return parent::delete();
+    if ($custom) {
+      foreach ($custom as $key => $serializer) {
+        $data[$key] = $serializer->willReadValue($data[$key]);
+      }
+    }
   }
+
+  protected function willWriteData(array &$data) {
+    static $custom;
+    if ($custom === null) {
+      $custom = $this->getConfigOption(self::CONFIG_APPLICATION_SERIALIZERS);
+    }
+
+    if ($custom) {
+      foreach ($custom as $key => $serializer) {
+        $data[$key] = $serializer->willWriteValue($data[$key]);
+      }
+    }
+
+    parent::willWriteData($data);
+  }
+
 
 }

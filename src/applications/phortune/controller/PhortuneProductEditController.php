@@ -25,19 +25,16 @@ final class PhortuneProductEditController extends PhabricatorController {
       $cancel_uri = $this->getApplicationURI(
         'product/view/'.$this->productID.'/');
     } else {
-      $product = new PhortuneProduct();
+      $product = PhortuneProduct::initializeNewProduct();
       $is_create = true;
       $cancel_uri = $this->getApplicationURI('product/');
     }
 
     $v_name = $product->getProductName();
-    $v_type = $product->getProductType();
-    $v_price = (int)$product->getPriceInCents();
-    $display_price = PhortuneCurrency::newFromUSDCents($v_price)
-      ->formatForDisplay();
+    $v_price = $product->getPriceAsCurrency()->formatForDisplay();
+    $display_price = $v_price;
 
     $e_name = true;
-    $e_type = null;
     $e_price = true;
     $errors = array();
 
@@ -50,21 +47,10 @@ final class PhortuneProductEditController extends PhabricatorController {
         $e_name = null;
       }
 
-      if ($is_create) {
-        $v_type = $request->getStr('type');
-        $type_map = PhortuneProduct::getTypeMap();
-        if (empty($type_map[$v_type])) {
-          $e_type = pht('Invalid');
-          $errors[] = pht('Product type is invalid.');
-        } else {
-          $e_type = null;
-        }
-      }
-
       $display_price = $request->getStr('price');
       try {
         $v_price = PhortuneCurrency::newFromUserInput($user, $display_price)
-          ->getValue();
+          ->serializeForStorage();
         $e_price = null;
       } catch (Exception $ex) {
         $errors[] = pht('Price should be formatted as: $1.23');
@@ -77,10 +63,6 @@ final class PhortuneProductEditController extends PhabricatorController {
         $xactions[] = id(new PhortuneProductTransaction())
           ->setTransactionType(PhortuneProductTransaction::TYPE_NAME)
           ->setNewValue($v_name);
-
-        $xactions[] = id(new PhortuneProductTransaction())
-          ->setTransactionType(PhortuneProductTransaction::TYPE_TYPE)
-          ->setNewValue($v_type);
 
         $xactions[] = id(new PhortuneProductTransaction())
           ->setTransactionType(PhortuneProductTransaction::TYPE_PRICE)
@@ -111,14 +93,6 @@ final class PhortuneProductEditController extends PhabricatorController {
           ->setName('name')
           ->setValue($v_name)
           ->setError($e_name))
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setLabel(pht('Type'))
-          ->setName('type')
-          ->setValue($v_type)
-          ->setError($e_type)
-          ->setOptions(PhortuneProduct::getTypeMap())
-          ->setDisabled(!$is_create))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Price'))

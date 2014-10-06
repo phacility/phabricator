@@ -93,8 +93,7 @@ final class PhortunePaypalPaymentProvider extends PhortunePaymentProvider {
             'cartID' => $cart->getID(),
           ));
 
-        $total_in_cents = $cart->getTotalPriceInCents();
-        $price = PhortuneCurrency::newFromUSDCents($total_in_cents);
+        $price = $cart->getTotalPriceAsCurrency();
 
         $result = $this
           ->newPaypalAPICall()

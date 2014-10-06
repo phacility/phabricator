@@ -10,7 +10,6 @@ final class PhortuneAccount extends PhortuneDAO
   implements PhabricatorPolicyInterface {
 
   protected $name;
-  protected $balanceInCents = 0;
 
   private $memberPHIDs = self::ATTACHABLE;
 
@@ -19,7 +18,6 @@ final class PhortuneAccount extends PhortuneDAO
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'text255',
-        'balanceInCents' => 'sint64',
       ),
     ) + parent::getConfiguration();
   }

@@ -17,9 +17,8 @@ final class PhortunePurchase extends PhortuneDAO
   protected $accountPHID;
   protected $authorPHID;
   protected $cartPHID;
-  protected $basePriceInCents;
+  protected $basePriceAsCurrency;
   protected $quantity;
-  protected $totalPriceInCents;
   protected $status;
   protected $metadata;
 
@@ -31,11 +30,13 @@ final class PhortunePurchase extends PhortuneDAO
       self::CONFIG_SERIALIZATION => array(
         'metadata' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_APPLICATION_SERIALIZERS => array(
+        'basePriceAsCurrency' => new PhortuneCurrencySerializer(),
+      ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'cartPHID' => 'phid?',
-        'basePriceInCents' => 'sint32',
+        'basePriceAsCurrency' => 'text64',
         'quantity' => 'uint32',
-        'totalPriceInCents' => 'sint32',
         'status' => 'text32',
       ),
       self::CONFIG_KEY_SCHEMA => array(
@@ -60,14 +61,12 @@ final class PhortunePurchase extends PhortuneDAO
     return $this->assertAttached($this->cart);
   }
 
-  protected function didReadData() {
-    // The payment processing code is strict about types.
-    $this->basePriceInCents = (int)$this->basePriceInCents;
-    $this->totalPriceInCents = (int)$this->totalPriceInCents;
-  }
-
   public function getFullDisplayName() {
     return pht('Goods and/or Services');
+  }
+
+  public function getTotalPriceAsCurrency() {
+    return $this->getBasePriceAsCurrency();
   }
 
 

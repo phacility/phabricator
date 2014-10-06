@@ -4,7 +4,6 @@ final class PhortuneProductTransaction
   extends PhabricatorApplicationTransaction {
 
   const TYPE_NAME   = 'product:name';
-  const TYPE_TYPE   = 'product:type';
   const TYPE_PRICE  = 'product:price';
 
   public function getApplicationName() {
@@ -44,31 +43,16 @@ final class PhortuneProductTransaction
           return pht(
             '%s set product price to %s.',
             $this->renderHandleLink($author_phid),
-            PhortuneCurrency::newFromUSDCents($new)
+            PhortuneCurrency::newFromString($new)
               ->formatForDisplay());
         } else {
           return pht(
             '%s changed product price from %s to %s.',
             $this->renderHandleLink($author_phid),
-            PhortuneCurrency::newFromUSDCents($old)
+            PhortuneCurrency::newFromString($old)
               ->formatForDisplay(),
-            PhortuneCurrency::newFromUSDCents($new)
+            PhortuneCurrency::newFromString($new)
               ->formatForDisplay());
-        }
-        break;
-      case self::TYPE_TYPE:
-        $map = PhortuneProduct::getTypeMap();
-        if ($old === null) {
-          return pht(
-            '%s set product type to "%s".',
-            $this->renderHandleLink($author_phid),
-            $map[$new]);
-        } else {
-          return pht(
-            '%s changed product type from "%s" to "%s".',
-            $this->renderHandleLink($author_phid),
-            $map[$old],
-            $map[$new]);
         }
         break;
     }

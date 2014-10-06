@@ -73,8 +73,7 @@ abstract class PhortuneController extends PhabricatorController {
         $cart_href,
         $charge->getPaymentProviderKey(),
         $charge->getPaymentMethodPHID(),
-        PhortuneCurrency::newFromUSDCents($charge->getAmountInCents())
-          ->formatForDisplay(),
+        $charge->getAmountAsCurrency()->formatForDisplay(),
         $charge->getStatus(),
         phabricator_datetime($charge->getDateCreated(), $viewer),
       );

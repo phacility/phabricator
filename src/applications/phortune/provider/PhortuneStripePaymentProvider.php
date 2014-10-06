@@ -47,10 +47,12 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
     $root = dirname(phutil_get_library_root('phabricator'));
     require_once $root.'/externals/stripe-php/lib/Stripe.php';
 
+    $price = $charge->getAmountAsCurrency();
+
     $secret_key = $this->getSecretKey();
     $params = array(
-      'amount'      => $charge->getAmountInCents(),
-      'currency'    => 'usd',
+      'amount'      => $price->getValue(),
+      'currency'    => $price->getCurrency(),
       'customer'    => $method->getMetadataValue('stripe.customerID'),
       'description' => $charge->getPHID(),
       'capture'     => true,

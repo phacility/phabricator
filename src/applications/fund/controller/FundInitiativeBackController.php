@@ -57,7 +57,7 @@ final class FundInitiativeBackController
         $backer = FundBacker::initializeNewBacker($viewer)
           ->setInitiativePHID($initiative->getPHID())
           ->attachInitiative($initiative)
-          ->setAmountInCents($currency->getValue())
+          ->setAmountAsCurrency($currency)
           ->save();
 
         // TODO: Here, we'd create a purchase and cart.

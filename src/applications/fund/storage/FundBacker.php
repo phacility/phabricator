@@ -7,7 +7,7 @@ final class FundBacker extends FundDAO
 
   protected $initiativePHID;
   protected $backerPHID;
-  protected $amountInCents;
+  protected $amountAsCurrency;
   protected $status;
   protected $properties = array();
 
@@ -28,9 +28,12 @@ final class FundBacker extends FundDAO
       self::CONFIG_SERIALIZATION => array(
         'properties' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_APPLICATION_SERIALIZERS => array(
+        'amountAsCurrency' => new PhortuneCurrencySerializer(),
+      ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'status' => 'text32',
-        'amountInCents' => 'uint32',
+        'amountAsCurrency' => 'text64',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_initiative' => array(
@@ -45,11 +48,6 @@ final class FundBacker extends FundDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(FundBackerPHIDType::TYPECONST);
-  }
-
-  protected function didReadData() {
-    // The payment processing code is strict about types.
-    $this->amountInCents = (int)$this->amountInCents;
   }
 
   public function getProperty($key, $default = null) {

@@ -128,8 +128,7 @@ final class FundBackerSearchEngine
     foreach ($backers as $backer) {
       $backer_handle = $handles[$backer->getBackerPHID()];
 
-      $currency = PhortuneCurrency::newFromUSDCents(
-        $backer->getAmountInCents());
+      $currency = $backer->getAmount();
 
       $header = pht(
         '%s for %s',
