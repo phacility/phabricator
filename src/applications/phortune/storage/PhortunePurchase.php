@@ -60,8 +60,7 @@ final class PhortunePurchase extends PhortuneDAO
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_PRCH);
+    return PhabricatorPHID::generateNewPHID(PhortuneChargePHIDType::TYPECONST);
   }
 
   public function attachCart(PhortuneCart $cart) {

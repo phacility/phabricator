@@ -48,7 +48,7 @@ final class PhortunePaymentMethod extends PhortuneDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_PAYM);
+      PhortunePaymentMethodPHIDType::TYPECONST);
   }
 
   public function attachAccount(PhortuneAccount $account) {

@@ -58,7 +58,7 @@ final class PhortuneCharge extends PhortuneDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_CHRG);
+      PhortuneChargePHIDType::TYPECONST);
   }
 
   public function getMetadataValue($key, $default = null) {
