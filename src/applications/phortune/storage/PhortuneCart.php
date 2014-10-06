@@ -52,17 +52,67 @@ final class PhortuneCart extends PhortuneDAO
     return $this;
   }
 
-  public function didApplyCharge(PhortuneCharge $charge) {
-    if ($this->getStatus() !== self::STATUS_PURCHASING) {
-      throw new Exception(
-        pht(
-          'Cart has wrong status ("%s") to call didApplyCharge(), expected '.
-          '"%s".',
-          $this->getStatus(),
-          self::STATUS_PURCHASING));
+  public function willApplyCharge(
+    PhabricatorUser $actor,
+    PhortunePaymentProvider $provider,
+    PhortunePaymentMethod $method = null) {
+
+    $account = $this->getAccount();
+
+    $charge = PhortuneCharge::initializeNewCharge()
+      ->setAccountPHID($account->getPHID())
+      ->setCartPHID($this->getPHID())
+      ->setAuthorPHID($actor->getPHID())
+      ->setPaymentProviderKey($provider->getProviderKey())
+      ->setAmountAsCurrency($this->getTotalPriceAsCurrency());
+
+    if ($method) {
+      $charge->setPaymentMethodPHID($method->getPHID());
     }
 
-    $this->setStatus(self::STATUS_CHARGED)->save();
+    $this->openTransaction();
+      $this->beginReadLocking();
+
+      $copy = clone $this;
+      $copy->reload();
+
+      if ($copy->getStatus() !== self::STATUS_READY) {
+        throw new Exception(
+          pht(
+            'Cart has wrong status ("%s") to call willApplyCharge(), expected '.
+            '"%s".',
+            $copy->getStatus(),
+            self::STATUS_READY));
+      }
+
+      $charge->save();
+      $this->setStatus(PhortuneCart::STATUS_PURCHASING)->save();
+    $this->saveTransaction();
+
+    return $charge;
+  }
+
+  public function didApplyCharge(PhortuneCharge $charge) {
+    $charge->setStatus(PhortuneCharge::STATUS_CHARGED);
+
+    $this->openTransaction();
+      $this->beginReadLocking();
+
+      $copy = clone $this;
+      $copy->reload();
+
+      if ($copy->getStatus() !== self::STATUS_PURCHASING) {
+        throw new Exception(
+          pht(
+            'Cart has wrong status ("%s") to call didApplyCharge(), expected '.
+            '"%s".',
+            $copy->getStatus(),
+            self::STATUS_PURCHASING));
+      }
+
+      $charge->save();
+      $this->setStatus(self::STATUS_CHARGED)->save();
+    $this->saveTransaction();
 
     foreach ($this->purchases as $purchase) {
       $purchase->getProduct()->didPurchaseProduct($purchase);

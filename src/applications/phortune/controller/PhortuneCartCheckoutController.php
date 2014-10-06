@@ -38,6 +38,25 @@ final class PhortuneCartCheckoutController
         // This is the expected, normal state for a cart that's ready for
         // checkout.
         break;
+      case PhortuneCart::STATUS_PURCHASING:
+        // We've started the purchase workflow for this cart, but were not able
+        // to complete it. If the workflow is on an external site, this could
+        // happen because the user abandoned the workflow. Just return them to
+        // the right place so they can resume where they left off.
+        $uri = $cart->getMetadataValue('provider.checkoutURI');
+        if ($uri !== null) {
+          return id(new AphrontRedirectResponse())
+            ->setIsExternal(true)
+            ->setURI($uri);
+        }
+
+        return $this->newDialog()
+          ->setTitle(pht('Charge Failed'))
+          ->appendParagraph(
+            pht(
+              'Failed to charge this cart.'))
+          ->addCancelButton($cancel_uri);
+        break;
       case PhortuneCart::STATUS_CHARGED:
         // TODO: This is really bad (we took your money and at least partially
         // failed to fulfill your order) and should have better steps forward.
@@ -89,24 +108,8 @@ final class PhortuneCartCheckoutController
       if (!$errors) {
         $provider = $method->buildPaymentProvider();
 
-        $charge = id(new PhortuneCharge())
-          ->setAccountPHID($account->getPHID())
-          ->setCartPHID($cart->getPHID())
-          ->setAuthorPHID($viewer->getPHID())
-          ->setPaymentProviderKey($provider->getProviderKey())
-          ->setPaymentMethodPHID($method->getPHID())
-          ->setAmountAsCurrency($cart->getTotalPriceAsCurrency())
-          ->setStatus(PhortuneCharge::STATUS_PENDING);
-
-        $charge->openTransaction();
-          $charge->save();
-
-          $cart->setStatus(PhortuneCart::STATUS_PURCHASING);
-          $cart->save();
-        $charge->saveTransaction();
-
+        $charge = $cart->willApplyCharge($viewer, $provider, $method);
         $provider->applyCharge($method, $charge);
-
         $cart->didApplyCharge($charge);
 
         $done_uri = $cart->getDoneURI();

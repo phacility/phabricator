@@ -9,8 +9,6 @@
 final class PhortuneCharge extends PhortuneDAO
   implements PhabricatorPolicyInterface {
 
-  const STATUS_PENDING    = 'charge:pending';
-  const STATUS_AUTHORIZED = 'charge:authorized';
   const STATUS_CHARGING   = 'charge:charging';
   const STATUS_CHARGED    = 'charge:charged';
   const STATUS_FAILED     = 'charge:failed';
@@ -26,6 +24,11 @@ final class PhortuneCharge extends PhortuneDAO
 
   private $account = self::ATTACHABLE;
   private $cart = self::ATTACHABLE;
+
+  public static function initializeNewCharge() {
+    return id(new PhortuneCharge())
+      ->setStatus(self::STATUS_CHARGING);
+  }
 
   public function getConfiguration() {
     return array(

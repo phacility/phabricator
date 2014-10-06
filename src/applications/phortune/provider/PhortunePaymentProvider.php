@@ -204,11 +204,13 @@ abstract class PhortunePaymentProvider {
       ->setText($description)
       ->setSubtext($details);
 
+    // NOTE: We generate a local URI to make sure the form picks up CSRF tokens.
     $uri = $this->getControllerURI(
       'checkout',
       array(
         'cartID' => $cart->getID(),
-      ));
+      ),
+      $local = true);
 
     return phabricator_form(
       $user,
@@ -225,7 +227,8 @@ abstract class PhortunePaymentProvider {
 
   final public function getControllerURI(
     $action,
-    array $params = array()) {
+    array $params = array(),
+    $local = false) {
 
     $digest = PhabricatorHash::digestForIndex($this->getProviderKey());
 
@@ -235,7 +238,11 @@ abstract class PhortunePaymentProvider {
     $uri = new PhutilURI($path);
     $uri->setQueryParams($params);
 
-    return PhabricatorEnv::getURI((string)$uri);
+    if ($local) {
+      return $uri;
+    } else {
+      return PhabricatorEnv::getURI((string)$uri);
+    }
   }
 
   public function canRespondToControllerAction($action) {

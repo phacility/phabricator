@@ -91,8 +91,6 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
       return new Aphront404Response();
     }
 
-    $cart_uri = '/phortune/cart/'.$cart->getID().'/';
-
     $root = dirname(phutil_get_library_root('phabricator'));
     require_once $root.'/externals/wepay/wepay.php';
 
@@ -101,6 +99,29 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
       $this->getWePayClientSecret());
 
     $wepay = new WePay($this->getWePayAccessToken());
+
+    $charge = id(new PhortuneChargeQuery())
+      ->setViewer($viewer)
+      ->withCartPHIDs(array($cart->getPHID()))
+      ->withStatuses(
+        array(
+          PhortuneCharge::STATUS_CHARGING,
+        ))
+      ->executeOne();
+
+    switch ($controller->getAction()) {
+      case 'checkout':
+        if ($charge) {
+          throw new Exception(pht('Cart is already charging!'));
+        }
+        break;
+      case 'charge':
+      case 'cancel':
+        if (!$charge) {
+          throw new Exception(pht('Cart is not charging yet!'));
+        }
+        break;
+    }
 
     switch ($controller->getAction()) {
       case 'checkout':
@@ -142,10 +163,13 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
           'funding_sources'   => 'bank,cc'
         );
 
+        $cart->willApplyCharge($viewer, $this);
+
         $result = $wepay->request('checkout/create', $params);
 
-        // TODO: We must store "$result->checkout_id" on the Cart since the
-        // user might not end up back here. Really this needs a bunch of junk.
+        $cart->setMetadataValue('provider.checkoutURI', $result->checkout_uri);
+        $cart->setMetadataValue('wepay.checkoutID', $result->checkout_id);
+        $cart->save();
 
         $uri = new PhutilURI($result->checkout_uri);
         return id(new AphrontRedirectResponse())
@@ -175,38 +199,22 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
                 $result->state));
         }
 
-        $currency = PhortuneCurrency::newFromString($checkout->gross, 'USD');
-
         $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-
-          $charge = id(new PhortuneCharge())
-            ->setAmountAsCurrency($currency)
-            ->setAccountPHID($cart->getAccount()->getPHID())
-            ->setAuthorPHID($viewer->getPHID())
-            ->setPaymentProviderKey($this->getProviderKey())
-            ->setCartPHID($cart->getPHID())
-            ->setStatus(PhortuneCharge::STATUS_CHARGING)
-            ->save();
-
-          $cart->openTransaction();
-            $charge->setStatus(PhortuneCharge::STATUS_CHARGED);
-            $charge->save();
-
-            $cart->setStatus(PhortuneCart::STATUS_PURCHASED);
-            $cart->save();
-          $cart->saveTransaction();
-
+          $cart->didApplyCharge($charge);
         unset($unguarded);
 
         return id(new AphrontRedirectResponse())
-          ->setIsExternal(true)
-          ->setURI($cart_uri);
+          ->setURI($cart->getDoneURI());
       case 'cancel':
-        var_dump($_REQUEST);
+        // TODO: I don't know how it's possible to cancel out of a WePay
+        // charge workflow.
+        throw new Exception(
+          pht('How did you get here? WePay has no cancel flow in its UI...?'));
         break;
     }
 
-    throw new Exception("The rest of this isn't implemented yet.");
+    throw new Exception(
+      pht('Unsupported action "%s".', $controller->getAction()));
   }
 
 
