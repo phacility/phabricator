@@ -163,13 +163,14 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
           'funding_sources'   => 'bank,cc'
         );
 
-        $cart->willApplyCharge($viewer, $this);
-
+        $charge = $cart->willApplyCharge($viewer, $this);
         $result = $wepay->request('checkout/create', $params);
 
         $cart->setMetadataValue('provider.checkoutURI', $result->checkout_uri);
-        $cart->setMetadataValue('wepay.checkoutID', $result->checkout_id);
         $cart->save();
+
+        $charge->setMetadataValue('wepay.checkoutID', $result->checkout_id);
+        $charge->save();
 
         $uri = new PhutilURI($result->checkout_uri);
         return id(new AphrontRedirectResponse())

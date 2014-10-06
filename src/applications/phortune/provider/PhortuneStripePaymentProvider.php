@@ -39,6 +39,7 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
 
   /**
    * @phutil-external-symbol class Stripe_Charge
+   * @phutil-external-symbol class Stripe_CardError
    */
   protected function executeCharge(
     PhortunePaymentMethod $method,
@@ -58,13 +59,20 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
       'capture'     => true,
     );
 
-    $stripe_charge = Stripe_Charge::create($params, $secret_key);
+    try {
+      $stripe_charge = Stripe_Charge::create($params, $secret_key);
+    } catch (Stripe_CardError $ex) {
+      // TODO: Fail charge explicitly.
+      throw $ex;
+    }
+
     $id = $stripe_charge->id;
     if (!$id) {
       throw new Exception('Stripe charge call did not return an ID!');
     }
 
     $charge->setMetadataValue('stripe.chargeID', $id);
+    $charge->save();
   }
 
   private function getPublishableKey() {
