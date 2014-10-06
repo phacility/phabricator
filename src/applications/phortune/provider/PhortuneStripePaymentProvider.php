@@ -52,7 +52,7 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
 
     $secret_key = $this->getSecretKey();
     $params = array(
-      'amount'      => $price->getValue(),
+      'amount'      => $price->getValueInUSDCents(),
       'currency'    => $price->getCurrency(),
       'customer'    => $method->getMetadataValue('stripe.customerID'),
       'description' => $charge->getPHID(),

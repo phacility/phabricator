@@ -40,7 +40,43 @@ final class PhortuneBalancedPaymentProvider extends PhortunePaymentProvider {
   protected function executeCharge(
     PhortunePaymentMethod $method,
     PhortuneCharge $charge) {
-    throw new PhortuneNotImplementedException($this);
+
+    $root = dirname(phutil_get_library_root('phabricator'));
+    require_once $root.'/externals/httpful/bootstrap.php';
+    require_once $root.'/externals/restful/bootstrap.php';
+    require_once $root.'/externals/balanced-php/bootstrap.php';
+
+    $price = $charge->getAmountAsCurrency();
+
+    // Build the string which will appear on the credit card statement.
+    $charge_as = new PhutilURI(PhabricatorEnv::getProductionURI('/'));
+    $charge_as = $charge_as->getDomain();
+    $charge_as = id(new PhutilUTF8StringTruncator())
+      ->setMaximumBytes(22)
+      ->setTerminator('')
+      ->truncateString($charge_as);
+
+    try {
+      Balanced\Settings::$api_key = $this->getSecretKey();
+      $card = Balanced\Card::get($method->getMetadataValue('balanced.cardURI'));
+      $debit = $card->debit($price->getValueInUSDCents(), $charge_as);
+    } catch (RESTful\Exceptions\HTTPError $error) {
+      // NOTE: This exception doesn't print anything meaningful if it escapes
+      // to top level. Replace it with something slightly readable.
+      throw new Exception($error->response->body->description);
+    }
+
+    $expect_status = 'succeeded';
+    if ($debit->status !== $expect_status) {
+      throw new Exception(
+        pht(
+          'Debit failed, expected "%s", got "%s".',
+          $expect_status,
+          $debit->status));
+    }
+
+    $charge->setMetadataValue('balanced.debitURI', $debit->uri);
+    $charge->save();
   }
 
   private function getMarketplaceURI() {

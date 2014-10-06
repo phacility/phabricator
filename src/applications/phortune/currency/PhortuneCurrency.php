@@ -121,6 +121,13 @@ final class PhortuneCurrency extends Phobject {
     return $this->currency;
   }
 
+  public function getValueInUSDCents() {
+    if ($this->currency !== 'USD') {
+      throw new Exception(pht('Unexpected currency!'));
+    }
+    return $this->value;
+  }
+
   private static function throwFormatException($string) {
     throw new Exception("Invalid currency format ('{$string}').");
   }
