@@ -15,6 +15,38 @@ final class PhortuneCart extends PhortuneDAO
   private $account = self::ATTACHABLE;
   private $purchases = self::ATTACHABLE;
 
+  public static function initializeNewCart(
+    PhabricatorUser $actor,
+    PhortuneAccount $account) {
+    $cart = id(new PhortuneCart())
+      ->setAuthorPHID($actor->getPHID())
+      ->setStatus(self::STATUS_READY)
+      ->setAccountPHID($account->getPHID());
+
+    $cart->account = $account;
+    $cart->purchases = array();
+
+    return $cart;
+  }
+
+  public function newPurchase(
+    PhabricatorUser $actor,
+    PhortuneProduct $product) {
+
+    $purchase = PhortunePurchase::initializeNewPurchase($actor, $product)
+      ->setAccountPHID($this->getAccount()->getPHID())
+      ->setCartPHID($this->getPHID())
+      ->save();
+
+    $this->purchases[] = $purchase;
+
+    return $purchase;
+  }
+
+  public function getCheckoutURI() {
+    return '/phortune/cart/'.$this->getID().'/checkout/';
+  }
+
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,

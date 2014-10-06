@@ -60,7 +60,19 @@ final class FundInitiativeBackController
           ->setAmountAsCurrency($currency)
           ->save();
 
-        // TODO: Here, we'd create a purchase and cart.
+        $product = id(new PhortuneProductQuery())
+          ->setViewer($viewer)
+          ->withClassAndRef('FundBackerProduct', $initiative->getPHID())
+          ->executeOne();
+
+        $account = PhortuneAccountQuery::loadActiveAccountForUser(
+          $viewer,
+          PhabricatorContentSource::newFromRequest($request));
+
+        $cart = $account->newCart($viewer);
+
+        $purchase = $cart->newPurchase($viewer, $product);
+        $purchase->setBasePriceAsCurrency($currency)->save();
 
         $xactions = array();
 
@@ -74,9 +86,8 @@ final class FundInitiativeBackController
 
         $editor->applyTransactions($backer, $xactions);
 
-        // TODO: Here, we'd ship the user into Phortune.
-
-        return id(new AphrontRedirectResponse())->setURI($initiative_uri);
+        return id(new AphrontRedirectResponse())
+          ->setURI($cart->getCheckoutURI());
       }
     }
 

@@ -13,6 +13,54 @@ final class PhortuneAccount extends PhortuneDAO
 
   private $memberPHIDs = self::ATTACHABLE;
 
+  public static function initializeNewAccount(PhabricatorUser $actor) {
+    $account = id(new PhortuneAccount());
+
+    $account->memberPHIDs = array();
+
+    return $account;
+  }
+
+  public static function createNewAccount(
+    PhabricatorUser $actor,
+    PhabricatorContentSource $content_source) {
+
+    $account = PhortuneAccount::initializeNewAccount($actor);
+
+    $xactions = array();
+    $xactions[] = id(new PhortuneAccountTransaction())
+      ->setTransactionType(PhortuneAccountTransaction::TYPE_NAME)
+      ->setNewValue(pht('Account (%s)', $actor->getUserName()));
+
+    $xactions[] = id(new PhortuneAccountTransaction())
+      ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+      ->setMetadataValue(
+        'edge:type',
+        PhabricatorEdgeConfig::TYPE_ACCOUNT_HAS_MEMBER)
+      ->setNewValue(
+        array(
+          '=' => array($actor->getPHID() => $actor->getPHID()),
+        ));
+
+    $editor = id(new PhortuneAccountEditor())
+      ->setActor($actor)
+      ->setContentSource($content_source);
+
+    // We create an account for you the first time you visit Phortune.
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+
+      $editor->applyTransactions($account, $xactions);
+
+    unset($unguarded);
+
+    return $account;
+  }
+
+  public function newCart(PhabricatorUser $actor) {
+    return PhortuneCart::initializeNewCart($actor, $this)
+      ->save();
+  }
+
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,

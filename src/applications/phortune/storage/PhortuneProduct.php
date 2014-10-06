@@ -6,9 +6,13 @@
 final class PhortuneProduct extends PhortuneDAO
   implements PhabricatorPolicyInterface {
 
-  protected $productName;
-  protected $priceAsCurrency;
-  protected $metadata;
+  protected $productClassKey;
+  protected $productClass;
+  protected $productRefKey;
+  protected $productRef;
+  protected $metadata = array();
+
+  private $implementation = self::ATTACHABLE;
 
   public function getConfiguration() {
     return array(
@@ -16,15 +20,17 @@ final class PhortuneProduct extends PhortuneDAO
       self::CONFIG_SERIALIZATION => array(
         'metadata' => self::SERIALIZATION_JSON,
       ),
-      self::CONFIG_APPLICATION_SERIALIZERS => array(
-        'priceAsCurrency' => new PhortuneCurrencySerializer(),
-      ),
       self::CONFIG_COLUMN_SCHEMA => array(
-        'productName' => 'text255',
-        'status' => 'text64',
-        'priceAsCurrency' => 'text64',
-        'billingIntervalInMonths' => 'uint32?',
-        'trialPeriodInDays' => 'uint32?',
+        'productClassKey' => 'bytes12',
+        'productClass' => 'text128',
+        'productRefKey' => 'bytes12',
+        'productRef' => 'text128',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_product' => array(
+          'columns' => array('productClassKey', 'productRefKey'),
+          'unique' => true,
+        ),
       ),
     ) + parent::getConfiguration();
   }
@@ -35,8 +41,33 @@ final class PhortuneProduct extends PhortuneDAO
   }
 
   public static function initializeNewProduct() {
-    return id(new PhortuneProduct())
-      ->setPriceAsCurrency(PhortuneCurrency::newEmptyCurrency());
+    return id(new PhortuneProduct());
+  }
+
+  public function attachImplementation(PhortuneProductImplementation $impl) {
+    $this->implementation = $impl;
+  }
+
+  public function getImplementation() {
+    return $this->assertAttached($this->implementation);
+  }
+
+  public function save() {
+    $this->productClassKey = PhabricatorHash::digestForIndex(
+      $this->productClass);
+
+    $this->productRefKey = PhabricatorHash::digestForIndex(
+      $this->productRef);
+
+    return parent::save();
+  }
+
+  public function getPriceAsCurrency() {
+    return $this->getImplementation()->getPriceAsCurrency($this);
+  }
+
+  public function getProductName() {
+    return $this->getImplementation()->getName($this);
   }
 
 

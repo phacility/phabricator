@@ -20,9 +20,20 @@ final class PhortunePurchase extends PhortuneDAO
   protected $basePriceAsCurrency;
   protected $quantity;
   protected $status;
-  protected $metadata;
+  protected $metadata = array();
 
   private $cart = self::ATTACHABLE;
+
+  public static function initializeNewPurchase(
+    PhabricatorUser $actor,
+    PhortuneProduct $product) {
+    return id(new PhortunePurchase())
+      ->setAuthorPHID($actor->getPHID())
+      ->setProductPHID($product->getPHID())
+      ->setQuantity(1)
+      ->setStatus(self::STATUS_PENDING)
+      ->setBasePriceAsCurrency($product->getPriceAsCurrency());
+  }
 
   public function getConfiguration() {
     return array(

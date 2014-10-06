@@ -34,19 +34,7 @@ final class PhortuneProductViewController extends PhortuneController {
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($user)
-      ->setObjectURI($request->getRequestURI())
-      ->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Edit Product'))
-          ->setHref($edit_uri)
-          ->setIcon('fa-pencil'))
-      ->addAction(
-        id(new PhabricatorActionView())
-          ->setUser($user)
-          ->setName(pht('Purchase'))
-          ->setHref($cart_uri)
-          ->setIcon('fa-shopping-cart')
-          ->setWorkflow(true));
+      ->setObjectURI($request->getRequestURI());
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->setActionList($actions);
@@ -64,20 +52,6 @@ final class PhortuneProductViewController extends PhortuneController {
         pht('Price'),
         $product->getPriceAsCurrency()->formatForDisplay());
 
-    $xactions = id(new PhortuneProductTransactionQuery())
-      ->setViewer($user)
-      ->withObjectPHIDs(array($product->getPHID()))
-      ->execute();
-
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($user);
-
-    $xaction_view = id(new PhabricatorApplicationTransactionView())
-      ->setUser($user)
-      ->setObjectPHID($product->getPHID())
-      ->setTransactions($xactions)
-      ->setMarkupEngine($engine);
-
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->addPropertyList($properties);
@@ -86,7 +60,6 @@ final class PhortuneProductViewController extends PhortuneController {
       array(
         $crumbs,
         $object_box,
-        $xaction_view,
       ),
       array(
         'title' => $title,
