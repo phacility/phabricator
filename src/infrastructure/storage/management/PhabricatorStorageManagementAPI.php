@@ -114,7 +114,7 @@ final class PhabricatorStorageManagementAPI {
 
     queryfx(
       $this->getConn(null),
-      'CREATE DATABASE IF NOT EXISTS %T COLLATE %Q',
+      'CREATE DATABASE IF NOT EXISTS %T COLLATE %T',
       $this->getDatabaseName($fragment),
       $collate_text);
   }
