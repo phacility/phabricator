@@ -51,7 +51,7 @@ final class PhortuneAccountViewController extends PhortuneController {
       ->setObject($account)
       ->setUser($user);
 
-    $properties->addProperty(pht('Balance'), $account->getBalanceInCents());
+    $properties->addProperty(pht('Balance'), '-');
     $properties->setActionList($actions);
 
     $payment_methods = $this->buildPaymentMethodsSection($account);
@@ -189,8 +189,7 @@ final class PhortuneAccountViewController extends PhortuneController {
       foreach ($cart->getPurchases() as $purchase) {
         $id = $purchase->getID();
 
-        $price = $purchase->getTotalPriceInCents();
-        $price = PhortuneCurrency::newFromUSDCents($price)->formatForDisplay();
+        $price = $purchase->getTotalPriceAsCurrency()->formatForDisplay();
 
         $purchase_link = phutil_tag(
           'a',

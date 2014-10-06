@@ -5,6 +5,7 @@ final class FundBackerQuery
 
   private $ids;
   private $phids;
+  private $statuses;
 
   private $initiativePHIDs;
   private $backerPHIDs;
@@ -16,6 +17,11 @@ final class FundBackerQuery
 
   public function withPHIDs(array $phids) {
     $this->phids = $phids;
+    return $this;
+  }
+
+  public function withStatuses(array $statuses) {
+    $this->statuses = $statuses;
     return $this;
   }
 
@@ -93,6 +99,13 @@ final class FundBackerQuery
         $conn_r,
         'backerPHID IN (%Ls)',
         $this->backerPHIDs);
+    }
+
+    if ($this->statuses !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'status IN (%Ls)',
+        $this->statuses);
     }
 
     return $this->formatWhereClause($where);

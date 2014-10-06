@@ -35,6 +35,8 @@ final class FundBackerSearchEngine
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new FundBackerQuery());
 
+    $query->withStatuses(array(FundBacker::STATUS_PURCHASED));
+
     if ($this->getInitiative()) {
       $query->withInitiativePHIDs(
         array(
@@ -128,8 +130,7 @@ final class FundBackerSearchEngine
     foreach ($backers as $backer) {
       $backer_handle = $handles[$backer->getBackerPHID()];
 
-      $currency = PhortuneCurrency::newFromUSDCents(
-        $backer->getAmountInCents());
+      $currency = $backer->getAmountAsCurrency();
 
       $header = pht(
         '%s for %s',

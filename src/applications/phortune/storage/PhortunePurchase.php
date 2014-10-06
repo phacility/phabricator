@@ -1,7 +1,7 @@
 <?php
 
 /**
- * A purchase represents a user buying something or a subscription to a plan.
+ * A purchase represents a user buying something.
  */
 final class PhortunePurchase extends PhortuneDAO
   implements PhabricatorPolicyInterface {
@@ -17,13 +17,24 @@ final class PhortunePurchase extends PhortuneDAO
   protected $accountPHID;
   protected $authorPHID;
   protected $cartPHID;
-  protected $basePriceInCents;
+  protected $basePriceAsCurrency;
   protected $quantity;
-  protected $totalPriceInCents;
   protected $status;
-  protected $metadata;
+  protected $metadata = array();
 
   private $cart = self::ATTACHABLE;
+  private $product = self::ATTACHABLE;
+
+  public static function initializeNewPurchase(
+    PhabricatorUser $actor,
+    PhortuneProduct $product) {
+    return id(new PhortunePurchase())
+      ->setAuthorPHID($actor->getPHID())
+      ->setProductPHID($product->getPHID())
+      ->setQuantity(1)
+      ->setStatus(self::STATUS_PENDING)
+      ->setBasePriceAsCurrency($product->getPriceAsCurrency());
+  }
 
   public function getConfiguration() {
     return array(
@@ -31,11 +42,13 @@ final class PhortunePurchase extends PhortuneDAO
       self::CONFIG_SERIALIZATION => array(
         'metadata' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_APPLICATION_SERIALIZERS => array(
+        'basePriceAsCurrency' => new PhortuneCurrencySerializer(),
+      ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'cartPHID' => 'phid?',
-        'basePriceInCents' => 'sint32',
+        'basePriceAsCurrency' => 'text64',
         'quantity' => 'uint32',
-        'totalPriceInCents' => 'sint32',
         'status' => 'text32',
       ),
       self::CONFIG_KEY_SCHEMA => array(
@@ -60,14 +73,30 @@ final class PhortunePurchase extends PhortuneDAO
     return $this->assertAttached($this->cart);
   }
 
-  protected function didReadData() {
-    // The payment processing code is strict about types.
-    $this->basePriceInCents = (int)$this->basePriceInCents;
-    $this->totalPriceInCents = (int)$this->totalPriceInCents;
+  public function attachProduct(PhortuneProduct $product) {
+    $this->product = $product;
+    return $this;
+  }
+
+  public function getProduct() {
+    return $this->assertAttached($this->product);
   }
 
   public function getFullDisplayName() {
-    return pht('Goods and/or Services');
+    return $this->getProduct()->getPurchaseName($this);
+  }
+
+  public function getTotalPriceAsCurrency() {
+    return $this->getBasePriceAsCurrency();
+  }
+
+  public function getMetadataValue($key, $default = null) {
+    return idx($this->metadata, $key, $default);
+  }
+
+  public function setMetadataValue($key, $value) {
+    $this->metadata[$key] = $value;
+    return $this;
   }
 
 

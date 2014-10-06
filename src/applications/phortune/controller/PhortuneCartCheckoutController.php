@@ -22,6 +22,42 @@ final class PhortuneCartCheckoutController
       return new Aphront404Response();
     }
 
+    $cancel_uri = $cart->getCancelURI();
+
+    switch ($cart->getStatus()) {
+      case PhortuneCart::STATUS_BUILDING:
+        return $this->newDialog()
+          ->setTitle(pht('Incomplete Cart'))
+          ->appendParagraph(
+            pht(
+              'The application that created this cart did not finish putting '.
+              'products in it. You can not checkout with an incomplete '.
+              'cart.'))
+          ->addCancelButton($cancel_uri);
+      case PhortuneCart::STATUS_READY:
+        // This is the expected, normal state for a cart that's ready for
+        // checkout.
+        break;
+      case PhortuneCart::STATUS_CHARGED:
+        // TODO: This is really bad (we took your money and at least partially
+        // failed to fulfill your order) and should have better steps forward.
+
+        return $this->newDialog()
+          ->setTitle(pht('Purchase Failed'))
+          ->appendParagraph(
+            pht(
+              'This cart was charged but the purchase could not be '.
+              'completed.'))
+          ->addCancelButton($cancel_uri);
+      case PhortuneCart::STATUS_PURCHASED:
+        return id(new AphrontRedirectResponse())->setURI($cart->getDetailURI());
+      default:
+        throw new Exception(
+          pht(
+            'Unknown cart status "%s"!',
+            $cart->getStatus()));
+    }
+
     $account = $cart->getAccount();
     $account_uri = $this->getApplicationURI($account->getID().'/');
 
@@ -59,7 +95,7 @@ final class PhortuneCartCheckoutController
           ->setAuthorPHID($viewer->getPHID())
           ->setPaymentProviderKey($provider->getProviderKey())
           ->setPaymentMethodPHID($method->getPHID())
-          ->setAmountInCents($cart->getTotalPriceInCents())
+          ->setAmountAsCurrency($cart->getTotalPriceAsCurrency())
           ->setStatus(PhortuneCharge::STATUS_PENDING);
 
         $charge->openTransaction();
@@ -71,12 +107,10 @@ final class PhortuneCartCheckoutController
 
         $provider->applyCharge($method, $charge);
 
-        $cart->setStatus(PhortuneCart::STATUS_PURCHASED);
-        $cart->save();
+        $cart->didApplyCharge($charge);
 
-        $view_uri = $this->getApplicationURI('cart/'.$cart->getID().'/');
-
-        return id(new AphrontRedirectResponse())->setURI($view_uri);
+        $done_uri = $cart->getDoneURI();
+        return id(new AphrontRedirectResponse())->setURI($done_uri);
       }
     }
 

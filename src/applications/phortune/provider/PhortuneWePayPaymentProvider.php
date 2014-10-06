@@ -116,8 +116,7 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
             'cartID' => $cart->getID(),
           ));
 
-        $total_in_cents = $cart->getTotalPriceInCents();
-        $price = PhortuneCurrency::newFromUSDCents($total_in_cents);
+        $price = $cart->getTotalPriceAsCurrency();
 
         $params = array(
           'account_id'        => $this->getWePayAccountID(),
@@ -176,10 +175,12 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
                 $result->state));
         }
 
+        $currency = PhortuneCurrency::newFromString($checkout->gross, 'USD');
+
         $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
 
           $charge = id(new PhortuneCharge())
-            ->setAmountInCents((int)$checkout->gross * 100)
+            ->setAmountAsCurrency($currency)
             ->setAccountPHID($cart->getAccount()->getPHID())
             ->setAuthorPHID($viewer->getPHID())
             ->setPaymentProviderKey($this->getProviderKey())

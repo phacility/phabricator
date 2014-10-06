@@ -20,7 +20,7 @@ final class PhortuneCharge extends PhortuneDAO
   protected $cartPHID;
   protected $paymentProviderKey;
   protected $paymentMethodPHID;
-  protected $amountInCents;
+  protected $amountAsCurrency;
   protected $status;
   protected $metadata = array();
 
@@ -33,10 +33,13 @@ final class PhortuneCharge extends PhortuneDAO
       self::CONFIG_SERIALIZATION => array(
         'metadata' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_APPLICATION_SERIALIZERS => array(
+        'amountAsCurrency' => new PhortuneCurrencySerializer(),
+      ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'paymentProviderKey' => 'text128',
         'paymentMethodPHID' => 'phid?',
-        'amountInCents' => 'sint32',
+        'amountAsCurrency' => 'text64',
         'status' => 'text32',
       ),
       self::CONFIG_KEY_SCHEMA => array(
@@ -53,11 +56,6 @@ final class PhortuneCharge extends PhortuneDAO
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
       PhabricatorPHIDConstants::PHID_TYPE_CHRG);
-  }
-
-  protected function didReadData() {
-    // The payment processing code is strict about types.
-    $this->amountInCents = (int)$this->amountInCents;
   }
 
   public function getMetadataValue($key, $default = null) {
