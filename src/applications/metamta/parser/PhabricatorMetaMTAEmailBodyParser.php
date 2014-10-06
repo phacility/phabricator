@@ -103,6 +103,13 @@ final class PhabricatorMetaMTAEmailBodyParser {
       '',
       $body);
 
+    // Mailbox seems to make an attempt to comply with the "standard" but
+    // omits the leading newline and uses an em dash?
+    $body = preg_replace(
+      "/\s*\xE2\x80\x94 \nSent from Mailbox\s*\z/su",
+      '',
+      $body);
+
     // HTC Mail application (mobile)
     $body = preg_replace(
       '/^\s*^Sent from my HTC smartphone.*/sm',

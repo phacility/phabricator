@@ -22,6 +22,24 @@ function phabricator_read_config_file($original_config) {
 
   if ($conf === false) {
     if (!Filesystem::pathExists($full_config_path)) {
+
+      // These are very old configuration files which we used to ship with
+      // by default. File based configuration was de-emphasized once web-based
+      // configuration was built. The actual files were removed to reduce
+      // user confusion over how to configure Phabricator.
+
+      switch ($config) {
+        case 'default':
+        case 'production':
+          return array();
+        case 'development':
+          return array(
+            'phabricator.developer-mode'      => true,
+            'darkconsole.enabled'             => true,
+            'celerity.minify'                 => false,
+          );
+      }
+
       $files = id(new FileFinder($root.'/conf/'))
         ->withType('f')
         ->withSuffix('conf.php')

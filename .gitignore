@@ -13,6 +13,8 @@
 /conf/local/local.json
 /conf/local/ENVIRONMENT
 /conf/local/VERSION
+/conf/local/HOSTKEY
+/conf/local/HOSTID
 
 # Impact Font
 /resources/font/impact.ttf
