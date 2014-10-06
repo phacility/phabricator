@@ -42,7 +42,7 @@ abstract class ManiphestConduitAPIMethod extends ConduitAPIMethod {
 
     if (!$is_new) {
       $fields += array(
-        'status'    => 'optional int',
+        'status'    => 'optional string',
         'comments'  => 'optional string',
       );
     }
