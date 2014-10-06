@@ -13,7 +13,7 @@ only screen and (min-device-pixel-ratio: 1.5),
 only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   .sprite-login {
     background-image: url(/rsrc/image/sprite-login-X2.png);
-    background-size: 175px 175px;
+    background-size: 175px 210px;
   }
 }
 
@@ -26,32 +26,36 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: -35px 0px;
 }
 
-.login-Bitbucket {
+.login-Balanced {
   background-position: -70px 0px;
 }
 
-.login-Disqus {
+.login-Bitbucket {
   background-position: -105px 0px;
 }
 
-.login-Dropbox {
+.login-Disqus {
   background-position: -140px 0px;
 }
 
-.login-Facebook {
+.login-Dropbox {
   background-position: 0px -35px;
 }
 
-.login-Generic {
+.login-Facebook {
   background-position: -35px -35px;
 }
 
-.login-Github {
+.login-Generic {
   background-position: -70px -35px;
 }
 
-.login-Google {
+.login-Github {
   background-position: -105px -35px;
+}
+
+.login-Google {
+  background-position: -140px -35px;
 }
 
 .login-HTTP {
@@ -71,10 +75,14 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
 }
 
 .login-MediaWiki {
-  background-position: 0px -105px;
+  background-position: -140px -70px;
 }
 
 .login-Openid {
+  background-position: 0px -105px;
+}
+
+.login-PayPal {
   background-position: -35px -105px;
 }
 
@@ -86,18 +94,30 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: -105px -105px;
 }
 
-.login-TwitchTV {
+.login-Stripe {
+  background-position: -140px -105px;
+}
+
+.login-TestPayment {
   background-position: 0px -140px;
 }
 
-.login-Twitter {
+.login-TwitchTV {
   background-position: -35px -140px;
 }
 
-.login-WordPressCOM {
+.login-Twitter {
   background-position: -70px -140px;
 }
 
-.login-Yahoo {
+.login-WePay {
   background-position: -105px -140px;
+}
+
+.login-WordPressCOM {
+  background-position: -140px -140px;
+}
+
+.login-Yahoo {
+  background-position: 0px -175px;
 }
