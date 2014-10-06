@@ -100,15 +100,7 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
 
     $wepay = new WePay($this->getWePayAccessToken());
 
-    $charge = id(new PhortuneChargeQuery())
-      ->setViewer($viewer)
-      ->withCartPHIDs(array($cart->getPHID()))
-      ->withStatuses(
-        array(
-          PhortuneCharge::STATUS_CHARGING,
-        ))
-      ->executeOne();
-
+    $charge = $controller->loadActiveCharge($cart);
     switch ($controller->getAction()) {
       case 'checkout':
         if ($charge) {

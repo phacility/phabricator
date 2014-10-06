@@ -71,4 +71,18 @@ final class PhortuneProviderController extends PhortuneController {
       ->executeOne();
   }
 
+  public function loadActiveCharge(PhortuneCart $cart) {
+    $request = $this->getRequest();
+    $viewer = $request->getUser();
+
+    return id(new PhortuneChargeQuery())
+      ->setViewer($viewer)
+      ->withCartPHIDs(array($cart->getPHID()))
+      ->withStatuses(
+        array(
+          PhortuneCharge::STATUS_CHARGING,
+        ))
+      ->executeOne();
+  }
+
 }
