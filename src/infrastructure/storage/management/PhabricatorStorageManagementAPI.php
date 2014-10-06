@@ -114,7 +114,7 @@ final class PhabricatorStorageManagementAPI {
 
     queryfx(
       $this->getConn(null),
-      'CREATE DATABASE IF NOT EXISTS %T COLLATE %Q',
+      'CREATE DATABASE IF NOT EXISTS %T COLLATE %C',
       $this->getDatabaseName($fragment),
       $collate_text);
   }
@@ -192,8 +192,8 @@ final class PhabricatorStorageManagementAPI {
     foreach ($queries as $query) {
       $query = str_replace('{$NAMESPACE}', $this->namespace, $query);
       $query = str_replace('{$CHARSET}', $charset, $query);
-      $query = str_replace('{$COLLATE_TEXT}', $collate_text, $query);
-      $query = str_replace('{$COLLATE_SORT}', $collate_sort, $query);
+      $query = str_replace('{$COLLATE_TEXT}', '`' . $collate_text . '`', $query);
+      $query = str_replace('{$COLLATE_SORT}', '`' . $collate_sort . '`', $query);
       queryfx(
         $conn,
         '%Q',
