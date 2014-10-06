@@ -115,4 +115,4 @@ return array(
     '#^build/#',
   ),
 
-) + phabricator_read_config_file('production');
+);
