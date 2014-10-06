@@ -70,7 +70,10 @@ final class FundInitiativeBackController
           $viewer,
           PhabricatorContentSource::newFromRequest($request));
 
-        $cart = $account->newCart($viewer);
+        $cart_implementation = id(new FundBackerCart())
+          ->setInitiative($initiative);
+
+        $cart = $account->newCart($viewer, $cart_implementation);
 
         $purchase = $cart->newPurchase($viewer, $product);
         $purchase

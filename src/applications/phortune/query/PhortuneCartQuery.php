@@ -66,6 +66,24 @@ final class PhortuneCartQuery
       $cart->attachAccount($account);
     }
 
+    $implementations = array();
+
+    $cart_map = mgroup($carts, 'getCartClass');
+    foreach ($cart_map as $class => $class_carts) {
+      $implementations += newv($class, array())->loadImplementationsForCarts(
+        $this->getViewer(),
+        $class_carts);
+    }
+
+    foreach ($carts as $key => $cart) {
+      $implementation = idx($implementations, $key);
+      if (!$implementation) {
+        unset($carts[$key]);
+        continue;
+      }
+      $cart->attachImplementation($implementation);
+    }
+
     return $carts;
   }
 

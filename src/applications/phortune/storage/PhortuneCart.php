@@ -11,11 +11,13 @@ final class PhortuneCart extends PhortuneDAO
 
   protected $accountPHID;
   protected $authorPHID;
+  protected $cartClass;
   protected $status;
-  protected $metadata;
+  protected $metadata = array();
 
   private $account = self::ATTACHABLE;
   private $purchases = self::ATTACHABLE;
+  private $implementation = self::ATTACHABLE;
 
   public static function initializeNewCart(
     PhabricatorUser $actor,
@@ -73,13 +75,11 @@ final class PhortuneCart extends PhortuneDAO
 
 
   public function getDoneURI() {
-    // TODO: Implement properly.
-    return '/phortune/cart/'.$this->getID().'/';
+    return $this->getImplementation()->getDoneURI($this);
   }
 
   public function getCancelURI() {
-    // TODO: Implement properly.
-    return '/';
+    return $this->getImplementation()->getCancelURI($this);
   }
 
   public function getDetailURI() {
@@ -98,6 +98,7 @@ final class PhortuneCart extends PhortuneDAO
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'status' => 'text32',
+        'cartClass' => 'text128',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_account' => array(
@@ -131,6 +132,16 @@ final class PhortuneCart extends PhortuneDAO
     return $this->assertAttached($this->account);
   }
 
+  public function attachImplementation(
+    PhortuneCartImplementation $implementation) {
+    $this->implementation = $implementation;
+    return $this;
+  }
+
+  public function getImplementation() {
+    return $this->assertAttached($this->implementation);
+  }
+
   public function getTotalPriceAsCurrency() {
     $prices = array();
     foreach ($this->getPurchases() as $purchase) {
@@ -138,6 +149,15 @@ final class PhortuneCart extends PhortuneDAO
     }
 
     return PhortuneCurrency::newFromList($prices);
+  }
+
+  public function setMetadataValue($key, $value) {
+    $this->metadata[$key] = $value;
+    return $this;
+  }
+
+  public function getMetadataValue($key, $default = null) {
+    return idx($this->metadata, $key, $default);
   }
 
 
