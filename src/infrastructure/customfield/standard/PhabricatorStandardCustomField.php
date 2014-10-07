@@ -107,8 +107,10 @@ abstract class PhabricatorStandardCustomField
           $this->setCaption($value);
           break;
         case 'required':
-          $this->setRequired($value);
-          $this->setFieldError(true);
+          if ($value) {
+            $this->setRequired($value);
+            $this->setFieldError(true);
+          }
           break;
         case 'default':
           $this->setFieldValue($value);
