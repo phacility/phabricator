@@ -1,12 +1,12 @@
 <?php
 
-final class PhortuneProviderController extends PhortuneController {
+final class PhortuneProviderActionController extends PhortuneController {
 
-  private $digest;
+  private $id;
   private $action;
 
   public function willProcessRequest(array $data) {
-    $this->digest = $data['digest'];
+    $this->id = $data['id'];
     $this->setAction($data['action']);
   }
 
@@ -21,23 +21,21 @@ final class PhortuneProviderController extends PhortuneController {
 
   public function processRequest() {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $request->getUser();
 
-
-    // NOTE: This use of digests to identify payment providers is because
-    // payment provider keys don't necessarily have restrictions on what they
-    // contain (so they might have stuff that's not safe to put in URIs), and
-    // using digests prevents errors with URI encoding.
-
-    $provider = PhortunePaymentProvider::getProviderByDigest($this->digest);
-    if (!$provider) {
-      throw new Exception('Invalid payment provider digest!');
+    $provider_config = id(new PhortunePaymentProviderConfigQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($this->id))
+      ->executeOne();
+    if (!$provider_config) {
+      return new Aphront404Response();
     }
+
+    $provider = $provider_config->buildProvider();
 
     if (!$provider->canRespondToControllerAction($this->getAction())) {
       return new Aphront404Response();
     }
-
 
     $response = $provider->processControllerRequest($this, $request);
 

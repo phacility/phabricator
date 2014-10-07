@@ -1,6 +1,11 @@
 <?php
 
-final class PhortunePaypalPaymentProvider extends PhortunePaymentProvider {
+final class PhortunePayPalPaymentProvider extends PhortunePaymentProvider {
+
+  const PAYPAL_API_USERNAME   = 'paypal.api-username';
+  const PAYPAL_API_PASSWORD   = 'paypal.api-password';
+  const PAYPAL_API_SIGNATURE  = 'paypal.api-signature';
+  const PAYPAL_MODE           = 'paypal.mode';
 
   public function isEnabled() {
     // TODO: See note in processControllerRequest().
@@ -11,16 +16,135 @@ final class PhortunePaypalPaymentProvider extends PhortunePaymentProvider {
            $this->getPaypalAPISignature();
   }
 
-  public function getProviderType() {
-    return 'paypal';
+  public function getName() {
+    return pht('PayPal');
   }
 
-  public function getProviderDomain() {
-    return 'paypal.com';
+  public function getConfigureName() {
+    return pht('Add PayPal Payments Account');
+  }
+
+  public function getConfigureDescription() {
+    return pht(
+      'Allows you to accept various payment instruments with a paypal.com '.
+      'account.');
+  }
+
+  public function getConfigureInstructions() {
+    return pht(
+      "To configure PayPal, register or log into an existing account on ".
+      "[[https://paypal.com | paypal.com]] (for live payments) or ".
+      "[[https://sandbox.paypal.com | sandbox.paypal.com]] (for test ".
+      "payments). Once logged in:\n\n".
+      "  - Navigate to {nav Tools > API Access}.\n".
+      "  - Choose **View API Signature**.\n".
+      "  - Copy the **API Username**, **API Password** and **Signature** ".
+      "    into the fields above.\n\n".
+      "You can select whether the provider operates in test mode or ".
+      "accepts live payments using the **Mode** dropdown above.\n\n".
+      "You can either use `sandbox.paypal.com` to retrieve live credentials, ".
+      "or `paypal.com` to retrieve live credentials.");
+  }
+
+  public function getAllConfigurableProperties() {
+    return array(
+      self::PAYPAL_API_USERNAME,
+      self::PAYPAL_API_PASSWORD,
+      self::PAYPAL_API_SIGNATURE,
+      self::PAYPAL_MODE,
+    );
+  }
+
+  public function getAllConfigurableSecretProperties() {
+    return array(
+      self::PAYPAL_API_PASSWORD,
+      self::PAYPAL_API_SIGNATURE,
+    );
+  }
+
+  public function processEditForm(
+    AphrontRequest $request,
+    array $values) {
+
+    $errors = array();
+    $issues = array();
+
+    if (!strlen($values[self::PAYPAL_API_USERNAME])) {
+      $errors[] = pht('PayPal API Username is required.');
+      $issues[self::PAYPAL_API_USERNAME] = pht('Required');
+    }
+
+    if (!strlen($values[self::PAYPAL_API_PASSWORD])) {
+      $errors[] = pht('PayPal API Password is required.');
+      $issues[self::PAYPAL_API_PASSWORD] = pht('Required');
+    }
+
+    if (!strlen($values[self::PAYPAL_API_SIGNATURE])) {
+      $errors[] = pht('PayPal API Signature is required.');
+      $issues[self::PAYPAL_API_SIGNATURE] = pht('Required');
+    }
+
+    if (!strlen($values[self::PAYPAL_MODE])) {
+      $errors[] = pht('Mode is required.');
+      $issues[self::PAYPAL_MODE] = pht('Required');
+    }
+
+    return array($errors, $issues, $values);
+  }
+
+  public function extendEditForm(
+    AphrontRequest $request,
+    AphrontFormView $form,
+    array $values,
+    array $issues) {
+
+    $form
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setName(self::PAYPAL_API_USERNAME)
+          ->setValue($values[self::PAYPAL_API_USERNAME])
+          ->setError(idx($issues, self::PAYPAL_API_USERNAME, true))
+          ->setLabel(pht('Paypal API Username')))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setName(self::PAYPAL_API_PASSWORD)
+          ->setValue($values[self::PAYPAL_API_PASSWORD])
+          ->setError(idx($issues, self::PAYPAL_API_PASSWORD, true))
+          ->setLabel(pht('Paypal API Password')))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setName(self::PAYPAL_API_SIGNATURE)
+          ->setValue($values[self::PAYPAL_API_SIGNATURE])
+          ->setError(idx($issues, self::PAYPAL_API_SIGNATURE, true))
+          ->setLabel(pht('Paypal API Signature')))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setName(self::PAYPAL_MODE)
+          ->setValue($values[self::PAYPAL_MODE])
+          ->setError(idx($issues, self::PAYPAL_MODE))
+          ->setLabel(pht('Mode'))
+          ->setOptions(
+            array(
+              'test' => pht('Test Mode'),
+              'live' => pht('Live Mode'),
+            )));
+
+    return;
+  }
+
+  public function canRunConfigurationTest() {
+    return true;
+  }
+
+  public function runConfigurationTest() {
+    $result = $this
+      ->newPaypalAPICall()
+      ->setRawPayPalQuery('GetBalance', array())
+      ->resolve();
   }
 
   public function getPaymentMethodDescription() {
-    return pht('Credit Card or Paypal Account');
+    return pht('Credit Card or PayPal Account');
   }
 
   public function getPaymentMethodIcon() {
@@ -28,12 +152,7 @@ final class PhortunePaypalPaymentProvider extends PhortunePaymentProvider {
   }
 
   public function getPaymentMethodProviderDescription() {
-    return 'Paypal';
-  }
-
-  public function canHandlePaymentMethod(PhortunePaymentMethod $method) {
-    $type = $method->getMetadataValue('type');
-    return ($type == 'paypal');
+    return 'PayPal';
   }
 
   protected function executeCharge(
@@ -43,15 +162,21 @@ final class PhortunePaypalPaymentProvider extends PhortunePaymentProvider {
   }
 
   private function getPaypalAPIUsername() {
-    return PhabricatorEnv::getEnvConfig('phortune.paypal.api-username');
+    return $this
+      ->getProviderConfig()
+      ->getMetadataValue(self::PAYPAL_API_USERNAME);
   }
 
   private function getPaypalAPIPassword() {
-    return PhabricatorEnv::getEnvConfig('phortune.paypal.api-password');
+    return $this
+      ->getProviderConfig()
+      ->getMetadataValue(self::PAYPAL_API_PASSWORD);
   }
 
   private function getPaypalAPISignature() {
-    return PhabricatorEnv::getEnvConfig('phortune.paypal.api-signature');
+    return $this
+      ->getProviderConfig()
+      ->getMetadataValue(self::PAYPAL_API_SIGNATURE);
   }
 
 /* -(  One-Time Payments  )-------------------------------------------------- */
@@ -74,7 +199,7 @@ final class PhortunePaypalPaymentProvider extends PhortunePaymentProvider {
   }
 
   public function processControllerRequest(
-    PhortuneProviderController $controller,
+    PhortuneProviderActionController $controller,
     AphrontRequest $request) {
 
     $viewer = $request->getUser();
@@ -214,8 +339,15 @@ final class PhortunePaypalPaymentProvider extends PhortunePaymentProvider {
   }
 
   private function newPaypalAPICall() {
+    $mode = $this->getProviderConfig()->getMetadataValue(self::PAYPAL_MODE);
+    if ($mode == 'live') {
+      $host = 'https://api-3t.paypal.com/nvp';
+    } else {
+      $host = 'https://api-3t.sandbox.paypal.com/nvp';
+    }
+
     return id(new PhutilPayPalAPIFuture())
-      ->setHost('https://api-3t.sandbox.paypal.com/nvp')
+      ->setHost($host)
       ->setAPIUsername($this->getPaypalAPIUsername())
       ->setAPIPassword($this->getPaypalAPIPassword())
       ->setAPISignature($this->getPaypalAPISignature());

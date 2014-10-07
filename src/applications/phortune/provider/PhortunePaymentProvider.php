@@ -5,16 +5,119 @@
  */
 abstract class PhortunePaymentProvider {
 
+  private $providerConfig;
+
+  public function setProviderConfig(
+    PhortunePaymentProviderConfig $provider_config) {
+    $this->providerConfig = $provider_config;
+    return $this;
+  }
+
+  public function getProviderConfig() {
+    return $this->providerConfig;
+  }
+
+  /**
+   * Return a short name which identifies this provider.
+   */
+  abstract public function getName();
+
+
+/* -(  Configuring Providers  )---------------------------------------------- */
+
+
+  /**
+   * Return a human-readable provider name for use on the merchant workflow
+   * where a merchant owner adds providers.
+   */
+  abstract public function getConfigureName();
+
+
+  /**
+   * Return a human-readable provider description for use on the merchant
+   * workflow where a merchant owner adds providers.
+   */
+  abstract public function getConfigureDescription();
+
+  abstract public function getConfigureInstructions();
+
+  abstract public function getAllConfigurableProperties();
+
+  abstract public function getAllConfigurableSecretProperties();
+  /**
+   * Read a dictionary of properties from the provider's configuration for
+   * use when editing the provider.
+   */
+  public function readEditFormValuesFromProviderConfig() {
+    $properties = $this->getAllConfigurableProperties();
+    $config = $this->getProviderConfig();
+
+    $secrets = $this->getAllConfigurableSecretProperties();
+    $secrets = array_fuse($secrets);
+
+    $map = array();
+    foreach ($properties as $property) {
+      $map[$property] = $config->getMetadataValue($property);
+      if (isset($secrets[$property])) {
+        $map[$property] = $this->renderConfigurationSecret($map[$property]);
+      }
+    }
+
+    return $map;
+  }
+
+
+  /**
+   * Read a dictionary of properties from a request for use when editing the
+   * provider.
+   */
+  public function readEditFormValuesFromRequest(AphrontRequest $request) {
+    $properties = $this->getAllConfigurableProperties();
+
+    $map = array();
+    foreach ($properties as $property) {
+      $map[$property] = $request->getStr($property);
+    }
+
+    return $map;
+  }
+
+
+  abstract public function processEditForm(
+    AphrontRequest $request,
+    array $values);
+
+  abstract public function extendEditForm(
+    AphrontRequest $request,
+    AphrontFormView $form,
+    array $values,
+    array $issues);
+
+  protected function renderConfigurationSecret($value) {
+    if (strlen($value)) {
+      return str_repeat('*', strlen($value));
+    }
+    return '';
+  }
+
+  public function isConfigurationSecret($value) {
+    return preg_match('/^\*+\z/', trim($value));
+  }
+
+  abstract public function canRunConfigurationTest();
+
+  public function runConfigurationTest() {
+    throw new PhortuneNotImplementedException($this);
+  }
+
 
 /* -(  Selecting Providers  )------------------------------------------------ */
 
 
   public static function getAllProviders() {
-    $objects = id(new PhutilSymbolLoader())
+    return id(new PhutilSymbolLoader())
       ->setAncestorClass('PhortunePaymentProvider')
       ->loadObjects();
-
-    return mpull($objects, null, 'getProviderKey');
   }
 
   public static function getEnabledProviders() {
@@ -47,66 +150,16 @@ abstract class PhortunePaymentProvider {
     return $providers;
   }
 
-  public static function getProviderByDigest($digest) {
-    $providers = self::getEnabledProviders();
-    foreach ($providers as $key => $provider) {
-      $provider_digest = PhabricatorHash::digestForIndex($key);
-      if ($provider_digest == $digest) {
-        return $provider;
-      }
-    }
-    return null;
-  }
-
   abstract public function isEnabled();
-
-  final public function getProviderKey() {
-    return $this->getProviderType().'@'.$this->getProviderDomain();
-  }
-
-
-  /**
-   * Return a short string which uniquely identifies this provider's protocol
-   * type, like "stripe", "paypal", or "balanced".
-   */
-  abstract public function getProviderType();
-
-
-  /**
-   * Return a short string which uniquely identifies the domain for this
-   * provider, like "stripe.com" or "google.com".
-   *
-   * This is distinct from the provider type so that protocols are not bound
-   * to a single domain. This is probably not relevant for payments, but this
-   * assumption burned us pretty hard with authentication and it's easy enough
-   * to avoid.
-   */
-  abstract public function getProviderDomain();
 
   abstract public function getPaymentMethodDescription();
   abstract public function getPaymentMethodIcon();
   abstract public function getPaymentMethodProviderDescription();
 
-
-  /**
-   * Determine of a provider can handle a payment method.
-   *
-   * @return bool True if this provider can apply charges to the payment method.
-   */
-  abstract public function canHandlePaymentMethod(
-    PhortunePaymentMethod $method);
-
   final public function applyCharge(
     PhortunePaymentMethod $payment_method,
     PhortuneCharge $charge) {
-
-    $charge->setStatus(PhortuneCharge::STATUS_CHARGING);
-    $charge->save();
-
     $this->executeCharge($payment_method, $charge);
-
-    $charge->setStatus(PhortuneCharge::STATUS_CHARGED);
-    $charge->save();
   }
 
   abstract protected function executeCharge(
@@ -230,10 +283,9 @@ abstract class PhortunePaymentProvider {
     array $params = array(),
     $local = false) {
 
-    $digest = PhabricatorHash::digestForIndex($this->getProviderKey());
-
+    $id = $this->getProviderConfig()->getID();
     $app = PhabricatorApplication::getByClass('PhabricatorPhortuneApplication');
-    $path = $app->getBaseURI().'provider/'.$digest.'/'.$action.'/';
+    $path = $app->getBaseURI().'provider/'.$id.'/'.$action.'/';
 
     $uri = new PhutilURI($path);
     $uri->setQueryParams($params);
@@ -250,7 +302,7 @@ abstract class PhortunePaymentProvider {
   }
 
   public function processControllerRequest(
-    PhortuneProviderController $controller,
+    PhortuneProviderActionController $controller,
     AphrontRequest $request) {
     throw new PhortuneNotImplementedException($this);
   }

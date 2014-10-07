@@ -14,12 +14,11 @@ final class PhortunePaymentMethod extends PhortuneDAO
   protected $status;
   protected $accountPHID;
   protected $authorPHID;
+  protected $providerPHID;
   protected $expires;
   protected $metadata = array();
   protected $brand;
   protected $lastFourDigits;
-  protected $providerType;
-  protected $providerDomain;
 
   private $account = self::ATTACHABLE;
 
@@ -34,8 +33,6 @@ final class PhortunePaymentMethod extends PhortuneDAO
         'status' => 'text64',
         'brand' => 'text64',
         'expires' => 'text16',
-        'providerType' => 'text16',
-        'providerDomain' => 'text64',
         'lastFourDigits' => 'text16',
       ),
       self::CONFIG_KEY_SCHEMA => array(
@@ -75,26 +72,8 @@ final class PhortunePaymentMethod extends PhortuneDAO
   }
 
   public function buildPaymentProvider() {
-    $providers = PhortunePaymentProvider::getAllProviders();
-
-    $accept = array();
-    foreach ($providers as $provider) {
-      if ($provider->canHandlePaymentMethod($this)) {
-        $accept[] = $provider;
-      }
-    }
-
-    if (!$accept) {
-      throw new PhortuneNoPaymentProviderException($this);
-    }
-
-    if (count($accept) > 1) {
-      throw new PhortuneMultiplePaymentProvidersException($this, $accept);
-    }
-
-    return head($accept);
+    throw new Exception(pht('TODO: Reimplement this junk.'));
   }
-
 
   public function getDisplayName() {
     if (strlen($this->name)) {

@@ -2,6 +2,11 @@
 
 final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
 
+  const WEPAY_CLIENT_ID       = 'wepay.client-id';
+  const WEPAY_CLIENT_SECRET   = 'wepay.client-secret';
+  const WEPAY_ACCESS_TOKEN    = 'wepay.access-token';
+  const WEPAY_ACCOUNT_ID      = 'wepay.account-id';
+
   public function isEnabled() {
     return $this->getWePayClientID() &&
            $this->getWePayClientSecret() &&
@@ -9,12 +14,133 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
            $this->getWePayAccountID();
   }
 
-  public function getProviderType() {
-    return 'wepay';
+  public function getName() {
+    return pht('WePay');
   }
 
-  public function getProviderDomain() {
-    return 'wepay.com';
+  public function getConfigureName() {
+    return pht('Add WePay Payments Account');
+  }
+
+  public function getConfigureDescription() {
+    return pht(
+      'Allows you to accept credit or debit card payments with a '.
+      'wepay.com account.');
+  }
+
+  public function getConfigureInstructions() {
+    return pht(
+      "To configure WePay, register or log in to an existing account on ".
+      "[[https://wepay.com | wepay.com]] (for live payments) or ".
+      "[[https://stage.wepay.com | stage.wepay.com]] (for testing). ".
+      "Once logged in:\n\n".
+      "  - Create an API application if you don't already have one.\n".
+      "  - Click the API application name to go to the detail page.\n".
+      "  - Copy **Client ID**, **Client Secret**, **Access Token** and ".
+      "    **AccountID** from that page to the fields above.\n\n".
+      "You can either use `stage.wepay.com` to retrieve test credentials, ".
+      "or `wepay.com` to retrieve live credentials for accepting live ".
+      "payments.");
+  }
+
+  public function canRunConfigurationTest() {
+    return true;
+  }
+
+  public function runConfigurationTest() {
+    $root = dirname(phutil_get_library_root('phabricator'));
+    require_once $root.'/externals/wepay/wepay.php';
+
+    WePay::useStaging(
+      $this->getWePayClientID(),
+      $this->getWePayClientSecret());
+
+    $wepay = new WePay($this->getWePayAccessToken());
+    $params = array(
+      'client_id' => $this->getWePayClientID(),
+      'client_secret' => $this->getWePayClientSecret(),
+    );
+
+    $wepay->request('app', $params);
+  }
+
+  public function getAllConfigurableProperties() {
+    return array(
+      self::WEPAY_CLIENT_ID,
+      self::WEPAY_CLIENT_SECRET,
+      self::WEPAY_ACCESS_TOKEN,
+      self::WEPAY_ACCOUNT_ID,
+    );
+  }
+
+  public function getAllConfigurableSecretProperties() {
+    return array(
+      self::WEPAY_CLIENT_SECRET,
+    );
+  }
+
+  public function processEditForm(
+    AphrontRequest $request,
+    array $values) {
+
+    $errors = array();
+    $issues = array();
+
+    if (!strlen($values[self::WEPAY_CLIENT_ID])) {
+      $errors[] = pht('WePay Client ID is required.');
+      $issues[self::WEPAY_CLIENT_ID] = pht('Required');
+    }
+
+    if (!strlen($values[self::WEPAY_CLIENT_SECRET])) {
+      $errors[] = pht('WePay Client Secret is required.');
+      $issues[self::WEPAY_CLIENT_SECRET] = pht('Required');
+    }
+
+    if (!strlen($values[self::WEPAY_ACCESS_TOKEN])) {
+      $errors[] = pht('WePay Access Token is required.');
+      $issues[self::WEPAY_ACCESS_TOKEN] = pht('Required');
+    }
+
+    if (!strlen($values[self::WEPAY_ACCOUNT_ID])) {
+      $errors[] = pht('WePay Account ID is required.');
+      $issues[self::WEPAY_ACCOUNT_ID] = pht('Required');
+    }
+
+    return array($errors, $issues, $values);
+  }
+
+  public function extendEditForm(
+    AphrontRequest $request,
+    AphrontFormView $form,
+    array $values,
+    array $issues) {
+
+    $form
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setName(self::WEPAY_CLIENT_ID)
+          ->setValue($values[self::WEPAY_CLIENT_ID])
+          ->setError(idx($issues, self::WEPAY_CLIENT_ID, true))
+          ->setLabel(pht('WePay Client ID')))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setName(self::WEPAY_CLIENT_SECRET)
+          ->setValue($values[self::WEPAY_CLIENT_SECRET])
+          ->setError(idx($issues, self::WEPAY_CLIENT_SECRET, true))
+          ->setLabel(pht('WePay Client Secret')))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setName(self::WEPAY_ACCESS_TOKEN)
+          ->setValue($values[self::WEPAY_ACCESS_TOKEN])
+          ->setError(idx($issues, self::WEPAY_ACCESS_TOKEN, true))
+          ->setLabel(pht('WePay Access Token')))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setName(self::WEPAY_ACCOUNT_ID)
+          ->setValue($values[self::WEPAY_ACCOUNT_ID])
+          ->setError(idx($issues, self::WEPAY_ACCOUNT_ID, true))
+          ->setLabel(pht('WePay Account ID')));
+
   }
 
   public function getPaymentMethodDescription() {
@@ -29,11 +155,6 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
     return 'WePay';
   }
 
-  public function canHandlePaymentMethod(PhortunePaymentMethod $method) {
-    $type = $method->getMetadataValue('type');
-    return ($type == 'wepay');
-  }
-
   protected function executeCharge(
     PhortunePaymentMethod $payment_method,
     PhortuneCharge $charge) {
@@ -41,19 +162,27 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
   }
 
   private function getWePayClientID() {
-    return PhabricatorEnv::getEnvConfig('phortune.wepay.client-id');
+    return $this
+      ->getProviderConfig()
+      ->getMetadataValue(self::WEPAY_CLIENT_ID);
   }
 
   private function getWePayClientSecret() {
-    return PhabricatorEnv::getEnvConfig('phortune.wepay.client-secret');
+    return $this
+      ->getProviderConfig()
+      ->getMetadataValue(self::WEPAY_CLIENT_SECRET);
   }
 
   private function getWePayAccessToken() {
-    return PhabricatorEnv::getEnvConfig('phortune.wepay.access-token');
+    return $this
+      ->getProviderConfig()
+      ->getMetadataValue(self::WEPAY_ACCESS_TOKEN);
   }
 
   private function getWePayAccountID() {
-    return PhabricatorEnv::getEnvConfig('phortune.wepay.account-id');
+    return $this
+      ->getProviderConfig()
+      ->getMetadataValue(self::WEPAY_ACCOUNT_ID);
   }
 
 
@@ -81,7 +210,7 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
    * @phutil-external-symbol class WePay
    */
   public function processControllerRequest(
-    PhortuneProviderController $controller,
+    PhortuneProviderActionController $controller,
     AphrontRequest $request) {
 
     $viewer = $request->getUser();

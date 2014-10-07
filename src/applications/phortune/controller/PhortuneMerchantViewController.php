@@ -22,7 +22,7 @@ final class PhortuneMerchantViewController
     }
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('Merchant %d', $merchant->getID()));
+    $crumbs->addTextCrumb($merchant->getName());
 
     $title = pht(
       'Merchant %d %s',
@@ -38,6 +38,8 @@ final class PhortuneMerchantViewController
     $properties = $this->buildPropertyListView($merchant);
     $actions = $this->buildActionListView($merchant);
     $properties->setActionList($actions);
+
+    $providers = $this->buildProviderList($merchant);
 
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
@@ -57,6 +59,7 @@ final class PhortuneMerchantViewController
       array(
         $crumbs,
         $box,
+        $providers,
         $timeline,
       ),
       array(
@@ -97,5 +100,58 @@ final class PhortuneMerchantViewController
 
     return $view;
   }
+
+  private function buildProviderList(PhortuneMerchant $merchant) {
+    $viewer = $this->getRequest()->getUser();
+    $id = $merchant->getID();
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $merchant,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $provider_list = id(new PHUIObjectItemListView())
+      ->setNoDataString(pht('This merchant has no payment providers.'));
+
+    $providers = id(new PhortunePaymentProviderConfigQuery())
+      ->setViewer($viewer)
+      ->withMerchantPHIDs(array($merchant->getPHID()))
+      ->execute();
+    foreach ($providers as $provider_config) {
+      $provider = $provider_config->buildProvider();
+      $provider_id = $provider_config->getID();
+
+      $item = id(new PHUIObjectItemView())
+        ->setObjectName(pht('Provider %d', $provider_id))
+        ->setHeader($provider->getName());
+
+      $item->addAction(
+        id(new PHUIListItemView())
+          ->setIcon('fa-pencil')
+          ->setHref($this->getApplicationURI("/provider/edit/{$provider_id}"))
+          ->setWorkflow(!$can_edit)
+          ->setDisabled(!$can_edit));
+
+      $provider_list->addItem($item);
+    }
+
+    $add_action = id(new PHUIButtonView())
+      ->setTag('a')
+      ->setHref($this->getApplicationURI('provider/edit/?merchantID='.$id))
+      ->setText(pht('Add Payment Provider'))
+      ->setDisabled(!$can_edit)
+      ->setWorkflow(!$can_edit)
+      ->setIcon(id(new PHUIIconView())->setIconFont('fa-plus'));
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Payment Providers'))
+      ->addActionLink($add_action);
+
+    return id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->appendChild($provider_list);
+  }
+
+
 
 }
