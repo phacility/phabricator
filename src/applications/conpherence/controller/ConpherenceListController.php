@@ -140,7 +140,8 @@ final class ConpherenceListController extends ConpherenceController {
         $phids = array_keys($participation);
         $content = array(
           'html' => $thread_html,
-          'phids' => $phids);
+          'phids' => $phids,
+        );
         $response = id(new AphrontAjaxResponse())->setContent($content);
         break;
       case self::UNSELECTED_MODE:

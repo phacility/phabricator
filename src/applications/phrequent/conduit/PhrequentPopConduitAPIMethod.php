@@ -18,7 +18,7 @@ final class PhrequentPopConduitAPIMethod extends PhrequentConduitAPIMethod {
     return array(
       'objectPHID' => 'phid',
       'stopTime' => 'int',
-      'note' => 'string'
+      'note' => 'string',
     );
   }
 

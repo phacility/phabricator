@@ -61,13 +61,14 @@ final class DivinerReturnTableView extends AphrontTagView {
     $table = phutil_tag(
       'table',
       array(
-        'class' => 'diviner-return-table-view'),
+        'class' => 'diviner-return-table-view',
+      ),
       $rows);
 
     $header = phutil_tag(
       'span',
       array(
-        'class' => 'diviner-table-header'
+        'class' => 'diviner-table-header',
       ),
       $this->header);
 

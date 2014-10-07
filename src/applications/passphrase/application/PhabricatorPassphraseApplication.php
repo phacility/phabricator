@@ -47,7 +47,8 @@ final class PhabricatorPassphraseApplication extends PhabricatorApplication {
         'public/(?P<id>\d+)/' => 'PassphraseCredentialPublicController',
         'lock/(?P<id>\d+)/' => 'PassphraseCredentialLockController',
         'conduit/(?P<id>\d+)/' => 'PassphraseCredentialConduitController',
-      ));
+      ),
+    );
   }
 
   public function getRemarkupRules() {

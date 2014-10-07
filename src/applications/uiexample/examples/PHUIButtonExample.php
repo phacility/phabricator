@@ -48,7 +48,7 @@ final class PHUIButtonExample extends PhabricatorUIExample {
       $column3[] = phutil_tag(
           'a',
             array(
-              'class' => $color.' button dropdown'
+              'class' => $color.' button dropdown',
             ),
           array(
             phutil_utf8_ucwords($color.' Dropdown'),
@@ -67,10 +67,11 @@ final class PHUIButtonExample extends PhabricatorUIExample {
    // PHUIButtonView
 
    $colors = array(null,
-          PHUIButtonView::GREEN,
-          PHUIButtonView::GREY,
-          PHUIButtonView::BLACK,
-          PHUIButtonView::DISABLED);
+     PHUIButtonView::GREEN,
+     PHUIButtonView::GREY,
+     PHUIButtonView::BLACK,
+     PHUIButtonView::DISABLED,
+    );
    $sizes = array(null, PHUIButtonView::SMALL);
    $column = array();
    foreach ($colors as $color) {
@@ -106,7 +107,8 @@ final class PHUIButtonExample extends PhabricatorUIExample {
       'Comment' => 'fa-comment',
       'Give Token' => 'fa-trophy',
       'Reverse Time' => 'fa-clock-o',
-      'Implode Earth' => 'fa-exclamation-triangle red');
+      'Implode Earth' => 'fa-exclamation-triangle red',
+    );
     foreach ($icons as $text => $icon) {
       $image = id(new PHUIIconView())
           ->setIconFont($icon);
@@ -121,7 +123,8 @@ final class PHUIButtonExample extends PhabricatorUIExample {
     $column2 = array();
     $icons = array(
       'Subscribe' => 'fa-check-circle bluegrey',
-      'Edit' => 'fa-pencil bluegrey');
+      'Edit' => 'fa-pencil bluegrey',
+    );
     foreach ($icons as $text => $icon) {
       $image = id(new PHUIIconView())
           ->setIconFont($icon);
@@ -195,6 +198,7 @@ final class PHUIButtonExample extends PhabricatorUIExample {
       ->addMargin(PHUI::MARGIN_LARGE);
 
     return array($head1, $wrap1, $head2, $wrap2, $head3, $wrap3,
-      $head4, $wrap4);
+      $head4, $wrap4,
+    );
   }
 }

@@ -124,7 +124,8 @@ try {
             'z-index: 200000;'.
             'position: relative;'.
             'padding: 8px;'.
-            'font-family: monospace'),
+            'font-family: monospace',
+          ),
           $unexpected_output);
       }
     }

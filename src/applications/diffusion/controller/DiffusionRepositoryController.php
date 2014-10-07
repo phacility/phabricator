@@ -96,7 +96,8 @@ final class DiffusionRepositoryController extends DiffusionController {
           'commit' => $drequest->getCommit(),
           'path' => $drequest->getPath(),
           'offset' => 0,
-          'limit' => 15));
+          'limit' => 15,
+        ));
       $history = DiffusionPathChange::newFromConduit(
         $history_results['pathChanges']);
 

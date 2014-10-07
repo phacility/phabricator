@@ -15,7 +15,7 @@ final class ReleephQueryRequestsConduitAPIMethod
   public function defineParamTypes() {
     return array(
       'revisionPHIDs'         => 'optional list<phid>',
-      'requestedCommitPHIDs'  => 'optional list<phid>'
+      'requestedCommitPHIDs'  => 'optional list<phid>',
     );
   }
 

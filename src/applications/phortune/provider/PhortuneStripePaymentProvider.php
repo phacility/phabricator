@@ -2,17 +2,26 @@
 
 final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
 
+  const STRIPE_PUBLISHABLE_KEY  = 'stripe.publishable-key';
+  const STRIPE_SECRET_KEY       = 'stripe.secret-key';
+
   public function isEnabled() {
     return $this->getPublishableKey() &&
            $this->getSecretKey();
   }
 
-  public function getProviderType() {
-    return 'stripe';
+  public function getName() {
+    return pht('Stripe');
   }
 
-  public function getProviderDomain() {
-    return 'stripe.com';
+  public function getConfigureName() {
+    return pht('Add Stripe Payments Account');
+  }
+
+  public function getConfigureDescription() {
+    return pht(
+      'Allows you to accept credit or debit card payments with a '.
+      'stripe.com account.');
   }
 
   public function getPaymentMethodDescription() {
@@ -20,7 +29,7 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
   }
 
   public function getPaymentMethodIcon() {
-    return celerity_get_resource_uri('/rsrc/image/phortune/stripe.png');
+    return 'Stripe';
   }
 
   public function getPaymentMethodProviderDescription() {
@@ -32,13 +41,88 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
     return pht('Credit/Debit Card');
   }
 
-  public function canHandlePaymentMethod(PhortunePaymentMethod $method) {
-    $type = $method->getMetadataValue('type');
-    return ($type === 'stripe.customer');
+  public function getAllConfigurableProperties() {
+    return array(
+      self::STRIPE_PUBLISHABLE_KEY,
+      self::STRIPE_SECRET_KEY,
+    );
+  }
+
+  public function getAllConfigurableSecretProperties() {
+    return array(
+      self::STRIPE_SECRET_KEY,
+    );
+  }
+
+  public function processEditForm(
+    AphrontRequest $request,
+    array $values) {
+
+    $errors = array();
+    $issues = array();
+
+    if (!strlen($values[self::STRIPE_SECRET_KEY])) {
+      $errors[] = pht('Stripe Secret Key is required.');
+      $issues[self::STRIPE_SECRET_KEY] = pht('Required');
+    }
+
+    if (!strlen($values[self::STRIPE_PUBLISHABLE_KEY])) {
+      $errors[] = pht('Stripe Publishable Key is required.');
+      $issues[self::STRIPE_PUBLISHABLE_KEY] = pht('Required');
+    }
+
+    return array($errors, $issues, $values);
+  }
+
+  public function extendEditForm(
+    AphrontRequest $request,
+    AphrontFormView $form,
+    array $values,
+    array $issues) {
+
+    $form
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setName(self::STRIPE_SECRET_KEY)
+          ->setValue($values[self::STRIPE_SECRET_KEY])
+          ->setError(idx($issues, self::STRIPE_SECRET_KEY, true))
+          ->setLabel(pht('Stripe Secret Key')))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setName(self::STRIPE_PUBLISHABLE_KEY)
+          ->setValue($values[self::STRIPE_PUBLISHABLE_KEY])
+          ->setError(idx($issues, self::STRIPE_PUBLISHABLE_KEY, true))
+          ->setLabel(pht('Stripe Publishable Key')));
+  }
+
+  public function getConfigureInstructions() {
+    return pht(
+      "To configure Stripe, register or log in to an existing account on ".
+      "[[https://stripe.com | stripe.com]]. Once logged in:\n\n".
+      "  - Go to {nav icon=user, name=Your Account > Account Settings ".
+      "> API Keys}\n".
+      "  - Copy the **Secret Key** and **Publishable Key** into the fields ".
+      "above.\n\n".
+      "You can either use the test keys to add this provider in test mode, ".
+      "or the live keys to accept live payments.");
+  }
+
+  public function canRunConfigurationTest() {
+    return true;
+  }
+
+  public function runConfigurationTest() {
+    $root = dirname(phutil_get_library_root('phabricator'));
+    require_once $root.'/externals/stripe-php/lib/Stripe.php';
+
+    $secret_key = $this->getSecretKey();
+    $account = Stripe_Account::retrieve($secret_key);
   }
 
   /**
    * @phutil-external-symbol class Stripe_Charge
+   * @phutil-external-symbol class Stripe_CardError
+   * @phutil-external-symbol class Stripe_Account
    */
   protected function executeCharge(
     PhortunePaymentMethod $method,
@@ -51,28 +135,39 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
 
     $secret_key = $this->getSecretKey();
     $params = array(
-      'amount'      => $price->getValue(),
+      'amount'      => $price->getValueInUSDCents(),
       'currency'    => $price->getCurrency(),
       'customer'    => $method->getMetadataValue('stripe.customerID'),
       'description' => $charge->getPHID(),
       'capture'     => true,
     );
 
-    $stripe_charge = Stripe_Charge::create($params, $secret_key);
+    try {
+      $stripe_charge = Stripe_Charge::create($params, $secret_key);
+    } catch (Stripe_CardError $ex) {
+      // TODO: Fail charge explicitly.
+      throw $ex;
+    }
+
     $id = $stripe_charge->id;
     if (!$id) {
       throw new Exception('Stripe charge call did not return an ID!');
     }
 
     $charge->setMetadataValue('stripe.chargeID', $id);
+    $charge->save();
   }
 
   private function getPublishableKey() {
-    return PhabricatorEnv::getEnvConfig('phortune.stripe.publishable-key');
+    return $this
+      ->getProviderConfig()
+      ->getMetadataValue(self::STRIPE_PUBLISHABLE_KEY);
   }
 
   private function getSecretKey() {
-    return PhabricatorEnv::getEnvConfig('phortune.stripe.secret-key');
+    return $this
+      ->getProviderConfig()
+      ->getMetadataValue(self::STRIPE_SECRET_KEY);
   }
 
 

@@ -42,7 +42,8 @@ abstract class DiffusionQueryConduitAPIMethod
         'ERR-UNKNOWN-VCS-TYPE' =>
           pht('Unknown repository VCS type.'),
         'ERR-UNSUPPORTED-VCS' =>
-          pht('VCS is not supported for this method.'));
+          pht('VCS is not supported for this method.'),
+      );
   }
 
   /**

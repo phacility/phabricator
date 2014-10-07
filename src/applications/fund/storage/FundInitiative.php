@@ -13,6 +13,7 @@ final class FundInitiative extends FundDAO
 
   protected $name;
   protected $ownerPHID;
+  protected $merchantPHID;
   protected $description;
   protected $viewPolicy;
   protected $editPolicy;
@@ -52,6 +53,7 @@ final class FundInitiative extends FundDAO
         'name' => 'text255',
         'description' => 'text',
         'status' => 'text32',
+        'merchantPHID' => 'phid?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_status' => array(

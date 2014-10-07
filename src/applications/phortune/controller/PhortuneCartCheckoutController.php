@@ -23,6 +23,7 @@ final class PhortuneCartCheckoutController
     }
 
     $cancel_uri = $cart->getCancelURI();
+    $merchant = $cart->getMerchant();
 
     switch ($cart->getStatus()) {
       case PhortuneCart::STATUS_BUILDING:
@@ -37,6 +38,25 @@ final class PhortuneCartCheckoutController
       case PhortuneCart::STATUS_READY:
         // This is the expected, normal state for a cart that's ready for
         // checkout.
+        break;
+      case PhortuneCart::STATUS_PURCHASING:
+        // We've started the purchase workflow for this cart, but were not able
+        // to complete it. If the workflow is on an external site, this could
+        // happen because the user abandoned the workflow. Just return them to
+        // the right place so they can resume where they left off.
+        $uri = $cart->getMetadataValue('provider.checkoutURI');
+        if ($uri !== null) {
+          return id(new AphrontRedirectResponse())
+            ->setIsExternal(true)
+            ->setURI($uri);
+        }
+
+        return $this->newDialog()
+          ->setTitle(pht('Charge Failed'))
+          ->appendParagraph(
+            pht(
+              'Failed to charge this cart.'))
+          ->addCancelButton($cancel_uri);
         break;
       case PhortuneCart::STATUS_CHARGED:
         // TODO: This is really bad (we took your money and at least partially
@@ -64,6 +84,7 @@ final class PhortuneCartCheckoutController
     $methods = id(new PhortunePaymentMethodQuery())
       ->setViewer($viewer)
       ->withAccountPHIDs(array($account->getPHID()))
+      ->withMerchantPHIDs(array($merchant->getPHID()))
       ->withStatuses(array(PhortunePaymentMethod::STATUS_ACTIVE))
       ->execute();
 
@@ -89,24 +110,8 @@ final class PhortuneCartCheckoutController
       if (!$errors) {
         $provider = $method->buildPaymentProvider();
 
-        $charge = id(new PhortuneCharge())
-          ->setAccountPHID($account->getPHID())
-          ->setCartPHID($cart->getPHID())
-          ->setAuthorPHID($viewer->getPHID())
-          ->setPaymentProviderKey($provider->getProviderKey())
-          ->setPaymentMethodPHID($method->getPHID())
-          ->setAmountAsCurrency($cart->getTotalPriceAsCurrency())
-          ->setStatus(PhortuneCharge::STATUS_PENDING);
-
-        $charge->openTransaction();
-          $charge->save();
-
-          $cart->setStatus(PhortuneCart::STATUS_PURCHASING);
-          $cart->save();
-        $charge->saveTransaction();
-
+        $charge = $cart->willApplyCharge($viewer, $provider, $method);
         $provider->applyCharge($method, $charge);
-
         $cart->didApplyCharge($charge);
 
         $done_uri = $cart->getDoneURI();
@@ -139,16 +144,24 @@ final class PhortuneCartCheckoutController
 
     $method_control->setError($e_method);
 
-    $payment_method_uri = $this->getApplicationURI(
-      $account->getID().'/card/new/');
+    $account_id = $account->getID();
+
+    $payment_method_uri = $this->getApplicationURI("{$account_id}/card/new/");
+    $payment_method_uri = new PhutilURI($payment_method_uri);
+    $payment_method_uri->setQueryParams(
+      array(
+        'merchantID' => $merchant->getID(),
+        'cartID' => $cart->getID(),
+      ));
 
     $form = id(new AphrontFormView())
       ->setUser($viewer)
       ->appendChild($method_control);
 
-    $add_providers = PhortunePaymentProvider::getProvidersForAddPaymentMethod();
+    $add_providers = $this->loadCreatePaymentMethodProvidersForMerchant(
+      $merchant);
     if ($add_providers) {
-      $new_method = phutil_tag(
+      $new_method = javelin_tag(
         'a',
         array(
           'class' => 'button grey',
@@ -162,16 +175,20 @@ final class PhortuneCartCheckoutController
     }
 
     if ($methods || $add_providers) {
-      $form
-        ->appendChild(
-          id(new AphrontFormSubmitControl())
-            ->setValue(pht('Submit Payment'))
-            ->setDisabled(!$methods));
+      $submit = id(new AphrontFormSubmitControl())
+        ->setValue(pht('Submit Payment'))
+        ->setDisabled(!$methods);
+
+      if ($cart->getCancelURI() !== null) {
+        $submit->addCancelButton($cart->getCancelURI());
+      }
+
+      $form->appendChild($submit);
     }
 
     $provider_form = null;
 
-    $pay_providers = PhortunePaymentProvider::getProvidersForOneTimePayment();
+    $pay_providers = $this->loadOneTimePaymentProvidersForMerchant($merchant);
     if ($pay_providers) {
       $one_time_options = array();
       foreach ($pay_providers as $provider) {

@@ -229,7 +229,7 @@ final class DifferentialDiff
       'lintStatus' => $this->getLintStatus(),
       'changes' => array(),
       'properties' => array(),
-      'projectName' => $this->getArcanistProjectName()
+      'projectName' => $this->getArcanistProjectName(),
     );
 
     $dict['changes'] = $this->buildChangesList();

@@ -99,7 +99,8 @@ final class PhragmentPolicyController extends PhragmentController {
       array(
         $crumbs,
         $this->renderConfigurationWarningIfRequired(),
-        $box),
+        $box,
+      ),
       array(
         'title' => pht('Edit Fragment Policies'),
       ));

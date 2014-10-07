@@ -115,7 +115,8 @@ final class DifferentialUpdateUnitResultsConduitAPIMethod
         DifferentialUnitTestResult::RESULT_SKIP =>
           DifferentialUnitStatus::UNIT_OKAY,
         DifferentialUnitTestResult::RESULT_POSTPONED =>
-          DifferentialUnitStatus::UNIT_POSTPONED);
+          DifferentialUnitStatus::UNIT_POSTPONED,
+      );
 
     // These are the relative priorities for the unit test results
     $status_codes_priority =
@@ -123,7 +124,8 @@ final class DifferentialUpdateUnitResultsConduitAPIMethod
         DifferentialUnitStatus::UNIT_OKAY => 1,
         DifferentialUnitStatus::UNIT_WARN => 2,
         DifferentialUnitStatus::UNIT_POSTPONED => 3,
-        DifferentialUnitStatus::UNIT_FAIL => 4);
+        DifferentialUnitStatus::UNIT_FAIL => 4,
+      );
 
     // Walk the now-current list of status codes to find the overall diff
     // status

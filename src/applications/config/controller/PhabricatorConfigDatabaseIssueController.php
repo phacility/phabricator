@@ -25,7 +25,8 @@ final class PhabricatorConfigDatabaseIssueController
           null,
           null,
           null,
-          $issue);
+          $issue,
+        );
       }
       foreach ($database->getTables() as $table_name => $table) {
         foreach ($table->getLocalIssues() as $issue) {
@@ -34,7 +35,8 @@ final class PhabricatorConfigDatabaseIssueController
             $table_name,
             null,
             null,
-            $issue);
+            $issue,
+          );
         }
         foreach ($table->getColumns() as $column_name => $column) {
           foreach ($column->getLocalIssues() as $issue) {
@@ -43,7 +45,8 @@ final class PhabricatorConfigDatabaseIssueController
               $table_name,
               'column',
               $column_name,
-              $issue);
+              $issue,
+            );
           }
         }
         foreach ($table->getKeys() as $key_name => $key) {
@@ -53,7 +56,8 @@ final class PhabricatorConfigDatabaseIssueController
               $table_name,
               'key',
               $key_name,
-              $issue);
+              $issue,
+            );
           }
         }
       }

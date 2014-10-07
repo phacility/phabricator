@@ -14,14 +14,16 @@ final class PhortunePaymentMethod extends PhortuneDAO
   protected $status;
   protected $accountPHID;
   protected $authorPHID;
+  protected $merchantPHID;
+  protected $providerPHID;
   protected $expires;
   protected $metadata = array();
   protected $brand;
   protected $lastFourDigits;
-  protected $providerType;
-  protected $providerDomain;
 
   private $account = self::ATTACHABLE;
+  private $merchant = self::ATTACHABLE;
+  private $providerConfig = self::ATTACHABLE;
 
   public function getConfiguration() {
     return array(
@@ -34,13 +36,14 @@ final class PhortunePaymentMethod extends PhortuneDAO
         'status' => 'text64',
         'brand' => 'text64',
         'expires' => 'text16',
-        'providerType' => 'text16',
-        'providerDomain' => 'text64',
         'lastFourDigits' => 'text16',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_account' => array(
           'columns' => array('accountPHID', 'status'),
+        ),
+        'key_merchant' => array(
+          'columns' => array('merchantPHID', 'accountPHID'),
         ),
       ),
     ) + parent::getConfiguration();
@@ -48,7 +51,7 @@ final class PhortunePaymentMethod extends PhortuneDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_PAYM);
+      PhortunePaymentMethodPHIDType::TYPECONST);
   }
 
   public function attachAccount(PhortuneAccount $account) {
@@ -58,6 +61,24 @@ final class PhortunePaymentMethod extends PhortuneDAO
 
   public function getAccount() {
     return $this->assertAttached($this->account);
+  }
+
+  public function attachMerchant(PhortuneMerchant $merchant) {
+    $this->merchant = $merchant;
+    return $this;
+  }
+
+  public function getMerchant() {
+    return $this->assertAttached($this->merchant);
+  }
+
+  public function attachProviderConfig(PhortunePaymentProviderConfig $config) {
+    $this->providerConfig = $config;
+    return $this;
+  }
+
+  public function getProviderConfig() {
+    return $this->assertAttached($this->providerConfig);
   }
 
   public function getDescription() {
@@ -75,26 +96,8 @@ final class PhortunePaymentMethod extends PhortuneDAO
   }
 
   public function buildPaymentProvider() {
-    $providers = PhortunePaymentProvider::getAllProviders();
-
-    $accept = array();
-    foreach ($providers as $provider) {
-      if ($provider->canHandlePaymentMethod($this)) {
-        $accept[] = $provider;
-      }
-    }
-
-    if (!$accept) {
-      throw new PhortuneNoPaymentProviderException($this);
-    }
-
-    if (count($accept) > 1) {
-      throw new PhortuneMultiplePaymentProvidersException($this, $accept);
-    }
-
-    return head($accept);
+    return $this->getProviderConfig()->buildProvider();
   }
-
 
   public function getDisplayName() {
     if (strlen($this->name)) {

@@ -88,7 +88,8 @@ final class PhragmentBrowseController extends PhragmentController {
         $crumbs,
         $this->renderConfigurationWarningIfRequired(),
         $current_box,
-        $list),
+        $list,
+      ),
       array(
         'title' => pht('Browse Fragments'),
       ));

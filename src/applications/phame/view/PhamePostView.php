@@ -203,7 +203,7 @@ final class PhamePostView extends AphrontView {
 
     $disqus_thread = phutil_tag('div',
       array(
-        'id' => 'disqus_thread'
+        'id' => 'disqus_thread',
       ));
 
     // protip - try some  var disqus_developer = 1; action to test locally

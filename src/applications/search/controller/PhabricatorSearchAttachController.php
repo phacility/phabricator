@@ -81,7 +81,8 @@ final class PhabricatorSearchAttachController
           ->setMetadataValue('edge:type', $edge_type)
           ->setNewValue(array(
             '+' => array_fuse($add_phids),
-            '-' => array_fuse($rem_phids)));
+            '-' => array_fuse($rem_phids),
+          ));
         $txn_editor->applyTransactions(
           $object->getApplicationTransactionObject(),
           array($txn_template));
@@ -160,7 +161,8 @@ final class PhabricatorSearchAttachController
       $cc_vector[] = $target->getCCPHIDs();
       $cc_vector[] = array(
         $target->getAuthorPHID(),
-        $target->getOwnerPHID());
+        $target->getOwnerPHID(),
+      );
 
       $merged_into_txn = id(new ManiphestTransaction())
         ->setTransactionType(ManiphestTransaction::TYPE_MERGED_INTO)

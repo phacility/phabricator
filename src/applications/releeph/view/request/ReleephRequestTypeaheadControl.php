@@ -51,7 +51,7 @@ final class ReleephRequestTypeaheadControl extends AphrontFormControl {
         'callsign'  => $this->repo->getCallsign(),
         'since'     => $this->startTime,
         'limit'     => 16,
-      )
+      ),
     ));
 
     return $div;

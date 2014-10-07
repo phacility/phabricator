@@ -81,11 +81,12 @@ final class PhabricatorPeopleCalendarController
     $crumbs->addTextCrumb($date->format('F Y'));
 
     return $this->buildApplicationPage(
+      array(
+        $crumbs,
+        $month_view,
+     ),
      array(
-      $crumbs,
-      $month_view),
-     array(
-        'title' => pht('Calendar'),
-      ));
+       'title' => pht('Calendar'),
+     ));
   }
 }

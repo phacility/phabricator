@@ -83,7 +83,8 @@ final class PhragmentGetPatchConduitAPIMethod
               'fileNew' => $files[$file_phid],
               'hashOld' => $hash_caller,
               'hashNew' => $hash_current,
-              'patchURI' => null);
+              'patchURI' => null,
+            );
           }
         } else {
           // We have a record of this as a file, but there is no file
@@ -95,7 +96,8 @@ final class PhragmentGetPatchConduitAPIMethod
             'fileNew' => null,
             'hashOld' => $hash_caller,
             'hashNew' => PhragmentPatchUtil::EMPTY_HASH,
-            'patchURI' => null);
+            'patchURI' => null,
+          );
         }
       } else {
         // If $mappings[$path] does not exist, then the user has a file,
@@ -125,7 +127,8 @@ final class PhragmentGetPatchConduitAPIMethod
             'fileNew' => $files[$file_phid],
             'hashOld' => PhragmentPatchUtil::EMPTY_HASH,
             'hashNew' => $hash_current,
-            'patchURI' => null);
+            'patchURI' => null,
+          );
         } else {
           // We have a record of deleting this file, and the caller hasn't
           // reported it, so they've probably deleted it in a previous

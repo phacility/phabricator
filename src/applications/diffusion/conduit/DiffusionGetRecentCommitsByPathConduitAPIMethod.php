@@ -54,7 +54,8 @@ final class DiffusionGetRecentCommitsByPathConduitAPIMethod
         'offset' => 0,
         'limit' => $limit,
         'needDirectChanges' => true,
-        'needChildChanges' => true));
+        'needChildChanges' => true,
+      ));
     $history = DiffusionPathChange::newFromConduit(
       $history_result['pathChanges']);
 

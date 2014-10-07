@@ -148,7 +148,7 @@ final class PHUITimelineEventView extends AphrontView {
     return $this;
   }
 
-  public function setToken($token, $removed=false) {
+  public function setToken($token, $removed = false) {
     $this->token = $token;
     $this->tokenRemoved = $removed;
     return $this;

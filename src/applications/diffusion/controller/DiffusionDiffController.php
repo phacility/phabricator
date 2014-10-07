@@ -50,7 +50,8 @@ final class DiffusionDiffController extends DiffusionController {
       'diffusion.diffquery',
       array(
         'commit' => $drequest->getCommit(),
-        'path' => $drequest->getPath()));
+        'path' => $drequest->getPath(),
+      ));
     $drequest->updateSymbolicCommit($data['effectiveCommit']);
     $raw_changes = ArcanistDiffChange::newFromConduit($data['changes']);
     $diff = DifferentialDiff::newFromRawChanges($raw_changes);
@@ -66,7 +67,8 @@ final class DiffusionDiffController extends DiffusionController {
     $parser->setChangeset($changeset);
     $parser->setRenderingReference($drequest->generateURI(
       array(
-        'action' => 'rendering-ref')));
+        'action' => 'rendering-ref',
+      )));
 
     $parser->setCharacterEncoding($request->getStr('encoding'));
     $parser->setHighlightAs($request->getStr('highlight'));

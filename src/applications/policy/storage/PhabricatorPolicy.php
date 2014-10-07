@@ -245,7 +245,7 @@ final class PhabricatorPolicy
     }
   }
 
-  public function renderDescription($icon=false) {
+  public function renderDescription($icon = false) {
     $img = null;
     if ($icon) {
       $img = id(new PHUIIconView())

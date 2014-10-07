@@ -215,7 +215,7 @@ final class PhabricatorImageTransformer {
       'dx' => $dx,
       'dy' => $dy,
       'sdx' => $sdx,
-      'sdy' => $sdy
+      'sdy' => $sdy,
     );
   }
 

@@ -1052,7 +1052,7 @@ abstract class HeraldAdapter {
     $match_title = phutil_tag(
       'p',
       array(
-        'class' => 'herald-list-description'
+        'class' => 'herald-list-description',
       ),
       $match_text);
 
@@ -1061,11 +1061,12 @@ abstract class HeraldAdapter {
       $match_list[] = phutil_tag(
         'div',
         array(
-          'class' => 'herald-list-item'
+          'class' => 'herald-list-item',
         ),
         array(
           $icon,
-          $this->renderConditionAsText($condition, $handles)));
+          $this->renderConditionAsText($condition, $handles),
+        ));
     }
 
     $integer_code_for_every = HeraldRepetitionPolicyConfig::toInt(
@@ -1082,7 +1083,7 @@ abstract class HeraldAdapter {
     $action_title = phutil_tag(
       'p',
       array(
-        'class' => 'herald-list-description'
+        'class' => 'herald-list-description',
       ),
       $action_text);
 
@@ -1091,17 +1092,20 @@ abstract class HeraldAdapter {
       $action_list[] = phutil_tag(
         'div',
         array(
-          'class' => 'herald-list-item'
+          'class' => 'herald-list-item',
         ),
         array(
           $icon,
-          $this->renderActionAsText($action, $handles)));    }
+          $this->renderActionAsText($action, $handles),
+        ));
+    }
 
     return array(
       $match_title,
       $match_list,
       $action_title,
-      $action_list);
+      $action_list,
+    );
   }
 
   private function renderConditionAsText(

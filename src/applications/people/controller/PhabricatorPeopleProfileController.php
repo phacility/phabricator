@@ -150,7 +150,7 @@ final class PhabricatorPeopleProfileController
       ),
       array(
         $calendar,
-        $feed
+        $feed,
       ));
 
     $object_box = id(new PHUIObjectBoxView())
@@ -271,7 +271,7 @@ final class PhabricatorPeopleProfileController
       $header = phutil_tag(
         'a',
         array(
-          'href' => $this->getRequest()->getRequestURI().'calendar/'
+          'href' => $this->getRequest()->getRequestURI().'calendar/',
         ),
         $headertext);
 

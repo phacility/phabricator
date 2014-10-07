@@ -11,6 +11,11 @@
       "rule" : ".login-Asana",
       "hash" : "30df492eab339fa64c9ae9b21bb46a18"
     },
+    "login-Balanced"     : {
+      "name" : "login-Balanced",
+      "rule" : ".login-Balanced",
+      "hash" : "46bbf6e8329889b1ad55a96beacfd2f3"
+    },
     "login-Bitbucket"    : {
       "name" : "login-Bitbucket",
       "rule" : ".login-Bitbucket",
@@ -76,6 +81,11 @@
       "rule" : ".login-Openid",
       "hash" : "9267ffbb8d4e6dee409c4d8fa2d50c0a"
     },
+    "login-PayPal"       : {
+      "name" : "login-PayPal",
+      "rule" : ".login-PayPal",
+      "hash" : "60dc511206dd2923418fa07f84bf2db3"
+    },
     "login-Persona"      : {
       "name" : "login-Persona",
       "rule" : ".login-Persona",
@@ -86,6 +96,16 @@
       "rule" : ".login-Phabricator",
       "hash" : "fad258eb347a1ccf5800b0ee2d8e6e49"
     },
+    "login-Stripe"       : {
+      "name" : "login-Stripe",
+      "rule" : ".login-Stripe",
+      "hash" : "6a71ba00ed2325012650b4bf63bb064d"
+    },
+    "login-TestPayment"  : {
+      "name" : "login-TestPayment",
+      "rule" : ".login-TestPayment",
+      "hash" : "9783485db2b5f5035265f4e6d2bc6cd0"
+    },
     "login-TwitchTV"     : {
       "name" : "login-TwitchTV",
       "rule" : ".login-TwitchTV",
@@ -95,6 +115,11 @@
       "name" : "login-Twitter",
       "rule" : ".login-Twitter",
       "hash" : "0b64983507a720b365474b778a966bab"
+    },
+    "login-WePay"        : {
+      "name" : "login-WePay",
+      "rule" : ".login-WePay",
+      "hash" : "7dd33f6271e948b86df5a642d504c995"
     },
     "login-WordPressCOM" : {
       "name" : "login-WordPressCOM",

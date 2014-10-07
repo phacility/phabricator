@@ -87,7 +87,7 @@ final class PonderQuestion extends PonderDAO
       ->withEdgeTypes(
         array(
           PhabricatorEdgeConfig::TYPE_VOTING_USER_HAS_QUESTION,
-          PhabricatorEdgeConfig::TYPE_VOTING_USER_HAS_ANSWER
+          PhabricatorEdgeConfig::TYPE_VOTING_USER_HAS_ANSWER,
         ))
       ->needEdgeData(true)
       ->execute();

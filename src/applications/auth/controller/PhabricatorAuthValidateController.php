@@ -22,7 +22,8 @@ final class PhabricatorAuthValidateController
         array(
           pht(
             'Login validation is missing expected parameter ("%s").',
-            'phusr')));
+            'phusr'),
+        ));
     }
 
     $expect_phusr = $request->getStr('expect');

@@ -20,7 +20,7 @@ final class ConpherenceQueryTransactionConduitAPIMethod
       'threadID' => 'optional int',
       'threadPHID' => 'optional phid',
       'limit' => 'optional int',
-      'offset' => 'optional int'
+      'offset' => 'optional int',
     );
   }
 
@@ -32,7 +32,7 @@ final class ConpherenceQueryTransactionConduitAPIMethod
     return array(
       'ERR_USAGE_NO_THREAD_ID' => pht(
         'You must specify a thread id or thread phid to query transactions '.
-        'from.')
+        'from.'),
     );
   }
 
@@ -88,7 +88,8 @@ final class ConpherenceQueryTransactionConduitAPIMethod
         'authorPHID' => $transaction->getAuthorPHID(),
         'dateCreated' => $transaction->getDateCreated(),
         'conpherenceID' => $conpherence->getID(),
-        'conpherencePHID' => $conpherence->getPHID());
+        'conpherencePHID' => $conpherence->getPHID(),
+      );
     }
     return $data;
   }

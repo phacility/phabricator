@@ -31,7 +31,7 @@ final class PhabricatorSetupCheckDaemons extends PhabricatorSetupCheck {
           'a',
           array(
             'href' => $doc_href,
-            'target' => '_blank'
+            'target' => '_blank',
           ),
           pht('Managing Daemons with phd')));
 
@@ -100,14 +100,14 @@ final class PhabricatorSetupCheckDaemons extends PhabricatorSetupCheck {
             'a',
             array(
               'href' => '/daemon/',
-              'target' => '_blank'
+              'target' => '_blank',
             ),
             pht('Daemon Console')),
           phutil_tag(
             'a',
             array(
               'href' => $doc_href,
-              'target' => '_blank'
+              'target' => '_blank',
             ),
             pht('Managing Daemons with phd')),
           phutil_tag('tt', array(), 'PHABRICATOR_ENV'),

@@ -171,7 +171,8 @@ final class DiffusionHistoryTableView extends DiffusionView {
             'span',
             array(
               'sigil' => 'has-tooltip',
-              'meta' => array('tip' => $name)),
+              'meta' => array('tip' => $name),
+            ),
             $icon_view);
 
           Javelin::initBehavior('phabricator-tooltips');

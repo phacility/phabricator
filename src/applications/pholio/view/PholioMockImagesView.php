@@ -142,7 +142,7 @@ final class PholioMockImagesView extends AphrontView {
       array(
         'id' => $viewport_id,
         'sigil' => 'mock-viewport',
-        'class' => 'pholio-mock-image-viewport'
+        'class' => 'pholio-mock-image-viewport',
       ),
       '');
 
@@ -171,7 +171,7 @@ final class PholioMockImagesView extends AphrontView {
       array(
         'id' => 'mock-image-description',
         'sigil' => 'mock-image-description',
-        'class' => 'mock-image-description'
+        'class' => 'mock-image-description',
       ),
       '');
 
@@ -179,7 +179,7 @@ final class PholioMockImagesView extends AphrontView {
       'div',
         array(
           'class' => 'pholio-mock-image-container',
-          'id' => 'pholio-mock-image-container'
+          'id' => 'pholio-mock-image-container',
         ),
       array($mock_wrapper, $inline_comments_holder));
 

@@ -32,7 +32,7 @@ final class HeraldRuleTestCase extends PhabricatorTestCase {
         // Global
         1,
         2,
-        5
+        5,
       ),
       array_values(mpull($rules, 'getID')));
   }

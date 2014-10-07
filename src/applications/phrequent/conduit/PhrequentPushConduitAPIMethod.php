@@ -19,7 +19,7 @@ final class PhrequentPushConduitAPIMethod extends PhrequentConduitAPIMethod {
   public function defineParamTypes() {
     return array(
       'objectPHID' => 'required phid',
-      'startTime' => 'int'
+      'startTime' => 'int',
     );
   }
 

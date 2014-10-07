@@ -15,7 +15,7 @@ final class ConpherenceCreateThreadConduitAPIMethod
     return array(
       'title' => 'optional string',
       'message' => 'required string',
-      'participantPHIDs' => 'required list<phids>'
+      'participantPHIDs' => 'required list<phids>',
     );
   }
 
@@ -28,7 +28,7 @@ final class ConpherenceCreateThreadConduitAPIMethod
       'ERR_EMPTY_PARTICIPANT_PHIDS' => pht(
         'You must specify participant phids.'),
       'ERR_EMPTY_MESSAGE' => pht(
-        'You must specify a message.')
+        'You must specify a message.'),
     );
   }
 

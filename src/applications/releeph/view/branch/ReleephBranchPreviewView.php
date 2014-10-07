@@ -46,7 +46,7 @@ final class ReleephBranchPreviewView extends AphrontFormControl {
       'params'        => array(
         'static'  => $this->statics,
         'dynamic' => $this->dynamics,
-      )
+      ),
     ));
 
     return phutil_tag(

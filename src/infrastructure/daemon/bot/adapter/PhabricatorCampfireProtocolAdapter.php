@@ -92,7 +92,9 @@ final class PhabricatorCampfireProtocolAdapter
       array(
         'message' => array(
           'type' => $type,
-          'body' => $message)));
+          'body' => $message,
+        ),
+      ));
   }
 
   public function __destruct() {

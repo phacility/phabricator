@@ -37,14 +37,14 @@ final class PasteEmbedView extends AphrontView {
     $link = phutil_tag(
       'a',
       array(
-        'href' => '/P'.$this->paste->getID()
+        'href' => '/P'.$this->paste->getID(),
       ),
       $this->handle->getFullName());
 
     $head = phutil_tag(
       'div',
       array(
-        'class' => 'paste-embed-head'
+        'class' => 'paste-embed-head',
       ),
       $link);
 

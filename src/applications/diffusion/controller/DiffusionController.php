@@ -184,7 +184,8 @@ abstract class DiffusionController extends PhabricatorController {
     $divider = phutil_tag(
       'span',
       array(
-        'class' => 'phui-header-divider'),
+        'class' => 'phui-header-divider',
+      ),
       '/');
 
     $links = array();

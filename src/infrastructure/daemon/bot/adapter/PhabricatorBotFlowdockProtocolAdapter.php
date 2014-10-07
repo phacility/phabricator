@@ -76,7 +76,8 @@ final class PhabricatorBotFlowdockProtocolAdapter
         array(
           'flow' => $flow->getName(),
           'event' => 'message',
-          'content' => $body));
+          'content' => $body,
+        ));
     }
 
   public function __destruct() {

@@ -184,7 +184,7 @@ final class PhabricatorFilesConfigOptions
        ->setBoolOptions(
          array(
            pht('Enable'),
-           pht('Disable')
+           pht('Disable'),
          ))->setDescription(
              pht("This option will enable animated gif images".
                   "to be set as profile pictures. The 'convert' binary ".

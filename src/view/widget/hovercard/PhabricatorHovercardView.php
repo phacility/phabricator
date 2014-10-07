@@ -108,21 +108,22 @@ final class PhabricatorHovercardView extends AphrontView {
       $body = phutil_tag(
         'div',
         array(
-          'class' => 'phabricator-hovercard-body-image'),
-          phutil_tag(
-            'div',
-            array(
-              'class' => 'profile-header-picture-frame',
-              'style' => 'background-image: url('.$handle->getImageURI().');',
-            ),
-            ''))
-        ->appendHTML(
-          phutil_tag(
-            'div',
-            array(
-              'class' => 'phabricator-hovercard-body-details',
-            ),
-            $body));
+          'class' => 'phabricator-hovercard-body-image',
+        ),
+        phutil_tag(
+          'div',
+          array(
+            'class' => 'profile-header-picture-frame',
+            'style' => 'background-image: url('.$handle->getImageURI().');',
+          ),
+          ''))
+      ->appendHTML(
+        phutil_tag(
+          'div',
+          array(
+            'class' => 'phabricator-hovercard-body-details',
+          ),
+          $body));
     }
 
     $buttons = array();

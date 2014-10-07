@@ -145,10 +145,12 @@ final class DiffusionLastModifiedController extends DiffusionController {
     if ($lint !== null) {
       $return['lint'] = phutil_tag(
         'a',
-        array('href' => $drequest->generateURI(array(
-          'action' => 'lint',
-          'lint' => null,
-        ))),
+        array(
+          'href' => $drequest->generateURI(array(
+            'action' => 'lint',
+            'lint' => null,
+          )),
+        ),
         number_format($lint));
     }
 

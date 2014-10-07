@@ -55,7 +55,8 @@ final class CalendarTimeUtilTestCase extends PhabricatorTestCase {
       'Wednesday',
       'Thursday',
       'Friday',
-      'Saturday');
+      'Saturday',
+    );
   }
 
 }

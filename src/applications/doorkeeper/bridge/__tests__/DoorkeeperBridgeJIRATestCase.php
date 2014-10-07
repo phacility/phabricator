@@ -8,13 +8,13 @@ final class DoorkeeperBridgeJIRATestCase extends PhabricatorTestCase {
         // Installed at domain root.
         'http://jira.example.com/rest/api/2/issue/1',
         'TP-1',
-        'http://jira.example.com/browse/TP-1'
+        'http://jira.example.com/browse/TP-1',
       ),
       array(
         // Installed on path.
         'http://jira.example.com/jira/rest/api/2/issue/1',
         'TP-1',
-        'http://jira.example.com/jira/browse/TP-1'
+        'http://jira.example.com/jira/browse/TP-1',
       ),
       array(
         // A URI we don't understand.

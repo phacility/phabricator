@@ -75,7 +75,7 @@ final class PhabricatorSettingsPanelEmailAddresses
         array(
           'class'   => 'button small grey',
           'href'    => $uri->alter('delete', $email->getID()),
-          'sigil'   => 'workflow'
+          'sigil'   => 'workflow',
         ),
         pht('Remove'));
 

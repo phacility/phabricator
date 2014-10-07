@@ -120,7 +120,8 @@ final class PhabricatorDashboardLayoutConfig {
       case self::MODE_THIRDS_AND_THIRD:
         return array(
           0 => pht('Left'),
-          1 => pht('Right'));
+          1 => pht('Right'),
+        );
         break;
       case self::MODE_FULL:
         throw new Exception('There is only one column in mode full.');
@@ -156,7 +157,7 @@ final class PhabricatorDashboardLayoutConfig {
   public function toDictionary() {
     return array(
       'layoutMode' => $this->getLayoutMode(),
-      'panelLocations' => $this->getPanelLocations()
+      'panelLocations' => $this->getPanelLocations(),
     );
   }
 

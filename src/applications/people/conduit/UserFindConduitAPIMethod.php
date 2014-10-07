@@ -20,7 +20,7 @@ final class UserFindConduitAPIMethod extends UserConduitAPIMethod {
 
   public function defineParamTypes() {
     return array(
-      'aliases' => 'required list<string>'
+      'aliases' => 'required list<string>',
     );
   }
 

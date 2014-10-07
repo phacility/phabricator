@@ -56,9 +56,19 @@ final class PhortuneAccount extends PhortuneDAO
     return $account;
   }
 
-  public function newCart(PhabricatorUser $actor) {
-    return PhortuneCart::initializeNewCart($actor, $this)
-      ->save();
+  public function newCart(
+    PhabricatorUser $actor,
+    PhortuneCartImplementation $implementation,
+    PhortuneMerchant $merchant) {
+
+    $cart = PhortuneCart::initializeNewCart($actor, $this, $merchant);
+
+    $cart->setCartClass(get_class($implementation));
+    $cart->attachImplementation($implementation);
+
+    $implementation->willCreateCart($actor, $cart);
+
+    return $cart->save();
   }
 
   public function getConfiguration() {
@@ -72,7 +82,7 @@ final class PhortuneAccount extends PhortuneDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_ACNT);
+      PhortuneAccountPHIDType::TYPECONST);
   }
 
   public function getMemberPHIDs() {

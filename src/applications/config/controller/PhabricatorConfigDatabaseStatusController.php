@@ -372,7 +372,7 @@ final class PhabricatorConfigDatabaseStatusController
           null,
           null,
           null,
-          null
+          null,
         ));
 
     $key_rows = array();

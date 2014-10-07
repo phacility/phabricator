@@ -19,7 +19,8 @@ final class PHUIButtonBarExample extends PhabricatorUIExample {
       'Go Back' => 'fa-chevron-left bluegrey',
       'Choose Date' => 'fa-calendar bluegrey',
       'Edit View' => 'fa-pencil bluegrey',
-      'Go Forward' => 'fa-chevron-right bluegrey');
+      'Go Forward' => 'fa-chevron-right bluegrey',
+    );
     $button_bar = new PHUIButtonBarView();
     foreach ($icons as $text => $icon) {
       $image = id(new PHUIIconView())

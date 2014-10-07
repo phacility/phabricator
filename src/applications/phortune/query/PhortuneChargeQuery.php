@@ -7,6 +7,7 @@ final class PhortuneChargeQuery
   private $phids;
   private $accountPHIDs;
   private $cartPHIDs;
+  private $statuses;
 
   private $needCarts;
 
@@ -27,6 +28,11 @@ final class PhortuneChargeQuery
 
   public function withCartPHIDs(array $cart_phids) {
     $this->cartPHIDs = $cart_phids;
+    return $this;
+  }
+
+  public function withStatuses(array $statuses) {
+    $this->statuses = $statuses;
     return $this;
   }
 
@@ -119,6 +125,13 @@ final class PhortuneChargeQuery
         $conn,
         'charge.cartPHID IN (%Ls)',
         $this->cartPHIDs);
+    }
+
+    if ($this->statuses !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'charge.status IN (%Ls)',
+        $this->statuses);
     }
 
     return $this->formatWhereClause($where);

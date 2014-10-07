@@ -237,7 +237,8 @@ final class PhabricatorPeopleProfilePictureController
             'name'  => 'phid',
             'value' => $phid,
           )),
-        $button);
+        $button,
+      );
 
       $button = phabricator_form(
         $viewer,

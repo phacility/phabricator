@@ -17,7 +17,7 @@ final class DiffusionExistsQueryConduitAPIMethod
 
   protected function defineCustomParamTypes() {
     return array(
-      'commit' => 'required string'
+      'commit' => 'required string',
     );
   }
 

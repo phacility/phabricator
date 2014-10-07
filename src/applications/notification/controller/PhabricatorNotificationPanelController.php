@@ -60,7 +60,7 @@ final class PhabricatorNotificationPanelController
     $connection_ui = phutil_tag(
       'div',
       array(
-        'class' => 'phabricator-notification-footer'
+        'class' => 'phabricator-notification-footer',
       ),
       $connection_status);
 

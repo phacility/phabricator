@@ -81,7 +81,8 @@ final class DiffusionDiffQueryConduitAPIMethod
         if ($path->getTargetPath()) {
           $old = array(
             $path->getTargetPath(),
-            $path->getTargetCommitIdentifier());
+            $path->getTargetCommitIdentifier(),
+          );
         } else {
           $old = array($path->getPath(), $path->getCommitIdentifier() - 1);
         }
@@ -99,7 +100,8 @@ final class DiffusionDiffQueryConduitAPIMethod
       case DifferentialChangeType::TYPE_COPY_HERE:
         $old = array(
           $path->getTargetPath(),
-          $path->getTargetCommitIdentifier());
+          $path->getTargetCommitIdentifier(),
+        );
         $new = array($path->getPath(), $path->getCommitIdentifier());
         $old_name = $path->getTargetPath();
         $new_name = $path->getPath();
@@ -107,7 +109,8 @@ final class DiffusionDiffQueryConduitAPIMethod
       case DifferentialChangeType::TYPE_MOVE_AWAY:
         $old = array(
           $path->getPath(),
-          $path->getCommitIdentifier() - 1);
+          $path->getCommitIdentifier() - 1,
+        );
         $old_name = $path->getPath();
         $new_name = null;
         $new = null;

@@ -40,7 +40,8 @@ final class PhrictionDocumentController
         $project = id(new PhabricatorProjectQuery())
           ->setViewer($user)
           ->withPhrictionSlugs(array(
-            PhrictionDocument::getProjectSlugIdentifier($slug)))
+            PhrictionDocument::getProjectSlugIdentifier($slug),
+          ))
           ->executeOne();
         if (!$project) {
           return new Aphront404Response();
@@ -222,7 +223,7 @@ final class PhrictionDocumentController
     $core_page = phutil_tag(
       'div',
         array(
-          'class' => 'phriction-offset'
+          'class' => 'phriction-offset',
         ),
         array(
           $page_content,
@@ -256,7 +257,8 @@ final class PhrictionDocumentController
       $project = id(new PhabricatorProjectQuery())
         ->setViewer($viewer)
         ->withPhrictionSlugs(array(
-          PhrictionDocument::getProjectSlugIdentifier($slug)))
+          PhrictionDocument::getProjectSlugIdentifier($slug),
+        ))
         ->executeOne();
       if ($project) {
         $project_phid = $project->getPHID();

@@ -21,6 +21,14 @@ final class FundInitiativeBackController
       return new Aphront404Response();
     }
 
+    $merchant = id(new PhortuneMerchantQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($initiative->getMerchantPHID()))
+      ->executeOne();
+    if (!$merchant) {
+      return new Aphront404Response();
+    }
+
     $initiative_uri = '/'.$initiative->getMonogram();
 
     if ($initiative->isClosed()) {
@@ -70,7 +78,10 @@ final class FundInitiativeBackController
           $viewer,
           PhabricatorContentSource::newFromRequest($request));
 
-        $cart = $account->newCart($viewer);
+        $cart_implementation = id(new FundBackerCart())
+          ->setInitiative($initiative);
+
+        $cart = $account->newCart($viewer, $cart_implementation, $merchant);
 
         $purchase = $cart->newPurchase($viewer, $product);
         $purchase

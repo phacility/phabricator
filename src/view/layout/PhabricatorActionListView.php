@@ -57,7 +57,7 @@ final class PhabricatorActionListView extends AphrontView {
       'ul',
       array(
         'class' => 'phabricator-action-list-view',
-        'id' => $this->id
+        'id' => $this->id,
       ),
       $actions);
   }

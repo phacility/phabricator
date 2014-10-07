@@ -41,7 +41,7 @@ final class PhabricatorPhrequentApplication extends PhabricatorApplication {
       '/phrequent/' => array(
         '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhrequentListController',
         'track/(?P<verb>[a-z]+)/(?P<phid>[^/]+)/'
-          => 'PhrequentTrackController'
+          => 'PhrequentTrackController',
       ),
     );
   }

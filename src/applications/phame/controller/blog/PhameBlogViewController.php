@@ -105,7 +105,7 @@ final class PhameBlogViewController extends PhameController {
           'meta' => array(
             'tip' => pht('Atom URI does not support custom domains.'),
             'size' => 320,
-          )
+          ),
         ),
         $feed_uri));
 

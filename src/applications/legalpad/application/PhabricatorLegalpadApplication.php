@@ -63,7 +63,8 @@ final class PhabricatorLegalpadApplication extends PhabricatorApplication {
         'document/' => array(
           'preview/' => 'PhabricatorMarkupPreviewController',
         ),
-      ));
+      ),
+    );
   }
 
   protected function getCustomCapabilities() {

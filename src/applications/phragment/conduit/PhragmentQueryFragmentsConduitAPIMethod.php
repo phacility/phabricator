@@ -74,7 +74,8 @@ final class PhragmentQueryFragmentsConduitAPIMethod
           'path' => $cpath,
           'hash' => $file->getContentHash(),
           'version' => $child->getLatestVersion()->getSequence(),
-          'uri' => $file->getViewURI());
+          'uri' => $file->getViewURI(),
+        );
       }
       $results[$path] = $result;
     }

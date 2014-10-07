@@ -128,7 +128,7 @@ final class FeedQueryConduitAPIMethod extends FeedConduitAPIMethod {
               'authorPHID' => $story_data->getAuthorPHID(),
               'chronologicalKey' => $story_data->getChronologicalKey(),
               'objectPHID' => $story->getPrimaryObjectPHID(),
-              'text' => $story->renderText()
+              'text' => $story->renderText(),
             );
           break;
           default:

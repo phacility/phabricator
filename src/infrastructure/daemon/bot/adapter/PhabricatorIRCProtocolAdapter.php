@@ -20,7 +20,8 @@ final class PhabricatorIRCProtocolAdapter
 
   // Hash map of command translations
   public static $commandTranslations = array(
-    'PRIVMSG' => 'MESSAGE');
+    'PRIVMSG' => 'MESSAGE',
+  );
 
   public function connect() {
     $nick = $this->getConfig('nick', 'phabot');
@@ -246,7 +247,8 @@ final class PhabricatorIRCProtocolAdapter
 
           return array(
             $target,
-            rtrim($matches[2], "\r\n"));
+            rtrim($matches[2], "\r\n"),
+          );
         }
         break;
     }
@@ -254,7 +256,8 @@ final class PhabricatorIRCProtocolAdapter
     // By default we assume there is no target, only a body
     return array(
       null,
-      $data);
+      $data,
+    );
   }
 
   public function disconnect() {

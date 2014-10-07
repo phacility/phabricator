@@ -9,8 +9,6 @@
 final class PhortuneCharge extends PhortuneDAO
   implements PhabricatorPolicyInterface {
 
-  const STATUS_PENDING    = 'charge:pending';
-  const STATUS_AUTHORIZED = 'charge:authorized';
   const STATUS_CHARGING   = 'charge:charging';
   const STATUS_CHARGED    = 'charge:charged';
   const STATUS_FAILED     = 'charge:failed';
@@ -18,7 +16,8 @@ final class PhortuneCharge extends PhortuneDAO
   protected $accountPHID;
   protected $authorPHID;
   protected $cartPHID;
-  protected $paymentProviderKey;
+  protected $providerPHID;
+  protected $merchantPHID;
   protected $paymentMethodPHID;
   protected $amountAsCurrency;
   protected $status;
@@ -26,6 +25,11 @@ final class PhortuneCharge extends PhortuneDAO
 
   private $account = self::ATTACHABLE;
   private $cart = self::ATTACHABLE;
+
+  public static function initializeNewCharge() {
+    return id(new PhortuneCharge())
+      ->setStatus(self::STATUS_CHARGING);
+  }
 
   public function getConfiguration() {
     return array(
@@ -49,13 +53,19 @@ final class PhortuneCharge extends PhortuneDAO
         'key_account' => array(
           'columns' => array('accountPHID'),
         ),
+        'key_merchant' => array(
+          'columns' => array('merchantPHID'),
+        ),
+        'key_provider' => array(
+          'columns' => array('providerPHID'),
+        ),
       ),
     ) + parent::getConfiguration();
   }
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_CHRG);
+      PhortuneChargePHIDType::TYPECONST);
   }
 
   public function getMetadataValue($key, $default = null) {

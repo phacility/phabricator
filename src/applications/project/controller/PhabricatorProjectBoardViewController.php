@@ -68,7 +68,9 @@ final class PhabricatorProjectBoardViewController
     $columns = $column_query->execute();
     $columns = mpull($columns, null, 'getSequence');
 
-    if (empty($columns[0])) {
+    // TODO: Expand the checks here if we add the ability
+    // to hide the Backlog column
+    if (!$columns) {
       switch ($request->getStr('initialize-type')) {
         case 'backlog-only':
           $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
@@ -300,7 +302,7 @@ final class PhabricatorProjectBoardViewController
     $header_link = phutil_tag(
       'a',
       array(
-        'href' => $this->getApplicationURI('view/'.$project->getID().'/')
+        'href' => $this->getApplicationURI('view/'.$project->getID().'/'),
       ),
       $project->getName());
 

@@ -7,6 +7,7 @@ final class FundInitiativeTransaction
   const TYPE_DESCRIPTION = 'fund:description';
   const TYPE_STATUS = 'fund:status';
   const TYPE_BACKER = 'fund:backer';
+  const TYPE_MERCHANT = 'fund:merchant';
 
   public function getApplicationName() {
     return 'fund';
@@ -18,6 +19,27 @@ final class FundInitiativeTransaction
 
   public function getApplicationTransactionCommentObject() {
     return null;
+  }
+
+  public function getRequiredHandlePHIDs() {
+    $phids = parent::getRequiredHandlePHIDs();
+
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    $type = $this->getTransactionType();
+    switch ($type) {
+      case FundInitiativeTransaction::TYPE_MERCHANT:
+        if ($old) {
+          $phids[] = $old;
+        }
+        if ($new) {
+          $phids[] = $new;
+        }
+        break;
+    }
+
+    return $phids;
   }
 
   public function getTitle() {
@@ -62,6 +84,20 @@ final class FundInitiativeTransaction
         return pht(
           '%s backed this initiative.',
           $this->renderHandleLink($author_phid));
+      case FundInitiativeTransaction::TYPE_MERCHANT:
+        if ($old === null) {
+          return pht(
+            '%s set this initiative to pay to %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($new));
+        } else {
+          return pht(
+            '%s changed the merchant receiving funds from this '.
+            'initiative from %s to %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($old),
+            $this->renderHandleLink($new));
+        }
     }
 
     return parent::getTitle();

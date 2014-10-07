@@ -65,8 +65,10 @@ final class ReleephDiffSizeFieldSpecification
           'meta' => array(
             'tip' => $test_blurb,
             'align' => 'E',
-            'size' => 'auto'),
-          'style' => ''),
+            'size' => 'auto',
+          ),
+          'style' => '',
+        ),
         ' + tests');
     }
 
@@ -107,7 +109,7 @@ final class ReleephDiffSizeFieldSpecification
       'tests' => array(
         'lines' => $test_lines,
         'paths' => array_unique($test_paths_touched),
-      )
+      ),
     );
   }
 }

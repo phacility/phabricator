@@ -30,7 +30,7 @@ final class PhabricatorBotWhatsNewHandler extends PhabricatorBotHandler {
       'feed.query',
       array(
         'limit' => 5,
-        'view'  => 'text'
+        'view'  => 'text',
       ));
 
     foreach ($latest as $feed_item) {

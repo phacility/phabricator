@@ -33,7 +33,7 @@ final class DifferentialCreateInlineConduitAPIMethod
       'ERR-BAD-DIFF'     => 'Bad diff ID, or diff does not belong to revision.',
       'ERR-NEED-DIFF'    => 'Neither revision ID nor diff ID was provided.',
       'ERR-NEED-FILE'    => 'A file path was not provided.',
-      'ERR-BAD-FILE'     => "Requested file doesn't exist in this revision."
+      'ERR-BAD-FILE'     => "Requested file doesn't exist in this revision.",
     );
   }
 

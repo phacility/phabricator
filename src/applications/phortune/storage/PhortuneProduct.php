@@ -37,7 +37,7 @@ final class PhortuneProduct extends PhortuneDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_PDCT);
+      PhortuneProductPHIDType::TYPECONST);
   }
 
   public static function initializeNewProduct() {

@@ -24,7 +24,8 @@ final class CalendarTimeUtil {
 
     return array(
       'start_epoch' => $start_day->format('U'),
-      'end_epoch' => $end_day->format('U'));
+      'end_epoch' => $end_day->format('U'),
+    );
   }
 
   public static function getCalendarWeekTimestamps(
@@ -56,7 +57,8 @@ final class CalendarTimeUtil {
     }
     return array(
       'today' => $objects['today'],
-      'epoch_stamps' => $timestamps);
+      'epoch_stamps' => $timestamps,
+    );
   }
 
   private static function getStartDateTimeObjects(
@@ -80,7 +82,8 @@ final class CalendarTimeUtil {
     }
     return array(
       'today' => $today,
-      'start_day' => $start_day);
+      'start_day' => $start_day,
+    );
   }
 
 }

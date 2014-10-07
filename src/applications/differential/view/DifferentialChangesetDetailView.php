@@ -215,7 +215,8 @@ final class DifferentialChangesetDetailView extends AphrontView {
         $buttons,
         phutil_tag('h1',
           array(
-            'class' => 'differential-file-icon-header'),
+            'class' => 'differential-file-icon-header',
+          ),
           array(
             $icon,
             $display_filename,

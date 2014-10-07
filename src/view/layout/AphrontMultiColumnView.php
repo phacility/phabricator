@@ -31,7 +31,8 @@ final class AphrontMultiColumnView extends AphrontView {
       'column' => $column,
       'class' => $class,
       'sigil' => $sigil,
-      'metadata' => $metadata);
+      'metadata' => $metadata,
+    );
     return $this;
   }
 
@@ -95,12 +96,14 @@ final class AphrontMultiColumnView extends AphrontView {
         array(
           'class' => implode(' ', $column_class),
           'sigil' => $column_sigil,
-          'meta'  => $column_metadata),
+          'meta'  => $column_metadata,
+        ),
         $column);
       $columns[] = phutil_tag(
         'div',
         array(
-          'class' => implode(' ', $outer_class)),
+          'class' => implode(' ', $outer_class),
+        ),
         $column_inner);
     }
 
@@ -127,7 +130,7 @@ final class AphrontMultiColumnView extends AphrontView {
     $board = phutil_tag(
       'div',
         array(
-          'class' => implode(' ', $classes)
+          'class' => implode(' ', $classes),
         ),
         $view);
 

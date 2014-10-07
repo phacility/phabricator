@@ -383,7 +383,8 @@ final class ManiphestReportController extends ManiphestController {
       $label,
       number_format($info['open']),
       number_format($info['close']),
-      $fmt);
+      $fmt,
+    );
   }
 
   public function renderOpenTasks() {
@@ -611,7 +612,7 @@ final class ManiphestReportController extends ManiphestController {
         'sigil' => 'has-tooltip',
         'meta'  => array(
           'tip'  => pht('Closed after %s', $edate),
-          'size' => 260
+          'size' => 260,
         ),
       ),
       pht('Recently Closed'));

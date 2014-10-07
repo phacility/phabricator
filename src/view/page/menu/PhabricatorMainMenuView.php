@@ -314,7 +314,7 @@ final class PhabricatorMainMenuView extends AphrontView {
         'span',
         array(
           'id'    => $message_count_id,
-          'class' => 'phabricator-main-menu-message-count'
+          'class' => 'phabricator-main-menu-message-count',
         ),
         $message_count_number);
 
@@ -398,7 +398,7 @@ final class PhabricatorMainMenuView extends AphrontView {
         'span',
         array(
           'id'    => $count_id,
-          'class' => 'phabricator-main-menu-alert-count'
+          'class' => 'phabricator-main-menu-alert-count',
         ),
         $count_number);
 
@@ -447,7 +447,8 @@ final class PhabricatorMainMenuView extends AphrontView {
 
     $dropdowns = array(
       $notification_dropdown,
-      $message_notification_dropdown);
+      $message_notification_dropdown,
+    );
 
     $applications = PhabricatorApplication::getAllInstalledApplications();
     foreach ($applications as $application) {

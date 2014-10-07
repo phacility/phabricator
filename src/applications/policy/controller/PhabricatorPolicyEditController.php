@@ -162,7 +162,7 @@ final class PhabricatorPolicyEditController
                 'href' => '#',
                 'class' => 'button green',
                 'sigil' => 'create-rule',
-                'mustcapture' => true
+                'mustcapture' => true,
               ),
               pht('New Rule')))
           ->setDescription(
@@ -171,7 +171,7 @@ final class PhabricatorPolicyEditController
             'table',
             array(
               'sigil' => 'rules',
-              'class' => 'policy-rules-table'
+              'class' => 'policy-rules-table',
             ),
             '')))
       ->appendChild(

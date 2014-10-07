@@ -70,10 +70,11 @@ abstract class ConpherenceController extends PhabricatorController {
         phutil_tag(
           'div',
           array(
-            'class' => 'header-loading-mask'
+            'class' => 'header-loading-mask',
           ),
           ''),
-        $crumbs));
+        $crumbs,
+      ));
   }
 
   protected function renderConpherenceTransactions(

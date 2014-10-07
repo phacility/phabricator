@@ -81,7 +81,7 @@ final class ReleephBranchEditController extends ReleephBranchController {
           ->setLabel(pht('Created By'))
           ->setValue($handles[$creator_phid]->renderLink()))
       ->appendChild(
-        id(new AphrontFormTextControl)
+        id(new AphrontFormTextControl())
           ->setLabel(pht('Symbolic Name'))
           ->setName('symbolicName')
           ->setValue($symbolic_name)

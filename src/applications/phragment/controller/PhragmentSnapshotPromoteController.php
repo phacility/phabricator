@@ -25,7 +25,8 @@ final class PhragmentSnapshotPromoteController extends PhragmentController {
         ->setViewer($viewer)
         ->requireCapabilities(array(
           PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT))
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
         ->withPaths(array($this->dblob))
         ->executeOne();
       if ($this->targetFragment === null) {
@@ -45,7 +46,8 @@ final class PhragmentSnapshotPromoteController extends PhragmentController {
         ->setViewer($viewer)
         ->requireCapabilities(array(
           PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT))
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
         ->withIDs(array($this->id))
         ->executeOne();
       if ($this->targetSnapshot === null) {
@@ -55,7 +57,8 @@ final class PhragmentSnapshotPromoteController extends PhragmentController {
       $this->snapshots = id(new PhragmentSnapshotQuery())
         ->setViewer($viewer)
         ->withPrimaryFragmentPHIDs(array(
-          $this->targetSnapshot->getPrimaryFragmentPHID()))
+          $this->targetSnapshot->getPrimaryFragmentPHID(),
+        ))
         ->execute();
     }
 

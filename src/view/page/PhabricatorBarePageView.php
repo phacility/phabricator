@@ -79,14 +79,14 @@ class PhabricatorBarePageView extends AphrontPageView {
       'link',
       array(
         'rel' => 'apple-touch-icon',
-        'href' => celerity_get_resource_uri('/rsrc/image/apple-touch-icon.png')
+        'href' => celerity_get_resource_uri('/rsrc/image/apple-touch-icon.png'),
       ));
 
     $apple_tag = phutil_tag(
       'meta',
       array(
         'name' => 'apple-mobile-web-app-status-bar-style',
-        'content' => 'black-translucent'
+        'content' => 'black-translucent',
       ));
 
     $referrer_tag = phutil_tag(

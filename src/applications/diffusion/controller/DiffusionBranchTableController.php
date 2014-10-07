@@ -22,7 +22,7 @@ final class DiffusionBranchTableController extends DiffusionController {
       'diffusion.branchquery',
       array(
         'offset' => $pager->getOffset(),
-        'limit' => $pager->getPageSize() + 1
+        'limit' => $pager->getPageSize() + 1,
       ));
     $branches = $pager->sliceResults($branches);
 

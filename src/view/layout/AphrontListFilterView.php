@@ -110,7 +110,7 @@ final class AphrontListFilterView extends AphrontView {
     return phutil_tag(
       'div',
       array(
-        'class' => 'aphront-list-filter-wrap'
+        'class' => 'aphront-list-filter-wrap',
       ),
       $content);
   }

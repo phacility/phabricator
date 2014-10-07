@@ -48,7 +48,8 @@ final class SlowvoteEmbedView extends AphrontView {
     require_celerity_resource('javelin-behavior-slowvote-embed');
 
     $config = array(
-      'pollID' => $poll->getID());
+      'pollID' => $poll->getID(),
+    );
     Javelin::initBehavior('slowvote-embed', $config);
 
     $user_choices = $poll->getViewerChoices($this->getUser());
@@ -63,7 +64,7 @@ final class SlowvoteEmbedView extends AphrontView {
     $link_to_slowvote = phutil_tag(
       'a',
       array(
-        'href' => '/V'.$poll->getID()
+        'href' => '/V'.$poll->getID(),
       ),
       $poll->getQuestion());
 
@@ -83,7 +84,8 @@ final class SlowvoteEmbedView extends AphrontView {
           array(
             'V'.$poll->getID(),
             ' ',
-            $link_to_slowvote)));
+            $link_to_slowvote,
+          )));
 
       $description = null;
       if ($poll->getDescription()) {
@@ -102,7 +104,8 @@ final class SlowvoteEmbedView extends AphrontView {
 
       $header = array(
         $header,
-        $description);
+        $description,
+      );
     }
 
     $vis = $poll->getResponseVisibility();
@@ -171,8 +174,8 @@ final class SlowvoteEmbedView extends AphrontView {
         'class' => 'slowvote-embed',
         'sigil' => 'slowvote-embed',
         'meta' => array(
-          'pollID' => $poll->getID()
-        )
+          'pollID' => $poll->getID(),
+        ),
       ),
       array($header, $body));
   }

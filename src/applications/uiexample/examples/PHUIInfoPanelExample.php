@@ -133,7 +133,7 @@ final class PHUIInfoPanelExample extends PhabricatorUIExample {
           $head1,
           $wrap1,
           $head2,
-          $wrap2
+          $wrap2,
         ));
-        }
+  }
 }

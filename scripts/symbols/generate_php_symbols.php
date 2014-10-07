@@ -98,7 +98,7 @@ foreach (Futures($futures)->limit(8) as $file => $future) {
   }
 }
 
-function print_symbol($file, $type, $token, $context=null) {
+function print_symbol($file, $type, $token, $context = null) {
   $parts = array(
     $context ? $context->getConcreteString() : '',
     // variable tokens are `$name`, not just `name`, so strip the $ off of

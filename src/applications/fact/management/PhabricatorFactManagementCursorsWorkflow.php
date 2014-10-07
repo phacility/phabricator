@@ -17,7 +17,7 @@ final class PhabricatorFactManagementCursorsWorkflow
             'param'   => 'cursor',
             'repeat'  => true,
             'help'    => 'Reset cursor __cursor__.',
-          )
+          ),
         ));
   }
 

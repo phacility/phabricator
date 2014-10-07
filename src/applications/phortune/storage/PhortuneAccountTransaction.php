@@ -10,7 +10,7 @@ final class PhortuneAccountTransaction
   }
 
   public function getApplicationTransactionType() {
-    return PhabricatorPHIDConstants::PHID_TYPE_ACNT;
+    return PhortuneAccountPHIDType::TYPECONST;
   }
 
   public function getApplicationTransactionCommentObject() {

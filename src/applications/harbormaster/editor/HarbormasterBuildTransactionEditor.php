@@ -94,7 +94,7 @@ final class HarbormasterBuildTransactionEditor
     PhabricatorWorker::scheduleTask(
       'HarbormasterBuildWorker',
       array(
-        'buildID' => $build->getID()
+        'buildID' => $build->getID(),
       ));
   }
 

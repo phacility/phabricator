@@ -43,7 +43,7 @@ final class PhabricatorCountdownApplication extends PhabricatorApplication {
           => 'PhabricatorCountdownListController',
         '(?P<id>[1-9]\d*)/' => 'PhabricatorCountdownViewController',
         'edit/(?:(?P<id>[1-9]\d*)/)?' => 'PhabricatorCountdownEditController',
-        'delete/(?P<id>[1-9]\d*)/' => 'PhabricatorCountdownDeleteController'
+        'delete/(?P<id>[1-9]\d*)/' => 'PhabricatorCountdownDeleteController',
       ),
     );
   }

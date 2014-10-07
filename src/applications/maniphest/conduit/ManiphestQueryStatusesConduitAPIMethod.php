@@ -31,7 +31,7 @@ final class ManiphestQueryStatusesConduitAPIMethod
       'openStatuses' => ManiphestTaskStatus::getOpenStatusConstants(),
       'closedStatuses' => ManiphestTaskStatus::getClosedStatusConstants(),
       'allStatuses' => array_keys(ManiphestTaskStatus::getTaskStatusMap()),
-      'statusMap' => ManiphestTaskStatus::getTaskStatusMap()
+      'statusMap' => ManiphestTaskStatus::getTaskStatusMap(),
     );
     return $results;
   }

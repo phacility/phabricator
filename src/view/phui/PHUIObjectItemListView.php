@@ -114,7 +114,8 @@ final class PHUIObjectItemListView extends AphrontTagView {
       $items = phutil_tag(
         'li',
         array(
-          'class' => 'phui-object-item-empty'),
+          'class' => 'phui-object-item-empty',
+        ),
         $string);
 
     }

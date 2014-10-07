@@ -49,7 +49,7 @@ final class PhabricatorMailImplementationTestAdapter
     $this->guts['attachments'][] = array(
       'data' => $data,
       'filename' => $filename,
-      'mimetype' => $mimetype
+      'mimetype' => $mimetype,
     );
     return $this;
   }

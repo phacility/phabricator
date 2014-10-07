@@ -72,7 +72,7 @@ final class ConpherenceViewController extends
       $content = array(
         'header' => $header,
         'messages' => $messages,
-        'form' => $form
+        'form' => $form,
       );
     }
 
@@ -114,8 +114,8 @@ final class ConpherenceViewController extends
           'sigil' => 'show-older-messages',
           'class' => 'conpherence-show-older-messages',
           'meta' => array(
-            'oldest_transaction_id' => $oldest_transaction_id
-          )
+            'oldest_transaction_id' => $oldest_transaction_id,
+          ),
         ),
         pht('Show Older Messages'));
     }

@@ -49,7 +49,8 @@ final class DiffusionRefsQueryConduitAPIMethod
           array(
             'action'  => 'browse',
             'branch'  => $ref,
-          )));
+          )),
+      );
     }
 
     return $ref_links;

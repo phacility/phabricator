@@ -120,7 +120,7 @@ final class PhabricatorChatLogChannelLogController
         'a',
           array(
             'href' => $href,
-            'class' => 'timestamp'
+            'class' => 'timestamp',
           ),
         $timestamp);
 
@@ -129,11 +129,12 @@ final class PhabricatorChatLogChannelLogController
       $message = phutil_tag(
         'td',
           array(
-            'class' => 'message'
+            'class' => 'message',
           ),
           array(
             $timestamp,
-            $message));
+            $message,
+          ));
 
       $out[] = phutil_tag(
         'tr',
@@ -142,7 +143,8 @@ final class PhabricatorChatLogChannelLogController
         ),
         array(
           $author,
-          $message));
+          $message,
+        ));
     }
 
     $links = array();
@@ -210,41 +212,41 @@ final class PhabricatorChatLogChannelLogController
     $table = phutil_tag(
       'table',
         array(
-          'class' => 'phabricator-chat-log'
+          'class' => 'phabricator-chat-log',
         ),
       $out);
 
     $log = phutil_tag(
       'div',
         array(
-          'class' => 'phabricator-chat-log-panel'
+          'class' => 'phabricator-chat-log-panel',
         ),
         $table);
 
     $jump_link = phutil_tag(
       'a',
         array(
-          'href' => '#latest'
+          'href' => '#latest',
         ),
         pht('Jump to Bottom')." \xE2\x96\xBE");
 
     $jump = phutil_tag(
       'div',
         array(
-          'class' => 'phabricator-chat-log-jump'
+          'class' => 'phabricator-chat-log-jump',
         ),
         $jump_link);
 
     $jump_target = phutil_tag(
       'div',
         array(
-          'id' => 'latest'
+          'id' => 'latest',
         ));
 
     $content = phutil_tag(
       'div',
         array(
-          'class' => 'phabricator-chat-log-wrap'
+          'class' => 'phabricator-chat-log-wrap',
         ),
         array(
           $jump,

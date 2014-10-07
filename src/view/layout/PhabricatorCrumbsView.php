@@ -63,7 +63,7 @@ final class PhabricatorCrumbsView extends AphrontView {
         $name = phutil_tag(
           'span',
             array(
-              'class' => 'phabricator-crumbs-action-name'
+              'class' => 'phabricator-crumbs-action-name',
             ),
           $action->getName());
 
@@ -84,7 +84,7 @@ final class PhabricatorCrumbsView extends AphrontView {
             'href' => $action->getHref(),
             'class' => implode(' ', $action_classes),
             'sigil' => implode(' ', $action_sigils),
-            'style' => $action->getStyle()
+            'style' => $action->getStyle(),
           ),
           array(
             $icon,
@@ -99,7 +99,7 @@ final class PhabricatorCrumbsView extends AphrontView {
         $name = phutil_tag(
           'span',
             array(
-              'class' => 'phabricator-crumbs-action-name'
+              'class' => 'phabricator-crumbs-action-name',
             ),
           pht('Actions'));
 
@@ -114,7 +114,7 @@ final class PhabricatorCrumbsView extends AphrontView {
               'meta'  => array(
                 'map' => array(
                   $this->actionListID => 'phabricator-action-list-toggle',
-                  $icon_id => 'phabricator-crumbs-action-menu-open'
+                  $icon_id => 'phabricator-crumbs-action-menu-open',
                 ),
               ),
             ),

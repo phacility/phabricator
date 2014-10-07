@@ -93,7 +93,7 @@ final class ReleephRequestDifferentialCreateController
       }
     }
 
-    return id(new AphrontDialogResponse)
+    return id(new AphrontDialogResponse())
       ->setDialog($dialog);
   }
 

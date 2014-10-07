@@ -64,7 +64,8 @@ final class DiffusionBrowseResultSet {
       'isValidResults' => $this->isValidResults(),
       'reasonForEmptyResultSet' => $this->getReasonForEmptyResultSet(),
       'existedAtCommit' => $this->getExistedAtCommit(),
-      'deletedAtCommit' => $this->getDeletedAtCommit());
+      'deletedAtCommit' => $this->getDeletedAtCommit(),
+    );
   }
 
   public function getPathDicts() {

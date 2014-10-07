@@ -60,7 +60,7 @@ final class HarbormasterWaitForPreviousBuildStepImplementation
       'diffusion.commitparentsquery',
       array(
         'commit'   => $commit->getCommitIdentifier(),
-        'callsign' => $commit->getRepository()->getCallsign()
+        'callsign' => $commit->getRepository()->getCallsign(),
       ));
     $call->setUser(PhabricatorUser::getOmnipotentUser());
     $parents = $call->execute();

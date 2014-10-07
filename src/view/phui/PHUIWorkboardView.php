@@ -43,14 +43,14 @@ final class PHUIWorkboardView extends AphrontTagView {
         $items[] = phutil_tag(
           'li',
             array(
-              'class' => 'phui-workboard-action-item'
+              'class' => 'phui-workboard-action-item',
             ),
             $action);
       }
       $action_list = phutil_tag(
         'ul',
           array(
-            'class' => 'phui-workboard-action-list'
+            'class' => 'phui-workboard-action-list',
           ),
           $items);
     }
@@ -70,7 +70,7 @@ final class PHUIWorkboardView extends AphrontTagView {
     $board = phutil_tag(
       'div',
         array(
-          'class' => 'phui-workboard-view-shadow'
+          'class' => 'phui-workboard-view-shadow',
         ),
         $view);
 

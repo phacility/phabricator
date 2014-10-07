@@ -84,7 +84,7 @@ final class ManiphestBatchEditController extends ManiphestController {
           'cc'    => array(
             'src'           => $mailable_source->getDatasourceURI(),
             'placeholder'   => $mailable_source->getPlaceholderText(),
-          )
+          ),
         ),
         'input' => 'batch-form-actions',
         'priorityMap' => ManiphestTaskPriority::getTaskPriorityMap(),

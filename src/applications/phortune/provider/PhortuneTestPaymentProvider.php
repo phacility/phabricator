@@ -6,12 +6,27 @@ final class PhortuneTestPaymentProvider extends PhortunePaymentProvider {
     return PhabricatorEnv::getEnvConfig('phortune.test.enabled');
   }
 
-  public function getProviderType() {
-    return 'test';
+  public function getName() {
+    return pht('Test Payments');
   }
 
-  public function getProviderDomain() {
-    return 'example.com';
+  public function getConfigureName() {
+    return pht('Test Payments');
+  }
+
+  public function getConfigureDescription() {
+    return pht(
+      'Adds a test provider to allow you to test payments. This allows '.
+      'users to make purchases by clicking a button without actually paying '.
+      'any money.');
+  }
+
+  public function getConfigureInstructions() {
+    return pht('This providers does not require any special configuration.');
+  }
+
+  public function canRunConfigurationTest() {
+    return false;
   }
 
   public function getPaymentMethodDescription() {
@@ -19,7 +34,7 @@ final class PhortuneTestPaymentProvider extends PhortunePaymentProvider {
   }
 
   public function getPaymentMethodIcon() {
-    return celerity_get_resource_uri('/rsrc/image/phortune/test.png');
+    return 'TestPayment';
   }
 
   public function getPaymentMethodProviderDescription() {
@@ -31,16 +46,39 @@ final class PhortuneTestPaymentProvider extends PhortunePaymentProvider {
     return pht('Vast Wealth');
   }
 
-  public function canHandlePaymentMethod(PhortunePaymentMethod $method) {
-    $type = $method->getMetadataValue('type');
-    return ($type === 'test.wealth' || $type == 'test.multiple');
-  }
-
   protected function executeCharge(
     PhortunePaymentMethod $payment_method,
     PhortuneCharge $charge) {
     return;
   }
+
+  public function getAllConfigurableProperties() {
+    return array();
+  }
+
+  public function getAllConfigurableSecretProperties() {
+    return array();
+  }
+
+  public function processEditForm(
+    AphrontRequest $request,
+    array $values) {
+
+    $errors = array();
+    $issues = array();
+    $values = array();
+
+    return array($errors, $issues, $values);
+  }
+
+  public function extendEditForm(
+    AphrontRequest $request,
+    AphrontFormView $form,
+    array $values,
+    array $issues) {
+    return;
+  }
+
 
 
 /* -(  Adding Payment Methods  )--------------------------------------------- */

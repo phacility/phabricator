@@ -400,7 +400,8 @@ final class PhabricatorStartup {
     // Replace superglobals with unfiltered versions, disrespect php.ini (we
     // filter ourselves)
     $filter = array(INPUT_GET, INPUT_POST,
-      INPUT_SERVER, INPUT_ENV, INPUT_COOKIE);
+      INPUT_SERVER, INPUT_ENV, INPUT_COOKIE,
+    );
     foreach ($filter as $type) {
       $filtered = filter_input_array($type, FILTER_UNSAFE_RAW);
       if (!is_array($filtered)) {

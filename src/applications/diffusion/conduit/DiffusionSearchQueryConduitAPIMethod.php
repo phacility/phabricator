@@ -27,7 +27,8 @@ final class DiffusionSearchQueryConduitAPIMethod
 
   protected function defineCustomErrorTypes() {
     return array(
-      'ERR-GREP-COMMAND' => 'Grep command failed.');
+      'ERR-GREP-COMMAND' => 'Grep command failed.',
+    );
   }
 
   protected function getResult(ConduitAPIRequest $request) {

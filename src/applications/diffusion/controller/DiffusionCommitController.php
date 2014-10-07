@@ -796,7 +796,7 @@ final class DiffusionCommitController extends DiffusionController {
       'aphront-panel-preview aphront-panel-flush',
       array(
         phutil_tag('div', array('id' => 'audit-preview'), $loading),
-        phutil_tag('div', array('id' => 'inline-comment-preview'))
+        phutil_tag('div', array('id' => 'inline-comment-preview')),
       ));
 
     // TODO: This is pretty awkward, unify the CSS between Diffusion and
@@ -911,7 +911,8 @@ final class DiffusionCommitController extends DiffusionController {
         'diffusion.mergedcommitsquery',
         array(
           'commit' => $drequest->getCommit(),
-          'limit' => $limit + 1));
+          'limit' => $limit + 1,
+        ));
     } catch (ConduitException $ex) {
       if ($ex->getMessage() != 'ERR-UNSUPPORTED-VCS') {
         throw $ex;
@@ -1026,7 +1027,8 @@ final class DiffusionCommitController extends DiffusionController {
       'diffusion.rawdiffquery',
       array(
         'commit' => $drequest->getCommit(),
-        'path' => $drequest->getPath()));
+        'path' => $drequest->getPath(),
+      ));
 
     $file = PhabricatorFile::buildFromFileDataOrHash(
       $raw_diff,

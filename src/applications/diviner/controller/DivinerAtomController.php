@@ -174,7 +174,8 @@ final class DivinerAtomController extends DivinerController {
                 $item = array(
                   $item,
                   " \xE2\x80\x94 ",
-                  $atom->getSummary());
+                  $atom->getSummary(),
+                );
               }
 
               $list_items[] = phutil_tag('li', array(), $item);
@@ -280,7 +281,8 @@ final class DivinerAtomController extends DivinerController {
           $items[] = array(
             $this->renderAtomTag($iface),
             "  \xE2\x97\x80  ",
-            $this->renderAtomTag($via));
+            $this->renderAtomTag($via),
+          );
         }
       }
 

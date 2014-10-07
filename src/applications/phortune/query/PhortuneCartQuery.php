@@ -66,6 +66,39 @@ final class PhortuneCartQuery
       $cart->attachAccount($account);
     }
 
+    $merchants = id(new PhortuneMerchantQuery())
+      ->setViewer($this->getViewer())
+      ->withPHIDs(mpull($carts, 'getMerchantPHID'))
+      ->execute();
+    $merchants = mpull($merchants, null, 'getPHID');
+
+    foreach ($carts as $key => $cart) {
+      $merchant = idx($merchants, $cart->getMerchantPHID());
+      if (!$merchant) {
+        unset($carts[$key]);
+        continue;
+      }
+      $cart->attachMerchant($merchant);
+    }
+
+    $implementations = array();
+
+    $cart_map = mgroup($carts, 'getCartClass');
+    foreach ($cart_map as $class => $class_carts) {
+      $implementations += newv($class, array())->loadImplementationsForCarts(
+        $this->getViewer(),
+        $class_carts);
+    }
+
+    foreach ($carts as $key => $cart) {
+      $implementation = idx($implementations, $key);
+      if (!$implementation) {
+        unset($carts[$key]);
+        continue;
+      }
+      $cart->attachImplementation($implementation);
+    }
+
     return $carts;
   }
 

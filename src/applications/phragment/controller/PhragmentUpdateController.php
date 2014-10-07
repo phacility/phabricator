@@ -73,7 +73,8 @@ final class PhragmentUpdateController extends PhragmentController {
       array(
         $crumbs,
         $this->renderConfigurationWarningIfRequired(),
-        $box),
+        $box,
+      ),
       array(
         'title' => pht('Update Fragment'),
       ));

@@ -55,7 +55,7 @@ final class ReleephProject extends ReleephDAO
     $components = array(
       '/releeph/product',
       $this->getID(),
-      $path
+      $path,
     );
     return implode('/', $components);
   }

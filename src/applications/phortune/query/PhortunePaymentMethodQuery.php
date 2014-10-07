@@ -6,6 +6,7 @@ final class PhortunePaymentMethodQuery
   private $ids;
   private $phids;
   private $accountPHIDs;
+  private $merchantPHIDs;
   private $statuses;
 
   public function withIDs(array $ids) {
@@ -20,6 +21,11 @@ final class PhortunePaymentMethodQuery
 
   public function withAccountPHIDs(array $phids) {
     $this->accountPHIDs = $phids;
+    return $this;
+  }
+
+  public function withMerchantPHIDs(array $phids) {
+    $this->merchantPHIDs = $phids;
     return $this;
   }
 
@@ -44,15 +50,6 @@ final class PhortunePaymentMethodQuery
   }
 
   protected function willFilterPage(array $methods) {
-    foreach ($methods as $key => $method) {
-      try {
-        $method->buildPaymentProvider();
-      } catch (Exception $ex) {
-        unset($methods[$key]);
-        continue;
-      }
-    }
-
     $accounts = id(new PhortuneAccountQuery())
       ->setViewer($this->getViewer())
       ->withPHIDs(mpull($methods, 'getAccountPHID'))
@@ -66,6 +63,36 @@ final class PhortunePaymentMethodQuery
         continue;
       }
       $method->attachAccount($account);
+    }
+
+    $merchants = id(new PhortuneMerchantQuery())
+      ->setViewer($this->getViewer())
+      ->withPHIDs(mpull($methods, 'getMerchantPHID'))
+      ->execute();
+    $merchants = mpull($merchants, null, 'getPHID');
+
+    foreach ($methods as $key => $method) {
+      $merchant = idx($merchants, $method->getMerchantPHID());
+      if (!$merchant) {
+        unset($methods[$key]);
+        continue;
+      }
+      $method->attachMerchant($merchant);
+    }
+
+    $provider_configs = id(new PhortunePaymentProviderConfigQuery())
+      ->setViewer($this->getViewer())
+      ->withPHIDs(mpull($methods, 'getProviderPHID'))
+      ->execute();
+    $provider_configs = mpull($provider_configs, null, 'getPHID');
+
+    foreach ($methods as $key => $method) {
+      $provider_config = idx($provider_configs, $method->getProviderPHID());
+      if (!$provider_config) {
+        unset($methods[$key]);
+        continue;
+      }
+      $method->attachProviderConfig($provider_config);
     }
 
     return $methods;
@@ -93,6 +120,13 @@ final class PhortunePaymentMethodQuery
         $conn,
         'accountPHID IN (%Ls)',
         $this->accountPHIDs);
+    }
+
+    if ($this->merchantPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'merchantPHID IN (%Ls)',
+        $this->merchantPHIDs);
     }
 
     if ($this->statuses !== null) {

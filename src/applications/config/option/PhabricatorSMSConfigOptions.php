@@ -48,7 +48,7 @@ EODOC
         ->setDescription(pht('Authorization token from Twilio service.'))
         ->setLocked(true)
         ->setHidden(true)
-        ->addExample('f3jsi4i67wiwt6w54hf2zwvy3fjf5h', pht('30 characters'))
+        ->addExample('f3jsi4i67wiwt6w54hf2zwvy3fjf5h', pht('30 characters')),
     );
   }
 

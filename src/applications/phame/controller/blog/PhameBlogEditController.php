@@ -19,7 +19,7 @@ final class PhameBlogEditController
         ->withIDs(array($this->id))
         ->requireCapabilities(
           array(
-            PhabricatorPolicyCapability::CAN_EDIT
+            PhabricatorPolicyCapability::CAN_EDIT,
           ))
         ->executeOne();
       if (!$blog) {

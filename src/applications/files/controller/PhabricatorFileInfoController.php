@@ -78,7 +78,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       array(
         $crumbs,
         $object_box,
-        $timeline
+        $timeline,
       ),
       array(
         'title' => $file->getName(),
@@ -126,7 +126,8 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
 
     return array(
       $timeline,
-      $add_comment_form);
+      $add_comment_form,
+    );
   }
 
   private function buildActionView(PhabricatorFile $file) {
