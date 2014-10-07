@@ -19,7 +19,8 @@ final class DiffusionTagListController extends DiffusionController {
 
     $params = array(
       'limit' => $pager->getPageSize() + 1,
-      'offset' => $pager->getOffset());
+      'offset' => $pager->getOffset(),
+    );
 
     if ($drequest->getSymbolicCommit()) {
       $is_commit = true;

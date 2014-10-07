@@ -38,7 +38,7 @@ final class ConpherenceTransactionView extends AphrontView {
         return phutil_tag(
           'div',
           array(
-            'class' => 'date-marker'
+            'class' => 'date-marker',
           ),
           array(
             phutil_tag(
@@ -49,7 +49,8 @@ final class ConpherenceTransactionView extends AphrontView {
               phabricator_format_local_time(
                 $transaction->getDateCreated(),
                 $user,
-              'M jS, Y'))));
+              'M jS, Y')),
+          ));
         break;
     }
 
@@ -92,7 +93,7 @@ final class ConpherenceTransactionView extends AphrontView {
       phutil_tag(
         'div',
         array(
-          'class' => $content_class
+          'class' => $content_class,
         ),
         $content));
 

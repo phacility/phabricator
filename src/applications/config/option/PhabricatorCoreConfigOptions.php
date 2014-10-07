@@ -94,7 +94,7 @@ final class PhabricatorCoreConfigOptions
         ->setBoolOptions(
           array(
             pht('Enable Prototypes'),
-            pht('Disable Prototypes')
+            pht('Disable Prototypes'),
           ))
         ->setSummary(
           pht(

@@ -119,7 +119,8 @@ final class DiffusionQueryCommitsConduitAPIMethod
         foreach ($lowlevel_commitref->getHashes() as $hash) {
           $dict['hashes'][] = array(
             'type' => $hash->getHashType(),
-            'value' => $hash->getHashValue());
+            'value' => $hash->getHashValue(),
+          );
         }
       }
 

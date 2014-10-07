@@ -300,7 +300,7 @@ final class PhabricatorProjectBoardViewController
     $header_link = phutil_tag(
       'a',
       array(
-        'href' => $this->getApplicationURI('view/'.$project->getID().'/')
+        'href' => $this->getApplicationURI('view/'.$project->getID().'/'),
       ),
       $project->getName());
 

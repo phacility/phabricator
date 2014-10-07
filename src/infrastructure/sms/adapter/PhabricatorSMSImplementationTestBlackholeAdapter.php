@@ -17,7 +17,8 @@ final class PhabricatorSMSImplementationTestBlackholeAdapter
   public function getSMSDataFromResult($result) {
     return array(
       Filesystem::readRandomCharacters(40),
-      PhabricatorSMS::STATUS_SENT);
+      PhabricatorSMS::STATUS_SENT,
+    );
   }
 
   public function pollSMSSentStatus(PhabricatorSMS $sms) {

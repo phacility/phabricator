@@ -42,7 +42,8 @@ final class PhabricatorMetaMTAEmailBodyParser {
     return array(
       'body' => $body,
       'command' => $command,
-      'command_value' => $command_value);
+      'command_value' => $command_value,
+    );
   }
 
   public function stripTextBody($body) {

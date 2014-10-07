@@ -95,7 +95,7 @@ final class PHUIDocumentView extends AphrontTagView {
       $sidenav = phutil_tag(
         'div',
         array(
-          'class' => 'phui-document-sidenav'
+          'class' => 'phui-document-sidenav',
         ),
         $this->sidenav);
     }
@@ -105,7 +105,7 @@ final class PHUIDocumentView extends AphrontTagView {
       $book = phutil_tag(
         'div',
         array(
-          'class' => 'phui-document-bookname grouped'
+          'class' => 'phui-document-bookname grouped',
         ),
         array(
           phutil_tag(
@@ -115,7 +115,8 @@ final class PHUIDocumentView extends AphrontTagView {
           phutil_tag(
             'span',
             array('class' => 'bookdescription'),
-          $this->bookdescription)));
+          $this->bookdescription),
+        ));
     }
 
     $topnav = null;
@@ -123,7 +124,7 @@ final class PHUIDocumentView extends AphrontTagView {
       $topnav = phutil_tag(
         'div',
         array(
-          'class' => 'phui-document-topnav'
+          'class' => 'phui-document-topnav',
         ),
         $this->topnav);
     }
@@ -133,7 +134,7 @@ final class PHUIDocumentView extends AphrontTagView {
       $crumbs = phutil_tag(
         'div',
         array(
-          'class' => 'phui-document-crumbs'
+          'class' => 'phui-document-crumbs',
         ),
         $this->bookName);
     }
@@ -142,7 +143,7 @@ final class PHUIDocumentView extends AphrontTagView {
       $main_content = phutil_tag(
         'div',
         array(
-          'class' => 'phui-font-'.$this->fontKit
+          'class' => 'phui-font-'.$this->fontKit,
         ),
         $this->renderChildren());
     } else {
@@ -159,7 +160,7 @@ final class PHUIDocumentView extends AphrontTagView {
           $this->header,
           $topnav,
           $main_content,
-          $crumbs
+          $crumbs,
         ));
 
     if ($this->mobileview == self::NAV_BOTTOM) {

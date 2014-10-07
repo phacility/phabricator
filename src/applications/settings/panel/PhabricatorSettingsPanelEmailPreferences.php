@@ -146,7 +146,8 @@ final class PhabricatorSettingsPanelEmailPreferences
     foreach ($editors as $editor) {
       $tag_groups[] = array(
         $editor->getEditorObjectsDescription(),
-        array_diff_key($editor->getMailTagsMap(), $common_tags));
+        array_diff_key($editor->getMailTagsMap(), $common_tags),
+      );
     }
 
     // Sort them, then put "Common" at the top.

@@ -43,7 +43,7 @@ final class DiffusionChangeController extends DiffusionController {
     $changeset_view->setVisibleChangesets($changesets);
     $changeset_view->setRenderingReferences(
       array(
-        0 => $drequest->generateURI(array('action' => 'rendering-ref'))
+        0 => $drequest->generateURI(array('action' => 'rendering-ref')),
       ));
 
     $raw_params = array(

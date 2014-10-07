@@ -80,7 +80,8 @@ final class PhabricatorMetaMTAMailBody {
   public function addHTMLSection($header, $html_fragment) {
     $this->htmlSections[] = array(
       phutil_tag('div', array('style' => 'font-weight:800;'), $header),
-      $html_fragment);
+      $html_fragment,
+    );
 
     return $this;
   }

@@ -208,7 +208,7 @@ final class ReleephRequestEditController extends ReleephBranchController {
         hsprintf(
           'Requested %s by %s',
           $age_string,
-          $handles[$pull->getRequestUserPHID()]->renderLink())
+          $handles[$pull->getRequestUserPHID()]->renderLink()),
       );
       $notice_view = id(new AphrontErrorView())
         ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)

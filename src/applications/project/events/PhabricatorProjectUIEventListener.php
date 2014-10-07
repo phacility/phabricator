@@ -80,7 +80,8 @@ final class PhabricatorProjectUIEventListener
 
           $annotations[$project_phid] = array(
             ' ',
-            $column_link);
+            $column_link,
+          );
         }
       }
 

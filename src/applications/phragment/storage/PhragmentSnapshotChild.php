@@ -62,7 +62,7 @@ final class PhragmentSnapshotChild extends PhragmentDAO
 
   public function getCapabilities() {
     return array(
-      PhabricatorPolicyCapability::CAN_VIEW
+      PhabricatorPolicyCapability::CAN_VIEW,
     );
   }
 

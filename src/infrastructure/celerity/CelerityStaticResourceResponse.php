@@ -206,7 +206,8 @@ final class CelerityStaticResourceResponse {
 
       $behavior_groups = array(
         $higher_priority_behaviors,
-        $behaviors);
+        $behaviors,
+      );
 
       foreach ($behavior_groups as $group) {
         if (!$group) {

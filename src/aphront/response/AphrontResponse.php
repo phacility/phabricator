@@ -109,23 +109,28 @@ abstract class AphrontResponse {
     if ($this->cacheable) {
       $headers[] = array(
         'Expires',
-        $this->formatEpochTimestampForHTTPHeader(time() + $this->cacheable));
+        $this->formatEpochTimestampForHTTPHeader(time() + $this->cacheable),
+      );
     } else {
       $headers[] = array(
         'Cache-Control',
-        'private, no-cache, no-store, must-revalidate');
+        'private, no-cache, no-store, must-revalidate',
+      );
       $headers[] = array(
         'Pragma',
-        'no-cache');
+        'no-cache',
+      );
       $headers[] = array(
         'Expires',
-        'Sat, 01 Jan 2000 00:00:00 GMT');
+        'Sat, 01 Jan 2000 00:00:00 GMT',
+      );
     }
 
     if ($this->lastModified) {
       $headers[] = array(
         'Last-Modified',
-        $this->formatEpochTimestampForHTTPHeader($this->lastModified));
+        $this->formatEpochTimestampForHTTPHeader($this->lastModified),
+      );
     }
 
     // IE has a feature where it may override an explicit Content-Type

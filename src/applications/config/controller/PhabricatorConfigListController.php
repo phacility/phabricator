@@ -21,7 +21,7 @@ final class PhabricatorConfigListController
 
     $nav->appendChild(
       array(
-        $box
+        $box,
       ));
 
     $crumbs = $this

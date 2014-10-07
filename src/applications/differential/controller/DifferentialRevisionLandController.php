@@ -145,8 +145,8 @@ final class DifferentialRevisionLandController extends DifferentialController {
     $looksoon = new ConduitCall(
       'diffusion.looksoon',
       array(
-        'callsigns' => array($repository->getCallsign())
-        ));
+        'callsigns' => array($repository->getCallsign()),
+      ));
     $looksoon->setUser($request->getUser());
     $looksoon->execute();
 

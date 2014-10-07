@@ -39,7 +39,7 @@ final class PhameBlogFeedController extends PhameController {
       array(
         'rel' => 'self',
         'type' => 'application/atom+xml',
-        'href' => $blog_uri
+        'href' => $blog_uri,
       ));
 
     $updated = $blog->getDateModified();

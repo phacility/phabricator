@@ -109,7 +109,8 @@ final class PHUIIconExample extends PhabricatorUIExample {
       'like-1',
       'like-2',
       'heart-1',
-      'heart-2');
+      'heart-2',
+    );
     $tokenview = array();
     foreach ($tokens as $token) {
       $tokenview[] =
@@ -122,7 +123,8 @@ final class PHUIIconExample extends PhabricatorUIExample {
       'Asana',
       'Dropbox',
       'Google',
-      'Github');
+      'Github',
+    );
     $loginview = array();
     foreach ($logins as $login) {
       $loginview[] =
@@ -163,7 +165,7 @@ final class PHUIIconExample extends PhabricatorUIExample {
     $fa_link = phutil_tag(
       'a',
       array(
-        'href' => 'http://fontawesome.io'
+        'href' => 'http://fontawesome.io',
       ),
       'http://fontawesome.io');
     $fa_text = pht('Font Awesome by Dave Gandy - %s', $fa_link);
@@ -203,7 +205,7 @@ final class PHUIIconExample extends PhabricatorUIExample {
           $wrap2,
           $wrap3,
           $wrap4,
-          $wrap5
+          $wrap5,
         ));
-        }
+  }
 }

@@ -82,7 +82,8 @@ final class PhabricatorCommitSearchEngine
       array(
         $auditor_phids,
         $commit_author_phids,
-        $repository_phids));
+        $repository_phids,
+      ));
 
     $handles = id(new PhabricatorHandleQuery())
       ->setViewer($this->requireViewer())

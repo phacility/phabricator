@@ -20,7 +20,7 @@ final class ConpherenceQueryThreadConduitAPIMethod
       'ids' => 'optional array<int>',
       'phids' => 'optional array<phids>',
       'limit' => 'optional int',
-      'offset' => 'optional int'
+      'offset' => 'optional int',
     );
   }
 
@@ -78,7 +78,8 @@ final class ConpherenceQueryThreadConduitAPIMethod
         'messageCount' => $conpherence->getMessageCount(),
         'recentParticipantPHIDs' => $conpherence->getRecentParticipantPHIDs(),
         'filePHIDs' => $conpherence->getFilePHIDs(),
-        'conpherenceURI' => $this->getConpherenceURI($conpherence));
+        'conpherenceURI' => $this->getConpherenceURI($conpherence),
+      );
     }
     return $data;
   }

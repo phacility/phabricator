@@ -116,7 +116,8 @@ final class PhabricatorFlagSearchEngine
     // sort it alphabetically...
     asort($options);
     $default_option = array(
-      0 => pht('All Object Types'));
+      0 => pht('All Object Types'),
+    );
     // ...and stick the default option on front
     $options = array_merge($default_option, $options);
 

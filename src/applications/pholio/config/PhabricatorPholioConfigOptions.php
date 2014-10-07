@@ -19,7 +19,7 @@ final class PhabricatorPholioConfigOptions
             'Like {{metamta.maniphest.reply-handler-domain}}, but affects '.
             'Pholio.')),
       $this->newOption('metamta.pholio.subject-prefix', 'string', '[Pholio]')
-        ->setDescription(pht('Subject prefix for Pholio email.'))
+        ->setDescription(pht('Subject prefix for Pholio email.')),
     );
   }
 

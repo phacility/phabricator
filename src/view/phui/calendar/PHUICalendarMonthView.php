@@ -150,7 +150,8 @@ final class PHUICalendarMonthView extends AphrontView {
           $cells[] = phutil_tag(
             'td',
             array(
-              'class' => 'phui-calendar-month-weekstart'),
+              'class' => 'phui-calendar-month-weekstart',
+            ),
             $cell);
         } else {
           $cells[] = phutil_tag('td', array(), $cell);

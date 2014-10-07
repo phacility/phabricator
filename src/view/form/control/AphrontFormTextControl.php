@@ -48,7 +48,7 @@ final class AphrontFormTextControl extends AphrontFormControl {
         'autocomplete' => $this->getDisableAutocomplete() ? 'off' : null,
         'id'           => $this->getID(),
         'sigil'        => $this->getSigil(),
-        'placeholder'  => $this->getPlaceholder()
+        'placeholder'  => $this->getPlaceholder(),
       ));
   }
 

@@ -75,7 +75,8 @@ final class PassphraseCredentialRevealController
       $type_secret = PassphraseCredentialTransaction::TYPE_LOOKEDATSECRET;
       $xactions = array(id(new PassphraseCredentialTransaction())
         ->setTransactionType($type_secret)
-        ->setNewValue(true));
+        ->setNewValue(true),
+      );
 
       $editor = id(new PassphraseCredentialTransactionEditor())
         ->setActor($viewer)

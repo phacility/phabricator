@@ -48,43 +48,47 @@ final class PHUICalendarListView extends AphrontTagView {
       $dot = phutil_tag(
         'span',
         array(
-          'class' => 'phui-calendar-list-dot'),
+          'class' => 'phui-calendar-list-dot',
+        ),
         '');
       $title = phutil_tag(
         'span',
         array(
-          'class' => 'phui-calendar-list-title'),
+          'class' => 'phui-calendar-list-title',
+        ),
         $this->renderEventLink($event, $allday));
       $time = phutil_tag(
         'span',
         array(
-          'class' => 'phui-calendar-list-time'),
+          'class' => 'phui-calendar-list-time',
+        ),
         $timelabel);
 
       $singletons[] = phutil_tag(
         'li',
         array(
-          'class' => 'phui-calendar-list-item phui-calendar-'.$color
+          'class' => 'phui-calendar-list-item phui-calendar-'.$color,
           ),
         array(
           $dot,
           $title,
-          $time));
+          $time,
+        ));
     }
 
     if (empty($singletons)) {
       $singletons[] = phutil_tag(
         'li',
         array(
-          'class' => 'phui-calendar-list-item-empty'
-          ),
+          'class' => 'phui-calendar-list-item-empty',
+        ),
         pht('Clear sailing ahead.'));
     }
 
     $list = phutil_tag(
       'ul',
       array(
-        'class' => 'phui-calendar-list'
+        'class' => 'phui-calendar-list',
       ),
       $singletons);
 

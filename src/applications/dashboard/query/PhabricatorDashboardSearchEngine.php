@@ -60,8 +60,10 @@ final class PhabricatorDashboardSearchEngine
       $installs = id(new PhabricatorDashboardInstall())
         ->loadAllWhere(
           'objectPHID IN (%Ls) AND dashboardPHID IN (%Ls)',
-          array(PhabricatorHomeApplication::DASHBOARD_DEFAULT,
-                $viewer->getPHID()),
+          array(
+            PhabricatorHomeApplication::DASHBOARD_DEFAULT,
+            $viewer->getPHID(),
+          ),
           array_keys($dashboards));
       $installs = mpull($installs, null, 'getDashboardPHID');
     } else {
@@ -87,12 +89,14 @@ final class PhabricatorDashboardSearchEngine
         if ($install->getObjectPHID() == $viewer->getPHID()) {
           $attrs = array(
             'tip' => pht(
-              'This dashboard is installed to your personal homepage.'));
+              'This dashboard is installed to your personal homepage.'),
+          );
           $item->addIcon('fa-user', pht('Installed'), $attrs);
         } else {
           $attrs = array(
             'tip' => pht(
-              'This dashboard is the default homepage for all users.'));
+              'This dashboard is the default homepage for all users.'),
+          );
           $item->addIcon('fa-globe', pht('Installed'), $attrs);
         }
       }

@@ -246,10 +246,13 @@ final class ManiphestTaskEditController extends ManiphestController {
                 array(
                   'new' => array(
                     'projectPHID' => $column->getProjectPHID(),
-                    'columnPHIDs' => array($column_phid)),
+                    'columnPHIDs' => array($column_phid),
+                  ),
                   'old' => array(
                     'projectPHID' => $column->getProjectPHID(),
-                    'columnPHIDs' => array()));
+                    'columnPHIDs' => array(),
+                  ),
+                );
             }
           }
         }

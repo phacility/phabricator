@@ -344,7 +344,8 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
               array(
                 'commit' => $drequest->getCommit(),
                 'path' => $path,
-                'needValidityOnly' => true)));
+                'needValidityOnly' => true,
+              )));
           $valid = $results->isValidResults();
           $is_directory = true;
           if (!$valid) {

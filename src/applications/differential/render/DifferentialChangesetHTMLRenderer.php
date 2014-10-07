@@ -328,7 +328,7 @@ abstract class DifferentialChangesetHTMLRenderer
         $row = array(
           $readable_key,
           $oval,
-          $nval
+          $nval,
         );
         $rows[] = $row;
 

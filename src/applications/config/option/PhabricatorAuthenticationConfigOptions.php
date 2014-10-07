@@ -17,7 +17,7 @@ final class PhabricatorAuthenticationConfigOptions
         ->setBoolOptions(
           array(
             pht('Require email verification'),
-            pht("Don't require email verification")
+            pht("Don't require email verification"),
           ))
         ->setSummary(
           pht('Require email verification before a user can log in.'))
@@ -77,7 +77,7 @@ final class PhabricatorAuthenticationConfigOptions
         ->setBoolOptions(
           array(
             pht('Allow editing'),
-            pht('Prevent editing')
+            pht('Prevent editing'),
           ))
         ->setSummary(
           pht(

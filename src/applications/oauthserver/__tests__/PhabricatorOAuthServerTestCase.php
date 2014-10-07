@@ -9,7 +9,7 @@ final class PhabricatorOAuthServerTestCase
       'http://www.google.com/'             => true,
       'http://www.google.com/auth'         => true,
       'www.google.com'                     => false,
-      'http://www.google.com/auth#invalid' => false
+      'http://www.google.com/auth#invalid' => false,
     );
     $server = new PhabricatorOAuthServer();
     foreach ($map as $input => $expected) {
@@ -32,7 +32,7 @@ final class PhabricatorOAuthServerTestCase
       'http://www.google.com/?auth'         => true,
       'www.google.com'                      => false,
       'http://www.google.com/auth#invalid'  => false,
-      'http://www.example.com'              => false
+      'http://www.example.com'              => false,
     );
     foreach ($test_domain_map as $input => $expected) {
       $uri = new PhutilURI($input);

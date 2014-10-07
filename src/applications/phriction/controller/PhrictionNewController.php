@@ -34,7 +34,8 @@ final class PhrictionNewController extends PhrictionController {
         $project = id(new PhabricatorProjectQuery())
           ->setViewer($user)
           ->withPhrictionSlugs(array(
-            PhrictionDocument::getProjectSlugIdentifier($slug)))
+            PhrictionDocument::getProjectSlugIdentifier($slug),
+          ))
           ->executeOne();
         if (!$project) {
           $dialog = new AphrontDialogView();

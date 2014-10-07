@@ -90,7 +90,7 @@ final class PhabricatorTokenGiveController extends PhabricatorTokenController {
           'sigil' => 'has-tooltip',
           'meta' => array(
             'tip' => $token->getName(),
-          )
+          ),
         ),
         array(
           $aural,

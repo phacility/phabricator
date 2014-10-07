@@ -66,7 +66,8 @@ final class PhrictionEditController
           $project = id(new PhabricatorProjectQuery())
             ->setViewer($user)
             ->withPhrictionSlugs(array(
-              PhrictionDocument::getProjectSlugIdentifier($slug)))
+              PhrictionDocument::getProjectSlugIdentifier($slug),
+            ))
             ->executeOne();
           if (!$project) {
             return new Aphront404Response();

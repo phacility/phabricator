@@ -255,7 +255,7 @@ final class PhrequentTimeBlockTestCase extends PhabricatorTestCase {
       array(
         'T1' => array(
           array(1, 100),
-          array(900, null)
+          array(900, null),
         ),
       ),
       $ranges);

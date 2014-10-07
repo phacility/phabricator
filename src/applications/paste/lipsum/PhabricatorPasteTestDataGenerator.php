@@ -6,7 +6,8 @@ final class PhabricatorPasteTestDataGenerator
   // Better Support for this in the future
   public $supportedLanguages = array(
     'Java' => 'java',
-    'PHP' => 'php');
+    'PHP' => 'php',
+  );
 
   public function generate() {
     $authorphid = $this->loadPhabrictorUserPHID();

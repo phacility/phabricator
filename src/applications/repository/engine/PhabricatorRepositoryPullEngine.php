@@ -151,7 +151,7 @@ final class PhabricatorRepositoryPullEngine
       PhabricatorRepositoryStatusMessage::TYPE_INIT,
       $code,
       array(
-        'message' => $message
+        'message' => $message,
       ));
   }
 

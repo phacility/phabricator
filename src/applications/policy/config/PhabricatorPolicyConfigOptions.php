@@ -17,7 +17,8 @@ final class PhabricatorPolicyConfigOptions
         ->setBoolOptions(
           array(
             pht('Allow Public Visibility'),
-            pht('Require Login')))
+            pht('Require Login'),
+          ))
         ->setSummary(pht('Allow users to set object visibility to public.'))
         ->setDescription(
           pht(

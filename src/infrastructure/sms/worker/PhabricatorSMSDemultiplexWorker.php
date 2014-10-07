@@ -23,7 +23,8 @@ final class PhabricatorSMSDemultiplexWorker
       $this->queueTask(
         'PhabricatorSMSSendWorker',
         array(
-          'smsID' => $sms->getID()));
+          'smsID' => $sms->getID(),
+        ));
     }
   }
 

@@ -177,7 +177,7 @@ final class HeraldRuleController extends HeraldController {
               'href' => '#',
               'class' => 'button green',
               'sigil' => 'create-condition',
-              'mustcapture' => true
+              'mustcapture' => true,
             ),
             pht('New Condition')))
           ->setDescription(
@@ -186,7 +186,7 @@ final class HeraldRuleController extends HeraldController {
             'table',
             array(
               'sigil' => 'rule-conditions',
-              'class' => 'herald-condition-table'
+              'class' => 'herald-condition-table',
             ),
             '')))
       ->appendChild(
@@ -494,8 +494,10 @@ final class HeraldRuleController extends HeraldController {
         'template' => $this->buildTokenizerTemplates($handles) + array(
           'rules' => $all_rules,
         ),
-        'author' => array($rule->getAuthorPHID() =>
-                          $handles[$rule->getAuthorPHID()]->getName()),
+        'author' => array(
+          $rule->getAuthorPHID() =>
+            $handles[$rule->getAuthorPHID()]->getName(),
+        ),
         'info' => $config_info,
       ));
   }

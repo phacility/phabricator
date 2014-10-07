@@ -61,7 +61,8 @@ final class PhabricatorRepositoryPushLog
       PhabricatorRepositoryPushLog::CHANGEFLAG_REWRITE =>
         pht('change rewrites ref'),
       PhabricatorRepositoryPushLog::CHANGEFLAG_DANGEROUS =>
-        pht('dangerous change'));
+        pht('dangerous change'),
+    );
   }
 
   public function getConfiguration() {

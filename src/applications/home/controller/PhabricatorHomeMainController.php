@@ -327,7 +327,7 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
         ),
         array(
           phutil_tag('strong', array(), $title.': '),
-          $body
+          $body,
         )));
     $this->minipanels[] = $panel;
   }

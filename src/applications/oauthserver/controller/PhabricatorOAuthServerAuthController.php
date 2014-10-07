@@ -196,7 +196,7 @@ final class PhabricatorOAuthServerAuthController
     } else {
       $desired_scopes = array(
         PhabricatorOAuthServerScope::SCOPE_WHOAMI         => 1,
-        PhabricatorOAuthServerScope::SCOPE_OFFLINE_ACCESS => 1
+        PhabricatorOAuthServerScope::SCOPE_OFFLINE_ACCESS => 1,
       );
     }
 

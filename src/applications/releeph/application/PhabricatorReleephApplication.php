@@ -74,7 +74,7 @@ final class PhabricatorReleephApplication extends PhabricatorApplication {
           'comment/(?P<requestID>[1-9]\d*)/'
             => 'ReleephRequestCommentController',
         ),
-      )
+      ),
     );
   }
 

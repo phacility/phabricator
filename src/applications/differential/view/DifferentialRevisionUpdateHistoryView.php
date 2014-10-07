@@ -314,7 +314,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       DifferentialLintStatus::LINT_FAIL => self::STAR_FAIL,
       DifferentialLintStatus::LINT_SKIP => self::STAR_SKIP,
       DifferentialLintStatus::LINT_AUTO_SKIP => self::STAR_SKIP,
-      DifferentialLintStatus::LINT_POSTPONED => self::STAR_SKIP
+      DifferentialLintStatus::LINT_POSTPONED => self::STAR_SKIP,
     );
 
     $star = idx($map, $diff->getLintStatus(), self::STAR_FAIL);

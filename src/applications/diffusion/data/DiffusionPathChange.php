@@ -171,7 +171,8 @@ final class DiffusionPathChange {
       'changeType' => $this->getChangeType(),
       'targetPath' =>  $this->getTargetPath(),
       'targetCommitIdentifier' => $this->getTargetCommitIdentifier(),
-      'awayPaths' => $this->getAwayPaths());
+      'awayPaths' => $this->getAwayPaths(),
+    );
   }
 
   public static function newFromConduit(array $dicts) {

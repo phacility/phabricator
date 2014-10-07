@@ -66,7 +66,7 @@ final class PHUIWorkpanelView extends AphrontTagView {
       $footer = phutil_tag(
         'ul',
           array(
-            'class' => 'phui-workpanel-footer-action mst ps'
+            'class' => 'phui-workpanel-footer-action mst ps',
           ),
           $footer_tag);
     }
@@ -92,7 +92,7 @@ final class PHUIWorkpanelView extends AphrontTagView {
     $body = phutil_tag(
       'div',
         array(
-          'class' => 'phui-workpanel-body'
+          'class' => 'phui-workpanel-body',
         ),
       $this->cards);
 

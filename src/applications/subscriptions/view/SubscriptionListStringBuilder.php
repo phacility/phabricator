@@ -69,7 +69,7 @@ final class SubscriptionListStringBuilder {
       'a',
       array(
         'href' => $list_uri,
-        'sigil' => 'workflow'
+        'sigil' => 'workflow',
       ),
       $not_shown_txt);
 

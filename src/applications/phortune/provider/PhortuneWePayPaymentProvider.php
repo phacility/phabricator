@@ -152,7 +152,7 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
           'shipping_fee'      => 0,
           'charge_tax'        => 0,
           'mode'              => 'regular',
-          'funding_sources'   => 'bank,cc'
+          'funding_sources'   => 'bank,cc',
         );
 
         $charge = $cart->willApplyCharge($viewer, $this);

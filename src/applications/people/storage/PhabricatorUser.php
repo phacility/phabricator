@@ -445,7 +445,8 @@ final class PhabricatorUser
         PhabricatorUserPreferences::PREFERENCE_TITLES => 'glyph',
         PhabricatorUserPreferences::PREFERENCE_EDITOR => '',
         PhabricatorUserPreferences::PREFERENCE_MONOSPACED => '',
-        PhabricatorUserPreferences::PREFERENCE_DARK_CONSOLE => 0);
+        PhabricatorUserPreferences::PREFERENCE_DARK_CONSOLE => 0,
+      );
 
       $preferences->setPreferences($default_dict);
     }

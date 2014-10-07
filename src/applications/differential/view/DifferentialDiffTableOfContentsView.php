@@ -160,7 +160,7 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
         $meta = phutil_tag(
           'div',
           array(
-            'class' => 'differential-toc-meta'
+            'class' => 'differential-toc-meta',
           ),
           $meta);
       }
@@ -176,7 +176,7 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
         $desc,
         array($link, $lines, $meta),
         $cov,
-        $mcov
+        $mcov,
       );
     }
 
@@ -210,11 +210,11 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
     $buttons = phutil_tag(
       'div',
       array(
-        'class' => 'differential-toc-buttons grouped'
+        'class' => 'differential-toc-buttons grouped',
       ),
       array(
         $editor_link,
-        $reveal_link
+        $reveal_link,
       ));
 
     $table = id(new AphrontTableView($rows));

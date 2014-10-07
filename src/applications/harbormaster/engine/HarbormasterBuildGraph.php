@@ -33,7 +33,8 @@ final class HarbormasterBuildGraph extends AbstractDirectedGraph {
       $results[] = array(
         'node' => $steps_by_phid[$node['node']],
         'depth' => $node['depth'],
-        'cycle' => $node['cycle']);
+        'cycle' => $node['cycle'],
+      );
     }
 
     return $results;

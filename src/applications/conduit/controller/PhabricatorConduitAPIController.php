@@ -279,7 +279,7 @@ final class PhabricatorConduitAPIController
     if (!$session_key) {
       return array(
         'ERR-INVALID-SESSION',
-        'Session key is not present.'
+        'Session key is not present.',
       );
     }
 

@@ -65,7 +65,8 @@ final class PhabricatorSlowvoteVoteController
       return id(new AphrontAjaxResponse())
         ->setContent(array(
           'pollID' => $poll->getID(),
-          'contentHTML' => $embed->render()));
+          'contentHTML' => $embed->render(),
+        ));
     }
 
     if (!$request->isFormPost()) {

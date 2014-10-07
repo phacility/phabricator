@@ -44,21 +44,21 @@ final class DivinerBookItemView extends AphrontTagView {
     $title = phutil_tag(
       'span',
         array(
-          'class' => 'diviner-book-item-title'
+          'class' => 'diviner-book-item-title',
         ),
       $this->title);
 
     $subtitle = phutil_tag(
       'span',
         array(
-          'class' => 'diviner-book-item-subtitle'
+          'class' => 'diviner-book-item-subtitle',
         ),
       $this->subtitle);
 
     $type = phutil_tag(
       'span',
         array(
-          'class' => 'diviner-book-item-type'
+          'class' => 'diviner-book-item-type',
         ),
       $this->type);
 

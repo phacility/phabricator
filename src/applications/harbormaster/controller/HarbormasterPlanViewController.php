@@ -391,7 +391,8 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
         $note = array(
           phutil_tag('strong', array(), pht('ERROR:')),
           ' ',
-          $error);
+          $error,
+        );
       } else {
         $note = $bound;
       }
@@ -457,7 +458,8 @@ final class HarbormasterPlanViewController extends HarbormasterPlanController {
         $note = array(
           phutil_tag('strong', array(), pht('ERROR:')),
           ' ',
-          $error);
+          $error,
+        );
       } else {
         $note = $bound;
       }

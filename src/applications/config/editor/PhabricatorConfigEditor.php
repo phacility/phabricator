@@ -122,7 +122,7 @@ final class PhabricatorConfigEditor
       ->setNewValue(
         array(
            'deleted' => false,
-           'value' => $value
+           'value' => $value,
         ));
 
     $editor = id(new PhabricatorConfigEditor())

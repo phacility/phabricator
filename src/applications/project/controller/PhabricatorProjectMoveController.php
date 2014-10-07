@@ -128,7 +128,8 @@ final class PhabricatorProjectMoveController
           ->setNewValue(array(
             'newPriority' => $after_pri,
             'newSubpriorityBase' => $after_sub,
-            'direction' => '>'));
+            'direction' => '>',
+          ));
 
        } else if ($b_task &&
                  (($b_task->getPriority() > $object->getPriority()) ||
@@ -143,7 +144,8 @@ final class PhabricatorProjectMoveController
           ->setNewValue(array(
             'newPriority' => $before_pri,
             'newSubpriorityBase' => $before_sub,
-            'direction' => '<'));
+            'direction' => '<',
+          ));
       }
    }
 

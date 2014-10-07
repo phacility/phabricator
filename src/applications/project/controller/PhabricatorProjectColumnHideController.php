@@ -35,7 +35,8 @@ final class PhabricatorProjectColumnHideController
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT))
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
       ->executeOne();
     if (!$column) {
       return new Aphront404Response();
@@ -67,7 +68,8 @@ final class PhabricatorProjectColumnHideController
       $type_status = PhabricatorProjectColumnTransaction::TYPE_STATUS;
       $xactions = array(id(new PhabricatorProjectColumnTransaction())
         ->setTransactionType($type_status)
-        ->setNewValue($new_status));
+        ->setNewValue($new_status),
+      );
 
       $editor = id(new PhabricatorProjectColumnTransactionEditor())
         ->setActor($viewer)

@@ -43,7 +43,9 @@ final class ManiphestSubpriorityController extends ManiphestController {
       ->setNewValue(array(
         'newPriority' => $after_pri,
         'newSubpriorityBase' => $after_sub,
-        'direction' => '>')));
+        'direction' => '>',
+      )),
+    );
     $editor = id(new ManiphestTransactionEditor())
       ->setActor($user)
       ->setContinueOnMissingFields(true)

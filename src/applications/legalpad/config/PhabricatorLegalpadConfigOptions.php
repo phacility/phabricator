@@ -17,7 +17,7 @@ final class PhabricatorLegalpadConfigOptions
         'metamta.legalpad.subject-prefix',
         'string',
         '[Legalpad]')
-        ->setDescription(pht('Subject prefix for Legalpad email.'))
+        ->setDescription(pht('Subject prefix for Legalpad email.')),
     );
   }
 

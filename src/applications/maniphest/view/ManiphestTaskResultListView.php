@@ -93,7 +93,7 @@ final class ManiphestTaskResultListView extends ManiphestView {
       $lists[] = phutil_tag(
         'div',
         array(
-          'class' => 'maniphest-task-group'
+          'class' => 'maniphest-task-group',
         ),
         array(
           $header,

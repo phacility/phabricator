@@ -14,7 +14,8 @@ final class PhabricatorStorageManagementDestroyWorkflow
             'name'  => 'unittest-fixtures',
             'help'  => 'Restrict **destroy** operations to databases created '.
                        'by PhabricatorTestCase test fixtures.',
-          )));
+          ),
+        ));
   }
 
   public function execute(PhutilArgumentParser $args) {

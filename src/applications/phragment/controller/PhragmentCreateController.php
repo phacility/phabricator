@@ -122,7 +122,8 @@ final class PhragmentCreateController extends PhragmentController {
       array(
         $crumbs,
         $this->renderConfigurationWarningIfRequired(),
-        $box),
+        $box,
+      ),
       array(
         'title' => pht('Create Fragment'),
       ));

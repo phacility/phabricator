@@ -294,7 +294,7 @@ final class AphrontSideNavFilterView extends AphrontView {
           array(
             $crumbs,
             $this->renderChildren(),
-          ))
+          )),
       ));
   }
 

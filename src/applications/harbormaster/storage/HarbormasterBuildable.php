@@ -146,7 +146,7 @@ final class HarbormasterBuildable extends HarbormasterDAO
     PhabricatorWorker::scheduleTask(
       'HarbormasterBuildWorker',
       array(
-        'buildID' => $build->getID()
+        'buildID' => $build->getID(),
       ));
 
     return $build;

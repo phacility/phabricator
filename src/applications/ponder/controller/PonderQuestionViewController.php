@@ -64,7 +64,7 @@ final class PonderQuestionViewController extends PonderController {
         $object_box,
         $question_xactions,
         $answers,
-        $answer_add_panel
+        $answer_add_panel,
       ),
       array(
         'title' => 'Q'.$question->getID().' '.$question->getTitle(),

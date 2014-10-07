@@ -52,8 +52,8 @@ final class PhabricatorDashboardPanelSearchQueryCustomField
         'options' => $queries,
         'value' => array(
           'key' => strlen($value) ? $value : null,
-          'name' => $name
-        )
+          'name' => $name,
+        ),
       ));
 
     return id(new AphrontFormSelectControl())

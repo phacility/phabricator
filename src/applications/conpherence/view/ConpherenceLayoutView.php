@@ -83,7 +83,7 @@ final class ConpherenceLayoutView extends AphrontView {
             'name' => pht('Thread'),
             'icon' => 'fa-comment',
             'deviceOnly' => true,
-            'hasCreate' => false
+            'hasCreate' => false,
           ),
           'widgets-people' => array(
             'name' => pht('Participants'),
@@ -93,14 +93,14 @@ final class ConpherenceLayoutView extends AphrontView {
             'createData' => array(
               'refreshFromResponse' => true,
               'action' => ConpherenceUpdateActions::ADD_PERSON,
-              'customHref' => null
-            )
+              'customHref' => null,
+            ),
           ),
           'widgets-files' => array(
             'name' => pht('Files'),
             'icon' => 'fa-files-o',
             'deviceOnly' => false,
-            'hasCreate' => false
+            'hasCreate' => false,
           ),
           'widgets-calendar' => array(
             'name' => pht('Calendar'),
@@ -110,16 +110,17 @@ final class ConpherenceLayoutView extends AphrontView {
             'createData' => array(
               'refreshFromResponse' => false,
               'action' => ConpherenceUpdateActions::ADD_STATUS,
-              'customHref' => '/calendar/event/create/'
-            )
+              'customHref' => '/calendar/event/create/',
+            ),
           ),
           'widgets-settings' => array(
             'name' => pht('Settings'),
             'icon' => 'fa-wrench',
             'deviceOnly' => false,
-            'hasCreate' => false
+            'hasCreate' => false,
           ),
-        )));
+        ),
+      ));
 
 
     return javelin_tag(
@@ -170,7 +171,7 @@ final class ConpherenceLayoutView extends AphrontView {
                 phutil_tag(
                   'div',
                   array(
-                    'class' => 'text'
+                    'class' => 'text',
                   ),
                   pht('You do not have any messages yet.')),
                 javelin_tag(
@@ -180,7 +181,7 @@ final class ConpherenceLayoutView extends AphrontView {
                     'class' => 'button grey',
                     'sigil' => 'workflow',
                   ),
-                  pht('Send a Message'))
+                  pht('Send a Message')),
             )),
             javelin_tag(
               'div',
@@ -193,21 +194,22 @@ final class ConpherenceLayoutView extends AphrontView {
                 phutil_tag(
                   'div',
                   array(
-                    'class' => 'widgets-loading-mask'
+                    'class' => 'widgets-loading-mask',
                   ),
                   ''),
                 javelin_tag(
                   'div',
                   array(
-                    'sigil' => 'conpherence-widgets-holder'
+                    'sigil' => 'conpherence-widgets-holder',
                   ),
-                  ''))),
+                  ''),
+              )),
             javelin_tag(
               'div',
               array(
                 'class' => 'conpherence-message-pane',
                 'id' => 'conpherence-message-pane',
-                'sigil' => 'conpherence-message-pane'
+                'sigil' => 'conpherence-message-pane',
               ),
               array(
                 javelin_tag(
@@ -228,9 +230,9 @@ final class ConpherenceLayoutView extends AphrontView {
                   'div',
                   array(
                     'id' => 'conpherence-form',
-                    'sigil' => 'conpherence-form'
+                    'sigil' => 'conpherence-form',
                   ),
-                  nonempty($this->replyForm, ''))
+                  nonempty($this->replyForm, '')),
               )),
           )),
       ));

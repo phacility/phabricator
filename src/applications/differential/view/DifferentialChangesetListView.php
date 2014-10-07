@@ -110,8 +110,9 @@ final class DifferentialChangesetListView extends AphrontView {
     Javelin::initBehavior('differential-toggle-files', array(
       'pht' => array(
         'undo' => pht('Undo'),
-        'collapsed' => pht('This file content has been collapsed.'))
-      ));
+        'collapsed' => pht('This file content has been collapsed.'),
+      ),
+    ));
     Javelin::initBehavior(
       'differential-dropdown-menus',
       array(

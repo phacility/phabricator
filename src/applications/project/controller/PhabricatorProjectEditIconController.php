@@ -71,7 +71,7 @@ final class PhabricatorProjectEditIconController
           'sigil' => 'has-tooltip',
           'meta' => array(
             'tip' => $label,
-          )
+          ),
         ),
         array(
           $aural,

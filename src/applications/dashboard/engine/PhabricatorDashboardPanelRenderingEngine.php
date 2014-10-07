@@ -193,11 +193,14 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
         'id' => $id,
         'sigil' => 'dashboard-panel',
         'meta' => array(
-          'objectPHID' => $panel->getPHID()),
-        'class' => 'dashboard-panel'),
+          'objectPHID' => $panel->getPHID(),
+        ),
+        'class' => 'dashboard-panel',
+      ),
       array(
         $header,
-        $content));
+        $content,
+      ));
   }
 
 

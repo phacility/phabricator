@@ -69,7 +69,7 @@ final class ReleephCommitFinder {
     } else {
       $dr_data = array(
         'callsign' => $repository->getCallsign(),
-        'commit' => $partial_string
+        'commit' => $partial_string,
       );
     }
 

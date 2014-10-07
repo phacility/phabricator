@@ -299,7 +299,8 @@ final class HarbormasterBuildViewController
           'div',
           array(
             'style' => 'display: none',
-            'id' => $id),
+            'id' => $id,
+          ),
           $log_box);
       }
 
@@ -377,7 +378,8 @@ final class HarbormasterBuildViewController
         $link_100,
         ' - ',
         $link_0,
-        ' Lines'));
+        ' Lines',
+      ));
   }
 
   private function buildActionList(HarbormasterBuild $build) {
@@ -440,7 +442,8 @@ final class HarbormasterBuildViewController
       ->setViewer($viewer)
       ->withPHIDs(array(
         $build->getBuildablePHID(),
-        $build->getBuildPlanPHID()))
+        $build->getBuildPlanPHID(),
+      ))
       ->execute();
 
     $properties->addProperty(

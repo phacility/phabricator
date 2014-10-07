@@ -48,7 +48,7 @@ final class PHUIDocumentExample extends PhabricatorUIExample {
       ->setIcon('fa-plus-circle')
       ->setType(PHUIListItemView::TYPE_LINK);
 
-    $divider = id(new PHUIListItemView)
+    $divider = id(new PHUIListItemView())
       ->setType(PHUIListItemView::TYPE_DIVIDER);
 
     $header = id(new PHUIHeaderView())

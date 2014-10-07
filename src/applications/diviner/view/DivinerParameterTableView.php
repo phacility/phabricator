@@ -67,13 +67,14 @@ final class DivinerParameterTableView extends AphrontTagView {
     $table = phutil_tag(
       'table',
       array(
-        'class' => 'diviner-parameter-table-view'),
+        'class' => 'diviner-parameter-table-view',
+      ),
       $rows);
 
     $header = phutil_tag(
       'span',
       array(
-        'class' => 'diviner-table-header'
+        'class' => 'diviner-table-header',
       ),
       $this->header);
 

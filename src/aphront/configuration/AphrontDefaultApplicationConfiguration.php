@@ -306,7 +306,8 @@ class AphrontDefaultApplicationConfiguration
       array(
         'uri' => $uri,
         'external' => $external,
-      ));
+      ),
+    );
   }
 
 }

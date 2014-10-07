@@ -76,7 +76,8 @@ final class PhragmentSnapshotViewController extends PhragmentController {
         $crumbs,
         $this->renderConfigurationWarningIfRequired(),
         $box,
-        $list),
+        $list,
+      ),
       array(
         'title' => pht('View Snapshot'),
       ));

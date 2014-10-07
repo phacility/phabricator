@@ -24,7 +24,7 @@ final class JavelinReactorExample extends PhabricatorUIExample {
         'Reactive checkbox generates a boolean dynamic value',
         'ReactorCheckboxExample',
         'phabricator-uiexample-reactor-checkbox',
-        array('checked' => true)
+        array('checked' => true),
       ),
       array(
         'Reactive focus detector generates a boolean dynamic value',
@@ -60,7 +60,7 @@ final class JavelinReactorExample extends PhabricatorUIExample {
         'sendclass makes the class of an element a string dynamic value',
         'ReactorSendClassExample',
         'phabricator-uiexample-reactor-sendclass',
-        array()
+        array(),
       ),
       array(
         'sendproperties makes some properties of an object into dynamic values',

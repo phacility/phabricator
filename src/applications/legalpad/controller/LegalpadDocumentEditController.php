@@ -218,7 +218,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
       array(
         $crumbs,
         $form_box,
-        $preview
+        $preview,
       ),
       array(
         'title' => $title,

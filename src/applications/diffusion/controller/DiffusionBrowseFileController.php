@@ -1016,7 +1016,8 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
       array(
         'commit' => $drequest->getCommit(),
         'path' => $drequest->getPath(),
-        'againstCommit' => $target_commit));
+        'againstCommit' => $target_commit,
+      ));
     $old_line = 0;
     $new_line = 0;
 

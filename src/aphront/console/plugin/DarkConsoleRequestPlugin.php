@@ -47,7 +47,8 @@ final class DarkConsoleRequestPlugin extends DarkConsolePlugin {
         if (isset($mask[$key])) {
           $rows[] = array(
             $key,
-            phutil_tag('em', array(), '(Masked)'));
+            phutil_tag('em', array(), '(Masked)'),
+          );
         } else {
           $rows[] = array(
             $key,

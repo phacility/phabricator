@@ -94,43 +94,52 @@ final class PhameBlog extends PhameDAO
     // so just use it to test if there's a protocol specified
     $uri = new PhutilURI($custom_domain);
     if ($uri->getProtocol()) {
-      return array($label,
+      return array(
+        $label,
         pht(
           'The custom domain should not include a protocol. Just provide '.
           'the bare domain name (for example, "%s").',
-          $example_domain));
+          $example_domain),
+      );
     }
 
     if ($uri->getPort()) {
-      return array($label,
+      return array(
+        $label,
         pht(
           'The custom domain should not include a port number. Just provide '.
           'the bare domain name (for example, "%s").',
-          $example_domain));
+          $example_domain),
+      );
     }
 
     if (strpos($custom_domain, '/') !== false) {
-      return array($label,
+      return array(
+        $label,
         pht(
           'The custom domain should not specify a path (hosting a Phame '.
           'blog at a path is currently not supported). Instead, just provide '.
           'the bare domain name (for example, "%s").',
-          $example_domain));
+          $example_domain),
+        );
     }
 
     if (strpos($custom_domain, '.') === false) {
-      return array($label,
+      return array(
+        $label,
         pht(
           'The custom domain should contain at least one dot (.) because '.
           'some browsers fail to set cookies on domains without a dot. '.
           'Instead, use a normal looking domain name like "%s".',
-          $example_domain));
+          $example_domain),
+        );
     }
 
     if (!PhabricatorEnv::getEnvConfig('policy.allow-public')) {
       $href = PhabricatorEnv::getProductionURI(
         '/config/edit/policy.allow-public/');
-      return array(pht('Fix Configuration'),
+      return array(
+        pht('Fix Configuration'),
         pht(
           'For custom domains to work, this Phabricator instance must be '.
           'configured to allow the public access policy. Configure this '.
@@ -140,7 +149,8 @@ final class PhameBlog extends PhameDAO
           phutil_tag(
             'a',
             array('href' => $href),
-            pht('here'))));
+            pht('here'))),
+      );
     }
 
     return null;

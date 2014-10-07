@@ -49,7 +49,7 @@ final class AphrontFormTextWithSubmitControl extends AphrontFormControl {
             array(
               'type' => 'submit',
               'class' => 'text-with-submit-control-submit grey',
-              'value' => coalesce($this->getSubmitLabel(), pht('Submit'))
+              'value' => coalesce($this->getSubmitLabel(), pht('Submit')),
             ))),
       ));
   }

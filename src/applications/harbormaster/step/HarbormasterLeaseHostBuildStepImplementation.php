@@ -37,7 +37,8 @@ final class HarbormasterLeaseHostBuildStepImplementation
       $settings['name'],
       HarbormasterBuildArtifact::TYPE_HOST);
     $artifact->setArtifactData(array(
-      'drydock-lease' => $lease->getID()));
+      'drydock-lease' => $lease->getID(),
+    ));
     $artifact->save();
   }
 

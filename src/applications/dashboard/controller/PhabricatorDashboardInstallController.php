@@ -52,7 +52,8 @@ final class PhabricatorDashboardInstallController
 
     $handles = $this->loadHandles(array(
       $object_phid,
-      $installer_phid));
+      $installer_phid,
+    ));
 
     if ($request->isFormPost()) {
       $dashboard_install = id(new PhabricatorDashboardInstall())

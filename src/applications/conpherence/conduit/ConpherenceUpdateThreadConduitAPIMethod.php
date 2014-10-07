@@ -18,7 +18,7 @@ final class ConpherenceUpdateThreadConduitAPIMethod
       'title' => 'optional string',
       'message' => 'optional string',
       'addParticipantPHIDs' => 'optional list<phids>',
-      'removeParticipantPHID' => 'optional phid'
+      'removeParticipantPHID' => 'optional phid',
     );
   }
 
@@ -36,7 +36,7 @@ final class ConpherenceUpdateThreadConduitAPIMethod
       'ERR_USAGE_ONLY_SELF_REMOVE' => pht(
         'Only a user can remove themselves from a thread.'),
       'ERR_USAGE_NO_UPDATES' => pht(
-        'You must specify data that actually updates the conpherence.')
+        'You must specify data that actually updates the conpherence.'),
     );
   }
 

@@ -219,14 +219,14 @@ final class PhabricatorProjectSearchEngine
       $workboards_url = phutil_tag(
         'a',
         array(
-          'href' => $workboards_uri
+          'href' => $workboards_uri,
         ),
         pht('Workboards'));
 
       $members_url = phutil_tag(
         'a',
         array(
-          'href' => $members_uri
+          'href' => $members_uri,
         ),
         pht('Members'));
 

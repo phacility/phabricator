@@ -264,7 +264,7 @@ final class PHUIActionHeaderExample extends PhabricatorUIExample {
           $title3,
           $wrap3,
           $title4,
-          $wrap4
+          $wrap4,
         ));
   }
 }

@@ -82,7 +82,7 @@ final class PHUIImageMaskExample extends PhabricatorUIExample {
           $box2,
           $box3,
           $box4,
-          $box5
+          $box5,
         ));
   }
 }

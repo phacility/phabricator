@@ -32,7 +32,8 @@ final class PHUIFeedStoryExample extends PhabricatorUIExample {
       'like-1',
       'like-2',
       'heart-1',
-      'heart-2');
+      'heart-2',
+    );
     $tokenview = array();
     foreach ($tokens as $token) {
       $tokenview[] =
@@ -152,42 +153,48 @@ final class PHUIFeedStoryExample extends PhabricatorUIExample {
         id(new PHUIBoxView())
           ->appendChild($story1)
           ->addMargin(PHUI::MARGIN_MEDIUM)
-          ->addPadding(PHUI::PADDING_SMALL));
+          ->addPadding(PHUI::PADDING_SMALL),
+      );
 
     $wrap2 =
       array(
         id(new PHUIBoxView())
           ->appendChild($story2)
           ->addMargin(PHUI::MARGIN_MEDIUM)
-          ->addPadding(PHUI::PADDING_SMALL));
+          ->addPadding(PHUI::PADDING_SMALL),
+      );
 
     $wrap3 =
       array(
         id(new PHUIBoxView())
           ->appendChild($story3)
           ->addMargin(PHUI::MARGIN_MEDIUM)
-          ->addPadding(PHUI::PADDING_SMALL));
+          ->addPadding(PHUI::PADDING_SMALL),
+      );
 
     $wrap4 =
       array(
         id(new PHUIBoxView())
           ->appendChild($story4)
           ->addMargin(PHUI::MARGIN_MEDIUM)
-          ->addPadding(PHUI::PADDING_SMALL));
+          ->addPadding(PHUI::PADDING_SMALL),
+      );
 
     $wrap5 =
       array(
         id(new PHUIBoxView())
           ->appendChild($story5)
           ->addMargin(PHUI::MARGIN_MEDIUM)
-          ->addPadding(PHUI::PADDING_SMALL));
+          ->addPadding(PHUI::PADDING_SMALL),
+      );
 
     $wrap6 =
       array(
         id(new PHUIBoxView())
           ->appendChild($story6)
           ->addMargin(PHUI::MARGIN_MEDIUM)
-          ->addPadding(PHUI::PADDING_SMALL));
+          ->addPadding(PHUI::PADDING_SMALL),
+      );
 
     return phutil_tag(
       'div',
@@ -204,7 +211,7 @@ final class PHUIFeedStoryExample extends PhabricatorUIExample {
           $head5,
           $wrap5,
           $head6,
-          $wrap6
+          $wrap6,
         ));
   }
 }

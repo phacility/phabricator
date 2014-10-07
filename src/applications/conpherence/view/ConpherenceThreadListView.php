@@ -148,7 +148,8 @@ final class ConpherenceThreadListView extends AphrontView {
         'participant_id' => $participant->getID(),
         'conpherence_phid' => $participant->getConpherencePHID(),
         'date_touched' => $participant->getDateTouched(),
-        'direction' => $direction));
+        'direction' => $direction,
+      ));
     return $item;
   }
 
@@ -156,7 +157,7 @@ final class ConpherenceThreadListView extends AphrontView {
     $message = phutil_tag(
       'div',
       array(
-        'class' => 'no-conpherences-menu-item'
+        'class' => 'no-conpherences-menu-item',
       ),
       pht('No conpherences.'));
 

@@ -99,7 +99,7 @@ final class PHUIActionHeaderView extends AphrontView {
         $action_list[] = phutil_tag(
           'li',
             array(
-            'class' => 'phui-action-header-icon-item'
+            'class' => 'phui-action-header-icon-item',
           ),
           $action);
       }
@@ -109,7 +109,7 @@ final class PHUIActionHeaderView extends AphrontView {
       $action_list[] = phutil_tag(
         'li',
           array(
-          'class' => 'phui-action-header-icon-item'
+          'class' => 'phui-action-header-icon-item',
         ),
         $this->tag);
     }
@@ -126,7 +126,7 @@ final class PHUIActionHeaderView extends AphrontView {
           array(
             'class' => 'phui-action-header-link',
             'href' => $this->headerHref,
-            'sigil' => implode(' ', $this->headerSigils)
+            'sigil' => implode(' ', $this->headerSigils),
           ),
           $this->headerTitle);
     }
@@ -134,18 +134,19 @@ final class PHUIActionHeaderView extends AphrontView {
     $header = phutil_tag(
       'h3',
         array(
-          'class' => 'phui-action-header-title'
+          'class' => 'phui-action-header-title',
         ),
       array(
         $header_icon,
-        $header_title));
+        $header_title,
+      ));
 
     $icons = '';
     if (nonempty($action_list)) {
       $icons = phutil_tag(
         'ul',
           array(
-            'class' => 'phui-action-header-icon-list'
+            'class' => 'phui-action-header-icon-list',
           ),
           $action_list);
     }
@@ -153,11 +154,11 @@ final class PHUIActionHeaderView extends AphrontView {
     return phutil_tag(
       'div',
         array(
-          'class' => implode(' ', $classes)
+          'class' => implode(' ', $classes),
         ),
         array(
           $header,
-          $icons
+          $icons,
         ));
   }
 }

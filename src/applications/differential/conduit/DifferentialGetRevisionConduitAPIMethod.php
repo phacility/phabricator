@@ -94,7 +94,7 @@ final class DifferentialGetRevisionConduitAPIMethod
       'reviewerPHIDs' => $reviewer_phids,
       'diffs' => $diff_dicts,
       'commits' => $commit_dicts,
-      'auxiliary' => idx($field_data, $revision->getPHID(), array())
+      'auxiliary' => idx($field_data, $revision->getPHID(), array()),
     );
 
     return $dict;

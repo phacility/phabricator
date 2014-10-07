@@ -64,7 +64,7 @@ final class PHUIPropertyListView extends AphrontView {
     return $this;
   }
 
-  public function addSectionHeader($name, $icon=null) {
+  public function addSectionHeader($name, $icon = null) {
     $this->parts[] = array(
       'type' => 'section',
       'name' => $name,

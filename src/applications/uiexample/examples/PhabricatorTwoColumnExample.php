@@ -15,21 +15,21 @@ final class PhabricatorTwoColumnExample extends PhabricatorUIExample {
     $main = phutil_tag(
       'div',
       array(
-        'style' => 'border: 1px solid blue; padding: 20px;'
+        'style' => 'border: 1px solid blue; padding: 20px;',
       ),
       'Mary, mary quite contrary.');
 
     $side = phutil_tag(
       'div',
       array(
-        'style' => 'border: 1px solid red; padding: 20px;'
+        'style' => 'border: 1px solid red; padding: 20px;',
       ),
       'How does your garden grow?');
 
 
-    $content = id(new AphrontTwoColumnView)
-          ->setMainColumn($main)
-          ->setSideColumn($side);
+    $content = id(new AphrontTwoColumnView())
+      ->setMainColumn($main)
+      ->setSideColumn($side);
 
     return $content;
   }

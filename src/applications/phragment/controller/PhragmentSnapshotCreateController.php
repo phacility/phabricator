@@ -90,13 +90,15 @@ final class PhragmentSnapshotCreateController extends PhragmentController {
       array(),
       array(
         phutil_tag('th', array(), 'Fragment'),
-        phutil_tag('th', array(), 'Version')));
+        phutil_tag('th', array(), 'Version'),
+      ));
     $rows[] = phutil_tag(
       'tr',
       array(),
       array(
         phutil_tag('td', array(), $fragment->getPath()),
-        phutil_tag('td', array(), $fragment_sequence)));
+        phutil_tag('td', array(), $fragment_sequence),
+      ));
     foreach ($children as $child) {
       $sequence = '-';
       if ($child->getLatestVersion() !== null) {
@@ -107,7 +109,8 @@ final class PhragmentSnapshotCreateController extends PhragmentController {
         array(),
         array(
           phutil_tag('td', array(), $child->getPath()),
-          phutil_tag('td', array(), $sequence)));
+          phutil_tag('td', array(), $sequence),
+        ));
     }
 
     $table = phutil_tag(
@@ -125,7 +128,8 @@ final class PhragmentSnapshotCreateController extends PhragmentController {
           pht(
             'The snapshot will contain the following fragments at '.
             'the specified versions: ')),
-        $table));
+        $table,
+      ));
 
     $form = id(new AphrontFormView())
       ->setUser($viewer)
@@ -159,7 +163,8 @@ final class PhragmentSnapshotCreateController extends PhragmentController {
       array(
         $crumbs,
         $this->renderConfigurationWarningIfRequired(),
-        $box),
+        $box,
+      ),
       array(
         'title' => pht('Create Fragment'),
       ));

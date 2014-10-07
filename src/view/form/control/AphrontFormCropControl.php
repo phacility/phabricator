@@ -32,7 +32,7 @@ final class AphrontFormCropControl extends AphrontFormControl {
       return phutil_tag(
         'img',
         array(
-          'src' => PhabricatorUser::getDefaultProfileImageURI()
+          'src' => PhabricatorUser::getDefaultProfileImageURI(),
         ),
         '');
     }
@@ -61,7 +61,7 @@ final class AphrontFormCropControl extends AphrontFormControl {
         'id' => $c_id,
         'sigil' => 'crop-box',
         'mustcapture' => true,
-        'class' => 'crop-box'
+        'class' => 'crop-box',
       ),
       array(
         javelin_tag(
@@ -69,7 +69,7 @@ final class AphrontFormCropControl extends AphrontFormControl {
           array(
             'src' => $file->getBestURI(),
             'class' => 'crop-image',
-            'sigil' => 'crop-image'
+            'sigil' => 'crop-image',
           ),
           ''),
         javelin_tag(

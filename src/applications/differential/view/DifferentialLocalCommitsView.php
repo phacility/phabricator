@@ -144,7 +144,8 @@ final class DifferentialLocalCommitsView extends AphrontView {
       $link = phutil_tag(
         'a',
         array(
-          'href' => $commit_for_link->getURI()),
+          'href' => $commit_for_link->getURI(),
+        ),
         $commit_hash);
     } else {
       $link = $commit_hash;

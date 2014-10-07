@@ -279,7 +279,7 @@ final class ConpherenceThreadQuery
       $widget_data = array(
         'statuses' => $statuses,
         'files' => $conpherence_files,
-        'files_authors' => $files_authors
+        'files_authors' => $files_authors,
       );
       $conpherence->attachWidgetData($widget_data);
     }

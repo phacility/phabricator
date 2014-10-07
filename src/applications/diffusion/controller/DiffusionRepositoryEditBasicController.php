@@ -144,7 +144,8 @@ final class DiffusionRepositoryEditBasicController
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $object_box),
+        $object_box,
+      ),
       array(
         'title' => $title,
       ));

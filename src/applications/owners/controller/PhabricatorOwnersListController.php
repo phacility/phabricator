@@ -310,7 +310,7 @@ final class PhabricatorOwnersListController
           array(
             'href' => '/audit/view/packagecommits/?phid='.$package->getPHID(),
           ),
-          pht('Related Commits'))
+          pht('Related Commits')),
       );
     }
 
