@@ -148,7 +148,7 @@ final class PhortunePayPalPaymentProvider extends PhortunePaymentProvider {
   }
 
   public function getPaymentMethodIcon() {
-    return celerity_get_resource_uri('rsrc/image/phortune/paypal.png');
+    return 'PayPal';
   }
 
   public function getPaymentMethodProviderDescription() {

@@ -29,7 +29,7 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
   }
 
   public function getPaymentMethodIcon() {
-    return celerity_get_resource_uri('/rsrc/image/phortune/stripe.png');
+    return 'Stripe';
   }
 
   public function getPaymentMethodProviderDescription() {

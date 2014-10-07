@@ -34,7 +34,7 @@ final class PhortuneTestPaymentProvider extends PhortunePaymentProvider {
   }
 
   public function getPaymentMethodIcon() {
-    return celerity_get_resource_uri('/rsrc/image/phortune/test.png');
+    return 'TestPayment';
   }
 
   public function getPaymentMethodProviderDescription() {

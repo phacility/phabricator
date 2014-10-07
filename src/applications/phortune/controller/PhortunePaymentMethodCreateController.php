@@ -29,8 +29,12 @@ final class PhortunePaymentMethodCreateController
       return new Aphront404Response();
     }
 
-    $cancel_uri = $this->getApplicationURI($account->getID().'/');
-    $account_uri = $this->getApplicationURI($account->getID().'/');
+    $cart_id = $request->getInt('cartID');
+    if ($cart_id) {
+      $cancel_uri = $this->getApplicationURI("cart/{$cart_id}/checkout/");
+    } else {
+      $cancel_uri = $this->getApplicationURI($account->getID().'/');
+    }
 
     $providers = $this->loadCreatePaymentMethodProvidersForMerchant($merchant);
     if (!$providers) {
@@ -58,7 +62,7 @@ final class PhortunePaymentMethodCreateController
         ->setTitle(pht('Add Payment Method'))
         ->appendParagraph(pht('Choose a payment method to add:'))
         ->appendChild($content)
-        ->addCancelButton($account_uri);
+        ->addCancelButton($cancel_uri);
     }
 
     $provider = $providers[$provider_id];
@@ -107,11 +111,11 @@ final class PhortunePaymentMethodCreateController
 
         // If we added this method on a cart flow, return to the cart to
         // check out.
-        $cart_id = $request->getInt('cartID');
         if ($cart_id) {
           $next_uri = $this->getApplicationURI(
             "cart/{$cart_id}/checkout/?paymentMethodID=".$method->getID());
         } else {
+          $account_uri = $this->getApplicationURI($account->getID().'/');
           $next_uri = new PhutilURI($account_uri);
           $next_uri->setFragment('payment');
         }
@@ -140,7 +144,7 @@ final class PhortunePaymentMethodCreateController
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Add Payment Method'))
-          ->addCancelButton($account_uri));
+          ->addCancelButton($cancel_uri));
 
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText($provider->getPaymentMethodDescription())
@@ -172,18 +176,20 @@ final class PhortunePaymentMethodCreateController
     $this->requireResource('phortune-css');
 
     $icon = id(new PHUIIconView())
-      ->setImage($icon_uri)
-      ->addClass('phortune-payment-icon');
+      ->setSpriteSheet(PHUIIconView::SPRITE_LOGIN)
+      ->setSpriteIcon($provider->getPaymentMethodIcon());
 
     $button = id(new PHUIButtonView())
       ->setSize(PHUIButtonView::BIG)
       ->setColor(PHUIButtonView::GREY)
       ->setIcon($icon)
       ->setText($description)
-      ->setSubtext($details);
+      ->setSubtext($details)
+      ->setMetadata(array('disableWorkflow' => true));
 
     $form = id(new AphrontFormView())
       ->setUser($viewer)
+      ->setAction($request->getRequestURI())
       ->addHiddenInput('providerID', $provider->getProviderConfig()->getID())
       ->appendChild($button);
 

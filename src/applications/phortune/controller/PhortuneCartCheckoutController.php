@@ -161,7 +161,7 @@ final class PhortuneCartCheckoutController
     $add_providers = $this->loadCreatePaymentMethodProvidersForMerchant(
       $merchant);
     if ($add_providers) {
-      $new_method = phutil_tag(
+      $new_method = javelin_tag(
         'a',
         array(
           'class' => 'button grey',

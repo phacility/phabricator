@@ -121,7 +121,7 @@ final class PhortuneBalancedPaymentProvider extends PhortunePaymentProvider {
   }
 
   public function getPaymentMethodIcon() {
-    return celerity_get_resource_uri('/rsrc/image/phortune/balanced.png');
+    return 'Balanced';
   }
 
   public function getPaymentMethodProviderDescription() {

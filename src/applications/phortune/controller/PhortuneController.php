@@ -27,7 +27,7 @@ abstract class PhortuneController extends PhabricatorController {
       $rows[] = array(
         $charge->getID(),
         $cart_href,
-        $charge->getPaymentProviderKey(),
+        $charge->getProviderPHID(),
         $charge->getPaymentMethodPHID(),
         $charge->getAmountAsCurrency()->formatForDisplay(),
         $charge->getStatus(),

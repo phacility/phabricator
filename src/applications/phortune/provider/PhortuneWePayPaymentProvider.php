@@ -148,7 +148,7 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
   }
 
   public function getPaymentMethodIcon() {
-    return celerity_get_resource_uri('/rsrc/image/phortune/wepay.png');
+    return 'WePay';
   }
 
   public function getPaymentMethodProviderDescription() {

@@ -212,13 +212,12 @@ abstract class PhortunePaymentProvider {
 
     require_celerity_resource('phortune-css');
 
-    $icon_uri = $this->getPaymentMethodIcon();
     $description = $this->getPaymentMethodProviderDescription();
     $details = $this->getPaymentMethodDescription();
 
     $icon = id(new PHUIIconView())
-      ->setImage($icon_uri)
-      ->addClass('phortune-payment-icon');
+      ->setSpriteSheet(PHUIIconView::SPRITE_LOGIN)
+      ->setSpriteIcon($this->getPaymentMethodIcon());
 
     $button = id(new PHUIButtonView())
       ->setSize(PHUIButtonView::BIG)

@@ -130,7 +130,6 @@ final class PhortuneAccountViewController extends PhortuneController {
 
       $provider = $method->buildPaymentProvider();
       $item->addAttribute($provider->getPaymentMethodProviderDescription());
-      $item->setImageURI($provider->getPaymentMethodIcon());
 
       $edit_uri = $this->getApplicationURI('card/'.$id.'/edit/');
 
