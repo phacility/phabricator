@@ -89,13 +89,7 @@ final class PhortuneAccountViewController extends PhortuneController {
     $id = $account->getID();
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Payment Methods'))
-      ->addActionLink(
-        id(new PHUIButtonView())
-          ->setTag('a')
-          ->setHref($this->getApplicationURI($id.'/card/new/'))
-          ->setText(pht('Add Payment Method'))
-          ->setIcon(id(new PHUIIconView())->setIconFont('fa-plus')));
+      ->setHeader(pht('Payment Methods'));
 
     $list = id(new PHUIObjectItemListView())
       ->setUser($viewer)

@@ -11,6 +11,7 @@ final class PhortuneCart extends PhortuneDAO
 
   protected $accountPHID;
   protected $authorPHID;
+  protected $merchantPHID;
   protected $cartClass;
   protected $status;
   protected $metadata = array();
@@ -18,14 +19,17 @@ final class PhortuneCart extends PhortuneDAO
   private $account = self::ATTACHABLE;
   private $purchases = self::ATTACHABLE;
   private $implementation = self::ATTACHABLE;
+  private $merchant = self::ATTACHABLE;
 
   public static function initializeNewCart(
     PhabricatorUser $actor,
-    PhortuneAccount $account) {
+    PhortuneAccount $account,
+    PhortuneMerchant $merchant) {
     $cart = id(new PhortuneCart())
       ->setAuthorPHID($actor->getPHID())
       ->setStatus(self::STATUS_BUILDING)
-      ->setAccountPHID($account->getPHID());
+      ->setAccountPHID($account->getPHID())
+      ->setMerchantPHID($merchant->getPHID());
 
     $cart->account = $account;
     $cart->purchases = array();
@@ -63,7 +67,8 @@ final class PhortuneCart extends PhortuneDAO
       ->setAccountPHID($account->getPHID())
       ->setCartPHID($this->getPHID())
       ->setAuthorPHID($actor->getPHID())
-      ->setPaymentProviderKey($provider->getProviderKey())
+      ->setMerchantPHID($this->getMerchant()->getPHID())
+      ->setProviderPHID($provider->getProviderConfig()->getPHID())
       ->setAmountAsCurrency($this->getTotalPriceAsCurrency());
 
     if ($method) {
@@ -154,6 +159,9 @@ final class PhortuneCart extends PhortuneDAO
         'key_account' => array(
           'columns' => array('accountPHID'),
         ),
+        'key_merchant' => array(
+          'columns' => array('merchantPHID'),
+        ),
       ),
     ) + parent::getConfiguration();
   }
@@ -180,6 +188,15 @@ final class PhortuneCart extends PhortuneDAO
 
   public function getAccount() {
     return $this->assertAttached($this->account);
+  }
+
+  public function attachMerchant(PhortuneMerchant $merchant) {
+    $this->merchant = $merchant;
+    return $this;
+  }
+
+  public function getMerchant() {
+    return $this->assertAttached($this->merchant);
   }
 
   public function attachImplementation(

@@ -16,7 +16,8 @@ final class PhortuneCharge extends PhortuneDAO
   protected $accountPHID;
   protected $authorPHID;
   protected $cartPHID;
-  protected $paymentProviderKey;
+  protected $providerPHID;
+  protected $merchantPHID;
   protected $paymentMethodPHID;
   protected $amountAsCurrency;
   protected $status;
@@ -51,6 +52,12 @@ final class PhortuneCharge extends PhortuneDAO
         ),
         'key_account' => array(
           'columns' => array('accountPHID'),
+        ),
+        'key_merchant' => array(
+          'columns' => array('merchantPHID'),
+        ),
+        'key_provider' => array(
+          'columns' => array('providerPHID'),
         ),
       ),
     ) + parent::getConfiguration();

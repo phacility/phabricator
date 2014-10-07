@@ -23,6 +23,7 @@ final class PhortuneCartCheckoutController
     }
 
     $cancel_uri = $cart->getCancelURI();
+    $merchant = $cart->getMerchant();
 
     switch ($cart->getStatus()) {
       case PhortuneCart::STATUS_BUILDING:
@@ -83,6 +84,7 @@ final class PhortuneCartCheckoutController
     $methods = id(new PhortunePaymentMethodQuery())
       ->setViewer($viewer)
       ->withAccountPHIDs(array($account->getPHID()))
+      ->withMerchantPHIDs(array($merchant->getPHID()))
       ->withStatuses(array(PhortunePaymentMethod::STATUS_ACTIVE))
       ->execute();
 
@@ -142,14 +144,22 @@ final class PhortuneCartCheckoutController
 
     $method_control->setError($e_method);
 
-    $payment_method_uri = $this->getApplicationURI(
-      $account->getID().'/card/new/');
+    $account_id = $account->getID();
+
+    $payment_method_uri = $this->getApplicationURI("{$account_id}/card/new/");
+    $payment_method_uri = new PhutilURI($payment_method_uri);
+    $payment_method_uri->setQueryParams(
+      array(
+        'merchantID' => $merchant->getID(),
+        'cartID' => $cart->getID(),
+      ));
 
     $form = id(new AphrontFormView())
       ->setUser($viewer)
       ->appendChild($method_control);
 
-    $add_providers = PhortunePaymentProvider::getProvidersForAddPaymentMethod();
+    $add_providers = $this->loadCreatePaymentMethodProvidersForMerchant(
+      $merchant);
     if ($add_providers) {
       $new_method = phutil_tag(
         'a',
@@ -178,7 +188,7 @@ final class PhortuneCartCheckoutController
 
     $provider_form = null;
 
-    $pay_providers = PhortunePaymentProvider::getProvidersForOneTimePayment();
+    $pay_providers = $this->loadOneTimePaymentProvidersForMerchant($merchant);
     if ($pay_providers) {
       $one_time_options = array();
       foreach ($pay_providers as $provider) {

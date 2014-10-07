@@ -14,6 +14,7 @@ final class PhortunePaymentMethod extends PhortuneDAO
   protected $status;
   protected $accountPHID;
   protected $authorPHID;
+  protected $merchantPHID;
   protected $providerPHID;
   protected $expires;
   protected $metadata = array();
@@ -21,6 +22,8 @@ final class PhortunePaymentMethod extends PhortuneDAO
   protected $lastFourDigits;
 
   private $account = self::ATTACHABLE;
+  private $merchant = self::ATTACHABLE;
+  private $providerConfig = self::ATTACHABLE;
 
   public function getConfiguration() {
     return array(
@@ -38,6 +41,9 @@ final class PhortunePaymentMethod extends PhortuneDAO
       self::CONFIG_KEY_SCHEMA => array(
         'key_account' => array(
           'columns' => array('accountPHID', 'status'),
+        ),
+        'key_merchant' => array(
+          'columns' => array('merchantPHID', 'accountPHID'),
         ),
       ),
     ) + parent::getConfiguration();
@@ -57,6 +63,24 @@ final class PhortunePaymentMethod extends PhortuneDAO
     return $this->assertAttached($this->account);
   }
 
+  public function attachMerchant(PhortuneMerchant $merchant) {
+    $this->merchant = $merchant;
+    return $this;
+  }
+
+  public function getMerchant() {
+    return $this->assertAttached($this->merchant);
+  }
+
+  public function attachProviderConfig(PhortunePaymentProviderConfig $config) {
+    $this->providerConfig = $config;
+    return $this;
+  }
+
+  public function getProviderConfig() {
+    return $this->assertAttached($this->providerConfig);
+  }
+
   public function getDescription() {
     $provider = $this->buildPaymentProvider();
     return $provider->getPaymentMethodProviderDescription();
@@ -72,7 +96,7 @@ final class PhortunePaymentMethod extends PhortuneDAO
   }
 
   public function buildPaymentProvider() {
-    throw new Exception(pht('TODO: Reimplement this junk.'));
+    return $this->getProviderConfig()->buildProvider();
   }
 
   public function getDisplayName() {

@@ -120,36 +120,6 @@ abstract class PhortunePaymentProvider {
       ->loadObjects();
   }
 
-  public static function getEnabledProviders() {
-    $providers = self::getAllProviders();
-    foreach ($providers as $key => $provider) {
-      if (!$provider->isEnabled()) {
-        unset($providers[$key]);
-      }
-    }
-    return $providers;
-  }
-
-  public static function getProvidersForAddPaymentMethod() {
-    $providers = self::getEnabledProviders();
-    foreach ($providers as $key => $provider) {
-      if (!$provider->canCreatePaymentMethods()) {
-        unset($providers[$key]);
-      }
-    }
-    return $providers;
-  }
-
-  public static function getProvidersForOneTimePayment() {
-    $providers = self::getEnabledProviders();
-    foreach ($providers as $key => $provider) {
-      if (!$provider->canProcessOneTimePayments()) {
-        unset($providers[$key]);
-      }
-    }
-    return $providers;
-  }
-
   abstract public function isEnabled();
 
   abstract public function getPaymentMethodDescription();

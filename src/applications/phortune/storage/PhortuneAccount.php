@@ -58,9 +58,10 @@ final class PhortuneAccount extends PhortuneDAO
 
   public function newCart(
     PhabricatorUser $actor,
-    PhortuneCartImplementation $implementation) {
+    PhortuneCartImplementation $implementation,
+    PhortuneMerchant $merchant) {
 
-    $cart = PhortuneCart::initializeNewCart($actor, $this);
+    $cart = PhortuneCart::initializeNewCart($actor, $this, $merchant);
 
     $cart->setCartClass(get_class($implementation));
     $cart->attachImplementation($implementation);
