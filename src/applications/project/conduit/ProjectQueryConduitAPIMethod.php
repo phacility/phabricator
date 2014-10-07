@@ -24,7 +24,7 @@ final class ProjectQueryConduitAPIMethod extends ProjectConduitAPIMethod {
 
     return array(
       'ids'               => 'optional list<int>',
-      'names'              => 'optional list<string>',
+      'names'             => 'optional list<string>',
       'phids'             => 'optional list<phid>',
       'slugs'             => 'optional list<string>',
       'status'            => 'optional '.$status_const,
@@ -96,11 +96,13 @@ final class ProjectQueryConduitAPIMethod extends ProjectConduitAPIMethod {
 
     // TODO: This is pretty hideous.
     $slug_map = array();
-    foreach ($slugs as $slug) {
-      $normal = rtrim(PhabricatorSlug::normalize($slug), '/');
-      foreach ($projects as $project) {
-        if (in_array($normal, $project['slugs'])) {
-          $slug_map[$slug] = $project['phid'];
+    if ($slugs) {
+      foreach ($slugs as $slug) {
+        $normal = rtrim(PhabricatorSlug::normalize($slug), '/');
+        foreach ($projects as $project) {
+          if (in_array($normal, $project['slugs'])) {
+            $slug_map[$slug] = $project['phid'];
+          }
         }
       }
     }
