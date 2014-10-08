@@ -78,6 +78,10 @@ final class PhortuneProduct extends PhortuneDAO
     return $this->getImplementation()->didPurchaseProduct($this, $purchase);
   }
 
+  public function didRefundProduct(PhortunePurchase $purchase) {
+    return $this->getImplementation()->didRefundProduct($this, $purchase);
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

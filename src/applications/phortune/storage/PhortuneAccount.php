@@ -106,11 +106,19 @@ final class PhortuneAccount extends PhortuneDAO
   }
 
   public function getPolicy($capability) {
-    if ($this->getPHID() === null) {
-      // Allow a user to create an account for themselves.
-      return PhabricatorPolicies::POLICY_USER;
-    } else {
-      return PhabricatorPolicies::POLICY_NOONE;
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        // Accounts are technically visible to all users, because merchant
+        // controllers need to be able to see accounts in order to process
+        // orders. We lock things down more tightly at the application level.
+        return PhabricatorPolicies::POLICY_USER;
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        if ($this->getPHID() === null) {
+          // Allow a user to create an account for themselves.
+          return PhabricatorPolicies::POLICY_USER;
+        } else {
+          return PhabricatorPolicies::POLICY_NOONE;
+        }
     }
   }
 

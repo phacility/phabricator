@@ -92,20 +92,22 @@ final class PhortuneCart extends PhortuneDAO
     $this->openTransaction();
       $this->beginReadLocking();
 
-      $copy = clone $this;
-      $copy->reload();
+        $copy = clone $this;
+        $copy->reload();
 
-      if ($copy->getStatus() !== self::STATUS_READY) {
-        throw new Exception(
-          pht(
-            'Cart has wrong status ("%s") to call willApplyCharge(), expected '.
-            '"%s".',
-            $copy->getStatus(),
-            self::STATUS_READY));
-      }
+        if ($copy->getStatus() !== self::STATUS_READY) {
+          throw new Exception(
+            pht(
+              'Cart has wrong status ("%s") to call willApplyCharge(), '.
+              'expected "%s".',
+              $copy->getStatus(),
+              self::STATUS_READY));
+        }
 
-      $charge->save();
-      $this->setStatus(PhortuneCart::STATUS_PURCHASING)->save();
+        $charge->save();
+        $this->setStatus(PhortuneCart::STATUS_PURCHASING)->save();
+
+      $this->endReadLocking();
     $this->saveTransaction();
 
     return $charge;
@@ -117,20 +119,22 @@ final class PhortuneCart extends PhortuneDAO
     $this->openTransaction();
       $this->beginReadLocking();
 
-      $copy = clone $this;
-      $copy->reload();
+        $copy = clone $this;
+        $copy->reload();
 
-      if ($copy->getStatus() !== self::STATUS_PURCHASING) {
-        throw new Exception(
-          pht(
-            'Cart has wrong status ("%s") to call didApplyCharge(), expected '.
-            '"%s".',
-            $copy->getStatus(),
-            self::STATUS_PURCHASING));
-      }
+        if ($copy->getStatus() !== self::STATUS_PURCHASING) {
+          throw new Exception(
+            pht(
+              'Cart has wrong status ("%s") to call didApplyCharge(), '.
+              'expected "%s".',
+              $copy->getStatus(),
+              self::STATUS_PURCHASING));
+        }
 
-      $charge->save();
-      $this->setStatus(self::STATUS_CHARGED)->save();
+        $charge->save();
+        $this->setStatus(self::STATUS_CHARGED)->save();
+
+      $this->endReadLocking();
     $this->saveTransaction();
 
     foreach ($this->purchases as $purchase) {
@@ -140,6 +144,127 @@ final class PhortuneCart extends PhortuneDAO
     $this->setStatus(self::STATUS_PURCHASED)->save();
 
     return $this;
+  }
+
+  public function willRefundCharge(
+    PhabricatorUser $actor,
+    PhortunePaymentProvider $provider,
+    PhortuneCharge $charge,
+    PhortuneCurrency $amount) {
+
+    if (!$amount->isPositive()) {
+      throw new Exception(
+        pht('Trying to refund nonpositive amount of money!'));
+    }
+
+    if ($amount->isGreaterThan($charge->getAmountRefundableAsCurrency())) {
+      throw new Exception(
+        pht('Trying to refund more money than remaining on charge!'));
+    }
+
+    if ($charge->getRefundedChargePHID()) {
+      throw new Exception(
+        pht('Trying to refund a refund!'));
+    }
+
+    if ($charge->getStatus() !== PhortuneCharge::STATUS_CHARGED) {
+      throw new Exception(
+        pht('Trying to refund an uncharged charge!'));
+    }
+
+    $refund_charge = PhortuneCharge::initializeNewCharge()
+      ->setAccountPHID($this->getAccount()->getPHID())
+      ->setCartPHID($this->getPHID())
+      ->setAuthorPHID($actor->getPHID())
+      ->setMerchantPHID($this->getMerchant()->getPHID())
+      ->setProviderPHID($provider->getProviderConfig()->getPHID())
+      ->setPaymentMethodPHID($charge->getPaymentMethodPHID())
+      ->setRefundedChargePHID($charge->getPHID())
+      ->setAmountAsCurrency($amount->negate());
+
+    $charge->openTransaction();
+      $charge->beginReadLocking();
+
+        $copy = clone $charge;
+        $copy->reload();
+
+        if ($copy->getRefundingPHID() !== null) {
+          throw new Exception(
+            pht('Trying to refund a charge which is already refunding!'));
+        }
+
+        $refund_charge->save();
+        $charge->setRefundingPHID($refund_charge->getPHID());
+        $charge->save();
+
+      $charge->endReadLocking();
+    $charge->saveTransaction();
+
+    return $refund_charge;
+  }
+
+  public function didRefundCharge(
+    PhortuneCharge $charge,
+    PhortuneCharge $refund) {
+
+    $refund->setStatus(PhortuneCharge::STATUS_CHARGED);
+
+    $this->openTransaction();
+      $this->beginReadLocking();
+
+        $copy = clone $charge;
+        $copy->reload();
+
+        if ($charge->getRefundingPHID() !== $refund->getPHID()) {
+          throw new Exception(
+            pht('Charge is in the wrong refunding state!'));
+        }
+
+        $charge->setRefundingPHID(null);
+
+        // NOTE: There's some trickiness here to get the signs right. Both
+        // these values are positive but the refund has a negative value.
+        $total_refunded = $charge
+          ->getAmountRefundedAsCurrency()
+          ->add($refund->getAmountAsCurrency()->negate());
+
+        $charge->setAmountRefundedAsCurrency($total_refunded);
+        $charge->save();
+        $refund->save();
+
+      $this->endReadLocking();
+    $this->saveTransaction();
+
+    foreach ($this->purchases as $purchase) {
+      $purchase->getProduct()->didRefundProduct($purchase);
+    }
+
+    return $this;
+  }
+
+  public function didFailRefund(
+    PhortuneCharge $charge,
+    PhortuneCharge $refund) {
+
+    $refund->setStatus(PhortuneCharge::STATUS_FAILED);
+
+    $this->openTransaction();
+      $this->beginReadLocking();
+
+        $copy = clone $charge;
+        $copy->reload();
+
+        if ($charge->getRefundingPHID() !== $refund->getPHID()) {
+          throw new Exception(
+            pht('Charge is in the wrong refunding state!'));
+        }
+
+        $charge->setRefundingPHID(null);
+        $charge->save();
+        $refund->save();
+
+      $this->endReadLocking();
+    $this->saveTransaction();
   }
 
   public function getName() {
@@ -160,6 +285,56 @@ final class PhortuneCart extends PhortuneDAO
 
   public function getCheckoutURI() {
     return '/phortune/cart/'.$this->getID().'/checkout/';
+  }
+
+  public function canCancelOrder() {
+    try {
+      $this->assertCanCancelOrder();
+      return true;
+    } catch (Exception $ex) {
+      return false;
+    }
+  }
+
+  public function canRefundOrder() {
+    try {
+      $this->assertCanRefundOrder();
+      return true;
+    } catch (Exception $ex) {
+      return false;
+    }
+  }
+
+  public function assertCanCancelOrder() {
+    switch ($this->getStatus()) {
+      case self::STATUS_BUILDING:
+        throw new Exception(
+          pht(
+            'This order can not be cancelled because the application has not '.
+            'finished building it yet.'));
+      case self::STATUS_READY:
+        throw new Exception(
+          pht(
+            'This order can not be cancelled because it has not been placed.'));
+    }
+
+    return $this->getImplementation()->assertCanCancelOrder($this);
+  }
+
+  public function assertCanRefundOrder() {
+    switch ($this->getStatus()) {
+      case self::STATUS_BUILDING:
+        throw new Exception(
+          pht(
+            'This order can not be refunded because the application has not '.
+            'finished building it yet.'));
+      case self::STATUS_READY:
+        throw new Exception(
+          pht(
+            'This order can not be refunded because it has not been placed.'));
+    }
+
+    return $this->getImplementation()->assertCanRefundOrder($this);
   }
 
   public function getConfiguration() {
@@ -260,11 +435,30 @@ final class PhortuneCart extends PhortuneDAO
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    return $this->getAccount()->hasAutomaticCapability($capability, $viewer);
+    if ($this->getAccount()->hasAutomaticCapability($capability, $viewer)) {
+      return true;
+    }
+
+    // If the viewer controls the merchant this order was placed with, they
+    // can view the order.
+    if ($capability == PhabricatorPolicyCapability::CAN_VIEW) {
+      $can_admin = PhabricatorPolicyFilter::hasCapability(
+        $viewer,
+        $this->getMerchant(),
+        PhabricatorPolicyCapability::CAN_EDIT);
+      if ($can_admin) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   public function describeAutomaticCapability($capability) {
-    return pht('Carts inherit the policies of the associated account.');
+    return array(
+      pht('Orders inherit the policies of the associated account.'),
+      pht('The merchant you placed an order with can review and manage it.'),
+    );
   }
 
 }

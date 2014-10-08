@@ -115,4 +115,11 @@ final class FundBackerProduct extends PhortuneProductImplementation {
     return;
   }
 
+  public function didRefundProduct(
+    PhortuneProduct $product,
+    PhortunePurchase $purchase) {
+    $viewer = $this->getViewer();
+    // TODO: Undonate.
+  }
+
 }

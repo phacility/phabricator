@@ -146,12 +146,7 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
       'capture'     => true,
     );
 
-    try {
-      $stripe_charge = Stripe_Charge::create($params, $secret_key);
-    } catch (Stripe_CardError $ex) {
-      // TODO: Fail charge explicitly.
-      throw $ex;
-    }
+    $stripe_charge = Stripe_Charge::create($params, $secret_key);
 
     $id = $stripe_charge->id;
     if (!$id) {
@@ -159,6 +154,41 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
     }
 
     $charge->setMetadataValue('stripe.chargeID', $id);
+    $charge->save();
+  }
+
+  protected function executeRefund(
+    PhortuneCharge $charge,
+    PhortuneCharge $refund) {
+
+    $charge_id = $charge->getMetadataValue('stripe.chargeID');
+    if (!$charge_id) {
+      throw new Exception(
+        pht('Unable to refund charge; no Stripe chargeID!'));
+    }
+
+    $root = dirname(phutil_get_library_root('phabricator'));
+    require_once $root.'/externals/stripe-php/lib/Stripe.php';
+
+    $refund_cents = $refund
+      ->getAmountAsCurrency()
+      ->negate()
+      ->getValueInUSDCents();
+
+    $secret_key = $this->getSecretKey();
+    $params = array(
+      'amount' => $refund_cents,
+    );
+
+    $stripe_charge = Stripe_Charge::retrieve($charge_id, $secret_key);
+    $stripe_refund = $stripe_charge->refunds->create($params);
+
+    $id = $stripe_refund->id;
+    if (!$id) {
+      throw new Exception(pht('Stripe refund call did not return an ID!'));
+    }
+
+    $charge->setMetadataValue('stripe.refundID', $id);
     $charge->save();
   }
 

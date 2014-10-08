@@ -3,7 +3,7 @@
 abstract class PhortuneCartController
   extends PhortuneController {
 
-  protected function buildCartContents(PhortuneCart $cart) {
+  protected function buildCartContentTable(PhortuneCart $cart) {
 
     $rows = array();
     foreach ($cart->getPurchases() as $purchase) {
@@ -39,9 +39,7 @@ abstract class PhortuneCartController
         'right',
       ));
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Cart Contents'))
-      ->appendChild($table);
+    return $table;
   }
 
 }

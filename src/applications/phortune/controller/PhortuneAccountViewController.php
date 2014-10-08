@@ -12,9 +12,20 @@ final class PhortuneAccountViewController extends PhortuneController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
+    // TODO: Currently, you must be able to edit an account to view the detail
+    // page, because the account must be broadly visible so merchants can
+    // process orders but merchants should not be able to see all the details
+    // of an account. Ideally this page should be visible to merchants, too,
+    // just with less information.
+
     $account = id(new PhortuneAccountQuery())
       ->setViewer($user)
       ->withIDs(array($this->accountID))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
       ->executeOne();
 
     if (!$account) {

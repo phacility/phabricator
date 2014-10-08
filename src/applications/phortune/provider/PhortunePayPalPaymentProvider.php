@@ -167,6 +167,13 @@ final class PhortunePayPalPaymentProvider extends PhortunePaymentProvider {
     throw new Exception('!');
   }
 
+  protected function executeRefund(
+    PhortuneCharge $charge,
+    PhortuneCharge $refund) {
+    // TODO: Implement.
+    throw new PhortuneNotImplementedException($this);
+  }
+
   private function getPaypalAPIUsername() {
     return $this
       ->getProviderConfig()

@@ -119,8 +119,12 @@ final class PhortuneCartCheckoutController
       }
     }
 
-    $cart_box = $this->buildCartContents($cart);
-    $cart_box->setFormErrors($errors);
+    $cart_table = $this->buildCartContentTable($cart);
+
+    $cart_box = id(new PHUIObjectBoxView())
+      ->setFormErrors($errors)
+      ->setHeaderText(pht('Cart Contents'))
+      ->appendChild($cart_table);
 
     $title = pht('Buy Stuff');
 

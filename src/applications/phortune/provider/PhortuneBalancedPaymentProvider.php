@@ -179,6 +179,13 @@ final class PhortuneBalancedPaymentProvider extends PhortunePaymentProvider {
     $charge->save();
   }
 
+  protected function executeRefund(
+    PhortuneCharge $charge,
+    PhortuneCharge $refund) {
+    // TODO: Implement.
+    throw new PhortuneNotImplementedException($this);
+  }
+
   private function getMarketplaceID() {
     return $this
       ->getProviderConfig()
@@ -192,7 +199,7 @@ final class PhortuneBalancedPaymentProvider extends PhortunePaymentProvider {
   }
 
   private function getMarketplaceURI() {
-    return '/v1/marketplace/'.$this->getMarketplaceID();
+    return '/v1/marketplaces/'.$this->getMarketplaceID();
   }
 
 

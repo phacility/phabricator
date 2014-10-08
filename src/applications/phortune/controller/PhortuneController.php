@@ -28,10 +28,12 @@ abstract class PhortuneController extends PhabricatorController {
         $charge->getID(),
         $handles[$charge->getCartPHID()]->renderLink(),
         $handles[$charge->getProviderPHID()]->renderLink(),
-        $handles[$charge->getPaymentMethodPHID()]->renderLink(),
+        $charge->getPaymentMethodPHID()
+          ? $handles[$charge->getPaymentMethodPHID()]->renderLink()
+          : null,
         $handles[$charge->getMerchantPHID()]->renderLink(),
         $charge->getAmountAsCurrency()->formatForDisplay(),
-        PhortuneCharge::getNameForStatus($charge->getStatus()),
+        $charge->getStatusForDisplay(),
         phabricator_datetime($charge->getDateCreated(), $viewer),
       );
     }

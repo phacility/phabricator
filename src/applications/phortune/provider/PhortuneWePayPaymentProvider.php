@@ -186,6 +186,29 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
       ->getMetadataValue(self::WEPAY_ACCOUNT_ID);
   }
 
+  protected function executeRefund(
+    PhortuneCharge $charge,
+    PhortuneCharge $refund) {
+
+    $root = dirname(phutil_get_library_root('phabricator'));
+    require_once $root.'/externals/wepay/wepay.php';
+
+    WePay::useStaging(
+      $this->getWePayClientID(),
+      $this->getWePayClientSecret());
+
+    $wepay = new WePay($this->getWePayAccessToken());
+
+    $charge_id = $charge->getMetadataValue('wepay.checkoutID');
+
+    $params = array(
+      'checkout_id' => $charge_id,
+      'refund_reason' => pht('Refund'),
+      'amount' => $refund->getAmountAsCurrency()->negate()->formatBareValue(),
+    );
+
+    $wepay->request('checkout/refund', $params);
+  }
 
 /* -(  One-Time Payments  )-------------------------------------------------- */
 

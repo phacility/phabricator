@@ -137,8 +137,18 @@ abstract class PhortunePaymentProvider {
     $this->executeCharge($payment_method, $charge);
   }
 
+  final public function refundCharge(
+    PhortuneCharge $charge,
+    PhortuneCharge $refund) {
+    $this->executeRefund($charge, $refund);
+  }
+
   abstract protected function executeCharge(
     PhortunePaymentMethod $payment_method,
+    PhortuneCharge $charge);
+
+  abstract protected function executeRefund(
+    PhortuneCharge $charge,
     PhortuneCharge $charge);
 
 
