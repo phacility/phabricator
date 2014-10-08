@@ -51,6 +51,20 @@ final class PhortuneCart extends PhortuneDAO
     return $purchase;
   }
 
+  public static function getStatusNameMap() {
+    return array(
+      self::STATUS_BUILDING => pht('Building'),
+      self::STATUS_READY => pht('Ready'),
+      self::STATUS_PURCHASING => pht('Purchasing'),
+      self::STATUS_CHARGED => pht('Charged'),
+      self::STATUS_PURCHASED => pht('Purchased'),
+    );
+  }
+
+  public static function getNameForStatus($status) {
+    return idx(self::getStatusNameMap(), $status, $status);
+  }
+
   public function activateCart() {
     $this->setStatus(self::STATUS_READY)->save();
     return $this;
@@ -128,6 +142,9 @@ final class PhortuneCart extends PhortuneDAO
     return $this;
   }
 
+  public function getName() {
+    return $this->getImplementation()->getName($this);
+  }
 
   public function getDoneURI() {
     return $this->getImplementation()->getDoneURI($this);

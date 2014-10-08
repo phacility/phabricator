@@ -177,6 +177,14 @@ final class PhortuneMerchantViewController
         ->setWorkflow(!$can_edit)
         ->setHref($this->getApplicationURI("merchant/edit/{$id}/")));
 
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('View Orders'))
+        ->setIcon('fa-shopping-cart')
+        ->setHref($this->getApplicationURI("merchant/orders/{$id}/"))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
+
     return $view;
   }
 
