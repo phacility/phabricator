@@ -55,6 +55,7 @@ final class FundInitiative extends FundDAO
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'text255',
         'description' => 'text',
+        'risks' => 'text',
         'status' => 'text32',
         'merchantPHID' => 'phid?',
         'totalAsCurrency' => 'text64',
