@@ -143,7 +143,7 @@ final class DoorkeeperFeedWorkerAsana extends DoorkeeperFeedWorker {
 
           $this->makeAsanaAPICall(
             $oauth_token,
-            "tasks/".$parent_ref->getObjectID(),
+            'tasks/'.$parent_ref->getObjectID(),
             'PUT',
             $main_data);
         } else {
@@ -235,7 +235,6 @@ final class DoorkeeperFeedWorkerAsana extends DoorkeeperFeedWorker {
     );
 
     id(new PhabricatorEdgeEditor())
-      ->setActor($viewer)
       ->addEdge($src_phid, $etype_main, $dst_phid, $edge_options)
       ->save();
 
@@ -247,8 +246,7 @@ final class DoorkeeperFeedWorkerAsana extends DoorkeeperFeedWorker {
 
     // Now, handle the subtasks.
 
-    $sub_editor = id(new PhabricatorEdgeEditor())
-      ->setActor($viewer);
+    $sub_editor = new PhabricatorEdgeEditor();
 
     // First, find all the object references in Phabricator for tasks that we
     // know about and import their objects from Asana.
@@ -447,7 +445,7 @@ final class DoorkeeperFeedWorkerAsana extends DoorkeeperFeedWorker {
 
   private function getProvider() {
     if (!$this->provider) {
-      $provider = PhabricatorAuthProviderOAuthAsana::getAsanaProvider();
+      $provider = PhabricatorAsanaAuthProvider::getAsanaProvider();
       if (!$provider) {
         throw new PhabricatorWorkerPermanentFailureException(
           'No Asana provider configured.');
@@ -517,13 +515,18 @@ final class DoorkeeperFeedWorkerAsana extends DoorkeeperFeedWorker {
       return $phid_map;
     }
 
-    $provider = PhabricatorAuthProviderOAuthAsana::getAsanaProvider();
+    $provider = PhabricatorAsanaAuthProvider::getAsanaProvider();
 
     $accounts = id(new PhabricatorExternalAccountQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withUserPHIDs($all_phids)
       ->withAccountTypes(array($provider->getProviderType()))
       ->withAccountDomains(array($provider->getProviderDomain()))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
       ->execute();
 
     foreach ($accounts as $account) {
@@ -549,6 +552,11 @@ final class DoorkeeperFeedWorkerAsana extends DoorkeeperFeedWorker {
       ->withUserPHIDs($user_phids)
       ->withAccountTypes(array($provider->getProviderType()))
       ->withAccountDomains(array($provider->getProviderDomain()))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
       ->execute();
 
     // Reorder accounts in the original order.

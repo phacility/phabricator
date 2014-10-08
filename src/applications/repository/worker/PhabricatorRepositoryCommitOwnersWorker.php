@@ -92,12 +92,12 @@ final class PhabricatorRepositoryCommitOwnersWorker
     $reasons = array();
 
     if ($data->getCommitDetail('vsDiff')) {
-      $reasons[] = "Changed After Revision Was Accepted";
+      $reasons[] = 'Changed After Revision Was Accepted';
     }
 
     $commit_author_phid = $data->getCommitDetail('authorPHID');
     if (!$commit_author_phid) {
-      $reasons[] = "Commit Author Not Recognized";
+      $reasons[] = 'Commit Author Not Recognized';
     }
 
     $revision_id = $data->getCommitDetail('differential.revisionID');
@@ -113,14 +113,14 @@ final class PhabricatorRepositoryCommitOwnersWorker
         $revision_author_phid = $revision->getAuthorPHID();
         $commit_reviewedby_phid = $data->getCommitDetail('reviewerPHID');
         if ($revision_author_phid !== $commit_author_phid) {
-          $reasons[] = "Author Not Matching with Revision";
+          $reasons[] = 'Author Not Matching with Revision';
         }
       } else {
-        $reasons[] = "Revision Not Found";
+        $reasons[] = 'Revision Not Found';
       }
 
     } else {
-      $reasons[] = "No Revision Specified";
+      $reasons[] = 'No Revision Specified';
     }
 
     $owners_phids = PhabricatorOwnersOwner::loadAffiliatedUserPHIDs(
@@ -129,7 +129,7 @@ final class PhabricatorRepositoryCommitOwnersWorker
     if (!($commit_author_phid && in_array($commit_author_phid, $owners_phids) ||
         $commit_reviewedby_phid && in_array($commit_reviewedby_phid,
           $owners_phids))) {
-      $reasons[] = "Owners Not Involved";
+      $reasons[] = 'Owners Not Involved';
     }
 
     return $reasons;

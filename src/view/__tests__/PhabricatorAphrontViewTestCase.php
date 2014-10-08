@@ -18,7 +18,7 @@ final class PhabricatorAphrontViewTestCase extends PhabricatorTestCase {
       $this->assertFalse($view->hasChildren());
     }
 
-    $view->appendChild("!");
+    $view->appendChild('!');
     $this->assertTrue($view->hasChildren());
   }
 

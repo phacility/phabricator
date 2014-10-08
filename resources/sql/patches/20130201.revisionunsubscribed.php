@@ -11,7 +11,7 @@ $revs = queryfx_all(
   'SELECT id, phid, unsubscribed FROM differential_revision');
 
 foreach ($revs as $rev) {
-  echo ".";
+  echo '.';
 
   $unsubscribed = json_decode($rev['unsubscribed']);
   if (!$unsubscribed) {
@@ -19,7 +19,6 @@ foreach ($revs as $rev) {
   }
 
   $editor = new PhabricatorEdgeEditor();
-  $editor->setSuppressEvents(true);
   foreach ($unsubscribed as $user_phid => $_) {
     $editor->addEdge(
       $rev['phid'],

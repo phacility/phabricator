@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group pholio
- */
 final class PholioUploadedImageView extends AphrontView {
 
   private $image;
@@ -34,7 +31,7 @@ final class PholioUploadedImageView extends AphrontView {
       ->setSigil('image-title')
       ->setLabel(pht('Title'));
 
-    $description = id(new AphrontFormTextAreaControl())
+    $description = id(new PhabricatorRemarkupControl())
       ->setName('description_'.$phid)
       ->setValue($image->getDescription())
       ->setSigil('image-description')

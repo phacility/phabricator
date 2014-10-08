@@ -1,10 +1,7 @@
 <?php
 
-/**
- * @group oauthserver
- */
 final class PhabricatorOAuthServerTokenController
-extends PhabricatorAuthController {
+  extends PhabricatorAuthController {
 
   public function shouldRequireLogin() {
     return false;
@@ -137,4 +134,5 @@ extends PhabricatorAuthController {
       return $response;
     }
   }
+
 }

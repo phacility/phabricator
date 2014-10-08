@@ -4,11 +4,11 @@ final class PhabricatorSecurityConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
   public function getName() {
-    return pht("Security");
+    return pht('Security');
   }
 
   public function getDescription() {
-    return pht("Security options.");
+    return pht('Security options.');
   }
 
   public function getOptions() {
@@ -16,7 +16,8 @@ final class PhabricatorSecurityConfigOptions
 
     return array(
       $this->newOption('security.alternate-file-domain', 'string', null)
-        ->setSummary(pht("Alternate domain to serve files from."))
+        ->setLocked(true)
+        ->setSummary(pht('Alternate domain to serve files from.'))
         ->setDescription(
           pht(
             "IMPORTANT: By default, Phabricator serves files from the same ".
@@ -43,18 +44,19 @@ final class PhabricatorSecurityConfigOptions
         'string',
         '[D\t~Y7eNmnQGJ;rnH6aF;m2!vJ8@v8C=Cs:aQS\.Qw')
         ->setMasked(true)
+        ->setLocked(true)
         ->setSummary(
-          pht("Key for HMAC digests."))
+          pht('Key for HMAC digests.'))
         ->setDescription(
           pht(
-            "Default key for HMAC digests where the key is not important ".
-            "(i.e., the hash itself is secret). You can change this if you ".
-            "want (to any other string), but doing so will break existing ".
-            "sessions and CSRF tokens.")),
+            'Default key for HMAC digests where the key is not important '.
+            '(i.e., the hash itself is secret). You can change this if you '.
+            'want (to any other string), but doing so will break existing '.
+            'sessions and CSRF tokens.')),
       $this->newOption('security.require-https', 'bool', false)
         ->setLocked(true)
         ->setSummary(
-          pht("Force users to connect via HTTPS instead of HTTP."))
+          pht('Force users to connect via HTTPS instead of HTTP.'))
         ->setDescription(
           pht(
             "If the web server responds to both HTTP and HTTPS requests but ".
@@ -80,28 +82,46 @@ final class PhabricatorSecurityConfigOptions
             pht('Force HTTPS'),
             pht('Allow HTTP'),
           )),
+      $this->newOption('security.require-multi-factor-auth', 'bool', false)
+        ->setLocked(true)
+        ->setSummary(
+          pht('Require all users to configure multi-factor authentication.'))
+        ->setDescription(
+          pht(
+            'By default, Phabricator allows users to add multi-factor '.
+            'authentication to their accounts, but does not require it. '.
+            'By enabling this option, you can force all users to add '.
+            'at least one authentication factor before they can use their '.
+            'accounts.'))
+        ->setBoolOptions(
+          array(
+            pht('Multi-Factor Required'),
+            pht('Multi-Factor Optional'),
+          )),
       $this->newOption(
         'phabricator.csrf-key',
         'string',
         '0b7ec0592e0a2829d8b71df2fa269b2c6172eca3')
         ->setMasked(true)
+        ->setLocked(true)
         ->setSummary(
-          pht("Hashed with other inputs to generate CSRF tokens."))
+          pht('Hashed with other inputs to generate CSRF tokens.'))
         ->setDescription(
           pht(
-            "This is hashed with other inputs to generate CSRF tokens. If ".
-            "you want, you can change it to some other string which is ".
-            "unique to your install. This will make your install more secure ".
-            "in a vague, mostly theoretical way. But it will take you like 3 ".
-            "seconds of mashing on your keyboard to set it up so you might ".
-            "as well.")),
+            'This is hashed with other inputs to generate CSRF tokens. If '.
+            'you want, you can change it to some other string which is '.
+            'unique to your install. This will make your install more secure '.
+            'in a vague, mostly theoretical way. But it will take you like 3 '.
+            'seconds of mashing on your keyboard to set it up so you might '.
+            'as well.')),
        $this->newOption(
          'phabricator.mail-key',
          'string',
          '5ce3e7e8787f6e40dfae861da315a5cdf1018f12')
         ->setMasked(true)
+        ->setLocked(true)
         ->setSummary(
-          pht("Hashed with other inputs to generate mail tokens."))
+          pht('Hashed with other inputs to generate mail tokens.'))
         ->setDescription(
           pht(
             "This is hashed with other inputs to generate mail tokens. If ".
@@ -115,9 +135,10 @@ final class PhabricatorSecurityConfigOptions
         array(
           'http' => true,
           'https' => true,
+          'mailto' => true,
         ))
         ->setSummary(
-          pht("Determines which URI protocols are auto-linked."))
+          pht('Determines which URI protocols are auto-linked.'))
         ->setDescription(
           pht(
             "When users write comments which have URIs, they'll be ".
@@ -166,24 +187,24 @@ final class PhabricatorSecurityConfigOptions
          'string',
          'd9455ea150622ee044f7931dabfa52aa')
         ->setSummary(
-          pht("An input to the hash function when building resource hashes."))
+          pht('An input to the hash function when building resource hashes.'))
         ->setDescription(
           pht(
-            "This value is an input to the hash function when building ".
-            "resource hashes. It has no security value, but if you ".
-            "accidentally poison user caches (by pushing a bad patch or ".
-            "having something go wrong with a CDN, e.g.) you can change this ".
-            "to something else and rebuild the Celerity map to break user ".
-            "caches. Unless you are doing Celerity development, it is ".
-            "exceptionally unlikely that you need to modify this.")),
+            'This value is an input to the hash function when building '.
+            'resource hashes. It has no security value, but if you '.
+            'accidentally poison user caches (by pushing a bad patch or '.
+            'having something go wrong with a CDN, e.g.) you can change this '.
+            'to something else and rebuild the Celerity map to break user '.
+            'caches. Unless you are doing Celerity development, it is '.
+            'exceptionally unlikely that you need to modify this.')),
        $this->newOption('remarkup.enable-embedded-youtube', 'bool', false)
         ->setBoolOptions(
           array(
-            pht("Embed YouTube videos"),
+            pht('Embed YouTube videos'),
             pht("Don't embed YouTube videos"),
           ))
         ->setSummary(
-          pht("Determines whether or not YouTube videos get embedded."))
+          pht('Determines whether or not YouTube videos get embedded.'))
         ->setDescription(
           pht(
             "If you enable this, linked YouTube videos will be embeded ".
@@ -191,17 +212,34 @@ final class PhabricatorSecurityConfigOptions
             "referrers to YouTube) and is pretty silly (but sort of ".
             "awesome).")),
         $this->newOption('security.allow-outbound-http', 'bool', true)
-        ->setBoolOptions(
-          array(
-            pht("Allow"),
-            pht("Disallow"),
-          ))
-        ->setSummary(
-          pht("Allow outbound HTTP requests"))
-        ->setDescription(
-          pht(
-            "If you enable this, you are allowing Phabricator to potentially ".
-            "make requests to external servers.")),
+          ->setBoolOptions(
+            array(
+              pht('Allow'),
+              pht('Disallow'),
+            ))
+          ->setLocked(true)
+          ->setSummary(
+            pht('Allow outbound HTTP requests.'))
+          ->setDescription(
+            pht(
+              'If you enable this, you are allowing Phabricator to '.
+              'potentially make requests to external servers.')),
+        $this->newOption('security.allow-conduit-act-as-user', 'bool', false)
+          ->setBoolOptions(
+            array(
+              pht('Allow'),
+              pht('Disallow'),
+            ))
+          ->setLocked(true)
+          ->setSummary(
+            pht('Allow administrators to use the Conduit API as other users.'))
+          ->setDescription(
+            pht(
+              'DEPRECATED - if you enable this, you are allowing '.
+              'administrators to act as any user via the Conduit API. '.
+              'Enabling this is not advised as it introduces a huge policy '.
+              'violation and has been obsoleted in functionality.')),
+
     );
   }
 

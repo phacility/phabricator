@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group legalpad
- */
 final class PhabricatorLegalpadConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
@@ -20,7 +17,7 @@ final class PhabricatorLegalpadConfigOptions
         'metamta.legalpad.subject-prefix',
         'string',
         '[Legalpad]')
-        ->setDescription(pht('Subject prefix for Legalpad email.'))
+        ->setDescription(pht('Subject prefix for Legalpad email.')),
     );
   }
 

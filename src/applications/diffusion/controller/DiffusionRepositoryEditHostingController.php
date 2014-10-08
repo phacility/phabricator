@@ -119,7 +119,6 @@ final class DiffusionRepositoryEditHostingController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 
@@ -187,7 +186,8 @@ final class DiffusionRepositoryEditHostingController
           '%s: This repository is hosted elsewhere, so Phabricator can not '.
           'perform writes. This mode will act like "Read Only" for '.
           'repositories hosted elsewhere.',
-          phutil_tag('strong', array(), 'WARNING')));
+          phutil_tag('strong', array(), 'WARNING')),
+      );
     }
 
     $ssh_control =
@@ -284,7 +284,6 @@ final class DiffusionRepositoryEditHostingController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group celerity
- */
 final class CelerityResourceTransformer {
 
   private $minify;
@@ -111,6 +108,17 @@ final class CelerityResourceTransformer {
 
   public function translateResourceURI(array $matches) {
     $uri = trim($matches[1], "'\" \r\t\n");
+    $tail = '';
+
+    // If the resource URI has a query string or anchor, strip it off before
+    // we go looking for the resource. We'll stitch it back on later. This
+    // primarily affects FontAwesome.
+
+    $parts = preg_split('/(?=[?#])/', $uri, 2);
+    if (count($parts) == 2) {
+      $uri = $parts[0];
+      $tail = $parts[1];
+    }
 
     $alternatives = array_unique(
       array(
@@ -142,7 +150,7 @@ final class CelerityResourceTransformer {
       }
     }
 
-    return 'url('.$uri.')';
+    return 'url('.$uri.$tail.')';
   }
 
   private function replaceCSSVariables($path, $data) {
@@ -181,7 +189,12 @@ final class CelerityResourceTransformer {
       'violet'        => '#8e44ad',
       'lightviolet'   => '#ecdff1',
       'charcoal'      => '#4b4d51',
-      'backdrop'      => '#c4cde0',
+      'backdrop'      => '#dadee7',
+      'hovergrey'     => '#c5cbcf',
+      'hoverblue'     => '#eceff5',
+      'hoverborder'   => '#dfe1e9',
+      'hoverselectedgrey' => '#bbc4ca',
+      'hoverselectedblue' => '#e6e9ee',
 
       // Base Greys
       'lightgreyborder'     => '#C7CCD9',
@@ -204,6 +217,98 @@ final class CelerityResourceTransformer {
       'lightbluetext'       => '#8C98B8',
       'bluetext'            => '#6B748C',
       'darkbluetext'        => '#464C5C',
+
+      // Base Greens
+      'lightgreenborder'      => '#bfdac1',
+      'greenborder'           => '#8cb89c',
+      'greentext'             => '#3e6d35',
+      'lightgreenbackground'  => '#e6f2e4',
+
+      // Base Red
+      'lightredborder'        => '#f4c6c6',
+      'redborder'             => '#eb9797',
+      'redtext'               => '#802b2b',
+      'lightredbackground'    => '#f5e1e1',
+
+      // Base Violet
+      'lightvioletborder'     => '#cfbddb',
+      'violetborder'          => '#b589ba',
+      'violettext'            => '#603c73',
+      'lightvioletbackground' => '#e9dfee',
+
+      // Shades are a more muted set of our base colors
+      // better suited to blending into other UIs.
+
+      // Shade Red
+      'sh-lightredborder'     => '#efcfcf',
+      'sh-redborder'          => '#d1abab',
+      'sh-redicon'            => '#c85a5a',
+      'sh-redtext'            => '#a53737',
+      'sh-redbackground'      => '#f7e6e6',
+
+      // Shade Orange
+      'sh-lightorangeborder'  => '#f8dcc3',
+      'sh-orangeborder'       => '#dbb99e',
+      'sh-orangeicon'         => '#e78331',
+      'sh-orangetext'         => '#ba6016',
+      'sh-orangebackground'   => '#fbede1',
+
+      // Shade Yellow
+      'sh-lightyellowborder'  => '#e9dbcd',
+      'sh-yellowborder'       => '#c9b8a8',
+      'sh-yellowicon'         => '#9b946e',
+      'sh-yellowtext'         => '#726f56',
+      'sh-yellowbackground'   => '#fdf3da',
+
+      // Shade Green
+      'sh-lightgreenborder'   => '#c6e6c7',
+      'sh-greenborder'        => '#a0c4a1',
+      'sh-greenicon'          => '#4ca74e',
+      'sh-greentext'          => '#326d34',
+      'sh-greenbackground'    => '#ddefdd',
+
+      // Shade Blue
+      'sh-lightblueborder'    => '#cfdbe3',
+      'sh-blueborder'         => '#a7b5bf',
+      'sh-blueicon'           => '#6b748c',
+      'sh-bluetext'           => '#464c5c',
+      'sh-bluebackground'     => '#dee7f8',
+
+      // Shade Indigo
+      'sh-lightindigoborder'  => '#d1c9ee',
+      'sh-indigoborder'       => '#bcb4da',
+      'sh-indigoicon'         => '#8672d4',
+      'sh-indigotext'         => '#6e5cb6',
+      'sh-indigobackground'   => '#eae6f7',
+
+      // Shade Violet
+      'sh-lightvioletborder'  => '#e0d1e7',
+      'sh-violetborder'       => '#bcabc5',
+      'sh-violeticon'         => '#9260ad',
+      'sh-violettext'         => '#69427f',
+      'sh-violetbackground'   => '#efe8f3',
+
+      // Shade Pink
+      'sh-lightpinkborder'  => '#f6d5ef',
+      'sh-pinkborder'       => '#d5aecd',
+      'sh-pinkicon'         => '#e26fcb',
+      'sh-pinktext'         => '#da49be',
+      'sh-pinkbackground'   => '#fbeaf8',
+
+      // Shade Grey
+      'sh-lightgreyborder'    => '#d8d8d8',
+      'sh-greyborder'         => '#b2b2b2',
+      'sh-greyicon'           => '#757575',
+      'sh-greytext'           => '#555555',
+      'sh-greybackground'     => '#e7e7e7',
+
+      // Shade Disabled
+      'sh-lightdisabledborder'  => '#e5e5e5',
+      'sh-disabledborder'       => '#cbcbcb',
+      'sh-disabledicon'         => '#bababa',
+      'sh-disabledtext'         => '#a6a6a6',
+      'sh-disabledbackground'   => '#f3f3f3',
+
     );
   }
 
@@ -245,7 +350,6 @@ final class CelerityResourceTransformer {
    * @return string|null Data URI, or null if we declined to generate one.
    */
   private function generateDataURI($resource_name) {
-
     $ext = last(explode('.', $resource_name));
     switch ($ext) {
       case 'png':
@@ -278,6 +382,5 @@ final class CelerityResourceTransformer {
 
     return $uri;
   }
-
 
 }

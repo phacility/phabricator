@@ -7,6 +7,7 @@
  *           javelin-uri
  *           javelin-util
  *           javelin-stratcom
+ *           phabricator-prefab
  */
 
 JX.behavior('phabricator-search-typeahead', function(config) {
@@ -14,30 +15,28 @@ JX.behavior('phabricator-search-typeahead', function(config) {
   var datasource = new JX.TypeaheadOnDemandSource(config.src);
 
   function transform(object) {
+    object = JX.Prefab.transformDatasourceResults(object);
+
     var attr = {
       className: 'phabricator-main-search-typeahead-result'
     };
 
-    if (object[6]) {
-      attr.style = {backgroundImage: 'url('+object[6]+')'};
+    if (object.imageURI) {
+      attr.style = {backgroundImage: 'url('+object.imageURI+')'};
     }
 
     var render = JX.$N(
       'span',
       attr,
       [
-        JX.$N('span', {className: 'result-name'}, object[4] || object[0]),
-        JX.$N('span', {className: 'result-type'}, object[5])
+        JX.$N('span', {className: object.sprite}),
+        JX.$N('span', {className: 'result-name'}, object.displayName),
+        JX.$N('span', {className: 'result-type'}, object.type)
       ]);
 
-    return {
-      name: object[0],
-      display: render,
-      uri: object[1],
-      id: object[2],
-      priority: object[3],
-      type: object[7]
-    };
+    object.display = render;
+
+    return object;
   }
 
   datasource.setTransformer(transform);
@@ -53,8 +52,9 @@ JX.behavior('phabricator-search-typeahead', function(config) {
     var type_priority = {
       'jump' : 1,
       'apps' : 2,
-      'user' : 3,
-      'symb' : 4
+      'proj' : 3,
+      'user' : 4,
+      'symb' : 5
     };
 
     var tokens = this.tokenize(value);
@@ -74,8 +74,8 @@ JX.behavior('phabricator-search-typeahead', function(config) {
     }
 
     list.sort(function(u, v) {
-      var u_type = type_priority[u.type] || 999;
-      var v_type = type_priority[v.type] || 999;
+      var u_type = type_priority[u.priorityType] || 999;
+      var v_type = type_priority[v.priorityType] || 999;
 
       if (u_type != v_type) {
         return u_type - v_type;
@@ -118,6 +118,7 @@ JX.behavior('phabricator-search-typeahead', function(config) {
   };
 
   datasource.setSortHandler(JX.bind(datasource, sort_handler));
+  datasource.setFilterHandler(JX.Prefab.filterClosedResults);
   datasource.setMaximumResultCount(config.limit);
 
   var typeahead = new JX.Typeahead(JX.$(config.id), JX.$(config.input));
@@ -130,4 +131,9 @@ JX.behavior('phabricator-search-typeahead', function(config) {
   });
 
   typeahead.start();
+
+  JX.DOM.listen(JX.$(config.button), 'click', null, function () {
+    typeahead.setPlaceholder('');
+    typeahead.updatePlaceHolder();
+  });
 });

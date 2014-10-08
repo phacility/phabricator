@@ -3,6 +3,14 @@
 final class PhabricatorRepositoryPushLogSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Push Logs');
+  }
+
+  public function getApplicationClassName() {
+    return 'PhabricatorDiffusionApplication';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 
@@ -12,7 +20,7 @@ final class PhabricatorRepositoryPushLogSearchEngine
         $request,
         'repositories',
         array(
-          PhabricatorRepositoryPHIDTypeRepository::TYPECONST,
+          PhabricatorRepositoryRepositoryPHIDType::TYPECONST,
         )));
 
     $saved->setParameter(
@@ -66,13 +74,13 @@ final class PhabricatorRepositoryPushLogSearchEngine
     $form
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/repositories/')
+          ->setDatasource(new DiffusionRepositoryDatasource())
           ->setName('repositories')
           ->setLabel(pht('Repositories'))
           ->setValue($repository_handles))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/accounts/')
+          ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('pushers')
           ->setLabel(pht('Pushers'))
           ->setValue($pusher_handles));
@@ -83,15 +91,12 @@ final class PhabricatorRepositoryPushLogSearchEngine
   }
 
   public function getBuiltinQueryNames() {
-    $names = array(
+    return array(
       'all' => pht('All Push Logs'),
     );
-
-    return $names;
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
-
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
 
@@ -101,6 +106,29 @@ final class PhabricatorRepositoryPushLogSearchEngine
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
+  }
+
+  protected function getRequiredHandlePHIDsForResultList(
+    array $logs,
+    PhabricatorSavedQuery $query) {
+    return mpull($logs, 'getPusherPHID');
+  }
+
+  protected function renderResultList(
+    array $logs,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+
+    $table = id(new DiffusionPushLogListView())
+      ->setUser($this->requireViewer())
+      ->setHandles($handles)
+      ->setLogs($logs);
+
+    $box = id(new PHUIBoxView())
+      ->addMargin(PHUI::MARGIN_LARGE)
+      ->appendChild($table);
+
+    return $box;
   }
 
 }

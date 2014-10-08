@@ -9,7 +9,6 @@
  *
  * @task impl     Implementation
  * @task internal Internals
- * @group filestorage
  */
 final class PhabricatorMySQLFileStorageEngine
   extends PhabricatorFileStorageEngine {

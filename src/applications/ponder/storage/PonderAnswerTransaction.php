@@ -14,7 +14,7 @@ final class PonderAnswerTransaction
   }
 
   public function getApplicationTransactionType() {
-    return PonderPHIDTypeAnswer::TYPECONST;
+    return PonderAnswerPHIDType::TYPECONST;
   }
 
   public function getApplicationTransactionCommentObject() {
@@ -31,6 +31,18 @@ final class PonderAnswerTransaction
     }
 
     return $phids;
+  }
+
+  public function getRemarkupBlocks() {
+    $blocks = parent::getRemarkupBlocks();
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_CONTENT:
+        $blocks[] = $this->getNewValue();
+        break;
+    }
+
+    return $blocks;
   }
 
   public function getTitle() {
@@ -54,16 +66,10 @@ final class PonderAnswerTransaction
 
     switch ($this->getTransactionType()) {
       case self::TYPE_CONTENT:
-        $answer = $story->getObject($object_phid);
-        $question = $answer->getQuestion();
-        $answer_handle = $this->getHandle($object_phid);
-        $link = $answer_handle->renderLink(
-          $question->getFullTitle());
-
         return pht(
-          '%s updated their answer to %s',
+          '%s updated %s.',
           $this->renderHandleLink($author_phid),
-          $link);
+          $this->renderHandleLink($object_phid));
     }
 
     return parent::getTitleForFeed($story);
@@ -77,7 +83,9 @@ final class PonderAnswerTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_CONTENT:
         return phutil_escape_html_newlines(
-          phutil_utf8_shorten($new, 128));
+          id(new PhutilUTF8StringTruncator())
+          ->setMaximumGlyphs(128)
+          ->truncateString($new));
         break;
     }
     return parent::getBodyForFeed($story);

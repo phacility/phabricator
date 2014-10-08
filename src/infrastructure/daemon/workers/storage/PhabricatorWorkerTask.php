@@ -9,33 +9,47 @@ abstract class PhabricatorWorkerTask extends PhabricatorWorkerDAO {
   protected $leaseExpires;
   protected $failureCount;
   protected $dataID;
+  protected $priority;
 
   private $data;
   private $executionException;
 
-  public function setExecutionException(Exception $execution_exception) {
+  public function getConfiguration() {
+    return array(
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'taskClass' => 'text64',
+        'leaseOwner' => 'text64?',
+        'leaseExpires' => 'epoch?',
+        'failureCount' => 'uint32',
+        'failureTime' => 'epoch?',
+        'priority' => 'uint32',
+      ),
+    ) + parent::getConfiguration();
+  }
+
+  final public function setExecutionException(Exception $execution_exception) {
     $this->executionException = $execution_exception;
     return $this;
   }
 
-  public function getExecutionException() {
+  final public function getExecutionException() {
     return $this->executionException;
   }
 
-  public function setData($data) {
+  final public function setData($data) {
     $this->data = $data;
     return $this;
   }
 
-  public function getData() {
+  final public function getData() {
     return $this->data;
   }
 
-  public function isArchived() {
+  final public function isArchived() {
     return ($this instanceof PhabricatorWorkerArchiveTask);
   }
 
-  public function getWorkerInstance() {
+  final public function getWorkerInstance() {
     $id = $this->getID();
     $class = $this->getTaskClass();
 

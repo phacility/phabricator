@@ -9,6 +9,10 @@ final class PhabricatorMacroViewController
     $this->id = $data['id'];
   }
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
@@ -16,6 +20,7 @@ final class PhabricatorMacroViewController
     $macro = id(new PhabricatorMacroQuery())
       ->setViewer($user)
       ->withIDs(array($this->id))
+      ->needFiles(true)
       ->executeOne();
     if (!$macro) {
       return new Aphront404Response();
@@ -114,14 +119,12 @@ final class PhabricatorMacroViewController
       ),
       array(
         'title' => $title_short,
-        'device' => true,
       ));
   }
 
   private function buildActionView(PhabricatorFileImageMacro $macro) {
-
     $can_manage = $this->hasApplicationCapability(
-      PhabricatorMacroCapabilityManage::CAPABILITY);
+      PhabricatorMacroManageCapability::CAPABILITY);
 
     $request = $this->getRequest();
     $view = id(new PhabricatorActionListView())
@@ -134,7 +137,7 @@ final class PhabricatorMacroViewController
         ->setHref($this->getApplicationURI('/edit/'.$macro->getID().'/'))
         ->setDisabled(!$can_manage)
         ->setWorkflow(!$can_manage)
-        ->setIcon('edit'));
+        ->setIcon('fa-pencil'));
 
     $view->addAction(
       id(new PhabricatorActionView())
@@ -142,7 +145,7 @@ final class PhabricatorMacroViewController
         ->setHref($this->getApplicationURI('/audio/'.$macro->getID().'/'))
         ->setDisabled(!$can_manage)
         ->setWorkflow(!$can_manage)
-        ->setIcon('herald'));
+        ->setIcon('fa-music'));
 
     if ($macro->getIsDisabled()) {
       $view->addAction(
@@ -151,7 +154,7 @@ final class PhabricatorMacroViewController
           ->setHref($this->getApplicationURI('/disable/'.$macro->getID().'/'))
           ->setWorkflow(true)
           ->setDisabled(!$can_manage)
-          ->setIcon('undo'));
+          ->setIcon('fa-check-circle-o'));
     } else {
       $view->addAction(
         id(new PhabricatorActionView())
@@ -159,7 +162,7 @@ final class PhabricatorMacroViewController
           ->setHref($this->getApplicationURI('/disable/'.$macro->getID().'/'))
           ->setWorkflow(true)
           ->setDisabled(!$can_manage)
-          ->setIcon('delete'));
+          ->setIcon('fa-ban'));
     }
 
     return $view;

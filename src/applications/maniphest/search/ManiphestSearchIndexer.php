@@ -1,10 +1,6 @@
 <?php
 
-/**
- * @group maniphest
- */
-final class ManiphestSearchIndexer
-  extends PhabricatorSearchDocumentIndexer {
+final class ManiphestSearchIndexer extends PhabricatorSearchDocumentIndexer {
 
   public function getIndexableObject() {
     return new ManiphestTask();
@@ -15,7 +11,7 @@ final class ManiphestSearchIndexer
 
     $doc = new PhabricatorSearchAbstractDocument();
     $doc->setPHID($task->getPHID());
-    $doc->setDocumentType(ManiphestPHIDTypeTask::TYPECONST);
+    $doc->setDocumentType(ManiphestTaskPHIDType::TYPECONST);
     $doc->setDocumentTitle($task->getTitle());
     $doc->setDocumentCreated($task->getDateCreated());
     $doc->setDocumentModified($task->getDateModified());
@@ -27,7 +23,7 @@ final class ManiphestSearchIndexer
     $doc->addRelationship(
       PhabricatorSearchRelationship::RELATIONSHIP_AUTHOR,
       $task->getAuthorPHID(),
-      PhabricatorPeoplePHIDTypeUser::TYPECONST,
+      PhabricatorPeopleUserPHIDType::TYPECONST,
       $task->getDateCreated());
 
     $doc->addRelationship(
@@ -35,7 +31,7 @@ final class ManiphestSearchIndexer
         ? PhabricatorSearchRelationship::RELATIONSHIP_CLOSED
         : PhabricatorSearchRelationship::RELATIONSHIP_OPEN,
       $task->getPHID(),
-      ManiphestPHIDTypeTask::TYPECONST,
+      ManiphestTaskPHIDType::TYPECONST,
       time());
 
     $this->indexTransactions(
@@ -47,7 +43,7 @@ final class ManiphestSearchIndexer
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_PROJECT,
         $phid,
-        PhabricatorProjectPHIDTypeProject::TYPECONST,
+        PhabricatorProjectProjectPHIDType::TYPECONST,
         $task->getDateModified()); // Bogus.
     }
 
@@ -56,7 +52,7 @@ final class ManiphestSearchIndexer
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_OWNER,
         $owner,
-        PhabricatorPeoplePHIDTypeUser::TYPECONST,
+        PhabricatorPeopleUserPHIDType::TYPECONST,
         time());
     } else {
       $doc->addRelationship(
@@ -83,4 +79,5 @@ final class ManiphestSearchIndexer
 
     return $doc;
   }
+
 }

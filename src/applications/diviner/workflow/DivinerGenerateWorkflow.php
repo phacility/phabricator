@@ -192,12 +192,12 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
 
     if ($futures) {
       $this->resolveAtomizerFutures($futures, $file_hashes);
-      $this->log(pht("Atomization complete."));
+      $this->log(pht('Atomization complete.'));
     } else {
-      $this->log(pht("Atom cache is up to date, no files to atomize."));
+      $this->log(pht('Atom cache is up to date, no files to atomize.'));
     }
 
-    $this->log(pht("Writing atom cache."));
+    $this->log(pht('Writing atom cache.'));
 
     $this->getAtomCache()->saveAtoms();
 

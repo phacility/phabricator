@@ -2,7 +2,6 @@
 
 /**
  * @task  routing URI Routing
- * @group aphront
  */
 abstract class AphrontApplicationConfiguration {
 
@@ -15,7 +14,7 @@ abstract class AphrontApplicationConfiguration {
   abstract public function getURIMap();
   abstract public function buildRequest();
   abstract public function build404Controller();
-  abstract public function buildRedirectController($uri);
+  abstract public function buildRedirectController($uri, $external);
 
   final public function setRequest(AphrontRequest $request) {
     $this->request = $request;
@@ -53,8 +52,7 @@ abstract class AphrontApplicationConfiguration {
     return $this->path;
   }
 
-  public function willBuildRequest() {
-  }
+  public function willBuildRequest() {}
 
 
 /* -(  URI Routing  )-------------------------------------------------------- */
@@ -97,7 +95,10 @@ abstract class AphrontApplicationConfiguration {
         $https_uri = $request->getRequestURI();
         $https_uri->setDomain($request->getHost());
         $https_uri->setProtocol('https');
-        return $this->buildRedirectController($https_uri);
+
+        // In this scenario, we'll be redirecting to HTTPS using an absolute
+        // URI, so we need to permit an external redirect.
+        return $this->buildRedirectController($https_uri, true);
       }
     }
 
@@ -114,16 +115,33 @@ abstract class AphrontApplicationConfiguration {
       array(
         $base_uri,
         $prod_uri,
-        $file_uri,
       ),
       $conduit_uris,
       $allowed_uris);
+
+    $cdn_routes = array(
+      '/res/',
+      '/file/data/',
+      '/file/xform/',
+      '/phame/r/',
+      );
 
     $host_match = false;
     foreach ($uris as $uri) {
       if ($host === id(new PhutilURI($uri))->getDomain()) {
         $host_match = true;
         break;
+      }
+    }
+
+    if (!$host_match) {
+      if ($host === id(new PhutilURI($file_uri))->getDomain()) {
+        foreach ($cdn_routes as $route) {
+          if (strncmp($path, $route, strlen($route)) == 0) {
+            $host_match = true;
+            break;
+          }
+        }
       }
     }
 
@@ -138,8 +156,8 @@ abstract class AphrontApplicationConfiguration {
           ->executeOne();
       } catch (PhabricatorPolicyException $ex) {
         throw new Exception(
-          "This blog is not visible to logged out users, so it can not be ".
-          "visited from a custom domain.");
+          'This blog is not visible to logged out users, so it can not be '.
+          'visited from a custom domain.');
       }
 
       if (!$blog) {
@@ -172,7 +190,9 @@ abstract class AphrontApplicationConfiguration {
 
         if ($controller && !$request->isHTTPPost()) {
           $slash_uri = $request->getRequestURI()->setPath($path.'/');
-          return $this->buildRedirectController($slash_uri);
+
+          $external = strlen($request->getRequestURI()->getDomain());
+          return $this->buildRedirectController($slash_uri, $external);
         }
       }
       return $this->build404Controller();
@@ -228,4 +248,5 @@ abstract class AphrontApplicationConfiguration {
 
     return array($controller, $uri_data);
   }
+
 }

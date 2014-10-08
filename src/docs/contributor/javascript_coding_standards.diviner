@@ -107,7 +107,7 @@ see @{article:Javascript Object and Array}.
       break;
   }
 
-##break## statements should be indented to block level. If you don't push them
+`break` statements should be indented to block level. If you don't push them
 in, you end up with an inconsistent rule for conditional ##break## statements,
 as in the ##2## case.
 

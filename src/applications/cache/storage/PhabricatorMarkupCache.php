@@ -15,6 +15,18 @@ final class PhabricatorMarkupCache extends PhabricatorCacheDAO {
       self::CONFIG_BINARY => array(
         'cacheData' => true,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'cacheKey' => 'text128',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'cacheKey' => array(
+          'columns' => array('cacheKey'),
+          'unique' => true,
+        ),
+        'dateCreated' => array(
+          'columns' => array('dateCreated'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

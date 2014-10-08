@@ -32,7 +32,7 @@ final class DiffusionEmptyResultView extends DiffusionView {
         $title = pht('Path Does Not Exist');
         // TODO: Under git, this error message should be more specific. It
         // may exist on some other branch.
-        $body  = pht("This path does not exist anywhere.");
+        $body  = pht('This path does not exist anywhere.');
         $severity = AphrontErrorView::SEVERITY_ERROR;
         break;
       case DiffusionBrowseResultSet::REASON_IS_EMPTY:
@@ -54,8 +54,8 @@ final class DiffusionEmptyResultView extends DiffusionView {
 
         $title = pht('Path Was Deleted');
         $body = pht(
-          "This path does not exist at %s. It was deleted in %s and last %s ".
-            "at %s.",
+          'This path does not exist at %s. It was deleted in %s and last %s '.
+            'at %s.',
           $commit,
           self::linkCommit($drequest->getRepository(), $deleted),
           $browse,

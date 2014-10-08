@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phriction
- */
 final class PhabricatorMacroQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
@@ -14,6 +11,8 @@ final class PhabricatorMacroQuery
   private $dateCreatedAfter;
   private $dateCreatedBefore;
   private $flagColor;
+
+  private $needFiles;
 
   private $status = 'status-any';
   const STATUS_ANY = 'status-any';
@@ -29,8 +28,10 @@ final class PhabricatorMacroQuery
   }
 
   public static function getFlagColorsOptions() {
-
-    $options = array('-1' => pht('(No Filtering)'));
+    $options = array(
+      '-1' => pht('(No Filtering)'),
+      '-2' => pht('(Marked With Any Flag)'),
+    );
 
     foreach (PhabricatorFlagColor::getColorNameMap() as $color => $name) {
       $options[$color] = $name;
@@ -81,6 +82,11 @@ final class PhabricatorMacroQuery
 
   public function withFlagColor($flag_color) {
     $this->flagColor = $flag_color;
+    return $this;
+  }
+
+  public function needFiles($need_files) {
+    $this->needFiles = $need_files;
     return $this;
   }
 
@@ -169,10 +175,15 @@ final class PhabricatorMacroQuery
     }
 
     if ($this->flagColor != '-1' && $this->flagColor !== null) {
+      if ($this->flagColor == '-2') {
+        $flag_colors = array_keys(PhabricatorFlagColor::getColorNameMap());
+      } else {
+        $flag_colors = array($this->flagColor);
+      }
       $flags = id(new PhabricatorFlagQuery())
         ->withOwnerPHIDs(array($this->getViewer()->getPHID()))
-        ->withTypes(array(PhabricatorMacroPHIDTypeMacro::TYPECONST))
-        ->withColors(array($this->flagColor))
+        ->withTypes(array(PhabricatorMacroMacroPHIDType::TYPECONST))
+        ->withColors($flag_colors)
         ->setViewer($this->getViewer())
         ->execute();
 
@@ -192,21 +203,23 @@ final class PhabricatorMacroQuery
   }
 
   protected function didFilterPage(array $macros) {
-    $file_phids = mpull($macros, 'getFilePHID');
-    $files = id(new PhabricatorFileQuery())
-      ->setViewer($this->getViewer())
-      ->setParentQuery($this)
-      ->withPHIDs($file_phids)
-      ->execute();
-    $files = mpull($files, null, 'getPHID');
+    if ($this->needFiles) {
+      $file_phids = mpull($macros, 'getFilePHID');
+      $files = id(new PhabricatorFileQuery())
+        ->setViewer($this->getViewer())
+        ->setParentQuery($this)
+        ->withPHIDs($file_phids)
+        ->execute();
+      $files = mpull($files, null, 'getPHID');
 
-    foreach ($macros as $key => $macro) {
-      $file = idx($files, $macro->getFilePHID());
-      if (!$file) {
-        unset($macros[$key]);
-        continue;
+      foreach ($macros as $key => $macro) {
+        $file = idx($files, $macro->getFilePHID());
+        if (!$file) {
+          unset($macros[$key]);
+          continue;
+        }
+        $macro->attachFile($file);
       }
-      $macro->attachFile($file);
     }
 
     return $macros;
@@ -217,7 +230,7 @@ final class PhabricatorMacroQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationMacro';
+    return 'PhabricatorMacroApplication';
   }
 
 }

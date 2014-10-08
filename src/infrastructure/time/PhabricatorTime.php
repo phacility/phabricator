@@ -25,7 +25,7 @@ final class PhabricatorTime {
 
   public static function popTime($key) {
     if ($key !== last_key(self::$stack)) {
-      throw new Exception("PhabricatorTime::popTime with bad key.");
+      throw new Exception('PhabricatorTime::popTime with bad key.');
     }
     array_pop(self::$stack);
 

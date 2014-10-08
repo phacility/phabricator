@@ -13,6 +13,20 @@ final class DivinerLiveBook extends DivinerDAO
       self::CONFIG_SERIALIZATION => array(
         'configurationData' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'name' => 'text64',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_phid' => null,
+        'phid' => array(
+          'columns' => array('phid'),
+          'unique' => true,
+        ),
+        'name' => array(
+          'columns' => array('name'),
+          'unique' => true,
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 
@@ -27,7 +41,7 @@ final class DivinerLiveBook extends DivinerDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      DivinerPHIDTypeBook::TYPECONST);
+      DivinerBookPHIDType::TYPECONST);
   }
 
   public function getTitle() {

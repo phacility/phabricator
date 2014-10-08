@@ -1,13 +1,10 @@
 <?php
 
-/**
- * @group maniphest
- */
 final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
 
   public function validateMailReceiver($mail_receiver) {
     if (!($mail_receiver instanceof ManiphestTask)) {
-      throw new Exception("Mail receiver is not a ManiphestTask!");
+      throw new Exception('Mail receiver is not a ManiphestTask!');
     }
   }
 
@@ -28,15 +25,14 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
   public function getReplyHandlerInstructions() {
     if ($this->supportsReplies()) {
       return pht(
-        "Reply to comment or attach files, or !close, !claim, ".
-        "!unsubscribe or !assign <username>.");
+        'Reply to comment or attach files, or !close, !claim, '.
+        '!unsubscribe or !assign <username>.');
     } else {
       return null;
     }
   }
 
   protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
-
     // NOTE: We'll drop in here on both the "reply to a task" and "create a
     // new task" workflows! Make sure you test both if you make changes!
 
@@ -61,17 +57,19 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
 
     $is_unsub = false;
     if ($is_new_task) {
-      // If this is a new task, create a "User created this task." transaction
-      // and then set the title and description.
-      $xaction = clone $template;
-      $xaction->setTransactionType(ManiphestTransaction::TYPE_STATUS);
-      $xaction->setNewValue(ManiphestTaskStatus::getDefaultStatus());
-      $xactions[] = $xaction;
+      $task = ManiphestTask::initializeNewTask($user);
 
-      $task->setAuthorPHID($user->getPHID());
-      $task->setTitle(nonempty($mail->getSubject(), 'Untitled Task'));
-      $task->setDescription($body);
-      $task->setPriority(ManiphestTaskPriority::getDefaultPriority());
+      $xactions[] = id(new ManiphestTransaction())
+        ->setTransactionType(ManiphestTransaction::TYPE_STATUS)
+        ->setNewValue(ManiphestTaskStatus::getDefaultStatus());
+
+      $xactions[] = id(new ManiphestTransaction())
+        ->setTransactionType(ManiphestTransaction::TYPE_TITLE)
+        ->setNewValue(nonempty($mail->getSubject(), pht('Untitled Task')));
+
+      $xactions[] = id(new ManiphestTransaction())
+        ->setTransactionType(ManiphestTransaction::TYPE_DESCRIPTION)
+        ->setNewValue($body);
 
     } else {
 
@@ -134,7 +132,6 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
             ->setContent($body));
         $xactions[] = $xaction;
       }
-
     }
 
     $ccs = $mail->loadCCPHIDs();
@@ -184,7 +181,6 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
       ));
     $event->setUser($user);
     PhutilEventEngine::dispatchEvent($event);
-
   }
 
 }

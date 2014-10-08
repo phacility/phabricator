@@ -8,5 +8,6 @@ final class DifferentialUnitStatus {
   const UNIT_FAIL             = 3;
   const UNIT_SKIP             = 4;
   const UNIT_POSTPONED        = 5;
+  const UNIT_AUTO_SKIP        = 6;
 
 }

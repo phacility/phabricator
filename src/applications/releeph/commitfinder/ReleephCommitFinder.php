@@ -60,7 +60,7 @@ final class ReleephCommitFinder {
       $callsign = $matches['callsign'];
       if ($callsign != $repository->getCallsign()) {
         throw new ReleephCommitFinderException(sprintf(
-          "%s is in a different repository to this Releeph project (%s).",
+          '%s is in a different repository to this Releeph project (%s).',
           $partial_string,
           $repository->getCallsign()));
       } else {
@@ -69,7 +69,7 @@ final class ReleephCommitFinder {
     } else {
       $dr_data = array(
         'callsign' => $repository->getCallsign(),
-        'commit' => $partial_string
+        'commit' => $partial_string,
       );
     }
 

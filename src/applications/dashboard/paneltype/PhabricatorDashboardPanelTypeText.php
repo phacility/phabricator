@@ -26,9 +26,15 @@ final class PhabricatorDashboardPanelTypeText
     );
   }
 
-  protected function renderPanelContent(
+  public function shouldRenderAsync() {
+    // Rendering text panels is normally a cheap cache hit.
+    return false;
+  }
+
+  public function renderPanelContent(
     PhabricatorUser $viewer,
-    PhabricatorDashboardPanel $panel) {
+    PhabricatorDashboardPanel $panel,
+    PhabricatorDashboardPanelRenderingEngine $engine) {
 
     $text = $panel->getProperty('text', '');
 

@@ -3,6 +3,14 @@
 final class DrydockLeaseSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Drydock Leases');
+  }
+
+  public function getApplicationClassName() {
+    return 'PhabricatorDrydockApplication';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 
@@ -50,12 +58,10 @@ final class DrydockLeaseSearchEngine
   }
 
   public function getBuiltinQueryNames() {
-    $names = array(
+    return array(
       'active' => pht('Active Leases'),
       'all' => pht('All Leases'),
     );
-
-    return $names;
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
@@ -76,6 +82,17 @@ final class DrydockLeaseSearchEngine
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
+  }
+
+  protected function renderResultList(
+    array $leases,
+    PhabricatorSavedQuery $saved,
+    array $handles) {
+
+    return id(new DrydockLeaseListView())
+      ->setUser($this->requireViewer())
+      ->setLeases($leases)
+      ->render();
   }
 
 }

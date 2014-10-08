@@ -14,12 +14,23 @@ final class PhabricatorConfigEntry extends PhabricatorConfigEntryDAO
       self::CONFIG_SERIALIZATION => array(
         'value' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'namespace' => 'text64',
+        'configKey' => 'text64',
+        'isDeleted' => 'bool',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_name' => array(
+          'columns' => array('namespace', 'configKey'),
+          'unique' => true,
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorConfigPHIDTypeConfig::TYPECONST);
+      PhabricatorConfigConfigPHIDType::TYPECONST);
   }
 
   public static function loadConfigEntry($key) {

@@ -73,7 +73,7 @@ final class DiffusionRepositoryEditBasicController
           ->setTransactionType($type_edge)
           ->setMetadataValue(
             'edge:type',
-            PhabricatorEdgeConfig::TYPE_OBJECT_HAS_PROJECT)
+            PhabricatorProjectObjectHasProjectEdgeType::EDGECONST)
           ->setNewValue(
             array(
               '=' => array_fuse($v_projects),
@@ -125,7 +125,7 @@ final class DiffusionRepositoryEditBasicController
           ->setValue($v_desc))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/projects/')
+          ->setDatasource(new PhabricatorProjectDatasource())
           ->setName('projectPHIDs')
           ->setLabel(pht('Projects'))
           ->setValue($project_handles))
@@ -144,10 +144,10 @@ final class DiffusionRepositoryEditBasicController
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $object_box),
+        $object_box,
+      ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

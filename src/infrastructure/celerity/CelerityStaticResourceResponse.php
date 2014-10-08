@@ -4,8 +4,6 @@
  * Tracks and resolves dependencies the page declares with
  * @{function:require_celerity_resource}, and then builds appropriate HTML or
  * Ajax responses.
- *
- * @group celerity
  */
 final class CelerityStaticResourceResponse {
 
@@ -208,7 +206,8 @@ final class CelerityStaticResourceResponse {
 
       $behavior_groups = array(
         $higher_priority_behaviors,
-        $behaviors);
+        $behaviors,
+      );
 
       foreach ($behavior_groups as $group) {
         if (!$group) {
@@ -281,9 +280,10 @@ final class CelerityStaticResourceResponse {
     return $response;
   }
 
-  private function getURI(
+  public function getURI(
     CelerityResourceMap $map,
-    $name) {
+    $name,
+    $use_primary_domain = false) {
 
     $uri = $map->getURIForName($name);
 
@@ -298,7 +298,11 @@ final class CelerityStaticResourceResponse {
       $uri = preg_replace('@^/res/@', '/res/'.$mtime.'T/', $uri);
     }
 
-    return PhabricatorEnv::getCDNURI($uri);
+    if ($use_primary_domain) {
+      return PhabricatorEnv::getURI($uri);
+    } else {
+      return PhabricatorEnv::getCDNURI($uri);
+    }
   }
 
 }

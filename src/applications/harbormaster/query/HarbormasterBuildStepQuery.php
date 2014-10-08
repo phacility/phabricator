@@ -22,14 +22,6 @@ final class HarbormasterBuildStepQuery
     return $this;
   }
 
-  public function getPagingColumn() {
-    return 'sequence';
-  }
-
-  public function getReversePaging() {
-    return true;
-  }
-
   protected function loadPage() {
     $table = new HarbormasterBuildStep();
     $conn_r = $table->establishConnection('r');
@@ -100,7 +92,7 @@ final class HarbormasterBuildStepQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationHarbormaster';
+    return 'PhabricatorHarbormasterApplication';
   }
 
 }

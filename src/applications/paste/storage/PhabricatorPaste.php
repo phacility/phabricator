@@ -5,7 +5,11 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
     PhabricatorSubscribableInterface,
     PhabricatorTokenReceiverInterface,
     PhabricatorFlaggableInterface,
-    PhabricatorPolicyInterface {
+    PhabricatorMentionableInterface,
+    PhabricatorPolicyInterface,
+    PhabricatorProjectInterface,
+    PhabricatorDestructibleInterface,
+    PhabricatorApplicationTransactionInterface {
 
   protected $title;
   protected $authorPHID;
@@ -21,10 +25,10 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
   public static function initializeNewPaste(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
       ->setViewer($actor)
-      ->withClasses(array('PhabricatorApplicationPaste'))
+      ->withClasses(array('PhabricatorPasteApplication'))
       ->executeOne();
 
-    $view_policy = $app->getPolicy(PasteCapabilityDefaultView::CAPABILITY);
+    $view_policy = $app->getPolicy(PasteDefaultViewCapability::CAPABILITY);
 
     return id(new PhabricatorPaste())
       ->setTitle('')
@@ -39,12 +43,36 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'title' => 'text255',
+        'language' => 'text64',
+        'mailKey' => 'bytes20',
+        'parentPHID' => 'phid?',
+
+        // T6203/NULLABILITY
+        // Pastes should always have a view policy.
+        'viewPolicy' => 'policy?',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'parentPHID' => array(
+          'columns' => array('parentPHID'),
+        ),
+        'authorPHID' => array(
+          'columns' => array('authorPHID'),
+        ),
+        'key_dateCreated' => array(
+          'columns' => array('dateCreated'),
+        ),
+        'key_language' => array(
+          'columns' => array('language'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPastePHIDTypePaste::TYPECONST);
+      PhabricatorPastePastePHIDType::TYPECONST);
   }
 
   public function save() {
@@ -130,5 +158,40 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
     return pht('The author of a paste can always view and edit it.');
   }
 
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    if ($this->filePHID) {
+      $file = id(new PhabricatorFileQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withPHIDs(array($this->filePHID))
+        ->executeOne();
+      if ($file) {
+        $engine->destroyObject($file);
+      }
+    }
+
+    $this->delete();
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhabricatorPasteEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhabricatorPasteTransaction();
+  }
 
 }

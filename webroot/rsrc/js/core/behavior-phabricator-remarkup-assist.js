@@ -22,7 +22,7 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
 
     // First, disable any active mode.
     if (edit_root) {
-      if (edit_mode == 'fullscreen') {
+      if (edit_mode == 'fa-arrows-alt') {
         JX.DOM.alterClass(edit_root, 'remarkup-control-fullscreen-mode', false);
         JX.DOM.alterClass(document.body, 'remarkup-fullscreen-mode', false);
       }
@@ -33,7 +33,7 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
     edit_mode = mode;
 
     // Now, apply the new mode.
-    if (mode == 'fullscreen') {
+    if (mode == 'fa-arrows-alt') {
       JX.DOM.alterClass(edit_root, 'remarkup-control-fullscreen-mode', true);
       JX.DOM.alterClass(document.body, 'remarkup-fullscreen-mode', true);
       resizearea();
@@ -46,7 +46,7 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
     if (!edit_root) {
       return;
     }
-    if (edit_mode != 'fullscreen') {
+    if (edit_mode != 'fa-arrows-alt') {
       return;
     }
 
@@ -71,7 +71,7 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
       return;
     }
 
-    if (edit_mode != 'fullscreen') {
+    if (edit_mode != 'fa-arrows-alt') {
       return;
     }
 
@@ -101,13 +101,13 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
     var r = JX.TextAreaUtils.getSelectionRange(area);
 
     switch (action) {
-      case 'b':
+      case 'fa-bold':
         update(area, '**', sel || pht('bold text'), '**');
         break;
-      case 'i':
+      case 'fa-italic':
         update(area, '//', sel || pht('italic text'), '//');
         break;
-      case 'link':
+      case 'fa-link':
         var name = pht('name');
         if (/^https?:/i.test(sel)) {
           update(area, '[[ ' + sel + ' | ', name, ' ]]');
@@ -115,31 +115,30 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
           update(area, '[[ ', pht('URL'), ' | ' + (sel || name) + ' ]]');
         }
         break;
-      case 'tt':
+      case 'fa-text-width':
         update(area, '`', sel || pht('monospaced text'), '`');
         break;
-      case 'ul':
-      case 'ol':
-        var ch = (action == 'ol') ? '  # ' : '  - ';
+      case 'fa-list-ul':
+      case 'fa-list-ol':
+        var ch = (action == 'fa-list-ol') ? '  # ' : '  - ';
         if (sel) {
-          sel = sel.split("\n");
+          sel = sel.split('\n');
         } else {
           sel = [pht('List Item')];
         }
-        sel = sel.join("\n" + ch);
-        update(area, ((r.start === 0) ? "" : "\n\n") + ch, sel, "\n\n");
+        sel = sel.join('\n' + ch);
+        update(area, ((r.start === 0) ? '' : '\n\n') + ch, sel, '\n\n');
         break;
-      case 'code':
-        sel = sel || "foreach ($list as $item) {\n  work_miracles($item);\n}";
-        sel = sel.split("\n");
-        sel = "  " + sel.join("\n  ");
-        update(area, ((r.start === 0) ? "" : "\n\n"), sel, "\n\n");
+      case 'fa-code':
+        sel = sel || 'foreach ($list as $item) {\n  work_miracles($item);\n}';
+        var code_prefix = (r.start === 0) ? '' : '\n';
+        update(area, code_prefix + '```\n', sel, '\n```');
         break;
-      case 'table':
-        var prefix = (r.start === 0 ? '' : '\n\n');
-        update(area, prefix + '| ', sel || pht('data'), ' |');
+      case 'fa-table':
+        var table_prefix = (r.start === 0 ? '' : '\n\n');
+        update(area, table_prefix + '| ', sel || pht('data'), ' |');
         break;
-      case 'meme':
+      case 'fa-meh-o':
         new JX.Workflow('/macro/meme/create/')
           .setHandler(function(response) {
             update(
@@ -150,14 +149,14 @@ JX.behavior('phabricator-remarkup-assist', function(config) {
           })
           .start();
         break;
-      case 'image':
+      case 'fa-cloud-upload':
         new JX.Workflow('/file/uploaddialog/').start();
         break;
-      case 'fullscreen':
-        if (edit_mode == 'fullscreen') {
+      case 'fa-arrows-alt':
+        if (edit_mode == 'fa-arrows-alt') {
           set_edit_mode(root, 'normal');
         } else {
-          set_edit_mode(root, 'fullscreen');
+          set_edit_mode(root, 'fa-arrows-alt');
         }
         break;
     }

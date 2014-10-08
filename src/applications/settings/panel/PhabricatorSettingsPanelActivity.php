@@ -27,10 +27,13 @@ final class PhabricatorSettingsPanelActivity
     $viewer = $request->getUser();
     $user = $this->getUser();
 
+    $pager = id(new AphrontCursorPagerView())
+      ->readFromRequest($request);
+
     $logs = id(new PhabricatorPeopleLogQuery())
       ->setViewer($viewer)
       ->withRelatedPHIDs(array($user->getPHID()))
-      ->execute();
+      ->executeWithCursorPager($pager);
 
     $phids = array();
     foreach ($logs as $log) {
@@ -56,7 +59,11 @@ final class PhabricatorSettingsPanelActivity
       ->setHeaderText(pht('Account Activity Logs'))
       ->appendChild($table);
 
-    return $panel;
+    $pager_box = id(new PHUIBoxView())
+      ->addMargin(PHUI::MARGIN_LARGE)
+      ->appendChild($pager);
+
+    return array($panel, $pager_box);
   }
 
 }

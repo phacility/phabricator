@@ -7,6 +7,10 @@ final class PhabricatorAuthValidateController
     return false;
   }
 
+  public function shouldAllowPartialSessions() {
+    return true;
+  }
+
   public function processRequest() {
     $request = $this->getRequest();
     $viewer = $request->getUser();
@@ -18,7 +22,8 @@ final class PhabricatorAuthValidateController
         array(
           pht(
             'Login validation is missing expected parameter ("%s").',
-            'phusr')));
+            'phusr'),
+        ));
     }
 
     $expect_phusr = $request->getStr('expect');
@@ -45,8 +50,8 @@ final class PhabricatorAuthValidateController
     if (!$failures) {
       if (!$viewer->getPHID()) {
         $failures[] = pht(
-          "Login cookie was set correctly, but your login session is not ".
-          "valid. Try clearing cookies and logging in again.");
+          'Login cookie was set correctly, but your login session is not '.
+          'valid. Try clearing cookies and logging in again.');
       }
     }
 
@@ -54,14 +59,8 @@ final class PhabricatorAuthValidateController
       return $this->renderErrors($failures);
     }
 
-    $next = PhabricatorCookies::getNextURICookie($request);
-    $request->clearCookie(PhabricatorCookies::COOKIE_NEXTURI);
-
-    if (!PhabricatorEnv::isValidLocalWebResource($next)) {
-      $next = '/';
-    }
-
-    return id(new AphrontRedirectResponse())->setURI($next);
+    $finish_uri = $this->getApplicationURI('finish/');
+    return id(new AphrontRedirectResponse())->setURI($finish_uri);
   }
 
   private function renderErrors(array $messages) {

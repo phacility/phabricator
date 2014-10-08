@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group search
- */
 final class PhabricatorSearchRelationship {
 
   const RELATIONSHIP_AUTHOR     = 'auth';

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group file
- */
 final class PhabricatorFileQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
@@ -120,9 +117,9 @@ final class PhabricatorFileQuery
     // First, load the edges.
 
     $edge_type = PhabricatorEdgeConfig::TYPE_FILE_HAS_OBJECT;
-    $phids = mpull($files, 'getPHID');
+    $file_phids = mpull($files, 'getPHID');
     $edges = id(new PhabricatorEdgeQuery())
-      ->withSourcePHIDs($phids)
+      ->withSourcePHIDs($file_phids)
       ->withEdgeTypes(array($edge_type))
       ->execute();
 
@@ -134,16 +131,37 @@ final class PhabricatorFileQuery
         $object_phids[$phid] = true;
       }
     }
+
+    // If this file is a transform of another file, load that file too. If you
+    // can see the original file, you can see the thumbnail.
+
+    // TODO: It might be nice to put this directly on PhabricatorFile and remove
+    // the PhabricatorTransformedFile table, which would be a little simpler.
+
+    $xforms = id(new PhabricatorTransformedFile())->loadAllWhere(
+      'transformedPHID IN (%Ls)',
+      $file_phids);
+    $xform_phids = mpull($xforms, 'getOriginalPHID', 'getTransformedPHID');
+    foreach ($xform_phids as $derived_phid => $original_phid) {
+      $object_phids[$original_phid] = true;
+    }
+
     $object_phids = array_keys($object_phids);
 
     // Now, load the objects.
 
     $objects = array();
     if ($object_phids) {
+      // NOTE: We're explicitly turning policy exceptions off, since the rule
+      // here is "you can see the file if you can see ANY associated object".
+      // Without this explicit flag, we'll incorrectly throw unless you can
+      // see ALL associated objects.
+
       $objects = id(new PhabricatorObjectQuery())
         ->setParentQuery($this)
         ->setViewer($this->getViewer())
         ->withPHIDs($object_phids)
+        ->setRaisePolicyExceptions(false)
         ->execute();
       $objects = mpull($objects, null, 'getPHID');
     }
@@ -151,6 +169,27 @@ final class PhabricatorFileQuery
     foreach ($files as $file) {
       $file_objects = array_select_keys($objects, $file->getObjectPHIDs());
       $file->attachObjects($file_objects);
+    }
+
+    foreach ($files as $key => $file) {
+      $original_phid = idx($xform_phids, $file->getPHID());
+      if ($original_phid == PhabricatorPHIDConstants::PHID_VOID) {
+        // This is a special case for builtin files, which are handled
+        // oddly.
+        $original = null;
+      } else if ($original_phid) {
+        $original = idx($objects, $original_phid);
+        if (!$original) {
+          // If the viewer can't see the original file, also prevent them from
+          // seeing the transformed file.
+          $this->didRejectResult($file);
+          unset($files[$key]);
+          continue;
+        }
+      } else {
+        $original = null;
+      }
+      $file->attachOriginalFile($original);
     }
 
     return $files;
@@ -248,9 +287,8 @@ final class PhabricatorFileQuery
     return 'f.id';
   }
 
-
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationFiles';
+    return 'PhabricatorFilesApplication';
   }
 
 }

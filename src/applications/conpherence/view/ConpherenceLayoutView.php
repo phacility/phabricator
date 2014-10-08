@@ -59,7 +59,7 @@ final class ConpherenceLayoutView extends AphrontView {
     $selected_id = null;
     $selected_thread_id = null;
     if ($this->thread) {
-      $selected_id = $this->thread->getPHID() . '-nav-item';
+      $selected_id = $this->thread->getPHID().'-nav-item';
       $selected_thread_id = $this->thread->getID();
     }
     $this->initBehavior('conpherence-menu',
@@ -77,44 +77,50 @@ final class ConpherenceLayoutView extends AphrontView {
     $this->initBehavior(
       'conpherence-widget-pane',
       array(
-        'widgetBaseUpdateURI' => $this->baseURI . 'update/',
+        'widgetBaseUpdateURI' => $this->baseURI.'update/',
         'widgetRegistry' => array(
           'conpherence-message-pane' => array(
             'name' => pht('Thread'),
+            'icon' => 'fa-comment',
             'deviceOnly' => true,
-            'hasCreate' => false
+            'hasCreate' => false,
           ),
           'widgets-people' => array(
             'name' => pht('Participants'),
+            'icon' => 'fa-users',
             'deviceOnly' => false,
             'hasCreate' => true,
             'createData' => array(
               'refreshFromResponse' => true,
               'action' => ConpherenceUpdateActions::ADD_PERSON,
-              'customHref' => null
-            )
+              'customHref' => null,
+            ),
           ),
           'widgets-files' => array(
             'name' => pht('Files'),
+            'icon' => 'fa-files-o',
             'deviceOnly' => false,
-            'hasCreate' => false
+            'hasCreate' => false,
           ),
           'widgets-calendar' => array(
             'name' => pht('Calendar'),
+            'icon' => 'fa-calendar',
             'deviceOnly' => false,
             'hasCreate' => true,
             'createData' => array(
               'refreshFromResponse' => false,
               'action' => ConpherenceUpdateActions::ADD_STATUS,
-              'customHref' => '/calendar/event/create/'
-            )
+              'customHref' => '/calendar/event/create/',
+            ),
           ),
           'widgets-settings' => array(
             'name' => pht('Settings'),
+            'icon' => 'fa-wrench',
             'deviceOnly' => false,
-            'hasCreate' => false
+            'hasCreate' => false,
           ),
-        )));
+        ),
+      ));
 
 
     return javelin_tag(
@@ -165,7 +171,7 @@ final class ConpherenceLayoutView extends AphrontView {
                 phutil_tag(
                   'div',
                   array(
-                    'class' => 'text'
+                    'class' => 'text',
                   ),
                   pht('You do not have any messages yet.')),
                 javelin_tag(
@@ -175,7 +181,7 @@ final class ConpherenceLayoutView extends AphrontView {
                     'class' => 'button grey',
                     'sigil' => 'workflow',
                   ),
-                  pht('Send a Message'))
+                  pht('Send a Message')),
             )),
             javelin_tag(
               'div',
@@ -188,21 +194,22 @@ final class ConpherenceLayoutView extends AphrontView {
                 phutil_tag(
                   'div',
                   array(
-                    'class' => 'widgets-loading-mask'
+                    'class' => 'widgets-loading-mask',
                   ),
                   ''),
                 javelin_tag(
                   'div',
                   array(
-                    'sigil' => 'conpherence-widgets-holder'
+                    'sigil' => 'conpherence-widgets-holder',
                   ),
-                  ''))),
+                  ''),
+              )),
             javelin_tag(
               'div',
               array(
                 'class' => 'conpherence-message-pane',
                 'id' => 'conpherence-message-pane',
-                'sigil' => 'conpherence-message-pane'
+                'sigil' => 'conpherence-message-pane',
               ),
               array(
                 javelin_tag(
@@ -223,9 +230,9 @@ final class ConpherenceLayoutView extends AphrontView {
                   'div',
                   array(
                     'id' => 'conpherence-form',
-                    'sigil' => 'conpherence-form'
+                    'sigil' => 'conpherence-form',
                   ),
-                  nonempty($this->replyForm, ''))
+                  nonempty($this->replyForm, '')),
               )),
           )),
       ));

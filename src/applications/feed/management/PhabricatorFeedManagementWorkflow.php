@@ -1,6 +1,4 @@
 <?php
 
 abstract class PhabricatorFeedManagementWorkflow
-  extends PhabricatorManagementWorkflow {
-
-}
+  extends PhabricatorManagementWorkflow {}

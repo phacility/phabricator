@@ -30,7 +30,7 @@ final class PhabricatorCountdownView extends AphrontTagView {
           'class' => 'phabricator-timer-header',
         ),
         array(
-          "C".$countdown->getID(),
+          'C'.$countdown->getID(),
           ' ',
           phutil_tag(
             'a',

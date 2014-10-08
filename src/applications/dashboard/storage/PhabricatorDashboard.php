@@ -4,11 +4,14 @@
  * A collection of dashboard panels with a specific layout.
  */
 final class PhabricatorDashboard extends PhabricatorDashboardDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorDestructibleInterface {
 
   protected $name;
   protected $viewPolicy;
   protected $editPolicy;
+  protected $layoutConfig = array();
 
   private $panelPHIDs = self::ATTACHABLE;
   private $panels = self::ATTACHABLE;
@@ -17,18 +20,47 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
     return id(new PhabricatorDashboard())
       ->setName('')
       ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
-      ->setEditPolicy($actor->getPHID());
+      ->setEditPolicy($actor->getPHID())
+      ->attachPanels(array())
+      ->attachPanelPHIDs(array());
+  }
+
+  public static function copyDashboard(
+    PhabricatorDashboard $dst,
+    PhabricatorDashboard $src) {
+
+    $dst->name = $src->name;
+    $dst->layoutConfig = $src->layoutConfig;
+
+    return $dst;
   }
 
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_SERIALIZATION => array(
+        'layoutConfig' => self::SERIALIZATION_JSON,
+      ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'name' => 'text255',
+      ),
     ) + parent::getConfiguration();
   }
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorDashboardPHIDTypeDashboard::TYPECONST);
+      PhabricatorDashboardDashboardPHIDType::TYPECONST);
+  }
+
+  public function getLayoutConfigObject() {
+    return PhabricatorDashboardLayoutConfig::newFromDictionary(
+      $this->getLayoutConfig());
+  }
+
+  public function setLayoutConfigFromObject(
+    PhabricatorDashboardLayoutConfig $object) {
+    $this->setLayoutConfig($object->toDictionary());
+    return $this;
   }
 
   public function attachPanelPHIDs(array $phids) {
@@ -77,5 +109,25 @@ final class PhabricatorDashboard extends PhabricatorDashboardDAO
   public function describeAutomaticCapability($capability) {
     return null;
   }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+      $installs = id(new PhabricatorDashboardInstall())->loadAllWhere(
+        'dashboardPHID = %s',
+        $this->getPHID());
+      foreach ($installs as $install) {
+        $install->delete();
+      }
+
+      $this->delete();
+    $this->saveTransaction();
+  }
+
 
 }

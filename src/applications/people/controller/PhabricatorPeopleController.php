@@ -18,7 +18,7 @@ abstract class PhabricatorPeopleController extends PhabricatorController {
 
     if ($viewer->getIsAdmin()) {
       $nav->addLabel(pht('User Administration'));
-      if (PhabricatorAuthProviderLDAP::getLDAPProvider()) {
+      if (PhabricatorLDAPAuthProvider::getLDAPProvider()) {
         $nav->addFilter('ldap', pht('Import from LDAP'));
       }
 
@@ -42,7 +42,7 @@ abstract class PhabricatorPeopleController extends PhabricatorController {
         id(new PHUIListItemView())
           ->setName(pht('Create New User'))
           ->setHref($this->getApplicationURI('create/'))
-          ->setIcon('create'));
+          ->setIcon('fa-plus-square'));
     }
 
     return $crumbs;

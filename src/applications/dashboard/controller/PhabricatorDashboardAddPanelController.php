@@ -26,68 +26,81 @@ final class PhabricatorDashboardAddPanelController
       return new Aphront404Response();
     }
 
-    $dashboard_uri = $this->getApplicationURI('view/'.$dashboard->getID().'/');
+    $redirect_uri = $this->getApplicationURI('manage/'.$dashboard->getID().'/');
 
     $v_panel = $request->getStr('panel');
     $e_panel = true;
     $errors = array();
     if ($request->isFormPost()) {
       if (strlen($v_panel)) {
-        $panel = id(new PhabricatorObjectQuery())
+        $panel = id(new PhabricatorDashboardPanelQuery())
           ->setViewer($viewer)
-          ->withNames(array($v_panel))
-          ->withTypes(array(PhabricatorDashboardPHIDTypePanel::TYPECONST))
+          ->withIDs(array($v_panel))
           ->executeOne();
         if (!$panel) {
           $errors[] = pht('No such panel!');
           $e_panel = pht('Invalid');
         }
       } else {
-        $errors[] = pht('Name a panel to add.');
+        $errors[] = pht('Select a panel to add.');
         $e_panel = pht('Required');
       }
 
       if (!$errors) {
-        $xactions = array();
-        $xactions[] = id(new PhabricatorDashboardTransaction())
-          ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-          ->setMetadataValue(
-            'edge:type',
-            PhabricatorEdgeConfig::TYPE_DASHBOARD_HAS_PANEL)
-          ->setNewValue(
-            array(
-              '+' => array(
-                $panel->getPHID() => $panel->getPHID(),
-              ),
-            ));
+        PhabricatorDashboardTransactionEditor::addPanelToDashboard(
+          $viewer,
+          PhabricatorContentSource::newFromRequest($request),
+          $panel,
+          $dashboard,
+          $request->getInt('column', 0));
 
-        $editor = id(new PhabricatorDashboardTransactionEditor())
-          ->setActor($viewer)
-          ->setContentSourceFromRequest($request)
-          ->setContinueOnMissingFields(true)
-          ->setContinueOnNoEffect(true)
-          ->applyTransactions($dashboard, $xactions);
-
-        return id(new AphrontRedirectResponse())->setURI($dashboard_uri);
+        return id(new AphrontRedirectResponse())->setURI($redirect_uri);
       }
+    }
+
+    $panels = id(new PhabricatorDashboardPanelQuery())
+      ->setViewer($viewer)
+      ->withArchived(false)
+      ->execute();
+
+    if (!$panels) {
+      return $this->newDialog()
+        ->setTitle(pht('No Panels Exist Yet'))
+        ->appendParagraph(
+          pht(
+            'You have not created any dashboard panels yet, so you can not '.
+            'add an existing panel.'))
+        ->appendParagraph(
+          pht('Instead, add a new panel.'))
+        ->addCancelButton($redirect_uri);
+    }
+
+    $panel_options = array();
+    foreach ($panels as $panel) {
+      $panel_options[$panel->getID()] = pht(
+        '%s %s',
+        $panel->getMonogram(),
+        $panel->getName());
     }
 
     $form = id(new AphrontFormView())
       ->setUser($viewer)
+      ->addHiddenInput('column', $request->getInt('column'))
       ->appendRemarkupInstructions(
-        pht('Enter a panel monogram like `W123`.'))
+        pht('Choose a panel to add to this dashboard:'))
       ->appendChild(
-        id(new AphrontFormTextControl())
+        id(new AphrontFormSelectControl())
           ->setName('panel')
           ->setLabel(pht('Panel'))
           ->setValue($v_panel)
-          ->setError($e_panel));
+          ->setError($e_panel)
+          ->setOptions($panel_options));
 
     return $this->newDialog()
       ->setTitle(pht('Add Panel'))
       ->setErrors($errors)
       ->appendChild($form->buildLayoutView())
-      ->addCancelButton($dashboard_uri)
+      ->addCancelButton($redirect_uri)
       ->addSubmitButton(pht('Add Panel'));
   }
 

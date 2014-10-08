@@ -54,7 +54,8 @@ final class PHUITextExample extends PhabricatorUIExample {
           ->addClass(PHUI::TEXT_WHITE),
         id(new PHUITextView())
           ->setText($color9)
-          ->addClass(PHUI::TEXT_BLACK));
+          ->addClass(PHUI::TEXT_BLACK),
+      );
 
     $content2 =
       array(
@@ -66,7 +67,8 @@ final class PHUITextExample extends PhabricatorUIExample {
           ->addClass(PHUI::TEXT_UPPERCASE),
         id(new PHUITextView())
           ->setText($text3)
-          ->addClass(PHUI::TEXT_STRIKE));
+          ->addClass(PHUI::TEXT_STRIKE),
+      );
 
     $layout1 = id(new PHUIBoxView())
       ->appendChild($content)
@@ -99,7 +101,7 @@ final class PHUITextExample extends PhabricatorUIExample {
           $head1,
           $wrap1,
           $head2,
-          $wrap2
+          $wrap2,
         ));
-        }
+  }
 }

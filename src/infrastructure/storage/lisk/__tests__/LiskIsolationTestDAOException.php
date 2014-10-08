@@ -1,3 +1,3 @@
 <?php
 
-final class LiskIsolationTestDAOException extends Exception { }
+final class LiskIsolationTestDAOException extends Exception {}

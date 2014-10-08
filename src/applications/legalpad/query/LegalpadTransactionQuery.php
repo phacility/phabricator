@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group legalpad
- */
 final class LegalpadTransactionQuery
   extends PhabricatorApplicationTransactionQuery {
 

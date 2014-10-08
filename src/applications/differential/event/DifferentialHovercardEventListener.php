@@ -28,7 +28,7 @@ final class DifferentialHovercardEventListener
 
     $rev->loadRelationships();
     $reviewer_phids = $rev->getReviewers();
-    $e_task = PhabricatorEdgeConfig::TYPE_DREV_HAS_RELATED_TASK;
+    $e_task = DifferentialRevisionHasTaskEdgeType::EDGECONST;
     $edge_query = id(new PhabricatorEdgeQuery())
       ->withSourcePHIDs(array($phid))
       ->withEdgeTypes(
@@ -56,9 +56,6 @@ final class DifferentialHovercardEventListener
     $hovercard->addField(pht('Author'),
       $handles[$rev->getAuthorPHID()]->renderLink());
 
-    $hovercard->addField(pht('Date'),
-      phabricator_datetime($rev->getDateModified(), $viewer));
-
     $hovercard->addField(pht('Reviewers'),
       implode_selected_handle_links(', ', $handles, $reviewer_phids));
 
@@ -69,7 +66,9 @@ final class DifferentialHovercardEventListener
 
     if ($rev->getSummary()) {
       $hovercard->addField(pht('Summary'),
-        phutil_utf8_shorten($rev->getSummary(), 120));
+        id(new PhutilUTF8StringTruncator())
+        ->setMaximumGlyphs(120)
+        ->truncateString($rev->getSummary()));
     }
 
     $hovercard->addTag(

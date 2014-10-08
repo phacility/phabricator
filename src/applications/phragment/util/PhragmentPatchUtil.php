@@ -2,7 +2,7 @@
 
 final class PhragmentPatchUtil extends Phobject {
 
-  const EMPTY_HASH = "0000000000000000000000000000000000000000";
+  const EMPTY_HASH = '0000000000000000000000000000000000000000';
 
   /**
    * Calculate the DiffMatchPatch patch between two Phabricator files.
@@ -26,8 +26,8 @@ final class PhragmentPatchUtil extends Phobject {
       $new_hash = $new->getContentHash();
     }
 
-    $old_content = "";
-    $new_content = "";
+    $old_content = '';
+    $new_content = '';
 
     if ($old_hash === $new_hash) {
       return null;
@@ -36,13 +36,13 @@ final class PhragmentPatchUtil extends Phobject {
     if ($old_hash !== self::EMPTY_HASH) {
       $old_content = $old->loadFileData();
     } else {
-      $old_content = "";
+      $old_content = '';
     }
 
     if ($new_hash !== self::EMPTY_HASH) {
       $new_content = $new->loadFileData();
     } else {
-      $new_content = "";
+      $new_content = '';
     }
 
     $dmp = new diff_match_patch();

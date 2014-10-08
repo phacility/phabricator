@@ -6,6 +6,20 @@ final class DifferentialDraft extends DifferentialDAO {
   protected $authorPHID;
   protected $draftKey;
 
+  public function getConfiguration() {
+    return array(
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'draftKey' => 'text64',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_unique' => array(
+          'columns' => array('objectPHID', 'authorPHID', 'draftKey'),
+          'unique' => true,
+        ),
+      ),
+    )  + parent::getConfiguration();
+  }
+
   public static function markHasDraft(
     $author_phid,
     $object_phid,
@@ -16,7 +30,7 @@ final class DifferentialDraft extends DifferentialDAO {
         ->setAuthorPHID($author_phid)
         ->setDraftKey($draft_key)
         ->save();
-    } catch (AphrontQueryDuplicateKeyException $ex) {
+    } catch (AphrontDuplicateKeyQueryException $ex) {
       // no worries
     }
   }

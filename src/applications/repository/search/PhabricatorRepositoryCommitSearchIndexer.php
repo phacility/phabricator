@@ -22,15 +22,15 @@ final class PhabricatorRepositoryCommitSearchIndexer
       ->withIDs(array($commit->getRepositoryID()))
       ->executeOne();
     if (!$repository) {
-      throw new Exception("No such repository!");
+      throw new Exception('No such repository!');
     }
 
     $title = 'r'.$repository->getCallsign().$commit->getCommitIdentifier().
-      " ".$commit_data->getSummary();
+      ' '.$commit_data->getSummary();
 
     $doc = new PhabricatorSearchAbstractDocument();
     $doc->setPHID($commit->getPHID());
-    $doc->setDocumentType(PhabricatorRepositoryPHIDTypeCommit::TYPECONST);
+    $doc->setDocumentType(PhabricatorRepositoryCommitPHIDType::TYPECONST);
     $doc->setDocumentCreated($date_created);
     $doc->setDocumentModified($date_created);
     $doc->setDocumentTitle($title);
@@ -43,7 +43,7 @@ final class PhabricatorRepositoryCommitSearchIndexer
       $doc->addRelationship(
         PhabricatorSearchRelationship::RELATIONSHIP_AUTHOR,
         $author_phid,
-        PhabricatorPeoplePHIDTypeUser::TYPECONST,
+        PhabricatorPeopleUserPHIDType::TYPECONST,
         $date_created);
     }
 
@@ -55,7 +55,7 @@ final class PhabricatorRepositoryCommitSearchIndexer
         $doc->addRelationship(
           PhabricatorSearchRelationship::RELATIONSHIP_PROJECT,
           $project_phid,
-          PhabricatorProjectPHIDTypeProject::TYPECONST,
+          PhabricatorProjectProjectPHIDType::TYPECONST,
           $date_created);
       }
     }
@@ -63,19 +63,13 @@ final class PhabricatorRepositoryCommitSearchIndexer
     $doc->addRelationship(
       PhabricatorSearchRelationship::RELATIONSHIP_REPOSITORY,
       $repository->getPHID(),
-      PhabricatorRepositoryPHIDTypeRepository::TYPECONST,
+      PhabricatorRepositoryRepositoryPHIDType::TYPECONST,
       $date_created);
 
-    $comments = id(new PhabricatorAuditComment())->loadAllWhere(
-      'targetPHID = %s',
-      $commit->getPHID());
-    foreach ($comments as $comment) {
-      if (strlen($comment->getContent())) {
-        $doc->addField(
-          PhabricatorSearchField::FIELD_COMMENT,
-          $comment->getContent());
-      }
-    }
+    $this->indexTransactions(
+      $doc,
+      new PhabricatorAuditTransactionQuery(),
+      array($commit->getPHID()));
 
     return $doc;
   }

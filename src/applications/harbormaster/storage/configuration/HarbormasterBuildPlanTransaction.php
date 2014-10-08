@@ -11,11 +11,7 @@ final class HarbormasterBuildPlanTransaction
   }
 
   public function getApplicationTransactionType() {
-    return HarbormasterPHIDTypeBuildPlan::TYPECONST;
-  }
-
-  public function getApplicationTransactionCommentObject() {
-    return new HarbormasterBuildPlanTransactionComment();
+    return HarbormasterBuildPlanPHIDType::TYPECONST;
   }
 
   public function getIcon() {

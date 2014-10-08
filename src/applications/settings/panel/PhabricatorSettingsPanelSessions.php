@@ -25,6 +25,11 @@ final class PhabricatorSettingsPanelSessions
     $accounts = id(new PhabricatorExternalAccountQuery())
       ->setViewer($viewer)
       ->withUserPHIDs(array($viewer->getPHID()))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
       ->execute();
 
     $identity_phids = mpull($accounts, 'getPHID');
@@ -73,7 +78,7 @@ final class PhabricatorSettingsPanelSessions
         substr($session->getSessionKey(), 0, 6),
         $session->getType(),
         ($hisec > 0)
-          ? phabricator_format_relative_time($hisec)
+          ? phutil_format_relative_time($hisec)
           : null,
         phabricator_datetime($session->getSessionStart(), $viewer),
         phabricator_date($session->getSessionExpires(), $viewer),
@@ -107,8 +112,7 @@ final class PhabricatorSettingsPanelSessions
 
 
     $terminate_icon = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-      ->setSpriteIcon('warning');
+      ->setIconFont('fa-exclamation-triangle');
     $terminate_button = id(new PHUIButtonView())
       ->setText(pht('Terminate All Sessions'))
       ->setHref('/auth/session/terminate/all/')
@@ -123,8 +127,7 @@ final class PhabricatorSettingsPanelSessions
     $hisec = ($viewer->getSession()->getHighSecurityUntil() - time());
     if ($hisec > 0) {
       $hisec_icon = id(new PHUIIconView())
-        ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-        ->setSpriteIcon('lock');
+        ->setIconFont('fa-lock');
       $hisec_button = id(new PHUIButtonView())
         ->setText(pht('Leave High Security'))
         ->setHref('/auth/session/downgrade/')

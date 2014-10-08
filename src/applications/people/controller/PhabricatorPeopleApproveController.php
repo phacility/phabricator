@@ -45,6 +45,7 @@ final class PhabricatorPeopleApproveController
         ->addTos(array($user->getPHID()))
         ->addCCs(array($admin->getPHID()))
         ->setSubject('[Phabricator] '.$title)
+        ->setForceDelivery(true)
         ->setBody($body)
         ->saveAndSend();
 

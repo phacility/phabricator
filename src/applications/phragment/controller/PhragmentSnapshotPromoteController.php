@@ -25,7 +25,8 @@ final class PhragmentSnapshotPromoteController extends PhragmentController {
         ->setViewer($viewer)
         ->requireCapabilities(array(
           PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT))
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
         ->withPaths(array($this->dblob))
         ->executeOne();
       if ($this->targetFragment === null) {
@@ -45,7 +46,8 @@ final class PhragmentSnapshotPromoteController extends PhragmentController {
         ->setViewer($viewer)
         ->requireCapabilities(array(
           PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT))
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
         ->withIDs(array($this->id))
         ->executeOne();
       if ($this->targetSnapshot === null) {
@@ -55,7 +57,8 @@ final class PhragmentSnapshotPromoteController extends PhragmentController {
       $this->snapshots = id(new PhragmentSnapshotQuery())
         ->setViewer($viewer)
         ->withPrimaryFragmentPHIDs(array(
-          $this->targetSnapshot->getPrimaryFragmentPHID()))
+          $this->targetSnapshot->getPrimaryFragmentPHID(),
+        ))
         ->execute();
     }
 
@@ -80,7 +83,7 @@ final class PhragmentSnapshotPromoteController extends PhragmentController {
         id(new AphrontDialogView())
           ->setTitle(pht('No snapshots to promote'))
           ->appendParagraph(pht(
-            "There are no snapshots available to promote."))
+            'There are no snapshots available to promote.'))
           ->setUser($request->getUser())
           ->addCancelButton(pht('Cancel')));
     }
@@ -130,7 +133,7 @@ final class PhragmentSnapshotPromoteController extends PhragmentController {
               ->save();
           }
         } else {
-          // The user is promoting the snapshot to another snapshot.  We just
+          // The user is promoting the snapshot to another snapshot. We just
           // copy the other snapshot's child entries and change the snapshot
           // PHID to make it identical.
           $children = id(new PhragmentSnapshotChildQuery())
@@ -172,7 +175,7 @@ final class PhragmentSnapshotPromoteController extends PhragmentController {
     if ($this->id === null) {
       // The user is promoting a snapshot to the latest version.
       $dialog->appendParagraph(pht(
-        "Select the snapshot you want to promote to the latest version:"));
+        'Select the snapshot you want to promote to the latest version:'));
     } else {
       // The user is promoting a snapshot to another snapshot.
       $dialog->appendParagraph(pht(

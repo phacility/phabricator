@@ -78,7 +78,7 @@ final class DiffusionSubversionWireProtocolTestCase
             'value' => 'duck',
           ),
           array(
-            'type'=> 'string',
+            'type' => 'string',
             'value' => 'quack',
           ),
         ),

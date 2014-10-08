@@ -45,7 +45,8 @@ final class HarbormasterUploadArtifactBuildStepImplementation
       $settings['name'],
       HarbormasterBuildArtifact::TYPE_FILE);
     $artifact->setArtifactData(array(
-      'filePHID' => $file->getPHID()));
+      'filePHID' => $file->getPHID(),
+    ));
     $artifact->save();
   }
 

@@ -35,8 +35,7 @@ final class PhrictionActionMenuEventListener extends PhabricatorEventListener {
     $href = '/w/projects/'.$slug;
 
     return id(new PhabricatorActionView())
-      ->setIcon('phriction-dark')
-      ->setIconSheet(PHUIIconView::SPRITE_APPS)
+      ->setIcon('fa-book')
       ->setName(pht('View Wiki'))
       ->setHref($href);
   }

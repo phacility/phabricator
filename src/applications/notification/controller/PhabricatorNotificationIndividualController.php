@@ -9,7 +9,7 @@ final class PhabricatorNotificationIndividualController
 
     $stories = id(new PhabricatorNotificationQuery())
       ->setViewer($user)
-      ->setUserPHID($user->getPHID())
+      ->withUserPHIDs(array($user->getPHID()))
       ->withKeys(array($request->getStr('key')))
       ->execute();
 

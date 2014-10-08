@@ -4,13 +4,30 @@ final class PHUIStatusItemView extends AphrontTagView {
 
   private $icon;
   private $iconLabel;
+  private $iconColor;
   private $target;
   private $note;
   private $highlighted;
 
-  public function setIcon($icon, $label = null) {
+  const ICON_ACCEPT = 'fa-check-circle';
+  const ICON_REJECT = 'fa-times-circle';
+  const ICON_LEFT = 'fa-chevron-circle-left';
+  const ICON_RIGHT = 'fa-chevron-circle-right';
+  const ICON_UP = 'fa-chevron-circle-up';
+  const ICON_DOWN = 'fa-chevron-circle-down';
+  const ICON_QUESTION = 'fa-question-circle';
+  const ICON_WARNING = 'fa-exclamation-circle';
+  const ICON_INFO = 'fa-info-circle';
+  const ICON_ADD = 'fa-plus-circle';
+  const ICON_MINUS = 'fa-minus-circle';
+  const ICON_OPEN = 'fa-circle-o';
+  const ICON_CLOCK = 'fa-clock-o';
+
+  /* render_textarea */
+  public function setIcon($icon, $color = null, $label = null) {
     $this->icon = $icon;
     $this->iconLabel = $label;
+    $this->iconColor = $color;
     return $this;
   }
 
@@ -53,8 +70,7 @@ final class PHUIStatusItemView extends AphrontTagView {
     $icon = null;
     if ($this->icon) {
       $icon = id(new PHUIIconView())
-        ->setSpriteSheet(PHUIIconView::SPRITE_STATUS)
-        ->setSpriteIcon($this->icon);
+        ->setIconFont($this->icon.' '.$this->iconColor);
 
       if ($this->iconLabel) {
         Javelin::initBehavior('phabricator-tooltips');

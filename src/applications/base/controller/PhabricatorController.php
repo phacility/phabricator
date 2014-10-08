@@ -20,12 +20,37 @@ abstract class PhabricatorController extends AphrontController {
     return false;
   }
 
+  public function shouldAllowPartialSessions() {
+    return false;
+  }
+
   public function shouldRequireEmailVerification() {
     return PhabricatorUserEmail::isEmailVerificationRequired();
   }
 
   public function shouldAllowRestrictedParameter($parameter_name) {
     return false;
+  }
+
+  public function shouldRequireMultiFactorEnrollment() {
+    if (!$this->shouldRequireLogin()) {
+      return false;
+    }
+
+    if (!$this->shouldRequireEnabledUser()) {
+      return false;
+    }
+
+    if ($this->shouldAllowPartialSessions()) {
+      return false;
+    }
+
+    $user = $this->getRequest()->getUser();
+    if (!$user->getIsStandardUser()) {
+      return false;
+    }
+
+    return PhabricatorEnv::getEnvConfig('security.require-multi-factor-auth');
   }
 
   public function willBeginExecution() {
@@ -53,7 +78,8 @@ abstract class PhabricatorController extends AphrontController {
         // session. This is used to provide CSRF protection to logged-out users.
         $phsid = $session_engine->establishSession(
           PhabricatorAuthSession::TYPE_WEB,
-          null);
+          null,
+          $partial = false);
 
         // This may be a resource request, in which case we just don't set
         // the cookie.
@@ -133,13 +159,38 @@ abstract class PhabricatorController extends AphrontController {
       return $this->delegateToController($checker_controller);
     }
 
+    $auth_class = 'PhabricatorAuthApplication';
+    $auth_application = PhabricatorApplication::getByClass($auth_class);
+
+    // Require partial sessions to finish login before doing anything.
+    if (!$this->shouldAllowPartialSessions()) {
+      if ($user->hasSession() &&
+          $user->getSession()->getIsPartial()) {
+        $login_controller = new PhabricatorAuthFinishController($request);
+        $this->setCurrentApplication($auth_application);
+        return $this->delegateToController($login_controller);
+      }
+    }
+
+    // Check if the user needs to configure MFA.
+    $need_mfa = $this->shouldRequireMultiFactorEnrollment();
+    $have_mfa = $user->getIsEnrolledInMultiFactor();
+    if ($need_mfa && !$have_mfa) {
+      // Check if the cache is just out of date. Otherwise, roadblock the user
+      // and require MFA enrollment.
+      $user->updateMultiFactorEnrollment();
+      if (!$user->getIsEnrolledInMultiFactor()) {
+        $mfa_controller = new PhabricatorAuthNeedsMultiFactorController(
+          $request);
+        $this->setCurrentApplication($auth_application);
+        return $this->delegateToController($mfa_controller);
+      }
+    }
+
     if ($this->shouldRequireLogin()) {
       // This actually means we need either:
       //   - a valid user, or a public controller; and
       //   - permission to see the application.
-
-      $auth_class = 'PhabricatorApplicationAuth';
-      $auth_application = PhabricatorApplication::getByClass($auth_class);
 
       $allow_public = $this->shouldAllowPublic() &&
                       PhabricatorEnv::getEnvConfig('policy.allow-public');
@@ -180,7 +231,6 @@ abstract class PhabricatorController extends AphrontController {
     if ($this->shouldRequireAdmin() && !$user->getIsAdmin()) {
       return new Aphront403Response();
     }
-
   }
 
   public function buildStandardPageView() {
@@ -200,7 +250,7 @@ abstract class PhabricatorController extends AphrontController {
 
   public function getApplicationURI($path = '') {
     if (!$this->getCurrentApplication()) {
-      throw new Exception("No application!");
+      throw new Exception('No application!');
     }
     return $this->getCurrentApplication()->getApplicationURI($path);
   }
@@ -242,10 +292,11 @@ abstract class PhabricatorController extends AphrontController {
       }
     }
 
-    if (idx($options, 'device')) {
+    if (idx($options, 'device', true)) {
       $page->setDeviceReady(true);
     }
 
+    $page->setShowFooter(idx($options, 'showFooter', true));
     $page->setShowChrome(idx($options, 'chrome', true));
 
     $application_menu = $this->buildApplicationMenu();
@@ -268,12 +319,11 @@ abstract class PhabricatorController extends AphrontController {
 
     $seen = array();
     while ($response instanceof AphrontProxyResponse) {
-
       $hash = spl_object_hash($response);
       if (isset($seen[$hash])) {
         $seen[] = get_class($response);
         throw new Exception(
-          "Cycle while reducing proxy responses: ".
+          'Cycle while reducing proxy responses: '.
           implode(' -> ', $seen));
       }
       $seen[$hash] = get_class($response);
@@ -299,6 +349,7 @@ abstract class PhabricatorController extends AphrontController {
         $view = id(new PhabricatorStandardPageView())
           ->setRequest($request)
           ->setController($this)
+          ->setDeviceReady(true)
           ->setTitle($title)
           ->appendChild($page_content);
 
@@ -351,7 +402,6 @@ abstract class PhabricatorController extends AphrontController {
       ->execute();
   }
 
-
   /**
    * Render a list of links to handles, identified by PHIDs. The handles must
    * already be loaded.
@@ -381,7 +431,6 @@ abstract class PhabricatorController extends AphrontController {
   }
 
   protected function buildApplicationCrumbs() {
-
     $crumbs = array();
 
     $application = $this->getCurrentApplication();
@@ -393,6 +442,7 @@ abstract class PhabricatorController extends AphrontController {
 
       $crumbs[] = id(new PhabricatorCrumbView())
         ->setHref($this->getApplicationURI())
+        ->setAural($application->getName())
         ->setIcon($sprite);
     }
 
@@ -426,15 +476,14 @@ abstract class PhabricatorController extends AphrontController {
     $can_act = $this->hasApplicationCapability($capability);
     if ($can_act) {
       $message = $positive_message;
-      $icon_name = 'enable-grey';
+      $icon_name = 'fa-play-circle-o lightgreytext';
     } else {
       $message = $negative_message;
-      $icon_name = 'lock';
+      $icon_name = 'fa-lock';
     }
 
     $icon = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-      ->setSpriteIcon($icon_name);
+      ->setIconFont($icon_name);
 
     require_celerity_resource('policy-css');
 
@@ -463,7 +512,6 @@ abstract class PhabricatorController extends AphrontController {
   public function getDefaultResourceSource() {
     return 'phabricator';
   }
-
 
   /**
    * Create a new @{class:AphrontDialogView} with defaults filled in.

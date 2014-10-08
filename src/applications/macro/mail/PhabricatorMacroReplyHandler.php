@@ -4,7 +4,7 @@ final class PhabricatorMacroReplyHandler extends PhabricatorMailReplyHandler {
 
   public function validateMailReceiver($mail_receiver) {
     if (!($mail_receiver instanceof PhabricatorFileImageMacro)) {
-      throw new Exception("Mail receiver is not a PhabricatorFileImageMacro!");
+      throw new Exception('Mail receiver is not a PhabricatorFileImageMacro!');
     }
   }
 
@@ -26,7 +26,7 @@ final class PhabricatorMacroReplyHandler extends PhabricatorMailReplyHandler {
     if ($this->supportsReplies()) {
       // TODO: Implement.
       return null;
-      return pht("Reply to comment.");
+      return pht('Reply to comment.');
     } else {
       return null;
     }

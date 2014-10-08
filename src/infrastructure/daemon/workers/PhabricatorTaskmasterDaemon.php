@@ -40,7 +40,7 @@ final class PhabricatorTaskmasterDaemon extends PhabricatorDaemon {
       }
 
       $this->sleep($sleep);
-    } while (true);
+    } while (!$this->shouldExit());
   }
 
 }

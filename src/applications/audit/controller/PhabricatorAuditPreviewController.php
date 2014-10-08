@@ -18,59 +18,71 @@ final class PhabricatorAuditPreviewController
       return new Aphront404Response();
     }
 
+    $xactions = array();
+
     $action = $request->getStr('action');
+    if ($action != PhabricatorAuditActionConstants::COMMENT) {
+      $action_xaction = id(new PhabricatorAuditTransaction())
+        ->setAuthorPHID($user->getPHID())
+        ->setObjectPHID($commit->getPHID())
+        ->setTransactionType(PhabricatorAuditActionConstants::ACTION)
+        ->setNewValue($action);
 
-    $comment = id(new PhabricatorAuditComment())
-      ->setActorPHID($user->getPHID())
-      ->setTargetPHID($commit->getPHID())
-      ->setAction($action)
-      ->setContent($request->getStr('content'));
+      $auditors = $request->getStrList('auditors');
+      if ($action == PhabricatorAuditActionConstants::ADD_AUDITORS &&
+        $auditors) {
+        $action_xaction->setTransactionType($action);
+        $action_xaction->setNewValue(array_fuse($auditors));
+      }
 
-    $phids = array(
-      $user->getPHID(),
-      $commit->getPHID(),
-    );
+      $ccs = $request->getStrList('ccs');
+      if ($action == PhabricatorAuditActionConstants::ADD_CCS && $ccs) {
+        $action_xaction->setTransactionType(
+          PhabricatorTransactions::TYPE_SUBSCRIBERS);
 
-    $auditors = $request->getStrList('auditors');
-    if ($action == PhabricatorAuditActionConstants::ADD_AUDITORS && $auditors) {
-      $comment->setMetadata(array(
-        PhabricatorAuditComment::METADATA_ADDED_AUDITORS => $auditors));
-      $phids = array_merge($phids, $auditors);
+        // NOTE: This doesn't get processed before use, so just provide fake
+        // values.
+        $action_xaction->setOldValue(array());
+        $action_xaction->setNewValue($ccs);
+      }
+
+      $xactions[] = $action_xaction;
     }
 
-    $ccs = $request->getStrList('ccs');
-    if ($action == PhabricatorAuditActionConstants::ADD_CCS && $ccs) {
-      $comment->setMetadata(array(
-        PhabricatorAuditComment::METADATA_ADDED_CCS => $ccs));
-      $phids = array_merge($phids, $ccs);
+    $content = $request->getStr('content');
+    if (strlen($content)) {
+      $xactions[] = id(new PhabricatorAuditTransaction())
+        ->setAuthorPHID($user->getPHID())
+        ->setObjectPHID($commit->getPHID())
+        ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
+        ->attachComment(
+          id(new PhabricatorAuditTransactionComment())
+            ->setContent($content));
     }
 
-    $engine = new PhabricatorMarkupEngine();
-    $engine->setViewer($user);
-    $engine->addObject(
-      $comment,
-      PhabricatorAuditComment::MARKUP_FIELD_BODY);
-    $engine->process();
-
-    $view = id(new DiffusionCommentView())
-      ->setMarkupEngine($engine)
-      ->setUser($user)
-      ->setComment($comment)
-      ->setIsPreview(true);
-
-    $phids = array_merge($phids, $view->getRequiredHandlePHIDs());
-
+    $phids = array();
+    foreach ($xactions as $xaction) {
+      $phids[] = $xaction->getRequiredHandlePHIDs();
+    }
+    $phids = array_mergev($phids);
     $handles = $this->loadViewerHandles($phids);
-    $view->setHandles($handles);
+    foreach ($xactions as $xaction) {
+      $xaction->setHandles($handles);
+    }
+
+    $view = id(new PhabricatorAuditTransactionView())
+      ->setIsPreview(true)
+      ->setUser($user)
+      ->setObjectPHID($commit->getPHID())
+      ->setTransactions($xactions);
 
     id(new PhabricatorDraft())
-      ->setAuthorPHID($comment->getActorPHID())
+      ->setAuthorPHID($user->getPHID())
       ->setDraftKey('diffusion-audit-'.$this->id)
-      ->setDraft($comment->getContent())
+      ->setDraft($content)
       ->replaceOrDelete();
 
-    return id(new AphrontAjaxResponse())
-      ->setContent($view->render());
+    return id(new AphrontAjaxResponse())->setContent(hsprintf('%s', $view));
   }
 
 }

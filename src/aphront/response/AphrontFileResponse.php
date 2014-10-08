@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group aphront
- */
 final class AphrontFileResponse extends AphrontResponse {
 
   private $content;
@@ -85,7 +82,8 @@ final class AphrontFileResponse extends AphrontResponse {
     if ($this->allowOrigins) {
       $headers[] = array(
         'Access-Control-Allow-Origin',
-        implode(',', $this->allowOrigins));
+        implode(',', $this->allowOrigins),
+      );
     }
 
     $headers = array_merge(parent::getHeaders(), $headers);

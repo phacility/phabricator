@@ -51,7 +51,8 @@ final class AphrontProgressBarView extends AphrontBarView {
         phutil_tag(
           'span',
           array(),
-          $this->getCaption())));
+          $this->getCaption()),
+        ));
   }
 
 }

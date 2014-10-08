@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phame
- */
 final class PhamePostView extends AphrontView {
 
   private $post;
@@ -150,7 +147,7 @@ final class PhamePostView extends AphrontView {
   }
 
   private function renderFacebookComments() {
-    $fb_id = PhabricatorAuthProviderOAuthFacebook::getFacebookApplicationID();
+    $fb_id = PhabricatorFacebookAuthProvider::getFacebookApplicationID();
     if (!$fb_id) {
       return null;
     }
@@ -206,7 +203,7 @@ final class PhamePostView extends AphrontView {
 
     $disqus_thread = phutil_tag('div',
       array(
-        'id' => 'disqus_thread'
+        'id' => 'disqus_thread',
       ));
 
     // protip - try some  var disqus_developer = 1; action to test locally

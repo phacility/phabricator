@@ -14,13 +14,22 @@ final class PhluxVariable extends PhluxDAO
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
-        'variableValue' => self::SERIALIZATION_JSON
+        'variableValue' => self::SERIALIZATION_JSON,
+      ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'variableKey' => 'text64',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_key' => array(
+          'columns' => array('variableKey'),
+          'unique' => true,
+        ),
       ),
     ) + parent::getConfiguration();
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(PhluxPHIDTypeVariable::TYPECONST);
+    return PhabricatorPHID::generateNewPHID(PhluxVariablePHIDType::TYPECONST);
   }
 
 

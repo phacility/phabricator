@@ -21,15 +21,15 @@ if ($is_first_user) {
     "which gives you more help setting up your install. If you create an ".
     "account with this script instead, you will skip the setup help and you ".
     "will not be able to access it later.");
-  if (!phutil_console_confirm(pht("Skip easy setup and create account?"))) {
-    echo pht("Cancelled.")."\n";
+  if (!phutil_console_confirm(pht('Skip easy setup and create account?'))) {
+    echo pht('Cancelled.')."\n";
     exit(1);
   }
 }
 
-echo "Enter a username to create a new account or edit an existing account.";
+echo 'Enter a username to create a new account or edit an existing account.';
 
-$username = phutil_console_prompt("Enter a username:");
+$username = phutil_console_prompt('Enter a username:');
 if (!strlen($username)) {
   echo "Cancelled.\n";
   exit(1);
@@ -95,7 +95,7 @@ $user->setRealName($realname);
 $create_email = null;
 if ($is_new) {
   do {
-    $email = phutil_console_prompt("Enter user email address:");
+    $email = phutil_console_prompt('Enter user email address:');
     $duplicate = id(new PhabricatorUserEmail())->loadOneWhere(
       'address = %s',
       $email);
@@ -115,7 +115,7 @@ $changed_pass = false;
 // it.
 phutil_passthru('stty -echo');
 $password = phutil_console_prompt(
-  "Enter a password for this user [blank to leave unchanged]:");
+  'Enter a password for this user [blank to leave unchanged]:');
 phutil_passthru('stty echo');
 if (strlen($password)) {
   $changed_pass = $password;
@@ -183,7 +183,7 @@ printf(
 
 echo "\n";
 
-if (!phutil_console_confirm("Save these changes?", $default_no = false)) {
+if (!phutil_console_confirm('Save these changes?', $default_no = false)) {
   echo "Cancelled.\n";
   exit(1);
 }

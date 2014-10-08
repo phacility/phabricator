@@ -44,7 +44,6 @@ final class PhabricatorFeedDetailController extends PhabricatorFeedController {
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

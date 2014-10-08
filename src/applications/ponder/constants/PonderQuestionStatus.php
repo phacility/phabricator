@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group ponder
- */
 final class PonderQuestionStatus extends PonderConstants {
 
   const STATUS_OPEN     = 0;

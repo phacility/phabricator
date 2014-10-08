@@ -4,8 +4,12 @@ final class PhabricatorProjectTransaction
   extends PhabricatorApplicationTransaction {
 
   const TYPE_NAME       = 'project:name';
+  const TYPE_SLUGS      = 'project:slugs';
   const TYPE_STATUS     = 'project:status';
   const TYPE_IMAGE      = 'project:image';
+  const TYPE_ICON       = 'project:icon';
+  const TYPE_COLOR      = 'project:color';
+  const TYPE_LOCKED     = 'project:locked';
 
   // NOTE: This is deprecated, members are just a normal edge now.
   const TYPE_MEMBERS    = 'project:members';
@@ -15,7 +19,7 @@ final class PhabricatorProjectTransaction
   }
 
   public function getApplicationTransactionType() {
-    return PhabricatorProjectPHIDTypeProject::TYPECONST;
+    return PhabricatorProjectProjectPHIDType::TYPECONST;
   }
 
   public function getRequiredHandlePHIDs() {
@@ -84,6 +88,56 @@ final class PhabricatorProjectTransaction
             $this->renderHandleLink($old),
             $this->renderHandleLink($new));
         }
+
+      case PhabricatorProjectTransaction::TYPE_ICON:
+        return pht(
+          '%s set this project\'s icon to %s.',
+          $author_handle,
+          PhabricatorProjectIcon::getLabel($new));
+
+      case PhabricatorProjectTransaction::TYPE_COLOR:
+        return pht(
+          '%s set this project\'s color to %s.',
+          $author_handle,
+          PHUITagView::getShadeName($new));
+
+      case PhabricatorProjectTransaction::TYPE_LOCKED:
+        if ($new) {
+          return pht(
+            '%s locked this project\'s membership.',
+            $author_handle);
+        } else {
+          return pht(
+            '%s unlocked this project\'s membership.',
+            $author_handle);
+        }
+
+      case PhabricatorProjectTransaction::TYPE_SLUGS:
+        $add = array_diff($new, $old);
+        $rem = array_diff($old, $new);
+
+        if ($add && $rem) {
+          return pht(
+            '%s changed project hashtag(s), added %d: %s; removed %d: %s',
+            $author_handle,
+            count($add),
+            $this->renderSlugList($add),
+            count($rem),
+            $this->renderSlugList($rem));
+        } else if ($add) {
+          return pht(
+            '%s added %d project hashtag(s): %s',
+            $author_handle,
+            count($add),
+            $this->renderSlugList($add));
+        } else if ($rem) {
+            return pht(
+              '%s removed %d project hashtag(s): %s',
+              $author_handle,
+              count($rem),
+              $this->renderSlugList($rem));
+        }
+
       case PhabricatorProjectTransaction::TYPE_MEMBERS:
         $add = array_diff($new, $old);
         $rem = array_diff($old, $new);
@@ -126,5 +180,8 @@ final class PhabricatorProjectTransaction
     return parent::getTitle();
   }
 
+  private function renderSlugList($slugs) {
+    return implode(', ', $slugs);
+  }
 
 }

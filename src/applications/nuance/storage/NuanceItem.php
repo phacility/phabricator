@@ -22,18 +22,37 @@ final class NuanceItem
       ->setDateNuanced(time())
       ->setStatus(NuanceItem::STATUS_OPEN);
   }
+
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
         'data' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'ownerPHID' => 'phid?',
+        'sourceLabel' => 'text255?',
+        'status' => 'uint32',
+        'mailKey' => 'bytes20',
+        'dateNuanced' => 'epoch',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_source' => array(
+          'columns' => array('sourcePHID', 'status', 'dateNuanced', 'id'),
+        ),
+        'key_owner' => array(
+          'columns' => array('ownerPHID', 'status', 'dateNuanced', 'id'),
+        ),
+        'key_contacter' => array(
+          'columns' => array('requestorPHID', 'status', 'dateNuanced', 'id'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      NuancePHIDTypeItem::TYPECONST);
+      NuanceItemPHIDType::TYPECONST);
   }
 
   public function save() {

@@ -3,6 +3,14 @@
 final class PhabricatorCountdownSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Countdowns');
+  }
+
+  public function getApplicationClassName() {
+    return 'PhabricatorCountdownApplication';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
     $saved->setParameter(
@@ -43,7 +51,7 @@ final class PhabricatorCountdownSearchEngine
     $form
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/users/')
+          ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('authors')
           ->setLabel(pht('Authors'))
           ->setValue($author_handles))
@@ -54,7 +62,6 @@ final class PhabricatorCountdownSearchEngine
             1,
             pht('Show only countdowns that are still counting down.'),
             $upcoming));
-
   }
 
   protected function getURI($path) {
@@ -75,7 +82,6 @@ final class PhabricatorCountdownSearchEngine
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
-
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
 
@@ -91,6 +97,54 @@ final class PhabricatorCountdownSearchEngine
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
+  }
+
+  protected function getRequiredHandlePHIDsForResultList(
+    array $countdowns,
+    PhabricatorSavedQuery $query) {
+
+    return mpull($countdowns, 'getAuthorPHID');
+  }
+
+  protected function renderResultList(
+    array $countdowns,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+
+    assert_instances_of($countdowns, 'PhabricatorCountdown');
+
+    $viewer = $this->requireViewer();
+
+    $list = new PHUIObjectItemListView();
+    $list->setUser($viewer);
+    foreach ($countdowns as $countdown) {
+      $id = $countdown->getID();
+
+      $item = id(new PHUIObjectItemView())
+        ->setObjectName("C{$id}")
+        ->setHeader($countdown->getTitle())
+        ->setHref($this->getApplicationURI("{$id}/"))
+        ->addByline(
+          pht(
+            'Created by %s',
+            $handles[$countdown->getAuthorPHID()]->renderLink()));
+
+      $epoch = $countdown->getEpoch();
+      if ($epoch >= time()) {
+        $item->addIcon(
+          'none',
+          pht('Ends %s', phabricator_datetime($epoch, $viewer)));
+      } else {
+        $item->addIcon(
+          'delete',
+          pht('Ended %s', phabricator_datetime($epoch, $viewer)));
+        $item->setDisabled(true);
+      }
+
+      $list->addItem($item);
+    }
+
+    return $list;
   }
 
 }

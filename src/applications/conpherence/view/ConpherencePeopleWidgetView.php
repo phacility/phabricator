@@ -1,7 +1,5 @@
 <?php
-/**
- * @group conpherence
- */
+
 final class ConpherencePeopleWidgetView extends ConpherenceWidgetView {
 
   public function render() {
@@ -27,14 +25,14 @@ final class ConpherencePeopleWidgetView extends ConpherenceWidgetView {
             'meta' => array(
               'remove_person' => $handle->getPHID(),
               'action' => 'remove_person',
-            )
+            ),
           ),
           hsprintf('<span class="close-icon">&times;</span>'));
       }
       $body[] = phutil_tag(
         'div',
         array(
-          'class' => 'person-entry grouped'
+          'class' => 'person-entry grouped',
         ),
         array(
           phutil_tag(
@@ -45,13 +43,15 @@ final class ConpherencePeopleWidgetView extends ConpherenceWidgetView {
             phutil_tag(
               'img',
               array(
-                'src' => $handle->getImageURI()
+                'src' => $handle->getImageURI(),
               ),
               '')),
           $handle->renderLink(),
-          $remove_html));
+          $remove_html,
+        ));
     }
 
     return $body;
   }
+
 }

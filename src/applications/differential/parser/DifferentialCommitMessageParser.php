@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Parses commit messages (containing relaively freeform text with textual
+ * Parses commit messages (containing relatively freeform text with textual
  * field labels) into a dictionary of fields.
  *
  *   $parser = id(new DifferentialCommitMessageParser())
@@ -141,7 +141,11 @@ final class DifferentialCommitMessageParser {
     if (isset($fields[$key_title])) {
       $terminal = '...';
       $title = $fields[$key_title];
-      $short = phutil_utf8_shorten($title, 250, $terminal);
+      $short = id(new PhutilUTF8StringTruncator())
+        ->setMaximumGlyphs(250)
+        ->setTerminator($terminal)
+        ->truncateString($title);
+
       if ($short != $title) {
 
         // If we shortened the title, split the rest into the summary, so

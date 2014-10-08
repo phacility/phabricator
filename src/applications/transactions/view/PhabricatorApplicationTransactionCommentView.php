@@ -92,8 +92,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
             'a',
             array(
               'class' => 'login-to-comment button',
-              'sigil' => 'workflow',
-              'href' => $uri
+              'href' => $uri,
             ),
             pht('Login to Comment')));
     }
@@ -124,9 +123,6 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
         'showPreview'   => $this->getShowPreview(),
 
         'actionURI'     => $this->getAction(),
-        'draftKey'      => $this->getDraft()
-          ? $this->getDraft()->getDraftKey()
-          : null,
       ));
 
     $comment_box = id(new PHUIObjectBoxView())
@@ -146,12 +142,14 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
       '');
 
     $draft_comment = '';
+    $draft_key = null;
     if ($this->getDraft()) {
       $draft_comment = $this->getDraft()->getDraft();
+      $draft_key = $this->getDraft()->getDraftKey();
     }
 
     if (!$this->getObjectPHID()) {
-      throw new Exception("Call setObjectPHID() before render()!");
+      throw new Exception('Call setObjectPHID() before render()!');
     }
 
     return id(new AphrontFormView())
@@ -164,6 +162,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
         ))
       ->setAction($this->getAction())
       ->setID($this->getFormID())
+      ->addHiddenInput('__draft__', $draft_key)
       ->appendChild(
         id(new PhabricatorRemarkupControl())
           ->setID($this->getCommentID())

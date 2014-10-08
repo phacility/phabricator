@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phame
- */
 final class PhamePostUnpublishController extends PhameController {
 
   private $id;
@@ -51,4 +48,5 @@ final class PhamePostUnpublishController extends PhameController {
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }
+
 }

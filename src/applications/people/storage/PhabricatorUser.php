@@ -1,11 +1,15 @@
 <?php
 
+/**
+ * @task factors  Multi-Factor Authentication
+ */
 final class PhabricatorUser
   extends PhabricatorUserDAO
   implements
     PhutilPerson,
     PhabricatorPolicyInterface,
-    PhabricatorCustomFieldInterface {
+    PhabricatorCustomFieldInterface,
+    PhabricatorDestructibleInterface {
 
   const SESSION_TABLE = 'phabricator_session';
   const NAMETOKEN_TABLE = 'user_nametoken';
@@ -31,6 +35,7 @@ final class PhabricatorUser
   protected $isDisabled = 0;
   protected $isEmailVerified = 0;
   protected $isApproved = 0;
+  protected $isEnrolledInMultiFactor = 0;
 
   protected $accountSecret;
 
@@ -101,27 +106,64 @@ final class PhabricatorUser
    *              a normal session.
    */
   public function getIsStandardUser() {
-    $type_user = PhabricatorPeoplePHIDTypeUser::TYPECONST;
+    $type_user = PhabricatorPeopleUserPHIDType::TYPECONST;
     return $this->getPHID() && (phid_get_type($this->getPHID()) == $type_user);
   }
 
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
-      self::CONFIG_PARTIAL_OBJECTS => true,
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'userName' => 'text64',
+        'realName' => 'text128',
+        'sex' => 'text4?',
+        'translation' => 'text64?',
+        'passwordSalt' => 'text32?',
+        'passwordHash' => 'text128?',
+        'profileImagePHID' => 'phid?',
+        'consoleEnabled' => 'bool',
+        'consoleVisible' => 'bool',
+        'consoleTab' => 'text64',
+        'conduitCertificate' => 'text255',
+        'isSystemAgent' => 'bool',
+        'isDisabled' => 'bool',
+        'isAdmin' => 'bool',
+        'timezoneIdentifier' => 'text255',
+        'isEmailVerified' => 'uint32',
+        'isApproved' => 'uint32',
+        'accountSecret' => 'bytes64',
+        'isEnrolledInMultiFactor' => 'bool',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_phid' => null,
+        'phid' => array(
+          'columns' => array('phid'),
+          'unique' => true,
+        ),
+        'userName' => array(
+          'columns' => array('userName'),
+          'unique' => true,
+        ),
+        'realName' => array(
+          'columns' => array('realName'),
+        ),
+        'key_approved' => array(
+          'columns' => array('isApproved'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPeoplePHIDTypeUser::TYPECONST);
+      PhabricatorPeopleUserPHIDType::TYPECONST);
   }
 
   public function setPassword(PhutilOpaqueEnvelope $envelope) {
     if (!$this->getPHID()) {
       throw new Exception(
-        "You can not set a password for an unsaved user because their PHID ".
-        "is a salt component in the password hash.");
+        'You can not set a password for an unsaved user because their PHID '.
+        'is a salt component in the password hash.');
     }
 
     if (!strlen($envelope->openEnvelope())) {
@@ -137,6 +179,10 @@ final class PhabricatorUser
   // To satisfy PhutilPerson.
   public function getSex() {
     return $this->sex;
+  }
+
+  public function getMonogram() {
+    return '@'.$this->getUsername();
   }
 
   public function getTranslation() {
@@ -317,7 +363,7 @@ final class PhabricatorUser
           }
           break;
         default:
-          throw new Exception("Unknown CSRF token format!");
+          throw new Exception('Unknown CSRF token format!');
       }
     }
 
@@ -331,64 +377,14 @@ final class PhabricatorUser
       $vec = $this->getAlternateCSRFString();
     }
 
+    if ($this->hasSession()) {
+      $vec = $vec.$this->getSession()->getSessionKey();
+    }
+
     $time_block = floor($epoch / $frequency);
     $vec = $vec.$key.$time_block;
 
     return substr(PhabricatorHash::digest($vec), 0, $len);
-  }
-
-  private function generateEmailToken(
-    PhabricatorUserEmail $email,
-    $offset = 0) {
-
-    $key = implode(
-      '-',
-      array(
-        PhabricatorEnv::getEnvConfig('phabricator.csrf-key'),
-        $this->getPHID(),
-        $email->getVerificationCode(),
-      ));
-
-    return $this->generateToken(
-      time() + ($offset * self::EMAIL_CYCLE_FREQUENCY),
-      self::EMAIL_CYCLE_FREQUENCY,
-      $key,
-      self::EMAIL_TOKEN_LENGTH);
-  }
-
-  public function validateEmailToken(
-    PhabricatorUserEmail $email,
-    $token) {
-    for ($ii = -1; $ii <= 1; $ii++) {
-      $valid = $this->generateEmailToken($email, $ii);
-      if ($token == $valid) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  public function getEmailLoginURI(PhabricatorUserEmail $email = null) {
-    if (!$email) {
-      $email = $this->loadPrimaryEmail();
-      if (!$email) {
-        throw new Exception("User has no primary email!");
-      }
-    }
-    $token = $this->generateEmailToken($email);
-
-    $uri = '/login/etoken/'.$token.'/';
-    try {
-      $uri = PhabricatorEnv::getProductionURI($uri);
-    } catch (Exception $ex) {
-      // If a user runs `bin/auth recover` before configuring the base URI,
-      // just show the path. We don't have any way to figure out the domain.
-      // See T4132.
-    }
-
-    $uri = new PhutilURI($uri);
-
-    return $uri->alter('email', $email->getAddress());
   }
 
   public function attachUserProfile(PhabricatorUserProfile $profile) {
@@ -416,7 +412,7 @@ final class PhabricatorUser
   public function loadPrimaryEmailAddress() {
     $email = $this->loadPrimaryEmail();
     if (!$email) {
-      throw new Exception("User has no primary email address!");
+      throw new Exception('User has no primary email address!');
     }
     return $email->getAddress();
   }
@@ -449,7 +445,8 @@ final class PhabricatorUser
         PhabricatorUserPreferences::PREFERENCE_TITLES => 'glyph',
         PhabricatorUserPreferences::PREFERENCE_EDITOR => '',
         PhabricatorUserPreferences::PREFERENCE_MONOSPACED => '',
-        PhabricatorUserPreferences::PREFERENCE_DARK_CONSOLE => 0);
+        PhabricatorUserPreferences::PREFERENCE_DARK_CONSOLE => 0,
+      );
 
       $preferences->setPreferences($default_dict);
     }
@@ -505,31 +502,17 @@ final class PhabricatorUser
     return $this;
   }
 
-  private static function tokenizeName($name) {
-    if (function_exists('mb_strtolower')) {
-      $name = mb_strtolower($name, 'UTF-8');
-    } else {
-      $name = strtolower($name);
-    }
-    $name = trim($name);
-    if (!strlen($name)) {
-      return array();
-    }
-    return preg_split('/\s+/', $name);
-  }
-
   /**
    * Populate the nametoken table, which used to fetch typeahead results. When
    * a user types "linc", we want to match "Abraham Lincoln" from on-demand
    * typeahead sources. To do this, we need a separate table of name fragments.
    */
   public function updateNameTokens() {
-    $tokens = array_merge(
-      self::tokenizeName($this->getRealName()),
-      self::tokenizeName($this->getUserName()));
-    $tokens = array_unique($tokens);
     $table  = self::NAMETOKEN_TABLE;
     $conn_w = $this->establishConnection('w');
+
+    $tokens = PhabricatorTypeaheadDatasource::tokenizeString(
+      $this->getUserName().' '.$this->getRealName());
 
     $sql = array();
     foreach ($tokens as $token) {
@@ -562,7 +545,12 @@ final class PhabricatorUser
 
     $base_uri = PhabricatorEnv::getProductionURI('/');
 
-    $uri = $this->getEmailLoginURI();
+    $engine = new PhabricatorAuthSessionEngine();
+    $uri = $engine->getOneTimeLoginURI(
+      $this,
+      $this->loadPrimaryEmail(),
+      PhabricatorAuthSessionEngine::ONETIME_WELCOME);
+
     $body = <<<EOBODY
 Welcome to Phabricator!
 
@@ -591,6 +579,7 @@ EOBODY;
 
     $mail = id(new PhabricatorMetaMTAMail())
       ->addTos(array($this->getPHID()))
+      ->setForceDelivery(true)
       ->setSubject('[Phabricator] Welcome to Phabricator')
       ->setBody($body)
       ->saveAndSend();
@@ -605,8 +594,12 @@ EOBODY;
     $new_username = $this->getUserName();
 
     $password_instructions = null;
-    if (PhabricatorAuthProviderPassword::getPasswordProvider()) {
-      $uri = $this->getEmailLoginURI();
+    if (PhabricatorPasswordAuthProvider::getPasswordProvider()) {
+      $engine = new PhabricatorAuthSessionEngine();
+      $uri = $engine->getOneTimeLoginURI(
+        $this,
+        null,
+        PhabricatorAuthSessionEngine::ONETIME_USERNAME);
       $password_instructions = <<<EOTXT
 If you use a password to login, you'll need to reset it before you can login
 again. You can reset your password by following this link:
@@ -630,6 +623,7 @@ EOBODY;
 
     $mail = id(new PhabricatorMetaMTAMail())
       ->addTos(array($this->getPHID()))
+      ->setForceDelivery(true)
       ->setSubject('[Phabricator] Username Changed')
       ->setBody($body)
       ->saveAndSend();
@@ -706,7 +700,11 @@ EOBODY;
   }
 
   public function getFullName() {
-    return $this->getUsername().' ('.$this->getRealName().')';
+    if (strlen($this->getRealName())) {
+      return $this->getUsername().' ('.$this->getRealName().')';
+    } else {
+      return $this->getUsername();
+    }
   }
 
   public function __toString() {
@@ -723,6 +721,59 @@ EOBODY;
     return id(new PhabricatorUser())->loadOneWhere(
       'phid = %s',
       $email->getUserPHID());
+  }
+
+/* -(  Multi-Factor Authentication  )---------------------------------------- */
+
+
+  /**
+   * Update the flag storing this user's enrollment in multi-factor auth.
+   *
+   * With certain settings, we need to check if a user has MFA on every page,
+   * so we cache MFA enrollment on the user object for performance. Calling this
+   * method synchronizes the cache by examining enrollment records. After
+   * updating the cache, use @{method:getIsEnrolledInMultiFactor} to check if
+   * the user is enrolled.
+   *
+   * This method should be called after any changes are made to a given user's
+   * multi-factor configuration.
+   *
+   * @return void
+   * @task factors
+   */
+  public function updateMultiFactorEnrollment() {
+    $factors = id(new PhabricatorAuthFactorConfig())->loadAllWhere(
+      'userPHID = %s',
+      $this->getPHID());
+
+    $enrolled = count($factors) ? 1 : 0;
+    if ($enrolled !== $this->isEnrolledInMultiFactor) {
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+        queryfx(
+          $this->establishConnection('w'),
+          'UPDATE %T SET isEnrolledInMultiFactor = %d WHERE id = %d',
+          $this->getTableName(),
+          $enrolled,
+          $this->getID());
+      unset($unguarded);
+
+      $this->isEnrolledInMultiFactor = $enrolled;
+    }
+  }
+
+
+  /**
+   * Check if the user is enrolled in multi-factor authentication.
+   *
+   * Enrolled users have one or more multi-factor authentication sources
+   * attached to their account. For performance, this value is cached. You
+   * can use @{method:updateMultiFactorEnrollment} to update the cache.
+   *
+   * @return bool True if the user is enrolled.
+   * @task factors
+   */
+  public function getIsEnrolledInMultiFactor() {
+    return $this->isEnrolledInMultiFactor;
   }
 
 
@@ -813,5 +864,68 @@ EOBODY;
     $this->customFields = $fields;
     return $this;
   }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+      $this->delete();
+
+      $externals = id(new PhabricatorExternalAccount())->loadAllWhere(
+        'userPHID = %s',
+        $this->getPHID());
+      foreach ($externals as $external) {
+        $external->delete();
+      }
+
+      $prefs = id(new PhabricatorUserPreferences())->loadAllWhere(
+        'userPHID = %s',
+        $this->getPHID());
+      foreach ($prefs as $pref) {
+        $pref->delete();
+      }
+
+      $profiles = id(new PhabricatorUserProfile())->loadAllWhere(
+        'userPHID = %s',
+        $this->getPHID());
+      foreach ($profiles as $profile) {
+        $profile->delete();
+      }
+
+      $keys = id(new PhabricatorUserSSHKey())->loadAllWhere(
+        'userPHID = %s',
+        $this->getPHID());
+      foreach ($keys as $key) {
+        $key->delete();
+      }
+
+      $emails = id(new PhabricatorUserEmail())->loadAllWhere(
+        'userPHID = %s',
+        $this->getPHID());
+      foreach ($emails as $email) {
+        $email->delete();
+      }
+
+      $sessions = id(new PhabricatorAuthSession())->loadAllWhere(
+        'userPHID = %s',
+        $this->getPHID());
+      foreach ($sessions as $session) {
+        $session->delete();
+      }
+
+      $factors = id(new PhabricatorAuthFactorConfig())->loadAllWhere(
+        'userPHID = %s',
+        $this->getPHID());
+      foreach ($factors as $factor) {
+        $factor->delete();
+      }
+
+    $this->saveTransaction();
+  }
+
 
 }

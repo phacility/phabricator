@@ -90,12 +90,12 @@ final class AphrontGlyphBarView extends AphrontBarView {
             phutil_tag(
               'div',
               array(),
-              $bg_glyphs)
+              $bg_glyphs),
           )),
         phutil_tag(
           'div',
           array('class' => 'caption'),
-          $this->getCaption())
+          $this->getCaption()),
       ));
   }
 

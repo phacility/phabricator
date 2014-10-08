@@ -48,7 +48,7 @@
   background-color: {$lightred};
 }
 
-.phabricator-remarkup tt {
+.phabricator-remarkup tt.remarkup-monospaced {
   color: #333333;
   background: #ebebeb;
   padding: 0 4px;
@@ -57,24 +57,37 @@
 
 /* NOTE: You can currently produce this with [[link | `name`]]. Restore the
    link color. */
-.phabricator-remarkup a tt {
+.phabricator-remarkup a tt.remarkup-monospaced {
   color: #18559d;
 }
 
-.phabricator-remarkup ul {
+.phabricator-remarkup ul.remarkup-list {
   list-style: disc;
   margin: 12px 0 12px 30px;
 }
 
-.phabricator-remarkup ol {
+.phabricator-remarkup ol.remarkup-list {
   list-style: decimal;
   margin: 12px 0 12px 30px;
 }
 
-.phabricator-remarkup ul ol,
-.phabricator-remarkup ul ul,
-.phabricator-remarkup ol ol,
-.phabricator-remarkup ol ul {
+.phabricator-remarkup .remarkup-list-with-checkmarks {
+  list-style: none;
+  margin-left: 18px;
+}
+
+.phabricator-remarkup .remarkup-list-with-checkmarks input {
+  margin-right: 2px;
+}
+
+.phabricator-remarkup .remarkup-list-with-checkmarks .remarkup-checked-item {
+  color: {$greytext};
+}
+
+.phabricator-remarkup ul.remarkup-list ol.remarkup-list,
+.phabricator-remarkup ul.remarkup-list ul.remarkup-list,
+.phabricator-remarkup ol.remarkup-list ol.remarkup-list,
+.phabricator-remarkup ol.remarkup-list ul.remarkup-list {
   margin: 4px 0 4px 24px;
 }
 
@@ -83,55 +96,55 @@
   list-style-type: none;
 }
 
-.phabricator-remarkup h1:first-child,
-.phabricator-remarkup h2:first-child,
-.phabricator-remarkup h3:first-child,
-.phabricator-remarkup h4:first-child,
-.phabricator-remarkup h5:first-child,
-.phabricator-remarkup h6:first-child {
+.phabricator-remarkup h1.remarkup-header:first-child,
+.phabricator-remarkup h2.remarkup-header:first-child,
+.phabricator-remarkup h3.remarkup-header:first-child,
+.phabricator-remarkup h4.remarkup-header:first-child,
+.phabricator-remarkup h5.remarkup-header:first-child,
+.phabricator-remarkup h6.remarkup-header:first-child {
   margin-top: 0;
 }
 
-.phabricator-remarkup h1:last-child,
-.phabricator-remarkup h2:last-child,
-.phabricator-remarkup h3:last-child,
-.phabricator-remarkup h4:last-child,
-.phabricator-remarkup h5:last-child,
-.phabricator-remarkup h6:last-child {
+.phabricator-remarkup h1.remarkup-header:last-child,
+.phabricator-remarkup h2.remarkup-header:last-child,
+.phabricator-remarkup h3.remarkup-header:last-child,
+.phabricator-remarkup h4.remarkup-header:last-child,
+.phabricator-remarkup h5.remarkup-header:last-child,
+.phabricator-remarkup h6.remarkup-header:last-child {
   margin-bottom: 0;
 }
 
-.phabricator-remarkup h1 {
+.phabricator-remarkup h1.remarkup-header {
   font-size: 1.625em;
   line-height: 1.625em;
   margin: 8px 0;
 }
 
-.phabricator-remarkup h2 {
+.phabricator-remarkup h2.remarkup-header {
   font-size: 1.5em;
   line-height: 1.5em;
   margin: 8px 0;
 }
 
-.phabricator-remarkup h3 {
+.phabricator-remarkup h3.remarkup-header {
   font-size: 1.375em;
   line-height: 1.375em;
   margin: 8px 0;
 }
 
-.phabricator-remarkup h4 {
+.phabricator-remarkup h4.remarkup-header {
   font-size: 1.25em;
   line-height: 1.25em;
   margin: 8px 0;
 }
 
-.phabricator-remarkup h5 {
+.phabricator-remarkup h5.remarkup-header {
   font-size: 1.125em;
   line-height: 1.125em;
   margin: 4px 0;
 }
 
-.phabricator-remarkup h6 {
+.phabricator-remarkup h6.remarkup-header {
   font-size: 1em;
   line-height: 1em;
   margin: 4px 0;
@@ -141,13 +154,26 @@
   border-left: 3px solid {$lightbluetext};
   color: {$bluetext};
   font-style:  italic;
-  margin: 4px 20px 12px 0;
+  margin: 4px 0 12px 0;
   padding: 8px 12px;
   background-color: #F8F9FC;
 }
 
 .phabricator-remarkup blockquote em {
   font-style: normal;
+}
+
+.phabricator-remarkup blockquote div.remarkup-reply-head {
+  font-style: normal;
+  padding-bottom: 4px;
+}
+
+.phabricator-remarkup blockquote div.remarkup-reply-head
+  .phui-tag-core {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  color: {$darkbluetext};
 }
 
 .phabricator-remarkup img.remarkup-proxy-image {
@@ -199,6 +225,12 @@
   background: {$lightred};
 }
 
+.phabricator-remarkup .remarkup-note .remarkup-monospaced,
+.phabricator-remarkup .remarkup-important .remarkup-monospaced,
+.phabricator-remarkup .remarkup-warning .remarkup-monospaced {
+  background-color: rgba(150,150,150,.2);
+}
+
 .phabricator-remarkup .remarkup-note-word {
   font-weight: bold;
   color: {$darkbluetext};
@@ -206,15 +238,15 @@
 
 .phabricator-remarkup-toc {
   float: right;
-  border: 1px solid {$lightblueborder};
-  background: {$lightgreybackground};
-  padding: 8px;
-  width: 180px;
+  border-left: 1px solid {$lightblueborder};
+  background: #fff;
+  width: 160px;
+  padding-left: 8px;
   margin: 0 0 4px 8px;
 }
 
 .phabricator-remarkup-toc-header {
-  font-size: 12px;
+  font-size: 13px;
   line-height: 12px;
   color: {$darkbluetext};
   font-weight: bold;
@@ -229,13 +261,16 @@
 }
 
 .phabricator-remarkup-toc ul ul {
-  margin: 0 0 0 10px;
+  margin: 0 0 0 8px;
 }
 
 .phabricator-remarkup-toc ul li {
   padding: 0;
   margin: 0;
-  font-size: 11px;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .phabricator-remarkup-embed-layout-right {
@@ -275,6 +310,10 @@
   display: inline-block;
 }
 
+.phabricator-remarkup-embed-image-full img {
+  max-width: 100%;
+}
+
 .phabricator-remarkup table.remarkup-table {
   border-collapse: separate;
   border-spacing: 1px;
@@ -297,12 +336,30 @@
   border-left-color: {$blueborder};
   border-right-color: {$blueborder};
   border-bottom-color: {$blueborder};
-  border-top-color: {$lightblueborder};
+  border-top-color: {$thinblueborder};
   border-radius: 0;
+
+  box-shadow: none;
+  -webkit-box-shadow: none;
+
+  /* Set line height explicitly so the metrics <var /> and the real textarea
+     are forced to the same value. */
+  line-height: 1.25em;
 
   /* Prevent Safari and Chrome users from dragging the textarea any wider,
      because the top bar won't resize along with it. */
   resize: vertical;
+}
+
+var.remarkup-assist-textarea {
+  /* This is an invisible element used to measure the size of text in the
+     textarea so we can float typeaheads over the cursor position. */
+  display: block;
+  border-color: orange;
+  box-sizing: border-box;
+  padding: 4px 6px;
+  white-space: pre-wrap;
+  visibility: hidden;
 }
 
 .remarkup-assist-textarea:focus {
@@ -310,9 +367,7 @@
 }
 
 .remarkup-assist-bar {
-  height: 27px;
-  padding: 0 2px;
-
+  height: 26px;
   border-width: 1px 1px 0;
   border-style: solid;
   border-top-color: {$blueborder};
@@ -325,24 +380,20 @@
 
 .remarkup-assist-button {
   display: block;
-  padding: 3px;
-  margin: 2px 1px;
+  padding: 5px;
   float: left;
-
-  border: 1px solid transparent;
-  border-radius: 2px;
 }
 
 .remarkup-assist-button:hover {
-  background: #f7f7f7;
-  border-color: #c6c6c6;
-  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.10);
+  background-color: rgba(100,100,100,.15);
+}
+
+.remarkup-assist-button:hover .phui-icon-view.phui-font-fa {
+  color: {$darkbluetext};
 }
 
 .remarkup-assist-button:active {
   outline: none;
-  background: #f3f3f3;
-  box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.10);
 }
 
 .remarkup-assist-button:focus {
@@ -375,10 +426,11 @@
 }
 
 .remarkup-assist {
-  display: block;
   width: 14px;
   height: 14px;
   overflow: hidden;
+  text-align: center;
+  vertical-align: middle;
 }
 
 .remarkup-assist-right {
@@ -388,11 +440,6 @@
 .jx-order-mask {
   background: #ffffff;
   opacity: 1.0;
-}
-
-.remarkup-assist-textarea {
-  box-shadow: none;
-  -webkit-box-shadow: none;
 }
 
 .remarkup-control-fullscreen-mode {
@@ -405,7 +452,7 @@
 
 .remarkup-control-fullscreen-mode textarea.remarkup-assist-textarea {
   position: absolute;
-  top: 26px;
+  top: 27px;
   left: 0;
   right: 0;
   bottom: 0;
@@ -418,4 +465,8 @@
 .phabricator-image-macro-hero {
   margin: auto;
   max-width: 95%;
+}
+
+.remarkup-nav-sequence-arrow {
+  color: {$lightgreytext};
 }

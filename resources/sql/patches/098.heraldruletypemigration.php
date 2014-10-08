@@ -41,7 +41,7 @@ foreach ($rules as $rule) {
         $rule->getRuleType(),
         $rule->getID());
 
-      echo "Setting rule '" . $rule->getName() . "' to personal. ";
+      echo "Setting rule '".$rule->getName()."' to personal. ";
     }
   }
 }

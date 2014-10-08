@@ -69,7 +69,7 @@ final class DifferentialReviewersField
   public function renderEditControl(array $handles) {
     return id(new AphrontFormTokenizerControl())
       ->setName($this->getFieldKey())
-      ->setDatasource('/typeahead/common/usersorprojects/')
+      ->setDatasource(new PhabricatorProjectOrUserDatasource())
       ->setValue($handles)
       ->setError($this->getFieldError())
       ->setLabel($this->getFieldName());
@@ -142,8 +142,8 @@ final class DifferentialReviewersField
     return $this->parseObjectList(
       $value,
       array(
-        PhabricatorPeoplePHIDTypeUser::TYPECONST,
-        PhabricatorProjectPHIDTypeProject::TYPECONST,
+        PhabricatorPeopleUserPHIDType::TYPECONST,
+        PhabricatorProjectProjectPHIDType::TYPECONST,
       ));
   }
 
@@ -191,5 +191,35 @@ final class DifferentialReviewersField
     }
   }
 
+  public function getRequiredHandlePHIDsForRevisionHeaderWarnings() {
+    return mpull($this->getValue(), 'getReviewerPHID');
+  }
+
+  public function getWarningsForRevisionHeader(array $handles) {
+    $revision = $this->getObject();
+
+    $status_needs_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
+    if ($revision->getStatus() != $status_needs_review) {
+      return array();
+    }
+
+    foreach ($this->getValue() as $reviewer) {
+      if (!$handles[$reviewer->getReviewerPHID()]->isDisabled()) {
+        return array();
+      }
+    }
+
+    $warnings = array();
+    if ($this->getValue()) {
+      $warnings[] = pht(
+        'This revision needs review, but all specified reviewers are '.
+        'disabled or inactive.');
+    } else {
+      $warnings[] = pht(
+        'This revision needs review, but there are no reviewers specified.');
+    }
+
+    return $warnings;
+  }
 
 }

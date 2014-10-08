@@ -1,7 +1,6 @@
 <?php
 
-final class ReleephProductListController extends ReleephController
-  implements PhabricatorApplicationSearchResultsControllerInterface {
+final class ReleephProductListController extends ReleephController {
 
   private $queryKey;
 
@@ -23,47 +22,6 @@ final class ReleephProductListController extends ReleephController
     return $this->delegateToController($controller);
   }
 
-  public function renderResultsList(
-    array $products,
-    PhabricatorSavedQuery $query) {
-    assert_instances_of($products, 'ReleephProject');
-    $viewer = $this->getRequest()->getUser();
-
-    $list = id(new PHUIObjectItemListView())
-      ->setUser($viewer);
-
-    foreach ($products as $product) {
-      $id = $product->getID();
-
-      $item = id(new PHUIObjectItemView())
-        ->setHeader($product->getName())
-        ->setHref($this->getApplicationURI("product/{$id}/"));
-
-      if (!$product->getIsActive()) {
-        $item->setDisabled(true);
-        $item->addIcon('none', pht('Inactive'));
-      }
-
-      $repo = $product->getRepository();
-      $item->addAttribute(
-        phutil_tag(
-          'a',
-          array(
-            'href' => '/diffusion/'.$repo->getCallsign().'/',
-          ),
-          'r'.$repo->getCallsign()));
-
-      $arc = $product->getArcanistProject();
-      if ($arc) {
-        $item->addAttribute($arc->getName());
-      }
-
-      $list->addItem($item);
-    }
-
-    return $list;
-  }
-
   public function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
@@ -71,7 +29,7 @@ final class ReleephProductListController extends ReleephController
       id(new PHUIListItemView())
         ->setName(pht('Create Product'))
         ->setHref($this->getApplicationURI('product/create/'))
-        ->setIcon('create'));
+        ->setIcon('fa-plus-square'));
 
     return $crumbs;
   }

@@ -4,7 +4,7 @@ final class NuanceRequestorTransaction
   extends NuanceTransaction {
 
   public function getApplicationTransactionType() {
-    return NuancePHIDTypeRequestor::TYPECONST;
+    return NuanceRequestorPHIDType::TYPECONST;
   }
 
   public function getApplicationTransactionCommentObject() {

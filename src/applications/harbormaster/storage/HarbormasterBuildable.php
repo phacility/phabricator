@@ -33,6 +33,32 @@ final class HarbormasterBuildable extends HarbormasterDAO
     }
   }
 
+  public static function getBuildableStatusIcon($status) {
+    switch ($status) {
+      case self::STATUS_BUILDING:
+        return PHUIStatusItemView::ICON_RIGHT;
+      case self::STATUS_PASSED:
+        return PHUIStatusItemView::ICON_ACCEPT;
+      case self::STATUS_FAILED:
+        return PHUIStatusItemView::ICON_REJECT;
+      default:
+        return PHUIStatusItemView::ICON_QUESTION;
+    }
+  }
+
+  public static function getBuildableStatusColor($status) {
+    switch ($status) {
+      case self::STATUS_BUILDING:
+        return 'blue';
+      case self::STATUS_PASSED:
+        return 'green';
+      case self::STATUS_FAILED:
+        return 'red';
+      default:
+        return 'bluegrey';
+    }
+  }
+
   public static function initializeNewBuildable(PhabricatorUser $actor) {
     return id(new HarbormasterBuildable())
       ->setIsManualBuildable(0)
@@ -84,7 +110,7 @@ final class HarbormasterBuildable extends HarbormasterDAO
     // Skip all of this logic if the Harbormaster application
     // isn't currently installed.
 
-    $harbormaster_app = 'PhabricatorApplicationHarbormaster';
+    $harbormaster_app = 'PhabricatorHarbormasterApplication';
     if (!PhabricatorApplication::isClassInstalled($harbormaster_app)) {
       return;
     }
@@ -120,21 +146,37 @@ final class HarbormasterBuildable extends HarbormasterDAO
     PhabricatorWorker::scheduleTask(
       'HarbormasterBuildWorker',
       array(
-        'buildID' => $build->getID()
+        'buildID' => $build->getID(),
       ));
 
-    return $this;
+    return $build;
   }
 
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'containerPHID' => 'phid?',
+        'buildableStatus' => 'text32',
+        'isManualBuildable' => 'bool',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_buildable' => array(
+          'columns' => array('buildablePHID'),
+        ),
+        'key_container' => array(
+          'columns' => array('containerPHID'),
+        ),
+        'key_manual' => array(
+          'columns' => array('isManualBuildable'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      HarbormasterPHIDTypeBuildable::TYPECONST);
+      HarbormasterBuildablePHIDType::TYPECONST);
   }
 
   public function attachBuildableObject($buildable_object) {
@@ -222,6 +264,14 @@ final class HarbormasterBuildable extends HarbormasterDAO
 
   public function getHarbormasterContainerPHID() {
     return $this->getContainerPHID();
+  }
+
+  public function getBuildVariables() {
+    return array();
+  }
+
+  public function getAvailableBuildVariables() {
+    return array();
   }
 
 

@@ -19,6 +19,13 @@ final class PhabricatorStandardCustomFieldRemarkup
     return 'block';
   }
 
+  public function getApplicationTransactionRemarkupBlocks(
+    PhabricatorApplicationTransaction $xaction) {
+    return array(
+      $xaction->getNewValue(),
+    );
+  }
+
   public function renderPropertyViewValue(array $handles) {
     $value = $this->getFieldValue();
 
@@ -32,7 +39,9 @@ final class PhabricatorStandardCustomFieldRemarkup
 
     $viewer = $this->getViewer();
     return PhabricatorMarkupEngine::renderOneObject(
-      id(new PhabricatorMarkupOneOff())->setContent($value),
+      id(new PhabricatorMarkupOneOff())
+        ->setContent($value)
+        ->setPReserveLinebreaks(true),
       'default',
       $viewer);
   }

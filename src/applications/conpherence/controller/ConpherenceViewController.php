@@ -72,7 +72,7 @@ final class ConpherenceViewController extends
       $content = array(
         'header' => $header,
         'messages' => $messages,
-        'form' => $form
+        'form' => $form,
       );
     }
 
@@ -96,7 +96,7 @@ final class ConpherenceViewController extends
       $layout,
       array(
         'title' => $title,
-        'device' => true,
+        'pageObjects' => array($conpherence->getPHID()),
       ));
   }
 
@@ -114,8 +114,8 @@ final class ConpherenceViewController extends
           'sigil' => 'show-older-messages',
           'class' => 'conpherence-show-older-messages',
           'meta' => array(
-            'oldest_transaction_id' => $oldest_transaction_id
-          )
+            'oldest_transaction_id' => $oldest_transaction_id,
+          ),
         ),
         pht('Show Older Messages'));
     }
@@ -156,7 +156,11 @@ final class ConpherenceViewController extends
             'type' => 'hidden',
             'name' => 'latest_transaction_id',
             'value' => $latest_transaction_id,
-            'sigil' => 'latest-transaction-id'
+            'sigil' => 'latest-transaction-id',
+            'meta' => array(
+              'threadPHID' => $conpherence->getPHID(),
+              'threadID' => $conpherence->getID(),
+            ),
           ),
           ''))
       ->render();

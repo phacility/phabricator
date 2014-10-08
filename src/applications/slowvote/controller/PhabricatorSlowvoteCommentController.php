@@ -55,12 +55,11 @@ final class PhabricatorSlowvoteCommentController
       $draft->replaceOrDelete();
     }
 
-    if ($request->isAjax()) {
+    if ($request->isAjax() && $is_preview) {
       return id(new PhabricatorApplicationTransactionResponse())
         ->setViewer($user)
         ->setTransactions($xactions)
-        ->setIsPreview($is_preview)
-        ->setAnchorOffset($request->getStr('anchor'));
+        ->setIsPreview($is_preview);
     } else {
       return id(new AphrontRedirectResponse())
         ->setURI($view_uri);

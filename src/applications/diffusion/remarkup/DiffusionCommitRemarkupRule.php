@@ -1,7 +1,6 @@
 <?php
 
-final class DiffusionCommitRemarkupRule
-  extends PhabricatorRemarkupRuleObject {
+final class DiffusionCommitRemarkupRule extends PhabricatorObjectRemarkupRule {
 
   protected function getObjectNamePrefix() {
     return '';
@@ -12,7 +11,7 @@ final class DiffusionCommitRemarkupRule
   }
 
   protected function getObjectIDPattern() {
-    return PhabricatorRepositoryPHIDTypeCommit::getCommitObjectNamePattern();
+    return PhabricatorRepositoryCommitPHIDType::getCommitObjectNamePattern();
   }
 
   protected function loadObjects(array $ids) {

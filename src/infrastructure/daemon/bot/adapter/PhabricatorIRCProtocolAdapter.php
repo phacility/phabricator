@@ -8,6 +8,8 @@ final class PhabricatorIRCProtocolAdapter
   private $writeBuffer;
   private $readBuffer;
 
+  private $nickIncrement = 0;
+
   public function getServiceType() {
     return 'IRC';
   }
@@ -18,7 +20,8 @@ final class PhabricatorIRCProtocolAdapter
 
   // Hash map of command translations
   public static $commandTranslations = array(
-    'PRIVMSG' => 'MESSAGE');
+    'PRIVMSG' => 'MESSAGE',
+  );
 
   public function connect() {
     $nick = $this->getConfig('nick', 'phabot');
@@ -45,7 +48,7 @@ final class PhabricatorIRCProtocolAdapter
     }
     $ok = stream_set_blocking($socket, false);
     if (!$ok) {
-      throw new Exception("Failed to set stream nonblocking.");
+      throw new Exception('Failed to set stream nonblocking.');
     }
 
     $this->socket = $socket;
@@ -69,8 +72,13 @@ final class PhabricatorIRCProtocolAdapter
 
     $ok = @stream_select($read, $write, $except, $timeout_sec = 1);
     if ($ok === false) {
-      throw new Exception(
-        "socket_select() failed: ".socket_strerror(socket_last_error()));
+      // We may have been interrupted by a signal, like a SIGINT. Try
+      // selecting again. If the second select works, conclude that the failure
+      // was most likely because we were signaled.
+      $ok = @stream_select($read, $write, $except, $timeout_sec = 0);
+      if ($ok === false) {
+        throw new Exception('stream_select() failed!');
+      }
     }
 
     if ($read) {
@@ -80,16 +88,16 @@ final class PhabricatorIRCProtocolAdapter
         // This indicates the connection was terminated on the other side,
         // just exit via exception and let the overseer restart us after a
         // delay so we can reconnect.
-        throw new Exception("Remote host closed connection.");
+        throw new Exception('Remote host closed connection.');
       }
       do {
         $data = fread($this->socket, 4096);
         if ($data === false) {
-          throw new Exception("fread() failed!");
+          throw new Exception('fread() failed!');
         } else {
           $messages[] = id(new PhabricatorBotMessage())
-            ->setCommand("LOG")
-            ->setBody(">>> ".$data);
+            ->setCommand('LOG')
+            ->setBody('>>> '.$data);
           $this->readBuffer .= $data;
         }
       } while (strlen($data));
@@ -99,11 +107,13 @@ final class PhabricatorIRCProtocolAdapter
       do {
         $len = fwrite($this->socket, $this->writeBuffer);
         if ($len === false) {
-          throw new Exception("fwrite() failed!");
+          throw new Exception('fwrite() failed!');
+        } else if ($len === 0) {
+          break;
         } else {
           $messages[] = id(new PhabricatorBotMessage())
-            ->setCommand("LOG")
-            ->setBody(">>> ".substr($this->writeBuffer, 0, $len));
+            ->setCommand('LOG')
+            ->setBody('>>> '.substr($this->writeBuffer, 0, $len));
           $this->writeBuffer = substr($this->writeBuffer, $len);
         }
       } while (strlen($this->writeBuffer));
@@ -183,6 +193,12 @@ final class PhabricatorIRCProtocolAdapter
   private function handleIRCProtocol(array $matches) {
     $data = $matches['data'];
     switch ($matches['command']) {
+      case '433': // Nickname already in use
+        // If we receive this error, try appending "-1", "-2", etc. to the nick
+        $this->nickIncrement++;
+        $nick = $this->getConfig('nick', 'phabot').'-'.$this->nickIncrement;
+        $this->write("NICK {$nick}");
+        return true;
       case '422': // Error - no MOTD
       case '376': // End of MOTD
         $nickpass = $this->getConfig('nickpass');
@@ -191,7 +207,7 @@ final class PhabricatorIRCProtocolAdapter
         }
         $join = $this->getConfig('join');
         if (!$join) {
-          throw new Exception("Not configured to join any channels!");
+          throw new Exception('Not configured to join any channels!');
         }
         foreach ($join as $channel) {
           $this->write("JOIN {$channel}");
@@ -231,7 +247,8 @@ final class PhabricatorIRCProtocolAdapter
 
           return array(
             $target,
-            rtrim($matches[2], "\r\n"));
+            rtrim($matches[2], "\r\n"),
+          );
         }
         break;
     }
@@ -239,11 +256,26 @@ final class PhabricatorIRCProtocolAdapter
     // By default we assume there is no target, only a body
     return array(
       null,
-      $data);
+      $data,
+    );
   }
 
-  public function __destruct() {
-    $this->write("QUIT Goodbye.");
-    fclose($this->socket);
+  public function disconnect() {
+    // NOTE: FreeNode doesn't show quit messages if you've recently joined a
+    // channel, presumably to prevent some kind of abuse. If you're testing
+    // this, you may need to stay connected to the network for a few minutes
+    // before it works. If you disconnect too quickly, the server will replace
+    // your message with a "Client Quit" message.
+
+    $quit = $this->getConfig('quit', pht('Shutting down.'));
+    $this->write("QUIT :{$quit}");
+
+    // Flush the write buffer.
+    while (strlen($this->writeBuffer)) {
+      $this->getNextMessages(0);
+    }
+
+    @fclose($this->socket);
+    $this->socket = null;
   }
 }

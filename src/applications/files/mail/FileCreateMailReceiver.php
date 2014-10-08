@@ -1,13 +1,9 @@
 <?php
 
-/**
- * @group files
- */
-final class FileCreateMailReceiver
-  extends PhabricatorMailReceiver {
+final class FileCreateMailReceiver extends PhabricatorMailReceiver {
 
   public function isEnabled() {
-    $app_class = 'PhabricatorApplicationFiles';
+    $app_class = 'PhabricatorFilesApplication';
     return PhabricatorApplication::isClassInstalled($app_class);
   }
 
@@ -42,9 +38,7 @@ final class FileCreateMailReceiver
 
     $attachment_count = count($attachment_phids);
     if ($attachment_count > 1) {
-      $subject = pht(
-        'You successfully uploaded %d files.',
-        $attachment_count);
+      $subject = pht('You successfully uploaded %d files.', $attachment_count);
     } else {
       $subject = pht('You successfully uploaded a file.');
     }

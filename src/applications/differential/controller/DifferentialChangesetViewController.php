@@ -23,25 +23,33 @@ final class DifferentialChangesetViewController extends DifferentialController {
     $id = (int)$id;
     $vs = (int)$vs;
 
-    $changeset = id(new DifferentialChangeset())->load($id);
+    $load_ids = array($id);
+    if ($vs && ($vs != -1)) {
+      $load_ids[] = $vs;
+    }
+
+    $changesets = id(new DifferentialChangesetQuery())
+      ->setViewer($request->getUser())
+      ->withIDs($load_ids)
+      ->needHunks(true)
+      ->execute();
+    $changesets = mpull($changesets, null, 'getID');
+
+    $changeset = idx($changesets, $id);
     if (!$changeset) {
       return new Aphront404Response();
     }
 
-    // TODO: (T603) Make Changeset policy-aware. For now, just fake it
-    // by making sure we can see the diff.
-    $diff = id(new DifferentialDiffQuery())
-      ->setViewer($request->getUser())
-      ->withIDs(array($changeset->getDiffID()))
-      ->executeOne();
-    if (!$diff) {
-      return new Aphront404Response();
+    $vs_changeset = null;
+    if ($vs && ($vs != -1)) {
+      $vs_changeset = idx($changesets, $vs);
+      if (!$vs_changeset) {
+        return new Aphront404Response();
+      }
     }
-
 
     $view = $request->getStr('view');
     if ($view) {
-      $changeset->attachHunks($changeset->loadHunks());
       $phid = idx($changeset->getMetadata(), "$view:binary-phid");
       if ($phid) {
         return id(new AphrontRedirectResponse())->setURI("/file/info/$phid/");
@@ -50,23 +58,12 @@ final class DifferentialChangesetViewController extends DifferentialController {
         case 'new':
           return $this->buildRawFileResponse($changeset, $is_new = true);
         case 'old':
-          if ($vs && ($vs != -1)) {
-            $vs_changeset = id(new DifferentialChangeset())->load($vs);
-            if ($vs_changeset) {
-              $vs_changeset->attachHunks($vs_changeset->loadHunks());
-              return $this->buildRawFileResponse($vs_changeset, $is_new = true);
-            }
+          if ($vs_changeset) {
+            return $this->buildRawFileResponse($vs_changeset, $is_new = true);
           }
           return $this->buildRawFileResponse($changeset, $is_new = false);
         default:
           return new Aphront400Response();
-      }
-    }
-
-    if ($vs && ($vs != -1)) {
-      $vs_changeset = id(new DifferentialChangeset())->load($vs);
-      if (!$vs_changeset) {
-        return new Aphront404Response();
       }
     }
 
@@ -103,15 +100,6 @@ final class DifferentialChangesetViewController extends DifferentialController {
     }
 
     if ($left) {
-      $left->attachHunks($left->loadHunks());
-    }
-
-    if ($right) {
-      $right->attachHunks($right->loadHunks());
-    }
-
-    if ($left) {
-
       $left_data = $left->makeNewFile();
       if ($right) {
         $right_data = $right->makeNewFile();
@@ -167,6 +155,8 @@ final class DifferentialChangesetViewController extends DifferentialController {
     $parser->setRightSideCommentMapping($right_source, $right_new);
     $parser->setLeftSideCommentMapping($left_source, $left_new);
     $parser->setWhitespaceMode($request->getStr('whitespace'));
+    $parser->setCharacterEncoding($request->getStr('encoding'));
+    $parser->setHighlightAs($request->getStr('highlight'));
 
     if ($request->getStr('renderer') == '1up') {
       $parser->setRenderer(new DifferentialChangesetOneUpRenderer());
@@ -264,12 +254,34 @@ final class DifferentialChangesetViewController extends DifferentialController {
       ),
       $detail->render()));
 
+    $crumbs = $this->buildApplicationCrumbs();
+
+    $revision_id = $changeset->getDiff()->getRevisionID();
+    if ($revision_id) {
+      $crumbs->addTextCrumb('D'.$revision_id, '/D'.$revision_id);
+    }
+
+    $diff_id = $changeset->getDiff()->getID();
+    if ($diff_id) {
+      $crumbs->addTextCrumb(
+        pht('Diff %d', $diff_id),
+        $this->getApplicationURI('diff/'.$diff_id));
+    }
+
+    $crumbs->addTextCrumb($changeset->getDisplayFilename());
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Standalone View'))
+      ->appendChild($panel);
+
     return $this->buildApplicationPage(
       array(
-        $panel
+        $crumbs,
+        $box,
       ),
       array(
         'title' => pht('Changeset View'),
+        'device' => false,
       ));
   }
 
@@ -335,8 +347,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
       unset($unguard);
     }
 
-    return id(new AphrontRedirectResponse())
-      ->setURI($file->getBestURI());
+    return $file->getRedirectResponse();
   }
 
   private function buildLintInlineComments($changeset) {

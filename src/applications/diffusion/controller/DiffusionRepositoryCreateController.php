@@ -38,12 +38,12 @@ final class DiffusionRepositoryCreateController
       case 'import':
       case 'create':
         $this->requireApplicationCapability(
-          DiffusionCapabilityCreateRepositories::CAPABILITY);
+          DiffusionCreateRepositoriesCapability::CAPABILITY);
 
         $cancel_uri = $this->getApplicationURI('new/');
         break;
       default:
-        throw new Exception("Invalid edit operation!");
+        throw new Exception('Invalid edit operation!');
     }
 
     $form = id(new PHUIPagedFormView())
@@ -224,7 +224,6 @@ final class DiffusionRepositoryCreateController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 
@@ -432,7 +431,7 @@ final class DiffusionRepositoryCreateController
         $is_mercurial = true;
         break;
       default:
-        throw new Exception("Unsupported VCS!");
+        throw new Exception('Unsupported VCS!');
     }
 
     $has_local = ($is_git || $is_mercurial);
@@ -446,7 +445,6 @@ final class DiffusionRepositoryCreateController
         "| ----------------------- |\n".
         "| `git@github.com:example/example.git` |\n".
         "| `ssh://user@host.com/git/example.git` |\n".
-        "| `file:///local/path/to/repo` |\n".
         "| `https://example.com/repository.git` |\n");
     } else if ($is_mercurial) {
       $uri_label = pht('Remote URI');
@@ -457,7 +455,7 @@ final class DiffusionRepositoryCreateController
         "| Example Mercurial Remote URIs |\n".
         "| ----------------------- |\n".
         "| `ssh://hg@bitbucket.org/example/repository` |\n".
-        "| `file:///local/path/to/repo` |\n");
+        "| `https://bitbucket.org/example/repository` |\n");
     } else if ($is_svn) {
       $uri_label = pht('Repository Root');
       $instructions = pht(
@@ -471,14 +469,13 @@ final class DiffusionRepositoryCreateController
         "| `http://svn.example.org/svnroot/` |\n".
         "| `svn+ssh://svn.example.com/svnroot/` |\n".
         "| `svn://svn.example.net/svnroot/` |\n".
-        "| `file:///local/path/to/svnroot/` |\n".
         "\n\n".
         "You **MUST** specify the root of the repository, not a ".
         "subdirectory. (If you want to import only part of a Subversion ".
         "repository, use the //Import Only// option at the end of this ".
         "workflow.)");
     } else {
-      throw new Exception("Unsupported VCS!");
+      throw new Exception('Unsupported VCS!');
     }
 
     $page->addRemarkupInstructions($instructions, 'remoteURI');
@@ -492,54 +489,13 @@ final class DiffusionRepositoryCreateController
     if (!strlen($v_remote)) {
       $c_remote->setError(pht('Required'));
       $page->addPageError(
-        pht("You must specify a URI."));
+        pht('You must specify a URI.'));
     } else {
-      $proto = $this->getRemoteURIProtocol($v_remote);
-
-      if ($proto === 'file') {
-        if (!preg_match('@^file:///@', $v_remote)) {
-          $c_remote->setError(pht('Invalid'));
-          $page->addPageError(
-            pht(
-              "URIs using the 'file://' protocol should have three slashes ".
-              "(e.g., 'file:///absolute/path/to/file'). You only have two. ".
-              "Add another one."));
-        }
-      }
-
-      // Catch confusion between Git/SCP-style URIs and normal URIs. See T3619
-      // for discussion. This is usually a user adding "ssh://" to an implicit
-      // SSH Git URI.
-      if ($proto == 'ssh') {
-        if (preg_match('(^[^:@]+://[^/:]+:[^\d])', $v_remote)) {
-          $c_remote->setError(pht('Invalid'));
-          $page->addPageError(
-            pht(
-              "The Remote URI is not formatted correctly. Remote URIs ".
-              "with an explicit protocol should be in the form ".
-              "'proto://domain/path', not 'proto://domain:/path'. ".
-              "The ':/path' syntax is only valid in SCP-style URIs."));
-        }
-      }
-
-      switch ($proto) {
-        case 'ssh':
-        case 'http':
-        case 'https':
-        case 'file':
-        case 'git':
-        case 'svn':
-        case 'svn+ssh':
-          break;
-        default:
-          $c_remote->setError(pht('Invalid'));
-          $page->addPageError(
-            pht(
-              "The URI protocol is unrecognized. It should begin ".
-              "'ssh://', 'http://', 'https://', 'file://', 'git://', ".
-              "'svn://', 'svn+ssh://', or be in the form ".
-              "'git@domain.com:path'."));
-          break;
+      try {
+        PhabricatorRepository::assertValidRemoteURI($v_remote);
+      } catch (Exception $ex) {
+        $c_remote->setError(pht('Invalid'));
+        $page->addPageError($ex->getMessage());
       }
     }
 
@@ -573,7 +529,8 @@ final class DiffusionRepositoryCreateController
     $remote_uri = $form->getPage('remote-uri')
       ->getControl('remoteURI')
       ->getValue();
-    $proto = $this->getRemoteURIProtocol($remote_uri);
+
+    $proto = PhabricatorRepository::getRemoteURIProtocol($remote_uri);
     $remote_user = $this->getRemoteURIUser($remote_uri);
 
     $c_credential = $page->getControl('credential');
@@ -603,7 +560,7 @@ final class DiffusionRepositoryCreateController
 
       $page->addRemarkupInstructions(
         pht(
-          'Choose the a username and pasword used to connect to the '.
+          'Choose the username and password used to connect to the '.
           'repository hosted at:'.
           "\n\n".
           "  lang=text\n".
@@ -613,17 +570,8 @@ final class DiffusionRepositoryCreateController
           "you can continue to the next step.",
           $remote_uri),
         'credential');
-    } else if ($proto == 'file') {
-      $c_credential->setHidden(true);
-      $provides_type = null;
-
-      $page->addRemarkupInstructions(
-        pht(
-          'You do not need to configure any credentials for repositories '.
-          'accessed over the `file://` protocol. Continue to the next step.'),
-        'credential');
     } else {
-      throw new Exception("Unknown URI protocol!");
+      throw new Exception('Unknown URI protocol!');
     }
 
     if ($provides_type) {
@@ -723,7 +671,7 @@ final class DiffusionRepositoryCreateController
 
     $push_policy = id(new AphrontFormPolicyControl())
       ->setUser($viewer)
-      ->setCapability(DiffusionCapabilityPush::CAPABILITY)
+      ->setCapability(DiffusionPushCapability::CAPABILITY)
       ->setPolicyObject($repository)
       ->setPolicies($policies)
       ->setName('pushPolicy');
@@ -735,7 +683,7 @@ final class DiffusionRepositoryCreateController
         ->setUser($viewer)
         ->addRemarkupInstructions(
           pht(
-            "Select access policies for this repository."))
+            'Select access policies for this repository.'))
         ->addControl($view_policy)
         ->addControl($edit_policy)
         ->addControl($push_policy);
@@ -870,21 +818,6 @@ final class DiffusionRepositoryCreateController
 
 /* -(  Internal  )----------------------------------------------------------- */
 
-
-  private function getRemoteURIProtocol($raw_uri) {
-    $uri = new PhutilURI($raw_uri);
-    if ($uri->getProtocol()) {
-      return strtolower($uri->getProtocol());
-    }
-
-    $git_uri = new PhutilGitURI($raw_uri);
-    if (strlen($git_uri->getDomain()) && strlen($git_uri->getPath())) {
-      return 'ssh';
-    }
-
-    return null;
-  }
-
   private function getRemoteURIUser($raw_uri) {
     $uri = new PhutilURI($raw_uri);
     if ($uri->getUser()) {
@@ -915,6 +848,5 @@ final class DiffusionRepositoryCreateController
   private function getRepository() {
     return $this->repository;
   }
-
 
 }

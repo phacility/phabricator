@@ -28,6 +28,11 @@ final class PhabricatorSettingsPanelExternalAccounts
       ->setViewer($viewer)
       ->withUserPHIDs(array($viewer->getPHID()))
       ->needImages(true)
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
       ->execute();
 
     $linked_head = id(new PHUIHeaderView())
@@ -35,7 +40,6 @@ final class PhabricatorSettingsPanelExternalAccounts
 
     $linked = id(new PHUIObjectItemListView())
       ->setUser($viewer)
-      ->setCards(true)
       ->setFlush(true)
       ->setNoDataString(pht('You have no linked accounts.'));
 
@@ -76,13 +80,13 @@ final class PhabricatorSettingsPanelExternalAccounts
       if ($can_refresh) {
         $item->addAction(
           id(new PHUIListItemView())
-            ->setIcon('refresh')
+            ->setIcon('fa-refresh')
             ->setHref('/auth/refresh/'.$account->getProviderKey().'/'));
       }
 
       $item->addAction(
         id(new PHUIListItemView())
-          ->setIcon('delete')
+          ->setIcon('fa-times')
           ->setWorkflow(true)
           ->setDisabled(!$can_unlink)
           ->setHref('/auth/unlink/'.$account->getProviderKey().'/'));
@@ -99,7 +103,6 @@ final class PhabricatorSettingsPanelExternalAccounts
 
     $linkable = id(new PHUIObjectItemListView())
       ->setUser($viewer)
-      ->setCards(true)
       ->setFlush(true)
       ->setNoDataString(
         pht('Your account is linked with all available providers.'));
@@ -124,7 +127,7 @@ final class PhabricatorSettingsPanelExternalAccounts
       $item->setHref($link_uri);
       $item->addAction(
         id(new PHUIListItemView())
-          ->setIcon('link')
+          ->setIcon('fa-link')
           ->setHref($link_uri));
 
       $linkable->addItem($item);

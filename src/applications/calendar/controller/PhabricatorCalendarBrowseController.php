@@ -3,6 +3,10 @@
 final class PhabricatorCalendarBrowseController
   extends PhabricatorCalendarController {
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function processRequest() {
     $now     = time();
     $request = $this->getRequest();
@@ -88,7 +92,6 @@ final class PhabricatorCalendarBrowseController
      $nav,
      array(
         'title' => pht('Calendar'),
-        'device' => true,
       ));
   }
 

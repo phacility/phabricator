@@ -20,8 +20,8 @@ final class DifferentialDiffCreateController extends DifferentialController {
 
       if (!strlen($diff)) {
         $errors[] = pht(
-          "You can not create an empty diff. Copy/paste a diff, or upload a ".
-          "diff file.");
+          'You can not create an empty diff. Copy/paste a diff, or upload a '.
+          'diff file.');
         $e_diff = pht('Required');
         $e_file = pht('Required');
       }
@@ -79,7 +79,7 @@ final class DifferentialDiffCreateController extends DifferentialController {
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton($cancel_uri)
-          ->setValue(pht("Create Diff")));
+          ->setValue(pht('Create Diff')));
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Create New Diff'))
@@ -96,7 +96,6 @@ final class DifferentialDiffCreateController extends DifferentialController {
       ),
       array(
         'title' => pht('Create Diff'),
-        'device' => true,
       ));
   }
 

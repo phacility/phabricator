@@ -14,7 +14,7 @@ final class DifferentialJIRAIssuesField
   }
 
   public function isFieldEnabled() {
-    return (bool)PhabricatorAuthProviderOAuth1JIRA::getJIRAProvider();
+    return (bool)PhabricatorJIRAAuthProvider::getJIRAProvider();
   }
 
   public function canDisableField() {
@@ -26,7 +26,11 @@ final class DifferentialJIRAIssuesField
   }
 
   public function setValueFromStorage($value) {
-    $this->setValue(phutil_json_decode($value));
+    try {
+      $this->setValue(phutil_json_decode($value));
+    } catch (PhutilJSONParserException $ex) {
+      $this->setValue(array());
+    }
     return $this;
   }
 
@@ -62,7 +66,7 @@ final class DifferentialJIRAIssuesField
   }
 
   private function buildDoorkeeperRefs($value) {
-    $provider = PhabricatorAuthProviderOAuth1JIRA::getJIRAProvider();
+    $provider = PhabricatorJIRAAuthProvider::getJIRAProvider();
 
     $refs = array();
     if ($value) {
@@ -93,11 +97,11 @@ final class DifferentialJIRAIssuesField
   }
 
   public function shouldAppearInEditView() {
-    return PhabricatorAuthProviderOAuth1JIRA::getJIRAProvider();
+    return PhabricatorJIRAAuthProvider::getJIRAProvider();
   }
 
   public function shouldAppearInApplicationTransactions() {
-    return PhabricatorAuthProviderOAuth1JIRA::getJIRAProvider();
+    return PhabricatorJIRAAuthProvider::getJIRAProvider();
   }
 
   public function readValueFromRequest(AphrontRequest $request) {
@@ -183,8 +187,8 @@ final class DifferentialJIRAIssuesField
           $type,
           pht('Invalid'),
           pht(
-            "Some JIRA issues could not be loaded. They may not exist, or ".
-            "you may not have permission to view them: %s",
+            'Some JIRA issues could not be loaded. They may not exist, or '.
+            'you may not have permission to view them: %s',
             $bad),
           $xaction);
       }
@@ -253,8 +257,7 @@ final class DifferentialJIRAIssuesField
       $revision_phid,
       $edge_type);
 
-    $editor = id(new PhabricatorEdgeEditor())
-      ->setActor($this->getViewer());
+    $editor = new PhabricatorEdgeEditor();
 
     foreach (array_diff($edges, $edge_dsts) as $rem_edge) {
       $editor->removeEdge($revision_phid, $edge_type, $rem_edge);

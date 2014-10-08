@@ -14,6 +14,16 @@ final class PhabricatorDraft extends PhabricatorDraftDAO {
       self::CONFIG_SERIALIZATION => array(
         'metadata' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'draftKey' => 'text64',
+        'draft' => 'text',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'authorPHID' => array(
+          'columns' => array('authorPHID', 'draftKey'),
+          'unique' => true,
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

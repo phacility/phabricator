@@ -47,8 +47,8 @@ foreach ($rows as $row) {
   }
 
   $xaction_phid = PhabricatorPHID::generateNewPHID(
-    PhabricatorApplicationTransactionPHIDTypeTransaction::TYPECONST,
-    PhabricatorProjectPHIDTypeProject::TYPECONST);
+    PhabricatorApplicationTransactionTransactionPHIDType::TYPECONST,
+    PhabricatorProjectProjectPHIDType::TYPECONST);
 
   queryfx(
     $conn_w,

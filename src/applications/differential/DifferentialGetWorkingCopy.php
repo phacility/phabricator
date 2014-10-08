@@ -17,7 +17,7 @@ final class DifferentialGetWorkingCopy {
     $origin_path = $repo->getLocalPath();
 
     $path = rtrim($origin_path, '/');
-    $path = $path . '__workspace';
+    $path = $path.'__workspace';
 
     if (!Filesystem::pathExists($path)) {
       $repo->execxLocalCommand(
@@ -53,7 +53,7 @@ final class DifferentialGetWorkingCopy {
     $origin_path = $repo->getLocalPath();
 
     $path = rtrim($origin_path, '/');
-    $path = $path . '__workspace';
+    $path = $path.'__workspace';
 
     if (!Filesystem::pathExists($path)) {
       $repo->execxLocalCommand(

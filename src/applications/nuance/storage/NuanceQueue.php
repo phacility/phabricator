@@ -12,12 +12,16 @@ final class NuanceQueue
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'name' => 'text255?',
+        'mailKey' => 'bytes20',
+      ),
     ) + parent::getConfiguration();
   }
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      NuancePHIDTypeQueue::TYPECONST);
+      NuanceQueuePHIDType::TYPECONST);
   }
 
   public function save() {

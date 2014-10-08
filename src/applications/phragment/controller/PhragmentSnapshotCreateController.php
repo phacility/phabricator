@@ -5,7 +5,7 @@ final class PhragmentSnapshotCreateController extends PhragmentController {
   private $dblob;
 
   public function willProcessRequest(array $data) {
-    $this->dblob = idx($data, "dblob", "");
+    $this->dblob = idx($data, 'dblob', '');
   }
 
   public function processRequest() {
@@ -52,7 +52,7 @@ final class PhragmentSnapshotCreateController extends PhragmentController {
             ->setPrimaryFragmentPHID($fragment->getPHID())
             ->setName($v_name)
             ->save();
-        } catch (AphrontQueryDuplicateKeyException $e) {
+        } catch (AphrontDuplicateKeyQueryException $e) {
           $errors[] = pht('A snapshot with this name already exists.');
         }
 
@@ -79,7 +79,7 @@ final class PhragmentSnapshotCreateController extends PhragmentController {
       }
     }
 
-    $fragment_sequence = "-";
+    $fragment_sequence = '-';
     if ($fragment->getLatestVersion() !== null) {
       $fragment_sequence = $fragment->getLatestVersion()->getSequence();
     }
@@ -90,15 +90,17 @@ final class PhragmentSnapshotCreateController extends PhragmentController {
       array(),
       array(
         phutil_tag('th', array(), 'Fragment'),
-        phutil_tag('th', array(), 'Version')));
+        phutil_tag('th', array(), 'Version'),
+      ));
     $rows[] = phutil_tag(
       'tr',
       array(),
       array(
         phutil_tag('td', array(), $fragment->getPath()),
-        phutil_tag('td', array(), $fragment_sequence)));
+        phutil_tag('td', array(), $fragment_sequence),
+      ));
     foreach ($children as $child) {
-      $sequence = "-";
+      $sequence = '-';
       if ($child->getLatestVersion() !== null) {
         $sequence = $child->getLatestVersion()->getSequence();
       }
@@ -107,7 +109,8 @@ final class PhragmentSnapshotCreateController extends PhragmentController {
         array(),
         array(
           phutil_tag('td', array(), $child->getPath()),
-          phutil_tag('td', array(), $sequence)));
+          phutil_tag('td', array(), $sequence),
+        ));
     }
 
     $table = phutil_tag(
@@ -123,9 +126,10 @@ final class PhragmentSnapshotCreateController extends PhragmentController {
           'p',
           array(),
           pht(
-            "The snapshot will contain the following fragments at ".
-            "the specified versions: ")),
-        $table));
+            'The snapshot will contain the following fragments at '.
+            'the specified versions: ')),
+        $table,
+      ));
 
     $form = id(new AphrontFormView())
       ->setUser($viewer)
@@ -159,10 +163,11 @@ final class PhragmentSnapshotCreateController extends PhragmentController {
       array(
         $crumbs,
         $this->renderConfigurationWarningIfRequired(),
-        $box),
+        $box,
+      ),
       array(
         'title' => pht('Create Fragment'),
-        'device' => true));
+      ));
   }
 
 }

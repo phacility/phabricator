@@ -199,10 +199,31 @@ final class PhrequentUserTimeQuery
           $u_start = $u_event->getDateStarted();
           $u_end = $u_event->getDateEnded();
 
-          if (($u_start >= $e_start) && ($u_end <= $e_end) &&
-              ($u_end === null || $u_end > $e_start)) {
-            $select[] = $u_event;
+          if ($u_start < $e_start) {
+            // This event started before our event started, so it's not
+            // preempting us.
+            continue;
           }
+
+          if ($u_start == $e_start) {
+            if ($u_event->getID() < $event->getID()) {
+              // This event started at the same time as our event started,
+              // but has a lower ID, so it's not preempting us.
+              continue;
+            }
+          }
+
+          if (($e_end !== null) && ($u_start > $e_end)) {
+            // Our event has ended, and this event started after it ended.
+            continue;
+          }
+
+          if (($u_end !== null) && ($u_end < $e_start)) {
+            // This event ended before our event began.
+            continue;
+          }
+
+          $select[] = $u_event;
         }
 
         $event->attachPreemptingEvents($select);
@@ -218,7 +239,8 @@ final class PhrequentUserTimeQuery
     return array(
       self::ENDED_ALL => pht('All'),
       self::ENDED_NO  => pht('No'),
-      self::ENDED_YES => pht('Yes'));
+      self::ENDED_YES => pht('Yes'),
+    );
   }
 
   public static function getOrderSearchOptions() {
@@ -228,7 +250,8 @@ final class PhrequentUserTimeQuery
       self::ORDER_ENDED_ASC     => pht('by furthest end date'),
       self::ORDER_ENDED_DESC    => pht('by nearest end date'),
       self::ORDER_DURATION_ASC  => pht('by smallest duration'),
-      self::ORDER_DURATION_DESC => pht('by largest duration'));
+      self::ORDER_DURATION_DESC => pht('by largest duration'),
+    );
   }
 
   public static function getUserTotalObjectsTracked(
@@ -302,9 +325,8 @@ final class PhrequentUserTimeQuery
     return $sum_ended['N'] + $sum_not_ended['N'];
   }
 
-
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationPhrequent';
+    return 'PhabricatorPhrequentApplication';
   }
 
 }

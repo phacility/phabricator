@@ -1,10 +1,15 @@
 <?php
 
-/**
- * @group legalpad
- */
 final class LegalpadDocumentSearchEngine
   extends PhabricatorApplicationSearchEngine {
+
+  public function getResultTypeDescription() {
+    return pht('Legalpad Documents');
+  }
+
+  public function getApplicationClassName() {
+    return 'PhabricatorLegalpadApplication';
+  }
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
@@ -16,6 +21,10 @@ final class LegalpadDocumentSearchEngine
       'contributorPHIDs',
       $this->readUsersFromRequest($request, 'contributors'));
 
+    $saved->setParameter(
+      'withViewerSignature',
+      $request->getBool('withViewerSignature'));
+
     $saved->setParameter('createdStart', $request->getStr('createdStart'));
     $saved->setParameter('createdEnd', $request->getStr('createdEnd'));
 
@@ -24,8 +33,24 @@ final class LegalpadDocumentSearchEngine
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new LegalpadDocumentQuery())
-      ->withCreatorPHIDs($saved->getParameter('creatorPHIDs', array()))
-      ->withContributorPHIDs($saved->getParameter('contributorPHIDs', array()));
+      ->needViewerSignatures(true);
+
+    $creator_phids = $saved->getParameter('creatorPHIDs', array());
+    if ($creator_phids) {
+      $query->withCreatorPHIDs($creator_phids);
+    }
+
+    $contributor_phids = $saved->getParameter('contributorPHIDs', array());
+    if ($contributor_phids) {
+      $query->withContributorPHIDs($contributor_phids);
+    }
+
+    if ($saved->getParameter('withViewerSignature')) {
+      $viewer_phid = $this->requireViewer()->getPHID();
+      if ($viewer_phid) {
+        $query->withSignerPHIDs(array($viewer_phid));
+      }
+    }
 
     $start = $this->parseDateTime($saved->getParameter('createdStart'));
     $end = $this->parseDateTime($saved->getParameter('createdEnd'));
@@ -54,16 +79,29 @@ final class LegalpadDocumentSearchEngine
       ->withPHIDs($phids)
       ->execute();
 
+    $viewer_signature = $saved_query->getParameter('withViewerSignature');
+    if (!$this->requireViewer()->getPHID()) {
+      $viewer_signature = false;
+    }
+
     $form
       ->appendChild(
+        id(new AphrontFormCheckboxControl())
+          ->addCheckbox(
+            'withViewerSignature',
+            1,
+            pht('Show only documents I have signed.'),
+            $viewer_signature)
+          ->setDisabled(!$this->requireViewer()->getPHID()))
+      ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/users/')
+          ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('creators')
           ->setLabel(pht('Creators'))
           ->setValue(array_select_keys($handles, $creator_phids)))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/users/')
+          ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('contributors')
           ->setLabel(pht('Contributors'))
           ->setValue(array_select_keys($handles, $contributor_phids)));
@@ -83,24 +121,94 @@ final class LegalpadDocumentSearchEngine
   }
 
   public function getBuiltinQueryNames() {
-    $names = array(
-      'all' => pht('All Documents'),
-    );
+    $names = array();
+
+    if ($this->requireViewer()->isLoggedIn()) {
+      $names['signed'] = pht('Signed Documents');
+    }
+
+    $names['all'] = pht('All Documents');
 
     return $names;
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
-
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
 
     switch ($query_key) {
+      case 'signed':
+        return $query
+          ->setParameter('withViewerSignature', true);
       case 'all':
         return $query;
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
+  }
+
+  protected function getRequiredHandlePHIDsForResultList(
+    array $documents,
+    PhabricatorSavedQuery $query) {
+    return array();
+  }
+
+  protected function renderResultList(
+    array $documents,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+    assert_instances_of($documents, 'LegalpadDocument');
+
+    $viewer = $this->requireViewer();
+
+    $list = new PHUIObjectItemListView();
+    $list->setUser($viewer);
+    foreach ($documents as $document) {
+      $last_updated = phabricator_date($document->getDateModified(), $viewer);
+
+      $title = $document->getTitle();
+
+      $type_name = $document->getSignatureTypeName();
+      $type_icon = $document->getSignatureTypeIcon();
+
+      $item = id(new PHUIObjectItemView())
+        ->setObjectName($document->getMonogram())
+        ->setHeader($title)
+        ->setHref('/'.$document->getMonogram())
+        ->setObject($document)
+        ->addIcon($type_icon, $type_name)
+        ->addIcon(
+          'fa-pencil grey',
+          pht('Version %d (%s)', $document->getVersions(), $last_updated));
+
+      if ($viewer->getPHID()) {
+        $signature = $document->getUserSignature($viewer->getPHID());
+      } else {
+        $signature = null;
+      }
+
+      if ($signature) {
+        $item->addAttribute(
+          array(
+            id(new PHUIIconView())->setIconFont('fa-check-square-o', 'green'),
+            ' ',
+            pht(
+              'Signed on %s',
+              phabricator_date($signature->getDateCreated(), $viewer)),
+          ));
+      } else {
+        $item->addAttribute(
+          array(
+            id(new PHUIIconView())->setIconFont('fa-square-o', 'grey'),
+            ' ',
+            pht('Not Signed'),
+          ));
+      }
+
+      $list->addItem($item);
+    }
+
+    return $list;
   }
 
 }

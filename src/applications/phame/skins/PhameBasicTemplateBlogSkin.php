@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phame
- */
 final class PhameBasicTemplateBlogSkin extends PhameBasicBlogSkin {
 
   private $cssResources;
@@ -44,16 +41,21 @@ final class PhameBasicTemplateBlogSkin extends PhameBasicBlogSkin {
     $this->cssResources = phutil_implode_html("\n", $this->cssResources);
 
     $request = $this->getRequest();
+
+    // Render page parts in order so the templates execute in order, if we're
+    // using templates.
+    $header = $this->renderHeader();
     $content = $this->renderContent($request);
+    $footer = $this->renderFooter();
 
     if (!$content) {
       $content = $this->render404Page();
     }
 
     $content = array(
-      $this->renderHeader(),
+      $header,
       $content,
-      $this->renderFooter(),
+      $footer,
     );
 
     $response = new AphrontWebpageResponse();

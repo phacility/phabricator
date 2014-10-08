@@ -174,9 +174,9 @@ final class ReleephBranchTemplate {
       $part_error = null;
       if (preg_match('{^\.}', $part) || preg_match('{\.$}', $part)) {
         $errors[] = "Path components cannot begin or end with '.'";
-      } elseif (preg_match('{^(?!\w)}', $part)) {
-        $errors[] = "Path components must begin with an alphanumeric";
-      } elseif (!preg_match('{^\w ([\w-_%\.]* [\w-_%])?$}x', $part)) {
+      } else if (preg_match('{^(?!\w)}', $part)) {
+        $errors[] = 'Path components must begin with an alphanumeric';
+      } else if (!preg_match('{^\w ([\w-_%\.]* [\w-_%])?$}x', $part)) {
         $errors[] =
           "Path components may only contain alphanumerics ".
           "or '-', '_', or '.'";

@@ -8,6 +8,43 @@ function phabricator_read_config_file($original_config) {
   $config = preg_replace('/\.conf\.php$/', '', $original_config);
   $full_config_path = $root.'/conf/'.$config.'.conf.php';
 
+  if (!Filesystem::pathExists($full_config_path)) {
+
+    // These are very old configuration files which we used to ship with
+    // by default. File based configuration was de-emphasized once web-based
+    // configuration was built. The actual files were removed to reduce
+    // user confusion over how to configure Phabricator.
+
+    switch ($config) {
+      case 'default':
+      case 'production':
+        return array();
+      case 'development':
+        return array(
+          'phabricator.developer-mode'      => true,
+          'darkconsole.enabled'             => true,
+          'celerity.minify'                 => false,
+        );
+    }
+
+    $files = id(new FileFinder($root.'/conf/'))
+      ->withType('f')
+      ->withSuffix('conf.php')
+      ->withFollowSymlinks(true)
+      ->find();
+
+    foreach ($files as $key => $file) {
+      $file = trim($file, './');
+      $files[$key] = preg_replace('/\.conf\.php$/', '', $file);
+    }
+    $files = "    ".implode("\n    ", $files);
+
+    throw new Exception(
+      "CONFIGURATION ERROR\n".
+      "Config file '{$original_config}' does not exist. Valid config files ".
+      "are:\n\n".$files);
+  }
+
   // Make sure config file errors are reported.
   $old_error_level = error_reporting(E_ALL | E_STRICT);
   $old_display_errors = ini_get('display_errors');
@@ -21,24 +58,6 @@ function phabricator_read_config_file($original_config) {
   ini_set('display_errors', $old_display_errors);
 
   if ($conf === false) {
-    if (!Filesystem::pathExists($full_config_path)) {
-      $files = id(new FileFinder($root.'/conf/'))
-        ->withType('f')
-        ->withSuffix('conf.php')
-        ->withFollowSymlinks(true)
-        ->find();
-
-      foreach ($files as $key => $file) {
-        $file = trim($file, './');
-        $files[$key] = preg_replace('/\.conf\.php$/', '', $file);
-      }
-      $files = "    ".implode("\n    ", $files);
-
-      throw new Exception(
-        "CONFIGURATION ERROR\n".
-        "Config file '{$original_config}' does not exist. Valid config files ".
-        "are:\n\n".$files);
-    }
     throw new Exception("Failed to read config file '{$config}': {$errors}");
   }
 

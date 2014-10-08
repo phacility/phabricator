@@ -3,6 +3,10 @@
 final class PhabricatorSlowvoteSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Slowvotes');
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
     $saved->setParameter(
@@ -51,7 +55,7 @@ final class PhabricatorSlowvoteSearchEngine
     $form
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/users/')
+          ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('authors')
           ->setLabel(pht('Authors'))
           ->setValue($author_handles))
@@ -113,6 +117,57 @@ final class PhabricatorSlowvoteSearchEngine
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
+  }
+
+  public function getRequiredHandlePHIDsForResultList(
+    array $polls,
+    PhabricatorSavedQuery $query) {
+    return mpull($polls, 'getAuthorPHID');
+  }
+
+  protected function renderResultList(
+    array $polls,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+
+    assert_instances_of($polls, 'PhabricatorSlowvotePoll');
+    $viewer = $this->requireViewer();
+
+    $list = id(new PHUIObjectItemListView())
+      ->setUser($viewer);
+
+    $phids = mpull($polls, 'getAuthorPHID');
+
+    foreach ($polls as $poll) {
+      $date_created = phabricator_datetime($poll->getDateCreated(), $viewer);
+      if ($poll->getAuthorPHID()) {
+        $author = $handles[$poll->getAuthorPHID()]->renderLink();
+      } else {
+        $author = null;
+      }
+
+      $item = id(new PHUIObjectItemView())
+        ->setObjectName('V'.$poll->getID())
+        ->setHeader($poll->getQuestion())
+        ->setHref('/V'.$poll->getID())
+        ->setDisabled($poll->getIsClosed())
+        ->addIcon('none', $date_created);
+
+      $description = $poll->getDescription();
+      if (strlen($description)) {
+        $item->addAttribute(id(new PhutilUTF8StringTruncator())
+          ->setMaximumGlyphs(120)
+          ->truncateString($poll->getDescription()));
+      }
+
+      if ($author) {
+        $item->addByline(pht('Author: %s', $author));
+      }
+
+      $list->addItem($item);
+    }
+
+    return $list;
   }
 
 }

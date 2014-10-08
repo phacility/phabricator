@@ -39,7 +39,10 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
       ->withLeaseIDs(array($lease->getID()))
       ->executeWithOffsetPager($pager);
 
-    $log_table = $this->buildLogTableView($logs);
+    $log_table = id(new DrydockLogListView())
+      ->setUser($viewer)
+      ->setLogs($logs)
+      ->render();
     $log_table->appendChild($pager);
 
     $crumbs = $this->buildApplicationCrumbs();
@@ -57,7 +60,6 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
         $log_table,
       ),
       array(
-        'device'  => true,
         'title'   => $title,
       ));
 
@@ -76,7 +78,7 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
     $view->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Release Lease'))
-        ->setIcon('delete')
+        ->setIcon('fa-times')
         ->setHref($this->getApplicationURI("/lease/{$id}/release/"))
         ->setWorkflow(true)
         ->setDisabled(!$can_release));

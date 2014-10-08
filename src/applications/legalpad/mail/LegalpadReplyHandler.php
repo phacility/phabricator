@@ -1,13 +1,10 @@
 <?php
 
-/**
- * @group legalpad
- */
 final class LegalpadReplyHandler extends PhabricatorMailReplyHandler {
 
   public function validateMailReceiver($mail_receiver) {
     if (!($mail_receiver instanceof LegalpadDocument)) {
-      throw new Exception("Mail receiver is not a LegalpadDocument!");
+      throw new Exception('Mail receiver is not a LegalpadDocument!');
     }
   }
 

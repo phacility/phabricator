@@ -99,7 +99,7 @@ final class PhabricatorApplicationTransactionValueController
     $details[] = phutil_tag(
       'p',
       array(
-        'class' => 'policy-transaction-detail-intro'
+        'class' => 'policy-transaction-detail-intro',
       ),
       pht('These rules are processed in order:'));
 
@@ -123,17 +123,18 @@ final class PhabricatorApplicationTransactionValueController
       }
       $details[] = phutil_tag('div',
         array(
-          'class' => 'policy-transaction-detail-row'
+          'class' => 'policy-transaction-detail-row',
         ),
         array(
           $icon,
-          $value));
+          $value,
+        ));
     }
 
     $details[] = phutil_tag(
       'p',
       array(
-        'class' => 'policy-transaction-detail-end'
+        'class' => 'policy-transaction-detail-end',
       ),
       pht(
         'If no rules match, %s all other users.',

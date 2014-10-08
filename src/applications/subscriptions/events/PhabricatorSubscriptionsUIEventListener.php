@@ -45,7 +45,7 @@ final class PhabricatorSubscriptionsUIEventListener
         ->setRenderAsForm(true)
         ->setHref('/subscriptions/add/'.$object->getPHID().'/')
         ->setName(pht('Automatically Subscribed'))
-        ->setIcon('enable');
+        ->setIcon('fa-check-circle lightgreytext');
     } else {
       $subscribed = false;
       if ($user->isLoggedIn()) {
@@ -67,14 +67,14 @@ final class PhabricatorSubscriptionsUIEventListener
           ->setRenderAsForm(true)
           ->setHref('/subscriptions/delete/'.$object->getPHID().'/')
           ->setName(pht('Unsubscribe'))
-          ->setIcon('disable');
+          ->setIcon('fa-minus-circle');
       } else {
         $sub_action = id(new PhabricatorActionView())
           ->setWorkflow(true)
           ->setRenderAsForm(true)
           ->setHref('/subscriptions/add/'.$object->getPHID().'/')
           ->setName(pht('Subscribe'))
-          ->setIcon('check');
+          ->setIcon('fa-plus-circle');
       }
 
       if (!$user->isLoggedIn()) {

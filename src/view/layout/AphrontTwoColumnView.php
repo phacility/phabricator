@@ -33,14 +33,14 @@ final class AphrontTwoColumnView extends AphrontView {
     $main = phutil_tag(
       'div',
       array(
-        'class' => 'aphront-main-column'
+        'class' => 'aphront-main-column',
       ),
       $this->mainColumn);
 
     $side = phutil_tag(
       'div',
       array(
-        'class' => 'aphront-side-column'
+        'class' => 'aphront-side-column',
       ),
       $this->sideColumn);
 
@@ -56,7 +56,7 @@ final class AphrontTwoColumnView extends AphrontView {
     return phutil_tag(
       'div',
       array(
-        'class' => implode(' ', $classes)
+        'class' => implode(' ', $classes),
       ),
       array(
         $main,

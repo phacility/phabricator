@@ -107,8 +107,10 @@ abstract class PhabricatorStandardCustomField
           $this->setCaption($value);
           break;
         case 'required':
-          $this->setRequired($value);
-          $this->setFieldError(true);
+          if ($value) {
+            $this->setRequired($value);
+            $this->setFieldError(true);
+          }
           break;
         case 'default':
           $this->setFieldValue($value);
@@ -215,13 +217,18 @@ abstract class PhabricatorStandardCustomField
     return $this->getFieldConfigValue('instructions');
   }
 
+  public function getPlaceholder() {
+    return $this->getFieldConfigValue('placeholder', null);
+  }
+
   public function renderEditControl(array $handles) {
     return id(new AphrontFormTextControl())
       ->setName($this->getFieldKey())
       ->setCaption($this->getCaption())
       ->setValue($this->getFieldValue())
       ->setError($this->getFieldError())
-      ->setLabel($this->getFieldName());
+      ->setLabel($this->getFieldName())
+      ->setPlaceholder($this->getPlaceholder());
   }
 
   public function newStorageObject() {
@@ -253,6 +260,10 @@ abstract class PhabricatorStandardCustomField
 
   public function buildFieldIndexes() {
     return array();
+  }
+
+  public function buildOrderIndex() {
+    return null;
   }
 
   public function readApplicationSearchValueFromRequest(
@@ -384,6 +395,11 @@ abstract class PhabricatorStandardCustomField
 
   public function getHeraldFieldValue() {
     return $this->getFieldValue();
+  }
+
+  public function getFieldControlID($key = null) {
+    $key = coalesce($key, $this->getRawStandardFieldKey());
+    return 'std:control:'.$key;
   }
 
 }

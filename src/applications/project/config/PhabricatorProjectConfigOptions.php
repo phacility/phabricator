@@ -4,11 +4,11 @@ final class PhabricatorProjectConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
   public function getName() {
-    return pht("Projects");
+    return pht('Projects');
   }
 
   public function getDescription() {
-    return pht("Configure Projects.");
+    return pht('Configure Projects.');
   }
 
   public function getOptions() {
@@ -29,14 +29,14 @@ final class PhabricatorProjectConfigOptions
         ->setSummary(pht('Custom Projects fields.'))
         ->setDescription(
           pht(
-            "Array of custom fields for Projects."))
+            'Array of custom fields for Projects.'))
         ->addExample(
           '{"mycompany:motto": {"name": "Project Motto", '.
           '"type": "string"}}',
           pht('Valid Setting')),
       $this->newOption('projects.fields', $custom_field_type, $default_fields)
         ->setCustomData(id(new PhabricatorProject())->getCustomFieldBaseClass())
-        ->setDescription(pht("Select and reorder project fields.")),
+        ->setDescription(pht('Select and reorder project fields.')),
     );
   }
 

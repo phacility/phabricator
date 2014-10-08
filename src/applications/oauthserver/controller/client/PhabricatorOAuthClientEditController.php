@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorOAuthClientEditController
-  extends PhabricatorOAuthClientBaseController {
+  extends PhabricatorOAuthClientController {
 
   public function processRequest() {
     $request = $this->getRequest();
@@ -29,7 +29,7 @@ final class PhabricatorOAuthClientEditController
       $is_new = false;
     } else {
       $this->requireApplicationCapability(
-        PhabricatorOAuthServerCapabilityCreateClients::CAPABILITY);
+        PhabricatorOAuthServerCreateClientsCapability::CAPABILITY);
 
       $client = PhabricatorOAuthServerClient::initializeNewClient($viewer);
 
@@ -110,7 +110,6 @@ final class PhabricatorOAuthClientEditController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

@@ -7,6 +7,14 @@ final class DifferentialTransactionEditor
   private $changedPriorToCommitURI;
   private $isCloseByCommit;
 
+  public function getEditorApplicationClass() {
+    return 'PhabricatorDifferentialApplication';
+  }
+
+  public function getEditorObjectsDescription() {
+    return pht('Differential Revisions');
+  }
+
   public function getDiffUpdateTransaction(array $xactions) {
     $type_update = DifferentialTransaction::TYPE_UPDATE;
 
@@ -98,6 +106,8 @@ final class DifferentialTransactionEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
+    $actor_phid = $this->getActingAsPHID();
+
     switch ($xaction->getTransactionType()) {
       case DifferentialTransaction::TYPE_INLINE:
         return $xaction->hasComment();
@@ -119,7 +129,6 @@ final class DifferentialTransactionEditor
             }
 
             $actor = $this->getActor();
-            $actor_phid = $actor->getPHID();
 
             // These transactions can cause effects in two ways: by altering the
             // status of an existing reviewer; or by adding the actor as a new
@@ -151,7 +160,6 @@ final class DifferentialTransactionEditor
           case DifferentialAction::ACTION_REQUEST:
             return ($object->getStatus() != $status_review);
           case DifferentialAction::ACTION_RESIGN:
-            $actor_phid = $this->getActor()->getPHID();
             foreach ($object->getReviewerStatus() as $reviewer) {
               if ($reviewer->getReviewerPHID() == $actor_phid) {
                 return true;
@@ -159,14 +167,12 @@ final class DifferentialTransactionEditor
             }
             return false;
           case DifferentialAction::ACTION_CLAIM:
-            $actor_phid = $this->getActor()->getPHID();
             return ($actor_phid != $object->getAuthorPHID());
         }
     }
 
     return parent::transactionHasEffect($object, $xaction);
   }
-
 
   protected function applyCustomInternalTransaction(
     PhabricatorLiskDAO $object,
@@ -232,7 +238,7 @@ final class DifferentialTransactionEditor
             $object->setStatus(ArcanistDifferentialRevisionStatus::CLOSED);
             return;
           case DifferentialAction::ACTION_CLAIM:
-            $object->setAuthorPHID($this->getActor()->getPHID());
+            $object->setAuthorPHID($this->getActingAsPHID());
             return;
         }
         break;
@@ -248,13 +254,13 @@ final class DifferentialTransactionEditor
     $results = parent::expandTransaction($object, $xaction);
 
     $actor = $this->getActor();
-    $actor_phid = $actor->getPHID();
+    $actor_phid = $this->getActingAsPHID();
     $type_edge = PhabricatorTransactions::TYPE_EDGE;
 
     $status_plan = ArcanistDifferentialRevisionStatus::CHANGES_PLANNED;
 
     $edge_reviewer = PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER;
-    $edge_ref_task = PhabricatorEdgeConfig::TYPE_DREV_HAS_RELATED_TASK;
+    $edge_ref_task = DifferentialRevisionHasTaskEdgeType::EDGECONST;
 
     $is_sticky_accept = PhabricatorEnv::getEnvConfig(
       'differential.sticky-accept');
@@ -350,7 +356,7 @@ final class DifferentialTransactionEditor
         // "T123" or similar, automatically associate the commit with the
         // task that the branch names.
 
-        $maniphest = 'PhabricatorApplicationManiphest';
+        $maniphest = 'PhabricatorManiphestApplication';
         if (PhabricatorApplication::isClassInstalled($maniphest)) {
           $diff = $this->requireDiff($xaction->getNewValue());
           $branch = $diff->getBranch();
@@ -572,8 +578,6 @@ final class DifferentialTransactionEditor
     return $result;
   }
 
-
-
   protected function applyFinalEffects(
     PhabricatorLiskDAO $object,
     array $xactions) {
@@ -693,7 +697,6 @@ final class DifferentialTransactionEditor
     return $xactions;
   }
 
-
   protected function validateTransaction(
     PhabricatorLiskDAO $object,
     $type,
@@ -786,8 +789,11 @@ final class DifferentialTransactionEditor
     $action) {
 
     $author_phid = $revision->getAuthorPHID();
-    $actor_phid = $this->getActor()->getPHID();
+    $actor_phid = $this->getActingAsPHID();
     $actor_is_author = ($author_phid == $actor_phid);
+
+    $config_abandon_key = 'differential.always-allow-abandon';
+    $always_allow_abandon = PhabricatorEnv::getEnvConfig($config_abandon_key);
 
     $config_close_key = 'differential.always-allow-close';
     $always_allow_close = PhabricatorEnv::getEnvConfig($config_close_key);
@@ -822,6 +828,18 @@ final class DifferentialTransactionEditor
             'You can not accept this revision because it has already been '.
             'closed.');
         }
+
+        // TODO: It would be nice to make this generic at some point.
+        $signatures = DifferentialRequiredSignaturesField::loadForRevision(
+          $revision);
+        foreach ($signatures as $phid => $signed) {
+          if (!$signed) {
+            return pht(
+              'You can not accept this revision because the author has '.
+              'not signed all of the required legal documents.');
+          }
+        }
+
         break;
 
       case DifferentialAction::ACTION_REJECT:
@@ -854,22 +872,22 @@ final class DifferentialTransactionEditor
 
         if ($revision_status == $status_closed) {
           return pht(
-            "You can not commandeer this revision because it has already been ".
-            "closed.");
+            'You can not commandeer this revision because it has already been '.
+            'closed.');
         }
         break;
 
       case DifferentialAction::ACTION_ABANDON:
-        if (!$actor_is_author) {
+        if (!$actor_is_author && !$always_allow_abandon) {
           return pht(
-            "You can not abandon this revision because you do not own it. ".
-            "You can only abandon revisions you own.");
+            'You can not abandon this revision because you do not own it. '.
+            'You can only abandon revisions you own.');
         }
 
         if ($revision_status == $status_closed) {
           return pht(
-            "You can not abandon this revision because it has already been ".
-            "closed.");
+            'You can not abandon this revision because it has already been '.
+            'closed.');
         }
 
         // NOTE: Abandons of already-abandoned revisions are treated as no-op
@@ -880,14 +898,14 @@ final class DifferentialTransactionEditor
       case DifferentialAction::ACTION_RECLAIM:
         if (!$actor_is_author) {
           return pht(
-            "You can not reclaim this revision because you do not own ".
-            "it. You can only reclaim revisions you own.");
+            'You can not reclaim this revision because you do not own '.
+            'it. You can only reclaim revisions you own.');
         }
 
         if ($revision_status == $status_closed) {
           return pht(
-            "You can not reclaim this revision because it has already been ".
-            "closed.");
+            'You can not reclaim this revision because it has already been '.
+            'closed.');
         }
 
         // NOTE: Reclaims of other non-abandoned revisions are treated as no-op
@@ -910,8 +928,8 @@ final class DifferentialTransactionEditor
       case DifferentialAction::ACTION_RETHINK:
         if (!$actor_is_author) {
           return pht(
-            "You can not plan changes to this revision because you do not ".
-            "own it. To plan changes to a revision, you must be its owner.");
+            'You can not plan changes to this revision because you do not '.
+            'own it. To plan changes to a revision, you must be its owner.');
         }
 
         switch ($revision_status) {
@@ -925,12 +943,12 @@ final class DifferentialTransactionEditor
             break;
           case ArcanistDifferentialRevisionStatus::ABANDONED:
             return pht(
-              "You can not plan changes to this revision because it has ".
-              "been abandoned.");
+              'You can not plan changes to this revision because it has '.
+              'been abandoned.');
           case ArcanistDifferentialRevisionStatus::CLOSED:
             return pht(
-              "You can not plan changes to this revision because it has ".
-              "already been closed.");
+              'You can not plan changes to this revision because it has '.
+              'already been closed.');
           default:
             throw new Exception(
               pht(
@@ -944,9 +962,9 @@ final class DifferentialTransactionEditor
       case DifferentialAction::ACTION_REQUEST:
         if (!$actor_is_author) {
           return pht(
-            "You can not request review of this revision because you do ".
-            "not own it. To request review of a revision, you must be its ".
-            "owner.");
+            'You can not request review of this revision because you do '.
+            'not own it. To request review of a revision, you must be its '.
+            'owner.');
         }
 
         switch ($revision_status) {
@@ -960,12 +978,12 @@ final class DifferentialTransactionEditor
             break;
           case ArcanistDifferentialRevisionStatus::ABANDONED:
             return pht(
-              "You can not request review of this revision because it has ".
-              "been abandoned. Instead, reclaim it.");
+              'You can not request review of this revision because it has '.
+              'been abandoned. Instead, reclaim it.');
           case ArcanistDifferentialRevisionStatus::CLOSED:
             return pht(
-              "You can not request review of this revision because it has ".
-              "already been closed.");
+              'You can not request review of this revision because it has '.
+              'already been closed.');
           default:
             throw new Exception(
               pht(
@@ -984,14 +1002,14 @@ final class DifferentialTransactionEditor
         if (!$this->getIsCloseByCommit()) {
           if (!$actor_is_author && !$always_allow_close) {
             return pht(
-              "You can not close this revision because you do not own it. To ".
-              "close a revision, you must be its owner.");
+              'You can not close this revision because you do not own it. To '.
+              'close a revision, you must be its owner.');
           }
 
           if ($revision_status != $status_accepted) {
             return pht(
-              "You can not close this revision because it has not been ".
-              "accepted. You can only close accepted revisions.");
+              'You can not close this revision because it has not been '.
+              'accepted. You can only close accepted revisions.');
           }
         }
         break;
@@ -1022,8 +1040,7 @@ final class DifferentialTransactionEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
-    switch ($xaction->getTransactionType()) {
-    }
+    switch ($xaction->getTransactionType()) {}
 
     return parent::requireCapabilities($object, $xaction);
   }
@@ -1161,25 +1178,45 @@ final class DifferentialTransactionEditor
       $config_attach = PhabricatorEnv::getEnvConfig($config_key_attach);
 
       if ($config_inline || $config_attach) {
-        $patch = $this->renderPatchForMail($diff);
-        $lines = count(phutil_split_lines($patch));
+        $patch_section = $this->renderPatchForMail($diff);
+        $lines = count(phutil_split_lines($patch_section->getPlaintext()));
 
         if ($config_inline && ($lines <= $config_inline)) {
           $body->addTextSection(
             pht('CHANGE DETAILS'),
-            $patch);
+            $patch_section);
         }
 
         if ($config_attach) {
           $name = pht('D%s.%s.patch', $object->getID(), $diff->getID());
           $mime_type = 'text/x-patch; charset=utf-8';
           $body->addAttachment(
-            new PhabricatorMetaMTAAttachment($patch, $name, $mime_type));
+            new PhabricatorMetaMTAAttachment(
+              $patch_section->getPlaintext(), $name, $mime_type));
         }
       }
     }
 
     return $body;
+  }
+
+  public function getMailTagsMap() {
+    return array(
+      MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEW_REQUEST =>
+        pht('A revision is created.'),
+      MetaMTANotificationType::TYPE_DIFFERENTIAL_UPDATED =>
+        pht('A revision is updated.'),
+      MetaMTANotificationType::TYPE_DIFFERENTIAL_COMMENT =>
+        pht('Someone comments on a revision.'),
+      MetaMTANotificationType::TYPE_DIFFERENTIAL_CLOSED =>
+        pht('A revision is closed.'),
+      MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEWERS =>
+        pht("A revision's reviewers change."),
+      MetaMTANotificationType::TYPE_DIFFERENTIAL_CC =>
+        pht("A revision's CCs change."),
+      MetaMTANotificationType::TYPE_DIFFERENTIAL_OTHER =>
+        pht('Other revision activity not listed above occurs.'),
+    );
   }
 
   protected function supportsSearch() {
@@ -1190,8 +1227,7 @@ final class DifferentialTransactionEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
-    switch ($xaction->getTransactionType()) {
-    }
+    switch ($xaction->getTransactionType()) {}
 
     return parent::extractFilePHIDsFromCustomTransaction($object, $xaction);
   }
@@ -1201,7 +1237,6 @@ final class DifferentialTransactionEditor
     array $xactions,
     $blocks,
     PhutilMarkupEngine $engine) {
-
 
     $flat_blocks = array_mergev($blocks);
     $huge_block = implode("\n\n", $flat_blocks);
@@ -1235,8 +1270,10 @@ final class DifferentialTransactionEditor
         ->execute();
 
       if ($tasks) {
-        $edge_related = PhabricatorEdgeConfig::TYPE_DREV_HAS_RELATED_TASK;
-        $edges[$edge_related] = mpull($tasks, 'getPHID', 'getPHID');
+        $phid_map = mpull($tasks, 'getPHID', 'getPHID');
+        $edge_related = DifferentialRevisionHasTaskEdgeType::EDGECONST;
+        $edges[$edge_related] = $phid_map;
+        $this->setUnmentionablePHIDMap($phid_map);
       }
     }
 
@@ -1268,6 +1305,38 @@ final class DifferentialTransactionEditor
     return $result;
   }
 
+  protected function indentForMail(array $lines) {
+    $indented = array();
+    foreach ($lines as $line) {
+      $indented[] = '> '.$line;
+    }
+    return $indented;
+  }
+
+  protected function nestCommentHistory(
+    DifferentialTransactionComment $comment, array $comments_by_line_number,
+    array $users_by_phid) {
+
+    $nested = array();
+    $previous_comments = $comments_by_line_number[$comment->getChangesetID()]
+                                                 [$comment->getLineNumber()];
+    foreach ($previous_comments as $previous_comment) {
+      if ($previous_comment->getID() >= $comment->getID())
+        break;
+      $nested = $this->indentForMail(
+        array_merge(
+          $nested,
+          explode("\n", $previous_comment->getContent())));
+      $user = idx($users_by_phid, $previous_comment->getAuthorPHID(), null);
+      if ($user) {
+        array_unshift($nested, pht('%s wrote:', $user->getUserName()));
+      }
+    }
+
+    $nested = array_merge($nested, explode("\n", $comment->getContent()));
+    return implode("\n", $nested);
+  }
+
   private function renderInlineCommentsForMail(
     PhabricatorLiskDAO $object,
     array $inlines) {
@@ -1276,27 +1345,53 @@ final class DifferentialTransactionEditor
     $show_context = PhabricatorEnv::getEnvConfig($context_key);
 
     $changeset_ids = array();
+    $line_numbers_by_changeset = array();
     foreach ($inlines as $inline) {
       $id = $inline->getComment()->getChangesetID();
       $changeset_ids[$id] = $id;
+      $line_numbers_by_changeset[$id][] =
+        $inline->getComment()->getLineNumber();
     }
 
-    // TODO: We should write a proper Query class for this eventually.
-    $changesets = id(new DifferentialChangeset())->loadAllWhere(
-      'id IN (%Ld)',
-      $changeset_ids);
-    if ($show_context) {
-      $hunk_parser = new DifferentialHunkParser();
-      foreach ($changesets as $changeset) {
-        $changeset->attachHunks($changeset->loadHunks());
-      }
-    }
+    $changesets = id(new DifferentialChangesetQuery())
+      ->setViewer($this->getActor())
+      ->withIDs($changeset_ids)
+      ->needHunks(true)
+      ->execute();
 
     $inline_groups = DifferentialTransactionComment::sortAndGroupInlines(
       $inlines,
       $changesets);
 
-    $result = array();
+    if ($show_context) {
+      $hunk_parser = new DifferentialHunkParser();
+      $table = new DifferentialTransactionComment();
+      $conn_r = $table->establishConnection('r');
+      $queries = array();
+      foreach ($line_numbers_by_changeset as $id => $line_numbers) {
+        $queries[] = qsprintf(
+          $conn_r,
+          '(changesetID = %d AND lineNumber IN (%Ld))',
+          $id, $line_numbers);
+      }
+      $all_comments = id(new DifferentialTransactionComment())->loadAllWhere(
+        'transactionPHID IS NOT NULL AND (%Q)', implode(' OR ', $queries));
+      $comments_by_line_number = array();
+      foreach ($all_comments as $comment) {
+        $comments_by_line_number
+          [$comment->getChangesetID()]
+          [$comment->getLineNumber()]
+          [$comment->getID()] = $comment;
+      }
+      $author_phids = mpull($all_comments, 'getAuthorPHID');
+      $authors = id(new PhabricatorPeopleQuery())
+        ->setViewer($this->getActor())
+        ->withPHIDs($author_phids)
+        ->execute();
+      $authors_by_phid = mpull($authors, null, 'getPHID');
+    }
+
+    $section = new PhabricatorMetaMTAMailSection();
     foreach ($inline_groups as $changeset_id => $group) {
       $changeset = idx($changesets, $changeset_id);
       if (!$changeset) {
@@ -1317,25 +1412,29 @@ final class DifferentialTransactionEditor
         $inline_content = $comment->getContent();
 
         if (!$show_context) {
-          $result[] = "{$file}:{$range} {$inline_content}";
+          $section->addFragment("{$file}:{$range} {$inline_content}");
         } else {
-          $result[] = "================";
-          $result[] = "Comment at: " . $file . ":" . $range;
-          $result[] = $hunk_parser->makeContextDiff(
+          $patch = $hunk_parser->makeContextDiff(
             $changeset->getHunks(),
             $comment->getIsNewFile(),
             $comment->getLineNumber(),
             $comment->getLineLength(),
             1);
-          $result[] = "----------------";
+          $nested_comments = $this->nestCommentHistory(
+            $inline->getComment(), $comments_by_line_number, $authors_by_phid);
 
-          $result[] = $inline_content;
-          $result[] = null;
+          $section->addFragment('================')
+                  ->addFragment('Comment at: '.$file.':'.$range)
+                  ->addPlaintextFragment($patch)
+                  ->addHTMLFragment($this->renderPatchHTMLForMail($patch))
+                  ->addFragment('----------------')
+                  ->addFragment($nested_comments)
+                  ->addFragment(null);
         }
       }
     }
 
-    return implode("\n", $result);
+    return $section;
   }
 
   private function loadDiff($phid, $need_changesets = false) {
@@ -1375,6 +1474,15 @@ final class DifferentialTransactionEditor
           if (!$this->getIsCloseByCommit()) {
             return true;
           }
+          break;
+        case DifferentialTransaction::TYPE_ACTION:
+          switch ($xaction->getNewValue()) {
+            case DifferentialAction::ACTION_CLAIM:
+              // When users commandeer revisions, we may need to trigger
+              // signatures or author-based rules.
+              return true;
+          }
+          break;
       }
     }
 
@@ -1499,6 +1607,34 @@ final class DifferentialTransactionEditor
         ->setNewValue($value);
     }
 
+    // Require legalpad document signatures.
+    $legal_phids = $adapter->getRequiredSignatureDocumentPHIDs();
+    if ($legal_phids) {
+      // We only require signatures of documents which have not already
+      // been signed. In general, this reduces the amount of churn that
+      // signature rules cause.
+
+      $signatures = id(new LegalpadDocumentSignatureQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withDocumentPHIDs($legal_phids)
+        ->withSignerPHIDs(array($object->getAuthorPHID()))
+        ->execute();
+      $signed_phids = mpull($signatures, 'getDocumentPHID');
+      $legal_phids = array_diff($legal_phids, $signed_phids);
+
+      // If we still have something to trigger, add the edges.
+      if ($legal_phids) {
+        $edge_legal = PhabricatorEdgeConfig::TYPE_OBJECT_NEEDS_SIGNATURE;
+        $xactions[] = id(new DifferentialTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+          ->setMetadataValue('edge:type', $edge_legal)
+          ->setNewValue(
+            array(
+              '+' => array_fuse($legal_phids),
+            ));
+      }
+    }
+
     // Save extra email PHIDs for later.
     $email_phids = $adapter->getEmailPHIDsAddedByHerald();
     $this->heraldEmailPHIDs = array_keys($email_phids);
@@ -1598,7 +1734,6 @@ final class DifferentialTransactionEditor
     }
   }
 
-
   /**
    * Update the table connecting revisions to DVCS local hashes, so we can
    * identify revisions by commit/tree hashes.
@@ -1692,14 +1827,25 @@ final class DifferentialTransactionEditor
     return implode("\n", $filenames);
   }
 
+  private function renderPatchHTMLForMail($patch) {
+    return phutil_tag('pre',
+      array('style' => 'font-family: monospace;'), $patch);
+  }
+
   private function renderPatchForMail(DifferentialDiff $diff) {
     $format = PhabricatorEnv::getEnvConfig('metamta.differential.patch-format');
 
-    return id(new DifferentialRawDiffRenderer())
+    $patch = id(new DifferentialRawDiffRenderer())
       ->setViewer($this->getActor())
       ->setFormat($format)
       ->setChangesets($diff->getChangesets())
       ->buildPatch();
+
+    $section = new PhabricatorMetaMTAMailSection();
+    $section->addHTMLFragment($this->renderPatchHTMLForMail($patch));
+    $section->addPlaintextFragment($patch);
+
+    return $section;
   }
 
 }

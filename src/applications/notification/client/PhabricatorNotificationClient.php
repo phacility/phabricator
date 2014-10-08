@@ -2,7 +2,7 @@
 
 final class PhabricatorNotificationClient {
 
-  const EXPECT_VERSION = 3;
+  const EXPECT_VERSION = 6;
 
   public static function getServerStatus() {
     $uri = PhabricatorEnv::getEnvConfig('notification.server-uri');
@@ -25,10 +25,25 @@ final class PhabricatorNotificationClient {
     return $status;
   }
 
-  public static function postMessage(array $data) {
-    $server_uri = PhabricatorEnv::getEnvConfig('notification.server-uri');
+  public static function tryToPostMessage(array $data) {
+    if (!PhabricatorEnv::getEnvConfig('notification.enabled')) {
+      return;
+    }
 
-    id(new HTTPSFuture($server_uri, $data))
+    try {
+      self::postMessage($data);
+    } catch (Exception $ex) {
+      // Just ignore any issues here.
+      phlog($ex);
+    }
+  }
+
+  private static function postMessage(array $data) {
+    $server_uri = PhabricatorEnv::getEnvConfig('notification.server-uri');
+    $server_uri = id(new PhutilURI($server_uri))
+      ->setPath('/');
+
+    id(new HTTPSFuture($server_uri, json_encode($data)))
       ->setMethod('POST')
       ->setTimeout(1)
       ->resolvex();

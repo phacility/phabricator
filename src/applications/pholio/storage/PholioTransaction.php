@@ -7,7 +7,7 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
   }
 
   public function getApplicationTransactionType() {
-    return PholioPHIDTypeMock::TYPECONST;
+    return PholioMockPHIDType::TYPECONST;
   }
 
   public function getApplicationTransactionCommentObject() {
@@ -66,6 +66,7 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
         return 'fa-comment';
       case PholioTransactionType::TYPE_NAME:
       case PholioTransactionType::TYPE_DESCRIPTION:
+      case PholioTransactionType::TYPE_STATUS:
       case PholioTransactionType::TYPE_IMAGE_NAME:
       case PholioTransactionType::TYPE_IMAGE_DESCRIPTION:
       case PholioTransactionType::TYPE_IMAGE_SEQUENCE:
@@ -76,6 +77,32 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
     }
 
     return parent::getIcon();
+  }
+
+  public function getMailTags() {
+    $tags = array();
+    switch ($this->getTransactionType()) {
+      case PholioTransactionType::TYPE_INLINE:
+      case PhabricatorTransactions::TYPE_COMMENT:
+        $tags[] = MetaMTANotificationType::TYPE_PHOLIO_COMMENT;
+        break;
+      case PholioTransactionType::TYPE_STATUS:
+        $tags[] = MetaMTANotificationType::TYPE_PHOLIO_STATUS;
+        break;
+      case PholioTransactionType::TYPE_NAME:
+      case PholioTransactionType::TYPE_DESCRIPTION:
+      case PholioTransactionType::TYPE_IMAGE_NAME:
+      case PholioTransactionType::TYPE_IMAGE_DESCRIPTION:
+      case PholioTransactionType::TYPE_IMAGE_SEQUENCE:
+      case PholioTransactionType::TYPE_IMAGE_FILE:
+      case PholioTransactionType::TYPE_IMAGE_REPLACE:
+        $tags[] = MetaMTANotificationType::TYPE_PHOLIO_UPDATED;
+        break;
+      default:
+        $tags[] = MetaMTANotificationType::TYPE_PHOLIO_OTHER;
+        break;
+    }
+    return $tags;
   }
 
   public function getTitle() {
@@ -103,6 +130,11 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
       case PholioTransactionType::TYPE_DESCRIPTION:
         return pht(
           "%s updated the mock's description.",
+          $this->renderHandleLink($author_phid));
+        break;
+      case PholioTransactionType::TYPE_STATUS:
+        return pht(
+          "%s updated the mock's status.",
           $this->renderHandleLink($author_phid));
         break;
       case PholioTransactionType::TYPE_INLINE:
@@ -207,6 +239,12 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
         break;
+      case PholioTransactionType::TYPE_STATUS:
+        return pht(
+          '%s updated the status for %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid));
+        break;
       case PholioTransactionType::TYPE_INLINE:
         return pht(
           '%s added an inline comment to %s.',
@@ -259,7 +297,9 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
 
     if ($text) {
       return phutil_escape_html_newlines(
-        phutil_utf8_shorten($text, 128));
+        id(new PhutilUTF8StringTruncator())
+        ->setMaximumGlyphs(128)
+        ->truncateString($text));
     }
 
     return parent::getBodyForFeed($story);
@@ -299,6 +339,7 @@ final class PholioTransaction extends PhabricatorApplicationTransaction {
           return PhabricatorTransactions::COLOR_GREEN;
         }
       case PholioTransactionType::TYPE_DESCRIPTION:
+      case PholioTransactionType::TYPE_STATUS:
       case PholioTransactionType::TYPE_IMAGE_NAME:
       case PholioTransactionType::TYPE_IMAGE_DESCRIPTION:
       case PholioTransactionType::TYPE_IMAGE_SEQUENCE:

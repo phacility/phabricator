@@ -6,6 +6,7 @@ final class PHUIPinboardItemView extends AphrontView {
   private $uri;
   private $header;
   private $iconBlock = array();
+  private $disabled;
 
   private $imageWidth;
   private $imageHeight;
@@ -36,43 +37,54 @@ final class PHUIPinboardItemView extends AphrontView {
     return $this;
   }
 
+  public function setDisabled($disabled) {
+    $this->disabled = $disabled;
+    return $this;
+  }
+
   public function render() {
+    require_celerity_resource('phui-pinboard-view-css');
     $header = null;
     if ($this->header) {
+      if ($this->disabled) {
+        $header_color = 'gradient-lightgrey-header';
+      } else {
+        $header_color = 'gradient-lightblue-header';
+      }
       $header = phutil_tag(
         'div',
         array(
           'class' => 'phui-pinboard-item-header '.
-            'sprite-gradient gradient-lightblue-header',
+            'sprite-gradient '.$header_color,
         ),
         phutil_tag('a', array('href' => $this->uri), $this->header));
     }
 
-    $image = phutil_tag(
-      'a',
-      array(
-        'href' => $this->uri,
-        'class' => 'phui-pinboard-item-image-link',
-      ),
-      phutil_tag(
-        'img',
+    $image = null;
+    if ($this->imageWidth) {
+      $image = phutil_tag(
+        'a',
         array(
-          'src'     => $this->imageURI,
-          'width'   => $this->imageWidth,
-          'height'  => $this->imageHeight,
-        )));
+          'href' => $this->uri,
+          'class' => 'phui-pinboard-item-image-link',
+        ),
+        phutil_tag(
+          'img',
+          array(
+            'src'     => $this->imageURI,
+            'width'   => $this->imageWidth,
+            'height'  => $this->imageHeight,
+          )));
+    }
 
     $icons = array();
     if ($this->iconBlock) {
       $icon_list = array();
       foreach ($this->iconBlock as $block) {
-        $icon = phutil_tag(
-          'span',
-          array(
-            'class' =>
-              'phui-pinboard-icon sprite-icons icons-'.$block[0].'-grey',
-          ),
-          '');
+        $icon = id(new PHUIIconView())
+          ->setIconFont($block[0].' lightgreytext')
+          ->addClass('phui-pinboard-icon');
+
         $count = phutil_tag('span', array(), $block[1]);
         $icon_list[] = phutil_tag(
           'span',
@@ -99,16 +111,22 @@ final class PHUIPinboardItemView extends AphrontView {
         $content);
     }
 
+    $classes = array();
+    $classes[] = 'phui-pinboard-item-view';
+    if ($this->disabled) {
+      $classes[] = 'phui-pinboard-item-disabled';
+    }
+
     return phutil_tag(
       'div',
       array(
-        'class' => 'phui-pinboard-item-view',
+        'class' => implode(' ', $classes),
       ),
       array(
         $header,
         $image,
-        $icons,
         $content,
+        $icons,
       ));
   }
 

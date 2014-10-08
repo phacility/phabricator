@@ -6,7 +6,7 @@ How to use the Phabricator OAuth Server.
 = Overview =
 
 Phabricator includes an OAuth Server which supports the
-##Authorization Code Grant## flow as described in the OAuth 2.0
+`Authorization Code Grant` flow as described in the OAuth 2.0
 specification:
 
 http://tools.ietf.org/html/draft-ietf-oauth-v2-23

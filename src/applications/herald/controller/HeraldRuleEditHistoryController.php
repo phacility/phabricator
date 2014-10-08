@@ -50,7 +50,6 @@ final class HeraldRuleEditHistoryController extends HeraldController {
       $nav,
       array(
         'title' => pht('Rule Edit History'),
-        'device' => true,
       ));
   }
 

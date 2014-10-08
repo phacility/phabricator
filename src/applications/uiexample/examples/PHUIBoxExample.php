@@ -23,7 +23,8 @@ final class PHUIBoxExample extends PhabricatorUIExample {
         id(new PHUIBoxView())
           ->appendChild($content2),
         id(new PHUIBoxView())
-          ->appendChild($content3));
+          ->appendChild($content3),
+      );
 
 
     $layout2 =
@@ -38,7 +39,8 @@ final class PHUIBoxExample extends PhabricatorUIExample {
         id(new PHUIBoxView())
           ->appendChild($content3)
           ->addMargin(PHUI::MARGIN_LARGE_LEFT)
-          ->addMargin(PHUI::MARGIN_LARGE_TOP));
+          ->addMargin(PHUI::MARGIN_LARGE_TOP),
+      );
 
     $layout3 =
       array(
@@ -56,11 +58,11 @@ final class PHUIBoxExample extends PhabricatorUIExample {
           ->appendChild($content3)
           ->setBorder(true)
           ->addPadding(PHUI::PADDING_LARGE)
-          ->addMargin(PHUI::MARGIN_LARGE_BOTTOM));
+          ->addMargin(PHUI::MARGIN_LARGE_BOTTOM),
+      );
 
     $image = id(new PHUIIconView())
-          ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-          ->setSpriteIcon('love');
+          ->setIconFont('fa-heart');
     $button = id(new PHUIButtonView())
         ->setTag('a')
         ->setColor(PHUIButtonView::SIMPLE)
@@ -115,5 +117,5 @@ final class PHUIBoxExample extends PhabricatorUIExample {
           $head4,
           $obj4,
         ));
-        }
+      }
 }

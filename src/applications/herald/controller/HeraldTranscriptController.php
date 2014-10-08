@@ -60,7 +60,7 @@ final class HeraldTranscriptController extends HeraldController {
         // table, and then filter this earlier (and thus raise a better error).
         // For now, just block access so we don't violate policies.
         throw new Exception(
-          pht("This transcript has an invalid or inaccessible adapter."));
+          pht('This transcript has an invalid or inaccessible adapter.'));
       }
 
       $this->adapter = HeraldAdapter::getAdapterForContentType($object_type);
@@ -110,7 +110,6 @@ final class HeraldTranscriptController extends HeraldController {
       $nav,
       array(
         'title' => pht('Transcript'),
-        'device' => true,
       ));
   }
 
@@ -298,7 +297,7 @@ final class HeraldTranscriptController extends HeraldController {
       $object_xscript = $xscript->getObjectTranscript();
       $handle = $handles[$object_xscript->getPHID()];
       if ($handle->getType() ==
-          PhabricatorRepositoryPHIDTypeCommit::TYPECONST) {
+          PhabricatorRepositoryCommitPHIDType::TYPECONST) {
         $commit = id(new DiffusionCommitQuery())
           ->setViewer($request->getUser())
           ->withPHIDs(array($handle->getPHID()))
@@ -355,13 +354,15 @@ final class HeraldTranscriptController extends HeraldController {
           $target = $target;
           break;
         default:
-          if ($target) {
+          if (is_array($target) && $target) {
             foreach ($target as $k => $phid) {
               if (isset($handles[$phid])) {
                 $target[$k] = $handles[$phid]->getName();
               }
             }
-            $target = implode(", ", $target);
+            $target = implode(', ', $target);
+          } else if (is_string($target)) {
+            $target = $target;
           } else {
             $target = '<empty>';
           }

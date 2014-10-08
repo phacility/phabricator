@@ -22,6 +22,11 @@ final class DivinerPHPAtomizer extends DivinerAtomizer {
 
       $name = $func->getChildByIndex(2);
 
+      // Don't atomize closures
+      if ($name->getTypeName() === 'n_EMPTY') {
+        continue;
+      }
+
       $atom = $this->newAtom(DivinerAtom::TYPE_FUNCTION)
         ->setName($name->getConcreteString())
         ->setLine($func->getLineNumber())

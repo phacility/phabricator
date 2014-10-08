@@ -313,7 +313,8 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       DifferentialLintStatus::LINT_WARN => self::STAR_WARN,
       DifferentialLintStatus::LINT_FAIL => self::STAR_FAIL,
       DifferentialLintStatus::LINT_SKIP => self::STAR_SKIP,
-      DifferentialLintStatus::LINT_POSTPONED => self::STAR_SKIP
+      DifferentialLintStatus::LINT_AUTO_SKIP => self::STAR_SKIP,
+      DifferentialLintStatus::LINT_POSTPONED => self::STAR_SKIP,
     );
 
     $star = idx($map, $diff->getLintStatus(), self::STAR_FAIL);
@@ -328,6 +329,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       DifferentialUnitStatus::UNIT_WARN => self::STAR_WARN,
       DifferentialUnitStatus::UNIT_FAIL => self::STAR_FAIL,
       DifferentialUnitStatus::UNIT_SKIP => self::STAR_SKIP,
+      DifferentialUnitStatus::UNIT_AUTO_SKIP => self::STAR_SKIP,
       DifferentialUnitStatus::UNIT_POSTPONED => self::STAR_SKIP,
     );
 
@@ -339,17 +341,19 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
   public static function getDiffLintMessage(DifferentialDiff $diff) {
     switch ($diff->getLintStatus()) {
       case DifferentialLintStatus::LINT_NONE:
-        return 'No Linters Available';
+        return pht('No Linters Available');
       case DifferentialLintStatus::LINT_OKAY:
-        return 'Lint OK';
+        return pht('Lint OK');
       case DifferentialLintStatus::LINT_WARN:
-        return 'Lint Warnings';
+        return pht('Lint Warnings');
       case DifferentialLintStatus::LINT_FAIL:
-        return 'Lint Errors';
+        return pht('Lint Errors');
       case DifferentialLintStatus::LINT_SKIP:
-        return 'Lint Skipped';
+        return pht('Lint Skipped');
+      case DifferentialLintStatus::LINT_AUTO_SKIP:
+        return pht('Automatic diff as part of commit; lint not applicable.');
       case DifferentialLintStatus::LINT_POSTPONED:
-        return 'Lint Postponed';
+        return pht('Lint Postponed');
     }
     return '???';
   }
@@ -357,17 +361,20 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
   public static function getDiffUnitMessage(DifferentialDiff $diff) {
     switch ($diff->getUnitStatus()) {
       case DifferentialUnitStatus::UNIT_NONE:
-        return 'No Unit Test Coverage';
+        return pht('No Unit Test Coverage');
       case DifferentialUnitStatus::UNIT_OKAY:
-        return 'Unit Tests OK';
+        return pht('Unit Tests OK');
       case DifferentialUnitStatus::UNIT_WARN:
-        return 'Unit Test Warnings';
+        return pht('Unit Test Warnings');
       case DifferentialUnitStatus::UNIT_FAIL:
-        return 'Unit Test Errors';
+        return pht('Unit Test Errors');
       case DifferentialUnitStatus::UNIT_SKIP:
-        return 'Unit Tests Skipped';
+        return pht('Unit Tests Skipped');
+      case DifferentialUnitStatus::UNIT_AUTO_SKIP:
+        return pht(
+          'Automatic diff as part of commit; unit tests not applicable.');
       case DifferentialUnitStatus::UNIT_POSTPONED:
-        return 'Unit Tests Postponed';
+        return pht('Unit Tests Postponed');
     }
     return '???';
   }

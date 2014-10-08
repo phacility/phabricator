@@ -3,11 +3,12 @@
 abstract class PhabricatorBotBaseStreamingProtocolAdapter
   extends PhabricatorBaseProtocolAdapter {
 
+  protected $readHandles;
+  protected $multiHandle;
+  protected $authtoken;
+
   private $readBuffers;
-  private $authtoken;
   private $server;
-  private $readHandles;
-  private $multiHandle;
   private $active;
   private $inRooms = array();
 
@@ -23,7 +24,7 @@ abstract class PhabricatorBotBaseStreamingProtocolAdapter
 
     // First, join the room
     if (!$rooms) {
-      throw new Exception("Not configured to join any rooms!");
+      throw new Exception('Not configured to join any rooms!');
     }
 
     $this->readBuffers = array();
@@ -38,26 +39,28 @@ abstract class PhabricatorBotBaseStreamingProtocolAdapter
 
       // Set up the curl stream for reading
       $url = $this->buildStreamingUrl($room_id);
-      $this->readHandle[$url] = curl_init();
-      curl_setopt($this->readHandle[$url], CURLOPT_URL, $url);
-      curl_setopt($this->readHandle[$url], CURLOPT_RETURNTRANSFER, true);
-      curl_setopt($this->readHandle[$url], CURLOPT_FOLLOWLOCATION, 1);
+      $ch = $this->readHandles[$url] = curl_init();
+
+      curl_setopt($ch, CURLOPT_URL, $url);
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
       curl_setopt(
-        $this->readHandle[$url],
+        $ch,
         CURLOPT_USERPWD,
         $this->authtoken.':x');
+
       curl_setopt(
-        $this->readHandle[$url],
+        $ch,
         CURLOPT_HTTPHEADER,
-        array("Content-type: application/json"));
+        array('Content-type: application/json'));
       curl_setopt(
-        $this->readHandle[$url],
+        $ch,
         CURLOPT_WRITEFUNCTION,
         array($this, 'read'));
-      curl_setopt($this->readHandle[$url], CURLOPT_BUFFERSIZE, 128);
-      curl_setopt($this->readHandle[$url], CURLOPT_TIMEOUT, 0);
+      curl_setopt($ch, CURLOPT_BUFFERSIZE, 128);
+      curl_setopt($ch, CURLOPT_TIMEOUT, 0);
 
-      curl_multi_add_handle($this->multiHandle, $this->readHandle[$url]);
+      curl_multi_add_handle($this->multiHandle, $ch);
 
       // Initialize read buffer
       $this->readBuffers[$url] = '';
@@ -88,7 +91,7 @@ abstract class PhabricatorBotBaseStreamingProtocolAdapter
     // Check for errors
     if ($status != CURLM_OK) {
       throw new Exception(
-        "Phabricator Bot had a problem reading from stream.");
+        'Phabricator Bot had a problem reading from stream.');
     }
   }
 
@@ -96,7 +99,7 @@ abstract class PhabricatorBotBaseStreamingProtocolAdapter
     $messages = array();
 
     if (!$this->active) {
-      throw new Exception("Phabricator Bot stopped reading from stream.");
+      throw new Exception('Phabricator Bot stopped reading from stream.');
     }
 
     // Prod our http request
@@ -153,10 +156,15 @@ abstract class PhabricatorBotBaseStreamingProtocolAdapter
   }
 
   protected function getAuthorizationHeader() {
-    return 'Basic '.base64_encode($this->authtoken.':x');
+    return 'Basic '.$this->getEncodedAuthToken();
+  }
+
+  protected function getEncodedAuthToken() {
+    return base64_encode($this->authtoken.':x');
   }
 
   abstract protected function buildStreamingUrl($channel);
 
   abstract protected function processMessage($raw_object);
+
 }

@@ -9,7 +9,7 @@ final class ReleephProject extends ReleephDAO
   protected $name;
 
   // Specifying the place to pick from is a requirement for svn, though not
-  // for git.  It's always useful though for reasoning about what revs have
+  // for git. It's always useful though for reasoning about what revs have
   // been picked and which haven't.
   protected $trunkBranch;
 
@@ -29,11 +29,22 @@ final class ReleephProject extends ReleephDAO
       self::CONFIG_SERIALIZATION => array(
         'details' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'name' => 'text128',
+        'trunkBranch' => 'text255',
+        'isActive' => 'bool',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'projectName' => array(
+          'columns' => array('name'),
+          'unique' => true,
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(ReleephPHIDTypeProduct::TYPECONST);
+    return PhabricatorPHID::generateNewPHID(ReleephProductPHIDType::TYPECONST);
   }
 
   public function getDetail($key, $default = null) {
@@ -44,7 +55,7 @@ final class ReleephProject extends ReleephDAO
     $components = array(
       '/releeph/product',
       $this->getID(),
-      $path
+      $path,
     );
     return implode('/', $components);
   }

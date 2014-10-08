@@ -1,0 +1,23 @@
+/**
+ * @provides phui-image-mask-css
+ */
+
+
+.phui-image-mask {
+  background: url('/rsrc/image/checker_lighter.png');
+  display: inline-block;
+  border: 1px solid {$lightblueborder};
+  padding: 4px;
+}
+
+.phui-image-mask-image {
+  background-repeat: no-repeat;
+  position: relative;
+  overflow: hidden;
+}
+
+.phui-image-mask-mask {
+  border: 300px solid rgba(0, 0, 0, 0.5);
+  background-clip: content-box;
+  position: absolute;
+}

@@ -1,0 +1,85 @@
+{
+  "exclude": [
+    "(^externals/)",
+    "(^webroot/rsrc/externals/)",
+    "(/__tests__/data/)"
+  ],
+  "linters": {
+    "chmod": {
+      "type": "chmod"
+    },
+    "filename": {
+      "type": "filename"
+    },
+    "generated": {
+      "type": "generated"
+    },
+    "javelin": {
+      "type": "javelin",
+      "include": "(\\.js$)",
+      "exclude": [
+        "(^support/aphlict/)"
+      ]
+    },
+    "jshint": {
+      "type": "jshint",
+      "include": "(\\.js$)",
+      "jshint.jshintrc": "support/lint/jshintrc"
+    },
+    "json": {
+      "type": "json",
+      "include": [
+        "(^src/docs/book/.*\\.book$)",
+        "(^support/lint/jshintrc$)",
+        "(^\\.arcconfig$)",
+        "(^\\.arclint$)",
+        "(\\.json$)"
+      ]
+    },
+    "merge-conflict": {
+      "type": "merge-conflict"
+    },
+    "nolint": {
+      "type": "nolint"
+    },
+    "phutil-library": {
+      "type": "phutil-library",
+      "include": "(\\.php$)"
+    },
+    "phutil-xhpast": {
+      "type": "phutil-xhpast",
+      "include": "(\\.php$)",
+      "phutil-xhpast.deprecated.functions": {
+        "phutil_escape_html": "The phutil_escape_html() function is deprecated. Raw strings passed to phutil_tag() or hsprintf() are escaped automatically."
+      }
+    },
+    "spelling": {
+      "type": "spelling"
+    },
+    "text": {
+      "type": "text",
+      "exclude": [
+        "(^\\.arclint)"
+      ]
+    },
+    "text-without-length": {
+      "type": "text",
+      "severity": {
+        "3": "disabled"
+      },
+      "include": [
+        "(^\\.arclint)"
+      ]
+    },
+    "xhpast": {
+      "type": "xhpast",
+      "include": "(\\.php$)",
+      "severity": {
+        "16": "advice",
+        "34": "error"
+      },
+      "xhpast.php-version": "5.2.3",
+      "xhpast.php-version.windows": "5.3.0"
+    }
+  }
+}

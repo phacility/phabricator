@@ -8,13 +8,13 @@ final class DiffusionCommitEditController extends DiffusionController {
   }
 
   public function processRequest() {
-
     $request    = $this->getRequest();
     $user       = $request->getUser();
     $drequest   = $this->getDiffusionRequest();
     $callsign   = $drequest->getRepository()->getCallsign();
     $repository = $drequest->getRepository();
     $commit     = $drequest->loadCommit();
+    $data = $commit->loadCommitData();
     $page_title = pht('Edit Diffusion Commit');
 
     if (!$commit) {
@@ -34,8 +34,8 @@ final class DiffusionCommitEditController extends DiffusionController {
       $new_proj_phids = array_values($proj_phids);
       $rem_proj_phids = array_diff($current_proj_phids,
                                    $new_proj_phids);
-      $editor         = id(new PhabricatorEdgeEditor());
-      $editor->setActor($user);
+
+      $editor = id(new PhabricatorEdgeEditor());
       foreach ($rem_proj_phids as $phid) {
         $editor->removeEdge($commit_phid, $edge_type, $phid);
       }
@@ -52,7 +52,7 @@ final class DiffusionCommitEditController extends DiffusionController {
     }
 
     $tokenizer_id = celerity_generate_unique_node_id();
-    $form         = id(new AphrontFormView())
+    $form = id(new AphrontFormView())
       ->setUser($user)
       ->setAction($request->getRequestURI()->getPath())
       ->appendChild(
@@ -70,7 +70,43 @@ final class DiffusionCommitEditController extends DiffusionController {
               'sigil'       => 'project-create',
             ),
             pht('Create New Project')))
-        ->setDatasource('/typeahead/common/projects/'));;
+        ->setDatasource(new PhabricatorProjectDatasource()));
+
+    $reason = $data->getCommitDetail('autocloseReason', false);
+    if ($reason !== false) {
+      switch ($reason) {
+        case PhabricatorRepository::BECAUSE_REPOSITORY_IMPORTING:
+          $desc = pht('No, Repository Importing');
+          break;
+        case PhabricatorRepository::BECAUSE_AUTOCLOSE_DISABLED:
+          $desc = pht('No, Autoclose Disabled');
+          break;
+        case PhabricatorRepository::BECAUSE_NOT_ON_AUTOCLOSE_BRANCH:
+          $desc = pht('No, Not On Autoclose Branch');
+          break;
+        case null:
+          $desc = pht('Yes');
+          break;
+        default:
+          $desc = pht('Unknown');
+          break;
+      }
+
+      $doc_href = PhabricatorEnv::getDoclink('Diffusion User Guide: Autoclose');
+      $doc_link = phutil_tag(
+        'a',
+        array(
+          'href' => $doc_href,
+          'target' => '_blank',
+        ),
+        pht('Learn More'));
+
+      $form->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setLabel(pht('Autoclose?'))
+          ->setValue(array($desc, " \xC2\xB7 ", $doc_link)));
+    }
+
 
     Javelin::initBehavior('project-create', array(
       'tokenizerID' => $tokenizer_id,
@@ -81,17 +117,22 @@ final class DiffusionCommitEditController extends DiffusionController {
       ->addCancelButton('/r'.$callsign.$commit->getCommitIdentifier());
     $form->appendChild($submit);
 
+    $crumbs = $this->buildCrumbs(array(
+      'commit' => true,
+    ));
+    $crumbs->addTextCrumb(pht('Edit'));
+
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($page_title)
       ->setForm($form);
 
     return $this->buildApplicationPage(
       array(
+        $crumbs,
         $form_box,
       ),
       array(
         'title' => $page_title,
-        'device' => true,
       ));
   }
 

@@ -35,7 +35,7 @@ foreach (Futures($futures)->limit(8) as $file => $future) {
   $tags = explode("\n", $tags[1]);
 
   foreach ($tags as $tag) {
-    $parts = explode(";", $tag);
+    $parts = explode(';', $tag);
     // skip lines that we can not parse
     if (count($parts) < 2) {
       continue;
@@ -67,11 +67,11 @@ foreach (Futures($futures)->limit(8) as $file => $future) {
 
     // To keep consistent with "Separate with commas, for example: php, py"
     // in Arcanist Project edit form.
-    $language = str_ireplace("python", "py", $language);
+    $language = str_ireplace('python', 'py', $language);
 
     // also, "normalize" c++ and c#
-    $language = str_ireplace("c++", "cpp", $language);
-    $language = str_ireplace("c#", "cs", $language);
+    $language = str_ireplace('c++', 'cpp', $language);
+    $language = str_ireplace('c#', 'cs', $language);
 
     // Ruby has "singleton method", for example
     $type = substr(str_replace(' ', '_', $type), 0, 12);
@@ -107,10 +107,10 @@ function ctags_check_executable() {
 function print_symbol($file, $line_num, $type, $token, $context, $language) {
   // get rid of relative path
   $file = explode('/', $file);
-  if ($file[0] == '.' || $file[0] == "..") {
+  if ($file[0] == '.' || $file[0] == '..') {
     array_shift($file);
   }
-  $file = '/' . implode('/', $file);
+  $file = '/'.implode('/', $file);
 
   $parts = array(
     $context,

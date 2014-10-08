@@ -82,7 +82,7 @@ final class PhortuneCreditCardForm {
                 'tip'  => 'We support Visa, Mastercard, American Express, '.
                           'Discover, JCB, and Diners Club.',
                 'size' => 440,
-              )
+              ),
             ))))
       ->appendChild(
         id(new AphrontFormTextControl())

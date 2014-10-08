@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group pholio
- */
 final class PholioMockEditController extends PholioController {
 
   private $id;
@@ -47,14 +44,25 @@ final class PholioMockEditController extends PholioController {
       $mock_images = array();
     }
 
+    if ($is_new) {
+      $v_projects = array();
+    } else {
+      $v_projects = PhabricatorEdgeQuery::loadDestinationPHIDs(
+        $mock->getPHID(),
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
+      $v_projects = array_reverse($v_projects);
+    }
+
     $e_name = true;
-    $e_images = true;
+    $e_images = count($mock_images) ? null : true;
     $errors = array();
     $posted_mock_images = array();
 
     $v_name = $mock->getName();
     $v_desc = $mock->getDescription();
+    $v_status = $mock->getStatus();
     $v_view = $mock->getViewPolicy();
+    $v_edit = $mock->getEditPolicy();
     $v_cc = PhabricatorSubscribersQuery::loadSubscribersForPHID(
       $mock->getPHID());
 
@@ -63,18 +71,25 @@ final class PholioMockEditController extends PholioController {
 
       $type_name = PholioTransactionType::TYPE_NAME;
       $type_desc = PholioTransactionType::TYPE_DESCRIPTION;
+      $type_status = PholioTransactionType::TYPE_STATUS;
       $type_view = PhabricatorTransactions::TYPE_VIEW_POLICY;
+      $type_edit = PhabricatorTransactions::TYPE_EDIT_POLICY;
       $type_cc   = PhabricatorTransactions::TYPE_SUBSCRIBERS;
 
       $v_name = $request->getStr('name');
       $v_desc = $request->getStr('description');
+      $v_status = $request->getStr('status');
       $v_view = $request->getStr('can_view');
+      $v_edit = $request->getStr('can_edit');
       $v_cc   = $request->getArr('cc');
+      $v_projects = $request->getArr('projects');
 
       $mock_xactions = array();
       $mock_xactions[$type_name] = $v_name;
       $mock_xactions[$type_desc] = $v_desc;
+      $mock_xactions[$type_status] = $v_status;
       $mock_xactions[$type_view] = $v_view;
+      $mock_xactions[$type_edit] = $v_edit;
       $mock_xactions[$type_cc]   = array('=' => $v_cc);
 
       if (!strlen($request->getStr('name'))) {
@@ -121,9 +136,11 @@ final class PholioMockEditController extends PholioController {
         $replaces_image_phid = null;
         if (isset($replaces_map[$file_phid])) {
           $old_file_phid = $replaces_map[$file_phid];
-          $old_image = idx($mock_images, $old_file_phid);
-          if ($old_image) {
-            $replaces_image_phid = $old_image->getPHID();
+          if ($old_file_phid != $file_phid) {
+            $old_image = idx($mock_images, $old_file_phid);
+            if ($old_image) {
+              $replaces_image_phid = $old_image->getPHID();
+            }
           }
         }
 
@@ -144,7 +161,7 @@ final class PholioMockEditController extends PholioController {
           $xactions[] = id(new PholioTransaction())
             ->setTransactionType(
               PholioTransactionType::TYPE_IMAGE_REPLACE)
-              ->setNewValue($replace_image);
+            ->setNewValue($replace_image);
           $posted_mock_images[] = $replace_image;
         } else if (!$existing_image) { // this is an add
           $add_image = id(new PholioImage())
@@ -173,6 +190,7 @@ final class PholioMockEditController extends PholioController {
               PholioTransactionType::TYPE_IMAGE_SEQUENCE)
               ->setNewValue(
                 array($existing_image->getPHID() => $sequence));
+
           $posted_mock_images[] = $existing_image;
         }
       }
@@ -187,6 +205,12 @@ final class PholioMockEditController extends PholioController {
       }
 
       if (!$errors) {
+        $proj_edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
+        $xactions[] = id(new PholioTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+          ->setMetadataValue('edge:type', $proj_edge_type)
+          ->setNewValue(array('=' => array_fuse($v_projects)));
+
         $mock->openTransaction();
         $editor = id(new PholioMockEditor())
           ->setContentSourceFromRequest($request)
@@ -219,6 +243,7 @@ final class PholioMockEditController extends PholioController {
 
     // NOTE: Make this show up correctly on the rendered form.
     $mock->setViewPolicy($v_view);
+    $mock->setEditPolicy($v_edit);
 
     $handles = id(new PhabricatorHandleQuery())
       ->setViewer($user)
@@ -235,7 +260,7 @@ final class PholioMockEditController extends PholioController {
       $image_elements[] = id(new PholioUploadedImageView())
         ->setUser($user)
         ->setImage($mock_image)
-        ->setReplacesPHID($mock_image->getReplacesImagePHID());
+        ->setReplacesPHID($mock_image->getFilePHID());
     }
 
     $list_id = celerity_generate_unique_node_id();
@@ -282,6 +307,12 @@ final class PholioMockEditController extends PholioController {
         ),
       ));
 
+    if ($v_projects) {
+      $project_handles = $this->loadViewerHandles($v_projects);
+    } else {
+      $project_handles = array();
+    }
+
     require_celerity_resource('pholio-edit-css');
     $form = id(new AphrontFormView())
       ->setUser($user)
@@ -297,28 +328,54 @@ final class PholioMockEditController extends PholioController {
         ->setName('description')
         ->setValue($v_desc)
         ->setLabel(pht('Description'))
-        ->setUser($user))
+        ->setUser($user));
+
+    if ($this->id) {
+      $form->appendChild(
+        id(new AphrontFormSelectControl())
+        ->setLabel(pht('Status'))
+        ->setName('status')
+        ->setValue($mock->getStatus())
+        ->setOptions($mock->getStatuses()));
+    } else {
+      $form->addHiddenInput('status', 'open');
+    }
+
+    $form
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-        ->setLabel(pht('CC'))
-        ->setName('cc')
-        ->setValue($handles)
-        ->setUser($user)
-        ->setDatasource('/typeahead/common/mailable/'))
+          ->setLabel(pht('Projects'))
+          ->setName('projects')
+          ->setValue($project_handles)
+          ->setDatasource(new PhabricatorProjectDatasource()))
+      ->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setLabel(pht('CC'))
+          ->setName('cc')
+          ->setValue($handles)
+          ->setUser($user)
+          ->setDatasource(new PhabricatorMetaMTAMailableDatasource()))
       ->appendChild(
         id(new AphrontFormPolicyControl())
-        ->setUser($user)
-        ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
-        ->setPolicyObject($mock)
-        ->setPolicies($policies)
-        ->setName('can_view'))
+          ->setUser($user)
+          ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
+          ->setPolicyObject($mock)
+          ->setPolicies($policies)
+          ->setName('can_view'))
+      ->appendChild(
+        id(new AphrontFormPolicyControl())
+          ->setUser($user)
+          ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
+          ->setPolicyObject($mock)
+          ->setPolicies($policies)
+          ->setName('can_edit'))
       ->appendChild(
         id(new AphrontFormMarkupControl())
-        ->setValue($list_control))
+          ->setValue($list_control))
       ->appendChild(
         id(new AphrontFormMarkupControl())
-        ->setValue($drop_control)
-        ->setError($e_images))
+          ->setValue($drop_control)
+          ->setError($e_images))
       ->appendChild($submit);
 
     $form_box = id(new PHUIObjectBoxView())
@@ -327,7 +384,10 @@ final class PholioMockEditController extends PholioController {
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($title, $this->getApplicationURI());
+    if (!$is_new) {
+      $crumbs->addTextCrumb($mock->getMonogram(), '/'.$mock->getMonogram());
+    }
+    $crumbs->addTextCrumb($title);
 
     $content = array(
       $crumbs,
@@ -338,7 +398,6 @@ final class PholioMockEditController extends PholioController {
       $content,
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

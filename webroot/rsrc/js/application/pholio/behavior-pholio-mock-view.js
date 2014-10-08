@@ -21,8 +21,7 @@ JX.behavior('pholio-mock-view', function(config) {
   var panel = JX.$(config.panelID);
   var viewport = JX.$(config.viewportID);
 
-  var selection_border;
-  var selection_fill;
+  var selection_reticle;
   var active_image;
 
   var inline_comments = {};
@@ -35,10 +34,7 @@ JX.behavior('pholio-mock-view', function(config) {
     var loading = false;
     var stageElement = JX.$(config.panelID);
     var viewElement = JX.$(config.viewportID);
-    var gutterElement = JX.$('mock-inline-comments');
     var reticles = [];
-    var cards = [];
-    var inline_phid_map = {};
 
     function begin_load() {
       if (loading) {
@@ -61,17 +57,9 @@ JX.behavior('pholio-mock-view', function(config) {
       JX.DOM.alterClass(stageElement, 'pholio-image-loading', loading);
     }
 
-    function add_inline_node(node, phid) {
-      inline_phid_map[phid] = (inline_phid_map[phid] || []);
-      inline_phid_map[phid].push(node);
-    }
-
-    function add_reticle(reticle, phid) {
-      mark_ref(reticle, phid);
-
+    function add_reticle(reticle, id) {
+      mark_ref(reticle, id);
       reticles.push(reticle);
-      add_inline_node(reticle, phid);
-
       viewElement.appendChild(reticle);
     }
 
@@ -80,58 +68,51 @@ JX.behavior('pholio-mock-view', function(config) {
       for (ii = 0; ii < reticles.length; ii++) {
         JX.DOM.remove(reticles[ii]);
       }
-      for (ii = 0; ii < cards.length; ii++) {
-        JX.DOM.remove(cards[ii]);
-      }
       reticles = [];
-      cards = [];
-      inline_phid_map = {};
     }
 
-    function highlight_inline(phid, show) {
-      var nodes = inline_phid_map[phid] || [];
-      var cls = 'pholio-mock-inline-comment-highlight';
-      for (var ii = 0; ii < nodes.length; ii++) {
-        JX.DOM.alterClass(nodes[ii], cls, show);
-      }
-    }
-
-    function remove_inline(phid) {
-      var nodes = inline_phid_map[phid] || [];
-      for (var ii = 0; ii < nodes.length; ii++) {
-        JX.DOM.remove(nodes[ii]);
-      }
-      delete inline_phid_map[phid];
-    }
-
-    function mark_ref(node, phid) {
+    function mark_ref(node, id) {
       JX.Stratcom.addSigil(node, 'pholio-inline-ref');
-      JX.Stratcom.addData(node, {phid: phid});
-    }
-
-    function add_card(card, phid) {
-      mark_ref(card, phid);
-
-      cards.push(card);
-      add_inline_node(card, phid);
-
-      gutterElement.appendChild(card);
+      JX.Stratcom.addData(node, {inlineID: id});
     }
 
     return {
       beginLoad: begin_load,
       endLoad: end_load,
       addReticle: add_reticle,
-      clearStage: clear_stage,
-      highlightInline: highlight_inline,
-      removeInline: remove_inline,
-      addCard: add_card
+      clearStage: clear_stage
     };
   })();
+
+  JX.enableDispatch(document.body, 'mouseenter');
+  JX.enableDispatch(document.body, 'mouseleave');
+
+  JX.Stratcom.listen(
+    ['mouseenter', 'mouseover'],
+    'mock-panel',
+    function(e) {
+      JX.DOM.alterClass(e.getNode('mock-panel'), 'mock-has-cursor', true);
+    });
+
+  JX.Stratcom.listen('mouseleave', 'mock-panel', function(e) {
+    var node = e.getNode('mock-panel');
+    if (e.getTarget() == node) {
+      JX.DOM.alterClass(node, 'mock-has-cursor', false);
+    }
+  });
 
   function get_image_index(id) {
     for (var ii = 0; ii < config.images.length; ii++) {
       if (config.images[ii].id == id) {
+        return ii;
+      }
+    }
+    return null;
+  }
+
+  function get_image_navindex(id) {
+    for (var ii = 0; ii < config.navsequence.length; ii++) {
+      if (config.navsequence[ii] == id) {
         return ii;
       }
     }
@@ -161,37 +142,39 @@ JX.behavior('pholio-mock-view', function(config) {
     if (!active_image) {
       return;
     }
-    var idx = get_image_index(active_image.id);
-    idx = (idx + delta + config.images.length) % config.images.length;
-    select_image(config.images[idx].id);
+    var idx = get_image_navindex(active_image.id);
+    if (idx === null) {
+      return;
+    }
+    idx = (idx + delta + config.navsequence.length) % config.navsequence.length;
+    select_image(config.navsequence[idx]);
   }
 
   function redraw_image() {
+    var new_y;
 
-    // Force the stage to scale as a function of the viewport size. Broadly,
-    // we make the stage 95% of the height of the viewport, then scale images
-    // to fit within it.
-    var new_y = (JX.Vector.getViewport().y * 0.90) - 150;
-    new_y = Math.max(320, new_y);
-    panel.style.height = new_y + 'px';
-
+    // If we don't have an image yet, just scale the stage relative to the
+    // entire viewport height so the jump isn't too jumpy when the image loads.
     if (!active_image || !active_image.tag) {
+      new_y = (JX.Vector.getViewport().y * 0.80);
+      new_y = Math.max(320, new_y);
+      panel.style.height = new_y + 'px';
+
       return;
     }
 
     var tag = active_image.tag;
 
-    // If the image is too wide or tall for the viewport, scale it down so it
-    // fits.
+    // If the image is too wide for the viewport, scale it down so it fits.
+    // If it is too tall, just let the viewport scroll.
     var w = JX.Vector.getDim(panel);
-    w.x -= 40;
-    w.y -= 40;
+
+    // Leave 24px margins on either side of the image.
+    w.x -= 48;
+
     var scale = 1;
     if (w.x < tag.naturalWidth) {
       scale = Math.min(scale, w.x / tag.naturalWidth);
-    }
-    if (w.y < tag.naturalHeight) {
-      scale = Math.min(scale, w.y / tag.naturalHeight);
     }
 
     if (scale < 1) {
@@ -201,6 +184,10 @@ JX.behavior('pholio-mock-view', function(config) {
       tag.width = tag.naturalWidth;
       tag.height = tag.naturalHeight;
     }
+
+    // Scale the viewport's vertical size to the image's adjusted size.
+    new_y = Math.max(320, tag.height + 48);
+    panel.style.height = new_y + 'px';
 
     viewport.style.top = Math.floor((new_y - tag.height) / 2) + 'px';
 
@@ -219,10 +206,10 @@ JX.behavior('pholio-mock-view', function(config) {
 
     var img = JX.$N('img', {className: 'pholio-mock-image'});
     img.onload = JX.bind(img, onload_image, active_image.id);
-    img.src = active_image.fullURI;
+    img.src = active_image.stageURI;
 
     var thumbs = JX.DOM.scry(
-      JX.$('pholio-mock-carousel'),
+      JX.$('pholio-mock-thumb-grid'),
       'a',
       'mock-thumbnail');
 
@@ -231,19 +218,18 @@ JX.behavior('pholio-mock-view', function(config) {
 
       JX.DOM.alterClass(
         thumbs[k],
-        'pholio-mock-carousel-thumb-current',
+        'pholio-mock-thumb-grid-current',
         (active_image.id == thumb_meta.imageID));
     }
 
     load_inline_comments();
-
     if (image_id != config.selectedID) {
       JX.History.replace(active_image.pageURI);
     }
   }
 
   JX.Stratcom.listen(
-    ['mousedown', 'click'],
+    'click',
     'mock-thumbnail',
     function(e) {
       if (!e.isNormalMouseEvent()) {
@@ -264,15 +250,21 @@ JX.behavior('pholio-mock-view', function(config) {
       return;
     }
 
-    if (config.viewMode == 'history') {
+    if (JX.Stratcom.pass()) {
       return;
     }
 
-    if (drag_begin) {
+    if (is_dragging) {
       return;
     }
 
     e.kill();
+
+    if (!active_image.isImage) {
+      // If this is a PDF or something like that, we eat the event but we
+      // don't let users add inlines to the thumbnail.
+      return;
+    }
 
     is_dragging = true;
     drag_begin = get_image_xy(JX.$V(e));
@@ -292,12 +284,35 @@ JX.behavior('pholio-mock-view', function(config) {
   });
 
   JX.Stratcom.listen(
-    ['mouseover', 'mouseout'],
+    'mousedown',
     'pholio-inline-ref',
     function(e) {
-      var phid = e.getNodeData('pholio-inline-ref').phid;
-      var show = (e.getType() == 'mouseover');
-      stage.highlightInline(phid, show);
+      e.kill();
+
+      var id = e.getNodeData('pholio-inline-ref').inlineID;
+
+      var active_id = active_image.id;
+      var handler = function(r) {
+        var inlines = inline_comments[active_id];
+
+        for (var ii = 0; ii < inlines.length; ii++) {
+          if (inlines[ii].id == id) {
+            if (r.id) {
+              inlines[ii] = r;
+            } else {
+              inlines.splice(ii, 1);
+            }
+            break;
+          }
+        }
+
+        redraw_inlines(active_id);
+        JX.DOM.invoke(JX.$(config.commentFormID), 'shouldRefresh');
+      };
+
+      new JX.Workflow('/pholio/inline/' + id + '/')
+        .setHandler(handler)
+        .start();
     });
 
   JX.Stratcom.listen(
@@ -315,23 +330,31 @@ JX.behavior('pholio-mock-view', function(config) {
       }
 
       drag_end = get_image_xy(JX.$V(e));
-      var scale = get_image_scale();
 
       resize_selection(16);
 
-      var data = {mockID: config.mockID};
-      var handler = function(r) {
-        var dialog = JX.$H(r).getFragment().firstChild;
-        JX.DOM.appendContent(viewport, dialog);
-
-        var x = Math.min(drag_begin.x * scale, drag_end.x * scale);
-        var y = Math.max(drag_begin.y * scale, drag_end.y * scale) + 4;
-        JX.$V(x, y).setPos(dialog);
-
-        JX.DOM.focus(JX.DOM.find(dialog, 'textarea'));
+      var data = {
+        mockID: config.mockID,
+        imageID: active_image.id,
+        startX: Math.min(drag_begin.x, drag_end.x),
+        startY: Math.min(drag_begin.y, drag_end.y),
+        endX: Math.max(drag_begin.x, drag_end.x),
+        endY: Math.max(drag_begin.y, drag_end.y)
       };
 
-      new JX.Workflow('/pholio/inline/save/', data)
+      var handler = function(r) {
+        if (!inline_comments[active_image.id]) {
+          inline_comments[active_image.id] = [];
+        }
+        inline_comments[active_image.id].push(r);
+
+        redraw_inlines(active_image.id);
+        JX.DOM.invoke(JX.$(config.commentFormID), 'shouldRefresh');
+      };
+
+      clear_selection();
+
+      new JX.Workflow('/pholio/inline/', data)
         .setHandler(handler)
         .start();
     });
@@ -381,6 +404,38 @@ JX.behavior('pholio-mock-view', function(config) {
     redraw_selection();
   }
 
+  function render_image_header(image) {
+    // Render image dimensions and visible size. If we have this infomation
+    // from the server we can display some of it immediately; otherwise, we need
+    // to wait for the image to load so we can read dimension information from
+    // it.
+
+    var image_x = image.width;
+    var image_y = image.height;
+    var display_x = null;
+    if (image.tag) {
+      image_x = image.tag.naturalWidth;
+      image_y = image.tag.naturalHeight;
+      display_x = image.tag.width;
+    }
+
+    var visible = [];
+    if (image_x) {
+      if (display_x) {
+        var area = Math.round(100 * (display_x / image_x));
+        visible.push(
+          JX.$N(
+            'span',
+            {className: 'pholio-visible-size'},
+            [area, '%']));
+        visible.push(' ');
+      }
+      visible.push(['(', image_x, ' \u00d7 ', image_y, ')']);
+    }
+
+    return visible;
+  }
+
   function redraw_inlines(id) {
     if (!active_image) {
       return;
@@ -391,8 +446,11 @@ JX.behavior('pholio-mock-view', function(config) {
     }
 
     stage.clearStage();
-    var comment_holder = JX.$('mock-inline-comments');
+    var comment_holder = JX.$('mock-image-description');
     JX.DOM.setContent(comment_holder, render_image_info(active_image));
+
+    var image_header = JX.$('mock-image-header');
+    JX.DOM.setContent(image_header, render_image_header(active_image));
 
     var inlines = inline_comments[active_image.id];
     if (!inlines || !inlines.length) {
@@ -401,9 +459,6 @@ JX.behavior('pholio-mock-view', function(config) {
 
     for (var ii = 0; ii < inlines.length; ii++) {
       var inline = inlines[ii];
-      var card = JX.$H(inline.contentHTML).getFragment().firstChild;
-
-      stage.addCard(card, inline.phid);
 
       if (!active_image.tag) {
         // The image itself hasn't loaded yet, so we can't draw the inline
@@ -411,15 +466,17 @@ JX.behavior('pholio-mock-view', function(config) {
         continue;
       }
 
-      var inline_selection = render_reticle_fill();
-      stage.addReticle(inline_selection, inline.phid);
-      position_inline_rectangle(inline, inline_selection);
-
-      if (!inline.transactionphid) {
-        var inline_draft = render_reticle_border();
-        stage.addReticle(inline_draft, inline.phid);
-        position_inline_rectangle(inline, inline_draft);
+      var classes = [];
+      if (!inline.transactionPHID) {
+        classes.push('pholio-mock-reticle-draft');
+      } else {
+        classes.push('pholio-mock-reticle-final');
       }
+
+      var inline_selection = render_reticle(classes,
+        'pholio-mock-comment-icon phui-font-fa fa-comment');
+      stage.addReticle(inline_selection, inline.id);
+      position_inline_rectangle(inline, inline_selection);
     }
   }
 
@@ -453,8 +510,8 @@ JX.behavior('pholio-mock-view', function(config) {
   }
 
   function redraw_selection() {
-    selection_border = selection_border || render_reticle_border();
-    selection_fill = selection_fill || render_reticle_fill();
+    var classes = ['pholio-mock-reticle-selection'];
+    selection_reticle = selection_reticle || render_reticle(classes, '');
 
     var p = JX.$V(
       Math.min(drag_begin.x, drag_end.x),
@@ -471,167 +528,24 @@ JX.behavior('pholio-mock-view', function(config) {
     d.x *= scale;
     d.y *= scale;
 
-    var nodes = [selection_fill, selection_border];
-    for (var ii = 0; ii < nodes.length; ii++) {
-      var node = nodes[ii];
-      viewport.appendChild(node);
-      p.setPos(node);
-      d.setDim(node);
-    }
+    viewport.appendChild(selection_reticle);
+    p.setPos(selection_reticle);
+    d.setDim(selection_reticle);
   }
 
   function clear_selection() {
-    selection_fill && JX.DOM.remove(selection_fill);
-    selection_border && JX.DOM.remove(selection_border);
+    selection_reticle && JX.DOM.remove(selection_reticle);
+    selection_reticle = null;
   }
 
   function load_inline_comments() {
     var id = active_image.id;
-    var inline_comments_uri = "/pholio/inline/" + id + "/";
+    var inline_comments_uri = '/pholio/inline/list/' + id + '/';
 
     new JX.Request(inline_comments_uri, function(r) {
       inline_comments[id] = r;
       redraw_inlines(id);
     }).send();
-  }
-
-  JX.Stratcom.listen(
-    'click',
-    'inline-delete',
-    function(e) {
-      var data = e.getNodeData('inline-delete');
-      e.kill();
-      interrupt_typing();
-
-      stage.removeInline(data.phid);
-
-      var deleteURI = '/pholio/inline/delete/' + data.id + '/';
-      var del = new JX.Request(deleteURI, function(r) {
-
-        });
-      del.send();
-
-    });
-
-  JX.Stratcom.listen(
-    'click',
-    'inline-edit',
-    function(e) {
-      var data = e.getNodeData('inline-edit');
-      e.kill();
-
-      interrupt_typing();
-
-      var editURI = "/pholio/inline/edit/" + data.id + '/';
-
-      var edit_dialog = new JX.Request(editURI, function(r) {
-        var dialog = JX.$N(
-          'div',
-          {
-            className: 'pholio-edit-inline-popup'
-          },
-          JX.$H(r));
-
-        JX.DOM.setContent(JX.$(data.phid + '_comment'), dialog);
-      });
-
-      edit_dialog.send();
-    });
-
-  JX.Stratcom.listen(
-    'click',
-    'inline-edit-cancel',
-    function(e) {
-      var data = e.getNodeData('inline-edit-cancel');
-      e.kill();
-      load_inline_comment(data.id);
-  });
-
-  JX.Stratcom.listen(
-    'click',
-    'inline-edit-submit',
-    function(e) {
-      var data = e.getNodeData('inline-edit-submit');
-      var editURI = "/pholio/inline/edit/" + data.id + '/';
-      e.kill();
-
-      var edit = new JX.Request(editURI, function(r) {
-        load_inline_comment(data.id);
-        JX.DOM.invoke(JX.$(config.commentFormID), 'shouldRefresh');
-      });
-      edit.addData({
-        op: 'update',
-        content: JX.DOM.find(JX.$(data.phid + '_comment'), 'textarea').value
-      });
-      edit.send();
-  });
-
-  JX.Stratcom.listen(
-    'click',
-    'inline-save-cancel',
-    function(e) {
-      e.kill();
-      interrupt_typing();
-    }
-  );
-
-  JX.Stratcom.listen(
-    'click',
-    'inline-save-submit',
-    function(e) {
-      e.kill();
-
-      var form = JX.$('pholio-new-inline-comment-dialog');
-      var text = JX.DOM.find(form, 'textarea').value;
-      if (!text.length) {
-        interrupt_typing();
-        return;
-      }
-
-      var data = {
-        mockID: config.mockID,
-        imageID: active_image.id,
-        startX: Math.min(drag_begin.x, drag_end.x),
-        startY: Math.min(drag_begin.y, drag_end.y),
-        endX: Math.max(drag_begin.x, drag_end.x),
-        endY: Math.max(drag_begin.y, drag_end.y)
-      };
-
-      var handler = function(r) {
-        if (!inline_comments[active_image.id]) {
-          inline_comments[active_image.id] = [];
-        }
-        inline_comments[active_image.id].push(r);
-
-        interrupt_typing();
-        redraw_inlines(active_image.id);
-        JX.DOM.invoke(JX.$(config.commentFormID), 'shouldRefresh');
-      };
-
-      JX.Workflow.newFromForm(form, data)
-        .setHandler(handler)
-        .start();
-    }
-  );
-
-  function load_inline_comment(id) {
-    var viewInlineURI = '/pholio/inline/view/' + id + '/';
-    var inline_comment = new JX.Request(viewInlineURI, function(r) {
-      JX.DOM.replace(JX.$(r.phid + '_comment'), JX.$H(r.contentHTML));
-    });
-    inline_comment.send();
-  }
-
-  function interrupt_typing() {
-    clear_selection();
-
-    try {
-      JX.DOM.remove(JX.$('pholio-new-inline-comment-dialog'));
-    } catch (x) {
-      // TODO: For now, ignore this.
-    }
-
-    drag_begin = null;
   }
 
   load_inline_comments();
@@ -675,92 +589,96 @@ JX.behavior('pholio-mock-view', function(config) {
   function render_image_info(image) {
     var info = [];
 
+    var buttons = [];
+
+    var classes = ['pholio-image-button'];
+
+    if (image.isViewable) {
+      classes.push('pholio-image-button-active');
+    } else {
+      classes.push('pholio-image-button-disabled');
+    }
+
+    buttons.push(
+      JX.$N(
+        'div',
+        {
+          className: classes.join(' ')
+        },
+        JX.$N(
+          image.isViewable ? 'a' : 'span',
+          {
+            href: image.fullURI,
+            target: '_blank',
+            className: 'pholio-image-button-link'
+          },
+          JX.$H(config.fullIcon))));
+
+    classes = ['pholio-image-button', 'pholio-image-button-active'];
+
+    buttons.push(
+      JX.$N(
+        'form',
+        {
+          className: classes.join(' '),
+          action: image.downloadURI,
+          method: 'POST',
+          sigil: 'download'
+        },
+        JX.$N(
+          'button',
+          {
+            href: image.downloadURI,
+            className: 'pholio-image-button-link'
+          },
+          JX.$H(config.downloadIcon))));
+
+    if (image.title === '') {
+      image.title = 'Untitled Masterpiece';
+    }
     var title = JX.$N(
       'div',
       {className: 'pholio-image-title'},
       image.title);
     info.push(title);
 
-    var desc = JX.$N(
-      'div',
-      {className: 'pholio-image-description'},
-      image.desc);
-    info.push(desc);
-
     if (!image.isObsolete) {
-      var embed = JX.$N(
+      var img_len = config.currentSetSize;
+      var rev = JX.$N(
         'div',
-        {className: 'pholio-image-embedding'},
-        JX.$H('Embed this image:<br />{M' + config.mockID +
-        ', image=' + image.id + '}'));
-      info.push(embed);
+        {className: 'pholio-image-revision'},
+        JX.$H('Current Revision (' + img_len + ' images)'));
+      info.push(rev);
+    } else {
+      var prev = JX.$N(
+        'div',
+        {className: 'pholio-image-revision'},
+        JX.$H('(Previous Revision)'));
+      info.push(prev);
     }
-
-    // Render image dimensions and visible size. If we have this infomation
-    // from the server we can display some of it immediately; otherwise, we need
-    // to wait for the image to load so we can read dimension information from
-    // it.
-
-    var image_x = image.width;
-    var image_y = image.height;
-    var display_x = null;
-    if (image.tag) {
-      image_x = image.tag.naturalWidth;
-      image_y = image.tag.naturalHeight;
-      display_x = image.tag.width;
-    }
-
-    var visible = [];
-    if (image_x) {
-      visible.push([image_x, '\u00d7', image_y, 'px']);
-      if (display_x) {
-        var area = Math.round(100 * (display_x / image_x));
-        visible.push(' ');
-        visible.push(
-          JX.$N(
-            'span',
-            {className: 'pholio-visible-size'},
-            ['(', area, '%', ')']));
-      }
-    }
-
-    if (visible.length) {
-      info.push(visible);
-    }
-
-    var full_link = JX.$N(
-      'a',
-      {href: image.fullURI, target: '_blank'},
-      'View Full Image');
-    info.push(full_link);
-
-    if (config.viewMode != 'history') {
-      var history_link = JX.$N(
-        'a',
-        { href: image.historyURI },
-        'View Image History');
-      info.push(history_link);
-    }
-
 
     for (var ii = 0; ii < info.length; ii++) {
       info[ii] = JX.$N('div', {className: 'pholio-image-info-item'}, info[ii]);
     }
     info = JX.$N('div', {className: 'pholio-image-info'}, info);
 
-    return info;
+    if (image.descriptionMarkup === '') {
+      return [buttons, info];
+    } else {
+      var desc = JX.$N(
+        'div',
+        {className: 'pholio-image-description'},
+        JX.$H(image.descriptionMarkup));
+      return [buttons, info, desc];
+    }
   }
 
-  function render_reticle_border() {
-    return JX.$N(
+  function render_reticle(classes, inner_classes) {
+    var inner = JX.$N('div', {className: inner_classes});
+    var outer = JX.$N(
       'div',
-      {className: 'pholio-mock-select-border'});
-  }
-
-  function render_reticle_fill() {
-    return JX.$N(
-      'div',
-      {className: 'pholio-mock-select-fill'});
+      {className: ['pholio-mock-reticle'].concat(classes).join(' ')}, inner);
+    return outer;
   }
 
 
@@ -793,7 +711,7 @@ JX.behavior('pholio-mock-view', function(config) {
     var image = JX.$N('img');
     image.onload = lightbox_loaded;
     setTimeout(function() {
-      image.src = active_image.fullURI;
+      image.src = active_image.stageURI;
     }, 1000);
     JX.DOM.setContent(lightbox, image);
     JX.DOM.alterClass(lightbox, 'pholio-device-lightbox-loading', true);
@@ -810,7 +728,7 @@ JX.behavior('pholio-mock-view', function(config) {
     lightbox = null;
   }
 
-  function lightbox_resize(e) {
+  function lightbox_resize() {
     if (!lightbox) {
       return;
     }
@@ -833,7 +751,7 @@ JX.behavior('pholio-mock-view', function(config) {
 
   var preload = [];
   for (var ii = 0; ii < config.images.length; ii++) {
-    preload.push(config.images[ii].fullURI);
+    preload.push(config.images[ii].stageURI);
   }
 
   function preload_next() {

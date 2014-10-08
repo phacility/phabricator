@@ -11,7 +11,7 @@ final class PhabricatorMailManagementSendTestWorkflow
           'Simulate sending mail. This may be useful to test your mail '.
           'configuration, or while developing new mail adapters.'))
       ->setExamples(
-        "**send-test** --to alincoln --subject hi < body.txt")
+        '**send-test** --to alincoln --subject hi < body.txt')
       ->setArguments(
         array(
           array(
@@ -79,6 +79,13 @@ final class PhabricatorMailManagementSendTestWorkflow
     $tos = $args->getArg('to');
     $ccs = $args->getArg('cc');
 
+    if (!$tos && !$ccs) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'Specify one or more users to send mail to with `--to` and '.
+          '`--cc`.'));
+    }
+
     $names = array_merge($tos, $ccs);
     $users = id(new PhabricatorPeopleQuery())
       ->setViewer($viewer)
@@ -103,24 +110,34 @@ final class PhabricatorMailManagementSendTestWorkflow
     }
 
     $subject = $args->getArg('subject');
+    if ($subject === null) {
+      $subject = pht('No Subject');
+    }
+
     $tags = $args->getArg('tag');
     $attach = $args->getArg('attach');
-    $is_html = $args->getArg('html');
     $is_bulk = $args->getArg('bulk');
 
     $console->writeErr("%s\n", pht('Reading message body from stdin...'));
     $body = file_get_contents('php://stdin');
-
 
     $mail = id(new PhabricatorMetaMTAMail())
       ->addTos($tos)
       ->addCCs($ccs)
       ->setSubject($subject)
       ->setBody($body)
-      ->setOverrideNoSelfMailPreference(true)
-      ->setIsHTML($is_html)
       ->setIsBulk($is_bulk)
       ->setMailTags($tags);
+
+    if ($args->getArg('html')) {
+      $mail->setBody(
+        pht('(This is a placeholder plaintext email body for a test message '.
+            'sent with --html.)'));
+
+      $mail->setHTMLBody($body);
+    } else {
+      $mail->setBody($body);
+    }
 
     if ($from) {
       $mail->setFrom($from->getPHID());
@@ -139,7 +156,7 @@ final class PhabricatorMailManagementSendTestWorkflow
 
     $console->writeErr(
       "%s\n\n    phabricator/ $ ./bin/mail show-outbound --id %d\n\n",
-      pht("Mail sent! You can view details by running this command:"),
+      pht('Mail sent! You can view details by running this command:'),
       $mail->getID());
   }
 

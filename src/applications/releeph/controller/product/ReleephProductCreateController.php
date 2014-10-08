@@ -44,7 +44,7 @@ final class ReleephProductCreateController extends ReleephProductController {
 
           return id(new AphrontRedirectResponse())
             ->setURI($releeph_product->getURI());
-        } catch (AphrontQueryDuplicateKeyException $ex) {
+        } catch (AphrontDuplicateKeyQueryException $ex) {
           $e_name = pht('Not Unique');
           $errors[] = pht('Another product already uses this name.');
         }
@@ -116,7 +116,6 @@ final class ReleephProductCreateController extends ReleephProductController {
       ),
       array(
         'title' => pht('Create New Product'),
-        'device' => true,
       ));
   }
 

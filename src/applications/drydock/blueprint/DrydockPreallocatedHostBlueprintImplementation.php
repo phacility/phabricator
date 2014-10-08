@@ -79,8 +79,8 @@ final class DrydockPreallocatedHostBlueprintImplementation
     if ($v_platform !== 'windows') {
       $cmd->execx('mkdir %s', $full_path);
     } else {
-      // Windows is terrible.  The mkdir command doesn't even support putting
-      // the path in quotes.  IN QUOTES.  ARGUHRGHUGHHGG!!  Do some terribly
+      // Windows is terrible. The mkdir command doesn't even support putting
+      // the path in quotes. IN QUOTES. ARGUHRGHUGHHGG!! Do some terribly
       // inaccurate sanity checking since we can't safely escape the path.
       if (preg_match('/^[A-Z]\\:\\\\[a-zA-Z0-9\\\\\\ ]/', $full_path) === 0) {
         throw new Exception(
@@ -108,13 +108,16 @@ final class DrydockPreallocatedHostBlueprintImplementation
             'host' => $resource->getAttribute('host'),
             'port' => $resource->getAttribute('port'),
             'credential' => $resource->getAttribute('credential'),
-            'platform' => $resource->getAttribute('platform')));
+            'platform' => $resource->getAttribute('platform'),
+          ))
+          ->setWorkingDirectory($lease->getAttribute('path'));
       case 'filesystem':
         return id(new DrydockSFTPFilesystemInterface())
           ->setConfiguration(array(
             'host' => $resource->getAttribute('host'),
             'port' => $resource->getAttribute('port'),
-            'credential' => $resource->getAttribute('credential')));
+            'credential' => $resource->getAttribute('credential'),
+          ));
     }
 
     throw new Exception("No interface of type '{$type}'.");

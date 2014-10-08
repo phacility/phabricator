@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group aphront
- */
 final class AphrontURIMapper {
 
   private $map;
@@ -49,4 +46,5 @@ final class AphrontURIMapper {
 
     return array(null, null);
   }
+
 }

@@ -53,9 +53,13 @@
 
 .phabricator-transaction-subheader {
   color: {$lightgreytext};
-  border-bottom: 1px solid {$thinblueborder};
-  padding-bottom: 4px;
-  margin-bottom: 8px;
+  padding-bottom: 8px;
+}
+
+.transaction-comment + .phabricator-transaction-subheader {
+  border-top: 1px solid {$thinblueborder};
+  margin-top: 12px;
+  padding-top: 12px;
 }
 
 div.phabricator-remarkup + .phabricator-transaction-subheader {

@@ -3,6 +3,41 @@
 final class ManiphestTaskSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  private $showBatchControls;
+  private $baseURI;
+  private $isBoardView;
+
+  public function setIsBoardView($is_board_view) {
+    $this->isBoardView = $is_board_view;
+    return $this;
+  }
+
+  public function getIsBoardView() {
+    return $this->isBoardView;
+  }
+
+  public function setBaseURI($base_uri) {
+    $this->baseURI = $base_uri;
+    return $this;
+  }
+
+  public function getBaseURI() {
+    return $this->baseURI;
+  }
+
+  public function setShowBatchControls($show_batch_controls) {
+    $this->showBatchControls = $show_batch_controls;
+    return $this;
+  }
+
+  public function getResultTypeDescription() {
+    return pht('Tasks');
+  }
+
+  public function getApplicationClassName() {
+    return 'PhabricatorManiphestApplication';
+  }
+
   public function getCustomFieldObject() {
     return new ManiphestTask();
   }
@@ -50,7 +85,7 @@ final class ManiphestTaskSearchEngine
 
     $saved->setParameter(
       'allProjectPHIDs',
-      $request->getArr('allProjects'));
+      $this->readPHIDsFromRequest($request, 'allProjects'));
 
     $saved->setParameter(
       'withNoProject',
@@ -58,11 +93,11 @@ final class ManiphestTaskSearchEngine
 
     $saved->setParameter(
       'anyProjectPHIDs',
-      $request->getArr('anyProjects'));
+      $this->readPHIDsFromRequest($request, 'anyProjects'));
 
     $saved->setParameter(
       'excludeProjectPHIDs',
-      $request->getArr('excludeProjects'));
+      $this->readPHIDsFromRequest($request, 'excludeProjects'));
 
     $saved->setParameter(
       'userProjectPHIDs',
@@ -116,13 +151,10 @@ final class ManiphestTaskSearchEngine
       $query->withPriorities($priorities);
     }
 
-    $order = $saved->getParameter('order');
-    $order = idx($this->getOrderValues(), $order);
-    if ($order) {
-      $query->setOrderBy($order);
-    } else {
-      $query->setOrderBy(head($this->getOrderValues()));
-    }
+    $this->applyOrderByToQuery(
+      $query,
+      $this->getOrderValues(),
+      $saved->getParameter('order'));
 
     $group = $saved->getParameter('group');
     $group = idx($this->getGroupValues(), $group);
@@ -271,10 +303,14 @@ final class ManiphestTaskSearchEngine
 
     $ids = $saved->getParameter('ids', array());
 
+    $builtin_orders = $this->getOrderOptions();
+    $custom_orders = $this->getCustomFieldOrderOptions();
+    $all_orders = $builtin_orders + $custom_orders;
+
     $form
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/accounts/')
+          ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('assigned')
           ->setLabel(pht('Assigned To'))
           ->setValue($assigned_handles))
@@ -287,65 +323,77 @@ final class ManiphestTaskSearchEngine
             $with_unassigned))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/projects/')
+          ->setDatasource(new PhabricatorProjectDatasource())
           ->setName('allProjects')
           ->setLabel(pht('In All Projects'))
-          ->setValue($all_project_handles))
-      ->appendChild(
-        id(new AphrontFormCheckboxControl())
-          ->addCheckbox(
-            'withNoProject',
-            1,
-            pht('Show only tasks with no projects.'),
-            $with_no_projects))
+          ->setValue($all_project_handles));
+
+    if (!$this->getIsBoardView()) {
+      $form
+        ->appendChild(
+          id(new AphrontFormCheckboxControl())
+            ->addCheckbox(
+              'withNoProject',
+              1,
+              pht('Show only tasks with no projects.'),
+              $with_no_projects));
+    }
+
+    $form
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/projects/')
+          ->setDatasource(new PhabricatorProjectDatasource())
           ->setName('anyProjects')
           ->setLabel(pht('In Any Project'))
           ->setValue($any_project_handles))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/projects/')
+          ->setDatasource(new PhabricatorProjectDatasource())
           ->setName('excludeProjects')
           ->setLabel(pht('Not In Projects'))
           ->setValue($exclude_project_handles))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/accounts/')
+          ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('userProjects')
           ->setLabel(pht('In Users\' Projects'))
           ->setValue($user_project_handles))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/accounts/')
+          ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('authors')
           ->setLabel(pht('Authors'))
           ->setValue($author_handles))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/mailable/')
+          ->setDatasource(new PhabricatorMetaMTAMailableDatasource())
           ->setName('subscribers')
           ->setLabel(pht('Subscribers'))
           ->setValue($subscriber_handles))
       ->appendChild($status_control)
-      ->appendChild($priority_control)
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setName('group')
-          ->setLabel(pht('Group By'))
-          ->setValue($saved->getParameter('group'))
-          ->setOptions($this->getGroupOptions()))
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setName('order')
-          ->setLabel(pht('Order By'))
-          ->setValue($saved->getParameter('order'))
-          ->setOptions($this->getOrderOptions()))
+      ->appendChild($priority_control);
+
+    if (!$this->getIsBoardView()) {
+      $form
+        ->appendChild(
+          id(new AphrontFormSelectControl())
+            ->setName('group')
+            ->setLabel(pht('Group By'))
+            ->setValue($saved->getParameter('group'))
+            ->setOptions($this->getGroupOptions()))
+        ->appendChild(
+          id(new AphrontFormSelectControl())
+            ->setName('order')
+            ->setLabel(pht('Order By'))
+            ->setValue($saved->getParameter('order'))
+            ->setOptions($all_orders));
+    }
+
+    $form
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('fulltext')
-          ->setLabel(pht('Contains Text'))
+          ->setLabel(pht('Contains Words'))
           ->setValue($saved->getParameter('fulltext')))
       ->appendChild(
         id(new AphrontFormTextControl())
@@ -371,15 +419,20 @@ final class ManiphestTaskSearchEngine
       'modifiedEnd',
       pht('Updated Before'));
 
-    $form
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setName('limit')
-          ->setLabel(pht('Page Size'))
-          ->setValue($saved->getParameter('limit', 100)));
+    if (!$this->getIsBoardView()) {
+      $form
+        ->appendChild(
+          id(new AphrontFormTextControl())
+            ->setName('limit')
+            ->setLabel(pht('Page Size'))
+            ->setValue($saved->getParameter('limit', 100)));
+    }
   }
 
   protected function getURI($path) {
+    if ($this->baseURI) {
+      return $this->baseURI.$path;
+    }
     return '/maniphest/'.$path;
   }
 
@@ -447,9 +500,9 @@ final class ManiphestTaskSearchEngine
   private function getOrderValues() {
     return array(
       'priority' => ManiphestTaskQuery::ORDER_PRIORITY,
-      'updated' => ManiphestTaskQuery::ORDER_MODIFIED,
-      'created' => ManiphestTaskQuery::ORDER_CREATED,
-      'title' => ManiphestTaskQuery::ORDER_TITLE,
+      'updated'  => ManiphestTaskQuery::ORDER_MODIFIED,
+      'created'  => ManiphestTaskQuery::ORDER_CREATED,
+      'title'    => ManiphestTaskQuery::ORDER_TITLE,
     );
   }
 
@@ -457,9 +510,9 @@ final class ManiphestTaskSearchEngine
     return array(
       'priority' => pht('Priority'),
       'assigned' => pht('Assigned'),
-      'status' => pht('Status'),
-      'project' => pht('Project'),
-      'none' => pht('None'),
+      'status'   => pht('Status'),
+      'project'  => pht('Project'),
+      'none'     => pht('None'),
     );
   }
 
@@ -467,10 +520,41 @@ final class ManiphestTaskSearchEngine
     return array(
       'priority' => ManiphestTaskQuery::GROUP_PRIORITY,
       'assigned' => ManiphestTaskQuery::GROUP_OWNER,
-      'status' => ManiphestTaskQuery::GROUP_STATUS,
-      'project' => ManiphestTaskQuery::GROUP_PROJECT,
-      'none' => ManiphestTaskQuery::GROUP_NONE,
+      'status'   => ManiphestTaskQuery::GROUP_STATUS,
+      'project'  => ManiphestTaskQuery::GROUP_PROJECT,
+      'none'     => ManiphestTaskQuery::GROUP_NONE,
     );
+  }
+
+  protected function renderResultList(
+    array $tasks,
+    PhabricatorSavedQuery $saved,
+    array $handles) {
+
+    $viewer = $this->requireViewer();
+
+    if ($this->isPanelContext()) {
+      $can_edit_priority = false;
+      $can_bulk_edit = false;
+    } else {
+      $can_edit_priority = PhabricatorPolicyFilter::hasCapability(
+        $viewer,
+        $this->getApplication(),
+        ManiphestEditPriorityCapability::CAPABILITY);
+
+      $can_bulk_edit = PhabricatorPolicyFilter::hasCapability(
+        $viewer,
+        $this->getApplication(),
+        ManiphestBulkEditCapability::CAPABILITY);
+    }
+
+    return id(new ManiphestTaskResultListView())
+      ->setUser($viewer)
+      ->setTasks($tasks)
+      ->setSavedQuery($saved)
+      ->setCanEditPriority($can_edit_priority)
+      ->setCanBatchEdit($can_bulk_edit)
+      ->setShowBatchControls($this->showBatchControls);
   }
 
 }

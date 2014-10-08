@@ -74,6 +74,14 @@ abstract class DifferentialCustomField
     return array();
   }
 
+  public function getRequiredHandlePHIDsForRevisionHeaderWarnings() {
+    return array();
+  }
+
+  public function getWarningsForRevisionHeader(array $handles) {
+    return array();
+  }
+
 /* -(  Integration with Commit Messages  )----------------------------------- */
 
 

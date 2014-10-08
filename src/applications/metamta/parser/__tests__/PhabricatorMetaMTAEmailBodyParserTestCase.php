@@ -8,7 +8,7 @@ final class PhabricatorMetaMTAEmailBodyParserTestCase
     foreach ($bodies as $body) {
       $parser = new PhabricatorMetaMTAEmailBodyParser();
       $stripped = $parser->stripTextBody($body);
-      $this->assertEqual("OKAY", $stripped);
+      $this->assertEqual('OKAY', $stripped);
     }
   }
 
@@ -42,14 +42,14 @@ EOEMAIL;
 
     $parser = new PhabricatorMetaMTAEmailBodyParser();
     $stripped = $parser->stripTextBody($body);
-    $this->assertEqual("On which horse shall you ride?", $stripped);
+    $this->assertEqual('On which horse shall you ride?', $stripped);
   }
 
   private function getEmailBodiesWithFullCommands() {
     $bodies = $this->getEmailBodies();
     $with_commands = array();
     foreach ($bodies as $body) {
-      $with_commands[] = "!whatevs dude\n" . $body;
+      $with_commands[] = "!whatevs dude\n".$body;
     }
     return $with_commands;
   }
@@ -58,7 +58,7 @@ EOEMAIL;
     $bodies = $this->getEmailBodies();
     $with_commands = array();
     foreach ($bodies as $body) {
-      $with_commands[] = "!whatevs\n" . $body;
+      $with_commands[] = "!whatevs\n".$body;
     }
     return $with_commands;
   }
@@ -66,6 +66,7 @@ EOEMAIL;
 
   private function getEmailBodies() {
     $trailing_space = ' ';
+    $emdash = "\xE2\x80\x94";
 
     return array(
 <<<EOEMAIL
@@ -168,6 +169,19 @@ OKAY
 
 > On 17 Oct 2013, at 17:47, "Someone" <somebody@somewhere> wrote:
 > ...
+EOMAIL
+,
+<<<EOMAIL
+OKAY
+
+> -----Original Message-----
+>
+> ...
+EOMAIL
+,
+<<<EOMAIL
+OKAY {$emdash}{$trailing_space}
+Sent from Mailbox
 EOMAIL
     );
   }

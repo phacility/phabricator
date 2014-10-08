@@ -30,7 +30,7 @@ final class PhabricatorHash {
   public static function digestPassword(PhutilOpaqueEnvelope $envelope, $salt) {
     $result = $envelope->openEnvelope();
     if (!$result) {
-      throw new Exception("Trying to digest empty password!");
+      throw new Exception('Trying to digest empty password!');
     }
 
     for ($ii = 0; $ii < 1000; $ii++) {
@@ -58,13 +58,13 @@ final class PhabricatorHash {
 
     static $map;
     if ($map === null) {
-      $map = "0123456789".
-             "abcdefghij".
-             "klmnopqrst".
-             "uvwxyzABCD".
-             "EFGHIJKLMN".
-             "OPQRSTUVWX".
-             "YZ._";
+      $map = '0123456789'.
+             'abcdefghij'.
+             'klmnopqrst'.
+             'uvwxyzABCD'.
+             'EFGHIJKLMN'.
+             'OPQRSTUVWX'.
+             'YZ._';
     }
 
     $result = '';

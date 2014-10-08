@@ -8,6 +8,46 @@ final class DifferentialChangesetDetailView extends AphrontView {
   private $symbolIndex;
   private $id;
   private $vsChangesetID;
+  private $renderURI;
+  private $whitespace;
+  private $renderingRef;
+  private $autoload;
+
+  public function setAutoload($autoload) {
+    $this->autoload = $autoload;
+    return $this;
+  }
+
+  public function getAutoload() {
+    return $this->autoload;
+  }
+
+  public function setRenderingRef($rendering_ref) {
+    $this->renderingRef = $rendering_ref;
+    return $this;
+  }
+
+  public function getRenderingRef() {
+    return $this->renderingRef;
+  }
+
+  public function setWhitespace($whitespace) {
+    $this->whitespace = $whitespace;
+    return $this;
+  }
+
+  public function getWhitespace() {
+    return $this->whitespace;
+  }
+
+  public function setRenderURI($render_uri) {
+    $this->renderURI = $render_uri;
+    return $this;
+  }
+
+  public function getRenderURI() {
+    return $this->renderURI;
+  }
 
   public function setChangeset($changeset) {
     $this->changeset = $changeset;
@@ -36,6 +76,11 @@ final class DifferentialChangesetDetailView extends AphrontView {
     return $this->id;
   }
 
+  public function setID($id) {
+    $this->id = $id;
+    return $this;
+  }
+
   public function setVsChangesetID($vs_changeset_id) {
     $this->vsChangesetID = $vs_changeset_id;
     return $this;
@@ -51,43 +96,56 @@ final class DifferentialChangesetDetailView extends AphrontView {
     switch ($extension) {
       case 'psd':
       case 'ai':
-        $icon = 'preview';
+        $icon = 'fa-eye';
         break;
       case 'conf':
-        $icon = 'wrench';
+        $icon = 'fa-wrench';
         break;
       case 'wav':
       case 'mp3':
       case 'aiff':
-        $icon = 'music';
+        $icon = 'fa-file-sound-o';
         break;
       case 'm4v':
       case 'mov':
-        $icon = 'film';
+        $icon = 'fa-file-movie-o';
         break;
-      case 'sql';
+      case 'sql':
       case 'db':
+        $icon = 'fa-database';
+        break;
+      case 'xls':
       case 'csv':
-        $icon = 'data';
+        $icon = 'fa-file-excel-o';
         break;
       case 'ics':
-        $icon = 'calendar';
+        $icon = 'fa-calendar';
         break;
       case 'zip':
       case 'tar':
       case 'bz':
       case 'tgz':
       case 'gz':
-        $icon = 'zip';
+        $icon = 'fa-file-archive-o';
         break;
       case 'png':
       case 'jpg':
       case 'bmp':
       case 'gif':
-        $icon = 'image';
+        $icon = 'fa-file-picture-o';
+        break;
+      case 'txt':
+        $icon = 'fa-file-text-o';
+        break;
+      case 'doc':
+      case 'docx':
+        $icon = 'fa-file-word-o';
+        break;
+      case 'pdf':
+        $icon = 'fa-file-pdf-o';
         break;
       default:
-        $icon = 'file';
+        $icon = 'fa-file-code-o';
         break;
     }
     return $icon;
@@ -128,8 +186,7 @@ final class DifferentialChangesetDetailView extends AphrontView {
     $display_filename = $changeset->getDisplayFilename();
     $display_icon = $this->getFileIcon($display_filename);
     $icon = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-      ->setSpriteIcon($display_icon);
+      ->setIconFont($display_icon);
 
     return javelin_tag(
       'div',
@@ -140,6 +197,12 @@ final class DifferentialChangesetDetailView extends AphrontView {
             $this->getVsChangesetID(),
             $this->changeset->getID()),
           'right' => $this->changeset->getID(),
+          'renderURI' => $this->getRenderURI(),
+          'whitespace' => $this->getWhitespace(),
+          'highlight' => null,
+          'renderer' => null,
+          'ref' => $this->getRenderingRef(),
+          'autoload' => $this->getAutoload(),
         ),
         'class' => $class,
         'id'    => $id,
@@ -152,12 +215,19 @@ final class DifferentialChangesetDetailView extends AphrontView {
         $buttons,
         phutil_tag('h1',
           array(
-            'class' => 'differential-file-icon-header'),
+            'class' => 'differential-file-icon-header',
+          ),
           array(
             $icon,
-            $display_filename)),
-        phutil_tag('div', array('style' => 'clear: both'), ''),
-        $this->renderChildren(),
+            $display_filename,
+          )),
+        javelin_tag(
+          'div',
+          array(
+            'class' => 'changeset-view-content',
+            'sigil' => 'changeset-view-content',
+          ),
+          $this->renderChildren()),
       ));
   }
 

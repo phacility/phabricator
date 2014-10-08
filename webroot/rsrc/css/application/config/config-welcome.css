@@ -1,0 +1,27 @@
+/**
+ * @provides config-welcome-css
+ */
+
+.config-welcome {
+  margin-top: -1px;
+}
+
+.config-welcome .phui-object-box {
+  margin: 12px;
+}
+
+.config-welcome .aphront-multi-column-column-last .phui-object-box {
+  margin-left: 0;
+}
+
+.config-welcome-box .phui-action-header-title {
+  padding: 10px 4px;
+}
+
+.config-welcome-box-content {
+  padding: 12px;
+}
+
+.config-welcome .phui-object-box .phui-action-header {
+  padding: 2px 8px 2px 12px;
+}

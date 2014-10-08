@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group pholio
- */
 final class PholioMockCommentController extends PholioController {
 
   private $id;
@@ -76,12 +73,15 @@ final class PholioMockCommentController extends PholioController {
       $draft->replaceOrDelete();
     }
 
-    if ($request->isAjax()) {
+    if ($request->isAjax() && $is_preview) {
+      $xaction_view = id(new PholioTransactionView())
+        ->setMock($mock);
+
       return id(new PhabricatorApplicationTransactionResponse())
         ->setViewer($user)
         ->setTransactions($xactions)
-        ->setIsPreview($is_preview)
-        ->setAnchorOffset($request->getStr('anchor'));
+        ->setTransactionView($xaction_view)
+        ->setIsPreview($is_preview);
     } else {
       return id(new AphrontRedirectResponse())->setURI($mock_uri);
     }

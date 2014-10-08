@@ -15,6 +15,8 @@ final class PhabricatorSetupIssue {
   private $relatedPhabricatorConfig = array();
   private $phpConfig = array();
   private $commands = array();
+  private $mysqlConfig = array();
+  private $originalPHPConfigValues = array();
 
   public function addCommand($command) {
     $this->commands[] = $command;
@@ -81,8 +83,39 @@ final class PhabricatorSetupIssue {
     return $this;
   }
 
+  /**
+   * Set an explicit value to display when showing the user PHP configuration
+   * values.
+   *
+   * If Phabricator has changed a value by the time a config issue is raised,
+   * you can provide the original value here so the UI makes sense. For example,
+   * we alter `memory_limit` during startup, so if the original value is not
+   * provided it will look like it is always set to `-1`.
+   *
+   * @param string PHP configuration option to provide a value for.
+   * @param string Explicit value to show in the UI.
+   * @return this
+   */
+  public function addPHPConfigOriginalValue($php_config, $value) {
+    $this->originalPHPConfigValues[$php_config] = $value;
+    return $this;
+  }
+
+  public function getPHPConfigOriginalValue($php_config, $default = null) {
+    return idx($this->originalPHPConfigValues, $php_config, $default);
+  }
+
   public function getPHPConfig() {
     return $this->phpConfig;
+  }
+
+  public function addMySQLConfig($mysql_config) {
+    $this->mysqlConfig[] = $mysql_config;
+    return $this;
+  }
+
+  public function getMySQLConfig() {
+    return $this->mysqlConfig;
   }
 
   public function addPhabricatorConfig($phabricator_config) {

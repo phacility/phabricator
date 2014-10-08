@@ -1,7 +1,6 @@
 <?php
 
-final class HarbormasterStepDeleteController
-  extends HarbormasterController {
+final class HarbormasterStepDeleteController extends HarbormasterController {
 
   private $id;
 
@@ -14,7 +13,7 @@ final class HarbormasterStepDeleteController
     $viewer = $request->getUser();
 
     $this->requireApplicationCapability(
-      HarbormasterCapabilityManagePlans::CAPABILITY);
+      HarbormasterManagePlansCapability::CAPABILITY);
 
     $id = $this->id;
 
@@ -23,7 +22,7 @@ final class HarbormasterStepDeleteController
       ->withIDs(array($id))
       ->executeOne();
     if ($step === null) {
-      throw new Exception("Build step not found!");
+      throw new Exception('Build step not found!');
     }
 
     $plan_id = $step->getBuildPlan()->getID();

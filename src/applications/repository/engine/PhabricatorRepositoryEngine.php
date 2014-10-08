@@ -23,7 +23,7 @@ abstract class PhabricatorRepositoryEngine {
    */
   protected function getRepository() {
     if ($this->repository === null) {
-      throw new Exception("Call setRepository() to provide a repository!");
+      throw new Exception('Call setRepository() to provide a repository!');
     }
 
     return $this->repository;

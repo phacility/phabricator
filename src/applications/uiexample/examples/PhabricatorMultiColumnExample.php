@@ -19,7 +19,7 @@ final class PhabricatorMultiColumnExample extends PhabricatorUIExample {
       'div',
         array(
           'class' => 'pm',
-          'style' => 'border: 1px solid green;'
+          'style' => 'border: 1px solid green;',
         ),
         'Bruce Campbell');
 
@@ -27,7 +27,7 @@ final class PhabricatorMultiColumnExample extends PhabricatorUIExample {
       'div',
         array(
           'class' => 'pm',
-          'style' => 'border: 1px solid blue;'
+          'style' => 'border: 1px solid blue;',
         ),
         'Army of Darkness');
 
@@ -165,42 +165,42 @@ final class PhabricatorMultiColumnExample extends PhabricatorUIExample {
     $wrap1 = phutil_tag(
       'div',
         array(
-          'class' => 'ml'
+          'class' => 'ml',
         ),
         $layout1);
 
     $wrap2 = phutil_tag(
       'div',
         array(
-          'class' => 'ml'
+          'class' => 'ml',
         ),
         $layout2);
 
     $wrap3 = phutil_tag(
       'div',
         array(
-          'class' => 'ml'
+          'class' => 'ml',
         ),
         $layout3);
 
     $wrap4 = phutil_tag(
       'div',
         array(
-          'class' => 'ml'
+          'class' => 'ml',
         ),
         $layout4);
 
     $wrap5 = phutil_tag(
       'div',
         array(
-          'class' => 'ml'
+          'class' => 'ml',
         ),
         $layout5);
 
     $wrap6 = phutil_tag(
       'div',
         array(
-          'class' => 'ml'
+          'class' => 'ml',
         ),
         $layout6);
 
@@ -219,7 +219,7 @@ final class PhabricatorMultiColumnExample extends PhabricatorUIExample {
           $head5,
           $wrap5,
           $head6,
-          $wrap6
+          $wrap6,
         ));
   }
 }

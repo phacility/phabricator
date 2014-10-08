@@ -4,11 +4,11 @@ final class PhabricatorCoreConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
   public function getName() {
-    return pht("Core");
+    return pht('Core');
   }
 
   public function getDescription() {
-    return pht("Configure core options, including URIs.");
+    return pht('Configure core options, including URIs.');
   }
 
   public function getOptions() {
@@ -24,34 +24,38 @@ final class PhabricatorCoreConfigOptions
 
     $path = getenv('PATH');
 
+    $proto_doc_href = PhabricatorEnv::getDoclink(
+      'User Guide: Prototype Applications');
+    $proto_doc_name = pht('User Guide: Prototype Applications');
+
     return array(
       $this->newOption('phabricator.base-uri', 'string', null)
         ->setLocked(true)
-        ->setSummary(pht("URI where Phabricator is installed."))
+        ->setSummary(pht('URI where Phabricator is installed.'))
         ->setDescription(
           pht(
-            "Set the URI where Phabricator is installed. Setting this ".
-            "improves security by preventing cookies from being set on other ".
-            "domains, and allows daemons to send emails with links that have ".
-            "the correct domain."))
+            'Set the URI where Phabricator is installed. Setting this '.
+            'improves security by preventing cookies from being set on other '.
+            'domains, and allows daemons to send emails with links that have '.
+            'the correct domain.'))
         ->addExample('http://phabricator.example.com/', pht('Valid Setting')),
       $this->newOption('phabricator.production-uri', 'string', null)
         ->setSummary(
-          pht("Primary install URI, for multi-environment installs."))
+          pht('Primary install URI, for multi-environment installs.'))
         ->setDescription(
           pht(
-            "If you have multiple Phabricator environments (like a ".
-            "development/staging environment for working on testing ".
-            "Phabricator, and a production environment for deploying it), ".
-            "set the production environment URI here so that emails and other ".
-            "durable URIs will always generate with links pointing at the ".
-            "production environment. If unset, defaults to ".
-            "{{phabricator.base-uri}}. Most installs do not need to set ".
-            "this option."))
+            'If you have multiple Phabricator environments (like a '.
+            'development/staging environment for working on testing '.
+            'Phabricator, and a production environment for deploying it), '.
+            'set the production environment URI here so that emails and other '.
+            'durable URIs will always generate with links pointing at the '.
+            'production environment. If unset, defaults to '.
+            '{{phabricator.base-uri}}. Most installs do not need to set '.
+            'this option.'))
         ->addExample('http://phabricator.example.com/', pht('Valid Setting')),
       $this->newOption('phabricator.allowed-uris', 'list<string>', array())
         ->setLocked(true)
-        ->setSummary(pht("Alternative URIs that can access Phabricator."))
+        ->setSummary(pht('Alternative URIs that can access Phabricator.'))
         ->setDescription(
           pht(
             "These alternative URIs will be able to access 'normal' pages ".
@@ -64,7 +68,7 @@ final class PhabricatorCoreConfigOptions
           pht('Valid Setting')),
       $this->newOption('phabricator.timezone', 'string', null)
         ->setSummary(
-          pht("The timezone Phabricator should use."))
+          pht('The timezone Phabricator should use.'))
         ->setDescription(
           pht(
             "PHP requires that you set a timezone in your php.ini before ".
@@ -78,30 +82,41 @@ final class PhabricatorCoreConfigOptions
         ->addExample('America/Los_Angeles', pht('US West (PDT)')),
       $this->newOption('phabricator.cookie-prefix', 'string', null)
         ->setSummary(
-          pht("Set a string Phabricator should use to prefix ".
-              "cookie names"))
+          pht('Set a string Phabricator should use to prefix '.
+              'cookie names'))
         ->setDescription(
           pht(
-            "Cookies set for x.com are also sent for y.x.com. Assuming ".
-            "Phabricator instances are running on both domains, this will ".
-            "create a collision preventing you from logging in."))
+            'Cookies set for x.com are also sent for y.x.com. Assuming '.
+            'Phabricator instances are running on both domains, this will '.
+            'create a collision preventing you from logging in.'))
         ->addExample('dev', pht('Prefix cookie with "dev"')),
-      $this->newOption('phabricator.show-beta-applications', 'bool', false)
+      $this->newOption('phabricator.show-prototypes', 'bool', false)
         ->setBoolOptions(
           array(
-            pht('Install Beta Applications'),
-            pht('Uninstall Beta Applications')
+            pht('Enable Prototypes'),
+            pht('Disable Prototypes'),
           ))
+        ->setSummary(
+          pht(
+            'Install applications which are still under development.'))
         ->setDescription(
           pht(
-            "Phabricator includes 'Beta' applications which are in an early ".
-            "stage of development. They range from very rough prototypes to ".
-            "relatively complete (but unpolished) applications.\n\n".
-            "By default, Beta applications are not installed. You can enable ".
-            "this option to install them if you're interested in previewing ".
-            "upcoming features.\n\n".
-            "After enabling Beta applications, you can selectively uninstall ".
-            "them (like normal applications).")),
+            "IMPORTANT: The upstream does not provide support for prototype ".
+            "applications.".
+            "\n\n".
+            "Phabricator includes prototype applications which are in an ".
+            "**early stage of development**. By default, prototype ".
+            "applications are not installed, because they are often not yet ".
+            "developed enough to be generally usable. You can enable ".
+            "this option to install them if you're developing Phabricator ".
+            "or are interested in previewing upcoming features.".
+            "\n\n".
+            "To learn more about prototypes, see [[ %s | %s ]].".
+            "\n\n".
+            "After enabling prototypes, you can selectively uninstall them ".
+            "(like normal applications).",
+            $proto_doc_href,
+            $proto_doc_name)),
       $this->newOption('phabricator.serious-business', 'bool', false)
         ->setBoolOptions(
           array(
@@ -109,7 +124,7 @@ final class PhabricatorCoreConfigOptions
             pht('Shenanigans'), // That should be interesting to translate. :P
           ))
         ->setSummary(
-          pht("Should Phabricator be serious?"))
+          pht('Allows you to remove levity and jokes from the UI.'))
         ->setDescription(
           pht(
             'By default, Phabricator includes some flavor text in the UI, '.
@@ -117,9 +132,19 @@ final class PhabricatorCoreConfigOptions
             'Maniphest. If you\'d prefer more traditional UI strings like '.
             '"Add Comment", you can set this flag to disable most of the '.
             'extra flavor.')),
-       $this->newOption('environment.append-paths', 'list<string>', $paths)
+      $this->newOption('remarkup.ignored-object-names', 'string', '/^(Q|V)\d$/')
         ->setSummary(
-          pht("These paths get appended to your \$PATH envrionment variable."))
+          pht('Text values that match this regex and are also object names '.
+          'will not be linked.'))
+        ->setDescription(
+          pht(
+            'By default, Phabricator links object names in Remarkup fields '.
+            'to the corresponding object. This regex can be used to modify '.
+            'this behavior; object names that match this regex will not be '.
+            'linked.')),
+      $this->newOption('environment.append-paths', 'list<string>', $paths)
+        ->setSummary(
+          pht('These paths get appended to your \$PATH envrionment variable.'))
         ->setDescription(
           pht(
             "Phabricator occasionally shells out to other binaries on the ".
@@ -135,6 +160,7 @@ final class PhabricatorCoreConfigOptions
             "The current value of PATH after configuration is applied is:\n\n".
             "  lang=text\n".
             "  %s", $path))
+        ->setLocked(true)
         ->addExample('/usr/local/bin', pht('Add One Path'))
         ->addExample("/usr/bin\n/usr/local/bin", pht('Add Multiple Paths')),
       $this->newOption('config.lock', 'set', array())

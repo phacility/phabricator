@@ -131,7 +131,7 @@ JX.install('Hovercard', {
           continue;
         }
         self._cards[phid] = true; // means "loading"
-        uri.setQueryParam("phids["+ii+"]", phids[ii]);
+        uri.setQueryParam('phids['+ii+']', phids[ii]);
         send = true;
       }
 

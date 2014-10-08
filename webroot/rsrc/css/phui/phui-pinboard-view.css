@@ -18,13 +18,15 @@
   border-radius: 3px;
   border: 1px solid {$lightblueborder};
   border-bottom: 1px solid {$blueborder};
-  float: left;
-  width: 288px;
   text-align: left;
+  width: 288px;
+}
+
+.phui-pinboard-view .phui-pinboard-item-view {
+  float: left;
 }
 
 .device-desktop .phui-pinboard-item-view:hover {
-  cursor: pointer;
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.30);
 }
 
@@ -35,7 +37,7 @@
 }
 
 .phui-pinboard-item-header {
-  padding: 4px 8px;
+  padding: 6px 8px;
   display: block;
   font-weight: bold;
   border-top-left-radius: 3px;
@@ -55,10 +57,15 @@
 }
 
 .phui-pinboard-item-content {
-  padding: 0 8px 4px;
+  padding: 8px;
   overflow: hidden;
-  color: {$greytext};
-  font-size: 11px;
+  color: {$bluetext};
+  font-size: 12px;
+}
+
+.phui-pinboard-item-content + .phui-pinboard-icons,
+.phui-pinboard-item-image-link + .phui-pinboard-icons {
+  border-top: 1px solid {$thinblueborder};
 }
 
 .phui-pinboard-item-count {
@@ -67,16 +74,29 @@
 }
 
 .phui-pinboard-icons {
-  padding: 0 8px 8px 0;
+  padding: 4px 8px 4px 0;
   color: {$darkbluetext};
-  border-bottom: 1px solid {$lightblueborder};
-  margin-bottom: 5px;
   overflow: hidden;
 }
 
 .phui-pinboard-icon {
-  height: 14px;
-  width: 14px;
-  float: left;
-  padding-left: 2px;
+  margin-right: 4px;
+}
+
+.phui-pinboard-item-disabled .phui-pinboard-item-image-link img {
+  opacity: 0.25;
+}
+
+.phui-pinboard-item-disabled .phui-pinboard-item-header a {
+  color: {$greytext};
+  text-decoration: line-through;
+}
+
+.dashboard-panel .phui-pinboard-view {
+  margin: 0;
+  padding: 16px 12px 0 12px;
+  background: #fff;
+  border-left: 1px solid {$lightblueborder};
+  border-right: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$blueborder};
 }

@@ -117,7 +117,7 @@ final class ReleephProductViewController extends ReleephProductController
       if ($open_count) {
         $item->setBarColor('orange');
         $item->addIcon(
-          'fork',
+          'fa-code-fork',
           pht('%d Open Pull Request(s)', new PhutilNumber($open_count)));
       }
 
@@ -157,7 +157,7 @@ final class ReleephProductViewController extends ReleephProductController
         id(new PHUIListItemView())
           ->setHref($product->getURI('cutbranch/'))
           ->setName(pht('Cut New Branch'))
-          ->setIcon('create'));
+          ->setIcon('fa-plus'));
     }
 
     return $crumbs;
@@ -175,9 +175,9 @@ final class ReleephProductViewController extends ReleephProductController
       ->setPolicyObject($product);
 
     if ($product->getIsActive()) {
-      $header->setStatus('oh-ok', '', pht('Active'));
+      $header->setStatus('fa-check', 'bluegrey', pht('Active'));
     } else {
-      $header->setStatus('policy-noone', '', pht('Inactive'));
+      $header->setStatus('fa-ban', 'dark', pht('Inactive'));
     }
 
     $actions = id(new PhabricatorActionListView())
@@ -197,18 +197,18 @@ final class ReleephProductViewController extends ReleephProductController
       id(new PhabricatorActionView())
         ->setName(pht('Edit Product'))
         ->setHref($edit_uri)
-        ->setIcon('edit')
+        ->setIcon('fa-pencil')
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
     if ($product->getIsActive()) {
       $status_name = pht('Deactivate Product');
       $status_href = "product/{$id}/action/deactivate/";
-      $status_icon = 'delete';
+      $status_icon = 'fa-times';
     } else {
       $status_name = pht('Reactivate Product');
       $status_href = "product/{$id}/action/activate/";
-      $status_icon = 'new';
+      $status_icon = 'fa-plus-circle-o';
     }
 
     $actions->addAction(
@@ -223,7 +223,7 @@ final class ReleephProductViewController extends ReleephProductController
       id(new PhabricatorActionView())
         ->setName(pht('View History'))
         ->setHref($history_uri)
-        ->setIcon('transcript'));
+        ->setIcon('fa-list'));
 
     $properties = id(new PHUIPropertyListView())
       ->setUser($viewer)

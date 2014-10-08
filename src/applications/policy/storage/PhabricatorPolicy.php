@@ -25,6 +25,16 @@ final class PhabricatorPolicy
       self::CONFIG_SERIALIZATION => array(
         'rules' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'defaultAction' => 'text32',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_phid' => null,
+        'phid' => array(
+          'columns' => array('phid'),
+          'unique' => true,
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 
@@ -63,11 +73,11 @@ final class PhabricatorPolicy
 
     $phid_type = phid_get_type($policy_identifier);
     switch ($phid_type) {
-      case PhabricatorProjectPHIDTypeProject::TYPECONST:
+      case PhabricatorProjectProjectPHIDType::TYPECONST:
         $policy->setType(PhabricatorPolicyType::TYPE_PROJECT);
         $policy->setName($handle->getName());
         break;
-      case PhabricatorPeoplePHIDTypeUser::TYPECONST:
+      case PhabricatorPeopleUserPHIDType::TYPECONST:
         $policy->setType(PhabricatorPolicyType::TYPE_USER);
         $policy->setName($handle->getFullName());
         break;
@@ -146,21 +156,21 @@ final class PhabricatorPolicy
     switch ($this->getType()) {
       case PhabricatorPolicyType::TYPE_GLOBAL:
         static $map = array(
-          PhabricatorPolicies::POLICY_PUBLIC  => 'policy-public',
-          PhabricatorPolicies::POLICY_USER    => 'policy-all',
-          PhabricatorPolicies::POLICY_ADMIN   => 'policy-admin',
-          PhabricatorPolicies::POLICY_NOONE   => 'policy-noone',
+          PhabricatorPolicies::POLICY_PUBLIC  => 'fa-globe',
+          PhabricatorPolicies::POLICY_USER    => 'fa-users',
+          PhabricatorPolicies::POLICY_ADMIN   => 'fa-eye',
+          PhabricatorPolicies::POLICY_NOONE   => 'fa-ban',
         );
-        return idx($map, $this->getPHID(), 'policy-unknown');
+        return idx($map, $this->getPHID(), 'fa-question-circle');
       case PhabricatorPolicyType::TYPE_USER:
-        return 'policy-user';
+        return 'fa-user';
       case PhabricatorPolicyType::TYPE_PROJECT:
-        return 'policy-project';
+        return 'fa-briefcase';
       case PhabricatorPolicyType::TYPE_CUSTOM:
       case PhabricatorPolicyType::TYPE_MASKED:
-        return 'policy-custom';
+        return 'fa-certificate';
       default:
-        return 'policy-unknown';
+        return 'fa-question-circle';
     }
   }
 
@@ -204,11 +214,11 @@ final class PhabricatorPolicy
           ->executeOne();
 
         $type = phid_get_type($policy);
-        if ($type == PhabricatorProjectPHIDTypeProject::TYPECONST) {
+        if ($type == PhabricatorProjectProjectPHIDType::TYPECONST) {
           return pht(
             'Members of the project "%s" can take this action.',
             $handle->getFullName());
-        } else if ($type == PhabricatorPeoplePHIDTypeUser::TYPECONST) {
+        } else if ($type == PhabricatorPeopleUserPHIDType::TYPECONST) {
           return pht(
             '%s can take this action.',
             $handle->getFullName());
@@ -235,12 +245,11 @@ final class PhabricatorPolicy
     }
   }
 
-  public function renderDescription($icon=false) {
+  public function renderDescription($icon = false) {
     $img = null;
     if ($icon) {
       $img = id(new PHUIIconView())
-        ->setSpriteSheet(PHUIIconView::SPRITE_STATUS)
-        ->setSpriteIcon($this->getIcon());
+        ->setIconFont($this->getIcon());
     }
 
     if ($this->getHref()) {

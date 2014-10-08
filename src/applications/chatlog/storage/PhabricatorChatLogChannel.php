@@ -10,6 +10,22 @@ final class PhabricatorChatLogChannel
   protected $viewPolicy;
   protected $editPolicy;
 
+  public function getConfiguration() {
+    return array(
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'serviceName' => 'text64',
+        'serviceType' => 'text32',
+        'channelName' => 'text64',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_channel' => array(
+          'columns' => array('channelName', 'serviceType', 'serviceName'),
+          'unique' => true,
+        ),
+      ),
+    ) + parent::getConfiguration();
+  }
+
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,

@@ -177,7 +177,7 @@ final class PhabricatorOwnersListController
           ->setValue($request->getStr('name')))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/usersorprojects/')
+          ->setDatasource(new PhabricatorProjectOrUserDatasource())
           ->setLimit(1)
           ->setName('owner')
           ->setLabel(pht('Owner'))
@@ -209,7 +209,6 @@ final class PhabricatorOwnersListController
       ),
       array(
         'title' => pht('Package Index'),
-        'device' => true,
       ));
   }
 
@@ -311,7 +310,7 @@ final class PhabricatorOwnersListController
           array(
             'href' => '/audit/view/packagecommits/?phid='.$package->getPHID(),
           ),
-          pht('Related Commits'))
+          pht('Related Commits')),
       );
     }
 

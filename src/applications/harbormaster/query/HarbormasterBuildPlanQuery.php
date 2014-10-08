@@ -37,7 +37,6 @@ final class HarbormasterBuildPlanQuery
     return $table->loadAllFromArray($data);
   }
 
-
   private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
@@ -68,7 +67,7 @@ final class HarbormasterBuildPlanQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationHarbormaster';
+    return 'PhabricatorHarbormasterApplication';
   }
 
 }

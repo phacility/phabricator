@@ -1,7 +1,9 @@
 <?php
 
 final class HeraldTranscript extends HeraldDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorDestructibleInterface {
 
   protected $objectTranscript;
   protected $ruleTranscripts = array();
@@ -14,6 +16,7 @@ final class HeraldTranscript extends HeraldDAO
 
   protected $objectPHID;
   protected $dryRun;
+  protected $garbageCollected = 0;
 
   const TABLE_SAVED_HEADER = 'herald_savedheader';
 
@@ -97,6 +100,26 @@ final class HeraldTranscript extends HeraldDAO
         'ruleTranscripts'       => true,
         'conditionTranscripts'  => true,
         'applyTranscripts'      => true,
+      ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'time' => 'epoch',
+        'host' => 'text255',
+        'duration' => 'double',
+        'dryRun' => 'bool',
+        'garbageCollected' => 'bool',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_phid' => null,
+        'phid' => array(
+          'columns' => array('phid'),
+          'unique' => true,
+        ),
+        'objectPHID' => array(
+          'columns' => array('objectPHID'),
+        ),
+        'garbageCollected' => array(
+          'columns' => array('garbageCollected', 'time'),
+        ),
       ),
     ) + parent::getConfiguration();
   }
@@ -193,6 +216,18 @@ final class HeraldTranscript extends HeraldDAO
     return pht(
       'To view a transcript, you must be able to view the object the '.
       'transcript is about.');
+  }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+      $this->delete();
+    $this->saveTransaction();
   }
 
 

@@ -65,7 +65,6 @@ final class NuanceSourceViewController extends NuanceController {
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
 
   }
@@ -98,7 +97,7 @@ final class NuanceSourceViewController extends NuanceController {
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Source'))
-        ->setIcon('edit')
+        ->setIcon('fa-pencil')
         ->setHref($this->getApplicationURI("source/edit/{$id}/"))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));

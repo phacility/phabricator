@@ -6,6 +6,10 @@ final class PhabricatorApplicationUninstallController
   private $application;
   private $action;
 
+  public function shouldRequireAdmin() {
+    return true;
+  }
+
   public function willProcessRequest(array $data) {
     $this->application = $data['application'];
     $this->action = $data['action'];
@@ -23,21 +27,21 @@ final class PhabricatorApplicationUninstallController
 
     $view_uri = $this->getApplicationURI('view/'.$this->application);
 
-    $beta_enabled = PhabricatorEnv::getEnvConfig(
-      'phabricator.show-beta-applications');
+    $prototypes_enabled = PhabricatorEnv::getEnvConfig(
+      'phabricator.show-prototypes');
 
     $dialog = id(new AphrontDialogView())
                ->setUser($user)
                ->addCancelButton($view_uri);
 
-    if ($selected->isBeta() && !$beta_enabled) {
+    if ($selected->isPrototype() && !$prototypes_enabled) {
       $dialog
-        ->setTitle(pht('Beta Applications Not Enabled'))
+        ->setTitle(pht('Prototypes Not Enabled'))
         ->appendChild(
           pht(
-            'To manage beta applications, enable them by setting %s in your '.
+            'To manage prototypes, enable them by setting %s in your '.
             'Phabricator configuration.',
-            phutil_tag('tt', array(), 'phabricator.show-beta-applications')));
+            phutil_tag('tt', array(), 'phabricator.show-prototypes')));
       return id(new AphrontDialogResponse())->setDialog($dialog);
     }
 
@@ -50,7 +54,7 @@ final class PhabricatorApplicationUninstallController
       if ($selected->canUninstall()) {
         $dialog->setTitle('Confirmation')
                ->appendChild(
-                 'Install '. $selected->getName(). ' application?')
+                 'Install '.$selected->getName().' application?')
                ->addSubmitButton('Install');
 
       } else {
@@ -61,7 +65,7 @@ final class PhabricatorApplicationUninstallController
       if ($selected->canUninstall()) {
         $dialog->setTitle('Confirmation')
                ->appendChild(
-                 'Really Uninstall '. $selected->getName(). ' application?')
+                 'Really Uninstall '.$selected->getName().' application?')
                ->addSubmitButton('Uninstall');
       } else {
         $dialog->setTitle('Information')

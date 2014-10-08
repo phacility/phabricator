@@ -1,94 +1,99 @@
 <?php
 
 final class LegalpadDocumentSignatureVerificationController
-extends LegalpadController {
+  extends LegalpadController {
 
   private $code;
+
+  public function shouldAllowPublic() {
+    return true;
+  }
 
   public function willProcessRequest(array $data) {
     $this->code = $data['code'];
   }
 
-  public function shouldRequireEmailVerification() {
-    return false;
-  }
-
-  public function shouldRequireLogin() {
-    return false;
-  }
-
   public function processRequest() {
     $request = $this->getRequest();
-    $user = $request->getUser();
+    $viewer = $request->getUser();
 
-    // this page can be accessed by not logged in users to valid their
-    // signatures. use the omnipotent user for these cases.
-    if (!$user->isLoggedIn()) {
-      $viewer = PhabricatorUser::getOmnipotentUser();
-    } else {
-      $viewer = $user;
-    }
-
+    // NOTE: We're using the omnipotent user to handle logged-out signatures
+    // and corporate signatures.
     $signature = id(new LegalpadDocumentSignatureQuery())
-      ->setViewer($viewer)
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withSecretKeys(array($this->code))
       ->executeOne();
 
     if (!$signature) {
-      $title = pht('Unable to Verify Signature');
-      $content = pht(
-        'The verification code you provided is incorrect or the signature '.
-        'has been removed. '.
-        'Make sure you followed the link in the email correctly.');
-      $uri = $this->getApplicationURI();
-      $continue = pht('Rats!');
-    } else {
-      $document = id(new LegalpadDocumentQuery())
-        ->setViewer($user)
-        ->withPHIDs(array($signature->getDocumentPHID()))
-        ->executeOne();
-      // the document could be deleted or have its permissions changed
-      // 4oh4 time
-      if (!$document) {
-        return new Aphront404Response();
-      }
-      $uri = '/'.$document->getMonogram();
-      if ($signature->isVerified()) {
-        $title = pht('Signature Already Verified');
-        $content = pht(
-          'This signature has already been verified.');
-        $continue = pht('Continue to Legalpad Document');
-      } else {
-        $guard = AphrontWriteGuard::beginScopedUnguardedWrites();
-          $signature
-            ->setVerified(LegalpadDocumentSignature::VERIFIED)
-            ->save();
-        unset($guard);
-        $title = pht('Signature Verified');
-        $content = pht('The signature is now verified.');
-        $continue = pht('Continue to Legalpad Document');
-      }
+      return $this->newDialog()
+        ->setTitle(pht('Unable to Verify Signature'))
+        ->appendParagraph(
+          pht(
+            'The signature verification code is incorrect, or the signature '.
+            'has been invalidated. Make sure you followed the link in the '.
+            'email correctly.'))
+        ->addCancelButton('/', pht('Rats!'));
     }
 
-    $dialog = id(new AphrontDialogView())
-      ->setUser($user)
-      ->setTitle($title)
-      ->setMethod('GET')
-      ->addCancelButton($uri, $continue)
-      ->appendChild($content);
+    if ($signature->isVerified()) {
+      return $this->newDialog()
+        ->setTitle(pht('Signature Already Verified'))
+        ->appendParagraph(
+          pht(
+            'This signature has already been verified.'))
+        ->addCancelButton('/', pht('Okay'));
+    }
 
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('Verify Signature'));
+    if ($request->isFormPost()) {
+      $signature
+        ->setVerified(LegalpadDocumentSignature::VERIFIED)
+        ->save();
 
-    return $this->buildApplicationPage(
+      return $this->newDialog()
+        ->setTitle(pht('Signature Verified'))
+        ->appendParagraph(pht('The signature is now verified.'))
+        ->addCancelButton('/', pht('Okay'));
+    }
+
+    $document_link = phutil_tag(
+      'a',
       array(
-        $crumbs,
-        $dialog,
+        'href' => '/'.$signature->getDocument()->getMonogram(),
+        'target' => '_blank',
       ),
-      array(
-        'title' => pht('Verify Signature'),
-        'device' => true,
-      ));
+      $signature->getDocument()->getTitle());
+
+    $signed_at = phabricator_datetime($signature->getDateCreated(), $viewer);
+
+    $name = $signature->getSignerName();
+    $email = $signature->getSignerEmail();
+
+    $form = id(new AphrontFormView())
+      ->setUser($viewer)
+      ->appendRemarkupInstructions(
+        pht('Please verify this document signature.'))
+      ->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setLabel(pht('Document'))
+          ->setValue($document_link))
+      ->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setLabel(pht('Signed At'))
+          ->setValue($signed_at))
+      ->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setLabel(pht('Name'))
+          ->setValue($name))
+      ->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setLabel(pht('Email'))
+          ->setValue($email));
+
+    return $this->newDialog()
+      ->setTitle(pht('Verify Signature?'))
+      ->appendChild($form->buildLayoutView())
+      ->addCancelButton('/')
+      ->addSubmitButton(pht('Verify Signature'));
   }
 
 }

@@ -4,17 +4,17 @@ final class PhabricatorAsanaConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
   public function getName() {
-    return pht("Integration with Asana");
+    return pht('Integration with Asana');
   }
 
   public function getDescription() {
-    return pht("Asana integration options.");
+    return pht('Asana integration options.');
   }
 
   public function getOptions() {
     return array(
       $this->newOption('asana.workspace-id', 'string', null)
-        ->setSummary(pht("Asana Workspace ID to publish into."))
+        ->setSummary(pht('Asana Workspace ID to publish into.'))
         ->setDescription(
           pht(
             'To enable synchronization into Asana, enter an Asana Workspace '.
@@ -22,7 +22,7 @@ final class PhabricatorAsanaConfigOptions
             "\n\n".
             "NOTE: This feature is new and experimental.")),
       $this->newOption('asana.project-ids', 'wild', null)
-        ->setSummary(pht("Optional Asana projects to use as application tags."))
+        ->setSummary(pht('Optional Asana projects to use as application tags.'))
         ->setDescription(
           pht(
             'When Phabricator creates tasks in Asana, it can add the tasks '.
@@ -30,7 +30,7 @@ final class PhabricatorAsanaConfigOptions
             'object in Phabricator comes from. For example, you can add code '.
             'reviews in Asana to a "Differential" project.'.
             "\n\n".
-            'NOTE: This feature is new and experimental.'))
+            'NOTE: This feature is new and experimental.')),
     );
   }
 
@@ -49,7 +49,7 @@ final class PhabricatorAsanaConfigOptions
 
     $viewer = $request->getUser();
 
-    $provider = PhabricatorAuthProviderOAuthAsana::getAsanaProvider();
+    $provider = PhabricatorAsanaAuthProvider::getAsanaProvider();
     if (!$provider) {
       return null;
     }
@@ -59,6 +59,11 @@ final class PhabricatorAsanaConfigOptions
       ->withUserPHIDs(array($viewer->getPHID()))
       ->withAccountTypes(array($provider->getProviderType()))
       ->withAccountDomains(array($provider->getProviderDomain()))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
       ->executeOne();
     if (!$account) {
       return null;
@@ -83,8 +88,8 @@ final class PhabricatorAsanaConfigOptions
     }
 
     $out = array();
-    $out[] = pht("| Workspace ID | Workspace Name |");
-    $out[] =     "| ------------ | -------------- |";
+    $out[] = pht('| Workspace ID | Workspace Name |');
+    $out[] =     '| ------------ | -------------- |';
     foreach ($workspaces as $workspace) {
       $out[] = sprintf('| `%s` | `%s` |', $workspace['id'], $workspace['name']);
     }

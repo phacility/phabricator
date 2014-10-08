@@ -16,7 +16,7 @@
  */
 JX.behavior('phabricator-oncopy', function() {
 
-  var zws = "\u200B"; // Unicode Zero-Width Space
+  var zws = '\u200B'; // Unicode Zero-Width Space
 
   JX.enableDispatch(document.body, 'copy');
   JX.Stratcom.listen(
@@ -44,7 +44,7 @@ JX.behavior('phabricator-oncopy', function() {
       // Strip everything before the marker (and the marker itself) out of the
       // text. If a line doesn't have the marker, throw it away (the assumption
       // is that it's a line number or part of some other meta-text).
-      var lines = text.split("\n");
+      var lines = text.split('\n');
       var pos;
       for (var ii = 0; ii < lines.length; ii++) {
         pos = lines[ii].indexOf(zws);
@@ -53,7 +53,7 @@ JX.behavior('phabricator-oncopy', function() {
         }
         result.push(lines[ii].substring(pos + 1));
       }
-      result = result.join("\n");
+      result = result.join('\n');
 
       var rawEvent = e.getRawEvent();
       var clipboardData = 'clipboardData' in rawEvent ?

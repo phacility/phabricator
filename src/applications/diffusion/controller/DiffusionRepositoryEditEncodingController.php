@@ -87,7 +87,6 @@ final class DiffusionRepositoryEditEncodingController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

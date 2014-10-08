@@ -36,7 +36,7 @@ final class DivinerAtomizeWorkflow extends DivinerWorkflow {
 
     $atomizer_class = $args->getArg('atomizer');
     if (!$atomizer_class) {
-      throw new Exception("Specify an atomizer class with --atomizer.");
+      throw new Exception('Specify an atomizer class with --atomizer.');
     }
 
     $symbols = id(new PhutilSymbolLoader())
@@ -54,7 +54,7 @@ final class DivinerAtomizeWorkflow extends DivinerWorkflow {
 
     $files = $args->getArg('files');
     if (!$files) {
-      throw new Exception("Specify one or more files to atomize.");
+      throw new Exception('Specify one or more files to atomize.');
     }
 
     $file_atomizer = new DivinerFileAtomizer();
@@ -98,7 +98,7 @@ final class DivinerAtomizeWorkflow extends DivinerWorkflow {
       $all_atoms[] = $file_atoms;
 
       if (count($file_atoms) !== 1) {
-        throw new Exception("Expected exactly one atom from file atomizer.");
+        throw new Exception('Expected exactly one atom from file atomizer.');
       }
       $file_atom = head($file_atoms);
 

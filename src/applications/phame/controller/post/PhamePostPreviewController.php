@@ -1,10 +1,6 @@
 <?php
 
-/**
- * @group phame
- */
-final class PhamePostPreviewController
-extends PhameController {
+final class PhamePostPreviewController extends PhameController {
 
   protected function getSideNavFilter() {
     return null;
@@ -27,4 +23,5 @@ extends PhameController {
 
     return id(new AphrontAjaxResponse())->setContent($content);
   }
+
 }

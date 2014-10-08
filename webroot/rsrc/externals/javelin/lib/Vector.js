@@ -20,8 +20,6 @@
  *                            If numeric, the x-coordinate for the new vector.
  * @param number?             The y-coordinate for the new vector.
  * @return @{class:JX.Vector} New vector.
- *
- * @group dom
  */
 JX.$V = function(x, y) {
   return new JX.Vector(x, y);
@@ -75,8 +73,6 @@ JX.$V = function(x, y) {
  * @task query  Querying Positions and Dimensions
  * @task update Changing Positions and Dimensions
  * @task manip  Manipulating Vectors
- *
- * @group dom
  */
 JX.install('Vector', {
 
@@ -224,7 +220,12 @@ JX.install('Vector', {
       JX.Event && (node instanceof JX.Event) && (node = node.getRawEvent());
 
       if (node.getBoundingClientRect) {
-        var rect = node.getBoundingClientRect();
+        var rect;
+        try {
+          rect = node.getBoundingClientRect();
+        } catch (e) {
+          rect = { top : 0, left : 0 };
+        }
         return new JX.Vector(
           rect.left + window.pageXOffset,
           rect.top + window.pageYOffset);
@@ -294,6 +295,35 @@ JX.install('Vector', {
         window.pageXOffset || b.scrollLeft || e.scrollLeft,
         window.pageYOffset || b.scrollTop || e.scrollTop
       );
+    },
+
+
+    /**
+     * Get the aggregate scroll offsets for a node and all of its parents.
+     *
+     * Note that this excludes scroll at the document level, because it does
+     * not normally impact operations in document coordinates, which everything
+     * on this class returns. Use @{method:getScroll} to get the document scroll
+     * position.
+     *
+     * @param   Node        Node to determine offsets for.
+     * @return  JX.Vector   New vector with aggregate scroll offsets.
+     */
+    getAggregateScrollForNode: function(node) {
+      var x = 0;
+      var y = 0;
+
+      do {
+        if (node == document.body || node == document.documentElement) {
+          break;
+        }
+
+        x += node.scrollLeft || 0;
+        y += node.scrollTop || 0;
+        node = node.parentNode;
+      } while (node);
+
+      return new JX.$V(x, y);
     },
 
     /**

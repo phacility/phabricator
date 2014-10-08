@@ -33,11 +33,10 @@ final class AuditActionMenuEventListener extends PhabricatorEventListener {
     $user = $event->getValue('object');
 
     $username = phutil_escape_uri($user->getUsername());
-    $view_uri = '/audit/view/author/'.$username.'/';
+    $view_uri = '/audit/?authors='.$username;
 
     return id(new PhabricatorActionView())
-      ->setIcon('audit-dark')
-      ->setIconSheet(PHUIIconView::SPRITE_APPS)
+      ->setIcon('fa-check-circle-o')
       ->setName(pht('View Commits'))
       ->setHref($view_uri);
   }

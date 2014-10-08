@@ -16,7 +16,7 @@ final class PhabricatorGitGraphStream
     $this->repository = $repository;
 
     $future = $repository->getLocalCommandFuture(
-      "log --format=%s %s --",
+      'log --format=%s %s --',
       '%H%x01%P%x01%ct',
       $start_commit);
 
@@ -29,7 +29,12 @@ final class PhabricatorGitGraphStream
     if (!isset($this->parents[$commit])) {
       $this->parseUntil($commit);
     }
-    return $this->parents[$commit];
+    $parents = $this->parents[$commit];
+
+    // NOTE: In Git, it is possible for a commit to list the same parent more
+    // than once. See T5226. Discard duplicate parents.
+
+    return array_unique($parents);
   }
 
   public function getCommitDate($commit) {

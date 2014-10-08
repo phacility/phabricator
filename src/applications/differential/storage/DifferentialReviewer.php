@@ -26,7 +26,7 @@ final class DifferentialReviewer {
   }
 
   public function isUser() {
-    $user_type = PhabricatorPeoplePHIDTypeUser::TYPECONST;
+    $user_type = PhabricatorPeopleUserPHIDType::TYPECONST;
     return (phid_get_type($this->getReviewerPHID()) == $user_type);
   }
 
@@ -41,7 +41,7 @@ final class DifferentialReviewer {
 
     $viewer_phid = $viewer->getPHID();
     if (!array_key_exists($viewer_phid, $this->authority)) {
-      throw new Exception("You must attachAuthority() first!");
+      throw new Exception('You must attachAuthority() first!');
     }
     return $this->authority[$viewer_phid];
   }

@@ -4,27 +4,41 @@ final class PhabricatorProjectProfileController
   extends PhabricatorProjectController {
 
   private $id;
+  private $slug;
 
   public function shouldAllowPublic() {
     return true;
   }
 
   public function willProcessRequest(array $data) {
+    // via /project/view/$id/
     $this->id = idx($data, 'id');
+    // via /tag/$slug/
+    $this->slug = idx($data, 'slug');
   }
 
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $project = id(new PhabricatorProjectQuery())
+    $query = id(new PhabricatorProjectQuery())
       ->setViewer($user)
-      ->withIDs(array($this->id))
       ->needMembers(true)
+      ->needWatchers(true)
       ->needImages(true)
-      ->executeOne();
+      ->needSlugs(true);
+    if ($this->slug) {
+      $query->withSlugs(array($this->slug));
+    } else {
+      $query->withIDs(array($this->id));
+    }
+    $project = $query->executeOne();
     if (!$project) {
       return new Aphront404Response();
+    }
+    if ($this->slug && $this->slug != $project->getPrimarySlug()) {
+      return id(new AphrontRedirectResponse())
+        ->setURI('/tag/'.$project->getPrimarySlug().'/');
     }
 
     $picture = $project->getProfileImageURI();
@@ -47,10 +61,9 @@ final class PhabricatorProjectProfileController
       'phabricator-project-layout',
       array($tasks, $feed));
 
-    $id = $this->id;
+    $id = $project->getID();
     $icon = id(new PHUIIconView())
-          ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-          ->setSpriteIcon('workboard');
+          ->setIconFont('fa-columns');
     $board_btn = id(new PHUIButtonView())
         ->setTag('a')
         ->setText(pht('Workboards'))
@@ -65,9 +78,9 @@ final class PhabricatorProjectProfileController
       ->addActionLink($board_btn);
 
     if ($project->getStatus() == PhabricatorProjectStatus::STATUS_ACTIVE) {
-      $header->setStatus('oh-ok', '', pht('Active'));
+      $header->setStatus('fa-check', 'bluegrey', pht('Active'));
     } else {
-      $header->setStatus('policy-noone', '', pht('Archived'));
+      $header->setStatus('fa-ban', 'dark', pht('Archived'));
     }
 
     $actions = $this->buildActionListView($project);
@@ -89,7 +102,6 @@ final class PhabricatorProjectProfileController
       ),
       array(
         'title' => $project->getName(),
-        'device' => true,
       ));
   }
 
@@ -148,21 +160,19 @@ final class PhabricatorProjectProfileController
 
     $phid = $project->getPHID();
     $view_uri = urisprintf(
-      '/maniphest/?statuses=%s&allProjects[]=%s#R',
+      '/maniphest/?statuses=%s&allProjects=%s#R',
       implode(',', ManiphestTaskStatus::getOpenStatusConstants()),
       $phid);
     $create_uri = '/maniphest/task/create/?projects='.$phid;
     $icon = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-      ->setSpriteIcon('action-menu');
+      ->setIconFont('fa-list');
     $button_view = id(new PHUIButtonView())
       ->setTag('a')
       ->setText(pht('View All'))
       ->setHref($view_uri)
       ->setIcon($icon);
     $icon_new = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-      ->setSpriteIcon('new');
+      ->setIconFont('fa-plus');
     $button_add = id(new PHUIButtonView())
       ->setTag('a')
       ->setText(pht('New Task'))
@@ -200,13 +210,13 @@ final class PhabricatorProjectProfileController
     $view->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Project'))
-        ->setIcon('edit')
+        ->setIcon('fa-pencil')
         ->setHref($this->getApplicationURI("edit/{$id}/")));
 
     $view->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Members'))
-        ->setIcon('user')
+        ->setIcon('fa-users')
         ->setHref($this->getApplicationURI("members/{$id}/"))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
@@ -222,17 +232,35 @@ final class PhabricatorProjectProfileController
         ->setUser($viewer)
         ->setRenderAsForm(true)
         ->setHref('/project/update/'.$project->getID().'/join/')
-        ->setIcon('new')
+        ->setIcon('fa-plus')
         ->setDisabled(!$can_join)
         ->setName(pht('Join Project'));
+      $view->addAction($action);
     } else {
       $action = id(new PhabricatorActionView())
         ->setWorkflow(true)
         ->setHref('/project/update/'.$project->getID().'/leave/')
-        ->setIcon('delete')
+        ->setIcon('fa-times')
         ->setName(pht('Leave Project...'));
+      $view->addAction($action);
+
+      if (!$project->isUserWatcher($viewer->getPHID())) {
+        $action = id(new PhabricatorActionView())
+          ->setWorkflow(true)
+          ->setHref('/project/watch/'.$project->getID().'/')
+          ->setIcon('fa-eye')
+          ->setName(pht('Watch Project'));
+        $view->addAction($action);
+      } else {
+        $action = id(new PhabricatorActionView())
+          ->setWorkflow(true)
+          ->setHref('/project/unwatch/'.$project->getID().'/')
+          ->setIcon('fa-eye-slash')
+          ->setName(pht('Unwatch Project'));
+        $view->addAction($action);
+      }
     }
-    $view->addAction($action);
+
 
     return $view;
   }
@@ -243,18 +271,36 @@ final class PhabricatorProjectProfileController
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
-    $this->loadHandles($project->getMemberPHIDs());
+    $this->loadHandles(
+      array_merge(
+        $project->getMemberPHIDs(),
+        $project->getWatcherPHIDs()));
 
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
       ->setObject($project)
       ->setActionList($actions);
 
+    $hashtags = array();
+    foreach ($project->getSlugs() as $slug) {
+      $hashtags[] = id(new PHUITagView())
+        ->setType(PHUITagView::TYPE_OBJECT)
+        ->setName('#'.$slug->getSlug());
+    }
+
+    $view->addProperty(pht('Hashtags'), phutil_implode_html(' ', $hashtags));
+
     $view->addProperty(
       pht('Members'),
       $project->getMemberPHIDs()
-      ? $this->renderHandlesForPHIDs($project->getMemberPHIDs(), ',')
-      : phutil_tag('em', array(), pht('None')));
+        ? $this->renderHandlesForPHIDs($project->getMemberPHIDs(), ',')
+        : phutil_tag('em', array(), pht('None')));
+
+    $view->addProperty(
+      pht('Watchers'),
+      $project->getWatcherPHIDs()
+        ? $this->renderHandlesForPHIDs($project->getWatcherPHIDs(), ',')
+        : phutil_tag('em', array(), pht('None')));
 
     $field_list = PhabricatorCustomField::getObjectFields(
       $project,

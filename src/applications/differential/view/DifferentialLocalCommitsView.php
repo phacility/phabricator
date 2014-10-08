@@ -19,7 +19,7 @@ final class DifferentialLocalCommitsView extends AphrontView {
   public function render() {
     $user = $this->user;
     if (!$user) {
-      throw new Exception("Call setUser() before render()-ing this view.");
+      throw new Exception('Call setUser() before render()-ing this view.');
     }
 
     $local = $this->localCommits;
@@ -77,7 +77,9 @@ final class DifferentialLocalCommitsView extends AphrontView {
       $message = idx($commit, 'message');
 
       $summary = idx($commit, 'summary');
-      $summary = phutil_utf8_shorten($summary, 80);
+      $summary = id(new PhutilUTF8StringTruncator())
+        ->setMaximumGlyphs(80)
+        ->truncateString($summary);
 
       $view = new AphrontMoreView();
       $view->setSome($summary);
@@ -142,7 +144,8 @@ final class DifferentialLocalCommitsView extends AphrontView {
       $link = phutil_tag(
         'a',
         array(
-          'href' => $commit_for_link->getURI()),
+          'href' => $commit_for_link->getURI(),
+        ),
         $commit_hash);
     } else {
       $link = $commit_hash;

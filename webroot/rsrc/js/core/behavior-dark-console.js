@@ -90,7 +90,7 @@ JX.behavior('dark-console', function(config, statics) {
     if (!color) {
       return null;
     }
-    return JX.$N('span', {style: {color: color}}, "\u2022");
+    return JX.$N('span', {style: {color: color}}, '\u2022');
   }
 
 
@@ -225,7 +225,7 @@ JX.behavior('dark-console', function(config, statics) {
   function install_shortcut() {
     var desc = 'Toggle visibility of DarkConsole.';
     new JX.KeyboardShortcut('`', desc)
-      .setHandler(function(manager) {
+      .setHandler(function() {
         statics.visible = !statics.visible;
 
         if (statics.visible) {

@@ -18,7 +18,7 @@ final class NuanceSourceEditController extends NuanceController {
 
   public function processRequest() {
     $can_edit = $this->requireApplicationCapability(
-      NuanceCapabilitySourceManage::CAPABILITY);
+      NuanceSourceManageCapability::CAPABILITY);
 
     $request = $this->getRequest();
     $user = $request->getUser();
@@ -61,6 +61,6 @@ final class NuanceSourceEditController extends NuanceController {
       ),
       array(
         'title' => $definition->getEditTitle(),
-        'device' => true));
+      ));
   }
 }

@@ -4,7 +4,6 @@
  * Implodes selected handles from a pool of handles. Useful if you load handles
  * for various phids, but only render a few of them at a time.
  *
- * @group  handle
  * @return PhutilSafeHTML
  */
 function implode_selected_handle_links($glue, array $handles, array $phids) {

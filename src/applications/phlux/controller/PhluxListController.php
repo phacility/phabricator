@@ -41,7 +41,6 @@ final class PhluxListController extends PhluxController {
       ),
       array(
         'title'  => $title,
-        'device' => true,
       ));
   }
 

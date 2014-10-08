@@ -21,12 +21,21 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'name' => 'text255',
+        'planStatus' => 'text32',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_status' => array(
+          'columns' => array('planStatus'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      HarbormasterPHIDTypeBuildPlan::TYPECONST);
+      HarbormasterBuildPlanPHIDType::TYPECONST);
   }
 
   public function attachBuildSteps(array $steps) {
@@ -37,19 +46,6 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
 
   public function getBuildSteps() {
     return $this->assertAttached($this->buildSteps);
-  }
-
-  /**
-   * Returns a standard, ordered list of build steps for this build plan.
-   *
-   * This method should be used to load build steps for a given build plan
-   * so that the ordering is consistent.
-   */
-  public function loadOrderedBuildSteps() {
-    return id(new HarbormasterBuildStepQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withBuildPlanPHIDs(array($this->getPHID()))
-      ->execute();
   }
 
   public function isDisabled() {

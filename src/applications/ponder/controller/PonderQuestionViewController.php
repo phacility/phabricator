@@ -41,7 +41,7 @@ final class PonderQuestionViewController extends PonderController {
       $answer_add_panel
         ->setQuestion($question)
         ->setUser($user)
-        ->setActionURI("/ponder/answer/add/");
+        ->setActionURI('/ponder/answer/add/');
     }
 
     $header = id(new PHUIHeaderView())
@@ -64,10 +64,9 @@ final class PonderQuestionViewController extends PonderController {
         $object_box,
         $question_xactions,
         $answers,
-        $answer_add_panel
+        $answer_add_panel,
       ),
       array(
-        'device' => true,
         'title' => 'Q'.$question->getID().' '.$question->getTitle(),
         'pageObjects' => array_merge(
           array($question->getPHID()),
@@ -93,20 +92,20 @@ final class PonderQuestionViewController extends PonderController {
 
     $view->addAction(
       id(new PhabricatorActionView())
-        ->setIcon('edit')
+        ->setIcon('fa-pencil')
         ->setName(pht('Edit Question'))
         ->setHref($this->getApplicationURI("/question/edit/{$id}/"))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
     if ($question->getStatus() == PonderQuestionStatus::STATUS_OPEN) {
-      $name = pht("Close Question");
-      $icon = "delete";
-      $href = "close";
+      $name = pht('Close Question');
+      $icon = 'fa-times';
+      $href = 'close';
     } else {
-      $name = pht("Reopen Question");
-      $icon = "enable";
-      $href = "open";
+      $name = pht('Reopen Question');
+      $icon = 'fa-check-circle-o';
+      $href = 'open';
     }
 
     $view->addAction(
@@ -120,7 +119,7 @@ final class PonderQuestionViewController extends PonderController {
 
     $view->addAction(
       id(new PhabricatorActionView())
-        ->setIcon('transcript')
+        ->setIcon('fa-list')
         ->setName(pht('View History'))
         ->setHref($this->getApplicationURI("/question/history/{$id}/")));
 
@@ -316,7 +315,7 @@ final class PonderQuestionViewController extends PonderController {
 
     $view->addAction(
       id(new PhabricatorActionView())
-        ->setIcon('edit')
+        ->setIcon('fa-pencil')
         ->setName(pht('Edit Answer'))
         ->setHref($this->getApplicationURI("/answer/edit/{$id}/"))
         ->setDisabled(!$can_edit)
@@ -324,7 +323,7 @@ final class PonderQuestionViewController extends PonderController {
 
     $view->addAction(
       id(new PhabricatorActionView())
-        ->setIcon('transcript')
+        ->setIcon('fa-list')
         ->setName(pht('View History'))
         ->setHref($this->getApplicationURI("/answer/history/{$id}/")));
 

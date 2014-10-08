@@ -120,7 +120,7 @@ abstract class DiffusionView extends AphrontView {
     $callsign = $repository->getCallsign();
 
     if (strlen($summary)) {
-      $commit_name .= ': ' . $summary;
+      $commit_name .= ': '.$summary;
     }
 
     return phutil_tag(
@@ -144,7 +144,7 @@ abstract class DiffusionView extends AphrontView {
       "D{$id}");
   }
 
-  final protected static function renderName($name) {
+  final public static function renderName($name) {
     $email = new PhutilEmailAddress($name);
     if ($email->getDisplayName() && $email->getDomainName()) {
       Javelin::initBehavior('phabricator-tooltips', array());

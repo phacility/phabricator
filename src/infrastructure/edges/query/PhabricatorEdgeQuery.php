@@ -160,7 +160,7 @@ final class PhabricatorEdgeQuery extends PhabricatorQuery {
   public function execute() {
     if (!$this->sourcePHIDs) {
       throw new Exception(
-      "You must use withSourcePHIDs() to query edges.");
+      'You must use withSourcePHIDs() to query edges.');
     }
 
     $sources = phid_group_by_type($this->sourcePHIDs);
@@ -257,7 +257,7 @@ final class PhabricatorEdgeQuery extends PhabricatorQuery {
     array $types = array()) {
     if ($this->resultSet === null) {
       throw new Exception(
-        "You must execute() a query before you you can getDestinationPHIDs().");
+        'You must execute() a query before you you can getDestinationPHIDs().');
     }
 
     $src_phids = array_fill_keys($src_phids, true);

@@ -8,7 +8,7 @@ abstract class PhluxController extends PhabricatorController {
       id(new PHUIListItemView())
         ->setName(pht('Create Variable'))
         ->setHref($this->getApplicationURI('/edit/'))
-        ->setIcon('create'));
+        ->setIcon('fa-plus-square'));
 
     return $crumbs;
   }

@@ -76,7 +76,7 @@ JX.behavior('phabricator-active-nav', function(config) {
   };
 
   var pending = null;
-  var onviewportchange = function(e) {
+  var onviewportchange = function() {
     pending && clearTimeout(pending);
     pending = setTimeout(updateposition, 100);
   };

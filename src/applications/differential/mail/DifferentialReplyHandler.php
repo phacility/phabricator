@@ -11,7 +11,7 @@ class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
 
   public function validateMailReceiver($mail_receiver) {
     if (!($mail_receiver instanceof DifferentialRevision)) {
-      throw new Exception("Receiver is not a DifferentialRevision!");
+      throw new Exception('Receiver is not a DifferentialRevision!');
     }
   }
 
@@ -71,7 +71,7 @@ class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
       $text .= implode(', ', $modified_commands);
     }
 
-    $text .= ".";
+    $text .= '.';
 
     return $text;
   }
@@ -105,11 +105,11 @@ class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
     // unrecognized commands will be parsed as part of the comment.
     $command = DifferentialAction::ACTION_COMMENT;
     $supported_commands = $this->getSupportedCommands();
-    $regex = "/\A\n*!(" . implode('|', $supported_commands) . ")\n*/";
+    $regex = "/\A\n*!(".implode('|', $supported_commands).")\n*/";
     $matches = array();
     if (preg_match($regex, $body, $matches)) {
       $command = $matches[1];
-      $body = trim(str_replace('!' . $command, '', $body));
+      $body = trim(str_replace('!'.$command, '', $body));
     }
 
     $actor = $this->getActor();
@@ -120,6 +120,7 @@ class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
     switch ($command) {
       case 'unsubscribe':
         id(new PhabricatorSubscriptionsEditor())
+          ->setActor($actor)
           ->setObject($this->getMailReceiver())
           ->unsubscribe(array($actor->getPHID()))
           ->save();

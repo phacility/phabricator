@@ -12,7 +12,6 @@
  * @task construct Constructing an Engine
  * @task meta Engine Metadata
  * @task file Managing File Data
- * @group filestorage
  */
 abstract class PhabricatorFileStorageEngine {
 

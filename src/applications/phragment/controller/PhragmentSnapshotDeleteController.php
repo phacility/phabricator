@@ -16,7 +16,8 @@ final class PhragmentSnapshotDeleteController extends PhragmentController {
       ->setViewer($viewer)
       ->requireCapabilities(array(
         PhabricatorPolicyCapability::CAN_VIEW,
-        PhabricatorPolicyCapability::CAN_EDIT))
+        PhabricatorPolicyCapability::CAN_EDIT,
+      ))
       ->withIDs(array($this->id))
       ->executeOne();
     if ($snapshot === null) {
@@ -45,8 +46,8 @@ final class PhragmentSnapshotDeleteController extends PhragmentController {
       ->addSubmitButton(pht('Delete'))
       ->addCancelButton(pht('Cancel'))
       ->appendParagraph(pht(
-        "Deleting this snapshot is a permanent operation.  You can not ".
-        "recover the state of the snapshot."));
+        'Deleting this snapshot is a permanent operation. You can not '.
+        'recover the state of the snapshot.'));
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }
 

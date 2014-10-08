@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group console
- */
 final class DarkConsoleDataController extends PhabricatorController {
 
   private $key;
@@ -13,6 +10,10 @@ final class DarkConsoleDataController extends PhabricatorController {
 
   public function shouldRequireEnabledUser() {
     return !PhabricatorEnv::getEnvConfig('darkconsole.always-on');
+  }
+
+  public function shouldAllowPartialSessions() {
+    return true;
   }
 
   public function willProcessRequest(array $data) {

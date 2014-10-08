@@ -44,7 +44,7 @@ handles.
 
 There is a web interface for viewing and testing Conduit called the "Conduit
 Console", implemented by @{class:PhabricatorConduitConsoleController} at
-##/conduit/##.
+`/conduit/`.
 
 A log of connections and calls is stored by
 @{class:PhabricatorConduitConnectionLog} and
@@ -52,6 +52,6 @@ A log of connections and calls is stored by
 @{class:PhabricatorConduitLogController} at ##/conduit/log/##.
 
 Conduit provides a token-based handshake mechanism used by
-##arc install-certificate## at ##/conduit/token/##, implemented by
+`arc install-certificate` at `/conduit/token/`, implemented by
 @{class:PhabricatorConduitTokenController} which stores generated tokens using
 @{class:PhabricatorConduitCertificateToken}.

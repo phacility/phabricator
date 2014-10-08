@@ -27,8 +27,8 @@ final class ConduitCall {
       $this->handler->defineParamTypes());
     if ($invalid_params) {
       throw new ConduitException(
-        "Method '{$method}' doesn't define these parameters: '" .
-        implode("', '", array_keys($invalid_params)) . "'.");
+        "Method '{$method}' doesn't define these parameters: '".
+        implode("', '", array_keys($invalid_params))."'.");
     }
 
     if ($this->servers) {
@@ -114,7 +114,7 @@ final class ConduitCall {
       if (!$allow_public) {
         if (!$user->isLoggedIn() && !$user->isOmnipotent()) {
           // TODO: As per below, this should get centralized and cleaned up.
-          throw new ConduitException("ERR-INVALID-AUTH");
+          throw new ConduitException('ERR-INVALID-AUTH');
         }
       }
 
@@ -131,8 +131,8 @@ final class ConduitCall {
         if (!$can_view) {
           throw new ConduitException(
             pht(
-              "You do not have access to the application which provides this ".
-              "API method."));
+              'You do not have access to the application which provides this '.
+              'API method.'));
         }
       }
     }
@@ -142,7 +142,7 @@ final class ConduitCall {
       $client = new ConduitClient($server);
       $params = $this->request->getAllParameters();
 
-      $params["__conduit__"]["isProxied"] = true;
+      $params['__conduit__']['isProxied'] = true;
 
       if ($this->handler->shouldRequireAuthentication()) {
         $client->callMethodSynchronous(
@@ -152,7 +152,7 @@ final class ConduitCall {
              'clientVersion'     => '1.0',
              'user'              => $this->getUser()->getUserName(),
              'certificate'       => $this->getUser()->getConduitCertificate(),
-             '__conduit__'       => $params["__conduit__"],
+             '__conduit__'       => $params['__conduit__'],
         ));
       }
 
@@ -168,42 +168,17 @@ final class ConduitCall {
     return $servers[array_rand($servers)];
   }
 
-  protected function buildMethodHandler($method) {
-    $method_class = ConduitAPIMethod::getClassNameFromAPIMethodName($method);
+  protected function buildMethodHandler($method_name) {
+    $method = ConduitAPIMethod::getConduitMethod($method_name);
 
-    // Test if the method exists.
-    $ok = false;
-    try {
-      $ok = class_exists($method_class);
-    } catch (Exception $ex) {
-      // Discard, we provide a more specific exception below.
-    }
-    if (!$ok) {
-      throw new ConduitException(
-        "Conduit method '{$method}' does not exist.");
-    }
-
-    $class_info = new ReflectionClass($method_class);
-    if ($class_info->isAbstract()) {
-      throw new ConduitException(
-        "Method '{$method}' is not valid; the implementation is an abstract ".
-        "base class.");
-    }
-
-    $method = newv($method_class, array());
-
-    if (!($method instanceof ConduitAPIMethod)) {
-      throw new ConduitException(
-        "Method '{$method_class}' is not valid; the implementation must be ".
-        "a subclass of ConduitAPIMethod.");
+    if (!$method) {
+      throw new ConduitMethodDoesNotExistException($method_name);
     }
 
     $application = $method->getApplication();
     if ($application && !$application->isInstalled()) {
       $app_name = $application->getName();
-      throw new ConduitException(
-        "Method '{$method_class}' belongs to application '{$app_name}', ".
-        "which is not installed.");
+      throw new ConduitApplicationNotInstalledException($method, $app_name);
     }
 
     return $method;

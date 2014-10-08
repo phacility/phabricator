@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group maniphest
- */
 final class ManiphestExcelDefaultFormat extends ManiphestExcelFormat {
 
   public function getName() {
@@ -107,7 +104,9 @@ final class ManiphestExcelDefaultFormat extends ManiphestExcelFormat {
         $task->getTitle(),
         $projects,
         PhabricatorEnv::getProductionURI('/T'.$task->getID()),
-        phutil_utf8_shorten($task->getDescription(), 512),
+        id(new PhutilUTF8StringTruncator())
+        ->setMaximumBytes(512)
+        ->truncateString($task->getDescription()),
       );
     }
 
@@ -133,7 +132,6 @@ final class ManiphestExcelDefaultFormat extends ManiphestExcelFormat {
       }
     }
   }
-
 
   private function col($n) {
     return chr(ord('A') + $n);

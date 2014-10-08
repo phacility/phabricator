@@ -2,6 +2,10 @@
 
 final class PonderAnswerEditor extends PonderEditor {
 
+  public function getEditorObjectsDescription() {
+    return pht('Ponder Answers');
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 

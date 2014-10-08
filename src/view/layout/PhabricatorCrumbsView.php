@@ -53,20 +53,17 @@ final class PhabricatorCrumbsView extends AphrontView {
         if ($action->getIcon()) {
           $icon_name = $action->getIcon();
           if ($action->getDisabled()) {
-            $icon_name .= '-grey';
+            $icon_name .= ' lightgreytext';
           }
 
-          $icon = phutil_tag(
-            'span',
-            array(
-              'class' => 'sprite-icons icons-'.$icon_name,
-            ),
-            '');
+          $icon = id(new PHUIIconView())
+            ->setIconFont($icon_name);
+
         }
         $name = phutil_tag(
           'span',
             array(
-              'class' => 'phabricator-crumbs-action-name'
+              'class' => 'phabricator-crumbs-action-name',
             ),
           $action->getName());
 
@@ -87,7 +84,7 @@ final class PhabricatorCrumbsView extends AphrontView {
             'href' => $action->getHref(),
             'class' => implode(' ', $action_classes),
             'sigil' => implode(' ', $action_sigils),
-            'style' => $action->getStyle()
+            'style' => $action->getStyle(),
           ),
           array(
             $icon,
@@ -97,16 +94,12 @@ final class PhabricatorCrumbsView extends AphrontView {
 
       if ($this->actionListID) {
         $icon_id = celerity_generate_unique_node_id();
-        $icon = phutil_tag(
-          'span',
-            array(
-              'class' => 'sprite-icons action-action-menu'
-            ),
-            '');
+        $icon = id(new PHUIIconView())
+          ->setIconFont('fa-bars');
         $name = phutil_tag(
           'span',
             array(
-              'class' => 'phabricator-crumbs-action-name'
+              'class' => 'phabricator-crumbs-action-name',
             ),
           pht('Actions'));
 
@@ -121,7 +114,7 @@ final class PhabricatorCrumbsView extends AphrontView {
               'meta'  => array(
                 'map' => array(
                   $this->actionListID => 'phabricator-action-list-toggle',
-                  $icon_id => 'phabricator-crumbs-action-menu-open'
+                  $icon_id => 'phabricator-crumbs-action-menu-open',
                 ),
               ),
             ),

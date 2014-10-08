@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group pholio
- */
 final class PholioMockEmbedView extends AphrontView {
 
   private $mock;
@@ -20,103 +17,41 @@ final class PholioMockEmbedView extends AphrontView {
 
   public function render() {
     if (!$this->mock) {
-      throw new Exception("Call setMock() before render()!");
+      throw new Exception('Call setMock() before render()!');
     }
-
-    require_celerity_resource('pholio-css');
-
-    $mock_link = phutil_tag(
-      'a',
-      array(
-        'href' => '/M'.$this->mock->getID(),
-      ),
-      'M'.$this->mock->getID().' '.$this->mock->getName());
-
-    $mock_header = phutil_tag(
-      'div',
-      array(
-        'class' => 'pholio-mock-embed-head',
-      ),
-      $mock_link);
+    $mock = $this->mock;
 
     $images_to_show = array();
+    $thumbnail = null;
     if (!empty($this->images)) {
       $images_to_show = array_intersect_key(
         $this->mock->getImages(), array_flip($this->images));
     }
 
-    if (empty($images_to_show)) {
-      $images_to_show = array_slice($this->mock->getImages(), 0, 4);
+    if ($images_to_show) {
+      foreach ($images_to_show as $image) {
+        $thumbfile = $image->getFile();
+        $thumbnail = $thumbfile->getThumb280x210URI();
+      }
+      $header = 'M'.$mock->getID().' '.$mock->getName().
+        ' (#'.$image->getID().')';
+      $uri = '/M'.$this->mock->getID().'/'.$image->getID().'/';
+    } else {
+      $thumbnail = $mock->getCoverFile()->getThumb280x210URI();
+      $header = 'M'.$mock->getID().' '.$mock->getName();
+      $uri = '/M'.$this->mock->getID();
     }
 
-    $thumbnails = array();
-    foreach ($images_to_show as $image) {
-      $thumbfile = $image->getFile();
+    $item = id(new PHUIPinboardItemView())
+      ->setHeader($header)
+      ->setURI($uri)
+      ->setImageURI($thumbnail)
+      ->setImageSize(280, 210)
+      ->setDisabled($mock->isClosed())
+      ->addIconCount('fa-picture-o', count($mock->getImages()))
+      ->addIconCount('fa-trophy', $mock->getTokenCount());
 
-      $dimensions = PhabricatorImageTransformer::getPreviewDimensions(
-        $thumbfile,
-        140);
-
-      $tag = phutil_tag(
-        'img',
-        array(
-            'width' => $dimensions['sdx'],
-            'height' => $dimensions['sdy'],
-            'class' => 'pholio-mock-carousel-thumbnail',
-            'src' => $thumbfile->getPreview140URI(),
-            'style' => 'top: '.floor((140 - $dimensions['sdy'] ) / 2).'px',
-          ));
-
-        $thumbnails[] = javelin_tag(
-          'a',
-          array(
-            'class' => 'pholio-mock-carousel-thumb-item',
-            'href' => '/M'.$this->mock->getID().'/'.$image->getID().'/',
-          ),
-          $tag);
-    }
-
-    $mock_body = phutil_tag(
-      'div',
-      array(),
-      $thumbnails);
-
-    $icons_data = array(
-      'image' => count($this->mock->getImages()),
-      'like' => $this->mock->getTokenCount());
-
-    $icon_list = array();
-    foreach ($icons_data as $icon_name => $icon_value) {
-      $icon = phutil_tag(
-        'span',
-         array(
-           'class' =>
-             'pholio-mock-embed-icon sprite-icons icons-'.$icon_name.'-white',
-         ),
-         ' ');
-      $count = phutil_tag('span', array(), $icon_value);
-
-      $icon_list[] = phutil_tag(
-        'span',
-        array(
-          'class' => 'pholio-mock-embed-icons'
-        ),
-        array($icon, $count));
-    }
-
-    $mock_footer = phutil_tag(
-      'div',
-      array(
-         'class' => 'pholio-mock-embed-footer',
-      ),
-      $icon_list);
-
-
-    return phutil_tag(
-      'div',
-      array(
-        'class' => 'pholio-mock-embed'
-      ),
-      array($mock_header, $mock_body, $mock_footer));
+    return $item;
   }
+
 }

@@ -3,6 +3,14 @@
 final class HarbormasterBuildPlanSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Harbormaster Build Plans');
+  }
+
+  public function getApplicationClassName() {
+    return 'PhabricatorHarbormasterApplication';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 
@@ -44,7 +52,6 @@ final class HarbormasterBuildPlanSearchEngine
             HarbormasterBuildPlan::STATUS_DISABLED,
             pht('Disabled'),
             in_array(HarbormasterBuildPlan::STATUS_DISABLED, $status)));
-
   }
 
   protected function getURI($path) {
@@ -52,16 +59,13 @@ final class HarbormasterBuildPlanSearchEngine
   }
 
   public function getBuiltinQueryNames() {
-    $names = array(
+    return array(
       'active' => pht('Active Plans'),
       'all' => pht('All Plans'),
     );
-
-    return $names;
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
-
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
 
@@ -77,6 +81,34 @@ final class HarbormasterBuildPlanSearchEngine
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
+  }
+
+  protected function renderResultList(
+    array $plans,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+    assert_instances_of($plans, 'HarbormasterBuildPlan');
+
+    $viewer = $this->requireViewer();
+
+    $list = new PHUIObjectItemListView();
+    foreach ($plans as $plan) {
+      $id = $plan->getID();
+
+      $item = id(new PHUIObjectItemView())
+        ->setObjectName(pht('Plan %d', $plan->getID()))
+        ->setHeader($plan->getName());
+
+      if ($plan->isDisabled()) {
+        $item->setDisabled(true);
+      }
+
+      $item->setHref($this->getApplicationURI("plan/{$id}/"));
+
+      $list->addItem($item);
+    }
+
+    return $list;
   }
 
 }

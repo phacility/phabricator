@@ -3,7 +3,7 @@
 final class DifferentialChangesetParserTestCase extends PhabricatorTestCase {
 
   public function testDiffChangesets() {
-    $hunk = new DifferentialHunk();
+    $hunk = new DifferentialHunkModern();
     $hunk->setChanges("+a\n b\n-c");
     $hunk->setNewOffset(1);
     $hunk->setNewLen(2);
@@ -20,7 +20,7 @@ final class DifferentialChangesetParserTestCase extends PhabricatorTestCase {
     );
 
     foreach ($tests as $changes => $expected) {
-      $hunk = new DifferentialHunk();
+      $hunk = new DifferentialHunkModern();
       $hunk->setChanges($changes);
       $hunk->setNewOffset(11);
       $hunk->setNewLen(3);

@@ -71,7 +71,7 @@ final class PhabricatorRepositoryPullLocalDaemon
     $futures = array();
     $queue = array();
 
-    while (true) {
+    while (!$this->shouldExit()) {
       $pullable = $this->loadPullableRepositories($include, $exclude);
 
       // If any repositories have the NEEDS_UPDATE flag set, pull them
@@ -345,55 +345,23 @@ final class PhabricatorRepositoryPullLocalDaemon
       phlog($stderr_msg);
     }
 
-    $sleep_for = (int)$repository->getDetail('pull-frequency', $min_sleep);
+    // For now, continue respecting this deprecated setting for raising the
+    // minimum pull frequency.
+    // TODO: Remove this some day once this code has been completely stable
+    // for a while.
+    $sleep_for = (int)$repository->getDetail('pull-frequency');
+    $min_sleep = max($sleep_for, $min_sleep);
 
-    // Smart wait: pull rarely used repositories less frequently. Find the
-    // most recent commit which is older than the current time (this keeps us
-    // from spinning on repositories with a silly commit post-dated to some time
-    // in 2037), and adjust how frequently we pull based on how frequently this
-    // repository updates.
+    $smart_wait = $repository->loadUpdateInterval($min_sleep);
 
-    $table = id(new PhabricatorRepositoryCommit());
-    $last_commit = queryfx_one(
-      $table->establishConnection('w'),
-      'SELECT epoch FROM %T
-        WHERE repositoryID = %d AND epoch <= %d
-        ORDER BY epoch DESC LIMIT 1',
-      $table->getTableName(),
-      $repository->getID(),
-      time() + $min_sleep);
-    if ($last_commit) {
-      $time_since_commit = (time() + $min_sleep) - $last_commit['epoch'];
+    $this->log(
+      pht(
+        'Based on activity in repository "%s", considering a wait of %s '.
+        'seconds before update.',
+        $repository->getMonogram(),
+        new PhutilNumber($smart_wait)));
 
-      // Wait 0.5% of the time since the last commit before we pull. This gives
-      // us these wait times:
-      //
-      // 50 minutes or less: 15 seconds
-      // about 3 hours: 1 minute
-      // about 16 hours: 5 minutes
-      // about 2 days: 15 minutes
-      // 50 days or more: 6 hours
-
-      $smart_wait = ($time_since_commit / 200);
-      $smart_wait = min($smart_wait, phutil_units('6 hours in seconds'));
-
-      $this->log(
-        pht(
-          'Last commit to repository "%s" was %s seconds ago; considering '.
-          'a wait of %s seconds before update.',
-          $repository->getMonogram(),
-          new PhutilNumber($time_since_commit),
-          new PhutilNumber($smart_wait)));
-
-      $smart_wait = max(15, $smart_wait);
-      $sleep_for = max($smart_wait, $sleep_for);
-    }
-
-    if ($sleep_for < $min_sleep) {
-      $sleep_for = $min_sleep;
-    }
-
-    return time() + $sleep_for;
+    return time() + $smart_wait;
   }
 
 
@@ -422,6 +390,12 @@ final class PhabricatorRepositoryPullLocalDaemon
           new PhutilNumber($sleep_duration)));
 
       $this->sleep(1);
+
+      if ($this->shouldExit()) {
+        $this->log(pht('Awakened from sleep by graceful shutdown!'));
+        return;
+      }
+
       if ($this->loadRepositoryUpdateMessages()) {
         $this->log(pht('Awakened from sleep by pending updates!'));
         break;

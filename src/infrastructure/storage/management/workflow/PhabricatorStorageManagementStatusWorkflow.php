@@ -24,27 +24,25 @@ final class PhabricatorStorageManagementStatusWorkflow
       return 1;
     }
 
-    $len = 0;
-    foreach ($patches as $patch) {
-      $len = max($len, strlen($patch->getFullKey()));
-    }
+    $table = id(new PhutilConsoleTable())
+      ->setShowHeader(false)
+      ->addColumn('id',     array('title' => 'ID'))
+      ->addColumn('status', array('title' => 'Status'))
+      ->addColumn('type',   array('title' => 'Type'))
+      ->addColumn('name',   array('title' => 'Name'));
 
     foreach ($patches as $patch) {
-      printf(
-
-        "% -".($len + 2)."s ".
-        "%-".strlen("Not Applied")."s   ".
-        "%-4s   ".
-        "%s\n",
-
-        $patch->getFullKey(),
-        in_array($patch->getFullKey(), $applied)
+      $table->addRow(array(
+        'id' => $patch->getFullKey(),
+        'status' => in_array($patch->getFullKey(), $applied)
           ? 'Applied'
           : 'Not Applied',
-        $patch->getType(),
-        $patch->getName());
+        'type' => $patch->getType(),
+        'name' => $patch->getName(),
+      ));
     }
 
+    $table->draw();
     return 0;
   }
 

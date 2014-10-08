@@ -36,7 +36,7 @@ final class PhabricatorMetaMTAMemberQuery extends PhabricatorQuery {
     $results = array();
     foreach ($type_map as $type => $phids) {
       switch ($type) {
-        case PhabricatorProjectPHIDTypeProject::TYPECONST:
+        case PhabricatorProjectProjectPHIDType::TYPECONST:
           // NOTE: We're loading the projects here in order to respect policies.
 
           $projects = id(new PhabricatorProjectQuery())

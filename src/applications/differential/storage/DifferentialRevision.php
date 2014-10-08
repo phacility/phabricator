@@ -9,7 +9,10 @@ final class DifferentialRevision extends DifferentialDAO
     HarbormasterBuildableInterface,
     PhabricatorSubscribableInterface,
     PhabricatorCustomFieldInterface,
-    PhabricatorApplicationTransactionInterface {
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorMentionableInterface,
+    PhabricatorDestructibleInterface,
+    PhabricatorProjectInterface {
 
   protected $title = '';
   protected $originalTitle;
@@ -51,11 +54,11 @@ final class DifferentialRevision extends DifferentialDAO
   public static function initializeNewRevision(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
       ->setViewer($actor)
-      ->withClasses(array('PhabricatorApplicationDifferential'))
+      ->withClasses(array('PhabricatorDifferentialApplication'))
       ->executeOne();
 
     $view_policy = $app->getPolicy(
-      DifferentialCapabilityDefaultView::CAPABILITY);
+      DifferentialDefaultViewCapability::CAPABILITY);
 
     return id(new DifferentialRevision())
       ->setViewPolicy($view_policy)
@@ -70,6 +73,33 @@ final class DifferentialRevision extends DifferentialDAO
       self::CONFIG_SERIALIZATION => array(
         'attached'      => self::SERIALIZATION_JSON,
         'unsubscribed'  => self::SERIALIZATION_JSON,
+      ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'title' => 'text255',
+        'originalTitle' => 'text255',
+        'status' => 'text32',
+        'summary' => 'text',
+        'testPlan' => 'text',
+        'authorPHID' => 'phid?',
+        'lastReviewerPHID' => 'phid?',
+        'lineCount' => 'uint32?',
+        'mailKey' => 'bytes40',
+        'branchName' => 'text255?',
+        'arcanistProjectPHID' => 'phid?',
+        'repositoryPHID' => 'phid?',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_phid' => null,
+        'phid' => array(
+          'columns' => array('phid'),
+          'unique' => true,
+        ),
+        'authorPHID' => array(
+          'columns' => array('authorPHID', 'status'),
+        ),
+        'repositoryPHID' => array(
+          'columns' => array('repositoryPHID'),
+        ),
       ),
     ) + parent::getConfiguration();
   }
@@ -158,7 +188,7 @@ final class DifferentialRevision extends DifferentialDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      DifferentialPHIDTypeRevision::TYPECONST);
+      DifferentialRevisionPHIDType::TYPECONST);
   }
 
   public function loadActiveDiff() {
@@ -172,45 +202,6 @@ final class DifferentialRevision extends DifferentialDAO
       $this->mailKey = Filesystem::readRandomCharacters(40);
     }
     return parent::save();
-  }
-
-  public function delete() {
-    $this->openTransaction();
-    $diffs = id(new DifferentialDiffQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withRevisionIDs(array($this->getID()))
-      ->execute();
-      foreach ($diffs as $diff) {
-        $diff->delete();
-      }
-
-      $conn_w = $this->establishConnection('w');
-
-      queryfx(
-        $conn_w,
-        'DELETE FROM %T WHERE revisionID = %d',
-        self::TABLE_COMMIT,
-        $this->getID());
-
-      $inlines = id(new DifferentialInlineCommentQuery())
-        ->withRevisionIDs(array($this->getID()))
-        ->execute();
-      foreach ($inlines as $inline) {
-        $inline->delete();
-      }
-
-      // we have to do paths a little differentally as they do not have
-      // an id or phid column for delete() to act on
-      $dummy_path = new DifferentialAffectedPath();
-      queryfx(
-        $conn_w,
-        'DELETE FROM %T WHERE revisionID = %d',
-        $dummy_path->getTableName(),
-        $this->getID());
-
-      $result = parent::delete();
-    $this->saveTransaction();
-    return $result;
   }
 
   public function loadRelationships() {
@@ -306,7 +297,6 @@ final class DifferentialRevision extends DifferentialDAO
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $user) {
-
     // A revision's author (which effectively means "owner" after we added
     // commandeering) can always view and edit it.
     $author_phid = $this->getAuthorPHID();
@@ -399,6 +389,14 @@ final class DifferentialRevision extends DifferentialDAO
     return $this->getPHID();
   }
 
+  public function getBuildVariables() {
+    return array();
+  }
+
+  public function getAvailableBuildVariables() {
+    return array();
+  }
+
 
 /* -(  PhabricatorSubscribableInterface  )----------------------------------- */
 
@@ -475,6 +473,55 @@ final class DifferentialRevision extends DifferentialDAO
 
   public function getApplicationTransactionTemplate() {
     return new DifferentialTransaction();
+  }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+      $diffs = id(new DifferentialDiffQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withRevisionIDs(array($this->getID()))
+        ->execute();
+      foreach ($diffs as $diff) {
+        $engine->destroyObject($diff);
+      }
+
+      $conn_w = $this->establishConnection('w');
+
+      queryfx(
+        $conn_w,
+        'DELETE FROM %T WHERE revisionID = %d',
+        self::TABLE_COMMIT,
+        $this->getID());
+
+      try {
+        $inlines = id(new DifferentialInlineCommentQuery())
+          ->withRevisionIDs(array($this->getID()))
+          ->execute();
+        foreach ($inlines as $inline) {
+          $inline->delete();
+        }
+      } catch (PhabricatorEmptyQueryException $ex) {
+        // TODO: There's still some funky legacy wrapping going on here, and
+        // we might catch a raw query exception.
+      }
+
+      // we have to do paths a little differentally as they do not have
+      // an id or phid column for delete() to act on
+      $dummy_path = new DifferentialAffectedPath();
+      queryfx(
+        $conn_w,
+        'DELETE FROM %T WHERE revisionID = %d',
+        $dummy_path->getTableName(),
+        $this->getID());
+
+      $this->delete();
+    $this->saveTransaction();
   }
 
 }

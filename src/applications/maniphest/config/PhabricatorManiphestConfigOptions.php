@@ -4,11 +4,11 @@ final class PhabricatorManiphestConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
   public function getName() {
-    return pht("Maniphest");
+    return pht('Maniphest');
   }
 
   public function getDescription() {
-    return pht("Configure Maniphest.");
+    return pht('Configure Maniphest.');
   }
 
   public function getOptions() {
@@ -215,12 +215,12 @@ EOTEXT
 
     return array(
       $this->newOption('maniphest.custom-field-definitions', 'wild', array())
-        ->setSummary(pht("Custom Maniphest fields."))
+        ->setSummary(pht('Custom Maniphest fields.'))
         ->setDescription(
           pht(
-            "Array of custom fields for Maniphest tasks. For details on ".
-            "adding custom fields to Maniphest, see 'Maniphest User Guide: ".
-            "Adding Custom Fields'."))
+            'Array of custom fields for Maniphest tasks. For details on '.
+            'adding custom fields to Maniphest, see "Configuring Custom '.
+            'Fields" in the documentation.'))
         ->addExample(
           '{"mycompany:estimated-hours": {"name": "Estimated Hours", '.
           '"type": "int", "caption": "Estimated number of hours this will '.
@@ -228,9 +228,9 @@ EOTEXT
           pht('Valid Setting')),
       $this->newOption('maniphest.fields', $custom_field_type, $default_fields)
         ->setCustomData(id(new ManiphestTask())->getCustomFieldBaseClass())
-        ->setDescription(pht("Select and reorder task fields.")),
+        ->setDescription(pht('Select and reorder task fields.')),
       $this->newOption('maniphest.priorities', 'wild', $priority_defaults)
-        ->setSummary(pht("Configure Maniphest priority names."))
+        ->setSummary(pht('Configure Maniphest priority names.'))
         ->setDescription(
           pht(
             'Allows you to edit or override the default priorities available '.
@@ -252,12 +252,13 @@ EOTEXT
         ->setDescription($status_description)
         ->addExample($status_example, pht('Minimal Valid Config')),
       $this->newOption('maniphest.default-priority', 'int', 90)
-        ->setSummary(pht("Default task priority for create flows."))
+        ->setSummary(pht('Default task priority for create flows.'))
         ->setDescription(
           pht(
-            "What should the default task priority be in create flows? See ".
-            "the constants in @{class:ManiphestTaskPriority} for valid ".
-            "values. Defaults to 'needs triage'.")),
+            'Choose a default priority for newly created tasks. You can '.
+            'review and adjust available priorities by using the '.
+            '{{maniphest.priorities}} configuration option. The default value '.
+            '(`90`) corresponds to the default "Needs Triage" priority.')),
       $this->newOption(
         'metamta.maniphest.reply-handler-domain',
         'string',

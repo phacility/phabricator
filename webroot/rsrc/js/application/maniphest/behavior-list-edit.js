@@ -8,7 +8,7 @@
  *           javelin-util
  */
 
-JX.behavior('maniphest-list-editor', function(config) {
+JX.behavior('maniphest-list-editor', function() {
 
   var onedit = function(task, r) {
     var nodes = JX.$H(r.tasks).getFragment().firstChild;

@@ -6,10 +6,8 @@ final class PhortunePaymentMethodQuery
   private $ids;
   private $phids;
   private $accountPHIDs;
-
-  const STATUS_ANY = 'status-any';
-  const STATUS_OPEN = 'status-open';
-  private $status = self::STATUS_ANY;
+  private $merchantPHIDs;
+  private $statuses;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -26,8 +24,13 @@ final class PhortunePaymentMethodQuery
     return $this;
   }
 
-  public function withStatus($status) {
-    $this->status = $status;
+  public function withMerchantPHIDs(array $phids) {
+    $this->merchantPHIDs = $phids;
+    return $this;
+  }
+
+  public function withStatuses(array $statuses) {
+    $this->statuses = $statuses;
     return $this;
   }
 
@@ -62,47 +65,75 @@ final class PhortunePaymentMethodQuery
       $method->attachAccount($account);
     }
 
+    $merchants = id(new PhortuneMerchantQuery())
+      ->setViewer($this->getViewer())
+      ->withPHIDs(mpull($methods, 'getMerchantPHID'))
+      ->execute();
+    $merchants = mpull($merchants, null, 'getPHID');
+
+    foreach ($methods as $key => $method) {
+      $merchant = idx($merchants, $method->getMerchantPHID());
+      if (!$merchant) {
+        unset($methods[$key]);
+        continue;
+      }
+      $method->attachMerchant($merchant);
+    }
+
+    $provider_configs = id(new PhortunePaymentProviderConfigQuery())
+      ->setViewer($this->getViewer())
+      ->withPHIDs(mpull($methods, 'getProviderPHID'))
+      ->execute();
+    $provider_configs = mpull($provider_configs, null, 'getPHID');
+
+    foreach ($methods as $key => $method) {
+      $provider_config = idx($provider_configs, $method->getProviderPHID());
+      if (!$provider_config) {
+        unset($methods[$key]);
+        continue;
+      }
+      $method->attachProviderConfig($provider_config);
+    }
+
     return $methods;
   }
 
   private function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn,
         'id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn,
         'phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->accountPHIDs) {
+    if ($this->accountPHIDs !== null) {
       $where[] = qsprintf(
         $conn,
         'accountPHID IN (%Ls)',
         $this->accountPHIDs);
     }
 
-    switch ($this->status) {
-      case self::STATUS_ANY;
-        break;
-      case self::STATUS_OPEN:
-        $where[] = qsprintf(
-          $conn,
-          'status in (%Ls)',
-          array(
-            PhortunePaymentMethod::STATUS_ACTIVE,
-            PhortunePaymentMethod::STATUS_FAILED,
-          ));
-        break;
-      default:
-        throw new Exception("Unknown status '{$this->status}'!");
+    if ($this->merchantPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'merchantPHID IN (%Ls)',
+        $this->merchantPHIDs);
+    }
+
+    if ($this->statuses !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'status IN (%Ls)',
+        $this->statuses);
     }
 
     $where[] = $this->buildPagingClause($conn);
@@ -110,9 +141,8 @@ final class PhortunePaymentMethodQuery
     return $this->formatWhereClause($where);
   }
 
-
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationPhortune';
+    return 'PhabricatorPhortuneApplication';
   }
 
 }

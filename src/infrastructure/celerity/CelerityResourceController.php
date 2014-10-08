@@ -14,6 +14,10 @@ abstract class CelerityResourceController extends PhabricatorController {
     return false;
   }
 
+  public function shouldAllowPartialSessions() {
+    return true;
+  }
+
   abstract public function getCelerityResourceMap();
 
   protected function serveResource($path, $package_hash = null) {
@@ -24,47 +28,68 @@ abstract class CelerityResourceController extends PhabricatorController {
     }
 
     $type = CelerityResourceTransformer::getResourceType($path);
-    $type_map = $this->getSupportedResourceTypes();
+    $type_map = self::getSupportedResourceTypes();
 
     if (empty($type_map[$type])) {
-      throw new Exception("Only static resources may be served.");
+      throw new Exception('Only static resources may be served.');
     }
 
-    if (AphrontRequest::getHTTPHeader('If-Modified-Since') &&
-        !PhabricatorEnv::getEnvConfig('phabricator.developer-mode')) {
+    $dev_mode = PhabricatorEnv::getEnvConfig('phabricator.developer-mode');
+
+    if (AphrontRequest::getHTTPHeader('If-Modified-Since') && !$dev_mode) {
       // Return a "304 Not Modified". We don't care about the value of this
       // field since we never change what resource is served by a given URI.
       return $this->makeResponseCacheable(new Aphront304Response());
     }
 
-    $map = $this->getCelerityResourceMap();
+    $is_cacheable = (!$dev_mode) &&
+                    $this->isCacheableResourceType($type);
 
-    if ($map->isPackageResource($path)) {
-      $resource_names = $map->getResourceNamesForPackageName($path);
-      if (!$resource_names) {
-        return new Aphront404Response();
-      }
+    $cache = null;
+    $data = null;
+    if ($is_cacheable) {
+      $cache = PhabricatorCaches::getImmutableCache();
 
-      try {
-        $data = array();
-        foreach ($resource_names as $resource_name) {
-          $data[] = $map->getResourceDataForName($resource_name);
-        }
-        $data = implode("\n\n", $data);
-      } catch (Exception $ex) {
-        return new Aphront404Response();
-      }
-    } else {
-      try {
-        $data = $map->getResourceDataForName($path);
-      } catch (Exception $ex) {
-        return new Aphront404Response();
-      }
+      $request_path = $this->getRequest()->getPath();
+      $cache_key = $this->getCacheKey($request_path);
+
+      $data = $cache->getKey($cache_key);
     }
 
-    $xformer = $this->buildResourceTransformer();
-    if ($xformer) {
-      $data = $xformer->transformResource($path, $data);
+    if ($data === null) {
+      $map = $this->getCelerityResourceMap();
+
+      if ($map->isPackageResource($path)) {
+        $resource_names = $map->getResourceNamesForPackageName($path);
+        if (!$resource_names) {
+          return new Aphront404Response();
+        }
+
+        try {
+          $data = array();
+          foreach ($resource_names as $resource_name) {
+            $data[] = $map->getResourceDataForName($resource_name);
+          }
+          $data = implode("\n\n", $data);
+        } catch (Exception $ex) {
+          return new Aphront404Response();
+        }
+      } else {
+        try {
+          $data = $map->getResourceDataForName($path);
+        } catch (Exception $ex) {
+          return new Aphront404Response();
+        }
+      }
+
+      $xformer = $this->buildResourceTransformer();
+      if ($xformer) {
+        $data = $xformer->transformResource($path, $data);
+      }
+
+      if ($cache) {
+        $cache->setKey($cache_key, $data);
+      }
     }
 
     $response = new AphrontFileResponse();
@@ -78,13 +103,13 @@ abstract class CelerityResourceController extends PhabricatorController {
       // generate a comprehensive list of valid origins (an install may have
       // arbitrarily many Phame blogs, for example), and we lose nothing by
       // allowing access from anywhere.
-      $response->addAllowOrigin("*");
+      $response->addAllowOrigin('*');
     }
 
     return $this->makeResponseCacheable($response);
   }
 
-  protected function getSupportedResourceTypes() {
+  public static function getSupportedResourceTypes() {
     return array(
       'css' => 'text/css; charset=utf-8',
       'js'  => 'text/javascript; charset=utf-8',
@@ -103,6 +128,31 @@ abstract class CelerityResourceController extends PhabricatorController {
     $response->setLastModified(time());
 
     return $response;
+  }
+
+
+  /**
+   * Is it appropriate to cache the data for this resource type in the fast
+   * immutable cache?
+   *
+   * Generally, text resources (which are small, and expensive to process)
+   * are cached, while other types of resources (which are large, and cheap
+   * to process) are not.
+   *
+   * @param string  Resource type.
+   * @return bool   True to enable caching.
+   */
+  private function isCacheableResourceType($type) {
+    $types = array(
+      'js' => true,
+      'css' => true,
+    );
+
+    return isset($types[$type]);
+  }
+
+  private function getCacheKey($path) {
+    return 'celerity:'.$path;
   }
 
 }

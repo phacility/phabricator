@@ -6,52 +6,67 @@ final class PhabricatorDaemonManagementLogWorkflow
   public function didConstruct() {
     $this
       ->setName('log')
-      ->setExamples('**log** __id__')
+      ->setExamples('**log** [__options__]')
       ->setSynopsis(
         pht(
-          'Print the log for a daemon, identified by ID. You can get the '.
-          'ID for a daemon from the Daemon Console in the web interface.'))
+          'Print the logs for all daemons, or some daemon(s) identified by '.
+          'ID. You can get the ID for a daemon from the Daemon Console in '.
+          'the web interface.'))
       ->setArguments(
         array(
           array(
-            'name' => 'daemon',
-            'wildcard' => true,
+            'name'    => 'id',
+            'param'   => 'id',
+            'help'    => 'Show logs for daemon(s) with given ID(s).',
+            'repeat'  => true,
+          ),
+          array(
+            'name'    => 'limit',
+            'param'   => 'N',
+            'default' => 100,
+            'help'    => 'Show a specific number of log messages '.
+                         '(default 100).',
           ),
         ));
   }
 
   public function execute(PhutilArgumentParser $args) {
-    $id = $args->getArg('daemon');
-    if (!$id) {
-      throw new PhutilArgumentUsageException(
-        pht('You must specify the daemon ID to show logs for.'));
-    } else if (count($id) > 1) {
-      throw new PhutilArgumentUsageException(
-        pht('Specify exactly one daemon ID to show logs for.'));
-    }
-    $id = head($id);
 
-    $daemon = id(new PhabricatorDaemonLogQuery())
+    $query = id(new PhabricatorDaemonLogQuery())
       ->setViewer($this->getViewer())
-      ->withIDs(array($id))
-      ->setAllowStatusWrites(true)
-      ->executeOne();
+      ->setAllowStatusWrites(true);
+    $ids = $args->getArg('id');
+    if ($ids) {
+      $query->withIDs($ids);
+    }
+    $daemons = $query->execute();
 
-    if (!$daemon) {
-      throw new PhutilArgumentUsageException(
-        pht('No such daemon with id "%s"!', $id));
+    if (!$daemons) {
+      if ($ids) {
+        throw new PhutilArgumentUsageException(
+          pht('No daemon(s) with id(s) "%s" exist!', implode(', ', $ids)));
+      } else {
+        throw new PhutilArgumentUsageException(
+          pht('No daemons are running.'));
+      }
     }
 
     $console = PhutilConsole::getConsole();
+
+    $limit = $args->getArg('limit');
+
     $logs = id(new PhabricatorDaemonLogEvent())->loadAllWhere(
-      'logID = %d ORDER BY id ASC',
-      $daemon->getID());
+      'logID IN (%Ld) ORDER BY id DESC LIMIT %d',
+      mpull($daemons, 'getID'),
+      $limit);
+    $logs = array_reverse($logs);
 
     $lines = array();
     foreach ($logs as $log) {
       $text_lines = phutil_split_lines($log->getMessage(), $retain = false);
       foreach ($text_lines as $line) {
         $lines[] = array(
+          'id' => $log->getLogID(),
           'type' => $log->getLogType(),
           'date' => $log->getEpoch(),
           'data' => $line,
@@ -59,7 +74,13 @@ final class PhabricatorDaemonManagementLogWorkflow
       }
     }
 
+    // Each log message may be several lines. Limit the number of lines we
+    // output so that `--limit 123` means "show 123 lines", which is the most
+    // easily understandable behavior.
+    $lines = array_slice($lines, -$limit);
+
     foreach ($lines as $line) {
+      $id = $line['id'];
       $type = $line['type'];
       $data = $line['data'];
       $date = date('r', $line['date']);
@@ -67,9 +88,10 @@ final class PhabricatorDaemonManagementLogWorkflow
       $console->writeOut(
         "%s\n",
         sprintf(
-          '[%s] %s %s',
-          $date,
+          'Daemon %d %s [%s] %s',
+          $id,
           $type,
+          $date,
           $data));
     }
 

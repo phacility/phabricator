@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group search
- */
 final class PhabricatorNamedQuery extends PhabricatorSearchDAO
   implements PhabricatorPolicyInterface {
 
@@ -14,6 +11,25 @@ final class PhabricatorNamedQuery extends PhabricatorSearchDAO
   protected $isBuiltin  = 0;
   protected $isDisabled = 0;
   protected $sequence   = 0;
+
+  public function getConfiguration() {
+    return array(
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'engineClassName' => 'text128',
+        'queryName' => 'text255',
+        'queryKey' => 'text12',
+        'isBuiltin' => 'bool',
+        'isDisabled' => 'bool',
+        'sequence' => 'uint32',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_userquery' => array(
+          'columns' => array('userPHID', 'engineClassName', 'queryKey'),
+          'unique' => true,
+        ),
+      ),
+    ) + parent::getConfiguration();
+  }
 
   public function getSortKey() {
     return sprintf('~%010d%010d', $this->sequence, $this->getID());
@@ -44,6 +60,5 @@ final class PhabricatorNamedQuery extends PhabricatorSearchDAO
       'The queries you have saved are private. Only you can view or edit '.
       'them.');
   }
-
 
 }

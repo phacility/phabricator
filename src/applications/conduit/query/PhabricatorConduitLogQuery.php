@@ -10,7 +10,6 @@ final class PhabricatorConduitLogQuery
     return $this;
   }
 
-
   public function loadPage() {
     $table = new PhabricatorConduitMethodCallLog();
     $conn_r = $table->establishConnection('r');
@@ -41,7 +40,7 @@ final class PhabricatorConduitLogQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationConduit';
+    return 'PhabricatorConduitApplication';
   }
 
 }

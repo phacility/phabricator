@@ -12,8 +12,8 @@ final class PhragmentZIPController extends PhragmentController {
   }
 
   public function willProcessRequest(array $data) {
-    $this->dblob = idx($data, "dblob", "");
-    $this->snapshot = idx($data, "snapshot", null);
+    $this->dblob = idx($data, 'dblob', '');
+    $this->snapshot = idx($data, 'snapshot', null);
   }
 
   public function processRequest() {
@@ -68,7 +68,7 @@ final class PhragmentZIPController extends PhragmentController {
     }
 
     if (!$zip->open((string)$temp, ZipArchive::CREATE)) {
-      throw new Exception("Unable to create ZIP archive!");
+      throw new Exception('Unable to create ZIP archive!');
     }
 
     $mappings = $this->getFragmentMappings($fragment, $fragment->getPath());
@@ -114,7 +114,7 @@ final class PhragmentZIPController extends PhragmentController {
       ));
 
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-      $file->attachToObject($viewer, $fragment->getPHID());
+      $file->attachToObject($fragment->getPHID());
     unset($unguarded);
 
     $return = $fragment->getURI();
@@ -123,6 +123,7 @@ final class PhragmentZIPController extends PhragmentController {
     }
 
     return id(new AphrontRedirectResponse())
+      ->setIsExternal(true)
       ->setURI($file->getDownloadURI($return));
   }
 

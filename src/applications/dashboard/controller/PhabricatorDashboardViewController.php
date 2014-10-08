@@ -5,6 +5,10 @@ final class PhabricatorDashboardViewController
 
   private $id;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function willProcessRequest(array $data) {
     $this->id = $data['id'];
   }
@@ -26,117 +30,51 @@ final class PhabricatorDashboardViewController
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Dashboard %d', $dashboard->getID()));
 
-    $header = $this->buildHeaderView($dashboard);
-    $actions = $this->buildActionView($dashboard);
-    $properties = $this->buildPropertyView($dashboard);
-    $timeline = $this->buildTransactions($dashboard);
-
-    $properties->setActionList($actions);
-    $box = id(new PHUIObjectBoxView())
-      ->setHeader($header)
-      ->addPropertyList($properties);
-
-    $rendered_dashboard = id(new PhabricatorDashboardRenderingEngine())
-      ->setViewer($viewer)
-      ->setDashboard($dashboard)
-      ->renderDashboard();
+    if ($dashboard->getPanelPHIDs()) {
+      $rendered_dashboard = id(new PhabricatorDashboardRenderingEngine())
+        ->setViewer($viewer)
+        ->setDashboard($dashboard)
+        ->renderDashboard();
+    } else {
+      $rendered_dashboard = $this->buildEmptyView();
+    }
 
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $box,
-        $timeline,
         $rendered_dashboard,
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 
-  private function buildHeaderView(PhabricatorDashboard $dashboard) {
-    $viewer = $this->getRequest()->getUser();
+  public function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
+    $id = $this->id;
 
-    return id(new PHUIHeaderView())
-      ->setUser($viewer)
-      ->setHeader($dashboard->getName())
-      ->setPolicyObject($dashboard);
+    $crumbs->addAction(
+      id(new PHUIListItemView())
+        ->setIcon('fa-th')
+        ->setName(pht('Manage Dashboard'))
+        ->setHref($this->getApplicationURI("manage/{$id}/")));
+
+    return $crumbs;
   }
 
-  private function buildActionView(PhabricatorDashboard $dashboard) {
-    $viewer = $this->getRequest()->getUser();
-    $id = $dashboard->getID();
+  public function buildEmptyView() {
+    $id = $this->id;
+    $manage_uri = $this->getApplicationURI("manage/{$id}/");
 
-    $actions = id(new PhabricatorActionListView())
-      ->setObjectURI($this->getApplicationURI('view/'.$dashboard->getID().'/'))
-      ->setUser($viewer);
-
-    $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $dashboard,
-      PhabricatorPolicyCapability::CAN_EDIT);
-
-    $actions->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Edit Dashboard'))
-        ->setIcon('edit')
-        ->setHref($this->getApplicationURI("edit/{$id}/"))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit));
-
-    $actions->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Add Panel'))
-        ->setIcon('new')
-        ->setHref($this->getApplicationURI("addpanel/{$id}/"))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(true));
-
-    return $actions;
-  }
-
-  private function buildPropertyView(PhabricatorDashboard $dashboard) {
-    $viewer = $this->getRequest()->getUser();
-
-    $properties = id(new PHUIPropertyListView())
-      ->setUser($viewer)
-      ->setObject($dashboard);
-
-    $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
-      $viewer,
-      $dashboard);
-
-    $properties->addProperty(
-      pht('Editable By'),
-      $descriptions[PhabricatorPolicyCapability::CAN_EDIT]);
-
-    $panel_phids = $dashboard->getPanelPHIDs();
-    $this->loadHandles($panel_phids);
-
-    $properties->addProperty(
-      pht('Panels'),
-      $this->renderHandlesForPHIDs($panel_phids));
-
-    return $properties;
-  }
-
-  private function buildTransactions(PhabricatorDashboard $dashboard) {
-    $viewer = $this->getRequest()->getUser();
-
-    $xactions = id(new PhabricatorDashboardTransactionQuery())
-      ->setViewer($viewer)
-      ->withObjectPHIDs(array($dashboard->getPHID()))
-      ->execute();
-
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($viewer);
-
-    $timeline = id(new PhabricatorApplicationTransactionView())
-      ->setUser($viewer)
-      ->setObjectPHID($dashboard->getPHID())
-      ->setTransactions($xactions);
-
-    return $timeline;
+    return id(new AphrontErrorView())
+      ->setSeverity(AphrontErrorView::SEVERITY_NODATA)
+      ->appendChild(
+        pht('This dashboard has no panels '.
+          'yet. Use %s to add panels.',
+          phutil_tag(
+            'a',
+            array('href' => $manage_uri),
+            pht('Manage Dashboard'))));
   }
 
 }

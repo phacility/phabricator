@@ -37,6 +37,6 @@ final class NuanceQueueViewController extends NuanceController {
       $crumbs,
       array(
         'title' => $title,
-        'device' => true));
+      ));
   }
 }

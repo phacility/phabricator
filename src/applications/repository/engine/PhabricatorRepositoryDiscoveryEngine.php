@@ -61,7 +61,8 @@ final class PhabricatorRepositoryDiscoveryEngine
         $repository,
         $ref->getIdentifier(),
         $ref->getEpoch(),
-        $ref->getCanCloseImmediately());
+        $ref->getCanCloseImmediately(),
+        $ref->getParents());
 
       $this->commitCache[$ref->getIdentifier()] = true;
     }
@@ -109,16 +110,16 @@ final class PhabricatorRepositoryDiscoveryEngine
       $this->log(pht('Examining branch "%s", at "%s".', $name, $commit));
 
       if (!$repository->shouldTrackBranch($name)) {
-        $this->log(pht("Skipping, branch is untracked."));
+        $this->log(pht('Skipping, branch is untracked.'));
         continue;
       }
 
       if ($this->isKnownCommit($commit)) {
-        $this->log(pht("Skipping, HEAD is known."));
+        $this->log(pht('Skipping, HEAD is known.'));
         continue;
       }
 
-      $this->log(pht("Looking for new commits."));
+      $this->log(pht('Looking for new commits.'));
 
       $branch_refs = $this->discoverStreamAncestry(
         new PhabricatorGitGraphStream($repository, $commit),
@@ -157,7 +158,7 @@ final class PhabricatorRepositoryDiscoveryEngine
     $remote_uri = $matches[1];
     $expect_remote = $repository->getRemoteURI();
 
-    if ($remote_uri == "origin") {
+    if ($remote_uri == 'origin') {
       // If a remote does not exist, git pretends it does and prints out a
       // made up remote where the URI is the same as the remote name. This is
       // definitely not correct.
@@ -367,16 +368,16 @@ final class PhabricatorRepositoryDiscoveryEngine
 
       $this->log(pht('Examining branch "%s" head "%s".', $name, $commit));
       if (!$repository->shouldTrackBranch($name)) {
-        $this->log(pht("Skipping, branch is untracked."));
+        $this->log(pht('Skipping, branch is untracked.'));
         continue;
       }
 
       if ($this->isKnownCommit($commit)) {
-        $this->log(pht("Skipping, this head is a known commit."));
+        $this->log(pht('Skipping, this head is a known commit.'));
         continue;
       }
 
-      $this->log(pht("Looking for new commits."));
+      $this->log(pht('Looking for new commits.'));
 
       $branch_refs = $this->discoverStreamAncestry(
         new PhabricatorMercurialGraphStream($repository, $commit),
@@ -436,7 +437,8 @@ final class PhabricatorRepositoryDiscoveryEngine
       $refs[] = id(new PhabricatorRepositoryCommitRef())
         ->setIdentifier($commit)
         ->setEpoch($stream->getCommitDate($commit))
-        ->setCanCloseImmediately($close_immediately);
+        ->setCanCloseImmediately($close_immediately)
+        ->setParents($stream->getParents($commit));
     }
 
     return $refs;
@@ -534,7 +536,8 @@ final class PhabricatorRepositoryDiscoveryEngine
     PhabricatorRepository $repository,
     $commit_identifier,
     $epoch,
-    $close_immediately) {
+    $close_immediately,
+    array $parents) {
 
     $commit = new PhabricatorRepositoryCommit();
     $commit->setRepositoryID($repository->getID());
@@ -546,17 +549,61 @@ final class PhabricatorRepositoryDiscoveryEngine
 
     $data = new PhabricatorRepositoryCommitData();
 
+    $conn_w = $repository->establishConnection('w');
+
     try {
+
+      // If this commit has parents, look up their IDs. The parent commits
+      // should always exist already.
+
+      $parent_ids = array();
+      if ($parents) {
+        $parent_rows = queryfx_all(
+          $conn_w,
+          'SELECT id, commitIdentifier FROM %T
+            WHERE commitIdentifier IN (%Ls) AND repositoryID = %d',
+          $commit->getTableName(),
+          $parents,
+          $repository->getID());
+
+        $parent_map = ipull($parent_rows, 'id', 'commitIdentifier');
+
+        foreach ($parents as $parent) {
+          if (empty($parent_map[$parent])) {
+            throw new Exception(
+              pht('Unable to identify parent "%s"!', $parent));
+          }
+          $parent_ids[] = $parent_map[$parent];
+        }
+      } else {
+        // Write an explicit 0 so we can distinguish between "really no
+        // parents" and "data not available".
+        if (!$repository->isSVN()) {
+          $parent_ids = array(0);
+        }
+      }
+
       $commit->openTransaction();
         $commit->save();
+
         $data->setCommitID($commit->getID());
         $data->save();
+
+        foreach ($parent_ids as $parent_id) {
+          queryfx(
+            $conn_w,
+            'INSERT IGNORE INTO %T (childCommitID, parentCommitID)
+              VALUES (%d, %d)',
+            PhabricatorRepository::TABLE_PARENTS,
+            $commit->getID(),
+            $parent_id);
+        }
       $commit->saveTransaction();
 
       $this->insertTask($repository, $commit);
 
       queryfx(
-        $repository->establishConnection('w'),
+        $conn_w,
         'INSERT INTO %T (repositoryID, size, lastCommitID, epoch)
           VALUES (%d, 1, %d, %d)
           ON DUPLICATE KEY UPDATE
@@ -583,7 +630,9 @@ final class PhabricatorRepositoryDiscoveryEngine
             'commit'      => $commit,
           )));
 
-    } catch (AphrontQueryDuplicateKeyException $ex) {
+
+
+    } catch (AphrontDuplicateKeyQueryException $ex) {
       $commit->killTransaction();
       // Ignore. This can happen because we discover the same new commit
       // more than once when looking at history, or because of races or

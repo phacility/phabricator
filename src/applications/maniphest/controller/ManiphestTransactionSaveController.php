@@ -53,7 +53,16 @@ final class ManiphestTransactionSaveController extends ManiphestController {
         $projects = array_merge($projects, $task->getProjectPHIDs());
         $projects = array_filter($projects);
         $projects = array_unique($projects);
-        $transaction->setNewValue($projects);
+
+        // TODO: Bleh.
+        $project_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
+        $transaction
+          ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+          ->setMetadataValue('edge:type', $project_type)
+          ->setNewValue(
+            array(
+              '+' => array_fuse($projects),
+            ));
         break;
       case ManiphestTransaction::TYPE_CCS:
         // Accumulate the new explicit CCs into the array that we'll add in
@@ -78,17 +87,6 @@ final class ManiphestTransactionSaveController extends ManiphestController {
       $transactions[] = $transaction;
     }
 
-    $resolution = $request->getStr('resolution');
-    $did_scuttle = false;
-    if ($action !== ManiphestTransaction::TYPE_STATUS) {
-      if ($request->getStr('scuttle')) {
-        $transactions[] = id(new ManiphestTransaction())
-          ->setTransactionType(ManiphestTransaction::TYPE_STATUS)
-          ->setNewValue(ManiphestTaskStatus::getDefaultClosedStatus());
-        $did_scuttle = true;
-        $resolution = ManiphestTaskStatus::getDefaultClosedStatus();
-      }
-    }
 
     // When you interact with a task, we add you to the CC list so you get
     // further updates, and possibly assign the task to you if you took an
@@ -106,7 +104,8 @@ final class ManiphestTransactionSaveController extends ManiphestController {
       }
     }
 
-    if ($did_scuttle || ($action == ManiphestTransaction::TYPE_STATUS)) {
+    if ($action == ManiphestTransaction::TYPE_STATUS) {
+      $resolution = $request->getStr('resolution');
       if (!$task->getOwnerPHID() &&
           ManiphestTaskStatus::isClosedStatus($resolution)) {
         // Closing an unassigned task. Assign the user as the owner of

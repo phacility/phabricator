@@ -16,7 +16,7 @@ final class DoorkeeperFeedWorkerJIRA extends DoorkeeperFeedWorker {
    * This worker is enabled when a JIRA authentication provider is active.
    */
   public function isEnabled() {
-    return (bool)PhabricatorAuthProviderOAuth1JIRA::getJIRAProvider();
+    return (bool)PhabricatorJIRAAuthProvider::getJIRAProvider();
   }
 
 
@@ -63,6 +63,11 @@ final class DoorkeeperFeedWorkerJIRA extends DoorkeeperFeedWorker {
         ->withUserPHIDs($try_users)
         ->withAccountTypes(array($provider->getProviderType()))
         ->withAccountDomains(array($domain))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
         ->execute();
       // Reorder accounts in the original order.
       // TODO: This needs to be adjusted if/when we allow you to link multiple
@@ -100,12 +105,12 @@ final class DoorkeeperFeedWorkerJIRA extends DoorkeeperFeedWorker {
   /**
    * Get the active JIRA provider.
    *
-   * @return PhabricatorAuthProviderOAuth1JIRA Active JIRA auth provider.
+   * @return PhabricatorJIRAAuthProvider Active JIRA auth provider.
    * @task internal
    */
   private function getProvider() {
     if (!$this->provider) {
-      $provider = PhabricatorAuthProviderOAuth1JIRA::getJIRAProvider();
+      $provider = PhabricatorJIRAAuthProvider::getJIRAProvider();
       if (!$provider) {
         throw new PhabricatorWorkerPermanentFailureException(
           'No JIRA provider configured.');

@@ -123,3 +123,57 @@ hr {
   background: #bbbbbb;
   border: none;
 }
+
+.aural-only {
+  position: absolute !important;
+  clip: rect(1px, 1px, 1px, 1px);
+
+  /* NOTE: Without this, Safari sometimes lays these elements out at normal
+     size. An example is the label on the comment action menu on timelines. */
+
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.visual-only {
+  /* These elements are hidden by the 'aria-hidden' attribute. */
+}
+
+.audible .aural-only {
+  clip: auto;
+  width: auto;
+  height: auto;
+  overflow: auto;
+  background: #006699;
+  color: #ffffff;
+}
+
+.audible .aural-only a {
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.audible .visual-only {
+  position: absolute !important;
+  background: #990066;
+  opacity: 0.25;
+}
+
+.routing-bar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 2px;
+  background: {$darkbluetext};
+  z-index: 80;
+  box-shadow: 0 2px 1px rgba(0, 128, 255, 0.25);
+}
+
+.routing-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: {$sky};
+}

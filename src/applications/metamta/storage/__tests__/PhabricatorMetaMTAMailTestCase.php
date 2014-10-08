@@ -72,7 +72,7 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
       '"To" is a recipient.');
 
 
-    // Test that the "No Self Mail" preference works correctly.
+    // Test that the "No Self Mail" and "No Mail" preferences work correctly.
     $mail->setFrom($phid);
 
     $this->assertTrue(
@@ -90,6 +90,31 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
 
     $prefs->unsetPreference(
       PhabricatorUserPreferences::PREFERENCE_NO_SELF_MAIL);
+    $prefs->save();
+
+    $this->assertTrue(
+      in_array($phid, $mail->buildRecipientList()),
+      '"From" does not exclude recipients by default.');
+
+    $prefs->setPreference(
+      PhabricatorUserPreferences::PREFERENCE_NO_MAIL,
+      true);
+    $prefs->save();
+
+    $this->assertFalse(
+      in_array($phid, $mail->buildRecipientList()),
+      '"From" excludes recipients with no-mail set.');
+
+    $mail->setForceDelivery(true);
+
+    $this->assertTrue(
+      in_array($phid, $mail->buildRecipientList()),
+      '"From" includes no-mail recipients when forced.');
+
+    $mail->setForceDelivery(false);
+
+    $prefs->unsetPreference(
+      PhabricatorUserPreferences::PREFERENCE_NO_MAIL);
     $prefs->save();
 
     $this->assertTrue(
@@ -164,8 +189,8 @@ final class PhabricatorMetaMTAMailTestCase extends PhabricatorTestCase {
       $expect_references = true;
     }
 
-    $case = "<message-id = ".($supports_message_id ? 'Y' : 'N').", ".
-            "first = ".($is_first_mail ? 'Y' : 'N').">";
+    $case = '<message-id = '.($supports_message_id ? 'Y' : 'N').', '.
+            'first = '.($is_first_mail ? 'Y' : 'N').'>';
 
     $this->assertTrue(
       isset($dict['Thread-Index']),

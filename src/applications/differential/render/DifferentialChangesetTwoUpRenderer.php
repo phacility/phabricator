@@ -25,7 +25,7 @@ final class DifferentialChangesetTwoUpRenderer
           'td',
           array(
             'colspan' => 6,
-            'class' => 'show-more'
+            'class' => 'show-more',
           ),
           pht('Context not available.')));
     }
@@ -94,7 +94,7 @@ final class DifferentialChangesetTwoUpRenderer
               ),
             ),
             $is_first_block
-              ? pht("Show First 20 Lines")
+              ? pht('Show First 20 Lines')
               : pht("\xE2\x96\xB2 Show 20 Lines"));
         }
 
@@ -130,7 +130,7 @@ final class DifferentialChangesetTwoUpRenderer
               ),
             ),
             $is_last_block
-              ? pht("Show Last 20 Lines")
+              ? pht('Show Last 20 Lines')
               : pht("\xE2\x96\xBC Show 20 Lines"));
         }
 
@@ -302,7 +302,7 @@ final class DifferentialChangesetTwoUpRenderer
           array('class' => $n_classes, 'colspan' => $n_colspan),
           array(
             phutil_tag('span', array('class' => 'zwsp'), $zero_space),
-            $n_text
+            $n_text,
           )),
         $n_cov,
       ));
@@ -365,7 +365,7 @@ final class DifferentialChangesetTwoUpRenderer
       $old = phutil_tag(
         'div',
         array(
-          'class' => 'differential-image-stage'
+          'class' => 'differential-image-stage',
         ),
         phutil_tag(
           'img',
@@ -379,7 +379,7 @@ final class DifferentialChangesetTwoUpRenderer
       $new = phutil_tag(
         'div',
         array(
-          'class' => 'differential-image-stage'
+          'class' => 'differential-image-stage',
         ),
         phutil_tag(
           'img',

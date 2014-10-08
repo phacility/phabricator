@@ -1,0 +1,26 @@
+/**
+ * @provides phortune-css
+ */
+
+.phortune-payment-icon {
+  width: 34px;
+  height: 34px;
+}
+
+.phortune-payment-method-list {
+  margin: 8px 24px 0;
+}
+
+.phortune-payment-method-list button {
+  margin: 4px 0;
+  width: 100%;
+}
+
+.phortune-payment-onetime-list {
+  width: 280px;
+}
+
+.phortune-payment-onetime-list button {
+  margin: 0 0 8px 0;
+  width: 100%;
+}

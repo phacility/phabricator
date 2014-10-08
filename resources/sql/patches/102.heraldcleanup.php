@@ -24,14 +24,14 @@ if ($rules) {
     mpull($rules, 'getID'));
 }
 
-echo "This may take a moment";
+echo 'This may take a moment';
 do {
   queryfx(
     $conn_w,
     'DELETE FROM %T %Q LIMIT 1000',
     HeraldRule::TABLE_RULE_APPLIED,
     $clause);
-  echo ".";
+  echo '.';
 } while ($conn_w->getAffectedRows());
 
 $table->endReadLocking();

@@ -2,6 +2,8 @@
 
 final class PhabricatorAuthFactorTOTP extends PhabricatorAuthFactor {
 
+  const TEMPORARY_TOKEN_TYPE = 'mfa:totp:key';
+
   public function getFactorKey() {
     return 'totp';
   }
@@ -22,15 +24,43 @@ final class PhabricatorAuthFactorTOTP extends PhabricatorAuthFactor {
     AphrontRequest $request,
     PhabricatorUser $user) {
 
-
     $key = $request->getStr('totpkey');
+    if (strlen($key)) {
+      // If the user is providing a key, make sure it's a key we generated.
+      // This raises the barrier to theoretical attacks where an attacker might
+      // provide a known key (such attacks are already prevented by CSRF, but
+      // this is a second barrier to overcome).
+
+      // (We store and verify the hash of the key, not the key itself, to limit
+      // how useful the data in the table is to an attacker.)
+
+      $temporary_token = id(new PhabricatorAuthTemporaryTokenQuery())
+        ->setViewer($user)
+        ->withObjectPHIDs(array($user->getPHID()))
+        ->withTokenTypes(array(self::TEMPORARY_TOKEN_TYPE))
+        ->withExpired(false)
+        ->withTokenCodes(array(PhabricatorHash::digest($key)))
+        ->executeOne();
+      if (!$temporary_token) {
+        // If we don't have a matching token, regenerate the key below.
+        $key = null;
+      }
+    }
+
     if (!strlen($key)) {
-      // TODO: When the user submits a key, we should require that it be
-      // one we generated for them, so there's no way an attacker can ever
-      // force a key they control onto an account. However, it's clumsy to
-      // do this right now. Once we have one-time tokens for SMS and email,
-      // we should be able to put it on that infrastructure.
       $key = self::generateNewTOTPKey();
+
+      // Mark this key as one we generated, so the user is allowed to submit
+      // a response for it.
+
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+        id(new PhabricatorAuthTemporaryToken())
+          ->setObjectPHID($user->getPHID())
+          ->setTokenType(self::TEMPORARY_TOKEN_TYPE)
+          ->setTokenExpires(time() + phutil_units('1 hour in seconds'))
+          ->setTokenCode(PhabricatorHash::digest($key))
+          ->save();
+      unset($unguarded);
     }
 
     $code = $request->getStr('totpcode');
@@ -69,8 +99,21 @@ final class PhabricatorAuthFactorTOTP extends PhabricatorAuthFactor {
     $form->appendInstructions(
       pht(
         'Launch the application on your phone, and add a new entry for '.
-        'this Phabricator install. When prompted, enter the key shown '.
-        'below into the application.'));
+        'this Phabricator install. When prompted, scan the QR code or '.
+        'manually enter the key shown below into the application.'));
+
+    $prod_uri = new PhutilURI(PhabricatorEnv::getProductionURI('/'));
+    $issuer = $prod_uri->getDomain();
+
+    $uri = urisprintf(
+      'otpauth://totp/%s:%s?secret=%s&issuer=%s',
+      $issuer,
+      $user->getUsername(),
+      $key,
+      $issuer);
+
+    $qrcode = $this->renderQRCode($uri);
+    $form->appendChild($qrcode);
 
     $form->appendChild(
       id(new AphrontFormStaticControl())
@@ -217,6 +260,49 @@ final class PhabricatorAuthFactorTOTP extends PhabricatorAuthFactor {
     $code = str_pad($code, 6, '0', STR_PAD_LEFT);
 
     return $code;
+  }
+
+
+  /**
+   * @phutil-external-symbol class QRcode
+   */
+  private function renderQRCode($uri) {
+    $root = dirname(phutil_get_library_root('phabricator'));
+    require_once $root.'/externals/phpqrcode/phpqrcode.php';
+
+    $lines = QRcode::text($uri);
+
+    $total_width = 240;
+    $cell_size = floor($total_width / count($lines));
+
+    $rows = array();
+    foreach ($lines as $line) {
+      $cells = array();
+      for ($ii = 0; $ii < strlen($line); $ii++) {
+        if ($line[$ii] == '1') {
+          $color = '#000';
+        } else {
+          $color = '#fff';
+        }
+
+        $cells[] = phutil_tag(
+          'td',
+          array(
+            'width' => $cell_size,
+            'height' => $cell_size,
+            'style' => 'background: '.$color,
+          ),
+          '');
+      }
+      $rows[] = phutil_tag('tr', array(), $cells);
+    }
+
+    return phutil_tag(
+      'table',
+      array(
+        'style' => 'margin: 24px auto;',
+      ),
+      $rows);
   }
 
 }

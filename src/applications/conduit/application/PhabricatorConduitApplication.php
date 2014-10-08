@@ -1,0 +1,54 @@
+<?php
+
+final class PhabricatorConduitApplication extends PhabricatorApplication {
+
+  public function getBaseURI() {
+    return '/conduit/';
+  }
+
+  public function getIconName() {
+    return 'conduit';
+  }
+
+  public function canUninstall() {
+    return false;
+  }
+
+  public function getHelpURI() {
+    return PhabricatorEnv::getDoclink('Conduit Technical Documentation');
+  }
+
+  public function getName() {
+    return pht('Conduit');
+  }
+
+  public function getShortDescription() {
+    return pht('Developer API');
+  }
+
+  public function getTitleGlyph() {
+    return "\xE2\x87\xB5";
+  }
+
+  public function getApplicationGroup() {
+    return self::GROUP_DEVELOPER;
+  }
+
+  public function getApplicationOrder() {
+    return 0.100;
+  }
+
+  public function getRoutes() {
+    return array(
+      '/conduit/' => array(
+        '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhabricatorConduitListController',
+        'method/(?P<method>[^/]+)/' => 'PhabricatorConduitConsoleController',
+        'log/' => 'PhabricatorConduitLogController',
+        'log/view/(?P<view>[^/]+)/' => 'PhabricatorConduitLogController',
+        'token/' => 'PhabricatorConduitTokenController',
+      ),
+      '/api/(?P<method>[^/]+)' => 'PhabricatorConduitAPIController',
+    );
+  }
+
+}

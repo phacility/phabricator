@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorOAuthClientDeleteController
-  extends PhabricatorOAuthClientBaseController {
+  extends PhabricatorOAuthClientController {
 
   public function processRequest() {
     $request = $this->getRequest();

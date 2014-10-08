@@ -40,21 +40,21 @@ final class PhabricatorSavedQueryQuery
   private function buildWhereClause($conn_r) {
     $where = array();
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn_r,
         'id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->engineClassNames) {
+    if ($this->engineClassNames !== null) {
       $where[] = qsprintf(
         $conn_r,
         'engineClassName IN (%Ls)',
         $this->engineClassNames);
     }
 
-    if ($this->queryKeys) {
+    if ($this->queryKeys !== null) {
       $where[] = qsprintf(
         $conn_r,
         'queryKey IN (%Ls)',
@@ -66,9 +66,8 @@ final class PhabricatorSavedQueryQuery
     return $this->formatWhereClause($where);
   }
 
-
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationSearch';
+    return 'PhabricatorSearchApplication';
   }
 
 }

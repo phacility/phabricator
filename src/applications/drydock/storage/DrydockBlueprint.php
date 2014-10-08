@@ -1,7 +1,9 @@
 <?php
 
 final class DrydockBlueprint extends DrydockDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorCustomFieldInterface {
 
   protected $className;
   protected $blueprintName;
@@ -10,17 +12,18 @@ final class DrydockBlueprint extends DrydockDAO
   protected $details = array();
 
   private $implementation = self::ATTACHABLE;
+  private $customFields = self::ATTACHABLE;
 
   public static function initializeNewBlueprint(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
       ->setViewer($actor)
-      ->withClasses(array('PhabricatorApplicationDrydock'))
+      ->withClasses(array('PhabricatorDrydockApplication'))
       ->executeOne();
 
     $view_policy = $app->getPolicy(
-      DrydockCapabilityDefaultView::CAPABILITY);
+      DrydockDefaultViewCapability::CAPABILITY);
     $edit_policy = $app->getPolicy(
-      DrydockCapabilityDefaultEdit::CAPABILITY);
+      DrydockDefaultEditCapability::CAPABILITY);
 
     return id(new DrydockBlueprint())
       ->setViewPolicy($view_policy)
@@ -33,13 +36,17 @@ final class DrydockBlueprint extends DrydockDAO
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
         'details' => self::SERIALIZATION_JSON,
-      )
+      ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'className' => 'text255',
+        'blueprintName' => 'text255',
+      ),
     ) + parent::getConfiguration();
   }
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      DrydockPHIDTypeBlueprint::TYPECONST);
+      DrydockBlueprintPHIDType::TYPECONST);
   }
 
   public function getImplementation() {
@@ -55,6 +62,15 @@ final class DrydockBlueprint extends DrydockDAO
 
   public function attachImplementation(DrydockBlueprintImplementation $impl) {
     $this->implementation = $impl;
+    return $this;
+  }
+
+  public function getDetail($key, $default = null) {
+    return idx($this->details, $key, $default);
+  }
+
+  public function setDetail($key, $value) {
+    $this->details[$key] = $value;
     return $this;
   }
 
@@ -85,4 +101,28 @@ final class DrydockBlueprint extends DrydockDAO
   public function describeAutomaticCapability($capability) {
     return null;
   }
+
+
+/* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
+
+
+  public function getCustomFieldSpecificationForRole($role) {
+    return array();
+  }
+
+  public function getCustomFieldBaseClass() {
+    return 'DrydockBlueprintCustomField';
+  }
+
+  public function getCustomFields() {
+    return $this->assertAttached($this->customFields);
+  }
+
+  public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
+    $this->customFields = $fields;
+    return $this;
+  }
+
+
+
 }

@@ -12,11 +12,11 @@ final class PhabricatorCountdown
   public static function initializeNewCountdown(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
       ->setViewer($actor)
-      ->withClasses(array('PhabricatorApplicationCountdown'))
+      ->withClasses(array('PhabricatorCountdownApplication'))
       ->executeOne();
 
     $view_policy = $app->getPolicy(
-      PhabricatorCountdownCapabilityDefaultView::CAPABILITY);
+      PhabricatorCountdownDefaultViewCapability::CAPABILITY);
 
     return id(new PhabricatorCountdown())
       ->setAuthorPHID($actor->getPHID())
@@ -27,12 +27,15 @@ final class PhabricatorCountdown
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'title' => 'text255',
+      ),
     ) + parent::getConfiguration();
   }
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorCountdownPHIDTypeCountdown::TYPECONST);
+      PhabricatorCountdownCountdownPHIDType::TYPECONST);
   }
 
 

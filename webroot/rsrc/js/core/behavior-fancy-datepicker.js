@@ -7,10 +7,9 @@
  *           javelin-vector
  */
 
-JX.behavior('fancy-datepicker', function(config) {
+JX.behavior('fancy-datepicker', function() {
 
   var picker;
-  var button;
   var root;
 
   var value_y;
@@ -48,8 +47,8 @@ JX.behavior('fancy-datepicker', function(config) {
     var p = JX.$V(button);
     var d = JX.Vector.getDim(picker);
 
-    picker.style.left = (p.x - d.x + 2) + 'px';
-    picker.style.top = (p.y - 10) + 'px';
+    picker.style.left = (p.x - d.x - 2) + 'px';
+    picker.style.top = (p.y) + 'px';
 
     JX.DOM.alterClass(root, 'picker-open', true);
 
@@ -159,9 +158,9 @@ JX.behavior('fancy-datepicker', function(config) {
       'December'];
 
     var buttons = [
-      cell("\u25C0", 'm:-1', false, 'lrbutton'),
+      cell('\u25C0', 'm:-1', false, 'lrbutton'),
       cell(months[value_m - 1] + ' ' + value_y, null),
-      cell("\u25B6", 'm:1', false, 'lrbutton')];
+      cell('\u25B6', 'm:1', false, 'lrbutton')];
 
     return JX.$N(
       'table',
@@ -206,6 +205,7 @@ JX.behavior('fancy-datepicker', function(config) {
                       today.getDate() == date.getDate());
 
       var classes = [];
+      classes.push('day');
       if (is_today) {
         classes.push('today');
       }

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group pholio
- */
 final class PholioSearchIndexer extends PhabricatorSearchDocumentIndexer {
 
   public function getIndexableObject() {
@@ -24,7 +21,7 @@ final class PholioSearchIndexer extends PhabricatorSearchDocumentIndexer {
     $doc->addRelationship(
       PhabricatorSearchRelationship::RELATIONSHIP_AUTHOR,
       $mock->getAuthorPHID(),
-      PhabricatorPeoplePHIDTypeUser::TYPECONST,
+      PhabricatorPeopleUserPHIDType::TYPECONST,
       $mock->getDateCreated());
 
     $this->indexTransactions(
@@ -34,4 +31,5 @@ final class PholioSearchIndexer extends PhabricatorSearchDocumentIndexer {
 
     return $doc;
   }
+
 }

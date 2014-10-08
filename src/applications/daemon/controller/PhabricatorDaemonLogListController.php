@@ -32,7 +32,6 @@ final class PhabricatorDaemonLogListController
       $nav,
       array(
         'title' => pht('All Daemons'),
-        'device' => true,
       ));
   }
 

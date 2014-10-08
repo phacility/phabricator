@@ -10,7 +10,7 @@ final class PhabricatorPolicyManagementUnlockWorkflow
         'Unlock an object by setting its policies to allow anyone to view '.
         'and edit it.')
       ->setExamples(
-        "**unlock** D123")
+        '**unlock** D123')
       ->setArguments(
         array(
           array(
@@ -28,11 +28,11 @@ final class PhabricatorPolicyManagementUnlockWorkflow
     if (!$obj_names) {
       throw new PhutilArgumentUsageException(
         pht(
-          "Specify the name of an object to unlock."));
+          'Specify the name of an object to unlock.'));
     } else if (count($obj_names) > 1) {
       throw new PhutilArgumentUsageException(
         pht(
-          "Specify the name of exactly one object to unlock."));
+          'Specify the name of exactly one object to unlock.'));
     }
 
     $object = id(new PhabricatorObjectQuery())

@@ -19,6 +19,16 @@ final class PhabricatorRepositoryCommitData extends PhabricatorRepositoryDAO {
       self::CONFIG_SERIALIZATION => array(
         'commitDetails' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'authorName' => 'text',
+        'commitMessage' => 'text',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'commitID' => array(
+          'columns' => array('commitID'),
+          'unique' => true,
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 
@@ -30,7 +40,9 @@ final class PhabricatorRepositoryCommitData extends PhabricatorRepositoryDAO {
   public static function summarizeCommitMessage($message) {
     $summary = phutil_split_lines($message, $retain_endings = false);
     $summary = head($summary);
-    $summary = phutil_utf8_shorten($summary, self::SUMMARY_MAX_LENGTH);
+    $summary = id(new PhutilUTF8StringTruncator())
+      ->setMaximumCodepoints(self::SUMMARY_MAX_LENGTH)
+      ->truncateString($summary);
 
     return $summary;
   }

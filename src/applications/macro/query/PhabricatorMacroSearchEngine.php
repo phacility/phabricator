@@ -3,6 +3,14 @@
 final class PhabricatorMacroSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Macros');
+  }
+
+  public function getApplicationClassName() {
+    return 'PhabricatorMacroApplication';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
     $saved->setParameter(
@@ -21,6 +29,7 @@ final class PhabricatorMacroSearchEngine
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new PhabricatorMacroQuery())
+      ->needFiles(true)
       ->withIDs($saved->getParameter('ids', array()))
       ->withPHIDs($saved->getParameter('phids', array()))
       ->withAuthorPHIDs($saved->getParameter('authorPHIDs', array()));
@@ -74,7 +83,7 @@ final class PhabricatorMacroSearchEngine
     $status = $saved_query->getParameter('status');
     $names = implode(', ', $saved_query->getParameter('names', array()));
     $like = $saved_query->getParameter('nameLike');
-    $color = $saved_query->getParameter('flagColor', "-1");
+    $color = $saved_query->getParameter('flagColor', '-1');
 
     $form
       ->appendChild(
@@ -85,7 +94,7 @@ final class PhabricatorMacroSearchEngine
           ->setValue($status))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/users/')
+          ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('authors')
           ->setLabel(pht('Authors'))
           ->setValue($author_handles))
@@ -133,7 +142,6 @@ final class PhabricatorMacroSearchEngine
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
-
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
 
@@ -151,6 +159,63 @@ final class PhabricatorMacroSearchEngine
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
+  }
+
+  protected function getRequiredHandlePHIDsForResultList(
+    array $macros,
+    PhabricatorSavedQuery $query) {
+    return mpull($macros, 'getAuthorPHID');
+  }
+
+  protected function renderResultList(
+    array $macros,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+
+    assert_instances_of($macros, 'PhabricatorFileImageMacro');
+    $viewer = $this->requireViewer();
+
+    $pinboard = new PHUIPinboardView();
+    foreach ($macros as $macro) {
+      $file = $macro->getFile();
+
+      $item = new PHUIPinboardItemView();
+      if ($file) {
+        $item->setImageURI($file->getThumb280x210URI());
+        $item->setImageSize(280, 210);
+      }
+
+      if ($macro->getDateCreated()) {
+        $datetime = phabricator_date($macro->getDateCreated(), $viewer);
+        $item->appendChild(
+          phutil_tag(
+            'div',
+            array(),
+            pht('Created on %s', $datetime)));
+      } else {
+        // Very old macros don't have a creation date. Rendering something
+        // keeps all the pins at the same height and avoids flow issues.
+        $item->appendChild(
+          phutil_tag(
+            'div',
+            array(),
+            pht('Created in ages long past')));
+      }
+
+      if ($macro->getAuthorPHID()) {
+        $author_handle = $handles[$macro->getAuthorPHID()];
+        $item->appendChild(
+          pht('Created by %s', $author_handle->renderLink()));
+      }
+
+      $item->setURI($this->getApplicationURI('/view/'.$macro->getID().'/'));
+      $item->setDisabled($macro->getisDisabled());
+      $item->setHeader($macro->getName());
+
+      $pinboard->addItem($item);
+    }
+
+    return $pinboard;
   }
 
 }

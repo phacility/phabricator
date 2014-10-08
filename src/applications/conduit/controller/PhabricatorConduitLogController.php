@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class PhabricatorConduitLogController
   extends PhabricatorConduitController {
 
@@ -50,7 +47,6 @@ final class PhabricatorConduitLogController
       ),
       array(
         'title' => 'Conduit Logs',
-        'device' => true,
       ));
   }
 

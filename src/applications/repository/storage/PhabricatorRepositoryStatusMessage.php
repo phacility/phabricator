@@ -23,6 +23,16 @@ final class PhabricatorRepositoryStatusMessage
       self::CONFIG_SERIALIZATION => array(
         'parameters' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'statusType' => 'text32',
+        'statusCode' => 'text32',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'repositoryID' => array(
+          'columns' => array('repositoryID', 'statusType'),
+          'unique' => true,
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

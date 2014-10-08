@@ -2,8 +2,6 @@
 
 /**
  * Create or update Phriction documents.
- *
- * @group phriction
  */
 final class PhrictionDocumentEditor extends PhabricatorEditor {
 
@@ -23,6 +21,8 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
 
   public static function newForSlug($slug) {
     $slug = PhabricatorSlug::normalize($slug);
+
+    // TODO: Get rid of this.
     $document = id(new PhrictionDocument())->loadOneWhere(
       'slug = %s',
       $slug);
@@ -243,7 +243,8 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
       $project = id(new PhabricatorProjectQuery())
         ->setViewer($this->requireActor())
         ->withPhrictionSlugs(array(
-          PhrictionDocument::getProjectSlugIdentifier($slug)))
+          PhrictionDocument::getProjectSlugIdentifier($slug),
+        ))
         ->executeOne();
       if ($project) {
         $project_phid = $project->getPHID();
@@ -264,6 +265,9 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
     }
 
     if ($feed_action) {
+      $content_str = id(new PhutilUTF8StringTruncator())
+        ->setMaximumGlyphs(140)
+        ->truncateString($new_content->getContent());
       id(new PhabricatorFeedStoryPublisher())
         ->setRelatedPHIDs($related_phids)
         ->setStoryAuthorPHID($this->getActor()->getPHID())
@@ -273,7 +277,7 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
           array(
             'phid'      => $document->getPHID(),
             'action'    => $feed_action,
-            'content'   => phutil_utf8_shorten($new_content->getContent(), 140),
+            'content'   => $content_str,
             'project'   => $project_phid,
             'movedFromPHID' => $this->fromDocumentPHID,
           ))
@@ -291,15 +295,15 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
   private function getChangeTypeDescription($const, $title) {
     $map = array(
       PhrictionChangeType::CHANGE_EDIT =>
-        pht("Phriction Document %s was edited.", $title),
+        pht('Phriction Document %s was edited.', $title),
       PhrictionChangeType::CHANGE_DELETE =>
-        pht("Phriction Document %s was deleted.", $title),
+        pht('Phriction Document %s was deleted.', $title),
       PhrictionChangeType::CHANGE_MOVE_HERE =>
-        pht("Phriction Document %s was moved here.", $title),
+        pht('Phriction Document %s was moved here.', $title),
       PhrictionChangeType::CHANGE_MOVE_AWAY =>
-        pht("Phriction Document %s was moved away.", $title),
+        pht('Phriction Document %s was moved away.', $title),
       PhrictionChangeType::CHANGE_STUB =>
-        pht("Phriction Document %s was created through child.", $title),
+        pht('Phriction Document %s was created through child.', $title),
     );
     return idx($map, $const, pht('Something magical occurred.'));
   }

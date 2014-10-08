@@ -8,7 +8,7 @@ final class CelerityResourceGraph extends AbstractDirectedGraph {
   protected function loadEdges(array $nodes) {
     if (!$this->graphSet) {
       throw new Exception(
-        "Call setResourceGraph before loading the graph!"
+        'Call setResourceGraph before loading the graph!'
       );
     }
 

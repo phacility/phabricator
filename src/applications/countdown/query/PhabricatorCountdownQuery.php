@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group countdown
- */
 final class PhabricatorCountdownQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
@@ -45,7 +42,6 @@ final class PhabricatorCountdownQuery
 
     $countdowns = $table->loadAllFromArray($data);
 
-
     return $countdowns;
   }
 
@@ -86,7 +82,7 @@ final class PhabricatorCountdownQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationCountdown';
+    return 'PhabricatorCountdownApplication';
   }
 
 }

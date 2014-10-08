@@ -71,7 +71,7 @@ something like:
    complicated edits and should be used pragmatically versus Storage objects.
  - **DerpException**: exceptions used in the ##Derp## application.
  - **DerpQuery**: query one or more storage objects for pertinent ##Derp##
-   application data.  @{class:PhabricatorOffsetPagedQuery} is particularly
+   application data. @{class:PhabricatorOffsetPagedQuery} is particularly
    handy for pagination and works well with @{class:AphrontPagerView}.
  - **DerpReplyHandler**: business logic from any configured email interactions
    users can have with the ##Derp## application.
@@ -81,7 +81,7 @@ something like:
    Reading more about the @{class:LiskDAO} is highly recommended.
  - **DerpView**: view objects for the ##Derp## application. Typically these
    extend @{class:AphrontView}.
- - **ConduitAPI_derp_Method**: provides any and all ##Derp## application
+ - **DerpConduitAPIMethod**: provides any and all ##Derp## application
    functionality that is accessible over Conduit.
 
 However, it is likely that ##Derp## is even more complex, and rather than

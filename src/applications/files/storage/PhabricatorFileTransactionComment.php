@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group file
- */
 final class PhabricatorFileTransactionComment
   extends PhabricatorApplicationTransactionComment {
 
@@ -14,4 +11,16 @@ final class PhabricatorFileTransactionComment
     // Only cache submitted comments.
     return ($this->getTransactionPHID() != null);
   }
+
+  public function getConfiguration() {
+    $config = parent::getConfiguration();
+    $config[self::CONFIG_KEY_SCHEMA] = array(
+      'key_draft' => array(
+        'columns' => array('authorPHID', 'transactionPHID'),
+        'unique' => true,
+      ),
+    ) + $config[self::CONFIG_KEY_SCHEMA];
+    return $config;
+  }
+
 }

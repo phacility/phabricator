@@ -56,7 +56,7 @@ final class ReleephRequestTypeaheadController
         $full_commit_id,
         $short_commit_id,
         $row['authorName'],
-        phabricator_format_relative_time($now - $row['epoch']),
+        phutil_format_relative_time($now - $row['epoch']),
         $first_line,
       );
     }

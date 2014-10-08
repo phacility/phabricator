@@ -11,7 +11,7 @@ final class PhabricatorMailManagementReceiveTestWorkflow
           'Simulate receiving mail. This is primarily useful if you are '.
           'developing new mail receivers.'))
       ->setExamples(
-        "**receive-test** --as alincoln --to D123 < body.txt")
+        '**receive-test** --as alincoln --to D123 < body.txt')
       ->setArguments(
         array(
           array(
@@ -136,7 +136,7 @@ final class PhabricatorMailManagementReceiveTestWorkflow
 
     $console->writeErr(
       "%s\n\n    phabricator/ $ ./bin/mail show-inbound --id %d\n\n",
-      pht("Mail received! You can view details by running this command:"),
+      pht('Mail received! You can view details by running this command:'),
       $received->getID());
   }
 

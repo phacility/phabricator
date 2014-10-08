@@ -30,12 +30,27 @@ final class HarbormasterBuildLog extends HarbormasterDAO
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_COLUMN_SCHEMA => array(
+        // T6203/NULLABILITY
+        // It seems like these should be non-nullable? All logs should have a
+        // source, etc.
+        'logSource' => 'text255?',
+        'logType' => 'text255?',
+        'duration' => 'uint32?',
+
+        'live' => 'bool',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_buildtarget' => array(
+          'columns' => array('buildTargetPHID'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      HarbormasterPHIDTypeBuildLog::TYPECONST);
+      HarbormasterBuildLogPHIDType::TYPECONST);
   }
 
   public function attachBuildTarget(HarbormasterBuildTarget $build_target) {
@@ -53,7 +68,7 @@ final class HarbormasterBuildLog extends HarbormasterDAO
 
   public function start() {
     if ($this->getLive()) {
-      throw new Exception("Live logging has already started for this log.");
+      throw new Exception('Live logging has already started for this log.');
     }
 
     $this->setLive(1);
@@ -64,14 +79,14 @@ final class HarbormasterBuildLog extends HarbormasterDAO
 
   public function append($content) {
     if (!$this->getLive()) {
-      throw new Exception("Start logging before appending data to the log.");
+      throw new Exception('Start logging before appending data to the log.');
     }
     if (strlen($content) === 0) {
       return;
     }
 
     // If the length of the content is greater than the chunk size limit,
-    // then we can never fit the content in a single record.  We need to
+    // then we can never fit the content in a single record. We need to
     // split our content out and call append on it for as many parts as there
     // are to the content.
     if (strlen($content) > self::CHUNK_BYTE_LIMIT) {
@@ -85,7 +100,7 @@ final class HarbormasterBuildLog extends HarbormasterDAO
       return;
     }
 
-    // Retrieve the size of last chunk from the DB for this log.  If the
+    // Retrieve the size of last chunk from the DB for this log. If the
     // chunk is over 500K, then we need to create a new log entry.
     $conn = $this->establishConnection('w');
     $result = queryfx_all(
@@ -97,8 +112,8 @@ final class HarbormasterBuildLog extends HarbormasterDAO
       'LIMIT 1',
       $this->getID());
     if (count($result) === 0 ||
-      $result[0]["size"] + strlen($content) > self::CHUNK_BYTE_LIMIT ||
-      $result[0]["encoding"] !== self::ENCODING_TEXT) {
+      $result[0]['size'] + strlen($content) > self::CHUNK_BYTE_LIMIT ||
+      $result[0]['encoding'] !== self::ENCODING_TEXT) {
 
       // We must insert a new chunk because the data we are appending
       // won't fit into the existing one, or we don't have any existing
@@ -122,13 +137,13 @@ final class HarbormasterBuildLog extends HarbormasterDAO
         'WHERE id = %d',
         $content,
         $content,
-        $result[0]["id"]);
+        $result[0]['id']);
     }
   }
 
   public function finalize($start = 0) {
     if (!$this->getLive()) {
-      throw new Exception("Start logging before finalizing it.");
+      throw new Exception('Start logging before finalizing it.');
     }
 
     // TODO: Encode the log contents in a gzipped format.
@@ -142,7 +157,7 @@ final class HarbormasterBuildLog extends HarbormasterDAO
 
   public function getLogText() {
     // TODO: This won't cope very well if we're pulling like a 700MB
-    // log file out of the DB.  We should probably implement some sort
+    // log file out of the DB. We should probably implement some sort
     // of optional limit parameter so that when we're rendering out only
     // 25 lines in the UI, we don't wastefully read in the whole log.
 
@@ -157,9 +172,9 @@ final class HarbormasterBuildLog extends HarbormasterDAO
       'ORDER BY id ASC',
       $this->getID());
 
-    $content = "";
+    $content = '';
     foreach ($result as $row) {
-      $content .= $row["chunk"];
+      $content .= $row['chunk'];
     }
     return $content;
   }

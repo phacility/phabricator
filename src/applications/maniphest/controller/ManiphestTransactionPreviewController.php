@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group maniphest
- */
 final class ManiphestTransactionPreviewController extends ManiphestController {
 
   private $id;
@@ -86,14 +83,19 @@ final class ManiphestTransactionPreviewController extends ManiphestController {
           $value = array();
         }
 
-        $phids = $value;
-        foreach ($task->getProjectPHIDs() as $project_phid) {
+        $phids = array();
+        $value = array_fuse($value);
+        foreach ($value as $project_phid) {
           $phids[] = $project_phid;
-          $value[] = $project_phid;
+          $value[$project_phid] = array('dst' => $project_phid);
         }
 
-        $transaction->setOldValue($task->getProjectPHIDs());
-        $transaction->setNewValue($value);
+        $project_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
+        $transaction
+          ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+          ->setMetadataValue('edge:type', $project_type)
+          ->setOldValue(array())
+          ->setNewValue($value);
         break;
       case ManiphestTransaction::TYPE_STATUS:
         $phids = array();

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group maniphest
- */
 final class ManiphestTaskListView extends ManiphestView {
 
   private $tasks;
@@ -35,8 +32,9 @@ final class ManiphestTaskListView extends ManiphestView {
   public function render() {
     $handles = $this->handles;
 
+    require_celerity_resource('maniphest-task-summary-css');
+
     $list = new PHUIObjectItemListView();
-    $list->setCards(true);
     $list->setFlush(true);
 
     $status_map = ManiphestTaskStatus::getTaskStatusMap();
@@ -75,13 +73,16 @@ final class ManiphestTaskListView extends ManiphestView {
         $item->addSigil('maniphest-task');
       }
 
-      $projects_view = new ManiphestTaskProjectsView();
-      $projects_view->setHandles(
-        array_select_keys(
-          $handles,
-          $task->getProjectPHIDs()));
+      $project_handles = array_select_keys(
+        $handles,
+        $task->getProjectPHIDs());
 
-      $item->addAttribute($projects_view);
+      $item->addAttribute(
+        id(new PHUIHandleTagListView())
+          ->setLimit(4)
+          ->setNoDataString(pht('No Projects'))
+          ->setSlim(true)
+          ->setHandles($project_handles));
 
       $item->setMetadata(
         array(
@@ -89,11 +90,15 @@ final class ManiphestTaskListView extends ManiphestView {
         ));
 
       if ($this->showBatchControls) {
+        $href = new PhutilURI('/maniphest/task/edit/'.$task->getID().'/');
+        if (!$this->showSubpriorityControls) {
+          $href->setQueryParam('ungrippable', 'true');
+        }
         $item->addAction(
           id(new PHUIListItemView())
-            ->setIcon('edit')
+            ->setIcon('fa-pencil')
             ->addSigil('maniphest-edit-task')
-            ->setHref('/maniphest/task/edit/'.$task->getID().'/'));
+            ->setHref($href));
       }
 
       $list->addItem($item);

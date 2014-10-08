@@ -17,7 +17,7 @@ you need to build new classes. For instance:
   - if you want to configure linters, or add new linters, you need to create a
     new class which extends @{class@arcanist:ArcanistLintEngine}.
   - if you want to integrate with a unit testing framework, you need to create a
-    new class which extends @{class@arcanist:ArcanistBaseUnitTestEngine}.
+    new class which extends @{class@arcanist:ArcanistUnitTestEngine}.
   - if you you want to change how workflows behave, or add new workflows, you
     need to create a new class which extends
     @{class@arcanist:ArcanistConfiguration}.
@@ -37,8 +37,9 @@ make this work, you need to do three things:
 = Create a libphutil Library =
 
 If you haven't created a library for the class to live in yet, you need to do
-that first. Follow the instructions in @{article:libphutil Libraries User Guide},
-then make the library loadable by adding it to your ##.arcconfig## like this:
+that first. Follow the instructions in
+@{article:libphutil Libraries User Guide}, then make the library loadable by
+adding it to your ##.arcconfig## like this:
 
   {
     // ...
@@ -56,13 +57,13 @@ When you run ##arc list --trace##, you should see a message to the effect that
 it has loaded your library.
 
 For debugging or testing, you can also run Arcanist with the
-##--load-phutil-library## flag:
+`--load-phutil-library` flag:
 
   arc --load-phutil-library=/path/to/library <command>
 
 You can specify this flag more than once to load several libraries. Note that
 if you use this flag, Arcanist will ignore any libraries listed in
-##.arcconfig##.
+`.arcconfig`.
 
 = Use the Class =
 
@@ -87,7 +88,5 @@ This is mostly useful for debugging and testing.
 
 = Next Steps =
 
-  - Browse the source for an example lint engine at
-    @{class@arcanist:ExampleLintEngine}; or
-  - learn how to reuse existing linters by reading
+  - Learn how to reuse existing linters by reading
     @{article:Arcanist User Guide: Customizing Existing Linters}.

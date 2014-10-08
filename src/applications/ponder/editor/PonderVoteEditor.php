@@ -25,7 +25,7 @@ final class PonderVoteEditor extends PhabricatorEditor {
   public function saveVote() {
     $actor = $this->requireActor();
     if (!$this->votable) {
-      throw new Exception("Must set votable before saving vote");
+      throw new Exception('Must set votable before saving vote');
     }
 
     $votable = $this->votable;
@@ -34,7 +34,6 @@ final class PonderVoteEditor extends PhabricatorEditor {
     // prepare vote add, or update if this user is amending an
     // earlier vote
     $editor = id(new PhabricatorEdgeEditor())
-      ->setActor($actor)
       ->addEdge(
         $actor->getPHID(),
         $votable->getUserVoteEdgeType(),

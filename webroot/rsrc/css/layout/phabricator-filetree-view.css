@@ -14,6 +14,7 @@
   margin: 0;
   padding: 0;
   display: block;
+  border-left: 4px solid transparent;
 }
 
 .phabricator-filetree span.phabricator-filetree-icon {
@@ -28,7 +29,7 @@
 .phabricator-filetree span.phabricator-filetree-name {
   padding: 0;
   margin-left: 4px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: normal;
   line-height: 20px;
   white-space: nowrap;
@@ -36,22 +37,20 @@
 
 .phabricator-filetree span.phabricator-filetree-item
   .phabricator-filetree-name {
-  color: #a0a0a0;
+  color: {$darkbluetext};
 }
 
 .phabricator-filetree a.phabricator-filetree-item
   .phabricator-filetree-name {
-  color: #fff;
+  color: {$darkbluetext};
 }
 
 .phabricator-filetree a.phabricator-filetree-item:hover {
   text-decoration: none;
+  background-color: {$hovergrey};
 }
 
-.phabricator-filetree-icon-file {
-  background-image: url(/rsrc/image/icon/fatcow/page_white_text.png);
-}
-
-.phabricator-filetree-icon-dir {
-  background-image: url(/rsrc/image/icon/fatcow/folder.png);
+.phabricator-filetree .phabricator-active-nav-focus {
+  background-color: {$hovergrey};
+  border-left: 4px solid {$sky};
 }

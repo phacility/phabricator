@@ -10,8 +10,6 @@
  *
  * @task write  Writing Response Components
  * @task emit   Emitting the Response
- *
- * @group aphront
  */
 abstract class AphrontHTTPSink {
 
@@ -50,7 +48,7 @@ abstract class AphrontHTTPSink {
 
       if (strpos($name, ':') !== false) {
         throw new Exception(
-          "Declining to emit response with malformed HTTP header name: ".
+          'Declining to emit response with malformed HTTP header name: '.
           $name);
       }
 
@@ -117,4 +115,5 @@ abstract class AphrontHTTPSink {
   abstract protected function emitHTTPStatus($code, $message = '');
   abstract protected function emitHeader($name, $value);
   abstract protected function emitData($data);
+
 }

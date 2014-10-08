@@ -1,7 +1,5 @@
 <?php
-/**
- * @group ponder
- */
+
 final class PonderVote extends PonderConstants {
 
   const VOTE_UP = 1;

@@ -37,6 +37,6 @@ final class NuanceRequestorViewController extends NuanceController {
       $crumbs,
       array(
         'title' => $title,
-        'device' => true));
+      ));
   }
 }

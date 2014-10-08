@@ -71,7 +71,6 @@ final class PhabricatorWorkerTaskDetailController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 
@@ -92,7 +91,7 @@ final class PhabricatorWorkerTaskDetailController
         id(new PhabricatorActionView())
           ->setName(pht('Retry Task'))
           ->setHref($this->getApplicationURI('/task/'.$id.'/retry/'))
-          ->setIcon('undo')
+          ->setIcon('fa-refresh')
           ->setWorkflow(true)
           ->setDisabled(!$can_retry));
     } else {
@@ -100,7 +99,7 @@ final class PhabricatorWorkerTaskDetailController
         id(new PhabricatorActionView())
           ->setName(pht('Cancel Task'))
           ->setHref($this->getApplicationURI('/task/'.$id.'/cancel/'))
-          ->setIcon('delete')
+          ->setIcon('fa-times')
           ->setWorkflow(true));
     }
 
@@ -111,7 +110,7 @@ final class PhabricatorWorkerTaskDetailController
       id(new PhabricatorActionView())
         ->setName(pht('Free Lease'))
         ->setHref($this->getApplicationURI('/task/'.$id.'/release/'))
-        ->setIcon('unlock')
+        ->setIcon('fa-unlock')
         ->setWorkflow(true)
         ->setDisabled(!$can_release));
 
@@ -139,7 +138,7 @@ final class PhabricatorWorkerTaskDetailController
           $status = pht('Cancelled');
           break;
         default:
-          throw new Exception("Unknown task status!");
+          throw new Exception('Unknown task status!');
       }
     } else {
       $status = pht('Queued');
@@ -175,7 +174,7 @@ final class PhabricatorWorkerTaskDetailController
 
     if ($task->getLeaseExpires() && $task->getLeaseOwner()) {
       $expires = ($task->getLeaseExpires() - time());
-      $expires = phabricator_format_relative_time_detailed($expires);
+      $expires = phutil_format_relative_time_detailed($expires);
     } else {
       $expires = phutil_tag('em', array(), pht('None'));
     }
@@ -248,7 +247,7 @@ final class PhabricatorWorkerTaskDetailController
           $duration = 60;
         }
         $cumulative += $duration;
-        $next[$key] = phabricator_format_relative_time($cumulative);
+        $next[$key] = phutil_format_relative_time($cumulative);
       }
       if ($ii != $retry_count) {
         $next[] = '...';

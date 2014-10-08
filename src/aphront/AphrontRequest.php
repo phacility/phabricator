@@ -231,19 +231,19 @@ final class AphrontRequest {
       if (PhabricatorEnv::getEnvConfig('phabricator.developer-mode')) {
         // TODO: Clean this up, see T1921.
         $more_info[] =
-          "To avoid this error, use phabricator_form() to construct forms. " .
-          "If you are already using phabricator_form(), make sure the form " .
-          "'action' uses a relative URI (i.e., begins with a '/'). Forms " .
-          "using absolute URIs do not include CSRF tokens, to prevent " .
-          "leaking tokens to external sites.\n\n" .
-          "If this page performs writes which do not require CSRF " .
-          "protection (usually, filling caches or logging), you can use " .
-          "AphrontWriteGuard::beginScopedUnguardedWrites() to temporarily " .
-          "bypass CSRF protection while writing. You should use this only " .
-          "for writes which can not be protected with normal CSRF " .
-          "mechanisms.\n\n" .
-          "Some UI elements (like PhabricatorActionListView) also have " .
-          "methods which will allow you to render links as forms (like " .
+          "To avoid this error, use phabricator_form() to construct forms. ".
+          "If you are already using phabricator_form(), make sure the form ".
+          "'action' uses a relative URI (i.e., begins with a '/'). Forms ".
+          "using absolute URIs do not include CSRF tokens, to prevent ".
+          "leaking tokens to external sites.\n\n".
+          "If this page performs writes which do not require CSRF ".
+          "protection (usually, filling caches or logging), you can use ".
+          "AphrontWriteGuard::beginScopedUnguardedWrites() to temporarily ".
+          "bypass CSRF protection while writing. You should use this only ".
+          "for writes which can not be protected with normal CSRF ".
+          "mechanisms.\n\n".
+          "Some UI elements (like PhabricatorActionListView) also have ".
+          "methods which will allow you to render links as forms (like ".
           "setRenderAsForm(true)).";
       }
 
@@ -273,6 +273,18 @@ final class AphrontRequest {
 
     return $this->validateCSRF();
   }
+
+  final public function isFormOrHisecPost() {
+    $post = $this->getExists(self::TYPE_FORM) &&
+            $this->isHTTPPost();
+
+    if (!$post) {
+      return false;
+    }
+
+    return $this->validateCSRF();
+  }
+
 
   final public function setCookiePrefix($prefix) {
     $this->cookiePrefix = $prefix;
@@ -483,7 +495,7 @@ final class AphrontRequest {
     if (empty($_SERVER['HTTPS'])) {
       return false;
     }
-    if (!strcasecmp($_SERVER["HTTPS"], "off")) {
+    if (!strcasecmp($_SERVER['HTTPS'], 'off')) {
       return false;
     }
     return true;

@@ -3,6 +3,14 @@
 final class DrydockResourceSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Drydock Resources');
+  }
+
+  public function getApplicationClassName() {
+    return 'PhabricatorDrydockApplication';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 
@@ -42,7 +50,6 @@ final class DrydockResourceSearchEngine
 
     $form
       ->appendChild($status_control);
-
   }
 
   protected function getURI($path) {
@@ -50,12 +57,10 @@ final class DrydockResourceSearchEngine
   }
 
   public function getBuiltinQueryNames() {
-    $names = array(
+    return array(
       'active' => pht('Active Resources'),
       'all' => pht('All Resources'),
     );
-
-    return $names;
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
@@ -75,6 +80,17 @@ final class DrydockResourceSearchEngine
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
+  }
+
+  protected function renderResultList(
+    array $resources,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+
+    return id(new DrydockResourceListView())
+      ->setUser($this->requireViewer())
+      ->setResources($resources)
+      ->render();
   }
 
 }

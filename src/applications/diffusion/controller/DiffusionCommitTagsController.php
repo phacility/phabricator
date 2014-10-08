@@ -22,7 +22,8 @@ final class DiffusionCommitTagsController extends DiffusionController {
           'diffusion.tagsquery',
           array(
             'commit' => $request->getCommit(),
-            'limit' => $tag_limit + 1)));
+            'limit' => $tag_limit + 1,
+          )));
     } catch (ConduitException $ex) {
       if ($ex->getMessage() != 'ERR-UNSUPPORTED-VCS') {
         throw $ex;

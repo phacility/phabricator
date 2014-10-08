@@ -66,6 +66,9 @@ final class HarbormasterBuildEngine extends Phobject {
       $build->save();
 
       $lock->unlock();
+
+      $this->releaseAllArtifacts($build);
+
       throw $ex;
     }
 
@@ -87,12 +90,17 @@ final class HarbormasterBuildEngine extends Phobject {
     if ($new_status != $old_status || $this->shouldForceBuildableUpdate()) {
       $this->updateBuildable($build->getBuildable());
     }
+
+    // If we are no longer building for any reason, release all artifacts.
+    if (!$build->isBuilding()) {
+      $this->releaseAllArtifacts($build);
+    }
   }
 
   private function updateBuild(HarbormasterBuild $build) {
     if (($build->getBuildStatus() == HarbormasterBuild::STATUS_PENDING) ||
         ($build->isRestarting())) {
-      $this->destroyBuildTargets($build);
+      $this->restartBuild($build);
       $build->setBuildStatus(HarbormasterBuild::STATUS_BUILDING);
       $build->save();
     }
@@ -114,36 +122,28 @@ final class HarbormasterBuildEngine extends Phobject {
     }
   }
 
-  private function destroyBuildTargets(HarbormasterBuild $build) {
-    $targets = id(new HarbormasterBuildTargetQuery())
-      ->setViewer($this->getViewer())
-      ->withBuildPHIDs(array($build->getPHID()))
-      ->execute();
+  private function restartBuild(HarbormasterBuild $build) {
 
-    if (!$targets) {
-      return;
-    }
+    // We're restarting the build, so release all previous artifacts.
+    $this->releaseAllArtifacts($build);
 
-    $target_phids = mpull($targets, 'getPHID');
+    // Increment the build generation counter on the build.
+    $build->setBuildGeneration($build->getBuildGeneration() + 1);
 
-    $artifacts = id(new HarbormasterBuildArtifactQuery())
-      ->setViewer($this->getViewer())
-      ->withBuildTargetPHIDs($target_phids)
-      ->execute();
+    // Currently running targets should periodically check their build
+    // generation (which won't have changed) against the build's generation.
+    // If it is different, they will automatically stop what they're doing
+    // and abort.
 
-    foreach ($artifacts as $artifact) {
-      $artifact->delete();
-    }
-
-    foreach ($targets as $target) {
-      $target->delete();
-    }
+    // Previously we used to delete targets, logs and artifacts here.  Instead
+    // leave them around so users can view previous generations of this build.
   }
 
   private function updateBuildSteps(HarbormasterBuild $build) {
     $targets = id(new HarbormasterBuildTargetQuery())
       ->setViewer($this->getViewer())
       ->withBuildPHIDs(array($build->getPHID()))
+      ->withBuildGenerations(array($build->getBuildGeneration()))
       ->execute();
 
     $this->updateWaitingTargets($targets);
@@ -244,24 +244,16 @@ final class HarbormasterBuildEngine extends Phobject {
     }
 
     // Identify all the steps which are ready to run (because all their
-    // depdendencies are complete).
+    // dependencies are complete).
 
-    $previous_step = null;
     $runnable = array();
     foreach ($steps as $step) {
-      // TODO: For now, we're hard coding sequential dependencies into build
-      // steps. In the future, we can be smart about this instead.
-
-      if ($previous_step) {
-        $dependencies = array($previous_step);
-      } else {
-        $dependencies = array();
-      }
+      $dependencies = $step->getStepImplementation()->getDependencies($step);
 
       if (isset($queued[$step->getPHID()])) {
         $can_run = true;
         foreach ($dependencies as $dependency) {
-          if (empty($complete[$dependency->getPHID()])) {
+          if (empty($complete[$dependency])) {
             $can_run = false;
             break;
           }
@@ -271,14 +263,12 @@ final class HarbormasterBuildEngine extends Phobject {
           $runnable[] = $step;
         }
       }
-
-      $previous_step = $step;
     }
 
     if (!$runnable && !$waiting && !$underway) {
-      // TODO: This means the build is deadlocked, probably? It should not
-      // normally be possible yet, but we should communicate it more clearly.
-      $build->setBuildStatus(HarbormasterBuild::STATUS_FAILED);
+      // This means the build is deadlocked, and the user has configured
+      // circular dependencies.
+      $build->setBuildStatus(HarbormasterBuild::STATUS_DEADLOCKED);
       $build->save();
       return;
     }
@@ -292,7 +282,6 @@ final class HarbormasterBuildEngine extends Phobject {
 
       $this->queueNewBuildTarget($target);
     }
-
   }
 
 
@@ -378,7 +367,8 @@ final class HarbormasterBuildEngine extends Phobject {
         $all_pass = false;
       }
       if ($build->getBuildStatus() == HarbormasterBuild::STATUS_FAILED ||
-          $build->getBuildStatus() == HarbormasterBuild::STATUS_ERROR) {
+          $build->getBuildStatus() == HarbormasterBuild::STATUS_ERROR ||
+          $build->getBuildStatus() == HarbormasterBuild::STATUS_DEADLOCKED) {
         $any_fail = true;
       }
     }
@@ -408,8 +398,10 @@ final class HarbormasterBuildEngine extends Phobject {
     // can look at the results themselves, and other users generally don't
     // care about the outcome.
 
-    if ($did_update && !$buildable->getIsManualBuildable()) {
-
+    $should_publish = $did_update &&
+                      $new_status != HarbormasterBuildable::STATUS_BUILDING &&
+                      !$buildable->getIsManualBuildable();
+    if ($should_publish) {
       $object = id(new PhabricatorObjectQuery())
         ->setViewer($viewer)
         ->withPHIDs(array($buildable->getBuildablePHID()))
@@ -426,7 +418,7 @@ final class HarbormasterBuildEngine extends Phobject {
             ->setOldValue($old_status)
             ->setNewValue($new_status);
 
-          $harbormaster_phid = id(new PhabricatorApplicationHarbormaster())
+          $harbormaster_phid = id(new PhabricatorHarbormasterApplication())
             ->getPHID();
 
           $daemon_source = PhabricatorContentSource::newForSource(
@@ -445,6 +437,29 @@ final class HarbormasterBuildEngine extends Phobject {
             array($template));
         }
       }
+    }
+  }
+
+  private function releaseAllArtifacts(HarbormasterBuild $build) {
+    $targets = id(new HarbormasterBuildTargetQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withBuildPHIDs(array($build->getPHID()))
+      ->withBuildGenerations(array($build->getBuildGeneration()))
+      ->execute();
+
+    if (count($targets) === 0) {
+      return;
+    }
+
+    $target_phids = mpull($targets, 'getPHID');
+
+    $artifacts = id(new HarbormasterBuildArtifactQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withBuildTargetPHIDs($target_phids)
+      ->execute();
+
+    foreach ($artifacts as $artifact) {
+      $artifact->release();
     }
 
   }

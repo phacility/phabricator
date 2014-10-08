@@ -9,6 +9,23 @@ final class PhabricatorTokenGiven extends PhabricatorTokenDAO
 
   private $object = self::ATTACHABLE;
 
+  public function getConfiguration() {
+    return array(
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_all' => array(
+          'columns' => array('objectPHID', 'authorPHID'),
+          'unique' => true,
+        ),
+        'key_author' => array(
+          'columns' => array('authorPHID'),
+        ),
+        'key_token' => array(
+          'columns' => array('tokenPHID'),
+        ),
+      ),
+    ) + parent::getConfiguration();
+  }
+
   public function attachObject(PhabricatorTokenReceiverInterface $object) {
     $this->object = $object;
     return $this;

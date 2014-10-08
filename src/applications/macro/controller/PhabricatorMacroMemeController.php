@@ -3,6 +3,10 @@
 final class PhabricatorMacroMemeController
   extends PhabricatorMacroController {
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function processRequest() {
     $request = $this->getRequest();
     $macro_name = $request->getStr('macro');
@@ -15,7 +19,9 @@ final class PhabricatorMacroMemeController
     if ($uri === false) {
       return new Aphront404Response();
     }
-    return id(new AphrontRedirectResponse())->setURI($uri);
+    return id(new AphrontRedirectResponse())
+      ->setIsExternal(true)
+      ->setURI($uri);
   }
 
   public static function generateMacro($user, $macro_name, $upper_text,
@@ -23,6 +29,7 @@ final class PhabricatorMacroMemeController
     $macro = id(new PhabricatorMacroQuery())
       ->setViewer($user)
       ->withNames(array($macro_name))
+      ->needFiles(true)
       ->executeOne();
     if (!$macro) {
       return false;
@@ -31,8 +38,8 @@ final class PhabricatorMacroMemeController
 
     $upper_text = strtoupper($upper_text);
     $lower_text = strtoupper($lower_text);
-    $mixed_text = md5($upper_text).":".md5($lower_text);
-    $hash = "meme".hash("sha256", $mixed_text);
+    $mixed_text = md5($upper_text).':'.md5($lower_text);
+    $hash = 'meme'.hash('sha256', $mixed_text);
     $xform = id(new PhabricatorTransformedFile())
       ->loadOneWhere('originalphid=%s and transform=%s',
         $file->getPHID(), $hash);

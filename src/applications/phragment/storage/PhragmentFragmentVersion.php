@@ -13,12 +13,22 @@ final class PhragmentFragmentVersion extends PhragmentDAO
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'sequence' => 'uint32',
+        'filePHID' => 'phid?',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_version' => array(
+          'columns' => array('fragmentPHID', 'sequence'),
+          'unique' => true,
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhragmentPHIDTypeFragmentVersion::TYPECONST);
+      PhragmentFragmentVersionPHIDType::TYPECONST);
   }
 
   public function getURI() {
@@ -43,7 +53,7 @@ final class PhragmentFragmentVersion extends PhragmentDAO
 
   public function getCapabilities() {
     return array(
-      PhabricatorPolicyCapability::CAN_VIEW
+      PhabricatorPolicyCapability::CAN_VIEW,
     );
   }
 

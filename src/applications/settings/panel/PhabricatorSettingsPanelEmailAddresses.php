@@ -75,7 +75,7 @@ final class PhabricatorSettingsPanelEmailAddresses
         array(
           'class'   => 'button small grey',
           'href'    => $uri->alter('delete', $email->getID()),
-          'sigil'   => 'workflow'
+          'sigil'   => 'workflow',
         ),
         pht('Remove'));
 
@@ -136,8 +136,7 @@ final class PhabricatorSettingsPanelEmailAddresses
 
     if ($editable) {
       $icon = id(new PHUIIconView())
-        ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-        ->setSpriteIcon('new');
+        ->setIconFont('fa-plus');
 
       $button = new PHUIButtonView();
       $button->setText(pht('Add New Address'));
@@ -211,8 +210,8 @@ final class PhabricatorSettingsPanelEmailAddresses
             ->addSubmitButton(pht('Done'));
 
           return id(new AphrontDialogResponse())->setDialog($dialog);
-        } catch (AphrontQueryDuplicateKeyException $ex) {
-          $email = pht('Duplicate');
+        } catch (AphrontDuplicateKeyQueryException $ex) {
+          $e_email = pht('Duplicate');
           $errors[] = pht('Another user already has this email.');
         }
       }
@@ -277,9 +276,14 @@ final class PhabricatorSettingsPanelEmailAddresses
       ->setUser($user)
       ->addHiddenInput('delete', $email_id)
       ->setTitle(pht("Really delete address '%s'?", $address))
-      ->appendChild(phutil_tag('p', array(), pht(
-        'Are you sure you want to delete this address? You will no '.
-        'longer be able to use it to login.')))
+      ->appendParagraph(
+        pht(
+          'Are you sure you want to delete this address? You will no '.
+            'longer be able to use it to login.'))
+      ->appendParagraph(
+        pht(
+          'Note: Removing an email address from your account will invalidate '.
+          'any outstanding password reset links.'))
       ->addSubmitButton(pht('Delete'))
       ->addCancelButton($uri);
 
@@ -313,7 +317,7 @@ final class PhabricatorSettingsPanelEmailAddresses
     $dialog = id(new AphrontDialogView())
       ->setUser($user)
       ->addHiddenInput('verify', $email_id)
-      ->setTitle(pht("Send Another Verification Email?"))
+      ->setTitle(pht('Send Another Verification Email?'))
       ->appendChild(phutil_tag('p', array(), pht(
         'Send another copy of the verification email to %s?',
         $address)))
@@ -329,6 +333,11 @@ final class PhabricatorSettingsPanelEmailAddresses
     $email_id) {
 
     $user = $request->getUser();
+
+    $token = id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
+      $user,
+      $request,
+      $this->getPanelURI());
 
     // NOTE: You can only make your own verified addresses primary.
     $email = id(new PhabricatorUserEmail())->loadOneWhere(
@@ -354,11 +363,16 @@ final class PhabricatorSettingsPanelEmailAddresses
     $dialog = id(new AphrontDialogView())
       ->setUser($user)
       ->addHiddenInput('primary', $email_id)
-      ->setTitle(pht("Change primary email address?"))
-      ->appendChild(phutil_tag('p', array(), pht(
-        'If you change your primary address, Phabricator will send'.
-          ' all email to %s.',
-        $address)))
+      ->setTitle(pht('Change primary email address?'))
+      ->appendParagraph(
+        pht(
+          'If you change your primary address, Phabricator will send all '.
+          'email to %s.',
+          $address))
+      ->appendParagraph(
+        pht(
+          'Note: Changing your primary email address will invalidate any '.
+          'outstanding password reset links.'))
       ->addSubmitButton(pht('Change Primary Address'))
       ->addCancelButton($uri);
 

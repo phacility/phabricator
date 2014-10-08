@@ -5,6 +5,9 @@
  * @{class:PhabricatorEdgeQuery} to load object edges. For more information
  * on edges, see @{article:Using Edges}.
  *
+ * Edges are not directly policy aware, and this editor makes low-level changes
+ * below the policy layer.
+ *
  *    name=Adding Edges
  *    $src  = $earth_phid;
  *    $type = PhabricatorEdgeConfig::TYPE_BODY_HAS_SATELLITE;
@@ -12,19 +15,17 @@
  *
  *    id(new PhabricatorEdgeEditor())
  *      ->addEdge($src, $type, $dst)
- *      ->setActor($user)
  *      ->save();
  *
  * @task edit     Editing Edges
  * @task cycles   Cycle Prevention
  * @task internal Internals
  */
-final class PhabricatorEdgeEditor extends PhabricatorEditor {
+final class PhabricatorEdgeEditor extends Phobject {
 
   private $addEdges = array();
   private $remEdges = array();
   private $openTransactions = array();
-  private $suppressEvents;
 
 
 /* -(  Editing Edges  )------------------------------------------------------ */
@@ -118,8 +119,6 @@ final class PhabricatorEdgeEditor extends PhabricatorEditor {
       static $id = 0;
       $id++;
 
-      $this->sendEvent($id, PhabricatorEventType::TYPE_EDGE_WILLEDITEDGES);
-
       // NOTE: Removes first, then adds, so that "remove + add" is a useful
       // operation meaning "overwrite".
 
@@ -129,8 +128,6 @@ final class PhabricatorEdgeEditor extends PhabricatorEditor {
       foreach ($cycle_types as $cycle_type) {
         $this->detectCycles($src_phids, $cycle_type);
       }
-
-      $this->sendEvent($id, PhabricatorEventType::TYPE_EDGE_DIDEDITEDGES);
 
       $this->saveTransactions();
     } catch (Exception $ex) {
@@ -180,8 +177,9 @@ final class PhabricatorEdgeEditor extends PhabricatorEditor {
       'data'      => $data,
     );
 
-    $inverse = PhabricatorEdgeConfig::getInverse($type);
-    if ($inverse) {
+    $type_obj = PhabricatorEdgeType::getByConstant($type);
+    $inverse = $type_obj->getInverseEdgeConstant();
+    if ($inverse !== null) {
 
       // If `inverse_data` is set, overwrite the edge data. Normally, just
       // write the same data to the inverse edge.
@@ -350,37 +348,6 @@ final class PhabricatorEdgeEditor extends PhabricatorEditor {
     }
   }
 
-  /**
-   * Suppress edge edit events. This prevents listeners from making updates in
-   * response to edits, and is primarily useful when performing migrations. You
-   * should not normally need to use it.
-   *
-   * @param bool True to suppress events related to edits.
-   * @return this
-   * @task internal
-   */
-  public function setSuppressEvents($suppress) {
-    $this->suppressEvents = $suppress;
-    return $this;
-  }
-
-
-  private function sendEvent($edit_id, $event_type) {
-    if ($this->suppressEvents) {
-      return;
-    }
-
-    $event = new PhabricatorEvent(
-      $event_type,
-      array(
-        'id'    => $edit_id,
-        'add'   => $this->addEdges,
-        'rem'   => $this->remEdges,
-      ));
-    $event->setUser($this->getActor());
-    PhutilEventEngine::dispatchEvent($event);
-  }
-
 
 /* -(  Cycle Prevention  )--------------------------------------------------- */
 
@@ -398,7 +365,8 @@ final class PhabricatorEdgeEditor extends PhabricatorEditor {
       $edge_types[$edge['type']] = true;
     }
     foreach ($edge_types as $type => $ignored) {
-      if (!PhabricatorEdgeConfig::shouldPreventCycles($type)) {
+      $type_obj = PhabricatorEdgeType::getByConstant($type);
+      if (!$type_obj->shouldPreventCycles()) {
         unset($edge_types[$type]);
       }
     }

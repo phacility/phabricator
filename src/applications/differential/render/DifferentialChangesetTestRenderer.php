@@ -23,8 +23,7 @@ abstract class DifferentialChangesetTestRenderer
 
   protected function renderPropertyChangeHeader() {
     $changeset = $this->getChangeset();
-    $old = $changeset->getOldProperties();
-    $new = $changeset->getNewProperties();
+    list($old, $new) = $this->getChangesetProperties($changeset);
 
     if (!$old && !$new) {
       return null;
@@ -76,11 +75,13 @@ abstract class DifferentialChangesetTestRenderer
   }
 
 
-  public function renderFileChange($old_file = null,
-                                   $new_file = null,
-                                   $id = 0,
-                                   $vs = 0) {
-    throw new Exception("Not implemented!");
+  public function renderFileChange(
+    $old_file = null,
+    $new_file = null,
+    $id = 0,
+    $vs = 0) {
+
+    throw new PhutilMethodNotImplementedException();
   }
 
 }

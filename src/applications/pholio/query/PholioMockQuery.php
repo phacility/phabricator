@@ -1,14 +1,12 @@
 <?php
 
-/**
- * @group pholio
- */
 final class PholioMockQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $ids;
   private $phids;
   private $authorPHIDs;
+  private $statuses;
 
   private $needCoverFiles;
   private $needImages;
@@ -27,6 +25,11 @@ final class PholioMockQuery
 
   public function withAuthorPHIDs(array $author_phids) {
     $this->authorPHIDs = $author_phids;
+    return $this;
+  }
+
+  public function withStatuses(array $statuses) {
+    $this->statuses = $statuses;
     return $this;
   }
 
@@ -105,6 +108,13 @@ final class PholioMockQuery
         $this->authorPHIDs);
     }
 
+    if ($this->statuses) {
+      $where[] = qsprintf(
+        $conn_r,
+        'status IN (%Ls)',
+        $this->statuses);
+    }
+
     return $this->formatWhereClause($where);
   }
 
@@ -162,7 +172,7 @@ final class PholioMockQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationPholio';
+    return 'PhabricatorPholioApplication';
   }
 
 }

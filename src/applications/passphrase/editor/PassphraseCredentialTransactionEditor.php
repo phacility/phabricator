@@ -3,6 +3,14 @@
 final class PassphraseCredentialTransactionEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  public function getEditorApplicationClass() {
+    return 'PhabricatorPassphraseApplication';
+  }
+
+  public function getEditorObjectsDescription() {
+    return pht('Passphrase Credentials');
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
@@ -15,6 +23,8 @@ final class PassphraseCredentialTransactionEditor
     $types[] = PassphraseCredentialTransaction::TYPE_SECRET_ID;
     $types[] = PassphraseCredentialTransaction::TYPE_DESTROY;
     $types[] = PassphraseCredentialTransaction::TYPE_LOOKEDATSECRET;
+    $types[] = PassphraseCredentialTransaction::TYPE_LOCK;
+    $types[] = PassphraseCredentialTransaction::TYPE_CONDUIT;
 
     return $types;
   }
@@ -35,7 +45,11 @@ final class PassphraseCredentialTransactionEditor
       case PassphraseCredentialTransaction::TYPE_SECRET_ID:
         return $object->getSecretID();
       case PassphraseCredentialTransaction::TYPE_DESTROY:
-        return $object->getIsDestroyed();
+        return (int)$object->getIsDestroyed();
+      case PassphraseCredentialTransaction::TYPE_LOCK:
+        return (int)$object->getIsLocked();
+      case PassphraseCredentialTransaction::TYPE_CONDUIT:
+        return (int)$object->getAllowConduit();
       case PassphraseCredentialTransaction::TYPE_LOOKEDATSECRET:
         return null;
     }
@@ -51,9 +65,13 @@ final class PassphraseCredentialTransactionEditor
       case PassphraseCredentialTransaction::TYPE_DESCRIPTION:
       case PassphraseCredentialTransaction::TYPE_USERNAME:
       case PassphraseCredentialTransaction::TYPE_SECRET_ID:
-      case PassphraseCredentialTransaction::TYPE_DESTROY:
       case PassphraseCredentialTransaction::TYPE_LOOKEDATSECRET:
         return $xaction->getNewValue();
+      case PassphraseCredentialTransaction::TYPE_DESTROY:
+      case PassphraseCredentialTransaction::TYPE_LOCK:
+        return (int)$xaction->getNewValue();
+      case PassphraseCredentialTransaction::TYPE_CONDUIT:
+        return (int)$xaction->getNewValue();
     }
     return parent::getCustomTransactionNewValue($object, $xaction);
   }
@@ -98,6 +116,12 @@ final class PassphraseCredentialTransactionEditor
         return;
       case PassphraseCredentialTransaction::TYPE_LOOKEDATSECRET:
         return;
+      case PassphraseCredentialTransaction::TYPE_LOCK:
+        $object->setIsLocked((int)$xaction->getNewValue());
+        return;
+      case PassphraseCredentialTransaction::TYPE_CONDUIT:
+        $object->setAllowConduit((int)$xaction->getNewValue());
+        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -114,6 +138,8 @@ final class PassphraseCredentialTransactionEditor
       case PassphraseCredentialTransaction::TYPE_SECRET_ID:
       case PassphraseCredentialTransaction::TYPE_DESTROY:
       case PassphraseCredentialTransaction::TYPE_LOOKEDATSECRET:
+      case PassphraseCredentialTransaction::TYPE_LOCK:
+      case PassphraseCredentialTransaction::TYPE_CONDUIT:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         return;

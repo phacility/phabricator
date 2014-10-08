@@ -2,121 +2,85 @@
 
 final class LegalpadDocumentSignatureListController extends LegalpadController {
 
-  private $documentId;
+  private $documentID;
+  private $queryKey;
+  private $document;
 
   public function willProcessRequest(array $data) {
-    $this->documentId = $data['id'];
+    $this->documentID = idx($data, 'id');
+    $this->queryKey = idx($data, 'queryKey');
   }
 
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $document = id(new LegalpadDocumentQuery())
-      ->setViewer($user)
-      ->withIDs(array($this->documentId))
-      ->executeOne();
+    if ($this->documentID) {
+      $document = id(new LegalpadDocumentQuery())
+        ->setViewer($user)
+        ->withIDs(array($this->documentID))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->executeOne();
+      if (!$document) {
+        return new Aphront404Response();
+      }
 
-    if (!$document) {
-      return new Aphront404Response();
+      $this->document = $document;
     }
 
-    $title = pht('Signatures for %s', $document->getMonogram());
+    $engine = id(new LegalpadDocumentSignatureSearchEngine());
 
-    $pager = id(new AphrontCursorPagerView())
-      ->readFromRequest($request);
-    $signatures = id(new LegalpadDocumentSignatureQuery())
-      ->setViewer($user)
-      ->withDocumentPHIDs(array($document->getPHID()))
-      ->executeWithCursorPager($pager);
+    if ($this->document) {
+      $engine->setDocument($this->document);
+    }
 
-    $crumbs = $this->buildApplicationCrumbs($this->buildSideNav());
-    $crumbs->addTextCrumb(
-      $document->getMonogram(),
-      $this->getApplicationURI('view/'.$document->getID()));
+    $controller = id(new PhabricatorApplicationSearchController($request))
+      ->setQueryKey($this->queryKey)
+      ->setSearchEngine($engine)
+      ->setNavigation($this->buildSideNav());
 
-    $crumbs->addTextCrumb(
-      pht('Signatures'));
-    $list = $this->renderResultsList($document, $signatures);
-    $list->setPager($pager);
-
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $list,
-      ),
-      array(
-        'title' => $title,
-        'device' => true,
-      ));
+    return $this->delegateToController($controller);
   }
 
-  private function renderResultsList(
-    LegalpadDocument $document,
-    array $signatures) {
-    assert_instances_of($signatures, 'LegalpadDocumentSignature');
-
+  public function buildSideNav($for_app = false) {
     $user = $this->getRequest()->getUser();
 
-    $list = new PHUIObjectItemListView();
-    $list->setUser($user);
+    $nav = new AphrontSideNavFilterView();
+    $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
-    foreach ($signatures as $signature) {
-      $created = phabricator_date($signature->getDateCreated(), $user);
+    $engine = id(new LegalpadDocumentSignatureSearchEngine())
+      ->setViewer($user);
 
-      $data = $signature->getSignatureData();
-
-      $sig_data = phutil_tag(
-        'div',
-        array(),
-        array(
-          phutil_tag(
-            'div',
-            array(),
-            phutil_tag(
-              'a',
-              array(
-                'href' => 'mailto:'.$data['email'],
-              ),
-              $data['email'])),
-          phutil_tag(
-            'div',
-            array(),
-            $data['address_1']),
-          phutil_tag(
-            'div',
-            array(),
-            $data['address_2']),
-          phutil_tag(
-            'div',
-            array(),
-            $data['phone'])
-          ));
-
-      $item = id(new PHUIObjectItemView())
-        ->setObject($signature)
-        ->setHeader($data['name'])
-        ->setSubhead($sig_data)
-        ->addIcon('none', pht('Signed %s', $created));
-
-      $good_sig = true;
-      if (!$signature->isVerified()) {
-        $item->addFootIcon('disable', 'Unverified Email');
-        $good_sig = false;
-      }
-      if ($signature->getDocumentVersion() != $document->getVersions()) {
-        $item->addFootIcon('delete', 'Stale Signature');
-        $good_sig = false;
-      }
-
-      if ($good_sig) {
-        $item->setBarColor('green');
-      }
-
-      $list->addItem($item);
+    if ($this->document) {
+      $engine->setDocument($this->document);
     }
 
-    return $list;
+    $engine->addNavigationItems($nav->getMenu());
+
+    return $nav;
+  }
+
+  public function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
+
+    if ($this->document) {
+      $crumbs->addTextCrumb(
+        $this->document->getMonogram(),
+        '/'.$this->document->getMonogram());
+      $crumbs->addTextCrumb(
+        pht('Manage'),
+        $this->getApplicationURI('view/'.$this->document->getID().'/'));
+    } else {
+      $crumbs->addTextCrumb(
+        pht('Signatures'),
+        '/legalpad/signatures/');
+    }
+
+    return $crumbs;
   }
 
 }

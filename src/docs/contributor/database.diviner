@@ -115,11 +115,11 @@ We use both autoincrementing IDs and global PHIDs because each is useful in
 different contexts. Autoincrementing IDs are chronologically ordered and allow
 us to construct short, human-readable object names (like D2258) and URIs. Global
 PHIDs allow us to represent relationships between different types of objects in
-a homogenous way.
+a homogeneous way.
 
 For example, the concept of "subscribers" is more powerfully done with PHIDs
-because we could theoretically have users, projects, teams, and more all
-as "subscribers" of other objects. Using an ID column we would need to add a
+because we could theoretically have users, projects, teams, and more all as
+"subscribers" of other objects. Using an ID column we would need to add a
 "type" column to avoid ID collision; using PHIDs does not require this
 additional column.
 
@@ -148,14 +148,15 @@ to avoid it if possible.
 There are three simple steps to update the schema:
 
 # Create a `.sql` file in `resources/sql/patches/`. This file should:
- - Contain the approprate MySQL commands to update the schema.
- - Be named as `YYYYMMDD.patchname.ext`. For example, `20130217.example.sql`.
- - Use `${NAMESPACE}` rather than `phabricator` for database names.
- - Use `COLLATE utf8_bin` for any columns that are to be used as identifiers,
-such as PHID columns. Otherwise, use `COLLATE utf8_general_ci`.
- - Name all indexes so it is possible to delete them later.
+  - Contain the appropriate MySQL commands to update the schema.
+  - Be named as `YYYYMMDD.patchname.ext`. For example, `20130217.example.sql`.
+  - Use `${NAMESPACE}` rather than `phabricator` for database names.
+  - Use `COLLATE utf8_bin` for any columns that are to be used as identifiers,
+    such as PHID columns. Otherwise, use `COLLATE utf8_general_ci`.
+   - Name all indexes so it is possible to delete them later.
 # Edit `src/infrastructure/storage/patch/PhabricatorBuiltinPatchList.php` and
-add your patch to @{method@phabricator:PhabricatorBuiltinPatchList::getPatches}.
+  add your patch to
+  @{method@phabricator:PhabricatorBuiltinPatchList::getPatches}.
 # Run `bin/storage upgrade`.
 
 It is also possible to create more complex patches in PHP for data migration

@@ -38,7 +38,10 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
       ->setViewer($viewer)
       ->execute();
 
-    $resource_list = $this->buildResourceListView($resources);
+    $resource_list = id(new DrydockResourceListView())
+      ->setUser($viewer)
+      ->setResources($resources)
+      ->render();
     $resource_list->setNoDataString(pht('This blueprint has no resources.'));
 
     $pager = new AphrontPagerView();
@@ -58,6 +61,18 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
       ->withObjectPHIDs(array($blueprint->getPHID()))
       ->execute();
 
+    $field_list = PhabricatorCustomField::getObjectFields(
+      $blueprint,
+      PhabricatorCustomField::ROLE_VIEW);
+    $field_list
+      ->setViewer($viewer)
+      ->readFieldsFromStorage($blueprint);
+
+    $field_list->appendFieldsToPropertyList(
+      $blueprint,
+      $viewer,
+      $properties);
+
     $engine = id(new PhabricatorMarkupEngine())
       ->setViewer($viewer);
 
@@ -75,7 +90,6 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
         $timeline,
       ),
       array(
-        'device'  => true,
         'title'   => $title,
       ));
 
@@ -101,7 +115,7 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
       id(new PhabricatorActionView())
         ->setHref($uri)
         ->setName(pht('Edit Blueprint'))
-        ->setIcon('edit')
+        ->setIcon('fa-pencil')
         ->setWorkflow(!$can_edit)
         ->setDisabled(!$can_edit));
 

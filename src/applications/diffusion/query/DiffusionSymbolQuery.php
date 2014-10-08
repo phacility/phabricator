@@ -8,8 +8,6 @@
  * @task config   Configuring the Query
  * @task exec     Executing the Query
  * @task internal Internals
- *
- * @group diffusion
  */
 final class DiffusionSymbolQuery extends PhabricatorOffsetPagedQuery {
 
@@ -119,10 +117,10 @@ final class DiffusionSymbolQuery extends PhabricatorOffsetPagedQuery {
   public function execute() {
     if ($this->name && $this->namePrefix) {
       throw new Exception(
-        "You can not set both a name and a name prefix!");
+        'You can not set both a name and a name prefix!');
     } else if (!$this->name && !$this->namePrefix) {
       throw new Exception(
-        "You must set a name or a name prefix!");
+        'You must set a name or a name prefix!');
     }
 
     $symbol = new PhabricatorRepositorySymbol();
@@ -282,6 +280,5 @@ final class DiffusionSymbolQuery extends PhabricatorOffsetPagedQuery {
       }
     }
   }
-
 
 }

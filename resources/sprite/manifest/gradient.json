@@ -1,60 +1,40 @@
 {
   "version" : 1,
   "sprites" : {
-    "gradient-blue-header"      : {
-      "name" : "gradient-blue-header",
-      "rule" : ".gradient-blue-header",
-      "hash" : "bcfc1d3e93ea8585af5b5ca52b08e944"
-    },
-    "gradient-breadcrumbs"      : {
-      "name" : "gradient-breadcrumbs",
-      "rule" : ".gradient-breadcrumbs",
-      "hash" : "ed46fe9544216513a3958900c688a808"
-    },
-    "gradient-dark-grey-header" : {
+    "gradient-dark-grey-header"   : {
       "name" : "gradient-dark-grey-header",
       "rule" : ".gradient-dark-grey-header",
       "hash" : "e8762dd2849410a7e4fba8f972f946ff"
     },
-    "gradient-dark-menu-label"  : {
-      "name" : "gradient-dark-menu-label",
-      "rule" : ".gradient-dark-menu-label, .phabricator-dark-menu .phui-list-item-type-label",
-      "hash" : "8a11efa454f788aa2419ed8c745dece2"
-    },
-    "gradient-green-header"     : {
-      "name" : "gradient-green-header",
-      "rule" : ".gradient-green-header",
-      "hash" : "848b563e846e187b688e899a9d838e40"
-    },
-    "gradient-grey-header"      : {
+    "gradient-grey-header"        : {
       "name" : "gradient-grey-header",
       "rule" : ".gradient-grey-header",
       "hash" : "1c8f8d61984e3fc5a7e528b9bd4d484a"
     },
-    "gradient-lightblue-header" : {
+    "gradient-lightblue-header"   : {
       "name" : "gradient-lightblue-header",
       "rule" : ".gradient-lightblue-header",
       "hash" : "e7753a6ce63c6822a559266eef9e255b"
     },
-    "gradient-menu-label"       : {
-      "name" : "gradient-menu-label",
-      "rule" : ".gradient-menu-label, .phabricator-side-menu .phui-list-item-type-label",
-      "hash" : "e2aa8e74c3b2c0b18de34d336d318b5c"
+    "gradient-lightgreen-header"  : {
+      "name" : "gradient-lightgreen-header",
+      "rule" : ".gradient-lightgreen-header",
+      "hash" : "87b5c391ea4ea84dd8531fb0f199cbeb"
     },
-    "gradient-red-header"       : {
-      "name" : "gradient-red-header",
-      "rule" : ".gradient-red-header",
-      "hash" : "070a2e01f611bfaf5207be25eebdd6f2"
+    "gradient-lightred-header"    : {
+      "name" : "gradient-lightred-header",
+      "rule" : ".gradient-lightred-header",
+      "hash" : "a367ea9163aa15f52c105b5805cf493e"
     },
-    "gradient-yellow-header"    : {
-      "name" : "gradient-yellow-header",
-      "rule" : ".gradient-yellow-header",
-      "hash" : "166ee67c5201416cfa598c1eb86bf92a"
+    "gradient-lightviolet-header" : {
+      "name" : "gradient-lightviolet-header",
+      "rule" : ".gradient-lightviolet-header",
+      "hash" : "e17e05135e53e1258340cfc27f96f23f"
     }
   },
   "scales"  : [
     1
   ],
-  "header"  : "\/**\n * @provides sprite-gradient-css\n * @generated\n *\/\n\n.sprite-gradient, .phabricator-dark-menu .phui-list-item-type-label, .phabricator-side-menu .phui-list-item-type-label {\n  background-image: url(\/rsrc\/image\/sprite-gradient.png);\n  background-repeat: repeat-x;\n}\n\n\n",
+  "header"  : "\/**\n * @provides sprite-gradient-css\n * @generated\n *\/\n\n.sprite-gradient {\n  background-image: url(\/rsrc\/image\/sprite-gradient.png);\n  background-repeat: repeat-x;\n}\n\n\n",
   "type"    : "repeat-x"
 }

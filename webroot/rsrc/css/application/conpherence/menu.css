@@ -14,7 +14,7 @@
 .conpherence-layout .conpherence-no-threads {
   text-align: center;
   position: fixed;
-  left: 280px;
+  left: 240px;
   right: 241px;
   top: 76px;
   bottom: 0px;
@@ -43,7 +43,7 @@
 
 .device-desktop .conpherence-layout .conpherence-menu-pane,
 .device-desktop .conpherence-layout .phabricator-nav-column-background {
-  width: 280px;
+  width: 239px;
 }
 
 .device .conpherence-menu-pane {
@@ -73,7 +73,7 @@
 }
 
 .device-desktop .conpherence-content-pane {
-  margin-left: 280px;
+  margin-left: 240px;
 }
 
 .conpherence-content-pane {
@@ -89,20 +89,22 @@
 
 .conpherence-menu .conpherence-menu-item-view {
   display: block;
-  height: 55px;
+  height: 46px;
   width: 100%;
   overflow: hidden;
   position: relative;
   text-decoration: none;
-  border-top: solid 1px #3B3D3E;
-  border-bottom: solid 1px #1C1F21;
-  border-right: 0;
-  border-left: 2px solid transparent;
+  border-left: 4px solid transparent;
 }
 
 .conpherence-menu .conpherence-selected {
-  background: rgba(0, 0, 0, .6);
-  border-left: 2px solid #66CCFF;
+  background: {$hovergrey};
+  border-left: 4px solid {$sky};
+}
+
+.device-desktop .conpherence-menu
+ .conpherence-selected.conpherence-menu-item-view:hover {
+  background-color: {$hoverselectedgrey};
 }
 
 .conpherence-menu .loading {
@@ -110,55 +112,53 @@
 }
 
 .device-desktop .conpherence-menu .conpherence-menu-item-view:hover {
-  background-image: url('/rsrc/image/texture/dark-menu-hover.png');
+  background-color: {$hovergrey};
 }
 
 .conpherence-menu .conpherence-menu-item-view .conpherence-menu-item-image {
   top: 6px;
-  left: 6px;
+  left: 8px;
   display: block;
   position: absolute;
-  width: 35px;
-  height: 35px;
-  background-size: 35px;
-  border: 4px solid rgb(29, 32, 34);
-  border-radius: 3px;
+  width: 30px;
+  height: 30px;
+  background-size: 30px;
+  border: 2px solid #fff;
+  border-radius: 2px;
 }
 
 .conpherence-menu .conpherence-menu-item-view .conpherence-menu-item-title {
   display: block;
-  margin-top: 12px;
-  margin-left: 58px;
+  margin-top: 8px;
+  margin-left: 50px;
   text-align: left;
   font-weight: bold;
   font-size: 13px;
-  color: #ffffff;
-  text-shadow: 0px 1px 1px #000000;
+  color: {$darkbluetext};
+  text-shadow: 0px 1px 1px #fff;
   overflow: hidden;
-  width: 140px;
+  width: 160px;
   text-overflow: ellipsis;
 }
 
 .conpherence-menu .conpherence-menu-item-view .conpherence-menu-item-subtitle {
   display: block;
-  color: #a1a5a9;
+  color: {$bluetext};
   font-size: 11px;
   margin-top: 2px;
-  margin-left: 58px;
-  font-style: italic;
+  margin-left: 50px;
 }
 
 .conpherence-menu .conpherence-menu-item-view
 .conpherence-menu-item-unread-count {
   position: absolute;
-  left: 35px;
-  top: 3px;
-  background: {$red};
-  border-radius: 10px;
-  color: #FFF;
+  right: 8px;
+  top: 15px;
+  background: {$blue};
+  border-radius: 2px;
+  color: #fff;
   font-weight: bold;
-  padding: 1px 5px 2px;
-  border: 1px solid #333;
+  padding: 0 5px 1px;
   font-size: 11px;
 }
 
@@ -171,7 +171,7 @@
   position: absolute;
   top: 15px;
   right: 16px;
-  color: #a1a5a9;
+  color: {$bluetext};
   font-size: 11px;
 }
 

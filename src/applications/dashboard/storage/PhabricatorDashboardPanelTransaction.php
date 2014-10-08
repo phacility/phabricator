@@ -4,13 +4,14 @@ final class PhabricatorDashboardPanelTransaction
   extends PhabricatorApplicationTransaction {
 
   const TYPE_NAME = 'dashpanel:name';
+  const TYPE_ARCHIVE = 'dashboard:archive';
 
   public function getApplicationName() {
     return 'dashboard';
   }
 
   public function getApplicationTransactionType() {
-    return PhabricatorDashboardPHIDTypePanel::TYPECONST;
+    return PhabricatorDashboardPanelPHIDType::TYPECONST;
   }
 
   public function getTitle() {
@@ -35,6 +36,16 @@ final class PhabricatorDashboardPanelTransaction
             $author_link,
             $old,
             $new);
+        }
+      case self::TYPE_ARCHIVE:
+        if ($new) {
+          return pht(
+            '%s archived this panel.',
+            $author_link);
+        } else {
+          return pht(
+            '%s activated this panel.',
+            $author_link);
         }
     }
 
@@ -66,6 +77,18 @@ final class PhabricatorDashboardPanelTransaction
             $object_link,
             $old,
             $new);
+        }
+      case self::TYPE_ARCHIVE:
+        if ($new) {
+          return pht(
+            '%s archived dashboard panel %s.',
+            $author_link,
+            $object_link);
+        } else {
+          return pht(
+            '%s activated dashboard panel %s.',
+            $author_link,
+            $object_link);
         }
     }
 

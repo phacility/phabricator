@@ -144,8 +144,10 @@ final class PhabricatorAuthRegisterController
 
     $errors = array();
 
+    $require_real_name = PhabricatorEnv::getEnvConfig('user.require-real-name');
+
     $e_username = strlen($value_username) ? null : true;
-    $e_realname = strlen($value_realname) ? null : true;
+    $e_realname = $require_real_name ? true : null;
     $e_email = strlen($value_email) ? null : true;
     $e_password = true;
     $e_captcha = true;
@@ -161,7 +163,7 @@ final class PhabricatorAuthRegisterController
 
         $captcha_ok = AphrontFormRecaptchaControl::processCaptcha($request);
         if (!$captcha_ok) {
-          $errors[] = pht("Captcha response is incorrect, try again.");
+          $errors[] = pht('Captcha response is incorrect, try again.');
           $e_captcha = pht('Invalid');
         }
       }
@@ -224,7 +226,7 @@ final class PhabricatorAuthRegisterController
 
       if ($can_edit_realname) {
         $value_realname = $request->getStr('realName');
-        if (!strlen($value_realname)) {
+        if (!strlen($value_realname) && $require_real_name) {
           $e_realname = pht('Required');
           $errors[] = pht('Real name is required.');
         } else {
@@ -245,6 +247,11 @@ final class PhabricatorAuthRegisterController
             $verify_email =
               ($account->getEmailVerified()) &&
               ($value_email === $default_email);
+          }
+
+          if ($provider->shouldTrustEmails() &&
+              $value_email === $default_email) {
+            $verify_email = true;
           }
 
           $email_obj = id(new PhabricatorUserEmail())
@@ -297,7 +304,7 @@ final class PhabricatorAuthRegisterController
           }
 
           return $this->loginUser($user);
-        } catch (AphrontQueryDuplicateKeyException $exception) {
+        } catch (AphrontDuplicateKeyQueryException $exception) {
           $same_username = id(new PhabricatorUser())->loadOneWhere(
             'userName = %s',
             $user->getUserName());
@@ -449,7 +456,6 @@ final class PhabricatorAuthRegisterController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 
@@ -472,12 +478,12 @@ final class PhabricatorAuthRegisterController
     if (!$providers) {
       $response = $this->renderError(
         pht(
-          "There are no configured default registration providers."));
+          'There are no configured default registration providers.'));
       return array($account, $provider, $response);
     } else if (count($providers) > 1) {
       $response = $this->renderError(
         pht(
-          "There are too many configured default registration providers."));
+          'There are too many configured default registration providers.'));
       return array($account, $provider, $response);
     }
 
@@ -488,7 +494,7 @@ final class PhabricatorAuthRegisterController
   }
 
   private function loadSetupAccount() {
-    $provider = new PhabricatorAuthProviderPassword();
+    $provider = new PhabricatorPasswordAuthProvider();
     $provider->attachProviderConfig(
       id(new PhabricatorAuthProviderConfig())
         ->setShouldAllowRegistration(1)

@@ -139,18 +139,18 @@ final class ReleephRequestView extends AphrontView {
     if ($viewer_is_pusher) {
       $yes_text = pht('Approve Pull');
       $no_text = pht('Reject Pull');
-      $yes_icon = 'check';
-      $no_icon = 'delete';
+      $yes_icon = 'fa-check';
+      $no_icon = 'fa-times';
     } else if ($viewer_is_requestor) {
       $yes_text = pht('Request Pull');
       $no_text = pht('Cancel Pull');
-      $yes_icon = 'ok';
-      $no_icon = 'delete';
+      $yes_icon = 'fa-check';
+      $no_icon = 'fa-times';
     } else {
       $yes_text = pht('Support Pull');
       $no_text = pht('Discourage Pull');
-      $yes_icon = 'like';
-      $no_icon = 'dislike';
+      $yes_icon = 'fa-thumbs-o-up';
+      $no_icon = 'fa-thumbs-o-down';
     }
 
     $yes_href = '/releeph/request/action/want/'.$id.'/';
@@ -211,7 +211,7 @@ final class ReleephRequestView extends AphrontView {
             ->setRenderAsForm($use_workflow)
             ->addSigil('releeph-request-state-change')
             ->addSigil('mark-manually-picked')
-            ->setIcon('warning'));
+            ->setIcon('fa-exclamation-triangle'));
       }
     }
 
@@ -220,7 +220,7 @@ final class ReleephRequestView extends AphrontView {
       $view->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Edit Pull Request'))
-          ->setIcon('edit')
+          ->setIcon('fa-pencil')
           ->setHref($edit_uri));
     }
 

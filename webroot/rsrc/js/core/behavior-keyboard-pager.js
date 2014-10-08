@@ -8,7 +8,7 @@
 JX.behavior('phabricator-keyboard-pager', function(config) {
 
   new JX.KeyboardShortcut('[', 'Prev Page')
-    .setHandler(function(manager) {
+    .setHandler(function() {
       if (config.prev) {
         JX.$U(config.prev).go();
       }
@@ -16,7 +16,7 @@ JX.behavior('phabricator-keyboard-pager', function(config) {
     .register();
 
   new JX.KeyboardShortcut(']', 'Next Page')
-    .setHandler(function(manager) {
+    .setHandler(function() {
       if (config.next) {
         JX.$U(config.next).go();
       }

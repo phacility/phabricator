@@ -11,6 +11,24 @@ final class PhragmentSnapshotChild extends PhragmentDAO
   private $fragment = self::ATTACHABLE;
   private $fragmentVersion = self::ATTACHABLE;
 
+  public function getConfiguration() {
+    return array(
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'fragmentVersionPHID' => 'phid?',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_child' => array(
+          'columns' => array(
+            'snapshotPHID',
+            'fragmentPHID',
+            'fragmentVersionPHID',
+          ),
+          'unique' => true,
+        ),
+      ),
+    ) + parent::getConfiguration();
+  }
+
   public function getSnapshot() {
     return $this->assertAttached($this->snapshot);
   }
@@ -44,7 +62,7 @@ final class PhragmentSnapshotChild extends PhragmentDAO
 
   public function getCapabilities() {
     return array(
-      PhabricatorPolicyCapability::CAN_VIEW
+      PhabricatorPolicyCapability::CAN_VIEW,
     );
   }
 

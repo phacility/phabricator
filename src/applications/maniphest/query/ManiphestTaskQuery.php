@@ -3,11 +3,8 @@
 /**
  * Query tasks by specific criteria. This class uses the higher-performance
  * but less-general Maniphest indexes to satisfy queries.
- *
- * @group maniphest
  */
-final class ManiphestTaskQuery
-  extends PhabricatorCursorPagedPolicyAwareQuery {
+final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $taskIDs             = array();
   private $taskPHIDs           = array();
@@ -95,6 +92,22 @@ final class ManiphestTaskQuery
     return $this;
   }
 
+  /**
+   * Add an additional "all projects" constraint to existing filters.
+   *
+   * This is used by boards to supplement queries.
+   *
+   * @param list<phid> List of project PHIDs to add to any existing constraint.
+   * @return this
+   */
+  public function addWithAllProjects(array $projects) {
+    if ($this->projectPHIDs === null) {
+      $this->projectPHIDs = array();
+    }
+
+    return $this->withAllProjects(array_merge($this->projectPHIDs, $projects));
+  }
+
   public function withoutProjects(array $projects) {
     $this->xprojectPHIDs = $projects;
     return $this;
@@ -166,7 +179,6 @@ final class ManiphestTaskQuery
   }
 
   public function loadPage() {
-
     // TODO: (T603) It is possible for a user to find the PHID of a project
     // they can't see, then query for tasks in that project and deduce the
     // identity of unknown/invisible projects. Before we allow the user to
@@ -194,28 +206,28 @@ final class ManiphestTaskQuery
     if ($this->dateCreatedAfter) {
       $where[] = qsprintf(
         $conn,
-        'dateCreated >= %d',
+        'task.dateCreated >= %d',
         $this->dateCreatedAfter);
     }
 
     if ($this->dateCreatedBefore) {
       $where[] = qsprintf(
         $conn,
-        'dateCreated <= %d',
+        'task.dateCreated <= %d',
         $this->dateCreatedBefore);
     }
 
     if ($this->dateModifiedAfter) {
       $where[] = qsprintf(
         $conn,
-        'dateModified >= %d',
+        'task.dateModified >= %d',
         $this->dateModifiedAfter);
     }
 
     if ($this->dateModifiedBefore) {
       $where[] = qsprintf(
         $conn,
-        'dateModified <= %d',
+        'task.dateModified <= %d',
         $this->dateModifiedBefore);
     }
 
@@ -231,7 +243,7 @@ final class ManiphestTaskQuery
       // query. We sum the project count and require it be the same as the
       // number of projects we're searching for.
 
-      $count = ', COUNT(project.projectPHID) projectCount';
+      $count = ', COUNT(project.dst) projectCount';
       $having = qsprintf(
         $conn,
         'HAVING projectCount = %d',
@@ -304,10 +316,37 @@ final class ManiphestTaskQuery
       $projects = mpull($projects, null, 'getPHID');
 
       foreach ($tasks as $key => $task) {
+        if (!$task->getGroupByProjectPHID()) {
+          // This task is either not in any projects, or only in projects
+          // which we're ignoring because they're being queried for explicitly.
+          continue;
+        }
+
         if (empty($projects[$task->getGroupByProjectPHID()])) {
           unset($tasks[$key]);
         }
       }
+    }
+
+    return $tasks;
+  }
+
+  protected function didFilterPage(array $tasks) {
+    // TODO: Eventually, we should make this optional and introduce a
+    // needProjectPHIDs() method, but for now there's a lot of code which
+    // assumes the data is always populated.
+
+    $edge_query = id(new PhabricatorEdgeQuery())
+      ->withSourcePHIDs(mpull($tasks, 'getPHID'))
+      ->withEdgeTypes(
+        array(
+          PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+        ));
+    $edge_query->execute();
+
+    foreach ($tasks as $task) {
+      $phids = $edge_query->getDestinationPHIDs(array($task->getPHID()));
+      $task->attachProjectPHIDs($phids);
     }
 
     return $tasks;
@@ -336,7 +375,6 @@ final class ManiphestTaskQuery
   }
 
   private function buildStatusWhereClause(AphrontDatabaseConnection $conn) {
-
     static $map = array(
       self::STATUS_RESOLVED   => ManiphestTaskStatus::STATUS_CLOSED_RESOLVED,
       self::STATUS_WONTFIX    => ManiphestTaskStatus::STATUS_CLOSED_WONTFIX,
@@ -391,7 +429,6 @@ final class ManiphestTaskQuery
     return null;
   }
 
-
   private function buildAuthorWhereClause(AphrontDatabaseConnection $conn) {
     if (!$this->authorPHIDs) {
       return null;
@@ -439,13 +476,13 @@ final class ManiphestTaskQuery
     // In doing a fulltext search, we first find all the PHIDs that match the
     // fulltext search, and then use that to limit the rest of the search
     $fulltext_query = id(new PhabricatorSavedQuery())
-      ->setEngineClassName('PhabricatorSearchApplicaionSearchEngine')
+      ->setEngineClassName('PhabricatorSearchApplicationSearchEngine')
       ->setParameter('query', $this->fullTextSearch);
 
     // NOTE: Setting this to something larger than 2^53 will raise errors in
     // ElasticSearch, and billions of results won't fit in memory anyway.
     $fulltext_query->setParameter('limit', 100000);
-    $fulltext_query->setParameter('type', ManiphestPHIDTypeTask::TYPECONST);
+    $fulltext_query->setParameter('type', ManiphestTaskPHIDType::TYPECONST);
 
     $engine = PhabricatorSearchEngineSelector::newSelector()->newEngine();
     $fulltext_results = $engine->executeSearch($fulltext_query);
@@ -480,13 +517,13 @@ final class ManiphestTaskQuery
     if ($this->projectPHIDs) {
       $parts[] = qsprintf(
         $conn,
-        'project.projectPHID in (%Ls)',
+        'project.dst in (%Ls)',
         $this->projectPHIDs);
     }
     if ($this->includeNoProject) {
       $parts[] = qsprintf(
         $conn,
-        'project.projectPHID IS NULL');
+        'project.dst IS NULL');
     }
 
     return '('.implode(') OR (', $parts).')';
@@ -499,7 +536,7 @@ final class ManiphestTaskQuery
 
     return qsprintf(
       $conn,
-      'anyproject.projectPHID IN (%Ls)',
+      'anyproject.dst IN (%Ls)',
       $this->anyProjectPHIDs);
   }
 
@@ -520,7 +557,7 @@ final class ManiphestTaskQuery
 
     return qsprintf(
       $conn,
-      'anyproject.projectPHID IN (%Ls)',
+      'anyproject.dst IN (%Ls)',
       $any_user_project_phids);
   }
 
@@ -531,10 +568,12 @@ final class ManiphestTaskQuery
 
     return qsprintf(
       $conn,
-      'xproject.projectPHID IS NULL');
+      'xproject.dst IS NULL');
   }
 
   private function buildCustomOrderClause(AphrontDatabaseConnection $conn) {
+    $reverse = ($this->getBeforeID() xor $this->getReversePaging());
+
     $order = array();
 
     switch ($this->groupBy) {
@@ -556,32 +595,34 @@ final class ManiphestTaskQuery
         throw new Exception("Unknown group query '{$this->groupBy}'!");
     }
 
-    switch ($this->orderBy) {
-      case self::ORDER_PRIORITY:
-        $order[] = 'priority';
-        $order[] = 'subpriority';
-        $order[] = 'dateModified';
-        break;
-      case self::ORDER_CREATED:
-        $order[] = 'id';
-        break;
-      case self::ORDER_MODIFIED:
-        $order[] = 'dateModified';
-        break;
-      case self::ORDER_TITLE:
-        $order[] = 'title';
-        break;
-      default:
-        throw new Exception("Unknown order query '{$this->orderBy}'!");
+    $app_order = $this->buildApplicationSearchOrders($conn, $reverse);
+
+    if (!$app_order) {
+      switch ($this->orderBy) {
+        case self::ORDER_PRIORITY:
+          $order[] = 'priority';
+          $order[] = 'subpriority';
+          $order[] = 'dateModified';
+          break;
+        case self::ORDER_CREATED:
+          $order[] = 'id';
+          break;
+        case self::ORDER_MODIFIED:
+          $order[] = 'dateModified';
+          break;
+        case self::ORDER_TITLE:
+          $order[] = 'title';
+          break;
+        default:
+          throw new Exception("Unknown order query '{$this->orderBy}'!");
+      }
     }
 
     $order = array_unique($order);
 
-    if (empty($order)) {
+    if (empty($order) && empty($app_order)) {
       return null;
     }
-
-    $reverse = ($this->getBeforeID() xor $this->getReversePaging());
 
     foreach ($order as $k => $column) {
       switch ($column) {
@@ -616,35 +657,53 @@ final class ManiphestTaskQuery
       }
     }
 
+    if ($app_order) {
+      foreach ($app_order as $order_by) {
+        $order[] = $order_by;
+      }
+
+      if ($reverse) {
+        $order[] = 'task.id ASC';
+      } else {
+        $order[] = 'task.id DESC';
+      }
+    }
+
     return 'ORDER BY '.implode(', ', $order);
   }
 
   private function buildJoinsClause(AphrontDatabaseConnection $conn_r) {
-    $project_dao = new ManiphestTaskProject();
+    $edge_table = PhabricatorEdgeConfig::TABLE_NAME_EDGE;
 
     $joins = array();
 
     if ($this->projectPHIDs || $this->includeNoProject) {
       $joins[] = qsprintf(
         $conn_r,
-        '%Q JOIN %T project ON project.taskPHID = task.phid',
+        '%Q JOIN %T project ON project.src = task.phid
+          AND project.type = %d',
         ($this->includeNoProject ? 'LEFT' : ''),
-        $project_dao->getTableName());
+        $edge_table,
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
     }
 
     if ($this->anyProjectPHIDs || $this->anyUserProjectPHIDs) {
       $joins[] = qsprintf(
         $conn_r,
-        'JOIN %T anyproject ON anyproject.taskPHID = task.phid',
-        $project_dao->getTableName());
+        'JOIN %T anyproject ON anyproject.src = task.phid
+          AND anyproject.type = %d',
+        $edge_table,
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
     }
 
     if ($this->xprojectPHIDs) {
       $joins[] = qsprintf(
         $conn_r,
-        'LEFT JOIN %T xproject ON xproject.taskPHID = task.phid
-          AND xproject.projectPHID IN (%Ls)',
-        $project_dao->getTableName(),
+        'LEFT JOIN %T xproject ON xproject.src = task.phid
+          AND xproject.type = %d
+          AND xproject.dst IN (%Ls)',
+        $edge_table,
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
         $this->xprojectPHIDs);
     }
 
@@ -662,20 +721,24 @@ final class ManiphestTaskQuery
         if ($ignore_group_phids) {
           $joins[] = qsprintf(
             $conn_r,
-            'LEFT JOIN %T projectGroup ON task.phid = projectGroup.taskPHID
-              AND projectGroup.projectPHID NOT IN (%Ls)',
-            $project_dao->getTableName(),
+            'LEFT JOIN %T projectGroup ON task.phid = projectGroup.src
+              AND projectGroup.type = %d
+              AND projectGroup.dst NOT IN (%Ls)',
+            $edge_table,
+            PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
             $ignore_group_phids);
         } else {
           $joins[] = qsprintf(
             $conn_r,
-            'LEFT JOIN %T projectGroup ON task.phid = projectGroup.taskPHID',
-            $project_dao->getTableName());
+            'LEFT JOIN %T projectGroup ON task.phid = projectGroup.src
+              AND projectGroup.type = %d',
+            $edge_table,
+            PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
         }
         $joins[] = qsprintf(
           $conn_r,
           'LEFT JOIN %T projectGroupName
-            ON projectGroup.projectPHID = projectGroupName.indexedObjectPHID',
+            ON projectGroup.dst = projectGroupName.indexedObjectPHID',
           id(new ManiphestNameIndex())->getTableName());
         break;
     }
@@ -696,7 +759,7 @@ final class ManiphestTaskQuery
     // task IDs.
     if ($joined_multiple_rows) {
       if ($joined_project_name) {
-        return 'GROUP BY task.phid, projectGroup.projectPHID';
+        return 'GROUP BY task.phid, projectGroup.dst';
       } else {
         return 'GROUP BY task.phid';
       }
@@ -856,55 +919,65 @@ final class ManiphestTaskQuery
         throw new Exception("Unknown group query '{$this->groupBy}'!");
     }
 
-    switch ($this->orderBy) {
-      case self::ORDER_PRIORITY:
-        if ($this->groupBy != self::GROUP_PRIORITY) {
+    $app_columns = $this->buildApplicationSearchPagination($conn_r, $cursor);
+    if ($app_columns) {
+      $columns = array_merge($columns, $app_columns);
+      $columns[] = array(
+        'name' => 'task.id',
+        'value' => (int)$cursor->getID(),
+        'type' => 'int',
+      );
+    } else {
+      switch ($this->orderBy) {
+        case self::ORDER_PRIORITY:
+          if ($this->groupBy != self::GROUP_PRIORITY) {
+            $columns[] = array(
+              'name' => 'task.priority',
+              'value' => (int)$cursor->getPriority(),
+              'type' => 'int',
+            );
+          }
           $columns[] = array(
-            'name' => 'task.priority',
-            'value' => (int)$cursor->getPriority(),
+            'name' => 'task.subpriority',
+            'value' => (int)$cursor->getSubpriority(),
+            'type' => 'int',
+            'reverse' => true,
+          );
+          $columns[] = array(
+            'name' => 'task.dateModified',
+            'value' => (int)$cursor->getDateModified(),
             'type' => 'int',
           );
-        }
-        $columns[] = array(
-          'name' => 'task.subpriority',
-          'value' => (int)$cursor->getSubpriority(),
-          'type' => 'int',
-          'reverse' => true,
-        );
-        $columns[] = array(
-          'name' => 'task.dateModified',
-          'value' => (int)$cursor->getDateModified(),
-          'type' => 'int',
-        );
-        break;
-      case self::ORDER_CREATED:
-        $columns[] = array(
-          'name' => 'task.id',
-          'value' => (int)$cursor->getID(),
-          'type' => 'int',
-        );
-        break;
-      case self::ORDER_MODIFIED:
-        $columns[] = array(
-          'name' => 'task.dateModified',
-          'value' => (int)$cursor->getDateModified(),
-          'type' => 'int',
-        );
-        break;
-      case self::ORDER_TITLE:
-        $columns[] = array(
-          'name' => 'task.title',
-          'value' => $cursor->getTitle(),
-          'type' => 'string',
-        );
-        $columns[] = array(
-          'name' => 'task.id',
-          'value' => $cursor->getID(),
-          'type' => 'int',
-        );
-        break;
-      default:
-        throw new Exception("Unknown order query '{$this->orderBy}'!");
+          break;
+        case self::ORDER_CREATED:
+          $columns[] = array(
+            'name' => 'task.id',
+            'value' => (int)$cursor->getID(),
+            'type' => 'int',
+          );
+          break;
+        case self::ORDER_MODIFIED:
+          $columns[] = array(
+            'name' => 'task.dateModified',
+            'value' => (int)$cursor->getDateModified(),
+            'type' => 'int',
+          );
+          break;
+        case self::ORDER_TITLE:
+          $columns[] = array(
+            'name' => 'task.title',
+            'value' => $cursor->getTitle(),
+            'type' => 'string',
+          );
+          $columns[] = array(
+            'name' => 'task.id',
+            'value' => $cursor->getID(),
+            'type' => 'int',
+          );
+          break;
+        default:
+          throw new Exception("Unknown order query '{$this->orderBy}'!");
+      }
     }
 
     return $this->buildPagingClauseFromMultipleColumns(
@@ -919,9 +992,8 @@ final class ManiphestTaskQuery
     return 'task.phid';
   }
 
-
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationManiphest';
+    return 'PhabricatorManiphestApplication';
   }
 
 }

@@ -16,6 +16,12 @@ try {
   PhabricatorStartup::loadCoreLibraries();
 
   PhabricatorEnv::initializeWebEnvironment();
+
+  $debug_time_limit = PhabricatorEnv::getEnvConfig('debug.time-limit');
+  if ($debug_time_limit) {
+    PhabricatorStartup::setDebugTimeLimit($debug_time_limit);
+  }
+
   $show_unexpected_traces = PhabricatorEnv::getEnvConfig(
     'phabricator.developer-mode');
 
@@ -118,7 +124,8 @@ try {
             'z-index: 200000;'.
             'position: relative;'.
             'padding: 8px;'.
-            'font-family: monospace'),
+            'font-family: monospace',
+          ),
           $unexpected_output);
       }
     }
@@ -129,7 +136,7 @@ try {
     $access_log->write();
     if ($original_exception) {
       $ex = new PhutilAggregateException(
-        "Multiple exceptions during processing and rendering.",
+        'Multiple exceptions during processing and rendering.',
         array(
           $original_exception,
           $ex,

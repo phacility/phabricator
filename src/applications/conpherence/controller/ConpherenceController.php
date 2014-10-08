@@ -1,9 +1,7 @@
 <?php
 
-/**
- * @group conpherence
- */
 abstract class ConpherenceController extends PhabricatorController {
+
   private $conpherences;
 
   public function buildApplicationMenu() {
@@ -40,13 +38,13 @@ abstract class ConpherenceController extends PhabricatorController {
         id(new PHUIListItemView())
         ->setName(pht('New Message'))
         ->setHref($this->getApplicationURI('new/'))
-        ->setIcon('create')
+        ->setIcon('fa-plus-square')
         ->setWorkflow(true))
       ->addAction(
         id(new PHUIListItemView())
         ->setName(pht('Thread'))
         ->setHref('#')
-        ->setIcon('action-menu')
+        ->setIcon('fa-bars')
         ->setStyle('display: none;')
         ->addClass('device-widgets-selector')
         ->addSigil('device-widgets-selector'));
@@ -72,10 +70,11 @@ abstract class ConpherenceController extends PhabricatorController {
         phutil_tag(
           'div',
           array(
-            'class' => 'header-loading-mask'
+            'class' => 'header-loading-mask',
           ),
           ''),
-        $crumbs));
+        $crumbs,
+      ));
   }
 
   protected function renderConpherenceTransactions(
@@ -149,8 +148,8 @@ abstract class ConpherenceController extends PhabricatorController {
     return array(
       'transactions' => $rendered_transactions,
       'latest_transaction_id' => $latest_transaction_id,
-      'oldest_transaction_id' => $oldest_transaction_id
+      'oldest_transaction_id' => $oldest_transaction_id,
     );
-
   }
+
 }

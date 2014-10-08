@@ -1,12 +1,9 @@
 <?php
 
-/**
- * @group paste
- */
 final class PasteMockMailReceiver extends PhabricatorObjectMailReceiver {
 
   public function isEnabled() {
-    $app_class = 'PhabricatorApplicationPaste';
+    $app_class = 'PhabricatorPasteApplication';
     return PhabricatorApplication::isClassInstalled($app_class);
   }
 

@@ -5,7 +5,7 @@
  * @provides javelin-behavior-phabricator-notification-example
  */
 
-JX.behavior('phabricator-notification-example', function(config) {
+JX.behavior('phabricator-notification-example', function() {
 
   var sequence = 0;
 
@@ -39,7 +39,7 @@ JX.behavior('phabricator-notification-example', function(config) {
           notification.listen(
             'activate',
             function() {
-              if (!confirm("Close notification?")) {
+              if (!confirm('Close notification?')) {
                 JX.Stratcom.context().kill();
               }
             });

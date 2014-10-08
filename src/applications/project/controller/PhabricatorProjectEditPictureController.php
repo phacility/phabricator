@@ -50,6 +50,7 @@ final class PhabricatorProjectEditPictureController
             $_FILES['picture'],
             array(
               'authorPHID' => $viewer->getPHID(),
+              'canCDN' => true,
             ));
         } else {
           $e_file = pht('Required');
@@ -166,7 +167,8 @@ final class PhabricatorProjectEditPictureController
             'name'  => 'phid',
             'value' => $phid,
           )),
-        $button);
+        $button,
+      );
 
       $button = phabricator_form(
         $viewer,
@@ -266,7 +268,6 @@ final class PhabricatorProjectEditPictureController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 }

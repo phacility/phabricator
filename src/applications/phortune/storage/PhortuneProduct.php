@@ -1,25 +1,18 @@
 <?php
 
 /**
- * A product is something users can purchase. It may be a one-time purchase,
- * or a plan which is billed monthly.
+ * A product is something users can purchase.
  */
 final class PhortuneProduct extends PhortuneDAO
   implements PhabricatorPolicyInterface {
 
-  const TYPE_BILL_ONCE      = 'phortune:thing';
-  const TYPE_BILL_PLAN      = 'phortune:plan';
+  protected $productClassKey;
+  protected $productClass;
+  protected $productRefKey;
+  protected $productRef;
+  protected $metadata = array();
 
-  const STATUS_ACTIVE       = 'product:active';
-  const STATUS_DISABLED     = 'product:disabled';
-
-  protected $productName;
-  protected $productType;
-  protected $status = self::STATUS_ACTIVE;
-  protected $priceInCents;
-  protected $billingIntervalInMonths;
-  protected $trialPeriodInDays;
-  protected $metadata;
+  private $implementation = self::ATTACHABLE;
 
   public function getConfiguration() {
     return array(
@@ -27,32 +20,62 @@ final class PhortuneProduct extends PhortuneDAO
       self::CONFIG_SERIALIZATION => array(
         'metadata' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'productClassKey' => 'bytes12',
+        'productClass' => 'text128',
+        'productRefKey' => 'bytes12',
+        'productRef' => 'text128',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_product' => array(
+          'columns' => array('productClassKey', 'productRefKey'),
+          'unique' => true,
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_PDCT);
+      PhortuneProductPHIDType::TYPECONST);
   }
 
-  public static function getTypeMap() {
-    return array(
-      self::TYPE_BILL_ONCE => pht('Product (Charged Once)'),
-      self::TYPE_BILL_PLAN => pht('Flat Rate Plan (Charged Monthly)'),
-    );
+  public static function initializeNewProduct() {
+    return id(new PhortuneProduct());
   }
 
-  public function getTypeName() {
-    return idx(self::getTypeMap(), $this->getProductType());
+  public function attachImplementation(PhortuneProductImplementation $impl) {
+    $this->implementation = $impl;
   }
 
-  public function getPriceInCents() {
-    $price = parent::getPriceInCents();
-    if ($price === null) {
-      return $price;
-    } else {
-      return (int)parent::getPriceInCents();
-    }
+  public function getImplementation() {
+    return $this->assertAttached($this->implementation);
+  }
+
+  public function save() {
+    $this->productClassKey = PhabricatorHash::digestForIndex(
+      $this->productClass);
+
+    $this->productRefKey = PhabricatorHash::digestForIndex(
+      $this->productRef);
+
+    return parent::save();
+  }
+
+  public function getPriceAsCurrency() {
+    return $this->getImplementation()->getPriceAsCurrency($this);
+  }
+
+  public function getProductName() {
+    return $this->getImplementation()->getName($this);
+  }
+
+  public function getPurchaseName(PhortunePurchase $purchase) {
+    return $this->getImplementation()->getPurchaseName($this, $purchase);
+  }
+
+  public function didPurchaseProduct(PhortunePurchase $purchase) {
+    return $this->getImplementation()->didPurchaseProduct($this, $purchase);
   }
 
 

@@ -1,7 +1,12 @@
 <?php
 
 /**
- * @task hisec High Security Mode
+ *
+ * @task use      Using Sessions
+ * @task new      Creating Sessions
+ * @task hisec    High Security
+ * @task partial  Partial Sessions
+ * @task onetime  One Time Login URIs
  */
 final class PhabricatorAuthSessionEngine extends Phobject {
 
@@ -35,6 +40,23 @@ final class PhabricatorAuthSessionEngine extends Phobject {
 
 
   /**
+   * Temporary tokens for one time logins.
+   */
+  const ONETIME_TEMPORARY_TOKEN_TYPE = 'login:onetime';
+
+
+  /**
+   * Temporary tokens for password recovery after one time login.
+   */
+  const PASSWORD_TEMPORARY_TOKEN_TYPE = 'login:password';
+
+  const ONETIME_RECOVER = 'recover';
+  const ONETIME_RESET = 'reset';
+  const ONETIME_WELCOME = 'welcome';
+  const ONETIME_USERNAME = 'rename';
+
+
+  /**
    * Get the session kind (e.g., anonymous, user, external account) from a
    * session token. Returns a `KIND_` constant.
    *
@@ -60,6 +82,23 @@ final class PhabricatorAuthSessionEngine extends Phobject {
   }
 
 
+  /**
+   * Load the user identity associated with a session of a given type,
+   * identified by token.
+   *
+   * When the user presents a session token to an API, this method verifies
+   * it is of the correct type and loads the corresponding identity if the
+   * session exists and is valid.
+   *
+   * NOTE: `$session_type` is the type of session that is required by the
+   * loading context. This prevents use of a Conduit sesssion as a Web
+   * session, for example.
+   *
+   * @param const The type of session to load.
+   * @param string The session token.
+   * @return PhabricatorUser|null
+   * @task use
+   */
   public function loadUserForSession($session_type, $session_token) {
     $session_kind = self::getSessionKindFromToken($session_token);
     switch ($session_kind) {
@@ -94,6 +133,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
           s.sessionExpires AS s_sessionExpires,
           s.sessionStart AS s_sessionStart,
           s.highSecurityUntil AS s_highSecurityUntil,
+          s.isPartial AS s_isPartial,
           u.*
         FROM %T u JOIN %T s ON u.phid = s.userPHID
         AND s.type = %s AND s.sessionKey = %s',
@@ -124,6 +164,9 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     // If more than 20% of the time on this session has been used, refresh the
     // TTL back up to the full duration. The idea here is that sessions are
     // good forever if used regularly, but get GC'd when they fall out of use.
+
+    // NOTE: If we begin rotating session keys when extending sessions, the
+    // CSRF code needs to be updated so CSRF tokens survive session rotation.
 
     if (time() + (0.80 * $ttl) > $session->getSessionExpires()) {
       $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
@@ -159,9 +202,10 @@ final class PhabricatorAuthSessionEngine extends Phobject {
    *                    @{class:PhabricatorAuthSession}).
    * @param   phid|null Identity to establish a session for, usually a user
    *                    PHID. With `null`, generates an anonymous session.
+   * @param   bool      True to issue a partial session.
    * @return  string    Newly generated session key.
    */
-  public function establishSession($session_type, $identity_phid) {
+  public function establishSession($session_type, $identity_phid, $partial) {
     // Consume entropy to generate a new session key, forestalling the eventual
     // heat death of the universe.
     $session_key = Filesystem::readRandomCharacters(40);
@@ -176,31 +220,77 @@ final class PhabricatorAuthSessionEngine extends Phobject {
     // This has a side effect of validating the session type.
     $session_ttl = PhabricatorAuthSession::getSessionTypeTTL($session_type);
 
+    $digest_key = PhabricatorHash::digest($session_key);
+
     // Logging-in users don't have CSRF stuff yet, so we have to unguard this
     // write.
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
       id(new PhabricatorAuthSession())
         ->setUserPHID($identity_phid)
         ->setType($session_type)
-        ->setSessionKey(PhabricatorHash::digest($session_key))
+        ->setSessionKey($digest_key)
         ->setSessionStart(time())
         ->setSessionExpires(time() + $session_ttl)
+        ->setIsPartial($partial ? 1 : 0)
         ->save();
 
       $log = PhabricatorUserLog::initializeNewLog(
         null,
         $identity_phid,
-        PhabricatorUserLog::ACTION_LOGIN);
+        ($partial
+          ? PhabricatorUserLog::ACTION_LOGIN_PARTIAL
+          : PhabricatorUserLog::ACTION_LOGIN));
+
       $log->setDetails(
         array(
           'session_type' => $session_type,
         ));
-      $log->setSession($session_key);
+      $log->setSession($digest_key);
       $log->save();
     unset($unguarded);
 
     return $session_key;
   }
+
+
+  /**
+   * Terminate all of a user's login sessions.
+   *
+   * This is used when users change passwords, linked accounts, or add
+   * multifactor authentication.
+   *
+   * @param PhabricatorUser User whose sessions should be terminated.
+   * @param string|null Optionally, one session to keep. Normally, the current
+   *   login session.
+   *
+   * @return void
+   */
+  public function terminateLoginSessions(
+    PhabricatorUser $user,
+    $except_session = null) {
+
+    $sessions = id(new PhabricatorAuthSessionQuery())
+      ->setViewer($user)
+      ->withIdentityPHIDs(array($user->getPHID()))
+      ->execute();
+
+    if ($except_session !== null) {
+      $except_session = PhabricatorHash::digest($except_session);
+    }
+
+    foreach ($sessions as $key => $session) {
+      if ($except_session !== null) {
+        if ($except_session == $session->getSessionKey()) {
+          continue;
+        }
+      }
+
+      $session->delete();
+    }
+  }
+
+
+/* -(  High Security  )------------------------------------------------------ */
 
 
   /**
@@ -213,12 +303,17 @@ final class PhabricatorAuthSessionEngine extends Phobject {
    * @param PhabricatorUser User whose session needs to be in high security.
    * @param AphrontReqeust  Current request.
    * @param string          URI to return the user to if they cancel.
+   * @param bool            True to jump partial sessions directly into high
+   *                        security instead of just upgrading them to full
+   *                        sessions.
    * @return PhabricatorAuthHighSecurityToken Security token.
+   * @task hisec
    */
   public function requireHighSecuritySession(
     PhabricatorUser $viewer,
     AphrontRequest $request,
-    $cancel_uri) {
+    $cancel_uri,
+    $jump_into_hisec = false) {
 
     if (!$viewer->hasSession()) {
       throw new Exception(
@@ -287,6 +382,13 @@ final class PhabricatorAuthSessionEngine extends Phobject {
             new PhabricatorAuthTryFactorAction(),
             -1);
 
+          if ($session->getIsPartial() && !$jump_into_hisec) {
+            // If we have a partial session and are not jumping directly into
+            // hisec, just issue a token without putting it in high security
+            // mode.
+            return $this->issueHighSecurityToken($session, true);
+          }
+
           $until = time() + phutil_units('15 minutes in seconds');
           $session->setHighSecurityUntil($until);
 
@@ -303,9 +405,6 @@ final class PhabricatorAuthSessionEngine extends Phobject {
             PhabricatorUserLog::ACTION_ENTER_HISEC);
           $log->save();
         } else {
-
-
-
           $log = PhabricatorUserLog::initializeNewLog(
             $viewer,
             $viewer->getPHID(),
@@ -331,13 +430,19 @@ final class PhabricatorAuthSessionEngine extends Phobject {
    * Issue a high security token for a session, if authorized.
    *
    * @param PhabricatorAuthSession Session to issue a token for.
+   * @param bool Force token issue.
    * @return PhabricatorAuthHighSecurityToken|null Token, if authorized.
+   * @task hisec
    */
-  private function issueHighSecurityToken(PhabricatorAuthSession $session) {
+  private function issueHighSecurityToken(
+    PhabricatorAuthSession $session,
+    $force = false) {
+
     $until = $session->getHighSecurityUntil();
-    if ($until > time()) {
+    if ($until > time() || $force) {
       return new PhabricatorAuthHighSecurityToken();
     }
+
     return null;
   }
 
@@ -345,9 +450,10 @@ final class PhabricatorAuthSessionEngine extends Phobject {
   /**
    * Render a form for providing relevant multi-factor credentials.
    *
-   * @param   PhabricatorUser Viewing user.
-   * @param   AphrontRequest  Current request.
-   * @return  AphrontFormView Renderable form.
+   * @param PhabricatorUser Viewing user.
+   * @param AphrontRequest Current request.
+   * @return AphrontFormView Renderable form.
+   * @task hisec
    */
   public function renderHighSecurityForm(
     array $factors,
@@ -373,9 +479,23 @@ final class PhabricatorAuthSessionEngine extends Phobject {
   }
 
 
+  /**
+   * Strip the high security flag from a session.
+   *
+   * Kicks a session out of high security and logs the exit.
+   *
+   * @param PhabricatorUser Acting user.
+   * @param PhabricatorAuthSession Session to return to normal security.
+   * @return void
+   * @task hisec
+   */
   public function exitHighSecurity(
     PhabricatorUser $viewer,
     PhabricatorAuthSession $session) {
+
+    if (!$session->getHighSecurityUntil()) {
+      return;
+    }
 
     queryfx(
       $session->establishConnection('w'),
@@ -388,6 +508,154 @@ final class PhabricatorAuthSessionEngine extends Phobject {
       $viewer->getPHID(),
       PhabricatorUserLog::ACTION_EXIT_HISEC);
     $log->save();
+  }
+
+
+/* -(  Partial Sessions  )--------------------------------------------------- */
+
+
+  /**
+   * Upgrade a partial session to a full session.
+   *
+   * @param PhabricatorAuthSession Session to upgrade.
+   * @return void
+   * @task partial
+   */
+  public function upgradePartialSession(PhabricatorUser $viewer) {
+
+    if (!$viewer->hasSession()) {
+      throw new Exception(
+        pht('Upgrading partial session of user with no session!'));
+    }
+
+    $session = $viewer->getSession();
+
+    if (!$session->getIsPartial()) {
+      throw new Exception(pht('Session is not partial!'));
+    }
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      $session->setIsPartial(0);
+
+      queryfx(
+        $session->establishConnection('w'),
+        'UPDATE %T SET isPartial = %d WHERE id = %d',
+        $session->getTableName(),
+        0,
+        $session->getID());
+
+      $log = PhabricatorUserLog::initializeNewLog(
+        $viewer,
+        $viewer->getPHID(),
+        PhabricatorUserLog::ACTION_LOGIN_FULL);
+      $log->save();
+    unset($unguarded);
+  }
+
+
+/* -(  One Time Login URIs  )------------------------------------------------ */
+
+
+  /**
+   * Retrieve a temporary, one-time URI which can log in to an account.
+   *
+   * These URIs are used for password recovery and to regain access to accounts
+   * which users have been locked out of.
+   *
+   * @param PhabricatorUser User to generate a URI for.
+   * @param PhabricatorUserEmail Optionally, email to verify when
+   *  link is used.
+   * @param string Optional context string for the URI. This is purely cosmetic
+   *  and used only to customize workflow and error messages.
+   * @return string Login URI.
+   * @task onetime
+   */
+  public function getOneTimeLoginURI(
+    PhabricatorUser $user,
+    PhabricatorUserEmail $email = null,
+    $type = self::ONETIME_RESET) {
+
+    $key = Filesystem::readRandomCharacters(32);
+    $key_hash = $this->getOneTimeLoginKeyHash($user, $email, $key);
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      id(new PhabricatorAuthTemporaryToken())
+        ->setObjectPHID($user->getPHID())
+        ->setTokenType(self::ONETIME_TEMPORARY_TOKEN_TYPE)
+        ->setTokenExpires(time() + phutil_units('1 day in seconds'))
+        ->setTokenCode($key_hash)
+        ->save();
+    unset($unguarded);
+
+    $uri = '/login/once/'.$type.'/'.$user->getID().'/'.$key.'/';
+    if ($email) {
+      $uri = $uri.$email->getID().'/';
+    }
+
+    try {
+      $uri = PhabricatorEnv::getProductionURI($uri);
+    } catch (Exception $ex) {
+      // If a user runs `bin/auth recover` before configuring the base URI,
+      // just show the path. We don't have any way to figure out the domain.
+      // See T4132.
+    }
+
+    return $uri;
+  }
+
+
+  /**
+   * Load the temporary token associated with a given one-time login key.
+   *
+   * @param PhabricatorUser User to load the token for.
+   * @param PhabricatorUserEmail Optionally, email to verify when
+   *  link is used.
+   * @param string Key user is presenting as a valid one-time login key.
+   * @return PhabricatorAuthTemporaryToken|null Token, if one exists.
+   * @task onetime
+   */
+  public function loadOneTimeLoginKey(
+    PhabricatorUser $user,
+    PhabricatorUserEmail $email = null,
+    $key = null) {
+
+    $key_hash = $this->getOneTimeLoginKeyHash($user, $email, $key);
+
+    return id(new PhabricatorAuthTemporaryTokenQuery())
+      ->setViewer($user)
+      ->withObjectPHIDs(array($user->getPHID()))
+      ->withTokenTypes(array(self::ONETIME_TEMPORARY_TOKEN_TYPE))
+      ->withTokenCodes(array($key_hash))
+      ->withExpired(false)
+      ->executeOne();
+  }
+
+
+  /**
+   * Hash a one-time login key for storage as a temporary token.
+   *
+   * @param PhabricatorUser User this key is for.
+   * @param PhabricatorUserEmail Optionally, email to verify when
+   *  link is used.
+   * @param string The one time login key.
+   * @return string Hash of the key.
+   * task onetime
+   */
+  private function getOneTimeLoginKeyHash(
+    PhabricatorUser $user,
+    PhabricatorUserEmail $email = null,
+    $key = null) {
+
+    $parts = array(
+      $key,
+      $user->getAccountSecret(),
+    );
+
+    if ($email) {
+      $parts[] = $email->getVerificationCode();
+    }
+
+    return PhabricatorHash::digest(implode(':', $parts));
   }
 
 }

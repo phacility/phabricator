@@ -1,0 +1,29 @@
+{
+  "name": "stripe/stripe-php",
+  "description": "Stripe PHP Library",
+  "keywords": [
+    "stripe",
+    "payment processing",
+    "api"
+  ],
+  "homepage": "https://stripe.com/",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Stripe and contributors",
+      "homepage": "https://github.com/stripe/stripe-php/contributors"
+    }
+  ],
+  "require": {
+    "php": ">=5.2",
+    "ext-curl": "*",
+    "ext-json": "*",
+    "ext-mbstring": "*"
+  },
+  "require-dev": {
+    "simpletest/simpletest": "*"
+  },
+  "autoload": {
+    "classmap": ["lib/Stripe/"]
+  }
+}

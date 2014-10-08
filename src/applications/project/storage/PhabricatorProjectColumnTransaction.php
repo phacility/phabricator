@@ -5,13 +5,14 @@ final class PhabricatorProjectColumnTransaction
 
   const TYPE_NAME       = 'project:col:name';
   const TYPE_STATUS     = 'project:col:status';
+  const TYPE_LIMIT      = 'project:col:limit';
 
   public function getApplicationName() {
     return 'project';
   }
 
   public function getApplicationTransactionType() {
-    return PhabricatorProjectPHIDTypeColumn::TYPECONST;
+    return PhabricatorProjectColumnPHIDType::TYPECONST;
   }
 
   public function getTitle() {
@@ -21,26 +22,55 @@ final class PhabricatorProjectColumnTransaction
 
     switch ($this->getTransactionType()) {
       case PhabricatorProjectColumnTransaction::TYPE_NAME:
-        if (!strlen($old)) {
+        if ($old === null) {
           return pht(
             '%s created this column.',
             $author_handle);
         } else {
+          if (!strlen($old)) {
+            return pht(
+              '%s named this column "%s".',
+              $author_handle,
+              $new);
+          } else if (strlen($new)) {
+            return pht(
+              '%s renamed this column from "%s" to "%s".',
+              $author_handle,
+              $old,
+              $new);
+          } else {
+            return pht(
+              '%s removed the custom name of this column.',
+              $author_handle);
+          }
+        }
+      case PhabricatorProjectColumnTransaction::TYPE_LIMIT:
+        if (!$old) {
           return pht(
-            '%s renamed this column from "%s" to "%s".',
+            '%s set the point limit for this column to %s.',
+            $author_handle,
+            $new);
+        } else if (!$new) {
+          return pht(
+            '%s removed the point limit for this column.',
+            $author_handle);
+        } else {
+          return pht(
+            '%s changed point limit for this column from %s to %s.',
             $author_handle,
             $old,
             $new);
         }
+
       case PhabricatorProjectColumnTransaction::TYPE_STATUS:
         switch ($new) {
           case PhabricatorProjectColumn::STATUS_ACTIVE:
             return pht(
-              '%s activated this column.',
+              '%s marked this column visible.',
               $author_handle);
-          case PhabricatorProjectColumn::STATUS_DELETED:
+          case PhabricatorProjectColumn::STATUS_HIDDEN:
             return pht(
-              '%s deleted this column.',
+              '%s marked this column hidden.',
               $author_handle);
         }
         break;

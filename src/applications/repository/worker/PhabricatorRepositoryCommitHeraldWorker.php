@@ -3,6 +3,8 @@
 final class PhabricatorRepositoryCommitHeraldWorker
   extends PhabricatorRepositoryCommitParserWorker {
 
+  const MAX_FILES_SHOWN_IN_EMAIL = 1000;
+
   public function getRequiredLeaseTime() {
     // Herald rules may take a long time to process.
     return phutil_units('4 hours in seconds');
@@ -138,13 +140,13 @@ final class PhabricatorRepositoryCommitHeraldWorker
       ? PhabricatorEnv::getProductionURI('/D'.$revision->getID())
       : 'No revision.';
 
-    $limit = 1000;
+    $limit = self::MAX_FILES_SHOWN_IN_EMAIL;
     $files = $adapter->loadAffectedPaths();
     sort($files);
     if (count($files) > $limit) {
       array_splice($files, $limit);
-      $files[] = '(This commit affected more than 1000 files. '.
-        'Only 1000 are shown here and additional ones are truncated.)';
+      $files[] = '(This commit affected more than '.$limit.' files. '.
+        'Only '.$limit.' are shown here and additional ones are truncated.)';
     }
     $files = implode("\n", $files);
 
@@ -199,7 +201,7 @@ final class PhabricatorRepositoryCommitHeraldWorker
     $template->setRelatedPHID($commit->getPHID());
     $template->setSubject("{$commit_name}: {$name}");
     $template->setSubjectPrefix($prefix);
-    $template->setVarySubjectPrefix("[Commit]");
+    $template->setVarySubjectPrefix('[Commit]');
     $template->setBody($body);
     $template->setThreadID($thread_id, $is_new = true);
     $template->addHeader('Thread-Topic', $thread_topic);
@@ -242,7 +244,6 @@ final class PhabricatorRepositoryCommitHeraldWorker
 
     $maps = array(
       PhabricatorAuditStatusConstants::AUDIT_REQUIRED => $map,
-      PhabricatorAuditStatusConstants::CC => $ccmap,
     );
 
     foreach ($maps as $status => $map) {
@@ -279,6 +280,14 @@ final class PhabricatorRepositoryCommitHeraldWorker
 
     $commit->updateAuditStatus($requests);
     $commit->save();
+
+    if ($ccmap) {
+      id(new PhabricatorSubscriptionsEditor())
+        ->setActor(PhabricatorUser::getOmnipotentUser())
+        ->setObject($commit)
+        ->subscribeExplicit(array_keys($ccmap))
+        ->save();
+    }
   }
 
 
@@ -302,8 +311,8 @@ final class PhabricatorRepositoryCommitHeraldWorker
       ->setAllowPartialResults(true)
       ->setAllowedTypes(
         array(
-          PhabricatorPeoplePHIDTypeUser::TYPECONST,
-          PhabricatorProjectPHIDTypeProject::TYPECONST,
+          PhabricatorPeopleUserPHIDType::TYPECONST,
+          PhabricatorProjectProjectPHIDType::TYPECONST,
         ))
       ->setObjectList($matches[1])
       ->execute();
@@ -467,8 +476,8 @@ final class PhabricatorRepositoryCommitHeraldWorker
 
     $size = strlen($raw_diff);
     if ($byte_limit && $size > $byte_limit) {
-      $pretty_size = phabricator_format_bytes($size);
-      $pretty_limit = phabricator_format_bytes($byte_limit);
+      $pretty_size = phutil_format_bytes($size);
+      $pretty_limit = phutil_format_bytes($byte_limit);
       throw new Exception(
         "Patch size of {$pretty_size} exceeds configured byte size limit of ".
         "{$pretty_limit}.");

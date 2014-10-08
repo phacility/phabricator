@@ -66,6 +66,20 @@ JX.install('PhabricatorDragAndDropFileUpload', {
         return false;
       }
 
+      // Firefox has some issues sometimes; implement this click handler so
+      // the user can recover. See T5188.
+      JX.DOM.listen(
+        this._node,
+        'click',
+        null,
+        JX.bind(this, function (e) {
+          if (this._depth) {
+            e.kill();
+            // Force depth to 0.
+            this._updateDepth(-this._depth);
+          }
+        }));
+
       // We track depth so that the _node may have children inside of it and
       // not become unselected when they are dragged over.
       JX.DOM.listen(
@@ -121,17 +135,36 @@ JX.install('PhabricatorDragAndDropFileUpload', {
           'paste',
           null,
           JX.bind(this, function(e) {
-            var clipboardData = e.getRawEvent().clipboardData;
-            if (!clipboardData) {
+            var clipboard = e.getRawEvent().clipboardData;
+            if (!clipboard) {
               return;
             }
 
-            for (var ii = 0; ii < clipboardData.items.length; ii++) {
-              var item = clipboardData.items[ii];
+            // If there's any text on the clipboard, just let the event fire
+            // normally, choosing the text over any images. See T5437 / D9647.
+            var text = clipboard.getData('text/plain').toString();
+            if (text.length) {
+              return;
+            }
+
+            // Safari and Firefox have clipboardData, but no items. They
+            // don't seem to provide a way to get image data directly yet.
+            if (!clipboard.items) {
+              return;
+            }
+
+            for (var ii = 0; ii < clipboard.items.length; ii++) {
+              var item = clipboard.items[ii];
               if (!/^image\//.test(item.type)) {
                 continue;
               }
-              this._sendRequest(item.getAsFile());
+              var spec = item.getAsFile();
+              // pasted files don't have a name; see
+              // https://code.google.com/p/chromium/issues/detail?id=361145
+              if (!spec.name) {
+                spec.name = 'pasted_file';
+              }
+              this._sendRequest(spec);
             }
           }));
       }
@@ -147,8 +180,13 @@ JX.install('PhabricatorDragAndDropFileUpload', {
 
       var up_uri = JX.$U(this.getURI())
         .setQueryParam('name', file.getName())
-        .setQueryParam('__upload__', 1)
-        .toString();
+        .setQueryParam('__upload__', 1);
+
+      if (this.getViewPolicy()) {
+        up_uri.setQueryParam('viewPolicy', this.getViewPolicy());
+      }
+
+      up_uri = up_uri.toString();
 
       var onupload = JX.bind(this, function(r) {
         if (r.error) {
@@ -208,6 +246,7 @@ JX.install('PhabricatorDragAndDropFileUpload', {
   },
   properties: {
     URI : null,
-    activatedClass : null
+    activatedClass : null,
+    viewPolicy : null
   }
 });

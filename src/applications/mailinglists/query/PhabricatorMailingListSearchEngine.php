@@ -3,6 +3,14 @@
 final class PhabricatorMailingListSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Mailing Lists');
+  }
+
+  public function getApplicationClassName() {
+    return 'PhabricatorMailingListsApplication';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 
@@ -31,15 +39,12 @@ final class PhabricatorMailingListSearchEngine
   }
 
   public function getBuiltinQueryNames() {
-    $names = array(
+    return array(
       'all' => pht('All Lists'),
     );
-
-    return $names;
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
-
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
 
@@ -49,6 +54,31 @@ final class PhabricatorMailingListSearchEngine
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
+  }
+
+  protected function renderResultList(
+    array $lists,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+    assert_instances_of($lists, 'PhabricatorMetaMTAMailingList');
+
+    $view = id(new PHUIObjectItemListView());
+
+    foreach ($lists as $list) {
+      $item = new PHUIObjectItemView();
+
+      $item->setHeader($list->getName());
+      $item->setHref($list->getURI());
+      $item->addAttribute($list->getEmail());
+      $item->addAction(
+        id(new PHUIListItemView())
+          ->setIcon('fa-pencil')
+          ->setHref($this->getApplicationURI('/edit/'.$list->getID().'/')));
+
+      $view->addItem($item);
+    }
+
+    return $view;
   }
 
 }

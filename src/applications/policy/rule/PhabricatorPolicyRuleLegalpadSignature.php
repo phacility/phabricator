@@ -15,6 +15,9 @@ final class PhabricatorPolicyRuleLegalpadSignature
       return;
     }
 
+    // TODO: This accepts signature of any version of the document, even an
+    // older version.
+
     $documents = id(new LegalpadDocumentQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withPHIDs($values)
@@ -37,10 +40,12 @@ final class PhabricatorPolicyRuleLegalpadSignature
   }
 
   public function getValueControlTemplate() {
+    $datasource = new LegalpadDocumentDatasource();
+
     return array(
       'markup' => new AphrontTokenizerTemplateView(),
-      'uri' => '/typeahead/common/legalpaddocuments/',
-      'placeholder' => pht('Type a document title...'),
+      'uri' => $datasource->getDatasourceURI(),
+      'placeholder' => $datasource->getPlaceholderText(),
     );
   }
 

@@ -32,7 +32,6 @@
  * @task start        Activating a Typeahead
  * @task control      Controlling Typeaheads from Javascript
  * @task internal     Internal Methods
- * @group control
  */
 JX.install('Typeahead', {
   /**
@@ -242,6 +241,15 @@ JX.install('Typeahead', {
       var obj = {show: results};
       var e = this.invoke('show', obj);
 
+      // If the user has an element focused, store the value before we redraw.
+      // After we redraw, try to select the same element if it still exists in
+      // the list. This prevents redraws from disrupting keyboard element
+      // selection.
+      var old_focus = null;
+      if (this._focus >= 0 && this._display[this._focus]) {
+        old_focus = this._display[this._focus].name;
+      }
+
       // Note that the results list may have been update by the "show" event
       // listener. Non-result node (e.g. divider or label) may have been
       // inserted.
@@ -257,6 +265,18 @@ JX.install('Typeahead', {
           this._hardpoint.appendChild(this._root);
         }
         JX.DOM.show(this._root);
+
+        // If we had a node focused before, look for a node with the same value
+        // and focus it.
+        if (old_focus !== null) {
+          for (var ii = 0; ii < this._display.length; ii++) {
+            if (this._display[ii].name == old_focus) {
+              this._focus = ii;
+              this._drawFocus();
+              break;
+            }
+          }
+        }
       } else {
         this.hide();
         JX.DOM.setContent(this._root, null);

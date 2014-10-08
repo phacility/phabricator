@@ -3,9 +3,6 @@
  */
 
 .phabricator-inline-summary {
-  font-size: 12px;
-  text-transform: uppercase;
-  font-weight: bold;
   color: {$bluetext};
   padding-top: 12px;
   margin-top: 12px;

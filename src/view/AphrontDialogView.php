@@ -12,14 +12,17 @@ final class AphrontDialogView extends AphrontView {
   private $class;
   private $renderAsForm = true;
   private $formID;
-  private $headerColor = PhabricatorActionHeaderView::HEADER_LIGHTBLUE;
+  private $headerColor = PHUIActionHeaderView::HEADER_LIGHTBLUE;
   private $footers = array();
   private $isStandalone;
   private $method = 'POST';
   private $disableWorkflowOnSubmit;
   private $disableWorkflowOnCancel;
   private $width      = 'default';
-  private $errors;
+  private $errors = array();
+  private $flush;
+  private $validationException;
+
 
   const WIDTH_DEFAULT = 'default';
   const WIDTH_FORM    = 'form';
@@ -107,6 +110,11 @@ final class AphrontDialogView extends AphrontView {
     return $this;
   }
 
+  public function setFlush($flush) {
+    $this->flush = $flush;
+    return $this;
+  }
+
   public function setRenderDialogAsDiv() {
     // TODO: This API is awkward.
     $this->renderAsForm = false;
@@ -156,6 +164,12 @@ final class AphrontDialogView extends AphrontView {
     return $this->disableWorkflowOnCancel;
   }
 
+  public function setValidationException(
+    PhabricatorApplicationTransactionValidationException $ex = null) {
+    $this->validationException = $ex;
+    return $this;
+  }
+
   final public function render() {
     require_celerity_resource('aphront-dialog-view-css');
 
@@ -197,10 +211,13 @@ final class AphrontDialogView extends AphrontView {
 
     if (!$this->user) {
       throw new Exception(
-        pht("You must call setUser() when rendering an AphrontDialogView."));
+        pht('You must call setUser() when rendering an AphrontDialogView.'));
     }
 
     $more = $this->class;
+    if ($this->flush) {
+      $more .= ' aphront-dialog-flush';
+    }
 
     switch ($this->width) {
       case self::WIDTH_FORM:
@@ -245,7 +262,7 @@ final class AphrontDialogView extends AphrontView {
           'type' => 'hidden',
           'name' => $key,
           'value' => $value,
-          'sigil' => 'aphront-dialog-application-input'
+          'sigil' => 'aphront-dialog-application-input',
         ));
     }
 
@@ -253,18 +270,30 @@ final class AphrontDialogView extends AphrontView {
       $buttons = array(phabricator_form(
         $this->user,
         $form_attributes,
-        array_merge($hidden_inputs, $buttons)));
+        array_merge($hidden_inputs, $buttons)),
+      );
     }
 
     $children = $this->renderChildren();
 
-    if ($this->errors) {
-      $children = array(
-        id(new AphrontErrorView())->setErrors($this->errors),
-        $children);
+    $errors = $this->errors;
+
+    $ex = $this->validationException;
+    $exception_errors = null;
+    if ($ex) {
+      foreach ($ex->getErrors() as $error) {
+        $errors[] = $error->getMessage();
+      }
     }
 
-    $header = new PhabricatorActionHeaderView();
+    if ($errors) {
+      $children = array(
+        id(new AphrontErrorView())->setErrors($errors),
+        $children,
+      );
+    }
+
+    $header = new PHUIActionHeaderView();
     $header->setHeaderTitle($this->title);
     $header->setHeaderColor($this->headerColor);
 

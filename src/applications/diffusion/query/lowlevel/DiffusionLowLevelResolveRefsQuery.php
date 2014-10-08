@@ -31,7 +31,7 @@ final class DiffusionLowLevelResolveRefsQuery
         $result = $this->resolveSubversionRefs();
         break;
       default:
-        throw new Exception("Unsupported repository type!");
+        throw new Exception('Unsupported repository type!');
     }
 
     return $result;
@@ -46,7 +46,7 @@ final class DiffusionLowLevelResolveRefsQuery
 
     $lines = explode("\n", rtrim($stdout, "\n"));
     if (count($lines) !== count($this->refs)) {
-      throw new Exception("Unexpected line count from `git cat-file`!");
+      throw new Exception('Unexpected line count from `git cat-file`!');
     }
 
     $hits = array();
@@ -135,12 +135,6 @@ final class DiffusionLowLevelResolveRefsQuery
 
     $futures = array();
     foreach ($this->refs as $ref) {
-      // TODO: There was a note about `--rev 'a b'` not working for branches
-      // with spaces in their names in older code, but I suspect this was
-      // misidentified and resulted from the branch name being interpeted as
-      // a revset. Use hgsprintf() to avoid that. If this doesn't break for a
-      // bit, remove this comment. Otherwise, consider `-b %s --limit 1`.
-
       $futures[$ref] = $repository->getLocalCommandFuture(
         'log --template=%s --rev %s',
         '{node}',

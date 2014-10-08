@@ -42,7 +42,8 @@ final class PhabricatorMetaMTAEmailBodyParser {
     return array(
       'body' => $body,
       'command' => $command,
-      'command_value' => $command_value);
+      'command_value' => $command_value,
+    );
   }
 
   public function stripTextBody($body) {
@@ -76,13 +77,13 @@ final class PhabricatorMetaMTAEmailBodyParser {
 
     // Outlook english
     $body = preg_replace(
-      '/^\s*-----Original Message-----.*?/imsU',
+      '/^\s*(> )?-----Original Message-----.*?/imsU',
       '',
       $body);
 
     // Outlook danish
     $body = preg_replace(
-      '/^\s*-----Oprindelig Meddelelse-----.*?/imsU',
+      '/^\s*(> )?-----Oprindelig Meddelelse-----.*?/imsU',
       '',
       $body);
 
@@ -100,6 +101,13 @@ final class PhabricatorMetaMTAEmailBodyParser {
     //   https://bugzilla.mozilla.org/show_bug.cgi?id=58406
     $body = preg_replace(
       '/^-- +$.*/sm',
+      '',
+      $body);
+
+    // Mailbox seems to make an attempt to comply with the "standard" but
+    // omits the leading newline and uses an em dash?
+    $body = preg_replace(
+      "/\s*\xE2\x80\x94 \nSent from Mailbox\s*\z/su",
       '',
       $body);
 

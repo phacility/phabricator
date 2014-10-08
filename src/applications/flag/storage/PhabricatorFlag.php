@@ -13,6 +13,25 @@ final class PhabricatorFlag extends PhabricatorFlagDAO
   private $handle = self::ATTACHABLE;
   private $object = self::ATTACHABLE;
 
+  public function getConfiguration() {
+    return array(
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'type' => 'text4',
+        'color' => 'uint32',
+        'note' => 'text',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'ownerPHID' => array(
+          'columns' => array('ownerPHID', 'type', 'objectPHID'),
+          'unique' => true,
+        ),
+        'objectPHID' => array(
+          'columns' => array('objectPHID'),
+        ),
+      ),
+    ) + parent::getConfiguration();
+  }
+
   public function getObject() {
     return $this->assertAttached($this->object);
   }

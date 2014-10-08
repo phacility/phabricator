@@ -5,21 +5,21 @@ final class DoorkeeperRemarkupRuleJIRA
 
   public function apply($text) {
     return preg_replace_callback(
-      '@(https?://[^/]+)/browse/([A-Z]+-[1-9]\d*)@',
+      '@(https?://\S+?)/browse/([A-Z]+-[1-9]\d*)@',
       array($this, 'markupJIRALink'),
       $text);
   }
 
   public function markupJIRALink($matches) {
-
     $match_domain = $matches[1];
     $match_issue = $matches[2];
 
     // TODO: When we support multiple instances, deal with them here.
-    $provider = PhabricatorAuthProviderOAuth1JIRA::getJIRAProvider();
+    $provider = PhabricatorJIRAAuthProvider::getJIRAProvider();
     if (!$provider) {
       return $matches[0];
     }
+
 
     $jira_base = $provider->getJIRABaseURI();
     if ($match_domain != rtrim($jira_base, '/')) {

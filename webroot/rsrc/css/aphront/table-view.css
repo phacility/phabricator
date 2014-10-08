@@ -181,6 +181,11 @@ th.aphront-table-view-sortable-selected {
   width: 1px;
 }
 
+.aphront-table-view td.icon, .aphront-table-view th.icon {
+  width: 1px;
+  padding: 0px;
+}
+
 div.single-display-line-bounds {
   width: 100%;
   position: relative;
@@ -220,7 +225,7 @@ span.single-display-line-content {
 .aphront-table-view td.threads {
   font-family: monospace;
   white-space: pre;
-  padding: 0;
+  padding: 0 0 0 8px;
 }
 
 .aphront-table-view td.threads canvas {

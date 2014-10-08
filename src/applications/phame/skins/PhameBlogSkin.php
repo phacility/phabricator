@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phame
- */
 abstract class PhameBlogSkin extends PhabricatorController {
 
   private $blog;

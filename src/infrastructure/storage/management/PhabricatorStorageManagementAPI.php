@@ -109,10 +109,14 @@ final class PhabricatorStorageManagementAPI {
   }
 
   public function createDatabase($fragment) {
+    $info = $this->getCharsetInfo();
+    list($charset, $collate_text, $collate_sort) = $info;
+
     queryfx(
       $this->getConn(null),
-      'CREATE DATABASE IF NOT EXISTS %T COLLATE utf8_general_ci',
-      $this->getDatabaseName($fragment));
+      'CREATE DATABASE IF NOT EXISTS %T COLLATE %T',
+      $this->getDatabaseName($fragment),
+      $collate_text);
   }
 
   public function createTable($fragment, $table, array $cols) {
@@ -182,8 +186,16 @@ final class PhabricatorStorageManagementAPI {
 
     $conn = $this->getConn(null);
 
+    $charset_info = $this->getCharsetInfo();
+    list($charset, $collate_text, $collate_sort) = $charset_info;
+
     foreach ($queries as $query) {
       $query = str_replace('{$NAMESPACE}', $this->namespace, $query);
+      $query = str_replace('{$CHARSET}', $charset, $query);
+      $escaped_text = qsprintf($conn, '%T', $collate_text);
+      $query = str_replace('{$COLLATE_TEXT}', $escaped_text, $query);
+      $escaped_text = qsprintf($conn, '%T', $collate_sort);
+      $query = str_replace('{$COLLATE_SORT}', $escaped_text, $query);
       queryfx(
         $conn,
         '%Q',
@@ -194,6 +206,45 @@ final class PhabricatorStorageManagementAPI {
   public function applyPatchPHP($script) {
     $schema_conn = $this->getConn(null);
     require_once $script;
+  }
+
+  public function isCharacterSetAvailable($character_set) {
+    $conn = $this->getConn(null);
+
+    $result = queryfx_one(
+      $conn,
+      'SELECT CHARACTER_SET_NAME FROM INFORMATION_SCHEMA.CHARACTER_SETS
+        WHERE CHARACTER_SET_NAME = %s',
+      $character_set);
+
+    return (bool)$result;
+  }
+
+  public function getCharsetInfo() {
+    if ($this->isCharacterSetAvailable('utf8mb4')) {
+      // If utf8mb4 is available, we use it with the utf8mb4_unicode_ci
+      // collation. This is most correct, and will sort properly.
+
+      $charset = 'utf8mb4';
+      $collate_text = 'utf8mb4_bin';
+      $collate_sort = 'utf8mb4_unicode_ci';
+    } else {
+      // If utf8mb4 is not available, we use binary. This allows us to store
+      // 4-byte unicode characters. This has some tradeoffs:
+      //
+      // Unicode characters won't sort correctly. There's nothing we can do
+      // about this while still supporting 4-byte characters.
+      //
+      // It's possible that strings will be truncated in the middle of a
+      // character on insert. We encourage users to set STRICT_ALL_TABLES
+      // to prevent this.
+
+      $charset = 'binary';
+      $collate_text = 'binary';
+      $collate_sort = 'binary';
+    }
+
+    return array($charset, $collate_text, $collate_sort);
   }
 
 }

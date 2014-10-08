@@ -8,7 +8,7 @@
 JX.install('ReactorCheckboxExample', {
   extend: 'View',
   members: {
-    render: function(rendered_children) {
+    render: function() {
       var checkbox = JX.$N('input', {type: 'checkbox'});
 
       return [checkbox, JX.RDOM.$DT(JX.RDOM.checkbox(checkbox))];

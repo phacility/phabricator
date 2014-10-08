@@ -4,11 +4,9 @@
 
 .phui-list-item-header,
 .phui-list-item-header a {
-  color: #9ca5b5;
-  text-transform: uppercase;
+  color: {$bluetext};
   font-weight: bold;
-  font-size: 12px;
-  text-shadow: 0 1px 0 rgba(255,255,255,0.90);
+  -webkit-font-smoothing: antialiased;
 }
 
 /* - Sidenav and Actions -------------------------------------------------------
@@ -22,12 +20,11 @@
 }
 
 .phui-list-sidenav .phui-list-item-type-label .phui-list-item-name {
-  font-size: 12px;
   font-weight: bold;
-  color: #9ca5b5;
-  text-transform: uppercase;
-  padding: 4px 8px 4px 8px;
+  color: {$bluetext};
+  padding: 4px 8px 6px 8px;
   display: block;
+  -webkit-font-smoothing: antialiased;
 }
 
 .phui-list-sidenav .phui-list-item-type-divider {
@@ -60,7 +57,7 @@
   display: block;
   padding: 4px 16px;
   clear: both;
-  color: #333333;
+  color: {$darkgreytext};
   line-height: 18px;
 }
 
@@ -69,10 +66,14 @@
 }
 
 .device-desktop .phui-list-sidenav .phui-list-item-href:hover {
-  background: {$blue};
+  background: {$sky};
   color: white;
   cursor: pointer;
   text-decoration: none;
+}
+
+.device-desktop .phui-list-sidenav .phui-list-item-href:hover .phui-icon-view {
+  color: #fff;
 }
 
 /* - Top, Full Width Navigations -----------------------------------------------
@@ -121,6 +122,7 @@
   height: 14px;
   width: 14px;
   display: block;
+  font-size: 14px;
 }
 
 .device-phone .phui-list-view.phui-list-navbar > li {
@@ -160,4 +162,12 @@
 
 .phui-list-item-fail.phui-list-item-selected .phui-list-item-href:hover {
   background: #f5d3d0;
+}
+
+/* - Dashboards ------------------------------------------------------------ */
+
+.dashboard-panel .phui-list-view.phui-list-navbar {
+  border-left: 1px solid {$lightblueborder};
+  border-right: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$thinblueborder};
 }

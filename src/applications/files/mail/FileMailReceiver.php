@@ -1,12 +1,9 @@
 <?php
 
-/**
- * @group file
- */
 final class FileMailReceiver extends PhabricatorObjectMailReceiver {
 
   public function isEnabled() {
-    $app_class = 'PhabricatorApplicationFiles';
+    $app_class = 'PhabricatorFilesApplication';
     return PhabricatorApplication::isClassInstalled($app_class);
   }
 

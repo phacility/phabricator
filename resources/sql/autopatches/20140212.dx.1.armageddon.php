@@ -171,8 +171,8 @@ foreach ($rows as $row) {
     $xaction_phid = idx($xaction, 'phid');
     if (!$xaction_phid) {
       $xaction_phid = PhabricatorPHID::generateNewPHID(
-        PhabricatorApplicationTransactionPHIDTypeTransaction::TYPECONST,
-        DifferentialPHIDTypeRevision::TYPECONST);
+        PhabricatorApplicationTransactionTransactionPHIDType::TYPECONST,
+        DifferentialRevisionPHIDType::TYPECONST);
     }
     unset($xaction['phid']);
 

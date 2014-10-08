@@ -21,11 +21,11 @@ final class PhabricatorOwnersPackagePathValidator {
     $move_map = array();
     foreach ($changes as $change) {
       if ($change->getChangeType() == DifferentialChangeType::TYPE_MOVE_HERE) {
-        $from_path = "/".$change->getTargetPath();
-        $to_path = "/".$change->getPath();
+        $from_path = '/'.$change->getTargetPath();
+        $to_path = '/'.$change->getPath();
         if ($change->getFileType() == DifferentialChangeType::FILE_DIRECTORY) {
-          $to_path = $to_path."/";
-          $from_path = $from_path."/";
+          $to_path = $to_path.'/';
+          $from_path = $from_path.'/';
         }
         $move_map[$from_path] = $to_path;
       }
@@ -60,7 +60,7 @@ final class PhabricatorOwnersPackagePathValidator {
             'packageID' => $package->getID(),
             'repositoryPHID' => $pkg_path->getRepositoryPHID(),
             'path' => str_replace($pkg_path->getPath(), $old_path,
-                                    $move_map[$old_path])
+                                    $move_map[$old_path]),
           );
           $path_changed = true;
         }
@@ -89,7 +89,7 @@ final class PhabricatorOwnersPackagePathValidator {
       'user' => PhabricatorUser::getOmnipotentUser(),
       'initFromConduit' => false,
       'repository' => $repository,
-      'commit' => $commit->getCommitIdentifier()
+      'commit' => $commit->getCommitIdentifier(),
     );
     $drequest = DiffusionRequest::newFromDictionary($data);
     $change_query =

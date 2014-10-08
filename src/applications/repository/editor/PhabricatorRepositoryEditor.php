@@ -3,6 +3,14 @@
 final class PhabricatorRepositoryEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  public function getEditorApplicationClass() {
+    return 'PhabricatorDiffusionApplication';
+  }
+
+  public function getEditorObjectsDescription() {
+    return pht('Repositories');
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
@@ -225,8 +233,7 @@ final class PhabricatorRepositoryEditor
         $old_phid = $xaction->getOldValue();
         $new_phid = $xaction->getNewValue();
 
-        $editor = id(new PhabricatorEdgeEditor())
-          ->setActor($this->requireActor());
+        $editor = new PhabricatorEdgeEditor();
 
         $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_USES_CREDENTIAL;
         $src_phid = $object->getPHID();
@@ -250,8 +257,7 @@ final class PhabricatorRepositoryEditor
     PhabricatorApplicationTransaction $v) {
 
     $type = $u->getTransactionType();
-    switch ($type) {
-    }
+    switch ($type) {}
 
     return parent::mergeTransactions($u, $v);
   }
@@ -264,9 +270,7 @@ final class PhabricatorRepositoryEditor
     $new = $xaction->getNewValue();
 
     $type = $xaction->getTransactionType();
-    switch ($type) {
-
-    }
+    switch ($type) {}
 
     return parent::transactionHasEffect($object, $xaction);
   }
@@ -318,6 +322,67 @@ final class PhabricatorRepositoryEditor
     $errors = parent::validateTransaction($object, $type, $xactions);
 
     switch ($type) {
+      case PhabricatorRepositoryTransaction::TYPE_AUTOCLOSE:
+      case PhabricatorRepositoryTransaction::TYPE_TRACK_ONLY:
+        foreach ($xactions as $xaction) {
+          foreach ($xaction->getNewValue() as $pattern) {
+            // Check for invalid regular expressions.
+            $regexp = PhabricatorRepository::extractBranchRegexp($pattern);
+            if ($regexp !== null) {
+              $ok = @preg_match($regexp, '');
+              if ($ok === false) {
+                $error = new PhabricatorApplicationTransactionValidationError(
+                  $type,
+                  pht('Invalid'),
+                  pht(
+                    'Expression "%s" is not a valid regular expression. Note '.
+                    'that you must include delimiters.',
+                    $regexp),
+                  $xaction);
+                $errors[] = $error;
+                continue;
+              }
+            }
+
+            // Check for formatting mistakes like `regex(...)` instead of
+            // `regexp(...)`.
+            $matches = null;
+            if (preg_match('/^([^(]+)\\(.*\\)\z/', $pattern, $matches)) {
+              switch ($matches[1]) {
+                case 'regexp':
+                  break;
+                default:
+                  $error = new PhabricatorApplicationTransactionValidationError(
+                    $type,
+                    pht('Invalid'),
+                    pht(
+                      'Matching function "%s(...)" is not recognized. Valid '.
+                      'functions are: regexp(...).',
+                      $matches[1]),
+                    $xaction);
+                  $errors[] = $error;
+                  break;
+              }
+            }
+          }
+        }
+        break;
+
+      case PhabricatorRepositoryTransaction::TYPE_REMOTE_URI:
+        foreach ($xactions as $xaction) {
+          $new_uri = $xaction->getNewValue();
+          try {
+            PhabricatorRepository::assertValidRemoteURI($new_uri);
+          } catch (Exception $ex) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              $ex->getMessage(),
+              $xaction);
+          }
+        }
+        break;
+
       case PhabricatorRepositoryTransaction::TYPE_CREDENTIAL:
         $ok = PassphraseCredentialControl::validateTransactions(
           $this->getActor(),

@@ -49,7 +49,13 @@ final class DiffusionMirrorEditController
     if ($request->isFormPost()) {
       $v_remote = $request->getStr('remoteURI');
       if (strlen($v_remote)) {
-        $e_remote = null;
+        try {
+          PhabricatorRepository::assertValidRemoteURI($v_remote);
+          $e_remote = null;
+        } catch (Exception $ex) {
+          $e_remote = pht('Invalid');
+          $errors[] = $ex->getMessage();
+        }
       } else {
         $e_remote = pht('Required');
         $errors[] = pht('You must provide a remote URI.');

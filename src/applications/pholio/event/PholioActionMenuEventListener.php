@@ -43,7 +43,7 @@ final class PholioActionMenuEventListener
       ->setName(pht('Edit Pholio Mocks'))
       ->setHref("/search/attach/{$phid}/MOCK/edge/")
       ->setWorkflow(true)
-      ->setIcon('attach')
+      ->setIcon('fa-camera-retro')
       ->setDisabled(!$can_edit)
       ->setWorkflow(true);
   }

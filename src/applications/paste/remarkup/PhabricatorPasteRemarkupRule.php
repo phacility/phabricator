@@ -1,10 +1,6 @@
 <?php
 
-/**
- * @group markup
- */
-final class PhabricatorPasteRemarkupRule
-  extends PhabricatorRemarkupRuleObject {
+final class PhabricatorPasteRemarkupRule extends PhabricatorObjectRemarkupRule {
 
   protected function getObjectNamePrefix() {
     return 'P';
@@ -54,7 +50,7 @@ final class PhabricatorPasteRemarkupRule
 
     }
 
-    return $embed_paste->render();
-
+    return $embed_paste;
   }
+
 }

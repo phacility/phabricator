@@ -3,6 +3,14 @@
 final class HarbormasterBuildableSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Harbormaster Buildables');
+  }
+
+  public function getApplicationClassName() {
+    return 'PhabricatorHarbormasterApplication';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 
@@ -10,14 +18,14 @@ final class HarbormasterBuildableSearchEngine
       $request,
       'revisions',
       array(
-        DifferentialPHIDTypeRevision::TYPECONST,
+        DifferentialRevisionPHIDType::TYPECONST,
       ));
 
     $repositories = $this->readPHIDsFromRequest(
       $request,
       'repositories',
       array(
-        PhabricatorRepositoryPHIDTypeRepository::TYPECONST,
+        PhabricatorRepositoryRepositoryPHIDType::TYPECONST,
       ));
 
     $container_phids = array_merge($revisions, $repositories);
@@ -27,7 +35,7 @@ final class HarbormasterBuildableSearchEngine
       $request,
       'commits',
       array(
-        PhabricatorRepositoryPHIDTypeCommit::TYPECONST,
+        PhabricatorRepositoryCommitPHIDType::TYPECONST,
       ));
 
     $diffs = $this->readListFromRequest($request, 'diffs');
@@ -152,15 +160,12 @@ final class HarbormasterBuildableSearchEngine
   }
 
   public function getBuiltinQueryNames() {
-    $names = array(
+    return array(
       'all' => pht('All Buildables'),
     );
-
-    return $names;
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
-
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
 
@@ -170,6 +175,47 @@ final class HarbormasterBuildableSearchEngine
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
+  }
+
+  protected function renderResultList(
+    array $buildables,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+    assert_instances_of($buildables, 'HarbormasterBuildable');
+
+    $viewer = $this->requireViewer();
+
+    $list = new PHUIObjectItemListView();
+    foreach ($buildables as $buildable) {
+      $id = $buildable->getID();
+
+      $item = id(new PHUIObjectItemView())
+        ->setHeader(pht('Buildable %d', $buildable->getID()));
+      if ($buildable->getContainerHandle() !== null) {
+        $item->addAttribute($buildable->getContainerHandle()->getName());
+      }
+      if ($buildable->getBuildableHandle() !== null) {
+        $item->addAttribute($buildable->getBuildableHandle()->getFullName());
+      }
+
+      if ($id) {
+        $item->setHref("/B{$id}");
+      }
+
+      if ($buildable->getIsManualBuildable()) {
+        $item->addIcon('fa-wrench grey', pht('Manual'));
+      }
+
+      $item->setBarColor(HarbormasterBuildable::getBuildableStatusColor(
+        $buildable->getBuildableStatus()));
+      $item->addByline(HarbormasterBuildable::getBuildableStatusName(
+        $buildable->getBuildableStatus()));
+
+      $list->addItem($item);
+
+    }
+
+    return $list;
   }
 
 }

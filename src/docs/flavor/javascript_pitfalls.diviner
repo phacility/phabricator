@@ -29,7 +29,7 @@ usually after operators.
 
 = ##with## is Bad News =
 
-##with## is a pretty bad feature, for this reason among others:
+`with` is a pretty bad feature, for this reason among others:
 
   with (object) {
     property = 3; // Might be on object, might be on window: who knows.

@@ -43,6 +43,21 @@ final class DrydockLease extends DrydockDAO
       self::CONFIG_SERIALIZATION => array(
         'attributes'    => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'status' => 'uint32',
+        'until' => 'epoch?',
+        'resourceType' => 'text128',
+        'taskID' => 'id?',
+        'ownerPHID' => 'phid?',
+        'resourceID' => 'id?',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_phid' => null,
+        'phid' => array(
+          'columns' => array('phid'),
+          'unique' => true,
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 
@@ -56,7 +71,7 @@ final class DrydockLease extends DrydockDAO
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(DrydockPHIDTypeLease::TYPECONST);
+    return PhabricatorPHID::generateNewPHID(DrydockLeasePHIDType::TYPECONST);
   }
 
   public function getInterface($type) {
@@ -85,7 +100,7 @@ final class DrydockLease extends DrydockDAO
   public function queueForActivation() {
     if ($this->getID()) {
       throw new Exception(
-        "Only new leases may be queued for activation!");
+        'Only new leases may be queued for activation!');
     }
 
     $this->setStatus(DrydockLeaseStatus::STATUS_PENDING);
@@ -128,8 +143,8 @@ final class DrydockLease extends DrydockDAO
   private function assertActive() {
     if (!$this->isActive()) {
       throw new Exception(
-        "Lease is not active! You can not interact with resources through ".
-        "an inactive lease.");
+        'Lease is not active! You can not interact with resources through '.
+        'an inactive lease.');
     }
   }
 
@@ -149,16 +164,16 @@ final class DrydockLease extends DrydockDAO
             unset($unresolved[$key]);
             break;
           case DrydockLeaseStatus::STATUS_RELEASED:
-            throw new Exception("Lease has already been released!");
+            throw new Exception('Lease has already been released!');
           case DrydockLeaseStatus::STATUS_EXPIRED:
-            throw new Exception("Lease has already expired!");
+            throw new Exception('Lease has already expired!');
           case DrydockLeaseStatus::STATUS_BROKEN:
-            throw new Exception("Lease has been broken!");
+            throw new Exception('Lease has been broken!');
           case DrydockLeaseStatus::STATUS_PENDING:
           case DrydockLeaseStatus::STATUS_ACQUIRING:
             break;
           default:
-            throw new Exception("Unknown status??");
+            throw new Exception('Unknown status??');
         }
       }
 

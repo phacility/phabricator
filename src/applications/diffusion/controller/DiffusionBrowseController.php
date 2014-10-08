@@ -37,10 +37,8 @@ abstract class DiffusionBrowseController extends DiffusionController {
         break;
     }
 
-
     $filter = new AphrontListFilterView();
     $filter->appendChild($forms);
-
 
     if ($collapsed) {
       $filter->setCollapsed(
@@ -94,9 +92,9 @@ abstract class DiffusionBrowseController extends DiffusionController {
       id(new PhabricatorActionView())
         ->setName(pht('View History'))
         ->setHref($history_uri)
-        ->setIcon('history'));
+        ->setIcon('fa-list'));
 
-    $behind_head = $drequest->getRawCommit();
+    $behind_head = $drequest->getSymbolicCommit();
     $head_uri = $drequest->generateURI(
       array(
         'commit' => '',
@@ -106,13 +104,13 @@ abstract class DiffusionBrowseController extends DiffusionController {
       id(new PhabricatorActionView())
         ->setName(pht('Jump to HEAD'))
         ->setHref($head_uri)
-        ->setIcon('home')
+        ->setIcon('fa-home')
         ->setDisabled(!$behind_head));
 
     // TODO: Ideally, this should live in Owners and be event-triggered, but
     // there's no reasonable object for it to react to right now.
 
-    $owners = 'PhabricatorApplicationOwners';
+    $owners = 'PhabricatorOwnersApplication';
     if (PhabricatorApplication::isClassInstalled($owners)) {
       $owners_uri = id(new PhutilURI('/owners/view/search/'))
         ->setQueryParams(
@@ -125,7 +123,7 @@ abstract class DiffusionBrowseController extends DiffusionController {
         id(new PhabricatorActionView())
           ->setName(pht('Find Owners'))
           ->setHref((string)$owners_uri)
-          ->setIcon('preview'));
+          ->setIcon('fa-users'));
     }
 
     return $view;
@@ -141,7 +139,7 @@ abstract class DiffusionBrowseController extends DiffusionController {
       ->setUser($viewer)
       ->setActionList($actions);
 
-    $stable_commit = $drequest->getStableCommitName();
+    $stable_commit = $drequest->getStableCommit();
     $callsign = $drequest->getRepository()->getCallsign();
 
     $view->addProperty(
@@ -157,7 +155,7 @@ abstract class DiffusionBrowseController extends DiffusionController {
         ),
         $drequest->getRepository()->formatCommitName($stable_commit)));
 
-    if ($drequest->getCommitType() == 'tag') {
+    if ($drequest->getSymbolicType() == 'tag') {
       $symbolic = $drequest->getSymbolicCommit();
       $view->addProperty(pht('Tag'), $symbolic);
 
@@ -220,7 +218,6 @@ abstract class DiffusionBrowseController extends DiffusionController {
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Pending Differential Revisions'))
       ->appendChild($view);
-
   }
 
 }

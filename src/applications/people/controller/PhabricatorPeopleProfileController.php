@@ -33,7 +33,7 @@ final class PhabricatorPeopleProfileController
     $picture = $user->loadProfileImageURI();
 
     $header = id(new PHUIHeaderView())
-      ->setHeader($user->getUserName().' ('.$user->getRealName().')')
+      ->setHeader($user->getFullName())
       ->setSubheader($profile->getTitle())
       ->setImage($picture);
 
@@ -49,7 +49,7 @@ final class PhabricatorPeopleProfileController
 
     $actions->addAction(
       id(new PhabricatorActionView())
-        ->setIcon('edit')
+        ->setIcon('fa-pencil')
         ->setName(pht('Edit Profile'))
         ->setHref($this->getApplicationURI('editprofile/'.$user->getID().'/'))
         ->setDisabled(!$can_edit)
@@ -57,7 +57,7 @@ final class PhabricatorPeopleProfileController
 
     $actions->addAction(
       id(new PhabricatorActionView())
-        ->setIcon('image')
+        ->setIcon('fa-picture-o')
         ->setName(pht('Edit Profile Picture'))
         ->setHref($this->getApplicationURI('picture/'.$user->getID().'/'))
         ->setDisabled(!$can_edit)
@@ -66,17 +66,17 @@ final class PhabricatorPeopleProfileController
     if ($viewer->getIsAdmin()) {
       $actions->addAction(
         id(new PhabricatorActionView())
-          ->setIcon('wrench')
+          ->setIcon('fa-wrench')
           ->setName(pht('Edit Settings'))
           ->setDisabled(!$can_edit)
           ->setWorkflow(!$can_edit)
           ->setHref('/settings/'.$user->getID().'/'));
 
       if ($user->getIsAdmin()) {
-        $empower_icon = 'lower-priority';
+        $empower_icon = 'fa-arrow-circle-o-down';
         $empower_name = pht('Remove Administrator');
       } else {
-        $empower_icon = 'raise-priority';
+        $empower_icon = 'fa-arrow-circle-o-up';
         $empower_name = pht('Make Administrator');
       }
 
@@ -90,16 +90,16 @@ final class PhabricatorPeopleProfileController
 
       $actions->addAction(
         id(new PhabricatorActionView())
-          ->setIcon('tag')
+          ->setIcon('fa-tag')
           ->setName(pht('Change Username'))
           ->setWorkflow(true)
           ->setHref($this->getApplicationURI('rename/'.$user->getID().'/')));
 
       if ($user->getIsDisabled()) {
-        $disable_icon = 'enable';
+        $disable_icon = 'fa-check-circle-o';
         $disable_name = pht('Enable User');
       } else {
-        $disable_icon = 'disable';
+        $disable_icon = 'fa-ban';
         $disable_name = pht('Disable User');
       }
 
@@ -113,7 +113,7 @@ final class PhabricatorPeopleProfileController
 
       $actions->addAction(
         id(new PhabricatorActionView())
-          ->setIcon('delete')
+          ->setIcon('fa-times')
           ->setName(pht('Delete User'))
           ->setDisabled(($user->getPHID() == $viewer->getPHID()))
           ->setWorkflow(true)
@@ -121,7 +121,7 @@ final class PhabricatorPeopleProfileController
 
       $actions->addAction(
         id(new PhabricatorActionView())
-          ->setIcon('message')
+          ->setIcon('fa-envelope')
           ->setName(pht('Send Welcome Email'))
           ->setWorkflow(true)
           ->setHref($this->getApplicationURI('welcome/'.$user->getID().'/')));
@@ -131,16 +131,26 @@ final class PhabricatorPeopleProfileController
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($user->getUsername());
+    $crumbs->setActionList($actions);
     $feed = $this->renderUserFeed($user);
-    $calendar = $this->renderUserCalendar($user);
+    $cal_class = 'PhabricatorCalendarApplication';
+    $classes = array();
+    $classes[] = 'profile-activity-view';
+    if (PhabricatorApplication::isClassInstalledForViewer($cal_class, $user)) {
+      $calendar = $this->renderUserCalendar($user);
+      $classes[] = 'profile-has-calendar';
+      $classes[] = 'grouped';
+    } else {
+      $calendar = null;
+    }
     $activity = phutil_tag(
       'div',
       array(
-        'class' => 'profile-activity-view grouped'
+        'class' => implode($classes, ' '),
       ),
       array(
         $calendar,
-        $feed
+        $feed,
       ));
 
     $object_box = id(new PHUIObjectBoxView())
@@ -155,7 +165,6 @@ final class PhabricatorPeopleProfileController
       ),
       array(
         'title' => $user->getUsername(),
-        'device' => true,
       ));
   }
 
@@ -262,7 +271,7 @@ final class PhabricatorPeopleProfileController
       $header = phutil_tag(
         'a',
         array(
-          'href' => $this->getRequest()->getRequestURI().'calendar/'
+          'href' => $this->getRequest()->getRequestURI().'calendar/',
         ),
         $headertext);
 

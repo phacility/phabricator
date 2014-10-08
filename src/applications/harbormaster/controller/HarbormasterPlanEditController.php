@@ -1,7 +1,6 @@
 <?php
 
-final class HarbormasterPlanEditController
-  extends HarbormasterPlanController {
+final class HarbormasterPlanEditController extends HarbormasterPlanController {
 
   private $id;
 
@@ -14,7 +13,7 @@ final class HarbormasterPlanEditController
     $viewer = $request->getUser();
 
     $this->requireApplicationCapability(
-      HarbormasterCapabilityManagePlans::CAPABILITY);
+      HarbormasterManagePlansCapability::CAPABILITY);
 
     if ($this->id) {
       $plan = id(new HarbormasterBuildPlanQuery())
@@ -97,7 +96,7 @@ final class HarbormasterPlanEditController
     } else {
       $id = $plan->getID();
       $crumbs->addTextCrumb(
-        pht("Plan %d", $id),
+        pht('Plan %d', $id),
         $this->getApplicationURI("plan/{$id}/"));
       $crumbs->addTextCrumb(pht('Edit'));
     }
@@ -109,7 +108,6 @@ final class HarbormasterPlanEditController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

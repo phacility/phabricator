@@ -71,13 +71,13 @@ final class PhabricatorSourceCodeView extends AphrontView {
       }
 
       if ($this->canClickHighlight) {
-        $line_uri = $this->uri . "$" . $line_number;
+        $line_uri = $this->uri.'$'.$line_number;
         $line_href = (string) new PhutilURI($line_uri);
 
         $tag_number = javelin_tag(
           'a',
           array(
-               'href' => $line_href
+            'href' => $line_href,
           ),
           $line_number);
       } else {
@@ -95,15 +95,16 @@ final class PhabricatorSourceCodeView extends AphrontView {
             'th',
             array(
               'class' => 'phabricator-source-line',
-              'sigil' => 'phabricator-source-line'
+              'sigil' => 'phabricator-source-line',
             ),
             $tag_number),
           phutil_tag(
             'td',
             array(
-              'class' => 'phabricator-source-code'
+              'class' => 'phabricator-source-code',
             ),
-            $content_line)));
+            $content_line),
+          ));
 
       if ($hit_limit) {
         break;
@@ -123,7 +124,7 @@ final class PhabricatorSourceCodeView extends AphrontView {
         'table',
         array(
           'class' => implode(' ', $classes),
-          'sigil' => 'phabricator-source'
+          'sigil' => 'phabricator-source',
         ),
         phutil_implode_html('', $rows)));
   }

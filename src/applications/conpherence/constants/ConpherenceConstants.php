@@ -1,8 +1,3 @@
 <?php
 
-/**
- * @group conpherence
- */
-abstract class ConpherenceConstants {
-
-}
+abstract class ConpherenceConstants {}

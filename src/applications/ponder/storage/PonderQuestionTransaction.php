@@ -17,7 +17,7 @@ final class PonderQuestionTransaction
   }
 
   public function getApplicationTransactionType() {
-    return PonderPHIDTypeQuestion::TYPECONST;
+    return PonderQuestionPHIDType::TYPECONST;
   }
 
   public function getApplicationTransactionCommentObject() {
@@ -35,6 +35,18 @@ final class PonderQuestionTransaction
     }
 
     return $phids;
+  }
+
+  public function getRemarkupBlocks() {
+    $blocks = parent::getRemarkupBlocks();
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_CONTENT:
+        $blocks[] = $this->getNewValue();
+        break;
+    }
+
+    return $blocks;
   }
 
   public function getTitle() {
@@ -64,10 +76,11 @@ final class PonderQuestionTransaction
       case self::TYPE_ANSWERS:
         $answer_handle = $this->getHandle($this->getNewAnswerPHID());
         $question_handle = $this->getHandle($object_phid);
+
         return pht(
           '%s answered %s',
           $this->renderHandleLink($author_phid),
-          $answer_handle->renderLink($question_handle->getFullName()));
+          $this->renderHandleLink($object_phid));
       case self::TYPE_STATUS:
         switch ($new) {
           case PonderQuestionStatus::STATUS_OPEN:
@@ -251,14 +264,18 @@ final class PonderQuestionTransaction
         if ($old === null) {
           $question = $story->getObject($this->getObjectPHID());
           return phutil_escape_html_newlines(
-            phutil_utf8_shorten($question->getContent(), 128));
+            id(new PhutilUTF8StringTruncator())
+            ->setMaximumGlyphs(128)
+            ->truncateString($question->getContent()));
         }
         break;
       case self::TYPE_ANSWERS:
         $answer = $this->getNewAnswerObject($story);
         if ($answer) {
           return phutil_escape_html_newlines(
-            phutil_utf8_shorten($answer->getContent(), 128));
+            id(new PhutilUTF8StringTruncator())
+            ->setMaximumGlyphs(128)
+            ->truncateString($answer->getContent()));
         }
         break;
     }

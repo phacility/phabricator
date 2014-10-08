@@ -10,19 +10,79 @@ final class PhortuneAccount extends PhortuneDAO
   implements PhabricatorPolicyInterface {
 
   protected $name;
-  protected $balanceInCents = 0;
 
   private $memberPHIDs = self::ATTACHABLE;
+
+  public static function initializeNewAccount(PhabricatorUser $actor) {
+    $account = id(new PhortuneAccount());
+
+    $account->memberPHIDs = array();
+
+    return $account;
+  }
+
+  public static function createNewAccount(
+    PhabricatorUser $actor,
+    PhabricatorContentSource $content_source) {
+
+    $account = PhortuneAccount::initializeNewAccount($actor);
+
+    $xactions = array();
+    $xactions[] = id(new PhortuneAccountTransaction())
+      ->setTransactionType(PhortuneAccountTransaction::TYPE_NAME)
+      ->setNewValue(pht('Account (%s)', $actor->getUserName()));
+
+    $xactions[] = id(new PhortuneAccountTransaction())
+      ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+      ->setMetadataValue(
+        'edge:type',
+        PhabricatorEdgeConfig::TYPE_ACCOUNT_HAS_MEMBER)
+      ->setNewValue(
+        array(
+          '=' => array($actor->getPHID() => $actor->getPHID()),
+        ));
+
+    $editor = id(new PhortuneAccountEditor())
+      ->setActor($actor)
+      ->setContentSource($content_source);
+
+    // We create an account for you the first time you visit Phortune.
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+
+      $editor->applyTransactions($account, $xactions);
+
+    unset($unguarded);
+
+    return $account;
+  }
+
+  public function newCart(
+    PhabricatorUser $actor,
+    PhortuneCartImplementation $implementation,
+    PhortuneMerchant $merchant) {
+
+    $cart = PhortuneCart::initializeNewCart($actor, $this, $merchant);
+
+    $cart->setCartClass(get_class($implementation));
+    $cart->attachImplementation($implementation);
+
+    $implementation->willCreateCart($actor, $cart);
+
+    return $cart->save();
+  }
 
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'name' => 'text255',
+      ),
     ) + parent::getConfiguration();
   }
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_ACNT);
+      PhortuneAccountPHIDType::TYPECONST);
   }
 
   public function getMemberPHIDs() {

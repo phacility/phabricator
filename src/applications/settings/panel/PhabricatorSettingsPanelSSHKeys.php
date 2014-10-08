@@ -103,7 +103,7 @@ final class PhabricatorSettingsPanelSSHKeys
           $key->save();
           return id(new AphrontRedirectResponse())
             ->setURI($this->getPanelURI());
-        } catch (AphrontQueryDuplicateKeyException $ex) {
+        } catch (AphrontDuplicateKeyQueryException $ex) {
           $e_key = pht('Duplicate');
           $errors[] = pht('This public key is already associated with a user '.
                       'account.');
@@ -206,8 +206,7 @@ final class PhabricatorSettingsPanelSSHKeys
     $header = new PHUIHeaderView();
 
     $upload_icon = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-      ->setSpriteIcon('upload');
+      ->setIconFont('fa-upload');
     $upload_button = id(new PHUIButtonView())
       ->setText(pht('Upload Public Key'))
       ->setHref($this->getPanelURI('?edit=true'))
@@ -222,8 +221,7 @@ final class PhabricatorSettingsPanelSSHKeys
     }
 
     $generate_icon = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-      ->setSpriteIcon('lock');
+      ->setIconFont('fa-lock');
     $generate_button = id(new PHUIButtonView())
       ->setText(pht('Generate Keypair'))
       ->setHref($this->getPanelURI('?generate=true'))
@@ -276,6 +274,12 @@ final class PhabricatorSettingsPanelSSHKeys
     $user = $this->getUser();
     $viewer = $request->getUser();
 
+    $token = id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
+      $viewer,
+      $request,
+      $this->getPanelURI());
+
+
     $is_self = ($user->getPHID() == $viewer->getPHID());
 
     if ($request->isFormPost()) {
@@ -287,7 +291,7 @@ final class PhabricatorSettingsPanelSSHKeys
         array(
           'name' => 'id_rsa_phabricator.key',
           'ttl' => time() + (60 * 10),
-          'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
+          'viewPolicy' => $viewer->getPHID(),
         ));
 
       list($type, $body, $comment) = self::parsePublicKey($public_key);
@@ -361,7 +365,7 @@ final class PhabricatorSettingsPanelSSHKeys
         ->appendParagraph($explain)
         ->appendParagraph(
           pht(
-            "Phabricator will not retain a copy of the private key."))
+            'Phabricator will not retain a copy of the private key.'))
         ->addSubmitButton(pht('Generate Keypair'));
     } catch (Exception $ex) {
       $dialog
@@ -375,22 +379,29 @@ final class PhabricatorSettingsPanelSSHKeys
 
   private static function parsePublicKey($entire_key) {
     $parts = str_replace("\n", '', trim($entire_key));
-    $parts = preg_split('/\s+/', $parts);
 
-    if (count($parts) == 2) {
-      $parts[] = ''; // Add an empty comment part.
-    } else if (count($parts) == 3) {
-      // This is the expected case.
-    } else {
-      if (preg_match('/private\s*key/i', $entire_key)) {
-        // Try to give the user a better error message if it looks like
-        // they uploaded a private key.
-        throw new Exception(
-          pht('Provide your public key, not your private key!'));
-      } else {
+    // The third field (the comment) can have spaces in it, so split this
+    // into a maximum of three parts.
+    $parts = preg_split('/\s+/', $parts, 3);
+
+    if (preg_match('/private\s*key/i', $entire_key)) {
+      // Try to give the user a better error message if it looks like
+      // they uploaded a private key.
+      throw new Exception(
+        pht('Provide your public key, not your private key!'));
+    }
+
+    switch (count($parts)) {
+      case 1:
         throw new Exception(
           pht('Provided public key is not properly formatted.'));
-      }
+      case 2:
+        // Add an empty comment part.
+        $parts[] = '';
+        break;
+      case 3:
+        // This is the expected case.
+        break;
     }
 
     list($type, $body, $comment) = $parts;

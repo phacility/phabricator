@@ -7,6 +7,7 @@
  *           javelin-dom
  *           javelin-uri
  *           javelin-behavior-device
+ *           phabricator-title
  */
 
 JX.behavior('aphlict-dropdown', function(config, statics) {
@@ -24,6 +25,8 @@ JX.behavior('aphlict-dropdown', function(config, statics) {
   var request = null;
   var dirty = config.local ? false : true;
 
+  JX.Title.setCount(config.countType, config.countNumber);
+
   function refresh() {
     if (dirty) {
       JX.DOM.setContent(dropdown, config.loadingText);
@@ -38,7 +41,9 @@ JX.behavior('aphlict-dropdown', function(config, statics) {
     }
 
     request = new JX.Request(config.uri, function(response) {
-      var display = (response.number > 999) ? "\u221E" : response.number;
+      JX.Title.setCount(config.countType, response.number);
+
+      var display = (response.number > 999) ? '\u221E' : response.number;
 
       JX.DOM.setContent(count, display);
       if (response.number === 0) {
@@ -70,6 +75,12 @@ JX.behavior('aphlict-dropdown', function(config, statics) {
 
       if (e.getNode('tag:a')) {
         // User clicked a link, just follow the link.
+        return;
+      }
+
+      if (!e.getNode('notification')) {
+        // User clicked somewhere in the dead area of the menu, like the header
+        // or footer.
         return;
       }
 

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group maniphest
- */
 abstract class ManiphestExcelFormat {
 
   final public static function loadAllFormats() {

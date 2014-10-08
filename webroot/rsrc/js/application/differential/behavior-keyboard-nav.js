@@ -230,7 +230,7 @@ JX.behavior('differential-keyboard-navigation', function(config) {
   new JX.KeyboardShortcut(
     'h',
     'Collapse or expand the file display (after jump).')
-    .setHandler(function(manager) {
+    .setHandler(function() {
       if (!changesets || !changesets[cursor]) {
         return;
       }
@@ -256,13 +256,13 @@ JX.behavior('differential-keyboard-navigation', function(config) {
   }
 
   new JX.KeyboardShortcut('r', 'Reply to selected inline comment.')
-    .setHandler(function(manager) {
+    .setHandler(function() {
       inline_op(selection_begin, 'reply');
     })
     .register();
 
   new JX.KeyboardShortcut('e', 'Edit selected inline comment.')
-    .setHandler(function(manager) {
+    .setHandler(function() {
       inline_op(selection_begin, 'edit');
     })
     .register();

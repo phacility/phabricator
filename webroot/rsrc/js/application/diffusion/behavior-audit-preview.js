@@ -8,7 +8,6 @@
 
 JX.behavior('audit-preview', function(config) {
 
-  var preview = JX.$(config.preview);
   var content = JX.$(config.content);
   var action = JX.$(config.action);
 

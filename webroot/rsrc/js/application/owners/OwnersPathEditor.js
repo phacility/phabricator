@@ -96,12 +96,12 @@ JX.install('OwnersPathEditor', {
         this._lastRepositoryChoice;
       var options = this._buildRepositoryOptions(selected_repository);
       var attrs = {
-        name : "repo[" + this._count + "]",
+        name : 'repo[' + this._count + ']',
         className : 'owners-repo'
       };
       var repo_select = JX.$N('select', attrs, options);
 
-      JX.DOM.listen(repo_select, 'change', null, JX.bind(this, function(e) {
+      JX.DOM.listen(repo_select, 'change', null, JX.bind(this, function() {
         this._lastRepositoryChoice = repo_select.value;
       }));
 
@@ -115,8 +115,8 @@ JX.install('OwnersPathEditor', {
       JX.copy(
         path_input,
         {
-          value : path_ref.path || "",
-          name : "path[" + this._count + "]"
+          value : path_ref.path || '',
+          name : 'path[' + this._count + ']'
         });
 
       // The Typeahead requires a display div called hardpoint.
@@ -128,7 +128,7 @@ JX.install('OwnersPathEditor', {
       var error_display = JX.$N(
         'div',
         {
-          className : "error-display validating"
+          className : 'error-display validating'
         },
         'Validating...');
 

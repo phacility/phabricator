@@ -4,13 +4,14 @@ final class PhabricatorDashboardTransaction
   extends PhabricatorApplicationTransaction {
 
   const TYPE_NAME = 'dashboard:name';
+  const TYPE_LAYOUT_MODE = 'dashboard:layoutmode';
 
   public function getApplicationName() {
     return 'dashboard';
   }
 
   public function getApplicationTransactionType() {
-    return PhabricatorDashboardPHIDTypeDashboard::TYPECONST;
+    return PhabricatorDashboardDashboardPHIDType::TYPECONST;
   }
 
   public function getTitle() {
@@ -85,5 +86,16 @@ final class PhabricatorDashboardTransaction
     }
 
     return parent::getColor();
+  }
+
+  public function shouldHide() {
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_LAYOUT_MODE:
+        return true;
+    }
+    return parent::shouldHide();
   }
 }

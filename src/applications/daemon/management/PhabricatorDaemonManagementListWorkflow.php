@@ -17,7 +17,7 @@ final class PhabricatorDaemonManagementListWorkflow
     $symbols = igroup($symbols, 'library');
 
     foreach ($symbols as $library => $symbol_list) {
-      $console->writeOut(pht("Daemons in library __%s__:", $library)."\n");
+      $console->writeOut(pht('Daemons in library __%s__:', $library)."\n");
       foreach ($symbol_list as $symbol) {
         $console->writeOut("    %s\n", $symbol['name']);
       }

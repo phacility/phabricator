@@ -54,15 +54,14 @@ final class ManiphestTaskStatus extends ManiphestConstants {
   public static function renderFullDescription($status) {
     if (self::isOpenStatus($status)) {
       $color = 'status';
-      $icon = 'oh-open';
+      $icon = 'fa-square-o bluegrey';
     } else {
       $color = 'status-dark';
-      $icon = 'oh-closed-dark';
+      $icon = 'fa-check-square-o';
     }
 
     $img = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_STATUS)
-      ->setSpriteIcon($icon);
+      ->setIconFont($icon);
 
     $tag = phutil_tag(
       'span',

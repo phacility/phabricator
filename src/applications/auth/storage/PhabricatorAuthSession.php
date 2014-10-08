@@ -12,12 +12,33 @@ final class PhabricatorAuthSession extends PhabricatorAuthDAO
   protected $sessionStart;
   protected $sessionExpires;
   protected $highSecurityUntil;
+  protected $isPartial;
 
   private $identityObject = self::ATTACHABLE;
 
   public function getConfiguration() {
     return array(
       self::CONFIG_TIMESTAMPS => false,
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'type' => 'text32',
+        'sessionKey' => 'bytes40',
+        'sessionStart' => 'epoch',
+        'sessionExpires' => 'epoch',
+        'highSecurityUntil' => 'epoch?',
+        'isPartial' => 'bool',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'sessionKey' => array(
+          'columns' => array('sessionKey'),
+          'unique' => true,
+        ),
+        'key_identity' => array(
+          'columns' => array('userPHID', 'type'),
+        ),
+        'key_expires' => array(
+          'columns' => array('sessionExpires'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 
@@ -43,9 +64,9 @@ final class PhabricatorAuthSession extends PhabricatorAuthDAO
   public static function getSessionTypeTTL($session_type) {
     switch ($session_type) {
       case self::TYPE_WEB:
-        return (60 * 60 * 24 * 30); // 30 days
+        return phutil_units('30 days in seconds');
       case self::TYPE_CONDUIT:
-        return (60 * 60 * 24); // 24 hours
+        return phutil_units('24 hours in seconds');
       default:
         throw new Exception(pht('Unknown session type "%s".', $session_type));
     }

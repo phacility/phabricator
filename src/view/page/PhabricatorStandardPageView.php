@@ -15,6 +15,16 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
   private $disableConsole;
   private $pageObjects = array();
   private $applicationMenu;
+  private $showFooter = true;
+
+  public function setShowFooter($show_footer) {
+    $this->showFooter = $show_footer;
+    return $this;
+  }
+
+  public function getShowFooter() {
+    return $this->showFooter;
+  }
 
   public function setApplicationMenu(PHUIListView $application_menu) {
     $this->applicationMenu = $application_menu;
@@ -101,7 +111,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     if (!$this->getRequest()) {
       throw new Exception(
         pht(
-          "You must set the Request to render a PhabricatorStandardPageView."));
+          'You must set the Request to render a PhabricatorStandardPageView.'));
     }
 
     $console = $this->getConsole();
@@ -124,8 +134,8 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
     if ($user) {
       $default_img_uri =
-        PhabricatorEnv::getCDNURI(
-          '/rsrc/image/icon/fatcow/document_black.png');
+        celerity_get_resource_uri(
+          'rsrc/image/icon/fatcow/document_black.png');
       $download_form = phabricator_form(
         $user,
         array(
@@ -171,7 +181,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     if ($user->hasSession()) {
       $hisec = ($user->getSession()->getHighSecurityUntil() - time());
       if ($hisec > 0) {
-        $remaining_time = phabricator_format_relative_time($hisec);
+        $remaining_time = phutil_format_relative_time($hisec);
         Javelin::initBehavior(
           'high-security-warning',
           array(
@@ -329,73 +339,85 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       }
     }
 
-    return
-      phutil_tag(
-        'div',
-        array(
-          'id' => 'base-page',
-          'class' => 'phabricator-standard-page',
-        ),
-        array(
-          $developer_warning,
-          $setup_warning,
-          $header_chrome,
-          phutil_tag_div('phabricator-standard-page-body', array(
-            ($console ? hsprintf('<darkconsole />') : null),
-            parent::getBody(),
-            phutil_tag('div', array('style' => 'clear: both;')),
-          )),
-        ));
+    return phutil_tag(
+      'div',
+      array(
+        'id' => 'base-page',
+        'class' => 'phabricator-standard-page',
+      ),
+      array(
+        $developer_warning,
+        $setup_warning,
+        $header_chrome,
+        phutil_tag_div('phabricator-standard-page-body', array(
+          ($console ? hsprintf('<darkconsole />') : null),
+          parent::getBody(),
+          $this->renderFooter(),
+        )),
+      ));
   }
 
   protected function getTail() {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $container = null;
-    if ($user && $user->isLoggedIn()) {
-
-      $aphlict_object_id = celerity_generate_unique_node_id();
-      $aphlict_container_id = celerity_generate_unique_node_id();
-
-      $client_uri = PhabricatorEnv::getEnvConfig('notification.client-uri');
-      $client_uri = new PhutilURI($client_uri);
-      if ($client_uri->getDomain() == 'localhost') {
-        $this_host = $this->getRequest()->getHost();
-        $this_host = new PhutilURI('http://'.$this_host.'/');
-        $client_uri->setDomain($this_host->getDomain());
-      }
-
-      $enable_debug = PhabricatorEnv::getEnvConfig('notification.debug');
-      Javelin::initBehavior(
-        'aphlict-listen',
-        array(
-          'id'           => $aphlict_object_id,
-          'containerID'  => $aphlict_container_id,
-          'server'       => $client_uri->getDomain(),
-          'port'         => $client_uri->getPort(),
-          'debug'        => $enable_debug,
-          'pageObjects'  => array_fill_keys($this->pageObjects, true),
-        ));
-      $container = phutil_tag(
-        'div',
-        array(
-          'id' => $aphlict_container_id,
-          'style' =>
-            'position: absolute; width: 0; height: 0; overflow: hidden;',
-        ),
-        '');
-    }
+    $tail = array(
+      parent::getTail(),
+    );
 
     $response = CelerityAPI::getStaticResourceResponse();
 
-    $tail = array(
-      parent::getTail(),
-      $container,
-      $response->renderHTMLFooter(),
-    );
+    if (PhabricatorEnv::getEnvConfig('notification.enabled')) {
+      if ($user && $user->isLoggedIn()) {
 
-    return phutil_implode_html("\n", $tail);
+        $aphlict_object_id = celerity_generate_unique_node_id();
+        $aphlict_container_id = celerity_generate_unique_node_id();
+
+        $client_uri = PhabricatorEnv::getEnvConfig('notification.client-uri');
+        $client_uri = new PhutilURI($client_uri);
+        if ($client_uri->getDomain() == 'localhost') {
+          $this_host = $this->getRequest()->getHost();
+          $this_host = new PhutilURI('http://'.$this_host.'/');
+          $client_uri->setDomain($this_host->getDomain());
+        }
+
+        $map = CelerityResourceMap::getNamedInstance('phabricator');
+        $swf_uri = $response->getURI($map, 'rsrc/swf/aphlict.swf', true);
+
+        $enable_debug = PhabricatorEnv::getEnvConfig('notification.debug');
+
+        $subscriptions = $this->pageObjects;
+        if ($user) {
+          $subscriptions[] = $user->getPHID();
+        }
+
+        Javelin::initBehavior(
+          'aphlict-listen',
+          array(
+            'id'            => $aphlict_object_id,
+            'containerID'   => $aphlict_container_id,
+            'server'        => $client_uri->getDomain(),
+            'port'          => $client_uri->getPort(),
+            'debug'         => $enable_debug,
+            'swfURI'        => $swf_uri,
+            'pageObjects'   => array_fill_keys($this->pageObjects, true),
+            'subscriptions' => $subscriptions,
+          ));
+
+        $tail[] = phutil_tag(
+          'div',
+          array(
+            'id' => $aphlict_container_id,
+            'style' =>
+              'position: absolute; width: 0; height: 0; overflow: hidden;',
+          ),
+          '');
+      }
+    }
+
+    $tail[] = $response->renderHTMLFooter();
+
+    return $tail;
   }
 
   protected function getBodyClasses() {
@@ -430,6 +452,10 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       $classes[] = 'printable';
     }
 
+    if ($this->getRequest()->getStr('__aural__')) {
+      $classes[] = 'audible';
+    }
+
     return implode(' ', $classes);
   }
 
@@ -438,6 +464,52 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       return null;
     }
     return $this->getRequest()->getApplicationConfiguration()->getConsole();
+  }
+
+  private function renderFooter() {
+    if (!$this->getShowChrome()) {
+      return null;
+    }
+
+    if (!$this->getShowFooter()) {
+      return null;
+    }
+
+    $items = PhabricatorEnv::getEnvConfig('ui.footer-items');
+    if (!$items) {
+      return null;
+    }
+
+    $foot = array();
+    foreach ($items as $item) {
+      $name = idx($item, 'name', pht('Unnamed Footer Item'));
+
+      $href = idx($item, 'href');
+      if (!PhabricatorEnv::isValidWebResource($href)) {
+        $href = null;
+      }
+
+      if ($href !== null) {
+        $tag = 'a';
+      } else {
+        $tag = 'span';
+      }
+
+      $foot[] = phutil_tag(
+        $tag,
+        array(
+          'href' => $href,
+        ),
+        $name);
+    }
+    $foot = phutil_implode_html(" \xC2\xB7 ", $foot);
+
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'phabricator-standard-page-footer grouped',
+      ),
+      $foot);
   }
 
 }

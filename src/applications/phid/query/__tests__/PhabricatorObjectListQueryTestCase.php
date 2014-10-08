@@ -26,13 +26,13 @@ final class PhabricatorObjectListQueryTestCase extends PhabricatorTestCase {
     $result = $this->parseObjectList("@{$name}, {$name}");
     $this->assertEqual(array($phid), $result);
 
-    $result = $this->parseObjectList("");
+    $result = $this->parseObjectList('');
     $this->assertEqual(array(), $result);
 
     // Expect failure when loading a user if objects must be of type "DUCK".
     $caught = null;
     try {
-      $result = $this->parseObjectList("{$name}", array("DUCK"));
+      $result = $this->parseObjectList("{$name}", array('DUCK'));
     } catch (Exception $ex) {
       $caught = $ex;
     }
@@ -42,7 +42,7 @@ final class PhabricatorObjectListQueryTestCase extends PhabricatorTestCase {
     // Expect failure when loading an invalid object.
     $caught = null;
     try {
-      $result = $this->parseObjectList("invalid");
+      $result = $this->parseObjectList('invalid');
     } catch (Exception $ex) {
       $caught = $ex;
     }

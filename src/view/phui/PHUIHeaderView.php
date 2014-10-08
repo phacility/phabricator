@@ -8,8 +8,9 @@ final class PHUIHeaderView extends AphrontView {
   private $header;
   private $tags = array();
   private $image;
+  private $imageURL = null;
   private $subheader;
-  private $gradient;
+  private $headerColor;
   private $noBackground;
   private $bleedHeader;
   private $properties = array();
@@ -42,6 +43,11 @@ final class PHUIHeaderView extends AphrontView {
     return $this;
   }
 
+  public function setImageURL($url) {
+    $this->imageURL = $url;
+    return $this;
+  }
+
   public function setSubheader($subheader) {
     $this->subheader = $subheader;
     return $this;
@@ -52,8 +58,8 @@ final class PHUIHeaderView extends AphrontView {
     return $this;
   }
 
-  public function setGradient($gradient) {
-    $this->gradient = $gradient;
+  public function setHeaderColor($color) {
+    $this->headerColor = $color;
     return $this;
   }
 
@@ -81,13 +87,12 @@ final class PHUIHeaderView extends AphrontView {
     $header_class = 'phui-header-status';
 
     if ($color) {
-      $icon = $icon.'-'.$color;
+      $icon = $icon.' '.$color;
       $header_class = $header_class.'-'.$color;
     }
 
     $img = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_STATUS)
-      ->setSpriteIcon($icon);
+      ->setIconFont($icon);
 
     $tag = phutil_tag(
       'span',
@@ -116,9 +121,9 @@ final class PHUIHeaderView extends AphrontView {
       $classes[] = 'phui-bleed-header';
     }
 
-    if ($this->gradient) {
+    if ($this->headerColor) {
       $classes[] = 'sprite-gradient';
-      $classes[] = 'gradient-'.$this->gradient.'-header';
+      $classes[] = 'gradient-'.$this->headerColor.'-header';
     }
 
     if ($this->properties || $this->policyObject || $this->subheader) {
@@ -128,12 +133,13 @@ final class PHUIHeaderView extends AphrontView {
     $image = null;
     if ($this->image) {
       $image = phutil_tag(
-        'span',
+        ($this->imageURL ? 'a' : 'span'),
         array(
+          'href' => $this->imageURL,
           'class' => 'phui-header-image',
           'style' => 'background-image: url('.$this->image.')',
         ),
-        '');
+        ' ');
       $classes[] = 'phui-header-has-image';
     }
 
@@ -251,8 +257,7 @@ final class PHUIHeaderView extends AphrontView {
     $phid = $object->getPHID();
 
     $icon = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_STATUS)
-      ->setSpriteIcon($policy->getIcon());
+      ->setIconFont($policy->getIcon().' bluegrey');
 
     $link = javelin_tag(
       'a',

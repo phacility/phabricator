@@ -17,20 +17,24 @@ final class DiffusionLintDetailsController extends DiffusionController {
     foreach ($messages as $message) {
       $path = phutil_tag(
         'a',
-        array('href' => $drequest->generateURI(array(
-          'action' => 'lint',
-          'path' => $message['path'],
-        ))),
+        array(
+          'href' => $drequest->generateURI(array(
+            'action' => 'lint',
+            'path' => $message['path'],
+          )),
+        ),
         substr($message['path'], strlen($drequest->getPath()) + 1));
 
       $line = phutil_tag(
         'a',
-        array('href' => $drequest->generateURI(array(
-          'action' => 'browse',
-          'path' => $message['path'],
-          'line' => $message['line'],
-          'commit' => $branch->getLintCommit(),
-        ))),
+        array(
+          'href' => $drequest->generateURI(array(
+            'action' => 'browse',
+            'path' => $message['path'],
+            'line' => $message['line'],
+            'commit' => $branch->getLintCommit(),
+          )),
+        ),
         $message['line']);
 
       $author = $message['authorPHID'];
@@ -86,12 +90,12 @@ final class DiffusionLintDetailsController extends DiffusionController {
         $content,
       ),
       array(
-        'device' => true,
         'title' =>
           array(
             pht('Lint'),
             $drequest->getRepository()->getCallsign(),
-      )));
+          ),
+      ));
   }
 
   private function loadLintMessages(

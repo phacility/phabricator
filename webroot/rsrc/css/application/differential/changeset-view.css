@@ -41,17 +41,6 @@
 }
 
 .differential-diff td {
-  /*
-    Disable ligatures in Firefox. Firefox 3 has fancypants ligature support, but
-    it gets applied to monospaced fonts, which sucks because it means that the
-    "fi" ligature only takes up one character, e.g. It's probably the font's
-    fault that it even specifies ligatures (seriously, what the hell?) but
-    that's hard to fix and this is "easy" to "fix": custom letter spacing
-    disables ligatures, as long as it's at least 0.008333-repeating pixels of
-    custom letter spacing. I have no idea where this number comes from, but note
-    that .83333.. = 5/6. -epriestley
-  */
-  letter-spacing:     0.0083334px;
   vertical-align:     top;
   white-space:        pre-wrap;
   word-wrap:          break-word;
@@ -136,6 +125,10 @@
   padding: 0;
 }
 
+.diffusion-source td.cov {
+  padding: 0 8px;
+}
+
 td.cov-U {
   background: #dd8866;
 }
@@ -150,6 +143,10 @@ td.cov-N {
 
 td.cov-X {
   background: #aa00aa;
+}
+
+td.cov-I {
+  background: {$lightgreybackground};
 }
 
 .differential-diff td.source-cov-C,
@@ -213,6 +210,14 @@ td.cov-X {
 
 .differential-diff .differential-image-diff:hover {
   background-image: url(/rsrc/image/checker_dark.png);
+}
+
+.differential-diff .differential-image-diff td {
+  padding: 8px;
+}
+
+.differential-image-stage {
+  overflow: auto;
 }
 
 .differential-meta-notice {
@@ -327,51 +332,24 @@ td.cov-X {
 }
 
 .differential-property-table {
-  width: auto;
-  margin: 12px auto;
-  background: #e3e3e3;
-}
-
-.differential-property-table th {
-  text-align: right;
-  width: 10em;
-  font-weight: bold;
-  color: {$greytext};
-  white-space: nowrap;
-  padding: 4px 8px;
-  border-right: 1px solid {$greytext};
-}
-
-.differential-property-table td {
-  padding: 4px 8px;
-  width: 35em;
+  margin: 12px;
+  background: {$lightgreybackground};
+  border: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$blueborder};
 }
 
 .differential-property-table td em {
   color: {$lightgreytext};
 }
 
-.differential-property-table tr.property-table-header th,
-.differential-property-table tr.property-table-header td {
-  text-align: center;
-  font-weight: bold;
-  border-bottom: 1px solid {$greytext};
-}
-
 .differential-property-table td.oval {
   background: #ffd0d0;
+  width: 50%;
 }
 
 .differential-property-table td.nval {
   background: #d0ffd0;
-}
-
-.differential-property-table tr.property-table-header td.oval {
-  background: #ffaaaa;
-}
-
-.differential-property-table tr.property-table-header td.nval {
-  background: #aaffaa;
+  width: 50%;
 }
 
 .differential-inline-undo {
@@ -473,8 +451,9 @@ tr.differential-inline-loading {
 
 .differential-file-icon-header .phui-icon-view {
   display: inline-block;
-  margin: 0 4px 2px 0;
+  margin: 0 6px 2px 0;
   vertical-align: middle;
+  font-size: 14px;
 }
 
 .device-phone .differential-file-icon-header .phui-icon-view {

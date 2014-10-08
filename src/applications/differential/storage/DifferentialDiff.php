@@ -5,7 +5,8 @@ final class DifferentialDiff
   implements
     PhabricatorPolicyInterface,
     HarbormasterBuildableInterface,
-    PhabricatorApplicationTransactionInterface {
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorDestructibleInterface {
 
   protected $revisionID;
   protected $authorPHID;
@@ -41,12 +42,40 @@ final class DifferentialDiff
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'revisionID' => 'id?',
+        'authorPHID' => 'phid?',
+        'repositoryPHID' => 'phid?',
+        'sourceMachine' => 'text255?',
+        'sourcePath' => 'text255?',
+        'sourceControlSystem' => 'text64?',
+        'sourceControlBaseRevision' => 'text255?',
+        'sourceControlPath' => 'text255?',
+        'lintStatus' => 'uint32',
+        'unitStatus' => 'uint32',
+        'lineCount' => 'uint32',
+        'branch' => 'text255?',
+        'bookmark' => 'text255?',
+        'arcanistProjectPHID' => 'phid?',
+        'repositoryUUID' => 'text64?',
+
+        // T6203/NULLABILITY
+        // These should be non-null; all diffs should have a creation method
+        // and the description should just be empty.
+        'creationMethod' => 'text255?',
+        'description' => 'text255?',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'revisionID' => array(
+          'columns' => array('revisionID'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      DifferentialPHIDTypeDiff::TYPECONST);
+      DifferentialDiffPHIDType::TYPECONST);
   }
 
   public function addUnsavedChangeset(DifferentialChangeset $changeset) {
@@ -107,24 +136,6 @@ final class DifferentialDiff
     return $ret;
   }
 
-  public function delete() {
-    $this->openTransaction();
-      foreach ($this->loadChangesets() as $changeset) {
-        $changeset->delete();
-      }
-
-      $properties = id(new DifferentialDiffProperty())->loadAllWhere(
-        'diffID = %d',
-        $this->getID());
-      foreach ($properties as $prop) {
-        $prop->delete();
-      }
-
-      $ret = parent::delete();
-    $this->saveTransaction();
-    return $ret;
-  }
-
   public static function newFromRawChanges(array $changes) {
     assert_instances_of($changes, 'ArcanistDiffChange');
     $diff = new DifferentialDiff();
@@ -149,7 +160,7 @@ final class DifferentialDiff
       $hunks = $change->getHunks();
       if ($hunks) {
         foreach ($hunks as $hunk) {
-          $dhunk = new DifferentialHunk();
+          $dhunk = new DifferentialHunkModern();
           $dhunk->setOldOffset($hunk->getOldOffset());
           $dhunk->setOldLen($hunk->getOldLength());
           $dhunk->setNewOffset($hunk->getNewOffset());
@@ -218,7 +229,7 @@ final class DifferentialDiff
       'lintStatus' => $this->getLintStatus(),
       'changes' => array(),
       'properties' => array(),
-      'projectName' => $this->getArcanistProjectName()
+      'projectName' => $this->getArcanistProjectName(),
     );
 
     $dict['changes'] = $this->buildChangesList();
@@ -350,6 +361,38 @@ final class DifferentialDiff
     return null;
   }
 
+  public function getBuildVariables() {
+    $results = array();
+
+    $results['buildable.diff'] = $this->getID();
+    $revision = $this->getRevision();
+    $results['buildable.revision'] = $revision->getID();
+    $repo = $revision->getRepository();
+
+    if ($repo) {
+      $results['repository.callsign'] = $repo->getCallsign();
+      $results['repository.vcs'] = $repo->getVersionControlSystem();
+      $results['repository.uri'] = $repo->getPublicCloneURI();
+    }
+
+    return $results;
+  }
+
+  public function getAvailableBuildVariables() {
+    return array(
+      'buildable.diff' =>
+        pht('The differential diff ID, if applicable.'),
+      'buildable.revision' =>
+        pht('The differential revision ID, if applicable.'),
+      'repository.callsign' =>
+        pht('The callsign of the repository in Phabricator.'),
+      'repository.vcs' =>
+        pht('The version control system, either "svn", "hg" or "git".'),
+      'repository.uri' =>
+        pht('The URI to clone or checkout the repository from.'),
+    );
+  }
+
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 
@@ -374,6 +417,30 @@ final class DifferentialDiff
       return null;
     }
     return $this->getRevision()->getApplicationTransactionTemplate();
+  }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+      $this->delete();
+
+      foreach ($this->loadChangesets() as $changeset) {
+        $changeset->delete();
+      }
+
+      $properties = id(new DifferentialDiffProperty())->loadAllWhere(
+        'diffID = %d',
+        $this->getID());
+      foreach ($properties as $prop) {
+        $prop->delete();
+      }
+
+    $this->saveTransaction();
   }
 
 }

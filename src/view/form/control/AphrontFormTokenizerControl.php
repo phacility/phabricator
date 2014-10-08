@@ -7,7 +7,7 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
   private $limit;
   private $placeholder;
 
-  public function setDatasource($datasource) {
+  public function setDatasource(PhabricatorTypeaheadDatasource $datasource) {
     $this->datasource = $datasource;
     return $this;
   }
@@ -43,8 +43,13 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
       $id = celerity_generate_unique_node_id();
     }
 
-    if (!$this->placeholder) {
-      $this->placeholder = $this->getDefaultPlaceholder();
+    $placeholder = null;
+    if (!strlen($this->placeholder)) {
+      if ($this->datasource) {
+        $placeholder = $this->datasource->getPlaceholderText();
+      }
+    } else {
+      $placeholder = $this->placeholder;
     }
 
     $template = new AphrontTokenizerTemplateView();
@@ -57,52 +62,24 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
       $username = $this->user->getUsername();
     }
 
+    $datasource_uri = null;
+    if ($this->datasource) {
+      $datasource_uri = $this->datasource->getDatasourceURI();
+    }
+
     if (!$this->disableBehavior) {
       Javelin::initBehavior('aphront-basic-tokenizer', array(
         'id'          => $id,
-        'src'         => $this->datasource,
+        'src'         => $datasource_uri,
         'value'       => mpull($values, 'getFullName', 'getPHID'),
-        'icons'       => mpull($values, 'getTypeIcon', 'getPHID'),
+        'icons'       => mpull($values, 'getIcon', 'getPHID'),
         'limit'       => $this->limit,
         'username'    => $username,
-        'placeholder' => $this->placeholder,
+        'placeholder' => $placeholder,
       ));
     }
 
     return $template->render();
   }
-
-  private function getDefaultPlaceholder() {
-    $datasource = $this->datasource;
-
-    $matches = null;
-    if (!preg_match('@^/typeahead/common/(.*)/$@', $datasource, $matches)) {
-      return null;
-    }
-
-    $request = $matches[1];
-
-    $map = array(
-      'users'           => pht('Type a user name...'),
-      'authors'         => pht('Type a user name...'),
-      'usersorprojects' => pht('Type a user or project name...'),
-      'searchowner'     => pht('Type a user name...'),
-      'accounts'        => pht('Type a user name...'),
-      'mailable'        => pht('Type a user, project, or mailing list...'),
-      'allmailable'     => pht('Type a user, project, or mailing list...'),
-      'searchproject'   => pht('Type a project name...'),
-      'projects'        => pht('Type a project name...'),
-      'repositories'    => pht('Type a repository name...'),
-      'packages'        => pht('Type a package name...'),
-      'macros'          => pht('Type a macro name...'),
-      'arcanistproject' => pht('Type an arc project name...'),
-      'accountsorprojects' => pht('Type a user or project name...'),
-      'usersprojectsorpackages' =>
-        pht('Type a user, project, or package name...'),
-    );
-
-    return idx($map, $request);
-  }
-
 
 }

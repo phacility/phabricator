@@ -16,6 +16,7 @@ final class PhabricatorImageTransformer {
       array(
         'name' => 'meme-'.$file->getName(),
         'ttl' => time() + 60 * 60 * 24,
+        'canCDN' => true,
       ));
   }
 
@@ -30,6 +31,7 @@ final class PhabricatorImageTransformer {
       $image,
       array(
         'name' => 'thumb-'.$file->getName(),
+        'canCDN' => true,
       ));
   }
 
@@ -45,6 +47,7 @@ final class PhabricatorImageTransformer {
       $image,
       array(
         'name' => 'profile-'.$file->getName(),
+        'canCDN' => true,
       ));
   }
 
@@ -58,6 +61,7 @@ final class PhabricatorImageTransformer {
       $image,
       array(
         'name' => 'preview-'.$file->getName(),
+        'canCDN' => true,
       ));
   }
 
@@ -79,6 +83,7 @@ final class PhabricatorImageTransformer {
       $image,
       array(
         'name' => 'conpherence-'.$file->getName(),
+        'canCDN' => true,
       ));
   }
 
@@ -210,7 +215,7 @@ final class PhabricatorImageTransformer {
       'dx' => $dx,
       'dy' => $dy,
       'sdx' => $sdx,
-      'sdy' => $sdy
+      'sdy' => $sdy,
     );
   }
 
@@ -388,12 +393,12 @@ final class PhabricatorImageTransformer {
     $text_height = abs($bbox[3] - $bbox[5]);
     $text_width = abs($bbox[0] - $bbox[2]);
     return array(
-      "doesfit" => ($text_height * 1.05 <= imagesy($img) / 2
+      'doesfit' => ($text_height * 1.05 <= imagesy($img) / 2
         && $text_width * 1.05 <= imagesx($img)),
-      "txtwidth" => $text_width,
-      "txtheight" => $text_height,
-      "imgwidth" => imagesx($img),
-      "imgheight" => imagesy($img),
+      'txtwidth' => $text_width,
+      'txtheight' => $text_height,
+      'imgwidth' => imagesx($img),
+      'imgheight' => imagesy($img),
     );
   }
 

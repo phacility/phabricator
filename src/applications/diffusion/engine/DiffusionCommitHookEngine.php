@@ -187,7 +187,8 @@ final class DiffusionCommitHookEngine extends Phobject {
           'eventPHID' => $event->getPHID(),
           'emailPHIDs' => array_values($this->emailPHIDs),
           'info' => $this->loadCommitInfoForWorker($all_updates),
-        ));
+        ),
+        PhabricatorWorker::PRIORITY_ALERTS);
     }
 
     return 0;
@@ -477,7 +478,12 @@ final class DiffusionCommitHookEngine extends Phobject {
       $ref_flags = 0;
       $dangerous = null;
 
-      if ($ref_old === self::EMPTY_HASH) {
+      if (($ref_old === self::EMPTY_HASH) && ($ref_new === self::EMPTY_HASH)) {
+        // This happens if you try to delete a tag or branch which does not
+        // exist by pushing directly to the ref. Git will warn about it but
+        // allow it. Just call it a delete, without flagging it as dangerous.
+        $ref_flags |= PhabricatorRepositoryPushLog::CHANGEFLAG_DELETE;
+      } else if ($ref_old === self::EMPTY_HASH) {
         $ref_flags |= PhabricatorRepositoryPushLog::CHANGEFLAG_ADD;
       } else if ($ref_new === self::EMPTY_HASH) {
         $ref_flags |= PhabricatorRepositoryPushLog::CHANGEFLAG_DELETE;
@@ -610,8 +616,8 @@ final class DiffusionCommitHookEngine extends Phobject {
         if (!$err) {
           // This hook ran OK, but echo its output in case there was something
           // informative.
-          $console->writeOut("%s", $stdout);
-          $console->writeErr("%s", $stderr);
+          $console->writeOut('%s', $stdout);
+          $console->writeErr('%s', $stderr);
           continue;
         }
 
@@ -637,9 +643,19 @@ final class DiffusionCommitHookEngine extends Phobject {
 
     foreach (Filesystem::listDirectory($directory) as $path) {
       $full_path = $directory.DIRECTORY_SEPARATOR.$path;
-      if (is_executable($full_path)) {
-        $executables[] = $full_path;
+      if (!is_executable($full_path)) {
+        // Don't include non-executable files.
+        continue;
       }
+
+      if (basename($full_path) == 'README') {
+        // Don't include README, even if it is marked as executable. It almost
+        // certainly got caught in the crossfire of a sweeping `chmod`, since
+        // users do this with some frequency.
+        continue;
+      }
+
+      $executables[] = $full_path;
     }
 
     return $executables;
@@ -678,16 +694,16 @@ final class DiffusionCommitHookEngine extends Phobject {
     foreach (array('old', 'new') as $key) {
       $futures[$key] = $repository->getLocalCommandFuture(
         'heads --template %s',
-        '{node}\1{branches}\2');
+        '{node}\1{branch}\2');
     }
     // Wipe HG_PENDING out of the old environment so we see the pre-commit
     // state of the repository.
     $futures['old']->updateEnv('HG_PENDING', null);
 
     $futures['commits'] = $repository->getLocalCommandFuture(
-      "log --rev %s --rev tip --template %s",
-      hgsprintf('%s', $hg_node),
-      '{node}\1{branches}\2');
+      'log --rev %s --template %s',
+      hgsprintf('%s:%s', $hg_node, 'tip'),
+      '{node}\1{branch}\2');
 
     // Resolve all of the futures now. We don't need the 'commits' future yet,
     // but it simplifies the logic to just get it out of the way.
@@ -720,31 +736,29 @@ final class DiffusionCommitHookEngine extends Phobject {
       sort($old_heads);
       sort($new_heads);
 
+      if (!$old_heads && !$new_heads) {
+        // This should never be possible, as it makes no sense. Explode.
+        throw new Exception(
+          pht(
+            'Mercurial repository has no new or old heads for branch "%s" '.
+            'after push. This makes no sense; rejecting change.',
+            $ref));
+      }
+
       if ($old_heads === $new_heads) {
         // No changes to this branch, so skip it.
         continue;
       }
 
-      if (!$new_heads) {
-        if ($old_heads) {
-          // It looks like this push deletes a branch, but that isn't possible
-          // in Mercurial, so something is going wrong here. Bail out.
-          throw new Exception(
-            pht(
-              'Mercurial repository has no new head for branch "%s" after '.
-              'push. This is unexpected; rejecting change.'));
-        } else {
-          // Obviously, this should never be possible either, as it makes
-          // no sense. Explode.
-          throw new Exception(
-            pht(
-              'Mercurial repository has no new or old heads for branch "%s" '.
-              'after push. This makes no sense; rejecting change.'));
-        }
-      }
-
       $stray_heads = array();
-      if (count($old_heads) > 1) {
+
+      if ($old_heads && !$new_heads) {
+        // This is a branch deletion with "--close-branch".
+        $head_map = array();
+        foreach ($old_heads as $old_head) {
+          $head_map[$old_head] = array(self::EMPTY_HASH);
+        }
+      } else if (count($old_heads) > 1) {
         // HORRIBLE: In Mercurial, branches can have multiple heads. If the
         // old branch had multiple heads, we need to figure out which new
         // heads descend from which old heads, so we can tell whether you're
@@ -752,10 +766,15 @@ final class DiffusionCommitHookEngine extends Phobject {
         // repository that's already full of garbage (strongly discouraged but
         // not as inherently dangerous). These cases should be very uncommon.
 
+        // NOTE: We're only looking for heads on the same branch. The old
+        // tip of the branch may be the branchpoint for other branches, but that
+        // is OK.
+
         $dfutures = array();
         foreach ($old_heads as $old_head) {
           $dfutures[$old_head] = $repository->getLocalCommandFuture(
-            'log --rev %s --template %s',
+            'log --branch %s --rev %s --template %s',
+            $ref,
             hgsprintf('(descendants(%s) and head())', $old_head),
             '{node}\1');
         }
@@ -763,13 +782,24 @@ final class DiffusionCommitHookEngine extends Phobject {
         $head_map = array();
         foreach (Futures($dfutures) as $future_head => $dfuture) {
           list($stdout) = $dfuture->resolvex();
-          $head_map[$future_head] = array_filter(explode("\1", $stdout));
+          $descendant_heads = array_filter(explode("\1", $stdout));
+          if ($descendant_heads) {
+            // This old head has at least one descendant in the push.
+            $head_map[$future_head] = $descendant_heads;
+          } else {
+            // This old head has no descendants, so it is being deleted.
+            $head_map[$future_head] = array(self::EMPTY_HASH);
+          }
         }
 
         // Now, find all the new stray heads this push creates, if any. These
         // are new heads which do not descend from the old heads.
         $seen = array_fuse(array_mergev($head_map));
         foreach ($new_heads as $new_head) {
+          if ($new_head === self::EMPTY_HASH) {
+            // If a branch head is being deleted, don't insert it as an add.
+            continue;
+          }
           if (empty($seen[$new_head])) {
             $head_map[self::EMPTY_HASH][] = $new_head;
           }
@@ -794,6 +824,8 @@ final class DiffusionCommitHookEngine extends Phobject {
             $ref_flags |= PhabricatorRepositoryPushLog::CHANGEFLAG_APPEND;
           }
 
+
+          $deletes_existing_head = ($new_head == self::EMPTY_HASH);
           $splits_existing_head = (count($child_heads) > 1);
           $creates_duplicate_head = ($old_head == self::EMPTY_HASH) &&
                                     (count($head_map) > 1);
@@ -828,6 +860,19 @@ final class DiffusionCommitHookEngine extends Phobject {
                 $ref,
                 implode(', ', $readable_child_heads));
             }
+          }
+
+          if ($deletes_existing_head) {
+            // TODO: Somewhere in here we should be setting CHANGEFLAG_REWRITE
+            // if we are also creating at least one other head to replace
+            // this one.
+
+            // NOTE: In Git, this is a dangerous change, but it is not dangerous
+            // in Mercurial. Mercurial branches are version controlled, and
+            // Mercurial does not prompt you for any special flags when pushing
+            // a `--close-branch` commit by default.
+
+            $ref_flags |= PhabricatorRepositoryPushLog::CHANGEFLAG_DELETE;
           }
 
           $ref_update = $this->newPushLog()
@@ -939,15 +984,8 @@ final class DiffusionCommitHookEngine extends Phobject {
     $commits_lines = array_filter($commits_lines);
     $commit_map = array();
     foreach ($commits_lines as $commit_line) {
-      list($node, $branches_raw) = explode("\1", $commit_line);
-
-      if (!strlen($branches_raw)) {
-        $branches = array('default');
-      } else {
-        $branches = explode(' ', $branches_raw);
-      }
-
-      $commit_map[$node] = $branches;
+      list($node, $branch) = explode("\1", $commit_line);
+      $commit_map[$node] = array($branch);
     }
 
     return $commit_map;
@@ -1070,6 +1108,11 @@ final class DiffusionCommitHookEngine extends Phobject {
           $byte_limit));
     }
 
+    if (!strlen($raw_diff)) {
+      // If the commit is actually empty, just return no changesets.
+      return array();
+    }
+
     $parser = new ArcanistDiffParser();
     $changes = $parser->parseDiff($raw_diff);
     $diff = DifferentialDiff::newFromRawChanges($changes);
@@ -1108,6 +1151,9 @@ final class DiffusionCommitHookEngine extends Phobject {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         return idx($this->gitCommits, $identifier, array());
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        // NOTE: This will be "the branch the commit was made to", not
+        // "a list of all branch heads which descend from the commit".
+        // This is consistent with Mercurial, but possibly confusing.
         return idx($this->mercurialCommits, $identifier, array());
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
         // Subversion doesn't have branches.

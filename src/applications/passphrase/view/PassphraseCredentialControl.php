@@ -41,7 +41,7 @@ final class PassphraseCredentialControl extends AphrontFormControl {
     $options_map = array();
     foreach ($this->options as $option) {
       $options_map[$option->getPHID()] = pht(
-        "%s %s",
+        '%s %s',
         'K'.$option->getID(),
         $option->getName());
     }

@@ -104,9 +104,19 @@ final class PhabricatorSettingsPanelMultiFactor
     $panel = new PHUIObjectBoxView();
     $header = new PHUIHeaderView();
 
+    $help_uri = PhabricatorEnv::getDoclink(
+      'User Guide: Multi-Factor Authentication');
+
+    $help_icon = id(new PHUIIconView())
+      ->setIconFont('fa-info-circle');
+    $help_button = id(new PHUIButtonView())
+      ->setText(pht('Help'))
+      ->setHref($help_uri)
+      ->setTag('a')
+      ->setIcon($help_icon);
+
     $create_icon = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-      ->setSpriteIcon('new');
+      ->setIconFont('fa-plus');
     $create_button = id(new PHUIButtonView())
       ->setText(pht('Add Authentication Factor'))
       ->setHref($this->getPanelURI('?new=true'))
@@ -115,6 +125,7 @@ final class PhabricatorSettingsPanelMultiFactor
       ->setIcon($create_icon);
 
     $header->setHeader(pht('Authentication Factors'));
+    $header->addActionLink($help_button);
     $header->addActionLink($create_button);
 
     $panel->setHeader($header);
@@ -162,11 +173,12 @@ final class PhabricatorSettingsPanelMultiFactor
 
       $dialog->appendParagraph(
         pht(
-          'Adding an additional authentication factor increases the security '.
-          'of your account.'));
+          'Adding an additional authentication factor improves the security '.
+          'of your account. Choose the type of factor to add:'));
 
       $form
         ->appendChild($choice_control);
+
     } else {
       $dialog->addHiddenInput('type', $type);
 
@@ -183,6 +195,15 @@ final class PhabricatorSettingsPanelMultiFactor
           $user->getPHID(),
           PhabricatorUserLog::ACTION_MULTI_ADD);
         $log->save();
+
+        $user->updateMultiFactorEnrollment();
+
+        // Terminate other sessions so they must log in and survive the
+        // multi-factor auth check.
+
+        id(new PhabricatorAuthSessionEngine())->terminateLoginSessions(
+          $user,
+          $request->getCookie(PhabricatorCookies::COOKIE_SESSION));
 
         return id(new AphrontRedirectResponse())
           ->setURI($this->getPanelURI('?id='.$config->getID()));
@@ -225,6 +246,8 @@ final class PhabricatorSettingsPanelMultiFactor
       if (!$errors) {
         $factor->setFactorName($name);
         $factor->save();
+
+        $user->updateMultiFactorEnrollment();
 
         return id(new AphrontRedirectResponse())
           ->setURI($this->getPanelURI('?id='.$factor->getID()));
@@ -280,6 +303,8 @@ final class PhabricatorSettingsPanelMultiFactor
         $user->getPHID(),
         PhabricatorUserLog::ACTION_MULTI_REMOVE);
       $log->save();
+
+      $user->updateMultiFactorEnrollment();
 
       return id(new AphrontRedirectResponse())
         ->setURI($this->getPanelURI());

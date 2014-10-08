@@ -53,6 +53,22 @@ final class CelerityResourceMap {
     return self::$instances[$name];
   }
 
+  public function getNameMap() {
+    return $this->nameMap;
+  }
+
+  public function getSymbolMap() {
+    return $this->symbolMap;
+  }
+
+  public function getRequiresMap() {
+    return $this->requiresMap;
+  }
+
+  public function getPackageMap() {
+    return $this->packageMap;
+  }
+
   public function getPackagedNamesForSymbols(array $symbols) {
     $resolved = $this->resolveResources($symbols);
     return $this->packageResources($resolved);

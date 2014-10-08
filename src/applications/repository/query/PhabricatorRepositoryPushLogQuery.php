@@ -82,7 +82,6 @@ final class PhabricatorRepositoryPushLogQuery
     return $logs;
   }
 
-
   private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
@@ -140,9 +139,8 @@ final class PhabricatorRepositoryPushLogQuery
     return $this->formatWhereClause($where);
   }
 
-
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationDiffusion';
+    return 'PhabricatorDiffusionApplication';
   }
 
 }

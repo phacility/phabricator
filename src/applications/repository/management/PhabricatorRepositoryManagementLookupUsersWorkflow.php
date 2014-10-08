@@ -21,7 +21,7 @@ final class PhabricatorRepositoryManagementLookupUsersWorkflow
     $commits = $this->loadCommits($args, 'commits');
     if (!$commits) {
       throw new PhutilArgumentUsageException(
-        "Specify one or more commits to resolve users for.");
+        'Specify one or more commits to resolve users for.');
     }
 
     $console = PhutilConsole::getConsole();
@@ -31,7 +31,7 @@ final class PhabricatorRepositoryManagementLookupUsersWorkflow
 
       $console->writeOut(
         "%s\n",
-        pht("Examining commit %s...", $name));
+        pht('Examining commit %s...', $name));
 
       $ref = id(new DiffusionLowLevelCommitQuery())
         ->setRepository($repo)

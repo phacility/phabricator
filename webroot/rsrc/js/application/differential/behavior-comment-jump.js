@@ -5,9 +5,9 @@
  *           javelin-dom
  */
 
-JX.behavior('differential-comment-jump', function(config) {
+JX.behavior('differential-comment-jump', function() {
   function handle_jump(offset) {
-    return (function(e) {
+    return function(e) {
       var parent = JX.$('differential-review-stage');
       var clicked = e.getNode('differential-inline-comment');
       var inlines = JX.DOM.scry(parent, 'div', 'differential-inline-comment');
@@ -24,7 +24,7 @@ JX.behavior('differential-comment-jump', function(config) {
       });
       JX.DOM.scrollTo(jumpto);
       e.kill();
-    });
+    };
   }
 
   JX.Stratcom.listen('click', 'differential-inline-prev', handle_jump(-1));

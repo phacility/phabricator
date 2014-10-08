@@ -12,6 +12,18 @@ final class ManiphestNameIndex extends ManiphestDAO {
   public function getConfiguration() {
     return array(
       self::CONFIG_TIMESTAMPS => false,
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'indexedObjectName' => 'sort128',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_phid' => array(
+          'columns' => array('indexedObjectPHID'),
+          'unique' => true,
+        ),
+        'key_name' => array(
+          'columns' => array('indexedObjectName'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

@@ -21,7 +21,7 @@ abstract class HeraldPreCommitAdapter extends HeraldAdapter {
   }
 
   public function getAdapterApplicationClass() {
-    return 'PhabricatorApplicationDiffusion';
+    return 'PhabricatorDiffusionApplication';
   }
 
   public function getObject() {
@@ -56,8 +56,7 @@ abstract class HeraldPreCommitAdapter extends HeraldAdapter {
   }
 
   public function explainValidTriggerObjects() {
-    return pht(
-      'This rule can trigger for **repositories** or **projects**.');
+    return pht('This rule can trigger for **repositories** or **projects**.');
   }
 
   public function getTriggerObjectPHIDs() {
@@ -73,16 +72,20 @@ abstract class HeraldPreCommitAdapter extends HeraldAdapter {
     switch ($rule_type) {
       case HeraldRuleTypeConfig::RULE_TYPE_GLOBAL:
       case HeraldRuleTypeConfig::RULE_TYPE_OBJECT:
-        return array(
-          self::ACTION_BLOCK,
-          self::ACTION_EMAIL,
-          self::ACTION_NOTHING
-        );
+        return array_merge(
+          array(
+            self::ACTION_BLOCK,
+            self::ACTION_EMAIL,
+            self::ACTION_NOTHING,
+          ),
+          parent::getActions($rule_type));
       case HeraldRuleTypeConfig::RULE_TYPE_PERSONAL:
-        return array(
-          self::ACTION_EMAIL,
-          self::ACTION_NOTHING,
-        );
+        return array_merge(
+          array(
+            self::ACTION_EMAIL,
+            self::ACTION_NOTHING,
+          ),
+          parent::getActions($rule_type));
     }
   }
 
@@ -119,7 +122,15 @@ abstract class HeraldPreCommitAdapter extends HeraldAdapter {
             pht('Blocked push.'));
           break;
         default:
-          throw new Exception(pht('No rules to handle action "%s"!', $action));
+          $custom_result = parent::handleCustomHeraldEffect($effect);
+          if ($custom_result === null) {
+            throw new Exception(pht(
+              "No rules to handle action '%s'.",
+              $action));
+          }
+
+          $result[] = $custom_result;
+          break;
       }
     }
 

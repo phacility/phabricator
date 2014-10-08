@@ -32,6 +32,15 @@ abstract class PhabricatorRepositoryManagementWorkflow
       return null;
     }
 
+    return $this->loadNamedCommits($names);
+  }
+
+  protected function loadNamedCommit($name) {
+    $map = $this->loadNamedCommits(array($name));
+    return $map[$name];
+  }
+
+  protected function loadNamedCommits(array $names) {
     $query = id(new DiffusionCommitQuery())
       ->setViewer($this->getViewer())
       ->withIdentifiers($names);
@@ -48,5 +57,6 @@ abstract class PhabricatorRepositoryManagementWorkflow
 
     return $map;
   }
+
 
 }

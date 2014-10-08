@@ -34,10 +34,8 @@ final class NuancePhabricatorFormSourceDefinition
     return $transactions;
   }
 
-  public function renderView() {
-  }
+  public function renderView() {}
 
-  public function renderListView() {
-  }
+  public function renderListView() {}
 
 }

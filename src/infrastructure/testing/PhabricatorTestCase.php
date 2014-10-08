@@ -102,7 +102,7 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
       'phabricator.uninstalled-applications',
       array());
     $this->env->overrideEnvConfig(
-      'phabricator.show-beta-applications',
+      'phabricator.show-prototypes',
       true);
 
     // Reset application settings to defaults, particularly policies.
@@ -110,8 +110,15 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
       'phabricator.application-settings',
       array());
 
-    // TODO: Remove this when we remove "releeph.installed".
-    $this->env->overrideEnvConfig('releeph.installed', true);
+    // We can't stub this service right now, and it's not generally useful
+    // to publish notifications about test execution.
+    $this->env->overrideEnvConfig(
+      'notification.enabled',
+      false);
+
+    $this->env->overrideEnvConfig(
+      'phabricator.base-uri',
+      'http://phabricator.example.com');
   }
 
   protected function didRunTests() {
@@ -128,8 +135,8 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
       unset($this->env);
     } catch (Exception $ex) {
       throw new Exception(
-        "Some test called PhabricatorEnv::beginScopedEnv(), but is still ".
-        "holding a reference to the scoped environment!");
+        'Some test called PhabricatorEnv::beginScopedEnv(), but is still '.
+        'holding a reference to the scoped environment!');
     }
   }
 
@@ -206,8 +213,8 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
   public static function assertExecutingUnitTests() {
     if (!self::$testsAreRunning) {
       throw new Exception(
-        "Executing test code outside of test execution! This code path can ".
-        "only be run during unit tests.");
+        'Executing test code outside of test execution! This code path can '.
+        'only be run during unit tests.');
     }
   }
 

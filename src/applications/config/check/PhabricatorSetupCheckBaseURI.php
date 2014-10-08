@@ -55,7 +55,7 @@ final class PhabricatorSetupCheckBaseURI extends PhabricatorSetupCheck {
     $this
       ->newIssue('config.phabricator.base-uri')
       ->setShortName(pht('No Base URI'))
-      ->setName(pht("Base URI Not Configured"))
+      ->setName(pht('Base URI Not Configured'))
       ->setSummary($summary)
       ->setMessage($message)
       ->addCommand(

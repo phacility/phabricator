@@ -31,7 +31,6 @@
  * @task sigil    Managing Sigils
  * @task meta     Managing Metadata
  * @task internal Internals
- * @group event
  */
 JX.install('Stratcom', {
   statics : {

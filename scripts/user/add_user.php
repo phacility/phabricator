@@ -19,8 +19,8 @@ $admin = id(new PhabricatorUser())->loadOneWhere(
   $argv[4]);
 if (!$admin) {
   throw new Exception(
-    "Admin user must be the username of a valid Phabricator account, used ".
-    "to send the new user a welcome email.");
+    'Admin user must be the username of a valid Phabricator account, used '.
+    'to send the new user a welcome email.');
 }
 
 $existing_user = id(new PhabricatorUser())->loadOneWhere(

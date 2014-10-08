@@ -19,6 +19,27 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
         'bodies'      => self::SERIALIZATION_JSON,
         'attachments' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'relatedPHID' => 'phid?',
+        'authorPHID' => 'phid?',
+        'message' => 'text?',
+        'messageIDHash' => 'bytes12',
+        'status' => 'text32',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'relatedPHID' => array(
+          'columns' => array('relatedPHID'),
+        ),
+        'authorPHID' => array(
+          'columns' => array('authorPHID'),
+        ),
+        'key_messageIDHash' => array(
+          'columns' => array('messageIDHash'),
+        ),
+        'key_created' => array(
+          'columns' => array('dateCreated'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 
@@ -329,6 +350,7 @@ EOBODY
 
     $mail = id(new PhabricatorMetaMTAMail())
       ->setIsErrorEmail(true)
+      ->setForceDelivery(true)
       ->setSubject($title)
       ->addRawTos(array($from))
       ->setBody($body)

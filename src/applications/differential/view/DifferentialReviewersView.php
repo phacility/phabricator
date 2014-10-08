@@ -43,49 +43,59 @@ final class DifferentialReviewersView extends AphrontView {
 
       switch ($reviewer->getStatus()) {
         case DifferentialReviewerStatus::STATUS_ADDED:
-          $item->setIcon('open', pht('Review Requested'));
+          $item->setIcon(
+            PHUIStatusItemView::ICON_OPEN,
+            'bluegrey',
+            pht('Review Requested'));
           break;
 
         case DifferentialReviewerStatus::STATUS_ACCEPTED:
           if ($is_current) {
             $item->setIcon(
-              'accept-green',
+              PHUIStatusItemView::ICON_ACCEPT,
+              'green',
               pht('Accepted'));
           } else {
             $item->setIcon(
-              'accept-dark',
+              PHUIStatusItemView::ICON_ACCEPT,
+              'dark',
               pht('Accepted Prior Diff'));
           }
           break;
 
         case DifferentialReviewerStatus::STATUS_ACCEPTED_OLDER:
           $item->setIcon(
-            'accept-dark',
+            PHUIStatusItemView::ICON_ACCEPT,
+            'dark',
             pht('Accepted Prior Diff'));
           break;
 
         case DifferentialReviewerStatus::STATUS_REJECTED:
           if ($is_current) {
             $item->setIcon(
-              'reject-red',
+              PHUIStatusItemView::ICON_REJECT,
+              'red',
               pht('Requested Changes'));
           } else {
             $item->setIcon(
-              'reject-dark',
+              PHUIStatusItemView::ICON_REJECT,
+              'dark',
               pht('Requested Changes to Prior Diff'));
           }
           break;
 
         case DifferentialReviewerStatus::STATUS_REJECTED_OLDER:
           $item->setIcon(
-            'reject-dark',
+            PHUIStatusItemView::ICON_REJECT,
+            'dark',
             pht('Rejected Prior Diff'));
           break;
 
         case DifferentialReviewerStatus::STATUS_COMMENTED:
           if ($is_current) {
             $item->setIcon(
-              'info',
+              PHUIStatusItemView::ICON_INFO,
+              'bluegrey',
               pht('Commented'));
           } else {
             $item->setIcon(
@@ -95,11 +105,17 @@ final class DifferentialReviewersView extends AphrontView {
           break;
 
         case DifferentialReviewerStatus::STATUS_BLOCKING:
-          $item->setIcon('minus-red', pht('Blocking Review'));
+          $item->setIcon(
+            PHUIStatusItemView::ICON_MINUS,
+            'red',
+            pht('Blocking Review'));
           break;
 
         default:
-          $item->setIcon('question', pht('%s?', $reviewer->getStatus()));
+          $item->setIcon(
+            PHUIStatusItemView::ICON_QUESTION,
+            'bluegrey',
+            pht('%s?', $reviewer->getStatus()));
           break;
 
       }

@@ -14,10 +14,16 @@ final class PhabricatorPolicyDataTestCase extends PhabricatorTestCase {
     $proj_a = id(new PhabricatorProject())
       ->setName('A')
       ->setAuthorPHID($author->getPHID())
+      ->setIcon(PhabricatorProject::DEFAULT_ICON)
+      ->setColor(PhabricatorProject::DEFAULT_COLOR)
+      ->setIsMembershipLocked(0)
       ->save();
     $proj_b = id(new PhabricatorProject())
       ->setName('B')
       ->setAuthorPHID($author->getPHID())
+      ->setIcon(PhabricatorProject::DEFAULT_ICON)
+      ->setColor(PhabricatorProject::DEFAULT_COLOR)
+      ->setIsMembershipLocked(0)
       ->save();
 
     $proj_a->setViewPolicy($proj_b->getPHID())->save();

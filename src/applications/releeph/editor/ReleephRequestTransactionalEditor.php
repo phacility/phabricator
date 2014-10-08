@@ -3,6 +3,14 @@
 final class ReleephRequestTransactionalEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  public function getEditorApplicationClass() {
+    return 'PhabricatorReleephApplication';
+  }
+
+  public function getEditorObjectsDescription() {
+    return pht('Releeph Requests');
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
@@ -253,7 +261,7 @@ final class ReleephRequestTransactionalEditor
       }
     }
 
-    $name = sprintf("RQ%s: %s", $rq->getID(), $rq->getSummaryForDisplay());
+    $name = sprintf('RQ%s: %s', $rq->getID(), $rq->getSummaryForDisplay());
     $body->addTextSection(
       pht('RELEEPH REQUEST'),
       $name."\n".

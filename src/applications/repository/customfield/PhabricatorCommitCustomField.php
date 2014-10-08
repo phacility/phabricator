@@ -1,7 +1,4 @@
 <?php
 
 abstract class PhabricatorCommitCustomField
-  extends PhabricatorCustomField {
-
-
-}
+  extends PhabricatorCustomField {}

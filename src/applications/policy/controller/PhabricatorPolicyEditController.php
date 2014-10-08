@@ -54,7 +54,7 @@ final class PhabricatorPolicyEditController
       $data = $request->getStr('rules');
       $data = @json_decode($data, true);
       if (!is_array($data)) {
-        throw new Exception("Failed to JSON decode rule data!");
+        throw new Exception('Failed to JSON decode rule data!');
       }
 
       $rule_data = array();
@@ -162,7 +162,7 @@ final class PhabricatorPolicyEditController
                 'href' => '#',
                 'class' => 'button green',
                 'sigil' => 'create-rule',
-                'mustcapture' => true
+                'mustcapture' => true,
               ),
               pht('New Rule')))
           ->setDescription(
@@ -171,14 +171,14 @@ final class PhabricatorPolicyEditController
             'table',
             array(
               'sigil' => 'rules',
-              'class' => 'policy-rules-table'
+              'class' => 'policy-rules-table',
             ),
             '')))
       ->appendChild(
         id(new AphrontFormMarkupControl())
           ->setLabel(pht('If No Rules Match'))
           ->setValue(pht(
-            "%s all other users.",
+            '%s all other users.',
             $default_select)));
 
     $form = phutil_tag(

@@ -1,10 +1,6 @@
 <?php
 
-/**
- * @group maniphest
- */
-final class ManiphestRemarkupRule
-  extends PhabricatorRemarkupRuleObject {
+final class ManiphestRemarkupRule extends PhabricatorObjectRemarkupRule {
 
   protected function getObjectNamePrefix() {
     return 'T';

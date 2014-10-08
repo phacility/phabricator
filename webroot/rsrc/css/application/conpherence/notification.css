@@ -9,7 +9,7 @@
 
 .phabricator-notification .conpherence-menu-item-view {
   display: block;
-  height: 55px;
+  height: 46px;
   overflow: hidden;
   position: relative;
   text-decoration: none;
@@ -20,60 +20,48 @@
 
 .phabricator-notification .conpherence-menu-item-view
 .conpherence-menu-item-image {
-  top: 6px;
-  left: 6px;
+  top: 8px;
+  left: 8px;
   display: block;
   position: absolute;
-  width: 35px;
-  height: 35px;
-  background-size: 35px;
-  border: 4px solid #e7e7e7;
-  border-radius: 3px;
+  width: 30px;
+  height: 30px;
+  background-size: 30px;
 }
 
 .phabricator-notification .conpherence-menu-item-view
 .conpherence-menu-item-title {
   display: block;
-  margin-top: 12px;
-  margin-left: 58px;
+  margin-top: 8px;
+  margin-left: 46px;
   text-align: left;
   font-weight: bold;
   font-size: 13px;
-  color: #333;
-  overflow: hidden;
-  width: 220px;
+  color: {$darkgreytext};
+  width: 280px;
   text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .phabricator-notification .conpherence-menu-item-view
 .conpherence-menu-item-subtitle {
   display: block;
-  color: #a1a5a9;
+  color: {$lightgreytext};
   font-size: 11px;
   margin-top: 2px;
-  margin-left: 58px;
-  font-style: italic;
+  margin-left: 46px;
 }
 
 .phabricator-notification .conpherence-menu-item-view
 .conpherence-menu-item-unread-count {
   position: absolute;
-  left: 35px;
-  top: 3px;
-  background: {$red};
-  border-radius: 10px;
-  color: #FFF;
-  font-weight: bold;
-  padding: 1px 5px 2px;
-  border: 1px solid #333;
-  font-size: 11px;
-}
-
-.phabricator-notification .conpherence-menu-item-view
-.conpherence-menu-item-date {
-  position: absolute;
+  right: 8px;
   top: 15px;
-  right: 16px;
-  color: #a1a5a9;
+  background: {$blue};
+  border-radius: 2px;
+  color: #fff;
+  font-weight: bold;
+  padding: 0 5px 1px;
   font-size: 11px;
 }

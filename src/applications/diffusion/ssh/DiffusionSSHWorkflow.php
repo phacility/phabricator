@@ -8,7 +8,7 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
 
   public function getRepository() {
     if (!$this->repository) {
-      throw new Exception("Call loadRepository() before getRepository()!");
+      throw new Exception('Call loadRepository() before getRepository()!');
     }
     return $this->repository;
   }
@@ -62,7 +62,7 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
           'Unrecognized repository path "%s". Expected a path like '.
           '"%s".',
           $path,
-          "/diffusion/X/"));
+          '/diffusion/X/'));
     }
 
     $callsign = $matches[1];
@@ -118,7 +118,7 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
         $can_push = PhabricatorPolicyFilter::hasCapability(
           $viewer,
           $repository,
-          DiffusionCapabilityPush::CAPABILITY);
+          DiffusionPushCapability::CAPABILITY);
         if (!$can_push) {
           throw new Exception(
             pht('You do not have permission to push to this repository.'));

@@ -1,6 +1,6 @@
 <?php
 
-echo "Giving image macros PHIDs";
+echo 'Giving image macros PHIDs';
 $table = new PhabricatorFileImageMacro();
 $table->openTransaction();
 
@@ -9,7 +9,7 @@ foreach (new LiskMigrationIterator($table) as $macro) {
     continue;
   }
 
-  echo ".";
+  echo '.';
 
   queryfx(
     $macro->establishConnection('w'),

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group console
- */
 final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
 
   protected $observations;
@@ -36,7 +33,6 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
    * @phutil-external-symbol class PhabricatorStartup
    */
   public function generateData() {
-
     $should_analyze = self::isQueryAnalyzerRequested();
 
     $log = PhutilServiceProfiler::getInstance()->getServiceCallLog();
@@ -250,6 +246,7 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
         case 'exec':
           $info = $row['command'];
           break;
+        case 's3':
         case 'conduit':
           $info = $row['method'];
           break;

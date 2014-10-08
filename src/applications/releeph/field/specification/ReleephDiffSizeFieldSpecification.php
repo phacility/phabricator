@@ -65,12 +65,14 @@ final class ReleephDiffSizeFieldSpecification
           'meta' => array(
             'tip' => $test_blurb,
             'align' => 'E',
-            'size' => 'auto'),
-          'style' => ''),
+            'size' => 'auto',
+          ),
+          'style' => '',
+        ),
         ' + tests');
     }
 
-    $blurb = hsprintf("%s%s.",
+    $blurb = hsprintf('%s%s.',
       pht('%d line(s)', $mr_changes['code']['lines']).' and '.
       pht('%d path(s)', count($mr_changes['code']['paths'])).' over '.
       pht('%d diff(s)', count($diffs)),
@@ -107,7 +109,7 @@ final class ReleephDiffSizeFieldSpecification
       'tests' => array(
         'lines' => $test_lines,
         'paths' => array_unique($test_paths_touched),
-      )
+      ),
     );
   }
 }

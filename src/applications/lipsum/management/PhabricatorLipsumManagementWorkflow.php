@@ -1,6 +1,4 @@
 <?php
 
 abstract class PhabricatorLipsumManagementWorkflow
-  extends PhabricatorManagementWorkflow {
-
-}
+  extends PhabricatorManagementWorkflow {}

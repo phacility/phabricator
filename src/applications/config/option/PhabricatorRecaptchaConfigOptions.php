@@ -4,11 +4,11 @@ final class PhabricatorRecaptchaConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
   public function getName() {
-    return pht("Integration with Recaptcha");
+    return pht('Integration with Recaptcha');
   }
 
   public function getDescription() {
-    return pht("Configure Recaptcha captchas.");
+    return pht('Configure Recaptcha captchas.');
   }
 
   public function getOptions() {
@@ -17,15 +17,15 @@ final class PhabricatorRecaptchaConfigOptions
       $this->newOption('recaptcha.enabled', 'bool', false)
         ->setBoolOptions(
           array(
-            pht("Enable Recaptcha"),
-            pht("Disable Recaptcha"),
+            pht('Enable Recaptcha'),
+            pht('Disable Recaptcha'),
           ))
         ->setSummary(pht('Enable captchas with Recaptcha.'))
         ->setDescription(
           pht(
-            "Enable recaptcha to require users solve captchas after a few ".
-            "failed login attempts. This hinders brute-force attacks against ".
-            "user passwords. For more information, see http://recaptcha.net/")),
+            'Enable recaptcha to require users solve captchas after a few '.
+            'failed login attempts. This hinders brute-force attacks against '.
+            'user passwords. For more information, see http://recaptcha.net/')),
       $this->newOption('recaptcha.public-key', 'string', null)
         ->setDescription(
           pht('Recaptcha public key, obtained by signing up for Recaptcha.')),

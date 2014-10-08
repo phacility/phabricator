@@ -1,36 +1,35 @@
 <?php
 
-final class DrydockLogSearchEngine
-  extends PhabricatorApplicationSearchEngine {
+final class DrydockLogSearchEngine extends PhabricatorApplicationSearchEngine {
+
+  public function getResultTypeDescription() {
+    return pht('Drydock Logs');
+  }
+
+  public function getApplicationClassName() {
+    return 'PhabricatorDrydockApplication';
+  }
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
-    $saved = new PhabricatorSavedQuery();
-
-    return $saved;
+    return new PhabricatorSavedQuery();
   }
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new DrydockLogQuery());
-
-    return $query;
+    return new DrydockLogQuery();
   }
 
   public function buildSearchForm(
     AphrontFormView $form,
-    PhabricatorSavedQuery $saved) {
-
-  }
+    PhabricatorSavedQuery $saved) {}
 
   protected function getURI($path) {
     return '/drydock/log/'.$path;
   }
 
   public function getBuiltinQueryNames() {
-    $names = array(
+    return array(
       'all' => pht('All Logs'),
     );
-
-    return $names;
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
@@ -43,6 +42,17 @@ final class DrydockLogSearchEngine
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
+  }
+
+  protected function renderResultList(
+    array $logs,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+
+    return id(new DrydockLogListView())
+      ->setUser($this->requireViewer())
+      ->setLogs($logs)
+      ->render();
   }
 
 }

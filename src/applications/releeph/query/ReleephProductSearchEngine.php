@@ -3,6 +3,14 @@
 final class ReleephProductSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Releeph Products');
+  }
+
+  public function getApplicationClassName() {
+    return 'PhabricatorReleephApplication';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 
@@ -35,7 +43,6 @@ final class ReleephProductSearchEngine
         ->setLabel(pht('Show Products'))
         ->setValue($saved_query->getParameter('active'))
         ->setOptions($this->getActiveOptions()));
-
   }
 
   protected function getURI($path) {
@@ -43,16 +50,13 @@ final class ReleephProductSearchEngine
   }
 
   public function getBuiltinQueryNames() {
-    $names = array(
+    return array(
       'active' => pht('Active'),
       'all' => pht('All'),
     );
-
-    return $names;
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
-
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
 
@@ -81,6 +85,49 @@ final class ReleephProductSearchEngine
       'active' => 1,
       'inactive' => 0,
     );
+  }
+
+  protected function renderResultList(
+    array $products,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+
+    assert_instances_of($products, 'ReleephProject');
+    $viewer = $this->requireViewer();
+
+    $list = id(new PHUIObjectItemListView())
+      ->setUser($viewer);
+
+    foreach ($products as $product) {
+      $id = $product->getID();
+
+      $item = id(new PHUIObjectItemView())
+        ->setHeader($product->getName())
+        ->setHref($this->getApplicationURI("product/{$id}/"));
+
+      if (!$product->getIsActive()) {
+        $item->setDisabled(true);
+        $item->addIcon('none', pht('Inactive'));
+      }
+
+      $repo = $product->getRepository();
+      $item->addAttribute(
+        phutil_tag(
+          'a',
+          array(
+            'href' => '/diffusion/'.$repo->getCallsign().'/',
+          ),
+          'r'.$repo->getCallsign()));
+
+      $arc = $product->getArcanistProject();
+      if ($arc) {
+        $item->addAttribute($arc->getName());
+      }
+
+      $list->addItem($item);
+    }
+
+    return $list;
   }
 
 }

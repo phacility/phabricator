@@ -10,7 +10,7 @@ final class DiffusionMercurialRawDiffQuery extends DiffusionRawDiffQuery {
     $drequest = $this->getRequest();
     $repository = $drequest->getRepository();
 
-    $commit = $drequest->getCommit();
+    $commit = $this->getAnchorCommit();
 
     // If there's no path, get the entire raw diff.
     $path = nonempty($drequest->getPath(), '.');

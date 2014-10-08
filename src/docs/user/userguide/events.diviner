@@ -91,7 +91,7 @@ Arcanist event constants are listed in @{class@arcanist:ArcanistEventType}.
 
 All Arcanist events have this data available:
 
-  - `workflow` The active @{class@arcanist:ArcanistBaseWorkflow}.
+  - `workflow` The active @{class@arcanist:ArcanistWorkflow}.
 
 == Arcanist: Commit: Will Commit SVN ==
 
@@ -182,55 +182,17 @@ edit. Data available on this event:
 This is similar to the previous event (will edit task) but occurs after the
 edit completes.
 
-== Differential: Will Send Mail ==
-
-The constant for this event is
-`PhabricatorEventType::TYPE_DIFFERENTIAL_WILLSENDMAIL`
-
-This event is dispatched before Differential sends an email, and allows you to
-edit the message that will be sent.  Data available on this event:
-
-  - ##mail## The @{class:PhabricatorMetaMTAMail} being edited.
-
 == Differential: Will Mark Generated ==
 
 The constant for this event is
 `PhabricatorEventType::TYPE_DIFFERENTIAL_WILLMARKGENERATED`.
 
 This event is dispatched before Differential decides if a file is generated (and
-doesn't need to be reviewed) or not.  Data available on this event:
+doesn't need to be reviewed) or not. Data available on this event:
 
   - ##corpus## Body of the file.
   - ##is_generated## Boolean indicating if this file should be treated as
     generated.
-
-== Differential: Will Edit Revision ==
-
-The constant for this event is
-`PhabricatorEventType::TYPE_DIFFERENTIAL_WILLEDITREVISION`.
-
-This event is dispatched before a revision is edited, and allows you to
-respond to or alter the edit. Data available on this event:
-
-  - ##revision## The @{class:DifferentialRevision} being edited.
-  - ##new## A boolean indicating if this revision is being created.
-
-This is similar to the next event (did edit revision) but occurs before the edit
-begins.
-
-== Differential: Did Edit Revision ==
-
-The constant for this event is
-`PhabricatorEventType::TYPE_DIFFERENTIAL_DIDEDITREVISION`.
-
-This event is dispatched after a revision is edited, and allows you to
-react to the edit. Data available on this event:
-
-  - ##revision## The @{class:DifferentialRevision} being edited.
-  - ##new## A boolean indicating if this revision is being created.
-
-This is similar to the previous event (will edit revision) but occurs after the
-edit completes.
 
 == Diffusion: Did Discover Commit ==
 
@@ -273,40 +235,6 @@ Data available on this event:
     listener.
 
 Using @{class@libphutil:PhutilEmailAddress} may be helpful in parsing the query.
-
-== Edge: Will Edit Edges ==
-
-NOTE: Edge events are low-level events deep in the core. It is more difficult to
-correct implement listeners for these events than for higher-level events.
-
-The constant for this event is
-`PhabricatorEventType::TYPE_EDGE_WILLEDITEDGES`.
-
-This event is dispatched before @{class:PhabricatorEdgeEditor} makes an edge
-edit.
-
-  - `id` An identifier for this edit operation.
-  - `add` A list of dictionaries, each representing a new edge.
-  - `rem` A list of dictionaries, each representing a removed edge.
-
-This is similar to the next event (did edit edges) but occurs before the
-edit begins.
-
-== Edge: Did Edit Edges ==
-
-The constant for this event is
-`PhabricatorEventType::TYPE_EDGE_DIDEDITEDGES`.
-
-This event is dispatched after @{class:PhabricatorEdgeEditor} makes an edge
-edit, but before it commits the transactions. Data available on this event:
-
-  - `id` An identifier for this edit operation. This is the same ID as
-    the one included in the corresponding "will edit edges" event.
-  - `add` A list of dictionaries, each representing a new edge.
-  - `rem` A list of dictionaries, each representing a removed edge.
-
-This is similar to the previous event (will edit edges) but occurs after the
-edit completes.
 
 == Search: Did Update Index ==
 

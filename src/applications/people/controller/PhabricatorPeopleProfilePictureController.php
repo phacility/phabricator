@@ -53,6 +53,7 @@ final class PhabricatorPeopleProfilePictureController
             $_FILES['picture'],
             array(
               'authorPHID' => $viewer->getPHID(),
+              'canCDN' => true,
             ));
         } else {
           $e_file = pht('Required');
@@ -82,7 +83,7 @@ final class PhabricatorPeopleProfilePictureController
           $user->setProfileImagePHID(null);
         } else {
           $user->setProfileImagePHID($xformed->getPHID());
-          $xformed->attachToObject($viewer, $user->getPHID());
+          $xformed->attachToObject($user->getPHID());
         }
         $user->save();
         return id(new AphrontRedirectResponse())->setURI($profile_uri);
@@ -125,6 +126,11 @@ final class PhabricatorPeopleProfilePictureController
       ->setViewer($viewer)
       ->withUserPHIDs(array($user->getPHID()))
       ->needImages(true)
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
       ->execute();
 
     foreach ($accounts as $account) {
@@ -231,7 +237,8 @@ final class PhabricatorPeopleProfilePictureController
             'name'  => 'phid',
             'value' => $phid,
           )),
-        $button);
+        $button,
+      );
 
       $button = phabricator_form(
         $viewer,
@@ -288,7 +295,6 @@ final class PhabricatorPeopleProfilePictureController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 }

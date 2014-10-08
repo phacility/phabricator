@@ -4,12 +4,12 @@
 
 div.jx-typeahead-hardpoint {
   position: relative;
-  _zoom: 1; /* Some kind of IE6 fix? */ /* yes */
+  _zoom: 1; /* Some kind of IE6 fix? */ /* yes */ /* why? */
 }
 
 div.jx-typeahead-results {
   position: absolute;
-  border: 1px solid #96a6c7;
+  border: 1px solid {$hoverborder};
   border-top: 0px;
   padding: 0;
   background: #fefefe;
@@ -18,21 +18,28 @@ div.jx-typeahead-results {
   margin: -1px 1% 0;
 }
 
+.aphront-form-control-typeahead div.jx-typeahead-results {
+  width: 100%;
+  margin: 0;
+  box-sizing: border-box;
+}
+
 div.jx-typeahead-results a.jx-result {
-  color: #333;
+  color: {$darkgreytext};
   display: block;
   font-size: 13px;
-  border-bottom: 1px solid #e7e7e7;
-  border-top: 1px solid #fff;
+  border-top: 1px solid {$hoverborder};
 }
 
 div.jx-typeahead-results a.jx-result:hover,
 div.jx-typeahead-results a.focused {
   display: block;
-  background: #dde6f9;
-  border-top: 1px solid #dde6f9;
-  border-bottom: 1px solid #d0dbf3;
+  background: {$hoverblue};
   text-decoration: none;
+}
+
+div.jx-typeahead-results .phui-icon-view {
+  margin-top: 2px;
 }
 
 table.jx-typeahead button {
@@ -50,4 +57,17 @@ input.jx-typeahead-placeholder {
 
 div.jx-tokenizer-container-focused.jx-typeahead-waiting {
   border-color: {$lightblueborder};
+}
+
+div.jx-typeahead-results a.diffusion-locate-file {
+ padding: 4px 8px;
+ color: {$darkgreytext}
+}
+
+.diffusion-locate-file strong {
+  color: {$blue};
+}
+
+.diffusion-locate-file .phui-icon-view {
+  padding-right: 8px;
 }

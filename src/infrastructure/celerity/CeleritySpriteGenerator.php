@@ -2,202 +2,6 @@
 
 final class CeleritySpriteGenerator {
 
-  public function buildIconSheet() {
-    $icons = $this->getDirectoryList('icons_1x');
-
-    $colors = array(
-      '',
-      'grey',
-      'white',
-    );
-
-    $scales = array(
-      '1x'  => 1,
-      '2x'  => 2,
-    );
-
-    $template = id(new PhutilSprite())
-      ->setSourceSize(14, 14);
-
-    $sprites = array();
-    foreach ($colors as $color) {
-      foreach ($icons as $icon) {
-        $prefix = 'icons_';
-        if (strlen($color)) {
-          $prefix .= $color.'_';
-        }
-
-        $suffix = '';
-        if (strlen($color)) {
-          $suffix = '-'.$color;
-        }
-
-        $sprite = id(clone $template)
-          ->setName('icons-'.$icon.$suffix);
-
-        $tcss = array();
-        $tcss[] = '.icons-'.$icon.$suffix;
-        if ($color == 'white') {
-          $tcss[] = '.device-desktop .phabricator-action-view:hover '.
-            '.icons-'.$icon;
-          $tcss[] = '.device-desktop .phui-list-sidenav '.
-            '.phui-list-item-href:hover .icons-'.$icon;
-        }
-
-        $sprite->setTargetCSS(implode(', ', $tcss));
-
-        foreach ($scales as $scale_key => $scale) {
-          $path = $this->getPath($prefix.$scale_key.'/'.$icon.'.png');
-          $sprite->setSourceFile($path, $scale);
-        }
-        $sprites[] = $sprite;
-      }
-    }
-
-    $remarkup_icons = $this->getDirectoryList('remarkup_1x');
-    foreach ($remarkup_icons as $icon) {
-      $prefix = 'remarkup_';
-
-      // Strip 'text_' from these file names.
-      $class_name = substr($icon, 5);
-
-      if ($class_name == 'fullscreen_off') {
-        $tcss = '.remarkup-control-fullscreen-mode .remarkup-assist-fullscreen';
-      } else {
-        $tcss = '.remarkup-assist-'.$class_name;
-      }
-
-      $sprite = id(clone $template)
-        ->setName('remarkup-assist-'.$icon)
-        ->setTargetCSS($tcss);
-
-      foreach ($scales as $scale_key => $scale) {
-        $path = $this->getPath($prefix.$scale_key.'/'.$icon.'.png');
-        $sprite->setSourceFile($path, $scale);
-      }
-      $sprites[] = $sprite;
-    }
-
-    $sheet = $this->buildSheet('icons', true);
-    $sheet->setScales($scales);
-    foreach ($sprites as $sprite) {
-      $sheet->addSprite($sprite);
-    }
-
-    return $sheet;
-  }
-
-  public function buildActionsSheet() {
-    $icons = $this->getDirectoryList('actions_white_1x');
-
-    $colors = array(
-      'dark',
-      'grey',
-      'white',
-    );
-
-    $scales = array(
-      '1x'  => 1,
-      '2x'  => 2,
-    );
-
-    $template = id(new PhutilSprite())
-      ->setSourceSize(24, 24);
-
-    $sprites = array();
-    foreach ($colors as $color) {
-      foreach ($icons as $icon) {
-        $prefix = 'actions_';
-        if (strlen($color)) {
-          $prefix .= $color.'_';
-        }
-
-        $suffix = '';
-        if (strlen($color)) {
-          $suffix = '-'.$color;
-        }
-
-        $sprite = id(clone $template)
-          ->setName('actions-'.$icon.$suffix);
-
-        $tcss = array();
-        $tcss[] = '.actions-'.$icon.$suffix;
-        if ($color == 'dark') {
-          $tcss[] = '.device-desktop '.
-            '.actions-'.$icon.'-grey.phui-icon-view:hover';
-        }
-
-        $sprite->setTargetCSS(implode(', ', $tcss));
-
-        foreach ($scales as $scale_key => $scale) {
-          $path = $this->getPath($prefix.$scale_key.'/'.$icon.'.png');
-          $sprite->setSourceFile($path, $scale);
-        }
-        $sprites[] = $sprite;
-      }
-    }
-
-    $sheet = $this->buildSheet('actions', true);
-    $sheet->setScales($scales);
-    foreach ($sprites as $sprite) {
-      $sheet->addSprite($sprite);
-    }
-
-    return $sheet;
-  }
-
-    public function buildMiniconsSheet() {
-    $icons = $this->getDirectoryList('minicons_white_1x');
-
-    $colors = array(
-      'white',
-      'dark',
-    );
-
-    $scales = array(
-      '1x'  => 1,
-      '2x'  => 2,
-    );
-
-    $template = id(new PhutilSprite())
-      ->setSourceSize(16, 16);
-
-    $sprites = array();
-    foreach ($colors as $color) {
-      foreach ($icons as $icon) {
-        $prefix = 'minicons_';
-        if (strlen($color)) {
-          $prefix .= $color.'_';
-        }
-
-        $suffix = '';
-        if (strlen($color)) {
-          $suffix = '-'.$color;
-        }
-
-        $sprite = id(clone $template)
-          ->setName('minicons-'.$icon.$suffix);
-
-        $sprite->setTargetCSS('.minicons-'.$icon.$suffix);
-
-        foreach ($scales as $scale_key => $scale) {
-          $path = $this->getPath($prefix.$scale_key.'/'.$icon.'.png');
-          $sprite->setSourceFile($path, $scale);
-        }
-        $sprites[] = $sprite;
-      }
-    }
-
-    $sheet = $this->buildSheet('minicons', true);
-    $sheet->setScales($scales);
-    foreach ($sprites as $sprite) {
-      $sheet->addSprite($sprite);
-    }
-
-    return $sheet;
-  }
-
-
   public function buildMenuSheet() {
     $sprites = array();
 
@@ -244,6 +48,31 @@ final class CeleritySpriteGenerator {
         'x' => 24,
         'y' => 24,
         'css' => '.menu-icon-new-blue',
+      ),
+      'info-sm' => array(
+        'x' => 28,
+        'y' => 28,
+        'css' => '.menu-icon-info-sm',
+      ),
+      'logout-sm' => array(
+        'x' => 28,
+        'y' => 28,
+        'css' => '.menu-icon-logout-sm',
+      ),
+      'new-sm' => array(
+        'x' => 28,
+        'y' => 28,
+        'css' => '.menu-icon-new-sm',
+      ),
+      'settings-sm' => array(
+        'x' => 28,
+        'y' => 28,
+        'css' => '.menu-icon-settings-sm',
+      ),
+      'power' => array(
+        'x' => 28,
+        'y' => 28,
+        'css' => '.menu-icon-power',
       ),
       'app' => array(
         'x' => 24,
@@ -335,38 +164,6 @@ final class CeleritySpriteGenerator {
     }
 
     $sheet = $this->buildSheet('tokens', true);
-    $sheet->setScales($scales);
-    foreach ($sprites as $sprite) {
-      $sheet->addSprite($sprite);
-    }
-
-    return $sheet;
-  }
-
-  public function buildButtonBarSheet() {
-    $icons = $this->getDirectoryList('button_bar_1x');
-    $scales = array(
-      '1x' => 1,
-      '2x' => 2,
-    );
-    $template = id(new PhutilSprite())
-      ->setSourceSize(14, 14);
-
-    $sprites = array();
-    $prefix = 'button_bar_';
-    foreach ($icons as $icon) {
-      $sprite = id(clone $template)
-        ->setName('buttonbar-'.$icon)
-        ->setTargetCSS('.buttonbar-'.$icon);
-
-      foreach ($scales as $scale_key => $scale) {
-        $path = $this->getPath($prefix.$scale_key.'/'.$icon.'.png');
-        $sprite->setSourceFile($path, $scale);
-      }
-      $sprites[] = $sprite;
-    }
-
-    $sheet = $this->buildSheet('buttonbar', true);
     $sheet->setScales($scales);
     foreach ($sprites as $sprite) {
       $sheet->addSprite($sprite);
@@ -547,78 +344,19 @@ final class CeleritySpriteGenerator {
     return $sheet;
   }
 
-  public function buildStatusSheet() {
-    $icons = $this->getDirectoryList('status_1x');
-    $scales = array(
-      '1x' => 1,
-      '2x' => 2,
-    );
-    $template = id(new PhutilSprite())
-      ->setSourceSize(14, 14);
-
-    $sprites = array();
-    $prefix = 'status_';
-    $extra_css = array(
-      'policy-custom-white' =>
-        ', .dropdown-menu-item:hover .status-policy-custom',
-      'policy-all-white' =>
-        ', .dropdown-menu-item:hover .status-policy-all',
-      'policy-unknown-white' =>
-        ', .dropdown-menu-item:hover .status-policy-unknown',
-      'policy-admin-white' =>
-        ', .dropdown-menu-item:hover .status-policy-admin',
-      'policy-public-white' =>
-        ', .dropdown-menu-item:hover .status-policy-public',
-      'policy-project-white' =>
-        ', .dropdown-menu-item:hover .status-policy-project',
-      'policy-noone-white' =>
-        ', .dropdown-menu-item:hover .status-policy-noone',
-    );
-
-    foreach ($icons as $icon) {
-      $sprite = id(clone $template)
-        ->setName('status-'.$icon)
-        ->setTargetCSS('.status-'.$icon.idx($extra_css, $icon));
-
-      foreach ($scales as $scale_key => $scale) {
-        $path = $this->getPath($prefix.$scale_key.'/'.$icon.'.png');
-        $sprite->setSourceFile($path, $scale);
-      }
-      $sprites[] = $sprite;
-    }
-
-    $sheet = $this->buildSheet('status', true);
-    $sheet->setScales($scales);
-    foreach ($sprites as $sprite) {
-      $sheet->addSprite($sprite);
-    }
-
-    return $sheet;
-  }
-
   public function buildGradientSheet() {
     $gradients = $this->getDirectoryList('gradients');
 
     $template = new PhutilSprite();
 
     $unusual_heights = array(
-      'dark-menu-label' => 25,
       'breadcrumbs'     => 31,
-      'menu-label'      => 24,
-      'red-header'      => 70,
-      'blue-header'     => 70,
-      'green-header'    => 70,
-      'yellow-header'   => 70,
       'grey-header'     => 70,
       'dark-grey-header' => 70,
       'lightblue-header' => 240,
-    );
-
-    $extra_css = array(
-      'dark-menu-label' =>
-        ', .phabricator-dark-menu .phui-list-item-type-label',
-      'menu-label' =>
-        ', .phabricator-side-menu .phui-list-item-type-label',
+      'lightgreen-header' => 240,
+      'lightviolet-header' => 240,
+      'lightred-header' => 240,
     );
 
     $sprites = array();
@@ -627,7 +365,7 @@ final class CeleritySpriteGenerator {
       $sprite = id(clone $template)
         ->setName('gradient-'.$gradient)
         ->setSourceFile($path)
-        ->setTargetCSS('.gradient-'.$gradient.idx($extra_css, $gradient));
+        ->setTargetCSS('.gradient-'.$gradient);
 
       $sprite->setSourceSize(4, idx($unusual_heights, $gradient, 26));
 
@@ -637,9 +375,7 @@ final class CeleritySpriteGenerator {
     $sheet = $this->buildSheet(
       'gradient',
       false,
-      PhutilSpriteSheet::TYPE_REPEAT_X,
-      ', .phabricator-dark-menu .phui-list-item-type-label, '.
-      '.phabricator-side-menu .phui-list-item-type-label');
+      PhutilSpriteSheet::TYPE_REPEAT_X);
     foreach ($sprites as $sprite) {
       $sheet->addSprite($sprite);
     }
@@ -692,6 +428,7 @@ final class CeleritySpriteGenerator {
       $scales = array(
         '1x' => 1,
         '2x' => 2,
+        '4x' => 4,
       );
       $variant_name = 'apps';
       $variant_short = '';
@@ -700,7 +437,6 @@ final class CeleritySpriteGenerator {
 
       $colors = array(
         'dark'  => 'dark',
-        'white' => 'white',
       );
     } else if ($variant == 2) {
       $scales = array(
@@ -713,10 +449,7 @@ final class CeleritySpriteGenerator {
       $size_y = 28;
 
       $colors = array(
-        'light' => 'lb',
         'dark'  => 'dark',
-        'blue'  => 'blue',
-        'white' => 'white',
       );
     } else {
       $scales = array(
@@ -729,16 +462,8 @@ final class CeleritySpriteGenerator {
 
       $colors = array(
         'dark'  => 'dark',
-        /*
-
-        TODO: These are available but not currently used.
-
-        'blue'  => 'blue',
-        'light' => 'lb',
-        */
       );
     }
-
 
     $apps = $this->getDirectoryList('apps_dark_1x');
 
@@ -750,14 +475,6 @@ final class CeleritySpriteGenerator {
       foreach ($colors as $color => $color_path) {
 
         $css = '.apps-'.$app.'-'.$color.$variant_short;
-        if ($color == 'blue' && $variant_name == 'apps-large') {
-          $css .= ', .phabricator-crumb-view:hover .apps-'.$app.'-dark-large';
-        }
-
-        if ($color == 'white' && $variant == 1) {
-          $css .= ', .phui-list-item-href:hover .apps-'.$app.'-dark';
-        }
-
         $sprite = id(clone $template)
           ->setName('apps-'.$app.'-'.$color.$variant_short)
           ->setTargetCSS($css);

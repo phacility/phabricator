@@ -16,7 +16,7 @@ final class NuanceRequestor
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      NuancePHIDTypeRequestor::TYPECONST);
+      NuanceRequestorPHIDType::TYPECONST);
   }
 
   public function save() {

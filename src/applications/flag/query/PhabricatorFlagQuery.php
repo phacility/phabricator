@@ -36,7 +36,7 @@ final class PhabricatorFlagQuery
   }
 
   /**
-   * Note this is done in php and not in mySQL, which means its inappropriate
+   * NOTE: this is done in PHP and not in MySQL, which means its inappropriate
    * for large datasets. Pragmatically, this is fine for user flags which are
    * typically well under 100 flags per user.
    */
@@ -65,7 +65,6 @@ final class PhabricatorFlagQuery
       ->executeOne();
   }
 
-
   public function loadPage() {
     $table = new PhabricatorFlag();
     $conn_r = $table->establishConnection('r');
@@ -82,7 +81,6 @@ final class PhabricatorFlagQuery
   }
 
   public function willFilterPage(array $flags) {
-
     if ($this->needObjects) {
       $objects = id(new PhabricatorObjectQuery())
         ->setViewer($this->getViewer())
@@ -160,9 +158,8 @@ final class PhabricatorFlagQuery
     return $this->formatWhereClause($where);
   }
 
-
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationFlags';
+    return 'PhabricatorFlagsApplication';
   }
 
 }

@@ -53,4 +53,13 @@ final class PhabricatorTokenGivenFeedStory
     return $title;
   }
 
+  public function renderAsTextForDoorkeeper(
+    DoorkeeperFeedStoryPublisher $publisher) {
+    // TODO: This is slightly wrong, as it does not respect implied context
+    // on the publisher, so it will always say "awarded D123 a token" when it
+    // should sometimes say "awarded this revision a token".
+    return $this->renderText();
+  }
+
+
 }

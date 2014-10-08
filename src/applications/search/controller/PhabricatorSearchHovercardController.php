@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group search
- */
 final class PhabricatorSearchHovercardController
   extends PhabricatorSearchBaseController {
 
@@ -56,6 +53,7 @@ final class PhabricatorSearchHovercardController
       return $this->buildApplicationPage(
         $cards,
         array(
+          'device' => false,
         ));
     } else {
       return id(new AphrontAjaxResponse())->setContent(

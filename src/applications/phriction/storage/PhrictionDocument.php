@@ -1,14 +1,12 @@
 <?php
 
-/**
- * @group phriction
- */
 final class PhrictionDocument extends PhrictionDAO
   implements
     PhabricatorPolicyInterface,
     PhabricatorSubscribableInterface,
     PhabricatorFlaggableInterface,
-    PhabricatorTokenReceiverInterface {
+    PhabricatorTokenReceiverInterface,
+    PhabricatorDestructibleInterface {
 
   protected $slug;
   protected $depth;
@@ -16,6 +14,7 @@ final class PhrictionDocument extends PhrictionDAO
   protected $status;
 
   private $contentObject = self::ATTACHABLE;
+  private $ancestors = array();
 
   // TODO: This should be `self::ATTACHABLE`, but there are still a lot of call
   // sites which load PhrictionDocuments directly.
@@ -25,12 +24,33 @@ final class PhrictionDocument extends PhrictionDAO
     return array(
       self::CONFIG_AUX_PHID   => true,
       self::CONFIG_TIMESTAMPS => false,
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'slug' => 'sort128',
+        'depth' => 'uint32',
+        'contentID' => 'id?',
+        'status' => 'uint32',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_phid' => null,
+        'phid' => array(
+          'columns' => array('phid'),
+          'unique' => true,
+        ),
+        'slug' => array(
+          'columns' => array('slug'),
+          'unique' => true,
+        ),
+        'depth' => array(
+          'columns' => array('depth', 'slug'),
+          'unique' => true,
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhrictionPHIDTypeDocument::TYPECONST);
+      PhrictionDocumentPHIDType::TYPECONST);
   }
 
   public static function getSlugURI($slug, $type = 'document') {
@@ -84,6 +104,19 @@ final class PhrictionDocument extends PhrictionDAO
     return (bool)$this->getProject();
   }
 
+  public function getAncestors() {
+    return $this->ancestors;
+  }
+
+  public function getAncestor($slug) {
+    return $this->assertAttachedKey($this->ancestors, $slug);
+  }
+
+  public function attachAncestor($slug, $ancestor) {
+    $this->ancestors[$slug] = $ancestor;
+    return $this;
+  }
+
   public static function isProjectSlug($slug) {
     $slug = PhabricatorSlug::normalize($slug);
     $prefix = 'projects/';
@@ -119,6 +152,7 @@ final class PhrictionDocument extends PhrictionDAO
     if ($this->hasProject()) {
       return $this->getProject()->getPolicy($capability);
     }
+
     return PhabricatorPolicies::POLICY_USER;
   }
 
@@ -134,6 +168,14 @@ final class PhrictionDocument extends PhrictionDAO
       return pht(
         "This is a project wiki page, and inherits the project's policies.");
     }
+
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return pht(
+          'To view a wiki document, you must also be able to view all '.
+          'of its parents.');
+    }
+
     return null;
   }
 
@@ -160,4 +202,26 @@ final class PhrictionDocument extends PhrictionDAO
   public function getUsersToNotifyOfTokenGiven() {
     return PhabricatorSubscribersQuery::loadSubscribersForPHID($this->phid);
   }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+
+      $this->delete();
+
+      $contents = id(new PhrictionContent())->loadAllWhere(
+        'documentID = %d',
+        $this->getID());
+      foreach ($contents as $content) {
+        $content->delete();
+      }
+
+    $this->saveTransaction();
+  }
+
 }

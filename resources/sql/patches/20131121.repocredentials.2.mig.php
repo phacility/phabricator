@@ -67,9 +67,14 @@ foreach ($map as $credential_type => $credential_usernames) {
   foreach ($credential_usernames as $username => $credential_secrets) {
     foreach ($credential_secrets as $secret_plaintext => $repositories) {
       $callsigns = mpull($repositories, 'getCallsign');
+
+      $signs = implode(', ', $callsigns);
+
       $name = pht(
         'Migrated Repository Credential (%s)',
-        phutil_utf8_shorten(implode(', ', $callsigns), 128));
+        id(new PhutilUTF8StringTruncator())
+          ->setMaximumGlyphs(128)
+          ->truncateString($signs));
 
       echo "Creating: {$name}...\n";
 
@@ -86,8 +91,29 @@ foreach ($map as $credential_type => $credential_usernames) {
         ->setEditPolicy(PhabricatorPolicies::POLICY_ADMIN)
         ->setName($name)
         ->setUsername($username)
-        ->setSecretID($secret_id)
-        ->save();
+        ->setSecretID($secret_id);
+
+      $credential->setPHID($credential->generatePHID());
+
+      queryfx(
+        $credential->establishConnection('w'),
+        'INSERT INTO %T (name, credentialType, providesType, viewPolicy,
+          editPolicy, description, username, secretID, isDestroyed,
+          phid, dateCreated, dateModified)
+          VALUES (%s, %s, %s, %s, %s, %s, %s, %d, %d, %s, %d, %d)',
+        $credential->getTableName(),
+        $credential->getName(),
+        $credential->getCredentialType(),
+        $credential->getProvidesType(),
+        $credential->getViewPolicy(),
+        $credential->getEditPolicy(),
+        $credential->getDescription(),
+        $credential->getUsername(),
+        $credential->getSecretID(),
+        $credential->getIsDestroyed(),
+        $credential->getPHID(),
+        time(),
+        time());
 
       foreach ($repositories as $repository) {
         queryfx(
@@ -100,7 +126,6 @@ foreach ($map as $credential_type => $credential_usernames) {
         $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_USES_CREDENTIAL;
 
         id(new PhabricatorEdgeEditor())
-          ->setActor($viewer)
           ->addEdge($repository->getPHID(), $edge_type, $credential->getPHID())
           ->save();
       }

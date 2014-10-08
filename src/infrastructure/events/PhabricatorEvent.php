@@ -1,9 +1,5 @@
 <?php
 
-
-/**
- * @group events
- */
 final class PhabricatorEvent extends PhutilEvent {
 
   private $user;

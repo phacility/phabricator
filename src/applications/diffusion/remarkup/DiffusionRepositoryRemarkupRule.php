@@ -1,7 +1,7 @@
 <?php
 
 final class DiffusionRepositoryRemarkupRule
-  extends PhabricatorRemarkupRuleObject {
+  extends PhabricatorObjectRemarkupRule {
 
   protected function getObjectNamePrefix() {
     return 'r';

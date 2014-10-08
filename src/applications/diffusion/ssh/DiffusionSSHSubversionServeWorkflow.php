@@ -35,7 +35,7 @@ final class DiffusionSSHSubversionServeWorkflow
   protected function executeRepositoryOperations() {
     $args = $this->getArgs();
     if (!$args->getArg('tunnel')) {
-      throw new Exception("Expected `svnserve -t`!");
+      throw new Exception('Expected `svnserve -t`!');
     }
 
     $command = csprintf(

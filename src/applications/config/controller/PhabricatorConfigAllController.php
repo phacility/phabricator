@@ -39,7 +39,6 @@ final class PhabricatorConfigAllController
       );
     }
     $table = id(new AphrontTableView($rows))
-      ->setDeviceReadyTable(true)
       ->setColumnClasses(
         array(
           '',
@@ -58,9 +57,9 @@ final class PhabricatorConfigAllController
       ->buildApplicationCrumbs()
       ->addTextCrumb($title);
 
-    $panel = new AphrontPanelView();
+    $panel = new PHUIObjectBoxView();
+    $panel->setHeaderText(pht('Current Settings'));
     $panel->appendChild($table);
-    $panel->setNoBackground();
 
     $versions = $this->loadVersions();
 
@@ -71,7 +70,7 @@ final class PhabricatorConfigAllController
     }
 
     $object_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Current Settings'))
+      ->setHeaderText(pht('Current Version'))
       ->addPropertyList($version_property_list);
 
     $phabricator_root = dirname(phutil_get_library_root('phabricator'));
@@ -94,7 +93,6 @@ final class PhabricatorConfigAllController
       $nav,
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

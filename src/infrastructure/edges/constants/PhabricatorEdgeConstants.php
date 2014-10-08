@@ -1,5 +1,3 @@
 <?php
 
-abstract class PhabricatorEdgeConstants {
-
-}
+abstract class PhabricatorEdgeConstants {}

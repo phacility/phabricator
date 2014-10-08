@@ -5,7 +5,7 @@ final class PhragmentUpdateController extends PhragmentController {
   private $dblob;
 
   public function willProcessRequest(array $data) {
-    $this->dblob = idx($data, "dblob", "");
+    $this->dblob = idx($data, 'dblob', '');
   }
 
   public function processRequest() {
@@ -34,7 +34,7 @@ final class PhragmentUpdateController extends PhragmentController {
         // If the file is a ZIP archive (has application/zip mimetype)
         // then we extract the zip and apply versions for each of the
         // individual fragments, creating and deleting files as needed.
-        if ($file->getMimeType() === "application/zip") {
+        if ($file->getMimeType() === 'application/zip') {
           $fragment->updateFromZIP($viewer, $file);
         } else {
           $fragment->updateFromFile($viewer, $file);
@@ -73,10 +73,11 @@ final class PhragmentUpdateController extends PhragmentController {
       array(
         $crumbs,
         $this->renderConfigurationWarningIfRequired(),
-        $box),
+        $box,
+      ),
       array(
         'title' => pht('Update Fragment'),
-        'device' => true));
+      ));
   }
 
 }

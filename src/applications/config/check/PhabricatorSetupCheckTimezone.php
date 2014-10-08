@@ -31,8 +31,8 @@ final class PhabricatorSetupCheckTimezone extends PhabricatorSetupCheck {
     }
 
     $summary = pht(
-      "Without a configured timezone, PHP will emit warnings when working ".
-      "with dates, and dates and times may not display correctly.");
+      'Without a configured timezone, PHP will emit warnings when working '.
+      'with dates, and dates and times may not display correctly.');
 
     $message = pht(
       "Your configuration fails to specify a server timezone. You can either ".

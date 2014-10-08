@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phriction
- */
 final class PhrictionDocumentStatus extends PhrictionConstants {
 
   const STATUS_EXISTS     = 0;

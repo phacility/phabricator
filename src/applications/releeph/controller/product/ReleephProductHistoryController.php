@@ -46,7 +46,6 @@ final class ReleephProductHistoryController extends ReleephProductController {
       ),
       array(
         'title' => pht('Product History'),
-        'device' => true,
       ));
   }
 

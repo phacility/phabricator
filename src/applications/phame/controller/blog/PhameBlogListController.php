@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phame
- */
 final class PhameBlogListController extends PhameController {
 
   private $filter;
@@ -60,7 +57,6 @@ final class PhameBlogListController extends PhameController {
       $nav,
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

@@ -84,7 +84,6 @@ abstract class PhameController extends PhabricatorController {
 
         $story->addAction(id(new PHUIIconView())
           ->setHref($this->getApplicationURI('post/edit/'.$post->getID().'/'))
-          ->setText(pht('Edit'))
           ->setIconFont('fa-pencil'));
       }
 
@@ -114,12 +113,12 @@ abstract class PhameController extends PhabricatorController {
       id(new PHUIListItemView())
         ->setName(pht('New Blog'))
         ->setHref($this->getApplicationURI('/blog/new'))
-        ->setIcon('create'));
+        ->setIcon('fa-plus-square'));
     $crumbs->addAction(
       id(new PHUIListItemView())
         ->setName(pht('New Post'))
         ->setHref($this->getApplicationURI('/post/new'))
-        ->setIcon('new'));
+        ->setIcon('fa-pencil'));
     return $crumbs;
   }
 }

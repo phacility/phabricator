@@ -10,9 +10,9 @@ configuration, performance and error information. It can help you detect,
 understand and resolve bugs and performance problems in Phabricator
 applications.
 
-DarkConsole was originally implemented as part of the Facebook Lite site;
-its name is a bit of play on that (and a reference to the dark color palette
-its design uses).
+DarkConsole was originally implemented as part of the Facebook Lite site; its
+name is a bit of play on that (and a reference to the dark color palette its
+design uses).
 
 = Warning =
 
@@ -24,8 +24,8 @@ it in production may compromise the integrity of an install.
 = Enabling DarkConsole =
 
 You enable DarkConsole in your configuration, by setting `darkconsole.enabled`
-to `true`, and then turning it on in `Settings` -> `Display Preferences`.
-Once DarkConsole is enabled, you can show or hide it by pressing ##`## on your
+to `true`, and then turning it on in `Settings` -> `Developer Settings`. Once
+DarkConsole is enabled, you can show or hide it by pressing ##`## on your
 keyboard.
 
 Since the setting is not available to logged-out users, you can also set

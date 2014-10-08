@@ -11,7 +11,6 @@
   var dragging = false;
   var startX, startY;
   var finalX, finalY;
-  var dScale = config.scale;
 
   var cropBox = JX.$(config.cropBoxID);
   var basePos = JX.$V(cropBox);
@@ -28,17 +27,6 @@
   );
   var minLeft = baseD.x - imageD.x;
   var minTop = baseD.y - imageD.y;
-
-  var minScale = Math.min(
-    config.width / config.imageW,
-    config.height / config.imageH,
-    1
-  );
-  var maxScale = Math.max(
-    config.imageW / config.width,
-    config.imageH / config.height,
-    2
-  );
 
   var ondrag = function(e) {
     e.kill();
@@ -76,7 +64,7 @@
     JX.DOM.find(cropBox, 'input', 'crop-y').value = finalY;
   };
 
-  var ondrop = function(e) {
+  var ondrop = function() {
     if (!dragging) {
       return;
     }

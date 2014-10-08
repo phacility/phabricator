@@ -4,6 +4,19 @@ final class PhabricatorApplicationTransactionCommentEditor
   extends PhabricatorEditor {
 
   private $contentSource;
+  private $actingAsPHID;
+
+  public function setActingAsPHID($acting_as_phid) {
+    $this->actingAsPHID = $acting_as_phid;
+    return $this;
+  }
+
+  public function getActingAsPHID() {
+    if ($this->actingAsPHID) {
+      return $this->actingAsPHID;
+    }
+    return $this->getActor()->getPHID();
+  }
 
   public function setContentSource(PhabricatorContentSource $content_source) {
     $this->contentSource = $content_source;
@@ -27,11 +40,17 @@ final class PhabricatorApplicationTransactionCommentEditor
     $actor = $this->requireActor();
 
     $comment->setContentSource($this->getContentSource());
-    $comment->setAuthorPHID($actor->getPHID());
+    $comment->setAuthorPHID($this->getActingAsPHID());
 
     // TODO: This needs to be more sophisticated once we have meta-policies.
     $comment->setViewPolicy(PhabricatorPolicies::POLICY_PUBLIC);
-    $comment->setEditPolicy($actor->getPHID());
+    $comment->setEditPolicy($this->getActingAsPHID());
+
+    $file_phids = PhabricatorMarkupEngine::extractFilePHIDsFromEmbeddedFiles(
+      $actor,
+      array(
+        $comment->getContent(),
+      ));
 
     $xaction->openTransaction();
       $xaction->beginReadLocking();
@@ -54,10 +73,19 @@ final class PhabricatorApplicationTransactionCommentEditor
       $xaction->endReadLocking();
     $xaction->saveTransaction();
 
-    $xaction->attachComment($comment);
+    // Add links to any files newly referenced by the edit.
+    if ($file_phids) {
+      $editor = new PhabricatorEdgeEditor();
+      foreach ($file_phids as $file_phid) {
+        $editor->addEdge(
+          $xaction->getObjectPHID(),
+          PhabricatorEdgeConfig::TYPE_OBJECT_HAS_FILE,
+          $file_phid);
+      }
+      $editor->save();
+    }
 
-    // TODO: Emit an event for notifications/feed? Can we handle them
-    // generically?
+    $xaction->attachComment($comment);
 
     return $this;
   }
@@ -72,20 +100,20 @@ final class PhabricatorApplicationTransactionCommentEditor
 
     if (!$xaction->getPHID()) {
       throw new Exception(
-        "Transaction must have a PHID before calling applyEdit()!");
+        'Transaction must have a PHID before calling applyEdit()!');
     }
 
     $type_comment = PhabricatorTransactions::TYPE_COMMENT;
     if ($xaction->getTransactionType() == $type_comment) {
       if ($comment->getPHID()) {
         throw new Exception(
-        "Transaction comment must not yet have a PHID!");
+          'Transaction comment must not yet have a PHID!');
       }
     }
 
     if (!$this->getContentSource()) {
       throw new Exception(
-        "Call setContentSource() before applyEdit()!");
+        'Call setContentSource() before applyEdit()!');
     }
 
     $actor = $this->requireActor();
@@ -95,10 +123,15 @@ final class PhabricatorApplicationTransactionCommentEditor
       $xaction,
       PhabricatorPolicyCapability::CAN_VIEW);
 
-    PhabricatorPolicyFilter::requireCapability(
-      $actor,
-      $xaction,
-      PhabricatorPolicyCapability::CAN_EDIT);
+    if ($comment->getIsRemoved() && $actor->getIsAdmin()) {
+      // NOTE: Administrators can remove comments by any user, and don't need
+      // to pass the edit check.
+    } else {
+      PhabricatorPolicyFilter::requireCapability(
+        $actor,
+        $xaction,
+        PhabricatorPolicyCapability::CAN_EDIT);
+    }
   }
 
 

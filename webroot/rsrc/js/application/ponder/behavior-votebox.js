@@ -7,7 +7,7 @@
  *           javelin-request
  */
 
-JX.behavior('ponder-votebox', function(config) {
+JX.behavior('ponder-votebox', function() {
 
   function handle_vote(e, vote) {
     e.kill();

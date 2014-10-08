@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phame
- */
 final class PhameBlogViewController extends PhameController {
 
   private $id;
@@ -74,7 +71,6 @@ final class PhameBlogViewController extends PhameController {
     return $this->buildApplicationPage(
       $nav,
       array(
-        'device' => true,
         'title' => $blog->getName(),
       ));
   }
@@ -109,7 +105,7 @@ final class PhameBlogViewController extends PhameController {
           'meta' => array(
             'tip' => pht('Atom URI does not support custom domains.'),
             'size' => 320,
-          )
+          ),
         ),
         $feed_uri));
 
@@ -142,7 +138,6 @@ final class PhameBlogViewController extends PhameController {
   }
 
   private function renderActions(PhameBlog $blog, PhabricatorUser $user) {
-
     $actions = id(new PhabricatorActionListView())
       ->setObject($blog)
       ->setObjectURI($this->getRequest()->getRequestURI())
@@ -160,7 +155,7 @@ final class PhameBlogViewController extends PhameController {
 
     $actions->addAction(
       id(new PhabricatorActionView())
-        ->setIcon('new')
+        ->setIcon('fa-plus')
         ->setHref($this->getApplicationURI('post/edit/?blog='.$blog->getID()))
         ->setName(pht('Write Post'))
         ->setDisabled(!$can_join)
@@ -169,13 +164,13 @@ final class PhameBlogViewController extends PhameController {
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setUser($user)
-        ->setIcon('world')
+        ->setIcon('fa-globe')
         ->setHref($blog->getLiveURI())
         ->setName(pht('View Live')));
 
     $actions->addAction(
       id(new PhabricatorActionView())
-        ->setIcon('edit')
+        ->setIcon('fa-pencil')
         ->setHref($this->getApplicationURI('blog/edit/'.$blog->getID().'/'))
         ->setName('Edit Blog')
         ->setDisabled(!$can_edit)
@@ -183,7 +178,7 @@ final class PhameBlogViewController extends PhameController {
 
     $actions->addAction(
       id(new PhabricatorActionView())
-        ->setIcon('delete')
+        ->setIcon('fa-times')
         ->setHref($this->getApplicationURI('blog/delete/'.$blog->getID().'/'))
         ->setName('Delete Blog')
         ->setDisabled(!$can_edit)

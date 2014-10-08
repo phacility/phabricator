@@ -5,16 +5,21 @@
 .phui-tag-view {
   font-weight: bold;
   text-decoration: none;
-  display: inline-block;
   position: relative;
+  -webkit-font-smoothing: antialiased;
 }
 
 a.phui-tag-view:hover {
   text-decoration: none;
 }
 
-.phui-tag-state-closed .phui-tag-core {
+.phui-tag-core-closed {
   text-decoration: line-through;
+  color: rgba(0,0,0,0.5);
+}
+
+.phui-tag-core-closed:hover {
+  text-decoration: none;
 }
 
 .phui-tag-core {
@@ -57,8 +62,9 @@ a.phui-tag-view:hover {
 
 .phui-tag-type-object,
 a.phui-tag-type-object,
-a.phui-tag-type-object:link {
-  color: #000000;
+a.phui-tag-type-object:link,
+.phui-tag-core-closed .phui-tag-color-object {
+  color: #000;
 }
 
 .phui-tag-type-person {
@@ -134,4 +140,204 @@ a.phui-tag-view:hover
 a.phui-tag-view:hover
   .phui-tag-core.phui-tag-color-object {
   border-color: #d7d7d7;
+}
+
+/* - Shaded Tags ---------------------------------------------------------------
+
+  For object representation inside text areas and lists.
+
+*/
+
+.phui-tag-shade {
+  font-weight: normal;
+}
+
+.phui-tag-shade .phui-icon-view {
+  font-size: 12px;
+  top: 2px;
+  left: 6px;
+}
+
+.phui-tag-shade-slim .phui-icon-view {
+  font-size: 11px;
+  top: 3px;
+  left: 6px;
+}
+
+.phui-tag-shade-slim .phui-tag-core {
+  font-size: 12px;
+}
+
+.phui-tag-shade-slim.phui-tag-icon-view .phui-tag-core {
+  padding-left: 20px;
+}
+
+.phui-tag-shade-red .phui-tag-core {
+  background-color: {$sh-redbackground};
+  border-color: {$sh-lightredborder};
+  color: {$sh-redtext};
+}
+
+.phui-tag-shade-red .phui-icon-view {
+  color: {$sh-redicon};
+}
+
+a.phui-tag-view:hover.phui-tag-shade-red .phui-tag-core {
+  border-color: {$sh-redborder};
+}
+
+.phui-tag-shade-orange .phui-tag-core {
+  background-color: {$sh-orangebackground};
+  border-color: {$sh-lightorangeborder};
+  color: {$sh-orangetext};
+}
+
+.phui-tag-shade-orange .phui-icon-view {
+  color: {$sh-orangeicon};
+}
+
+a.phui-tag-view:hover.phui-tag-shade-orange .phui-tag-core {
+  border-color: {$sh-orangeborder};
+}
+
+.phui-tag-shade-yellow .phui-tag-core {
+  background-color: {$sh-yellowbackground};
+  border-color: {$sh-lightyellowborder};
+  color: {$sh-yellowtext};
+}
+
+.phui-tag-shade-yellow .phui-icon-view {
+  color: {$sh-yellowicon};
+}
+
+a.phui-tag-view:hover.phui-tag-shade-yellow .phui-tag-core {
+  border-color: {$sh-yellowborder};
+}
+
+.phui-tag-shade-blue .phui-tag-core {
+  background-color: {$sh-bluebackground};
+  border-color: {$sh-lightblueborder};
+  color: {$sh-bluetext};
+}
+
+.phui-tag-shade-blue .phui-icon-view {
+  color: {$sh-blueicon};
+}
+
+a.phui-tag-view:hover.phui-tag-shade-blue .phui-tag-core {
+  border-color: {$sh-blueborder};
+}
+
+.phui-tag-shade-indigo .phui-tag-core {
+  background-color: {$sh-indigobackground};
+  border-color: {$sh-lightindigoborder};
+  color: {$sh-indigotext};
+}
+
+.phui-tag-shade-indigo .phui-icon-view {
+  color: {$sh-indigoicon};
+}
+
+a.phui-tag-view:hover.phui-tag-shade-indigo .phui-tag-core {
+  border-color: {$sh-indigoborder};
+}
+
+.phui-tag-shade-green .phui-tag-core {
+  background-color: {$sh-greenbackground};
+  border-color: {$sh-lightgreenborder};
+  color: {$sh-greentext};
+}
+
+.phui-tag-shade-green .phui-icon-view {
+  color: {$sh-greenicon};
+}
+
+a.phui-tag-view:hover.phui-tag-shade-green .phui-tag-core {
+  border-color: {$sh-greenborder};
+}
+
+.phui-tag-shade-violet .phui-tag-core {
+  background-color: {$sh-violetbackground};
+  border-color: {$sh-lightvioletborder};
+  color: {$sh-violettext};
+}
+
+.phui-tag-shade-violet .phui-icon-view {
+  color: {$sh-violeticon};
+}
+
+a.phui-tag-view:hover.phui-tag-shade-violet .phui-tag-core {
+  border-color: {$sh-violetborder};
+}
+
+.phui-tag-shade-pink .phui-tag-core {
+  background-color: {$sh-pinkbackground};
+  border-color: {$sh-lightpinkborder};
+  color: {$sh-pinktext};
+}
+
+.phui-tag-shade-pink .phui-icon-view {
+  color: {$sh-pinkicon};
+}
+
+a.phui-tag-view:hover.phui-tag-shade-pink .phui-tag-core {
+  border-color: {$sh-pinkborder};
+}
+
+.phui-tag-shade-grey .phui-tag-core {
+  background-color: {$sh-greybackground};
+  border-color: {$sh-lightgreyborder};
+  color: {$sh-greytext};
+}
+
+.phui-tag-shade-grey .phui-icon-view {
+  color: {$sh-greyicon};
+}
+
+a.phui-tag-view:hover.phui-tag-shade-grey .phui-tag-core {
+  border-color: {$sh-greyborder};
+}
+
+.phui-tag-shade-checkered .phui-tag-core {
+  background: url(/rsrc/image/checker_lighter.png);
+  border-style: dashed;
+  border-color: {$sh-greyborder};
+  color: {$sh-greytext};
+  text-shadow: 1px 1px #fff;
+}
+
+.phui-tag-shade-checkered .phui-icon-view {
+  color: {$sh-greyicon};
+}
+
+a.phui-tag-view:hover.phui-tag-shade-checkered .phui-tag-core {
+  border-style: solid;
+  border-color: {$sh-greyborder};
+}
+
+.phui-tag-shade-disabled .phui-tag-core {
+  background-color: {$sh-disabledbackground};
+  border-color: {$sh-lightdisabledborder};
+  color: {$sh-disabledtext};
+}
+
+.phui-tag-shade-disabled .phui-icon-view {
+  color: {$sh-disabledicon};
+}
+
+a.phui-tag-view:hover.phui-tag-shade-disabled .phui-tag-core {
+  border-color: {$sh-disabledborder};
+}
+
+.phabricator-handle-tag-list-item + .phabricator-handle-tag-list-item {
+  margin-top: 4px;
+}
+
+.phui-object-item .phabricator-handle-tag-list {
+  display: inline-block;
+}
+
+.phui-object-item .phabricator-handle-tag-list-item {
+  display: inline-block;
+  margin: 0 4px 2px 0;
 }

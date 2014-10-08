@@ -103,7 +103,7 @@ $force_local = $args->getArg('force-local');
 $min_date = $args->getArg('min-date');
 
 if (!$all_from_repo && !$reparse_what) {
-  usage("Specify a commit or repository to reparse.");
+  usage('Specify a commit or repository to reparse.');
 }
 
 if ($all_from_repo && $reparse_what) {
@@ -116,8 +116,8 @@ if ($all_from_repo && $reparse_what) {
 
 if (!$reparse_message && !$reparse_change && !$reparse_herald &&
     !$reparse_owners && !$reparse_harbormaster) {
-  usage("Specify what information to reparse with --message, --change,  ".
-        "--herald, --harbormaster, and/or --owners");
+  usage('Specify what information to reparse with --message, --change,  '.
+        '--herald, --harbormaster, and/or --owners');
 }
 
 $min_timestamp = false;
@@ -142,9 +142,9 @@ if ($min_date) {
 
 if ($reparse_owners && !$force) {
   echo phutil_console_wrap(
-    "You are about to recreate the relationship entries between the commits ".
-    "and the packages they touch. This might delete some existing ".
-    "relationship entries for some old commits.");
+    'You are about to recreate the relationship entries between the commits '.
+    'and the packages they touch. This might delete some existing '.
+    'relationship entries for some old commits.');
 
   if (!phutil_console_confirm('Are you ready to continue?')) {
     echo "Cancelled.\n";
@@ -218,6 +218,9 @@ if ($all_from_repo && !$force_local) {
   echo "QUEUEING TASKS (".number_format(count($commits))." Commits):\n";
 }
 
+$progress = new PhutilConsoleProgressBar();
+$progress->setTotal(count($commits));
+
 $tasks = array();
 foreach ($commits as $commit) {
   $classes = array();
@@ -267,21 +270,22 @@ foreach ($commits as $commit) {
 
   if ($all_from_repo && !$force_local) {
     foreach ($classes as $class) {
-      PhabricatorWorker::scheduleTask($class, $spec);
-
-      $commit_name = 'r'.$callsign.$commit->getCommitIdentifier();
-      echo "  Queued '{$class}' for commit '{$commit_name}'.\n";
+      PhabricatorWorker::scheduleTask(
+        $class,
+        $spec,
+        PhabricatorWorker::PRIORITY_IMPORT);
     }
   } else {
     foreach ($classes as $class) {
       $worker = newv($class, array($spec));
-      echo "Running '{$class}'...\n";
       $worker->executeTask();
     }
   }
+
+  $progress->update(1);
 }
 
-echo "\nDone.\n";
+$progress->done();
 
 function usage($message) {
   echo phutil_console_format(

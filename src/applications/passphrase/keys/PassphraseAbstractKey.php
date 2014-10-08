@@ -6,7 +6,7 @@ abstract class PassphraseAbstractKey extends Phobject {
 
   protected function requireCredential() {
     if (!$this->credential) {
-      throw new Exception(pht("Credential is required!"));
+      throw new Exception(pht('Credential is required!'));
     }
     return $this->credential;
   }

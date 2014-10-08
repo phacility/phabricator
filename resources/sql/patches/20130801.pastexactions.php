@@ -15,7 +15,7 @@ foreach ($rows as $row) {
   echo "Adding transactions for paste id {$id}...\n";
 
   $xaction_phid = PhabricatorPHID::generateNewPHID(
-    PhabricatorApplicationTransactionPHIDTypeTransaction::TYPECONST);
+    PhabricatorApplicationTransactionTransactionPHIDType::TYPECONST);
 
   queryfx(
     $conn_w,
@@ -30,7 +30,7 @@ foreach ($rows as $row) {
     $row['phid'],
     'public',
     $row['authorPHID'],
-    PhabricatorPasteTransaction::TYPE_CREATE,
+    PhabricatorPasteTransaction::TYPE_CONTENT,
     'null',
     $row['filePHID'],
     PhabricatorContentSource::newForSource(

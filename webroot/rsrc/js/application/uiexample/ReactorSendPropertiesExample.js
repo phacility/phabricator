@@ -8,7 +8,7 @@
 JX.install('ReactorSendPropertiesExample', {
   extend: 'View',
   members: {
-    render: function(rendered_children) {
+    render: function() {
       var color = JX.$N('input', {value: '#fff000'});
       var title = JX.$N('input', {value: 'seen on hover'});
       var target = JX.$N('span', 'Change my color and title');

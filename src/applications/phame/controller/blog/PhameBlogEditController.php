@@ -19,7 +19,7 @@ final class PhameBlogEditController
         ->withIDs(array($this->id))
         ->requireCapabilities(
           array(
-            PhabricatorPolicyCapability::CAN_EDIT
+            PhabricatorPolicyCapability::CAN_EDIT,
           ))
         ->executeOne();
       if (!$blog) {
@@ -74,7 +74,7 @@ final class PhameBlogEditController
           $errors[] = $error_text;
           $e_custom_domain = $error_label;
         }
-        if ($blog->getJoinPolicy() != PhabricatorPolicies::POLICY_PUBLIC) {
+        if ($blog->getViewPolicy() != PhabricatorPolicies::POLICY_PUBLIC) {
           $errors[] = pht(
             'For custom domains to work, the blog must have a view policy of '.
             'public.');
@@ -96,7 +96,7 @@ final class PhameBlogEditController
           $blog->save();
           return id(new AphrontRedirectResponse())
             ->setURI($this->getApplicationURI('blog/view/'.$blog->getID().'/'));
-        } catch (AphrontQueryDuplicateKeyException $ex) {
+        } catch (AphrontDuplicateKeyQueryException $ex) {
           $errors[] = pht('Domain must be unique.');
           $e_custom_domain = pht('Not Unique');
         }
@@ -188,7 +188,6 @@ final class PhameBlogEditController
       $nav,
       array(
         'title' => $page_title,
-        'device' => true,
       ));
   }
 }

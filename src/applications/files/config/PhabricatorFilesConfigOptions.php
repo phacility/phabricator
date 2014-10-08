@@ -1,21 +1,17 @@
 <?php
 
-/**
- * @group file
- */
 final class PhabricatorFilesConfigOptions
   extends PhabricatorApplicationConfigOptions {
 
   public function getName() {
-    return pht("Files");
+    return pht('Files');
   }
 
   public function getDescription() {
-    return pht("Configure files and file storage.");
+    return pht('Configure files and file storage.');
   }
 
   public function getOptions() {
-
     $viewable_default = array(
       'image/jpeg'  => 'image/jpeg',
       'image/jpg'   => 'image/jpg',
@@ -118,6 +114,7 @@ final class PhabricatorFilesConfigOptions
             'Configure the largest file which will be put into the MySQL '.
             'storage engine.')),
       $this->newOption('storage.local-disk.path', 'string', null)
+        ->setLocked(true)
         ->setSummary(pht('Local storage disk path.'))
         ->setDescription(
           pht(
@@ -145,14 +142,14 @@ final class PhabricatorFilesConfigOptions
         ->setSummary(pht('Storage engine selector.'))
         ->setDescription(
           pht(
-            "Phabricator uses a storage engine selector to choose which ".
-            "storage engine to use when writing file data. If you add new ".
-            "storage engines or want to provide very custom rules (e.g., ".
-            "write images to one storage engine and other files to a ".
-            "different one), you can provide an alternate implementation ".
-            "here. The default engine will use choose MySQL, Local Disk, and ".
-            "S3, in that order, if they have valid configurations above and ".
-            "a file fits within configured limits.")),
+            'Phabricator uses a storage engine selector to choose which '.
+            'storage engine to use when writing file data. If you add new '.
+            'storage engines or want to provide very custom rules (e.g., '.
+            'write images to one storage engine and other files to a '.
+            'different one), you can provide an alternate implementation '.
+            'here. The default engine will use choose MySQL, Local Disk, and '.
+            'S3, in that order, if they have valid configurations above and '.
+            'a file fits within configured limits.')),
      $this->newOption('storage.upload-size-limit', 'string', null)
         ->setSummary(
           pht('Limit to users in interfaces which allow uploading.'))
@@ -172,7 +169,7 @@ final class PhabricatorFilesConfigOptions
             "limit.\n\n".
             "Specify this limit in bytes, or using a 'K', 'M', or 'G' ".
             "suffix."))
-        ->addExample('10M', pht("Allow Uploads 10MB or Smaller")),
+        ->addExample('10M', pht('Allow Uploads 10MB or Smaller')),
      $this->newOption(
         'metamta.files.public-create-email',
         'string',
@@ -182,15 +179,15 @@ final class PhabricatorFilesConfigOptions
         'metamta.files.subject-prefix',
         'string',
         '[File]')
-        ->setDescription(pht('Subject prefix for paste email.')),
+        ->setDescription(pht('Subject prefix for Files email.')),
      $this->newOption('files.enable-imagemagick', 'bool', false)
        ->setBoolOptions(
          array(
            pht('Enable'),
-           pht('Disable')
+           pht('Disable'),
          ))->setDescription(
              pht("This option will enable animated gif images".
-                  "to be set as profile pictures. The \'convert\' binary ".
+                  "to be set as profile pictures. The 'convert' binary ".
                   "should be available to the webserver for this to work")),
 
     );

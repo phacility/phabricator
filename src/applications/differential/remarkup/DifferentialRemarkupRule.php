@@ -1,10 +1,6 @@
 <?php
 
-/**
- * @group differential
- */
-final class DifferentialRemarkupRule
-  extends PhabricatorRemarkupRuleObject {
+final class DifferentialRemarkupRule extends PhabricatorObjectRemarkupRule {
 
   protected function getObjectNamePrefix() {
     return 'D';

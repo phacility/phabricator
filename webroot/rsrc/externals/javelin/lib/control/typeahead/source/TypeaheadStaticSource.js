@@ -9,8 +9,6 @@
  * Typeahead source that uses static data passed to the constructor. For larger
  * datasets, use @{class:JX.TypeaheadPreloadedSource} or
  * @{class:JX.TypeaheadOnDemandSource} to improve performance.
- *
- * @group control
  */
 JX.install('TypeaheadStaticSource', {
 

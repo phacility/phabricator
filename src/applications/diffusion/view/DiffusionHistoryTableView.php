@@ -7,10 +7,12 @@ final class DiffusionHistoryTableView extends DiffusionView {
   private $handles = array();
   private $isHead;
   private $parents;
+  private $buildCache;
 
   public function setHistory(array $history) {
     assert_instances_of($history, 'DiffusionPathChange');
     $this->history = $history;
+    $this->buildCache = null;
     return $this;
   }
 
@@ -60,6 +62,28 @@ final class DiffusionHistoryTableView extends DiffusionView {
     return $this;
   }
 
+  public function loadBuildablesOnDemand() {
+    if ($this->buildCache !== null) {
+      return $this->buildCache;
+    }
+
+    $commits_to_builds = array();
+
+    $commits = mpull($this->history, 'getCommit');
+
+    $commit_phids = mpull($commits, 'getPHID');
+
+    $buildables = id(new HarbormasterBuildableQuery())
+      ->setViewer($this->getUser())
+      ->withBuildablePHIDs($commit_phids)
+      ->withManualBuildables(false)
+      ->execute();
+
+    $this->buildCache = mpull($buildables, null, 'getBuildablePHID');
+
+    return $this->buildCache;
+  }
+
   public function render() {
     $drequest = $this->getDiffusionRequest();
 
@@ -69,6 +93,10 @@ final class DiffusionHistoryTableView extends DiffusionView {
     if ($this->parents) {
       $graph = $this->renderGraph();
     }
+
+    $show_builds = PhabricatorApplication::isClassInstalledForViewer(
+      'PhabricatorHarbormasterApplication',
+      $this->getUser());
 
     $rows = array();
     $ii = 0;
@@ -118,66 +146,101 @@ final class DiffusionHistoryTableView extends DiffusionView {
 
       $commit = $history->getCommit();
       if ($commit && $commit->isPartiallyImported($partial_import) && $data) {
-        $change = $this->linkChange(
-          $history->getChangeType(),
-          $history->getFileType(),
-          $path = null,
-          $history->getCommitIdentifier());
+        $summary = AphrontTableView::renderSingleDisplayLine(
+          $history->getSummary());
       } else {
-        $change = phutil_tag('em', array(), "Importing\xE2\x80\xA6");
+        $summary = phutil_tag('em', array(), "Importing\xE2\x80\xA6");
+      }
+
+      $build = null;
+      if ($show_builds) {
+        $buildable_lookup = $this->loadBuildablesOnDemand();
+        $buildable = idx($buildable_lookup, $commit->getPHID());
+        if ($buildable !== null) {
+          $icon = HarbormasterBuildable::getBuildableStatusIcon(
+            $buildable->getBuildableStatus());
+          $color = HarbormasterBuildable::getBuildableStatusColor(
+            $buildable->getBuildableStatus());
+          $name = HarbormasterBuildable::getBuildableStatusName(
+            $buildable->getBuildableStatus());
+
+          $icon_view = id(new PHUIIconView())
+            ->setIconFont($icon.' '.$color);
+
+          $tooltip_view = javelin_tag(
+            'span',
+            array(
+              'sigil' => 'has-tooltip',
+              'meta' => array('tip' => $name),
+            ),
+            $icon_view);
+
+          Javelin::initBehavior('phabricator-tooltips');
+
+          $href_view = phutil_tag(
+            'a',
+            array('href' => '/'.$buildable->getMonogram()),
+            $tooltip_view);
+
+          $build = $href_view;
+
+          $has_any_build = true;
+        }
       }
 
       $rows[] = array(
-        $this->linkBrowse(
-          $drequest->getPath(),
-          array(
-            'commit' => $history->getCommitIdentifier(),
-          )),
         $graph ? $graph[$ii++] : null,
         self::linkCommit(
           $drequest->getRepository(),
           $history->getCommitIdentifier()),
+        $build,
         ($commit ?
           self::linkRevision(idx($this->revisions, $commit->getPHID())) :
           null),
-        $change,
+        $author,
+        $summary,
         $date,
         $time,
-        $author,
-        AphrontTableView::renderSingleDisplayLine($history->getSummary()),
-        // TODO: etc etc
       );
     }
 
     $view = new AphrontTableView($rows);
     $view->setHeaders(
       array(
-        pht('Browse'),
         '',
         pht('Commit'),
+        '',
         pht('Revision'),
-        pht('Change'),
-        pht('Date'),
-        pht('Time'),
         pht('Author/Committer'),
         pht('Details'),
+        pht('Date'),
+        pht('Time'),
       ));
     $view->setColumnClasses(
       array(
-        '',
         'threads',
         'n',
+        'icon',
         'n',
         '',
+        'wide',
         '',
         'right',
-        '',
-        'wide',
       ));
     $view->setColumnVisibility(
       array(
-        true,
         $graph ? true : false,
+      ));
+    $view->setDeviceVisibility(
+      array(
+        $graph ? true : false,
+        true,
+        true,
+        true,
+        false,
+        true,
+        false,
+        false,
       ));
     return $view->render();
   }
@@ -192,13 +255,12 @@ final class DiffusionHistoryTableView extends DiffusionView {
    *  |o
    *  o
    *
-   * ...which form an ASCII representation of the graph we eventaully want to
+   * ...which form an ASCII representation of the graph we eventually want to
    * draw.
    *
    * NOTE: The actual implementation is black magic.
    */
   private function renderGraph() {
-
     // This keeps our accumulated information about each line of the
     // merge/branch graph.
     $graph = array();

@@ -20,17 +20,21 @@
   margin: auto;
 }
 
-.aphront-dialog-head .phabricator-action-header {
+.aphront-dialog-head .phui-action-header {
   border-bottom: 1px solid {$lightblueborder};
   padding: 4px 16px;
   white-space: nowrap;
 }
 
-.aphront-dialog-head .phabricator-action-header
-  .phabricator-action-header-title {
+.aphront-dialog-head .phui-action-header
+  .phui-action-header-title {
   font-size: 15px;
   color: {$bluetext};
   text-shadow: 0 1px 2px #fff;
+}
+
+.aphront-dialog-flush .aphront-dialog-body {
+  padding: 0;
 }
 
 .aphront-dialog-view-width-form {
@@ -127,4 +131,20 @@
 
 .aphront-dialog-view-paragraph + .aphront-dialog-view-paragraph {
   margin-top: 16px;
+}
+
+.device-desktop .aphront-dialog-flush .phui-object-item-list-view {
+  margin: 0;
+  padding: 0;
+}
+
+.aphront-dialog-flush .phui-object-item-list-view.phui-object-list-stackable
+ .phui-object-item {
+  border: 0;
+}
+
+.aphront-dialog-flush .phui-object-item-list-view.phui-object-list-stackable
+ .phui-object-item-frame {
+  border: 0;
+  border-top: 1px solid {$thinblueborder};
 }

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phame
- */
 final class PhameSkinSpecification {
 
   const TYPE_ADVANCED   = 'advanced';
@@ -16,7 +13,6 @@ final class PhameSkinSpecification {
   private $config;
 
   public static function loadAllSkinSpecifications() {
-
     static $specs;
 
     if ($specs === null) {
@@ -105,7 +101,7 @@ final class PhameSkinSpecification {
         $spec->addPhutilLibrary($path.DIRECTORY_SEPARATOR.'src');
         break;
       default:
-        throw new Exception("Unknown skin type!");
+        throw new Exception('Unknown skin type!');
     }
 
     $spec->setType($type);

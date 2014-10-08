@@ -5,97 +5,137 @@
  */
 abstract class PhortunePaymentProvider {
 
+  private $providerConfig;
+
+  public function setProviderConfig(
+    PhortunePaymentProviderConfig $provider_config) {
+    $this->providerConfig = $provider_config;
+    return $this;
+  }
+
+  public function getProviderConfig() {
+    return $this->providerConfig;
+  }
+
+  /**
+   * Return a short name which identifies this provider.
+   */
+  abstract public function getName();
+
+
+/* -(  Configuring Providers  )---------------------------------------------- */
+
+
+  /**
+   * Return a human-readable provider name for use on the merchant workflow
+   * where a merchant owner adds providers.
+   */
+  abstract public function getConfigureName();
+
+
+  /**
+   * Return a human-readable provider description for use on the merchant
+   * workflow where a merchant owner adds providers.
+   */
+  abstract public function getConfigureDescription();
+
+  abstract public function getConfigureInstructions();
+
+  abstract public function getConfigureProvidesDescription();
+
+  abstract public function getAllConfigurableProperties();
+
+  abstract public function getAllConfigurableSecretProperties();
+  /**
+   * Read a dictionary of properties from the provider's configuration for
+   * use when editing the provider.
+   */
+  public function readEditFormValuesFromProviderConfig() {
+    $properties = $this->getAllConfigurableProperties();
+    $config = $this->getProviderConfig();
+
+    $secrets = $this->getAllConfigurableSecretProperties();
+    $secrets = array_fuse($secrets);
+
+    $map = array();
+    foreach ($properties as $property) {
+      $map[$property] = $config->getMetadataValue($property);
+      if (isset($secrets[$property])) {
+        $map[$property] = $this->renderConfigurationSecret($map[$property]);
+      }
+    }
+
+    return $map;
+  }
+
+
+  /**
+   * Read a dictionary of properties from a request for use when editing the
+   * provider.
+   */
+  public function readEditFormValuesFromRequest(AphrontRequest $request) {
+    $properties = $this->getAllConfigurableProperties();
+
+    $map = array();
+    foreach ($properties as $property) {
+      $map[$property] = $request->getStr($property);
+    }
+
+    return $map;
+  }
+
+
+  abstract public function processEditForm(
+    AphrontRequest $request,
+    array $values);
+
+  abstract public function extendEditForm(
+    AphrontRequest $request,
+    AphrontFormView $form,
+    array $values,
+    array $issues);
+
+  protected function renderConfigurationSecret($value) {
+    if (strlen($value)) {
+      return str_repeat('*', strlen($value));
+    }
+    return '';
+  }
+
+  public function isConfigurationSecret($value) {
+    return preg_match('/^\*+\z/', trim($value));
+  }
+
+  abstract public function canRunConfigurationTest();
+
+  public function runConfigurationTest() {
+    throw new PhortuneNotImplementedException($this);
+  }
+
 
 /* -(  Selecting Providers  )------------------------------------------------ */
 
 
   public static function getAllProviders() {
-    $objects = id(new PhutilSymbolLoader())
+    return id(new PhutilSymbolLoader())
       ->setAncestorClass('PhortunePaymentProvider')
       ->loadObjects();
-
-    return mpull($objects, null, 'getProviderKey');
   }
 
-  public static function getEnabledProviders() {
-    $providers = self::getAllProviders();
-    foreach ($providers as $key => $provider) {
-      if (!$provider->isEnabled()) {
-        unset($providers[$key]);
-      }
-    }
-    return $providers;
+  public function isEnabled() {
+    return $this->getProviderConfig()->getIsEnabled();
   }
 
-  public static function getProvidersForAddPaymentMethod() {
-    $providers = self::getEnabledProviders();
-    foreach ($providers as $key => $provider) {
-      if (!$provider->canCreatePaymentMethods()) {
-        unset($providers[$key]);
-      }
-    }
-    return $providers;
-  }
-
-  public static function getProvidersForOneTimePayment() {
-    $providers = self::getEnabledProviders();
-    foreach ($providers as $key => $provider) {
-      if (!$provider->canProcessOneTimePayments()) {
-        unset($providers[$key]);
-      }
-    }
-    return $providers;
-  }
-
-  public static function getProviderByDigest($digest) {
-    $providers = self::getEnabledProviders();
-    foreach ($providers as $key => $provider) {
-      $provider_digest = PhabricatorHash::digestForIndex($key);
-      if ($provider_digest == $digest) {
-        return $provider;
-      }
-    }
-    return null;
-  }
-
-  abstract public function isEnabled();
-
-  final public function getProviderKey() {
-    return $this->getProviderType().'@'.$this->getProviderDomain();
-  }
-
-
-  /**
-   * Return a short string which uniquely identifies this provider's protocol
-   * type, like "stripe", "paypal", or "balanced".
-   */
-  abstract public function getProviderType();
-
-
-  /**
-   * Return a short string which uniquely identifies the domain for this
-   * provider, like "stripe.com" or "google.com".
-   *
-   * This is distinct from the provider type so that protocols are not bound
-   * to a single domain. This is probably not relevant for payments, but this
-   * assumption burned us pretty hard with authentication and it's easy enough
-   * to avoid.
-   */
-  abstract public function getProviderDomain();
-
+  abstract public function isAcceptingLivePayments();
   abstract public function getPaymentMethodDescription();
   abstract public function getPaymentMethodIcon();
   abstract public function getPaymentMethodProviderDescription();
 
-
-  /**
-   * Determine of a provider can handle a payment method.
-   *
-   * @return bool True if this provider can apply charges to the payment
-   *              method.
-   */
-  abstract public function canHandlePaymentMethod(
-    PhortunePaymentMethod $method);
+  final public function applyCharge(
+    PhortunePaymentMethod $payment_method,
+    PhortuneCharge $charge) {
+    $this->executeCharge($payment_method, $charge);
+  }
 
   abstract protected function executeCharge(
     PhortunePaymentMethod $payment_method,
@@ -157,6 +197,11 @@ abstract class PhortunePaymentProvider {
     throw new PhortuneNotImplementedException($this);
   }
 
+  public function getDefaultPaymentMethodDisplayName(
+    PhortunePaymentMethod $method) {
+    throw new PhortuneNotImplementedException($this);
+  }
+
 
 /* -(  One-Time Payments  )-------------------------------------------------- */
 
@@ -169,7 +214,38 @@ abstract class PhortunePaymentProvider {
     PhortuneAccount $account,
     PhortuneCart $cart,
     PhabricatorUser $user) {
-    throw new PhortuneNotImplementedException($this);
+
+    require_celerity_resource('phortune-css');
+
+    $description = $this->getPaymentMethodProviderDescription();
+    $details = $this->getPaymentMethodDescription();
+
+    $icon = id(new PHUIIconView())
+      ->setSpriteSheet(PHUIIconView::SPRITE_LOGIN)
+      ->setSpriteIcon($this->getPaymentMethodIcon());
+
+    $button = id(new PHUIButtonView())
+      ->setSize(PHUIButtonView::BIG)
+      ->setColor(PHUIButtonView::GREY)
+      ->setIcon($icon)
+      ->setText($description)
+      ->setSubtext($details);
+
+    // NOTE: We generate a local URI to make sure the form picks up CSRF tokens.
+    $uri = $this->getControllerURI(
+      'checkout',
+      array(
+        'cartID' => $cart->getID(),
+      ),
+      $local = true);
+
+    return phabricator_form(
+      $user,
+      array(
+        'action' => $uri,
+        'method' => 'POST',
+      ),
+      $button);
   }
 
 
@@ -178,17 +254,21 @@ abstract class PhortunePaymentProvider {
 
   final public function getControllerURI(
     $action,
-    array $params = array()) {
+    array $params = array(),
+    $local = false) {
 
-    $digest = PhabricatorHash::digestForIndex($this->getProviderKey());
-
-    $app = PhabricatorApplication::getByClass('PhabricatorApplicationPhortune');
-    $path = $app->getBaseURI().'provider/'.$digest.'/'.$action.'/';
+    $id = $this->getProviderConfig()->getID();
+    $app = PhabricatorApplication::getByClass('PhabricatorPhortuneApplication');
+    $path = $app->getBaseURI().'provider/'.$id.'/'.$action.'/';
 
     $uri = new PhutilURI($path);
     $uri->setQueryParams($params);
 
-    return PhabricatorEnv::getURI((string)$uri);
+    if ($local) {
+      return $uri;
+    } else {
+      return PhabricatorEnv::getURI((string)$uri);
+    }
   }
 
   public function canRespondToControllerAction($action) {
@@ -196,7 +276,7 @@ abstract class PhortunePaymentProvider {
   }
 
   public function processControllerRequest(
-    PhortuneProviderController $controller,
+    PhortuneProviderActionController $controller,
     AphrontRequest $request) {
     throw new PhortuneNotImplementedException($this);
   }

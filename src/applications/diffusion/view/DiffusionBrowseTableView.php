@@ -17,100 +17,6 @@ final class DiffusionBrowseTableView extends DiffusionView {
     return $this;
   }
 
-  public function renderLastModifiedColumns(
-    DiffusionRequest $drequest,
-    array $handles,
-    PhabricatorRepositoryCommit $commit = null,
-    PhabricatorRepositoryCommitData $data = null) {
-    assert_instances_of($handles, 'PhabricatorObjectHandle');
-
-    if ($commit) {
-      $epoch = $commit->getEpoch();
-      $modified = DiffusionView::linkCommit(
-        $drequest->getRepository(),
-        $commit->getCommitIdentifier());
-      $date = phabricator_date($epoch, $this->user);
-      $time = phabricator_time($epoch, $this->user);
-    } else {
-      $modified = '';
-      $date = '';
-      $time = '';
-    }
-
-    if ($data) {
-      $author_phid = $data->getCommitDetail('authorPHID');
-      if ($author_phid && isset($handles[$author_phid])) {
-        $author = $handles[$author_phid]->renderLink();
-      } else {
-        $author = self::renderName($data->getAuthorName());
-      }
-
-      $committer = $data->getCommitDetail('committer');
-      if ($committer) {
-        $committer_phid = $data->getCommitDetail('committerPHID');
-        if ($committer_phid && isset($handles[$committer_phid])) {
-          $committer = $handles[$committer_phid]->renderLink();
-        } else {
-          $committer = self::renderName($committer);
-        }
-        if ($author != $committer) {
-          $author = hsprintf('%s/%s', $author, $committer);
-        }
-      }
-
-      $details = AphrontTableView::renderSingleDisplayLine($data->getSummary());
-    } else {
-      $author = '';
-      $details = '';
-    }
-
-    $return = array(
-      'commit'    => $modified,
-      'date'      => $date,
-      'time'      => $time,
-      'author'    => $author,
-      'details'   => $details,
-    );
-
-    $lint = self::loadLintMessagesCount($drequest);
-    if ($lint !== null) {
-      $return['lint'] = phutil_tag(
-        'a',
-        array('href' => $drequest->generateURI(array(
-          'action' => 'lint',
-          'lint' => null,
-        ))),
-        number_format($lint));
-    }
-
-    return $return;
-  }
-
-  private static function loadLintMessagesCount(DiffusionRequest $drequest) {
-    $branch = $drequest->loadBranch();
-    if (!$branch) {
-      return null;
-    }
-
-    $conn = $drequest->getRepository()->establishConnection('r');
-
-    $path = '/'.$drequest->getPath();
-    $where = (substr($path, -1) == '/'
-      ? qsprintf($conn, 'AND path LIKE %>', $path)
-      : qsprintf($conn, 'AND path = %s', $path));
-
-    if ($drequest->getLint()) {
-      $where .= qsprintf($conn, ' AND code = %s', $drequest->getLint());
-    }
-
-    return head(queryfx_one(
-      $conn,
-      'SELECT COUNT(*) FROM %T WHERE branchID = %d %Q',
-      PhabricatorRepository::TABLE_LINTMESSAGE,
-      $branch->getID(),
-      $where));
-  }
-
   public function render() {
     $request = $this->getDiffusionRequest();
     $repository = $request->getRepository();
@@ -156,69 +62,42 @@ final class DiffusionBrowseTableView extends DiffusionView {
           ));
       }
 
-      $commit = $path->getLastModifiedCommit();
-      if ($commit) {
-        $drequest = clone $request;
-        $drequest->setPath($request->getPath().$path->getPath().$dir_slash);
-        $dict = $this->renderLastModifiedColumns(
-          $drequest,
-          $this->handles,
-          $commit,
-          $path->getLastCommitData());
-      } else {
-        $dict = array(
-          'lint'      => celerity_generate_unique_node_id(),
-          'commit'    => celerity_generate_unique_node_id(),
-          'date'      => celerity_generate_unique_node_id(),
-          'time'      => celerity_generate_unique_node_id(),
-          'author'    => celerity_generate_unique_node_id(),
-          'details'   => celerity_generate_unique_node_id(),
-        );
+      $dict = array(
+        'lint'      => celerity_generate_unique_node_id(),
+        'commit'    => celerity_generate_unique_node_id(),
+        'date'      => celerity_generate_unique_node_id(),
+        'time'      => celerity_generate_unique_node_id(),
+        'author'    => celerity_generate_unique_node_id(),
+        'details'   => celerity_generate_unique_node_id(),
+      );
 
-        $uri = (string)$request->generateURI(
-          array(
-            'action' => 'lastmodified',
-            'path'   => $base_path.$path->getPath().$dir_slash,
-          ));
-
-        $need_pull[$uri] = $dict;
-        foreach ($dict as $k => $uniq) {
-          $dict[$k] = phutil_tag('span', array('id' => $uniq), '');
-        }
-      }
-
-      $editor_button = '';
-      if ($this->user) {
-        $editor_link = $this->user->loadEditorLink(
-          $base_path.$path->getPath(),
-          1,
-          $request->getRepository()->getCallsign());
-        if ($editor_link) {
-          $show_edit = true;
-          $editor_button = phutil_tag(
-            'a',
-            array(
-              'href' => $editor_link,
-            ),
-            pht('Edit'));
-        }
+      $need_pull[$base_path.$path->getPath().$dir_slash] = $dict;
+      foreach ($dict as $k => $uniq) {
+        $dict[$k] = phutil_tag('span', array('id' => $uniq), '');
       }
 
       $rows[] = array(
-        $this->linkHistory($base_path.$path->getPath().$dir_slash),
-        $editor_button,
         $browse_link,
         idx($dict, 'lint'),
         $dict['commit'],
-        $dict['date'],
-        $dict['time'],
         $dict['author'],
         $dict['details'],
+        $dict['date'],
+        $dict['time'],
       );
     }
 
     if ($need_pull) {
-      Javelin::initBehavior('diffusion-pull-lastmodified', $need_pull);
+      Javelin::initBehavior(
+        'diffusion-pull-lastmodified',
+        array(
+          'uri'   => (string)$request->generateURI(
+            array(
+              'action' => 'lastmodified',
+              'stable' => true,
+            )),
+          'map' => $need_pull,
+        ));
     }
 
     $branch = $this->getDiffusionRequest()->loadBranch();
@@ -228,32 +107,26 @@ final class DiffusionBrowseTableView extends DiffusionView {
     $view = new AphrontTableView($rows);
     $view->setHeaders(
       array(
-        pht('History'),
-        pht('Edit'),
         pht('Path'),
         ($lint ? $lint : pht('Lint')),
         pht('Modified'),
-        pht('Date'),
-        pht('Time'),
         pht('Author/Committer'),
         pht('Details'),
+        pht('Date'),
+        pht('Time'),
       ));
     $view->setColumnClasses(
       array(
         '',
-        '',
-        '',
+        'n',
         'n',
         '',
+        'wide',
         '',
         'right',
-        '',
-        'wide',
       ));
     $view->setColumnVisibility(
       array(
-        true,
-        $show_edit,
         true,
         $show_lint,
         true,
@@ -262,6 +135,19 @@ final class DiffusionBrowseTableView extends DiffusionView {
         true,
         true,
       ));
+
+    $view->setDeviceVisibility(
+      array(
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        false,
+      ));
+
+
     return $view->render();
   }
 

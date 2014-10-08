@@ -11,7 +11,7 @@ final class HeraldRuleTransaction
   }
 
   public function getApplicationTransactionType() {
-    return HeraldPHIDTypeRule::TYPECONST;
+    return HeraldRulePHIDType::TYPECONST;
   }
 
   public function getApplicationTransactionCommentObject() {

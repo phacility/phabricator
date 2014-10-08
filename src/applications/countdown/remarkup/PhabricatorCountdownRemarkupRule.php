@@ -1,10 +1,7 @@
 <?php
 
-/**
- * @group countdown
- */
 final class PhabricatorCountdownRemarkupRule
-  extends PhabricatorRemarkupRuleObject {
+  extends PhabricatorObjectRemarkupRule {
 
   protected function getObjectNamePrefix() {
     return 'C';

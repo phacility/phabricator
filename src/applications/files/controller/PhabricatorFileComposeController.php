@@ -38,6 +38,7 @@ final class PhabricatorFileComposeController
           $data,
           array(
             'name' => 'project.png',
+            'canCDN' => true,
           ));
 
         $content = array(

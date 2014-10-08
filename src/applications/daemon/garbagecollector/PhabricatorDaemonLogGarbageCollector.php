@@ -9,14 +9,15 @@ final class PhabricatorDaemonLogGarbageCollector
       return false;
     }
 
-    $table = new PhabricatorDaemonLogEvent();
+    $table = new PhabricatorDaemonLog();
     $conn_w = $table->establishConnection('w');
 
     queryfx(
       $conn_w,
-      'DELETE FROM %T WHERE epoch < %d LIMIT 100',
+      'DELETE FROM %T WHERE dateCreated < %d AND status != %s LIMIT 100',
       $table->getTableName(),
-      time() - $ttl);
+      time() - $ttl,
+      PhabricatorDaemonLog::STATUS_RUNNING);
 
     return ($conn_w->getAffectedRows() == 100);
   }

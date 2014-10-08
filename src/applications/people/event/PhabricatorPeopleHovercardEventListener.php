@@ -37,7 +37,9 @@ final class PhabricatorPeopleHovercardEventListener
       $hovercard->addField(pht('Account'), pht('Disabled'));
     } else if (!$user->isUserActivated()) {
       $hovercard->addField(pht('Account'), pht('Not Activated'));
-    } else {
+    } else if (PhabricatorApplication::isClassInstalledForViewer(
+        'PhabricatorCalendarApplication',
+        $viewer)) {
       $statuses = id(new PhabricatorCalendarEvent())->loadCurrentStatuses(
         array($user->getPHID()));
       if ($statuses) {
@@ -57,7 +59,9 @@ final class PhabricatorPeopleHovercardEventListener
 
     if ($profile->getBlurb()) {
       $hovercard->addField(pht('Blurb'),
-        phutil_utf8_shorten($profile->getBlurb(), 120));
+        id(new PhutilUTF8StringTruncator())
+        ->setMaximumGlyphs(120)
+        ->truncateString($profile->getBlurb()));
     }
 
     $event->setValue('hovercard', $hovercard);

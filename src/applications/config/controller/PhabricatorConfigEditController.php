@@ -24,8 +24,8 @@ final class PhabricatorConfigEditController
           $ancient[$this->key]);
       } else {
         $desc = pht(
-          "This configuration option is unknown. It may be misspelled, ".
-          "or have existed in a previous version of Phabricator.");
+          'This configuration option is unknown. It may be misspelled, '.
+          'or have existed in a previous version of Phabricator.');
       }
 
       // This may be a dead config entry, which existed in the past but no
@@ -112,8 +112,8 @@ final class PhabricatorConfigEditController
         ->setErrors($errors);
     } else if ($option->getHidden()) {
       $msg = pht(
-        "This configuration is hidden and can not be edited or viewed from ".
-        "the web interface.");
+        'This configuration is hidden and can not be edited or viewed from '.
+        'the web interface.');
 
       $error_view = id(new AphrontErrorView())
         ->setTitle(pht('Configuration Hidden'))
@@ -121,8 +121,8 @@ final class PhabricatorConfigEditController
         ->appendChild(phutil_tag('p', array(), $msg));
     } else if ($option->getLocked()) {
       $msg = pht(
-        "This configuration is locked and can not be edited from the web ".
-        "interface. Use `./bin/config` in `phabricator/` to edit it.");
+        'This configuration is locked and can not be edited from the web '.
+        'interface. Use `./bin/config` in `phabricator/` to edit it.');
 
       $error_view = id(new AphrontErrorView())
         ->setTitle(pht('Configuration Locked'))
@@ -234,7 +234,6 @@ final class PhabricatorConfigEditController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

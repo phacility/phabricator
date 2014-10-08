@@ -43,16 +43,14 @@ final class PhrequentUIEventListener
     if (!$tracking) {
       $track_action = id(new PhabricatorActionView())
         ->setName(pht('Start Tracking Time'))
-        ->setIcon('history')
+        ->setIcon('fa-clock-o')
         ->setWorkflow(true)
-        ->setRenderAsForm(true)
         ->setHref('/phrequent/track/start/'.$object->getPHID().'/');
     } else {
       $track_action = id(new PhabricatorActionView())
         ->setName(pht('Stop Tracking Time'))
-        ->setIcon('history')
+        ->setIcon('fa-clock-o red')
         ->setWorkflow(true)
-        ->setRenderAsForm(true)
         ->setHref('/phrequent/track/stop/'.$object->getPHID().'/');
     }
 
@@ -117,19 +115,28 @@ final class PhrequentUIEventListener
 
       switch ($state) {
         case 'active':
-          $item->setIcon('time-green', pht('Working Now'));
+          $item->setIcon(
+            PHUIStatusItemView::ICON_CLOCK,
+            'green',
+            pht('Working Now'));
           break;
         case 'suspended':
-          $item->setIcon('time-yellow', pht('Interrupted'));
+          $item->setIcon(
+            PHUIStatusItemView::ICON_CLOCK,
+            'yellow',
+            pht('Interrupted'));
           break;
         case 'stopped':
-          $item->setIcon('time-orange', pht('Not Working Now'));
+          $item->setIcon(
+            PHUIStatusItemView::ICON_CLOCK,
+            'bluegrey',
+            pht('Not Working Now'));
           break;
       }
 
       $block = new PhrequentTimeBlock($event_group);
       $item->setNote(
-        phabricator_format_relative_time(
+        phutil_format_relative_time(
           $block->getTimeSpentOnObject(
             $object->getPHID(),
             time())));

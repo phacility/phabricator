@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phriction
- */
 final class PhrictionChangeType extends PhrictionConstants {
 
   const CHANGE_EDIT       = 0;

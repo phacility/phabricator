@@ -5,7 +5,7 @@ abstract class DivinerDiskCache {
   private $cache;
 
   public function __construct($cache_directory, $name) {
-    $dir_cache = id(new PhutilKeyValueCacheDirectory())
+    $dir_cache = id(new PhutilDirectoryKeyValueCache())
       ->setCacheDirectory($cache_directory);
     $profiled_cache = id(new PhutilKeyValueCacheProfiler($dir_cache))
       ->setProfiler(PhutilServiceProfiler::getInstance())
@@ -25,7 +25,7 @@ abstract class DivinerDiskCache {
   /**
    * Convert a long-form hash key like `ccbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaN` into
    * a shortened directory form, like `cc/bb/aaaaaaaaN`. In conjunction with
-   * @{class:PhutilKeyValueCacheDirectory}, this gives us nice directories
+   * @{class:PhutilDirectoryKeyValueCache}, this gives us nice directories
    * inside .divinercache instead of a million hash files with huge names at
    * top level.
    */

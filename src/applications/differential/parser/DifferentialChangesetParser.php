@@ -41,6 +41,26 @@ final class DifferentialChangesetParser {
   private $highlightErrors;
   private $disableCache;
   private $renderer;
+  private $characterEncoding;
+  private $highlightAs;
+
+  public function setHighlightAs($highlight_as) {
+    $this->highlightAs = $highlight_as;
+    return $this;
+  }
+
+  public function getHighlightAs() {
+    return $this->highlightAs;
+  }
+
+  public function setCharacterEncoding($character_encoding) {
+    $this->characterEncoding = $character_encoding;
+    return $this;
+  }
+
+  public function getCharacterEncoding() {
+    return $this->characterEncoding;
+  }
 
   public function setRenderer($renderer) {
     $this->renderer = $renderer;
@@ -352,22 +372,27 @@ final class DifferentialChangesetParser {
       return;
     }
 
-    try {
-      $changeset = new DifferentialChangeset();
-      $conn_w = $changeset->establishConnection('w');
+    $changeset = new DifferentialChangeset();
+    $conn_w = $changeset->establishConnection('w');
 
-      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-      queryfx(
-        $conn_w,
-        'INSERT INTO %T (id, cache, dateCreated) VALUES (%d, %s, %d)
-          ON DUPLICATE KEY UPDATE cache = VALUES(cache)',
-        DifferentialChangeset::TABLE_CACHE,
-        $render_cache_key,
-        $cache,
-        time());
-    } catch (AphrontQueryException $ex) {
-      // TODO: uhoh
-    }
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      try {
+        queryfx(
+          $conn_w,
+          'INSERT INTO %T (id, cache, dateCreated) VALUES (%d, %B, %d)
+            ON DUPLICATE KEY UPDATE cache = VALUES(cache)',
+          DifferentialChangeset::TABLE_CACHE,
+          $render_cache_key,
+          $cache,
+          time());
+      } catch (AphrontQueryException $ex) {
+        // Ignore these exceptions. A common cause is that the cache is
+        // larger than 'max_allowed_packet', in which case we're better off
+        // not writing it.
+
+        // TODO: It would be nice to tailor this more narrowly.
+      }
+    unset($unguarded);
   }
 
   private function markGenerated($new_corpus_block = '') {
@@ -425,8 +450,15 @@ final class DifferentialChangesetParser {
   }
 
   private function getHighlightFuture($corpus) {
+    $language = $this->highlightAs;
+
+    if (!$language) {
+      $language = $this->highlightEngine->getLanguageFromFilename(
+        $this->filename);
+    }
+
     return $this->highlightEngine->getHighlightFuture(
-      $this->highlightEngine->getLanguageFromFilename($this->filename),
+      $language,
       $corpus);
   }
 
@@ -455,6 +487,14 @@ final class DifferentialChangesetParser {
 
     $skip_cache = ($whitespace_mode != self::WHITESPACE_IGNORE_ALL);
     if ($this->disableCache) {
+      $skip_cache = true;
+    }
+
+    if ($this->characterEncoding) {
+      $skip_cache = true;
+    }
+
+    if ($this->highlightAs) {
       $skip_cache = true;
     }
 
@@ -558,7 +598,7 @@ final class DifferentialChangesetParser {
     if ($changetype == DifferentialChangeType::TYPE_MOVE_AWAY) {
       // sometimes we show moved files as unchanged, sometimes deleted,
       // and sometimes inconsistent with what actually happened at the
-      // destination of the move.  Rather than make a false claim,
+      // destination of the move. Rather than make a false claim,
       // omit the 'not changed' notice if this is the source of a move
       $unchanged = false;
     }
@@ -650,22 +690,6 @@ final class DifferentialChangesetParser {
       return false;
     }
 
-    $old = $changeset->getOldProperties();
-    $new = $changeset->getNewProperties();
-
-    if ($old === $new) {
-      return false;
-    }
-
-    if ($changeset->getChangeType() == DifferentialChangeType::TYPE_ADD &&
-        $new == array('unix:filemode' => '100644')) {
-      return false;
-    }
-
-    if ($changeset->getChangeType() == DifferentialChangeType::TYPE_DELETE &&
-        $old == array('unix:filemode' => '100644')) {
-      return false;
-    }
     return true;
   }
 
@@ -680,6 +704,25 @@ final class DifferentialChangesetParser {
     // requests.
     $this->isTopLevel = (($range_start === null) && ($range_len === null));
     $this->highlightEngine = PhabricatorSyntaxHighlighter::newEngine();
+
+    $encoding = null;
+    if ($this->characterEncoding) {
+      // We are forcing this changeset to be interpreted with a specific
+      // character encoding, so force all the hunks into that encoding and
+      // propagate it to the renderer.
+      $encoding = $this->characterEncoding;
+      foreach ($this->changeset->getHunks() as $hunk) {
+        $hunk->forceEncoding($this->characterEncoding);
+      }
+    } else {
+      // We're just using the default, so tell the renderer what that is
+      // (by reading the encoding from the first hunk).
+      foreach ($this->changeset->getHunks() as $hunk) {
+        $encoding = $hunk->getDataEncoding();
+        break;
+      }
+    }
+
     $this->tryCacheStuff();
     $render_pch = $this->shouldRenderPropertyChangeHeader($this->changeset);
 
@@ -703,7 +746,8 @@ final class DifferentialChangesetParser {
       ->setMarkupEngine($this->markupEngine)
       ->setHandles($this->handles)
       ->setOldLines($this->old)
-      ->setNewLines($this->new);
+      ->setNewLines($this->new)
+      ->setOriginalCharacterEncoding($encoding);
 
     if ($this->user) {
       $renderer->setUser($this->user);
@@ -867,6 +911,9 @@ final class DifferentialChangesetParser {
           }
         }
 
+        $renderer->attachOldFile($old);
+        $renderer->attachNewFile($new);
+
         return $renderer->renderFileChange($old, $new, $id, $vs);
       case DifferentialChangeType::FILE_DIRECTORY:
       case DifferentialChangeType::FILE_BINARY:
@@ -993,7 +1040,7 @@ final class DifferentialChangesetParser {
     for ($ii = $range_end; $ii >= $range_start; $ii--) {
       // We need to expand tabs to process mixed indenting and to round
       // correctly later.
-      $line = str_replace("\t", "  ", $this->new[$ii]['text']);
+      $line = str_replace("\t", '  ', $this->new[$ii]['text']);
       $trimmed = ltrim($line);
       if ($trimmed != '') {
         // We round down to flatten "/**" and " *".
@@ -1016,18 +1063,18 @@ final class DifferentialChangesetParser {
   private function isCommentVisibleOnRenderedDiff(
     PhabricatorInlineCommentInterface $comment) {
 
-      $changeset_id = $comment->getChangesetID();
-      $is_new = $comment->getIsNewFile();
+    $changeset_id = $comment->getChangesetID();
+    $is_new = $comment->getIsNewFile();
 
-      if ($changeset_id == $this->rightSideChangesetID &&
+    if ($changeset_id == $this->rightSideChangesetID &&
         $is_new == $this->rightSideAttachesToNewFile) {
-          return true;
-        }
+        return true;
+    }
 
-      if ($changeset_id == $this->leftSideChangesetID &&
+    if ($changeset_id == $this->leftSideChangesetID &&
         $is_new == $this->leftSideAttachesToNewFile) {
-          return true;
-        }
+        return true;
+    }
 
     return false;
   }
@@ -1046,7 +1093,7 @@ final class DifferentialChangesetParser {
     PhabricatorInlineCommentInterface $comment) {
 
     if (!$this->isCommentVisibleOnRenderedDiff($comment)) {
-      throw new Exception("Comment is not visible on changeset!");
+      throw new Exception('Comment is not visible on changeset!');
     }
 
     $changeset_id = $comment->getChangesetID();
@@ -1179,6 +1226,16 @@ final class DifferentialChangesetParser {
         $added = array_map('trim', $hunk->getAddedLines());
         for (reset($added); list($line, $code) = each($added); ) {
           if (isset($map[$code])) { // We found a long matching line.
+
+            if (count($map[$code]) > 16) {
+              // If there are a large number of identical lines in this diff,
+              // don't try to figure out where this block came from: the
+              // analysis is O(N^2), since we need to compare every line
+              // against every other line. Even if we arrive at a result, it
+              // is unlikely to be meaningful. See T5041.
+              continue 2;
+            }
+
             $best_length = 0;
             foreach ($map[$code] as $val) { // Explore all candidates.
               list($file, $orig_line) = $val;

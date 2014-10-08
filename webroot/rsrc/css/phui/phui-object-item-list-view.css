@@ -30,16 +30,18 @@
 
 .phui-object-item-list-view .aphront-error-view {
   margin: 4px 0 8px 0;
-  color: {$bluetext};
+  color: {$greytext};
 }
 
 .phui-object-item {
-  background: #ffffff;
   border-style: solid;
   border-color: {$lightgreyborder};
-  border-width: 0 0 0 4px;
   margin: 5px 0;
   overflow: hidden;
+  border-radius: 3px;
+  border-left-width: 6px;
+  background: #fff;
+  margin-bottom: 4px;
 }
 
 .phui-object-item .phui-icon-view {
@@ -49,20 +51,16 @@
 .phui-object-item-frame {
   border-style: solid;
   border-color: {$lightgreyborder};
-  border-bottom-color: {$greyborder};
   border-width: 1px 1px 1px 0;
-  overflow: hidden;
   position: relative;
   min-height: 29px;
-}
-
-.phui-object-list-cards .phui-object-item-frame {
+  overflow: hidden;
   border-bottom-right-radius: 3px;
   border-top-right-radius: 3px;
 }
 
 .device-desktop .phui-object-item {
-  margin: 0 0 5px 0;
+  margin: 0 0 4px 0;
 }
 
 .phui-object-item-name {
@@ -145,7 +143,7 @@
 }
 
 .phui-object-item-actions .phui-list-item-href:hover {
-  background: #e9e9f9;
+  background: {$hoverblue};
 }
 
 .phui-object-item-actions .phui-list-item-icon {
@@ -155,7 +153,7 @@
   display: block;
   top: 50%;
   margin-top: -7px;
-  left: 5px;
+  left: 3px;
 }
 
 .phui-object-item-actions .phui-list-item-name {
@@ -187,16 +185,34 @@
 .phui-object-item-list-view.phui-object-list-stackable
   .phui-object-item {
   margin: -1px 0 0 0;
+  border-radius: 0;
+  border-left-width: 1px;
+  background: #fff;
+}
+
+.phui-object-list-stackable .phui-object-item-frame {
+  border-radius: 0;
 }
 
 .phui-object-list-stackable .phui-object-item {
-  border-left-width: 1px;
 }
 
-.device-desktop .phui-object-list-stackable
-  .phui-object-item:hover {
-  background: #e9ecf5;
+.phui-object-box .phui-object-list-stackable {
+  padding: 0;
 }
+
+.phui-object-box .phui-object-list-stackable .phui-object-item {
+  border: none;
+}
+
+.phui-object-box .phui-object-list-stackable .phui-object-item-frame {
+  border-right: none;
+}
+
+.phui-object-box .phui-object-list-stackable:last-child .phui-object-item-frame {
+  border-bottom: none;
+}
+
 
 /* - Subhead -------------------------------------------------------------------
 
@@ -271,6 +287,10 @@
   background: #fff;
 }
 
+.device-phone .phui-object-item-with-1-actions .phui-object-icon-pane {
+  right: 25px;
+}
+
 .device-desktop .phui-object-item-with-icons
   .phui-object-item-content,
 .device-desktop .phui-object-item-with-handle-icons
@@ -328,6 +348,7 @@
   top: 2px;
   width: 14px;
   height: 14px;
+  font-size: 13px;
 }
 
 
@@ -413,14 +434,18 @@
   background: {$lightyellow};
 }
 
-.phui-object-list-cards
- .phui-object-item.phui-object-item-highlighted {
+.phui-object-item.phui-object-item-highlighted {
   background-image: linear-gradient(to bottom, rgb(253, 255, 221), rgb(243, 245, 206));
   background-image: -webkit-linear-gradient(top, rgb(253, 255, 221), rgb(243, 245, 206));
 }
 
 .phui-object-item-selected {
   background: {$lightblue};
+  border-left-color: {$blue};
+}
+
+.phui-object-item-selected .phui-object-item-frame {
+  border-color: {$blue};
 }
 
 
@@ -446,18 +471,16 @@
   color: #ffffff;
   font-weight: bold;
   margin-right: 3px;
-  padding: 1px 4px 0 22px;
-  height: 19px;
+  padding: 3px 6px 0;
+  height: 17px;
   vertical-align: middle;
   position: relative;
+  font-size: 12px;
+  -webkit-font-smoothing: antialiased;
 }
 
-.phui-object-item-foot-icon .sprite-icons {
-  width: 14px;
-  height: 14px;
-  position: absolute;
-  left: 4px;
-  top: 3px;
+.phui-object-item-foot-icon .phui-icon-view {
+  margin-right: 4px;
 }
 
 
@@ -511,33 +534,6 @@
   font-size: 13px;
 }
 
-/* - Card List -----------------------------------------------------------------
-
-  Rounded card list.
-
-*/
-
-/* Hard to sprite since we can't have other sprites appearing in tall cells */
-.phui-object-list-cards .phui-object-item {
-  border-radius: 3px;
-  border-left-width: 6px;
-  background: #f0f0f0 url('/rsrc/image/texture/card-gradient.png') repeat-x;
-  margin-bottom: 4px;
-}
-
-.phui-object-list-cards .phui-object-item-frame {
-  min-height: 50px;
-}
-
-.phui-object-list-cards .phui-object-item-selected {
-  background: #bfdcff;
-}
-
-.phui-object-list-cards .phui-object-item-selected
-  .phui-object-item-frame {
-  border-color: #99ccff;
-}
-
 
 /* - Draggable List ------------------------------------------------------------
 
@@ -553,13 +549,26 @@
   border-radius: 3px;
 }
 
+.phui-object-list-stackable .drag-ghost {
+  background: {$hoverblue};
+  margin: 0;
+  border-radius: none;
+  border: none;
+  border-top: 1px solid {$lightgreyborder}
+}
+
 .drag-dragging {
   position: relative;
-  opacity: 0.9;
+  opacity: 0.85;
+}
+
+.phui-object-box .phui-object-list-stackable .drag-dragging
+ .phui-object-item-frame {
+  border-bottom: 1px solid {$lightgreyborder};
 }
 
 .drag-sending {
-  opacity: 0.75;
+  opacity: 0.5;
 }
 
 /* - Plain ---------------------------------------------------------------------
@@ -584,19 +593,20 @@
 }
 
 .phui-object-item-image {
-  width: 50px;
-  height: 50px;
-  margin: 4px 4px 4px 4px;
+  width: 40px;
+  height: 40px;
+  background-size: 40px;
+  margin: 4px;
   position: absolute;
   background-color: {$lightbluebackground};
 }
 
 .phui-object-item-with-image .phui-object-item-frame {
-  min-height: 58px;
+  min-height: 48px;
 }
 
 .phui-object-item-with-image .phui-object-item-content-box {
-  margin-left: 54px;
+  margin-left: 44px;
 }
 
 /* - State ---------------------------------------------------------------------
@@ -608,20 +618,30 @@
 .phui-object-item-ficon {
   width: 26px;
   height: 26px;
-  margin: 7px 9px 7px 0;
+  margin: 11px 9px 7px 12px;
   position: absolute;
 }
 
+.device-desktop .phui-object-list-states .phui-object-item {
+  margin: 0;
+}
+
 .phui-object-item-with-ficon .phui-object-item-content-box {
-  margin-left: 24px;
+  margin-left: 38px;
 }
 
 .phui-object-box .phui-object-list-states {
-  padding: 8px 12px 0 12px;
+  padding: 0;
+}
+
+.phui-object-list-states .aphront-error-view {
+  margin: 0;
+  border: none;
 }
 
 .phui-object-box .phui-object-list-states li:last-child .phui-object-item-frame {
   border: none;
+  padding-bottom: 0;
 }
 
 .phui-object-list-states .phui-object-item-frame {
@@ -635,4 +655,101 @@
 
 .phui-object-list-states .phui-object-item-frame {
   min-height: 44px;
+}
+
+/* - Dashboards ------------------------------------------------------------ */
+
+.dashboard-panel .phui-object-item-list-view {
+  padding: 0;
+  border-left: 1px solid {$lightblueborder};
+  border-right: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$blueborder};
+  margin-bottom: -1px;
+}
+
+.dashboard-panel .phui-object-item-list-view .phui-object-item {
+  border-radius: 0;
+  margin: 0;
+  background-image: none;
+  background-color: #fff;
+  border-left-width: 4px;
+}
+
+.dashboard-panel .phui-object-item-frame {
+  border: none;
+  border-bottom: 1px solid {$thinblueborder};
+  border-radius: 0;
+}
+
+.dashboard-panel .phui-object-item-list-header {
+  font-size: 13px;
+  color: {$bluetext};
+  background: {$lightgreybackground};
+  border-bottom: 1px solid {$thinblueborder};
+  padding: 8px 12px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.dashboard-panel .phui-object-item-empty .aphront-error-view {
+  border: none;
+  border-bottom: 1px solid {$thinblueborder};
+}
+
+
+/* - Launcher List ---------------------------------------------------------- */
+
+.launcher-header {
+  margin: 8px 16px -4px;
+  clear: both;
+  color: {$darkbluetext};
+}
+
+.launcher-header:nth-of-type(1) {
+  margin-top: 24px;
+}
+
+.phui-object-item-launcher-list {
+  overflow: hidden;
+}
+
+.device-desktop .phui-object-item-launcher-list .phui-object-item {
+  width: 32.333%;
+  float: left;
+  margin-right: 1%;
+  box-sizing: border-box;
+}
+
+.phui-object-item-image-icon {
+  background: none;
+}
+
+.phui-object-item-image-icon {
+  width: 30px;
+  height: 30px;
+  margin: 4px 4px 4px 4px;
+  position: absolute;
+}
+
+.phui-object-item-image-icon .phui-icon-view {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  left: 6px;
+  top: 6px;
+}
+
+.phui-object-item-with-image-icon .phui-object-item-frame {
+  min-height: 48px;
+}
+
+.phui-object-item-with-image-icon .phui-object-item-content-box {
+  margin-left: 44px;
+}
+
+.device-desktop .phui-object-item-launcher-list .phui-object-item-content {
+  margin-right: 0;
+}
+
+.device-desktop .phui-object-item-launcher-list .phui-object-icon-pane {
+  width: auto;
 }

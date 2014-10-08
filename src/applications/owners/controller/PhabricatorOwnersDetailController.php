@@ -86,7 +86,7 @@ final class PhabricatorOwnersDetailController
           'callsign' => $repo->getCallsign(),
           'branch'   => $repo->getDefaultBranch(),
           'path'     => $path->getPath(),
-          'action'   => 'browse'
+          'action'   => 'browse',
         ));
       $repo_name = phutil_tag('strong', array(), $repo->getName());
       $path_link = phutil_tag(
@@ -224,8 +224,7 @@ final class PhabricatorOwnersDetailController
         $nav,
       ),
       array(
-        'title' => pht("Package %s", $package->getName()),
-        'device' => true,
+        'title' => pht('Package %s', $package->getName()),
       ));
   }
 

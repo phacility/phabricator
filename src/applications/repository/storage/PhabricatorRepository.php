@@ -1,13 +1,16 @@
 <?php
 
 /**
- * @task uri Repository URI Management
+ * @task uri        Repository URI Management
+ * @task autoclose  Autoclose
  */
 final class PhabricatorRepository extends PhabricatorRepositoryDAO
   implements
     PhabricatorPolicyInterface,
     PhabricatorFlaggableInterface,
-    PhabricatorMarkupInterface {
+    PhabricatorMarkupInterface,
+    PhabricatorDestructibleInterface,
+    PhabricatorProjectInterface {
 
   /**
    * Shortest hash we'll recognize in raw "a829f32" form.
@@ -25,10 +28,18 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   const TABLE_SUMMARY = 'repository_summary';
   const TABLE_BADCOMMIT = 'repository_badcommit';
   const TABLE_LINTMESSAGE = 'repository_lintmessage';
+  const TABLE_PARENTS = 'repository_parents';
+  const TABLE_COVERAGE = 'repository_coverage';
 
   const SERVE_OFF = 'off';
   const SERVE_READONLY = 'readonly';
   const SERVE_READWRITE = 'readwrite';
+
+  const BECAUSE_REPOSITORY_IMPORTING = 'auto/importing';
+  const BECAUSE_AUTOCLOSE_DISABLED = 'auto/disabled';
+  const BECAUSE_NOT_ON_AUTOCLOSE_BRANCH = 'auto/nobranch';
+  const BECAUSE_BRANCH_UNTRACKED = 'auto/notrack';
+  const BECAUSE_BRANCH_NOT_AUTOCLOSE = 'auto/noclose';
 
   protected $name;
   protected $callsign;
@@ -48,12 +59,12 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   public static function initializeNewRepository(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
       ->setViewer($actor)
-      ->withClasses(array('PhabricatorApplicationDiffusion'))
+      ->withClasses(array('PhabricatorDiffusionApplication'))
       ->executeOne();
 
-    $view_policy = $app->getPolicy(DiffusionCapabilityDefaultView::CAPABILITY);
-    $edit_policy = $app->getPolicy(DiffusionCapabilityDefaultEdit::CAPABILITY);
-    $push_policy = $app->getPolicy(DiffusionCapabilityDefaultPush::CAPABILITY);
+    $view_policy = $app->getPolicy(DiffusionDefaultViewCapability::CAPABILITY);
+    $edit_policy = $app->getPolicy(DiffusionDefaultEditCapability::CAPABILITY);
+    $push_policy = $app->getPolicy(DiffusionDefaultPushCapability::CAPABILITY);
 
     return id(new PhabricatorRepository())
       ->setViewPolicy($view_policy)
@@ -67,12 +78,37 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       self::CONFIG_SERIALIZATION => array(
         'details' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'name' => 'sort255',
+        'callsign' => 'sort32',
+        'versionControlSystem' => 'text32',
+        'uuid' => 'text64?',
+        'pushPolicy' => 'policy',
+        'credentialPHID' => 'phid?',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_phid' => null,
+        'phid' => array(
+          'columns' => array('phid'),
+          'unique' => true,
+        ),
+        'callsign' => array(
+          'columns' => array('callsign'),
+          'unique' => true,
+        ),
+        'key_name' => array(
+          'columns' => array('name(128)'),
+        ),
+        'key_vcs' => array(
+          'columns' => array('versionControlSystem'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorRepositoryPHIDTypeRepository::TYPECONST);
+      PhabricatorRepositoryRepositoryPHIDType::TYPECONST);
   }
 
   public function toDictionary() {
@@ -174,7 +210,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   public function getSubversionPathURI($path = null, $commit = null) {
     $vcs = $this->getVersionControlSystem();
     if ($vcs != PhabricatorRepositoryType::REPOSITORY_TYPE_SVN) {
-      throw new Exception("Not a subversion repository!");
+      throw new Exception('Not a subversion repository!');
     }
 
     if ($this->isHosted()) {
@@ -370,7 +406,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         $env['HGPLAIN'] = 1;
         break;
       default:
-        throw new Exception("Unrecognized version control system.");
+        throw new Exception('Unrecognized version control system.');
     }
 
     return $env;
@@ -401,7 +437,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
           // command-line flag instead of an environmental variable.
           break;
         default:
-          throw new Exception("Unrecognized version control system.");
+          throw new Exception('Unrecognized version control system.');
       }
     }
 
@@ -455,7 +491,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         }
         break;
       default:
-        throw new Exception("Unrecognized version control system.");
+        throw new Exception('Unrecognized version control system.');
     }
 
     array_unshift($args, $pattern);
@@ -478,7 +514,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         $pattern = "hg {$pattern}";
         break;
       default:
-        throw new Exception("Unrecognized version control system.");
+        throw new Exception('Unrecognized version control system.');
     }
 
     array_unshift($args, $pattern);
@@ -533,7 +569,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
           $uri);
         break;
       default:
-        throw new Exception("Unrecognized version control system.");
+        throw new Exception('Unrecognized version control system.');
     }
 
     return $normalized_uri->getNormalizedPath();
@@ -567,73 +603,51 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     $is_git = ($vcs == PhabricatorRepositoryType::REPOSITORY_TYPE_GIT);
 
     $use_filter = ($is_git);
+    if (!$use_filter) {
+      // If this VCS doesn't use filters, pass everything through.
+      return true;
+    }
 
-    if ($use_filter) {
-      $filter = $this->getDetail($filter_key, array());
-      if ($filter && empty($filter[$branch])) {
-        return false;
+
+    $filter = $this->getDetail($filter_key, array());
+
+    // If there's no filter set, let everything through.
+    if (!$filter) {
+      return true;
+    }
+
+    // If this branch isn't literally named `regexp(...)`, and it's in the
+    // filter list, let it through.
+    if (isset($filter[$branch])) {
+      if (self::extractBranchRegexp($branch) === null) {
+        return true;
       }
     }
 
-    // By default, all branches pass.
-    return true;
+    // If the branch matches a regexp, let it through.
+    foreach ($filter as $pattern => $ignored) {
+      $regexp = self::extractBranchRegexp($pattern);
+      if ($regexp !== null) {
+        if (preg_match($regexp, $branch)) {
+          return true;
+        }
+      }
+    }
+
+    // Nothing matched, so filter this branch out.
+    return false;
+  }
+
+  public static function extractBranchRegexp($pattern) {
+    $matches = null;
+    if (preg_match('/^regexp\\((.*)\\)\z/', $pattern, $matches)) {
+      return $matches[1];
+    }
+    return null;
   }
 
   public function shouldTrackBranch($branch) {
     return $this->isBranchInFilter($branch, 'branch-filter');
-  }
-
-  public function shouldAutocloseBranch($branch) {
-    if ($this->isImporting()) {
-      return false;
-    }
-
-    if ($this->getDetail('disable-autoclose', false)) {
-      return false;
-    }
-
-    if (!$this->shouldTrackBranch($branch)) {
-      return false;
-    }
-
-    return $this->isBranchInFilter($branch, 'close-commits-filter');
-  }
-
-  public function shouldAutocloseCommit(
-    PhabricatorRepositoryCommit $commit,
-    PhabricatorRepositoryCommitData $data) {
-
-    if ($this->getDetail('disable-autoclose', false)) {
-      return false;
-    }
-
-    switch ($this->getVersionControlSystem()) {
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        return true;
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-        break;
-      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-        return true;
-      default:
-        throw new Exception("Unrecognized version control system.");
-    }
-
-    $closeable_flag = PhabricatorRepositoryCommit::IMPORTED_CLOSEABLE;
-    if ($commit->isPartiallyImported($closeable_flag)) {
-      return true;
-    }
-
-    // TODO: Remove this eventually, it's no longer written to by the import
-    // pipeline (however, old tasks may still be queued which don't reflect
-    // the new data format).
-    $branches = $data->getCommitDetail('seenOnBranches', array());
-    foreach ($branches as $branch) {
-      if ($this->shouldAutocloseBranch($branch)) {
-        return true;
-      }
-    }
-
-    return false;
   }
 
   public function formatCommitName($commit_identifier) {
@@ -655,6 +669,125 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   public function isImporting() {
     return (bool)$this->getDetail('importing', false);
+  }
+
+
+/* -(  Autoclose  )---------------------------------------------------------- */
+
+
+  /**
+   * Determine if autoclose is active for a branch.
+   *
+   * For more details about why, use @{method:shouldSkipAutocloseBranch}.
+   *
+   * @param string Branch name to check.
+   * @return bool True if autoclose is active for the branch.
+   * @task autoclose
+   */
+  public function shouldAutocloseBranch($branch) {
+    return ($this->shouldSkipAutocloseBranch($branch) === null);
+  }
+
+  /**
+   * Determine if autoclose is active for a commit.
+   *
+   * For more details about why, use @{method:shouldSkipAutocloseCommit}.
+   *
+   * @param PhabricatorRepositoryCommit Commit to check.
+   * @return bool True if autoclose is active for the commit.
+   * @task autoclose
+   */
+  public function shouldAutocloseCommit(PhabricatorRepositoryCommit $commit) {
+    return ($this->shouldSkipAutocloseCommit($commit) === null);
+  }
+
+
+  /**
+   * Determine why autoclose should be skipped for a branch.
+   *
+   * This method gives a detailed reason why autoclose will be skipped. To
+   * perform a simple test, use @{method:shouldAutocloseBranch}.
+   *
+   * @param string Branch name to check.
+   * @return const|null Constant identifying reason to skip this branch, or null
+   *   if autoclose is active.
+   * @task autoclose
+   */
+  public function shouldSkipAutocloseBranch($branch) {
+    $all_reason = $this->shouldSkipAllAutoclose();
+    if ($all_reason) {
+      return $all_reason;
+    }
+
+    if (!$this->shouldTrackBranch($branch)) {
+      return self::BECAUSE_BRANCH_UNTRACKED;
+    }
+
+    if (!$this->isBranchInFilter($branch, 'close-commits-filter')) {
+      return self::BECAUSE_BRANCH_NOT_AUTOCLOSE;
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Determine why autoclose should be skipped for a commit.
+   *
+   * This method gives a detailed reason why autoclose will be skipped. To
+   * perform a simple test, use @{method:shouldAutocloseCommit}.
+   *
+   * @param PhabricatorRepositoryCommit Commit to check.
+   * @return const|null Constant identifying reason to skip this commit, or null
+   *   if autoclose is active.
+   * @task autoclose
+   */
+  public function shouldSkipAutocloseCommit(
+    PhabricatorRepositoryCommit $commit) {
+
+    $all_reason = $this->shouldSkipAllAutoclose();
+    if ($all_reason) {
+      return $all_reason;
+    }
+
+    switch ($this->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        return null;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        break;
+      default:
+        throw new Exception('Unrecognized version control system.');
+    }
+
+    $closeable_flag = PhabricatorRepositoryCommit::IMPORTED_CLOSEABLE;
+    if (!$commit->isPartiallyImported($closeable_flag)) {
+      return self::BECAUSE_NOT_ON_AUTOCLOSE_BRANCH;
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Determine why all autoclose operations should be skipped for this
+   * repository.
+   *
+   * @return const|null Constant identifying reason to skip all autoclose
+   *   operations, or null if autoclose operations are not blocked at the
+   *   repository level.
+   * @task autoclose
+   */
+  private function shouldSkipAllAutoclose() {
+    if ($this->isImporting()) {
+      return self::BECAUSE_REPOSITORY_IMPORTING;
+    }
+
+    if ($this->getDetail('disable-autoclose', false)) {
+      return self::BECAUSE_AUTOCLOSE_DISABLED;
+    }
+
+    return null;
   }
 
 
@@ -1190,6 +1323,10 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return Filesystem::isDescendant($this->getLocalPath(), $default_path);
   }
 
+  public function canUsePathTree() {
+    return !$this->isSVN();
+  }
+
   public function canMirror() {
     if ($this->isGit() || $this->isHg()) {
       return true;
@@ -1251,6 +1388,129 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return $this;
   }
 
+  public static function getRemoteURIProtocol($raw_uri) {
+    $uri = new PhutilURI($raw_uri);
+    if ($uri->getProtocol()) {
+      return strtolower($uri->getProtocol());
+    }
+
+    $git_uri = new PhutilGitURI($raw_uri);
+    if (strlen($git_uri->getDomain()) && strlen($git_uri->getPath())) {
+      return 'ssh';
+    }
+
+    return null;
+  }
+
+  public static function assertValidRemoteURI($uri) {
+    if (trim($uri) != $uri) {
+      throw new Exception(
+        pht(
+          'The remote URI has leading or trailing whitespace.'));
+    }
+
+    $protocol = self::getRemoteURIProtocol($uri);
+
+    // Catch confusion between Git/SCP-style URIs and normal URIs. See T3619
+    // for discussion. This is usually a user adding "ssh://" to an implicit
+    // SSH Git URI.
+    if ($protocol == 'ssh') {
+      if (preg_match('(^[^:@]+://[^/:]+:[^\d])', $uri)) {
+        throw new Exception(
+          pht(
+            "The remote URI is not formatted correctly. Remote URIs ".
+            "with an explicit protocol should be in the form ".
+            "'proto://domain/path', not 'proto://domain:/path'. ".
+            "The ':/path' syntax is only valid in SCP-style URIs."));
+      }
+    }
+
+    switch ($protocol) {
+      case 'ssh':
+      case 'http':
+      case 'https':
+      case 'git':
+      case 'svn':
+      case 'svn+ssh':
+        break;
+      default:
+        // NOTE: We're explicitly rejecting 'file://' because it can be
+        // used to clone from the working copy of another repository on disk
+        // that you don't normally have permission to access.
+
+        throw new Exception(
+          pht(
+            "The URI protocol is unrecognized. It should begin ".
+            "'ssh://', 'http://', 'https://', 'git://', 'svn://', ".
+            "'svn+ssh://', or be in the form 'git@domain.com:path'."));
+    }
+
+    return true;
+  }
+
+
+  /**
+   * Load the pull frequency for this repository, based on the time since the
+   * last activity.
+   *
+   * We pull rarely used repositories less frequently. This finds the most
+   * recent commit which is older than the current time (which prevents us from
+   * spinning on repositories with a silly commit post-dated to some time in
+   * 2037). We adjust the pull frequency based on when the most recent commit
+   * occurred.
+   *
+   * @param   int   The minimum update interval to use, in seconds.
+   * @return  int   Repository update interval, in seconds.
+   */
+  public function loadUpdateInterval($minimum = 15) {
+    // If a repository is still importing, always pull it as frequently as
+    // possible. This prevents us from hanging for a long time at 99.9% when
+    // importing an inactive repository.
+    if ($this->isImporting()) {
+      return $minimum;
+    }
+
+    $window_start = (PhabricatorTime::getNow() + $minimum);
+
+    $table = id(new PhabricatorRepositoryCommit());
+    $last_commit = queryfx_one(
+      $table->establishConnection('r'),
+      'SELECT epoch FROM %T
+        WHERE repositoryID = %d AND epoch <= %d
+        ORDER BY epoch DESC LIMIT 1',
+      $table->getTableName(),
+      $this->getID(),
+      $window_start);
+    if ($last_commit) {
+      $time_since_commit = ($window_start - $last_commit['epoch']);
+
+      $last_few_days = phutil_units('3 days in seconds');
+
+      if ($time_since_commit <= $last_few_days) {
+        // For repositories with activity in the recent past, we wait one
+        // extra second for every 10 minutes since the last commit. This
+        // shorter backoff is intended to handle weekends and other short
+        // breaks from development.
+        $smart_wait = ($time_since_commit / 600);
+      } else {
+        // For repositories without recent activity, we wait one extra second
+        // for every 4 minutes since the last commit. This longer backoff
+        // handles rarely used repositories, up to the maximum.
+        $smart_wait = ($time_since_commit / 240);
+      }
+
+      // We'll never wait more than 6 hours to pull a repository.
+      $longest_wait = phutil_units('6 hours in seconds');
+      $smart_wait = min($smart_wait, $longest_wait);
+
+      $smart_wait = max($minimum, $smart_wait);
+    } else {
+      $smart_wait = $minimum;
+    }
+
+    return $smart_wait;
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -1259,7 +1519,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
       PhabricatorPolicyCapability::CAN_EDIT,
-      DiffusionCapabilityPush::CAPABILITY,
+      DiffusionPushCapability::CAPABILITY,
     );
   }
 
@@ -1269,7 +1529,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         return $this->getViewPolicy();
       case PhabricatorPolicyCapability::CAN_EDIT:
         return $this->getEditPolicy();
-      case DiffusionCapabilityPush::CAPABILITY:
+      case DiffusionPushCapability::CAPABILITY:
         return $this->getPushPolicy();
     }
   }
@@ -1315,6 +1575,17 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
   public function shouldUseMarkupCache($field) {
     return true;
+  }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+    $this->delete();
+    $this->saveTransaction();
   }
 
 }

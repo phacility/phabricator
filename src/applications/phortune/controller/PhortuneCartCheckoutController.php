@@ -1,0 +1,234 @@
+<?php
+
+final class PhortuneCartCheckoutController
+  extends PhortuneCartController {
+
+  private $id;
+
+  public function willProcessRequest(array $data) {
+    $this->id = $data['id'];
+  }
+
+  public function processRequest() {
+    $request = $this->getRequest();
+    $viewer = $request->getUser();
+
+    $cart = id(new PhortuneCartQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($this->id))
+      ->needPurchases(true)
+      ->executeOne();
+    if (!$cart) {
+      return new Aphront404Response();
+    }
+
+    $cancel_uri = $cart->getCancelURI();
+    $merchant = $cart->getMerchant();
+
+    switch ($cart->getStatus()) {
+      case PhortuneCart::STATUS_BUILDING:
+        return $this->newDialog()
+          ->setTitle(pht('Incomplete Cart'))
+          ->appendParagraph(
+            pht(
+              'The application that created this cart did not finish putting '.
+              'products in it. You can not checkout with an incomplete '.
+              'cart.'))
+          ->addCancelButton($cancel_uri);
+      case PhortuneCart::STATUS_READY:
+        // This is the expected, normal state for a cart that's ready for
+        // checkout.
+        break;
+      case PhortuneCart::STATUS_PURCHASING:
+        // We've started the purchase workflow for this cart, but were not able
+        // to complete it. If the workflow is on an external site, this could
+        // happen because the user abandoned the workflow. Just return them to
+        // the right place so they can resume where they left off.
+        $uri = $cart->getMetadataValue('provider.checkoutURI');
+        if ($uri !== null) {
+          return id(new AphrontRedirectResponse())
+            ->setIsExternal(true)
+            ->setURI($uri);
+        }
+
+        return $this->newDialog()
+          ->setTitle(pht('Charge Failed'))
+          ->appendParagraph(
+            pht(
+              'Failed to charge this cart.'))
+          ->addCancelButton($cancel_uri);
+        break;
+      case PhortuneCart::STATUS_CHARGED:
+        // TODO: This is really bad (we took your money and at least partially
+        // failed to fulfill your order) and should have better steps forward.
+
+        return $this->newDialog()
+          ->setTitle(pht('Purchase Failed'))
+          ->appendParagraph(
+            pht(
+              'This cart was charged but the purchase could not be '.
+              'completed.'))
+          ->addCancelButton($cancel_uri);
+      case PhortuneCart::STATUS_PURCHASED:
+        return id(new AphrontRedirectResponse())->setURI($cart->getDetailURI());
+      default:
+        throw new Exception(
+          pht(
+            'Unknown cart status "%s"!',
+            $cart->getStatus()));
+    }
+
+    $account = $cart->getAccount();
+    $account_uri = $this->getApplicationURI($account->getID().'/');
+
+    $methods = id(new PhortunePaymentMethodQuery())
+      ->setViewer($viewer)
+      ->withAccountPHIDs(array($account->getPHID()))
+      ->withMerchantPHIDs(array($merchant->getPHID()))
+      ->withStatuses(array(PhortunePaymentMethod::STATUS_ACTIVE))
+      ->execute();
+
+    $e_method = null;
+    $errors = array();
+
+    if ($request->isFormPost()) {
+
+      // Require CAN_EDIT on the cart to actually make purchases.
+
+      PhabricatorPolicyFilter::requireCapability(
+        $viewer,
+        $cart,
+        PhabricatorPolicyCapability::CAN_EDIT);
+
+      $method_id = $request->getInt('paymentMethodID');
+      $method = idx($methods, $method_id);
+      if (!$method) {
+        $e_method = pht('Required');
+        $errors[] = pht('You must choose a payment method.');
+      }
+
+      if (!$errors) {
+        $provider = $method->buildPaymentProvider();
+
+        $charge = $cart->willApplyCharge($viewer, $provider, $method);
+        $provider->applyCharge($method, $charge);
+        $cart->didApplyCharge($charge);
+
+        $done_uri = $cart->getDoneURI();
+        return id(new AphrontRedirectResponse())->setURI($done_uri);
+      }
+    }
+
+    $cart_box = $this->buildCartContents($cart);
+    $cart_box->setFormErrors($errors);
+
+    $title = pht('Buy Stuff');
+
+    if (!$methods) {
+      $method_control = id(new AphrontFormStaticControl())
+        ->setLabel(pht('Payment Method'))
+        ->setValue(
+          phutil_tag('em', array(), pht('No payment methods configured.')));
+    } else {
+      $method_control = id(new AphrontFormRadioButtonControl())
+        ->setLabel(pht('Payment Method'))
+        ->setName('paymentMethodID')
+        ->setValue($request->getInt('paymentMethodID'));
+      foreach ($methods as $method) {
+        $method_control->addButton(
+          $method->getID(),
+          $method->getFullDisplayName(),
+          $method->getDescription());
+      }
+    }
+
+    $method_control->setError($e_method);
+
+    $account_id = $account->getID();
+
+    $payment_method_uri = $this->getApplicationURI("{$account_id}/card/new/");
+    $payment_method_uri = new PhutilURI($payment_method_uri);
+    $payment_method_uri->setQueryParams(
+      array(
+        'merchantID' => $merchant->getID(),
+        'cartID' => $cart->getID(),
+      ));
+
+    $form = id(new AphrontFormView())
+      ->setUser($viewer)
+      ->appendChild($method_control);
+
+    $add_providers = $this->loadCreatePaymentMethodProvidersForMerchant(
+      $merchant);
+    if ($add_providers) {
+      $new_method = javelin_tag(
+        'a',
+        array(
+          'class' => 'button grey',
+          'href'  => $payment_method_uri,
+          'sigil' => 'workflow',
+        ),
+        pht('Add New Payment Method'));
+      $form->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setValue($new_method));
+    }
+
+    if ($methods || $add_providers) {
+      $submit = id(new AphrontFormSubmitControl())
+        ->setValue(pht('Submit Payment'))
+        ->setDisabled(!$methods);
+
+      if ($cart->getCancelURI() !== null) {
+        $submit->addCancelButton($cart->getCancelURI());
+      }
+
+      $form->appendChild($submit);
+    }
+
+    $provider_form = null;
+
+    $pay_providers = $this->loadOneTimePaymentProvidersForMerchant($merchant);
+    if ($pay_providers) {
+      $one_time_options = array();
+      foreach ($pay_providers as $provider) {
+        $one_time_options[] = $provider->renderOneTimePaymentButton(
+          $account,
+          $cart,
+          $viewer);
+      }
+
+      $one_time_options = phutil_tag(
+        'div',
+        array(
+          'class' => 'phortune-payment-onetime-list',
+        ),
+        $one_time_options);
+
+      $provider_form = new PHUIFormLayoutView();
+      $provider_form->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setLabel('Pay With')
+          ->setValue($one_time_options));
+    }
+
+    $payment_box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Choose Payment Method'))
+      ->appendChild($form)
+      ->appendChild($provider_form);
+
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb($title);
+
+    return $this->buildApplicationPage(
+      array(
+        $crumbs,
+        $cart_box,
+        $payment_box,
+      ),
+      array(
+        'title'   => $title,
+      ));
+
+  }
+}

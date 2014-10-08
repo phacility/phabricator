@@ -28,8 +28,8 @@ final class PhabricatorRepositoryManagementImportingWorkflow
 
     if (!$repos) {
       throw new PhutilArgumentUsageException(
-        "Specify one or more repositories to find importing commits for, ".
-        "by callsign.");
+        'Specify one or more repositories to find importing commits for, '.
+        'by callsign.');
     }
 
     $repos = mpull($repos, null, 'getID');
@@ -52,7 +52,7 @@ final class PhabricatorRepositoryManagementImportingWorkflow
         $repo = $repos[$row['repositoryID']];
         $identifier = $row['commitIdentifier'];
 
-        $console->writeOut("%s", 'r'.$repo->getCallsign().$identifier);
+        $console->writeOut('%s', 'r'.$repo->getCallsign().$identifier);
 
         if (!$args->getArg('simple')) {
           $status = $row['importStatus'];
@@ -70,7 +70,7 @@ final class PhabricatorRepositoryManagementImportingWorkflow
             $need[] = 'Herald';
           }
 
-          $console->writeOut(" %s", implode(', ', $need));
+          $console->writeOut(' %s', implode(', ', $need));
         }
 
         $console->writeOut("\n");

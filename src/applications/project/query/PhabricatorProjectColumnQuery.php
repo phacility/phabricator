@@ -106,7 +106,7 @@ final class PhabricatorProjectColumnQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationProject';
+    return 'PhabricatorProjectApplication';
   }
 
 }

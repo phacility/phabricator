@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group search
- */
 final class PhabricatorSearchSelectController
   extends PhabricatorSearchBaseController {
 
@@ -34,7 +31,7 @@ final class PhabricatorSearchSelectController
         $query->setParameter('authorPHIDs', array($user->getPHID()));
         // TODO - if / when we allow pholio mocks to be archived, etc
         // update this
-        if ($this->type != PholioPHIDTypeMock::TYPECONST) {
+        if ($this->type != PholioMockPHIDType::TYPECONST) {
           $query->setParameter('statuses', array($status_open));
         }
         break;

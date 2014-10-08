@@ -3,6 +3,14 @@
 final class PhabricatorRepositorySearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Repositories');
+  }
+
+  public function getApplicationClassName() {
+    return 'PhabricatorDiffusionApplication';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 
@@ -98,7 +106,7 @@ final class PhabricatorRepositorySearchEngine
           ->setValue($name))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/projects/')
+          ->setDatasource(new PhabricatorProjectDatasource())
           ->setName('anyProjects')
           ->setLabel(pht('In Any Project'))
           ->setValue($any_project_handles))
@@ -213,6 +221,85 @@ final class PhabricatorRepositorySearchEngine
       'phabricator' => PhabricatorRepositoryQuery::HOSTED_PHABRICATOR,
       'remote' => PhabricatorRepositoryQuery::HOSTED_REMOTE,
     );
+  }
+
+  protected function getRequiredHandlePHIDsForResultList(
+    array $repositories,
+    PhabricatorSavedQuery $query) {
+    return array_mergev(mpull($repositories, 'getProjectPHIDs'));
+  }
+
+  protected function renderResultList(
+    array $repositories,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+    assert_instances_of($repositories, 'PhabricatorRepository');
+
+    $viewer = $this->requireViewer();;
+
+    $list = new PHUIObjectItemListView();
+    foreach ($repositories as $repository) {
+      $id = $repository->getID();
+
+      $item = id(new PHUIObjectItemView())
+        ->setUser($viewer)
+        ->setHeader($repository->getName())
+        ->setObjectName('r'.$repository->getCallsign())
+        ->setHref($this->getApplicationURI($repository->getCallsign().'/'));
+
+      $commit = $repository->getMostRecentCommit();
+      if ($commit) {
+        $commit_link = DiffusionView::linkCommit(
+            $repository,
+            $commit->getCommitIdentifier(),
+            $commit->getSummary());
+        $item->setSubhead($commit_link);
+        $item->setEpoch($commit->getEpoch());
+      }
+
+      $item->addIcon(
+        'none',
+        PhabricatorRepositoryType::getNameForRepositoryType(
+          $repository->getVersionControlSystem()));
+
+      $size = $repository->getCommitCount();
+      if ($size) {
+        $history_uri = DiffusionRequest::generateDiffusionURI(
+          array(
+            'callsign' => $repository->getCallsign(),
+            'action' => 'history',
+          ));
+
+        $item->addAttribute(
+          phutil_tag(
+            'a',
+            array(
+              'href' => $history_uri,
+            ),
+            pht('%s Commit(s)', new PhutilNumber($size))));
+      } else {
+        $item->addAttribute(pht('No Commits'));
+      }
+
+      $project_handles = array_select_keys(
+        $handles,
+        $repository->getProjectPHIDs());
+      if ($project_handles) {
+        $item->addAttribute(
+          id(new PHUIHandleTagListView())
+            ->setSlim(true)
+            ->setHandles($project_handles));
+      }
+
+      if (!$repository->isTracked()) {
+        $item->setDisabled(true);
+        $item->addIcon('disable-grey', pht('Inactive'));
+      }
+
+      $list->addItem($item);
+    }
+
+    return $list;
   }
 
 }

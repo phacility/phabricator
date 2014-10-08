@@ -26,7 +26,8 @@ final class PhabricatorInlineSummaryView extends AphrontView {
       'phabricator-inline-summary',
       array(
         $icon,
-        pht('Inline Comments')));
+        pht('Inline Comments'),
+      ));
     return $header;
   }
 
@@ -101,7 +102,8 @@ final class PhabricatorInlineSummaryView extends AphrontView {
                 'class' => 'inline-summary-content',
                 'colspan' => $colspan,
               ),
-              phutil_tag_div('phabricator-remarkup', $item['content']))));
+              phutil_tag_div('phabricator-remarkup', $item['content'])),
+            ));
       }
     }
 

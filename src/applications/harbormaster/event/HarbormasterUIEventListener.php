@@ -74,35 +74,10 @@ final class HarbormasterUIEventListener
 
       $status = $build->getBuildStatus();
       $status_name = HarbormasterBuild::getBuildStatusName($status);
+      $icon = HarbormasterBuild::getBuildStatusIcon($status);
+      $color = HarbormasterBuild::getBuildStatusColor($status);
 
-      switch ($status) {
-        case HarbormasterBuild::STATUS_INACTIVE:
-          $icon = 'open-dark';
-          break;
-        case HarbormasterBuild::STATUS_PENDING:
-          $icon = 'open-blue';
-          break;
-        case HarbormasterBuild::STATUS_BUILDING:
-          $icon = 'right-blue';
-          break;
-        case HarbormasterBuild::STATUS_PASSED:
-          $icon = 'accept-green';
-          break;
-        case HarbormasterBuild::STATUS_FAILED:
-          $icon = 'reject-red';
-          break;
-        case HarbormasterBuild::STATUS_ERROR:
-          $icon = 'minus-red';
-          break;
-        case HarbormasterBuild::STATUS_STOPPED:
-          $icon = 'minus-dark';
-          break;
-        default:
-          $icon = 'question';
-          break;
-      }
-
-      $item->setIcon($icon, $status_name);
+      $item->setIcon($icon, $color, $status_name);
 
 
       $status_view->addItem($item);

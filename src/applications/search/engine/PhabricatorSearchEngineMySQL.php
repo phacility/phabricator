@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group search
- */
 final class PhabricatorSearchEngineMySQL extends PhabricatorSearchEngine {
 
   public function reindexAbstractDocument(
@@ -10,7 +7,7 @@ final class PhabricatorSearchEngineMySQL extends PhabricatorSearchEngine {
 
     $phid = $doc->getPHID();
     if (!$phid) {
-      throw new Exception("Document has no PHID!");
+      throw new Exception('Document has no PHID!');
     }
 
     $store = new PhabricatorSearchDocument();
@@ -143,7 +140,6 @@ final class PhabricatorSearchEngineMySQL extends PhabricatorSearchEngine {
   }
 
   public function executeSearch(PhabricatorSavedQuery $query) {
-
     $where = array();
     $join  = array();
     $order = 'ORDER BY documentCreated DESC';
@@ -334,6 +330,5 @@ final class PhabricatorSearchEngineMySQL extends PhabricatorSearchEngine {
 
     return $sql;
   }
-
 
 }

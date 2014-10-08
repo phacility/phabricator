@@ -1,13 +1,9 @@
 <?php
 
-/**
- * @group paste
- */
-final class PasteCreateMailReceiver
-  extends PhabricatorMailReceiver {
+final class PasteCreateMailReceiver extends PhabricatorMailReceiver {
 
   public function isEnabled() {
-    $app_class = 'PhabricatorApplicationPaste';
+    $app_class = 'PhabricatorPasteApplication';
     return PhabricatorApplication::isClassInstalled($app_class);
   }
 
@@ -33,31 +29,36 @@ final class PasteCreateMailReceiver
 
     $title = $mail->getSubject();
     if (!$title) {
-      $title = pht('Pasted via email.');
+      $title = pht('Email Paste');
     }
+
+    $file = PhabricatorPasteEditor::initializeFileForPaste(
+      $sender,
+      $title,
+      $mail->getCleanTextBody());
+
     $xactions = array();
+
     $xactions[] = id(new PhabricatorPasteTransaction())
-      ->setTransactionType(PhabricatorPasteTransaction::TYPE_CREATE)
-      ->setNewValue(array(
-        'title' => $title,
-        'text' => $mail->getCleanTextBody()));
+      ->setTransactionType(PhabricatorPasteTransaction::TYPE_CONTENT)
+      ->setNewValue($file->getPHID());
+
     $xactions[] = id(new PhabricatorPasteTransaction())
       ->setTransactionType(PhabricatorPasteTransaction::TYPE_TITLE)
       ->setNewValue($title);
+
     $xactions[] = id(new PhabricatorPasteTransaction())
       ->setTransactionType(PhabricatorPasteTransaction::TYPE_LANGUAGE)
       ->setNewValue(''); // auto-detect
-    $xactions[] = id(new PhabricatorPasteTransaction())
-      ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
-      ->setNewValue(PhabricatorPolicies::POLICY_USER);
 
-    $paste = id(new PhabricatorPaste())
-      ->setAuthorPHID($sender->getPHID());
+    $paste = PhabricatorPaste::initializeNewPaste($sender);
+
     $content_source = PhabricatorContentSource::newForSource(
       PhabricatorContentSource::SOURCE_EMAIL,
       array(
         'id' => $mail->getID(),
       ));
+
     $editor = id(new PhabricatorPasteEditor())
       ->setActor($sender)
       ->setContentSource($content_source)
@@ -82,7 +83,6 @@ final class PasteCreateMailReceiver
       ->setRelatedPHID($paste->getPHID())
       ->setBody($body->render())
       ->saveAndSend();
-
   }
 
 }

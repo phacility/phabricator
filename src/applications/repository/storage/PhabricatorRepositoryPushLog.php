@@ -61,7 +61,8 @@ final class PhabricatorRepositoryPushLog
       PhabricatorRepositoryPushLog::CHANGEFLAG_REWRITE =>
         pht('change rewrites ref'),
       PhabricatorRepositoryPushLog::CHANGEFLAG_DANGEROUS =>
-        pht('dangerous change'));
+        pht('dangerous change'),
+    );
   }
 
   public function getConfiguration() {
@@ -71,12 +72,39 @@ final class PhabricatorRepositoryPushLog
       self::CONFIG_BINARY => array(
         'refNameRaw' => true,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'refType' => 'text12',
+        'refNameHash' => 'bytes12?',
+        'refNameRaw' => 'bytes?',
+        'refNameEncoding' => 'text16?',
+        'refOld' => 'text40?',
+        'refNew' => 'text40',
+        'mergeBase' => 'text40?',
+        'changeFlags' => 'uint32',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_repository' => array(
+          'columns' => array('repositoryPHID'),
+        ),
+        'key_ref' => array(
+          'columns' => array('repositoryPHID', 'refNew'),
+        ),
+        'key_name' => array(
+          'columns' => array('repositoryPHID', 'refNameHash'),
+        ),
+        'key_event' => array(
+          'columns' => array('pushEventPHID'),
+        ),
+        'key_pusher' => array(
+          'columns' => array('pusherPHID'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorRepositoryPHIDTypePushLog::TYPECONST);
+      PhabricatorRepositoryPushLogPHIDType::TYPECONST);
   }
 
   public function attachPushEvent(PhabricatorRepositoryPushEvent $push_event) {

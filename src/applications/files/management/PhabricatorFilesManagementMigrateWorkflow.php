@@ -35,8 +35,8 @@ final class PhabricatorFilesManagementMigrateWorkflow
     $engine_id = $args->getArg('engine');
     if (!$engine_id) {
       throw new PhutilArgumentUsageException(
-        "Specify an engine to migrate to with `--engine`. ".
-        "Use `files engines` to get a list of engines.");
+        'Specify an engine to migrate to with `--engine`. '.
+        'Use `files engines` to get a list of engines.');
     }
 
     $engine = PhabricatorFile::buildEngine($engine_id);
@@ -44,8 +44,8 @@ final class PhabricatorFilesManagementMigrateWorkflow
     $iterator = $this->buildIterator($args);
     if (!$iterator) {
       throw new PhutilArgumentUsageException(
-        "Either specify a list of files to migrate, or use `--all` ".
-        "to migrate all files.");
+        'Either specify a list of files to migrate, or use `--all` '.
+        'to migrate all files.');
     }
 
     $is_dry_run = $args->getArg('dry-run');

@@ -28,6 +28,11 @@ final class PhabricatorApplicationTransactionCommentEditController
       return new Aphront404Response();
     }
 
+    if ($xaction->getComment()->getIsRemoved()) {
+      // You can't edit history of a transaction with a removed comment.
+      return new Aphront400Response();
+    }
+
     $obj_phid = $xaction->getObjectPHID();
     $obj_handle = id(new PhabricatorHandleQuery())
       ->setViewer($user)
@@ -49,10 +54,7 @@ final class PhabricatorApplicationTransactionCommentEditController
         ->applyEdit($xaction, $comment);
 
       if ($request->isAjax()) {
-        return id(new PhabricatorApplicationTransactionResponse())
-          ->setViewer($user)
-          ->setTransactions(array($xaction))
-          ->setAnchorOffset($request->getStr('anchor'));
+        return id(new AphrontAjaxResponse())->setContent(array());
       } else {
         return id(new AphrontReloadResponse())->setURI($obj_handle->getURI());
       }
@@ -60,6 +62,8 @@ final class PhabricatorApplicationTransactionCommentEditController
 
     $dialog = id(new AphrontDialogView())
       ->setUser($user)
+      ->setSubmitURI(
+        $this->getApplicationURI('/transactions/edit/'.$xaction->getPHID().'/'))
       ->setTitle(pht('Edit Comment'));
 
     $dialog
@@ -73,7 +77,7 @@ final class PhabricatorApplicationTransactionCommentEditController
           ->setValue($xaction->getComment()->getContent())));
 
     $dialog
-      ->addSubmitButton(pht('Edit Comment'))
+      ->addSubmitButton(pht('Save Changes'))
       ->addCancelButton($obj_handle->getURI());
 
     return id(new AphrontDialogResponse())->setDialog($dialog);

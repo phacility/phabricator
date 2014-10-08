@@ -59,7 +59,7 @@ Other options include:
     @{class@arcanist:ArcanistLintEngine}, which should be used to apply lint
     rules to this project. See @{article:Arcanist User Guide: Lint}.
   - **unit.engine**: the name of a subclass of
-    @{class@arcanist:ArcanistBaseUnitTestEngine}, which should be used to apply
+    @{class@arcanist:ArcanistUnitTestEngine}, which should be used to apply
     unit test rules to this project. See
     @{article:Arcanist User Guide: Customizing Lint, Unit Tests and Workflows}.
 
@@ -74,7 +74,7 @@ These options are supported, but their use is discouraged:
     solution to certificate validity problems, and is discouraged. Instead,
     use valid certificates.
 
-For a complete list of options, run `arc set-config --show`. Although all
+For a complete list of options, run `arc get-config`. Although all
 options can be set in `.arcconfig`, some options (like `editor`) usually do not
 make sense to set here because they're likely to vary from user to user.
 
@@ -149,7 +149,7 @@ relative path like this:
 ...arc looks for it by trying these paths:
 
   - `path/to/root/examplelib/src/` First, arc looks in the project's root
-    directory (where the .arcconfig lives) to see if the library is part of
+    directory (where the `.arcconfig` lives) to see if the library is part of
     the project. This makes it easy to just put project-specific code in a
     project.
   - `path/to/root/../examplelib/src/` Next, arc looks //next to// the project's

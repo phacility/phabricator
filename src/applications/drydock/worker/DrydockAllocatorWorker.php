@@ -4,6 +4,10 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
 
   private $lease;
 
+  public function getRequiredLeaseTime() {
+    return 3600 * 24;
+  }
+
   public function getMaximumRetryCount() {
     // TODO: Allow Drydock allocations to retry. For now, every failure is
     // permanent and most of them are because I am bad at programming, so fail
@@ -19,7 +23,7 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
         ->executeOne();
       if (!$lease) {
         throw new PhabricatorWorkerPermanentFailureException(
-          pht("No such lease %d!", $this->getTaskData()));
+          pht('No such lease %d!', $this->getTaskData()));
       }
       $this->lease = $lease;
     }
@@ -170,7 +174,7 @@ final class DrydockAllocatorWorker extends PhabricatorWorker {
         // and then switch them to "OPEN" only after the allocating lease gets
         // its grubby mitts on the resource. This might make more sense but
         // is a bit messy.
-        throw new Exception("Lost an allocation race?");
+        throw new Exception('Lost an allocation race?');
       }
     }
 

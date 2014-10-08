@@ -45,7 +45,7 @@ final class PhabricatorTokenQuery
       array('misc-4', pht('The World Burns')),
     );
 
-    $type = PhabricatorTokenPHIDTypeToken::TYPECONST;
+    $type = PhabricatorTokenTokenPHIDType::TYPECONST;
 
     $tokens = array();
     foreach ($specs as $id => $spec) {
@@ -63,7 +63,7 @@ final class PhabricatorTokenQuery
 
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationTokens';
+    return 'PhabricatorTokensApplication';
   }
 
 }

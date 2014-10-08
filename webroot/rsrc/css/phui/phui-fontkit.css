@@ -9,7 +9,7 @@
   line-height: 20px;
 }
 
-.phui-font-source-sans .phabricator-remarkup h2 {
+.phui-font-source-sans .phabricator-remarkup h2.remarkup-header {
   padding: 8px 24px 8px 0;
   border-bottom: 1px solid {$thinblueborder};
   font-size: 20px;
@@ -18,21 +18,49 @@
   margin: 0 0 16px;
 }
 
-.phui-font-source-sans .phabricator-remarkup tt {
+.phui-font-source-sans .phabricator-remarkup ol li.remarkup-list-item,
+.phui-font-source-sans .phabricator-remarkup ul li.remarkup-list-item {
+  margin-bottom: 4px;
+}
+
+.phui-font-source-sans .phabricator-remarkup tt.remarkup-monospaced {
   font-size: 13px;
   padding: 1px 3px 2px;
 }
 
-.phui-font-source-sans .phui-property-list-section {
+.diviner-view .phui-font-source-sans .phui-property-list-section,
+.legalpad .phui-font-source-sans .phui-property-list-section {
   border-bottom: 1px solid {$thinblueborder};
   margin-bottom: 8px;
   background: {$lightgreybackground};
 }
 
-.phui-font-source-sans .phui-property-list-container {
-  padding-bottom: 6px;
+.phui-font-source-sans .phui-property-list-text-content {
+  background: {$lightgreybackground};
+  padding: 0;
 }
 
-.phui-font-source-sans a {
+.phui-font-source-sans .phui-property-list-container {
+  padding-bottom: 6px;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 13px;
+  line-height: 16px;
+}
+
+.phui-font-source-sans .phabricator-action-view {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+}
+
+.phui-font-source-sans a.remarkup-link {
   color: {$blue};
+}
+
+body .phui-font-source-sans
+  .phui-header-shell.phui-bleed-header .phui-header-view {
+  font-size: 18px;
+}
+
+.phui-font-source-sans .phui-form-view {
+  font: 13px/1.231 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-weight: normal;
 }

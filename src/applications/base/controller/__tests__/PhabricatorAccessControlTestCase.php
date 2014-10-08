@@ -1,7 +1,6 @@
 <?php
 
-final class PhabricatorAccessControlTestCase
-  extends PhabricatorTestCase {
+final class PhabricatorAccessControlTestCase extends PhabricatorTestCase {
 
   protected function getPhabricatorTestCaseConfiguration() {
     return array(
@@ -57,12 +56,13 @@ final class PhabricatorAccessControlTestCase
     $env->overrideEnvConfig('policy.allow-public', false);
     $env->overrideEnvConfig('auth.require-email-verification', false);
     $env->overrideEnvConfig('auth.email-domains', array());
+    $env->overrideEnvConfig('security.require-multi-factor-auth', false);
 
 
     // Test standard defaults.
 
     $this->checkAccess(
-      "Default",
+      'Default',
       id(clone $controller),
       $request,
       array(
@@ -81,7 +81,7 @@ final class PhabricatorAccessControlTestCase
 
     $env->overrideEnvConfig('auth.require-email-verification', true);
     $this->checkAccess(
-      "Email Verification Required",
+      'Email Verification Required',
       id(clone $controller),
       $request,
       array(
@@ -96,7 +96,7 @@ final class PhabricatorAccessControlTestCase
       ));
 
     $this->checkAccess(
-      "Email Verification Required, With Exception",
+      'Email Verification Required, With Exception',
       id(clone $controller)->setConfig('email', false),
       $request,
       array(
@@ -115,7 +115,7 @@ final class PhabricatorAccessControlTestCase
     // Test admin access.
 
     $this->checkAccess(
-      "Admin Required",
+      'Admin Required',
       id(clone $controller)->setConfig('admin', true),
       $request,
       array(
@@ -133,7 +133,7 @@ final class PhabricatorAccessControlTestCase
     // Test disabled access.
 
     $this->checkAccess(
-      "Allow Disabled",
+      'Allow Disabled',
       id(clone $controller)->setConfig('enabled', false),
       $request,
       array(
@@ -151,7 +151,7 @@ final class PhabricatorAccessControlTestCase
     // Test no login required.
 
     $this->checkAccess(
-      "No Login Required",
+      'No Login Required',
       id(clone $controller)->setConfig('login', false),
       $request,
       array(
@@ -169,7 +169,7 @@ final class PhabricatorAccessControlTestCase
     // Test public access.
 
     $this->checkAccess(
-      "No Login Required",
+      'No Login Required',
       id(clone $controller)->setConfig('public', true),
       $request,
       array(
@@ -184,7 +184,7 @@ final class PhabricatorAccessControlTestCase
 
     $env->overrideEnvConfig('policy.allow-public', true);
     $this->checkAccess(
-      "Public + configured",
+      'Public + configured',
       id(clone $controller)->setConfig('public', true),
       $request,
       array(
@@ -200,7 +200,7 @@ final class PhabricatorAccessControlTestCase
     $env->overrideEnvConfig('policy.allow-public', false);
 
 
-    $app = PhabricatorApplication::getByClass('PhabricatorApplicationTest');
+    $app = PhabricatorApplication::getByClass('PhabricatorTestApplication');
     $app->reset();
     $app->setPolicy(
       PhabricatorPolicyCapability::CAN_VIEW,
@@ -209,7 +209,7 @@ final class PhabricatorAccessControlTestCase
     $app_controller = id(clone $controller)->setCurrentApplication($app);
 
     $this->checkAccess(
-      "Application Controller",
+      'Application Controller',
       $app_controller,
       $request,
       array(
@@ -224,7 +224,7 @@ final class PhabricatorAccessControlTestCase
       ));
 
     $this->checkAccess(
-      "Application Controller",
+      'Application Controller',
       id(clone $app_controller)->setConfig('login', false),
       $request,
       array(

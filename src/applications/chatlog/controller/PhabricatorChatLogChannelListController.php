@@ -36,7 +36,6 @@ final class PhabricatorChatLogChannelListController
       ),
       array(
         'title' => pht('Channel List'),
-        'device' => true,
       ));
   }
 }

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group file
- */
 final class PhabricatorFileTransaction
   extends PhabricatorApplicationTransaction {
 
@@ -11,7 +8,7 @@ final class PhabricatorFileTransaction
   }
 
   public function getApplicationTransactionType() {
-    return PhabricatorFilePHIDTypeFile::TYPECONST;
+    return PhabricatorFileFilePHIDType::TYPECONST;
   }
 
   public function getApplicationTransactionCommentObject() {

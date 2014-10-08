@@ -1,10 +1,7 @@
 <?php
 
-/**
- * @group oauthserver
- */
 final class PhabricatorOAuthServerAuthController
-extends PhabricatorAuthController {
+  extends PhabricatorAuthController {
 
   public function shouldRequireLogin() {
     return true;
@@ -199,7 +196,7 @@ extends PhabricatorAuthController {
     } else {
       $desired_scopes = array(
         PhabricatorOAuthServerScope::SCOPE_WHOAMI         => 1,
-        PhabricatorOAuthServerScope::SCOPE_OFFLINE_ACCESS => 1
+        PhabricatorOAuthServerScope::SCOPE_OFFLINE_ACCESS => 1,
       );
     }
 

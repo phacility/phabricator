@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 final class PhabricatorConduitAPIController
   extends PhabricatorConduitController {
 
@@ -107,7 +104,9 @@ final class PhabricatorConduitAPIController
         list($error_code, $error_info) = $auth_error;
       }
     } catch (Exception $ex) {
-      phlog($ex);
+      if (!($ex instanceof ConduitMethodNotFoundException)) {
+        phlog($ex);
+      }
       $result = null;
       $error_code = ($ex instanceof ConduitException
         ? 'ERR-CONDUIT-CALL'
@@ -167,8 +166,13 @@ final class PhabricatorConduitAPIController
     ConduitAPIRequest $api_request,
     $user_name) {
 
+    $config_key = 'security.allow-conduit-act-as-user';
+    if (!PhabricatorEnv::getEnvConfig($config_key)) {
+      throw new Exception('security.allow-conduit-act-as-user is disabled');
+    }
+
     if (!$api_request->getUser()->getIsAdmin()) {
-      throw new Exception("Only administrators can use actAsUser");
+      throw new Exception('Only administrators can use actAsUser');
     }
 
     $user = id(new PhabricatorUser())->loadOneWhere(
@@ -275,7 +279,7 @@ final class PhabricatorConduitAPIController
     if (!$session_key) {
       return array(
         'ERR-INVALID-SESSION',
-        'Session key is not present.'
+        'Session key is not present.',
       );
     }
 
@@ -379,7 +383,6 @@ final class PhabricatorConduitAPIController
       ),
       array(
         'title' => 'Method Call Result',
-        'device' => true,
       ));
   }
 
@@ -468,4 +471,5 @@ final class PhabricatorConduitAPIController
 
     return $params;
   }
+
 }

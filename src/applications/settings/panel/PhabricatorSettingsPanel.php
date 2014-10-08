@@ -12,13 +12,13 @@
  * @task config   Panel Configuration
  * @task panel    Panel Implementation
  * @task internal Internals
- *
- * @group settings
  */
 abstract class PhabricatorSettingsPanel {
 
   private $user;
   private $viewer;
+  private $overrideURI;
+
 
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
@@ -36,6 +36,11 @@ abstract class PhabricatorSettingsPanel {
 
   public function getViewer() {
     return $this->viewer;
+  }
+
+  public function setOverrideURI($override_uri) {
+    $this->overrideURI = $override_uri;
+    return $this;
   }
 
 
@@ -148,10 +153,14 @@ abstract class PhabricatorSettingsPanel {
    * @task panel
    */
   final public function getPanelURI($path = '') {
+    $path = ltrim($path, '/');
+
+    if ($this->overrideURI) {
+      return rtrim($this->overrideURI, '/').'/'.$path;
+    }
+
     $key = $this->getPanelKey();
     $key = phutil_escape_uri($key);
-
-    $path = ltrim($path, '/');
 
     if ($this->getUser()->getPHID() != $this->getViewer()->getPHID()) {
       $user_id = $this->getUser()->getID();

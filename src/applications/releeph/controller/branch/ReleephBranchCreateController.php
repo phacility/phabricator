@@ -126,7 +126,6 @@ final class ReleephBranchCreateController extends ReleephProductController {
       ),
       array(
         'title' => pht('New Branch'),
-        'device' => true,
       ));
   }
 }

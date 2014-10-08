@@ -3,6 +3,14 @@
 final class PassphraseCredentialSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  public function getResultTypeDescription() {
+    return pht('Passphrase Credentials');
+  }
+
+  public function getApplicationClassName() {
+    return 'PhabricatorPassphraseApplication';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 
@@ -39,7 +47,6 @@ final class PassphraseCredentialSearchEngine
             'false' => pht('Show Only Active Credentials'),
             'true' => pht('Show Only Destroyed Credentials'),
           )));
-
   }
 
   protected function getURI($path) {
@@ -47,16 +54,13 @@ final class PassphraseCredentialSearchEngine
   }
 
   public function getBuiltinQueryNames() {
-    $names = array(
+    return array(
       'active' => pht('Active Credentials'),
       'all' => pht('All Credentials'),
     );
-
-    return $names;
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
-
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
 
@@ -68,6 +72,44 @@ final class PassphraseCredentialSearchEngine
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
+  }
+
+  protected function renderResultList(
+    array $credentials,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+    assert_instances_of($credentials, 'PassphraseCredential');
+
+    $viewer = $this->requireViewer();
+
+    $list = new PHUIObjectItemListView();
+    $list->setUser($viewer);
+    foreach ($credentials as $credential) {
+
+      $item = id(new PHUIObjectItemView())
+        ->setObjectName('K'.$credential->getID())
+        ->setHeader($credential->getName())
+        ->setHref('/K'.$credential->getID())
+        ->setObject($credential);
+
+      $item->addAttribute(
+        pht('Login: %s', $credential->getUsername()));
+
+      if ($credential->getIsDestroyed()) {
+        $item->addIcon('fa-ban', pht('Destroyed'));
+        $item->setDisabled(true);
+      }
+
+      $type = PassphraseCredentialType::getTypeByConstant(
+        $credential->getCredentialType());
+      if ($type) {
+        $item->addIcon('fa-wrench', $type->getCredentialTypeName());
+      }
+
+      $list->addItem($item);
+    }
+
+    return $list;
   }
 
 }

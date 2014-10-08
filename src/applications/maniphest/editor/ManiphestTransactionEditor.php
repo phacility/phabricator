@@ -5,20 +5,30 @@ final class ManiphestTransactionEditor
 
   private $heraldEmailPHIDs = array();
 
+  public function getEditorApplicationClass() {
+    return 'PhabricatorManiphestApplication';
+  }
+
+  public function getEditorObjectsDescription() {
+    return pht('Maniphest Tasks');
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
+    $types[] = PhabricatorTransactions::TYPE_EDGE;
     $types[] = ManiphestTransaction::TYPE_PRIORITY;
     $types[] = ManiphestTransaction::TYPE_STATUS;
     $types[] = ManiphestTransaction::TYPE_TITLE;
     $types[] = ManiphestTransaction::TYPE_DESCRIPTION;
     $types[] = ManiphestTransaction::TYPE_OWNER;
     $types[] = ManiphestTransaction::TYPE_CCS;
-    $types[] = ManiphestTransaction::TYPE_PROJECTS;
-    $types[] = ManiphestTransaction::TYPE_EDGE;
     $types[] = ManiphestTransaction::TYPE_SUBPRIORITY;
     $types[] = ManiphestTransaction::TYPE_PROJECT_COLUMN;
+    $types[] = ManiphestTransaction::TYPE_MERGED_INTO;
+    $types[] = ManiphestTransaction::TYPE_MERGED_FROM;
+    $types[] = ManiphestTransaction::TYPE_UNBLOCK;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
@@ -54,16 +64,15 @@ final class ManiphestTransactionEditor
         return nonempty($object->getOwnerPHID(), null);
       case ManiphestTransaction::TYPE_CCS:
         return array_values(array_unique($object->getCCPHIDs()));
-      case ManiphestTransaction::TYPE_PROJECTS:
-        return array_values(array_unique($object->getProjectPHIDs()));
-      case ManiphestTransaction::TYPE_EDGE:
       case ManiphestTransaction::TYPE_PROJECT_COLUMN:
         // These are pre-populated.
         return $xaction->getOldValue();
       case ManiphestTransaction::TYPE_SUBPRIORITY:
         return $object->getSubpriority();
+      case ManiphestTransaction::TYPE_MERGED_INTO:
+      case ManiphestTransaction::TYPE_MERGED_FROM:
+        return null;
     }
-
   }
 
   protected function getCustomTransactionNewValue(
@@ -74,20 +83,20 @@ final class ManiphestTransactionEditor
       case ManiphestTransaction::TYPE_PRIORITY:
         return (int)$xaction->getNewValue();
       case ManiphestTransaction::TYPE_CCS:
-      case ManiphestTransaction::TYPE_PROJECTS:
         return array_values(array_unique($xaction->getNewValue()));
       case ManiphestTransaction::TYPE_OWNER:
         return nonempty($xaction->getNewValue(), null);
       case ManiphestTransaction::TYPE_STATUS:
       case ManiphestTransaction::TYPE_TITLE:
       case ManiphestTransaction::TYPE_DESCRIPTION:
-      case ManiphestTransaction::TYPE_EDGE:
       case ManiphestTransaction::TYPE_SUBPRIORITY:
       case ManiphestTransaction::TYPE_PROJECT_COLUMN:
+      case ManiphestTransaction::TYPE_MERGED_INTO:
+      case ManiphestTransaction::TYPE_MERGED_FROM:
+      case ManiphestTransaction::TYPE_UNBLOCK:
         return $xaction->getNewValue();
     }
   }
-
 
   protected function transactionHasEffect(
     PhabricatorLiskDAO $object,
@@ -97,7 +106,6 @@ final class ManiphestTransactionEditor
     $new = $xaction->getNewValue();
 
     switch ($xaction->getTransactionType()) {
-      case ManiphestTransaction::TYPE_PROJECTS:
       case ManiphestTransaction::TYPE_CCS:
         sort($old);
         sort($new);
@@ -149,12 +157,6 @@ final class ManiphestTransactionEditor
         return $object->setOwnerPHID($phid);
       case ManiphestTransaction::TYPE_CCS:
         return $object->setCCPHIDs($xaction->getNewValue());
-      case ManiphestTransaction::TYPE_PROJECTS:
-        return $object->setProjectPHIDs($xaction->getNewValue());
-      case ManiphestTransaction::TYPE_EDGE:
-        // These are a weird, funky mess and are already being applied by the
-        // time we reach this.
-        return;
       case ManiphestTransaction::TYPE_SUBPRIORITY:
         $data = $xaction->getNewValue();
         $new_sub = $this->getNextSubpriority(
@@ -166,8 +168,12 @@ final class ManiphestTransactionEditor
       case ManiphestTransaction::TYPE_PROJECT_COLUMN:
         // these do external (edge) updates
         return;
+      case ManiphestTransaction::TYPE_MERGED_INTO:
+        $object->setStatus(ManiphestTaskStatus::getDuplicateStatus());
+        return;
+      case ManiphestTransaction::TYPE_MERGED_FROM:
+        return;
     }
-
   }
 
   protected function expandTransaction(
@@ -198,50 +204,207 @@ final class ManiphestTransactionEditor
 
     switch ($xaction->getTransactionType()) {
       case ManiphestTransaction::TYPE_PROJECT_COLUMN:
-        $new = $xaction->getNewValue();
-        $old = $xaction->getOldValue();
-        $src = $object->getPHID();
-        $dst = head($new['columnPHIDs']);
-        $edges = $old['columnPHIDs'];
-        $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_COLUMN;
-        // NOTE: Normally, we expect only one edge to exist, but this works in
-        // a general way so it will repair any stray edges.
-        $remove = array();
-        $edge_missing = true;
-        foreach ($edges as $phid) {
-          if ($phid == $dst) {
-            $edge_missing = false;
-          } else {
-            $remove[] = $phid;
-          }
+        $board_phid = idx($xaction->getNewValue(), 'projectPHID');
+        if (!$board_phid) {
+          throw new Exception(
+            pht("Expected 'projectPHID' in column transaction."));
         }
 
-        $add = array();
-        if ($edge_missing) {
-          $add[] = $dst;
+        $old_phids = idx($xaction->getOldValue(), 'columnPHIDs', array());
+        $new_phids = idx($xaction->getNewValue(), 'columnPHIDs', array());
+        if (count($new_phids) !== 1) {
+          throw new Exception(
+            pht("Expected exactly one 'columnPHIDs' in column transaction."));
         }
 
-        // This should never happen because of the code in
-        // transactionHasEffect, but keep it for maximum conservativeness
-        if (!$add && !$remove) {
+        $columns = id(new PhabricatorProjectColumnQuery())
+          ->setViewer($this->requireActor())
+          ->withPHIDs($new_phids)
+          ->execute();
+        $columns = mpull($columns, null, 'getPHID');
+
+        $positions = id(new PhabricatorProjectColumnPositionQuery())
+          ->setViewer($this->requireActor())
+          ->withObjectPHIDs(array($object->getPHID()))
+          ->withBoardPHIDs(array($board_phid))
+          ->execute();
+
+        $before_phid = idx($xaction->getNewValue(), 'beforePHID');
+        $after_phid = idx($xaction->getNewValue(), 'afterPHID');
+
+        if (!$before_phid && !$after_phid && ($old_phids == $new_phids)) {
+          // If we are not moving the object between columns and also not
+          // reordering the position, this is a move on some other order
+          // (like priority). We can leave the positions untouched and just
+          // bail, there's no work to be done.
           return;
         }
 
-        $editor = id(new PhabricatorEdgeEditor())
-          ->setActor($this->getActor())
-          ->setSuppressEvents(true);
+        // Otherwise, we're either moving between columns or adjusting the
+        // object's position in the "natural" ordering, so we do need to update
+        // some rows.
 
-        foreach ($add as $phid) {
-          $editor->addEdge($src, $edge_type, $phid);
+        // Remove all existing column positions on the board.
+
+        foreach ($positions as $position) {
+          $position->delete();
         }
-        foreach ($remove as $phid) {
-          $editor->removeEdge($src, $edge_type, $phid);
+
+        // Add the new column positions.
+
+        foreach ($new_phids as $phid) {
+          $column = idx($columns, $phid);
+          if (!$column) {
+            throw new Exception(
+              pht('No such column "%s" exists!', $phid));
+          }
+
+          // Load the other object positions in the column. Note that we must
+          // skip implicit column creation to avoid generating a new position
+          // if the target column is a backlog column.
+
+          $other_positions = id(new PhabricatorProjectColumnPositionQuery())
+            ->setViewer($this->requireActor())
+            ->withColumns(array($column))
+            ->withBoardPHIDs(array($board_phid))
+            ->setSkipImplicitCreate(true)
+            ->execute();
+          $other_positions = msort($other_positions, 'getOrderingKey');
+
+          // Set up the new position object. We're going to figure out the
+          // right sequence number and then persist this object with that
+          // sequence number.
+          $new_position = id(new PhabricatorProjectColumnPosition())
+            ->setBoardPHID($board_phid)
+            ->setColumnPHID($column->getPHID())
+            ->setObjectPHID($object->getPHID());
+
+          $updates = array();
+          $sequence = 0;
+
+          // If we're just dropping this into the column without any specific
+          // position information, put it at the top.
+          if (!$before_phid && !$after_phid) {
+            $new_position->setSequence($sequence)->save();
+            $sequence++;
+          }
+
+          foreach ($other_positions as $position) {
+            $object_phid = $position->getObjectPHID();
+
+            // If this is the object we're moving before and we haven't
+            // saved yet, insert here.
+            if (($before_phid == $object_phid) && !$new_position->getID()) {
+              $new_position->setSequence($sequence)->save();
+              $sequence++;
+            }
+
+            // This object goes here in the sequence; we might need to update
+            // the row.
+            if ($sequence != $position->getSequence()) {
+              $updates[$position->getID()] = $sequence;
+            }
+            $sequence++;
+
+            // If this is the object we're moving after and we haven't saved
+            // yet, insert here.
+            if (($after_phid == $object_phid) && !$new_position->getID()) {
+              $new_position->setSequence($sequence)->save();
+              $sequence++;
+            }
+          }
+
+          // We should have found a place to put it.
+          if (!$new_position->getID()) {
+            throw new Exception(
+              pht('Unable to find a place to insert object on column!'));
+          }
+
+          // If we changed other objects' column positions, bulk reorder them.
+
+          if ($updates) {
+            $position = new PhabricatorProjectColumnPosition();
+            $conn_w = $position->establishConnection('w');
+
+            $pairs = array();
+            foreach ($updates as $id => $sequence) {
+              // This is ugly because MySQL gets upset with us if it is
+              // configured strictly and we attempt inserts which can't work.
+              // We'll never actually do these inserts since they'll always
+              // collide (triggering the ON DUPLICATE KEY logic), so we just
+              // provide dummy values in order to get there.
+
+              $pairs[] = qsprintf(
+                $conn_w,
+                '(%d, %d, "", "", "")',
+                $id,
+                $sequence);
+            }
+
+            queryfx(
+              $conn_w,
+              'INSERT INTO %T (id, sequence, boardPHID, columnPHID, objectPHID)
+                VALUES %Q ON DUPLICATE KEY UPDATE sequence = VALUES(sequence)',
+              $position->getTableName(),
+              implode(', ', $pairs));
+          }
         }
-        $editor->save();
         break;
       default:
         break;
     }
+  }
+
+  protected function applyFinalEffects(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    // When we change the status of a task, update tasks this tasks blocks
+    // with a message to the effect of "alincoln resolved blocking task Txxx."
+    $unblock_xaction = null;
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case ManiphestTransaction::TYPE_STATUS:
+          $unblock_xaction = $xaction;
+          break;
+      }
+    }
+
+    if ($unblock_xaction !== null) {
+      $blocked_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+        $object->getPHID(),
+        PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK);
+      if ($blocked_phids) {
+        // In theory we could apply these through policies, but that seems a
+        // little bit surprising. For now, use the actor's vision.
+        $blocked_tasks = id(new ManiphestTaskQuery())
+          ->setViewer($this->getActor())
+          ->withPHIDs($blocked_phids)
+          ->execute();
+
+        $old = $unblock_xaction->getOldValue();
+        $new = $unblock_xaction->getNewValue();
+
+        foreach ($blocked_tasks as $blocked_task) {
+          $unblock_xactions = array();
+
+          $unblock_xactions[] = id(new ManiphestTransaction())
+            ->setTransactionType(ManiphestTransaction::TYPE_UNBLOCK)
+            ->setOldValue(array($object->getPHID() => $old))
+            ->setNewValue(array($object->getPHID() => $new));
+
+          id(new ManiphestTransactionEditor())
+            ->setActor($this->getActor())
+            ->setActingAsPHID($this->getActingAsPHID())
+            ->setContentSource($this->getContentSource())
+            ->setContinueOnNoEffect(true)
+            ->setContinueOnMissingFields(true)
+            ->applyTransactions($blocked_task, $unblock_xactions);
+        }
+      }
+    }
+
+    return $xactions;
   }
 
   protected function shouldSendMail(
@@ -263,7 +426,7 @@ final class ManiphestTransactionEditor
   protected function getMailTo(PhabricatorLiskDAO $object) {
     return array(
       $object->getOwnerPHID(),
-      $this->requireActor()->getPHID(),
+      $this->getActingAsPHID(),
     );
   }
 
@@ -274,11 +437,38 @@ final class ManiphestTransactionEditor
       $phids[] = $phid;
     }
 
+    foreach (parent::getMailCC($object) as $phid) {
+      $phids[] = $phid;
+    }
+
     foreach ($this->heraldEmailPHIDs as $phid) {
       $phids[] = $phid;
     }
 
     return $phids;
+  }
+
+  public function getMailTagsMap() {
+    return array(
+      ManiphestTransaction::MAILTAG_STATUS =>
+        pht("A task's status changes."),
+      ManiphestTransaction::MAILTAG_OWNER =>
+        pht("A task's owner changes."),
+      ManiphestTransaction::MAILTAG_PRIORITY =>
+        pht("A task's priority changes."),
+      ManiphestTransaction::MAILTAG_CC =>
+        pht("A task's subscribers change."),
+      ManiphestTransaction::MAILTAG_PROJECTS =>
+        pht("A task's associated projects change."),
+      ManiphestTransaction::MAILTAG_UNBLOCK =>
+        pht('One of the tasks a task is blocked by changes status.'),
+      ManiphestTransaction::MAILTAG_COLUMN =>
+        pht('A task is moved between columns on a workboard.'),
+      ManiphestTransaction::MAILTAG_COMMENT =>
+        pht('Someone comments on a task.'),
+      ManiphestTransaction::MAILTAG_OTHER =>
+        pht('Other task activity not listed above occurs.'),
+    );
   }
 
   protected function buildReplyHandler(PhabricatorLiskDAO $object) {
@@ -352,19 +542,6 @@ final class ManiphestTransactionEditor
       $existing_cc = $object->getCCPHIDs();
       $new_cc = array_unique(array_merge($cc_phids, $existing_cc));
       $object->setCCPHIDs($new_cc);
-      $save_again = true;
-    }
-
-    $project_phids = $adapter->getProjectPHIDs();
-    if ($project_phids) {
-      $existing_projects = $object->getProjectPHIDs();
-      $new_projects = array_unique(
-        array_merge($project_phids, $existing_projects));
-      $object->setProjectPHIDs($new_projects);
-      $save_again = true;
-    }
-
-    if ($save_again) {
       $object->save();
     }
 
@@ -379,6 +556,18 @@ final class ManiphestTransactionEditor
         ->setNewValue($assign_phid);
     }
 
+    $project_phids = $adapter->getProjectPHIDs();
+    if ($project_phids) {
+      $project_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
+      $xactions[] = id(new ManiphestTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+        ->setMetadataValue('edge:type', $project_type)
+        ->setNewValue(
+          array(
+            '+' => array_fuse($project_phids),
+          ));
+    }
+
     return $xactions;
   }
 
@@ -390,26 +579,35 @@ final class ManiphestTransactionEditor
 
     $app_capability_map = array(
       ManiphestTransaction::TYPE_PRIORITY =>
-        ManiphestCapabilityEditPriority::CAPABILITY,
+        ManiphestEditPriorityCapability::CAPABILITY,
       ManiphestTransaction::TYPE_STATUS =>
-        ManiphestCapabilityEditStatus::CAPABILITY,
-      ManiphestTransaction::TYPE_PROJECTS =>
-        ManiphestCapabilityEditProjects::CAPABILITY,
+        ManiphestEditStatusCapability::CAPABILITY,
       ManiphestTransaction::TYPE_OWNER =>
-        ManiphestCapabilityEditAssign::CAPABILITY,
+        ManiphestEditAssignCapability::CAPABILITY,
       PhabricatorTransactions::TYPE_EDIT_POLICY =>
-        ManiphestCapabilityEditPolicies::CAPABILITY,
+        ManiphestEditPoliciesCapability::CAPABILITY,
       PhabricatorTransactions::TYPE_VIEW_POLICY =>
-        ManiphestCapabilityEditPolicies::CAPABILITY,
+        ManiphestEditPoliciesCapability::CAPABILITY,
     );
 
+
     $transaction_type = $xaction->getTransactionType();
-    $app_capability = idx($app_capability_map, $transaction_type);
+
+    $app_capability = null;
+    if ($transaction_type == PhabricatorTransactions::TYPE_EDGE) {
+      switch ($xaction->getMetadataValue('edge:type')) {
+        case PhabricatorProjectObjectHasProjectEdgeType::EDGECONST:
+          $app_capability = ManiphestEditProjectsCapability::CAPABILITY;
+          break;
+      }
+    } else {
+      $app_capability = idx($app_capability_map, $transaction_type);
+    }
 
     if ($app_capability) {
       $app = id(new PhabricatorApplicationQuery())
         ->setViewer($this->getActor())
-        ->withClasses(array('PhabricatorApplicationManiphest'))
+        ->withClasses(array('PhabricatorManiphestApplication'))
         ->executeOne();
       PhabricatorPolicyFilter::requireCapability(
         $this->getActor(),
@@ -437,7 +635,6 @@ final class ManiphestTransactionEditor
   }
 
   private function getNextSubpriority($pri, $sub, $dir = '>') {
-
     switch ($dir) {
       case '>':
         $order = 'ASC';

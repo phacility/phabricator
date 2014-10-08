@@ -1,5 +1,3 @@
 <?php
 
-interface PhrequentTrackableInterface {
-
-}
+interface PhrequentTrackableInterface {}

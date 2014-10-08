@@ -184,8 +184,8 @@ final class DifferentialInlineComment
   public function setCommentID($id) {
     $this->proxy->setTransactionPHID(
       PhabricatorPHID::generateNewPHID(
-        PhabricatorApplicationTransactionPHIDTypeTransaction::TYPECONST,
-        DifferentialPHIDTypeRevision::TYPECONST));
+        PhabricatorApplicationTransactionTransactionPHIDType::TYPECONST,
+        DifferentialRevisionPHIDType::TYPECONST));
     return $this;
   }
 

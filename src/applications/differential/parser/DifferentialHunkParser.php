@@ -423,16 +423,41 @@ final class DifferentialHunkParser {
       $lines = phutil_split_lines($lines);
 
       $line_type_map = array();
+      $line_text = array();
       foreach ($lines as $line_index => $line) {
         if (isset($line[0])) {
           $char = $line[0];
-          if ($char == ' ') {
-            $line_type_map[$line_index] = null;
-          } else {
-            $line_type_map[$line_index] = $char;
+          switch ($char) {
+            case ' ':
+              $line_type_map[$line_index] = null;
+              $line_text[$line_index] = substr($line, 1);
+              break;
+            case "\r":
+            case "\n":
+              // NOTE: Normally, the first character is a space, plus, minus or
+              // backslash, but it may be a newline if it used to be a space and
+              // trailing whitespace has been stripped via email transmission or
+              // some similar mechanism. In these cases, we essentially pretend
+              // the missing space is still there.
+              $line_type_map[$line_index] = null;
+              $line_text[$line_index] = $line;
+              break;
+            case '+':
+            case '-':
+            case '\\':
+              $line_type_map[$line_index] = $char;
+              $line_text[$line_index] = substr($line, 1);
+              break;
+            default:
+              throw new Exception(
+                pht(
+                  'Unexpected leading character "%s" at line index %s!',
+                  $char,
+                  $line_index));
           }
         } else {
           $line_type_map[$line_index] = null;
+          $line_text[$line_index] = '';
         }
       }
 
@@ -444,7 +469,7 @@ final class DifferentialHunkParser {
         $type = $line_type_map[$cursor];
         $data = array(
           'type'  => $type,
-          'text'  => (string)substr($lines[$cursor], 1),
+          'text'  => $line_text[$cursor],
           'line'  => $new_line,
         );
         if ($type == '\\') {
@@ -577,13 +602,13 @@ final class DifferentialHunkParser {
         $start = $start - $add_context;
         $end = $end + $add_context;
         $hunk_content = array();
-        $hunk_pos = array( "-" => 0, "+" => 0 );
-        $hunk_offset = array( "-" => null, "+" => null );
-        $hunk_last = array( "-" => null, "+" => null );
+        $hunk_pos = array( '-' => 0, '+' => 0 );
+        $hunk_offset = array( '-' => null, '+' => null );
+        $hunk_last = array( '-' => null, '+' => null );
         foreach (explode("\n", $hunk->getChanges()) as $line) {
-          $in_common = strncmp($line, " ", 1) === 0;
-          $in_old = strncmp($line, "-", 1) === 0 || $in_common;
-          $in_new = strncmp($line, "+", 1) === 0 || $in_common;
+          $in_common = strncmp($line, ' ', 1) === 0;
+          $in_old = strncmp($line, '-', 1) === 0 || $in_common;
+          $in_new = strncmp($line, '+', 1) === 0 || $in_common;
           $in_selected = strncmp($line, $prefix, 1) === 0;
           $skip = !$in_selected && !$in_common;
           if ($hunk_pos[$prefix] <= $end) {
@@ -591,36 +616,36 @@ final class DifferentialHunkParser {
               if (!$skip || ($hunk_pos[$prefix] != $start &&
                 $hunk_pos[$prefix] != $end)) {
                   if ($in_old) {
-                    if ($hunk_offset["-"] === null) {
-                      $hunk_offset["-"] = $hunk_pos["-"];
+                    if ($hunk_offset['-'] === null) {
+                      $hunk_offset['-'] = $hunk_pos['-'];
                     }
-                    $hunk_last["-"] = $hunk_pos["-"];
+                    $hunk_last['-'] = $hunk_pos['-'];
                   }
                   if ($in_new) {
-                    if ($hunk_offset["+"] === null) {
-                      $hunk_offset["+"] = $hunk_pos["+"];
+                    if ($hunk_offset['+'] === null) {
+                      $hunk_offset['+'] = $hunk_pos['+'];
                     }
-                    $hunk_last["+"] = $hunk_pos["+"];
+                    $hunk_last['+'] = $hunk_pos['+'];
                   }
 
                   $hunk_content[] = $line;
                 }
             }
-            if ($in_old) { ++$hunk_pos["-"]; }
-            if ($in_new) { ++$hunk_pos["+"]; }
+            if ($in_old) { ++$hunk_pos['-']; }
+            if ($in_new) { ++$hunk_pos['+']; }
           }
         }
-        if ($hunk_offset["-"] !== null || $hunk_offset["+"] !== null) {
-          $header = "@@";
-          if ($hunk_offset["-"] !== null) {
-            $header .= " -" . ($hunk->getOldOffset() + $hunk_offset["-"]) .
-              "," . ($hunk_last["-"] - $hunk_offset["-"] + 1);
+        if ($hunk_offset['-'] !== null || $hunk_offset['+'] !== null) {
+          $header = '@@';
+          if ($hunk_offset['-'] !== null) {
+            $header .= ' -'.($hunk->getOldOffset() + $hunk_offset['-']).
+              ','.($hunk_last['-'] - $hunk_offset['-'] + 1);
           }
-          if ($hunk_offset["+"] !== null) {
-            $header .= " +" . ($hunk->getNewOffset() + $hunk_offset["+"]) .
-              "," . ($hunk_last["+"] - $hunk_offset["+"] + 1);
+          if ($hunk_offset['+'] !== null) {
+            $header .= ' +'.($hunk->getNewOffset() + $hunk_offset['+']).
+              ','.($hunk_last['+'] - $hunk_offset['+'] + 1);
           }
-          $header .= " @@";
+          $header .= ' @@';
           $context[] = $header;
           $context[] = implode("\n", $hunk_content);
         }

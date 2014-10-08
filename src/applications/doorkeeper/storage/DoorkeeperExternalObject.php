@@ -19,6 +19,29 @@ final class DoorkeeperExternalObject extends DoorkeeperDAO
       self::CONFIG_SERIALIZATION => array(
         'properties' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'objectKey' => 'bytes12',
+        'applicationType' => 'text32',
+        'applicationDomain' => 'text32',
+        'objectType' => 'text32',
+        'objectID' => 'text64',
+        'objectURI' => 'text128?',
+        'importerPHID' => 'phid?',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_object' => array(
+          'columns' => array('objectKey'),
+          'unique' => true,
+        ),
+        'key_full' => array(
+          'columns' => array(
+            'applicationType',
+            'applicationDomain',
+            'objectType',
+            'objectID',
+          ),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 

@@ -58,8 +58,8 @@ final class PhabricatorAuthConfirmLinkController
             'class' => 'aphront-form-instructions',
           ),
           pht(
-            "Confirm the link with this %s account. This account will be ".
-            "able to log in to your Phabricator account.",
+            'Confirm the link with this %s account. This account will be '.
+            'able to log in to your Phabricator account.',
             $provider->getProviderName())))
       ->appendChild(
         id(new PhabricatorAuthAccountView())
@@ -80,7 +80,6 @@ final class PhabricatorAuthConfirmLinkController
       ),
       array(
         'title' => pht('Confirm External Account Link'),
-        'device' => true,
       ));
   }
 

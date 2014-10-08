@@ -17,3 +17,11 @@
   margin-bottom: 2px;
   color: {$darkbluetext};
 }
+
+.harbormaster-empty-logs-are-hidden {
+  background: {$lightyellow};
+  border: 1px solid {$yellow};
+  text-align: center;
+  padding: 12px;
+  color: {$darkgreytext};
+}

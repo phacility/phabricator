@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conpherence
- */
 final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
 
   public function getApplicationName() {
@@ -10,7 +7,7 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
   }
 
   public function getApplicationTransactionType() {
-    return PhabricatorConpherencePHIDTypeThread::TYPECONST;
+    return PhabricatorConpherenceThreadPHIDType::TYPECONST;
   }
 
   public function getApplicationTransactionCommentObject() {

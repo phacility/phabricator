@@ -1,12 +1,48 @@
-= Installation
+= Stripe PHP bindings
+{<img src="https://travis-ci.org/stripe/stripe-php.svg?branch=master" alt="Build Status" />}[https://travis-ci.org/stripe/stripe-php]
+{<img src="https://poser.pugx.org/stripe/stripe-php/v/stable.svg" alt="Latest Stable Version" />}[https://packagist.org/packages/stripe/stripe-php]
+{<img src="https://poser.pugx.org/stripe/stripe-php/downloads.svg" alt="Total Downloads" />}[https://packagist.org/packages/stripe/stripe-php]
+{<img src="https://poser.pugx.org/stripe/stripe-php/license.svg" alt="License" />}[https://packagist.org/packages/stripe/stripe-php]
+
+You can sign up for a Stripe account at https://stripe.com.
+
+== Requirements
+
+PHP 5.2 and later.
+
+== Composer
+
+You can install the bindings via Composer[http://getcomposer.org/]. Add this to your +composer.json+:
+
+    {
+      "require": {
+        "stripe/stripe-php": "1.*"
+      }
+    }
+    
+Then install via:
+
+    composer.phar install
+
+To use the bindings, either user Composer's autoload[https://getcomposer.org/doc/00-intro.md#autoloading]:
+
+    require_once('vendor/autoload.php');
+    
+Or manually:
+
+    require_once('/path/to/vendor/stripe/stripe-php/lib/Stripe.php');
+
+== Manual Installation
 
 Obtain the latest version of the Stripe PHP bindings with:
 
     git clone https://github.com/stripe/stripe-php
 
-To get started, add the following to your PHP script:
+To use the bindings, add the following to your PHP script:
 
     require_once("/path/to/stripe-php/lib/Stripe.php");
+
+== Getting Started
 
 Simple usage looks like:
 
@@ -15,6 +51,17 @@ Simple usage looks like:
     $charge = Stripe_Charge::create(array('card' => $myCard, 'amount' => 2000, 'currency' => 'usd'));
     echo $charge;
 
-= Documentation
+== Documentation
 
 Please see https://stripe.com/api for up-to-date documentation.
+
+== Tests
+
+In order to run tests you have to install SimpleTest[http://packagist.org/packages/simpletest/simpletest] via Composer[http://getcomposer.org/] (recommended way):
+
+    composer.phar update --dev
+
+Run test suite:
+
+    php ./test/Stripe.php
+

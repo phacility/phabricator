@@ -6,7 +6,7 @@ JX.require('core/install');
 
 // NOTE: This is faking out a piece of code in JX.install which waits for
 // Stratcom before running static initializers.
-JX.Stratcom = {ready : true};
+JX.Stratcom = {ready: true};
 JX.require('core/Event');
 JX.require('core/Stratcom');
 

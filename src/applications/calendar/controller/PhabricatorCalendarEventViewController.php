@@ -5,6 +5,10 @@ final class PhabricatorCalendarEventViewController
 
   private $id;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function willProcessRequest(array $data) {
     $this->id = $data['id'];
   }
@@ -41,7 +45,6 @@ final class PhabricatorCalendarEventViewController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 
@@ -70,7 +73,7 @@ final class PhabricatorCalendarEventViewController
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Event'))
-        ->setIcon('edit')
+        ->setIcon('fa-pencil')
         ->setHref($this->getApplicationURI("event/edit/{$id}/"))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
@@ -78,7 +81,7 @@ final class PhabricatorCalendarEventViewController
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Cancel Event'))
-        ->setIcon('delete')
+        ->setIcon('fa-times')
         ->setHref($this->getApplicationURI("event/delete/{$id}/"))
         ->setDisabled(!$can_edit)
         ->setWorkflow(true));

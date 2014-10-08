@@ -23,7 +23,7 @@ abstract class PhabricatorRepositoryCommitChangeParserWorker
 
     $this->log("Parsing %s...\n", $full_name);
     if ($this->isBadCommit($full_name)) {
-      $this->log("This commit is marked bad!");
+      $this->log('This commit is marked bad!');
       return;
     }
 

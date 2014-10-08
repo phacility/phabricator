@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phriction
- */
 final class PhrictionDocumentController
   extends PhrictionController {
 
@@ -43,7 +40,8 @@ final class PhrictionDocumentController
         $project = id(new PhabricatorProjectQuery())
           ->setViewer($user)
           ->withPhrictionSlugs(array(
-            PhrictionDocument::getProjectSlugIdentifier($slug)))
+            PhrictionDocument::getProjectSlugIdentifier($slug),
+          ))
           ->executeOne();
         if (!$project) {
           return new Aphront404Response();
@@ -78,7 +76,6 @@ final class PhrictionDocumentController
           $vdate = phabricator_datetime($content->getDateCreated(), $user);
           $version_note = new AphrontErrorView();
           $version_note->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
-          $version_note->setTitle('Older Version');
           $version_note->appendChild(
             pht('You are viewing an older version of this document, as it '.
             'appeared on %s.', $vdate));
@@ -115,18 +112,44 @@ final class PhrictionDocumentController
         $core_content = $notice->render();
       } else if ($current_status == PhrictionChangeType::CHANGE_MOVE_AWAY) {
         $new_doc_id = $content->getChangeRef();
-        $new_doc = new PhrictionDocument();
-        $new_doc->load($new_doc_id);
 
-        $slug_uri = PhrictionDocument::getSlugURI($new_doc->getSlug());
+        $slug_uri = null;
 
-        $notice = new AphrontErrorView();
-        $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
-        $notice->setTitle(pht('Document Moved'));
-        $notice->appendChild(phutil_tag('p', array(),
-          pht('This document has been moved to %s. You can edit it to put new '.
-          'content here, or use history to revert to an earlier version.',
-            phutil_tag('a', array('href' => $slug_uri), $slug_uri))));
+        // If the new document exists and the viewer can see it, provide a link
+        // to it. Otherwise, render a generic message.
+        $new_docs = id(new PhrictionDocumentQuery())
+          ->setViewer($user)
+          ->withIDs(array($new_doc_id))
+          ->execute();
+        if ($new_docs) {
+          $new_doc = head($new_docs);
+          $slug_uri = PhrictionDocument::getSlugURI($new_doc->getSlug());
+        }
+
+        $notice = id(new AphrontErrorView())
+          ->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
+
+        if ($slug_uri) {
+          $notice->appendChild(
+            phutil_tag(
+              'p',
+              array(),
+              pht(
+                'This document has been moved to %s. You can edit it to put '.
+                'new content here, or use history to revert to an earlier '.
+                'version.',
+                phutil_tag('a', array('href' => $slug_uri), $slug_uri))));
+        } else {
+          $notice->appendChild(
+            phutil_tag(
+              'p',
+              array(),
+              pht(
+                'This document has been moved. You can edit it to put new '.
+                'contne here, or use history to revert to an earlier '.
+                'version.')));
+        }
+
         $core_content = $notice->render();
       } else {
         throw new Exception("Unknown document status '{$doc_status}'!");
@@ -135,19 +158,33 @@ final class PhrictionDocumentController
       $move_notice = null;
       if ($current_status == PhrictionChangeType::CHANGE_MOVE_HERE) {
         $from_doc_id = $content->getChangeRef();
-        $from_doc = id(new PhrictionDocument())->load($from_doc_id);
-        $slug_uri = PhrictionDocument::getSlugURI($from_doc->getSlug());
+
+        $slug_uri = null;
+
+        // If the old document exists and is visible, provide a link to it.
+        $from_docs = id(new PhrictionDocumentQuery())
+          ->setViewer($user)
+          ->withIDs(array($from_doc_id))
+          ->execute();
+        if ($from_docs) {
+          $from_doc = head($from_docs);
+          $slug_uri = PhrictionDocument::getSlugURI($from_doc->getSlug());
+        }
 
         $move_notice = id(new AphrontErrorView())
-          ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-          ->appendChild(pht('This document was moved from %s',
-            phutil_tag('a', array('href' => $slug_uri), $slug_uri)))
-          ->render();
-      }
-    }
+          ->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
 
-    if ($version_note) {
-      $version_note = $version_note->render();
+        if ($slug_uri) {
+          $move_notice->appendChild(
+            pht(
+              'This document was moved from %s.',
+              phutil_tag('a', array('href' => $slug_uri), $slug_uri)));
+        } else {
+          // Render this for consistency, even though it's a bit silly.
+          $move_notice->appendChild(
+            pht('This document was moved from elsewhere.'));
+        }
+      }
     }
 
     $children = $this->renderDocumentChildren($slug);
@@ -172,11 +209,13 @@ final class PhrictionDocumentController
 
     $page_content = id(new PHUIDocumentView())
       ->setOffset(true)
+      ->setFontKit(PHUIDocumentView::FONT_SOURCE_SANS)
       ->setHeader($header)
       ->appendChild(
         array(
           $actions,
           $prop_list,
+          $version_note,
           $move_notice,
           $core_content,
         ));
@@ -184,7 +223,7 @@ final class PhrictionDocumentController
     $core_page = phutil_tag(
       'div',
         array(
-          'class' => 'phriction-offset'
+          'class' => 'phriction-offset',
         ),
         array(
           $page_content,
@@ -199,7 +238,6 @@ final class PhrictionDocumentController
       array(
         'pageObjects' => array($document->getPHID()),
         'title'   => $page_title,
-        'device'  => true,
       ));
 
   }
@@ -219,7 +257,8 @@ final class PhrictionDocumentController
       $project = id(new PhabricatorProjectQuery())
         ->setViewer($viewer)
         ->withPhrictionSlugs(array(
-          PhrictionDocument::getProjectSlugIdentifier($slug)))
+          PhrictionDocument::getProjectSlugIdentifier($slug),
+        ))
         ->executeOne();
       if ($project) {
         $project_phid = $project->getPHID();
@@ -252,7 +291,7 @@ final class PhrictionDocumentController
     } else if ($age == 1) {
       $when = pht('Yesterday');
     } else {
-      $when = pht("%d Days Ago", $age);
+      $when = pht('%d Days Ago', $age);
     }
     $view->addProperty(pht('Last Updated'), $when);
 
@@ -278,28 +317,28 @@ final class PhrictionDocumentController
       return $action_view->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Create This Document'))
-          ->setIcon('create')
+          ->setIcon('fa-plus-square')
           ->setHref('/phriction/edit/?slug='.$slug));
     }
 
     $action_view->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Document'))
-        ->setIcon('edit')
+        ->setIcon('fa-pencil')
         ->setHref('/phriction/edit/'.$document->getID().'/'));
 
     if ($document->getStatus() == PhrictionDocumentStatus::STATUS_EXISTS) {
       $action_view->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Move Document'))
-          ->setIcon('move')
+          ->setIcon('fa-arrows')
           ->setHref('/phriction/move/'.$document->getID().'/')
           ->setWorkflow(true));
 
       $action_view->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Delete Document'))
-          ->setIcon('delete')
+          ->setIcon('fa-times')
           ->setHref('/phriction/delete/'.$document->getID().'/')
           ->setWorkflow(true));
     }
@@ -308,7 +347,7 @@ final class PhrictionDocumentController
       $action_view->addAction(
         id(new PhabricatorActionView())
         ->setName(pht('View History'))
-        ->setIcon('history')
+        ->setIcon('fa-list')
         ->setHref(PhrictionDocument::getSlugURI($slug, 'history')));
   }
 

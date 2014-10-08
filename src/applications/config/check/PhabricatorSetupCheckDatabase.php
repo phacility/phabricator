@@ -30,7 +30,7 @@ final class PhabricatorSetupCheckDatabase extends PhabricatorSetupCheck {
 
     try {
       queryfx($conn_raw, 'SELECT 1');
-    } catch (AphrontQueryConnectionException $ex) {
+    } catch (AphrontConnectionQueryException $ex) {
       $message = pht(
         "Unable to connect to MySQL!\n\n".
         "%s\n\n".

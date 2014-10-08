@@ -77,7 +77,6 @@ final class PhabricatorSettingsMainController
       $nav,
       array(
         'title' => $panel->getPanelName(),
-        'device' => true,
       ));
   }
 

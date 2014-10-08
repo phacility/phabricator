@@ -5,7 +5,7 @@ final class PhragmentPolicyController extends PhragmentController {
   private $dblob;
 
   public function willProcessRequest(array $data) {
-    $this->dblob = idx($data, "dblob", "");
+    $this->dblob = idx($data, 'dblob', '');
   }
 
   public function processRequest() {
@@ -99,10 +99,11 @@ final class PhragmentPolicyController extends PhragmentController {
       array(
         $crumbs,
         $this->renderConfigurationWarningIfRequired(),
-        $box),
+        $box,
+      ),
       array(
         'title' => pht('Edit Fragment Policies'),
-        'device' => true));
+      ));
   }
 
 }

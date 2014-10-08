@@ -4,11 +4,12 @@ final class PhabricatorApplicationQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $installed;
-  private $beta;
+  private $prototypes;
   private $firstParty;
   private $nameContains;
   private $unlisted;
   private $classes;
+  private $launchable;
   private $phids;
 
   const ORDER_APPLICATION = 'order:application';
@@ -26,8 +27,8 @@ final class PhabricatorApplicationQuery
     return $this;
   }
 
-  public function withBeta($beta) {
-    $this->beta = $beta;
+  public function withPrototypes($prototypes) {
+    $this->prototypes = $prototypes;
     return $this;
   }
 
@@ -38,6 +39,11 @@ final class PhabricatorApplicationQuery
 
   public function withUnlisted($unlisted) {
     $this->unlisted = $unlisted;
+    return $this;
+  }
+
+  public function withLaunchable($launchable) {
+    $this->launchable = $launchable;
     return $this;
   }
 
@@ -93,9 +99,9 @@ final class PhabricatorApplicationQuery
       }
     }
 
-    if ($this->beta !== null) {
+    if ($this->prototypes !== null) {
       foreach ($apps as $key => $app) {
-        if ($app->isBeta() != $this->beta) {
+        if ($app->isPrototype() != $this->prototypes) {
           unset($apps[$key]);
         }
       }
@@ -116,6 +122,15 @@ final class PhabricatorApplicationQuery
         }
       }
     }
+
+    if ($this->launchable !== null) {
+      foreach ($apps as $key => $app) {
+        if ($app->isLaunchable() != $this->launchable) {
+          unset($apps[$key]);
+        }
+      }
+    }
+
 
     switch ($this->order) {
       case self::ORDER_NAME:

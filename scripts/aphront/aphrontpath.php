@@ -22,5 +22,5 @@ if (!$controller && substr($path, -1) !== '/') {
   list($controller) = $application->buildControllerForPath($path.'/');
 }
 if ($controller) {
-  echo get_class($controller) . "\n";
+  echo get_class($controller)."\n";
 }

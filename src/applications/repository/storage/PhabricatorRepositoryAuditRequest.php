@@ -17,11 +17,22 @@ final class PhabricatorRepositoryAuditRequest
       self::CONFIG_SERIALIZATION => array(
         'auditReasons' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'auditStatus' => 'text64',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'commitPHID' => array(
+          'columns' => array('commitPHID'),
+        ),
+        'auditorPHID' => array(
+          'columns' => array('auditorPHID', 'auditStatus'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 
   public function isUser() {
-    $user_type = PhabricatorPeoplePHIDTypeUser::TYPECONST;
+    $user_type = PhabricatorPeopleUserPHIDType::TYPECONST;
     return (phid_get_type($this->getAuditorPHID()) == $user_type);
   }
 

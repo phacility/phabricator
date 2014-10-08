@@ -9,7 +9,7 @@ final class PhabricatorNotificationStatusController
       $status = $this->renderServerStatus($status);
     } catch (Exception $ex) {
       $status = new AphrontErrorView();
-      $status->setTitle("Notification Server Issue");
+      $status->setTitle('Notification Server Issue');
       $status->appendChild(hsprintf(
         'Unable to determine server status. This probably means the server '.
         'is not in great shape. The specific issue encountered was:'.
@@ -30,6 +30,7 @@ final class PhabricatorNotificationStatusController
       ),
       array(
         'title' => pht('Notification Server Status'),
+        'device' => false,
       ));
   }
 
@@ -40,7 +41,7 @@ final class PhabricatorNotificationStatusController
       switch ($key) {
         case 'uptime':
           $value /= 1000;
-          $value = phabricator_format_relative_time_detailed($value);
+          $value = phutil_format_relative_time_detailed($value);
           break;
         case 'log':
           break;
@@ -60,14 +61,13 @@ final class PhabricatorNotificationStatusController
       ));
 
     $test_icon = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-      ->setSpriteIcon('warning');
+      ->setIconFont('fa-exclamation-triangle');
 
     $test_button = id(new PHUIButtonView())
         ->setTag('a')
         ->setWorkflow(true)
         ->setText(pht('Send Test Notification'))
-        ->setHref($this->getApplicationURI("test/"))
+        ->setHref($this->getApplicationURI('test/'))
         ->setIcon($test_icon);
 
     $header = id(new PHUIHeaderView())

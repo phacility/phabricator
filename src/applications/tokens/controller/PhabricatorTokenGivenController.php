@@ -73,7 +73,6 @@ final class PhabricatorTokenGivenController extends PhabricatorTokenController {
       $nav,
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

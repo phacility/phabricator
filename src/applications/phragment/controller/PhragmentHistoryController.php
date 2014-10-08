@@ -9,7 +9,7 @@ final class PhragmentHistoryController extends PhragmentController {
   }
 
   public function willProcessRequest(array $data) {
-    $this->dblob = idx($data, "dblob", "");
+    $this->dblob = idx($data, 'dblob', '');
   }
 
   public function processRequest() {
@@ -26,12 +26,12 @@ final class PhragmentHistoryController extends PhragmentController {
 
     $crumbs = $this->buildApplicationCrumbsWithPath($parents);
     if ($this->hasApplicationCapability(
-      PhragmentCapabilityCanCreate::CAPABILITY)) {
+      PhragmentCanCreateCapability::CAPABILITY)) {
       $crumbs->addAction(
         id(new PHUIListItemView())
           ->setName(pht('Create Fragment'))
           ->setHref($this->getApplicationURI('/create/'.$path))
-          ->setIcon('create'));
+          ->setIcon('fa-plus-square'));
     }
 
     $current_box = $this->createCurrentFragmentView($current, true);
@@ -72,20 +72,20 @@ final class PhragmentHistoryController extends PhragmentController {
 
       if (!$first && $can_edit) {
         $item->addAction(id(new PHUIListItemView())
-          ->setIcon('undo')
+          ->setIcon('fa-refresh')
           ->setRenderNameAsTooltip(true)
           ->setWorkflow(true)
-          ->setName(pht("Revert to Here"))
+          ->setName(pht('Revert to Here'))
           ->setHref($this->getApplicationURI(
-            "revert/".$version->getID()."/".$current->getPath())));
+            'revert/'.$version->getID().'/'.$current->getPath())));
       }
 
       $disabled = !isset($files[$version->getFilePHID()]);
       $action = id(new PHUIListItemView())
-        ->setIcon('download')
+        ->setIcon('fa-download')
         ->setDisabled($disabled || !$this->isCorrectlyConfigured())
         ->setRenderNameAsTooltip(true)
-        ->setName(pht("Download"));
+        ->setName(pht('Download'));
       if (!$disabled && $this->isCorrectlyConfigured()) {
         $action->setHref($files[$version->getFilePHID()]
           ->getDownloadURI($version->getURI()));
@@ -102,10 +102,11 @@ final class PhragmentHistoryController extends PhragmentController {
         $crumbs,
         $this->renderConfigurationWarningIfRequired(),
         $current_box,
-        $list),
+        $list,
+      ),
       array(
         'title' => pht('Fragment History'),
-        'device' => true));
+      ));
   }
 
 }

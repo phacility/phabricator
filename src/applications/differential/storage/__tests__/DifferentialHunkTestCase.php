@@ -5,7 +5,7 @@ final class DifferentialHunkTestCase extends ArcanistPhutilTestCase {
   public function testMakeChanges() {
     $root = dirname(__FILE__).'/hunk/';
 
-    $hunk = new DifferentialHunk();
+    $hunk = new DifferentialHunkModern();
     $hunk->setChanges(Filesystem::readFile($root.'basic.diff'));
     $hunk->setOldOffset(1);
     $hunk->setNewOffset(11);
@@ -23,14 +23,14 @@ final class DifferentialHunkTestCase extends ArcanistPhutilTestCase {
     );
     $this->assertEqual($added, $hunk->getAddedLines());
 
-    $hunk = new DifferentialHunk();
+    $hunk = new DifferentialHunkModern();
     $hunk->setChanges(Filesystem::readFile($root.'newline.diff'));
     $hunk->setOldOffset(1);
     $hunk->setNewOffset(11);
 
     $this->assertEqual("a\n", $hunk->makeOldFile());
-    $this->assertEqual("a", $hunk->makeNewFile());
-    $this->assertEqual(array(11 => "a"), $hunk->getAddedLines());
+    $this->assertEqual('a', $hunk->makeNewFile());
+    $this->assertEqual(array(11 => 'a'), $hunk->getAddedLines());
 
   }
 

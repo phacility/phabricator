@@ -3,54 +3,136 @@
 abstract class PhortuneController extends PhabricatorController {
 
   protected function loadActiveAccount(PhabricatorUser $user) {
-    $accounts = id(new PhortuneAccountQuery())
-      ->setViewer($user)
-      ->withMemberPHIDs(array($user->getPHID()))
-      ->execute();
+    return PhortuneAccountQuery::loadActiveAccountForUser(
+      $user,
+      PhabricatorContentSource::newFromRequest($this->getRequest()));
+  }
 
-    if (!$accounts) {
-      return $this->createUserAccount($user);
-    } else if (count($accounts) == 1) {
-      return head($accounts);
+  protected function buildChargesTable(array $charges, $show_cart = true) {
+    $request = $this->getRequest();
+    $viewer = $request->getUser();
+
+    $phids = array();
+    foreach ($charges as $charge) {
+      $phids[] = $charge->getProviderPHID();
+      $phids[] = $charge->getCartPHID();
+      $phids[] = $charge->getMerchantPHID();
+      $phids[] = $charge->getPaymentMethodPHID();
+    }
+
+    $handles = $this->loadViewerHandles($phids);
+
+    $rows = array();
+    foreach ($charges as $charge) {
+      $rows[] = array(
+        $charge->getID(),
+        $handles[$charge->getCartPHID()]->renderLink(),
+        $handles[$charge->getProviderPHID()]->renderLink(),
+        $handles[$charge->getPaymentMethodPHID()]->renderLink(),
+        $handles[$charge->getMerchantPHID()]->renderLink(),
+        $charge->getAmountAsCurrency()->formatForDisplay(),
+        PhortuneCharge::getNameForStatus($charge->getStatus()),
+        phabricator_datetime($charge->getDateCreated(), $viewer),
+      );
+    }
+
+    $charge_table = id(new AphrontTableView($rows))
+      ->setHeaders(
+        array(
+          pht('ID'),
+          pht('Cart'),
+          pht('Provider'),
+          pht('Method'),
+          pht('Merchant'),
+          pht('Amount'),
+          pht('Status'),
+          pht('Created'),
+        ))
+      ->setColumnClasses(
+        array(
+          '',
+          '',
+          '',
+          '',
+          '',
+          'wide right',
+          '',
+          '',
+        ))
+      ->setColumnVisibility(
+        array(
+          true,
+          $show_cart,
+        ));
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Charge History'));
+
+    return id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->appendChild($charge_table);
+  }
+
+  protected function addAccountCrumb(
+    $crumbs,
+    PhortuneAccount $account,
+    $link = true) {
+
+    $name = pht('Account');
+    $href = null;
+
+    if ($link) {
+      $href = $this->getApplicationURI($account->getID().'/');
+      $crumbs->addTextCrumb($name, $href);
     } else {
-      throw new Exception("TODO: No account selection yet.");
+      $crumbs->addTextCrumb($name);
     }
   }
 
-  protected function createUserAccount(PhabricatorUser $user) {
-    $request = $this->getRequest();
+  private function loadEnabledProvidersForMerchant(PhortuneMerchant $merchant) {
+    $viewer = $this->getRequest()->getUser();
 
-    $xactions = array();
-    $xactions[] = id(new PhortuneAccountTransaction())
-      ->setTransactionType(PhortuneAccountTransaction::TYPE_NAME)
-      ->setNewValue(pht('Account (%s)', $user->getUserName()));
+    $provider_configs = id(new PhortunePaymentProviderConfigQuery())
+      ->setViewer($viewer)
+      ->withMerchantPHIDs(array($merchant->getPHID()))
+      ->execute();
+    $providers = mpull($provider_configs, 'buildProvider', 'getID');
 
-    $xactions[] = id(new PhortuneAccountTransaction())
-      ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-      ->setMetadataValue(
-        'edge:type',
-        PhabricatorEdgeConfig::TYPE_ACCOUNT_HAS_MEMBER)
-      ->setNewValue(
-        array(
-          '=' => array($user->getPHID() => $user->getPHID()),
-        ));
+    foreach ($providers as $key => $provider) {
+      if (!$provider->isEnabled()) {
+        unset($providers[$key]);
+      }
+    }
 
-    $account = id(new PhortuneAccount())
-      ->attachMemberPHIDs(array());
-
-    $editor = id(new PhortuneAccountEditor())
-      ->setActor($user)
-      ->setContentSourceFromRequest($request);
-
-    // We create an account for you the first time you visit Phortune.
-    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-
-      $editor->applyTransactions($account, $xactions);
-
-    unset($unguarded);
-
-    return $account;
+    return $providers;
   }
 
+  protected function loadCreatePaymentMethodProvidersForMerchant(
+    PhortuneMerchant $merchant) {
+
+    $providers = $this->loadEnabledProvidersForMerchant($merchant);
+    foreach ($providers as $key => $provider) {
+      if (!$provider->canCreatePaymentMethods()) {
+        unset($providers[$key]);
+        continue;
+      }
+    }
+
+    return $providers;
+  }
+
+  protected function loadOneTimePaymentProvidersForMerchant(
+    PhortuneMerchant $merchant) {
+
+    $providers = $this->loadEnabledProvidersForMerchant($merchant);
+    foreach ($providers as $key => $provider) {
+      if (!$provider->canProcessOneTimePayments()) {
+        unset($providers[$key]);
+        continue;
+      }
+    }
+
+    return $providers;
+  }
 
 }

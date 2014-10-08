@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conpherence
- */
 final class ConpherenceTransactionView extends AphrontView {
 
   private $conpherenceTransaction;
@@ -19,6 +16,7 @@ final class ConpherenceTransactionView extends AphrontView {
     $this->handles = $handles;
     return $this;
   }
+
   public function getHandles() {
     return $this->handles;
   }
@@ -27,6 +25,7 @@ final class ConpherenceTransactionView extends AphrontView {
     $this->conpherenceTransaction = $tx;
     return $this;
   }
+
   private function getConpherenceTransaction() {
     return $this->conpherenceTransaction;
   }
@@ -39,7 +38,7 @@ final class ConpherenceTransactionView extends AphrontView {
         return phutil_tag(
           'div',
           array(
-            'class' => 'date-marker'
+            'class' => 'date-marker',
           ),
           array(
             phutil_tag(
@@ -50,7 +49,8 @@ final class ConpherenceTransactionView extends AphrontView {
               phabricator_format_local_time(
                 $transaction->getDateCreated(),
                 $user,
-              'M jS, Y'))));
+              'M jS, Y')),
+          ));
         break;
     }
 
@@ -93,10 +93,11 @@ final class ConpherenceTransactionView extends AphrontView {
       phutil_tag(
         'div',
         array(
-          'class' => $content_class
+          'class' => $content_class,
         ),
         $content));
 
     return $transaction_view->render();
   }
+
 }

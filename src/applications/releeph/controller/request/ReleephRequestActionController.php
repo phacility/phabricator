@@ -44,7 +44,8 @@ final class ReleephRequestActionController
       case 'pass':
         static $action_map = array(
           'want' => ReleephRequest::INTENT_WANT,
-          'pass' => ReleephRequest::INTENT_PASS);
+          'pass' => ReleephRequest::INTENT_PASS,
+        );
         $intent = $action_map[$action];
         $xactions[] = id(new ReleephRequestTransaction())
           ->setTransactionType(ReleephRequestTransaction::TYPE_USER_INTENT)

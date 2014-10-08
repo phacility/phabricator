@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group paste
- */
 final class PhabricatorPasteQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
@@ -157,7 +154,13 @@ final class PhabricatorPasteQuery
   }
 
   private function getContentCacheKey(PhabricatorPaste $paste) {
-    return 'P'.$paste->getID().':content/'.$paste->getLanguage();
+    return implode(
+      ':',
+      array(
+        'P'.$paste->getID(),
+        $paste->getFilePHID(),
+        $paste->getLanguage(),
+      ));
   }
 
   private function loadRawContent(array $pastes) {
@@ -233,7 +236,6 @@ final class PhabricatorPasteQuery
     return $results;
   }
 
-
   private function buildContent(PhabricatorPaste $paste) {
     $language = $paste->getLanguage();
     $source = $paste->getRawContent();
@@ -249,9 +251,8 @@ final class PhabricatorPasteQuery
     }
   }
 
-
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationPaste';
+    return 'PhabricatorPasteApplication';
   }
 
 }

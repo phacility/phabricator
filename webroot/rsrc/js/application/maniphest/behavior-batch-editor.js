@@ -17,7 +17,7 @@ JX.behavior('maniphest-batch-editor', function(config) {
 
   addRow({});
 
-  function renderRow(data) {
+  function renderRow() {
 
     var action_select = JX.Prefab.renderSelect(
       {
@@ -108,7 +108,7 @@ JX.behavior('maniphest-batch-editor', function(config) {
     action_rows[id] = data.dataCallback;
   }
 
-  function onsubmit(e) {
+  function onsubmit() {
     var input = JX.$(config.input);
 
     var actions = [];

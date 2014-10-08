@@ -15,16 +15,9 @@ $args->setSynopsis(<<<EOSYNOPSIS
 EOSYNOPSIS
   );
 $args->parseStandardArguments();
-$workflows = array(
-  new PhabricatorDaemonManagementListWorkflow(),
-  new PhabricatorDaemonManagementStatusWorkflow(),
-  new PhabricatorDaemonManagementStartWorkflow(),
-  new PhabricatorDaemonManagementStopWorkflow(),
-  new PhabricatorDaemonManagementRestartWorkflow(),
-  new PhabricatorDaemonManagementLaunchWorkflow(),
-  new PhabricatorDaemonManagementDebugWorkflow(),
-  new PhabricatorDaemonManagementLogWorkflow(),
-  new PhutilHelpArgumentWorkflow(),
-);
 
+$workflows = id(new PhutilSymbolLoader())
+  ->setAncestorClass('PhabricatorDaemonManagementWorkflow')
+  ->loadObjects();
+$workflows[] = new PhutilHelpArgumentWorkflow();
 $args->parseWorkflows($workflows);

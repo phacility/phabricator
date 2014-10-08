@@ -61,7 +61,7 @@
   padding-left: 12px;
   text-align: left;
   margin-left: 0;
-  width: 100%;
+  width: auto;
 }
 
 .phui-property-list-value {
@@ -79,9 +79,10 @@
 .device .phui-property-list-value,
 .phui-property-list-properties.phui-property-list-stacked
   .phui-property-list-value {
-  padding-left: 16px;
+  padding: 0 16px;
   margin-bottom: 8px;
-  width: 100%;
+  width: auto;
+  word-break: break-word;
 }
 
 .phui-property-list-section-header {
@@ -102,7 +103,7 @@
   padding-left: 8px;
 }
 
-.phui-property-list-section-header-icon .sprite-status {
+.phui-property-list-section-header-icon .phui-icon-view {
   display: inline-block;
   margin: -2px 4px -2px 0;
 }
@@ -115,6 +116,12 @@
 
 .device .phui-property-list-text-content {
   padding: 8px;
+}
+
+.phui-property-list-raw-content {
+  padding: 0px;
+  background: #fff;
+  overflow: hidden;
 }
 
 /* In the common case where we immediately follow a header, move back up 30px
@@ -170,6 +177,7 @@
   float: none;
   width: auto;
   margin: -12px 0 12px 0;
+  border: none;
 }
 
 .phui-property-list-image-content img {
@@ -180,4 +188,12 @@
 
 .device-desktop .phui-property-list-image-content img:hover {
   background: url('/rsrc/image/checker_dark.png');
+}
+
+/* - Dashboards ------------------------------------------------------------ */
+
+.dashboard-panel .phui-property-list-section {
+  border-left: 1px solid {$lightblueborder};
+  border-right: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$blueborder};
 }

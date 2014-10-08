@@ -119,21 +119,21 @@ confirm
 
 if [[ ! -e libphutil ]]
 then
-  git clone git://github.com/facebook/libphutil.git
+  git clone https://github.com/phacility/libphutil.git
 else
   (cd libphutil && git pull --rebase)
 fi
 
 if [[ ! -e arcanist ]]
 then
-  git clone git://github.com/facebook/arcanist.git
+  git clone https://github.com/phacility/arcanist.git
 else
   (cd arcanist && git pull --rebase)
 fi
 
 if [[ ! -e phabricator ]]
 then
-  git clone git://github.com/facebook/phabricator.git
+  git clone https://github.com/phacility/phabricator.git
 else
   (cd phabricator && git pull --rebase)
 fi

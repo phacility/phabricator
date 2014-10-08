@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group paste
- */
 final class PasteReplyHandler extends PhabricatorMailReplyHandler {
 
   public function validateMailReceiver($mail_receiver) {
@@ -78,7 +75,6 @@ final class PasteReplyHandler extends PhabricatorMailReplyHandler {
 
     $head_xaction = head($xactions);
     return $head_xaction->getID();
-
   }
 
 }

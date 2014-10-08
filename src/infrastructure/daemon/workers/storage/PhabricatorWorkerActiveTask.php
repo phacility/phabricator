@@ -8,10 +8,42 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
   private $localTime;
 
   public function getConfiguration() {
-    return array(
+    $parent = parent::getConfiguration();
+
+    $config = array(
       self::CONFIG_IDS => self::IDS_COUNTER,
       self::CONFIG_TIMESTAMPS => false,
-    ) + parent::getConfiguration();
+      self::CONFIG_KEY_SCHEMA => array(
+        'dataID' => array(
+          'columns' => array('dataID'),
+          'unique' => true,
+        ),
+        'taskClass' => array(
+          'columns' => array('taskClass'),
+        ),
+        'leaseExpires' => array(
+          'columns' => array('leaseExpires'),
+        ),
+        'leaseOwner' => array(
+          'columns' => array('leaseOwner(16)'),
+        ),
+        'key_failuretime' => array(
+          'columns' => array('failureTime'),
+        ),
+        'leaseOwner_2' => array(
+          'columns' => array('leaseOwner', 'priority', 'id'),
+        ),
+      ),
+    );
+
+    $config[self::CONFIG_COLUMN_SCHEMA] = array(
+      // T6203/NULLABILITY
+      // This isn't nullable in the archive table, so at a minimum these
+      // should be the same.
+      'dataID' => 'uint32?',
+    ) + $parent[self::CONFIG_COLUMN_SCHEMA];
+
+    return $config + $parent;
   }
 
   public function setServerTime($server_time) {
@@ -67,8 +99,8 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
 
   public function delete() {
     throw new Exception(
-      "Active tasks can not be deleted directly. ".
-      "Use archiveTask() to move tasks to the archive.");
+      'Active tasks can not be deleted directly. '.
+      'Use archiveTask() to move tasks to the archive.');
   }
 
   public function archiveTask($result, $duration) {
@@ -86,6 +118,7 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
       ->setLeaseExpires($this->getLeaseExpires())
       ->setFailureCount($this->getFailureCount())
       ->setDataID($this->getDataID())
+      ->setPriority($this->getPriority())
       ->setResult($result)
       ->setDuration($duration);
 
@@ -164,12 +197,11 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
     if ($did_succeed) {
       foreach ($worker->getQueuedTasks() as $task) {
         list($class, $data) = $task;
-        PhabricatorWorker::scheduleTask($class, $data);
+        PhabricatorWorker::scheduleTask($class, $data, $this->getPriority());
       }
     }
 
     return $result;
   }
-
 
 }

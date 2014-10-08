@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group search
- */
 abstract class PhabricatorSearchBaseController extends PhabricatorController {
 
   public function buildStandardPageResponse($view, array $data) {

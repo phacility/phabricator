@@ -12,7 +12,7 @@ Phabricator can send outbound email via several different providers, called
 |---------|-------|------|---------|-------|
 | Mailgun | Easy | Cheap | Yes | Recommended |
 | Amazon SES | Easy | Cheap | No | Recommended |
-| SendGrid | Easy | Cheap | Yes | |
+| SendGrid | Medium | Cheap | Yes | Discouraged (See Note) |
 | External SMTP | Medium | Varies | No | Gmail, etc. |
 | Local SMTP | Hard | Free | No | (Default) sendmail, postfix, etc |
 | Custom | Hard | Free | No | Write an adapter for some other service. |
@@ -33,6 +33,11 @@ Phabricator sends mail in the background, so the daemons need to be running for
 it to be able to deliver mail. You should receive setup warnings if they are
 not. For more information on using daemons, see
 @{article:Managing Daemons with phd}.
+
+**Note on SendGrid**: Users have experienced a number of odd issues with
+SendGrid, compared to fewer issues with other mailers. We discourage SendGrid
+unless you're already using it. If you send to SendGrid via SMTP, you may need
+to adjust `phpmailer.smtp-encoding`.
 
 = Basics =
 
@@ -83,6 +88,9 @@ document. If you can already send outbound email from the command line or know
 how to configure it, this option is straightforward. If you have no idea how to
 do any of this, strongly consider using Mailgun or Amazon SES instead.
 
+If you experience issues with mail getting mangled (for example, arriving with
+too many or too few newlines) you may try adjusting `phpmailer.smtp-encoding`.
+
 = Adapter: SMTP =
 
 You can use this adapter to send mail via an external SMTP server, like Gmail.
@@ -97,6 +105,9 @@ To do this, set these configuration keys:
   - **phpmailer.smtp-password**: set to your password used for authentication.
   - **phpmailer.smtp-protocol**: set to `tls` or `ssl` if necessary. Use
     `ssl` for Gmail.
+  - **phpmailer.smtp-encoding**: Normally safe to leave as the default, but
+    adjusting it may help resolve mail mangling issues (for example, mail
+    arriving with too many or too few newlines).
 
 = Adapter: Mailgun =
 

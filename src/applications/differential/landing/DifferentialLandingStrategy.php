@@ -8,7 +8,7 @@ abstract class DifferentialLandingStrategy {
     PhabricatorRepository $repository);
 
   /**
-   * returns PhabricatorActionView or null.
+   * @return PhabricatorActionView or null.
    */
   abstract function createMenuItem(
     PhabricatorUser $viewer,
@@ -16,7 +16,7 @@ abstract class DifferentialLandingStrategy {
     PhabricatorRepository $repository);
 
   /**
-   * returns PhabricatorActionView which can be attached to the revision view.
+   * @return PhabricatorActionView which can be attached to the revision view.
    */
   protected function createActionView($revision, $name) {
     $strategy = get_class($this);
@@ -34,8 +34,8 @@ abstract class DifferentialLandingStrategy {
    * By default, this method checks for push permissions, and for the
    * revision being Accepted.
    *
-   * @return FALSE for "not disabled";
-   *         Human-readable text explaining why, if it is disabled;
+   * @return False for "not disabled"; human-readable text explaining why, if
+   *         it is disabled.
    */
   public function isActionDisabled(
     PhabricatorUser $viewer,
@@ -44,43 +44,40 @@ abstract class DifferentialLandingStrategy {
 
     $status = $revision->getStatus();
     if ($status != ArcanistDifferentialRevisionStatus::ACCEPTED) {
-      return pht("Only Accepted revisions can be landed.");
+      return pht('Only Accepted revisions can be landed.');
     }
 
     if (!PhabricatorPolicyFilter::hasCapability(
         $viewer,
         $repository,
-        DiffusionCapabilityPush::CAPABILITY)) {
-      return pht("You do not have permissions to push to this repository.");
+        DiffusionPushCapability::CAPABILITY)) {
+      return pht('You do not have permissions to push to this repository.');
     }
 
     return false;
   }
 
   /**
-   * might break if repository is not Git.
+   * Might break if repository is not Git.
    */
   protected function getGitWorkspace(PhabricatorRepository $repository) {
     try {
         return DifferentialGetWorkingCopy::getCleanGitWorkspace($repository);
     } catch (Exception $e) {
-      throw new PhutilProxyException(
-        'Failed to allocate a workspace',
-        $e);
+      throw new PhutilProxyException('Failed to allocate a workspace', $e);
     }
   }
 
   /**
-   * might break if repository is not Mercurial.
+   * Might break if repository is not Mercurial.
    */
   protected function getMercurialWorkspace(PhabricatorRepository $repository) {
     try {
       return DifferentialGetWorkingCopy::getCleanMercurialWorkspace(
         $repository);
     } catch (Exception $e) {
-      throw new PhutilProxyException(
-        'Failed to allocate a workspace',
-        $e);
+      throw new PhutilProxyException('Failed to allocate a workspace', $e);
     }
   }
+
 }

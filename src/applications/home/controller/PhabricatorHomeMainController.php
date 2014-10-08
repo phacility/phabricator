@@ -1,9 +1,8 @@
 <?php
 
-final class PhabricatorHomeMainController
-  extends PhabricatorHomeController {
+final class PhabricatorHomeMainController extends PhabricatorHomeController {
 
-  private $filter;
+  private $only;
   private $minipanels = array();
 
   public function shouldAllowPublic() {
@@ -11,40 +10,69 @@ final class PhabricatorHomeMainController
   }
 
   public function willProcessRequest(array $data) {
-    $this->filter = idx($data, 'filter');
+    $this->only = idx($data, 'only');
   }
 
   public function processRequest() {
     $user = $this->getRequest()->getUser();
 
-    if ($this->filter == 'jump') {
-      return $this->buildJumpResponse();
+    $dashboard = PhabricatorDashboardInstall::getDashboard(
+      $user,
+      $user->getPHID(),
+      get_class($this->getCurrentApplication()));
+
+    if (!$dashboard) {
+      $dashboard = PhabricatorDashboardInstall::getDashboard(
+        $user,
+        PhabricatorHomeApplication::DASHBOARD_DEFAULT,
+        get_class($this->getCurrentApplication()));
     }
 
-    $nav = $this->buildNav();
+    if ($dashboard) {
+      $content = id(new PhabricatorDashboardRenderingEngine())
+        ->setViewer($user)
+        ->setDashboard($dashboard)
+        ->renderDashboard();
+    } else {
+      $project_query = new PhabricatorProjectQuery();
+      $project_query->setViewer($user);
+      $project_query->withMemberPHIDs(array($user->getPHID()));
+      $projects = $project_query->execute();
 
-    $project_query = new PhabricatorProjectQuery();
-    $project_query->setViewer($user);
-    $project_query->withMemberPHIDs(array($user->getPHID()));
-    $projects = $project_query->execute();
+      $content = $this->buildMainResponse($projects);
+    }
 
-    return $this->buildMainResponse($nav, $projects);
+    if (!$this->only) {
+      $nav = $this->buildNav();
+      $nav->appendChild(
+        array(
+          $content,
+          id(new PhabricatorGlobalUploadTargetView())->setUser($user),
+        ));
+      $content = $nav;
+    }
+
+    return $this->buildApplicationPage(
+      $content,
+      array(
+        'title' => 'Phabricator',
+      ));
   }
 
-  private function buildMainResponse($nav, array $projects) {
+  private function buildMainResponse(array $projects) {
     assert_instances_of($projects, 'PhabricatorProject');
     $viewer = $this->getRequest()->getUser();
 
     $has_maniphest = PhabricatorApplication::isClassInstalledForViewer(
-      'PhabricatorApplicationManiphest',
+      'PhabricatorManiphestApplication',
       $viewer);
 
     $has_audit = PhabricatorApplication::isClassInstalledForViewer(
-      'PhabricatorApplicationAudit',
+      'PhabricatorAuditApplication',
       $viewer);
 
     $has_differential = PhabricatorApplication::isClassInstalledForViewer(
-      'PhabricatorApplicationDifferential',
+      'PhabricatorDifferentialApplication',
       $viewer);
 
     if ($has_maniphest) {
@@ -71,16 +99,13 @@ final class PhabricatorHomeMainController
       $welcome_panel = null;
     }
 
-    $jump_panel = $this->buildJumpPanel();
-
     if ($has_differential) {
       $revision_panel = $this->buildRevisionPanel();
     } else {
       $revision_panel = null;
     }
 
-    $content = array(
-      $jump_panel,
+    return array(
       $welcome_panel,
       $unbreak_panel,
       $triage_panel,
@@ -90,39 +115,6 @@ final class PhabricatorHomeMainController
       $commit_panel,
       $this->minipanels,
     );
-
-    $user = $this->getRequest()->getUser();
-    $nav->appendChild($content);
-    $nav->appendChild(id(new PhabricatorGlobalUploadTargetView())
-      ->setUser($user));
-
-    return $this->buildApplicationPage(
-      $nav,
-      array(
-        'title' => 'Phabricator',
-        'device' => true,
-      ));
-  }
-
-  private function buildJumpResponse() {
-    $request = $this->getRequest();
-    $jump = $request->getStr('jump');
-
-    $response = PhabricatorJumpNavHandler::getJumpResponse(
-      $request->getUser(),
-      $jump);
-
-    if ($response) {
-      return $response;
-    } else if ($request->isFormPost()) {
-      $uri = new PhutilURI('/search/');
-      $uri->setQueryParam('query', $jump);
-      $uri->setQueryParam('search:primary', 'true');
-
-      return id(new AphrontRedirectResponse())->setURI((string)$uri);
-    } else {
-      return id(new AphrontRedirectResponse())->setURI('/');
-    }
   }
 
   private function buildUnbreakNowPanel() {
@@ -148,8 +140,8 @@ final class PhabricatorHomeMainController
         'Nothing appears to be critically broken right now.');
     }
 
-    $href = sprintf(
-      '/maniphest/?statuses[]=%s&priorities[]=%s#R',
+    $href = urisprintf(
+      '/maniphest/?statuses=%s&priorities=%s#R',
       implode(',', ManiphestTaskStatus::getOpenStatusConstants()),
       $unbreak_now);
     $title = pht('Unbreak Now!');
@@ -196,8 +188,8 @@ final class PhabricatorHomeMainController
     }
 
     $title = pht('Needs Triage');
-    $href = sprintf(
-      '/maniphest/?statuses[]=%s&priorities[]=%s&userProjects[]=%s#R',
+    $href = urisprintf(
+      '/maniphest/?statuses=%s&priorities=%s&userProjects=%s#R',
       implode(',', ManiphestTaskStatus::getOpenStatusConstants()),
       $needs_triage,
       $user->getPHID());
@@ -316,73 +308,6 @@ final class PhabricatorHomeMainController
     return $view;
   }
 
-  private function buildJumpPanel($query=null) {
-    $request = $this->getRequest();
-    $user = $request->getUser();
-
-    $uniq_id = celerity_generate_unique_node_id();
-
-    Javelin::initBehavior(
-      'phabricator-autofocus',
-      array(
-        'id' => $uniq_id,
-      ));
-
-    require_celerity_resource('phabricator-jump-nav');
-
-    $doc_href = PhabricatorEnv::getDocLink('Jump Nav User Guide');
-    $doc_link = phutil_tag(
-      'a',
-      array(
-        'href' => $doc_href,
-      ),
-      'Jump Nav User Guide');
-
-    $jump_input = phutil_tag(
-      'input',
-      array(
-        'type'  => 'text',
-        'class' => 'phabricator-jump-nav',
-        'name'  => 'jump',
-        'id'    => $uniq_id,
-        'value' => $query,
-      ));
-    $jump_caption = phutil_tag(
-      'p',
-      array(
-        'class' => 'phabricator-jump-nav-caption',
-      ),
-      hsprintf(
-        'Enter the name of an object like <tt>D123</tt> to quickly jump to '.
-          'it. See %s or type <tt>help</tt>.',
-        $doc_link));
-
-    $form = phabricator_form(
-      $user,
-      array(
-        'action' => '/jump/',
-        'method' => 'POST',
-        'class'  => 'phabricator-jump-nav-form',
-      ),
-      array(
-        $jump_input,
-        $jump_caption,
-      ));
-
-    $panel = new AphrontPanelView();
-    $panel->setNoBackground();
-    // $panel->appendChild();
-
-    $list_filter = new AphrontListFilterView();
-    $list_filter->appendChild($form);
-
-    $container = phutil_tag('div',
-      array('class' => 'phabricator-jump-nav-container'),
-      $list_filter);
-
-    return $container;
-  }
-
   private function renderSectionHeader($title, $href) {
     $header = phutil_tag(
       'a',
@@ -402,7 +327,7 @@ final class PhabricatorHomeMainController
         ),
         array(
           phutil_tag('strong', array(), $title.': '),
-          $body
+          $body,
         )));
     $this->minipanels[] = $panel;
   }

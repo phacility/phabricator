@@ -93,7 +93,7 @@ final class ReleephRequestEditController extends ReleephBranchController {
         if ($request_identifier ===
           ReleephRequestTypeaheadControl::PLACEHOLDER) {
 
-          $errors[] = "No commit ID was provided.";
+          $errors[] = 'No commit ID was provided.';
           $e_request_identifier = 'Required';
         } else {
           $pr_commit = null;
@@ -195,8 +195,8 @@ final class ReleephRequestEditController extends ReleephBranchController {
 
     $age_string = '';
     if ($is_edit) {
-      $age_string = phabricator_format_relative_time(
-        time() - $pull->getDateCreated()) . ' ago';
+      $age_string = phutil_format_relative_time(
+        time() - $pull->getDateCreated()).' ago';
     }
 
     // Warn the user if we've been redirected here because we tried to
@@ -206,9 +206,9 @@ final class ReleephRequestEditController extends ReleephBranchController {
       $notice_messages = array(
         'You are editing an existing pick request!',
         hsprintf(
-          "Requested %s by %s",
+          'Requested %s by %s',
           $age_string,
-          $handles[$pull->getRequestUserPHID()]->renderLink())
+          $handles[$pull->getRequestUserPHID()]->renderLink()),
       );
       $notice_view = id(new AphrontErrorView())
         ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
@@ -307,7 +307,6 @@ final class ReleephRequestEditController extends ReleephBranchController {
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 }

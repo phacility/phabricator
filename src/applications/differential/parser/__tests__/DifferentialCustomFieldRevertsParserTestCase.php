@@ -42,7 +42,7 @@ final class DifferentialCustomFieldRevertsParserTestCase
         ),
       ),
 
-      "Reverts 123" => array(
+      'Reverts 123' => array(
         array(
           'match' => 'Reverts 123',
           'prefix' => 'Reverts',
@@ -54,7 +54,7 @@ final class DifferentialCustomFieldRevertsParserTestCase
       ),
 
 
-      "Reverts r123" => array(
+      'Reverts r123' => array(
         array(
           'match' => 'Reverts r123',
           'prefix' => 'Reverts',
@@ -78,7 +78,7 @@ final class DifferentialCustomFieldRevertsParserTestCase
 
       "This doesn't revert anything" => array(),
       'nonrevert of r11' => array(),
-      "fixed a bug" => array(),
+      'fixed a bug' => array(),
     );
 
     foreach ($map as $input => $expect) {

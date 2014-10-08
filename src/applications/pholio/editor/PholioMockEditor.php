@@ -1,11 +1,17 @@
 <?php
 
-/**
- * @group pholio
- */
 final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
 
   private $newImages = array();
+
+  public function getEditorApplicationClass() {
+    return 'PhabricatorPholioApplication';
+  }
+
+  public function getEditorObjectsDescription() {
+    return pht('Pholio Mocks');
+  }
+
   private function setNewImages(array $new_images) {
     assert_instances_of($new_images, 'PholioImage');
     $this->newImages = $new_images;
@@ -25,6 +31,7 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
 
     $types[] = PholioTransactionType::TYPE_NAME;
     $types[] = PholioTransactionType::TYPE_DESCRIPTION;
+    $types[] = PholioTransactionType::TYPE_STATUS;
     $types[] = PholioTransactionType::TYPE_INLINE;
 
     $types[] = PholioTransactionType::TYPE_IMAGE_FILE;
@@ -45,6 +52,8 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
         return $object->getName();
       case PholioTransactionType::TYPE_DESCRIPTION:
         return $object->getDescription();
+      case PholioTransactionType::TYPE_STATUS:
+        return $object->getStatus();
       case PholioTransactionType::TYPE_IMAGE_FILE:
         $images = $object->getImages();
         return mpull($images, 'getPHID');
@@ -88,6 +97,7 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
     switch ($xaction->getTransactionType()) {
       case PholioTransactionType::TYPE_NAME:
       case PholioTransactionType::TYPE_DESCRIPTION:
+      case PholioTransactionType::TYPE_STATUS:
       case PholioTransactionType::TYPE_IMAGE_NAME:
       case PholioTransactionType::TYPE_IMAGE_DESCRIPTION:
       case PholioTransactionType::TYPE_IMAGE_SEQUENCE:
@@ -196,6 +206,11 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
       case PholioTransactionType::TYPE_DESCRIPTION:
         $object->setDescription($xaction->getNewValue());
         break;
+      case PholioTransactionType::TYPE_STATUS:
+        $object->setStatus($xaction->getNewValue());
+        break;
+      case PhabricatorTransactions::TYPE_EDGE:
+        return;
     }
   }
 
@@ -263,6 +278,8 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
         $image->setSequence($value);
         $image->save();
         break;
+      case PhabricatorTransactions::TYPE_EDGE:
+        return;
     }
   }
 
@@ -287,6 +304,7 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
     switch ($type) {
       case PholioTransactionType::TYPE_NAME:
       case PholioTransactionType::TYPE_DESCRIPTION:
+      case PholioTransactionType::TYPE_STATUS:
         return $v;
       case PholioTransactionType::TYPE_IMAGE_REPLACE:
         $u_img = $u->getNewValue();
@@ -400,6 +418,19 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
 
   protected function getMailSubjectPrefix() {
     return PhabricatorEnv::getEnvConfig('metamta.pholio.subject-prefix');
+  }
+
+  public function getMailTagsMap() {
+    return array(
+      MetaMTANotificationType::TYPE_PHOLIO_STATUS =>
+        pht("A mock's status changes."),
+      MetaMTANotificationType::TYPE_PHOLIO_COMMENT =>
+        pht('Someone comments on a mock.'),
+      MetaMTANotificationType::TYPE_PHOLIO_UPDATED =>
+        pht('Mock images or descriptions change.'),
+      MetaMTANotificationType::TYPE_PHOLIO_OTHER =>
+        pht('Other mock activity not listed above occurs.'),
+    );
   }
 
   protected function shouldPublishFeedStory(

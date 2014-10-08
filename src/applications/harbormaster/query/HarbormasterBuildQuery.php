@@ -122,6 +122,13 @@ final class HarbormasterBuildQuery
       $targets = mgroup($targets, 'getBuildPHID');
       foreach ($page as $build) {
         $build_targets = idx($targets, $build->getPHID(), array());
+
+        foreach ($build_targets as $phid => $target) {
+          if ($target->getBuildGeneration() !== $build->getBuildGeneration()) {
+            unset($build_targets[$phid]);
+          }
+        }
+
         $build->attachBuildTargets($build_targets);
       }
     }
@@ -173,7 +180,7 @@ final class HarbormasterBuildQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationHarbormaster';
+    return 'PhabricatorHarbormasterApplication';
   }
 
 }

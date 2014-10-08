@@ -14,7 +14,7 @@ final class PhabricatorStorageManagementProbeWorkflow
     $console = PhutilConsole::getConsole();
     $console->writeErr(
       "%s\n",
-      pht("Analyzing table sizes (this may take a moment)..."));
+      pht('Analyzing table sizes (this may take a moment)...'));
 
     $api = $this->getAPI();
     $patches = $this->getPatches();
@@ -45,25 +45,25 @@ final class PhabricatorStorageManagementProbeWorkflow
       }
     }
 
-    $console->writeOut("%s\n", pht("APPROXIMATE TABLE SIZES"));
+    $console->writeOut("%s\n", pht('APPROXIMATE TABLE SIZES'));
     asort($totals);
     foreach ($totals as $db => $size) {
       $database_size = $this->formatSize($totals[$db], $overall);
       $console->writeOut(
         "**%s**\n",
-        sprintf("%-32.32s %18s", $db, $database_size));
+        sprintf('%-32.32s %18s', $db, $database_size));
       $data[$db] = isort($data[$db], '_totalSize');
       foreach ($data[$db] as $table => $info) {
         $table_size = $this->formatSize($info['_totalSize'], $overall);
         $console->writeOut(
           "%s\n",
-          sprintf("    %-28.28s %18s", $table, $table_size));
+          sprintf('    %-28.28s %18s', $table, $table_size));
       }
     }
     $overall_size = $this->formatSize($overall, $overall);
     $console->writeOut(
       "**%s**\n",
-      sprintf("%-32.32s %18s", pht('TOTAL'), $overall_size));
+      sprintf('%-32.32s %18s', pht('TOTAL'), $overall_size));
 
     return 0;
   }

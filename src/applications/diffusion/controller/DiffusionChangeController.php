@@ -18,7 +18,9 @@ final class DiffusionChangeController extends DiffusionController {
         'commit' => $drequest->getCommit(),
         'path' => $drequest->getPath(),
       ));
-    $drequest->setCommit($data['effectiveCommit']);
+
+    $drequest->updateSymbolicCommit($data['effectiveCommit']);
+
     $raw_changes = ArcanistDiffChange::newFromConduit($data['changes']);
     $diff = DifferentialDiff::newFromRawChanges($raw_changes);
     $changesets = $diff->getChangesets();
@@ -31,7 +33,6 @@ final class DiffusionChangeController extends DiffusionController {
 
     $repository = $drequest->getRepository();
     $callsign = $repository->getCallsign();
-    $commit = $drequest->getRawCommit();
     $changesets = array(
       0 => $changeset,
     );
@@ -42,7 +43,7 @@ final class DiffusionChangeController extends DiffusionController {
     $changeset_view->setVisibleChangesets($changesets);
     $changeset_view->setRenderingReferences(
       array(
-        0 => $drequest->generateURI(array('action' => 'rendering-ref'))
+        0 => $drequest->generateURI(array('action' => 'rendering-ref')),
       ));
 
     $raw_params = array(
@@ -53,7 +54,7 @@ final class DiffusionChangeController extends DiffusionController {
     );
 
     $right_uri = $drequest->generateURI($raw_params);
-    $raw_params['params']['before'] = $drequest->getRawCommit();
+    $raw_params['params']['before'] = $drequest->getStableCommit();
     $left_uri = $drequest->generateURI($raw_params);
     $changeset_view->setRawFileURIs($left_uri, $right_uri);
 
@@ -95,6 +96,7 @@ final class DiffusionChangeController extends DiffusionController {
       ),
       array(
         'title' => pht('Change'),
+        'device' => false,
       ));
   }
 
@@ -113,7 +115,7 @@ final class DiffusionChangeController extends DiffusionController {
       id(new PhabricatorActionView())
         ->setName(pht('View History'))
         ->setHref($history_uri)
-        ->setIcon('history'));
+        ->setIcon('fa-clock-o'));
 
     $browse_uri = $drequest->generateURI(
       array(
@@ -124,7 +126,7 @@ final class DiffusionChangeController extends DiffusionController {
       id(new PhabricatorActionView())
         ->setName(pht('Browse Content'))
         ->setHref($browse_uri)
-        ->setIcon('file'));
+        ->setIcon('fa-files-o'));
 
     return $view;
   }
@@ -139,7 +141,7 @@ final class DiffusionChangeController extends DiffusionController {
       ->setUser($viewer)
       ->setActionList($actions);
 
-    $stable_commit = $drequest->getStableCommitName();
+    $stable_commit = $drequest->getStableCommit();
     $callsign = $drequest->getRepository()->getCallsign();
 
     $view->addProperty(

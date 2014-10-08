@@ -10,7 +10,7 @@ final class PhabricatorCampfireProtocolAdapter
   protected function buildStreamingUrl($channel) {
     $ssl = $this->getConfig('ssl');
 
-    $url = ($ssl) ? "https://" : "http://";
+    $url = ($ssl) ? 'https://' : 'http://';
     $url .= "streaming.campfirenow.com/room/{$channel}/live.json";
 
     return $url;
@@ -92,7 +92,9 @@ final class PhabricatorCampfireProtocolAdapter
       array(
         'message' => array(
           'type' => $type,
-          'body' => $message)));
+          'body' => $message,
+        ),
+      ));
   }
 
   public function __destruct() {

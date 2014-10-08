@@ -2,10 +2,8 @@
 
 /**
  * Delivers CSS and JS resources to the browser. This controller handles all
- * ##/res/## requests, and manages caching, package construction, and resource
+ * `/res/` requests, and manages caching, package construction, and resource
  * preprocessing.
- *
- * @group celerity
  */
 final class CelerityPhabricatorResourceController
   extends CelerityResourceController {

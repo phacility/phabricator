@@ -42,7 +42,7 @@ final class DifferentialManiphestTasksField
 
     return PhabricatorEdgeQuery::loadDestinationPHIDs(
       $revision->getPHID(),
-      PhabricatorEdgeConfig::TYPE_DREV_HAS_RELATED_TASK);
+      DifferentialRevisionHasTaskEdgeType::EDGECONST);
   }
 
   public function getApplicationTransactionType() {
@@ -51,7 +51,7 @@ final class DifferentialManiphestTasksField
 
   public function getApplicationTransactionMetadata() {
     return array(
-      'edge:type' => PhabricatorEdgeConfig::TYPE_DREV_HAS_RELATED_TASK,
+      'edge:type' => DifferentialRevisionHasTaskEdgeType::EDGECONST,
     );
   }
 
@@ -91,7 +91,7 @@ final class DifferentialManiphestTasksField
     return $this->parseObjectList(
       $value,
       array(
-        ManiphestPHIDTypeTask::TYPECONST,
+        ManiphestTaskPHIDType::TYPECONST,
       ));
   }
 

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group phame
- */
 final class PhamePostPublishController extends PhameController {
 
   private $id;
@@ -65,7 +62,6 @@ final class PhamePostPublishController extends PhameController {
       $nav,
       array(
         'title'   => pht('Preview Post'),
-        'device'  => true,
       ));
   }
 
@@ -87,4 +83,5 @@ final class PhamePostPublishController extends PhameController {
         ),
         ''));
   }
+
 }

@@ -1,14 +1,13 @@
 <?php
 
-final class DiffusionRepositoryNewController
-  extends DiffusionController {
+final class DiffusionRepositoryNewController extends DiffusionController {
 
   public function processRequest() {
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
     $this->requireApplicationCapability(
-      DiffusionCapabilityCreateRepositories::CAPABILITY);
+      DiffusionCreateRepositoriesCapability::CAPABILITY);
 
     if ($request->isFormPost()) {
       if ($request->getStr('type')) {
@@ -48,8 +47,7 @@ final class DiffusionRepositoryNewController
             array(
               pht(
                 'Create a new, empty repository which Phabricator will host. '.
-                'For instructions on configuring repository hosting, see %s. '.
-                'This feature is new and in beta!',
+                'For instructions on configuring repository hosting, see %s.',
                 $doc_link),
             ))
           ->addButton(
@@ -80,7 +78,6 @@ final class DiffusionRepositoryNewController
       ),
       array(
         'title' => pht('New Repository'),
-        'device' => true,
       ));
   }
 

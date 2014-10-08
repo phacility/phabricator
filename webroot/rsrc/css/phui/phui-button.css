@@ -78,6 +78,7 @@ a.simple:visited {
   background-image: none;
   border: 1px solid transparent;
   color: {$bluetext};
+  border: 1px solid {$lightblueborder};
   text-shadow: 0 1px #fff;
 }
 
@@ -98,12 +99,12 @@ body a.button:active {
 button.grey:active,
 a.grey:active,
 button.grey_active,
-a.button.dropdown-open {
+a.button.phuix-dropdown-open {
   background-color: #7d7d7d;
   box-shadow: inset 0 0 4px rgba(0,0,0,.2);
 }
 
-a.dropdown-open {
+a.phuix-dropdown-open {
   color: {$greytext};
 }
 
@@ -120,6 +121,11 @@ button.simple:hover {
   background-image: none;
   border-bottom: 1px solid {$greyborder};
   text-shadow: none;
+  box-shadow: none;
+}
+
+a.button.simple.phuix-dropdown-open {
+  background-color: #fff;
   box-shadow: none;
 }
 
@@ -166,34 +172,23 @@ button.link:hover {
   text-decoration: underline;
 }
 
-.dropdown-menu-frame {
+.phuix-dropdown-menu {
   position: absolute;
   width: 240px;
   background: #fff;
   margin-top: -1px;
   padding: 5px 0;
-  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
   border: 1px solid {$lightgreyborder};
-  border-bottom-color: {$greyborder};
+  border-bottom: 1px solid {$greyborder};
+  border-radius: 3px;
+  margin-bottom: 16px;
 }
 
-.dropdown-menu-frame .dropdown-menu-item {
-  display: block;
-  padding: 2px 10px;
-  clear: both;
-  line-height: 20px;
-  color: {$darkgreytext};
-  white-space: nowrap;
-}
-
-.dropdown-menu-frame .dropdown-menu-item-disabled {
-  color: {$lightgreytext};
-}
-
-.dropdown-menu-frame .phui-icon-view {
-  display: inline-block;
-  padding: 0;
-  margin: 2px 6px -2px 4px;
+.phuix-dropdown-menu a:focus {
+  /* We automatically focus links in dropdown menus for assistive devices, but
+     this is distracting for visual user agents. */
+  outline: none;
 }
 
 a.policy-control {
@@ -210,17 +205,6 @@ a.policy-control span.phui-icon-view {
      dropdown buttons? */
   top: 4px;
   left: 7px;
-}
-
-.dropdown-menu-frame .dropdown-menu-item-selected {
-  background: {$lightblue};
-}
-
-.dropdown-menu-frame a:hover {
-  background: {$blue};
-  color: white;
-  cursor: pointer;
-  text-decoration: none;
 }
 
 a.toggle {
@@ -310,6 +294,10 @@ a.toggle-fixed {
   position: absolute;
   top: 5px;
   left: 8px;
+}
+
+.phui-button-bar .button .phui-icon-view {
+  left: 11px;
 }
 
 .button.has-icon .phui-button-text {

@@ -31,7 +31,7 @@ abstract class PhabricatorCalendarController extends PhabricatorController {
       id(new PHUIListItemView())
         ->setName(pht('Create Event'))
         ->setHref($this->getApplicationURI().'event/create')
-        ->setIcon('create'));
+        ->setIcon('fa-plus-square'));
 
     return $crumbs;
   }

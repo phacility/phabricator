@@ -8,7 +8,10 @@
  * @task load     Loading Stories
  * @task policy   Policy Implementation
  */
-abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
+abstract class PhabricatorFeedStory
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorMarkupInterface {
 
   private $data;
   private $hasViewed;
@@ -16,8 +19,10 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
   private $hovercard = false;
   private $renderingTarget = PhabricatorApplicationTransaction::TARGET_HTML;
 
-  private $handles  = array();
-  private $objects  = array();
+  private $handles = array();
+  private $objects = array();
+  private $projectPHIDs = array();
+  private $markupFieldOutput = array();
 
 /* -(  Loading Stories  )---------------------------------------------------- */
 
@@ -93,6 +98,30 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
       $stories[$key]->setObjects($story_objects);
     }
 
+    // If stories are about PhabricatorProjectInterface objects, load the
+    // projects the objects are a part of so we can render project tags
+    // on the stories.
+
+    $project_phids = array();
+    foreach ($objects as $object) {
+      if ($object instanceof PhabricatorProjectInterface) {
+        $project_phids[$object->getPHID()] = array();
+      }
+    }
+
+    if ($project_phids) {
+      $edge_query = id(new PhabricatorEdgeQuery())
+        ->withSourcePHIDs(array_keys($project_phids))
+        ->withEdgeTypes(
+          array(
+            PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+          ));
+      $edge_query->execute();
+      foreach ($project_phids as $phid => $ignored) {
+        $project_phids[$phid] = $edge_query->getDestinationPHIDs(array($phid));
+      }
+    }
+
     $handle_phids = array();
     foreach ($stories as $key => $story) {
       foreach ($story->getRequiredHandlePHIDs() as $phid) {
@@ -101,6 +130,14 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
       if ($story->getAuthorPHID()) {
         $key_phids[$key][$story->getAuthorPHID()] = true;
       }
+
+      $object_phid = $story->getPrimaryObjectPHID();
+      $object_project_phids = idx($project_phids, $object_phid, array());
+      $story->setProjectPHIDs($object_project_phids);
+      foreach ($object_project_phids as $dst) {
+        $key_phids[$key][$dst] = true;
+      }
+
       $handle_phids += $key_phids[$key];
     }
 
@@ -117,7 +154,44 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
       $stories[$key]->setHandles($story_handles);
     }
 
+    // Load and process story markup blocks.
+
+    $engine = new PhabricatorMarkupEngine();
+    $engine->setViewer($viewer);
+    foreach ($stories as $story) {
+      foreach ($story->getFieldStoryMarkupFields() as $field) {
+        $engine->addObject($story, $field);
+      }
+    }
+
+    $engine->process();
+
+    foreach ($stories as $story) {
+      foreach ($story->getFieldStoryMarkupFields() as $field) {
+        $story->setMarkupFieldOutput(
+          $field,
+          $engine->getOutput($story, $field));
+      }
+    }
+
     return $stories;
+  }
+
+  public function setMarkupFieldOutput($field, $output) {
+    $this->markupFieldOutput[$field] = $output;
+    return $this;
+  }
+
+  public function getMarkupFieldOutput($field) {
+    if (!array_key_exists($field, $this->markupFieldOutput)) {
+      throw new Exception(
+        pht(
+          'Trying to retrieve markup field key "%s", but this feed story '.
+          'did not request it be rendered.',
+          $field));
+    }
+
+    return $this->markupFieldOutput[$field];
   }
 
   public function setHovercard($hover) {
@@ -163,7 +237,7 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
   public function getPrimaryObject() {
     $phid = $this->getPrimaryObjectPHID();
     if (!$phid) {
-      throw new Exception("Story has no primary object!");
+      throw new Exception('Story has no primary object!');
     }
     return $this->getObject($phid);
   }
@@ -177,6 +251,17 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
   }
 
   abstract public function renderView();
+  public function renderAsTextForDoorkeeper(
+    DoorkeeperFeedStoryPublisher $publisher) {
+
+    // TODO: This (and text rendering) should be properly abstract and
+    // universal. However, this is far less bad than it used to be, and we
+    // need to clean up more old feed code to really make this reasonable.
+
+    return pht(
+      '(Unable to render story of class %s for Doorkeeper.)',
+      get_class($this));
+  }
 
   public function getRequiredHandlePHIDs() {
     return array();
@@ -277,7 +362,7 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
     // the '_top' target for framed feeds.
 
     $class = null;
-    if ($handle->getType() == PhabricatorPeoplePHIDTypeUser::TYPECONST) {
+    if ($handle->getType() == PhabricatorPeopleUserPHIDType::TYPECONST) {
       $class = 'phui-link-person';
     }
 
@@ -304,7 +389,9 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
 
   final protected function renderSummary($text, $len = 128) {
     if ($len) {
-      $text = phutil_utf8_shorten($text, $len);
+      $text = id(new PhutilUTF8StringTruncator())
+        ->setMaximumGlyphs($len)
+        ->truncateString($text);
     }
     switch ($this->getRenderingTarget()) {
       case PhabricatorApplicationTransaction::TARGET_HTML:
@@ -319,10 +406,30 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
   }
 
   protected function newStoryView() {
-    return id(new PHUIFeedStoryView())
+    $view = id(new PHUIFeedStoryView())
       ->setChronologicalKey($this->getChronologicalKey())
       ->setEpoch($this->getEpoch())
       ->setViewed($this->getHasViewed());
+
+    $project_phids = $this->getProjectPHIDs();
+    if ($project_phids) {
+      $view->setTags($this->renderHandleList($project_phids));
+    }
+
+    return $view;
+  }
+
+  public function setProjectPHIDs(array $phids) {
+    $this->projectPHIDs = $phids;
+    return $this;
+  }
+
+  public function getProjectPHIDs() {
+    return $this->projectPHIDs;
+  }
+
+  public function getFieldStoryMarkupFields() {
+    return array();
   }
 
 
@@ -374,6 +481,33 @@ abstract class PhabricatorFeedStory implements PhabricatorPolicyInterface {
 
   public function describeAutomaticCapability($capability) {
     return null;
+  }
+
+
+/* -(  PhabricatorMarkupInterface Implementation )--------------------------- */
+
+
+  public function getMarkupFieldKey($field) {
+    return 'feed:'.$this->getChronologicalKey().':'.$field;
+  }
+
+  public function newMarkupEngine($field) {
+    return PhabricatorMarkupEngine::newMarkupEngine(array());
+  }
+
+  public function getMarkupText($field) {
+    throw new PhutilMethodNotImplementedException();
+  }
+
+  public function didMarkupText(
+    $field,
+    $output,
+    PhutilMarkupEngine $engine) {
+    return $output;
+  }
+
+  public function shouldUseMarkupCache($field) {
+    return true;
   }
 
 }

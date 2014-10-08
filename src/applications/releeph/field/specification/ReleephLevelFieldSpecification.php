@@ -43,7 +43,7 @@ abstract class ReleephLevelFieldSpecification
 
     if ($this->error) {
       $control->setError($this->error);
-    } elseif ($this->getDefaultLevel()) {
+    } else if ($this->getDefaultLevel()) {
       $control->setError(true);
     }
 

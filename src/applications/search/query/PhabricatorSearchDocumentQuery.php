@@ -25,7 +25,6 @@ final class PhabricatorSearchDocumentQuery
   }
 
   protected function willFilterPage(array $handles) {
-
     // NOTE: This is used by the object selector dialog to exclude the object
     // you're looking at, so that, e.g., a task can't be set as a dependency
     // of itself in the UI.
@@ -67,7 +66,7 @@ final class PhabricatorSearchDocumentQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationSearch';
+    return 'PhabricatorSearchApplication';
   }
 
   protected function getPagingValue($result) {

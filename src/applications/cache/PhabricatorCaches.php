@@ -1,13 +1,112 @@
 <?php
 
 /**
- * @task setup  Setup Cache
+ * @task immutable  Immutable Cache
+ * @task setup      Setup Cache
+ * @task compress   Compression
  */
 final class PhabricatorCaches {
 
   public static function getNamespace() {
     return PhabricatorEnv::getEnvConfig('phabricator.cache-namespace');
   }
+
+  private static function newStackFromCaches(array $caches) {
+    $caches = self::addNamespaceToCaches($caches);
+    $caches = self::addProfilerToCaches($caches);
+    return id(new PhutilKeyValueCacheStack())
+      ->setCaches($caches);
+  }
+
+
+/* -(  Local Cache  )-------------------------------------------------------- */
+
+
+  /**
+   * Gets an immutable cache stack.
+   *
+   * This stack trades mutability away for improved performance. Normally, it is
+   * APC + DB.
+   *
+   * In the general case with multiple web frontends, this stack can not be
+   * cleared, so it is only appropriate for use if the value of a given key is
+   * permanent and immutable.
+   *
+   * @return PhutilKeyValueCacheStack Best immutable stack available.
+   * @task immutable
+   */
+  public static function getImmutableCache() {
+    static $cache;
+    if (!$cache) {
+      $caches = self::buildImmutableCaches();
+      $cache = self::newStackFromCaches($caches);
+    }
+    return $cache;
+  }
+
+
+  /**
+   * Build the immutable cache stack.
+   *
+   * @return list<PhutilKeyValueCache> List of caches.
+   * @task immutable
+   */
+  private static function buildImmutableCaches() {
+    $caches = array();
+
+    $apc = new PhutilAPCKeyValueCache();
+    if ($apc->isAvailable()) {
+      $caches[] = $apc;
+    }
+
+    $caches[] = new PhabricatorKeyValueDatabaseCache();
+
+    return $caches;
+  }
+
+
+/* -(  Repository Graph Cache  )--------------------------------------------- */
+
+
+  public static function getRepositoryGraphL1Cache() {
+    static $cache;
+    if (!$cache) {
+      $caches = self::buildRepositoryGraphL1Caches();
+      $cache = self::newStackFromCaches($caches);
+    }
+    return $cache;
+  }
+
+  private static function buildRepositoryGraphL1Caches() {
+    $caches = array();
+
+    $request = new PhutilInRequestKeyValueCache();
+    $request->setLimit(32);
+    $caches[] = $request;
+
+    $apc = new PhutilAPCKeyValueCache();
+    if ($apc->isAvailable()) {
+      $caches[] = $apc;
+    }
+
+    return $caches;
+  }
+
+  public static function getRepositoryGraphL2Cache() {
+    static $cache;
+    if (!$cache) {
+      $caches = self::buildRepositoryGraphL2Caches();
+      $cache = self::newStackFromCaches($caches);
+    }
+    return $cache;
+  }
+
+  private static function buildRepositoryGraphL2Caches() {
+    $caches = array();
+    $caches[] = new PhabricatorKeyValueDatabaseCache();
+    return $caches;
+  }
+
 
 /* -(  Setup Cache  )-------------------------------------------------------- */
 
@@ -30,10 +129,7 @@ final class PhabricatorCaches {
     static $cache;
     if (!$cache) {
       $caches = self::buildSetupCaches();
-      $caches = self::addNamespaceToCaches($caches);
-      $caches = self::addProfilerToCaches($caches);
-      $cache = id(new PhutilKeyValueCacheStack())
-        ->setCaches($caches);
+      $cache = self::newStackFromCaches($caches);
     }
     return $cache;
   }
@@ -45,7 +141,7 @@ final class PhabricatorCaches {
   private static function buildSetupCaches() {
     // In most cases, we should have APC. This is an ideal cache for our
     // purposes -- it's fast and empties on server restart.
-    $apc = new PhutilKeyValueCacheAPC();
+    $apc = new PhutilAPCKeyValueCache();
     if ($apc->isAvailable()) {
       return array($apc);
     }
@@ -54,7 +150,7 @@ final class PhabricatorCaches {
     // much better than nothing; some setup steps are quite slow.
     $disk_path = self::getSetupCacheDiskCachePath();
     if ($disk_path) {
-      $disk = new PhutilKeyValueCacheOnDisk();
+      $disk = new PhutilOnDiskKeyValueCache();
       $disk->setCacheFile($disk_path);
       $disk->setWait(0.1);
       if ($disk->isAvailable()) {
@@ -187,5 +283,65 @@ final class PhabricatorCaches {
 
     return $caches;
   }
+
+
+  /**
+   * Deflate a value, if deflation is available and has an impact.
+   *
+   * If the value is larger than 1KB, we have `gzdeflate()`, we successfully
+   * can deflate it, and it benefits from deflation, we deflate it. Otherwise
+   * we leave it as-is.
+   *
+   * Data can later be inflated with @{method:inflateData}.
+   *
+   * @param string String to attempt to deflate.
+   * @return string|null Deflated string, or null if it was not deflated.
+   * @task compress
+   */
+  public static function maybeDeflateData($value) {
+    $len = strlen($value);
+    if ($len <= 1024) {
+      return null;
+    }
+
+    if (!function_exists('gzdeflate')) {
+      return null;
+    }
+
+    $deflated = gzdeflate($value);
+    if ($deflated === false) {
+      return null;
+    }
+
+    $deflated_len = strlen($deflated);
+    if ($deflated_len >= ($len / 2)) {
+      return null;
+    }
+
+    return $deflated;
+  }
+
+
+  /**
+   * Inflate data previously deflated by @{method:maybeDeflateData}.
+   *
+   * @param string Deflated data, from @{method:maybeDeflateData}.
+   * @return string Original, uncompressed data.
+   * @task compress
+   */
+  public static function inflateData($value) {
+    if (!function_exists('gzinflate')) {
+      throw new Exception(
+        pht('gzinflate() is not available; unable to read deflated data!'));
+    }
+
+    $value = gzinflate($value);
+    if ($value === false) {
+      throw new Exception(pht('Failed to inflate data!'));
+    }
+
+    return $value;
+  }
+
 
 }

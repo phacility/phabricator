@@ -8,14 +8,14 @@ final class PhabricatorFactDaemon extends PhabricatorDaemon {
 
   public function run() {
     $this->setEngines(PhabricatorFactEngine::loadAllEngines());
-    while (true) {
+    while (!$this->shouldExit()) {
       $iterators = $this->getAllApplicationIterators();
       foreach ($iterators as $iterator_name => $iterator) {
         $this->processIteratorWithCursor($iterator_name, $iterator);
       }
       $this->processAggregates();
 
-      $this->log("Zzz...");
+      $this->log('Zzz...');
       $this->sleep(60 * 5);
     }
   }
@@ -91,7 +91,7 @@ final class PhabricatorFactDaemon extends PhabricatorDaemon {
   }
 
   public function processAggregates() {
-    $this->log("Processing aggregates.");
+    $this->log('Processing aggregates.');
 
     $facts = $this->computeAggregateFacts();
     $this->updateAggregateFacts($facts);

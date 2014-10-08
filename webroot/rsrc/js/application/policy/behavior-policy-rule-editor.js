@@ -5,9 +5,6 @@
  *           javelin-dom
  *           javelin-util
  *           phabricator-prefab
- *           javelin-tokenizer
- *           javelin-typeahead
- *           javelin-typeahead-preloaded-source
  *           javelin-json
  */
 JX.behavior('policy-rule-editor', function(config) {
@@ -94,14 +91,14 @@ JX.behavior('policy-rule-editor', function(config) {
       config.actions,
       data[row_id].action);
     data[row_id].actionNode = action_content;
-    var action_cell = JX.$N('td', {className: "action-cell"}, action_content);
+    var action_cell = JX.$N('td', {className: 'action-cell'}, action_content);
 
     var rule_content = JX.Prefab.renderSelect(
       config.rules,
       data[row_id].rule,
       {sigil: 'rule-select'});
     data[row_id].ruleNode = rule_content;
-    var rule_cell = JX.$N('td', {className: "rule-cell"}, rule_content);
+    var rule_cell = JX.$N('td', {className: 'rule-cell'}, rule_content);
 
     var input = render_input(data[row_id].rule, null);
 
@@ -109,7 +106,7 @@ JX.behavior('policy-rule-editor', function(config) {
     data[row_id].getValue = input.get;
     input.set(data[row_id].value);
 
-    var value_cell = JX.$N('td', {className: "value-cell"}, value_content);
+    var value_cell = JX.$N('td', {className: 'value-cell'}, value_content);
 
     rules_manager.updateRow(row_id, [action_cell, rule_cell, value_cell]);
   }
@@ -124,15 +121,14 @@ JX.behavior('policy-rule-editor', function(config) {
         node = JX.$H(template.markup).getNode();
         node.id = '';
 
-        var datasource = new JX.TypeaheadPreloadedSource(template.uri);
+        var options = {
+          root: node,
+          src: template.uri,
+          placeholder: template.placeholder,
+          limit: template.limit
+        };
 
-        var typeahead = new JX.Typeahead(node);
-        typeahead.setDatasource(datasource);
-
-        var tokenizer = new JX.Tokenizer(node);
-        tokenizer.setLimit(template.limit);
-        tokenizer.setTypeahead(typeahead);
-        tokenizer.setPlaceholder(template.placeholder);
+        var tokenizer = JX.Prefab.buildTokenizer(options).tokenizer;
         tokenizer.start();
 
         get_fn = function() { return JX.keys(tokenizer.getTokens()); };

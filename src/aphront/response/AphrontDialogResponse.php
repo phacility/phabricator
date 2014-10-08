@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group aphront
- */
 final class AphrontDialogResponse extends AphrontResponse {
 
   private $dialog;

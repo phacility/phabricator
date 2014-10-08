@@ -1,10 +1,6 @@
 <?php
 
-/**
- * @group phriction
- */
-final class PhrictionMoveController
-  extends PhrictionController {
+final class PhrictionMoveController extends PhrictionController {
 
   private $id;
 
@@ -17,7 +13,15 @@ final class PhrictionMoveController
     $user = $request->getUser();
 
     if ($this->id) {
-      $document = id(new PhrictionDocument())->load($this->id);
+      $document = id(new PhrictionDocumentQuery())
+        ->setViewer($user)
+        ->withIDs(array($this->id))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->executeOne();
     } else {
       $slug = PhabricatorSlug::normalize(
         $request->getStr('slug'));
@@ -25,9 +29,15 @@ final class PhrictionMoveController
         return new Aphront404Response();
       }
 
-      $document = id(new PhrictionDocument())->loadOneWhere(
-        'slug = %s',
-        $slug);
+      $document = id(new PhrictionDocumentQuery())
+        ->setViewer($user)
+        ->withSlugs(array($slug))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->executeOne();
     }
 
     if (!$document) {
@@ -56,7 +66,7 @@ final class PhrictionMoveController
     if (isset($disallowed_statuses[$document->getStatus()])) {
       $error_dialog = id(new AphrontDialogView())
         ->setUser($user)
-        ->setTitle("Can not move page!")
+        ->setTitle('Can not move page!')
         ->appendChild(pht('An already moved or deleted document '.
           'can not be moved again.'))
         ->addCancelButton($cancel_uri);
@@ -68,9 +78,13 @@ final class PhrictionMoveController
 
     if ($request->isFormPost() && !count($errors)) {
       if (!count($errors)) { // First check if the target document exists
-        $target_document = id(new PhrictionDocument())->loadOneWhere(
-          'slug = %s',
-          $target_slug);
+
+        // NOTE: We use the ominpotent user because we can't let users overwrite
+        // documents even if they can't see them.
+        $target_document = id(new PhrictionDocumentQuery())
+          ->setViewer(PhabricatorUser::getOmnipotentUser())
+          ->withSlugs(array($target_slug))
+          ->executeOne();
 
         // Considering to overwrite existing docs? Nuke this!
         if ($target_document && $target_document->getStatus() ==
@@ -143,4 +157,5 @@ final class PhrictionMoveController
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }
+
 }

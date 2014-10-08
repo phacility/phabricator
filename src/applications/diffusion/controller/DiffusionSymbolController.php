@@ -57,6 +57,7 @@ final class DiffusionSymbolController extends DiffusionController {
           $functions = get_defined_functions();
           if (in_array($this->name, $functions['internal'])) {
             return id(new AphrontRedirectResponse())
+              ->setIsExternal(true)
               ->setURI('http://www.php.net/function.'.$this->name);
           }
         }
@@ -65,6 +66,7 @@ final class DiffusionSymbolController extends DiffusionController {
               interface_exists($this->name, false)) {
             if (id(new ReflectionClass($this->name))->isInternal()) {
               return id(new AphrontRedirectResponse())
+                ->setIsExternal(true)
                 ->setURI('http://www.php.net/class.'.$this->name);
             }
           }
@@ -136,7 +138,7 @@ final class DiffusionSymbolController extends DiffusionController {
         '',
       ));
     $table->setNoDataString(
-      pht("No matching symbol could be found in any indexed project."));
+      pht('No matching symbol could be found in any indexed project.'));
 
     $panel = new AphrontPanelView();
     $panel->setHeader(pht('Similar Symbols'));
@@ -148,7 +150,6 @@ final class DiffusionSymbolController extends DiffusionController {
       ),
       array(
         'title' => pht('Find Symbol'),
-        'device' => true,
       ));
   }
 

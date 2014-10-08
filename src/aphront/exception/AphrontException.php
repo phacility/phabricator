@@ -1,5 +1,3 @@
 <?php
 
-abstract class AphrontException extends Exception {
-
-}
+abstract class AphrontException extends Exception {}

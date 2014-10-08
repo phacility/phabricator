@@ -4,9 +4,20 @@
  *           javelin-stratcom
  *           javelin-workflow
  *           javelin-dom
+ *           javelin-router
  */
 
 JX.behavior('workflow', function() {
+
+  // Queue a workflow at elevated priority. The user just clicked or submitted
+  // something, so service this before loading background content.
+  var queue = function(workflow) {
+    var routable = workflow.getRoutable()
+      .setPriority(2000)
+      .setType('workflow');
+
+    JX.Router.getInstance().queue(routable);
+  };
 
   // If a user clicks an alternate submit button, make sure it gets marshalled
   // into the workflow.
@@ -40,7 +51,8 @@ JX.behavior('workflow', function() {
       // not just the <form /> itself.
 
       e.prevent();
-      JX.Workflow.newFromForm(e.getNode('tag:form'), extra).start();
+
+      queue(JX.Workflow.newFromForm(e.getNode('tag:form'), extra));
     });
 
   JX.Stratcom.listen(
@@ -70,7 +82,7 @@ JX.behavior('workflow', function() {
       }
 
       e.prevent();
-      JX.Workflow.newFromLink(e.getNode('tag:a')).start();
+      queue(JX.Workflow.newFromLink(e.getNode('tag:a')));
     });
 
 });

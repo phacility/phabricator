@@ -3,7 +3,7 @@
  * @provides javelin-behavior-aphront-form-disable-on-submit
  */
 
-JX.behavior('aphront-form-disable-on-submit', function(config) {
+JX.behavior('aphront-form-disable-on-submit', function() {
 
   var restore = [];
   var root = null;
@@ -84,8 +84,8 @@ JX.behavior('aphront-form-disable-on-submit', function(config) {
     will_submit(root);
   });
 
-  JX.Stratcom.listen('unload', null, function(e) {
-    // Reenable everything on page unload so we don't bfcache back to a page
+  JX.Stratcom.listen('unload', null, function() {
+    // Re-enable everything on page unload so we don't bfcache back to a page
     // that has disabled forms.
     for (var ii = 0; ii < restore.length; ii++) {
       restore[ii].disabled = '';

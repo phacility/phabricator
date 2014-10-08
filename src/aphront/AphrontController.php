@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group aphront
- */
 abstract class AphrontController extends Phobject {
 
   private $request;

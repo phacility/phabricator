@@ -2,9 +2,9 @@
 
 abstract class DiffusionRawDiffQuery extends DiffusionQuery {
 
-  private $request;
   private $timeout;
   private $linesOfContext = 65535;
+  private $anchorCommit;
   private $againstCommit;
   private $byteLimit;
 
@@ -51,6 +51,19 @@ abstract class DiffusionRawDiffQuery extends DiffusionQuery {
 
   final public function getAgainstCommit() {
     return $this->againstCommit;
+  }
+
+  public function setAnchorCommit($anchor_commit) {
+    $this->anchorCommit = $anchor_commit;
+    return $this;
+  }
+
+  public function getAnchorCommit() {
+    if ($this->anchorCommit) {
+      return $this->anchorCommit;
+    }
+
+    return $this->getRequest()->getStableCommit();
   }
 
   protected function configureFuture(ExecFuture $future) {

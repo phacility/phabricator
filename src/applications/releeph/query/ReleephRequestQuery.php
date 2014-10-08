@@ -79,7 +79,6 @@ final class ReleephRequestQuery
   }
 
   public function willFilterPage(array $requests) {
-
     // Load requested objects: you must be able to see an object to see
     // requests for it.
     $object_phids = mpull($requests, 'getRequestedObjectPHID');
@@ -241,9 +240,8 @@ final class ReleephRequestQuery
     }
   }
 
-
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationReleeph';
+    return 'PhabricatorReleephApplication';
   }
 
 }

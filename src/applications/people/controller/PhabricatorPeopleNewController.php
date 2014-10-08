@@ -25,9 +25,10 @@ final class PhabricatorPeopleNewController
     }
 
     $user = new PhabricatorUser();
+    $require_real_name = PhabricatorEnv::getEnvConfig('user.require-real-name');
 
     $e_username = true;
-    $e_realname = true;
+    $e_realname = $require_real_name ? true : null;
     $e_email    = true;
     $errors = array();
 
@@ -55,7 +56,7 @@ final class PhabricatorPeopleNewController
       $user->setRealName($request->getStr('realname'));
 
       if (!strlen($user->getUsername())) {
-        $errors[] = pht("Username is required.");
+        $errors[] = pht('Username is required.');
         $e_username = pht('Required');
       } else if (!PhabricatorUser::validateUsername($user->getUsername())) {
         $errors[] = PhabricatorUser::describeValidUsername();
@@ -64,7 +65,7 @@ final class PhabricatorPeopleNewController
         $e_username = null;
       }
 
-      if (!strlen($user->getRealName())) {
+      if (!strlen($user->getRealName()) && $require_real_name) {
         $errors[] = pht('Real name is required.');
         $e_realname = pht('Required');
       } else {
@@ -103,7 +104,7 @@ final class PhabricatorPeopleNewController
           $response = id(new AphrontRedirectResponse())
             ->setURI('/p/'.$user->getUsername().'/');
           return $response;
-        } catch (AphrontQueryDuplicateKeyException $ex) {
+        } catch (AphrontDuplicateKeyQueryException $ex) {
           $errors[] = pht('Username and email must be unique.');
 
           $same_username = id(new PhabricatorUser())
@@ -216,7 +217,6 @@ final class PhabricatorPeopleNewController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

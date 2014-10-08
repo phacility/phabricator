@@ -6,6 +6,10 @@ final class ReleephRequestSearchEngine
   private $branch;
   private $baseURI;
 
+  public function getResultTypeDescription() {
+    return pht('Releeph Pull Requests');
+  }
+
   public function setBranch(ReleephBranch $branch) {
     $this->branch = $branch;
     return $this;
@@ -80,7 +84,7 @@ final class ReleephRequestSearchEngine
           ->setOptions($this->getSeverityOptions()))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource('/typeahead/common/users/')
+          ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('requestors')
           ->setLabel(pht('Requestors'))
           ->setValue($requestor_handles));

@@ -24,6 +24,5 @@ a navigational command into the box and press return.
   - **p** - Jump to Project
   - **p Some Project** - Jump to Project: Some Project
   - **s SymbolName** - Jump to Symbol SymbolName
-  - **task: (new title)** - Jumps to Task Creation Page with pre-filled
-    title.
+  - **task: (new title)** - Jumps to Task Creation Page with pre-filled title.
   - **(default)** - Search for input.

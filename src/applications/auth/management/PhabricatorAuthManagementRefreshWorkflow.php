@@ -36,7 +36,12 @@ final class PhabricatorAuthManagementRefreshWorkflow
     $viewer = $this->getViewer();
 
     $query = id(new PhabricatorExternalAccountQuery())
-      ->setViewer($viewer);
+      ->setViewer($viewer)
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ));
 
     $username = $args->getArg('user');
     if (strlen($username)) {
@@ -67,12 +72,12 @@ final class PhabricatorAuthManagementRefreshWorkflow
 
     if (!$accounts) {
       throw new PhutilArgumentUsageException(
-        pht("No accounts match the arguments!"));
+        pht('No accounts match the arguments!'));
     } else {
       $console->writeOut(
         "%s\n",
         pht(
-          "Found %s account(s) to refresh.",
+          'Found %s account(s) to refresh.',
           new PhutilNumber(count($accounts))));
     }
 
@@ -82,7 +87,7 @@ final class PhabricatorAuthManagementRefreshWorkflow
       $console->writeOut(
         "%s\n",
         pht(
-          "Refreshing account #%d (%s/%s).",
+          'Refreshing account #%d (%s/%s).',
           $account->getID(),
           $account->getAccountType(),
           $account->getAccountDomain()));
@@ -91,15 +96,15 @@ final class PhabricatorAuthManagementRefreshWorkflow
       if (empty($providers[$key])) {
         $console->writeOut(
           "> %s\n",
-          pht("Skipping, provider is not enabled or does not exist."));
+          pht('Skipping, provider is not enabled or does not exist.'));
         continue;
       }
 
       $provider = $providers[$key];
-      if (!($provider instanceof PhabricatorAuthProviderOAuth2)) {
+      if (!($provider instanceof PhabricatorOAuth2AuthProvider)) {
         $console->writeOut(
           "> %s\n",
-          pht("Skipping, provider is not an OAuth2 provider."));
+          pht('Skipping, provider is not an OAuth2 provider.'));
         continue;
       }
 
@@ -107,7 +112,7 @@ final class PhabricatorAuthManagementRefreshWorkflow
       if (!$adapter->supportsTokenRefresh()) {
         $console->writeOut(
           "> %s\n",
-          pht("Skipping, provider does not support token refresh."));
+          pht('Skipping, provider does not support token refresh.'));
         continue;
       }
 
@@ -115,14 +120,14 @@ final class PhabricatorAuthManagementRefreshWorkflow
       if (!$refresh_token) {
         $console->writeOut(
           "> %s\n",
-          pht("Skipping, provider has no stored refresh token."));
+          pht('Skipping, provider has no stored refresh token.'));
         continue;
       }
 
       $console->writeOut(
         "+ %s\n",
         pht(
-          "Refreshing token, current token expires in %s seconds.",
+          'Refreshing token, current token expires in %s seconds.',
           new PhutilNumber(
             $account->getProperty('oauth.token.access.expires') - time())));
 
@@ -137,13 +142,13 @@ final class PhabricatorAuthManagementRefreshWorkflow
       $console->writeOut(
         "+ %s\n",
         pht(
-          "Refreshed token, new token expires in %s seconds.",
+          'Refreshed token, new token expires in %s seconds.',
           new PhutilNumber(
             $account->getProperty('oauth.token.access.expires') - time())));
 
     }
 
-    $console->writeOut("%s\n", pht("Done."));
+    $console->writeOut("%s\n", pht('Done.'));
 
     return 0;
   }

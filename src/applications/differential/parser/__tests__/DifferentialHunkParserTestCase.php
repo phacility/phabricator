@@ -1,22 +1,29 @@
 <?php
 
 final class DifferentialHunkParserTestCase extends PhabricatorTestCase {
+
   private function createComment() {
     $comment = new DifferentialInlineComment();
     return $comment;
   }
 
+  private function createHunk(
+    $old_offset,
+    $old_len,
+    $new_offset,
+    $new_len,
+    $changes) {
 
+    $hunk = id(new DifferentialHunkModern())
+      ->setOldOffset($old_offset)
+      ->setOldLen($old_len)
+      ->setNewOffset($new_offset)
+      ->setNewLen($new_len)
+      ->setChanges($changes);
 
-  private function createHunk($oldOffset, $oldLen, $newOffset, $newLen, $changes) {
-    $hunk = new DifferentialHunk();
-    $hunk->setOldOffset($oldOffset);
-    $hunk->setOldLen($oldLen);
-    $hunk->setNewOffset($newOffset);
-    $hunk->setNewLen($newLen);
-    $hunk->setChanges($changes);
     return $hunk;
   }
+
   // Returns a change that consists of a single hunk, starting at line 1.
   private function createSingleChange($old_lines, $new_lines, $changes) {
     return array(
@@ -39,7 +46,7 @@ final class DifferentialHunkParserTestCase extends PhabricatorTestCase {
 
   public function testOneLineOldComment() {
     $parser = new DifferentialHunkParser();
-    $hunks = $this->createSingleChange(1, 0, "-a");
+    $hunks = $this->createSingleChange(1, 0, '-a');
     $context = $parser->makeContextDiff(
       $hunks,
       0,
@@ -51,7 +58,7 @@ final class DifferentialHunkParserTestCase extends PhabricatorTestCase {
 
   public function testOneLineNewComment() {
     $parser = new DifferentialHunkParser();
-    $hunks = $this->createSingleChange(0, 1, "+a");
+    $hunks = $this->createSingleChange(0, 1, '+a');
     $context = $parser->makeContextDiff(
       $hunks,
       1,
@@ -63,14 +70,14 @@ final class DifferentialHunkParserTestCase extends PhabricatorTestCase {
 
   public function testCannotFindContext() {
     $parser = new DifferentialHunkParser();
-    $hunks = $this->createSingleChange(0, 1, "+a");
+    $hunks = $this->createSingleChange(0, 1, '+a');
     $context = $parser->makeContextDiff(
       $hunks,
       1,
       2,
       0,
       0);
-    $this->assertEqual("", $context);
+    $this->assertEqual('', $context);
   }
 
   public function testOverlapFromStartOfHunk() {

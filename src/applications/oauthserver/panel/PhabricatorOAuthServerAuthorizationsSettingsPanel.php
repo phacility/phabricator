@@ -16,7 +16,7 @@ final class PhabricatorOAuthServerAuthorizationsSettingsPanel
   }
 
   public function isEnabled() {
-    $app_name = 'PhabricatorApplicationOAuthServer';
+    $app_name = 'PhabricatorOAuthServerApplication';
     return PhabricatorApplication::isClassInstalled($app_name);
   }
 
@@ -26,7 +26,7 @@ final class PhabricatorOAuthServerAuthorizationsSettingsPanel
     // TODO: It would be nice to simply disable this panel, but we can't do
     // viewer-based checks for enabled panels right now.
 
-    $app_class = 'PhabricatorApplicationOAuthServer';
+    $app_class = 'PhabricatorOAuthServerApplication';
     $installed = PhabricatorApplication::isClassInstalledForViewer(
       $app_class,
       $viewer);

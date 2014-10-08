@@ -33,8 +33,6 @@ final class PhabricatorTestController extends PhabricatorController {
     return $this->getConfig('enabled', parent::shouldRequireEnabledUser());
   }
 
-  public function processRequest() {
-
-  }
+  public function processRequest() {}
 
 }

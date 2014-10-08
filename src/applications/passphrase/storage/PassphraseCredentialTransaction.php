@@ -9,13 +9,15 @@ final class PassphraseCredentialTransaction
   const TYPE_SECRET_ID = 'passphrase:secretID';
   const TYPE_DESTROY = 'passphrase:destroy';
   const TYPE_LOOKEDATSECRET = 'passphrase:lookedAtSecret';
+  const TYPE_LOCK = 'passphrase:lock';
+  const TYPE_CONDUIT = 'passphrase:conduit';
 
   public function getApplicationName() {
     return 'passphrase';
   }
 
   public function getApplicationTransactionType() {
-    return PassphrasePHIDTypeCredential::TYPECONST;
+    return PassphraseCredentialPHIDType::TYPECONST;
   }
 
   public function getApplicationTransactionCommentObject() {
@@ -26,6 +28,8 @@ final class PassphraseCredentialTransaction
     $old = $this->getOldValue();
     switch ($this->getTransactionType()) {
       case self::TYPE_DESCRIPTION:
+        return ($old === null);
+      case self::TYPE_LOCK:
         return ($old === null);
       case self::TYPE_USERNAME:
         return !strlen($old);
@@ -84,6 +88,21 @@ final class PassphraseCredentialTransaction
         return pht(
           '%s examined the secret plaintext for this credential.',
           $this->renderHandleLink($author_phid));
+      case self::TYPE_LOCK:
+        return pht(
+          '%s locked this credential.',
+          $this->renderHandleLink($author_phid));
+      case self::TYPE_CONDUIT:
+        if ($old) {
+          return pht(
+            '%s disallowed Conduit API access to this credential.',
+            $this->renderHandleLink($author_phid));
+        } else {
+          return pht(
+            '%s allowed Conduit API access to this credential.',
+            $this->renderHandleLink($author_phid));
+        }
+        break;
     }
 
     return parent::getTitle();

@@ -1,7 +1,14 @@
 <?php
 
-final class DivinerAtomSearchEngine
-  extends PhabricatorApplicationSearchEngine {
+final class DivinerAtomSearchEngine extends PhabricatorApplicationSearchEngine {
+
+  public function getResultTypeDescription() {
+    return pht('Documentation Atoms');
+  }
+
+  public function getApplicationClassName() {
+    return 'PhabricatorDivinerApplication';
+  }
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
@@ -60,7 +67,6 @@ final class DivinerAtomSearchEngine
           ->setName('name')
           ->setValue($saved->getParameter('name')))
       ->appendChild($type_control);
-
   }
 
   protected function getURI($path) {
@@ -68,15 +74,12 @@ final class DivinerAtomSearchEngine
   }
 
   public function getBuiltinQueryNames() {
-    $names = array(
+    return array(
       'all' => pht('All'),
     );
-
-    return $names;
   }
 
   public function buildSavedQueryFromBuiltin($query_key) {
-
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
 
@@ -86,6 +89,34 @@ final class DivinerAtomSearchEngine
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
+  }
+
+  protected function renderResultList(
+    array $symbols,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+
+    assert_instances_of($symbols, 'DivinerLiveSymbol');
+
+    $viewer = $this->requireViewer();
+
+    $list = id(new PHUIObjectItemListView())
+      ->setUser($viewer);
+
+    foreach ($symbols as $symbol) {
+      $type = $symbol->getType();
+      $type_name = DivinerAtom::getAtomTypeNameString($type);
+
+      $item = id(new PHUIObjectItemView())
+        ->setHeader($symbol->getTitle())
+        ->setHref($symbol->getURI())
+        ->addAttribute($symbol->getSummary())
+        ->addIcon('none', $type_name);
+
+      $list->addItem($item);
+    }
+
+    return $list;
   }
 
 }

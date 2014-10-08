@@ -50,18 +50,16 @@ final class PassphraseCredentialDestroyController
       return id(new AphrontRedirectResponse())->setURI($view_uri);
     }
 
-    $dialog = id(new AphrontDialogView())
+    return $this->newDialog()
       ->setUser($viewer)
       ->setTitle(pht('Really destroy credential?'))
       ->appendChild(
         pht(
           'This credential will be deactivated and the secret will be '.
-          'unrecoverably destroyed. Anything relying on this credential will '.
-          'cease to function. This operation can not be undone.'))
+          'unrecoverably destroyed. Anything relying on this credential '.
+          'will cease to function. This operation can not be undone.'))
       ->addSubmitButton(pht('Destroy Credential'))
       ->addCancelButton($view_uri);
-
-    return id(new AphrontDialogResponse())->setDialog($dialog);
   }
 
 }

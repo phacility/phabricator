@@ -25,7 +25,7 @@ JX.install('MultirowRowManager', {
     this._root = root;
     this._rows = [];
 
-    if (typeof minRows !== "undefined") {
+    if (typeof minRows !== 'undefined') {
       this._minRows = minRows;
     } else {
       this._minRows = 1;
@@ -45,7 +45,7 @@ JX.install('MultirowRowManager', {
     _rows : null,
 
     _generateRowID : function() {
-      return "" + this._nextID++;
+      return '' + this._nextID++;
     },
 
     _wrapRowContents : function(row_id, row_contents) {
@@ -60,7 +60,7 @@ JX.install('MultirowRowManager', {
         {},
         JX.$N(
           'a',
-          { className: "button",
+          { className: 'button',
             sigil: JX.MultirowRowManager._removeSigil
           },
           '-'));
@@ -78,11 +78,11 @@ JX.install('MultirowRowManager', {
        */
     updateRow : function(row_id, row_contents) {
       if (__DEV__) {
-        if (typeof this._rows[row_id] === "undefined") {
-          throw new Error("JX.MultirowRowManager.updateRow(row_id, " +
-                          "row_contents): provided row id does not exist." +
-                          " Use addRow to create a new row and make sure " +
-                          "not to update rows that have been deleted.");
+        if (typeof this._rows[row_id] === 'undefined') {
+          throw new Error('JX.MultirowRowManager.updateRow(row_id, ' +
+                          'row_contents): provided row id does not exist.' +
+                          ' Use addRow to create a new row and make sure ' +
+                          'not to update rows that have been deleted.');
         }
       }
       var old_row = this._rows[row_id];
@@ -121,7 +121,7 @@ JX.install('MultirowRowManager', {
       this.invoke('row-removed', row_id);
     },
 
-    _oncountchanged : function(e) {
+    _oncountchanged : function() {
       var buttons = JX.DOM.scry(
         this._root,
         'a',
@@ -138,8 +138,8 @@ JX.install('MultirowRowManager', {
   events : ['row-removed'],
   statics : {
     getRowSigil : function() {
-      return "tools-multirow-row-manager-row";
+      return 'tools-multirow-row-manager-row';
     },
-    _removeSigil : "tools-multirow-row-manager-row-remove"
+    _removeSigil : 'tools-multirow-row-manager-row-remove'
   }
 });

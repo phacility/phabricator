@@ -4,7 +4,7 @@ final class DifferentialRevisionMailReceiver
   extends PhabricatorObjectMailReceiver {
 
   public function isEnabled() {
-    $app_class = 'PhabricatorApplicationDifferential';
+    $app_class = 'PhabricatorDifferentialApplication';
     return PhabricatorApplication::isClassInstalled($app_class);
   }
 

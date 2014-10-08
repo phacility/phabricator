@@ -53,7 +53,7 @@ final class DoorkeeperExternalObjectQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationDoorkeeper';
+    return 'PhabricatorDoorkeeperApplication';
   }
 
 }

@@ -8,7 +8,7 @@ final class PhabricatorMailManagementShowOutboundWorkflow
       ->setName('show-outbound')
       ->setSynopsis('Show diagnostic details about outbound mail.')
       ->setExamples(
-        "**show-outbound** --id 1 --id 2")
+        '**show-outbound** --id 1 --id 2')
       ->setArguments(
         array(
           array(
@@ -16,6 +16,12 @@ final class PhabricatorMailManagementShowOutboundWorkflow
             'param'   => 'id',
             'help'    => 'Show details about outbound mail with given ID.',
             'repeat'  => true,
+          ),
+          array(
+            'name' => 'dump-html',
+            'help' => pht(
+              'Dump the HTML body of the mail. You can redirect it to a '.
+              'file and then open it in a browser.'),
           ),
         ));
   }
@@ -38,13 +44,27 @@ final class PhabricatorMailManagementShowOutboundWorkflow
       $missing = array_diff_key($ids, $messages);
       if ($missing) {
         throw new PhutilArgumentUsageException(
-          "Some specified messages do not exist: ".
+          'Some specified messages do not exist: '.
           implode(', ', array_keys($missing)));
       }
     }
 
     $last_key = last_key($messages);
     foreach ($messages as $message_key => $message) {
+      if ($args->getArg('dump-html')) {
+        $html_body = $message->getHTMLBody();
+        if (strlen($html_body)) {
+          $template =
+            "<!doctype html><html><body>{$html_body}</body></html>";
+          $console->writeOut("%s\n", $html_body);
+        } else {
+          $console->writeErr(
+            "%s\n",
+            pht('(This message has no HTML body.)'));
+        }
+        continue;
+      }
+
       $info = array();
 
       $info[] = pht('PROPERTIES');
@@ -58,6 +78,10 @@ final class PhabricatorMailManagementShowOutboundWorkflow
       $parameters = $message->getParameters();
       foreach ($parameters as $key => $value) {
         if ($key == 'body') {
+          continue;
+        }
+
+        if ($key == 'html-body') {
           continue;
         }
 
@@ -110,8 +134,21 @@ final class PhabricatorMailManagementShowOutboundWorkflow
       }
 
       $info[] = null;
-      $info[] = pht('BODY');
-      $info[] = $message->getBody();
+      $info[] = pht('TEXT BODY');
+      if (strlen($message->getBody())) {
+        $info[] = $message->getBody();
+      } else {
+        $info[] = pht('(This message has no text body.)');
+      }
+
+      $info[] = null;
+      $info[] = pht('HTML BODY');
+      if (strlen($message->getHTMLBody())) {
+        $info[] = $message->getHTMLBody();
+        $info[] = null;
+      } else {
+        $info[] = pht('(This message has no HTML body.)');
+      }
 
       $console->writeOut('%s', implode("\n", $info));
 

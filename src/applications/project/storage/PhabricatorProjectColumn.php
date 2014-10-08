@@ -2,15 +2,22 @@
 
 final class PhabricatorProjectColumn
   extends PhabricatorProjectDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorDestructibleInterface {
 
   const STATUS_ACTIVE = 0;
-  const STATUS_DELETED = 1;
+  const STATUS_HIDDEN = 1;
+
+  const DEFAULT_ORDER = 'natural';
+  const ORDER_NATURAL = 'natural';
+  const ORDER_PRIORITY = 'priority';
 
   protected $name;
   protected $status;
   protected $projectPHID;
   protected $sequence;
+  protected $properties = array();
 
   private $project = self::ATTACHABLE;
 
@@ -23,12 +30,28 @@ final class PhabricatorProjectColumn
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
+      self::CONFIG_SERIALIZATION => array(
+        'properties' => self::SERIALIZATION_JSON,
+      ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'name' => 'text255',
+        'status' => 'uint32',
+        'sequence' => 'uint32',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_status' => array(
+          'columns' => array('projectPHID', 'status', 'sequence'),
+        ),
+        'key_sequence' => array(
+          'columns' => array('projectPHID', 'sequence'),
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorProjectPHIDTypeColumn::TYPECONST);
+      PhabricatorProjectColumnPHIDType::TYPECONST);
   }
 
   public function attachProject(PhabricatorProject $project) {
@@ -41,25 +64,68 @@ final class PhabricatorProjectColumn
   }
 
   public function isDefaultColumn() {
-    return ($this->getSequence() == 0);
+    return (bool)$this->getProperty('isDefault');
   }
 
-  public function isDeleted() {
-    return ($this->getStatus() == self::STATUS_DELETED);
+  public function isHidden() {
+    return ($this->getStatus() == self::STATUS_HIDDEN);
   }
 
   public function getDisplayName() {
+    $name = $this->getName();
+    if (strlen($name)) {
+      return $name;
+    }
+
     if ($this->isDefaultColumn()) {
       return pht('Backlog');
     }
-    return $this->getName();
+
+    return pht('Unnamed Column');
   }
 
-  public function getHeaderColor() {
-    if ($this->isDefaultColumn()) {
-      return PhabricatorActionHeaderView::HEADER_DARK_GREY;
+  public function getHeaderIcon() {
+    $icon = null;
+
+    if ($this->isHidden()) {
+      $icon = 'fa-eye-slash';
+      $text = pht('Hidden');
     }
-    return PhabricatorActionHeaderView::HEADER_GREY;
+
+    if ($this->isDefaultColumn()) {
+      $icon = 'fa-archive';
+      $text = pht('Default');
+    }
+
+    if ($icon) {
+      return id(new PHUIIconView())
+        ->setIconFont($icon)
+        ->addSigil('has-tooltip')
+        ->setMetadata(
+          array(
+            'tip' => $text,
+          ));;
+    }
+
+    return null;
+  }
+
+  public function getProperty($key, $default = null) {
+    return idx($this->properties, $key, $default);
+  }
+
+  public function setProperty($key, $value) {
+    $this->properties[$key] = $value;
+    return $this;
+  }
+
+  public function getPointLimit() {
+    return $this->getProperty('pointLimit');
+  }
+
+  public function setPointLimit($limit) {
+    $this->setProperty('pointLimit', $limit);
+    return $this;
   }
 
 
@@ -85,6 +151,17 @@ final class PhabricatorProjectColumn
 
   public function describeAutomaticCapability($capability) {
     return pht('Users must be able to see a project to see its board.');
+  }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+    $this->delete();
+    $this->saveTransaction();
   }
 
 }

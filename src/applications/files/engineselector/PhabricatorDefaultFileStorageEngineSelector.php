@@ -4,8 +4,6 @@
  * Default storage engine selector. See
  * @{class:PhabricatorFileStorageEngineSelector} and @{article:File Storage
  * Technical Documentation} for more information.
- *
- * @group filestorage
  */
 final class PhabricatorDefaultFileStorageEngineSelector
   extends PhabricatorFileStorageEngineSelector {
@@ -42,10 +40,10 @@ final class PhabricatorDefaultFileStorageEngineSelector
       // a little vague ("No valid storage engines"). Since this is a default
       // case, throw a more specific exception.
       throw new Exception(
-        "This file exceeds the configured MySQL storage engine filesize ".
-        "limit, but no other storage engines are configured. Increase the ".
-        "MySQL storage engine limit or configure a storage engine suitable ".
-        "for larger files.");
+        'This file exceeds the configured MySQL storage engine filesize '.
+        'limit, but no other storage engines are configured. Increase the '.
+        'MySQL storage engine limit or configure a storage engine suitable '.
+        'for larger files.');
     }
 
     return $engines;

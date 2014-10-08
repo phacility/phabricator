@@ -3,6 +3,14 @@
 final class PhabricatorDashboardPanelTransactionEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  public function getEditorApplicationClass() {
+    return 'PhabricatorDashboardApplication';
+  }
+
+  public function getEditorObjectsDescription() {
+    return pht('Dashboard Panels');
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
@@ -11,6 +19,7 @@ final class PhabricatorDashboardPanelTransactionEditor
     $types[] = PhabricatorTransactions::TYPE_EDGE;
 
     $types[] = PhabricatorDashboardPanelTransaction::TYPE_NAME;
+    $types[] = PhabricatorDashboardPanelTransaction::TYPE_ARCHIVE;
 
     return $types;
   }
@@ -24,6 +33,8 @@ final class PhabricatorDashboardPanelTransactionEditor
           return null;
         }
         return $object->getName();
+      case PhabricatorDashboardPanelTransaction::TYPE_ARCHIVE:
+        return (int)$object->getIsArchived();
     }
 
     return parent::getCustomTransactionOldValue($object, $xaction);
@@ -35,6 +46,8 @@ final class PhabricatorDashboardPanelTransactionEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorDashboardPanelTransaction::TYPE_NAME:
         return $xaction->getNewValue();
+      case PhabricatorDashboardPanelTransaction::TYPE_ARCHIVE:
+        return (int)$xaction->getNewValue();
     }
     return parent::getCustomTransactionNewValue($object, $xaction);
   }
@@ -45,6 +58,9 @@ final class PhabricatorDashboardPanelTransactionEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorDashboardPanelTransaction::TYPE_NAME:
         $object->setName($xaction->getNewValue());
+        return;
+      case PhabricatorDashboardPanelTransaction::TYPE_ARCHIVE:
+        $object->setIsArchived((int)$xaction->getNewValue());
         return;
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
         $object->setViewPolicy($xaction->getNewValue());
@@ -63,6 +79,9 @@ final class PhabricatorDashboardPanelTransactionEditor
 
     switch ($xaction->getTransactionType()) {
       case PhabricatorDashboardPanelTransaction::TYPE_NAME:
+      case PhabricatorDashboardPanelTransaction::TYPE_ARCHIVE:
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+      case PhabricatorTransactions::TYPE_EDIT_POLICY:
         return;
     }
 

@@ -50,10 +50,10 @@ final class SubscriptionListDialogBuilder {
     $object_handle = $handles[$phid];
     unset($handles[$phid]);
 
-    require_celerity_resource('subscribers-list-css');
     return id(new AphrontDialogView())
       ->setUser($this->getViewer())
-      ->setClass('subscriber-list-dialog')
+      ->setWidth(AphrontDialogView::WIDTH_FORM)
+      ->setFlush(true)
       ->setTitle($this->getTitle())
       ->appendChild($this->buildBody($this->getViewer(), $handles))
       ->addCancelButton($object_handle->getURI(), pht('Close'));
@@ -62,7 +62,8 @@ final class SubscriptionListDialogBuilder {
   private function buildBody(PhabricatorUser $viewer, array $handles) {
 
     $list = id(new PHUIObjectItemListView())
-      ->setUser($viewer);
+      ->setUser($viewer)
+      ->setStackable(true);
     foreach ($handles as $handle) {
       $item = id(new PHUIObjectItemView())
         ->setHeader($handle->getFullName())

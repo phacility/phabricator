@@ -621,6 +621,28 @@ abstract class PhabricatorCustomField {
 
 
   /**
+   * Return an index against which this field can be meaningfully ordered
+   * against to implement ApplicationSearch.
+   *
+   * This should be a single index, normally built using
+   * @{method:newStringIndex} and @{method:newNumericIndex}.
+   *
+   * The value of the index is not used.
+   *
+   * Return null from this method if the field can not be ordered.
+   *
+   * @return PhabricatorCustomFieldIndexStorage A single index to order by.
+   * @task appsearch
+   */
+  public function buildOrderIndex() {
+    if ($this->proxy) {
+      return $this->proxy->buildOrderIndex();
+    }
+    return null;
+  }
+
+
+  /**
    * Build a new empty storage object for storing string indexes. Normally,
    * this should be a concrete subclass of
    * @{class:PhabricatorCustomFieldStringIndexStorage}.

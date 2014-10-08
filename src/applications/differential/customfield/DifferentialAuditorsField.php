@@ -20,7 +20,11 @@ final class DifferentialAuditorsField
   }
 
   public function setValueFromStorage($value) {
-    $this->setValue(phutil_json_decode($value));
+    try {
+      $this->setValue(phutil_json_decode($value));
+    } catch (PhutilJSONParserException $ex) {
+      $this->setValue(array());
+    }
     return $this;
   }
 
@@ -44,14 +48,13 @@ final class DifferentialAuditorsField
     return $this->parseObjectList(
       $value,
       array(
-        PhabricatorPeoplePHIDTypeUser::TYPECONST,
-        PhabricatorProjectPHIDTypeProject::TYPECONST,
+        PhabricatorPeopleUserPHIDType::TYPECONST,
+        PhabricatorProjectProjectPHIDType::TYPECONST,
       ));
   }
 
   public function renderCommitMessageValue(array $handles) {
     return $this->renderObjectList($handles);
   }
-
 
 }

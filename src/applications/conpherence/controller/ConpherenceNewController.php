@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conpherence
- */
 final class ConpherenceNewController extends ConpherenceController {
 
   public function processRequest() {
@@ -85,7 +82,7 @@ final class ConpherenceNewController extends ConpherenceController {
         ->setName('participants')
         ->setValue($participant_handles)
         ->setUser($user)
-        ->setDatasource('/typeahead/common/users/')
+        ->setDatasource(new PhabricatorPeopleDatasource())
         ->setLabel(pht('To'))
         ->setError($e_participants))
       ->appendChild(
@@ -99,4 +96,5 @@ final class ConpherenceNewController extends ConpherenceController {
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }
+
 }

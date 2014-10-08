@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group search
- */
 final class PhabricatorSearchAttachController
   extends PhabricatorSearchBaseController {
 
@@ -13,6 +10,7 @@ final class PhabricatorSearchAttachController
   const ACTION_ATTACH       = 'attach';
   const ACTION_MERGE        = 'merge';
   const ACTION_DEPENDENCIES = 'dependencies';
+  const ACTION_BLOCKS       = 'blocks';
   const ACTION_EDGE         = 'edge';
 
   public function willProcessRequest(array $data) {
@@ -47,6 +45,7 @@ final class PhabricatorSearchAttachController
     switch ($this->action) {
       case self::ACTION_EDGE:
       case self::ACTION_DEPENDENCIES:
+      case self::ACTION_BLOCKS:
       case self::ACTION_ATTACH:
         $edge_type = $this->getEdgeType($object_type, $attach_type);
         break;
@@ -58,45 +57,35 @@ final class PhabricatorSearchAttachController
       $phids = array_values($phids);
 
       if ($edge_type) {
-        $do_txn = $object instanceof PhabricatorApplicationTransactionInterface;
+        if (!$object instanceof PhabricatorApplicationTransactionInterface) {
+          throw new Exception(
+            pht(
+              'Expected object ("%s") to implement interface "%s".',
+              get_class($object),
+              'PhabricatorApplicationTransactionInterface'));
+        }
+
         $old_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
           $this->phid,
           $edge_type);
         $add_phids = $phids;
         $rem_phids = array_diff($old_phids, $add_phids);
 
-        if ($do_txn) {
+        $txn_editor = $object->getApplicationTransactionEditor()
+          ->setActor($user)
+          ->setContentSourceFromRequest($request)
+          ->setContinueOnMissingFields(true);
 
-          $txn_editor = $object->getApplicationTransactionEditor()
-            ->setActor($user)
-            ->setContentSourceFromRequest($request);
-          $txn_template = $object->getApplicationTransactionTemplate()
-            ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-            ->setMetadataValue('edge:type', $edge_type)
-            ->setNewValue(array(
-              '+' => array_fuse($add_phids),
-              '-' => array_fuse($rem_phids)));
-          $txn_editor->applyTransactions(
-            $object->getApplicationTransactionObject(),
-            array($txn_template));
-
-        } else {
-
-          $editor = id(new PhabricatorEdgeEditor());
-          $editor->setActor($user);
-          foreach ($add_phids as $phid) {
-            $editor->addEdge($this->phid, $edge_type, $phid);
-          }
-          foreach ($rem_phids as $phid) {
-            $editor->removeEdge($this->phid, $edge_type, $phid);
-          }
-
-          try {
-            $editor->save();
-          } catch (PhabricatorEdgeCycleException $ex) {
-            $this->raiseGraphCycleException($ex);
-          }
-        }
+        $txn_template = $object->getApplicationTransactionTemplate()
+          ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+          ->setMetadataValue('edge:type', $edge_type)
+          ->setNewValue(array(
+            '+' => array_fuse($add_phids),
+            '-' => array_fuse($rem_phids),
+          ));
+        $txn_editor->applyTransactions(
+          $object->getApplicationTransactionObject(),
+          array($txn_template));
 
         return id(new AphrontReloadResponse())->setURI($handle->getURI());
       } else {
@@ -166,73 +155,58 @@ final class PhabricatorSearchAttachController
       ->setContinueOnNoEffect(true)
       ->setContinueOnMissingFields(true);
 
-    $task_names = array();
-
-    $merge_into_name = 'T'.$task->getID();
-
     $cc_vector = array();
     $cc_vector[] = $task->getCCPHIDs();
     foreach ($targets as $target) {
       $cc_vector[] = $target->getCCPHIDs();
       $cc_vector[] = array(
         $target->getAuthorPHID(),
-        $target->getOwnerPHID());
+        $target->getOwnerPHID(),
+      );
 
-      $close_task = id(new ManiphestTransaction())
-        ->setTransactionType(ManiphestTransaction::TYPE_STATUS)
-        ->setNewValue(ManiphestTaskStatus::getDuplicateStatus());
-
-      $merge_comment = id(new ManiphestTransaction())
-        ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
-        ->attachComment(
-          id(new ManiphestTransactionComment())
-            ->setContent("\xE2\x9C\x98 Merged into {$merge_into_name}."));
+      $merged_into_txn = id(new ManiphestTransaction())
+        ->setTransactionType(ManiphestTransaction::TYPE_MERGED_INTO)
+        ->setNewValue($task->getPHID());
 
       $editor->applyTransactions(
         $target,
-        array(
-          $close_task,
-          $merge_comment,
-        ));
+        array($merged_into_txn));
 
-      $task_names[] = 'T'.$target->getID();
     }
     $all_ccs = array_mergev($cc_vector);
     $all_ccs = array_filter($all_ccs);
     $all_ccs = array_unique($all_ccs);
 
-    $task_names = implode(', ', $task_names);
-
     $add_ccs = id(new ManiphestTransaction())
       ->setTransactionType(ManiphestTransaction::TYPE_CCS)
       ->setNewValue($all_ccs);
 
-    $merged_comment = id(new ManiphestTransaction())
-      ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
-      ->attachComment(
-        id(new ManiphestTransactionComment())
-          ->setContent("\xE2\x97\x80 Merged tasks: {$task_names}."));
+    $merged_from_txn = id(new ManiphestTransaction())
+      ->setTransactionType(ManiphestTransaction::TYPE_MERGED_FROM)
+      ->setNewValue(mpull($targets, 'getPHID'));
 
-    $editor->applyTransactions($task, array($add_ccs, $merged_comment));
+    $editor->applyTransactions(
+      $task,
+      array($add_ccs, $merged_from_txn));
 
     return $response;
   }
 
   private function getStrings() {
     switch ($this->type) {
-      case DifferentialPHIDTypeRevision::TYPECONST:
+      case DifferentialRevisionPHIDType::TYPECONST:
         $noun = 'Revisions';
         $selected = 'created';
         break;
-      case ManiphestPHIDTypeTask::TYPECONST:
+      case ManiphestTaskPHIDType::TYPECONST:
         $noun = 'Tasks';
         $selected = 'assigned';
         break;
-      case PhabricatorRepositoryPHIDTypeCommit::TYPECONST:
+      case PhabricatorRepositoryCommitPHIDType::TYPECONST:
         $noun = 'Commits';
         $selected = 'created';
         break;
-      case PholioPHIDTypeMock::TYPECONST:
+      case PholioMockPHIDType::TYPECONST:
         $noun = 'Mocks';
         $selected = 'created';
         break;
@@ -247,17 +221,23 @@ final class PhabricatorSearchAttachController
         $instructions = null;
         break;
       case self::ACTION_MERGE:
-        $dialog_title = "Merge Duplicate Tasks";
-        $header_text = "Tasks To Merge";
+        $dialog_title = 'Merge Duplicate Tasks';
+        $header_text = 'Tasks To Merge';
         $button_text = "Merge {$noun}";
         $instructions =
-          "These tasks will be merged into the current task and then closed. ".
-          "The current task will grow stronger.";
+          'These tasks will be merged into the current task and then closed. '.
+          'The current task will grow stronger.';
         break;
       case self::ACTION_DEPENDENCIES:
-        $dialog_title = "Edit Dependencies";
-        $header_text = "Current Dependencies";
-        $button_text = "Save Dependencies";
+        $dialog_title = 'Edit Dependencies';
+        $header_text = 'Current Dependencies';
+        $button_text = 'Save Dependencies';
+        $instructions = null;
+        break;
+      case self::ACTION_BLOCKS:
+        $dialog_title = pht('Edit Blocking Tasks');
+        $header_text = pht('Current Blocking Tasks');
+        $button_text = pht('Save Blocking Tasks');
         $instructions = null;
         break;
     }
@@ -273,7 +253,7 @@ final class PhabricatorSearchAttachController
   }
 
   private function getFilters(array $strings) {
-    if ($this->type == PholioPHIDTypeMock::TYPECONST) {
+    if ($this->type == PholioMockPHIDType::TYPECONST) {
       $filters = array(
         'created' => 'Created By Me',
         'all' => 'All '.$strings['target_plural_noun'],
@@ -291,24 +271,24 @@ final class PhabricatorSearchAttachController
   }
 
   private function getEdgeType($src_type, $dst_type) {
-    $t_cmit = PhabricatorRepositoryPHIDTypeCommit::TYPECONST;
-    $t_task = ManiphestPHIDTypeTask::TYPECONST;
-    $t_drev = DifferentialPHIDTypeRevision::TYPECONST;
-    $t_mock = PholioPHIDTypeMock::TYPECONST;
+    $t_cmit = PhabricatorRepositoryCommitPHIDType::TYPECONST;
+    $t_task = ManiphestTaskPHIDType::TYPECONST;
+    $t_drev = DifferentialRevisionPHIDType::TYPECONST;
+    $t_mock = PholioMockPHIDType::TYPECONST;
 
     $map = array(
       $t_cmit => array(
-        $t_task => PhabricatorEdgeConfig::TYPE_COMMIT_HAS_TASK,
+        $t_task => DiffusionCommitHasTaskEdgeType::EDGECONST,
       ),
       $t_task => array(
-        $t_cmit => PhabricatorEdgeConfig::TYPE_TASK_HAS_COMMIT,
+        $t_cmit => ManiphestTaskHasCommitEdgeType::EDGECONST,
         $t_task => PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK,
-        $t_drev => PhabricatorEdgeConfig::TYPE_TASK_HAS_RELATED_DREV,
+        $t_drev => ManiphestTaskHasRevisionEdgeType::EDGECONST,
         $t_mock => PhabricatorEdgeConfig::TYPE_TASK_HAS_MOCK,
       ),
       $t_drev => array(
         $t_drev => PhabricatorEdgeConfig::TYPE_DREV_DEPENDS_ON_DREV,
-        $t_task => PhabricatorEdgeConfig::TYPE_DREV_HAS_RELATED_TASK,
+        $t_task => DifferentialRevisionHasTaskEdgeType::EDGECONST,
       ),
       $t_mock => array(
         $t_task => PhabricatorEdgeConfig::TYPE_MOCK_HAS_TASK,

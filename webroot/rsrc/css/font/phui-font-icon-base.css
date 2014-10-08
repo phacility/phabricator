@@ -104,39 +104,54 @@
   }
 }
 
-.phui-icon-view.bluegrey:before {
-  color: #7787a6;
+.phui-icon-view.dark {
+  color: {$darkgreytext};
 }
-.phui-icon-view.white:before {
+.phui-icon-view.bluegrey {
+  color: {$bluetext};
+}
+.phui-icon-view.white {
   color: #fff;
 }
-.phui-icon-view.red:before  {
+.phui-icon-view.red  {
   color: {$red};
 }
-.phui-icon-view.orange:before {
+.phui-icon-view.orange {
   color: {$orange};
 }
-.phui-icon-view.yellow:before {
+.phui-icon-view.yellow {
   color: {$yellow};
 }
-.phui-icon-view.green:before {
+.phui-icon-view.green {
   color: {$green}
 }
-.phui-icon-view.blue:before {
+.phui-icon-view.blue {
   color: {$blue};
 }
-.phui-icon-view.sky:before {
+.phui-icon-view.sky {
   color: {$sky};
 }
-.phui-icon-view.indigo:before {
+.phui-icon-view.indigo {
   color: {$indigo};
 }
-.phui-icon-view.violet:before {
+.phui-icon-view.violet {
   color: {$violet};
 }
-.phui-icon-view.lightbluetext:before {
+.phui-icon-view.lightbluetext {
   color: {$lightbluetext};
 }
-.phui-icon-view.lightgreytext:before {
+.phui-icon-view.lightgreytext,
+.phui-icon-view.grey {
   color: {$lightgreytext};
+}
+
+/* Hovers */
+
+.device-desktop a.phui-icon-view.lightgreytext:hover,
+.device-desktop a.phui-icon-view.grey:hover {
+  color: {$darkgreytext};
+}
+
+.device-desktop a.phui-icon-view.bluegrey:hover {
+  color: {$darkbluetext};
 }

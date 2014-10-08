@@ -29,11 +29,31 @@ final class ReleephBranch extends ReleephDAO
       self::CONFIG_SERIALIZATION => array(
         'details' => self::SERIALIZATION_JSON,
       ),
+      self::CONFIG_COLUMN_SCHEMA => array(
+        'basename' => 'text64',
+        'isActive' => 'bool',
+        'symbolicName' => 'text64?',
+        'name' => 'text128',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'releephProjectID' => array(
+          'columns' => array('releephProjectID', 'symbolicName'),
+          'unique' => true,
+        ),
+        'releephProjectID_2' => array(
+          'columns' => array('releephProjectID', 'basename'),
+          'unique' => true,
+        ),
+        'releephProjectID_name' => array(
+          'columns' => array('releephProjectID', 'name'),
+          'unique' => true,
+        ),
+      ),
     ) + parent::getConfiguration();
   }
 
   public function generatePHID() {
-    return PhabricatorPHID::generateNewPHID(ReleephPHIDTypeBranch::TYPECONST);
+    return PhabricatorPHID::generateNewPHID(ReleephBranchPHIDType::TYPECONST);
   }
 
   public function getDetail($key, $default = null) {
@@ -49,7 +69,7 @@ final class ReleephBranch extends ReleephDAO
     // If symbolicName is omitted, set it to the basename.
     //
     // This means that we can enforce symbolicName as a UNIQUE column in the
-    // DB.  We'll interpret symbolicName === basename as meaning "no symbolic
+    // DB. We'll interpret symbolicName === basename as meaning "no symbolic
     // name".
     //
     // SYMBOLIC_NAME_NOTE

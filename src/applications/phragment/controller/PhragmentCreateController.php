@@ -5,7 +5,7 @@ final class PhragmentCreateController extends PhragmentController {
   private $dblob;
 
   public function willProcessRequest(array $data) {
-    $this->dblob = idx($data, "dblob", "");
+    $this->dblob = idx($data, 'dblob', '');
   }
 
   public function processRequest() {
@@ -122,10 +122,11 @@ final class PhragmentCreateController extends PhragmentController {
       array(
         $crumbs,
         $this->renderConfigurationWarningIfRequired(),
-        $box),
+        $box,
+      ),
       array(
         'title' => pht('Create Fragment'),
-        'device' => true));
+      ));
   }
 
 }

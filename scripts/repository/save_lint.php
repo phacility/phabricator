@@ -18,30 +18,30 @@ $args = id(new PhutilArgumentParser($argv))
     array(
       'name' => 'all',
       'help' =>
-        "Discover problems in the whole repository instead of just changes ".
-        "since the last run.",
+        'Discover problems in the whole repository instead of just changes '.
+        'since the last run.',
     ),
     array(
       'name' => 'arc',
       'param' => 'path',
       'default' => 'arc',
-      'help' => "Path to Arcanist executable.",
+      'help' => 'Path to Arcanist executable.',
     ),
     array(
       'name' => 'severity',
       'param' => 'string',
       'default' => ArcanistLintSeverity::SEVERITY_ADVICE,
-      'help' => "Minimum severity, one of ArcanistLintSeverity constants.",
+      'help' => 'Minimum severity, one of ArcanistLintSeverity constants.',
     ),
     array(
       'name' => 'chunk-size',
       'param' => 'number',
       'default' => 256,
-      'help' => "Number of paths passed to `arc` at once.",
+      'help' => 'Number of paths passed to `arc` at once.',
     ),
     array(
       'name' => 'blame',
-      'help' => "Assign lint errors to authors who last modified the line.",
+      'help' => 'Assign lint errors to authors who last modified the line.',
     ),
   ));
 

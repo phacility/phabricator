@@ -5,9 +5,9 @@ Guide to the Edges infrastructure.
 
 = Overview =
 
-Edges are a generic way of storing a relationship between two objects (like
-a Task and its attached files). If you are familiar with the Facebook
-associations framework, Phabricator Edges are substantially similar.
+Edges are a generic way of storing a relationship between two objects (like a
+Task and its attached files). If you are familiar with the Facebook associations
+framework, Phabricator Edges are substantially similar.
 
 An edge is defined by a source PHID (the edge origin), a destination PHID
 (the edge destination) and an edge type (which describes the relationship,

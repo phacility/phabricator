@@ -8,6 +8,11 @@
   overflow-y: hidden;
 }
 
+.phui-object-item .phabricator-source-code-container {
+  margin-left: 8px;
+  border: 1px solid #d7d7d7;
+}
+
 .phabricator-source-code-view tr:first-child * {
   padding-top: 8px;
 }

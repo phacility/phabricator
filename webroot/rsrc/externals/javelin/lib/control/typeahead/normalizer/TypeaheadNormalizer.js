@@ -4,9 +4,6 @@
  * @javelin
  */
 
-/**
- * @group control
- */
 JX.install('TypeaheadNormalizer', {
   statics : {
     /**
@@ -19,7 +16,8 @@ JX.install('TypeaheadNormalizer', {
     normalize : function(str) {
       return ('' + str)
         .toLocaleLowerCase()
-        .replace(/[\.,-\/#!$%\^&\*;:{}=\-_`~()]/g, '')
+        .replace(/[\.,\/#!$%\^&\*;:{}=_`~()]/g, '')
+        .replace(/-/g, ' ')
         .replace(/ +/g, ' ')
         .replace(/^\s*|\s*$/g, '');
     }

@@ -48,7 +48,7 @@ final class DiffusionFileContent {
       'corpus' => $this->getCorpus(),
       'blameDict' => $this->getBlameDict(),
       'revList' => $this->getRevList(),
-      'textList' => $this->getTextList()
+      'textList' => $this->getTextList(),
     );
   }
 

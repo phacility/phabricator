@@ -14,13 +14,13 @@ abstract class DoorkeeperFeedStoryPublisher {
 
 
   /**
-   * Render story text using contextual langauge to identify the object the
+   * Render story text using contextual language to identify the object the
    * story is about, instead of the full object name. For example, without
    * contextual language a story might render like this:
    *
    *   alincoln created D123: Chop Wood for Log Cabin v2.0
    *
-   * With contextual langauge, it will render like this instead:
+   * With contextual language, it will render like this instead:
    *
    *   alincoln created this revision.
    *
@@ -81,6 +81,11 @@ abstract class DoorkeeperFeedStoryPublisher {
     return $object;
   }
 
+
+  public function getStoryText($object) {
+    return $this->getFeedStory()->renderAsTextForDoorkeeper($this);
+  }
+
   abstract public function isStoryAboutObjectCreation($object);
   abstract public function isStoryAboutObjectClosure($object);
   abstract public function getOwnerPHID($object);
@@ -92,6 +97,5 @@ abstract class DoorkeeperFeedStoryPublisher {
   abstract public function getObjectDescription($object);
   abstract public function isObjectClosed($object);
   abstract public function getResponsibilityTitle($object);
-  abstract public function getStoryText($object);
 
 }

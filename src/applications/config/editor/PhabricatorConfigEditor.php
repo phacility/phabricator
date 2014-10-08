@@ -3,6 +3,14 @@
 final class PhabricatorConfigEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  public function getEditorApplicationClass() {
+    return 'PhabricatorConfigApplication';
+  }
+
+  public function getEditorObjectsDescription() {
+    return pht('Phabricator Configuration');
+  }
+
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
@@ -114,7 +122,7 @@ final class PhabricatorConfigEditor
       ->setNewValue(
         array(
            'deleted' => false,
-           'value' => $value
+           'value' => $value,
         ));
 
     $editor = id(new PhabricatorConfigEditor())

@@ -79,8 +79,8 @@ reviewing big checkins.
 
 = Write Sensible Commit Messages =
 
-There are lots of resources for this on the internet. All of them say pretty much
-the same thing; this one does too.
+There are lots of resources for this on the internet. All of them say pretty
+much the same thing; this one does too.
 
 The single most important thing is: **commit messages should explain //why// you
 are making the change**.

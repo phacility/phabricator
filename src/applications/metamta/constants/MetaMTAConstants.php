@@ -1,5 +1,3 @@
 <?php
 
-abstract class MetaMTAConstants {
-
-}
+abstract class MetaMTAConstants {}

@@ -25,6 +25,16 @@ final class PHUIListItemView extends AphrontTagView {
   private $renderNameAsTooltip;
   private $statusColor;
   private $order;
+  private $aural;
+
+  public function setAural($aural) {
+    $this->aural = $aural;
+    return $this;
+  }
+
+  public function getAural() {
+    return $this->aural;
+  }
 
   public function setOrder($order) {
     $this->order = $order;
@@ -170,10 +180,21 @@ final class PHUIListItemView extends AphrontTagView {
           $external = " \xE2\x86\x97";
         }
 
+        // If this element has an aural representation, make any name visual
+        // only. This is primarily dealing with the links in the main menu like
+        // "Profile" and "Logout". If we don't hide the name, the mobile
+        // version of these elements will have two redundant names.
+
+        $classes = array();
+        $classes[] = 'phui-list-item-name';
+        if ($this->aural !== null) {
+          $classes[] = 'visual-only';
+        }
+
         $name = phutil_tag(
           'span',
           array(
-            'class' => 'phui-list-item-name',
+            'class' => implode(' ', $classes),
           ),
           array(
             $this->name,
@@ -182,16 +203,25 @@ final class PHUIListItemView extends AphrontTagView {
       }
     }
 
+    $aural = null;
+    if ($this->aural !== null) {
+      $aural = javelin_tag(
+        'span',
+        array(
+          'aural' => true,
+        ),
+        $this->aural);
+    }
+
     if ($this->icon) {
       $icon_name = $this->icon;
       if ($this->getDisabled()) {
-        $icon_name .= '-grey';
+        $icon_name .= ' grey';
       }
 
       $icon = id(new PHUIIconView())
         ->addClass('phui-list-item-icon')
-        ->setSpriteSheet(PHUIIconView::SPRITE_ICONS)
-        ->setSpriteIcon($icon_name);
+        ->setIconFont($icon_name);
     }
 
     if ($this->appIcon) {
@@ -210,6 +240,7 @@ final class PHUIListItemView extends AphrontTagView {
         'sigil' => $sigil,
       ),
       array(
+        $aural,
         $icon,
         $this->renderChildren(),
         $name,

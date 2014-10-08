@@ -5,6 +5,10 @@ final class PhabricatorDashboardPanelViewController
 
   private $id;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function willProcessRequest(array $data) {
     $this->id = $data['id'];
   }
@@ -41,18 +45,24 @@ final class PhabricatorDashboardPanelViewController
     $rendered_panel = id(new PhabricatorDashboardPanelRenderingEngine())
       ->setViewer($viewer)
       ->setPanel($panel)
+      ->setParentPanelPHIDs(array())
       ->renderPanel();
+
+    $view = id(new PHUIBoxView())
+      ->addMargin(PHUI::MARGIN_LARGE_LEFT)
+      ->addMargin(PHUI::MARGIN_LARGE_RIGHT)
+      ->addMargin(PHUI::MARGIN_LARGE_TOP)
+      ->appendChild($rendered_panel);
 
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $box,
+        $view,
         $timeline,
-        $rendered_panel,
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 
@@ -81,15 +91,31 @@ final class PhabricatorDashboardPanelViewController
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('Edit Panel'))
-        ->setIcon('edit')
+        ->setIcon('fa-pencil')
         ->setHref($this->getApplicationURI("panel/edit/{$id}/"))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
+    if (!$panel->getIsArchived()) {
+      $archive_text = pht('Archive Panel');
+      $archive_icon = 'fa-times';
+    } else {
+      $archive_text = pht('Activate Panel');
+      $archive_icon = 'fa-plus';
+    }
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setName($archive_text)
+        ->setIcon($archive_icon)
+        ->setHref($this->getApplicationURI("panel/archive/{$id}/"))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(true));
+
     $actions->addAction(
       id(new PhabricatorActionView())
         ->setName(pht('View Standalone'))
-        ->setIcon('preview')
+        ->setIcon('fa-eye')
         ->setHref($this->getApplicationURI("panel/render/{$id}/")));
 
     return $actions;
@@ -129,9 +155,14 @@ final class PhabricatorDashboardPanelViewController
       PhabricatorEdgeConfig::TYPE_PANEL_HAS_DASHBOARD);
     $this->loadHandles($dashboard_phids);
 
+    $does_not_appear = pht(
+      'This panel does not appear on any dashboards.');
+
     $properties->addProperty(
       pht('Appears On'),
-      $this->renderHandlesForPHIDs($dashboard_phids));
+      $dashboard_phids
+        ? $this->renderHandlesForPHIDs($dashboard_phids)
+        : phutil_tag('em', array(), $does_not_appear));
 
     return $properties;
   }
@@ -149,6 +180,7 @@ final class PhabricatorDashboardPanelViewController
 
     $timeline = id(new PhabricatorApplicationTransactionView())
       ->setUser($viewer)
+      ->setShouldTerminate(true)
       ->setObjectPHID($panel->getPHID())
       ->setTransactions($xactions);
 

@@ -133,7 +133,7 @@ abstract class AphrontFormControl extends AphrontView {
 
   public function setFormPage(PHUIFormPageView $page) {
     if ($this->formPage) {
-      throw new Exception("This control is already a member of a page!");
+      throw new Exception('This control is already a member of a page!');
     }
     $this->formPage = $page;
     return $this;
@@ -141,7 +141,7 @@ abstract class AphrontFormControl extends AphrontView {
 
   public function getFormPage() {
     if ($this->formPage === null) {
-      throw new Exception("This control does not have a page!");
+      throw new Exception('This control does not have a page!');
     }
     return $this->formPage;
   }
@@ -169,20 +169,30 @@ abstract class AphrontFormControl extends AphrontView {
 
     $custom_class = $this->getCustomControlClass();
 
-    if (strlen($this->getLabel())) {
-      $label = phutil_tag(
-        'label',
-        array('class' => 'aphront-form-label'),
-        $this->getLabel());
-    } else {
-      $label = null;
-      $custom_class .= ' aphront-form-control-nolabel';
+    // If we don't have an ID yet, assign an automatic one so we can associate
+    // the label with the control. This allows assistive technologies to read
+    // form labels.
+    if (!$this->getID()) {
+      $this->setID(celerity_generate_unique_node_id());
     }
 
     $input = phutil_tag(
       'div',
       array('class' => 'aphront-form-input'),
       $this->renderInput());
+
+    if (strlen($this->getLabel())) {
+      $label = phutil_tag(
+        'label',
+        array(
+          'class' => 'aphront-form-label',
+          'for' => $this->getID(),
+        ),
+        $this->getLabel());
+    } else {
+      $label = null;
+      $custom_class .= ' aphront-form-control-nolabel';
+    }
 
     if (strlen($this->getError())) {
       $error = $this->getError();

@@ -8,7 +8,7 @@ final class PhabricatorPolicyManagementShowWorkflow
       ->setName('show')
       ->setSynopsis('Show policy information about an object.')
       ->setExamples(
-        "**show** D123")
+        '**show** D123')
       ->setArguments(
         array(
           array(
@@ -26,12 +26,12 @@ final class PhabricatorPolicyManagementShowWorkflow
     if (!$obj_names) {
       throw new PhutilArgumentUsageException(
         pht(
-          "Specify the name of an object to show policy information for."));
+          'Specify the name of an object to show policy information for.'));
     } else if (count($obj_names) > 1) {
       throw new PhutilArgumentUsageException(
         pht(
-          "Specify the name of exactly one object to show policy information ".
-          "for."));
+          'Specify the name of exactly one object to show policy information '.
+          'for.'));
     }
 
     $object = id(new PhabricatorObjectQuery())

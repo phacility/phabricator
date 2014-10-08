@@ -21,7 +21,6 @@
  *
  * @task stop Stopping Event Behaviors
  * @task info Getting Event Information
- * @group event
  */
 JX.install('Event', {
   members : {
@@ -142,9 +141,8 @@ JX.install('Event', {
      * @task info
      */
     isNormalMouseEvent : function() {
-      var supportedEvents = ['click', 'mouseup', 'mousedown'];
-
-      if (supportedEvents.indexOf(this.getType()) == -1) {
+      var supportedEvents = {'click': 1, 'mouseup': 1, 'mousedown': 1};
+      if (!(this.getType() in supportedEvents)) {
         return false;
       }
 
@@ -159,7 +157,12 @@ JX.install('Event', {
       }
 
       if (('button' in r) && r.button) {
-        return false;
+        if ('which' in r) {
+          return false;
+        // IE won't have which and has left click == 1 here
+        } else if (r.button != 1) {
+          return false;
+        }
       }
 
       return true;
@@ -207,7 +210,7 @@ JX.install('Event', {
 
     /**
      * Get the metadata associated with the node that corresponds to the key
-     * in this event's node map.  This is a simple helper method that makes
+     * in this event's node map. This is a simple helper method that makes
      * the API for accessing metadata associated with specific nodes less ugly.
      *
      *  JX.Stratcom.listen('click', 'tag:a', function(event) {

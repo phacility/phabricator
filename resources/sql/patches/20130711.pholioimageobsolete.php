@@ -1,6 +1,6 @@
 <?php
 
-echo "Giving pholio images PHIDs";
+echo 'Giving pholio images PHIDs';
 $table = new PholioImage();
 $table->openTransaction();
 
@@ -9,7 +9,7 @@ foreach (new LiskMigrationIterator($table) as $image) {
     continue;
   }
 
-  echo ".";
+  echo '.';
 
   queryfx(
     $image->establishConnection('w'),

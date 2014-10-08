@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group legalpad
- */
 final class LegalpadDocumentEditController extends LegalpadController {
 
   private $id;
@@ -18,20 +15,20 @@ final class LegalpadDocumentEditController extends LegalpadController {
     if (!$this->id) {
       $is_create = true;
 
+      $this->requireApplicationCapability(
+        LegalpadCreateDocumentsCapability::CAPABILITY);
+
       $document = LegalpadDocument::initializeNewDocument($user);
       $body = id(new LegalpadDocumentBody())
         ->setCreatorPHID($user->getPHID());
       $document->attachDocumentBody($body);
       $document->setDocumentBodyPHID(PhabricatorPHIDConstants::PHID_VOID);
-      $title = null;
-      $text = null;
     } else {
       $is_create = false;
 
       $document = id(new LegalpadDocumentQuery())
         ->setViewer($user)
         ->needDocumentBodies(true)
-        ->needSignatures(true)
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
@@ -42,12 +39,16 @@ final class LegalpadDocumentEditController extends LegalpadController {
       if (!$document) {
         return new Aphront404Response();
       }
-      $title = $document->getDocumentBody()->getTitle();
-      $text = $document->getDocumentBody()->getText();
     }
 
     $e_title = true;
     $e_text = true;
+
+    $title = $document->getDocumentBody()->getTitle();
+    $text = $document->getDocumentBody()->getText();
+    $v_signature_type = $document->getSignatureType();
+    $v_preamble = $document->getPreamble();
+
     $errors = array();
     $can_view = null;
     $can_edit = null;
@@ -84,6 +85,18 @@ final class LegalpadDocumentEditController extends LegalpadController {
         ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
         ->setNewValue($can_edit);
 
+      if ($is_create) {
+        $v_signature_type = $request->getStr('signatureType');
+        $xactions[] = id(new LegalpadTransaction())
+          ->setTransactionType(LegalpadTransactionType::TYPE_SIGNATURE_TYPE)
+          ->setNewValue($v_signature_type);
+      }
+
+      $v_preamble = $request->getStr('preamble');
+      $xactions[] = id(new LegalpadTransaction())
+        ->setTransactionType(LegalpadTransactionType::TYPE_PREAMBLE)
+        ->setNewValue($v_preamble);
+
       if (!$errors) {
         $editor = id(new LegalpadDocumentEditor())
           ->setContentSourceFromRequest($request)
@@ -111,11 +124,35 @@ final class LegalpadDocumentEditController extends LegalpadController {
         ->setLabel(pht('Title'))
         ->setError($e_title)
         ->setValue($title)
-        ->setName('title'))
+        ->setName('title'));
+
+    if ($is_create) {
+      $form->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setLabel(pht('Who Should Sign?'))
+          ->setName(pht('signatureType'))
+          ->setValue($v_signature_type)
+          ->setOptions(LegalpadDocument::getSignatureTypeMap()));
+    } else {
+      $form->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setLabel(pht('Who Should Sign?'))
+          ->setValue($document->getSignatureTypeName()));
+    }
+
+    $form
+      ->appendChild(
+        id(new PhabricatorRemarkupControl())
+        ->setID('preamble')
+        ->setLabel(pht('Preamble'))
+        ->setValue($v_preamble)
+        ->setName('preamble')
+        ->setCaption(
+          pht('Optional help text for users signing this document.')))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
         ->setID('document-text')
-        ->setLabel(pht('Text'))
+        ->setLabel(pht('Document Body'))
         ->setError($e_text)
         ->setValue($text)
         ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
@@ -146,22 +183,16 @@ final class LegalpadDocumentEditController extends LegalpadController {
     $submit = new AphrontFormSubmitControl();
     if ($is_create) {
       $submit->setValue(pht('Create Document'));
+      $submit->addCancelButton($this->getApplicationURI());
       $title = pht('Create Document');
       $short = pht('Create');
     } else {
-      $submit->setValue(pht('Update Document'));
+      $submit->setValue(pht('Edit Document'));
       $submit->addCancelButton(
           $this->getApplicationURI('view/'.$document->getID()));
-      $title = pht('Update Document');
-      $short = pht('Update');
-      $signatures = $document->getSignatures();
-      if ($signatures) {
-        $form->appendInstructions(pht(
-          'Warning: there are %d signature(s) already for this document. '.
-          'Updating the title or text will invalidate these signatures and '.
-          'users will need to sign again. Proceed carefully.',
-          count($signatures)));
-      }
+      $title = pht('Edit Document');
+      $short = pht('Edit');
+
       $crumbs->addTextCrumb(
         $document->getMonogram(),
         $this->getApplicationURI('view/'.$document->getID()));
@@ -187,11 +218,10 @@ final class LegalpadDocumentEditController extends LegalpadController {
       array(
         $crumbs,
         $form_box,
-        $preview
+        $preview,
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

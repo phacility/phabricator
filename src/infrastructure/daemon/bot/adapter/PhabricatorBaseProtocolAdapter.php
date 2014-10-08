@@ -22,6 +22,13 @@ abstract class PhabricatorBaseProtocolAdapter {
   abstract public function connect();
 
   /**
+   * Disconnect from the service.
+   */
+  public function disconnect() {
+    return;
+  }
+
+  /**
    * This is the spout for messages coming in from the protocol.
    * This will be called in the main event loop of the bot daemon
    * So if if doesn't implement some sort of blocking timeout

@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group conduit
- */
 abstract class PhabricatorConduitController extends PhabricatorController {
 
   protected function buildSideNavView() {
@@ -26,6 +23,5 @@ abstract class PhabricatorConduitController extends PhabricatorController {
   protected function buildApplicationMenu() {
     return $this->buildSideNavView()->getMenu();
   }
-
 
 }

@@ -7,6 +7,11 @@ final class PhabricatorPeopleCreateController
     $request = $this->getRequest();
     $admin = $request->getUser();
 
+    id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
+      $admin,
+      $request,
+      $this->getApplicationURI());
+
     $v_type = 'standard';
     if ($request->isFormPost()) {
       $v_type = $request->getStr('type');
@@ -75,7 +80,6 @@ final class PhabricatorPeopleCreateController
       ),
       array(
         'title' => $title,
-        'device' => true,
       ));
   }
 

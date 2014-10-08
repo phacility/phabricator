@@ -28,7 +28,7 @@ final class PhabricatorBcryptPasswordHasher
   }
 
   public function getHumanReadableStrength() {
-    return pht("Good");
+    return pht('Good');
   }
 
   protected function getPasswordHash(PhutilOpaqueEnvelope $envelope) {

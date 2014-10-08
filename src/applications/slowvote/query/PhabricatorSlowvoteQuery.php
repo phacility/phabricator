@@ -1,8 +1,5 @@
 <?php
 
-/**
- * @group slowvote
- */
 final class PhabricatorSlowvoteQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
@@ -181,9 +178,8 @@ final class PhabricatorSlowvoteQuery
     return 'p.id';
   }
 
-
   public function getQueryApplicationClass() {
-    return 'PhabricatorApplicationSlowvote';
+    return 'PhabricatorSlowvoteApplication';
   }
 
 }

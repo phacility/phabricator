@@ -1,12 +1,9 @@
 <?php
 
-/**
- * @group pholio
- */
 final class PholioMockMailReceiver extends PhabricatorObjectMailReceiver {
 
   public function isEnabled() {
-    $app_class = 'PhabricatorApplicationPholio';
+    $app_class = 'PhabricatorPholioApplication';
     return PhabricatorApplication::isClassInstalled($app_class);
   }
 
@@ -29,8 +26,6 @@ final class PholioMockMailReceiver extends PhabricatorObjectMailReceiver {
     PhabricatorUser $sender) {
 
     // TODO: For now, we just drop this mail on the floor.
-
   }
-
 
 }

@@ -115,12 +115,13 @@ final class DivinerAtomController extends DivinerController {
     $toc = $engine->getEngineMetadata(
       $symbol,
       $field,
-      PhutilRemarkupEngineRemarkupHeaderBlockRule::KEY_HEADER_TOC,
+      PhutilRemarkupHeaderBlockRule::KEY_HEADER_TOC,
       array());
 
     $document = id(new PHUIDocumentView())
       ->setBook($book->getTitle(), $group_name)
       ->setHeader($header)
+      ->addClass('diviner-view')
       ->setFontKit(PHUIDocumentView::FONT_SOURCE_SANS)
       ->appendChild($properties)
       ->appendChild($warnings)
@@ -173,7 +174,8 @@ final class DivinerAtomController extends DivinerController {
                 $item = array(
                   $item,
                   " \xE2\x80\x94 ",
-                  $atom->getSummary());
+                  $atom->getSummary(),
+                );
               }
 
               $list_items[] = phutil_tag('li', array(), $item);
@@ -248,7 +250,6 @@ final class DivinerAtomController extends DivinerController {
       ),
       array(
         'title' => $symbol->getTitle(),
-        'device' => true,
       ));
   }
 
@@ -280,7 +281,8 @@ final class DivinerAtomController extends DivinerController {
           $items[] = array(
             $this->renderAtomTag($iface),
             "  \xE2\x97\x80  ",
-            $this->renderAtomTag($via));
+            $this->renderAtomTag($via),
+          );
         }
       }
 

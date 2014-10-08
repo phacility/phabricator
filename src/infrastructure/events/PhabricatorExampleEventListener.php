@@ -3,15 +3,12 @@
 /**
  * Example event listener. For details about installing Phabricator event hooks,
  * refer to @{article:Events User Guide: Installing Event Listeners}.
- *
- * @group events
  */
 final class PhabricatorExampleEventListener extends PhabricatorEventListener {
 
   public function register() {
     // When your listener is installed, its register() method will be called.
     // You should listen() to any events you are interested in here.
-
     $this->listen(PhabricatorEventType::TYPE_TEST_DIDRUNTEST);
   }
 

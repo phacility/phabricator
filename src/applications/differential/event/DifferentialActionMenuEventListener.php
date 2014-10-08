@@ -34,12 +34,10 @@ final class DifferentialActionMenuEventListener
     }
 
     $person = $event->getValue('object');
-    $href = '/differential/?authorPHIDs[]='.$person->getPHID();
+    $href = '/differential/?authors='.$person->getUsername();
 
     return id(new PhabricatorActionView())
-      ->setRenderAsForm(true)
-      ->setIcon('differential-dark')
-      ->setIconSheet(PHUIIconView::SPRITE_APPS)
+      ->setIcon('fa-cog')
       ->setName(pht('View Revisions'))
       ->setHref($href);
   }
@@ -60,8 +58,7 @@ final class DifferentialActionMenuEventListener
     return id(new PhabricatorActionView())
       ->setName(pht('Edit Differential Revisions'))
       ->setHref("/search/attach/{$phid}/DREV/")
-      ->setWorkflow(true)
-      ->setIcon('attach')
+      ->setIcon('fa-cog')
       ->setDisabled(!$can_edit)
       ->setWorkflow(true);
   }

@@ -8,7 +8,7 @@
  *           phabricator-keyboard-shortcut
  */
 
-JX.behavior('releeph-request-state-change', function(config) {
+JX.behavior('releeph-request-state-change', function() {
   function getRequestHeaderNodes() {
     return JX.DOM.scry(document.body, 'div', 'releeph-request-box');
   }
@@ -92,7 +92,7 @@ JX.behavior('releeph-request-state-change', function(config) {
   new JX.KeyboardShortcut(
     ['g', 'return'],
     "Open selected request's page in a new tab.")
-    .setHandler(function(manager) {
+    .setHandler(function() {
       keynavNavigateToRequestPage();
     })
     .register();
