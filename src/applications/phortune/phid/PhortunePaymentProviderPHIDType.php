@@ -30,8 +30,7 @@ final class PhortunePaymentProviderPHIDType extends PhabricatorPHIDType {
 
       $id = $provider_config->getID();
 
-      $handle->setName(pht('Payment Provider %d', $id));
-      $handle->setURI("/phortune/provider/{$id}/");
+      $handle->setName($provider_config->buildProvider()->getName());
     }
   }
 

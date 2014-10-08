@@ -12,6 +12,8 @@ abstract class PhortuneCartImplementation {
     PhabricatorUser $viewer,
     array $carts);
 
+  abstract public function getName();
+
   abstract public function getCancelURI(PhortuneCart $cart);
   abstract public function getDoneURI(PhortuneCart $cart);
 

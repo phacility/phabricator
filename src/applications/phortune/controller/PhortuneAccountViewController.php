@@ -51,7 +51,6 @@ final class PhortuneAccountViewController extends PhortuneController {
       ->setObject($account)
       ->setUser($user);
 
-    $properties->addProperty(pht('Balance'), '-');
     $properties->setActionList($actions);
 
     $payment_methods = $this->buildPaymentMethodsSection($account);
@@ -163,39 +162,52 @@ final class PhortuneAccountViewController extends PhortuneController {
         ))
       ->execute();
 
+    $phids = array();
+    foreach ($carts as $cart) {
+      $phids[] = $cart->getPHID();
+      foreach ($cart->getPurchases() as $purchase) {
+        $phids[] = $purchase->getPHID();
+      }
+    }
+    $handles = $this->loadViewerHandles($phids);
+
     $rows = array();
     $rowc = array();
     foreach ($carts as $cart) {
-      $cart_link = phutil_tag(
-        'a',
-        array(
-          'href' => $this->getApplicationURI('cart/'.$cart->getID().'/'),
-        ),
-        pht('Cart %d', $cart->getID()));
+      $cart_link = $handles[$cart->getPHID()]->renderLink();
+      $purchases = $cart->getPurchases();
 
-      $rowc[] = 'highlighted';
+      if (count($purchases) == 1) {
+        $purchase_name = $handles[$purchase->getPHID()]->renderLink();
+        $purchases = array();
+      } else {
+        $purchase_name = '';
+      }
+
+      $rowc[] = '';
       $rows[] = array(
-        phutil_tag('strong', array(), $cart_link),
-        '',
-        '',
+        phutil_tag(
+          'strong',
+          array(),
+          $cart_link),
+        $purchase_name,
+        phutil_tag(
+          'strong',
+          array(),
+          $cart->getTotalPriceAsCurrency()->formatForDisplay()),
+        phabricator_datetime($cart->getDateModified(), $viewer),
       );
-      foreach ($cart->getPurchases() as $purchase) {
+      foreach ($purchases as $purchase) {
         $id = $purchase->getID();
 
         $price = $purchase->getTotalPriceAsCurrency()->formatForDisplay();
 
-        $purchase_link = phutil_tag(
-          'a',
-          array(
-            'href' => $this->getApplicationURI('purchase/'.$id.'/'),
-          ),
-          $purchase->getFullDisplayName());
-
         $rowc[] = '';
         $rows[] = array(
           '',
-          $purchase_link,
+          $handles[$purchase->getPHID()]->renderLink(),
           $price,
+          '',
         );
       }
     }
@@ -207,11 +219,13 @@ final class PhortuneAccountViewController extends PhortuneController {
           pht('Cart'),
           pht('Purchase'),
           pht('Amount'),
+          pht('Updated'),
         ))
       ->setColumnClasses(
         array(
           '',
           'wide',
+          'right',
           'right',
         ));
 
@@ -240,9 +254,6 @@ final class PhortuneAccountViewController extends PhortuneController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Account History'));
-
     $xactions = id(new PhortuneAccountTransactionQuery())
       ->setViewer($user)
       ->withObjectPHIDs(array($account->getPHID()))
@@ -257,13 +268,7 @@ final class PhortuneAccountViewController extends PhortuneController {
       ->setTransactions($xactions)
       ->setMarkupEngine($engine);
 
-    $box = id(new PHUIObjectBoxView())
-      ->setHeader($header);
-
-    return array(
-      $box,
-      $xaction_view,
-    );
+    return $xaction_view;
   }
 
 }

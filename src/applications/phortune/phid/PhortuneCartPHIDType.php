@@ -29,8 +29,9 @@ final class PhortuneCartPHIDType extends PhabricatorPHIDType {
       $cart = $objects[$phid];
 
       $id = $cart->getID();
+      $name = $cart->getImplementation()->getName();
 
-      $handle->setName(pht('Cart %d', $id));
+      $handle->setName($name);
       $handle->setURI("/phortune/cart/{$id}/");
     }
   }

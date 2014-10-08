@@ -63,6 +63,18 @@ final class PhortuneCharge extends PhortuneDAO
     ) + parent::getConfiguration();
   }
 
+  public static function getStatusNameMap() {
+    return array(
+      self::STATUS_CHARGING => pht('Charging'),
+      self::STATUS_CHARGED => pht('Charged'),
+      self::STATUS_FAILED => pht('Failed'),
+    );
+  }
+
+  public static function getNameForStatus($status) {
+    return idx(self::getStatusNameMap(), $status, pht('Unknown'));
+  }
+
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
       PhortuneChargePHIDType::TYPECONST);
