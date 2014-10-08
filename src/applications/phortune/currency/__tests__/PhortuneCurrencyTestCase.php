@@ -19,7 +19,6 @@ final class PhortuneCurrencyTestCase extends PhabricatorTestCase {
     }
   }
 
-
   public function testCurrencyFormatBareValue() {
 
     // NOTE: The PayPal API depends on the behavior of the bare value format!
@@ -140,6 +139,24 @@ final class PhortuneCurrencyTestCase extends PhabricatorTestCase {
       $caught = $ex;
     }
     $this->assertTrue($caught instanceof Exception);
+  }
+
+  public function testAddCurrency() {
+    $cases = array(
+      array('0.00 USD', '0.00 USD', '$0.00 USD'),
+      array('1.00 USD', '1.00 USD', '$2.00 USD'),
+      array('1.23 USD', '9.77 USD', '$11.00 USD'),
+    );
+
+    foreach ($cases as $case) {
+      list($l, $r, $expect) = $case;
+
+      $l = PhortuneCurrency::newFromString($l);
+      $r = PhortuneCurrency::newFromString($r);
+      $sum = $l->add($r);
+
+      $this->assertEqual($expect, $sum->formatForDisplay());
+    }
   }
 
 }

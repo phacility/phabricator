@@ -72,26 +72,20 @@ final class PhortuneCurrency extends Phobject {
   public static function newFromList(array $list) {
     assert_instances_of($list, 'PhortuneCurrency');
 
-    $total = 0;
-    $currency = null;
-    foreach ($list as $item) {
-      if ($currency === null) {
-        $currency = $item->getCurrency();
-      } else if ($currency === $item->getCurrency()) {
-        // Adding a value denominated in the same currency, which is
-        // fine.
-      } else {
-        throw new Exception(
-          pht('Trying to sum a list of unlike currencies.'));
-      }
-
-      // TODO: This should check for integer overflows, etc.
-      $total += $item->getValue();
+    if (!$list) {
+      return PhortuneCurrency::newEmptyCurrency();
     }
 
-    return PhortuneCurrency::newFromValueAndCurrency(
-      $total,
-      self::getDefaultCurrency());
+    $total = null;
+    foreach ($list as $item) {
+      if ($total === null) {
+        $total = $item;
+      } else {
+        $total = $total->add($item);
+      }
+    }
+
+    return $total;
   }
 
   public function formatForDisplay() {
@@ -130,6 +124,20 @@ final class PhortuneCurrency extends Phobject {
 
   private static function throwFormatException($string) {
     throw new Exception("Invalid currency format ('{$string}').");
+  }
+
+  public function add(PhortuneCurrency $other) {
+    if ($this->currency !== $other->currency) {
+      throw new Exception(pht('Trying to add unlike currencies!'));
+    }
+
+    $currency = new PhortuneCurrency();
+
+    // TODO: This should check for integer overflows, etc.
+    $currency->value = $this->value + $other->value;
+    $currency->currency = $this->currency;
+
+    return $currency;
   }
 
   /**

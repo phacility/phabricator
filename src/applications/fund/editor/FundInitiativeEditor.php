@@ -78,7 +78,18 @@ final class FundInitiativeEditor
         $object->setStatus($xaction->getNewValue());
         return;
       case FundInitiativeTransaction::TYPE_BACKER:
-        // TODO: Calculate total funding / backers / etc.
+        $backer = id(new FundBackerQuery())
+          ->setViewer($this->requireActor())
+          ->withPHIDs(array($xaction->getNewValue()))
+          ->executeOne();
+        if (!$backer) {
+          throw new Exception(pht('No such backer!'));
+        }
+
+        $backer_amount = $backer->getAmountAsCurrency();
+        $total = $object->getTotalAsCurrency()->add($backer_amount);
+        $object->setTotalAsCurrency($total);
+
         return;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
       case PhabricatorTransactions::TYPE_EDGE:
