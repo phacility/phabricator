@@ -7,11 +7,8 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
   const WEPAY_ACCESS_TOKEN    = 'wepay.access-token';
   const WEPAY_ACCOUNT_ID      = 'wepay.account-id';
 
-  public function isEnabled() {
-    return $this->getWePayClientID() &&
-           $this->getWePayClientSecret() &&
-           $this->getWePayAccessToken() &&
-           $this->getWePayAccountID();
+  public function isAcceptingLivePayments() {
+    return preg_match('/^PRODUCTION_/', $this->getWePayAccessToken());
   }
 
   public function getName() {
@@ -26,6 +23,10 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
     return pht(
       'Allows you to accept credit or debit card payments with a '.
       'wepay.com account.');
+  }
+
+  public function getConfigureProvidesDescription() {
+    return pht('This merchant accepts credit and debit cards via WePay.');
   }
 
   public function getConfigureInstructions() {

@@ -60,6 +60,7 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
         ),
         'provider/' => array(
           'edit/(?:(?P<id>\d+)/)?' => 'PhortuneProviderEditController',
+          'disable/(?P<id>\d+)/' => 'PhortuneProviderDisableController',
           '(?P<id>\d+)/(?P<action>[^/]+)/'
             => 'PhortuneProviderActionController',
         ),

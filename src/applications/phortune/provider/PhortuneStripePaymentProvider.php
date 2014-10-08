@@ -5,9 +5,8 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
   const STRIPE_PUBLISHABLE_KEY  = 'stripe.publishable-key';
   const STRIPE_SECRET_KEY       = 'stripe.secret-key';
 
-  public function isEnabled() {
-    return $this->getPublishableKey() &&
-           $this->getSecretKey();
+  public function isAcceptingLivePayments() {
+    return preg_match('/_live_/', $this->getPublishableKey());
   }
 
   public function getName() {
@@ -22,6 +21,11 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
     return pht(
       'Allows you to accept credit or debit card payments with a '.
       'stripe.com account.');
+  }
+
+  public function getConfigureProvidesDescription() {
+    return pht(
+      'This merchant accepts credit and debit cards via Stripe.');
   }
 
   public function getPaymentMethodDescription() {

@@ -2,8 +2,8 @@
 
 final class PhortuneTestPaymentProvider extends PhortunePaymentProvider {
 
-  public function isEnabled() {
-    return PhabricatorEnv::getEnvConfig('phortune.test.enabled');
+  public function isAcceptingLivePayments() {
+    return false;
   }
 
   public function getName() {
@@ -19,6 +19,10 @@ final class PhortuneTestPaymentProvider extends PhortunePaymentProvider {
       'Adds a test provider to allow you to test payments. This allows '.
       'users to make purchases by clicking a button without actually paying '.
       'any money.');
+  }
+
+  public function getConfigureProvidesDescription() {
+    return pht('This merchant accepts test payments.');
   }
 
   public function getConfigureInstructions() {

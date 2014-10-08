@@ -41,6 +41,8 @@ abstract class PhortunePaymentProvider {
 
   abstract public function getConfigureInstructions();
 
+  abstract public function getConfigureProvidesDescription();
+
   abstract public function getAllConfigurableProperties();
 
   abstract public function getAllConfigurableSecretProperties();
@@ -120,8 +122,11 @@ abstract class PhortunePaymentProvider {
       ->loadObjects();
   }
 
-  abstract public function isEnabled();
+  public function isEnabled() {
+    return $this->getProviderConfig()->getIsEnabled();
+  }
 
+  abstract public function isAcceptingLivePayments();
   abstract public function getPaymentMethodDescription();
   abstract public function getPaymentMethodIcon();
   abstract public function getPaymentMethodProviderDescription();

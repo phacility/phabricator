@@ -6,6 +6,7 @@ final class PhortuneMerchant extends PhortuneDAO
   protected $name;
   protected $viewPolicy;
   protected $editPolicy;
+  protected $description;
 
   public static function initializeNewMerchant(PhabricatorUser $actor) {
     return id(new PhortuneMerchant())
@@ -18,6 +19,7 @@ final class PhortuneMerchant extends PhortuneDAO
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'text255',
+        'description' => 'text',
       ),
     ) + parent::getConfiguration();
   }

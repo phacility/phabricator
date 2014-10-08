@@ -10,10 +10,11 @@ final class PhortunePayPalPaymentProvider extends PhortunePaymentProvider {
   public function isEnabled() {
     // TODO: See note in processControllerRequest().
     return false;
+  }
 
-    return $this->getPaypalAPIUsername() &&
-           $this->getPaypalAPIPassword() &&
-           $this->getPaypalAPISignature();
+  public function isAcceptingLivePayments() {
+    $mode = $this->getProviderConfig()->getMetadataValue(self::PAYPAL_MODE);
+    return ($mode === 'live');
   }
 
   public function getName() {
@@ -28,6 +29,11 @@ final class PhortunePayPalPaymentProvider extends PhortunePaymentProvider {
     return pht(
       'Allows you to accept various payment instruments with a paypal.com '.
       'account.');
+  }
+
+  public function getConfigureProvidesDescription() {
+    return pht(
+      'This merchant accepts payments via PayPal.');
   }
 
   public function getConfigureInstructions() {
@@ -339,8 +345,7 @@ final class PhortunePayPalPaymentProvider extends PhortunePaymentProvider {
   }
 
   private function newPaypalAPICall() {
-    $mode = $this->getProviderConfig()->getMetadataValue(self::PAYPAL_MODE);
-    if ($mode == 'live') {
+    if ($this->isAcceptingLivePayments()) {
       $host = 'https://api-3t.paypal.com/nvp';
     } else {
       $host = 'https://api-3t.sandbox.paypal.com/nvp';

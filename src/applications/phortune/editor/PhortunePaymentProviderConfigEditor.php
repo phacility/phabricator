@@ -16,6 +16,7 @@ final class PhortunePaymentProviderConfigEditor
 
     $types[] = PhortunePaymentProviderConfigTransaction::TYPE_CREATE;
     $types[] = PhortunePaymentProviderConfigTransaction::TYPE_PROPERTY;
+    $types[] = PhortunePaymentProviderConfigTransaction::TYPE_ENABLE;
 
     return $types;
   }
@@ -26,6 +27,8 @@ final class PhortunePaymentProviderConfigEditor
     switch ($xaction->getTransactionType()) {
       case PhortunePaymentProviderConfigTransaction::TYPE_CREATE:
         return null;
+      case PhortunePaymentProviderConfigTransaction::TYPE_ENABLE:
+        return (int)$object->getIsEnabled();
       case PhortunePaymentProviderConfigTransaction::TYPE_PROPERTY:
         $property_key = $xaction->getMetadataValue(
           PhortunePaymentProviderConfigTransaction::PROPERTY_KEY);
@@ -43,6 +46,8 @@ final class PhortunePaymentProviderConfigEditor
       case PhortunePaymentProviderConfigTransaction::TYPE_CREATE:
       case PhortunePaymentProviderConfigTransaction::TYPE_PROPERTY:
         return $xaction->getNewValue();
+      case PhortunePaymentProviderConfigTransaction::TYPE_ENABLE:
+        return (int)$xaction->getNewValue();
     }
 
     return parent::getCustomTransactionNewValue($object, $xaction);
@@ -60,6 +65,8 @@ final class PhortunePaymentProviderConfigEditor
           PhortunePaymentProviderConfigTransaction::PROPERTY_KEY);
         $object->setMetadataValue($property_key, $xaction->getNewValue());
         return;
+      case PhortunePaymentProviderConfigTransaction::TYPE_ENABLE:
+        return $object->setIsEnabled((int)$xaction->getNewValue());
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -72,6 +79,7 @@ final class PhortunePaymentProviderConfigEditor
     switch ($xaction->getTransactionType()) {
       case PhortunePaymentProviderConfigTransaction::TYPE_CREATE:
       case PhortunePaymentProviderConfigTransaction::TYPE_PROPERTY:
+      case PhortunePaymentProviderConfigTransaction::TYPE_ENABLE:
         return;
     }
 

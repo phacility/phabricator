@@ -5,9 +5,8 @@ final class PhortuneBalancedPaymentProvider extends PhortunePaymentProvider {
   const BALANCED_MARKETPLACE_ID   = 'balanced.marketplace-id';
   const BALANCED_SECRET_KEY       = 'balanced.secret-key';
 
-  public function isEnabled() {
-    return $this->getMarketplaceURI() &&
-           $this->getSecretKey();
+  public function isAcceptingLivePayments() {
+    return !preg_match('/-test-/', $this->getSecretKey());
   }
 
   public function getName() {
@@ -22,6 +21,11 @@ final class PhortuneBalancedPaymentProvider extends PhortunePaymentProvider {
     return pht(
       'Allows you to accept credit or debit card payments with a '.
       'balancedpayments.com account.');
+  }
+
+  public function getConfigureProvidesDescription() {
+    return pht(
+      'This merchant accepts credit and debit cards via Balanced Payments.');
   }
 
   public function getConfigureInstructions() {

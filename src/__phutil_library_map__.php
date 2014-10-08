@@ -2609,6 +2609,7 @@ phutil_register_library_map(array(
     'PhortuneProductQuery' => 'applications/phortune/query/PhortuneProductQuery.php',
     'PhortuneProductViewController' => 'applications/phortune/controller/PhortuneProductViewController.php',
     'PhortuneProviderActionController' => 'applications/phortune/controller/PhortuneProviderActionController.php',
+    'PhortuneProviderDisableController' => 'applications/phortune/controller/PhortuneProviderDisableController.php',
     'PhortuneProviderEditController' => 'applications/phortune/controller/PhortuneProviderEditController.php',
     'PhortunePurchase' => 'applications/phortune/storage/PhortunePurchase.php',
     'PhortunePurchasePHIDType' => 'applications/phortune/phid/PhortunePurchasePHIDType.php',
@@ -5670,6 +5671,7 @@ phutil_register_library_map(array(
     'PhortuneProductQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhortuneProductViewController' => 'PhortuneController',
     'PhortuneProviderActionController' => 'PhortuneController',
+    'PhortuneProviderDisableController' => 'PhortuneMerchantController',
     'PhortuneProviderEditController' => 'PhortuneMerchantController',
     'PhortunePurchase' => array(
       'PhortuneDAO',

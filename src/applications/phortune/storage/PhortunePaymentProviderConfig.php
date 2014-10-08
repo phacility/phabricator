@@ -6,6 +6,7 @@ final class PhortunePaymentProviderConfig extends PhortuneDAO
   protected $merchantPHID;
   protected $providerClassKey;
   protected $providerClass;
+  protected $isEnabled;
   protected $metadata = array();
 
   private $merchant = self::ATTACHABLE;
@@ -13,7 +14,8 @@ final class PhortunePaymentProviderConfig extends PhortuneDAO
   public static function initializeNewProvider(
     PhortuneMerchant $merchant) {
     return id(new PhortunePaymentProviderConfig())
-      ->setMerchantPHID($merchant->getPHID());
+      ->setMerchantPHID($merchant->getPHID())
+      ->setIsEnabled(1);
   }
 
   public function getConfiguration() {
@@ -25,6 +27,7 @@ final class PhortunePaymentProviderConfig extends PhortuneDAO
       self::CONFIG_COLUMN_SCHEMA => array(
         'providerClassKey' => 'bytes12',
         'providerClass' => 'text128',
+        'isEnabled' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_merchant' => array(
