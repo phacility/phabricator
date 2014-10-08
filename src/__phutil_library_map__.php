@@ -1380,6 +1380,7 @@ phutil_register_library_map(array(
     'PhabricatorConfigManagementDeleteWorkflow' => 'applications/config/management/PhabricatorConfigManagementDeleteWorkflow.php',
     'PhabricatorConfigManagementGetWorkflow' => 'applications/config/management/PhabricatorConfigManagementGetWorkflow.php',
     'PhabricatorConfigManagementListWorkflow' => 'applications/config/management/PhabricatorConfigManagementListWorkflow.php',
+    'PhabricatorConfigManagementMigrateWorkflow' => 'applications/config/management/PhabricatorConfigManagementMigrateWorkflow.php',
     'PhabricatorConfigManagementSetWorkflow' => 'applications/config/management/PhabricatorConfigManagementSetWorkflow.php',
     'PhabricatorConfigManagementWorkflow' => 'applications/config/management/PhabricatorConfigManagementWorkflow.php',
     'PhabricatorConfigOption' => 'applications/config/option/PhabricatorConfigOption.php',
@@ -4342,6 +4343,7 @@ phutil_register_library_map(array(
     'PhabricatorConfigManagementDeleteWorkflow' => 'PhabricatorConfigManagementWorkflow',
     'PhabricatorConfigManagementGetWorkflow' => 'PhabricatorConfigManagementWorkflow',
     'PhabricatorConfigManagementListWorkflow' => 'PhabricatorConfigManagementWorkflow',
+    'PhabricatorConfigManagementMigrateWorkflow' => 'PhabricatorConfigManagementWorkflow',
     'PhabricatorConfigManagementSetWorkflow' => 'PhabricatorConfigManagementWorkflow',
     'PhabricatorConfigManagementWorkflow' => 'PhabricatorManagementWorkflow',
     'PhabricatorConfigOption' => array(

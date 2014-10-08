@@ -113,9 +113,10 @@ final class PhabricatorConfigEditor
   }
 
   public static function storeNewValue(
+    PhabricatorUser $user,
     PhabricatorConfigEntry $config_entry,
     $value,
-    AphrontRequest $request) {
+    PhabricatorContentSource $source) {
 
     $xaction = id(new PhabricatorConfigTransaction())
       ->setTransactionType(PhabricatorConfigTransaction::TYPE_EDIT)
@@ -126,9 +127,30 @@ final class PhabricatorConfigEditor
         ));
 
     $editor = id(new PhabricatorConfigEditor())
-           ->setActor($request->getUser())
-           ->setContinueOnNoEffect(true)
-           ->setContentSourceFromRequest($request);
+      ->setActor($user)
+      ->setContinueOnNoEffect(true)
+      ->setContentSource($source);
+
+    $editor->applyTransactions($config_entry, array($xaction));
+  }
+
+  public static function deleteConfig(
+    PhabricatorUser $user,
+    PhabricatorConfigEntry $config_entry,
+    PhabricatorContentSource $source) {
+
+    $xaction = id(new PhabricatorConfigTransaction())
+      ->setTransactionType(PhabricatorConfigTransaction::TYPE_EDIT)
+      ->setNewValue(
+        array(
+          'deleted' => true,
+          'value' => null,
+        ));
+
+    $editor = id(new PhabricatorConfigEditor())
+      ->setActor($user)
+      ->setContinueOnNoEffect(true)
+      ->setContentSource($source);
 
     $editor->applyTransactions($config_entry, array($xaction));
   }

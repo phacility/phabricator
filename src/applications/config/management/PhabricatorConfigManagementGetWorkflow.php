@@ -40,15 +40,60 @@ final class PhabricatorConfigManagementGetWorkflow
         "keys.");
     }
 
+    $values = array();
     $config = new PhabricatorConfigLocalSource();
-    $values = $config->getKeys(array($key));
+    $local_value = $config->getKeys(array($key));
+    if (empty($local_value)) {
+      $values['local'] = array(
+        'key' => $key,
+        'value' => null,
+        'status' => 'unset',
+        'errorInfo' => null,
+      );
+    } else {
+      $values['local'] = array(
+        'key' => $key,
+        'value' => reset($local_value),
+        'status' => 'set',
+        'errorInfo' => null,
+      );
+    }
+
+    $database_config = new PhabricatorConfigDatabaseSource('default');
+    try {
+      $database_value = $database_config->getKeys(array($key));
+      if (empty($database_value)) {
+        $values['database'] = array(
+          'key' => $key,
+          'value' => null,
+          'status' => 'unset',
+          'errorInfo' => null,
+        );
+      } else {
+        $values['database'] = array(
+          'key' => $key,
+          'value' => reset($database_value),
+          'status' => 'set',
+          'errorInfo' => null,
+        );
+      }
+    } catch (Exception $e) {
+      $values['database'] = array(
+        'key' => $key,
+        'value' => null,
+        'status' => 'error',
+        'errorInfo' => pht('Database source is not configured properly'),
+      );
+    }
 
     $result = array();
-    foreach ($values as $key => $value) {
+    foreach ($values as $source => $value) {
       $result[] = array(
-        'key' => $key,
-        'source' => 'local',
-        'value' => $value,
+        'key' => $value['key'],
+        'source' => $source,
+        'value' => $value['value'],
+        'status' => $value['status'],
+        'errorInfo' => $value['errorInfo'],
       );
     }
     $result = array(
