@@ -15,6 +15,7 @@ final class FundInitiative extends FundDAO
   protected $ownerPHID;
   protected $merchantPHID;
   protected $description;
+  protected $risks;
   protected $viewPolicy;
   protected $editPolicy;
   protected $status;
