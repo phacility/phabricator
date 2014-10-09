@@ -7,6 +7,26 @@ final class PhortuneAccountQuery
   private $phids;
   private $memberPHIDs;
 
+  public static function loadAccountsForUser(
+    PhabricatorUser $user,
+    PhabricatorContentSource $content_source) {
+
+    $accounts = id(new PhortuneAccountQuery())
+      ->setViewer($user)
+      ->withMemberPHIDs(array($user->getPHID()))
+      ->execute();
+
+    if (!$accounts) {
+      $accounts = array(
+        PhortuneAccount::createNewAccount($user, $content_source),
+      );
+    }
+
+    $accounts = mpull($accounts, null, 'getPHID');
+
+    return $accounts;
+  }
+
   public static function loadActiveAccountForUser(
     PhabricatorUser $user,
     PhabricatorContentSource $content_source) {

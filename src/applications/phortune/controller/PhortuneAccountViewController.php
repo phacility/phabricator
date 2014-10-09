@@ -17,6 +17,7 @@ final class PhortuneAccountViewController extends PhortuneController {
     // process orders but merchants should not be able to see all the details
     // of an account. Ideally this page should be visible to merchants, too,
     // just with less information.
+    $can_edit = true;
 
     $account = id(new PhortuneAccountQuery())
       ->setViewer($user)
@@ -27,7 +28,6 @@ final class PhortuneAccountViewController extends PhortuneController {
           PhabricatorPolicyCapability::CAN_EDIT,
         ))
       ->executeOne();
-
     if (!$account) {
       return new Aphront404Response();
     }
@@ -35,10 +35,14 @@ final class PhortuneAccountViewController extends PhortuneController {
     $title = $account->getName();
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('Account'), $request->getRequestURI());
+    $crumbs->addTextCrumb(
+      $account->getName(),
+      $request->getRequestURI());
 
     $header = id(new PHUIHeaderView())
       ->setHeader($title);
+
+    $edit_uri = $this->getApplicationURI('account/edit/'.$account->getID().'/');
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($user)
@@ -47,8 +51,9 @@ final class PhortuneAccountViewController extends PhortuneController {
         id(new PhabricatorActionView())
           ->setName(pht('Edit Account'))
           ->setIcon('fa-pencil')
-          ->setHref('#')
-          ->setDisabled(true))
+          ->setHref($edit_uri)
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(!$can_edit))
       ->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Edit Members'))
@@ -290,5 +295,18 @@ final class PhortuneAccountViewController extends PhortuneController {
 
     return $xaction_view;
   }
+
+  protected function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
+
+    $crumbs->addAction(
+      id(new PHUIListItemView())
+        ->setIcon('fa-exchange')
+        ->setHref($this->getApplicationURI('account/'))
+        ->setName(pht('Switch Accounts')));
+
+    return $crumbs;
+  }
+
 
 }

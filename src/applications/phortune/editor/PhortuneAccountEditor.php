@@ -67,4 +67,32 @@ final class PhortuneAccountEditor
     return parent::applyCustomExternalTransaction($object, $xaction);
   }
 
+  protected function validateTransaction(
+    PhabricatorLiskDAO $object,
+    $type,
+    array $xactions) {
+
+    $errors = parent::validateTransaction($object, $type, $xactions);
+
+    switch ($type) {
+      case PhortuneAccountTransaction::TYPE_NAME:
+        $missing = $this->validateIsEmptyTextField(
+          $object->getName(),
+          $xactions);
+
+        if ($missing) {
+          $error = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Required'),
+            pht('Account name is required.'),
+            nonempty(last($xactions), null));
+
+          $error->setIsMissingFieldError(true);
+          $errors[] = $error;
+        }
+        break;
+    }
+
+    return $errors;
+  }
 }

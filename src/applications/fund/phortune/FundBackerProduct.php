@@ -79,8 +79,6 @@ final class FundBackerProduct extends PhortuneProductImplementation {
   public function didPurchaseProduct(
     PhortuneProduct $product,
     PhortunePurchase $purchase) {
-    // TODO: This viewer may be wrong if the purchase completes after a hold
-    // we should load the backer explicitly.
     $viewer = $this->getViewer();
 
     $backer = id(new FundBackerQuery())
@@ -91,17 +89,25 @@ final class FundBackerProduct extends PhortuneProductImplementation {
       throw new Exception(pht('Unable to load FundBacker!'));
     }
 
+    // Load the actual backing user --they may not be the curent viewer if this
+    // product purchase is completing from a background worker or a merchant
+    // action.
+
+    $actor = id(new PhabricatorPeopleQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($backer->getBackerPHID()))
+      ->executeOne();
+
     $xactions = array();
     $xactions[] = id(new FundBackerTransaction())
       ->setTransactionType(FundBackerTransaction::TYPE_STATUS)
       ->setNewValue(FundBacker::STATUS_PURCHASED);
 
     $editor = id(new FundBackerEditor())
-      ->setActor($viewer)
+      ->setActor($actor)
       ->setContentSource($this->getContentSource());
 
     $editor->applyTransactions($backer, $xactions);
-
 
     $xactions = array();
     $xactions[] = id(new FundInitiativeTransaction())
@@ -109,7 +115,7 @@ final class FundBackerProduct extends PhortuneProductImplementation {
       ->setNewValue($backer->getPHID());
 
     $editor = id(new FundInitiativeEditor())
-      ->setActor($viewer)
+      ->setActor($actor)
       ->setContentSource($this->getContentSource());
 
     $editor->applyTransactions($this->getInitiative(), $xactions);

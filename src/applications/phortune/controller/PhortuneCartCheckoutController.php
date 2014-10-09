@@ -114,7 +114,7 @@ final class PhortuneCartCheckoutController
       ->setHeaderText(pht('Cart Contents'))
       ->appendChild($cart_table);
 
-    $title = pht('Buy Stuff');
+    $title = $cart->getName();
 
     if (!$methods) {
       $method_control = id(new AphrontFormStaticControl())
@@ -210,6 +210,7 @@ final class PhortuneCartCheckoutController
       ->appendChild($provider_form);
 
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(pht('Checkout'));
     $crumbs->addTextCrumb($title);
 
     return $this->buildApplicationPage(
