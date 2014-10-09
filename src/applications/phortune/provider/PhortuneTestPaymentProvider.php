@@ -62,6 +62,10 @@ final class PhortuneTestPaymentProvider extends PhortunePaymentProvider {
     return;
   }
 
+  public function updateCharge(PhortuneCharge $charge) {
+    return;
+  }
+
   public function getAllConfigurableProperties() {
     return array();
   }

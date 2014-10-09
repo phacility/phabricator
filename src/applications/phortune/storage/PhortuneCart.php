@@ -149,13 +149,12 @@ final class PhortuneCart extends PhortuneDAO
         $copy = clone $this;
         $copy->reload();
 
-        if ($copy->getStatus() !== self::STATUS_PURCHASING) {
+        if (($copy->getStatus() !== self::STATUS_PURCHASING) &&
+            ($copy->getStatus() !== self::STATUS_HOLD)) {
           throw new Exception(
             pht(
-              'Cart has wrong status ("%s") to call didApplyCharge(), '.
-              'expected "%s".',
-              $copy->getStatus(),
-              self::STATUS_PURCHASING));
+              'Cart has wrong status ("%s") to call didApplyCharge().',
+              $copy->getStatus()));
         }
 
         $charge->save();
@@ -182,13 +181,12 @@ final class PhortuneCart extends PhortuneDAO
         $copy = clone $this;
         $copy->reload();
 
-        if ($copy->getStatus() !== self::STATUS_PURCHASING) {
+        if (($copy->getStatus() !== self::STATUS_PURCHASING) &&
+            ($copy->getStatus() !== self::STATUS_HOLD)) {
           throw new Exception(
             pht(
-              'Cart has wrong status ("%s") to call didFailCharge(), '.
-              'expected "%s".',
-              $copy->getStatus(),
-              self::STATUS_PURCHASING));
+              'Cart has wrong status ("%s") to call didFailCharge().',
+              $copy->getStatus()));
         }
 
         $charge->save();

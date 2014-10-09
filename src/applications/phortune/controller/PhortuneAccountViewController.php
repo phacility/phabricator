@@ -169,6 +169,8 @@ final class PhortuneAccountViewController extends PhortuneController {
       ->withStatuses(
         array(
           PhortuneCart::STATUS_PURCHASING,
+          PhortuneCart::STATUS_CHARGED,
+          PhortuneCart::STATUS_HOLD,
           PhortuneCart::STATUS_PURCHASED,
         ))
       ->execute();
@@ -197,6 +199,7 @@ final class PhortuneAccountViewController extends PhortuneController {
 
       $rowc[] = '';
       $rows[] = array(
+        $cart->getID(),
         phutil_tag(
           'strong',
           array(),
@@ -206,6 +209,7 @@ final class PhortuneAccountViewController extends PhortuneController {
           'strong',
           array(),
           $cart->getTotalPriceAsCurrency()->formatForDisplay()),
+        PhortuneCart::getNameForStatus($cart->getStatus()),
         phabricator_datetime($cart->getDateModified(), $viewer),
       );
       foreach ($purchases as $purchase) {
@@ -219,6 +223,7 @@ final class PhortuneAccountViewController extends PhortuneController {
           $handles[$purchase->getPHID()]->renderLink(),
           $price,
           '',
+          '',
         );
       }
     }
@@ -227,21 +232,25 @@ final class PhortuneAccountViewController extends PhortuneController {
       ->setRowClasses($rowc)
       ->setHeaders(
         array(
-          pht('Cart'),
+          pht('ID'),
+          pht('Order'),
           pht('Purchase'),
           pht('Amount'),
+          pht('Status'),
           pht('Updated'),
         ))
       ->setColumnClasses(
         array(
           '',
+          '',
           'wide',
           'right',
+          '',
           'right',
         ));
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Purchase History'));
+      ->setHeader(pht('Order History'));
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)

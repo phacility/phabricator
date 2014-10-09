@@ -83,8 +83,7 @@ final class PhortuneCartViewController
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
-      ->setHeader(pht('Order Detail'))
-      ->setPolicyObject($cart);
+      ->setHeader(pht('Order Detail'));
 
     $cart_box = id(new PHUIObjectBoxView())
       ->setHeader($header)

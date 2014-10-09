@@ -79,6 +79,8 @@ final class FundBackerProduct extends PhortuneProductImplementation {
   public function didPurchaseProduct(
     PhortuneProduct $product,
     PhortunePurchase $purchase) {
+    // TODO: This viewer may be wrong if the purchase completes after a hold
+    // we should load the backer explicitly.
     $viewer = $this->getViewer();
 
     $backer = id(new FundBackerQuery())
