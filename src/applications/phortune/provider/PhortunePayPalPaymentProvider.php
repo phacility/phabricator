@@ -339,9 +339,27 @@ final class PhortunePayPalPaymentProvider extends PhortunePaymentProvider {
         // difficult for now and we can't reasonably just fail these charges.
 
         var_dump($result);
-
         die();
-        break;
+
+        $success = false; // TODO: <----
+
+        // TODO: Clean this up once that mess up there ^^^^^ gets cleaned up.
+        $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+          if ($success) {
+            $cart->didApplyCharge($charge);
+            $response = id(new AphrontRedirectResponse())->setURI(
+               $cart->getDoneURI());
+          } else {
+            $cart->didFailCharge($charge);
+
+            $response = $controller
+              ->newDialog()
+              ->setTitle(pht('Charge Failed'))
+              ->addCancelButton($cart->getCheckoutURI(), pht('Continue'));
+          }
+        unset($unguarded);
+
+        return $response;
       case 'cancel':
         var_dump($_REQUEST);
         break;

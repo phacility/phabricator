@@ -111,7 +111,20 @@ final class PhortuneCartCheckoutController
         $provider = $method->buildPaymentProvider();
 
         $charge = $cart->willApplyCharge($viewer, $provider, $method);
-        $provider->applyCharge($method, $charge);
+
+        try {
+          $provider->applyCharge($method, $charge);
+        } catch (Exception $ex) {
+          $cart->didFailCharge($charge);
+          return $this->newDialog()
+            ->setTitle(pht('Charge Failed'))
+            ->appendParagraph(
+              pht(
+                'Unable to make payment: %s',
+                $ex->getMessage()))
+            ->addCancelButton($cart->getCheckoutURI(), pht('Continue'));
+        }
+
         $cart->didApplyCharge($charge);
 
         $done_uri = $cart->getDoneURI();

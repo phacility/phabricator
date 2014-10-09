@@ -145,7 +145,7 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
   }
 
   public function getPaymentMethodDescription() {
-    return pht('Credit Card or Bank Account');
+    return pht('Credit or Debit Card');
   }
 
   public function getPaymentMethodIcon() {
@@ -286,10 +286,10 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
 
         $params = array(
           'account_id'        => $this->getWePayAccountID(),
-          'short_description' => 'Services', // TODO
+          'short_description' => $cart->getName(),
           'type'              => 'SERVICE',
           'amount'            => $price->formatBareValue(),
-          'long_description'  => 'Services', // TODO
+          'long_description'  => $cart->getName(),
           'reference_id'      => $cart->getPHID(),
           'app_fee'           => 0,
           'fee_payer'         => 'Payee',
@@ -305,7 +305,10 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
           'shipping_fee'      => 0,
           'charge_tax'        => 0,
           'mode'              => 'regular',
-          'funding_sources'   => 'bank,cc',
+
+          // TODO: We could accept bank accounts but the hold/capture rules
+          // are not quite clear. Just accept credit cards for now.
+          'funding_sources'   => 'cc',
         );
 
         $charge = $cart->willApplyCharge($viewer, $this);
@@ -322,6 +325,11 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
           ->setIsExternal(true)
           ->setURI($uri);
       case 'charge':
+        if ($cart->getStatus() !== PhortuneCart::STATUS_PURCHASING) {
+          return id(new AphrontRedirectResponse())
+            ->setURI($cart->getCheckoutURI());
+        }
+
         $checkout_id = $request->getInt('checkout_id');
         $params = array(
           'checkout_id' => $checkout_id,
@@ -333,24 +341,41 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
             pht('Checkout reference ID does not match cart PHID!'));
         }
 
-        switch ($checkout->state) {
-          case 'authorized':
-          case 'reserved':
-          case 'captured':
-            break;
-          default:
-            throw new Exception(
-              pht(
-                'Checkout is in bad state "%s"!',
-                $result->state));
-        }
-
         $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-          $cart->didApplyCharge($charge);
+          switch ($checkout->state) {
+            case 'authorized':
+            case 'reserved':
+            case 'captured':
+              // TODO: Are these all really "done" states, and not "hold"
+              // states? Cards and bank accounts both come back as "authorized"
+              // on the staging environment. Figure out what happens in
+              // production?
+
+              $cart->didApplyCharge($charge);
+
+              $response = id(new AphrontRedirectResponse())->setURI(
+                 $cart->getDoneURI());
+              break;
+            default:
+              // It's not clear if we can ever get here on the web workflow,
+              // WePay doesn't seem to return back to us after a failure (the
+              // workflow dead-ends instead).
+
+              $cart->didFailCharge($charge);
+
+              $response = $controller
+                ->newDialog()
+                ->setTitle(pht('Charge Failed'))
+                ->appendParagraph(
+                  pht(
+                    'Unable to make payment (checkout state is "%s").',
+                    $checkout->state))
+                ->addCancelButton($cart->getCheckoutURI(), pht('Continue'));
+              break;
+          }
         unset($unguarded);
 
-        return id(new AphrontRedirectResponse())
-          ->setURI($cart->getDoneURI());
+        return $response;
       case 'cancel':
         // TODO: I don't know how it's possible to cancel out of a WePay
         // charge workflow.

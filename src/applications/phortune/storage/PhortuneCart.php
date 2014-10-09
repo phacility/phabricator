@@ -146,6 +146,37 @@ final class PhortuneCart extends PhortuneDAO
     return $this;
   }
 
+  public function didFailCharge(PhortuneCharge $charge) {
+    $charge->setStatus(PhortuneCharge::STATUS_FAILED);
+
+    $this->openTransaction();
+      $this->beginReadLocking();
+
+        $copy = clone $this;
+        $copy->reload();
+
+        if ($copy->getStatus() !== self::STATUS_PURCHASING) {
+          throw new Exception(
+            pht(
+              'Cart has wrong status ("%s") to call didFailCharge(), '.
+              'expected "%s".',
+              $copy->getStatus(),
+              self::STATUS_PURCHASING));
+        }
+
+        $charge->save();
+
+        // Move the cart back into STATUS_READY so the user can try
+        // making the purchase again.
+        $this->setStatus(self::STATUS_READY)->save();
+
+      $this->endReadLocking();
+    $this->saveTransaction();
+
+    return $this;
+  }
+
+
   public function willRefundCharge(
     PhabricatorUser $actor,
     PhortunePaymentProvider $provider,

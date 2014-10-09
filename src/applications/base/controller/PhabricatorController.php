@@ -518,7 +518,7 @@ abstract class PhabricatorController extends AphrontController {
    *
    * @return AphrontDialogView New dialog.
    */
-  protected function newDialog() {
+  public function newDialog() {
     $submit_uri = new PhutilURI($this->getRequest()->getRequestURI());
     $submit_uri = $submit_uri->getPath();
 
