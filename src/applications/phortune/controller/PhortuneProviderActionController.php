@@ -1,6 +1,7 @@
 <?php
 
-final class PhortuneProviderActionController extends PhortuneController {
+final class PhortuneProviderActionController
+  extends PhortuneController {
 
   private $id;
   private $action;

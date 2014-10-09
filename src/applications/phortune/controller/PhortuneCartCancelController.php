@@ -68,6 +68,7 @@ final class PhortuneCartCancelController
       ->withCartPHIDs(array($cart->getPHID()))
       ->withStatuses(
         array(
+          PhortuneCharge::STATUS_HOLD,
           PhortuneCharge::STATUS_CHARGED,
         ))
       ->execute();
@@ -156,6 +157,10 @@ final class PhortuneCartCancelController
           throw new Exception(pht('Unable to refund some charges!'));
         }
 
+        // TODO: If every HOLD and CHARGING transaction has been fully refunded
+        // and we're in a HOLD, PURCHASING or CHARGED cart state we probably
+        // need to kick the cart back to READY here?
+
         return id(new AphrontRedirectResponse())->setURI($cancel_uri);
       }
     }
@@ -182,6 +187,10 @@ final class PhortuneCartCancelController
         'Really cancel this order? Any payment will be refunded.');
       $button = pht('Cancel Order');
 
+      // Don't give the user a "Cancel" button in response to a "Cancel?"
+      // prompt, as it's confusing.
+      $cancel_text = pht('Do Not Cancel Order');
+
       $form = null;
     }
 
@@ -190,6 +199,6 @@ final class PhortuneCartCancelController
       ->appendChild($body)
       ->appendChild($form)
       ->addSubmitButton($button)
-      ->addCancelButton($cancel_uri);
+      ->addCancelButton($cancel_uri, $cancel_text);
   }
 }

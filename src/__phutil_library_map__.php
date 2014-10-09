@@ -2563,6 +2563,7 @@ phutil_register_library_map(array(
     'PhortuneCartPHIDType' => 'applications/phortune/phid/PhortuneCartPHIDType.php',
     'PhortuneCartQuery' => 'applications/phortune/query/PhortuneCartQuery.php',
     'PhortuneCartSearchEngine' => 'applications/phortune/query/PhortuneCartSearchEngine.php',
+    'PhortuneCartUpdateController' => 'applications/phortune/controller/PhortuneCartUpdateController.php',
     'PhortuneCartViewController' => 'applications/phortune/controller/PhortuneCartViewController.php',
     'PhortuneCharge' => 'applications/phortune/storage/PhortuneCharge.php',
     'PhortuneChargePHIDType' => 'applications/phortune/phid/PhortuneChargePHIDType.php',
@@ -5618,6 +5619,7 @@ phutil_register_library_map(array(
     'PhortuneCartPHIDType' => 'PhabricatorPHIDType',
     'PhortuneCartQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhortuneCartSearchEngine' => 'PhabricatorApplicationSearchEngine',
+    'PhortuneCartUpdateController' => 'PhortuneCartController',
     'PhortuneCartViewController' => 'PhortuneCartController',
     'PhortuneCharge' => array(
       'PhortuneDAO',

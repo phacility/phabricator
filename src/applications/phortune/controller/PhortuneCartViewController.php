@@ -29,8 +29,56 @@ final class PhortuneCartViewController
 
     $cart_table = $this->buildCartContentTable($cart);
 
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $cart,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $errors = array();
+    $resume_uri = null;
+    switch ($cart->getStatus()) {
+      case PhortuneCart::STATUS_PURCHASING:
+        if ($can_edit) {
+          $resume_uri = $cart->getMetadataValue('provider.checkoutURI');
+          if ($resume_uri) {
+            $errors[] = pht(
+              'The checkout process has been started, but not yet completed. '.
+              'You can continue checking out by clicking %s, or cancel the '.
+              'order, or contact the merchant for assistance.',
+              phutil_tag('strong', array(), pht('Continue Checkout')));
+          } else {
+            $errors[] = pht(
+              'The checkout process has been started, but an error occurred. '.
+              'You can cancel the order or contact the merchant for '.
+              'assistance.');
+          }
+        }
+        break;
+      case PhortuneCart::STATUS_CHARGED:
+        if ($can_edit) {
+          $errors[] = pht(
+            'You have been charged, but processing could not be completed. '.
+            'You can cancel your order, or contact the merchant for '.
+            'assistance.');
+        }
+        break;
+      case PhortuneCart::STATUS_HOLD:
+        if ($can_edit) {
+          $errors[] = pht(
+            'Payment for this order is on hold. You can click %s to check '.
+            'for updates, cancel the order, or contact the merchant for '.
+            'assistance.',
+            phutil_tag('strong', array(), pht('Update Status')));
+        }
+        break;
+    }
+
     $properties = $this->buildPropertyListView($cart);
-    $actions = $this->buildActionListView($cart, $can_admin);
+    $actions = $this->buildActionListView(
+      $cart,
+      $can_edit,
+      $can_admin,
+      $resume_uri);
     $properties->setActionList($actions);
 
     $header = id(new PHUIHeaderView())
@@ -40,6 +88,7 @@ final class PhortuneCartViewController
 
     $cart_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
+      ->setFormErrors($errors)
       ->appendChild($properties)
       ->appendChild($cart_table);
 
@@ -106,14 +155,14 @@ final class PhortuneCartViewController
     return $view;
   }
 
-  private function buildActionListView(PhortuneCart $cart, $can_admin) {
+  private function buildActionListView(
+    PhortuneCart $cart,
+    $can_edit,
+    $can_admin,
+    $resume_uri) {
+
     $viewer = $this->getRequest()->getUser();
     $id = $cart->getID();
-
-    $can_edit = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $cart,
-      PhabricatorPolicyCapability::CAN_EDIT);
 
     $view = id(new PhabricatorActionListView())
       ->setUser($viewer)
@@ -123,6 +172,7 @@ final class PhortuneCartViewController
 
     $cancel_uri = $this->getApplicationURI("cart/{$id}/cancel/");
     $refund_uri = $this->getApplicationURI("cart/{$id}/refund/");
+    $update_uri = $this->getApplicationURI("cart/{$id}/update/");
 
     $view->addAction(
       id(new PhabricatorActionView())
@@ -139,6 +189,20 @@ final class PhortuneCartViewController
           ->setIcon('fa-reply')
           ->setWorkflow(true)
           ->setHref($refund_uri));
+    }
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Update Status'))
+        ->setIcon('fa-refresh')
+        ->setHref($update_uri));
+
+    if ($can_edit && $resume_uri) {
+      $view->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Continue Checkout'))
+          ->setIcon('fa-shopping-cart')
+          ->setHref($resume_uri));
     }
 
     return $view;

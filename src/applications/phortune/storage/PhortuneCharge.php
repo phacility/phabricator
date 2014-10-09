@@ -11,6 +11,7 @@ final class PhortuneCharge extends PhortuneDAO
 
   const STATUS_CHARGING   = 'charge:charging';
   const STATUS_CHARGED    = 'charge:charged';
+  const STATUS_HOLD       = 'charge:hold';
   const STATUS_FAILED     = 'charge:failed';
 
   protected $accountPHID;
@@ -74,6 +75,7 @@ final class PhortuneCharge extends PhortuneDAO
     return array(
       self::STATUS_CHARGING => pht('Charging'),
       self::STATUS_CHARGED => pht('Charged'),
+      self::STATUS_HOLD => pht('Hold'),
       self::STATUS_FAILED => pht('Failed'),
     );
   }

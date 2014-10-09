@@ -49,6 +49,7 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
           '' => 'PhortuneCartViewController',
           'checkout/' => 'PhortuneCartCheckoutController',
           '(?P<action>cancel|refund)/' => 'PhortuneCartCancelController',
+          'update/' => 'PhortuneCartUpdateController',
         ),
         'account/' => array(
           '' => 'PhortuneAccountListController',
