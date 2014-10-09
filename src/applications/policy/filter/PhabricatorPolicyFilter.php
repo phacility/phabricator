@@ -343,20 +343,15 @@ final class PhabricatorPolicyFilter {
       ->withPHIDs(array($phid))
       ->executeOne();
 
-    $object_name = pht(
-      '%s %s',
-      $handle->getTypeName(),
-      $handle->getObjectName());
-
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
     if ($is_serious) {
       $title = pht(
         'Access Denied: %s',
-        $object_name);
+        $handle->getObjectName());
     } else {
       $title = pht(
         'You Shall Not Pass: %s',
-        $object_name);
+        $handle->getObjectName());
     }
 
     $full_message = pht(
