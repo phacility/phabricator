@@ -118,7 +118,8 @@ final class FundInitiativeBackController
           ->setError($e_amount));
 
     return $this->newDialog()
-      ->setTitle(pht('Back Initiative'))
+      ->setTitle(
+        pht('Back %s %s', $initiative->getMonogram(), $initiative->getName()))
       ->setErrors($errors)
       ->appendChild($form->buildLayoutView())
       ->addCancelButton($initiative_uri)

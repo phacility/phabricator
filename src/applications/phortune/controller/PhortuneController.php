@@ -12,25 +12,28 @@ abstract class PhortuneController extends PhabricatorController {
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
+    $phids = array();
+    foreach ($charges as $charge) {
+      $phids[] = $charge->getProviderPHID();
+      $phids[] = $charge->getCartPHID();
+      $phids[] = $charge->getMerchantPHID();
+      $phids[] = $charge->getPaymentMethodPHID();
+    }
+
+    $handles = $this->loadViewerHandles($phids);
+
     $rows = array();
     foreach ($charges as $charge) {
-      $cart = $charge->getCart();
-      $cart_id = $cart->getID();
-      $cart_uri = $this->getApplicationURI("cart/{$cart_id}/");
-      $cart_href = phutil_tag(
-        'a',
-        array(
-          'href' => $cart_uri,
-        ),
-        pht('Cart %d', $cart_id));
-
       $rows[] = array(
         $charge->getID(),
-        $cart_href,
-        $charge->getProviderPHID(),
-        $charge->getPaymentMethodPHID(),
+        $handles[$charge->getCartPHID()]->renderLink(),
+        $handles[$charge->getProviderPHID()]->renderLink(),
+        $charge->getPaymentMethodPHID()
+          ? $handles[$charge->getPaymentMethodPHID()]->renderLink()
+          : null,
+        $handles[$charge->getMerchantPHID()]->renderLink(),
         $charge->getAmountAsCurrency()->formatForDisplay(),
-        $charge->getStatus(),
+        $charge->getStatusForDisplay(),
         phabricator_datetime($charge->getDateCreated(), $viewer),
       );
     }
@@ -42,6 +45,7 @@ abstract class PhortuneController extends PhabricatorController {
           pht('Cart'),
           pht('Provider'),
           pht('Method'),
+          pht('Merchant'),
           pht('Amount'),
           pht('Status'),
           pht('Created'),
@@ -49,7 +53,8 @@ abstract class PhortuneController extends PhabricatorController {
       ->setColumnClasses(
         array(
           '',
-          'strong',
+          '',
+          '',
           '',
           '',
           'wide right',

@@ -16,6 +16,7 @@ final class FundInitiativeEditor
 
     $types[] = FundInitiativeTransaction::TYPE_NAME;
     $types[] = FundInitiativeTransaction::TYPE_DESCRIPTION;
+    $types[] = FundInitiativeTransaction::TYPE_RISKS;
     $types[] = FundInitiativeTransaction::TYPE_STATUS;
     $types[] = FundInitiativeTransaction::TYPE_BACKER;
     $types[] = FundInitiativeTransaction::TYPE_MERCHANT;
@@ -33,6 +34,8 @@ final class FundInitiativeEditor
         return $object->getName();
       case FundInitiativeTransaction::TYPE_DESCRIPTION:
         return $object->getDescription();
+      case FundInitiativeTransaction::TYPE_RISKS:
+        return $object->getRisks();
       case FundInitiativeTransaction::TYPE_STATUS:
         return $object->getStatus();
       case FundInitiativeTransaction::TYPE_BACKER:
@@ -51,6 +54,7 @@ final class FundInitiativeEditor
     switch ($xaction->getTransactionType()) {
       case FundInitiativeTransaction::TYPE_NAME:
       case FundInitiativeTransaction::TYPE_DESCRIPTION:
+      case FundInitiativeTransaction::TYPE_RISKS:
       case FundInitiativeTransaction::TYPE_STATUS:
       case FundInitiativeTransaction::TYPE_BACKER:
       case FundInitiativeTransaction::TYPE_MERCHANT:
@@ -71,6 +75,9 @@ final class FundInitiativeEditor
       case FundInitiativeTransaction::TYPE_DESCRIPTION:
         $object->setDescription($xaction->getNewValue());
         return;
+      case FundInitiativeTransaction::TYPE_RISKS:
+        $object->setRisks($xaction->getNewValue());
+        return;
       case FundInitiativeTransaction::TYPE_MERCHANT:
         $object->setMerchantPHID($xaction->getNewValue());
         return;
@@ -78,7 +85,18 @@ final class FundInitiativeEditor
         $object->setStatus($xaction->getNewValue());
         return;
       case FundInitiativeTransaction::TYPE_BACKER:
-        // TODO: Calculate total funding / backers / etc.
+        $backer = id(new FundBackerQuery())
+          ->setViewer($this->requireActor())
+          ->withPHIDs(array($xaction->getNewValue()))
+          ->executeOne();
+        if (!$backer) {
+          throw new Exception(pht('No such backer!'));
+        }
+
+        $backer_amount = $backer->getAmountAsCurrency();
+        $total = $object->getTotalAsCurrency()->add($backer_amount);
+        $object->setTotalAsCurrency($total);
+
         return;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
       case PhabricatorTransactions::TYPE_EDGE:
@@ -95,6 +113,7 @@ final class FundInitiativeEditor
     switch ($xaction->getTransactionType()) {
       case FundInitiativeTransaction::TYPE_NAME:
       case FundInitiativeTransaction::TYPE_DESCRIPTION:
+      case FundInitiativeTransaction::TYPE_RISKS:
       case FundInitiativeTransaction::TYPE_STATUS:
       case FundInitiativeTransaction::TYPE_MERCHANT:
       case FundInitiativeTransaction::TYPE_BACKER:

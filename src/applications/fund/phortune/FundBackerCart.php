@@ -23,6 +23,10 @@ final class FundBackerCart extends PhortuneCartImplementation {
     return $this->initiative;
   }
 
+  public function getName(PhortuneCart $cart) {
+    return pht('Fund Initiative');
+  }
+
   public function willCreateCart(
     PhabricatorUser $viewer,
     PhortuneCart $cart) {

@@ -35,11 +35,18 @@ final class PhortuneMerchantViewController
       ->setUser($viewer)
       ->setPolicyObject($merchant);
 
-    $properties = $this->buildPropertyListView($merchant);
+    $providers = id(new PhortunePaymentProviderConfigQuery())
+      ->setViewer($viewer)
+      ->withMerchantPHIDs(array($merchant->getPHID()))
+      ->execute();
+
+    $properties = $this->buildPropertyListView($merchant, $providers);
     $actions = $this->buildActionListView($merchant);
     $properties->setActionList($actions);
 
-    $providers = $this->buildProviderList($merchant);
+    $provider_list = $this->buildProviderList(
+      $merchant,
+      $providers);
 
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
@@ -59,7 +66,7 @@ final class PhortuneMerchantViewController
       array(
         $crumbs,
         $box,
-        $providers,
+        $provider_list,
         $timeline,
       ),
       array(
@@ -67,12 +74,84 @@ final class PhortuneMerchantViewController
       ));
   }
 
-  private function buildPropertyListView(PhortuneMerchant $merchant) {
+  private function buildPropertyListView(
+    PhortuneMerchant $merchant,
+    array $providers) {
+
     $viewer = $this->getRequest()->getUser();
 
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
       ->setObject($merchant);
+
+    $status_view = new PHUIStatusListView();
+
+    $have_any = false;
+    $any_test = false;
+    foreach ($providers as $provider_config) {
+      $provider = $provider_config->buildProvider();
+      if ($provider->isEnabled()) {
+        $have_any = true;
+      }
+      if (!$provider->isAcceptingLivePayments()) {
+        $any_test = true;
+      }
+    }
+
+    if ($have_any) {
+      $status_view->addItem(
+        id(new PHUIStatusItemView())
+          ->setIcon(PHUIStatusItemView::ICON_ACCEPT, 'green')
+          ->setTarget(pht('Accepts Payments'))
+          ->setNote(pht('This merchant can accept payments.')));
+
+      if ($any_test) {
+        $status_view->addItem(
+          id(new PHUIStatusItemView())
+            ->setIcon(PHUIStatusItemView::ICON_WARNING, 'yellow')
+            ->setTarget(pht('Test Mode'))
+            ->setNote(pht('This merchant is accepting test payments.')));
+      } else {
+        $status_view->addItem(
+          id(new PHUIStatusItemView())
+          ->setIcon(PHUIStatusItemView::ICON_ACCEPT, 'green')
+            ->setTarget(pht('Live Mode'))
+            ->setNote(pht('This merchant is accepting live payments.')));
+      }
+    } else if ($providers) {
+      $status_view->addItem(
+        id(new PHUIStatusItemView())
+          ->setIcon(PHUIStatusItemView::ICON_REJECT, 'red')
+          ->setTarget(pht('No Enabled Providers'))
+          ->setNote(
+            pht(
+              'All of the payment providers for this merchant are '.
+              'disabled.')));
+    } else {
+      $status_view->addItem(
+        id(new PHUIStatusItemView())
+          ->setIcon(PHUIStatusItemView::ICON_WARNING, 'yellow')
+          ->setTarget(pht('No Providers'))
+          ->setNote(
+            pht(
+              'This merchant does not have any payment providers configured '.
+              'yet, so it can not accept payments. Add a provider.')));
+    }
+
+    $view->addProperty(pht('Status'), $status_view);
+
+    $view->invokeWillRenderEvent();
+
+    $description = $merchant->getDescription();
+    if (strlen($description)) {
+      $description = PhabricatorMarkupEngine::renderOneObject(
+        id(new PhabricatorMarkupOneOff())->setContent($description),
+        'default',
+        $viewer);
+
+      $view->addSectionHeader(pht('Description'));
+      $view->addTextContent($description);
+    }
 
     return $view;
   }
@@ -98,10 +177,21 @@ final class PhortuneMerchantViewController
         ->setWorkflow(!$can_edit)
         ->setHref($this->getApplicationURI("merchant/edit/{$id}/")));
 
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('View Orders'))
+        ->setIcon('fa-shopping-cart')
+        ->setHref($this->getApplicationURI("merchant/orders/{$id}/"))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
+
     return $view;
   }
 
-  private function buildProviderList(PhortuneMerchant $merchant) {
+  private function buildProviderList(
+    PhortuneMerchant $merchant,
+    array $providers) {
+
     $viewer = $this->getRequest()->getUser();
     $id = $merchant->getID();
 
@@ -113,24 +203,61 @@ final class PhortuneMerchantViewController
     $provider_list = id(new PHUIObjectItemListView())
       ->setNoDataString(pht('This merchant has no payment providers.'));
 
-    $providers = id(new PhortunePaymentProviderConfigQuery())
-      ->setViewer($viewer)
-      ->withMerchantPHIDs(array($merchant->getPHID()))
-      ->execute();
     foreach ($providers as $provider_config) {
       $provider = $provider_config->buildProvider();
       $provider_id = $provider_config->getID();
 
       $item = id(new PHUIObjectItemView())
-        ->setObjectName(pht('Provider %d', $provider_id))
         ->setHeader($provider->getName());
 
-      $item->addAction(
-        id(new PHUIListItemView())
-          ->setIcon('fa-pencil')
-          ->setHref($this->getApplicationURI("/provider/edit/{$provider_id}"))
-          ->setWorkflow(!$can_edit)
-          ->setDisabled(!$can_edit));
+      if ($provider->isEnabled()) {
+        if ($provider->isAcceptingLivePayments()) {
+          $item->setBarColor('green');
+        } else {
+          $item->setBarColor('yellow');
+          $item->addIcon('fa-exclamation-triangle', pht('Test Mode'));
+        }
+
+        $item->addAttribute($provider->getConfigureProvidesDescription());
+      } else {
+        // Don't show disabled providers to users who can't manage the merchant
+        // account.
+        if (!$can_edit) {
+          continue;
+        }
+        $item->setDisabled(true);
+        $item->addAttribute(
+          phutil_tag('em', array(), pht('This payment provider is disabled.')));
+      }
+
+
+      if ($can_edit) {
+        $edit_uri = $this->getApplicationURI(
+          "/provider/edit/{$provider_id}/");
+        $disable_uri = $this->getApplicationURI(
+          "/provider/disable/{$provider_id}/");
+
+        if ($provider->isEnabled()) {
+          $disable_icon = 'fa-times';
+          $disable_name = pht('Disable');
+        } else {
+          $disable_icon = 'fa-check';
+          $disable_name = pht('Enable');
+        }
+
+        $item->addAction(
+          id(new PHUIListItemView())
+            ->setIcon($disable_icon)
+            ->setHref($disable_uri)
+            ->setName($disable_name)
+            ->setWorkflow(true));
+
+        $item->addAction(
+          id(new PHUIListItemView())
+            ->setIcon('fa-pencil')
+            ->setHref($edit_uri)
+            ->setName(pht('Edit')));
+      }
 
       $provider_list->addItem($item);
     }

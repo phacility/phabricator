@@ -22,7 +22,7 @@ final class FundBackerProduct extends PhortuneProductImplementation {
   public function getName(PhortuneProduct $product) {
     $initiative = $this->getInitiative();
     return pht(
-      'Back Initiative %s %s',
+      'Fund %s %s',
       $initiative->getMonogram(),
       $initiative->getName());
   }
@@ -113,6 +113,13 @@ final class FundBackerProduct extends PhortuneProductImplementation {
     $editor->applyTransactions($this->getInitiative(), $xactions);
 
     return;
+  }
+
+  public function didRefundProduct(
+    PhortuneProduct $product,
+    PhortunePurchase $purchase) {
+    $viewer = $this->getViewer();
+    // TODO: Undonate.
   }
 
 }

@@ -84,11 +84,24 @@ final class FundInitiativeViewController
       ->setObject($initiative);
 
     $owner_phid = $initiative->getOwnerPHID();
-    $this->loadHandles(array($owner_phid));
+    $merchant_phid = $initiative->getMerchantPHID();
+    $this->loadHandles(
+      array(
+        $owner_phid,
+        $merchant_phid,
+      ));
 
     $view->addProperty(
       pht('Owner'),
       $this->getHandle($owner_phid)->renderLink());
+
+    $view->addProperty(
+      pht('Payable to Merchant'),
+      $this->getHandle($merchant_phid)->renderLink());
+
+    $view->addProperty(
+      pht('Total Funding'),
+      $initiative->getTotalAsCurrency()->formatForDisplay());
 
     $view->invokeWillRenderEvent();
 
@@ -101,6 +114,17 @@ final class FundInitiativeViewController
 
       $view->addSectionHeader(pht('Description'));
       $view->addTextContent($description);
+    }
+
+    $risks = $initiative->getRisks();
+    if (strlen($risks)) {
+      $risks = PhabricatorMarkupEngine::renderOneObject(
+        id(new PhabricatorMarkupOneOff())->setContent($risks),
+        'default',
+        $viewer);
+
+      $view->addSectionHeader(pht('Risks/Challenges'));
+      $view->addTextContent($risks);
     }
 
     return $view;

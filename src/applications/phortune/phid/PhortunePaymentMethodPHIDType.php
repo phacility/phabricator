@@ -30,7 +30,7 @@ final class PhortunePaymentMethodPHIDType extends PhabricatorPHIDType {
 
       $id = $method->getID();
 
-      $handle->setName(pht('Method %d', $id));
+      $handle->setName($method->getFullDisplayName());
       $handle->setURI("/phortune/method/{$id}/");
     }
   }

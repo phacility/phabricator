@@ -7,13 +7,9 @@ final class PhortunePayPalPaymentProvider extends PhortunePaymentProvider {
   const PAYPAL_API_SIGNATURE  = 'paypal.api-signature';
   const PAYPAL_MODE           = 'paypal.mode';
 
-  public function isEnabled() {
-    // TODO: See note in processControllerRequest().
-    return false;
-
-    return $this->getPaypalAPIUsername() &&
-           $this->getPaypalAPIPassword() &&
-           $this->getPaypalAPISignature();
+  public function isAcceptingLivePayments() {
+    $mode = $this->getProviderConfig()->getMetadataValue(self::PAYPAL_MODE);
+    return ($mode === 'live');
   }
 
   public function getName() {
@@ -28,6 +24,11 @@ final class PhortunePayPalPaymentProvider extends PhortunePaymentProvider {
     return pht(
       'Allows you to accept various payment instruments with a paypal.com '.
       'account.');
+  }
+
+  public function getConfigureProvidesDescription() {
+    return pht(
+      'This merchant accepts payments via PayPal.');
   }
 
   public function getConfigureInstructions() {
@@ -161,6 +162,36 @@ final class PhortunePayPalPaymentProvider extends PhortunePaymentProvider {
     throw new Exception('!');
   }
 
+  protected function executeRefund(
+    PhortuneCharge $charge,
+    PhortuneCharge $refund) {
+
+    $transaction_id = $charge->getMetadataValue('paypal.transactionID');
+    if (!$transaction_id) {
+      throw new Exception(pht('Charge has no transaction ID!'));
+    }
+
+    $refund_amount = $refund->getAmountAsCurrency()->negate();
+    $refund_currency = $refund_amount->getCurrency();
+    $refund_value = $refund_amount->formatBareValue();
+
+    $params = array(
+      'TRANSACTIONID' => $transaction_id,
+      'REFUNDTYPE' => 'Partial',
+      'AMT' => $refund_value,
+      'CURRENCYCODE' => $refund_currency,
+    );
+
+    $result = $this
+      ->newPaypalAPICall()
+      ->setRawPayPalQuery('RefundTransaction', $params)
+      ->resolve();
+
+    $charge->setMetadataValue(
+      'paypal.refundID',
+      $result['REFUNDTRANSACTIONID']);
+  }
+
   private function getPaypalAPIUsername() {
     return $this
       ->getProviderConfig()
@@ -268,7 +299,7 @@ final class PhortunePayPalPaymentProvider extends PhortunePaymentProvider {
             'token' => $result['TOKEN'],
           ));
 
-        $cart->setMetadataValue('provider.checkoutURI', $uri);
+        $cart->setMetadataValue('provider.checkoutURI', (string)$uri);
         $cart->save();
 
         $charge->setMetadataValue('paypal.token', $result['TOKEN']);
@@ -278,6 +309,11 @@ final class PhortunePayPalPaymentProvider extends PhortunePaymentProvider {
           ->setIsExternal(true)
           ->setURI($uri);
       case 'charge':
+        if ($cart->getStatus() !== PhortuneCart::STATUS_PURCHASING) {
+          return id(new AphrontRedirectResponse())
+            ->setURI($cart->getCheckoutURI());
+        }
+
         $token = $request->getStr('token');
 
         $params = array(
@@ -289,19 +325,19 @@ final class PhortunePayPalPaymentProvider extends PhortunePaymentProvider {
           ->setRawPayPalQuery('GetExpressCheckoutDetails', $params)
           ->resolve();
 
-        var_dump($result);
-
         if ($result['CUSTOM'] !== $charge->getPHID()) {
           throw new Exception(
             pht('Paypal checkout does not match Phortune charge!'));
         }
 
         if ($result['CHECKOUTSTATUS'] !== 'PaymentActionNotInitiated') {
-          throw new Exception(
-            pht(
-              'Expected status "%s", got "%s".',
-              'PaymentActionNotInitiated',
-              $result['CHECKOUTSTATUS']));
+          return $controller->newDialog()
+            ->setTitle(pht('Payment Already Processed'))
+            ->appendParagraph(
+              pht(
+                'The payment response for this charge attempt has already '.
+                'been processed.'))
+            ->addCancelButton($cart->getCheckoutURI(), pht('Continue'));
         }
 
         $price = $cart->getTotalPriceAsCurrency();
@@ -320,18 +356,75 @@ final class PhortunePayPalPaymentProvider extends PhortunePaymentProvider {
           ->setRawPayPalQuery('DoExpressCheckoutPayment', $params)
           ->resolve();
 
-        // TODO: Paypal can send requests back in "PaymentReview" status,
-        // and does this for test transactions. We're supposed to hold
-        // the transaction and poll the API every 6 hours. This is unreasonably
-        // difficult for now and we can't reasonably just fail these charges.
+        $transaction_id = $result['PAYMENTINFO_0_TRANSACTIONID'];
 
-        var_dump($result);
+        $success = false;
+        $hold = false;
+        switch ($result['PAYMENTINFO_0_PAYMENTSTATUS']) {
+          case 'Processed':
+          case 'Completed':
+          case 'Completed-Funds-Held':
+            $success = true;
+            break;
+          case 'In-Progress':
+          case 'Pending':
+            // TODO: We can capture more information about this stuff.
+            $hold = true;
+            break;
+          case 'Denied':
+          case 'Expired':
+          case 'Failed':
+          case 'Partially-Refunded':
+          case 'Canceled-Reversal':
+          case 'None':
+          case 'Refunded':
+          case 'Reversed':
+          case 'Voided':
+          default:
+            // These are all failure states.
+            break;
+        }
 
-        die();
-        break;
+        $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+
+          $charge->setMetadataValue('paypal.transactionID', $transaction_id);
+          $charge->save();
+
+          if ($success) {
+            $cart->didApplyCharge($charge);
+            $response = id(new AphrontRedirectResponse())->setURI(
+              $cart->getDoneURI());
+          } else if ($hold) {
+            $cart->didHoldCharge($charge);
+
+            $response = $controller
+              ->newDialog()
+              ->setTitle(pht('Charge On Hold'))
+              ->appendParagraph(
+                pht('Your charge is on hold, for reasons?'))
+              ->addCancelButton($cart->getCheckoutURI(), pht('Continue'));
+          } else {
+            $cart->didFailCharge($charge);
+
+            $response = $controller
+              ->newDialog()
+              ->setTitle(pht('Charge Failed'))
+              ->addCancelButton($cart->getCheckoutURI(), pht('Continue'));
+          }
+        unset($unguarded);
+
+        return $response;
       case 'cancel':
-        var_dump($_REQUEST);
-        break;
+        if ($cart->getStatus() !== PhortuneCart::STATUS_PURCHASING) {
+          $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+            // TODO: Since the user cancelled this, we could conceivably just
+            // throw it away or make it more clear that it's a user cancel.
+            $cart->didFailCharge($charge);
+          unset($unguarded);
+        }
+
+        return id(new AphrontRedirectResponse())
+          ->setURI($cart->getCheckoutURI());
     }
 
     throw new Exception(
@@ -339,8 +432,7 @@ final class PhortunePayPalPaymentProvider extends PhortunePaymentProvider {
   }
 
   private function newPaypalAPICall() {
-    $mode = $this->getProviderConfig()->getMetadataValue(self::PAYPAL_MODE);
-    if ($mode == 'live') {
+    if ($this->isAcceptingLivePayments()) {
       $host = 'https://api-3t.paypal.com/nvp';
     } else {
       $host = 'https://api-3t.sandbox.paypal.com/nvp';

@@ -7,9 +7,14 @@ final class PhabricatorConfigManagementDeleteWorkflow
     $this
       ->setName('delete')
       ->setExamples('**delete** __key__')
-      ->setSynopsis('Delete a local configuration value.')
+      ->setSynopsis(pht('Delete a local configuration value.'))
       ->setArguments(
         array(
+          array(
+            'name'  => 'database',
+            'help'  => pht('Delete configuration in the database instead of '.
+            'in local configuration.'),
+          ),
           array(
             'name'      => 'args',
             'wildcard'  => true,
@@ -22,28 +27,50 @@ final class PhabricatorConfigManagementDeleteWorkflow
 
     $argv = $args->getArg('args');
     if (count($argv) == 0) {
-      throw new PhutilArgumentUsageException(
-        'Specify a configuration key to delete.');
+      throw new PhutilArgumentUsageException(pht(
+        'Specify a configuration key to delete.'));
     }
 
     $key = $argv[0];
 
     if (count($argv) > 1) {
-      throw new PhutilArgumentUsageException(
-        'Too many arguments: expected one key.');
+      throw new PhutilArgumentUsageException(pht(
+        'Too many arguments: expected one key.'));
     }
 
-    $config = new PhabricatorConfigLocalSource();
+
+    $use_database = $args->getArg('database');
+    if ($use_database) {
+      $config = new PhabricatorConfigDatabaseSource('default');
+      $config_type = 'database';
+    } else {
+      $config = new PhabricatorConfigLocalSource();
+      $config_type = 'local';
+    }
     $values = $config->getKeys(array($key));
     if (!$values) {
-      throw new PhutilArgumentUsageException(
-        "Configuration key '{$key}' is not set in local configuration!");
+      throw new PhutilArgumentUsageException(pht(
+        "Configuration key '%s' is not set in %s configuration!",
+        $key,
+        $config_type));
     }
 
-    $config->deleteKeys(array($key));
+    if ($use_database) {
+      $config_entry = id(new PhabricatorConfigOption())
+        ->loadOneWhere(
+          'namespace = %s and key = %s',
+          'default',
+          $key);
+      PhabricatorConfigEditor::deleteConfig(
+        $this->getViewer(),
+        $config_entry,
+        PhabricatorContentSource::newConsoleSource());
+    } else {
+      $config->deleteKeys(array($key));
+    }
 
     $console->writeOut(
-      pht("Deleted '%s' from local configuration.", $key)."\n");
+      pht("Deleted '%s' from %s configuration.", $key, $config_type)."\n");
   }
 
 }

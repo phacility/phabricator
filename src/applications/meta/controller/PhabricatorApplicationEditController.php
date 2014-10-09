@@ -104,9 +104,10 @@ final class PhabricatorApplicationEditController
           PhabricatorPolicyCapability::CAN_EDIT);
 
         PhabricatorConfigEditor::storeNewValue(
+          $user,
           $config_entry,
           $value,
-          $this->getRequest());
+          PhabricatorContentSource::newFromRequest($this->getRequest()));
       }
 
       return id(new AphrontRedirectResponse())->setURI($view_uri);

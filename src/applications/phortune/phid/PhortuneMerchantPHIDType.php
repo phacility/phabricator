@@ -30,7 +30,7 @@ final class PhortuneMerchantPHIDType extends PhabricatorPHIDType {
 
       $id = $merchant->getID();
 
-      $handle->setName(pht('Merchant %d %s', $id, $merchant->getName()));
+      $handle->setName($merchant->getName());
       $handle->setURI("/phortune/merchant/{$id}/");
     }
   }

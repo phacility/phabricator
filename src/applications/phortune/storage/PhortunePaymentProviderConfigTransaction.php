@@ -5,6 +5,7 @@ final class PhortunePaymentProviderConfigTransaction
 
   const TYPE_CREATE = 'paymentprovider:create';
   const TYPE_PROPERTY = 'paymentprovider:property';
+  const TYPE_ENABLE = 'paymentprovider:enable';
 
   const PROPERTY_KEY = 'provider-property';
 
@@ -31,6 +32,16 @@ final class PhortunePaymentProviderConfigTransaction
         return pht(
           '%s created this payment provider.',
           $this->renderHandleLink($author_phid));
+      case self::TYPE_ENABLE:
+        if ($new) {
+          return pht(
+            '%s enabled this payment provider.',
+            $this->renderHandleLink($author_phid));
+        } else {
+          return pht(
+            '%s disabled this payment provider.',
+            $this->renderHandleLink($author_phid));
+        }
       case self::TYPE_PROPERTY:
         // TODO: Allow providers to improve this.
 

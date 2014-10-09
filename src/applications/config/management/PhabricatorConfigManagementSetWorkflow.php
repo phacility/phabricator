@@ -7,9 +7,14 @@ final class PhabricatorConfigManagementSetWorkflow
     $this
       ->setName('set')
       ->setExamples('**set** __key__ __value__')
-      ->setSynopsis('Set a local configuration value.')
+      ->setSynopsis(pht('Set a local configuration value.'))
       ->setArguments(
         array(
+          array(
+            'name'  => 'database',
+            'help'  => pht('Update configuration in the database instead of '.
+            'in local configuration.'),
+          ),
           array(
             'name'      => 'args',
             'wildcard'  => true,
@@ -21,29 +26,31 @@ final class PhabricatorConfigManagementSetWorkflow
     $console = PhutilConsole::getConsole();
     $argv = $args->getArg('args');
     if (count($argv) == 0) {
-      throw new PhutilArgumentUsageException(
-        'Specify a configuration key and a value to set it to.');
+      throw new PhutilArgumentUsageException(pht(
+        'Specify a configuration key and a value to set it to.'));
     }
 
     $key = $argv[0];
 
     if (count($argv) == 1) {
-      throw new PhutilArgumentUsageException(
-        "Specify a value to set the key '{$key}' to.");
+      throw new PhutilArgumentUsageException(pht(
+        "Specify a value to set the key '%s' to.",
+        $key));
     }
 
     $value = $argv[1];
 
     if (count($argv) > 2) {
-      throw new PhutilArgumentUsageException(
-        'Too many arguments: expected one key and one value.');
+      throw new PhutilArgumentUsageException(pht(
+        'Too many arguments: expected one key and one value.'));
     }
 
     $options = PhabricatorApplicationConfigOptions::loadAllOptions();
     if (empty($options[$key])) {
-      throw new PhutilArgumentUsageException(
-        "No such configuration key '{$key}'! Use `config list` to list all ".
-        "keys.");
+      throw new PhutilArgumentUsageException(pht(
+        "No such configuration key '%s'! Use `config list` to list all ".
+        "keys.",
+        $key));
     }
 
     $option = $options[$key];
@@ -57,8 +64,10 @@ final class PhabricatorConfigManagementSetWorkflow
         break;
       case 'int':
         if (!ctype_digit($value)) {
-          throw new PhutilArgumentUsageException(
-            "Config key '{$key}' is of type '{$type}'. Specify an integer.");
+          throw new PhutilArgumentUsageException(pht(
+            "Config key '%s' is of type '%s'. Specify an integer.",
+            $key,
+            $type));
         }
         $value = (int)$value;
         break;
@@ -68,18 +77,29 @@ final class PhabricatorConfigManagementSetWorkflow
         } else if ($value == 'false') {
           $value = false;
         } else {
-          throw new PhutilArgumentUsageException(
-            "Config key '{$key}' is of type '{$type}'. ".
-            "Specify 'true' or 'false'.");
+          throw new PhutilArgumentUsageException(pht(
+            "Config key '%s' is of type '%s'. ".
+            "Specify 'true' or 'false'.",
+            $key,
+            $type));
         }
         break;
       default:
         $value = json_decode($value, true);
         if (!is_array($value)) {
-          throw new PhutilArgumentUsageException(
-            "Config key '{$key}' is of type '{$type}'. Specify it in JSON.");
+          throw new PhutilArgumentUsageException(pht(
+            "Config key '%s' is of type '%s'. Specify it in JSON.",
+            $key,
+            $type));
         }
         break;
+    }
+    $use_database = $args->getArg('database');
+    if ($option->getLocked() && $use_database) {
+      throw new PhutilArgumentUsageException(pht(
+        "Config key '%s' is locked and can only be set in local ".
+        'configuration.',
+        $key));
     }
 
     try {
@@ -89,11 +109,22 @@ final class PhabricatorConfigManagementSetWorkflow
       throw new PhutilArgumentUsageException($validation->getMessage());
     }
 
-    $config = new PhabricatorConfigLocalSource();
-    $config->setKeys(array($key => $value));
+    if ($use_database) {
+      $config_type = 'database';
+      PhabricatorConfigEditor::storeNewValue(
+        $this->getViewer(),
+        id(new PhabricatorConfigEntry())
+          ->loadOneWhere('namespace = %s AND key = %s', 'default', $key),
+        $value,
+        PhabricatorContentSource::newConsoleSource());
+    } else {
+      $config_type = 'local';
+      id(new PhabricatorConfigLocalSource())
+        ->setKeys(array($key => $value));
+    }
 
     $console->writeOut(
-      pht("Set '%s' in local configuration.", $key)."\n");
+      pht("Set '%s' in %s configuration.", $key, $config_type)."\n");
   }
 
 }

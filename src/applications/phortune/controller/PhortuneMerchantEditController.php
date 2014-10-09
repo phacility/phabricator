@@ -51,14 +51,17 @@ final class PhortuneMerchantEditController
 
     $e_name = true;
     $v_name = $merchant->getName();
+    $v_desc = $merchant->getDescription();
 
     $validation_exception = null;
     if ($request->isFormPost()) {
       $v_name = $request->getStr('name');
+      $v_desc = $request->getStr('desc');
       $v_view = $request->getStr('viewPolicy');
       $v_edit = $request->getStr('editPolicy');
 
       $type_name = PhortuneMerchantTransaction::TYPE_NAME;
+      $type_desc = PhortuneMerchantTransaction::TYPE_DESCRIPTION;
       $type_view = PhabricatorTransactions::TYPE_VIEW_POLICY;
       $type_edit = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
@@ -67,6 +70,10 @@ final class PhortuneMerchantEditController
       $xactions[] = id(new PhortuneMerchantTransaction())
         ->setTransactionType($type_name)
         ->setNewValue($v_name);
+
+      $xactions[] = id(new PhortuneMerchantTransaction())
+        ->setTransactionType($type_desc)
+        ->setNewValue($v_desc);
 
       $xactions[] = id(new PhortuneMerchantTransaction())
         ->setTransactionType($type_view)
@@ -110,6 +117,11 @@ final class PhortuneMerchantEditController
           ->setLabel(pht('Name'))
           ->setValue($v_name)
           ->setError($e_name))
+      ->appendChild(
+        id(new PhabricatorRemarkupControl())
+          ->setName('desc')
+          ->setLabel(pht('Description'))
+          ->setValue($v_desc))
       ->appendChild(
         id(new AphrontFormPolicyControl())
           ->setName('viewPolicy')

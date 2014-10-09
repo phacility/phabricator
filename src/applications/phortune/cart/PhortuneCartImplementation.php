@@ -12,8 +12,24 @@ abstract class PhortuneCartImplementation {
     PhabricatorUser $viewer,
     array $carts);
 
+  abstract public function getName(PhortuneCart $cart);
   abstract public function getCancelURI(PhortuneCart $cart);
   abstract public function getDoneURI(PhortuneCart $cart);
+
+  public function assertCanCancelOrder(PhortuneCart $cart) {
+    switch ($cart->getStatus()) {
+      case PhortuneCart::STATUS_PURCHASED:
+        throw new Exception(
+          pht(
+            'This order can not be cancelled because it has already been '.
+            'completed.'));
+        break;
+    }
+  }
+
+  public function assertCanRefundOrder(PhortuneCart $cart) {
+    return;
+  }
 
   abstract public function willCreateCart(
     PhabricatorUser $viewer,

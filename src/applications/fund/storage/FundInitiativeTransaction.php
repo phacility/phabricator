@@ -5,6 +5,7 @@ final class FundInitiativeTransaction
 
   const TYPE_NAME = 'fund:name';
   const TYPE_DESCRIPTION = 'fund:description';
+  const TYPE_RISKS = 'fund:risks';
   const TYPE_STATUS = 'fund:status';
   const TYPE_BACKER = 'fund:backer';
   const TYPE_MERCHANT = 'fund:merchant';
@@ -64,6 +65,10 @@ final class FundInitiativeTransaction
             $new);
         }
         break;
+      case FundInitiativeTransaction::TYPE_RISKS:
+        return pht(
+          '%s edited the risks for this initiative.',
+          $this->renderHandleLink($author_phid));
       case FundInitiativeTransaction::TYPE_DESCRIPTION:
         return pht(
           '%s edited the description of this initiative.',
@@ -159,6 +164,7 @@ final class FundInitiativeTransaction
     $old = $this->getOldValue();
     switch ($this->getTransactionType()) {
       case FundInitiativeTransaction::TYPE_DESCRIPTION:
+      case FundInitiativeTransaction::TYPE_RISKS:
         return ($old === null);
     }
     return parent::shouldHide();
@@ -167,6 +173,7 @@ final class FundInitiativeTransaction
   public function hasChangeDetails() {
     switch ($this->getTransactionType()) {
       case FundInitiativeTransaction::TYPE_DESCRIPTION:
+      case FundInitiativeTransaction::TYPE_RISKS:
         return ($this->getOldValue() !== null);
     }
 

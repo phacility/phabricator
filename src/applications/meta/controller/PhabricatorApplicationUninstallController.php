@@ -90,7 +90,10 @@ final class PhabricatorApplicationUninstallController
     }
 
     PhabricatorConfigEditor::storeNewValue(
-     $config_entry, $list, $this->getRequest());
+      $this->getRequest()->getUser(),
+      $config_entry,
+      $list,
+      PhabricatorContentSource::newFromRequest($this->getRequest()));
   }
 
 }

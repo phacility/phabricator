@@ -48,13 +48,11 @@ final class PhortuneCurrency extends Phobject {
     $value = (int)round(100 * $value);
 
     $currency = idx($matches, 2, $default);
-    if ($currency) {
-      switch ($currency) {
-        case 'USD':
-          break;
-        default:
-          throw new Exception("Unsupported currency '{$currency}'!");
-      }
+    switch ($currency) {
+      case 'USD':
+        break;
+      default:
+        throw new Exception("Unsupported currency '{$currency}'!");
     }
 
     return self::newFromValueAndCurrency($value, $currency);
@@ -72,26 +70,20 @@ final class PhortuneCurrency extends Phobject {
   public static function newFromList(array $list) {
     assert_instances_of($list, 'PhortuneCurrency');
 
-    $total = 0;
-    $currency = null;
-    foreach ($list as $item) {
-      if ($currency === null) {
-        $currency = $item->getCurrency();
-      } else if ($currency === $item->getCurrency()) {
-        // Adding a value denominated in the same currency, which is
-        // fine.
-      } else {
-        throw new Exception(
-          pht('Trying to sum a list of unlike currencies.'));
-      }
-
-      // TODO: This should check for integer overflows, etc.
-      $total += $item->getValue();
+    if (!$list) {
+      return PhortuneCurrency::newEmptyCurrency();
     }
 
-    return PhortuneCurrency::newFromValueAndCurrency(
-      $total,
-      self::getDefaultCurrency());
+    $total = null;
+    foreach ($list as $item) {
+      if ($total === null) {
+        $total = $item;
+      } else {
+        $total = $total->add($item);
+      }
+    }
+
+    return $total;
   }
 
   public function formatForDisplay() {
@@ -130,6 +122,68 @@ final class PhortuneCurrency extends Phobject {
 
   private static function throwFormatException($string) {
     throw new Exception("Invalid currency format ('{$string}').");
+  }
+
+  private function throwUnlikeCurrenciesException(PhortuneCurrency $other) {
+    throw new Exception(
+      pht(
+        'Trying to operate on unlike currencies ("%s" and "%s")!',
+        $this->currency,
+        $other->currency));
+  }
+
+  public function add(PhortuneCurrency $other) {
+    if ($this->currency !== $other->currency) {
+      $this->throwUnlikeCurrenciesException($other);
+    }
+
+    $currency = new PhortuneCurrency();
+
+    // TODO: This should check for integer overflows, etc.
+    $currency->value = $this->value + $other->value;
+    $currency->currency = $this->currency;
+
+    return $currency;
+  }
+
+  public function subtract(PhortuneCurrency $other) {
+    if ($this->currency !== $other->currency) {
+      $this->throwUnlikeCurrenciesException($other);
+    }
+
+    $currency = new PhortuneCurrency();
+
+    // TODO: This should check for integer overflows, etc.
+    $currency->value = $this->value - $other->value;
+    $currency->currency = $this->currency;
+
+    return $currency;
+  }
+
+  public function isEqualTo(PhortuneCurrency $other) {
+    if ($this->currency !== $other->currency) {
+      $this->throwUnlikeCurrenciesException($other);
+    }
+
+    return ($this->value === $other->value);
+  }
+
+  public function negate() {
+    $currency = new PhortuneCurrency();
+    $currency->value = -$this->value;
+    $currency->currency = $this->currency;
+    return $currency;
+  }
+
+  public function isPositive() {
+    return ($this->value > 0);
+  }
+
+  public function isGreaterThan(PhortuneCurrency $other) {
+    if ($this->currency !== $other->currency) {
+      $this->throwUnlikeCurrenciesException($other);
+    }
+    return $this->value > $other->value;
   }
 
   /**
