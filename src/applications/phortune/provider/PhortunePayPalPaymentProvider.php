@@ -450,7 +450,7 @@ final class PhortunePayPalPaymentProvider extends PhortunePaymentProvider {
           if ($success) {
             $cart->didApplyCharge($charge);
             $response = id(new AphrontRedirectResponse())->setURI(
-              $cart->getDoneURI());
+              $cart->getCheckoutURI());
           } else if ($hold) {
             $cart->didHoldCharge($charge);
 

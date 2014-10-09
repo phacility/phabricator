@@ -332,6 +332,10 @@ final class PhortuneCart extends PhortuneDAO
     return $this->getImplementation()->getDoneURI($this);
   }
 
+  public function getDoneActionName() {
+    return $this->getImplementation()->getDoneActionName($this);
+  }
+
   public function getCancelURI() {
     return $this->getImplementation()->getCancelURI($this);
   }

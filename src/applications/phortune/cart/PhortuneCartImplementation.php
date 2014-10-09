@@ -16,6 +16,10 @@ abstract class PhortuneCartImplementation {
   abstract public function getCancelURI(PhortuneCart $cart);
   abstract public function getDoneURI(PhortuneCart $cart);
 
+  public function getDoneActionName(PhortuneCart $cart) {
+    return pht('Return to Application');
+  }
+
   public function assertCanCancelOrder(PhortuneCart $cart) {
     switch ($cart->getStatus()) {
       case PhortuneCart::STATUS_PURCHASED:

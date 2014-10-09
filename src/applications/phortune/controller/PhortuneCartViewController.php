@@ -35,6 +35,7 @@ final class PhortuneCartViewController
       PhabricatorPolicyCapability::CAN_EDIT);
 
     $errors = array();
+    $error_view = null;
     $resume_uri = null;
     switch ($cart->getStatus()) {
       case PhortuneCart::STATUS_PURCHASING:
@@ -71,6 +72,12 @@ final class PhortuneCartViewController
             phutil_tag('strong', array(), pht('Update Status')));
         }
         break;
+      case PhortuneCart::STATUS_PURCHASED:
+        $error_view = id(new AphrontErrorView())
+          ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+          ->appendChild(pht('This purchase has been completed.'));
+
+        break;
     }
 
     $properties = $this->buildPropertyListView($cart);
@@ -85,11 +92,29 @@ final class PhortuneCartViewController
       ->setUser($viewer)
       ->setHeader(pht('Order Detail'));
 
+    if ($cart->getStatus() == PhortuneCart::STATUS_PURCHASED) {
+      $done_uri = $cart->getDoneURI();
+      if ($done_uri) {
+        $header->addActionLink(
+          id(new PHUIButtonView())
+            ->setTag('a')
+            ->setHref($done_uri)
+            ->setIcon(id(new PHUIIconView())
+              ->setIconFont('fa-check-square green'))
+            ->setText($cart->getDoneActionName()));
+      }
+    }
+
     $cart_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setFormErrors($errors)
       ->appendChild($properties)
       ->appendChild($cart_table);
+
+    if ($errors) {
+      $cart_box->setFormErrors($errors);
+    } else if ($error_view) {
+      $cart_box->setErrorView($error_view);
+    }
 
     $charges = id(new PhortuneChargeQuery())
       ->setViewer($viewer)

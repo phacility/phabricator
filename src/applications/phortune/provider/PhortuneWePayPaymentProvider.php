@@ -349,7 +349,7 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
               $cart->didApplyCharge($charge);
 
               $response = id(new AphrontRedirectResponse())->setURI(
-                 $cart->getDoneURI());
+                 $cart->getCheckoutURI());
               break;
             default:
               // It's not clear if we can ever get here on the web workflow,

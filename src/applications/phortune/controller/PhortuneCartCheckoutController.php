@@ -102,7 +102,7 @@ final class PhortuneCartCheckoutController
 
         $cart->didApplyCharge($charge);
 
-        $done_uri = $cart->getDoneURI();
+        $done_uri = $cart->getCheckoutURI();
         return id(new AphrontRedirectResponse())->setURI($done_uri);
       }
     }

@@ -81,4 +81,8 @@ final class FundBackerCart extends PhortuneCartImplementation {
     return '/'.$this->getInitiative()->getMonogram();
   }
 
+  public function getDoneActionName(PhortuneCart $cart) {
+    return pht('Return to Initiative');
+  }
+
 }
