@@ -53,19 +53,19 @@ final class PhortuneAccountViewController extends PhortuneController {
           ->setIcon('fa-pencil')
           ->setHref($edit_uri)
           ->setDisabled(!$can_edit)
-          ->setWorkflow(!$can_edit))
-      ->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Edit Members'))
-          ->setIcon('fa-users')
-          ->setHref('#')
-          ->setDisabled(true));
+          ->setWorkflow(!$can_edit));
 
     $crumbs->setActionList($actions);
 
     $properties = id(new PHUIPropertyListView())
       ->setObject($account)
       ->setUser($user);
+
+    $this->loadHandles($account->getMemberPHIDs());
+
+    $properties->addProperty(
+      pht('Members'),
+      $this->renderHandlesForPHIDs($account->getMemberPHIDs()));
 
     $properties->setActionList($actions);
 

@@ -28,34 +28,39 @@ final class PhortuneAccountEditController extends PhortuneController {
       $is_new = false;
     } else {
       $account = PhortuneAccount::initializeNewAccount($viewer);
+      $account->attachMemberPHIDs(array($viewer->getPHID()));
       $is_new = true;
     }
 
     $v_name = $account->getName();
     $e_name = true;
+
+    $v_members = $account->getMemberPHIDs();
+    $e_members = null;
+
     $validation_exception = null;
 
     if ($request->isFormPost()) {
       $v_name = $request->getStr('name');
+      $v_members = $request->getArr('memberPHIDs');
 
       $type_name = PhortuneAccountTransaction::TYPE_NAME;
+      $type_edge = PhabricatorTransactions::TYPE_EDGE;
 
       $xactions = array();
       $xactions[] = id(new PhortuneAccountTransaction())
         ->setTransactionType($type_name)
         ->setNewValue($v_name);
 
-      if ($is_new) {
-        $xactions[] = id(new PhortuneAccountTransaction())
-          ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-          ->setMetadataValue(
-            'edge:type',
-            PhabricatorEdgeConfig::TYPE_ACCOUNT_HAS_MEMBER)
-          ->setNewValue(
-            array(
-              '=' => array($viewer->getPHID() => $viewer->getPHID()),
-            ));
-      }
+      $xactions[] = id(new PhortuneAccountTransaction())
+        ->setTransactionType($type_edge)
+        ->setMetadataValue(
+          'edge:type',
+          PhortuneAccountHasMemberEdgeType::EDGECONST)
+        ->setNewValue(
+          array(
+            '=' => array_fuse($v_members),
+          ));
 
       $editor = id(new PhortuneAccountEditor())
         ->setActor($viewer)
@@ -70,6 +75,7 @@ final class PhortuneAccountEditController extends PhortuneController {
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
         $validation_exception = $ex;
         $e_name = $ex->getShortMessage($type_name);
+        $e_members = $ex->getShortMessage($type_edge);
       }
     }
 
@@ -91,6 +97,8 @@ final class PhortuneAccountEditController extends PhortuneController {
       $submit_button = pht('Save Changes');
     }
 
+    $member_handles = $this->loadViewerHandles($v_members);
+
     $form = id(new AphrontFormView())
       ->setUser($viewer)
       ->appendChild(
@@ -99,6 +107,13 @@ final class PhortuneAccountEditController extends PhortuneController {
           ->setLabel(pht('Name'))
           ->setValue($v_name)
           ->setError($e_name))
+      ->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setDatasource(new PhabricatorPeopleDatasource())
+          ->setLabel(pht('Members'))
+          ->setName('memberPHIDs')
+          ->setValue($member_handles)
+          ->setError($e_members))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue($submit_button)

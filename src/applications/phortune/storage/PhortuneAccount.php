@@ -36,7 +36,7 @@ final class PhortuneAccount extends PhortuneDAO
       ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
       ->setMetadataValue(
         'edge:type',
-        PhabricatorEdgeConfig::TYPE_ACCOUNT_HAS_MEMBER)
+        PhortuneAccountHasMemberEdgeType::EDGECONST)
       ->setNewValue(
         array(
           '=' => array($actor->getPHID() => $actor->getPHID()),

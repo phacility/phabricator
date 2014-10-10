@@ -91,6 +91,29 @@ final class PhortuneAccountEditor
           $errors[] = $error;
         }
         break;
+      case PhabricatorTransactions::TYPE_EDGE:
+        foreach ($xactions as $xaction) {
+          switch ($xaction->getMetadataValue('edge:type')) {
+            case PhortuneAccountHasMemberEdgeType::EDGECONST:
+              // TODO: This is a bit cumbersome, but validation happens before
+              // transaction normalization. Maybe provide a cleaner attack on
+              // this eventually? There's no way to generate "+" or "-"
+              // transactions right now.
+              $new = $xaction->getNewValue();
+              $set = idx($new, '=', array());
+
+              if (empty($set[$this->requireActor()->getPHID()])) {
+                $error = new PhabricatorApplicationTransactionValidationError(
+                  $type,
+                  pht('Invalid'),
+                  pht('You can not remove yourself as an account member.'),
+                  $xaction);
+                $errors[] = $error;
+              }
+              break;
+          }
+        }
+        break;
     }
 
     return $errors;

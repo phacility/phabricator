@@ -79,11 +79,12 @@ final class PhortuneAccountQuery
   protected function willFilterPage(array $accounts) {
     $query = id(new PhabricatorEdgeQuery())
       ->withSourcePHIDs(mpull($accounts, 'getPHID'))
-      ->withEdgeTypes(array(PhabricatorEdgeConfig::TYPE_ACCOUNT_HAS_MEMBER));
+      ->withEdgeTypes(array(PhortuneAccountHasMemberEdgeType::EDGECONST));
     $query->execute();
 
     foreach ($accounts as $account) {
       $member_phids = $query->getDestinationPHIDs(array($account->getPHID()));
+      $member_phids = array_reverse($member_phids);
       $account->attachMemberPHIDs($member_phids);
     }
 
@@ -127,7 +128,7 @@ final class PhortuneAccountQuery
         $conn,
         'LEFT JOIN %T m ON a.phid = m.src AND m.type = %d',
         PhabricatorEdgeConfig::TABLE_NAME_EDGE,
-        PhabricatorEdgeConfig::TYPE_ACCOUNT_HAS_MEMBER);
+        PhortuneAccountHasMemberEdgeType::EDGECONST);
     }
 
     return implode(' ', $joins);
