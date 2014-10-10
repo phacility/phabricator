@@ -472,7 +472,7 @@ final class PhortunePayPalPaymentProvider extends PhortunePaymentProvider {
 
         return $response;
       case 'cancel':
-        if ($cart->getStatus() !== PhortuneCart::STATUS_PURCHASING) {
+        if ($cart->getStatus() === PhortuneCart::STATUS_PURCHASING) {
           $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
             // TODO: Since the user cancelled this, we could conceivably just
             // throw it away or make it more clear that it's a user cancel.

@@ -42,6 +42,7 @@ final class PhortuneCartCheckoutController
       case PhortuneCart::STATUS_CHARGED:
       case PhortuneCart::STATUS_PURCHASING:
       case PhortuneCart::STATUS_HOLD:
+      case PhortuneCart::STATUS_REVIEW:
       case PhortuneCart::STATUS_PURCHASED:
         // For these states, kick the user to the order page to give them
         // information and options.

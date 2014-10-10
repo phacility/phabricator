@@ -158,8 +158,9 @@ final class PhortuneCartCancelController
         }
 
         // TODO: If every HOLD and CHARGING transaction has been fully refunded
-        // and we're in a HOLD, PURCHASING or CHARGED cart state we probably
-        // need to kick the cart back to READY here?
+        // and we're in a HOLD, REVIEW, PURCHASING or CHARGED cart state we
+        // probably need to kick the cart back to READY here (or maybe kill
+        // it if it was in REVIEW)?
 
         return id(new AphrontRedirectResponse())->setURI($cancel_uri);
       }
@@ -170,6 +171,7 @@ final class PhortuneCartCancelController
       $body = pht(
         'Really refund this order?');
       $button = pht('Refund Order');
+      $cancel_text = pht('Cancel');
 
       $form = id(new AphrontFormView())
         ->setUser($viewer)
@@ -181,6 +183,7 @@ final class PhortuneCartCancelController
             ->setValue($v_refund));
 
       $form = $form->buildLayoutView();
+
     } else {
       $title = pht('Cancel Order?');
       $body = pht(
