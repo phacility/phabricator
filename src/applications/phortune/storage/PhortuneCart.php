@@ -351,8 +351,9 @@ final class PhortuneCart extends PhortuneDAO
       $this->endReadLocking();
     $this->saveTransaction();
 
+    $amount = $refund->getAmountAsCurrency()->negate();
     foreach ($this->purchases as $purchase) {
-      $purchase->getProduct()->didRefundProduct($purchase);
+      $purchase->getProduct()->didRefundProduct($purchase, $amount);
     }
 
     return $this;

@@ -87,7 +87,7 @@ final class PhortuneCartCancelController
             $request->getStr('refund'));
           $refund->assertInRange('0.00 USD', $maximum->formatForDisplay());
         } catch (Exception $ex) {
-          $errors[] = $ex;
+          $errors[] = $ex->getMessage();
           $e_refund = pht('Invalid');
         }
       } else {
@@ -199,6 +199,7 @@ final class PhortuneCartCancelController
 
     return $this->newDialog()
       ->setTitle($title)
+      ->setErrors($errors)
       ->appendChild($body)
       ->appendChild($form)
       ->addSubmitButton($button)

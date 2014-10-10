@@ -89,7 +89,7 @@ final class FundBackerProduct extends PhortuneProductImplementation {
       throw new Exception(pht('Unable to load FundBacker!'));
     }
 
-    // Load the actual backing user --they may not be the curent viewer if this
+    // Load the actual backing user -- they may not be the curent viewer if this
     // product purchase is completing from a background worker or a merchant
     // action.
 
@@ -99,19 +99,11 @@ final class FundBackerProduct extends PhortuneProductImplementation {
       ->executeOne();
 
     $xactions = array();
-    $xactions[] = id(new FundBackerTransaction())
-      ->setTransactionType(FundBackerTransaction::TYPE_STATUS)
-      ->setNewValue(FundBacker::STATUS_PURCHASED);
-
-    $editor = id(new FundBackerEditor())
-      ->setActor($actor)
-      ->setContentSource($this->getContentSource());
-
-    $editor->applyTransactions($backer, $xactions);
-
-    $xactions = array();
     $xactions[] = id(new FundInitiativeTransaction())
       ->setTransactionType(FundInitiativeTransaction::TYPE_BACKER)
+      ->setMetadataValue(
+        FundInitiativeTransaction::PROPERTY_AMOUNT,
+        $backer->getAmountAsCurrency()->serializeForStorage())
       ->setNewValue($backer->getPHID());
 
     $editor = id(new FundInitiativeEditor())
@@ -119,15 +111,38 @@ final class FundBackerProduct extends PhortuneProductImplementation {
       ->setContentSource($this->getContentSource());
 
     $editor->applyTransactions($this->getInitiative(), $xactions);
-
-    return;
   }
 
   public function didRefundProduct(
     PhortuneProduct $product,
-    PhortunePurchase $purchase) {
+    PhortunePurchase $purchase,
+    PhortuneCurrency $amount) {
     $viewer = $this->getViewer();
-    // TODO: Undonate.
+
+    $backer = id(new FundBackerQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($purchase->getMetadataValue('backerPHID')))
+      ->executeOne();
+    if (!$backer) {
+      throw new Exception(pht('Unable to load FundBacker!'));
+    }
+
+    $xactions = array();
+    $xactions[] = id(new FundInitiativeTransaction())
+      ->setTransactionType(FundInitiativeTransaction::TYPE_REFUND)
+      ->setMetadataValue(
+        FundInitiativeTransaction::PROPERTY_AMOUNT,
+        $amount->serializeForStorage())
+      ->setMetadataValue(
+        FundInitiativeTransaction::PROPERTY_BACKER,
+        $backer->getBackerPHID())
+      ->setNewValue($backer->getPHID());
+
+    $editor = id(new FundInitiativeEditor())
+      ->setActor($viewer)
+      ->setContentSource($this->getContentSource());
+
+    $editor->applyTransactions($this->getInitiative(), $xactions);
   }
 
 }
