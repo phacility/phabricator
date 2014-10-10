@@ -20,6 +20,7 @@ final class FundInitiative extends FundDAO
   protected $editPolicy;
   protected $status;
   protected $totalAsCurrency;
+  protected $mailKey;
 
   private $projectPHIDs = self::ATTACHABLE;
 
@@ -59,6 +60,7 @@ final class FundInitiative extends FundDAO
         'status' => 'text32',
         'merchantPHID' => 'phid?',
         'totalAsCurrency' => 'text64',
+        'mailKey' => 'bytes20',
       ),
       self::CONFIG_APPLICATION_SERIALIZERS => array(
         'totalAsCurrency' => new PhortuneCurrencySerializer(),
@@ -93,6 +95,13 @@ final class FundInitiative extends FundDAO
 
   public function isClosed() {
     return ($this->getStatus() == self::STATUS_CLOSED);
+  }
+
+  public function save() {
+    if (!$this->mailKey) {
+      $this->mailKey = Filesystem::readRandomCharacters(20);
+    }
+    return parent::save();
   }
 
 

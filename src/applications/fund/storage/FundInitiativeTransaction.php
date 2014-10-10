@@ -11,6 +11,10 @@ final class FundInitiativeTransaction
   const TYPE_REFUND = 'fund:refund';
   const TYPE_MERCHANT = 'fund:merchant';
 
+  const MAILTAG_BACKER = 'fund.backer';
+  const MAILTAG_STATUS = 'fund.status';
+  const MAILTAG_OTHER  = 'fund.other';
+
   const PROPERTY_AMOUNT = 'fund.amount';
   const PROPERTY_BACKER = 'fund.backer';
 
@@ -172,14 +176,49 @@ final class FundInitiativeTransaction
         }
         break;
       case FundInitiativeTransaction::TYPE_BACKER:
+        $amount = $this->getMetadataValue(self::PROPERTY_AMOUNT);
+        $amount = PhortuneCurrency::newFromString($amount);
         return pht(
-          '%s backed %s.',
+          '%s backed %s with %s.',
           $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid),
+          $amount->formatForDisplay());
+      case FundInitiativeTransaction::TYPE_REFUND:
+        $amount = $this->getMetadataValue(self::PROPERTY_AMOUNT);
+        $amount = PhortuneCurrency::newFromString($amount);
+
+        $backer_phid = $this->getMetadataValue(self::PROPERTY_BACKER);
+
+        return pht(
+          '%s refunded %s to %s for %s.',
+          $this->renderHandleLink($author_phid),
+          $amount->formatForDisplay(),
+          $this->renderHandleLink($backer_phid),
           $this->renderHandleLink($object_phid));
     }
 
     return parent::getTitleForFeed($story);
   }
+
+  public function getMailTags() {
+    $tags = parent::getMailTags();
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_STATUS:
+        $tags[] = self::MAILTAG_STATUS;
+        break;
+      case self::TYPE_BACKER:
+      case self::TYPE_REFUND:
+        $tags[] = self::MAILTAG_BACKER;
+        break;
+      default:
+        $tags[] = self::MAILTAG_OTHER;
+        break;
+    }
+
+    return $tags;
+  }
+
 
   public function shouldHide() {
     $old = $this->getOldValue();

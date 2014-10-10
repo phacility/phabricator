@@ -231,5 +231,52 @@ final class FundInitiativeEditor
     return $errors;
   }
 
+  protected function shouldSendMail(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return true;
+  }
+
+  public function getMailTagsMap() {
+    return array(
+      FundInitiativeTransaction::MAILTAG_BACKER =>
+        pht('Someone backs an initiative.'),
+      FundInitiativeTransaction::MAILTAG_STATUS =>
+        pht("An initiative's status changes."),
+      FundInitiativeTransaction::MAILTAG_OTHER =>
+        pht('Other initiative activity not listed above occurs.'),
+    );
+  }
+
+  protected function buildMailTemplate(PhabricatorLiskDAO $object) {
+    $monogram = $object->getMonogram();
+    $name = $object->getName();
+
+    return id(new PhabricatorMetaMTAMail())
+      ->setSubject("{$monogram}: {$name}")
+      ->addHeader('Thread-Topic', $monogram);
+  }
+
+
+  protected function getMailTo(PhabricatorLiskDAO $object) {
+    return array($object->getOwnerPHID());
+  }
+
+  protected function getMailSubjectPrefix() {
+    return 'Fund';
+  }
+
+  protected function buildReplyHandler(PhabricatorLiskDAO $object) {
+    return id(new FundInitiativeReplyHandler())
+      ->setMailReceiver($object);
+  }
+
+  protected function shouldPublishFeedStory(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return true;
+  }
+
+
 
 }
