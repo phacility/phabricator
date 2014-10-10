@@ -146,6 +146,10 @@ final class AphrontDialogView extends AphrontView {
         $paragraph));
   }
 
+  public function appendForm(AphrontFormView $form) {
+    return $this->appendChild($form->buildLayoutView());
+  }
+
   public function setDisableWorkflowOnSubmit($disable_workflow_on_submit) {
     $this->disableWorkflowOnSubmit = $disable_workflow_on_submit;
     return $this;
