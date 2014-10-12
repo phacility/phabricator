@@ -74,6 +74,7 @@
   margin-left: 1%;
   float: left;
   margin-bottom: 4px;
+  overflow-x: auto;
 }
 
 .device .phui-property-list-value,
