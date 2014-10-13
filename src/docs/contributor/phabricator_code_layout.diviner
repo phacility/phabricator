@@ -8,9 +8,6 @@ application class and subdirectory organization best practices.
 
 When a user visits a Phabricator URI, the Phabricator infrastructure parses
 that URI with a regular expression to determine what controller class to load.
-For now, that regular expression is hard-coded inside the
-@{class:AphrontDefaultApplicationConfiguration} within the ##getURIMap##
-method. Use the existing entries as examples for adding your own entries.
 
 The Phabricator infrastructure knows where a given controller class lives on
 disk from a cache file the Arcanist phutil mapper generates. This mapping
