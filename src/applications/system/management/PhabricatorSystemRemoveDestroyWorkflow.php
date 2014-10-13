@@ -68,9 +68,10 @@ final class PhabricatorSystemRemoveDestroyWorkflow
 
     foreach ($named_objects as $object_name => $object) {
       $console->writeOut(
-        "    - %s (%s)\n",
+        "    - %s (%s): %s\n",
         $object_name,
-        get_class($object));
+        get_class($object),
+        $object->getTitle());
     }
 
     $force = $args->getArg('force');
