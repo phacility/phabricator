@@ -110,7 +110,9 @@ class PhabricatorApplicationTransactionFeedStory
     $xactions = array();
     $xaction_phids = $this->getValue('transactionPHIDs');
     foreach ($xaction_phids as $xaction_phid) {
-      $xactions[] = $this->getObject($xaction_phid);
+      $xaction = $this->getObject($xaction_phid);
+      $xaction->setHandles($this->getHandles());
+      $xactions[] = $xaction;
     }
 
     $primary = $this->getPrimaryTransaction();
