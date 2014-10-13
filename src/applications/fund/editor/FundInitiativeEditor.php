@@ -277,6 +277,8 @@ final class FundInitiativeEditor
     return true;
   }
 
-
+  protected function supportsSearch() {
+    return true;
+  }
 
 }
