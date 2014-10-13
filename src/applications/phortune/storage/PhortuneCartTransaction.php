@@ -22,6 +22,15 @@ final class PhortuneCartTransaction
     return null;
   }
 
+  public function shouldHideForMail(array $xactions) {
+    switch ($this->getTransactionType()) {
+      case self::TYPE_CREATED:
+        return true;
+    }
+
+    return parent::shouldHideForMail($xactions);
+  }
+
   public function getTitle() {
     $old = $this->getOldValue();
     $new = $this->getNewValue();

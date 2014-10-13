@@ -92,4 +92,76 @@ final class PhortuneCartEditor
     return parent::applyCustomExternalTransaction($object, $xaction);
   }
 
+  protected function shouldSendMail(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return true;
+  }
+
+  protected function buildMailTemplate(PhabricatorLiskDAO $object) {
+    $id = $object->getID();
+    $name = $object->getName();
+
+    return id(new PhabricatorMetaMTAMail())
+      ->setSubject(pht('Order %d: %s', $id, $name))
+      ->addHeader('Thread-Topic', pht('Order %s', $id));
+  }
+
+  protected function buildMailBody(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $body = parent::buildMailBody($object, $xactions);
+
+    $items = array();
+    foreach ($object->getPurchases() as $purchase) {
+      $name = $purchase->getFullDisplayName();
+      $price = $purchase->getTotalPriceAsCurrency()->formatForDisplay();
+
+      $items[] = "{$name} {$price}";
+    }
+
+    $body->addTextSection(pht('ORDER CONTENTS'), implode("\n", $items));
+
+    $body->addTextSection(
+      pht('ORDER DETAIL'),
+      PhabricatorEnv::getProductionURI('/phortune/cart/'.$object->getID().'/'));
+
+    return $body;
+  }
+
+  protected function getMailTo(PhabricatorLiskDAO $object) {
+    $phids = array();
+
+    // Relaod the cart to pull merchant and account information, in case we
+    // just created the object.
+    $cart = id(new PhortuneCartQuery())
+      ->setViewer($this->requireActor())
+      ->withPHIDs(array($object->getPHID()))
+      ->executeOne();
+
+    foreach ($cart->getAccount()->getMemberPHIDs() as $account_member) {
+      $phids[] = $account_member;
+    }
+
+    foreach ($cart->getMerchant()->getMemberPHIDs() as $merchant_member) {
+      $phids[] = $merchant_member;
+    }
+
+    return $phids;
+  }
+
+  protected function getMailCC(PhabricatorLiskDAO $object) {
+    return array();
+  }
+
+  protected function getMailSubjectPrefix() {
+    return 'Order';
+  }
+
+  protected function buildReplyHandler(PhabricatorLiskDAO $object) {
+    return id(new PhortuneCartReplyHandler())
+      ->setMailReceiver($object);
+  }
+
 }

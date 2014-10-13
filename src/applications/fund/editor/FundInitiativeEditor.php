@@ -261,6 +261,18 @@ final class FundInitiativeEditor
       ->addHeader('Thread-Topic', $monogram);
   }
 
+  protected function buildMailBody(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $body = parent::buildMailBody($object, $xactions);
+
+    $body->addTextSection(
+      pht('INITIATIVE DETAIL'),
+      PhabricatorEnv::getProductionURI('/'.$object->getMonogram()));
+
+    return $body;
+  }
 
   protected function getMailTo(PhabricatorLiskDAO $object) {
     return array($object->getOwnerPHID());

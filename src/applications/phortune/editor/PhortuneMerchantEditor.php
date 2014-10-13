@@ -111,5 +111,4 @@ final class PhortuneMerchantEditor
     return $errors;
   }
 
-
 }

@@ -17,6 +17,7 @@ final class PhortuneCart extends PhortuneDAO
   protected $cartClass;
   protected $status;
   protected $metadata = array();
+  protected $mailKey;
 
   private $account = self::ATTACHABLE;
   private $purchases = self::ATTACHABLE;
@@ -514,6 +515,7 @@ final class PhortuneCart extends PhortuneDAO
       self::CONFIG_COLUMN_SCHEMA => array(
         'status' => 'text32',
         'cartClass' => 'text128',
+        'mailKey' => 'bytes20',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_account' => array(
@@ -529,6 +531,13 @@ final class PhortuneCart extends PhortuneDAO
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
       PhortuneCartPHIDType::TYPECONST);
+  }
+
+  public function save() {
+    if (!$this->getMailKey()) {
+      $this->setMailKey(Filesystem::readRandomCharacters(20));
+    }
+    return parent::save();
   }
 
   public function attachPurchases(array $purchases) {
