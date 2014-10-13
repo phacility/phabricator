@@ -83,8 +83,8 @@ final class PhortuneAccountListController extends PhortuneController {
           ->setHref($this->getApplicationURI('merchant/'))
           ->setIcon(
             id(new PHUIIconView())
-              ->setIconFont('fa-folder-open'))
-          ->setText(pht('Browse Merchants')));
+              ->setIconFont('fa-list'))
+          ->setText(pht('View All Merchants')));
 
     $merchant_box = id(new PHUIObjectBoxView())
       ->setHeader($merchant_header)

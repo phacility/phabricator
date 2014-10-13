@@ -135,7 +135,24 @@ final class PhortuneCartViewController
       ->needCarts(true)
       ->execute();
 
-    $charges_table = $this->buildChargesTable($charges, false);
+    $phids = array();
+    foreach ($charges as $charge) {
+      $phids[] = $charge->getProviderPHID();
+      $phids[] = $charge->getCartPHID();
+      $phids[] = $charge->getMerchantPHID();
+      $phids[] = $charge->getPaymentMethodPHID();
+    }
+    $handles = $this->loadViewerHandles($phids);
+
+    $charges_table = id(new PhortuneChargeTableView())
+      ->setUser($viewer)
+      ->setHandles($handles)
+      ->setCharges($charges)
+      ->setShowOrder(false);
+
+    $charges = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Charges'))
+      ->appendChild($charges_table);
 
     $account = $cart->getAccount();
 
@@ -147,7 +164,7 @@ final class PhortuneCartViewController
       array(
         $crumbs,
         $cart_box,
-        $charges_table,
+        $charges,
       ),
       array(
         'title' => pht('Cart'),

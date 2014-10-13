@@ -1,17 +1,14 @@
 <?php
 
-final class PhortuneCartListController
+final class PhortuneChargeListController
   extends PhortuneController {
 
   private $accountID;
-  private $merchantID;
   private $queryKey;
 
-  private $merchant;
   private $account;
 
   public function willProcessRequest(array $data) {
-    $this->merchantID = idx($data, 'merchantID');
     $this->accountID = idx($data, 'accountID');
     $this->queryKey = idx($data, 'queryKey');
   }
@@ -20,24 +17,9 @@ final class PhortuneCartListController
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
-    $engine = new PhortuneCartSearchEngine();
+    $engine = new PhortuneChargeSearchEngine();
 
-    if ($this->merchantID) {
-      $merchant = id(new PhortuneMerchantQuery())
-        ->setViewer($viewer)
-        ->withIDs(array($this->merchantID))
-        ->requireCapabilities(
-          array(
-            PhabricatorPolicyCapability::CAN_VIEW,
-            PhabricatorPolicyCapability::CAN_EDIT,
-          ))
-        ->executeOne();
-      if (!$merchant) {
-        return new Aphront404Response();
-      }
-      $this->merchant = $merchant;
-      $engine->setMerchant($merchant);
-    } else if ($this->accountID) {
+    if ($this->accountID) {
       $account = id(new PhortuneAccountQuery())
         ->setViewer($viewer)
         ->withIDs(array($this->accountID))
@@ -70,7 +52,7 @@ final class PhortuneCartListController
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
-    id(new PhortuneCartSearchEngine())
+    id(new PhortuneChargeSearchEngine())
       ->setViewer($viewer)
       ->addNavigationItems($nav->getMenu());
 
@@ -82,17 +64,6 @@ final class PhortuneCartListController
   public function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
-    $merchant = $this->merchant;
-    if ($merchant) {
-      $id = $merchant->getID();
-      $crumbs->addTextCrumb(
-        $merchant->getName(),
-        $this->getApplicationURI("merchant/{$id}/"));
-      $crumbs->addTextCrumb(
-        pht('Orders'),
-        $this->getApplicationURI("merchant/orders/{$id}/"));
-    }
-
     $account = $this->account;
     if ($account) {
       $id = $account->getID();
@@ -100,8 +71,8 @@ final class PhortuneCartListController
         $account->getName(),
         $this->getApplicationURI("{$id}/"));
       $crumbs->addTextCrumb(
-        pht('Orders'),
-        $this->getApplicationURI("{$id}/order/"));
+        pht('Charges'),
+        $this->getApplicationURI("{$id}/charge/"));
     }
 
     return $crumbs;
