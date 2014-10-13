@@ -15,12 +15,7 @@ class AphrontDefaultApplicationConfiguration
   }
 
   public function getURIMap() {
-    return $this->getResourceURIMapRules() + array(
-      '/~/' => array(
-        '' => 'DarkConsoleController',
-        'data/(?P<key>[^/]+)/' => 'DarkConsoleDataController',
-      ),
-    );
+    return $this->getResourceURIMapRules();
   }
 
   protected function getResourceURIMapRules() {
