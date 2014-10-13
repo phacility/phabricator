@@ -36,9 +36,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TYPE_OBJECT_HAS_FILE            = 25;
   const TYPE_FILE_HAS_OBJECT            = 26;
 
-  const TYPE_ACCOUNT_HAS_MEMBER         = 27;
-  const TYPE_MEMBER_HAS_ACCOUNT         = 28;
-
   const TYPE_PURCAHSE_HAS_CHARGE        = 29;
   const TYPE_CHARGE_HAS_PURCHASE        = 30;
 
@@ -103,6 +100,9 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       array(9000),
       range(80000, 80005));
 
+    $exclude[] = 27; // Was TYPE_ACCOUNT_HAS_MEMBER
+    $exclude[] = 28; // Was TYPE_MEMBER_HAS_ACCOUNT
+
     $exclude[] = 43; // Was TYPE_OBJECT_HAS_COLUMN
     $exclude[] = 44; // Was TYPE_COLUMN_HAS_OBJECT
 
@@ -163,9 +163,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
       self::TYPE_OBJECT_HAS_FILE => self::TYPE_FILE_HAS_OBJECT,
       self::TYPE_FILE_HAS_OBJECT => self::TYPE_OBJECT_HAS_FILE,
-
-      self::TYPE_ACCOUNT_HAS_MEMBER => self::TYPE_MEMBER_HAS_ACCOUNT,
-      self::TYPE_MEMBER_HAS_ACCOUNT => self::TYPE_ACCOUNT_HAS_MEMBER,
 
       self::TYPE_DREV_HAS_COMMIT => self::TYPE_COMMIT_HAS_DREV,
       self::TYPE_COMMIT_HAS_DREV => self::TYPE_DREV_HAS_COMMIT,
@@ -284,10 +281,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s edited unsubcriber(s), added %d: %s; removed %d: %s.';
       case self::TYPE_OBJECT_HAS_FILE:
         return '%s edited file(s), added %d: %s; removed %d: %s.';
-      case self::TYPE_ACCOUNT_HAS_MEMBER:
-        return '%s edited member(s), added %d: %s; removed %d: %s.';
-      case self::TYPE_MEMBER_HAS_ACCOUNT:
-        return '%s edited account(s), added %d: %s; removed %d: %s.';
       case self::TYPE_PURCAHSE_HAS_CHARGE:
         return '%s edited charge(s), added %d: %s; removed %d: %s.';
       case self::TYPE_CHARGE_HAS_PURCHASE:
@@ -354,10 +347,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s added %d unsubcriber(s): %s.';
       case self::TYPE_OBJECT_HAS_FILE:
         return '%s added %d file(s): %s.';
-      case self::TYPE_ACCOUNT_HAS_MEMBER:
-        return '%s added %d member(s): %s.';
-      case self::TYPE_MEMBER_HAS_ACCOUNT:
-        return '%s added %d account(s): %s.';
       case self::TYPE_PURCAHSE_HAS_CHARGE:
         return '%s added %d charge(s): %s.';
       case self::TYPE_CHARGE_HAS_PURCHASE:
@@ -427,10 +416,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s removed %d unsubcriber(s): %s.';
       case self::TYPE_OBJECT_HAS_FILE:
         return '%s removed %d file(s): %s.';
-      case self::TYPE_ACCOUNT_HAS_MEMBER:
-        return '%s removed %d member(s): %s.';
-      case self::TYPE_MEMBER_HAS_ACCOUNT:
-        return '%s removed %d account(s): %s.';
       case self::TYPE_PURCAHSE_HAS_CHARGE:
         return '%s removed %d charge(s): %s.';
       case self::TYPE_CHARGE_HAS_PURCHASE:
@@ -496,10 +481,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s updated unsubcribers of %s.';
       case self::TYPE_OBJECT_HAS_FILE:
         return '%s updated files of %s.';
-      case self::TYPE_ACCOUNT_HAS_MEMBER:
-        return '%s updated members of %s.';
-      case self::TYPE_MEMBER_HAS_ACCOUNT:
-        return '%s updated accounts of %s.';
       case self::TYPE_PURCAHSE_HAS_CHARGE:
         return '%s updated charges of %s.';
       case self::TYPE_CHARGE_HAS_PURCHASE:

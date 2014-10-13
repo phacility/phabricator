@@ -37,31 +37,6 @@ final class PhortuneAccountTransaction
             $new);
         }
         break;
-      case PhabricatorTransactions::TYPE_EDGE:
-        switch ($this->getMetadataValue('edge:type')) {
-          case PhabricatorEdgeConfig::TYPE_ACCOUNT_HAS_MEMBER:
-            $add = array_diff(array_keys($new), array_keys($old));
-            $rem = array_diff(array_keys($old), array_keys($new));
-            if ($add && $rem) {
-              return pht(
-                '%s changed account members, added %s; removed %s.',
-                $this->renderHandleLink($author_phid),
-                $this->renderHandleList($add),
-                $this->renderHandleList($rem));
-            } else if ($add) {
-              return pht(
-                '%s added account members: %s',
-                $this->renderHandleLink($author_phid),
-                $this->renderHandleList($add));
-            } else {
-              return pht(
-                '%s removed account members: %s',
-                $this->renderHandleLink($author_phid),
-                $this->renderHandleList($add));
-            }
-            break;
-        }
-        break;
     }
 
     return parent::getTitle();

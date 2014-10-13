@@ -8,6 +8,7 @@ final class PhortuneCart extends PhortuneDAO
   const STATUS_PURCHASING = 'cart:purchasing';
   const STATUS_CHARGED = 'cart:charged';
   const STATUS_HOLD = 'cart:hold';
+  const STATUS_REVIEW = 'cart:review';
   const STATUS_PURCHASED = 'cart:purchased';
 
   protected $accountPHID;
@@ -59,6 +60,7 @@ final class PhortuneCart extends PhortuneDAO
       self::STATUS_PURCHASING => pht('Purchasing'),
       self::STATUS_CHARGED => pht('Charged'),
       self::STATUS_HOLD => pht('Hold'),
+      self::STATUS_REVIEW => pht('Review'),
       self::STATUS_PURCHASED => pht('Purchased'),
     );
   }
@@ -149,13 +151,12 @@ final class PhortuneCart extends PhortuneDAO
         $copy = clone $this;
         $copy->reload();
 
-        if ($copy->getStatus() !== self::STATUS_PURCHASING) {
+        if (($copy->getStatus() !== self::STATUS_PURCHASING) &&
+            ($copy->getStatus() !== self::STATUS_HOLD)) {
           throw new Exception(
             pht(
-              'Cart has wrong status ("%s") to call didApplyCharge(), '.
-              'expected "%s".',
-              $copy->getStatus(),
-              self::STATUS_PURCHASING));
+              'Cart has wrong status ("%s") to call didApplyCharge().',
+              $copy->getStatus()));
         }
 
         $charge->save();
@@ -164,11 +165,68 @@ final class PhortuneCart extends PhortuneDAO
       $this->endReadLocking();
     $this->saveTransaction();
 
-    foreach ($this->purchases as $purchase) {
-      $purchase->getProduct()->didPurchaseProduct($purchase);
+    // TODO: Perform purchase review. Here, we would apply rules to determine
+    // whether the charge needs manual review (maybe making the decision via
+    // Herald, configuration, or by examining provider fraud data). For now,
+    // always require review.
+    $needs_review = true;
+
+    if ($needs_review) {
+      $this->willReviewCart();
+    } else {
+      $this->didReviewCart();
     }
 
-    $this->setStatus(self::STATUS_PURCHASED)->save();
+    return $this;
+  }
+
+  public function willReviewCart() {
+    $this->openTransaction();
+      $this->beginReadLocking();
+
+        $copy = clone $this;
+        $copy->reload();
+
+        if (($copy->getStatus() !== self::STATUS_CHARGED)) {
+          throw new Exception(
+            pht(
+              'Cart has wrong status ("%s") to call willReviewCart()!',
+              $copy->getStatus()));
+        }
+
+        $this->setStatus(self::STATUS_REVIEW)->save();
+
+      $this->endReadLocking();
+    $this->saveTransaction();
+
+    // TODO: Notify merchant to review order.
+
+    return $this;
+  }
+
+  public function didReviewCart() {
+    $this->openTransaction();
+      $this->beginReadLocking();
+
+        $copy = clone $this;
+        $copy->reload();
+
+        if (($copy->getStatus() !== self::STATUS_CHARGED) &&
+            ($copy->getStatus() !== self::STATUS_REVIEW)) {
+          throw new Exception(
+            pht(
+              'Cart has wrong status ("%s") to call didReviewCart()!',
+              $copy->getStatus()));
+        }
+
+        foreach ($this->purchases as $purchase) {
+          $purchase->getProduct()->didPurchaseProduct($purchase);
+        }
+
+        $this->setStatus(self::STATUS_PURCHASED)->save();
+
+      $this->endReadLocking();
+    $this->saveTransaction();
 
     return $this;
   }
@@ -182,13 +240,12 @@ final class PhortuneCart extends PhortuneDAO
         $copy = clone $this;
         $copy->reload();
 
-        if ($copy->getStatus() !== self::STATUS_PURCHASING) {
+        if (($copy->getStatus() !== self::STATUS_PURCHASING) &&
+            ($copy->getStatus() !== self::STATUS_HOLD)) {
           throw new Exception(
             pht(
-              'Cart has wrong status ("%s") to call didFailCharge(), '.
-              'expected "%s".',
-              $copy->getStatus(),
-              self::STATUS_PURCHASING));
+              'Cart has wrong status ("%s") to call didFailCharge().',
+              $copy->getStatus()));
         }
 
         $charge->save();
@@ -294,8 +351,9 @@ final class PhortuneCart extends PhortuneDAO
       $this->endReadLocking();
     $this->saveTransaction();
 
+    $amount = $refund->getAmountAsCurrency()->negate();
     foreach ($this->purchases as $purchase) {
-      $purchase->getProduct()->didRefundProduct($purchase);
+      $purchase->getProduct()->didRefundProduct($purchase, $amount);
     }
 
     return $this;
@@ -332,6 +390,10 @@ final class PhortuneCart extends PhortuneDAO
 
   public function getDoneURI() {
     return $this->getImplementation()->getDoneURI($this);
+  }
+
+  public function getDoneActionName() {
+    return $this->getImplementation()->getDoneActionName($this);
   }
 
   public function getCancelURI() {

@@ -6,27 +6,36 @@ final class PhabricatorProjectEditIconController
   private $id;
 
   public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
+    $this->id = idx($data, 'id');
   }
 
   public function processRequest() {
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
-    $project = id(new PhabricatorProjectQuery())
-      ->setViewer($viewer)
-      ->withIDs(array($this->id))
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
-      ->executeOne();
-    if (!$project) {
-      return new Aphront404Response();
+    if ($this->id) {
+      $project = id(new PhabricatorProjectQuery())
+        ->setViewer($viewer)
+        ->withIDs(array($this->id))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+          ->executeOne();
+      if (!$project) {
+        return new Aphront404Response();
+      }
+      $cancel_uri = $this->getApplicationURI('edit/'.$project->getID().'/');
+      $project_icon = $project->getIcon();
+    } else {
+      $this->requireApplicationCapability(
+        ProjectCreateProjectsCapability::CAPABILITY);
+
+      $cancel_uri = '/project/';
+      $project_icon = $request->getStr('value');
     }
 
-    $edit_uri = $this->getApplicationURI('edit/'.$project->getID().'/');
     require_celerity_resource('project-icon-css');
     Javelin::initBehavior('phabricator-tooltips');
 
@@ -55,7 +64,7 @@ final class PhabricatorProjectEditIconController
         ),
         pht('Choose "%s" Icon', $label));
 
-      if ($icon == $project->getIcon()) {
+      if ($icon == $project_icon) {
         $class_extra = ' selected';
       } else {
         $class_extra = null;
@@ -92,6 +101,6 @@ final class PhabricatorProjectEditIconController
     return $this->newDialog()
       ->setTitle(pht('Choose Project Icon'))
       ->appendChild($buttons)
-      ->addCancelButton($edit_uri);
+      ->addCancelButton($cancel_uri);
   }
 }

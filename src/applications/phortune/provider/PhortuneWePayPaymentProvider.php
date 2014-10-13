@@ -49,8 +49,7 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
   }
 
   public function runConfigurationTest() {
-    $root = dirname(phutil_get_library_root('phabricator'));
-    require_once $root.'/externals/wepay/wepay.php';
+    $this->loadWePayAPILibraries();
 
     WePay::useStaging(
       $this->getWePayClientID(),
@@ -189,26 +188,30 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
   protected function executeRefund(
     PhortuneCharge $charge,
     PhortuneCharge $refund) {
+    $wepay = $this->loadWePayAPILibraries();
 
-    $root = dirname(phutil_get_library_root('phabricator'));
-    require_once $root.'/externals/wepay/wepay.php';
-
-    WePay::useStaging(
-      $this->getWePayClientID(),
-      $this->getWePayClientSecret());
-
-    $wepay = new WePay($this->getWePayAccessToken());
-
-    $charge_id = $charge->getMetadataValue('wepay.checkoutID');
+    $checkout_id = $this->getWePayCheckoutID($charge);
 
     $params = array(
-      'checkout_id' => $charge_id,
+      'checkout_id' => $checkout_id,
       'refund_reason' => pht('Refund'),
       'amount' => $refund->getAmountAsCurrency()->negate()->formatBareValue(),
     );
 
     $wepay->request('checkout/refund', $params);
   }
+
+  public function updateCharge(PhortuneCharge $charge) {
+    $wepay = $this->loadWePayAPILibraries();
+
+    $params = array(
+      'checkout_id' => $this->getWePayCheckoutID($charge),
+    );
+    $wepay_checkout = $wepay->request('checkout', $params);
+
+    // TODO: Deal with disputes / chargebacks / surprising refunds.
+  }
+
 
 /* -(  One-Time Payments  )-------------------------------------------------- */
 
@@ -236,6 +239,7 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
   public function processControllerRequest(
     PhortuneProviderActionController $controller,
     AphrontRequest $request) {
+    $wepay = $this->loadWePayAPILibraries();
 
     $viewer = $request->getUser();
 
@@ -243,15 +247,6 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
     if (!$cart) {
       return new Aphront404Response();
     }
-
-    $root = dirname(phutil_get_library_root('phabricator'));
-    require_once $root.'/externals/wepay/wepay.php';
-
-    WePay::useStaging(
-      $this->getWePayClientID(),
-      $this->getWePayClientSecret());
-
-    $wepay = new WePay($this->getWePayAccessToken());
 
     $charge = $controller->loadActiveCharge($cart);
     switch ($controller->getAction()) {
@@ -354,7 +349,7 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
               $cart->didApplyCharge($charge);
 
               $response = id(new AphrontRedirectResponse())->setURI(
-                 $cart->getDoneURI());
+                 $cart->getCheckoutURI());
               break;
             default:
               // It's not clear if we can ever get here on the web workflow,
@@ -388,5 +383,23 @@ final class PhortuneWePayPaymentProvider extends PhortunePaymentProvider {
       pht('Unsupported action "%s".', $controller->getAction()));
   }
 
+  private function loadWePayAPILibraries() {
+    $root = dirname(phutil_get_library_root('phabricator'));
+    require_once $root.'/externals/wepay/wepay.php';
+
+    WePay::useStaging(
+      $this->getWePayClientID(),
+      $this->getWePayClientSecret());
+
+    return new WePay($this->getWePayAccessToken());
+  }
+
+  private function getWePayCheckoutID(PhortuneCharge $charge) {
+    $checkout_id = $charge->getMetadataValue('wepay.checkoutID');
+    if ($checkout_id === null) {
+      throw new Exception(pht('No WePay Checkout ID present on charge!'));
+    }
+    return $checkout_id;
+  }
 
 }

@@ -192,6 +192,62 @@ final class PhortunePayPalPaymentProvider extends PhortunePaymentProvider {
       $result['REFUNDTRANSACTIONID']);
   }
 
+  public function updateCharge(PhortuneCharge $charge) {
+    $transaction_id = $charge->getMetadataValue('paypal.transactionID');
+    if (!$transaction_id) {
+      throw new Exception(pht('Charge has no transaction ID!'));
+    }
+
+    $params = array(
+      'TRANSACTIONID' => $transaction_id,
+    );
+
+    $result = $this
+      ->newPaypalAPICall()
+      ->setRawPayPalQuery('GetTransactionDetails', $params)
+      ->resolve();
+
+    $is_charge = false;
+    $is_fail = false;
+    switch ($result['PAYMENTSTATUS']) {
+      case 'Processed':
+      case 'Completed':
+      case 'Completed-Funds-Held':
+        $is_charge = true;
+        break;
+      case 'Partially-Refunded':
+      case 'Refunded':
+      case 'Reversed':
+      case 'Canceled-Reversal':
+        // TODO: Handle these.
+        return;
+      case 'In-Progress':
+      case 'Pending':
+        // TODO: Also handle these better?
+        return;
+      case 'Denied':
+      case 'Expired':
+      case 'Failed':
+      case 'None':
+      case 'Voided':
+      default:
+        $is_fail = true;
+        break;
+    }
+
+    if ($charge->getStatus() == PhortuneCharge::STATUS_HOLD) {
+      $cart = $charge->getCart();
+
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+        if ($is_charge) {
+          $cart->didApplyCharge($charge);
+        } else if ($is_fail) {
+          $cart->didFailCharge($charge);
+        }
+      unset($unguarded);
+    }
+  }
+
   private function getPaypalAPIUsername() {
     return $this
       ->getProviderConfig()
@@ -278,6 +334,7 @@ final class PhortunePayPalPaymentProvider extends PhortunePaymentProvider {
           'PAYMENTREQUEST_0_CURRENCYCODE'   => $price->getCurrency(),
           'PAYMENTREQUEST_0_PAYMENTACTION'  => 'Sale',
           'PAYMENTREQUEST_0_CUSTOM'         => $charge->getPHID(),
+          'PAYMENTREQUEST_0_DESC'           => $cart->getName(),
 
           'RETURNURL'                       => $return_uri,
           'CANCELURL'                       => $cancel_uri,
@@ -393,7 +450,7 @@ final class PhortunePayPalPaymentProvider extends PhortunePaymentProvider {
           if ($success) {
             $cart->didApplyCharge($charge);
             $response = id(new AphrontRedirectResponse())->setURI(
-              $cart->getDoneURI());
+              $cart->getCheckoutURI());
           } else if ($hold) {
             $cart->didHoldCharge($charge);
 
@@ -415,7 +472,7 @@ final class PhortunePayPalPaymentProvider extends PhortunePaymentProvider {
 
         return $response;
       case 'cancel':
-        if ($cart->getStatus() !== PhortuneCart::STATUS_PURCHASING) {
+        if ($cart->getStatus() === PhortuneCart::STATUS_PURCHASING) {
           $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
             // TODO: Since the user cancelled this, we could conceivably just
             // throw it away or make it more clear that it's a user cancel.

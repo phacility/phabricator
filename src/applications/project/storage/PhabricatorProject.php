@@ -45,7 +45,8 @@ final class PhabricatorProject extends PhabricatorProjectDAO
       ->setEditPolicy(PhabricatorPolicies::POLICY_USER)
       ->setJoinPolicy(PhabricatorPolicies::POLICY_USER)
       ->setIsMembershipLocked(0)
-      ->attachMemberPHIDs(array());
+      ->attachMemberPHIDs(array())
+      ->attachSlugs(array());
   }
 
   public function getCapabilities() {

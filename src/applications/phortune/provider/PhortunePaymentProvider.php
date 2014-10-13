@@ -149,7 +149,9 @@ abstract class PhortunePaymentProvider {
 
   abstract protected function executeRefund(
     PhortuneCharge $charge,
-    PhortuneCharge $charge);
+    PhortuneCharge $refund);
+
+  abstract public function updateCharge(PhortuneCharge $charge);
 
 
 /* -(  Adding Payment Methods  )--------------------------------------------- */

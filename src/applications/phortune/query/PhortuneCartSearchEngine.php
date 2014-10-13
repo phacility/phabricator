@@ -31,6 +31,8 @@ final class PhortuneCartSearchEngine
         array(
           PhortuneCart::STATUS_PURCHASING,
           PhortuneCart::STATUS_CHARGED,
+          PhortuneCart::STATUS_HOLD,
+          PhortuneCart::STATUS_REVIEW,
           PhortuneCart::STATUS_PURCHASED,
         ));
 

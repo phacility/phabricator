@@ -35,6 +35,7 @@ final class PhortuneCartViewController
       PhabricatorPolicyCapability::CAN_EDIT);
 
     $errors = array();
+    $error_view = null;
     $resume_uri = null;
     switch ($cart->getStatus()) {
       case PhortuneCart::STATUS_PURCHASING:
@@ -71,6 +72,25 @@ final class PhortuneCartViewController
             phutil_tag('strong', array(), pht('Update Status')));
         }
         break;
+      case PhortuneCart::STATUS_REVIEW:
+        if ($can_admin) {
+          $errors[] = pht(
+            'This order has been flagged for manual review. Review the order '.
+            'and choose %s to accept it or %s to reject it.',
+            phutil_tag('strong', array(), pht('Accept Order')),
+            phutil_tag('strong', array(), pht('Refund Order')));
+        } else if ($can_edit) {
+          $errors[] = pht(
+            'This order requires manual processing and will complete once '.
+            'the merchant accepts it.');
+        }
+        break;
+      case PhortuneCart::STATUS_PURCHASED:
+        $error_view = id(new AphrontErrorView())
+          ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+          ->appendChild(pht('This purchase has been completed.'));
+
+        break;
     }
 
     $properties = $this->buildPropertyListView($cart);
@@ -83,14 +103,31 @@ final class PhortuneCartViewController
 
     $header = id(new PHUIHeaderView())
       ->setUser($viewer)
-      ->setHeader(pht('Order Detail'))
-      ->setPolicyObject($cart);
+      ->setHeader(pht('Order Detail'));
+
+    if ($cart->getStatus() == PhortuneCart::STATUS_PURCHASED) {
+      $done_uri = $cart->getDoneURI();
+      if ($done_uri) {
+        $header->addActionLink(
+          id(new PHUIButtonView())
+            ->setTag('a')
+            ->setHref($done_uri)
+            ->setIcon(id(new PHUIIconView())
+              ->setIconFont('fa-check-square green'))
+            ->setText($cart->getDoneActionName()));
+      }
+    }
 
     $cart_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setFormErrors($errors)
       ->appendChild($properties)
       ->appendChild($cart_table);
+
+    if ($errors) {
+      $cart_box->setFormErrors($errors);
+    } else if ($error_view) {
+      $cart_box->setErrorView($error_view);
+    }
 
     $charges = id(new PhortuneChargeQuery())
       ->setViewer($viewer)
@@ -173,6 +210,7 @@ final class PhortuneCartViewController
     $cancel_uri = $this->getApplicationURI("cart/{$id}/cancel/");
     $refund_uri = $this->getApplicationURI("cart/{$id}/refund/");
     $update_uri = $this->getApplicationURI("cart/{$id}/update/");
+    $accept_uri = $this->getApplicationURI("cart/{$id}/accept/");
 
     $view->addAction(
       id(new PhabricatorActionView())
@@ -183,6 +221,15 @@ final class PhortuneCartViewController
         ->setHref($cancel_uri));
 
     if ($can_admin) {
+      if ($cart->getStatus() == PhortuneCart::STATUS_REVIEW) {
+        $view->addAction(
+          id(new PhabricatorActionView())
+            ->setName(pht('Accept Order'))
+            ->setIcon('fa-check')
+            ->setWorkflow(true)
+            ->setHref($accept_uri));
+      }
+
       $view->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('Refund Order'))

@@ -84,6 +84,10 @@ final class PhortuneCharge extends PhortuneDAO
     return idx(self::getStatusNameMap(), $status, pht('Unknown'));
   }
 
+  public function isRefund() {
+    return $this->getAmountAsCurrency()->negate()->isPositive();
+  }
+
   public function getStatusForDisplay() {
     if ($this->getStatus() == self::STATUS_CHARGED) {
       if ($this->getRefundedChargePHID()) {

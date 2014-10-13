@@ -63,7 +63,8 @@ final class FundInitiativeViewController
     $timeline = id(new PhabricatorApplicationTransactionView())
       ->setUser($viewer)
       ->setObjectPHID($initiative->getPHID())
-      ->setTransactions($xactions);
+      ->setTransactions($xactions)
+      ->setShouldTerminate(true);
 
     return $this->buildApplicationPage(
       array(

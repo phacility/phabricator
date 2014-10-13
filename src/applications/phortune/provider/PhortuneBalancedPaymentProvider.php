@@ -102,10 +102,7 @@ final class PhortuneBalancedPaymentProvider extends PhortunePaymentProvider {
   }
 
   public function runConfigurationTest() {
-    $root = dirname(phutil_get_library_root('phabricator'));
-    require_once $root.'/externals/httpful/bootstrap.php';
-    require_once $root.'/externals/restful/bootstrap.php';
-    require_once $root.'/externals/balanced-php/bootstrap.php';
+    $this->loadBalancedAPILibraries();
 
     // TODO: This only tests that the secret key is correct. It's not clear
     // how to test that the marketplace is correct.
@@ -140,11 +137,7 @@ final class PhortuneBalancedPaymentProvider extends PhortunePaymentProvider {
   protected function executeCharge(
     PhortunePaymentMethod $method,
     PhortuneCharge $charge) {
-
-    $root = dirname(phutil_get_library_root('phabricator'));
-    require_once $root.'/externals/httpful/bootstrap.php';
-    require_once $root.'/externals/restful/bootstrap.php';
-    require_once $root.'/externals/balanced-php/bootstrap.php';
+    $this->loadBalancedAPILibraries();
 
     $price = $charge->getAmountAsCurrency();
 
@@ -182,11 +175,7 @@ final class PhortuneBalancedPaymentProvider extends PhortunePaymentProvider {
   protected function executeRefund(
     PhortuneCharge $charge,
     PhortuneCharge $refund) {
-
-    $root = dirname(phutil_get_library_root('phabricator'));
-    require_once $root.'/externals/httpful/bootstrap.php';
-    require_once $root.'/externals/restful/bootstrap.php';
-    require_once $root.'/externals/balanced-php/bootstrap.php';
+    $this->loadBalancedAPILibraries();
 
     $debit_uri = $charge->getMetadataValue('balanced.debitURI');
     if (!$debit_uri) {
@@ -212,6 +201,24 @@ final class PhortuneBalancedPaymentProvider extends PhortunePaymentProvider {
 
     $refund->setMetadataValue('balanced.refundURI', $balanced_refund->uri);
     $refund->save();
+  }
+
+  public function updateCharge(PhortuneCharge $charge) {
+    $this->loadBalancedAPILibraries();
+
+    $debit_uri = $charge->getMetadataValue('balanced.debitURI');
+    if (!$debit_uri) {
+      throw new Exception(pht('No Balanced debit URI!'));
+    }
+
+    try {
+      Balanced\Settings::$api_key = $this->getSecretKey();
+      $balanced_debit = Balanced\Debit::get($debit_uri);
+    } catch (RESTful\Exceptions\HTTPError $error) {
+      throw new Exception($error->response->body->description);
+    }
+
+    // TODO: Deal with disputes / chargebacks / surprising refunds.
   }
 
   private function getMarketplaceID() {
@@ -255,13 +262,9 @@ final class PhortuneBalancedPaymentProvider extends PhortunePaymentProvider {
     AphrontRequest $request,
     PhortunePaymentMethod $method,
     array $token) {
+    $this->loadBalancedAPILibraries();
 
     $errors = array();
-
-    $root = dirname(phutil_get_library_root('phabricator'));
-    require_once $root.'/externals/httpful/bootstrap.php';
-    require_once $root.'/externals/restful/bootstrap.php';
-    require_once $root.'/externals/balanced-php/bootstrap.php';
 
     $account_phid = $method->getAccountPHID();
     $author_phid = $method->getAuthorPHID();
@@ -355,6 +358,13 @@ final class PhortuneBalancedPaymentProvider extends PhortunePaymentProvider {
 
 
     return null;
+  }
+
+  private function loadBalancedAPILibraries() {
+    $root = dirname(phutil_get_library_root('phabricator'));
+    require_once $root.'/externals/httpful/bootstrap.php';
+    require_once $root.'/externals/restful/bootstrap.php';
+    require_once $root.'/externals/balanced-php/bootstrap.php';
   }
 
 }

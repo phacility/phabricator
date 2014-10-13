@@ -85,7 +85,7 @@ final class PHUIObjectBoxView extends AphrontView {
   }
 
   public function setFormErrors(array $errors, $title = null) {
-    if (nonempty($errors)) {
+    if ($errors) {
       $this->formErrors = id(new AphrontErrorView())
         ->setTitle($title)
         ->setErrors($errors);

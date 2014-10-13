@@ -30,7 +30,8 @@ abstract class PhortuneProductImplementation {
 
   public function didRefundProduct(
     PhortuneProduct $product,
-    PhortunePurchase $purchase) {
+    PhortunePurchase $purchase,
+    PhortuneCurrency $amount) {
     return;
   }
 
