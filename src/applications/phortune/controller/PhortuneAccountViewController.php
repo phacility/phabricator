@@ -267,14 +267,10 @@ final class PhortuneAccountViewController extends PhortuneController {
       ->withObjectPHIDs(array($account->getPHID()))
       ->execute();
 
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($user);
-
     $xaction_view = id(new PhabricatorApplicationTransactionView())
       ->setUser($user)
       ->setObjectPHID($account->getPHID())
-      ->setTransactions($xactions)
-      ->setMarkupEngine($engine);
+      ->setTransactions($xactions);
 
     return $xaction_view;
   }

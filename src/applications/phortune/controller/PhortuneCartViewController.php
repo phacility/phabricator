@@ -160,11 +160,23 @@ final class PhortuneCartViewController
     $this->addAccountCrumb($crumbs, $cart->getAccount());
     $crumbs->addTextCrumb(pht('Cart %d', $cart->getID()));
 
+    $xactions = id(new PhortuneCartTransactionQuery())
+      ->setViewer($viewer)
+      ->withObjectPHIDs(array($cart->getPHID()))
+      ->execute();
+
+    $xaction_view = id(new PhabricatorApplicationTransactionView())
+      ->setUser($viewer)
+      ->setObjectPHID($cart->getPHID())
+      ->setTransactions($xactions)
+      ->setShouldTerminate(true);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $cart_box,
         $charges,
+        $xaction_view,
       ),
       array(
         'title' => pht('Cart'),

@@ -70,7 +70,26 @@ final class PhortuneCart extends PhortuneDAO
   }
 
   public function activateCart() {
-    $this->setStatus(self::STATUS_READY)->save();
+    $this->openTransaction();
+      $this->beginReadLocking();
+
+        $copy = clone $this;
+        $copy->reload();
+
+        if ($copy->getStatus() !== self::STATUS_BUILDING) {
+          throw new Exception(
+            pht(
+              'Cart has wrong status ("%s") to call willApplyCharge().',
+              $copy->getStatus()));
+        }
+
+        $this->setStatus(self::STATUS_READY)->save();
+
+      $this->endReadLocking();
+    $this->saveTransaction();
+
+    $this->recordCartTransaction(PhortuneCartTransaction::TYPE_CREATED);
+
     return $this;
   }
 
@@ -140,6 +159,8 @@ final class PhortuneCart extends PhortuneDAO
 
       $this->endReadLocking();
     $this->saveTransaction();
+
+    $this->recordCartTransaction(PhortuneCartTransaction::TYPE_HOLD);
   }
 
   public function didApplyCharge(PhortuneCharge $charge) {
@@ -199,7 +220,7 @@ final class PhortuneCart extends PhortuneDAO
       $this->endReadLocking();
     $this->saveTransaction();
 
-    // TODO: Notify merchant to review order.
+    $this->recordCartTransaction(PhortuneCartTransaction::TYPE_REVIEW);
 
     return $this;
   }
@@ -227,6 +248,8 @@ final class PhortuneCart extends PhortuneDAO
 
       $this->endReadLocking();
     $this->saveTransaction();
+
+    $this->recordCartTransaction(PhortuneCartTransaction::TYPE_PURCHASED);
 
     return $this;
   }
@@ -382,6 +405,30 @@ final class PhortuneCart extends PhortuneDAO
 
       $this->endReadLocking();
     $this->saveTransaction();
+  }
+
+  private function recordCartTransaction($type) {
+    $omnipotent_user = PhabricatorUser::getOmnipotentUser();
+    $phortune_phid = id(new PhabricatorPhortuneApplication())->getPHID();
+
+    $xactions = array();
+
+    $xactions[] = id(new PhortuneCartTransaction())
+      ->setTransactionType($type)
+      ->setNewValue(true);
+
+    $content_source = PhabricatorContentSource::newForSource(
+      PhabricatorContentSource::SOURCE_PHORTUNE,
+      array());
+
+    $editor = id(new PhortuneCartEditor())
+      ->setActor($omnipotent_user)
+      ->setActingAsPHID($phortune_phid)
+      ->setContentSource($content_source)
+      ->setContinueOnMissingFields(true)
+      ->setContinueOnNoEffect(true);
+
+    $editor->applyTransactions($this, $xactions);
   }
 
   public function getName() {
