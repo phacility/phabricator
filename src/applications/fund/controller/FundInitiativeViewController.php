@@ -78,6 +78,7 @@ final class FundInitiativeViewController
       ),
       array(
         'title' => $title,
+        'pageObjects' => array($initiative->getPHID()),
       ));
   }
 
