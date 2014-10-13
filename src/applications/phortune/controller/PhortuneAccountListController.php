@@ -18,11 +18,7 @@ final class PhortuneAccountListController extends PhortuneController {
 
     $merchants = id(new PhortuneMerchantQuery())
       ->setViewer($viewer)
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
+      ->withMemberPHIDs(array($viewer->getPHID()))
       ->execute();
 
     $title = pht('Accounts');
