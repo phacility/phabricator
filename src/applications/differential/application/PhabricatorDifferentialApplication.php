@@ -67,6 +67,8 @@ EOTEXT
           => 'DifferentialRevisionEditController',
         'revision/land/(?:(?P<id>[1-9]\d*))/(?P<strategy>[^/]+)/'
           => 'DifferentialRevisionLandController',
+        'revision/closedetails/(?P<phid>[^/]+)/'
+          => 'DifferentialRevisionCloseDetailsController',
         'comment/' => array(
           'preview/(?P<id>[1-9]\d*)/' => 'DifferentialCommentPreviewController',
           'save/(?P<id>[1-9]\d*)/' => 'DifferentialCommentSaveController',
