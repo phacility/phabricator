@@ -27,24 +27,6 @@ final class PhortuneAccountQuery
     return $accounts;
   }
 
-  public static function loadActiveAccountForUser(
-    PhabricatorUser $user,
-    PhabricatorContentSource $content_source) {
-
-    $accounts = id(new PhortuneAccountQuery())
-      ->setViewer($user)
-      ->withMemberPHIDs(array($user->getPHID()))
-      ->execute();
-
-    if (!$accounts) {
-      return PhortuneAccount::createNewAccount($user, $content_source);
-    } else if (count($accounts) == 1) {
-      return head($accounts);
-    } else {
-      throw new Exception('TODO: No account selection yet.');
-    }
-  }
-
   public function withIDs(array $ids) {
     $this->ids = $ids;
     return $this;

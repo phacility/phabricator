@@ -16,7 +16,6 @@ final class PhortuneProductViewController extends PhortuneController {
       ->setViewer($user)
       ->withIDs(array($this->productID))
       ->executeOne();
-
     if (!$product) {
       return new Aphront404Response();
     }
@@ -26,11 +25,7 @@ final class PhortuneProductViewController extends PhortuneController {
     $header = id(new PHUIHeaderView())
       ->setHeader($product->getProductName());
 
-    $account = $this->loadActiveAccount($user);
-
     $edit_uri = $this->getApplicationURI('product/edit/'.$product->getID().'/');
-    $cart_uri = $this->getApplicationURI(
-      $account->getID().'/buy/'.$product->getID().'/');
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($user)

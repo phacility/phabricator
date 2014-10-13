@@ -2,12 +2,6 @@
 
 abstract class PhortuneController extends PhabricatorController {
 
-  protected function loadActiveAccount(PhabricatorUser $user) {
-    return PhortuneAccountQuery::loadActiveAccountForUser(
-      $user,
-      PhabricatorContentSource::newFromRequest($this->getRequest()));
-  }
-
   protected function buildChargesTable(array $charges, $show_cart = true) {
     $request = $this->getRequest();
     $viewer = $request->getUser();
