@@ -63,7 +63,11 @@ final class DifferentialReviewersField
   }
 
   public function getRequiredHandlePHIDsForEdit() {
-    return mpull($this->getValue(), 'getReviewerPHID');
+    $phids = array();
+    if ($this->getValue()) {
+      $phids = mpull($this->getValue(), 'getReviewerPHID');
+    }
+    return $phids;
   }
 
   public function renderEditControl(array $handles) {
