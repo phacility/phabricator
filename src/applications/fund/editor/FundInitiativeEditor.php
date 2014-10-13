@@ -104,6 +104,8 @@ final class FundInitiativeEditor
         return;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
       case PhabricatorTransactions::TYPE_EDGE:
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+      case PhabricatorTransactions::TYPE_EDIT_POLICY:
         return;
     }
 
@@ -156,6 +158,8 @@ final class FundInitiativeEditor
         return;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
       case PhabricatorTransactions::TYPE_EDGE:
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+      case PhabricatorTransactions::TYPE_EDIT_POLICY:
         return;
     }
 
