@@ -46,9 +46,6 @@ final class PhabricatorProjectEditDetailsController
       ->setViewer($viewer)
       ->readFieldsFromStorage($project);
 
-    $view_uri = $this->getApplicationURI('view/'.$project->getID().'/');
-    $edit_uri = $this->getApplicationURI('edit/'.$project->getID().'/');
-
     $e_name = true;
     $e_slugs = false;
     $e_edit = null;
@@ -151,9 +148,11 @@ final class PhabricatorProjectEditDetailsController
         }
 
         if ($is_new) {
-          $redirect_uri = $view_uri;
+          $redirect_uri =
+            $this->getApplicationURI('view/'.$project->getID().'/');
         } else {
-          $redirect_uri = $edit_uri;
+          $redirect_uri =
+            $this->getApplicationURI('edit/'.$project->getID().'/');
         }
 
         return id(new AphrontRedirectResponse())->setURI($redirect_uri);
@@ -288,7 +287,7 @@ final class PhabricatorProjectEditDetailsController
 
     $form->appendChild(
       id(new AphrontFormSubmitControl())
-      ->addCancelButton($edit_uri)
+      ->addCancelButton($this->getApplicationURI())
       ->setValue(pht('Save')));
 
     $form_box = id(new PHUIObjectBoxView())
@@ -301,8 +300,10 @@ final class PhabricatorProjectEditDetailsController
       $crumbs->addTextCrumb($title);
     } else {
       $crumbs
-        ->addTextCrumb($project->getName(), $view_uri)
-        ->addTextCrumb(pht('Edit'), $edit_uri)
+        ->addTextCrumb($project->getName(),
+          $this->getApplicationURI('view/'.$project->getID().'/'))
+        ->addTextCrumb(pht('Edit'),
+          $this->getApplicationURI('edit/'.$project->getID().'/'))
         ->addTextCrumb(pht('Details'));
     }
 
