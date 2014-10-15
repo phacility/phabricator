@@ -3,7 +3,6 @@
 final class PhabricatorRepositoryCommitHeraldWorker
   extends PhabricatorRepositoryCommitParserWorker {
 
-  const MAX_FILES_SHOWN_IN_EMAIL = 1000;
 
   public function getRequiredLeaseTime() {
     // Herald rules may take a long time to process.
@@ -14,34 +13,14 @@ final class PhabricatorRepositoryCommitHeraldWorker
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
-    $result = $this->applyHeraldRules($repository, $commit);
-
-    $commit->writeImportStatusFlag(
-      PhabricatorRepositoryCommit::IMPORTED_HERALD);
-
-    return $result;
-  }
-
-  private function applyHeraldRules(
-    PhabricatorRepository $repository,
-    PhabricatorRepositoryCommit $commit) {
-
-    $commit->attachRepository($repository);
-
-    // Don't take any actions on an importing repository. Principally, this
-    // avoids generating thousands of audits or emails when you import an
-    // established repository on an existing install.
-    if ($repository->isImporting()) {
-      return;
-    }
-
-    if ($repository->getDetail('herald-disabled')) {
-      return;
-    }
-
-    $data = id(new PhabricatorRepositoryCommitData())->loadOneWhere(
-      'commitID = %d',
-      $commit->getID());
+    // Reload the commit to pull commit data and audit requests.
+    $commit = id(new DiffusionCommitQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withIDs(array($commit->getID()))
+      ->needCommitData(true)
+      ->needAuditRequests(true)
+      ->executeOne();
+    $data = $commit->getCommitData();
 
     if (!$data) {
       throw new PhabricatorWorkerPermanentFailureException(
@@ -50,402 +29,44 @@ final class PhabricatorRepositoryCommitHeraldWorker
           'or no longer exists.'));
     }
 
-    $adapter = id(new HeraldCommitAdapter())
-      ->setCommit($commit);
+    $commit->attachRepository($repository);
 
-    $rules = id(new HeraldRuleQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withContentTypes(array($adapter->getAdapterContentType()))
-      ->withDisabled(false)
-      ->needConditionsAndActions(true)
-      ->needAppliedToPHIDs(array($adapter->getPHID()))
-      ->needValidateAuthors(true)
-      ->execute();
-
-    $engine = new HeraldEngine();
-
-    $effects = $engine->applyRules($rules, $adapter);
-    $engine->applyEffects($effects, $adapter, $rules);
-    $xscript = $engine->getTranscript();
-
-    $audit_phids = $adapter->getAuditMap();
-    $cc_phids = $adapter->getAddCCMap();
-    if ($audit_phids || $cc_phids) {
-      $this->createAudits($commit, $audit_phids, $cc_phids, $rules);
-    }
-
-    HarbormasterBuildable::applyBuildPlans(
-      $commit->getPHID(),
-      $repository->getPHID(),
-      $adapter->getBuildPlans());
-
-    $explicit_auditors = $this->createAuditsFromCommitMessage($commit, $data);
-
-    $this->publishFeedStory($repository, $commit, $data);
-
-    $herald_targets = $adapter->getEmailPHIDs();
-
-    $email_phids = array_unique(
-      array_merge(
-        $explicit_auditors,
-        array_keys($cc_phids),
-        $herald_targets));
-    if (!$email_phids) {
-      return;
-    }
-
-    $revision = $adapter->loadDifferentialRevision();
-    if ($revision) {
-      $name = $revision->getTitle();
-    } else {
-      $name = $data->getSummary();
-    }
-
-    $author_phid = $data->getCommitDetail('authorPHID');
-    $reviewer_phid = $data->getCommitDetail('reviewerPHID');
-
-    $phids = array_filter(
-      array(
-        $author_phid,
-        $reviewer_phid,
-        $commit->getPHID(),
-      ));
-
-    $handles = id(new PhabricatorHandleQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withPHIDs($phids)
-      ->execute();
-
-    $commit_handle = $handles[$commit->getPHID()];
-    $commit_name = $commit_handle->getName();
-
-    if ($author_phid) {
-      $author_name = $handles[$author_phid]->getName();
-    } else {
-      $author_name = $data->getAuthorName();
-    }
-
-    if ($reviewer_phid) {
-      $reviewer_name = $handles[$reviewer_phid]->getName();
-    } else {
-      $reviewer_name = null;
-    }
-
-    $who = implode(', ', array_filter(array($author_name, $reviewer_name)));
-
-    $description = $data->getCommitMessage();
-
-    $commit_uri = PhabricatorEnv::getProductionURI($commit_handle->getURI());
-    $differential = $revision
-      ? PhabricatorEnv::getProductionURI('/D'.$revision->getID())
-      : 'No revision.';
-
-    $limit = self::MAX_FILES_SHOWN_IN_EMAIL;
-    $files = $adapter->loadAffectedPaths();
-    sort($files);
-    if (count($files) > $limit) {
-      array_splice($files, $limit);
-      $files[] = '(This commit affected more than '.$limit.' files. '.
-        'Only '.$limit.' are shown here and additional ones are truncated.)';
-    }
-    $files = implode("\n", $files);
-
-    $xscript_id = $xscript->getID();
-
-    $why_uri = '/herald/transcript/'.$xscript_id.'/';
-
-    $reply_handler = PhabricatorAuditCommentEditor::newReplyHandlerForCommit(
-      $commit);
-
-    $template = new PhabricatorMetaMTAMail();
-
-    $inline_patch_text = $this->buildPatch($template, $repository, $commit);
-
-    $body = new PhabricatorMetaMTAMailBody();
-    $body->addRawSection($description);
-    $body->addTextSection(pht('DETAILS'), $commit_uri);
-
-    // TODO: This should be integrated properly once we move to
-    // ApplicationTransactions.
-    $field_list = PhabricatorCustomField::getObjectFields(
-      $commit,
-      PhabricatorCustomField::ROLE_APPLICATIONTRANSACTIONS);
-    $field_list
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->readFieldsFromStorage($commit);
-    foreach ($field_list->getFields() as $field) {
-      try {
-        $field->buildApplicationTransactionMailBody(
-          new DifferentialTransaction(), // Bogus object to satisfy typehint.
-          $body);
-      } catch (Exception $ex) {
-        // Log the exception and continue.
-        phlog($ex);
-      }
-    }
-
-    $body->addTextSection(pht('DIFFERENTIAL REVISION'), $differential);
-    $body->addTextSection(pht('AFFECTED FILES'), $files);
-    $body->addReplySection($reply_handler->getReplyHandlerInstructions());
-    $body->addHeraldSection($why_uri);
-    $body->addRawSection($inline_patch_text);
-    $body = $body->render();
-
-    $prefix = PhabricatorEnv::getEnvConfig('metamta.diffusion.subject-prefix');
-
-    $threading = PhabricatorAuditCommentEditor::getMailThreading(
-      $repository,
-      $commit);
-    list($thread_id, $thread_topic) = $threading;
-
-    $template->setRelatedPHID($commit->getPHID());
-    $template->setSubject("{$commit_name}: {$name}");
-    $template->setSubjectPrefix($prefix);
-    $template->setVarySubjectPrefix('[Commit]');
-    $template->setBody($body);
-    $template->setThreadID($thread_id, $is_new = true);
-    $template->addHeader('Thread-Topic', $thread_topic);
-    $template->setIsBulk(true);
-
-    $template->addHeader('X-Herald-Rules', $xscript->getXHeraldRulesHeader());
-    if ($author_phid) {
-      $template->setFrom($author_phid);
-    }
-
-    // TODO: We should verify that each recipient can actually see the
-    // commit before sending them email (T603).
-
-    $mails = $reply_handler->multiplexMail(
-      $template,
-      id(new PhabricatorHandleQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withPHIDs($email_phids)
-      ->execute(),
+    $content_source = PhabricatorContentSource::newForSource(
+      PhabricatorContentSource::SOURCE_DAEMON,
       array());
 
-    foreach ($mails as $mail) {
-      $mail->saveAndSend();
-    }
-  }
-
-  private function createAudits(
-    PhabricatorRepositoryCommit $commit,
-    array $map,
-    array $ccmap,
-    array $rules) {
-    assert_instances_of($rules, 'HeraldRule');
-
-    $requests = id(new PhabricatorRepositoryAuditRequest())->loadAllWhere(
-      'commitPHID = %s',
-      $commit->getPHID());
-    $requests = mpull($requests, null, 'getAuditorPHID');
-
-    $rules = mpull($rules, null, 'getID');
-
-    $maps = array(
-      PhabricatorAuditStatusConstants::AUDIT_REQUIRED => $map,
-    );
-
-    foreach ($maps as $status => $map) {
-      foreach ($map as $phid => $rule_ids) {
-        $request = idx($requests, $phid);
-        if ($request) {
-          continue;
-        }
-        $reasons = array();
-        foreach ($rule_ids as $id) {
-          $rule_name = '?';
-          if ($rules[$id]) {
-            $rule_name = $rules[$id]->getName();
-          }
-          if ($status == PhabricatorAuditStatusConstants::AUDIT_REQUIRED) {
-            $reasons[] = pht(
-              '%s Triggered Audit',
-              "H{$id} {$rule_name}");
-          } else {
-            $reasons[] = pht(
-              '%s Triggered CC',
-              "H{$id} {$rule_name}");
-          }
-        }
-
-        $request = new PhabricatorRepositoryAuditRequest();
-        $request->setCommitPHID($commit->getPHID());
-        $request->setAuditorPHID($phid);
-        $request->setAuditStatus($status);
-        $request->setAuditReasons($reasons);
-        $request->save();
-      }
-    }
-
-    $commit->updateAuditStatus($requests);
-    $commit->save();
-
-    if ($ccmap) {
-      id(new PhabricatorSubscriptionsEditor())
-        ->setActor(PhabricatorUser::getOmnipotentUser())
-        ->setObject($commit)
-        ->subscribeExplicit(array_keys($ccmap))
-        ->save();
-    }
-  }
-
-
-  /**
-   * Find audit requests in the "Auditors" field if it is present and trigger
-   * explicit audit requests.
-   */
-  private function createAuditsFromCommitMessage(
-    PhabricatorRepositoryCommit $commit,
-    PhabricatorRepositoryCommitData $data) {
-
-    $message = $data->getCommitMessage();
-
-    $matches = null;
-    if (!preg_match('/^Auditors:\s*(.*)$/im', $message, $matches)) {
-      return array();
-    }
-
-    $phids = id(new PhabricatorObjectListQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->setAllowPartialResults(true)
-      ->setAllowedTypes(
-        array(
-          PhabricatorPeopleUserPHIDType::TYPECONST,
-          PhabricatorProjectProjectPHIDType::TYPECONST,
-        ))
-      ->setObjectList($matches[1])
-      ->execute();
-
-    if (!$phids) {
-      return array();
-    }
-
-    $requests = id(new PhabricatorRepositoryAuditRequest())->loadAllWhere(
-      'commitPHID = %s',
-      $commit->getPHID());
-    $requests = mpull($requests, null, 'getAuditorPHID');
-
-    foreach ($phids as $phid) {
-      if (isset($requests[$phid])) {
-        continue;
-      }
-
-      $request = new PhabricatorRepositoryAuditRequest();
-      $request->setCommitPHID($commit->getPHID());
-      $request->setAuditorPHID($phid);
-      $request->setAuditStatus(
-        PhabricatorAuditStatusConstants::AUDIT_REQUESTED);
-      $request->setAuditReasons(
-        array(
-          'Requested by Author',
-        ));
-      $request->save();
-
-      $requests[$phid] = $request;
-    }
-
-    $commit->updateAuditStatus($requests);
-    $commit->save();
-
-    return $phids;
-  }
-
-  private function publishFeedStory(
-    PhabricatorRepository $repository,
-    PhabricatorRepositoryCommit $commit,
-    PhabricatorRepositoryCommitData $data) {
-
-    if (time() > $commit->getEpoch() + (24 * 60 * 60)) {
-      // Don't publish stories that are more than 24 hours old, to avoid
-      // ridiculous levels of feed spam if a repository is imported without
-      // disabling feed publishing.
-      return;
-    }
-
-    $author_phid = $commit->getAuthorPHID();
     $committer_phid = $data->getCommitDetail('committerPHID');
+    $author_phid = $data->getCommitDetail('authorPHID');
+    $acting_as_phid = nonempty(
+      $committer_phid,
+      $author_phid,
+      id(new PhabricatorDiffusionApplication())->getPHID());
 
-    $publisher = new PhabricatorFeedStoryPublisher();
-    $publisher->setStoryType(PhabricatorFeedStoryTypeConstants::STORY_COMMIT);
-    $publisher->setStoryData(
-      array(
-        'commitPHID'    => $commit->getPHID(),
+    $editor = id(new PhabricatorAuditEditor())
+      ->setActor(PhabricatorUser::getOmnipotentUser())
+      ->setActingAsPHID($acting_as_phid)
+      ->setContentSource($content_source);
+
+    $xactions = array();
+    $xactions[] = id(new PhabricatorAuditTransaction())
+      ->setTransactionType(PhabricatorAuditTransaction::TYPE_COMMIT)
+      ->setDateCreated($commit->getEpoch())
+      ->setNewValue(array(
+        'description'   => $data->getCommitMessage(),
         'summary'       => $data->getSummary(),
         'authorName'    => $data->getAuthorName(),
-        'authorPHID'    => $author_phid,
+        'authorPHID'    => $commit->getAuthorPHID(),
         'committerName' => $data->getCommitDetail('committer'),
-        'committerPHID' => $committer_phid,
+        'committerPHID' => $data->getCommitDetail('committerPHID'),
       ));
-    $publisher->setStoryTime($commit->getEpoch());
-    $publisher->setRelatedPHIDs(
-      array_filter(
-        array(
-          $author_phid,
-          $committer_phid,
-        )));
-    if ($author_phid) {
-      $publisher->setStoryAuthorPHID($author_phid);
-    }
-    $publisher->publish();
-  }
-
-  private function buildPatch(
-    PhabricatorMetaMTAMail $template,
-    PhabricatorRepository $repository,
-    PhabricatorRepositoryCommit $commit) {
-
-    $attach_key = 'metamta.diffusion.attach-patches';
-    $inline_key = 'metamta.diffusion.inline-patches';
-
-    $attach_patches = PhabricatorEnv::getEnvConfig($attach_key);
-    $inline_patches = PhabricatorEnv::getEnvConfig($inline_key);
-
-    if (!$attach_patches && !$inline_patches) {
-      return;
-    }
-
-    $encoding = $repository->getDetail('encoding', 'UTF-8');
-
-    $result = null;
-    $patch_error = null;
-
     try {
       $raw_patch = $this->loadRawPatchText($repository, $commit);
-      if ($attach_patches) {
-        $commit_name = $repository->formatCommitName(
-          $commit->getCommitIdentifier());
-
-        $template->addAttachment(
-          new PhabricatorMetaMTAAttachment(
-            $raw_patch,
-            $commit_name.'.patch',
-            'text/x-patch; charset='.$encoding));
-      }
     } catch (Exception $ex) {
       phlog($ex);
-      $patch_error = 'Unable to generate: '.$ex->getMessage();
+      $raw_patch = pht('Unable to generate patch: %s', $ex->getMessage());
     }
-
-    if ($patch_error) {
-      $result = $patch_error;
-    } else if ($inline_patches) {
-      $len = substr_count($raw_patch, "\n");
-      if ($len <= $inline_patches) {
-        // We send email as utf8, so we need to convert the text to utf8 if
-        // we can.
-        if ($encoding) {
-          $raw_patch = phutil_utf8_convert($raw_patch, 'UTF-8', $encoding);
-        }
-        $result = phutil_utf8ize($raw_patch);
-      }
-    }
-
-    if ($result) {
-      $result = "PATCH\n\n{$result}\n";
-    }
-
-    return $result;
+    $editor->setRawPatch($raw_patch);
+    return $editor->applyTransactions($commit, $xactions);
   }
 
   private function loadRawPatchText(

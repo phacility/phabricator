@@ -3,6 +3,8 @@
 final class PhabricatorAuditTransaction
   extends PhabricatorApplicationTransaction {
 
+  const TYPE_COMMIT = 'audit:commit';
+
   public function getApplicationName() {
     return 'audit';
   }
@@ -15,12 +17,35 @@ final class PhabricatorAuditTransaction
     return new PhabricatorAuditTransactionComment();
   }
 
+  public function getRemarkupBlocks() {
+    $blocks = parent::getRemarkupBlocks();
+
+    switch ($this->getTransactionType()) {
+    case self::TYPE_COMMIT:
+      $data = $this->getNewValue();
+      $blocks[] = $data['description'];
+      break;
+    }
+
+    return $blocks;
+  }
+
   public function getRequiredHandlePHIDs() {
     $phids = parent::getRequiredHandlePHIDs();
 
     $type = $this->getTransactionType();
 
     switch ($type) {
+      case self::TYPE_COMMIT:
+        $phids[] = $this->getObjectPHID();
+        $data = $this->getNewValue();
+        if ($data['authorPHID']) {
+          $phids[] = $data['authorPHID'];
+        }
+        if ($data['committerPHID']) {
+          $phids[] = $data['committerPHID'];
+        }
+        break;
       case PhabricatorAuditActionConstants::ADD_CCS:
       case PhabricatorAuditActionConstants::ADD_AUDITORS:
         $old = $this->getOldValue();
@@ -59,6 +84,8 @@ final class PhabricatorAuditTransaction
         break;
       case PhabricatorAuditActionConstants::ADD_AUDITORS:
         return pht('Added Auditors');
+      case self::TYPE_COMMIT:
+        return pht('Committed');
     }
 
     return parent::getActionName();
@@ -104,10 +131,47 @@ final class PhabricatorAuditTransaction
     }
 
     switch ($type) {
+      case self::TYPE_COMMIT:
+        $author = null;
+        if ($new['authorPHID']) {
+          $author = $this->renderHandleLink($new['authorPHID']);
+        } else {
+          $author = $new['authorName'];
+        }
+
+        $committer = null;
+        if ($new['committerPHID']) {
+          $committer = $this->renderHandleLink($new['committerPHID']);
+        } else if ($new['committerName']) {
+          $committer = $new['committerName'];
+        }
+
+        $commit = $this->renderHandleLink($this->getObjectPHID());
+
+        if (!$committer) {
+          $committer = $author;
+          $author = null;
+        }
+
+        if ($author) {
+          $title = pht(
+            '%s committed %s (authored by %s).',
+            $committer,
+            $commit,
+            $author);
+        } else {
+          $title = pht(
+            '%s committed %s.',
+            $committer,
+            $commit);
+        }
+        return $title;
+
       case PhabricatorAuditActionConstants::INLINE:
         return pht(
           '%s added inline comments.',
           $author_handle);
+
       case PhabricatorAuditActionConstants::ADD_CCS:
         if ($add && $rem) {
           return pht(
@@ -203,6 +267,40 @@ final class PhabricatorAuditTransaction
     }
 
     switch ($type) {
+      case self::TYPE_COMMIT:
+        $author = null;
+        if ($new['authorPHID']) {
+          $author = $this->renderHandleLink($new['authorPHID']);
+        } else {
+          $author = $new['authorName'];
+        }
+
+        $committer = null;
+        if ($new['committerPHID']) {
+          $committer = $this->renderHandleLink($new['committerPHID']);
+        } else if ($new['committerName']) {
+          $committer = $new['committerName'];
+        }
+
+        if (!$committer) {
+          $committer = $author;
+          $author = null;
+        }
+
+        if ($author) {
+          $title = pht(
+            '%s committed %s (authored by %s).',
+            $committer,
+            $object_handle,
+            $author);
+        } else {
+          $title = pht(
+            '%s committed %s.',
+            $committer,
+            $object_handle);
+        }
+        return $title;
+
       case PhabricatorAuditActionConstants::INLINE:
         return pht(
           '%s added inline comments to %s.',
@@ -265,6 +363,15 @@ final class PhabricatorAuditTransaction
     return parent::getTitleForFeed($story);
   }
 
+  public function getBodyForFeed(PhabricatorFeedStory $story) {
+    switch ($this->getTransactionType()) {
+      case self::TYPE_COMMIT:
+        $data = $this->getNewValue();
+        return $story->renderSummary($data['summary']);
+    }
+    return parent::getBodyForFeed($story);
+  }
+
 
   // TODO: These two mail methods can likely be abstracted by introducing a
   // formal concept of "inline comment" transactions.
@@ -288,6 +395,9 @@ final class PhabricatorAuditTransaction
     switch ($this->getTransactionType()) {
       case PhabricatorAuditActionConstants::INLINE:
         return null;
+      case self::TYPE_COMMIT:
+        $data = $this->getNewValue();
+        return $data['description'];
     }
 
     return parent::getBodyForMail();
