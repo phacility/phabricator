@@ -47,22 +47,26 @@ final class DifferentialRevisionIDField
     $this->revisionID = $value;
   }
 
-  private static function parseRevisionIDFromURI($uri) {
-    $path = id(new PhutilURI($uri))->getPath();
+  private static function parseRevisionIDFromURI($uri_string) {
+    $uri = new PhutilURI($uri_string);
+    $path = $uri->getPath();
 
     $matches = null;
     if (preg_match('#^/D(\d+)$#', $path, $matches)) {
       $id = (int)$matches[1];
+
+      $prod_uri = new PhutilURI(PhabricatorEnv::getProductionURI('/D'.$id));
+
       // Make sure the URI is the same as our URI. Basically, we want to ignore
       // commits from other Phabricator installs.
-      if ($uri == PhabricatorEnv::getProductionURI('/D'.$id)) {
+      if ($uri->getDomain() == $prod_uri->getDomain()) {
         return $id;
       }
 
       $allowed_uris = PhabricatorEnv::getAllowedURIs('/D'.$id);
 
       foreach ($allowed_uris as $allowed_uri) {
-        if ($uri == $allowed_uri) {
+        if ($uri_string == $allowed_uri) {
           return $id;
         }
       }

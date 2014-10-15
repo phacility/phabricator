@@ -7,6 +7,10 @@ final class FundBackerListController
   private $queryKey;
   private $initiative;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function willProcessRequest(array $data) {
     $this->id = idx($data, 'id');
     $this->queryKey = idx($data, 'queryKey');

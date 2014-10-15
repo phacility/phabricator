@@ -306,6 +306,22 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
     return parent::getTitle();
   }
 
+  public function renderExtraInformationLink() {
+    if ($this->getMetadataValue('revisionMatchData')) {
+      $details_href =
+        '/differential/revision/closedetails/'.$this->getPHID().'/';
+      $details_link = javelin_tag(
+        'a',
+        array(
+          'href' => $details_href,
+          'sigil' => 'workflow',
+        ),
+        pht('Explain Why'));
+      return $details_link;
+    }
+    return parent::renderExtraInformationLink();
+  }
+
   public function getTitleForFeed(PhabricatorFeedStory $story) {
     $author_phid = $this->getAuthorPHID();
     $object_phid = $this->getObjectPHID();

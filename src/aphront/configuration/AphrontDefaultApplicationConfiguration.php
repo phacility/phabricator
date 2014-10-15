@@ -14,31 +14,6 @@ class AphrontDefaultApplicationConfiguration
     return 'aphront-default';
   }
 
-  public function getURIMap() {
-    return $this->getResourceURIMapRules() + array(
-      '/~/' => array(
-        '' => 'DarkConsoleController',
-        'data/(?P<key>[^/]+)/' => 'DarkConsoleDataController',
-      ),
-    );
-  }
-
-  protected function getResourceURIMapRules() {
-    $extensions = CelerityResourceController::getSupportedResourceTypes();
-    $extensions = array_keys($extensions);
-    $extensions = implode('|', $extensions);
-
-    return array(
-      '/res/' => array(
-        '(?:(?P<mtime>[0-9]+)T/)?'.
-        '(?P<library>[^/]+)/'.
-        '(?P<hash>[a-f0-9]{8})/'.
-        '(?P<path>.+\.(?:'.$extensions.'))'
-          => 'CelerityPhabricatorResourceController',
-      ),
-    );
-  }
-
   /**
    * @phutil-external-symbol class PhabricatorStartup
    */

@@ -4,9 +4,25 @@ final class DiffusionLowLevelCommitFieldsQuery
   extends DiffusionLowLevelQuery {
 
   private $ref;
+  private $revisionMatchData = array(
+    'usedURI' => null,
+    'foundURI' => null,
+    'validDomain' => null,
+    'matchHashType' => null,
+    'matchHashValue' => null,
+  );
 
   public function withCommitRef(DiffusionCommitRef $ref) {
     $this->ref = $ref;
+    return $this;
+  }
+
+  public function getRevisionMatchData() {
+    return $this->revisionMatchData;
+  }
+
+  private function setRevisionMatchData($key, $value) {
+    $this->revisionMatchData[$key] = $value;
     return $this;
   }
 
@@ -25,10 +41,21 @@ final class DiffusionLowLevelCommitFieldsQuery
       ->execute();
     $fields = $result['fields'];
 
+    $revision_id = idx($fields, 'revisionID');
+    if ($revision_id) {
+      $this->setRevisionMatchData('usedURI', true);
+    } else {
+      $this->setRevisionMatchData('usedURI', false);
+    }
+    $revision_id_info = $result['revisionIDFieldInfo'];
+    $this->setRevisionMatchData('foundURI', $revision_id_info['value']);
+    $this->setRevisionMatchData(
+      'validDomain',
+      $revision_id_info['validDomain']);
+
     // If there is no "Differential Revision:" field in the message, try to
     // identify the revision by doing a hash lookup.
 
-    $revision_id = idx($fields, 'revisionID');
     if (!$revision_id && $hashes) {
       $hash_list = array();
       foreach ($hashes as $hash) {
@@ -36,12 +63,33 @@ final class DiffusionLowLevelCommitFieldsQuery
       }
       $revisions = id(new DifferentialRevisionQuery())
         ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->needHashes(true)
         ->withCommitHashes($hash_list)
         ->execute();
 
       if (!empty($revisions)) {
         $revision = $this->pickBestRevision($revisions);
         $fields['revisionID'] = $revision->getID();
+        $revision_hashes = $revision->getHashes();
+        $revision_hashes = mpull($revision_hashes, 'getHashType');
+        // sort the hashes in the order the mighty
+        // @{class:ArcanstDifferentialRevisionHash} does; probably unnecessary
+        // but should future proof things nicely.
+        $revision_hashes = array_select_keys(
+          $revision_hashes,
+          ArcanistDifferentialRevisionHash::getTypes());
+        foreach ($hashes as $hash) {
+          $revision_hash = $revision_hashes[$hash->getHashType()];
+          if ($revision_hash->getHashValue() == $hash->getHashValue()) {
+            $this->setRevisionMatchData(
+              'matchHashType',
+              $hash->getHashType());
+            $this->setRevisionMatchData(
+              'matchHashValue',
+              $hash->getHashValue());
+            break;
+          }
+        }
       }
     }
 

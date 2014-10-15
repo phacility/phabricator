@@ -4,6 +4,16 @@ final class PhortuneCartSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
   private $merchant;
+  private $account;
+
+  public function setAccount(PhortuneAccount $account) {
+    $this->account = $account;
+    return $this;
+  }
+
+  public function getAccount() {
+    return $this->account;
+  }
 
   public function setMerchant(PhortuneMerchant $merchant) {
     $this->merchant = $merchant;
@@ -39,6 +49,7 @@ final class PhortuneCartSearchEngine
     $viewer = $this->requireViewer();
 
     $merchant = $this->getMerchant();
+    $account = $this->getAccount();
     if ($merchant) {
       $can_edit = PhabricatorPolicyFilter::hasCapability(
         $viewer,
@@ -49,9 +60,21 @@ final class PhortuneCartSearchEngine
           pht('You can not query orders for a merchant you do not control.'));
       }
       $query->withMerchantPHIDs(array($merchant->getPHID()));
+    } else if ($account) {
+      $can_edit = PhabricatorPolicyFilter::hasCapability(
+        $viewer,
+        $account,
+        PhabricatorPolicyCapability::CAN_EDIT);
+      if (!$can_edit) {
+        throw new Exception(
+          pht(
+            'You can not query orders for an account you are not '.
+            'a member of.'));
+      }
+      $query->withAccountPHIDs(array($account->getPHID()));
     } else {
       $accounts = id(new PhortuneAccountQuery())
-        ->withMemberPHIDs($viewer->getPHID())
+        ->withMemberPHIDs(array($viewer->getPHID()))
         ->execute();
       if ($accounts) {
         $query->withAccountPHIDs(mpull($accounts, 'getPHID'));
@@ -69,8 +92,11 @@ final class PhortuneCartSearchEngine
 
   protected function getURI($path) {
     $merchant = $this->getMerchant();
+    $account = $this->getAccount();
     if ($merchant) {
       return '/phortune/merchant/'.$merchant->getID().'/order/'.$path;
+    } else if ($account) {
+      return '/phortune/'.$account->getID().'/order/';
     } else {
       return '/phortune/order/'.$path;
     }

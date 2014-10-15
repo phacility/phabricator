@@ -17,6 +17,7 @@ final class PhortuneCart extends PhortuneDAO
   protected $cartClass;
   protected $status;
   protected $metadata = array();
+  protected $mailKey;
 
   private $account = self::ATTACHABLE;
   private $purchases = self::ATTACHABLE;
@@ -70,7 +71,26 @@ final class PhortuneCart extends PhortuneDAO
   }
 
   public function activateCart() {
-    $this->setStatus(self::STATUS_READY)->save();
+    $this->openTransaction();
+      $this->beginReadLocking();
+
+        $copy = clone $this;
+        $copy->reload();
+
+        if ($copy->getStatus() !== self::STATUS_BUILDING) {
+          throw new Exception(
+            pht(
+              'Cart has wrong status ("%s") to call willApplyCharge().',
+              $copy->getStatus()));
+        }
+
+        $this->setStatus(self::STATUS_READY)->save();
+
+      $this->endReadLocking();
+    $this->saveTransaction();
+
+    $this->recordCartTransaction(PhortuneCartTransaction::TYPE_CREATED);
+
     return $this;
   }
 
@@ -140,6 +160,8 @@ final class PhortuneCart extends PhortuneDAO
 
       $this->endReadLocking();
     $this->saveTransaction();
+
+    $this->recordCartTransaction(PhortuneCartTransaction::TYPE_HOLD);
   }
 
   public function didApplyCharge(PhortuneCharge $charge) {
@@ -199,7 +221,7 @@ final class PhortuneCart extends PhortuneDAO
       $this->endReadLocking();
     $this->saveTransaction();
 
-    // TODO: Notify merchant to review order.
+    $this->recordCartTransaction(PhortuneCartTransaction::TYPE_REVIEW);
 
     return $this;
   }
@@ -227,6 +249,8 @@ final class PhortuneCart extends PhortuneDAO
 
       $this->endReadLocking();
     $this->saveTransaction();
+
+    $this->recordCartTransaction(PhortuneCartTransaction::TYPE_PURCHASED);
 
     return $this;
   }
@@ -384,6 +408,30 @@ final class PhortuneCart extends PhortuneDAO
     $this->saveTransaction();
   }
 
+  private function recordCartTransaction($type) {
+    $omnipotent_user = PhabricatorUser::getOmnipotentUser();
+    $phortune_phid = id(new PhabricatorPhortuneApplication())->getPHID();
+
+    $xactions = array();
+
+    $xactions[] = id(new PhortuneCartTransaction())
+      ->setTransactionType($type)
+      ->setNewValue(true);
+
+    $content_source = PhabricatorContentSource::newForSource(
+      PhabricatorContentSource::SOURCE_PHORTUNE,
+      array());
+
+    $editor = id(new PhortuneCartEditor())
+      ->setActor($omnipotent_user)
+      ->setActingAsPHID($phortune_phid)
+      ->setContentSource($content_source)
+      ->setContinueOnMissingFields(true)
+      ->setContinueOnNoEffect(true);
+
+    $editor->applyTransactions($this, $xactions);
+  }
+
   public function getName() {
     return $this->getImplementation()->getName($this);
   }
@@ -467,6 +515,7 @@ final class PhortuneCart extends PhortuneDAO
       self::CONFIG_COLUMN_SCHEMA => array(
         'status' => 'text32',
         'cartClass' => 'text128',
+        'mailKey' => 'bytes20',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_account' => array(
@@ -482,6 +531,13 @@ final class PhortuneCart extends PhortuneDAO
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
       PhortuneCartPHIDType::TYPECONST);
+  }
+
+  public function save() {
+    if (!$this->getMailKey()) {
+      $this->setMailKey(Filesystem::readRandomCharacters(20));
+    }
+    return parent::save();
   }
 
   public function attachPurchases(array $purchases) {
