@@ -702,6 +702,33 @@ final class PhabricatorAuditEditor
     return implode("\n", $block);
   }
 
+  public function getMailTagsMap() {
+    return array(
+      PhabricatorAuditTransaction::MAILTAG_COMMIT =>
+        pht('A commit is created.'),
+      PhabricatorAuditTransaction::MAILTAG_ACTION_CONCERN =>
+        pht('A commit has a concerned raised against it.'),
+      PhabricatorAuditTransaction::MAILTAG_ACTION_ACCEPT =>
+        pht('A commit is accepted.'),
+      PhabricatorAuditTransaction::MAILTAG_ACTION_RESIGN =>
+        pht('A commit has an auditor resign.'),
+      PhabricatorAuditTransaction::MAILTAG_ACTION_CLOSE =>
+        pht('A commit is closed.'),
+      PhabricatorAuditTransaction::MAILTAG_ADD_AUDITORS =>
+        pht('A commit has auditors added.'),
+      PhabricatorAuditTransaction::MAILTAG_ADD_CCS =>
+        pht("A commit's subscribers change."),
+      PhabricatorAuditTransaction::MAILTAG_PROJECTS =>
+        pht("A commit's projects change."),
+      PhabricatorAuditTransaction::MAILTAG_COMMENT =>
+        pht('Someone comments on a commit.'),
+      PhabricatorAuditTransaction::MAILTAG_OTHER =>
+        pht('Other commit activity not listed above occurs.'),
+    );
+  }
+
+
+
   protected function shouldPublishFeedStory(
     PhabricatorLiskDAO $object,
     array $xactions) {
