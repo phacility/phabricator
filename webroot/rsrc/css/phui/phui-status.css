@@ -6,10 +6,6 @@
   width: 100%;
 }
 
-.phui-property-list-value .phui-status-list-view {
-  margin-left: -4px;
-}
-
 .phui-status-list-view .phui-icon-view {
   display: block;
   width: 14px;
