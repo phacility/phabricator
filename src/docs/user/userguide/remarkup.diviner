@@ -48,7 +48,7 @@ empty lines:
 
   > Quoted Text
 
-  Use "- " or "* " for bulleted lists, and "# " for numbered lists.
+  Use `- ` or `* ` for bulleted lists, and `# ` for numbered lists.
   Use ``` or indent two spaces for code.
   Use %%% for a literal block.
   Use | ... | ... for tables.
@@ -92,7 +92,7 @@ You can optionally omit the trailing `=` signs -- that is, these are the same:
 This produces headers like the ones in this document. Make sure you have an
 empty line before and after the header.
 
-Make **lists** by beginning each item with a "-" or a "*":
+Make **lists** by beginning each item with a `-` or a `*`:
 
   lang=text
   - milk
@@ -109,9 +109,9 @@ This produces a list like this:
   - eggs
   - bread
 
-(Note that you need to put a space after the "-" or "*".)
+(Note that you need to put a space after the `-` or `*`.)
 
-You can make numbered lists with a "#" instead of "-" or "*":
+You can make numbered lists with a `#` instead of `-` or `*`:
 
   # Articuno
   # Zapdos
@@ -184,7 +184,7 @@ You can also use three backticks to enclose the code block:
   ```f(x, y);
   g(f);```
 
-You can specify a language for syntax highlighting with "lang=xxx":
+You can specify a language for syntax highlighting with `lang=xxx`:
 
   lang=text
   lang=html
@@ -196,7 +196,7 @@ available (in most cases, this means you need to configure Pygments):
   lang=html
   <a href="#">...</a>
 
-You can also use a "COUNTEREXAMPLE" header to show that a block of code is
+You can also use a `COUNTEREXAMPLE` header to show that a block of code is
 bad and shouldn't be copied:
 
   lang=text
@@ -258,7 +258,7 @@ You can use `lines=N` to limit the vertical size of a chunk of code, and
   <p>Mangostine</p>
   <p>Melon</p>
 
-You can also use "NOTE:", "WARNING:", or "IMPORTANT:" to call out an important
+You can also use `NOTE:`, `WARNING:`, or `IMPORTANT:` to call out an important
  idea.
 
 NOTE: Best practices in proton pack operation include not crossing the streams.
@@ -267,8 +267,8 @@ WARNING: Crossing the streams can result in total protonic reversal!
 
 IMPORTANT: Don't cross the streams!
 
-In addition, you can use "(NOTE)", "(WARNING)", or "(IMPORTANT)" to get the
-same effect but without "(NOTE)", "(WARNING)", or "(IMPORTANT)" appearing in
+In addition, you can use `(NOTE)`, `(WARNING)`, or `(IMPORTANT)` to get the
+same effect but without `(NOTE)`, `(WARNING)`, or `(IMPORTANT)` appearing in
 the rendered result. For example
 
 (NOTE) Dr. Egon Spengler is the best resource for additional proton pack
@@ -325,7 +325,7 @@ task or revision is closed). Some types of objects support rich embedding.
 
 == Linking to Project Tags
 
-Projects can be linked to with the use of a hashtag (#). This works by default
+Projects can be linked to with the use of a hashtag `#`. This works by default
 using the name of the Project (lowercase, underscored). Additionally you
 can set multiple additional hashtags by editing the Project details.
 
@@ -398,7 +398,7 @@ You can embed a countdown by using braces:
 
 = Quoting Text =
 
-To quote text, preface it with an ">":
+To quote text, preface it with an `>`:
 
   > This is quoted text.
 
@@ -427,7 +427,7 @@ of a dancing banana.
 = Memes =
 
 You can also use image macros in the context of memes. For example, if you
-have an image macro named "grumpy", you can create a meme by doing the
+have an image macro named `grumpy`, you can create a meme by doing the
 following:
 
   {meme, src = grumpy, above = toptextgoeshere, below = bottomtextgoeshere}
@@ -480,7 +480,7 @@ opponents:
 
 = Literal Blocks =
 
-To place text in a literal block use "%%%":
+To place text in a literal block use `%%%`:
 
   %%%Text that won't be processed by remarkup
   [[http://www.example.com | example]]
