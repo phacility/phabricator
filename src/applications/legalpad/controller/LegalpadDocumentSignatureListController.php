@@ -38,7 +38,7 @@ final class LegalpadDocumentSignatureListController extends LegalpadController {
       $engine->setDocument($this->document);
     }
 
-    $controller = id(new PhabricatorApplicationSearchController($request))
+    $controller = id(new PhabricatorApplicationSearchController())
       ->setQueryKey($this->queryKey)
       ->setSearchEngine($engine)
       ->setNavigation($this->buildSideNav());

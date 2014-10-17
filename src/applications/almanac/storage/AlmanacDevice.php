@@ -5,18 +5,55 @@ final class AlmanacDevice
   implements PhabricatorPolicyInterface {
 
   protected $name;
+  protected $nameIndex;
+  protected $mailKey;
+  protected $viewPolicy;
+  protected $editPolicy;
+
+  public static function initializeNewDevice() {
+    return id(new AlmanacDevice())
+      ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
+      ->setEditPolicy(PhabricatorPolicies::POLICY_ADMIN);
+  }
 
   public function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
-        'name' => 'text255',
+        'name' => 'text128',
+        'nameIndex' => 'bytes12',
+        'mailKey' => 'bytes20',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_name' => array(
+          'columns' => array('nameIndex'),
+          'unique' => true,
+        ),
+        'key_nametext' => array(
+          'columns' => array('name'),
+        ),
       ),
     ) + parent::getConfiguration();
   }
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(AlmanacDevicePHIDType::TYPECONST);
+  }
+
+  public function save() {
+    AlmanacNames::validateServiceOrDeviceName($this->getName());
+
+    $this->nameIndex = PhabricatorHash::digestForIndex($this->getName());
+
+    if (!$this->mailKey) {
+      $this->mailKey = Filesystem::readRandomCharacters(20);
+    }
+
+    return parent::save();
+  }
+
+  public function getURI() {
+    return '/almanac/device/view/'.$this->getName().'/';
   }
 
 
@@ -26,16 +63,16 @@ final class AlmanacDevice
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
     );
   }
 
   public function getPolicy($capability) {
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
-        // Until we get a clearer idea on what's going to be stored in this
-        // table, don't allow anyone (other than the omnipotent user) to find
-        // these objects.
-        return PhabricatorPolicies::POLICY_NOONE;
+        return $this->getViewPolicy();
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return $this->getEditPolicy();
     }
   }
 

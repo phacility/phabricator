@@ -64,3 +64,9 @@ body .phui-font-source-sans
   font: 13px/1.231 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-weight: normal;
 }
+
+.phui-font-source-sans .phui-tag-shade .phui-icon-view {
+  font-size: 13px;
+  top: 4px;
+  left: 6px;
+}

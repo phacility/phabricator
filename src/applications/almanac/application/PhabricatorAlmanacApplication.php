@@ -30,12 +30,44 @@ final class PhabricatorAlmanacApplication extends PhabricatorApplication {
     return true;
   }
 
-  public function isLaunchable() {
-    return false;
+  public function getRoutes() {
+    return array(
+      '/almanac/' => array(
+        '' => 'AlmanacConsoleController',
+        'service/' => array(
+          '(?:query/(?P<queryKey>[^/]+)/)?' => 'AlmanacServiceListController',
+          'edit/(?:(?P<id>\d+)/)?' => 'AlmanacServiceEditController',
+          'view/(?P<name>[^/]+)/' => 'AlmanacServiceViewController',
+        ),
+        'device/' => array(
+          '(?:query/(?P<queryKey>[^/]+)/)?' => 'AlmanacDeviceListController',
+          'edit/(?:(?P<id>\d+)/)?' => 'AlmanacDeviceEditController',
+          'view/(?P<name>[^/]+)/' => 'AlmanacDeviceViewController',
+        ),
+        'interface/' => array(
+          'edit/(?:(?P<id>\d+)/)?' => 'AlmanacInterfaceEditController',
+        ),
+        'network/' => array(
+          '(?:query/(?P<queryKey>[^/]+)/)?' => 'AlmanacNetworkListController',
+          'edit/(?:(?P<id>\d+)/)?' => 'AlmanacNetworkEditController',
+          '(?P<id>\d+)/' => 'AlmanacNetworkViewController',
+        ),
+      ),
+    );
   }
 
-  public function getRoutes() {
-    return array();
+  protected function getCustomCapabilities() {
+    return array(
+      AlmanacCreateServicesCapability::CAPABILITY => array(
+        'default' => PhabricatorPolicies::POLICY_ADMIN,
+      ),
+      AlmanacCreateDevicesCapability::CAPABILITY => array(
+        'default' => PhabricatorPolicies::POLICY_ADMIN,
+      ),
+      AlmanacCreateNetworksCapability::CAPABILITY => array(
+        'default' => PhabricatorPolicies::POLICY_ADMIN,
+      ),
+    );
   }
 
 }

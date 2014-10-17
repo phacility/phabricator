@@ -13,8 +13,7 @@ final class PhabricatorFeedListController extends PhabricatorFeedController {
   }
 
   public function processRequest() {
-    $request = $this->getRequest();
-    $controller = id(new PhabricatorApplicationSearchController($request))
+    $controller = id(new PhabricatorApplicationSearchController())
       ->setQueryKey($this->queryKey)
       ->setSearchEngine(new PhabricatorFeedSearchEngine())
       ->setNavigation($this->buildSideNavView());

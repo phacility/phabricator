@@ -12,7 +12,7 @@ final class DiffusionBrowseMainController extends DiffusionBrowseController {
     $grep = $request->getStr('grep');
     $find = $request->getStr('find');
     if (strlen($grep) || strlen($find)) {
-      $controller = new DiffusionBrowseSearchController($request);
+      $controller = new DiffusionBrowseSearchController();
     } else {
       $results = DiffusionBrowseResultSet::newFromConduit(
         $this->callConduitWithDiffusionRequest(

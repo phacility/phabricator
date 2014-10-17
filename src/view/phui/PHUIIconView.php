@@ -580,6 +580,7 @@ final class PHUIIconView extends AphrontTagView {
       'sky',
       'indigo',
       'violet',
+      'pink',
       'lightgreytext',
       'lightbluetext',
     );

@@ -23,7 +23,7 @@ abstract class DiffusionController extends PhabricatorController {
     // "svn checkout". If it is, we jump off into repository serving code to
     // process the request.
     if (DiffusionServeController::isVCSRequest($request)) {
-      $serve_controller = id(new DiffusionServeController($request))
+      $serve_controller = id(new DiffusionServeController())
         ->setCurrentApplication($this->getCurrentApplication());
       return $this->delegateToController($serve_controller);
     }

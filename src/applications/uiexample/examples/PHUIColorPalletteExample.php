@@ -25,8 +25,10 @@ final class PHUIColorPalletteExample extends PhabricatorUIExample {
       'daeaf3' => '83% Blue {$lightblue}',
       '3498db' => 'Sky Base {$sky}',
       'ddeef9' => '83% Sky {$lightsky}',
-      'c6539d' => 'Base Indigo {$indigo}',
-      'f5e2ef' => '83% Indigo {$lightindigo}',
+      '6e5cb6' => 'Base Indigo {$indigo}',
+      'eae6f7' => '83% Indigo {$lightindigo}',
+      'da49be' => 'Base Pink {$pink}',
+      'fbeaf8' => '83% Pink {$lightpink}',
       '8e44ad' => 'Base Violet {$violet}',
       'ecdff1' => '83% Violet {$lightviolet}',
     );

@@ -14,8 +14,7 @@ final class PhabricatorConduitListController
   }
 
   public function processRequest() {
-    $request = $this->getRequest();
-    $controller = id(new PhabricatorApplicationSearchController($request))
+    $controller = id(new PhabricatorApplicationSearchController())
       ->setQueryKey($this->queryKey)
       ->setSearchEngine(new PhabricatorConduitSearchEngine())
       ->setNavigation($this->buildSideNavView());

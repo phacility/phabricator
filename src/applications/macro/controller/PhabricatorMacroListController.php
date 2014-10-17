@@ -13,8 +13,7 @@ final class PhabricatorMacroListController extends PhabricatorMacroController {
   }
 
   public function processRequest() {
-    $request = $this->getRequest();
-    $controller = id(new PhabricatorApplicationSearchController($request))
+    $controller = id(new PhabricatorApplicationSearchController())
       ->setQueryKey($this->key)
       ->setSearchEngine(new PhabricatorMacroSearchEngine())
       ->setNavigation($this->buildSideNavView());

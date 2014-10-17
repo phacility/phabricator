@@ -13,8 +13,7 @@ final class HarbormasterPlanListController extends HarbormasterPlanController {
   }
 
   public function processRequest() {
-    $request = $this->getRequest();
-    $controller = id(new PhabricatorApplicationSearchController($request))
+    $controller = id(new PhabricatorApplicationSearchController())
       ->setQueryKey($this->queryKey)
       ->setSearchEngine(new HarbormasterBuildPlanSearchEngine())
       ->setNavigation($this->buildSideNavView());

@@ -387,7 +387,7 @@ abstract class PhabricatorFeedStory
     }
   }
 
-  final protected function renderSummary($text, $len = 128) {
+  final public function renderSummary($text, $len = 128) {
     if ($len) {
       $text = id(new PhutilUTF8StringTruncator())
         ->setMaximumGlyphs($len)

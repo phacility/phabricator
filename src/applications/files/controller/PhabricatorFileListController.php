@@ -13,8 +13,7 @@ final class PhabricatorFileListController extends PhabricatorFileController {
   }
 
   public function processRequest() {
-    $request = $this->getRequest();
-    $controller = id(new PhabricatorApplicationSearchController($request))
+    $controller = id(new PhabricatorApplicationSearchController())
       ->setQueryKey($this->key)
       ->setSearchEngine(new PhabricatorFileSearchEngine())
       ->setNavigation($this->buildSideNavView());

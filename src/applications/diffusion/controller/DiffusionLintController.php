@@ -12,7 +12,7 @@ final class DiffusionLintController extends DiffusionController {
     $drequest = $this->diffusionRequest;
 
     if ($request->getStr('lint') !== null) {
-      $controller = new DiffusionLintDetailsController($request);
+      $controller = new DiffusionLintDetailsController();
       $controller->setDiffusionRequest($drequest);
       $controller->setCurrentApplication($this->getCurrentApplication());
       return $this->delegateToController($controller);

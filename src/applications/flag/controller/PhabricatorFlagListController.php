@@ -13,8 +13,7 @@ final class PhabricatorFlagListController extends PhabricatorFlagController {
   }
 
   public function processRequest() {
-    $request = $this->getRequest();
-    $controller = id(new PhabricatorApplicationSearchController($request))
+    $controller = id(new PhabricatorApplicationSearchController())
       ->setQueryKey($this->queryKey)
       ->setSearchEngine(new PhabricatorFlagSearchEngine())
       ->setNavigation($this->buildSideNavView());

@@ -14,7 +14,7 @@ final class DivinerAtomListController extends DivinerController {
 
   public function processRequest() {
     $request = $this->getRequest();
-    $controller = id(new PhabricatorApplicationSearchController($request))
+    $controller = id(new PhabricatorApplicationSearchController())
       ->setQueryKey($this->key)
       ->setSearchEngine(new DivinerAtomSearchEngine())
       ->setNavigation($this->buildSideNavView());
