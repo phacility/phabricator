@@ -321,6 +321,7 @@ final class PhabricatorAuditEditor
           $object);
         if ($request) {
           $xactions[] = $request;
+          $this->setUnmentionablePHIDMap($request->getNewValue());
         }
         break;
       default:
@@ -447,6 +448,64 @@ final class PhabricatorAuditEditor
   protected function supportsSearch() {
     return true;
   }
+
+  protected function expandCustomRemarkupBlockTransactions(
+    PhabricatorLiskDAO $object,
+    array $xactions,
+    $blocks,
+    PhutilMarkupEngine $engine) {
+
+    // we are only really trying to find unmentionable phids here...
+    // don't bother with this outside initial commit (i.e. create)
+    // transaction
+    $is_commit = false;
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case PhabricatorAuditTransaction::TYPE_COMMIT:
+          $is_commit = true;
+          break;
+      }
+    }
+
+    // "result" is always an array....
+    $result = array();
+    if (!$is_commit) {
+      return $result;
+    }
+
+    $flat_blocks = array_mergev($blocks);
+    $huge_block = implode("\n\n", $flat_blocks);
+    $phid_map = array();
+    $phid_map[] = $this->getUnmentionablePHIDMap();
+    $monograms = array();
+
+    $task_refs = id(new ManiphestCustomFieldStatusParser())
+      ->parseCorpus($huge_block);
+    foreach ($task_refs as $match) {
+      foreach ($match['monograms'] as $monogram) {
+        $monograms[] = $monogram;
+      }
+    }
+
+    $rev_refs = id(new DifferentialCustomFieldDependsOnParser())
+      ->parseCorpus($huge_block);
+    foreach ($rev_refs as $match) {
+      foreach ($match['monograms'] as $monogram) {
+        $monograms[] = $monogram;
+      }
+    }
+
+    $objects = id(new PhabricatorObjectQuery())
+      ->setViewer($this->getActor())
+      ->withNames($monograms)
+      ->execute();
+    $phid_map[] = mpull($objects, 'getPHID', 'getPHID');
+    $phid_map = array_mergev($phid_map);
+    $this->setUnmentionablePHIDMap($phid_map);
+
+    return $result;
+  }
+
 
   protected function shouldSendMail(
     PhabricatorLiskDAO $object,
