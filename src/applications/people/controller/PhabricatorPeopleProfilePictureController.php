@@ -156,51 +156,6 @@ final class PhabricatorPeopleProfilePictureController
       }
     }
 
-    // Try to add Gravatar images for any email addresses associated with the
-    // account.
-    if (PhabricatorEnv::getEnvConfig('security.allow-outbound-http')) {
-      $emails = id(new PhabricatorUserEmail())->loadAllWhere(
-        'userPHID = %s ORDER BY address',
-        $user->getPHID());
-
-      $futures = array();
-      foreach ($emails as $email_object) {
-        $email = $email_object->getAddress();
-
-        $hash = md5(strtolower(trim($email)));
-        $uri = id(new PhutilURI("https://secure.gravatar.com/avatar/{$hash}"))
-          ->setQueryParams(
-            array(
-              'size' => 200,
-              'default' => '404',
-              'rating' => 'x',
-            ));
-        $futures[$email] = new HTTPSFuture($uri);
-      }
-
-      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-      foreach (Futures($futures) as $email => $future) {
-        try {
-          list($body) = $future->resolvex();
-          $file = PhabricatorFile::newFromFileData(
-            $body,
-            array(
-              'name' => 'profile-gravatar',
-              'ttl'  => (60 * 60 * 4),
-            ));
-          if ($file->isTransformableImage()) {
-            $images[$file->getPHID()] = array(
-              'uri' => $file->getBestURI(),
-              'tip' => pht('Gravatar for %s', $email),
-            );
-          }
-        } catch (Exception $ex) {
-          // Just continue.
-        }
-      }
-      unset($unguarded);
-    }
-
     $images[PhabricatorPHIDConstants::PHID_VOID] = array(
       'uri' => $default_image->getBestURI(),
       'tip' => pht('Default Picture'),
