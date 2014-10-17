@@ -22,6 +22,7 @@ final class AlmanacDevice
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'text128',
         'nameIndex' => 'bytes12',
+        'mailKey' => 'bytes20',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_name' => array(

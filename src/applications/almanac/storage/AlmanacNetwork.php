@@ -20,6 +20,7 @@ final class AlmanacNetwork
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'text128',
+        'mailKey' => 'bytes20',
       ),
     ) + parent::getConfiguration();
   }
