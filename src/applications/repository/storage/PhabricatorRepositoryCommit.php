@@ -59,6 +59,7 @@ final class PhabricatorRepositoryCommit
       $this->getTableName(),
       $flag,
       $this->getID());
+    $this->setImportStatus($this->getImportStatus() | $flag);
     return $this;
   }
 

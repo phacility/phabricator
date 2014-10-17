@@ -22,7 +22,12 @@ final class PhabricatorAuditEditor
     if (isset($this->auditReasonMap[$phid])) {
       return $this->auditReasonMap[$phid];
     }
-    return array('Added by '.$this->getActor()->getUsername().'.');
+    if ($this->getIsHeraldEditor()) {
+      $name = 'herald';
+    } else {
+      $name = $this->getActor()->getUsername();
+    }
+    return array('Added by '.$name.'.');
   }
 
   public function setRawPatch($patch) {
