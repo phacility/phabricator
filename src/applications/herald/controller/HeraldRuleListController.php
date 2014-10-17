@@ -13,8 +13,7 @@ final class HeraldRuleListController extends HeraldController {
   }
 
   public function processRequest() {
-    $request = $this->getRequest();
-    $controller = id(new PhabricatorApplicationSearchController($request))
+    $controller = id(new PhabricatorApplicationSearchController())
       ->setQueryKey($this->queryKey)
       ->setSearchEngine(new HeraldRuleSearchEngine())
       ->setNavigation($this->buildSideNavView());

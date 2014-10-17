@@ -239,7 +239,7 @@ abstract class AphrontApplicationConfiguration {
 
     $request = $this->getRequest();
 
-    $controller = newv($controller_class, array($request));
+    $controller = newv($controller_class, array());
     if ($current_application) {
       $controller->setCurrentApplication($current_application);
     }

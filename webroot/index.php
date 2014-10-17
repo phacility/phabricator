@@ -74,6 +74,8 @@ try {
 
   $application->setRequest($request);
   list($controller, $uri_data) = $application->buildController();
+  $request->setURIMap($uri_data);
+  $controller->setRequest($request);
 
   $access_log->setData(
     array(
@@ -98,7 +100,7 @@ try {
 
     if (!$response) {
       $controller->willProcessRequest($uri_data);
-      $response = $controller->processRequest();
+      $response = $controller->handleRequest($request);
     }
   } catch (Exception $ex) {
     $original_exception = $ex;

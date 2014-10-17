@@ -72,7 +72,7 @@ final class PhabricatorSearchController
       }
     }
 
-    $controller = id(new PhabricatorApplicationSearchController($request))
+    $controller = id(new PhabricatorApplicationSearchController())
       ->setQueryKey($this->queryKey)
       ->setSearchEngine($engine)
       ->setNavigation($this->buildSideNavView());

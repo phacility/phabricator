@@ -14,8 +14,7 @@ final class FundInitiativeListController
   }
 
   public function processRequest() {
-    $request = $this->getRequest();
-    $controller = id(new PhabricatorApplicationSearchController($request))
+    $controller = id(new PhabricatorApplicationSearchController())
       ->setQueryKey($this->queryKey)
       ->setSearchEngine(new FundInitiativeSearchEngine())
       ->setNavigation($this->buildSideNavView());

@@ -28,7 +28,7 @@ final class ReleephBranchViewController extends ReleephBranchController
     }
     $this->setBranch($branch);
 
-    $controller = id(new PhabricatorApplicationSearchController($request))
+    $controller = id(new PhabricatorApplicationSearchController())
       ->setPreface($this->renderPreface())
       ->setQueryKey($this->queryKey)
       ->setSearchEngine($this->getSearchEngine())

@@ -29,7 +29,7 @@ final class FundBackerListController
       }
     }
 
-    $controller = id(new PhabricatorApplicationSearchController($request))
+    $controller = id(new PhabricatorApplicationSearchController())
       ->setQueryKey($this->queryKey)
       ->setSearchEngine($this->getEngine())
       ->setNavigation($this->buildSideNavView());

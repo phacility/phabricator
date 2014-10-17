@@ -28,25 +28,45 @@ abstract class AphrontController extends Phobject {
     return $response;
   }
 
-  abstract public function processRequest();
+  public function handleRequest(AphrontRequest $request) {
+    if (method_exists($this, 'processRequest')) {
+      return $this->processRequest();
+    }
 
-  final public function __construct(AphrontRequest $request) {
+    throw new PhutilMethodNotImplementedException(
+      pht(
+        'Controllers must implement either handleRequest() (recommended) '.
+        'or processRequest() (deprecated).'));
+  }
+
+  final public function setRequest(AphrontRequest $request) {
     $this->request = $request;
+    return $this;
   }
 
   final public function getRequest() {
+    if (!$this->request) {
+      throw new Exception(pht('Call setRequest() before getRequest()!'));
+    }
     return $this->request;
   }
 
+  final public function getViewer() {
+    return $this->getRequest()->getViewer();
+  }
+
   final public function delegateToController(AphrontController $controller) {
+    $request = $this->getRequest();
+
     $controller->setDelegatingController($this);
+    $controller->setRequest($request);
 
     $application = $this->getCurrentApplication();
     if ($application) {
       $controller->setCurrentApplication($application);
     }
 
-    return $controller->processRequest();
+    return $controller->handleRequest($request);
   }
 
   final public function setCurrentApplication(

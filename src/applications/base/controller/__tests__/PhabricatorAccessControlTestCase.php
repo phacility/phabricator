@@ -22,7 +22,8 @@ final class PhabricatorAccessControlTestCase extends PhabricatorTestCase {
       ->setApplicationConfiguration($application_configuration)
       ->setRequestData(array());
 
-    $controller = new PhabricatorTestController($request);
+    $controller = new PhabricatorTestController();
+    $controller->setRequest($request);
 
     $u_public = id(new PhabricatorUser())
       ->setUsername('public');

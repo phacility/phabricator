@@ -13,8 +13,7 @@ final class DrydockResourceListController extends DrydockResourceController {
   }
 
   public function processRequest() {
-    $request = $this->getRequest();
-    $controller = id(new PhabricatorApplicationSearchController($request))
+    $controller = id(new PhabricatorApplicationSearchController())
       ->setQueryKey($this->queryKey)
       ->setSearchEngine(new DrydockResourceSearchEngine())
       ->setNavigation($this->buildSideNavView());

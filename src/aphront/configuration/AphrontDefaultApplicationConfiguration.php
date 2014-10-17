@@ -152,13 +152,14 @@ class AphrontDefaultApplicationConfiguration
         //
         // Possibly we should add a header here like "you need to login to see
         // the thing you are trying to look at".
-        $login_controller = new PhabricatorAuthStartController($request);
+        $login_controller = new PhabricatorAuthStartController();
+        $login_controller->setRequest($request);
 
         $auth_app_class = 'PhabricatorAuthApplication';
         $auth_app = PhabricatorApplication::getByClass($auth_app_class);
         $login_controller->setCurrentApplication($auth_app);
 
-        return $login_controller->processRequest();
+        return $login_controller->handleRequest($request);
       }
 
       $list = $ex->getMoreInfo();
@@ -272,12 +273,12 @@ class AphrontDefaultApplicationConfiguration
   }
 
   public function build404Controller() {
-    return array(new Phabricator404Controller($this->getRequest()), array());
+    return array(new Phabricator404Controller(), array());
   }
 
   public function buildRedirectController($uri, $external) {
     return array(
-      new PhabricatorRedirectController($this->getRequest()),
+      new PhabricatorRedirectController(),
       array(
         'uri' => $uri,
         'external' => $external,

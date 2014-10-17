@@ -14,8 +14,7 @@ final class PhrictionListController
   }
 
   public function processRequest() {
-    $request = $this->getRequest();
-    $controller = id(new PhabricatorApplicationSearchController($request))
+    $controller = id(new PhabricatorApplicationSearchController())
       ->setQueryKey($this->queryKey)
       ->setSearchEngine(new PhrictionSearchEngine())
       ->setNavigation($this->buildSideNavView());

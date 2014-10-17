@@ -10,8 +10,7 @@ final class PhabricatorPeopleLogsController
   }
 
   public function processRequest() {
-    $request = $this->getRequest();
-    $controller = id(new PhabricatorApplicationSearchController($request))
+    $controller = id(new PhabricatorApplicationSearchController())
       ->setQueryKey($this->queryKey)
       ->setSearchEngine(new PhabricatorPeopleLogSearchEngine())
       ->setNavigation($this->buildSideNavView());
