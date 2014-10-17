@@ -1,10 +1,10 @@
 <?php
 
-final class AlmanacServiceSearchEngine
+final class AlmanacNetworkSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
   public function getResultTypeDescription() {
-    return pht('Almanac Services');
+    return pht('Almanac Networks');
   }
 
   protected function getApplicationClassName() {
@@ -18,7 +18,7 @@ final class AlmanacServiceSearchEngine
   }
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new AlmanacServiceQuery());
+    $query = id(new AlmanacNetworkQuery());
 
     return $query;
   }
@@ -28,12 +28,12 @@ final class AlmanacServiceSearchEngine
     PhabricatorSavedQuery $saved_query) {}
 
   protected function getURI($path) {
-    return '/almanac/service/'.$path;
+    return '/almanac/network/'.$path;
   }
 
   public function getBuiltinQueryNames() {
     $names = array(
-      'all' => pht('All Services'),
+      'all' => pht('All Networks'),
     );
 
     return $names;
@@ -53,27 +53,29 @@ final class AlmanacServiceSearchEngine
   }
 
   protected function getRequiredHandlePHIDsForResultList(
-    array $services,
+    array $networks,
     PhabricatorSavedQuery $query) {
     return array();
   }
 
   protected function renderResultList(
-    array $services,
+    array $networks,
     PhabricatorSavedQuery $query,
     array $handles) {
-    assert_instances_of($services, 'AlmanacService');
+    assert_instances_of($networks, 'AlmanacNetwork');
 
     $viewer = $this->requireViewer();
 
     $list = new PHUIObjectItemListView();
     $list->setUser($viewer);
-    foreach ($services as $service) {
+    foreach ($networks as $network) {
+      $id = $network->getID();
+
       $item = id(new PHUIObjectItemView())
-        ->setObjectName(pht('Service %d', $service->getID()))
-        ->setHeader($service->getName())
-        ->setHref($service->getURI())
-        ->setObject($service);
+        ->setObjectName(pht('Network %d', $id))
+        ->setHeader($network->getName())
+        ->setHref($this->getApplicationURI("network/{$id}/"))
+        ->setObject($network);
 
       $list->addItem($item);
     }

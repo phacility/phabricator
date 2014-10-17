@@ -1,0 +1,11 @@
+CREATE TABLE {$NAMESPACE}_almanac.almanac_network (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  phid VARBINARY(64) NOT NULL,
+  name VARCHAR(128) NOT NULL COLLATE utf8_bin,
+  mailKey BINARY(20) NOT NULL,
+  viewPolicy VARBINARY(64) NOT NULL,
+  editPolicy VARBINARY(64) NOT NULL,
+  dateCreated INT UNSIGNED NOT NULL,
+  dateModified INT UNSIGNED NOT NULL,
+  UNIQUE KEY `key_phid` (phid)
+) ENGINE=InnoDB, COLLATE utf8_general_ci;

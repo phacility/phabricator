@@ -1,16 +1,16 @@
 <?php
 
-final class AlmanacServiceEditController
-  extends AlmanacServiceController {
+final class AlmanacNetworkEditController
+  extends AlmanacNetworkController {
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getViewer();
 
-    $list_uri = $this->getApplicationURI('service/');
+    $list_uri = $this->getApplicationURI('network/');
 
     $id = $request->getURIData('id');
     if ($id) {
-      $service = id(new AlmanacServiceQuery())
+      $network = id(new AlmanacNetworkQuery())
         ->setViewer($viewer)
         ->withIDs(array($id))
         ->requireCapabilities(
@@ -19,28 +19,28 @@ final class AlmanacServiceEditController
             PhabricatorPolicyCapability::CAN_EDIT,
           ))
         ->executeOne();
-      if (!$service) {
+      if (!$network) {
         return new Aphront404Response();
       }
 
       $is_new = false;
-      $service_uri = $service->getURI();
-      $cancel_uri = $service_uri;
-      $title = pht('Edit Service');
+      $network_uri = $this->getApplicationURI('network/'.$network->getID().'/');
+      $cancel_uri = $network_uri;
+      $title = pht('Edit Network');
       $save_button = pht('Save Changes');
     } else {
       $this->requireApplicationCapability(
-        AlmanacCreateServicesCapability::CAPABILITY);
+        AlmanacCreateNetworksCapability::CAPABILITY);
 
-      $service = AlmanacService::initializeNewService();
+      $network = AlmanacNetwork::initializeNewNetwork();
       $is_new = true;
 
       $cancel_uri = $list_uri;
-      $title = pht('Create Service');
-      $save_button = pht('Create Service');
+      $title = pht('Create Network');
+      $save_button = pht('Create Network');
     }
 
-    $v_name = $service->getName();
+    $v_name = $network->getName();
     $e_name = true;
     $validation_exception = null;
 
@@ -49,46 +49,47 @@ final class AlmanacServiceEditController
       $v_view = $request->getStr('viewPolicy');
       $v_edit = $request->getStr('editPolicy');
 
-      $type_name = AlmanacServiceTransaction::TYPE_NAME;
+      $type_name = AlmanacNetworkTransaction::TYPE_NAME;
       $type_view = PhabricatorTransactions::TYPE_VIEW_POLICY;
       $type_edit = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
       $xactions = array();
 
-      $xactions[] = id(new AlmanacServiceTransaction())
+      $xactions[] = id(new AlmanacNetworkTransaction())
         ->setTransactionType($type_name)
         ->setNewValue($v_name);
 
-      $xactions[] = id(new AlmanacServiceTransaction())
+      $xactions[] = id(new AlmanacNetworkTransaction())
         ->setTransactionType($type_view)
         ->setNewValue($v_view);
 
-      $xactions[] = id(new AlmanacServiceTransaction())
+      $xactions[] = id(new AlmanacNetworkTransaction())
         ->setTransactionType($type_edit)
         ->setNewValue($v_edit);
 
-      $editor = id(new AlmanacServiceEditor())
+      $editor = id(new AlmanacNetworkEditor())
         ->setActor($viewer)
         ->setContentSourceFromRequest($request)
         ->setContinueOnNoEffect(true);
 
       try {
-        $editor->applyTransactions($service, $xactions);
+        $editor->applyTransactions($network, $xactions);
 
-        $service_uri = $service->getURI();
-        return id(new AphrontRedirectResponse())->setURI($service_uri);
+        $id = $network->getID();
+        $network_uri = $this->getApplicationURI("network/{$id}/");
+        return id(new AphrontRedirectResponse())->setURI($network_uri);
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
         $validation_exception = $ex;
         $e_name = $ex->getShortMessage($type_name);
 
-        $service->setViewPolicy($v_view);
-        $service->setEditPolicy($v_edit);
+        $network->setViewPolicy($v_view);
+        $network->setEditPolicy($v_edit);
       }
     }
 
     $policies = id(new PhabricatorPolicyQuery())
       ->setViewer($viewer)
-      ->setObject($service)
+      ->setObject($network)
       ->execute();
 
     $form = id(new AphrontFormView())
@@ -102,13 +103,13 @@ final class AlmanacServiceEditController
       ->appendChild(
         id(new AphrontFormPolicyControl())
           ->setName('viewPolicy')
-          ->setPolicyObject($service)
+          ->setPolicyObject($network)
           ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
           ->setPolicies($policies))
       ->appendChild(
         id(new AphrontFormPolicyControl())
           ->setName('editPolicy')
-          ->setPolicyObject($service)
+          ->setPolicyObject($network)
           ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
           ->setPolicies($policies))
       ->appendChild(
@@ -123,9 +124,9 @@ final class AlmanacServiceEditController
 
     $crumbs = $this->buildApplicationCrumbs();
     if ($is_new) {
-      $crumbs->addTextCrumb(pht('Create Service'));
+      $crumbs->addTextCrumb(pht('Create Network'));
     } else {
-      $crumbs->addTextCrumb($service->getName(), $service_uri);
+      $crumbs->addTextCrumb($network->getName(), $network_uri);
       $crumbs->addTextCrumb(pht('Edit'));
     }
 

@@ -7,6 +7,10 @@ final class AlmanacDeviceSearchEngine
     return pht('Almanac Devices');
   }
 
+  protected function getApplicationClassName() {
+    return 'PhabricatorAlmanacApplication';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 
@@ -76,4 +80,5 @@ final class AlmanacDeviceSearchEngine
 
     return $list;
   }
+
 }

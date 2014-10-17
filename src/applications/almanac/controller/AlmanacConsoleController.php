@@ -28,6 +28,14 @@ final class AlmanacConsoleController extends AlmanacController {
           pht(
             'Manage Almanac devices.')));
 
+    $menu->addItem(
+      id(new PHUIObjectItemView())
+        ->setHeader(pht('Networks'))
+        ->setHref($this->getApplicationURI('network/'))
+        ->addAttribute(
+          pht(
+            'Manage Almanac networks.')));
+
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Console'));
 
