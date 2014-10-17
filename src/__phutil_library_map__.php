@@ -9,6 +9,7 @@
 phutil_register_library_map(array(
   '__library_version__' => 2,
   'class' => array(
+    'AlmanacAddress' => 'applications/almanac/util/AlmanacAddress.php',
     'AlmanacConduitUtil' => 'applications/almanac/util/AlmanacConduitUtil.php',
     'AlmanacConsoleController' => 'applications/almanac/controller/AlmanacConsoleController.php',
     'AlmanacController' => 'applications/almanac/controller/AlmanacController.php',
@@ -28,6 +29,11 @@ phutil_register_library_map(array(
     'AlmanacDeviceTransaction' => 'applications/almanac/storage/AlmanacDeviceTransaction.php',
     'AlmanacDeviceTransactionQuery' => 'applications/almanac/query/AlmanacDeviceTransactionQuery.php',
     'AlmanacDeviceViewController' => 'applications/almanac/controller/AlmanacDeviceViewController.php',
+    'AlmanacInterface' => 'applications/almanac/storage/AlmanacInterface.php',
+    'AlmanacInterfaceEditController' => 'applications/almanac/controller/AlmanacInterfaceEditController.php',
+    'AlmanacInterfacePHIDType' => 'applications/almanac/phid/AlmanacInterfacePHIDType.php',
+    'AlmanacInterfaceQuery' => 'applications/almanac/query/AlmanacInterfaceQuery.php',
+    'AlmanacInterfaceTableView' => 'applications/almanac/view/AlmanacInterfaceTableView.php',
     'AlmanacManagementRegisterWorkflow' => 'applications/almanac/management/AlmanacManagementRegisterWorkflow.php',
     'AlmanacManagementWorkflow' => 'applications/almanac/management/AlmanacManagementWorkflow.php',
     'AlmanacNames' => 'applications/almanac/util/AlmanacNames.php',
@@ -2940,6 +2946,7 @@ phutil_register_library_map(array(
     'require_celerity_resource' => 'applications/celerity/api.php',
   ),
   'xmap' => array(
+    'AlmanacAddress' => 'Phobject',
     'AlmanacConduitUtil' => 'Phobject',
     'AlmanacConsoleController' => 'AlmanacController',
     'AlmanacController' => 'PhabricatorController',
@@ -2962,6 +2969,14 @@ phutil_register_library_map(array(
     'AlmanacDeviceTransaction' => 'PhabricatorApplicationTransaction',
     'AlmanacDeviceTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
     'AlmanacDeviceViewController' => 'AlmanacDeviceController',
+    'AlmanacInterface' => array(
+      'AlmanacDAO',
+      'PhabricatorPolicyInterface',
+    ),
+    'AlmanacInterfaceEditController' => 'AlmanacDeviceController',
+    'AlmanacInterfacePHIDType' => 'PhabricatorPHIDType',
+    'AlmanacInterfaceQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
+    'AlmanacInterfaceTableView' => 'AphrontView',
     'AlmanacManagementRegisterWorkflow' => 'AlmanacManagementWorkflow',
     'AlmanacManagementWorkflow' => 'PhabricatorManagementWorkflow',
     'AlmanacNames' => 'Phobject',

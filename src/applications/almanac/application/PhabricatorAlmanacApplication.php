@@ -44,6 +44,9 @@ final class PhabricatorAlmanacApplication extends PhabricatorApplication {
           'edit/(?:(?P<id>\d+)/)?' => 'AlmanacDeviceEditController',
           'view/(?P<name>[^/]+)/' => 'AlmanacDeviceViewController',
         ),
+        'interface/' => array(
+          'edit/(?:(?P<id>\d+)/)?' => 'AlmanacInterfaceEditController',
+        ),
         'network/' => array(
           '(?:query/(?P<queryKey>[^/]+)/)?' => 'AlmanacNetworkListController',
           'edit/(?:(?P<id>\d+)/)?' => 'AlmanacNetworkEditController',

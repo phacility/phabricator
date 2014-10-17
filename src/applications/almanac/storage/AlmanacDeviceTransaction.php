@@ -4,6 +4,7 @@ final class AlmanacDeviceTransaction
   extends PhabricatorApplicationTransaction {
 
   const TYPE_NAME = 'almanac:device:name';
+  const TYPE_INTERFACE = 'almanac:device:interface';
 
   public function getApplicationName() {
     return 'almanac';
@@ -15,6 +16,26 @@ final class AlmanacDeviceTransaction
 
   public function getApplicationTransactionCommentObject() {
     return null;
+  }
+
+  public function getRequiredHandlePHIDs() {
+    $phids = parent::getRequiredHandlePHIDs();
+
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    switch ($this->getTransactionType()) {
+      case self::TYPE_INTERFACE:
+        if ($old) {
+          $phids[] = $old['networkPHID'];
+        }
+        if ($new) {
+          $phids[] = $new['networkPHID'];
+        }
+        break;
+    }
+
+    return $phids;
   }
 
   public function getTitle() {
@@ -37,9 +58,43 @@ final class AlmanacDeviceTransaction
             $new);
         }
         break;
+      case self::TYPE_INTERFACE:
+        if ($old && $new) {
+          return pht(
+            '%s changed interface %s on this device to %s.',
+            $this->renderHandleLink($author_phid),
+            $this->describeInterface($old),
+            $this->describeInterface($new));
+        } else if ($old) {
+          return pht(
+            '%s removed the interface %s from this device.',
+            $this->renderHandleLink($author_phid),
+            $this->describeInterface($new));
+        } else if ($new) {
+          return pht(
+            '%s added the interface %s to this device.',
+            $this->renderHandleLink($author_phid),
+            $this->describeInterface($new));
+        }
     }
 
     return parent::getTitle();
+  }
+
+  public function shouldGenerateOldValue() {
+    switch ($this->getTransactionType()) {
+      case self::TYPE_INTERFACE:
+        return false;
+    }
+    return parent::shouldGenerateOldValue();
+  }
+
+  private function describeInterface(array $info) {
+    return pht(
+      '%s:%s (%s)',
+      $info['address'],
+      $info['port'],
+      $this->renderHandleLink($info['networkPHID']));
   }
 
 }

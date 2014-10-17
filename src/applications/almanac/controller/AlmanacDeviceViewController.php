@@ -35,6 +35,8 @@ final class AlmanacDeviceViewController
       ->setHeader($header)
       ->addPropertyList($property_list);
 
+    $interfaces = $this->buildInterfaceList($device);
+
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($device->getName());
 
@@ -53,6 +55,7 @@ final class AlmanacDeviceViewController
       array(
         $crumbs,
         $box,
+        $interfaces,
         $xaction_view,
       ),
       array(
@@ -90,6 +93,50 @@ final class AlmanacDeviceViewController
         ->setDisabled(!$can_edit));
 
     return $actions;
+  }
+
+  private function buildInterfaceList(AlmanacDevice $device) {
+    $viewer = $this->getViewer();
+    $id = $device->getID();
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $device,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $interfaces = id(new AlmanacInterfaceQuery())
+      ->setViewer($viewer)
+      ->withDevicePHIDs(array($device->getPHID()))
+      ->execute();
+
+    $phids = array();
+    foreach ($interfaces as $interface) {
+      $phids[] = $interface->getNetworkPHID();
+      $phids[] = $interface->getDevicePHID();
+    }
+    $handles = $this->loadViewerHandles($phids);
+
+    $table = id(new AlmanacInterfaceTableView())
+      ->setUser($viewer)
+      ->setInterfaces($interfaces)
+      ->setHandles($handles);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Device Interfaces'))
+      ->addActionLink(
+        id(new PHUIButtonView())
+          ->setTag('a')
+          ->setHref($this->getApplicationURI("interface/edit/?deviceID={$id}"))
+          ->setWorkflow(!$can_edit)
+          ->setDisabled(!$can_edit)
+          ->setText(pht('Add Interface'))
+          ->setIcon(
+            id(new PHUIIconView())
+              ->setIconFont('fa-plus')));
+
+    return id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->appendChild($table);
   }
 
 }
