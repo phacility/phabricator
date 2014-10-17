@@ -30,12 +30,25 @@ final class PhabricatorAlmanacApplication extends PhabricatorApplication {
     return true;
   }
 
-  public function isLaunchable() {
-    return false;
+  public function getRoutes() {
+    return array(
+      '/almanac/' => array(
+        '' => 'AlmanacConsoleController',
+        'service/' => array(
+          '(?:query/(?P<queryKey>[^/]+)/)?' => 'AlmanacServiceListController',
+          'edit/(?:(?P<id>\d+)/)?' => 'AlmanacServiceEditController',
+          'view/(?P<name>[^/]+)/' => 'AlmanacServiceViewController',
+        ),
+      ),
+    );
   }
 
-  public function getRoutes() {
-    return array();
+  protected function getCustomCapabilities() {
+    return array(
+      AlmanacCreateServicesCapability::CAPABILITY => array(
+        'default' => PhabricatorPolicies::POLICY_ADMIN,
+      ),
+    );
   }
 
 }
