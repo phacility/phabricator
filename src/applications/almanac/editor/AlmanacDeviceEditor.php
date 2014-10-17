@@ -1,6 +1,6 @@
 <?php
 
-final class AlmanacServiceEditor
+final class AlmanacDeviceEditor
   extends PhabricatorApplicationTransactionEditor {
 
   public function getEditorApplicationClass() {
@@ -8,13 +8,13 @@ final class AlmanacServiceEditor
   }
 
   public function getEditorObjectsDescription() {
-    return pht('Almanac Service');
+    return pht('Almanac Device');
   }
 
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
-    $types[] = AlmanacServiceTransaction::TYPE_NAME;
+    $types[] = AlmanacDeviceTransaction::TYPE_NAME;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
@@ -25,7 +25,7 @@ final class AlmanacServiceEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
     switch ($xaction->getTransactionType()) {
-      case AlmanacServiceTransaction::TYPE_NAME:
+      case AlmanacDeviceTransaction::TYPE_NAME:
         return $object->getName();
     }
 
@@ -37,7 +37,7 @@ final class AlmanacServiceEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case AlmanacServiceTransaction::TYPE_NAME:
+      case AlmanacDeviceTransaction::TYPE_NAME:
         return $xaction->getNewValue();
     }
 
@@ -49,7 +49,7 @@ final class AlmanacServiceEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case AlmanacServiceTransaction::TYPE_NAME:
+      case AlmanacDeviceTransaction::TYPE_NAME:
         $object->setName($xaction->getNewValue());
         return;
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
@@ -65,7 +65,7 @@ final class AlmanacServiceEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case AlmanacServiceTransaction::TYPE_NAME:
+      case AlmanacDeviceTransaction::TYPE_NAME:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         return;
@@ -82,7 +82,7 @@ final class AlmanacServiceEditor
     $errors = parent::validateTransaction($object, $type, $xactions);
 
     switch ($type) {
-      case AlmanacServiceTransaction::TYPE_NAME:
+      case AlmanacDeviceTransaction::TYPE_NAME:
         $missing = $this->validateIsEmptyTextField(
           $object->getName(),
           $xactions);
@@ -91,7 +91,7 @@ final class AlmanacServiceEditor
           $error = new PhabricatorApplicationTransactionValidationError(
             $type,
             pht('Required'),
-            pht('Service name is required.'),
+            pht('Device name is required.'),
             nonempty(last($xactions), null));
 
           $error->setIsMissingFieldError(true);
@@ -99,7 +99,6 @@ final class AlmanacServiceEditor
         } else {
           foreach ($xactions as $xaction) {
             $message = null;
-
             $name = $xaction->getNewValue();
 
             try {
@@ -120,7 +119,7 @@ final class AlmanacServiceEditor
         }
 
         if ($xactions) {
-          $duplicate = id(new AlmanacServiceQuery())
+          $duplicate = id(new AlmanacDeviceQuery())
             ->setViewer(PhabricatorUser::getOmnipotentUser())
             ->withNames(array(last($xactions)->getNewValue()))
             ->executeOne();
@@ -128,7 +127,7 @@ final class AlmanacServiceEditor
             $error = new PhabricatorApplicationTransactionValidationError(
               $type,
               pht('Not Unique'),
-              pht('Almanac services must have unique names.'),
+              pht('Almanac devices must have unique names.'),
               last($xactions));
             $errors[] = $error;
           }

@@ -39,6 +39,11 @@ final class PhabricatorAlmanacApplication extends PhabricatorApplication {
           'edit/(?:(?P<id>\d+)/)?' => 'AlmanacServiceEditController',
           'view/(?P<name>[^/]+)/' => 'AlmanacServiceViewController',
         ),
+        'device/' => array(
+          '(?:query/(?P<queryKey>[^/]+)/)?' => 'AlmanacDeviceListController',
+          'edit/(?:(?P<id>\d+)/)?' => 'AlmanacDeviceEditController',
+          'view/(?P<name>[^/]+)/' => 'AlmanacDeviceViewController',
+        ),
       ),
     );
   }
@@ -46,6 +51,9 @@ final class PhabricatorAlmanacApplication extends PhabricatorApplication {
   protected function getCustomCapabilities() {
     return array(
       AlmanacCreateServicesCapability::CAPABILITY => array(
+        'default' => PhabricatorPolicies::POLICY_ADMIN,
+      ),
+      AlmanacCreateDevicesCapability::CAPABILITY => array(
         'default' => PhabricatorPolicies::POLICY_ADMIN,
       ),
     );

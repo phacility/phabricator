@@ -1,8 +1,8 @@
 <?php
 
-final class AlmanacServiceTestCase extends PhabricatorTestCase {
+final class AlmanacNamesTestCase extends PhabricatorTestCase {
 
-  public function testServiceNames() {
+  public function testServiceOrDeviceNames() {
     $map = array(
       '' => false,
       'a' => false,
@@ -38,7 +38,7 @@ final class AlmanacServiceTestCase extends PhabricatorTestCase {
     foreach ($map as $input => $expect) {
       $caught = null;
       try {
-        AlmanacService::validateServiceName($input);
+        AlmanacNames::validateServiceOrDeviceName($input);
       } catch (Exception $ex) {
         $caught = $ex;
       }
