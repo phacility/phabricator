@@ -121,8 +121,8 @@ final class PhabricatorFeedStoryPublisher {
     }
 
     $subscribed_phids = $this->subscribedPHIDs;
-    $subscribed_phids = $this->filterSubscribedPHIDs($subscribed_phids);
     if ($subscribed_phids) {
+      $subscribed_phids = $this->filterSubscribedPHIDs($subscribed_phids);
       $this->insertNotifications($chrono_key, $subscribed_phids);
       $this->sendNotification($chrono_key, $subscribed_phids);
     }
