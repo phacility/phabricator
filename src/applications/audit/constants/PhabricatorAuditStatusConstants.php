@@ -38,16 +38,48 @@ final class PhabricatorAuditStatusConstants {
         $color = 'red';
         break;
       case self::AUDIT_REQUIRED:
+      case self::AUDIT_REQUESTED:
         $color = 'orange';
         break;
       case self::ACCEPTED:
         $color = 'green';
         break;
+      case self::AUDIT_NOT_REQUIRED:
+        $color = 'blue';
+        break;
+      case self::RESIGNED:
+      case self::CLOSED:
+        $color = 'dark';
+        break;
       default:
-        $color = null;
+        $color = 'bluegrey';
         break;
     }
     return $color;
+  }
+
+  public static function getStatusIcon($code) {
+    switch ($code) {
+      case PhabricatorAuditStatusConstants::AUDIT_NOT_REQUIRED:
+      case PhabricatorAuditStatusConstants::RESIGNED:
+        $icon = PHUIStatusItemView::ICON_OPEN;
+        break;
+      case PhabricatorAuditStatusConstants::AUDIT_REQUIRED:
+      case PhabricatorAuditStatusConstants::AUDIT_REQUESTED:
+        $icon = PHUIStatusItemView::ICON_WARNING;
+        break;
+      case PhabricatorAuditStatusConstants::CONCERNED:
+        $icon = PHUIStatusItemView::ICON_REJECT;
+        break;
+      case PhabricatorAuditStatusConstants::ACCEPTED:
+      case PhabricatorAuditStatusConstants::CLOSED:
+        $icon = PHUIStatusItemView::ICON_ACCEPT;
+        break;
+      default:
+        $icon = PHUIStatusItemView::ICON_QUESTION;
+        break;
+    }
+    return $icon;
   }
 
   public static function getOpenStatusConstants() {
