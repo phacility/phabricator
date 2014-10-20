@@ -160,12 +160,19 @@ final class PhabricatorAuditEditor
             continue;
           }
 
-          $audit_requested = PhabricatorAuditStatusConstants::AUDIT_REQUESTED;
+          if ($this->getIsHeraldEditor()) {
+            $audit_requested = $xaction->getMetadataValue('auditStatus');
+            $audit_reason_map = $xaction->getMetadataValue('auditReasonMap');
+            $audit_reason = $audit_reason_map[$phid];
+          } else {
+            $audit_requested = PhabricatorAuditStatusConstants::AUDIT_REQUESTED;
+            $audit_reason = $this->getAuditReasons($phid);
+          }
           $requests[] = id (new PhabricatorRepositoryAuditRequest())
             ->setCommitPHID($object->getPHID())
             ->setAuditorPHID($phid)
             ->setAuditStatus($audit_requested)
-            ->setAuditReasons($this->getAuditReasons($phid))
+            ->setAuditReasons($audit_reason)
             ->save();
         }
 
@@ -849,7 +856,12 @@ final class PhabricatorAuditEditor
     if ($audit_phids) {
       $xactions[] = id(new PhabricatorAuditTransaction())
         ->setTransactionType(PhabricatorAuditActionConstants::ADD_AUDITORS)
-        ->setNewValue(array_fuse(array_keys($audit_phids)));
+        ->setNewValue(array_fuse(array_keys($audit_phids)))
+        ->setMetadataValue(
+          'auditStatus',
+          PhabricatorAuditStatusConstants::AUDIT_REQUIRED)
+        ->setMetadataValue(
+          'auditReasonMap', $this->auditReasonMap);
     }
 
     $cc_phids = $adapter->getAddCCMap();
