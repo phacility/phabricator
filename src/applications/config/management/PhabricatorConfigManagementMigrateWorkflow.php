@@ -58,7 +58,7 @@ final class PhabricatorConfigManagementMigrateWorkflow
             PhabricatorConfigEditor::deleteConfig(
               $this->getViewer(),
               $option,
-              PhabricatorContentSource::newFromConsole());
+              PhabricatorContentSource::newConsoleSource());
             $key_count++;
             $console->writeOut(pht(
               'Migrated option "%s" from file to local config.', $key)."\n");
