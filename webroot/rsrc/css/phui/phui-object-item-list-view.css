@@ -681,7 +681,8 @@
   border-radius: 0;
 }
 
-.dashboard-panel .phui-object-item-list-header {
+.dashboard-panel .phui-object-item-list-header,
+.dashboard-panel .maniphest-task-group-header {
   font-size: 13px;
   color: {$bluetext};
   background: {$lightgreybackground};
