@@ -32,7 +32,7 @@
 }
 
 .device-desktop .pholio-mock-thumb-grid-item:hover {
-  border-color: {$indigo};
+  border-color: {$pink};
 }
 
 .pholio-mock-thumb-grid-current {
@@ -89,7 +89,7 @@
 }
 
 .device-desktop .pholio-transaction-inline-image-anchor:hover .phui-image-mask {
-  border-color: {$indigo};
+  border-color: {$pink};
 }
 
 .pholio-transaction-inline-comment {
@@ -138,7 +138,7 @@
 
 .pholio-mock-reticle-final .pholio-mock-comment-icon {
   font-size: 2.2em;
-  color: {$indigo};
+  color: {$pink};
   text-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
   -webkit-text-stroke: 1px white;
 }
@@ -198,7 +198,7 @@
   border-radius: 2px;
   color: #fff;
   text-decoration: none;
-  background: {$indigo};
+  background: {$pink};
 }
 
 .pholio-image-button {
