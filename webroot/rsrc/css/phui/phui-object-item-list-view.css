@@ -430,13 +430,13 @@
 
 */
 
-.phui-object-item-highlighted {
+.phui-object-item.phui-object-item-highlighted {
   background: {$lightyellow};
+  border-left-color: {$yellow};
 }
 
-.phui-object-item.phui-object-item-highlighted {
-  background-image: linear-gradient(to bottom, rgb(253, 255, 221), rgb(243, 245, 206));
-  background-image: -webkit-linear-gradient(top, rgb(253, 255, 221), rgb(243, 245, 206));
+.phui-object-item-highlighted .phui-object-item-frame {
+  border-color: {$yellow};
 }
 
 .phui-object-item-selected {
