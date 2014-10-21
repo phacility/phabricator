@@ -164,12 +164,15 @@ final class PhabricatorFeedStoryPublisher {
         $mark_read);
     }
 
-    queryfx(
-      $conn,
-      'INSERT INTO %T (primaryObjectPHID, userPHID, chronologicalKey, hasViewed)
-        VALUES %Q',
-      $notif->getTableName(),
-      implode(', ', $sql));
+    if ($sql) {
+      queryfx(
+        $conn,
+        'INSERT INTO %T '.
+        '(primaryObjectPHID, userPHID, chronologicalKey, hasViewed) '.
+        'VALUES %Q',
+        $notif->getTableName(),
+        implode(', ', $sql));
+    }
   }
 
   private function sendNotification($chrono_key, array $subscribed_phids) {
