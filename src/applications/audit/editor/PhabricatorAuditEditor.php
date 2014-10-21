@@ -522,6 +522,14 @@ final class PhabricatorAuditEditor
   protected function shouldSendMail(
     PhabricatorLiskDAO $object,
     array $xactions) {
+
+    // not every code path loads the repository so tread carefully
+    if ($object->getRepository($assert_attached = false)) {
+      $repository = $object->getRepository();
+      if ($repository->isImporting()) {
+        return false;
+      }
+    }
     return $this->isCommitMostlyImported($object);
   }
 
@@ -803,7 +811,7 @@ final class PhabricatorAuditEditor
   protected function shouldPublishFeedStory(
     PhabricatorLiskDAO $object,
     array $xactions) {
-    return $this->isCommitMostlyImported($object);
+    return $this->shouldSendMail($object, $xactions);
   }
 
   protected function shouldApplyHeraldRules(
