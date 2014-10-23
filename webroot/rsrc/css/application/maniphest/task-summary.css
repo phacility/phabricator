@@ -101,5 +101,6 @@
 }
 
 .dashboard-panel .maniphest-task-group-header {
-  display: none;
+  border-left: 1px solid {$lightblueborder};
+  border-right: 1px solid {$lightblueborder};
 }

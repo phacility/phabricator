@@ -462,18 +462,17 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
     HeraldAdapter $adapter,
     HeraldTranscript $transcript) {
 
-    // TODO: Convert this to be transaction-based.
+    $xactions = array();
 
     $cc_phids = $adapter->getCcPHIDs();
     if ($cc_phids) {
-      id(new PhabricatorSubscriptionsEditor())
-        ->setObject($object)
-        ->setActor($this->requireActor())
-        ->subscribeImplicit($cc_phids)
-        ->save();
+      $value = array_fuse($cc_phids);
+      $xactions[] = id(new PholioTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+        ->setNewValue(array('+' => $value));
     }
 
-    return array();
+    return $xactions;
   }
 
   protected function sortTransactions(array $xactions) {

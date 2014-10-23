@@ -1055,58 +1055,12 @@ final class DiffusionCommitController extends DiffusionController {
 
     $view = new PHUIStatusListView();
     foreach ($audit_requests as $request) {
+      $code = $request->getAuditStatus();
       $item = new PHUIStatusItemView();
-
-      switch ($request->getAuditStatus()) {
-        case PhabricatorAuditStatusConstants::AUDIT_NOT_REQUIRED:
-          $item->setIcon(
-            PHUIStatusItemView::ICON_OPEN,
-            'blue',
-            pht('Commented'));
-          break;
-        case PhabricatorAuditStatusConstants::AUDIT_REQUIRED:
-          $item->setIcon(
-            PHUIStatusItemView::ICON_WARNING,
-            'blue',
-            pht('Audit Required'));
-          break;
-        case PhabricatorAuditStatusConstants::CONCERNED:
-          $item->setIcon(
-            PHUIStatusItemView::ICON_REJECT,
-            'red',
-            pht('Concern Raised'));
-          break;
-        case PhabricatorAuditStatusConstants::ACCEPTED:
-          $item->setIcon(
-            PHUIStatusItemView::ICON_ACCEPT,
-            'green',
-            pht('Accepted'));
-          break;
-        case PhabricatorAuditStatusConstants::AUDIT_REQUESTED:
-          $item->setIcon(
-            PHUIStatusItemView::ICON_WARNING,
-            'dark',
-            pht('Audit Requested'));
-          break;
-        case PhabricatorAuditStatusConstants::RESIGNED:
-          $item->setIcon(
-            PHUIStatusItemView::ICON_OPEN,
-            'dark',
-            pht('Resigned'));
-          break;
-        case PhabricatorAuditStatusConstants::CLOSED:
-          $item->setIcon(
-            PHUIStatusItemView::ICON_ACCEPT,
-            'blue',
-            pht('Closed'));
-          break;
-        default:
-          $item->setIcon(
-            PHUIStatusItemView::ICON_QUESTION,
-            'dark',
-            pht('%s?', $request->getAuditStatus()));
-          break;
-      }
+      $item->setIcon(
+        PhabricatorAuditStatusConstants::getStatusIcon($code),
+        PhabricatorAuditStatusConstants::getStatusColor($code),
+        PhabricatorAuditStatusConstants::getStatusName($code));
 
       $note = array();
       foreach ($request->getAuditReasons() as $reason) {

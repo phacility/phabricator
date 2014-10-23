@@ -17,7 +17,9 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       $data = new PhabricatorRepositoryCommitData();
     }
     $data->setCommitID($commit->getID());
-    $data->setAuthorName((string)$author);
+    $data->setAuthorName(id(new PhutilUTF8StringTruncator())
+      ->setMaximumCodepoints(255)
+      ->truncateString((string)$author));
 
     $data->setCommitDetail('authorName', $ref->getAuthorName());
     $data->setCommitDetail('authorEmail', $ref->getAuthorEmail());

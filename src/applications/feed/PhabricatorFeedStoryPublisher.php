@@ -121,8 +121,8 @@ final class PhabricatorFeedStoryPublisher {
     }
 
     $subscribed_phids = $this->subscribedPHIDs;
-    $subscribed_phids = $this->filterSubscribedPHIDs($subscribed_phids);
     if ($subscribed_phids) {
+      $subscribed_phids = $this->filterSubscribedPHIDs($subscribed_phids);
       $this->insertNotifications($chrono_key, $subscribed_phids);
       $this->sendNotification($chrono_key, $subscribed_phids);
     }
@@ -164,12 +164,15 @@ final class PhabricatorFeedStoryPublisher {
         $mark_read);
     }
 
-    queryfx(
-      $conn,
-      'INSERT INTO %T (primaryObjectPHID, userPHID, chronologicalKey, hasViewed)
-        VALUES %Q',
-      $notif->getTableName(),
-      implode(', ', $sql));
+    if ($sql) {
+      queryfx(
+        $conn,
+        'INSERT INTO %T '.
+        '(primaryObjectPHID, userPHID, chronologicalKey, hasViewed) '.
+        'VALUES %Q',
+        $notif->getTableName(),
+        implode(', ', $sql));
+    }
   }
 
   private function sendNotification($chrono_key, array $subscribed_phids) {

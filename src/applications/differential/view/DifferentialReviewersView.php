@@ -95,7 +95,7 @@ final class DifferentialReviewersView extends AphrontView {
           if ($is_current) {
             $item->setIcon(
               PHUIStatusItemView::ICON_INFO,
-              'bluegrey',
+              'blue',
               pht('Commented'));
           } else {
             $item->setIcon(

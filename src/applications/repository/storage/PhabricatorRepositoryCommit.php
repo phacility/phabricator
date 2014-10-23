@@ -40,8 +40,11 @@ final class PhabricatorRepositoryCommit
     return $this;
   }
 
-  public function getRepository() {
-    return $this->assertAttached($this->repository);
+  public function getRepository($assert_attached = true) {
+    if ($assert_attached) {
+      return $this->assertAttached($this->repository);
+    }
+    return $this->repository;
   }
 
   public function isPartiallyImported($mask) {
