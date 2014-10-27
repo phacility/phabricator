@@ -30,8 +30,20 @@ final class AlmanacInterfacePHIDType extends PhabricatorPHIDType {
 
       $id = $interface->getID();
 
+      $device_name = $interface->getDevice()->getName();
+      $address = $interface->getAddress();
+      $port = $interface->getPort();
+      $network = $interface->getNetwork()->getName();
+
+      $name = pht(
+        '%s:%s (%s on %s)',
+        $device_name,
+        $port,
+        $address,
+        $network);
+
       $handle->setObjectName(pht('Interface %d', $id));
-      $handle->setName(pht('Interface %d', $id));
+      $handle->setName($name);
     }
   }
 

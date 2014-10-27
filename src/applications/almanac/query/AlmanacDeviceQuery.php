@@ -6,6 +6,7 @@ final class AlmanacDeviceQuery
   private $ids;
   private $phids;
   private $names;
+  private $datasourceQuery;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -19,6 +20,11 @@ final class AlmanacDeviceQuery
 
   public function withNames(array $names) {
     $this->names = $names;
+    return $this;
+  }
+
+  public function withDatasourceQuery($query) {
+    $this->datasourceQuery = $query;
     return $this;
   }
 
@@ -63,6 +69,13 @@ final class AlmanacDeviceQuery
         $conn_r,
         'nameIndex IN (%Ls)',
         $hashes);
+    }
+
+    if ($this->datasourceQuery !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'name LIKE %>',
+        $this->datasourceQuery);
     }
 
     $where[] = $this->buildPagingClause($conn_r);

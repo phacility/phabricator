@@ -33,6 +33,7 @@ final class AlmanacDevicePHIDType extends PhabricatorPHIDType {
 
       $handle->setObjectName(pht('Device %d', $id));
       $handle->setName($name);
+      $handle->setURI($device->getURI());
     }
   }
 
