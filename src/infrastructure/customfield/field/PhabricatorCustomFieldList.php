@@ -339,8 +339,6 @@ final class PhabricatorCustomFieldList extends Phobject {
       }
       $field->updateAbstractDocument($document);
     }
-
-    return $document;
   }
 
 
