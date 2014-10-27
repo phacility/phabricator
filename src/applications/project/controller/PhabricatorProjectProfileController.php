@@ -66,7 +66,7 @@ final class PhabricatorProjectProfileController
           ->setIconFont('fa-columns');
     $board_btn = id(new PHUIButtonView())
         ->setTag('a')
-        ->setText(pht('Workboards'))
+        ->setText(pht('Workboard'))
         ->setHref($this->getApplicationURI("board/{$id}/"))
         ->setIcon($icon);
 
