@@ -49,6 +49,14 @@ return array(
       'type'       => 'date',
       'caption'    => 'The date you expect to have this task completed by',
       'required'   => false,
+    ),
+    // TODO(tom): Link to a document with more information about what the error
+    // key signifies
+    'khan:errorkey' => array(
+      'name'       => 'Error key',
+      'type'       => 'text',
+      'caption'    => 'Associated error key; prepopulated by /devadmin/errors',
+      'required'   => false,
     )
   ),
 
