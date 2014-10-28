@@ -33,6 +33,7 @@ final class AlmanacServicePHIDType extends PhabricatorPHIDType {
 
       $handle->setObjectName(pht('Service %d', $id));
       $handle->setName($name);
+      $handle->setURI($service->getURI());
     }
   }
 

@@ -102,6 +102,9 @@ When defining custom fields using a configuration option like
     defaults to `true`). (Note: Empty fields are not shown.)
   - **search**: Show this field on the application's search interface, allowing
     users to filter objects by the field value.
+  - **fulltext**: Index the text in this field as part of the object's global
+    full-text index. This allows users to find the object by searching for
+    the field's contents using global search.
   - **caption**: A caption to display underneath the field (optional).
   - **required**: True if the user should be required to provide a value.
   - **options**: If type is set to **select**, provide options for the dropdown

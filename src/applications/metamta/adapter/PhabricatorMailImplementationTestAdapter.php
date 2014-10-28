@@ -75,7 +75,7 @@ final class PhabricatorMailImplementationTestAdapter
   }
 
   public function supportsMessageIDHeader() {
-    return $this->config['supportsMessageIDHeader'];
+    return idx($this->config, 'supportsMessageIDHeader', true);
   }
 
   public function send() {

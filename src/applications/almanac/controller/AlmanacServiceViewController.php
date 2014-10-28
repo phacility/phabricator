@@ -35,6 +35,8 @@ final class AlmanacServiceViewController
       ->setHeader($header)
       ->addPropertyList($property_list);
 
+    $bindings = $this->buildBindingList($service);
+
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($service->getName());
 
@@ -53,6 +55,7 @@ final class AlmanacServiceViewController
       array(
         $crumbs,
         $box,
+        $bindings,
         $xaction_view,
       ),
       array(
@@ -90,6 +93,53 @@ final class AlmanacServiceViewController
         ->setDisabled(!$can_edit));
 
     return $actions;
+  }
+
+  private function buildBindingList(AlmanacService $service) {
+    $viewer = $this->getViewer();
+    $id = $service->getID();
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $service,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $bindings = id(new AlmanacBindingQuery())
+      ->setViewer($viewer)
+      ->withServicePHIDs(array($service->getPHID()))
+      ->execute();
+
+    $phids = array();
+    foreach ($bindings as $binding) {
+      $phids[] = $binding->getServicePHID();
+      $phids[] = $binding->getDevicePHID();
+      $phids[] = $binding->getInterface()->getNetworkPHID();
+    }
+    $handles = $this->loadViewerHandles($phids);
+
+    $table = id(new AlmanacBindingTableView())
+      ->setNoDataString(
+        pht('This service has not been bound to any device interfaces yet.'))
+      ->setUser($viewer)
+      ->setBindings($bindings)
+      ->setHandles($handles);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Service Bindings'))
+      ->addActionLink(
+        id(new PHUIButtonView())
+          ->setTag('a')
+          ->setHref($this->getApplicationURI("binding/edit/?serviceID={$id}"))
+          ->setWorkflow(!$can_edit)
+          ->setDisabled(!$can_edit)
+          ->setText(pht('Add Binding'))
+          ->setIcon(
+            id(new PHUIIconView())
+              ->setIconFont('fa-plus')));
+
+    return id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->appendChild($table);
   }
 
 }

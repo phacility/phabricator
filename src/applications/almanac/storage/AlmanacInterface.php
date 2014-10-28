@@ -52,8 +52,8 @@ final class AlmanacInterface
     return $this->assertAttached($this->network);
   }
 
-  public function attachNetwork(AlmanacNetwork $device) {
-    $this->device = $device;
+  public function attachNetwork(AlmanacNetwork $network) {
+    $this->network = $network;
     return $this;
   }
 
@@ -66,6 +66,10 @@ final class AlmanacInterface
 
   public function getAddressHash() {
     return $this->toAddress()->toHash();
+  }
+
+  public function renderDisplayAddress() {
+    return $this->getAddress().':'.$this->getPort();
   }
 
 

@@ -33,6 +33,7 @@ final class AlmanacNetworkPHIDType extends PhabricatorPHIDType {
 
       $handle->setObjectName(pht('Network %d', $id));
       $handle->setName($name);
+      $handle->setURI($network->getURI());
     }
   }
 

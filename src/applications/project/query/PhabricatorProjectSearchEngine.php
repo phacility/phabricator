@@ -221,7 +221,7 @@ final class PhabricatorProjectSearchEngine
         array(
           'href' => $workboards_uri,
         ),
-        pht('Workboards'));
+        pht('Workboard'));
 
       $members_url = phutil_tag(
         'a',

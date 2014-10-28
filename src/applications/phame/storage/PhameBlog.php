@@ -72,7 +72,8 @@ final class PhameBlog extends PhameDAO
         'load.');
     }
 
-    $skin = newv($spec->getSkinClass(), array($request));
+    $skin = newv($spec->getSkinClass(), array());
+    $skin->setRequest($request);
     $skin->setSpecification($spec);
 
     return $skin;
