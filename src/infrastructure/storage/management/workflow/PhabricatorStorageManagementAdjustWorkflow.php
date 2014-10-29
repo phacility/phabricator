@@ -10,14 +10,26 @@ final class PhabricatorStorageManagementAdjustWorkflow
       ->setSynopsis(
         pht(
           'Make schemata adjustments to correct issues with characters sets, '.
-          'collations, and keys.'));
+          'collations, and keys.'))
+      ->setArguments(
+        array(
+          array(
+            'name' => 'unsafe',
+            'help' => pht(
+              'Permit adjustments which truncate data. This option may '.
+              'destroy some data, but the lost data is usually not '.
+              'important (most commonly, the ends of very long object '.
+              'titles).'),
+          ),
+        ));
   }
 
   public function execute(PhutilArgumentParser $args) {
     $force = $args->getArg('force');
+    $unsafe = $args->getArg('unsafe');
 
     $this->requireAllPatchesApplied();
-    return $this->adjustSchemata($force);
+    return $this->adjustSchemata($force, $unsafe);
   }
 
   private function requireAllPatchesApplied() {
@@ -59,7 +71,7 @@ final class PhabricatorStorageManagementAdjustWorkflow
     return array($comp, $expect, $actual);
   }
 
-  private function adjustSchemata($force) {
+  private function adjustSchemata($force, $unsafe) {
     $console = PhutilConsole::getConsole();
 
     $console->writeOut(
@@ -137,6 +149,12 @@ final class PhabricatorStorageManagementAdjustWorkflow
 
     $api = $this->getAPI();
     $conn = $api->getConn(null);
+
+    if ($unsafe) {
+      queryfx($conn, 'SET SESSION sql_mode = %s', '');
+    } else {
+      queryfx($conn, 'SET SESSION sql_mode = %s', 'STRICT_ALL_TABLES');
+    }
 
     $failed = array();
 
@@ -326,6 +344,15 @@ final class PhabricatorStorageManagementAdjustWorkflow
     $console->writeOut(
       "\n%s\n",
       pht('Failed to make some schema adjustments, detailed above.'));
+
+    if (!$unsafe) {
+      $console->writeOut(
+        "%s\n",
+        pht(
+          'Migrations which fail with certain types of errors (including '.
+          '"#1406 Data Too Long" and "#1366 Incorrect String Value") can be '.
+          'forced to complete by running again with `--unsafe`.'));
+    }
 
     return 1;
   }

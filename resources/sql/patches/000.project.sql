@@ -1,6 +1,6 @@
 create table {$NAMESPACE}_project.project (
   id int unsigned not null auto_increment primary key,
-  name varchar(255) not null,
+  name varchar(255) COLLATE `binary` not null,
   unique key (name),
   phid varchar(64) binary not null,
   authorPHID varchar(64) binary not null,

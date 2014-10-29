@@ -9,7 +9,7 @@ final class PhabricatorUserSchemaSpec extends PhabricatorConfigSchemaSpec {
       id(new PhabricatorUser())->getApplicationName(),
       PhabricatorUser::NAMETOKEN_TABLE,
       array(
-        'token' => 'text255',
+        'token' => 'sort255',
         'userID' => 'id',
       ),
       array(

@@ -23,6 +23,6 @@ create table {$NAMESPACE}_timeline.timeline_eventdata (
 );
 
 create table {$NAMESPACE}_timeline.timeline_cursor (
-  name varchar(255) not null primary key,
+  name varchar(255) COLLATE `binary` not null primary key,
   position int unsigned not null
 );

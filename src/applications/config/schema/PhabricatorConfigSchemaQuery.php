@@ -153,11 +153,7 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
 
   public function loadExpectedSchema() {
     $databases = $this->getDatabaseNames();
-
-    $api = $this->getAPI();
-
-    $charset_info = $api->getCharsetInfo();
-    list($charset, $collate_text, $collate_sort) = $charset_info;
+    $info = $this->getAPI()->getCharsetInfo();
 
     $specs = id(new PhutilSymbolLoader())
       ->setAncestorClass('PhabricatorConfigSchemaSpec')
@@ -166,9 +162,12 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
     $server_schema = new PhabricatorConfigServerSchema();
     foreach ($specs as $spec) {
       $spec
-        ->setUTF8Charset($charset)
-        ->setUTF8BinaryCollation($collate_text)
-        ->setUTF8SortingCollation($collate_sort)
+        ->setUTF8Charset(
+          $info[PhabricatorStorageManagementAPI::CHARSET_DEFAULT])
+        ->setUTF8BinaryCollation(
+          $info[PhabricatorStorageManagementAPI::COLLATE_TEXT])
+        ->setUTF8SortingCollation(
+          $info[PhabricatorStorageManagementAPI::COLLATE_SORT])
         ->setServer($server_schema)
         ->buildSchemata($server_schema);
     }
