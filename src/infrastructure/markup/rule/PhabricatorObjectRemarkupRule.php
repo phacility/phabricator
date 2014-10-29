@@ -95,14 +95,32 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
   }
 
   public function apply($text) {
-    $prefix = $this->getObjectNamePrefix();
-    $prefix = preg_quote($prefix, '@');
-    $id = $this->getObjectIDPattern();
-
     $text = preg_replace_callback(
-      '@\B{'.$prefix.'('.$id.')((?:[^}\\\\]|\\\\.)*)}\B@u',
+      $this->getObjectEmbedPattern(),
       array($this, 'markupObjectEmbed'),
       $text);
+
+    $text = preg_replace_callback(
+      $this->getObjectReferencePattern(),
+      array($this, 'markupObjectReference'),
+      $text);
+
+    return $text;
+  }
+
+  private function getObjectEmbedPattern() {
+    $prefix = $this->getObjectNamePrefix();
+    $prefix = preg_quote($prefix);
+    $id = $this->getObjectIDPattern();
+
+    return '(\B{'.$prefix.'('.$id.')((?:[^}\\\\]|\\\\.)*)}\B)u';
+  }
+
+  private function getObjectReferencePattern() {
+    $prefix = $this->getObjectNamePrefix();
+    $prefix = preg_quote($prefix);
+
+    $id = $this->getObjectIDPattern();
 
     // If the prefix starts with a word character (like "D"), we want to
     // require a word boundary so that we don't match "XD1" as "D1". If the
@@ -121,12 +139,55 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
     // The "\b" allows us to link "(abcdef)" or similar without linking things
     // in the middle of words.
 
-    $text = preg_replace_callback(
-      '((?<![#-])'.$boundary.$prefix.'('.$id.')(?:#([-\w\d]+))?(?!\w))u',
-      array($this, 'markupObjectReference'),
-      $text);
+    return '((?<![#-])'.$boundary.$prefix.'('.$id.')(?:#([-\w\d]+))?(?!\w))u';
+  }
 
-    return $text;
+
+  /**
+   * Extract matched object references from a block of text.
+   *
+   * This is intended to make it easy to write unit tests for object remarkup
+   * rules. Production code is not normally expected to call this method.
+   *
+   * @param   string  Text to match rules against.
+   * @return  wild    Matches, suitable for writing unit tests against.
+   */
+  public function extractReferences($text) {
+    $embed_matches = null;
+    preg_match_all(
+      $this->getObjectEmbedPattern(),
+      $text,
+      $embed_matches,
+      PREG_OFFSET_CAPTURE | PREG_SET_ORDER);
+
+    $ref_matches = null;
+    preg_match_all(
+      $this->getObjectReferencePattern(),
+      $text,
+      $ref_matches,
+      PREG_OFFSET_CAPTURE | PREG_SET_ORDER);
+
+    $results = array();
+    $sets = array(
+      'embed' => $embed_matches,
+      'ref' => $ref_matches,
+    );
+    foreach ($sets as $type => $matches) {
+      $formatted = array();
+      foreach ($matches as $match) {
+        $format = array(
+          'offset' => $match[1][1],
+          'id' => $match[1][0],
+        );
+        if (isset($match[2][0])) {
+          $format['tail'] = $match[2][0];
+        }
+        $formatted[] = $format;
+      }
+      $results[$type] = $formatted;
+    }
+
+    return $results;
   }
 
   public function markupObjectEmbed($matches) {

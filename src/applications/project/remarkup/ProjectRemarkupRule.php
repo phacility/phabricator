@@ -30,7 +30,7 @@ final class ProjectRemarkupRule extends PhabricatorObjectRemarkupRule {
     // In other contexts, the PhabricatorProjectProjectPHIDType pattern is
     // controlling and these names should parse correctly.
 
-    return '[^\s.!,:;{}#]*[^\s\d!,:;{}#]+(?:[^\s.!,:;{}#][^\s!,:;{}#]*)*';
+    return '[^\s.\d!,:;{}#]+(?:[^\s!,:;{}#][^\s.!,:;{}#]+)*';
   }
 
   protected function loadObjects(array $ids) {
