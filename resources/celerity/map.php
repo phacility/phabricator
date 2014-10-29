@@ -150,7 +150,7 @@ return array(
     'rsrc/css/sprite-conpherence.css' => '3b4a0487',
     'rsrc/css/sprite-docs.css' => '5f65d0da',
     'rsrc/css/sprite-gradient.css' => '4bdb98a7',
-    'rsrc/css/sprite-login.css' => 'cf08ac44',
+    'rsrc/css/sprite-login.css' => 'a355d921',
     'rsrc/css/sprite-main-header.css' => '92720ee2',
     'rsrc/css/sprite-menu.css' => '28281e16',
     'rsrc/css/sprite-payments.css' => 'cc085d44',
@@ -321,8 +321,8 @@ return array(
     'rsrc/image/sprite-docs-X2.png' => '6dc1adad',
     'rsrc/image/sprite-docs.png' => '4636297f',
     'rsrc/image/sprite-gradient.png' => 'ec15a417',
-    'rsrc/image/sprite-login-X2.png' => '46f95dcc',
-    'rsrc/image/sprite-login.png' => '4e0e66ee',
+    'rsrc/image/sprite-login-X2.png' => '5ae6de3a',
+    'rsrc/image/sprite-login.png' => '07f2c67c',
     'rsrc/image/sprite-main-header.png' => '83521873',
     'rsrc/image/sprite-menu-X2.png' => '39d78f97',
     'rsrc/image/sprite-menu.png' => '259dab45',
@@ -812,7 +812,7 @@ return array(
     'sprite-conpherence-css' => '3b4a0487',
     'sprite-docs-css' => '5f65d0da',
     'sprite-gradient-css' => '4bdb98a7',
-    'sprite-login-css' => 'cf08ac44',
+    'sprite-login-css' => 'a355d921',
     'sprite-main-header-css' => '92720ee2',
     'sprite-menu-css' => '28281e16',
     'sprite-payments-css' => 'cc085d44',
@@ -854,6 +854,10 @@ return array(
       'javelin-stratcom',
       'javelin-workflow',
       'phabricator-draggable-list',
+    ),
+    '7319e029' => array(
+      'javelin-behavior',
+      'javelin-dom',
     ),
     '06e05112' => array(
       'javelin-behavior',
@@ -1272,10 +1276,6 @@ return array(
       'phabricator-phtize',
       'changeset-view-manager',
     ),
-    '7319e029' => array(
-      'javelin-behavior',
-      'javelin-dom',
-    ),
     '76b9fc3e' => array(
       'javelin-behavior',
       'javelin-stratcom',
@@ -1335,6 +1335,28 @@ return array(
       'javelin-uri',
       'javelin-behavior-device',
       'phabricator-title',
+    ),
+    42126667 => array(
+      'javelin-behavior',
+      'javelin-dom',
+      'javelin-request',
+    ),
+    48086888 => array(
+      'javelin-behavior',
+      'javelin-dom',
+      'javelin-workflow',
+    ),
+    60479091 => array(
+      'phabricator-busy',
+      'javelin-behavior',
+    ),
+    82439934 => array(
+      'javelin-behavior',
+      'javelin-dom',
+      'javelin-util',
+      'javelin-stratcom',
+      'javelin-workflow',
+      'phabricator-draggable-list',
     ),
     '7e41274a' => array(
       'javelin-install',
@@ -1939,28 +1961,6 @@ return array(
       'javelin-util',
       'phabricator-prefab',
       'javelin-json',
-    ),
-    42126667 => array(
-      'javelin-behavior',
-      'javelin-dom',
-      'javelin-request',
-    ),
-    48086888 => array(
-      'javelin-behavior',
-      'javelin-dom',
-      'javelin-workflow',
-    ),
-    60479091 => array(
-      'phabricator-busy',
-      'javelin-behavior',
-    ),
-    82439934 => array(
-      'javelin-behavior',
-      'javelin-dom',
-      'javelin-util',
-      'javelin-stratcom',
-      'javelin-workflow',
-      'phabricator-draggable-list',
     ),
   ),
   'packages' => array(
