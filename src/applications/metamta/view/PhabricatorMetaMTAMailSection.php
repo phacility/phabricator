@@ -22,7 +22,6 @@ final class PhabricatorMetaMTAMailSection {
   public function addHTMLFragment($fragment) {
     $this->htmlFragments[] = $fragment;
     return $this;
-
   }
 
   public function addPlaintextFragment($fragment) {

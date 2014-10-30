@@ -678,7 +678,7 @@ final class PhabricatorAuditEditor
     $monogram = $object->getRepository()->formatCommitName(
       $object->getCommitIdentifier());
 
-    $body->addTextSection(
+    $body->addLinkSection(
       pht('COMMIT'),
       PhabricatorEnv::getProductionURI('/'.$monogram));
 

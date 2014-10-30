@@ -267,7 +267,7 @@ final class FundInitiativeEditor
 
     $body = parent::buildMailBody($object, $xactions);
 
-    $body->addTextSection(
+    $body->addLinkSection(
       pht('INITIATIVE DETAIL'),
       PhabricatorEnv::getProductionURI('/'.$object->getMonogram()));
 

@@ -123,7 +123,7 @@ final class PhortuneCartEditor
 
     $body->addTextSection(pht('ORDER CONTENTS'), implode("\n", $items));
 
-    $body->addTextSection(
+    $body->addLinkSection(
       pht('ORDER DETAIL'),
       PhabricatorEnv::getProductionURI('/phortune/cart/'.$object->getID().'/'));
 

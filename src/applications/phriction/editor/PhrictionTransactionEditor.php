@@ -242,7 +242,7 @@ final class PhrictionTransactionEditor
         $object->getContent()->getContent());
     }
 
-    $body->addTextSection(
+    $body->addLinkSection(
       pht('DOCUMENT DETAIL'),
       PhabricatorEnv::getProductionURI(
         PhrictionDocument::getSlugURI($object->getSlug())));

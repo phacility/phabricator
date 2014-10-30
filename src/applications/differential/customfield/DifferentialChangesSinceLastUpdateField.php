@@ -54,7 +54,7 @@ final class DifferentialChangesSinceLastUpdateField
     $uri = '/'.$revision->getMonogram().'?vs='.$old_id.'&id='.$new_id;
     $uri = PhabricatorEnv::getProductionURI($uri);
 
-    $body->addTextSection(pht('CHANGES SINCE LAST UPDATE'), $uri);
+    $body->addLinkSection(pht('CHANGES SINCE LAST UPDATE'), $uri);
   }
 
 }

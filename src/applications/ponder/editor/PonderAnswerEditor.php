@@ -98,7 +98,7 @@ final class PonderAnswerEditor extends PonderEditor {
       }
     }
 
-    $body->addTextSection(
+    $body->addLinkSection(
       pht('ANSWER DETAIL'),
       PhabricatorEnv::getProductionURI($object->getURI()));
 

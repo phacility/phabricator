@@ -194,7 +194,7 @@ final class LegalpadDocumentEditor
 
     $body = parent::buildMailBody($object, $xactions);
 
-    $body->addTextSection(
+    $body->addLinkSection(
       pht('DOCUMENT DETAIL'),
       PhabricatorEnv::getProductionURI('/legalpad/view/'.$object->getID().'/'));
 

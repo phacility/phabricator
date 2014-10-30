@@ -497,7 +497,7 @@ final class ManiphestTransactionEditor
         $object->getDescription());
     }
 
-    $body->addTextSection(
+    $body->addLinkSection(
       pht('TASK DETAIL'),
       PhabricatorEnv::getProductionURI('/T'.$object->getID()));
 
