@@ -106,7 +106,7 @@ final class PhrictionDocumentEditor extends PhabricatorEditor {
     return $this->execute(PhrictionChangeType::CHANGE_DELETE, true);
   }
 
-  private function stub() {
+  public function stub() {
     return $this->execute(PhrictionChangeType::CHANGE_STUB, true);
   }
 

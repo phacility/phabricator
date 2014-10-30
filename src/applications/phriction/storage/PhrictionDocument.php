@@ -12,6 +12,7 @@ final class PhrictionDocument extends PhrictionDAO
   protected $depth;
   protected $contentID;
   protected $status;
+  protected $mailKey;
 
   private $contentObject = self::ATTACHABLE;
   private $ancestors = array();
@@ -51,6 +52,27 @@ final class PhrictionDocument extends PhrictionDAO
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
       PhrictionDocumentPHIDType::TYPECONST);
+  }
+
+  public static function initializeNewDocument(PhabricatorUser $actor, $slug) {
+    $document = new PhrictionDocument();
+    $document->setSlug($slug);
+
+    $content  = new PhrictionContent();
+    $content->setSlug($slug);
+
+    $default_title = PhabricatorSlug::getDefaultTitle($slug);
+    $content->setTitle($default_title);
+    $document->attachContent($content);
+
+    return $document;
+  }
+
+  public function save() {
+    if (!$this->getMailKey()) {
+      $this->setMailKey(Filesystem::readRandomCharacters(20));
+    }
+    return parent::save();
   }
 
   public static function getSlugURI($slug, $type = 'document') {
