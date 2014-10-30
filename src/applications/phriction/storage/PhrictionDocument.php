@@ -30,6 +30,7 @@ final class PhrictionDocument extends PhrictionDAO
         'depth' => 'uint32',
         'contentID' => 'id?',
         'status' => 'uint32',
+        'mailKey' => 'bytes20',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
