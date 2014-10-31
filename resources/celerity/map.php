@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => '1d489507',
+    'core.pkg.css' => 'cab5a4a0',
     'core.pkg.js' => 'cbdbd552',
     'darkconsole.pkg.js' => 'df001cab',
     'differential.pkg.css' => '8af45893',
@@ -104,7 +104,7 @@ return array(
     'rsrc/css/application/uiexample/example.css' => '528b19de',
     'rsrc/css/core/core.css' => '40151074',
     'rsrc/css/core/remarkup.css' => '45313445',
-    'rsrc/css/core/syntax.css' => '863f3cd8',
+    'rsrc/css/core/syntax.css' => '56c1ba38',
     'rsrc/css/core/z-index.css' => '44e1d311',
     'rsrc/css/diviner/diviner-shared.css' => '38813222',
     'rsrc/css/font/font-awesome.css' => '73d075c3',
@@ -818,7 +818,7 @@ return array(
     'sprite-payments-css' => 'cc085d44',
     'sprite-projects-css' => '7578fa56',
     'sprite-tokens-css' => '1706b943',
-    'syntax-highlighting-css' => '863f3cd8',
+    'syntax-highlighting-css' => '56c1ba38',
     'tokens-css' => '3d0f239e',
   ),
   'requires' => array(

@@ -10,8 +10,9 @@
   margin-right: 1px;
 }
 
-.remarkup-code td > span {
-  padding:        1px 0 3px;
+.remarkup-code td > span,
+.remarkup-code td > span > span {
+  padding: 1px 0 3px;
 }
 
 .remarkup-code span {
