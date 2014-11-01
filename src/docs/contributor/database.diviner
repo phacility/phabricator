@@ -4,93 +4,116 @@
 This document describes key components of the database schema and should answer
 questions like how to store new types of data.
 
-= Database System =
+Database System
+===============
 
-Phabricator uses MySQL with InnoDB engine. The only exception is the
+Phabricator uses MySQL or another MySQL-compatible database (like MariaDB
+or Amazon RDS).
+
+Phabricator the InnoDB table engine. The only exception is the
 `search_documentfield` table which uses MyISAM because MySQL doesn't support
-fulltext search in InnoDB.
+fulltext search in InnoDB (recent versions do, but we haven't added support
+yet).
 
-Let us know if you need to use other database system: @{article:Give Feedback!
-Get Support!}.
+We are unlikely to ever support other incompatible databases like PostgreSQL or
+SQLite.
 
-= PHP Drivers =
+PHP Drivers
+===========
 
 Phabricator supports [[ http://www.php.net/book.mysql | MySQL ]] and
-[[ http://www.php.net/book.mysqli | MySQLi ]] PHP extensions. Most installations
-use MySQL but MySQLi should work equally well.
+[[ http://www.php.net/book.mysqli | MySQLi ]] PHP extensions.
 
-= Databases =
+Databases
+=========
 
 Each Phabricator application has its own database. The names are prefixed by
-`phabricator_`. This design has two advantages:
+`phabricator_` (this is configurable). This design has two advantages:
 
-* Each database is easier to comprehend and to maintain.
-* We don't do cross-database joins so each database can live on its own machine
-  which is useful for load-balancing.
+  - Each database is easier to comprehend and to maintain.
+  - We don't do cross-database joins so each database can live on its own
+    machine. This gives us flexibility in sharding data later.
 
-= Connections =
+Connections
+===========
 
 Phabricator specifies if it will use any opened connection just for reading or
-also for writing. This allows opening write connections to master and read
-connections to slave in master/slave replication. It is useful for
-load-balancing.
+also for writing. This allows opening write connections to a primary and read
+connections to a replica in primary/replica setups (which are not actually
+supported yet).
 
-= Tables =
+Tables
+======
 
-Each table name is prefixed by its application. For example, Differential
-revisions are stored in database `phabricator_differential` and table
-`differential_revision`. This duplicity allows easy recognition of the table in
-DarkConsole (see @{article:Using DarkConsole}) and other places.
+Most table names are prefixed by their application names. For example,
+Differential revisions are stored in database `phabricator_differential` and
+table `differential_revision`. This generally makes queries easier to recognize
+and understand.
 
-The exception is tables which share the same schema over different databases
-such as `edge`.
+The exception is a few tables which share the same schema over different
+databases such as `edge`.
 
-We use lower-case table names with words separated by underscores. The reason is
-that MySQL can be configured (with `lower_case_table_names`) to lower-case the
-table names anyway.
+We use lower-case table names with words separated by underscores.
 
-= Column Names =
+Column Names
+============
 
-Phabricator uses camelCase names for columns. The main advantage is that they
+Phabricator uses `camelCase` names for columns. The main advantage is that they
 directly map to properties in PHP classes.
 
 Don't use MySQL reserved words (such as `order`) for column names.
 
-= Data Types =
+Data Types
+==========
 
-Phabricator uses `int unsigned` columns for storing dates instead of `date` or
-`datetime`. We don't need to care about time-zones in both MySQL and PHP because
-of it. The other reason is that PHP internally uses numbers for storing dates.
+Phabricator defines a set of abstract data types (like `uint32`, `epoch`, and
+`phid`) which map to MySQL column types. The mapping depends on the MySQL
+version.
 
-Phabricator uses UTF-8 encoding for storing all text data. We use
-`utf8_general_ci` collation for free-text and `utf8_bin` for identifiers.
+Phabricator uses `utf8mb4` character sets where available (MySQL 5.5 or newer),
+and `binary` character sets in most other cases. The primary motivation is to
+allow 4-byte unicode characters to be stored (the `utf8` character set, which
+is more widely available, does not support them). On newer MySQL, we use
+`utf8mb4` to take advantage of improved collation rules.
+
+Phabricator stores dates with an `epoch` abstract data type, which maps to
+`int unsigned`. Although this makes dates less readable when browsing the
+database, it makes date and time manipulation more consistent and
+straightforward in the application.
 
 We don't use the `enum` data type because each change to the list of possible
 values requires altering the table (which is slow with big tables). We use
 numbers (or short strings in some cases) mapped to PHP constants instead.
 
-= JSON =
+JSON and Other Serialized Data
+==============================
 
-Some data don't require structured access - you don't need to filter or order by
+Some data don't require structured access -- we don't need to filter or order by
 them. We store these data as text fields in JSON format. This approach has
 several advantages:
 
-* If we decide to add another unstructured field then we don't need to alter the
-  table (which is slow for big tables in MySQL).
-* Table structure is not cluttered by fields which could be unused most of the
-  time.
+  - If we decide to add another unstructured field then we don't need to alter
+    the table (which is slow for big tables in MySQL).
+  - Table structure is not cluttered by fields which could be unused most of the
+    time.
 
 An example of such usage can be found in column
 `differential_diffproperty.data`.
 
-= Primary Keys =
+Primary Keys
+============
 
-Most tables have auto-increment column named `id`. However creating such column
-is not required for tables which are not usually directly referenced (such as
-tables expressing M:N relations). Example of such table is
-`differential_relationship`.
+Most tables have auto-increment column named `id`. Adding an ID column is
+appropriate for most tables (even tables that have another natural unique key),
+as it improves consistency and makes it easier to perform generic operations
+on objects.
 
-= Indexes =
+For example, @{class:LiskMigrationIterator} allows you to very easily apply a
+migration to a table using a constant amount of memory provided the table has
+an `id` column.
+
+Indexes
+======
 
 Create all indexes necessary for fast query execution in most cases. Don't
 create indexes which are not used. You can analyze queries @{article:Using
@@ -100,77 +123,90 @@ Older MySQL versions are not able to use indexes for tuple search:
 `(a, b) IN ((%s, %d), (%s, %d))`. Use `AND` and `OR` instead:
 `((a = %s AND b = %d) OR (a = %s AND b = %d))`.
 
-= Foreign Keys =
+Foreign Keys
+============
 
-We don't use InnoDB's foreign keys because our application is so great that
-no inconsistencies can arise. It will just slow us down.
+We don't use foreign keys because they're complicated and we haven't experienced
+significant issues with data inconsistency that foreign keys could help prevent.
+Empirically, we have witnessed first hand as `ON DELETE CASCADE` relationships
+accidentally destroy huge amounts of data. We may pursue foreign keys
+eventually, but there isn't a strong case for them at the present time.
 
-= PHIDs =
+PHIDs
+=====
 
 Each globally referencable object in Phabricator has its associated PHID
-(Phabricator ID) which serves as a global identifier. We use PHIDs for
-referencing data in different databases.
+("Phabricator ID") which serves as a global identifier, similar to a GUID.
+We use PHIDs for referencing data in different databases.
 
 We use both autoincrementing IDs and global PHIDs because each is useful in
-different contexts. Autoincrementing IDs are chronologically ordered and allow
-us to construct short, human-readable object names (like D2258) and URIs. Global
-PHIDs allow us to represent relationships between different types of objects in
-a homogeneous way.
+different contexts. Autoincrementing IDs are meaningfully ordered and allow
+us to construct short, human-readable object names (like `D2258`) and URIs.
+Global PHIDs allow us to represent relationships between different types of
+objects in a homogeneous way.
 
-For example, the concept of "subscribers" is more powerfully done with PHIDs
-because we could theoretically have users, projects, teams, and more all as
-"subscribers" of other objects. Using an ID column we would need to add a
-"type" column to avoid ID collision; using PHIDs does not require this
-additional column.
+For example, infrastructure like "subscribers" can be implemented easily with
+PHID relationships: different types of objects (users, projects, mailing lists)
+are permitted to subscribe to different types of objects (revisions, tasks,
+etc). Without PHIDs, we would need to add a "type" column to avoid ID collision;
+using PHIDs makes implementing features like this simpler.
 
-= Transactions =
+Transactions
+============
 
 Transactional code should be written using transactions. Example of such code is
 inserting multiple records where one doesn't make sense without the other or
 selecting data later used for update. See chapter in @{class:LiskDAO}.
 
-= Advanced Features =
+Advanced Features
+=================
 
 We don't use MySQL advanced features such as triggers, stored procedures or
 events because we like expressing the application logic in PHP more than in SQL.
-Some of these features (especially triggers) can also cause big confusion.
+Some of these features (especially triggers) can also cause a great deal of
+confusion, and are generally more difficult to debug, profile, version control,
+update, and understand than application code.
 
-Avoiding these advanced features is also good for supporting other database
-systems (which we don't support anyway).
+Schema Denormalization
+======================
 
-= Schema Denormalization =
+Phabricator uses schema denormalization sparingly. Avoid denormalization unless
+there is a compelling reason (usually, performance) to denormalize.
 
-Phabricator uses schema denormalization for performance reasons sparingly. Try
-to avoid it if possible.
+Schema Changes and Migrations
+=============================
 
-= Changing the Schema =
+To create a new schema change or migration:
 
-There are three simple steps to update the schema:
+**Create a database patch**. Database patches go in
+`resources/sql/autopatches/`. To change a schema, use a `.sql` file and write
+in SQL. To perform a migration, use a `.php` file and write in PHP. Name your
+file `YYYYMMDD.patchname.ext`. For example, `20141225.christmas.sql`.
 
-# Create a `.sql` file in `resources/sql/patches/`. This file should:
-  - Contain the appropriate MySQL commands to update the schema.
-  - Be named as `YYYYMMDD.patchname.ext`. For example, `20130217.example.sql`.
-  - Use `${NAMESPACE}` rather than `phabricator` for database names.
-  - Use `COLLATE utf8_bin` for any columns that are to be used as identifiers,
-    such as PHID columns. Otherwise, use `COLLATE utf8_general_ci`.
-   - Name all indexes so it is possible to delete them later.
-# Edit `src/infrastructure/storage/patch/PhabricatorBuiltinPatchList.php` and
-  add your patch to
-  @{method@phabricator:PhabricatorBuiltinPatchList::getPatches}.
-# Run `bin/storage upgrade`.
+**Keep patches small**. Most schema change statements are not transactional. If
+a patch contains several SQL statements and fails partway through, it normally
+can not be rolled back. When a user tries to apply the patch again later, the
+first statement (which, for example, adds a column) may fail (because the column
+already exists). This can be avoided by keeping patches small (generally, one
+statement per patch).
 
-It is also possible to create more complex patches in PHP for data migration
-(due to schema changes or otherwise.) However, the schema changes themselves
-should be done in separate `.sql` files. Order can be guaranteed by editing
-`src/infrastructure/storage/patch/PhabricatorBuiltinPatchList.php`
-appropriately.
+**Use namespace and character set variables**. When defining a `.sql` patch,
+you should use these variables instead of hard-coding namespaces or character
+set names:
 
-See the
-[[https://secure.phabricator.com/rPb39175342dc5bee0c2246b05fa277e76a7e96ed3
-| commit adding policy storage for Paste ]] for a reasonable example of the code
-changes.
+| Variable | Meaning | Notes |
+|---|---|---|
+| {$NAMESPACE} | Storage Namespace | Defaults to `phabricator` |
+| {$CHARSET} | Default Charset | Mostly used to specify table charset |
+| {$COLLATE_TEXT} | Text Collation | For most text (case-sensitive) |
+| {$COLLATE_SORT} | Sort Collation | For sortable text (case-insensitive) |
+| {$CHARSET_FULLTEXT} | Fulltext Charset | Specify explicitly for fulltext |
+| {$COLLATE_FULLTEXT} | Fulltext Collate | Specify explicitly for fulltext |
 
-= See Also =
 
-* @{class:LiskDAO}
-* @{class:PhabricatorPHID}
+**Test your patch**. Run `bin/storage upgrade` to test your patch.
+
+See Also
+========
+
+  - @{class:LiskDAO}

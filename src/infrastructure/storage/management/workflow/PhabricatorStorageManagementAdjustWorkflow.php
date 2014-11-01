@@ -148,16 +148,11 @@ final class PhabricatorStorageManagementAdjustWorkflow
         pht(
           "Found %s issues(s) with schemata, detailed above.\n\n".
           "You can review issues in more detail from the web interface, ".
-          "in Config > Database Status.\n\n".
+          "in Config > Database Status. To better understand the adjustment ".
+          "workflow, see \"Managing Storage Adjustments\" in the ".
+          "documentation.\n\n".
           "MySQL needs to copy table data to make some adjustments, so these ".
-          "migrations may take some time.".
-
-          // TODO: Remove warning once this stabilizes.
-          "\n\n".
-          "WARNING: This workflow is new and unstable. If you continue, you ".
-          "may unrecoverably destory data. Make sure you have a backup before ".
-          "you proceed.",
-
+          "migrations may take some time.",
           new PhutilNumber(count($adjustments))));
 
       $prompt = pht('Fix these schema issues?');
