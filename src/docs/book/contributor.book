@@ -23,6 +23,9 @@
     "contrib" : {
       "name" : "Contributor Overview"
     },
+    "detail": {
+      "name" : "Contributing in Detail"
+    },
     "standards" : {
       "name" : "Coding Standards"
     },

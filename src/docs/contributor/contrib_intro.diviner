@@ -41,6 +41,9 @@ contribute to Phabricator:
     things right away, but knowing about issues users are encountering or
     features they'd like to see improves our ability to plan and prioritize.
     For ways to do this, see @{article:Give Feedback! Get Support!}
+    - For details on reporting bugs, see @{article:Contributing Bug Reports}.
+    - For details on requesting features, see @{article:Contributing Feature
+      Requests}.
   - Give us feedback on planned features. Most of what we'll build in the next
     6-12 months currently exists on the [[ Roadmap ]] or in Maniphest. Telling
     us about use cases you have can help us build better products when the time
@@ -53,70 +56,15 @@ contribute to Phabricator:
     @{article:Give Feedback! Get Support!}
 
 If all of this sounds nice but you really just want to write some code, that's
-awesome too. The rest of this document (and the other articles in this section
-of the documentation) can help you get started.
+awesome too. To get started with contributing code, see
+@{article:Contributing Code}.
 
-= Legal Stuff =
+Next Steps
+==========
 
-Before we can accept source code contributions, you need to submit a
-[[ https://secure.phabricator.com/L28 | Contributor License Agreement ]]. Your
-changes can not be accepted until you sign the agreement.
+Continue by:
 
-If you haven't signed it by the time you send changes for review, you'll be
-reminded to sign it at that time.
-
-If you're submitting work on behalf of a company (like your employer), the
-company can sign the [[ https://secure.phabricator.com/L30 | Corporate
-Contributor License Agreement ]] instead.
-
-Both agreements are substantially similar to the Apache Foundation's CLAs. They
-protect Phacility and users of Phabricator by making sure we have permission to
-distribute your changes under an open source license.
-
-= Not Sure Where To Get Started? =
-
-Because we're usually quick to fix easy bugs and issues, we often don't have a
-very good backlog of starter tasks.
-
-You can try searching in Maniphest for tasks tagged with "Easy", which might
-have something, but a lot of time this list is small and the tasks on it aren't
-very fun or interesting even if they aren't technically too difficult.
-
-In general, the best way to contribute is to come to us with a problem you
-encountered or something you're interested in building, and then work with us
-to find a solution to it or a plan to build it. We can help turn a hacky patch
-into something that's upstreamable, and you'll get a fix or feature you want.
-
-You can also look though the rest of the open tasks for something more
-substantive that you're interested in. This will give you a better chance of
-finding something that's relevant to you, but many tasks are large or blocked
-by other large tasks.
-
-If you do find something, feel free to leave a comment like "I'm interested in
-working on this, is this something I could reasonably help with?". We're happy
-to walk through things, break larger tasks down into more detail, provide
-pointers to similar changes and the right places in the codebase to get started,
-and generally figure out how to attack a problem.
-
-You can also just come find us in IRC and ask how to get started.
-
-= Submitting Patches =
-
-To submit patches against libphutil, Arcanist or Phabricator, create a commit
-and use `arc` to send it for review (probably with `epriestley` as a reviewer):
-
-  $ arc diff
-
-You can also submit a pull request on GitHub, but Differential is strongly
-preferred.
-
-= Suggested Reading =
-
-You should read the relevant coding convention documents before you submit a
-change. If you're a new contributor, you don't need to worry about this too
-much. Just try to make your code look similar to the code around it, and we
-can help you through the details during review.
-
-  - @{article:General Coding Standards} (for all languages)
-  - @{article:PHP Coding Standards} (for PHP)
-  - @{article:Javascript Coding Standards} (for Javascript)
+  - learning about bug reports in @{article:Contributing Bug Reports};
+  - learning about feature requests in @{article:Contributing Feature Requests};
+  - learning about code contributions in @{article:Contributing Code}; or
+  - getting in touch with @{article:Give Feedback! Get Support!}
