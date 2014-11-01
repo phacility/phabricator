@@ -79,12 +79,43 @@ final class PhabricatorStorageManagementAdjustWorkflow
       pht('Verifying database schemata...'));
 
     $adjustments = $this->findAdjustments();
+    $api = $this->getAPI();
 
     if (!$adjustments) {
       $console->writeOut(
         "%s\n",
         pht('Found no issues with schemata.'));
       return;
+    }
+
+    if (!$force && !$api->isCharacterSetAvailable('utf8mb4')) {
+      $message = pht(
+        "You have an old version of MySQL (older than 5.5) which does not ".
+        "support the utf8mb4 character set. If you apply adjustments now ".
+        "and later update MySQL to 5.5 or newer, you'll need to apply ".
+        "adjustments again (and they will take a long time).\n\n".
+        "You can exit this workflow, update MySQL now, and then run this ".
+        "workflow again. This is recommended, but may cause a lot of downtime ".
+        "right now.\n\n".
+        "You can exit this workflow, continue using Phabricator without ".
+        "applying adjustments, update MySQL at a later date, and then run ".
+        "this workflow again. This is also a good approach, and will let you ".
+        "delay downtime until later.\n\n".
+        "You can proceed with this workflow, and then optionally update ".
+        "MySQL at a later date. After you do, you'll need to apply ".
+        "adjustments again.\n\n".
+        "For more information, see \"Managing Storage Adjustments\" in ".
+        "the documentation.");
+
+      $console->writeOut(
+        "\n**<bg:yellow> %s </bg>**\n\n%s\n",
+        pht('OLD MySQL VERSION'),
+        phutil_console_wrap($message));
+
+      $prompt = pht('Continue with old MySQL version?');
+      if (!phutil_console_confirm($prompt, $default_no = true)) {
+        return;
+      }
     }
 
     $table = id(new PhutilConsoleTable())
@@ -147,7 +178,6 @@ final class PhabricatorStorageManagementAdjustWorkflow
       "%s\n",
       pht('Fixing schema issues...'));
 
-    $api = $this->getAPI();
     $conn = $api->getConn(null);
 
     if ($unsafe) {
@@ -344,15 +374,11 @@ final class PhabricatorStorageManagementAdjustWorkflow
     $console->writeOut(
       "\n%s\n",
       pht('Failed to make some schema adjustments, detailed above.'));
-
-    if (!$unsafe) {
-      $console->writeOut(
-        "%s\n",
-        pht(
-          'Migrations which fail with certain types of errors (including '.
-          '"#1406 Data Too Long" and "#1366 Incorrect String Value") can be '.
-          'forced to complete by running again with `--unsafe`.'));
-    }
+    $console->writeOut(
+      "%s\n",
+      pht(
+        'For help troubleshooting adjustments, see "Managing Storage '.
+        'Adjustments" in the documentation.'));
 
     return 1;
   }

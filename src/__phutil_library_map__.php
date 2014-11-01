@@ -4480,7 +4480,7 @@ phutil_register_library_map(array(
     'PhabricatorConfigEntryQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorConfigFileSource' => 'PhabricatorConfigProxySource',
     'PhabricatorConfigGroupController' => 'PhabricatorConfigController',
-    'PhabricatorConfigIgnoreController' => 'PhabricatorApplicationsController',
+    'PhabricatorConfigIgnoreController' => 'PhabricatorConfigController',
     'PhabricatorConfigIssueListController' => 'PhabricatorConfigController',
     'PhabricatorConfigIssueViewController' => 'PhabricatorConfigController',
     'PhabricatorConfigJSONOptionType' => 'PhabricatorConfigOptionType',
