@@ -161,10 +161,10 @@ abstract class PhabricatorBaseChineseTranslation
       // phabricator/src/applications/nuance/controller/NuanceSourceViewController.php:48
       // phabricator/src/applications/pholio/view/PholioMockThumbGridView.php:152
       // phabricator/src/applications/project/controller/PhabricatorProjectColumnDetailController.php:57
-      '%s' => null,
+      '%s' => '%s',
     
       // phabricator/src/applications/releeph/field/specification/ReleephDiffSizeFieldSpecification.php:58
-      '%s\n' => null,
+      '%s\n' => '%s\n',
     
       // phabricator/src/applications/settings/panel/PhabricatorSettingsPanelDeveloperPreferences.php:64
       '%s\n\nBefore you can turn on DarkConsole, it needs to be enabled in the configuration for this install (`darkconsole.enabled`).' => '%s\n\n你需要先在配置里面安装 (`darkconsole.enabled`)才能打开DarkConsole功能',
@@ -778,16 +778,16 @@ abstract class PhabricatorBaseChineseTranslation
       '%s completed building %s for %s.' => '%s 完成了编译 %s 为 %s.',
     
       // phabricator/src/applications/transactions/storage/PhabricatorApplicationTransaction.php:710
-      '%s completed building %s.' => null,
+      '%s completed building %s.' => '%s 完成了编译 %s.',
     
       // phabricator/src/applications/releeph/storage/ReleephRequestTransaction.php:103
-      '%s couldn\'t pick this request' => null,
+      '%s couldn\'t pick this request' => '%s 不能接受此请求',
     
       // phabricator/src/applications/releeph/storage/ReleephRequestTransaction.php:107
-      '%s couldn\'t revert this request' => null,
+      '%s couldn\'t revert this request' => '%s 不能还原这个请求',
     
       // phabricator/src/applications/pholio/storage/PholioTransaction.php:119
-      '%s created "%s".' => null,
+      '%s created "%s".' => '%s 创建了 "%s"。',
     
       // phabricator/src/applications/fund/storage/FundInitiativeTransaction.php:148
       // phabricator/src/applications/differential/customfield/DifferentialTitleField.php:95
@@ -795,209 +795,209 @@ abstract class PhabricatorBaseChineseTranslation
       // phabricator/src/applications/paste/storage/PhabricatorPasteTransaction.php:105
       // phabricator/src/applications/maniphest/storage/ManiphestTransaction.php:624
       // phabricator/src/applications/pholio/storage/PholioTransaction.php:224
-      '%s created %s.' => null,
+      '%s created %s.' => '%s 创建了 %s。',
     
       // phabricator/src/applications/dashboard/storage/PhabricatorDashboardTransaction.php:60
-      '%s created dashboard %s.' => null,
+      '%s created dashboard %s.' => '%s 创建了面板 %s。',
     
       // phabricator/src/applications/dashboard/storage/PhabricatorDashboardPanelTransaction.php:70
       '%s created dashboard panel %s.' => null,
     
       // phabricator/src/applications/feed/story/PhabricatorFeedStoryDifferential.php:101
-      '%s created revision %s' => null,
+      '%s created revision %s' => '%s 创建了修订 %s',
     
       // phabricator/src/applications/feed/story/PhabricatorFeedStoryDifferential.php:192
-      '%s created revision %s %s' => null,
+      '%s created revision %s %s' => '%s 创建了修订 %s %s',
     
       // phabricator/src/applications/phortune/storage/PhortuneAccountTransaction.php:30
-      '%s created this account.' => null,
+      '%s created this account.' => '%s 创建了这个账号。',
     
       // phabricator/src/applications/drydock/storage/DrydockBlueprintTransaction.php:25
-      '%s created this blueprint.' => null,
+      '%s created this blueprint.' => '%s 创建了这个蓝图。',
     
       // phabricator/src/applications/harbormaster/storage/configuration/HarbormasterBuildPlanTransaction.php:56
-      '%s created this build plan.' => null,
+      '%s created this build plan.' => '%s 创建了这个编译计划。',
     
       // phabricator/src/applications/harbormaster/storage/configuration/HarbormasterBuildStepTransaction.php:28
-      '%s created this build step.' => null,
+      '%s created this build step.' => '%s 创建了这个编译步骤。',
     
       // phabricator/src/applications/harbormaster/storage/HarbormasterBuildTransaction.php:26
-      '%s created this build.' => null,
+      '%s created this build.' => '%s 创建了这个编译。',
     
       // phabricator/src/applications/harbormaster/storage/HarbormasterBuildableTransaction.php:26
-      '%s created this buildable.' => null,
+      '%s created this buildable.' => '%s 创建了这个可编译的。',
     
       // phabricator/src/applications/project/storage/PhabricatorProjectColumnTransaction.php:27
-      '%s created this column.' => null,
+      '%s created this column.' => '%s 创建了这列。',
     
       // phabricator/src/applications/config/storage/PhabricatorConfigTransaction.php:36
-      '%s created this configuration entry.' => null,
+      '%s created this configuration entry.' => '%s 创建了这个配置条目。',
     
       // phabricator/src/applications/passphrase/storage/PassphraseCredentialTransaction.php:51
-      '%s created this credential.' => null,
+      '%s created this credential.' => '%s 创建了这个证书。',
     
       // phabricator/src/applications/dashboard/storage/PhabricatorDashboardTransaction.php:31
-      '%s created this dashboard.' => null,
+      '%s created this dashboard.' => '%s 创建了这个控制面板。',
     
       // phabricator/src/applications/fund/storage/FundInitiativeTransaction.php:69
-      '%s created this initiative.' => null,
+      '%s created this initiative.' => '%s 创建了这个倡议。',
     
       // phabricator/src/applications/macro/storage/PhabricatorMacroTransaction.php:112
-      '%s created this macro.' => null,
+      '%s created this macro.' => '%s 创建了这个宏。',
     
       // phabricator/src/applications/phortune/storage/PhortuneMerchantTransaction.php:31
-      '%s created this merchant.' => null,
+      '%s created this merchant.' => '%s 创建了这个商家。',
     
       // phabricator/src/applications/dashboard/storage/PhabricatorDashboardPanelTransaction.php:31
-      '%s created this panel.' => null,
+      '%s created this panel.' => '%s 创建了这个面板。',
     
       // phabricator/src/applications/paste/storage/PhabricatorPasteTransaction.php:69
-      '%s created this paste.' => null,
+      '%s created this paste.' => '%s 创建了这个粘贴。',
     
       // phabricator/src/applications/phortune/storage/PhortunePaymentProviderConfigTransaction.php:33
-      '%s created this payment provider.' => null,
+      '%s created this payment provider.' => '%s 创建了这个支付提供商。',
     
       // phabricator/src/applications/slowvote/storage/PhabricatorSlowvoteTransaction.php:49
-      '%s created this poll.' => null,
+      '%s created this poll.' => '%s 创建了这个投票。',
     
       // phabricator/src/applications/project/storage/PhabricatorProjectTransaction.php:54
-      '%s created this project.' => null,
+      '%s created this project.' => '%s 创建了这个项目。',
     
       // phabricator/src/applications/auth/storage/PhabricatorAuthProviderConfigTransaction.php:80
-      '%s created this provider.' => null,
+      '%s created this provider.' => '%s 创建了这个提供程序。',
     
       // phabricator/src/applications/repository/storage/PhabricatorRepositoryTransaction.php:114
-      '%s created this repository.' => null,
+      '%s created this repository.' => '%s 创建了这个代码库。',
     
       // phabricator/src/applications/differential/constants/DifferentialAction.php:74
       // phabricator/src/applications/differential/customfield/DifferentialTitleField.php:72
-      '%s created this revision.' => null,
+      '%s created this revision.' => '%s 创建了这个修订。',
     
       // phabricator/src/applications/nuance/storage/NuanceSourceTransaction.php:25
-      '%s created this source.' => null,
+      '%s created this source.' => '%s 创建了这个源。',
     
       // phabricator/src/applications/maniphest/storage/ManiphestTransaction.php:386
-      '%s created this task.' => null,
+      '%s created this task.' => '%s 创建了这个任务。',
     
       // phabricator/src/applications/phlux/storage/PhluxTransaction.php:26
-      '%s created this variable.' => null,
+      '%s created this variable.' => '%s 创建了这个变量。',
     
       // phabricator/src/applications/releeph/storage/ReleephProductTransaction.php:89
-      '%s deactivated release product %s.' => null,
+      '%s deactivated release product %s.' => '%s 停用了发布产品 %s。',
     
       // phabricator/src/applications/releeph/storage/ReleephProductTransaction.php:64
-      '%s deactivated this product.' => null,
+      '%s deactivated this product.' => '%s 停用了这个产品。',
     
       // phabricator/src/applications/repository/storage/PhabricatorRepositoryTransaction.php:123
-      '%s deactivated this repository.' => null,
+      '%s deactivated this repository.' => '%s 停用了这个代码库。',
     
       // phabricator/src/applications/conpherence/storage/ConpherenceTransaction.php:64
-      '%s deleted the conpherence name "%s".' => null,
+      '%s deleted the conpherence name "%s".' => '%s 删除了会议名称 "%s"。',
     
       // phabricator/src/applications/config/storage/PhabricatorConfigTransaction.php:45
-      '%s deleted this configuration entry (again?).' => null,
+      '%s deleted this configuration entry (again?).' => '%s 删除了这个配置条目(再次确认？)。',
     
       // phabricator/src/applications/config/storage/PhabricatorConfigTransaction.php:40
-      '%s deleted this configuration entry.' => null,
+      '%s deleted this configuration entry.' => '%s 删除了这个配置条目。',
     
       // phabricator/src/applications/passphrase/storage/PassphraseCredentialTransaction.php:85
-      '%s destroyed this credential.' => null,
+      '%s destroyed this credential.' => '%s 销毁了这个证书。',
     
       // phabricator/src/applications/maniphest/storage/ManiphestTransaction.php:824
-      '%s detached %d file(s) of %s: %s' => null,
+      '%s detached %d file(s) of %s: %s' => '%s 删除了 %d 个关于 %s: %s 的文件',
     
       // phabricator/src/applications/maniphest/storage/ManiphestTransaction.php:568
-      '%s detached %d file(s): %s' => null,
+      '%s detached %d file(s): %s' => '%s移除了 %d 个文件: %s',
     
       // phabricator/src/applications/macro/storage/PhabricatorMacroTransaction.php:145
-      '%s disabled %s.' => null,
+      '%s disabled %s.' => '%s 禁用了 %s.',
     
       // phabricator/src/applications/auth/storage/PhabricatorAuthProviderConfigTransaction.php:110
-      '%s disabled account linking.' => null,
+      '%s disabled account linking.' => '%s 禁用了账号连接。',
     
       // phabricator/src/applications/auth/storage/PhabricatorAuthProviderConfigTransaction.php:121
-      '%s disabled account unlinking.' => null,
+      '%s disabled account unlinking.' => '%s 禁用了账号连接解除。',
     
       // phabricator/src/applications/repository/storage/PhabricatorRepositoryTransaction.php:265
-      '%s disabled autoclose for this repository.' => null,
+      '%s disabled autoclose for this repository.' => '%s 禁用了这个代码库的自动关闭功能。',
     
       // phabricator/src/applications/auth/storage/PhabricatorAuthProviderConfigTransaction.php:132
-      '%s disabled email trust.' => null,
+      '%s disabled email trust.' => '%s 禁用了邮件信任。',
     
       // phabricator/src/applications/repository/storage/PhabricatorRepositoryTransaction.php:254
-      '%s disabled notifications and publishing for this repository.' => null,
+      '%s disabled notifications and publishing for this repository.' => '%s 禁用了这个代码库的通知和发布。',
     
       // phabricator/src/applications/repository/storage/PhabricatorRepositoryTransaction.php:346
-      '%s disabled protection against dangerous changes.' => null,
+      '%s disabled protection against dangerous changes.' => '%s 禁用了针对危险修改的保护。',
     
       // phabricator/src/applications/auth/storage/PhabricatorAuthProviderConfigTransaction.php:99
-      '%s disabled registration.' => null,
+      '%s disabled registration.' => '%s 禁用了注册。',
     
       // phabricator/src/applications/macro/storage/PhabricatorMacroTransaction.php:197
-      '%s disabled the audio for %s.' => null,
+      '%s disabled the audio for %s.' => '%s 禁用了 %s 的音频。',
     
       // phabricator/src/applications/macro/storage/PhabricatorMacroTransaction.php:105
-      '%s disabled the audio for this macro.' => null,
+      '%s disabled the audio for this macro.' => '%s 禁用了这个宏的音频。',
     
       // phabricator/src/applications/harbormaster/storage/configuration/HarbormasterBuildPlanTransaction.php:68
-      '%s disabled this build plan.' => null,
+      '%s disabled this build plan.' => '%s 禁用了这个编译计划。',
     
       // phabricator/src/applications/macro/storage/PhabricatorMacroTransaction.php:70
-      '%s disabled this macro.' => null,
+      '%s disabled this macro.' => '%s 禁用了这个宏',
     
       // phabricator/src/applications/phortune/storage/PhortunePaymentProviderConfigTransaction.php:42
-      '%s disabled this payment provider.' => null,
+      '%s disabled this payment provider.' => '%s 禁用了这个支付提供商',
     
       // phabricator/src/applications/auth/storage/PhabricatorAuthProviderConfigTransaction.php:88
-      '%s disabled this provider.' => null,
+      '%s disabled this provider.' => '%s 禁用了这个提供程序。',
     
       // phabricator/src/applications/herald/storage/HeraldRuleTransaction.php:80
-      '%s disabled this rule.' => null,
+      '%s disabled this rule.' => '%s 禁用这条规则。',
     
       // phabricator/src/applications/passphrase/storage/PassphraseCredentialTransaction.php:98
-      '%s disallowed Conduit API access to this credential.' => null,
+      '%s disallowed Conduit API access to this credential.' => '%s 驳回了对这个证书的Conduit API访问。',
     
       // phabricator/src/applications/releeph/storage/ReleephRequestTransaction.php:138
-      '%s discovered this commit as %s' => null,
+      '%s discovered this commit as %s' => '%s 发现了这个代码提交作为 %s',
     
       // phabricator/src/applications/phame/controller/PhameController.php:59
-      '%s drafted a blog post on %s.' => null,
+      '%s drafted a blog post on %s.' => '%s 起草了一篇博客张贴在 %s 上。',
     
       // phabricator/src/applications/feed/story/PhabricatorFeedStoryDifferential.php:125
-      '%s edited %s' => null,
+      '%s edited %s' => '%s 编辑了 %s',
     
       // phabricator/src/applications/feed/story/PhabricatorFeedStoryDifferential.php:216
-      '%s edited %s %s' => null,
+      '%s edited %s %s' => '%s 编辑了 %s %s',
     
       // phabricator/src/applications/phortune/edge/PhortuneAccountHasMemberEdgeType.php:91
-      '%s edited %s account member(s) for %s, added %s: %s; removed %s: %s.' => null,
+      '%s edited %s account member(s) for %s, added %s: %s; removed %s: %s.' => '%s 编辑了 %s 账号成员为了 %s, 添加了 %s: %s; 移除了 %s: %s。',
     
       // phabricator/src/applications/phortune/edge/PhortuneAccountHasMemberEdgeType.php:44
-      '%s edited %s account member(s), added %s: %s; removed %s: %s.' => null,
+      '%s edited %s account member(s), added %s: %s; removed %s: %s.' => '%s 编辑了 %s 账号成员, 添加了 %s: %s; 移除了 %s: %s。',
     
       // phabricator/src/applications/maniphest/edge/ManiphestTaskHasCommitEdgeType.php:95
-      '%s edited %s commit(s) for %s, added %s: %s; removed %s: %s.' => null,
+      '%s edited %s commit(s) for %s, added %s: %s; removed %s: %s.' => '%s 编辑了 %s 代码提交为了 %s, 添加了 %s: %s; 移除了 %s: %s。',
     
       // phabricator/src/applications/maniphest/edge/ManiphestTaskHasCommitEdgeType.php:48
-      '%s edited %s commit(s), added %s: %s; removed %s: %s.' => null,
+      '%s edited %s commit(s), added %s: %s; removed %s: %s.' => '%s 编辑了 %s 代码提交, 添加了 %s: %s; 移除了 %s: %s。',
     
       // phabricator/src/infrastructure/edges/type/PhabricatorEdgeType.php:129
-      '%s edited %s edge(s) for %s, added %s: %s; removed %s: %s.' => null,
+      '%s edited %s edge(s) for %s, added %s: %s; removed %s: %s.' => '%s 编辑了 %s 边缘为了 %s, 添加了 %s: %s; 移除了 %s: %s。',
     
       // phabricator/src/infrastructure/edges/type/PhabricatorEdgeType.php:82
-      '%s edited %s edge(s), added %s: %s; removed %s: %s.' => null,
+      '%s edited %s edge(s), added %s: %s; removed %s: %s.' => '%s 编辑了 %s 边缘, 添加了 %s: %s; 移除了 %s: %s。',
     
       // phabricator/src/applications/project/edge/PhabricatorProjectObjectHasProjectEdgeType.php:92
-      '%s edited %s project(s) for %s, added %s: %s; removed %s: %s.' => null,
+      '%s edited %s project(s) for %s, added %s: %s; removed %s: %s.' => '%s 编辑了 %s 个项目为了 %s, 添加了 %s: %s; 移除了 %s: %s。',
     
       // phabricator/src/applications/project/edge/PhabricatorProjectObjectHasProjectEdgeType.php:45
-      '%s edited %s project(s), added %s: %s; removed %s: %s.' => null,
+      '%s edited %s project(s), added %s: %s; removed %s: %s.' => '%s 编辑了 %s 个项目, 添加了 %s: %s; 移除了 %s: %s。',
     
       // phabricator/src/applications/maniphest/edge/ManiphestTaskHasRevisionEdgeType.php:95
-      '%s edited %s revision(s) for %s, added %s: %s; removed %s: %s.' => null,
+      '%s edited %s revision(s) for %s, added %s: %s; removed %s: %s.' => '%s 编辑了 %s 个修订为了 %s, 添加了 %s: %s; 移除了 %s: %s。',
     
       // phabricator/src/applications/maniphest/edge/ManiphestTaskHasRevisionEdgeType.php:48
-      '%s edited %s revision(s), added %s: %s; removed %s: %s.' => null,
+      '%s edited %s revision(s), added %s: %s; removed %s: %s.' => '%s edited %s revision(s), added %s: %s; removed %s: %s。',
     
       // phabricator/src/applications/differential/edge/DifferentialRevisionHasTaskEdgeType.php:95
       // phabricator/src/applications/diffusion/edge/DiffusionCommitHasTaskEdgeType.php:95
