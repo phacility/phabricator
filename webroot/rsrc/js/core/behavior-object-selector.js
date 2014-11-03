@@ -74,7 +74,7 @@ JX.behavior('phabricator-object-selector', function(config) {
 
     var select_object_link = JX.$N(
       'a',
-      {href: '#', sigil: 'object-attacher'},
+      {href: h.uri, sigil: 'object-attacher'},
       h.name);
 
     var select_object_button = JX.$N(
