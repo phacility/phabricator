@@ -84,17 +84,23 @@ final class PhabricatorProjectColumn
     return pht('Unnamed Column');
   }
 
+  public function getDisplayType() {
+    if ($this->isDefaultColumn()) {
+      return pht('(Default)');
+    }
+    if ($this->isHidden()) {
+      return pht('(Hidden)');
+    }
+
+    return null;
+  }
+
   public function getHeaderIcon() {
     $icon = null;
 
     if ($this->isHidden()) {
       $icon = 'fa-eye-slash';
       $text = pht('Hidden');
-    }
-
-    if ($this->isDefaultColumn()) {
-      $icon = 'fa-archive';
-      $text = pht('Default');
     }
 
     if ($icon) {

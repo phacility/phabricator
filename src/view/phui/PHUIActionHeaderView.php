@@ -11,6 +11,7 @@ final class PHUIActionHeaderView extends AphrontView {
   const HEADER_WHITE = 'white';
 
   private $headerTitle;
+  private $headerSubtitle;
   private $headerHref;
   private $headerIcon;
   private $headerSigils = array();
@@ -36,6 +37,11 @@ final class PHUIActionHeaderView extends AphrontView {
 
   public function setHeaderTitle($header) {
     $this->headerTitle = $header;
+    return $this;
+  }
+
+  public function setHeaderSubtitle($subtitle) {
+    $this->headerSubtitle = $subtitle;
     return $this;
   }
 
@@ -131,6 +137,16 @@ final class PHUIActionHeaderView extends AphrontView {
           $this->headerTitle);
     }
 
+    $header_subtitle = null;
+    if ($this->headerSubtitle) {
+      $header_subtitle = phutil_tag(
+        'span',
+          array(
+            'class' => 'phui-action-header-subtitle',
+          ),
+          $this->headerSubtitle);
+    }
+
     $header = phutil_tag(
       'h3',
         array(
@@ -139,6 +155,7 @@ final class PHUIActionHeaderView extends AphrontView {
       array(
         $header_icon,
         $header_title,
+        $header_subtitle,
       ));
 
     $icons = '';

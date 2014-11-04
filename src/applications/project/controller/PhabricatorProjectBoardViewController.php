@@ -227,6 +227,7 @@ final class PhabricatorProjectBoardViewController
 
       $panel = id(new PHUIWorkpanelView())
         ->setHeader($column->getDisplayName())
+        ->setSubHeader($column->getDisplayType())
         ->addSigil('workpanel');
 
       $header_icon = $column->getHeaderIcon();
