@@ -1804,7 +1804,7 @@ abstract class LiskDAO {
       }
 
       // We don't know the type of this column.
-      $map[$property] = '<unknown>';
+      $map[$property] = PhabricatorConfigSchemaSpec::DATATYPE_UNKNOWN;
     }
 
     return $map;

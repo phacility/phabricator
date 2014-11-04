@@ -7,6 +7,8 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
   private $utf8BinaryCollation;
   private $utf8SortingCollation;
 
+  const DATATYPE_UNKNOWN = '<unknown>';
+
   public function setUTF8SortingCollation($utf8_sorting_collation) {
     $this->utf8SortingCollation = $utf8_sorting_collation;
     return $this;
@@ -324,9 +326,9 @@ abstract class PhabricatorConfigSchemaSpec extends Phobject {
           $column_type = 'date';
           break;
         default:
-          $column_type = pht('<unknown>');
-          $charset = pht('<unknown>');
-          $collation = pht('<unknown>');
+          $column_type = self::DATATYPE_UNKNOWN;
+          $charset = self::DATATYPE_UNKNOWN;
+          $collation = self::DATATYPE_UNKNOWN;
           break;
       }
     }
