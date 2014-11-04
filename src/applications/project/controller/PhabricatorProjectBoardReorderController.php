@@ -107,7 +107,8 @@ final class PhabricatorProjectBoardReorderController
 
     foreach ($columns as $column) {
       $item = id(new PHUIObjectItemView())
-        ->setHeader($column->getDisplayName());
+        ->setHeader($column->getDisplayName())
+        ->addIcon('none', $column->getDisplayType());
 
       if ($column->isHidden()) {
         $item->setDisabled(true);

@@ -271,6 +271,10 @@
   padding: 0 10px;
 }
 
+ul.phui-object-item-icons {
+  margin: 0;
+}
+
 /* NOTE: The main content is an "overflow: hidden" div which we give a right
    margin so it doesn't overlap the icons. The margin is slightly larger than
    the width + padding of the icon div, so the icons have some space even if

@@ -72,11 +72,17 @@
   font-weight: normal;
 }
 
-.phui-action-header-title span {
+.phui-action-header-title .phui-icon-view {
   float: left;
   height: 16px;
   width: 16px;
   margin-right: 4px;
+}
+
+.phui-action-header-title .phui-action-header-subtitle {
+  margin-left: 4px;
+  font-weight: normal;
+  color: {$lightgreytext};
 }
 
 /* - Dashboards ------------------------------------------------------------ */
