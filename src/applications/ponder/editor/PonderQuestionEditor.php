@@ -243,7 +243,7 @@ final class PonderQuestionEditor
       }
     }
 
-    $body->addTextSection(
+    $body->addLinkSection(
       $header,
       PhabricatorEnv::getProductionURI($uri));
 

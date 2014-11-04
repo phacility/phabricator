@@ -62,7 +62,6 @@ final class PhabricatorRepositoryCommitHeraldWorker
     try {
       $raw_patch = $this->loadRawPatchText($repository, $commit);
     } catch (Exception $ex) {
-      phlog($ex);
       $raw_patch = pht('Unable to generate patch: %s', $ex->getMessage());
     }
     $editor->setRawPatch($raw_patch);
@@ -99,9 +98,11 @@ final class PhabricatorRepositoryCommitHeraldWorker
     if ($byte_limit && $size > $byte_limit) {
       $pretty_size = phutil_format_bytes($size);
       $pretty_limit = phutil_format_bytes($byte_limit);
-      throw new Exception(
-        "Patch size of {$pretty_size} exceeds configured byte size limit of ".
-        "{$pretty_limit}.");
+      throw new Exception(pht(
+        'Patch size of %s exceeds configured byte size limit (%s) of %s.',
+        $pretty_size,
+        $byte_key,
+        $pretty_limit));
     }
 
     return $raw_diff;

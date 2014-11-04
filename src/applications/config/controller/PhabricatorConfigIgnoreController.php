@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorConfigIgnoreController
-  extends PhabricatorApplicationsController {
+  extends PhabricatorConfigController {
 
   private $verb;
   private $issue;

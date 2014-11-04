@@ -10,14 +10,26 @@ final class PhabricatorStorageManagementAdjustWorkflow
       ->setSynopsis(
         pht(
           'Make schemata adjustments to correct issues with characters sets, '.
-          'collations, and keys.'));
+          'collations, and keys.'))
+      ->setArguments(
+        array(
+          array(
+            'name' => 'unsafe',
+            'help' => pht(
+              'Permit adjustments which truncate data. This option may '.
+              'destroy some data, but the lost data is usually not '.
+              'important (most commonly, the ends of very long object '.
+              'titles).'),
+          ),
+        ));
   }
 
   public function execute(PhutilArgumentParser $args) {
     $force = $args->getArg('force');
+    $unsafe = $args->getArg('unsafe');
 
     $this->requireAllPatchesApplied();
-    return $this->adjustSchemata($force);
+    return $this->adjustSchemata($force, $unsafe);
   }
 
   private function requireAllPatchesApplied() {
@@ -59,20 +71,52 @@ final class PhabricatorStorageManagementAdjustWorkflow
     return array($comp, $expect, $actual);
   }
 
-  private function adjustSchemata($force) {
+  private function adjustSchemata($force, $unsafe) {
     $console = PhutilConsole::getConsole();
 
     $console->writeOut(
       "%s\n",
       pht('Verifying database schemata...'));
 
-    $adjustments = $this->findAdjustments();
+    list($adjustments, $errors) = $this->findAdjustments();
+    $api = $this->getAPI();
 
     if (!$adjustments) {
       $console->writeOut(
         "%s\n",
-        pht('Found no issues with schemata.'));
-      return;
+        pht('Found no adjustments for schemata.'));
+
+      return $this->printErrors($errors, 0);
+    }
+
+    if (!$force && !$api->isCharacterSetAvailable('utf8mb4')) {
+      $message = pht(
+        "You have an old version of MySQL (older than 5.5) which does not ".
+        "support the utf8mb4 character set. If you apply adjustments now ".
+        "and later update MySQL to 5.5 or newer, you'll need to apply ".
+        "adjustments again (and they will take a long time).\n\n".
+        "You can exit this workflow, update MySQL now, and then run this ".
+        "workflow again. This is recommended, but may cause a lot of downtime ".
+        "right now.\n\n".
+        "You can exit this workflow, continue using Phabricator without ".
+        "applying adjustments, update MySQL at a later date, and then run ".
+        "this workflow again. This is also a good approach, and will let you ".
+        "delay downtime until later.\n\n".
+        "You can proceed with this workflow, and then optionally update ".
+        "MySQL at a later date. After you do, you'll need to apply ".
+        "adjustments again.\n\n".
+        "For more information, see \"Managing Storage Adjustments\" in ".
+        "the documentation.");
+
+      $console->writeOut(
+        "\n**<bg:yellow> %s </bg>**\n\n%s\n",
+        pht('OLD MySQL VERSION'),
+        phutil_console_wrap($message));
+
+      $prompt = pht('Continue with old MySQL version?');
+      if (!phutil_console_confirm($prompt, $default_no = true)) {
+        return;
+      }
     }
 
     $table = id(new PhutilConsoleTable())
@@ -105,16 +149,11 @@ final class PhabricatorStorageManagementAdjustWorkflow
         pht(
           "Found %s issues(s) with schemata, detailed above.\n\n".
           "You can review issues in more detail from the web interface, ".
-          "in Config > Database Status.\n\n".
+          "in Config > Database Status. To better understand the adjustment ".
+          "workflow, see \"Managing Storage Adjustments\" in the ".
+          "documentation.\n\n".
           "MySQL needs to copy table data to make some adjustments, so these ".
-          "migrations may take some time.".
-
-          // TODO: Remove warning once this stabilizes.
-          "\n\n".
-          "WARNING: This workflow is new and unstable. If you continue, you ".
-          "may unrecoverably destory data. Make sure you have a backup before ".
-          "you proceed.",
-
+          "migrations may take some time.",
           new PhutilNumber(count($adjustments))));
 
       $prompt = pht('Fix these schema issues?');
@@ -135,8 +174,13 @@ final class PhabricatorStorageManagementAdjustWorkflow
       "%s\n",
       pht('Fixing schema issues...'));
 
-    $api = $this->getAPI();
     $conn = $api->getConn(null);
+
+    if ($unsafe) {
+      queryfx($conn, 'SET SESSION sql_mode = %s', '');
+    } else {
+      queryfx($conn, 'SET SESSION sql_mode = %s', 'STRICT_ALL_TABLES');
+    }
 
     $failed = array();
 
@@ -300,34 +344,44 @@ final class PhabricatorStorageManagementAdjustWorkflow
       $console->writeOut(
         "%s\n",
         pht('Completed fixing all schema issues.'));
-      return 0;
+
+      $err = 0;
+    } else {
+      $table = id(new PhutilConsoleTable())
+        ->addColumn('target', array('title' => pht('Target')))
+        ->addColumn('error', array('title' => pht('Error')));
+
+      foreach ($failed as $failure) {
+        list($adjust, $ex) = $failure;
+
+        $pieces = array_select_keys(
+          $adjust,
+          array('database', 'table', 'name'));
+        $pieces = array_filter($pieces);
+        $target = implode('.', $pieces);
+
+        $table->addRow(
+          array(
+            'target' => $target,
+            'error' => $ex->getMessage(),
+          ));
+      }
+
+      $console->writeOut("\n");
+      $table->draw();
+      $console->writeOut(
+        "\n%s\n",
+        pht('Failed to make some schema adjustments, detailed above.'));
+      $console->writeOut(
+        "%s\n",
+        pht(
+          'For help troubleshooting adjustments, see "Managing Storage '.
+          'Adjustments" in the documentation.'));
+
+      $err = 1;
     }
 
-    $table = id(new PhutilConsoleTable())
-      ->addColumn('target', array('title' => pht('Target')))
-      ->addColumn('error', array('title' => pht('Error')));
-
-    foreach ($failed as $failure) {
-      list($adjust, $ex) = $failure;
-
-      $pieces = array_select_keys($adjust, array('database', 'table', 'name'));
-      $pieces = array_filter($pieces);
-      $target = implode('.', $pieces);
-
-      $table->addRow(
-        array(
-          'target' => $target,
-          'error' => $ex->getMessage(),
-        ));
-    }
-
-    $console->writeOut("\n");
-    $table->draw();
-    $console->writeOut(
-      "\n%s\n",
-      pht('Failed to make some schema adjustments, detailed above.'));
-
-    return 1;
+    return $this->printErrors($errors, $err);
   }
 
   private function findAdjustments() {
@@ -344,7 +398,15 @@ final class PhabricatorStorageManagementAdjustWorkflow
     $issue_auto = PhabricatorConfigStorageSchema::ISSUE_AUTOINCREMENT;
 
     $adjustments = array();
+    $errors = array();
     foreach ($comp->getDatabases() as $database_name => $database) {
+      foreach ($this->findErrors($database) as $issue) {
+        $errors[] = array(
+          'database' => $database_name,
+          'issue' => $issue,
+        );
+      }
+
       $expect_database = $expect->getDatabase($database_name);
       $actual_database = $actual->getDatabase($database_name);
 
@@ -372,6 +434,14 @@ final class PhabricatorStorageManagementAdjustWorkflow
       }
 
       foreach ($database->getTables() as $table_name => $table) {
+        foreach ($this->findErrors($table) as $issue) {
+          $errors[] = array(
+            'database' => $database_name,
+            'table' => $table_name,
+            'issue' => $issue,
+          );
+        }
+
         $expect_table = $expect_database->getTable($table_name);
         $actual_table = $actual_database->getTable($table_name);
 
@@ -395,6 +465,15 @@ final class PhabricatorStorageManagementAdjustWorkflow
         }
 
         foreach ($table->getColumns() as $column_name => $column) {
+          foreach ($this->findErrors($column) as $issue) {
+            $errors[] = array(
+              'database' => $database_name,
+              'table' => $table_name,
+              'name' => $column_name,
+              'issue' => $issue,
+            );
+          }
+
           $expect_column = $expect_table->getColumn($column_name);
           $actual_column = $actual_table->getColumn($column_name);
 
@@ -455,6 +534,15 @@ final class PhabricatorStorageManagementAdjustWorkflow
         }
 
         foreach ($table->getKeys() as $key_name => $key) {
+          foreach ($this->findErrors($key) as $issue) {
+            $errors[] = array(
+              'database' => $database_name,
+              'table' => $table_name,
+              'name' => $key_name,
+              'issue' => $issue,
+            );
+          }
+
           $expect_key = $expect_table->getKey($key_name);
           $actual_key = $actual_table->getKey($key_name);
 
@@ -512,8 +600,66 @@ final class PhabricatorStorageManagementAdjustWorkflow
       }
     }
 
-    return $adjustments;
+    return array($adjustments, $errors);
   }
 
+  private function findErrors(PhabricatorConfigStorageSchema $schema) {
+    $result = array();
+    foreach ($schema->getLocalIssues() as $issue) {
+      $status = PhabricatorConfigStorageSchema::getIssueStatus($issue);
+      if ($status == PhabricatorConfigStorageSchema::STATUS_FAIL) {
+        $result[] = $issue;
+      }
+    }
+    return $result;
+  }
+
+  private function printErrors(array $errors, $default_return) {
+    if (!$errors) {
+      return $default_return;
+    }
+
+    $console = PhutilConsole::getConsole();
+
+    $table = id(new PhutilConsoleTable())
+      ->addColumn('target', array('title' => pht('Target')))
+      ->addColumn('error', array('title' => pht('Error')));
+
+    foreach ($errors as $error) {
+      $pieces = array_select_keys(
+        $error,
+        array('database', 'table', 'name'));
+      $pieces = array_filter($pieces);
+      $target = implode('.', $pieces);
+
+      $name = PhabricatorConfigStorageSchema::getIssueName($error['issue']);
+
+      $table->addRow(
+        array(
+          'target' => $target,
+          'error' => $name,
+        ));
+    }
+
+    $console->writeOut("\n");
+    $table->draw();
+    $console->writeOut("\n");
+
+    $message = pht(
+      "The schemata have serious errors (detailed above) which the adjustment ".
+      "workflow can not fix.\n\n".
+      "If you are not developing Phabricator itself, report this issue to ".
+      "the upstream.\n\n".
+      "If you are developing Phabricator, these errors usually indicate that ".
+      "your schema specifications do not agree with the schemata your code ".
+      "actually builds.");
+
+    $console->writeOut(
+      "**<bg:red> %s </bg>**\n\n%s\n",
+      pht('SCHEMATA ERRORS'),
+      phutil_console_wrap($message));
+
+    return 2;
+  }
 
 }

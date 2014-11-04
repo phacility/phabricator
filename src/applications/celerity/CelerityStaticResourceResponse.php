@@ -40,7 +40,7 @@ final class CelerityStaticResourceResponse {
   public function initBehavior(
     $behavior,
     array $config = array(),
-    $source_name = 'phabricator') {
+    $source_name) {
 
     $this->requireResource('javelin-behavior-'.$behavior, $source_name);
 

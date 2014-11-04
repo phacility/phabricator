@@ -1,0 +1,256 @@
+@title Contributing Code
+@group detail
+
+Describes how to contribute code to Phabricator.
+
+Overview
+========
+
+If you're planning to send a patch to Phabricator, this guide can help you
+through the process. The most important parts of contributing code to
+Phabricator are:
+
+  - File a task with a bug report or feature request //before// you write code.
+  - We rarely accept patches which we haven't discussed first.
+  - We do not accept patches against prototype applications.
+  - You must sign the CLA.
+  - We do not accept GitHub pull requests.
+  - Some alternative approaches are available if your change isn't something
+    we want to bring upstream.
+
+The rest of this article describes these points in more detail, and then
+provides guidance on writing and submitting patches.
+
+If you just want to contribute some code but don't have a specific bug or
+feature in mind, see the bottom of this document for tips on finding ways to get
+started.
+
+For general information on contributing to Phabricator, see
+@{article:Contributor Introduction}.
+
+
+Coordinate First
+================
+
+Before sending code, you should file a bug report or feature request describing
+what you'd like to write. For details on how to do this, see these articles:
+
+  - @{article:Contributing Bug Reports}
+  - @{article:Contributing Feature Requests}
+
+When you file a task, mention that you'd like to write the code to fix it. We
+can help contextualize your request or bug and guide you through writing an
+upstreamable patch, provided it's something that's upstreamable. If it isn't
+upstreamable, we can let you know what the issues are and help find another
+plan of attack.
+
+You don't have to file first (for example, if you spot a misspelling it's
+normally fine to just send a diff), but for anything even moderately complex
+you're strongly encouraged to file first and coordinate with the upstream.
+
+
+Rejecting Patches
+=================
+
+If you send us a patch without coordinating it with us first, it will probably
+be immediately rejected, or sit in limbo for a long time and eventually be
+rejected. The reasons we do this vary from patch to patch, but some of the most
+common reasons are:
+
+**Unjustifiable Costs**: We support code in the upstream forever. Support is
+enormously expensive and takes up a huge amount of our time. The cost to support
+a change over its lifetime is often 10x or 100x or 1000x greater than the cost
+to write the first version of it. Many uncoordinated patches we receive are
+"white elephants", which would cost much more to maintain than the value they
+provide.
+
+As an author, it may look like you're giving us free work and we're rejecting it
+as too expensive, but this viewpoint doesn't align with the reality of a large
+project which is actively supported by a small, experienced team. Writing code
+is cheap; maintaining it is expensive.
+
+By coordinating with us first, you can make sure the patch is something we
+consider valuable enough to put long-term support resources behind, and that
+you're building it in a way that we're comfortable taking over.
+
+**Not a Good Fit**: Many patches aren't good fits for the upstream: they
+implement features we simply don't want. You can find more information in
+@{article:Contributing Feature Requests}. Coordinating with us first helps
+make sure we're on the same page and interested in a feature.
+
+The most common type of patch along these lines is a patch which adds new
+configuration options. We consider additional configuration options to have
+an exceptionally high lifetime support cost and are very unlikely to accept
+them. Coordinate with us first.
+
+**Not a Priority**: If you send us a patch against something which isn't a
+priority, we probably won't have time to look at it. We don't give special
+treatment to low-priority issues just because there's code written: we'd still
+be spending time on something lower-priority when we could be spending it on
+something higher-priority instead.
+
+If you coordinate with us first, you can make sure your patch is in an area
+of the codebase that we can prioritize.
+
+**Overly Ambitious Patches**: Sometimes we'll get huge patches from new
+contributors. These can have a lot of fundamental problems and require a huge
+amount of our time to review and correct. If you're interested in contributing,
+you'll have more success if you start small and learn as you go.
+
+We can help you break a large change into smaller pieces and learn how the
+codebase works as you proceed through the implementation, but only if you
+coordinate with us first.
+
+**Generality**: We often receive several feature requests which ask for similar
+features, and can come up with a general approach which covers all of the use
+cases. If you send us a patch for //your use case only//, the approach may be
+too specific. When a cleaner and more general approach is available, we usually
+prefer to pursue it.
+
+By coordinating with us first, we can make you aware of similar use cases and
+opportunities to generalize an approach. These changes are often small, but can
+have a big impact on how useful a piece of code is.
+
+**Infrastructure and Sequencing**: Sometimes patches are written against a piece
+of infrastructure with major planned changes. We don't want to accept these
+because they'll make the infrastructure changes more difficult to implement.
+
+Coordinate with us first to make sure a change doesn't need to wait on other
+pieces of infrastructure. We can help you identify technical blockers and
+possibly guide you through resolving them if you're interested.
+
+
+No Prototype Changes
+====================
+
+With rare exceptions, we do not accept patches for prototype applications for
+the same reasons that we don't accept feature requests or bug reports. To learn
+more about prototype applications, see
+@{article:User Guide: Prototype Applications}.
+
+
+You Must Sign the CLA
+=====================
+
+Before we can accept source code contributions, you need to submit a
+[[ https://secure.phabricator.com/L28 | Contributor License Agreement ]]. Your
+changes can not be accepted until you sign the agreement.
+
+If you haven't signed it by the time you send changes for review, you'll be
+reminded to sign it at that time.
+
+If you're submitting work on behalf of a company (like your employer), the
+company can sign the [[ https://secure.phabricator.com/L30 | Corporate
+Contributor License Agreement ]] instead.
+
+Both agreements are substantially similar to the Apache Foundation's CLAs. They
+protect Phacility and users of Phabricator by making sure we have permission to
+distribute your changes under an open source license.
+
+
+No Pull Requests
+================
+
+We do not accept pull requests on GitHub:
+
+  - We can not monitor who has signed CLAs on GitHub. You must sign the CLA
+    to contribute, and we can't tell if you've signed it or not when you send
+    us a pull request.
+  - Pull requests do not get lint and unit tests run, so issues which are
+    normally caught statically can slip by.
+  - Phabricator is code review software, and developed using its own workflows.
+    Pull requests bypass some of these workflows (for example, they will not
+    trigger Herald rules to notify interested parties).
+  - GitHub is not the authoritative master repository and we maintain a linear
+    history, so merging pull requests is cumbersome on our end.
+  - If you're comfortable enough with Phabricator to contribute to it, you
+    should also be comfortable using it to submit changes.
+
+Instead of sending a pull request, use `arc diff` to create a revision on the
+upstream install. Your change will go through the normal Phabricator review
+process.
+
+(GitHub does not allow repositories to disable pull requests, which is why
+it's technically possible to submit them.)
+
+
+Alternatives
+============
+
+If you've written code but we're not accepting it into the upstream, some
+alternative approaches include:
+
+**Maintain a local fork.** This will require some ongoing effort to port your
+changes forward when you update, but is often very reasonable for simple
+changes.
+
+**Develop as an application.** Many parts of Phabricator's infrastructure are
+modular, and modularity is increasing over time. A lot of changes can be built
+as external modules or applications without forking Phabricator itself. There
+isn't much documentation or support for this right now, but you can look at
+how other applications are implemented, and at other third-party code that
+extends Phabricator.
+
+**Rise to prominence.** We're more willing to accept borderline changes from
+community members who are active, make multiple contributions, or have a history
+with the project. This is not carte blanche, but distinguishing yourself can
+make us feel more comfortable about supporting a change which is slightly
+outside of our comfort zone.
+
+
+Writing and Submitting Patches
+==================
+
+To actually submit a patch, run `arc diff` in `phabricator/`, `arcanist/`, or
+`libphutil/`. When executed in these directories, `arc` should automatically
+talk to the upstream install. You can add `epriestley` as a reviewer.
+
+You should read the relevant coding convention documents before you submit a
+change. If you're a new contributor, you don't need to worry about this too
+much. Just try to make your code look similar to the code around it, and we
+can help you through the details during review.
+
+  - @{article:General Coding Standards} (for all languages)
+  - @{article:PHP Coding Standards} (for PHP)
+  - @{article:Javascript Coding Standards} (for Javascript)
+
+In general, if you're coordinating with us first, we can usually provide
+guidance on how to implement things. The other articles in this section also
+provide information on how to work in the Phabricator codebase.
+
+Not Sure Where To Get Started?
+==============================
+
+If you don't have a specific bug or feature in mind and just want to write
+some code, you can try to find something simple to get started with.
+
+Because we're usually quick to fix easy bugs and issues, we often don't have a
+very good backlog of starter tasks.
+
+You can try searching in Maniphest for tasks tagged with #easy, which might
+have something, but a lot of time this list is small and the tasks on it aren't
+very fun or interesting even if they aren't technically too difficult.
+
+In general, the best way to contribute is to come to us with a problem you
+encountered or something you're interested in building, and then work with us
+to find a solution to it or a plan to build it. We can help turn a hacky patch
+into something that's upstreamable, and you'll get a fix or feature you want.
+
+You can also look though the rest of the open tasks for something more
+substantive that you're interested in. This will give you a better chance of
+finding something that's relevant to you, but many tasks are large or blocked
+by other large tasks.
+
+If you do find something, feel free to leave a comment like "I'm interested in
+working on this, is this something I could reasonably help with?". We're happy
+to walk through things, break larger tasks down into more detail, provide
+pointers to similar changes and the right places in the codebase to get started,
+and generally figure out how to attack a problem.
+
+
+Next Steps
+==========
+
+Continue by:
+
+  - returning to the @{article:Contributor Introduction}.

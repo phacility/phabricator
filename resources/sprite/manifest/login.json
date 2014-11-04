@@ -74,7 +74,7 @@
     "login-MediaWiki"    : {
       "name" : "login-MediaWiki",
       "rule" : ".login-MediaWiki",
-      "hash" : "6e9e75fdad545f415d78719bd2dee3ec"
+      "hash" : "51c7e71ab0e44126e72d8a130779b02c"
     },
     "login-Openid"       : {
       "name" : "login-Openid",

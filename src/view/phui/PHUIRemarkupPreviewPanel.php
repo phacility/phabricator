@@ -116,7 +116,8 @@ final class PHUIRemarkupPreviewPanel extends AphrontTagView {
     switch ($this->skin) {
       case 'document':
         $content = id(new PHUIDocumentView())
-          ->appendChild($content);
+          ->appendChild($content)
+          ->setFontKit(PHUIDocumentView::FONT_SOURCE_SANS);
         break;
       default:
         $content = id(new PHUIBoxView())

@@ -73,14 +73,8 @@ final class PhrictionEditController
             return new Aphront404Response();
           }
         }
-        $document = new PhrictionDocument();
-        $document->setSlug($slug);
-
-        $content  = new PhrictionContent();
-        $content->setSlug($slug);
-
-        $default_title = PhabricatorSlug::getDefaultTitle($slug);
-        $content->setTitle($default_title);
+        $document = PhrictionDocument::initializeNewDocument($user, $slug);
+        $content = $document->getContent();
       }
     }
 
@@ -174,13 +168,21 @@ final class PhrictionEditController
       }
 
       if (!count($errors)) {
-        $editor = id(PhrictionDocumentEditor::newForSlug($document->getSlug()))
-          ->setActor($user)
-          ->setTitle($title)
-          ->setContent($request->getStr('content'))
-          ->setDescription($notes);
 
-        $editor->save();
+        $xactions = array();
+        $xactions[] = id(new PhrictionTransaction())
+          ->setTransactionType(PhrictionTransaction::TYPE_TITLE)
+          ->setNewValue($title);
+        $xactions[] = id(new PhrictionTransaction())
+          ->setTransactionType(PhrictionTransaction::TYPE_CONTENT)
+          ->setNewValue($request->getStr('content'));
+
+        $editor = id(new PhrictionTransactionEditor())
+          ->setActor($user)
+          ->setContentSourceFromRequest($request)
+          ->setContinueOnNoEffect(true)
+          ->setDescription($notes)
+          ->applyTransactions($document, $xactions);
 
         if ($draft) {
           $draft->delete();

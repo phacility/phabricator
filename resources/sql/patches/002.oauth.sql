@@ -1,8 +1,8 @@
 create table {$NAMESPACE}_user.user_oauthinfo (
   id int unsigned not null auto_increment primary key,
   userID int unsigned not null,
-  oauthProvider varchar(255) not null,
-  oauthUID varchar(255) not null,
+  oauthProvider varchar(255) COLLATE `binary` not null,
+  oauthUID varchar(255) COLLATE `binary` not null,
   unique key (userID, oauthProvider),
   unique key (oauthProvider, oauthUID),
   dateCreated int unsigned not null,

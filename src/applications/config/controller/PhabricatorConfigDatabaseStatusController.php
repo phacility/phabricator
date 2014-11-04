@@ -166,7 +166,7 @@ final class PhabricatorConfigDatabaseStatusController
       $comp->getIssues());
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
+      ->setHeader($this->buildHeaderWithDocumentationLink($title))
       ->addPropertyList($properties)
       ->appendChild($table);
 
@@ -261,7 +261,7 @@ final class PhabricatorConfigDatabaseStatusController
       $database->getIssues());
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
+      ->setHeader($this->buildHeaderWithDocumentationLink($title))
       ->addPropertyList($properties)
       ->appendChild($table);
 
@@ -471,7 +471,7 @@ final class PhabricatorConfigDatabaseStatusController
       $table->getIssues());
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
+      ->setHeader($this->buildHeaderWithDocumentationLink($title))
       ->addPropertyList($properties)
       ->appendChild($table_view)
       ->appendChild($keys_view);
@@ -609,7 +609,7 @@ final class PhabricatorConfigDatabaseStatusController
       $column->getIssues());
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
+      ->setHeader($this->buildHeaderWithDocumentationLink($title))
       ->addPropertyList($properties);
 
     return $this->buildResponse($title, $box);
@@ -702,7 +702,7 @@ final class PhabricatorConfigDatabaseStatusController
       $key->getIssues());
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText($title)
+      ->setHeader($this->buildHeaderWithDocumentationLink($title))
       ->addPropertyList($properties);
 
     return $this->buildResponse($title, $box);

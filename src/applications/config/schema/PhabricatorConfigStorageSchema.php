@@ -16,6 +16,7 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
   const ISSUE_SUBWARN = 'subwarn';
   const ISSUE_SUBFAIL = 'subfail';
   const ISSUE_AUTOINCREMENT = 'autoincrement';
+  const ISSUE_UNKNOWN = 'unknown';
 
   const STATUS_OKAY = 'okay';
   const STATUS_WARN = 'warn';
@@ -127,6 +128,8 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
         return pht('Subschemata Have Failures');
       case self::ISSUE_AUTOINCREMENT:
         return pht('Column has Wrong Autoincrement');
+      case self::ISSUE_UNKNOWN:
+        return pht('Column Has No Specification');
       default:
         throw new Exception(pht('Unknown schema issue "%s"!', $issue));
     }
@@ -162,6 +165,8 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
         return pht('Subschemata have setup failures.');
       case self::ISSUE_AUTOINCREMENT:
         return pht('This column has the wrong autoincrement setting.');
+      case self::ISSUE_UNKNOWN:
+        return pht('This column is missing a type specification.');
       default:
         throw new Exception(pht('Unknown schema issue "%s"!', $issue));
     }
@@ -173,6 +178,7 @@ abstract class PhabricatorConfigStorageSchema extends Phobject {
       case self::ISSUE_SURPLUS:
       case self::ISSUE_NULLABLE:
       case self::ISSUE_SUBFAIL:
+      case self::ISSUE_UNKNOWN:
         return self::STATUS_FAIL;
       case self::ISSUE_SUBWARN:
       case self::ISSUE_COLUMNTYPE:

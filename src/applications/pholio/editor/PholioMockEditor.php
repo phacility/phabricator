@@ -409,7 +409,7 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
       }
     }
 
-    $body->addTextSection(
+    $body->addLinkSection(
       pht('MOCK DETAIL'),
       PhabricatorEnv::getProductionURI('/M'.$object->getID()));
 

@@ -2,7 +2,7 @@ CREATE TABLE {$NAMESPACE}_owners.owners_package (
   id int unsigned not null auto_increment primary key,
   phid varchar(64) binary not null,
   unique key(phid),
-  name varchar(255) not null,
+  name varchar(255) COLLATE `binary` not null,
   unique key(name),
   description text not null,
   primaryOwnerPHID varchar(64) binary

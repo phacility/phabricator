@@ -64,6 +64,13 @@ try {
         'help'  => 'Do not actually change anything, just show what would be '.
                    'changed.',
       ),
+      array(
+        'name' => 'disable-utf8mb4',
+        'help' => pht(
+          'Disable utf8mb4, even if the database supports it. This is an '.
+          'advanced feature used for testing changes to Phabricator; you '.
+          'should not normally use this flag.'),
+      )
     ));
 } catch (PhutilArgumentUsageException $ex) {
   $args->printUsageException($ex);
@@ -126,6 +133,7 @@ $api->setHost($default_host);
 $api->setPort($default_port);
 $api->setPassword($password);
 $api->setNamespace($args->getArg('namespace'));
+$api->setDisableUTF8MB4($args->getArg('disable-utf8mb4'));
 
 try {
   queryfx(

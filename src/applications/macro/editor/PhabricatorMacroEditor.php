@@ -173,7 +173,7 @@ final class PhabricatorMacroEditor
     array $xactions) {
 
     $body = parent::buildMailBody($object, $xactions);
-    $body->addTextSection(
+    $body->addLinkSection(
       pht('MACRO DETAIL'),
       PhabricatorEnv::getProductionURI('/macro/view/'.$object->getID().'/'));
 

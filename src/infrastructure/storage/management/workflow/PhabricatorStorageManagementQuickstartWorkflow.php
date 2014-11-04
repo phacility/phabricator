@@ -33,6 +33,14 @@ final class PhabricatorStorageManagementQuickstartWorkflow
 
     $bin = dirname(phutil_get_library_root('phabricator')).'/bin/storage';
 
+    if (!$this->getAPI()->isCharacterSetAvailable('utf8mb4')) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'You can only generate a new quickstart file if MySQL supports '.
+          'the utf8mb4 character set (available in MySQL 5.5 and newer). The '.
+          'configured server does not support utf8mb4.'));
+    }
+
     $err = phutil_passthru(
       '%s upgrade --force --no-quickstart --namespace %s',
       $bin,
@@ -73,6 +81,21 @@ final class PhabricatorStorageManagementQuickstartWorkflow
       $namespace,
       '{$NAMESPACE}',
       $dump);
+
+    // NOTE: This is a hack. We can not use `binary` for this column, because
+    // it is part of a fulltext index.
+    $old = $dump;
+    $dump = preg_replace(
+      '/`corpus` longtext CHARACTER SET .* COLLATE .*,/mi',
+      '`corpus` longtext CHARACTER SET {$CHARSET_FULLTEXT} '.
+        'COLLATE {$COLLATE_FULLTEXT},',
+      $dump);
+    if ($dump == $old) {
+      // If we didn't make any changes, yell about it. We'll produce an invalid
+      // dump otherwise.
+      throw new PhutilArgumentUsageException(
+        pht('Failed to apply hack to adjust FULLTEXT search column!'));
+    }
 
     $dump = str_replace(
       'utf8mb4_bin',

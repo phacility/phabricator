@@ -82,7 +82,13 @@ final class PhabricatorMetaMTAMailBody {
       phutil_tag('div', array('style' => 'font-weight:800;'), $header),
       $html_fragment,
     );
+    return $this;
+  }
 
+  public function addLinkSection($header, $link) {
+    $html = phutil_tag('a', array('href' => $link), $link);
+    $this->addPlaintextSection($header, $link);
+    $this->addHTMLSection($header, $html);
     return $this;
   }
 
@@ -98,7 +104,7 @@ final class PhabricatorMetaMTAMailBody {
       return $this;
     }
 
-    $this->addTextSection(
+    $this->addLinkSection(
       pht('WHY DID I GET THIS EMAIL?'),
       PhabricatorEnv::getProductionURI($xscript_uri));
 

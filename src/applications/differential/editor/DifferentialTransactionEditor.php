@@ -1140,7 +1140,7 @@ final class DifferentialTransactionEditor
 
     $changed_uri = $this->getChangedPriorToCommitURI();
     if ($changed_uri) {
-      $body->addTextSection(
+      $body->addLinkSection(
         pht('CHANGED PRIOR TO COMMIT'),
         $changed_uri);
     }
@@ -1151,7 +1151,7 @@ final class DifferentialTransactionEditor
         $this->renderInlineCommentsForMail($object, $inlines));
     }
 
-    $body->addTextSection(
+    $body->addLinkSection(
       pht('REVISION DETAIL'),
       PhabricatorEnv::getProductionURI('/D'.$object->getID()));
 
