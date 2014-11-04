@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => '810e8b13',
+    'core.pkg.css' => '33952f78',
     'core.pkg.js' => 'cbdbd552',
     'darkconsole.pkg.js' => 'df001cab',
     'differential.pkg.css' => '8af45893',
@@ -107,7 +107,7 @@ return array(
     'rsrc/css/core/syntax.css' => '56c1ba38',
     'rsrc/css/core/z-index.css' => '44e1d311',
     'rsrc/css/diviner/diviner-shared.css' => '38813222',
-    'rsrc/css/font/font-awesome.css' => '327559dd',
+    'rsrc/css/font/font-awesome.css' => '0c10d96b',
     'rsrc/css/font/font-source-sans-pro.css' => '91d53463',
     'rsrc/css/font/phui-font-icon-base.css' => '3dad2ae3',
     'rsrc/css/layout/phabricator-crumbs-view.css' => 'a49339de',
@@ -526,7 +526,7 @@ return array(
     'diffusion-icons-css' => '9c5828da',
     'diffusion-source-css' => '66fdf661',
     'diviner-shared-css' => '38813222',
-    'font-fontawesome' => '327559dd',
+    'font-fontawesome' => '0c10d96b',
     'font-source-sans-pro' => '91d53463',
     'global-drag-and-drop-css' => '697324ad',
     'harbormaster-css' => '49d64eb4',
