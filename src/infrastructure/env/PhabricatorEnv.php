@@ -153,6 +153,15 @@ final class PhabricatorEnv {
     // pull in all options from non-phabricator libraries now they are loaded.
     $default_source->loadExternalOptions();
 
+    // If this install has site config sources, load them now.
+    $site_sources = id(new PhutilSymbolLoader())
+      ->setAncestorClass('PhabricatorConfigSiteSource')
+      ->loadObjects();
+    $site_sources = msort($site_sources, 'getPriority');
+    foreach ($site_sources as $site_source) {
+      $stack->pushSource($site_source);
+    }
+
     try {
       $stack->pushSource(
         id(new PhabricatorConfigDatabaseSource('default'))
