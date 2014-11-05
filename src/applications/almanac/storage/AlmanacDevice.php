@@ -6,6 +6,7 @@ final class AlmanacDevice
     PhabricatorPolicyInterface,
     PhabricatorCustomFieldInterface,
     PhabricatorApplicationTransactionInterface,
+    PhabricatorProjectInterface,
     AlmanacPropertyInterface {
 
   protected $name;

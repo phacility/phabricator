@@ -68,7 +68,8 @@ final class AlmanacDeviceViewController
     $viewer = $this->getViewer();
 
     $properties = id(new PHUIPropertyListView())
-      ->setUser($viewer);
+      ->setUser($viewer)
+      ->setObject($device);
 
     return $properties;
   }

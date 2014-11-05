@@ -44,10 +44,20 @@ final class AlmanacDeviceEditController
     $e_name = true;
     $validation_exception = null;
 
+    if ($is_new) {
+      $v_projects = array();
+    } else {
+      $v_projects = PhabricatorEdgeQuery::loadDestinationPHIDs(
+        $device->getPHID(),
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
+      $v_projects = array_reverse($v_projects);
+    }
+
     if ($request->isFormPost()) {
       $v_name = $request->getStr('name');
       $v_view = $request->getStr('viewPolicy');
       $v_edit = $request->getStr('editPolicy');
+      $v_projects = $request->getArr('projects');
 
       $type_name = AlmanacDeviceTransaction::TYPE_NAME;
       $type_view = PhabricatorTransactions::TYPE_VIEW_POLICY;
@@ -66,6 +76,12 @@ final class AlmanacDeviceEditController
       $xactions[] = id(new AlmanacDeviceTransaction())
         ->setTransactionType($type_edit)
         ->setNewValue($v_edit);
+
+      $proj_edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
+      $xactions[] = id(new AlmanacDeviceTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+        ->setMetadataValue('edge:type', $proj_edge_type)
+        ->setNewValue(array('=' => array_fuse($v_projects)));
 
       $editor = id(new AlmanacDeviceEditor())
         ->setActor($viewer)
@@ -91,6 +107,12 @@ final class AlmanacDeviceEditController
       ->setObject($device)
       ->execute();
 
+    if ($v_projects) {
+      $project_handles = $this->loadViewerHandles($v_projects);
+    } else {
+      $project_handles = array();
+    }
+
     $form = id(new AphrontFormView())
       ->setUser($viewer)
       ->appendChild(
@@ -111,6 +133,12 @@ final class AlmanacDeviceEditController
           ->setPolicyObject($device)
           ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
           ->setPolicies($policies))
+      ->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setLabel(pht('Projects'))
+          ->setName('projects')
+          ->setValue($project_handles)
+          ->setDatasource(new PhabricatorProjectDatasource()))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton($cancel_uri)
