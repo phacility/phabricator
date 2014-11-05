@@ -48,6 +48,7 @@ final class PhrictionTransactionEditor
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
     $types[] = PhrictionTransaction::TYPE_TITLE;
     $types[] = PhrictionTransaction::TYPE_CONTENT;
+    $types[] = PhrictionTransaction::TYPE_DELETE;
 
     /* TODO
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
@@ -72,6 +73,8 @@ final class PhrictionTransactionEditor
           return null;
         }
         return $this->getOldContent()->getContent();
+      case PhrictionTransaction::TYPE_DELETE:
+        return null;
     }
   }
 
@@ -82,6 +85,7 @@ final class PhrictionTransactionEditor
     switch ($xaction->getTransactionType()) {
       case PhrictionTransaction::TYPE_TITLE:
       case PhrictionTransaction::TYPE_CONTENT:
+      case PhrictionTransaction::TYPE_DELETE:
         return $xaction->getNewValue();
     }
   }
@@ -94,6 +98,7 @@ final class PhrictionTransactionEditor
       switch ($xaction->getTransactionType()) {
       case PhrictionTransaction::TYPE_TITLE:
       case PhrictionTransaction::TYPE_CONTENT:
+      case PhrictionTransaction::TYPE_DELETE:
         return true;
       }
     }
@@ -131,6 +136,11 @@ final class PhrictionTransactionEditor
       case PhrictionTransaction::TYPE_CONTENT:
         $this->getNewContent()->setContent($xaction->getNewValue());
         break;
+      case PhrictionTransaction::TYPE_DELETE:
+        $this->getNewContent()->setContent('');
+        $this->getNewContent()->setChangeType(
+          PhrictionChangeType::CHANGE_DELETE);
+        break;
       default:
         break;
     }
@@ -145,6 +155,7 @@ final class PhrictionTransactionEditor
       switch ($xaction->getTransactionType()) {
         case PhrictionTransaction::TYPE_TITLE:
         case PhrictionTransaction::TYPE_CONTENT:
+        case PhrictionTransaction::TYPE_DELETE:
           $save_content = true;
           break;
         default:
@@ -213,6 +224,8 @@ final class PhrictionTransactionEditor
         pht("A document's title changes."),
       PhrictionTransaction::MAILTAG_CONTENT =>
         pht("A document's content changes."),
+      PhrictionTransaction::MAILTAG_DELETE =>
+        pht('A document is deleted.'),
     );
   }
 
@@ -279,14 +292,12 @@ final class PhrictionTransactionEditor
   private function buildNewContentTemplate(
     PhrictionDocument $document) {
 
-    $new_content = new PhrictionContent();
-    $new_content->setSlug($document->getSlug());
-    $new_content->setAuthorPHID($this->getActor()->getPHID());
-    $new_content->setChangeType(PhrictionChangeType::CHANGE_EDIT);
-
-    $new_content->setTitle($this->getOldContent()->getTitle());
-    $new_content->setContent($this->getOldContent()->getContent());
-
+    $new_content = id(new PhrictionContent())
+      ->setSlug($document->getSlug())
+      ->setAuthorPHID($this->getActor()->getPHID())
+      ->setChangeType(PhrictionChangeType::CHANGE_EDIT)
+      ->setTitle($this->getOldContent()->getTitle())
+      ->setContent($this->getOldContent()->getContent());
     if (strlen($this->getDescription())) {
       $new_content->setDescription($this->getDescription());
     }

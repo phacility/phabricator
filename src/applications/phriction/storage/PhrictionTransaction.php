@@ -5,9 +5,11 @@ final class PhrictionTransaction
 
   const TYPE_TITLE = 'title';
   const TYPE_CONTENT = 'content';
+  const TYPE_DELETE  = 'delete';
 
   const MAILTAG_TITLE = 'phriction-title';
   const MAILTAG_CONTENT = 'phriction-content';
+  const MAILTAG_DELETE  = 'phriction-delete';
 
   public function getApplicationName() {
     return 'phriction';
@@ -53,6 +55,8 @@ final class PhrictionTransaction
         return 1.4;
       case self::TYPE_CONTENT:
         return 1.3;
+      case self::TYPE_DELETE:
+        return 1.5;
     }
 
     return parent::getActionStrength();
@@ -73,6 +77,9 @@ final class PhrictionTransaction
       case self::TYPE_CONTENT:
         return pht('Edited');
 
+      case self::TYPE_DELETE:
+        return pht('Deleted');
+
     }
 
     return parent::getActionName();
@@ -86,11 +93,12 @@ final class PhrictionTransaction
       case self::TYPE_TITLE:
       case self::TYPE_CONTENT:
         return 'fa-pencil';
+      case self::TYPE_DELETE:
+        return 'fa-times';
     }
 
     return parent::getIcon();
   }
-
 
 
   public function getTitle() {
@@ -116,6 +124,12 @@ final class PhrictionTransaction
         return pht(
           '%s edited the document content.',
           $this->renderHandleLink($author_phid));
+
+      case self::TYPE_DELETE:
+        return pht(
+          '%s deleted this document.',
+          $this->renderHandleLink($author_phid));
+
 
     }
 
@@ -151,6 +165,12 @@ final class PhrictionTransaction
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
 
+      case self::TYPE_DELETE:
+        return pht(
+          '%s deleted %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid));
+
     }
     return parent::getTitleForFeed($story);
   }
@@ -179,6 +199,10 @@ final class PhrictionTransaction
       case self::TYPE_CONTENT:
         $tags[] = self::MAILTAG_CONTENT;
         break;
+      case self::TYPE_DELETE:
+        $tags[] = self::MAILTAG_DELETE;
+        break;
+
     }
     return $tags;
   }
