@@ -16,6 +16,7 @@ final class PhrictionMoveController extends PhrictionController {
       $document = id(new PhrictionDocumentQuery())
         ->setViewer($user)
         ->withIDs(array($this->id))
+        ->needContent(true)
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
@@ -32,6 +33,7 @@ final class PhrictionMoveController extends PhrictionController {
       $document = id(new PhrictionDocumentQuery())
         ->setViewer($user)
         ->withSlugs(array($slug))
+        ->needContent(true)
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
@@ -74,50 +76,46 @@ final class PhrictionMoveController extends PhrictionController {
       return id(new AphrontDialogResponse())->setDialog($error_dialog);
     }
 
-    $content = id(new PhrictionContent())->load($document->getContentID());
+    $content = $document->getContent();
 
     if ($request->isFormPost() && !count($errors)) {
-      if (!count($errors)) { // First check if the target document exists
 
-        // NOTE: We use the ominpotent user because we can't let users overwrite
-        // documents even if they can't see them.
-        $target_document = id(new PhrictionDocumentQuery())
-          ->setViewer(PhabricatorUser::getOmnipotentUser())
-          ->withSlugs(array($target_slug))
-          ->executeOne();
+      // NOTE: We use the ominpotent user because we can't let users overwrite
+      // documents even if they can't see them.
+      $target_document = id(new PhrictionDocumentQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withSlugs(array($target_slug))
+        ->needContent(true)
+        ->executeOne();
 
-        // Considering to overwrite existing docs? Nuke this!
-        if ($target_document && $target_document->getStatus() ==
-          PhrictionDocumentStatus::STATUS_EXISTS) {
-
-          $errors[] = pht('Can not overwrite existing target document.');
-          $e_url = pht('Already exists.');
-        }
+      // Considering to overwrite existing docs? Nuke this!
+      $exists = PhrictionDocumentStatus::STATUS_EXISTS;
+      if ($target_document && $target_document->getStatus() == $exists) {
+        $errors[] = pht('Can not overwrite existing target document.');
+        $e_url = pht('Already exists.');
       }
 
-      if (!count($errors)) { // I like to move it, move it!
-        $from_editor = id(PhrictionDocumentEditor::newForSlug($slug))
+      if (!count($errors)) {
+
+        $editor = id(new PhrictionTransactionEditor())
           ->setActor($user)
-          ->setTitle($content->getTitle())
-          ->setContent($content->getContent())
-          ->setDescription($content->getDescription());
+          ->setContentSourceFromRequest($request)
+          ->setContinueOnNoEffect(true)
+          ->setDescription($request->getStr('description'));
 
-        $target_editor = id(PhrictionDocumentEditor::newForSlug(
-          $target_slug))
-          ->setActor($user)
-          ->setTitle($content->getTitle())
-          ->setContent($content->getContent())
-          ->setDescription($content->getDescription());
+        $xactions = array();
+        $xactions[] = id(new PhrictionTransaction())
+          ->setTransactionType(PhrictionTransaction::TYPE_MOVE_TO)
+          ->setNewValue($document);
+        if (!$target_document) {
+          $target_document = PhrictionDocument::initializeNewDocument(
+            $user,
+            $target_slug);
+        }
+        $editor->applyTransactions($target_document, $xactions);
 
-        // Move it!
-        $target_editor->moveHere($document->getID(), $document->getPHID());
-
-        // Retrieve the target doc directly from the editor
-        // No need to load it per Sql again
-        $target_document = $target_editor->getDocument();
-        $from_editor->moveAway($target_document->getID());
-
-        $redir_uri = PhrictionDocument::getSlugURI($target_document->getSlug());
+        $redir_uri = PhrictionDocument::getSlugURI(
+          $target_document->getSlug());
         return id(new AphrontRedirectResponse())->setURI($redir_uri);
       }
     }
@@ -131,21 +129,21 @@ final class PhrictionMoveController extends PhrictionController {
       ->setUser($user)
       ->appendChild(
         id(new AphrontFormStaticControl())
-          ->setLabel(pht('Title'))
-          ->setValue($content->getTitle()))
+        ->setLabel(pht('Title'))
+        ->setValue($content->getTitle()))
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel(pht('New URI'))
-          ->setValue($target_slug)
-          ->setError($e_url)
-          ->setName('new-slug')
-          ->setCaption(pht('The new location of the document.')))
+        ->setLabel(pht('New URI'))
+        ->setValue($target_slug)
+        ->setError($e_url)
+        ->setName('new-slug')
+        ->setCaption(pht('The new location of the document.')))
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel(pht('Edit Notes'))
-          ->setValue($content->getDescription())
-          ->setError(null)
-          ->setName('description'));
+        ->setLabel(pht('Edit Notes'))
+        ->setValue($content->getDescription())
+        ->setError(null)
+        ->setName('description'));
 
     $dialog = id(new AphrontDialogView())
       ->setUser($user)

@@ -6,6 +6,7 @@ final class PhrictionTransactionEditor
   private $description;
   private $oldContent;
   private $newContent;
+  private $moveAwayDocument;
 
   public function setDescription($description) {
     $this->description = $description;
@@ -49,6 +50,8 @@ final class PhrictionTransactionEditor
     $types[] = PhrictionTransaction::TYPE_TITLE;
     $types[] = PhrictionTransaction::TYPE_CONTENT;
     $types[] = PhrictionTransaction::TYPE_DELETE;
+    $types[] = PhrictionTransaction::TYPE_MOVE_TO;
+    $types[] = PhrictionTransaction::TYPE_MOVE_AWAY;
 
     /* TODO
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
@@ -74,6 +77,8 @@ final class PhrictionTransactionEditor
         }
         return $this->getOldContent()->getContent();
       case PhrictionTransaction::TYPE_DELETE:
+      case PhrictionTransaction::TYPE_MOVE_TO:
+      case PhrictionTransaction::TYPE_MOVE_AWAY:
         return null;
     }
   }
@@ -87,6 +92,22 @@ final class PhrictionTransactionEditor
       case PhrictionTransaction::TYPE_CONTENT:
       case PhrictionTransaction::TYPE_DELETE:
         return $xaction->getNewValue();
+      case PhrictionTransaction::TYPE_MOVE_TO:
+        $document = $xaction->getNewValue();
+        // grab the real object now for the sub-editor to come
+        $this->moveAwayDocument = $document;
+        $dict = array(
+          'id' => $document->getID(),
+          'phid' => $document->getPHID(),
+          'content' => $document->getContent()->getContent(),);
+        return $dict;
+      case PhrictionTransaction::TYPE_MOVE_AWAY:
+        $document = $xaction->getNewValue();
+        $dict = array(
+          'id' => $document->getID(),
+          'phid' => $document->getPHID(),
+          'content' => $document->getContent()->getContent(),);
+        return $dict;
     }
   }
 
@@ -99,6 +120,8 @@ final class PhrictionTransactionEditor
       case PhrictionTransaction::TYPE_TITLE:
       case PhrictionTransaction::TYPE_CONTENT:
       case PhrictionTransaction::TYPE_DELETE:
+      case PhrictionTransaction::TYPE_MOVE_TO:
+      case PhrictionTransaction::TYPE_MOVE_AWAY:
         return true;
       }
     }
@@ -120,7 +143,11 @@ final class PhrictionTransactionEditor
     switch ($xaction->getTransactionType()) {
       case PhrictionTransaction::TYPE_TITLE:
       case PhrictionTransaction::TYPE_CONTENT:
+      case PhrictionTransaction::TYPE_MOVE_TO:
         $object->setStatus(PhrictionDocumentStatus::STATUS_EXISTS);
+        return;
+      case PhrictionTransaction::TYPE_MOVE_AWAY:
+        $object->setStatus(PhrictionDocumentStatus::STATUS_MOVED);
         return;
     }
   }
@@ -141,6 +168,20 @@ final class PhrictionTransactionEditor
         $this->getNewContent()->setChangeType(
           PhrictionChangeType::CHANGE_DELETE);
         break;
+      case PhrictionTransaction::TYPE_MOVE_TO:
+        $dict = $xaction->getNewValue();
+        $this->getNewContent()->setContent($dict['content']);
+        $this->getNewContent()->setChangeType(
+          PhrictionChangeType::CHANGE_MOVE_HERE);
+        $this->getNewContent()->setChangeRef($dict['id']);
+        break;
+      case PhrictionTransaction::TYPE_MOVE_AWAY:
+        $dict = $xaction->getNewValue();
+        $this->getNewContent()->setContent('');
+        $this->getNewContent()->setChangeType(
+          PhrictionChangeType::CHANGE_MOVE_AWAY);
+        $this->getNewContent()->setChangeRef($dict['id']);
+        break;
       default:
         break;
     }
@@ -156,6 +197,8 @@ final class PhrictionTransactionEditor
         case PhrictionTransaction::TYPE_TITLE:
         case PhrictionTransaction::TYPE_CONTENT:
         case PhrictionTransaction::TYPE_DELETE:
+        case PhrictionTransaction::TYPE_MOVE_AWAY:
+        case PhrictionTransaction::TYPE_MOVE_TO:
           $save_content = true;
           break;
         default:
@@ -196,15 +239,27 @@ final class PhrictionTransactionEditor
         }
       }
     }
+
+    if ($this->moveAwayDocument !== null) {
+      $move_away_xactions = array();
+      $move_away_xactions[] = id(new PhrictionTransaction())
+        ->setTransactionType(PhrictionTransaction::TYPE_MOVE_AWAY)
+        ->setNewValue($object);
+      $sub_editor = id(new PhrictionTransactionEditor())
+        ->setActor($this->getActor())
+        ->setContentSource($this->getContentSource())
+        ->setContinueOnNoEffect($this->getContinueOnNoEffect())
+        ->setDescription($this->getDescription())
+        ->applyTransactions($this->moveAwayDocument, $move_away_xactions);
+    }
+
     return $xactions;
   }
 
   protected function shouldSendMail(
     PhabricatorLiskDAO $object,
     array $xactions) {
-
-    $xactions = mfilter($xactions, 'shouldHide', true);
-    return $xactions;
+    return true;
   }
 
   protected function getMailSubjectPrefix() {
@@ -274,8 +329,16 @@ final class PhrictionTransactionEditor
     array $xactions) {
 
     $phids = parent::getFeedRelatedPHIDs($object, $xactions);
-    // TODO - once the editor supports moves, we'll need to surface the
-    // "from document phid" to related phids.
+
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case PhrictionTransaction::TYPE_MOVE_TO:
+          $dict = $xaction->getNewValue();
+          $phids[] = $dict['phid'];
+          break;
+      }
+    }
+
     return $phids;
   }
 

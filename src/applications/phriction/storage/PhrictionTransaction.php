@@ -6,6 +6,8 @@ final class PhrictionTransaction
   const TYPE_TITLE = 'title';
   const TYPE_CONTENT = 'content';
   const TYPE_DELETE  = 'delete';
+  const TYPE_MOVE_TO = 'move-to';
+  const TYPE_MOVE_AWAY = 'move-away';
 
   const MAILTAG_TITLE = 'phriction-title';
   const MAILTAG_CONTENT = 'phriction-content';
@@ -21,6 +23,20 @@ final class PhrictionTransaction
 
   public function getApplicationTransactionCommentObject() {
     return new PhrictionTransactionComment();
+  }
+
+  public function getRequiredHandlePHIDs() {
+    $phids = parent::getRequiredHandlePHIDs();
+    $new = $this->getNewValue();
+    switch ($this->getTransactionType()) {
+      case self::TYPE_MOVE_TO:
+      case self::TYPE_MOVE_AWAY:
+        $phids[] = $new['phid'];
+        break;
+    }
+
+
+    return $phids;
   }
 
   public function getRemarkupBlocks() {
@@ -49,6 +65,24 @@ final class PhrictionTransaction
     return parent::shouldHide();
   }
 
+  public function shouldHideForMail(array $xactions) {
+    switch ($this->getTransactionType()) {
+      case self::TYPE_MOVE_TO:
+      case self::TYPE_MOVE_AWAY:
+        return true;
+    }
+    return parent::shouldHideForMail($xactions);
+  }
+
+  public function shouldHideForFeed() {
+    switch ($this->getTransactionType()) {
+      case self::TYPE_MOVE_TO:
+      case self::TYPE_MOVE_AWAY:
+        return true;
+    }
+    return parent::shouldHideForFeed();
+  }
+
   public function getActionStrength() {
     switch ($this->getTransactionType()) {
       case self::TYPE_TITLE:
@@ -57,6 +91,9 @@ final class PhrictionTransaction
         return 1.3;
       case self::TYPE_DELETE:
         return 1.5;
+      case self::TYPE_MOVE_TO:
+      case self::TYPE_MOVE_AWAY:
+        return 1.0;
     }
 
     return parent::getActionStrength();
@@ -80,6 +117,12 @@ final class PhrictionTransaction
       case self::TYPE_DELETE:
         return pht('Deleted');
 
+      case self::TYPE_MOVE_TO:
+        return pht('Moved');
+
+      case self::TYPE_MOVE_AWAY:
+        return pht('Moved Away');
+
     }
 
     return parent::getActionName();
@@ -95,6 +138,9 @@ final class PhrictionTransaction
         return 'fa-pencil';
       case self::TYPE_DELETE:
         return 'fa-times';
+      case self::TYPE_MOVE_TO:
+      case self::TYPE_MOVE_AWAY:
+        return 'fa-arrows';
     }
 
     return parent::getIcon();
@@ -130,6 +176,17 @@ final class PhrictionTransaction
           '%s deleted this document.',
           $this->renderHandleLink($author_phid));
 
+      case self::TYPE_MOVE_TO:
+        return pht(
+          '%s moved this document from %s',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($new['phid']));
+
+      case self::TYPE_MOVE_AWAY:
+        return pht(
+          '%s moved this document to %s',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($new['phid']));
 
     }
 
