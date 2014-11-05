@@ -997,7 +997,7 @@ abstract class PhabricatorBaseChineseTranslation
       '%s edited %s revision(s) for %s, added %s: %s; removed %s: %s.' => '%s 编辑了 %s 个修订为了 %s, 添加了 %s: %s; 移除了 %s: %s。',
     
       // phabricator/src/applications/maniphest/edge/ManiphestTaskHasRevisionEdgeType.php:48
-      '%s edited %s revision(s), added %s: %s; removed %s: %s.' => '%s edited %s revision(s), added %s: %s; removed %s: %s。',
+      '%s edited %s revision(s), added %s: %s; removed %s: %s.' => '%s 编辑了 %s 修订, 添加了 %s: %s; 移除了 %s: %s。',
     
       // phabricator/src/applications/differential/edge/DifferentialRevisionHasTaskEdgeType.php:95
       // phabricator/src/applications/diffusion/edge/DiffusionCommitHasTaskEdgeType.php:95
@@ -2093,7 +2093,7 @@ abstract class PhabricatorBaseChineseTranslation
       '(Any)' => null,
     
       // phabricator/src/applications/repository/application/PhabricatorRepositoriesApplication.php:18
-      '(Deprecated)' => null,
+      '(Deprecated)' => '(废弃的)',
     
       // phabricator/src/applications/paste/controller/PhabricatorPasteEditController.php:146
       '(Detect From Filename in Title)' => null,
@@ -2734,7 +2734,7 @@ abstract class PhabricatorBaseChineseTranslation
       'Active Resources' => null,
     
       // phabricator/src/applications/differential/query/DifferentialRevisionSearchEngine.php:207
-      'Active Revisions' => null,
+      'Active Revisions' => '活动的修订',
     
       // phabricator/src/applications/macro/query/PhabricatorMacroQuery.php:26
       'Active and Disabled Macros' => null,
@@ -3101,7 +3101,7 @@ abstract class PhabricatorBaseChineseTranslation
       // phabricator/src/applications/diviner/controller/DivinerMainController.php:26
       // phabricator/src/applications/search/engine/PhabricatorApplicationSearchEngine.php:171
       // phabricator/src/applications/search/controller/PhabricatorApplicationSearchController.php:259
-      'Advanced Search' => null,
+      'Advanced Search' => '高级搜索',
     
       // phabricator/src/applications/files/controller/PhabricatorFileComposeController.php:87
       'Adventure Pack' => null,
@@ -3318,7 +3318,7 @@ abstract class PhabricatorBaseChineseTranslation
       'All Resources' => null,
     
       // phabricator/src/applications/differential/query/DifferentialRevisionSearchEngine.php:211
-      'All Revisions' => null,
+      'All Revisions' => '所有修订',
     
       // phabricator/src/applications/herald/controller/HeraldTranscriptController.php:162
       'All Rules' => null,
@@ -3334,7 +3334,7 @@ abstract class PhabricatorBaseChineseTranslation
     
       // phabricator/src/applications/maniphest/query/ManiphestTaskSearchEngine.php:449
       // phabricator/src/applications/project/controller/PhabricatorProjectBoardViewController.php:397
-      'All Tasks' => null,
+      'All Tasks' => '所有任务',
     
       // phabricator/src/applications/maniphest/controller/ManiphestReportController.php:224
       'All Time' => null,
@@ -3755,7 +3755,7 @@ abstract class PhabricatorBaseChineseTranslation
       // phabricator/src/applications/meta/phid/PhabricatorApplicationApplicationPHIDType.php:9
       // phabricator/src/applications/oauthserver/panel/PhabricatorOAuthServerAuthorizationsSettingsPanel.php:117
       // phabricator/src/applications/settings/panel/PhabricatorSettingsPanelHomePreferences.php:63
-      'Application' => null,
+      'Application' => 'Application',
     
       // phabricator/src/applications/search/engine/PhabricatorApplicationSearchEngine.php:238
       'Application "%s" is not installed!' => null,
@@ -3781,7 +3781,7 @@ abstract class PhabricatorBaseChineseTranslation
     
       // phabricator/src/applications/meta/query/PhabricatorAppSearchEngine.php:7
       // phabricator/src/applications/meta/application/PhabricatorApplicationsApplication.php:6
-      'Applications' => null,
+      'Applications' => 'Applications',
     
       // phabricator/src/applications/herald/adapter/HeraldCommitAdapter.php:540
       // phabricator/src/applications/herald/adapter/HeraldDifferentialRevisionAdapter.php:411
@@ -3989,7 +3989,7 @@ abstract class PhabricatorBaseChineseTranslation
       // phabricator/src/applications/maniphest/query/ManiphestTaskSearchEngine.php:315
       // phabricator/src/applications/maniphest/controller/ManiphestTaskDetailController.php:499
       // phabricator/src/applications/maniphest/controller/ManiphestTaskEditController.php:603
-      'Assigned To' => null,
+      'Assigned To' => '分派给',
     
       // phabricator/src/applications/herald/adapter/HeraldManiphestTaskAdapter.php:196
       'Assigned task.' => null,
@@ -4002,7 +4002,7 @@ abstract class PhabricatorBaseChineseTranslation
       'Assigned to Me' => null,
     
       // phabricator/src/applications/maniphest/view/ManiphestTaskListView.php:55
-      'Assigned: %s' => null,
+      'Assigned: %s' => '分派: %s',
     
       // phabricator/src/applications/herald/adapter/HeraldAdapter.php:279
       'Assignee' => null,
@@ -4160,7 +4160,7 @@ abstract class PhabricatorBaseChineseTranslation
       'Aug' => null,
     
       // phabricator/src/applications/auth/application/PhabricatorAuthApplication.php:22
-      'Auth' => null,
+      'Auth' => 'Auth',
     
       // phabricator/src/applications/auth/phid/PhabricatorAuthAuthFactorPHIDType.php:8
       'Auth Factor' => null,
@@ -4249,7 +4249,7 @@ abstract class PhabricatorBaseChineseTranslation
       // phabricator/src/applications/pholio/query/PholioMockSearchEngine.php:81
       // phabricator/src/applications/ponder/query/PonderQuestionSearchEngine.php:105
       // phabricator/src/applications/slowvote/query/PhabricatorSlowvoteSearchEngine.php:95
-      'Authored' => null,
+      'Authored' => '由你提出的',
     
       // phabricator/src/applications/audit/query/PhabricatorCommitSearchEngine.php:136
       'Authored Commits' => null,
@@ -4292,7 +4292,7 @@ abstract class PhabricatorBaseChineseTranslation
       // phabricator/src/applications/pholio/query/PholioMockSearchEngine.php:60
       // phabricator/src/applications/ponder/query/PonderQuestionSearchEngine.php:78
       // phabricator/src/applications/slowvote/query/PhabricatorSlowvoteSearchEngine.php:60
-      'Authors' => null,
+      'Authors' => '作者(发起人)',
     
       // phabricator/src/applications/diffusion/controller/DiffusionRepositoryEditMainController.php:521
       // phabricator/src/applications/diffusion/controller/DiffusionRepositoryEditActionsController.php:98
@@ -4496,7 +4496,7 @@ abstract class PhabricatorBaseChineseTranslation
       'Basic Transforms' => null,
     
       // phabricator/src/applications/maniphest/view/ManiphestTaskResultListView.php:236
-      'Batch Edit Selected \302\273' => null,
+      'Batch Edit Selected \302\273' => 'Batch Edit Selected \302\273',
     
       // phabricator/src/applications/maniphest/controller/ManiphestBatchEditController.php:150
       'Batch Edit Tasks' => null,
@@ -4505,7 +4505,7 @@ abstract class PhabricatorBaseChineseTranslation
       'Batch Editor' => null,
     
       // phabricator/src/applications/maniphest/view/ManiphestTaskResultListView.php:265
-      'Batch Task Editor' => null,
+      'Batch Task Editor' => '批量任务编辑器',
     
       // phabricator/src/applications/people/controller/PhabricatorPeopleDeleteController.php:31
       'Be careful when deleting users! This will permanently and irreversibly destroy this user account.' => null,
@@ -4738,7 +4738,7 @@ abstract class PhabricatorBaseChineseTranslation
       'Browse Settings' => null,
     
       // phabricator/src/applications/audit/application/PhabricatorAuditApplication.php:18
-      'Browse and Audit Commits' => array(''),
+      'Browse and Audit Commits' => '浏览审核代码提交',
     
       // phabricator/src/applications/differential/view/DifferentialChangesetListView.php:126
       'Browse in Diffusion' => null,
@@ -4830,7 +4830,7 @@ abstract class PhabricatorBaseChineseTranslation
       'Building' => null,
     
       // phabricator/src/applications/search/controller/PhabricatorApplicationSearchController.php:322
-      'Builtin' => null,
+      'Builtin' => '内建的',
     
       // phabricator/src/view/form/control/PhabricatorRemarkupControl.php:69
       'Bulleted List' => null,
@@ -5114,7 +5114,7 @@ abstract class PhabricatorBaseChineseTranslation
       // phabricator/src/applications/phragment/controller/PhragmentRevertController.php:78
       // phabricator/src/applications/phragment/controller/PhragmentSnapshotDeleteController.php:47
       // phabricator/src/applications/phortune/controller/PhortuneCartCancelController.php:174
-      'Cancel' => null,
+      'Cancel' => '取消',
     
       // phabricator/src/applications/calendar/controller/PhabricatorCalendarEventViewController.php:83
       'Cancel Event' => null,
@@ -5499,7 +5499,7 @@ abstract class PhabricatorBaseChineseTranslation
       'Classes must match to compare schemata!' => null,
     
       // phabricator/src/applications/maniphest/view/ManiphestTaskResultListView.php:227
-      'Clear Selection' => null,
+      'Clear Selection' => '清除选中',
     
       // phabricator/src/view/phui/calendar/PHUICalendarListView.php:85
       'Clear sailing ahead.' => null,
@@ -5901,7 +5901,7 @@ abstract class PhabricatorBaseChineseTranslation
       // phabricator/src/applications/config/controller/PhabricatorConfigEditController.php:211
       // phabricator/src/applications/config/controller/PhabricatorConfigGroupController.php:31
       // phabricator/src/applications/config/controller/PhabricatorConfigListController.php:29
-      'Config' => null,
+      'Config' => 'Config',
     
       // phabricator/src/applications/config/check/PhabricatorSetupCheckInvalidConfig.php:17
       'Config \'%s\' Invalid' => null,
@@ -6011,7 +6011,7 @@ abstract class PhabricatorBaseChineseTranslation
       'Configure Paste.' => null,
     
       // phabricator/src/applications/config/application/PhabricatorConfigApplication.php:34
-      'Configure Phabricator' => null,
+      'Configure Phabricator' => '配置Phabricator',
     
       // phabricator/src/applications/config/controller/PhabricatorConfigWelcomeController.php:130
       'Configure Phabricator Settings' => null,
@@ -6225,7 +6225,7 @@ abstract class PhabricatorBaseChineseTranslation
       'Container' => null,
     
       // phabricator/src/applications/maniphest/query/ManiphestTaskSearchEngine.php:396
-      'Contains Words' => null,
+      'Contains Words' => 'Contains Words',
     
       // phabricator/src/applications/phriction/controller/PhrictionEditController.php:250
       'Content' => null,
@@ -6488,7 +6488,7 @@ abstract class PhabricatorBaseChineseTranslation
       // phabricator/src/applications/differential/controller/DifferentialDiffCreateController.php:90
       // phabricator/src/applications/differential/controller/DifferentialDiffCreateController.php:98
       // phabricator/src/applications/differential/controller/DifferentialController.php:11
-      'Create Diff' => null,
+      'Create Diff' => '创建Diff(文件)',
     
       // phabricator/src/applications/phriction/controller/PhrictionEditController.php:199
       // phabricator/src/applications/legalpad/controller/LegalpadDocumentEditController.php:185
@@ -6608,7 +6608,7 @@ abstract class PhabricatorBaseChineseTranslation
       'Create New...' => null,
     
       // phabricator/src/applications/herald/application/PhabricatorHeraldApplication.php:18
-      'Create Notification Rules' => null,
+      'Create Notification Rules' => '创建通知规则',
     
       // phabricator/src/applications/oauthserver/controller/client/PhabricatorOAuthClientEditController.php:36
       'Create OAuth Application' => null,
@@ -6697,10 +6697,10 @@ abstract class PhabricatorBaseChineseTranslation
       // phabricator/src/applications/maniphest/controller/ManiphestController.php:39
       // phabricator/src/applications/maniphest/controller/ManiphestTaskEditController.php:539
       // phabricator/src/applications/maniphest/controller/ManiphestTaskEditController.php:542
-      'Create Task' => null,
+      'Create Task' => '创建任务',
     
       // phabricator/src/applications/project/controller/PhabricatorProjectBoardViewController.php:549
-      'Create Task...' => null,
+      'Create Task...' => '创建任务...',
     
       // phabricator/src/applications/oauthserver/controller/client/PhabricatorOAuthClientViewController.php:87
       'Create Test Authorization' => null,
@@ -6811,14 +6811,14 @@ abstract class PhabricatorBaseChineseTranslation
       // phabricator/src/applications/paste/query/PhabricatorPasteSearchEngine.php:91
       // phabricator/src/applications/legalpad/query/LegalpadDocumentSearchEngine.php:113
       // phabricator/src/applications/maniphest/query/ManiphestTaskSearchEngine.php:410
-      'Created After' => null,
+      'Created After' => 'Created After',
     
       // phabricator/src/applications/files/query/PhabricatorFileSearchEngine.php:82
       // phabricator/src/applications/macro/query/PhabricatorMacroSearchEngine.php:124
       // phabricator/src/applications/paste/query/PhabricatorPasteSearchEngine.php:93
       // phabricator/src/applications/legalpad/query/LegalpadDocumentSearchEngine.php:115
       // phabricator/src/applications/maniphest/query/ManiphestTaskSearchEngine.php:412
-      'Created Before' => null,
+      'Created Before' => 'Created Before',
     
       // phabricator/src/applications/releeph/controller/branch/ReleephBranchEditController.php:81
       // phabricator/src/applications/calendar/query/PhabricatorCalendarEventSearchEngine.php:111
@@ -6997,7 +6997,7 @@ abstract class PhabricatorBaseChineseTranslation
       'Custom remarkup rules are now added by subclassing PhabricatorRemarkupCustomInlineRule or PhabricatorRemarkupCustomBlockRule.' => null,
     
       // phabricator/src/applications/home/controller/PhabricatorHomeController.php:77
-      'Customize Applications...' => null,
+      'Customize Applications...' => '定制应用...',
     
       // phabricator/src/applications/config/controller/PhabricatorConfigWelcomeController.php:191
       'Customize Home Page' => null,
@@ -7071,7 +7071,7 @@ abstract class PhabricatorBaseChineseTranslation
       // phabricator/src/applications/daemon/application/PhabricatorDaemonsApplication.php:6
       // phabricator/src/applications/daemon/controller/PhabricatorDaemonController.php:9
       // phabricator/src/applications/config/option/PhabricatorPHDConfigOptions.php:7
-      'Daemons' => null,
+      'Daemons' => 'Daemons',
     
       // phabricator/src/applications/config/check/PhabricatorSetupCheckDaemons.php:39
       'Daemons Not Running' => null,
@@ -7772,10 +7772,10 @@ abstract class PhabricatorBaseChineseTranslation
       'Disable Provider?' => null,
     
       // phabricator/src/applications/search/controller/PhabricatorSearchDeleteController.php:75
-      'Disable Query' => null,
+      'Disable Query' => '禁用查询',
     
       // phabricator/src/applications/search/controller/PhabricatorSearchDeleteController.php:69
-      'Disable Query?' => null,
+      'Disable Query?' => '禁用查询？',
     
       // phabricator/src/applications/config/option/PhabricatorNotificationConfigOptions.php:20
       'Disable Real-Time Notifications' => null,
@@ -8188,7 +8188,7 @@ abstract class PhabricatorBaseChineseTranslation
       // phabricator/src/applications/settings/panel/PhabricatorSettingsPanelSSHKeys.php:107
       // phabricator/src/applications/project/editor/PhabricatorProjectTransactionEditor.php:305
       // phabricator/src/applications/project/editor/PhabricatorProjectTransactionEditor.php:320
-      'Duplicate' => null,
+      'Duplicate' => '重复的',
     
       // phabricator/src/applications/metamta/constants/MetaMTAReceivedMailStatus.php:23
       'Duplicate Message' => null,
@@ -8599,10 +8599,10 @@ abstract class PhabricatorBaseChineseTranslation
       'Edit Pull Request' => null,
     
       // phabricator/src/applications/search/engine/PhabricatorApplicationSearchEngine.php:166
-      'Edit Queries...' => null,
+      'Edit Queries...' => '编辑查询类型...',
     
       // phabricator/src/applications/search/controller/PhabricatorApplicationSearchController.php:196
-      'Edit Query...' => null,
+      'Edit Query...' => '编辑查询...',
     
       // phabricator/src/applications/ponder/controller/PonderQuestionViewController.php:96
       'Edit Question' => null,
@@ -9178,7 +9178,7 @@ abstract class PhabricatorBaseChineseTranslation
       'Exceptions occurred while mirroring the "%s" repository.' => null,
     
       // phabricator/src/applications/search/controller/PhabricatorApplicationSearchController.php:170
-      'Execute Query' => null,
+      'Execute Query' => '执行查询',
     
       // phabricator/src/infrastructure/markup/interpreter/PhabricatorRemarkupCowsayBlockInterpreter.php:40
       'Execution of `cowsay` failed:' => null,
@@ -9299,69 +9299,69 @@ abstract class PhabricatorBaseChineseTranslation
       'Explore Applications' => null,
     
       // phabricator/src/applications/meta/application/PhabricatorApplicationsApplication.php:24
-      'Explore More Applications' => null,
+      'Explore More Applications' => '探索更多应用',
     
       // phabricator/src/applications/config/controller/PhabricatorConfigWelcomeController.php:341
-      'Explore Phabricator' => null,
+      'Explore Phabricator' => '探索Phabricator',
     
       // phabricator/src/applications/maniphest/controller/ManiphestExportController.php:80
-      'Export Tasks to Excel' => null,
+      'Export Tasks to Excel' => '将任务导出到Excel',
     
       // phabricator/src/applications/maniphest/view/ManiphestTaskResultListView.php:244
       // phabricator/src/applications/maniphest/controller/ManiphestExportController.php:94
-      'Export to Excel' => null,
+      'Export to Excel' => '导出到Excel',
     
       // phabricator/src/applications/repository/editor/PhabricatorRepositoryEditor.php:338
-      'Expression "%s" is not a valid regular expression. Note that you must include delimiters.' => null,
+      'Expression "%s" is not a valid regular expression. Note that you must include delimiters.' => '表达式 "%s" 不是一个有效的正则表达式。 请注意你必须包括分隔符。',
     
       // phabricator/src/applications/config/option/PhabricatorExtendingPhabricatorConfigOptions.php:7
-      'Extending Phabricator' => null,
+      'Extending Phabricator' => '扩展Phabricator',
     
       // phabricator/src/applications/diviner/controller/DivinerAtomController.php:269
-      'Extends' => null,
+      'Extends' => '扩展',
     
       // phabricator/src/applications/meta/query/PhabricatorAppSearchEngine.php:244
-      'Extension' => null,
+      'Extension' => '扩展',
     
       // phabricator/src/applications/auth/controller/PhabricatorAuthRegisterController.php:342
       // phabricator/src/applications/people/phid/PhabricatorPeopleExternalPHIDType.php:8
-      'External Account' => null,
+      'External Account' => '外部账号',
     
       // phabricator/src/applications/settings/panel/PhabricatorSettingsPanelExternalAccounts.php:11
-      'External Accounts' => null,
+      'External Accounts' => '外部账号',
     
       // phabricator/src/applications/doorkeeper/engine/DoorkeeperObjectRef.php:108
-      'External Object' => null,
+      'External Object' => '外部对象',
     
       // phabricator/src/applications/people/storage/PhabricatorExternalAccount.php:161
-      'External accounts can only be edited by the account owner.' => null,
+      'External accounts can only be edited by the account owner.' => '外部账号只能由账号的拥有者来编辑。',
     
       // phabricator/src/applications/config/check/PhabricatorSetupCheckExtraConfig.php:161
-      'External loaders have been replaced. Extend `PhabricatorPHIDType` to implement new PHID and handle types.' => null,
+      'External loaders have been replaced. Extend `PhabricatorPHIDType` to implement new PHID and handle types.' => '外部加载器已经被替换。 扩展 `PhabricatorPHIDType` 继承新的PHID和句柄类型。',
     
       // phabricator/src/infrastructure/internationalization/management/PhabricatorInternationalizationManagementExtractWorkflow.php:9
-      'Extract translatable strings.' => null,
+      'Extract translatable strings.' => '抽取可翻译的字符串。',
     
       // phabricator/src/applications/uiexample/examples/PHUIObjectItemListExample.php:226
-      'Extras' => null,
+      'Extras' => '额外工具',
     
       // phabricator/src/applications/files/controller/PhabricatorFileComposeController.php:109
-      'Extremely Secret' => null,
+      'Extremely Secret' => '极度机密',
     
       // phabricator/src/applications/herald/controller/HeraldTranscriptController.php:452
-      'FAIL' => null,
+      'FAIL' => '失败',
     
       // phabricator/src/applications/files/editor/PhabricatorFileEditor.php:84
-      'FILE DETAIL' => null,
+      'FILE DETAIL' => '文件细节',
     
       // phabricator/src/applications/files/mail/FileCreateMailReceiver.php:56
-      'FILE LINKS' => null,
+      'FILE LINKS' => '文件链接',
     
       // phabricator/src/applications/diviner/workflow/DivinerGenerateWorkflow.php:46
-      'FINDING DOCUMENTATION BOOKS' => null,
+      'FINDING DOCUMENTATION BOOKS' => '查找文件编制手册',
     
       // phabricator/src/applications/auth/provider/PhabricatorFacebookAuthProvider.php:9
-      'Facebook' => null,
+      'Facebook' => 'Facebook',
     
       // phabricator/src/applications/auth/factor/PhabricatorAuthFactorTOTP.php:157
       'Factor Name: %s' => null,
@@ -9879,7 +9879,7 @@ abstract class PhabricatorBaseChineseTranslation
       'Generating book "%s"...' => null,
     
       // phabricator/src/applications/project/application/PhabricatorProjectApplication.php:10
-      'Get Organized' => null,
+      'Get Organized' => '让项目有条不紊',
     
       // phabricator/src/applications/phragment/controller/PhragmentVersionController.php:118
       // phabricator/src/applications/phragment/controller/PhragmentVersionController.php:129
@@ -9987,7 +9987,7 @@ abstract class PhabricatorBaseChineseTranslation
     
       // phabricator/src/applications/flag/query/PhabricatorFlagSearchEngine.php:59
       // phabricator/src/applications/maniphest/query/ManiphestTaskSearchEngine.php:381
-      'Group By' => null,
+      'Group By' => 'Group By',
     
       // phabricator/src/applications/project/application/PhabricatorProjectApplication.php:26
       'Group stuff into big piles.' => null,
@@ -10121,7 +10121,7 @@ abstract class PhabricatorBaseChineseTranslation
       // phabricator/src/applications/metamta/contentsource/PhabricatorContentSource.php:77
       // phabricator/src/applications/herald/application/PhabricatorHeraldApplication.php:14
       // phabricator/src/applications/herald/controller/HeraldController.php:8
-      'Herald' => null,
+      'Herald' => 'Herald',
     
       // phabricator/src/applications/herald/phid/HeraldRulePHIDType.php:8
       'Herald Rule' => null,
@@ -10165,7 +10165,7 @@ abstract class PhabricatorBaseChineseTranslation
       'Hide Hidden Columns' => null,
     
       // phabricator/src/applications/search/controller/PhabricatorApplicationSearchController.php:197
-      'Hide Query' => null,
+      'Hide Query' => '隐藏查询',
     
       // phabricator/src/applications/diffusion/controller/DiffusionBrowseController.php:46
       'Hide Search' => null,
@@ -10588,11 +10588,11 @@ abstract class PhabricatorBaseChineseTranslation
       'In %s, %s wrote:' => null,
     
       // phabricator/src/applications/maniphest/query/ManiphestTaskSearchEngine.php:328
-      'In All Projects' => null,
+      'In All Projects' => '在所有项目中',
     
       // phabricator/src/applications/repository/query/PhabricatorRepositorySearchEngine.php:111
       // phabricator/src/applications/maniphest/query/ManiphestTaskSearchEngine.php:347
-      'In Any Project' => null,
+      'In Any Project' => '在任何项目',
     
       // phabricator/src/applications/differential/customfield/DifferentialAsanaRepresentationField.php:11
       'In Asana' => null,
@@ -10601,7 +10601,7 @@ abstract class PhabricatorBaseChineseTranslation
       'In Git and Mercurial, use a branch like "T123" to automatically associate changes with the corresponding task.' => null,
     
       // phabricator/src/applications/maniphest/query/ManiphestTaskSearchEngine.php:359
-      'In Users\' Projects' => null,
+      'In Users\' Projects' => '在用户的项目中',
     
       // phabricator/src/applications/differential/landing/DifferentialLandingToGitHub.php:176
       'In order to complete this action, you need a stronger GitHub token.' => null,
@@ -10886,7 +10886,7 @@ abstract class PhabricatorBaseChineseTranslation
       // phabricator/src/applications/project/editor/PhabricatorProjectTransactionEditor.php:349
       // phabricator/src/applications/project/editor/PhabricatorProjectTransactionEditor.php:361
       // phabricator/src/applications/project/editor/PhabricatorProjectColumnTransactionEditor.php:106
-      'Invalid' => null,
+      'Invalid' => '无效的',
     
       // phabricator/src/applications/oauthserver/controller/PhabricatorOAuthServerAuthController.php:48
       'Invalid Client Application' => null,
@@ -11623,7 +11623,7 @@ abstract class PhabricatorBaseChineseTranslation
       'Login with Phabricator' => null,
     
       // phabricator/src/applications/auth/application/PhabricatorAuthApplication.php:26
-      'Login/Registration' => null,
+      'Login/Registration' => '登录/注册',
     
       // phabricator/src/applications/passphrase/controller/PassphraseCredentialEditController.php:270
       'Login/Username' => null,
@@ -11847,7 +11847,7 @@ abstract class PhabricatorBaseChineseTranslation
       'Manage Panels' => null,
     
       // phabricator/src/applications/daemon/application/PhabricatorDaemonsApplication.php:10
-      'Manage Phabricator Daemons' => null,
+      'Manage Phabricator Daemons' => '管理Phabricator Daemons',
     
       // phabricator/src/applications/config/controller/PhabricatorConfigWelcomeController.php:317
       'Manage and browse source code repositories with **[[ %s | Diffusion ]]**.\n\nEngineers can use Diffusion to browse and audit source code.\n\nYou can configure Phabricator to host repositories, or have it track existing repositories hosted elsewhere (like GitHub, Bitbucket, or an internal server).\n\nTo get started with repositories:\n\n  - **[[ %s | Create a New Repository ]]**\n  - **[[ %s | View All Repositories ]]**\n\nFor more information, see these articles in the documentation:\n\n  - **[[ %s | Diffusion User Guide ]]**, for a general overview of     Diffusion.\n  - **[[ %s | Diffusion User Guide: Repository Hosting ]]**,     for instructions on configuring repository hosting.\n\nPhabricator supports Git, Mercurial and Subversion.' => null,
@@ -13278,7 +13278,7 @@ abstract class PhabricatorBaseChineseTranslation
       'Not Editable' => null,
     
       // phabricator/src/applications/maniphest/query/ManiphestTaskSearchEngine.php:353
-      'Not In Projects' => null,
+      'Not In Projects' => '不在项目中',
     
       // phabricator/src/applications/auth/provider/PhabricatorPasswordAuthProvider.php:36
       'Not Installed' => null,
@@ -13744,7 +13744,7 @@ abstract class PhabricatorBaseChineseTranslation
       // phabricator/src/applications/search/query/PhabricatorSearchApplicationSearchEngine.php:91
       // phabricator/src/applications/slowvote/query/PhabricatorSlowvoteSearchEngine.php:75
       // phabricator/src/applications/slowvote/controller/PhabricatorSlowvotePollController.php:42
-      'Open' => null,
+      'Open' => '打开的',
     
       // phabricator/src/applications/differential/view/DifferentialDiffTableOfContentsView.php:197
       'Open All in Editor' => null,
@@ -13791,7 +13791,7 @@ abstract class PhabricatorBaseChineseTranslation
       // phabricator/src/applications/search/query/PhabricatorSearchApplicationSearchEngine.php:176
       // phabricator/src/applications/project/controller/PhabricatorProjectBoardViewController.php:396
       // phabricator/src/applications/project/controller/PhabricatorProjectProfileController.php:183
-      'Open Tasks' => null,
+      'Open Tasks' => '打开的任务',
     
       // phabricator/src/applications/maniphest/controller/ManiphestReportController.php:460
       'Open Tasks by Project and Priority (%s)' => null,
@@ -13910,7 +13910,7 @@ abstract class PhabricatorBaseChineseTranslation
       'Order' => null,
     
       // phabricator/src/applications/maniphest/query/ManiphestTaskSearchEngine.php:387
-      'Order By' => null,
+      'Order By' => 'Order By',
     
       // phabricator/src/applications/phortune/controller/PhortuneCartViewController.php:106
       'Order Detail' => null,
@@ -14170,7 +14170,7 @@ abstract class PhabricatorBaseChineseTranslation
       'Page Not Found' => null,
     
       // phabricator/src/applications/maniphest/query/ManiphestTaskSearchEngine.php:427
-      'Page Size' => null,
+      'Page Size' => '每页记录数',
     
       // phabricator/src/applications/settings/panel/PhabricatorSettingsPanelDisplayPreferences.php:110
       'Page Titles' => null,
@@ -14441,7 +14441,7 @@ abstract class PhabricatorBaseChineseTranslation
       'Pending Differential Revisions' => null,
     
       // phabricator/src/applications/people/application/PhabricatorPeopleApplication.php:6
-      'People' => null,
+      'People' => 'People',
     
       // phabricator/src/applications/uiexample/examples/PHUIIconExample.php:182
       'People!' => null,
@@ -14774,7 +14774,7 @@ abstract class PhabricatorBaseChineseTranslation
       'Pink' => null,
     
       // phabricator/src/applications/settings/panel/PhabricatorSettingsPanelHomePreferences.php:180
-      'Pinned Applications' => null,
+      'Pinned Applications' => '已钉选的应用',
     
       // phabricator/src/applications/config/option/PhabricatorMetaMTAConfigOptions.php:293
       'Placeholder for mail with only CCs.' => null,
@@ -15149,7 +15149,7 @@ abstract class PhabricatorBaseChineseTranslation
       // phabricator/src/applications/project/config/PhabricatorProjectConfigOptions.php:7
       // phabricator/src/applications/project/editor/PhabricatorProjectTransactionEditor.php:11
       // phabricator/src/applications/project/events/PhabricatorProjectUIEventListener.php:99
-      'Projects' => null,
+      'Projects' => 'Projects',
     
       // phabricator/src/applications/phragment/controller/PhragmentSnapshotPromoteController.php:172
       'Promote' => null,
@@ -15411,7 +15411,7 @@ abstract class PhabricatorBaseChineseTranslation
       'Quack' => null,
     
       // phabricator/src/applications/search/engine/PhabricatorApplicationSearchEngine.php:154
-      'Queries' => null,
+      'Queries' => '查询',
     
       // phabricator/src/applications/dashboard/paneltype/PhabricatorDashboardPanelTypeQuery.php:27
       // phabricator/src/applications/typeahead/controller/PhabricatorTypeaheadModularDatasourceController.php:71
@@ -16272,7 +16272,7 @@ abstract class PhabricatorBaseChineseTranslation
       // phabricator/src/applications/maniphest/controller/ManiphestController.php:25
       // phabricator/src/applications/maniphest/controller/ManiphestController.php:26
       // phabricator/src/applications/maniphest/controller/ManiphestReportController.php:55
-      'Reports' => null,
+      'Reports' => '报告',
     
       // phabricator/src/applications/differential/query/DifferentialRevisionSearchEngine.php:168
       // phabricator/src/applications/audit/query/PhabricatorCommitSearchEngine.php:114
@@ -16282,7 +16282,7 @@ abstract class PhabricatorBaseChineseTranslation
       // phabricator/src/applications/repository/application/PhabricatorRepositoriesApplication.php:14
       // phabricator/src/applications/repository/editor/PhabricatorRepositoryEditor.php:11
       // phabricator/src/applications/harbormaster/query/HarbormasterBuildableSearchEngine.php:137
-      'Repositories' => null,
+      'Repositories' => 'Repositories',
     
       // phabricator/src/applications/diffusion/controller/DiffusionRepositoryEditDeleteController.php:34
       'Repositories touch many objects and as such deletes are prohibitively expensive to run from the web UI.' => null,
@@ -16658,7 +16658,7 @@ abstract class PhabricatorBaseChineseTranslation
       'Resolve references into stable, canonical identifiers.' => null,
     
       // phabricator/src/applications/maniphest/config/PhabricatorManiphestConfigOptions.php:56
-      'Resolved' => null,
+      'Resolved' => '已解决的',
     
       // phabricator/src/applications/config/controller/PhabricatorConfigIssueViewController.php:32
       'Resolved Issue' => null,
@@ -17233,7 +17233,7 @@ abstract class PhabricatorBaseChineseTranslation
     
       // phabricator/src/applications/search/controller/PhabricatorApplicationSearchController.php:345
       // phabricator/src/applications/search/controller/PhabricatorApplicationSearchController.php:354
-      'Saved Queries' => null,
+      'Saved Queries' => '已保存的查询',
     
       // phabricator/src/applications/policy/management/PhabricatorPolicyManagementUnlockWorkflow.php:83
       'Saved application.' => null,
@@ -17268,7 +17268,7 @@ abstract class PhabricatorBaseChineseTranslation
       // phabricator/src/applications/search/application/PhabricatorSearchApplication.php:10
       // phabricator/src/applications/search/config/PhabricatorSearchConfigOptions.php:7
       // phabricator/src/applications/search/engine/PhabricatorApplicationSearchEngine.php:169
-      'Search' => null,
+      'Search' => '搜索',
     
       // phabricator/src/applications/auth/provider/PhabricatorLDAPAuthProvider.php:209
       'Search Attributes' => null,
@@ -17334,7 +17334,7 @@ abstract class PhabricatorBaseChineseTranslation
       'Seen' => null,
     
       // phabricator/src/applications/maniphest/view/ManiphestTaskResultListView.php:217
-      'Select All' => null,
+      'Select All' => '选择全部',
     
       // phabricator/src/applications/system/controller/PhabricatorSystemSelectEncodingController.php:50
       'Select Character Encoding' => null,
@@ -17900,10 +17900,10 @@ abstract class PhabricatorBaseChineseTranslation
       'Show only revisions with a draft comment.' => null,
     
       // phabricator/src/applications/maniphest/query/ManiphestTaskSearchEngine.php:338
-      'Show only tasks with no projects.' => null,
+      'Show only tasks with no projects.' => '只显示没有项目的任务。',
     
       // phabricator/src/applications/maniphest/query/ManiphestTaskSearchEngine.php:322
-      'Show only unassigned tasks.' => null,
+      'Show only unassigned tasks.' => '只显示未分派的任务。',
     
       // phabricator/src/applications/search/query/PhabricatorSearchApplicationSearchEngine.php:152
       'Show only unowned documents.' => null,
@@ -17936,10 +17936,10 @@ abstract class PhabricatorBaseChineseTranslation
       'Showing %d branches.' => null,
     
       // phabricator/src/applications/search/controller/PhabricatorApplicationSearchController.php:187
-      'Showing results for query "%s".' => null,
+      'Showing results for query "%s".' => '显示查询 "%s" 的结果。',
     
       // phabricator/src/applications/search/controller/PhabricatorApplicationSearchController.php:191
-      'Showing results for saved query "%s".' => null,
+      'Showing results for saved query "%s".' => '显示保存的查询 "%s" 的结果。',
     
       // phabricator/src/applications/diffusion/controller/DiffusionRepositoryController.php:425
       'Showing the %d most recent tags.' => null,
@@ -18307,7 +18307,7 @@ abstract class PhabricatorBaseChineseTranslation
       'Specify the name of exactly one object to unlock.' => null,
     
       // phabricator/src/applications/maniphest/config/PhabricatorManiphestConfigOptions.php:110
-      'Spite' => null,
+      'Spite' => '怨念的',
     
       // phabricator/src/applications/maniphest/config/PhabricatorManiphestConfigOptions.php:112
       'Spited' => null,
@@ -18462,7 +18462,7 @@ abstract class PhabricatorBaseChineseTranslation
       // phabricator/src/applications/passphrase/query/PassphraseCredentialSearchEngine.php:42
       // phabricator/src/applications/uiexample/examples/PhabricatorHovercardExample.php:62
       // phabricator/src/applications/project/query/PhabricatorProjectSearchEngine.php:134
-      'Status' => null,
+      'Status' => '状态(Status)',
     
       // phabricator/src/applications/maniphest/constants/ManiphestTaskStatus.php:259
       'Status "%s" is marked as default, but it is a closed status. The default status should be an open status.' => null,
@@ -18714,10 +18714,10 @@ abstract class PhabricatorBaseChineseTranslation
       // phabricator/src/applications/maniphest/controller/ManiphestTaskDetailController.php:446
       // phabricator/src/applications/uiexample/examples/PhabricatorHovercardExample.php:30
       // phabricator/src/applications/uiexample/examples/PhabricatorHovercardExample.php:48
-      'Subscribe' => null,
+      'Subscribe' => '订阅',
     
       // phabricator/src/applications/maniphest/query/ManiphestTaskSearchEngine.php:445
-      'Subscribed' => null,
+      'Subscribed' => '由你订阅的',
     
       // phabricator/src/applications/differential/query/DifferentialRevisionSearchEngine.php:162
       // phabricator/src/applications/differential/customfield/DifferentialSubscribersField.php:15
@@ -18725,7 +18725,7 @@ abstract class PhabricatorBaseChineseTranslation
       // phabricator/src/applications/subscriptions/controller/PhabricatorSubscriptionsListController.php:41
       // phabricator/src/applications/maniphest/query/ManiphestTaskSearchEngine.php:371
       // phabricator/src/applications/maniphest/controller/ManiphestTaskDetailController.php:514
-      'Subscribers' => null,
+      'Subscribers' => '订阅人',
     
       // phabricator/src/applications/subscriptions/application/PhabricatorSubscriptionsApplication.php:6
       'Subscriptions' => null,
@@ -18943,7 +18943,7 @@ abstract class PhabricatorBaseChineseTranslation
       'Task Does Not Exist' => null,
     
       // phabricator/src/applications/maniphest/query/ManiphestTaskSearchEngine.php:401
-      'Task IDs' => null,
+      'Task IDs' => 'Task IDs',
     
       // phabricator/src/applications/daemon/controller/PhabricatorWorkerTaskDetailController.php:148
       'Task Status' => null,
@@ -21303,7 +21303,7 @@ abstract class PhabricatorBaseChineseTranslation
       'Type a package name...' => null,
     
       // phabricator/src/applications/project/typeahead/PhabricatorProjectDatasource.php:7
-      'Type a project name...' => null,
+      'Type a project name...' => '输入项目名称...',
     
       // phabricator/src/applications/diffusion/typeahead/DiffusionRepositoryDatasource.php:7
       'Type a repository name...' => null,
@@ -21315,7 +21315,7 @@ abstract class PhabricatorBaseChineseTranslation
       'Type a task priority name...' => null,
     
       // phabricator/src/applications/typeahead/datasource/PhabricatorTypeaheadOwnerDatasource.php:7
-      'Type a user name or "none"...' => null,
+      'Type a user name or "none"...' => '输入一个用户名或者为空...',
     
       // phabricator/src/applications/project/typeahead/PhabricatorProjectOrUserDatasource.php:7
       'Type a user or project name...' => null,
@@ -21324,10 +21324,10 @@ abstract class PhabricatorBaseChineseTranslation
       'Type a user, project or package name...' => null,
     
       // phabricator/src/applications/metamta/typeahead/PhabricatorMetaMTAMailableDatasource.php:7
-      'Type a user, project, or mailing list name...' => null,
+      'Type a user, project, or mailing list name...' => '输入用户，项目，或者邮件列表的名称...',
     
       // phabricator/src/applications/people/typeahead/PhabricatorPeopleDatasource.php:19
-      'Type a username...' => null,
+      'Type a username...' => '输入用户名...',
     
       // phabricator/src/applications/meta/typeahead/PhabricatorApplicationDatasource.php:7
       'Type an application name...' => null,
@@ -21867,10 +21867,10 @@ abstract class PhabricatorBaseChineseTranslation
     
       // phabricator/src/applications/settings/panel/PhabricatorSettingsPanelHomePreferences.php:102
       // phabricator/src/applications/settings/panel/PhabricatorSettingsPanelHomePreferences.php:107
-      'Unpin Application' => null,
+      'Unpin Application' => '取消钉选应用',
     
       // phabricator/src/applications/settings/panel/PhabricatorSettingsPanelHomePreferences.php:105
-      'Unpin the %s application from your home page?' => null,
+      'Unpin the %s application from your home page?' => '从你的主页上取消钉选 %s 应用？',
     
       // phabricator/src/applications/phame/controller/post/PhamePostUnpublishController.php:46
       // phabricator/src/applications/phame/controller/post/PhamePostViewController.php:126
@@ -22070,13 +22070,13 @@ abstract class PhabricatorBaseChineseTranslation
       'Updated' => null,
     
       // phabricator/src/applications/maniphest/query/ManiphestTaskSearchEngine.php:418
-      'Updated After' => null,
+      'Updated After' => 'Updated After',
     
       // phabricator/src/applications/maniphest/query/ManiphestTaskSearchEngine.php:420
-      'Updated Before' => null,
+      'Updated Before' => 'Updated Before',
     
       // phabricator/src/applications/legalpad/controller/LegalpadDocumentManageController.php:185
-      'Updated By' => null,
+      'Updated By' => 'Updated By',
     
       // phabricator/src/applications/conpherence/controller/ConpherenceUpdateController.php:93
       'Updated notification settings to "%s".' => null,
@@ -22236,7 +22236,7 @@ abstract class PhabricatorBaseChineseTranslation
       'User Account' => null,
     
       // phabricator/src/applications/people/application/PhabricatorPeopleApplication.php:10
-      'User Accounts and Profiles' => null,
+      'User Accounts and Profiles' => '用户账号和配置',
     
       // phabricator/src/applications/people/query/PhabricatorPeopleLogSearchEngine.php:206
       'User Activity Logs' => null,
@@ -22952,7 +22952,7 @@ abstract class PhabricatorBaseChineseTranslation
       'Without a configured timezone, PHP will emit warnings when working with dates, and dates and times may not display correctly.' => null,
     
       // phabricator/src/applications/maniphest/config/PhabricatorManiphestConfigOptions.php:77
-      'Wontfix' => null,
+      'Wontfix' => '不需要修复的',
     
       // phabricator/src/applications/auth/provider/PhabricatorWordPressAuthProvider.php:7
       'WordPress.com' => null,
@@ -24389,7 +24389,7 @@ abstract class PhabricatorBaseChineseTranslation
       '| Variable | Description |' => null,
     
       // phabricator/src/applications/doorkeeper/option/PhabricatorAsanaConfigOptions.php:91
-      '| Workspace ID | Workspace Name |' => null,
+      '| Workspace ID | Workspace Name |' => '| Workspace ID | Workspace Name |',
     
       // phabricator/src/view/form/control/PHUIFormMultiSubmitControl.php:9
       '\302\253 Back' => null,
@@ -24434,4 +24434,3 @@ abstract class PhabricatorBaseChineseTranslation
   }
 
 }
-)
