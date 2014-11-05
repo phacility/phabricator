@@ -209,8 +209,16 @@ final class PhabricatorIRCProtocolAdapter
         if (!$join) {
           throw new Exception('Not configured to join any channels!');
         }
+        $channelkeys = $this->getConfig('channelkeys');
+        if (!$channelkeys)
+          $channelkeys = array();
         foreach ($join as $channel) {
-          $this->write("JOIN {$channel}");
+          if (isset($channelkeys[$channel])) {
+            $channelkey = $channelkeys[$channel];
+            $this->write("JOIN {$channel} {$channelkey}");
+          }
+          else
+            $this->write("JOIN {$channel}");
         }
         return true;
       case 'PING':

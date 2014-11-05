@@ -30,6 +30,7 @@ These are the configuration values it reads:
   - ##pass## String, optional, password for server.
   - ##nickpass## String, optional, password for NickServ.
   - ##join## Array, list of channels to join.
+  - ##channelkeys## Object, keys to use to join channels (if present)
   - ##handlers## Array, list of handlers to run. These are like plugins for the
     bot.
   - ##conduit.uri##, ##conduit.user##, ##conduit.cert## Conduit configuration,
