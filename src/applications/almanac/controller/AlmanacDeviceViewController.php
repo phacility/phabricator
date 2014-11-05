@@ -56,6 +56,7 @@ final class AlmanacDeviceViewController
         $crumbs,
         $box,
         $interfaces,
+        $this->buildAlmanacPropertiesTable($device),
         $xaction_view,
       ),
       array(

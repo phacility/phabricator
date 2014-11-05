@@ -3,14 +3,11 @@
 abstract class AlmanacController
   extends PhabricatorController {
 
+  protected function buildAlmanacPropertiesTable(
+    AlmanacPropertyInterface $object) {
 
-  protected function buildAlmanacPropertiesTable($object) {
     $viewer = $this->getViewer();
-
-    $properties = id(new AlmanacPropertyQuery())
-      ->setViewer($viewer)
-      ->withObjectPHIDs(array($object->getPHID()))
-      ->execute();
+    $properties = $object->getAlmanacProperties();
 
     $rows = array();
     foreach ($properties as $property) {

@@ -2,7 +2,11 @@
 
 final class AlmanacBinding
   extends AlmanacDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorCustomFieldInterface,
+    PhabricatorApplicationTransactionInterface,
+    AlmanacPropertyInterface {
 
   protected $servicePHID;
   protected $devicePHID;
@@ -12,6 +16,8 @@ final class AlmanacBinding
   private $service = self::ATTACHABLE;
   private $device = self::ATTACHABLE;
   private $interface = self::ATTACHABLE;
+  private $customFields = self::ATTACHABLE;
+  private $almanacProperties = self::ATTACHABLE;
 
   public static function initializeNewBinding(AlmanacService $service) {
     return id(new AlmanacBinding())
@@ -82,6 +88,37 @@ final class AlmanacBinding
   }
 
 
+/* -(  AlmanacPropertyInterface  )------------------------------------------- */
+
+
+  public function attachAlmanacProperties(array $properties) {
+    assert_instances_of($properties, 'AlmanacProperty');
+    $this->almanacProperties = mpull($properties, null, 'getFieldName');
+    return $this;
+  }
+
+  public function getAlmanacProperties() {
+    return $this->assertAttached($this->almanacProperties);
+  }
+
+  public function hasAlmanacProperty($key) {
+    $this->assertAttached($this->almanacProperties);
+    return isset($this->almanacProperties[$key]);
+  }
+
+  public function getAlmanacProperty($key) {
+    return $this->assertAttachedKey($this->almanacProperties, $key);
+  }
+
+  public function getAlmanacPropertyValue($key, $default = null) {
+    if ($this->hasAlmanacProperty($key)) {
+      return $this->getAlmanacProperty($key)->getFieldValue();
+    } else {
+      return $default;
+    }
+  }
+
+
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
 
@@ -107,6 +144,43 @@ final class AlmanacBinding
         'To view a binding, you must also be able to view its device and '.
         'interface.'),
     );
+  }
+
+
+/* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
+
+
+  public function getCustomFieldSpecificationForRole($role) {
+    return array();
+  }
+
+  public function getCustomFieldBaseClass() {
+    return 'AlmanacCustomField';
+  }
+
+  public function getCustomFields() {
+    return $this->assertAttached($this->customFields);
+  }
+
+  public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
+    $this->customFields = $fields;
+    return $this;
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new AlmanacBindingEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new AlmanacBindingTransaction();
   }
 
 }

@@ -3,8 +3,15 @@
 final class AlmanacPropertyQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
+  private $ids;
   private $objectPHIDs;
   private $names;
+  private $disablePolicyFilteringAndAttachment;
+
+  public function withIDs(array $ids) {
+    $this->ids = $ids;
+    return $this;
+  }
 
   public function withObjectPHIDs(array $phids) {
     $this->phids = $phids;
@@ -14,6 +21,15 @@ final class AlmanacPropertyQuery
   public function withNames(array $names) {
     $this->names = $names;
     return $this;
+  }
+
+  public function setDisablePolicyFilteringAndAttachment($disable) {
+    $this->disablePolicyFilteringAndAttachment = $disable;
+    return $this;
+  }
+
+  protected function shouldDisablePolicyFiltering() {
+    return $this->disablePolicyFilteringAndAttachment;
   }
 
   protected function loadPage() {
@@ -32,22 +48,24 @@ final class AlmanacPropertyQuery
   }
 
   protected function willFilterPage(array $properties) {
-    $object_phids = mpull($properties, 'getObjectPHID');
+    if (!$this->disablePolicyFilteringAndAttachment) {
+      $object_phids = mpull($properties, 'getObjectPHID');
 
-    $objects = id(new PhabricatorObjectQuery())
-      ->setViewer($this->getViewer())
-      ->setParentQuery($this)
-      ->withPHIDs($object_phids)
-      ->execute();
-    $objects = mpull($objects, null, 'getPHID');
+      $objects = id(new PhabricatorObjectQuery())
+        ->setViewer($this->getViewer())
+        ->setParentQuery($this)
+        ->withPHIDs($object_phids)
+        ->execute();
+      $objects = mpull($objects, null, 'getPHID');
 
-    foreach ($properties as $key => $property) {
-      $object = idx($objects, $property->getObjectPHID());
-      if (!$object) {
-        unset($properties[$key]);
-        continue;
+      foreach ($properties as $key => $property) {
+        $object = idx($objects, $property->getObjectPHID());
+        if (!$object) {
+          unset($properties[$key]);
+          continue;
+        }
+        $property->attachObject($object);
       }
-      $property->attachObject($object);
     }
 
     return $properties;
@@ -55,6 +73,13 @@ final class AlmanacPropertyQuery
 
   protected function buildWhereClause($conn_r) {
     $where = array();
+
+    if ($this->ids !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'id IN (%Ld)',
+        $this->ids);
+    }
 
     if ($this->objectPHIDs !== null) {
       $where[] = qsprintf(

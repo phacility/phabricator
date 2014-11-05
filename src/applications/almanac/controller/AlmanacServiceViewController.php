@@ -15,7 +15,6 @@ final class AlmanacServiceViewController
     $service = id(new AlmanacServiceQuery())
       ->setViewer($viewer)
       ->withNames(array($name))
-      ->needProperties(true)
       ->executeOne();
     if (!$service) {
       return new Aphront404Response();
