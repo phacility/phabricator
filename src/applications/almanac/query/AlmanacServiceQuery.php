@@ -6,6 +6,7 @@ final class AlmanacServiceQuery
   private $ids;
   private $phids;
   private $names;
+  private $needProperties;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -19,6 +20,11 @@ final class AlmanacServiceQuery
 
   public function withNames(array $names) {
     $this->names = $names;
+    return $this;
+  }
+
+  public function needProperties($need) {
+    $this->needProperties = $need;
     return $this;
   }
 
@@ -69,6 +75,25 @@ final class AlmanacServiceQuery
     $where[] = $this->buildPagingClause($conn_r);
 
     return $this->formatWhereClause($where);
+  }
+
+  protected function didFilterPage(array $services) {
+    // NOTE: We load properties unconditionally because CustomField assumes
+    // it can always generate a list of fields on an object. It may make
+    // sense to re-examine that assumption eventually.
+
+    $properties = id(new AlmanacPropertyQuery())
+      ->setViewer($this->getViewer())
+      ->setParentQuery($this)
+      ->withObjectPHIDs(mpull($services, null, 'getPHID'))
+      ->execute();
+    $properties = mgroup($properties, 'getObjectPHID');
+    foreach ($services as $service) {
+      $service_properties = idx($properties, $service->getPHID(), array());
+      $service->attachAlmanacProperties($service_properties);
+    }
+
+    return $services;
   }
 
   public function getQueryApplicationClass() {

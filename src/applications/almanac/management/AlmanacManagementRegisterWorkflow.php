@@ -25,15 +25,15 @@ final class AlmanacManagementRegisterWorkflow
       ->setName(php_uname('n'))
       ->save();
 
-    id(new AlmanacDeviceProperty())
-      ->setDevicePHID($host->getPHID())
-      ->setKey('conduitPublicOpenSSHKey')
+    id(new AlmanacProperty())
+      ->setObjectPHID($host->getPHID())
+      ->setName('conduitPublicOpenSSHKey')
       ->setValue($public_key)
       ->save();
 
-    id(new AlmanacDeviceProperty())
-      ->setDevicePHID($host->getPHID())
-      ->setKey('conduitPublicOpenSSLKey')
+    id(new AlmanacProperty())
+      ->setObjectPHID($host->getPHID())
+      ->setName('conduitPublicOpenSSLKey')
       ->setValue($this->convertToOpenSSLPublicKey($public_key))
       ->save();
 
