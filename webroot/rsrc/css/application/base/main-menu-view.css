@@ -63,7 +63,7 @@
   top: 2px;
 }
 
-.device .phabricator-main-menu-brand:hover {
+.device-desktop .phabricator-main-menu-brand:hover {
   background-color: rgba(0,0,0,.6);
   cursor: hand;
 }
