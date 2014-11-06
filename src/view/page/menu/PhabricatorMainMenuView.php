@@ -238,12 +238,11 @@ final class PhabricatorMainMenuView extends AphrontView {
   }
 
   private function renderPhabricatorLogo() {
-    $class = 'phabricator-main-menu-logo-image';
 
     return phutil_tag(
       'a',
       array(
-        'class' => 'phabricator-main-menu-logo',
+        'class' => 'phabricator-main-menu-brand',
         'href'  => '/',
       ),
       array(
@@ -256,7 +255,13 @@ final class PhabricatorMainMenuView extends AphrontView {
         phutil_tag(
           'span',
           array(
-            'class' => 'sprite-menu menu-logo-image '.$class,
+            'class' => 'sprite-menu phabricator-main-menu-eye',
+          ),
+          ''),
+          phutil_tag(
+          'span',
+          array(
+            'class' => 'sprite-menu phabricator-main-menu-logo',
           ),
           ''),
       ));
