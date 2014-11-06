@@ -8,6 +8,8 @@ final class PhrictionTransactionEditor
   private $newContent;
   private $moveAwayDocument;
   private $skipAncestorCheck;
+  private $contentVersion;
+  private $processContentVersionError = true;
 
   public function setDescription($description) {
     $this->description = $description;
@@ -43,6 +45,24 @@ final class PhrictionTransactionEditor
 
   public function getSkipAncestorCheck() {
     return $this->skipAncestorCheck;
+  }
+
+  public function setContentVersion($version) {
+    $this->contentVersion = $version;
+    return $this;
+  }
+
+  public function getContentVersion() {
+    return $this->contentVersion;
+  }
+
+  public function setProcessContentVersionError($process) {
+    $this->processContentVersionError = $process;
+    return $this;
+  }
+
+  public function getProcessContentVersionError() {
+    return $this->processContentVersionError;
   }
 
   public function getEditorApplicationClass() {
@@ -162,6 +182,30 @@ final class PhrictionTransactionEditor
     }
   }
 
+  protected function expandTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    $xactions = parent::expandTransaction($object, $xaction);
+    switch ($xaction->getTransactionType()) {
+      case PhrictionTransaction::TYPE_CONTENT:
+        if ($this->getIsNewObject()) {
+          break;
+        }
+        $content = $xaction->getNewValue();
+        if ($content === '') {
+          $xactions[] = id(new PhrictionTransaction())
+            ->setTransactionType(PhrictionTransaction::TYPE_DELETE)
+            ->setNewValue(true);
+        }
+        break;
+      default:
+        break;
+    }
+
+    return $xactions;
+  }
+
   protected function applyCustomExternalTransaction(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
@@ -251,7 +295,8 @@ final class PhrictionTransactionEditor
               ->setMetadataValue('stub:create:phid', $object->getPHID());
             $stub_xactions[] = id(new PhrictionTransaction())
               ->setTransactionType(PhrictionTransaction::TYPE_CONTENT)
-              ->setNewValue('');
+              ->setNewValue('')
+              ->setMetadataValue('stub:create:phid', $object->getPHID());
             $sub_editor = id(new PhrictionTransactionEditor())
               ->setActor($this->getActor())
               ->setContentSource($this->getContentSource())
@@ -364,6 +409,97 @@ final class PhrictionTransactionEditor
     }
 
     return $phids;
+  }
+
+  protected function validateTransaction(
+    PhabricatorLiskDAO $object,
+    $type,
+    array $xactions) {
+
+    $errors = parent::validateTransaction($object, $type, $xactions);
+
+    foreach ($xactions as $xaction) {
+      switch ($type) {
+        case PhrictionTransaction::TYPE_TITLE:
+          $title = $object->getContent()->getTitle();
+          $missing = $this->validateIsEmptyTextField(
+            $title,
+            $xactions);
+
+          if ($missing) {
+            $error = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Required'),
+              pht('Document title is required.'),
+              nonempty(last($xactions), null));
+
+            $error->setIsMissingFieldError(true);
+            $errors[] = $error;
+          } else if ($this->getProcessContentVersionError()) {
+            $error = $this->validateContentVersion($object, $type, $xaction);
+            if ($error) {
+              $this->setProcessContentVersionError(false);
+              $errors[] = $error;
+            }
+          }
+          break;
+
+        case PhrictionTransaction::TYPE_CONTENT:
+          if ($xaction->getMetadataValue('stub:create:phid')) {
+            continue;
+          }
+
+          $missing = false;
+          if ($this->getIsNewObject()) {
+            $content = $object->getContent()->getContent();
+            $missing = $this->validateIsEmptyTextField(
+              $content,
+              $xactions);
+          }
+
+          if ($missing) {
+            $error = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Required'),
+              pht('Document content is required.'),
+              nonempty(last($xactions), null));
+
+            $error->setIsMissingFieldError(true);
+            $errors[] = $error;
+          } else if ($this->getProcessContentVersionError()) {
+            $error = $this->validateContentVersion($object, $type, $xaction);
+            if ($error) {
+              $this->setProcessContentVersionError(false);
+              $errors[] = $error;
+            }
+          }
+          break;
+      }
+    }
+
+    return $errors;
+  }
+
+  private function validateContentVersion(
+    PhabricatorLiskDAO $object,
+    $type,
+    PhabricatorApplicationTransaction $xaction) {
+
+    $error = null;
+    if ($this->getContentVersion() &&
+       ($object->getContent()->getVersion() != $this->getContentVersion())) {
+      $error = new PhabricatorApplicationTransactionValidationError(
+        $type,
+        pht('Edit Conflict'),
+        pht(
+          'Another user made changes to this document after you began '.
+          'editing it. Do you want to overwrite their changes? '.
+          '(If you choose to overwrite their changes, you should review '.
+          'the document edit history to see what you overwrote, and '.
+          'then make another edit to merge the changes if necessary.)'),
+        $xaction);
+    }
+    return $error;
   }
 
   protected function supportsSearch() {
