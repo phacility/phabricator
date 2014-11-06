@@ -1,6 +1,8 @@
 <?php
 
-final class PhabricatorUserSSHKey extends PhabricatorUserDAO {
+final class PhabricatorUserSSHKey
+  extends PhabricatorUserDAO
+  implements PhabricatorPolicyInterface {
 
   protected $userPHID;
   protected $name;
@@ -8,6 +10,12 @@ final class PhabricatorUserSSHKey extends PhabricatorUserDAO {
   protected $keyBody;
   protected $keyHash;
   protected $keyComment;
+
+  private $object = self::ATTACHABLE;
+
+  public function getObjectPHID() {
+    return $this->getUserPHID();
+  }
 
   public function getConfiguration() {
     return array(
@@ -40,6 +48,39 @@ final class PhabricatorUserSSHKey extends PhabricatorUserDAO {
       $this->getKeyComment(),
     );
     return trim(implode(' ', $parts));
+  }
+
+  public function getObject() {
+    return $this->assertAttached($this->object);
+  }
+
+  public function attachObject($object) {
+    $this->object = $object;
+    return $this;
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+      PhabricatorPolicyCapability::CAN_EDIT,
+    );
+  }
+
+  public function getPolicy($capability) {
+    return $this->getObject()->getPolicy($capability);
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return $this->getObject()->hasAutomaticCapability($capability, $viewer);
+  }
+
+  public function describeAutomaticCapability($capability) {
+    return pht(
+      'SSH keys inherit the policies of the user or object they authenticate.');
   }
 
 }
