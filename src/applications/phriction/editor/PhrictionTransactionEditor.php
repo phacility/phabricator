@@ -7,6 +7,7 @@ final class PhrictionTransactionEditor
   private $oldContent;
   private $newContent;
   private $moveAwayDocument;
+  private $skipAncestorCheck;
 
   public function setDescription($description) {
     $this->description = $description;
@@ -33,6 +34,15 @@ final class PhrictionTransactionEditor
 
   private function getNewContent() {
     return $this->newContent;
+  }
+
+  public function setSkipAncestorCheck($bool) {
+    $this->skipAncestorCheck = $bool;
+    return $this;
+  }
+
+  public function getSkipAncestorCheck() {
+    return $this->skipAncestorCheck;
   }
 
   public function getEditorApplicationClass() {
@@ -216,26 +226,40 @@ final class PhrictionTransactionEditor
       $object->attachContent($content);
     }
 
-    if ($this->getIsNewObject()) {
+    if ($this->getIsNewObject() && !$this->getSkipAncestorCheck()) {
       // Stub out empty parent documents if they don't exist
       $ancestral_slugs = PhabricatorSlug::getAncestry($object->getSlug());
       if ($ancestral_slugs) {
-        $ancestors = id(new PhrictionDocument())->loadAllWhere(
-          'slug IN (%Ls)',
-          $ancestral_slugs);
+        $ancestors = id(new PhrictionDocumentQuery())
+          ->setViewer(PhabricatorUser::getOmnipotentUser())
+          ->withSlugs($ancestral_slugs)
+          ->needContent(true)
+          ->execute();
         $ancestors = mpull($ancestors, null, 'getSlug');
+        $stub_type = PhrictionChangeType::CHANGE_STUB;
         foreach ($ancestral_slugs as $slug) {
+          $ancestor_doc = idx($ancestors, $slug);
           // We check for change type to prevent near-infinite recursion
-          if (!isset($ancestors[$slug]) &&
-            $content->getChangeType() !=
-            PhrictionChangeType::CHANGE_STUB) {
-              id(PhrictionDocumentEditor::newForSlug($slug))
-                ->setActor($this->getActor())
-                ->setTitle(PhabricatorSlug::getDefaultTitle($slug))
-                ->setContent('')
-                ->setDescription(pht('Empty Parent Document'))
-                ->stub();
-            }
+          if (!$ancestor_doc && $content->getChangeType() != $stub_type) {
+            $ancestor_doc = PhrictionDocument::initializeNewDocument(
+              $this->getActor(),
+              $slug);
+            $stub_xactions = array();
+            $stub_xactions[] = id(new PhrictionTransaction())
+              ->setTransactionType(PhrictionTransaction::TYPE_TITLE)
+              ->setNewValue(PhabricatorSlug::getDefaultTitle($slug))
+              ->setMetadataValue('stub:create:phid', $object->getPHID());
+            $stub_xactions[] = id(new PhrictionTransaction())
+              ->setTransactionType(PhrictionTransaction::TYPE_CONTENT)
+              ->setNewValue('');
+            $sub_editor = id(new PhrictionTransactionEditor())
+              ->setActor($this->getActor())
+              ->setContentSource($this->getContentSource())
+              ->setContinueOnNoEffect($this->getContinueOnNoEffect())
+              ->setSkipAncestorCheck(true)
+              ->setDescription(pht('Empty Parent Document'))
+              ->applyTransactions($ancestor_doc, $stub_xactions);
+          }
         }
       }
     }

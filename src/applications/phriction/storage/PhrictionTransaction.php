@@ -33,6 +33,11 @@ final class PhrictionTransaction
       case self::TYPE_MOVE_AWAY:
         $phids[] = $new['phid'];
         break;
+      case self::TYPE_TITLE:
+        if ($this->getMetadataValue('stub:create:phid')) {
+          $phids[] = $this->getMetadataValue('stub:create:phid');
+        }
+        break;
     }
 
 
@@ -70,6 +75,8 @@ final class PhrictionTransaction
       case self::TYPE_MOVE_TO:
       case self::TYPE_MOVE_AWAY:
         return true;
+      case self::TYPE_TITLE:
+        return $this->getMetadataValue('stub:create:phid', false);
     }
     return parent::shouldHideForMail($xactions);
   }
@@ -79,6 +86,8 @@ final class PhrictionTransaction
       case self::TYPE_MOVE_TO:
       case self::TYPE_MOVE_AWAY:
         return true;
+      case self::TYPE_TITLE:
+        return $this->getMetadataValue('stub:create:phid', false);
     }
     return parent::shouldHideForFeed();
   }
@@ -106,7 +115,11 @@ final class PhrictionTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_TITLE:
         if ($old === null) {
-          return pht('Created');
+          if ($this->getMetadataValue('stub:create:phid')) {
+            return pht('Stubbed');
+          } else {
+            return pht('Created');
+          }
         }
 
         return pht('Retitled');
@@ -156,9 +169,17 @@ final class PhrictionTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_TITLE:
         if ($old === null) {
-          return pht(
-            '%s created this document.',
-            $this->renderHandleLink($author_phid));
+          if ($this->getMetadataValue('stub:create:phid')) {
+            return pht(
+              '%s stubbed out this document when creating %s.',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink(
+                $this->getMetadataValue('stub:create:phid')));
+          } else {
+            return pht(
+              '%s created this document.',
+              $this->renderHandleLink($author_phid));
+          }
         }
         return pht(
           '%s changed the title from "%s" to "%s".',

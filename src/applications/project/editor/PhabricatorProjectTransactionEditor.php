@@ -127,7 +127,7 @@ final class PhabricatorProjectTransactionEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorProjectTransaction::TYPE_NAME:
         // First, remove the old and new slugs. Removing the old slug is
-        // important when changing the project's capitalization or puctuation.
+        // important when changing the project's capitalization or punctuation.
         // Removing the new slug is important when changing the project's name
         // so that one of its secondary slugs is now the primary slug.
         if ($old !== null) {
@@ -140,40 +140,6 @@ final class PhabricatorProjectTransactionEditor
           ->setProjectPHID($object->getPHID())
           ->save();
 
-        // TODO -- delete all of the below once we sever automagical project
-        // to phriction stuff
-        if ($xaction->getOldValue() === null) {
-          // Project was just created, we don't need to move anything.
-          return;
-        }
-
-        $clone_object = clone $object;
-        $clone_object->setPhrictionSlug($xaction->getOldValue());
-        $old_slug = $clone_object->getFullPhrictionSlug();
-
-        $old_document = id(new PhrictionDocument())
-          ->loadOneWhere('slug = %s', $old_slug);
-        if ($old_document && $old_document->getStatus() ==
-            PhrictionDocumentStatus::STATUS_EXISTS) {
-          $content = id(new PhrictionContent())
-            ->load($old_document->getContentID());
-          $from_editor = id(PhrictionDocumentEditor::newForSlug($old_slug))
-            ->setActor($this->getActor())
-            ->setTitle($content->getTitle())
-            ->setContent($content->getContent())
-            ->setDescription($content->getDescription());
-
-          $target_editor = id(PhrictionDocumentEditor::newForSlug(
-            $object->getFullPhrictionSlug()))
-            ->setActor($this->getActor())
-            ->setTitle($content->getTitle())
-            ->setContent($content->getContent())
-            ->setDescription($content->getDescription())
-            ->moveHere($old_document->getID(), $old_document->getPHID());
-
-          $target_document = $target_editor->getDocument();
-          $from_editor->moveAway($target_document->getID());
-        }
         return;
       case PhabricatorProjectTransaction::TYPE_SLUGS:
         $old = $xaction->getOldValue();

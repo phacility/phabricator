@@ -34,6 +34,7 @@ final class PhrictionEditConduitAPIMethod extends PhrictionConduitAPIMethod {
     $doc = id(new PhrictionDocumentQuery())
       ->setViewer($request->getUser())
       ->withSlugs(array(PhabricatorSlug::normalize($slug)))
+      ->needContent(true)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -44,14 +45,22 @@ final class PhrictionEditConduitAPIMethod extends PhrictionConduitAPIMethod {
       throw new Exception(pht('No such document.'));
     }
 
-    $editor = id(PhrictionDocumentEditor::newForSlug($slug))
-      ->setActor($request->getUser())
-      ->setTitle($request->getValue('title'))
-      ->setContent($request->getValue('content'))
-      ->setDescription($request->getvalue('description'))
-      ->save();
+    $xactions = array();
+    $xactions[] = id(new PhrictionTransaction())
+      ->setTransactionType(PhrictionTransaction::TYPE_TITLE)
+      ->setNewValue($request->getValue('title'));
+    $xactions[] = id(new PhrictionTransaction())
+      ->setTransactionType(PhrictionTransaction::TYPE_CONTENT)
+      ->setNewValue($request->getValue('content'));
 
-    return $this->buildDocumentInfoDictionary($editor->getDocument());
+    $editor = id(new PhrictionTransactionEditor())
+      ->setActor($request->getUser())
+      ->setContentSourceFromConduitRequest($request)
+      ->setContinueOnNoEffect(true)
+      ->setDescription($request->getValue('description'))
+      ->applyTransactions($doc, $xactions);
+
+    return $this->buildDocumentInfoDictionary($doc);
   }
 
 }
