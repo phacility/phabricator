@@ -24,7 +24,7 @@ final class PhabricatorAuthSSHKeyQuery
   }
 
   protected function loadPage() {
-    $table = new PhabricatorUserSSHKey();
+    $table = new PhabricatorAuthSSHKey();
     $conn_r = $table->establishConnection('r');
 
     $data = queryfx_all(

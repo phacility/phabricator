@@ -896,7 +896,7 @@ EOBODY;
         $profile->delete();
       }
 
-      $keys = id(new PhabricatorUserSSHKey())->loadAllWhere(
+      $keys = id(new PhabricatorAuthSSHKey())->loadAllWhere(
         'userPHID = %s',
         $this->getPHID());
       foreach ($keys as $key) {

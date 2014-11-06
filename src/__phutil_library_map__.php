@@ -1317,6 +1317,7 @@ phutil_register_library_map(array(
     'PhabricatorAuthProviderConfigTransactionQuery' => 'applications/auth/query/PhabricatorAuthProviderConfigTransactionQuery.php',
     'PhabricatorAuthRegisterController' => 'applications/auth/controller/PhabricatorAuthRegisterController.php',
     'PhabricatorAuthRevokeTokenController' => 'applications/auth/controller/PhabricatorAuthRevokeTokenController.php',
+    'PhabricatorAuthSSHKey' => 'applications/auth/storage/PhabricatorAuthSSHKey.php',
     'PhabricatorAuthSSHKeyQuery' => 'applications/auth/query/PhabricatorAuthSSHKeyQuery.php',
     'PhabricatorAuthSSHPublicKey' => 'applications/auth/storage/PhabricatorAuthSSHPublicKey.php',
     'PhabricatorAuthSession' => 'applications/auth/storage/PhabricatorAuthSession.php',
@@ -2488,7 +2489,6 @@ phutil_register_library_map(array(
     'PhabricatorUserProfileEditor' => 'applications/people/editor/PhabricatorUserProfileEditor.php',
     'PhabricatorUserRealNameField' => 'applications/people/customfield/PhabricatorUserRealNameField.php',
     'PhabricatorUserRolesField' => 'applications/people/customfield/PhabricatorUserRolesField.php',
-    'PhabricatorUserSSHKey' => 'applications/settings/storage/PhabricatorUserSSHKey.php',
     'PhabricatorUserSchemaSpec' => 'applications/people/storage/PhabricatorUserSchemaSpec.php',
     'PhabricatorUserSearchIndexer' => 'applications/people/search/PhabricatorUserSearchIndexer.php',
     'PhabricatorUserSinceField' => 'applications/people/customfield/PhabricatorUserSinceField.php',
@@ -4383,6 +4383,10 @@ phutil_register_library_map(array(
     'PhabricatorAuthProviderConfigTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
     'PhabricatorAuthRegisterController' => 'PhabricatorAuthController',
     'PhabricatorAuthRevokeTokenController' => 'PhabricatorAuthController',
+    'PhabricatorAuthSSHKey' => array(
+      'PhabricatorAuthDAO',
+      'PhabricatorPolicyInterface',
+    ),
     'PhabricatorAuthSSHKeyQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorAuthSSHPublicKey' => 'Phobject',
     'PhabricatorAuthSession' => array(
@@ -5631,10 +5635,6 @@ phutil_register_library_map(array(
     'PhabricatorUserProfileEditor' => 'PhabricatorApplicationTransactionEditor',
     'PhabricatorUserRealNameField' => 'PhabricatorUserCustomField',
     'PhabricatorUserRolesField' => 'PhabricatorUserCustomField',
-    'PhabricatorUserSSHKey' => array(
-      'PhabricatorUserDAO',
-      'PhabricatorPolicyInterface',
-    ),
     'PhabricatorUserSchemaSpec' => 'PhabricatorConfigSchemaSpec',
     'PhabricatorUserSearchIndexer' => 'PhabricatorSearchDocumentIndexer',
     'PhabricatorUserSinceField' => 'PhabricatorUserCustomField',

@@ -1,7 +1,7 @@
 <?php
 
-final class PhabricatorUserSSHKey
-  extends PhabricatorUserDAO
+final class PhabricatorAuthSSHKey
+  extends PhabricatorAuthDAO
   implements PhabricatorPolicyInterface {
 
   protected $userPHID;

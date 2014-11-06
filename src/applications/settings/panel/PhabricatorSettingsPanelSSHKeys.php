@@ -59,7 +59,7 @@ final class PhabricatorSettingsPanelSSHKeys
         return new Aphront404Response();
       }
     } else {
-      $key = new PhabricatorUserSSHKey();
+      $key = new PhabricatorAuthSSHKey();
       $key->setUserPHID($user->getPHID());
     }
 
@@ -251,7 +251,7 @@ final class PhabricatorSettingsPanelSSHKeys
 
   private function processDelete(
     AphrontRequest $request,
-    PhabricatorUserSSHKey $key) {
+    PhabricatorAuthSSHKey $key) {
 
     $viewer = $request->getUser();
     $user = $this->getUser();
@@ -308,7 +308,7 @@ final class PhabricatorSettingsPanelSSHKeys
       $type = $public_key->getType();
       $body = $public_key->getBody();
 
-      $key = id(new PhabricatorUserSSHKey())
+      $key = id(new PhabricatorAuthSSHKey())
         ->setUserPHID($user->getPHID())
         ->setName('id_rsa_phabricator')
         ->setKeyType($type)
