@@ -24,8 +24,8 @@ The best way to report bugs and request features is through
 [[http://secure.phabricator.com/maniphest/task/create/ | Maniphest]]. For
 information on filing good bug reports and feature requests, see:
 
-  - @{article:Filing Good Bug Reports}
-  - @{article:Filing Good Feature Requests}
+  - @{article:Contributing Bug Reports}
+  - @{article:Contributing Feature Requests}
 
 IRC
 ==========
@@ -38,7 +38,7 @@ Next Steps
 
 Continue by:
 
-  - learning more about bug reports with @{article:Filing Good Bug Reports}; or
+  - learning more about bug reports with @{article:Contributing Bug Reports}; or
   - learning more about feature requests with
-    @{article:Filing Good Feature Requests}; or
+    @{article:Contributing Feature Requests}; or
   - contributing to Phabricator with @{article:Contributor Introduction}.
