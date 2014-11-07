@@ -131,6 +131,8 @@ final class PhrictionEditController
       $content_text = $request->getStr('content');
       $notes = $request->getStr('description');
       $current_version = $request->getInt('contentVersion');
+      $v_view = $request->getStr('viewPolicy');
+      $v_edit = $request->getStr('editPolicy');
 
       $xactions = array();
       $xactions[] = id(new PhrictionTransaction())
@@ -139,6 +141,12 @@ final class PhrictionEditController
       $xactions[] = id(new PhrictionTransaction())
         ->setTransactionType(PhrictionTransaction::TYPE_CONTENT)
         ->setNewValue($content_text);
+      $xactions[] = id(new PhrictionTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
+        ->setNewValue($v_view);
+      $xactions[] = id(new PhrictionTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
+        ->setNewValue($v_edit);
 
       $editor = id(new PhrictionTransactionEditor())
         ->setActor($user)
@@ -170,7 +178,8 @@ final class PhrictionEditController
           $overwrite = true;
         }
 
-        // TODO - remember to set policy to what the user tried to set it to
+        $document->setViewPolicy($v_view);
+        $document->setEditPolicy($v_edit);
       }
     }
 
@@ -193,6 +202,13 @@ final class PhrictionEditController
     $uri = PhabricatorEnv::getProductionURI($uri);
 
     $cancel_uri = PhrictionDocument::getSlugURI($document->getSlug());
+
+    $policies = id(new PhabricatorPolicyQuery())
+      ->setViewer($user)
+      ->setObject($document)
+      ->execute();
+    $view_capability = PhabricatorPolicyCapability::CAN_VIEW;
+    $edit_capability = PhabricatorPolicyCapability::CAN_EDIT;
 
     $form = id(new AphrontFormView())
       ->setUser($user)
@@ -219,6 +235,22 @@ final class PhrictionEditController
           ->setName('content')
           ->setID('document-textarea')
           ->setUser($user))
+      ->appendChild(
+        id(new AphrontFormPolicyControl())
+          ->setName('viewPolicy')
+          ->setPolicyObject($document)
+          ->setCapability($view_capability)
+          ->setPolicies($policies)
+          ->setCaption(
+            $document->describeAutomaticCapability($view_capability)))
+      ->appendChild(
+        id(new AphrontFormPolicyControl())
+          ->setName('editPolicy')
+          ->setPolicyObject($document)
+          ->setCapability($edit_capability)
+          ->setPolicies($policies)
+          ->setCaption(
+            $document->describeAutomaticCapability($edit_capability)))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Edit Notes'))

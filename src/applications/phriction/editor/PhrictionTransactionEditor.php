@@ -200,8 +200,18 @@ final class PhrictionTransactionEditor
             ->setNewValue(true);
         }
         break;
+      case PhrictionTransaction::TYPE_MOVE_TO:
+        $document = $xaction->getNewValue();
+        $xactions[] = id(new PhrictionTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
+          ->setNewValue($document->getViewPolicy());
+        $xactions[] = id(new PhrictionTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
+          ->setNewValue($document->getEditPolicy());
+        break;
       default:
         break;
+
     }
 
     return $xactions;
@@ -298,6 +308,12 @@ final class PhrictionTransactionEditor
               ->setTransactionType(PhrictionTransaction::TYPE_CONTENT)
               ->setNewValue('')
               ->setMetadataValue('stub:create:phid', $object->getPHID());
+            $stub_xactions[] = id(new PhrictionTransaction())
+              ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
+              ->setNewValue($object->getViewPolicy());
+            $stub_xactions[] = id(new PhrictionTransaction())
+              ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
+              ->setNewValue($object->getEditPolicy());
             $sub_editor = id(new PhrictionTransactionEditor())
               ->setActor($this->getActor())
               ->setContentSource($this->getContentSource())

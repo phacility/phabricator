@@ -18,10 +18,7 @@ final class PhrictionDocument extends PhrictionDAO
 
   private $contentObject = self::ATTACHABLE;
   private $ancestors = array();
-
-  // TODO: This should be `self::ATTACHABLE`, but there are still a lot of call
-  // sites which load PhrictionDocuments directly.
-  private $project = null;
+  private $project = self::ATTACHABLE;
 
   public function getConfiguration() {
     return array(
@@ -68,9 +65,24 @@ final class PhrictionDocument extends PhrictionDAO
     $content->setTitle($default_title);
     $document->attachContent($content);
 
-    $default_view_policy = PhabricatorPolicies::getMostOpenPolicy();
-    $document->setViewPolicy($default_view_policy);
-    $document->setEditPolicy(PhabricatorPolicies::POLICY_USER);
+    $parent_doc = null;
+    $ancestral_slugs = PhabricatorSlug::getAncestry($slug);
+    if ($ancestral_slugs) {
+      $parent = end($ancestral_slugs);
+      $parent_doc = id(new PhrictionDocumentQuery())
+        ->setViewer($actor)
+        ->withSlugs(array($parent))
+        ->executeOne();
+    }
+
+    if ($parent_doc) {
+      $document->setViewPolicy($parent_doc->getViewPolicy());
+      $document->setEditPolicy($parent_doc->getEditPolicy());
+    } else {
+      $default_view_policy = PhabricatorPolicies::getMostOpenPolicy();
+      $document->setViewPolicy($default_view_policy);
+      $document->setEditPolicy(PhabricatorPolicies::POLICY_USER);
+    }
 
     return $document;
   }
