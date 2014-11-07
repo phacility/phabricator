@@ -27,21 +27,20 @@ foreach (new LiskMigrationIterator($table) as $doc) {
       ->withPhrictionSlugs($project_slugs)
       ->executeOne();
 
-    $project_name = $project->getName();
-    echo "Migrating doc $id to project policy $project_name...\n";
-    $doc->setViewPolicy($project->getViewPolicy());
-    $doc->setEditPolicy($project->getEditPolicy());
-    $doc->save();
-
-  // non-project documents get the most open policy possible
-  } else {
-
-    echo "Migrating doc $id to default install policy...\n";
-    $doc->setViewPolicy($default_view_policy);
-    $doc->setEditPolicy($default_edit_policy);
-    $doc->save();
-
+    if ($project) {
+      $project_name = $project->getName();
+      echo "Migrating doc $id to project policy $project_name...\n";
+      $doc->setViewPolicy($project->getViewPolicy());
+      $doc->setEditPolicy($project->getEditPolicy());
+      $doc->save();
+      continue;
+    }
   }
+
+  echo "Migrating doc $id to default install policy...\n";
+  $doc->setViewPolicy($default_view_policy);
+  $doc->setEditPolicy($default_edit_policy);
+  $doc->save();
 }
 
 echo "Done.\n";
