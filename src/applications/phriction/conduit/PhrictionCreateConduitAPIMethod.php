@@ -1,49 +1,48 @@
 <?php
 
-final class PhrictionEditConduitAPIMethod extends PhrictionConduitAPIMethod {
-
+final class PhrictionCreateConduitAPIMethod extends PhrictionConduitAPIMethod {
   public function getAPIMethodName() {
-    return 'phriction.edit';
+    return 'phriction.create';
   }
-
   public function getMethodDescription() {
-    return pht('Update a Phriction document.');
+    return pht('Create a Phriction document.');
   }
-
   public function defineParamTypes() {
     return array(
       'slug'          => 'required string',
-      'title'         => 'optional string',
-      'content'       => 'optional string',
+      'title'         => 'required string',
+      'content'       => 'required string',
       'description'   => 'optional string',
     );
   }
-
   public function defineReturnType() {
     return 'nonempty dict';
   }
-
   public function defineErrorTypes() {
     return array(
     );
   }
-
   protected function execute(ConduitAPIRequest $request) {
     $slug = $request->getValue('slug');
-
+    if (!strlen($slug)) {
+      throw new Exception(pht('No such document.'));
+    }
     $doc = id(new PhrictionDocumentQuery())
       ->setViewer($request->getUser())
       ->withSlugs(array(PhabricatorSlug::normalize($slug)))
-      ->needContent(true)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
           PhabricatorPolicyCapability::CAN_EDIT,
         ))
       ->executeOne();
-    if (!$doc) {
-      throw new Exception(pht('No such document.'));
+    if ($doc) {
+      throw new Exception(pht('Document already exists!'));
     }
+
+    $doc = PhrictionDocument::initializeNewDocument(
+      $request->getUser(),
+      $slug);
 
     $xactions = array();
     $xactions[] = id(new PhrictionTransaction())
@@ -68,5 +67,4 @@ final class PhrictionEditConduitAPIMethod extends PhrictionConduitAPIMethod {
 
     return $this->buildDocumentInfoDictionary($doc);
   }
-
 }
