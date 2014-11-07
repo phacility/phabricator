@@ -199,6 +199,8 @@ final class PhrictionDocumentController
     }
 
     $header = id(new PHUIHeaderView())
+      ->setUser($user)
+      ->setPolicyObject($document)
       ->setHeader($page_title);
 
     $prop_list = null;

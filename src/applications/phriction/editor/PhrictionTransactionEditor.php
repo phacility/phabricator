@@ -83,10 +83,8 @@ final class PhrictionTransactionEditor
     $types[] = PhrictionTransaction::TYPE_MOVE_TO;
     $types[] = PhrictionTransaction::TYPE_MOVE_AWAY;
 
-    /* TODO
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
-     */
 
     return $types;
   }

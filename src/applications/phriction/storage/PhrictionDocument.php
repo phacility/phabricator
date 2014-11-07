@@ -13,6 +13,8 @@ final class PhrictionDocument extends PhrictionDAO
   protected $contentID;
   protected $status;
   protected $mailKey;
+  protected $viewPolicy;
+  protected $editPolicy;
 
   private $contentObject = self::ATTACHABLE;
   private $ancestors = array();
@@ -65,6 +67,10 @@ final class PhrictionDocument extends PhrictionDAO
     $default_title = PhabricatorSlug::getDefaultTitle($slug);
     $content->setTitle($default_title);
     $document->attachContent($content);
+
+    $default_view_policy = PhabricatorPolicies::getMostOpenPolicy();
+    $document->setViewPolicy($default_view_policy);
+    $document->setEditPolicy(PhabricatorPolicies::POLICY_USER);
 
     return $document;
   }
@@ -172,30 +178,28 @@ final class PhrictionDocument extends PhrictionDAO
   }
 
   public function getPolicy($capability) {
-    if ($this->hasProject()) {
-      return $this->getProject()->getPolicy($capability);
+    switch ($capability) {
+      case PhabricatorPolicyCapability::CAN_VIEW:
+        return $this->getViewPolicy();
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return $this->getEditPolicy();
     }
-
-    return PhabricatorPolicies::POLICY_USER;
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $user) {
-    if ($this->hasProject()) {
-      return $this->getProject()->hasAutomaticCapability($capability, $user);
-    }
     return false;
   }
 
   public function describeAutomaticCapability($capability) {
-    if ($this->hasProject()) {
-      return pht(
-        "This is a project wiki page, and inherits the project's policies.");
-    }
 
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
         return pht(
           'To view a wiki document, you must also be able to view all '.
+          'of its parents.');
+      case PhabricatorPolicyCapability::CAN_EDIT:
+        return pht(
+          'To edit a wiki document, you must also be able to view all '.
           'of its parents.');
     }
 
