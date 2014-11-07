@@ -477,6 +477,29 @@ final class PhrictionTransactionEditor
             }
           }
           break;
+        case PhrictionTransaction::TYPE_DELETE:
+          switch ($object->getStatus()) {
+            case PhrictionDocumentStatus::STATUS_DELETED:
+              $e_text = pht('An already deleted document can not be deleted.');
+              break;
+            case PhrictionDocumentStatus::STATUS_MOVED:
+              $e_text = pht('A moved document can not be deleted.');
+              break;
+            case PhrictionDocumentStatus::STATUS_STUB:
+              $e_text = pht('A stub document can not be deleted.');
+              break;
+            default:
+              break 2;
+          }
+
+          $error = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Can not delete document.'),
+            $e_text,
+            $xaction);
+          $errors[] = $error;
+
+          break;
       }
     }
 
