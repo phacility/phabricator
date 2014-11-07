@@ -179,6 +179,9 @@ final class PhrictionTransactionEditor
       case PhrictionTransaction::TYPE_MOVE_AWAY:
         $object->setStatus(PhrictionDocumentStatus::STATUS_MOVED);
         return;
+      case PhrictionTransaction::TYPE_DELETE:
+        $object->setStatus(PhrictionDocumentStatus::STATUS_DELETED);
+        return;
     }
   }
 
