@@ -13,6 +13,15 @@ final class PhabricatorAuthSSHPublicKey extends Phobject {
     // <internal>
   }
 
+  public static function newFromStoredKey(PhabricatorAuthSSHKey $key) {
+    $public_key = new PhabricatorAuthSSHPublicKey();
+    $public_key->type = $key->getKeyType();
+    $public_key->body = $key->getKeyBody();
+    $public_key->comment = $key->getKeyComment();
+
+    return $public_key;
+  }
+
   public static function newFromRawKey($entire_key) {
     $entire_key = trim($entire_key);
     if (!strlen($entire_key)) {
@@ -81,6 +90,13 @@ final class PhabricatorAuthSSHPublicKey extends Phobject {
 
   public function getComment() {
     return $this->comment;
+  }
+
+  public function getHash() {
+    $body = $this->getBody();
+    $body = trim($body);
+    $body = rtrim($body, '=');
+    return PhabricatorHash::digestForIndex($body);
   }
 
 }

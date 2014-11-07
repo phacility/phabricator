@@ -4,41 +4,43 @@ final class PhabricatorAuthSSHKey
   extends PhabricatorAuthDAO
   implements PhabricatorPolicyInterface {
 
-  protected $userPHID;
+  protected $objectPHID;
   protected $name;
   protected $keyType;
+  protected $keyIndex;
   protected $keyBody;
-  protected $keyHash;
-  protected $keyComment;
+  protected $keyComment = '';
 
   private $object = self::ATTACHABLE;
-
-  public function getObjectPHID() {
-    return $this->getUserPHID();
-  }
 
   public function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
-        'keyHash' => 'bytes32',
-        'keyComment' => 'text255?',
-
-        // T6203/NULLABILITY
-        // These seem like they should not be nullable.
-        'name' => 'text255?',
-        'keyType' => 'text255?',
-        'keyBody' => 'text?',
+        'name' => 'text255',
+        'keyType' => 'text255',
+        'keyIndex' => 'bytes12',
+        'keyBody' => 'text',
+        'keyComment' => 'text255',
       ),
       self::CONFIG_KEY_SCHEMA => array(
-        'userPHID' => array(
-          'columns' => array('userPHID'),
+        'key_object' => array(
+          'columns' => array('objectPHID'),
         ),
-        'keyHash' => array(
-          'columns' => array('keyHash'),
+        'key_unique' => array(
+          'columns' => array('keyIndex'),
           'unique' => true,
         ),
       ),
     ) + parent::getConfiguration();
+  }
+
+  public function save() {
+    $this->setKeyIndex($this->toPublicKey()->getHash());
+    return parent::save();
+  }
+
+  public function toPublicKey() {
+    return PhabricatorAuthSSHPublicKey::newFromStoredKey($this);
   }
 
   public function getEntireKey() {
@@ -58,6 +60,8 @@ final class PhabricatorAuthSSHKey
     $this->object = $object;
     return $this;
   }
+
+
 
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */

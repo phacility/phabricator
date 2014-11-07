@@ -897,7 +897,7 @@ EOBODY;
       }
 
       $keys = id(new PhabricatorAuthSSHKey())->loadAllWhere(
-        'userPHID = %s',
+        'objectPHID = %s',
         $this->getPHID());
       foreach ($keys as $key) {
         $key->delete();

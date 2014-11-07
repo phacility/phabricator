@@ -73,21 +73,18 @@ final class PhabricatorAuthSSHKeyQuery
     if ($this->objectPHIDs !== null) {
       $where[] = qsprintf(
         $conn_r,
-        'userPHID IN (%Ls)',
+        'objectPHID IN (%Ls)',
         $this->objectPHIDs);
     }
 
     if ($this->keys !== null) {
-      // TODO: This could take advantage of a better key, and the hashing
-      // scheme for this table is a bit nonstandard and questionable.
-
       $sql = array();
       foreach ($this->keys as $key) {
         $sql[] = qsprintf(
           $conn_r,
-          '(keyType = %s AND keyBody = %s)',
+          '(keyType = %s AND keyIndex = %s)',
           $key->getType(),
-          $key->getBody());
+          $key->getHash());
       }
       $where[] = implode(' OR ', $sql);
     }

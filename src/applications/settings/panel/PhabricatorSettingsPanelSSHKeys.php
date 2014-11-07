@@ -44,8 +44,7 @@ final class PhabricatorSettingsPanelSSHKeys
       $this->getPanelURI());
 
     $id = nonempty($edit, $delete);
-
-    if ($id) {
+    if ($id && (int)$id) {
       $key = id(new PhabricatorAuthSSHKeyQuery())
         ->setViewer($viewer)
         ->withIDs(array($id))
@@ -59,8 +58,8 @@ final class PhabricatorSettingsPanelSSHKeys
         return new Aphront404Response();
       }
     } else {
-      $key = new PhabricatorAuthSSHKey();
-      $key->setUserPHID($user->getPHID());
+      $key = id(new PhabricatorAuthSSHKey())
+        ->setObjectPHID($user->getPHID());
     }
 
     if ($delete) {
@@ -89,7 +88,6 @@ final class PhabricatorSettingsPanelSSHKeys
 
           $key->setKeyType($type);
           $key->setKeyBody($body);
-          $key->setKeyHash(md5($body));
           $key->setKeyComment($comment);
 
           $e_key = null;
@@ -309,11 +307,10 @@ final class PhabricatorSettingsPanelSSHKeys
       $body = $public_key->getBody();
 
       $key = id(new PhabricatorAuthSSHKey())
-        ->setUserPHID($user->getPHID())
+        ->setObjectPHID($user->getPHID())
         ->setName('id_rsa_phabricator')
         ->setKeyType($type)
         ->setKeyBody($body)
-        ->setKeyHash(md5($body))
         ->setKeyComment(pht('Generated'))
         ->save();
 

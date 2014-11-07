@@ -34,9 +34,15 @@ foreach ($keys as $ssh_key) {
 
   $type = $ssh_key->getKeyType();
   $type = preg_replace('@[\x00-\x20]+@', '', $type);
+  if (!strlen($type)) {
+    continue;
+  }
 
   $key = $ssh_key->getKeyBody();
   $key = preg_replace('@[\x00-\x20]+@', '', $key);
+  if (!strlen($key)) {
+    continue;
+  }
 
   $options = array(
     'command="'.$cmd.'"',
