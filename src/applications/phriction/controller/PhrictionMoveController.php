@@ -56,73 +56,34 @@ final class PhrictionMoveController extends PhrictionController {
     $submit_uri = $request->getRequestURI()->getPath();
     $cancel_uri = PhrictionDocument::getSlugURI($slug);
 
-    $errors = array();
-    $error_view = null;
-    $e_url = null;
-
-    $disallowed_statuses = array(
-      PhrictionDocumentStatus::STATUS_DELETED => true, // Silly
-      PhrictionDocumentStatus::STATUS_MOVED => true, // Plain silly
-      PhrictionDocumentStatus::STATUS_STUB => true, // Utterly silly
-    );
-    if (isset($disallowed_statuses[$document->getStatus()])) {
-      $error_dialog = id(new AphrontDialogView())
-        ->setUser($user)
-        ->setTitle('Can not move page!')
-        ->appendChild(pht('An already moved or deleted document '.
-          'can not be moved again.'))
-        ->addCancelButton($cancel_uri);
-
-      return id(new AphrontDialogResponse())->setDialog($error_dialog);
-    }
-
+    $e_url = true;
+    $validation_exception = null;
     $content = $document->getContent();
 
-    if ($request->isFormPost() && !count($errors)) {
+    if ($request->isFormPost()) {
 
-      // NOTE: We use the ominpotent user because we can't let users overwrite
-      // documents even if they can't see them.
-      $target_document = id(new PhrictionDocumentQuery())
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
-        ->withSlugs(array($target_slug))
-        ->needContent(true)
-        ->executeOne();
+      $editor = id(new PhrictionTransactionEditor())
+        ->setActor($user)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true)
+        ->setDescription($request->getStr('description'));
 
-      // Considering to overwrite existing docs? Nuke this!
-      $exists = PhrictionDocumentStatus::STATUS_EXISTS;
-      if ($target_document && $target_document->getStatus() == $exists) {
-        $errors[] = pht('Can not overwrite existing target document.');
-        $e_url = pht('Already exists.');
-      }
-
-      if (!count($errors)) {
-
-        $editor = id(new PhrictionTransactionEditor())
-          ->setActor($user)
-          ->setContentSourceFromRequest($request)
-          ->setContinueOnNoEffect(true)
-          ->setDescription($request->getStr('description'));
-
-        $xactions = array();
-        $xactions[] = id(new PhrictionTransaction())
-          ->setTransactionType(PhrictionTransaction::TYPE_MOVE_TO)
-          ->setNewValue($document);
-        if (!$target_document) {
-          $target_document = PhrictionDocument::initializeNewDocument(
-            $user,
-            $target_slug);
-        }
+      $xactions = array();
+      $xactions[] = id(new PhrictionTransaction())
+        ->setTransactionType(PhrictionTransaction::TYPE_MOVE_TO)
+        ->setNewValue($document);
+      $target_document = PhrictionDocument::initializeNewDocument(
+        $user,
+        $target_slug);
+      try {
         $editor->applyTransactions($target_document, $xactions);
-
         $redir_uri = PhrictionDocument::getSlugURI(
           $target_document->getSlug());
         return id(new AphrontRedirectResponse())->setURI($redir_uri);
+      } catch (PhabricatorApplicationTransactionValidationException $ex) {
+        $validation_exception = $ex;
+        $e_url = $ex->getShortMessage(PhrictionTransaction::TYPE_MOVE_TO);
       }
-    }
-
-    if ($errors) {
-      $error_view = id(new AphrontErrorView())
-        ->setErrors($errors);
     }
 
     $form = id(new PHUIFormLayoutView())
@@ -141,12 +102,13 @@ final class PhrictionMoveController extends PhrictionController {
       ->appendChild(
         id(new AphrontFormTextControl())
         ->setLabel(pht('Edit Notes'))
-        ->setValue($content->getDescription())
+        ->setValue(pht('Moving document to a new location.'))
         ->setError(null)
         ->setName('description'));
 
     $dialog = id(new AphrontDialogView())
       ->setUser($user)
+      ->setValidationException($validation_exception)
       ->setTitle(pht('Move Document'))
       ->appendChild($form)
       ->setSubmitURI($submit_uri)

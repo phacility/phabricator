@@ -477,6 +477,53 @@ final class PhrictionTransactionEditor
             }
           }
           break;
+
+        case PhrictionTransaction::TYPE_MOVE_TO:
+          $source_document = $xaction->getNewValue();
+          switch ($source_document->getStatus()) {
+            case PhrictionDocumentStatus::STATUS_DELETED:
+              $e_text = pht('A deleted document can not be moved.');
+              break;
+            case PhrictionDocumentStatus::STATUS_MOVED:
+              $e_text = pht('A moved document can not be moved again.');
+              break;
+            case PhrictionDocumentStatus::STATUS_STUB:
+              $e_text = pht('A stub document can not be moved.');
+              break;
+            default:
+              $e_text = null;
+              break;
+          }
+
+          if ($e_text) {
+            $error = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Can not move document.'),
+              $e_text,
+              $xaction);
+            $errors[] = $error;
+          }
+
+          // NOTE: We use the ominpotent user because we can't let users
+          // overwrite documents even if they can't see them.
+          $target_document = id(new PhrictionDocumentQuery())
+            ->setViewer(PhabricatorUser::getOmnipotentUser())
+            ->withSlugs(array($object->getSlug()))
+            ->needContent(true)
+            ->executeOne();
+
+          // Considering to overwrite existing docs? Nuke this!
+          $exists = PhrictionDocumentStatus::STATUS_EXISTS;
+          if ($target_document && $target_document->getStatus() == $exists) {
+            $error = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Can not move document.'),
+              pht('Can not overwrite existing target document.'),
+              $xaction);
+            $errors[] = $error;
+          }
+          break;
+
         case PhrictionTransaction::TYPE_DELETE:
           switch ($object->getStatus()) {
             case PhrictionDocumentStatus::STATUS_DELETED:
@@ -498,7 +545,6 @@ final class PhrictionTransactionEditor
             $e_text,
             $xaction);
           $errors[] = $error;
-
           break;
       }
     }
