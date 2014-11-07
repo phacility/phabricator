@@ -5,7 +5,7 @@ $conn_w = $table->establishConnection('w');
 
 echo "Populating Phriction policies.\n";
 
-$default_view_policy = PhabricatorPolicies::getMostOpenPolicy();
+$default_view_policy = PhabricatorPolicies::POLICY_USER;
 $default_edit_policy = PhabricatorPolicies::POLICY_USER;
 
 foreach (new LiskMigrationIterator($table) as $doc) {
