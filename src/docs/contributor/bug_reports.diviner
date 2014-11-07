@@ -58,7 +58,7 @@ make it more difficult for us to figure out what's going wrong.)
 
 To update Phabricator, use a script like this one:
 
-  http://www.phabricator.com/rsrc/install/update_phabricator.sh
+http://www.phabricator.com/rsrc/install/update_phabricator.sh
 
 This script will require some adjustments depending on how your setup is
 configured, which webserver you are using, etc.
@@ -176,7 +176,7 @@ We'll look at any issue report we can find (we monitor IRC, email, GitHub,
 StackOverflow, Quora, Facebook and Twitter), but the upstream Maniphest is
 the authoritative bug tracker and the best place to file:
 
-  https://secure.phabricator.com/maniphest/task/create/
+https://secure.phabricator.com/maniphest/task/create/
 
 If you don't want to file there (or, for example, your bug relates to being
 unable to log in or unable to file an issue in Maniphest) you can file on any

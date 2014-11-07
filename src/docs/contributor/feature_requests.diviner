@@ -167,7 +167,7 @@ If you think your feature might be a good fit for the upstream, have reasonable
 expectations about it, and have a good description of the problem you're trying
 to solve, you're ready to file a feature request:
 
-  https://secure.phabricator.com/maniphest/task/create/
+https://secure.phabricator.com/maniphest/task/create/
 
 You can file feature requests in places other than Maniphest (like GitHub), but
 we can address them far more effectively if you file them in the upstream.

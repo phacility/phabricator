@@ -67,7 +67,7 @@ abbreviate the hash, but note that hash collisions are probable for short prefix
 lengths. See this post on the LKML for a historical explanation of Git's
 occasional internal use of 7-character hashes:
 
-  https://lkml.org/lkml/2010/10/28/287
+https://lkml.org/lkml/2010/10/28/287
 
 Because 7-character hashes are likely to collide for even moderately large
 repositories, Diffusion generally uses either a 16-character prefix (which makes

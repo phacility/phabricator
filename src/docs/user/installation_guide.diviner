@@ -152,7 +152,7 @@ Then you have two options. Either install via PECL (try this first):
 **If that doesn't work**, grab the package from PECL directly and follow the
 build instructions there:
 
-  http://pecl.php.net/package/APC
+http://pecl.php.net/package/APC
 
 Installing APC is optional but **strongly recommended**, especially on
 production hosts.
@@ -180,7 +180,7 @@ update Phabricator:
 For more details, see @{article:Configuration Guide}. You can use a script
 similar to this one to automate the process:
 
-  http://www.phabricator.com/rsrc/install/update_phabricator.sh
+http://www.phabricator.com/rsrc/install/update_phabricator.sh
 
 = Next Steps =
 
