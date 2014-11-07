@@ -211,7 +211,7 @@ final class PhabricatorOwnersEditController
               ? 'enabled'
               : 'disabled'))
       ->appendChild(
-        id(new AphrontFormInsetView())
+        id(new PHUIFormInsetView())
           ->setTitle(pht('Paths'))
           ->addDivAttributes(array('id' => 'path-editor'))
           ->setRightButton(javelin_tag(

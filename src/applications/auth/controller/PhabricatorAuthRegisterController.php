@@ -558,12 +558,12 @@ final class PhabricatorAuthRegisterController
         'administrator.',
         $user->getUsername()));
 
-    $body->addTextSection(
+    $body->addLinkSection(
       pht('APPROVAL QUEUE'),
       PhabricatorEnv::getProductionURI(
         '/people/query/approval/'));
 
-    $body->addTextSection(
+    $body->addLinkSection(
       pht('DISABLE APPROVAL QUEUE'),
       PhabricatorEnv::getProductionURI(
         '/config/edit/auth.require-approval/'));

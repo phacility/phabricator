@@ -251,14 +251,14 @@ table.aphront-form-control-checkbox-layout th {
   position: relative;
 }
 
-.aphront-form-inset {
+.phui-form-inset {
   margin: 0 0 8px;
   padding: 8px;
   background: #fff;
   border: 1px solid #d4dae0;
 }
 
-.aphront-form-inset h1 {
+.phui-form-inset h1 {
   color: {$greytext};
   font-weight: normal;
   padding-bottom: 8px;
