@@ -28,10 +28,14 @@ foreach (new LiskMigrationIterator($table) as $doc) {
       ->executeOne();
 
     if ($project) {
+
+      $view_policy = nonempty($project->getViewPolicy(), $default_view_policy);
+      $edit_policy = nonempty($project->getEditPolicy(), $default_edit_policy);
+
       $project_name = $project->getName();
       echo "Migrating doc $id to project policy $project_name...\n";
-      $doc->setViewPolicy($project->getViewPolicy());
-      $doc->setEditPolicy($project->getEditPolicy());
+      $doc->setViewPolicy($view_policy);
+      $doc->setEditPolicy($edit_policy);
       $doc->save();
       continue;
     }
