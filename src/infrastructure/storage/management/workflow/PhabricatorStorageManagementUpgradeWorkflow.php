@@ -13,18 +13,26 @@ final class PhabricatorStorageManagementUpgradeWorkflow
           array(
             'name'  => 'apply',
             'param' => 'patch',
-            'help'  => 'Apply __patch__ explicitly. This is an advanced '.
-                       'feature for development and debugging; you should '.
-                       'not normally use this flag.',
+            'help'  => pht(
+              'Apply __patch__ explicitly. This is an advanced feature for '.
+              'development and debugging; you should not normally use this '.
+              'flag. This skips adjustment.'),
           ),
           array(
             'name'  => 'no-quickstart',
-            'help'  => 'Build storage patch-by-patch from scatch, even if it '.
-                       'could be loaded from the quickstart template.',
+            'help'  => pht(
+              'Build storage patch-by-patch from scatch, even if it could '.
+              'be loaded from the quickstart template.'),
           ),
           array(
             'name'  => 'init-only',
-            'help'  => 'Initialize storage only; do not apply patches.',
+            'help'  => pht(
+              'Initialize storage only; do not apply patches or adjustments.'),
+          ),
+          array(
+            'name' => 'no-adjust',
+            'help' => pht(
+              'Do not apply storage adjustments after storage upgrades.'),
           ),
         ));
   }
@@ -59,6 +67,7 @@ final class PhabricatorStorageManagementUpgradeWorkflow
 
     $no_quickstart = $args->getArg('no-quickstart');
     $init_only = $args->getArg('init-only');
+    $no_adjust = $args->getArg('no-adjust');
 
     $applied = $api->getAppliedPatches();
     if ($applied === null) {
@@ -187,7 +196,15 @@ final class PhabricatorStorageManagementUpgradeWorkflow
       }
     }
 
-    return 0;
+    $console = PhutilConsole::getConsole();
+    if ($no_adjust || $init_only || $apply_only) {
+      $console->writeOut(
+        "%s\n",
+        pht('Declining to apply storage adjustments.'));
+      return 0;
+    } else {
+      return $this->adjustSchemata($is_force, $unsafe = false, $is_dry);
+    }
   }
 
 }
