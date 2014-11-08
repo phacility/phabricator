@@ -155,38 +155,6 @@ final class PhrictionDocumentQuery
       }
     }
 
-    foreach ($documents as $document) {
-      $document->attachProject(null);
-    }
-
-    $project_slugs = array();
-    foreach ($documents as $key => $document) {
-      $slug = $document->getSlug();
-      if (!PhrictionDocument::isProjectSlug($slug)) {
-        continue;
-      }
-      $project_slugs[$key] = PhrictionDocument::getProjectSlugIdentifier($slug);
-    }
-
-    if ($project_slugs) {
-      $projects = id(new PhabricatorProjectQuery())
-        ->setViewer($this->getViewer())
-        ->withPhrictionSlugs($project_slugs)
-        ->execute();
-      $projects = mpull($projects, null, 'getPhrictionSlug');
-      foreach ($documents as $key => $document) {
-        $slug = idx($project_slugs, $key);
-        if ($slug) {
-          $project = idx($projects, $slug);
-          if (!$project) {
-            unset($documents[$key]);
-            continue;
-          }
-          $document->attachProject($project);
-        }
-      }
-    }
-
     return $documents;
   }
 

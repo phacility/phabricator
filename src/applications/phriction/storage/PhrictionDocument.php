@@ -18,7 +18,6 @@ final class PhrictionDocument extends PhrictionDAO
 
   private $contentObject = self::ATTACHABLE;
   private $ancestors = array();
-  private $project = self::ATTACHABLE;
 
   public function getConfiguration() {
     return array(
@@ -130,19 +129,6 @@ final class PhrictionDocument extends PhrictionDAO
 
   public function getContent() {
     return $this->assertAttached($this->contentObject);
-  }
-
-  public function getProject() {
-    return $this->assertAttached($this->project);
-  }
-
-  public function attachProject(PhabricatorProject $project = null) {
-    $this->project = $project;
-    return $this;
-  }
-
-  public function hasProject() {
-    return (bool)$this->getProject();
   }
 
   public function getAncestors() {
