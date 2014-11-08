@@ -308,7 +308,7 @@ final class PhabricatorOwnersListController
         phutil_tag(
           'a',
           array(
-            'href' => '/audit/view/packagecommits/?phid='.$package->getPHID(),
+            'href' => '/audit/?auditorPHIDs='.$package->getPHID(),
           ),
           pht('Related Commits')),
       );
