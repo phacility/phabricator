@@ -907,6 +907,8 @@ phutil_register_library_map(array(
     'JavelinUIExample' => 'applications/uiexample/examples/JavelinUIExample.php',
     'JavelinViewExample' => 'applications/uiexample/examples/JavelinViewExample.php',
     'JavelinViewExampleServerView' => 'applications/uiexample/examples/JavelinViewExampleServerView.php',
+    'JenkinsAPIRequest' => 'applications/diffusion/JenkinsAPIRequest.php',
+    'JenkinsWarnings' => 'applications/diffusion/JenkinsWarnings.php',
     'LegalpadConstants' => 'applications/legalpad/constants/LegalpadConstants.php',
     'LegalpadController' => 'applications/legalpad/controller/LegalpadController.php',
     'LegalpadCreateDocumentsCapability' => 'applications/legalpad/capability/LegalpadCreateDocumentsCapability.php',
