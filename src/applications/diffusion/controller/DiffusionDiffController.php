@@ -91,6 +91,10 @@ final class DiffusionDiffController extends DiffusionController {
     $inlines = PhabricatorAuditInlineComment::loadDraftAndPublishedComments(
       $user,
       $drequest->loadCommit()->getPHID(),
+      $path_id) +
+    $this->getLintMessages(
+      $drequest->loadCommit(),
+      $changeset->getFilename(),
       $path_id);
 
     if ($inlines) {
@@ -124,4 +128,56 @@ final class DiffusionDiffController extends DiffusionController {
     return id(new PhabricatorChangesetResponse())
       ->setRenderedChangeset($output);
   }
+
+  private function getLintMessages(
+    PhabricatorRepositoryCommit $commit, $filename, $path_id) {
+    $properties = id(new PhabricatorRepositoryCommitProperty())->loadAllWhere(
+      'commitID = %d AND name IN (%Ls)',
+      $commit->getID(),
+      array('checkstyle:warnings', 'pmd:warnings'));
+
+    if (!$properties) {
+      return array();
+    }
+
+    $inlines = array();
+
+    foreach ($properties as $property) {
+      $warnings = $property->getData();
+
+      if (!idx($warnings, $filename)) {
+        continue;
+      }
+
+      $synthetic_author = $this->getSyntheticAuthor($property);
+
+      foreach ($warnings[$filename] as $warning) {
+        $priority = ucfirst(strtolower($warning['priority'])).' Priority';
+
+        $inline = new PhabricatorAuditInlineComment();
+        $inline->setChangesetID($path_id);
+        $inline->setIsNewFile(1);
+        $inline->setSyntheticAuthor($synthetic_author.' ('.$priority.')');
+        $inline->setLineNumber($warning['line']);
+        $inline->setLineLength(0);
+
+        $inline->setContent('%%%'.$warning['message'].'%%%');
+        $inlines[] = $inline;
+      }
+    }
+
+    return $inlines;
+  }
+
+  private function getSyntheticAuthor(
+    PhabricatorRepositoryCommitProperty $property) {
+    if ($property->getName() == 'checkstyle:warnings') {
+      return 'Lint: Checkstyle Warning';
+    } elseif ($property->getName() == 'pmd:warnings') {
+      return 'Lint: PMD Warning';
+    }
+
+    return 'Lint: Unknown Warning Type';
+  }
+
 }
