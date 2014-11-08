@@ -116,6 +116,13 @@ final class PhabricatorDiffusionConfigOptions
             'When constructing clone URIs to show to users, Diffusion by '.
             'default will not display a port assuming the default for your '.
             'VCS. Explicitly declare when running on a non-standard port.')),
+      $this->newOption('jenkins.host', 'string', null)
+        ->setDescription(pht('Jenkins installation hostname.')),
+      $this->newOption('jenkins.user-id', 'string', null)
+        ->setDescription(pht('Username for accessing Jenkins.')),
+      $this->newOption('jenkins.api-token', 'string', null)
+        ->setMasked(true)
+        ->setDescription(pht('API token for accessing Jenkins.')),
     );
   }
 
