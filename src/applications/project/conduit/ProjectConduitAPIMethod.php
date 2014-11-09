@@ -26,14 +26,19 @@ abstract class ProjectConduitAPIMethod extends ConduitAPIMethod {
       $project_slugs = $project->getSlugs();
       $project_slugs = array_values(mpull($project_slugs, 'getSlug'));
 
+      $project_icon = PhabricatorProjectIcon::getAPIName($project->getIcon());
+
       $result[$project->getPHID()] = array(
-        'id'            => $project->getID(),
-        'phid'          => $project->getPHID(),
-        'name'          => $project->getName(),
-        'members'       => $member_phids,
-        'slugs'         => $project_slugs,
-        'dateCreated'   => $project->getDateCreated(),
-        'dateModified'  => $project->getDateModified(),
+        'id'               => $project->getID(),
+        'phid'             => $project->getPHID(),
+        'name'             => $project->getName(),
+        'profileImagePHID' => $project->getProfileImagePHID(),
+        'icon'             => $project_icon,
+        'color'            => $project->getColor(),
+        'members'          => $member_phids,
+        'slugs'            => $project_slugs,
+        'dateCreated'      => $project->getDateCreated(),
+        'dateModified'     => $project->getDateModified(),
       );
     }
 
