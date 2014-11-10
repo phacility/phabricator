@@ -4,7 +4,23 @@
 This document contains basic install instructions to get Phabricator up and
 running.
 
-= Installation Requirements =
+Overview
+========
+
+Phabricator is a LAMP (Linux, Apache, MySQL, PHP) application. To install
+Phabricator, you will need:
+
+  - a normal computer to install it on (shared hosts and unusual environments
+    are not supported) running some flavor of Linux or a similar OS;
+  - a domain name (like `phabricator.mycompany.com`);
+  - basic sysadmin skills;
+  - Apache, nginx, or another webserver;
+  - PHP, MySQL, and Git.
+
+The remainder of this document details these requirements.
+
+Installation Requirements
+=========================
 
 You will need **a computer**. Options include:
 
@@ -12,20 +28,22 @@ You will need **a computer**. Options include:
     in EC2. Phabricator installs properly and works well on a normal computer.
   - **A Shared Host**: This may work, but is not recommended. Many shared
     hosting environments have restrictions which prevent some of Phabricator's
-    features from working. Consider using a normal computer instead.
+    features from working. Consider using a normal computer instead. We do not
+    support shared hosts.
   - **A SAN Appliance, Network Router, Gaming Console, Raspberry Pi, etc.**:
     Although you may be able to install Phabricator on specialized hardware, it
     is unlikely to work well and will be difficult for us to support. Strongly
-    consider using a normal computer instead.
+    consider using a normal computer instead. We do not support specialized
+    hardware.
   - **A Toaster, Car, Firearm, Thermostat, etc.**: Yes, many modern devices now
     have embedded computing capability. We live in interesting times. However,
     you should not install Phabricator on these devices. Instead, install it on
-    a normal computer.
+    a normal computer. We do not support installing on noncomputing devices.
 
 To install the Phabricator server software, you will need an **operating
-system** on your normal computer which is **not Windows**. Note that **the
-command line interface //does// work on Windows**, and **you can //use//
-Phabricator from any operating system with a web browser**. However, the server
+system** on your normal computer which is **not Windows**. Note that the
+command line interface //does// work on Windows, and you can //use//
+Phabricator from any operating system with a web browser. However, the server
 software does not run on Windows. It does run on most other operating systems,
 so choose one of these instead:
 
@@ -51,7 +69,7 @@ Beyond an operating system, you will need **a webserver**.
 
 You will also need:
 
-  - **MySQL**: You need MySQL.
+  - **MySQL**: You need MySQL. We strongly recommend MySQL 5.5 or newer.
   - **PHP**: You need PHP 5.2 or newer.
 
 You'll probably also need a **domain name**. In particular, you should read this
@@ -61,7 +79,27 @@ NOTE: Phabricator must be installed on an entire domain. You can not install it
 to a path on an existing domain, like `example.com/phabricator/`. Instead,
 install it to an entire domain or subdomain, like `phabricator.example.com`.
 
-= Installing Required Components =
+Level Requirements
+==================
+
+To install and administrate Phabricator, you'll need to be comfortable with
+common system administration skills. For example, you should be familiar with
+using the command line, installing software on your operating system of choice,
+working with the filesystem, managing processes, dealing with permissions,
+editing configuration files, and setting environment variables.
+
+If you aren't comfortable with these skills, you can still try to perform an
+install. The install documentation will attempt to guide you through what you
+need to know. However, if you aren't very familiar or comfortable with using
+this set of skills to troubleshoot and resolve problems, you may encounter
+issues which you have substantial difficulty working through.
+
+We assume users installing and administrating Phabricator are comfortable with
+common system administration skills and concepts. If you aren't, proceed at
+your own risk and expect that your skills may be tested.
+
+Installing Required Components
+==============================
 
 If you are installing on Ubuntu or an RedHat derivative, there are install
 scripts available which should handle most of the things discussed in this
@@ -114,7 +152,7 @@ Then you have two options. Either install via PECL (try this first):
 **If that doesn't work**, grab the package from PECL directly and follow the
 build instructions there:
 
-  http://pecl.php.net/package/APC
+http://pecl.php.net/package/APC
 
 Installing APC is optional but **strongly recommended**, especially on
 production hosts.
@@ -129,28 +167,6 @@ If it doesn't show up, add:
 
 ..to "/etc/php.d/apc.ini" or the "php.ini" file indicated by "php -i".
 
-= Installing XHProf (Optional) =
-
-XHProf is a PHP profiling tool. You don't need to install it unless you are
-developing Phabricator and making performance changes.
-
-You can install xhprof with:
-
-  $ pecl install xhprof
-
-If you have a PEAR version prior to 1.9.3, you may run into a `phpize` failure.
-If so, you can download the source and build it with:
-
-  $ cd extension/
-  $ phpize
-  $ ./configure
-  $ make
-  $ sudo make install
-
-You may also need to add "##extension=xhprof.so##" to your php.ini.
-
-See <https://bugs.php.net/bug.php?id=59747> for more information.
-
 = Updating Phabricator =
 
 Since Phabricator is under active development, you should update frequently. To
@@ -164,7 +180,7 @@ update Phabricator:
 For more details, see @{article:Configuration Guide}. You can use a script
 similar to this one to automate the process:
 
-  http://www.phabricator.com/rsrc/install/update_phabricator.sh
+http://www.phabricator.com/rsrc/install/update_phabricator.sh
 
 = Next Steps =
 

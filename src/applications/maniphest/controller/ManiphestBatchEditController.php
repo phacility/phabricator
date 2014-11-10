@@ -118,7 +118,7 @@ final class ManiphestBatchEditController extends ManiphestController {
       phutil_tag('p', array(), pht('These tasks will be edited:')));
     $form->appendChild($list);
     $form->appendChild(
-      id(new AphrontFormInsetView())
+      id(new PHUIFormInsetView())
         ->setTitle('Actions')
         ->setRightButton(javelin_tag(
             'a',

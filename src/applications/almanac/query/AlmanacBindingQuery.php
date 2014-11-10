@@ -1,7 +1,7 @@
 <?php
 
 final class AlmanacBindingQuery
-  extends PhabricatorCursorPagedPolicyAwareQuery {
+  extends AlmanacQuery {
 
   private $ids;
   private $phids;
@@ -134,10 +134,6 @@ final class AlmanacBindingQuery
     $where[] = $this->buildPagingClause($conn_r);
 
     return $this->formatWhereClause($where);
-  }
-
-  public function getQueryApplicationClass() {
-    return 'PhabricatorAlmanacApplication';
   }
 
 }

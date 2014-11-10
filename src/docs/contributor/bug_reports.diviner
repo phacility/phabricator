@@ -15,6 +15,7 @@ The most important things to do are:
   - check the list of common fixes below;
   - make sure Phabricator is up to date;
   - make sure we support your setup;
+  - gather debugging information;
   - explain how to reproduce the issue; and
   - create a task in
     [[ http://secure.phabricator.com/maniphest/task/create/ | Maniphest ]].
@@ -57,7 +58,7 @@ make it more difficult for us to figure out what's going wrong.)
 
 To update Phabricator, use a script like this one:
 
-  http://www.phabricator.com/rsrc/install/update_phabricator.sh
+http://www.phabricator.com/rsrc/install/update_phabricator.sh
 
 This script will require some adjustments depending on how your setup is
 configured, which webserver you are using, etc.
@@ -104,6 +105,25 @@ Otherwise, if you're having an issue with a supported first-party application
 and followed the upstream install instructions on a normal computer, we're happy
 to try to help.
 
+Getting More Information
+========================
+
+For some issues, there are places you can check for more information. This may
+help you resolve the issue yourself. Even if it doesn't, this information can
+help us figure out and resolve an issue.
+
+  - For issues with `arc` or any other command-line script, you can get more
+    details about what the script is doing by adding the `--trace` flag.
+  - For issues with Phabricator, check your webserver error logs.
+    - For Apache, this is often `/var/log/httpd/error.log`, or
+      `/var/log/apache2/error.log` or similar.
+    - For nginx, check both the nginx and php-fpm logs.
+  - For issues with the UI, check the Javascript error console in your web
+    browser.
+  - Some other things, like daemons, have their own debug flags or
+    troubleshooting steps. Check the documentation for information on
+    troubleshooting. Adjusting settings or enabling debugging modes may give
+    you more information about the issue.
 
 Reproducibility
 ===============
@@ -111,30 +131,56 @@ Reproducibility
 The most important part of your report content is instructions on how to
 reproduce the issue. What did you do? If you do it again, does it still break?
 Does it depend on a specific browser? Can you reproduce the issue on
-`secure.phabricator.com`? Feel free to try to reproduce issues on the upstream
-install (which is kept near HEAD), within reason -- it's okay to make a few test
-objects if you're having trouble narrowing something down or want to check if
-updating might fix an issue.
+`secure.phabricator.com`?
+
+Feel free to try to reproduce issues on the upstream install (which is kept near
+HEAD), within reason -- it's okay to make a few test objects if you're having
+trouble narrowing something down or want to check if updating might fix an
+issue.
 
 It is nearly impossible for us to resolve many issues if we can not reproduce
-them. For more information, see @{article: Give Feedback! Get Support!}.
+them.
 
+Unreproducible Problems
+=======================
+
+Before we can fix a bug, we need to reproduce it. If we can't reproduce a
+problem, we can't tell if we've fixed it and often won't be able to figure out
+why it is occurring.
+
+Most problems reproduce easily, but some are more difficult to reproduce. We
+will generally make a reasonable effort to reproduce problems, but sometimes
+we will be unable to reproduce an issue.
+
+Many of these unreproducible issues turn out to be bizarre environmental
+problems that are unique to one user's install, and figuring out what is wrong
+takes a very long time with a lot of back and forth as we ask questions to
+narrow down the cause of the problem. When we eventually figure it out and fix
+it, few others benefit (in some cases, no one else). This sort of fishing
+expedition is not a good use of anyone's time, and it's very hard for us to
+prioritize solving these problems because they represent a huge effort for very
+little benefit.
+
+We will make a reasonable effort to reproduce problems, but can not help with
+issues which we can't reproduce. You can make sure we're able to help resolve
+your issue by generating clear reproduction steps.
 
 Create a Task in Maniphest
 ==========================
 
-If you're up to date, supported, and have the best reproduction instructions
-you can come up with, you're ready to file an issue.
+If you're up to date, supported, have collected information about the problem,
+and have the best reproduction instructions you can come up with, you're ready
+to file an issue.
 
 We'll look at any issue report we can find (we monitor IRC, email, GitHub,
 StackOverflow, Quora, Facebook and Twitter), but the upstream Maniphest is
 the authoritative bug tracker and the best place to file:
 
-  https://secure.phabricator.com/maniphest/task/create/
+https://secure.phabricator.com/maniphest/task/create/
 
 If you don't want to file there (or, for example, your bug relates to being
-unable to log in or unable to file an issue in Maniphest) you can file on any of
-the other channels, but we can address reports much more effectively if they're
+unable to log in or unable to file an issue in Maniphest) you can file on any
+other channel, but we can address reports much more effectively if they're
 filed against the upstream than if they're filed somewhere else.
 
 | Effectiveness | Filing Method |
@@ -146,7 +192,7 @@ filed against the upstream than if they're filed somewhere else.
 
 If you have a quick question or want to discuss something before filing an
 issue, IRC is a great way to get a sanity check first. You can find information
-about these channels in @{article: Give Feedback! Get Support!}.
+about IRC in @{article: Give Feedback! Get Support!}.
 
 Next Steps
 ==========

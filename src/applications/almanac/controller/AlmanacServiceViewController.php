@@ -56,6 +56,7 @@ final class AlmanacServiceViewController
         $crumbs,
         $box,
         $bindings,
+        $this->buildAlmanacPropertiesTable($service),
         $xaction_view,
       ),
       array(
@@ -67,7 +68,8 @@ final class AlmanacServiceViewController
     $viewer = $this->getViewer();
 
     $properties = id(new PHUIPropertyListView())
-      ->setUser($viewer);
+      ->setUser($viewer)
+      ->setObject($service);
 
     return $properties;
   }

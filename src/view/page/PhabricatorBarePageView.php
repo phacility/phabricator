@@ -75,11 +75,30 @@ class PhabricatorBarePageView extends AphrontPageView {
                        'maximum-scale=1',
         ));
     }
-    $icon_tag = phutil_tag(
+    $icon_tag_76 = phutil_tag(
       'link',
       array(
         'rel' => 'apple-touch-icon',
-        'href' => celerity_get_resource_uri('/rsrc/image/apple-touch-icon.png'),
+        'href' => celerity_get_resource_uri(
+          '/rsrc/favicons/apple-touch-icon-76x76.png'),
+      ));
+
+    $icon_tag_120 = phutil_tag(
+      'link',
+      array(
+        'rel' => 'apple-touch-icon',
+        'sizes' => '120x120',
+        'href' => celerity_get_resource_uri(
+          '/rsrc/favicons/apple-touch-icon-120x120.png'),
+      ));
+
+    $icon_tag_152 = phutil_tag(
+      'link',
+      array(
+        'rel' => 'apple-touch-icon',
+        'sizes' => '152x152',
+        'href' => celerity_get_resource_uri(
+          '/rsrc/favicons/apple-touch-icon-152x152.png'),
       ));
 
     $apple_tag = phutil_tag(
@@ -100,9 +119,11 @@ class PhabricatorBarePageView extends AphrontPageView {
 
     $developer = PhabricatorEnv::getEnvConfig('phabricator.developer-mode');
     return hsprintf(
-      '%s%s%s%s%s%s',
+      '%s%s%s%s%s%s%s%s',
       $viewport_tag,
-      $icon_tag,
+      $icon_tag_76,
+      $icon_tag_120,
+      $icon_tag_152,
       $apple_tag,
       $referrer_tag,
       CelerityStaticResourceResponse::renderInlineScript(

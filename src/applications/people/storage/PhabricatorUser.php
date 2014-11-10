@@ -114,7 +114,7 @@ final class PhabricatorUser
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
-        'userName' => 'text64',
+        'userName' => 'sort64',
         'realName' => 'text128',
         'sex' => 'text4?',
         'translation' => 'text64?',
@@ -896,8 +896,8 @@ EOBODY;
         $profile->delete();
       }
 
-      $keys = id(new PhabricatorUserSSHKey())->loadAllWhere(
-        'userPHID = %s',
+      $keys = id(new PhabricatorAuthSSHKey())->loadAllWhere(
+        'objectPHID = %s',
         $this->getPHID());
       foreach ($keys as $key) {
         $key->delete();

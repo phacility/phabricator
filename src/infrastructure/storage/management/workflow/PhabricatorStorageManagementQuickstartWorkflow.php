@@ -139,6 +139,12 @@ final class PhabricatorStorageManagementQuickstartWorkflow
 
     Filesystem::writeFile($output, $dump);
 
+    $console = PhutilConsole::getConsole();
+    $console->writeOut(
+      "**<bg:green> %s </bg>** %s\n",
+      pht('SUCCESS'),
+      pht('Wrote fresh quickstart SQL.'));
+
     return 0;
   }
 

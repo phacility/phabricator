@@ -5,6 +5,10 @@ final class PhrictionHistoryController
 
   private $slug;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function willProcessRequest(array $data) {
     $this->slug = $data['slug'];
   }

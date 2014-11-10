@@ -5,6 +5,10 @@ final class PhrictionDocumentController
 
   private $slug;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function willProcessRequest(array $data) {
     $this->slug = $data['slug'];
   }
@@ -199,6 +203,8 @@ final class PhrictionDocumentController
     }
 
     $header = id(new PHUIHeaderView())
+      ->setUser($user)
+      ->setPolicyObject($document)
       ->setHeader($page_title);
 
     $prop_list = null;

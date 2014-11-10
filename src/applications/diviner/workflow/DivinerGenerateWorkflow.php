@@ -334,14 +334,18 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
     $bar = id(new PhutilConsoleProgressBar())
       ->setTotal(count($futures));
     foreach (Futures($futures)->limit(4) as $key => $future) {
-      $atoms = $future->resolveJSON();
+      try {
+        $atoms = $future->resolveJSON();
 
-      foreach ($atoms as $atom) {
-        if ($atom['type'] == DivinerAtom::TYPE_FILE) {
-          $file_hash = $file_hashes[$atom['file']];
-          $atom_cache->addFileHash($file_hash, $atom['hash']);
+        foreach ($atoms as $atom) {
+          if ($atom['type'] == DivinerAtom::TYPE_FILE) {
+            $file_hash = $file_hashes[$atom['file']];
+            $atom_cache->addFileHash($file_hash, $atom['hash']);
+          }
+          $atom_cache->addAtom($atom);
         }
-        $atom_cache->addAtom($atom);
+      } catch (Exception $e) {
+        phlog($e);
       }
 
       $bar->update(1);

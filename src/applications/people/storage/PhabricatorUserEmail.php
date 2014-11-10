@@ -17,7 +17,7 @@ final class PhabricatorUserEmail extends PhabricatorUserDAO {
   public function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
-        'address' => 'text128',
+        'address' => 'sort128',
         'isVerified' => 'bool',
         'isPrimary' => 'bool',
         'verificationCode' => 'text64?',

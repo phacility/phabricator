@@ -5,9 +5,13 @@ final class PhrictionTransaction
 
   const TYPE_TITLE = 'title';
   const TYPE_CONTENT = 'content';
+  const TYPE_DELETE  = 'delete';
+  const TYPE_MOVE_TO = 'move-to';
+  const TYPE_MOVE_AWAY = 'move-away';
 
   const MAILTAG_TITLE = 'phriction-title';
   const MAILTAG_CONTENT = 'phriction-content';
+  const MAILTAG_DELETE  = 'phriction-delete';
 
   public function getApplicationName() {
     return 'phriction';
@@ -19,6 +23,25 @@ final class PhrictionTransaction
 
   public function getApplicationTransactionCommentObject() {
     return new PhrictionTransactionComment();
+  }
+
+  public function getRequiredHandlePHIDs() {
+    $phids = parent::getRequiredHandlePHIDs();
+    $new = $this->getNewValue();
+    switch ($this->getTransactionType()) {
+      case self::TYPE_MOVE_TO:
+      case self::TYPE_MOVE_AWAY:
+        $phids[] = $new['phid'];
+        break;
+      case self::TYPE_TITLE:
+        if ($this->getMetadataValue('stub:create:phid')) {
+          $phids[] = $this->getMetadataValue('stub:create:phid');
+        }
+        break;
+    }
+
+
+    return $phids;
   }
 
   public function getRemarkupBlocks() {
@@ -47,12 +70,39 @@ final class PhrictionTransaction
     return parent::shouldHide();
   }
 
+  public function shouldHideForMail(array $xactions) {
+    switch ($this->getTransactionType()) {
+      case self::TYPE_MOVE_TO:
+      case self::TYPE_MOVE_AWAY:
+        return true;
+      case self::TYPE_TITLE:
+        return $this->getMetadataValue('stub:create:phid', false);
+    }
+    return parent::shouldHideForMail($xactions);
+  }
+
+  public function shouldHideForFeed() {
+    switch ($this->getTransactionType()) {
+      case self::TYPE_MOVE_TO:
+      case self::TYPE_MOVE_AWAY:
+        return true;
+      case self::TYPE_TITLE:
+        return $this->getMetadataValue('stub:create:phid', false);
+    }
+    return parent::shouldHideForFeed();
+  }
+
   public function getActionStrength() {
     switch ($this->getTransactionType()) {
       case self::TYPE_TITLE:
         return 1.4;
       case self::TYPE_CONTENT:
         return 1.3;
+      case self::TYPE_DELETE:
+        return 1.5;
+      case self::TYPE_MOVE_TO:
+      case self::TYPE_MOVE_AWAY:
+        return 1.0;
     }
 
     return parent::getActionStrength();
@@ -65,13 +115,26 @@ final class PhrictionTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_TITLE:
         if ($old === null) {
-          return pht('Created');
+          if ($this->getMetadataValue('stub:create:phid')) {
+            return pht('Stubbed');
+          } else {
+            return pht('Created');
+          }
         }
 
         return pht('Retitled');
 
       case self::TYPE_CONTENT:
         return pht('Edited');
+
+      case self::TYPE_DELETE:
+        return pht('Deleted');
+
+      case self::TYPE_MOVE_TO:
+        return pht('Moved');
+
+      case self::TYPE_MOVE_AWAY:
+        return pht('Moved Away');
 
     }
 
@@ -86,11 +149,15 @@ final class PhrictionTransaction
       case self::TYPE_TITLE:
       case self::TYPE_CONTENT:
         return 'fa-pencil';
+      case self::TYPE_DELETE:
+        return 'fa-times';
+      case self::TYPE_MOVE_TO:
+      case self::TYPE_MOVE_AWAY:
+        return 'fa-arrows';
     }
 
     return parent::getIcon();
   }
-
 
 
   public function getTitle() {
@@ -102,9 +169,17 @@ final class PhrictionTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_TITLE:
         if ($old === null) {
-          return pht(
-            '%s created this document.',
-            $this->renderHandleLink($author_phid));
+          if ($this->getMetadataValue('stub:create:phid')) {
+            return pht(
+              '%s stubbed out this document when creating %s.',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink(
+                $this->getMetadataValue('stub:create:phid')));
+          } else {
+            return pht(
+              '%s created this document.',
+              $this->renderHandleLink($author_phid));
+          }
         }
         return pht(
           '%s changed the title from "%s" to "%s".',
@@ -116,6 +191,23 @@ final class PhrictionTransaction
         return pht(
           '%s edited the document content.',
           $this->renderHandleLink($author_phid));
+
+      case self::TYPE_DELETE:
+        return pht(
+          '%s deleted this document.',
+          $this->renderHandleLink($author_phid));
+
+      case self::TYPE_MOVE_TO:
+        return pht(
+          '%s moved this document from %s',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($new['phid']));
+
+      case self::TYPE_MOVE_AWAY:
+        return pht(
+          '%s moved this document to %s',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($new['phid']));
 
     }
 
@@ -151,6 +243,12 @@ final class PhrictionTransaction
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
 
+      case self::TYPE_DELETE:
+        return pht(
+          '%s deleted %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid));
+
     }
     return parent::getTitleForFeed($story);
   }
@@ -179,6 +277,10 @@ final class PhrictionTransaction
       case self::TYPE_CONTENT:
         $tags[] = self::MAILTAG_CONTENT;
         break;
+      case self::TYPE_DELETE:
+        $tags[] = self::MAILTAG_DELETE;
+        break;
+
     }
     return $tags;
   }

@@ -31,6 +31,11 @@
       "rule" : ".alert-notifications.message-unread .phabricator-main-menu-message-icon",
       "hash" : "7edd6d68b36f2f46133eb3118f966c6b"
     },
+    "eye"              : {
+      "name" : "eye",
+      "rule" : ".phabricator-main-menu-eye",
+      "hash" : "35f24014f23142275574136a63dcb73f"
+    },
     "info-sm"          : {
       "name" : "info-sm",
       "rule" : ".menu-icon-info-sm",
@@ -38,8 +43,8 @@
     },
     "logo"             : {
       "name" : "logo",
-      "rule" : ".phabricator-main-menu-logo-image",
-      "hash" : "b03901ae5dff3ec840b88f8335819598"
+      "rule" : ".phabricator-main-menu-logo",
+      "hash" : "668b04729a4b9460b0c89cb6ef6db4d4"
     },
     "logout-sm"        : {
       "name" : "logout-sm",

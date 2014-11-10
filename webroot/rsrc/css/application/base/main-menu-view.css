@@ -38,29 +38,34 @@
   float: left;
 }
 
-.phabricator-main-menu-logo {
+.phabricator-main-menu-brand {
   display: inline-block;
-  width: 149px;
+  width: 148px;
   height: 44px;
   float: left;
   margin-right: 6px;
-  padding-right: 6px;
+  padding-right: 4px;
   padding-left: 6px;
 }
 
-.menu-logo-image {
+.phabricator-main-menu-logo {
   position: absolute;
-  width: 149px;
+  width: 96px;
   height: 26px;
+  left: 52px;
   top: 9px;
 }
 
-.device-phone .phabricator-main-menu-logo {
-  margin-left: -45px;
+.phabricator-main-menu-eye {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  top: 2px;
 }
 
-.device .phabricator-main-menu-logo:hover {
-  background-color: transparent;
+.device-desktop .phabricator-main-menu-brand:hover {
+  background-color: rgba(0,0,0,.6);
+  cursor: hand;
 }
 
 /* - Expand/Collapse Button ----------------------------------------------------
@@ -385,15 +390,12 @@
 }
 
 .device-desktop .main-header-dark .phabricator-application-menu
- .core-menu-item.phui-list-item-view:hover,
-.device-desktop .main-header-dark .phabricator-main-menu-logo:hover {
+ .core-menu-item.phui-list-item-view:hover {
   background-color: rgba(0,0,0,.6);
 }
 
 .device-desktop .phabricator-application-menu
- .core-menu-item.phui-list-item-view:hover,
-.device-desktop .phabricator-main-menu-logo:hover {
-  background-color: rgba(0,0,0,.3);
+ .core-menu-item.phui-list-item-view:hover {
   box-shadow: inset 0 5px 10px rgba(0,0,0,0.5);
   border-radius: 3px;
 }

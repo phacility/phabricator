@@ -199,11 +199,18 @@ probably means something like this:
 Now, you can actually configure sendmail to deliver to Phabricator. In
 `/etc/aliases`, add an entry like this:
 
-  phabricator: "| /path/to/phabricator/scripts/mail/mail_handler.php <ENV>"
+  phabricator: "| /path/to/phabricator/scripts/mail/mail_handler.php"
 
-...where <ENV> is the PHABRICATOR_ENV the script should run under. Run
-`sudo newaliases`. Now you likely need to symlink this script into
-`/etc/smrsh/`:
+If you use the `PHABRICATOR_ENV` environmental variable to select a
+configuration, you can pass the value to the script as an argument:
+
+  .../path/to/mail_handler.php <ENV>
+
+This is an advanced feature which is rarely used. Most installs should run
+without an argument.
+
+After making this change, run `sudo newaliases`. Now you likely need to symlink
+this script into `/etc/smrsh/`:
 
   sudo ln -s /path/to/phabricator/scripts/mail/mail_handler.php /etc/smrsh/
 

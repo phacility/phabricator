@@ -101,7 +101,7 @@ message.
 Simply include a query param with the key of "access_token" and the value
 as the earlier obtained access token. For example:
 
-  https://phabricator.example.com/api/user.whoami?access_token=ykc7ly7vtibj334oga4fnfbuvnwz4ocp
+https://phabricator.example.com/api/user.whoami?access_token=ykc7ly7vtibj334oga4fnfbuvnwz4ocp
 
 If the token has expired or is otherwise invalid, the client will receive
 an error indicating as such. In these cases, the client should re-initiate

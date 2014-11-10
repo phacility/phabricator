@@ -57,6 +57,7 @@ final class AlmanacBindingViewController
       array(
         $crumbs,
         $box,
+        $this->buildAlmanacPropertiesTable($binding),
         $xaction_view,
       ),
       array(

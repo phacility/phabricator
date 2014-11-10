@@ -32,7 +32,7 @@ Differential and displayed in the right gutter when viewing diffs.
 If you're contributing, libphutil, Arcanist and Phabricator support coverage if
 you install Xdebug:
 
-  http://xdebug.org/
+http://xdebug.org/
 
 It should be sufficient to correctly install Xdebug; coverage information will
 be automatically enabled.

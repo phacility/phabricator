@@ -1,6 +1,6 @@
 <?php
 
-final class AphrontFormInsetView extends AphrontView {
+final class PHUIFormInsetView extends AphrontView {
 
   private $title;
   private $description;
@@ -83,7 +83,7 @@ final class AphrontFormInsetView extends AphrontView {
     }
 
     $div_attributes = $this->divAttributes;
-    $classes = array('aphront-form-inset');
+    $classes = array('phui-form-inset');
     if (isset($div_attributes['class'])) {
       $classes[] = $div_attributes['class'];
     }

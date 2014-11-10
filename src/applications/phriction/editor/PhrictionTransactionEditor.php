@@ -6,6 +6,10 @@ final class PhrictionTransactionEditor
   private $description;
   private $oldContent;
   private $newContent;
+  private $moveAwayDocument;
+  private $skipAncestorCheck;
+  private $contentVersion;
+  private $processContentVersionError = true;
 
   public function setDescription($description) {
     $this->description = $description;
@@ -34,6 +38,33 @@ final class PhrictionTransactionEditor
     return $this->newContent;
   }
 
+  public function setSkipAncestorCheck($bool) {
+    $this->skipAncestorCheck = $bool;
+    return $this;
+  }
+
+  public function getSkipAncestorCheck() {
+    return $this->skipAncestorCheck;
+  }
+
+  public function setContentVersion($version) {
+    $this->contentVersion = $version;
+    return $this;
+  }
+
+  public function getContentVersion() {
+    return $this->contentVersion;
+  }
+
+  public function setProcessContentVersionError($process) {
+    $this->processContentVersionError = $process;
+    return $this;
+  }
+
+  public function getProcessContentVersionError() {
+    return $this->processContentVersionError;
+  }
+
   public function getEditorApplicationClass() {
     return 'PhabricatorPhrictionApplication';
   }
@@ -48,11 +79,12 @@ final class PhrictionTransactionEditor
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
     $types[] = PhrictionTransaction::TYPE_TITLE;
     $types[] = PhrictionTransaction::TYPE_CONTENT;
+    $types[] = PhrictionTransaction::TYPE_DELETE;
+    $types[] = PhrictionTransaction::TYPE_MOVE_TO;
+    $types[] = PhrictionTransaction::TYPE_MOVE_AWAY;
 
-    /* TODO
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
-     */
 
     return $types;
   }
@@ -72,6 +104,10 @@ final class PhrictionTransactionEditor
           return null;
         }
         return $this->getOldContent()->getContent();
+      case PhrictionTransaction::TYPE_DELETE:
+      case PhrictionTransaction::TYPE_MOVE_TO:
+      case PhrictionTransaction::TYPE_MOVE_AWAY:
+        return null;
     }
   }
 
@@ -82,7 +118,24 @@ final class PhrictionTransactionEditor
     switch ($xaction->getTransactionType()) {
       case PhrictionTransaction::TYPE_TITLE:
       case PhrictionTransaction::TYPE_CONTENT:
+      case PhrictionTransaction::TYPE_DELETE:
         return $xaction->getNewValue();
+      case PhrictionTransaction::TYPE_MOVE_TO:
+        $document = $xaction->getNewValue();
+        // grab the real object now for the sub-editor to come
+        $this->moveAwayDocument = $document;
+        $dict = array(
+          'id' => $document->getID(),
+          'phid' => $document->getPHID(),
+          'content' => $document->getContent()->getContent(),);
+        return $dict;
+      case PhrictionTransaction::TYPE_MOVE_AWAY:
+        $document = $xaction->getNewValue();
+        $dict = array(
+          'id' => $document->getID(),
+          'phid' => $document->getPHID(),
+          'content' => $document->getContent()->getContent(),);
+        return $dict;
     }
   }
 
@@ -94,6 +147,9 @@ final class PhrictionTransactionEditor
       switch ($xaction->getTransactionType()) {
       case PhrictionTransaction::TYPE_TITLE:
       case PhrictionTransaction::TYPE_CONTENT:
+      case PhrictionTransaction::TYPE_DELETE:
+      case PhrictionTransaction::TYPE_MOVE_TO:
+      case PhrictionTransaction::TYPE_MOVE_AWAY:
         return true;
       }
     }
@@ -115,9 +171,50 @@ final class PhrictionTransactionEditor
     switch ($xaction->getTransactionType()) {
       case PhrictionTransaction::TYPE_TITLE:
       case PhrictionTransaction::TYPE_CONTENT:
+      case PhrictionTransaction::TYPE_MOVE_TO:
         $object->setStatus(PhrictionDocumentStatus::STATUS_EXISTS);
         return;
+      case PhrictionTransaction::TYPE_MOVE_AWAY:
+        $object->setStatus(PhrictionDocumentStatus::STATUS_MOVED);
+        return;
+      case PhrictionTransaction::TYPE_DELETE:
+        $object->setStatus(PhrictionDocumentStatus::STATUS_DELETED);
+        return;
     }
+  }
+
+  protected function expandTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    $xactions = parent::expandTransaction($object, $xaction);
+    switch ($xaction->getTransactionType()) {
+      case PhrictionTransaction::TYPE_CONTENT:
+        if ($this->getIsNewObject()) {
+          break;
+        }
+        $content = $xaction->getNewValue();
+        if ($content === '') {
+          $xactions[] = id(new PhrictionTransaction())
+            ->setTransactionType(PhrictionTransaction::TYPE_DELETE)
+            ->setNewValue(true);
+        }
+        break;
+      case PhrictionTransaction::TYPE_MOVE_TO:
+        $document = $xaction->getNewValue();
+        $xactions[] = id(new PhrictionTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
+          ->setNewValue($document->getViewPolicy());
+        $xactions[] = id(new PhrictionTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
+          ->setNewValue($document->getEditPolicy());
+        break;
+      default:
+        break;
+
+    }
+
+    return $xactions;
   }
 
   protected function applyCustomExternalTransaction(
@@ -130,6 +227,25 @@ final class PhrictionTransactionEditor
         break;
       case PhrictionTransaction::TYPE_CONTENT:
         $this->getNewContent()->setContent($xaction->getNewValue());
+        break;
+      case PhrictionTransaction::TYPE_DELETE:
+        $this->getNewContent()->setContent('');
+        $this->getNewContent()->setChangeType(
+          PhrictionChangeType::CHANGE_DELETE);
+        break;
+      case PhrictionTransaction::TYPE_MOVE_TO:
+        $dict = $xaction->getNewValue();
+        $this->getNewContent()->setContent($dict['content']);
+        $this->getNewContent()->setChangeType(
+          PhrictionChangeType::CHANGE_MOVE_HERE);
+        $this->getNewContent()->setChangeRef($dict['id']);
+        break;
+      case PhrictionTransaction::TYPE_MOVE_AWAY:
+        $dict = $xaction->getNewValue();
+        $this->getNewContent()->setContent('');
+        $this->getNewContent()->setChangeType(
+          PhrictionChangeType::CHANGE_MOVE_AWAY);
+        $this->getNewContent()->setChangeRef($dict['id']);
         break;
       default:
         break;
@@ -145,6 +261,9 @@ final class PhrictionTransactionEditor
       switch ($xaction->getTransactionType()) {
         case PhrictionTransaction::TYPE_TITLE:
         case PhrictionTransaction::TYPE_CONTENT:
+        case PhrictionTransaction::TYPE_DELETE:
+        case PhrictionTransaction::TYPE_MOVE_AWAY:
+        case PhrictionTransaction::TYPE_MOVE_TO:
           $save_content = true;
           break;
         default:
@@ -162,38 +281,71 @@ final class PhrictionTransactionEditor
       $object->attachContent($content);
     }
 
-    if ($this->getIsNewObject()) {
+    if ($this->getIsNewObject() && !$this->getSkipAncestorCheck()) {
       // Stub out empty parent documents if they don't exist
       $ancestral_slugs = PhabricatorSlug::getAncestry($object->getSlug());
       if ($ancestral_slugs) {
-        $ancestors = id(new PhrictionDocument())->loadAllWhere(
-          'slug IN (%Ls)',
-          $ancestral_slugs);
+        $ancestors = id(new PhrictionDocumentQuery())
+          ->setViewer(PhabricatorUser::getOmnipotentUser())
+          ->withSlugs($ancestral_slugs)
+          ->needContent(true)
+          ->execute();
         $ancestors = mpull($ancestors, null, 'getSlug');
+        $stub_type = PhrictionChangeType::CHANGE_STUB;
         foreach ($ancestral_slugs as $slug) {
+          $ancestor_doc = idx($ancestors, $slug);
           // We check for change type to prevent near-infinite recursion
-          if (!isset($ancestors[$slug]) &&
-            $content->getChangeType() !=
-            PhrictionChangeType::CHANGE_STUB) {
-              id(PhrictionDocumentEditor::newForSlug($slug))
-                ->setActor($this->getActor())
-                ->setTitle(PhabricatorSlug::getDefaultTitle($slug))
-                ->setContent('')
-                ->setDescription(pht('Empty Parent Document'))
-                ->stub();
-            }
+          if (!$ancestor_doc && $content->getChangeType() != $stub_type) {
+            $ancestor_doc = PhrictionDocument::initializeNewDocument(
+              $this->getActor(),
+              $slug);
+            $stub_xactions = array();
+            $stub_xactions[] = id(new PhrictionTransaction())
+              ->setTransactionType(PhrictionTransaction::TYPE_TITLE)
+              ->setNewValue(PhabricatorSlug::getDefaultTitle($slug))
+              ->setMetadataValue('stub:create:phid', $object->getPHID());
+            $stub_xactions[] = id(new PhrictionTransaction())
+              ->setTransactionType(PhrictionTransaction::TYPE_CONTENT)
+              ->setNewValue('')
+              ->setMetadataValue('stub:create:phid', $object->getPHID());
+            $stub_xactions[] = id(new PhrictionTransaction())
+              ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
+              ->setNewValue($object->getViewPolicy());
+            $stub_xactions[] = id(new PhrictionTransaction())
+              ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
+              ->setNewValue($object->getEditPolicy());
+            $sub_editor = id(new PhrictionTransactionEditor())
+              ->setActor($this->getActor())
+              ->setContentSource($this->getContentSource())
+              ->setContinueOnNoEffect($this->getContinueOnNoEffect())
+              ->setSkipAncestorCheck(true)
+              ->setDescription(pht('Empty Parent Document'))
+              ->applyTransactions($ancestor_doc, $stub_xactions);
+          }
         }
       }
     }
+
+    if ($this->moveAwayDocument !== null) {
+      $move_away_xactions = array();
+      $move_away_xactions[] = id(new PhrictionTransaction())
+        ->setTransactionType(PhrictionTransaction::TYPE_MOVE_AWAY)
+        ->setNewValue($object);
+      $sub_editor = id(new PhrictionTransactionEditor())
+        ->setActor($this->getActor())
+        ->setContentSource($this->getContentSource())
+        ->setContinueOnNoEffect($this->getContinueOnNoEffect())
+        ->setDescription($this->getDescription())
+        ->applyTransactions($this->moveAwayDocument, $move_away_xactions);
+    }
+
     return $xactions;
   }
 
   protected function shouldSendMail(
     PhabricatorLiskDAO $object,
     array $xactions) {
-
-    $xactions = mfilter($xactions, 'shouldHide', true);
-    return $xactions;
+    return true;
   }
 
   protected function getMailSubjectPrefix() {
@@ -213,6 +365,8 @@ final class PhrictionTransactionEditor
         pht("A document's title changes."),
       PhrictionTransaction::MAILTAG_CONTENT =>
         pht("A document's content changes."),
+      PhrictionTransaction::MAILTAG_DELETE =>
+        pht('A document is deleted.'),
     );
   }
 
@@ -261,9 +415,229 @@ final class PhrictionTransactionEditor
     array $xactions) {
 
     $phids = parent::getFeedRelatedPHIDs($object, $xactions);
-    // TODO - once the editor supports moves, we'll need to surface the
-    // "from document phid" to related phids.
+
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case PhrictionTransaction::TYPE_MOVE_TO:
+          $dict = $xaction->getNewValue();
+          $phids[] = $dict['phid'];
+          break;
+      }
+    }
+
     return $phids;
+  }
+
+  protected function validateTransaction(
+    PhabricatorLiskDAO $object,
+    $type,
+    array $xactions) {
+
+    $errors = parent::validateTransaction($object, $type, $xactions);
+
+    foreach ($xactions as $xaction) {
+      switch ($type) {
+        case PhrictionTransaction::TYPE_TITLE:
+          $title = $object->getContent()->getTitle();
+          $missing = $this->validateIsEmptyTextField(
+            $title,
+            $xactions);
+
+          if ($missing) {
+            $error = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Required'),
+              pht('Document title is required.'),
+              nonempty(last($xactions), null));
+
+            $error->setIsMissingFieldError(true);
+            $errors[] = $error;
+          } else if ($this->getProcessContentVersionError()) {
+            $error = $this->validateContentVersion($object, $type, $xaction);
+            if ($error) {
+              $this->setProcessContentVersionError(false);
+              $errors[] = $error;
+            }
+          }
+          break;
+
+        case PhrictionTransaction::TYPE_CONTENT:
+          if ($xaction->getMetadataValue('stub:create:phid')) {
+            continue;
+          }
+
+          $missing = false;
+          if ($this->getIsNewObject()) {
+            $content = $object->getContent()->getContent();
+            $missing = $this->validateIsEmptyTextField(
+              $content,
+              $xactions);
+          }
+
+          if ($missing) {
+            $error = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Required'),
+              pht('Document content is required.'),
+              nonempty(last($xactions), null));
+
+            $error->setIsMissingFieldError(true);
+            $errors[] = $error;
+          } else if ($this->getProcessContentVersionError()) {
+            $error = $this->validateContentVersion($object, $type, $xaction);
+            if ($error) {
+              $this->setProcessContentVersionError(false);
+              $errors[] = $error;
+            }
+          }
+          break;
+
+        case PhrictionTransaction::TYPE_MOVE_TO:
+          $source_document = $xaction->getNewValue();
+          switch ($source_document->getStatus()) {
+            case PhrictionDocumentStatus::STATUS_DELETED:
+              $e_text = pht('A deleted document can not be moved.');
+              break;
+            case PhrictionDocumentStatus::STATUS_MOVED:
+              $e_text = pht('A moved document can not be moved again.');
+              break;
+            case PhrictionDocumentStatus::STATUS_STUB:
+              $e_text = pht('A stub document can not be moved.');
+              break;
+            default:
+              $e_text = null;
+              break;
+          }
+
+          if ($e_text) {
+            $error = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Can not move document.'),
+              $e_text,
+              $xaction);
+            $errors[] = $error;
+          }
+
+          // NOTE: We use the ominpotent user because we can't let users
+          // overwrite documents even if they can't see them.
+          $target_document = id(new PhrictionDocumentQuery())
+            ->setViewer(PhabricatorUser::getOmnipotentUser())
+            ->withSlugs(array($object->getSlug()))
+            ->needContent(true)
+            ->executeOne();
+
+          // Considering to overwrite existing docs? Nuke this!
+          $exists = PhrictionDocumentStatus::STATUS_EXISTS;
+          if ($target_document && $target_document->getStatus() == $exists) {
+            $error = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Can not move document.'),
+              pht('Can not overwrite existing target document.'),
+              $xaction);
+            $errors[] = $error;
+          }
+          break;
+
+        case PhrictionTransaction::TYPE_DELETE:
+          switch ($object->getStatus()) {
+            case PhrictionDocumentStatus::STATUS_DELETED:
+              $e_text = pht('An already deleted document can not be deleted.');
+              break;
+            case PhrictionDocumentStatus::STATUS_MOVED:
+              $e_text = pht('A moved document can not be deleted.');
+              break;
+            case PhrictionDocumentStatus::STATUS_STUB:
+              $e_text = pht('A stub document can not be deleted.');
+              break;
+            default:
+              break 2;
+          }
+
+          $error = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Can not delete document.'),
+            $e_text,
+            $xaction);
+          $errors[] = $error;
+          break;
+      }
+    }
+
+    return $errors;
+  }
+
+  private function validateContentVersion(
+    PhabricatorLiskDAO $object,
+    $type,
+    PhabricatorApplicationTransaction $xaction) {
+
+    $error = null;
+    if ($this->getContentVersion() &&
+       ($object->getContent()->getVersion() != $this->getContentVersion())) {
+      $error = new PhabricatorApplicationTransactionValidationError(
+        $type,
+        pht('Edit Conflict'),
+        pht(
+          'Another user made changes to this document after you began '.
+          'editing it. Do you want to overwrite their changes? '.
+          '(If you choose to overwrite their changes, you should review '.
+          'the document edit history to see what you overwrote, and '.
+          'then make another edit to merge the changes if necessary.)'),
+        $xaction);
+    }
+    return $error;
+  }
+  protected function requireCapabilities(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    /*
+     * New objects have a special case. If a user can't see
+     *   x/y
+     * then definitely don't let them make some
+     *   x/y/z
+     * We need to load the direct parent to handle this case.
+     */
+    if ($this->getIsNewObject()) {
+      $actor = $this->requireActor();
+      $parent_doc = null;
+      $ancestral_slugs = PhabricatorSlug::getAncestry($object->getSlug());
+      // No ancestral slugs is "/"; the first person gets to play with "/".
+      if ($ancestral_slugs) {
+        $parent = end($ancestral_slugs);
+        $parent_doc = id(new PhrictionDocumentQuery())
+          ->setViewer($actor)
+          ->withSlugs(array($parent))
+          ->executeOne();
+        // If the $actor can't see the $parent_doc then they can't create
+        // the child $object; throw a policy exception.
+        if (!$parent_doc) {
+          id(new PhabricatorPolicyFilter())
+            ->setViewer($actor)
+            ->raisePolicyExceptions(true)
+            ->rejectObject(
+              $object,
+              $object->getEditPolicy(),
+              PhabricatorPolicyCapability::CAN_EDIT);
+        }
+
+        // If the $actor can't edit the $parent_doc then they can't create
+        // the child $object; throw a policy exception.
+        if (!PhabricatorPolicyFilter::hasCapability(
+          $actor,
+          $parent_doc,
+          PhabricatorPolicyCapability::CAN_EDIT)) {
+          id(new PhabricatorPolicyFilter())
+            ->setViewer($actor)
+            ->raisePolicyExceptions(true)
+            ->rejectObject(
+              $object,
+              $object->getEditPolicy(),
+              PhabricatorPolicyCapability::CAN_EDIT);
+        }
+      }
+    }
+    return parent::requireCapabilities($object, $xaction);
   }
 
   protected function supportsSearch() {
@@ -279,14 +653,12 @@ final class PhrictionTransactionEditor
   private function buildNewContentTemplate(
     PhrictionDocument $document) {
 
-    $new_content = new PhrictionContent();
-    $new_content->setSlug($document->getSlug());
-    $new_content->setAuthorPHID($this->getActor()->getPHID());
-    $new_content->setChangeType(PhrictionChangeType::CHANGE_EDIT);
-
-    $new_content->setTitle($this->getOldContent()->getTitle());
-    $new_content->setContent($this->getOldContent()->getContent());
-
+    $new_content = id(new PhrictionContent())
+      ->setSlug($document->getSlug())
+      ->setAuthorPHID($this->getActor()->getPHID())
+      ->setChangeType(PhrictionChangeType::CHANGE_EDIT)
+      ->setTitle($this->getOldContent()->getTitle())
+      ->setContent($this->getOldContent()->getContent());
     if (strlen($this->getDescription())) {
       $new_content->setDescription($this->getDescription());
     }

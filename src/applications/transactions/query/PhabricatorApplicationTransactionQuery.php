@@ -119,7 +119,7 @@ abstract class PhabricatorApplicationTransactionQuery
 
     // NOTE: We have to do this after loading objects, because the objects
     // may help determine which handles are required (for example, in the case
-    // of custom fields.
+    // of custom fields).
 
     if ($this->needHandles) {
       $phids = array();

@@ -121,9 +121,6 @@ final class PhrictionSearchEngine
     $phids = array();
     foreach ($documents as $document) {
       $content = $document->getContent();
-      if ($document->hasProject()) {
-        $phids[] = $document->getProject()->getPHID();
-      }
       $phids[] = $content->getAuthorPHID();
     }
 
@@ -160,11 +157,6 @@ final class PhrictionSearchEngine
         ->setHref($slug_uri)
         ->addByline($byline)
         ->addIcon('none', $updated);
-
-      if ($document->hasProject()) {
-        $item->addAttribute(
-          $handles[$document->getProject()->getPHID()]->renderLink());
-      }
 
       $item->addAttribute($slug_uri);
 

@@ -242,7 +242,7 @@ final class PHUIFeedStoryView extends AphrontView {
       $body = phutil_tag(
         'div',
         array(
-          'class' => 'phui-feed-story-body',
+          'class' => 'phui-feed-story-body phabricator-remarkup',
         ),
         $body_content);
     }

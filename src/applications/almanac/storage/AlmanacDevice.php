@@ -2,13 +2,21 @@
 
 final class AlmanacDevice
   extends AlmanacDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorCustomFieldInterface,
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorProjectInterface,
+    AlmanacPropertyInterface {
 
   protected $name;
   protected $nameIndex;
   protected $mailKey;
   protected $viewPolicy;
   protected $editPolicy;
+
+  private $customFields = self::ATTACHABLE;
+  private $almanacProperties = self::ATTACHABLE;
 
   public static function initializeNewDevice() {
     return id(new AlmanacDevice())
@@ -57,6 +65,37 @@ final class AlmanacDevice
   }
 
 
+/* -(  AlmanacPropertyInterface  )------------------------------------------- */
+
+
+  public function attachAlmanacProperties(array $properties) {
+    assert_instances_of($properties, 'AlmanacProperty');
+    $this->almanacProperties = mpull($properties, null, 'getFieldName');
+    return $this;
+  }
+
+  public function getAlmanacProperties() {
+    return $this->assertAttached($this->almanacProperties);
+  }
+
+  public function hasAlmanacProperty($key) {
+    $this->assertAttached($this->almanacProperties);
+    return isset($this->almanacProperties[$key]);
+  }
+
+  public function getAlmanacProperty($key) {
+    return $this->assertAttachedKey($this->almanacProperties, $key);
+  }
+
+  public function getAlmanacPropertyValue($key, $default = null) {
+    if ($this->hasAlmanacProperty($key)) {
+      return $this->getAlmanacProperty($key)->getFieldValue();
+    } else {
+      return $default;
+    }
+  }
+
+
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
 
@@ -82,6 +121,43 @@ final class AlmanacDevice
 
   public function describeAutomaticCapability($capability) {
     return null;
+  }
+
+
+/* -(  PhabricatorCustomFieldInterface  )------------------------------------ */
+
+
+  public function getCustomFieldSpecificationForRole($role) {
+    return array();
+  }
+
+  public function getCustomFieldBaseClass() {
+    return 'AlmanacCustomField';
+  }
+
+  public function getCustomFields() {
+    return $this->assertAttached($this->customFields);
+  }
+
+  public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
+    $this->customFields = $fields;
+    return $this;
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new AlmanacDeviceEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new AlmanacDeviceTransaction();
   }
 
 }
