@@ -47,7 +47,25 @@ final class ManiphestTaskListView extends ManiphestView {
     foreach ($this->tasks as $task) {
       $item = new PHUIObjectItemView();
       $item->setObjectName('T'.$task->getID());
-      $item->setHeader($task->getTitle());
+      $field_list = PhabricatorCustomField::getObjectFields(
+        $task,
+        PhabricatorCustomField::ROLE_VIEW);
+      $field_list
+        ->setViewer($this->getUser())
+        ->readFieldsFromStorage($task);
+      $completion_date = null;
+      foreach ($field_list->getFields() as $key => $field) {
+        if ($key == 'std:maniphest:bnch:completion-date') {
+          $value = $field->renderPropertyViewValue([]);
+          $completion_date = $value;
+        }
+      }
+      if ($completion_date) {
+        $header = '['.$completion_date.'] '.$task->getTitle();
+      } else {
+        $header = $task->getTitle();
+      }
+      $item->setHeader($header);
       $item->setHref('/T'.$task->getID());
 
       if ($task->getOwnerPHID()) {
