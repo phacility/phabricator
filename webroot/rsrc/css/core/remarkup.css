@@ -159,6 +159,10 @@
   background-color: #F8F9FC;
 }
 
+.phabricator-remarkup blockquote blockquote {
+  background-color: rgba(175,175,175, .1);
+}
+
 .phabricator-remarkup blockquote em {
   font-style: normal;
 }
