@@ -50,10 +50,14 @@ final class PhabricatorAuthSSHKeyQuery
 
     foreach ($keys as $key => $ssh_key) {
       $object = idx($objects, $ssh_key->getObjectPHID());
-      if (!$object) {
+
+      // We must have an object, and that object must be a valid object for
+      // SSH keys.
+      if (!$object || !($object instanceof PhabricatorSSHPublicKeyInterface)) {
         unset($keys[$key]);
         continue;
       }
+
       $ssh_key->attachObject($object);
     }
 

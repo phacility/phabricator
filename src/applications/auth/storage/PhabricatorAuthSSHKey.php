@@ -56,7 +56,7 @@ final class PhabricatorAuthSSHKey
     return $this->assertAttached($this->object);
   }
 
-  public function attachObject($object) {
+  public function attachObject(PhabricatorSSHPublicKeyInterface $object) {
     $this->object = $object;
     return $this;
   }
