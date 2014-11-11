@@ -32,51 +32,11 @@ final class PhabricatorSettingsPanelSSHKeys
       ->withObjectPHIDs(array($user->getPHID()))
       ->execute();
 
-    $rows = array();
-    foreach ($keys as $key) {
-      $rows[] = array(
-        javelin_tag(
-          'a',
-          array(
-            'href' => '/auth/sshkey/edit/'.$key->getID().'/',
-            'sigil' => 'workflow',
-          ),
-          $key->getName()),
-        $key->getKeyComment(),
-        $key->getKeyType(),
-        phabricator_date($key->getDateCreated(), $viewer),
-        phabricator_time($key->getDateCreated(), $viewer),
-        javelin_tag(
-          'a',
-          array(
-            'href' => '/auth/sshkey/delete/'.$key->getID().'/',
-            'class' => 'small grey button',
-            'sigil' => 'workflow',
-          ),
-          pht('Delete')),
-      );
-    }
-
-    $table = new AphrontTableView($rows);
-    $table->setNoDataString(pht("You haven't added any SSH Public Keys."));
-    $table->setHeaders(
-      array(
-        pht('Name'),
-        pht('Comment'),
-        pht('Type'),
-        pht('Created'),
-        pht('Time'),
-        '',
-      ));
-    $table->setColumnClasses(
-      array(
-        'wide pri',
-        '',
-        '',
-        '',
-        'right',
-        'action',
-      ));
+    $table = id(new PhabricatorAuthSSHKeyTableView())
+      ->setUser($viewer)
+      ->setKeys($keys)
+      ->setCanEdit(true)
+      ->setNoDataString("You haven't added any SSH Public Keys.");
 
     $panel = new PHUIObjectBoxView();
     $header = new PHUIHeaderView();

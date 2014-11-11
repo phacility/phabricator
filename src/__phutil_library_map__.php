@@ -1323,6 +1323,7 @@ phutil_register_library_map(array(
     'PhabricatorAuthSSHKeyEditController' => 'applications/auth/controller/PhabricatorAuthSSHKeyEditController.php',
     'PhabricatorAuthSSHKeyGenerateController' => 'applications/auth/controller/PhabricatorAuthSSHKeyGenerateController.php',
     'PhabricatorAuthSSHKeyQuery' => 'applications/auth/query/PhabricatorAuthSSHKeyQuery.php',
+    'PhabricatorAuthSSHKeyTableView' => 'applications/auth/view/PhabricatorAuthSSHKeyTableView.php',
     'PhabricatorAuthSSHPublicKey' => 'applications/auth/sshkey/PhabricatorAuthSSHPublicKey.php',
     'PhabricatorAuthSession' => 'applications/auth/storage/PhabricatorAuthSession.php',
     'PhabricatorAuthSessionEngine' => 'applications/auth/engine/PhabricatorAuthSessionEngine.php',
@@ -3011,6 +3012,7 @@ phutil_register_library_map(array(
       'PhabricatorCustomFieldInterface',
       'PhabricatorApplicationTransactionInterface',
       'PhabricatorProjectInterface',
+      'PhabricatorSSHPublicKeyInterface',
       'AlmanacPropertyInterface',
     ),
     'AlmanacDeviceController' => 'AlmanacController',
@@ -4396,6 +4398,7 @@ phutil_register_library_map(array(
     'PhabricatorAuthSSHKeyEditController' => 'PhabricatorAuthSSHKeyController',
     'PhabricatorAuthSSHKeyGenerateController' => 'PhabricatorAuthSSHKeyController',
     'PhabricatorAuthSSHKeyQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
+    'PhabricatorAuthSSHKeyTableView' => 'AphrontView',
     'PhabricatorAuthSSHPublicKey' => 'Phobject',
     'PhabricatorAuthSession' => array(
       'PhabricatorAuthDAO',

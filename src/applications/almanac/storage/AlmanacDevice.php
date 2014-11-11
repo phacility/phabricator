@@ -7,6 +7,7 @@ final class AlmanacDevice
     PhabricatorCustomFieldInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorProjectInterface,
+    PhabricatorSSHPublicKeyInterface,
     AlmanacPropertyInterface {
 
   protected $name;
@@ -159,5 +160,14 @@ final class AlmanacDevice
   public function getApplicationTransactionTemplate() {
     return new AlmanacDeviceTransaction();
   }
+
+
+/* -(  PhabricatorSSHPublicKeyInterface  )----------------------------------- */
+
+
+  public function getSSHPublicKeyManagementURI(PhabricatorUser $viewer) {
+    return $this->getURI();
+  }
+
 
 }

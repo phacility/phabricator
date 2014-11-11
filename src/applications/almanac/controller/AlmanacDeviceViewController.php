@@ -57,6 +57,7 @@ final class AlmanacDeviceViewController
         $box,
         $interfaces,
         $this->buildAlmanacPropertiesTable($device),
+        $this->buildSSHKeysTable($device),
         $xaction_view,
       ),
       array(
@@ -139,6 +140,67 @@ final class AlmanacDeviceViewController
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->appendChild($table);
+  }
+
+  private function buildSSHKeysTable(AlmanacDevice $device) {
+    $viewer = $this->getViewer();
+    $id = $device->getID();
+    $device_phid = $device->getPHID();
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $device,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $keys = id(new PhabricatorAuthSSHKeyQuery())
+      ->setViewer($viewer)
+      ->withObjectPHIDs(array($device_phid))
+      ->execute();
+
+    $table = id(new PhabricatorAuthSSHKeyTableView())
+      ->setUser($viewer)
+      ->setKeys($keys)
+      ->setCanEdit($can_edit)
+      ->setNoDataString(pht('This device has no associated SSH public keys.'));
+
+    try {
+      PhabricatorSSHKeyGenerator::assertCanGenerateKeypair();
+      $can_generate = true;
+    } catch (Exception $ex) {
+      $can_generate = false;
+    }
+
+    $generate_uri = '/auth/sshkey/generate/?objectPHID='.$device_phid;
+    $upload_uri = '/auth/sshkey/upload/?objectPHID='.$device_phid;
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('SSH Public Keys'))
+      ->addActionLink(
+        id(new PHUIButtonView())
+          ->setTag('a')
+          ->setHref($generate_uri)
+          ->setWorkflow(true)
+          ->setDisabled(!$can_edit || !$can_generate)
+          ->setText(pht('Generate Keypair'))
+          ->setIcon(
+            id(new PHUIIconView())
+              ->setIconFont('fa-lock')))
+      ->addActionLink(
+        id(new PHUIButtonView())
+          ->setTag('a')
+          ->setHref($upload_uri)
+          ->setWorkflow(true)
+          ->setDisabled(!$can_edit)
+          ->setText(pht('Upload Public Key'))
+          ->setIcon(
+            id(new PHUIIconView())
+              ->setIconFont('fa-upload')));
+
+    return id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->appendChild($table);
+
+
   }
 
 }
