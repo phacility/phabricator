@@ -55,7 +55,7 @@ final class ManiphestTaskListView extends ManiphestView {
         ->readFieldsFromStorage($task);
       $completion_date = null;
       foreach ($field_list->getFields() as $key => $field) {
-        if ($key == 'std:maniphest:bnch:completion-date') {
+        if ($key == 'std:maniphest:benchling:completion-date') {
           $value = $field->renderPropertyViewValue([]);
           $completion_date = $value;
         }
