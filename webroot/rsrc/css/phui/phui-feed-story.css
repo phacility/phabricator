@@ -35,6 +35,10 @@
   overflow: hidden;
 }
 
+.phui-feed-story-body.phabricator-remarkup {
+  line-height: inherit;
+}
+
 .phui-feed-story-foot {
   font-size: 11px;
   background: {$lightgreybackground};
@@ -47,8 +51,7 @@
   color: {$greytext};
 }
 
-.phui-feed-story-foot .phui-icon-view,
-.phui-feed-story-oneline-foot .phui-icon-view {
+.phui-feed-story-foot .phui-icon-view {
   float: left;
   display: inline-block;
   margin-right: 5px;
@@ -93,21 +96,4 @@
 
 .phui-feed-story-action-list .phui-icon-view {
   display: block;
-}
-
-.phui-feed-story-oneline .phui-feed-story-head {
-  padding: 8px;
-}
-
-.phui-feed-story-oneline .phui-feed-story-body {
-  padding: 0;
-}
-
-.phui-feed-story-oneline-foot,
-.phui-feed-story-oneline-foot a {
-  font-size: 11px;
-  color: {$lightgreytext};
-  margin-top: 2px;
-  line-height: 14px;
-  font-weight: normal;
 }
