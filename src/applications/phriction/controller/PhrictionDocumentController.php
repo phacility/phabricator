@@ -358,33 +358,24 @@ final class PhrictionDocumentController
   }
 
   private function renderDocumentChildren($slug) {
-    $document_dao = new PhrictionDocument();
-    $content_dao = new PhrictionContent();
-    $conn = $document_dao->establishConnection('r');
 
-    $limit = 250;
     $d_child = PhabricatorSlug::getDepth($slug) + 1;
     $d_grandchild = PhabricatorSlug::getDepth($slug) + 2;
+    $limit = 250;
 
-    // Select children and grandchildren.
-    $children = queryfx_all(
-      $conn,
-      'SELECT d.slug, d.depth, c.title FROM %T d JOIN %T c
-        ON d.contentID = c.id
-        WHERE d.slug LIKE %> AND d.depth IN (%d, %d)
-          AND d.status IN (%Ld)
-        ORDER BY d.depth, c.title LIMIT %d',
-      $document_dao->getTableName(),
-      $content_dao->getTableName(),
-      ($slug == '/' ? '' : $slug),
-      $d_child,
-      $d_grandchild,
-      array(
+    $query = id(new PhrictionDocumentQuery())
+      ->setViewer($this->getRequest()->getUser())
+      ->withDepths(array($d_child, $d_grandchild))
+      ->withSlugPrefix($slug == '/' ? '' : $slug)
+      ->withStatuses(array(
         PhrictionDocumentStatus::STATUS_EXISTS,
         PhrictionDocumentStatus::STATUS_STUB,
-      ),
-      $limit);
+      ))
+      ->setLimit($limit)
+      ->setOrder(PhrictionDocumentQuery::ORDER_HIERARCHY)
+      ->needContent(true);
 
+    $children = $query->execute();
     if (!$children) {
       return;
     }
@@ -405,7 +396,7 @@ final class PhrictionDocumentController
     if (count($children) == $limit) {
       $more_children = true;
       foreach ($children as $child) {
-        if ($child['depth'] == $d_grandchild) {
+        if ($child->getDepth() == $d_grandchild) {
           $more_children = false;
         }
       }
@@ -415,24 +406,30 @@ final class PhrictionDocumentController
       $more_children = false;
     }
 
-    $grandchildren = array();
+    $children_dicts = array();
+    $grandchildren_dicts = array();
     foreach ($children as $key => $child) {
-      if ($child['depth'] == $d_child) {
+      $child_dict = array(
+        'slug' => $child->getSlug(),
+        'depth' => $child->getDepth(),
+        'title' => $child->getContent()->getTitle(),);
+      if ($child->getDepth() == $d_child) {
+        $children_dicts[] = $child_dict;
         continue;
       } else {
         unset($children[$key]);
         if ($show_grandchildren) {
-          $ancestors = PhabricatorSlug::getAncestry($child['slug']);
-          $grandchildren[end($ancestors)][] = $child;
+          $ancestors = PhabricatorSlug::getAncestry($child->getSlug());
+          $grandchildren_dicts[end($ancestors)][] = $child_dict;
         }
       }
     }
 
     // Fill in any missing children.
-    $known_slugs = ipull($children, null, 'slug');
-    foreach ($grandchildren as $slug => $ignored) {
+    $known_slugs = mpull($children, null, 'getSlug');
+    foreach ($grandchildren_dicts as $slug => $ignored) {
       if (empty($known_slugs[$slug])) {
-        $children[] = array(
+        $children_dicts[] = array(
           'slug'    => $slug,
           'depth'   => $d_child,
           'title'   => PhabricatorSlug::getDefaultTitle($slug),
@@ -441,13 +438,13 @@ final class PhrictionDocumentController
       }
     }
 
-    $children = isort($children, 'title');
+    $children_dicts = isort($children_dicts, 'title');
 
     $list = array();
-    foreach ($children as $child) {
+    foreach ($children_dicts as $child) {
       $list[] = hsprintf('<li>');
       $list[] = $this->renderChildDocumentLink($child);
-      $grand = idx($grandchildren, $child['slug'], array());
+      $grand = idx($grandchildren_dicts, $child['slug'], array());
       if ($grand) {
         $list[] = hsprintf('<ul>');
         foreach ($grand as $grandchild) {
