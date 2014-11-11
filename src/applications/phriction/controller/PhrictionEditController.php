@@ -62,17 +62,6 @@ final class PhrictionEditController
         $content = $document->getContent();
         $current_version = $content->getVersion();
       } else {
-        if (PhrictionDocument::isProjectSlug($slug)) {
-          $project = id(new PhabricatorProjectQuery())
-            ->setViewer($user)
-            ->withPhrictionSlugs(array(
-              PhrictionDocument::getProjectSlugIdentifier($slug),
-            ))
-            ->executeOne();
-          if (!$project) {
-            return new Aphront404Response();
-          }
-        }
         $document = PhrictionDocument::initializeNewDocument($user, $slug);
         $content = $document->getContent();
       }

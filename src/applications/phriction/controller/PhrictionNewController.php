@@ -30,25 +30,6 @@ final class PhrictionNewController extends PhrictionController {
           ->addSubmitButton(pht('Edit Document'));
 
         return id(new AphrontDialogResponse())->setDialog($dialog);
-      } else if (PhrictionDocument::isProjectSlug($slug)) {
-        $project = id(new PhabricatorProjectQuery())
-          ->setViewer($user)
-          ->withPhrictionSlugs(array(
-            PhrictionDocument::getProjectSlugIdentifier($slug),
-          ))
-          ->executeOne();
-        if (!$project) {
-          $dialog = new AphrontDialogView();
-          $dialog->setSubmitURI('/w/')
-              ->setTitle(pht('Oops!'))
-              ->setUser($user)
-              ->appendChild(pht(
-                  'You cannot create wiki pages under "projects/",
-                  because they are reserved as project pages.
-                  Create a new project with this name first.'))
-              ->addCancelButton('/w/', 'Okay');
-          return id(new AphrontDialogResponse())->setDialog($dialog);
-        }
       }
 
       $uri  = '/phriction/edit/?slug='.$slug;

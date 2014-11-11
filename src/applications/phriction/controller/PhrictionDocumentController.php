@@ -40,17 +40,6 @@ final class PhrictionDocumentController
 
       $document = new PhrictionDocument();
 
-      if (PhrictionDocument::isProjectSlug($slug)) {
-        $project = id(new PhabricatorProjectQuery())
-          ->setViewer($user)
-          ->withPhrictionSlugs(array(
-            PhrictionDocument::getProjectSlugIdentifier($slug),
-          ))
-          ->executeOne();
-        if (!$project) {
-          return new Aphront404Response();
-        }
-      }
       $create_uri = '/phriction/edit/?slug='.$slug;
 
       $notice = new AphrontErrorView();
@@ -258,33 +247,9 @@ final class PhrictionDocumentController
       ->setUser($viewer)
       ->setObject($document);
 
-    $project_phid = null;
-    if (PhrictionDocument::isProjectSlug($slug)) {
-      $project = id(new PhabricatorProjectQuery())
-        ->setViewer($viewer)
-        ->withPhrictionSlugs(array(
-          PhrictionDocument::getProjectSlugIdentifier($slug),
-        ))
-        ->executeOne();
-      if ($project) {
-        $project_phid = $project->getPHID();
-      }
-    }
-
-    $phids = array_filter(
-      array(
-        $content->getAuthorPHID(),
-        $project_phid,
-      ));
+    $phids = array($content->getAuthorPHID());
 
     $this->loadHandles($phids);
-
-    $project_info = null;
-    if ($project_phid) {
-      $view->addProperty(
-        pht('Project Info'),
-        $this->getHandle($project_phid)->renderLink());
-    }
 
     $view->addProperty(
       pht('Last Author'),
