@@ -40,6 +40,7 @@ abstract class HeraldAdapter {
   const FIELD_COMMITTER_RAW          = 'committer-raw';
   const FIELD_IS_NEW_OBJECT          = 'new-object';
   const FIELD_TASK_PRIORITY          = 'taskpriority';
+  const FIELD_TASK_STATUS            = 'taskstatus';
   const FIELD_ARCANIST_PROJECT       = 'arcanist-project';
   const FIELD_PUSHER_IS_COMMITTER    = 'pusher-is-committer';
   const FIELD_PATH                   = 'path';
@@ -96,6 +97,7 @@ abstract class HeraldAdapter {
   const VALUE_USER_OR_PROJECT = 'userorproject';
   const VALUE_BUILD_PLAN      = 'buildplan';
   const VALUE_TASK_PRIORITY   = 'taskpriority';
+  const VALUE_TASK_STATUS     = 'taskstatus';
   const VALUE_ARCANIST_PROJECT = 'arcanistprojects';
   const VALUE_LEGAL_DOCUMENTS = 'legaldocuments';
 
@@ -311,6 +313,7 @@ abstract class HeraldAdapter {
       self::FIELD_COMMITTER_RAW => pht('Raw committer name'),
       self::FIELD_IS_NEW_OBJECT => pht('Is newly created?'),
       self::FIELD_TASK_PRIORITY => pht('Task priority'),
+      self::FIELD_TASK_STATUS => pht('Task status'),
       self::FIELD_ARCANIST_PROJECT => pht('Arcanist Project'),
       self::FIELD_PUSHER_IS_COMMITTER => pht('Pusher same as committer'),
       self::FIELD_PATH => pht('Path'),
@@ -366,6 +369,7 @@ abstract class HeraldAdapter {
       case self::FIELD_REVIEWER:
       case self::FIELD_PUSHER:
       case self::FIELD_TASK_PRIORITY:
+      case self::FIELD_TASK_STATUS:
       case self::FIELD_ARCANIST_PROJECT:
         return array(
           self::CONDITION_IS_ANY,
@@ -843,6 +847,8 @@ abstract class HeraldAdapter {
             return self::VALUE_REPOSITORY;
           case self::FIELD_TASK_PRIORITY:
             return self::VALUE_TASK_PRIORITY;
+          case self::FIELD_TASK_STATUS:
+            return self::VALUE_TASK_STATUS;
           case self::FIELD_ARCANIST_PROJECT:
             return self::VALUE_ARCANIST_PROJECT;
           default:
@@ -1157,6 +1163,15 @@ abstract class HeraldAdapter {
         $priority_map = ManiphestTaskPriority::getTaskPriorityMap();
         foreach ($value as $index => $val) {
           $name = idx($priority_map, $val);
+          if ($name) {
+            $value[$index] = $name;
+          }
+        }
+        break;
+      case self::FIELD_TASK_STATUS:
+        $status_map = ManiphestTaskStatus::getTaskStatusMap();
+        foreach ($value as $index => $val) {
+          $name = idx($status_map, $val);
           if ($name) {
             $value[$index] = $name;
           }

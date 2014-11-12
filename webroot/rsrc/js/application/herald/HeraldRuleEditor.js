@@ -219,6 +219,7 @@ JX.install('HeraldRuleEditor', {
         case 'userorproject':
         case 'buildplan':
         case 'taskpriority':
+        case 'taskstatus':
         case 'arcanistprojects':
         case 'legaldocuments':
           var tokenizer = this._newTokenizer(type);
