@@ -38,7 +38,7 @@ final class PhrictionDocumentController
 
     if (!$document) {
 
-      $document = new PhrictionDocument();
+      $document = PhrictionDocument::initializeNewDocument($user, $slug);
 
       $create_uri = '/phriction/edit/?slug='.$slug;
 
