@@ -10,6 +10,7 @@ final class PhrictionTransactionEditor
   private $skipAncestorCheck;
   private $contentVersion;
   private $processContentVersionError = true;
+  private $heraldEmailPHIDs = array();
 
   public function setDescription($description) {
     $this->description = $description;
@@ -359,6 +360,16 @@ final class PhrictionTransactionEditor
     );
   }
 
+  protected function getMailCC(PhabricatorLiskDAO $object) {
+    $phids = array();
+
+    foreach ($this->heraldEmailPHIDs as $phid) {
+      $phids[] = $phid;
+    }
+
+    return $phids;
+  }
+
   public function getMailTagsMap() {
     return array(
       PhrictionTransaction::MAILTAG_TITLE =>
@@ -647,7 +658,35 @@ final class PhrictionTransactionEditor
   protected function shouldApplyHeraldRules(
     PhabricatorLiskDAO $object,
     array $xactions) {
-    return false;
+    return true;
+  }
+
+  protected function buildHeraldAdapter(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    return id(new PhrictionDocumentHeraldAdapter())
+      ->setDocument($object);
+  }
+
+  protected function didApplyHeraldRules(
+    PhabricatorLiskDAO $object,
+    HeraldAdapter $adapter,
+    HeraldTranscript $transcript) {
+
+    $xactions = array();
+
+    $cc_phids = $adapter->getCcPHIDs();
+    if ($cc_phids) {
+      $value = array_fuse($cc_phids);
+      $xactions[] = id(new PhrictionTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+        ->setNewValue(array('+' => $value));
+    }
+
+    $this->heraldEmailPHIDs = $adapter->getEmailPHIDs();
+
+    return $xactions;
   }
 
   private function buildNewContentTemplate(

@@ -6,7 +6,8 @@ final class PhrictionDocument extends PhrictionDAO
     PhabricatorSubscribableInterface,
     PhabricatorFlaggableInterface,
     PhabricatorTokenReceiverInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorApplicationTransactionInterface {
 
   protected $slug;
   protected $depth;
@@ -199,6 +200,22 @@ final class PhrictionDocument extends PhrictionDAO
   public function shouldAllowSubscription($phid) {
     return true;
   }
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhrictionTransactionEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhrictionTransaction();
+  }
+
 
 
 /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */

@@ -42,6 +42,7 @@ abstract class HeraldAdapter {
   const FIELD_TASK_PRIORITY          = 'taskpriority';
   const FIELD_ARCANIST_PROJECT       = 'arcanist-project';
   const FIELD_PUSHER_IS_COMMITTER    = 'pusher-is-committer';
+  const FIELD_PATH                   = 'path';
 
   const CONDITION_CONTAINS        = 'contains';
   const CONDITION_NOT_CONTAINS    = '!contains';
@@ -312,6 +313,7 @@ abstract class HeraldAdapter {
       self::FIELD_TASK_PRIORITY => pht('Task priority'),
       self::FIELD_ARCANIST_PROJECT => pht('Arcanist Project'),
       self::FIELD_PUSHER_IS_COMMITTER => pht('Pusher same as committer'),
+      self::FIELD_PATH => pht('Path'),
     ) + $this->getCustomFieldNameMap();
   }
 
@@ -353,6 +355,7 @@ abstract class HeraldAdapter {
       case self::FIELD_BODY:
       case self::FIELD_COMMITTER_RAW:
       case self::FIELD_AUTHOR_RAW:
+      case self::FIELD_PATH:
         return array(
           self::CONDITION_CONTAINS,
           self::CONDITION_NOT_CONTAINS,
