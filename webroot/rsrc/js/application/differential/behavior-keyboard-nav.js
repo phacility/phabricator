@@ -242,6 +242,10 @@ JX.behavior('differential-keyboard-navigation', function(config) {
 
 
   function inline_op(node, op) {
+    // nothing selected
+    if (!node) {
+      return;
+    }
     if (!JX.DOM.scry(node, 'a', 'differential-inline-' + op)) {
       // No link for this operation, e.g. editing a comment you can't edit.
       return;
