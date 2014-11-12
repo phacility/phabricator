@@ -537,13 +537,24 @@ final class PhrictionTransactionEditor
             ->needContent(true)
             ->executeOne();
 
-          // Considering to overwrite existing docs? Nuke this!
+          // Prevent overwrites and no-op moves.
           $exists = PhrictionDocumentStatus::STATUS_EXISTS;
-          if ($target_document && $target_document->getStatus() == $exists) {
+          if ($target_document) {
+            if ($target_document->getSlug() == $source_document->getSlug()) {
+              $message = pht(
+                'You can not move a document to its existing location. '.
+                'Choose a different location to move the document to.');
+            } else if ($target_document->getStatus() == $exists) {
+              $message = pht(
+                'You can not move this document there, because it would '.
+                'overwrite an existing document which is already at that '.
+                'location. Move or delete the existing document first.');
+            }
+
             $error = new PhabricatorApplicationTransactionValidationError(
               $type,
-              pht('Can not move document.'),
-              pht('Can not overwrite existing target document.'),
+              pht('Invalid'),
+              $message,
               $xaction);
             $errors[] = $error;
           }

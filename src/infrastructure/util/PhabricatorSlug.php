@@ -8,7 +8,17 @@ final class PhabricatorSlug {
     $slug = phutil_utf8_strtolower($slug);
     $slug = preg_replace("@[\\x00-\\x19#%&+=\\\\?<> ]+@", '_', $slug);
     $slug = preg_replace('@_+@', '_', $slug);
-    $slug = trim($slug, '_');
+
+    // Remove leading and trailing underscores from each component, if the
+    // component has not been reduced to a single underscore. For example, "a?"
+    // converts to "a", but "??" converts to "_".
+    $parts = explode('/', $slug);
+    foreach ($parts as $key => $part) {
+      if ($part != '_') {
+        $parts[$key] = trim($part, '_');
+      }
+    }
+    $slug = implode('/', $parts);
 
     // Specifically rewrite these slugs. It's OK to have a slug like "a..b",
     // but not a slug which is only "..".

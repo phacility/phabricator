@@ -7,7 +7,7 @@ final class PhabricatorSlugTestCase extends PhabricatorTestCase {
       ''                  => '/',
       '/'                 => '/',
       '//'                => '/',
-      '&&&'               => '/',
+      '&&&'               => '_/',
       '/derp/'            => 'derp/',
       'derp'              => 'derp/',
       'derp//derp'        => 'derp/derp/',
@@ -27,6 +27,13 @@ final class PhabricatorSlugTestCase extends PhabricatorTestCase {
       '../a'              => 'dotdot/a/',
       'a/..'              => 'a/dotdot/',
       'a/../'             => 'a/dotdot/',
+      'a?'                => 'a/',
+      '??'                => '_/',
+      'a/?'               => 'a/_/',
+      '??/a/??'           => '_/a/_/',
+      'a/??/c'            => 'a/_/c/',
+      'a/?b/c'            => 'a/b/c/',
+      'a/b?/c'            => 'a/b/c/',
     );
 
     foreach ($slugs as $slug => $normal) {
