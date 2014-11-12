@@ -10,7 +10,6 @@ final class PhrictionDocumentQuery
   private $slugPrefix;
   private $statuses;
 
-
   private $needContent;
 
   private $status       = 'status-any';
@@ -72,7 +71,7 @@ final class PhrictionDocumentQuery
     $table = new PhrictionDocument();
     $conn_r = $table->establishConnection('r');
 
-    if ($this->order = self::ORDER_HIERARCHY) {
+    if ($this->order == self::ORDER_HIERARCHY) {
       $order_clause = $this->buildHierarchicalOrderClause($conn_r);
     } else {
       $order_clause = $this->buildOrderClause($conn_r);
@@ -80,7 +79,7 @@ final class PhrictionDocumentQuery
 
     $rows = queryfx_all(
       $conn_r,
-      'SELECT * FROM %T d %Q %Q %Q %Q',
+      'SELECT d.* FROM %T d %Q %Q %Q %Q',
       $table->getTableName(),
       $this->buildJoinClause($conn_r),
       $this->buildWhereClause($conn_r),
@@ -186,8 +185,8 @@ final class PhrictionDocumentQuery
   }
 
   private function buildJoinClause(AphrontDatabaseConnection $conn) {
-    $join = null;
-    if ($this->order = self::ORDER_HIERARCHY) {
+    $join = '';
+    if ($this->order == self::ORDER_HIERARCHY) {
       $content_dao = new PhrictionContent();
       $join = qsprintf(
         $conn,
