@@ -37,12 +37,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
         ->executeOne();
     }
 
-    $transactions = id(new ManiphestTransactionQuery())
-      ->setViewer($user)
-      ->withObjectPHIDs(array($task->getPHID()))
-      ->needComments(true)
-      ->execute();
-
     $field_list = PhabricatorCustomField::getObjectFields(
       $task,
       PhabricatorCustomField::ROLE_VIEW);
@@ -136,15 +130,11 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $engine = new PhabricatorMarkupEngine();
     $engine->setViewer($user);
     $engine->addObject($task, ManiphestTask::MARKUP_FIELD_DESCRIPTION);
-    foreach ($transactions as $modern_xaction) {
-      if ($modern_xaction->getComment()) {
-        $engine->addObject(
-          $modern_xaction->getComment(),
-          PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
-      }
-    }
 
-    $engine->process();
+    $timeline = $this->buildTransactionTimeline(
+      $task,
+      new ManiphestTransactionQuery(),
+      $engine);
 
     $resolution_types = ManiphestTaskStatus::getTaskStatusMap();
 
@@ -336,12 +326,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
         phutil_tag_div(
           'aphront-panel-preview-loading-text',
           pht('Loading preview...'))));
-
-    $timeline = id(new PhabricatorApplicationTransactionView())
-      ->setUser($user)
-      ->setObjectPHID($task->getPHID())
-      ->setTransactions($transactions)
-      ->setMarkupEngine($engine);
 
     $object_name = 'T'.$task->getID();
     $actions = $this->buildActionView($task);
