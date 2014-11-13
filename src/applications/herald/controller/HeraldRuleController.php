@@ -358,6 +358,14 @@ final class HeraldRuleController extends HeraldController {
             }
             $value = $value_map;
             break;
+          case HeraldAdapter::FIELD_TASK_STATUS:
+            $value_map = array();
+            $status_map = ManiphestTaskStatus::getTaskStatusMap();
+            foreach ($value as $status) {
+              $value_map[$status] = idx($status_map, $status);
+            }
+            $value = $value_map;
+            break;
           default:
             if (is_array($value)) {
               $value_map = array();
@@ -586,6 +594,7 @@ final class HeraldRuleController extends HeraldController {
       'repository' => new DiffusionRepositoryDatasource(),
       'legaldocuments' => new LegalpadDocumentDatasource(),
       'taskpriority' => new ManiphestTaskPriorityDatasource(),
+      'taskstatus' => new ManiphestTaskStatusDatasource(),
       'buildplan' => new HarbormasterBuildPlanDatasource(),
       'arcanistprojects' => new DiffusionArcanistProjectDatasource(),
       'package' => new PhabricatorOwnersPackageDatasource(),

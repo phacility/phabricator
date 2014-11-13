@@ -213,6 +213,11 @@ final class ManiphestTransaction
           return 'yellow';
         }
 
+      case self::TYPE_MERGED_FROM:
+        return 'orange';
+
+      case self::TYPE_MERGED_INTO:
+        return 'black';
     }
 
     return parent::getColor();
@@ -591,7 +596,7 @@ final class ManiphestTransaction
 
       case self::TYPE_MERGED_INTO:
         return pht(
-          '%s merged this task into %s.',
+          '%s closed this task as a duplicate of %s.',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($new));
         break;

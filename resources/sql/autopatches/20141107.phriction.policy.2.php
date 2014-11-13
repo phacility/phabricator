@@ -16,11 +16,16 @@ foreach (new LiskMigrationIterator($table) as $doc) {
     continue;
   }
 
-  // project documents get the project policy
-  if (PhrictionDocument::isProjectSlug($doc->getSlug())) {
+  // If this was previously a magical project wiki page (under projects/, but
+  // not projects/ itself) we need to apply the project policies. Otherwise,
+  // apply the default policies.
+  $slug = $doc->getSlug();
+  $slug = PhabricatorSlug::normalize($slug);
+  $prefix = 'projects/';
+  if (($slug != $prefix) && (strncmp($slug, $prefix, strlen($prefix)) === 0)) {
+    $parts = explode('/', $slug);
+    $project_slug = $parts[1].'/';
 
-    $project_slug =
-      PhrictionDocument::getProjectSlugIdentifier($doc->getSlug());
     $project_slugs = array($project_slug);
     $project = id(new PhabricatorProjectQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())

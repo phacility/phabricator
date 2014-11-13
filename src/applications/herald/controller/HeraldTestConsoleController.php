@@ -47,6 +47,9 @@ final class HeraldTestConsoleController extends HeraldController {
           } else if ($object instanceof PholioMock) {
             $adapter = id(new HeraldPholioMockAdapter())
               ->setMock($object);
+          } else if ($object instanceof PhrictionDocument) {
+            $adapter = id(new PhrictionDocumentHeraldAdapter())
+              ->setDocument($object);
           } else {
             throw new Exception('Can not build adapter for object!');
           }

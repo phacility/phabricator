@@ -6,6 +6,9 @@ final class PhrictionDocumentQuery
   private $ids;
   private $phids;
   private $slugs;
+  private $depths;
+  private $slugPrefix;
+  private $statuses;
 
   private $needContent;
 
@@ -17,6 +20,7 @@ final class PhrictionDocumentQuery
   private $order        = 'order-created';
   const ORDER_CREATED   = 'order-created';
   const ORDER_UPDATED   = 'order-updated';
+  const ORDER_HIERARCHY = 'order-hierarchy';
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -30,6 +34,21 @@ final class PhrictionDocumentQuery
 
   public function withSlugs(array $slugs) {
     $this->slugs = $slugs;
+    return $this;
+  }
+
+  public function withDepths(array $depths) {
+    $this->depths = $depths;
+    return $this;
+  }
+
+  public function  withSlugPrefix($slug_prefix) {
+    $this->slugPrefix = $slug_prefix;
+    return $this;
+  }
+
+  public function withStatuses(array $statuses) {
+    $this->statuses = $statuses;
     return $this;
   }
 
@@ -52,12 +71,19 @@ final class PhrictionDocumentQuery
     $table = new PhrictionDocument();
     $conn_r = $table->establishConnection('r');
 
+    if ($this->order == self::ORDER_HIERARCHY) {
+      $order_clause = $this->buildHierarchicalOrderClause($conn_r);
+    } else {
+      $order_clause = $this->buildOrderClause($conn_r);
+    }
+
     $rows = queryfx_all(
       $conn_r,
-      'SELECT * FROM %T %Q %Q %Q',
+      'SELECT d.* FROM %T d %Q %Q %Q %Q',
       $table->getTableName(),
+      $this->buildJoinClause($conn_r),
       $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
+      $order_clause,
       $this->buildLimitClause($conn_r));
 
     $documents = $table->loadAllFromArray($rows);
@@ -158,35 +184,67 @@ final class PhrictionDocumentQuery
     return $documents;
   }
 
+  private function buildJoinClause(AphrontDatabaseConnection $conn) {
+    $join = '';
+    if ($this->order == self::ORDER_HIERARCHY) {
+      $content_dao = new PhrictionContent();
+      $join = qsprintf(
+        $conn,
+        'JOIN %T c ON d.contentID = c.id',
+        $content_dao->getTableName());
+    }
+    return $join;
+  }
   protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
     if ($this->ids) {
       $where[] = qsprintf(
         $conn,
-        'id IN (%Ld)',
+        'd.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids) {
       $where[] = qsprintf(
         $conn,
-        'phid IN (%Ls)',
+        'd.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->slugs) {
       $where[] = qsprintf(
         $conn,
-        'slug IN (%Ls)',
+        'd.slug IN (%Ls)',
         $this->slugs);
+    }
+
+    if ($this->statuses) {
+      $where[] = qsprintf(
+        $conn,
+        'd.status IN (%Ld)',
+        $this->statuses);
+    }
+
+    if ($this->slugPrefix) {
+      $where[] = qsprintf(
+        $conn,
+        'd.slug LIKE %>',
+        $this->slugPrefix);
+    }
+
+    if ($this->depths) {
+      $where[] = qsprintf(
+        $conn,
+        'd.depth IN (%Ld)',
+        $this->depths);
     }
 
     switch ($this->status) {
       case self::STATUS_OPEN:
         $where[] = qsprintf(
           $conn,
-          'status NOT IN (%Ld)',
+          'd.status NOT IN (%Ld)',
           array(
             PhrictionDocumentStatus::STATUS_DELETED,
             PhrictionDocumentStatus::STATUS_MOVED,
@@ -196,7 +254,7 @@ final class PhrictionDocumentQuery
       case self::STATUS_NONSTUB:
         $where[] = qsprintf(
           $conn,
-          'status NOT IN (%Ld)',
+          'd.status NOT IN (%Ld)',
           array(
             PhrictionDocumentStatus::STATUS_MOVED,
             PhrictionDocumentStatus::STATUS_STUB,
@@ -213,12 +271,31 @@ final class PhrictionDocumentQuery
     return $this->formatWhereClause($where);
   }
 
+  private function buildHierarchicalOrderClause(
+    AphrontDatabaseConnection $conn_r) {
+
+    if ($this->getBeforeID()) {
+      return qsprintf(
+        $conn_r,
+        'ORDER BY d.depth, c.title, %Q %Q',
+        $this->getPagingColumn(),
+        $this->getReversePaging() ? 'DESC' : 'ASC');
+    } else {
+      return qsprintf(
+        $conn_r,
+        'ORDER BY d.depth, c.title, %Q %Q',
+        $this->getPagingColumn(),
+        $this->getReversePaging() ? 'ASC' : 'DESC');
+    }
+  }
+
   protected function getPagingColumn() {
     switch ($this->order) {
       case self::ORDER_CREATED:
-        return 'id';
+      case self::ORDER_HIERARCHY:
+        return 'd.id';
       case self::ORDER_UPDATED:
-        return 'contentID';
+        return 'd.contentID';
       default:
         throw new Exception("Unknown order '{$this->order}'!");
     }
@@ -227,6 +304,7 @@ final class PhrictionDocumentQuery
   protected function getPagingValue($result) {
     switch ($this->order) {
       case self::ORDER_CREATED:
+      case self::ORDER_HIERARCHY:
         return $result->getID();
       case self::ORDER_UPDATED:
         return $result->getContentID();

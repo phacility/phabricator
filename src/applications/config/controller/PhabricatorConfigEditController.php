@@ -120,10 +120,8 @@ final class PhabricatorConfigEditController
         ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
         ->appendChild(phutil_tag('p', array(), $msg));
     } else if ($option->getLocked()) {
-      $msg = pht(
-        'This configuration is locked and can not be edited from the web '.
-        'interface. Use `./bin/config` in `phabricator/` to edit it.');
 
+      $msg = $option->getLockedMessage();
       $error_view = id(new AphrontErrorView())
         ->setTitle(pht('Configuration Locked'))
         ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)

@@ -10,6 +10,7 @@ final class PhrictionTransactionEditor
   private $skipAncestorCheck;
   private $contentVersion;
   private $processContentVersionError = true;
+  private $heraldEmailPHIDs = array();
 
   public function setDescription($description) {
     $this->description = $description;
@@ -359,6 +360,16 @@ final class PhrictionTransactionEditor
     );
   }
 
+  protected function getMailCC(PhabricatorLiskDAO $object) {
+    $phids = array();
+
+    foreach ($this->heraldEmailPHIDs as $phid) {
+      $phids[] = $phid;
+    }
+
+    return $phids;
+  }
+
   public function getMailTagsMap() {
     return array(
       PhrictionTransaction::MAILTAG_TITLE =>
@@ -526,13 +537,24 @@ final class PhrictionTransactionEditor
             ->needContent(true)
             ->executeOne();
 
-          // Considering to overwrite existing docs? Nuke this!
+          // Prevent overwrites and no-op moves.
           $exists = PhrictionDocumentStatus::STATUS_EXISTS;
-          if ($target_document && $target_document->getStatus() == $exists) {
+          if ($target_document) {
+            if ($target_document->getSlug() == $source_document->getSlug()) {
+              $message = pht(
+                'You can not move a document to its existing location. '.
+                'Choose a different location to move the document to.');
+            } else if ($target_document->getStatus() == $exists) {
+              $message = pht(
+                'You can not move this document there, because it would '.
+                'overwrite an existing document which is already at that '.
+                'location. Move or delete the existing document first.');
+            }
+
             $error = new PhabricatorApplicationTransactionValidationError(
               $type,
-              pht('Can not move document.'),
-              pht('Can not overwrite existing target document.'),
+              pht('Invalid'),
+              $message,
               $xaction);
             $errors[] = $error;
           }
@@ -647,7 +669,35 @@ final class PhrictionTransactionEditor
   protected function shouldApplyHeraldRules(
     PhabricatorLiskDAO $object,
     array $xactions) {
-    return false;
+    return true;
+  }
+
+  protected function buildHeraldAdapter(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    return id(new PhrictionDocumentHeraldAdapter())
+      ->setDocument($object);
+  }
+
+  protected function didApplyHeraldRules(
+    PhabricatorLiskDAO $object,
+    HeraldAdapter $adapter,
+    HeraldTranscript $transcript) {
+
+    $xactions = array();
+
+    $cc_phids = $adapter->getCcPHIDs();
+    if ($cc_phids) {
+      $value = array_fuse($cc_phids);
+      $xactions[] = id(new PhrictionTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+        ->setNewValue(array('+' => $value));
+    }
+
+    $this->heraldEmailPHIDs = $adapter->getEmailPHIDs();
+
+    return $xactions;
   }
 
   private function buildNewContentTemplate(

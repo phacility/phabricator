@@ -109,6 +109,12 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
           => 'PhabricatorAuthDowngradeSessionController',
         'multifactor/'
           => 'PhabricatorAuthNeedsMultiFactorController',
+        'sshkey/' => array(
+          'generate/' => 'PhabricatorAuthSSHKeyGenerateController',
+          'upload/' => 'PhabricatorAuthSSHKeyEditController',
+          'edit/(?P<id>\d+)/' => 'PhabricatorAuthSSHKeyEditController',
+          'delete/(?P<id>\d+)/' => 'PhabricatorAuthSSHKeyDeleteController',
+        ),
       ),
 
       '/oauth/(?P<provider>\w+)/login/'

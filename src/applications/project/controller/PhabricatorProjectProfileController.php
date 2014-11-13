@@ -261,6 +261,12 @@ final class PhabricatorProjectProfileController
       }
     }
 
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('fa-book grey')
+        ->setName(pht('View Wiki'))
+        ->setWorkflow(true)
+        ->setHref('/project/wiki/'));
 
     return $view;
   }
