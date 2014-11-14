@@ -59,8 +59,8 @@ final class PhabricatorConfigManagementGetWorkflow
       );
     }
 
-    $database_config = new PhabricatorConfigDatabaseSource('default');
     try {
+      $database_config = new PhabricatorConfigDatabaseSource('default');
       $database_value = $database_config->getKeys(array($key));
       if (empty($database_value)) {
         $values['database'] = array(
