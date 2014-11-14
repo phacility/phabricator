@@ -527,7 +527,7 @@ abstract class PhabricatorController extends AphrontController {
   }
 
   protected function buildTransactionTimeline(
-    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransactionInterface $object,
     PhabricatorApplicationTransactionQuery $query,
     PhabricatorMarkupEngine $engine = null) {
 

@@ -39,24 +39,7 @@ final class PhabricatorBuiltinPatchList extends PhabricatorSQLPatchList {
 
     $root = dirname(phutil_get_library_root('phabricator'));
     $auto_root = $root.'/resources/sql/autopatches/';
-    $auto_list = Filesystem::listDirectory($auto_root, $include_hidden = false);
-    sort($auto_list);
-
-    foreach ($auto_list as $auto_patch) {
-      $matches = null;
-      if (!preg_match('/\.(sql|php)$/', $auto_patch, $matches)) {
-        throw new Exception(
-          pht(
-            'Unknown patch "%s" in "%s", expected ".php" or ".sql" suffix.',
-            $auto_patch,
-            $auto_root));
-      }
-
-      $patches[$auto_patch] = array(
-        'type' => $matches[1],
-        'name' => $auto_root.$auto_patch,
-      );
-    }
+    $patches += $this->buildPatchesFromDirectory($auto_root);
 
     return $patches;
   }
