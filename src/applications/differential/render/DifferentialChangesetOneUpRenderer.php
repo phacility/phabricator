@@ -7,6 +7,14 @@ final class DifferentialChangesetOneUpRenderer
     return true;
   }
 
+  protected function renderColgroup() {
+    return phutil_tag('colgroup', array(), array(
+      phutil_tag('col', array('class' => 'num')),
+      phutil_tag('col', array('class' => 'num')),
+      phutil_tag('col', array('class' => 'unified')),
+    ));
+  }
+
   public function renderTextChange(
     $range_start,
     $range_len,
