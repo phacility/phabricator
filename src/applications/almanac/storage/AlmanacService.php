@@ -21,7 +21,8 @@ final class AlmanacService
   public static function initializeNewService() {
     return id(new AlmanacService())
       ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
-      ->setEditPolicy(PhabricatorPolicies::POLICY_ADMIN);
+      ->setEditPolicy(PhabricatorPolicies::POLICY_ADMIN)
+      ->attachAlmanacProperties(array());
   }
 
   public function getConfiguration() {
