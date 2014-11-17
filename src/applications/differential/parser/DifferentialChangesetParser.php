@@ -90,6 +90,7 @@ final class DifferentialChangesetParser {
   const ATTR_DELETED    = 'attr:deleted';
   const ATTR_UNCHANGED  = 'attr:unchanged';
   const ATTR_WHITELINES = 'attr:white';
+  const ATTR_MOVEAWAY   = 'attr:moveaway';
 
   const LINES_CONTEXT = 8;
 
@@ -438,6 +439,10 @@ final class DifferentialChangesetParser {
     return idx($this->specialAttributes, self::ATTR_WHITELINES, false);
   }
 
+  public function isMoveAway() {
+    return idx($this->specialAttributes, self::ATTR_MOVEAWAY, false);
+  }
+
   private function applyIntraline(&$render, $intra, $corpus) {
 
     foreach ($render as $key => $text) {
@@ -594,6 +599,7 @@ final class DifferentialChangesetParser {
       }
     }
 
+    $moveaway = false;
     $changetype = $this->changeset->getChangeType();
     if ($changetype == DifferentialChangeType::TYPE_MOVE_AWAY) {
       // sometimes we show moved files as unchanged, sometimes deleted,
@@ -601,12 +607,14 @@ final class DifferentialChangesetParser {
       // destination of the move. Rather than make a false claim,
       // omit the 'not changed' notice if this is the source of a move
       $unchanged = false;
+      $moveaway = true;
     }
 
     $this->setSpecialAttributes(array(
       self::ATTR_UNCHANGED  => $unchanged,
       self::ATTR_DELETED    => $hunk_parser->getIsDeleted(),
       self::ATTR_WHITELINES => !$hunk_parser->getHasTextChanges(),
+      self::ATTR_MOVEAWAY   => $moveaway,
     ));
 
     $hunk_parser->generateIntraLineDiffs();
@@ -775,6 +783,8 @@ final class DifferentialChangesetParser {
         $shield = $renderer->renderShield(
           pht('The contents of this file were not changed.'),
           $type);
+      } else if ($this->isMoveAway()) {
+        $shield = null;
       } else if ($this->isWhitespaceOnly()) {
         $shield = $renderer->renderShield(
           pht('This file was changed only by adding or removing whitespace.'),
