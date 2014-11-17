@@ -209,6 +209,84 @@ final class PhabricatorConduitAPIController
         $request->getUser());
     }
 
+    $auth_type = idx($metadata, 'auth.type');
+    if ($auth_type === ConduitClient::AUTH_ASYMMETRIC) {
+      $host = idx($metadata, 'auth.host');
+      if (!$host) {
+        return array(
+          'ERR-INVALID-AUTH',
+          pht(
+            'Request is missing required "auth.host" parameter.'),
+        );
+      }
+
+      // TODO: Validate that we are the host!
+
+      $raw_key = idx($metadata, 'auth.key');
+      $public_key = PhabricatorAuthSSHPublicKey::newFromRawKey($raw_key);
+      $ssl_public_key = $public_key->toPCKS8();
+
+      // First, verify the signature.
+      try {
+        $protocol_data = $metadata;
+
+        // TODO: We should stop writing this into the protocol data when
+        // processing a request.
+        unset($protocol_data['scope']);
+
+        ConduitClient::verifySignature(
+          $this->method,
+          $api_request->getAllParameters(),
+          $protocol_data,
+          $ssl_public_key);
+      } catch (Exception $ex) {
+        return array(
+          'ERR-INVALID-AUTH',
+          pht(
+            'Signature verification failure. %s',
+            $ex->getMessage()),
+        );
+      }
+
+      // If the signature is valid, find the user or device which is
+      // associated with this public key.
+
+      $stored_key = id(new PhabricatorAuthSSHKeyQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withKeys(array($public_key))
+        ->executeOne();
+      if (!$stored_key) {
+        return array(
+          'ERR-INVALID-AUTH',
+          pht(
+            'No user or device is associated with that public key.'),
+        );
+      }
+
+      $object = $stored_key->getObject();
+
+      if ($object instanceof PhabricatorUser) {
+        $user = $object;
+      } else {
+        throw new Exception(
+          pht('Not Implemented: Would authenticate Almanac device.'));
+      }
+
+      return $this->validateAuthenticatedUser(
+        $api_request,
+        $user);
+    } else if ($auth_type === null) {
+      // No specified authentication type, continue with other authentication
+      // methods below.
+    } else {
+      return array(
+        'ERR-INVALID-AUTH',
+        pht(
+          'Provided "auth.type" ("%s") is not recognized.',
+          $auth_type),
+      );
+    }
+
     // handle oauth
     $access_token = $request->getStr('access_token');
     $method_scope = $metadata['scope'];
