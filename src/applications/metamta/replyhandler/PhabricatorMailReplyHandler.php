@@ -210,8 +210,10 @@ abstract class PhabricatorMailReplyHandler {
     $body .= $this->getRecipientsSummary($to_handles, $cc_handles);
 
     $html_body = $mail_template->getHTMLBody();
-    $html_body .= hsprintf('%s',
-      $this->getRecipientsSummaryHTML($to_handles, $cc_handles));
+    if (strlen($html_body)) {
+      $html_body .= hsprintf('%s',
+        $this->getRecipientsSummaryHTML($to_handles, $cc_handles));
+    }
 
     foreach ($recipients as $phid => $recipient) {
 
