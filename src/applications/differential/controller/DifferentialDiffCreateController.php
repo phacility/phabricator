@@ -6,11 +6,12 @@ final class DifferentialDiffCreateController extends DifferentialController {
 
     $request = $this->getRequest();
 
+    $diff = null;
     $errors = array();
     $e_diff = null;
     $e_file = null;
+    $validation_exception = null;
     if ($request->isFormPost()) {
-      $diff = null;
 
       if ($request->getFileExists('diff-file')) {
         $diff = PhabricatorFile::readUploadedFileData($_FILES['diff-file']);
@@ -27,16 +28,19 @@ final class DifferentialDiffCreateController extends DifferentialController {
       }
 
       if (!$errors) {
-        $call = new ConduitCall(
-          'differential.createrawdiff',
-          array(
-            'diff' => $diff,
+        try {
+          $call = new ConduitCall(
+            'differential.createrawdiff',
+            array(
+              'diff' => $diff,
             ));
-        $call->setUser($request->getUser());
-        $result = $call->execute();
-
-        $path = id(new PhutilURI($result['uri']))->getPath();
-        return id(new AphrontRedirectResponse())->setURI($path);
+          $call->setUser($request->getUser());
+          $result = $call->execute();
+          $path = id(new PhutilURI($result['uri']))->getPath();
+          return id(new AphrontRedirectResponse())->setURI($path);
+        } catch (PhabricatorApplicationTransactionValidationException $ex) {
+          $validation_exception = $ex;
+        }
       }
     }
 
@@ -69,6 +73,7 @@ final class DifferentialDiffCreateController extends DifferentialController {
         id(new AphrontFormTextAreaControl())
           ->setLabel(pht('Raw Diff'))
           ->setName('diff')
+          ->setValue($diff)
           ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
           ->setError($e_diff))
       ->appendChild(
@@ -83,6 +88,7 @@ final class DifferentialDiffCreateController extends DifferentialController {
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Create New Diff'))
+      ->setValidationException($validation_exception)
       ->setForm($form)
       ->setFormErrors($errors);
 

@@ -1523,8 +1523,6 @@ final class DifferentialTransactionEditor
     $adapter->setExplicitReviewers($reviewer_phids);
     $adapter->setForbiddenCCs($unsubscribed_phids);
 
-    $adapter->setIsNewObject($this->getIsNewObject());
-
     return $adapter;
   }
 

@@ -41,29 +41,27 @@ final class DifferentialCreateRawDiffConduitAPIMethod
         throw new Exception(
           pht('No such repository "%s"!', $repository_phid));
       }
-    } else {
-      $repository = null;
     }
 
     $parser = new ArcanistDiffParser();
     $changes = $parser->parseDiff($raw_diff);
     $diff = DifferentialDiff::newFromRawChanges($changes);
 
-    $diff->setLintStatus(DifferentialLintStatus::LINT_SKIP);
-    $diff->setUnitStatus(DifferentialUnitStatus::UNIT_SKIP);
+    $diff_data_dict = array(
+      'creationMethod' => 'web',
+      'authorPHID' => $viewer->getPHID(),
+      'repositoryPHID' => $repository_phid,
+      'lintStatus' => DifferentialLintStatus::LINT_SKIP,
+      'unitStatus' => DifferentialUnitStatus::UNIT_SKIP,);
 
-    $diff->setAuthorPHID($viewer->getPHID());
-    $diff->setCreationMethod('web');
-
-    if ($repository) {
-      $diff->setRepositoryPHID($repository->getPHID());
-    }
+    $xactions = array(id(new DifferentialTransaction())
+      ->setTransactionType(DifferentialDiffTransaction::TYPE_DIFF_CREATE)
+      ->setNewValue($diff_data_dict),);
 
     id(new DifferentialDiffEditor())
       ->setActor($viewer)
-      ->setContentSource(
-        PhabricatorContentSource::newFromConduitRequest($request))
-      ->saveDiff($diff);
+      ->setContentSourceFromConduitRequest($request)
+      ->applyTransactions($diff, $xactions);
 
     return $this->buildDiffInfoDictionary($diff);
   }
