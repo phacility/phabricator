@@ -109,6 +109,8 @@ final class PhabricatorImageMacroRemarkupRule extends PhutilRemarkupRule {
         $result = $spec['original'].' <'.$src_uri.'>';
         $engine->overwriteStoredText($spec['token'], $result);
         continue;
+      } else if ($this->getEngine()->isHTMLMailMode()) {
+        $src_uri = PhabricatorEnv::getProductionURI($src_uri);
       }
 
       $file_data = $file->getMetadata();
