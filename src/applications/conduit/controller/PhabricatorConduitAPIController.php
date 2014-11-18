@@ -224,7 +224,7 @@ final class PhabricatorConduitAPIController
 
       $raw_key = idx($metadata, 'auth.key');
       $public_key = PhabricatorAuthSSHPublicKey::newFromRawKey($raw_key);
-      $ssl_public_key = $public_key->toPCKS8();
+      $ssl_public_key = $public_key->toPKCS8();
 
       // First, verify the signature.
       try {
