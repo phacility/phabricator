@@ -7,9 +7,13 @@
 }
 
 .policy-rules-table td {
-  padding: 4px;
+  padding: 4px 8px 4px 0;
   width: 32px;
   vertical-align: middle;
+}
+
+.policy-rules-table td.remove-column {
+  padding-right: 0;
 }
 
 .policy-rules-table td.action-cell {

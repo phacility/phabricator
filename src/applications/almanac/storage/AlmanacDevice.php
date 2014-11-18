@@ -22,7 +22,8 @@ final class AlmanacDevice
   public static function initializeNewDevice() {
     return id(new AlmanacDevice())
       ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
-      ->setEditPolicy(PhabricatorPolicies::POLICY_ADMIN);
+      ->setEditPolicy(PhabricatorPolicies::POLICY_ADMIN)
+      ->attachAlmanacProperties(array());
   }
 
   public function getConfiguration() {

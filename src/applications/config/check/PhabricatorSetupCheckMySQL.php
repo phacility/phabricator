@@ -34,6 +34,7 @@ final class PhabricatorSetupCheckMySQL extends PhabricatorSetupCheck {
 
     $modes = self::loadRawConfigValue('sql_mode');
     $modes = explode(',', $modes);
+
     if (!in_array('STRICT_ALL_TABLES', $modes)) {
       $summary = pht(
         'MySQL is not in strict mode, but using strict mode is strongly '.
@@ -63,6 +64,45 @@ final class PhabricatorSetupCheckMySQL extends PhabricatorSetupCheck {
 
       $this->newIssue('mysql.mode')
         ->setName(pht('MySQL STRICT_ALL_TABLES Mode Not Set'))
+        ->setSummary($summary)
+        ->setMessage($message)
+        ->addMySQLConfig('sql_mode');
+    }
+    if (in_array('ONLY_FULL_GROUP_BY', $modes)) {
+      $summary = pht(
+        'MySQL is in ONLY_FULL_GROUP_BY mode, but using this mode is strongly '.
+        'discouraged.');
+
+      $message = pht(
+        "On your MySQL instance, the global %s is set to %s. ".
+        "It is strongly encouraged that you disable this mode when running ".
+        "Phabricator.\n\n".
+        "With %s enabled, MySQL rejects queries for which the select list ".
+        "or (as of MySQL 5.0.23) %s list refer to nonaggregated columns ".
+        "that are not named in the %s clause. More importantly, Phabricator ".
+        "does not work properly with this mode enabled.\n\n".
+        "You can find more information about this mode (and how to configure ".
+        "it) in the MySQL manual. Usually, it is sufficient to change the %s ".
+        "in your %s file (in the %s section) and then restart %s:\n\n".
+        "%s\n".
+        "(Note that if you run other applications against the same database, ".
+        "they may not work with %s. Be careful about enabling ".
+        "it in these cases and consider migrating Phabricator to a different ".
+        "database.)",
+        phutil_tag('tt', array(), 'sql_mode'),
+        phutil_tag('tt', array(), 'ONLY_FULL_GROUP_BY'),
+        phutil_tag('tt', array(), 'ONLY_FULL_GROUP_BY'),
+        phutil_tag('tt', array(), 'HAVING'),
+        phutil_tag('tt', array(), 'GROUP BY'),
+        phutil_tag('tt', array(), 'sql_mode'),
+        phutil_tag('tt', array(), 'my.cnf'),
+        phutil_tag('tt', array(), '[mysqld]'),
+        phutil_tag('tt', array(), 'mysqld'),
+        phutil_tag('pre', array(), 'sql_mode=STRICT_ALL_TABLES'),
+        phutil_tag('tt', array(), 'ONLY_FULL_GROUP_BY'));
+
+      $this->newIssue('mysql.mode')
+        ->setName(pht('MySQL ONLY_FULL_GROUP_BY Mode Set'))
         ->setSummary($summary)
         ->setMessage($message)
         ->addMySQLConfig('sql_mode');

@@ -526,4 +526,39 @@ abstract class PhabricatorController extends AphrontController {
       ->setSubmitURI($submit_uri);
   }
 
+  protected function buildTransactionTimeline(
+    PhabricatorApplicationTransactionInterface $object,
+    PhabricatorApplicationTransactionQuery $query,
+    PhabricatorMarkupEngine $engine = null) {
+
+    $viewer = $this->getRequest()->getUser();
+    $xaction = $object->getApplicationTransactionTemplate();
+    $view = $xaction->getApplicationTransactionViewObject();
+
+    $xactions = $query
+      ->setViewer($viewer)
+      ->withObjectPHIDs(array($object->getPHID()))
+      ->needComments(true)
+      ->execute();
+
+    if ($engine) {
+      foreach ($xactions as $xaction) {
+        if ($xaction->getComment()) {
+          $engine->addObject(
+            $xaction->getComment(),
+            PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
+        }
+      }
+      $engine->process();
+      $view->setMarkupEngine($engine);
+    }
+
+    $timeline = $view
+      ->setUser($viewer)
+      ->setObjectPHID($object->getPHID())
+      ->setTransactions($xactions);
+
+    return $timeline;
+  }
+
 }

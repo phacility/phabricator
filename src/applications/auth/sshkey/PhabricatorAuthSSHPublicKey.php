@@ -99,4 +99,26 @@ final class PhabricatorAuthSSHPublicKey extends Phobject {
     return PhabricatorHash::digestForIndex($body);
   }
 
+  public function getEntireKey() {
+    $key = $this->type.' '.$this->body;
+    if (strlen($this->comment)) {
+      $key = $key.' '.$this->comment;
+    }
+    return $key;
+  }
+
+  public function toPKCS8() {
+
+    // TODO: Put a cache in front of this.
+
+    $tmp = new TempFile();
+    Filesystem::writeFile($tmp, $this->getEntireKey());
+    list($pem_key) = execx(
+      'ssh-keygen -e -m PKCS8 -f %s',
+      $tmp);
+    unset($tmp);
+
+    return $pem_key;
+  }
+
 }

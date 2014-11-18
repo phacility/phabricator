@@ -92,6 +92,53 @@ final class PhabricatorSetupCheckBinaries extends PhabricatorSetupCheck {
           'version control system. It will not work without the VCS binary.');
         $this->raiseWarning($binary, $message);
       }
+
+      switch ($binary) {
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+          $minimum_version = null;
+          $bad_versions = array();
+          list($err, $stdout, $stderr) = exec_manual('git --version');
+          $version = trim(substr($stdout, strlen('git version ')));
+          break;
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+          $minimum_version = null;
+          $bad_versions = array(
+            '1.7.1' => pht('This version of Subversion has a bug where '.
+                           '"svn diff -c N" does not work for files added '.
+                           'in rN (Subverison issue #2873), fixed in 1.7.2.'),);
+          list($err, $stdout, $stderr) = exec_manual('svn --version --quiet');
+          $version = trim($stdout);
+          break;
+        case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+          $minimum_version = '1.9';
+          $bad_versions = array(
+            '2.1' => pht('This version of Mercurial returns a bad exit code '.
+                         'after a successful pull.'),
+            '2.2' => pht('This version of Mercurial has a significant memory '.
+                         'leak, fixed in 2.2.1. Pushing fails with this '.
+                         'version as well; see T3046#54922.'),);
+          list($err, $stdout, $stderr) = exec_manual('hg --version --quiet');
+          $version = rtrim(
+            substr($stdout, strlen('Mercurial Distributed SCM (version ')),
+            ")\n");
+          break;
+      }
+
+      if ($minimum_version &&
+        version_compare($version, $minimum_version, '<')) {
+        $this->raiseMinimumVersionWarning(
+          $binary,
+          $minimum_version,
+          $version);
+      }
+
+      foreach ($bad_versions as $bad_version => $details) {
+        if ($bad_version === $version) {
+          $this->raiseBadVersionWarning(
+            $binary,
+            $bad_version);
+        }
+      }
     }
 
   }
@@ -124,6 +171,63 @@ final class PhabricatorSetupCheckBinaries extends PhabricatorSetupCheck {
         pht("The '%s' binary could not be located or executed.", $bin))
       ->setMessage($preamble.' '.$message)
       ->addPhabricatorConfig('environment.append-paths');
+  }
+
+  private function raiseMinimumVersionWarning(
+    $binary,
+    $minimum_version,
+    $version) {
+
+    switch ($binary) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $summary = pht(
+          "The '%s' binary is version %s and Phabricator requires version ".
+          "%s or higher.",
+          $binary,
+          $version,
+          $minimum_version);
+        $message = pht(
+          "Please upgrade the '%s' binary to a more modern version.",
+          $binary);
+        $this->newIssue('bin.'.$binary)
+          ->setShortName(pht("Unsupported '%s' Version", $binary))
+          ->setName(pht("Unsupported '%s' Version", $binary))
+          ->setSummary($summary)
+          ->setMessage($summary.' '.$message);
+        break;
+      }
+
+
+  }
+
+  private function raiseBadVersionWarning($binary, $bad_version) {
+
+    switch ($binary) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $summary = pht(
+          "The '%s' binary is version %s which has bugs that break ".
+          "Phabricator.",
+          $binary,
+          $bad_version);
+        $message = pht(
+          "Please upgrade the '%s' binary to a more modern version.",
+          $binary);
+        $this->newIssue('bin.'.$binary)
+          ->setShortName(pht("Unsupported '%s' Version", $binary))
+          ->setName(pht("Unsupported '%s' Version", $binary))
+          ->setSummary($summary)
+          ->setMessage($summary.' '.$message);
+        break;
+      }
+
+
   }
 
 }

@@ -57,13 +57,13 @@ JX.install('MultirowRowManager', {
 
       var removeButton = JX.$N(
         'td',
-        {},
+        { className: 'remove-column' },
         JX.$N(
           'a',
-          { className: 'button',
+          { className: 'button simple',
             sigil: JX.MultirowRowManager._removeSigil
           },
-          '-'));
+          'Remove'));
 
       JX.DOM.appendContent(row, removeButton);
       return row;

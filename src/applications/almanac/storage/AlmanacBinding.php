@@ -21,7 +21,8 @@ final class AlmanacBinding
 
   public static function initializeNewBinding(AlmanacService $service) {
     return id(new AlmanacBinding())
-      ->setServicePHID($service->getPHID());
+      ->setServicePHID($service->getPHID())
+      ->attachAlmanacProperties(array());
   }
 
   public function getConfiguration() {

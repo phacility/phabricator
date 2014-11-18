@@ -124,6 +124,31 @@ abstract class PhabricatorMailReplyHandler {
     return $body;
   }
 
+  final public function getRecipientsSummaryHTML(
+    array $to_handles,
+    array $cc_handles) {
+    assert_instances_of($to_handles, 'PhabricatorObjectHandle');
+    assert_instances_of($cc_handles, 'PhabricatorObjectHandle');
+
+    if (PhabricatorEnv::getEnvConfig('metamta.recipients.show-hints')) {
+      $body = array();
+      if ($to_handles) {
+        $body[] = phutil_tag('strong', array(), 'To: ');
+        $body[] = phutil_implode_html(', ', mpull($to_handles, 'getName'));
+        $body[] = phutil_tag('br');
+      }
+      if ($cc_handles) {
+        $body[] = phutil_tag('strong', array(), 'Cc: ');
+        $body[] = phutil_implode_html(', ', mpull($cc_handles, 'getName'));
+        $body[] = phutil_tag('br');
+      }
+      return phutil_tag('div', array(), $body);
+    } else {
+      return '';
+    }
+
+  }
+
   final public function multiplexMail(
     PhabricatorMetaMTAMail $mail_template,
     array $to_handles,
@@ -184,8 +209,13 @@ abstract class PhabricatorMailReplyHandler {
     $body .= "\n";
     $body .= $this->getRecipientsSummary($to_handles, $cc_handles);
 
-    foreach ($recipients as $phid => $recipient) {
+    $html_body = $mail_template->getHTMLBody();
+    if (strlen($html_body)) {
+      $html_body .= hsprintf('%s',
+        $this->getRecipientsSummaryHTML($to_handles, $cc_handles));
+    }
 
+    foreach ($recipients as $phid => $recipient) {
 
       $mail = clone $mail_template;
       if (isset($to_handles[$phid])) {
@@ -198,6 +228,7 @@ abstract class PhabricatorMailReplyHandler {
       }
 
       $mail->setBody($body);
+      $mail->setHTMLBody($html_body);
 
       $reply_to = null;
       if (!$reply_to && $this->supportsPrivateReplies()) {

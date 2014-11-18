@@ -5,6 +5,37 @@ abstract class PhabricatorSQLPatchList {
   abstract function getNamespace();
   abstract function getPatches();
 
+  /**
+   * Examine a directory for `.php` and `.sql` files and build patch
+   * specifications for them.
+   */
+  protected function buildPatchesFromDirectory($directory) {
+    $patch_list = Filesystem::listDirectory(
+      $directory,
+      $include_hidden = false);
+
+    sort($patch_list);
+    $patches = array();
+
+    foreach ($patch_list as $patch) {
+      $matches = null;
+      if (!preg_match('/\.(sql|php)$/', $patch, $matches)) {
+        throw new Exception(
+          pht(
+            'Unknown patch "%s" in "%s", expected ".php" or ".sql" suffix.',
+            $patch,
+            $directory));
+      }
+
+      $patches[$patch] = array(
+        'type' => $matches[1],
+        'name' => rtrim($directory, '/').'/'.$patch,
+      );
+    }
+
+    return $patches;
+  }
+
   final public static function buildAllPatches() {
     $patch_lists = id(new PhutilSymbolLoader())
       ->setAncestorClass('PhabricatorSQLPatchList')

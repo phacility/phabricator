@@ -405,6 +405,24 @@ final class PhrictionTransactionEditor
       $body->addTextSection(
         pht('DOCUMENT CONTENT'),
         $object->getContent()->getContent());
+    } else {
+
+      foreach ($xactions as $xaction) {
+        switch ($xaction->getTransactionType()) {
+          case PhrictionTransaction::TYPE_CONTENT:
+            $diff_uri = id(new PhutilURI(
+              '/phriction/diff/'.$object->getID().'/'))
+              ->alter('l', $this->getOldContent()->getVersion())
+              ->alter('r', $this->getNewContent()->getVersion());
+            $body->addLinkSection(
+              pht('DOCUMENT DIFF'),
+              PhabricatorEnv::getProductionURI($diff_uri));
+            break 2;
+          default:
+            break;
+        }
+      }
+
     }
 
     $body->addLinkSection(

@@ -27,6 +27,10 @@ final class PhabricatorRepositoryAuditRequest
         'auditorPHID' => array(
           'columns' => array('auditorPHID', 'auditStatus'),
         ),
+        'key_unique' => array(
+          'columns' => array('commitPHID', 'auditorPHID'),
+          'unique' => true,
+        ),
       ),
     ) + parent::getConfiguration();
   }
