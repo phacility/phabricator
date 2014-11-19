@@ -69,6 +69,7 @@ final class PHUIFormInsetView extends AphrontView {
           'style' => 'float: right;',
         ),
         $this->rightButton);
+      $right_button = phutil_tag_div('grouped', $right_button);
     }
 
     if ($this->description) {
@@ -76,10 +77,6 @@ final class PHUIFormInsetView extends AphrontView {
         'p',
         array(),
         $this->description);
-
-      if ($right_button) {
-        $desc = hsprintf('%s<div style="clear: both;"></div>', $desc);
-      }
     }
 
     $div_attributes = $this->divAttributes;
