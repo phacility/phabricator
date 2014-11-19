@@ -75,6 +75,10 @@ final class PhabricatorManiphestApplication extends PhabricatorApplication {
   public function loadStatus(PhabricatorUser $user) {
     $status = array();
 
+    if (!$user->isLoggedIn()) {
+      return $status;
+    }
+
     $query = id(new ManiphestTaskQuery())
       ->setViewer($user)
       ->withStatuses(ManiphestTaskStatus::getOpenStatusConstants())
