@@ -86,7 +86,7 @@ return array(
   'remarkup.enable-embedded-youtube' => true,
 
   // This apparently avoids some cookie-based attacks.
-  'security.alternate-file-domain'  => 'http://phabricator-files.khanacademy.org/',
+  'security.alternate-file-domain'  => 'https://phabricator-files.khanacademy.org/',
 
   // Let people upload giant files.
   'storage.mysql-engine.max-size' => 0,
