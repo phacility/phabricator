@@ -276,6 +276,7 @@ final class DiffusionCommitController extends DiffusionController {
       $content[] = $change_panel;
 
       $changesets = DiffusionPathChange::convertToDifferentialChangesets(
+        $user,
         $changes);
 
       $vcs = $repository->getVersionControlSystem();

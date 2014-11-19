@@ -54,7 +54,9 @@ final class DiffusionDiffController extends DiffusionController {
       ));
     $drequest->updateSymbolicCommit($data['effectiveCommit']);
     $raw_changes = ArcanistDiffChange::newFromConduit($data['changes']);
-    $diff = DifferentialDiff::newFromRawChanges($raw_changes);
+    $diff = DifferentialDiff::newFromRawChanges(
+      $user,
+      $raw_changes);
     $changesets = $diff->getChangesets();
     $changeset = reset($changesets);
 

@@ -79,6 +79,13 @@ final class DifferentialRevisionEditController
       if ($repository_field) {
         $repository_field->setValue($request->getStr($repo_key));
       }
+      $view_policy_key = id(new DifferentialViewPolicyField())->getFieldKey();
+      $view_policy_field = idx(
+        $field_list->getFields(),
+        $view_policy_key);
+      if ($view_policy_field) {
+        $view_policy_field->setValue($diff->getViewPolicy());
+      }
     }
 
     $validation_exception = null;

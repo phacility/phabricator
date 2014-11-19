@@ -69,7 +69,7 @@ final class DifferentialCreateDiffConduitAPIMethod
       $changes[] = ArcanistDiffChange::newFromDictionary($dict);
     }
 
-    $diff = DifferentialDiff::newFromRawChanges($changes);
+    $diff = DifferentialDiff::newFromRawChanges($viewer, $changes);
 
     // TODO: Remove repository UUID eventually; for now continue writing
     // the UUID. Note that we'll overwrite it below if we identify a

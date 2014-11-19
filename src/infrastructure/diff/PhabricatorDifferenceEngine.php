@@ -163,7 +163,9 @@ final class PhabricatorDifferenceEngine {
     $diff = $this->generateRawDiffFromFileContent($old, $new);
 
     $changes = id(new ArcanistDiffParser())->parseDiff($diff);
-    $diff = DifferentialDiff::newFromRawChanges($changes);
+    $diff = DifferentialDiff::newFromRawChanges(
+      PhabricatorUser::getOmnipotentUser(),
+      $changes);
     return head($diff->getChangesets());
   }
 

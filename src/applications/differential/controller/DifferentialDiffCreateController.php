@@ -5,8 +5,11 @@ final class DifferentialDiffCreateController extends DifferentialController {
   public function processRequest() {
 
     $request = $this->getRequest();
+    $viewer = $request->getUser();
 
     $diff = null;
+    // This object is just for policy stuff
+    $diff_object = DifferentialDiff::initializeNewDiff($viewer);
     $repository_phid = null;
     $repository_value = array();
     $errors = array();
@@ -41,8 +44,9 @@ final class DifferentialDiffCreateController extends DifferentialController {
             'differential.createrawdiff',
             array(
               'diff' => $diff,
-              'repositoryPHID' => $repository_phid,));
-          $call->setUser($request->getUser());
+              'repositoryPHID' => $repository_phid,
+              'viewPolicy' => $request->getStr('viewPolicy'),));
+          $call->setUser($viewer);
           $result = $call->execute();
           $path = id(new PhutilURI($result['uri']))->getPath();
           return id(new AphrontRedirectResponse())->setURI($path);
@@ -68,10 +72,15 @@ final class DifferentialDiffCreateController extends DifferentialController {
       $repository_value = $this->loadViewerHandles(array($repository_phid));
     }
 
+    $policies = id(new PhabricatorPolicyQuery())
+      ->setViewer($viewer)
+      ->setObject($diff_object)
+      ->execute();
+
     $form
       ->setAction('/differential/diff/create/')
       ->setEncType('multipart/form-data')
-      ->setUser($request->getUser())
+      ->setUser($viewer)
       ->appendInstructions(
         pht(
           'The best way to create a Differential diff is by using %s, but you '.
@@ -100,6 +109,13 @@ final class DifferentialDiffCreateController extends DifferentialController {
         ->setDatasource(new DiffusionRepositoryDatasource())
         ->setValue($repository_value)
         ->setLimit(1))
+      ->appendChild(
+        id(new AphrontFormPolicyControl())
+        ->setUser($viewer)
+        ->setName('viewPolicy')
+        ->setPolicyObject($diff_object)
+        ->setPolicies($policies)
+        ->setCapability(PhabricatorPolicyCapability::CAN_VIEW))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton($cancel_uri)
