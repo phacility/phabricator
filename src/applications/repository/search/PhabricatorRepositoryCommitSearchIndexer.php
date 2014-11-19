@@ -47,19 +47,6 @@ final class PhabricatorRepositoryCommitSearchIndexer
         $date_created);
     }
 
-    $project_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
-      $commit->getPHID(),
-      PhabricatorEdgeConfig::TYPE_COMMIT_HAS_PROJECT);
-    if ($project_phids) {
-      foreach ($project_phids as $project_phid) {
-        $doc->addRelationship(
-          PhabricatorSearchRelationship::RELATIONSHIP_PROJECT,
-          $project_phid,
-          PhabricatorProjectProjectPHIDType::TYPECONST,
-          $date_created);
-      }
-    }
-
     $doc->addRelationship(
       PhabricatorSearchRelationship::RELATIONSHIP_REPOSITORY,
       $repository->getPHID(),

@@ -39,14 +39,6 @@ final class ManiphestSearchIndexer extends PhabricatorSearchDocumentIndexer {
       new ManiphestTransactionQuery(),
       array($phid));
 
-    foreach ($task->getProjectPHIDs() as $phid) {
-      $doc->addRelationship(
-        PhabricatorSearchRelationship::RELATIONSHIP_PROJECT,
-        $phid,
-        PhabricatorProjectProjectPHIDType::TYPECONST,
-        $task->getDateModified()); // Bogus.
-    }
-
     $owner = $task->getOwnerPHID();
     if ($owner) {
       $doc->addRelationship(

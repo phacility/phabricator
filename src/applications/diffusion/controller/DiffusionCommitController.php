@@ -420,7 +420,6 @@ final class DiffusionCommitController extends DiffusionController {
       ->withSourcePHIDs(array($commit_phid))
       ->withEdgeTypes(array(
         DiffusionCommitHasTaskEdgeType::EDGECONST,
-        PhabricatorEdgeConfig::TYPE_COMMIT_HAS_PROJECT,
         PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV,
       ));
 
@@ -428,8 +427,6 @@ final class DiffusionCommitController extends DiffusionController {
 
     $task_phids = array_keys(
       $edges[$commit_phid][DiffusionCommitHasTaskEdgeType::EDGECONST]);
-    $proj_phids = array_keys(
-      $edges[$commit_phid][PhabricatorEdgeConfig::TYPE_COMMIT_HAS_PROJECT]);
     $revision_phid = key(
       $edges[$commit_phid][PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV]);
 
@@ -627,15 +624,6 @@ final class DiffusionCommitController extends DiffusionController {
       }
       $task_list = phutil_implode_html(phutil_tag('br'), $task_list);
       $props['Tasks'] = $task_list;
-    }
-
-    if ($proj_phids) {
-      $proj_list = array();
-      foreach ($proj_phids as $phid) {
-        $proj_list[] = $handles[$phid]->renderLink();
-      }
-      $proj_list = phutil_implode_html(phutil_tag('br'), $proj_list);
-      $props['Projects'] = $proj_list;
     }
 
     return $props;

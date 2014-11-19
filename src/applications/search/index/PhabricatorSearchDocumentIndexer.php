@@ -47,6 +47,11 @@ abstract class PhabricatorSearchDocumentIndexer {
         $this->indexSubscribers($document);
       }
 
+      // Automatically build project relationships
+      if ($object instanceof PhabricatorProjectInterface) {
+        $this->indexProjects($document, $object);
+      }
+
       $engine = PhabricatorSearchEngineSelector::newSelector()->newEngine();
       try {
         $engine->reindexAbstractDocument($document);
@@ -90,6 +95,24 @@ abstract class PhabricatorSearchDocumentIndexer {
         $phid,
         $handle->getType(),
         $doc->getDocumentModified()); // Bogus timestamp.
+    }
+  }
+
+  protected function indexProjects(
+    PhabricatorSearchAbstractDocument $doc,
+    PhabricatorProjectInterface $object) {
+
+    $project_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+      $object->getPHID(),
+      PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
+    if ($project_phids) {
+      foreach ($project_phids as $project_phid) {
+        $doc->addRelationship(
+          PhabricatorSearchRelationship::RELATIONSHIP_PROJECT,
+          $project_phid,
+          PhabricatorProjectProjectPHIDType::TYPECONST,
+          $doc->getDocumentModified()); // Bogus timestamp.
+      }
     }
   }
 

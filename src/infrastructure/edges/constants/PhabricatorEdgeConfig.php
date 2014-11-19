@@ -19,9 +19,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TYPE_PROJ_MEMBER                = 13;
   const TYPE_MEMBER_OF_PROJ             = 14;
 
-  const TYPE_COMMIT_HAS_PROJECT         = 15;
-  const TYPE_PROJECT_HAS_COMMIT         = 16;
-
   const TYPE_QUESTION_HAS_VOTING_USER   = 17;
   const TYPE_VOTING_USER_HAS_QUESTION   = 18;
   const TYPE_ANSWER_HAS_VOTING_USER     = 19;
@@ -100,6 +97,9 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       array(9000),
       range(80000, 80005));
 
+    $exclude[] = 15; // Was TYPE_COMMIT_HAS_PROJECT
+    $exclude[] = 16; // Was TYPE_PROJECT_HAS_COMMIT
+
     $exclude[] = 27; // Was TYPE_ACCOUNT_HAS_MEMBER
     $exclude[] = 28; // Was TYPE_MEMBER_HAS_ACCOUNT
 
@@ -144,9 +144,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
       self::TYPE_PROJ_MEMBER => self::TYPE_MEMBER_OF_PROJ,
       self::TYPE_MEMBER_OF_PROJ => self::TYPE_PROJ_MEMBER,
-
-      self::TYPE_COMMIT_HAS_PROJECT => self::TYPE_PROJECT_HAS_COMMIT,
-      self::TYPE_PROJECT_HAS_COMMIT => self::TYPE_COMMIT_HAS_PROJECT,
 
       self::TYPE_QUESTION_HAS_VOTING_USER =>
         self::TYPE_VOTING_USER_HAS_QUESTION,
@@ -239,7 +236,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
   public static function getEditStringForEdgeType($type) {
     switch ($type) {
-      case self::TYPE_PROJECT_HAS_COMMIT:
       case self::TYPE_DREV_HAS_COMMIT:
         return '%s edited commit(s), added %d: %s; removed %d: %s.';
       case self::TYPE_TASK_DEPENDS_ON_TASK:
@@ -261,7 +257,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       case self::TYPE_PROJ_MEMBER:
         return '%s edited member(s), added %d: %s; removed %d: %s.';
       case self::TYPE_MEMBER_OF_PROJ:
-      case self::TYPE_COMMIT_HAS_PROJECT:
         return '%s edited project(s), added %d: %s; removed %d: %s.';
       case self::TYPE_QUESTION_HAS_VOTING_USER:
       case self::TYPE_ANSWER_HAS_VOTING_USER:
@@ -307,7 +302,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
   public static function getAddStringForEdgeType($type) {
     switch ($type) {
-      case self::TYPE_PROJECT_HAS_COMMIT:
       case self::TYPE_DREV_HAS_COMMIT:
         return '%s added %d commit(s): %s.';
       case self::TYPE_TASK_DEPENDS_ON_TASK:
@@ -332,7 +326,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       case self::TYPE_PROJ_MEMBER:
         return '%s added %d member(s): %s.';
       case self::TYPE_MEMBER_OF_PROJ:
-      case self::TYPE_COMMIT_HAS_PROJECT:
         return '%s added %d project(s): %s.';
       case self::TYPE_QUESTION_HAS_VOTING_USER:
       case self::TYPE_ANSWER_HAS_VOTING_USER:
@@ -377,7 +370,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
   public static function getRemoveStringForEdgeType($type) {
     switch ($type) {
-      case self::TYPE_PROJECT_HAS_COMMIT:
       case self::TYPE_DREV_HAS_COMMIT:
         return '%s removed %d commit(s): %s.';
       case self::TYPE_TASK_DEPENDS_ON_TASK:
@@ -401,7 +393,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       case self::TYPE_PROJ_MEMBER:
         return '%s removed %d member(s): %s.';
       case self::TYPE_MEMBER_OF_PROJ:
-      case self::TYPE_COMMIT_HAS_PROJECT:
         return '%s removed %d project(s): %s.';
       case self::TYPE_QUESTION_HAS_VOTING_USER:
       case self::TYPE_ANSWER_HAS_VOTING_USER:
@@ -444,7 +435,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
   public static function getFeedStringForEdgeType($type) {
     switch ($type) {
-      case self::TYPE_PROJECT_HAS_COMMIT:
       case self::TYPE_DREV_HAS_COMMIT:
         return '%s updated commits of %s.';
       case self::TYPE_TASK_DEPENDS_ON_TASK:
@@ -466,7 +456,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       case self::TYPE_PROJ_MEMBER:
         return '%s updated members of %s.';
       case self::TYPE_MEMBER_OF_PROJ:
-      case self::TYPE_COMMIT_HAS_PROJECT:
         return '%s updated projects of %s.';
       case self::TYPE_QUESTION_HAS_VOTING_USER:
       case self::TYPE_ANSWER_HAS_VOTING_USER:
