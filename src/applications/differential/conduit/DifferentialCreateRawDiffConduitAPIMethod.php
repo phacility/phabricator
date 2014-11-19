@@ -61,6 +61,7 @@ final class DifferentialCreateRawDiffConduitAPIMethod
     id(new DifferentialDiffEditor())
       ->setActor($viewer)
       ->setContentSourceFromConduitRequest($request)
+      ->setLookupRepository(false) // respect user choice
       ->applyTransactions($diff, $xactions);
 
     return $this->buildDiffInfoDictionary($diff);

@@ -6,6 +6,7 @@ final class DifferentialTransactionEditor
   private $heraldEmailPHIDs;
   private $changedPriorToCommitURI;
   private $isCloseByCommit;
+  private $repositoryPHIDOverride = false;
 
   public function getEditorApplicationClass() {
     return 'PhabricatorDifferentialApplication';
@@ -43,6 +44,11 @@ final class DifferentialTransactionEditor
 
   public function getChangedPriorToCommitURI() {
     return $this->changedPriorToCommitURI;
+  }
+
+  public function setRepositoryPHIDOverride($phid_or_null) {
+    $this->repositoryPHIDOverride = $phid_or_null;
+    return $this;
   }
 
   public function getTransactionTypes() {
@@ -205,7 +211,11 @@ final class DifferentialTransactionEditor
         $diff = $this->requireDiff($xaction->getNewValue());
 
         $object->setLineCount($diff->getLineCount());
-        $object->setRepositoryPHID($diff->getRepositoryPHID());
+        if ($this->repositoryPHIDOverride !== false) {
+          $object->setRepositoryPHID($this->repositoryPHIDOverride);
+        } else {
+          $object->setRepositoryPHID($diff->getRepositoryPHID());
+        }
         $object->setArcanistProjectPHID($diff->getArcanistProjectPHID());
         $object->attachActiveDiff($diff);
 

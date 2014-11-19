@@ -80,6 +80,9 @@ final class DifferentialDiffViewController extends DifferentialController {
         ->setAction('/differential/revision/edit/')
         ->addHiddenInput('diffID', $diff->getID())
         ->addHiddenInput('viaDiffView', 1)
+        ->addHiddenInput(
+          id(new DifferentialRepositoryField())->getFieldKey(),
+          $diff->getRepositoryPHID())
         ->appendRemarkupInstructions(
           pht(
             'Review the diff for correctness. When you are satisfied, either '.

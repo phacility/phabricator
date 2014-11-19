@@ -4,6 +4,12 @@ final class DifferentialDiffEditor
   extends PhabricatorApplicationTransactionEditor {
 
   private $diffDataDict;
+  private $lookupRepository = true;
+
+  public function setLookupRepository($bool) {
+    $this->lookupRepository = $bool;
+    return $this;
+  }
 
   public function getEditorApplicationClass() {
     return 'PhabricatorDifferentialApplication';
@@ -80,7 +86,7 @@ final class DifferentialDiffEditor
     // is old, or couldn't figure out which repository the working copy
     // belongs to), apply heuristics to try to figure it out.
 
-    if (!$object->getRepositoryPHID()) {
+    if ($this->lookupRepository && !$object->getRepositoryPHID()) {
       $repository = id(new DifferentialRepositoryLookup())
         ->setDiff($object)
         ->setViewer($this->getActor())

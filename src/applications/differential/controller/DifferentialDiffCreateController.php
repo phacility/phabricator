@@ -7,11 +7,19 @@ final class DifferentialDiffCreateController extends DifferentialController {
     $request = $this->getRequest();
 
     $diff = null;
+    $repository_phid = null;
+    $repository_value = array();
     $errors = array();
     $e_diff = null;
     $e_file = null;
     $validation_exception = null;
     if ($request->isFormPost()) {
+
+      $repository_tokenizer = $request->getArr(
+        id(new DifferentialRepositoryField())->getFieldKey());
+      if ($repository_tokenizer) {
+        $repository_phid = reset($repository_tokenizer);
+      }
 
       if ($request->getFileExists('diff-file')) {
         $diff = PhabricatorFile::readUploadedFileData($_FILES['diff-file']);
@@ -33,7 +41,7 @@ final class DifferentialDiffCreateController extends DifferentialController {
             'differential.createrawdiff',
             array(
               'diff' => $diff,
-            ));
+              'repositoryPHID' => $repository_phid,));
           $call->setUser($request->getUser());
           $result = $call->execute();
           $path = id(new PhutilURI($result['uri']))->getPath();
@@ -55,6 +63,10 @@ final class DifferentialDiffCreateController extends DifferentialController {
       'Arcanist');
 
     $cancel_uri = $this->getApplicationURI();
+
+    if ($repository_phid) {
+      $repository_value = $this->loadViewerHandles(array($repository_phid));
+    }
 
     $form
       ->setAction('/differential/diff/create/')
@@ -81,6 +93,13 @@ final class DifferentialDiffCreateController extends DifferentialController {
           ->setLabel(pht('Raw Diff From File'))
           ->setName('diff-file')
           ->setError($e_file))
+      ->appendChild(
+        id(new AphrontFormTokenizerControl())
+        ->setName(id(new DifferentialRepositoryField())->getFieldKey())
+        ->setLabel(pht('Repository'))
+        ->setDatasource(new DiffusionRepositoryDatasource())
+        ->setValue($repository_value)
+        ->setLimit(1))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton($cancel_uri)
