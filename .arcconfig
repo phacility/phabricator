@@ -1,6 +1,6 @@
 {
   "project.name" : "phabricator",
-  "phabricator.uri" : "http://phabricator.khanacademy.org/",
+  "phabricator.uri" : "https://phabricator.khanacademy.org/",
   "unit.engine" : "PhutilUnitTestEngine",
   "load" : ["src/"]
 }
