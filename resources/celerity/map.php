@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => '0784ef1d',
+    'core.pkg.css' => '673d0a25',
     'core.pkg.js' => 'e5f7f2ba',
     'darkconsole.pkg.js' => 'df001cab',
     'differential.pkg.css' => '8af45893',
@@ -142,7 +142,7 @@ return array(
     'rsrc/css/phui/phui-status.css' => '888cedb8',
     'rsrc/css/phui/phui-tag-view.css' => 'b0c282e0',
     'rsrc/css/phui/phui-text.css' => 'cf019f54',
-    'rsrc/css/phui/phui-timeline-view.css' => '8c6fefe7',
+    'rsrc/css/phui/phui-timeline-view.css' => '26bb3fd4',
     'rsrc/css/phui/phui-workboard-view.css' => '2bf82d00',
     'rsrc/css/phui/phui-workpanel-view.css' => '198c7e6c',
     'rsrc/css/sprite-apps-large.css' => '20ec0cc0',
@@ -791,7 +791,7 @@ return array(
     'phui-status-list-view-css' => '888cedb8',
     'phui-tag-view-css' => 'b0c282e0',
     'phui-text-css' => 'cf019f54',
-    'phui-timeline-view-css' => '8c6fefe7',
+    'phui-timeline-view-css' => '26bb3fd4',
     'phui-workboard-view-css' => '2bf82d00',
     'phui-workpanel-view-css' => '198c7e6c',
     'phuix-action-list-view' => 'b5c256b8',
