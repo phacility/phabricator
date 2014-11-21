@@ -36,14 +36,26 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   const TABLE_DATASOURCE_TOKEN = 'project_datasourcetoken';
 
   public static function initializeNewProject(PhabricatorUser $actor) {
+    $app = id(new PhabricatorApplicationQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withClasses(array('PhabricatorProjectApplication'))
+      ->executeOne();
+
+    $view_policy = $app->getPolicy(
+      ProjectDefaultViewCapability::CAPABILITY);
+    $edit_policy = $app->getPolicy(
+      ProjectDefaultEditCapability::CAPABILITY);
+    $join_policy = $app->getPolicy(
+      ProjectDefaultJoinCapability::CAPABILITY);
+
     return id(new PhabricatorProject())
       ->setName('')
       ->setAuthorPHID($actor->getPHID())
       ->setIcon(self::DEFAULT_ICON)
       ->setColor(self::DEFAULT_COLOR)
-      ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
-      ->setEditPolicy(PhabricatorPolicies::POLICY_USER)
-      ->setJoinPolicy(PhabricatorPolicies::POLICY_USER)
+      ->setViewPolicy($view_policy)
+      ->setEditPolicy($edit_policy)
+      ->setJoinPolicy($join_policy)
       ->setIsMembershipLocked(0)
       ->attachMemberPHIDs(array())
       ->attachSlugs(array());

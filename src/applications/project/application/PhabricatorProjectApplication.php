@@ -98,6 +98,18 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
       ProjectCanLockProjectsCapability::CAPABILITY => array(
         'default' => PhabricatorPolicies::POLICY_ADMIN,
       ),
+      ProjectDefaultViewCapability::CAPABILITY => array(
+        'caption' => pht(
+          'Default view policy for newly created projects.'),
+      ),
+      ProjectDefaultEditCapability::CAPABILITY => array(
+        'caption' => pht(
+          'Default edit policy for newly created projects.'),
+      ),
+      ProjectDefaultJoinCapability::CAPABILITY => array(
+        'caption' => pht(
+          'Default join policy for newly created projects.'),
+      ),
     );
   }
 
