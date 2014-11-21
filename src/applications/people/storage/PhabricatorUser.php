@@ -943,4 +943,8 @@ EOBODY;
     }
   }
 
+  public function getSSHKeyDefaultName() {
+    return 'id_rsa_phabricator';
+  }
+
 }

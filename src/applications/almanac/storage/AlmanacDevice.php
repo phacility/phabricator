@@ -170,5 +170,9 @@ final class AlmanacDevice
     return $this->getURI();
   }
 
+  public function getSSHKeyDefaultName() {
+    return $this->getName();
+  }
+
 
 }
