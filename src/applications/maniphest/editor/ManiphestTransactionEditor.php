@@ -501,6 +501,34 @@ final class ManiphestTransactionEditor
       pht('TASK DETAIL'),
       PhabricatorEnv::getProductionURI('/T'.$object->getID()));
 
+
+    $board_phids = array();
+    $type_column = ManiphestTransaction::TYPE_PROJECT_COLUMN;
+    foreach ($xactions as $xaction) {
+      if ($xaction->getTransactionType() == $type_column) {
+        $new = $xaction->getNewValue();
+        $project_phid = idx($new, 'projectPHID');
+        if ($project_phid) {
+          $board_phids[] = $project_phid;
+        }
+      }
+    }
+
+    if ($board_phids) {
+      $projects = id(new PhabricatorProjectQuery())
+        ->setViewer($this->requireActor())
+        ->withPHIDs($board_phids)
+        ->execute();
+
+      foreach ($projects as $project) {
+        $body->addLinkSection(
+          pht('WORKBOARD'),
+          PhabricatorEnv::getProductionURI(
+            '/project/board/'.$project->getID().'/'));
+      }
+    }
+
+
     return $body;
   }
 

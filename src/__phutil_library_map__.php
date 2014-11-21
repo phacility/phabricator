@@ -5312,6 +5312,7 @@ phutil_register_library_map(array(
       'PhabricatorRepositoryDAO',
       'PhabricatorPolicyInterface',
       'PhabricatorFlaggableInterface',
+      'PhabricatorProjectInterface',
       'PhabricatorTokenReceiverInterface',
       'PhabricatorSubscribableInterface',
       'PhabricatorMentionableInterface',
