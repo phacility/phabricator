@@ -268,6 +268,15 @@ final class PhabricatorConduitAPIController
       if ($object instanceof PhabricatorUser) {
         $user = $object;
       } else {
+        if (!$stored_key->getIsTrusted()) {
+          return array(
+            'ERR-INVALID-AUTH',
+            pht(
+              'The key which signed this request is not trusted. Only '.
+              'trusted keys can be used to sign API calls.'),
+          );
+        }
+
         throw new Exception(
           pht('Not Implemented: Would authenticate Almanac device.'));
       }

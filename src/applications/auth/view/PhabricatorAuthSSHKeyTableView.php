@@ -5,6 +5,8 @@ final class PhabricatorAuthSSHKeyTableView extends AphrontView {
   private $keys;
   private $canEdit;
   private $noDataString;
+  private $showTrusted;
+  private $showID;
 
   public function setNoDataString($no_data_string) {
     $this->noDataString = $no_data_string;
@@ -13,6 +15,16 @@ final class PhabricatorAuthSSHKeyTableView extends AphrontView {
 
   public function setCanEdit($can_edit) {
     $this->canEdit = $can_edit;
+    return $this;
+  }
+
+  public function setShowTrusted($show_trusted) {
+    $this->showTrusted = $show_trusted;
+    return $this;
+  }
+
+  public function setShowID($show_id) {
+    $this->showID = $show_id;
     return $this;
   }
 
@@ -32,9 +44,15 @@ final class PhabricatorAuthSSHKeyTableView extends AphrontView {
       $delete_class = 'small grey button disabled';
     }
 
+    $trusted_icon = id(new PHUIIconView())
+      ->setIconFont('fa-star blue');
+    $untrusted_icon = id(new PHUIIconView())
+      ->setIconFont('fa-times grey');
+
     $rows = array();
     foreach ($keys as $key) {
       $rows[] = array(
+        $key->getID(),
         javelin_tag(
           'a',
           array(
@@ -42,6 +60,7 @@ final class PhabricatorAuthSSHKeyTableView extends AphrontView {
             'sigil' => 'workflow',
           ),
           $key->getName()),
+        $key->getIsTrusted() ? $trusted_icon : $untrusted_icon,
         $key->getKeyComment(),
         $key->getKeyType(),
         phabricator_datetime($key->getDateCreated(), $viewer),
@@ -60,15 +79,25 @@ final class PhabricatorAuthSSHKeyTableView extends AphrontView {
       ->setNoDataString($this->noDataString)
       ->setHeaders(
         array(
+          pht('ID'),
           pht('Name'),
+          pht('Trusted'),
           pht('Comment'),
           pht('Type'),
           pht('Added'),
           null,
         ))
+      ->setColumnVisibility(
+        array(
+          $this->showID,
+          true,
+          $this->showTrusted,
+        ))
       ->setColumnClasses(
         array(
+          '',
           'wide pri',
+          'center',
           '',
           '',
           'right',

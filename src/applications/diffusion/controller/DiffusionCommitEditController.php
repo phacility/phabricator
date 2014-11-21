@@ -22,7 +22,7 @@ final class DiffusionCommitEditController extends DiffusionController {
     }
 
     $commit_phid        = $commit->getPHID();
-    $edge_type          = PhabricatorEdgeConfig::TYPE_COMMIT_HAS_PROJECT;
+    $edge_type          = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
     $current_proj_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $commit_phid,
       $edge_type);
@@ -30,23 +30,17 @@ final class DiffusionCommitEditController extends DiffusionController {
     $proj_t_values = $handles;
 
     if ($request->isFormPost()) {
+      $xactions = array();
       $proj_phids = $request->getArr('projects');
-      $new_proj_phids = array_values($proj_phids);
-      $rem_proj_phids = array_diff($current_proj_phids,
-                                   $new_proj_phids);
-
-      $editor = id(new PhabricatorEdgeEditor());
-      foreach ($rem_proj_phids as $phid) {
-        $editor->removeEdge($commit_phid, $edge_type, $phid);
-      }
-      foreach ($new_proj_phids as $phid) {
-        $editor->addEdge($commit_phid, $edge_type, $phid);
-      }
-      $editor->save();
-
-      id(new PhabricatorSearchIndexer())
-        ->queueDocumentForIndexing($commit->getPHID());
-
+      $xactions[] = id(new PhabricatorAuditTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+        ->setMetadataValue('edge:type', $edge_type)
+        ->setNewValue(array('=' => array_fuse($proj_phids)));
+      $editor = id(new PhabricatorAuditEditor())
+        ->setActor($user)
+        ->setContinueOnNoEffect(true)
+        ->setContentSourceFromRequest($request);
+      $xactions = $editor->applyTransactions($commit, $xactions);
       return id(new AphrontRedirectResponse())
       ->setURI('/r'.$callsign.$commit->getCommitIdentifier());
     }

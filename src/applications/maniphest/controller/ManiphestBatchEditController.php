@@ -115,11 +115,8 @@ final class ManiphestBatchEditController extends ManiphestController {
           'id'   => 'batch-form-actions',
         )));
     $form->appendChild(
-      phutil_tag('p', array(), pht('These tasks will be edited:')));
-    $form->appendChild($list);
-    $form->appendChild(
       id(new PHUIFormInsetView())
-        ->setTitle('Actions')
+        ->setTitle(pht('Actions'))
         ->setRightButton(javelin_tag(
             'a',
             array(
@@ -146,18 +143,22 @@ final class ManiphestBatchEditController extends ManiphestController {
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($title);
 
+    $task_box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Selected Tasks'))
+      ->appendChild($list);
+
     $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Batch Edit Tasks'))
+      ->setHeaderText(pht('Batch Editor'))
       ->setForm($form);
 
     return $this->buildApplicationPage(
       array(
         $crumbs,
+        $task_box,
         $form_box,
       ),
       array(
         'title' => $title,
-        'device' => false,
       ));
   }
 

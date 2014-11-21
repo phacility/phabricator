@@ -352,6 +352,7 @@ final class ManiphestTransaction
         return 'fa-columns';
 
       case self::TYPE_MERGED_INTO:
+        return 'fa-check';
       case self::TYPE_MERGED_FROM:
         return 'fa-compress';
 

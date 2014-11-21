@@ -5,6 +5,7 @@ final class PhabricatorRepositoryCommit
   implements
     PhabricatorPolicyInterface,
     PhabricatorFlaggableInterface,
+    PhabricatorProjectInterface,
     PhabricatorTokenReceiverInterface,
     PhabricatorSubscribableInterface,
     PhabricatorMentionableInterface,

@@ -52,11 +52,15 @@ final class AlmanacQueryServicesConduitAPIMethod
 
     $services = $query->executeWithCursorPager($pager);
 
-    $bindings = id(new AlmanacBindingQuery())
-      ->setViewer($viewer)
-      ->withServicePHIDs(mpull($services, 'getPHID'))
-      ->execute();
-    $bindings = mgroup($bindings, 'getServicePHID');
+    if ($services) {
+      $bindings = id(new AlmanacBindingQuery())
+        ->setViewer($viewer)
+        ->withServicePHIDs(mpull($services, 'getPHID'))
+        ->execute();
+      $bindings = mgroup($bindings, 'getServicePHID');
+    } else {
+      $bindings = array();
+    }
 
     $data = array();
     foreach ($services as $service) {

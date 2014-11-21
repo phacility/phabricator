@@ -40,7 +40,9 @@ final class DifferentialHunkParserTestCase extends PhabricatorTestCase {
       throw new Exception("Expected 1 changeset for '{$name}'!");
     }
 
-    $diff = DifferentialDiff::newFromRawChanges($changes);
+    $diff = DifferentialDiff::newFromRawChanges(
+      PhabricatorUser::getOmnipotentUser(),
+      $changes);
     return head($diff->getChangesets())->getHunks();
   }
 

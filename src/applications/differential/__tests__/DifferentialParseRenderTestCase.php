@@ -35,7 +35,9 @@ final class DifferentialParseRenderTestCase extends PhabricatorTestCase {
     $parser = new ArcanistDiffParser();
     $changes = $parser->parseDiff($data);
 
-    $diff = DifferentialDiff::newFromRawChanges($changes);
+    $diff = DifferentialDiff::newFromRawChanges(
+      PhabricatorUser::getOmnipotentUser(),
+      $changes);
     if (count($diff->getChangesets()) !== 1) {
       throw new Exception("Expected one changeset: {$file}");
     }

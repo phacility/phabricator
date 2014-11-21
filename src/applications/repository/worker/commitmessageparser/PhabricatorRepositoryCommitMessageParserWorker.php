@@ -265,7 +265,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       $changes = array();
     }
 
-    $diff = DifferentialDiff::newFromRawChanges($changes)
+    $diff = DifferentialDiff::newFromRawChanges($viewer, $changes)
       ->setRepositoryPHID($this->repository->getPHID())
       ->setAuthorPHID($actor_phid)
       ->setCreationMethod('commit')
