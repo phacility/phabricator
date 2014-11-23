@@ -53,7 +53,16 @@ final class PhabricatorFile extends PhabricatorFileDAO
   private $originalFile = self::ATTACHABLE;
 
   public static function initializeNewFile() {
+    $app = id(new PhabricatorApplicationQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withClasses(array('PhabricatorFilesApplication'))
+      ->executeOne();
+
+    $view_policy = $app->getPolicy(
+      FilesDefaultViewCapability::CAPABILITY);
+
     return id(new PhabricatorFile())
+      ->setViewPolicy($view_policy)
       ->attachOriginalFile(null)
       ->attachObjects(array())
       ->attachObjectPHIDs(array());
