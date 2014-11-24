@@ -7,8 +7,8 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => 'c48b3276',
-    'core.pkg.js' => 'e5f7f2ba',
+    'core.pkg.css' => '8db4d657',
+    'core.pkg.js' => 'a78e2fa6',
     'darkconsole.pkg.js' => 'df001cab',
     'differential.pkg.css' => '8af45893',
     'differential.pkg.js' => '42c10e78',
@@ -30,7 +30,7 @@ return array(
     'rsrc/css/aphront/phabricator-nav-view.css' => '9283c2df',
     'rsrc/css/aphront/table-view.css' => 'b22b7216',
     'rsrc/css/aphront/tokenizer.css' => '82ce2142',
-    'rsrc/css/aphront/tooltip.css' => '9c90229d',
+    'rsrc/css/aphront/tooltip.css' => '4099b97e',
     'rsrc/css/aphront/transaction.css' => '5d0cae25',
     'rsrc/css/aphront/two-column.css' => '16ab3ad2',
     'rsrc/css/aphront/typeahead.css' => 'a989b5b3',
@@ -449,7 +449,7 @@ return array(
     'rsrc/js/core/ShapedRequest.js' => '7cbe244b',
     'rsrc/js/core/TextAreaUtils.js' => '5c93c52c',
     'rsrc/js/core/Title.js' => '5c1c758c',
-    'rsrc/js/core/ToolTip.js' => '3915d490',
+    'rsrc/js/core/ToolTip.js' => 'ef8ca3d9',
     'rsrc/js/core/behavior-active-nav.js' => 'e379b58e',
     'rsrc/js/core/behavior-audio-source.js' => '59b251eb',
     'rsrc/js/core/behavior-autofocus.js' => '7319e029',
@@ -508,7 +508,7 @@ return array(
     'aphront-panel-view-css' => '5846dfa2',
     'aphront-table-view-css' => 'b22b7216',
     'aphront-tokenizer-control-css' => '82ce2142',
-    'aphront-tooltip-css' => '9c90229d',
+    'aphront-tooltip-css' => '4099b97e',
     'aphront-two-column-view-css' => '16ab3ad2',
     'aphront-typeahead-control-css' => 'a989b5b3',
     'auth-css' => '1e655982',
@@ -741,7 +741,7 @@ return array(
     'phabricator-standard-page-view' => '3f5b9311',
     'phabricator-textareautils' => '5c93c52c',
     'phabricator-title' => '5c1c758c',
-    'phabricator-tooltip' => '3915d490',
+    'phabricator-tooltip' => 'ef8ca3d9',
     'phabricator-transaction-view-css' => '5d0cae25',
     'phabricator-ui-example-css' => '528b19de',
     'phabricator-uiexample-javelin-view' => 'd4a14807',
@@ -1045,12 +1045,6 @@ return array(
     '361e3ed3' => array(
       'javelin-behavior',
       'javelin-dom',
-    ),
-    '3915d490' => array(
-      'javelin-install',
-      'javelin-util',
-      'javelin-dom',
-      'javelin-vector',
     ),
     '3ab51e2c' => array(
       'javelin-behavior',
@@ -1833,6 +1827,12 @@ return array(
       'javelin-workflow',
       'javelin-dom',
       'phabricator-draggable-list',
+    ),
+    'ef8ca3d9' => array(
+      'javelin-install',
+      'javelin-util',
+      'javelin-dom',
+      'javelin-vector',
     ),
     'efe49472' => array(
       'javelin-install',

@@ -29,13 +29,18 @@ JX.install('Tooltip', {
         }
       }
 
-      var node = JX.$N(
+      var node_inner = JX.$N(
         'div',
-        { className: 'jx-tooltip-container' },
+        { className: 'jx-tooltip-inner' },
         [
           JX.$N('div', { className: 'jx-tooltip' }, content),
           JX.$N('div', { className: 'jx-tooltip-anchor' })
         ]);
+
+      var node = JX.$N(
+        'div',
+        { className: 'jx-tooltip-container' },
+        node_inner);
 
       node.style.maxWidth  = scale + 'px';
 
