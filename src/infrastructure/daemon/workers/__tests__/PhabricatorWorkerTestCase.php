@@ -160,14 +160,14 @@ final class PhabricatorWorkerTestCase extends PhabricatorTestCase {
     $this->expectNextLease($task1);
   }
 
-  public function testLeasedIsHighestPriority() {
-    $task1 = $this->scheduleTask(array(), 1);
-    $task2 = $this->scheduleTask(array(), 1);
-    $task3 = $this->scheduleTask(array(), 2);
+  public function testLeasedIsLowestPriority() {
+    $task1 = $this->scheduleTask(array(), 2);
+    $task2 = $this->scheduleTask(array(), 2);
+    $task3 = $this->scheduleTask(array(), 1);
 
     $this->expectNextLease(
       $task3,
-      'Tasks with a higher priority should be scheduled first.');
+      'Tasks with a lower priority should be scheduled first.');
     $this->expectNextLease(
       $task1,
       'Tasks with the same priority should be FIFO.');
