@@ -254,6 +254,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
           ->setControlStyle('display: none'))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
+          ->setUser($user)
           ->setLabel(pht('Comments'))
           ->setName('comments')
           ->setValue($draft_text)

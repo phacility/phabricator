@@ -157,6 +157,7 @@ final class PholioInlineController extends PholioController {
     $form
       ->appendChild(
         id(new PhabricatorRemarkupControl())
+          ->setUser($viewer)
           ->setName('content')
           ->setLabel(pht('Comment'))
           ->setValue($v_content));

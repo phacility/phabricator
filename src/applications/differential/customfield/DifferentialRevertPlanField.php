@@ -85,6 +85,7 @@ final class DifferentialRevertPlanField
 
   public function renderEditControl(array $handles) {
     return id(new PhabricatorRemarkupControl())
+      ->setUser($this->getViewer())
       ->setName($this->getFieldKey())
       ->setValue($this->getValue())
       ->setLabel($this->getFieldName());
