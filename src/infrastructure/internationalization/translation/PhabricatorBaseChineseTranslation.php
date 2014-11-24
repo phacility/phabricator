@@ -12,10 +12,10 @@ abstract class PhabricatorBaseChineseTranslation
       // phabricator/src/applications/diffusion/view/DiffusionBranchTableView.php:119
       // phabricator/src/applications/settings/panel/PhabricatorSettingsPanelSessions.php:100
       // phabricator/src/applications/settings/panel/PhabricatorSettingsPanelTokens.php:70
-      '' => null,
+      '' => '',
     
       // phabricator/src/applications/people/controller/PhabricatorPeopleDeleteController.php:54
-      '  phabricator/ $ ./bin/remove destroy %s\n' => null,
+      '  phabricator/ $ ./bin/remove destroy %s\n' => '  phabricator/ $ ./bin/remove destroy %s\n',
     
       // phabricator/src/applications/system/management/PhabricatorSystemRemoveDestroyWorkflow.php:59
       ' IMPORTANT: OBJECTS WILL BE PERMANENTLY DESTROYED! ' => ' 重要: 对象将被永久摧毁！ ',
@@ -24,7 +24,7 @@ abstract class PhabricatorBaseChineseTranslation
       '"%s"' => null,
     
       // phabricator/src/applications/auth/view/PhabricatorAuthAccountView.php:54
-      '"%s" Account' => '"%s" 账号',
+      '"%s" Account' => '"%s" 帐号',
     
       // phabricator/src/applications/phragment/controller/PhragmentSnapshotViewController.php:43
       // phabricator/src/applications/phragment/controller/PhragmentSnapshotViewController.php:99
@@ -173,7 +173,7 @@ abstract class PhabricatorBaseChineseTranslation
       '%s\n\nTo configure Amazon OAuth, create a new \'API Project\' here:\n\nhttp://login.amazon.com/manageApps\n\nUse these settings:\n\n  - **Allowed Return URLs:** Add this: `%s`\n\nAfter completing configuration, copy the **Client ID** and **Client Secret** to the fields above.' => null,
     
       // phabricator/src/applications/settings/panel/PhabricatorSettingsPanelDeveloperPreferences.php:53
-      '%s\n\nYou can enable it for your account below. Enabling DarkConsole will slightly decrease performance, but give you access to debugging tools. You may want to disable it again later if you only need it temporarily.\n\nNOTE: After enabling DarkConsole, **press the ##`## key on your keyboard** to show or hide it.' => '%s\n\n你可以在你的账号下启用它。启用DarkConsole会轻微的降低性能，但是能够让你使用调试工具。如果你只是临时使用，稍后可以再禁用它。\n\n注意: 启用DarkConsole后, **可以按 ##`## 键** 显示或者隐藏',
+      '%s\n\nYou can enable it for your account below. Enabling DarkConsole will slightly decrease performance, but give you access to debugging tools. You may want to disable it again later if you only need it temporarily.\n\nNOTE: After enabling DarkConsole, **press the ##`## key on your keyboard** to show or hide it.' => '%s\n\n你可以在你的帐号下启用它。启用DarkConsole会轻微的降低性能，但是能够让你使用调试工具。如果你只是临时使用，稍后可以再禁用它。\n\n注意: 启用DarkConsole后, **可以按 ##`## 键** 显示或者隐藏',
     
       // phabricator/src/applications/fund/controller/FundInitiativeViewController.php:28
       // phabricator/src/applications/phriction/controller/PhrictionDiffController.php:268
@@ -215,10 +215,10 @@ abstract class PhabricatorBaseChineseTranslation
       '%s (bookmark) on %s (branch)' => '%s (书签) on %s (branch)',
     
       // phabricator/src/applications/people/event/PhabricatorPeopleHovercardEventListener.php:32
-      '%s - %s.' => null,
+      '%s - %s.' => '%s - %s。',
     
       // phabricator/src/applications/auth/view/PhabricatorAuthAccountView.php:52
-      '%s Account' => '%s 账号',
+      '%s Account' => '%s 帐号',
     
       // phabricator/src/infrastructure/customfield/standard/PhabricatorStandardCustomFieldDate.php:146
       '%s After' => '%s 之后',
@@ -351,10 +351,10 @@ abstract class PhabricatorBaseChineseTranslation
       '%s added %d subscriber(s): %s.' => '%s 添加了 %d 个订阅人: %s。',
     
       // phabricator/src/applications/phortune/edge/PhortuneAccountHasMemberEdgeType.php:60
-      '%s added %s account member(s) to %s: %s.' => '%s 添加了 %s 账号成员给 %s: %s。',
+      '%s added %s account member(s) to %s: %s.' => '%s 添加了 %s 帐号成员给 %s: %s。',
     
       // phabricator/src/applications/phortune/edge/PhortuneAccountHasMemberEdgeType.php:17
-      '%s added %s account member(s): %s.' => '%s 添加了 %s 账号成员: %s。',
+      '%s added %s account member(s): %s.' => '%s 添加了 %s 帐号成员: %s。',
     
       // phabricator/src/applications/maniphest/edge/ManiphestTaskHasCommitEdgeType.php:64
       '%s added %s commit(s) to %s: %s.' => '%s 添加了 %s 对 %s: %s 添加了代码提交',
@@ -801,7 +801,7 @@ abstract class PhabricatorBaseChineseTranslation
       '%s created dashboard %s.' => '%s 创建了面板 %s。',
     
       // phabricator/src/applications/dashboard/storage/PhabricatorDashboardPanelTransaction.php:70
-      '%s created dashboard panel %s.' => null,
+      '%s created dashboard panel %s.' => '%s 创建了控制面板 %s。',
     
       // phabricator/src/applications/feed/story/PhabricatorFeedStoryDifferential.php:101
       '%s created revision %s' => '%s 创建了修订 %s',
@@ -810,13 +810,13 @@ abstract class PhabricatorBaseChineseTranslation
       '%s created revision %s %s' => '%s 创建了修订 %s %s',
     
       // phabricator/src/applications/phortune/storage/PhortuneAccountTransaction.php:30
-      '%s created this account.' => '%s 创建了这个账号。',
+      '%s created this account.' => '%s 创建了这个帐号。',
     
       // phabricator/src/applications/drydock/storage/DrydockBlueprintTransaction.php:25
       '%s created this blueprint.' => '%s 创建了这个蓝图。',
     
       // phabricator/src/applications/harbormaster/storage/configuration/HarbormasterBuildPlanTransaction.php:56
-      '%s created this build plan.' => '%s 创建了这个编译计划。',
+      '%s created this build plan.' => '%s 创建了这个构建计划。',
     
       // phabricator/src/applications/harbormaster/storage/configuration/HarbormasterBuildStepTransaction.php:28
       '%s created this build step.' => '%s 创建了这个编译步骤。',
@@ -855,7 +855,7 @@ abstract class PhabricatorBaseChineseTranslation
       '%s created this paste.' => '%s 创建了这个粘贴。',
     
       // phabricator/src/applications/phortune/storage/PhortunePaymentProviderConfigTransaction.php:33
-      '%s created this payment provider.' => '%s 创建了这个支付提供商。',
+      '%s created this payment provider.' => '%s 创建了这个支付服务提供商。',
     
       // phabricator/src/applications/slowvote/storage/PhabricatorSlowvoteTransaction.php:49
       '%s created this poll.' => '%s 创建了这个投票。',
@@ -913,10 +913,10 @@ abstract class PhabricatorBaseChineseTranslation
       '%s disabled %s.' => '%s 禁用了 %s.',
     
       // phabricator/src/applications/auth/storage/PhabricatorAuthProviderConfigTransaction.php:110
-      '%s disabled account linking.' => '%s 禁用了账号连接。',
+      '%s disabled account linking.' => '%s 禁用了帐号连接。',
     
       // phabricator/src/applications/auth/storage/PhabricatorAuthProviderConfigTransaction.php:121
-      '%s disabled account unlinking.' => '%s 禁用了账号连接解除。',
+      '%s disabled account unlinking.' => '%s 禁用了帐号连接解除。',
     
       // phabricator/src/applications/repository/storage/PhabricatorRepositoryTransaction.php:265
       '%s disabled autoclose for this repository.' => '%s 禁用了这个代码库的自动关闭功能。',
@@ -940,13 +940,13 @@ abstract class PhabricatorBaseChineseTranslation
       '%s disabled the audio for this macro.' => '%s 禁用了这个宏的音频。',
     
       // phabricator/src/applications/harbormaster/storage/configuration/HarbormasterBuildPlanTransaction.php:68
-      '%s disabled this build plan.' => '%s 禁用了这个编译计划。',
+      '%s disabled this build plan.' => '%s 禁用了这个构建计划。',
     
       // phabricator/src/applications/macro/storage/PhabricatorMacroTransaction.php:70
       '%s disabled this macro.' => '%s 禁用了这个宏',
     
       // phabricator/src/applications/phortune/storage/PhortunePaymentProviderConfigTransaction.php:42
-      '%s disabled this payment provider.' => '%s 禁用了这个支付提供商',
+      '%s disabled this payment provider.' => '%s 禁用了这个支付服务提供商',
     
       // phabricator/src/applications/auth/storage/PhabricatorAuthProviderConfigTransaction.php:88
       '%s disabled this provider.' => '%s 禁用了这个提供程序。',
@@ -970,10 +970,10 @@ abstract class PhabricatorBaseChineseTranslation
       '%s edited %s %s' => '%s 编辑了 %s %s',
     
       // phabricator/src/applications/phortune/edge/PhortuneAccountHasMemberEdgeType.php:91
-      '%s edited %s account member(s) for %s, added %s: %s; removed %s: %s.' => '%s 编辑了 %s 账号成员为了 %s, 添加了 %s: %s; 移除了 %s: %s。',
+      '%s edited %s account member(s) for %s, added %s: %s; removed %s: %s.' => '%s 编辑了 %s 帐号成员为了 %s, 添加了 %s: %s; 移除了 %s: %s。',
     
       // phabricator/src/applications/phortune/edge/PhortuneAccountHasMemberEdgeType.php:44
-      '%s edited %s account member(s), added %s: %s; removed %s: %s.' => '%s 编辑了 %s 账号成员, 添加了 %s: %s; 移除了 %s: %s。',
+      '%s edited %s account member(s), added %s: %s; removed %s: %s.' => '%s 编辑了 %s 帐号成员, 添加了 %s: %s; 移除了 %s: %s。',
     
       // phabricator/src/applications/maniphest/edge/ManiphestTaskHasCommitEdgeType.php:95
       '%s edited %s commit(s) for %s, added %s: %s; removed %s: %s.' => '%s 编辑了 %s 代码提交为了 %s, 添加了 %s: %s; 移除了 %s: %s。',
@@ -1001,145 +1001,145 @@ abstract class PhabricatorBaseChineseTranslation
     
       // phabricator/src/applications/differential/edge/DifferentialRevisionHasTaskEdgeType.php:95
       // phabricator/src/applications/diffusion/edge/DiffusionCommitHasTaskEdgeType.php:95
-      '%s edited %s task(s) for %s, added %s: %s; removed %s: %s.' => null,
+      '%s edited %s task(s) for %s, added %s: %s; removed %s: %s.' => '%s 编辑了 %s 个任务为了 %s, 添加了 %s: %s; 移除了 %s: %s。',
     
       // phabricator/src/applications/differential/edge/DifferentialRevisionHasTaskEdgeType.php:48
       // phabricator/src/applications/diffusion/edge/DiffusionCommitHasTaskEdgeType.php:48
-      '%s edited %s task(s), added %s: %s; removed %s: %s.' => null,
+      '%s edited %s task(s), added %s: %s; removed %s: %s.' => '%s 编辑了 %s 个任务, 添加了 %s: %s; 移除了 %s: %s。',
     
       // phabricator/src/infrastructure/customfield/standard/PhabricatorStandardCustomFieldRemarkup.php:56
       // phabricator/src/applications/paste/storage/PhabricatorPasteTransaction.php:110
       // phabricator/src/applications/ponder/storage/PonderAnswerTransaction.php:55
-      '%s edited %s.' => null,
+      '%s edited %s.' => '%s 编辑 %s。',
     
       // phabricator/src/applications/transactions/storage/PhabricatorApplicationTransaction.php:809
-      '%s edited a custom field on %s.' => null,
+      '%s edited a custom field on %s.' => '%s 编辑了 %s.',
     
       // phabricator/src/applications/transactions/storage/PhabricatorApplicationTransaction.php:681
-      '%s edited a custom field.' => null,
+      '%s edited a custom field.' => '%s 编辑了自定义字段。',
     
       // phabricator/src/applications/phortune/storage/PhortunePaymentProviderConfigTransaction.php:49
-      '%s edited a property of this payment provider.' => null,
+      '%s edited a property of this payment provider.' => '%s 编辑了这个支付服务提供商的特性。',
     
       // phabricator/src/applications/auth/storage/PhabricatorAuthProviderConfigTransaction.php:146
-      '%s edited a property of this provider.' => null,
+      '%s edited a property of this provider.' => '%s 编辑了这个提供商的特性。',
     
       // phabricator/src/applications/audit/storage/PhabricatorAuditTransaction.php:215
-      '%s edited auditors for %s; added: %s, removed: %s.' => null,
+      '%s edited auditors for %s; added: %s, removed: %s.' => '%s 编辑了 %s 的审核人; 添加了: %s, 移除了: %s。',
     
       // phabricator/src/applications/audit/storage/PhabricatorAuditTransaction.php:137
-      '%s edited auditors; added: %s, removed: %s.' => null,
+      '%s edited auditors; added: %s, removed: %s.' => '%s 编辑了审核人; 添加了: %s, 移除了: %s。',
     
       // phabricator/src/applications/transactions/storage/PhabricatorApplicationTransaction.php:798
-      '%s edited edge metadata for %s.' => null,
+      '%s edited edge metadata for %s.' => '%s 编辑了 %s 的边缘元数据。',
     
       // phabricator/src/applications/transactions/storage/PhabricatorApplicationTransaction.php:671
-      '%s edited edge metadata.' => null,
+      '%s edited edge metadata.' => '%s 编辑了边缘元数据。',
     
       // phabricator/src/applications/conpherence/storage/ConpherenceTransaction.php:80
-      '%s edited files(s), added %d and removed %d.' => null,
+      '%s edited files(s), added %d and removed %d.' => '%s 编辑了文件, 添加了 %d 个并且移除了 %d个。',
     
       // phabricator/src/applications/pholio/storage/PholioTransaction.php:166
-      '%s edited image(s), added %d: %s; removed %d: %s.' => null,
+      '%s edited image(s), added %d: %s; removed %d: %s.' => '%s 编辑了图片, 添加了 %d 个: %s; 移除了 %d 个: %s。',
     
       // phabricator/src/applications/conpherence/storage/ConpherenceTransaction.php:103
-      '%s edited participant(s), added %d: %s; removed %d: %s.' => null,
+      '%s edited participant(s), added %d: %s; removed %d: %s.' => '%s 编辑了参与者, 添加了 %d 个: %s; 移除了 %d 个: %s。',
     
       // phabricator/src/applications/transactions/storage/PhabricatorApplicationTransaction.php:615
-      '%s edited subscriber(s), added %d: %s; removed %d: %s.' => null,
+      '%s edited subscriber(s), added %d: %s; removed %d: %s.' => '%s 编辑了订阅人, 添加了 %d 个: %s; 移除了 %d 个: %s。',
     
       // phabricator/src/applications/audit/storage/PhabricatorAuditTransaction.php:114
-      '%s edited subscribers; added: %s, removed: %s.' => null,
+      '%s edited subscribers; added: %s, removed: %s.' => '%s 编辑了订阅人; 添加了: %s, 移除了: %s。',
     
       // phabricator/src/applications/paste/storage/PhabricatorPasteTransaction.php:73
-      '%s edited the content of this paste.' => null,
+      '%s edited the content of this paste.' => '%s 编辑了这个帖子的内容。',
     
       // phabricator/src/applications/ponder/storage/PonderQuestionTransaction.php:228
-      '%s edited the description of %s' => null,
+      '%s edited the description of %s' => '%s 编辑了 %s 的描述',
     
       // phabricator/src/applications/maniphest/storage/ManiphestTransaction.php:638
-      '%s edited the description of %s.' => null,
+      '%s edited the description of %s.' => '%s 编辑了 %s 的描述。' ,
     
       // phabricator/src/applications/fund/storage/FundInitiativeTransaction.php:85
-      '%s edited the description of this initiative.' => null,
+      '%s edited the description of this initiative.' => '%s 编辑了这个倡议的描述。',
     
       // phabricator/src/applications/ponder/storage/PonderQuestionTransaction.php:74
-      '%s edited the question description.' => null,
+      '%s edited the question description.' => '%s 编辑了问题描述。',
     
       // phabricator/src/applications/ponder/storage/PonderQuestionTransaction.php:67
-      '%s edited the question title from "%s" to "%s".' => null,
+      '%s edited the question title from "%s" to "%s".' => '%s 编辑了问题标题从 "%s" 改为 "%s"。',
     
       // phabricator/src/applications/fund/storage/FundInitiativeTransaction.php:81
-      '%s edited the risks for this initiative.' => null,
+      '%s edited the risks for this initiative.' => '%s 编辑了这个倡议的风险。',
     
       // phabricator/src/applications/maniphest/storage/ManiphestTransaction.php:397
-      '%s edited the task description.' => null,
+      '%s edited the task description.' => '%s 编辑了任务描述。',
     
       // phabricator/src/applications/ponder/storage/PonderQuestionTransaction.php:221
-      '%s edited the title of %s (was "%s")' => null,
+      '%s edited the title of %s (was "%s")' => '%s 编辑了 %s 的标题(原来是 "%s")',
     
       // phabricator/src/applications/transactions/storage/PhabricatorApplicationTransaction.php:726
-      '%s edited this %s.' => null,
+      '%s edited this %s.' => '%s 编辑了这个 %s。',
     
       // phabricator/src/applications/config/storage/PhabricatorConfigTransaction.php:49
-      '%s edited this configuration entry.' => null,
+      '%s edited this configuration entry.' => '%s 编辑了这个配置条目。',
     
       // phabricator/src/applications/harbormaster/controller/HarbormasterBuildViewController.php:323
-      '%s empty logs are hidden.' => null,
+      '%s empty logs are hidden.' => '%s 空日志文件被隐藏。',
     
       // phabricator/src/applications/auth/storage/PhabricatorAuthProviderConfigTransaction.php:106
-      '%s enabled accont linking.' => null,
+      '%s enabled accont linking.' =>  '%s 启用了多连接。',
     
       // phabricator/src/applications/auth/storage/PhabricatorAuthProviderConfigTransaction.php:117
-      '%s enabled account unlinking.' => null,
+      '%s enabled account unlinking.' => '%s 启用了帐号连接解除。',
     
       // phabricator/src/applications/repository/storage/PhabricatorRepositoryTransaction.php:261
-      '%s enabled autoclose for this repository.' => null,
+      '%s enabled autoclose for this repository.' => '%s 启用了这个代码库的自动关闭功能。',
     
       // phabricator/src/applications/auth/storage/PhabricatorAuthProviderConfigTransaction.php:128
-      '%s enabled email trust.' => null,
+      '%s enabled email trust.' => '%s 启用了电子邮件信任。',
     
       // phabricator/src/applications/repository/storage/PhabricatorRepositoryTransaction.php:250
-      '%s enabled notifications and publishing for this repository.' => null,
+      '%s enabled notifications and publishing for this repository.' => '%s 启用了这个代码库的通知和发布功能。',
     
       // phabricator/src/applications/repository/storage/PhabricatorRepositoryTransaction.php:350
-      '%s enabled protection against dangerous changes.' => null,
+      '%s enabled protection against dangerous changes.' => '%s 启用了对抗危险修改的保护功能。',
     
       // phabricator/src/applications/auth/storage/PhabricatorAuthProviderConfigTransaction.php:95
-      '%s enabled registration.' => null,
+      '%s enabled registration.' => '%s 启用了注册。',
     
       // phabricator/src/applications/harbormaster/storage/configuration/HarbormasterBuildPlanTransaction.php:72
-      '%s enabled this build plan.' => null,
+      '%s enabled this build plan.' => '%s 启用了这个构建计划。',
     
       // phabricator/src/applications/phortune/storage/PhortunePaymentProviderConfigTransaction.php:38
-      '%s enabled this payment provider.' => null,
+      '%s enabled this payment provider.' => '%s 启用了这个支付服务提供商。',
     
       // phabricator/src/applications/auth/storage/PhabricatorAuthProviderConfigTransaction.php:84
-      '%s enabled this provider.' => null,
+      '%s enabled this provider.' => '%s 启用了这个提供商。',
     
       // phabricator/src/applications/herald/storage/HeraldRuleTransaction.php:84
-      '%s enabled this rule.' => null,
+      '%s enabled this rule.' => '%s 启用了这个规则。',
     
       // phabricator/src/applications/passphrase/storage/PassphraseCredentialTransaction.php:89
-      '%s examined the secret plaintext for this credential.' => null,
+      '%s examined the secret plaintext for this credential.' => '%s 校验了这个证书的加密明文。',
     
       // phabricator/src/applications/feed/story/PhabricatorFeedStoryDifferential.php:97
-      '%s explained the test plan for revision %s' => null,
+      '%s explained the test plan for revision %s' => '%s 解释了修订 %s 的测试计划',
     
       // phabricator/src/applications/feed/story/PhabricatorFeedStoryDifferential.php:188
-      '%s explained the test plan for revision %s %s' => null,
+      '%s explained the test plan for revision %s %s' => '%s 解释了修订 %s %s 的测试计划',
     
       // phabricator/src/applications/differential/constants/DifferentialAction.php:70
-      '%s explained the test plan for this revision.' => null,
+      '%s explained the test plan for this revision.' => '%s 解释了这个修订的测试计划。',
     
       // phabricator/src/applications/transactions/storage/PhabricatorApplicationTransaction.php:831
-      '%s failed to build %s for %s.' => null,
+      '%s failed to build %s for %s.' => '%s 构建 %s 为了 %s 失败了。',
     
       // phabricator/src/applications/transactions/storage/PhabricatorApplicationTransaction.php:716
-      '%s failed to build %s!' => null,
+      '%s failed to build %s!' => '%s 构建 %s 失败了!',
     
       // phabricator/src/applications/herald/adapter/HeraldDifferentialRevisionAdapter.php:367
-      '%s forbidden, these addresses have unsubscribed.' => null,
+      '%s forbidden, these addresses have unsubscribed.' => '%s 被禁止, 这些地址已经取消订阅。',
     
       // phabricator/src/applications/releeph/storage/ReleephRequestTransaction.php:95
       '%s found this request picks without error' => null,
@@ -3060,7 +3060,7 @@ abstract class PhabricatorBaseChineseTranslation
       'Adds a test provider to allow you to test payments. This allows users to make purchases by clicking a button without actually paying any money.' => null,
     
       // phabricator/src/applications/config/controller/PhabricatorConfigWelcomeController.php:153
-      'Adjust Account Settings' => '调整账号设置',
+      'Adjust Account Settings' => '调整帐号设置',
     
       // phabricator/src/applications/people/query/PhabricatorPeopleSearchEngine.php:239
       'Admin' => null,
@@ -9325,16 +9325,16 @@ abstract class PhabricatorBaseChineseTranslation
     
       // phabricator/src/applications/auth/controller/PhabricatorAuthRegisterController.php:342
       // phabricator/src/applications/people/phid/PhabricatorPeopleExternalPHIDType.php:8
-      'External Account' => '外部账号',
+      'External Account' => '外部帐号',
     
       // phabricator/src/applications/settings/panel/PhabricatorSettingsPanelExternalAccounts.php:11
-      'External Accounts' => '外部账号',
+      'External Accounts' => '外部帐号',
     
       // phabricator/src/applications/doorkeeper/engine/DoorkeeperObjectRef.php:108
       'External Object' => '外部对象',
     
       // phabricator/src/applications/people/storage/PhabricatorExternalAccount.php:161
-      'External accounts can only be edited by the account owner.' => '外部账号只能由账号的拥有者来编辑。',
+      'External accounts can only be edited by the account owner.' => '外部帐号只能由帐号的拥有者来编辑。',
     
       // phabricator/src/applications/config/check/PhabricatorSetupCheckExtraConfig.php:161
       'External loaders have been replaced. Extend `PhabricatorPHIDType` to implement new PHID and handle types.' => '外部加载器已经被替换。 扩展 `PhabricatorPHIDType` 继承新的PHID和句柄类型。',
@@ -22236,7 +22236,7 @@ abstract class PhabricatorBaseChineseTranslation
       'User Account' => null,
     
       // phabricator/src/applications/people/application/PhabricatorPeopleApplication.php:10
-      'User Accounts and Profiles' => '用户账号和配置',
+      'User Accounts and Profiles' => '用户帐号和配置',
     
       // phabricator/src/applications/people/query/PhabricatorPeopleLogSearchEngine.php:206
       'User Activity Logs' => null,
