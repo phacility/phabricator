@@ -7,8 +7,8 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => '8db4d657',
-    'core.pkg.js' => 'a78e2fa6',
+    'core.pkg.css' => 'fa2b86b3',
+    'core.pkg.js' => 'e64447dc',
     'darkconsole.pkg.js' => 'df001cab',
     'differential.pkg.css' => '8af45893',
     'differential.pkg.js' => '42c10e78',
@@ -140,7 +140,7 @@ return array(
     'rsrc/css/phui/phui-remarkup-preview.css' => '19ad512b',
     'rsrc/css/phui/phui-spacing.css' => '042804d6',
     'rsrc/css/phui/phui-status.css' => '888cedb8',
-    'rsrc/css/phui/phui-tag-view.css' => 'b0c282e0',
+    'rsrc/css/phui/phui-tag-view.css' => '6b74282b',
     'rsrc/css/phui/phui-text.css' => 'cf019f54',
     'rsrc/css/phui/phui-timeline-view.css' => '26bb3fd4',
     'rsrc/css/phui/phui-workboard-view.css' => '2bf82d00',
@@ -449,7 +449,7 @@ return array(
     'rsrc/js/core/ShapedRequest.js' => '7cbe244b',
     'rsrc/js/core/TextAreaUtils.js' => '5c93c52c',
     'rsrc/js/core/Title.js' => '5c1c758c',
-    'rsrc/js/core/ToolTip.js' => 'ef8ca3d9',
+    'rsrc/js/core/ToolTip.js' => '031d4411',
     'rsrc/js/core/behavior-active-nav.js' => 'e379b58e',
     'rsrc/js/core/behavior-audio-source.js' => '59b251eb',
     'rsrc/js/core/behavior-autofocus.js' => '7319e029',
@@ -741,7 +741,7 @@ return array(
     'phabricator-standard-page-view' => '3f5b9311',
     'phabricator-textareautils' => '5c93c52c',
     'phabricator-title' => '5c1c758c',
-    'phabricator-tooltip' => 'ef8ca3d9',
+    'phabricator-tooltip' => '031d4411',
     'phabricator-transaction-view-css' => '5d0cae25',
     'phabricator-ui-example-css' => '528b19de',
     'phabricator-uiexample-javelin-view' => 'd4a14807',
@@ -789,7 +789,7 @@ return array(
     'phui-remarkup-preview-css' => '19ad512b',
     'phui-spacing-css' => '042804d6',
     'phui-status-list-view-css' => '888cedb8',
-    'phui-tag-view-css' => 'b0c282e0',
+    'phui-tag-view-css' => '6b74282b',
     'phui-text-css' => 'cf019f54',
     'phui-timeline-view-css' => '26bb3fd4',
     'phui-workboard-view-css' => '2bf82d00',
@@ -838,6 +838,12 @@ return array(
     ),
     '029a133d' => array(
       'aphront-dialog-view-css',
+    ),
+    '031d4411' => array(
+      'javelin-install',
+      'javelin-util',
+      'javelin-dom',
+      'javelin-vector',
     ),
     '03d6ed07' => array(
       'javelin-behavior',
@@ -1827,12 +1833,6 @@ return array(
       'javelin-workflow',
       'javelin-dom',
       'phabricator-draggable-list',
-    ),
-    'ef8ca3d9' => array(
-      'javelin-install',
-      'javelin-util',
-      'javelin-dom',
-      'javelin-vector',
     ),
     'efe49472' => array(
       'javelin-install',

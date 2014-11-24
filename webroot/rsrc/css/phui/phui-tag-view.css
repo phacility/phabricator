@@ -334,10 +334,10 @@ a.phui-tag-view:hover.phui-tag-shade-disabled .phui-tag-core {
 }
 
 .phui-object-item .phabricator-handle-tag-list {
-  display: inline-block;
+  display: inline;
 }
 
 .phui-object-item .phabricator-handle-tag-list-item {
-  display: inline-block;
+  display: inline;
   margin: 0 4px 2px 0;
 }
