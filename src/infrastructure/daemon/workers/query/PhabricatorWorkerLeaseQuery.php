@@ -215,8 +215,8 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
     switch ($phase) {
       case self::PHASE_UNLEASED:
         // When selecting new tasks, we want to consume them in order of
-        // decreasing priority (and then FIFO).
-        return qsprintf($conn_w, 'ORDER BY priority DESC, id ASC');
+        // increasing priority (and then FIFO).
+        return qsprintf($conn_w, 'ORDER BY priority ASC, id ASC');
       case self::PHASE_EXPIRED:
         // When selecting failed tasks, we want to consume them in roughly
         // FIFO order of their failures, which is not necessarily their original

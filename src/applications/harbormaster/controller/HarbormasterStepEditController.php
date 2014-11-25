@@ -155,6 +155,7 @@ final class HarbormasterStepEditController extends HarbormasterController {
     $form
       ->appendChild(
         id(new PhabricatorRemarkupControl())
+          ->setUser($viewer)
           ->setName('description')
           ->setLabel(pht('Description'))
           ->setError($e_description)

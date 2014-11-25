@@ -200,11 +200,13 @@ final class FundInitiativeEditController
           ->setOptions($merchant_options))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
+          ->setUser($viewer)
           ->setName('description')
           ->setLabel(pht('Description'))
           ->setValue($v_desc))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
+          ->setUser($viewer)
           ->setName('risks')
           ->setLabel(pht('Risks/Challenges'))
           ->setValue($v_risk))

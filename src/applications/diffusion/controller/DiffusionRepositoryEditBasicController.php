@@ -120,6 +120,7 @@ final class DiffusionRepositoryEditBasicController
     $form
       ->appendChild(
         id(new PhabricatorRemarkupControl())
+          ->setUser($user)
           ->setName('description')
           ->setLabel(pht('Description'))
           ->setValue($v_desc))

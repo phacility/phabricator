@@ -16,18 +16,14 @@ final class PhabricatorUITooltipExample extends PhabricatorUIExample {
     require_celerity_resource('aphront-tooltip-css');
 
     $style = 'width: 200px; '.
-             'height: 200px '.
              'text-align: center; '.
              'margin: 20px; '.
              'background: #dfdfdf; '.
-             'padding: 30px 10px; '.
+             'padding: 20px 10px; '.
              'border: 1px solid black; ';
 
     $lorem = <<<EOTEXT
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eget urna
-sed ante ultricies consequat id a odio. Mauris interdum volutpat sapien eu
-accumsan. In hac habitasse platea dictumst. Lorem ipsum dolor sit amet,
-consectetur adipiscing elit.
+Lorem ipsum dolor sit amet, consectetur adipiscing elit.
 EOTEXT;
 
     $overflow = str_repeat('M', 1024);

@@ -9,10 +9,14 @@ abstract class PhabricatorWorker {
   private static $runAllTasksInProcess = false;
   private $queuedTasks = array();
 
-  const PRIORITY_ALERTS  = 4000;
-  const PRIORITY_DEFAULT = 3000;
-  const PRIORITY_BULK    = 2000;
-  const PRIORITY_IMPORT  = 1000;
+  // NOTE: Lower priority numbers execute first. The priority numbers have to
+  // have the same ordering that IDs do (lowest first) so MySQL can use a
+  // multipart key across both of them efficiently.
+
+  const PRIORITY_ALERTS  = 1000;
+  const PRIORITY_DEFAULT = 2000;
+  const PRIORITY_BULK    = 3000;
+  const PRIORITY_IMPORT  = 4000;
 
 
 /* -(  Configuring Retries and Failures  )----------------------------------- */

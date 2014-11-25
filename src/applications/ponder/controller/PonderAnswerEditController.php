@@ -71,6 +71,7 @@ final class PonderAnswerEditController extends PonderController {
           ->setValue($question->getTitle()))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
+          ->setUser($viewer)
           ->setLabel(pht('Answer'))
           ->setName('content')
           ->setID($answer_content_id)

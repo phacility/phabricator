@@ -98,6 +98,7 @@ final class PonderQuestionEditController extends PonderController {
           ->setError($e_title))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
+          ->setUser($user)
           ->setName('content')
           ->setID('content')
           ->setValue($v_content)

@@ -53,6 +53,7 @@ final class DifferentialTestPlanField
 
   public function renderEditControl(array $handles) {
     return id(new PhabricatorRemarkupControl())
+      ->setUser($this->getViewer())
       ->setName($this->getFieldKey())
       ->setValue($this->getValue())
       ->setError($this->getFieldError())

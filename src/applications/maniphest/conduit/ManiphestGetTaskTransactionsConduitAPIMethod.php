@@ -64,6 +64,7 @@ final class ManiphestGetTaskTransactionsConduitAPIMethod
 
       $results[$task_id][] = array(
         'taskID'  => $task_id,
+        'transactionPHID' => $transaction->getPHID(),
         'transactionType'  => $transaction->getTransactionType(),
         'oldValue'  => $transaction->getOldValue(),
         'newValue'  => $transaction->getNewValue(),

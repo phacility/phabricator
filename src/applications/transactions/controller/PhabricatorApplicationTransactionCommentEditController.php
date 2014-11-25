@@ -73,6 +73,7 @@ final class PhabricatorApplicationTransactionCommentEditController
         ->setFullWidth(true)
         ->appendChild(
           id(new PhabricatorRemarkupControl())
+          ->setUser($user)
           ->setName('text')
           ->setValue($xaction->getComment()->getContent())));
 
