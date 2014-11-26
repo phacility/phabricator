@@ -13,6 +13,11 @@ a.button {
   user-select: none;
 }
 
+button::-moz-focus-inner {
+  padding: 0;
+  border: 0;
+}
+
 button,
 a.button,
 a.button:visited,
