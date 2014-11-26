@@ -1153,6 +1153,7 @@ phutil_register_library_map(array(
     'PackageMail' => 'applications/owners/mail/PackageMail.php',
     'PackageModifyMail' => 'applications/owners/mail/PackageModifyMail.php',
     'PassphraseAbstractKey' => 'applications/passphrase/keys/PassphraseAbstractKey.php',
+    'PassphraseAddConduitAPIMethod' => 'applications/passphrase/conduit/PassphraseAddConduitAPIMethod.php',
     'PassphraseConduitAPIMethod' => 'applications/passphrase/conduit/PassphraseConduitAPIMethod.php',
     'PassphraseController' => 'applications/passphrase/controller/PassphraseController.php',
     'PassphraseCredential' => 'applications/passphrase/storage/PassphraseCredential.php',
@@ -4224,6 +4225,7 @@ phutil_register_library_map(array(
     'PackageMail' => 'PhabricatorMail',
     'PackageModifyMail' => 'PackageMail',
     'PassphraseAbstractKey' => 'Phobject',
+    'PassphraseAddConduitAPIMethod' => 'PassphraseConduitAPIMethod',
     'PassphraseConduitAPIMethod' => 'ConduitAPIMethod',
     'PassphraseController' => 'PhabricatorController',
     'PassphraseCredential' => array(
