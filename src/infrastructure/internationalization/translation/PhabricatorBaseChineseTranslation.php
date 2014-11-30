@@ -1142,98 +1142,98 @@ abstract class PhabricatorBaseChineseTranslation
       '%s forbidden, these addresses have unsubscribed.' => '%s 被禁止, 这些地址已经取消订阅。',
     
       // phabricator/src/applications/releeph/storage/ReleephRequestTransaction.php:95
-      '%s found this request picks without error' => null,
+      '%s found this request picks without error' => '%s 发现这个请求选择没有错误',
     
       // phabricator/src/applications/releeph/storage/ReleephRequestTransaction.php:99
-      '%s found this request reverts without error' => null,
+      '%s found this request reverts without error' => '%s 发现这个请求恢复没有错误',
     
       // phabricator/src/applications/phame/controller/post/PhamePostListController.php:47
-      '%s has not written any posts.' => null,
+      '%s has not written any posts.' => '%s 还没有写任何帖子。',
     
       // phabricator/src/applications/differential/storage/DifferentialTransaction.php:422
-      '%s is now accepted and ready to land.' => null,
+      '%s is now accepted and ready to land.' => '%s 现在被接受并且准备落地。',
     
       // phabricator/src/infrastructure/customfield/standard/PhabricatorStandardCustomField.php:317
-      '%s is required.' => null,
+      '%s is required.' => '%s 是被要求的。',
     
       // phabricator/src/applications/project/storage/PhabricatorProjectTransaction.php:156
-      '%s joined this project.' => null,
+      '%s joined this project.' => '%s 加入了这个项目。',
     
       // phabricator/src/applications/project/storage/PhabricatorProjectTransaction.php:168
-      '%s left this project.' => null,
+      '%s left this project.' => '%s 离开了这个项目。',
     
       // phabricator/src/applications/passphrase/storage/PassphraseCredentialTransaction.php:93
-      '%s locked this credential.' => null,
+      '%s locked this credential.' => '%s 锁定了这个证书。',
     
       // phabricator/src/applications/project/storage/PhabricatorProjectTransaction.php:107
-      '%s locked this project\'s membership.' => null,
+      '%s locked this project\'s membership.' => '%s 锁定了这个项目的成员。',
     
       // phabricator/src/applications/maniphest/storage/ManiphestTransaction.php:779
-      '%s lowered the priority of %s from "%s" to "%s".' => null,
+      '%s lowered the priority of %s from "%s" to "%s".' => '%s 将 %s 的优先级从 "%s" 降低到 "%s"。',
     
       // phabricator/src/applications/maniphest/storage/ManiphestTransaction.php:526
-      '%s lowered the priority of this task from "%s" to "%s".' => null,
+      '%s lowered the priority of this task from "%s" to "%s".' => '%s 将这个任务的优先级从 "%s" 降低到 "%s"。',
     
       // phabricator/src/applications/feed/story/PhabricatorFeedStoryManiphestAggregate.php:20
       // phabricator/src/applications/feed/story/PhabricatorFeedStoryDifferentialAggregate.php:20
-      '%s made multiple updates to %s' => null,
+      '%s made multiple updates to %s' => '%s 对 %s' 做了多次更新,
     
       // phabricator/src/applications/slowvote/storage/PhabricatorSlowvoteTransaction.php:75
-      '%s made poll responses appear in a fixed order.' => null,
+      '%s made poll responses appear in a fixed order.' => '%s 使投票响应结果以固定的顺序显示。',
     
       // phabricator/src/applications/slowvote/storage/PhabricatorSlowvoteTransaction.php:71
-      '%s made poll responses appear in a random order.' => null,
+      '%s made poll responses appear in a random order.' => '%s 使投票响应结果以随机的顺序显示。',
     
       // phabricator/src/applications/project/storage/PhabricatorProjectColumnTransaction.php:73
-      '%s marked this column hidden.' => null,
+      '%s marked this column hidden.' => '%s 将这一列标记为隐藏。',
     
       // phabricator/src/applications/project/storage/PhabricatorProjectColumnTransaction.php:69
-      '%s marked this column visible.' => null,
+      '%s marked this column visible.' => '%s 将这一列标记为可见。',
     
       // phabricator/src/applications/releeph/storage/ReleephRequestTransaction.php:132
-      '%s marked this request as manually %s' => null,
+      '%s marked this request as manually %s' => '%s 将这个请求标记为手动 %s',
     
       // phabricator/src/applications/transactions/edges/PhabricatorObjectMentionedByObject.php:21
-      '%s mentioned this in %s.' => null,
+      '%s mentioned this in %s.' => '%s 在 %s 中提到这个。',
     
       // phabricator/src/applications/maniphest/storage/ManiphestTransaction.php:859
-      '%s merged %d task(s) %s into %s.' => null,
+      '%s merged %d task(s) %s into %s.' => '%s 将 %d 个任务 %s 合并到了 %s。',
     
       // phabricator/src/applications/maniphest/storage/ManiphestTransaction.php:601
-      '%s merged %d task(s): %s.' => null,
+      '%s merged %d task(s): %s.' => '%s 合并了 %d 个任务: %s。',
     
       // phabricator/src/applications/maniphest/storage/ManiphestTransaction.php:852
-      '%s merged task %s into %s.' => null,
+      '%s merged task %s into %s.' => '%s 将任务 %s 合并到 %s。',
     
       // phabricator/src/applications/maniphest/storage/ManiphestTransaction.php:594
-      '%s merged this task into %s.' => null,
+      '%s merged this task into %s.' => '%s 将这个任务合并到 %s。',
     
       // phabricator/src/applications/maniphest/storage/ManiphestTransaction.php:844
-      '%s moved %s to %s on the %s workboard.' => null,
+      '%s moved %s to %s on the %s workboard.' => '%s 将 %s 移动到了 %s 在 %s 工作面板上。',
     
       // phabricator/src/applications/feed/story/PhabricatorFeedStoryPhriction.php:41
-      '%s moved the document %s from %s to %s.' => null,
+      '%s moved the document %s from %s to %s.' => '%s 将文档 %s 从 %s 移动到了 %s。',
     
       // phabricator/src/applications/maniphest/storage/ManiphestTransaction.php:586
-      '%s moved this task to %s on the %s workboard.' => null,
+      '%s moved this task to %s on the %s workboard.' => '%s 将这个任务移动到了 %s 在 %s 工作面板上。',
     
       // phabricator/src/infrastructure/customfield/standard/PhabricatorStandardCustomFieldInt.php:92
-      '%s must be an integer.' => null,
+      '%s must be an integer.' => '%s 必须为一个整数。',
     
       // phabricator/src/applications/project/storage/PhabricatorProjectColumnTransaction.php:32
-      '%s named this column "%s".' => null,
+      '%s named this column "%s".' => '%s 将这一列命名为 "%s"。',
     
       // phabricator/src/applications/conpherence/storage/ConpherenceTransaction.php:69
-      '%s named this conpherence "%s".' => null,
+      '%s named this conpherence "%s".' => '%s 将这个会议命名为 "%s"。',
     
       // phabricator/src/applications/differential/storage/DifferentialTransaction.php:426
-      '%s now requires changes to proceed.' => null,
+      '%s now requires changes to proceed.' => '%s 现在需要修改才能继续。',
     
       // phabricator/src/applications/differential/storage/DifferentialTransaction.php:430
-      '%s now requires review to proceed.' => null,
+      '%s now requires review to proceed.' => '%s 现在需要审查才能继续。',
     
       // phabricator/src/view/phui/PHUITimelineView.php:65
-      '%s older changes(s) are hidden.' => null,
+      '%s older changes(s) are hidden.' => '%s 更早之前的修改被隐藏了。',
     
       // phabricator/src/applications/uiexample/examples/PHUITimelineExample.php:163
       '%s paid for his goods.' => null,
