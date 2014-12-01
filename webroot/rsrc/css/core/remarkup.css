@@ -71,7 +71,7 @@
   margin: 12px 0 12px 30px;
 }
 
-.phabricator-remarkup .remarkup-list-with-checkmarks {
+.phabricator-remarkup ul.remarkup-list-with-checkmarks {
   list-style: none;
   margin-left: 18px;
 }
