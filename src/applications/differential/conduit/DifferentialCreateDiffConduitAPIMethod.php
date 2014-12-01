@@ -172,6 +172,7 @@ final class DifferentialCreateDiffConduitAPIMethod
     id(new DifferentialDiffEditor())
       ->setActor($viewer)
       ->setContentSourceFromConduitRequest($request)
+      ->setContinueOnNoEffect(true)
       ->applyTransactions($diff, $xactions);
 
     $path = '/differential/diff/'.$diff->getID().'/';
