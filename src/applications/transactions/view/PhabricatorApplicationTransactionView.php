@@ -13,6 +13,7 @@ class PhabricatorApplicationTransactionView extends AphrontView {
   private $shouldTerminate = false;
   private $quoteTargetID;
   private $quoteRef;
+  private $pager;
 
   public function setQuoteRef($quote_ref) {
     $this->quoteRef = $quote_ref;
@@ -69,6 +70,15 @@ class PhabricatorApplicationTransactionView extends AphrontView {
   public function setShouldTerminate($term) {
     $this->shouldTerminate = $term;
     return $this;
+  }
+
+  public function setPager(AphrontCursorPagerView $pager) {
+    $this->pager = $pager;
+    return $this;
+  }
+
+  public function getPager() {
+    return $this->pager;
   }
 
   public function buildEvents($with_hiding = false) {
@@ -129,6 +139,12 @@ class PhabricatorApplicationTransactionView extends AphrontView {
         } else {
           $group_event->addEventToGroup($event);
         }
+        if ($hide_by_default) {
+          $pager = $this->getPager();
+          if ($pager) {
+            $pager->setNextPageID($xaction->getID());
+          }
+        }
       }
       $events[] = $group_event;
 
@@ -142,18 +158,32 @@ class PhabricatorApplicationTransactionView extends AphrontView {
       throw new Exception('Call setObjectPHID() before render()!');
     }
 
-    $view = new PHUITimelineView();
-    $view->setShouldTerminate($this->shouldTerminate);
-    $events = $this->buildEvents($with_hiding = true);
-    foreach ($events as $event) {
-      $view->addEvent($event);
-    }
+    $view = $this->buildPHUITimelineView();
 
     if ($this->getShowEditActions()) {
       Javelin::initBehavior('phabricator-transaction-list');
     }
 
     return $view->render();
+  }
+
+  public function buildPHUITimelineView($with_hiding = true) {
+    if (!$this->getObjectPHID()) {
+      throw new Exception(
+        'Call setObjectPHID() before buildPHUITimelineView()!');
+    }
+
+    $view = new PHUITimelineView();
+    $view->setShouldTerminate($this->shouldTerminate);
+    $events = $this->buildEvents($with_hiding);
+    foreach ($events as $event) {
+      $view->addEvent($event);
+    }
+    if ($this->getPager()) {
+      $view->setPager($this->getPager());
+    }
+
+    return $view;
   }
 
   protected function getOrBuildEngine() {

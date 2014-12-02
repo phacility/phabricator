@@ -535,11 +535,18 @@ abstract class PhabricatorController extends AphrontController {
     $xaction = $object->getApplicationTransactionTemplate();
     $view = $xaction->getApplicationTransactionViewObject();
 
+    $pager = id(new AphrontCursorPagerView())
+      ->readFromRequest($this->getRequest())
+      ->setURI(new PhutilURI(
+        '/transactions/showolder/'.$object->getPHID().'/'));
+
     $xactions = $query
       ->setViewer($viewer)
       ->withObjectPHIDs(array($object->getPHID()))
       ->needComments(true)
-      ->execute();
+      ->setReversePaging(false)
+      ->executeWithCursorPager($pager);
+    $xactions = array_reverse($xactions);
 
     if ($engine) {
       foreach ($xactions as $xaction) {
@@ -556,7 +563,8 @@ abstract class PhabricatorController extends AphrontController {
     $timeline = $view
       ->setUser($viewer)
       ->setObjectPHID($object->getPHID())
-      ->setTransactions($xactions);
+      ->setTransactions($xactions)
+      ->setPager($pager);
 
     return $timeline;
   }

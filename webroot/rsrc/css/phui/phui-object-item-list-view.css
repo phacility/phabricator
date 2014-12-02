@@ -38,7 +38,6 @@
   border-color: {$lightgreyborder};
   margin: 5px 0;
   overflow: hidden;
-  border-radius: 3px;
   border-left-width: 6px;
   background: #fff;
   margin-bottom: 4px;
@@ -53,10 +52,8 @@
   border-color: {$lightgreyborder};
   border-width: 1px 1px 1px 0;
   position: relative;
-  min-height: 29px;
+  min-height: 33px;
   overflow: hidden;
-  border-bottom-right-radius: 3px;
-  border-top-right-radius: 3px;
 }
 
 .device-desktop .phui-object-item {
@@ -64,14 +61,21 @@
 }
 
 .phui-object-item-name {
-  display: inline-block;
   font-weight: bold;
-  padding: 6px 8px 0;
+  padding: 8px 8px 0;
   white-space: nowrap;
+  word-wrap: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.device-phone .phui-object-item-name {
+  overflow: normal;
+  white-space: normal;
 }
 
 .phui-object-item-link {
-  display: inline-block;
+  display: inline;
 }
 
 .phui-object-item-objname {
@@ -80,12 +84,16 @@
 }
 
 .phui-object-item-content {
-  margin-top: 4px;
+  margin: 4px 8px 2px 0;
   overflow: hidden;
 }
 
 .phui-object-item-grippable {
   cursor: move;
+}
+
+.device .phui-object-item-grippable {
+  cursor: normal;
 }
 
 .phui-object-item-grip {
@@ -97,13 +105,48 @@
   background: url('/rsrc/image/texture/grip.png') center center no-repeat;
 }
 
+.device .phui-object-item-grip {
+  display: none;
+}
+
 .phui-object-item-grippable .phui-object-item-frame {
   padding-left: 11px;
+}
+
+.device .phui-object-item-grippable .phui-object-item-frame {
+  padding-left: 0;
 }
 
 .phui-object-item-list-header {
   padding: 0 0 8px 0;
   color: {$darkgreytext};
+}
+
+.phui-object-item-table {
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+}
+
+.phui-object-item-table-row {
+  display: table-row;
+}
+
+.phui-object-item-col1 {
+  display: table-cell;
+  vertical-align: top;
+}
+
+.phui-object-item-col2 {
+  width: 160px;
+  display: table-cell;
+  vertical-align: top;
+}
+
+.device-phone .phui-object-item-col1,
+.device-phone .phui-object-item-col2 {
+  display: block;
+  width: auto;
 }
 
 /* - Item Actions --------------------------------------------------------------
@@ -142,7 +185,7 @@
   height: 100%;
 }
 
-.phui-object-item-actions .phui-list-item-href:hover {
+.device-desktop .phui-object-item-actions .phui-list-item-href:hover {
   background: {$hoverblue};
 }
 
@@ -185,16 +228,8 @@
 .phui-object-item-list-view.phui-object-list-stackable
   .phui-object-item {
   margin: -1px 0 0 0;
-  border-radius: 0;
   border-left-width: 1px;
   background: #fff;
-}
-
-.phui-object-list-stackable .phui-object-item-frame {
-  border-radius: 0;
-}
-
-.phui-object-list-stackable .phui-object-item {
 }
 
 .phui-object-box .phui-object-list-stackable {
@@ -234,6 +269,7 @@
 
 .phui-object-item-attributes {
   padding: 0 8px 6px;
+  line-height: 18px;
 }
 
 .phui-object-item-attribute {
@@ -254,12 +290,11 @@
 */
 
 .phui-object-icon-pane {
-  float: right;
-  margin-top: 6px;
+  margin: 8px 0 4px;
 }
 
-.device .phui-object-item-no-icon-images .phui-object-icon-pane {
-  display: none;
+.device-phone .phui-object-icon-pane {
+  margin: 0 0 4px;
 }
 
 .phui-object-item-with-handle-icons .phui-object-item-icons {
@@ -267,92 +302,46 @@
 }
 
 .phui-object-item-icons {
-  float: right;
-  padding: 0 10px;
+  padding: 0 10px 0 0;
+}
+
+.device-phone .phui-object-item-icons {
+  padding: 0 0 0 8px;
 }
 
 ul.phui-object-item-icons {
   margin: 0;
 }
 
-/* NOTE: The main content is an "overflow: hidden" div which we give a right
-   margin so it doesn't overlap the icons. The margin is slightly larger than
-   the width + padding of the icon div, so the icons have some space even if
-   the content is wider than available space. */
-
-.device-desktop .phui-object-icon-pane {
-  width: 120px;
-}
-
-.device-phone .phui-object-icon-pane {
-  position: absolute;
-  top: 0;
-  right: 0;
-  background: #fff;
-}
-
-.device-phone .phui-object-item-with-1-actions .phui-object-icon-pane {
-  right: 25px;
-}
-
-.device-desktop .phui-object-item-with-icons
-  .phui-object-item-content,
-.device-desktop .phui-object-item-with-handle-icons
-  .phui-object-item-content {
-  margin-right: 132px;
-}
-
-.device .phui-object-item-icons {
-  width: 18px;
-}
-
-.device .phui-object-item-with-icons .phui-object-item-content,
-.device .phui-object-item-with-handle-icons
-  .phui-object-item-content {
-  margin-right: 30px;
-}
-
-.device .phui-object-item-icon-label,
-.device .phui-object-item-icon-none {
-  display: none;
-}
-
 .phui-object-item-icon {
   vertical-align: middle;
-  position: relative;
   font-size: 12px;
   color: {$greytext};
   text-align: right;
   white-space: nowrap;
   overflow: hidden;
-
   min-height: 18px;
   line-height: 18px;
+}
+
+.device-phone .phui-object-item-icon {
+  text-align: left;
+  font-size: 13px;
 }
 
 /*
  * Items with icon 'none' still have on mobile, thus creating a weird vertical
  * margin for elements which follow
  */
-.device-phone .phui-object-item-icon-none {
+.device-phone .phui-object-item-icon .none {
   display: none;
 }
 
-.device-desktop .phui-object-item-icon {
-  padding-right: 18px;
-}
-
-.device-desktop .phui-object-item-icon-none {
-  padding-right: 0;
-}
-
 .phui-object-item-icon-image {
-  position: absolute;
-  right: 0;
-  top: 2px;
   width: 14px;
   height: 14px;
   font-size: 13px;
+  margin-right: 4px;
 }
 
 
@@ -465,13 +454,18 @@ ul.phui-object-item-icons {
   position: absolute;
 }
 
-.phui-object-item-with-foot-icons .phui-object-item-content {
-  padding-bottom: 22px;
+.phui-object-item-with-foot-icons .phui-object-item-content,
+.device-phone .phui-object-item-with-foot-icons .phui-object-item-col2  {
+  padding-bottom: 24px;
+}
+
+.device-phone .phui-object-item-with-foot-icons .phui-object-item-content {
+  padding-bottom: 0;
 }
 
 .phui-object-item-foot-icon {
   display: inline-block;
-  background: #909090;
+  background: {$lightgreyborder};
   color: #ffffff;
   font-weight: bold;
   margin-right: 3px;
@@ -520,15 +514,17 @@ ul.phui-object-item-icons {
 */
 
 .phui-object-item-bylines {
-  float: right;
-  clear: right;
   padding: 0 10px;
   margin: 4px 0;
   font-size: 12px;
-  color: {$greytext};
-  white-space: nowrap;
-  overflow: hidden;
+  color: {$lightgreytext};
   text-align: right;
+}
+
+.phui-object-item-byline {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 .device-phone .phui-object-item-bylines {
@@ -550,13 +546,11 @@ ul.phui-object-item-icons {
   border: 1px dashed #fff;
   background: rgba(255,255,255,.5);
   margin-bottom: 4px;
-  border-radius: 3px;
 }
 
 .phui-object-list-stackable .drag-ghost {
   background: {$hoverblue};
   margin: 0;
-  border-radius: none;
   border: none;
   border-top: 1px solid {$lightgreyborder}
 }
@@ -600,17 +594,17 @@ ul.phui-object-item-icons {
   width: 40px;
   height: 40px;
   background-size: 40px;
-  margin: 4px;
+  margin: 6px;
   position: absolute;
   background-color: {$lightbluebackground};
 }
 
 .phui-object-item-with-image .phui-object-item-frame {
-  min-height: 48px;
+  min-height: 52px;
 }
 
 .phui-object-item-with-image .phui-object-item-content-box {
-  margin-left: 44px;
+  margin-left: 46px;
 }
 
 /* - State ---------------------------------------------------------------------
@@ -672,7 +666,6 @@ ul.phui-object-item-icons {
 }
 
 .dashboard-panel .phui-object-item-list-view .phui-object-item {
-  border-radius: 0;
   margin: 0;
   background-image: none;
   background-color: #fff;
@@ -682,7 +675,6 @@ ul.phui-object-item-icons {
 .dashboard-panel .phui-object-item-frame {
   border: none;
   border-bottom: 1px solid {$thinblueborder};
-  border-radius: 0;
 }
 
 .dashboard-panel .phui-object-item-list-header,
@@ -731,7 +723,7 @@ ul.phui-object-item-icons {
 .phui-object-item-image-icon {
   width: 30px;
   height: 30px;
-  margin: 4px 4px 4px 4px;
+  margin: 4px;
   position: absolute;
 }
 
@@ -739,8 +731,8 @@ ul.phui-object-item-icons {
   position: absolute;
   width: 28px;
   height: 28px;
-  left: 6px;
-  top: 6px;
+  left: 8px;
+  top: 8px;
 }
 
 .phui-object-item-with-image-icon .phui-object-item-frame {

@@ -421,25 +421,17 @@ final class DifferentialDiff
 
 
   public function getApplicationTransactionEditor() {
-    if (!$this->getRevisionID()) {
-      return null;
-    }
-    return $this->getRevision()->getApplicationTransactionEditor();
+
+    return new DifferentialDiffEditor();
   }
 
 
   public function getApplicationTransactionObject() {
-    if (!$this->getRevisionID()) {
-      return null;
-    }
-    return $this->getRevision();
+    return $this;
   }
 
   public function getApplicationTransactionTemplate() {
-    if (!$this->getRevisionID()) {
-      return null;
-    }
-    return $this->getRevision()->getApplicationTransactionTemplate();
+    return new DifferentialDiffTransaction();
   }
 
 
