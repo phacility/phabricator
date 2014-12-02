@@ -421,6 +421,7 @@ return array(
     'rsrc/js/application/repository/repository-crossreference.js' => 'f9539603',
     'rsrc/js/application/search/behavior-reorder-queries.js' => 'e9581f08',
     'rsrc/js/application/slowvote/behavior-slowvote-embed.js' => 'd6f54db0',
+    'rsrc/js/application/transactions/behavior-show-older-transactions.js' => 'c30ccda9',
     'rsrc/js/application/transactions/behavior-transaction-comment-form.js' => '9f7309fb',
     'rsrc/js/application/transactions/behavior-transaction-list.js' => '13c739ea',
     'rsrc/js/application/uiexample/JavelinViewExample.js' => 'd4a14807',
@@ -624,6 +625,7 @@ return array(
     'javelin-behavior-phabricator-reveal-content' => '60821bc7',
     'javelin-behavior-phabricator-search-typeahead' => '724b1247',
     'javelin-behavior-phabricator-show-all-transactions' => '7c273581',
+    'javelin-behavior-phabricator-show-older-transactions' => 'c30ccda9',
     'javelin-behavior-phabricator-tooltips' => '3ee3408b',
     'javelin-behavior-phabricator-transaction-comment-form' => '9f7309fb',
     'javelin-behavior-phabricator-transaction-list' => '13c739ea',
@@ -1665,6 +1667,12 @@ return array(
       'javelin-dom',
       'javelin-util',
       'phabricator-shaped-request',
+    ),
+    'c30ccda9' => array(
+      'javelin-behavior',
+      'javelin-stratcom',
+      'javelin-dom',
+      'phabricator-busy',
     ),
     'c4569c05' => array(
       'javelin-magical-init',

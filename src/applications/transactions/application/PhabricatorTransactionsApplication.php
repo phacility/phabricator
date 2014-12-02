@@ -29,6 +29,8 @@ final class PhabricatorTransactionsApplication extends PhabricatorApplication {
           => 'PhabricatorApplicationTransactionCommentRawController',
         'detail/(?<phid>[^/]+)/'
           => 'PhabricatorApplicationTransactionDetailController',
+        'showolder/(?<phid>[^/]+)/'
+          => 'PhabricatorApplicationTransactionShowOlderController',
         '(?P<value>old|new)/(?<phid>[^/]+)/'
           => 'PhabricatorApplicationTransactionValueController',
       ),
