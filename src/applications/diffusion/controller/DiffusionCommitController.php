@@ -67,7 +67,6 @@ final class DiffusionCommitController extends DiffusionController {
         ),
         array(
           'title' => pht('Commit Still Parsing'),
-          'device' => false,
         ));
     }
 
@@ -400,7 +399,6 @@ final class DiffusionCommitController extends DiffusionController {
       array(
         'title' => $commit_id,
         'pageObjects' => array($commit->getPHID()),
-        'device' => false,
       ));
   }
 
