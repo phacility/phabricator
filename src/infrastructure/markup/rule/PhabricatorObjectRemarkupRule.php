@@ -166,7 +166,7 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
     $prefix = preg_quote($prefix);
     $id = $this->getObjectIDPattern();
 
-    return '(\B{'.$prefix.'('.$id.')((?:[^}\\\\]|\\\\.)*)}\B)u';
+    return '(\B{'.$prefix.'('.$id.')([,\s](?:[^}\\\\]|\\\\.)*)?}\B)u';
   }
 
   private function getObjectReferencePattern() {
