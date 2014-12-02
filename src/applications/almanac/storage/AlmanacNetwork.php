@@ -2,7 +2,9 @@
 
 final class AlmanacNetwork
   extends AlmanacDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorPolicyInterface {
 
   protected $name;
   protected $mailKey;
@@ -39,6 +41,22 @@ final class AlmanacNetwork
 
   public function getURI() {
     return '/almanac/network/view/'.$this->getName().'/';
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new AlmanacNetworkEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new AlmanacNetworkTransaction();
   }
 
 

@@ -51,7 +51,9 @@ final class HeraldRuleViewController extends HeraldController {
       ->setHeader($header)
       ->addPropertyList($properties);
 
-    $timeline = $this->buildTimeline($rule);
+    $timeline = $this->buildTransactionTimeline(
+      $rule,
+      new HeraldTransactionQuery());
 
     return $this->buildApplicationPage(
       array(
@@ -156,33 +158,6 @@ final class HeraldRuleViewController extends HeraldController {
     }
 
     return $view;
-  }
-
-  private function buildTimeline(HeraldRule $rule) {
-    $viewer = $this->getRequest()->getUser();
-
-    $xactions = id(new HeraldTransactionQuery())
-      ->setViewer($viewer)
-      ->withObjectPHIDs(array($rule->getPHID()))
-      ->needComments(true)
-      ->execute();
-
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($viewer);
-    foreach ($xactions as $xaction) {
-      if ($xaction->getComment()) {
-        $engine->addObject(
-          $xaction->getComment(),
-          PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
-      }
-    }
-    $engine->process();
-
-    return id(new PhabricatorApplicationTransactionView())
-      ->setUser($viewer)
-      ->setObjectPHID($rule->getPHID())
-      ->setTransactions($xactions)
-      ->setMarkupEngine($engine);
   }
 
 }

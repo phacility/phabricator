@@ -28,7 +28,7 @@ final class PhabricatorAuthProviderConfigTransaction
   }
 
   public function getApplicationTransactionType() {
-    return PhabricatorPHIDConstants::PHID_TYPE_AUTH;
+    return PhabricatorAuthAuthProviderPHIDType::TYPECONST;
   }
 
   public function getApplicationTransactionCommentObject() {

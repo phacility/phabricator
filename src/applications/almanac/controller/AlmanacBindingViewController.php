@@ -42,23 +42,17 @@ final class AlmanacBindingViewController
     $crumbs->addTextCrumb($service->getName(), $service_uri);
     $crumbs->addTextCrumb($title);
 
-    $xactions = id(new AlmanacBindingTransactionQuery())
-      ->setViewer($viewer)
-      ->withObjectPHIDs(array($binding->getPHID()))
-      ->execute();
-
-    $xaction_view = id(new PhabricatorApplicationTransactionView())
-      ->setUser($viewer)
-      ->setObjectPHID($binding->getPHID())
-      ->setTransactions($xactions)
-      ->setShouldTerminate(true);
+    $timeline = $this->buildTransactionTimeline(
+      $binding,
+      new AlmanacBindingTransactionQuery());
+    $timeline->setShouldTerminate(true);
 
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $box,
         $this->buildAlmanacPropertiesTable($binding),
-        $xaction_view,
+        $timeline,
       ),
       array(
         'title' => $title,

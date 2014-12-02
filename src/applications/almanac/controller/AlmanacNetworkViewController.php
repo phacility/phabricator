@@ -38,22 +38,16 @@ final class AlmanacNetworkViewController
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($network->getName());
 
-    $xactions = id(new AlmanacNetworkTransactionQuery())
-      ->setViewer($viewer)
-      ->withObjectPHIDs(array($network->getPHID()))
-      ->execute();
-
-    $xaction_view = id(new PhabricatorApplicationTransactionView())
-      ->setUser($viewer)
-      ->setObjectPHID($network->getPHID())
-      ->setTransactions($xactions)
-      ->setShouldTerminate(true);
+    $timeline = $this->buildTransactionTimeline(
+      $network,
+      new AlmanacNetworkTransactionQuery());
+    $timeline->setShouldTerminate(true);
 
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $box,
-        $xaction_view,
+        $timeline,
       ),
       array(
         'title' => $title,

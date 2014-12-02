@@ -40,16 +40,10 @@ final class AlmanacServiceViewController
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($service->getName());
 
-    $xactions = id(new AlmanacServiceTransactionQuery())
-      ->setViewer($viewer)
-      ->withObjectPHIDs(array($service->getPHID()))
-      ->execute();
-
-    $xaction_view = id(new PhabricatorApplicationTransactionView())
-      ->setUser($viewer)
-      ->setObjectPHID($service->getPHID())
-      ->setTransactions($xactions)
-      ->setShouldTerminate(true);
+    $timeline = $this->buildTransactionTimeline(
+      $service,
+      new AlmanacServiceTransactionQuery());
+    $timeline->setShouldTerminate(true);
 
     return $this->buildApplicationPage(
       array(
@@ -57,7 +51,7 @@ final class AlmanacServiceViewController
         $box,
         $bindings,
         $this->buildAlmanacPropertiesTable($service),
-        $xaction_view,
+        $timeline,
       ),
       array(
         'title' => $title,

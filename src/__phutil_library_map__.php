@@ -1288,6 +1288,7 @@ phutil_register_library_map(array(
     'PhabricatorAuthAccountView' => 'applications/auth/view/PhabricatorAuthAccountView.php',
     'PhabricatorAuthApplication' => 'applications/auth/application/PhabricatorAuthApplication.php',
     'PhabricatorAuthAuthFactorPHIDType' => 'applications/auth/phid/PhabricatorAuthAuthFactorPHIDType.php',
+    'PhabricatorAuthAuthProviderPHIDType' => 'applications/auth/phid/PhabricatorAuthAuthProviderPHIDType.php',
     'PhabricatorAuthConfirmLinkController' => 'applications/auth/controller/PhabricatorAuthConfirmLinkController.php',
     'PhabricatorAuthController' => 'applications/auth/controller/PhabricatorAuthController.php',
     'PhabricatorAuthDAO' => 'applications/auth/storage/PhabricatorAuthDAO.php',
@@ -3054,6 +3055,7 @@ phutil_register_library_map(array(
     'AlmanacNamesTestCase' => 'PhabricatorTestCase',
     'AlmanacNetwork' => array(
       'AlmanacDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
     ),
     'AlmanacNetworkController' => 'AlmanacController',
@@ -3927,6 +3929,7 @@ phutil_register_library_map(array(
     'HeraldRemarkupRule' => 'PhabricatorObjectRemarkupRule',
     'HeraldRule' => array(
       'HeraldDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorFlaggableInterface',
       'PhabricatorPolicyInterface',
       'PhabricatorDestructibleInterface',
@@ -4372,6 +4375,7 @@ phutil_register_library_map(array(
     'PhabricatorAuthAccountView' => 'AphrontView',
     'PhabricatorAuthApplication' => 'PhabricatorApplication',
     'PhabricatorAuthAuthFactorPHIDType' => 'PhabricatorPHIDType',
+    'PhabricatorAuthAuthProviderPHIDType' => 'PhabricatorPHIDType',
     'PhabricatorAuthConfirmLinkController' => 'PhabricatorAuthController',
     'PhabricatorAuthController' => 'PhabricatorController',
     'PhabricatorAuthDAO' => 'PhabricatorLiskDAO',
@@ -4400,6 +4404,7 @@ phutil_register_library_map(array(
     'PhabricatorAuthOneTimeLoginController' => 'PhabricatorAuthController',
     'PhabricatorAuthProviderConfig' => array(
       'PhabricatorAuthDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
     ),
     'PhabricatorAuthProviderConfigController' => 'PhabricatorAuthController',
@@ -5516,6 +5521,7 @@ phutil_register_library_map(array(
     'PhabricatorSlowvoteOption' => 'PhabricatorSlowvoteDAO',
     'PhabricatorSlowvotePoll' => array(
       'PhabricatorSlowvoteDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
       'PhabricatorSubscribableInterface',
       'PhabricatorFlaggableInterface',
