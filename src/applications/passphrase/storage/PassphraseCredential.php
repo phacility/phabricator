@@ -1,8 +1,10 @@
 <?php
 
 final class PassphraseCredential extends PassphraseDAO
-  implements PhabricatorPolicyInterface,
-  PhabricatorDestructibleInterface {
+  implements
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorPolicyInterface,
+    PhabricatorDestructibleInterface {
 
   protected $name;
   protected $credentialType;
@@ -78,6 +80,22 @@ final class PassphraseCredential extends PassphraseDAO
   public function getCredentialTypeImplementation() {
     $type = $this->getCredentialType();
     return PassphraseCredentialType::getTypeByConstant($type);
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PassphraseCredentialTransactionEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PassphraseCredentialTransaction();
   }
 
 

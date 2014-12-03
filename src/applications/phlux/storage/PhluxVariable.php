@@ -2,6 +2,7 @@
 
 final class PhluxVariable extends PhluxDAO
   implements
+    PhabricatorApplicationTransactionInterface,
     PhabricatorFlaggableInterface,
     PhabricatorPolicyInterface {
 
@@ -30,6 +31,22 @@ final class PhluxVariable extends PhluxDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(PhluxVariablePHIDType::TYPECONST);
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhluxVariableEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhluxTransaction();
   }
 
 

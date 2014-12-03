@@ -56,11 +56,6 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
       ->setHeader($header)
       ->addPropertyList($properties);
 
-    $xactions = id(new DrydockBlueprintTransactionQuery())
-      ->setViewer($viewer)
-      ->withObjectPHIDs(array($blueprint->getPHID()))
-      ->execute();
-
     $field_list = PhabricatorCustomField::getObjectFields(
       $blueprint,
       PhabricatorCustomField::ROLE_VIEW);
@@ -73,14 +68,10 @@ final class DrydockBlueprintViewController extends DrydockBlueprintController {
       $viewer,
       $properties);
 
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($viewer);
-
-    $timeline = id(new PhabricatorApplicationTransactionView())
-      ->setUser($viewer)
-      ->setObjectPHID($blueprint->getPHID())
-      ->setTransactions($xactions)
-      ->setMarkupEngine($engine);
+    $timeline = $this->buildTransactionTimeline(
+      $blueprint,
+      new DrydockBlueprintTransactionQuery());
+    $timeline->setShouldTerminate(true);
 
     return $this->buildApplicationPage(
       array(

@@ -3649,6 +3649,7 @@ phutil_register_library_map(array(
     'DrydockApacheWebrootInterface' => 'DrydockWebrootInterface',
     'DrydockBlueprint' => array(
       'DrydockDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
       'PhabricatorCustomFieldInterface',
     ),
@@ -4240,6 +4241,7 @@ phutil_register_library_map(array(
     'PassphraseController' => 'PhabricatorController',
     'PassphraseCredential' => array(
       'PassphraseDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
       'PhabricatorDestructibleInterface',
     ),
@@ -4657,6 +4659,7 @@ phutil_register_library_map(array(
     'PhabricatorDaemonsApplication' => 'PhabricatorApplication',
     'PhabricatorDashboard' => array(
       'PhabricatorDashboardDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
       'PhabricatorDestructibleInterface',
     ),
@@ -4675,6 +4678,7 @@ phutil_register_library_map(array(
     'PhabricatorDashboardMovePanelController' => 'PhabricatorDashboardController',
     'PhabricatorDashboardPanel' => array(
       'PhabricatorDashboardDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
       'PhabricatorCustomFieldInterface',
       'PhabricatorDestructibleInterface',
@@ -4808,6 +4812,7 @@ phutil_register_library_map(array(
     'PhabricatorFeedStoryTypeConstants' => 'PhabricatorFeedConstants',
     'PhabricatorFile' => array(
       'PhabricatorFileDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorTokenReceiverInterface',
       'PhabricatorSubscribableInterface',
       'PhabricatorFlaggableInterface',
@@ -5773,6 +5778,7 @@ phutil_register_library_map(array(
     'PhluxTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
     'PhluxVariable' => array(
       'PhluxDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorFlaggableInterface',
       'PhabricatorPolicyInterface',
     ),
