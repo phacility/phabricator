@@ -2,6 +2,7 @@
 
 final class HarbormasterBuildStep extends HarbormasterDAO
   implements
+    PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
     PhabricatorCustomFieldInterface {
 
@@ -85,6 +86,22 @@ final class HarbormasterBuildStep extends HarbormasterDAO
     }
 
     return $this->implementation;
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new HarbormasterBuildStepEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new HarbormasterBuildStepTransaction();
   }
 
 

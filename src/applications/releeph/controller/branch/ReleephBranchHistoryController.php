@@ -25,15 +25,10 @@ final class ReleephBranchHistoryController extends ReleephBranchController {
     }
     $this->setBranch($branch);
 
-    $xactions = id(new ReleephBranchTransactionQuery())
-      ->setViewer($viewer)
-      ->withObjectPHIDs(array($branch->getPHID()))
-      ->execute();
-
-    $timeline = id(new PhabricatorApplicationTransactionView())
-      ->setUser($viewer)
-      ->setObjectPHID($branch->getPHID())
-      ->setTransactions($xactions)
+    $timeline = $this->buildTransactionTimeline(
+      $branch,
+      new ReleephBranchTransactionQuery());
+    $timeline
       ->setShouldTerminate(true);
 
     $crumbs = $this->buildApplicationCrumbs();

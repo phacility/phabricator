@@ -628,13 +628,10 @@ final class DiffusionCommitController extends DiffusionController {
   }
 
   private function buildComments(PhabricatorRepositoryCommit $commit) {
-    $viewer = $this->getRequest()->getUser();
-
-    $xactions = id(new PhabricatorAuditTransactionQuery())
-      ->setViewer($viewer)
-      ->withObjectPHIDs(array($commit->getPHID()))
-      ->needComments(true)
-      ->execute();
+    $timeline = $this->buildTransactionTimeline(
+      $commit,
+      new PhabricatorAuditTransactionQuery());
+    $xactions = $timeline->getTransactions();
 
     $path_ids = array();
     foreach ($xactions as $xaction) {
@@ -654,11 +651,7 @@ final class DiffusionCommitController extends DiffusionController {
       $path_map = ipull($path_map, 'path', 'id');
     }
 
-    return id(new PhabricatorAuditTransactionView())
-      ->setUser($viewer)
-      ->setObjectPHID($commit->getPHID())
-      ->setPathMap($path_map)
-      ->setTransactions($xactions);
+    return $timeline->setPathMap($path_map);
   }
 
   private function renderAddCommentPanel(

@@ -93,27 +93,10 @@ final class DiffusionRepositoryEditMainController
       $repository,
       $this->buildActionsActions($repository));
 
-    $xactions = id(new PhabricatorRepositoryTransactionQuery())
-      ->setViewer($viewer)
-      ->withObjectPHIDs(array($repository->getPHID()))
-      ->execute();
-
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($viewer);
-    foreach ($xactions as $xaction) {
-      if ($xaction->getComment()) {
-        $engine->addObject(
-          $xaction->getComment(),
-          PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
-      }
-    }
-    $engine->process();
-
-    $xaction_view = id(new PhabricatorApplicationTransactionView())
-      ->setUser($viewer)
-      ->setObjectPHID($repository->getPHID())
-      ->setTransactions($xactions)
-      ->setMarkupEngine($engine);
+    $timeline = $this->buildTransactionTimeline(
+      $repository,
+      new PhabricatorRepositoryTransactionQuery());
+    $timeline->setShouldTerminate(true);
 
     $boxes = array();
 
@@ -187,7 +170,7 @@ final class DiffusionRepositoryEditMainController
       array(
         $crumbs,
         $boxes,
-        $xaction_view,
+        $timeline,
       ),
       array(
         'title' => $title,

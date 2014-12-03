@@ -60,15 +60,11 @@ final class FundInitiativeViewController
       ->setHeader($header)
       ->appendChild($properties);
 
-    $xactions = id(new FundInitiativeTransactionQuery())
-      ->setViewer($viewer)
-      ->withObjectPHIDs(array($initiative->getPHID()))
-      ->execute();
 
-    $timeline = id(new PhabricatorApplicationTransactionView())
-      ->setUser($viewer)
-      ->setObjectPHID($initiative->getPHID())
-      ->setTransactions($xactions)
+    $timeline = $this->buildTransactionTimeline(
+      $initiative,
+      new FundInitiativeTransactionQuery());
+    $timeline
       ->setShouldTerminate(true);
 
     return $this->buildApplicationPage(

@@ -29,7 +29,7 @@ final class PonderAnswerCommentController extends PonderController {
 
     $qid = $answer->getQuestion()->getID();
     $aid = $answer->getID();
-    $view_uri = "Q{$qid}#A{$aid}";
+    $view_uri = "/Q{$qid}#A{$aid}";
 
     $xactions = array();
     $xactions[] = id(new PonderAnswerTransaction())
