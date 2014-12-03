@@ -4551,6 +4551,7 @@ phutil_register_library_map(array(
     'PhabricatorConfigEditor' => 'PhabricatorApplicationTransactionEditor',
     'PhabricatorConfigEntry' => array(
       'PhabricatorConfigEntryDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
     ),
     'PhabricatorConfigEntryDAO' => 'PhabricatorLiskDAO',
@@ -5212,6 +5213,7 @@ phutil_register_library_map(array(
     'PhabricatorPonderApplication' => 'PhabricatorApplication',
     'PhabricatorProject' => array(
       'PhabricatorProjectDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorFlaggableInterface',
       'PhabricatorPolicyInterface',
       'PhabricatorSubscribableInterface',
@@ -5226,6 +5228,7 @@ phutil_register_library_map(array(
     'PhabricatorProjectBoardViewController' => 'PhabricatorProjectBoardController',
     'PhabricatorProjectColumn' => array(
       'PhabricatorProjectDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
       'PhabricatorDestructibleInterface',
     ),
