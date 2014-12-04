@@ -926,22 +926,14 @@ final class DifferentialRevisionViewController extends DifferentialController {
     DifferentialDiff $right_diff,
     array $changesets) {
 
-    $viewer = $this->getRequest()->getUser();
-
-    $xactions = id(new DifferentialTransactionQuery())
-      ->setViewer($viewer)
-      ->withObjectPHIDs(array($revision->getPHID()))
-      ->needComments(true)
-      ->execute();
-
-    $timeline = id(new DifferentialTransactionView())
-      ->setUser($viewer)
-      ->setObjectPHID($revision->getPHID())
+    $timeline = $this->buildTransactionTimeline(
+      $revision,
+      new DifferentialTransactionQuery());
+    $timeline
       ->setChangesets($changesets)
       ->setRevision($revision)
       ->setLeftDiff($left_diff)
-      ->setRightDiff($right_diff)
-      ->setTransactions($xactions);
+      ->setRightDiff($right_diff);
 
     return $timeline;
   }

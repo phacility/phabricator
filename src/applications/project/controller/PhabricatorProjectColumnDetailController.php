@@ -41,18 +41,10 @@ final class PhabricatorProjectColumnDetailController
       return new Aphront404Response();
     }
 
-    $xactions = id(new PhabricatorProjectColumnTransactionQuery())
-      ->setViewer($viewer)
-      ->withObjectPHIDs(array($column->getPHID()))
-      ->execute();
-
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($viewer);
-
-    $timeline = id(new PhabricatorApplicationTransactionView())
-      ->setUser($viewer)
-      ->setObjectPHID($column->getPHID())
-      ->setTransactions($xactions);
+    $timeline = $this->buildTransactionTimeline(
+      $column,
+      new PhabricatorProjectColumnTransactionQuery());
+    $timeline->setShouldTerminate(true);
 
     $title = pht('%s', $column->getDisplayName());
     $crumbs = $this->buildApplicationCrumbs();

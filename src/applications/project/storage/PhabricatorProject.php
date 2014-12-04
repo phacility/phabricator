@@ -2,6 +2,7 @@
 
 final class PhabricatorProject extends PhabricatorProjectDAO
   implements
+    PhabricatorApplicationTransactionInterface,
     PhabricatorFlaggableInterface,
     PhabricatorPolicyInterface,
     PhabricatorSubscribableInterface,
@@ -356,6 +357,22 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   public function attachCustomFields(PhabricatorCustomFieldAttachment $fields) {
     $this->customFields = $fields;
     return $this;
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhabricatorProjectTransactionEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhabricatorProjectTransaction();
   }
 
 

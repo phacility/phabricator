@@ -31,19 +31,11 @@ final class NuanceSourceViewController extends NuanceController {
     }
 
     $source_phid = $source->getPHID();
-    $xactions = id(new NuanceSourceTransactionQuery())
-      ->setViewer($viewer)
-      ->withObjectPHIDs(array($source_phid))
-      ->execute();
 
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($viewer);
-
-    $timeline = id(new PhabricatorApplicationTransactionView())
-      ->setUser($viewer)
-      ->setObjectPHID($source_phid)
-      ->setMarkupEngine($engine)
-      ->setTransactions($xactions);
+    $timeline = $this->buildTransactionTimeline(
+      $source,
+      new NuanceSourceTransactionQuery());
+    $timeline->setShouldTerminate(true);
 
     $title = pht('%s', $source->getName());
     $crumbs = $this->buildApplicationCrumbs();

@@ -35,7 +35,10 @@ final class PhabricatorDashboardPanelViewController
     $header = $this->buildHeaderView($panel);
     $actions = $this->buildActionView($panel);
     $properties = $this->buildPropertyView($panel);
-    $timeline = $this->buildTransactions($panel);
+    $timeline = $this->buildTransactionTimeline(
+      $panel,
+      new PhabricatorDashboardPanelTransactionQuery());
+    $timeline->setShouldTerminate(true);
 
     $properties->setActionList($actions);
     $box = id(new PHUIObjectBoxView())
@@ -165,26 +168,6 @@ final class PhabricatorDashboardPanelViewController
         : phutil_tag('em', array(), $does_not_appear));
 
     return $properties;
-  }
-
-  private function buildTransactions(PhabricatorDashboardPanel $panel) {
-    $viewer = $this->getRequest()->getUser();
-
-    $xactions = id(new PhabricatorDashboardPanelTransactionQuery())
-      ->setViewer($viewer)
-      ->withObjectPHIDs(array($panel->getPHID()))
-      ->execute();
-
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($viewer);
-
-    $timeline = id(new PhabricatorApplicationTransactionView())
-      ->setUser($viewer)
-      ->setShouldTerminate(true)
-      ->setObjectPHID($panel->getPHID())
-      ->setTransactions($xactions);
-
-    return $timeline;
   }
 
 }

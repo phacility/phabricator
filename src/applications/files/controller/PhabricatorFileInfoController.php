@@ -38,10 +38,6 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
     }
 
     $phid = $file->getPHID();
-    $xactions = id(new PhabricatorFileTransactionQuery())
-      ->setViewer($user)
-      ->withObjectPHIDs(array($phid))
-      ->execute();
 
     $handle_phids = array_merge(
       array($file->getAuthorPHID()),
@@ -62,7 +58,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
     }
 
     $actions = $this->buildActionView($file);
-    $timeline = $this->buildTransactionView($file, $xactions);
+    $timeline = $this->buildTransactionView($file);
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->setActionList($actions);
     $crumbs->addTextCrumb(
@@ -86,27 +82,12 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       ));
   }
 
-  private function buildTransactionView(
-    PhabricatorFile $file,
-    array $xactions) {
-
+  private function buildTransactionView(PhabricatorFile $file) {
     $user = $this->getRequest()->getUser();
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($user);
-    foreach ($xactions as $xaction) {
-      if ($xaction->getComment()) {
-        $engine->addObject(
-          $xaction->getComment(),
-          PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
-      }
-    }
-    $engine->process();
 
-    $timeline = id(new PhabricatorApplicationTransactionView())
-      ->setUser($user)
-      ->setObjectPHID($file->getPHID())
-      ->setTransactions($xactions)
-      ->setMarkupEngine($engine);
+    $timeline = $this->buildTransactionTimeline(
+      $file,
+      new PhabricatorFileTransactionQuery());
 
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
 

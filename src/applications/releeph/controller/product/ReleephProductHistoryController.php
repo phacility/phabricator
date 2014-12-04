@@ -25,16 +25,10 @@ final class ReleephProductHistoryController extends ReleephProductController {
     }
     $this->setProduct($product);
 
-    $xactions = id(new ReleephProductTransactionQuery())
-      ->setViewer($viewer)
-      ->withObjectPHIDs(array($product->getPHID()))
-      ->execute();
-
-    $timeline = id(new PhabricatorApplicationTransactionView())
-      ->setUser($viewer)
-      ->setObjectPHID($product->getPHID())
-      ->setTransactions($xactions)
-      ->setShouldTerminate(true);
+    $timeline = $this->buildTransactionTimeline(
+      $product,
+      new ReleephProductTransactionQuery());
+    $timeline->setShouldTerminate(true);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('History'));

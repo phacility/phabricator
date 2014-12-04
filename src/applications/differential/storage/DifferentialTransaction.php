@@ -31,6 +31,10 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
     return new DifferentialTransactionComment();
   }
 
+  public function getApplicationTransactionViewObject() {
+    return new DifferentialTransactionView();
+  }
+
   public function shouldHide() {
     $old = $this->getOldValue();
     $new = $this->getNewValue();

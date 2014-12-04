@@ -29,11 +29,6 @@ final class LegalpadDocumentManageController extends LegalpadController {
       return new Aphront404Response();
     }
 
-    $xactions = id(new LegalpadTransactionQuery())
-      ->setViewer($user)
-      ->withObjectPHIDs(array($document->getPHID()))
-      ->execute();
-
     $subscribers = PhabricatorSubscribersQuery::loadSubscribersForPHID(
       $document->getPHID());
 
@@ -53,14 +48,10 @@ final class LegalpadDocumentManageController extends LegalpadController {
     $engine->addObject(
       $document_body,
       LegalpadDocumentBody::MARKUP_FIELD_TEXT);
-    foreach ($xactions as $xaction) {
-      if ($xaction->getComment()) {
-        $engine->addObject(
-          $xaction->getComment(),
-          PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
-      }
-    }
-    $engine->process();
+    $timeline = $this->buildTransactionTimeline(
+      $document,
+      new LegalpadTransactionQuery(),
+      $engine);
 
     $title = $document_body->getTitle();
 
@@ -73,12 +64,6 @@ final class LegalpadDocumentManageController extends LegalpadController {
     $properties = $this->buildPropertyView($document, $engine, $actions);
 
     $comment_form_id = celerity_generate_unique_node_id();
-
-    $xaction_view = id(new LegalpadTransactionView())
-      ->setUser($this->getRequest()->getUser())
-      ->setObjectPHID($document->getPHID())
-      ->setTransactions($xactions)
-      ->setMarkupEngine($engine);
 
     $add_comment = $this->buildAddCommentView($document, $comment_form_id);
 
@@ -97,7 +82,7 @@ final class LegalpadDocumentManageController extends LegalpadController {
     $content = array(
       $crumbs,
       $object_box,
-      $xaction_view,
+      $timeline,
       $add_comment,
     );
 

@@ -191,16 +191,10 @@ final class HarbormasterStepEditController extends HarbormasterController {
     if ($is_new) {
       $xaction_view = null;
     } else {
-      $xactions = id(new HarbormasterBuildStepTransactionQuery())
-        ->setViewer($viewer)
-        ->withObjectPHIDs(array($step->getPHID()))
-        ->execute();
-
-      $xaction_view = id(new PhabricatorApplicationTransactionView())
-        ->setUser($viewer)
-        ->setObjectPHID($step->getPHID())
-        ->setTransactions($xactions)
-        ->setShouldTerminate(true);
+      $timeline = $this->buildTransactionTimeline(
+        $step,
+        new HarbormasterBuildStepTransactionQuery());
+      $timeline->setShouldTerminate(true);
     }
 
     return $this->buildApplicationPage(
@@ -208,7 +202,7 @@ final class HarbormasterStepEditController extends HarbormasterController {
         $crumbs,
         $box,
         $variables,
-        $xaction_view,
+        $timeline,
       ),
       array(
         'title' => $implementation->getName(),

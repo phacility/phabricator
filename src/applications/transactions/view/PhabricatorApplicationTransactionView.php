@@ -67,6 +67,10 @@ class PhabricatorApplicationTransactionView extends AphrontView {
     return $this;
   }
 
+  public function getTransactions() {
+    return $this->transactions;
+  }
+
   public function setShouldTerminate($term) {
     $this->shouldTerminate = $term;
     return $this;

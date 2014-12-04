@@ -178,31 +178,14 @@ final class PonderQuestionViewController extends PonderController {
   }
 
   private function buildQuestionTransactions(PonderQuestion $question) {
-    $viewer = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
     $id = $question->getID();
 
-    $xactions = id(new PonderQuestionTransactionQuery())
-      ->setViewer($viewer)
-      ->withTransactionTypes(array(PhabricatorTransactions::TYPE_COMMENT))
-      ->withObjectPHIDs(array($question->getPHID()))
-      ->execute();
-
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($viewer);
-    foreach ($xactions as $xaction) {
-      if ($xaction->getComment()) {
-        $engine->addObject(
-          $xaction->getComment(),
-          PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
-      }
-    }
-    $engine->process();
-
-    $timeline = id(new PhabricatorApplicationTransactionView())
-      ->setUser($viewer)
-      ->setObjectPHID($question->getPHID())
-      ->setTransactions($xactions)
-      ->setMarkupEngine($engine);
+    $timeline = $this->buildTransactionTimeline(
+      $question,
+      id(new PonderQuestionTransactionQuery())
+      ->withTransactionTypes(array(PhabricatorTransactions::TYPE_COMMENT)));
+    $xactions = $timeline->getTransactions();
 
     $add_comment = id(new PhabricatorApplicationTransactionCommentView())
       ->setUser($viewer)
@@ -220,6 +203,13 @@ final class PonderQuestionViewController extends PonderController {
       ));
   }
 
+  /**
+   * This is fairly non-standard; building N timelines at once (N = number of
+   * answers) is tricky business.
+   *
+   * TODO - re-factor this to ajax in one answer panel at a time in a more
+   * standard fashion. This is necessary to scale this application.
+   */
   private function buildAnswers(array $answers) {
     $request = $this->getRequest();
     $viewer = $request->getUser();

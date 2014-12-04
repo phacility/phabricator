@@ -6,6 +6,7 @@
 final class PhabricatorDashboardPanel
   extends PhabricatorDashboardDAO
   implements
+    PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
     PhabricatorCustomFieldInterface,
     PhabricatorDestructibleInterface {
@@ -86,6 +87,22 @@ final class PhabricatorDashboardPanel
           $this->getPanelType()));
     }
     return $impl;
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhabricatorDashboardPanelTransactionEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhabricatorDashboardPanelTransaction();
   }
 
 

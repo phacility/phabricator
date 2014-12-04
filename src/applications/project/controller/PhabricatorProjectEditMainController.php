@@ -48,16 +48,10 @@ final class PhabricatorProjectEditMainController
       ->setHeader($header)
       ->addPropertyList($properties);
 
-    $xactions = id(new PhabricatorProjectTransactionQuery())
-      ->setViewer($viewer)
-      ->withObjectPHIDs(array($project->getPHID()))
-      ->execute();
-
-    $timeline = id(new PhabricatorApplicationTransactionView())
-      ->setUser($viewer)
-      ->setObjectPHID($project->getPHID())
-      ->setShouldTerminate(true)
-      ->setTransactions($xactions);
+    $timeline = $this->buildTransactionTimeline(
+      $project,
+      new PhabricatorProjectTransactionQuery());
+    $timeline->setShouldTerminate(true);
 
     return $this->buildApplicationPage(
       array(

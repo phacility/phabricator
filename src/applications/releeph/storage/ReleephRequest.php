@@ -2,6 +2,7 @@
 
 final class ReleephRequest extends ReleephDAO
   implements
+    PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
     PhabricatorCustomFieldInterface {
 
@@ -293,6 +294,22 @@ final class ReleephRequest extends ReleephDAO
 
   private function setUserIntents(array $ar) {
     return parent::setUserIntents($ar);
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new ReleephRequestTransactionalEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new ReleephRequestTransaction();
   }
 
 

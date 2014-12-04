@@ -167,7 +167,6 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
       ),
       array(
         'title' => $basename,
-        'device' => false,
       ));
   }
 

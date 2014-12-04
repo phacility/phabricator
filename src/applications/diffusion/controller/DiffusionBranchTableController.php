@@ -69,7 +69,6 @@ final class DiffusionBranchTableController extends DiffusionController {
           pht('Branches'),
           'r'.$repository->getCallsign(),
         ),
-        'device' => false,
       ));
   }
 

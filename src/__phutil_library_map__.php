@@ -1288,6 +1288,7 @@ phutil_register_library_map(array(
     'PhabricatorAuthAccountView' => 'applications/auth/view/PhabricatorAuthAccountView.php',
     'PhabricatorAuthApplication' => 'applications/auth/application/PhabricatorAuthApplication.php',
     'PhabricatorAuthAuthFactorPHIDType' => 'applications/auth/phid/PhabricatorAuthAuthFactorPHIDType.php',
+    'PhabricatorAuthAuthProviderPHIDType' => 'applications/auth/phid/PhabricatorAuthAuthProviderPHIDType.php',
     'PhabricatorAuthConfirmLinkController' => 'applications/auth/controller/PhabricatorAuthConfirmLinkController.php',
     'PhabricatorAuthController' => 'applications/auth/controller/PhabricatorAuthController.php',
     'PhabricatorAuthDAO' => 'applications/auth/storage/PhabricatorAuthDAO.php',
@@ -3054,6 +3055,7 @@ phutil_register_library_map(array(
     'AlmanacNamesTestCase' => 'PhabricatorTestCase',
     'AlmanacNetwork' => array(
       'AlmanacDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
     ),
     'AlmanacNetworkController' => 'AlmanacController',
@@ -3647,6 +3649,7 @@ phutil_register_library_map(array(
     'DrydockApacheWebrootInterface' => 'DrydockWebrootInterface',
     'DrydockBlueprint' => array(
       'DrydockDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
       'PhabricatorCustomFieldInterface',
     ),
@@ -3786,6 +3789,7 @@ phutil_register_library_map(array(
     'FundSchemaSpec' => 'PhabricatorConfigSchemaSpec',
     'HarbormasterBuild' => array(
       'HarbormasterDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
     ),
     'HarbormasterBuildAbortedException' => 'Exception',
@@ -3817,6 +3821,7 @@ phutil_register_library_map(array(
     'HarbormasterBuildPHIDType' => 'PhabricatorPHIDType',
     'HarbormasterBuildPlan' => array(
       'HarbormasterDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
       'PhabricatorSubscribableInterface',
     ),
@@ -3830,6 +3835,7 @@ phutil_register_library_map(array(
     'HarbormasterBuildQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'HarbormasterBuildStep' => array(
       'HarbormasterDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
       'PhabricatorCustomFieldInterface',
     ),
@@ -3856,6 +3862,7 @@ phutil_register_library_map(array(
     'HarbormasterBuildWorker' => 'HarbormasterWorker',
     'HarbormasterBuildable' => array(
       'HarbormasterDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
       'HarbormasterBuildableInterface',
     ),
@@ -3927,6 +3934,7 @@ phutil_register_library_map(array(
     'HeraldRemarkupRule' => 'PhabricatorObjectRemarkupRule',
     'HeraldRule' => array(
       'HeraldDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorFlaggableInterface',
       'PhabricatorPolicyInterface',
       'PhabricatorDestructibleInterface',
@@ -4150,6 +4158,7 @@ phutil_register_library_map(array(
     'NuanceSchemaSpec' => 'PhabricatorConfigSchemaSpec',
     'NuanceSource' => array(
       'NuanceDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
     ),
     'NuanceSourceDefaultEditCapability' => 'PhabricatorPolicyCapability',
@@ -4237,6 +4246,7 @@ phutil_register_library_map(array(
     'PassphraseController' => 'PhabricatorController',
     'PassphraseCredential' => array(
       'PassphraseDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
       'PhabricatorDestructibleInterface',
     ),
@@ -4372,6 +4382,7 @@ phutil_register_library_map(array(
     'PhabricatorAuthAccountView' => 'AphrontView',
     'PhabricatorAuthApplication' => 'PhabricatorApplication',
     'PhabricatorAuthAuthFactorPHIDType' => 'PhabricatorPHIDType',
+    'PhabricatorAuthAuthProviderPHIDType' => 'PhabricatorPHIDType',
     'PhabricatorAuthConfirmLinkController' => 'PhabricatorAuthController',
     'PhabricatorAuthController' => 'PhabricatorController',
     'PhabricatorAuthDAO' => 'PhabricatorLiskDAO',
@@ -4400,6 +4411,7 @@ phutil_register_library_map(array(
     'PhabricatorAuthOneTimeLoginController' => 'PhabricatorAuthController',
     'PhabricatorAuthProviderConfig' => array(
       'PhabricatorAuthDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
     ),
     'PhabricatorAuthProviderConfigController' => 'PhabricatorAuthController',
@@ -4546,6 +4558,7 @@ phutil_register_library_map(array(
     'PhabricatorConfigEditor' => 'PhabricatorApplicationTransactionEditor',
     'PhabricatorConfigEntry' => array(
       'PhabricatorConfigEntryDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
     ),
     'PhabricatorConfigEntryDAO' => 'PhabricatorLiskDAO',
@@ -4651,6 +4664,7 @@ phutil_register_library_map(array(
     'PhabricatorDaemonsApplication' => 'PhabricatorApplication',
     'PhabricatorDashboard' => array(
       'PhabricatorDashboardDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
       'PhabricatorDestructibleInterface',
     ),
@@ -4669,6 +4683,7 @@ phutil_register_library_map(array(
     'PhabricatorDashboardMovePanelController' => 'PhabricatorDashboardController',
     'PhabricatorDashboardPanel' => array(
       'PhabricatorDashboardDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
       'PhabricatorCustomFieldInterface',
       'PhabricatorDestructibleInterface',
@@ -4802,6 +4817,7 @@ phutil_register_library_map(array(
     'PhabricatorFeedStoryTypeConstants' => 'PhabricatorFeedConstants',
     'PhabricatorFile' => array(
       'PhabricatorFileDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorTokenReceiverInterface',
       'PhabricatorSubscribableInterface',
       'PhabricatorFlaggableInterface',
@@ -5207,6 +5223,7 @@ phutil_register_library_map(array(
     'PhabricatorPonderApplication' => 'PhabricatorApplication',
     'PhabricatorProject' => array(
       'PhabricatorProjectDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorFlaggableInterface',
       'PhabricatorPolicyInterface',
       'PhabricatorSubscribableInterface',
@@ -5221,6 +5238,7 @@ phutil_register_library_map(array(
     'PhabricatorProjectBoardViewController' => 'PhabricatorProjectBoardController',
     'PhabricatorProjectColumn' => array(
       'PhabricatorProjectDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
       'PhabricatorDestructibleInterface',
     ),
@@ -5299,6 +5317,7 @@ phutil_register_library_map(array(
     'PhabricatorRepositoriesApplication' => 'PhabricatorApplication',
     'PhabricatorRepository' => array(
       'PhabricatorRepositoryDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
       'PhabricatorFlaggableInterface',
       'PhabricatorMarkupInterface',
@@ -5516,6 +5535,7 @@ phutil_register_library_map(array(
     'PhabricatorSlowvoteOption' => 'PhabricatorSlowvoteDAO',
     'PhabricatorSlowvotePoll' => array(
       'PhabricatorSlowvoteDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
       'PhabricatorSubscribableInterface',
       'PhabricatorFlaggableInterface',
@@ -5764,6 +5784,7 @@ phutil_register_library_map(array(
     'PhluxTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
     'PhluxVariable' => array(
       'PhluxDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorFlaggableInterface',
       'PhabricatorPolicyInterface',
     ),
@@ -5822,6 +5843,7 @@ phutil_register_library_map(array(
     'PholioUploadedImageView' => 'AphrontView',
     'PhortuneAccount' => array(
       'PhortuneDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
     ),
     'PhortuneAccountEditController' => 'PhortuneController',
@@ -5836,6 +5858,7 @@ phutil_register_library_map(array(
     'PhortuneBalancedPaymentProvider' => 'PhortunePaymentProvider',
     'PhortuneCart' => array(
       'PhortuneDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
     ),
     'PhortuneCartAcceptController' => 'PhortuneCartController',
@@ -5872,6 +5895,7 @@ phutil_register_library_map(array(
     'PhortuneMemberHasMerchantEdgeType' => 'PhabricatorEdgeType',
     'PhortuneMerchant' => array(
       'PhortuneDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
     ),
     'PhortuneMerchantCapability' => 'PhabricatorPolicyCapability',
@@ -6041,6 +6065,7 @@ phutil_register_library_map(array(
     'PonderAddAnswerView' => 'AphrontView',
     'PonderAnswer' => array(
       'PonderDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorMarkupInterface',
       'PonderVotableInterface',
       'PhabricatorPolicyInterface',
@@ -6064,6 +6089,7 @@ phutil_register_library_map(array(
     'PonderEditor' => 'PhabricatorApplicationTransactionEditor',
     'PonderQuestion' => array(
       'PonderDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorMarkupInterface',
       'PonderVotableInterface',
       'PhabricatorSubscribableInterface',
@@ -6111,6 +6137,7 @@ phutil_register_library_map(array(
     'ReleephAuthorFieldSpecification' => 'ReleephFieldSpecification',
     'ReleephBranch' => array(
       'ReleephDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
     ),
     'ReleephBranchAccessController' => 'ReleephBranchController',
@@ -6168,6 +6195,7 @@ phutil_register_library_map(array(
     ),
     'ReleephProject' => array(
       'ReleephDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
     ),
     'ReleephProjectInfoConduitAPIMethod' => 'ReleephConduitAPIMethod',
@@ -6177,6 +6205,7 @@ phutil_register_library_map(array(
     'ReleephReasonFieldSpecification' => 'ReleephFieldSpecification',
     'ReleephRequest' => array(
       'ReleephDAO',
+      'PhabricatorApplicationTransactionInterface',
       'PhabricatorPolicyInterface',
       'PhabricatorCustomFieldInterface',
     ),

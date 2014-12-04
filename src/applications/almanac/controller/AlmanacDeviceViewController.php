@@ -40,16 +40,10 @@ final class AlmanacDeviceViewController
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($device->getName());
 
-    $xactions = id(new AlmanacDeviceTransactionQuery())
-      ->setViewer($viewer)
-      ->withObjectPHIDs(array($device->getPHID()))
-      ->execute();
-
-    $xaction_view = id(new PhabricatorApplicationTransactionView())
-      ->setUser($viewer)
-      ->setObjectPHID($device->getPHID())
-      ->setTransactions($xactions)
-      ->setShouldTerminate(true);
+    $timeline = $this->buildTransactionTimeline(
+      $device,
+      new AlmanacDeviceTransactionQuery());
+    $timeline->setShouldTerminate(true);
 
     return $this->buildApplicationPage(
       array(
@@ -58,7 +52,7 @@ final class AlmanacDeviceViewController
         $interfaces,
         $this->buildAlmanacPropertiesTable($device),
         $this->buildSSHKeysTable($device),
-        $xaction_view,
+        $timeline,
       ),
       array(
         'title' => $title,

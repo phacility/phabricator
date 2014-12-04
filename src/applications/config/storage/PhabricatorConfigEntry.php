@@ -1,7 +1,10 @@
 <?php
 
-final class PhabricatorConfigEntry extends PhabricatorConfigEntryDAO
-  implements PhabricatorPolicyInterface {
+final class PhabricatorConfigEntry
+  extends PhabricatorConfigEntryDAO
+  implements
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorPolicyInterface {
 
   protected $namespace;
   protected $configKey;
@@ -47,6 +50,22 @@ final class PhabricatorConfigEntry extends PhabricatorConfigEntryDAO
     }
 
     return $config_entry;
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhabricatorConfigEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhabricatorConfigTransaction();
   }
 
 

@@ -144,7 +144,6 @@ final class PhabricatorAuthEditController
           ->setContinueOnNoEffect(true)
           ->applyTransactions($config, $xactions);
 
-
         if ($provider->hasSetupStep() && $is_new) {
           $id = $config->getID();
           $next_uri = $this->getApplicationURI('config/edit/'.$id.'/');
@@ -304,21 +303,15 @@ final class PhabricatorAuthEditController
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($crumb);
 
-    $xaction_view = null;
+    $timeline = null;
     if (!$is_new) {
-      $xactions = id(new PhabricatorAuthProviderConfigTransactionQuery())
-        ->withObjectPHIDs(array($config->getPHID()))
-        ->setViewer($viewer)
-        ->execute();
-
+      $timeline = $this->buildTransactionTimeline(
+        $config,
+        new PhabricatorAuthProviderConfigTransactionQuery());
+      $xactions = $timeline->getTransactions();
       foreach ($xactions as $xaction) {
         $xaction->setProvider($provider);
       }
-
-      $xaction_view = id(new PhabricatorApplicationTransactionView())
-        ->setUser($viewer)
-        ->setObjectPHID($config->getPHID())
-        ->setTransactions($xactions);
     }
 
     $form_box = id(new PHUIObjectBoxView())
@@ -331,7 +324,7 @@ final class PhabricatorAuthEditController
         $crumbs,
         $form_box,
         $footer,
-        $xaction_view,
+        $timeline,
       ),
       array(
         'title' => $title,
