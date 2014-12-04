@@ -48,7 +48,7 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
       $item = id(new PHUIListItemView())
         ->addClass('core-menu-item')
         ->setName(pht('Log Out'))
-        ->setIcon('logout-sm')
+        ->setIcon('fa-sign-out')
         ->setWorkflow(true)
         ->setHref('/logout/')
         ->setSelected(($controller instanceof PhabricatorLogoutController))
@@ -64,7 +64,7 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
           ->addClass('core-menu-item')
           ->setName(pht('Log In'))
           // TODO: Login icon?
-          ->setIcon('power')
+          ->setIcon('fa-sign-in')
           ->setHref('/auth/start/')
           ->setAural(pht('Log In'))
           ->setOrder(900);
