@@ -82,6 +82,13 @@ final class NuanceSource extends NuanceDAO
     return new NuanceSourceTransaction();
   }
 
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
+  }
+
 
   public function getCapabilities() {
     return array(

@@ -40,7 +40,7 @@ final class PhabricatorHelpApplication extends PhabricatorApplication {
       $item = id(new PHUIListItemView())
         ->setName($help_name)
         ->addClass('core-menu-item')
-        ->setIcon('info-sm')
+        ->setIcon('fa-info-circle')
         ->setAural($help_name)
         ->setOrder(200)
         ->setHref($application->getHelpURI());

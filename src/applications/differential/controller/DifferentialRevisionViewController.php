@@ -928,12 +928,12 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $timeline = $this->buildTransactionTimeline(
       $revision,
-      new DifferentialTransactionQuery());
-    $timeline
-      ->setChangesets($changesets)
-      ->setRevision($revision)
-      ->setLeftDiff($left_diff)
-      ->setRightDiff($right_diff);
+      new DifferentialTransactionQuery(),
+      $engine = null,
+      array(
+        'left' => $left_diff->getID(),
+        'right' => $right_diff->getID(),
+      ));
 
     return $timeline;
   }

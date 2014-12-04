@@ -82,7 +82,7 @@ JX.behavior('phabricator-show-older-transactions', function(config) {
   };
 
   var fetch_older_workflow = function(href, callback, swap) {
-    return new JX.Workflow(href)
+    return new JX.Workflow(href, config.renderData)
       .setHandler(JX.bind(null, callback, swap));
   };
 

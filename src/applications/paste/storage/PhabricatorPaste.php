@@ -194,4 +194,11 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
     return new PhabricatorPasteTransaction();
   }
 
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
+  }
+
 }

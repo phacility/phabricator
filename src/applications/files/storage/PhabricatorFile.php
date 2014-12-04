@@ -1095,6 +1095,13 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return new PhabricatorFileTransaction();
   }
 
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
+  }
+
 
 /* -(  PhabricatorPolicyInterface Implementation  )-------------------------- */
 

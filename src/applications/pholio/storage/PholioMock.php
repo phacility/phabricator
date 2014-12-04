@@ -264,6 +264,13 @@ final class PholioMock extends PholioDAO
     return new PholioTransaction();
   }
 
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    $timeline->setMock($this);
+    return $timeline;
+  }
 
 /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
 

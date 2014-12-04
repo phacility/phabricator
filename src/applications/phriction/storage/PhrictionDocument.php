@@ -216,6 +216,12 @@ final class PhrictionDocument extends PhrictionDAO
     return new PhrictionTransaction();
   }
 
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
+  }
 
 
 /* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */

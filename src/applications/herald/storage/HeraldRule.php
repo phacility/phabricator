@@ -265,7 +265,9 @@ final class HeraldRule extends HeraldDAO
     return sprintf('~%d%010d', $type_order, $this->getID());
   }
 
+
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
 
   public function getApplicationTransactionEditor() {
     return new HeraldRuleEditor();
@@ -278,6 +280,14 @@ final class HeraldRule extends HeraldDAO
   public function getApplicationTransactionTemplate() {
     return new HeraldRuleTransaction();
   }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

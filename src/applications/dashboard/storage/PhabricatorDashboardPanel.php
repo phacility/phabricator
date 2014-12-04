@@ -105,6 +105,13 @@ final class PhabricatorDashboardPanel
     return new PhabricatorDashboardPanelTransaction();
   }
 
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
