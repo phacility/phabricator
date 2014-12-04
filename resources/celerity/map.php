@@ -8,7 +8,7 @@
 return array(
   'names' => array(
     'core.pkg.css' => 'b5618e4c',
-    'core.pkg.js' => 'e64447dc',
+    'core.pkg.js' => 'ef8f73ee',
     'darkconsole.pkg.js' => 'df001cab',
     'differential.pkg.css' => '8af45893',
     'differential.pkg.js' => '42c10e78',
@@ -371,7 +371,6 @@ return array(
     'rsrc/js/application/differential/behavior-edit-inline-comments.js' => '00861799',
     'rsrc/js/application/differential/behavior-keyboard-nav.js' => '2c426492',
     'rsrc/js/application/differential/behavior-populate.js' => 'bdb3e4d0',
-    'rsrc/js/application/differential/behavior-show-all-comments.js' => '7c273581',
     'rsrc/js/application/differential/behavior-show-field-details.js' => 'bba9eedf',
     'rsrc/js/application/differential/behavior-show-more.js' => 'dd7e8ef5',
     'rsrc/js/application/differential/behavior-toggle-files.js' => 'ca3f91eb',
@@ -624,7 +623,6 @@ return array(
     'javelin-behavior-phabricator-remarkup-assist' => 'e32d14ab',
     'javelin-behavior-phabricator-reveal-content' => '60821bc7',
     'javelin-behavior-phabricator-search-typeahead' => '724b1247',
-    'javelin-behavior-phabricator-show-all-transactions' => '7c273581',
     'javelin-behavior-phabricator-show-older-transactions' => '83458cbb',
     'javelin-behavior-phabricator-tooltips' => '3ee3408b',
     'javelin-behavior-phabricator-transaction-comment-form' => '9f7309fb',
@@ -1332,11 +1330,6 @@ return array(
       'javelin-dom',
       'javelin-stratcom',
       'javelin-util',
-    ),
-    '7c273581' => array(
-      'javelin-behavior',
-      'javelin-stratcom',
-      'javelin-dom',
     ),
     '7cbe244b' => array(
       'javelin-install',
@@ -2095,7 +2088,7 @@ return array(
       'javelin-fx',
       'phabricator-draggable-list',
       'javelin-behavior-phabricator-transaction-list',
-      'javelin-behavior-phabricator-show-all-transactions',
+      'javelin-behavior-phabricator-show-older-transactions',
       'javelin-behavior-phui-timeline-dropdown-menu',
       'javelin-behavior-doorkeeper-tag',
     ),

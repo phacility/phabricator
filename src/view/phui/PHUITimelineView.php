@@ -83,73 +83,25 @@ final class PHUITimelineView extends AphrontView {
     }
 
     $events = array();
-    if ($hide) {
-      if ($this->getPager()) {
-
-        $events[] = javelin_tag(
-          'div',
-          array(
-            'sigil' => 'show-older-block',
-            'class' => 'phui-timeline-older-transactions-are-hidden',
-          ),
-          array(
-            pht('Older changes are hidden. '),
-            ' ',
-            javelin_tag(
-              'a',
-              array(
+    if ($hide && $this->getPager()) {
+      $events[] = javelin_tag(
+        'div',
+        array(
+          'sigil' => 'show-older-block',
+          'class' => 'phui-timeline-older-transactions-are-hidden',
+        ),
+        array(
+          pht('Older changes are hidden. '),
+          ' ',
+          javelin_tag(
+            'a',
+            array(
               'href' => (string) $this->getPager()->getNextPageURI(),
               'mustcapture' => true,
               'sigil' => 'show-older-link',
             ),
             pht('Show older changes.')),
-          ));
-
-      } else {
-
-        $hidden = phutil_implode_html($spacer, $hide);
-        $count = count($hide);
-
-        $show_id = celerity_generate_unique_node_id();
-        $hide_id = celerity_generate_unique_node_id();
-        $link_id = celerity_generate_unique_node_id();
-
-        Javelin::initBehavior(
-          'phabricator-show-all-transactions',
-          array(
-            'anchors' => array_filter(mpull($hide, 'getAnchor')),
-            'linkID' => $link_id,
-            'hideID' => $hide_id,
-            'showID' => $show_id,
-          ));
-
-        $events[] = phutil_tag(
-          'div',
-          array(
-            'id' => $hide_id,
-            'class' => 'phui-timeline-older-transactions-are-hidden',
-          ),
-          array(
-            pht('%s older changes(s) are hidden.', new PhutilNumber($count)),
-            ' ',
-            javelin_tag(
-              'a',
-              array(
-                'href' => '#',
-                'mustcapture' => true,
-                'id' => $link_id,
-              ),
-              pht('Show all changes.')),
-          ));
-
-        $events[] = phutil_tag(
-          'div',
-          array(
-            'id' => $show_id,
-            'style' => 'display: none',
-          ),
-          $hidden);
-      }
+        ));
     }
 
     if ($hide && $show) {
