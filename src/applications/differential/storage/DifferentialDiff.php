@@ -421,10 +421,8 @@ final class DifferentialDiff
 
 
   public function getApplicationTransactionEditor() {
-
     return new DifferentialDiffEditor();
   }
-
 
   public function getApplicationTransactionObject() {
     return $this;
@@ -432,6 +430,13 @@ final class DifferentialDiff
 
   public function getApplicationTransactionTemplate() {
     return new DifferentialDiffTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
   }
 
 

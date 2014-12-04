@@ -14,6 +14,7 @@ class PhabricatorApplicationTransactionView extends AphrontView {
   private $quoteTargetID;
   private $quoteRef;
   private $pager;
+  private $renderData = array();
 
   public function setQuoteRef($quote_ref) {
     $this->quoteRef = $quote_ref;
@@ -83,6 +84,21 @@ class PhabricatorApplicationTransactionView extends AphrontView {
 
   public function getPager() {
     return $this->pager;
+  }
+
+  /**
+   * This is additional data that may be necessary to render the next set
+   * of transactions. Objects that implement
+   * PhabricatorApplicationTransactionInterface use this data in
+   * willRenderTimeline.
+   */
+  public function setRenderData(array $data) {
+    $this->renderData = $data;
+    return $this;
+  }
+
+  public function getRenderData() {
+    return $this->renderData;
   }
 
   public function buildEvents($with_hiding = false) {
@@ -185,6 +201,9 @@ class PhabricatorApplicationTransactionView extends AphrontView {
     }
     if ($this->getPager()) {
       $view->setPager($this->getPager());
+    }
+    if ($this->getRenderData()) {
+      $view->setRenderData($this->getRenderData());
     }
 
     return $view;

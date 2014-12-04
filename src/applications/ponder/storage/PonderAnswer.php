@@ -129,6 +129,13 @@ final class PonderAnswer extends PonderDAO
     return new PonderAnswerTransaction();
   }
 
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
+  }
+
 
   // Markup interface
 

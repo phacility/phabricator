@@ -529,7 +529,8 @@ abstract class PhabricatorController extends AphrontController {
   protected function buildTransactionTimeline(
     PhabricatorApplicationTransactionInterface $object,
     PhabricatorApplicationTransactionQuery $query,
-    PhabricatorMarkupEngine $engine = null) {
+    PhabricatorMarkupEngine $engine = null,
+    $render_data = array()) {
 
     $viewer = $this->getRequest()->getUser();
     $xaction = $object->getApplicationTransactionTemplate();
@@ -564,7 +565,9 @@ abstract class PhabricatorController extends AphrontController {
       ->setUser($viewer)
       ->setObjectPHID($object->getPHID())
       ->setTransactions($xactions)
-      ->setPager($pager);
+      ->setPager($pager)
+      ->setRenderData($render_data);
+    $object->willRenderTimeline($timeline, $this->getRequest());
 
     return $timeline;
   }

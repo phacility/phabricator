@@ -213,6 +213,13 @@ final class LegalpadDocument extends LegalpadDAO
     return new LegalpadTransaction();
   }
 
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
+  }
+
 
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 

@@ -97,6 +97,13 @@ final class PhabricatorAuthProviderConfig
     return new PhabricatorAuthProviderConfigTransaction();
   }
 
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

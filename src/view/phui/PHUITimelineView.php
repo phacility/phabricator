@@ -7,6 +7,7 @@ final class PHUITimelineView extends AphrontView {
   private $shouldTerminate = false;
   private $shouldAddSpacers = true;
   private $pager;
+  private $renderData = array();
 
   public function setID($id) {
     $this->id = $id;
@@ -37,6 +38,11 @@ final class PHUITimelineView extends AphrontView {
     return $this;
   }
 
+  public function setRenderData(array $data) {
+    $this->renderData = $data;
+    return $this;
+  }
+
   public function render() {
     if ($this->getPager()) {
       if ($this->id === null) {
@@ -46,6 +52,7 @@ final class PHUITimelineView extends AphrontView {
         'phabricator-show-older-transactions',
         array(
           'timelineID' => $this->id,
+          'renderData' => $this->renderData,
         ));
     }
     $events = $this->buildEvents();

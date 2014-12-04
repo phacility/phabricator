@@ -68,6 +68,13 @@ final class PhabricatorConfigEntry
     return new PhabricatorConfigTransaction();
   }
 
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

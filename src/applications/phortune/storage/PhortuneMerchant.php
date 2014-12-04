@@ -57,6 +57,13 @@ final class PhortuneMerchant extends PhortuneDAO
     return new PhortuneMerchantTransaction();
   }
 
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

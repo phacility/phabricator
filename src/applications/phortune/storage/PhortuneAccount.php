@@ -112,6 +112,13 @@ final class PhortuneAccount extends PhortuneDAO
     return new PhortuneAccountTransaction();
   }
 
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

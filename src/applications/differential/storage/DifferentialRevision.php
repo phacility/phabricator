@@ -475,6 +475,35 @@ final class DifferentialRevision extends DifferentialDAO
     return new DifferentialTransaction();
   }
 
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    $render_data = $timeline->getRenderData();
+    $left = $request->getInt('left', idx($render_data, 'left'));
+    $right = $request->getInt('right', idx($render_data, 'right'));
+
+    $diffs = id(new DifferentialDiffQuery())
+      ->setViewer($request->getUser())
+      ->withIDs(array($left, $right))
+      ->execute();
+    $diffs = mpull($diffs, null, 'getID');
+    $left_diff = $diffs[$left];
+    $right_diff = $diffs[$right];
+
+    $changesets = id(new DifferentialChangesetQuery())
+      ->setViewer($request->getUser())
+      ->withDiffs(array($right_diff))
+      ->execute();
+    $changesets = mpull($changesets, null, 'getID');
+
+    return $timeline
+      ->setChangesets($changesets)
+      ->setRevision($this)
+      ->setLeftDiff($left_diff)
+      ->setRightDiff($right_diff);
+  }
+
 
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 

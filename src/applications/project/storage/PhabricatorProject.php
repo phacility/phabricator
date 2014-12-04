@@ -375,6 +375,13 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     return new PhabricatorProjectTransaction();
   }
 
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
+  }
+
 
 /* -(  PhabricatorDestructibleInterface  )----------------------------------- */
 
