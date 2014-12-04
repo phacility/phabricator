@@ -71,22 +71,26 @@ final class PhabricatorApplicationTransactionCommentEditor
         $xaction->save();
         $xaction->attachComment($comment);
 
-        $object = id(new PhabricatorObjectQuery())
-          ->withPHIDs(array($xaction->getObjectPHID()))
-          ->setViewer($this->getActor())
-          ->executeOne();
-        if ($object &&
-            $object instanceof PhabricatorApplicationTransactionInterface) {
-          $editor = $object->getApplicationTransactionEditor();
-          $editor->setActor($this->getActor());
-          $support_xactions = $editor->getExpandedSupportTransactions(
-            $object,
-            $xaction);
-          if ($support_xactions) {
-            $editor
-              ->setContentSource($this->getContentSource())
-              ->setContinueOnNoEffect(true)
-              ->applyTransactions($object, $support_xactions);
+        // For comment edits, we need to make sure there are no automagical
+        // transactions like adding mentions or projects.
+        if ($new_version > 1) {
+          $object = id(new PhabricatorObjectQuery())
+            ->withPHIDs(array($xaction->getObjectPHID()))
+            ->setViewer($this->getActor())
+            ->executeOne();
+          if ($object &&
+              $object instanceof PhabricatorApplicationTransactionInterface) {
+            $editor = $object->getApplicationTransactionEditor();
+            $editor->setActor($this->getActor());
+            $support_xactions = $editor->getExpandedSupportTransactions(
+              $object,
+              $xaction);
+            if ($support_xactions) {
+              $editor
+                ->setContentSource($this->getContentSource())
+                ->setContinueOnNoEffect(true)
+                ->applyTransactions($object, $support_xactions);
+            }
           }
         }
       $xaction->endReadLocking();
