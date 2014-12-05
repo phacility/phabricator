@@ -144,10 +144,12 @@ class PhabricatorApplicationTransactionView extends AphrontView {
 
     $events = array();
     $hide_by_default = ($show_group !== null);
+    $set_next_page_id = false;
 
     foreach ($groups as $group_key => $group) {
       if ($hide_by_default && ($show_group === $group_key)) {
         $hide_by_default = false;
+        $set_next_page_id = true;
       }
 
       $group_event = null;
@@ -159,7 +161,8 @@ class PhabricatorApplicationTransactionView extends AphrontView {
         } else {
           $group_event->addEventToGroup($event);
         }
-        if ($hide_by_default) {
+        if ($set_next_page_id) {
+          $set_next_page_id = false;
           $pager = $this->getPager();
           if ($pager) {
             $pager->setNextPageID($xaction->getID());
