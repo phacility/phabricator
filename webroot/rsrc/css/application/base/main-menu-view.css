@@ -396,6 +396,11 @@
   color: #fff;
   margin: 8px;
   text-align: center;
+  vertical-align: middle;
+}
+
+.phabricator-application-menu .phui-list-item-icon.fa-plus {
+  line-height: 22px;
 }
 
 .device-desktop .phabricator-application-menu .phui-list-item-view.core-menu-item {
