@@ -76,10 +76,10 @@
 */
 
 .phabricator-menu-button-icon {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 32px;
   float: left;
-  margin: 10px 10px 0 5px;
+  margin: 10px 8px 0 8px;
 }
 
 .phabricator-menu-button-icon.phui-icon-view {
@@ -326,7 +326,7 @@
   text-transform: uppercase;
   font-size: 13px;
   background-color: #151719;
-  padding: 6px 0;
+  padding: 6px 0 6px 20px;
   display: block;
   font-weight: bold;
 }
@@ -336,7 +336,7 @@
   border-style: solid;
   border-color: #34373b transparent #282c2d;
   background-color: #272c2f;
-  padding: 4px 0 4px 16px;
+  padding: 4px 0 4px 20px;
   display: block;
 }
 
@@ -373,7 +373,7 @@
 
 .device .phui-list-item-type-link
   .phabricator-core-menu-icon + .phui-list-item-name {
-  margin-left: 30px;
+  margin-left: 32px;
 }
 
 .device-desktop .phabricator-application-menu {
@@ -393,10 +393,25 @@
   font-size: 20px;
   height: 20px;
   width: 20px;
-  color: #fff;
+  color: #d7d7d7;
   margin: 8px;
   text-align: center;
+  vertical-align: middle;
 }
+
+.device .phabricator-application-menu .phui-list-item-icon.phui-font-fa {
+  margin: 4px 12px 4px 0;
+}
+
+.phabricator-application-menu .phui-list-item-icon.fa-plus {
+  line-height: 22px;
+}
+
+.device-desktop .phabricator-application-menu
+  .core-menu-item.phui-list-item-view:hover
+  .phui-list-item-icon.phui-font-fa {
+    color: #fff;
+  }
 
 .device-desktop .phabricator-application-menu .phui-list-item-view.core-menu-item {
   display: block;
@@ -411,6 +426,7 @@
  .core-menu-item.phui-list-item-view:hover {
   box-shadow: inset 0 5px 10px rgba(0,0,0,0.5);
   border-radius: 3px;
+  color: #fff;
 }
 
 .device-desktop .phabricator-application-menu .phui-list-item-view {
@@ -427,7 +443,11 @@
 }
 
 .device .phabricator-core-menu-icon {
-  left: 24px;
+  left: 16px;
+  height: 24px;
+  width: 24px;
+  background-size: 24px;
+  margin: 2px;
 }
 
 .phabricator-core-menu-icon {
@@ -462,10 +482,6 @@
 .device .phabricator-application-menu,
 .device-desktop .phabricator-dark-menu .phui-list-item-type-label {
   display: none;
-}
-
-.phabricator-application-menu .phui-list-item-name {
-  padding-left: 12px;
 }
 
 
