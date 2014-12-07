@@ -135,7 +135,16 @@ final class PassphraseAddConduitAPIMethod
         ->setTransactionType($type_username)
         ->setNewValue($v_username);
 
-     // TODO: handle weird secret logic
+      $xactions[] = id(new PassphraseCredentialTransaction())
+        ->setTransactionType($type_destroy)
+        ->setNewValue(0);
+
+      $new_secret = id(new PassphraseSecret())
+        ->setSecretData($v_decrypt)
+        ->save();
+      $xactions[] = id(new PassphraseCredentialTransaction())
+        ->setTransactionType($type_secret_id)
+        ->setNewValue($new_secret->getID());
 
       $xactions[] = id(new PassphraseCredentialTransaction())
         ->setTransactionType($type_is_locked)
