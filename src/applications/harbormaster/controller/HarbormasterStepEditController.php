@@ -190,6 +190,7 @@ final class HarbormasterStepEditController extends HarbormasterController {
 
     if ($is_new) {
       $xaction_view = null;
+      $timeline = null;
     } else {
       $timeline = $this->buildTransactionTimeline(
         $step,
