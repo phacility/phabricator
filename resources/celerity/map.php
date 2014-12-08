@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => 'b95abae6',
+    'core.pkg.css' => '78e368d3',
     'core.pkg.js' => 'ef8f73ee',
     'darkconsole.pkg.js' => 'df001cab',
     'differential.pkg.css' => '8af45893',
@@ -102,7 +102,7 @@ return array(
     'rsrc/css/application/slowvote/slowvote.css' => '266df6a1',
     'rsrc/css/application/tokens/tokens.css' => '3d0f239e',
     'rsrc/css/application/uiexample/example.css' => '528b19de',
-    'rsrc/css/core/core.css' => '40151074',
+    'rsrc/css/core/core.css' => 'ca42b69f',
     'rsrc/css/core/remarkup.css' => '29524ba4',
     'rsrc/css/core/syntax.css' => '56c1ba38',
     'rsrc/css/core/z-index.css' => '44e1d311',
@@ -708,7 +708,7 @@ return array(
     'phabricator-busy' => '6453c869',
     'phabricator-chatlog-css' => '852140ff',
     'phabricator-content-source-view-css' => '4b8b05d4',
-    'phabricator-core-css' => '40151074',
+    'phabricator-core-css' => 'ca42b69f',
     'phabricator-countdown-css' => '86b7b0a0',
     'phabricator-crumbs-view-css' => 'a49339de',
     'phabricator-dashboard-css' => 'a2bfdcbf',
