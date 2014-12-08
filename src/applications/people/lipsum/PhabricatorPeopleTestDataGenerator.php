@@ -46,8 +46,7 @@ final class PhabricatorPeopleTestDataGenerator
       foreach ($words as $w) {
          if ($w == end($words)) {
           $reduced .= $w;
-        }
-        else {
+        } else {
           $reduced .= $w[0];
         }
       }
@@ -55,8 +54,7 @@ final class PhabricatorPeopleTestDataGenerator
         foreach ($words as $w) {
           if ($w == $words[0]) {
             $reduced .= $w;
-          }
-          else {
+          } else {
             $reduced .= $w[0];
           }
         }
@@ -64,8 +62,7 @@ final class PhabricatorPeopleTestDataGenerator
         foreach ($words as $w) {
           if ($w == $words[0] || $w == end($words)) {
             $reduced .= $w;
-          }
-          else {
+          } else {
             $reduced .= $w[0];
           }
         }
@@ -73,8 +70,7 @@ final class PhabricatorPeopleTestDataGenerator
         foreach ($words as $w) {
           if ($w == $words[0] || $w == end($words)) {
             $reduced .= $w;
-          }
-          else {
+          } else {
             $reduced .= $w[0].'.';
           }
         }
@@ -82,8 +78,7 @@ final class PhabricatorPeopleTestDataGenerator
         foreach ($words as $w) {
           if ($w == $words[0] || $w == end($words)) {
             $reduced .= $w;
-          }
-          else {
+          } else {
             $reduced .= $w[0].'_';
           }
         }
