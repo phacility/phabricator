@@ -212,6 +212,9 @@ final class ConpherenceUpdateController
     return id(new AphrontDialogView())
       ->setTitle(pht('Add Participants'))
       ->addHiddenInput('action', 'add_person')
+      ->addHiddenInput(
+        'latest_transaction_id',
+        $request->getInt('latest_transaction_id'))
       ->appendChild($form);
     }
 
@@ -241,8 +244,11 @@ final class ConpherenceUpdateController
     return id(new AphrontDialogView())
       ->setTitle(pht('Remove Participants'))
       ->addHiddenInput('action', 'remove_person')
-      ->addHiddenInput('__continue__', true)
       ->addHiddenInput('remove_person', $remove_person)
+      ->addHiddenInput(
+        'latest_transaction_id',
+        $request->getInt('latest_transaction_id'))
+      ->addHiddenInput('__continue__', true)
       ->appendChild($body);
   }
 
@@ -250,6 +256,7 @@ final class ConpherenceUpdateController
     ConpherenceThread $conpherence,
     $error_view) {
 
+    $request = $this->getRequest();
     $form = id(new PHUIFormLayoutView())
       ->appendChild($error_view)
       ->appendChild(
@@ -262,6 +269,9 @@ final class ConpherenceUpdateController
     return id(new AphrontDialogView())
       ->setTitle(pht('Update Conpherence'))
       ->addHiddenInput('action', 'metadata')
+      ->addHiddenInput(
+        'latest_transaction_id',
+        $request->getInt('latest_transaction_id'))
       ->addHiddenInput('__continue__', true)
       ->appendChild($form);
   }
