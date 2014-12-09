@@ -6,24 +6,6 @@ final class CeleritySpriteGenerator {
     $sprites = array();
 
     $sources = array(
-      'seen_read_all' => array(
-        'x' => 18,
-        'y' => 18,
-        'css' =>
-          '.alert-notifications .phabricator-main-menu-alert-icon',
-      ),
-      'seen_have_unread' => array(
-        'x' => 18,
-        'y' => 18,
-        'css' =>
-          '.alert-notifications:hover .phabricator-main-menu-alert-icon',
-      ),
-      'unseen_any' => array(
-        'x' => 18,
-        'y' => 18,
-        'css' =>
-          '.alert-notifications.alert-unread .phabricator-main-menu-alert-icon',
-      ),
       'arrow-right' => array(
         'x' => 9,
         'y' => 31,
@@ -38,25 +20,6 @@ final class CeleritySpriteGenerator {
         'x' => 40,
         'y' => 40,
         'css' => '.phabricator-main-menu-eye',
-      ),
-      'conf-off' => array(
-        'x' => 18,
-        'y' => 18,
-        'css' =>
-          '.alert-notifications .phabricator-main-menu-message-icon',
-      ),
-      'conf-hover' => array(
-        'x' => 18,
-        'y' => 18,
-        'css' =>
-          '.alert-notifications:hover .phabricator-main-menu-message-icon',
-      ),
-      'conf-unseen' => array(
-        'x' => 18,
-        'y' => 18,
-        'css' =>
-          '.alert-notifications.message-unread '.
-          '.phabricator-main-menu-message-icon',
       ),
     );
 

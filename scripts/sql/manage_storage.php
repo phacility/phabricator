@@ -70,7 +70,7 @@ try {
           'Disable utf8mb4, even if the database supports it. This is an '.
           'advanced feature used for testing changes to Phabricator; you '.
           'should not normally use this flag.'),
-      )
+      ),
     ));
 } catch (PhutilArgumentUsageException $ex) {
   $args->printUsageException($ex);

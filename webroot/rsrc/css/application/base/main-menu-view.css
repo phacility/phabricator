@@ -43,8 +43,7 @@
   width: 148px;
   height: 44px;
   float: left;
-  margin-right: 6px;
-  padding-right: 4px;
+  margin-right: 4px;
   padding-left: 6px;
 }
 
@@ -271,36 +270,58 @@
 
 .phabricator-main-menu-alerts {
   display: inline-block;
-  border-radius: 15px;
   float: left;
-  background: rgba(0,0,0,.5);
-  height: 20px;
-  padding: 2px 10px 3px 8px;
-  margin-top: 10px;
+  padding: 4px 0;
+}
+
+.alert-notifications {
+  float: left;
+}
+
+.alert-notifications:hover .phui-icon-view {
+  color: #fff;
+}
+
+.alert-unread:hover .phabricator-main-menu-alert-icon.phui-icon-view,
+.message-unread:hover .phabricator-main-menu-message-icon.phui-icon-view {
+  color: {$sky};
 }
 
 .phabricator-main-menu-alert-icon,
 .phabricator-main-menu-message-icon {
   width: 18px;
   height: 18px;
-  display: block;
   float: left;
-  margin: 2px 0 0 0;
+  padding: 8px 6px 8px 4px;
+  color: white;
+  font-size: 18px;
+  line-height: 20px;
+  text-align: right;
 }
 
-.alert-notifications .phabricator-main-menu-message-icon {
-  margin: 2px 0 0 6px;
+.phabricator-main-menu-alert-icon {
+  font-size: 16px;
+  margin-top: 2px;
 }
 
 .phabricator-main-menu-alert-count,
 .phabricator-main-menu-message-count {
-  font-weight: bold;
-  line-height: 20px;
-  color: #ffffff;
+  color: #fff;
   text-align: center;
   display: none;
   float: left;
-  margin-left: 3px;
+  margin: 11px 6px 0 -2px;
+  font-size: 12px;
+}
+
+.device-phone .alert-unread .phabricator-main-menu-alert-count,
+.device-phone .message-unread .phabricator-main-menu-message-count {
+  display: none;
+}
+
+.alert-unread .phabricator-main-menu-alert-icon,
+.message-unread .phabricator-main-menu-message-icon  {
+  color: {$sky};
 }
 
 .alert-unread .phabricator-main-menu-alert-count,

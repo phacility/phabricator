@@ -13,43 +13,19 @@ only screen and (min-device-pixel-ratio: 1.5),
 only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   .sprite-menu {
     background-image: url(/rsrc/image/sprite-menu-X2.png);
-    background-size: 97px 138px;
+    background-size: 97px 100px;
   }
 }
 
 
-.alert-notifications .phabricator-main-menu-alert-icon {
-  background-position: 0px 0px;
-}
-
-.alert-notifications:hover .phabricator-main-menu-alert-icon {
-  background-position: -19px 0px;
-}
-
-.alert-notifications.alert-unread .phabricator-main-menu-alert-icon {
-  background-position: -38px 0px;
-}
-
 .phabricator-crumb-divider {
-  background-position: 0px -65px;
+  background-position: 0px -27px;
 }
 
 .phabricator-main-menu-logo {
-  background-position: 0px -38px;
+  background-position: 0px 0px;
 }
 
 .phabricator-main-menu-eye {
-  background-position: 0px -97px;
-}
-
-.alert-notifications .phabricator-main-menu-message-icon {
-  background-position: 0px -19px;
-}
-
-.alert-notifications:hover .phabricator-main-menu-message-icon {
-  background-position: -19px -19px;
-}
-
-.alert-notifications.message-unread .phabricator-main-menu-message-icon {
-  background-position: -38px -19px;
+  background-position: 0px -59px;
 }
