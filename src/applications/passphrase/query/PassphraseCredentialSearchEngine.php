@@ -17,6 +17,7 @@ final class PassphraseCredentialSearchEngine
     $saved->setParameter(
       'isDestroyed',
       $this->readBoolFromRequest($request, 'isDestroyed'));
+    $saved->setParameter('name', $request->getStr('name'));
 
     return $saved;
   }
@@ -29,6 +30,11 @@ final class PassphraseCredentialSearchEngine
       $query->withIsDestroyed($destroyed);
     }
 
+    $name = $saved->getParameter('name');
+    if (strlen($name)) {
+      $query->withNameContains($name);
+    }
+
     return $query;
   }
 
@@ -36,7 +42,10 @@ final class PassphraseCredentialSearchEngine
     AphrontFormView $form,
     PhabricatorSavedQuery $saved_query) {
 
-    $form->appendChild(
+    $name = $saved_query->getParameter('name');
+
+    $form
+      ->appendChild(
       id(new AphrontFormSelectControl())
         ->setName('isDestroyed')
         ->setLabel(pht('Status'))
@@ -46,7 +55,12 @@ final class PassphraseCredentialSearchEngine
             '' => pht('Show All Credentials'),
             'false' => pht('Show Only Active Credentials'),
             'true' => pht('Show Only Destroyed Credentials'),
-          )));
+          )))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setName('name')
+          ->setLabel(pht('Name Contains'))
+          ->setValue($name));
   }
 
   protected function getURI($path) {
