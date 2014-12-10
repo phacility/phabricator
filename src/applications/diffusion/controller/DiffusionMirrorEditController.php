@@ -16,10 +16,20 @@ final class DiffusionMirrorEditController
     $drequest = $this->diffusionRequest;
     $repository = $drequest->getRepository();
 
+    PhabricatorPolicyFilter::requireCapability(
+      $viewer,
+      $repository,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
     if ($this->id) {
       $mirror = id(new PhabricatorRepositoryMirrorQuery())
         ->setViewer($viewer)
         ->withIDs(array($this->id))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
         ->executeOne();
       if (!$mirror) {
         return new Aphront404Response();

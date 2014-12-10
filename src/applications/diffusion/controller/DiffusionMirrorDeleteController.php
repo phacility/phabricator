@@ -19,6 +19,11 @@ final class DiffusionMirrorDeleteController
     $mirror = id(new PhabricatorRepositoryMirrorQuery())
       ->setViewer($viewer)
       ->withIDs(array($this->id))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
       ->executeOne();
     if (!$mirror) {
       return new Aphront404Response();
