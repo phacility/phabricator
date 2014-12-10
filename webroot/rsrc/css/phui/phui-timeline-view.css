@@ -318,6 +318,7 @@
   text-align: center;
   padding: 12px;
   color: {$darkgreytext};
+  cursor: pointer;
 }
 
 .device-phone .phui-timeline-older-transactions-are-hidden {

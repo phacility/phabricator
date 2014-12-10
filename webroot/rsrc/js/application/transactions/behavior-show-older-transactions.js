@@ -8,8 +8,6 @@
 
 JX.behavior('phabricator-show-older-transactions', function(config) {
 
-  var loading = false;
-
   function get_hash() {
     return window.location.hash.replace(/^#/, '');
   }
@@ -30,39 +28,8 @@ JX.behavior('phabricator-show-older-transactions', function(config) {
 
   function check_hash() {
     if (hash_is_hidden()) {
-      var showOlderBlock = null;
-      try {
-        showOlderBlock = JX.DOM.find(
-          JX.$(config.timelineID),
-          'div',
-          'show-older-block');
-      } catch (not_found_exception) {
-        // probably a garbage hash and we loaded everything looking
-        // for it; just abort
-        if (loading) {
-          loading = false;
-          JX.Busy.done();
-        }
-        return;
-      }
-      var showOlderLink = JX.DOM.find(
-        showOlderBlock,
-        'a',
-        'show-older-link');
-      if (!loading) {
-        loading = true;
-        JX.Busy.start();
-      }
-      fetch_older_workflow(
-        showOlderLink.href,
-        load_hidden_hash,
-        showOlderBlock)
-      .start();
+      load_older(load_hidden_hash_callback);
     } else {
-      if (loading) {
-        loading = false;
-        JX.Busy.done();
-      }
       try {
         var target = JX.$(get_hash());
         JX.DOM.scrollTo(target);
@@ -72,13 +39,44 @@ JX.behavior('phabricator-show-older-transactions', function(config) {
     }
   }
 
+  function load_older(callback) {
+    var showOlderBlock = null;
+    try {
+      showOlderBlock = JX.DOM.find(
+        JX.$(config.timelineID),
+        'div',
+        'show-older-block');
+    } catch (not_found_exception) {
+      // we loaded everything...!
+      return;
+    }
+
+    var showOlderLink = JX.DOM.find(
+      showOlderBlock,
+      'a',
+      'show-older-link');
+    var workflow = fetch_older_workflow(
+      showOlderLink.href,
+      callback,
+      showOlderBlock);
+    var routable = workflow.getRoutable()
+      .setPriority(2000)
+      .setType('workflow');
+    JX.Router.getInstance().queue(routable);
+  }
+
   var show_older = function(swap, r) {
     JX.DOM.replace(swap, JX.$H(r.timeline).getFragment());
   };
 
-  var load_hidden_hash = function(swap, r) {
+  var load_hidden_hash_callback = function(swap, r) {
     show_older(swap, r);
     check_hash();
+  };
+
+  var load_all_older_callback = function(swap, r) {
+    show_older(swap, r);
+    load_older(load_all_older_callback);
   };
 
   var fetch_older_workflow = function(href, callback, swap) {
@@ -88,17 +86,26 @@ JX.behavior('phabricator-show-older-transactions', function(config) {
 
   JX.Stratcom.listen(
     'click',
-    ['show-older-link'],
+    ['show-older-block'],
     function(e) {
       e.kill();
-      fetch_older_workflow(
-        e.getNode('tag:a').href,
+      var workflow = fetch_older_workflow(
+        JX.DOM.find(
+          e.getNode('show-older-block'),
+          'a',
+          'show-older-link').href,
         show_older,
-        e.getNode('show-older-block'))
-      .start();
+        e.getNode('show-older-block'));
+      var routable = workflow.getRoutable()
+        .setPriority(2000)
+        .setType('workflow');
+      JX.Router.getInstance().queue(routable);
     });
 
   JX.Stratcom.listen('hashchange', null, check_hash);
   check_hash();
 
+  new JX.KeyboardShortcut(['~'], 'Show all older changes in the timeline.')
+    .setHandler(JX.bind(null, load_older, load_all_older_callback))
+    .register();
 });

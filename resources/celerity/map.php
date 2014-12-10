@@ -7,8 +7,8 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => '78b8bd03',
-    'core.pkg.js' => 'ef8f73ee',
+    'core.pkg.css' => 'a157f664',
+    'core.pkg.js' => '7c53868c',
     'darkconsole.pkg.js' => 'df001cab',
     'differential.pkg.css' => '8af45893',
     'differential.pkg.js' => '42c10e78',
@@ -142,7 +142,7 @@ return array(
     'rsrc/css/phui/phui-status.css' => '888cedb8',
     'rsrc/css/phui/phui-tag-view.css' => '6b74282b',
     'rsrc/css/phui/phui-text.css' => 'cf019f54',
-    'rsrc/css/phui/phui-timeline-view.css' => '26bb3fd4',
+    'rsrc/css/phui/phui-timeline-view.css' => '7556c113',
     'rsrc/css/phui/phui-workboard-view.css' => '2bf82d00',
     'rsrc/css/phui/phui-workpanel-view.css' => '198c7e6c',
     'rsrc/css/sprite-apps-large.css' => '20ec0cc0',
@@ -420,7 +420,7 @@ return array(
     'rsrc/js/application/repository/repository-crossreference.js' => 'f9539603',
     'rsrc/js/application/search/behavior-reorder-queries.js' => 'e9581f08',
     'rsrc/js/application/slowvote/behavior-slowvote-embed.js' => 'd6f54db0',
-    'rsrc/js/application/transactions/behavior-show-older-transactions.js' => '83458cbb',
+    'rsrc/js/application/transactions/behavior-show-older-transactions.js' => '77fcaaee',
     'rsrc/js/application/transactions/behavior-transaction-comment-form.js' => '9f7309fb',
     'rsrc/js/application/transactions/behavior-transaction-list.js' => '13c739ea',
     'rsrc/js/application/uiexample/JavelinViewExample.js' => 'd4a14807',
@@ -623,7 +623,7 @@ return array(
     'javelin-behavior-phabricator-remarkup-assist' => 'e32d14ab',
     'javelin-behavior-phabricator-reveal-content' => '60821bc7',
     'javelin-behavior-phabricator-search-typeahead' => '724b1247',
-    'javelin-behavior-phabricator-show-older-transactions' => '83458cbb',
+    'javelin-behavior-phabricator-show-older-transactions' => '77fcaaee',
     'javelin-behavior-phabricator-tooltips' => '3ee3408b',
     'javelin-behavior-phabricator-transaction-comment-form' => '9f7309fb',
     'javelin-behavior-phabricator-transaction-list' => '13c739ea',
@@ -791,7 +791,7 @@ return array(
     'phui-status-list-view-css' => '888cedb8',
     'phui-tag-view-css' => '6b74282b',
     'phui-text-css' => 'cf019f54',
-    'phui-timeline-view-css' => '26bb3fd4',
+    'phui-timeline-view-css' => '7556c113',
     'phui-workboard-view-css' => '2bf82d00',
     'phui-workpanel-view-css' => '198c7e6c',
     'phuix-action-list-view' => 'b5c256b8',
@@ -1308,6 +1308,12 @@ return array(
       'javelin-install',
       'javelin-util',
     ),
+    '77fcaaee' => array(
+      'javelin-behavior',
+      'javelin-stratcom',
+      'javelin-dom',
+      'phabricator-busy',
+    ),
     '7814b593' => array(
       'javelin-request',
       'javelin-behavior',
@@ -1367,12 +1373,6 @@ return array(
     ),
     '82ce2142' => array(
       'aphront-typeahead-control-css',
-    ),
-    '83458cbb' => array(
-      'javelin-behavior',
-      'javelin-stratcom',
-      'javelin-dom',
-      'phabricator-busy',
     ),
     '84845b5b' => array(
       'javelin-behavior',
