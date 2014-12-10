@@ -13,14 +13,10 @@ final class ConduitCall {
   private $method;
   private $request;
   private $user;
-  private $servers;
-  private $forceLocal;
 
   public function __construct($method, array $params) {
     $this->method     = $method;
     $this->handler    = $this->buildMethodHandler($method);
-    $this->servers    = PhabricatorEnv::getEnvConfig('conduit.servers');
-    $this->forceLocal = false;
 
     $invalid_params = array_diff_key(
       $params,
@@ -29,16 +25,6 @@ final class ConduitCall {
       throw new ConduitException(
         "Method '{$method}' doesn't define these parameters: '".
         implode("', '", array_keys($invalid_params))."'.");
-    }
-
-    if ($this->servers) {
-      $current_host = AphrontRequest::getHTTPHeader('HOST');
-      foreach ($this->servers as $server) {
-        if ($current_host === id(new PhutilURI($server))->getDomain()) {
-          $this->forceLocal = true;
-          break;
-        }
-      }
     }
 
     $this->request = new ConduitAPIRequest($params);
@@ -51,15 +37,6 @@ final class ConduitCall {
 
   public function getUser() {
     return $this->user;
-  }
-
-  public function setForceLocal($force_local) {
-    $this->forceLocal = $force_local;
-    return $this;
-  }
-
-  public function shouldForceLocal() {
-    return $this->forceLocal;
   }
 
   public function shouldRequireAuthentication() {
@@ -137,35 +114,7 @@ final class ConduitCall {
       }
     }
 
-    if (!$this->shouldForceLocal() && $this->servers) {
-      $server = $this->pickRandomServer($this->servers);
-      $client = new ConduitClient($server);
-      $params = $this->request->getAllParameters();
-
-      $params['__conduit__']['isProxied'] = true;
-
-      if ($this->handler->shouldRequireAuthentication()) {
-        $client->callMethodSynchronous(
-        'conduit.connect',
-        array(
-             'client'            => 'PhabricatorConduit',
-             'clientVersion'     => '1.0',
-             'user'              => $this->getUser()->getUserName(),
-             'certificate'       => $this->getUser()->getConduitCertificate(),
-             '__conduit__'       => $params['__conduit__'],
-        ));
-      }
-
-      return $client->callMethodSynchronous(
-        $this->method,
-        $params);
-    } else {
-      return $this->handler->executeMethod($this->request);
-    }
-  }
-
-  protected function pickRandomServer($servers) {
-    return $servers[array_rand($servers)];
+    return $this->handler->executeMethod($this->request);
   }
 
   protected function buildMethodHandler($method_name) {
