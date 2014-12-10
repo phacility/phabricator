@@ -149,7 +149,8 @@ final class PhabricatorFlagSearchEngine
 
       $item = id(new PHUIObjectItemView())
         ->addHeadIcon($flag_icon)
-        ->setHeader($flag->getHandle()->renderLink());
+        ->setHeader($flag->getHandle()->getFullName())
+        ->setHref($flag->getHandle()->getURI());
 
       $item->addAction(
         id(new PHUIListItemView())
