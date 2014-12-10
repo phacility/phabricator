@@ -202,5 +202,7 @@ final class PassphraseCredentialTransactionEditor
     return $errors;
   }
 
-
+  protected function supportsSearch() {
+    return true;
+  }
 }

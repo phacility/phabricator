@@ -9,6 +9,7 @@ final class PassphraseCredentialQuery
   private $providesTypes;
   private $isDestroyed;
   private $allowConduit;
+  private $nameContains;
 
   private $needSecrets;
 
@@ -39,6 +40,11 @@ final class PassphraseCredentialQuery
 
   public function withAllowConduit($allow_conduit) {
     $this->allowConduit = $allow_conduit;
+    return $this;
+  }
+
+  public function withNameContains($name_contains) {
+    $this->nameContains = $name_contains;
     return $this;
   }
 
@@ -138,6 +144,13 @@ final class PassphraseCredentialQuery
         $conn_r,
         'allowConduit = %d',
         (int)$this->allowConduit);
+    }
+
+    if (strlen($this->nameContains)) {
+      $where[] = qsprintf(
+        $conn_r,
+        'name LIKE %~',
+        $this->nameContains);
     }
 
     return $this->formatWhereClause($where);

@@ -101,6 +101,7 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorProjectTransaction::TYPE_LOCKED:
         $object->setIsMembershipLocked($xaction->getNewValue());
         return;
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
       case PhabricatorTransactions::TYPE_EDGE:
         return;
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
@@ -165,6 +166,7 @@ final class PhabricatorProjectTransactionEditor
         }
 
         return;
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
