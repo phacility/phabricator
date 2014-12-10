@@ -329,7 +329,6 @@ final class PHUIObjectItemView extends AphrontTagView {
       array(
         'href' => $this->href,
         'class' => 'phui-object-item-link',
-        'title' => $this->header,
       ),
       $this->header);
 
