@@ -38,11 +38,13 @@ final class ManiphestUpdateConduitAPIMethod extends ManiphestConduitAPIMethod {
       $task = id(new ManiphestTaskQuery())
         ->setViewer($request->getUser())
         ->withIDs(array($id))
+        ->needSubscriberPHIDs(true)
         ->executeOne();
     } else {
       $task = id(new ManiphestTaskQuery())
         ->setViewer($request->getUser())
         ->withPHIDs(array($phid))
+        ->needSubscriberPHIDs(true)
         ->executeOne();
     }
 
@@ -58,7 +60,7 @@ final class ManiphestUpdateConduitAPIMethod extends ManiphestConduitAPIMethod {
       throw new ConduitException('ERR-BAD-TASK');
     }
 
-    $this->applyRequest($task, $request, $is_new = false);
+    $task = $this->applyRequest($task, $request, $is_new = false);
 
     return $this->buildTaskInfoDictionary($task);
   }

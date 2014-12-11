@@ -32,6 +32,7 @@ final class ManiphestInfoConduitAPIMethod extends ManiphestConduitAPIMethod {
     $task = id(new ManiphestTaskQuery())
       ->setViewer($request->getUser())
       ->withIDs(array($task_id))
+      ->needSubscriberPHIDs(true)
       ->executeOne();
     if (!$task) {
       throw new ConduitException('ERR_BAD_TASK');

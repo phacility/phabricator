@@ -1001,7 +1001,6 @@ phutil_register_library_map(array(
     'ManiphestSearchIndexer' => 'applications/maniphest/search/ManiphestSearchIndexer.php',
     'ManiphestStatusConfigOptionType' => 'applications/maniphest/config/ManiphestStatusConfigOptionType.php',
     'ManiphestSubpriorityController' => 'applications/maniphest/controller/ManiphestSubpriorityController.php',
-    'ManiphestSubscribeController' => 'applications/maniphest/controller/ManiphestSubscribeController.php',
     'ManiphestTask' => 'applications/maniphest/storage/ManiphestTask.php',
     'ManiphestTaskDescriptionPreviewController' => 'applications/maniphest/controller/ManiphestTaskDescriptionPreviewController.php',
     'ManiphestTaskDetailController' => 'applications/maniphest/controller/ManiphestTaskDetailController.php',
@@ -4071,9 +4070,9 @@ phutil_register_library_map(array(
     'ManiphestSearchIndexer' => 'PhabricatorSearchDocumentIndexer',
     'ManiphestStatusConfigOptionType' => 'PhabricatorConfigJSONOptionType',
     'ManiphestSubpriorityController' => 'ManiphestController',
-    'ManiphestSubscribeController' => 'ManiphestController',
     'ManiphestTask' => array(
       'ManiphestDAO',
+      'PhabricatorSubscribableInterface',
       'PhabricatorMarkupInterface',
       'PhabricatorPolicyInterface',
       'PhabricatorTokenReceiverInterface',

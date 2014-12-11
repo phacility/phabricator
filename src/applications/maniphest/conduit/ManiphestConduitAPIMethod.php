@@ -62,6 +62,8 @@ abstract class ManiphestConduitAPIMethod extends ConduitAPIMethod {
       $task->setDescription((string)$request->getValue('description'));
       $changes[ManiphestTransaction::TYPE_STATUS] =
         ManiphestTaskStatus::getDefaultStatus();
+      $changes[PhabricatorTransactions::TYPE_SUBSCRIBERS] =
+        array('+' => array($request->getUser()->getPHID()));
     } else {
 
       $comments = $request->getValue('comments');
@@ -111,7 +113,8 @@ abstract class ManiphestConduitAPIMethod extends ConduitAPIMethod {
 
     $ccs = $request->getValue('ccPHIDs');
     if ($ccs !== null) {
-      $changes[ManiphestTransaction::TYPE_CCS] = $ccs;
+      $changes[PhabricatorTransactions::TYPE_SUBSCRIBERS] =
+        array('=' => array_fuse($ccs));
     }
 
     $transactions = array();
@@ -228,6 +231,13 @@ abstract class ManiphestConduitAPIMethod extends ConduitAPIMethod {
     $event->setUser($request->getUser());
     $event->setConduitRequest($request);
     PhutilEventEngine::dispatchEvent($event);
+
+    // reload the task now that we've done all the fun stuff
+    return id(new ManiphestTaskQuery())
+      ->setViewer($request->getUser())
+      ->withPHIDs(array($task->getPHID()))
+      ->needSubscriberPHIDs(true)
+      ->executeOne();
   }
 
   protected function buildTaskInfoDictionaries(array $tasks) {
@@ -265,7 +275,7 @@ abstract class ManiphestConduitAPIMethod extends ConduitAPIMethod {
         'phid'         => $task->getPHID(),
         'authorPHID'   => $task->getAuthorPHID(),
         'ownerPHID'    => $task->getOwnerPHID(),
-        'ccPHIDs'      => $task->getCCPHIDs(),
+        'ccPHIDs'      => $task->getSubscriberPHIDs(),
         'status'       => $task->getStatus(),
         'statusName'   => ManiphestTaskStatus::getTaskStatusName(
           $task->getStatus()),

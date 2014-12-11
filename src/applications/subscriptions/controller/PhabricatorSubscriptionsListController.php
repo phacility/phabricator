@@ -23,8 +23,6 @@ final class PhabricatorSubscriptionsListController
     if ($object instanceof PhabricatorSubscribableInterface) {
       $subscriber_phids = PhabricatorSubscribersQuery::loadSubscribersForPHID(
         $phid);
-    } else if ($object instanceof ManiphestTask) {
-      $subscriber_phids = $object->getCCPHIDs();
     }
 
     $handle_phids = $subscriber_phids;

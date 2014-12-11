@@ -58,22 +58,19 @@ final class ManiphestTransactionPreviewController extends ManiphestController {
         }
         $transaction->setNewValue($value);
         break;
-      case ManiphestTransaction::TYPE_CCS:
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         if ($value) {
           $value = json_decode($value);
         }
         if (!$value) {
           $value = array();
         }
-        $phids = $value;
-
-        foreach ($task->getCCPHIDs() as $cc_phid) {
+        $phids = array();
+        foreach ($value as $cc_phid) {
           $phids[] = $cc_phid;
-          $value[] = $cc_phid;
         }
-
-        $transaction->setOldValue($task->getCCPHIDs());
-        $transaction->setNewValue($value);
+        $transaction->setOldValue(array());
+        $transaction->setNewValue($phids);
         break;
       case ManiphestTransaction::TYPE_PROJECTS:
         if ($value) {

@@ -9,6 +9,7 @@ final class ManiphestTransactionSaveController extends ManiphestController {
     $task = id(new ManiphestTaskQuery())
       ->setViewer($user)
       ->withIDs(array($request->getStr('taskID')))
+      ->needSubscriberPHIDs(true)
       ->executeOne();
     if (!$task) {
       return new Aphront404Response();
@@ -33,7 +34,7 @@ final class ManiphestTransactionSaveController extends ManiphestController {
 
     $cc_transaction = new ManiphestTransaction();
     $cc_transaction
-      ->setTransactionType(ManiphestTransaction::TYPE_CCS);
+      ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS);
 
     $transaction = new ManiphestTransaction();
     $transaction
@@ -64,7 +65,7 @@ final class ManiphestTransactionSaveController extends ManiphestController {
               '+' => array_fuse($projects),
             ));
         break;
-      case ManiphestTransaction::TYPE_CCS:
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         // Accumulate the new explicit CCs into the array that we'll add in
         // the CC transaction later.
         $added_ccs = array_merge($added_ccs, $request->getArr('ccs'));
@@ -135,19 +136,21 @@ final class ManiphestTransactionSaveController extends ManiphestController {
     if (!$user_owns_task) {
       // If we aren't making the user the new task owner and they aren't the
       // existing task owner, add them to CC unless they're aleady CC'd.
-      if (!in_array($user->getPHID(), $task->getCCPHIDs())) {
+      if (!in_array($user->getPHID(), $task->getSubscriberPHIDs())) {
         $added_ccs[] = $user->getPHID();
       }
     }
 
     // Evade no-effect detection in the new editor stuff until we can switch
     // to subscriptions.
-    $added_ccs = array_filter(array_diff($added_ccs, $task->getCCPHIDs()));
+    $added_ccs = array_filter(array_diff(
+      $added_ccs,
+      $task->getSubscriberPHIDs()));
 
     if ($added_ccs) {
       // We've added CCs, so include a CC transaction.
-      $all_ccs = array_merge($task->getCCPHIDs(), $added_ccs);
-      $cc_transaction->setNewValue($all_ccs);
+      $all_ccs = array_merge($task->getSubscriberPHIDs(), $added_ccs);
+      $cc_transaction->setNewValue(array('=' => $all_ccs));
       $transactions[] = $cc_transaction;
     }
 
