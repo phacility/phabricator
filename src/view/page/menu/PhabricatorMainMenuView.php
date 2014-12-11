@@ -316,11 +316,12 @@ final class PhabricatorMainMenuView extends AphrontView {
         ),
         $message_count_number);
 
-      $message_icon_tag = phutil_tag(
+      $message_icon_tag = javelin_tag(
         'span',
         array(
           'class' => 'phabricator-main-menu-message-icon phui-icon-view '.
                      'phui-font-fa fa-comments',
+          'sigil' => 'menu-icon',
         ),
         '');
 
@@ -401,11 +402,12 @@ final class PhabricatorMainMenuView extends AphrontView {
         ),
         $count_number);
 
-      $icon_tag = phutil_tag(
+      $icon_tag = javelin_tag(
         'span',
         array(
           'class' => 'phabricator-main-menu-alert-icon phui-icon-view '.
                      'phui-font-fa fa-bell',
+          'sigil' => 'menu-icon',
         ),
         '');
 

@@ -16,6 +16,7 @@ JX.behavior('aphlict-dropdown', function(config, statics) {
 
   var dropdown = JX.$(config.dropdownID);
   var bubble = JX.$(config.bubbleID);
+  var icon = JX.DOM.scry(bubble, 'span', 'menu-icon')[0];
 
   var count;
   if (config.countID) {
@@ -69,6 +70,9 @@ JX.behavior('aphlict-dropdown', function(config, statics) {
       if (!e.getNode('phabricator-notification-menu')) {
         // Click outside the dropdown; hide it.
         JX.DOM.hide(dropdown);
+        if (icon) {
+          JX.DOM.alterClass(icon, 'white', false);
+        }
         statics.visible = null;
         return;
       }
@@ -140,6 +144,10 @@ JX.behavior('aphlict-dropdown', function(config, statics) {
       p.setPos(dropdown);
 
       statics.visible = dropdown;
+
+      if (icon) {
+        JX.DOM.alterClass(icon, 'white', true);
+      }
     }
   );
 
