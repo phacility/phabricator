@@ -566,7 +566,9 @@ abstract class PhabricatorController extends AphrontController {
       ->setObjectPHID($object->getPHID())
       ->setTransactions($xactions)
       ->setPager($pager)
-      ->setRenderData($render_data);
+      ->setRenderData($render_data)
+      ->setQuoteTargetID($this->getRequest()->getStr('quoteTargetID'))
+      ->setQuoteRef($this->getRequest()->getStr('quoteRef'));
     $object->willRenderTimeline($timeline, $this->getRequest());
 
     return $timeline;
