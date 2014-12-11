@@ -62,7 +62,7 @@
 
 .phui-timeline-title {
   line-height: 18px;
-  min-height: 18px;
+  min-height: 19px;
   position: relative;
   color: {$bluetext};
 }
