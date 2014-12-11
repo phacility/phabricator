@@ -692,6 +692,11 @@ ul.phui-object-item-icons {
   border-bottom: 1px solid {$thinblueborder};
 }
 
+.device-desktop .aphront-multi-column-fluid .aphront-multi-column-2-up
+ .aphront-multi-column-column-outer.third .phui-object-item-col2 {
+   display: none;
+ }
+
 
 /* - Launcher List ---------------------------------------------------------- */
 

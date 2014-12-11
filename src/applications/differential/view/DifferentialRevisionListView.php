@@ -121,9 +121,8 @@ final class DifferentialRevisionListView extends AphrontView {
       }
 
       $item->setObjectName('D'.$revision->getID());
-      $item->setHeader(phutil_tag('a',
-        array('href' => '/D'.$revision->getID()),
-        $revision->getTitle()));
+      $item->setHeader($revision->getTitle());
+      $item->setHref('/D'.$revision->getID());
 
       if (isset($icons['draft'])) {
         $draft = id(new PHUIIconView())

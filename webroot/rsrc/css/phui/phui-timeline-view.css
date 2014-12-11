@@ -62,7 +62,7 @@
 
 .phui-timeline-title {
   line-height: 18px;
-  min-height: 18px;
+  min-height: 19px;
   position: relative;
   color: {$bluetext};
 }
@@ -318,6 +318,7 @@
   text-align: center;
   padding: 12px;
   color: {$darkgreytext};
+  cursor: pointer;
 }
 
 .device-phone .phui-timeline-older-transactions-are-hidden {

@@ -143,6 +143,7 @@ final class PhabricatorSearchAttachController
     $targets = id(new ManiphestTaskQuery())
       ->setViewer($user)
       ->withPHIDs(array_keys($phids))
+      ->needSubscriberPHIDs(true)
       ->execute();
 
     if (empty($targets)) {
@@ -156,9 +157,13 @@ final class PhabricatorSearchAttachController
       ->setContinueOnMissingFields(true);
 
     $cc_vector = array();
-    $cc_vector[] = $task->getCCPHIDs();
+    // since we loaded this via a generic object query, go ahead and get the
+    // attach the cc phids now
+    $task->attachSubscriberPHIDs(
+      PhabricatorSubscribersQuery::loadSubscribersForPHID($task->getPHID()));
+    $cc_vector[] = $task->getSubscriberPHIDs();
     foreach ($targets as $target) {
-      $cc_vector[] = $target->getCCPHIDs();
+      $cc_vector[] = $target->getSubscriberPHIDs();
       $cc_vector[] = array(
         $target->getAuthorPHID(),
         $target->getOwnerPHID(),
@@ -178,8 +183,8 @@ final class PhabricatorSearchAttachController
     $all_ccs = array_unique($all_ccs);
 
     $add_ccs = id(new ManiphestTransaction())
-      ->setTransactionType(ManiphestTransaction::TYPE_CCS)
-      ->setNewValue($all_ccs);
+      ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+      ->setNewValue(array('=' => $all_ccs));
 
     $merged_from_txn = id(new ManiphestTransaction())
       ->setTransactionType(ManiphestTransaction::TYPE_MERGED_FROM)

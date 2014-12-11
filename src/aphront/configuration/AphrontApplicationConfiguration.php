@@ -107,7 +107,6 @@ abstract class AphrontApplicationConfiguration {
     $prod_uri     = PhabricatorEnv::getEnvConfig('phabricator.production-uri');
     $file_uri     = PhabricatorEnv::getEnvConfig(
       'security.alternate-file-domain');
-    $conduit_uris = PhabricatorEnv::getEnvConfig('conduit.servers');
     $allowed_uris = PhabricatorEnv::getEnvConfig('phabricator.allowed-uris');
 
     $uris = array_merge(
@@ -115,7 +114,6 @@ abstract class AphrontApplicationConfiguration {
         $base_uri,
         $prod_uri,
       ),
-      $conduit_uris,
       $allowed_uris);
 
     $cdn_routes = array(

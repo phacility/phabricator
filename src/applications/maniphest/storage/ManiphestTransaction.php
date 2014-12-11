@@ -7,7 +7,6 @@ final class ManiphestTransaction
   const TYPE_STATUS = 'status';
   const TYPE_DESCRIPTION = 'description';
   const TYPE_OWNER  = 'reassign';
-  const TYPE_CCS = 'ccs';
   const TYPE_PROJECTS = 'projects';
   const TYPE_PRIORITY = 'priority';
   const TYPE_EDGE = 'edge';
@@ -21,6 +20,12 @@ final class ManiphestTransaction
   // NOTE: this type is deprecated. Keep it around for legacy installs
   // so any transactions render correctly.
   const TYPE_ATTACH = 'attach';
+  /**
+   * TYPE_CCS is legacy and depracted in favor of
+   * PhabricatorTransactions::TYPE_SUBSCRIBERS; keep it around for legacy
+   * transaction-rendering.
+   */
+  const TYPE_CCS = 'ccs';
 
 
   const MAILTAG_STATUS = 'maniphest-status';

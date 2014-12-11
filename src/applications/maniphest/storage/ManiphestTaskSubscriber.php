@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Deprecated; delete me.
+ */
 final class ManiphestTaskSubscriber extends ManiphestDAO {
 
   protected $taskPHID;

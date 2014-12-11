@@ -50,6 +50,8 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   const ORDER_MODIFIED      = 'order-modified';
   const ORDER_TITLE         = 'order-title';
 
+  private $needSubscriberPHIDs;
+
   const DEFAULT_PAGE_SIZE   = 1000;
 
   public function withAuthors(array $authors) {
@@ -178,6 +180,11 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $this;
   }
 
+  public function needSubscriberPHIDs($bool) {
+    $this->needSubscriberPHIDs = $bool;
+    return $this;
+  }
+
   public function loadPage() {
     // TODO: (T603) It is possible for a user to find the PHID of a project
     // they can't see, then query for tasks in that project and deduce the
@@ -196,7 +203,6 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     $where[] = $this->buildPrioritiesWhereClause($conn);
     $where[] = $this->buildAuthorWhereClause($conn);
     $where[] = $this->buildOwnerWhereClause($conn);
-    $where[] = $this->buildSubscriberWhereClause($conn);
     $where[] = $this->buildProjectWhereClause($conn);
     $where[] = $this->buildAnyProjectWhereClause($conn);
     $where[] = $this->buildAnyUserProjectWhereClause($conn);
@@ -332,12 +338,14 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   }
 
   protected function didFilterPage(array $tasks) {
+    $phids = mpull($tasks, 'getPHID');
+
     // TODO: Eventually, we should make this optional and introduce a
     // needProjectPHIDs() method, but for now there's a lot of code which
     // assumes the data is always populated.
 
     $edge_query = id(new PhabricatorEdgeQuery())
-      ->withSourcePHIDs(mpull($tasks, 'getPHID'))
+      ->withSourcePHIDs($phids)
       ->withEdgeTypes(
         array(
           PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
@@ -345,8 +353,19 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     $edge_query->execute();
 
     foreach ($tasks as $task) {
-      $phids = $edge_query->getDestinationPHIDs(array($task->getPHID()));
-      $task->attachProjectPHIDs($phids);
+      $project_phids = $edge_query->getDestinationPHIDs(
+        array($task->getPHID()));
+      $task->attachProjectPHIDs($project_phids);
+    }
+
+    if ($this->needSubscriberPHIDs) {
+      $subscriber_sets = id(new PhabricatorSubscribersQuery())
+        ->withObjectPHIDs($phids)
+        ->execute();
+      foreach ($tasks as $task) {
+        $subscribers = idx($subscriber_sets, $task->getPHID(), array());
+        $task->attachSubscriberPHIDs($subscribers);
+      }
     }
 
     return $tasks;
@@ -495,17 +514,6 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       $conn,
       'phid IN (%Ls)',
       $fulltext_results);
-  }
-
-  private function buildSubscriberWhereClause(AphrontDatabaseConnection $conn) {
-    if (!$this->subscriberPHIDs) {
-      return null;
-    }
-
-    return qsprintf(
-      $conn,
-      'subscriber.subscriberPHID IN (%Ls)',
-      $this->subscriberPHIDs);
   }
 
   private function buildProjectWhereClause(AphrontDatabaseConnection $conn) {
@@ -708,11 +716,14 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     }
 
     if ($this->subscriberPHIDs) {
-      $subscriber_dao = new ManiphestTaskSubscriber();
       $joins[] = qsprintf(
         $conn_r,
-        'JOIN %T subscriber ON subscriber.taskPHID = task.phid',
-        $subscriber_dao->getTableName());
+        'JOIN %T e_ccs ON e_ccs.src = task.phid '.
+        'AND e_ccs.type = %s '.
+        'AND e_ccs.dst in (%Ls)',
+        PhabricatorEdgeConfig::TABLE_NAME_EDGE,
+        PhabricatorEdgeConfig::TYPE_OBJECT_HAS_SUBSCRIBER,
+        $this->subscriberPHIDs);
     }
 
     switch ($this->groupBy) {

@@ -220,12 +220,17 @@ final class PhabricatorProjectEditDetailsController
           ->setLabel(pht('Color'))
           ->setName('color')
           ->setValue($v_color)
-          ->setOptions($shades))
-      ->appendChild(
+          ->setOptions($shades));
+
+    if (!$is_new) {
+      $form->appendChild(
         id(new AphrontFormStaticControl())
         ->setLabel(pht('Primary Hashtag'))
         ->setCaption(pht('The primary hashtag is derived from the name.'))
-        ->setValue($v_primary_slug))
+        ->setValue($v_primary_slug));
+    }
+
+    $form
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Additional Hashtags'))
