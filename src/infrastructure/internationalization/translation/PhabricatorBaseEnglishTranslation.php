@@ -172,9 +172,19 @@ abstract class PhabricatorBaseEnglishTranslation
         '%d Reviews Waiting on Others',
       ),
 
+      '%d Active Review(s)' => array(
+        '%d Active Review',
+        '%d Active Reviews',
+      ),
+
       '%d Flagged Object(s)' => array(
         '%d Flagged Object',
         '%d Flagged Objects',
+      ),
+
+      '%d Object(s) Tracked' => array(
+        '%d Object Tracked',
+        '%d Objects Tracked',
       ),
 
       '%d Unbreak Now Task(s)!' => array(

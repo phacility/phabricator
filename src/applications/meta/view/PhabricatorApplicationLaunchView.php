@@ -73,7 +73,7 @@ final class PhabricatorApplicationLaunchView extends AphrontTagView {
           array(
             'class' => 'phabricator-application-attention-count',
           ),
-          $count);
+          PhabricatorApplication::formatStatusCount($count));
         }
 
 
@@ -83,7 +83,7 @@ final class PhabricatorApplicationLaunchView extends AphrontTagView {
           array(
             'class' => 'phabricator-application-warning-count',
           ),
-          $counts[$warning]);
+          PhabricatorApplication::formatStatusCount($counts[$warning]));
         }
         if (nonempty($count1) && nonempty($count2)) {
           $numbers = array($count1, ' / ', $count2);

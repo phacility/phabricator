@@ -255,7 +255,8 @@ final class PhrequentUserTimeQuery
   }
 
   public static function getUserTotalObjectsTracked(
-    PhabricatorUser $user) {
+    PhabricatorUser $user,
+    $limit = PHP_INT_MAX) {
 
     $usertime_dao = new PhrequentUserTime();
     $conn = $usertime_dao->establishConnection('r');
@@ -264,9 +265,11 @@ final class PhrequentUserTimeQuery
       $conn,
       'SELECT COUNT(usertime.id) N FROM %T usertime '.
       'WHERE usertime.userPHID = %s '.
-      'AND usertime.dateEnded IS NULL',
+      'AND usertime.dateEnded IS NULL '.
+      'LIMIT %d',
       $usertime_dao->getTableName(),
-      $user->getPHID());
+      $user->getPHID(),
+      $limit);
     return $count['N'];
   }
 
