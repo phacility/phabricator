@@ -198,6 +198,8 @@ class PhabricatorApplicationTransactionView extends AphrontView {
 
     $view = new PHUITimelineView();
     $view->setShouldTerminate($this->shouldTerminate);
+    $view->setQuoteTargetID($this->getQuoteTargetID());
+    $view->setQuoteRef($this->getQuoteRef());
     $events = $this->buildEvents($with_hiding);
     foreach ($events as $event) {
       $view->addEvent($event);

@@ -370,6 +370,11 @@ final class ManiphestTaskSearchEngine
           ->setName('subscribers')
           ->setLabel(pht('Subscribers'))
           ->setValue($subscriber_handles))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setName('fulltext')
+          ->setLabel(pht('Contains Words'))
+          ->setValue($saved->getParameter('fulltext')))
       ->appendChild($status_control)
       ->appendChild($priority_control);
 
@@ -390,11 +395,6 @@ final class ManiphestTaskSearchEngine
     }
 
     $form
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setName('fulltext')
-          ->setLabel(pht('Contains Words'))
-          ->setValue($saved->getParameter('fulltext')))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('ids')

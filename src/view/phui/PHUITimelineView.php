@@ -8,6 +8,8 @@ final class PHUITimelineView extends AphrontView {
   private $shouldAddSpacers = true;
   private $pager;
   private $renderData = array();
+  private $quoteTargetID;
+  private $quoteRef;
 
   public function setID($id) {
     $this->id = $id;
@@ -41,6 +43,24 @@ final class PHUITimelineView extends AphrontView {
   public function setRenderData(array $data) {
     $this->renderData = $data;
     return $this;
+  }
+
+  public function setQuoteTargetID($quote_target_id) {
+    $this->quoteTargetID = $quote_target_id;
+    return $this;
+  }
+
+  public function getQuoteTargetID() {
+    return $this->quoteTargetID;
+  }
+
+  public function setQuoteRef($quote_ref) {
+    $this->quoteRef = $quote_ref;
+    return $this;
+  }
+
+  public function getQuoteRef() {
+    return $this->quoteRef;
   }
 
   public function render() {
@@ -84,6 +104,9 @@ final class PHUITimelineView extends AphrontView {
 
     $events = array();
     if ($hide && $this->getPager()) {
+      $uri = $this->getPager()->getNextPageURI();
+      $uri->setQueryParam('quoteTargetID', $this->getQuoteTargetID());
+      $uri->setQueryParam('quoteRef', $this->getQuoteRef());
       $events[] = javelin_tag(
         'div',
         array(
@@ -96,7 +119,7 @@ final class PHUITimelineView extends AphrontView {
           javelin_tag(
             'a',
             array(
-              'href' => (string) $this->getPager()->getNextPageURI(),
+              'href' => (string) $uri,
               'mustcapture' => true,
               'sigil' => 'show-older-link',
             ),

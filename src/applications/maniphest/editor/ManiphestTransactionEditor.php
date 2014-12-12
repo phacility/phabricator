@@ -369,6 +369,7 @@ final class ManiphestTransactionEditor
         $blocked_tasks = id(new ManiphestTaskQuery())
           ->setViewer($this->getActor())
           ->withPHIDs($blocked_phids)
+          ->needSubscriberPHIDs(true)
           ->execute();
 
         $old = $unblock_xaction->getOldValue();
