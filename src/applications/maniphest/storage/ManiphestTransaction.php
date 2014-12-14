@@ -903,6 +903,7 @@ final class ManiphestTransaction
         $tags[] = self::MAILTAG_OWNER;
         break;
       case self::TYPE_CCS:
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         $tags[] = self::MAILTAG_CC;
         break;
       case PhabricatorTransactions::TYPE_EDGE:
