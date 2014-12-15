@@ -50,6 +50,7 @@ final class PhabricatorConduitApplication extends PhabricatorApplication {
           'PhabricatorConduitTokenEditController',
         'token/terminate/(?:(?P<id>\d+)/)?' =>
           'PhabricatorConduitTokenTerminateController',
+        'login/' => 'PhabricatorConduitTokenHandshakeController',
       ),
       '/api/(?P<method>[^/]+)' => 'PhabricatorConduitAPIController',
     );

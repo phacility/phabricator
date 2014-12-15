@@ -301,22 +301,22 @@ final class PhabricatorConduitAPIController
           'ERR-INVALID-AUTH',
           pht(
             'API token "%s" has the wrong length. API tokens should be '.
-            '32 characters long.'),
+            '32 characters long.',
+            $token_string),
         );
       }
 
       $type = head(explode('-', $token_string));
-      switch ($type) {
-        case 'api':
-        case 'tmp':
-          break;
-        default:
-          return array(
-            'ERR-INVALID-AUTH',
-            pht(
-              'API token "%s" has the wrong format. API tokens should begin '.
-              'with "api-" or "tmp-" and be 32 characters long.',
-              $token_string),
+      $valid_types = PhabricatorConduitToken::getAllTokenTypes();
+      $valid_types = array_fuse($valid_types);
+      if (empty($valid_types[$type])) {
+        return array(
+          'ERR-INVALID-AUTH',
+          pht(
+            'API token "%s" has the wrong format. API tokens should be '.
+            '32 characters long and begin with one of these prefixes: %s.',
+            $token_string,
+            implode(', ', $valid_types)),
           );
       }
 
@@ -345,6 +345,19 @@ final class PhabricatorConduitAPIController
               'API token "%s" is not valid.',
               $token_string),
           );
+        }
+      }
+
+      // If this is a "cli-" token, it expires shortly after it is generated
+      // by default. Once it is actually used, we extend its lifetime and make
+      // it permanent. This allows stray tokens to get cleaned up automatically
+      // if they aren't being used.
+      if ($token->getTokenType() == PhabricatorConduitToken::TYPE_COMMANDLINE) {
+        if ($token->getExpires()) {
+          $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+            $token->setExpires(null);
+            $token->save();
+          unset($unguarded);
         }
       }
 

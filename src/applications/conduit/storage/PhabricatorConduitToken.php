@@ -13,6 +13,7 @@ final class PhabricatorConduitToken
 
   const TYPE_STANDARD = 'api';
   const TYPE_TEMPORARY = 'tmp';
+  const TYPE_COMMANDLINE = 'cli';
 
   public function getConfiguration() {
     return array(
@@ -53,9 +54,18 @@ final class PhabricatorConduitToken
     $map = array(
       self::TYPE_STANDARD => pht('Standard API Token'),
       self::TYPE_TEMPORARY => pht('Temporary API Token'),
+      self::TYPE_COMMANDLINE => pht('Command Line API Token'),
     );
 
     return idx($map, $type, $type);
+  }
+
+  public static function getAllTokenTypes() {
+    return array(
+      self::TYPE_STANDARD,
+      self::TYPE_TEMPORARY,
+      self::TYPE_COMMANDLINE,
+    );
   }
 
   private function getTokenExpires($token_type) {
@@ -63,7 +73,9 @@ final class PhabricatorConduitToken
       case self::TYPE_STANDARD:
         return null;
       case self::TYPE_TEMPORARY:
-        return PhabricatorTime::getNow() + phutil_units('24h in seconds');
+        return PhabricatorTime::getNow() + phutil_units('24 hours in seconds');
+      case self::TYPE_COMMANDLINE:
+        return PhabricatorTime::getNow() + phutil_units('1 hour in seconds');
       default:
         throw new Exception(
           pht('Unknown Conduit token type "%s"!', $token_type));
