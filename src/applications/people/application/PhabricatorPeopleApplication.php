@@ -91,6 +91,7 @@ final class PhabricatorPeopleApplication extends PhabricatorApplication {
       ->setViewer($user)
       ->withIsApproved(false)
       ->withIsDisabled(false)
+      ->setLimit(self::MAX_STATUS_ITEMS)
       ->execute();
 
     if (!$need_approval) {
@@ -100,10 +101,14 @@ final class PhabricatorPeopleApplication extends PhabricatorApplication {
     $status = array();
 
     $count = count($need_approval);
+    $count_str = self::formatStatusCount(
+      $count,
+      '%s Users Need Approval',
+      '%d User(s) Need Approval');
     $type = PhabricatorApplicationStatusView::TYPE_NEEDS_ATTENTION;
     $status[] = id(new PhabricatorApplicationStatusView())
       ->setType($type)
-      ->setText(pht('%d User(s) Need Approval', $count))
+      ->setText($count_str)
       ->setCount($count);
 
     return $status;

@@ -6,6 +6,7 @@ final class AlmanacServiceQuery
   private $ids;
   private $phids;
   private $names;
+  private $needBindings;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -19,6 +20,11 @@ final class AlmanacServiceQuery
 
   public function withNames(array $names) {
     $this->names = $names;
+    return $this;
+  }
+
+  public function needBindings($need_bindings) {
+    $this->needBindings = $need_bindings;
     return $this;
   }
 
@@ -69,6 +75,24 @@ final class AlmanacServiceQuery
     $where[] = $this->buildPagingClause($conn_r);
 
     return $this->formatWhereClause($where);
+  }
+
+  protected function didFilterPage(array $services) {
+    if ($this->needBindings) {
+      $service_phids = mpull($services, 'getPHID');
+      $bindings = id(new AlmanacBindingQuery())
+        ->setViewer($this->getViewer())
+        ->withServicePHIDs($service_phids)
+        ->execute();
+      $bindings = mgroup($bindings, 'getServicePHID');
+
+      foreach ($services as $service) {
+        $service_bindings = idx($bindings, $service->getPHID(), array());
+        $service->attachBindings($service_bindings);
+      }
+    }
+
+    return parent::didFilterPage($services);
   }
 
 }

@@ -17,6 +17,7 @@ final class AlmanacService
 
   private $customFields = self::ATTACHABLE;
   private $almanacProperties = self::ATTACHABLE;
+  private $bindings = self::ATTACHABLE;
 
   public static function initializeNewService() {
     return id(new AlmanacService())
@@ -63,6 +64,15 @@ final class AlmanacService
 
   public function getURI() {
     return '/almanac/service/view/'.$this->getName().'/';
+  }
+
+  public function getBindings() {
+    return $this->assertAttached($this->bindings);
+  }
+
+  public function attachBindings(array $bindings) {
+    $this->bindings = $bindings;
+    return $this;
   }
 
 

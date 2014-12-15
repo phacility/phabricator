@@ -9,6 +9,8 @@
  */
 abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
 
+  const MAX_STATUS_ITEMS      = 100;
+
   const GROUP_CORE            = 'core';
   const GROUP_UTILITIES       = 'util';
   const GROUP_ADMIN           = 'admin';
@@ -229,6 +231,22 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
    */
   public function loadStatus(PhabricatorUser $user) {
     return array();
+  }
+
+  /**
+   * @return string
+   * @task ui
+   */
+  public static function formatStatusCount(
+    $count,
+    $limit_string = '%s',
+    $base_string = '%d') {
+    if ($count == self::MAX_STATUS_ITEMS) {
+      $count_str = pht($limit_string, ($count - 1).'+');
+    } else {
+      $count_str = pht($base_string, $count);
+    }
+    return $count_str;
   }
 
 
