@@ -18,13 +18,26 @@ final class ConduitCall {
     $this->method     = $method;
     $this->handler    = $this->buildMethodHandler($method);
 
-    $invalid_params = array_diff_key(
-      $params,
-      $this->handler->defineParamTypes());
+    $param_types = $this->handler->defineParamTypes();
+
+    foreach ($param_types as $key => $spec) {
+      if (ConduitAPIMethod::getParameterMetadataKey($key) !== null) {
+        throw new ConduitException(
+          pht(
+            'API Method "%s" defines a disallowed parameter, "%s". This '.
+            'parameter name is reserved.',
+            $method,
+            $key));
+      }
+    }
+
+    $invalid_params = array_diff_key($params, $param_types);
     if ($invalid_params) {
       throw new ConduitException(
-        "Method '{$method}' doesn't define these parameters: '".
-        implode("', '", array_keys($invalid_params))."'.");
+        pht(
+          'API Method "%s" does not define these parameters: %s.',
+          $method,
+          "'".implode("', '", array_keys($invalid_params))."'"));
     }
 
     $this->request = new ConduitAPIRequest($params);

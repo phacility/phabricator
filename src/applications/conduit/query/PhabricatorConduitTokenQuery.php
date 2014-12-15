@@ -6,6 +6,7 @@ final class PhabricatorConduitTokenQuery
   private $ids;
   private $objectPHIDs;
   private $expired;
+  private $tokens;
 
   public function withExpired($expired) {
     $this->expired = $expired;
@@ -19,6 +20,11 @@ final class PhabricatorConduitTokenQuery
 
   public function withObjectPHIDs(array $phids) {
     $this->objectPHIDs = $phids;
+    return $this;
+  }
+
+  public function withTokens(array $tokens) {
+    $this->tokens = $tokens;
     return $this;
   }
 
@@ -52,6 +58,13 @@ final class PhabricatorConduitTokenQuery
         $conn_r,
         'objectPHID IN (%Ls)',
         $this->objectPHIDs);
+    }
+
+    if ($this->tokens !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'token IN (%Ls)',
+        $this->tokens);
     }
 
     if ($this->expired !== null) {
