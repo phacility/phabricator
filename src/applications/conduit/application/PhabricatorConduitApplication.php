@@ -46,6 +46,10 @@ final class PhabricatorConduitApplication extends PhabricatorApplication {
         'log/' => 'PhabricatorConduitLogController',
         'log/view/(?P<view>[^/]+)/' => 'PhabricatorConduitLogController',
         'token/' => 'PhabricatorConduitTokenController',
+        'token/edit/(?:(?P<id>\d+)/)?' =>
+          'PhabricatorConduitTokenEditController',
+        'token/terminate/(?:(?P<id>\d+)/)?' =>
+          'PhabricatorConduitTokenTerminateController',
       ),
       '/api/(?P<method>[^/]+)' => 'PhabricatorConduitAPIController',
     );
