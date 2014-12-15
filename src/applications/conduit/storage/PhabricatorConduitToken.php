@@ -12,8 +12,8 @@ final class PhabricatorConduitToken
   private $object = self::ATTACHABLE;
 
   const TYPE_STANDARD = 'api';
-  const TYPE_TEMPORARY = 'tmp';
   const TYPE_COMMANDLINE = 'cli';
+  const TYPE_CLUSTER = 'clr';
 
   public function getConfiguration() {
     return array(
@@ -37,6 +37,43 @@ final class PhabricatorConduitToken
     ) + parent::getConfiguration();
   }
 
+  public static function loadClusterTokenForUser(PhabricatorUser $user) {
+    if (!$user->isLoggedIn()) {
+      return null;
+    }
+
+    $tokens = id(new PhabricatorConduitTokenQuery())
+      ->setViewer($user)
+      ->withObjectPHIDs(array($user->getPHID()))
+      ->withTokenTypes(array(self::TYPE_CLUSTER))
+      ->withExpired(false)
+      ->execute();
+
+    // Only return a token if it has at least 5 minutes left before
+    // expiration. Cluster tokens cycle regularly, so we don't want to use
+    // one that's going to expire momentarily.
+    $now = PhabricatorTime::getNow();
+    $must_expire_after = $now + phutil_units('5 minutes in seconds');
+
+    foreach ($tokens as $token) {
+      if ($token->getExpires() > $must_expire_after) {
+        return $token;
+      }
+    }
+
+    // We didn't find any existing tokens (or the existing tokens are all about
+    // to expire) so generate a new token.
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      $token = PhabricatorConduitToken::initializeNewToken(
+        $user->getPHID(),
+        self::TYPE_CLUSTER);
+      $token->save();
+    unset($unguarded);
+
+    return $token;
+  }
+
   public static function initializeNewToken($object_phid, $token_type) {
     $token = new PhabricatorConduitToken();
     $token->objectPHID = $object_phid;
@@ -53,8 +90,8 @@ final class PhabricatorConduitToken
   public static function getTokenTypeName($type) {
     $map = array(
       self::TYPE_STANDARD => pht('Standard API Token'),
-      self::TYPE_TEMPORARY => pht('Temporary API Token'),
       self::TYPE_COMMANDLINE => pht('Command Line API Token'),
+      self::TYPE_CLUSTER => pht('Cluster API Token'),
     );
 
     return idx($map, $type, $type);
@@ -63,22 +100,32 @@ final class PhabricatorConduitToken
   public static function getAllTokenTypes() {
     return array(
       self::TYPE_STANDARD,
-      self::TYPE_TEMPORARY,
       self::TYPE_COMMANDLINE,
+      self::TYPE_CLUSTER,
     );
   }
 
   private function getTokenExpires($token_type) {
+    $now = PhabricatorTime::getNow();
     switch ($token_type) {
       case self::TYPE_STANDARD:
         return null;
-      case self::TYPE_TEMPORARY:
-        return PhabricatorTime::getNow() + phutil_units('24 hours in seconds');
       case self::TYPE_COMMANDLINE:
-        return PhabricatorTime::getNow() + phutil_units('1 hour in seconds');
+        return $now + phutil_units('1 hour in seconds');
+      case self::TYPE_CLUSTER:
+        return $now + phutil_units('30 minutes in seconds');
       default:
         throw new Exception(
           pht('Unknown Conduit token type "%s"!', $token_type));
+    }
+  }
+
+  public function getPublicTokenName() {
+    switch ($this->getTokenType()) {
+      case self::TYPE_CLUSTER:
+        return pht('Cluster API Token');
+      default:
+        return substr($this->getToken(), 0, 8).'...';
     }
   }
 

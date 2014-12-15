@@ -112,11 +112,15 @@ abstract class DiffusionQuery extends PhabricatorQuery {
 
     $domain = id(new PhutilURI(PhabricatorEnv::getURI('/')))->getDomain();
 
-    // TODO: This call needs authentication, which is blocked by T5955.
+    $client = id(new ConduitClient($uri))
+      ->setHost($domain);
 
-    return id(new ConduitClient($uri))
-      ->setHost($domain)
-      ->callMethodSynchronous($method, $params);
+    $token = PhabricatorConduitToken::loadClusterTokenForUser($user);
+    if ($token) {
+      $client->setConduitToken($token->getToken());
+    }
+
+    return $client->callMethodSynchronous($method, $params);
   }
 
   public function execute() {

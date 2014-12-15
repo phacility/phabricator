@@ -47,7 +47,7 @@ final class PhabricatorConduitSettingsPanel
             'href' => '/conduit/token/edit/'.$token->getID().'/',
             'sigil' => 'workflow',
           ),
-          substr($token->getToken(), 0, 8).'...'),
+          $token->getPublicTokenName()),
         PhabricatorConduitToken::getTokenTypeName($token->getTokenType()),
         phabricator_datetime($token->getDateCreated(), $viewer),
         ($token->getExpires()
