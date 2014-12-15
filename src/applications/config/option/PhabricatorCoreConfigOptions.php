@@ -92,6 +92,7 @@ final class PhabricatorCoreConfigOptions
             'create a collision preventing you from logging in.'))
         ->addExample('dev', pht('Prefix cookie with "dev"')),
       $this->newOption('phabricator.show-prototypes', 'bool', false)
+        ->setLocked(true)
         ->setBoolOptions(
           array(
             pht('Enable Prototypes'),
