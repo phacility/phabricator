@@ -65,6 +65,10 @@ final class AlmanacServiceViewController
       ->setUser($viewer)
       ->setObject($service);
 
+    $properties->addProperty(
+      pht('Service Type'),
+      $service->getServiceType()->getServiceTypeShortName());
+
     return $properties;
   }
 

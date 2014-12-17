@@ -16,6 +16,7 @@ final class AlmanacQueryServicesConduitAPIMethod
       'ids' => 'optional list<id>',
       'phids' => 'optional list<phid>',
       'names' => 'optional list<phid>',
+      'serviceClasses' => 'optional list<string>',
     ) + self::getPagerParamTypes();
   }
 
@@ -47,6 +48,11 @@ final class AlmanacQueryServicesConduitAPIMethod
     $names = $request->getValue('names');
     if ($names !== null) {
       $query->withNames($names);
+    }
+
+    $classes = $request->getValue('serviceClasses');
+    if ($classes !== null) {
+      $query->withServiceClasses($classes);
     }
 
     $pager = $this->newPager($request);
@@ -84,6 +90,7 @@ final class AlmanacQueryServicesConduitAPIMethod
       'phid' => $service->getPHID(),
       'name' => $service->getName(),
       'uri' => PhabricatorEnv::getProductionURI($service->getURI()),
+      'serviceClass' => $service->getServiceClass(),
       'properties' => $this->getPropertiesDictionary($service),
     );
   }

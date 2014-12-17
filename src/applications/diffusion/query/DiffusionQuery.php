@@ -81,6 +81,14 @@ abstract class DiffusionQuery extends PhabricatorQuery {
           'be loaded.'));
     }
 
+    $service_type = $service->getServiceType();
+    if (!($service_type instanceof AlmanacClusterRepositoryServiceType)) {
+      throw new Exception(
+        pht(
+          'The Alamnac service for this repository does not have the correct '.
+          'service type.'));
+    }
+
     $bindings = $service->getBindings();
     if (!$bindings) {
       throw new Exception(

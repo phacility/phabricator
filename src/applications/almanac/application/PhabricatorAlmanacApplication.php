@@ -74,6 +74,9 @@ final class PhabricatorAlmanacApplication extends PhabricatorApplication {
       AlmanacCreateNetworksCapability::CAPABILITY => array(
         'default' => PhabricatorPolicies::POLICY_ADMIN,
       ),
+      AlmanacCreateClusterServicesCapability::CAPABILITY => array(
+        'default' => PhabricatorPolicies::POLICY_ADMIN,
+      ),
     );
   }
 

@@ -73,7 +73,10 @@ final class AlmanacServiceSearchEngine
         ->setObjectName(pht('Service %d', $service->getID()))
         ->setHeader($service->getName())
         ->setHref($service->getURI())
-        ->setObject($service);
+        ->setObject($service)
+        ->addIcon(
+          $service->getServiceType()->getServiceTypeIcon(),
+          $service->getServiceType()->getServiceTypeShortName());
 
       $list->addItem($item);
     }
