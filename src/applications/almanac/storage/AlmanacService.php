@@ -121,6 +121,10 @@ final class AlmanacService
     }
   }
 
+  public function getAlmanacPropertyFieldSpecifications() {
+    return $this->getServiceType()->getFieldSpecifications();
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

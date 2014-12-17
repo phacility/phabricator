@@ -7,5 +7,6 @@ interface AlmanacPropertyInterface {
   public function hasAlmanacProperty($key);
   public function getAlmanacProperty($key);
   public function getAlmanacPropertyValue($key, $default = null);
+  public function getAlmanacPropertyFieldSpecifications();
 
 }

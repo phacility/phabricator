@@ -57,7 +57,8 @@ final class PhabricatorAlmanacApplication extends PhabricatorApplication {
           '(?P<id>\d+)/' => 'AlmanacNetworkViewController',
         ),
         'property/' => array(
-          'edit/(?:(?P<id>\d+)/)?' => 'AlmanacPropertyEditController',
+          'edit/' => 'AlmanacPropertyEditController',
+          'delete/' => 'AlmanacPropertyDeleteController',
         ),
       ),
     );

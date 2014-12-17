@@ -119,6 +119,10 @@ final class AlmanacBinding
     }
   }
 
+  public function getAlmanacPropertyFieldSpecifications() {
+    return array();
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

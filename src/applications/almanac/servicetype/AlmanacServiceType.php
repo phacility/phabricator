@@ -47,6 +47,14 @@ abstract class AlmanacServiceType extends Phobject {
   }
 
 
+  public function getDefaultPropertyMap() {
+    return array();
+  }
+
+  public function getFieldSpecifications() {
+    return array();
+  }
+
   /**
    * List all available service type implementations.
    *

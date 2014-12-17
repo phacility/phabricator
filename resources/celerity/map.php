@@ -34,6 +34,7 @@ return array(
     'rsrc/css/aphront/transaction.css' => '5d0cae25',
     'rsrc/css/aphront/two-column.css' => '16ab3ad2',
     'rsrc/css/aphront/typeahead.css' => 'a989b5b3',
+    'rsrc/css/application/almanac/almanac.css' => 'dbb9b3af',
     'rsrc/css/application/auth/auth.css' => '1e655982',
     'rsrc/css/application/base/main-menu-view.css' => '33e5f2f6',
     'rsrc/css/application/base/notification-menu.css' => '6aa0a74b',
@@ -497,6 +498,7 @@ return array(
     'rsrc/swf/aphlict.swf' => 'f19daffb',
   ),
   'symbols' => array(
+    'almanac-css' => 'dbb9b3af',
     'aphront-bars' => '231ac33c',
     'aphront-contextbar-view-css' => '1c3b0529',
     'aphront-dark-console-css' => '6378ef3d',

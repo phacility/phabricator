@@ -16,4 +16,19 @@ final class AlmanacClusterRepositoryServiceType
       'Defines a repository service for use in a Phabricator cluster.');
   }
 
+  public function getFieldSpecifications() {
+    return array(
+      'closed' => array(
+        'type' => 'bool',
+        'name' => pht('Closed'),
+        'default' => false,
+        'strings' => array(
+          'edit.checkbox' => pht(
+            'Prevent new repositories from being allocated on this '.
+            'service.'),
+        ),
+      ),
+    );
+  }
+
 }

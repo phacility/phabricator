@@ -97,6 +97,10 @@ final class AlmanacDevice
     }
   }
 
+  public function getAlmanacPropertyFieldSpecifications() {
+    return array();
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
