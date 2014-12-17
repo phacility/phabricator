@@ -268,6 +268,10 @@ final class PholioMock extends PholioDAO
     PhabricatorApplicationTransactionView $timeline,
     AphrontRequest $request) {
 
+    PholioMockQuery::loadImages(
+      $request->getUser(),
+      array($this),
+      $need_inline_comments = true);
     $timeline->setMock($this);
     return $timeline;
   }
