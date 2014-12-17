@@ -240,10 +240,23 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
   private function getLeaseOwnershipName() {
     static $sequence = 0;
 
+    // TODO: If the host name is very long, this can overflow the 64-character
+    // column, so we pick just the first part of the host name. It might be
+    // useful to just use a random hash as the identifier instead and put the
+    // pid / time / host (which are somewhat useful diagnostically) elsewhere.
+    // Likely, we could store a daemon ID instead and use that to identify
+    // when and where code executed. See T6742.
+
+    $host = php_uname('n');
+    $host = id(new PhutilUTF8StringTruncator())
+      ->setMaximumBytes(32)
+      ->setTerminator('...')
+      ->truncateString($host);
+
     $parts = array(
       getmypid(),
       time(),
-      php_uname('n'),
+      $host,
       ++$sequence,
     );
 
