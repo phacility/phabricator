@@ -82,11 +82,11 @@ final class DiffusionRepositoryEditMainController
         $this->buildSubversionActions($repository));
     }
 
-    $local_properties = null;
+    $storage_properties = null;
     if ($has_local) {
-      $local_properties = $this->buildLocalProperties(
+      $storage_properties = $this->buildStorageProperties(
         $repository,
-        $this->buildLocalActions($repository));
+        $this->buildStorageActions($repository));
     }
 
     $actions_properties = $this->buildActionsProperties(
@@ -140,10 +140,10 @@ final class DiffusionRepositoryEditMainController
         ->addPropertyList($remote_properties);
     }
 
-    if ($local_properties) {
+    if ($storage_properties) {
       $boxes[] = id(new PHUIObjectBoxView())
-        ->setHeaderText(pht('Local'))
-        ->addPropertyList($local_properties);
+        ->setHeaderText(pht('Storage'))
+        ->addPropertyList($storage_properties);
     }
 
     $boxes[] = id(new PHUIObjectBoxView())
@@ -548,7 +548,7 @@ final class DiffusionRepositoryEditMainController
     return $view;
   }
 
-  private function buildLocalActions(PhabricatorRepository $repository) {
+  private function buildStorageActions(PhabricatorRepository $repository) {
     $viewer = $this->getRequest()->getUser();
 
     $view = id(new PhabricatorActionListView())
@@ -557,15 +557,15 @@ final class DiffusionRepositoryEditMainController
 
     $edit = id(new PhabricatorActionView())
       ->setIcon('fa-pencil')
-      ->setName(pht('Edit Local'))
+      ->setName(pht('Edit Storage'))
       ->setHref(
-        $this->getRepositoryControllerURI($repository, 'edit/local/'));
+        $this->getRepositoryControllerURI($repository, 'edit/storage/'));
     $view->addAction($edit);
 
     return $view;
   }
 
-  private function buildLocalProperties(
+  private function buildStorageProperties(
     PhabricatorRepository $repository,
     PhabricatorActionListView $actions) {
 
@@ -576,7 +576,7 @@ final class DiffusionRepositoryEditMainController
       ->setActionList($actions);
 
     $view->addProperty(
-      pht('Local Path'),
+      pht('Storage Path'),
       $repository->getHumanReadableDetail('local-path'));
 
     return $view;

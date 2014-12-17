@@ -1,6 +1,6 @@
 <?php
 
-final class DiffusionRepositoryEditLocalController
+final class DiffusionRepositoryEditStorageController
   extends DiffusionRepositoryEditController {
 
   public function processRequest() {
@@ -29,7 +29,7 @@ final class DiffusionRepositoryEditLocalController
     $errors = array();
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('Edit Local'));
+    $crumbs->addTextCrumb(pht('Edit Storage'));
 
     $title = pht('Edit %s', $repository->getName());
 
