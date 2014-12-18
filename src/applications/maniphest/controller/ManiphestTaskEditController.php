@@ -39,6 +39,7 @@ final class ManiphestTaskEditController extends ManiphestController {
           ))
         ->withIDs(array($this->id))
         ->needSubscriberPHIDs(true)
+        ->needProjectPHIDs(true)
         ->executeOne();
       if (!$task) {
         return new Aphront404Response();
@@ -446,6 +447,7 @@ final class ManiphestTaskEditController extends ManiphestController {
             ->setViewer($user)
             ->withIDs(array($template_id))
             ->needSubscriberPHIDs(true)
+            ->needProjectPHIDs(true)
             ->executeOne();
           if ($template_task) {
             $cc_phids = array_unique(array_merge(

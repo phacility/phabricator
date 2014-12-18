@@ -144,6 +144,7 @@ final class PhabricatorSearchAttachController
       ->setViewer($user)
       ->withPHIDs(array_keys($phids))
       ->needSubscriberPHIDs(true)
+      ->needProjectPHIDs(true)
       ->execute();
 
     if (empty($targets)) {
@@ -158,9 +159,13 @@ final class PhabricatorSearchAttachController
 
     $cc_vector = array();
     // since we loaded this via a generic object query, go ahead and get the
-    // attach the cc phids now
+    // attach the subscriber and project phids now
     $task->attachSubscriberPHIDs(
       PhabricatorSubscribersQuery::loadSubscribersForPHID($task->getPHID()));
+    $task->attachProjectPHIDs(
+      PhabricatorEdgeQuery::loadDestinationPHIDs($task->getPHID(),
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST));
+
     $cc_vector[] = $task->getSubscriberPHIDs();
     foreach ($targets as $target) {
       $cc_vector[] = $target->getSubscriberPHIDs();

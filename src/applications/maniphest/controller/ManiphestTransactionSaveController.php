@@ -10,6 +10,7 @@ final class ManiphestTransactionSaveController extends ManiphestController {
       ->setViewer($user)
       ->withIDs(array($request->getStr('taskID')))
       ->needSubscriberPHIDs(true)
+      ->needProjectPHIDs(true)
       ->executeOne();
     if (!$task) {
       return new Aphront404Response();

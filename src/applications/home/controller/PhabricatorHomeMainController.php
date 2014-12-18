@@ -130,6 +130,7 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
       ->setViewer($user)
       ->withStatuses(ManiphestTaskStatus::getOpenStatusConstants())
       ->withPriorities(array($unbreak_now))
+      ->needProjectPHIDs(true)
       ->setLimit(10);
 
     $tasks = $task_query->execute();
@@ -173,6 +174,7 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
         ->withStatuses(ManiphestTaskStatus::getOpenStatusConstants())
         ->withPriorities(array($needs_triage))
         ->withAnyProjects(mpull($projects, 'getPHID'))
+        ->needProjectPHIDs(true)
         ->setLimit(10);
       $tasks = $task_query->execute();
     } else {
@@ -269,6 +271,7 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
       ->withStatuses(ManiphestTaskStatus::getOpenStatusConstants())
       ->setGroupBy(ManiphestTaskQuery::GROUP_PRIORITY)
       ->withOwners(array($user_phid))
+      ->needProjectPHIDs(true)
       ->setLimit(10);
 
     $tasks = $task_query->execute();

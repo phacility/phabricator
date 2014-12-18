@@ -19,6 +19,7 @@ final class ManiphestBatchEditController extends ManiphestController {
           PhabricatorPolicyCapability::CAN_EDIT,
         ))
       ->needSubscriberPHIDs(true)
+      ->needProjectPHIDs(true)
       ->execute();
 
     $actions = $request->getStr('actions');

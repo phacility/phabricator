@@ -13,6 +13,7 @@ final class ManiphestSubpriorityController extends ManiphestController {
     $task = id(new ManiphestTaskQuery())
       ->setViewer($user)
       ->withIDs(array($request->getInt('task')))
+      ->needProjectPHIDs(true)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
