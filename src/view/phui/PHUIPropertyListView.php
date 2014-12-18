@@ -204,7 +204,7 @@ final class PHUIPropertyListView extends AphrontView {
     $list = phutil_tag(
       'dl',
       array(
-        'class' => 'phui-property-list-properties '.$stacked,
+        'class' => 'phui-property-list-properties',
       ),
       $items);
 
@@ -216,7 +216,7 @@ final class PHUIPropertyListView extends AphrontView {
     $list = phutil_tag(
       'div',
       array(
-        'class' => 'phui-property-list-properties-wrap',
+        'class' => 'phui-property-list-properties-wrap '.$stacked,
       ),
       array($shortcuts, $list));
 
