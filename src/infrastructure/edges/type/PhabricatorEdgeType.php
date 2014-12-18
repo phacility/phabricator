@@ -46,6 +46,12 @@ abstract class PhabricatorEdgeType extends Phobject {
     return false;
   }
 
+  public function getTransactionPreviewString($actor) {
+    return pht(
+      '%s edited edge metadata.',
+      $actor);
+  }
+
   public function getTransactionAddString(
     $actor,
     $add_count,

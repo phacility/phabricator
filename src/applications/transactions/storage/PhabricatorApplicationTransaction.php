@@ -667,8 +667,7 @@ abstract class PhabricatorApplicationTransaction
             new PhutilNumber(count($rem)),
             $this->renderHandleList($rem));
         } else {
-          return pht(
-            '%s edited edge metadata.',
+          return $type_obj->getTransactionPreviewString(
             $this->renderHandleLink($author_phid));
         }
 
