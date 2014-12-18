@@ -40,7 +40,7 @@ final class AlmanacNetwork
   }
 
   public function getURI() {
-    return '/almanac/network/view/'.$this->getName().'/';
+    return '/almanac/network/'.$this->getID().'/';
   }
 
 

@@ -222,6 +222,12 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
         $header = id(new PHUIActionHeaderView())
           ->setHeaderTitle($panel->getName())
           ->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTBLUE);
+        $panel_type = $panel->getImplementation();
+        $header = $panel_type->adjustPanelHeader(
+          $this->getViewer(),
+          $panel,
+          $this,
+          $header);
         break;
     }
     return $header;
@@ -255,6 +261,7 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
     }
     return $header;
   }
+
 
   /**
    * Detect graph cycles in panels, and deeply nested panels.

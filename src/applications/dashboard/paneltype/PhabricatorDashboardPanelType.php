@@ -37,6 +37,14 @@ abstract class PhabricatorDashboardPanelType extends Phobject {
     return true;
   }
 
+  public function adjustPanelHeader(
+    PhabricatorUser $viewer,
+    PhabricatorDashboardPanel $panel,
+    PhabricatorDashboardPanelRenderingEngine $engine,
+    PHUIActionHeaderView $header) {
+    return $header;
+  }
+
   public static function getAllPanelTypes() {
     static $types;
 

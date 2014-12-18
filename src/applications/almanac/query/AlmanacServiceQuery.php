@@ -6,6 +6,7 @@ final class AlmanacServiceQuery
   private $ids;
   private $phids;
   private $names;
+  private $serviceClasses;
   private $needBindings;
 
   public function withIDs(array $ids) {
@@ -20,6 +21,11 @@ final class AlmanacServiceQuery
 
   public function withNames(array $names) {
     $this->names = $names;
+    return $this;
+  }
+
+  public function withServiceClasses(array $classes) {
+    $this->serviceClasses = $classes;
     return $this;
   }
 
@@ -72,9 +78,33 @@ final class AlmanacServiceQuery
         $hashes);
     }
 
+    if ($this->serviceClasses !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'serviceClass IN (%Ls)',
+        $this->serviceClasses);
+    }
+
     $where[] = $this->buildPagingClause($conn_r);
 
     return $this->formatWhereClause($where);
+  }
+
+  protected function willFilterPage(array $services) {
+    $service_types = AlmanacServiceType::getAllServiceTypes();
+
+    foreach ($services as $key => $service) {
+      $service_class = $service->getServiceClass();
+      $service_type = idx($service_types, $service_class);
+      if (!$service_type) {
+        $this->didRejectResult($service);
+        unset($services[$key]);
+        continue;
+      }
+      $service->attachServiceType($service_type);
+    }
+
+    return $services;
   }
 
   protected function didFilterPage(array $services) {

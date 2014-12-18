@@ -57,7 +57,8 @@ final class PhabricatorAlmanacApplication extends PhabricatorApplication {
           '(?P<id>\d+)/' => 'AlmanacNetworkViewController',
         ),
         'property/' => array(
-          'edit/(?:(?P<id>\d+)/)?' => 'AlmanacPropertyEditController',
+          'edit/' => 'AlmanacPropertyEditController',
+          'delete/' => 'AlmanacPropertyDeleteController',
         ),
       ),
     );
@@ -72,6 +73,9 @@ final class PhabricatorAlmanacApplication extends PhabricatorApplication {
         'default' => PhabricatorPolicies::POLICY_ADMIN,
       ),
       AlmanacCreateNetworksCapability::CAPABILITY => array(
+        'default' => PhabricatorPolicies::POLICY_ADMIN,
+      ),
+      AlmanacCreateClusterServicesCapability::CAPABILITY => array(
         'default' => PhabricatorPolicies::POLICY_ADMIN,
       ),
     );

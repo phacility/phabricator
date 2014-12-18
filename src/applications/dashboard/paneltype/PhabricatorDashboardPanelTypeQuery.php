@@ -69,15 +69,7 @@ final class PhabricatorDashboardPanelTypeQuery
     PhabricatorDashboardPanel $panel,
     PhabricatorDashboardPanelRenderingEngine $engine) {
 
-    $class = $panel->getProperty('class');
-
-    $engine = PhabricatorApplicationSearchEngine::getEngineByClassName($class);
-    if (!$engine) {
-      throw new Exception(
-        pht(
-          'The application search engine "%s" is not known to Phabricator!',
-          $class));
-    }
+    $engine = $this->getSearchEngine($panel);
 
     $engine->setViewer($viewer);
     $engine->setContext(PhabricatorApplicationSearchEngine::CONTEXT_PANEL);
@@ -88,7 +80,7 @@ final class PhabricatorDashboardPanelTypeQuery
     } else {
       $saved = id(new PhabricatorSavedQueryQuery())
         ->setViewer($viewer)
-        ->withEngineClassNames(array($class))
+        ->withEngineClassNames(array(get_class($engine)))
         ->withQueryKeys(array($key))
         ->executeOne();
     }
@@ -98,7 +90,7 @@ final class PhabricatorDashboardPanelTypeQuery
         pht(
           'Query "%s" is unknown to application search engine "%s"!',
           $key,
-          $class));
+          get_class($engine)));
     }
 
     $query = $engine->buildQueryFromSavedQuery($saved);
@@ -114,6 +106,33 @@ final class PhabricatorDashboardPanelTypeQuery
     $results = $engine->executeQuery($query, $pager);
 
     return $engine->renderResults($results, $saved);
+  }
+
+
+  public function adjustPanelHeader(
+    PhabricatorUser $viewer,
+    PhabricatorDashboardPanel $panel,
+    PhabricatorDashboardPanelRenderingEngine $engine,
+    PHUIActionHeaderView $header) {
+
+    $search_engine = $this->getSearchEngine($panel);
+    $key = $panel->getProperty('key');
+    $header->setHeaderHref($search_engine->getQueryResultsPageURI($key));
+
+    return $header;
+  }
+
+  private function getSearchEngine(PhabricatorDashboardPanel $panel) {
+    $class = $panel->getProperty('class');
+    $engine = PhabricatorApplicationSearchEngine::getEngineByClassName($class);
+    if (!$engine) {
+      throw new Exception(
+        pht(
+          'The application search engine "%s" is not known to Phabricator!',
+          $class));
+    }
+
+    return $engine;
   }
 
 }

@@ -11,7 +11,6 @@ final class AlmanacNetworkViewController
     $viewer = $request->getViewer();
 
     $id = $request->getURIData('id');
-
     $network = id(new AlmanacNetworkQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
