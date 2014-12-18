@@ -38,6 +38,14 @@ final class AlmanacBindingViewController
       ->setHeader($header)
       ->addPropertyList($property_list);
 
+    if ($binding->getService()->getIsLocked()) {
+      $this->addLockMessage(
+        $box,
+        pht(
+          'This service for this binding is locked, so the binding can '.
+          'not be edited.'));
+    }
+
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($service->getName(), $service_uri);
     $crumbs->addTextCrumb($title);

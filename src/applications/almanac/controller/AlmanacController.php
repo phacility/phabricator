@@ -179,4 +179,23 @@ abstract class AlmanacController
       ->appendChild($table);
   }
 
+  protected function addLockMessage(PHUIObjectBoxView $box, $message) {
+    $doc_link = phutil_tag(
+      'a',
+      array(
+        'href' => PhabricatorEnv::getDoclink('Almanac User Guide'),
+        'target' => '_blank',
+      ),
+      pht('Learn More'));
+
+    $error_view = id(new AphrontErrorView())
+      ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
+      ->setErrors(
+        array(
+          array($message, ' ', $doc_link),
+        ));
+
+    $box->setErrorView($error_view);
+  }
+
 }

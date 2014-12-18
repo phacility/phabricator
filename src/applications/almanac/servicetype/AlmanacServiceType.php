@@ -55,6 +55,10 @@ abstract class AlmanacServiceType extends Phobject {
     return array();
   }
 
+  public function getStatusMessages(AlmanacService $service) {
+    return array();
+  }
+
   /**
    * List all available service type implementations.
    *
