@@ -7,26 +7,23 @@ final class ManiphestTransaction
   const TYPE_STATUS = 'status';
   const TYPE_DESCRIPTION = 'description';
   const TYPE_OWNER  = 'reassign';
-  const TYPE_PROJECTS = 'projects';
   const TYPE_PRIORITY = 'priority';
   const TYPE_EDGE = 'edge';
   const TYPE_SUBPRIORITY = 'subpriority';
   const TYPE_PROJECT_COLUMN = 'projectcolumn';
   const TYPE_MERGED_INTO = 'mergedinto';
   const TYPE_MERGED_FROM = 'mergedfrom';
-
   const TYPE_UNBLOCK = 'unblock';
 
   // NOTE: this type is deprecated. Keep it around for legacy installs
   // so any transactions render correctly.
   const TYPE_ATTACH = 'attach';
   /**
-   * TYPE_CCS is legacy and depracted in favor of
-   * PhabricatorTransactions::TYPE_SUBSCRIBERS; keep it around for legacy
+   * TYPE_PROJECTS is legacy and depracted in favor of
+   * PhabricatorTransactions::TYPE_EDGE; keep it around for legacy
    * transaction-rendering.
    */
-  const TYPE_CCS = 'ccs';
-
+  const TYPE_PROJECTS = 'projects';
 
   const MAILTAG_STATUS = 'maniphest-status';
   const MAILTAG_OWNER = 'maniphest-owner';
@@ -90,7 +87,6 @@ final class ManiphestTransaction
           $phids[] = $old;
         }
         break;
-      case self::TYPE_CCS:
       case self::TYPE_PROJECTS:
         $phids = array_mergev(
           array(
@@ -271,9 +267,6 @@ final class ManiphestTransaction
           return pht('Reassigned');
         }
 
-      case self::TYPE_CCS:
-        return pht('Changed CC');
-
       case self::TYPE_PROJECTS:
         return pht('Changed Projects');
 
@@ -324,9 +317,6 @@ final class ManiphestTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_OWNER:
         return 'fa-user';
-
-      case self::TYPE_CCS:
-        return 'fa-envelope';
 
       case self::TYPE_TITLE:
         if ($old === null) {
@@ -545,13 +535,6 @@ final class ManiphestTransaction
             $old_name,
             $new_name);
         }
-
-      case self::TYPE_CCS:
-        // TODO: Remove this when we switch to subscribers. Just reuse the
-        // code in the parent.
-        $clone = clone $this;
-        $clone->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS);
-        return $clone->getTitle();
 
       case self::TYPE_EDGE:
         // TODO: Remove this when we switch to real edges. Just reuse the
@@ -801,13 +784,6 @@ final class ManiphestTransaction
             $new_name);
         }
 
-      case self::TYPE_CCS:
-        // TODO: Remove this when we switch to subscribers. Just reuse the
-        // code in the parent.
-        $clone = clone $this;
-        $clone->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS);
-        return $clone->getTitleForFeed($story);
-
       case self::TYPE_EDGE:
         // TODO: Remove this when we switch to real edges. Just reuse the
         // code in the parent;
@@ -902,7 +878,6 @@ final class ManiphestTransaction
       case self::TYPE_OWNER:
         $tags[] = self::MAILTAG_OWNER;
         break;
-      case self::TYPE_CCS:
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         $tags[] = self::MAILTAG_CC;
         break;
