@@ -58,7 +58,7 @@ final class PhabricatorPeopleEmpowerController
       $title = pht('Make Administrator?');
       $short = pht('Make Administrator');
       $body = pht(
-        'Empower %s as an admistrator? They will be able to create users, '.
+        'Empower %s as an administrator? They will be able to create users, '.
         'approve users, make and remove administrators, delete accounts, and '.
         'perform other administrative functions on this Phabricator install.',
         phutil_tag('strong', array(), $user->getUsername()));
