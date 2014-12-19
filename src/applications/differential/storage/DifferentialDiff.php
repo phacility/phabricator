@@ -159,6 +159,20 @@ final class DifferentialDiff
     assert_instances_of($changes, 'ArcanistDiffChange');
 
     $diff = self::initializeNewDiff($actor);
+    return self::buildChangesetsFromRawChanges($diff, $changes);
+  }
+
+  public static function newEphemeralFromRawChanges(array $changes) {
+    assert_instances_of($changes, 'ArcanistDiffChange');
+
+    $diff = id(new DifferentialDiff())->makeEphemeral();
+    return self::buildChangesetsFromRawChanges($diff, $changes);
+  }
+
+  private static function buildChangesetsFromRawChanges(
+    DifferentialDiff $diff,
+    array $changes) {
+
     // There may not be any changes; initialize the changesets list so that
     // we don't throw later when accessing it.
     $diff->attachChangesets(array());

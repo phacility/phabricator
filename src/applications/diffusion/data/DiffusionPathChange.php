@@ -147,7 +147,8 @@ final class DiffusionPathChange {
     array $changes) {
     assert_instances_of($changes, 'DiffusionPathChange');
     $arcanist_changes = self::convertToArcanistChanges($changes);
-    $diff = DifferentialDiff::newFromRawChanges($user, $arcanist_changes);
+    $diff = DifferentialDiff::newEphemeralFromRawChanges(
+      $arcanist_changes);
     return $diff->getChangesets();
   }
 

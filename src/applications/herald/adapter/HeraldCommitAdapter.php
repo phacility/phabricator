@@ -346,8 +346,7 @@ final class HeraldCommitAdapter extends HeraldAdapter {
     $parser = new ArcanistDiffParser();
     $changes = $parser->parseDiff($raw);
 
-    $diff = DifferentialDiff::newFromRawChanges(
-      PhabricatorUser::getOmnipotentUser(),
+    $diff = DifferentialDiff::newEphemeralFromRawChanges(
       $changes);
     return $diff;
   }

@@ -1115,8 +1115,7 @@ final class DiffusionCommitHookEngine extends Phobject {
 
     $parser = new ArcanistDiffParser();
     $changes = $parser->parseDiff($raw_diff);
-    $diff = DifferentialDiff::newFromRawChanges(
-      $this->getViewer(),
+    $diff = DifferentialDiff::newEphemeralFromRawChanges(
       $changes);
     return $diff->getChangesets();
   }
