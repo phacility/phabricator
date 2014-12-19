@@ -72,7 +72,7 @@ final class ManiphestTransactionPreviewController extends ManiphestController {
         $transaction->setOldValue(array());
         $transaction->setNewValue($phids);
         break;
-      case ManiphestTransaction::TYPE_PROJECTS:
+      case PhabricatorTransactions::TYPE_EDGE:
         if ($value) {
           $value = json_decode($value);
         }

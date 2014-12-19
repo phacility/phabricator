@@ -10,6 +10,7 @@ final class ManiphestTransactionSaveController extends ManiphestController {
       ->setViewer($user)
       ->withIDs(array($request->getStr('taskID')))
       ->needSubscriberPHIDs(true)
+      ->needProjectPHIDs(true)
       ->executeOne();
     if (!$task) {
       return new Aphront404Response();
@@ -49,16 +50,14 @@ final class ManiphestTransactionSaveController extends ManiphestController {
         $assign_to = reset($assign_to);
         $transaction->setNewValue($assign_to);
         break;
-      case ManiphestTransaction::TYPE_PROJECTS:
+      case PhabricatorTransactions::TYPE_EDGE:
         $projects = $request->getArr('projects');
         $projects = array_merge($projects, $task->getProjectPHIDs());
         $projects = array_filter($projects);
         $projects = array_unique($projects);
 
-        // TODO: Bleh.
         $project_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
         $transaction
-          ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
           ->setMetadataValue('edge:type', $project_type)
           ->setNewValue(
             array(

@@ -237,6 +237,7 @@ abstract class ManiphestConduitAPIMethod extends ConduitAPIMethod {
       ->setViewer($request->getUser())
       ->withPHIDs(array($task->getPHID()))
       ->needSubscriberPHIDs(true)
+      ->needProjectPHIDs(true)
       ->executeOne();
   }
 

@@ -92,12 +92,21 @@ final class AlmanacInterface
   }
 
   public function describeAutomaticCapability($capability) {
-    return array(
+    $notes = array(
       pht('An interface inherits the policies of the device it belongs to.'),
       pht(
         'You must be able to view the network an interface resides on to '.
         'view the interface.'),
     );
+
+    if ($capability === PhabricatorPolicyCapability::CAN_EDIT) {
+      if ($this->getDevice()->getIsLocked()) {
+        $notes[] = pht(
+          'The device for this interface is locked, so it can not be edited.');
+      }
+    }
+
+    return $notes;
   }
 
 }

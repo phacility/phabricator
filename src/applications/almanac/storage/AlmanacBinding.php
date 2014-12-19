@@ -143,12 +143,21 @@ final class AlmanacBinding
   }
 
   public function describeAutomaticCapability($capability) {
-    return array(
+    $notes = array(
       pht('A binding inherits the policies of its service.'),
       pht(
         'To view a binding, you must also be able to view its device and '.
         'interface.'),
     );
+
+    if ($capability === PhabricatorPolicyCapability::CAN_EDIT) {
+      if ($this->getService()->getIsLocked()) {
+        $notes[] = pht(
+          'The service for this binding is locked, so it can not be edited.');
+      }
+    }
+
+    return $notes;
   }
 
 

@@ -25,6 +25,7 @@ final class ManiphestHovercardEventListener extends PhabricatorEventListener {
       return;
     }
 
+    $e_project = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
     // Fun with "Unbeta Pholio", hua hua
     $e_dep_on = PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK;
     $e_dep_by = PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK;
@@ -33,6 +34,7 @@ final class ManiphestHovercardEventListener extends PhabricatorEventListener {
       ->withSourcePHIDs(array($phid))
       ->withEdgeTypes(
         array(
+          $e_project,
           $e_dep_on,
           $e_dep_by,
         ));
@@ -40,12 +42,10 @@ final class ManiphestHovercardEventListener extends PhabricatorEventListener {
     $edge_phids = $edge_query->getDestinationPHIDs();
 
     $owner_phid = $task->getOwnerPHID();
-    $project_phids = $task->getProjectPHIDs();
 
     $phids = array_filter(array_merge(
       array($owner_phid),
-      $edge_phids,
-      $project_phids));
+      $edge_phids));
 
     $viewer_handles = $this->loadHandles($phids, $viewer);
 
@@ -58,17 +58,12 @@ final class ManiphestHovercardEventListener extends PhabricatorEventListener {
     }
 
     $hovercard->addField(pht('Assigned to'), $owner);
-    if ($project_phids) {
-      $hovercard->addField(pht('Projects'),
-        implode_selected_handle_links(', ', $viewer_handles, $project_phids));
-    }
 
     if ($edge_phids) {
       $edge_types = array(
-        PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK
-          => pht('Dependent Tasks'),
-        PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK
-          => pht('Depends On'),
+        $e_project => pht('Projects'),
+        $e_dep_by => pht('Dependent Tasks'),
+        $e_dep_on  => pht('Depends On'),
       );
 
       $max_count = 6;

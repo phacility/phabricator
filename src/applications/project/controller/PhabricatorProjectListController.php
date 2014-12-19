@@ -22,6 +22,10 @@ final class PhabricatorProjectListController
     return $this->delegateToController($controller);
   }
 
+  public function buildApplicationMenu() {
+    return $this->buildSideNavView(true)->getMenu();
+  }
+
   public function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 

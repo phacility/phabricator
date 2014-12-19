@@ -26,6 +26,10 @@ final class PhabricatorAlmanacApplication extends PhabricatorApplication {
     return self::GROUP_UTILITIES;
   }
 
+  public function getHelpURI() {
+    return PhabricatorEnv::getDoclink('Almanac User Guide');
+  }
+
   public function isPrototype() {
     return true;
   }

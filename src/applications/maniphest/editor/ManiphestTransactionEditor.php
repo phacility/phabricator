@@ -370,6 +370,7 @@ final class ManiphestTransactionEditor
           ->setViewer($this->getActor())
           ->withPHIDs($blocked_phids)
           ->needSubscriberPHIDs(true)
+          ->needProjectPHIDs(true)
           ->execute();
 
         $old = $unblock_xaction->getOldValue();

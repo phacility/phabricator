@@ -396,6 +396,12 @@ final class ManiphestReportController extends ManiphestController {
       ->setViewer($user)
       ->withStatuses(ManiphestTaskStatus::getOpenStatusConstants());
 
+    switch ($this->view) {
+      case 'project':
+        $query->needProjectPHIDs(true);
+        break;
+    }
+
     $project_phid = $request->getStr('project');
     $project_handle = null;
     if ($project_phid) {

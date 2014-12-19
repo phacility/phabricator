@@ -20,6 +20,7 @@ final class DiffusionRepositoryCreateController
     // the latter two cases, we show only a few of the pages.
 
     $repository = null;
+    $service = null;
     switch ($this->edit) {
       case 'remote':
       case 'policy':
@@ -39,6 +40,38 @@ final class DiffusionRepositoryCreateController
       case 'create':
         $this->requireApplicationCapability(
           DiffusionCreateRepositoriesCapability::CAPABILITY);
+
+        // Pick a random open service to allocate this repository on, if any
+        // exist. If there are no services, we aren't in cluster mode and
+        // will allocate locally. If there are services but none permit
+        // allocations, we fail.
+        $services = id(new AlmanacServiceQuery())
+          ->setViewer(PhabricatorUser::getOmnipotentUser())
+          ->withServiceClasses(
+            array(
+              'AlmanacClusterRepositoryServiceType',
+            ))
+          ->execute();
+        if ($services) {
+          // Filter out services which do not permit new allocations.
+          foreach ($services as $key => $possible_service) {
+            if ($possible_service->getAlmanacPropertyValue('closed')) {
+              unset($services[$key]);
+            }
+          }
+
+          if (!$services) {
+            throw new Exception(
+              pht(
+                'This install is configured in cluster mode, but all '.
+                'available repository cluster services are closed to new '.
+                'allocations. At least one service must be open to allow '.
+                'new allocations to take place.'));
+          }
+
+          shuffle($services);
+          $service = head($services);
+        }
 
         $cancel_uri = $this->getApplicationURI('new/');
         break;
@@ -110,6 +143,7 @@ final class DiffusionRepositoryCreateController
         $type_view = PhabricatorTransactions::TYPE_VIEW_POLICY;
         $type_edit = PhabricatorTransactions::TYPE_EDIT_POLICY;
         $type_push = PhabricatorRepositoryTransaction::TYPE_PUSH_POLICY;
+        $type_service = PhabricatorRepositoryTransaction::TYPE_SERVICE;
 
         $xactions = array();
 
@@ -141,8 +175,13 @@ final class DiffusionRepositoryCreateController
             ->getControl('activate')->getValue();
           $xactions[] = id(clone $template)
             ->setTransactionType($type_activate)
-            ->setNewValue(
-              ($activate == 'start'));
+            ->setNewValue(($activate == 'start'));
+
+          if ($service) {
+            $xactions[] = id(clone $template)
+              ->setTransactionType($type_service)
+              ->setNewValue($service->getPHID());
+          }
 
           $default_local_path = PhabricatorEnv::getEnvConfig(
             'repository.default-local-path');

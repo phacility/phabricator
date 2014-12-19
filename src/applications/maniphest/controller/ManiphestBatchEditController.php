@@ -19,6 +19,7 @@ final class ManiphestBatchEditController extends ManiphestController {
           PhabricatorPolicyCapability::CAN_EDIT,
         ))
       ->needSubscriberPHIDs(true)
+      ->needProjectPHIDs(true)
       ->execute();
 
     $actions = $request->getStr('actions');
@@ -170,8 +171,8 @@ final class ManiphestBatchEditController extends ManiphestController {
       'assign'          => ManiphestTransaction::TYPE_OWNER,
       'status'          => ManiphestTransaction::TYPE_STATUS,
       'priority'        => ManiphestTransaction::TYPE_PRIORITY,
-      'add_project'     => ManiphestTransaction::TYPE_PROJECTS,
-      'remove_project'  => ManiphestTransaction::TYPE_PROJECTS,
+      'add_project'     => PhabricatorTransactions::TYPE_EDGE,
+      'remove_project'  => PhabricatorTransactions::TYPE_EDGE,
       'add_ccs'         => PhabricatorTransactions::TYPE_SUBSCRIBERS,
       'remove_ccs'      => PhabricatorTransactions::TYPE_SUBSCRIBERS,
     );
@@ -213,7 +214,7 @@ final class ManiphestBatchEditController extends ManiphestController {
           case ManiphestTransaction::TYPE_PRIORITY:
             $current = $task->getPriority();
             break;
-          case ManiphestTransaction::TYPE_PROJECTS:
+          case PhabricatorTransactions::TYPE_EDGE:
             $current = $task->getProjectPHIDs();
             break;
           case PhabricatorTransactions::TYPE_SUBSCRIBERS:
@@ -242,7 +243,7 @@ final class ManiphestBatchEditController extends ManiphestController {
             $value = null;
           }
           break;
-        case ManiphestTransaction::TYPE_PROJECTS:
+        case PhabricatorTransactions::TYPE_EDGE:
           if (empty($value)) {
             continue 2;
           }
@@ -274,7 +275,7 @@ final class ManiphestBatchEditController extends ManiphestController {
             $value = $current."\n\n".$value;
           }
           break;
-        case ManiphestTransaction::TYPE_PROJECTS:
+        case PhabricatorTransactions::TYPE_EDGE:
           $is_remove = $action['action'] == 'remove_project';
 
           $current = array_fill_keys($current, true);
@@ -355,12 +356,9 @@ final class ManiphestBatchEditController extends ManiphestController {
             id(new ManiphestTransactionComment())
               ->setContent($value));
           break;
-        case ManiphestTransaction::TYPE_PROJECTS:
-
-          // TODO: Clean this mess up.
+        case PhabricatorTransactions::TYPE_EDGE:
           $project_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
           $xaction
-            ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
             ->setMetadataValue('edge:type', $project_type)
             ->setNewValue(
               array(

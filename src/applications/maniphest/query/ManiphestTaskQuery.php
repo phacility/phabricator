@@ -51,6 +51,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   const ORDER_TITLE         = 'order-title';
 
   private $needSubscriberPHIDs;
+  private $needProjectPHIDs;
 
   const DEFAULT_PAGE_SIZE   = 1000;
 
@@ -182,6 +183,11 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   public function needSubscriberPHIDs($bool) {
     $this->needSubscriberPHIDs = $bool;
+    return $this;
+  }
+
+  public function needProjectPHIDs($bool) {
+    $this->needProjectPHIDs = $bool;
     return $this;
   }
 
@@ -340,22 +346,20 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   protected function didFilterPage(array $tasks) {
     $phids = mpull($tasks, 'getPHID');
 
-    // TODO: Eventually, we should make this optional and introduce a
-    // needProjectPHIDs() method, but for now there's a lot of code which
-    // assumes the data is always populated.
+    if ($this->needProjectPHIDs) {
+      $edge_query = id(new PhabricatorEdgeQuery())
+        ->withSourcePHIDs($phids)
+        ->withEdgeTypes(
+          array(
+            PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+          ));
+      $edge_query->execute();
 
-    $edge_query = id(new PhabricatorEdgeQuery())
-      ->withSourcePHIDs($phids)
-      ->withEdgeTypes(
-        array(
-          PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
-        ));
-    $edge_query->execute();
-
-    foreach ($tasks as $task) {
-      $project_phids = $edge_query->getDestinationPHIDs(
-        array($task->getPHID()));
-      $task->attachProjectPHIDs($project_phids);
+      foreach ($tasks as $task) {
+        $project_phids = $edge_query->getDestinationPHIDs(
+          array($task->getPHID()));
+        $task->attachProjectPHIDs($project_phids);
+      }
     }
 
     if ($this->needSubscriberPHIDs) {

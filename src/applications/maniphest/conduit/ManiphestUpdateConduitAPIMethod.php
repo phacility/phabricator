@@ -34,19 +34,16 @@ final class ManiphestUpdateConduitAPIMethod extends ManiphestConduitAPIMethod {
       throw new Exception("Specify exactly one of 'id' and 'phid'.");
     }
 
+    $query = id (new ManiphestTaskQuery())
+      ->setViewer($request->getUser())
+      ->needSubscriberPHIDs(true)
+      ->needProjectPHIDs(true);
     if ($id) {
-      $task = id(new ManiphestTaskQuery())
-        ->setViewer($request->getUser())
-        ->withIDs(array($id))
-        ->needSubscriberPHIDs(true)
-        ->executeOne();
+      $query->withIDs(array($id));
     } else {
-      $task = id(new ManiphestTaskQuery())
-        ->setViewer($request->getUser())
-        ->withPHIDs(array($phid))
-        ->needSubscriberPHIDs(true)
-        ->executeOne();
+      $query->withPHIDs(array($phid));
     }
+    $task = $query->executeOne();
 
     $params = $request->getAllParameters();
     unset($params['id']);

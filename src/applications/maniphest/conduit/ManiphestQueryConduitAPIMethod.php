@@ -61,10 +61,10 @@ class ManiphestQueryConduitAPIMethod extends ManiphestConduitAPIMethod {
   }
 
   protected function execute(ConduitAPIRequest $request) {
-    $query = new ManiphestTaskQuery();
-
-    $query->setViewer($request->getUser());
-    $query->needSubscriberPHIDs(true);
+    $query = id(new ManiphestTaskQuery())
+      ->setViewer($request->getUser())
+      ->needProjectPHIDs(true)
+      ->needSubscriberPHIDs(true);
 
     $task_ids = $request->getValue('ids');
     if ($task_ids) {

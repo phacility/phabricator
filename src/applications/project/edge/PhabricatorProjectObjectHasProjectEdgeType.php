@@ -9,6 +9,12 @@ final class PhabricatorProjectObjectHasProjectEdgeType
     return PhabricatorProjectProjectHasObjectEdgeType::EDGECONST;
   }
 
+  public function getTransactionPreviewString($actor) {
+    return pht(
+      '%s edited associated projects.',
+      $actor);
+  }
+
   public function getTransactionAddString(
     $actor,
     $add_count,

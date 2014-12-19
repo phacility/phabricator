@@ -119,7 +119,8 @@ final class ManiphestTaskSearchEngine
   }
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new ManiphestTaskQuery());
+    $query = id(new ManiphestTaskQuery())
+      ->needProjectPHIDs(true);
 
     $author_phids = $saved->getParameter('authorPHIDs');
     if ($author_phids) {

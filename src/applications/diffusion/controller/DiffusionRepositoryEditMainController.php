@@ -575,6 +575,21 @@ final class DiffusionRepositoryEditMainController
       ->setUser($viewer)
       ->setActionList($actions);
 
+    $service_phid = $repository->getAlmanacServicePHID();
+    if ($service_phid) {
+      $handles = $this->loadViewerHandles(array($service_phid));
+      $v_service = $handles[$service_phid]->renderLink();
+    } else {
+      $v_service = phutil_tag(
+        'em',
+        array(),
+        pht('Local'));
+    }
+
+    $view->addProperty(
+      pht('Storage Service'),
+      $v_service);
+
     $view->addProperty(
       pht('Storage Path'),
       $repository->getHumanReadableDetail('local-path'));

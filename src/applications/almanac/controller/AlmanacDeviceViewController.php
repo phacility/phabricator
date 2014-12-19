@@ -20,6 +20,10 @@ final class AlmanacDeviceViewController
       return new Aphront404Response();
     }
 
+    // We rebuild locks on a device when viewing the detail page, so they
+    // automatically get corrected if they fall out of sync.
+    $device->rebuildDeviceLocks();
+
     $title = pht('Device %s', $device->getName());
 
     $property_list = $this->buildPropertyList($device);
@@ -34,6 +38,14 @@ final class AlmanacDeviceViewController
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->addPropertyList($property_list);
+
+    if ($device->getIsLocked()) {
+      $this->addLockMessage(
+        $box,
+        pht(
+          'This device is bound to a locked service, so it can not be '.
+          'edited.'));
+    }
 
     $interfaces = $this->buildInterfaceList($device);
 
@@ -52,6 +64,7 @@ final class AlmanacDeviceViewController
         $interfaces,
         $this->buildAlmanacPropertiesTable($device),
         $this->buildSSHKeysTable($device),
+        $this->buildServicesTable($device),
         $timeline,
       ),
       array(
@@ -116,7 +129,8 @@ final class AlmanacDeviceViewController
     $table = id(new AlmanacInterfaceTableView())
       ->setUser($viewer)
       ->setInterfaces($interfaces)
-      ->setHandles($handles);
+      ->setHandles($handles)
+      ->setCanEdit($can_edit);
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Device Interfaces'))
@@ -198,5 +212,53 @@ final class AlmanacDeviceViewController
 
 
   }
+
+  private function buildServicesTable(AlmanacDevice $device) {
+
+    // NOTE: We're loading all services so we can show hidden, locked services.
+    // In general, we let you know about all the things the device is bound to,
+    // even if you don't have permission to see their details. This is similar
+    // to exposing the existence of edges in other applications, with the
+    // addition of always letting you see that locks exist.
+
+    $services = id(new AlmanacServiceQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withDevicePHIDs(array($device->getPHID()))
+      ->execute();
+
+    $handles = $this->loadViewerHandles(mpull($services, 'getPHID'));
+
+    $icon_lock = id(new PHUIIconView())
+      ->setIconFont('fa-lock');
+
+    $rows = array();
+    foreach ($services as $service) {
+      $handle = $handles[$service->getPHID()];
+      $rows[] = array(
+        ($service->getIsLocked()
+          ? $icon_lock
+          : null),
+        $handle->renderLink(),
+      );
+    }
+
+    $table = id(new AphrontTableView($rows))
+      ->setNoDataString(pht('No services are bound to this device.'))
+      ->setHeaders(
+        array(
+          null,
+          pht('Service'),
+        ))
+      ->setColumnClasses(
+        array(
+          null,
+          'wide pri',
+        ));
+
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Bound Services'))
+      ->appendChild($table);
+  }
+
 
 }

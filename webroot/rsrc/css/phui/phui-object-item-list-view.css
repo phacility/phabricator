@@ -316,7 +316,7 @@ ul.phui-object-item-icons {
 .phui-object-item-icon {
   vertical-align: middle;
   font-size: 12px;
-  color: {$greytext};
+  color: {$lightgreytext};
   text-align: right;
   white-space: nowrap;
   overflow: hidden;

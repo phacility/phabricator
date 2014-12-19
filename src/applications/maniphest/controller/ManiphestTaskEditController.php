@@ -39,6 +39,7 @@ final class ManiphestTaskEditController extends ManiphestController {
           ))
         ->withIDs(array($this->id))
         ->needSubscriberPHIDs(true)
+        ->needProjectPHIDs(true)
         ->executeOne();
       if (!$task) {
         return new Aphront404Response();
@@ -233,7 +234,7 @@ final class ManiphestTaskEditController extends ManiphestController {
 
         if ($can_edit_projects) {
           $projects = $request->getArr('projects');
-          $changes[ManiphestTransaction::TYPE_PROJECTS] =
+          $changes[PhabricatorTransactions::TYPE_EDGE] =
             $projects;
           $column_phid = $request->getStr('columnPHID');
           // allow for putting a task in a project column at creation -only-
@@ -275,12 +276,10 @@ final class ManiphestTaskEditController extends ManiphestController {
           if ($type == ManiphestTransaction::TYPE_PROJECT_COLUMN) {
             $transaction->setNewValue($value['new']);
             $transaction->setOldValue($value['old']);
-          } else if ($type == ManiphestTransaction::TYPE_PROJECTS) {
-            // TODO: Gross.
+          } else if ($type == PhabricatorTransactions::TYPE_EDGE) {
             $project_type =
               PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
             $transaction
-              ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
               ->setMetadataValue('edge:type', $project_type)
               ->setNewValue(
                 array(
@@ -446,6 +445,7 @@ final class ManiphestTaskEditController extends ManiphestController {
             ->setViewer($user)
             ->withIDs(array($template_id))
             ->needSubscriberPHIDs(true)
+            ->needProjectPHIDs(true)
             ->executeOne();
           if ($template_task) {
             $cc_phids = array_unique(array_merge(

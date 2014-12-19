@@ -98,7 +98,8 @@ final class PhabricatorApplicationLaunchView extends AphrontTagView {
             'sigil' => 'has-tooltip',
             'meta' => array(
               'tip' => implode("\n", $text),
-              'size' => 240,
+              'size' => 300,
+              'align' => 'E',
             ),
             'class' => 'phabricator-application-launch-attention',
           ),
