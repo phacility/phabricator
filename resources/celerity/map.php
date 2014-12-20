@@ -319,7 +319,6 @@ return array(
     'rsrc/image/sprite-apps-X4.png' => '936fc9af',
     'rsrc/image/sprite-apps-large-X2.png' => '79e15268',
     'rsrc/image/sprite-apps-large.png' => '4d41b94a',
-    'rsrc/image/sprite-apps-xlarge.png' => 'a751a580',
     'rsrc/image/sprite-apps.png' => '5570df20',
     'rsrc/image/sprite-docs-X2.png' => '6dc1adad',
     'rsrc/image/sprite-docs.png' => '4636297f',
