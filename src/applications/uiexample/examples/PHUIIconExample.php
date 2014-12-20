@@ -81,30 +81,6 @@ final class PHUIIconExample extends PhabricatorUIExample {
     $person6->setImage(
       celerity_get_resource_uri('/rsrc/image/people/taft.png'));
 
-    $card1 = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_PAYMENTS)
-      ->setSpriteIcon('visa')
-      ->addClass(PHUI::MARGIN_SMALL_RIGHT);
-
-    $card2 = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_PAYMENTS)
-      ->setSpriteIcon('mastercard')
-      ->addClass(PHUI::MARGIN_SMALL_RIGHT);
-
-    $card3 = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_PAYMENTS)
-      ->setSpriteIcon('paypal')
-      ->addClass(PHUI::MARGIN_SMALL_RIGHT);
-
-    $card4 = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_PAYMENTS)
-      ->setSpriteIcon('americanexpress')
-      ->addClass(PHUI::MARGIN_SMALL_RIGHT);
-
-    $card5 = id(new PHUIIconView())
-      ->setSpriteSheet(PHUIIconView::SPRITE_PAYMENTS)
-      ->setSpriteIcon('googlecheckout');
-
     $tokens = array(
       'like-1',
       'like-2',
@@ -154,10 +130,6 @@ final class PHUIIconExample extends PhabricatorUIExample {
       ->appendChild($tokenview)
       ->addMargin(PHUI::MARGIN_MEDIUM);
 
-    $layout4 = id(new PHUIBoxView())
-      ->appendChild(array($card1, $card2, $card3, $card4, $card5))
-      ->addMargin(PHUI::MARGIN_MEDIUM);
-
     $layout5 = id(new PHUIBoxView())
       ->appendChild($loginview)
       ->addMargin(PHUI::MARGIN_MEDIUM);
@@ -186,10 +158,6 @@ final class PHUIIconExample extends PhabricatorUIExample {
       ->setHeaderText(pht('Tokens'))
       ->appendChild($layout3);
 
-    $wrap4 = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Payments'))
-      ->appendChild($layout4);
-
     $wrap5 = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Authentication'))
       ->appendChild($layout5);
@@ -204,7 +172,6 @@ final class PHUIIconExample extends PhabricatorUIExample {
           $transforms,
           $wrap2,
           $wrap3,
-          $wrap4,
           $wrap5,
         ));
   }

@@ -30,7 +30,6 @@ $sheets = array(
   'menu' => $generator->buildMenuSheet(),
   'apps' => $generator->buildAppsSheet(),
   'apps-large' => $generator->buildAppsLargeSheet(),
-  'payments' => $generator->buildPaymentsSheet(),
   'tokens' => $generator->buildTokenSheet(),
   'docs' => $generator->buildDocsSheet(),
   'gradient' => $generator->buildGradientSheet(),
