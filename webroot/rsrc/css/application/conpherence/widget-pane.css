@@ -100,22 +100,24 @@
   width: 32px;
   height: 32px;
   float: left;
+  font-size: 30px;
 }
 .conpherence-widget-pane #widgets-files .file-title {
   display: block;
   position: relative;
   top: -4px;
-  left: 10px;
+  left: 2px;
   overflow-x: hidden;
-  width: 165px;
+  width: 180px;
   font-weight: bold;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .conpherence-widget-pane #widgets-files .file-uploaded-by {
   color: #a1a5a9;
   position: relative;
   top: 0px;
-  left: 10px;
+  left: 2px;
   width: 170px;
   font-size: 11px;
 }

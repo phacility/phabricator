@@ -31,7 +31,6 @@ $sheets = array(
   'apps' => $generator->buildAppsSheet(),
   'apps-large' => $generator->buildAppsLargeSheet(),
   'tokens' => $generator->buildTokenSheet(),
-  'docs' => $generator->buildDocsSheet(),
   'gradient' => $generator->buildGradientSheet(),
   'main-header' => $generator->buildMainHeaderSheet(),
   'login' => $generator->buildLoginSheet(),
