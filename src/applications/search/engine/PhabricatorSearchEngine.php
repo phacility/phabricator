@@ -36,4 +36,26 @@ abstract class PhabricatorSearchEngine {
    */
   abstract public function executeSearch(PhabricatorSavedQuery $query);
 
+  /**
+   * Does the search index exist?
+   *
+   * @return bool
+   */
+  abstract public function indexExists();
+
+  /**
+   * Is the index in a usable state?
+   *
+   * @return bool
+   */
+  public function indexIsSane() {
+    return $this->indexExists();
+  }
+
+  /**
+   * Do any sort of setup for the search index
+   *
+   * @return void
+   */
+  public function initIndex() {}
 }
