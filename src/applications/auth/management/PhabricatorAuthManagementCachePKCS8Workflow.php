@@ -66,7 +66,7 @@ final class PhabricatorAuthManagementCachePKCS8Workflow
     $warning = pht(
       'Adding a PKCS8 keyfile to the cache can be very dangerous. If the '.
       'PKCS8 file really encodes a different public key than the one '.
-      'specified, an attacker could use it to gain unautorized access.'.
+      'specified, an attacker could use it to gain unauthorized access.'.
       "\n\n".
       'Generally, you should use this option only in a development '.
       'environment where ssh-keygen is broken and it is inconvenient to '.
