@@ -8,7 +8,8 @@ final class AlmanacDevice
     PhabricatorApplicationTransactionInterface,
     PhabricatorProjectInterface,
     PhabricatorSSHPublicKeyInterface,
-    AlmanacPropertyInterface {
+    AlmanacPropertyInterface,
+    PhabricatorDestructibleInterface {
 
   protected $name;
   protected $nameIndex;
@@ -231,5 +232,22 @@ final class AlmanacDevice
     return $this->getName();
   }
 
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $interfaces = id(new AlmanacInterfaceQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withDevicePHIDs(array($this->getPHID()))
+      ->execute();
+    foreach ($interfaces as $interface) {
+      $engine->destroyObject($interface);
+    }
+
+    $this->delete();
+  }
 
 }

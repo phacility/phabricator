@@ -7,7 +7,8 @@ final class AlmanacService
     PhabricatorCustomFieldInterface,
     PhabricatorApplicationTransactionInterface,
     PhabricatorProjectInterface,
-    AlmanacPropertyInterface {
+    AlmanacPropertyInterface,
+    PhabricatorDestructibleInterface {
 
   protected $name;
   protected $nameIndex;
@@ -210,6 +211,24 @@ final class AlmanacService
     AphrontRequest $request) {
 
     return $timeline;
+  }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $bindings = id(new AlmanacBindingQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withServicePHIDs(array($this->getPHID()))
+      ->execute();
+    foreach ($bindings as $binding) {
+      $engine->destroyObject($binding);
+    }
+
+    $this->delete();
   }
 
 }

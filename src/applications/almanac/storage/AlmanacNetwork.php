@@ -4,7 +4,8 @@ final class AlmanacNetwork
   extends AlmanacDAO
   implements
     PhabricatorApplicationTransactionInterface,
-    PhabricatorPolicyInterface {
+    PhabricatorPolicyInterface,
+    PhabricatorDestructibleInterface {
 
   protected $name;
   protected $mailKey;
@@ -92,6 +93,25 @@ final class AlmanacNetwork
 
   public function describeAutomaticCapability($capability) {
     return null;
+  }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $interfaces = id(new AlmanacInterfaceQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withNetworkPHIDs(array($this->getPHID()))
+      ->execute();
+
+    foreach ($interfaces as $interface) {
+      $engine->destroyObject($interface);
+    }
+
+    $this->delete();
   }
 
 }
