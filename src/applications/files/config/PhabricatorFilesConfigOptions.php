@@ -50,31 +50,36 @@ final class PhabricatorFilesConfigOptions
     // largely lifted from http://en.wikipedia.org/wiki/Internet_media_type
     $icon_default = array(
       // audio file icon
-      'audio/basic' => 'docs_audio',
-      'audio/L24' => 'docs_audio',
-      'audio/mp4' => 'docs_audio',
-      'audio/mpeg' => 'docs_audio',
-      'audio/ogg' => 'docs_audio',
-      'audio/vorbis' => 'docs_audio',
-      'audio/vnd.rn-realaudio' => 'docs_audio',
-      'audio/vnd.wave' => 'docs_audio',
-      'audio/webm' => 'docs_audio',
+      'audio/basic' => 'fa-file-audio-o',
+      'audio/L24' => 'fa-file-audio-o',
+      'audio/mp4' => 'fa-file-audio-o',
+      'audio/mpeg' => 'fa-file-audio-o',
+      'audio/ogg' => 'fa-file-audio-o',
+      'audio/vorbis' => 'fa-file-audio-o',
+      'audio/vnd.rn-realaudio' => 'fa-file-audio-o',
+      'audio/vnd.wave' => 'fa-file-audio-o',
+      'audio/webm' => 'fa-file-audio-o',
       // movie file icon
-      'video/mpeg' => 'docs_movie',
-      'video/mp4' => 'docs_movie',
-      'video/ogg' => 'docs_movie',
-      'video/quicktime' => 'docs_movie',
-      'video/webm' => 'docs_movie',
-      'video/x-matroska' => 'docs_movie',
-      'video/x-ms-wmv' => 'docs_movie',
-      'video/x-flv' => 'docs_movie',
+      'video/mpeg' => 'fa-file-movie-o',
+      'video/mp4' => 'fa-file-movie-o',
+      'video/ogg' => 'fa-file-movie-o',
+      'video/quicktime' => 'fa-file-movie-o',
+      'video/webm' => 'fa-file-movie-o',
+      'video/x-matroska' => 'fa-file-movie-o',
+      'video/x-ms-wmv' => 'fa-file-movie-o',
+      'video/x-flv' => 'fa-file-movie-o',
       // pdf file icon
-      'application/pdf' => 'docs_pdf',
+      'application/pdf' => 'fa-file-pdf-o',
       // zip file icon
-      'application/zip' => 'docs_zip',
+      'application/zip' => 'fa-file-zip-o',
       // msword icon
-      'application/msword' => 'docs_doc',
-    ) + array_fill_keys(array_keys($image_default), 'docs_image');
+      'application/msword' => 'fa-file-word-o',
+      // msexcel
+      'application/vnd.ms-excel' => 'fa-file-excel-o',
+      // mspowerpoint
+      'application/vnd.ms-powerpoint' => 'fa-file-powerpoint-o',
+
+    ) + array_fill_keys(array_keys($image_default), 'fa-file-image-o');
 
     return array(
       $this->newOption('files.viewable-mime-types', 'wild', $viewable_default)

@@ -152,7 +152,7 @@
 
 .phabricator-remarkup blockquote {
   border-left: 3px solid {$lightbluetext};
-  color: {$bluetext};
+  color: {$darkbluetext};
   font-style:  italic;
   margin: 4px 0 12px 0;
   padding: 8px 12px;

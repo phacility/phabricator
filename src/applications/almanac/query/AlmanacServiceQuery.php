@@ -9,6 +9,8 @@ final class AlmanacServiceQuery
   private $serviceClasses;
   private $devicePHIDs;
   private $locked;
+  private $namePrefix;
+  private $nameSuffix;
 
   private $needBindings;
 
@@ -39,6 +41,16 @@ final class AlmanacServiceQuery
 
   public function withLocked($locked) {
     $this->locked = $locked;
+    return $this;
+  }
+
+  public function withNamePrefix($prefix) {
+    $this->namePrefix = $prefix;
+    return $this;
+  }
+
+  public function withNameSuffix($suffix) {
+    $this->nameSuffix = $suffix;
     return $this;
   }
 
@@ -124,6 +136,20 @@ final class AlmanacServiceQuery
         $conn_r,
         'service.isLocked = %d',
         (int)$this->locked);
+    }
+
+    if ($this->namePrefix !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'service.name LIKE %>',
+        $this->namePrefix);
+    }
+
+    if ($this->nameSuffix !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'service.name LIKE %<',
+        $this->nameSuffix);
     }
 
     $where[] = $this->buildPagingClause($conn_r);
