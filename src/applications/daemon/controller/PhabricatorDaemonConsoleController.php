@@ -14,9 +14,9 @@ final class PhabricatorDaemonConsoleController
     // but we'd rather show that utilization is too high than too low.
     $lease_overhead = 0.250;
 
-    $completed = id(new PhabricatorWorkerArchiveTask())->loadAllWhere(
-      'dateModified > %d',
-      $window_start);
+    $completed = id(new PhabricatorWorkerArchiveTaskQuery())
+      ->withDateModifiedSince($window_start)
+      ->execute();
 
     $failed = id(new PhabricatorWorkerActiveTask())->loadAllWhere(
       'failureTime > %d',

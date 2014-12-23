@@ -194,9 +194,8 @@ abstract class PhabricatorWorker {
       }
     }
 
-    $tasks = id(new PhabricatorWorkerArchiveTask())->loadAllWhere(
-      'id IN (%Ld)',
-      $task_ids);
+    $tasks = id(new PhabricatorWorkerArchiveTaskQuery())
+      ->withIDs($task_ids);
 
     foreach ($tasks as $task) {
       if ($task->getResult() != PhabricatorWorkerArchiveTask::RESULT_SUCCESS) {

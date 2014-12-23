@@ -15,7 +15,10 @@ final class PhabricatorWorkerTaskDetailController
 
     $task = id(new PhabricatorWorkerActiveTask())->load($this->id);
     if (!$task) {
-      $task = id(new PhabricatorWorkerArchiveTask())->load($this->id);
+      $tasks = id(new PhabricatorWorkerArchiveTaskQuery())
+        ->withIDs(array($this->id))
+        ->execute();
+      $task = reset($tasks);
     }
 
     if (!$task) {
