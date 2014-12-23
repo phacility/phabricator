@@ -3,6 +3,8 @@
 abstract class PhabricatorDaemonManagementWorkflow
   extends PhabricatorManagementWorkflow {
 
+  private $runDaemonsAsUser = null;
+
   protected final function loadAvailableDaemonClasses() {
     $loader = new PhutilSymbolLoader();
     return $loader
@@ -103,9 +105,36 @@ abstract class PhabricatorDaemonManagementWorkflow
     return head($match);
   }
 
-  protected final function launchDaemon($class, array $argv, $debug) {
+  protected final function launchDaemon(
+    $class,
+    array $argv,
+    $debug,
+    $run_as_current_user = false) {
+
     $daemon = $this->findDaemonClass($class);
     $console = PhutilConsole::getConsole();
+
+    if (!$run_as_current_user) {
+      // Check if the script is started as the correct user
+      $phd_user = PhabricatorEnv::getEnvConfig('phd.user');
+      $current_user = posix_getpwuid(posix_geteuid());
+      $current_user = $current_user['name'];
+      if ($phd_user && $phd_user != $current_user) {
+        if ($debug) {
+          throw new PhutilArgumentUsageException(pht(
+            'You are trying to run a daemon as a nonstandard user, '.
+            'and `phd` was not able to `sudo` to the correct user. '."\n".
+            'Phabricator is configured to run daemons as "%s", '.
+            'but the current user is "%s". '."\n".
+            'Use `sudo` to run as a different user, pass `--as-current-user` '.
+            'to ignore this warning, or edit `phd.user` '.
+            'to change the configuration.', $phd_user, $current_user));
+        } else {
+          $this->runDaemonsAsUser = $phd_user;
+          $console->writeOut(pht('Starting daemons as %s', $phd_user)."\n");
+        }
+      }
+    }
 
     if ($debug) {
       if ($argv) {
@@ -187,11 +216,39 @@ abstract class PhabricatorDaemonManagementWorkflow
 
       phutil_passthru('(cd %s && exec %C)', $daemon_script_dir, $command);
     } else {
-      $future = new ExecFuture('exec %C', $command);
-      // Play games to keep 'ps' looking reasonable.
-      $future->setCWD($daemon_script_dir);
-      $future->resolvex();
+      try {
+        $this->executeDaemonLaunchCommand(
+          $command,
+          $daemon_script_dir,
+          $this->runDaemonsAsUser);
+      } catch (CommandException $e) {
+        // Retry without sudo
+        $console->writeOut(pht(
+          "sudo command failed. Starting daemon as current user\n"));
+        $this->executeDaemonLaunchCommand(
+          $command,
+          $daemon_script_dir);
+      }
     }
+  }
+
+  private function executeDaemonLaunchCommand(
+    $command,
+    $daemon_script_dir,
+    $run_as_user = null) {
+
+    if ($run_as_user) {
+      // If anything else besides sudo should be
+      // supported then insert it here (runuser, su, ...)
+      $command = csprintf(
+        'sudo -En -u %s -- %C',
+        $run_as_user,
+        $command);
+    }
+    $future = new ExecFuture('exec %C', $command);
+    // Play games to keep 'ps' looking reasonable.
+    $future->setCWD($daemon_script_dir);
+    $future->resolvex();
   }
 
   public static function ignoreSignal($signo) {
