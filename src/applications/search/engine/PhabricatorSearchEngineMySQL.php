@@ -331,4 +331,7 @@ final class PhabricatorSearchEngineMySQL extends PhabricatorSearchEngine {
     return $sql;
   }
 
+  public function indexExists() {
+    return true;
+  }
 }

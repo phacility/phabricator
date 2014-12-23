@@ -43,12 +43,47 @@ final class PhabricatorSetupCheckDaemons extends PhabricatorSetupCheck {
         ->addCommand('phabricator/ $ ./bin/phd start');
     }
 
+    $phd_user = PhabricatorEnv::getEnvConfig('phd.user');
     $environment_hash = PhabricatorEnv::calculateEnvironmentHash();
     $all_daemons = id(new PhabricatorDaemonLogQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withStatus(PhabricatorDaemonLogQuery::STATUS_ALIVE)
       ->execute();
     foreach ($all_daemons as $daemon) {
+
+      if ($phd_user) {
+        if ($daemon->getRunningAsUser() != $phd_user) {
+          $doc_href = PhabricatorEnv::getDocLink(
+            'Managing Daemons with phd');
+
+          $summary = pht(
+            'At least one daemon is currently running as a different '.
+            'user than configured in the Phabricator phd.user setting');
+
+          $message = pht(
+            'A daemon is running as user %s while the Phabricator config '.
+            'specifies phd.user to be %s.'.
+            "\n\n".
+            'Either adjust phd.user to match %s or start '.
+            'the daemons as the correct user. '.
+            "\n\n".
+            'phd Daemons will try to '.
+            'use sudo to start as the configured user. '.
+            'Make sure that the user who starts phd has the correct '.
+            'sudo permissions to start phd daemons as %s',
+            phutil_tag('tt', array(), $daemon->getRunningAsUser()),
+            phutil_tag('tt', array(), $phd_user),
+            phutil_tag('tt', array(), $daemon->getRunningAsUser()),
+            phutil_tag('tt', array(), $phd_user));
+
+          $this->newIssue('daemons.run-as-different-user')
+            ->setName(pht('Daemons are running as the wrong user'))
+            ->setSummary($summary)
+            ->setMessage($message)
+            ->addCommand('phabricator/ $ ./bin/phd restart');
+        }
+      }
+
       if ($daemon->getEnvHash() != $environment_hash) {
         $doc_href = PhabricatorEnv::getDocLink(
           'Managing Daemons with phd');

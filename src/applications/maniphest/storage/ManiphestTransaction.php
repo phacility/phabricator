@@ -18,12 +18,6 @@ final class ManiphestTransaction
   // NOTE: this type is deprecated. Keep it around for legacy installs
   // so any transactions render correctly.
   const TYPE_ATTACH = 'attach';
-  /**
-   * TYPE_PROJECTS is legacy and depracted in favor of
-   * PhabricatorTransactions::TYPE_EDGE; keep it around for legacy
-   * transaction-rendering.
-   */
-  const TYPE_PROJECTS = 'projects';
 
   const MAILTAG_STATUS = 'maniphest-status';
   const MAILTAG_OWNER = 'maniphest-owner';
@@ -86,14 +80,6 @@ final class ManiphestTransaction
         if ($old) {
           $phids[] = $old;
         }
-        break;
-      case self::TYPE_PROJECTS:
-        $phids = array_mergev(
-          array(
-            $phids,
-            nonempty($old, array()),
-            nonempty($new, array()),
-          ));
         break;
       case self::TYPE_PROJECT_COLUMN:
         $phids[] = $new['projectPHID'];
@@ -267,9 +253,6 @@ final class ManiphestTransaction
           return pht('Reassigned');
         }
 
-      case self::TYPE_PROJECTS:
-        return pht('Changed Projects');
-
       case self::TYPE_PROJECT_COLUMN:
         return pht('Changed Project Column');
 
@@ -339,9 +322,6 @@ final class ManiphestTransaction
 
       case self::TYPE_DESCRIPTION:
         return 'fa-pencil';
-
-      case self::TYPE_PROJECTS:
-        return 'fa-briefcase';
 
       case self::TYPE_PROJECT_COLUMN:
         return 'fa-columns';
@@ -481,36 +461,6 @@ final class ManiphestTransaction
             $this->renderHandleLink($author_phid),
             $this->renderHandleLink($old),
             $this->renderHandleLink($new));
-        }
-
-      case self::TYPE_PROJECTS:
-        $added = array_diff($new, $old);
-        $removed = array_diff($old, $new);
-        if ($added && !$removed) {
-          return pht(
-            '%s added %d project(s): %s',
-            $this->renderHandleLink($author_phid),
-            count($added),
-            $this->renderHandleList($added));
-        } else if ($removed && !$added) {
-          return pht(
-            '%s removed %d project(s): %s',
-            $this->renderHandleLink($author_phid),
-            count($removed),
-            $this->renderHandleList($removed));
-        } else if ($removed && $added) {
-          return pht(
-            '%s changed project(s), added %d: %s; removed %d: %s',
-            $this->renderHandleLink($author_phid),
-            count($added),
-            $this->renderHandleList($added),
-            count($removed),
-            $this->renderHandleList($removed));
-        } else {
-          // This is hit when rendering previews.
-          return pht(
-            '%s changed projects...',
-            $this->renderHandleLink($author_phid));
         }
 
       case self::TYPE_PRIORITY:
@@ -730,34 +680,6 @@ final class ManiphestTransaction
             $this->renderHandleLink($new));
         }
 
-      case self::TYPE_PROJECTS:
-        $added = array_diff($new, $old);
-        $removed = array_diff($old, $new);
-        if ($added && !$removed) {
-          return pht(
-            '%s added %d project(s) to %s: %s',
-            $this->renderHandleLink($author_phid),
-            count($added),
-            $this->renderHandleLink($object_phid),
-            $this->renderHandleList($added));
-        } else if ($removed && !$added) {
-          return pht(
-            '%s removed %d project(s) from %s: %s',
-            $this->renderHandleLink($author_phid),
-            count($removed),
-            $this->renderHandleLink($object_phid),
-            $this->renderHandleList($removed));
-        } else if ($removed && $added) {
-          return pht(
-            '%s changed project(s) of %s, added %d: %s; removed %d: %s',
-            $this->renderHandleLink($author_phid),
-            $this->renderHandleLink($object_phid),
-            count($added),
-            $this->renderHandleList($added),
-            count($removed),
-            $this->renderHandleList($removed));
-        }
-
       case self::TYPE_PRIORITY:
         $old_name = ManiphestTaskPriority::getTaskPriorityName($old);
         $new_name = ManiphestTaskPriority::getTaskPriorityName($new);
@@ -917,8 +839,6 @@ final class ManiphestTransaction
         return pht('The task already has the selected status.');
       case self::TYPE_OWNER:
         return pht('The task already has the selected owner.');
-      case self::TYPE_PROJECTS:
-        return pht('The task is already associated with those projects.');
       case self::TYPE_PRIORITY:
         return pht('The task already has the selected priority.');
     }

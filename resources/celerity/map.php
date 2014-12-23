@@ -8,7 +8,7 @@
 return array(
   'names' => array(
     'core.pkg.css' => '679c69f6',
-    'core.pkg.js' => 'bc72b978',
+    'core.pkg.js' => '2d1f7db1',
     'darkconsole.pkg.js' => 'df001cab',
     'differential.pkg.css' => '8af45893',
     'differential.pkg.js' => '42c10e78',
@@ -462,7 +462,7 @@ return array(
     'rsrc/js/core/behavior-keyboard-pager.js' => 'a8da01f0',
     'rsrc/js/core/behavior-keyboard-shortcuts.js' => 'd75709e6',
     'rsrc/js/core/behavior-konami.js' => '5bc2cb21',
-    'rsrc/js/core/behavior-lightbox-attachments.js' => '0720f2cf',
+    'rsrc/js/core/behavior-lightbox-attachments.js' => 'f8ba29d7',
     'rsrc/js/core/behavior-line-linker.js' => 'f726d506',
     'rsrc/js/core/behavior-more.js' => 'a80d0378',
     'rsrc/js/core/behavior-object-selector.js' => '49b73b36',
@@ -586,7 +586,7 @@ return array(
     'javelin-behavior-icon-composer' => '8ef9ab58',
     'javelin-behavior-konami' => '5bc2cb21',
     'javelin-behavior-launch-icon-composer' => '48086888',
-    'javelin-behavior-lightbox-attachments' => '0720f2cf',
+    'javelin-behavior-lightbox-attachments' => 'f8ba29d7',
     'javelin-behavior-line-chart' => '22e16ae7',
     'javelin-behavior-load-blame' => '42126667',
     'javelin-behavior-maniphest-batch-editor' => 'f588412e',
@@ -862,14 +862,6 @@ return array(
       'javelin-stratcom',
       'javelin-dom',
       'javelin-vector',
-    ),
-    '0720f2cf' => array(
-      'javelin-behavior',
-      'javelin-stratcom',
-      'javelin-dom',
-      'javelin-mask',
-      'javelin-util',
-      'phabricator-busy',
     ),
     '07f199d8' => array(
       'javelin-behavior',
@@ -1910,6 +1902,14 @@ return array(
       'javelin-json',
       'javelin-stratcom',
       'phabricator-shaped-request',
+    ),
+    'f8ba29d7' => array(
+      'javelin-behavior',
+      'javelin-stratcom',
+      'javelin-dom',
+      'javelin-mask',
+      'javelin-util',
+      'phabricator-busy',
     ),
     'f9539603' => array(
       'javelin-behavior',

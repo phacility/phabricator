@@ -5,8 +5,9 @@ final class PhabricatorFileUploadException extends Exception {
   public function __construct($code) {
     $map = array(
       UPLOAD_ERR_INI_SIZE =>
-        "Uploaded file is too large: file is larger than the ".
-        "'upload_max_filesize' setting in php.ini.",
+        pht("Uploaded file is too large: current limit is %s. To adjust ".
+          "this limit change 'upload_max_filesize' in php.ini.",
+          ini_get('upload_max_filesize')),
       UPLOAD_ERR_FORM_SIZE =>
         'File is too large.',
       UPLOAD_ERR_PARTIAL =>
@@ -21,8 +22,9 @@ final class PhabricatorFileUploadException extends Exception {
         'Unable to upload: a PHP extension stopped the upload.',
 
       -1000 =>
-        "Uploaded file exceeds limit in Phabricator ".
-        "'storage.upload-size-limit' configuration.",
+        pht("Uploaded file is too large: current limit is %s. To adjust this ".
+          "limit change 'storage.upload-size-limit' in the Phabricator config.",
+          PhabricatorEnv::getEnvConfig('storage.upload-size-limit')),
     );
 
     $message = idx($map, $code, 'Upload failed: unknown error.');

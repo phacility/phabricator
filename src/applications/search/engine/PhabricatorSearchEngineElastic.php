@@ -52,10 +52,7 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
       );
     }
 
-    $this->executeRequest(
-      "/{$type}/{$phid}/",
-      $spec,
-      $is_write = true);
+    $this->executeRequest("/{$type}/{$phid}/", $spec, 'PUT');
   }
 
   public function reconstructDocument($phid) {
@@ -99,11 +96,9 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
 
     if (strlen($query->getParameter('query'))) {
       $spec[] = array(
-        'match' => array(
-          'field.corpus' => array(
-            'operator' => 'and',
-            'query' => $query->getParameter('query'),
-          ),
+        'simple_query_string' => array(
+          'query'  => $query->getParameter('query'),
+          'fields' => array( 'field.corpus' ),
         ),
       );
     }
@@ -238,22 +233,146 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
     return $phids;
   }
 
-  private function executeRequest($path, array $data, $is_write = false) {
+  public function indexExists() {
+    try {
+      return (bool)$this->executeRequest('/_status/', array());
+    } catch (HTTPFutureHTTPResponseStatus $e) {
+      if ($e->getStatusCode() == 404) {
+        return false;
+      }
+      throw $e;
+    }
+  }
+
+  private function getIndexConfiguration() {
+    $data = array();
+    $data['settings'] = array(
+      'index' => array(
+        'auto_expand_replicas' => '0-2',
+        'analysis' => array(
+          'filter' => array(
+            'trigrams_filter' => array(
+              'min_gram' => 3,
+              'type' => 'ngram',
+              'max_gram' => 3,
+            ),
+          ),
+          'analyzer' => array(
+            'custom_trigrams' => array(
+              'type' => 'custom',
+              'filter' => array(
+                'lowercase',
+                'kstem',
+                'trigrams_filter',
+              ),
+              'tokenizer' => 'standard',
+            ),
+          ),
+        ),
+      ),
+    );
+
+    $types = array_keys(
+      PhabricatorSearchApplicationSearchEngine::getIndexableDocumentTypes());
+    foreach ($types as $type) {
+      $data['mappings'][$type]['properties']['field']['properties']['corpus'] =
+        array( 'type' => 'string', 'analyzer' => 'custom_trigrams' );
+    }
+
+    return $data;
+  }
+
+  public function indexIsSane() {
+    if (!$this->indexExists()) {
+      return false;
+    }
+
+    $cur_mapping = $this->executeRequest('/_mapping/', array());
+    $cur_settings = $this->executeRequest('/_settings/', array());
+    $actual = array_merge($cur_settings[$this->index],
+      $cur_mapping[$this->index]);
+
+    return $this->check($actual, $this->getIndexConfiguration());
+  }
+
+  /**
+   * Recursively check if two Elasticsearch configuration arrays are equal
+   *
+   * @param $actual
+   * @param $required array
+   * @return bool
+   */
+  private function check($actual, $required) {
+    foreach ($required as $key => $value) {
+      if (!array_key_exists($key, $actual)) {
+        if ($key === '_all') {
+          // The _all field never comes back so we just have to assume it
+          // is set correctly.
+          continue;
+        }
+        return false;
+      }
+      if (is_array($value)) {
+        if (!is_array($actual[$key])) {
+          return false;
+        }
+        if (!$this->check($actual[$key], $value)) {
+          return false;
+        }
+        continue;
+      }
+
+      $actual[$key] = self::normalizeConfigValue($actual[$key]);
+      $value = self::normalizeConfigValue($value);
+      if ($actual[$key] != $value) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Normalize a config value for comparison. Elasticsearch accepts all kinds
+   * of config values but it tends to throw back 'true' for true and 'false' for
+   * false so we normalize everything. Sometimes, oddly, it'll throw back false
+   * for false....
+   *
+   * @param mixed $value config value
+   * @return mixed value normalized
+   */
+  private static function normalizeConfigValue($value) {
+    if ($value === true) {
+      return 'true';
+    } else if ($value === false) {
+      return 'false';
+    }
+    return $value;
+  }
+
+  public function initIndex() {
+    if ($this->indexExists()) {
+      $this->executeRequest('/', array(), 'DELETE');
+    }
+    $data = $this->getIndexConfiguration();
+    $this->executeRequest('/', $data, 'PUT');
+  }
+
+  private function executeRequest($path, array $data, $method = 'GET') {
     $uri = new PhutilURI($this->uri);
     $uri->setPath($this->index);
     $uri->appendPath($path);
     $data = json_encode($data);
 
     $future = new HTTPSFuture($uri, $data);
-    if ($is_write) {
-      $future->setMethod('PUT');
+    if ($method != 'GET') {
+      $future->setMethod($method);
     }
     if ($this->getTimeout()) {
       $future->setTimeout($this->getTimeout());
     }
     list($body) = $future->resolvex();
 
-    if ($is_write) {
+    if ($method != 'GET') {
       return null;
     }
 

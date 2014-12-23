@@ -21,11 +21,17 @@ final class PhabricatorDaemonManagementDebugWorkflow
             'name' => 'argv',
             'wildcard' => true,
           ),
+          array(
+            'name' => 'as-current-user',
+            'help' => 'Run the daemon as the current user '.
+              'instead of the configured phd.user',
+          ),
         ));
   }
 
   public function execute(PhutilArgumentParser $args) {
     $argv = $args->getArg('argv');
+    $run_as_current_user = $args->getArg('as-current-user');
 
     if (!$argv) {
       throw new PhutilArgumentUsageException(
@@ -33,7 +39,11 @@ final class PhabricatorDaemonManagementDebugWorkflow
     }
 
     $daemon_class = array_shift($argv);
-    return $this->launchDaemon($daemon_class, $argv, $is_debug = true);
+    return $this->launchDaemon(
+      $daemon_class,
+      $argv,
+      $is_debug = true,
+      $run_as_current_user);
   }
 
 }
