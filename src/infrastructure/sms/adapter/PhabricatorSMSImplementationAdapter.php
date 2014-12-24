@@ -81,6 +81,8 @@ abstract class PhabricatorSMSImplementationAdapter {
         'toNumbers'  => $to_numbers,
         'body'       => $body,
       ),
-      PhabricatorWorker::PRIORITY_ALERTS);
+      array(
+        'priority' => PhabricatorWorker::PRIORITY_ALERTS,
+      ));
   }
 }

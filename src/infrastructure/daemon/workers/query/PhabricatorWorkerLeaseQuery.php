@@ -9,6 +9,7 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
   const PHASE_EXPIRED  = 'expired';
 
   private $ids;
+  private $objectPHIDs;
   private $limit;
   private $skipLease;
 
@@ -36,6 +37,11 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
+    return $this;
+  }
+
+  public function withObjectPHIDs(array $phids) {
+    $this->objectPHIDs = $phids;
     return $this;
   }
 
@@ -173,6 +179,10 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
 
     if ($this->ids) {
       $where[] = qsprintf($conn_w, 'id IN (%Ld)', $this->ids);
+    }
+
+    if ($this->objectPHIDs !== null) {
+      $where[] = qsprintf($conn_w, 'objectPHID IN (%Ls)', $this->objectPHIDs);
     }
 
     return $this->formatWhereClause($where);

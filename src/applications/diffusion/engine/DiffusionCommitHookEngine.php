@@ -188,7 +188,9 @@ final class DiffusionCommitHookEngine extends Phobject {
           'emailPHIDs' => array_values($this->emailPHIDs),
           'info' => $this->loadCommitInfoForWorker($all_updates),
         ),
-        PhabricatorWorker::PRIORITY_ALERTS);
+        array(
+          'priority' => PhabricatorWorker::PRIORITY_ALERTS,
+        ));
     }
 
     return 0;
