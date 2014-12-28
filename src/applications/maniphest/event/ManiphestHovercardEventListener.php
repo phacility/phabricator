@@ -27,8 +27,8 @@ final class ManiphestHovercardEventListener extends PhabricatorEventListener {
 
     $e_project = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
     // Fun with "Unbeta Pholio", hua hua
-    $e_dep_on = PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK;
-    $e_dep_by = PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK;
+    $e_dep_on = ManiphestTaskDependsOnTaskEdgeType::EDGECONST;
+    $e_dep_by = ManiphestTaskDependedOnByTaskEdgeType::EDGECONST;
 
     $edge_query = id(new PhabricatorEdgeQuery())
       ->withSourcePHIDs(array($phid))

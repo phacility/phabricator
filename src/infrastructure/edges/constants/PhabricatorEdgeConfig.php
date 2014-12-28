@@ -5,9 +5,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TABLE_NAME_EDGE       = 'edge';
   const TABLE_NAME_EDGEDATA   = 'edgedata';
 
-  const TYPE_TASK_DEPENDS_ON_TASK       = 3;
-  const TYPE_TASK_DEPENDED_ON_BY_TASK   = 4;
-
   const TYPE_DREV_DEPENDS_ON_DREV       = 5;
   const TYPE_DREV_DEPENDED_ON_BY_DREV   = 6;
 
@@ -131,9 +128,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
   private static function getInverse($edge_type) {
     static $map = array(
-      self::TYPE_TASK_DEPENDS_ON_TASK => self::TYPE_TASK_DEPENDED_ON_BY_TASK,
-      self::TYPE_TASK_DEPENDED_ON_BY_TASK => self::TYPE_TASK_DEPENDS_ON_TASK,
-
       self::TYPE_DREV_DEPENDS_ON_DREV => self::TYPE_DREV_DEPENDED_ON_BY_DREV,
       self::TYPE_DREV_DEPENDED_ON_BY_DREV => self::TYPE_DREV_DEPENDS_ON_DREV,
 
@@ -203,7 +197,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   private static function shouldPreventCycles($edge_type) {
     static $map = array(
       self::TYPE_TEST_NO_CYCLE          => true,
-      self::TYPE_TASK_DEPENDS_ON_TASK   => true,
       self::TYPE_DREV_DEPENDS_ON_DREV   => true,
     );
     return isset($map[$edge_type]);
@@ -238,8 +231,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
     switch ($type) {
       case self::TYPE_DREV_HAS_COMMIT:
         return '%s edited commit(s), added %d: %s; removed %d: %s.';
-      case self::TYPE_TASK_DEPENDS_ON_TASK:
-      case self::TYPE_TASK_DEPENDED_ON_BY_TASK:
       case self::TYPE_MOCK_HAS_TASK:
         return '%s edited task(s), added %d: %s; removed %d: %s.';
       case self::TYPE_DREV_DEPENDS_ON_DREV:
@@ -304,12 +295,8 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
     switch ($type) {
       case self::TYPE_DREV_HAS_COMMIT:
         return '%s added %d commit(s): %s.';
-      case self::TYPE_TASK_DEPENDS_ON_TASK:
-        return '%s added %d blocking task(s): %s.';
       case self::TYPE_DREV_DEPENDS_ON_DREV:
         return '%s added %d dependencie(s): %s.';
-      case self::TYPE_TASK_DEPENDED_ON_BY_TASK:
-        return '%s added %d blocked task(s): %s.';
       case self::TYPE_MOCK_HAS_TASK:
         return '%s added %d task(s): %s.';
       case self::TYPE_DREV_DEPENDED_ON_BY_DREV:
@@ -372,10 +359,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
     switch ($type) {
       case self::TYPE_DREV_HAS_COMMIT:
         return '%s removed %d commit(s): %s.';
-      case self::TYPE_TASK_DEPENDS_ON_TASK:
-        return '%s removed %d blocking task(s): %s.';
-      case self::TYPE_TASK_DEPENDED_ON_BY_TASK:
-        return '%s removed %d blocked task(s): %s.';
       case self::TYPE_MOCK_HAS_TASK:
         return '%s removed %d task(s): %s.';
       case self::TYPE_DREV_DEPENDS_ON_DREV:
@@ -437,8 +420,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
     switch ($type) {
       case self::TYPE_DREV_HAS_COMMIT:
         return '%s updated commits of %s.';
-      case self::TYPE_TASK_DEPENDS_ON_TASK:
-      case self::TYPE_TASK_DEPENDED_ON_BY_TASK:
       case self::TYPE_MOCK_HAS_TASK:
         return '%s updated tasks of %s.';
       case self::TYPE_DREV_DEPENDS_ON_DREV:

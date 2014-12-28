@@ -362,7 +362,7 @@ final class ManiphestTransactionEditor
     if ($unblock_xaction !== null) {
       $blocked_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
         $object->getPHID(),
-        PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK);
+        ManiphestTaskDependedOnByTaskEdgeType::EDGECONST);
       if ($blocked_phids) {
         // In theory we could apply these through policies, but that seems a
         // little bit surprising. For now, use the actor's vision.

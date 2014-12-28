@@ -349,7 +349,7 @@ final class ManiphestTaskEditController extends ManiphestController {
           id(new PhabricatorEdgeEditor())
             ->addEdge(
               $parent_task->getPHID(),
-              PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK,
+              ManiphestTaskDependsOnTaskEdgeType::EDGECONST,
               $task->getPHID())
             ->save();
           $workflow = $parent_task->getID();
