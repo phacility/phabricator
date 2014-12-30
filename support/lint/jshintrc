@@ -16,6 +16,7 @@
 
   "globals": {
     "JX": false,
+    "Raphael": false,
     "__DEV__": false
   },
   "browser": true
