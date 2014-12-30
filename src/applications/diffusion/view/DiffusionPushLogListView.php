@@ -52,6 +52,15 @@ final class DiffusionPushLogListView extends AphrontView {
       $event_id = $log->getPushEvent()->getID();
 
       $callsign = $log->getRepository()->getCallsign();
+      $old_ref_link = null;
+      if ($log->getRefOld() != DiffusionCommitHookEngine::EMPTY_HASH) {
+        $old_ref_link = phutil_tag(
+          'a',
+          array(
+            'href' => '/r'.$callsign.$log->getRefOld(),
+          ),
+          $log->getRefOldShort());
+      }
       $rows[] = array(
         phutil_tag(
           'a',
@@ -70,12 +79,7 @@ final class DiffusionPushLogListView extends AphrontView {
         $log->getPushEvent()->getRemoteProtocol(),
         $log->getRefType(),
         $log->getRefName(),
-        phutil_tag(
-          'a',
-          array(
-            'href' => '/r'.$callsign.$log->getRefOld(),
-          ),
-          $log->getRefOldShort()),
+        $old_ref_link,
         phutil_tag(
           'a',
           array(
