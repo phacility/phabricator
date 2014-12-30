@@ -15,7 +15,7 @@
   "sub": true,
 
   "globals": {
-    "JX": false,
+    "JX": true,
     "__DEV__": false
   },
   "node": true
