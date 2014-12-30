@@ -1331,8 +1331,9 @@ final class DifferentialTransactionEditor
     $previous_comments = $comments_by_line_number[$comment->getChangesetID()]
                                                  [$comment->getLineNumber()];
     foreach ($previous_comments as $previous_comment) {
-      if ($previous_comment->getID() >= $comment->getID())
+      if ($previous_comment->getID() >= $comment->getID()) {
         break;
+      }
       $nested = $this->indentForMail(
         array_merge(
           $nested,

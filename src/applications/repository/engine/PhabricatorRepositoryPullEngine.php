@@ -52,6 +52,7 @@ final class PhabricatorRepositoryPullEngine
         break;
       default:
         $this->abortPull(pht('Unknown VCS "%s"!', $vcs));
+        break;
     }
 
     $callsign = $repository->getCallsign();
