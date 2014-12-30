@@ -229,7 +229,7 @@ JX.behavior('differential-dropdown-menus', function(config) {
           'More than one node with sigil "differential-diff" was found in "'+
           data.containerID+'."');
       } else if (diffs.length == 1) {
-        diff = diffs[0];
+        var diff = diffs[0];
         visible_item.setDisabled(false);
         if (JX.Stratcom.getData(diff).hidden) {
           visible_item
