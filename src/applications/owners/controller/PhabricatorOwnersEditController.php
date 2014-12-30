@@ -145,6 +145,7 @@ final class PhabricatorOwnersEditController
     }
 
     $repos = mpull($repos, 'getCallsign', 'getPHID');
+    asort($repos);
 
     $template = new AphrontTypeaheadTemplateView();
     $template = $template->render();
