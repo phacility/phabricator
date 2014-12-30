@@ -60,8 +60,8 @@ div.jx-tokenizer-container-focused.jx-typeahead-waiting {
 }
 
 div.jx-typeahead-results a.diffusion-locate-file {
- padding: 4px 8px;
- color: {$darkgreytext}
+  padding: 4px 8px;
+  color: {$darkgreytext}
 }
 
 .diffusion-locate-file strong {

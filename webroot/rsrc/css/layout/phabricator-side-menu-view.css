@@ -22,7 +22,7 @@
 }
 
 .device-desktop .phabricator-side-menu .phui-list-item-selected
- a.phui-list-item-href:hover {
+  a.phui-list-item-href:hover {
   background-color: {$hoverselectedgrey};
 }
 

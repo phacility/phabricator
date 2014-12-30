@@ -65,8 +65,8 @@
 }
 
 .device-desktop .phui-workpanel-view .phui-workpanel-footer-action:hover {
- background-color: rgba(100,100,100,.1);
- border-radius: 3px;
+  background-color: rgba(100,100,100,.1);
+  border-radius: 3px;
 }
 
 .phui-workpanel-view .phui-list-item-icon {
