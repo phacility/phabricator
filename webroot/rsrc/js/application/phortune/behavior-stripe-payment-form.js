@@ -8,8 +8,6 @@
 JX.behavior('stripe-payment-form', function(config) {
   Stripe.setPublishableKey(config.stripePublishableKey);
 
-  var ccform = new JX.PhortuneCreditCardForm(JX.$(config.formID), onsubmit);
-
   function onsubmit(card_data) {
     var errors = [];
 
@@ -54,4 +52,5 @@ JX.behavior('stripe-payment-form', function(config) {
     ccform.submitForm(errors, {stripeCardToken: token});
   }
 
+  var ccform = new JX.PhortuneCreditCardForm(JX.$(config.formID), onsubmit);
 });

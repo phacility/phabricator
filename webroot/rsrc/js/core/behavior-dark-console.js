@@ -17,8 +17,6 @@ JX.behavior('dark-console', function(config, statics) {
     config.color = root.getAttribute('data-console-color');
   }
 
-  add_request(config);
-
   // Do first-time setup.
   function setup_console() {
     statics.root = JX.$('darkconsole');
@@ -248,4 +246,5 @@ JX.behavior('dark-console', function(config, statics) {
       .register();
   }
 
+  add_request(config);
 });
