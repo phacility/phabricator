@@ -6,6 +6,7 @@ final class PhabricatorWorkerArchiveTaskQuery
   private $ids;
   private $dateModifiedSince;
   private $dateCreatedBefore;
+  private $objectPHIDs;
   private $limit;
 
   public function withIDs(array $ids) {
@@ -23,20 +24,24 @@ final class PhabricatorWorkerArchiveTaskQuery
     return $this;
   }
 
+  public function withObjectPHIDs(array $phids) {
+    $this->objectPHIDs = $phids;
+    return $this;
+  }
+
   public function setLimit($limit) {
     $this->limit = $limit;
     return $this;
   }
 
   public function execute() {
-
     $task_table = new PhabricatorWorkerArchiveTask();
 
     $conn_r = $task_table->establishConnection('r');
 
     $rows = queryfx_all(
       $conn_r,
-      'SELECT * FROM %T %Q %Q',
+      'SELECT * FROM %T %Q ORDER BY id DESC %Q',
       $task_table->getTableName(),
       $this->buildWhereClause($conn_r),
       $this->buildLimitClause($conn_r));
@@ -52,6 +57,13 @@ final class PhabricatorWorkerArchiveTaskQuery
         $conn_r,
         'ids in (%Ld)',
         $this->ids);
+    }
+
+    if ($this->objectPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'objectPHID IN (%Ls)',
+        $this->objectPHIDs);
     }
 
     if ($this->dateModifiedSince) {

@@ -5,6 +5,7 @@
  */
 final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
 
+  const PHASE_LEASED = 'leased';
   const PHASE_UNLEASED = 'unleased';
   const PHASE_EXPIRED  = 'expired';
 
@@ -12,6 +13,7 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
   private $objectPHIDs;
   private $limit;
   private $skipLease;
+  private $leased = false;
 
   public static function getDefaultWaitBeforeRetry() {
     return phutil_units('5 minutes in seconds');
@@ -45,6 +47,26 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
     return $this;
   }
 
+  /**
+   * Select only leased tasks, only unleased tasks, or both types of task.
+   *
+   * By default, queries select only unleased tasks (equivalent to passing
+   * `false` to this method). You can pass `true` to select only leased tasks,
+   * or `null` to ignore the lease status of tasks.
+   *
+   * If your result set potentially includes leased tasks, you must disable
+   * leasing using @{method:setSkipLease}. These options are intended for use
+   * when displaying task status information.
+   *
+   * @param mixed `true` to select only leased tasks, `false` to select only
+   *              unleased tasks (default), or `null` to select both.
+   * @return this
+   */
+  public function withLeasedTasks($leased) {
+    $this->leased = $leased;
+    return $this;
+  }
+
   public function setLimit($limit) {
     $this->limit = $limit;
     return $this;
@@ -52,7 +74,17 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
 
   public function execute() {
     if (!$this->limit) {
-      throw new Exception('You must setLimit() when leasing tasks.');
+      throw new Exception(
+        pht('You must setLimit() when leasing tasks.'));
+    }
+
+    if ($this->leased !== false) {
+      if (!$this->skipLease) {
+        throw new Exception(
+          pht(
+            'If you potentially select leased tasks using withLeasedTasks(), '.
+            'you MUST disable lease acquisition by calling setSkipLease().'));
+      }
     }
 
     $task_table = new PhabricatorWorkerActiveTask();
@@ -65,10 +97,16 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
     // find enough tasks, try tasks with expired leases (i.e., tasks which have
     // previously failed).
 
-    $phases = array(
-      self::PHASE_UNLEASED,
-      self::PHASE_EXPIRED,
-    );
+    // If we're selecting leased tasks, look for them first.
+
+    $phases = array();
+    if ($this->leased !== false) {
+      $phases[] = self::PHASE_LEASED;
+    }
+    if ($this->leased !== true) {
+      $phases[] = self::PHASE_UNLEASED;
+      $phases[] = self::PHASE_EXPIRED;
+    }
     $limit = $this->limit;
 
     $leased = 0;
@@ -160,6 +198,11 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
       $tasks[$row['id']]->setData($task_data);
     }
 
+    if ($this->skipLease) {
+      // Reorder rows into the original phase order if this is a status query.
+      $tasks = array_select_keys($tasks, $task_ids);
+    }
+
     return $tasks;
   }
 
@@ -167,6 +210,10 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
     $where = array();
 
     switch ($phase) {
+      case self::PHASE_LEASED:
+        $where[] = 'leaseOwner IS NOT NULL';
+        $where[] = 'leaseExpires >= UNIX_TIMESTAMP()';
+        break;
       case self::PHASE_UNLEASED:
         $where[] = 'leaseOwner IS NULL';
         break;
@@ -177,7 +224,7 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
         throw new Exception("Unknown phase '{$phase}'!");
     }
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf($conn_w, 'id IN (%Ld)', $this->ids);
     }
 
@@ -199,6 +246,11 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
     // `IN (NULL)` doesn't match NULL.
 
     switch ($phase) {
+      case self::PHASE_LEASED:
+        throw new Exception(
+          pht(
+            'Trying to lease tasks selected in the leased phase! This is '.
+            'intended to be imposssible.'));
       case self::PHASE_UNLEASED:
         $where[] = qsprintf($conn_w, 'leaseOwner IS NULL');
         $where[] = qsprintf($conn_w, 'id IN (%Ld)', ipull($rows, 'id'));
@@ -223,6 +275,10 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
 
   private function buildOrderClause(AphrontDatabaseConnection $conn_w, $phase) {
     switch ($phase) {
+      case self::PHASE_LEASED:
+        // Ideally we'd probably order these by lease acquisition time, but
+        // we don't have that handy and this is a good approximation.
+        return qsprintf($conn_w, 'ORDER BY priority ASC, id ASC');
       case self::PHASE_UNLEASED:
         // When selecting new tasks, we want to consume them in order of
         // increasing priority (and then FIFO).

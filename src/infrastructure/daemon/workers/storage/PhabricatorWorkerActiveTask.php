@@ -119,6 +119,7 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
       ->setFailureCount($this->getFailureCount())
       ->setDataID($this->getDataID())
       ->setPriority($this->getPriority())
+      ->setObjectPHID($this->getObjectPHID())
       ->setResult($result)
       ->setDuration($duration);
 

@@ -131,8 +131,11 @@ final class PhabricatorDaemonConsoleController
     $daemon_panel->appendChild($daemon_table);
 
 
-    $tasks = id(new PhabricatorWorkerActiveTask())->loadAllWhere(
-      'leaseOwner IS NOT NULL');
+    $tasks = id(new PhabricatorWorkerLeaseQuery())
+      ->setSkipLease(true)
+      ->withLeasedTasks(true)
+      ->setLimit(100)
+      ->execute();
 
     $tasks_table = id(new PhabricatorDaemonTasksTableView())
       ->setTasks($tasks)
