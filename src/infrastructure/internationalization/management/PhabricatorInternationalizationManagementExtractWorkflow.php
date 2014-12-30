@@ -43,7 +43,10 @@ final class PhabricatorInternationalizationManagementExtractWorkflow
 
     $bar = id(new PhutilConsoleProgressBar())
       ->setTotal(count($futures));
-    foreach (Futures($futures)->limit(8) as $full_path => $future) {
+
+    $futures = id(new FutureIterator($futures))
+      ->limit(8);
+    foreach ($futures as $full_path => $future) {
       $bar->update(1);
 
       $tree = XHPASTTree::newFromDataAndResolvedExecFuture(

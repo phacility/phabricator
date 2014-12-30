@@ -653,7 +653,7 @@ final class DifferentialChangesetParser {
     );
 
     $this->highlightErrors = false;
-    foreach (Futures($futures) as $key => $future) {
+    foreach (new FutureIterator($futures) as $key => $future) {
       try {
         try {
           $highlighted = $future->resolve();

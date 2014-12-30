@@ -132,7 +132,9 @@ final class DiffusionBrowseSearchController extends DiffusionBrowseController {
     }
 
     try {
-      Futures($futures)->limit(8)->resolveAll();
+      id(new FutureIterator($futures))
+        ->limit(8)
+        ->resolveAll();
     } catch (PhutilSyntaxHighlighterException $ex) {}
 
     $rows = array();

@@ -23,7 +23,9 @@ foreach ($input as $file) {
   $futures[$file] = xhpast_get_parser_future($data[$file]);
 }
 
-foreach (Futures($futures)->limit(8) as $file => $future) {
+$futures = id(new FutureIterator($futures))
+  ->limit(8);
+foreach ($futures as $file => $future) {
   $tree = XHPASTTree::newFromDataAndResolvedExecFuture(
     $data[$file],
     $future->resolve());
