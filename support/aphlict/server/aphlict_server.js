@@ -69,13 +69,13 @@ process.on('uncaughtException', function(err) {
   process.exit(1);
 });
 
-var flash_server = new JX.AphlictFlashPolicyServer()
+new JX.AphlictFlashPolicyServer()
   .setDebugLog(debug)
   .setAccessPort(config.port)
   .start();
 
 
-var send_server = net.createServer(function(socket) {
+net.createServer(function(socket) {
   var listener = clients.addListener(socket);
 
   debug.log('<%s> Connected from %s',
@@ -161,7 +161,7 @@ var messages_out = 0;
 var messages_in = 0;
 var start_time = new Date().getTime();
 
-var receive_server = http.createServer(function(request, response) {
+http.createServer(function(request, response) {
   // Publishing a notification.
   if (request.url == '/') {
     if (request.method == 'POST') {
