@@ -8,11 +8,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TYPE_DREV_DEPENDS_ON_DREV       = 5;
   const TYPE_DREV_DEPENDED_ON_BY_DREV   = 6;
 
-  const TYPE_BLOG_HAS_POST              = 7;
-  const TYPE_POST_HAS_BLOG              = 8;
-  const TYPE_BLOG_HAS_BLOGGER           = 9;
-  const TYPE_BLOGGER_HAS_BLOG           = 10;
-
   const TYPE_PROJ_MEMBER                = 13;
   const TYPE_MEMBER_OF_PROJ             = 14;
 
@@ -131,11 +126,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       self::TYPE_DREV_DEPENDS_ON_DREV => self::TYPE_DREV_DEPENDED_ON_BY_DREV,
       self::TYPE_DREV_DEPENDED_ON_BY_DREV => self::TYPE_DREV_DEPENDS_ON_DREV,
 
-      self::TYPE_BLOG_HAS_POST    => self::TYPE_POST_HAS_BLOG,
-      self::TYPE_POST_HAS_BLOG    => self::TYPE_BLOG_HAS_POST,
-      self::TYPE_BLOG_HAS_BLOGGER => self::TYPE_BLOGGER_HAS_BLOG,
-      self::TYPE_BLOGGER_HAS_BLOG => self::TYPE_BLOG_HAS_BLOGGER,
-
       self::TYPE_PROJ_MEMBER => self::TYPE_MEMBER_OF_PROJ,
       self::TYPE_MEMBER_OF_PROJ => self::TYPE_PROJ_MEMBER,
 
@@ -238,13 +228,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       case self::TYPE_COMMIT_HAS_DREV:
       case self::TYPE_REVIEWER_FOR_DREV:
         return '%s edited revision(s), added %d: %s; removed %d: %s.';
-      case self::TYPE_BLOG_HAS_POST:
-        return '%s edited post(s), added %d: %s; removed %d: %s.';
-      case self::TYPE_POST_HAS_BLOG:
-      case self::TYPE_BLOGGER_HAS_BLOG:
-        return '%s edited blog(s), added %d: %s; removed %d: %s.';
-      case self::TYPE_BLOG_HAS_BLOGGER:
-        return '%s edited blogger(s), added %d: %s; removed %d: %s.';
       case self::TYPE_PROJ_MEMBER:
         return '%s edited member(s), added %d: %s; removed %d: %s.';
       case self::TYPE_MEMBER_OF_PROJ:
@@ -303,13 +286,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       case self::TYPE_COMMIT_HAS_DREV:
       case self::TYPE_REVIEWER_FOR_DREV:
         return '%s added %d revision(s): %s.';
-      case self::TYPE_BLOG_HAS_POST:
-        return '%s added %d post(s): %s.';
-      case self::TYPE_POST_HAS_BLOG:
-      case self::TYPE_BLOGGER_HAS_BLOG:
-        return '%s added %d blog(s): %s.';
-      case self::TYPE_BLOG_HAS_BLOGGER:
-        return '%s added %d blogger(s): %s.';
       case self::TYPE_PROJ_MEMBER:
         return '%s added %d member(s): %s.';
       case self::TYPE_MEMBER_OF_PROJ:
@@ -366,13 +342,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       case self::TYPE_COMMIT_HAS_DREV:
       case self::TYPE_REVIEWER_FOR_DREV:
         return '%s removed %d revision(s): %s.';
-      case self::TYPE_BLOG_HAS_POST:
-        return '%s removed %d post(s): %s.';
-      case self::TYPE_POST_HAS_BLOG:
-      case self::TYPE_BLOGGER_HAS_BLOG:
-        return '%s removed %d blog(s): %s.';
-      case self::TYPE_BLOG_HAS_BLOGGER:
-        return '%s removed %d blogger(s): %s.';
       case self::TYPE_PROJ_MEMBER:
         return '%s removed %d member(s): %s.';
       case self::TYPE_MEMBER_OF_PROJ:
@@ -427,13 +396,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       case self::TYPE_COMMIT_HAS_DREV:
       case self::TYPE_REVIEWER_FOR_DREV:
         return '%s updated revisions of %s.';
-      case self::TYPE_BLOG_HAS_POST:
-        return '%s updated posts of %s.';
-      case self::TYPE_POST_HAS_BLOG:
-      case self::TYPE_BLOGGER_HAS_BLOG:
-        return '%s updated blogs of %s.';
-      case self::TYPE_BLOG_HAS_BLOGGER:
-        return '%s updated bloggers of %s.';
       case self::TYPE_PROJ_MEMBER:
         return '%s updated members of %s.';
       case self::TYPE_MEMBER_OF_PROJ:

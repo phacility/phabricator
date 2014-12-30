@@ -249,57 +249,6 @@ abstract class PhabricatorBaseEnglishTranslation
         'The actions you are taking have no effect:',
       ),
 
-      '%s edited post(s), added %d: %s; removed %d: %s.' =>
-        '%s edited posts, added: %3$s; removed: %5$s',
-
-      '%s added %d post(s): %s.' => array(
-        array(
-          '%s added a post: %3$s.',
-          '%s added posts: %3$s.',
-        ),
-      ),
-
-      '%s removed %d post(s): %s.' => array(
-        array(
-          '%s removed a post: %3$s.',
-          '%s removed posts: %3$s.',
-        ),
-      ),
-
-      '%s edited blog(s), added %d: %s; removed %d: %s.' =>
-        '%s edited blogs, added: %3$s; removed: %5$s',
-
-      '%s added %d blog(s): %s.' => array(
-        array(
-          '%s added a blog: %3$s.',
-          '%s added blogs: %3$s.',
-        ),
-      ),
-
-      '%s removed %d blog(s): %s.' => array(
-        array(
-          '%s removed a blog: %3$s.',
-          '%s removed blogs: %3$s.',
-        ),
-      ),
-
-      '%s edited blogger(s), added %d: %s; removed %d: %s.' =>
-        '%s edited bloggers, added: %3$s; removed: %5$s',
-
-      '%s added %d blogger(s): %s.' => array(
-        array(
-          '%s added a blogger: %3$s.',
-          '%s added bloggers: %3$s.',
-        ),
-      ),
-
-      '%s removed %d blogger(s): %s.' => array(
-        array(
-          '%s removed a blogger: %3$s.',
-          '%s removed bloggers: %3$s.',
-        ),
-      ),
-
       '%s edited member(s), added %d: %s; removed %d: %s.' =>
         '%s edited members, added: %3$s; removed: %5$s',
 
