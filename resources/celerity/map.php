@@ -463,7 +463,7 @@ return array(
     'rsrc/js/core/behavior-keyboard-shortcuts.js' => 'd75709e6',
     'rsrc/js/core/behavior-konami.js' => '5bc2cb21',
     'rsrc/js/core/behavior-lightbox-attachments.js' => 'f8ba29d7',
-    'rsrc/js/core/behavior-line-linker.js' => 'f726d506',
+    'rsrc/js/core/behavior-line-linker.js' => '1499a8cb',
     'rsrc/js/core/behavior-more.js' => 'a80d0378',
     'rsrc/js/core/behavior-object-selector.js' => '49b73b36',
     'rsrc/js/core/behavior-oncopy.js' => '2926fff2',
@@ -608,7 +608,7 @@ return array(
     'javelin-behavior-phabricator-hovercards' => 'f36e01af',
     'javelin-behavior-phabricator-keyboard-pager' => 'a8da01f0',
     'javelin-behavior-phabricator-keyboard-shortcuts' => 'd75709e6',
-    'javelin-behavior-phabricator-line-linker' => 'f726d506',
+    'javelin-behavior-phabricator-line-linker' => '1499a8cb',
     'javelin-behavior-phabricator-nav' => '14d7a8b8',
     'javelin-behavior-phabricator-notification-example' => '7a9677fc',
     'javelin-behavior-phabricator-object-selector' => '49b73b36',
@@ -911,6 +911,12 @@ return array(
       'javelin-dom',
       'javelin-uri',
       'phabricator-textareautils',
+    ),
+    '1499a8cb' => array(
+      'javelin-behavior',
+      'javelin-stratcom',
+      'javelin-dom',
+      'javelin-history',
     ),
     '14a827de' => array(
       'javelin-behavior',
@@ -1869,12 +1875,6 @@ return array(
       'javelin-uri',
       'javelin-behavior-device',
       'phabricator-title',
-    ),
-    'f726d506' => array(
-      'javelin-behavior',
-      'javelin-stratcom',
-      'javelin-dom',
-      'javelin-history',
     ),
     'f7379f45' => array(
       'javelin-behavior',
