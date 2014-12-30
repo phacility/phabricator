@@ -244,7 +244,8 @@
   border-right: none;
 }
 
-.phui-object-box .phui-object-list-stackable:last-child .phui-object-item-frame {
+.phui-object-box .phui-object-list-stackable:last-child
+  .phui-object-item-frame {
   border-bottom: none;
 }
 
@@ -637,7 +638,8 @@ ul.phui-object-item-icons {
   border: none;
 }
 
-.phui-object-box .phui-object-list-states li:last-child .phui-object-item-frame {
+.phui-object-box .phui-object-list-states li:last-child
+  .phui-object-item-frame {
   border: none;
   padding-bottom: 0;
 }

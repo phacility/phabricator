@@ -78,7 +78,8 @@
   background-repeat: no-repeat;
 }
 
-.device-desktop .phabricator-standard-page-body .has-drag-nav .phabricator-nav-content {
+.device-desktop .phabricator-standard-page-body .has-drag-nav
+  .phabricator-nav-content {
   margin-left: 212px;
 }
 
