@@ -134,9 +134,9 @@ final class PhabricatorDaemonConsoleController
     $tasks = id(new PhabricatorWorkerActiveTask())->loadAllWhere(
       'leaseOwner IS NOT NULL');
 
-    $tasks_table = $this->renderTasksTable(
-      $tasks,
-      pht('No tasks are leased by workers.'));
+    $tasks_table = id(new PhabricatorDaemonTasksTableView())
+      ->setTasks($tasks)
+      ->setNoDataString(pht('No tasks are leased by workers.'));
 
     $leased_panel = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Leased Tasks'))
@@ -182,7 +182,9 @@ final class PhabricatorDaemonConsoleController
     $upcoming_panel = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Next In Queue'))
       ->appendChild(
-        $this->renderTasksTable($upcoming, pht('Task queue is empty.')));
+        id(new PhabricatorDaemonTasksTableView())
+          ->setTasks($upcoming)
+          ->setNoDataString(pht('Task queue is empty.')));
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Console'));
@@ -205,54 +207,6 @@ final class PhabricatorDaemonConsoleController
         'title' => pht('Console'),
         'device' => false,
       ));
-  }
-
-  private function renderTasksTable(array $tasks, $nodata) {
-    $rows = array();
-    foreach ($tasks as $task) {
-      $rows[] = array(
-        $task->getID(),
-        $task->getTaskClass(),
-        $task->getLeaseOwner(),
-        $task->getLeaseExpires()
-          ? phutil_format_relative_time($task->getLeaseExpires() - time())
-          : '-',
-        $task->getPriority(),
-        $task->getFailureCount(),
-        phutil_tag(
-          'a',
-          array(
-            'href' => '/daemon/task/'.$task->getID().'/',
-            'class' => 'button small grey',
-          ),
-          pht('View Task')),
-      );
-    }
-
-    $table = new AphrontTableView($rows);
-    $table->setHeaders(
-      array(
-        pht('ID'),
-        pht('Class'),
-        pht('Owner'),
-        pht('Expires'),
-        pht('Priority'),
-        pht('Failures'),
-        '',
-      ));
-    $table->setColumnClasses(
-      array(
-        'n',
-        'wide',
-        '',
-        '',
-        'n',
-        'n',
-        'action',
-      ));
-    $table->setNoDataString($nodata);
-
-    return $table;
   }
 
 }

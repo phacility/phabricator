@@ -1565,6 +1565,7 @@ phutil_register_library_map(array(
     'PhabricatorDaemonManagementWorkflow' => 'applications/daemon/management/PhabricatorDaemonManagementWorkflow.php',
     'PhabricatorDaemonReference' => 'infrastructure/daemon/control/PhabricatorDaemonReference.php',
     'PhabricatorDaemonTaskGarbageCollector' => 'applications/daemon/garbagecollector/PhabricatorDaemonTaskGarbageCollector.php',
+    'PhabricatorDaemonTasksTableView' => 'applications/daemon/view/PhabricatorDaemonTasksTableView.php',
     'PhabricatorDaemonsApplication' => 'applications/daemon/application/PhabricatorDaemonsApplication.php',
     'PhabricatorDashboard' => 'applications/dashboard/storage/PhabricatorDashboard.php',
     'PhabricatorDashboardAddPanelController' => 'applications/dashboard/controller/PhabricatorDashboardAddPanelController.php',
@@ -4714,6 +4715,7 @@ phutil_register_library_map(array(
     'PhabricatorDaemonManagementStopWorkflow' => 'PhabricatorDaemonManagementWorkflow',
     'PhabricatorDaemonManagementWorkflow' => 'PhabricatorManagementWorkflow',
     'PhabricatorDaemonTaskGarbageCollector' => 'PhabricatorGarbageCollector',
+    'PhabricatorDaemonTasksTableView' => 'AphrontView',
     'PhabricatorDaemonsApplication' => 'PhabricatorApplication',
     'PhabricatorDashboard' => array(
       'PhabricatorDashboardDAO',
