@@ -1,0 +1,47 @@
+@title Managing Caches
+@group config
+
+Discusses Phabricator caches and cache management.
+
+Overview
+========
+
+Phabricator uses various caches to improve performance, similar to the caches
+a web browser uses to improve web performance.
+
+In particular, blocks of text which are expensive to render (like formatted
+text and syntax highlighted code) are often cached after they're rendered for
+the first time. When they're rendered again, Phabricator can read the cache
+instead of recomputing the result.
+
+Because text is cached, you may continue to see the old result even after you
+make certain configuration changes which should affect it. The most common
+example of this is that if you enable syntax highlighting with Pygments, old
+diffs and pastes may not appear highlighted.
+
+You may also run into this issue if you modify existing Remarkup rules or
+develop new ones, or modify other parts of the code that run before the results
+are cached.
+
+Caches will naturally expire over time, so if they aren't causing a problem
+you can just ignore the out of date caches and they'll fix themselves
+eventually (usually within 30 days).
+
+If you don't want to wait, you can purge the caches. This will remove any
+cached data and force Phabricator to recompute the results.
+
+Purging Caches
+==============
+
+If you need to purge Phabricator's caches, you can use the CLI tool. Run it
+with the `--help` flag to see options:
+
+  phabricator/ $ ./bin/cache purge --help
+
+This tool can purge caches in a granular way, but it's normally easiest to
+just purge all of the caches:
+
+  phabricator/ $ ./bin/cache purge --purge-all
+
+You can purge caches safely. The data they contain can always be rebuilt from
+other data if Phabricator needs it.
