@@ -501,40 +501,6 @@ abstract class PhabricatorBaseEnglishTranslation
         ),
       ),
 
-      '%s edited charge(s), added %d: %s; removed %d: %s.' =>
-        '%s edited charges, added: %3$s; removed: %5$s',
-
-      '%s added %d charge(s): %s.' => array(
-        array(
-          '%s added a charge: %3$s.',
-          '%s added charges: %3$s.',
-        ),
-      ),
-
-      '%s removed %d charge(s): %s.' => array(
-        array(
-          '%s removed a charge: %3$s.',
-          '%s removed charges: %3$s.',
-        ),
-      ),
-
-      '%s edited purchase(s), added %d: %s; removed %d: %s.' =>
-        '%s edited purchases, added: %3$s; removed: %5$s',
-
-      '%s added %d purchase(s): %s.' => array(
-        array(
-          '%s added a purchase: %3$s.',
-          '%s added purchases: %3$s.',
-        ),
-      ),
-
-      '%s removed %d purchase(s): %s.' => array(
-        array(
-          '%s removed a purchase: %3$s.',
-          '%s removed purchases: %3$s.',
-        ),
-      ),
-
       '%s edited contributor(s), added %d: %s; removed %d: %s.' =>
         '%s edited contributors, added: %3$s; removed: %5$s',
 

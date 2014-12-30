@@ -25,9 +25,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TYPE_OBJECT_HAS_FILE            = 25;
   const TYPE_FILE_HAS_OBJECT            = 26;
 
-  const TYPE_PURCAHSE_HAS_CHARGE        = 29;
-  const TYPE_CHARGE_HAS_PURCHASE        = 30;
-
   const TYPE_DREV_HAS_COMMIT            = 31;
   const TYPE_COMMIT_HAS_DREV            = 32;
 
@@ -250,10 +247,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s edited unsubcriber(s), added %d: %s; removed %d: %s.';
       case self::TYPE_OBJECT_HAS_FILE:
         return '%s edited file(s), added %d: %s; removed %d: %s.';
-      case self::TYPE_PURCAHSE_HAS_CHARGE:
-        return '%s edited charge(s), added %d: %s; removed %d: %s.';
-      case self::TYPE_CHARGE_HAS_PURCHASE:
-        return '%s edited purchase(s), added %d: %s; removed %d: %s.';
       case self::TYPE_OBJECT_HAS_CONTRIBUTOR:
         return '%s edited contributor(s), added %d: %s; removed %d: %s.';
       case self::TYPE_DREV_HAS_REVIEWER:
@@ -303,10 +296,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s added %d unsubcriber(s): %s.';
       case self::TYPE_OBJECT_HAS_FILE:
         return '%s added %d file(s): %s.';
-      case self::TYPE_PURCAHSE_HAS_CHARGE:
-        return '%s added %d charge(s): %s.';
-      case self::TYPE_CHARGE_HAS_PURCHASE:
-        return '%s added %d purchase(s): %s.';
       case self::TYPE_OBJECT_HAS_CONTRIBUTOR:
         return '%s added %d contributor(s): %s.';
       case self::TYPE_DREV_HAS_REVIEWER:
@@ -359,10 +348,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s removed %d unsubcriber(s): %s.';
       case self::TYPE_OBJECT_HAS_FILE:
         return '%s removed %d file(s): %s.';
-      case self::TYPE_PURCAHSE_HAS_CHARGE:
-        return '%s removed %d charge(s): %s.';
-      case self::TYPE_CHARGE_HAS_PURCHASE:
-        return '%s removed %d purchase(s): %s.';
       case self::TYPE_OBJECT_HAS_CONTRIBUTOR:
         return '%s removed %d contributor(s): %s.';
       case self::TYPE_DREV_HAS_REVIEWER:
@@ -413,10 +398,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s updated unsubcribers of %s.';
       case self::TYPE_OBJECT_HAS_FILE:
         return '%s updated files of %s.';
-      case self::TYPE_PURCAHSE_HAS_CHARGE:
-        return '%s updated charges of %s.';
-      case self::TYPE_CHARGE_HAS_PURCHASE:
-        return '%s updated purchases of %s.';
       case self::TYPE_OBJECT_HAS_CONTRIBUTOR:
         return '%s updated contributors of %s.';
       case self::TYPE_DREV_HAS_REVIEWER:
