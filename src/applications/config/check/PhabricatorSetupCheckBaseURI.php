@@ -31,13 +31,12 @@ final class PhabricatorSetupCheckBaseURI extends PhabricatorSetupCheck {
     $base_uri_guess = PhabricatorEnv::getRequestBaseURI();
 
     $summary = pht(
-      'The base URI for this install is not configured. Configuring it will '.
-      'improve security and enable features.');
+      'The base URI for this install is not configured. Many major features '.
+      'will not work properly until you configure it.');
 
     $message = pht(
-      'The base URI for this install is not configured. Configuring it will '.
-      'improve security and allow background processes (like daemons and '.
-      'scripts) to generate links.'.
+      'The base URI for this install is not configured, and major features '.
+      'will not work properly until you configure it.'.
       "\n\n".
       'You should set the base URI to the URI you will use to access '.
       'Phabricator, like "http://phabricator.example.com/".'.
