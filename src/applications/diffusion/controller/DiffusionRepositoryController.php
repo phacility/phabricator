@@ -151,15 +151,23 @@ final class DiffusionRepositoryController extends DiffusionController {
     $phids = array_keys($phids);
     $handles = $this->loadViewerHandles($phids);
 
+    $readme = null;
     if ($browse_results) {
-      $readme = $this->callConduitWithDiffusionRequest(
-        'diffusion.readmequery',
-        array(
-         'paths' => $browse_results->getPathDicts(),
-         'commit' => $drequest->getStableCommit(),
-        ));
-    } else {
-      $readme = null;
+      $readme_path = $browse_results->getReadmePath();
+      if ($readme_path) {
+        $readme_content = $this->callConduitWithDiffusionRequest(
+          'diffusion.filecontentquery',
+          array(
+            'path' => $readme_path,
+            'commit' => $drequest->getStableCommit(),
+          ));
+        if ($readme_content) {
+          $readme = id(new DiffusionReadmeView())
+            ->setUser($this->getViewer())
+            ->setPath($readme_path)
+            ->setContent($readme_content['corpus']);
+        }
+      }
     }
 
     $content[] = $this->buildBrowseTable(
@@ -195,14 +203,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     }
 
     if ($readme) {
-      $box = new PHUIBoxView();
-      $box->appendChild($readme);
-      $box->addPadding(PHUI::PADDING_LARGE);
-
-      $panel = new PHUIObjectBoxView();
-      $panel->setHeaderText(pht('README'));
-      $panel->appendChild($box);
-      $content[] = $panel;
+      $content[] = $readme;
     }
 
     return $content;
