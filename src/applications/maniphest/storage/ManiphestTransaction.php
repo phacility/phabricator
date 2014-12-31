@@ -794,6 +794,7 @@ final class ManiphestTransaction
   public function getMailTags() {
     $tags = array();
     switch ($this->getTransactionType()) {
+      case self::TYPE_MERGED_INTO:
       case self::TYPE_STATUS:
         $tags[] = self::MAILTAG_STATUS;
         break;
