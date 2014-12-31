@@ -55,7 +55,7 @@ final class PhabricatorWorkerArchiveTaskQuery
     if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn_r,
-        'ids in (%Ld)',
+        'id in (%Ld)',
         $this->ids);
     }
 
