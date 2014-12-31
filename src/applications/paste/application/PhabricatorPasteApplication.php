@@ -50,6 +50,9 @@ final class PhabricatorPasteApplication extends PhabricatorApplication {
       PasteDefaultViewCapability::CAPABILITY => array(
         'caption' => pht('Default view policy for newly created pastes.'),
       ),
+      PasteDefaultEditCapability::CAPABILITY => array(
+        'caption' => pht('Default edit policy for newly created pastes.'),
+      ),
     );
   }
 

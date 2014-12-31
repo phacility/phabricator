@@ -5,6 +5,12 @@ final class PhabricatorProjectEditMainController
 
   private $id;
 
+  public function shouldAllowPublic() {
+    // This page shows project history and some detailed information, and
+    // it's reasonable to allow public access to it.
+    return true;
+  }
+
   public function willProcessRequest(array $data) {
     $this->id = idx($data, 'id');
   }

@@ -12,6 +12,9 @@ final class PhabricatorSyntaxHighlightingConfigOptions
   }
 
   public function getOptions() {
+
+    $caches_href = PhabricatorEnv::getDocLink('Managing Caches');
+
     return array(
       $this->newOption(
         'syntax-highlighter.engine',
@@ -27,13 +30,32 @@ final class PhabricatorSyntaxHighlightingConfigOptions
             'PhutilSyntaxHighlighterEngine.')),
       $this->newOption('pygments.enabled', 'bool', false)
         ->setSummary(
-          pht('Should Phabricator shell out to Pygments to highlight code?'))
+          pht('Should Phabricator use Pygments to highlight code?'))
+        ->setBoolOptions(
+          array(
+            pht('Use Pygments'),
+            pht('Do Not Use Pygments'),
+          ))
         ->setDescription(
           pht(
-            "If you want syntax highlighting for other languages than PHP ".
-            "then you can install the python package 'Pygments', make sure ".
-            "the 'pygmentize' script is  available in the \$PATH of the ".
-            "webserver, and then enable this.")),
+            'Phabricator supports syntax highlighting a few languages by '.
+            'default, but you can install Pygments (a third-party syntax '.
+            'highlighting tool) to provide support for many more languages.'.
+            "\n\n".
+            'To install Pygments, visit '.
+            '[[ http://pygments.org | pygments.org ]] and follow the '.
+            'download and install instructions.'.
+            "\n\n".
+            'Once Pygments is installed, enable this option '.
+            '(`pygments.enabled`) to make Phabricator use Pygments when '.
+            'highlighting source code.'.
+            "\n\n".
+            'After you install and enable Pygments, newly created source '.
+            'code (like diffs and pastes) should highlight correctly. '.
+            'You may need to clear Phabricator\'s caches to get previously '.
+            'existing source code to highlight. For instructions on '.
+            'managing caches, see [[ %s | Managing Caches ]].',
+            $caches_href)),
       $this->newOption(
         'pygments.dropdown-choices',
         'wild',

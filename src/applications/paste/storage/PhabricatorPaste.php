@@ -17,6 +17,7 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
   protected $language;
   protected $parentPHID;
   protected $viewPolicy;
+  protected $editPolicy;
   protected $mailKey;
 
   private $content = self::ATTACHABLE;
@@ -29,11 +30,13 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
       ->executeOne();
 
     $view_policy = $app->getPolicy(PasteDefaultViewCapability::CAPABILITY);
+    $edit_policy = $app->getPolicy(PasteDefaultEditCapability::CAPABILITY);
 
     return id(new PhabricatorPaste())
       ->setTitle('')
       ->setAuthorPHID($actor->getPHID())
-      ->setViewPolicy($view_policy);
+      ->setViewPolicy($view_policy)
+      ->setEditPolicy($edit_policy);
   }
 
   public function getURI() {
@@ -146,6 +149,8 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
   public function getPolicy($capability) {
     if ($capability == PhabricatorPolicyCapability::CAN_VIEW) {
       return $this->viewPolicy;
+    } else if ($capability == PhabricatorPolicyCapability::CAN_EDIT) {
+      return $this->editPolicy;
     }
     return PhabricatorPolicies::POLICY_NOONE;
   }

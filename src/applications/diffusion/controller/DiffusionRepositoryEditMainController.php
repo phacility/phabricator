@@ -683,6 +683,7 @@ final class DiffusionRepositoryEditMainController
     PhabricatorRepository $repository) {
 
     $viewer = $this->getRequest()->getUser();
+    $is_cluster = $repository->getAlmanacServicePHID();
 
     $view = new PHUIStatusListView();
 
@@ -756,54 +757,61 @@ final class DiffusionRepositoryEditMainController
     }
 
     $binaries = array_unique($binaries);
-    foreach ($binaries as $binary) {
-      $where = Filesystem::resolveBinary($binary);
-      if (!$where) {
-        $view->addItem(
-          id(new PHUIStatusItemView())
-            ->setIcon(PHUIStatusItemView::ICON_WARNING, 'red')
-            ->setTarget(
-              pht('Missing Binary %s', phutil_tag('tt', array(), $binary)))
-            ->setNote(pht(
-              "Unable to find this binary in the webserver's PATH. You may ".
-              "need to configure %s.",
-              $this->getEnvConfigLink())));
-      } else {
-        $view->addItem(
-          id(new PHUIStatusItemView())
-            ->setIcon(PHUIStatusItemView::ICON_ACCEPT, 'green')
-            ->setTarget(
-              pht('Found Binary %s', phutil_tag('tt', array(), $binary)))
-            ->setNote(phutil_tag('tt', array(), $where)));
-      }
-    }
+    if (!$is_cluster) {
+      // We're only checking for binaries if we aren't running with a cluster
+      // configuration. In theory, we could check for binaries on the
+      // repository host machine, but we'd need to make this more complicated
+      // to do that.
 
-    // This gets checked generically above. However, for svn commit hooks, we
-    // need this to be in environment.append-paths because subversion strips
-    // PATH.
-    if ($svnlook_check) {
-      $where = Filesystem::resolveBinary('svnlook');
-      if ($where) {
-        $path = substr($where, 0, strlen($where) - strlen('svnlook'));
-        $dirs = PhabricatorEnv::getEnvConfig('environment.append-paths');
-        $in_path = false;
-        foreach ($dirs as $dir) {
-          if (Filesystem::isDescendant($path, $dir)) {
-            $in_path = true;
-            break;
-          }
-        }
-        if (!$in_path) {
+      foreach ($binaries as $binary) {
+        $where = Filesystem::resolveBinary($binary);
+        if (!$where) {
           $view->addItem(
             id(new PHUIStatusItemView())
-            ->setIcon(PHUIStatusItemView::ICON_WARNING, 'red')
-            ->setTarget(
-              pht('Missing Binary %s', phutil_tag('tt', array(), $binary)))
-            ->setNote(pht(
-                'Unable to find this binary in `environment.append-paths`. '.
-                'You need to configure %s and include %s.',
-                $this->getEnvConfigLink(),
-                $path)));
+              ->setIcon(PHUIStatusItemView::ICON_WARNING, 'red')
+              ->setTarget(
+                pht('Missing Binary %s', phutil_tag('tt', array(), $binary)))
+              ->setNote(pht(
+                "Unable to find this binary in the webserver's PATH. You may ".
+                "need to configure %s.",
+                $this->getEnvConfigLink())));
+        } else {
+          $view->addItem(
+            id(new PHUIStatusItemView())
+              ->setIcon(PHUIStatusItemView::ICON_ACCEPT, 'green')
+              ->setTarget(
+                pht('Found Binary %s', phutil_tag('tt', array(), $binary)))
+              ->setNote(phutil_tag('tt', array(), $where)));
+        }
+      }
+
+      // This gets checked generically above. However, for svn commit hooks, we
+      // need this to be in environment.append-paths because subversion strips
+      // PATH.
+      if ($svnlook_check) {
+        $where = Filesystem::resolveBinary('svnlook');
+        if ($where) {
+          $path = substr($where, 0, strlen($where) - strlen('svnlook'));
+          $dirs = PhabricatorEnv::getEnvConfig('environment.append-paths');
+          $in_path = false;
+          foreach ($dirs as $dir) {
+            if (Filesystem::isDescendant($path, $dir)) {
+              $in_path = true;
+              break;
+            }
+          }
+          if (!$in_path) {
+            $view->addItem(
+              id(new PHUIStatusItemView())
+              ->setIcon(PHUIStatusItemView::ICON_WARNING, 'red')
+              ->setTarget(
+                pht('Missing Binary %s', phutil_tag('tt', array(), $binary)))
+              ->setNote(pht(
+                  'Unable to find this binary in `environment.append-paths`. '.
+                  'You need to configure %s and include %s.',
+                  $this->getEnvConfigLink(),
+                  $path)));
+          }
         }
       }
     }
@@ -829,6 +837,12 @@ final class DiffusionRepositoryEditMainController
       ->execute();
 
     if ($pull_daemon) {
+
+      // TODO: In a cluster environment, we need a daemon on this repository's
+      // host, specifically, and we aren't checking for that right now. This
+      // is a reasonable proxy for things being more-or-less correctly set up,
+      // though.
+
       $view->addItem(
         id(new PHUIStatusItemView())
           ->setIcon(PHUIStatusItemView::ICON_ACCEPT, 'green')
@@ -861,7 +875,12 @@ final class DiffusionRepositoryEditMainController
           ->setNote($daemon_instructions));
     }
 
-    if ($repository->usesLocalWorkingCopy()) {
+
+    if ($is_cluster) {
+      // Just omit this status check for now in cluster environments. We
+      // could make a service call and pull it from the repository host
+      // eventually.
+    } else if ($repository->usesLocalWorkingCopy()) {
       $local_parent = dirname($repository->getLocalPath());
       if (Filesystem::pathExists($local_parent)) {
         $view->addItem(

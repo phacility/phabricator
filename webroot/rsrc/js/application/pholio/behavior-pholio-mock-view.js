@@ -700,9 +700,6 @@ JX.behavior('pholio-mock-view', function(config) {
     e.kill();
   });
 
-  JX.Stratcom.listen('click', 'pholio-device-lightbox', lightbox_detach);
-  JX.Stratcom.listen('resize', null, lightbox_resize);
-
   function lightbox_attach() {
     JX.DOM.alterClass(document.body, 'lightbox-attached', true);
     JX.Mask.show('jx-dark-mask');
@@ -746,6 +743,9 @@ JX.behavior('pholio-mock-view', function(config) {
     return el;
   }
 
+  JX.Stratcom.listen('click', 'pholio-device-lightbox', lightbox_detach);
+  JX.Stratcom.listen('resize', null, lightbox_resize);
+
 
 /* -(  Preload  )------------------------------------------------------------ */
 
@@ -755,7 +755,7 @@ JX.behavior('pholio-mock-view', function(config) {
   }
 
   function preload_next() {
-    next_src = preload[0];
+    var next_src = preload[0];
     if (!next_src) {
       return;
     }

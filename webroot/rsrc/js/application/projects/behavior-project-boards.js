@@ -48,8 +48,8 @@ JX.behavior('project-boards', function(config) {
       'project-panel-over-limit': over_limit
     };
     var panel = JX.DOM.findAbove(col, 'div', 'workpanel');
-    for (var k in panel_map) {
-      JX.DOM.alterClass(panel, k, !!panel_map[k]);
+    for (var p in panel_map) {
+      JX.DOM.alterClass(panel, p, !!panel_map[p]);
     }
 
     var color_map = {
@@ -57,8 +57,8 @@ JX.behavior('project-boards', function(config) {
       'phui-tag-shade-blue': (sum > 0 && !over_limit),
       'phui-tag-shade-red': (over_limit)
     };
-    for (var k in color_map) {
-      JX.DOM.alterClass(data.countTagNode, k, !!color_map[k]);
+    for (var c in color_map) {
+      JX.DOM.alterClass(data.countTagNode, c, !!color_map[c]);
     }
   }
 

@@ -12,17 +12,6 @@ JX.require('lib/AphlictFlashPolicyServer', __dirname);
 JX.require('lib/AphlictListenerList', __dirname);
 JX.require('lib/AphlictLog', __dirname);
 
-var debug = new JX.AphlictLog()
-  .addConsole(console);
-
-var clients = new JX.AphlictListenerList();
-
-var config = parse_command_line_arguments(process.argv);
-
-if (config.logfile) {
-  debug.addLogfile(config.logfile);
-}
-
 function parse_command_line_arguments(argv) {
   var config = {
     port: 22280,
@@ -50,6 +39,17 @@ function parse_command_line_arguments(argv) {
   return config;
 }
 
+var debug = new JX.AphlictLog()
+  .addConsole(console);
+
+var clients = new JX.AphlictListenerList();
+
+var config = parse_command_line_arguments(process.argv);
+
+if (config.logfile) {
+  debug.addLogfile(config.logfile);
+}
+
 if (process.getuid() !== 0) {
   console.log(
     "ERROR: " +
@@ -69,13 +69,13 @@ process.on('uncaughtException', function(err) {
   process.exit(1);
 });
 
-var flash_server = new JX.AphlictFlashPolicyServer()
+new JX.AphlictFlashPolicyServer()
   .setDebugLog(debug)
   .setAccessPort(config.port)
   .start();
 
 
-var send_server = net.createServer(function(socket) {
+net.createServer(function(socket) {
   var listener = clients.addListener(socket);
 
   debug.log('<%s> Connected from %s',
@@ -161,7 +161,27 @@ var messages_out = 0;
 var messages_in = 0;
 var start_time = new Date().getTime();
 
-var receive_server = http.createServer(function(request, response) {
+function transmit(msg) {
+  var listeners = clients.getListeners().filter(function(client) {
+    return client.isSubscribedToAny(msg.subscribers);
+  });
+
+  for (var i = 0; i < listeners.length; i++) {
+    var listener = listeners[i];
+
+    try {
+      listener.writeMessage(msg);
+
+      ++messages_out;
+      debug.log('<%s> Wrote Message', listener.getDescription());
+    } catch (error) {
+      clients.removeListener(listener);
+      debug.log('<%s> Write Error: %s', listener.getDescription(), error);
+    }
+  }
+}
+
+http.createServer(function(request, response) {
   // Publishing a notification.
   if (request.url == '/') {
     if (request.method == 'POST') {
@@ -232,26 +252,6 @@ var receive_server = http.createServer(function(request, response) {
     response.end();
   }
 }).listen(config.admin, config.host);
-
-function transmit(msg) {
-  var listeners = clients.getListeners().filter(function(client) {
-    return client.isSubscribedToAny(msg.subscribers);
-  });
-
-  for (var i = 0; i < listeners.length; i++) {
-    var listener = listeners[i];
-
-    try {
-      listener.writeMessage(msg);
-
-      ++messages_out;
-      debug.log('<%s> Wrote Message', listener.getDescription());
-    } catch (error) {
-      clients.removeListener(listener);
-      debug.log('<%s> Write Error: %s', listener.getDescription(), error);
-    }
-  }
-}
 
 // If we're configured to drop permissions, get rid of them now that we've
 // bound to the ports we need and opened logfiles.

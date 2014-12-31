@@ -434,7 +434,8 @@
     color: #fff;
   }
 
-.device-desktop .phabricator-application-menu .phui-list-item-view.core-menu-item {
+.device-desktop .phabricator-application-menu
+  .phui-list-item-view.core-menu-item {
   display: block;
 }
 

@@ -221,7 +221,7 @@ abstract class PhabricatorDaemonManagementWorkflow
           $command,
           $daemon_script_dir,
           $this->runDaemonsAsUser);
-      } catch (CommandException $e) {
+      } catch (Exception $e) {
         // Retry without sudo
         $console->writeOut(pht(
           "sudo command failed. Starting daemon as current user\n"));
@@ -237,6 +237,7 @@ abstract class PhabricatorDaemonManagementWorkflow
     $daemon_script_dir,
     $run_as_user = null) {
 
+    $is_sudo = false;
     if ($run_as_user) {
       // If anything else besides sudo should be
       // supported then insert it here (runuser, su, ...)
@@ -244,11 +245,25 @@ abstract class PhabricatorDaemonManagementWorkflow
         'sudo -En -u %s -- %C',
         $run_as_user,
         $command);
+      $is_sudo = true;
     }
     $future = new ExecFuture('exec %C', $command);
     // Play games to keep 'ps' looking reasonable.
     $future->setCWD($daemon_script_dir);
-    $future->resolvex();
+    list($stdout, $stderr) = $future->resolvex();
+
+    if ($is_sudo) {
+      // On OSX, `sudo -n` exits 0 when the user does not have permission to
+      // switch accounts without a password. This is not consistent with
+      // sudo on Linux, and seems buggy/broken. Check for this by string
+      // matching the output.
+      if (preg_match('/sudo: a password is required/', $stderr)) {
+        throw new Exception(
+          pht(
+            'sudo exited with a zero exit code, but emitted output '.
+            'consistent with failure under OSX.'));
+      }
+    }
   }
 
   public static function ignoreSignal($signo) {

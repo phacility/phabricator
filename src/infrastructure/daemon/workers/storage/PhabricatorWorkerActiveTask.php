@@ -33,7 +33,7 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
         'leaseOwner_2' => array(
           'columns' => array('leaseOwner', 'priority', 'id'),
         ),
-      ),
+      ) + $parent[self::CONFIG_KEY_SCHEMA],
     );
 
     $config[self::CONFIG_COLUMN_SCHEMA] = array(
@@ -119,6 +119,7 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
       ->setFailureCount($this->getFailureCount())
       ->setDataID($this->getDataID())
       ->setPriority($this->getPriority())
+      ->setObjectPHID($this->getObjectPHID())
       ->setResult($result)
       ->setDuration($duration);
 
@@ -197,7 +198,12 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
     if ($did_succeed) {
       foreach ($worker->getQueuedTasks() as $task) {
         list($class, $data) = $task;
-        PhabricatorWorker::scheduleTask($class, $data, $this->getPriority());
+        PhabricatorWorker::scheduleTask(
+          $class,
+          $data,
+          array(
+            'priority' => $this->getPriority(),
+          ));
       }
     }
 

@@ -95,6 +95,7 @@
   padding: 8px 0;
 }
 
-.dashboard-panel .phabricator-feed-frame .phabricator-feed-story-date-separator {
+.dashboard-panel .phabricator-feed-frame
+  .phabricator-feed-story-date-separator {
   margin-top: 0;
 }

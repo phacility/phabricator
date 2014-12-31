@@ -249,57 +249,6 @@ abstract class PhabricatorBaseEnglishTranslation
         'The actions you are taking have no effect:',
       ),
 
-      '%s edited post(s), added %d: %s; removed %d: %s.' =>
-        '%s edited posts, added: %3$s; removed: %5$s',
-
-      '%s added %d post(s): %s.' => array(
-        array(
-          '%s added a post: %3$s.',
-          '%s added posts: %3$s.',
-        ),
-      ),
-
-      '%s removed %d post(s): %s.' => array(
-        array(
-          '%s removed a post: %3$s.',
-          '%s removed posts: %3$s.',
-        ),
-      ),
-
-      '%s edited blog(s), added %d: %s; removed %d: %s.' =>
-        '%s edited blogs, added: %3$s; removed: %5$s',
-
-      '%s added %d blog(s): %s.' => array(
-        array(
-          '%s added a blog: %3$s.',
-          '%s added blogs: %3$s.',
-        ),
-      ),
-
-      '%s removed %d blog(s): %s.' => array(
-        array(
-          '%s removed a blog: %3$s.',
-          '%s removed blogs: %3$s.',
-        ),
-      ),
-
-      '%s edited blogger(s), added %d: %s; removed %d: %s.' =>
-        '%s edited bloggers, added: %3$s; removed: %5$s',
-
-      '%s added %d blogger(s): %s.' => array(
-        array(
-          '%s added a blogger: %3$s.',
-          '%s added bloggers: %3$s.',
-        ),
-      ),
-
-      '%s removed %d blogger(s): %s.' => array(
-        array(
-          '%s removed a blogger: %3$s.',
-          '%s removed bloggers: %3$s.',
-        ),
-      ),
-
       '%s edited member(s), added %d: %s; removed %d: %s.' =>
         '%s edited members, added: %3$s; removed: %5$s',
 
@@ -382,33 +331,73 @@ abstract class PhabricatorBaseEnglishTranslation
         ),
       ),
 
-      '%s added %d blocking task(s): %s.' => array(
+      '%s added %s blocking task(s): %s.' => array(
         array(
           '%s added a blocking task: %3$s.',
           '%s added blocking tasks: %3$s.',
         ),
       ),
 
-      '%s added %d blocked task(s): %s.' => array(
+      '%s added %s blocked task(s): %s.' => array(
         array(
           '%s added a blocked task: %3$s.',
           '%s added blocked tasks: %3$s.',
         ),
       ),
 
-      '%s removed %d blocking task(s): %s.' => array(
+      '%s removed %s blocking task(s): %s.' => array(
         array(
           '%s removed a blocking task: %3$s.',
           '%s removed blocking tasks: %3$s.',
         ),
       ),
 
-      '%s removed %d blocked task(s): %s.' => array(
+      '%s removed %s blocked task(s): %s.' => array(
         array(
           '%s removed a blocked task: %3$s.',
           '%s removed blocked tasks: %3$s.',
         ),
       ),
+
+      '%s added %s blocking task(s) for %s: %s.' => array(
+        array(
+          '%s added a blocking task for %3$s: %4$s.',
+          '%s added blocking tasks for %3$s: %4$s.',
+        ),
+      ),
+
+      '%s added %s blocked task(s) for %s: %s.' => array(
+        array(
+          '%s added a blocked task for %3$s: %4$s.',
+          '%s added blocked tasks for %3$s: %4$s.',
+        ),
+      ),
+
+      '%s removed %s blocking task(s) for %s: %s.' => array(
+        array(
+          '%s removed a blocking task for %3$s: %4$s.',
+          '%s removed blocking tasks for %3$s: %4$s.',
+        ),
+      ),
+
+      '%s removed %s blocked task(s) for %s: %s.' => array(
+        array(
+          '%s removed a blocked task for %3$s: %4$s.',
+          '%s removed blocked tasks for %3$s: %4$s.',
+        ),
+      ),
+
+      '%s edited blocking task(s), added %s: %s; removed %s: %s.' =>
+        '%s edited blocking tasks, added: %3$s; removed: %5$s',
+
+      '%s edited blocking task(s) for %s, added %s: %s; removed %s: %s.' =>
+        '%s edited blocking tasks for %s, added: %4$s; removed: %6$s',
+
+      '%s edited blocked task(s), added %s: %s; removed %s: %s.' =>
+        '%s edited blocked tasks, added: %3$s; removed: %5$s',
+
+      '%s edited blocked task(s) for %s, added %s: %s; removed %s: %s.' =>
+        '%s edited blocked tasks for %s, added: %4$s; removed: %6$s',
 
       '%s edited answer(s), added %d: %s; removed %d: %s.' =>
         '%s edited answers, added: %3$s; removed: %5$s',
@@ -461,7 +450,7 @@ abstract class PhabricatorBaseEnglishTranslation
         ),
       ),
 
-      '%s edited task(s), added %d: %s; removed %d: %s.' =>
+      '%s edited task(s), added %d: %s; removed %s: %s.' =>
         '%s edited tasks, added: %3$s; removed: %5$s',
 
       '%s added %d task(s): %s.' => array(
@@ -509,40 +498,6 @@ abstract class PhabricatorBaseEnglishTranslation
         array(
           '%s removed a account: %3$s.',
           '%s removed accounts: %3$s.',
-        ),
-      ),
-
-      '%s edited charge(s), added %d: %s; removed %d: %s.' =>
-        '%s edited charges, added: %3$s; removed: %5$s',
-
-      '%s added %d charge(s): %s.' => array(
-        array(
-          '%s added a charge: %3$s.',
-          '%s added charges: %3$s.',
-        ),
-      ),
-
-      '%s removed %d charge(s): %s.' => array(
-        array(
-          '%s removed a charge: %3$s.',
-          '%s removed charges: %3$s.',
-        ),
-      ),
-
-      '%s edited purchase(s), added %d: %s; removed %d: %s.' =>
-        '%s edited purchases, added: %3$s; removed: %5$s',
-
-      '%s added %d purchase(s): %s.' => array(
-        array(
-          '%s added a purchase: %3$s.',
-          '%s added purchases: %3$s.',
-        ),
-      ),
-
-      '%s removed %d purchase(s): %s.' => array(
-        array(
-          '%s removed a purchase: %3$s.',
-          '%s removed purchases: %3$s.',
         ),
       ),
 

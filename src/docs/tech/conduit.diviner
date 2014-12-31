@@ -26,7 +26,7 @@ by executing ##arc call-conduit method## (see ##arc help call-conduit## for
 more information). You can see and test available methods at ##/conduit/## in
 the web interface.
 
-Arcanist is implemented using Conduit, and @{class:PhabricatorIRCBot} is
+Arcanist is implemented using Conduit, and @{class:PhabricatorBot} is
 intended as a practical example of how to write a program which interfaces with
 Phabricator over Conduit.
 

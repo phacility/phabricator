@@ -3,6 +3,25 @@
 final class PhabricatorSetupCheckRepositories extends PhabricatorSetupCheck {
 
   protected function executeChecks() {
+
+    $cluster_services = id(new AlmanacServiceQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withServiceClasses(
+        array(
+          'AlmanacClusterRepositoryServiceType',
+        ))
+      ->setLimit(1)
+      ->execute();
+    if ($cluster_services) {
+      // If cluster repository services are defined, these checks aren't useful
+      // because some nodes (like web nodes) will usually not have any local
+      // repository information.
+
+      // Errors with this configuration will still be detected by checks on
+      // individual repositories.
+      return;
+    }
+
     $repo_path = PhabricatorEnv::getEnvConfig('repository.default-local-path');
 
     if (!$repo_path) {

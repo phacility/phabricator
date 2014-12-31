@@ -8,7 +8,9 @@ final class PhabricatorSearchIndexer {
       array(
         'documentPHID' => $phid,
       ),
-      PhabricatorWorker::PRIORITY_IMPORT);
+      array(
+        'priority' => PhabricatorWorker::PRIORITY_IMPORT,
+      ));
   }
 
   public function indexDocumentByPHID($phid) {

@@ -24,9 +24,9 @@ abstract class PhabricatorWorkerManagementWorkflow
     $active_tasks = id(new PhabricatorWorkerActiveTask())->loadAllWhere(
       'id IN (%Ls)',
       $ids);
-    $archive_tasks = id(new PhabricatorWorkerArchiveTask())->loadAllWhere(
-      'id IN (%Ls)',
-      $ids);
+    $archive_tasks = id(new PhabricatorWorkerArchiveTaskQuery())
+      ->withIDs($ids)
+      ->execute();
 
     $tasks =
       mpull($active_tasks, null, 'getID') +

@@ -161,12 +161,13 @@
 }
 
 .conpherence-message-pane .conpherence-edited .phabricator-transaction-content {
- padding: 0 0 5px 45px;
- font-style: italic;
+  padding: 0 0 5px 45px;
+  font-style: italic;
 }
 
-.device-phone .conpherence-message-pane .conpherence-edited .phabricator-transaction-content {
- padding: 0 0 5px 35px;
+.device-phone .conpherence-message-pane .conpherence-edited
+  .phabricator-transaction-content {
+  padding: 0 0 5px 35px;
 }
 
 .conpherence-message-pane .phabricator-transaction-info,

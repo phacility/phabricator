@@ -46,8 +46,8 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ->readFieldsFromStorage($task);
 
     $e_commit = ManiphestTaskHasCommitEdgeType::EDGECONST;
-    $e_dep_on = PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK;
-    $e_dep_by = PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK;
+    $e_dep_on = ManiphestTaskDependsOnTaskEdgeType::EDGECONST;
+    $e_dep_by = ManiphestTaskDependedOnByTaskEdgeType::EDGECONST;
     $e_rev    = ManiphestTaskHasRevisionEdgeType::EDGECONST;
     $e_mock   = PhabricatorEdgeConfig::TYPE_TASK_HAS_MOCK;
 
@@ -482,9 +482,9 @@ final class ManiphestTaskDetailController extends ManiphestController {
     }
 
     $edge_types = array(
-      PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK
+      ManiphestTaskDependedOnByTaskEdgeType::EDGECONST
         => pht('Blocks'),
-      PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK
+      ManiphestTaskDependsOnTaskEdgeType::EDGECONST
         => pht('Blocked By'),
       ManiphestTaskHasRevisionEdgeType::EDGECONST
         => pht('Differential Revisions'),

@@ -333,7 +333,9 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
     $atom_cache = $this->getAtomCache();
     $bar = id(new PhutilConsoleProgressBar())
       ->setTotal(count($futures));
-    foreach (Futures($futures)->limit(4) as $key => $future) {
+    $futures = id(new FutureIterator($futures))
+      ->limit(4);
+    foreach ($futures as $key => $future) {
       try {
         $atoms = $future->resolveJSON();
 

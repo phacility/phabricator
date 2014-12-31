@@ -94,16 +94,19 @@ abstract class PhabricatorWorker {
   final public static function scheduleTask(
     $task_class,
     $data,
-    $priority = null) {
+    $options = array()) {
 
+    $priority = idx($options, 'priority');
     if ($priority === null) {
       $priority = self::PRIORITY_DEFAULT;
     }
+    $object_phid = idx($options, 'objectPHID');
 
     $task = id(new PhabricatorWorkerActiveTask())
       ->setTaskClass($task_class)
       ->setData($data)
-      ->setPriority($priority);
+      ->setPriority($priority)
+      ->setObjectPHID($object_phid);
 
     if (self::$runAllTasksInProcess) {
       // Do the work in-process.
@@ -114,7 +117,8 @@ abstract class PhabricatorWorker {
           $worker->doWork();
           foreach ($worker->getQueuedTasks() as $queued_task) {
             list($queued_class, $queued_data, $queued_priority) = $queued_task;
-            self::scheduleTask($queued_class, $queued_data, $queued_priority);
+            $queued_options = array('priority' => $queued_priority);
+            self::scheduleTask($queued_class, $queued_data, $queued_options);
           }
           break;
         } catch (PhabricatorWorkerYieldException $ex) {
@@ -194,9 +198,8 @@ abstract class PhabricatorWorker {
       }
     }
 
-    $tasks = id(new PhabricatorWorkerArchiveTask())->loadAllWhere(
-      'id IN (%Ld)',
-      $task_ids);
+    $tasks = id(new PhabricatorWorkerArchiveTaskQuery())
+      ->withIDs($task_ids);
 
     foreach ($tasks as $task) {
       if ($task->getResult() != PhabricatorWorkerArchiveTask::RESULT_SUCCESS) {

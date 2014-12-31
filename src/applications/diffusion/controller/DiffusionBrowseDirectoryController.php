@@ -66,22 +66,21 @@ final class DiffusionBrowseDirectoryController
 
     $content[] = $this->buildOpenRevisions();
 
-    $readme = $this->callConduitWithDiffusionRequest(
-      'diffusion.readmequery',
-      array(
-        'paths' => $results->getPathDicts(),
-        'commit' => $drequest->getStableCommit(),
-      ));
-    if ($readme) {
-      $box = new PHUIBoxView();
-      $box->appendChild($readme);
-      $box->addPadding(PHUI::PADDING_LARGE);
 
-      $object_box = id(new PHUIObjectBoxView())
-        ->setHeaderText(pht('README'))
-        ->appendChild($box);
-
-      $content[] = $object_box;
+    $readme_path = $results->getReadmePath();
+    if ($readme_path) {
+      $readme_content = $this->callConduitWithDiffusionRequest(
+        'diffusion.filecontentquery',
+        array(
+          'path' => $readme_path,
+          'commit' => $drequest->getStableCommit(),
+        ));
+      if ($readme_content) {
+        $content[] = id(new DiffusionReadmeView())
+          ->setUser($this->getViewer())
+          ->setPath($readme_path)
+          ->setContent($readme_content['corpus']);
+      }
     }
 
     $crumbs = $this->buildCrumbs(

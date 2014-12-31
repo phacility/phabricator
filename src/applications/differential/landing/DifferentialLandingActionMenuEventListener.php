@@ -43,8 +43,9 @@ final class DifferentialLandingActionMenuEventListener
     foreach ($strategies as $strategy) {
       $viewer = $event->getUser();
       $action = $strategy->createMenuItem($viewer, $revision, $repository);
-      if ($action == null)
+      if ($action == null) {
         continue;
+      }
       if ($strategy->isActionDisabled($viewer, $revision, $repository)) {
         $action->setDisabled(true);
       }

@@ -21,10 +21,20 @@
         "(^support/aphlict/)"
       ]
     },
-    "jshint": {
+    "jshint-browser": {
       "type": "jshint",
       "include": "(\\.js$)",
-      "jshint.jshintrc": "support/lint/jshintrc"
+      "exclude": [
+        "(^support/aphlict/server/.*\\.js$)"
+      ],
+      "jshint.jshintrc": "support/lint/browser.jshintrc"
+    },
+    "jshint-node": {
+      "type": "jshint",
+      "include": [
+        "(^support/aphlict/server/.*\\.js$)"
+      ],
+      "jshint.jshintrc": "support/lint/node.jshintrc"
     },
     "json": {
       "type": "json",

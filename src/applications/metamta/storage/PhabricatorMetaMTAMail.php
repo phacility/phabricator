@@ -342,7 +342,9 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       $mailer_task = PhabricatorWorker::scheduleTask(
         'PhabricatorMetaMTAWorker',
         $this->getID(),
-        PhabricatorWorker::PRIORITY_ALERTS);
+        array(
+          'priority' => PhabricatorWorker::PRIORITY_ALERTS,
+        ));
 
     $this->saveTransaction();
 

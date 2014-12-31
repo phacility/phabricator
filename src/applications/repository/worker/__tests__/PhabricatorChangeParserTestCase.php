@@ -203,6 +203,8 @@ final class PhabricatorChangeParserTestCase
   }
 
   public function testMercurialParser() {
+    $this->requireBinaryForTest('hg');
+
     $repository = $this->buildDiscoveredRepository('CHB');
     $viewer = PhabricatorUser::getOmnipotentUser();
 

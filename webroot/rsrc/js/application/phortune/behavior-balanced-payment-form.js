@@ -8,8 +8,6 @@
 JX.behavior('balanced-payment-form', function(config) {
   balanced.init(config.balancedMarketplaceURI);
 
-  var ccform = new JX.PhortuneCreditCardForm(JX.$(config.formID), onsubmit);
-
   function onsubmit(card_data) {
     var errors = [];
 
@@ -54,4 +52,6 @@ JX.behavior('balanced-payment-form', function(config) {
 
     ccform.submitForm(errors, {balancedMarketplaceURI: token});
   }
+
+  var ccform = new JX.PhortuneCreditCardForm(JX.$(config.formID), onsubmit);
 });

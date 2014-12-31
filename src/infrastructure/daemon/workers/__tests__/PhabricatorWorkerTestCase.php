@@ -206,7 +206,7 @@ final class PhabricatorWorkerTestCase extends PhabricatorTestCase {
     return PhabricatorWorker::scheduleTask(
       'PhabricatorTestWorker',
       $data,
-      $priority);
+      array('priority' => $priority));
   }
 
 }

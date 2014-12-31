@@ -50,7 +50,7 @@ final class PhabricatorJavelinLinter extends ArcanistLinter {
       $futures[$path] = $future;
     }
 
-    foreach (Futures($futures)->limit(8) as $path => $future) {
+    foreach (id(new FutureIterator($futures))->limit(8) as $path => $future) {
       $this->symbols[$path] = $future->resolvex();
     }
   }
