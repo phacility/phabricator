@@ -278,23 +278,6 @@ abstract class PhabricatorBaseEnglishTranslation
         ),
       ),
 
-      '%s changed project(s) of %s, added %d: %s; removed %d: %s' =>
-        '%s changed projects of %s, added: %4$s; removed: %6$s',
-
-      '%s added %d project(s) to %s: %s' => array(
-        array(
-          '%s added a project to %3$s: %4$s',
-          '%s added projects to %3$s: %4$s',
-        ),
-      ),
-
-      '%s removed %d project(s) from %s: %s' => array(
-        array(
-          '%s removed a project from %3$s: %4$s',
-          '%s removed projects from %3$s: %4$s',
-        ),
-      ),
-
       '%s merged %d task(s): %s.' => array(
         array(
           '%s merged a task: %3$s.',
@@ -748,9 +731,6 @@ abstract class PhabricatorBaseEnglishTranslation
           '%s removed projects: %3$s',
         ),
       ),
-
-      '%s changed project(s), added %d: %s; removed %d: %s' =>
-        '%s changed projects, added: %3$s; removed: %5$s',
 
       '%s attached %d file(s): %s' => array(
         array(
