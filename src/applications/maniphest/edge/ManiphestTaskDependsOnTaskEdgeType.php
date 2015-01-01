@@ -8,7 +8,7 @@ final class ManiphestTaskDependsOnTaskEdgeType extends PhabricatorEdgeType {
     return ManiphestTaskDependedOnByTaskEdgeType::EDGECONST;
   }
 
-  public function shouldWriteInverseTransaction() {
+  public function shouldWriteInverseTransactions() {
     return true;
   }
 
