@@ -14,7 +14,13 @@ class PhabricatorApplicationTransactionView extends AphrontView {
   private $quoteTargetID;
   private $quoteRef;
   private $pager;
+  private $renderAsFeed;
   private $renderData = array();
+
+  public function setRenderAsFeed($feed) {
+    $this->renderAsFeed = $feed;
+    return $this;
+  }
 
   public function setQuoteRef($quote_ref) {
     $this->quoteRef = $quote_ref;
@@ -390,7 +396,11 @@ class PhabricatorApplicationTransactionView extends AphrontView {
     }
 
     if (!$this->shouldSuppressTitle($xaction, $group)) {
-      $title = $xaction->getTitle();
+      if ($this->renderAsFeed) {
+        $title = $xaction->getTitleForFeed();
+      } else {
+        $title = $xaction->getTitle();
+      }
       if ($xaction->hasChangeDetails()) {
         if (!$this->isPreview) {
           $details = $this->buildChangeDetailsLink($xaction);

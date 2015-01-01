@@ -14,6 +14,7 @@ abstract class PhabricatorConfigController extends PhabricatorController {
     $nav->addLabel(pht('Configuration'));
     $nav->addFilter('/', pht('Browse Settings'));
     $nav->addFilter('all/', pht('All Settings'));
+    $nav->addFilter('history/', pht('Settings History'));
     $nav->addLabel(pht('Setup'));
     $nav->addFilter('issue/', pht('Setup Issues'));
     $nav->addLabel(pht('Database'));
