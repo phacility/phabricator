@@ -5,9 +5,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TABLE_NAME_EDGE       = 'edge';
   const TABLE_NAME_EDGEDATA   = 'edgedata';
 
-  const TYPE_PROJ_MEMBER                = 13;
-  const TYPE_MEMBER_OF_PROJ             = 14;
-
   const TYPE_OBJECT_HAS_SUBSCRIBER      = 21;
   const TYPE_SUBSCRIBED_TO_OBJECT       = 22;
 
@@ -103,9 +100,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
   private static function getInverse($edge_type) {
     static $map = array(
-      self::TYPE_PROJ_MEMBER => self::TYPE_MEMBER_OF_PROJ,
-      self::TYPE_MEMBER_OF_PROJ => self::TYPE_PROJ_MEMBER,
-
       self::TYPE_OBJECT_HAS_SUBSCRIBER => self::TYPE_SUBSCRIBED_TO_OBJECT,
       self::TYPE_SUBSCRIBED_TO_OBJECT => self::TYPE_OBJECT_HAS_SUBSCRIBER,
 
@@ -179,10 +173,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
     switch ($type) {
       case self::TYPE_MOCK_HAS_TASK:
         return '%s edited task(s), added %d: %s; removed %d: %s.';
-      case self::TYPE_PROJ_MEMBER:
-        return '%s edited member(s), added %d: %s; removed %d: %s.';
-      case self::TYPE_MEMBER_OF_PROJ:
-        return '%s edited project(s), added %d: %s; removed %d: %s.';
       case self::TYPE_OBJECT_HAS_SUBSCRIBER:
         return '%s edited subscriber(s), added %d: %s; removed %d: %s.';
       case self::TYPE_SUBSCRIBED_TO_OBJECT:
@@ -216,10 +206,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
     switch ($type) {
       case self::TYPE_MOCK_HAS_TASK:
         return '%s added %d task(s): %s.';
-      case self::TYPE_PROJ_MEMBER:
-        return '%s added %d member(s): %s.';
-      case self::TYPE_MEMBER_OF_PROJ:
-        return '%s added %d project(s): %s.';
       case self::TYPE_OBJECT_HAS_SUBSCRIBER:
         return '%s added %d subscriber(s): %s.';
       case self::TYPE_OBJECT_HAS_UNSUBSCRIBER:
@@ -250,10 +236,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
     switch ($type) {
       case self::TYPE_MOCK_HAS_TASK:
         return '%s removed %d task(s): %s.';
-      case self::TYPE_PROJ_MEMBER:
-        return '%s removed %d member(s): %s.';
-      case self::TYPE_MEMBER_OF_PROJ:
-        return '%s removed %d project(s): %s.';
       case self::TYPE_OBJECT_HAS_SUBSCRIBER:
         return '%s removed %d subscriber(s): %s.';
       case self::TYPE_OBJECT_HAS_UNSUBSCRIBER:
@@ -284,10 +266,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
     switch ($type) {
       case self::TYPE_MOCK_HAS_TASK:
         return '%s updated tasks of %s.';
-      case self::TYPE_PROJ_MEMBER:
-        return '%s updated members of %s.';
-      case self::TYPE_MEMBER_OF_PROJ:
-        return '%s updated projects of %s.';
       case self::TYPE_OBJECT_HAS_SUBSCRIBER:
         return '%s updated subscribers of %s.';
       case self::TYPE_OBJECT_HAS_UNSUBSCRIBER:

@@ -9,7 +9,7 @@ foreach (new LiskMigrationIterator($table) as $project) {
 
   $members = PhabricatorEdgeQuery::loadDestinationPHIDs(
     $project->getPHID(),
-    PhabricatorEdgeConfig::TYPE_PROJ_MEMBER);
+    PhabricatorProjectProjectHasMemberEdgeType::EDGECONST);
 
   if (count($members)) {
     echo sprintf(

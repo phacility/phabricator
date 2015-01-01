@@ -133,31 +133,31 @@ abstract class PhabricatorBaseEnglishTranslation
       '%s edited member(s), added %d: %s; removed %d: %s.' =>
         '%s edited members, added: %3$s; removed: %5$s.',
 
-      '%s added %d member(s): %s.' => array(
+      '%s added %s member(s): %s.' => array(
         array(
           '%s added a member: %3$s.',
           '%s added members: %3$s.',
         ),
       ),
 
-      '%s removed %d member(s): %s.' => array(
+      '%s removed %s member(s): %s.' => array(
         array(
           '%s removed a member: %3$s.',
           '%s removed members: %3$s.',
         ),
       ),
 
-      '%s edited project(s), added %d: %s; removed %d: %s.' =>
+      '%s edited project(s), added %s: %s; removed %s: %s.' =>
         '%s edited projects, added: %3$s; removed: %5$s.',
 
-      '%s added %d project(s): %s.' => array(
+      '%s added %s project(s): %s.' => array(
         array(
           '%s added a project: %3$s.',
           '%s added projects: %3$s.',
         ),
       ),
 
-      '%s removed %d project(s): %s.' => array(
+      '%s removed %s project(s): %s.' => array(
         array(
           '%s removed a project: %3$s.',
           '%s removed projects: %3$s.',
@@ -791,20 +791,6 @@ abstract class PhabricatorBaseEnglishTranslation
 
       '%s edited %s revision(s) for %s, added %s: %s; removed %s: %s.' =>
         '%s edited revisions for %3$s, added: %5$s; removed %7$s.',
-
-      '%s added %s project(s): %s.' => array(
-        array(
-          '%s added a project: %3$s.',
-          '%s added projects: %3$s.',
-        ),
-      ),
-
-      '%s removed %s project(s): %s.' => array(
-        array(
-          '%s removed a project: %3$s.',
-          '%s removed projects: %3$s.',
-        ),
-      ),
 
       '%s edited %s project(s), added %s: %s; removed %s: %s.' =>
         '%s edited projects, added %4$s; removed %6$s.',

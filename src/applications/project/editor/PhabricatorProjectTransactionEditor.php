@@ -179,7 +179,7 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorTransactions::TYPE_EDGE:
         $edge_type = $xaction->getMetadataValue('edge:type');
         switch ($edge_type) {
-          case PhabricatorEdgeConfig::TYPE_PROJ_MEMBER:
+          case PhabricatorProjectProjectHasMemberEdgeType::EDGECONST:
           case PhabricatorEdgeConfig::TYPE_OBJECT_HAS_WATCHER:
             $old = $xaction->getOldValue();
             $new = $xaction->getNewValue();
@@ -190,7 +190,8 @@ final class PhabricatorProjectTransactionEditor
             // When removing members, we remove their subscription too.
             // When unwatching, we leave subscriptions, since it's fine to be
             // subscribed to a project but not be a member of it.
-            if ($edge_type == PhabricatorEdgeConfig::TYPE_PROJ_MEMBER) {
+            $edge_const = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
+            if ($edge_type == $edge_const) {
               $rem = array_keys(array_diff_key($old, $new));
             } else {
               $rem = array();
@@ -366,7 +367,7 @@ final class PhabricatorProjectTransactionEditor
         return;
       case PhabricatorTransactions::TYPE_EDGE:
         switch ($xaction->getMetadataValue('edge:type')) {
-          case PhabricatorEdgeConfig::TYPE_PROJ_MEMBER:
+          case PhabricatorProjectProjectHasMemberEdgeType::EDGECONST:
             $old = $xaction->getOldValue();
             $new = $xaction->getNewValue();
 
