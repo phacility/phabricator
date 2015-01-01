@@ -314,17 +314,17 @@ abstract class PhabricatorBaseEnglishTranslation
         ),
       ),
 
-      '%s edited voting user(s), added %d: %s; removed %d: %s.' =>
+      '%s edited voting user(s), added %s: %s; removed %d: %s.' =>
         '%s edited voting users, added: %3$s; removed: %5$s',
 
-      '%s added %d voting user(s): %s.' => array(
+      '%s added %s voting user(s): %s.' => array(
         array(
           '%s added a voting user: %3$s.',
           '%s added voting users: %3$s.',
         ),
       ),
 
-      '%s removed %d voting user(s): %s.' => array(
+      '%s removed %s voting user(s): %s.' => array(
         array(
           '%s removed a voting user: %3$s.',
           '%s removed voting users: %3$s.',
@@ -399,34 +399,34 @@ abstract class PhabricatorBaseEnglishTranslation
       '%s edited blocked task(s) for %s, added %s: %s; removed %s: %s.' =>
         '%s edited blocked tasks for %s, added: %4$s; removed: %6$s',
 
-      '%s edited answer(s), added %d: %s; removed %d: %s.' =>
+      '%s edited answer(s), added %s: %s; removed %d: %s.' =>
         '%s edited answers, added: %3$s; removed: %5$s',
 
-      '%s added %d answer(s): %s.' => array(
+      '%s added %s answer(s): %s.' => array(
         array(
           '%s added an answer: %3$s.',
           '%s added answers: %3$s.',
         ),
       ),
 
-      '%s removed %d answer(s): %s.' => array(
+      '%s removed %s answer(s): %s.' => array(
         array(
           '%s removed a answer: %3$s.',
           '%s removed answers: %3$s.',
         ),
       ),
 
-     '%s edited question(s), added %d: %s; removed %d: %s.' =>
+     '%s edited question(s), added %s: %s; removed %s: %s.' =>
         '%s edited questions, added: %3$s; removed: %5$s',
 
-      '%s added %d question(s): %s.' => array(
+      '%s added %s question(s): %s.' => array(
         array(
           '%s added a question: %3$s.',
           '%s added questions: %3$s.',
         ),
       ),
 
-      '%s removed %d question(s): %s.' => array(
+      '%s removed %s question(s): %s.' => array(
         array(
           '%s removed a question: %3$s.',
           '%s removed questions: %3$s.',

@@ -11,11 +11,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TYPE_PROJ_MEMBER                = 13;
   const TYPE_MEMBER_OF_PROJ             = 14;
 
-  const TYPE_QUESTION_HAS_VOTING_USER   = 17;
-  const TYPE_VOTING_USER_HAS_QUESTION   = 18;
-  const TYPE_ANSWER_HAS_VOTING_USER     = 19;
-  const TYPE_VOTING_USER_HAS_ANSWER     = 20;
-
   const TYPE_OBJECT_HAS_SUBSCRIBER      = 21;
   const TYPE_SUBSCRIBED_TO_OBJECT       = 22;
 
@@ -123,13 +118,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       self::TYPE_PROJ_MEMBER => self::TYPE_MEMBER_OF_PROJ,
       self::TYPE_MEMBER_OF_PROJ => self::TYPE_PROJ_MEMBER,
 
-      self::TYPE_QUESTION_HAS_VOTING_USER =>
-        self::TYPE_VOTING_USER_HAS_QUESTION,
-      self::TYPE_VOTING_USER_HAS_QUESTION =>
-        self::TYPE_QUESTION_HAS_VOTING_USER,
-      self::TYPE_ANSWER_HAS_VOTING_USER => self::TYPE_VOTING_USER_HAS_ANSWER,
-      self::TYPE_VOTING_USER_HAS_ANSWER => self::TYPE_ANSWER_HAS_VOTING_USER,
-
       self::TYPE_OBJECT_HAS_SUBSCRIBER => self::TYPE_SUBSCRIBED_TO_OBJECT,
       self::TYPE_SUBSCRIBED_TO_OBJECT => self::TYPE_OBJECT_HAS_SUBSCRIBER,
 
@@ -221,13 +209,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s edited member(s), added %d: %s; removed %d: %s.';
       case self::TYPE_MEMBER_OF_PROJ:
         return '%s edited project(s), added %d: %s; removed %d: %s.';
-      case self::TYPE_QUESTION_HAS_VOTING_USER:
-      case self::TYPE_ANSWER_HAS_VOTING_USER:
-        return '%s edited voting user(s), added %d: %s; removed %d: %s.';
-      case self::TYPE_VOTING_USER_HAS_QUESTION:
-        return '%s edited question(s), added %d: %s; removed %d: %s.';
-      case self::TYPE_VOTING_USER_HAS_ANSWER:
-        return '%s edited answer(s), added %d: %s; removed %d: %s.';
       case self::TYPE_OBJECT_HAS_SUBSCRIBER:
         return '%s edited subscriber(s), added %d: %s; removed %d: %s.';
       case self::TYPE_SUBSCRIBED_TO_OBJECT:
@@ -275,13 +256,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s added %d member(s): %s.';
       case self::TYPE_MEMBER_OF_PROJ:
         return '%s added %d project(s): %s.';
-      case self::TYPE_QUESTION_HAS_VOTING_USER:
-      case self::TYPE_ANSWER_HAS_VOTING_USER:
-        return '%s added %d voting user(s): %s.';
-      case self::TYPE_VOTING_USER_HAS_QUESTION:
-        return '%s added %d question(s): %s.';
-      case self::TYPE_VOTING_USER_HAS_ANSWER:
-        return '%s added %d answer(s): %s.';
       case self::TYPE_OBJECT_HAS_SUBSCRIBER:
         return '%s added %d subscriber(s): %s.';
       case self::TYPE_OBJECT_HAS_UNSUBSCRIBER:
@@ -325,13 +299,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s removed %d member(s): %s.';
       case self::TYPE_MEMBER_OF_PROJ:
         return '%s removed %d project(s): %s.';
-      case self::TYPE_QUESTION_HAS_VOTING_USER:
-      case self::TYPE_ANSWER_HAS_VOTING_USER:
-        return '%s removed %d voting user(s): %s.';
-      case self::TYPE_VOTING_USER_HAS_QUESTION:
-        return '%s removed %d question(s): %s.';
-      case self::TYPE_VOTING_USER_HAS_ANSWER:
-        return '%s removed %d answer(s): %s.';
       case self::TYPE_OBJECT_HAS_SUBSCRIBER:
         return '%s removed %d subscriber(s): %s.';
       case self::TYPE_OBJECT_HAS_UNSUBSCRIBER:
@@ -375,13 +342,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s updated members of %s.';
       case self::TYPE_MEMBER_OF_PROJ:
         return '%s updated projects of %s.';
-      case self::TYPE_QUESTION_HAS_VOTING_USER:
-      case self::TYPE_ANSWER_HAS_VOTING_USER:
-        return '%s updated voting users of %s.';
-      case self::TYPE_VOTING_USER_HAS_QUESTION:
-        return '%s updated questions of %s.';
-      case self::TYPE_VOTING_USER_HAS_ANSWER:
-        return '%s updated answers of %s.';
       case self::TYPE_OBJECT_HAS_SUBSCRIBER:
         return '%s updated subscribers of %s.';
       case self::TYPE_OBJECT_HAS_UNSUBSCRIBER:

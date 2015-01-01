@@ -166,7 +166,7 @@ final class PonderAnswer extends PonderDAO
 
   // votable interface
   public function getUserVoteEdgeType() {
-    return PhabricatorEdgeConfig::TYPE_VOTING_USER_HAS_ANSWER;
+    return PonderVotingUserHasAnswerEdgeType::EDGECONST;
   }
 
   public function getVotablePHID() {
