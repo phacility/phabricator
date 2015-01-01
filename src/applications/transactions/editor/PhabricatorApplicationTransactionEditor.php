@@ -1249,7 +1249,7 @@ abstract class PhabricatorApplicationTransactionEditor
       }
     }
     if ($mentionable_phids) {
-      $edge_type = PhabricatorObjectMentionsObject::EDGECONST;
+      $edge_type = PhabricatorObjectMentionsObjectEdgeType::EDGECONST;
       $block_xactions[] = newv(get_class(head($xactions)), array())
         ->setIgnoreOnNoEffect(true)
         ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
