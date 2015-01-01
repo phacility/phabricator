@@ -555,20 +555,6 @@ abstract class PhabricatorBaseEnglishTranslation
       '%s edited unsubscriber(s), added %d: %s; removed %d: %s.' =>
         '%s edited unsubscribers, added: %3$s; removed: %5$s',
 
-      '%s added %d unsubscriber(s): %s.' => array(
-        array(
-          '%s added a unsubscriber: %3$s.',
-          '%s added unsubscribers: %3$s.',
-        ),
-      ),
-
-      '%s removed %d unsubscriber(s): %s.' => array(
-        array(
-          '%s removed a unsubscriber: %3$s.',
-          '%s removed unsubscribers: %3$s.',
-        ),
-      ),
-
       '%s edited participant(s), added %d: %s; removed %d: %s.' =>
         '%s edited participants, added: %3$s; removed: %5$s',
 
