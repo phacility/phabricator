@@ -269,7 +269,7 @@ final class DifferentialTransactionEditor
 
     $status_plan = ArcanistDifferentialRevisionStatus::CHANGES_PLANNED;
 
-    $edge_reviewer = PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER;
+    $edge_reviewer = DifferentialRevisionHasReviewerEdgeType::EDGECONST;
     $edge_ref_task = DifferentialRevisionHasTaskEdgeType::EDGECONST;
 
     $is_sticky_accept = PhabricatorEnv::getEnvConfig(
@@ -565,7 +565,7 @@ final class DifferentialTransactionEditor
     $result = parent::mergeEdgeData($type, $u, $v);
 
     switch ($type) {
-      case PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER:
+      case DifferentialRevisionHasReviewerEdgeType::EDGECONST:
         // When the same reviewer has their status updated by multiple
         // transactions, we want the strongest status to win. An example of
         // this is when a user adds a comment and also accepts a revision which
@@ -721,7 +721,7 @@ final class DifferentialTransactionEditor
       switch ($type) {
         case PhabricatorTransactions::TYPE_EDGE:
           switch ($xaction->getMetadataValue('edge:type')) {
-            case PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER:
+            case DifferentialRevisionHasReviewerEdgeType::EDGECONST:
 
               // Prevent the author from becoming a reviewer.
 
@@ -1299,8 +1299,8 @@ final class DifferentialTransactionEditor
       unset($rev_phids[$object->getPHID()]);
 
       if ($revs) {
-        $edge_depends = PhabricatorEdgeConfig::TYPE_DREV_DEPENDS_ON_DREV;
-        $edges[$edge_depends] = $rev_phids;
+        $depends = DifferentialRevisionDependsOnRevisionEdgeType::EDGECONST;
+        $edges[$depends] = $rev_phids;
       }
     }
 
@@ -1608,7 +1608,7 @@ final class DifferentialTransactionEditor
     }
 
     if ($value) {
-      $edge_reviewer = PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER;
+      $edge_reviewer = DifferentialRevisionHasReviewerEdgeType::EDGECONST;
 
       $xactions[] = id(new DifferentialTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)

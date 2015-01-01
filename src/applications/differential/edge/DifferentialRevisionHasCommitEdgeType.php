@@ -1,10 +1,11 @@
 <?php
 
-final class ManiphestTaskDependedOnByTaskEdgeType extends PhabricatorEdgeType {
-  const EDGECONST = 4;
+final class DifferentialRevisionHasCommitEdgeType extends PhabricatorEdgeType {
+
+  const EDGECONST = 31;
 
   public function getInverseEdgeConstant() {
-    return ManiphestTaskDependsOnTaskEdgeType::EDGECONST;
+    return DiffusionCommitHasRevisionEdgeType::EDGECONST;
   }
 
   public function shouldWriteInverseTransactions() {
@@ -17,7 +18,7 @@ final class ManiphestTaskDependedOnByTaskEdgeType extends PhabricatorEdgeType {
     $add_edges) {
 
     return pht(
-      '%s added %s blocked task(s): %s.',
+      '%s added %s commit(s): %s.',
       $actor,
       $add_count,
       $add_edges);
@@ -29,7 +30,7 @@ final class ManiphestTaskDependedOnByTaskEdgeType extends PhabricatorEdgeType {
     $rem_edges) {
 
     return pht(
-      '%s removed %s blocked task(s): %s.',
+      '%s removed %s commit(s): %s.',
       $actor,
       $rem_count,
       $rem_edges);
@@ -44,7 +45,7 @@ final class ManiphestTaskDependedOnByTaskEdgeType extends PhabricatorEdgeType {
     $rem_edges) {
 
     return pht(
-      '%s edited blocked task(s), added %s: %s; removed %s: %s.',
+      '%s edited commit(s), added %s: %s; removed %s: %s.',
       $actor,
       $add_count,
       $add_edges,
@@ -59,7 +60,7 @@ final class ManiphestTaskDependedOnByTaskEdgeType extends PhabricatorEdgeType {
     $add_edges) {
 
     return pht(
-      '%s added %s blocked task(s) for %s: %s.',
+      '%s added %s commit(s) for %s: %s.',
       $actor,
       $add_count,
       $object,
@@ -73,7 +74,7 @@ final class ManiphestTaskDependedOnByTaskEdgeType extends PhabricatorEdgeType {
     $rem_edges) {
 
     return pht(
-      '%s removed %s blocked task(s) for %s: %s.',
+      '%s removed %s commit(s) for %s: %s.',
       $actor,
       $rem_count,
       $object,
@@ -90,7 +91,7 @@ final class ManiphestTaskDependedOnByTaskEdgeType extends PhabricatorEdgeType {
     $rem_edges) {
 
     return pht(
-      '%s edited blocked task(s) for %s, added %s: %s; removed %s: %s.',
+      '%s edited commit(s) for %s, added %s: %s; removed %s: %s.',
       $actor,
       $object,
       $add_count,

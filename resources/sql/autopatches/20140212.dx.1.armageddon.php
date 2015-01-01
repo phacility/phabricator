@@ -100,7 +100,7 @@ foreach ($rows as $row) {
       }
       $old[$phid] = array(
         'src' => $revision_phid,
-        'type' => PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER,
+        'type' => DifferentialRevisionHasReviewerEdgeType::EDGECONST,
         'dst' => $phid,
       );
     }
@@ -112,7 +112,7 @@ foreach ($rows as $row) {
       }
       $new[$phid] = array(
         'src' => $revision_phid,
-        'type' => PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER,
+        'type' => DifferentialRevisionHasReviewerEdgeType::EDGECONST,
         'dst' => $phid,
       );
     }
@@ -122,7 +122,7 @@ foreach ($rows as $row) {
       'old' => $old,
       'new' => $new,
       'meta' => array(
-        'edge:type' => PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER,
+        'edge:type' => DifferentialRevisionHasReviewerEdgeType::EDGECONST,
       ),
     );
   }

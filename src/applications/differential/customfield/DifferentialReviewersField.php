@@ -85,7 +85,7 @@ final class DifferentialReviewersField
 
   public function getApplicationTransactionMetadata() {
     return array(
-      'edge:type' => PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER,
+      'edge:type' => DifferentialRevisionHasReviewerEdgeType::EDGECONST,
     );
   }
 

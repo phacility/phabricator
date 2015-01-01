@@ -28,7 +28,7 @@ final class DiffusionHovercardEventListener extends PhabricatorEventListener {
 
     $revision = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $commit->getPHID(),
-      PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV);
+      DiffusionCommitHasRevisionEdgeType::EDGECONST);
     $revision = reset($revision);
 
     $author = $commit->getAuthorPHID();

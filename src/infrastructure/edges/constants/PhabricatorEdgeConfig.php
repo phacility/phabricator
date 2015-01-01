@@ -5,9 +5,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TABLE_NAME_EDGE       = 'edge';
   const TABLE_NAME_EDGEDATA   = 'edgedata';
 
-  const TYPE_DREV_DEPENDS_ON_DREV       = 5;
-  const TYPE_DREV_DEPENDED_ON_BY_DREV   = 6;
-
   const TYPE_PROJ_MEMBER                = 13;
   const TYPE_MEMBER_OF_PROJ             = 14;
 
@@ -20,14 +17,8 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TYPE_OBJECT_HAS_FILE            = 25;
   const TYPE_FILE_HAS_OBJECT            = 26;
 
-  const TYPE_DREV_HAS_COMMIT            = 31;
-  const TYPE_COMMIT_HAS_DREV            = 32;
-
   const TYPE_OBJECT_HAS_CONTRIBUTOR     = 33;
   const TYPE_CONTRIBUTED_TO_OBJECT      = 34;
-
-  const TYPE_DREV_HAS_REVIEWER          = 35;
-  const TYPE_REVIEWER_FOR_DREV          = 36;
 
   const TYPE_MOCK_HAS_TASK              = 37;
   const TYPE_TASK_HAS_MOCK              = 38;
@@ -112,9 +103,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
   private static function getInverse($edge_type) {
     static $map = array(
-      self::TYPE_DREV_DEPENDS_ON_DREV => self::TYPE_DREV_DEPENDED_ON_BY_DREV,
-      self::TYPE_DREV_DEPENDED_ON_BY_DREV => self::TYPE_DREV_DEPENDS_ON_DREV,
-
       self::TYPE_PROJ_MEMBER => self::TYPE_MEMBER_OF_PROJ,
       self::TYPE_MEMBER_OF_PROJ => self::TYPE_PROJ_MEMBER,
 
@@ -127,9 +115,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       self::TYPE_OBJECT_HAS_FILE => self::TYPE_FILE_HAS_OBJECT,
       self::TYPE_FILE_HAS_OBJECT => self::TYPE_OBJECT_HAS_FILE,
 
-      self::TYPE_DREV_HAS_COMMIT => self::TYPE_COMMIT_HAS_DREV,
-      self::TYPE_COMMIT_HAS_DREV => self::TYPE_DREV_HAS_COMMIT,
-
       self::TYPE_OBJECT_HAS_CONTRIBUTOR => self::TYPE_CONTRIBUTED_TO_OBJECT,
       self::TYPE_CONTRIBUTED_TO_OBJECT => self::TYPE_OBJECT_HAS_CONTRIBUTOR,
 
@@ -141,9 +126,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
       self::TYPE_PHOB_HAS_ASANASUBTASK => self::TYPE_ASANASUBTASK_HAS_PHOB,
       self::TYPE_ASANASUBTASK_HAS_PHOB => self::TYPE_PHOB_HAS_ASANASUBTASK,
-
-      self::TYPE_DREV_HAS_REVIEWER => self::TYPE_REVIEWER_FOR_DREV,
-      self::TYPE_REVIEWER_FOR_DREV => self::TYPE_DREV_HAS_REVIEWER,
 
       self::TYPE_PHOB_HAS_JIRAISSUE => self::TYPE_JIRAISSUE_HAS_PHOB,
       self::TYPE_JIRAISSUE_HAS_PHOB => self::TYPE_PHOB_HAS_JIRAISSUE,
@@ -163,8 +145,7 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
   private static function shouldPreventCycles($edge_type) {
     static $map = array(
-      self::TYPE_TEST_NO_CYCLE          => true,
-      self::TYPE_DREV_DEPENDS_ON_DREV   => true,
+      self::TYPE_TEST_NO_CYCLE => true,
     );
     return isset($map[$edge_type]);
   }
@@ -196,15 +177,8 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
   public static function getEditStringForEdgeType($type) {
     switch ($type) {
-      case self::TYPE_DREV_HAS_COMMIT:
-        return '%s edited commit(s), added %d: %s; removed %d: %s.';
       case self::TYPE_MOCK_HAS_TASK:
         return '%s edited task(s), added %d: %s; removed %d: %s.';
-      case self::TYPE_DREV_DEPENDS_ON_DREV:
-      case self::TYPE_DREV_DEPENDED_ON_BY_DREV:
-      case self::TYPE_COMMIT_HAS_DREV:
-      case self::TYPE_REVIEWER_FOR_DREV:
-        return '%s edited revision(s), added %d: %s; removed %d: %s.';
       case self::TYPE_PROJ_MEMBER:
         return '%s edited member(s), added %d: %s; removed %d: %s.';
       case self::TYPE_MEMBER_OF_PROJ:
@@ -222,8 +196,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s edited file(s), added %d: %s; removed %d: %s.';
       case self::TYPE_OBJECT_HAS_CONTRIBUTOR:
         return '%s edited contributor(s), added %d: %s; removed %d: %s.';
-      case self::TYPE_DREV_HAS_REVIEWER:
-        return '%s edited reviewer(s), added %d: %s; removed %d: %s.';
       case self::TYPE_TASK_HAS_MOCK:
         return '%s edited mock(s), added %d: %s; removed %d: %s.';
       case self::TYPE_DASHBOARD_HAS_PANEL:
@@ -242,16 +214,8 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
   public static function getAddStringForEdgeType($type) {
     switch ($type) {
-      case self::TYPE_DREV_HAS_COMMIT:
-        return '%s added %d commit(s): %s.';
-      case self::TYPE_DREV_DEPENDS_ON_DREV:
-        return '%s added %d dependencie(s): %s.';
       case self::TYPE_MOCK_HAS_TASK:
         return '%s added %d task(s): %s.';
-      case self::TYPE_DREV_DEPENDED_ON_BY_DREV:
-      case self::TYPE_COMMIT_HAS_DREV:
-      case self::TYPE_REVIEWER_FOR_DREV:
-        return '%s added %d revision(s): %s.';
       case self::TYPE_PROJ_MEMBER:
         return '%s added %d member(s): %s.';
       case self::TYPE_MEMBER_OF_PROJ:
@@ -264,8 +228,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s added %d file(s): %s.';
       case self::TYPE_OBJECT_HAS_CONTRIBUTOR:
         return '%s added %d contributor(s): %s.';
-      case self::TYPE_DREV_HAS_REVIEWER:
-        return '%s added %d reviewer(s): %s.';
       case self::TYPE_TASK_HAS_MOCK:
         return '%s added %d mock(s): %s.';
       case self::TYPE_DASHBOARD_HAS_PANEL:
@@ -286,15 +248,8 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
   public static function getRemoveStringForEdgeType($type) {
     switch ($type) {
-      case self::TYPE_DREV_HAS_COMMIT:
-        return '%s removed %d commit(s): %s.';
       case self::TYPE_MOCK_HAS_TASK:
         return '%s removed %d task(s): %s.';
-      case self::TYPE_DREV_DEPENDS_ON_DREV:
-      case self::TYPE_DREV_DEPENDED_ON_BY_DREV:
-      case self::TYPE_COMMIT_HAS_DREV:
-      case self::TYPE_REVIEWER_FOR_DREV:
-        return '%s removed %d revision(s): %s.';
       case self::TYPE_PROJ_MEMBER:
         return '%s removed %d member(s): %s.';
       case self::TYPE_MEMBER_OF_PROJ:
@@ -307,8 +262,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s removed %d file(s): %s.';
       case self::TYPE_OBJECT_HAS_CONTRIBUTOR:
         return '%s removed %d contributor(s): %s.';
-      case self::TYPE_DREV_HAS_REVIEWER:
-        return '%s removed %d reviewer(s): %s.';
       case self::TYPE_TASK_HAS_MOCK:
         return '%s removed %d mock(s): %s.';
       case self::TYPE_DASHBOARD_HAS_PANEL:
@@ -329,15 +282,8 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
   public static function getFeedStringForEdgeType($type) {
     switch ($type) {
-      case self::TYPE_DREV_HAS_COMMIT:
-        return '%s updated commits of %s.';
       case self::TYPE_MOCK_HAS_TASK:
         return '%s updated tasks of %s.';
-      case self::TYPE_DREV_DEPENDS_ON_DREV:
-      case self::TYPE_DREV_DEPENDED_ON_BY_DREV:
-      case self::TYPE_COMMIT_HAS_DREV:
-      case self::TYPE_REVIEWER_FOR_DREV:
-        return '%s updated revisions of %s.';
       case self::TYPE_PROJ_MEMBER:
         return '%s updated members of %s.';
       case self::TYPE_MEMBER_OF_PROJ:
@@ -350,8 +296,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s updated files of %s.';
       case self::TYPE_OBJECT_HAS_CONTRIBUTOR:
         return '%s updated contributors of %s.';
-      case self::TYPE_DREV_HAS_REVIEWER:
-        return '%s updated reviewers of %s.';
       case self::TYPE_TASK_HAS_MOCK:
         return '%s updated mocks of %s.';
       case self::TYPE_PANEL_HAS_DASHBOARD:

@@ -201,7 +201,7 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
         break;
       case PhabricatorTransactions::TYPE_EDGE:
         switch ($this->getMetadataValue('edge:type')) {
-          case PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER:
+          case DifferentialRevisionHasReviewerEdgeType::EDGECONST:
             $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEWERS;
             break;
         }
@@ -495,7 +495,7 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
         }
       case PhabricatorTransactions::TYPE_EDGE:
         switch ($this->getMetadataValue('edge:type')) {
-          case PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER:
+          case DifferentialRevisionHasReviewerEdgeType::EDGECONST:
             return 'fa-user';
         }
     }
@@ -571,7 +571,7 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_EDGE:
         switch ($this->getMetadataValue('edge:type')) {
-          case PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER:
+          case DifferentialRevisionHasReviewerEdgeType::EDGECONST:
             return pht(
               'The reviewers you are trying to add are already reviewing '.
               'this revision.');

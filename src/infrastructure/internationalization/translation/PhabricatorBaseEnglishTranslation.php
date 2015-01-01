@@ -67,27 +67,27 @@ abstract class PhabricatorBaseEnglishTranslation
         'removed mocks: %2$s',
       ),
 
-      'added %d dependencie(s): %s' => array(
+      'added %s dependencie(s): %s' => array(
         'added dependency: %2$s',
         'added dependencies: %2$s',
       ),
 
-      'removed %d dependencie(s): %s' => array(
+      'removed %s dependencie(s): %s' => array(
         'removed dependency: %2$s',
         'removed dependencies: %2$s',
       ),
 
-      'added %d revision(s): %s' => array(
+      'added %s revision(s): %s' => array(
         'added revision: %2$s',
         'added revisions: %2$s',
       ),
 
-      'removed %d revision(s): %s' => array(
+      'removed %s revision(s): %s' => array(
         'removed revision: %2$s',
         'removed revisions: %2$s',
       ),
 
-      '%s edited revision(s), added %d: %s; removed %d: %s.' =>
+      '%s edited revision(s), added %s: %s; removed %s: %s.' =>
         '%s edited revisions, added: %3$s; removed: %5$s',
 
       'There are %d raw fact(s) in storage.' => array(
@@ -437,17 +437,17 @@ abstract class PhabricatorBaseEnglishTranslation
         ),
       ),
 
-      '%s edited reviewer(s), added %d: %s; removed %d: %s.' =>
+      '%s edited reviewer(s), added %s: %s; removed %s: %s.' =>
         '%s edited reviewers, added: %4$s; removed: %6$s',
 
-      '%s added %d reviewer(s): %s.' => array(
+      '%s added %s reviewer(s): %s.' => array(
         array(
           '%s added a reviewer: %3$s.',
           '%s added reviewers: %3$s.',
         ),
       ),
 
-      '%s removed %d reviewer(s): %s.' => array(
+      '%s removed %s reviewer(s): %s.' => array(
         array(
           '%s removed a reviewer: %3$s.',
           '%s removed reviewers: %3$s.',
@@ -677,49 +677,49 @@ abstract class PhabricatorBaseEnglishTranslation
         '%s changed files, attached: %3$s; detached: %5$s',
 
 
-      '%s added %d dependencie(s): %s.' => array(
+      '%s added %s dependencie(s): %s.' => array(
         array(
-          '%s added a dependency: %3$s',
-          '%s added dependencies: %3$s',
+          '%s added a dependency: %3$s.',
+          '%s added dependencies: %3$s.',
         ),
       ),
 
-      '%s removed %d dependencie(s): %s.' => array(
+      '%s removed %s dependencie(s): %s.' => array(
         array(
           '%s removed a dependency: %3$s.',
           '%s removed dependencies: %3$s.',
         ),
       ),
 
-      '%s added %d revision(s): %s.' => array(
+      '%s added %s dependent revision(s): %s.' => array(
         array(
-          '%s added a revision: %3$s.',
-          '%s added revisions: %3$s.',
+          '%s added a dependent revision: %3$s.',
+          '%s added dependent revisions: %3$s.',
         ),
       ),
 
-      '%s removed %d revision(s): %s.' => array(
+      '%s removed %s dependent revision(s): %s.' => array(
         array(
-          '%s removed a revision: %3$s.',
-          '%s removed revisions: %3$s.',
+          '%s removed a dependent revision: %3$s.',
+          '%s removed dependent revisions: %3$s.',
         ),
       ),
 
-      '%s added %d commit(s): %s.' => array(
+      '%s added %s commit(s): %s.' => array(
         array(
           '%s added a commit: %3$s.',
           '%s added commits: %3$s.',
         ),
       ),
 
-      '%s removed %d commit(s): %s.' => array(
+      '%s removed %s commit(s): %s.' => array(
         array(
           '%s removed a commit: %3$s.',
           '%s removed commits: %3$s.',
         ),
       ),
 
-      '%s edited commit(s), added %d: %s; removed %d: %s.' =>
+      '%s edited commit(s), added %s: %s; removed %s: %s.' =>
         '%s edited commits, added %3$s; removed %5$s.',
 
       '%s changed project member(s), added %d: %s; removed %d: %s' =>
@@ -845,20 +845,6 @@ abstract class PhabricatorBaseEnglishTranslation
 
       '%s edited %s task(s) for %s, added %s: %s; removed %s: %s.' =>
         '%s edited tasks for %3$s, added: %5$s; removed %7$s.',
-
-      '%s added %s commit(s): %s.' => array(
-        array(
-          '%s added a commit: %3$s.',
-          '%s added commits: %3$s.',
-        ),
-      ),
-
-      '%s removed %s commit(s): %s.' => array(
-        array(
-          '%s removed a commit: %3$s.',
-          '%s removed commits: %3$s.',
-        ),
-      ),
 
       '%s edited %s commit(s), added %s: %s; removed %s: %s.' =>
         '%s edited commits, added %4$s; removed %6$s.',

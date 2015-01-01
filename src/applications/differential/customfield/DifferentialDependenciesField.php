@@ -30,7 +30,7 @@ final class DifferentialDependenciesField
   public function getRequiredHandlePHIDsForPropertyView() {
     return PhabricatorEdgeQuery::loadDestinationPHIDs(
       $this->getObject()->getPHID(),
-      PhabricatorEdgeConfig::TYPE_DREV_DEPENDED_ON_BY_DREV);
+      DifferentialRevisionDependedOnByRevisionEdgeType::EDGECONST);
   }
 
   public function renderPropertyViewValue(array $handles) {

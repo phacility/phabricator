@@ -1,13 +1,19 @@
 <?php
 
-final class ManiphestTaskDependedOnByTaskEdgeType extends PhabricatorEdgeType {
-  const EDGECONST = 4;
+final class DifferentialRevisionDependsOnRevisionEdgeType
+  extends PhabricatorEdgeType {
+
+  const EDGECONST = 5;
 
   public function getInverseEdgeConstant() {
-    return ManiphestTaskDependsOnTaskEdgeType::EDGECONST;
+    return DifferentialRevisionDependedOnByRevisionEdgeType::EDGECONST;
   }
 
   public function shouldWriteInverseTransactions() {
+    return true;
+  }
+
+  public function shouldPreventCycles() {
     return true;
   }
 
@@ -17,7 +23,7 @@ final class ManiphestTaskDependedOnByTaskEdgeType extends PhabricatorEdgeType {
     $add_edges) {
 
     return pht(
-      '%s added %s blocked task(s): %s.',
+      '%s added %s dependencie(s): %s.',
       $actor,
       $add_count,
       $add_edges);
@@ -29,7 +35,7 @@ final class ManiphestTaskDependedOnByTaskEdgeType extends PhabricatorEdgeType {
     $rem_edges) {
 
     return pht(
-      '%s removed %s blocked task(s): %s.',
+      '%s removed %s dependencie(s): %s.',
       $actor,
       $rem_count,
       $rem_edges);
@@ -44,7 +50,7 @@ final class ManiphestTaskDependedOnByTaskEdgeType extends PhabricatorEdgeType {
     $rem_edges) {
 
     return pht(
-      '%s edited blocked task(s), added %s: %s; removed %s: %s.',
+      '%s edited dependencie(s), added %s: %s; removed %s: %s.',
       $actor,
       $add_count,
       $add_edges,
@@ -59,7 +65,7 @@ final class ManiphestTaskDependedOnByTaskEdgeType extends PhabricatorEdgeType {
     $add_edges) {
 
     return pht(
-      '%s added %s blocked task(s) for %s: %s.',
+      '%s added %s dependencie(s) for %s: %s.',
       $actor,
       $add_count,
       $object,
@@ -73,7 +79,7 @@ final class ManiphestTaskDependedOnByTaskEdgeType extends PhabricatorEdgeType {
     $rem_edges) {
 
     return pht(
-      '%s removed %s blocked task(s) for %s: %s.',
+      '%s removed %s dependencie(s) for %s: %s.',
       $actor,
       $rem_count,
       $object,
@@ -90,7 +96,7 @@ final class ManiphestTaskDependedOnByTaskEdgeType extends PhabricatorEdgeType {
     $rem_edges) {
 
     return pht(
-      '%s edited blocked task(s) for %s, added %s: %s; removed %s: %s.',
+      '%s edited dependencie(s) for %s, added %s: %s; removed %s: %s.',
       $actor,
       $object,
       $add_count,

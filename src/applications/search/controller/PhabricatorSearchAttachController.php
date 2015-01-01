@@ -297,7 +297,7 @@ final class PhabricatorSearchAttachController
         $t_mock => PhabricatorEdgeConfig::TYPE_TASK_HAS_MOCK,
       ),
       $t_drev => array(
-        $t_drev => PhabricatorEdgeConfig::TYPE_DREV_DEPENDS_ON_DREV,
+        $t_drev => DifferentialRevisionDependsOnRevisionEdgeType::EDGECONST,
         $t_task => DifferentialRevisionHasTaskEdgeType::EDGECONST,
       ),
       $t_mock => array(

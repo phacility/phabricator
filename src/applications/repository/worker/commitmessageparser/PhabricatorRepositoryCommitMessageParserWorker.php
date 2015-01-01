@@ -126,7 +126,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
             'precommitRevisionStatus',
             $revision->getStatus());
         }
-        $commit_drev = PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV;
+        $commit_drev = DiffusionCommitHasRevisionEdgeType::EDGECONST;
         id(new PhabricatorEdgeEditor())
           ->addEdge($commit->getPHID(), $commit_drev, $revision->getPHID())
           ->save();
