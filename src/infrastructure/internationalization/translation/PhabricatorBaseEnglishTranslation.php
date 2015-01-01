@@ -462,23 +462,6 @@ abstract class PhabricatorBaseEnglishTranslation
         ),
       ),
 
-      '%s edited account(s), added %d: %s; removed %d: %s.' =>
-        '%s edited accounts, added: %3$s; removed: %5$s',
-
-      '%s added %d account(s): %s.' => array(
-        array(
-          '%s added a account: %3$s.',
-          '%s added accounts: %3$s.',
-        ),
-      ),
-
-      '%s removed %d account(s): %s.' => array(
-        array(
-          '%s removed a account: %3$s.',
-          '%s removed accounts: %3$s.',
-        ),
-      ),
-
       '%s edited contributor(s), added %d: %s; removed %d: %s.' =>
         '%s edited contributors, added: %3$s; removed: %5$s',
 
