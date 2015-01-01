@@ -118,7 +118,7 @@ final class PhabricatorProjectTransaction
 
         if ($add && $rem) {
           return pht(
-            '%s changed project hashtag(s), added %d: %s; removed %d: %s',
+            '%s changed project hashtag(s), added %d: %s; removed %d: %s.',
             $author_handle,
             count($add),
             $this->renderSlugList($add),
@@ -126,13 +126,13 @@ final class PhabricatorProjectTransaction
             $this->renderSlugList($rem));
         } else if ($add) {
           return pht(
-            '%s added %d project hashtag(s): %s',
+            '%s added %d project hashtag(s): %s.',
             $author_handle,
             count($add),
             $this->renderSlugList($add));
         } else if ($rem) {
             return pht(
-              '%s removed %d project hashtag(s): %s',
+              '%s removed %d project hashtag(s): %s.',
               $author_handle,
               count($rem),
               $this->renderSlugList($rem));
@@ -144,7 +144,7 @@ final class PhabricatorProjectTransaction
 
         if ($add && $rem) {
           return pht(
-            '%s changed project member(s), added %d: %s; removed %d: %s',
+            '%s changed project member(s), added %d: %s; removed %d: %s.',
             $author_handle,
             count($add),
             $this->renderHandleList($add),
@@ -157,7 +157,7 @@ final class PhabricatorProjectTransaction
               $author_handle);
           } else {
             return pht(
-              '%s added %d project member(s): %s',
+              '%s added %d project member(s): %s.',
               $author_handle,
               count($add),
               $this->renderHandleList($add));
@@ -169,7 +169,7 @@ final class PhabricatorProjectTransaction
               $author_handle);
           } else {
             return pht(
-              '%s removed %d project member(s): %s',
+              '%s removed %d project member(s): %s.',
               $author_handle,
               count($rem),
               $this->renderHandleList($rem));

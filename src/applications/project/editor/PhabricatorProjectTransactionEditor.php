@@ -328,7 +328,7 @@ final class PhabricatorProjectTransactionEditor
             $type,
             pht('Invalid'),
             pht(
-              '%d project hashtag(s) are already used: %s',
+              '%d project hashtag(s) are already used: %s.',
               count($used_slug_strs),
               implode(', ', $used_slug_strs)),
             $slug_xaction);

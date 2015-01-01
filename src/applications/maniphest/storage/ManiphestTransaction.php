@@ -503,19 +503,19 @@ final class ManiphestTransaction
         $removed = array_diff($old, $new);
         if ($added && !$removed) {
           return pht(
-            '%s attached %d file(s): %s',
+            '%s attached %d file(s): %s.',
             $this->renderHandleLink($author_phid),
             count($added),
             $this->renderHandleList($added));
         } else if ($removed && !$added) {
           return pht(
-            '%s detached %d file(s): %s',
+            '%s detached %d file(s): %s.',
             $this->renderHandleLink($author_phid),
             count($removed),
             $this->renderHandleList($removed));
         } else {
           return pht(
-            '%s changed file(s), attached %d: %s; detached %d: %s',
+            '%s changed file(s), attached %d: %s; detached %d: %s.',
             $this->renderHandleLink($author_phid),
             count($added),
             $this->renderHandleList($added),

@@ -131,7 +131,7 @@ abstract class PhabricatorBaseEnglishTranslation
       ),
 
       '%s edited member(s), added %d: %s; removed %d: %s.' =>
-        '%s edited members, added: %3$s; removed: %5$s',
+        '%s edited members, added: %3$s; removed: %5$s.',
 
       '%s added %d member(s): %s.' => array(
         array(
@@ -148,7 +148,7 @@ abstract class PhabricatorBaseEnglishTranslation
       ),
 
       '%s edited project(s), added %d: %s; removed %d: %s.' =>
-        '%s edited projects, added: %3$s; removed: %5$s',
+        '%s edited projects, added: %3$s; removed: %5$s.',
 
       '%s added %d project(s): %s.' => array(
         array(
@@ -249,19 +249,19 @@ abstract class PhabricatorBaseEnglishTranslation
       ),
 
       '%s edited blocking task(s), added %s: %s; removed %s: %s.' =>
-        '%s edited blocking tasks, added: %3$s; removed: %5$s',
+        '%s edited blocking tasks, added: %3$s; removed: %5$s.',
 
       '%s edited blocking task(s) for %s, added %s: %s; removed %s: %s.' =>
-        '%s edited blocking tasks for %s, added: %4$s; removed: %6$s',
+        '%s edited blocking tasks for %s, added: %4$s; removed: %6$s.',
 
       '%s edited blocked task(s), added %s: %s; removed %s: %s.' =>
-        '%s edited blocked tasks, added: %3$s; removed: %5$s',
+        '%s edited blocked tasks, added: %3$s; removed: %5$s.',
 
       '%s edited blocked task(s) for %s, added %s: %s; removed %s: %s.' =>
-        '%s edited blocked tasks for %s, added: %4$s; removed: %6$s',
+        '%s edited blocked tasks for %s, added: %4$s; removed: %6$s.',
 
       '%s edited answer(s), added %s: %s; removed %d: %s.' =>
-        '%s edited answers, added: %3$s; removed: %5$s',
+        '%s edited answers, added: %3$s; removed: %5$s.',
 
       '%s added %s answer(s): %s.' => array(
         array(
@@ -278,7 +278,7 @@ abstract class PhabricatorBaseEnglishTranslation
       ),
 
      '%s edited question(s), added %s: %s; removed %s: %s.' =>
-        '%s edited questions, added: %3$s; removed: %5$s',
+        '%s edited questions, added: %3$s; removed: %5$s.',
 
       '%s added %s question(s): %s.' => array(
         array(
@@ -295,7 +295,7 @@ abstract class PhabricatorBaseEnglishTranslation
       ),
 
       '%s edited mock(s), added %d: %s; removed %d: %s.' =>
-        '%s edited mocks, added: %3$s; removed: %5$s',
+        '%s edited mocks, added: %3$s; removed: %5$s.',
 
       '%s added %d mock(s): %s.' => array(
         array(
@@ -326,7 +326,7 @@ abstract class PhabricatorBaseEnglishTranslation
       ),
 
       '%s edited file(s), added %d: %s; removed %d: %s.' =>
-        '%s edited files, added: %3$s; removed: %5$s',
+        '%s edited files, added: %3$s; removed: %5$s.',
 
       '%s added %d file(s): %s.' => array(
         array(
@@ -343,7 +343,7 @@ abstract class PhabricatorBaseEnglishTranslation
       ),
 
       '%s edited contributor(s), added %d: %s; removed %d: %s.' =>
-        '%s edited contributors, added: %3$s; removed: %5$s',
+        '%s edited contributors, added: %3$s; removed: %5$s.',
 
       '%s added %d contributor(s): %s.' => array(
         array(
@@ -360,7 +360,7 @@ abstract class PhabricatorBaseEnglishTranslation
       ),
 
       '%s edited reviewer(s), added %s: %s; removed %s: %s.' =>
-        '%s edited reviewers, added: %4$s; removed: %6$s',
+        '%s edited reviewers, added: %4$s; removed: %6$s.',
 
       '%s added %s reviewer(s): %s.' => array(
         array(
@@ -377,7 +377,7 @@ abstract class PhabricatorBaseEnglishTranslation
       ),
 
       '%s edited object(s), added %d: %s; removed %d: %s.' =>
-        '%s edited objects, added: %3$s; removed: %5$s',
+        '%s edited objects, added: %3$s; removed: %5$s.',
 
       '%s added %d object(s): %s.' => array(
         array(
@@ -399,7 +399,7 @@ abstract class PhabricatorBaseEnglishTranslation
       ),
 
       '%s edited subscriber(s), added %d: %s; removed %d: %s.' =>
-        '%s edited subscribers, added: %3$s; removed: %5$s',
+        '%s edited subscribers, added: %3$s; removed: %5$s.',
 
       '%s added %d subscriber(s): %s.' => array(
         array(
@@ -416,7 +416,7 @@ abstract class PhabricatorBaseEnglishTranslation
       ),
 
       '%s edited participant(s), added %d: %s; removed %d: %s.' =>
-        '%s edited participants, added: %3$s; removed: %5$s',
+        '%s edited participants, added: %3$s; removed: %5$s.',
 
       '%s added %d participant(s): %s.' => array(
         array(
@@ -551,36 +551,22 @@ abstract class PhabricatorBaseEnglishTranslation
         '%s Commits',
       ),
 
-      '%s added %d project(s): %s' => array(
+      '%s attached %d file(s): %s.' => array(
         array(
-          '%s added a project: %3$s',
-          '%s added projects: %3$s',
+          '%s attached a file: %3$s.',
+          '%s attached files: %3$s.',
         ),
       ),
 
-      '%s removed %d project(s): %s' => array(
+      '%s detached %d file(s): %s.' => array(
         array(
-          '%s removed a project: %3$s',
-          '%s removed projects: %3$s',
+          '%s detached a file: %3$s.',
+          '%s detached files: %3$s.',
         ),
       ),
 
-      '%s attached %d file(s): %s' => array(
-        array(
-          '%s attached a file: %3$s',
-          '%s attached files: %3$s',
-        ),
-      ),
-
-      '%s detached %d file(s): %s' => array(
-        array(
-          '%s detached a file: %3$s',
-          '%s detached files: %3$s',
-        ),
-      ),
-
-      '%s changed file(s), attached %d: %s; detached %d: %s' =>
-        '%s changed files, attached: %3$s; detached: %5$s',
+      '%s changed file(s), attached %d: %s; detached %d: %s.' =>
+        '%s changed files, attached: %3$s; detached: %5$s.',
 
 
       '%s added %s dependencie(s): %s.' => array(
@@ -628,42 +614,42 @@ abstract class PhabricatorBaseEnglishTranslation
       '%s edited commit(s), added %s: %s; removed %s: %s.' =>
         '%s edited commits, added %3$s; removed %5$s.',
 
-      '%s changed project member(s), added %d: %s; removed %d: %s' =>
-        '%s changed project members, added %3$s; removed %5$s',
+      '%s changed project member(s), added %d: %s; removed %d: %s.' =>
+        '%s changed project members, added %3$s; removed %5$s.',
 
-      '%s added %d project member(s): %s' => array(
+      '%s added %d project member(s): %s.' => array(
         array(
-          '%s added a member: %3$s',
-          '%s added members: %3$s',
+          '%s added a member: %3$s.',
+          '%s added members: %3$s.',
         ),
       ),
 
-      '%s removed %d project member(s): %s' => array(
+      '%s removed %d project member(s): %s.' => array(
         array(
-          '%s removed a member: %3$s',
-          '%s removed members: %3$s',
+          '%s removed a member: %3$s.',
+          '%s removed members: %3$s.',
         ),
       ),
 
-      '%d project hashtag(s) are already used: %s' => array(
+      '%d project hashtag(s) are already used: %s.' => array(
           'Project hashtag %2$s is already used.',
-          '%d project hashtags are already used: %2$s',
+          '%d project hashtags are already used: %2$s.',
       ),
 
-      '%s changed project hashtag(s), added %d: %s; removed %d: %s' =>
-        '%s changed project hashtags, added %3$s; removed %5$s',
+      '%s changed project hashtag(s), added %d: %s; removed %d: %s.' =>
+        '%s changed project hashtags, added %3$s; removed %5$s.',
 
-      '%s added %d project hashtag(s): %s' => array(
+      '%s added %d project hashtag(s): %s.' => array(
         array(
-          '%s added a hashtag: %3$s',
-          '%s added hashtags: %3$s',
+          '%s added a hashtag: %3$s.',
+          '%s added hashtags: %3$s.',
         ),
       ),
 
-      '%s removed %d project hashtag(s): %s' => array(
+      '%s removed %d project hashtag(s): %s.' => array(
         array(
-          '%s removed a hashtag: %3$s',
-          '%s removed hashtags: %3$s',
+          '%s removed a hashtag: %3$s.',
+          '%s removed hashtags: %3$s.',
         ),
       ),
 
