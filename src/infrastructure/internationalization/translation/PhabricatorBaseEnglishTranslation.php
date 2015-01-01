@@ -294,31 +294,31 @@ abstract class PhabricatorBaseEnglishTranslation
         ),
       ),
 
-      '%s edited mock(s), added %d: %s; removed %d: %s.' =>
+      '%s edited mock(s), added %s: %s; removed %s: %s.' =>
         '%s edited mocks, added: %3$s; removed: %5$s.',
 
-      '%s added %d mock(s): %s.' => array(
+      '%s added %s mock(s): %s.' => array(
         array(
           '%s added a mock: %3$s.',
           '%s added mocks: %3$s.',
         ),
       ),
 
-      '%s removed %d mock(s): %s.' => array(
+      '%s removed %s mock(s): %s.' => array(
         array(
           '%s removed a mock: %3$s.',
           '%s removed mocks: %3$s.',
         ),
       ),
 
-      '%s added %d task(s): %s.' => array(
+      '%s added %s task(s): %s.' => array(
         array(
           '%s added a task: %3$s.',
           '%s added tasks: %3$s.',
         ),
       ),
 
-      '%s removed %d task(s): %s.' => array(
+      '%s removed %s task(s): %s.' => array(
         array(
           '%s removed a task: %3$s.',
           '%s removed tasks: %3$s.',
@@ -703,20 +703,6 @@ abstract class PhabricatorBaseEnglishTranslation
 
       '%s updated JIRA issue(s): added %d %s; removed %d %s.' =>
         '%s updated JIRA issues: added %3$s; removed %5$s.',
-
-      '%s added %s task(s): %s.' => array(
-        array(
-          '%s added a task: %3$s.',
-          '%s added tasks: %3$s.',
-        ),
-      ),
-
-      '%s removed %s task(s): %s.' => array(
-        array(
-          '%s removed a task: %3$s.',
-          '%s removed tasks: %3$s.',
-        ),
-      ),
 
       '%s edited %s task(s), added %s: %s; removed %s: %s.' =>
         '%s edited tasks, added %4$s; removed %6$s.',

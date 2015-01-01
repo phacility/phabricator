@@ -17,9 +17,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TYPE_OBJECT_HAS_CONTRIBUTOR     = 33;
   const TYPE_CONTRIBUTED_TO_OBJECT      = 34;
 
-  const TYPE_MOCK_HAS_TASK              = 37;
-  const TYPE_TASK_HAS_MOCK              = 38;
-
   const TYPE_OBJECT_USES_CREDENTIAL     = 39;
   const TYPE_CREDENTIAL_USED_BY_OBJECT  = 40;
 
@@ -112,9 +109,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
       self::TYPE_OBJECT_HAS_CONTRIBUTOR => self::TYPE_CONTRIBUTED_TO_OBJECT,
       self::TYPE_CONTRIBUTED_TO_OBJECT => self::TYPE_OBJECT_HAS_CONTRIBUTOR,
 
-      self::TYPE_TASK_HAS_MOCK => self::TYPE_MOCK_HAS_TASK,
-      self::TYPE_MOCK_HAS_TASK => self::TYPE_TASK_HAS_MOCK,
-
       self::TYPE_PHOB_HAS_ASANATASK => self::TYPE_ASANATASK_HAS_PHOB,
       self::TYPE_ASANATASK_HAS_PHOB => self::TYPE_PHOB_HAS_ASANATASK,
 
@@ -171,8 +165,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
   public static function getEditStringForEdgeType($type) {
     switch ($type) {
-      case self::TYPE_MOCK_HAS_TASK:
-        return '%s edited task(s), added %d: %s; removed %d: %s.';
       case self::TYPE_OBJECT_HAS_SUBSCRIBER:
         return '%s edited subscriber(s), added %d: %s; removed %d: %s.';
       case self::TYPE_SUBSCRIBED_TO_OBJECT:
@@ -186,8 +178,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s edited file(s), added %d: %s; removed %d: %s.';
       case self::TYPE_OBJECT_HAS_CONTRIBUTOR:
         return '%s edited contributor(s), added %d: %s; removed %d: %s.';
-      case self::TYPE_TASK_HAS_MOCK:
-        return '%s edited mock(s), added %d: %s; removed %d: %s.';
       case self::TYPE_DASHBOARD_HAS_PANEL:
         return '%s edited panel(s), added %d: %s; removed %d: %s.';
       case self::TYPE_PANEL_HAS_DASHBOARD:
@@ -204,8 +194,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
   public static function getAddStringForEdgeType($type) {
     switch ($type) {
-      case self::TYPE_MOCK_HAS_TASK:
-        return '%s added %d task(s): %s.';
       case self::TYPE_OBJECT_HAS_SUBSCRIBER:
         return '%s added %d subscriber(s): %s.';
       case self::TYPE_OBJECT_HAS_UNSUBSCRIBER:
@@ -214,8 +202,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s added %d file(s): %s.';
       case self::TYPE_OBJECT_HAS_CONTRIBUTOR:
         return '%s added %d contributor(s): %s.';
-      case self::TYPE_TASK_HAS_MOCK:
-        return '%s added %d mock(s): %s.';
       case self::TYPE_DASHBOARD_HAS_PANEL:
         return '%s added %d panel(s): %s.';
       case self::TYPE_PANEL_HAS_DASHBOARD:
@@ -234,8 +220,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
   public static function getRemoveStringForEdgeType($type) {
     switch ($type) {
-      case self::TYPE_MOCK_HAS_TASK:
-        return '%s removed %d task(s): %s.';
       case self::TYPE_OBJECT_HAS_SUBSCRIBER:
         return '%s removed %d subscriber(s): %s.';
       case self::TYPE_OBJECT_HAS_UNSUBSCRIBER:
@@ -244,8 +228,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s removed %d file(s): %s.';
       case self::TYPE_OBJECT_HAS_CONTRIBUTOR:
         return '%s removed %d contributor(s): %s.';
-      case self::TYPE_TASK_HAS_MOCK:
-        return '%s removed %d mock(s): %s.';
       case self::TYPE_DASHBOARD_HAS_PANEL:
         return '%s removed %d panel(s): %s.';
       case self::TYPE_PANEL_HAS_DASHBOARD:
@@ -264,8 +246,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
   public static function getFeedStringForEdgeType($type) {
     switch ($type) {
-      case self::TYPE_MOCK_HAS_TASK:
-        return '%s updated tasks of %s.';
       case self::TYPE_OBJECT_HAS_SUBSCRIBER:
         return '%s updated subscribers of %s.';
       case self::TYPE_OBJECT_HAS_UNSUBSCRIBER:
@@ -274,8 +254,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s updated files of %s.';
       case self::TYPE_OBJECT_HAS_CONTRIBUTOR:
         return '%s updated contributors of %s.';
-      case self::TYPE_TASK_HAS_MOCK:
-        return '%s updated mocks of %s.';
       case self::TYPE_PANEL_HAS_DASHBOARD:
         return '%s updated panels for %s.';
       case self::TYPE_PANEL_HAS_DASHBOARD:

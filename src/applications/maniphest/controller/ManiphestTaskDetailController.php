@@ -49,7 +49,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $e_dep_on = ManiphestTaskDependsOnTaskEdgeType::EDGECONST;
     $e_dep_by = ManiphestTaskDependedOnByTaskEdgeType::EDGECONST;
     $e_rev    = ManiphestTaskHasRevisionEdgeType::EDGECONST;
-    $e_mock   = PhabricatorEdgeConfig::TYPE_TASK_HAS_MOCK;
+    $e_mock   = ManiphestTaskHasMockEdgeType::EDGECONST;
 
     $phid = $task->getPHID();
 
@@ -489,7 +489,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
         => pht('Blocked By'),
       ManiphestTaskHasRevisionEdgeType::EDGECONST
         => pht('Differential Revisions'),
-      PhabricatorEdgeConfig::TYPE_TASK_HAS_MOCK
+      ManiphestTaskHasMockEdgeType::EDGECONST
         => pht('Pholio Mocks'),
     );
 
