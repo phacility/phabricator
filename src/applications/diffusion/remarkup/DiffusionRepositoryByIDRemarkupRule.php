@@ -1,14 +1,14 @@
 <?php
 
-final class DiffusionRepositoryRemarkupRule
+final class DiffusionRepositoryByIDRemarkupRule
   extends PhabricatorObjectRemarkupRule {
 
   protected function getObjectNamePrefix() {
-    return 'r';
+    return 'R';
   }
 
   protected function getObjectIDPattern() {
-    return '[A-Z]+';
+    return '[0-9]+';
   }
 
   public function getPriority() {

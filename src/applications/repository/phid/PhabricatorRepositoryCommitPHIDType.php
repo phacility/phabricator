@@ -54,9 +54,9 @@ final class PhabricatorRepositoryCommitPHIDType extends PhabricatorPHIDType {
     $min_qualified   = PhabricatorRepository::MINIMUM_QUALIFIED_HASH;
 
     return
-      'r[A-Z]+[1-9]\d*'.
+      '(?:r[A-Z]+:?|R[0-9]+:)[1-9]\d*'.
       '|'.
-      'r[A-Z]+[a-f0-9]{'.$min_qualified.',40}'.
+      '(?:r[A-Z]+:?|R[0-9]+:)[a-f0-9]{'.$min_qualified.',40}'.
       '|'.
       '[a-f0-9]{'.$min_unqualified.',40}';
   }
