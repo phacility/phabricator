@@ -17,18 +17,7 @@ abstract class PhabricatorBaseEnglishTranslation
         'This configuration value is related:',
         'These configuration values are related:',
       ),
-      'Differential Revision(s)' => array(
-        'Differential Revision',
-        'Differential Revisions',
-      ),
-      'file(s)' => array('file', 'files'),
-      'Maniphest Task(s)' => array('Maniphest Task', 'Maniphest Tasks'),
       'Task(s)' => array('Task', 'Tasks'),
-
-      'Please fix these errors and try again.' => array(
-        'Please fix this error and try again.',
-        'Please fix these errors and try again.',
-      ),
 
       '%d Error(s)' => array('%d Error', '%d Errors'),
       '%d Warning(s)' => array('%d Warning', '%d Warnings'),
@@ -38,57 +27,9 @@ abstract class PhabricatorBaseEnglishTranslation
 
       '(%d line(s))' => array('(%d line)', '(%d lines)'),
 
-      'COMMIT(S)' => array('COMMIT', 'COMMITS'),
-
       '%d line(s)' => array('%d line', '%d lines'),
       '%d path(s)' => array('%d path', '%d paths'),
       '%d diff(s)' => array('%d diff', '%d diffs'),
-
-      'added %d commit(s): %s' => array(
-        'added commit: %2$s',
-        'added commits: %2$s',
-      ),
-
-      'removed %d commit(s): %s' => array(
-        'removed commit: %2$s',
-        'removed commits: %2$s',
-      ),
-
-      'changed %d commit(s), added %d: %s; removed %d: %s' =>
-        'changed commits, added: %3$s; removed: %5$s',
-
-      'added %d mock(s): %s' => array(
-        'added a mock: %2$s',
-        'added mocks: %2$s',
-      ),
-
-      'removed %d mock(s): %s' => array(
-        'removed a mock: %2$s',
-        'removed mocks: %2$s',
-      ),
-
-      'added %s dependencie(s): %s' => array(
-        'added dependency: %2$s',
-        'added dependencies: %2$s',
-      ),
-
-      'removed %s dependencie(s): %s' => array(
-        'removed dependency: %2$s',
-        'removed dependencies: %2$s',
-      ),
-
-      'added %s revision(s): %s' => array(
-        'added revision: %2$s',
-        'added revisions: %2$s',
-      ),
-
-      'removed %s revision(s): %s' => array(
-        'removed revision: %2$s',
-        'removed revisions: %2$s',
-      ),
-
-      '%s edited revision(s), added %s: %s; removed %s: %s.' =>
-        '%s edited revisions, added: %3$s; removed: %5$s',
 
       'There are %d raw fact(s) in storage.' => array(
         'There is %d raw fact in storage.',
@@ -140,11 +81,6 @@ abstract class PhabricatorBaseEnglishTranslation
         '%d Objects Tracked',
       ),
 
-      '%d Unbreak Now Task(s)!' => array(
-        '%d Unbreak Now Task!',
-        '%d Unbreak Now Tasks!',
-      ),
-
       '%d Assigned Task(s)' => array(
         '%d Assigned Task',
         '%d Assigned Tasks',
@@ -157,14 +93,6 @@ abstract class PhabricatorBaseEnglishTranslation
       'Hide %d Lint Message(s)' => array(
         'Hide %d Lint Message',
         'Hide %d Lint Messages',
-      ),
-      'Switch for %d Lint Message(s)' => array(
-        'Switch for %d Lint Message',
-        'Switch for %d Lint Messages',
-      ),
-      '%d Lint Message(s)' => array(
-        '%d Lint Message',
-        '%d Lint Messages',
       ),
 
       'This is a binary file. It is %s byte(s) in length.' => array(
@@ -249,9 +177,6 @@ abstract class PhabricatorBaseEnglishTranslation
           '%s merged tasks %3$s into %4$s.',
         ),
       ),
-
-      '%s edited voting user(s), added %s: %s; removed %d: %s.' =>
-        '%s edited voting users, added: %3$s; removed: %5$s',
 
       '%s added %s voting user(s): %s.' => array(
         array(
@@ -386,9 +311,6 @@ abstract class PhabricatorBaseEnglishTranslation
         ),
       ),
 
-      '%s edited task(s), added %d: %s; removed %s: %s.' =>
-        '%s edited tasks, added: %3$s; removed: %5$s',
-
       '%s added %d task(s): %s.' => array(
         array(
           '%s added a task: %3$s.',
@@ -493,9 +415,6 @@ abstract class PhabricatorBaseEnglishTranslation
         ),
       ),
 
-      '%s edited unsubscriber(s), added %d: %s; removed %d: %s.' =>
-        '%s edited unsubscribers, added: %3$s; removed: %5$s',
-
       '%s edited participant(s), added %d: %s; removed %d: %s.' =>
         '%s edited participants, added: %3$s; removed: %5$s',
 
@@ -530,13 +449,6 @@ abstract class PhabricatorBaseEnglishTranslation
         ),
       ),
 
-      '%d people(s)' => array(
-        array(
-          '%d person',
-          '%d people',
-        ),
-      ),
-
       '%s Line(s)' => array(
         '%s Line',
         '%s Lines',
@@ -565,12 +477,6 @@ abstract class PhabricatorBaseEnglishTranslation
       'The current MySQL configuration has these %d value(s):' => array(
         'The current MySQL configuration has this value:',
         'The current MySQL configuration has these values:',
-      ),
-
-      'To update these %d value(s), run these command(s) from the command line:'
-      => array(
-        'To update this value, run this command from the command line:',
-        'To update these values, run these commands from the command line:',
       ),
 
       'You can update these %d value(s) here:' => array(
