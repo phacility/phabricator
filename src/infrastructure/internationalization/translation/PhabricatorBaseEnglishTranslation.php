@@ -95,11 +95,6 @@ abstract class PhabricatorBaseEnglishTranslation
         'removed dependencies: %2$s',
       ),
 
-      'removed %d dependent task(s): %s' => array(
-        'removed dependent task: %2$s',
-        'removed dependent tasks: %2$s',
-      ),
-
       'changed %d dependencie(s), added %d: %s; removed %d: %s' =>
         'changed dependencies, added: %3$s; removed: %5$s',
 
@@ -793,13 +788,6 @@ abstract class PhabricatorBaseEnglishTranslation
         array(
           '%s removed a dependency: %3$s.',
           '%s removed dependencies: %3$s.',
-        ),
-      ),
-
-      '%s removed %d dependent task(s): %s.' => array(
-        array(
-          '%s removed a dependent task: %3$s.',
-          '%s removed dependent tasks: %3$s.',
         ),
       ),
 
