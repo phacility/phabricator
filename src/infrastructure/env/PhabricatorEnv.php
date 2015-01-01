@@ -117,7 +117,7 @@ final class PhabricatorEnv {
     $translation = PhabricatorEnv::newObjectFromConfig('translation.provider');
     PhutilTranslator::getInstance()
       ->setLanguage($translation->getLanguage())
-      ->addTranslations($translation->getTranslations());
+      ->addTranslations($translation->getCleanTranslations());
   }
 
   private static function buildConfigurationSourceStack() {
