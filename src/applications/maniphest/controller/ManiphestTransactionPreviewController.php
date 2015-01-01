@@ -113,6 +113,7 @@ final class ManiphestTransactionPreviewController extends ManiphestController {
 
     $engine = new PhabricatorMarkupEngine();
     $engine->setViewer($user);
+    $engine->setContextObject($task);
     if ($transaction->hasComment()) {
       $engine->addObject(
         $transaction->getComment(),

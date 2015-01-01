@@ -124,6 +124,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $engine = new PhabricatorMarkupEngine();
     $engine->setViewer($user);
+    $engine->setContextObject($task);
     $engine->addObject($task, ManiphestTask::MARKUP_FIELD_DESCRIPTION);
 
     $timeline = $this->buildTransactionTimeline(

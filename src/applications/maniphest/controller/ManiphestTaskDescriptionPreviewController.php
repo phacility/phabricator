@@ -13,7 +13,8 @@ final class ManiphestTaskDescriptionPreviewController
     $output = PhabricatorMarkupEngine::renderOneObject(
       $task,
       ManiphestTask::MARKUP_FIELD_DESCRIPTION,
-      $request->getUser());
+      $request->getUser(),
+      $task);
 
     $content = phutil_tag_div('phabricator-remarkup', $output);
 
