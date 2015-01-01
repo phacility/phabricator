@@ -1,11 +1,6 @@
 <?php
 
-/**
- * TODO: Remove maniphest.find, then make this final.
- *
- * @concrete-extensible
- */
-class ManiphestQueryConduitAPIMethod extends ManiphestConduitAPIMethod {
+final class ManiphestQueryConduitAPIMethod extends ManiphestConduitAPIMethod {
 
   public function getAPIMethodName() {
     return 'maniphest.query';
