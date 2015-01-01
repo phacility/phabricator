@@ -798,6 +798,39 @@ abstract class PhabricatorBaseEnglishTranslation
       '%s edited %s project(s) for %s, added %s: %s; removed %s: %s.' =>
         '%s edited projects for %3$s, added: %5$s; removed %7$s.',
 
+      '%s added %s panel(s): %s.' => array(
+        array(
+          '%s added a panel: %3$s.',
+          '%s added panels: %3$s.',
+        ),
+      ),
+
+      '%s removed %s panel(s): %s.' => array(
+        array(
+          '%s removed a panel: %3$s.',
+          '%s removed panels: %3$s.',
+        ),
+      ),
+
+      '%s edited %s panel(s), added %s: %s; removed %s: %s.' =>
+        '%s edited panels, added %4$s; removed %6$s.',
+
+      '%s added %s dashboard(s): %s.' => array(
+        array(
+          '%s added a dashboard: %3$s.',
+          '%s added dashboards: %3$s.',
+        ),
+      ),
+
+      '%s removed %s dashboard(s): %s.' => array(
+        array(
+          '%s removed a dashboard: %3$s.',
+          '%s removed dashboards: %3$s.',
+        ),
+      ),
+
+      '%s edited %s dashboard(s), added %s: %s; removed %s: %s.' =>
+        '%s edited dashboards, added %4$s; removed %6$s.',
     );
   }
 
