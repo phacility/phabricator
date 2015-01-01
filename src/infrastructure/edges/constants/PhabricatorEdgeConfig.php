@@ -46,9 +46,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
   const TYPE_OBJECT_HAS_WATCHER         = 47;
   const TYPE_WATCHER_HAS_OBJECT         = 48;
 
-  const TYPE_OBJECT_NEEDS_SIGNATURE     = 49;
-  const TYPE_SIGNATURE_NEEDED_BY_OBJECT = 50;
-
 /* !!!! STOP !!!! STOP !!!! STOP !!!! STOP !!!! STOP !!!! STOP !!!! STOP !!!! */
 
   // HEY! DO NOT ADD NEW CONSTANTS HERE!
@@ -171,11 +168,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
 
       self::TYPE_OBJECT_HAS_WATCHER => self::TYPE_WATCHER_HAS_OBJECT,
       self::TYPE_WATCHER_HAS_OBJECT => self::TYPE_OBJECT_HAS_WATCHER,
-
-      self::TYPE_OBJECT_NEEDS_SIGNATURE =>
-        self::TYPE_SIGNATURE_NEEDED_BY_OBJECT,
-      self::TYPE_SIGNATURE_NEEDED_BY_OBJECT =>
-        self::TYPE_OBJECT_NEEDS_SIGNATURE,
     );
 
     return idx($map, $edge_type);
@@ -308,8 +300,6 @@ final class PhabricatorEdgeConfig extends PhabricatorEdgeConstants {
         return '%s added %d dashboard(s): %s.';
       case self::TYPE_OBJECT_HAS_WATCHER:
         return '%s added %d watcher(s): %s.';
-      case self::TYPE_OBJECT_NEEDS_SIGNATURE:
-        return '%s added %d required legal document(s): %s.';
       case self::TYPE_SUBSCRIBED_TO_OBJECT:
       case self::TYPE_UNSUBSCRIBED_FROM_OBJECT:
       case self::TYPE_FILE_HAS_OBJECT:

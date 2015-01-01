@@ -914,7 +914,7 @@ abstract class PhabricatorBaseEnglishTranslation
         ),
       ),
 
-      '%s added %d required legal document(s): %s.' => array(
+      '%s added %s required legal document(s): %s.' => array(
         array(
           '%s added a required legal document: %3$s.',
           '%s added required legal documents: %3$s.',
