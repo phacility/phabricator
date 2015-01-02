@@ -359,8 +359,11 @@ abstract class PhabricatorBaseEnglishTranslation
         ),
       ),
 
-      '%s edited reviewer(s), added %s: %s; removed %s: %s.' =>
+      '%s edited %s reviewer(s), added %s: %s; removed %s: %s.' =>
         '%s edited reviewers, added: %4$s; removed: %6$s.',
+
+      '%s edited %s reviewer(s) for %s, added %s: %s; removed %s: %s.' =>
+        '%s edited reviewers for %3$s, added: %5$s; removed: %7$s.',
 
       '%s added %s reviewer(s): %s.' => array(
         array(

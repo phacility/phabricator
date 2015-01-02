@@ -46,8 +46,9 @@ final class DifferentialRevisionHasReviewerEdgeType
     $rem_edges) {
 
     return pht(
-      '%s edited reviewer(s), added %s: %s; removed %s: %s.',
+      '%s edited %s reviewer(s), added %s: %s; removed %s: %s.',
       $actor,
+      $total_count,
       $add_count,
       $add_edges,
       $rem_count,
@@ -92,8 +93,9 @@ final class DifferentialRevisionHasReviewerEdgeType
     $rem_edges) {
 
     return pht(
-      '%s edited reviewer(s) for %s, added %s: %s; removed %s: %s.',
+      '%s edited %s reviewer(s) for %s, added %s: %s; removed %s: %s.',
       $actor,
+      $total_count,
       $object,
       $add_count,
       $add_edges,
