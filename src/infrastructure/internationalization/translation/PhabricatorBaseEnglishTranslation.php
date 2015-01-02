@@ -325,34 +325,34 @@ abstract class PhabricatorBaseEnglishTranslation
         ),
       ),
 
-      '%s edited file(s), added %d: %s; removed %d: %s.' =>
+      '%s edited file(s), added %s: %s; removed %s: %s.' =>
         '%s edited files, added: %3$s; removed: %5$s.',
 
-      '%s added %d file(s): %s.' => array(
+      '%s added %s file(s): %s.' => array(
         array(
           '%s added a file: %3$s.',
           '%s added files: %3$s.',
         ),
       ),
 
-      '%s removed %d file(s): %s.' => array(
+      '%s removed %s file(s): %s.' => array(
         array(
           '%s removed a file: %3$s.',
           '%s removed files: %3$s.',
         ),
       ),
 
-      '%s edited contributor(s), added %d: %s; removed %d: %s.' =>
+      '%s edited contributor(s), added %s: %s; removed %s: %s.' =>
         '%s edited contributors, added: %3$s; removed: %5$s.',
 
-      '%s added %d contributor(s): %s.' => array(
+      '%s added %s contributor(s): %s.' => array(
         array(
           '%s added a contributor: %3$s.',
           '%s added contributors: %3$s.',
         ),
       ),
 
-      '%s removed %d contributor(s): %s.' => array(
+      '%s removed %s contributor(s): %s.' => array(
         array(
           '%s removed a contributor: %3$s.',
           '%s removed contributors: %3$s.',
@@ -376,23 +376,6 @@ abstract class PhabricatorBaseEnglishTranslation
         array(
           '%s removed a reviewer: %3$s.',
           '%s removed reviewers: %3$s.',
-        ),
-      ),
-
-      '%s edited object(s), added %d: %s; removed %d: %s.' =>
-        '%s edited objects, added: %3$s; removed: %5$s.',
-
-      '%s added %d object(s): %s.' => array(
-        array(
-          '%s added a object: %3$s.',
-          '%s added objects: %3$s.',
-        ),
-      ),
-
-      '%s removed %d object(s): %s.' => array(
-        array(
-          '%s removed a object: %3$s.',
-          '%s removed objects: %3$s.',
         ),
       ),
 
@@ -683,14 +666,14 @@ abstract class PhabricatorBaseEnglishTranslation
         '%s commits',
       ),
 
-      '%s removed %d JIRA issue(s): %s.' => array(
+      '%s removed %s JIRA issue(s): %s.' => array(
         array(
           '%s removed a JIRA issue: %3$s.',
           '%s removed JIRA issues: %3$s.',
         ),
       ),
 
-      '%s added %d JIRA issue(s): %s.' => array(
+      '%s added %s JIRA issue(s): %s.' => array(
         array(
           '%s added a JIRA issue: %3$s.',
           '%s added JIRA issues: %3$s.',
@@ -704,7 +687,7 @@ abstract class PhabricatorBaseEnglishTranslation
         ),
       ),
 
-      '%s updated JIRA issue(s): added %d %s; removed %d %s.' =>
+      '%s updated JIRA issue(s): added %s %s; removed %d %s.' =>
         '%s updated JIRA issues: added %3$s; removed %5$s.',
 
       '%s edited %s task(s), added %s: %s; removed %s: %s.' =>

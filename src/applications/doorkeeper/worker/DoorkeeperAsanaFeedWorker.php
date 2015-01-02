@@ -90,8 +90,8 @@ final class DoorkeeperAsanaFeedWorker extends DoorkeeperFeedWorker {
         'pull an OAuth token out of.');
     }
 
-    $etype_main = PhabricatorEdgeConfig::TYPE_PHOB_HAS_ASANATASK;
-    $etype_sub = PhabricatorEdgeConfig::TYPE_PHOB_HAS_ASANASUBTASK;
+    $etype_main = PhabricatorObjectHasAsanaTaskEdgeType::EDGECONST;
+    $etype_sub = PhabricatorObjectHasAsanaSubtaskEdgeType::EDGECONST;
 
     $equery = id(new PhabricatorEdgeQuery())
       ->withSourcePHIDs(array($src_phid))

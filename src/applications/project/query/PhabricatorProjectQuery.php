@@ -139,7 +139,7 @@ final class PhabricatorProjectQuery
       $project_phids = mpull($projects, 'getPHID');
 
       $member_type = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
-      $watcher_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_WATCHER;
+      $watcher_type = PhabricatorObjectHasWatcherEdgeType::EDGECONST;
 
       $need_edge_types = array();
       if ($this->needMembers) {

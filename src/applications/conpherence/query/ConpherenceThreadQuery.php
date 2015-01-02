@@ -200,7 +200,7 @@ final class ConpherenceThreadQuery
   }
 
   private function loadFilePHIDs(array $conpherences) {
-    $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_FILE;
+    $edge_type = PhabricatorObjectHasFileEdgeType::EDGECONST;
     $file_edges = id(new PhabricatorEdgeQuery())
       ->withSourcePHIDs(array_keys($conpherences))
       ->withEdgeTypes(array($edge_type))

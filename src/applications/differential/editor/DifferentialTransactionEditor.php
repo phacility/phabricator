@@ -1506,7 +1506,7 @@ final class DifferentialTransactionEditor
 
     $unsubscribed_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $object->getPHID(),
-      PhabricatorEdgeConfig::TYPE_OBJECT_HAS_UNSUBSCRIBER);
+      PhabricatorObjectHasUnsubscriberEdgeType::EDGECONST);
 
     $subscribed_phids = PhabricatorSubscribersQuery::loadSubscribersForPHID(
       $object->getPHID());

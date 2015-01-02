@@ -249,7 +249,7 @@ final class DifferentialJIRAIssuesField
     $revision = $this->getObject();
     $revision_phid = $revision->getPHID();
 
-    $edge_type = PhabricatorEdgeConfig::TYPE_PHOB_HAS_JIRAISSUE;
+    $edge_type = PhabricatorJiraIssueHasObjectEdgeType::EDGECONST;
     $xobjs = $this->loadDoorkeeperExternalObjects($xaction->getNewValue());
     $edge_dsts = mpull($xobjs, 'getPHID');
 

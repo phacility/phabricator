@@ -45,7 +45,7 @@ final class PhabricatorProjectWatchController
           break;
       }
 
-      $type_member = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_WATCHER;
+      $type_member = PhabricatorObjectHasWatcherEdgeType::EDGECONST;
       $member_spec = array(
         $edge_action => array($viewer->getPHID() => $viewer->getPHID()),
       );

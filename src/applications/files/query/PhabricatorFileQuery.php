@@ -116,7 +116,7 @@ final class PhabricatorFileQuery
     // We need to load attached objects to perform policy checks for files.
     // First, load the edges.
 
-    $edge_type = PhabricatorEdgeConfig::TYPE_FILE_HAS_OBJECT;
+    $edge_type = PhabricatorFileHasObjectEdgeType::EDGECONST;
     $file_phids = mpull($files, 'getPHID');
     $edges = id(new PhabricatorEdgeQuery())
       ->withSourcePHIDs($file_phids)

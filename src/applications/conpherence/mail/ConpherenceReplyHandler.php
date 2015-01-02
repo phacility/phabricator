@@ -43,7 +43,7 @@ final class ConpherenceReplyHandler extends PhabricatorMailReplyHandler {
         ->attachParticipants(array())
         ->attachFilePHIDs(array());
     } else {
-      $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_FILE;
+      $edge_type = PhabricatorObjectHasFileEdgeType::EDGECONST;
       $file_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
         $conpherence->getPHID(),
         $edge_type);

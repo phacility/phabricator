@@ -180,7 +180,7 @@ final class PhabricatorProjectTransactionEditor
         $edge_type = $xaction->getMetadataValue('edge:type');
         switch ($edge_type) {
           case PhabricatorProjectProjectHasMemberEdgeType::EDGECONST:
-          case PhabricatorEdgeConfig::TYPE_OBJECT_HAS_WATCHER:
+          case PhabricatorObjectHasWatcherEdgeType::EDGECONST:
             $old = $xaction->getOldValue();
             $new = $xaction->getNewValue();
 
@@ -221,7 +221,7 @@ final class PhabricatorProjectTransactionEditor
               foreach ($rem as $rem_phid) {
                 $edge_editor->removeEdge(
                   $object->getPHID(),
-                  PhabricatorEdgeConfig::TYPE_OBJECT_HAS_WATCHER,
+                  PhabricatorObjectHasWatcherEdgeType::EDGECONST,
                   $rem_phid);
               }
               $edge_editor->save();

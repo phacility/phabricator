@@ -455,7 +455,7 @@ final class PhabricatorAuditTransaction
           case PhabricatorProjectObjectHasProjectEdgeType::EDGECONST:
             $tags[] = self::MAILTAG_PROJECTS;
             break;
-          case PhabricatorEdgeConfig::TYPE_OBJECT_HAS_SUBSCRIBER:
+          case PhabricatorObjectHasSubscriberEdgeType::EDGECONST:
             $tags[] = self::MAILTAG_ADD_CCS;
             break;
           default:

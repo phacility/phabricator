@@ -32,7 +32,7 @@ final class DoorkeeperJIRAFeedWorker extends DoorkeeperFeedWorker {
 
     $jira_issue_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $object->getPHID(),
-      PhabricatorEdgeConfig::TYPE_PHOB_HAS_JIRAISSUE);
+      PhabricatorJiraIssueHasObjectEdgeType::EDGECONST);
     if (!$jira_issue_phids) {
       $this->log("Story is about an object with no linked JIRA issues.\n");
       return;
