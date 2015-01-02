@@ -242,7 +242,7 @@ http.createServer(function(request, response) {
         'version': 6
       };
 
-      response.writeHead(200, {'Content-Type': 'text/plain'});
+      response.writeHead(200, {'Content-Type': 'application/json'});
       response.write(JSON.stringify(status));
       response.end();
     });
