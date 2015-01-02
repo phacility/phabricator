@@ -66,8 +66,9 @@ final class PhabricatorRepositoryRepositoryPHIDType
     if ($query->execute()) {
       $objects = $query->getIdentifierMap();
       foreach ($objects as $key => $object) {
-        foreach (idx($id_map, $key, array()) as $name)
+        foreach (idx($id_map, $key, array()) as $name) {
           $results[$name] = $object;
+        }
       }
       return $results;
     } else {

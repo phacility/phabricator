@@ -4,9 +4,9 @@ final class PhabricatorManiphestTaskTestDataGenerator
   extends PhabricatorTestDataGenerator {
 
   public function generate() {
-    $authorPHID = $this->loadPhabrictorUserPHID();
+    $author_phid = $this->loadPhabrictorUserPHID();
     $author = id(new PhabricatorUser())
-          ->loadOneWhere('phid = %s', $authorPHID);
+      ->loadOneWhere('phid = %s', $author_phid);
     $task = ManiphestTask::initializeNewTask($author)
       ->setSubPriority($this->generateTaskSubPriority())
       ->setTitle($this->generateTitle());
