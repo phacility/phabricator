@@ -206,23 +206,20 @@ http.createServer(function(request, response) {
               '<%s> Internal Server Error! %s',
               request.socket.remoteAddress,
               err);
-            response.statusCode = 500;
-            response.write('500 Internal Server Error\n');
+            response.writeHead(500, 'Internal Server Error');
           }
         } catch (err) {
           debug.log(
             '<%s> Bad Request! %s',
             request.socket.remoteAddress,
             err);
-          response.statusCode = 400;
-          response.write('400 Bad Request\n');
+          response.writeHead(400, 'Bad Request');
         } finally {
           response.end();
         }
       });
     } else {
-      response.statusCode = 405;
-      response.write('405 Method Not Allowed\n');
+      response.writeHead(405, 'Method Not Allowed');
       response.end();
     }
   } else if (request.url == '/status/') {
@@ -240,8 +237,7 @@ http.createServer(function(request, response) {
     response.write(JSON.stringify(status));
     response.end();
   } else {
-    response.statusCode = 404;
-    response.write('404 Not Found\n');
+    response.writeHead(404, 'Not Found');
     response.end();
   }
 }).listen(config.admin, config.host);
