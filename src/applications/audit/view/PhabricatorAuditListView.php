@@ -152,7 +152,7 @@ final class PhabricatorAuditListView extends AphrontView {
         ->addAttribute($status_text)
         ->addAttribute($reasons)
         ->addIcon('none', $committed)
-        ->addByline(pht('Author: %s', $author_name));
+        ->addByline($author_name);
 
       if (!empty($auditors)) {
         $item->addAttribute(pht('Auditors: %s', $auditors));
