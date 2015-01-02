@@ -4,7 +4,7 @@
  * Publishes tasks representing work that needs to be done into Asana, and
  * updates the tasks as the corresponding Phabricator objects are updated.
  */
-final class DoorkeeperFeedWorkerAsana extends DoorkeeperFeedWorker {
+final class DoorkeeperAsanaFeedWorker extends DoorkeeperFeedWorker {
 
   private $provider;
 

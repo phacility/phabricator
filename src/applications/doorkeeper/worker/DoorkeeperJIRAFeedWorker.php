@@ -4,7 +4,7 @@
  * Publishes feed stories into JIRA, using the "JIRA Issues" field to identify
  * linked issues.
  */
-final class DoorkeeperFeedWorkerJIRA extends DoorkeeperFeedWorker {
+final class DoorkeeperJIRAFeedWorker extends DoorkeeperFeedWorker {
 
   private $provider;
 
