@@ -1720,7 +1720,6 @@ phutil_register_library_map(array(
     'PhabricatorFeedApplication' => 'applications/feed/application/PhabricatorFeedApplication.php',
     'PhabricatorFeedBuilder' => 'applications/feed/builder/PhabricatorFeedBuilder.php',
     'PhabricatorFeedConfigOptions' => 'applications/feed/config/PhabricatorFeedConfigOptions.php',
-    'PhabricatorFeedConstants' => 'applications/feed/constants/PhabricatorFeedConstants.php',
     'PhabricatorFeedController' => 'applications/feed/controller/PhabricatorFeedController.php',
     'PhabricatorFeedDAO' => 'applications/feed/storage/PhabricatorFeedDAO.php',
     'PhabricatorFeedDetailController' => 'applications/feed/controller/PhabricatorFeedDetailController.php',
