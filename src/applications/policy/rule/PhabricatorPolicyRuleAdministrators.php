@@ -1,6 +1,7 @@
 <?php
 
-final class PhabricatorAdministratorsPolicyRule extends PhabricatorPolicyRule {
+final class PhabricatorPolicyRuleAdministrators
+  extends PhabricatorPolicyRule {
 
   public function getRuleDescription() {
     return pht('administrators');

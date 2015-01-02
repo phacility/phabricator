@@ -48,7 +48,7 @@ final class PhabricatorPolicyDataTestCase extends PhabricatorTestCase {
         array(
           array(
             'action' => PhabricatorPolicy::ACTION_ALLOW,
-            'rule' => 'PhabricatorUsersPolicyRule',
+            'rule' => 'PhabricatorPolicyRuleUsers',
             'value' => array($user_a->getPHID()),
           ),
         ))
@@ -84,7 +84,7 @@ final class PhabricatorPolicyDataTestCase extends PhabricatorTestCase {
         array(
           array(
             'action' => PhabricatorPolicy::ACTION_ALLOW,
-            'rule' => 'PhabricatorAdministratorsPolicyRule',
+            'rule' => 'PhabricatorPolicyRuleAdministrators',
             'value' => null,
           ),
         ))
@@ -118,7 +118,7 @@ final class PhabricatorPolicyDataTestCase extends PhabricatorTestCase {
         array(
           array(
             'action' => PhabricatorPolicy::ACTION_ALLOW,
-            'rule' => 'PhabricatorLunarPhasePolicyRule',
+            'rule' => 'PhabricatorPolicyRuleLunarPhase',
             'value' => 'new',
           ),
         ))

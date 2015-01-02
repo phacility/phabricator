@@ -1,12 +1,12 @@
 <?php
 
-final class PhabricatorLegalpadSignaturePolicyRule
+final class PhabricatorPolicyRuleProjects
   extends PhabricatorPolicyRule {
 
-  private $signatures = array();
+  private $memberships = array();
 
   public function getRuleDescription() {
-    return pht('signers of legalpad documents');
+    return pht('members of projects');
   }
 
   public function willApplyRules(PhabricatorUser $viewer, array $values) {
@@ -15,24 +15,23 @@ final class PhabricatorLegalpadSignaturePolicyRule
       return;
     }
 
-    // TODO: This accepts signature of any version of the document, even an
-    // older version.
-
-    $documents = id(new LegalpadDocumentQuery())
+    $projects = id(new PhabricatorProjectQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withMemberPHIDs(array($viewer->getPHID()))
       ->withPHIDs($values)
-      ->withSignerPHIDs(array($viewer->getPHID()))
       ->execute();
-    $this->signatures = mpull($documents, 'getPHID', 'getPHID');
+    foreach ($projects as $project) {
+      $this->memberships[$viewer->getPHID()][$project->getPHID()] = true;
+    }
   }
 
   public function applyRule(PhabricatorUser $viewer, $value) {
-    foreach ($value as $document_phid) {
-      if (!isset($this->signatures[$document_phid])) {
-        return false;
+    foreach ($value as $project_phid) {
+      if (isset($this->memberships[$viewer->getPHID()][$project_phid])) {
+        return true;
       }
     }
-    return true;
+    return false;
   }
 
   public function getValueControlType() {
@@ -40,17 +39,17 @@ final class PhabricatorLegalpadSignaturePolicyRule
   }
 
   public function getValueControlTemplate() {
-    $datasource = new LegalpadDocumentDatasource();
+    $projects_source = new PhabricatorProjectDatasource();
 
     return array(
       'markup' => new AphrontTokenizerTemplateView(),
-      'uri' => $datasource->getDatasourceURI(),
-      'placeholder' => $datasource->getPlaceholderText(),
+      'uri' => $projects_source->getDatasourceURI(),
+      'placeholder' => $projects_source->getPlaceholderText(),
     );
   }
 
   public function getRuleOrder() {
-    return 900;
+    return 200;
   }
 
   public function getValueForStorage($value) {
