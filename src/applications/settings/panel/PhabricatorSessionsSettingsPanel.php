@@ -1,7 +1,6 @@
 <?php
 
-final class PhabricatorSettingsPanelSessions
-  extends PhabricatorSettingsPanel {
+final class PhabricatorSessionsSettingsPanel extends PhabricatorSettingsPanel {
 
   public function getPanelKey() {
     return 'sessions';

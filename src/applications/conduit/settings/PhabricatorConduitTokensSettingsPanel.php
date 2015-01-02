@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorConduitSettingsPanel
+final class PhabricatorConduitTokensSettingsPanel
   extends PhabricatorSettingsPanel {
 
   public function isEditableByAdministrators() {

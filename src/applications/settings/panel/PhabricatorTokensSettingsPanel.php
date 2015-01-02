@@ -1,7 +1,6 @@
 <?php
 
-final class PhabricatorSettingsPanelTokens
-  extends PhabricatorSettingsPanel {
+final class PhabricatorTokensSettingsPanel extends PhabricatorSettingsPanel {
 
   public function getPanelKey() {
     return 'tokens';

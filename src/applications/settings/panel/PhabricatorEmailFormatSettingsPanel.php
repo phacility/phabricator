@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSettingsPanelEmailFormat
+final class PhabricatorEmailFormatSettingsPanel
   extends PhabricatorSettingsPanel {
 
   public function getPanelKey() {

@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSettingsPanelConpherencePreferences
+final class PhabricatorConpherencePreferencesSettingsPanel
   extends PhabricatorSettingsPanel {
 
   public function isEnabled() {

@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSettingsPanelEmailPreferences
+final class PhabricatorEmailPreferencesSettingsPanel
   extends PhabricatorSettingsPanel {
 
   public function getPanelKey() {

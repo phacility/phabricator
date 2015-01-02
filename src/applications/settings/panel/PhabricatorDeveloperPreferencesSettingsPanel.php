@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSettingsPanelDeveloperPreferences
+final class PhabricatorDeveloperPreferencesSettingsPanel
   extends PhabricatorSettingsPanel {
 
   public function getPanelKey() {

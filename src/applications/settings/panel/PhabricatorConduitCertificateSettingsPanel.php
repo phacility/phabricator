@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSettingsPanelConduit
+final class PhabricatorConduitCertificateSettingsPanel
   extends PhabricatorSettingsPanel {
 
   public function isEditableByAdministrators() {

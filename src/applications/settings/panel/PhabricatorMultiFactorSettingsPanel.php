@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSettingsPanelMultiFactor
+final class PhabricatorMultiFactorSettingsPanel
   extends PhabricatorSettingsPanel {
 
   public function getPanelKey() {

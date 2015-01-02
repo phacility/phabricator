@@ -1,7 +1,6 @@
 <?php
 
-final class PhabricatorSettingsPanelSSHKeys
-  extends PhabricatorSettingsPanel {
+final class PhabricatorSSHKeysSettingsPanel extends PhabricatorSettingsPanel {
 
   public function isEditableByAdministrators() {
     return true;

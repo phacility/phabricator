@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSettingsPanelExternalAccounts
+final class PhabricatorExternalAccountsSettingsPanel
   extends PhabricatorSettingsPanel {
 
   public function getPanelKey() {

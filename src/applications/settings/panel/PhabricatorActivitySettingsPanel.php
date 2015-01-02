@@ -1,7 +1,6 @@
 <?php
 
-final class PhabricatorSettingsPanelActivity
-  extends PhabricatorSettingsPanel {
+final class PhabricatorActivitySettingsPanel extends PhabricatorSettingsPanel {
 
   public function isEditableByAdministrators() {
     return true;

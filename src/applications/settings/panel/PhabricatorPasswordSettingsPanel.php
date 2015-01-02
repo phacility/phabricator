@@ -1,7 +1,6 @@
 <?php
 
-final class PhabricatorSettingsPanelPassword
-  extends PhabricatorSettingsPanel {
+final class PhabricatorPasswordSettingsPanel extends PhabricatorSettingsPanel {
 
   public function getPanelKey() {
     return 'password';
