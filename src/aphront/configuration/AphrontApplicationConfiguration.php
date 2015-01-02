@@ -275,6 +275,50 @@ abstract class AphrontApplicationConfiguration {
   final public function buildController() {
     $request = $this->getRequest();
 
+    // If we're configured to operate in cluster mode, reject requests which
+    // were not received on a cluster interface.
+    //
+    // For example, a host may have an internal address like "170.0.0.1", and
+    // also have a public address like "51.23.95.16". Assuming the cluster
+    // is configured on a range like "170.0.0.0/16", we want to reject the
+    // requests received on the public interface.
+    //
+    // Ideally, nodes in a cluster should only be listening on internal
+    // interfaces, but they may be configured in such a way that they also
+    // listen on external interfaces, since this is easy to forget about or
+    // get wrong. As a broad security measure, reject requests received on any
+    // interfaces which aren't on the whitelist.
+
+    $cluster_addresses = PhabricatorEnv::getEnvConfig('cluster.addresses');
+    if ($cluster_addresses) {
+      $server_addr = idx($_SERVER, 'SERVER_ADDR');
+      if (!$server_addr) {
+        if (php_sapi_name() == 'cli') {
+          // This is a command line script (probably something like a unit
+          // test) so it's fine that we don't have SERVER_ADDR defined.
+        } else {
+          throw new AphrontUsageException(
+            pht('No SERVER_ADDR'),
+            pht(
+              'Phabricator is configured to operate in cluster mode, but '.
+              'SERVER_ADDR is not defined in the request context. Your '.
+              'webserver configuration needs to forward SERVER_ADDR to '.
+              'PHP so Phabricator can reject requests received on '.
+              'external interfaces.'));
+        }
+      } else {
+        if (!PhabricatorEnv::isClusterAddress($server_addr)) {
+          throw new AphrontUsageException(
+            pht('External Interface'),
+            pht(
+              'Phabricator is configured in cluster mode and the address '.
+              'this request was received on ("%s") is not whitelisted as '.
+              'a cluster address.',
+              $server_addr));
+        }
+      }
+    }
+
     if (PhabricatorEnv::getEnvConfig('security.require-https')) {
       if (!$request->isHTTPS()) {
         $https_uri = $request->getRequestURI();
