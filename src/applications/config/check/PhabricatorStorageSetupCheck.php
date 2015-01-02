@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSetupCheckStorage extends PhabricatorSetupCheck {
+final class PhabricatorStorageSetupCheck extends PhabricatorSetupCheck {
 
   /**
    * @phutil-external-symbol class PhabricatorStartup

@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSetupCheckDaemons extends PhabricatorSetupCheck {
+final class PhabricatorDaemonsSetupCheck extends PhabricatorSetupCheck {
 
   protected function executeChecks() {
 

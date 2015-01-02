@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSetupCheckPygment extends PhabricatorSetupCheck {
+final class PhabricatorPygmentSetupCheck extends PhabricatorSetupCheck {
 
   protected function executeChecks() {
     $pygment = PhabricatorEnv::getEnvConfig('pygments.enabled');

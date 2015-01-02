@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSetupCheckDatabase extends PhabricatorSetupCheck {
+final class PhabricatorDatabaseSetupCheck extends PhabricatorSetupCheck {
 
   public function getExecutionOrder() {
     // This must run after basic PHP checks, but before most other checks.

@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSetupCheckMail extends PhabricatorSetupCheck {
+final class PhabricatorMailSetupCheck extends PhabricatorSetupCheck {
 
   protected function executeChecks() {
     $adapter = PhabricatorEnv::getEnvConfig('metamta.mail-adapter');

@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSetupCheckImagemagick extends PhabricatorSetupCheck {
+final class PhabricatorImagemagickSetupCheck extends PhabricatorSetupCheck {
 
   protected function executeChecks() {
     $imagemagick = PhabricatorEnv::getEnvConfig('files.enable-imagemagick');

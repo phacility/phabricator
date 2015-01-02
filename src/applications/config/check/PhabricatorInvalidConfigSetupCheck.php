@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSetupCheckInvalidConfig extends PhabricatorSetupCheck {
+final class PhabricatorInvalidConfigSetupCheck extends PhabricatorSetupCheck {
 
   protected function executeChecks() {
     $groups = PhabricatorApplicationConfigOptions::loadAll();

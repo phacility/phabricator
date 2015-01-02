@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSetupCheckBinaries extends PhabricatorSetupCheck {
+final class PhabricatorBinariesSetupCheck extends PhabricatorSetupCheck {
 
 
   protected function executeChecks() {

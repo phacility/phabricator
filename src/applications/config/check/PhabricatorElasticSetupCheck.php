@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSetupCheckElastic extends PhabricatorSetupCheck {
+final class PhabricatorElasticSetupCheck extends PhabricatorSetupCheck {
 
   protected function executeChecks() {
     if (PhabricatorDefaultSearchEngineSelector::shouldUseElasticSearch()) {

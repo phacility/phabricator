@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSetupCheckMySQL extends PhabricatorSetupCheck {
+final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
 
   public static function loadRawConfigValue($key) {
     $conn_raw = id(new PhabricatorUser())->establishConnection('w');

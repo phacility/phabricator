@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSetupCheckExtensions extends PhabricatorSetupCheck {
+final class PhabricatorExtensionsSetupCheck extends PhabricatorSetupCheck {
 
   public function getExecutionOrder() {
     return 0;

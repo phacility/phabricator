@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSetupCheckGD extends PhabricatorSetupCheck {
+final class PhabricatorGDSetupCheck extends PhabricatorSetupCheck {
 
   protected function executeChecks() {
     if (!extension_loaded('gd')) {

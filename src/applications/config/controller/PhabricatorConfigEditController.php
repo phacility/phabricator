@@ -16,7 +16,7 @@ final class PhabricatorConfigEditController
 
     $options = PhabricatorApplicationConfigOptions::loadAllOptions();
     if (empty($options[$this->key])) {
-      $ancient = PhabricatorSetupCheckExtraConfig::getAncientConfig();
+      $ancient = PhabricatorExtraConfigSetupCheck::getAncientConfig();
       if (isset($ancient[$this->key])) {
         $desc = pht(
           "This configuration has been removed. You can safely delete ".

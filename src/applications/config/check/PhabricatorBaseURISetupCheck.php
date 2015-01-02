@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSetupCheckBaseURI extends PhabricatorSetupCheck {
+final class PhabricatorBaseURISetupCheck extends PhabricatorSetupCheck {
 
   protected function executeChecks() {
     $base_uri = PhabricatorEnv::getEnvConfig('phabricator.base-uri');

@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSetupCheckTimezone extends PhabricatorSetupCheck {
+final class PhabricatorTimezoneSetupCheck extends PhabricatorSetupCheck {
 
   protected function executeChecks() {
     $php_value = ini_get('date.timezone');

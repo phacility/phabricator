@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSetupCheckPath extends PhabricatorSetupCheck {
+final class PhabricatorPathSetupCheck extends PhabricatorSetupCheck {
 
   protected function executeChecks() {
     // NOTE: We've already appended `environment.append-paths`, so we don't

@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSetupCheckAphlict extends PhabricatorSetupCheck {
+final class PhabricatorAphlictSetupCheck extends PhabricatorSetupCheck {
 
   protected function executeChecks() {
     $enabled = PhabricatorEnv::getEnvConfig('notification.enabled');

@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSetupCheckFileinfo extends PhabricatorSetupCheck {
+final class PhabricatorFileinfoSetupCheck extends PhabricatorSetupCheck {
 
   protected function executeChecks() {
     if (!extension_loaded('fileinfo')) {

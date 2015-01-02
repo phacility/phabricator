@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSetupCheckAuth extends PhabricatorSetupCheck {
+final class PhabricatorAuthSetupCheck extends PhabricatorSetupCheck {
 
   protected function executeChecks() {
     // NOTE: We're not actually building these providers. Building providers

@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSetupCheckExtraConfig extends PhabricatorSetupCheck {
+final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
 
   protected function executeChecks() {
     $ancient_config = self::getAncientConfig();

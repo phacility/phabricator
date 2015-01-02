@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSetupCheckRepositories extends PhabricatorSetupCheck {
+final class PhabricatorRepositoriesSetupCheck extends PhabricatorSetupCheck {
 
   protected function executeChecks() {
 

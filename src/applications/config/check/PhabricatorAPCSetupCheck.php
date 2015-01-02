@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSetupCheckAPC extends PhabricatorSetupCheck {
+final class PhabricatorAPCSetupCheck extends PhabricatorSetupCheck {
 
   protected function executeChecks() {
     if (!extension_loaded('apc')) {
