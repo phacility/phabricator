@@ -326,7 +326,7 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
     return parent::renderExtraInformationLink();
   }
 
-  public function getTitleForFeed(PhabricatorFeedStory $story) {
+  public function getTitleForFeed() {
     $author_phid = $this->getAuthorPHID();
     $object_phid = $this->getObjectPHID();
 
@@ -452,7 +452,7 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
         }
     }
 
-    return parent::getTitleForFeed($story);
+    return parent::getTitleForFeed();
   }
 
   public function getIcon() {

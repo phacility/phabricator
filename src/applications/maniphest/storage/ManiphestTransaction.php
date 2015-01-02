@@ -554,7 +554,7 @@ final class ManiphestTransaction
     return parent::getTitle();
   }
 
-  public function getTitleForFeed(PhabricatorFeedStory $story) {
+  public function getTitleForFeed() {
     $author_phid = $this->getAuthorPHID();
     $object_phid = $this->getObjectPHID();
 
@@ -711,7 +711,7 @@ final class ManiphestTransaction
         // code in the parent;
         $clone = clone $this;
         $clone->setTransactionType(PhabricatorTransactions::TYPE_EDGE);
-        return $clone->getTitleForFeed($story);
+        return $clone->getTitleForFeed();
 
       case self::TYPE_ATTACH:
         $old = nonempty($old, array());
@@ -773,7 +773,7 @@ final class ManiphestTransaction
 
     }
 
-    return parent::getTitleForFeed($story);
+    return parent::getTitleForFeed();
   }
 
   public function hasChangeDetails() {

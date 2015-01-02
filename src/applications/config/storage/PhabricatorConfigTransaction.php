@@ -55,7 +55,7 @@ final class PhabricatorConfigTransaction
     return parent::getTitle();
   }
 
-  public function getTitleForFeed(PhabricatorFeedStory $story = null) {
+  public function getTitleForFeed() {
     $author_phid = $this->getAuthorPHID();
 
     $old = $this->getOldValue();
