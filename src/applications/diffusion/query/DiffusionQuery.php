@@ -60,6 +60,16 @@ abstract class DiffusionQuery extends PhabricatorQuery {
       $core_params['branch'] = $drequest->getBranch();
     }
 
+    // If the method we're calling doesn't actually take some of the implicit
+    // parameters we derive from the DiffusionRequest, omit them.
+    $method_object = ConduitAPIMethod::getConduitMethod($method);
+    $method_params = $method_object->defineParamTypes();
+    foreach ($core_params as $key => $value) {
+      if (empty($method_params[$key])) {
+        unset($core_params[$key]);
+      }
+    }
+
     $params = $params + $core_params;
 
     $service_phid = $repository->getAlmanacServicePHID();
@@ -123,9 +133,48 @@ abstract class DiffusionQuery extends PhabricatorQuery {
     $client = id(new ConduitClient($uri))
       ->setHost($domain);
 
-    $token = PhabricatorConduitToken::loadClusterTokenForUser($user);
-    if ($token) {
-      $client->setConduitToken($token->getToken());
+    if ($user->isOmnipotent()) {
+      // If the caller is the omnipotent user (normally, a daemon), we will
+      // sign the request with this host's asymmetric keypair.
+
+      $public_path = AlmanacKeys::getKeyPath('device.pub');
+      try {
+        $public_key = Filesystem::readFile($public_path);
+      } catch (Exception $ex) {
+        throw new PhutilAggregateException(
+          pht(
+            'Unable to read device public key while attempting to make '.
+            'authenticated method call within the Phabricator cluster. '.
+            'Use `bin/almanac register` to register keys for this device. '.
+            'Exception: %s',
+            $ex->getMessage()),
+          array($ex));
+      }
+
+      $private_path = AlmanacKeys::getKeyPath('device.key');
+      try {
+        $private_key = Filesystem::readFile($private_path);
+        $private_key = new PhutilOpaqueEnvelope($private_key);
+      } catch (Exception $ex) {
+        throw new PhutilAggregateException(
+          pht(
+            'Unable to read device private key while attempting to make '.
+            'authenticated method call within the Phabricator cluster. '.
+            'Use `bin/almanac register` to register keys for this device. '.
+            'Exception: %s',
+            $ex->getMessage()),
+          array($ex));
+      }
+
+      $client->setSigningKeys($public_key, $private_key);
+    } else {
+      // If the caller is a normal user, we generate or retrieve a cluster
+      // API token.
+
+      $token = PhabricatorConduitToken::loadClusterTokenForUser($user);
+      if ($token) {
+        $client->setConduitToken($token->getToken());
+      }
     }
 
     return $client->callMethodSynchronous($method, $params);
