@@ -226,26 +226,19 @@ http.createServer(function(request, response) {
       response.end();
     }
   } else if (request.url == '/status/') {
-    request.on('data', function() {
-      // We just ignore the request data, but newer versions of Node don't
-      // get to 'end' if we don't process the data. See T2953.
-    });
+    var status = {
+      'uptime': (new Date().getTime() - start_time),
+      'clients.active': clients.getActiveListenerCount(),
+      'clients.total': clients.getTotalListenerCount(),
+      'messages.in': messages_in,
+      'messages.out': messages_out,
+      'log': config.log,
+      'version': 6
+    };
 
-    request.on('end', function() {
-      var status = {
-        'uptime': (new Date().getTime() - start_time),
-        'clients.active': clients.getActiveListenerCount(),
-        'clients.total': clients.getTotalListenerCount(),
-        'messages.in': messages_in,
-        'messages.out': messages_out,
-        'log': config.log,
-        'version': 6
-      };
-
-      response.writeHead(200, {'Content-Type': 'application/json'});
-      response.write(JSON.stringify(status));
-      response.end();
-    });
+    response.writeHead(200, {'Content-Type': 'application/json'});
+    response.write(JSON.stringify(status));
+    response.end();
   } else {
     response.statusCode = 404;
     response.write('404 Not Found\n');
