@@ -1056,7 +1056,6 @@ phutil_register_library_map(array(
     'MetaMTANotificationType' => 'applications/metamta/constants/MetaMTANotificationType.php',
     'MetaMTAReceivedMailStatus' => 'applications/metamta/constants/MetaMTAReceivedMailStatus.php',
     'NuanceConduitAPIMethod' => 'applications/nuance/conduit/NuanceConduitAPIMethod.php',
-    'NuanceConstants' => 'applications/nuance/constants/NuanceConstants.php',
     'NuanceController' => 'applications/nuance/controller/NuanceController.php',
     'NuanceCreateItemConduitAPIMethod' => 'applications/nuance/conduit/NuanceCreateItemConduitAPIMethod.php',
     'NuanceDAO' => 'applications/nuance/storage/NuanceDAO.php',
