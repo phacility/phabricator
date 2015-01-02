@@ -241,6 +241,9 @@ abstract class AphrontFormControl extends AphrontView {
         $error,
         $input,
         $caption,
+
+        // TODO: Remove this once the redesign finishes up.
+        phutil_tag('div', array('style' => 'clear: both;'), ''),
       ));
   }
 }
