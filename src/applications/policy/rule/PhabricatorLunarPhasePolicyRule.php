@@ -1,7 +1,6 @@
 <?php
 
-final class PhabricatorPolicyRuleLunarPhase
-  extends PhabricatorPolicyRule {
+final class PhabricatorLunarPhasePolicyRule extends PhabricatorPolicyRule {
 
   const PHASE_FULL = 'full';
   const PHASE_NEW = 'new';
