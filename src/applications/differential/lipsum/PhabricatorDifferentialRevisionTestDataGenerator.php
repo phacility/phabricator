@@ -5,7 +5,6 @@ final class PhabricatorDifferentialRevisionTestDataGenerator
 
   public function generate() {
     $author = $this->loadPhabrictorUser();
-    $authorPHID = $author->getPHID();
 
     $revision = DifferentialRevision::initializeNewRevision($author);
     $revision->attachReviewerStatus(array());
