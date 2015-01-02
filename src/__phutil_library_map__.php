@@ -2139,7 +2139,6 @@ phutil_register_library_map(array(
     'PhabricatorProjectColumnTransactionQuery' => 'applications/project/query/PhabricatorProjectColumnTransactionQuery.php',
     'PhabricatorProjectConfigOptions' => 'applications/project/config/PhabricatorProjectConfigOptions.php',
     'PhabricatorProjectConfiguredCustomField' => 'applications/project/customfield/PhabricatorProjectConfiguredCustomField.php',
-    'PhabricatorProjectConstants' => 'applications/project/constants/PhabricatorProjectConstants.php',
     'PhabricatorProjectController' => 'applications/project/controller/PhabricatorProjectController.php',
     'PhabricatorProjectCustomField' => 'applications/project/customfield/PhabricatorProjectCustomField.php',
     'PhabricatorProjectCustomFieldNumericIndex' => 'applications/project/storage/PhabricatorProjectCustomFieldNumericIndex.php',
