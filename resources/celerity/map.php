@@ -45,6 +45,7 @@ return array(
     'rsrc/css/application/config/config-template.css' => '25d446d6',
     'rsrc/css/application/config/config-welcome.css' => 'b0d16200',
     'rsrc/css/application/config/setup-issue.css' => '8f852bc0',
+    'rsrc/css/application/config/unhandled-exception.css' => '38f08073',
     'rsrc/css/application/conpherence/menu.css' => 'e1e0fdf1',
     'rsrc/css/application/conpherence/message-pane.css' => '042886d1',
     'rsrc/css/application/conpherence/notification.css' => '04a6e10a',
@@ -816,6 +817,7 @@ return array(
     'sprite-tokens-css' => '1706b943',
     'syntax-highlighting-css' => '56c1ba38',
     'tokens-css' => '3d0f239e',
+    'unhandled-exception-css' => '38f08073',
   ),
   'requires' => array(
     '00861799' => array(

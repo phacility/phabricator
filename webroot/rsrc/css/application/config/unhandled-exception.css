@@ -1,0 +1,27 @@
+/**
+ * @provides unhandled-exception-css
+ */
+
+.unhandled-exception {
+  background: #222228;
+}
+
+.unhandled-exception-detail {
+  max-width: 760px;
+  margin: 16px auto;
+  background: #f7f7f7;
+  border: 2px solid #ffffff;
+}
+
+.unhandled-exception-detail .unhandled-exception-title {
+  font-size: 15px;
+  font-weight: bold;
+  margin: 0;
+  padding: 16px;
+  background: #DFE0E2;
+}
+
+.unhandled-exception-detail .unhandled-exception-body {
+  padding: 16px;
+  color: #4B4D51;
+}
