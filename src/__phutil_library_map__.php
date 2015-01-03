@@ -1436,7 +1436,6 @@ phutil_register_library_map(array(
     'PhabricatorChatLogChannelListController' => 'applications/chatlog/controller/PhabricatorChatLogChannelListController.php',
     'PhabricatorChatLogChannelLogController' => 'applications/chatlog/controller/PhabricatorChatLogChannelLogController.php',
     'PhabricatorChatLogChannelQuery' => 'applications/chatlog/query/PhabricatorChatLogChannelQuery.php',
-    'PhabricatorChatLogConstants' => 'applications/chatlog/constants/PhabricatorChatLogConstants.php',
     'PhabricatorChatLogController' => 'applications/chatlog/controller/PhabricatorChatLogController.php',
     'PhabricatorChatLogDAO' => 'applications/chatlog/storage/PhabricatorChatLogDAO.php',
     'PhabricatorChatLogEvent' => 'applications/chatlog/storage/PhabricatorChatLogEvent.php',
