@@ -817,6 +817,40 @@ abstract class PhabricatorBaseEnglishTranslation
 
       '%s edited %s dashboard(s), added %s: %s; removed %s: %s.' =>
         '%s edited dashboards, added %4$s; removed %6$s.',
+
+      '%s added %s edge(s): %s.' => array(
+        array(
+          '%s added an edge: %3$s.',
+          '%s added edges: %3$s.',
+        ),
+      ),
+
+      '%s added %s edge(s) to %s: %s.' => array(
+        array(
+          '%s added an edge to %3$s: %4$s.',
+          '%s added edges to %3$s: %4$s.',
+        ),
+      ),
+
+      '%s removed %s edge(s): %s.' => array(
+        array(
+          '%s removed an edge: %3$s.',
+          '%s removed edges: %3$s.',
+        ),
+      ),
+
+      '%s removed %s edge(s) from %s: %s.' => array(
+        array(
+          '%s removed an edge from %3$s: %4$s.',
+          '%s removed edges from %3$s: %4$s.',
+        ),
+      ),
+
+      '%s edited edge(s), added %s: %s; removed %s: %s.' =>
+        '%s edited edges, added: %3$s; removed: %5$s.',
+
+      '%s edited %s edge(s) for %s, added %s: %s; removed %s: %s.' =>
+        '%s edited edges for %3$s, added: %5$s; removed %7$s.',
     );
   }
 
