@@ -9,10 +9,6 @@ final class DifferentialRevisionHasReviewerEdgeType
     return DifferentialReviewerForRevisionEdgeType::EDGECONST;
   }
 
-  public function shouldWriteInverseTransactions() {
-    return true;
-  }
-
   public function getTransactionAddString(
     $actor,
     $add_count,
