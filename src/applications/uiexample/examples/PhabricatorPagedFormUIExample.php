@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorPagedFormExample extends PhabricatorUIExample {
+final class PhabricatorPagedFormUIExample extends PhabricatorUIExample {
 
   public function getName() {
     return pht('Form (Paged)');

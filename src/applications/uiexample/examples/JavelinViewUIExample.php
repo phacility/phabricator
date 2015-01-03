@@ -1,6 +1,6 @@
 <?php
 
-final class JavelinViewExample extends PhabricatorUIExample {
+final class JavelinViewUIExample extends PhabricatorUIExample {
 
   public function getName() {
     return 'Javelin Views';

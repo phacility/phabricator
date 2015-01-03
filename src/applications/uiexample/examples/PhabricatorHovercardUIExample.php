@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorHovercardExample extends PhabricatorUIExample {
+final class PhabricatorHovercardUIExample extends PhabricatorUIExample {
 
   public function getName() {
     return 'Hovercard';

@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorUIListFilterExample extends PhabricatorUIExample {
+final class PhabricatorListFilterUIExample extends PhabricatorUIExample {
 
   public function getName() {
     return 'ListFilter';

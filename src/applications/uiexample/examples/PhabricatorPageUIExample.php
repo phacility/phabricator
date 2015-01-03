@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorUIPagerExample extends PhabricatorUIExample {
+final class PhabricatorPagerUIExample extends PhabricatorUIExample {
 
   public function getName() {
     return 'Pager';

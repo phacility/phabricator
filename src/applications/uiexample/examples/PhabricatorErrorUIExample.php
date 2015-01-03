@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorErrorExample extends PhabricatorUIExample {
+final class PhabricatorErrorUIExample extends PhabricatorUIExample {
 
   public function getName() {
     return 'Errors';

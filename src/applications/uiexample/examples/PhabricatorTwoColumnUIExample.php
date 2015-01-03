@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorTwoColumnExample extends PhabricatorUIExample {
+final class PhabricatorTwoColumnUIExample extends PhabricatorUIExample {
 
   public function getName() {
     return 'Two Column Layout';

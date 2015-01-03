@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorMultiColumnExample extends PhabricatorUIExample {
+final class PhabricatorMultiColumnUIExample extends PhabricatorUIExample {
 
   public function getName() {
     return 'Multiple Column Layouts';

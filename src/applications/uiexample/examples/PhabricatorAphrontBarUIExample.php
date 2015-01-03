@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorAphrontBarExample extends PhabricatorUIExample {
+final class PhabricatorAphrontBarUIExample extends PhabricatorUIExample {
 
   public function getName() {
     return 'Bars';

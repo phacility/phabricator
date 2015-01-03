@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSetupIssueExample extends PhabricatorUIExample {
+final class PhabricatorSetupIssueUIExample extends PhabricatorUIExample {
 
   public function getName() {
     return 'Setup Issue';

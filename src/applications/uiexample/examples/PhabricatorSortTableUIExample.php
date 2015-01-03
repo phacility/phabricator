@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSortTableExample extends PhabricatorUIExample {
+final class PhabricatorSortTableUIExample extends PhabricatorUIExample {
 
   public function getName() {
     return 'Sortable Tables';

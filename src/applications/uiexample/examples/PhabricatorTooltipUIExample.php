@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorUITooltipExample extends PhabricatorUIExample {
+final class PhabricatorTooltipUIExample extends PhabricatorUIExample {
 
   public function getName() {
     return 'Tooltips';
