@@ -1,6 +1,6 @@
 <?php
 
-final class DiffusionSetPasswordPanel extends PhabricatorSettingsPanel {
+final class DiffusionSetPasswordSettingsPanel extends PhabricatorSettingsPanel {
 
   public function isEditableByAdministrators() {
     return true;
