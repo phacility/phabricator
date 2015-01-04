@@ -3033,7 +3033,6 @@ phutil_register_library_map(array(
     'phabricator_datetime' => 'view/viewutils.php',
     'phabricator_form' => 'infrastructure/javelin/markup.php',
     'phabricator_format_local_time' => 'view/viewutils.php',
-    'phabricator_on_relative_date' => 'view/viewutils.php',
     'phabricator_relative_date' => 'view/viewutils.php',
     'phabricator_time' => 'view/viewutils.php',
     'phabricator_time_format' => 'view/viewutils.php',

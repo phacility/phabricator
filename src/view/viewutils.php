@@ -7,10 +7,6 @@ function phabricator_date($epoch, PhabricatorUser $user) {
     phutil_date_format($epoch));
 }
 
-function phabricator_on_relative_date($epoch, $user) {
-  return phabricator_relative_date($epoch, $user, true);
-}
-
 function phabricator_relative_date($epoch, $user, $on = false) {
   static $today;
   static $yesterday;
