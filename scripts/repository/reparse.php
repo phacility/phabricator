@@ -273,7 +273,9 @@ foreach ($commits as $commit) {
       PhabricatorWorker::scheduleTask(
         $class,
         $spec,
-        PhabricatorWorker::PRIORITY_IMPORT);
+        array(
+          'priority' => PhabricatorWorker::PRIORITY_IMPORT,
+        ));
     }
   } else {
     foreach ($classes as $class) {
