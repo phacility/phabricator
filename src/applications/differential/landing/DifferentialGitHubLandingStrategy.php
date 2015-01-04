@@ -1,6 +1,6 @@
 <?php
 
-final class DifferentialLandingToGitHub
+final class DifferentialGitHubLandingStrategy
   extends DifferentialLandingStrategy {
 
   private $account;
@@ -17,15 +17,10 @@ final class DifferentialLandingToGitHub
     $workspace = $this->getGitWorkspace($repository);
 
     try {
-      id(new DifferentialLandingToHostedGit())
-        ->commitRevisionToWorkspace(
-          $revision,
-          $workspace,
-          $viewer);
+      id(new DifferentialHostedGitLandingStrategy())
+        ->commitRevisionToWorkspace($revision, $workspace, $viewer);
     } catch (Exception $e) {
-      throw new PhutilProxyException(
-        'Failed to commit patch',
-        $e);
+      throw new PhutilProxyException('Failed to commit patch', $e);
     }
 
     try {
@@ -38,14 +33,12 @@ final class DifferentialLandingToGitHub
       }
 
       // Else, throw what git said.
-      throw new PhutilProxyException(
-        'Failed to push changes upstream',
-        $e);
+      throw new PhutilProxyException('Failed to push changes upstream', $e);
     }
   }
 
   /**
-   * returns PhabricatorActionView or an array of PhabricatorActionView or null.
+   * Returns PhabricatorActionView or an array of PhabricatorActionView or null.
    */
   public function createMenuItem(
     PhabricatorUser $viewer,

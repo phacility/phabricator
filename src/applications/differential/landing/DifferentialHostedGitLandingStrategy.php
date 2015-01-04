@@ -1,6 +1,6 @@
 <?php
 
-final class DifferentialLandingToHostedMercurial
+final class DifferentialHostedGitLandingStrategy
   extends DifferentialLandingStrategy {
 
   public function processLandRequest(
@@ -9,29 +9,18 @@ final class DifferentialLandingToHostedMercurial
     PhabricatorRepository $repository) {
 
     $viewer = $request->getUser();
-
-    $workspace = $this->getMercurialWorkspace($repository);
+    $workspace = $this->getGitWorkspace($repository);
 
     try {
-      $this->commitRevisionToWorkspace(
-        $revision,
-        $workspace,
-        $viewer);
+      $this->commitRevisionToWorkspace($revision, $workspace, $viewer);
     } catch (Exception $e) {
-      throw new PhutilProxyException(
-        'Failed to commit patch',
-        $e);
+      throw new PhutilProxyException('Failed to commit patch', $e);
     }
 
     try {
-      $this->pushWorkspaceRepository(
-        $repository,
-        $workspace,
-        $viewer);
+      $this->pushWorkspaceRepository($repository, $workspace, $viewer);
     } catch (Exception $e) {
-      throw new PhutilProxyException(
-        'Failed to push changes upstream',
-        $e);
+      throw new PhutilProxyException('Failed to push changes upstream', $e);
     }
   }
 
@@ -51,7 +40,15 @@ final class DifferentialLandingToHostedMercurial
     $call->setUser($user);
     $raw_diff = $call->execute();
 
-    $future = $workspace->execFutureLocal('patch --no-commit -');
+    $missing_binary =
+      "\nindex "
+      ."0000000000000000000000000000000000000000.."
+      ."0000000000000000000000000000000000000000\n";
+    if (strpos($raw_diff, $missing_binary) !== false) {
+      throw new Exception('Patch is missing content for a binary file');
+    }
+
+    $future = $workspace->execFutureLocal('apply --index -');
     $future->write($raw_diff);
     $future->resolvex();
 
@@ -77,20 +74,23 @@ final class DifferentialLandingToHostedMercurial
     $author_date = $revision->getDateCreated();
 
     $workspace->execxLocal(
-      'commit --date=%s --user=%s '.
+      '-c user.name=%s -c user.email=%s '.
+      'commit --date=%s --author=%s '.
       '--message=%s',
-      $author_date.' 0',
+      // -c will set the 'committer'
+      $user->getRealName(),
+      $user->loadPrimaryEmailAddress(),
+      $author_date,
       $author_string,
       $message);
   }
-
 
   public function pushWorkspaceRepository(
     PhabricatorRepository $repository,
     ArcanistRepositoryAPI $workspace,
     PhabricatorUser $user) {
 
-    $workspace->execxLocal('push -b default');
+    $workspace->execxLocal('push origin HEAD:master');
   }
 
   public function createMenuItem(
@@ -99,13 +99,22 @@ final class DifferentialLandingToHostedMercurial
     PhabricatorRepository $repository) {
 
     $vcs = $repository->getVersionControlSystem();
-    if ($vcs !== PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL) {
+    if ($vcs !== PhabricatorRepositoryType::REPOSITORY_TYPE_GIT) {
       return;
     }
 
     if (!$repository->isHosted()) {
       return;
     }
+
+    if (!$repository->isWorkingCopyBare()) {
+      return;
+    }
+
+    // TODO: This temporarily disables this action, because it doesn't work
+    // and is confusing to users. If you want to use it, comment out this line
+    // for now and we'll provide real support eventually.
+    return;
 
     return $this->createActionView(
       $revision,
