@@ -1,7 +1,6 @@
 <?php
 
-final class DiffusionSSHMercurialWireTestCase
-  extends PhabricatorTestCase {
+final class DiffusionMercurialWireSSHTestCase extends PhabricatorTestCase {
 
   public function testMercurialClientWireProtocolParser() {
     $data = dirname(__FILE__).'/hgwiredata/';
@@ -19,7 +18,7 @@ final class DiffusionSSHMercurialWireTestCase
 
   private function assertParserResult(array $expect, $input, $file) {
     list($x, $y) = PhutilSocketChannel::newChannelPair();
-    $xp = new DiffusionSSHMercurialWireClientProtocolChannel($x);
+    $xp = new DiffusionMercurialWireClientSSHProtocolChannel($x);
 
     $y->write($input);
     $y->flush();

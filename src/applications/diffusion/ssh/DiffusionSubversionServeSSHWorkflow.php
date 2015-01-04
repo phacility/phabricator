@@ -6,8 +6,8 @@
  *   http://svn.apache.org/repos/asf/subversion/trunk/subversion/libsvn_ra_svn/protocol
  *
  */
-final class DiffusionSSHSubversionServeWorkflow
-  extends DiffusionSSHSubversionWorkflow {
+final class DiffusionSubversionServeSSHWorkflow
+  extends DiffusionSubversionSSHWorkflow {
 
   private $didSeeWrite;
 

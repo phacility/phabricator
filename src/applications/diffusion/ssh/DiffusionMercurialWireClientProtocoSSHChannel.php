@@ -1,6 +1,6 @@
 <?php
 
-final class DiffusionSSHMercurialWireClientProtocolChannel
+final class DiffusionMercurialWireClientSSHProtocolChannel
   extends PhutilProtocolChannel {
 
   private $buffer = '';

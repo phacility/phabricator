@@ -1,6 +1,6 @@
 <?php
 
-abstract class DiffusionSSHGitWorkflow extends DiffusionSSHWorkflow {
+abstract class DiffusionGitSSHWorkflow extends DiffusionSSHWorkflow {
 
   protected function writeError($message) {
     // Git assumes we'll add our own newlines.

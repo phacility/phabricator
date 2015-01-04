@@ -1,7 +1,7 @@
 <?php
 
-final class DiffusionSSHMercurialServeWorkflow
-  extends DiffusionSSHMercurialWorkflow {
+final class DiffusionMercurialServeSSHWorkflow
+  extends DiffusionMercurialSSHWorkflow {
 
   protected $didSeeWrite;
 
@@ -46,7 +46,7 @@ final class DiffusionSSHMercurialServeWorkflow
       ->setEnv($this->getEnvironment());
 
     $io_channel = $this->getIOChannel();
-    $protocol_channel = new DiffusionSSHMercurialWireClientProtocolChannel(
+    $protocol_channel = new DiffusionMercurialWireClientSSHProtocolChannel(
       $io_channel);
 
     $err = id($this->newPassthruCommand())

@@ -1,10 +1,9 @@
 <?php
 
-final class DiffusionSSHGitReceivePackWorkflow
-  extends DiffusionSSHGitWorkflow {
+final class DiffusionGitUploadPackSSHWorkflow extends DiffusionGitSSHWorkflow {
 
   public function didConstruct() {
-    $this->setName('git-receive-pack');
+    $this->setName('git-upload-pack');
     $this->setArguments(
       array(
         array(
@@ -19,10 +18,7 @@ final class DiffusionSSHGitReceivePackWorkflow
     $path = head($args->getArg('dir'));
     $repository = $this->loadRepository($path);
 
-    // This is a write, and must have write access.
-    $this->requireWriteAccess();
-
-    $command = csprintf('git-receive-pack %s', $repository->getLocalPath());
+    $command = csprintf('git-upload-pack -- %s', $repository->getLocalPath());
     $command = PhabricatorDaemon::sudoCommandAsDaemonUser($command);
 
     $future = id(new ExecFuture('%C', $command))
@@ -34,9 +30,6 @@ final class DiffusionSSHGitReceivePackWorkflow
       ->execute();
 
     if (!$err) {
-      $repository->writeStatusMessage(
-        PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE,
-        PhabricatorRepositoryStatusMessage::CODE_OKAY);
       $this->waitForGitClient();
     }
 
