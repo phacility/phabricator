@@ -4,7 +4,7 @@ function phabricator_date($epoch, PhabricatorUser $user) {
   return phabricator_format_local_time(
     $epoch,
     $user,
-    _phutil_date_format($epoch));
+    phutil_date_format($epoch));
 }
 
 function phabricator_on_relative_date($epoch, $user) {
@@ -46,7 +46,7 @@ function phabricator_datetime($epoch, $user) {
     $epoch,
     $user,
     pht('%s, %s',
-      _phutil_date_format($epoch),
+      phutil_date_format($epoch),
       phabricator_time_format($user)));
 }
 
