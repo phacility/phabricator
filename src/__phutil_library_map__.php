@@ -3025,7 +3025,6 @@ phutil_register_library_map(array(
     'UserWhoAmIConduitAPIMethod' => 'applications/people/conduit/UserWhoAmIConduitAPIMethod.php',
   ),
   'function' => array(
-    '_phabricator_time_format' => 'view/viewutils.php',
     'celerity_generate_unique_node_id' => 'applications/celerity/api.php',
     'celerity_get_resource_uri' => 'applications/celerity/api.php',
     'implode_selected_handle_links' => 'applications/phid/handle/view/render.php',
@@ -3037,6 +3036,7 @@ phutil_register_library_map(array(
     'phabricator_on_relative_date' => 'view/viewutils.php',
     'phabricator_relative_date' => 'view/viewutils.php',
     'phabricator_time' => 'view/viewutils.php',
+    'phabricator_time_format' => 'view/viewutils.php',
     'phid_get_subtype' => 'applications/phid/utils.php',
     'phid_get_type' => 'applications/phid/utils.php',
     'phid_group_by_type' => 'applications/phid/utils.php',
