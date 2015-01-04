@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorDashboardPanelTypeText
+final class PhabricatorDashboardTextPanelType
   extends PhabricatorDashboardPanelType {
 
   public function getPanelTypeKey() {

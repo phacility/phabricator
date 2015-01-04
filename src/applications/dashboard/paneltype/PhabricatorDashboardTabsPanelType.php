@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorDashboardPanelTypeTabs
+final class PhabricatorDashboardTabsPanelType
   extends PhabricatorDashboardPanelType {
 
   public function getPanelTypeKey() {
@@ -12,8 +12,7 @@ final class PhabricatorDashboardPanelTypeTabs
   }
 
   public function getPanelTypeDescription() {
-    return pht(
-      'Use tabs to switch between several other panels.');
+    return pht('Use tabs to switch between several other panels.');
   }
 
   public function getFieldSpecifications() {

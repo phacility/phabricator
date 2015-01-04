@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorDashboardPanelTypeQuery
+final class PhabricatorDashboardQueryPanelType
   extends PhabricatorDashboardPanelType {
 
   public function getPanelTypeKey() {
@@ -63,7 +63,6 @@ final class PhabricatorDashboardPanelTypeQuery
     }
   }
 
-
   public function renderPanelContent(
     PhabricatorUser $viewer,
     PhabricatorDashboardPanel $panel,
@@ -107,7 +106,6 @@ final class PhabricatorDashboardPanelTypeQuery
 
     return $engine->renderResults($results, $saved);
   }
-
 
   public function adjustPanelHeader(
     PhabricatorUser $viewer,
