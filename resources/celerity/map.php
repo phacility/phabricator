@@ -850,20 +850,6 @@ return array(
       'javelin-stratcom',
       'javelin-workflow',
     ),
-    '7319e029' => array(
-      'javelin-behavior',
-      'javelin-dom',
-    ),
-    '97258e55' => array(
-      'javelin-install',
-      'javelin-stratcom',
-      'javelin-util',
-      'javelin-behavior',
-      'javelin-json',
-      'javelin-dom',
-      'javelin-resource',
-      'javelin-routable',
-    ),
     '06e05112' => array(
       'javelin-behavior',
       'javelin-stratcom',
@@ -1075,6 +1061,11 @@ return array(
       'phuix-action-list-view',
       'phuix-action-view',
     ),
+    42126667 => array(
+      'javelin-behavior',
+      'javelin-dom',
+      'javelin-request',
+    ),
     '44168bad' => array(
       'javelin-behavior',
       'javelin-dom',
@@ -1093,6 +1084,11 @@ return array(
       'javelin-install',
       'javelin-dom',
       'javelin-reactor-dom',
+    ),
+    48086888 => array(
+      'javelin-behavior',
+      'javelin-dom',
+      'javelin-workflow',
     ),
     '49b73b36' => array(
       'javelin-behavior',
@@ -1189,6 +1185,10 @@ return array(
       'javelin-workflow',
       'javelin-stratcom',
     ),
+    60479091 => array(
+      'phabricator-busy',
+      'javelin-behavior',
+    ),
     '60821bc7' => array(
       'javelin-behavior',
       'javelin-stratcom',
@@ -1258,6 +1258,10 @@ return array(
       'javelin-stratcom',
       'phabricator-prefab',
     ),
+    '7319e029' => array(
+      'javelin-behavior',
+      'javelin-dom',
+    ),
     '76b9fc3e' => array(
       'javelin-behavior',
       'javelin-stratcom',
@@ -1315,6 +1319,14 @@ return array(
     '7ee2b591' => array(
       'javelin-behavior',
       'javelin-history',
+    ),
+    82439934 => array(
+      'javelin-behavior',
+      'javelin-dom',
+      'javelin-util',
+      'javelin-stratcom',
+      'javelin-workflow',
+      'phabricator-draggable-list',
     ),
     '82ce2142' => array(
       'aphront-typeahead-control-css',
@@ -1408,6 +1420,16 @@ return array(
       'javelin-stratcom',
       'javelin-workflow',
       'javelin-util',
+    ),
+    '97258e55' => array(
+      'javelin-install',
+      'javelin-stratcom',
+      'javelin-util',
+      'javelin-behavior',
+      'javelin-json',
+      'javelin-dom',
+      'javelin-resource',
+      'javelin-routable',
     ),
     '988040b4' => array(
       'javelin-install',
@@ -1938,28 +1960,6 @@ return array(
       'javelin-util',
       'phabricator-prefab',
       'javelin-json',
-    ),
-    42126667 => array(
-      'javelin-behavior',
-      'javelin-dom',
-      'javelin-request',
-    ),
-    48086888 => array(
-      'javelin-behavior',
-      'javelin-dom',
-      'javelin-workflow',
-    ),
-    60479091 => array(
-      'phabricator-busy',
-      'javelin-behavior',
-    ),
-    82439934 => array(
-      'javelin-behavior',
-      'javelin-dom',
-      'javelin-util',
-      'javelin-stratcom',
-      'javelin-workflow',
-      'phabricator-draggable-list',
     ),
   ),
   'packages' => array(

@@ -97,10 +97,10 @@ final class CelerityResourceMapGenerator {
       ));
     $package_map = ipull($package_map, 'symbols');
 
-    ksort($name_map);
-    ksort($symbol_map);
-    ksort($requires_map);
-    ksort($package_map);
+    ksort($name_map, SORT_STRING);
+    ksort($symbol_map, SORT_STRING);
+    ksort($requires_map, SORT_STRING);
+    ksort($package_map, SORT_STRING);
 
     $this->nameMap     = $name_map;
     $this->symbolMap   = $symbol_map;
