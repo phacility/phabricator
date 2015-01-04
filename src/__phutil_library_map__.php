@@ -2065,7 +2065,7 @@ phutil_register_library_map(array(
     'PhabricatorPHPConfigSetupCheck' => 'applications/config/check/PhabricatorPHPConfigSetupCheck.php',
     'PhabricatorPHPMailerConfigOptions' => 'applications/config/option/PhabricatorPHPMailerConfigOptions.php',
     'PhabricatorPagedFormUIExample' => 'applications/uiexample/examples/PhabricatorPagedFormUIExample.php',
-    'PhabricatorPagerUIExample' => 'applications/uiexample/examples/PhabricatorPageUIExample.php',
+    'PhabricatorPagerUIExample' => 'applications/uiexample/examples/PhabricatorPagerUIExample.php',
     'PhabricatorPassphraseApplication' => 'applications/passphrase/application/PhabricatorPassphraseApplication.php',
     'PhabricatorPasswordAuthProvider' => 'applications/auth/provider/PhabricatorPasswordAuthProvider.php',
     'PhabricatorPasswordHasher' => 'infrastructure/util/password/PhabricatorPasswordHasher.php',
