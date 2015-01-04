@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => '094971a9',
+    'core.pkg.css' => '0a6d9589',
     'core.pkg.js' => '44aac665',
     'darkconsole.pkg.js' => '8ab24e01',
     'differential.pkg.css' => '8af45893',
@@ -136,7 +136,7 @@ return array(
     'rsrc/css/phui/phui-info-panel.css' => '27ea50a1',
     'rsrc/css/phui/phui-list.css' => '53deb25c',
     'rsrc/css/phui/phui-object-box.css' => 'e9f7e938',
-    'rsrc/css/phui/phui-object-item-list-view.css' => '7f20c02d',
+    'rsrc/css/phui/phui-object-item-list-view.css' => '5b2ad99d',
     'rsrc/css/phui/phui-pinboard-view.css' => '3dd4a269',
     'rsrc/css/phui/phui-property-list-view.css' => '51480060',
     'rsrc/css/phui/phui-remarkup-preview.css' => '19ad512b',
@@ -777,7 +777,7 @@ return array(
     'phui-info-panel-css' => '27ea50a1',
     'phui-list-view-css' => '53deb25c',
     'phui-object-box-css' => 'e9f7e938',
-    'phui-object-item-list-view-css' => '7f20c02d',
+    'phui-object-item-list-view-css' => '5b2ad99d',
     'phui-pinboard-view-css' => '3dd4a269',
     'phui-property-list-view-css' => '51480060',
     'phui-remarkup-preview-css' => '19ad512b',
@@ -849,6 +849,20 @@ return array(
       'javelin-dom',
       'javelin-stratcom',
       'javelin-workflow',
+    ),
+    '7319e029' => array(
+      'javelin-behavior',
+      'javelin-dom',
+    ),
+    '97258e55' => array(
+      'javelin-install',
+      'javelin-stratcom',
+      'javelin-util',
+      'javelin-behavior',
+      'javelin-json',
+      'javelin-dom',
+      'javelin-resource',
+      'javelin-routable',
     ),
     '06e05112' => array(
       'javelin-behavior',
@@ -1244,10 +1258,6 @@ return array(
       'javelin-stratcom',
       'phabricator-prefab',
     ),
-    '7319e029' => array(
-      'javelin-behavior',
-      'javelin-dom',
-    ),
     '76b9fc3e' => array(
       'javelin-behavior',
       'javelin-stratcom',
@@ -1398,16 +1408,6 @@ return array(
       'javelin-stratcom',
       'javelin-workflow',
       'javelin-util',
-    ),
-    '97258e55' => array(
-      'javelin-install',
-      'javelin-stratcom',
-      'javelin-util',
-      'javelin-behavior',
-      'javelin-json',
-      'javelin-dom',
-      'javelin-resource',
-      'javelin-routable',
     ),
     '988040b4' => array(
       'javelin-install',
