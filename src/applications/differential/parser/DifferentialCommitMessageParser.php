@@ -142,7 +142,7 @@ final class DifferentialCommitMessageParser {
       $terminal = '...';
       $title = $fields[$key_title];
       $short = id(new PhutilUTF8StringTruncator())
-        ->setMaximumGlyphs(250)
+        ->setMaximumBytes(250)
         ->setTerminator($terminal)
         ->truncateString($title);
 
