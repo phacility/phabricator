@@ -134,7 +134,7 @@ final class PonderQuestionTransaction
           case PonderQuestionStatus::STATUS_OPEN:
             return PhabricatorTransactions::COLOR_GREEN;
           case PonderQuestionStatus::STATUS_CLOSED:
-            return PhabricatorTransactions::COLOR_BLACK;
+            return PhabricatorTransactions::COLOR_INDIGO;
         }
     }
   }

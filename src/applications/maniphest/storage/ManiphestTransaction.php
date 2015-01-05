@@ -188,7 +188,7 @@ final class ManiphestTransaction
         if (ManiphestTaskStatus::isOpenStatus($new)) {
           return 'green';
         } else {
-          return 'black';
+          return 'indigo';
         }
 
       case self::TYPE_PRIORITY:
@@ -204,7 +204,7 @@ final class ManiphestTransaction
         return 'orange';
 
       case self::TYPE_MERGED_INTO:
-        return 'black';
+        return 'indigo';
     }
 
     return parent::getColor();

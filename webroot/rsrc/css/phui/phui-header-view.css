@@ -123,8 +123,12 @@ body.device-phone .phui-header-view {
 }
 
 .phui-header-subheader .phui-header-status-dark {
-  color: #111;
+  color: {$indigo};
   text-shadow: 0 1px #fff;
+}
+
+.phui-header-subheader .phui-header-status-dark .phui-icon-view {
+  color: {$indigo};
 }
 
 .phui-header-subheader .phui-header-status-red {
