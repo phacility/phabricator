@@ -17,7 +17,6 @@ div.phui-object-box.phui-object-box-flush {
 }
 
 .phui-object-box .phui-header-shell h1 {
-  color: {$bluetext};
   text-shadow: 0 1px #fff;
   padding: 8px 0;
 }
