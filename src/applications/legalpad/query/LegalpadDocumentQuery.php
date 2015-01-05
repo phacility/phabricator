@@ -136,7 +136,7 @@ final class LegalpadDocumentQuery
         $conn_r,
         'JOIN edge contributor ON contributor.src = d.phid
           AND contributor.type = %d',
-        PhabricatorEdgeConfig::TYPE_OBJECT_HAS_CONTRIBUTOR);
+        PhabricatorObjectHasContributorEdgeType::EDGECONST);
     }
 
     if ($this->signerPHIDs !== null) {
@@ -226,7 +226,7 @@ final class LegalpadDocumentQuery
 
   private function loadContributors(array $documents) {
     $document_map = mpull($documents, null, 'getPHID');
-    $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_CONTRIBUTOR;
+    $edge_type = PhabricatorObjectHasContributorEdgeType::EDGECONST;
     $contributor_data = id(new PhabricatorEdgeQuery())
       ->withSourcePHIDs(array_keys($document_map))
       ->withEdgeTypes(array($edge_type))

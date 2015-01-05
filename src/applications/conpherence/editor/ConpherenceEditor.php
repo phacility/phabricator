@@ -255,7 +255,7 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     switch ($xaction->getTransactionType()) {
       case ConpherenceTransactionType::TYPE_FILES:
         $editor = new PhabricatorEdgeEditor();
-        $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_FILE;
+        $edge_type = PhabricatorObjectHasFileEdgeType::EDGECONST;
         $old = array_fill_keys($xaction->getOldValue(), true);
         $new = array_fill_keys($xaction->getNewValue(), true);
         $add_edges = array_keys(array_diff_key($new, $old));

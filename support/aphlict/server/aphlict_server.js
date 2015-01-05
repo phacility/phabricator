@@ -206,49 +206,38 @@ http.createServer(function(request, response) {
               '<%s> Internal Server Error! %s',
               request.socket.remoteAddress,
               err);
-            response.statusCode = 500;
-            response.write('500 Internal Server Error\n');
+            response.writeHead(500, 'Internal Server Error');
           }
         } catch (err) {
           debug.log(
             '<%s> Bad Request! %s',
             request.socket.remoteAddress,
             err);
-          response.statusCode = 400;
-          response.write('400 Bad Request\n');
+          response.writeHead(400, 'Bad Request');
         } finally {
           response.end();
         }
       });
     } else {
-      response.statusCode = 405;
-      response.write('405 Method Not Allowed\n');
+      response.writeHead(405, 'Method Not Allowed');
       response.end();
     }
   } else if (request.url == '/status/') {
-    request.on('data', function() {
-      // We just ignore the request data, but newer versions of Node don't
-      // get to 'end' if we don't process the data. See T2953.
-    });
+    var status = {
+      'uptime': (new Date().getTime() - start_time),
+      'clients.active': clients.getActiveListenerCount(),
+      'clients.total': clients.getTotalListenerCount(),
+      'messages.in': messages_in,
+      'messages.out': messages_out,
+      'log': config.log,
+      'version': 6
+    };
 
-    request.on('end', function() {
-      var status = {
-        'uptime': (new Date().getTime() - start_time),
-        'clients.active': clients.getActiveListenerCount(),
-        'clients.total': clients.getTotalListenerCount(),
-        'messages.in': messages_in,
-        'messages.out': messages_out,
-        'log': config.log,
-        'version': 6
-      };
-
-      response.writeHead(200, {'Content-Type': 'text/plain'});
-      response.write(JSON.stringify(status));
-      response.end();
-    });
+    response.writeHead(200, {'Content-Type': 'application/json'});
+    response.write(JSON.stringify(status));
+    response.end();
   } else {
-    response.statusCode = 404;
-    response.write('404 Not Found\n');
+    response.writeHead(404, 'Not Found');
     response.end();
   }
 }).listen(config.admin, config.host);

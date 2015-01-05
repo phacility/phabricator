@@ -40,7 +40,7 @@ final class PholioMockViewController extends PholioController {
 
     $phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $mock->getPHID(),
-      PhabricatorEdgeConfig::TYPE_MOCK_HAS_TASK);
+      PholioMockHasTaskEdgeType::EDGECONST);
     $this->setManiphestTaskPHIDs($phids);
     $phids[] = $mock->getAuthorPHID();
     $this->loadHandles($phids);

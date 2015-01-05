@@ -56,7 +56,7 @@ final class PhabricatorProjectUpdateController
           break;
       }
 
-      $type_member = PhabricatorEdgeConfig::TYPE_PROJ_MEMBER;
+      $type_member = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
       $member_spec = array(
         $edge_action => array($user->getPHID() => $user->getPHID()),
       );

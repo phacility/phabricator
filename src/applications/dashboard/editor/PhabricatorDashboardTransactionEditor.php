@@ -23,7 +23,7 @@ final class PhabricatorDashboardTransactionEditor
       ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
       ->setMetadataValue(
         'edge:type',
-        PhabricatorEdgeConfig::TYPE_DASHBOARD_HAS_PANEL)
+        PhabricatorDashboardDashboardHasPanelEdgeType::EDGECONST)
       ->setNewValue(
         array(
           '+' => array(

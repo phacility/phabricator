@@ -117,9 +117,9 @@ final class PhabricatorPolicyQuery
   }
 
   public static function isGlobalPolicy($policy) {
-    $globalPolicies = self::getGlobalPolicies();
+    $global_policies = self::getGlobalPolicies();
 
-    if (isset($globalPolicies[$policy])) {
+    if (isset($global_policies[$policy])) {
       return true;
     }
 

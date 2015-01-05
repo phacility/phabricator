@@ -18,7 +18,7 @@ foreach (new LiskMigrationIterator($commit_table) as $commit) {
     continue;
   }
 
-  $commit_drev = PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV;
+  $commit_drev = DiffusionCommitHasRevisionEdgeType::EDGECONST;
   $editor->addEdge($commit->getPHID(), $commit_drev, $revision_phid);
   $edges++;
   if ($edges % 256 == 0) {

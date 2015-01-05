@@ -40,7 +40,7 @@ final class PhabricatorProjectMembersRemoveController
       $member_spec = array();
       $member_spec['-'] = array($remove_phid => $remove_phid);
 
-      $type_member = PhabricatorEdgeConfig::TYPE_PROJ_MEMBER;
+      $type_member = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
 
       $xactions = array();
 

@@ -8,17 +8,17 @@ final class PhabricatorProjectTestDataGenerator
   public function generate() {
     $title = $this->generateTitle();
     $author = $this->loadPhabrictorUser();
-    $authorPHID = $author->getPHID();
+    $author_phid = $author->getPHID();
     $project = id(new PhabricatorProject())
       ->setName($title)
-      ->setAuthorPHID($authorPHID);
+      ->setAuthorPHID($author_phid);
 
     $this->addTransaction(
       PhabricatorProjectTransaction::TYPE_NAME,
       $title);
     $this->addTransaction(
       PhabricatorProjectTransaction::TYPE_MEMBERS,
-      $this->loadMembersWithAuthor($authorPHID));
+      $this->loadMembersWithAuthor($author_phid));
     $this->addTransaction(
       PhabricatorProjectTransaction::TYPE_STATUS,
       $this->generateProjectStatus());

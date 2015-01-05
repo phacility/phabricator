@@ -98,7 +98,7 @@ final class PonderAnswerQuery
     if ($this->needViewerVotes) {
       $viewer_phid = $this->getViewer()->getPHID();
 
-      $etype = PhabricatorEdgeConfig::TYPE_ANSWER_HAS_VOTING_USER;
+      $etype = PonderAnswerHasVotingUserEdgeType::EDGECONST;
       $edges = id(new PhabricatorEdgeQuery())
         ->withSourcePHIDs(mpull($answers, 'getPHID'))
         ->withDestinationPHIDs(array($viewer_phid))

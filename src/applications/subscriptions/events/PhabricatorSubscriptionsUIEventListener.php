@@ -51,7 +51,7 @@ final class PhabricatorSubscriptionsUIEventListener
       if ($user->isLoggedIn()) {
         $src_phid = $object->getPHID();
         $dst_phid = $user->getPHID();
-        $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_SUBSCRIBER;
+        $edge_type = PhabricatorObjectHasSubscriberEdgeType::EDGECONST;
 
         $edges = id(new PhabricatorEdgeQuery())
           ->withSourcePHIDs(array($src_phid))

@@ -452,10 +452,10 @@ abstract class PhabricatorApplicationTransaction
       case PhabricatorTransactions::TYPE_EDGE:
         $edge_type = $this->getMetadataValue('edge:type');
         switch ($edge_type) {
-          case PhabricatorObjectMentionsObject::EDGECONST:
+          case PhabricatorObjectMentionsObjectEdgeType::EDGECONST:
             return true;
             break;
-          case PhabricatorObjectMentionedByObject::EDGECONST:
+          case PhabricatorObjectMentionedByObjectEdgeType::EDGECONST:
             $new = ipull($this->getNewValue(), 'dst');
             $old = ipull($this->getOldValue(), 'dst');
             $add = array_diff($new, $old);
@@ -491,8 +491,8 @@ abstract class PhabricatorApplicationTransaction
      case PhabricatorTransactions::TYPE_EDGE:
         $edge_type = $this->getMetadataValue('edge:type');
         switch ($edge_type) {
-          case PhabricatorObjectMentionsObject::EDGECONST:
-          case PhabricatorObjectMentionedByObject::EDGECONST:
+          case PhabricatorObjectMentionsObjectEdgeType::EDGECONST:
+          case PhabricatorObjectMentionedByObjectEdgeType::EDGECONST:
             return true;
             break;
           default:
@@ -521,8 +521,8 @@ abstract class PhabricatorApplicationTransaction
      case PhabricatorTransactions::TYPE_EDGE:
         $edge_type = $this->getMetadataValue('edge:type');
         switch ($edge_type) {
-          case PhabricatorObjectMentionsObject::EDGECONST:
-          case PhabricatorObjectMentionedByObject::EDGECONST:
+          case PhabricatorObjectMentionsObjectEdgeType::EDGECONST:
+          case PhabricatorObjectMentionedByObjectEdgeType::EDGECONST:
             return true;
             break;
           default:
@@ -728,7 +728,7 @@ abstract class PhabricatorApplicationTransaction
     }
   }
 
-  public function getTitleForFeed(PhabricatorFeedStory $story) {
+  public function getTitleForFeed() {
     $author_phid = $this->getAuthorPHID();
     $object_phid = $this->getObjectPHID();
 
@@ -802,7 +802,7 @@ abstract class PhabricatorApplicationTransaction
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $field = $this->getTransactionCustomField();
         if ($field) {
-          return $field->getApplicationTransactionTitleForFeed($this, $story);
+          return $field->getApplicationTransactionTitleForFeed($this);
         } else {
           return pht(
             '%s edited a custom field on %s.',
@@ -1102,7 +1102,7 @@ abstract class PhabricatorApplicationTransaction
       if ($publisher->getRenderWithImpliedContext()) {
         $text[] = $xaction->getTitle();
       } else {
-        $text[] = $xaction->getTitleForFeed($story);
+        $text[] = $xaction->getTitleForFeed();
       }
 
       $xaction->setRenderingTarget($old_target);

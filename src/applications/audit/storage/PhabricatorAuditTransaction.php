@@ -258,7 +258,7 @@ final class PhabricatorAuditTransaction
     return parent::getTitle();
   }
 
-  public function getTitleForFeed(PhabricatorFeedStory $story) {
+  public function getTitleForFeed() {
     $old = $this->getOldValue();
     $new = $this->getNewValue();
 
@@ -375,7 +375,7 @@ final class PhabricatorAuditTransaction
 
     }
 
-    return parent::getTitleForFeed($story);
+    return parent::getTitleForFeed();
   }
 
   public function getBodyForFeed(PhabricatorFeedStory $story) {
@@ -455,7 +455,7 @@ final class PhabricatorAuditTransaction
           case PhabricatorProjectObjectHasProjectEdgeType::EDGECONST:
             $tags[] = self::MAILTAG_PROJECTS;
             break;
-          case PhabricatorEdgeConfig::TYPE_OBJECT_HAS_SUBSCRIBER:
+          case PhabricatorObjectHasSubscriberEdgeType::EDGECONST:
             $tags[] = self::MAILTAG_ADD_CCS;
             break;
           default:

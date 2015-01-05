@@ -19,7 +19,7 @@ foreach (new LiskMigrationIterator($table) as $request) {
     'INSERT IGNORE INTO %T (src, type, dst) VALUES (%s, %d, %s)',
     PhabricatorEdgeConfig::TABLE_NAME_EDGE,
     $request->getCommitPHID(),
-    PhabricatorEdgeConfig::TYPE_OBJECT_HAS_SUBSCRIBER,
+    PhabricatorObjectHasSubscriberEdgeType::EDGECONST,
     $request->getAuditorPHID());
 
 

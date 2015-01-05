@@ -425,7 +425,7 @@ final class PhabricatorSetupIssueView extends AphrontView {
   private function renderMySQLConfig(array $config) {
     $values = array();
     foreach ($config as $key) {
-      $value = PhabricatorSetupCheckMySQL::loadRawConfigValue($key);
+      $value = PhabricatorMySQLSetupCheck::loadRawConfigValue($key);
       if ($value === null) {
         $value = phutil_tag(
           'em',

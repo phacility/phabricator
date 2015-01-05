@@ -43,7 +43,9 @@ final class ProjectCreateConduitAPIMethod extends ProjectConduitAPIMethod {
 
     $xactions[] = id(new PhabricatorProjectTransaction())
       ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-      ->setMetadataValue('edge:type', PhabricatorEdgeConfig::TYPE_PROJ_MEMBER)
+      ->setMetadataValue(
+        'edge:type',
+        PhabricatorProjectProjectHasMemberEdgeType::EDGECONST)
       ->setNewValue(
         array(
           '+' => array_fuse($members),

@@ -418,7 +418,9 @@ final class DiffusionCommitController extends DiffusionController {
       ->withSourcePHIDs(array($commit_phid))
       ->withEdgeTypes(array(
         DiffusionCommitHasTaskEdgeType::EDGECONST,
-        PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV,
+        DiffusionCommitHasRevisionEdgeType::EDGECONST,
+        DiffusionCommitRevertsCommitEdgeType::EDGECONST,
+        DiffusionCommitRevertedByCommitEdgeType::EDGECONST,
       ));
 
     $edges = $edge_query->execute();
@@ -426,7 +428,12 @@ final class DiffusionCommitController extends DiffusionController {
     $task_phids = array_keys(
       $edges[$commit_phid][DiffusionCommitHasTaskEdgeType::EDGECONST]);
     $revision_phid = key(
-      $edges[$commit_phid][PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV]);
+      $edges[$commit_phid][DiffusionCommitHasRevisionEdgeType::EDGECONST]);
+
+    $reverts_phids = array_keys(
+      $edges[$commit_phid][DiffusionCommitRevertsCommitEdgeType::EDGECONST]);
+    $reverted_by_phids = array_keys(
+      $edges[$commit_phid][DiffusionCommitRevertedByCommitEdgeType::EDGECONST]);
 
     $phids = $edge_query->getDestinationPHIDs(array($commit_phid));
 
@@ -613,6 +620,17 @@ final class DiffusionCommitController extends DiffusionController {
     $refs = $this->buildRefs($drequest);
     if ($refs) {
       $props['References'] = $refs;
+    }
+
+    if ($reverts_phids) {
+      $this->loadHandles($reverts_phids);
+      $props[pht('Reverts')] = $this->renderHandlesForPHIDs($reverts_phids);
+    }
+
+    if ($reverted_by_phids) {
+      $this->loadHandles($reverted_by_phids);
+      $props[pht('Reverted By')] = $this->renderHandlesForPHIDs(
+        $reverted_by_phids);
     }
 
     if ($task_phids) {

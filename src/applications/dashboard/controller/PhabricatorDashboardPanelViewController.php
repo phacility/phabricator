@@ -155,7 +155,7 @@ final class PhabricatorDashboardPanelViewController
 
     $dashboard_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $panel->getPHID(),
-      PhabricatorEdgeConfig::TYPE_PANEL_HAS_DASHBOARD);
+      PhabricatorDashboardPanelHasDashboardEdgeType::EDGECONST);
     $this->loadHandles($dashboard_phids);
 
     $does_not_appear = pht(

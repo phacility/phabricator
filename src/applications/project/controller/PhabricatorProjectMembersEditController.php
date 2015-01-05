@@ -42,7 +42,7 @@ final class PhabricatorProjectMembersEditController
         $member_spec['+'] = array_fuse($add_members);
       }
 
-      $type_member = PhabricatorEdgeConfig::TYPE_PROJ_MEMBER;
+      $type_member = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
 
       $xactions = array();
 

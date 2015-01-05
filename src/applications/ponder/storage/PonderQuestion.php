@@ -87,16 +87,16 @@ final class PonderQuestion extends PonderDAO
       ->withDestinationPHIDs($qa_phids)
       ->withEdgeTypes(
         array(
-          PhabricatorEdgeConfig::TYPE_VOTING_USER_HAS_QUESTION,
-          PhabricatorEdgeConfig::TYPE_VOTING_USER_HAS_ANSWER,
+          PonderVotingUserHasQuestionEdgeType::EDGECONST,
+          PonderVotingUserHasAnswerEdgeType::EDGECONST,
         ))
       ->needEdgeData(true)
       ->execute();
 
     $question_edge =
-      $edges[$user_phid][PhabricatorEdgeConfig::TYPE_VOTING_USER_HAS_QUESTION];
+      $edges[$user_phid][PonderVotingUserHasQuestionEdgeType::EDGECONST];
     $answer_edges =
-      $edges[$user_phid][PhabricatorEdgeConfig::TYPE_VOTING_USER_HAS_ANSWER];
+      $edges[$user_phid][PonderVotingUserHasAnswerEdgeType::EDGECONST];
     $edges = null;
 
     $this->setUserVote(idx($question_edge, $this->getPHID()));
@@ -198,7 +198,7 @@ final class PonderQuestion extends PonderDAO
 
   // votable interface
   public function getUserVoteEdgeType() {
-    return PhabricatorEdgeConfig::TYPE_VOTING_USER_HAS_QUESTION;
+    return PonderVotingUserHasQuestionEdgeType::EDGECONST;
   }
 
   public function getVotablePHID() {

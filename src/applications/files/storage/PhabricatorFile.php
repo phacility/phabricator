@@ -238,18 +238,18 @@ final class PhabricatorFile extends PhabricatorFileDAO
       $copy_of_storage_engine = $file->getStorageEngine();
       $copy_of_storage_handle = $file->getStorageHandle();
       $copy_of_storage_format = $file->getStorageFormat();
-      $copy_of_byteSize = $file->getByteSize();
-      $copy_of_mimeType = $file->getMimeType();
+      $copy_of_byte_size = $file->getByteSize();
+      $copy_of_mime_type = $file->getMimeType();
 
       $new_file = PhabricatorFile::initializeNewFile();
 
-      $new_file->setByteSize($copy_of_byteSize);
+      $new_file->setByteSize($copy_of_byte_size);
 
       $new_file->setContentHash($hash);
       $new_file->setStorageEngine($copy_of_storage_engine);
       $new_file->setStorageHandle($copy_of_storage_handle);
       $new_file->setStorageFormat($copy_of_storage_format);
-      $new_file->setMimeType($copy_of_mimeType);
+      $new_file->setMimeType($copy_of_mime_type);
       $new_file->copyDimensions($file);
 
       $new_file->readPropertiesFromParameters($params);
@@ -991,7 +991,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
    * @return this
    */
   public function attachToObject($phid) {
-    $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_FILE;
+    $edge_type = PhabricatorObjectHasFileEdgeType::EDGECONST;
 
     id(new PhabricatorEdgeEditor())
       ->addEdge($phid, $edge_type, $this->getPHID())
@@ -1008,7 +1008,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
    * @return this
    */
   public function detachFromObject($phid) {
-    $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_FILE;
+    $edge_type = PhabricatorObjectHasFileEdgeType::EDGECONST;
 
     id(new PhabricatorEdgeEditor())
       ->removeEdge($phid, $edge_type, $this->getPHID())

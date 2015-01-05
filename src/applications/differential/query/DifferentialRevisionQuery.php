@@ -628,7 +628,7 @@ final class DifferentialRevisionQuery
         'AND e_ccs.type = %s '.
         'AND e_ccs.dst in (%Ls)',
         PhabricatorEdgeConfig::TABLE_NAME_EDGE,
-        PhabricatorEdgeConfig::TYPE_OBJECT_HAS_SUBSCRIBER,
+        PhabricatorObjectHasSubscriberEdgeType::EDGECONST,
         $this->ccs);
     }
 
@@ -639,7 +639,7 @@ final class DifferentialRevisionQuery
         'AND e_reviewers.type = %s '.
         'AND e_reviewers.dst in (%Ls)',
         PhabricatorEdgeConfig::TABLE_NAME_EDGE,
-        PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER,
+        DifferentialRevisionHasReviewerEdgeType::EDGECONST,
         $this->reviewers);
     }
 
@@ -900,8 +900,8 @@ final class DifferentialRevisionQuery
   private function loadRelationships($conn_r, array $revisions) {
     assert_instances_of($revisions, 'DifferentialRevision');
 
-    $type_reviewer = PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER;
-    $type_subscriber = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_SUBSCRIBER;
+    $type_reviewer = DifferentialRevisionHasReviewerEdgeType::EDGECONST;
+    $type_subscriber = PhabricatorObjectHasSubscriberEdgeType::EDGECONST;
 
     $edges = id(new PhabricatorEdgeQuery())
       ->withSourcePHIDs(mpull($revisions, 'getPHID'))
@@ -1019,7 +1019,7 @@ final class DifferentialRevisionQuery
     array $revisions) {
 
     assert_instances_of($revisions, 'DifferentialRevision');
-    $edge_type = PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER;
+    $edge_type = DifferentialRevisionHasReviewerEdgeType::EDGECONST;
 
     $edges = id(new PhabricatorEdgeQuery())
       ->withSourcePHIDs(mpull($revisions, 'getPHID'))
@@ -1125,7 +1125,7 @@ final class DifferentialRevisionQuery
     // Find all the project reviewers which the user may have authority over.
     $project_phids = array();
     $project_type = PhabricatorProjectProjectPHIDType::TYPECONST;
-    $edge_type = PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER;
+    $edge_type = DifferentialRevisionHasReviewerEdgeType::EDGECONST;
     foreach ($edges as $src => $types) {
       if (!$allow_self) {
         if ($revision_map[$src]->getAuthorPHID() == $viewer_phid) {

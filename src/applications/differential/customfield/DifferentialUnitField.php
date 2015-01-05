@@ -113,6 +113,12 @@ final class DifferentialUnitField
         }
 
         $value = idx($test, 'name');
+
+        $namespace = idx($test, 'namespace');
+        if ($namespace) {
+          $value = $namespace.'::'.$value;
+        }
+
         if (!empty($test['link'])) {
           $value = phutil_tag(
             'a',

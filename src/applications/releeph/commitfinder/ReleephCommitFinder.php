@@ -94,7 +94,7 @@ final class ReleephCommitFinder {
     // right rule in the future.
     $phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $phabricator_repository_commit->getPHID(),
-      PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV);
+      DiffusionCommitHasRevisionEdgeType::EDGECONST);
     if ($phids) {
       $this->objectPHID = head($phids);
     }

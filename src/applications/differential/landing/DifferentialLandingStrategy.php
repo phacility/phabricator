@@ -62,7 +62,7 @@ abstract class DifferentialLandingStrategy {
    */
   protected function getGitWorkspace(PhabricatorRepository $repository) {
     try {
-        return DifferentialGetWorkingCopy::getCleanGitWorkspace($repository);
+      return DifferentialGetWorkingCopy::getCleanGitWorkspace($repository);
     } catch (Exception $e) {
       throw new PhutilProxyException('Failed to allocate a workspace', $e);
     }

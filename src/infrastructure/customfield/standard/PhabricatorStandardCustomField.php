@@ -360,8 +360,7 @@ abstract class PhabricatorStandardCustomField
   }
 
   public function getApplicationTransactionTitleForFeed(
-    PhabricatorApplicationTransaction $xaction,
-    PhabricatorFeedStory $story) {
+    PhabricatorApplicationTransaction $xaction) {
 
     $author_phid = $xaction->getAuthorPHID();
     $object_phid = $xaction->getObjectPHID();

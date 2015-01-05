@@ -41,7 +41,7 @@ final class DifferentialCommentPreviewController
         break;
     }
 
-    $edge_reviewer = PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER;
+    $edge_reviewer = DifferentialRevisionHasReviewerEdgeType::EDGECONST;
 
     $reviewers = $request->getStrList('reviewers');
     if (DifferentialAction::allowReviewers($action) && $reviewers) {

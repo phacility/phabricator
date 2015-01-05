@@ -102,7 +102,7 @@ final class PhabricatorApplicationTransactionCommentEditor
       foreach ($file_phids as $file_phid) {
         $editor->addEdge(
           $xaction->getObjectPHID(),
-          PhabricatorEdgeConfig::TYPE_OBJECT_HAS_FILE,
+          PhabricatorObjectHasFileEdgeType::EDGECONST ,
           $file_phid);
       }
       $editor->save();

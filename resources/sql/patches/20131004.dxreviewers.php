@@ -36,7 +36,7 @@ foreach (new LiskMigrationIterator($table) as $revision) {
 
     $editor->addEdge(
       $revision_phid,
-      PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER,
+      DifferentialRevisionHasReviewerEdgeType::EDGECONST,
       $dst,
       array(
         'data' => array(

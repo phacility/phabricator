@@ -726,7 +726,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         'AND e_ccs.type = %s '.
         'AND e_ccs.dst in (%Ls)',
         PhabricatorEdgeConfig::TABLE_NAME_EDGE,
-        PhabricatorEdgeConfig::TYPE_OBJECT_HAS_SUBSCRIBER,
+        PhabricatorObjectHasSubscriberEdgeType::EDGECONST,
         $this->subscriberPHIDs);
     }
 

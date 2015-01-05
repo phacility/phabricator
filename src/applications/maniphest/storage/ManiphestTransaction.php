@@ -503,19 +503,19 @@ final class ManiphestTransaction
         $removed = array_diff($old, $new);
         if ($added && !$removed) {
           return pht(
-            '%s attached %d file(s): %s',
+            '%s attached %d file(s): %s.',
             $this->renderHandleLink($author_phid),
             count($added),
             $this->renderHandleList($added));
         } else if ($removed && !$added) {
           return pht(
-            '%s detached %d file(s): %s',
+            '%s detached %d file(s): %s.',
             $this->renderHandleLink($author_phid),
             count($removed),
             $this->renderHandleList($removed));
         } else {
           return pht(
-            '%s changed file(s), attached %d: %s; detached %d: %s',
+            '%s changed file(s), attached %d: %s; detached %d: %s.',
             $this->renderHandleLink($author_phid),
             count($added),
             $this->renderHandleList($added),
@@ -554,7 +554,7 @@ final class ManiphestTransaction
     return parent::getTitle();
   }
 
-  public function getTitleForFeed(PhabricatorFeedStory $story) {
+  public function getTitleForFeed() {
     $author_phid = $this->getAuthorPHID();
     $object_phid = $this->getObjectPHID();
 
@@ -711,7 +711,7 @@ final class ManiphestTransaction
         // code in the parent;
         $clone = clone $this;
         $clone->setTransactionType(PhabricatorTransactions::TYPE_EDGE);
-        return $clone->getTitleForFeed($story);
+        return $clone->getTitleForFeed();
 
       case self::TYPE_ATTACH:
         $old = nonempty($old, array());
@@ -773,7 +773,7 @@ final class ManiphestTransaction
 
     }
 
-    return parent::getTitleForFeed($story);
+    return parent::getTitleForFeed();
   }
 
   public function hasChangeDetails() {

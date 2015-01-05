@@ -11,15 +11,19 @@ final class DiffusionRepositoryRemarkupRule
     return '[A-Z]+';
   }
 
+  public function getPriority() {
+    return 460.0;
+  }
+
   protected function loadObjects(array $ids) {
     $viewer = $this->getEngine()->getConfig('viewer');
 
-    $repositories = id(new PhabricatorRepositoryQuery())
+    $repos = id(new PhabricatorRepositoryQuery())
       ->setViewer($viewer)
-      ->withCallsigns($ids)
-      ->execute();
+      ->withIdentifiers($ids);
 
-    return mpull($repositories, null, 'getCallsign');
+    $repos->execute();
+    return $repos->getIdentifierMap();
   }
 
 }

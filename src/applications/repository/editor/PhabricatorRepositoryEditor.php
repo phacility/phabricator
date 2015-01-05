@@ -242,7 +242,7 @@ final class PhabricatorRepositoryEditor
 
         $editor = new PhabricatorEdgeEditor();
 
-        $edge_type = PhabricatorEdgeConfig::TYPE_OBJECT_USES_CREDENTIAL;
+        $edge_type = PhabricatorObjectUsesCredentialsEdgeType::EDGECONST;
         $src_phid = $object->getPHID();
 
         if ($old_phid) {

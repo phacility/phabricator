@@ -1053,13 +1053,32 @@ abstract class PhabricatorApplicationTransactionEditor
       $phids = array_diff($phids, $this->subscribers);
     }
 
-    foreach ($phids as $key => $phid) {
-      if ($object->isAutomaticallySubscribed($phid)) {
-        unset($phids[$key]);
-      }
-    }
-    $phids = array_values($phids);
+    if ($phids) {
+      $users = id(new PhabricatorPeopleQuery())
+        ->setViewer($this->getActor())
+        ->withPHIDs($phids)
+        ->execute();
+      $users = mpull($users, null, 'getPHID');
 
+      foreach ($phids as $key => $phid) {
+        // Do not subscribe mentioned users
+        // who do not have VIEW Permissions
+        if ($object instanceof PhabricatorPolicyInterface
+          && !PhabricatorPolicyFilter::hasCapability(
+          $users[$phid],
+          $object,
+          PhabricatorPolicyCapability::CAN_VIEW)
+        ) {
+          unset($phids[$key]);
+        } else {
+          if ($object->isAutomaticallySubscribed($phid)) {
+            unset($phids[$key]);
+          }
+        }
+      }
+      $phids = array_values($phids);
+    }
+    // No else here to properly return null should we unset all subscriber
     if (!$phids) {
       return null;
     }
@@ -1249,7 +1268,7 @@ abstract class PhabricatorApplicationTransactionEditor
       }
     }
     if ($mentionable_phids) {
-      $edge_type = PhabricatorObjectMentionsObject::EDGECONST;
+      $edge_type = PhabricatorObjectMentionsObjectEdgeType::EDGECONST;
       $block_xactions[] = newv(get_class(head($xactions)), array())
         ->setIgnoreOnNoEffect(true)
         ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
@@ -1847,7 +1866,7 @@ abstract class PhabricatorApplicationTransactionEditor
 
       $unsub = PhabricatorEdgeQuery::loadDestinationPHIDs(
         $object->getPHID(),
-        PhabricatorEdgeConfig::TYPE_OBJECT_HAS_UNSUBSCRIBER);
+        PhabricatorObjectHasUnsubscriberEdgeType::EDGECONST);
       $unsub = array_fuse($unsub);
       if (isset($unsub[$actor_phid])) {
         // If the user has previously unsubscribed from this object explicitly,
@@ -2121,7 +2140,7 @@ abstract class PhabricatorApplicationTransactionEditor
         PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
 
       if ($project_phids) {
-        $watcher_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_WATCHER;
+        $watcher_type = PhabricatorObjectHasWatcherEdgeType::EDGECONST;
 
         $query = id(new PhabricatorEdgeQuery())
           ->withSourcePHIDs($project_phids)
@@ -2506,7 +2525,7 @@ abstract class PhabricatorApplicationTransactionEditor
     $editor = new PhabricatorEdgeEditor();
 
     $src = $object->getPHID();
-    $type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_FILE;
+    $type = PhabricatorObjectHasFileEdgeType::EDGECONST;
     foreach ($file_phids as $dst) {
       $editor->addEdge($src, $type, $dst);
     }

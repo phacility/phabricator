@@ -128,7 +128,7 @@ final class PhabricatorProjectEditDetailsController
           ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
           ->setMetadataValue(
             'edge:type',
-            PhabricatorEdgeConfig::TYPE_PROJ_MEMBER)
+            PhabricatorProjectProjectHasMemberEdgeType::EDGECONST)
           ->setNewValue(
             array(
               '+' => array($viewer->getPHID() => $viewer->getPHID()),

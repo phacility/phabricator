@@ -22,16 +22,7 @@ final class ManiphestTransactionSaveController extends ManiphestController {
 
     $action = $request->getStr('action');
 
-    // Compute new CCs added by @mentions. Several things can cause CCs to
-    // be added as side effects: mentions, explicit CCs, users who aren't
-    // CC'd interacting with the task, and ownership changes. We build up a
-    // list of all the CCs and then construct a transaction for them at the
-    // end if necessary.
-    $added_ccs = PhabricatorMarkupEngine::extractPHIDsFromMentions(
-      $user,
-      array(
-        $request->getStr('comments'),
-      ));
+    $added_ccs = array();
 
     $cc_transaction = new ManiphestTransaction();
     $cc_transaction
@@ -67,7 +58,7 @@ final class ManiphestTransactionSaveController extends ManiphestController {
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         // Accumulate the new explicit CCs into the array that we'll add in
         // the CC transaction later.
-        $added_ccs = array_merge($added_ccs, $request->getArr('ccs'));
+        $added_ccs = $request->getArr('ccs');
 
         // Throw away the primary transaction.
         $transaction = null;

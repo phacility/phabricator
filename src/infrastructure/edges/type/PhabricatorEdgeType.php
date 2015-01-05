@@ -11,8 +11,7 @@
  */
 abstract class PhabricatorEdgeType extends Phobject {
 
-  // TODO: Make this final after we remove PhabricatorLegacyEdgeType.
-  /* final */ public function getEdgeConstant() {
+  final public function getEdgeConstant() {
     $class = new ReflectionClass($this);
 
     $const = $class->getConstant('EDGECONST');
@@ -158,13 +157,6 @@ abstract class PhabricatorEdgeType extends Phobject {
         ->loadObjects();
 
       $map = array();
-
-
-      // TODO: Remove this once everything is migrated.
-      $exclude = mpull($types, 'getEdgeConstant');
-      $map = PhabricatorEdgeConfig::getLegacyTypes($exclude);
-      unset($types['PhabricatorLegacyEdgeType']);
-
 
       foreach ($types as $class => $type) {
         $const = $type->getEdgeConstant();

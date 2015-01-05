@@ -40,8 +40,9 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
 
   public function getRemarkupRules() {
     return array(
-      new DiffusionRepositoryRemarkupRule(),
       new DiffusionCommitRemarkupRule(),
+      new DiffusionRepositoryRemarkupRule(),
+      new DiffusionRepositoryByIDRemarkupRule(),
     );
   }
 

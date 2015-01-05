@@ -122,6 +122,10 @@ final class PhabricatorStartup {
     self::setupPHP();
     self::verifyPHP();
 
+    // If we've made it this far, the environment isn't completely broken so
+    // we can switch over to relying on our own exception recovery mechanisms.
+    ini_set('display_errors', 0);
+
     if (isset($_SERVER['REMOTE_ADDR'])) {
       self::rateLimitRequest($_SERVER['REMOTE_ADDR']);
     }

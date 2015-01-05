@@ -274,8 +274,16 @@ final class PhabricatorConduitAPIController
           );
         }
 
-        throw new Exception(
-          pht('Not Implemented: Would authenticate Almanac device.'));
+        if (!PhabricatorEnv::isClusterRemoteAddress()) {
+          return array(
+            'ERR-INVALID-AUTH',
+            pht(
+              'This request originates from outside of the Phabricator '.
+              'cluster address range. Requests signed with trusted '.
+              'device keys must originate from within the cluster.'),);
+        }
+
+        $user = PhabricatorUser::getOmnipotentUser();
       }
 
       return $this->validateAuthenticatedUser(
@@ -358,6 +366,19 @@ final class PhabricatorConduitAPIController
             $token->setExpires(null);
             $token->save();
           unset($unguarded);
+        }
+      }
+
+      // If this is a "clr-" token, Phabricator must be configured in cluster
+      // mode and the remote address must be a cluster node.
+      if ($token->getTokenType() == PhabricatorConduitToken::TYPE_CLUSTER) {
+        if (!PhabricatorEnv::isClusterRemoteAddress()) {
+          return array(
+            'ERR-INVALID-AUTH',
+            pht(
+              'This request originates from outside of the Phabricator '.
+              'cluster address range. Requests signed with cluster API '.
+              'tokens must originate from within the cluster.'),);
         }
       }
 
