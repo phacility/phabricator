@@ -126,11 +126,14 @@ final class ManiphestTaskEditController extends ManiphestController {
 
       // You can only have a parent task if you're creating a new task.
       $parent_id = $request->getInt('parent');
-      if ($parent_id) {
+      if (strlen($parent_id)) {
         $parent_task = id(new ManiphestTaskQuery())
           ->setViewer($user)
           ->withIDs(array($parent_id))
           ->executeOne();
+        if (!$parent_task) {
+          return new Aphront404Response();
+        }
         if (!$template_id) {
           $template_id = $parent_id;
         }
