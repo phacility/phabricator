@@ -228,7 +228,7 @@ final class PhabricatorAppSearchEngine
               ->setIcon('fa-cog')
               ->setHref('/applications/view/'.get_class($application).'/'));
 
-        if ($application->getBaseURI()) {
+        if ($application->getBaseURI() && $application->isInstalled()) {
           $item->setHref($application->getBaseURI());
         }
 
