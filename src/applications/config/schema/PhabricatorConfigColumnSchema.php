@@ -121,7 +121,7 @@ final class PhabricatorConfigColumnSchema
     return 0;
   }
 
-  public function compareToSimilarSchema(
+  protected function compareToSimilarSchema(
     PhabricatorConfigStorageSchema $expect) {
 
     $issues = array();

@@ -29,7 +29,7 @@ final class PhabricatorConfigDatabaseSchema
     return $this->getTables();
   }
 
-  public function compareToSimilarSchema(
+  protected function compareToSimilarSchema(
     PhabricatorConfigStorageSchema $expect) {
 
     $issues = array();
