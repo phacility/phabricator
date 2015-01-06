@@ -383,6 +383,17 @@ final class ManiphestTaskEditController extends ManiphestController {
                 return new Aphront404Response();
               }
 
+              // re-load projects for accuracy as they are not re-loaded via
+              // the editor
+              $project_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
+                $task->getPHID(),
+                PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
+              $task->attachProjectPHIDs($project_phids);
+              $remove_from_board = false;
+              if (!in_array($column->getProjectPHID(), $project_phids)) {
+                $remove_from_board = true;
+              }
+
               $positions = id(new PhabricatorProjectColumnPositionQuery())
                 ->setViewer($user)
                 ->withColumns(array($column))
@@ -397,7 +408,7 @@ final class ManiphestTaskEditController extends ManiphestController {
               if ($order == PhabricatorProjectColumn::ORDER_NATURAL) {
                 // TODO: This is a little bit awkward, because PHP and JS use
                 // slightly different sort order parameters to achieve the same
-                // effect. It would be unify this a bit at some point.
+                // effect. It would be good to unify this a bit at some point.
                 $sort_map = array();
                 foreach ($positions as $position) {
                   $sort_map[$position->getObjectPHID()] = array(
@@ -414,6 +425,7 @@ final class ManiphestTaskEditController extends ManiphestController {
 
               $data = array(
                 'sortMap' => $sort_map,
+                'removeFromBoard' => $remove_from_board,
               );
               break;
             case 'task':
