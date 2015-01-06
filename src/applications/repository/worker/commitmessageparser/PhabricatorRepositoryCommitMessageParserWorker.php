@@ -84,9 +84,15 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     // aren't. Autoclose can be disabled for various reasons at the repository
     // or commit levels.
 
-    $autoclose_reason = $repository->shouldSkipAutocloseCommit($commit);
+    $force_autoclose = idx($this->getTaskData(), 'forceAutoclose', false);
+    if ($force_autoclose) {
+      $autoclose_reason = $repository::BECAUSE_AUTOCLOSE_FORCED;
+    } else {
+      $autoclose_reason = $repository->shouldSkipAutocloseCommit($commit);
+    }
     $data->setCommitDetail('autocloseReason', $autoclose_reason);
-    $should_autoclose = $repository->shouldAutocloseCommit($commit);
+    $should_autoclose = $force_autoclose ||
+                        $repository->shouldAutocloseCommit($commit);
 
 
     // When updating related objects, we'll act under an omnipotent user to
