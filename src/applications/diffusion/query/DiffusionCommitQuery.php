@@ -192,6 +192,7 @@ final class DiffusionCommitQuery
         $commit->attachRepository($repo);
       } else {
         unset($commits[$key]);
+        continue;
       }
 
       // Build the identifierMap
