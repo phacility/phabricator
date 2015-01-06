@@ -7,7 +7,7 @@ final class PhabricatorPeopleSearchEngine
     return pht('Users');
   }
 
-  public function getApplicationClassName() {
+  protected function getApplicationClassName() {
     return 'PhabricatorPeopleApplication';
   }
 
@@ -163,7 +163,7 @@ final class PhabricatorPeopleSearchEngine
     return '/people/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array(
       'all' => pht('All'),
     );

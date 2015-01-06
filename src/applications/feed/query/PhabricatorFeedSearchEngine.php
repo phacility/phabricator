@@ -101,7 +101,7 @@ final class PhabricatorFeedSearchEngine
     return '/feed/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array(
       'all' => pht('All Stories'),
     );

@@ -7,7 +7,7 @@ final class PhabricatorProjectSearchEngine
     return pht('Projects');
   }
 
-  public function getApplicationClassName() {
+  protected function getApplicationClassName() {
     return 'PhabricatorProjectApplication';
   }
 
@@ -145,7 +145,7 @@ final class PhabricatorProjectSearchEngine
     return '/project/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array();
 
     if ($this->requireViewer()->isLoggedIn()) {

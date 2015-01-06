@@ -7,7 +7,7 @@ final class PhabricatorRepositoryPushLogSearchEngine
     return pht('Push Logs');
   }
 
-  public function getApplicationClassName() {
+  protected function getApplicationClassName() {
     return 'PhabricatorDiffusionApplication';
   }
 
@@ -90,7 +90,7 @@ final class PhabricatorRepositoryPushLogSearchEngine
     return '/diffusion/pushlog/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     return array(
       'all' => pht('All Push Logs'),
     );

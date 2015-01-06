@@ -7,7 +7,7 @@ final class PhabricatorRepositorySearchEngine
     return pht('Repositories');
   }
 
-  public function getApplicationClassName() {
+  protected function getApplicationClassName() {
     return 'PhabricatorDiffusionApplication';
   }
 
@@ -149,7 +149,7 @@ final class PhabricatorRepositorySearchEngine
     return '/diffusion/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array(
       'active' => pht('Active Repositories'),
       'all' => pht('All Repositories'),

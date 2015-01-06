@@ -7,7 +7,7 @@ final class PhabricatorMacroSearchEngine
     return pht('Macros');
   }
 
-  public function getApplicationClassName() {
+  protected function getApplicationClassName() {
     return 'PhabricatorMacroApplication';
   }
 
@@ -128,7 +128,7 @@ final class PhabricatorMacroSearchEngine
     return '/macro/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array(
       'active'  => pht('Active'),
       'all'     => pht('All'),

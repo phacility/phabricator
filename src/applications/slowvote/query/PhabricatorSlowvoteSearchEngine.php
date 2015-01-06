@@ -85,7 +85,7 @@ final class PhabricatorSlowvoteSearchEngine
     return '/vote/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array(
       'open' => pht('Open Polls'),
       'all' => pht('All Polls'),
@@ -119,7 +119,7 @@ final class PhabricatorSlowvoteSearchEngine
     return parent::buildSavedQueryFromBuiltin($query_key);
   }
 
-  public function getRequiredHandlePHIDsForResultList(
+  protected function getRequiredHandlePHIDsForResultList(
     array $polls,
     PhabricatorSavedQuery $query) {
     return mpull($polls, 'getAuthorPHID');

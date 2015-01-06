@@ -94,7 +94,7 @@ final class ReleephRequestSearchEngine
     return $this->baseURI.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array(
       'open' => pht('Open Requests'),
       'all' => pht('All Requests'),

@@ -9,7 +9,7 @@ final class LegalpadDocumentSignatureSearchEngine
     return pht('Legalpad Signatures');
   }
 
-  public function getApplicationClassName() {
+  protected function getApplicationClassName() {
     return 'PhabricatorLegalpadApplication';
   }
 
@@ -123,7 +123,7 @@ final class LegalpadDocumentSignatureSearchEngine
     }
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array(
       'all' => pht('All Signatures'),
     );

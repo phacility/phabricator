@@ -98,7 +98,7 @@ final class PhabricatorPasteSearchEngine
     return '/paste/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array(
       'all' => pht('All Pastes'),
     );

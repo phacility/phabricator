@@ -7,7 +7,7 @@ final class PhabricatorNotificationSearchEngine
     return pht('Notifications');
   }
 
-  public function getApplicationClassName() {
+  protected function getApplicationClassName() {
     return 'PhabricatorNotificationsApplication';
   }
 
@@ -52,7 +52,7 @@ final class PhabricatorNotificationSearchEngine
     return '/notification/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
 
     $names = array(
       'all' => pht('All Notifications'),
