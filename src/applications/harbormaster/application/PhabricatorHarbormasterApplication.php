@@ -81,7 +81,7 @@ final class PhabricatorHarbormasterApplication extends PhabricatorApplication {
     );
   }
 
-  public function getCustomCapabilities() {
+  protected function getCustomCapabilities() {
     return array(
       HarbormasterManagePlansCapability::CAPABILITY => array(
         'caption' => pht('Can create and manage build plans.'),
