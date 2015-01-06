@@ -466,7 +466,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       $xactions = array();
 
       $edge_type = ManiphestTaskHasCommitEdgeType::EDGECONST;
-      $xactions[] = id(new ManiphestTransaction())
+      $edge_xaction = id(new ManiphestTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
         ->setMetadataValue('edge:type', $edge_type)
         ->setNewValue(
@@ -481,22 +481,14 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
         if ($task->getStatus() != $status) {
           $xactions[] = id(new ManiphestTransaction())
             ->setTransactionType(ManiphestTransaction::TYPE_STATUS)
+            ->setMetadataValue('commitPHID', $commit->getPHID())
             ->setNewValue($status);
 
-          $commit_name = $repository->formatCommitName(
-            $commit->getCommitIdentifier());
-
-          $status_message = pht(
-            'Closed by commit %s.',
-            $commit_name);
-
-          $xactions[] = id(new ManiphestTransaction())
-            ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
-            ->attachComment(
-              id(new ManiphestTransactionComment())
-                ->setContent($status_message));
+          $edge_xaction->setMetadataValue('commitPHID', $commit->getPHID());
         }
       }
+
+      $xactions[] = $edge_xaction;
 
       $content_source = PhabricatorContentSource::newForSource(
         PhabricatorContentSource::SOURCE_DAEMON,
