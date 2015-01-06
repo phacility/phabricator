@@ -3,7 +3,7 @@
 final class PhabricatorRepositoryGitCommitMessageParserWorker
   extends PhabricatorRepositoryCommitMessageParserWorker {
 
-  public function parseCommit(
+  protected function parseCommit(
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
