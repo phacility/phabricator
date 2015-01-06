@@ -21,7 +21,7 @@ final class PhabricatorFileListController extends PhabricatorFileController {
     return $this->delegateToController($controller);
   }
 
-  public function buildApplicationCrumbs() {
+  protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
     $crumbs->addAction(
       id(new PHUIListItemView())

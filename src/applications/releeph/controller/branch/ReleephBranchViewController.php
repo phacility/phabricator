@@ -103,7 +103,7 @@ final class ReleephBranchViewController extends ReleephBranchController
       ->setViewer($this->getRequest()->getUser());
   }
 
-  public function buildApplicationCrumbs() {
+  protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
     $branch = $this->getBranch();

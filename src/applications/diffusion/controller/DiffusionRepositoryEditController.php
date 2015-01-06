@@ -3,7 +3,7 @@
 abstract class DiffusionRepositoryEditController
   extends DiffusionController {
 
-  public function buildApplicationCrumbs($is_main = false) {
+  protected function buildApplicationCrumbs($is_main = false) {
     $crumbs = parent::buildApplicationCrumbs();
 
     if ($this->diffusionRequest) {

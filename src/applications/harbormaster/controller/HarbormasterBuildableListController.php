@@ -39,7 +39,7 @@ final class HarbormasterBuildableListController extends HarbormasterController {
     return $nav;
   }
 
-  public function buildApplicationMenu() {
+  protected function buildApplicationMenu() {
     return $this->buildSideNavView(true)->getMenu();
   }
 

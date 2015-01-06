@@ -17,7 +17,7 @@ abstract class PonderController extends PhabricatorController {
     return $nav;
   }
 
-  public function buildApplicationCrumbs() {
+  protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
     $crumbs
       ->addAction(

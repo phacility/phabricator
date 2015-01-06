@@ -23,7 +23,7 @@ final class HeraldTranscriptListController extends HeraldController {
     return $nav;
   }
 
-  public function buildApplicationCrumbs() {
+  protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
     $crumbs->addTextCrumb(

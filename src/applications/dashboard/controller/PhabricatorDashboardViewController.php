@@ -49,7 +49,7 @@ final class PhabricatorDashboardViewController
       ));
   }
 
-  public function buildApplicationCrumbs() {
+  protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
     $id = $this->id;
 

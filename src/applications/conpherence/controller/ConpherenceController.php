@@ -4,7 +4,7 @@ abstract class ConpherenceController extends PhabricatorController {
 
   private $conpherences;
 
-  public function buildApplicationMenu() {
+  protected function buildApplicationMenu() {
     $nav = new PHUIListView();
 
     $nav->newLink(
@@ -30,7 +30,7 @@ abstract class ConpherenceController extends PhabricatorController {
     return $nav;
   }
 
-  public function buildApplicationCrumbs() {
+  protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
     $crumbs
