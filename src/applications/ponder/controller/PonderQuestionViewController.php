@@ -47,6 +47,12 @@ final class PonderQuestionViewController extends PonderController {
     $header = id(new PHUIHeaderView())
       ->setHeader($question->getTitle());
 
+    if ($question->getStatus() == PonderQuestionStatus::STATUS_OPEN) {
+      $header->setStatus('fa-square-o', 'bluegrey', pht('Open'));
+    } else {
+      $header->setStatus('fa-check-square-o', 'dark', pht('Closed'));
+    }
+
     $actions = $this->buildActionListView($question);
     $properties = $this->buildPropertyListView($question, $actions);
 
@@ -100,11 +106,11 @@ final class PonderQuestionViewController extends PonderController {
 
     if ($question->getStatus() == PonderQuestionStatus::STATUS_OPEN) {
       $name = pht('Close Question');
-      $icon = 'fa-times';
+      $icon = 'fa-check-square-o';
       $href = 'close';
     } else {
       $name = pht('Reopen Question');
-      $icon = 'fa-check-circle-o';
+      $icon = 'fa-square-o';
       $href = 'open';
     }
 
