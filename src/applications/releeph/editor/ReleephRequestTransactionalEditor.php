@@ -26,7 +26,7 @@ final class ReleephRequestTransactionalEditor
     return $types;
   }
 
-  public function getCustomTransactionOldValue(
+  protected function getCustomTransactionOldValue(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
@@ -58,7 +58,7 @@ final class ReleephRequestTransactionalEditor
     }
   }
 
-  public function getCustomTransactionNewValue(
+  protected function getCustomTransactionNewValue(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
@@ -74,7 +74,7 @@ final class ReleephRequestTransactionalEditor
     }
   }
 
-  public function applyCustomInternalTransaction(
+  protected function applyCustomInternalTransaction(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
