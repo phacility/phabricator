@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorAuthFactorTOTP extends PhabricatorAuthFactor {
+final class PhabricatorTOTPAuthFactor extends PhabricatorAuthFactor {
 
   const TEMPORARY_TOKEN_TYPE = 'mfa:totp:key';
 
