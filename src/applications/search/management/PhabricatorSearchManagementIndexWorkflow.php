@@ -115,7 +115,7 @@ final class PhabricatorSearchManagementIndexWorkflow
 
   private function loadPHIDsByTypes($type) {
     $indexers = id(new PhutilSymbolLoader())
-      ->setAncestorClass('PhabricatorSearchObjectIndexer')
+      ->setAncestorClass('PhabricatorSearchDocumentIndexer')
       ->loadObjects();
 
     $phids = array();
