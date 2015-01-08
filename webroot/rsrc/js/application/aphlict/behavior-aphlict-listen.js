@@ -41,22 +41,8 @@ JX.behavior('aphlict-listen', function(config) {
 
   // Respond to a notification from the Aphlict notification server. We send
   // a request to Phabricator to get notification details.
-  function onaphlictmessage(type, message) {
-    switch (type) {
-      case 'receive':
-        JX.Stratcom.invoke('aphlict-receive-message', null, message);
-        break;
-
-      default:
-      case 'error':
-      case 'log':
-      case 'status':
-        if (config.debug) {
-          var details = message ? JX.JSON.stringify(message) : '';
-          JX.log('(Aphlict) [' + type + '] ' + details);
-        }
-        break;
-    }
+  function onaphlictmessage(message) {
+    JX.Stratcom.invoke('aphlict-receive-message', null, message);
   }
 
 
@@ -89,13 +75,11 @@ JX.behavior('aphlict-listen', function(config) {
   }
 
   var client = new JX.Aphlict(
-    config.id,
-    config.server,
-    config.port,
+    config.websocketURI,
     config.subscriptions);
 
   client
     .setHandler(onaphlictmessage)
-    .start(JX.$(config.containerID), config.swfURI);
+    .start();
 
 });

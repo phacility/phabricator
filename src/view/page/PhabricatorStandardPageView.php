@@ -371,9 +371,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     if (PhabricatorEnv::getEnvConfig('notification.enabled')) {
       if ($user && $user->isLoggedIn()) {
 
-        $aphlict_object_id = celerity_generate_unique_node_id();
-        $aphlict_container_id = celerity_generate_unique_node_id();
-
         $client_uri = PhabricatorEnv::getEnvConfig('notification.client-uri');
         $client_uri = new PhutilURI($client_uri);
         if ($client_uri->getDomain() == 'localhost') {
@@ -382,37 +379,24 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
           $client_uri->setDomain($this_host->getDomain());
         }
 
-        $map = CelerityResourceMap::getNamedInstance('phabricator');
-        $swf_uri = $response->getURI($map, 'rsrc/swf/aphlict.swf', true);
-
-        $enable_debug = PhabricatorEnv::getEnvConfig('notification.debug');
-
         $subscriptions = $this->pageObjects;
         if ($user) {
           $subscriptions[] = $user->getPHID();
         }
 
+        if ($request->isHTTPS()) {
+          $client_uri->setProtocol('wss');
+        } else {
+          $client_uri->setProtocol('ws');
+        }
+
         Javelin::initBehavior(
           'aphlict-listen',
           array(
-            'id'            => $aphlict_object_id,
-            'containerID'   => $aphlict_container_id,
-            'server'        => $client_uri->getDomain(),
-            'port'          => $client_uri->getPort(),
-            'debug'         => $enable_debug,
-            'swfURI'        => $swf_uri,
+            'websocketURI'  => (string)$client_uri,
             'pageObjects'   => array_fill_keys($this->pageObjects, true),
             'subscriptions' => $subscriptions,
           ));
-
-        $tail[] = phutil_tag(
-          'div',
-          array(
-            'id' => $aphlict_container_id,
-            'style' =>
-              'position: absolute; width: 0; height: 0; overflow: hidden;',
-          ),
-          '');
       }
     }
 

@@ -38,7 +38,7 @@ final class PhabricatorAphlictSetupCheck extends PhabricatorSetupCheck {
         ->addCommand(
           pht(
             "(To start the server, run this command.)\n".
-            "phabricator/ $ sudo ./bin/aphlict start"));
+            "phabricator/ $ ./bin/aphlict start"));
 
       return;
     }
@@ -57,7 +57,7 @@ final class PhabricatorAphlictSetupCheck extends PhabricatorSetupCheck {
         ->setShortName(pht('Notification Server Version'))
         ->setName(pht('Notification Server Out of Date'))
         ->setMessage($message)
-        ->addCommand('phabricator/ $ sudo ./bin/aphlict restart');
+        ->addCommand('phabricator/ $ ./bin/aphlict restart');
     }
 
   }

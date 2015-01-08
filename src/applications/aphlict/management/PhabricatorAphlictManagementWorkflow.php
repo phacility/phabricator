@@ -50,7 +50,7 @@ abstract class PhabricatorAphlictManagementWorkflow
     }
   }
 
-  final protected function willLaunch() {
+  final protected function willLaunch($debug = false) {
     $console = PhutilConsole::getConsole();
 
     $pid = $this->getPID();
@@ -61,15 +61,66 @@ abstract class PhabricatorAphlictManagementWorkflow
           'running. Use `aphlict restart` to restart it.'));
     }
 
-    if (posix_getuid() != 0) {
+    if (posix_getuid() == 0) {
       throw new PhutilArgumentUsageException(
         pht(
-          'You must run this script as root; the Aphlict server needs to bind '.
-          'to privileged ports.'));
+          // TODO: Update this message after a while.
+          'The notification server should not be run as root. It no '.
+          'longer requires access to privileged ports.'));
     }
 
-    // This will throw if we can't find an appropriate `node`.
-    $this->getNodeBinary();
+    // Make sure we can write to the PID file.
+    if (!$debug) {
+      Filesystem::writeFile($this->getPIDPath(), '');
+    }
+
+    // First, start the server in configuration test mode with --test. This
+    // will let us error explicitly if there are missing modules, before we
+    // fork and lose access to the console.
+    $test_argv = $this->getServerArgv($debug);
+    $test_argv[] = '--test=true';
+
+    execx(
+      '%s %s %Ls',
+      $this->getNodeBinary(),
+      $this->getAphlictScriptPath(),
+      $test_argv);
+  }
+
+  private function getServerArgv($debug) {
+    $ssl_key = PhabricatorEnv::getEnvConfig('notification.ssl-key');
+    $ssl_cert = PhabricatorEnv::getEnvConfig('notification.ssl-cert');
+
+    $server_uri = PhabricatorEnv::getEnvConfig('notification.server-uri');
+    $server_uri = new PhutilURI($server_uri);
+
+    $client_uri = PhabricatorEnv::getEnvConfig('notification.client-uri');
+    $client_uri = new PhutilURI($client_uri);
+
+    $log = PhabricatorEnv::getEnvConfig('notification.log');
+
+    $server_argv = array();
+    $server_argv[] = '--port='.$client_uri->getPort();
+    $server_argv[] = '--admin='.$server_uri->getPort();
+
+    if ($ssl_key) {
+      $server_argv[] = '--ssl-key='.$ssl_key;
+    }
+
+    if ($ssl_cert) {
+      $server_argv[] = '--ssl-cert='.$ssl_cert;
+    }
+
+    if (!$debug) {
+      $server_argv[] = '--log='.$log;
+    }
+
+    return $server_argv;
+  }
+
+  private function getAphlictScriptPath() {
+    $root = dirname(phutil_get_library_root('phabricator'));
+    return $root.'/support/aphlict/server/aphlict_server.js';
   }
 
   final protected function launch($debug = false) {
@@ -81,33 +132,11 @@ abstract class PhabricatorAphlictManagementWorkflow
       Filesystem::writeFile($this->getPIDPath(), getmypid());
     }
 
-    $server_uri = PhabricatorEnv::getEnvConfig('notification.server-uri');
-    $server_uri = new PhutilURI($server_uri);
-
-    $client_uri = PhabricatorEnv::getEnvConfig('notification.client-uri');
-    $client_uri = new PhutilURI($client_uri);
-
-    $user = PhabricatorEnv::getEnvConfig('notification.user');
-    $log  = PhabricatorEnv::getEnvConfig('notification.log');
-
-    $server_argv = array();
-    $server_argv[] = csprintf('--port=%s', $client_uri->getPort());
-    $server_argv[] = csprintf('--admin=%s', $server_uri->getPort());
-    $server_argv[] = csprintf('--host=%s', $server_uri->getDomain());
-
-    if ($user) {
-      $server_argv[] = csprintf('--user=%s', $user);
-    }
-
-    if (!$debug) {
-      $server_argv[] = csprintf('--log=%s', $log);
-    }
-
     $command = csprintf(
-      '%s %s %C',
+      '%s %s %Ls',
       $this->getNodeBinary(),
-      dirname(__FILE__).'/../../../../support/aphlict/server/aphlict_server.js',
-      implode(' ', $server_argv));
+      $this->getAphlictScriptPath(),
+      $this->getServerArgv($debug));
 
     if (!$debug) {
       declare(ticks = 1);
@@ -158,6 +187,7 @@ abstract class PhabricatorAphlictManagementWorkflow
     // in another script using passthru().)
     fclose(STDOUT);
     fclose(STDERR);
+
 
     $this->launch();
     return 0;

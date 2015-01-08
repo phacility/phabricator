@@ -14,7 +14,7 @@ final class PhabricatorAphlictManagementDebugWorkflow
   }
 
   public function execute(PhutilArgumentParser $args) {
-    $this->willLaunch();
+    $this->willLaunch(true);
     return $this->launch(true);
   }
 

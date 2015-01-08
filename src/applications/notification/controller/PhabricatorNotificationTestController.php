@@ -16,6 +16,11 @@ final class PhabricatorNotificationTestController
 
     $viewer_phid = $viewer->getPHID();
 
+    // NOTE: Because we don't currently show you your own notifications, make
+    // sure this comes from a different PHID.
+    $application_phid = id(new PhabricatorNotificationsApplication())
+      ->getPHID();
+
     // TODO: When it's easier to get these buttons to render as forms, this
     // would be slightly nicer as a more standard isFormPost() check.
 
@@ -24,7 +29,7 @@ final class PhabricatorNotificationTestController
         ->setStoryType($story_type)
         ->setStoryData($story_data)
         ->setStoryTime(time())
-        ->setStoryAuthorPHID($viewer_phid)
+        ->setStoryAuthorPHID($application_phid)
         ->setRelatedPHIDs(array($viewer_phid))
         ->setPrimaryObjectPHID($viewer_phid)
         ->setSubscribedPHIDs(array($viewer_phid))
