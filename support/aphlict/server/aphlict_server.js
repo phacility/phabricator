@@ -14,7 +14,7 @@ function parse_command_line_arguments(argv) {
     host: '127.0.0.1',
     log: '/var/log/aphlict.log',
     'ssl-key': null,
-    'ssl-certificate': null,
+    'ssl-cert': null,
     test: false
   };
 
