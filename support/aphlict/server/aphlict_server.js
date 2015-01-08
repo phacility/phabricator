@@ -52,7 +52,8 @@ try {
 } catch (ex) {
   throw new Error(
     'You need to install the Node.js "ws" module for websocket support. ' +
-    'Usually, you can do this with `npm install -g ws`. ' + ex.toString());
+    'See "Notifications User Guide: Setup and Configuration" in the ' +
+    'documentation for instructions. ' + ex.toString());
 }
 
 var ssl_config = {

@@ -41,16 +41,10 @@ The notification server uses Node.js, so you'll need to install it first.
 To install Node.js, follow the instructions on
 [[ http://nodejs.org | nodejs.org ]].
 
-You will also need to install the `ws` module for Node. After installing
-Node, run `npm install -g ws` to install it.
+You will also need to install the `ws` module for Node. This needs to be
+installed into the notification server directory:
 
-  name="(Option 1, Recommended) Install 'ws' Module Globally"
-  $ npm install -g ws # Global Install
-
-If you prefer, you can also install it locally in the `support/aphlict/server/`
-directory:
-
-  name="(Option 2) Install 'ws' Module Locally"
+  phabricator/ $ cd support/aphlict/server/
   phabricator/support/aphlict/server/ $ npm install ws
 
 Once Node.js and the `ws` module are installed, you're ready to start the
