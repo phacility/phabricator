@@ -102,6 +102,7 @@ abstract class PhabricatorAphlictManagementWorkflow
     $server_argv = array();
     $server_argv[] = '--port='.$client_uri->getPort();
     $server_argv[] = '--admin='.$server_uri->getPort();
+    $server_argv[] = '--host='.$server_uri->getDomain();
 
     if ($ssl_key) {
       $server_argv[] = '--ssl-key='.$ssl_key;
