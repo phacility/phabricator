@@ -4,18 +4,21 @@ final class PhabricatorAphlictManagementDebugWorkflow
   extends PhabricatorAphlictManagementWorkflow {
 
   public function didConstruct() {
+    parent::didConstruct();
     $this
       ->setName('debug')
       ->setSynopsis(
         pht(
           'Start the notifications server in the foreground and print large '.
-          'volumes of diagnostic information to the console.'))
-      ->setArguments(array());
+          'volumes of diagnostic information to the console.'));
   }
 
   public function execute(PhutilArgumentParser $args) {
-    $this->willLaunch(true);
-    return $this->launch(true);
+    parent::execute($args);
+    $this->setDebug(true);
+
+    $this->willLaunch();
+    return $this->launch();
   }
 
 }

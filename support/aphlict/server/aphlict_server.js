@@ -9,9 +9,10 @@ JX.require('lib/AphlictLog', __dirname);
 
 function parse_command_line_arguments(argv) {
   var config = {
-    port: 22280,
-    admin: 22281,
-    host: '127.0.0.1',
+    'client-port': 22280,
+    'admin-port': 22281,
+    'client-host': '0.0.0.0',
+    'admin-host': '127.0.0.1',
     log: '/var/log/aphlict.log',
     'ssl-key': null,
     'ssl-cert': null,
@@ -30,8 +31,8 @@ function parse_command_line_arguments(argv) {
     config[matches[1]] = matches[2];
   }
 
-  config.port = parseInt(config.port, 10);
-  config.admin = parseInt(config.admin, 10);
+  config['client-port'] = parseInt(config['client-port'], 10);
+  config['admin-port'] = parseInt(config['admin-port'], 10);
 
   return config;
 }
@@ -95,11 +96,16 @@ if (ssl_config.enabled) {
   var https_server = https.createServer({
     key: ssl_config.key,
     cert: ssl_config.cert
-  }, https_discard_handler).listen(config.port);
+  }, https_discard_handler).listen(
+    config['client-port'],
+    config['client-host']);
 
   ws = new WebSocket.Server({server: https_server});
 } else {
-  ws = new WebSocket.Server({port: config.port});
+  ws = new WebSocket.Server({
+    port: config['client-port'],
+    host: config['client-host'],
+  });
 }
 
 ws.on('connection', function(ws) {
@@ -234,6 +240,6 @@ http.createServer(function(request, response) {
     response.writeHead(404, 'Not Found');
     response.end();
   }
-}).listen(config.admin, config.host);
+}).listen(config['admin-port'], config['admin-host']);
 
 debug.log('Started Server (PID %d)', process.pid);
