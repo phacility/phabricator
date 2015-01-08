@@ -49,15 +49,7 @@ JX.install('AphlictListener', {
     },
 
     writeMessage: function(message) {
-      var serial = JSON.stringify(message);
-
-      var length = Buffer.byteLength(serial, 'utf8');
-      length = length.toString();
-      while (length.length < 8) {
-        length = '0' + length;
-      }
-
-      this._socket.write(length + serial);
+      this._socket.send(JSON.stringify(message));
     }
 
   }

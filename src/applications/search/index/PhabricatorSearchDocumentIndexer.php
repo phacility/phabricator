@@ -1,6 +1,17 @@
 <?php
 
-abstract class PhabricatorSearchDocumentIndexer {
+abstract class PhabricatorSearchDocumentIndexer extends Phobject {
+
+  private $context;
+
+  protected function setContext($context) {
+    $this->context = $context;
+    return $this;
+  }
+
+  protected function getContext() {
+    return $this->context;
+  }
 
   abstract public function getIndexableObject();
   abstract protected function buildAbstractDocumentByPHID($phid);
@@ -30,9 +41,15 @@ abstract class PhabricatorSearchDocumentIndexer {
     return $object;
   }
 
-  public function indexDocumentByPHID($phid) {
+  public function indexDocumentByPHID($phid, $context) {
     try {
+      $this->setContext($context);
+
       $document = $this->buildAbstractDocumentByPHID($phid);
+      if ($document === null) {
+        // This indexer doesn't build a document index, so we're done.
+        return $this;
+      }
 
       $object = $this->loadDocumentByPHID($phid);
 

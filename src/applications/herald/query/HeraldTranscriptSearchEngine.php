@@ -7,7 +7,7 @@ final class HeraldTranscriptSearchEngine
     return pht('Herald Transcripts');
   }
 
-  public function getApplicationClassName() {
+  protected function getApplicationClassName() {
     return 'PhabricatorHeraldApplication';
   }
 
@@ -74,7 +74,7 @@ final class HeraldTranscriptSearchEngine
     return '/herald/transcript/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     return array(
       'all' => pht('All'),
     );

@@ -17,12 +17,12 @@ final class ReleephBranchPreviewView extends AphrontFormControl {
     return $this;
   }
 
-  public function getCustomControlClass() {
+  protected function getCustomControlClass() {
     require_celerity_resource('releeph-preview-branch');
     return 'releeph-preview-branch';
   }
 
-  public function renderInput() {
+  protected function renderInput() {
     static $required_params = array(
       'arcProjectID',
       'projectName',

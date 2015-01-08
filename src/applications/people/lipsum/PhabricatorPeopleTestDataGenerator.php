@@ -30,7 +30,7 @@ final class PhabricatorPeopleTestDataGenerator
   }
 
   protected function generateRealname() {
-    $realname_generator = new PhutilRealnameContextFreeGrammar();
+    $realname_generator = new PhutilRealNameContextFreeGrammar();
     $random_real_name = $realname_generator->generate();
     return $random_real_name;
   }

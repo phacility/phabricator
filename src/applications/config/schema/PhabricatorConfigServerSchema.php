@@ -27,7 +27,7 @@ final class PhabricatorConfigServerSchema
     return $this->getDatabases();
   }
 
-  public function compareToSimilarSchema(
+  protected function compareToSimilarSchema(
     PhabricatorConfigStorageSchema $expect) {
     return array();
   }

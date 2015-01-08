@@ -29,8 +29,8 @@ final class HeraldRuleViewController extends HeraldController {
     if ($rule->getIsDisabled()) {
       $header->setStatus(
         'fa-ban',
-        'dark',
-        pht('Disabled'));
+        'red',
+        pht('Archived'));
     } else {
       $header->setStatus(
         'fa-check',
@@ -90,12 +90,12 @@ final class HeraldRuleViewController extends HeraldController {
 
     if ($rule->getIsDisabled()) {
       $disable_uri = "disable/{$id}/enable/";
-      $disable_icon = 'fa-check-circle-o';
-      $disable_name = pht('Enable Rule');
+      $disable_icon = 'fa-check';
+      $disable_name = pht('Activate Rule');
     } else {
       $disable_uri = "disable/{$id}/disable/";
       $disable_icon = 'fa-ban';
-      $disable_name = pht('Disable Rule');
+      $disable_name = pht('Archive Rule');
     }
 
     $view->addAction(

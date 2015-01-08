@@ -204,6 +204,7 @@ JX.behavior('project-boards', function(config) {
     var new_data = JX.Stratcom.getData(new_card);
     var items = finditems(column);
     var edited = false;
+    var remove_index = null;
 
     for (var ii = 0; ii < items.length; ii++) {
       var item = items[ii];
@@ -212,6 +213,9 @@ JX.behavior('project-boards', function(config) {
       var phid = data.objectPHID;
 
       if (phid == new_data.objectPHID) {
+        if (r.data.removeFromBoard) {
+          remove_index = ii;
+        }
         items[ii] = new_card;
         data = new_data;
         edited = true;
@@ -224,6 +228,10 @@ JX.behavior('project-boards', function(config) {
     if (!edited) {
       items[items.length + 1] = new_card;
       new_data.sort = r.data.sortMap[new_data.objectPHID] || new_data.sort;
+    }
+
+    if (remove_index !== null) {
+      items.splice(remove_index, 1);
     }
 
     items.sort(colsort);

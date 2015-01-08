@@ -7,7 +7,7 @@ final class PonderQuestionSearchEngine
     return pht('Ponder Questions');
   }
 
-  public function getApplicationClassName() {
+  protected function getApplicationClassName() {
     return 'PhabricatorPonderApplication';
   }
 
@@ -95,7 +95,7 @@ final class PonderQuestionSearchEngine
     return '/ponder/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array(
       'open' => pht('Open Questions'),
       'all' => pht('All Questions'),

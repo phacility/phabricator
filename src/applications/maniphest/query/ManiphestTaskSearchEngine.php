@@ -34,7 +34,7 @@ final class ManiphestTaskSearchEngine
     return pht('Tasks');
   }
 
-  public function getApplicationClassName() {
+  protected function getApplicationClassName() {
     return 'PhabricatorManiphestApplication';
   }
 
@@ -437,7 +437,7 @@ final class ManiphestTaskSearchEngine
     return '/maniphest/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array();
 
     if ($this->requireViewer()->isLoggedIn()) {

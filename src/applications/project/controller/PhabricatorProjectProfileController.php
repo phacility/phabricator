@@ -80,7 +80,7 @@ final class PhabricatorProjectProfileController
     if ($project->getStatus() == PhabricatorProjectStatus::STATUS_ACTIVE) {
       $header->setStatus('fa-check', 'bluegrey', pht('Active'));
     } else {
-      $header->setStatus('fa-ban', 'dark', pht('Archived'));
+      $header->setStatus('fa-ban', 'red', pht('Archived'));
     }
 
     $actions = $this->buildActionListView($project);

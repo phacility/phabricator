@@ -7,7 +7,7 @@ final class PhabricatorCalendarEventSearchEngine
     return pht('Calendar Events');
   }
 
-  public function getApplicationClassName() {
+  protected function getApplicationClassName() {
     return 'PhabricatorCalendarApplication';
   }
 
@@ -143,7 +143,7 @@ final class PhabricatorCalendarEventSearchEngine
     return '/calendar/event/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array(
       'upcoming' => pht('Upcoming Events'),
       'all'      => pht('All Events'),

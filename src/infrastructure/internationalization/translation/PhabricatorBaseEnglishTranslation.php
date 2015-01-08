@@ -600,6 +600,40 @@ abstract class PhabricatorBaseEnglishTranslation
       '%s edited commit(s), added %s: %s; removed %s: %s.' =>
         '%s edited commits, added %3$s; removed %5$s.',
 
+      '%s added %s reverted commit(s): %s.' => array(
+        array(
+          '%s added a reverted commit: %3$s.',
+          '%s added reverted commits: %3$s.',
+        ),
+      ),
+
+      '%s removed %s reverted commit(s): %s.' => array(
+        array(
+          '%s removed a reverted commit: %3$s.',
+          '%s removed reverted commits: %3$s.',
+        ),
+      ),
+
+      '%s edited reverted commit(s), added %s: %s; removed %s: %s.' =>
+        '%s edited reverted commits, added %3$s; removed %5$s.',
+
+      '%s added %s reverting commit(s): %s.' => array(
+        array(
+          '%s added a reverting commit: %3$s.',
+          '%s added reverting commits: %3$s.',
+        ),
+      ),
+
+      '%s removed %s reverting commit(s): %s.' => array(
+        array(
+          '%s removed a reverting commit: %3$s.',
+          '%s removed reverting commits: %3$s.',
+        ),
+      ),
+
+      '%s edited reverting commit(s), added %s: %s; removed %s: %s.' =>
+        '%s edited reverting commits, added %3$s; removed %5$s.',
+
       '%s changed project member(s), added %d: %s; removed %d: %s.' =>
         '%s changed project members, added %3$s; removed %5$s.',
 

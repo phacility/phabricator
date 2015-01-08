@@ -290,7 +290,7 @@ final class PhabricatorMacroTransaction
         }
       case PhabricatorMacroTransactionType::TYPE_DISABLED:
         if ($new) {
-          return PhabricatorTransactions::COLOR_BLACK;
+          return PhabricatorTransactions::COLOR_RED;
         } else {
           return PhabricatorTransactions::COLOR_SKY;
         }

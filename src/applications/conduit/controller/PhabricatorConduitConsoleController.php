@@ -49,19 +49,15 @@ final class PhabricatorConduitConsoleController
     }
 
     $error_types = $method->defineErrorTypes();
-    if ($error_types) {
-      $error_description = array();
-      foreach ($error_types as $error => $meaning) {
-        $error_description[] = hsprintf(
-          '<li><strong>%s:</strong> %s</li>',
-          $error,
-          $meaning);
-      }
-      $error_description = phutil_tag('ul', array(), $error_description);
-    } else {
-      $error_description = pht(
-        'This method does not raise any specific errors.');
+    $error_types['ERR-CONDUIT-CORE'] = pht('See error message for details.');
+    $error_description = array();
+    foreach ($error_types as $error => $meaning) {
+      $error_description[] = hsprintf(
+        '<li><strong>%s:</strong> %s</li>',
+        $error,
+        $meaning);
     }
+    $error_description = phutil_tag('ul', array(), $error_description);
 
     $form = new AphrontFormView();
     $form

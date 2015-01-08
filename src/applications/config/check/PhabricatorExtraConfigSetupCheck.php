@@ -194,6 +194,11 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
         'This option has been renamed to `phabricator.show-prototypes` '.
         'to emphasize the unfinished nature of many prototype applications. '.
         'Your existing setting has been migrated.'),
+      'notification.user' => pht(
+        'The notification server no longer requires root permissions. Start '.
+        'the server as the user you want it to run under.'),
+      'notification.debug' => pht(
+        'Notifications no longer have a dedicated debugging mode.'),
     );
 
     return $ancient_config;

@@ -21,7 +21,7 @@ final class ReleephProductListController extends ReleephController {
     return $this->delegateToController($controller);
   }
 
-  public function buildApplicationCrumbs() {
+  protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
     $crumbs->addAction(

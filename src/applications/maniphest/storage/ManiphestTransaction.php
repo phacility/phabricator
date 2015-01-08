@@ -114,6 +114,12 @@ final class ManiphestTransaction
           $phids[] = $phid;
         }
         break;
+      case self::TYPE_STATUS:
+        $commit_phid = $this->getMetadataValue('commitPHID');
+        if ($commit_phid) {
+          $phids[] = $commit_phid;
+        }
+        break;
     }
 
     return $phids;
@@ -121,6 +127,16 @@ final class ManiphestTransaction
 
   public function shouldHide() {
     switch ($this->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_EDGE:
+        $commit_phid = $this->getMetadataValue('commitPHID');
+        $edge_type = $this->getMetadataValue('edge:type');
+
+        if ($edge_type == ManiphestTaskHasCommitEdgeType::EDGECONST) {
+          if ($commit_phid) {
+            return true;
+          }
+        }
+        break;
       case self::TYPE_DESCRIPTION:
       case self::TYPE_PRIORITY:
       case self::TYPE_STATUS:
@@ -188,7 +204,7 @@ final class ManiphestTransaction
         if (ManiphestTaskStatus::isOpenStatus($new)) {
           return 'green';
         } else {
-          return 'black';
+          return 'indigo';
         }
 
       case self::TYPE_PRIORITY:
@@ -204,7 +220,7 @@ final class ManiphestTransaction
         return 'orange';
 
       case self::TYPE_MERGED_INTO:
-        return 'black';
+        return 'indigo';
     }
 
     return parent::getColor();
@@ -385,28 +401,62 @@ final class ManiphestTransaction
         $old_name = ManiphestTaskStatus::getTaskStatusName($old);
         $new_name = ManiphestTaskStatus::getTaskStatusName($new);
 
+        $commit_phid = $this->getMetadataValue('commitPHID');
+
         if ($new_closed && !$old_closed) {
           if ($new == ManiphestTaskStatus::getDuplicateStatus()) {
+            if ($commit_phid) {
+              return pht(
+                '%s closed this task as a duplicate by committing %s.',
+                $this->renderHandleLink($author_phid),
+                $this->renderHandleLink($commit_phid));
+            } else {
+              return pht(
+                '%s closed this task as a duplicate.',
+                $this->renderHandleLink($author_phid));
+            }
+          } else {
+            if ($commit_phid) {
+              return pht(
+                '%s closed this task as "%s" by committing %s.',
+                $this->renderHandleLink($author_phid),
+                $new_name,
+                $this->renderHandleLink($commit_phid));
+            } else {
+              return pht(
+                '%s closed this task as "%s".',
+                $this->renderHandleLink($author_phid),
+                $new_name);
+            }
+          }
+        } else if (!$new_closed && $old_closed) {
+          if ($commit_phid) {
             return pht(
-              '%s closed this task as a duplicate.',
-              $this->renderHandleLink($author_phid));
+              '%s reopened this task as "%s" by committing %s.',
+              $this->renderHandleLink($author_phid),
+              $new_name,
+              $this->renderHandleLink($commit_phid));
           } else {
             return pht(
-              '%s closed this task as "%s".',
+              '%s reopened this task as "%s".',
               $this->renderHandleLink($author_phid),
               $new_name);
           }
-        } else if (!$new_closed && $old_closed) {
-          return pht(
-            '%s reopened this task as "%s".',
-            $this->renderHandleLink($author_phid),
-            $new_name);
         } else {
-          return pht(
-            '%s changed the task status from "%s" to "%s".',
-            $this->renderHandleLink($author_phid),
-            $old_name,
-            $new_name);
+          if ($commit_phid) {
+            return pht(
+              '%s changed the task status from "%s" to "%s" by committing %s.',
+              $this->renderHandleLink($author_phid),
+              $old_name,
+              $new_name,
+              $this->renderHandleLink($commit_phid));
+          } else {
+            return pht(
+              '%s changed the task status from "%s" to "%s".',
+              $this->renderHandleLink($author_phid),
+              $old_name,
+              $new_name);
+          }
         }
 
       case self::TYPE_UNBLOCK:
@@ -590,32 +640,70 @@ final class ManiphestTransaction
         $old_name = ManiphestTaskStatus::getTaskStatusName($old);
         $new_name = ManiphestTaskStatus::getTaskStatusName($new);
 
+        $commit_phid = $this->getMetadataValue('commitPHID');
+
         if ($new_closed && !$old_closed) {
           if ($new == ManiphestTaskStatus::getDuplicateStatus()) {
+            if ($commit_phid) {
+              return pht(
+                '%s closed %s as a duplicate by committing %s.',
+                $this->renderHandleLink($author_phid),
+                $this->renderHandleLink($object_phid),
+                $this->renderHandleLink($commit_phid));
+            } else {
+              return pht(
+                '%s closed %s as a duplicate.',
+                $this->renderHandleLink($author_phid),
+                $this->renderHandleLink($object_phid));
+            }
+          } else {
+            if ($commit_phid) {
+              return pht(
+                '%s closed %s as "%s" by committing %s.',
+                $this->renderHandleLink($author_phid),
+                $this->renderHandleLink($object_phid),
+                $new_name,
+                $this->renderHandleLink($commit_phid));
+            } else {
+              return pht(
+                '%s closed %s as "%s".',
+                $this->renderHandleLink($author_phid),
+                $this->renderHandleLink($object_phid),
+                $new_name);
+            }
+          }
+        } else if (!$new_closed && $old_closed) {
+          if ($commit_phid) {
             return pht(
-              '%s closed %s as a duplicate.',
+              '%s reopened %s as "%s" by committing %s.',
               $this->renderHandleLink($author_phid),
-              $this->renderHandleLink($object_phid));
+              $this->renderHandleLink($object_phid),
+              $new_name,
+              $this->renderHandleLink($commit_phid));
           } else {
             return pht(
-              '%s closed %s as "%s".',
+              '%s reopened %s as "%s".',
               $this->renderHandleLink($author_phid),
               $this->renderHandleLink($object_phid),
               $new_name);
           }
-        } else if (!$new_closed && $old_closed) {
-          return pht(
-            '%s reopened %s as "%s".',
-            $this->renderHandleLink($author_phid),
-            $this->renderHandleLink($object_phid),
-            $new_name);
         } else {
-          return pht(
-            '%s changed the status of %s from "%s" to "%s".',
-            $this->renderHandleLink($author_phid),
-            $this->renderHandleLink($object_phid),
-            $old_name,
-            $new_name);
+          if ($commit_phid) {
+            return pht(
+              '%s changed the status of %s from "%s" to "%s" by committing %s.',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink($object_phid),
+              $old_name,
+              $new_name,
+              $this->renderHandleLink($commit_phid));
+          } else {
+            return pht(
+              '%s changed the status of %s from "%s" to "%s".',
+              $this->renderHandleLink($author_phid),
+              $this->renderHandleLink($object_phid),
+              $old_name,
+              $new_name);
+          }
         }
 
       case self::TYPE_UNBLOCK:

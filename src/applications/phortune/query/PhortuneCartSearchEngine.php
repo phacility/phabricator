@@ -102,7 +102,7 @@ final class PhortuneCartSearchEngine
     }
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array(
       'all' => pht('All Orders'),
     );

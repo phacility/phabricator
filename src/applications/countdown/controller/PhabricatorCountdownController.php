@@ -21,11 +21,11 @@ abstract class PhabricatorCountdownController extends PhabricatorController {
     return $nav;
   }
 
-  public function buildApplicationMenu() {
+  protected function buildApplicationMenu() {
     return $this->buildSideNavView($for_app = true)->getMenu();
   }
 
-  public function buildApplicationCrumbs() {
+  protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
     $crumbs->addAction(

@@ -6,7 +6,7 @@ final class DivinerAtomSearchEngine extends PhabricatorApplicationSearchEngine {
     return pht('Documentation Atoms');
   }
 
-  public function getApplicationClassName() {
+  protected function getApplicationClassName() {
     return 'PhabricatorDivinerApplication';
   }
 
@@ -73,7 +73,7 @@ final class DivinerAtomSearchEngine extends PhabricatorApplicationSearchEngine {
     return '/diviner/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     return array(
       'all' => pht('All'),
     );

@@ -7,7 +7,7 @@ final class PhabricatorFlagSearchEngine
     return pht('Flags');
   }
 
-  public function getApplicationClassName() {
+  protected function getApplicationClassName() {
     return 'PhabricatorFlagsApplication';
   }
 
@@ -71,7 +71,7 @@ final class PhabricatorFlagSearchEngine
     return '/flag/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array(
       'all' => pht('Flagged'),
     );

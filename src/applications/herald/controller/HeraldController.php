@@ -16,11 +16,11 @@ abstract class HeraldController extends PhabricatorController {
     return $response->setContent($page->render());
   }
 
-  public function buildApplicationMenu() {
+  protected function buildApplicationMenu() {
     return $this->buildSideNavView(true)->getMenu();
   }
 
-  public function buildApplicationCrumbs() {
+  protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
     $crumbs->addAction(

@@ -148,7 +148,7 @@ final class ReleephProductViewController extends ReleephProductController
     return $nav;
   }
 
-  public function buildApplicationCrumbs() {
+  protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
     $product = $this->getProduct();

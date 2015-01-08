@@ -7,7 +7,7 @@ final class PhabricatorSearchApplicationSearchEngine
     return pht('Fulltext Results');
   }
 
-  public function getApplicationClassName() {
+  protected function getApplicationClassName() {
     return 'PhabricatorSearchApplication';
   }
 
@@ -169,7 +169,7 @@ final class PhabricatorSearchApplicationSearchEngine
     return '/search/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     return array(
       'all' => pht('All Documents'),
       'open' => pht('Open Documents'),

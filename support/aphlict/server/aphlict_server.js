@@ -1,14 +1,9 @@
-/**
- * Notification server. Launch with:
- *
- *   sudo node aphlict_server.js --user=aphlict
- *
- * You can also specify `port`, `admin`, `host` and `log`.
- */
-
 var JX = require('./lib/javelin').JX;
+var http = require('http');
+var https = require('https');
+var util = require('util');
+var fs = require('fs');
 
-JX.require('lib/AphlictFlashPolicyServer', __dirname);
 JX.require('lib/AphlictListenerList', __dirname);
 JX.require('lib/AphlictLog', __dirname);
 
@@ -17,8 +12,10 @@ function parse_command_line_arguments(argv) {
     port: 22280,
     admin: 22281,
     host: '127.0.0.1',
-    user: null,
-    log: '/var/log/aphlict.log'
+    log: '/var/log/aphlict.log',
+    'ssl-key': null,
+    'ssl-certificate': null,
+    test: false
   };
 
   for (var ii = 2; ii < argv.length; ii++) {
@@ -42,124 +39,120 @@ function parse_command_line_arguments(argv) {
 var debug = new JX.AphlictLog()
   .addConsole(console);
 
-var clients = new JX.AphlictListenerList();
-
 var config = parse_command_line_arguments(process.argv);
 
+process.on('uncaughtException', function(err) {
+  debug.log('\n<<< UNCAUGHT EXCEPTION! >>>\n' + err.stack);
+  process.exit(1);
+});
+
+var WebSocket;
+try {
+  WebSocket = require('ws');
+} catch (ex) {
+  throw new Error(
+    'You need to install the Node.js "ws" module for websocket support. ' +
+    'Usually, you can do this with `npm install -g ws`. ' + ex.toString());
+}
+
+var ssl_config = {
+  enabled: (config['ssl-key'] || config['ssl-cert'])
+};
+
+// Load the SSL certificates (if any were provided) now, so that runs with
+// `--test` will see any errors.
+if (ssl_config.enabled) {
+  ssl_config.key = fs.readFileSync(config['ssl-key']);
+  ssl_config.cert = fs.readFileSync(config['ssl-cert']);
+}
+
+// Add the logfile so we'll fail if we can't write to it.
 if (config.logfile) {
   debug.addLogfile(config.logfile);
 }
 
-if (process.getuid() !== 0) {
-  console.log(
-    "ERROR: " +
-    "This server must be run as root because it needs to bind to privileged " +
-    "port 843 to start a Flash policy server. It will downgrade to run as a " +
-    "less-privileged user after binding if you pass a user in the command " +
-    "line arguments with '--user=alincoln'.");
-  process.exit(1);
+// If we're just doing a configuration test, exit here before starting any
+// servers.
+if (config.test) {
+  debug.log('Configuration test OK.');
+  process.exit(0);
 }
 
-var net = require('net');
-var http = require('http');
+var start_time = new Date().getTime();
+var messages_out = 0;
+var messages_in = 0;
 
-process.on('uncaughtException', function(err) {
-  debug.log('\n<<< UNCAUGHT EXCEPTION! >>>\n' + err.stack);
+var clients = new JX.AphlictListenerList();
 
-  process.exit(1);
-});
+function https_discard_handler(req, res) {
+  res.writeHead(501);
+  res.end('HTTP/501 Use Websockets\n');
+}
 
-new JX.AphlictFlashPolicyServer()
-  .setDebugLog(debug)
-  .setAccessPort(config.port)
-  .start();
+var ws;
+if (ssl_config.enabled) {
+  var https_server = https.createServer({
+    key: ssl_config.key,
+    cert: ssl_config.cert
+  }, https_discard_handler).listen(config.port);
 
+  ws = new WebSocket.Server({server: https_server});
+} else {
+  ws = new WebSocket.Server({port: config.port});
+}
 
-net.createServer(function(socket) {
-  var listener = clients.addListener(socket);
+ws.on('connection', function(ws) {
+  var listener = clients.addListener(ws);
 
-  debug.log('<%s> Connected from %s',
-    listener.getDescription(),
-    socket.remoteAddress);
+  function log() {
+    debug.log(
+      util.format('<%s>', listener.getDescription()) +
+      ' ' +
+      util.format.apply(null, arguments));
+  }
 
-  var buffer = new Buffer([]);
-  var length = 0;
+  log('Connected from %s.', ws._socket.remoteAddress);
 
-  socket.on('data', function(data) {
-    buffer = Buffer.concat([buffer, new Buffer(data)]);
+  ws.on('message', function(data) {
+    log('Received message: %s', data);
 
-    while (buffer.length) {
-      if (!length) {
-        length = buffer.readUInt16BE(0);
-        buffer = buffer.slice(2);
-      }
+    var message;
+    try {
+      message = JSON.parse(data);
+    } catch (err) {
+      log('Message is invalid: %s', err.message);
+      return;
+    }
 
-      if (buffer.length < length) {
-        // We need to wait for the rest of the data.
-        return;
-      }
+    switch (message.command) {
+      case 'subscribe':
+        log(
+          'Subscribed to: %s',
+          JSON.stringify(message.data));
+        listener.subscribe(message.data);
+        break;
 
-      var message;
-      try {
-        message = JSON.parse(buffer.toString('utf8', 0, length));
-      } catch (err) {
-        debug.log('<%s> Received invalid data.', listener.getDescription());
-        continue;
-      } finally {
-        buffer = buffer.slice(length);
-        length = 0;
-      }
+      case 'unsubscribe':
+        log(
+          'Unsubscribed from: %s',
+          JSON.stringify(message.data));
+        listener.unsubscribe(message.data);
+        break;
 
-      debug.log('<%s> Received data: %s',
-        listener.getDescription(),
-        JSON.stringify(message));
-
-      switch (message.command) {
-        case 'subscribe':
-          debug.log(
-            '<%s> Subscribed to: %s',
-            listener.getDescription(),
-            JSON.stringify(message.data));
-          listener.subscribe(message.data);
-          break;
-
-        case 'unsubscribe':
-          debug.log(
-            '<%s> Unsubscribed from: %s',
-            listener.getDescription(),
-            JSON.stringify(message.data));
-          listener.unsubscribe(message.data);
-          break;
-
-        default:
-          debug.log('<s> Unrecognized command.', listener.getDescription());
-      }
+      default:
+        log('Unrecognized command "%s".', message.command || '<undefined>');
     }
   });
 
-  socket.on('close', function() {
+  ws.on('close', function() {
     clients.removeListener(listener);
-    debug.log('<%s> Disconnected', listener.getDescription());
+    log('Disconnected.');
   });
 
-  socket.on('timeout', function() {
-    debug.log('<%s> Timed Out', listener.getDescription());
+  ws.on('error', function(err) {
+    log('Error: %s', err.message);
   });
-
-  socket.on('end', function() {
-    debug.log('<%s> Ended Connection', listener.getDescription());
-  });
-
-  socket.on('error', function(e) {
-    debug.log('<%s> Error: %s', listener.getDescription(), e);
-  });
-
-}).listen(config.port);
-
-
-var messages_out = 0;
-var messages_in = 0;
-var start_time = new Date().getTime();
+});
 
 function transmit(msg) {
   var listeners = clients.getListeners().filter(function(client) {
@@ -195,7 +188,7 @@ http.createServer(function(request, response) {
         try {
           var msg = JSON.parse(body);
 
-          debug.log('notification: ' + JSON.stringify(msg));
+          debug.log('Received notification: ' + JSON.stringify(msg));
           ++messages_in;
 
           try {
@@ -241,11 +234,5 @@ http.createServer(function(request, response) {
     response.end();
   }
 }).listen(config.admin, config.host);
-
-// If we're configured to drop permissions, get rid of them now that we've
-// bound to the ports we need and opened logfiles.
-if (config.user) {
-  process.setuid(config.user);
-}
 
 debug.log('Started Server (PID %d)', process.pid);

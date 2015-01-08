@@ -22,7 +22,7 @@ final class PhabricatorOAuthClientListController
     return $this->delegateToController($controller);
   }
 
-  public function buildApplicationCrumbs() {
+  protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
     $crumbs->addAction(

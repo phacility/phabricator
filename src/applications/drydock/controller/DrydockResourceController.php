@@ -16,7 +16,7 @@ abstract class DrydockResourceController
     return $nav;
   }
 
-  public function buildApplicationCrumbs() {
+  protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
     $crumbs->addTextCrumb(
       pht('Resources'),

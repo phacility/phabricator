@@ -541,13 +541,13 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
       case self::TYPE_ACTION:
         switch ($this->getNewValue()) {
           case DifferentialAction::ACTION_CLOSE:
-            return PhabricatorTransactions::COLOR_BLUE;
+            return PhabricatorTransactions::COLOR_INDIGO;
           case DifferentialAction::ACTION_ACCEPT:
             return PhabricatorTransactions::COLOR_GREEN;
           case DifferentialAction::ACTION_REJECT:
             return PhabricatorTransactions::COLOR_RED;
           case DifferentialAction::ACTION_ABANDON:
-            return PhabricatorTransactions::COLOR_BLACK;
+            return PhabricatorTransactions::COLOR_INDIGO;
           case DifferentialAction::ACTION_RETHINK:
             return PhabricatorTransactions::COLOR_RED;
           case DifferentialAction::ACTION_REQUEST:

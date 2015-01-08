@@ -27,7 +27,7 @@ final class PhortuneMerchantSearchEngine
     return '/phortune/merchant/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array(
       'all' => pht('All Merchants'),
     );

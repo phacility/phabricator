@@ -31,7 +31,7 @@ final class AlmanacNetworkSearchEngine
     return '/almanac/network/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array(
       'all' => pht('All Networks'),
     );

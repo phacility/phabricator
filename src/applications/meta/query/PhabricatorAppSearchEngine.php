@@ -7,7 +7,7 @@ final class PhabricatorAppSearchEngine
     return pht('Applications');
   }
 
-  public function getApplicationClassName() {
+  protected function getApplicationClassName() {
     return 'PhabricatorApplicationsApplication';
   }
 
@@ -136,7 +136,7 @@ final class PhabricatorAppSearchEngine
     return '/applications/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     return array(
       'launcher' => pht('Launcher'),
       'all' => pht('All Applications'),
@@ -228,7 +228,7 @@ final class PhabricatorAppSearchEngine
               ->setIcon('fa-cog')
               ->setHref('/applications/view/'.get_class($application).'/'));
 
-        if ($application->getBaseURI()) {
+        if ($application->getBaseURI() && $application->isInstalled()) {
           $item->setHref($application->getBaseURI());
         }
 

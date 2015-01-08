@@ -67,6 +67,7 @@ final class DiffusionCommitEditController extends DiffusionController {
         ->setDatasource(new PhabricatorProjectDatasource()));
 
     $reason = $data->getCommitDetail('autocloseReason', false);
+    $reason = PhabricatorRepository::BECAUSE_AUTOCLOSE_FORCED;
     if ($reason !== false) {
       switch ($reason) {
         case PhabricatorRepository::BECAUSE_REPOSITORY_IMPORTING:
@@ -77,6 +78,9 @@ final class DiffusionCommitEditController extends DiffusionController {
           break;
         case PhabricatorRepository::BECAUSE_NOT_ON_AUTOCLOSE_BRANCH:
           $desc = pht('No, Not On Autoclose Branch');
+          break;
+        case PhabricatorRepository::BECAUSE_AUTOCLOSE_FORCED:
+          $desc = pht('Yes, Forced Via bin/repository CLI Tool.');
           break;
         case null:
           $desc = pht('Yes');

@@ -31,7 +31,7 @@ final class AlmanacServiceSearchEngine
     return '/almanac/service/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array(
       'all' => pht('All Services'),
     );

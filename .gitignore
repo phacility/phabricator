@@ -30,3 +30,6 @@
 
 # User extensions
 /src/extensions/*
+
+# NPM local packages
+/support/aphlict/server/node_modules/

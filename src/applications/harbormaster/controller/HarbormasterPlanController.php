@@ -2,7 +2,7 @@
 
 abstract class HarbormasterPlanController extends HarbormasterController {
 
-  public function buildApplicationCrumbs() {
+  protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
     $crumbs->addTextCrumb(

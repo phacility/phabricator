@@ -41,6 +41,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   const BECAUSE_NOT_ON_AUTOCLOSE_BRANCH = 'auto/nobranch';
   const BECAUSE_BRANCH_UNTRACKED = 'auto/notrack';
   const BECAUSE_BRANCH_NOT_AUTOCLOSE = 'auto/noclose';
+  const BECAUSE_AUTOCLOSE_FORCED = 'auto/forced';
 
   protected $name;
   protected $callsign;

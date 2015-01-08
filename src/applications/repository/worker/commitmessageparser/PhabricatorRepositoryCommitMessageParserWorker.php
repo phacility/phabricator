@@ -18,7 +18,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     }
     $data->setCommitID($commit->getID());
     $data->setAuthorName(id(new PhutilUTF8StringTruncator())
-      ->setMaximumCodepoints(255)
+      ->setMaximumBytes(255)
       ->truncateString((string)$author));
 
     $data->setCommitDetail('authorName', $ref->getAuthorName());
@@ -84,9 +84,15 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
     // aren't. Autoclose can be disabled for various reasons at the repository
     // or commit levels.
 
-    $autoclose_reason = $repository->shouldSkipAutocloseCommit($commit);
+    $force_autoclose = idx($this->getTaskData(), 'forceAutoclose', false);
+    if ($force_autoclose) {
+      $autoclose_reason = $repository::BECAUSE_AUTOCLOSE_FORCED;
+    } else {
+      $autoclose_reason = $repository->shouldSkipAutocloseCommit($commit);
+    }
     $data->setCommitDetail('autocloseReason', $autoclose_reason);
-    $should_autoclose = $repository->shouldAutocloseCommit($commit);
+    $should_autoclose = $force_autoclose ||
+                        $repository->shouldAutocloseCommit($commit);
 
 
     // When updating related objects, we'll act under an omnipotent user to
@@ -101,35 +107,6 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       id(new PhabricatorDiffusionApplication())->getPHID());
 
     $conn_w = id(new DifferentialRevision())->establishConnection('w');
-
-    $reverts_refs = id(new DifferentialCustomFieldRevertsParser())
-      ->parseCorpus($message);
-    $reverts = array_mergev(ipull($reverts_refs, 'monograms'));
-
-    if ($reverts) {
-      $reverted_commits = id(new DiffusionCommitQuery())
-        ->setViewer($actor)
-        ->withIdentifiers($reverts)
-        ->execute();
-      $reverted_commit_phids = mpull($reverted_commits, 'getPHID', 'getPHID');
-
-      // NOTE: Skip any write attempts if a user cleverly implies a commit
-      // reverts itself.
-      unset($reverted_commit_phids[$commit->getPHID()]);
-
-      $editor = new PhabricatorEdgeEditor();
-      foreach ($reverted_commit_phids as $commit_phid) {
-        try {
-          $editor->addEdge(
-            $commit->getPHID(),
-            DiffusionCommitRevertsCommitEdgeType::EDGECONST,
-            $commit_phid);
-        } catch (PhabricatorEdgeCycleException $ex) {
-          continue;
-        }
-      }
-      $editor->save();
-    }
 
     // NOTE: The `differential_commit` table has a unique ID on `commitPHID`,
     // preventing more than one revision from being associated with a commit.
@@ -495,7 +472,7 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
       $xactions = array();
 
       $edge_type = ManiphestTaskHasCommitEdgeType::EDGECONST;
-      $xactions[] = id(new ManiphestTransaction())
+      $edge_xaction = id(new ManiphestTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
         ->setMetadataValue('edge:type', $edge_type)
         ->setNewValue(
@@ -510,22 +487,14 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
         if ($task->getStatus() != $status) {
           $xactions[] = id(new ManiphestTransaction())
             ->setTransactionType(ManiphestTransaction::TYPE_STATUS)
+            ->setMetadataValue('commitPHID', $commit->getPHID())
             ->setNewValue($status);
 
-          $commit_name = $repository->formatCommitName(
-            $commit->getCommitIdentifier());
-
-          $status_message = pht(
-            'Closed by commit %s.',
-            $commit_name);
-
-          $xactions[] = id(new ManiphestTransaction())
-            ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
-            ->attachComment(
-              id(new ManiphestTransactionComment())
-                ->setContent($status_message));
+          $edge_xaction->setMetadataValue('commitPHID', $commit->getPHID());
         }
       }
+
+      $xactions[] = $edge_xaction;
 
       $content_source = PhabricatorContentSource::newForSource(
         PhabricatorContentSource::SOURCE_DAEMON,
