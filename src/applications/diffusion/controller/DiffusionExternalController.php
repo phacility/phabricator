@@ -2,16 +2,15 @@
 
 final class DiffusionExternalController extends DiffusionController {
 
-  public function willProcessRequest(array $data) {
-    // Don't build a DiffusionRequest.
-  }
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
+  protected function shouldLoadDiffusionRequest() {
+    return false;
+  }
+
+  protected function processDiffusionRequest(AphrontRequest $request) {
 
     $uri = $request->getStr('uri');
     $id  = $request->getStr('id');

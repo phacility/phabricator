@@ -2,13 +2,7 @@
 
 final class DiffusionCommitEditController extends DiffusionController {
 
-  public function willProcessRequest(array $data) {
-    $data['user'] = $this->getRequest()->getUser();
-    $this->diffusionRequest = DiffusionRequest::newFromDictionary($data);
-  }
-
-  public function processRequest() {
-    $request    = $this->getRequest();
+  protected function processDiffusionRequest(AphrontRequest $request) {
     $user       = $request->getUser();
     $drequest   = $this->getDiffusionRequest();
     $callsign   = $drequest->getRepository()->getCallsign();

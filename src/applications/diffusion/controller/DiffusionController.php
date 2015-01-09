@@ -31,14 +31,27 @@ abstract class DiffusionController extends PhabricatorController {
     return parent::willBeginExecution();
   }
 
-  public function willProcessRequest(array $data) {
-    if (isset($data['callsign'])) {
+  protected function shouldLoadDiffusionRequest() {
+    return true;
+  }
+
+  final public function handleRequest(AphrontRequest $request) {
+    if ($request->getURIData('callsign') &&
+        $this->shouldLoadDiffusionRequest()) {
+      try {
       $drequest = DiffusionRequest::newFromAphrontRequestDictionary(
-        $data,
-        $this->getRequest());
+        $request->getURIMap(),
+        $request);
+      } catch (Exception $ex) {
+        return id(new Aphront404Response())
+          ->setRequest($request);
+      }
       $this->setDiffusionRequest($drequest);
     }
+    return $this->processDiffusionRequest($request);
   }
+
+  abstract protected function processDiffusionRequest(AphrontRequest $request);
 
   public function buildCrumbs(array $spec = array()) {
     $crumbs = $this->buildApplicationCrumbs();

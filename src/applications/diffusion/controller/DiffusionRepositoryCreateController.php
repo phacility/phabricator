@@ -6,14 +6,9 @@ final class DiffusionRepositoryCreateController
   private $edit;
   private $repository;
 
-  public function willProcessRequest(array $data) {
-    parent::willProcessRequest($data);
-    $this->edit = $data['edit'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
+  protected function processDiffusionRequest(AphrontRequest $request) {
     $viewer = $request->getUser();
+    $this->edit = $request->getURIData('edit');
 
     // NOTE: We can end up here via either "Create Repository", or via
     // "Import Repository", or via "Edit Remote", or via "Edit Policies". In

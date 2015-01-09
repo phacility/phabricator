@@ -2,8 +2,7 @@
 
 final class DiffusionRepositoryNewController extends DiffusionController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
+  protected function processDiffusionRequest(AphrontRequest $request) {
     $viewer = $request->getUser();
 
     $this->requireApplicationCapability(

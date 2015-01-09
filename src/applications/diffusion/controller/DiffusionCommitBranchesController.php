@@ -6,20 +6,15 @@ final class DiffusionCommitBranchesController extends DiffusionController {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $data['user'] = $this->getRequest()->getUser();
-    $this->diffusionRequest = DiffusionRequest::newFromDictionary($data);
-  }
-
-  public function processRequest() {
-    $request = $this->getDiffusionRequest();
+  protected function processDiffusionRequest(AphrontRequest $request) {
+    $drequest = $this->getDiffusionRequest();
 
     $branches = array();
     try {
       $branches = $this->callConduitWithDiffusionRequest(
         'diffusion.branchquery',
         array(
-          'contains' => $request->getCommit(),
+          'contains' => $drequest->getCommit(),
         ));
     } catch (ConduitException $ex) {
       if ($ex->getMessage() != 'ERR-UNSUPPORTED-VCS') {
@@ -34,7 +29,7 @@ final class DiffusionCommitBranchesController extends DiffusionController {
       $branch_links[] = phutil_tag(
         'a',
         array(
-          'href' => $request->generateURI(
+          'href' => $drequest->generateURI(
             array(
               'action'  => 'browse',
               'branch'  => $branch->getShortName(),

@@ -14,7 +14,7 @@ final class DiffusionBrowseDirectoryController
     return $this->browseQueryResults;
   }
 
-  public function processRequest() {
+  protected function processDiffusionRequest(AphrontRequest $request) {
     $drequest = $this->diffusionRequest;
 
     $results = $this->getBrowseQueryResults();
@@ -35,7 +35,7 @@ final class DiffusionBrowseDirectoryController
       $empty_result = new DiffusionEmptyResultView();
       $empty_result->setDiffusionRequest($drequest);
       $empty_result->setDiffusionBrowseResultSet($results);
-      $empty_result->setView($this->getRequest()->getStr('view'));
+      $empty_result->setView($request->getStr('view'));
       $content[] = $empty_result;
     } else {
       $phids = array();
@@ -55,7 +55,7 @@ final class DiffusionBrowseDirectoryController
       $browse_table->setDiffusionRequest($drequest);
       $browse_table->setHandles($handles);
       $browse_table->setPaths($results->getPaths());
-      $browse_table->setUser($this->getRequest()->getUser());
+      $browse_table->setUser($request->getUser());
 
       $browse_panel = new AphrontPanelView();
       $browse_panel->appendChild($browse_table);

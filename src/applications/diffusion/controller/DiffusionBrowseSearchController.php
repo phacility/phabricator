@@ -2,7 +2,7 @@
 
 final class DiffusionBrowseSearchController extends DiffusionBrowseController {
 
-  public function processRequest() {
+  protected function processDiffusionRequest(AphrontRequest $request) {
     $drequest = $this->diffusionRequest;
 
     $actions = $this->buildActionView($drequest);

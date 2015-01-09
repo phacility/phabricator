@@ -55,8 +55,7 @@ final class DiffusionServeController extends DiffusionController {
     return $matches['callsign'];
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
+  protected function processDiffusionRequest(AphrontRequest $request) {
     $callsign = self::getCallsign($request);
 
     // If authentication credentials have been provided, try to find a user
