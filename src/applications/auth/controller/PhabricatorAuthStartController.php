@@ -77,17 +77,23 @@ final class PhabricatorAuthStartController
     }
 
     $next_uri = $request->getStr('next');
-    if (!$next_uri) {
-      $next_uri_path = $this->getRequest()->getPath();
-      if ($next_uri_path == '/auth/start/') {
-        $next_uri = '/';
-      } else {
-        $next_uri = $this->getRequest()->getRequestURI();
+    if (!strlen($next_uri)) {
+      if ($this->getDelegatingController()) {
+        // Only set a next URI from the request path if this controller was
+        // delegated to, which happens when a user tries to view a page which
+        // requires them to login.
+
+        // If this controller handled the request directly, we're on the main
+        // login page, and never want to redirect the user back here after they
+        // login.
+        $next_uri = (string)$this->getRequest()->getRequestURI();
       }
     }
 
     if (!$request->isFormPost()) {
-      PhabricatorCookies::setNextURICookie($request, $next_uri);
+      if (strlen($next_uri)) {
+        PhabricatorCookies::setNextURICookie($request, $next_uri);
+      }
       PhabricatorCookies::setClientIDCookie($request);
     }
 
