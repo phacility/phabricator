@@ -85,4 +85,8 @@ final class PhabricatorApplicationTransactionCommentRawController
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
 }
