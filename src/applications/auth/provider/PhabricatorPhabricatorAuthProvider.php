@@ -13,7 +13,7 @@ final class PhabricatorPhabricatorAuthProvider
   public function getConfigurationHelp() {
     if ($this->isCreate()) {
       return pht(
-        '**Step 1 of 2** - Name Phabricator OAuth Instance'.
+        "**Step 1 of 2 - Name Phabricator OAuth Instance**\n\n".
         'Choose a permanent name for the OAuth server instance of '.
         'Phabricator. //This// instance of Phabricator uses this name '.
         'internally to keep track of the OAuth server instance of '.
@@ -29,7 +29,7 @@ final class PhabricatorPhabricatorAuthProvider
     $login_uri = PhabricatorEnv::getURI($this->getLoginURI());
 
     return pht(
-      "**Step 2 of 2 - Configure Phabricator OAuth Instance**".
+      "**Step 2 of 2 - Configure Phabricator OAuth Instance**\n\n".
       "To configure Phabricator OAuth, create a new application here:".
       "\n\n".
       "%s/oauthserver/client/create/".
