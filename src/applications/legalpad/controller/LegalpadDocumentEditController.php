@@ -189,7 +189,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
       $title = pht('Create Document');
       $short = pht('Create');
     } else {
-      $submit->setValue(pht('Edit Document'));
+      $submit->setValue(pht('Save Document'));
       $submit->addCancelButton(
           $this->getApplicationURI('view/'.$document->getID()));
       $title = pht('Edit Document');

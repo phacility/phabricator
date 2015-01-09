@@ -3,6 +3,26 @@
 abstract class PhabricatorAphlictManagementWorkflow
   extends PhabricatorManagementWorkflow {
 
+  private $debug = false;
+  private $clientHost;
+
+  public function didConstruct() {
+    $this
+      ->setArguments(
+        array(
+          array(
+            'name'  => 'client-host',
+            'param' => 'hostname',
+            'help'  => pht('Hostname to bind to for the client server.'),
+          ),
+        ));
+  }
+
+  public function execute(PhutilArgumentParser $args) {
+    $this->clientHost = $args->getArg('client-host');
+    return 0;
+  }
+
   final public function getPIDPath() {
     return PhabricatorEnv::getEnvConfig('notification.pidfile');
   }
@@ -25,6 +45,10 @@ abstract class PhabricatorAphlictManagementWorkflow
     Filesystem::remove($this->getPIDPath());
 
     exit(1);
+  }
+
+  protected final function setDebug($debug) {
+    $this->debug = $debug;
   }
 
   public static function requireExtensions() {
@@ -50,7 +74,7 @@ abstract class PhabricatorAphlictManagementWorkflow
     }
   }
 
-  final protected function willLaunch($debug = false) {
+  final protected function willLaunch() {
     $console = PhutilConsole::getConsole();
 
     $pid = $this->getPID();
@@ -70,14 +94,14 @@ abstract class PhabricatorAphlictManagementWorkflow
     }
 
     // Make sure we can write to the PID file.
-    if (!$debug) {
+    if (!$this->debug) {
       Filesystem::writeFile($this->getPIDPath(), '');
     }
 
     // First, start the server in configuration test mode with --test. This
     // will let us error explicitly if there are missing modules, before we
     // fork and lose access to the console.
-    $test_argv = $this->getServerArgv($debug);
+    $test_argv = $this->getServerArgv();
     $test_argv[] = '--test=true';
 
     execx(
@@ -87,7 +111,7 @@ abstract class PhabricatorAphlictManagementWorkflow
       $test_argv);
   }
 
-  private function getServerArgv($debug) {
+  private function getServerArgv() {
     $ssl_key = PhabricatorEnv::getEnvConfig('notification.ssl-key');
     $ssl_cert = PhabricatorEnv::getEnvConfig('notification.ssl-cert');
 
@@ -100,8 +124,9 @@ abstract class PhabricatorAphlictManagementWorkflow
     $log = PhabricatorEnv::getEnvConfig('notification.log');
 
     $server_argv = array();
-    $server_argv[] = '--port='.$client_uri->getPort();
-    $server_argv[] = '--admin='.$server_uri->getPort();
+    $server_argv[] = '--client-port='.$client_uri->getPort();
+    $server_argv[] = '--admin-port='.$server_uri->getPort();
+    $server_argv[] = '--admin-host='.$server_uri->getDomain();
 
     if ($ssl_key) {
       $server_argv[] = '--ssl-key='.$ssl_key;
@@ -111,8 +136,12 @@ abstract class PhabricatorAphlictManagementWorkflow
       $server_argv[] = '--ssl-cert='.$ssl_cert;
     }
 
-    if (!$debug) {
+    if (!$this->debug) {
       $server_argv[] = '--log='.$log;
+    }
+
+    if ($this->clientHost) {
+      $server_argv[] = '--client-host='.$this->clientHost;
     }
 
     return $server_argv;
@@ -123,10 +152,10 @@ abstract class PhabricatorAphlictManagementWorkflow
     return $root.'/support/aphlict/server/aphlict_server.js';
   }
 
-  final protected function launch($debug = false) {
+  final protected function launch() {
     $console = PhutilConsole::getConsole();
 
-    if ($debug) {
+    if ($this->debug) {
       $console->writeOut(pht("Starting Aphlict server in foreground...\n"));
     } else {
       Filesystem::writeFile($this->getPIDPath(), getmypid());
@@ -136,16 +165,16 @@ abstract class PhabricatorAphlictManagementWorkflow
       '%s %s %Ls',
       $this->getNodeBinary(),
       $this->getAphlictScriptPath(),
-      $this->getServerArgv($debug));
+      $this->getServerArgv());
 
-    if (!$debug) {
+    if (!$this->debug) {
       declare(ticks = 1);
       pcntl_signal(SIGINT, array($this, 'cleanup'));
       pcntl_signal(SIGTERM, array($this, 'cleanup'));
     }
     register_shutdown_function(array($this, 'cleanup'));
 
-    if ($debug) {
+    if ($this->debug) {
       $console->writeOut("Launching server:\n\n    $ ".$command."\n\n");
 
       $err = phutil_passthru('%C', $command);

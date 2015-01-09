@@ -333,7 +333,6 @@ final class AphrontRequest {
   }
 
   final public function clearCookie($name) {
-    $name = $this->getPrefixedCookieName($name);
     $this->setCookieWithExpiration($name, '', time() - (60 * 60 * 24 * 30));
     unset($_COOKIE[$name]);
   }

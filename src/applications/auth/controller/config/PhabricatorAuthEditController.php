@@ -159,7 +159,11 @@ final class PhabricatorAuthEditController
     }
 
     if ($is_new) {
-      $button = pht('Add Provider');
+      if ($provider->hasSetupStep()) {
+        $button = pht('Next Step');
+      } else {
+        $button = pht('Add Provider');
+      }
       $crumb = pht('Add Provider');
       $title = pht('Add Authentication Provider');
       $cancel_uri = $this->getApplicationURI('/config/new/');

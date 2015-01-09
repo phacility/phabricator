@@ -41,16 +41,10 @@ The notification server uses Node.js, so you'll need to install it first.
 To install Node.js, follow the instructions on
 [[ http://nodejs.org | nodejs.org ]].
 
-You will also need to install the `ws` module for Node. After installing
-Node, run `npm install -g ws` to install it.
+You will also need to install the `ws` module for Node. This needs to be
+installed into the notification server directory:
 
-  name="(Option 1, Recommended) Install 'ws' Module Globally"
-  $ npm install -g ws # Global Install
-
-If you prefer, you can also install it locally in the `support/aphlict/server/`
-directory:
-
-  name="(Option 2) Install 'ws' Module Locally"
+  phabricator/ $ cd support/aphlict/server/
   phabricator/support/aphlict/server/ $ npm install ws
 
 Once Node.js and the `ws` module are installed, you're ready to start the
@@ -114,3 +108,63 @@ may also have information that is useful in figuring out what's wrong.
 The server also generates a log, by default in `/var/log/aphlict.log`. You can
 change this location by changing `notification.log` in your configuration. The
 log may contain information useful in resolving issues.
+
+
+Advanced Usage
+==============
+
+It is possible to route the WebSockets traffic for Aphlict through a reverse
+proxy such as `nginx` (see @{article:Configuration Guide} for instructions on
+configuring `nginx`). In order to do this with `nginx`, you will require at
+least version 1.3. You can read some more information about using `nginx` with
+WebSockets at http://nginx.com/blog/websocket-nginx/.
+
+There are a few benefits of this approach:
+
+  - SSL is terminated at the `nginx` layer and consequently there is no need to
+    configure `notificaton.ssl-cert` and `notification.ssl-key` (in fact, with
+    this approach you should //not// configure these options because otherwise
+    the Aphlict server will not accept HTTP traffic).
+  - You don't have to open up a separate port on the server.
+  - Clients don't need to be able to connect to Aphlict over a non-standard
+    port which may be blocked by a firewall or anti-virus software.
+
+The following files show an example `nginx` configuration. Note that this is an
+example only and you may need to adjust this to suit your own setup.
+
+```lang=nginx, name=/etc/nginx/conf.d/connection_upgrade.conf
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    '' close;
+}
+```
+
+```lang=nginx, name=/etc/nginx/conf.d/websocket_pool.conf
+upstream websocket_pool {
+    ip_hash;
+    server 127.0.0.1:22280;
+}
+```
+
+```lang=nginx, name=/etc/nginx/sites-enabled/phabricator.example.com.conf
+server {
+  server_name phabricator.example.com;
+  root        /path/to/phabricator/webroot;
+
+  // ...
+
+  location = /ws/ {
+    proxy_pass http://websocket_pool;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_read_timeout 999999999;
+  }
+}
+```
+
+With this approach, you should set `notification.client-uri` to
+`http://localhost/ws/`. Additionally, there is no need for the Aphlict server
+to bind to `0.0.0.0` anymore (which is the default behavior), so you could
+start the Aphlict server with `./bin/aphlict start --client-host=localhost`
+instead.
