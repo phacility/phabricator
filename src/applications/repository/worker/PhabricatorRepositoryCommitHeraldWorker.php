@@ -44,6 +44,8 @@ final class PhabricatorRepositoryCommitHeraldWorker
     $editor = id(new PhabricatorAuditEditor())
       ->setActor(PhabricatorUser::getOmnipotentUser())
       ->setActingAsPHID($acting_as_phid)
+      ->setContinueOnMissingFields(true)
+      ->setContinueOnNoEffect(true)
       ->setContentSource($content_source);
 
     $xactions = array();
