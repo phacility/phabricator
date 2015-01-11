@@ -10,7 +10,7 @@ abstract class DifferentialLandingStrategy {
   /**
    * @return PhabricatorActionView or null.
    */
-  abstract function createMenuItem(
+  public abstract function createMenuItem(
     PhabricatorUser $viewer,
     DifferentialRevision $revision,
     PhabricatorRepository $repository);

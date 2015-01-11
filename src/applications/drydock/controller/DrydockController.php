@@ -2,7 +2,7 @@
 
 abstract class DrydockController extends PhabricatorController {
 
-  abstract function buildSideNavView();
+  public abstract function buildSideNavView();
 
   protected function buildApplicationMenu() {
     return $this->buildSideNavView()->getMenu();
