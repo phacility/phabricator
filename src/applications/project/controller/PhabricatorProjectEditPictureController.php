@@ -236,6 +236,38 @@ final class PhabricatorProjectEditPictureController
         ->setLabel(pht('Quick Create'))
         ->setValue($compose_form));
 
+    $default_button = javelin_tag(
+      'button',
+      array(
+        'class' => 'grey',
+      ),
+      pht('Use Project Icon'));
+
+    $default_input = javelin_tag(
+      'input',
+      array(
+        'type' => 'hidden',
+        'name' => 'projectPHID',
+        'value' => $project->getPHID(),
+      ));
+
+    $default_form = phabricator_form(
+      $viewer,
+      array(
+        'class' => 'profile-image-form',
+        'method' => 'POST',
+        'action' => '/file/compose/',
+       ),
+      array(
+        $default_input,
+        $default_button,
+      ));
+
+    $form->appendChild(
+      id(new AphrontFormMarkupControl())
+        ->setLabel(pht('Use Default'))
+        ->setValue($default_form));
+
     $upload_form = id(new AphrontFormView())
       ->setUser($viewer)
       ->setEncType('multipart/form-data')
