@@ -2,6 +2,10 @@
 
 final class DiffusionServeController extends DiffusionController {
 
+  protected function shouldLoadDiffusionRequest() {
+    return false;
+  }
+
   public static function isVCSRequest(AphrontRequest $request) {
     if (!self::getCallsign($request)) {
       return null;
