@@ -3,17 +3,12 @@
 final class PhabricatorAuthDisableController
   extends PhabricatorAuthProviderConfigController {
 
-  private $configID;
-  private $action;
-
-  public function willProcessRequest(array $data) {
-    $this->configID = idx($data, 'id');
-    $this->action = idx($data, 'action');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
+    $this->requireApplicationCapability(
+      AuthManageProvidersCapability::CAPABILITY);
     $viewer = $request->getUser();
+    $config_id = $request->getURIData('id');
+    $action = $request->getURIData('action');
 
     $config = id(new PhabricatorAuthProviderConfigQuery())
       ->setViewer($viewer)
@@ -22,13 +17,13 @@ final class PhabricatorAuthDisableController
           PhabricatorPolicyCapability::CAN_VIEW,
           PhabricatorPolicyCapability::CAN_EDIT,
         ))
-      ->withIDs(array($this->configID))
+      ->withIDs(array($config_id))
       ->executeOne();
     if (!$config) {
       return new Aphront404Response();
     }
 
-    $is_enable = ($this->action === 'enable');
+    $is_enable = ($action === 'enable');
 
     if ($request->isDialogFormPost()) {
       $xactions = array();
