@@ -25,7 +25,7 @@ final class PhabricatorProjectWatchController
       return new Aphront404Response();
     }
 
-    $project_uri = '/project/view/'.$project->getID().'/';
+    $project_uri = $this->getApplicationURI('profile/'.$project->getID().'/');
 
     // You must be a member of a project to
     if (!$project->isUserMember($viewer->getPHID())) {

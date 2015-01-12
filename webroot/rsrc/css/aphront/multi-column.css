@@ -159,25 +159,25 @@
     display: block;
     width: auto;
   }
-  .device-desktop .aphront-multi-column-column-outer {
+  .device-desktop .dashboard-view .aphront-multi-column-column-outer {
     display: block;
     border: none;
   }
-  .device-desktop .aphront-multi-column-column.mlr {
+  .device-desktop .dashboard-view .aphront-multi-column-column.mlr {
     margin: 0;
   }
-  .device-desktop .aphront-multi-column-fluid .aphront-multi-column-2-up
-    .aphront-multi-column-column-outer.half {
+  .device-desktop .dashboard-view .aphront-multi-column-fluid
+    .aphront-multi-column-2-up .aphront-multi-column-column-outer.half {
      width: auto;
      margin: 0 0 16px;
   }
-  .device-desktop .aphront-multi-column-fluid .aphront-multi-column-2-up
-   .aphront-multi-column-column-outer.thirds {
+  .device-desktop .dashboard-view .aphront-multi-column-fluid
+    .aphront-multi-column-2-up .aphront-multi-column-column-outer.thirds {
      width: auto;
      margin: 0 0 16px;
   }
-  .device-desktop .aphront-multi-column-fluid .aphront-multi-column-2-up
-    .aphront-multi-column-column-outer.third {
+  .device-desktop .dashboard-view .aphront-multi-column-fluid
+    .aphront-multi-column-2-up .aphront-multi-column-column-outer.third {
     width: auto;
     margin: 0 0 16px;
   }

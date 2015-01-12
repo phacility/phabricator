@@ -22,6 +22,7 @@ final class PhabricatorProjectColumnDetailController
           PhabricatorPolicyCapability::CAN_VIEW,
         ))
       ->withIDs(array($this->projectID))
+      ->needImages(true)
       ->executeOne();
 
     if (!$project) {
@@ -47,11 +48,6 @@ final class PhabricatorProjectColumnDetailController
     $timeline->setShouldTerminate(true);
 
     $title = pht('%s', $column->getDisplayName());
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(
-      pht('Board'),
-      $this->getApplicationURI('board/'.$project->getID().'/'));
-    $crumbs->addTextCrumb($title);
 
     $header = $this->buildHeaderView($column);
     $actions = $this->buildActionView($column);
@@ -61,11 +57,13 @@ final class PhabricatorProjectColumnDetailController
       ->setHeader($header)
       ->addPropertyList($properties);
 
+    $nav = $this->buildIconNavView($project);
+    $nav->appendChild($box);
+    $nav->appendChild($timeline);
+
     return $this->buildApplicationPage(
       array(
-        $crumbs,
-        $box,
-        $timeline,
+        $nav,
       ),
       array(
         'title' => $title,

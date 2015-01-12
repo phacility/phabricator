@@ -18,6 +18,7 @@ final class PhabricatorProjectEditMainController
   public function processRequest() {
     $request = $this->getRequest();
     $viewer = $request->getUser();
+    $id = $request->getURIData('id');
 
     $project = id(new PhabricatorProjectQuery())
       ->setViewer($viewer)
@@ -43,12 +44,6 @@ final class PhabricatorProjectEditMainController
     $actions = $this->buildActionListView($project);
     $properties = $this->buildPropertyListView($project, $actions);
 
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(
-      $project->getName(),
-      $this->getApplicationURI('view/'.$project->getID().'/'));
-    $crumbs->addTextCrumb(pht('Edit'));
-
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->addPropertyList($properties);
@@ -58,11 +53,16 @@ final class PhabricatorProjectEditMainController
       new PhabricatorProjectTransactionQuery());
     $timeline->setShouldTerminate(true);
 
+    $nav = $this->buildIconNavView($project);
+    $nav->selectFilter("edit/{$id}/");
+    $nav->appendChild($object_box);
+    $nav->appendChild($timeline);
+
+    $mnav = $this->buildSideNavView();
+
     return $this->buildApplicationPage(
       array(
-        $crumbs,
-        $object_box,
-        $timeline,
+        $nav,
       ),
       array(
         'title' => $project->getName(),
