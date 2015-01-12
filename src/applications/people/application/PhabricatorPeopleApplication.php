@@ -78,6 +78,9 @@ final class PhabricatorPeopleApplication extends PhabricatorApplication {
 
   protected function getCustomCapabilities() {
     return array(
+      PeopleCreateUsersCapability::CAPABILITY => array(
+        'default' => PhabricatorPolicies::POLICY_ADMIN,
+      ),
       PeopleBrowseUserDirectoryCapability::CAPABILITY => array(),
     );
   }
