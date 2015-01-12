@@ -5,16 +5,11 @@ final class DiffusionRepositoryEditHostingController
 
   private $serve;
 
-  public function willProcessRequest(array $data) {
-    parent::willProcessRequest($data);
-    $this->serve = idx($data, 'serve');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
+  protected function processDiffusionRequest(AphrontRequest $request) {
     $user = $request->getUser();
     $drequest = $this->diffusionRequest;
     $repository = $drequest->getRepository();
+    $this->serve = $request->getURIData('serve');
 
     $repository = id(new PhabricatorRepositoryQuery())
       ->setViewer($user)

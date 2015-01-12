@@ -14,12 +14,14 @@ final class PhabricatorProjectEditDetailsController
     $viewer = $request->getUser();
 
     if ($this->id) {
-      $is_new = false;
+     $id = $request->getURIData('id');
+     $is_new = false;
 
       $project = id(new PhabricatorProjectQuery())
         ->setViewer($viewer)
         ->withIDs(array($this->id))
         ->needSlugs(true)
+        ->needImages(true)
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
@@ -149,7 +151,7 @@ final class PhabricatorProjectEditDetailsController
 
         if ($is_new) {
           $redirect_uri =
-            $this->getApplicationURI('view/'.$project->getID().'/');
+            $this->getApplicationURI('profile/'.$project->getID().'/');
         } else {
           $redirect_uri =
             $this->getApplicationURI('edit/'.$project->getID().'/');
@@ -300,22 +302,17 @@ final class PhabricatorProjectEditDetailsController
       ->setValidationException($validation_exception)
       ->setForm($form);
 
-    $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
-    if ($is_new) {
-      $crumbs->addTextCrumb($title);
+    if (!$is_new) {
+      $nav = $this->buildIconNavView($project);
+      $nav->selectFilter("edit/{$id}/");
+      $nav->appendChild($form_box);
     } else {
-      $crumbs
-        ->addTextCrumb($project->getName(),
-          $this->getApplicationURI('view/'.$project->getID().'/'))
-        ->addTextCrumb(pht('Edit'),
-          $this->getApplicationURI('edit/'.$project->getID().'/'))
-        ->addTextCrumb(pht('Details'));
+      $nav = array($form_box);
     }
 
     return $this->buildApplicationPage(
       array(
-        $crumbs,
-        $form_box,
+        $nav,
       ),
       array(
         'title' => $title,

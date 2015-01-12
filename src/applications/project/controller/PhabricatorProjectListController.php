@@ -22,7 +22,7 @@ final class PhabricatorProjectListController
     return $this->delegateToController($controller);
   }
 
-  protected function buildApplicationMenu() {
+  public function buildApplicationMenu() {
     return $this->buildSideNavView(true)->getMenu();
   }
 

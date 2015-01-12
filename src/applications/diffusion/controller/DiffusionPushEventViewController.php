@@ -3,23 +3,16 @@
 final class DiffusionPushEventViewController
   extends DiffusionPushLogController {
 
-  private $id;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
+  protected function processDiffusionRequest(AphrontRequest $request) {
     $viewer = $request->getUser();
 
     $event = id(new PhabricatorRepositoryPushEventQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($request->getURIData('id')))
       ->needLogs(true)
       ->executeOne();
     if (!$event) {

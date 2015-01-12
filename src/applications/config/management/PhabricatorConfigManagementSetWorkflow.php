@@ -111,12 +111,9 @@ final class PhabricatorConfigManagementSetWorkflow
 
     if ($use_database) {
       $config_type = 'database';
-      PhabricatorConfigEditor::storeNewValue(
-        $this->getViewer(),
-        id(new PhabricatorConfigEntry())
-          ->loadOneWhere('namespace = %s AND key = %s', 'default', $key),
-        $value,
-        PhabricatorContentSource::newConsoleSource());
+      $config_entry = PhabricatorConfigEntry::loadConfigEntry($key);
+      $config_entry->setValue($value);
+      $config_entry->save();
     } else {
       $config_type = 'local';
       id(new PhabricatorConfigLocalSource())

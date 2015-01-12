@@ -6,8 +6,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     return true;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
+  protected function processDiffusionRequest(AphrontRequest $request) {
     $viewer = $request->getUser();
 
     $drequest = $this->getDiffusionRequest();

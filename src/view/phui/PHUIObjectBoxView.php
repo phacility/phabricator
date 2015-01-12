@@ -14,6 +14,7 @@ final class PHUIObjectBoxView extends AphrontView {
   private $id;
   private $sigils = array();
   private $metadata;
+  private $actionListID;
 
   private $tabs = array();
   private $propertyLists = array();
@@ -70,6 +71,12 @@ final class PHUIObjectBoxView extends AphrontView {
     }
 
     $this->propertyLists[$key][] = $property_list;
+
+    $action_list = $property_list->getActionList();
+    if ($action_list) {
+      $this->actionListID = celerity_generate_unique_node_id();
+      $action_list->setId($this->actionListID);
+    }
 
     return $this;
   }
@@ -154,6 +161,27 @@ final class PHUIObjectBoxView extends AphrontView {
       $header = id(new PHUIHeaderView())
         ->setHeader($this->headerText)
         ->setHeaderColor($header_color);
+    }
+
+    if ($this->actionListID) {
+      $icon_id = celerity_generate_unique_node_id();
+      $icon = id(new PHUIIconView())
+        ->setIconFont('fa-bars');
+      $meta = array(
+        'map' => array(
+          $this->actionListID => 'phabricator-action-list-toggle',
+          $icon_id => 'phuix-dropdown-open',
+        ),);
+      $mobile_menu = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setText(pht('Actions'))
+        ->setHref('#')
+        ->setIcon($icon)
+        ->addClass('phui-mobile-menu')
+        ->setID($icon_id)
+        ->addSigil('jx-toggle-class')
+        ->setMetadata($meta);
+      $header->addActionLink($mobile_menu);
     }
 
     $ex = $this->validationException;

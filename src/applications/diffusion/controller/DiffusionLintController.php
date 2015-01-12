@@ -6,9 +6,8 @@ final class DiffusionLintController extends DiffusionController {
     return true;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $this->getRequest()->getUser();
+  protected function processDiffusionRequest(AphrontRequest $request) {
+    $user = $request->getUser();
     $drequest = $this->diffusionRequest;
 
     if ($request->getStr('lint') !== null) {

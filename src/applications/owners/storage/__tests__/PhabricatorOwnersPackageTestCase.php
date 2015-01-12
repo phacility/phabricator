@@ -2,7 +2,7 @@
 
 final class PhabricatorOwnersPackageTestCase extends PhabricatorTestCase {
 
-  function testFindLongestPathsPerPackage() {
+  public function testFindLongestPathsPerPackage() {
     $rows = array(
       array('id' => 1, 'excluded' => 0, 'path' => 'src/'),
       array('id' => 1, 'excluded' => 1, 'path' => 'src/releeph/'),

@@ -131,7 +131,7 @@ final class PhabricatorPeopleProfileController
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($user->getUsername());
-    $crumbs->setActionList($actions);
+
     $feed = $this->renderUserFeed($user);
     $cal_class = 'PhabricatorCalendarApplication';
     $classes = array();

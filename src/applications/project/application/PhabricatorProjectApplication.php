@@ -52,8 +52,12 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
           => 'PhabricatorProjectMembersEditController',
         'members/(?P<id>[1-9]\d*)/remove/'
           => 'PhabricatorProjectMembersRemoveController',
-        'view/(?P<id>[1-9]\d*)/'
+        'profile/(?P<id>[1-9]\d*)/'
           => 'PhabricatorProjectProfileController',
+        'feed/(?P<id>[1-9]\d*)/'
+          => 'PhabricatorProjectFeedController',
+        'view/(?P<id>[1-9]\d*)/'
+          => 'PhabricatorProjectViewController',
         'picture/(?P<id>[1-9]\d*)/'
           => 'PhabricatorProjectEditPictureController',
         'icon/(?P<id>[1-9]\d*)/'
@@ -86,7 +90,7 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
         'wiki/' => 'PhabricatorProjectWikiExplainController',
       ),
       '/tag/' => array(
-        '(?P<slug>[^/]+)/' => 'PhabricatorProjectProfileController',
+        '(?P<slug>[^/]+)/' => 'PhabricatorProjectViewController',
         '(?P<slug>[^/]+)/board/' => 'PhabricatorProjectBoardViewController',
       ),
     );

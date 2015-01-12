@@ -138,3 +138,11 @@ body.device-phone .phui-header-view {
 .phui-header-subheader .phui-header-status-green {
   color: {$green};
 }
+
+.phui-header-action-links .phui-mobile-menu {
+  display: none;
+}
+
+.device .phui-header-action-links .phui-mobile-menu {
+  display: inline-block;
+}

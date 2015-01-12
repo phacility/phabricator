@@ -3,15 +3,7 @@
 final class DiffusionMirrorEditController
   extends DiffusionController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-    parent::willProcessRequest($data);
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
+  protected function processDiffusionRequest(AphrontRequest $request) {
     $viewer = $request->getUser();
     $drequest = $this->diffusionRequest;
     $repository = $drequest->getRepository();
@@ -21,10 +13,10 @@ final class DiffusionMirrorEditController
       $repository,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    if ($this->id) {
+    if ($request->getURIData('id')) {
       $mirror = id(new PhabricatorRepositoryMirrorQuery())
         ->setViewer($viewer)
-        ->withIDs(array($this->id))
+        ->withIDs(array($request->getURIData('id')))
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,

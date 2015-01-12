@@ -61,7 +61,6 @@ final class PonderQuestionViewController extends PonderController {
       ->addPropertyList($properties);
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView());
-    $crumbs->setActionList($actions);
     $crumbs->addTextCrumb('Q'.$this->questionID, '/Q'.$this->questionID);
 
     return $this->buildApplicationPage(

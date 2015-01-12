@@ -328,8 +328,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $actions = $this->buildActionView($task);
 
     $crumbs = $this->buildApplicationCrumbs()
-      ->addTextCrumb($object_name, '/'.$object_name)
-      ->setActionList($actions);
+      ->addTextCrumb($object_name, '/'.$object_name);
 
     $header = $this->buildHeaderView($task);
     $properties = $this->buildPropertyView(

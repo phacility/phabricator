@@ -159,7 +159,6 @@ final class PhortuneCartViewController
     $crumbs = $this->buildApplicationCrumbs();
     $this->addAccountCrumb($crumbs, $cart->getAccount());
     $crumbs->addTextCrumb(pht('Cart %d', $cart->getID()));
-    $crumbs->setActionList($actions);
 
     $timeline = $this->buildTransactionTimeline(
       $cart,

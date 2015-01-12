@@ -219,8 +219,15 @@ final class PhabricatorProjectSearchEngine
 
     foreach ($projects as $key => $project) {
       $id = $project->getID();
+      $profile_uri = $this->getApplicationURI("profile/{$id}/");
       $workboards_uri = $this->getApplicationURI("board/{$id}/");
       $members_uri = $this->getApplicationURI("members/{$id}/");
+      $profile_url = phutil_tag(
+        'a',
+        array(
+          'href' => $profile_uri,
+        ),
+        pht('Profile'));
       $workboards_url = phutil_tag(
         'a',
         array(
@@ -252,6 +259,7 @@ final class PhabricatorProjectSearchEngine
         ->setHref($this->getApplicationURI("view/{$id}/"))
         ->setImageURI($project->getProfileImageURI())
         ->addAttribute($tag_list)
+        ->addAttribute($profile_url)
         ->addAttribute($workboards_url)
         ->addAttribute($members_url);
 

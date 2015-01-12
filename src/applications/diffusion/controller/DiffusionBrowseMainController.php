@@ -2,9 +2,8 @@
 
 final class DiffusionBrowseMainController extends DiffusionBrowseController {
 
-  public function processRequest() {
+  protected function processDiffusionRequest(AphrontRequest $request) {
     $drequest = $this->diffusionRequest;
-    $request = $this->getRequest();
 
     // Figure out if we're browsing a directory, a file, or a search result
     // list. Then delegate to the appropriate controller.

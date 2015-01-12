@@ -22,11 +22,8 @@ final class ManiphestTransactionSaveController extends ManiphestController {
 
     $action = $request->getStr('action');
 
-    $added_ccs = array();
-
-    $cc_transaction = new ManiphestTransaction();
-    $cc_transaction
-      ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS);
+    $implicit_ccs = array();
+    $explicit_ccs = array();
 
     $transaction = new ManiphestTransaction();
     $transaction
@@ -58,7 +55,7 @@ final class ManiphestTransactionSaveController extends ManiphestController {
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         // Accumulate the new explicit CCs into the array that we'll add in
         // the CC transaction later.
-        $added_ccs = $request->getArr('ccs');
+        $explicit_ccs = $request->getArr('ccs');
 
         // Throw away the primary transaction.
         $transaction = null;
@@ -91,7 +88,9 @@ final class ManiphestTransactionSaveController extends ManiphestController {
         // If this is actually no-op, don't generate the side effect.
       } else {
         // Otherwise, when a task is reassigned, move the previous owner to CC.
-        $added_ccs[] = $task->getOwnerPHID();
+        if ($task->getOwnerPHID()) {
+          $implicit_ccs[] = $task->getOwnerPHID();
+        }
       }
     }
 
@@ -127,20 +126,25 @@ final class ManiphestTransactionSaveController extends ManiphestController {
       // If we aren't making the user the new task owner and they aren't the
       // existing task owner, add them to CC unless they're aleady CC'd.
       if (!in_array($user->getPHID(), $task->getSubscriberPHIDs())) {
-        $added_ccs[] = $user->getPHID();
+        $implicit_ccs[] = $user->getPHID();
       }
     }
 
-    // Evade no-effect detection in the new editor stuff until we can switch
-    // to subscriptions.
-    $added_ccs = array_filter(array_diff(
-      $added_ccs,
-      $task->getSubscriberPHIDs()));
+    if ($implicit_ccs || $explicit_ccs) {
 
-    if ($added_ccs) {
-      // We've added CCs, so include a CC transaction.
-      $all_ccs = array_merge($task->getSubscriberPHIDs(), $added_ccs);
-      $cc_transaction->setNewValue(array('=' => $all_ccs));
+      // TODO: These implicit CC rules should probably be handled inside the
+      // Editor, eventually.
+
+      $all_ccs = array_fuse($implicit_ccs) + array_fuse($explicit_ccs);
+
+      $cc_transaction = id(new ManiphestTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+        ->setNewValue(array('+' => $all_ccs));
+
+      if (!$explicit_ccs) {
+        $cc_transaction->setIgnoreOnNoEffect(true);
+      }
+
       $transactions[] = $cc_transaction;
     }
 

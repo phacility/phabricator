@@ -46,7 +46,8 @@ final class PhabricatorConfigEntry
     if (!$config_entry) {
       $config_entry = id(new PhabricatorConfigEntry())
         ->setConfigKey($key)
-        ->setNamespace('default');
+        ->setNamespace('default')
+        ->setIsDeleted(0);
     }
 
     return $config_entry;

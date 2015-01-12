@@ -64,7 +64,7 @@ final class PhragmentRevertController extends PhragmentController {
     return $this->createDialog($fragment, $version);
   }
 
-  function createDialog(
+  public function createDialog(
     PhragmentFragment $fragment,
     PhragmentFragmentVersion $version) {
 

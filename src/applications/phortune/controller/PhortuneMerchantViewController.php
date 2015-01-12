@@ -43,7 +43,6 @@ final class PhortuneMerchantViewController
     $properties = $this->buildPropertyListView($merchant, $providers);
     $actions = $this->buildActionListView($merchant);
     $properties->setActionList($actions);
-    $crumbs->setActionList($actions);
 
     $provider_list = $this->buildProviderList(
       $merchant,

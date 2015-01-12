@@ -42,7 +42,7 @@ final class PhabricatorProjectUpdateController
       return new Aphront404Response();
     }
 
-    $project_uri = '/project/view/'.$project->getID().'/';
+    $project_uri = $this->getApplicationURI('profile/'.$project->getID().'/');
 
     if ($process_action) {
 

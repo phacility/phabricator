@@ -136,9 +136,7 @@ abstract class PhabricatorAphlictManagementWorkflow
       $server_argv[] = '--ssl-cert='.$ssl_cert;
     }
 
-    if (!$this->debug) {
-      $server_argv[] = '--log='.$log;
-    }
+    $server_argv[] = '--log='.$log;
 
     if ($this->clientHost) {
       $server_argv[] = '--client-host='.$this->clientHost;

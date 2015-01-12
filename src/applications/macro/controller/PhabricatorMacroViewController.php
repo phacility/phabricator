@@ -34,7 +34,6 @@ final class PhabricatorMacroViewController
     $actions = $this->buildActionView($macro);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->setActionList($actions);
     $crumbs->addTextCrumb(
       $title_short,
       $this->getApplicationURI('/view/'.$macro->getID().'/'));

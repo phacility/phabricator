@@ -87,7 +87,6 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       ->addMargin(PHUI::MARGIN_LARGE_TOP);
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView())
-      ->setActionList($actions)
       ->addTextCrumb('P'.$paste->getID(), '/P'.$paste->getID());
 
     $timeline = $this->buildTransactionTimeline(

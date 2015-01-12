@@ -20,7 +20,7 @@ JX.install('AphlictLog', {
         mode: 066
       };
 
-      var logfile = fs.createWriteSteam(path, options);
+      var logfile = fs.createWriteStream(path, options);
 
       this._writeToLogs.push(logfile);
 

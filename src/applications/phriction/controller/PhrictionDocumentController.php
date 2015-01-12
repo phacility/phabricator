@@ -185,7 +185,6 @@ final class PhrictionDocumentController
     $actions = $this->buildActionView($user, $document);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->setActionList($actions);
     $crumb_views = $this->renderBreadcrumbs($slug);
     foreach ($crumb_views as $view) {
       $crumbs->addCrumb($view);

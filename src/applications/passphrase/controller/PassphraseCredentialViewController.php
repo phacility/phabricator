@@ -39,8 +39,6 @@ final class PassphraseCredentialViewController extends PassphraseController {
     $actions = $this->buildActionView($credential, $type);
     $properties = $this->buildPropertyView($credential, $type, $actions);
 
-    $crumbs->setActionList($actions);
-
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->addPropertyList($properties);
