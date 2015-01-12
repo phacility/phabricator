@@ -43,7 +43,25 @@ var debug = new JX.AphlictLog()
 var config = parse_command_line_arguments(process.argv);
 
 process.on('uncaughtException', function(err) {
-  debug.log('\n<<< UNCAUGHT EXCEPTION! >>>\n' + err.stack);
+  var context = null;
+  if ((err.code == 'EACCES') &&
+      (err.path == config.log)) {
+    context = util.format(
+      'Unable to open logfile ("%s"). Check that permissions are set ' +
+      'correctly.',
+      err.path);
+  }
+
+  var message = [
+    '\n<<< UNCAUGHT EXCEPTION! >>>',
+  ];
+  if (context) {
+    message.push(context);
+  }
+  message.push(err.stack);
+
+  debug.log(message.join('\n\n'));
+
   process.exit(1);
 });
 
@@ -69,8 +87,8 @@ if (ssl_config.enabled) {
 }
 
 // Add the logfile so we'll fail if we can't write to it.
-if (config.logfile) {
-  debug.addLogfile(config.logfile);
+if (config.log) {
+  debug.addLogfile(config.log);
 }
 
 // If we're just doing a configuration test, exit here before starting any
