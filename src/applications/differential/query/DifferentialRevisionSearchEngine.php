@@ -7,7 +7,7 @@ final class DifferentialRevisionSearchEngine
     return pht('Differential Revisions');
   }
 
-  public function getApplicationClassName() {
+  protected function getApplicationClassName() {
     return 'PhabricatorDifferentialApplication';
   }
 
@@ -200,7 +200,7 @@ final class DifferentialRevisionSearchEngine
     return '/differential/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array();
 
     if ($this->requireViewer()->isLoggedIn()) {

@@ -131,6 +131,7 @@ final class PhortuneMerchantEditController
           ->setError($e_name))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
+          ->setUser($viewer)
           ->setName('desc')
           ->setLabel(pht('Description'))
           ->setValue($v_desc))

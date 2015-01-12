@@ -7,7 +7,7 @@ final class PhabricatorProjectSearchEngine
     return pht('Projects');
   }
 
-  public function getApplicationClassName() {
+  protected function getApplicationClassName() {
     return 'PhabricatorProjectApplication';
   }
 
@@ -145,7 +145,7 @@ final class PhabricatorProjectSearchEngine
     return '/project/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array();
 
     if ($this->requireViewer()->isLoggedIn()) {
@@ -212,10 +212,22 @@ final class PhabricatorProjectSearchEngine
 
     $list = new PHUIObjectItemListView();
     $list->setUser($viewer);
-    foreach ($projects as $project) {
+    $can_edit_projects = id(new PhabricatorPolicyFilter())
+      ->setViewer($viewer)
+      ->requireCapabilities(array(PhabricatorPolicyCapability::CAN_EDIT))
+      ->apply($projects);
+
+    foreach ($projects as $key => $project) {
       $id = $project->getID();
+      $profile_uri = $this->getApplicationURI("profile/{$id}/");
       $workboards_uri = $this->getApplicationURI("board/{$id}/");
       $members_uri = $this->getApplicationURI("members/{$id}/");
+      $profile_url = phutil_tag(
+        'a',
+        array(
+          'href' => $profile_uri,
+        ),
+        pht('Profile'));
       $workboards_url = phutil_tag(
         'a',
         array(
@@ -223,10 +235,18 @@ final class PhabricatorProjectSearchEngine
         ),
         pht('Workboard'));
 
-      $members_url = phutil_tag(
+      $members_class = null;
+      $members_sigil = null;
+      if (!isset($can_edit_projects[$key])) {
+        $members_class = 'disabled';
+        $members_sigil = 'workflow';
+      }
+      $members_url = javelin_tag(
         'a',
         array(
           'href' => $members_uri,
+          'class' => $members_class,
+          'sigil' => $members_sigil,
         ),
         pht('Members'));
 
@@ -239,6 +259,7 @@ final class PhabricatorProjectSearchEngine
         ->setHref($this->getApplicationURI("view/{$id}/"))
         ->setImageURI($project->getProfileImageURI())
         ->addAttribute($tag_list)
+        ->addAttribute($profile_url)
         ->addAttribute($workboards_url)
         ->addAttribute($members_url);
 

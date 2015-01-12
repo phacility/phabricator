@@ -149,6 +149,13 @@ final class FundInitiative extends FundDAO
     return new FundInitiativeTransaction();
   }
 
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
+  }
+
 
 /* -(  PhabricatorSubscribableInterface  )----------------------------------- */
 

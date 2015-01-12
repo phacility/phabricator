@@ -2,7 +2,7 @@
 
 abstract class HarbormasterController extends PhabricatorController {
 
-  public function buildApplicationCrumbs() {
+  protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
     $crumbs->addAction(

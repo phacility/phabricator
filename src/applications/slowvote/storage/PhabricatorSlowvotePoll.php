@@ -2,6 +2,7 @@
 
 final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
   implements
+    PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
     PhabricatorSubscribableInterface,
     PhabricatorFlaggableInterface,
@@ -100,6 +101,29 @@ final class PhabricatorSlowvotePoll extends PhabricatorSlowvoteDAO
     assert_instances_of($choices, 'PhabricatorSlowvoteChoice');
     $this->viewerChoices[$viewer->getPHID()] = $choices;
     return $this;
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhabricatorSlowvoteEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhabricatorSlowvoteTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
   }
 
 

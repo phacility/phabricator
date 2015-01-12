@@ -62,7 +62,7 @@ final class PhabricatorConfigTableSchema
     return $this->collation;
   }
 
-  public function compareToSimilarSchema(
+  protected function compareToSimilarSchema(
     PhabricatorConfigStorageSchema $expect) {
 
     $issues = array();

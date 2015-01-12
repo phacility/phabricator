@@ -18,7 +18,7 @@ foreach (new LiskMigrationIterator($table) as $task) {
   foreach ($deps as $dep) {
     $editor->addEdge(
       $task->getPHID(),
-      PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK,
+      ManiphestTaskDependsOnTaskEdgeType::EDGECONST,
       $dep);
   }
   $editor->save();

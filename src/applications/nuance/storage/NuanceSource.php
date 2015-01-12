@@ -1,7 +1,9 @@
 <?php
 
 final class NuanceSource extends NuanceDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorPolicyInterface {
 
   protected $name;
   protected $type;
@@ -63,6 +65,30 @@ final class NuanceSource extends NuanceDAO
       ->setEditPolicy($edit_policy)
       ->setType($lucky_definition->getSourceTypeConstant());
   }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new NuanceSourceEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new NuanceSourceTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
+  }
+
 
   public function getCapabilities() {
     return array(

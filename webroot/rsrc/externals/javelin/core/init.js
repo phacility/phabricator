@@ -184,6 +184,9 @@
     'hashchange'
   ];
 
+  if (window.localStorage) {
+    window_events.push('storage');
+  }
 
   for (ii = 0; ii < window_events.length; ++ii) {
     JX.enableDispatch(window, window_events[ii]);

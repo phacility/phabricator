@@ -6,7 +6,7 @@ final class PHUIPropertyListView extends AphrontView {
   private $hasKeyboardShortcuts;
   private $object;
   private $invokedWillRenderEvent;
-  private $actionList;
+  private $actionList = null;
   private $classes = array();
   private $stacked;
 
@@ -25,6 +25,10 @@ final class PHUIPropertyListView extends AphrontView {
   public function setActionList(PhabricatorActionListView $list) {
     $this->actionList = $list;
     return $this;
+  }
+
+  public function getActionList() {
+    return $this->actionList;
   }
 
   public function setStacked($stacked) {
@@ -204,7 +208,7 @@ final class PHUIPropertyListView extends AphrontView {
     $list = phutil_tag(
       'dl',
       array(
-        'class' => 'phui-property-list-properties '.$stacked,
+        'class' => 'phui-property-list-properties',
       ),
       $items);
 
@@ -216,7 +220,7 @@ final class PHUIPropertyListView extends AphrontView {
     $list = phutil_tag(
       'div',
       array(
-        'class' => 'phui-property-list-properties-wrap',
+        'class' => 'phui-property-list-properties-wrap '.$stacked,
       ),
       array($shortcuts, $list));
 

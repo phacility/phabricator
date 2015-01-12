@@ -7,7 +7,7 @@ final class PhabricatorDashboardSearchEngine
     return pht('Dashboards');
   }
 
-  public function getApplicationClassName() {
+  protected function getApplicationClassName() {
     return 'PhabricatorDashboardApplication';
   }
 
@@ -29,7 +29,7 @@ final class PhabricatorDashboardSearchEngine
     return '/dashboard/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     return array(
       'all' => pht('All Dashboards'),
     );

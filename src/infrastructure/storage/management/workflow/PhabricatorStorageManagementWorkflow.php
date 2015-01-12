@@ -595,6 +595,8 @@ abstract class PhabricatorStorageManagementWorkflow
       ->addColumn('target', array('title' => pht('Target')))
       ->addColumn('error', array('title' => pht('Error')));
 
+    $any_surplus = false;
+    $all_surplus = true;
     foreach ($errors as $error) {
       $pieces = array_select_keys(
         $error,
@@ -603,6 +605,12 @@ abstract class PhabricatorStorageManagementWorkflow
       $target = implode('.', $pieces);
 
       $name = PhabricatorConfigStorageSchema::getIssueName($error['issue']);
+
+      if ($error['issue'] === PhabricatorConfigStorageSchema::ISSUE_SURPLUS) {
+        $any_surplus = true;
+      } else {
+        $all_surplus = false;
+      }
 
       $table->addRow(
         array(
@@ -615,19 +623,50 @@ abstract class PhabricatorStorageManagementWorkflow
     $table->draw();
     $console->writeOut("\n");
 
-    $message = pht(
-      "The schemata have serious errors (detailed above) which the adjustment ".
-      "workflow can not fix.\n\n".
-      "If you are not developing Phabricator itself, report this issue to ".
-      "the upstream.\n\n".
-      "If you are developing Phabricator, these errors usually indicate that ".
-      "your schema specifications do not agree with the schemata your code ".
-      "actually builds.");
 
-    $console->writeOut(
-      "**<bg:red> %s </bg>**\n\n%s\n",
-      pht('SCHEMATA ERRORS'),
-      phutil_console_wrap($message));
+    $message = array();
+    if ($all_surplus) {
+      $message[] = pht(
+        'You have surplus schemata (extra tables or columns which Phabricator '.
+        'does not expect). For information on resolving these '.
+        'issues, see the "Surplus Schemata" section in the "Managing Storage '.
+        'Adjustments" article in the documentation.');
+    } else {
+      $message[] = pht(
+        'The schemata have errors (detailed above) which the adjustment '.
+        'workflow can not fix.');
+
+      if ($any_surplus) {
+        $message[] = pht(
+          'Some of these errors are caused by surplus schemata (extra '.
+          'tables or columsn which Phabricator does not expect). These are '.
+          'not serious. For information on resolving these issues, see the '.
+          '"Surplus Schemata" section in the "Managing Storage Adjustments" '.
+          'article in the documentation.');
+      }
+
+      $message[] = pht(
+        'If you are not developing Phabricator itself, report this issue to '.
+        'the upstream.');
+
+      $message[] = pht(
+        'If you are developing Phabricator, these errors usually indicate '.
+        'that your schema specifications do not agree with the schemata your '.
+        'code actually builds.');
+    }
+    $message = implode("\n\n", $message);
+
+    if ($all_surplus) {
+      $console->writeOut(
+        "**<bg:yellow> %s </bg>**\n\n%s\n",
+        pht('SURPLUS SCHEMATA'),
+        phutil_console_wrap($message));
+    } else {
+      $console->writeOut(
+        "**<bg:red> %s </bg>**\n\n%s\n",
+        pht('SCHEMATA ERRORS'),
+        phutil_console_wrap($message));
+    }
 
     return 2;
   }

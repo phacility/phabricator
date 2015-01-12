@@ -5,13 +5,24 @@ final class DifferentialDiffCreateController extends DifferentialController {
   public function processRequest() {
 
     $request = $this->getRequest();
+    $viewer = $request->getUser();
 
     $diff = null;
+    // This object is just for policy stuff
+    $diff_object = DifferentialDiff::initializeNewDiff($viewer);
+    $repository_phid = null;
+    $repository_value = array();
     $errors = array();
     $e_diff = null;
     $e_file = null;
     $validation_exception = null;
     if ($request->isFormPost()) {
+
+      $repository_tokenizer = $request->getArr(
+        id(new DifferentialRepositoryField())->getFieldKey());
+      if ($repository_tokenizer) {
+        $repository_phid = reset($repository_tokenizer);
+      }
 
       if ($request->getFileExists('diff-file')) {
         $diff = PhabricatorFile::readUploadedFileData($_FILES['diff-file']);
@@ -33,8 +44,9 @@ final class DifferentialDiffCreateController extends DifferentialController {
             'differential.createrawdiff',
             array(
               'diff' => $diff,
-            ));
-          $call->setUser($request->getUser());
+              'repositoryPHID' => $repository_phid,
+              'viewPolicy' => $request->getStr('viewPolicy'),));
+          $call->setUser($viewer);
           $result = $call->execute();
           $path = id(new PhutilURI($result['uri']))->getPath();
           return id(new AphrontRedirectResponse())->setURI($path);
@@ -56,10 +68,19 @@ final class DifferentialDiffCreateController extends DifferentialController {
 
     $cancel_uri = $this->getApplicationURI();
 
+    if ($repository_phid) {
+      $repository_value = $this->loadViewerHandles(array($repository_phid));
+    }
+
+    $policies = id(new PhabricatorPolicyQuery())
+      ->setViewer($viewer)
+      ->setObject($diff_object)
+      ->execute();
+
     $form
       ->setAction('/differential/diff/create/')
       ->setEncType('multipart/form-data')
-      ->setUser($request->getUser())
+      ->setUser($viewer)
       ->appendInstructions(
         pht(
           'The best way to create a Differential diff is by using %s, but you '.
@@ -81,6 +102,20 @@ final class DifferentialDiffCreateController extends DifferentialController {
           ->setLabel(pht('Raw Diff From File'))
           ->setName('diff-file')
           ->setError($e_file))
+      ->appendChild(
+        id(new AphrontFormTokenizerControl())
+        ->setName(id(new DifferentialRepositoryField())->getFieldKey())
+        ->setLabel(pht('Repository'))
+        ->setDatasource(new DiffusionRepositoryDatasource())
+        ->setValue($repository_value)
+        ->setLimit(1))
+      ->appendChild(
+        id(new AphrontFormPolicyControl())
+        ->setUser($viewer)
+        ->setName('viewPolicy')
+        ->setPolicyObject($diff_object)
+        ->setPolicies($policies)
+        ->setCapability(PhabricatorPolicyCapability::CAN_VIEW))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton($cancel_uri)

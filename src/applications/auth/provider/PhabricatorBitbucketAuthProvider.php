@@ -7,7 +7,7 @@ final class PhabricatorBitbucketAuthProvider
     return pht('Bitbucket');
   }
 
-  public function getProviderConfigurationHelp() {
+  protected function getProviderConfigurationHelp() {
     return pht(
       "To configure Bitbucket OAuth, log in to Bitbucket and go to ".
       "**Manage Account** > **Access Management** > **OAuth**.\n\n".

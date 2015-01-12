@@ -9,6 +9,8 @@ final class ManiphestTransactionSaveController extends ManiphestController {
     $task = id(new ManiphestTaskQuery())
       ->setViewer($user)
       ->withIDs(array($request->getStr('taskID')))
+      ->needSubscriberPHIDs(true)
+      ->needProjectPHIDs(true)
       ->executeOne();
     if (!$task) {
       return new Aphront404Response();
@@ -20,20 +22,8 @@ final class ManiphestTransactionSaveController extends ManiphestController {
 
     $action = $request->getStr('action');
 
-    // Compute new CCs added by @mentions. Several things can cause CCs to
-    // be added as side effects: mentions, explicit CCs, users who aren't
-    // CC'd interacting with the task, and ownership changes. We build up a
-    // list of all the CCs and then construct a transaction for them at the
-    // end if necessary.
-    $added_ccs = PhabricatorMarkupEngine::extractPHIDsFromMentions(
-      $user,
-      array(
-        $request->getStr('comments'),
-      ));
-
-    $cc_transaction = new ManiphestTransaction();
-    $cc_transaction
-      ->setTransactionType(ManiphestTransaction::TYPE_CCS);
+    $implicit_ccs = array();
+    $explicit_ccs = array();
 
     $transaction = new ManiphestTransaction();
     $transaction
@@ -48,26 +38,24 @@ final class ManiphestTransactionSaveController extends ManiphestController {
         $assign_to = reset($assign_to);
         $transaction->setNewValue($assign_to);
         break;
-      case ManiphestTransaction::TYPE_PROJECTS:
+      case PhabricatorTransactions::TYPE_EDGE:
         $projects = $request->getArr('projects');
         $projects = array_merge($projects, $task->getProjectPHIDs());
         $projects = array_filter($projects);
         $projects = array_unique($projects);
 
-        // TODO: Bleh.
         $project_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
         $transaction
-          ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
           ->setMetadataValue('edge:type', $project_type)
           ->setNewValue(
             array(
               '+' => array_fuse($projects),
             ));
         break;
-      case ManiphestTransaction::TYPE_CCS:
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         // Accumulate the new explicit CCs into the array that we'll add in
         // the CC transaction later.
-        $added_ccs = array_merge($added_ccs, $request->getArr('ccs'));
+        $explicit_ccs = $request->getArr('ccs');
 
         // Throw away the primary transaction.
         $transaction = null;
@@ -100,7 +88,9 @@ final class ManiphestTransactionSaveController extends ManiphestController {
         // If this is actually no-op, don't generate the side effect.
       } else {
         // Otherwise, when a task is reassigned, move the previous owner to CC.
-        $added_ccs[] = $task->getOwnerPHID();
+        if ($task->getOwnerPHID()) {
+          $implicit_ccs[] = $task->getOwnerPHID();
+        }
       }
     }
 
@@ -135,19 +125,26 @@ final class ManiphestTransactionSaveController extends ManiphestController {
     if (!$user_owns_task) {
       // If we aren't making the user the new task owner and they aren't the
       // existing task owner, add them to CC unless they're aleady CC'd.
-      if (!in_array($user->getPHID(), $task->getCCPHIDs())) {
-        $added_ccs[] = $user->getPHID();
+      if (!in_array($user->getPHID(), $task->getSubscriberPHIDs())) {
+        $implicit_ccs[] = $user->getPHID();
       }
     }
 
-    // Evade no-effect detection in the new editor stuff until we can switch
-    // to subscriptions.
-    $added_ccs = array_filter(array_diff($added_ccs, $task->getCCPHIDs()));
+    if ($implicit_ccs || $explicit_ccs) {
 
-    if ($added_ccs) {
-      // We've added CCs, so include a CC transaction.
-      $all_ccs = array_merge($task->getCCPHIDs(), $added_ccs);
-      $cc_transaction->setNewValue($all_ccs);
+      // TODO: These implicit CC rules should probably be handled inside the
+      // Editor, eventually.
+
+      $all_ccs = array_fuse($implicit_ccs) + array_fuse($explicit_ccs);
+
+      $cc_transaction = id(new ManiphestTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+        ->setNewValue(array('+' => $all_ccs));
+
+      if (!$explicit_ccs) {
+        $cc_transaction->setIgnoreOnNoEffect(true);
+      }
+
       $transactions[] = $cc_transaction;
     }
 

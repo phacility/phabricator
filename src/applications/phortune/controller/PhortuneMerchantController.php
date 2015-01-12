@@ -3,7 +3,7 @@
 abstract class PhortuneMerchantController
   extends PhortuneController {
 
-  public function buildApplicationCrumbs() {
+  protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
     $crumbs->addTextCrumb(
       pht('Merchants'),

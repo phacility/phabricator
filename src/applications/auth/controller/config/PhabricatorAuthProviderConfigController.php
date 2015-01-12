@@ -20,7 +20,7 @@ abstract class PhabricatorAuthProviderConfigController
     return $nav;
   }
 
-  public function buildApplicationMenu() {
+  protected function buildApplicationMenu() {
     return $this->buildSideNavView($for_app = true)->getMenu();
   }
 

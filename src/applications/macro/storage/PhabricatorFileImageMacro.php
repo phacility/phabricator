@@ -95,6 +95,13 @@ final class PhabricatorFileImageMacro extends PhabricatorFileDAO
     return new PhabricatorMacroTransaction();
   }
 
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
+  }
+
 
 /* -(  PhabricatorSubscribableInterface  )----------------------------------- */
 

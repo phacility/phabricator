@@ -22,7 +22,9 @@ final class PHUITimelineEventView extends AphrontView {
   private $token;
   private $tokenRemoved;
   private $quoteTargetID;
+  private $isNormalComment;
   private $quoteRef;
+  private $reallyMajorEvent;
 
   public function setQuoteRef($quote_ref) {
     $this->quoteRef = $quote_ref;
@@ -40,6 +42,15 @@ final class PHUITimelineEventView extends AphrontView {
 
   public function getQuoteTargetID() {
     return $this->quoteTargetID;
+  }
+
+  public function setIsNormalComment($is_normal_comment) {
+    $this->isNormalComment = $is_normal_comment;
+    return $this;
+  }
+
+  public function getIsNormalComment() {
+    return $this->isNormalComment;
   }
 
   public function setHideByDefault($hide_by_default) {
@@ -145,6 +156,11 @@ final class PHUITimelineEventView extends AphrontView {
 
   public function setColor($color) {
     $this->color = $color;
+    return $this;
+  }
+
+  public function setReallyMajorEvent($me) {
+    $this->reallyMajorEvent = $me;
     return $this;
   }
 
@@ -401,20 +417,33 @@ final class PHUITimelineEventView extends AphrontView {
       );
     }
 
-    return javelin_tag(
-      'div',
-      array(
-        'class' => implode(' ', $outer_classes),
-        'id' => $this->anchor ? 'anchor-'.$this->anchor : null,
-        'sigil' => $sigil,
-        'meta' => $meta,
-      ),
-      phutil_tag(
+    $major_event = null;
+    if ($this->reallyMajorEvent) {
+      $major_event = phutil_tag(
         'div',
         array(
-          'class' => implode(' ', $classes),
+          'class' => 'phui-timeline-event-view '.
+                     'phui-timeline-spacer '.
+                     'phui-timeline-spacer-bold',
+        '',));
+    }
+
+    return array(
+      javelin_tag(
+        'div',
+        array(
+          'class' => implode(' ', $outer_classes),
+          'id' => $this->anchor ? 'anchor-'.$this->anchor : null,
+          'sigil' => $sigil,
+          'meta' => $meta,
         ),
-        $content));
+        phutil_tag(
+          'div',
+          array(
+            'class' => implode(' ', $classes),
+          ),
+          $content)),
+      $major_event,);
   }
 
   private function renderExtra(array $events) {
@@ -528,8 +557,9 @@ final class PHUITimelineEventView extends AphrontView {
             'uri' => '/transactions/quote/'.$xaction_phid.'/',
             'ref' => $ref,
           ));
+    }
 
-      // if there is something to quote then there is something to view raw
+    if ($this->getIsNormalComment()) {
       $items[] = id(new PhabricatorActionView())
         ->setIcon('fa-cutlery')
         ->setHref('/transactions/raw/'.$xaction_phid.'/')

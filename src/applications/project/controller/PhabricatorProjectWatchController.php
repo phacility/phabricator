@@ -25,7 +25,7 @@ final class PhabricatorProjectWatchController
       return new Aphront404Response();
     }
 
-    $project_uri = '/project/view/'.$project->getID().'/';
+    $project_uri = $this->getApplicationURI('profile/'.$project->getID().'/');
 
     // You must be a member of a project to
     if (!$project->isUserMember($viewer->getPHID())) {
@@ -45,7 +45,7 @@ final class PhabricatorProjectWatchController
           break;
       }
 
-      $type_member = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_WATCHER;
+      $type_member = PhabricatorObjectHasWatcherEdgeType::EDGECONST;
       $member_spec = array(
         $edge_action => array($viewer->getPHID() => $viewer->getPHID()),
       );

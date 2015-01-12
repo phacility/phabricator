@@ -87,7 +87,7 @@ JX.behavior('phabricator-line-linker', function() {
       e.kill();
       JX.History.replace(uri);
       if (editor_link.href) {
-        editdata = JX.Stratcom.getData(editor_link);
+        var editdata = JX.Stratcom.getData(editor_link);
         editor_link.href = editdata.link_template.replace('%25l', o);
       }
     });

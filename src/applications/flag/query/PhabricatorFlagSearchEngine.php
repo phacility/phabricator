@@ -7,7 +7,7 @@ final class PhabricatorFlagSearchEngine
     return pht('Flags');
   }
 
-  public function getApplicationClassName() {
+  protected function getApplicationClassName() {
     return 'PhabricatorFlagsApplication';
   }
 
@@ -71,7 +71,7 @@ final class PhabricatorFlagSearchEngine
     return '/flag/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array(
       'all' => pht('Flagged'),
     );
@@ -149,7 +149,8 @@ final class PhabricatorFlagSearchEngine
 
       $item = id(new PHUIObjectItemView())
         ->addHeadIcon($flag_icon)
-        ->setHeader($flag->getHandle()->renderLink());
+        ->setHeader($flag->getHandle()->getFullName())
+        ->setHref($flag->getHandle()->getURI());
 
       $item->addAction(
         id(new PHUIListItemView())

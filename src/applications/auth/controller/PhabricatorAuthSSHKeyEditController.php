@@ -32,6 +32,22 @@ final class PhabricatorAuthSSHKeyEditController
 
     $cancel_uri = $key->getObject()->getSSHPublicKeyManagementURI($viewer);
 
+    if ($key->getIsTrusted()) {
+      $id = $key->getID();
+
+      return $this->newDialog()
+        ->setTitle(pht('Can Not Edit Trusted Key'))
+        ->appendParagraph(
+          pht(
+            'This key is trusted. Trusted keys can not be edited. '.
+            'Use %s to revoke trust before editing the key.',
+            phutil_tag(
+              'tt',
+              array(),
+              "bin/almanac untrust-key --id {$id}")))
+        ->addCancelButton($cancel_uri, pht('Okay'));
+    }
+
     $token = id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
       $viewer,
       $request,

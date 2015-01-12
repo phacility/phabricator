@@ -16,7 +16,7 @@ final class PhabricatorConfigEditController
 
     $options = PhabricatorApplicationConfigOptions::loadAllOptions();
     if (empty($options[$this->key])) {
-      $ancient = PhabricatorSetupCheckExtraConfig::getAncientConfig();
+      $ancient = PhabricatorExtraConfigSetupCheck::getAncientConfig();
       if (isset($ancient[$this->key])) {
         $desc = pht(
           "This configuration has been removed. You can safely delete ".
@@ -214,21 +214,16 @@ final class PhabricatorConfigEditController
 
     $crumbs->addTextCrumb($this->key, '/config/edit/'.$this->key);
 
-    $xactions = id(new PhabricatorConfigTransactionQuery())
-      ->withObjectPHIDs(array($config_entry->getPHID()))
-      ->setViewer($user)
-      ->execute();
-
-    $xaction_view = id(new PhabricatorApplicationTransactionView())
-      ->setUser($user)
-      ->setObjectPHID($config_entry->getPHID())
-      ->setTransactions($xactions);
+    $timeline = $this->buildTransactionTimeline(
+      $config_entry,
+      new PhabricatorConfigTransactionQuery());
+    $timeline->setShouldTerminate(true);
 
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $form_box,
-        $xaction_view,
+        $timeline,
       ),
       array(
         'title' => $title,

@@ -17,11 +17,11 @@ final class ReleephRequestTypeaheadControl extends AphrontFormControl {
     return $this;
   }
 
-  public function getCustomControlClass() {
+  protected function getCustomControlClass() {
     return 'releeph-request-typeahead';
   }
 
-  public function renderInput() {
+  protected function renderInput() {
     $id = celerity_generate_unique_node_id();
 
     $div = phutil_tag(

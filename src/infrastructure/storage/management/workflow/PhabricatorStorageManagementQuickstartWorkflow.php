@@ -82,8 +82,8 @@ final class PhabricatorStorageManagementQuickstartWorkflow
       '{$NAMESPACE}',
       $dump);
 
-    // NOTE: This is a hack. We can not use `binary` for this column, because
-    // it is part of a fulltext index.
+    // NOTE: This is a hack. We can not use `binary` for these columns, because
+    // they are a part of a fulltext index.
     $old = $dump;
     $dump = preg_replace(
       '/`corpus` longtext CHARACTER SET .* COLLATE .*,/mi',

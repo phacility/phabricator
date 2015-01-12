@@ -7,7 +7,7 @@ final class FundInitiativeSearchEngine
     return pht('Fund Initiatives');
   }
 
-  public function getApplicationClassName() {
+  protected function getApplicationClassName() {
     return 'PhabricatorFundApplication';
   }
 
@@ -86,7 +86,7 @@ final class FundInitiativeSearchEngine
     return '/fund/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array();
 
     $names['open'] = pht('Open Initiatives');

@@ -2,7 +2,7 @@
 
 final class DiffusionBrowseSearchController extends DiffusionBrowseController {
 
-  public function processRequest() {
+  protected function processDiffusionRequest(AphrontRequest $request) {
     $drequest = $this->diffusionRequest;
 
     $actions = $this->buildActionView($drequest);
@@ -132,7 +132,9 @@ final class DiffusionBrowseSearchController extends DiffusionBrowseController {
     }
 
     try {
-      Futures($futures)->limit(8)->resolveAll();
+      id(new FutureIterator($futures))
+        ->limit(8)
+        ->resolveAll();
     } catch (PhutilSyntaxHighlighterException $ex) {}
 
     $rows = array();

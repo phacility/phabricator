@@ -2,7 +2,9 @@
 
 final class AlmanacInterface
   extends AlmanacDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorDestructibleInterface {
 
   protected $devicePHID;
   protected $networkPHID;
@@ -92,12 +94,39 @@ final class AlmanacInterface
   }
 
   public function describeAutomaticCapability($capability) {
-    return array(
+    $notes = array(
       pht('An interface inherits the policies of the device it belongs to.'),
       pht(
         'You must be able to view the network an interface resides on to '.
         'view the interface.'),
     );
+
+    if ($capability === PhabricatorPolicyCapability::CAN_EDIT) {
+      if ($this->getDevice()->getIsLocked()) {
+        $notes[] = pht(
+          'The device for this interface is locked, so it can not be edited.');
+      }
+    }
+
+    return $notes;
+  }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $bindings = id(new AlmanacBindingQuery())
+      ->setViewer($this->getViewer())
+      ->withInterfacePHIDs(array($this->getPHID()))
+      ->execute();
+    foreach ($bindings as $binding) {
+      $engine->destroyObject($binding);
+    }
+
+    $this->delete();
   }
 
 }

@@ -57,7 +57,9 @@ final class PhabricatorOwnersOwner extends PhabricatorOwnersDAO {
     if ($project_phids) {
       $query = id(new PhabricatorEdgeQuery())
         ->withSourcePHIDs($project_phids)
-        ->withEdgeTypes(array(PhabricatorEdgeConfig::TYPE_PROJ_MEMBER));
+        ->withEdgeTypes(array(
+          PhabricatorProjectProjectHasMemberEdgeType::EDGECONST,
+        ));
       $query->execute();
       $users_in_project_phids = $query->getDestinationPHIDs();
     }

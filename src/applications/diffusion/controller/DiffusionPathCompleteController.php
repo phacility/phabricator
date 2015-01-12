@@ -2,12 +2,11 @@
 
 final class DiffusionPathCompleteController extends DiffusionController {
 
-  public function willProcessRequest(array $data) {
-    // Don't build a DiffusionRequest.
+  protected function shouldLoadDiffusionRequest() {
+    return false;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
+  protected function processDiffusionRequest(AphrontRequest $request) {
 
     $repository_phid = $request->getStr('repositoryPHID');
     $repository = id(new PhabricatorRepositoryQuery())

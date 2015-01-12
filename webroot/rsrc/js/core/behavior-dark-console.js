@@ -9,16 +9,6 @@
  */
 
 JX.behavior('dark-console', function(config, statics) {
-  var root = statics.root || setup_console();
-
-  config.key = config.key || root.getAttribute('data-console-key');
-
-  if (!('color' in config)) {
-    config.color = root.getAttribute('data-console-color');
-  }
-
-  add_request(config);
-
   // Do first-time setup.
   function setup_console() {
     statics.root = JX.$('darkconsole');
@@ -57,6 +47,14 @@ JX.behavior('dark-console', function(config, statics) {
     }
 
     return statics.root;
+  }
+
+  var root = statics.root || setup_console();
+
+  config.key = config.key || root.getAttribute('data-console-key');
+
+  if (!('color' in config)) {
+    config.color = root.getAttribute('data-console-color');
   }
 
 
@@ -248,4 +246,5 @@ JX.behavior('dark-console', function(config, statics) {
       .register();
   }
 
+  add_request(config);
 });

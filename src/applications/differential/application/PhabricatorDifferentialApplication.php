@@ -100,35 +100,60 @@ EOTEXT
       ->withResponsibleUsers(array($user->getPHID()))
       ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
       ->needRelationships(true)
+      ->setLimit(self::MAX_STATUS_ITEMS)
       ->execute();
 
-    list($blocking, $active, $waiting) =
-      DifferentialRevisionQuery::splitResponsible(
-        $revisions,
-        array($user->getPHID()));
-
     $status = array();
+    if (count($revisions) == self::MAX_STATUS_ITEMS) {
+      $all_count = count($revisions);
+      $all_count_str = self::formatStatusCount(
+        $all_count,
+        '%s Active Reviews',
+        '%d Active Review(s)');
+      $type = PhabricatorApplicationStatusView::TYPE_WARNING;
+      $status[] = id(new PhabricatorApplicationStatusView())
+        ->setType($type)
+        ->setText($all_count_str)
+        ->setCount($all_count);
+    } else {
+      list($blocking, $active, $waiting) =
+        DifferentialRevisionQuery::splitResponsible(
+          $revisions,
+          array($user->getPHID()));
 
-    $blocking = count($blocking);
-    $type = PhabricatorApplicationStatusView::TYPE_NEEDS_ATTENTION;
-    $status[] = id(new PhabricatorApplicationStatusView())
-      ->setType($type)
-      ->setText(pht('%d Review(s) Blocking Others', $blocking))
-      ->setCount($blocking);
+      $blocking = count($blocking);
+      $blocking_str = self::formatStatusCount(
+        $blocking,
+        '%s Reviews Blocking Others',
+        '%d Review(s) Blocking Others');
+      $type = PhabricatorApplicationStatusView::TYPE_NEEDS_ATTENTION;
+      $status[] = id(new PhabricatorApplicationStatusView())
+        ->setType($type)
+        ->setText($blocking_str)
+        ->setCount($blocking);
 
-    $active = count($active);
-    $type = PhabricatorApplicationStatusView::TYPE_WARNING;
-    $status[] = id(new PhabricatorApplicationStatusView())
-      ->setType($type)
-      ->setText(pht('%d Review(s) Need Attention', $active))
-      ->setCount($active);
+      $active = count($active);
+      $active_str = self::formatStatusCount(
+        $active,
+        '%s Reviews Need Attention',
+        '%d Review(s) Need Attention');
+      $type = PhabricatorApplicationStatusView::TYPE_WARNING;
+      $status[] = id(new PhabricatorApplicationStatusView())
+        ->setType($type)
+        ->setText($active_str)
+        ->setCount($active);
 
-    $waiting = count($waiting);
-    $type = PhabricatorApplicationStatusView::TYPE_INFO;
-    $status[] = id(new PhabricatorApplicationStatusView())
-      ->setType($type)
-      ->setText(pht('%d Review(s) Waiting on Others', $waiting))
-      ->setCount($waiting);
+      $waiting = count($waiting);
+      $waiting_str = self::formatStatusCount(
+        $waiting,
+        '%s Reviews Waiting on Others',
+        '%d Review(s) Waiting on Others');
+      $type = PhabricatorApplicationStatusView::TYPE_INFO;
+      $status[] = id(new PhabricatorApplicationStatusView())
+        ->setType($type)
+        ->setText($waiting_str)
+        ->setCount($waiting);
+    }
 
     return $status;
   }

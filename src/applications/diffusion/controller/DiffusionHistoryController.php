@@ -6,9 +6,8 @@ final class DiffusionHistoryController extends DiffusionController {
     return true;
   }
 
-  public function processRequest() {
+  protected function processDiffusionRequest(AphrontRequest $request) {
     $drequest = $this->diffusionRequest;
-    $request = $this->getRequest();
     $viewer = $request->getUser();
     $repository = $drequest->getRepository();
 

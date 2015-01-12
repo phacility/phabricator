@@ -19,13 +19,15 @@ final class PhabricatorAuthSSHKeyGenerateController
       $cancel_uri);
 
     if ($request->isFormPost()) {
+      $default_name = $key->getObject()->getSSHKeyDefaultName();
+
       $keys = PhabricatorSSHKeyGenerator::generateKeypair();
       list($public_key, $private_key) = $keys;
 
       $file = PhabricatorFile::buildFromFileDataOrHash(
         $private_key,
         array(
-          'name' => 'id_rsa_phabricator.key',
+          'name' => $default_name.'.key',
           'ttl' => time() + (60 * 10),
           'viewPolicy' => $viewer->getPHID(),
         ));
@@ -36,7 +38,7 @@ final class PhabricatorAuthSSHKeyGenerateController
       $body = $public_key->getBody();
 
       $key
-        ->setName('id_rsa_phabricator')
+        ->setName($default_name)
         ->setKeyType($type)
         ->setKeyBody($body)
         ->setKeyComment(pht('Generated'))

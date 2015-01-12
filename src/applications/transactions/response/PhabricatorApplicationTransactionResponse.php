@@ -67,6 +67,12 @@ final class PhabricatorApplicationTransactionResponse
       $xactions = mpull($view->buildEvents(), 'render', 'getTransactionPHID');
     }
 
+    // Force whatever the underlying views built to render into HTML for
+    // the Javascript.
+    foreach ($xactions as $key => $xaction) {
+      $xactions[$key] = hsprintf('%s', $xaction);
+    }
+
     $content = array(
       'xactions' => $xactions,
       'spacer'   => PHUITimelineView::renderSpacer(),

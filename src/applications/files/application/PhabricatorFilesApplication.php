@@ -11,7 +11,7 @@ final class PhabricatorFilesApplication extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return 'Store and Share Files';
+    return pht('Store and Share Files');
   }
 
   public function getIconName() {
@@ -37,6 +37,15 @@ final class PhabricatorFilesApplication extends PhabricatorApplication {
   public function getRemarkupRules() {
     return array(
       new PhabricatorEmbedFileRemarkupRule(),
+    );
+  }
+
+  protected function getCustomCapabilities() {
+    return array(
+      FilesDefaultViewCapability::CAPABILITY => array(
+        'caption' => pht(
+          'Default view policy for newly created files.'),
+      ),
     );
   }
 

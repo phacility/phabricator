@@ -144,14 +144,15 @@ final class PhabricatorMainMenuView extends AphrontView {
         'meta'  => array(
           'map' => array(
             $header_id => 'phabricator-application-menu-expanded',
-            $button_id => 'menu-icon-app-blue',
+            $button_id => 'sky',
           ),
         ),
       ),
       phutil_tag(
         'span',
         array(
-          'class' => 'phabricator-menu-button-icon sprite-menu menu-icon-app',
+          'class' => 'phabricator-menu-button-icon phui-icon-view '.
+                     'phui-font-fa fa-bars white',
           'id' => $button_id,
         ),
         ''));
@@ -188,10 +189,6 @@ final class PhabricatorMainMenuView extends AphrontView {
           ->setType(PHUIListItemView::TYPE_LABEL)
           ->setName(pht('Actions')));
       foreach ($actions as $action) {
-        $icon = $action->getIcon();
-        if ($icon) {
-          $action->appendChild($this->renderMenuIcon($icon));
-        }
         $view->addMenuItem($action);
       }
     }
@@ -210,14 +207,15 @@ final class PhabricatorMainMenuView extends AphrontView {
         'meta'  => array(
           'map' => array(
             $header_id => 'phabricator-search-menu-expanded',
-            $button_id => 'menu-icon-search-blue',
+            $button_id => 'sky',
           ),
         ),
       ),
       phutil_tag(
       'span',
       array(
-        'class' => 'phabricator-menu-button-icon sprite-menu menu-icon-search',
+        'class' => 'phabricator-menu-button-icon phui-icon-view '.
+                   'phui-font-fa fa-search white',
         'id' => $button_id,
       ),
       ''));
@@ -272,13 +270,8 @@ final class PhabricatorMainMenuView extends AphrontView {
 
     require_celerity_resource('phabricator-notification-css');
     require_celerity_resource('phabricator-notification-menu-css');
-    require_celerity_resource('sprite-menu-css');
 
-    $container_classes = array(
-      'sprite-menu',
-      'alert-notifications',
-    );
-
+    $container_classes = array('alert-notifications');
     $aural = array();
 
     $message_tag = '';
@@ -323,10 +316,12 @@ final class PhabricatorMainMenuView extends AphrontView {
         ),
         $message_count_number);
 
-      $message_icon_tag = phutil_tag(
+      $message_icon_tag = javelin_tag(
         'span',
         array(
-          'class' => 'sprite-menu phabricator-main-menu-message-icon',
+          'class' => 'phabricator-main-menu-message-icon phui-icon-view '.
+                     'phui-font-fa fa-comments',
+          'sigil' => 'menu-icon',
         ),
         '');
 
@@ -407,10 +402,12 @@ final class PhabricatorMainMenuView extends AphrontView {
         ),
         $count_number);
 
-      $icon_tag = phutil_tag(
+      $icon_tag = javelin_tag(
         'span',
         array(
-          'class' => 'sprite-menu phabricator-main-menu-alert-icon',
+          'class' => 'phabricator-main-menu-alert-icon phui-icon-view '.
+                     'phui-font-fa fa-bell',
+          'sigil' => 'menu-icon',
         ),
         '');
 
@@ -470,16 +467,6 @@ final class PhabricatorMainMenuView extends AphrontView {
       $dropdowns,
       $aural,
     );
-  }
-
-  private function renderMenuIcon($name) {
-    return phutil_tag(
-      'span',
-      array(
-        'class' => 'phabricator-core-menu-icon '.
-                   'sprite-menu menu-icon-'.$name,
-      ),
-      '');
   }
 
 }

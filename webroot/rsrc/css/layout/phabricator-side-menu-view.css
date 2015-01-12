@@ -22,7 +22,7 @@
 }
 
 .device-desktop .phabricator-side-menu .phui-list-item-selected
- a.phui-list-item-href:hover {
+  a.phui-list-item-href:hover {
   background-color: {$hoverselectedgrey};
 }
 
@@ -42,4 +42,45 @@
 .device-desktop .phabricator-side-menu a.phui-list-item-href:hover {
   text-decoration: none;
   background-color: {$hovergrey};
+}
+
+.device-desktop .phabricator-icon-nav .phabricator-nav-column-background,
+.device-desktop .phabricator-icon-nav .phabricator-nav-local {
+  width: 40px;
+}
+
+.device-desktop .phabricator-icon-nav .phabricator-nav-content {
+  margin-left: 41px;
+}
+
+.phabricator-icon-nav .phabricator-side-menu .phui-list-item-href {
+  height: 40px;
+  width: 40px;
+  padding: 0;
+}
+
+.phabricator-icon-nav .phabricator-side-menu .phui-list-item-icon {
+  font-size: 20px;
+  width: 40px;
+  line-height: 40px;
+  text-align: center;
+  vertical-align: bottom;
+}
+
+.phabricator-icon-nav .phabricator-side-menu .phui-list-item-selected {
+  border: none;
+}
+
+.phabricator-icon-nav .phabricator-side-menu .phui-list-item-selected
+  .phui-icon-view {
+    color: {$sky};
+}
+
+.phabricator-icon-nav .phui-icon-view.phuihead-small {
+  height: 24px;
+  width: 24px;
+  border: 1px solid #fff;
+  background-size: 24px;
+  display: inline-block;
+  margin: 7px;
 }

@@ -129,7 +129,8 @@ final class DiffusionTagsQueryConduitAPIMethod
         $tag->getName());
     }
 
-    Futures($futures)->resolveAll();
+    id(new FutureIterator($futures))
+      ->resolveAll();
 
     foreach ($tags as $key => $tag) {
       $future = $futures[$key];

@@ -38,14 +38,9 @@ final class PholioMockViewController extends PholioController {
       return new Aphront404Response();
     }
 
-    $xactions = id(new PholioTransactionQuery())
-      ->setViewer($user)
-      ->withObjectPHIDs(array($mock->getPHID()))
-      ->execute();
-
     $phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $mock->getPHID(),
-      PhabricatorEdgeConfig::TYPE_MOCK_HAS_TASK);
+      PholioMockHasTaskEdgeType::EDGECONST);
     $this->setManiphestTaskPHIDs($phids);
     $phids[] = $mock->getAuthorPHID();
     $this->loadHandles($phids);
@@ -53,14 +48,6 @@ final class PholioMockViewController extends PholioController {
     $engine = id(new PhabricatorMarkupEngine())
       ->setViewer($user);
     $engine->addObject($mock, PholioMock::MARKUP_FIELD_DESCRIPTION);
-    foreach ($xactions as $xaction) {
-      if ($xaction->getComment()) {
-        $engine->addObject(
-          $xaction->getComment(),
-          PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
-      }
-    }
-    $engine->process();
 
     $title = $mock->getName();
 
@@ -80,6 +67,12 @@ final class PholioMockViewController extends PholioController {
       ->setStatus($header_icon, $header_color, $header_name)
       ->setPolicyObject($mock);
 
+    $timeline = $this->buildTransactionTimeline(
+      $mock,
+      new PholioTransactionQuery(),
+      $engine);
+    $timeline->setMock($mock);
+
     $actions = $this->buildActionView($mock);
     $properties = $this->buildPropertyView($mock, $engine, $actions);
 
@@ -98,17 +91,9 @@ final class PholioMockViewController extends PholioController {
       ->setHeaderText(pht('Image'))
       ->appendChild($output);
 
-    $xaction_view = id(new PholioTransactionView())
-      ->setUser($this->getRequest()->getUser())
-      ->setMock($mock)
-      ->setObjectPHID($mock->getPHID())
-      ->setTransactions($xactions)
-      ->setMarkupEngine($engine);
-
     $add_comment = $this->buildAddCommentView($mock, $comment_form_id);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->setActionList($actions);
     $crumbs->addTextCrumb('M'.$mock->getID(), '/M'.$mock->getID());
 
     $object_box = id(new PHUIObjectBoxView())
@@ -124,7 +109,7 @@ final class PholioMockViewController extends PholioController {
       $object_box,
       $output,
       $thumb_grid,
-      $xaction_view,
+      $timeline,
       $add_comment,
     );
 

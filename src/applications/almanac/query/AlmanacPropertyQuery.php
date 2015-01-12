@@ -14,7 +14,7 @@ final class AlmanacPropertyQuery
   }
 
   public function withObjectPHIDs(array $phids) {
-    $this->phids = $phids;
+    $this->objectPHIDs = $phids;
     return $this;
   }
 

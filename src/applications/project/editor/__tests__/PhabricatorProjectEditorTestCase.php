@@ -274,7 +274,9 @@ final class PhabricatorProjectEditorTestCase extends PhabricatorTestCase {
     $xactions = array();
     $xactions[] = id(new PhabricatorProjectTransaction())
       ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-      ->setMetadataValue('edge:type', PhabricatorEdgeConfig::TYPE_PROJ_MEMBER)
+      ->setMetadataValue(
+        'edge:type',
+        PhabricatorProjectProjectHasMemberEdgeType::EDGECONST)
       ->setNewValue($spec);
 
     $editor = id(new PhabricatorProjectTransactionEditor())

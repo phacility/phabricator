@@ -56,15 +56,9 @@ final class PhabricatorConfigManagementDeleteWorkflow
     }
 
     if ($use_database) {
-      $config_entry = id(new PhabricatorConfigOption())
-        ->loadOneWhere(
-          'namespace = %s and key = %s',
-          'default',
-          $key);
-      PhabricatorConfigEditor::deleteConfig(
-        $this->getViewer(),
-        $config_entry,
-        PhabricatorContentSource::newConsoleSource());
+      $config_entry = PhabricatorConfigEntry::loadConfigEntry($key);
+      $config_entry->setIsDeleted(1);
+      $config_entry->save();
     } else {
       $config->deleteKeys(array($key));
     }

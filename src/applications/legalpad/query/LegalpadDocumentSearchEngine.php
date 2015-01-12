@@ -7,7 +7,7 @@ final class LegalpadDocumentSearchEngine
     return pht('Legalpad Documents');
   }
 
-  public function getApplicationClassName() {
+  protected function getApplicationClassName() {
     return 'PhabricatorLegalpadApplication';
   }
 
@@ -120,7 +120,7 @@ final class LegalpadDocumentSearchEngine
     return '/legalpad/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array();
 
     if ($this->requireViewer()->isLoggedIn()) {

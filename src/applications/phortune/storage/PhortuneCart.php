@@ -1,7 +1,9 @@
 <?php
 
 final class PhortuneCart extends PhortuneDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorPolicyInterface {
 
   const STATUS_BUILDING = 'cart:building';
   const STATUS_READY = 'cart:ready';
@@ -594,6 +596,29 @@ final class PhortuneCart extends PhortuneDAO
 
   public function getMetadataValue($key, $default = null) {
     return idx($this->metadata, $key, $default);
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhortuneCartEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhortuneCartTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
   }
 
 

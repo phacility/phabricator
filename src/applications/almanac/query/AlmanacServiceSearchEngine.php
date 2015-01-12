@@ -31,7 +31,7 @@ final class AlmanacServiceSearchEngine
     return '/almanac/service/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array(
       'all' => pht('All Services'),
     );
@@ -73,7 +73,19 @@ final class AlmanacServiceSearchEngine
         ->setObjectName(pht('Service %d', $service->getID()))
         ->setHeader($service->getName())
         ->setHref($service->getURI())
-        ->setObject($service);
+        ->setObject($service)
+        ->addIcon(
+          $service->getServiceType()->getServiceTypeIcon(),
+          $service->getServiceType()->getServiceTypeShortName());
+
+      if ($service->getIsLocked() ||
+          $service->getServiceType()->isClusterServiceType()) {
+        if ($service->getIsLocked()) {
+          $item->addIcon('fa-lock', pht('Locked'));
+        } else {
+          $item->addIcon('fa-unlock-alt red', pht('Unlocked'));
+        }
+      }
 
       $list->addItem($item);
     }

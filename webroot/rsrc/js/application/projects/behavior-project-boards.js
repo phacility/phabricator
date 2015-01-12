@@ -48,8 +48,8 @@ JX.behavior('project-boards', function(config) {
       'project-panel-over-limit': over_limit
     };
     var panel = JX.DOM.findAbove(col, 'div', 'workpanel');
-    for (var k in panel_map) {
-      JX.DOM.alterClass(panel, k, !!panel_map[k]);
+    for (var p in panel_map) {
+      JX.DOM.alterClass(panel, p, !!panel_map[p]);
     }
 
     var color_map = {
@@ -57,8 +57,8 @@ JX.behavior('project-boards', function(config) {
       'phui-tag-shade-blue': (sum > 0 && !over_limit),
       'phui-tag-shade-red': (over_limit)
     };
-    for (var k in color_map) {
-      JX.DOM.alterClass(data.countTagNode, k, !!color_map[k]);
+    for (var c in color_map) {
+      JX.DOM.alterClass(data.countTagNode, c, !!color_map[c]);
     }
   }
 
@@ -204,6 +204,7 @@ JX.behavior('project-boards', function(config) {
     var new_data = JX.Stratcom.getData(new_card);
     var items = finditems(column);
     var edited = false;
+    var remove_index = null;
 
     for (var ii = 0; ii < items.length; ii++) {
       var item = items[ii];
@@ -212,6 +213,9 @@ JX.behavior('project-boards', function(config) {
       var phid = data.objectPHID;
 
       if (phid == new_data.objectPHID) {
+        if (r.data.removeFromBoard) {
+          remove_index = ii;
+        }
         items[ii] = new_card;
         data = new_data;
         edited = true;
@@ -224,6 +228,10 @@ JX.behavior('project-boards', function(config) {
     if (!edited) {
       items[items.length + 1] = new_card;
       new_data.sort = r.data.sortMap[new_data.objectPHID] || new_data.sort;
+    }
+
+    if (remove_index !== null) {
+      items.splice(remove_index, 1);
     }
 
     items.sort(colsort);

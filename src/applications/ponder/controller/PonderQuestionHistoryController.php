@@ -20,27 +20,10 @@ final class PonderQuestionHistoryController extends PonderController {
       return new Aphront404Response();
     }
 
-    $xactions = id(new PonderQuestionTransactionQuery())
-      ->setViewer($viewer)
-      ->withObjectPHIDs(array($question->getPHID()))
-      ->execute();
-
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($viewer);
-    foreach ($xactions as $xaction) {
-      if ($xaction->getComment()) {
-        $engine->addObject(
-          $xaction->getComment(),
-          PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
-      }
-    }
-    $engine->process();
-
-    $timeline = id(new PhabricatorApplicationTransactionView())
-      ->setUser($viewer)
-      ->setObjectPHID($question->getPHID())
-      ->setTransactions($xactions)
-      ->setMarkupEngine($engine);
+    $timeline = $this->buildTransactionTimeline(
+      $question,
+      new PonderQuestionTransactionQuery());
+    $timeline->setShouldTerminate(true);
 
     $qid = $question->getID();
 

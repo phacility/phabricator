@@ -66,9 +66,14 @@ return array(
     'javelin-fx',
     'phabricator-draggable-list',
     'javelin-behavior-phabricator-transaction-list',
-    'javelin-behavior-phabricator-show-all-transactions',
+    'javelin-behavior-phabricator-show-older-transactions',
     'javelin-behavior-phui-timeline-dropdown-menu',
     'javelin-behavior-doorkeeper-tag',
+    'phabricator-title',
+    'javelin-leader',
+    'javelin-websocket',
+    'javelin-behavior-dashboard-async-panel',
+    'javelin-behavior-dashboard-tab-panel',
   ),
   'core.pkg.css' => array(
     'phabricator-core-css',
@@ -126,6 +131,12 @@ return array(
     'sprite-tokens-css',
     'tokens-css',
     'phui-status-list-view-css',
+
+    'phui-feed-story-css',
+    'phabricator-feed-css',
+    'phabricator-dashboard-css',
+    'aphront-multi-column-view-css',
+    'phui-action-header-view-css',
   ),
   'differential.pkg.css' => array(
     'differential-core-view-css',

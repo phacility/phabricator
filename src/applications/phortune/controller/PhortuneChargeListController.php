@@ -61,7 +61,7 @@ final class PhortuneChargeListController
     return $nav;
   }
 
-  public function buildApplicationCrumbs() {
+  protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
     $account = $this->account;

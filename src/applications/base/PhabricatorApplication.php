@@ -9,6 +9,8 @@
  */
 abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
 
+  const MAX_STATUS_ITEMS      = 100;
+
   const GROUP_CORE            = 'core';
   const GROUP_UTILITIES       = 'util';
   const GROUP_ADMIN           = 'admin';
@@ -26,23 +28,7 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
 
 /* -(  Application Information  )-------------------------------------------- */
 
-
-  /**
-   * TODO: This should be abstract, but is not for historical reasons.
-   */
-  public function getName() {
-    phutil_deprecated(
-      'Automatic naming of `PhabricatorApplication` classes.',
-      'You should override the `getName` method.');
-
-    $match = null;
-    $regex = '/^PhabricatorApplication([A-Z][a-zA-Z]*)$/';
-    if (preg_match($regex, get_class($this), $match)) {
-      return $match[1];
-    }
-
-    throw new PhutilMethodNotImplementedException();
-  }
+  public abstract function getName();
 
   public function getShortDescription() {
     return $this->getName().' Application';
@@ -229,6 +215,22 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
    */
   public function loadStatus(PhabricatorUser $user) {
     return array();
+  }
+
+  /**
+   * @return string
+   * @task ui
+   */
+  public static function formatStatusCount(
+    $count,
+    $limit_string = '%s',
+    $base_string = '%d') {
+    if ($count == self::MAX_STATUS_ITEMS) {
+      $count_str = pht($limit_string, ($count - 1).'+');
+    } else {
+      $count_str = pht($base_string, $count);
+    }
+    return $count_str;
   }
 
 

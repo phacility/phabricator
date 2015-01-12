@@ -15,7 +15,10 @@ final class PhabricatorWorkerTaskDetailController
 
     $task = id(new PhabricatorWorkerActiveTask())->load($this->id);
     if (!$task) {
-      $task = id(new PhabricatorWorkerArchiveTask())->load($this->id);
+      $tasks = id(new PhabricatorWorkerArchiveTaskQuery())
+        ->withIDs(array($this->id))
+        ->execute();
+      $task = reset($tasks);
     }
 
     if (!$task) {
@@ -38,8 +41,7 @@ final class PhabricatorWorkerTaskDetailController
           $task->getID(),
           $task->getTaskClass()));
 
-      $actions = $this->buildActionListView($task);
-      $properties = $this->buildPropertyListView($task, $actions);
+      $properties = $this->buildPropertyListView($task);
 
       $object_box = id(new PHUIObjectBoxView())
         ->setHeader($header)
@@ -74,57 +76,12 @@ final class PhabricatorWorkerTaskDetailController
       ));
   }
 
-  private function buildActionListView(PhabricatorWorkerTask $task) {
-    $request = $this->getRequest();
-    $user = $request->getUser();
-    $id = $task->getID();
-
-    $view = id(new PhabricatorActionListView())
-      ->setUser($user)
-      ->setObjectURI($request->getRequestURI());
-
-    if ($task->isArchived()) {
-      $result_success = PhabricatorWorkerArchiveTask::RESULT_SUCCESS;
-      $can_retry = ($task->getResult() != $result_success);
-
-      $view->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Retry Task'))
-          ->setHref($this->getApplicationURI('/task/'.$id.'/retry/'))
-          ->setIcon('fa-refresh')
-          ->setWorkflow(true)
-          ->setDisabled(!$can_retry));
-    } else {
-      $view->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Cancel Task'))
-          ->setHref($this->getApplicationURI('/task/'.$id.'/cancel/'))
-          ->setIcon('fa-times')
-          ->setWorkflow(true));
-    }
-
-    $can_release = (!$task->isArchived()) &&
-                   ($task->getLeaseOwner());
-
-    $view->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Free Lease'))
-        ->setHref($this->getApplicationURI('/task/'.$id.'/release/'))
-        ->setIcon('fa-unlock')
-        ->setWorkflow(true)
-        ->setDisabled(!$can_release));
-
-    return $view;
-  }
-
   private function buildPropertyListView(
-    PhabricatorWorkerTask $task,
-    PhabricatorActionListView $actions) {
+    PhabricatorWorkerTask $task) {
 
     $viewer = $this->getRequest()->getUser();
 
     $view = new PHUIPropertyListView();
-    $view->setActionList($actions);
 
     if ($task->isArchived()) {
       switch ($task->getResult()) {

@@ -139,7 +139,8 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
       case self::FIELD_ASSIGNEE:
         return $this->getTask()->getOwnerPHID();
       case self::FIELD_CC:
-        return $this->getTask()->getCCPHIDs();
+        return PhabricatorSubscribersQuery::loadSubscribersForPHID(
+          $this->getTask()->getPHID());
       case self::FIELD_PROJECTS:
         return PhabricatorEdgeQuery::loadDestinationPHIDs(
           $this->getTask()->getPHID(),

@@ -1,0 +1,22 @@
+{
+  "bitwise": true,
+  "curly": true,
+  "immed": true,
+  "indent": 2,
+  "latedef": true,
+  "newcap": true,
+  "noarg": true,
+  "quotmark": "single",
+  "undef": true,
+  "unused": true,
+
+  "expr": true,
+  "loopfunc": true,
+  "sub": true,
+
+  "globals": {
+    "JX": true,
+    "__DEV__": false
+  },
+  "node": true
+}

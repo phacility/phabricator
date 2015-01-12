@@ -59,7 +59,7 @@ final class PhrictionSearchEngine
     return '/phriction/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array(
       'active' => pht('Active'),
       'updated' => pht('Updated'),

@@ -4,6 +4,7 @@ final class AlmanacInterfaceTableView extends AphrontView {
 
   private $interfaces;
   private $handles;
+  private $canEdit;
 
   public function setHandles(array $handles) {
     $this->handles = $handles;
@@ -23,10 +24,25 @@ final class AlmanacInterfaceTableView extends AphrontView {
     return $this->interfaces;
   }
 
+  public function setCanEdit($can_edit) {
+    $this->canEdit = $can_edit;
+    return $this;
+  }
+
+  public function getCanEdit() {
+    return $this->canEdit;
+  }
+
   public function render() {
     $interfaces = $this->getInterfaces();
     $handles = $this->getHandles();
     $viewer = $this->getUser();
+
+    if ($this->getCanEdit()) {
+      $button_class = 'small grey button';
+    } else {
+      $button_class = 'small grey button disabled';
+    }
 
     $rows = array();
     foreach ($interfaces as $interface) {
@@ -38,7 +54,7 @@ final class AlmanacInterfaceTableView extends AphrontView {
         phutil_tag(
           'a',
           array(
-            'class' => 'small grey button',
+            'class' => $button_class,
             'href' => '/almanac/interface/edit/'.$interface->getID().'/',
           ),
           pht('Edit')),

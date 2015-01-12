@@ -55,11 +55,9 @@ final class PhabricatorConfigManagementMigrateWorkflow
               'Skipping option "%s"; already in database config.', $key)."\n");
             continue;
           } else {
-            PhabricatorConfigEditor::storeNewValue(
-              $this->getViewer(),
-              id(new PhabricatorConfigEntry())
-              ->loadOneWhere('namespace = %s AND key = %s', 'default', $key),
-              PhabricatorContentSource::newConsoleSource());
+            $config_entry = PhabricatorConfigEntry::loadConfigEntry($key);
+            $config_entry->setValue($value);
+            $config_entry->save();
             $key_count++;
             $console->writeOut(pht(
               'Migrated option "%s" from file to database config.', $key)."\n");

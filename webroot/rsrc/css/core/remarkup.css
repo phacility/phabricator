@@ -71,7 +71,7 @@
   margin: 12px 0 12px 30px;
 }
 
-.phabricator-remarkup .remarkup-list-with-checkmarks {
+.phabricator-remarkup ul.remarkup-list-with-checkmarks {
   list-style: none;
   margin-left: 18px;
 }
@@ -152,7 +152,7 @@
 
 .phabricator-remarkup blockquote {
   border-left: 3px solid {$lightbluetext};
-  color: {$bluetext};
+  color: {$darkbluetext};
   font-style:  italic;
   margin: 4px 0 12px 0;
   padding: 8px 12px;
@@ -206,6 +206,11 @@
 .aphront-panel-preview .phabricator-remarkup-mention-unknown {
   font-weight: bold;
   background: #ffaaaa;
+}
+
+.phabricator-remarkup-mention-nopermission .phui-tag-core {
+  background: {$lightgreybackground};
+  color: {$lightgreytext};
 }
 
 .phabricator-remarkup .remarkup-note {

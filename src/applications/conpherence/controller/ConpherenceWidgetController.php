@@ -60,7 +60,6 @@ final class ConpherenceWidgetController extends ConpherenceController {
   }
 
   private function renderWidgetPaneContent() {
-    require_celerity_resource('sprite-conpherence-css');
     $conpherence = $this->getConpherence();
 
     $widgets = array();

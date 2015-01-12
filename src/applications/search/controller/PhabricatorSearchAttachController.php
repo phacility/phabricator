@@ -143,6 +143,8 @@ final class PhabricatorSearchAttachController
     $targets = id(new ManiphestTaskQuery())
       ->setViewer($user)
       ->withPHIDs(array_keys($phids))
+      ->needSubscriberPHIDs(true)
+      ->needProjectPHIDs(true)
       ->execute();
 
     if (empty($targets)) {
@@ -156,9 +158,17 @@ final class PhabricatorSearchAttachController
       ->setContinueOnMissingFields(true);
 
     $cc_vector = array();
-    $cc_vector[] = $task->getCCPHIDs();
+    // since we loaded this via a generic object query, go ahead and get the
+    // attach the subscriber and project phids now
+    $task->attachSubscriberPHIDs(
+      PhabricatorSubscribersQuery::loadSubscribersForPHID($task->getPHID()));
+    $task->attachProjectPHIDs(
+      PhabricatorEdgeQuery::loadDestinationPHIDs($task->getPHID(),
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST));
+
+    $cc_vector[] = $task->getSubscriberPHIDs();
     foreach ($targets as $target) {
-      $cc_vector[] = $target->getCCPHIDs();
+      $cc_vector[] = $target->getSubscriberPHIDs();
       $cc_vector[] = array(
         $target->getAuthorPHID(),
         $target->getOwnerPHID(),
@@ -178,8 +188,8 @@ final class PhabricatorSearchAttachController
     $all_ccs = array_unique($all_ccs);
 
     $add_ccs = id(new ManiphestTransaction())
-      ->setTransactionType(ManiphestTransaction::TYPE_CCS)
-      ->setNewValue($all_ccs);
+      ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+      ->setNewValue(array('=' => $all_ccs));
 
     $merged_from_txn = id(new ManiphestTransaction())
       ->setTransactionType(ManiphestTransaction::TYPE_MERGED_FROM)
@@ -282,16 +292,16 @@ final class PhabricatorSearchAttachController
       ),
       $t_task => array(
         $t_cmit => ManiphestTaskHasCommitEdgeType::EDGECONST,
-        $t_task => PhabricatorEdgeConfig::TYPE_TASK_DEPENDS_ON_TASK,
+        $t_task => ManiphestTaskDependsOnTaskEdgeType::EDGECONST,
         $t_drev => ManiphestTaskHasRevisionEdgeType::EDGECONST,
-        $t_mock => PhabricatorEdgeConfig::TYPE_TASK_HAS_MOCK,
+        $t_mock => ManiphestTaskHasMockEdgeType::EDGECONST,
       ),
       $t_drev => array(
-        $t_drev => PhabricatorEdgeConfig::TYPE_DREV_DEPENDS_ON_DREV,
+        $t_drev => DifferentialRevisionDependsOnRevisionEdgeType::EDGECONST,
         $t_task => DifferentialRevisionHasTaskEdgeType::EDGECONST,
       ),
       $t_mock => array(
-        $t_task => PhabricatorEdgeConfig::TYPE_MOCK_HAS_TASK,
+        $t_task => PholioMockHasTaskEdgeType::EDGECONST,
       ),
     );
 

@@ -188,7 +188,9 @@ final class DiffusionCommitHookEngine extends Phobject {
           'emailPHIDs' => array_values($this->emailPHIDs),
           'info' => $this->loadCommitInfoForWorker($all_updates),
         ),
-        PhabricatorWorker::PRIORITY_ALERTS);
+        array(
+          'priority' => PhabricatorWorker::PRIORITY_ALERTS,
+        ));
     }
 
     return 0;
@@ -443,7 +445,9 @@ final class DiffusionCommitHookEngine extends Phobject {
         $ref_new);
     }
 
-    foreach (Futures($futures)->limit(8) as $key => $future) {
+    $futures = id(new FutureIterator($futures))
+      ->limit(8);
+    foreach ($futures as $key => $future) {
 
       // If 'old' and 'new' have no common ancestors (for example, a force push
       // which completely rewrites a ref), `git merge-base` will exit with
@@ -552,7 +556,9 @@ final class DiffusionCommitHookEngine extends Phobject {
     }
 
     $content_updates = array();
-    foreach (Futures($futures)->limit(8) as $key => $future) {
+    $futures = id(new FutureIterator($futures))
+      ->limit(8);
+    foreach ($futures as $key => $future) {
       list($stdout) = $future->resolvex();
 
       if (!strlen(trim($stdout))) {
@@ -707,7 +713,7 @@ final class DiffusionCommitHookEngine extends Phobject {
 
     // Resolve all of the futures now. We don't need the 'commits' future yet,
     // but it simplifies the logic to just get it out of the way.
-    foreach (Futures($futures) as $future) {
+    foreach (new FutureIterator($futures) as $future) {
       $future->resolve();
     }
 
@@ -780,7 +786,7 @@ final class DiffusionCommitHookEngine extends Phobject {
         }
 
         $head_map = array();
-        foreach (Futures($dfutures) as $future_head => $dfuture) {
+        foreach (new FutureIterator($dfutures) as $future_head => $dfuture) {
           list($stdout) = $dfuture->resolvex();
           $descendant_heads = array_filter(explode("\1", $stdout));
           if ($descendant_heads) {
@@ -1115,7 +1121,8 @@ final class DiffusionCommitHookEngine extends Phobject {
 
     $parser = new ArcanistDiffParser();
     $changes = $parser->parseDiff($raw_diff);
-    $diff = DifferentialDiff::newFromRawChanges($changes);
+    $diff = DifferentialDiff::newEphemeralFromRawChanges(
+      $changes);
     return $diff->getChangesets();
   }
 

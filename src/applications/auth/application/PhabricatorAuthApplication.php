@@ -48,7 +48,7 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
       $item = id(new PHUIListItemView())
         ->addClass('core-menu-item')
         ->setName(pht('Log Out'))
-        ->setIcon('logout-sm')
+        ->setIcon('fa-sign-out')
         ->setWorkflow(true)
         ->setHref('/logout/')
         ->setSelected(($controller instanceof PhabricatorLogoutController))
@@ -60,12 +60,17 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
         // Don't show the "Login" item on auth controllers, since they're
         // generally all related to logging in anyway.
       } else {
+        $uri = new PhutilURI('/auth/start/');
+        if ($controller) {
+          $path = $controller->getRequest()->getPath();
+          $uri->setQueryParam('next', $path);
+        }
         $item = id(new PHUIListItemView())
           ->addClass('core-menu-item')
           ->setName(pht('Log In'))
           // TODO: Login icon?
-          ->setIcon('power')
-          ->setHref('/auth/start/')
+          ->setIcon('fa-sign-in')
+          ->setHref($uri)
           ->setAural(pht('Log In'))
           ->setOrder(900);
         $items[] = $item;

@@ -142,7 +142,7 @@ final class DiffusionLowLevelResolveRefsQuery
     }
 
     $results = array();
-    foreach (Futures($futures) as $ref => $future) {
+    foreach (new FutureIterator($futures) as $ref => $future) {
       try {
         list($stdout) = $future->resolvex();
       } catch (CommandException $ex) {

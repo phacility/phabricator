@@ -2,20 +2,14 @@
 
 final class DiffusionPushLogListController extends DiffusionPushLogController {
 
-  private $queryKey;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->queryKey = idx($data, 'queryKey');
-  }
-
-  public function processRequest() {
+  protected function processDiffusionRequest(AphrontRequest $request) {
     $request = $this->getRequest();
     $controller = id(new PhabricatorApplicationSearchController())
-      ->setQueryKey($this->queryKey)
+      ->setQueryKey($request->getURIData('queryKey'))
       ->setSearchEngine(new PhabricatorRepositoryPushLogSearchEngine())
       ->setNavigation($this->buildSideNavView());
 

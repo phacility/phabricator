@@ -17,7 +17,7 @@ final class AlmanacInterfaceDatasource
 
     $devices = id(new AlmanacDeviceQuery())
       ->setViewer($viewer)
-      ->withDatasourceQuery($raw_query)
+      ->withNamePrefix($raw_query)
       ->execute();
 
     if ($devices) {

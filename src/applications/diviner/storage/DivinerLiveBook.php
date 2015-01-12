@@ -57,7 +57,7 @@ final class DivinerLiveBook extends DivinerDAO
   }
 
   public function getGroupName($group) {
-    $groups = $this->getConfig('groups');
+    $groups = $this->getConfig('groups', array());
     $spec = idx($groups, $group, array());
     return idx($spec, 'name', $group);
   }

@@ -6,8 +6,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
   private $lintMessages;
   private $coverage;
 
-  public function processRequest() {
-    $request = $this->getRequest();
+  protected function processDiffusionRequest(AphrontRequest $request) {
     $drequest = $this->getDiffusionRequest();
     $viewer = $request->getUser();
 
@@ -167,7 +166,6 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
       ),
       array(
         'title' => $basename,
-        'device' => false,
       ));
   }
 

@@ -44,7 +44,7 @@ final class PhabricatorDashboardQuery
         ->withSourcePHIDs(mpull($dashboards, 'getPHID'))
         ->withEdgeTypes(
           array(
-            PhabricatorEdgeConfig::TYPE_DASHBOARD_HAS_PANEL,
+            PhabricatorDashboardDashboardHasPanelEdgeType::EDGECONST,
           ));
       $edge_query->execute();
 

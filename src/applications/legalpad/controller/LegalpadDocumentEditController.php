@@ -143,20 +143,22 @@ final class LegalpadDocumentEditController extends LegalpadController {
     $form
       ->appendChild(
         id(new PhabricatorRemarkupControl())
-        ->setID('preamble')
-        ->setLabel(pht('Preamble'))
-        ->setValue($v_preamble)
-        ->setName('preamble')
-        ->setCaption(
-          pht('Optional help text for users signing this document.')))
+          ->setUser($user)
+          ->setID('preamble')
+          ->setLabel(pht('Preamble'))
+          ->setValue($v_preamble)
+          ->setName('preamble')
+          ->setCaption(
+            pht('Optional help text for users signing this document.')))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
-        ->setID('document-text')
-        ->setLabel(pht('Document Body'))
-        ->setError($e_text)
-        ->setValue($text)
-        ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
-        ->setName('text'));
+          ->setUser($user)
+          ->setID('document-text')
+          ->setLabel(pht('Document Body'))
+          ->setError($e_text)
+          ->setValue($text)
+          ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
+          ->setName('text'));
 
     $policies = id(new PhabricatorPolicyQuery())
       ->setViewer($user)
@@ -187,7 +189,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
       $title = pht('Create Document');
       $short = pht('Create');
     } else {
-      $submit->setValue(pht('Edit Document'));
+      $submit->setValue(pht('Save Document'));
       $submit->addCancelButton(
           $this->getApplicationURI('view/'.$document->getID()));
       $title = pht('Edit Document');

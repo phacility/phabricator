@@ -2,7 +2,7 @@
 
 final class PhabricatorAccessLog {
 
-  static $log;
+  private static $log;
 
   public static function init() {
     // NOTE: This currently has no effect, but some day we may reuse PHP

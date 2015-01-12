@@ -163,6 +163,7 @@ final class PhabricatorSlowvoteEditController
           ->setError($e_question))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
+          ->setUser($user)
           ->setLabel(pht('Description'))
           ->setName('description')
           ->setValue($v_description))

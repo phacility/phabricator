@@ -15,6 +15,7 @@ final class DifferentialCreateRawDiffConduitAPIMethod
     return array(
       'diff' => 'required string',
       'repositoryPHID' => 'optional string',
+      'viewPolicy' => 'optional string',
     );
   }
 
@@ -45,7 +46,7 @@ final class DifferentialCreateRawDiffConduitAPIMethod
 
     $parser = new ArcanistDiffParser();
     $changes = $parser->parseDiff($raw_diff);
-    $diff = DifferentialDiff::newFromRawChanges($changes);
+    $diff = DifferentialDiff::newFromRawChanges($viewer, $changes);
 
     $diff_data_dict = array(
       'creationMethod' => 'web',
@@ -58,9 +59,17 @@ final class DifferentialCreateRawDiffConduitAPIMethod
       ->setTransactionType(DifferentialDiffTransaction::TYPE_DIFF_CREATE)
       ->setNewValue($diff_data_dict),);
 
+    if ($request->getValue('viewPolicy')) {
+      $xactions[] = id(new DifferentialTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
+        ->setNewValue($request->getValue('viewPolicy'));
+    }
+
     id(new DifferentialDiffEditor())
       ->setActor($viewer)
       ->setContentSourceFromConduitRequest($request)
+      ->setContinueOnNoEffect(true)
+      ->setLookupRepository(false) // respect user choice
       ->applyTransactions($diff, $xactions);
 
     return $this->buildDiffInfoDictionary($diff);

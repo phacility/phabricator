@@ -20,7 +20,11 @@ final class PhabricatorTaskmasterDaemon extends PhabricatorDaemon {
           $ex = $task->getExecutionException();
           if ($ex) {
             if ($ex instanceof PhabricatorWorkerPermanentFailureException) {
-              $this->log("Task {$id} failed permanently.");
+              $this->log(
+                pht(
+                  'Task %s failed permanently: %s',
+                  $id,
+                  $ex->getMessage()));
             } else if ($ex instanceof PhabricatorWorkerYieldException) {
               $this->log(pht('Task %s yielded.', $id));
             } else {

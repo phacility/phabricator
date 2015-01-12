@@ -122,7 +122,7 @@ final class PhabricatorCommitSearchEngine
     return '/audit/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array();
 
     if ($this->requireViewer()->isLoggedIn()) {

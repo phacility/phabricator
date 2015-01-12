@@ -6,7 +6,7 @@ final class PhrequentSearchEngine extends PhabricatorApplicationSearchEngine {
     return pht('Phrequent Time');
   }
 
-  public function getApplicationClassName() {
+  protected function getApplicationClassName() {
     return 'PhabricatorPhrequentApplication';
   }
 
@@ -91,7 +91,7 @@ final class PhrequentSearchEngine extends PhabricatorApplicationSearchEngine {
     return '/phrequent/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     return array(
       'tracking' => pht('Currently Tracking'),
       'all' => pht('All Tracked'),

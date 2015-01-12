@@ -86,9 +86,15 @@ div.jx-tokenizer-container-focused {
   outline: 0;
   /* IE6-9 */
 
-  -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(82,168,236,.6);
-  -moz-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(82,168,236,.6);
-  box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(82,168,236,.6);
+  -webkit-box-shadow:
+    inset 0 1px 1px rgba(0,0,0,.075),
+    0 0 8px rgba(82,168,236,.6);
+  -moz-box-shadow:
+    inset 0 1px 1px rgba(0,0,0,.075),
+    0 0 8px rgba(82,168,236,.6);
+  box-shadow:
+    inset 0 1px 1px rgba(0,0,0,.075),
+    0 0 8px rgba(82,168,236,.6);
 }
 input[type="radio"],
 input[type="checkbox"] {

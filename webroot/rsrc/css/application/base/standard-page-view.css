@@ -18,7 +18,7 @@
   margin: 4px 16px;
   padding: 12px 0;
   border-top: 1px solid {$lightgreyborder};
-  color: {$lightgreytext};
+  color: {$greytext};
 }
 
 .device-desktop .has-local-nav + .phabricator-standard-page-footer {

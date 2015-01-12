@@ -2,6 +2,7 @@
 
 final class PonderAnswer extends PonderDAO
   implements
+    PhabricatorApplicationTransactionInterface,
     PhabricatorMarkupInterface,
     PonderVotableInterface,
     PhabricatorPolicyInterface,
@@ -112,6 +113,30 @@ final class PonderAnswer extends PonderDAO
     return self::MARKUP_FIELD_CONTENT;
   }
 
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PonderAnswerEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PonderAnswerTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
+  }
+
+
   // Markup interface
 
   public function getMarkupFieldKey($field) {
@@ -141,7 +166,7 @@ final class PonderAnswer extends PonderDAO
 
   // votable interface
   public function getUserVoteEdgeType() {
-    return PhabricatorEdgeConfig::TYPE_VOTING_USER_HAS_ANSWER;
+    return PonderVotingUserHasAnswerEdgeType::EDGECONST;
   }
 
   public function getVotablePHID() {

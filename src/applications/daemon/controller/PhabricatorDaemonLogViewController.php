@@ -163,6 +163,7 @@ final class PhabricatorDaemonLogViewController
     $view->addProperty(pht('Daemon Class'), $daemon->getDaemon());
     $view->addProperty(pht('Host'), $daemon->getHost());
     $view->addProperty(pht('PID'), $daemon->getPID());
+    $view->addProperty(pht('Running as'), $daemon->getRunningAsUser());
     $view->addProperty(pht('Started'), phabricator_datetime($c_epoch, $viewer));
     $view->addProperty(
       pht('Seen'),

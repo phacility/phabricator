@@ -82,6 +82,10 @@ final class PhabricatorUser
    * @return bool True if this is a standard, usable account.
    */
   public function isUserActivated() {
+    if ($this->isOmnipotent()) {
+      return true;
+    }
+
     if ($this->getIsDisabled()) {
       return false;
     }
@@ -941,6 +945,10 @@ EOBODY;
       // Otherwise, take them to the administrative panel for this user.
       return '/settings/'.$this->getID().'/panel/ssh/';
     }
+  }
+
+  public function getSSHKeyDefaultName() {
+    return 'id_rsa_phabricator';
   }
 
 }

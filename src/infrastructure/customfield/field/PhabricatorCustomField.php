@@ -1003,12 +1003,10 @@ abstract class PhabricatorCustomField {
   }
 
   public function getApplicationTransactionTitleForFeed(
-    PhabricatorApplicationTransaction $xaction,
-    PhabricatorFeedStory $story) {
+    PhabricatorApplicationTransaction $xaction) {
     if ($this->proxy) {
       return $this->proxy->getApplicationTransactionTitleForFeed(
-        $xaction,
-        $story);
+        $xaction);
     }
 
     $author_phid = $xaction->getAuthorPHID();

@@ -30,7 +30,9 @@ foreach ($input as $file) {
   $futures[$file] = ctags_get_parser_future($file);
 }
 
-foreach (Futures($futures)->limit(8) as $file => $future) {
+$futures = id(new FutureIterator($futures))
+  ->limit(8);
+foreach ($futures as $file => $future) {
   $tags = $future->resolve();
   $tags = explode("\n", $tags[1]);
 

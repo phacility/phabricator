@@ -54,12 +54,23 @@ final class PhabricatorProjectUIEventListener
 
       require_celerity_resource('maniphest-task-summary-css');
 
-      $positions = id(new PhabricatorProjectColumnPositionQuery())
+      $positions_query = id(new PhabricatorProjectColumnPositionQuery())
         ->setViewer($user)
         ->withBoardPHIDs($project_phids)
         ->withObjectPHIDs(array($object->getPHID()))
-        ->needColumns(true)
+        ->needColumns(true);
+
+      // This is important because positions will be created "on demand"
+      // based on the set of columns. If we don't specify it, positions
+      // won't be created.
+      $columns = id(new PhabricatorProjectColumnQuery())
+        ->setViewer($user)
+        ->withProjectPHIDs($project_phids)
         ->execute();
+      if ($columns) {
+        $positions_query->withColumns($columns);
+      }
+      $positions = $positions_query->execute();
       $positions = mpull($positions, null, 'getBoardPHID');
 
       foreach ($project_phids as $project_phid) {

@@ -4,6 +4,12 @@ final class DifferentialDiffEditor
   extends PhabricatorApplicationTransactionEditor {
 
   private $diffDataDict;
+  private $lookupRepository = true;
+
+  public function setLookupRepository($bool) {
+    $this->lookupRepository = $bool;
+    return $this;
+  }
 
   public function getEditorApplicationClass() {
     return 'PhabricatorDifferentialApplication';
@@ -16,6 +22,7 @@ final class DifferentialDiffEditor
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
+    $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = DifferentialDiffTransaction::TYPE_DIFF_CREATE;
 
     return $types;
@@ -55,6 +62,9 @@ final class DifferentialDiffEditor
         $dict = $this->diffDataDict;
         $this->updateDiffFromDict($object, $dict);
         return;
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+        $object->setViewPolicy($xaction->getNewValue());
+        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -66,6 +76,7 @@ final class DifferentialDiffEditor
 
     switch ($xaction->getTransactionType()) {
       case DifferentialDiffTransaction::TYPE_DIFF_CREATE:
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
         return;
     }
 
@@ -80,7 +91,7 @@ final class DifferentialDiffEditor
     // is old, or couldn't figure out which repository the working copy
     // belongs to), apply heuristics to try to figure it out.
 
-    if (!$object->getRepositoryPHID()) {
+    if ($this->lookupRepository && !$object->getRepositoryPHID()) {
       $repository = id(new DifferentialRepositoryLookup())
         ->setDiff($object)
         ->setViewer($this->getActor())

@@ -43,7 +43,9 @@ final class PHUIInfoPanelView extends AphrontView {
         $tds[] = $this->renderCell($cell);
         unset($this->infoblock[$key]);
         $ii++;
-        if ($ii > $this->columns) break;
+        if ($ii > $this->columns) {
+          break;
+        }
       }
       $trs[] = phutil_tag(
         'tr',

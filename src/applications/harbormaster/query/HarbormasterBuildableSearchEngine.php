@@ -7,7 +7,7 @@ final class HarbormasterBuildableSearchEngine
     return pht('Harbormaster Buildables');
   }
 
-  public function getApplicationClassName() {
+  protected function getApplicationClassName() {
     return 'PhabricatorHarbormasterApplication';
   }
 
@@ -159,7 +159,7 @@ final class HarbormasterBuildableSearchEngine
     return '/harbormaster/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     return array(
       'all' => pht('All Buildables'),
     );

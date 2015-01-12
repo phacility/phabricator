@@ -144,8 +144,7 @@
 .phui-form-view .aphront-form-caption {
   font-size: 12px;
   color: {$bluetext};
-  padding: 8px 4px;
-  text-align: right;
+  padding: 8px 0;
   margin-right: 20%;
   margin-left: 20%;
   -webkit-font-smoothing: antialiased;
@@ -154,7 +153,7 @@
 
 .device-phone .phui-form-view .aphront-form-caption,
 .phui-form-full-width .phui-form-view .aphront-form-caption {
-  margin-right: 0%;
+  margin: 0;
 }
 
 /* override for when inside an aphront-panel-view */

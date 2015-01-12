@@ -1,7 +1,10 @@
 <?php
 
-final class PhabricatorAuthProviderConfig extends PhabricatorAuthDAO
-  implements PhabricatorPolicyInterface {
+final class PhabricatorAuthProviderConfig
+  extends PhabricatorAuthDAO
+  implements
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorPolicyInterface {
 
   protected $providerClass;
   protected $providerType;
@@ -20,7 +23,7 @@ final class PhabricatorAuthProviderConfig extends PhabricatorAuthDAO
 
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
-      PhabricatorPHIDConstants::PHID_TYPE_AUTH);
+      PhabricatorAuthAuthProviderPHIDType::TYPECONST);
   }
 
   public function getConfiguration() {
@@ -76,6 +79,29 @@ final class PhabricatorAuthProviderConfig extends PhabricatorAuthDAO
       }
     }
     return $this->provider;
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhabricatorAuthProviderConfigEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhabricatorAuthProviderConfigTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
   }
 
 

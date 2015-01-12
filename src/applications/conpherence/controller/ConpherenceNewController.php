@@ -87,10 +87,11 @@ final class ConpherenceNewController extends ConpherenceController {
         ->setError($e_participants))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
-        ->setName('message')
-        ->setValue($message)
-        ->setLabel(pht('Message'))
-        ->setError($e_message));
+          ->setUser($user)
+          ->setName('message')
+          ->setValue($message)
+          ->setLabel(pht('Message'))
+          ->setError($e_message));
 
     $dialog->appendChild($form);
 

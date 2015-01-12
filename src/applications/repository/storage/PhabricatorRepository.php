@@ -6,6 +6,7 @@
  */
 final class PhabricatorRepository extends PhabricatorRepositoryDAO
   implements
+    PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
     PhabricatorFlaggableInterface,
     PhabricatorMarkupInterface,
@@ -40,6 +41,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   const BECAUSE_NOT_ON_AUTOCLOSE_BRANCH = 'auto/nobranch';
   const BECAUSE_BRANCH_UNTRACKED = 'auto/notrack';
   const BECAUSE_BRANCH_NOT_AUTOCLOSE = 'auto/noclose';
+  const BECAUSE_AUTOCLOSE_FORCED = 'auto/forced';
 
   protected $name;
   protected $callsign;
@@ -51,6 +53,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   protected $versionControlSystem;
   protected $details = array();
   protected $credentialPHID;
+  protected $almanacServicePHID;
 
   private $commitCount = self::ATTACHABLE;
   private $mostRecentCommit = self::ATTACHABLE;
@@ -85,6 +88,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
         'uuid' => 'text64?',
         'pushPolicy' => 'policy',
         'credentialPHID' => 'phid?',
+        'almanacServicePHID' => 'phid?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
@@ -1509,6 +1513,29 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     }
 
     return $smart_wait;
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhabricatorRepositoryEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhabricatorRepositoryTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
   }
 
 

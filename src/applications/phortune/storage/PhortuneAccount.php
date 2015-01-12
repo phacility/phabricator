@@ -7,7 +7,9 @@
  * a personal account).
  */
 final class PhortuneAccount extends PhortuneDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorPolicyInterface {
 
   protected $name;
 
@@ -92,6 +94,29 @@ final class PhortuneAccount extends PhortuneDAO
   public function attachMemberPHIDs(array $phids) {
     $this->memberPHIDs = $phids;
     return $this;
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhortuneAccountEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhortuneAccountTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
   }
 
 

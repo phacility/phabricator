@@ -117,7 +117,7 @@ final class PhabricatorEnv {
     $translation = PhabricatorEnv::newObjectFromConfig('translation.provider');
     PhutilTranslator::getInstance()
       ->setLanguage($translation->getLanguage())
-      ->addTranslations($translation->getTranslations());
+      ->addTranslations($translation->getCleanTranslations());
   }
 
   private static function buildConfigurationSourceStack() {
@@ -528,6 +528,32 @@ final class PhabricatorEnv {
     return true;
   }
 
+  public static function isClusterRemoteAddress() {
+    $address = idx($_SERVER, 'REMOTE_ADDR');
+    if (!$address) {
+      throw new Exception(
+        pht(
+          'Unable to test remote address against cluster whitelist: '.
+          'REMOTE_ADDR is not defined.'));
+    }
+
+    return self::isClusterAddress($address);
+  }
+
+  public static function isClusterAddress($address) {
+    $cluster_addresses = PhabricatorEnv::getEnvConfig('cluster.addresses');
+    if (!$cluster_addresses) {
+      throw new Exception(
+        pht(
+          'Phabricator is not configured to serve cluster requests. '.
+          'Set `cluster.addresses` in the configuration to whitelist '.
+          'cluster hosts before sending requests that use a cluster '.
+          'authentication mechanism.'));
+    }
+
+    return PhutilCIDRList::newList($cluster_addresses)
+      ->containsAddress($address);
+  }
 
 /* -(  Internals  )---------------------------------------------------------- */
 

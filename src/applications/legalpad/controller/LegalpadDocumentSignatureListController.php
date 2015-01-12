@@ -64,7 +64,7 @@ final class LegalpadDocumentSignatureListController extends LegalpadController {
     return $nav;
   }
 
-  public function buildApplicationCrumbs() {
+  protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
     if ($this->document) {

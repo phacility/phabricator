@@ -56,7 +56,7 @@ final class ReleephBranchSearchEngine
     return '/releeph/product/'.$this->getProduct()->getID().'/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array(
       'open' => pht('Open'),
       'all' => pht('All'),

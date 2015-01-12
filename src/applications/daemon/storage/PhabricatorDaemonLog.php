@@ -13,6 +13,7 @@ final class PhabricatorDaemonLog extends PhabricatorDaemonDAO
   protected $daemon;
   protected $host;
   protected $pid;
+  protected $runningAsUser;
   protected $argv;
   protected $explicitArgv = array();
   protected $envHash;
@@ -28,6 +29,7 @@ final class PhabricatorDaemonLog extends PhabricatorDaemonDAO
         'daemon' => 'text255',
         'host' => 'text255',
         'pid' => 'uint32',
+        'runningAsUser' => 'text255?',
         'envHash' => 'bytes40',
         'status' => 'text8',
       ),

@@ -7,6 +7,7 @@ final class DifferentialDiffTestCase extends ArcanistPhutilTestCase {
     $parser = new ArcanistDiffParser();
 
     $diff = DifferentialDiff::newFromRawChanges(
+      PhabricatorUser::getOmnipotentUser(),
       $parser->parseDiff(Filesystem::readFile($root.'lint_engine.diff')));
     $copies = idx(head($diff->getChangesets())->getMetadata(), 'copy:lines');
 
@@ -46,7 +47,9 @@ index 123457..0000000
 {$oblock}
 EODIFF;
 
-    $diff = DifferentialDiff::newFromRawChanges($parser->parseDiff($raw_diff));
+    $diff = DifferentialDiff::newFromRawChanges(
+      PhabricatorUser::getOmnipotentUser(),
+      $parser->parseDiff($raw_diff));
 
     $this->assertTrue(true);
   }

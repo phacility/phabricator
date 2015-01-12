@@ -2,13 +2,7 @@
 
 final class DiffusionCommitEditController extends DiffusionController {
 
-  public function willProcessRequest(array $data) {
-    $data['user'] = $this->getRequest()->getUser();
-    $this->diffusionRequest = DiffusionRequest::newFromDictionary($data);
-  }
-
-  public function processRequest() {
-    $request    = $this->getRequest();
+  protected function processDiffusionRequest(AphrontRequest $request) {
     $user       = $request->getUser();
     $drequest   = $this->getDiffusionRequest();
     $callsign   = $drequest->getRepository()->getCallsign();
@@ -22,7 +16,7 @@ final class DiffusionCommitEditController extends DiffusionController {
     }
 
     $commit_phid        = $commit->getPHID();
-    $edge_type          = PhabricatorEdgeConfig::TYPE_COMMIT_HAS_PROJECT;
+    $edge_type          = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
     $current_proj_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $commit_phid,
       $edge_type);
@@ -30,23 +24,17 @@ final class DiffusionCommitEditController extends DiffusionController {
     $proj_t_values = $handles;
 
     if ($request->isFormPost()) {
+      $xactions = array();
       $proj_phids = $request->getArr('projects');
-      $new_proj_phids = array_values($proj_phids);
-      $rem_proj_phids = array_diff($current_proj_phids,
-                                   $new_proj_phids);
-
-      $editor = id(new PhabricatorEdgeEditor());
-      foreach ($rem_proj_phids as $phid) {
-        $editor->removeEdge($commit_phid, $edge_type, $phid);
-      }
-      foreach ($new_proj_phids as $phid) {
-        $editor->addEdge($commit_phid, $edge_type, $phid);
-      }
-      $editor->save();
-
-      id(new PhabricatorSearchIndexer())
-        ->queueDocumentForIndexing($commit->getPHID());
-
+      $xactions[] = id(new PhabricatorAuditTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+        ->setMetadataValue('edge:type', $edge_type)
+        ->setNewValue(array('=' => array_fuse($proj_phids)));
+      $editor = id(new PhabricatorAuditEditor())
+        ->setActor($user)
+        ->setContinueOnNoEffect(true)
+        ->setContentSourceFromRequest($request);
+      $xactions = $editor->applyTransactions($commit, $xactions);
       return id(new AphrontRedirectResponse())
       ->setURI('/r'.$callsign.$commit->getCommitIdentifier());
     }
@@ -73,6 +61,7 @@ final class DiffusionCommitEditController extends DiffusionController {
         ->setDatasource(new PhabricatorProjectDatasource()));
 
     $reason = $data->getCommitDetail('autocloseReason', false);
+    $reason = PhabricatorRepository::BECAUSE_AUTOCLOSE_FORCED;
     if ($reason !== false) {
       switch ($reason) {
         case PhabricatorRepository::BECAUSE_REPOSITORY_IMPORTING:
@@ -83,6 +72,9 @@ final class DiffusionCommitEditController extends DiffusionController {
           break;
         case PhabricatorRepository::BECAUSE_NOT_ON_AUTOCLOSE_BRANCH:
           $desc = pht('No, Not On Autoclose Branch');
+          break;
+        case PhabricatorRepository::BECAUSE_AUTOCLOSE_FORCED:
+          $desc = pht('Yes, Forced Via bin/repository CLI Tool.');
           break;
         case null:
           $desc = pht('Yes');

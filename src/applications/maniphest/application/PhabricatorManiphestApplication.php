@@ -66,8 +66,6 @@ final class PhabricatorManiphestApplication extends PhabricatorApplication {
         ),
         'export/(?P<key>[^/]+)/' => 'ManiphestExportController',
         'subpriority/' => 'ManiphestSubpriorityController',
-        'subscribe/(?P<action>add|rem)/(?P<id>[1-9]\d*)/'
-          => 'ManiphestSubscribeController',
       ),
     );
   }
@@ -75,16 +73,25 @@ final class PhabricatorManiphestApplication extends PhabricatorApplication {
   public function loadStatus(PhabricatorUser $user) {
     $status = array();
 
+    if (!$user->isLoggedIn()) {
+      return $status;
+    }
+
     $query = id(new ManiphestTaskQuery())
       ->setViewer($user)
       ->withStatuses(ManiphestTaskStatus::getOpenStatusConstants())
-      ->withOwners(array($user->getPHID()));
+      ->withOwners(array($user->getPHID()))
+      ->setLimit(self::MAX_STATUS_ITEMS);
     $count = count($query->execute());
+    $count_str = self::formatStatusCount(
+      $count,
+      '%s Assigned Tasks',
+      '%d Assigned Task(s)');
 
     $type = PhabricatorApplicationStatusView::TYPE_WARNING;
     $status[] = id(new PhabricatorApplicationStatusView())
       ->setType($type)
-      ->setText(pht('%s Assigned Task(s)', new PhutilNumber($count)))
+      ->setText($count_str)
       ->setCount($count);
 
     return $status;

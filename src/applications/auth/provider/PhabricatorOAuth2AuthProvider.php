@@ -159,7 +159,7 @@ abstract class PhabricatorOAuth2AuthProvider
             '%s set the OAuth application secret for this provider.',
             $xaction->renderHandleLink($author_phid));
         }
-      case self::PROPERTY_APP_NOTE:
+      case self::PROPERTY_NOTE:
         if (strlen($old)) {
           return pht(
             '%s updated the OAuth application notes for this provider.',

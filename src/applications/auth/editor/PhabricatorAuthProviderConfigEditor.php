@@ -41,7 +41,7 @@ final class PhabricatorAuthProviderConfigEditor
         return (int)$object->getShouldAllowLink();
       case PhabricatorAuthProviderConfigTransaction::TYPE_UNLINK:
         return (int)$object->getShouldAllowUnlink();
-      case PhabricatorAuthProviderConfigTransaction::TYPE_UNLINK:
+      case PhabricatorAuthProviderConfigTransaction::TYPE_TRUST_EMAILS:
         return (int)$object->getShouldTrustEmails();
       case PhabricatorAuthProviderConfigTransaction::TYPE_PROPERTY:
         $key = $xaction->getMetadataValue(

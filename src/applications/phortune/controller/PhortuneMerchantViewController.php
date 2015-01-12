@@ -43,7 +43,6 @@ final class PhortuneMerchantViewController
     $properties = $this->buildPropertyListView($merchant, $providers);
     $actions = $this->buildActionListView($merchant);
     $properties->setActionList($actions);
-    $crumbs->setActionList($actions);
 
     $provider_list = $this->buildProviderList(
       $merchant,
@@ -53,15 +52,10 @@ final class PhortuneMerchantViewController
       ->setHeader($header)
       ->appendChild($properties);
 
-    $xactions = id(new PhortuneMerchantTransactionQuery())
-      ->setViewer($viewer)
-      ->withObjectPHIDs(array($merchant->getPHID()))
-      ->execute();
-
-    $timeline = id(new PhabricatorApplicationTransactionView())
-      ->setUser($viewer)
-      ->setObjectPHID($merchant->getPHID())
-      ->setTransactions($xactions);
+    $timeline = $this->buildTransactionTimeline(
+      $merchant,
+      new PhortuneMerchantTransactionQuery());
+    $timeline->setShouldTerminate(true);
 
     return $this->buildApplicationPage(
       array(

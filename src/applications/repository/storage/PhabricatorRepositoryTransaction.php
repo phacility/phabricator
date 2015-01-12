@@ -24,6 +24,7 @@ final class PhabricatorRepositoryTransaction
   const TYPE_CREDENTIAL = 'repo:credential';
   const TYPE_DANGEROUS = 'repo:dangerous';
   const TYPE_CLONE_NAME = 'repo:clone-name';
+  const TYPE_SERVICE = 'repo:service';
 
   // TODO: Clean up these legacy transaction types.
   const TYPE_SSH_LOGIN = 'repo:ssh-login';
@@ -52,8 +53,13 @@ final class PhabricatorRepositoryTransaction
 
     switch ($this->getTransactionType()) {
       case self::TYPE_PUSH_POLICY:
-        $phids[] = $old;
-        $phids[] = $new;
+      case self::TYPE_SERVICE:
+        if ($old) {
+          $phids[] = $old;
+        }
+        if ($new) {
+          $phids[] = $new;
+        }
         break;
     }
 
@@ -366,6 +372,26 @@ final class PhabricatorRepositoryTransaction
             $this->renderHandleLink($author_phid),
             $old,
             $new);
+        }
+      case self::TYPE_SERVICE:
+        if (strlen($old) && !strlen($new)) {
+          return pht(
+            '%s moved storage for this repository from %s to local.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($old));
+        } else if (!strlen($old) && strlen($new)) {
+          // TODO: Possibly, we should distinguish between automatic assignment
+          // on creation vs explicit adjustment.
+          return pht(
+            '%s set storage for this repository to %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($new));
+        } else {
+          return pht(
+            '%s moved storage for this repository from %s to %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($old),
+            $this->renderHandleLink($new));
         }
     }
 

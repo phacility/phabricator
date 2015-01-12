@@ -65,7 +65,7 @@ final class HarbormasterCommandBuildStepImplementation
     $build_update = 5;
 
     // Read the next amount of available output every second.
-    $futures = Futures(array($future));
+    $futures = new FutureIterator(array($future));
     foreach ($futures->setUpdateInterval(1) as $key => $future_iter) {
       if ($future_iter === null) {
 

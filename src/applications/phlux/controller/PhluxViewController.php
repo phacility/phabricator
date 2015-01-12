@@ -58,19 +58,10 @@ final class PhluxViewController extends PhluxController {
       ->setActionList($actions)
       ->addProperty(pht('Value'), $display_value);
 
-    $xactions = id(new PhluxTransactionQuery())
-      ->setViewer($user)
-      ->withObjectPHIDs(array($var->getPHID()))
-      ->execute();
-
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($user);
-
-    $xaction_view = id(new PhabricatorApplicationTransactionView())
-      ->setUser($user)
-      ->setObjectPHID($var->getPHID())
-      ->setTransactions($xactions)
-      ->setMarkupEngine($engine);
+    $timeline = $this->buildTransactionTimeline(
+      $var,
+      new PhluxTransactionQuery());
+    $timeline->setShouldTerminate(true);
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
@@ -80,7 +71,7 @@ final class PhluxViewController extends PhluxController {
       array(
         $crumbs,
         $object_box,
-        $xaction_view,
+        $timeline,
       ),
       array(
         'title'  => $title,

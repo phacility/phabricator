@@ -39,7 +39,7 @@ final class DifferentialRequiredSignaturesField
 
     $phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $revision->getPHID(),
-      PhabricatorEdgeConfig::TYPE_OBJECT_NEEDS_SIGNATURE);
+      LegalpadObjectNeedsSignatureEdgeType::EDGECONST);
 
     if ($phids) {
 

@@ -1,105 +1,20 @@
 {
   "version" : 1,
   "sprites" : {
-    "app"              : {
-      "name" : "app",
-      "rule" : ".menu-icon-app",
-      "hash" : "2602e3ab2968d60c7584682e6b25766b"
-    },
-    "app_blue"         : {
-      "name" : "app_blue",
-      "rule" : ".menu-icon-app-blue",
-      "hash" : "e4a998e14f21ae244254f4025324f636"
-    },
-    "arrow-right"      : {
+    "arrow-right" : {
       "name" : "arrow-right",
       "rule" : ".phabricator-crumb-divider",
       "hash" : "87affa58adbe8da437a1cea6ffc5d8a4"
     },
-    "conf-hover"       : {
-      "name" : "conf-hover",
-      "rule" : ".alert-notifications:hover .phabricator-main-menu-message-icon",
-      "hash" : "78795fbf2345fd8f54e66a3b3dea7bcd"
-    },
-    "conf-off"         : {
-      "name" : "conf-off",
-      "rule" : ".alert-notifications .phabricator-main-menu-message-icon",
-      "hash" : "85e76a1e5d717d7d7f0a4e4e92a0b543"
-    },
-    "conf-unseen"      : {
-      "name" : "conf-unseen",
-      "rule" : ".alert-notifications.message-unread .phabricator-main-menu-message-icon",
-      "hash" : "7edd6d68b36f2f46133eb3118f966c6b"
-    },
-    "eye"              : {
+    "eye"         : {
       "name" : "eye",
       "rule" : ".phabricator-main-menu-eye",
       "hash" : "35f24014f23142275574136a63dcb73f"
     },
-    "info-sm"          : {
-      "name" : "info-sm",
-      "rule" : ".menu-icon-info-sm",
-      "hash" : "f87b45771fa5cfd61bfe20cacd84dd24"
-    },
-    "logo"             : {
+    "logo"        : {
       "name" : "logo",
       "rule" : ".phabricator-main-menu-logo",
       "hash" : "668b04729a4b9460b0c89cb6ef6db4d4"
-    },
-    "logout-sm"        : {
-      "name" : "logout-sm",
-      "rule" : ".menu-icon-logout-sm",
-      "hash" : "813cc784e18d5c4622e87210d203e067"
-    },
-    "new"              : {
-      "name" : "new",
-      "rule" : ".menu-icon-new",
-      "hash" : "84cf453396e9fdb82fb965ac74cd86cc"
-    },
-    "new-sm"           : {
-      "name" : "new-sm",
-      "rule" : ".menu-icon-new-sm",
-      "hash" : "795d30ee8ec68eb4d7ceb54e983c8694"
-    },
-    "new_blue"         : {
-      "name" : "new_blue",
-      "rule" : ".menu-icon-new-blue",
-      "hash" : "3cb927000c2bb3a11002377fe5fab9ec"
-    },
-    "power"            : {
-      "name" : "power",
-      "rule" : ".menu-icon-power",
-      "hash" : "f14a923a0ab7c359426defc561227e31"
-    },
-    "search"           : {
-      "name" : "search",
-      "rule" : ".menu-icon-search",
-      "hash" : "f83c83dbe748b94a4853edb6d9d28288"
-    },
-    "search_blue"      : {
-      "name" : "search_blue",
-      "rule" : ".menu-icon-search-blue",
-      "hash" : "96119040bd1c621d1fde30520488c4b8"
-    },
-    "seen_have_unread" : {
-      "name" : "seen_have_unread",
-      "rule" : ".alert-notifications:hover .phabricator-main-menu-alert-icon",
-      "hash" : "7742f97d26f025542d6f162346557871"
-    },
-    "seen_read_all"    : {
-      "name" : "seen_read_all",
-      "rule" : ".alert-notifications .phabricator-main-menu-alert-icon",
-      "hash" : "94d4fea01dbb666bb794feec56f783e5"
-    },
-    "settings-sm"      : {
-      "name" : "settings-sm",
-      "rule" : ".menu-icon-settings-sm",
-      "hash" : "c5fdf1316f114b07cc23ccc0435eb4e2"
-    },
-    "unseen_any"       : {
-      "name" : "unseen_any",
-      "rule" : ".alert-notifications.alert-unread .phabricator-main-menu-alert-icon",
-      "hash" : "6c577a4c2207f9e2250ca3f09fb4fac3"
     }
   },
   "scales"  : [

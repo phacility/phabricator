@@ -26,6 +26,10 @@ final class PhabricatorAlmanacApplication extends PhabricatorApplication {
     return self::GROUP_UTILITIES;
   }
 
+  public function getHelpURI() {
+    return PhabricatorEnv::getDoclink('Almanac User Guide');
+  }
+
   public function isPrototype() {
     return true;
   }
@@ -57,7 +61,8 @@ final class PhabricatorAlmanacApplication extends PhabricatorApplication {
           '(?P<id>\d+)/' => 'AlmanacNetworkViewController',
         ),
         'property/' => array(
-          'edit/(?:(?P<id>\d+)/)?' => 'AlmanacPropertyEditController',
+          'edit/' => 'AlmanacPropertyEditController',
+          'delete/' => 'AlmanacPropertyDeleteController',
         ),
       ),
     );
@@ -72,6 +77,9 @@ final class PhabricatorAlmanacApplication extends PhabricatorApplication {
         'default' => PhabricatorPolicies::POLICY_ADMIN,
       ),
       AlmanacCreateNetworksCapability::CAPABILITY => array(
+        'default' => PhabricatorPolicies::POLICY_ADMIN,
+      ),
+      AlmanacCreateClusterServicesCapability::CAPABILITY => array(
         'default' => PhabricatorPolicies::POLICY_ADMIN,
       ),
     );

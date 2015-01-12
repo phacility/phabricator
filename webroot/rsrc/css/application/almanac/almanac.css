@@ -1,0 +1,7 @@
+/**
+ * @provides almanac-css
+ */
+
+.almanac-default-property-value {
+  color: {$lightgreytext};
+}

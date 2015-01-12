@@ -2,11 +2,11 @@
 
 final class PhabricatorFlagSelectControl extends AphrontFormControl {
 
-  public function getCustomControlClass() {
+  protected function getCustomControlClass() {
     return 'phabricator-flag-select-control';
   }
 
-  public function renderInput() {
+  protected function renderInput() {
     require_celerity_resource('phabricator-flag-css');
 
     $colors = PhabricatorFlagColor::getColorNameMap();

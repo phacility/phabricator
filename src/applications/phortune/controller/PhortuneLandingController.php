@@ -12,7 +12,9 @@ final class PhortuneLandingController extends PhortuneController {
       ->execute();
 
     if (!$accounts) {
-      $account = $this->createUserAccount($user);
+      $account = PhortuneAccount::createNewAccount(
+        $user,
+        PhabricatorContentSource::newFromRequest($request));
       $accounts = array($account);
     }
 

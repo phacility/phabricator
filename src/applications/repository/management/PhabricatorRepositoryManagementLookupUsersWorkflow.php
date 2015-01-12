@@ -33,10 +33,25 @@ final class PhabricatorRepositoryManagementLookupUsersWorkflow
         "%s\n",
         pht('Examining commit %s...', $name));
 
-      $ref = id(new DiffusionLowLevelCommitQuery())
-        ->setRepository($repo)
-        ->withIdentifier($commit->getCommitIdentifier())
-        ->execute();
+      $refs_raw = DiffusionQuery::callConduitWithDiffusionRequest(
+        $this->getViewer(),
+        DiffusionRequest::newFromDictionary(
+          array(
+            'repository' => $repo,
+            'user' => $this->getViewer(),
+          )),
+        'diffusion.querycommits',
+        array(
+          'phids' => array($commit->getPHID()),
+          'bypassCache' => true,
+        ));
+
+      if (empty($refs_raw['data'])) {
+        throw new Exception(
+          pht('Unable to retrieve details for commit "%s"!'));
+      }
+
+      $ref = DiffusionCommitRef::newFromConduitResult(head($refs_raw['data']));
 
       $author = $ref->getAuthor();
       $console->writeOut(

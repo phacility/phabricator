@@ -79,7 +79,7 @@ final class PhortuneCartListController
     return $nav;
   }
 
-  public function buildApplicationCrumbs() {
+  protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
     $merchant = $this->merchant;

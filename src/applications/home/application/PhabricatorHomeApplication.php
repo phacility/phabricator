@@ -62,7 +62,7 @@ final class PhabricatorHomeApplication extends PhabricatorApplication {
 
       $item = id(new PHUIListItemView())
         ->setName(pht('Create New...'))
-        ->setIcon('new-sm')
+        ->setIcon('fa-plus')
         ->addClass('core-menu-item')
         ->setHref('/home/create/')
         ->addSigil('quick-create-menu')

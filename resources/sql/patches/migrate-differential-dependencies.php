@@ -18,7 +18,7 @@ foreach (new LiskMigrationIterator($table) as $rev) {
   foreach ($deps as $dep) {
     $editor->addEdge(
       $rev->getPHID(),
-      PhabricatorEdgeConfig::TYPE_DREV_DEPENDS_ON_DREV,
+      DifferentialRevisionDependsOnRevisionEdgeType::EDGECONST,
       $dep);
   }
   $editor->save();

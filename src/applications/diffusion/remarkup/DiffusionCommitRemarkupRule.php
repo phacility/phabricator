@@ -22,7 +22,6 @@ final class DiffusionCommitRemarkupRule extends PhabricatorObjectRemarkupRule {
       ->withIdentifiers($ids);
 
     $query->execute();
-
     return $query->getIdentifierMap();
   }
 

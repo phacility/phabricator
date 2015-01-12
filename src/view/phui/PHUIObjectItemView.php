@@ -259,10 +259,6 @@ final class PHUIObjectItemView extends AphrontTagView {
       $item_classes[] = 'phui-object-item-with-foot-icons';
     }
 
-    if ($this->bylines) {
-      $item_classes[] = 'phui-object-item-with-bylines';
-    }
-
     if ($this->actions) {
       $n = count($this->actions);
       $item_classes[] = 'phui-object-item-with-actions';
@@ -333,6 +329,7 @@ final class PHUIObjectItemView extends AphrontTagView {
       array(
         'href' => $this->href,
         'class' => 'phui-object-item-link',
+        'title' => ($this->href) ? $this->header : null,
       ),
       $this->header);
 
@@ -378,16 +375,13 @@ final class PHUIObjectItemView extends AphrontTagView {
           $icon_href = phutil_tag(
             'a',
             array('href' => $spec['attributes']['href']),
-            array($label, $icon));
+            array($icon, $label));
         } else {
-          $icon_href = array($label, $icon);
+          $icon_href = array($icon, $label);
         }
 
         $classes = array();
         $classes[] = 'phui-object-item-icon';
-        if ($spec['icon'] == 'none') {
-          $classes[] = 'phui-object-item-icon-none';
-        }
         if (isset($spec['attributes']['class'])) {
           $classes[] = $spec['attributes']['class'];
         }
@@ -562,6 +556,36 @@ final class PHUIObjectItemView extends AphrontTagView {
         $this->fontIcon);
     }
 
+    /* Build a fake table */
+    $column1 = phutil_tag(
+      'div',
+      array(
+        'class' => 'phui-object-item-col1',
+      ),
+      array(
+        $header,
+        $content,
+      ));
+
+    $column2 = null;
+    if ($icons || $bylines) {
+      $column2 = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-object-item-col2',
+        ),
+        array(
+          $icons,
+          $bylines,));
+    }
+
+    $table = phutil_tag(
+      'div',
+      array(
+        'class' => 'phui-object-item-table',
+      ),
+      phutil_tag_div('phui-object-item-table-row', array($column1, $column2)));
+
     $box = phutil_tag(
       'div',
       array(
@@ -569,10 +593,7 @@ final class PHUIObjectItemView extends AphrontTagView {
       ),
       array(
         $grippable,
-        $header,
-        $icons,
-        $bylines,
-        $content,
+        $table,
       ));
 
     $actions = array();

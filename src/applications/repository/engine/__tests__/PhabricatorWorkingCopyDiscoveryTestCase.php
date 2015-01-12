@@ -15,6 +15,8 @@ final class PhabricatorWorkingCopyDiscoveryTestCase
   }
 
   public function testMercurialCommitDiscovery() {
+    $this->requireBinaryForTest('hg');
+
     $refs = $this->discoverRefs('HT');
     $this->assertEqual(
       array(

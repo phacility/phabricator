@@ -6,6 +6,16 @@
 button,
 a.button {
   font: 13px/1.231 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+button::-moz-focus-inner {
+  padding: 0;
+  border: 0;
 }
 
 button,
@@ -14,13 +24,12 @@ a.button:visited,
 input[type="submit"] {
   background-color: #3477ad;
   color: white;
-  text-shadow: 0 -1px rgba(0,0,0,0.75);
   border: 1px solid #19558D;
   cursor: pointer;
   font-weight: bold;
   font-size: 13px;
   display: inline-block;
-  padding: 3px 10px 4px;
+  padding: 3px 12px 4px;
   text-align: center;
   white-space: nowrap;
   border-radius: 3px;
@@ -67,7 +76,6 @@ a.grey:visited {
   border-color: {$lightgreyborder};
   color: {$darkgreytext};
   border-bottom-color: {$greyborder};
-  text-shadow: none;
 }
 
 button.simple,
@@ -79,7 +87,6 @@ a.simple:visited {
   border: 1px solid transparent;
   color: {$bluetext};
   border: 1px solid {$lightblueborder};
-  text-shadow: 0 1px #fff;
 }
 
 a.disabled,
@@ -120,7 +127,6 @@ button.simple:hover {
   border: 1px solid {$lightgreyborder};
   background-image: none;
   border-bottom: 1px solid {$greyborder};
-  text-shadow: none;
   box-shadow: none;
 }
 
@@ -145,7 +151,7 @@ body button.disabled:active {
 button.small,
 a.small,
 a.small:visited {
-  padding: 2px 7px;
+  padding: 2px 8px;
   height: auto;
   font-size: 11px;
   line-height: 16px;
@@ -161,7 +167,6 @@ button.link {
   font-size: inherit;
   border-bottom: none;
   text-decoration: none;
-  text-shadow: none;
   color: #19558D;
   -webkit-box-shadow: none;
   -moz-box-shadow: none;
@@ -198,13 +203,6 @@ a.policy-control {
 
 a.policy-control .caret {
   float: right;
-}
-
-a.policy-control span.phui-icon-view {
-  /* NOTE: Nudge these icons a little bit. Should this be for all
-     dropdown buttons? */
-  top: 4px;
-  left: 7px;
 }
 
 a.toggle {
@@ -293,11 +291,11 @@ a.toggle-fixed {
   display: inline-block;
   position: absolute;
   top: 5px;
-  left: 8px;
+  left: 10px;
 }
 
 .phui-button-bar .button .phui-icon-view {
-  left: 11px;
+  left: 12px;
 }
 
 .button.has-icon .phui-button-text {
@@ -313,7 +311,7 @@ a.toggle-fixed {
 }
 
 .button.big.has-icon .phui-button-text {
-  margin-left: 36px;
+  margin-left: 40px;
   font-size: 14px;
   display: block;
 }

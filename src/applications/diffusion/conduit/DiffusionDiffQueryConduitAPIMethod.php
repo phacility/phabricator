@@ -129,7 +129,7 @@ final class DiffusionDiffQueryConduitAPIMethod
     );
     $futures = array_filter($futures);
 
-    foreach (Futures($futures) as $key => $future) {
+    foreach (new FutureIterator($futures) as $key => $future) {
       $stdout = '';
       try {
         list($stdout) = $future->resolvex();

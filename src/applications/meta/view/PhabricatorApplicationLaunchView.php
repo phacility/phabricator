@@ -73,7 +73,7 @@ final class PhabricatorApplicationLaunchView extends AphrontTagView {
           array(
             'class' => 'phabricator-application-attention-count',
           ),
-          $count);
+          PhabricatorApplication::formatStatusCount($count));
         }
 
 
@@ -83,7 +83,7 @@ final class PhabricatorApplicationLaunchView extends AphrontTagView {
           array(
             'class' => 'phabricator-application-warning-count',
           ),
-          $counts[$warning]);
+          PhabricatorApplication::formatStatusCount($counts[$warning]));
         }
         if (nonempty($count1) && nonempty($count2)) {
           $numbers = array($count1, ' / ', $count2);
@@ -98,7 +98,8 @@ final class PhabricatorApplicationLaunchView extends AphrontTagView {
             'sigil' => 'has-tooltip',
             'meta' => array(
               'tip' => implode("\n", $text),
-              'size' => 240,
+              'size' => 300,
+              'align' => 'E',
             ),
             'class' => 'phabricator-application-launch-attention',
           ),

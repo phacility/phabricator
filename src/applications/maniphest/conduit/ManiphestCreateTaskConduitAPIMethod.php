@@ -28,7 +28,7 @@ final class ManiphestCreateTaskConduitAPIMethod
   protected function execute(ConduitAPIRequest $request) {
     $task = ManiphestTask::initializeNewTask($request->getUser());
 
-    $this->applyRequest($task, $request, $is_new = true);
+    $task = $this->applyRequest($task, $request, $is_new = true);
 
     return $this->buildTaskInfoDictionary($task);
   }

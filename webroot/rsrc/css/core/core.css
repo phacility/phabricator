@@ -66,7 +66,6 @@ body {
   text-align: left;
   unicode-bidi: embed;
   background: #ebecee;
-  text-rendering: optimizeLegibility;
 }
 
 textarea {

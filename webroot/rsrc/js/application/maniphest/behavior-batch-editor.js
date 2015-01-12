@@ -9,16 +9,12 @@
  */
 
 JX.behavior('maniphest-batch-editor', function(config) {
-
   var root = JX.$(config.root);
   var editor_table = JX.DOM.find(root, 'table', 'maniphest-batch-actions');
   var manager = new JX.MultirowRowManager(editor_table);
   var action_rows = [];
 
-  addRow({});
-
   function renderRow() {
-
     var action_select = JX.Prefab.renderSelect(
       {
         'add_project': 'Add Projects',
@@ -118,6 +114,8 @@ JX.behavior('maniphest-batch-editor', function(config) {
 
     input.value = JX.JSON.stringify(actions);
   }
+
+  addRow({});
 
   JX.DOM.listen(
     root,
