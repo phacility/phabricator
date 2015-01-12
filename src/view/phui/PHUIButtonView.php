@@ -22,6 +22,9 @@ final class PHUIButtonView extends AphrontTagView {
   private $title = null;
   private $disabled;
   private $name;
+  private $id;
+  private $sigil;
+  private $meta;
 
   public function setName($name) {
     $this->name = $name;
@@ -82,6 +85,21 @@ final class PHUIButtonView extends AphrontTagView {
     return $this;
   }
 
+  public function setID($id) {
+    $this->id = $id;
+    return $this;
+  }
+
+  public function setSigil($sigil) {
+    $this->sigil = $sigil;
+    return $this;
+  }
+
+  public function setMeta($meta) {
+    $this->meta = $meta;
+    return $this;
+  }
+
   public function getTagName() {
     return $this->tag;
   }
@@ -118,6 +136,9 @@ final class PHUIButtonView extends AphrontTagView {
       'href'   => $this->href,
       'name'   => $this->name,
       'title'  => $this->title,
+      'id'     => $this->id,
+      'sigil'  => $this->sigil,
+      'meta'   => $this->meta,
     );
   }
 

@@ -60,7 +60,6 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
     $actions = $this->buildActionView($file);
     $timeline = $this->buildTransactionView($file);
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->setActionList($actions);
     $crumbs->addTextCrumb(
       'F'.$file->getID(),
       $this->getApplicationURI("/info/{$phid}/"));

@@ -54,7 +54,6 @@ final class FundInitiativeViewController
     $properties = $this->buildPropertyListView($initiative);
     $actions = $this->buildActionListView($initiative);
     $properties->setActionList($actions);
-    $crumbs->setActionList($actions);
 
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)

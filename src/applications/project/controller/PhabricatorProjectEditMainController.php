@@ -48,7 +48,6 @@ final class PhabricatorProjectEditMainController
       $project->getName(),
       $this->getApplicationURI('view/'.$project->getID().'/'));
     $crumbs->addTextCrumb(pht('Edit'));
-    $crumbs->setActionList($actions);
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)

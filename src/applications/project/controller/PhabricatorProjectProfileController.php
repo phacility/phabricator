@@ -87,8 +87,7 @@ final class PhabricatorProjectProfileController
     $properties = $this->buildPropertyListView($project, $actions);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($project->getName())
-      ->setActionList($actions);
+    $crumbs->addTextCrumb($project->getName());
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)

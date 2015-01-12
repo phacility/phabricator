@@ -55,8 +55,6 @@ final class PhortuneAccountViewController extends PhortuneController {
           ->setDisabled(!$can_edit)
           ->setWorkflow(!$can_edit));
 
-    $crumbs->setActionList($actions);
-
     $properties = id(new PHUIPropertyListView())
       ->setObject($account)
       ->setUser($user);

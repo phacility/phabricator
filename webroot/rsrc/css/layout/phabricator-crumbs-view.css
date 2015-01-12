@@ -28,18 +28,6 @@
   color: {$lightgreytext};
 }
 
-.phabricator-crumbs-action.phabricator-crumbs-action-menu {
-  display: none;
-}
-
-.device .phabricator-crumbs-action.phabricator-crumbs-action-menu {
-  display: inline-block;
-}
-
-.device .phabricator-crumbs-action-menu-open {
-  background: rgba(0,0,0,.1);
-}
-
 .phabricator-crumbs-view + .phui-header-shell {
   border-top: none;
 }
