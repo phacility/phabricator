@@ -146,7 +146,10 @@ final class PhabricatorSlowvoteTransaction
   }
 
   public function renderChangeDetails(PhabricatorUser $viewer) {
-    return $this->renderTextCorpusChangeDetails($viewer);
+    return $this->renderTextCorpusChangeDetails(
+      $viewer,
+      $this->getOldValue(),
+      $this->getNewValue());
   }
 
 
