@@ -110,6 +110,7 @@ final class PhabricatorProjectProfileController
     $task_list->setUser($user);
     $task_list->setTasks($tasks);
     $task_list->setHandles($handles);
+    $task_list->setNoDataString(pht('This project has no open tasks.'));
 
     $phid = $project->getPHID();
     $view_uri = urisprintf(
