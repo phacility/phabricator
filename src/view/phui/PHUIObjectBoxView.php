@@ -170,7 +170,7 @@ final class PHUIObjectBoxView extends AphrontView {
       $meta = array(
         'map' => array(
           $this->actionListID => 'phabricator-action-list-toggle',
-          $icon_id => 'phui-mobile-action-menu-open',
+          $icon_id => 'phuix-dropdown-open',
         ),);
       $mobile_menu = id(new PHUIButtonView())
         ->setTag('a')
@@ -179,8 +179,8 @@ final class PHUIObjectBoxView extends AphrontView {
         ->setIcon($icon)
         ->addClass('phui-mobile-menu')
         ->setID($icon_id)
-        ->setSigil('jx-toggle-class')
-        ->setMeta($meta);
+        ->addSigil('jx-toggle-class')
+        ->setMetadata($meta);
       $header->addActionLink($mobile_menu);
     }
 

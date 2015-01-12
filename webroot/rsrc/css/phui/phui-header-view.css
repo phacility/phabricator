@@ -146,7 +146,3 @@ body.device-phone .phui-header-view {
 .device .phui-header-action-links .phui-mobile-menu {
   display: inline-block;
 }
-
-.phui-mobile-action-menu-open {
-  background: white !important;
-}
