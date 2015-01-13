@@ -40,7 +40,7 @@ final class PhragmentSnapshotChildQuery
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $table = new PhragmentSnapshotChild();
     $conn_r = $table->establishConnection('r');
 

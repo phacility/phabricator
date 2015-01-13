@@ -222,7 +222,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     // TODO: (T603) It is possible for a user to find the PHID of a project
     // they can't see, then query for tasks in that project and deduce the
     // identity of unknown/invisible projects. Before we allow the user to

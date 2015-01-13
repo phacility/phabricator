@@ -17,7 +17,7 @@ final class DifferentialHunkQuery
     return $this;
   }
 
-  public function willExecute() {
+  protected function willExecute() {
     // If we fail to load any hunks at all (for example, because all of
     // the requested changesets are directories or empty files and have no
     // hunks) we'll never call didFilterPage(), and thus never have an
@@ -30,7 +30,7 @@ final class DifferentialHunkQuery
     }
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $all_results = array();
 
     // Load modern hunks.
@@ -65,7 +65,7 @@ final class DifferentialHunkQuery
     return array_values(array_merge($legacy_results, $modern_results));
   }
 
-  public function willFilterPage(array $hunks) {
+  protected function willFilterPage(array $hunks) {
     $changesets = mpull($this->changesets, null, 'getID');
     foreach ($hunks as $key => $hunk) {
       $changeset = idx($changesets, $hunk->getChangesetID());
@@ -78,7 +78,7 @@ final class DifferentialHunkQuery
     return $hunks;
   }
 
-  public function didFilterPage(array $hunks) {
+  protected function didFilterPage(array $hunks) {
     if ($this->shouldAttachToChangesets) {
       $hunk_groups = mgroup($hunks, 'getChangesetID');
       foreach ($this->changesets as $changeset) {

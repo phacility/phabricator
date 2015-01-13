@@ -53,7 +53,7 @@ final class PhabricatorSlowvoteQuery
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $table = new PhabricatorSlowvotePoll();
     $conn_r = $table->establishConnection('r');
 
@@ -69,7 +69,7 @@ final class PhabricatorSlowvoteQuery
     return $table->loadAllFromArray($data);
   }
 
-  public function willFilterPage(array $polls) {
+  protected function willFilterPage(array $polls) {
     assert_instances_of($polls, 'PhabricatorSlowvotePoll');
 
     $ids = mpull($polls, 'getID');

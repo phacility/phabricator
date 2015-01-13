@@ -49,7 +49,7 @@ final class PhabricatorRepositoryPushEventQuery
     return $table->loadAllFromArray($data);
   }
 
-  public function willFilterPage(array $events) {
+  protected function willFilterPage(array $events) {
     $repository_phids = mpull($events, 'getRepositoryPHID');
     $repositories = id(new PhabricatorRepositoryQuery())
       ->setViewer($this->getViewer())
@@ -69,7 +69,7 @@ final class PhabricatorRepositoryPushEventQuery
     return $events;
   }
 
-  public function didFilterPage(array $events) {
+  protected function didFilterPage(array $events) {
     $phids = mpull($events, 'getPHID');
 
     if ($this->needLogs) {

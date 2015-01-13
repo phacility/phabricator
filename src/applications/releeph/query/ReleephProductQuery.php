@@ -44,7 +44,7 @@ final class ReleephProductQuery
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $table = new ReleephProject();
     $conn_r = $table->establishConnection('r');
 
@@ -59,7 +59,7 @@ final class ReleephProductQuery
     return $table->loadAllFromArray($rows);
   }
 
-  public function willFilterPage(array $projects) {
+  protected function willFilterPage(array $projects) {
     assert_instances_of($projects, 'ReleephProject');
 
     $repository_phids = mpull($projects, 'getRepositoryPHID');
@@ -82,7 +82,7 @@ final class ReleephProductQuery
     return $projects;
   }
 
-  public function didFilterPage(array $products) {
+  protected function didFilterPage(array $products) {
     if ($this->needArcanistProjects) {
       $project_ids = array_filter(mpull($products, 'getArcanistProjectID'));
       if ($project_ids) {

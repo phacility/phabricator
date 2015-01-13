@@ -62,7 +62,7 @@ final class PhabricatorExternalAccountQuery
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $table = new PhabricatorExternalAccount();
     $conn_r = $table->establishConnection('r');
 
@@ -77,7 +77,7 @@ final class PhabricatorExternalAccountQuery
     return $table->loadAllFromArray($data);
   }
 
-  public function willFilterPage(array $accounts) {
+  protected function willFilterPage(array $accounts) {
     if ($this->needImages) {
       $file_phids = mpull($accounts, 'getProfileImagePHID');
       $file_phids = array_filter($file_phids);

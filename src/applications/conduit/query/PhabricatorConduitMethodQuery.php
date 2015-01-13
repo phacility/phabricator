@@ -40,7 +40,7 @@ final class PhabricatorConduitMethodQuery
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $methods = $this->getAllMethods();
     $methods = $this->filterMethods($methods);
     return $methods;

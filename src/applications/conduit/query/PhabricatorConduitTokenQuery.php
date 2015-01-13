@@ -34,7 +34,7 @@ final class PhabricatorConduitTokenQuery
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $table = new PhabricatorConduitToken();
     $conn_r = $table->establishConnection('r');
 

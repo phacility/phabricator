@@ -53,7 +53,7 @@ final class PhabricatorPolicyQuery
     return $policies;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     if ($this->object && $this->phids) {
       throw new Exception(
         'You can not issue a policy query with both setObject() and '.

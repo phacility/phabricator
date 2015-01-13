@@ -24,7 +24,7 @@ final class PhabricatorObjectQuery
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     if ($this->namedResults === null) {
       $this->namedResults = array();
     }
