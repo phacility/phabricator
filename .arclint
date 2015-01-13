@@ -1,7 +1,7 @@
 {
   "exclude": [
     "(^externals/)",
-    "(^webroot/rsrc/externals/)",
+    "(^webroot/rsrc/externals/(?!javelin/))",
     "(/__tests__/data/)"
   ],
   "linters": {
@@ -25,14 +25,16 @@
       "type": "jshint",
       "include": "(\\.js$)",
       "exclude": [
-        "(^support/aphlict/server/.*\\.js$)"
+        "(^support/aphlict/server/.*\\.js$)",
+        "(^webroot/rsrc/externals/javelin/core/init_node\\.js$)"
       ],
       "jshint.jshintrc": "support/lint/browser.jshintrc"
     },
     "jshint-node": {
       "type": "jshint",
       "include": [
-        "(^support/aphlict/server/.*\\.js$)"
+        "(^support/aphlict/server/.*\\.js$)",
+        "(^webroot/rsrc/externals/javelin/core/init_node\\.js$)"
       ],
       "jshint.jshintrc": "support/lint/node.jshintrc"
     },
