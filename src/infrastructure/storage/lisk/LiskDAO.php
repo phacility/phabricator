@@ -1291,7 +1291,7 @@ abstract class LiskDAO {
    *
    * @task   hook
    */
-  protected function generatePHID() {
+  public function generatePHID() {
     throw new Exception(
       'To use CONFIG_AUX_PHID, you need to overload '.
       'generatePHID() to perform PHID generation.');
