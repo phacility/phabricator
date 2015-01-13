@@ -539,7 +539,7 @@ phutil_register_library_map(array(
     'DiffusionMercurialResponse' => 'applications/diffusion/response/DiffusionMercurialResponse.php',
     'DiffusionMercurialSSHWorkflow' => 'applications/diffusion/ssh/DiffusionMercurialSSHWorkflow.php',
     'DiffusionMercurialServeSSHWorkflow' => 'applications/diffusion/ssh/DiffusionMercurialServeSSHWorkflow.php',
-    'DiffusionMercurialWireClientSSHProtocolChannel' => 'applications/diffusion/ssh/DiffusionMercurialWireClientProtocolSSHChannel.php',
+    'DiffusionMercurialWireClientSSHProtocolChannel' => 'applications/diffusion/ssh/DiffusionMercurialWireClientSSHProtocolChannel.php',
     'DiffusionMercurialWireProtocol' => 'applications/diffusion/protocol/DiffusionMercurialWireProtocol.php',
     'DiffusionMercurialWireSSHTestCase' => 'applications/diffusion/ssh/__tests__/DiffusionMercurialWireSSHTestCase.php',
     'DiffusionMergedCommitsQueryConduitAPIMethod' => 'applications/diffusion/conduit/DiffusionMergedCommitsQueryConduitAPIMethod.php',
