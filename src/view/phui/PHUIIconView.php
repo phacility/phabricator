@@ -56,7 +56,7 @@ final class PHUIIconView extends AphrontTagView {
     return $this;
   }
 
-  public function getTagName() {
+  protected function getTagName() {
     $tag = 'span';
     if ($this->href) {
       $tag = 'a';
@@ -64,7 +64,7 @@ final class PHUIIconView extends AphrontTagView {
     return $tag;
   }
 
-  public function getTagAttributes() {
+  protected function getTagAttributes() {
     require_celerity_resource('phui-icon-view-css');
 
     $style = null;

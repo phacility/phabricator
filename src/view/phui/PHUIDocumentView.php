@@ -57,7 +57,7 @@ final class PHUIDocumentView extends AphrontTagView {
     return $this;
   }
 
-  public function getTagAttributes() {
+  protected function getTagAttributes() {
     $classes = array();
 
     if ($this->offset) {
@@ -69,7 +69,7 @@ final class PHUIDocumentView extends AphrontTagView {
     );
   }
 
-  public function getTagContent() {
+  protected function getTagContent() {
     require_celerity_resource('phui-document-view-css');
     if ($this->fontKit) {
       require_celerity_resource('phui-fontkit-css');

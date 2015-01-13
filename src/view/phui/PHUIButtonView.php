@@ -82,7 +82,7 @@ final class PHUIButtonView extends AphrontTagView {
     return $this;
   }
 
-  public function getTagName() {
+  protected function getTagName() {
     return $this->tag;
   }
 

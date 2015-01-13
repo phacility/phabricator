@@ -15,11 +15,11 @@ final class PHUICalendarWidgetView extends AphrontTagView {
     return $this;
   }
 
-  public function getTagName() {
+  protected function getTagName() {
     return 'div';
   }
 
-  public function getTagAttributes() {
+  protected function getTagAttributes() {
     require_celerity_resource('phui-calendar-list-css');
     return array('class' => 'phui-calendar-list-container');
   }

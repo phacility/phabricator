@@ -50,11 +50,11 @@ final class PHUIRemarkupPreviewPanel extends AphrontTagView {
     return $this;
   }
 
-  public function getTagName() {
+  protected function getTagName() {
     return 'div';
   }
 
-  public function getTagAttributes() {
+  protected function getTagAttributes() {
     $classes = array();
     $classes[] = 'phui-remarkup-preview';
 
