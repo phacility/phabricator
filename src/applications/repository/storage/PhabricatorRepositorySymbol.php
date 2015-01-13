@@ -20,7 +20,7 @@ final class PhabricatorRepositorySymbol extends PhabricatorRepositoryDAO {
   private $arcanistProject = self::ATTACHABLE;
   private $repository = self::ATTACHABLE;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_IDS => self::IDS_MANUAL,
       self::CONFIG_TIMESTAMPS => false,

@@ -4,7 +4,7 @@ final class DifferentialHunkLegacy extends DifferentialHunk {
 
   protected $changes;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'changes' => 'text?',

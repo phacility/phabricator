@@ -13,7 +13,7 @@ final class PhabricatorFlag extends PhabricatorFlagDAO
   private $handle = self::ATTACHABLE;
   private $object = self::ATTACHABLE;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'type' => 'text4',

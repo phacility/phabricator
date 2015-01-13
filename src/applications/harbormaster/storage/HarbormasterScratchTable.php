@@ -11,7 +11,7 @@ final class HarbormasterScratchTable extends HarbormasterDAO {
   protected $data;
   protected $bigData;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'data' => 'text64',

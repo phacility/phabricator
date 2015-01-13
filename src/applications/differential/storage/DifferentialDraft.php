@@ -6,7 +6,7 @@ final class DifferentialDraft extends DifferentialDAO {
   protected $authorPHID;
   protected $draftKey;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'draftKey' => 'text64',

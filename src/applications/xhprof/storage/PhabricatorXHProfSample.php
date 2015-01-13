@@ -10,7 +10,7 @@ final class PhabricatorXHProfSample extends PhabricatorXHProfDAO {
   protected $controller;
   protected $userPHID;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'sampleRate' => 'uint32',

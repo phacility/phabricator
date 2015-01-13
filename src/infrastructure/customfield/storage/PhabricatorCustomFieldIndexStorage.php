@@ -7,7 +7,7 @@ abstract class PhabricatorCustomFieldIndexStorage
   protected $indexKey;
   protected $indexValue;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_TIMESTAMPS => false,
     ) + parent::getConfiguration();

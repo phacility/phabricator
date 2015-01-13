@@ -5,7 +5,7 @@ final class PhabricatorConduitCertificateToken extends PhabricatorConduitDAO {
   protected $userPHID;
   protected $token;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'token' => 'text64?',

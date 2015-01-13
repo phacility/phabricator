@@ -9,7 +9,7 @@ final class PhabricatorDraft extends PhabricatorDraftDAO {
 
   private $deleted = false;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_SERIALIZATION => array(
         'metadata' => self::SERIALIZATION_JSON,

@@ -115,7 +115,7 @@ final class PhabricatorUser
     return $this->getPHID() && (phid_get_type($this->getPHID()) == $type_user);
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(

@@ -8,7 +8,7 @@ final class NuanceQueueItem
   protected $itemStatus;
   protected $itemDateNuanced;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'itemStatus' => 'uint32',

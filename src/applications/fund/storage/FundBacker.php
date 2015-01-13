@@ -23,7 +23,7 @@ final class FundBacker extends FundDAO
       ->setStatus(self::STATUS_NEW);
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(

@@ -28,7 +28,7 @@ final class PhabricatorProjectColumn
       ->setStatus(self::STATUS_ACTIVE);
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(

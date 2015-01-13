@@ -12,7 +12,7 @@ final class PhabricatorFactRaw extends PhabricatorFactDAO {
   protected $valueY;
   protected $epoch;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'id' => 'auto64',

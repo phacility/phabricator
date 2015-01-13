@@ -122,7 +122,7 @@ final class PhabricatorUserLog extends PhabricatorUserDAO
     return parent::save();
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_SERIALIZATION => array(
         'oldValue' => self::SERIALIZATION_JSON,

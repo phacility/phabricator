@@ -17,7 +17,7 @@ final class PhabricatorRepositoryStatusMessage
   protected $parameters = array();
   protected $epoch;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_TIMESTAMPS => false,
       self::CONFIG_SERIALIZATION => array(

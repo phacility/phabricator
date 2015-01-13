@@ -65,7 +65,7 @@ final class PonderAnswer extends PonderDAO
     return $this->comments;
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(

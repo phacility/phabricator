@@ -99,7 +99,7 @@ abstract class PhabricatorApplicationTransaction
     return PhabricatorPHID::generateNewPHID($type, $subtype);
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(

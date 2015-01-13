@@ -67,7 +67,7 @@ final class DifferentialRevision extends DifferentialDAO
       ->setStatus(ArcanistDifferentialRevisionStatus::NEEDS_REVIEW);
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(

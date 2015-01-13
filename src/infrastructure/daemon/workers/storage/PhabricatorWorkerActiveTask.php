@@ -7,7 +7,7 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
   private $serverTime;
   private $localTime;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     $parent = parent::getConfiguration();
 
     $config = array(

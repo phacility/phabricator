@@ -14,7 +14,7 @@ final class PholioTransactionComment
     return new PholioTransaction();
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     $config = parent::getConfiguration();
 
     $config[self::CONFIG_COLUMN_SCHEMA] = array(

@@ -19,7 +19,7 @@ final class PhabricatorDaemonLog extends PhabricatorDaemonDAO
   protected $envHash;
   protected $status;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_SERIALIZATION => array(
         'argv' => self::SERIALIZATION_JSON,

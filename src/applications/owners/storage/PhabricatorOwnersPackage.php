@@ -33,7 +33,7 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
     return null;
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       // This information is better available from the history table.
       self::CONFIG_TIMESTAMPS => false,

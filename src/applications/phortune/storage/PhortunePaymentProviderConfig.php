@@ -18,7 +18,7 @@ final class PhortunePaymentProviderConfig extends PhortuneDAO
       ->setIsEnabled(1);
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(

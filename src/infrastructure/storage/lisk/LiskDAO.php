@@ -287,7 +287,7 @@ abstract class LiskDAO {
    * to change these behaviors, you should override this method in your child
    * class and change the options you're interested in. For example:
    *
-   *   public function getConfiguration() {
+   *   protected function getConfiguration() {
    *     return array(
    *       Lisk_DataAccessObject::CONFIG_EXAMPLE => true,
    *     ) + parent::getConfiguration();
