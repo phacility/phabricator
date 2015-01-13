@@ -96,7 +96,7 @@ JX.install('WebSocket', {
      * Close the connection.
      */
     close: function() {
-      if (!$this._isOpen) {
+      if (!this._isOpen) {
         return;
       }
       this._shouldClose = true;

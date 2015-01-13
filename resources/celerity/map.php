@@ -8,7 +8,7 @@
 return array(
   'names' => array(
     'core.pkg.css' => '60a6d241',
-    'core.pkg.js' => '61af8961',
+    'core.pkg.js' => '3db1b544',
     'darkconsole.pkg.js' => '8ab24e01',
     'differential.pkg.css' => '8af45893',
     'differential.pkg.js' => 'dad3622f',
@@ -201,7 +201,7 @@ return array(
     'rsrc/externals/javelin/lib/Router.js' => '29274e2b',
     'rsrc/externals/javelin/lib/URI.js' => '6eff08aa',
     'rsrc/externals/javelin/lib/Vector.js' => 'cc1bd0b0',
-    'rsrc/externals/javelin/lib/WebSocket.js' => '897b80bf',
+    'rsrc/externals/javelin/lib/WebSocket.js' => '16d40bb9',
     'rsrc/externals/javelin/lib/Workflow.js' => 'd149e002',
     'rsrc/externals/javelin/lib/__tests__/Cookie.js' => '5ed109e8',
     'rsrc/externals/javelin/lib/__tests__/DOM.js' => 'c984504b',
@@ -687,7 +687,7 @@ return array(
     'javelin-view-interpreter' => '0c33c1a0',
     'javelin-view-renderer' => '6c2b09a2',
     'javelin-view-visitor' => 'efe49472',
-    'javelin-websocket' => '897b80bf',
+    'javelin-websocket' => '16d40bb9',
     'javelin-workflow' => 'd149e002',
     'lightbox-attachment-css' => '7acac05d',
     'maniphest-batch-editor' => '8f380ebc',
@@ -950,6 +950,9 @@ return array(
       'javelin-vector',
       'javelin-request',
       'javelin-util',
+    ),
+    '16d40bb9' => array(
+      'javelin-install',
     ),
     '1ae869f2' => array(
       'javelin-install',
@@ -1391,9 +1394,6 @@ return array(
       'javelin-view-html',
       'javelin-view-interpreter',
       'javelin-view-renderer',
-    ),
-    '897b80bf' => array(
-      'javelin-install',
     ),
     '8a41885b' => array(
       'javelin-install',
