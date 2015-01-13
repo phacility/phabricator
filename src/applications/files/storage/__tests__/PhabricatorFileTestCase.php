@@ -2,7 +2,7 @@
 
 final class PhabricatorFileTestCase extends PhabricatorTestCase {
 
-  public function getPhabricatorTestCaseConfiguration() {
+  protected function getPhabricatorTestCaseConfiguration() {
     return array(
       self::PHABRICATOR_TESTCONFIG_BUILD_STORAGE_FIXTURES => true,
     );
