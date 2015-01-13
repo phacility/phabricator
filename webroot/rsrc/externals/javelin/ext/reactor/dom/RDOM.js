@@ -121,7 +121,7 @@ JX.install('RDOM', {
 
         if (__DEV__) {
           if (!found) {
-            throw new Error("Mismatched radio button value");
+            throw new Error('Mismatched radio button value');
           }
         }
       });
@@ -163,7 +163,7 @@ JX.install('RDOM', {
       return rnode.transform(function(val) {
         if (__DEV__) {
           if (!(val === true || val === false)) {
-            throw new Error("Send boolean values to checkboxes.");
+            throw new Error('Send boolean values to checkboxes.');
           }
         }
 
@@ -255,7 +255,7 @@ JX.install('RDOM', {
 
         if (__DEV__) {
           if (select.value !== val) {
-            throw new Error("Mismatched select value");
+            throw new Error('Mismatched select value');
           }
         }
       });

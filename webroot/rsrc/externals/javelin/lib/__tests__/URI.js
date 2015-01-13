@@ -43,7 +43,7 @@ describe('Javelin URI', function() {
   });
 
   function charRange(from, to) {
-    res = '';
+    var res = '';
     for (var i = from.charCodeAt(0); i <= to.charCodeAt(0); i++) {
       res += String.fromCharCode(i);
     }

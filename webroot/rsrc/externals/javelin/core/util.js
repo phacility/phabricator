@@ -283,7 +283,7 @@ if (!window.console || !window.console.log) {
   if (window.opera && window.opera.postError) {
     window.console = {log: function(m) { window.opera.postError(m); }};
   } else {
-    window.console = {log: function(m) { }};
+    window.console = {log: function() {}};
   }
 }
 

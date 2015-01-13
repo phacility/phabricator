@@ -147,7 +147,7 @@ JX.install('TypeaheadSource', {
       this._startListener.remove();
     },
 
-    didChange : function(value) {
+    didChange : function() {
       return;
     },
 

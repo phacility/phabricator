@@ -11,11 +11,11 @@ describe('JX.ViewRenderer', function() {
     var child = new JX.View({});
     var parent = new JX.View({});
     parent.addChild(child);
-    child.render = function(_) {
+    child.render = function() {
       child_rendered = true;
     };
 
-    parent.render = function(rendered_children) {
+    parent.render = function() {
       child_rendered_first = child_rendered;
     };
 

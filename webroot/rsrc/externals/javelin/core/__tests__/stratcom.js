@@ -3,10 +3,10 @@
  *           javelin-dom
  */
 describe('Stratcom Tests', function() {
-  node1 = document.createElement('div');
+  var node1 = document.createElement('div');
   JX.Stratcom.addSigil(node1, 'what');
-  node2 = document;
-  node3 = document.createElement('div');
+  var node2 = document;
+  var node3 = document.createElement('div');
   node3.className = 'what';
 
   it('should disallow document', function() {
