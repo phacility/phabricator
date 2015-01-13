@@ -46,6 +46,7 @@ final class PhabricatorPolicyConfigOptions
             "available, and the most open policy is 'All Users' (which means ".
             "users must have accounts and be logged in to view things).")),
       $this->newOption('policy.locked', $policy_locked_type, array())
+        ->setLocked(true)
         ->setSummary(pht(
           'Lock specific application policies so they can not be edited.'))
         ->setDescription(pht(

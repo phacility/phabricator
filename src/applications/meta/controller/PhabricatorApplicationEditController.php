@@ -115,11 +115,10 @@ final class PhabricatorApplicationEditController
       ->setUser($user);
 
     $locked_policies = PhabricatorEnv::getEnvConfig('policy.locked');
-    $locked_map = array_fill_keys($locked_policies, true);
     foreach ($application->getCapabilities() as $capability) {
       $label = $application->getCapabilityLabel($capability);
       $can_edit = $application->isCapabilityEditable($capability);
-      $locked = idx($locked_map, $capability);
+      $locked = idx($locked_policies, $capability);
       $caption = $application->getCapabilityCaption($capability);
 
       if (!$can_edit || $locked) {
@@ -132,7 +131,7 @@ final class PhabricatorApplicationEditController
         $form->appendChild(
           id(new AphrontFormPolicyControl())
           ->setUser($user)
-          ->setDisabled(idx($locked_map, $capability))
+          ->setDisabled($locked)
           ->setCapability($capability)
           ->setPolicyObject($application)
           ->setPolicies($policies)
