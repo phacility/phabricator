@@ -13,7 +13,6 @@
  */
 
 JX.behavior('aphlict-listen', function(config) {
-
   var showing_reload = false;
 
   JX.Stratcom.listen('aphlict-receive-message', null, function(e) {
@@ -25,7 +24,7 @@ JX.behavior('aphlict-listen', function(config) {
 
     var request = new JX.Request(
       '/notification/individual/',
-      onnotification);
+      onNotification);
 
     var routable = request
       .addData({key: message.key})
@@ -38,16 +37,14 @@ JX.behavior('aphlict-listen', function(config) {
     JX.Router.getInstance().queue(routable);
   });
 
-
   // Respond to a notification from the Aphlict notification server. We send
   // a request to Phabricator to get notification details.
-  function onaphlictmessage(message) {
+  function onAphlictMessage(message) {
     JX.Stratcom.invoke('aphlict-receive-message', null, message);
   }
 
-
   // Respond to a response from Phabricator about a specific notification.
-  function onnotification(response) {
+  function onNotification(response) {
     if (!response.pertinent) {
       return;
     }
@@ -58,7 +55,6 @@ JX.behavior('aphlict-listen', function(config) {
     new JX.Notification()
       .setContent(JX.$H(response.content))
       .show();
-
 
     // If the notification affected an object on this page, show a
     // permanent reload notification if we aren't already.
@@ -79,7 +75,7 @@ JX.behavior('aphlict-listen', function(config) {
     config.subscriptions);
 
   client
-    .setHandler(onaphlictmessage)
+    .setHandler(onAphlictMessage)
     .start();
 
 });

@@ -37,7 +37,8 @@ JX.behavior('aphlict-dropdown', function(config, statics) {
         true);
     }
 
-    if (request) { //already fetching
+    if (request) {
+      // Already fetching.
       return;
     }
 
@@ -109,7 +110,6 @@ JX.behavior('aphlict-dropdown', function(config, statics) {
         e.kill();
       }
     });
-
 
   JX.DOM.listen(
     bubble,
