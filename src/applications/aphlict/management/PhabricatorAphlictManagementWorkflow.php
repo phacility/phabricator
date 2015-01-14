@@ -34,6 +34,22 @@ abstract class PhabricatorAphlictManagementWorkflow
     return PhabricatorEnv::getEnvConfig('notification.pidfile');
   }
 
+  final public function getLogPath() {
+    $path = PhabricatorEnv::getEnvConfig('notification.log');
+
+    try {
+      $dir = dirname($path);
+      Filesystem::createDirectory($dir, 0755, true);
+    } catch (FilesystemException $ex) {
+      throw new Exception(
+        pht(
+          "Failed to create '%s'. You should manually create this directory.",
+          $dir));
+    }
+
+    return $path;
+  }
+
   final public function getPID() {
     $pid = null;
     if (Filesystem::pathExists($this->getPIDPath())) {
@@ -128,7 +144,7 @@ abstract class PhabricatorAphlictManagementWorkflow
     $client_uri = PhabricatorEnv::getEnvConfig('notification.client-uri');
     $client_uri = new PhutilURI($client_uri);
 
-    $log = PhabricatorEnv::getEnvConfig('notification.log');
+    $log = $this->getLogPath();
 
     $server_argv = array();
     $server_argv[] = '--client-port='.coalesce(
