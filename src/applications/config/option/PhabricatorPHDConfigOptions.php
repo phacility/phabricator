@@ -63,6 +63,13 @@ final class PhabricatorPHDConfigOptions
             "ENORMOUS amount of output, but can help debug issues. Daemons ".
             "launched in debug mode with 'phd debug' are always launched in ".
             "trace mdoe. See also 'phd.verbose'.")),
+      $this->newOption('phd.variant-config', 'list<string>', array())
+        ->setDescription(
+          pht(
+            'Specify config keys that can safely vary between the web tier '.
+            'and the daemons. Primarily, this is a way to suppress the '.
+            '"Daemons and Web Have Different Config" setup issue on a per '.
+            'config key basis.')),
     );
   }
 

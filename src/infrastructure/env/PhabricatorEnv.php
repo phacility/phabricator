@@ -232,7 +232,10 @@ final class PhabricatorEnv {
 
   public static function calculateEnvironmentHash() {
     $keys = array_keys(self::getAllConfigKeys());
-    ksort($keys);
+    sort($keys);
+
+    $skip_keys = self::getEnvConfig('phd.variant-config');
+    $keys = array_diff($keys, $skip_keys);
 
     $values = array();
     foreach ($keys as $key) {
