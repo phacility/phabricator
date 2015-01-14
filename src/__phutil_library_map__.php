@@ -5214,6 +5214,7 @@ phutil_register_library_map(array(
     'PhabricatorOAuthServerClient' => array(
       'PhabricatorOAuthServerDAO',
       'PhabricatorPolicyInterface',
+      'PhabricatorDestructibleInterface',
     ),
     'PhabricatorOAuthServerClientAuthorizationPHIDType' => 'PhabricatorPHIDType',
     'PhabricatorOAuthServerClientPHIDType' => 'PhabricatorPHIDType',
@@ -5350,6 +5351,7 @@ phutil_register_library_map(array(
     'PhabricatorPolicy' => array(
       'PhabricatorPolicyDAO',
       'PhabricatorPolicyInterface',
+      'PhabricatorDestructibleInterface',
     ),
     'PhabricatorPolicyApplication' => 'PhabricatorApplication',
     'PhabricatorPolicyAwareQuery' => 'PhabricatorOffsetPagedQuery',
