@@ -204,18 +204,6 @@ final class PhabricatorProjectProfileController
       }
     }
 
-    $have_phriction = PhabricatorApplication::isClassInstalledForViewer(
-      'PhabricatorPhrictionApplication',
-      $viewer);
-    if ($have_phriction) {
-      $view->addAction(
-        id(new PhabricatorActionView())
-          ->setIcon('fa-book grey')
-          ->setName(pht('View Wiki'))
-          ->setWorkflow(true)
-          ->setHref('/project/wiki/'));
-    }
-
     return $view;
   }
 
