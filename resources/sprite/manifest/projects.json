@@ -151,11 +151,6 @@
       "rule": ".projects-fa-folder",
       "hash": "d3c6eb3334d6b6f1b8a1159d9d9e7397"
     },
-    "projects-fa-group": {
-      "name": "projects-fa-group",
-      "rule": ".projects-fa-group",
-      "hash": "a16ef9c76892e2ea96e34b6c5042a9e1"
-    },
     "projects-fa-lock": {
       "name": "projects-fa-lock",
       "rule": ".projects-fa-lock",
@@ -180,6 +175,11 @@
       "name": "projects-fa-umbrella",
       "rule": ".projects-fa-umbrella",
       "hash": "55f6a65e425c5725e953e3a59cb50f49"
+    },
+    "projects-fa-users": {
+      "name": "projects-fa-users",
+      "rule": ".projects-fa-users",
+      "hash": "bd449bd0dea0d29031dc8fddad7bb66b"
     },
     "projects-facebook": {
       "name": "projects-facebook",
