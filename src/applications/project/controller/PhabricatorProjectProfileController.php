@@ -157,6 +157,13 @@ final class PhabricatorProjectProfileController
       $project,
       PhabricatorPolicyCapability::CAN_EDIT);
 
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Edit Project'))
+        ->setIcon('fa-pencil')
+        ->setHref($this->getApplicationURI("edit/{$id}/")));
+
+
     $action = null;
     if (!$project->isUserMember($viewer->getPHID())) {
       $can_join = PhabricatorPolicyFilter::hasCapability(
