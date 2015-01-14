@@ -1173,7 +1173,7 @@ abstract class LiskDAO {
         $id_key = $this->getIDKeyForUse();
         if (empty($data[$id_key])) {
           $counter_name = $this->getTableName();
-          $id = self::loadNextCounterID($conn, $counter_name);
+          $id = self::loadNextCounterValue($conn, $counter_name);
           $this->setID($id);
           $data[$id_key] = $id;
         }
@@ -1688,6 +1688,7 @@ abstract class LiskDAO {
     $this->$name = $value;
   }
 
+
   /**
    * Increments a named counter and returns the next value.
    *
@@ -1697,7 +1698,7 @@ abstract class LiskDAO {
    *
    * @task util
    */
-  public static function loadNextCounterID(
+  public static function loadNextCounterValue(
     AphrontDatabaseConnection $conn_w,
     $counter_name) {
 
@@ -1719,6 +1720,58 @@ abstract class LiskDAO {
       $counter_name);
 
     return $conn_w->getInsertID();
+  }
+
+
+  /**
+   * Returns the current value of a named counter.
+   *
+   * @param AphrontDatabaseConnection Database where the counter resides.
+   * @param string Counter name to read.
+   * @return int|null Current value, or `null` if the counter does not exist.
+   *
+   * @task util
+   */
+  public static function loadCurrentCounterValue(
+    AphrontDatabaseConnection $conn_r,
+    $counter_name) {
+
+    $row = queryfx_one(
+      $conn_r,
+      'SELECT counterValue FROM %T WHERE counterName = %s',
+      self::COUNTER_TABLE_NAME,
+      $counter_name);
+    if (!$row) {
+      return null;
+    }
+
+    return (int)$row['counterValue'];
+  }
+
+
+  /**
+   * Overwrite a named counter, forcing it to a specific value.
+   *
+   * If the counter does not exist, it is created.
+   *
+   * @param AphrontDatabaseConnection Database where the counter resides.
+   * @param string Counter name to create or overwrite.
+   * @return void
+   *
+   * @task util
+   */
+  public static function overwriteCounterValue(
+    AphrontDatabaseConnection $conn_w,
+    $counter_name,
+    $counter_value) {
+
+    queryfx(
+      $conn_w,
+      'INSERT INTO %T (counterName, counterValue) VALUES (%s, %d)
+        ON DUPLICATE KEY UPDATE counterValue = VALUES(counterValue)',
+      self::COUNTER_TABLE_NAME,
+      $counter_name,
+      $counter_value);
   }
 
   private function getBinaryColumns() {
