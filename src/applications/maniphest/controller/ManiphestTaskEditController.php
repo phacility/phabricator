@@ -25,6 +25,10 @@ final class ManiphestTaskEditController extends ManiphestController {
       ManiphestEditProjectsCapability::CAPABILITY);
     $can_edit_status = $this->hasApplicationCapability(
       ManiphestEditStatusCapability::CAPABILITY);
+    $can_create_projects = PhabricatorPolicyFilter::hasCapability(
+      $user,
+      PhabricatorApplication::getByClass('PhabricatorProjectApplication'),
+      ProjectCreateProjectsCapability::CAPABILITY);
 
     $parent_task = null;
     $template_id = null;
@@ -664,6 +668,17 @@ final class ManiphestTaskEditController extends ManiphestController {
     }
 
     if ($can_edit_projects) {
+      $caption = null;
+      if ($can_create_projects) {
+        $caption = javelin_tag(
+          'a',
+          array(
+            'href'        => '/project/create/',
+            'mustcapture' => true,
+            'sigil'       => 'project-create',
+          ),
+          pht('Create New Project'));
+      }
       $form
         ->appendChild(
           id(new AphrontFormTokenizerControl())
@@ -671,15 +686,7 @@ final class ManiphestTaskEditController extends ManiphestController {
             ->setName('projects')
             ->setValue($projects_value)
             ->setID($project_tokenizer_id)
-            ->setCaption(
-              javelin_tag(
-                'a',
-                array(
-                  'href'        => '/project/create/',
-                  'mustcapture' => true,
-                  'sigil'       => 'project-create',
-                ),
-                pht('Create New Project')))
+            ->setCaption($caption)
             ->setDatasource(new PhabricatorProjectDatasource()));
     }
 
