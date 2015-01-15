@@ -26,7 +26,7 @@ final class TokenGivenConduitAPIMethod extends TokenConduitAPIMethod {
     return 'list<dict>';
   }
 
-  public function execute(ConduitAPIRequest $request) {
+  protected function execute(ConduitAPIRequest $request) {
     $query = id(new PhabricatorTokenGivenQuery())
       ->setViewer($request->getUser());
 

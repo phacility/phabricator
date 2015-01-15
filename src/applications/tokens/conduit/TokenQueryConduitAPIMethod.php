@@ -22,7 +22,7 @@ final class TokenQueryConduitAPIMethod extends TokenConduitAPIMethod {
     return array();
   }
 
-  public function execute(ConduitAPIRequest $request) {
+  protected function execute(ConduitAPIRequest $request) {
     $query = id(new PhabricatorTokenQuery())
       ->setViewer($request->getUser());
 
