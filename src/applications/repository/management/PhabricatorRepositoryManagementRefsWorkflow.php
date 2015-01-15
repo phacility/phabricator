@@ -3,7 +3,7 @@
 final class PhabricatorRepositoryManagementRefsWorkflow
   extends PhabricatorRepositoryManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('refs')
       ->setExamples('**refs** [__options__] __repository__ ...')

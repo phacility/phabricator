@@ -3,7 +3,7 @@
 final class PhabricatorRepositoryManagementListWorkflow
   extends PhabricatorRepositoryManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('list')
       ->setSynopsis('Show a list of repositories.')

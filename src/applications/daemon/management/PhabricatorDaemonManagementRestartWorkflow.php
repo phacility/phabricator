@@ -3,7 +3,7 @@
 final class PhabricatorDaemonManagementRestartWorkflow
   extends PhabricatorDaemonManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('restart')
       ->setSynopsis(

@@ -3,7 +3,7 @@
 final class PhabricatorDaemonManagementStartWorkflow
   extends PhabricatorDaemonManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('start')
       ->setSynopsis(

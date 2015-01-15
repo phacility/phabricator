@@ -3,7 +3,7 @@
 final class AlmanacManagementRegisterWorkflow
   extends AlmanacManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('register')
       ->setSynopsis(pht('Register this host as an Almanac device.'))

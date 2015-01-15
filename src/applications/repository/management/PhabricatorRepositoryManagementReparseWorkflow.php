@@ -3,7 +3,7 @@
 final class PhabricatorRepositoryManagementReparseWorkflow
   extends PhabricatorRepositoryManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('reparse')
       ->setExamples('**reparse** [options] __repository__')

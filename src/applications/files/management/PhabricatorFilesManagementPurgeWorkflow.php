@@ -3,7 +3,7 @@
 final class PhabricatorFilesManagementPurgeWorkflow
   extends PhabricatorFilesManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('purge')
       ->setSynopsis('Delete files with missing data.')

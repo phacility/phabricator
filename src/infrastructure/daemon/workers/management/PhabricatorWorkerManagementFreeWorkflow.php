@@ -3,7 +3,7 @@
 final class PhabricatorWorkerManagementFreeWorkflow
   extends PhabricatorWorkerManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('free')
       ->setExamples('**free** --id __id__')

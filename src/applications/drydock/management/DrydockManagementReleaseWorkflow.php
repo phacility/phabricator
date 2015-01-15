@@ -3,7 +3,7 @@
 final class DrydockManagementReleaseWorkflow
   extends DrydockManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('release')
       ->setSynopsis('Release a lease.')

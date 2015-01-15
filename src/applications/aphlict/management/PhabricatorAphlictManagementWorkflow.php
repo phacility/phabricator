@@ -7,7 +7,7 @@ abstract class PhabricatorAphlictManagementWorkflow
   private $clientHost;
   private $clientPort;
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setArguments(
         array(

@@ -5,7 +5,7 @@ final class DiffusionMercurialServeSSHWorkflow
 
   protected $didSeeWrite;
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this->setName('hg');
     $this->setArguments(
       array(

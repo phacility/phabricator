@@ -3,7 +3,7 @@
 final class PhabricatorRepositoryManagementMarkImportedWorkflow
   extends PhabricatorRepositoryManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('mark-imported')
       ->setExamples('**mark-imported** __repository__ ...')

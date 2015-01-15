@@ -3,7 +3,7 @@
 final class PhabricatorDaemonManagementStatusWorkflow
   extends PhabricatorDaemonManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('status')
       ->setSynopsis(pht('Show status of running daemons.'))

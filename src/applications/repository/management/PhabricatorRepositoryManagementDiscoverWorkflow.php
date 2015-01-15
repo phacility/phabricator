@@ -3,7 +3,7 @@
 final class PhabricatorRepositoryManagementDiscoverWorkflow
   extends PhabricatorRepositoryManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('discover')
       ->setExamples('**discover** [__options__] __repository__ ...')

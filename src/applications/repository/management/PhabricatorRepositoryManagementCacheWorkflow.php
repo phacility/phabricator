@@ -3,7 +3,7 @@
 final class PhabricatorRepositoryManagementCacheWorkflow
   extends PhabricatorRepositoryManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('cache')
       ->setExamples(

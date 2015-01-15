@@ -2,7 +2,7 @@
 
 final class DiffusionGitUploadPackSSHWorkflow extends DiffusionGitSSHWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this->setName('git-upload-pack');
     $this->setArguments(
       array(

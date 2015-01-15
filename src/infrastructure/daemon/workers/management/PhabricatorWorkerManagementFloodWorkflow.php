@@ -3,7 +3,7 @@
 final class PhabricatorWorkerManagementFloodWorkflow
   extends PhabricatorWorkerManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('flood')
       ->setExamples('**flood**')

@@ -3,7 +3,7 @@
 final class AlmanacManagementUnlockWorkflow
   extends AlmanacManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('unlock')
       ->setSynopsis(pht('Unlock a service to allow it to be edited.'))

@@ -2,7 +2,7 @@
 
 final class DiffusionGitReceivePackSSHWorkflow extends DiffusionGitSSHWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this->setName('git-receive-pack');
     $this->setArguments(
       array(

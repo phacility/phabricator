@@ -3,7 +3,7 @@
 final class PhabricatorWorkerManagementCancelWorkflow
   extends PhabricatorWorkerManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('cancel')
       ->setExamples('**cancel** --id __id__')

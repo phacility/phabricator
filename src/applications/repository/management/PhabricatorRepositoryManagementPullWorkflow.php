@@ -3,7 +3,7 @@
 final class PhabricatorRepositoryManagementPullWorkflow
   extends PhabricatorRepositoryManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('pull')
       ->setExamples('**pull** __repository__ ...')
