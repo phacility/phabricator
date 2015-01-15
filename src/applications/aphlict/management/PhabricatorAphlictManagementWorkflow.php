@@ -39,7 +39,9 @@ abstract class PhabricatorAphlictManagementWorkflow
 
     try {
       $dir = dirname($path);
-      Filesystem::createDirectory($dir, 0755, true);
+      if (!Filesystem::pathExists($dir)) {
+        Filesystem::createDirectory($dir, 0755, true);
+      }
     } catch (FilesystemException $ex) {
       throw new Exception(
         pht(
