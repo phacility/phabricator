@@ -10,6 +10,8 @@ final class PhabricatorOAuthServerClient
   protected $name;
   protected $redirectURI;
   protected $creatorPHID;
+  protected $viewPolicy;
+  protected $editPolicy;
 
   public function getEditURI() {
     return '/oauthserver/client/edit/'.$this->getPHID().'/';
@@ -26,7 +28,9 @@ final class PhabricatorOAuthServerClient
   public static function initializeNewClient(PhabricatorUser $actor) {
     return id(new PhabricatorOAuthServerClient())
       ->setCreatorPHID($actor->getPHID())
-      ->setSecret(Filesystem::readRandomCharacters(32));
+      ->setSecret(Filesystem::readRandomCharacters(32))
+      ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
+      ->setEditPolicy($actor->getPHID());
   }
 
   protected function getConfiguration() {
@@ -69,25 +73,17 @@ final class PhabricatorOAuthServerClient
   public function getPolicy($capability) {
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
-        return PhabricatorPolicies::POLICY_USER;
+        return $this->getViewPolicy();
       case PhabricatorPolicyCapability::CAN_EDIT:
-        return PhabricatorPolicies::POLICY_NOONE;
+        return $this->getEditPolicy();
     }
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    switch ($capability) {
-      case PhabricatorPolicyCapability::CAN_EDIT:
-        return ($viewer->getPHID() == $this->getCreatorPHID());
-    }
     return false;
   }
 
   public function describeAutomaticCapability($capability) {
-    switch ($capability) {
-      case PhabricatorPolicyCapability::CAN_EDIT:
-        return pht("Only an application's creator can edit it.");
-    }
     return null;
   }
 
