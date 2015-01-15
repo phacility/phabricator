@@ -34,7 +34,7 @@ final class PhabricatorRepositoryPullLocalDaemon
   /**
    * @task pull
    */
-  public function run() {
+  protected function run() {
     $argv = $this->getArgv();
     array_unshift($argv, __CLASS__);
     $args = new PhutilArgumentParser($argv);
