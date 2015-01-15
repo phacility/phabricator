@@ -1137,7 +1137,10 @@ final class DifferentialTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
-    $body = parent::buildMailBody($object, $xactions);
+    $body = new PhabricatorMetaMTAMailBody();
+    $body->setViewer($this->requireActor());
+
+    $this->addHeadersAndCommentsToMailBody($body, $xactions);
 
     $type_inline = DifferentialTransaction::TYPE_INLINE;
 
@@ -1148,6 +1151,12 @@ final class DifferentialTransactionEditor
       }
     }
 
+    if ($inlines) {
+      $body->addTextSection(
+        pht('INLINE COMMENTS'),
+        $this->renderInlineCommentsForMail($object, $inlines));
+    }
+
     $changed_uri = $this->getChangedPriorToCommitURI();
     if ($changed_uri) {
       $body->addLinkSection(
@@ -1155,11 +1164,7 @@ final class DifferentialTransactionEditor
         $changed_uri);
     }
 
-    if ($inlines) {
-      $body->addTextSection(
-        pht('INLINE COMMENTS'),
-        $this->renderInlineCommentsForMail($object, $inlines));
-    }
+    $this->addCustomFieldsToMailBody($body, $object, $xactions);
 
     $body->addLinkSection(
       pht('REVISION DETAIL'),
