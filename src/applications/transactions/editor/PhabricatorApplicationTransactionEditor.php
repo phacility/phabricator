@@ -2191,6 +2191,21 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
+    $body = new PhabricatorMetaMTAMailBody();
+    $body->setViewer($this->requireActor());
+
+    $this->addHeadersAndCommentsToMailBody($body, $xactions);
+    $this->addCustomFieldsToMailBody($body, $object, $xactions);
+    return $body;
+  }
+
+  /**
+   * @task mail
+   */
+  protected function addHeadersAndCommentsToMailBody(
+    PhabricatorMetaMTAMailBody $body,
+    array $xactions) {
+
     $headers = array();
     $comments = array();
 
@@ -2209,14 +2224,20 @@ abstract class PhabricatorApplicationTransactionEditor
         $comments[] = $comment;
       }
     }
-
-    $body = new PhabricatorMetaMTAMailBody();
-    $body->setViewer($this->requireActor());
     $body->addRawSection(implode("\n", $headers));
 
     foreach ($comments as $comment) {
       $body->addRemarkupSection($comment);
     }
+  }
+
+  /**
+   * @task mail
+   */
+  protected function addCustomFieldsToMailBody(
+    PhabricatorMetaMTAMailBody $body,
+    PhabricatorLiskDAO $object,
+    array $xactions) {
 
     if ($object instanceof PhabricatorCustomFieldInterface) {
       $field_list = PhabricatorCustomField::getObjectFields(
@@ -2232,9 +2253,8 @@ abstract class PhabricatorApplicationTransactionEditor
           $xactions);
       }
     }
-
-    return $body;
   }
+
 
 
 /* -(  Publishing Feed Stories  )-------------------------------------------- */

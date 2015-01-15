@@ -40,7 +40,7 @@ final class PhragmentFragmentQuery
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $table = new PhragmentFragment();
     $conn_r = $table->establishConnection('r');
 

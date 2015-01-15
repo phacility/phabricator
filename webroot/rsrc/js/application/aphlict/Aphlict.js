@@ -36,13 +36,12 @@ JX.install('Aphlict', {
   events: ['didChangeStatus'],
 
   members: {
-    _server: null,
-    _port: null,
+    _uri: null,
+    _socket: null,
     _subscriptions: null,
     _status: null,
-    _statusCode: null,
 
-    start: function(node, uri) {
+    start: function() {
       JX.Leader.listen('onBecomeLeader', JX.bind(this, this._lead));
       JX.Leader.listen('onReceiveBroadcast', JX.bind(this, this._receive));
       JX.Leader.start();
@@ -64,14 +63,12 @@ JX.install('Aphlict', {
     },
 
     _lead: function() {
-      var socket = new JX.WebSocket(this._uri);
-      socket.setOpenHandler(JX.bind(this, this._open));
-      socket.setMessageHandler(JX.bind(this, this._message));
-      socket.setCloseHandler(JX.bind(this, this._close));
+      this._socket = new JX.WebSocket(this._uri);
+      this._socket.setOpenHandler(JX.bind(this, this._open));
+      this._socket.setMessageHandler(JX.bind(this, this._message));
+      this._socket.setCloseHandler(JX.bind(this, this._close));
 
-      this._socket = socket;
-
-      socket.open();
+      this._socket.open();
     },
 
     _open: function() {
@@ -97,16 +94,19 @@ JX.install('Aphlict', {
         case 'aphlict.status':
           this._setStatus(message.data);
           break;
+
         case 'aphlict.getstatus':
           if (is_leader) {
             this._broadcastStatus(this.getStatus());
           }
           break;
+
         case 'aphlict.getsubscribers':
           JX.Leader.broadcast(
             null,
             {type: 'aphlict.subscribe', data: this._subscriptions});
           break;
+
         case 'aphlict.subscribe':
           if (is_leader) {
             this._write({
@@ -115,6 +115,7 @@ JX.install('Aphlict', {
             });
           }
           break;
+
         case 'aphlict.server':
           var handler = this.getHandler();
           handler && handler(message.data);

@@ -134,14 +134,6 @@ abstract class PhabricatorStorageManagementWorkflow
 
     $console->writeOut(
       "%s\n",
-      pht('Dropping caches, for faster migrations...'));
-
-    $root = dirname(phutil_get_library_root('phabricator'));
-    $bin = $root.'/bin/cache';
-    phutil_passthru('%s purge --purge-all', $bin);
-
-    $console->writeOut(
-      "%s\n",
       pht('Fixing schema issues...'));
 
     $conn = $api->getConn(null);

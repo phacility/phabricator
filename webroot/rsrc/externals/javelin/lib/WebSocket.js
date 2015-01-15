@@ -96,7 +96,7 @@ JX.install('WebSocket', {
      * Close the connection.
      */
     close: function() {
-      if (!$this._isOpen) {
+      if (!this._isOpen) {
         return;
       }
       this._shouldClose = true;
@@ -107,7 +107,7 @@ JX.install('WebSocket', {
     /**
      * Callback for connection open.
      */
-    _onopen: function(e) {
+    _onopen: function() {
       this._isOpen = true;
 
       // Reset the reconnect delay, since we connected successfully.
@@ -144,7 +144,7 @@ JX.install('WebSocket', {
     /**
      * Callback for connection close.
      */
-    _onclose: function(e) {
+    _onclose: function() {
       this._isOpen = false;
 
       var done = false;

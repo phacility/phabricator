@@ -9,7 +9,7 @@ final class PhabricatorOwnersOwner extends PhabricatorOwnersDAO {
   // you want to recursively grab all user ids that own a package
   protected $userPHID;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_TIMESTAMPS => false,
       self::CONFIG_KEY_SCHEMA => array(

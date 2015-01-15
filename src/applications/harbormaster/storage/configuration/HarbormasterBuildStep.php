@@ -21,7 +21,7 @@ final class HarbormasterBuildStep extends HarbormasterDAO
     return id(new HarbormasterBuildStep());
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(

@@ -250,7 +250,6 @@ JX.install('Tokenizer', {
       }
       this._lastvalue = focus.value;
 
-      var root  = this._root;
       var metrics = JX.DOM.textMetrics(
         this._focus,
         'jx-tokenizer-metrics');
@@ -353,9 +352,6 @@ JX.install('Tokenizer', {
     },
 
     _onkeydown : function(e) {
-      var focus = this._focus;
-      var root = this._root;
-
       var raw = e.getRawEvent();
       if (raw.ctrlKey || raw.metaKey || raw.altKey) {
         return;

@@ -3,9 +3,9 @@
 final class PhabricatorPeopleLdapController
   extends PhabricatorPeopleController {
 
-  public function processRequest() {
-
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
+    $this->requireApplicationCapability(
+      PeopleCreateUsersCapability::CAPABILITY);
     $admin = $request->getUser();
 
     $content = array();

@@ -220,7 +220,7 @@ final class PHUIPagedFormView extends AphrontTagView {
     return $this->cancelURI;
   }
 
-  public function getTagContent() {
+  protected function getTagContent() {
     $form = id(new AphrontFormView())
       ->setUser($this->getUser());
 

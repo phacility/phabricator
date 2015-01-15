@@ -5,7 +5,7 @@ final class LiskIsolationTestDAO extends LiskDAO {
   protected $name;
   protected $phid;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
     ) + parent::getConfiguration();

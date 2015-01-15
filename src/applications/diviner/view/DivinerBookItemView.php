@@ -27,18 +27,18 @@ final class DivinerBookItemView extends AphrontTagView {
     return $this;
   }
 
-  public function getTagName() {
+  protected function getTagName() {
     return 'a';
   }
 
-  public function getTagAttributes() {
+  protected function getTagAttributes() {
     return array(
       'class' => 'diviner-book-item',
       'href' => $this->href,
     );
   }
 
-  public function getTagContent() {
+  protected function getTagContent() {
     require_celerity_resource('diviner-shared-css');
 
     $title = phutil_tag(

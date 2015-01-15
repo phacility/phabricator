@@ -21,7 +21,7 @@ final class HarbormasterBuildArtifact extends HarbormasterDAO
       ->setBuildTargetPHID($build_target->getPHID());
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_SERIALIZATION => array(
         'artifactData' => self::SERIALIZATION_JSON,

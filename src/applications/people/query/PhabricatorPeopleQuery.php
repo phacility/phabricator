@@ -101,7 +101,7 @@ final class PhabricatorPeopleQuery
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $table  = new PhabricatorUser();
     $conn_r = $table->establishConnection('r');
 

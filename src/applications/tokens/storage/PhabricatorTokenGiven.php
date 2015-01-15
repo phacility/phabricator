@@ -9,7 +9,7 @@ final class PhabricatorTokenGiven extends PhabricatorTokenDAO
 
   private $object = self::ATTACHABLE;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_KEY_SCHEMA => array(
         'key_all' => array(

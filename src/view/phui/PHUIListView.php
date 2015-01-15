@@ -166,7 +166,7 @@ final class PHUIListView extends AphrontTagView {
     }
   }
 
-  public function getTagName() {
+  protected function getTagName() {
     return 'ul';
   }
 

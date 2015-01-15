@@ -5,7 +5,7 @@ final class PhabricatorProjectSlug extends PhabricatorProjectDAO {
   protected $slug;
   protected $projectPHID;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'slug' => 'text128',

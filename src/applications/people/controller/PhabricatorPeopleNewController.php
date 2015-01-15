@@ -3,17 +3,13 @@
 final class PhabricatorPeopleNewController
   extends PhabricatorPeopleController {
 
-  private $type;
-
-  public function willProcessRequest(array $data) {
-    $this->type = $data['type'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
+    $this->requireApplicationCapability(
+      PeopleCreateUsersCapability::CAPABILITY);
+    $type = $request->getURIData('type');
     $admin = $request->getUser();
 
-    switch ($this->type) {
+    switch ($type) {
       case 'standard':
         $is_bot = false;
         break;
@@ -36,7 +32,6 @@ final class PhabricatorPeopleNewController
 
     $new_email = null;
 
-    $request = $this->getRequest();
     if ($request->isFormPost()) {
       $welcome_checked = $request->getInt('welcome');
 

@@ -6,7 +6,7 @@ final class PhabricatorRepositoryVCSPassword extends PhabricatorRepositoryDAO {
   protected $userPHID;
   protected $passwordHash;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'passwordHash' => 'text128',

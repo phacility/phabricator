@@ -21,7 +21,7 @@ final class PhabricatorRepositoryRefCursor extends PhabricatorRepositoryDAO
 
   private $repository = self::ATTACHABLE;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_TIMESTAMPS => false,
       self::CONFIG_BINARY => array(

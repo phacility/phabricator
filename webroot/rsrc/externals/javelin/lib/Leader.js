@@ -219,7 +219,7 @@ JX.install('Leader', {
     _read: function() {
       var self = JX.Leader;
 
-      leader = window.localStorage.getItem(self._leaderKey) || '0:0';
+      var leader = window.localStorage.getItem(self._leaderKey) || '0:0';
       leader = leader.split(':');
 
       return {
@@ -305,4 +305,3 @@ JX.install('Leader', {
 
   }
 });
-

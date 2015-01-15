@@ -368,7 +368,7 @@ final class DifferentialRevisionQuery
    * @return list List of matching DifferentialRevision objects.
    * @task exec
    */
-  public function loadPage() {
+  protected function loadPage() {
     $table = new DifferentialRevision();
     $conn_r = $table->establishConnection('r');
 
@@ -377,7 +377,7 @@ final class DifferentialRevisionQuery
     return $table->loadAllFromArray($data);
   }
 
-  public function willFilterPage(array $revisions) {
+  protected function willFilterPage(array $revisions) {
     $viewer = $this->getViewer();
 
     $repository_phids = mpull($revisions, 'getRepositoryPHID');

@@ -17,7 +17,7 @@ final class PhortuneMerchant extends PhortuneDAO
       ->attachMemberPHIDs(array());
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(

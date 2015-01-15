@@ -63,7 +63,7 @@ final class ReleephRequestQuery
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $table = new ReleephRequest();
     $conn_r = $table->establishConnection('r');
 
@@ -78,7 +78,7 @@ final class ReleephRequestQuery
     return $table->loadAllFromArray($data);
   }
 
-  public function willFilterPage(array $requests) {
+  protected function willFilterPage(array $requests) {
     // Load requested objects: you must be able to see an object to see
     // requests for it.
     $object_phids = mpull($requests, 'getRequestedObjectPHID');

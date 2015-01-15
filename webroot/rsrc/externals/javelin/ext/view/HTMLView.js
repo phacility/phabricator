@@ -26,10 +26,10 @@ JX.install('HTMLView', {
       return new JX.ViewVisitor(JX.HTMLView.validate);
     },
 
-    validate: function(view, children) {
+    validate: function(view) {
       var spec = this._getHTMLSpec();
       if (!(view.getName() in spec)) {
-        throw new Error("invalid tag");
+        throw new Error('invalid tag');
       }
 
       var tag_spec = spec[view.getName()];
@@ -37,11 +37,11 @@ JX.install('HTMLView', {
       var attrs = view.getAllAttributes();
       for (var attr in attrs) {
         if (!(attr in tag_spec)) {
-          throw new Error("invalid attr");
+          throw new Error('invalid attr');
         }
 
         var validator = tag_spec[attr];
-        if (typeof validator === "function") {
+        if (typeof validator === 'function') {
           return validator(attrs[attr]);
         }
       }
@@ -51,10 +51,10 @@ JX.install('HTMLView', {
 
     _validateRel: function(target) {
       return target in {
-        "_blank": 1,
-        "_self": 1,
-        "_parent": 1,
-        "_top": 1
+        '_blank': 1,
+        '_self': 1,
+        '_parent': 1,
+        '_top': 1
       };
     },
     _getHTMLSpec: function() {

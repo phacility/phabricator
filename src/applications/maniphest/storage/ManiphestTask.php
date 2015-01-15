@@ -60,7 +60,7 @@ final class ManiphestTask extends ManiphestDAO
       ->attachSubscriberPHIDs(array());
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(

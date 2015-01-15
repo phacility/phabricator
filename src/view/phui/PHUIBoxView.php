@@ -37,11 +37,11 @@ final class PHUIBoxView extends AphrontTagView {
     return array('class' => $outer_classes);
   }
 
-  public function getTagName() {
+  protected function getTagName() {
     return 'div';
   }
 
-  public function getTagContent() {
+  protected function getTagContent() {
     return $this->renderChildren();
   }
 }

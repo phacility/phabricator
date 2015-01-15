@@ -186,7 +186,7 @@ final class PhabricatorRepositoryQuery
     return $repositories;
   }
 
-  public function willFilterPage(array $repositories) {
+  protected function willFilterPage(array $repositories) {
     assert_instances_of($repositories, 'PhabricatorRepository');
 
     // TODO: Denormalize repository status into the PhabricatorRepository
@@ -273,7 +273,7 @@ final class PhabricatorRepositoryQuery
     return $repositories;
   }
 
-  public function didFilterPage(array $repositories) {
+  protected function didFilterPage(array $repositories) {
     if ($this->needProjectPHIDs) {
       $type_project = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
 
@@ -294,7 +294,7 @@ final class PhabricatorRepositoryQuery
     return $repositories;
   }
 
-  public function getReversePaging() {
+  protected function getReversePaging() {
     switch ($this->order) {
       case self::ORDER_CALLSIGN:
       case self::ORDER_NAME:

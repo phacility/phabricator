@@ -3,19 +3,14 @@
 final class PhabricatorAuthEditController
   extends PhabricatorAuthProviderConfigController {
 
-  private $providerClass;
-  private $configID;
-
-  public function willProcessRequest(array $data) {
-    $this->providerClass = idx($data, 'className');
-    $this->configID = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
+    $this->requireApplicationCapability(
+      AuthManageProvidersCapability::CAPABILITY);
     $viewer = $request->getUser();
+    $provider_class = $request->getURIData('className');
+    $config_id = $request->getURIData('id');
 
-    if ($this->configID) {
+    if ($config_id) {
       $config = id(new PhabricatorAuthProviderConfigQuery())
         ->setViewer($viewer)
         ->requireCapabilities(
@@ -23,7 +18,7 @@ final class PhabricatorAuthEditController
             PhabricatorPolicyCapability::CAN_VIEW,
             PhabricatorPolicyCapability::CAN_EDIT,
           ))
-        ->withIDs(array($this->configID))
+        ->withIDs(array($config_id))
         ->executeOne();
       if (!$config) {
         return new Aphront404Response();
@@ -36,9 +31,11 @@ final class PhabricatorAuthEditController
 
       $is_new = false;
     } else {
+      $provider = null;
+
       $providers = PhabricatorAuthProvider::getAllBaseProviders();
       foreach ($providers as $candidate_provider) {
-        if (get_class($candidate_provider) === $this->providerClass) {
+        if (get_class($candidate_provider) === $provider_class) {
           $provider = $candidate_provider;
           break;
         }

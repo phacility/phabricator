@@ -36,7 +36,7 @@ final class PhortunePurchase extends PhortuneDAO
       ->setBasePriceAsCurrency($product->getPriceAsCurrency());
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(

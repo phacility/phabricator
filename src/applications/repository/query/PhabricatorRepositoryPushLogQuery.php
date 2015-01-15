@@ -61,7 +61,7 @@ final class PhabricatorRepositoryPushLogQuery
     return $table->loadAllFromArray($data);
   }
 
-  public function willFilterPage(array $logs) {
+  protected function willFilterPage(array $logs) {
     $event_phids = mpull($logs, 'getPushEventPHID');
     $events = id(new PhabricatorObjectQuery())
       ->setParentQuery($this)

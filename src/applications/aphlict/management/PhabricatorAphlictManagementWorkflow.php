@@ -5,6 +5,7 @@ abstract class PhabricatorAphlictManagementWorkflow
 
   private $debug = false;
   private $clientHost;
+  private $clientPort;
 
   public function didConstruct() {
     $this
@@ -15,16 +16,40 @@ abstract class PhabricatorAphlictManagementWorkflow
             'param' => 'hostname',
             'help'  => pht('Hostname to bind to for the client server.'),
           ),
+          array(
+            'name'  => 'client-port',
+            'param' => 'port',
+            'help'  => pht('Port to bind to for the client server.'),
+          ),
         ));
   }
 
   public function execute(PhutilArgumentParser $args) {
     $this->clientHost = $args->getArg('client-host');
+    $this->clientPort = $args->getArg('client-port');
     return 0;
   }
 
   final public function getPIDPath() {
     return PhabricatorEnv::getEnvConfig('notification.pidfile');
+  }
+
+  final public function getLogPath() {
+    $path = PhabricatorEnv::getEnvConfig('notification.log');
+
+    try {
+      $dir = dirname($path);
+      if (!Filesystem::pathExists($dir)) {
+        Filesystem::createDirectory($dir, 0755, true);
+      }
+    } catch (FilesystemException $ex) {
+      throw new Exception(
+        pht(
+          "Failed to create '%s'. You should manually create this directory.",
+          $dir));
+    }
+
+    return $path;
   }
 
   final public function getPID() {
@@ -121,10 +146,12 @@ abstract class PhabricatorAphlictManagementWorkflow
     $client_uri = PhabricatorEnv::getEnvConfig('notification.client-uri');
     $client_uri = new PhutilURI($client_uri);
 
-    $log = PhabricatorEnv::getEnvConfig('notification.log');
+    $log = $this->getLogPath();
 
     $server_argv = array();
-    $server_argv[] = '--client-port='.$client_uri->getPort();
+    $server_argv[] = '--client-port='.coalesce(
+      $this->clientPort,
+      $client_uri->getPort());
     $server_argv[] = '--admin-port='.$server_uri->getPort();
     $server_argv[] = '--admin-host='.$server_uri->getDomain();
 

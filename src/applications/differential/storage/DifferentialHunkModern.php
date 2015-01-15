@@ -20,7 +20,7 @@ final class DifferentialHunkModern extends DifferentialHunk {
     return 'differential_hunk_modern';
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_BINARY => array(
         'data' => true,

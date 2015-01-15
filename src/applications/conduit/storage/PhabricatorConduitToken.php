@@ -15,7 +15,7 @@ final class PhabricatorConduitToken
   const TYPE_COMMANDLINE = 'cli';
   const TYPE_CLUSTER = 'clr';
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'tokenType' => 'text32',

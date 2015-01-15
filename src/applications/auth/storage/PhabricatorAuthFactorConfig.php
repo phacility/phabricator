@@ -8,7 +8,7 @@ final class PhabricatorAuthFactorConfig extends PhabricatorAuthDAO {
   protected $factorSecret;
   protected $properties = array();
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_SERIALIZATION => array(
         'properties' => self::SERIALIZATION_JSON,

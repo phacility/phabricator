@@ -7,7 +7,7 @@ final class PhabricatorUserProfile extends PhabricatorUserDAO {
   protected $blurb;
   protected $profileImagePHID;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'title' => 'text255',

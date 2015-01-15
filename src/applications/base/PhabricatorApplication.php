@@ -442,6 +442,11 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
       return null;
     }
 
+    $policy_locked = PhabricatorEnv::getEnvConfig('policy.locked');
+    if (isset($policy_locked[$capability])) {
+      return $policy_locked[$capability];
+    }
+
     $config = PhabricatorEnv::getEnvConfig('phabricator.application-settings');
 
     $app = idx($config, $this->getPHID());

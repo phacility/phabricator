@@ -45,7 +45,7 @@ final class PhabricatorDaemonLogQuery
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $table = new PhabricatorDaemonLog();
     $conn_r = $table->establishConnection('r');
 
@@ -60,7 +60,7 @@ final class PhabricatorDaemonLogQuery
     return $table->loadAllFromArray($data);
   }
 
-  public function willFilterPage(array $daemons) {
+  protected function willFilterPage(array $daemons) {
     $unknown_delay = PhabricatorDaemonLogQuery::getTimeUntilUnknown();
     $dead_delay = PhabricatorDaemonLogQuery::getTimeUntilDead();
 

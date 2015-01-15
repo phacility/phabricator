@@ -6,7 +6,7 @@ final class PhabricatorSlowvoteChoice extends PhabricatorSlowvoteDAO {
   protected $optionID;
   protected $authorPHID;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_KEY_SCHEMA => array(
         'pollID' => array(

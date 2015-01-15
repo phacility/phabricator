@@ -21,7 +21,7 @@ final class LegalpadDocumentSignature
 
   private $document = self::ATTACHABLE;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_SERIALIZATION => array(
         'signatureData' => self::SERIALIZATION_JSON,

@@ -34,7 +34,7 @@ final class DifferentialDiffQuery
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $table = new DifferentialDiff();
     $conn_r = $table->establishConnection('r');
 
@@ -49,7 +49,7 @@ final class DifferentialDiffQuery
     return $table->loadAllFromArray($data);
   }
 
-  public function willFilterPage(array $diffs) {
+  protected function willFilterPage(array $diffs) {
     $revision_ids = array_filter(mpull($diffs, 'getRevisionID'));
 
     $revisions = array();

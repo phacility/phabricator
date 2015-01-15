@@ -51,6 +51,7 @@ final class PhabricatorOAuthServerApplication extends PhabricatorApplication {
           'delete/(?P<phid>[^/]+)/' => 'PhabricatorOAuthClientDeleteController',
           'edit/(?P<phid>[^/]+)/' => 'PhabricatorOAuthClientEditController',
           'view/(?P<phid>[^/]+)/' => 'PhabricatorOAuthClientViewController',
+          'secret/(?P<phid>[^/]+)/' => 'PhabricatorOAuthClientSecretController',
         ),
       ),
     );

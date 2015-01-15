@@ -110,6 +110,7 @@ final class PhabricatorProjectProfileController
     $task_list->setUser($user);
     $task_list->setTasks($tasks);
     $task_list->setHandles($handles);
+    $task_list->setNoDataString(pht('This project has no open tasks.'));
 
     $phid = $project->getPHID();
     $view_uri = urisprintf(
@@ -156,6 +157,13 @@ final class PhabricatorProjectProfileController
       $project,
       PhabricatorPolicyCapability::CAN_EDIT);
 
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Edit Project'))
+        ->setIcon('fa-pencil')
+        ->setHref($this->getApplicationURI("edit/{$id}/")));
+
+
     $action = null;
     if (!$project->isUserMember($viewer->getPHID())) {
       $can_join = PhabricatorPolicyFilter::hasCapability(
@@ -194,18 +202,6 @@ final class PhabricatorProjectProfileController
           ->setName(pht('Unwatch Project'));
         $view->addAction($action);
       }
-    }
-
-    $have_phriction = PhabricatorApplication::isClassInstalledForViewer(
-      'PhabricatorPhrictionApplication',
-      $viewer);
-    if ($have_phriction) {
-      $view->addAction(
-        id(new PhabricatorActionView())
-          ->setIcon('fa-book grey')
-          ->setName(pht('View Wiki'))
-          ->setWorkflow(true)
-          ->setHref('/project/wiki/'));
     }
 
     return $view;

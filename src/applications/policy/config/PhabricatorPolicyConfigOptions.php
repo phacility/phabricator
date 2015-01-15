@@ -12,6 +12,12 @@ final class PhabricatorPolicyConfigOptions
   }
 
   public function getOptions() {
+    $policy_locked_type = 'custom:PolicyLockOptionType';
+    $policy_locked_example = array(
+      'people.create.users' => 'admin',);
+    $json = new PhutilJSON();
+    $policy_locked_example = $json->encodeFormatted($policy_locked_example);
+
     return array(
       $this->newOption('policy.allow-public', 'bool', false)
         ->setBoolOptions(
@@ -39,6 +45,17 @@ final class PhabricatorPolicyConfigOptions
             "With this setting disabled, the 'Public' policy is not ".
             "available, and the most open policy is 'All Users' (which means ".
             "users must have accounts and be logged in to view things).")),
+      $this->newOption('policy.locked', $policy_locked_type, array())
+        ->setLocked(true)
+        ->setSummary(pht(
+          'Lock specific application policies so they can not be edited.'))
+        ->setDescription(pht(
+          'Phabricator has application policies which can dictate whether '.
+          'users can take certain actions, such as creating new users. '."\n\n".
+          'This setting allows for "locking" these policies such that no '.
+          'further edits can be made on a per-policy basis.'))
+          ->addExample($policy_locked_example,
+                       pht('Lock Create User Policy To Admins')),
     );
   }
 

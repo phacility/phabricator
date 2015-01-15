@@ -65,7 +65,7 @@ final class PhabricatorFlagQuery
       ->executeOne();
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $table = new PhabricatorFlag();
     $conn_r = $table->establishConnection('r');
 
@@ -80,7 +80,7 @@ final class PhabricatorFlagQuery
     return $table->loadAllFromArray($data);
   }
 
-  public function willFilterPage(array $flags) {
+  protected function willFilterPage(array $flags) {
     if ($this->needObjects) {
       $objects = id(new PhabricatorObjectQuery())
         ->setViewer($this->getViewer())

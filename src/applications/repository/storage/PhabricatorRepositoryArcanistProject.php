@@ -14,7 +14,7 @@ final class PhabricatorRepositoryArcanistProject
 
   private $repository = self::ATTACHABLE;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID   => true,
       self::CONFIG_TIMESTAMPS => false,

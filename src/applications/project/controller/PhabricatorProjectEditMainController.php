@@ -32,8 +32,7 @@ final class PhabricatorProjectEditMainController
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Edit %s', $project->getName()))
       ->setUser($viewer)
-      ->setPolicyObject($project)
-      ->setImage($project->getProfileImageURI());
+      ->setPolicyObject($project);
 
     if ($project->getStatus() == PhabricatorProjectStatus::STATUS_ACTIVE) {
       $header->setStatus('fa-check', 'bluegrey', pht('Active'));

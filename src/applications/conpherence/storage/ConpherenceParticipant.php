@@ -10,7 +10,7 @@ final class ConpherenceParticipant extends ConpherenceDAO {
   protected $dateTouched;
   protected $settings = array();
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_SERIALIZATION => array(
         'settings' => self::SERIALIZATION_JSON,

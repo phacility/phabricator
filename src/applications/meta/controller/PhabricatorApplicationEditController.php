@@ -3,23 +3,17 @@
 final class PhabricatorApplicationEditController
   extends PhabricatorApplicationsController {
 
-  private $application;
-
   public function shouldRequireAdmin() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->application = $data['application'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
+    $application = $request->getURIData('application');
 
     $application = id(new PhabricatorApplicationQuery())
       ->setViewer($user)
-      ->withClasses(array($this->application))
+      ->withClasses(array($application))
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -107,7 +101,7 @@ final class PhabricatorApplicationEditController
           $user,
           $config_entry,
           $value,
-          PhabricatorContentSource::newFromRequest($this->getRequest()));
+          PhabricatorContentSource::newFromRequest($request));
       }
 
       return id(new AphrontRedirectResponse())->setURI($view_uri);
@@ -120,12 +114,14 @@ final class PhabricatorApplicationEditController
     $form = id(new AphrontFormView())
       ->setUser($user);
 
+    $locked_policies = PhabricatorEnv::getEnvConfig('policy.locked');
     foreach ($application->getCapabilities() as $capability) {
       $label = $application->getCapabilityLabel($capability);
       $can_edit = $application->isCapabilityEditable($capability);
+      $locked = idx($locked_policies, $capability);
       $caption = $application->getCapabilityCaption($capability);
 
-      if (!$can_edit) {
+      if (!$can_edit || $locked) {
         $form->appendChild(
           id(new AphrontFormStaticControl())
             ->setLabel($label)
@@ -135,6 +131,7 @@ final class PhabricatorApplicationEditController
         $form->appendChild(
           id(new AphrontFormPolicyControl())
           ->setUser($user)
+          ->setDisabled($locked)
           ->setCapability($capability)
           ->setPolicyObject($application)
           ->setPolicies($policies)

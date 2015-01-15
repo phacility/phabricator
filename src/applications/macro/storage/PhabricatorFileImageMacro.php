@@ -40,7 +40,7 @@ final class PhabricatorFileImageMacro extends PhabricatorFileDAO
     return $this->assertAttached($this->audio);
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID  => true,
       self::CONFIG_COLUMN_SCHEMA => array(

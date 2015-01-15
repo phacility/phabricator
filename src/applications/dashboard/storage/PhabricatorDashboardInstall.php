@@ -14,7 +14,7 @@ final class PhabricatorDashboardInstall
   protected $applicationClass;
   protected $dashboardPHID;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'applicationClass' => 'text64',

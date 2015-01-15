@@ -35,7 +35,7 @@ final class DifferentialManiphestTasksField
     return $this->getFieldName();
   }
 
-  public function readValueFromRevision(DifferentialRevision $revision) {
+  protected function readValueFromRevision(DifferentialRevision $revision) {
     if (!$revision->getPHID()) {
       return array();
     }

@@ -23,19 +23,11 @@ JX.behavior('aphlict-status', function(config) {
       return;
     }
 
-    var tip = null;
     var status = client.getStatus();
-
-    if (status == 'error') {
-      tip = pht(client.getStatusCode());
-    }
-
     var status_node = JX.$N(
       'span',
       {
-        className: 'aphlict-connection-status-' + status,
-        sigil: tip ? 'has-tooltip' : null,
-        meta: tip ? {tip: tip, align: 'S', size: 300} : {}
+        className: 'aphlict-connection-status-' + status
       },
       pht(status));
 

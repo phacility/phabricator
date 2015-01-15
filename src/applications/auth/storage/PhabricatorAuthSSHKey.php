@@ -14,7 +14,7 @@ final class PhabricatorAuthSSHKey
 
   private $object = self::ATTACHABLE;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'text255',

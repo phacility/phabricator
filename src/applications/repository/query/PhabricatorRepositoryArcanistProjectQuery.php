@@ -38,7 +38,7 @@ final class PhabricatorRepositoryArcanistProjectQuery
     return $table->loadAllFromArray($data);
   }
 
-  public function willFilterPage(array $projects) {
+  protected function willFilterPage(array $projects) {
     assert_instances_of($projects, 'PhabricatorRepositoryArcanistProject');
 
     if ($this->needRepositories) {

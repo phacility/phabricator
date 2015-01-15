@@ -501,7 +501,7 @@ final class DiffusionCommitQuery
     return $this->formatWhereClause($where);
   }
 
-  public function didFilterResults(array $filtered) {
+  protected function didFilterResults(array $filtered) {
     if ($this->identifierMap) {
       foreach ($this->identifierMap as $name => $commit) {
         if (isset($filtered[$commit->getPHID()])) {

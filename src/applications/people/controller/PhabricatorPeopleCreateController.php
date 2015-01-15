@@ -3,8 +3,9 @@
 final class PhabricatorPeopleCreateController
   extends PhabricatorPeopleController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
+    $this->requireApplicationCapability(
+      PeopleCreateUsersCapability::CAPABILITY);
     $admin = $request->getUser();
 
     id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(

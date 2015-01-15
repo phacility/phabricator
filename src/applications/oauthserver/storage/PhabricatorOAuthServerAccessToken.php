@@ -8,7 +8,7 @@ final class PhabricatorOAuthServerAccessToken
   protected $userPHID;
   protected $clientPHID;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'token' => 'text32',

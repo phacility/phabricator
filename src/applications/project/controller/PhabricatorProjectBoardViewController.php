@@ -303,11 +303,9 @@ final class PhabricatorProjectBoardViewController
       $project->getName());
 
     $header = id(new PHUIHeaderView())
-      ->setHeader($header_link)
+      ->setHeader(pht('%s Workboard', $header_link))
       ->setUser($viewer)
       ->setNoBackground(true)
-      ->setImage($project->getProfileImageURI())
-      ->setImageURL($this->getApplicationURI('profile/'.$project->getID().'/'))
       ->addActionLink($sort_menu)
       ->addActionLink($filter_menu)
       ->addActionLink($manage_menu)

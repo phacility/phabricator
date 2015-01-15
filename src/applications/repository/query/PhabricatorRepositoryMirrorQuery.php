@@ -37,7 +37,7 @@ final class PhabricatorRepositoryMirrorQuery
     return $table->loadAllFromArray($data);
   }
 
-  public function willFilterPage(array $mirrors) {
+  protected function willFilterPage(array $mirrors) {
     assert_instances_of($mirrors, 'PhabricatorRepositoryMirror');
 
     $repository_phids = mpull($mirrors, 'getRepositoryPHID');

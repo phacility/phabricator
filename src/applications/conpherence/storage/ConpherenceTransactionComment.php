@@ -9,7 +9,7 @@ final class ConpherenceTransactionComment
     return new ConpherenceTransaction();
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     $config = parent::getConfiguration();
 
     $config[self::CONFIG_COLUMN_SCHEMA] = array(

@@ -307,7 +307,7 @@ final class PHUIObjectItemView extends AphrontTagView {
     );
   }
 
-  public function getTagContent() {
+  protected function getTagContent() {
     $content_classes = array();
     $content_classes[] = 'phui-object-item-content';
 

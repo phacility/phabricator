@@ -14,7 +14,7 @@ final class PhabricatorUserEmail extends PhabricatorUserDAO {
 
   const MAX_ADDRESS_LENGTH = 128;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'address' => 'sort128',
