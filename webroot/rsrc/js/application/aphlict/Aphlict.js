@@ -116,9 +116,9 @@ JX.install('Aphlict', {
           }
           break;
 
-        case 'aphlict.server':
+        default:
           var handler = this.getHandler();
-          handler && handler(message.data);
+          handler && handler(message);
           break;
       }
     },

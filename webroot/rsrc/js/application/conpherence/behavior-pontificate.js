@@ -33,7 +33,7 @@ JX.behavior('conpherence-pontificate', function() {
     infonode.value = id;
   }
 
-  JX.Stratcom.listen('aphlict-receive-message', null, function(e) {
+  JX.Stratcom.listen('aphlict-server-message', null, function(e) {
     var message = e.getData();
 
     if (message.type != 'message') {
