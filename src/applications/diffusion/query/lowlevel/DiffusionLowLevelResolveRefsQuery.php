@@ -15,7 +15,7 @@ final class DiffusionLowLevelResolveRefsQuery
     return $this;
   }
 
-  public function executeQuery() {
+  protected function executeQuery() {
     if (!$this->refs) {
       return array();
     }
