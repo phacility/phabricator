@@ -21,7 +21,7 @@ abstract class PassphraseController extends PhabricatorController {
     return $nav;
   }
 
-  protected function buildApplicationMenu() {
+  public function buildApplicationMenu() {
     return $this->buildSideNavView(true)->getMenu();
   }
 

@@ -22,7 +22,7 @@ abstract class LegalpadController extends PhabricatorController {
     return $nav;
   }
 
-  protected function buildApplicationMenu() {
+  public function buildApplicationMenu() {
     return $this->buildSideNav(true)->getMenu();
   }
 

@@ -425,7 +425,7 @@ abstract class PhabricatorController extends AphrontController {
       array_filter($phids));
   }
 
-  protected function buildApplicationMenu() {
+  public function buildApplicationMenu() {
     return null;
   }
 

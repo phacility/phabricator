@@ -355,7 +355,7 @@ final class PhabricatorApplicationSearchController
       ));
   }
 
-  protected function buildApplicationMenu() {
+  public function buildApplicationMenu() {
     return $this->getDelegatingController()->buildApplicationMenu();
   }
 

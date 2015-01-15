@@ -151,7 +151,7 @@ final class PhabricatorSettingsMainController
     return $nav;
   }
 
-  protected function buildApplicationMenu() {
+  public function buildApplicationMenu() {
     $panels = $this->buildPanels();
     return $this->renderSideNav($panels)->getMenu();
   }

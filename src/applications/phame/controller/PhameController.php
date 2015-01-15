@@ -103,7 +103,7 @@ abstract class PhameController extends PhabricatorController {
     return $stories;
   }
 
-  protected function buildApplicationMenu() {
+  public function buildApplicationMenu() {
     return $this->renderSideNavFilterView()->getMenu();
   }
 
