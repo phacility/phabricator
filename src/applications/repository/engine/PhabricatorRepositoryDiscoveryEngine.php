@@ -215,9 +215,14 @@ final class PhabricatorRepositoryDiscoveryEngine
 
 
   private function verifySubversionRoot(PhabricatorRepository $repository) {
-    list($xml) = $repository->execxRemoteCommand(
-      'info --xml %s',
-      $repository->getSubversionPathURI());
+
+    $subversionPathURI = $repository->getSubversionPathURI();
+
+    if (strpos($subversionPathURI, 'svn+ssh') !== false && strpos($subversionPathURI, '@') !== false) {
+      $subversionPathURI .= '@';
+    }
+
+    list($xml) = $repository->execxRemoteCommand('info --xml %s', $subversionPathURI);
 
     $xml = phutil_utf8ize($xml);
     $xml = new SimpleXMLElement($xml);
