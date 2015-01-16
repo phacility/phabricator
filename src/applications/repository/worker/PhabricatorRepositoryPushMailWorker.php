@@ -3,7 +3,7 @@
 final class PhabricatorRepositoryPushMailWorker
   extends PhabricatorWorker {
 
-  public function doWork() {
+  protected function doWork() {
     $viewer = PhabricatorUser::getOmnipotentUser();
 
     $task_data = $this->getTaskData();

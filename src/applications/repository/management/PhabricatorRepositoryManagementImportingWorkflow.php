@@ -3,7 +3,7 @@
 final class PhabricatorRepositoryManagementImportingWorkflow
   extends PhabricatorRepositoryManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('importing')
       ->setExamples('**importing** __repository__ ...')

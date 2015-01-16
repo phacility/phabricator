@@ -3,7 +3,7 @@
 final class PhabricatorWorkerManagementRetryWorkflow
   extends PhabricatorWorkerManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('retry')
       ->setExamples('**retry** --id __id__')

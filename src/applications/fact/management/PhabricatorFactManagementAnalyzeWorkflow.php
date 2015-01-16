@@ -3,7 +3,7 @@
 final class PhabricatorFactManagementAnalyzeWorkflow
   extends PhabricatorFactManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('analyze')
       ->setSynopsis(pht('Manually invoke fact analyzers.'))

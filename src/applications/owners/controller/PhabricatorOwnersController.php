@@ -58,7 +58,7 @@ abstract class PhabricatorOwnersController extends PhabricatorController {
     return $nav;
   }
 
-  protected function buildApplicationMenu() {
+  public function buildApplicationMenu() {
     return $this->buildSideNavView()->getMenu();
   }
 

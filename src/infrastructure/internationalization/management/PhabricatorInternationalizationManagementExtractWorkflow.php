@@ -3,7 +3,7 @@
 final class PhabricatorInternationalizationManagementExtractWorkflow
   extends PhabricatorInternationalizationManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('extract')
       ->setSynopsis(pht('Extract translatable strings.'))

@@ -6,7 +6,7 @@
  */
 final class PhabricatorGarbageCollectorDaemon extends PhabricatorDaemon {
 
-  public function run() {
+  protected function run() {
     $collectors = id(new PhutilSymbolLoader())
       ->setAncestorClass('PhabricatorGarbageCollector')
       ->loadObjects();

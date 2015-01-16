@@ -21,7 +21,7 @@ final class DiffusionSubversionServeSSHWorkflow
   private $internalBaseURI;
   private $externalBaseURI;
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this->setName('svnserve');
     $this->setArguments(
       array(

@@ -3,7 +3,7 @@
 final class PhabricatorFilesManagementMigrateWorkflow
   extends PhabricatorFilesManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('migrate')
       ->setSynopsis('Migrate files between storage engines.')

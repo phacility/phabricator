@@ -7,7 +7,7 @@ final class PhabricatorDaemonManagementDebugWorkflow
     return true;
   }
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('debug')
       ->setExamples('**debug** __daemon__')

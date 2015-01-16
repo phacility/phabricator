@@ -16,7 +16,7 @@ abstract class HeraldController extends PhabricatorController {
     return $response->setContent($page->render());
   }
 
-  protected function buildApplicationMenu() {
+  public function buildApplicationMenu() {
     return $this->buildSideNavView(true)->getMenu();
   }
 

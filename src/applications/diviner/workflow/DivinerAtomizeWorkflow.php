@@ -2,7 +2,7 @@
 
 final class DivinerAtomizeWorkflow extends DivinerWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('atomize')
       ->setSynopsis(pht('Build atoms from source.'))

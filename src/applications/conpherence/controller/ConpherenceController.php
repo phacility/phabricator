@@ -4,7 +4,7 @@ abstract class ConpherenceController extends PhabricatorController {
 
   private $conpherences;
 
-  protected function buildApplicationMenu() {
+  public function buildApplicationMenu() {
     $nav = new PHUIListView();
 
     $nav->newLink(

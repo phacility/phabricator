@@ -3,7 +3,7 @@
 final class AlmanacManagementTrustKeyWorkflow
   extends AlmanacManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('trust-key')
       ->setSynopsis(pht('Mark a public key as trusted.'))

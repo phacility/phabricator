@@ -3,7 +3,7 @@
 final class PhabricatorRepositoryManagementLookupUsersWorkflow
   extends PhabricatorRepositoryManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('lookup-users')
       ->setExamples('**lookup-users** __commit__ ...')

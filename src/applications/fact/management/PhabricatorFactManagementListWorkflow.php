@@ -3,7 +3,7 @@
 final class PhabricatorFactManagementListWorkflow
   extends PhabricatorFactManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('list')
       ->setSynopsis(pht('Show a list of fact engines.'))

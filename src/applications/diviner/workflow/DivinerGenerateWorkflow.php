@@ -4,7 +4,7 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
 
   private $atomCache;
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('generate')
       ->setSynopsis(pht('Generate documentation.'))

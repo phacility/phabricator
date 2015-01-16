@@ -3,7 +3,7 @@
 final class DrydockManagementCloseWorkflow
   extends DrydockManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('close')
       ->setSynopsis('Close a resource.')

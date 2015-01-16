@@ -26,7 +26,7 @@ abstract class PhabricatorConfigController extends PhabricatorController {
     return $nav;
   }
 
-  protected function buildApplicationMenu() {
+  public function buildApplicationMenu() {
     return $this->buildSideNavView(null, true)->getMenu();
   }
 

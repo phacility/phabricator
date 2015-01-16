@@ -3,7 +3,7 @@
 final class AlmanacManagementUntrustKeyWorkflow
   extends AlmanacManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('untrust-key')
       ->setSynopsis(pht('Revoke trust of a public key.'))

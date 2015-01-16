@@ -7,7 +7,7 @@ final class PhabricatorDaemonManagementLaunchWorkflow
     return true;
   }
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('launch')
       ->setExamples('**launch** [n] __daemon__ [options]')

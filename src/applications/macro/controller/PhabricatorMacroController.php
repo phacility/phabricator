@@ -20,7 +20,7 @@ abstract class PhabricatorMacroController extends PhabricatorController {
     return $nav;
   }
 
-  protected function buildApplicationMenu() {
+  public function buildApplicationMenu() {
     return $this->buildSideNavView($for_app = true)->getMenu();
   }
 

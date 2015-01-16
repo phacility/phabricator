@@ -3,7 +3,7 @@
 final class PhabricatorStorageManagementUpgradeWorkflow
   extends PhabricatorStorageManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('upgrade')
       ->setExamples('**upgrade** [__options__]')

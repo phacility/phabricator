@@ -25,7 +25,7 @@ final class TokenGiveConduitAPIMethod extends TokenConduitAPIMethod {
     return 'void';
   }
 
-  public function execute(ConduitAPIRequest $request) {
+  protected function execute(ConduitAPIRequest $request) {
     $content_source = PhabricatorContentSource::newFromConduitRequest($request);
 
     $editor = id(new PhabricatorTokenGivenEditor())

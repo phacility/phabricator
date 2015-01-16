@@ -2,7 +2,7 @@
 
 final class ConduitSSHWorkflow extends PhabricatorSSHWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this->setName('conduit');
     $this->setArguments(
       array(

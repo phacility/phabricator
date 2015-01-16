@@ -3,7 +3,7 @@
 final class PhabricatorStorageManagementQuickstartWorkflow
   extends PhabricatorStorageManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('quickstart')
       ->setExamples('**quickstart** [__options__]')

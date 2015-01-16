@@ -3,7 +3,7 @@
 final class PhabricatorAphlictManagementStatusWorkflow
   extends PhabricatorAphlictManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('status')
       ->setSynopsis(pht('Show the status of the notifications server.'))

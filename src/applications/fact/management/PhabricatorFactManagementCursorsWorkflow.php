@@ -3,7 +3,7 @@
 final class PhabricatorFactManagementCursorsWorkflow
   extends PhabricatorFactManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('cursors')
       ->setSynopsis(pht('Show a list of fact iterators and cursors.'))

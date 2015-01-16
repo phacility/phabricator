@@ -3,7 +3,7 @@
 final class HarbormasterManagementBuildWorkflow
   extends HarbormasterManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('build')
       ->setExamples('**build** [__options__] __buildable__ --plan __id__')

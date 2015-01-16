@@ -3,7 +3,7 @@
 final class PhabricatorFilesManagementCompactWorkflow
   extends PhabricatorFilesManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('compact')
       ->setSynopsis(

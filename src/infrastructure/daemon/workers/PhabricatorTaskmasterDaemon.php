@@ -2,7 +2,7 @@
 
 final class PhabricatorTaskmasterDaemon extends PhabricatorDaemon {
 
-  public function run() {
+  protected function run() {
     $sleep = 0;
     do {
       $tasks = id(new PhabricatorWorkerLeaseQuery())

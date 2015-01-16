@@ -11,7 +11,7 @@ final class PhabricatorMetaMTAWorker
     return ($task->getFailureCount() * 15);
   }
 
-  public function doWork() {
+  protected function doWork() {
     $message = $this->loadMessage();
     if (!$message) {
       throw new PhabricatorWorkerPermanentFailureException(

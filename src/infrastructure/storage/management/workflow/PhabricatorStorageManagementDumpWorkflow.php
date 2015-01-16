@@ -3,7 +3,7 @@
 final class PhabricatorStorageManagementDumpWorkflow
   extends PhabricatorStorageManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('dump')
       ->setExamples('**dump** [__options__]')
