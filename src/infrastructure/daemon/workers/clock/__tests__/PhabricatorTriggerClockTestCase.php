@@ -21,6 +21,15 @@ final class PhabricatorTriggerClockTestCase extends PhabricatorTestCase {
       pht('Should trigger only once.'));
   }
 
+  public function testNeverTriggerClock() {
+    $clock = new PhabricatorNeverTriggerClock(array());
+
+    $this->assertEqual(
+      null,
+      $clock->getNextEventEpoch(null, false),
+      pht('Should never trigger.'));
+  }
+
   public function testSubscriptionTriggerClock() {
     $start = strtotime('2014-01-31 2:34:56 UTC');
 
