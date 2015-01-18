@@ -50,8 +50,6 @@ JX.install('AphlictListener', {
 
     writeMessage: function(message) {
       this._socket.send(JSON.stringify(message));
-    }
-
-  }
-
+    },
+  },
 });
