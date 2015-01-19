@@ -12,6 +12,7 @@
 
   "expr": true,
   "loopfunc": true,
+  "strict": true,
   "sub": true,
 
   "globals": {

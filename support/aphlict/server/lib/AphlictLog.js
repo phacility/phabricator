@@ -1,3 +1,5 @@
+'use strict';
+
 var JX = require('./javelin').JX;
 
 var fs = require('fs');
@@ -22,7 +24,7 @@ JX.install('AphlictLog', {
       this._logs.push(fs.createWriteStream(path, {
         flags: 'a',
         encoding: 'utf8',
-        mode: 0664,
+        mode: '0664',
       }));
       return this;
     },

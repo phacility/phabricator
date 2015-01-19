@@ -1,3 +1,5 @@
+'use strict';
+
 var JX = require('./javelin').JX;
 
 require('./AphlictListener');

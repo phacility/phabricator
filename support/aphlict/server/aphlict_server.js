@@ -1,3 +1,5 @@
+'use strict';
+
 var JX = require('./lib/javelin').JX;
 var http = require('http');
 var https = require('https');
