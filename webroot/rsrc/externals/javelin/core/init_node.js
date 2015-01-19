@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * Alternative Javelin init file for Node.js.
  *
