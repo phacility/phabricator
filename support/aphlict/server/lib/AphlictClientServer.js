@@ -1,7 +1,7 @@
-var JX = require('javelin').JX;
+var JX = require('./javelin').JX;
 
-JX.require('AphlictListenerList', __dirname);
-JX.require('AphlictLog', __dirname);
+require('./AphlictListenerList');
+require('./AphlictLog');
 
 var util = require('util');
 var WebSocket = require('ws');

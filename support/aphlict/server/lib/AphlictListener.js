@@ -1,4 +1,4 @@
-var JX = require('javelin').JX;
+var JX = require('./javelin').JX;
 
 JX.install('AphlictListener', {
   construct: function(id, socket) {

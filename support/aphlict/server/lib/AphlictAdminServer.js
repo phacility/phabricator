@@ -1,6 +1,6 @@
-var JX = require('javelin').JX;
+var JX = require('./javelin').JX;
 
-JX.require('AphlictListenerList', __dirname);
+require('./AphlictListenerList');
 
 var http = require('http');
 

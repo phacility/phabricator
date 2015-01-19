@@ -4,9 +4,6 @@ var https = require('https');
 var util = require('util');
 var fs = require('fs');
 
-JX.require('lib/AphlictListenerList', __dirname);
-JX.require('lib/AphlictLog', __dirname);
-
 function parse_command_line_arguments(argv) {
   var config = {
     'client-port': 22280,
@@ -36,6 +33,8 @@ function parse_command_line_arguments(argv) {
 
   return config;
 }
+
+require('./lib/AphlictLog');
 
 var debug = new JX.AphlictLog()
   .addConsole(console);
@@ -71,6 +70,12 @@ try {
     'documentation for instructions. ' + ex.toString());
 }
 
+// NOTE: Require these only after checking for the "ws" module, since they
+// depend on it.
+
+require('./lib/AphlictAdminServer');
+require('./lib/AphlictClientServer');
+
 var ssl_config = {
   enabled: (config['ssl-key'] || config['ssl-cert'])
 };
@@ -93,9 +98,6 @@ if (config.test) {
   debug.log('Configuration test OK.');
   process.exit(0);
 }
-
-JX.require('lib/AphlictAdminServer', __dirname);
-JX.require('lib/AphlictClientServer', __dirname);
 
 var server;
 if (ssl_config.enabled) {

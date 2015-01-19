@@ -1,5 +1,6 @@
-var JX = require('javelin').JX;
-JX.require('AphlictListener', __dirname);
+var JX = require('./javelin').JX;
+
+require('./AphlictListener');
 
 JX.install('AphlictListenerList', {
   construct: function() {

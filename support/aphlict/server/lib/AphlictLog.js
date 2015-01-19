@@ -1,4 +1,4 @@
-var JX = require('javelin').JX;
+var JX = require('./javelin').JX;
 
 var fs = require('fs');
 var util = require('util');
