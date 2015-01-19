@@ -91,7 +91,7 @@ JX.behavior('releeph-request-state-change', function() {
 
   new JX.KeyboardShortcut(
     ['g', 'return'],
-    "Open selected request's page in a new tab.")
+    'Open selected request\'s page in a new tab.')
     .setHandler(function() {
       keynavNavigateToRequestPage();
     })

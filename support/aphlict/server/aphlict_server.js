@@ -22,10 +22,10 @@ function parse_command_line_arguments(argv) {
     var arg = argv[ii];
     var matches = arg.match(/^--([^=]+)=(.*)$/);
     if (!matches) {
-      throw new Error("Unknown argument '" + arg + "'!");
+      throw new Error('Unknown argument "' + arg + '"!');
     }
     if (!(matches[1] in config)) {
-      throw new Error("Unknown argument '" + matches[1] + "'!");
+      throw new Error('Unknown argument "' + matches[1] + '"!');
     }
     config[matches[1]] = matches[2];
   }
