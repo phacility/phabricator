@@ -28,7 +28,7 @@ final class PhabricatorProjectEditPictureController
       return new Aphront404Response();
     }
 
-    $edit_uri = $this->getApplicationURI('edit/'.$project->getID().'/');
+    $edit_uri = $this->getApplicationURI('profile/'.$project->getID().'/');
     $view_uri = $this->getApplicationURI('profile/'.$project->getID().'/');
 
     $supported_formats = PhabricatorFile::getTransformableImageFormats();
