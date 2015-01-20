@@ -6,6 +6,8 @@ final class PhabricatorWorkerTriggerQuery
   const ORDER_EXECUTION = 'execution';
   const ORDER_VERSION = 'version';
 
+  private $ids;
+  private $phids;
   private $versionMin;
   private $versionMax;
   private $nextEpochMin;
@@ -13,6 +15,16 @@ final class PhabricatorWorkerTriggerQuery
 
   private $needEvents;
   private $order = self::ORDER_EXECUTION;
+
+  public function withIDs(array $ids) {
+    $this->ids = $ids;
+    return $this;
+  }
+
+  public function withPHIDs(array $phids) {
+    $this->phids = $phids;
+    return $this;
+  }
 
   public function withVersionBetween($min, $max) {
     $this->versionMin = $min;
@@ -125,6 +137,20 @@ final class PhabricatorWorkerTriggerQuery
 
   private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
+
+    if ($this->ids !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        't.id IN (%Ld)',
+        $this->ids);
+    }
+
+    if ($this->phids !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        't.phid IN (%Ls)',
+        $this->phids);
+    }
 
     if ($this->versionMin !== null) {
       $where[] = qsprintf(
