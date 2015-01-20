@@ -127,8 +127,9 @@ final class DifferentialCommentSaveController
         ->setCancelURI($revision_uri)
         ->setException($ex);
     } catch (PhabricatorApplicationTransactionValidationException $ex) {
-      // TODO: Provide a nice Response for rendering these in a clean way.
-      throw $ex;
+      return id(new PhabricatorApplicationTransactionValidationResponse())
+        ->setCancelURI($revision_uri)
+        ->setException($ex);
     }
 
     $user = $request->getUser();
