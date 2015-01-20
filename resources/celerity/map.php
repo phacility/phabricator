@@ -206,7 +206,7 @@ return array(
     'rsrc/externals/javelin/lib/__tests__/Cookie.js' => '5ed109e8',
     'rsrc/externals/javelin/lib/__tests__/DOM.js' => 'c984504b',
     'rsrc/externals/javelin/lib/__tests__/JSON.js' => '837a7d68',
-    'rsrc/externals/javelin/lib/__tests__/URI.js' => '31d49fa0',
+    'rsrc/externals/javelin/lib/__tests__/URI.js' => '1e45fda9',
     'rsrc/externals/javelin/lib/__tests__/behavior.js' => '1ea62783',
     'rsrc/externals/javelin/lib/behavior.js' => '61cbc29a',
     'rsrc/externals/javelin/lib/control/tokenizer/Tokenizer.js' => '7644823e',
