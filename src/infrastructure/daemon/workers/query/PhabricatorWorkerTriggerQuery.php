@@ -1,7 +1,11 @@
 <?php
 
 final class PhabricatorWorkerTriggerQuery
-  extends PhabricatorOffsetPagedQuery {
+  extends PhabricatorPolicyAwareQuery {
+
+  // NOTE: This is a PolicyAware query so it can work with other infrastructure
+  // like handles; triggers themselves are low-level and do not have
+  // meaninguful policies.
 
   const ORDER_ID = 'id';
   const ORDER_EXECUTION = 'execution';
@@ -16,6 +20,10 @@ final class PhabricatorWorkerTriggerQuery
 
   private $needEvents;
   private $order = self::ORDER_ID;
+
+  public function getQueryApplicationClass() {
+    return null;
+  }
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -59,7 +67,13 @@ final class PhabricatorWorkerTriggerQuery
     return $this;
   }
 
-  public function execute() {
+  public function nextPage(array $page) {
+    // NOTE: We don't implement paging because we don't currently ever need
+    // it and paging ORDER_EXCUTION is a hassle.
+    throw new PhutilMethodNotImplementedException();
+  }
+
+  public function loadPage() {
     $task_table = new PhabricatorWorkerTrigger();
 
     $conn_r = $task_table->establishConnection('r');

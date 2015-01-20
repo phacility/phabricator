@@ -3,9 +3,8 @@
 final class PhabricatorDaemonConsoleController
   extends PhabricatorDaemonController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
     $window_start = (time() - (60 * 15));
 
@@ -71,7 +70,7 @@ final class PhabricatorDaemonConsoleController
     }
 
     $logs = id(new PhabricatorDaemonLogQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withStatus(PhabricatorDaemonLogQuery::STATUS_ALIVE)
       ->setAllowStatusWrites(true)
       ->execute();
@@ -123,7 +122,7 @@ final class PhabricatorDaemonConsoleController
     $completed_panel->appendChild($completed_table);
 
     $daemon_table = new PhabricatorDaemonLogListView();
-    $daemon_table->setUser($user);
+    $daemon_table->setUser($viewer);
     $daemon_table->setDaemonLogs($logs);
 
     $daemon_panel = new PHUIObjectBoxView();
@@ -190,6 +189,7 @@ final class PhabricatorDaemonConsoleController
           ->setNoDataString(pht('Task queue is empty.')));
 
     $triggers = id(new PhabricatorWorkerTriggerQuery())
+      ->setViewer($viewer)
       ->setOrder(PhabricatorWorkerTriggerQuery::ORDER_EXECUTION)
       ->needEvents(true)
       ->setLimit(10)

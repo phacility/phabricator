@@ -102,6 +102,7 @@ final class PhabricatorTriggerDaemon
     $limit = 100;
 
     $query = id(new PhabricatorWorkerTriggerQuery())
+      ->setViewer($this->getViewer())
       ->withVersionBetween($cursor, null)
       ->setOrder(PhabricatorWorkerTriggerQuery::ORDER_VERSION)
       ->needEvents(true)
@@ -183,6 +184,7 @@ final class PhabricatorTriggerDaemon
     $now = PhabricatorTime::getNow();
 
     $triggers = id(new PhabricatorWorkerTriggerQuery())
+      ->setViewer($this->getViewer())
       ->setOrder(PhabricatorWorkerTriggerQuery::ORDER_EXECUTION)
       ->withNextEventBetween(null, $now)
       ->needEvents(true)
@@ -249,6 +251,7 @@ final class PhabricatorTriggerDaemon
     $sleep = 60;
 
     $next_triggers = id(new PhabricatorWorkerTriggerQuery())
+      ->setViewer($this->getViewer())
       ->setOrder(PhabricatorWorkerTriggerQuery::ORDER_EXECUTION)
       ->setLimit(1)
       ->needEvents(true)

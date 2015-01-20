@@ -3,7 +3,8 @@
 final class PhabricatorWorkerTrigger
   extends PhabricatorWorkerDAO
   implements
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorPolicyInterface {
 
   protected $triggerVersion;
   protected $clockClass;
@@ -143,7 +144,7 @@ final class PhabricatorWorkerTrigger
     // gymnastics, so don't bother trying to get it totally correct for now.
 
     if ($this->getEvent()) {
-      return $this->getEvent()->getNextEpoch();
+      return $this->getEvent()->getNextEventEpoch();
     } else {
       return $this->getNextEventEpoch(null, $is_reschedule = false);
     }
@@ -165,6 +166,32 @@ final class PhabricatorWorkerTrigger
 
       $this->delete();
     $this->saveTransaction();
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  // NOTE: Triggers are low-level infrastructure and do not have real
+  // policies, but implementing the policy interface allows us to use
+  // infrastructure like handles.
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    return PhabricatorPolicies::getMostOpenPolicy();
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return true;
+  }
+
+  public function describeAutomaticCapability($capability) {
+    return null;
   }
 
 }

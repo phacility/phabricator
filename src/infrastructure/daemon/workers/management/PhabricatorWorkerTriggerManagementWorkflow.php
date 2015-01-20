@@ -22,6 +22,7 @@ abstract class PhabricatorWorkerTriggerManagementWorkflow
     }
 
     $triggers = id(new PhabricatorWorkerTriggerQuery())
+      ->setViewer($this->getViewer())
       ->withIDs($ids)
       ->needEvents(true)
       ->execute();
