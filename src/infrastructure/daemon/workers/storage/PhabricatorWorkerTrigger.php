@@ -1,7 +1,9 @@
 <?php
 
 final class PhabricatorWorkerTrigger
-  extends PhabricatorWorkerDAO {
+  extends PhabricatorWorkerDAO
+  implements
+    PhabricatorDestructibleInterface {
 
   protected $triggerVersion;
   protected $clockClass;
@@ -125,6 +127,24 @@ final class PhabricatorWorkerTrigger
   public function attachClock(PhabricatorTriggerClock $clock) {
     $this->clock = $clock;
     return $this;
+  }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+      queryfx(
+        $this->establishConnection('w'),
+        'DELETE FROM %T WHERE triggerID = %d',
+        id(new PhabricatorWorkerTriggerEvent())->getTableName(),
+        $this->getID());
+
+      $this->delete();
+    $this->saveTransaction();
   }
 
 }

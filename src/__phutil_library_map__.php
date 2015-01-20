@@ -5884,7 +5884,10 @@ phutil_register_library_map(array(
     'PhabricatorWorkerTaskData' => 'PhabricatorWorkerDAO',
     'PhabricatorWorkerTaskDetailController' => 'PhabricatorDaemonController',
     'PhabricatorWorkerTestCase' => 'PhabricatorTestCase',
-    'PhabricatorWorkerTrigger' => 'PhabricatorWorkerDAO',
+    'PhabricatorWorkerTrigger' => array(
+      'PhabricatorWorkerDAO',
+      'PhabricatorDestructibleInterface',
+    ),
     'PhabricatorWorkerTriggerEvent' => 'PhabricatorWorkerDAO',
     'PhabricatorWorkerTriggerPHIDType' => 'PhabricatorPHIDType',
     'PhabricatorWorkerTriggerQuery' => 'PhabricatorOffsetPagedQuery',
