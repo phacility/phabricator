@@ -4,6 +4,7 @@
  * @task  info  Application Information
  * @task  ui    UI Integration
  * @task  uri   URI Routing
+ * @task  mail  Email integration
  * @task  fact  Fact Integration
  * @task  meta  Application Management
  */
@@ -190,6 +191,22 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
 
   public function getRoutes() {
     return array();
+  }
+
+
+/* -(  Email Integration  )-------------------------------------------------- */
+
+
+  public function supportsEmailIntegration() {
+    return false;
+  }
+
+  protected function getInboundEmailSupportLink() {
+    return PhabricatorEnv::getDocLink('Configuring Inbound Email');
+  }
+
+  public function getAppEmailBlurb() {
+    throw new Exception('Not Implemented.');
   }
 
 

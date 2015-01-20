@@ -294,9 +294,16 @@ EOTEXT
         'metamta.maniphest.public-create-email',
         'string',
         null)
-        ->setSummary(pht('Allow filing bugs via email.'))
+        ->setLocked(true)
+        ->setLockedMessage(pht(
+          'This configuration is deprecated. See description for details.'))
+        ->setSummary(pht('DEPRECATED - Allow filing bugs via email.'))
         ->setDescription(
           pht(
+            'This config has been deprecated in favor of [[ '.
+            '/applications/view/PhabricatorManiphestApplication/ | '.
+            'application settings ]], which allow for multiple email '.
+            'addresses and other functionality.'."\n\n".
             'You can configure an email address like '.
             '"bugs@phabricator.example.com" which will automatically create '.
             'Maniphest tasks when users send email to it. This relies on the '.

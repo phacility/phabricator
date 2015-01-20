@@ -109,6 +109,20 @@ final class PhabricatorManiphestApplication extends PhabricatorApplication {
     return $items;
   }
 
+  public function supportsEmailIntegration() {
+    return true;
+  }
+
+  public function getAppEmailBlurb() {
+    return pht(
+      'Send email to these addresses to create tasks. %s',
+      phutil_tag(
+        'a',
+        array(
+          'href' => $this->getInboundEmailSupportLink(),),
+        pht('Learn More')));
+  }
+
   protected function getCustomCapabilities() {
     return array(
       ManiphestDefaultViewCapability::CAPABILITY => array(

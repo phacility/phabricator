@@ -64,10 +64,9 @@ final class PhabricatorMetaMTAReceivedMailTestCase extends PhabricatorTestCase {
   }
 
   public function testDropUnknownSenderMail() {
+    $this->setManiphestCreateEmail();
+
     $env = PhabricatorEnv::beginScopedEnv();
-    $env->overrideEnvConfig(
-      'metamta.maniphest.public-create-email',
-      'bugs@example.com');
     $env->overrideEnvConfig('phabricator.allow-email-users', false);
     $env->overrideEnvConfig('metamta.maniphest.default-public-author', null);
 
@@ -89,10 +88,7 @@ final class PhabricatorMetaMTAReceivedMailTestCase extends PhabricatorTestCase {
 
 
   public function testDropDisabledSenderMail() {
-    $env = PhabricatorEnv::beginScopedEnv();
-    $env->overrideEnvConfig(
-      'metamta.maniphest.public-create-email',
-      'bugs@example.com');
+    $this->setManiphestCreateEmail();
 
     $user = $this->generateNewTestUser()
       ->setIsDisabled(true)
@@ -112,6 +108,17 @@ final class PhabricatorMetaMTAReceivedMailTestCase extends PhabricatorTestCase {
     $this->assertEqual(
       MetaMTAReceivedMailStatus::STATUS_DISABLED_SENDER,
       $mail->getStatus());
+  }
+
+  private function setManiphestCreateEmail() {
+    $maniphest_app = new PhabricatorManiphestApplication();
+    try {
+      id(new PhabricatorMetaMTAApplicationEmail())
+        ->setApplicationPHID($maniphest_app->getPHID())
+        ->setAddress('bugs@example.com')
+        ->setConfigData(array())
+        ->save();
+    } catch (AphrontDuplicateKeyQueryException $ex) {}
   }
 
 }
