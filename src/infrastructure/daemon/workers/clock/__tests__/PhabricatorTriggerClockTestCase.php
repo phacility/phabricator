@@ -30,6 +30,90 @@ final class PhabricatorTriggerClockTestCase extends PhabricatorTestCase {
       pht('Should never trigger.'));
   }
 
+  public function testDailyRoutineTriggerClockDaylightSavings() {
+    // These dates are selected to cross daylight savings in PST; they should
+    // be unaffected.
+    $start = strtotime('2015-03-05 16:17:18 UTC');
+
+    $clock = new PhabricatorDailyRoutineTriggerClock(
+      array(
+        'start' => $start,
+      ));
+
+    $expect_list = array(
+      '2015-03-06 16:17:18',
+      '2015-03-07 16:17:18',
+      '2015-03-08 16:17:18',
+      '2015-03-09 16:17:18',
+      '2015-03-10 16:17:18',
+    );
+
+    $this->expectClock($clock, $expect_list, pht('Daily Routine (PST)'));
+  }
+
+  public function testDailyRoutineTriggerClockLeapSecond() {
+    // These dates cross the leap second on June 30, 2012. There has never
+    // been a negative leap second, so we can't test that yet.
+    $start = strtotime('2012-06-28 23:59:59 UTC');
+
+    $clock = new PhabricatorDailyRoutineTriggerClock(
+      array(
+        'start' => $start,
+      ));
+
+    $expect_list = array(
+      '2012-06-29 23:59:59',
+      '2012-06-30 23:59:59',
+      '2012-07-01 23:59:59',
+      '2012-07-02 23:59:59',
+    );
+
+    $this->expectClock($clock, $expect_list, pht('Daily Routine (Leap)'));
+  }
+
+
+  public function testCDailyRoutineTriggerClockAdjustTimeOfDay() {
+    // In this case, we're going to update the time of day on the clock and
+    // make sure it keeps track of the date but adjusts the time.
+    $start = strtotime('2015-01-15 6:07:08 UTC');
+
+    $clock = new PhabricatorDailyRoutineTriggerClock(
+      array(
+        'start' => $start,
+      ));
+
+    $expect_list = array(
+      '2015-01-16 6:07:08',
+      '2015-01-17 6:07:08',
+      '2015-01-18 6:07:08',
+    );
+
+    $last_epoch = $this->expectClock(
+      $clock,
+      $expect_list,
+      pht('Daily Routine (Pre-Adjust)'));
+
+    // Now, change the time of day.
+    $new_start = strtotime('2015-01-08 1:23:45 UTC');
+
+    $clock = new PhabricatorDailyRoutineTriggerClock(
+      array(
+        'start' => $new_start,
+      ));
+
+    $expect_list = array(
+      '2015-01-19 1:23:45',
+      '2015-01-20 1:23:45',
+      '2015-01-21 1:23:45',
+    );
+
+    $this->expectClock(
+      $clock,
+      $expect_list,
+      pht('Daily Routine (Post-Adjust)'),
+      $last_epoch);
+  }
+
   public function testSubscriptionTriggerClock() {
     $start = strtotime('2014-01-31 2:34:56 UTC');
 
@@ -76,7 +160,15 @@ final class PhabricatorTriggerClockTestCase extends PhabricatorTestCase {
       '2016-03-31 2:34:56',
     );
 
-    $last_epoch = null;
+    $this->expectClock($clock, $expect_list, pht('Billing Cycle'));
+  }
+
+  private function expectClock(
+    PhabricatorTriggerClock $clock,
+    array $expect_list,
+    $clock_name,
+    $last_epoch = null) {
+
     foreach ($expect_list as $cycle => $expect) {
       $next_epoch = $clock->getNextEventEpoch(
         $last_epoch,
@@ -84,11 +176,13 @@ final class PhabricatorTriggerClockTestCase extends PhabricatorTestCase {
 
       $this->assertEqual(
         $expect,
-        id(new DateTime('@'.$next_epoch))->format('Y-m-d g:i:s'),
-        pht('Billing cycle %s.', $cycle));
+        id(new DateTime('@'.$next_epoch))->format('Y-m-d G:i:s'),
+        pht('%s (%s)', $clock_name, $cycle));
 
       $last_epoch = $next_epoch;
     }
+
+    return $last_epoch;
   }
 
 }

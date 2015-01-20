@@ -1596,6 +1596,7 @@ phutil_register_library_map(array(
     'PhabricatorDaemonTasksTableView' => 'applications/daemon/view/PhabricatorDaemonTasksTableView.php',
     'PhabricatorDaemonsApplication' => 'applications/daemon/application/PhabricatorDaemonsApplication.php',
     'PhabricatorDaemonsSetupCheck' => 'applications/config/check/PhabricatorDaemonsSetupCheck.php',
+    'PhabricatorDailyRoutineTriggerClock' => 'infrastructure/daemon/workers/clock/PhabricatorDailyRoutineTriggerClock.php',
     'PhabricatorDashboard' => 'applications/dashboard/storage/PhabricatorDashboard.php',
     'PhabricatorDashboardAddPanelController' => 'applications/dashboard/controller/PhabricatorDashboardAddPanelController.php',
     'PhabricatorDashboardApplication' => 'applications/dashboard/application/PhabricatorDashboardApplication.php',
@@ -4801,6 +4802,7 @@ phutil_register_library_map(array(
     'PhabricatorDaemonTasksTableView' => 'AphrontView',
     'PhabricatorDaemonsApplication' => 'PhabricatorApplication',
     'PhabricatorDaemonsSetupCheck' => 'PhabricatorSetupCheck',
+    'PhabricatorDailyRoutineTriggerClock' => 'PhabricatorTriggerClock',
     'PhabricatorDashboard' => array(
       'PhabricatorDashboardDAO',
       'PhabricatorApplicationTransactionInterface',
