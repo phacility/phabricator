@@ -3,6 +3,7 @@
 final class PhabricatorWorkerTriggerQuery
   extends PhabricatorOffsetPagedQuery {
 
+  const ORDER_ID = 'id';
   const ORDER_EXECUTION = 'execution';
   const ORDER_VERSION = 'version';
 
@@ -14,7 +15,7 @@ final class PhabricatorWorkerTriggerQuery
   private $nextEpochMax;
 
   private $needEvents;
-  private $order = self::ORDER_EXECUTION;
+  private $order = self::ORDER_ID;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -43,6 +44,16 @@ final class PhabricatorWorkerTriggerQuery
     return $this;
   }
 
+  /**
+   * Set the result order.
+   *
+   * Note that using `ORDER_EXECUTION` will also filter results to include only
+   * triggers which have been scheduled to execute. You should not use this
+   * ordering when querying for specific triggers, e.g. by ID or PHID.
+   *
+   * @param const Result order.
+   * @return this
+   */
   public function setOrder($order) {
     $this->order = $order;
     return $this;
@@ -185,6 +196,10 @@ final class PhabricatorWorkerTriggerQuery
 
   private function buildOrderClause(AphrontDatabaseConnection $conn_r) {
     switch ($this->order) {
+      case self::ORDER_ID:
+        return qsprintf(
+          $conn_r,
+          'ORDER BY id DESC');
       case self::ORDER_EXECUTION:
         return qsprintf(
           $conn_r,
