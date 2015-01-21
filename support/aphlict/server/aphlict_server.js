@@ -70,6 +70,11 @@ process.on('uncaughtException', function(err) {
   set_exit_code(1);
 });
 
+// Add the logfile so we'll fail if we can't write to it.
+if (config.log) {
+  debug.addLog(config.log);
+}
+
 try {
   require('ws');
 } catch (ex) {
@@ -94,11 +99,6 @@ var ssl_config = {
 if (ssl_config.enabled) {
   ssl_config.key = fs.readFileSync(config['ssl-key']);
   ssl_config.cert = fs.readFileSync(config['ssl-cert']);
-}
-
-// Add the logfile so we'll fail if we can't write to it.
-if (config.log) {
-  debug.addLog(config.log);
 }
 
 // If we're just doing a configuration test, exit here before starting any
