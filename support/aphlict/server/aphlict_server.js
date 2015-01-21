@@ -43,6 +43,12 @@ var debug = new JX.AphlictLog()
 
 var config = parse_command_line_arguments(process.argv);
 
+function set_exit_code(code) {
+  process.on('exit', function() {
+    process.exit(code);
+  });
+}
+
 process.on('uncaughtException', function(err) {
   var context = null;
   if (err.code == 'EACCES' && err.path == config.log) {
@@ -61,6 +67,7 @@ process.on('uncaughtException', function(err) {
   message.push(err.stack);
 
   debug.log(message.join('\n\n'));
+  set_exit_code(1);
 });
 
 try {
@@ -98,7 +105,8 @@ if (config.log) {
 // servers.
 if (config.test) {
   debug.log('Configuration test OK.');
-  process.exit(0);
+  set_exit_code(0);
+  return;
 }
 
 var server;
