@@ -402,8 +402,8 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
         //   -echo "test";
         //   -(empty line)
 
-        $hunk = id(new DifferentialHunkModern())->setChanges($context);
-        $vs_hunk = id(new DifferentialHunkModern())->setChanges($vs_context);
+        $hunk = id(new DifferentialModernHunk())->setChanges($context);
+        $vs_hunk = id(new DifferentialModernHunk())->setChanges($vs_context);
         if ($hunk->makeOldFile() != $vs_hunk->makeOldFile() ||
             $hunk->makeNewFile() != $vs_hunk->makeNewFile()) {
           return $vs_diff;

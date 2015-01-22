@@ -34,7 +34,7 @@ final class DifferentialHunkQuery
     $all_results = array();
 
     // Load modern hunks.
-    $table = new DifferentialHunkModern();
+    $table = new DifferentialModernHunk();
     $conn_r = $table->establishConnection('r');
 
     $modern_data = queryfx_all(
@@ -48,7 +48,7 @@ final class DifferentialHunkQuery
 
 
     // Now, load legacy hunks.
-    $table = new DifferentialHunkLegacy();
+    $table = new DifferentialLegacyHunk();
     $conn_r = $table->establishConnection('r');
 
     $legacy_data = queryfx_all(
