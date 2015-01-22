@@ -32,6 +32,7 @@ final class ConduitQueryConduitAPIMethod extends ConduitAPIMethod {
     foreach ($classes as $class) {
       $names_to_params[$class->getAPIMethodName()] = array(
         'params' => $class->defineParamTypes(),
+        'return' => $class->defineReturnType(),
       );
     }
 
