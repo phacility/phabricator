@@ -8,7 +8,7 @@
 return array(
   'names' => array(
     'core.pkg.css' => '8d1c0f87',
-    'core.pkg.js' => 'd60876a7',
+    'core.pkg.js' => '2d9bfc06',
     'darkconsole.pkg.js' => '8ab24e01',
     'differential.pkg.css' => '8af45893',
     'differential.pkg.js' => 'f437e70e',
@@ -193,7 +193,7 @@ return array(
     'rsrc/externals/javelin/lib/DOM.js' => 'c8fd8db2',
     'rsrc/externals/javelin/lib/History.js' => 'c60f4327',
     'rsrc/externals/javelin/lib/JSON.js' => '69adf288',
-    'rsrc/externals/javelin/lib/Leader.js' => '9330f91b',
+    'rsrc/externals/javelin/lib/Leader.js' => '331b1611',
     'rsrc/externals/javelin/lib/Mask.js' => '8a41885b',
     'rsrc/externals/javelin/lib/Request.js' => '94b750d2',
     'rsrc/externals/javelin/lib/Resource.js' => '44959b73',
@@ -659,7 +659,7 @@ return array(
     'javelin-history' => 'c60f4327',
     'javelin-install' => '05270951',
     'javelin-json' => '69adf288',
-    'javelin-leader' => '9330f91b',
+    'javelin-leader' => '331b1611',
     'javelin-magical-init' => '8c4e8f8b',
     'javelin-mask' => '8a41885b',
     'javelin-reactor' => '2b8de964',
@@ -1009,6 +1009,9 @@ return array(
     '316b8fa1' => array(
       'javelin-install',
       'javelin-typeahead-source',
+    ),
+    '331b1611' => array(
+      'javelin-install',
     ),
     '335470d7' => array(
       'javelin-behavior',
@@ -1466,9 +1469,6 @@ return array(
       'javelin-dom',
       'phabricator-drag-and-drop-file-upload',
       'phabricator-textareautils',
-    ),
-    '9330f91b' => array(
-      'javelin-install',
     ),
     '9414ff18' => array(
       'javelin-behavior',
