@@ -648,27 +648,8 @@ final class DiffusionCommitController extends DiffusionController {
     $timeline = $this->buildTransactionTimeline(
       $commit,
       new PhabricatorAuditTransactionQuery());
-    $xactions = $timeline->getTransactions();
-
-    $path_ids = array();
-    foreach ($xactions as $xaction) {
-      if ($xaction->hasComment()) {
-        $path_id = $xaction->getComment()->getPathID();
-        if ($path_id) {
-          $path_ids[] = $path_id;
-        }
-      }
-    }
-
-    $path_map = array();
-    if ($path_ids) {
-      $path_map = id(new DiffusionPathQuery())
-        ->withPathIDs($path_ids)
-        ->execute();
-      $path_map = ipull($path_map, 'path', 'id');
-    }
-
-    return $timeline->setPathMap($path_map);
+    $commit->willRenderTimeline($timeline, $this->getRequest());
+    return $timeline;
   }
 
   private function renderAddCommentPanel(
