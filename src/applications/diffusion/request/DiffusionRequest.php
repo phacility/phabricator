@@ -750,20 +750,42 @@ abstract class DiffusionRequest {
   }
 
   private function resolveRefs(array $refs) {
-    if ($this->shouldInitFromConduit()) {
-      return DiffusionQuery::callConduitWithDiffusionRequest(
-        $this->getUser(),
-        $this,
-        'diffusion.resolverefs',
-        array(
-          'refs' => $refs,
-        ));
-    } else {
-      return id(new DiffusionLowLevelResolveRefsQuery())
-        ->setRepository($this->getRepository())
-        ->withRefs($refs)
-        ->execute();
+    // First, try to resolve refs from fast cache sources.
+    $cached_results = id(new DiffusionCachedResolveRefsQuery())
+      ->setRepository($this->getRepository())
+      ->withRefs($refs)
+      ->execute();
+
+    // Throw away all the refs we resolved. Hopefully, we'll throw away
+    // everything here.
+    foreach ($refs as $key => $ref) {
+      if (isset($cached_results[$ref])) {
+        unset($refs[$key]);
+      }
     }
+
+    // If we couldn't pull everything out of the cache, execute the underlying
+    // VCS operation.
+    if ($refs) {
+      if ($this->shouldInitFromConduit()) {
+        $vcs_results = DiffusionQuery::callConduitWithDiffusionRequest(
+          $this->getUser(),
+          $this,
+          'diffusion.resolverefs',
+          array(
+            'refs' => $refs,
+          ));
+      } else {
+        $vcs_results = id(new DiffusionLowLevelResolveRefsQuery())
+          ->setRepository($this->getRepository())
+          ->withRefs($refs)
+          ->execute();
+      }
+    } else {
+      $vcs_results = array();
+    }
+
+    return $vcs_results + $cached_results;
   }
 
   public function setIsClusterRequest($is_cluster_request) {
