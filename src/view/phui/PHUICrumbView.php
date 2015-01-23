@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorCrumbView extends AphrontView {
+final class PHUICrumbView extends AphrontView {
 
   private $name;
   private $href;
@@ -53,7 +53,7 @@ final class PhabricatorCrumbView extends AphrontView {
 
   public function render() {
     $classes = array(
-      'phabricator-crumb-view',
+      'phui-crumb-view',
     );
 
     $aural = null;
@@ -68,11 +68,11 @@ final class PhabricatorCrumbView extends AphrontView {
 
     $icon = null;
     if ($this->icon) {
-      $classes[] = 'phabricator-crumb-has-icon';
+      $classes[] = 'phui-crumb-has-icon';
       $icon = phutil_tag(
         'span',
         array(
-          'class' => 'phabricator-crumb-icon '.
+          'class' => 'phui-crumb-icon '.
                      'sprite-apps-large apps-'.$this->icon.'-dark-large',
         ),
         '');
@@ -81,7 +81,7 @@ final class PhabricatorCrumbView extends AphrontView {
     $name = phutil_tag(
       'span',
       array(
-        'class' => 'phabricator-crumb-name',
+        'class' => 'phui-crumb-name',
       ),
       $this->name);
 
@@ -90,7 +90,7 @@ final class PhabricatorCrumbView extends AphrontView {
       $divider = phutil_tag(
         'span',
         array(
-          'class' => 'sprite-menu phabricator-crumb-divider',
+          'class' => 'sprite-menu phui-crumb-divider',
         ),
         '');
     } else {

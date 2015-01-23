@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorCrumbsView extends AphrontView {
+final class PHUICrumbsView extends AphrontView {
 
   private $crumbs = array();
   private $actions = array();
@@ -20,12 +20,12 @@ final class PhabricatorCrumbsView extends AphrontView {
    */
   public function addTextCrumb($text, $href = null) {
     return $this->addCrumb(
-      id(new PhabricatorCrumbView())
+      id(new PHUICrumbView())
         ->setName($text)
         ->setHref($href));
   }
 
-  public function addCrumb(PhabricatorCrumbView $crumb) {
+  public function addCrumb(PHUICrumbView $crumb) {
     $this->crumbs[] = $crumb;
     return $this;
   }
@@ -36,7 +36,7 @@ final class PhabricatorCrumbsView extends AphrontView {
   }
 
   public function render() {
-    require_celerity_resource('phabricator-crumbs-view-css');
+    require_celerity_resource('phui-crumbs-view-css');
 
     $action_view = null;
     if ($this->actions) {
@@ -56,7 +56,7 @@ final class PhabricatorCrumbsView extends AphrontView {
         $name = phutil_tag(
           'span',
             array(
-              'class' => 'phabricator-crumbs-action-name',
+              'class' => 'phui-crumbs-action-name',
             ),
           $action->getName());
 
@@ -65,10 +65,10 @@ final class PhabricatorCrumbsView extends AphrontView {
           $action_sigils[] = 'workflow';
         }
         $action_classes = $action->getClasses();
-        $action_classes[] = 'phabricator-crumbs-action';
+        $action_classes[] = 'phui-crumbs-action';
 
         if ($action->getDisabled()) {
-          $action_classes[] = 'phabricator-crumbs-action-disabled';
+          $action_classes[] = 'phui-crumbs-action-disabled';
         }
 
         $actions[] = javelin_tag(
@@ -88,7 +88,7 @@ final class PhabricatorCrumbsView extends AphrontView {
       $action_view = phutil_tag(
         'div',
         array(
-          'class' => 'phabricator-crumbs-actions',
+          'class' => 'phui-crumbs-actions',
         ),
         $actions);
     }
@@ -100,7 +100,7 @@ final class PhabricatorCrumbsView extends AphrontView {
     return phutil_tag(
       'div',
       array(
-        'class' => 'phabricator-crumbs-view '.
+        'class' => 'phui-crumbs-view '.
                    'sprite-gradient gradient-breadcrumbs',
       ),
       array(

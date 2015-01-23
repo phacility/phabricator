@@ -59,7 +59,7 @@ abstract class ConpherenceController extends PhabricatorController {
       $title = pht('[No Title]');
     }
     $crumbs->addCrumb(
-      id(new PhabricatorCrumbView())
+      id(new PHUICrumbView())
       ->setName($title)
       ->setHref($this->getApplicationURI('update/'.$conpherence->getID().'/'))
       ->setWorkflow(true));

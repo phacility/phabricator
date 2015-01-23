@@ -1,8 +1,8 @@
 /**
- * @provides phabricator-crumbs-view-css
+ * @provides phui-crumbs-view-css
  */
 
-.phabricator-crumbs-view {
+.phui-crumbs-view {
   background-color: #ebecee;
   background-image: none !important;
   height: 31px;
@@ -15,43 +15,43 @@
   -webkit-font-smoothing: antialiased;
 }
 
-.phabricator-crumbs-view,
-.phabricator-crumbs-view a.phabricator-crumb-view,
-.phabricator-crumbs-view a.phabricator-crumbs-action {
+.phui-crumbs-view,
+.phui-crumbs-view a.phui-crumb-view,
+.phui-crumbs-view a.phui-crumbs-action {
   color: {$darkbluetext};
   font-weight: bold;
   text-decoration: none;
   text-shadow: 0 1px 1px rgba(255, 255, 255, 0.9);
 }
 
-.phabricator-crumbs-view a.phabricator-crumbs-action-disabled {
+.phui-crumbs-view a.phui-crumbs-action-disabled {
   color: {$lightgreytext};
 }
 
-.phabricator-crumbs-view + .phui-header-shell {
+.phui-crumbs-view + .phui-header-shell {
   border-top: none;
 }
 
-.device-desktop .phabricator-crumbs-view a:hover {
+.device-desktop .phui-crumbs-view a:hover {
   text-decoration: underline;
 }
 
-.phabricator-crumb-view {
+.phui-crumb-view {
   float: left;
   height: 31px;
   line-height: 31px;
 }
 
-.device-phone .phabricator-crumb-view {
+.device-phone .phui-crumb-view {
   display: none;
 }
 
-.device-phone .phabricator-crumb-view.phabricator-last-crumb,
-.device-phone .phabricator-crumb-view.phabricator-crumb-has-icon {
+.device-phone .phui-crumb-view.phabricator-last-crumb,
+.device-phone .phui-crumb-view.phui-crumb-has-icon {
   display: inline-block;
 }
 
-.phabricator-crumb-icon {
+.phui-crumb-icon {
   display: inline-block;
   width: 28px;
   height: 28px;
@@ -59,46 +59,46 @@
   vertical-align: top;
 }
 
-.device-phone .phabricator-crumb-icon {
+.device-phone .phui-crumb-icon {
   margin-left: 7px;
 }
 
-.phabricator-crumbs-actions {
+.phui-crumbs-actions {
   float: right;
   white-space: nowrap;
 }
 
-.phabricator-crumbs-action {
+.phui-crumbs-action {
   display: inline-block;
   height: 17px;
   padding: 8px 12px;
   position: relative;
 }
 
-.device-phone a.phabricator-crumbs-action {
+.device-phone a.phui-crumbs-action {
   padding: 7px;
   border-left: 1px solid {$hovergrey};
 }
 
-.device-desktop a.phabricator-crumbs-action:hover {
+.device-desktop a.phui-crumbs-action:hover {
   background: rgba(205, 207, 211, .5);
   text-decoration: none;
 }
 
-.device-phone .phabricator-crumbs-action-name {
+.device-phone .phui-crumbs-action-name {
   display: none;
 }
 
-a.phabricator-crumbs-action .phui-icon-view {
+a.phui-crumbs-action .phui-icon-view {
   margin-right: 5px;
   color: {$darkbluetext};
 }
 
-.device-phone a.phabricator-crumbs-action .phui-icon-view {
+.device-phone a.phui-crumbs-action .phui-icon-view {
   margin-left: 5px;
 }
 
-.phabricator-crumb-divider {
+.phui-crumb-divider {
   display: inline-block;
   width: 9px;
   height: 31px;

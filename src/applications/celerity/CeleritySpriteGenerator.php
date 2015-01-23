@@ -9,7 +9,7 @@ final class CeleritySpriteGenerator {
       'arrow-right' => array(
         'x' => 9,
         'y' => 31,
-        'css' => '.phabricator-crumb-divider',
+        'css' => '.phui-crumb-divider',
       ),
       'logo' => array(
         'x' => 96,
