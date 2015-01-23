@@ -67,13 +67,13 @@ final class PhabricatorWorkerTriggerQuery
     return $this;
   }
 
-  public function nextPage(array $page) {
+  protected function nextPage(array $page) {
     // NOTE: We don't implement paging because we don't currently ever need
     // it and paging ORDER_EXCUTION is a hassle.
     throw new PhutilMethodNotImplementedException();
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $task_table = new PhabricatorWorkerTrigger();
 
     $conn_r = $task_table->establishConnection('r');
