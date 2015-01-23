@@ -340,10 +340,16 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       }
     }
 
-    return phutil_tag(
+    Javelin::initBehavior(
+      'scrollbar',
+      array(
+        'nodeID' => 'phabricator-standard-page',
+      ));
+
+    $main_page = phutil_tag(
       'div',
       array(
-        'id' => 'base-page',
+        'id' => 'phabricator-standard-page',
         'class' => 'phabricator-standard-page',
       ),
       array(
@@ -355,6 +361,15 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
           parent::getBody(),
           $this->renderFooter(),
         )),
+      ));
+
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'main-page-frame',
+      ),
+      array(
+        $main_page,
       ));
   }
 

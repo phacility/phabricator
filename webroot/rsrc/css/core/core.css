@@ -2,16 +2,6 @@
  * @provides phabricator-core-css
  */
 
-body {
-  /* Always show the vertical scrollbar so that going from a page without a
-     scrollbar to a page with a scrollbar doesn't make content jump a few
-     pixels left when the viewport narrows. */
-  overflow-y: scroll;
-  /* reset behavior in ie7, as it will add an extra scrollbar regardless
-     selector * targets ie6 and ie7 only */
-  *overflow-y: auto;
-}
-
 .device-phone {
   /* By default, the iPhone zooms all text on the page by some percentage when
      you rotate from portrait mode to landscape mode. Disable this, since it
