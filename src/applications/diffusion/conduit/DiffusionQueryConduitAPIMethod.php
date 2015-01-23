@@ -102,7 +102,6 @@ abstract class DiffusionQueryConduitAPIMethod
         'branch' => $request->getValue('branch'),
         'path' => $request->getValue('path'),
         'commit' => $request->getValue('commit'),
-        'initFromConduit' => false,
       ));
 
     // Figure out whether we're going to handle this request on this device,

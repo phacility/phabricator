@@ -215,10 +215,6 @@ abstract class DiffusionRequest {
     $this->didInitialize();
   }
 
-  final protected function shouldInitFromConduit() {
-    return $this->initFromConduit;
-  }
-
   final public function setUser(PhabricatorUser $user) {
     $this->user = $user;
     return $this;
@@ -767,20 +763,13 @@ abstract class DiffusionRequest {
     // If we couldn't pull everything out of the cache, execute the underlying
     // VCS operation.
     if ($refs) {
-      if ($this->shouldInitFromConduit()) {
-        $vcs_results = DiffusionQuery::callConduitWithDiffusionRequest(
-          $this->getUser(),
-          $this,
-          'diffusion.resolverefs',
-          array(
-            'refs' => $refs,
-          ));
-      } else {
-        $vcs_results = id(new DiffusionLowLevelResolveRefsQuery())
-          ->setRepository($this->getRepository())
-          ->withRefs($refs)
-          ->execute();
-      }
+      $vcs_results = DiffusionQuery::callConduitWithDiffusionRequest(
+        $this->getUser(),
+        $this,
+        'diffusion.resolverefs',
+        array(
+          'refs' => $refs,
+        ));
     } else {
       $vcs_results = array();
     }

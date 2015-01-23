@@ -375,7 +375,6 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
         }
         $drequest = DiffusionRequest::newFromDictionary(array(
           'user' => PhabricatorUser::getOmnipotentUser(),
-          'initFromConduit' => false,
           'repository' => $this->repository,
           'commit' => $this->commit->getCommitIdentifier(),
           'path' => $path,

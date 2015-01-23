@@ -87,7 +87,6 @@ final class PhabricatorOwnersPackagePathValidator {
       id(new PhabricatorRepository())->load($commit->getRepositoryID());
     $data = array(
       'user' => PhabricatorUser::getOmnipotentUser(),
-      'initFromConduit' => false,
       'repository' => $repository,
       'commit' => $commit->getCommitIdentifier(),
     );
