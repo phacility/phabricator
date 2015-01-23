@@ -1,7 +1,10 @@
 <?php
 
 final class PhabricatorWorkerTrigger
-  extends PhabricatorWorkerDAO {
+  extends PhabricatorWorkerDAO
+  implements
+    PhabricatorDestructibleInterface,
+    PhabricatorPolicyInterface {
 
   protected $triggerVersion;
   protected $clockClass;
@@ -125,6 +128,70 @@ final class PhabricatorWorkerTrigger
   public function attachClock(PhabricatorTriggerClock $clock) {
     $this->clock = $clock;
     return $this;
+  }
+
+
+  /**
+   * Predict the epoch at which this trigger will next fire.
+   *
+   * @return int|null  Epoch when the event will next fire, or `null` if it is
+   *   not planned to trigger.
+   */
+  public function getNextEventPrediction() {
+    // NOTE: We're basically echoing the database state here, so this won't
+    // necessarily be accurate if the caller just updated the object but has
+    // not saved it yet. That's a weird use case and would require more
+    // gymnastics, so don't bother trying to get it totally correct for now.
+
+    if ($this->getEvent()) {
+      return $this->getEvent()->getNextEventEpoch();
+    } else {
+      return $this->getNextEventEpoch(null, $is_reschedule = false);
+    }
+  }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+      queryfx(
+        $this->establishConnection('w'),
+        'DELETE FROM %T WHERE triggerID = %d',
+        id(new PhabricatorWorkerTriggerEvent())->getTableName(),
+        $this->getID());
+
+      $this->delete();
+    $this->saveTransaction();
+  }
+
+
+/* -(  PhabricatorPolicyInterface  )----------------------------------------- */
+
+
+  // NOTE: Triggers are low-level infrastructure and do not have real
+  // policies, but implementing the policy interface allows us to use
+  // infrastructure like handles.
+
+  public function getCapabilities() {
+    return array(
+      PhabricatorPolicyCapability::CAN_VIEW,
+    );
+  }
+
+  public function getPolicy($capability) {
+    return PhabricatorPolicies::getMostOpenPolicy();
+  }
+
+  public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    return true;
+  }
+
+  public function describeAutomaticCapability($capability) {
+    return null;
   }
 
 }

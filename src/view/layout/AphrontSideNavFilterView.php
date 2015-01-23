@@ -100,10 +100,14 @@ final class AphrontSideNavFilterView extends AphrontView {
       $key, $name, $uri, PHUIListItemView::TYPE_LINK);
   }
 
-  public function addIcon($key, $name, $icon, $image = null) {
-    $href = clone $this->baseURI;
-    $href->setPath(rtrim($href->getPath().$key, '/').'/');
-    $href = (string)$href;
+  public function addIcon($key, $name, $icon, $image = null, $uri = null) {
+    if (!$uri) {
+      $href = clone $this->baseURI;
+      $href->setPath(rtrim($href->getPath().$key, '/').'/');
+      $href = (string)$href;
+    } else {
+      $href = $uri;
+    }
 
     $item = id(new PHUIListItemView())
       ->setKey($key)

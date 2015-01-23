@@ -200,11 +200,14 @@ final class PhrictionDocumentController
       $prop_list = new PHUIPropertyGroupView();
       $prop_list->addPropertyList($properties);
     }
+    $action_id = celerity_generate_unique_node_id();
+    $actions->setID($action_id);
 
     $page_content = id(new PHUIDocumentView())
       ->setOffset(true)
       ->setFontKit(PHUIDocumentView::FONT_SOURCE_SANS)
       ->setHeader($header)
+      ->setActionListID($action_id)
       ->appendChild(
         array(
           $actions,

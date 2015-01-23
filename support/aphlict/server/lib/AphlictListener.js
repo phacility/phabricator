@@ -1,4 +1,6 @@
-var JX = require('javelin').JX;
+'use strict';
+
+var JX = require('./javelin').JX;
 
 JX.install('AphlictListener', {
   construct: function(id, socket) {
@@ -50,8 +52,6 @@ JX.install('AphlictListener', {
 
     writeMessage: function(message) {
       this._socket.send(JSON.stringify(message));
-    }
-
-  }
-
+    },
+  },
 });

@@ -2,6 +2,10 @@
 
 /**
  * A trigger action reacts to a scheduled event.
+ *
+ * Almost all events should use a @{class:PhabricatorScheduleTaskTriggerAction}.
+ * Avoid introducing new actions without strong justification. See that class
+ * for discussion of concerns.
  */
 abstract class PhabricatorTriggerAction extends Phobject {
 
@@ -40,6 +44,9 @@ abstract class PhabricatorTriggerAction extends Phobject {
    * daemon and blocks all other triggers. By queueing a task instead of
    * performing processing directly, triggers can execute more involved actions
    * without blocking other triggers.
+   *
+   * Almost all events should use @{class:PhabricatorScheduleTaskTriggerAction}
+   * to do this, ensuring that they execute quickly.
    *
    * An action may trigger a long time after it is scheduled. For example,
    * a meeting reminder may be scheduled at 9:45 AM, but the action may not

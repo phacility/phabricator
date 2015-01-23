@@ -9,19 +9,15 @@ final class PhabricatorWorkerTriggerPHIDType extends PhabricatorPHIDType {
   }
 
   public function newObject() {
-    return new PhabricatorWorkerTriggerPHIDType();
+    return new PhabricatorWorkerTrigger();
   }
 
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {
 
-    // TODO: Maybe straighten this out eventually, but these aren't policy
-    // objects and don't have an applicable query which we can return here.
-    // Since we should never call this normally, just leave it stubbed for
-    // now.
-
-    throw new PhutilMethodNotImplementedException();
+    return id(new PhabricatorWorkerTriggerQuery())
+      ->withPHIDs($phids);
   }
 
   public function loadHandles(

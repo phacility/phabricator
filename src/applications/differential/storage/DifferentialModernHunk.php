@@ -1,6 +1,6 @@
 <?php
 
-final class DifferentialHunkModern extends DifferentialHunk {
+final class DifferentialModernHunk extends DifferentialHunk {
 
   const DATATYPE_TEXT       = 'text';
   const DATATYPE_FILE       = 'file';

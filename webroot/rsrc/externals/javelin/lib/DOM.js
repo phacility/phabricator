@@ -46,14 +46,14 @@ JX.$ = function(id) {
     if (__DEV__) {
       if (node && (node.id != id)) {
         JX.$E(
-          'JX.$("'+id+'"): '+
+          'JX.$(\''+id+'\'): '+
           'document.getElementById() returned an element without the '+
           'correct ID. This usually means that the element you are trying '+
           'to select is being masked by a form with the same value in its '+
           '"name" attribute.');
       }
     }
-    JX.$E("JX.$('" + id + "') call matched no nodes.");
+    JX.$E('JX.$(\'' + id + '\') call matched no nodes.');
   }
 
   return node;

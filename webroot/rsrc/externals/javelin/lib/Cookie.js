@@ -82,8 +82,8 @@ JX.install('Cookie', {
         cookie_bits.push('Secure');
       }
 
-      cookie_str = cookie_bits.join('; ') + ';';
-      var cookie_str = this.getKey() + '=' + cookie_str;
+      var cookie_str = cookie_bits.join('; ') + ';';
+      cookie_str = this.getKey() + '=' + cookie_str;
       this.getTarget().cookie = cookie_str;
     },
 

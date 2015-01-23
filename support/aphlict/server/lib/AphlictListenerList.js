@@ -1,5 +1,8 @@
-var JX = require('javelin').JX;
-JX.require('AphlictListener', __dirname);
+'use strict';
+
+var JX = require('./javelin').JX;
+
+require('./AphlictListener');
 
 JX.install('AphlictListenerList', {
   construct: function() {
@@ -39,7 +42,7 @@ JX.install('AphlictListenerList', {
     },
 
     getActiveListenerCount: function() {
-      return Object.keys(this._listeners).length;
+      return this._listeners.length;
     },
 
     getTotalListenerCount: function() {
@@ -48,12 +51,10 @@ JX.install('AphlictListenerList', {
 
     _generateNextID: function() {
       do {
-        this._nextID = ((this._nextID + 1) % 1000000000000);
+        this._nextID = (this._nextID + 1) % 1000000000000;
       } while (this._nextID in this._listeners);
 
       return this._nextID;
-    }
-
-  }
-
+    },
+  },
 });

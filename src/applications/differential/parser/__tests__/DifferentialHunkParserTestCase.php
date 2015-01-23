@@ -14,7 +14,7 @@ final class DifferentialHunkParserTestCase extends PhabricatorTestCase {
     $new_len,
     $changes) {
 
-    $hunk = id(new DifferentialHunkModern())
+    $hunk = id(new DifferentialModernHunk())
       ->setOldOffset($old_offset)
       ->setOldLen($old_len)
       ->setNewOffset($new_offset)

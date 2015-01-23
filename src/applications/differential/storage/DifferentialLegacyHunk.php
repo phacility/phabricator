@@ -1,6 +1,6 @@
 <?php
 
-final class DifferentialHunkLegacy extends DifferentialHunk {
+final class DifferentialLegacyHunk extends DifferentialHunk {
 
   protected $changes;
 

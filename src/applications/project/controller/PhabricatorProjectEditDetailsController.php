@@ -149,13 +149,8 @@ final class PhabricatorProjectEditDetailsController
             ));
         }
 
-        if ($is_new) {
-          $redirect_uri =
-            $this->getApplicationURI('profile/'.$project->getID().'/');
-        } else {
-          $redirect_uri =
-            $this->getApplicationURI('edit/'.$project->getID().'/');
-        }
+        $redirect_uri =
+          $this->getApplicationURI('profile/'.$project->getID().'/');
 
         return id(new AphrontRedirectResponse())->setURI($redirect_uri);
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
@@ -304,7 +299,7 @@ final class PhabricatorProjectEditDetailsController
 
     if (!$is_new) {
       $nav = $this->buildIconNavView($project);
-      $nav->selectFilter("edit/{$id}/");
+      $nav->selectFilter("details/{$id}/");
       $nav->appendChild($form_box);
     } else {
       $nav = array($form_box);

@@ -218,7 +218,7 @@ JX.behavior('differential-dropdown-menus', function(config) {
       visible_item
         .setDisabled(true)
         .setIcon('fa-expand')
-        .setName(pht("Can't Toggle Unloaded File"));
+        .setName(pht('Can\'t Toggle Unloaded File'));
       var diffs = JX.DOM.scry(
         JX.$(data.containerID),
         'table',

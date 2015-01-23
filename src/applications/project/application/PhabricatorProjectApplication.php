@@ -43,7 +43,6 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
       '/project/' => array(
         '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhabricatorProjectListController',
         'filter/(?P<filter>[^/]+)/' => 'PhabricatorProjectListController',
-        'edit/(?P<id>[1-9]\d*)/' => 'PhabricatorProjectEditMainController',
         'details/(?P<id>[1-9]\d*)/'
           => 'PhabricatorProjectEditDetailsController',
         'archive/(?P<id>[1-9]\d*)/'

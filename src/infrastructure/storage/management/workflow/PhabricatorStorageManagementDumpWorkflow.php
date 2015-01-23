@@ -11,17 +11,19 @@ final class PhabricatorStorageManagementDumpWorkflow
   }
 
   public function execute(PhutilArgumentParser $args) {
+    $console = PhutilConsole::getConsole();
     $api = $this->getAPI();
     $patches = $this->getPatches();
 
     $applied = $api->getAppliedPatches();
     if ($applied === null) {
       $namespace = $api->getNamespace();
-      echo phutil_console_wrap(
-        phutil_console_format(
-          "**No Storage**: There is no database storage initialized in this ".
-          "storage namespace ('{$namespace}'). Use '**storage upgrade**' to ".
-          "initialize storage.\n"));
+      $console->writeErr(
+        pht(
+          '**Storage Not Initialized**: There is no database storage '.
+          'initialized in this storage namespace ("%s"). Use '.
+          '**storage upgrade** to initialize storage.',
+          $namespace));
       return 1;
     }
 

@@ -7,28 +7,27 @@ abstract class PhabricatorProjectController extends PhabricatorController {
   }
 
   public function buildSideNavView($for_app = false) {
-    $user = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
 
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
     $id = null;
     if ($for_app) {
-      $user = $this->getRequest()->getUser();
       $id = $this->getRequest()->getURIData('id');
       if ($id) {
         $nav->addFilter("profile/{$id}/", pht('Profile'));
         $nav->addFilter("board/{$id}/", pht('Workboard'));
         $nav->addFilter("members/{$id}/", pht('Members'));
         $nav->addFilter("feed/{$id}/", pht('Feed'));
-        $nav->addFilter("edit/{$id}/", pht('Edit'));
+        $nav->addFilter("details/{$id}/", pht('Edit Details'));
       }
       $nav->addFilter('create', pht('Create Project'));
     }
 
     if (!$id) {
       id(new PhabricatorProjectSearchEngine())
-        ->setViewer($user)
+        ->setViewer($viewer)
         ->addNavigationItems($nav->getMenu());
     }
 
@@ -38,13 +37,13 @@ abstract class PhabricatorProjectController extends PhabricatorController {
   }
 
   public function buildIconNavView(PhabricatorProject $project) {
-    $user = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
     $id = $project->getID();
     $picture = $project->getProfileImageURI();
     $name = $project->getName();
 
     $columns = id(new PhabricatorProjectColumnQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withProjectPHIDs(array($project->getPHID()))
       ->execute();
     if ($columns) {
@@ -58,9 +57,20 @@ abstract class PhabricatorProjectController extends PhabricatorController {
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
     $nav->addIcon("profile/{$id}/", $name, null, $picture);
     $nav->addIcon("board/{$id}/", pht('Workboard'), $board_icon);
+
+    $class = 'PhabricatorManiphestApplication';
+    if (PhabricatorApplication::isClassInstalledForViewer($class, $viewer)) {
+      $phid = $project->getPHID();
+      $query_uri = urisprintf(
+        '/maniphest/?statuses=%s&allProjects=%s#R',
+        implode(',', ManiphestTaskStatus::getOpenStatusConstants()),
+      $phid);
+      $nav->addIcon(null, pht('Open Tasks'), 'fa-anchor', null, $query_uri);
+    }
+
     $nav->addIcon("feed/{$id}/", pht('Feed'), 'fa-newspaper-o');
     $nav->addIcon("members/{$id}/", pht('Members'), 'fa-group');
-    $nav->addIcon("edit/{$id}/", pht('Edit'), 'fa-pencil');
+    $nav->addIcon("details/{$id}/", pht('Edit Details'), 'fa-pencil');
 
     return $nav;
   }

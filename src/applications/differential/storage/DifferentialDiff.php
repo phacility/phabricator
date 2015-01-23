@@ -193,7 +193,7 @@ final class DifferentialDiff
       $hunks = $change->getHunks();
       if ($hunks) {
         foreach ($hunks as $hunk) {
-          $dhunk = new DifferentialHunkModern();
+          $dhunk = new DifferentialModernHunk();
           $dhunk->setOldOffset($hunk->getOldOffset());
           $dhunk->setOldLen($hunk->getOldLength());
           $dhunk->setNewOffset($hunk->getNewOffset());

@@ -1,18 +1,39 @@
 <?php
 
 final class PhabricatorWorkerTriggerQuery
-  extends PhabricatorOffsetPagedQuery {
+  extends PhabricatorPolicyAwareQuery {
 
+  // NOTE: This is a PolicyAware query so it can work with other infrastructure
+  // like handles; triggers themselves are low-level and do not have
+  // meaninguful policies.
+
+  const ORDER_ID = 'id';
   const ORDER_EXECUTION = 'execution';
   const ORDER_VERSION = 'version';
 
+  private $ids;
+  private $phids;
   private $versionMin;
   private $versionMax;
   private $nextEpochMin;
   private $nextEpochMax;
 
   private $needEvents;
-  private $order = self::ORDER_EXECUTION;
+  private $order = self::ORDER_ID;
+
+  public function getQueryApplicationClass() {
+    return null;
+  }
+
+  public function withIDs(array $ids) {
+    $this->ids = $ids;
+    return $this;
+  }
+
+  public function withPHIDs(array $phids) {
+    $this->phids = $phids;
+    return $this;
+  }
 
   public function withVersionBetween($min, $max) {
     $this->versionMin = $min;
@@ -31,12 +52,28 @@ final class PhabricatorWorkerTriggerQuery
     return $this;
   }
 
+  /**
+   * Set the result order.
+   *
+   * Note that using `ORDER_EXECUTION` will also filter results to include only
+   * triggers which have been scheduled to execute. You should not use this
+   * ordering when querying for specific triggers, e.g. by ID or PHID.
+   *
+   * @param const Result order.
+   * @return this
+   */
   public function setOrder($order) {
     $this->order = $order;
     return $this;
   }
 
-  public function execute() {
+  protected function nextPage(array $page) {
+    // NOTE: We don't implement paging because we don't currently ever need
+    // it and paging ORDER_EXCUTION is a hassle.
+    throw new PhutilMethodNotImplementedException();
+  }
+
+  protected function loadPage() {
     $task_table = new PhabricatorWorkerTrigger();
 
     $conn_r = $task_table->establishConnection('r');
@@ -126,6 +163,20 @@ final class PhabricatorWorkerTriggerQuery
   private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
+    if ($this->ids !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        't.id IN (%Ld)',
+        $this->ids);
+    }
+
+    if ($this->phids !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        't.phid IN (%Ls)',
+        $this->phids);
+    }
+
     if ($this->versionMin !== null) {
       $where[] = qsprintf(
         $conn_r,
@@ -159,6 +210,10 @@ final class PhabricatorWorkerTriggerQuery
 
   private function buildOrderClause(AphrontDatabaseConnection $conn_r) {
     switch ($this->order) {
+      case self::ORDER_ID:
+        return qsprintf(
+          $conn_r,
+          'ORDER BY id DESC');
       case self::ORDER_EXECUTION:
         return qsprintf(
           $conn_r,

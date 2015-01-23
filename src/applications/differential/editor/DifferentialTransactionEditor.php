@@ -55,7 +55,6 @@ final class DifferentialTransactionEditor
     $types = parent::getTransactionTypes();
 
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
-    $types[] = PhabricatorTransactions::TYPE_EDGE;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
@@ -1277,6 +1276,8 @@ final class DifferentialTransactionEditor
     }
 
     $edges = array();
+    $task_phids = array();
+    $rev_phids = array();
 
     if ($task_map) {
       $tasks = id(new ManiphestTaskQuery())
@@ -1285,10 +1286,9 @@ final class DifferentialTransactionEditor
         ->execute();
 
       if ($tasks) {
-        $phid_map = mpull($tasks, 'getPHID', 'getPHID');
+        $task_phids = mpull($tasks, 'getPHID', 'getPHID');
         $edge_related = DifferentialRevisionHasTaskEdgeType::EDGECONST;
-        $edges[$edge_related] = $phid_map;
-        $this->setUnmentionablePHIDMap($phid_map);
+        $edges[$edge_related] = $task_phids;
       }
     }
 
@@ -1308,6 +1308,8 @@ final class DifferentialTransactionEditor
         $edges[$depends] = $rev_phids;
       }
     }
+
+    $this->setUnmentionablePHIDMap(array_merge($task_phids, $rev_phids));
 
     $result = array();
     foreach ($edges as $type => $specs) {

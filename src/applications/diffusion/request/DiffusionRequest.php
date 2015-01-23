@@ -99,7 +99,17 @@ abstract class DiffusionRequest {
     $object = self::newFromCallsign($callsign, $request->getUser());
 
     $use_branches = $object->supportsBranches();
-    $parsed = self::parseRequestBlob(idx($data, 'dblob'), $use_branches);
+
+    if (isset($data['dblob'])) {
+      $parsed = self::parseRequestBlob(idx($data, 'dblob'), $use_branches);
+    } else {
+      $parsed = array(
+        'commit' => idx($data, 'commit'),
+        'path' => idx($data, 'path'),
+        'line' => idx($data, 'line'),
+        'branch' => idx($data, 'branch'),
+      );
+    }
 
     $object->setUser($request->getUser());
     $object->initializeFromDictionary($parsed);

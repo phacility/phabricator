@@ -22,8 +22,8 @@ JX.install('Tooltip', {
             break;
           default:
             JX.$E(
-              "Only alignments 'N' (north), 'E' (east), 'S' (south), " +
-              "and 'W' (west) are supported."
+              'Only alignments "N" (north), "E" (east), "S" (south), ' +
+              'and "W" (west) are supported.'
             );
             break;
         }

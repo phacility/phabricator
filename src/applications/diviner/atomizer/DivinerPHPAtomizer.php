@@ -293,7 +293,7 @@ final class DivinerPHPAtomizer extends DivinerAtomizer {
           'this implicitly.');
       }
     } else if ($return) {
-      $split = preg_split('/\s+/', trim($return), $limit = 2);
+      $split = preg_split('/(?<!,)\s+/', trim($return), $limit = 2);
       if (!empty($split[0])) {
         $type = $split[0];
       }

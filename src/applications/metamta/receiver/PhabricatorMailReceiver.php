@@ -15,6 +15,10 @@ abstract class PhabricatorMailReceiver {
     $this->processReceivedMail($mail, $sender);
   }
 
+  public function getViewer() {
+    return PhabricatorUser::getOmnipotentUser();
+  }
+
   public function validateSender(
     PhabricatorMetaMTAReceivedMail $mail,
     PhabricatorUser $sender) {
@@ -103,7 +107,7 @@ abstract class PhabricatorMailReceiver {
     if ($allow_email_users) {
       $from_obj = new PhutilEmailAddress($from);
       $xuser = id(new PhabricatorExternalAccountQuery())
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->setViewer($this->getViewer())
         ->withAccountTypes(array('email'))
         ->withAccountDomains(array($from_obj->getDomainName(), 'self'))
         ->withAccountIDs(array($from_obj->getAddress()))

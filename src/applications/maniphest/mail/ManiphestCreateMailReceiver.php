@@ -8,12 +8,18 @@ final class ManiphestCreateMailReceiver extends PhabricatorMailReceiver {
   }
 
   public function canAcceptMail(PhabricatorMetaMTAReceivedMail $mail) {
-    $config_key = 'metamta.maniphest.public-create-email';
-    $create_address = PhabricatorEnv::getEnvConfig($config_key);
+    $maniphest_app = new PhabricatorManiphestApplication();
+    $application_emails = id(new PhabricatorMetaMTAApplicationEmailQuery())
+      ->setViewer($this->getViewer())
+      ->withApplicationPHIDs(array($maniphest_app->getPHID()))
+      ->execute();
 
     foreach ($mail->getToAddresses() as $to_address) {
-      if ($this->matchAddresses($create_address, $to_address)) {
-        return true;
+      foreach ($application_emails as $application_email) {
+        $create_address = $application_email->getAddress();
+        if ($this->matchAddresses($create_address, $to_address)) {
+          return true;
+        }
       }
     }
 

@@ -82,7 +82,7 @@ final class AlmanacNetworkEditor
     $errors = parent::validateTransaction($object, $type, $xactions);
 
     switch ($type) {
-      case AlmanacServiceTransaction::TYPE_NAME:
+      case AlmanacNetworkTransaction::TYPE_NAME:
         $missing = $this->validateIsEmptyTextField(
           $object->getName(),
           $xactions);
