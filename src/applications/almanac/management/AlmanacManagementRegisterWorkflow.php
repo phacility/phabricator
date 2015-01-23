@@ -23,7 +23,15 @@ final class AlmanacManagementRegisterWorkflow
             'name' => 'allow-key-reuse',
             'help' => pht(
               'Register even if another host is already registered with this '.
-              'keypair.'),
+              'keypair. This is an advanced featuer which allows a pool of '.
+              'devices to share credentials.'),
+          ),
+          array(
+            'name' => 'identify-as',
+            'param' => 'name',
+            'help' => pht(
+              'Specify an alternate host identity. This is an advanced '.
+              'feature which allows a pool of devices to share credentials.'),
           ),
           array(
             'name' => 'force',
@@ -85,6 +93,7 @@ final class AlmanacManagementRegisterWorkflow
 
     $stored_public_path = AlmanacKeys::getKeyPath('device.pub');
     $stored_private_path = AlmanacKeys::getKeyPath('device.key');
+    $stored_device_path = AlmanacKeys::getKeyPath('device.id');
 
     if (!$args->getArg('force')) {
       if (Filesystem::pathExists($stored_public_path)) {
@@ -171,6 +180,24 @@ final class AlmanacManagementRegisterWorkflow
     Filesystem::writeFile($tmp_private, $raw_private_key);
     execx('mv -f %s %s', $tmp_private, $stored_private_path);
 
+    $raw_device = $device_name;
+    $identify_as = $args->getArg('identify-as');
+    if (strlen($identify_as)) {
+      $raw_device = $identify_as;
+    }
+
+    $console->writeOut(
+      "%s\n",
+      pht('Installing device ID...', $raw_device));
+
+    // The permissions on this file are more open because the webserver also
+    // needs to read it.
+    $tmp_device = new TempFile();
+    Filesystem::changePermissions($tmp_device, 0644);
+    execx('chown %s %s', $phd_user, $tmp_device);
+    Filesystem::writeFile($tmp_device, $raw_device);
+    execx('mv -f %s %s', $tmp_device, $stored_device_path);
+
     if (!$public_key->getID()) {
       $console->writeOut(
         "%s\n",
@@ -184,7 +211,7 @@ final class AlmanacManagementRegisterWorkflow
       pht(
         'This host has been registered as "%s" and a trusted keypair '.
         'has been installed.',
-        $device_name));
+        $raw_device));
   }
 
 }

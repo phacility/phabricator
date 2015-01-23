@@ -15,6 +15,7 @@
 /conf/local/VERSION
 /conf/keys/device.pub
 /conf/keys/device.key
+/conf/keys/device.id
 
 # Impact Font
 /resources/font/impact.ttf
