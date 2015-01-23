@@ -4,6 +4,7 @@ final class ConduitAPIRequest {
 
   protected $params;
   private $user;
+  private $isClusterRequest = false;
 
   public function __construct(array $params) {
     $this->params = $params;
@@ -40,6 +41,15 @@ final class ConduitAPIRequest {
         'shouldRequireAuthentication()).');
     }
     return $this->user;
+  }
+
+  public function setIsClusterRequest($is_cluster_request) {
+    $this->isClusterRequest = $is_cluster_request;
+    return $this;
+  }
+
+  public function getIsClusterRequest() {
+    return $this->isClusterRequest;
   }
 
 }

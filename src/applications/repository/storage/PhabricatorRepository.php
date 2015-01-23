@@ -1520,13 +1520,39 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
    * Build a new Conduit client in order to make a service call to this
    * repository.
    *
-   * If the repository is hosted locally, this method returns `null`. The
+   * If the repository is hosted locally, this method may return `null`. The
    * caller should use `ConduitCall` or other local logic to complete the
    * request.
    *
+   * By default, we will return a @{class:ConduitClient} for any repository with
+   * a service, even if that service is on the current device.
+   *
+   * We do this because this configuration does not make very much sense in a
+   * production context, but is very common in a test/development context
+   * (where the developer's machine is both the web host and the repository
+   * service). By proxying in development, we get more consistent behavior
+   * between development and production, and don't have a major untested
+   * codepath.
+   *
+   * The `$never_proxy` parameter can be used to prevent this local proxying.
+   * If the flag is passed:
+   *
+   *   - The method will return `null` (implying a local service call)
+   *     if the repository service is hosted on the current device.
+   *   - The method will throw if it would need to return a client.
+   *
+   * This is used to prevent loops in Conduit: the first request will proxy,
+   * even in development, but the second request will be identified as a
+   * cluster request and forced not to proxy.
+   *
+   * @param PhabricatorUser Viewing user.
+   * @param bool `true` to throw if a client would be returned.
    * @return ConduitClient|null Client, or `null` for local repositories.
    */
-  public function newConduitClient(PhabricatorUser $viewer) {
+  public function newConduitClient(
+    PhabricatorUser $viewer,
+    $never_proxy = false) {
+
     $service_phid = $this->getAlmanacServicePHID();
     if (!$service_phid) {
       // No service, so this is a local repository.
@@ -1561,9 +1587,31 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
           'interfaces.'));
     }
 
+    $local_device = AlmanacKeys::getDeviceID();
+
+    if ($never_proxy && !$local_device) {
+      throw new Exception(
+        pht(
+          'Unable to handle proxied service request. This device is not '.
+          'registered, so it can not identify local services. Register '.
+          'this device before sending requests here.'));
+    }
+
     $uris = array();
     foreach ($bindings as $binding) {
       $iface = $binding->getInterface();
+
+      // If we're never proxying this and it's locally satisfiable, return
+      // `null` to tell the caller to handle it locally. If we're allowed to
+      // proxy, we skip this check and may proxy the request to ourselves.
+      // (That proxied request will end up here with proxying forbidden,
+      // return `null`, and then the request will actually run.)
+
+      if ($local_device && $never_proxy) {
+        if ($iface->getDevice()->getName() == $local_device) {
+          return null;
+        }
+      }
 
       $protocol = $binding->getAlmanacPropertyValue('protocol');
       if ($protocol === 'http') {
@@ -1577,6 +1625,13 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
             'invalid interface with an unknown protocol ("%s").',
             $protocol));
       }
+    }
+
+    if ($never_proxy) {
+      throw new Exception(
+        pht(
+          'Refusing to proxy a repository request from a cluster host. '.
+          'Cluster hosts must correctly route their intracluster requests.'));
     }
 
     shuffle($uris);

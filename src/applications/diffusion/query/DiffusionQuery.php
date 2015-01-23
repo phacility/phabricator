@@ -72,7 +72,9 @@ abstract class DiffusionQuery extends PhabricatorQuery {
 
     $params = $params + $core_params;
 
-    $client = $repository->newConduitClient($user);
+    $client = $repository->newConduitClient(
+      $user,
+      $drequest->getIsClusterRequest());
     if (!$client) {
       return id(new ConduitCall($method, $params))
         ->setUser($user)

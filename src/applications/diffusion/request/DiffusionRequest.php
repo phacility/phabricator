@@ -24,6 +24,7 @@ abstract class DiffusionRequest {
   protected $repositoryCommitData;
   protected $arcanistProjects;
 
+  private $isClusterRequest = false;
   private $initFromConduit = true;
   private $user;
   private $branchObject = false;
@@ -765,5 +766,13 @@ abstract class DiffusionRequest {
     }
   }
 
+  public function setIsClusterRequest($is_cluster_request) {
+    $this->isClusterRequest = $is_cluster_request;
+    return $this;
+  }
+
+  public function getIsClusterRequest() {
+    return $this->isClusterRequest;
+  }
 
 }
