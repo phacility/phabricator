@@ -1516,6 +1516,125 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
 
+  /**
+   * Build a new Conduit client in order to make a service call to this
+   * repository.
+   *
+   * If the repository is hosted locally, this method returns `null`. The
+   * caller should use `ConduitCall` or other local logic to complete the
+   * request.
+   *
+   * @return ConduitClient|null Client, or `null` for local repositories.
+   */
+  public function newConduitClient(PhabricatorUser $viewer) {
+    $service_phid = $this->getAlmanacServicePHID();
+    if (!$service_phid) {
+      // No service, so this is a local repository.
+      return null;
+    }
+
+    $service = id(new AlmanacServiceQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withPHIDs(array($service_phid))
+      ->needBindings(true)
+      ->executeOne();
+    if (!$service) {
+      throw new Exception(
+        pht(
+          'The Alamnac service for this repository is invalid or could not '.
+          'be loaded.'));
+    }
+
+    $service_type = $service->getServiceType();
+    if (!($service_type instanceof AlmanacClusterRepositoryServiceType)) {
+      throw new Exception(
+        pht(
+          'The Alamnac service for this repository does not have the correct '.
+          'service type.'));
+    }
+
+    $bindings = $service->getBindings();
+    if (!$bindings) {
+      throw new Exception(
+        pht(
+          'The Alamanc service for this repository is not bound to any '.
+          'interfaces.'));
+    }
+
+    $uris = array();
+    foreach ($bindings as $binding) {
+      $iface = $binding->getInterface();
+
+      $protocol = $binding->getAlmanacPropertyValue('protocol');
+      if ($protocol === 'http') {
+        $uris[] = 'http://'.$iface->renderDisplayAddress().'/';
+      } else if ($protocol === 'https' || $protocol === null) {
+        $uris[] = 'https://'.$iface->renderDisplayAddress().'/';
+      } else {
+        throw new Exception(
+          pht(
+            'The Almanac service for this repository has a binding to an '.
+            'invalid interface with an unknown protocol ("%s").',
+            $protocol));
+      }
+    }
+
+    shuffle($uris);
+    $uri = head($uris);
+
+    $domain = id(new PhutilURI(PhabricatorEnv::getURI('/')))->getDomain();
+
+    $client = id(new ConduitClient($uri))
+      ->setHost($domain);
+
+    if ($viewer->isOmnipotent()) {
+      // If the caller is the omnipotent user (normally, a daemon), we will
+      // sign the request with this host's asymmetric keypair.
+
+      $public_path = AlmanacKeys::getKeyPath('device.pub');
+      try {
+        $public_key = Filesystem::readFile($public_path);
+      } catch (Exception $ex) {
+        throw new PhutilAggregateException(
+          pht(
+            'Unable to read device public key while attempting to make '.
+            'authenticated method call within the Phabricator cluster. '.
+            'Use `bin/almanac register` to register keys for this device. '.
+            'Exception: %s',
+            $ex->getMessage()),
+          array($ex));
+      }
+
+      $private_path = AlmanacKeys::getKeyPath('device.key');
+      try {
+        $private_key = Filesystem::readFile($private_path);
+        $private_key = new PhutilOpaqueEnvelope($private_key);
+      } catch (Exception $ex) {
+        throw new PhutilAggregateException(
+          pht(
+            'Unable to read device private key while attempting to make '.
+            'authenticated method call within the Phabricator cluster. '.
+            'Use `bin/almanac register` to register keys for this device. '.
+            'Exception: %s',
+            $ex->getMessage()),
+          array($ex));
+      }
+
+      $client->setSigningKeys($public_key, $private_key);
+    } else {
+      // If the caller is a normal user, we generate or retrieve a cluster
+      // API token.
+
+      $token = PhabricatorConduitToken::loadClusterTokenForUser($viewer);
+      if ($token) {
+        $client->setConduitToken($token->getToken());
+      }
+    }
+
+    return $client;
+  }
+
+
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 
 
