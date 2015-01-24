@@ -188,7 +188,7 @@ JX.install('Scrollbar', {
       e.kill();
 
       // Store the position where the drag started.
-      this._dragOrigin = JX.$V(e).y;
+      this._dragOrigin = JX.$V(e);
 
       // Store the original position of the handle.
       this._scrollOrigin = this._viewport.scrollTop;
@@ -203,11 +203,32 @@ JX.install('Scrollbar', {
         return;
       }
 
-      var offset = (JX.$V(e).y - this._dragOrigin);
+      var p = JX.$V(e);
+      var offset = (p.y - this._dragOrigin.y);
       var ratio = offset / JX.Vector.getDim(this._bar).y;
       var adjust = ratio * JX.Vector.getDim(this._content).y;
 
+      if (this._shouldSnapback()) {
+        if (Math.abs(p.x - this._dragOrigin.x) > 140) {
+          adjust = 0;
+        }
+      }
+
       this._viewport.scrollTop = this._scrollOrigin + adjust;
+    },
+
+
+    /**
+     * Should the scrollbar snap back to the original position if the user
+     * drags the mouse away to the left or right, perpendicular to the
+     * scrollbar?
+     *
+     * Scrollbars have this behavior on Windows, but not on OSX or Linux.
+     */
+    _shouldSnapback: function() {
+      // Since this is an OS-specific behavior, detect the OS. We can't
+      // reasonably use feature detection here.
+      return (navigator.platform.indexOf('Win') > -1);
     },
 
 
