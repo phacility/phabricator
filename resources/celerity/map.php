@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => '0ca60f7b',
+    'core.pkg.css' => '7a40db47',
     'core.pkg.js' => '2d9bfc06',
     'darkconsole.pkg.js' => '8ab24e01',
     'differential.pkg.css' => '8af45893',
@@ -39,7 +39,7 @@ return array(
     'rsrc/css/application/base/main-menu-view.css' => '3cf893a9',
     'rsrc/css/application/base/notification-menu.css' => '6aa0a74b',
     'rsrc/css/application/base/phabricator-application-launch-view.css' => '5d71008f',
-    'rsrc/css/application/base/standard-page-view.css' => '98cc4c75',
+    'rsrc/css/application/base/standard-page-view.css' => '53882a33',
     'rsrc/css/application/chatlog/chatlog.css' => '852140ff',
     'rsrc/css/application/config/config-options.css' => '7fedf08b',
     'rsrc/css/application/config/config-template.css' => '25d446d6',
@@ -107,7 +107,7 @@ return array(
     'rsrc/css/core/core.css' => 'd7f6ec35',
     'rsrc/css/core/remarkup.css' => '0ee3d256',
     'rsrc/css/core/syntax.css' => '56c1ba38',
-    'rsrc/css/core/z-index.css' => '9c4313eb',
+    'rsrc/css/core/z-index.css' => '07df2e53',
     'rsrc/css/diviner/diviner-shared.css' => '38813222',
     'rsrc/css/font/font-awesome.css' => '0c10d96b',
     'rsrc/css/font/font-source-sans-pro.css' => '91d53463',
@@ -199,7 +199,7 @@ return array(
     'rsrc/externals/javelin/lib/Resource.js' => '44959b73',
     'rsrc/externals/javelin/lib/Routable.js' => 'b3e7d692',
     'rsrc/externals/javelin/lib/Router.js' => '29274e2b',
-    'rsrc/externals/javelin/lib/Scrollbar.js' => 'b403b668',
+    'rsrc/externals/javelin/lib/Scrollbar.js' => 'e8e4c640',
     'rsrc/externals/javelin/lib/URI.js' => '6eff08aa',
     'rsrc/externals/javelin/lib/Vector.js' => 'cc1bd0b0',
     'rsrc/externals/javelin/lib/WebSocket.js' => '3f840822',
@@ -673,7 +673,7 @@ return array(
     'javelin-resource' => '44959b73',
     'javelin-routable' => 'b3e7d692',
     'javelin-router' => '29274e2b',
-    'javelin-scrollbar' => 'b403b668',
+    'javelin-scrollbar' => 'e8e4c640',
     'javelin-stratcom' => '8b0ad945',
     'javelin-tokenizer' => '7644823e',
     'javelin-typeahead' => '70baed2f',
@@ -738,7 +738,7 @@ return array(
     'phabricator-side-menu-view-css' => '7e8c6341',
     'phabricator-slowvote-css' => '266df6a1',
     'phabricator-source-code-view-css' => '7d346aa4',
-    'phabricator-standard-page-view' => '98cc4c75',
+    'phabricator-standard-page-view' => '53882a33',
     'phabricator-textareautils' => '5c93c52c',
     'phabricator-title' => '5c1c758c',
     'phabricator-tooltip' => '1d298e3a',
@@ -754,7 +754,7 @@ return array(
     'phabricator-uiexample-reactor-select' => 'a155550f',
     'phabricator-uiexample-reactor-sendclass' => '1def2711',
     'phabricator-uiexample-reactor-sendproperties' => 'b1f0ccee',
-    'phabricator-zindex-css' => '9c4313eb',
+    'phabricator-zindex-css' => '07df2e53',
     'phame-css' => '19ecc703',
     'pholio-css' => '95174bdd',
     'pholio-edit-css' => '3ad9d1ee',
@@ -1611,12 +1611,6 @@ return array(
     'b3e7d692' => array(
       'javelin-install',
     ),
-    'b403b668' => array(
-      'javelin-install',
-      'javelin-dom',
-      'javelin-stratcom',
-      'javelin-vector',
-    ),
     'b42eddc7' => array(
       'javelin-install',
       'javelin-dom',
@@ -1850,6 +1844,12 @@ return array(
       'javelin-mask',
       'javelin-behavior-device',
       'phabricator-keyboard-shortcut',
+    ),
+    'e8e4c640' => array(
+      'javelin-install',
+      'javelin-dom',
+      'javelin-stratcom',
+      'javelin-vector',
     ),
     'e9581f08' => array(
       'javelin-behavior',

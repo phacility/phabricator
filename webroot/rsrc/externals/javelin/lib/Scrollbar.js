@@ -25,6 +25,14 @@
 JX.install('Scrollbar', {
 
   construct: function(frame) {
+    // Before doing anything, check if the scrollbar control has a measurable
+    // width. If it doesn't, we're already in an environment with an aesthetic
+    // scrollbar (like Safari on OSX with no mouse connected, or an iPhone)
+    // and we don't need to do anything.
+    if (JX.Scrollbar._getScrollbarControlWidth() === 0) {
+      return;
+    }
+
     // Wrap the frame content in a bunch of nodes. The frame itself stays on
     // the outside so that any positioning information the node had isn't
     // disrupted.
