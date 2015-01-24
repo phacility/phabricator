@@ -199,7 +199,7 @@ return array(
     'rsrc/externals/javelin/lib/Resource.js' => '44959b73',
     'rsrc/externals/javelin/lib/Routable.js' => 'b3e7d692',
     'rsrc/externals/javelin/lib/Router.js' => '29274e2b',
-    'rsrc/externals/javelin/lib/Scrollbar.js' => 'e8e4c640',
+    'rsrc/externals/javelin/lib/Scrollbar.js' => '65a65098',
     'rsrc/externals/javelin/lib/URI.js' => '6eff08aa',
     'rsrc/externals/javelin/lib/Vector.js' => 'cc1bd0b0',
     'rsrc/externals/javelin/lib/WebSocket.js' => '3f840822',
@@ -673,7 +673,7 @@ return array(
     'javelin-resource' => '44959b73',
     'javelin-routable' => 'b3e7d692',
     'javelin-router' => '29274e2b',
-    'javelin-scrollbar' => 'e8e4c640',
+    'javelin-scrollbar' => '65a65098',
     'javelin-stratcom' => '8b0ad945',
     'javelin-tokenizer' => '7644823e',
     'javelin-typeahead' => '70baed2f',
@@ -1243,6 +1243,12 @@ return array(
       'javelin-install',
       'javelin-dom',
       'javelin-fx',
+    ),
+    '65a65098' => array(
+      'javelin-install',
+      'javelin-dom',
+      'javelin-stratcom',
+      'javelin-vector',
     ),
     '6882e80a' => array(
       'javelin-dom',
@@ -1844,12 +1850,6 @@ return array(
       'javelin-mask',
       'javelin-behavior-device',
       'phabricator-keyboard-shortcut',
-    ),
-    'e8e4c640' => array(
-      'javelin-install',
-      'javelin-dom',
-      'javelin-stratcom',
-      'javelin-vector',
     ),
     'e9581f08' => array(
       'javelin-behavior',

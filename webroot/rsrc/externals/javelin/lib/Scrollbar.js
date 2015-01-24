@@ -127,6 +127,7 @@ JX.install('Scrollbar', {
 
     _timeout: null,
     _dragOrigin: null,
+    _scrollOrigin: null,
 
 
     /**
@@ -181,7 +182,12 @@ JX.install('Scrollbar', {
      */
     _ondrag: function(e) {
       e.kill();
+
+      // Store the position where the drag started.
       this._dragOrigin = JX.$V(e).y;
+
+      // Store the original position of the handle.
+      this._scrollOrigin = this._viewport.scrollTop;
     },
 
 
@@ -195,9 +201,9 @@ JX.install('Scrollbar', {
 
       var offset = (JX.$V(e).y - this._dragOrigin);
       var ratio = offset / JX.Vector.getDim(this._bar).y;
-      var target = ratio * JX.Vector.getDim(this._content).y;
+      var adjust = ratio * JX.Vector.getDim(this._content).y;
 
-      this._viewport.scrollTop = target;
+      this._viewport.scrollTop = this._scrollOrigin + adjust;
     },
 
 
