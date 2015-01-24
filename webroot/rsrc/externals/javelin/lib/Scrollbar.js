@@ -76,7 +76,11 @@ JX.install('Scrollbar', {
     JX.DOM.listen(this._bar, 'mousedown', null, JX.bind(this, this._onjump));
 
     JX.enableDispatch(document.body, 'mouseenter');
-    JX.enableDispatch(document.body, 'mousemove');
+
+    // Enabling dispatch for this event on `window` allows us to scroll even
+    // if the mouse cursor is dragged outside the window in at least some
+    // browsers (for example, Safari on OSX).
+    JX.enableDispatch(window, 'mousemove');
 
     JX.DOM.listen(viewport, 'mouseenter', null, JX.bind(this, this._onenter));
     JX.DOM.listen(frame, 'scroll', null, JX.bind(this, this._onscroll));
