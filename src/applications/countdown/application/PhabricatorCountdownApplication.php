@@ -11,7 +11,7 @@ final class PhabricatorCountdownApplication extends PhabricatorApplication {
   }
 
   public function getFontIcon() {
-    return 'fa-birthday-cake';
+    return 'fa-rocket';
   }
 
   public function getName() {

@@ -19,7 +19,7 @@ final class PhabricatorFactApplication extends PhabricatorApplication {
   }
 
   public function getFontIcon() {
-    return 'fa-area-chart';
+    return 'fa-line-chart';
   }
 
   public function getApplicationGroup() {

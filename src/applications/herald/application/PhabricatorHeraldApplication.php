@@ -11,7 +11,7 @@ final class PhabricatorHeraldApplication extends PhabricatorApplication {
   }
 
   public function getFontIcon() {
-    return 'fa-bell';
+    return 'fa-bullhorn';
   }
 
   public function getName() {

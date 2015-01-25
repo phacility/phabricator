@@ -11,7 +11,7 @@ final class PhabricatorConfigApplication extends PhabricatorApplication {
   }
 
   public function getFontIcon() {
-    return 'fa-wrench';
+    return 'fa-sliders';
   }
 
   public function isPinnedByDefault(PhabricatorUser $viewer) {
