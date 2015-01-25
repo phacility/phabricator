@@ -18,6 +18,10 @@ final class PhabricatorConpherenceApplication extends PhabricatorApplication {
     return 'conpherence';
   }
 
+  public function getFontIcon() {
+    return 'fa-comments';
+  }
+
   public function getTitleGlyph() {
     return "\xE2\x9C\x86";
   }

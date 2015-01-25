@@ -22,6 +22,10 @@ final class PhabricatorCalendarApplication extends PhabricatorApplication {
     return 'calendar';
   }
 
+  public function getFontIcon() {
+    return 'fa-calendar';
+  }
+
   public function getTitleGlyph() {
     // Unicode has a calendar character but it's in some distant code plane,
     // use "keyboard" since it looks vaguely similar.

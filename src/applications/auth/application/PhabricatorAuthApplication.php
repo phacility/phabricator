@@ -14,6 +14,10 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
     return 'authentication';
   }
 
+  public function getFontIcon() {
+    return 'fa-key';
+  }
+
   public function isPinnedByDefault(PhabricatorUser $viewer) {
     return $viewer->getIsAdmin();
   }

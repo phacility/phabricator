@@ -18,6 +18,10 @@ final class PhabricatorXHProfApplication extends PhabricatorApplication {
     return 'xhprof';
   }
 
+  public function getFontIcon() {
+    return 'fa-stethoscope';
+  }
+
   public function getTitleGlyph() {
     return "\xE2\x98\x84";
   }

@@ -18,6 +18,10 @@ final class PhabricatorDrydockApplication extends PhabricatorApplication {
     return 'drydock';
   }
 
+  public function getFontIcon() {
+    return 'fa-truck';
+  }
+
   public function getTitleGlyph() {
     return "\xE2\x98\x82";
   }

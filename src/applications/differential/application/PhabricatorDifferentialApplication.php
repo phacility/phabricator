@@ -18,6 +18,10 @@ final class PhabricatorDifferentialApplication extends PhabricatorApplication {
     return 'differential';
   }
 
+  public function getFontIcon() {
+    return 'fa-cog';
+  }
+
   public function isPinnedByDefault(PhabricatorUser $viewer) {
     return true;
   }

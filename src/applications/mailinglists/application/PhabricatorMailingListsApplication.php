@@ -18,6 +18,10 @@ final class PhabricatorMailingListsApplication extends PhabricatorApplication {
     return 'mail';
   }
 
+  public function getFontIcon() {
+    return 'fa-mail-reply-all';
+  }
+
   public function getApplicationGroup() {
     return self::GROUP_ADMIN;
   }

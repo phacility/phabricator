@@ -18,6 +18,10 @@ final class PhabricatorPassphraseApplication extends PhabricatorApplication {
     return 'passphrase';
   }
 
+  public function getFontIcon() {
+    return 'fa-user-secret';
+  }
+
   public function getTitleGlyph() {
     return "\xE2\x97\x88";
   }

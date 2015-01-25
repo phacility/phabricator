@@ -22,6 +22,10 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
     return 'projects';
   }
 
+  public function getFontIcon() {
+    return 'fa-briefcase';
+  }
+
   public function getFlavorText() {
     return pht('Group stuff into big piles.');
   }

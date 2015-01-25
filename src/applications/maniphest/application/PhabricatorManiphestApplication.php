@@ -18,6 +18,10 @@ final class PhabricatorManiphestApplication extends PhabricatorApplication {
     return 'maniphest';
   }
 
+  public function getFontIcon() {
+    return 'fa-anchor';
+  }
+
   public function isPinnedByDefault(PhabricatorUser $viewer) {
     return true;
   }

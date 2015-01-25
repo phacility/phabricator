@@ -28,6 +28,10 @@ final class PhabricatorApplicationsApplication extends PhabricatorApplication {
     return 'application';
   }
 
+  public function getFontIcon() {
+    return 'fa-globe';
+  }
+
   public function getTitleGlyph() {
     return "\xE0\xBC\x84";
   }

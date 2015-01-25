@@ -18,6 +18,10 @@ final class PhabricatorFactApplication extends PhabricatorApplication {
     return 'fact';
   }
 
+  public function getFontIcon() {
+    return 'fa-area-chart';
+  }
+
   public function getApplicationGroup() {
     return self::GROUP_UTILITIES;
   }

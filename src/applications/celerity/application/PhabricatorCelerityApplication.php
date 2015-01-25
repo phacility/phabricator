@@ -14,6 +14,10 @@ final class PhabricatorCelerityApplication extends PhabricatorApplication {
     return true;
   }
 
+  public function getFontIcon() {
+    return 'fa-leaf';
+  }
+
   public function getRoutes() {
     $extensions = CelerityResourceController::getSupportedResourceTypes();
     $extensions = array_keys($extensions);

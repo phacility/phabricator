@@ -18,6 +18,10 @@ final class PhabricatorPholioApplication extends PhabricatorApplication {
     return 'pholio';
   }
 
+  public function getFontIcon() {
+    return 'fa-camera-retro';
+  }
+
   public function getTitleGlyph() {
     return "\xE2\x9D\xA6";
   }

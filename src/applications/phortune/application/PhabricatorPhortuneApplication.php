@@ -18,6 +18,10 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
     return 'phortune';
   }
 
+  public function getFontIcon() {
+    return 'fa-diamond';
+  }
+
   public function getTitleGlyph() {
     return "\xE2\x9C\x98";
   }

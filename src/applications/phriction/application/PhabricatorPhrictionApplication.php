@@ -18,6 +18,10 @@ final class PhabricatorPhrictionApplication extends PhabricatorApplication {
     return 'phriction';
   }
 
+  public function getFontIcon() {
+    return 'fa-book';
+  }
+
   public function isPinnedByDefault(PhabricatorUser $viewer) {
     return true;
   }

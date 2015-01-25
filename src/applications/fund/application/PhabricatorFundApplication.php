@@ -18,6 +18,10 @@ final class PhabricatorFundApplication extends PhabricatorApplication {
     return 'phund';
   }
 
+  public function getFontIcon() {
+    return 'fa-heart';
+  }
+
   public function getTitleGlyph() {
     return "\xE2\x99\xA5";
   }

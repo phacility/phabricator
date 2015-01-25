@@ -18,6 +18,10 @@ final class PhabricatorPhluxApplication extends PhabricatorApplication {
     return 'phlux';
   }
 
+  public function getFontIcon() {
+    return 'fa-copy';
+  }
+
   public function getTitleGlyph() {
     return "\xE2\x98\xBD";
   }

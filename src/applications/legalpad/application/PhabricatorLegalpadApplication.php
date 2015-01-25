@@ -18,6 +18,10 @@ final class PhabricatorLegalpadApplication extends PhabricatorApplication {
     return 'legalpad';
   }
 
+  public function getFontIcon() {
+    return 'fa-gavel';
+  }
+
   public function getTitleGlyph() {
     return "\xC2\xA9";
   }

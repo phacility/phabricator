@@ -18,6 +18,10 @@ final class PhabricatorHarbormasterApplication extends PhabricatorApplication {
     return 'harbormaster';
   }
 
+  public function getFontIcon() {
+    return 'fa-ship';
+  }
+
   public function getTitleGlyph() {
     return "\xE2\x99\xBB";
   }

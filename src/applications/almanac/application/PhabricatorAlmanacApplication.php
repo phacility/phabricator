@@ -18,6 +18,10 @@ final class PhabricatorAlmanacApplication extends PhabricatorApplication {
     return 'almanac';
   }
 
+  public function getFontIcon() {
+    return 'fa-server';
+  }
+
   public function getTitleGlyph() {
     return "\xE2\x98\x82";
   }

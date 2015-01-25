@@ -18,6 +18,10 @@ final class PhabricatorDashboardApplication extends PhabricatorApplication {
     return 'fancyhome';
   }
 
+  public function getFontIcon() {
+    return 'fa-dashboard';
+  }
+
   public function getRoutes() {
     return array(
       '/W(?P<id>\d+)' => 'PhabricatorDashboardPanelViewController',

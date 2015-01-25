@@ -10,6 +10,10 @@ final class PhabricatorRepositoriesApplication extends PhabricatorApplication {
     return 'repositories';
   }
 
+  public function getFontIcon() {
+    return 'fa-hdd-o';
+  }
+
   public function getName() {
     return pht('Repositories');
   }

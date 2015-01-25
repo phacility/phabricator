@@ -22,6 +22,10 @@ final class PhabricatorPhrequentApplication extends PhabricatorApplication {
     return 'phrequent';
   }
 
+  public function getFontIcon() {
+    return 'fa-clock-o';
+  }
+
   public function getApplicationGroup() {
     return self::GROUP_UTILITIES;
   }

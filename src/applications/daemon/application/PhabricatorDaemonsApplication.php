@@ -22,6 +22,10 @@ final class PhabricatorDaemonsApplication extends PhabricatorApplication {
     return 'daemon';
   }
 
+  public function getFontIcon() {
+    return 'fa-pied-piper-alt';
+  }
+
   public function getApplicationGroup() {
     return self::GROUP_ADMIN;
   }

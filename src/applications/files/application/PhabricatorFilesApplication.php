@@ -18,6 +18,10 @@ final class PhabricatorFilesApplication extends PhabricatorApplication {
     return 'files';
   }
 
+  public function getFontIcon() {
+    return 'fa-file';
+  }
+
   public function getTitleGlyph() {
     return "\xE2\x87\xAA";
   }

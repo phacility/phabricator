@@ -18,6 +18,10 @@ final class PhabricatorPhragmentApplication extends PhabricatorApplication {
     return 'phragment';
   }
 
+  public function getFontIcon() {
+    return 'fa-floppy-o';
+  }
+
   public function getTitleGlyph() {
     return "\xE2\x26\xB6";
   }

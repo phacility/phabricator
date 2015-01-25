@@ -14,6 +14,10 @@ final class PhabricatorNotificationsApplication extends PhabricatorApplication {
     return pht('Real-Time Updates and Alerts');
   }
 
+  public function getFontIcon() {
+    return 'fa-bell';
+  }
+
   public function getRoutes() {
     return array(
       '/notification/' => array(

@@ -10,6 +10,10 @@ final class PhabricatorDivinerApplication extends PhabricatorApplication {
     return 'diviner';
   }
 
+  public function getFontIcon() {
+    return 'fa-cubes';
+  }
+
   public function getName() {
     return pht('Diviner');
   }
