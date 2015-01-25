@@ -25,6 +25,8 @@
 JX.install('Scrollbar', {
 
   construct: function(frame) {
+    this._frame = frame;
+
     // Before doing anything, check if the scrollbar control has a measurable
     // width. If it doesn't, we're already in an environment with an aesthetic
     // scrollbar (like Safari on OSX with no mouse connected, or an iPhone)
@@ -60,7 +62,6 @@ JX.install('Scrollbar', {
     var viewport = JX.$N('div', {className: 'jx-scrollbar-viewport'}, content);
     JX.DOM.appendContent(frame, viewport);
 
-    this._frame = frame;
     this._viewport = viewport;
     this._content = content;
 
@@ -132,6 +133,26 @@ JX.install('Scrollbar', {
     _timeout: null,
     _dragOrigin: null,
     _scrollOrigin: null,
+
+
+    /**
+     * Mark this content as the scroll frame.
+     *
+     * This changes the behavior of the @{class:JX.DOM} scroll functions so the
+     * continue to work properly if the main page content is reframed to scroll
+     * independently.
+     */
+    setAsScrollFrame: function() {
+      if (this._viewport) {
+        // If we activated the scrollbar, the viewport and content nodes become
+        // the new scroll and content frames.
+        JX.DOM.setContentFrame(this._viewport, this._content);
+      } else {
+        // Otherwise, the unaltered content frame is both the scroll frame and
+        // content frame.
+        JX.DOM.setContentFrame(this._frame, this._frame);
+      }
+    },
 
 
     /**

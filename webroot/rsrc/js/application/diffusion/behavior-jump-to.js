@@ -8,7 +8,7 @@
 JX.behavior('diffusion-jump-to', function(config) {
 
   setTimeout(function() {
-    window.scrollTo(0, JX.$V(JX.$(config.target)).y - 100);
+    JX.DOM.scrollTo(0, JX.$V(JX.$(config.target)).y - 100);
   }, 0);
 
 });

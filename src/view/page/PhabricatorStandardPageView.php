@@ -344,6 +344,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       'scrollbar',
       array(
         'nodeID' => 'phabricator-standard-page',
+        'isMainContent' => true,
       ));
 
     $main_page = phutil_tag(

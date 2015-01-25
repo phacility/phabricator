@@ -5,5 +5,8 @@
  */
 
 JX.behavior('scrollbar', function(config) {
-  new JX.Scrollbar(JX.$(config.nodeID));
+  var bar = new JX.Scrollbar(JX.$(config.nodeID));
+  if (config.isMainContent) {
+    bar.setAsScrollFrame();
+  }
 });

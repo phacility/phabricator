@@ -204,7 +204,7 @@ JX.install('Workflow', {
         // The `focus()` call may have scrolled the window. Scroll it back to
         // where it was before -- we want to focus the control, but not adjust
         // the scroll position.
-        window.scrollTo(s.x, s.y);
+        JX.DOM.scrollToPosition(s.x, s.y);
 
       } else if (this.getHandler()) {
         this.getHandler()(r);

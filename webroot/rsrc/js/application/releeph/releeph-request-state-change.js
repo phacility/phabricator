@@ -22,7 +22,7 @@ JX.behavior('releeph-request-state-change', function() {
 
     if (keynav_cursor < 0) {
       keynav_cursor = -1;
-      window.scrollTo(0);
+      JX.DOM.scrollToPosition(0, 0);
       keynavMarkup();
       return;
     }
