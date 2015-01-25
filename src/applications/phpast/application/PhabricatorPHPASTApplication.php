@@ -11,11 +11,11 @@ final class PhabricatorPHPASTApplication extends PhabricatorApplication {
   }
 
   public function getIconName() {
-    return 'fa-ambulance';
+    return 'phpast';
   }
 
   public function getFontIcon() {
-    return 'fa-check-circle-o';
+    return 'fa-ambulance';
   }
 
   public function getShortDescription() {
