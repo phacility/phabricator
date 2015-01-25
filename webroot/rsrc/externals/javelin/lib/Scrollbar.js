@@ -238,6 +238,9 @@ JX.install('Scrollbar', {
      */
     _ondrop: function() {
       this._dragOrigin = null;
+
+      // Reset the timer to hide the bar.
+      this._showBar();
     },
 
 
@@ -293,6 +296,12 @@ JX.install('Scrollbar', {
      * Hide the scrollbar.
      */
     _hideBar: function() {
+      if (this._dragOrigin !== null) {
+        // If we're currently dragging the handle, we never want to hide
+        // it.
+        return;
+      }
+
       JX.DOM.alterClass(this._handle, 'jx-scrollbar-visible', false);
       this._clearTimeout();
     },

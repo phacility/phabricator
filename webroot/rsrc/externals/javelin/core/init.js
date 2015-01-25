@@ -132,7 +132,6 @@
     'mousedown',
     'mouseover',
     'mouseout',
-    'mouseup',
     'keyup',
     'keydown',
     'input',
@@ -172,8 +171,8 @@
     JX.enableDispatch(root, document_events[ii]);
   }
 
-  //  In particular, we're interested in capturing window focus/blur here so
-  //  long polls can abort when the window is not focused.
+  // In particular, we're interested in capturing window focus/blur here so
+  // long polls can abort when the window is not focused.
   var window_events = [
     ('onpagehide' in window) ? 'pagehide' : 'unload',
     'resize',
@@ -181,7 +180,12 @@
     'focus',
     'blur',
     'popstate',
-    'hashchange'
+    'hashchange',
+
+    // In Firefox, if the user clicks in the window then drags the cursor
+    // outside of the window and releases the mouse button, we don't get this
+    // event unless we listen for it as a window event.
+    'mouseup'
   ];
 
   if (window.localStorage) {
