@@ -10,7 +10,6 @@ final class PhabricatorFeedStoryDifferential extends PhabricatorFeedStory {
     $data = $this->getStoryData();
 
     $view = $this->newStoryView();
-    $view->setAppIcon('differential-dark');
 
     $line = $this->getLineForData($data);
     $view->setTitle($line);

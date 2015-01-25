@@ -214,11 +214,6 @@ final class CeleritySpriteGenerator {
     return $sheet;
   }
 
-
-  public function buildAppsSheet() {
-    return $this->buildAppsSheetVariant(1);
-  }
-
   public function buildAppsLargeSheet() {
     return $this->buildAppsSheetVariant(2);
   }

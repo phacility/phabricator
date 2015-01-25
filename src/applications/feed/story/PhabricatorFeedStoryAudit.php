@@ -11,7 +11,6 @@ final class PhabricatorFeedStoryAudit extends PhabricatorFeedStory {
     $commit_phid = $this->getPrimaryObjectPHID();
 
     $view = $this->newStoryView();
-    $view->setAppIcon('audit-dark');
 
     $action = $this->getValue('action');
     $verb = PhabricatorAuditActionConstants::getActionPastTenseVerb($action);
