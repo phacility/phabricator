@@ -3,16 +3,14 @@
  */
 
 .phui-crumbs-view {
-  background-color: #ebecee;
-  background-image: none !important;
-  height: 31px;
   overflow: hidden;
   vertical-align: top;
-  border-bottom: 1px solid rgba(205, 207, 211, 1);
+  padding: 0 8px 0 16px;
   /* TODO: Position this over the slider for Differential's file tree view.
      Remove this once that gets sorted out. */
   position: relative;
   -webkit-font-smoothing: antialiased;
+  border-bottom: 1px solid rgba(205, 207, 211, 1);
 }
 
 .phui-crumbs-view,
@@ -38,12 +36,7 @@
 
 .phui-crumb-view {
   float: left;
-  height: 31px;
-  line-height: 31px;
-}
-
-.device-phone .phui-crumb-view {
-  display: none;
+  padding: 8px 0;
 }
 
 .device-phone .phui-crumb-view.phabricator-last-crumb,
@@ -51,14 +44,12 @@
   display: inline-block;
 }
 
-.phui-crumb-icon {
-  display: inline-block;
-  width: 28px;
-  height: 28px;
-  margin: 6px 2px 2px 10px;
-  vertical-align: top;
-  font-size: 20px;
-  text-align: center;
+.device-phone .phui-crumb-has-icon .phui-crumb-name {
+  display: none;
+}
+
+.phui-crumb-has-icon .phui-icon-view {
+  margin: 0 4px;
 }
 
 .device-phone .phui-crumb-icon {
@@ -79,11 +70,11 @@
 
 .device-phone a.phui-crumbs-action {
   padding: 7px;
-  border-left: 1px solid {$hovergrey};
 }
 
-.device-desktop a.phui-crumbs-action:hover {
-  background: rgba(205, 207, 211, .5);
+.device-desktop .phui-crumbs-view a:hover,
+.device-desktop .phui-crumbs-view a:hover .phui-icon-view {
+  color: {$sky};
   text-decoration: none;
 }
 
@@ -101,9 +92,5 @@ a.phui-crumbs-action .phui-icon-view {
 }
 
 .phui-crumb-divider {
-  display: inline-block;
-  width: 9px;
-  height: 31px;
-  vertical-align: top;
-  margin: 0 8px 0 4px;
+  margin: 2px 8px;
 }

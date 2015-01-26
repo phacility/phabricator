@@ -97,11 +97,13 @@ final class PHUICrumbsView extends AphrontView {
       last($this->crumbs)->setIsLastCrumb(true);
     }
 
+    $classes = array();
+    $classes[] = 'phui-crumbs-view';
+
     return phutil_tag(
       'div',
       array(
-        'class' => 'phui-crumbs-view '.
-                   'sprite-gradient gradient-breadcrumbs',
+        'class' => implode(' ', $classes),
       ),
       array(
         $action_view,

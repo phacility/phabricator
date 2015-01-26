@@ -6,11 +6,6 @@ final class CeleritySpriteGenerator {
     $sprites = array();
 
     $sources = array(
-      'arrow-right' => array(
-        'x' => 9,
-        'y' => 31,
-        'css' => '.phui-crumb-divider',
-      ),
       'logo' => array(
         'x' => 96,
         'y' => 26,

@@ -69,12 +69,8 @@ final class PHUICrumbView extends AphrontView {
     $icon = null;
     if ($this->icon) {
       $classes[] = 'phui-crumb-has-icon';
-      $icon = phutil_tag(
-        'span',
-        array(
-          'class' => 'phui-crumb-icon phui-icon-view phui-font-fa '.$this->icon,
-        ),
-        '');
+      $icon = id(new PHUIIconView())
+        ->setIconFont($this->icon);
     }
 
     $name = phutil_tag(
@@ -86,23 +82,23 @@ final class PHUICrumbView extends AphrontView {
 
     $divider = null;
     if (!$this->isLastCrumb) {
-      $divider = phutil_tag(
-        'span',
-        array(
-          'class' => 'sprite-menu phui-crumb-divider',
-        ),
-        '');
+      $divider = id(new PHUIIconView())
+        ->setIconFont('fa-angle-right')
+        ->addClass('phui-crumb-divider')
+        ->addClass('phui-crumb-view');
     } else {
       $classes[] = 'phabricator-last-crumb';
     }
 
-    return javelin_tag(
+    $tag = javelin_tag(
       $this->href ? 'a' : 'span',
         array(
           'sigil' => $this->workflow ? 'workflow' : null,
           'href'  => $this->href,
           'class' => implode(' ', $classes),
         ),
-        array($aural, $icon, $name, $divider));
+        array($aural, $icon, $name));
+
+    return array($tag, $divider);
   }
 }

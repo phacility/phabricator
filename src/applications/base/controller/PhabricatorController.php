@@ -441,7 +441,7 @@ abstract class PhabricatorController extends AphrontController {
 
       $crumbs[] = id(new PHUICrumbView())
         ->setHref($this->getApplicationURI())
-        ->setAural($application->getName())
+        ->setName($application->getName())
         ->setIcon($icon);
     }
 
