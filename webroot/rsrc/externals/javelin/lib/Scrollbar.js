@@ -147,6 +147,29 @@ JX.install('Scrollbar', {
         // If we activated the scrollbar, the viewport and content nodes become
         // the new scroll and content frames.
         JX.DOM.setContentFrame(this._viewport, this._content);
+
+        // If nothing is focused, or the document body is focused, change focus
+        // to the viewport. This makes the arrow keys, spacebar, and page
+        // up/page down keys work immediately after the page loads, without
+        // requiring a click.
+
+        // Focusing the <div /> itself doesn't work on any browser, so we
+        // add a fake, focusable element and focus that instead.
+        var focus = document.activeElement;
+        if (!focus || focus == window.document.body) {
+          var link = JX.$N('a', {href: '#', className: 'jx-scrollbar-link'});
+          JX.DOM.listen(link, 'blur', null, function() {
+            // When the user clicks anything else, remove this.
+            JX.DOM.remove(link);
+          });
+          JX.DOM.listen(link, 'click', null, function(e) {
+            // Don't respond to clicks. Since the link isn't visible, this
+            // most likely means the user hit enter or something like that.
+            e.kill();
+          });
+          JX.DOM.prependContent(this._viewport, link);
+          JX.DOM.focus(link);
+        }
       } else {
         // Otherwise, the unaltered content frame is both the scroll frame and
         // content frame.

@@ -97,6 +97,10 @@
   z-index: 9;
 }
 
+.jx-scrollbar-bar {
+  z-index: 9;
+}
+
 .jx-mask {
   z-index: 10;
 }
@@ -127,10 +131,6 @@ div.jx-typeahead-results {
 
 .jx-hovercard-container {
   z-index: 17;
-}
-
-.jx-scrollbar-bar {
-  z-index: 18;
 }
 
 .pholio-device-lightbox {

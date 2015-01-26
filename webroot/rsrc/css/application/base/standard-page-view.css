@@ -194,3 +194,8 @@ a.handle-disabled {
 .jx-scrollbar-bar .jx-scrollbar-visible {
   opacity: 0.7;
 }
+
+.jx-scrollbar-link {
+  position: absolute;
+  left: -50px;
+}
