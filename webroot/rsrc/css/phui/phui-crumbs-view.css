@@ -55,8 +55,10 @@
   display: inline-block;
   width: 28px;
   height: 28px;
-  margin: 2px 2px 2px 10px;
+  margin: 6px 2px 2px 10px;
   vertical-align: top;
+  font-size: 20px;
+  text-align: center;
 }
 
 .device-phone .phui-crumb-icon {

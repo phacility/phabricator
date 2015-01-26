@@ -72,8 +72,7 @@ final class PHUICrumbView extends AphrontView {
       $icon = phutil_tag(
         'span',
         array(
-          'class' => 'phui-crumb-icon '.
-                     'sprite-apps-large apps-'.$this->icon.'-dark-large',
+          'class' => 'phui-crumb-icon phui-icon-view phui-font-fa '.$this->icon,
         ),
         '');
     }

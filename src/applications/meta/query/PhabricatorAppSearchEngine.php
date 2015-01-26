@@ -191,7 +191,7 @@ final class PhabricatorAppSearchEngine
       $list->addClass('phui-object-item-launcher-list');
 
       foreach ($applications as $application) {
-        $icon = $application->getIconName();
+        $icon = $application->getFontIcon();
         if (!$icon) {
           $icon = 'application';
         }
@@ -203,8 +203,7 @@ final class PhabricatorAppSearchEngine
         $icon_view = javelin_tag(
           'span',
           array(
-            'class' => 'phui-icon-view '.
-                       'sprite-apps-large apps-'.$icon.'-dark-large',
+            'class' => 'phui-icon-view phui-font-fa '.$icon,
             'aural' => false,
           ),
           '');

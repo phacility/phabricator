@@ -434,15 +434,15 @@ abstract class PhabricatorController extends AphrontController {
 
     $application = $this->getCurrentApplication();
     if ($application) {
-      $sprite = $application->getIconName();
-      if (!$sprite) {
-        $sprite = 'application';
+      $icon = $application->getFontIcon();
+      if (!$icon) {
+        $icon = 'fa-puzzle';
       }
 
       $crumbs[] = id(new PHUICrumbView())
         ->setHref($this->getApplicationURI())
         ->setAural($application->getName())
-        ->setIcon($sprite);
+        ->setIcon($icon);
     }
 
     $view = new PHUICrumbsView();

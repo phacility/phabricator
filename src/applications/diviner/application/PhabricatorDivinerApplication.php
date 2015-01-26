@@ -11,7 +11,7 @@ final class PhabricatorDivinerApplication extends PhabricatorApplication {
   }
 
   public function getFontIcon() {
-    return 'fa-sun';
+    return 'fa-sun-o';
   }
 
   public function getName() {

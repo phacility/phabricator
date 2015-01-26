@@ -19,7 +19,7 @@ final class PhabricatorMacroApplication extends PhabricatorApplication {
   }
 
   public function getFontIcon() {
-    return 'fa-smile';
+    return 'fa-smile-o';
   }
 
   public function getTitleGlyph() {

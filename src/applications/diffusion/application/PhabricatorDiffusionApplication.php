@@ -19,7 +19,7 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
   }
 
   public function getFontIcon() {
-    return 'fa-file-code-o';
+    return 'fa-code';
   }
 
   public function isPinnedByDefault(PhabricatorUser $viewer) {
