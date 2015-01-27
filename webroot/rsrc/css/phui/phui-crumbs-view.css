@@ -22,6 +22,11 @@
   text-shadow: 0 1px 1px rgba(255, 255, 255, 0.9);
 }
 
+.device-phone .phui-crumbs-view {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
 .phui-crumbs-view a.phui-crumbs-action-disabled {
   color: {$lightgreytext};
 }
