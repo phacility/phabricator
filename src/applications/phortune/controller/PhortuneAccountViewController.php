@@ -70,6 +70,8 @@ final class PhortuneAccountViewController extends PhortuneController {
     $payment_methods = $this->buildPaymentMethodsSection($account);
     $purchase_history = $this->buildPurchaseHistorySection($account);
     $charge_history = $this->buildChargeHistorySection($account);
+    $subscriptions = $this->buildSubscriptionsSection($account);
+
     $timeline = $this->buildTransactionTimeline(
       $account,
       new PhortuneAccountTransactionQuery());
@@ -86,6 +88,7 @@ final class PhortuneAccountViewController extends PhortuneController {
         $payment_methods,
         $purchase_history,
         $charge_history,
+        $subscriptions,
         $timeline,
       ),
       array(
@@ -253,6 +256,39 @@ final class PhortuneAccountViewController extends PhortuneController {
               ->setIconFont('fa-list'))
           ->setHref($charges_uri)
           ->setText(pht('View All Charges')));
+
+    return id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->appendChild($table);
+  }
+
+  private function buildSubscriptionsSection(PhortuneAccount $account) {
+    $request = $this->getRequest();
+    $viewer = $request->getUser();
+
+    $subscriptions = id(new PhortuneSubscriptionQuery())
+      ->setViewer($viewer)
+      ->withAccountPHIDs(array($account->getPHID()))
+      ->setLimit(10)
+      ->execute();
+
+    $subscriptions_uri = $this->getApplicationURI(
+      $account->getID().'/subscription/');
+
+    $table = id(new PhortuneSubscriptionTableView())
+      ->setUser($viewer)
+      ->setSubscriptions($subscriptions);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Recent Subscriptions'))
+      ->addActionLink(
+        id(new PHUIButtonView())
+          ->setTag('a')
+          ->setIcon(
+            id(new PHUIIconView())
+              ->setIconFont('fa-list'))
+          ->setHref($subscriptions_uri)
+          ->setText(pht('View All Subscriptions')));
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
