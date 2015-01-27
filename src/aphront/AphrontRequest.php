@@ -19,6 +19,7 @@ final class AphrontRequest {
   const TYPE_CONTINUE = '__continue__';
   const TYPE_PREVIEW = '__preview__';
   const TYPE_HISEC = '__hisec__';
+  const TYPE_QUICKSAND = '__quicksand__';
 
   private $host;
   private $path;
@@ -194,8 +195,12 @@ final class AphrontRequest {
     return $this->getExists(self::TYPE_AJAX);
   }
 
-  final public function isJavelinWorkflow() {
+  final public function isWorkflow() {
     return $this->getExists(self::TYPE_WORKFLOW);
+  }
+
+  final public function isQuicksand() {
+    return $this->getExists(self::TYPE_QUICKSAND);
   }
 
   final public function isConduit() {

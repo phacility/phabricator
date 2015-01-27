@@ -311,8 +311,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
   }
 
   protected function getBody() {
-    $console = $this->getConsole();
-
     $user = null;
     $request = $this->getRequest();
     if ($request) {
@@ -367,11 +365,13 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
         $developer_warning,
         $setup_warning,
         $header_chrome,
-        phutil_tag_div('phabricator-standard-page-body', array(
-          ($console ? hsprintf('<darkconsole />') : null),
-          parent::getBody(),
-          $this->renderFooter(),
-        )),
+        phutil_tag(
+          'div',
+          array(
+            'id' => 'phabricator-standard-page-body',
+            'class' => 'phabricator-standard-page-body',
+          ),
+          $this->renderPageBodyContent()),
       ));
 
     $durable_column = null;
@@ -388,6 +388,16 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
         $main_page,
         $durable_column,
       ));
+  }
+
+  private function renderPageBodyContent() {
+    $console = $this->getConsole();
+
+    return array(
+      ($console ? hsprintf('<darkconsole />') : null),
+      parent::getBody(),
+      $this->renderFooter(),
+    );
   }
 
   protected function getTail() {
@@ -529,4 +539,15 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       $foot);
   }
 
+  public function renderForQuicksand() {
+    // TODO: We could run a lighter version of this and skip some work. In
+    // particular, we end up including many redundant resources.
+    $this->willRenderPage();
+    $response = $this->renderPageBodyContent();
+    $response = $this->willSendResponse($response);
+
+    return array(
+      'content' => hsprintf('%s', $response),
+    );
+  }
 }
