@@ -112,6 +112,15 @@ final class PhabricatorEnv {
     // subprocess environments.
     $_ENV['PATH'] = $env_path;
 
+
+    // If an instance identifier is defined, write it into the environment so
+    // it's available to subprocesses.
+    $instance = PhabricatorEnv::getEnvConfig('cluster.instance');
+    if (strlen($instance)) {
+      putenv('PHABRICATOR_INSTANCE='.$instance);
+      $_ENV['PHABRICATOR_INSTANCE'] = $instance;
+    }
+
     PhabricatorEventEngine::initialize();
 
     $translation = PhabricatorEnv::newObjectFromConfig('translation.provider');

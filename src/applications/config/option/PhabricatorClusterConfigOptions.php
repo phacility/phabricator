@@ -52,6 +52,18 @@ final class PhabricatorClusterConfigOptions
             '0.0.0.0/0',
           ),
           pht('Allow Any Host (Insecure!)')),
+      $this->newOption('cluster.instance', 'string', null)
+        ->setLocked(true)
+        ->setSummary(pht('Instance identifier for multi-tenant clusters.'))
+        ->setDescription(
+          pht(
+            'WARNING: This is a very advanced option, and only useful for '.
+            'hosting providers running multi-tenant clusters.'.
+            "\n\n".
+            'If you provide an instance identifier here (normally by '.
+            'injecting it with a `PhabricatorConfigSiteSource`), Phabricator '.
+            'will pass it to subprocesses and commit hooks in the '.
+            '`PHABRICATOR_INSTANCE` environmental variable.')),
     );
   }
 
