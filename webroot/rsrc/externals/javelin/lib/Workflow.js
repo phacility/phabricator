@@ -171,10 +171,12 @@ JX.install('Workflow', {
           'didSyntheticSubmit',
           [],
           JX.Workflow._onsyntheticsubmit);
-        document.body.appendChild(this._root);
+
+        var frame = JX.DOM.getContentFrame();
+        frame.appendChild(this._root);
         var d = JX.Vector.getDim(this._root);
-        var v = JX.Vector.getViewport();
-        var s = JX.Vector.getScroll();
+        var v = JX.Vector.getDim(frame);
+        var s = JX.Vector.getAggregateScrollForNode(frame);
 
         // Normally, we position dialogs 100px from the top of the screen.
         // Use more space if the dialog is large (at least roughly the size
