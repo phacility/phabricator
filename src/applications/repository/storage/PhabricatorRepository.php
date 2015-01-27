@@ -1517,41 +1517,21 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
 
 
   /**
-   * Build a new Conduit client in order to make a service call to this
-   * repository.
+   * Retrieve the sevice URI for the device hosting this repository.
    *
-   * If the repository is hosted locally, this method may return `null`. The
-   * caller should use `ConduitCall` or other local logic to complete the
-   * request.
-   *
-   * By default, we will return a @{class:ConduitClient} for any repository with
-   * a service, even if that service is on the current device.
-   *
-   * We do this because this configuration does not make very much sense in a
-   * production context, but is very common in a test/development context
-   * (where the developer's machine is both the web host and the repository
-   * service). By proxying in development, we get more consistent behavior
-   * between development and production, and don't have a major untested
-   * codepath.
-   *
-   * The `$never_proxy` parameter can be used to prevent this local proxying.
-   * If the flag is passed:
-   *
-   *   - The method will return `null` (implying a local service call)
-   *     if the repository service is hosted on the current device.
-   *   - The method will throw if it would need to return a client.
-   *
-   * This is used to prevent loops in Conduit: the first request will proxy,
-   * even in development, but the second request will be identified as a
-   * cluster request and forced not to proxy.
+   * See @{method:newConduitClient} for a general discussion of interacting
+   * with repository services. This method provides lower-level resolution of
+   * services, returning raw URIs.
    *
    * @param PhabricatorUser Viewing user.
-   * @param bool `true` to throw if a client would be returned.
-   * @return ConduitClient|null Client, or `null` for local repositories.
+   * @param bool `true` to throw if a remote URI would be returned.
+   * @param list<string> List of allowable protocols.
+   * @return string|null URI, or `null` for local repositories.
    */
-  public function newConduitClient(
+  public function getAlmanacServiceURI(
     PhabricatorUser $viewer,
-    $never_proxy = false) {
+    $never_proxy,
+    array $protocols) {
 
     $service_phid = $this->getAlmanacServicePHID();
     if (!$service_phid) {
@@ -1597,6 +1577,8 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
           'this device before sending requests here.'));
     }
 
+    $protocol_map = array_fuse($protocols);
+
     $uris = array();
     foreach ($bindings as $binding) {
       $iface = $binding->getInterface();
@@ -1614,17 +1596,23 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       }
 
       $protocol = $binding->getAlmanacPropertyValue('protocol');
-      if ($protocol === 'http') {
-        $uris[] = 'http://'.$iface->renderDisplayAddress().'/';
-      } else if ($protocol === 'https' || $protocol === null) {
-        $uris[] = 'https://'.$iface->renderDisplayAddress().'/';
-      } else {
-        throw new Exception(
-          pht(
-            'The Almanac service for this repository has a binding to an '.
-            'invalid interface with an unknown protocol ("%s").',
-            $protocol));
+      if ($protocol === null) {
+        $protocol = 'https';
       }
+
+      if (empty($protocol_map[$protocol])) {
+        continue;
+      }
+
+      $uris[] = $protocol.'://'.$iface->renderDisplayAddress().'/';
+    }
+
+    if (!$uris) {
+      throw new Exception(
+        pht(
+          'The Almanac service for this repository is not bound to any '.
+          'interfaces which support the required protocols (%s).',
+          implode(', ', $protocols)));
     }
 
     if ($never_proxy) {
@@ -1635,7 +1623,59 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     }
 
     shuffle($uris);
-    $uri = head($uris);
+    return head($uris);
+  }
+
+
+  /**
+   * Build a new Conduit client in order to make a service call to this
+   * repository.
+   *
+   * If the repository is hosted locally, this method may return `null`. The
+   * caller should use `ConduitCall` or other local logic to complete the
+   * request.
+   *
+   * By default, we will return a @{class:ConduitClient} for any repository with
+   * a service, even if that service is on the current device.
+   *
+   * We do this because this configuration does not make very much sense in a
+   * production context, but is very common in a test/development context
+   * (where the developer's machine is both the web host and the repository
+   * service). By proxying in development, we get more consistent behavior
+   * between development and production, and don't have a major untested
+   * codepath.
+   *
+   * The `$never_proxy` parameter can be used to prevent this local proxying.
+   * If the flag is passed:
+   *
+   *   - The method will return `null` (implying a local service call)
+   *     if the repository service is hosted on the current device.
+   *   - The method will throw if it would need to return a client.
+   *
+   * This is used to prevent loops in Conduit: the first request will proxy,
+   * even in development, but the second request will be identified as a
+   * cluster request and forced not to proxy.
+   *
+   * For lower-level service resolution, see @{method:getAlmanacServiceURI}.
+   *
+   * @param PhabricatorUser Viewing user.
+   * @param bool `true` to throw if a client would be returned.
+   * @return ConduitClient|null Client, or `null` for local repositories.
+   */
+  public function newConduitClient(
+    PhabricatorUser $viewer,
+    $never_proxy = false) {
+
+    $uri = $this->getAlmanacServiceURI(
+      $viewer,
+      $never_proxy,
+      array(
+        'http',
+        'https',
+      ));
+    if ($uri === null) {
+      return null;
+    }
 
     $domain = id(new PhutilURI(PhabricatorEnv::getURI('/')))->getDomain();
 
