@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => '30ec4610',
+    'core.pkg.css' => 'f020a5d6',
     'core.pkg.js' => '55716d41',
     'darkconsole.pkg.js' => '8ab24e01',
     'differential.pkg.css' => '8af45893',
@@ -39,7 +39,7 @@ return array(
     'rsrc/css/application/base/main-menu-view.css' => '7bb9c588',
     'rsrc/css/application/base/notification-menu.css' => '6aa0a74b',
     'rsrc/css/application/base/phabricator-application-launch-view.css' => '16ca323f',
-    'rsrc/css/application/base/standard-page-view.css' => '661ae3e3',
+    'rsrc/css/application/base/standard-page-view.css' => '8db344ee',
     'rsrc/css/application/chatlog/chatlog.css' => '852140ff',
     'rsrc/css/application/config/config-options.css' => '7fedf08b',
     'rsrc/css/application/config/config-template.css' => '25d446d6',
@@ -342,6 +342,7 @@ return array(
     'rsrc/js/application/aphlict/behavior-aphlict-status.js' => 'ea681761',
     'rsrc/js/application/auth/behavior-persona-login.js' => '9414ff18',
     'rsrc/js/application/config/behavior-reorder-fields.js' => '14a827de',
+    'rsrc/js/application/conpherence/behavior-durable-column.js' => 'acad7376',
     'rsrc/js/application/conpherence/behavior-menu.js' => 'f0a41b9f',
     'rsrc/js/application/conpherence/behavior-pontificate.js' => '2f6efe18',
     'rsrc/js/application/conpherence/behavior-widget-pane.js' => '40b1ff90',
@@ -574,6 +575,7 @@ return array(
     'javelin-behavior-diffusion-locate-file' => '6d3e1947',
     'javelin-behavior-diffusion-pull-lastmodified' => '2b228192',
     'javelin-behavior-doorkeeper-tag' => 'e5822781',
+    'javelin-behavior-durable-column' => 'acad7376',
     'javelin-behavior-error-log' => '6882e80a',
     'javelin-behavior-fancy-datepicker' => 'c51ae228',
     'javelin-behavior-global-drag-and-drop' => '07f199d8',
@@ -731,7 +733,7 @@ return array(
     'phabricator-side-menu-view-css' => '7e8c6341',
     'phabricator-slowvote-css' => '266df6a1',
     'phabricator-source-code-view-css' => '7d346aa4',
-    'phabricator-standard-page-view' => '661ae3e3',
+    'phabricator-standard-page-view' => '8db344ee',
     'phabricator-textareautils' => '5c93c52c',
     'phabricator-title' => '5c1c758c',
     'phabricator-tooltip' => '1d298e3a',
@@ -1600,6 +1602,13 @@ return array(
       'javelin-dom',
       'javelin-util',
       'phabricator-prefab',
+    ),
+    'acad7376' => array(
+      'javelin-behavior',
+      'javelin-dom',
+      'javelin-stratcom',
+      'javelin-scrollbar',
+      'phabricator-keyboard-shortcut',
     ),
     'b07b009f' => array(
       'javelin-behavior',

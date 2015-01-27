@@ -16,6 +16,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
   private $pageObjects = array();
   private $applicationMenu;
   private $showFooter = true;
+  private $showDurableColumn = true;
 
   public function setShowFooter($show_footer) {
     $this->showFooter = $show_footer;
@@ -71,6 +72,15 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     foreach ($objs as $obj) {
       $this->pageObjects[] = $obj;
     }
+  }
+
+  public function setShowDurableColumn($show) {
+    $this->showDurableColumn = $show;
+    return $this;
+  }
+
+  public function getShowDurableColumn() {
+    return $this->showDurableColumn;
   }
 
   public function getTitle() {
@@ -364,6 +374,11 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
         )),
       ));
 
+    $durable_column = null;
+    if ($this->getShowDurableColumn()) {
+      $durable_column = new PHUIDurableColumn();
+    }
+
     return phutil_tag(
       'div',
       array(
@@ -371,6 +386,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       ),
       array(
         $main_page,
+        $durable_column,
       ));
   }
 
