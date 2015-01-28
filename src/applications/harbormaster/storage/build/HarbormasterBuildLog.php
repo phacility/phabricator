@@ -123,7 +123,7 @@ final class HarbormasterBuildLog extends HarbormasterDAO
         'INSERT INTO harbormaster_buildlogchunk '.
         '(logID, encoding, size, chunk) '.
         'VALUES '.
-        '(%d, %s, %d, %s)',
+        '(%d, %s, %d, %B)',
         $this->getID(),
         self::ENCODING_TEXT,
         strlen($content),
