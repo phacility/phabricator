@@ -26,7 +26,17 @@ $bin = $root.'/bin/ssh-exec';
 foreach ($keys as $ssh_key) {
   $user = $ssh_key->getObject()->getUsername();
 
-  $cmd = csprintf('%s --phabricator-ssh-user %s', $bin, $user);
+  $key_argv = array();
+  $key_argv[] = '--phabricator-ssh-user';
+  $key_argv[] = $user;
+
+  $cmd = csprintf('%s %Ls', $bin, $key_argv);
+
+  $instance = PhabricatorEnv::getEnvConfig('cluster.instance');
+  if (strlen($instance)) {
+    $cmd = csprintf('PHABRICATOR_INSTANCE=%s %C', $instance, $cmd);
+  }
+
   // This is additional escaping for the SSH 'command="..."' string.
   $cmd = addcslashes($cmd, '"\\');
 
