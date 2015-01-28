@@ -30,10 +30,9 @@ final class HeraldRuleEditHistoryController extends HeraldController {
       ->setHandles($handles)
       ->setUser($this->getRequest()->getUser());
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('Edit History'));
+    $panel = new PHUIObjectBoxView();
+    $panel->setHeaderText(pht('Edit History'));
     $panel->appendChild($list_view);
-    $panel->setNoBackground();
 
     $crumbs = $this
       ->buildApplicationCrumbs($can_create = false)

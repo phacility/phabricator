@@ -32,6 +32,7 @@ abstract class ConpherenceController extends PhabricatorController {
 
   protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
+    $crumbs->setBorder(true);
 
     $crumbs
       ->addAction(

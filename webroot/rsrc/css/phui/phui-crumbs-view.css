@@ -10,7 +10,6 @@
      Remove this once that gets sorted out. */
   position: relative;
   -webkit-font-smoothing: antialiased;
-  border-bottom: 1px solid rgba(205, 207, 211, 1);
 }
 
 .phui-crumbs-view,
@@ -98,4 +97,16 @@ a.phui-crumbs-action .phui-icon-view {
 
 .phui-crumb-divider {
   margin: 2px 8px;
+}
+
+.phui-crumbs-view.phui-crumbs-border {
+  border-bottom: 1px solid rgba(205, 207, 211, 1);
+}
+
+.phui-crumbs-view + .phui-object-box {
+  margin-top: 0;
+}
+
+body .phui-crumbs-view + .phui-object-item-list-view {
+  padding-top: 0;
 }

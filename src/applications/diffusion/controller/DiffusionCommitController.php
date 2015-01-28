@@ -69,11 +69,6 @@ final class DiffusionCommitController extends DiffusionController {
         ));
     }
 
-
-    $top_anchor = id(new PhabricatorAnchorView())
-      ->setAnchorName('top')
-      ->setNavigationMarker(true);
-
     $audit_requests = $commit->getAudits();
     $this->auditAuthorityPHIDs =
       PhabricatorAuditCommentEditor::loadAuditPHIDsForUser($user);
@@ -93,7 +88,6 @@ final class DiffusionCommitController extends DiffusionController {
         "didn't affect the tracked subdirectory ('%s'), so no ".
         "information is available.", $subpath));
       $content[] = $error_panel;
-      $content[] = $top_anchor;
     } else {
       $engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine();
       $engine->setConfig('viewer', $user);
@@ -151,7 +145,6 @@ final class DiffusionCommitController extends DiffusionController {
             'class' => 'diffusion-commit-message phabricator-remarkup',
           ),
           $message));
-      $content[] = $top_anchor;
 
       $object_box = id(new PHUIObjectBoxView())
         ->setHeader($headsup_view)
@@ -381,7 +374,6 @@ final class DiffusionCommitController extends DiffusionController {
 
     if ($changesets && $show_filetree) {
       $nav = id(new DifferentialChangesetFileTreeSideNavBuilder())
-        ->setAnchorName('top')
         ->setTitle($short_name)
         ->setBaseURI(new PhutilURI('/'.$commit_id))
         ->build($changesets)

@@ -75,6 +75,7 @@ final class PhamePostListController extends PhameController {
       ->appendChild($post_list);
 
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setBorder(true);
     $crumbs->addTextCrumb($title, $this->getApplicationURI());
 
     $nav->appendChild(

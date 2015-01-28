@@ -4,6 +4,7 @@ final class PHUICrumbsView extends AphrontView {
 
   private $crumbs = array();
   private $actions = array();
+  private $border;
 
   protected function canAppendChild() {
     return false;
@@ -32,6 +33,11 @@ final class PHUICrumbsView extends AphrontView {
 
   public function addAction(PHUIListItemView $action) {
     $this->actions[] = $action;
+    return $this;
+  }
+
+  public function setBorder($border) {
+    $this->border = $border;
     return $this;
   }
 
@@ -99,6 +105,9 @@ final class PHUICrumbsView extends AphrontView {
 
     $classes = array();
     $classes[] = 'phui-crumbs-view';
+    if ($this->border) {
+      $classes[] = 'phui-crumbs-border';
+    }
 
     return phutil_tag(
       'div',

@@ -32,11 +32,9 @@ final class PhabricatorPeopleLdapController
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Search')));
 
-    $panel = id(new AphrontPanelView())
-      ->setHeader(pht('Import LDAP Users'))
-      ->setNoBackground()
-      ->setWidth(AphrontPanelView::WIDTH_FORM)
-      ->appendChild($form);
+    $panel = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Import LDAP Users'))
+      ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(

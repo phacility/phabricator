@@ -33,6 +33,7 @@ final class PhabricatorConfigHistoryController
     $title = pht('Settings History');
 
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setBorder(true);
     $crumbs->addTextCrumb('Config', $this->getApplicationURI());
     $crumbs->addTextCrumb($title, '/config/history/');
 
