@@ -318,9 +318,18 @@ EOTEXT
         'metamta.maniphest.default-public-author',
         'string',
         null)
-        ->setSummary(pht('Username anonymous bugs are filed under.'))
+        ->setLocked(true)
+        ->setLockedMessage(pht(
+          'This configuration is deprecated. See description for details.'))
+        ->setSummary(pht(
+          'DEPRECATED - Username anonymous bugs are filed under.'))
         ->setDescription(
           pht(
+            'This config has been deprecated in favor of [[ '.
+            '/applications/view/PhabricatorManiphestApplication/ | '.
+            'application settings ]], which allow for multiple email '.
+            'addresses each with its own default author, and other '.
+            'functionality.'."\n\n".
             'If you enable `metamta.maniphest.public-create-email` and create '.
             'an email address like "bugs@phabricator.example.com", it will '.
             'default to rejecting mail which doesn\'t come from a known user. '.

@@ -10,6 +10,8 @@ final class PhabricatorMetaMTAApplicationEmail
 
   private $application = self::ATTACHABLE;
 
+  const CONFIG_DEFAULT_AUTHOR = 'config:default:author';
+
   protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
@@ -48,6 +50,15 @@ final class PhabricatorMetaMTAApplicationEmail
 
   public function getApplication() {
     return self::assertAttached($this->application);
+  }
+
+  public function setConfigValue($key, $value) {
+    $this->configData[$key] = $value;
+    return $this;
+  }
+
+  public function getConfigValue($key, $default = null) {
+    return idx($this->configData, $key, $default);
   }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */

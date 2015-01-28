@@ -2,8 +2,21 @@
 
 abstract class PhabricatorMailReceiver {
 
+  private $applicationEmail;
+
+  public function setApplicationEmail(
+    PhabricatorMetaMTAApplicationEmail $email) {
+    $this->applicationEmail = $email;
+    return $this;
+  }
+
+  public function getApplicationEmail() {
+    return $this->applicationEmail;
+  }
+
   abstract public function isEnabled();
   abstract public function canAcceptMail(PhabricatorMetaMTAReceivedMail $mail);
+
 
   abstract protected function processReceivedMail(
     PhabricatorMetaMTAReceivedMail $mail,
@@ -126,6 +139,27 @@ abstract class PhabricatorMailReceiver {
         'To interact with Phabricator, add this address ("%s") to your '.
         'account.',
         $raw_from);
+    }
+
+    if ($this->getApplicationEmail()) {
+      $application_email = $this->getApplicationEmail();
+      $default_user_phid = $application_email->getConfigValue(
+        PhabricatorMetaMTAApplicationEmail::CONFIG_DEFAULT_AUTHOR);
+
+      if ($default_user_phid) {
+        $user = id(new PhabricatorUser())->loadOneWhere(
+          'phid = %s',
+          $default_user_phid);
+        if ($user) {
+          return $user;
+        }
+      }
+
+      $reasons[] = pht(
+        "Phabricator is misconfigured, the application email ".
+        "'%s' is set to user '%s' but that user does not exist.",
+        $application_email->getAddress(),
+        $default_user_phid);
     }
 
     $reasons = implode("\n\n", $reasons);
