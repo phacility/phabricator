@@ -73,7 +73,7 @@ abstract class PhameController extends PhabricatorController {
         ->setTitle($title)
         ->setImage($blogger_image)
         ->setImageHref($blogger_uri)
-        ->setAppIcon('phame-dark')
+        ->setAppIcon('fa-star')
         ->setUser($viewer)
         ->setPontification($phame_post, $phame_title);
 

@@ -18,6 +18,10 @@ final class PhabricatorPonderApplication extends PhabricatorApplication {
     return 'ponder';
   }
 
+  public function getFontIcon() {
+    return 'fa-university';
+  }
+
   public function getFactObjectsForAnalysis() {
     return array(
       new PonderQuestion(),

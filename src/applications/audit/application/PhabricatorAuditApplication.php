@@ -10,6 +10,10 @@ final class PhabricatorAuditApplication extends PhabricatorApplication {
     return 'audit';
   }
 
+  public function getFontIcon() {
+    return 'fa-check-circle-o';
+  }
+
   public function getName() {
     return pht('Audit');
   }

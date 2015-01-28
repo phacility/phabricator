@@ -16,6 +16,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
   private $pageObjects = array();
   private $applicationMenu;
   private $showFooter = true;
+  private $showDurableColumn = true;
 
   public function setShowFooter($show_footer) {
     $this->showFooter = $show_footer;
@@ -71,6 +72,15 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     foreach ($objs as $obj) {
       $this->pageObjects[] = $obj;
     }
+  }
+
+  public function setShowDurableColumn($show) {
+    $this->showDurableColumn = $show;
+    return $this;
+  }
+
+  public function getShowDurableColumn() {
+    return $this->showDurableColumn;
   }
 
   public function getTitle() {
@@ -301,8 +311,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
   }
 
   protected function getBody() {
-    $console = $this->getConsole();
-
     $user = null;
     $request = $this->getRequest();
     if ($request) {
@@ -340,22 +348,56 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       }
     }
 
-    return phutil_tag(
+    Javelin::initBehavior(
+      'scrollbar',
+      array(
+        'nodeID' => 'phabricator-standard-page',
+        'isMainContent' => true,
+      ));
+
+    $main_page = phutil_tag(
       'div',
       array(
-        'id' => 'base-page',
+        'id' => 'phabricator-standard-page',
         'class' => 'phabricator-standard-page',
       ),
       array(
         $developer_warning,
         $setup_warning,
         $header_chrome,
-        phutil_tag_div('phabricator-standard-page-body', array(
-          ($console ? hsprintf('<darkconsole />') : null),
-          parent::getBody(),
-          $this->renderFooter(),
-        )),
+        phutil_tag(
+          'div',
+          array(
+            'id' => 'phabricator-standard-page-body',
+            'class' => 'phabricator-standard-page-body',
+          ),
+          $this->renderPageBodyContent()),
       ));
+
+    $durable_column = null;
+    if ($this->getShowDurableColumn()) {
+      $durable_column = new PHUIDurableColumn();
+    }
+
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'main-page-frame',
+      ),
+      array(
+        $main_page,
+        $durable_column,
+      ));
+  }
+
+  private function renderPageBodyContent() {
+    $console = $this->getConsole();
+
+    return array(
+      ($console ? hsprintf('<darkconsole />') : null),
+      parent::getBody(),
+      $this->renderFooter(),
+    );
   }
 
   protected function getTail() {
@@ -497,4 +539,15 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       $foot);
   }
 
+  public function renderForQuicksand() {
+    // TODO: We could run a lighter version of this and skip some work. In
+    // particular, we end up including many redundant resources.
+    $this->willRenderPage();
+    $response = $this->renderPageBodyContent();
+    $response = $this->willSendResponse($response);
+
+    return array(
+      'content' => hsprintf('%s', $response),
+    );
+  }
 }

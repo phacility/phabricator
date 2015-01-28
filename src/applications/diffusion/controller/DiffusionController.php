@@ -96,7 +96,7 @@ abstract class DiffusionController extends PhabricatorController {
       }
     }
 
-    $crumb = id(new PhabricatorCrumbView())
+    $crumb = id(new PHUICrumbView())
       ->setName($repository_name);
     if (!$spec['view'] && !$spec['commit'] &&
         !$spec['tags'] && !$spec['branches']) {
@@ -114,7 +114,7 @@ abstract class DiffusionController extends PhabricatorController {
     $stable_commit = $drequest->getStableCommit();
 
     if ($spec['tags']) {
-      $crumb = new PhabricatorCrumbView();
+      $crumb = new PHUICrumbView();
       if ($spec['commit']) {
         $crumb->setName(
           pht('Tags for %s', 'r'.$callsign.$stable_commit));
@@ -131,21 +131,21 @@ abstract class DiffusionController extends PhabricatorController {
     }
 
     if ($spec['branches']) {
-      $crumb = id(new PhabricatorCrumbView())
+      $crumb = id(new PHUICrumbView())
         ->setName(pht('Branches'));
       $crumb_list[] = $crumb;
       return $crumb_list;
     }
 
     if ($spec['commit']) {
-      $crumb = id(new PhabricatorCrumbView())
+      $crumb = id(new PHUICrumbView())
         ->setName("r{$callsign}{$stable_commit}")
         ->setHref("r{$callsign}{$stable_commit}");
       $crumb_list[] = $crumb;
       return $crumb_list;
     }
 
-    $crumb = new PhabricatorCrumbView();
+    $crumb = new PHUICrumbView();
     $view = $spec['view'];
 
     switch ($view) {
@@ -163,7 +163,7 @@ abstract class DiffusionController extends PhabricatorController {
         break;
     }
 
-    $crumb = id(new PhabricatorCrumbView())
+    $crumb = id(new PHUICrumbView())
       ->setName($view_name);
 
     $crumb_list[] = $crumb;

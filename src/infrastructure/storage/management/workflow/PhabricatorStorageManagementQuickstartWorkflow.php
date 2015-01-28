@@ -87,9 +87,9 @@ final class PhabricatorStorageManagementQuickstartWorkflow
     // possible NOT NULL at the end of the line.
     $old = $dump;
     $dump = preg_replace(
-      '/`corpus` longtext CHARACTER SET .*? COLLATE \S+,/mi',
+      '/`corpus` longtext CHARACTER SET .*? COLLATE [^\s,]+/mi',
       '`corpus` longtext CHARACTER SET {$CHARSET_FULLTEXT} '.
-        'COLLATE {$COLLATE_FULLTEXT},',
+        'COLLATE {$COLLATE_FULLTEXT}',
       $dump);
     if ($dump == $old) {
       // If we didn't make any changes, yell about it. We'll produce an invalid

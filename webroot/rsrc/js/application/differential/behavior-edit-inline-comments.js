@@ -13,7 +13,6 @@ JX.behavior('differential-edit-inline-comments', function(config) {
   var selecting = false;
   var reticle = JX.$N('div', {className: 'differential-reticle'});
   JX.DOM.hide(reticle);
-  document.body.appendChild(reticle);
 
   var origin = null;
   var target = null;
@@ -23,6 +22,8 @@ JX.behavior('differential-edit-inline-comments', function(config) {
   var editor = null;
 
   function updateReticle() {
+    JX.DOM.getContentFrame().appendChild(reticle);
+
     var top = origin;
     var bot = target;
     if (JX.$V(top).y > JX.$V(bot).y) {
@@ -32,12 +33,17 @@ JX.behavior('differential-edit-inline-comments', function(config) {
     }
     var code = target.nextSibling;
 
-    var pos = JX.$V(top).add(1 + JX.Vector.getDim(target).x, 0);
+    var pos = JX.$V(top)
+      .add(JX.Vector.getAggregateScrollForNode(top))
+      .add(1 + JX.Vector.getDim(target).x, 0);
     var dim = JX.Vector.getDim(code).add(-4, 0);
     if (isOnRight(target)) {
       dim.x += JX.Vector.getDim(code.nextSibling).x;
     }
-    dim.y = (JX.$V(bot).y - pos.y) + JX.Vector.getDim(bot).y;
+
+    var bpos = JX.$V(bot)
+      .add(JX.Vector.getAggregateScrollForNode(bot));
+    dim.y = (bpos.y - pos.y) + JX.Vector.getDim(bot).y;
 
     pos.setPos(reticle);
     dim.setDim(reticle);
@@ -217,7 +223,7 @@ JX.behavior('differential-edit-inline-comments', function(config) {
         // Furthermore, deleting a comment in the preview does not automatically
         // delete other occurrences of the same comment, so do that manually.
         var nodes = JX.DOM.scry(
-          document.body,
+          JX.DOM.getContentFrame(),
           'div',
           'differential-inline-comment');
         for (var i = 0; i < nodes.length; ++i) {

@@ -18,6 +18,10 @@ final class PhabricatorFlagsApplication extends PhabricatorApplication {
     return 'flags';
   }
 
+  public function getFontIcon() {
+    return 'fa-flag';
+  }
+
   public function getEventListeners() {
     return array(
       new PhabricatorFlagsUIEventListener(),

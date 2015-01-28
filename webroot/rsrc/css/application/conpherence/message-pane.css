@@ -32,6 +32,11 @@
   margin: 16px 0px 16px 0px;
 }
 
+.conpherence-layout .phui-crumbs-view {
+  padding: 0 0 0 8px;
+  background: #EBECEE;
+}
+
 .conpherence-show-older-messages {
   display: block;
   background: #e0e3ec;

@@ -10,6 +10,10 @@ final class PhabricatorMetaMTAApplication extends PhabricatorApplication {
     return 'metamta';
   }
 
+  public function getFontIcon() {
+    return 'fa-send';
+  }
+
   public function getShortDescription() {
     return pht('Delivers Mail');
   }

@@ -80,7 +80,7 @@ abstract class PhrictionController extends PhabricatorController {
 
     $breadcrumbs = array();
     foreach ($ancestor_handles as $ancestor_handle) {
-      $breadcrumbs[] = id(new PhabricatorCrumbView())
+      $breadcrumbs[] = id(new PHUICrumbView())
         ->setName($ancestor_handle->getName())
         ->setHref($ancestor_handle->getUri());
     }

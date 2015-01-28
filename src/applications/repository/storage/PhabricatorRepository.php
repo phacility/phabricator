@@ -1516,6 +1516,220 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
 
+  /**
+   * Retrieve the sevice URI for the device hosting this repository.
+   *
+   * See @{method:newConduitClient} for a general discussion of interacting
+   * with repository services. This method provides lower-level resolution of
+   * services, returning raw URIs.
+   *
+   * @param PhabricatorUser Viewing user.
+   * @param bool `true` to throw if a remote URI would be returned.
+   * @param list<string> List of allowable protocols.
+   * @return string|null URI, or `null` for local repositories.
+   */
+  public function getAlmanacServiceURI(
+    PhabricatorUser $viewer,
+    $never_proxy,
+    array $protocols) {
+
+    $service_phid = $this->getAlmanacServicePHID();
+    if (!$service_phid) {
+      // No service, so this is a local repository.
+      return null;
+    }
+
+    $service = id(new AlmanacServiceQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withPHIDs(array($service_phid))
+      ->needBindings(true)
+      ->executeOne();
+    if (!$service) {
+      throw new Exception(
+        pht(
+          'The Alamnac service for this repository is invalid or could not '.
+          'be loaded.'));
+    }
+
+    $service_type = $service->getServiceType();
+    if (!($service_type instanceof AlmanacClusterRepositoryServiceType)) {
+      throw new Exception(
+        pht(
+          'The Alamnac service for this repository does not have the correct '.
+          'service type.'));
+    }
+
+    $bindings = $service->getBindings();
+    if (!$bindings) {
+      throw new Exception(
+        pht(
+          'The Alamanc service for this repository is not bound to any '.
+          'interfaces.'));
+    }
+
+    $local_device = AlmanacKeys::getDeviceID();
+
+    if ($never_proxy && !$local_device) {
+      throw new Exception(
+        pht(
+          'Unable to handle proxied service request. This device is not '.
+          'registered, so it can not identify local services. Register '.
+          'this device before sending requests here.'));
+    }
+
+    $protocol_map = array_fuse($protocols);
+
+    $uris = array();
+    foreach ($bindings as $binding) {
+      $iface = $binding->getInterface();
+
+      // If we're never proxying this and it's locally satisfiable, return
+      // `null` to tell the caller to handle it locally. If we're allowed to
+      // proxy, we skip this check and may proxy the request to ourselves.
+      // (That proxied request will end up here with proxying forbidden,
+      // return `null`, and then the request will actually run.)
+
+      if ($local_device && $never_proxy) {
+        if ($iface->getDevice()->getName() == $local_device) {
+          return null;
+        }
+      }
+
+      $protocol = $binding->getAlmanacPropertyValue('protocol');
+      if ($protocol === null) {
+        $protocol = 'https';
+      }
+
+      if (empty($protocol_map[$protocol])) {
+        continue;
+      }
+
+      $uris[] = $protocol.'://'.$iface->renderDisplayAddress().'/';
+    }
+
+    if (!$uris) {
+      throw new Exception(
+        pht(
+          'The Almanac service for this repository is not bound to any '.
+          'interfaces which support the required protocols (%s).',
+          implode(', ', $protocols)));
+    }
+
+    if ($never_proxy) {
+      throw new Exception(
+        pht(
+          'Refusing to proxy a repository request from a cluster host. '.
+          'Cluster hosts must correctly route their intracluster requests.'));
+    }
+
+    shuffle($uris);
+    return head($uris);
+  }
+
+
+  /**
+   * Build a new Conduit client in order to make a service call to this
+   * repository.
+   *
+   * If the repository is hosted locally, this method may return `null`. The
+   * caller should use `ConduitCall` or other local logic to complete the
+   * request.
+   *
+   * By default, we will return a @{class:ConduitClient} for any repository with
+   * a service, even if that service is on the current device.
+   *
+   * We do this because this configuration does not make very much sense in a
+   * production context, but is very common in a test/development context
+   * (where the developer's machine is both the web host and the repository
+   * service). By proxying in development, we get more consistent behavior
+   * between development and production, and don't have a major untested
+   * codepath.
+   *
+   * The `$never_proxy` parameter can be used to prevent this local proxying.
+   * If the flag is passed:
+   *
+   *   - The method will return `null` (implying a local service call)
+   *     if the repository service is hosted on the current device.
+   *   - The method will throw if it would need to return a client.
+   *
+   * This is used to prevent loops in Conduit: the first request will proxy,
+   * even in development, but the second request will be identified as a
+   * cluster request and forced not to proxy.
+   *
+   * For lower-level service resolution, see @{method:getAlmanacServiceURI}.
+   *
+   * @param PhabricatorUser Viewing user.
+   * @param bool `true` to throw if a client would be returned.
+   * @return ConduitClient|null Client, or `null` for local repositories.
+   */
+  public function newConduitClient(
+    PhabricatorUser $viewer,
+    $never_proxy = false) {
+
+    $uri = $this->getAlmanacServiceURI(
+      $viewer,
+      $never_proxy,
+      array(
+        'http',
+        'https',
+      ));
+    if ($uri === null) {
+      return null;
+    }
+
+    $domain = id(new PhutilURI(PhabricatorEnv::getURI('/')))->getDomain();
+
+    $client = id(new ConduitClient($uri))
+      ->setHost($domain);
+
+    if ($viewer->isOmnipotent()) {
+      // If the caller is the omnipotent user (normally, a daemon), we will
+      // sign the request with this host's asymmetric keypair.
+
+      $public_path = AlmanacKeys::getKeyPath('device.pub');
+      try {
+        $public_key = Filesystem::readFile($public_path);
+      } catch (Exception $ex) {
+        throw new PhutilAggregateException(
+          pht(
+            'Unable to read device public key while attempting to make '.
+            'authenticated method call within the Phabricator cluster. '.
+            'Use `bin/almanac register` to register keys for this device. '.
+            'Exception: %s',
+            $ex->getMessage()),
+          array($ex));
+      }
+
+      $private_path = AlmanacKeys::getKeyPath('device.key');
+      try {
+        $private_key = Filesystem::readFile($private_path);
+        $private_key = new PhutilOpaqueEnvelope($private_key);
+      } catch (Exception $ex) {
+        throw new PhutilAggregateException(
+          pht(
+            'Unable to read device private key while attempting to make '.
+            'authenticated method call within the Phabricator cluster. '.
+            'Use `bin/almanac register` to register keys for this device. '.
+            'Exception: %s',
+            $ex->getMessage()),
+          array($ex));
+      }
+
+      $client->setSigningKeys($public_key, $private_key);
+    } else {
+      // If the caller is a normal user, we generate or retrieve a cluster
+      // API token.
+
+      $token = PhabricatorConduitToken::loadClusterTokenForUser($viewer);
+      if ($token) {
+        $client->setConduitToken($token->getToken());
+      }
+    }
+
+    return $client;
+  }
+
+
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 
 

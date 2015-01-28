@@ -22,8 +22,8 @@ final class PhabricatorTokenGivenFeedStory
 
   public function renderView() {
     $view = $this->newStoryView();
-    $view->setAppIcon('token-dark');
     $author_phid = $this->getValue('authorPHID');
+    $view->setAppIcon('fa-trophy');
 
     $href = $this->getHandle($this->getPrimaryObjectPHID())->getURI();
     $view->setHref($href);

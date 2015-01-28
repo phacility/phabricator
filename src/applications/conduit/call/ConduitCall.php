@@ -43,6 +43,10 @@ final class ConduitCall {
     $this->request = new ConduitAPIRequest($params);
   }
 
+  public function getAPIRequest() {
+    return $this->request;
+  }
+
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
     return $this;

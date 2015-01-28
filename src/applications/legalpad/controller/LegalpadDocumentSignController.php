@@ -276,6 +276,7 @@ final class LegalpadDocumentSignController extends LegalpadController {
     }
 
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setBorder(true);
     $crumbs->addTextCrumb($document->getMonogram());
 
     return $this->buildApplicationPage(

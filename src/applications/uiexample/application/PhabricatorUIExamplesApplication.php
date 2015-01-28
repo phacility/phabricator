@@ -18,6 +18,10 @@ final class PhabricatorUIExamplesApplication extends PhabricatorApplication {
     return 'uiexamples';
   }
 
+  public function getFontIcon() {
+    return 'fa-magnet';
+  }
+
   public function getTitleGlyph() {
     return "\xE2\x8F\x9A";
   }

@@ -161,7 +161,7 @@ final class PhabricatorRepositoryPullEngine
     $this->log('%s', pht('Installing commit hook to "%s"...', $path));
 
     $repository = $this->getRepository();
-    $callsign = $repository->getCallsign();
+    $identifier = $this->getHookContextIdentifier($repository);
 
     $root = dirname(phutil_get_library_root('phabricator'));
     $bin = $root.'/bin/commit-hook';
@@ -171,7 +171,7 @@ final class PhabricatorRepositoryPullEngine
       'exec %s -f %s -- %s "$@"',
       $full_php_path,
       $bin,
-      $callsign);
+      $identifier);
 
     $hook = "#!/bin/sh\nexport TERM=dumb\n{$cmd}\n";
 
@@ -188,6 +188,17 @@ final class PhabricatorRepositoryPullEngine
 
     Filesystem::createDirectory($path, 0755);
     Filesystem::writeFile($path.'/README', $readme);
+  }
+
+  private function getHookContextIdentifier(PhabricatorRepository $repository) {
+    $identifier = $repository->getCallsign();
+
+    $instance = PhabricatorEnv::getEnvConfig('cluster.instance');
+    if (strlen($instance)) {
+      $identifier = "{$identifier}:{$instance}";
+    }
+
+    return $identifier;
   }
 
 
@@ -412,6 +423,8 @@ final class PhabricatorRepositoryPullEngine
     $repository = $this->getRepository();
     $path = $repository->getLocalPath().'/.hg/hgrc';
 
+    $identifier = $this->getHookContextIdentifier($repository);
+
     $root = dirname(phutil_get_library_root('phabricator'));
     $bin = $root.'/bin/commit-hook';
 
@@ -422,14 +435,14 @@ final class PhabricatorRepositoryPullEngine
     $data[] = csprintf(
       'pretxnchangegroup.phabricator = %s %s %s',
       $bin,
-      $repository->getCallsign(),
+      $identifier,
       'pretxnchangegroup');
 
     // This one handles creating bookmarks.
     $data[] = csprintf(
       'prepushkey.phabricator = %s %s %s',
       $bin,
-      $repository->getCallsign(),
+      $identifier,
       'prepushkey');
 
     $data[] = null;

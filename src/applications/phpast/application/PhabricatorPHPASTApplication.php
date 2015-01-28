@@ -14,6 +14,10 @@ final class PhabricatorPHPASTApplication extends PhabricatorApplication {
     return 'phpast';
   }
 
+  public function getFontIcon() {
+    return 'fa-ambulance';
+  }
+
   public function getShortDescription() {
     return 'Visual PHP Parser';
   }

@@ -10,6 +10,10 @@ final class PhabricatorSlowvoteApplication extends PhabricatorApplication {
     return 'slowvote';
   }
 
+  public function getFontIcon() {
+    return 'fa-bar-chart';
+  }
+
   public function getName() {
     return pht('Slowvote');
   }

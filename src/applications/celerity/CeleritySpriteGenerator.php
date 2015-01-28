@@ -6,11 +6,6 @@ final class CeleritySpriteGenerator {
     $sprites = array();
 
     $sources = array(
-      'arrow-right' => array(
-        'x' => 9,
-        'y' => 31,
-        'css' => '.phabricator-crumb-divider',
-      ),
       'logo' => array(
         'x' => 96,
         'y' => 26,
@@ -213,96 +208,6 @@ final class CeleritySpriteGenerator {
 
     return $sheet;
   }
-
-
-  public function buildAppsSheet() {
-    return $this->buildAppsSheetVariant(1);
-  }
-
-  public function buildAppsLargeSheet() {
-    return $this->buildAppsSheetVariant(2);
-  }
-
-  public function buildAppsXLargeSheet() {
-    return $this->buildAppsSheetVariant(3);
-  }
-
-  private function buildAppsSheetVariant($variant) {
-
-    if ($variant == 1) {
-      $scales = array(
-        '1x' => 1,
-        '2x' => 2,
-        '4x' => 4,
-      );
-      $variant_name = 'apps';
-      $variant_short = '';
-      $size_x = 14;
-      $size_y = 14;
-
-      $colors = array(
-        'dark'  => 'dark',
-      );
-    } else if ($variant == 2) {
-      $scales = array(
-        '2x' => 1,
-        '4x' => 2,
-      );
-      $variant_name = 'apps-large';
-      $variant_short = '-large';
-      $size_x = 28;
-      $size_y = 28;
-
-      $colors = array(
-        'dark'  => 'dark',
-      );
-    } else {
-      $scales = array(
-        '4x' => 1,
-      );
-      $variant_name = 'apps-xlarge';
-      $variant_short = '-xlarge';
-      $size_x = 56;
-      $size_y = 56;
-
-      $colors = array(
-        'dark'  => 'dark',
-      );
-    }
-
-    $apps = $this->getDirectoryList('apps_dark_1x');
-
-    $template = id(new PhutilSprite())
-      ->setSourceSize($size_x, $size_y);
-
-    $sprites = array();
-    foreach ($apps as $app) {
-      foreach ($colors as $color => $color_path) {
-
-        $css = '.apps-'.$app.'-'.$color.$variant_short;
-        $sprite = id(clone $template)
-          ->setName('apps-'.$app.'-'.$color.$variant_short)
-          ->setTargetCSS($css);
-
-        foreach ($scales as $scale_name => $scale) {
-          $path = $this->getPath(
-            'apps_'.$color_path.'_'.$scale_name.'/'.$app.'.png');
-          $sprite->setSourceFile($path, $scale);
-        }
-
-        $sprites[] = $sprite;
-      }
-    }
-
-    $sheet = $this->buildSheet($variant_name, count($scales) > 1);
-    $sheet->setScales($scales);
-    foreach ($sprites as $sprite) {
-      $sheet->addSprite($sprite);
-    }
-
-    return $sheet;
-  }
-
 
   private function getPath($to_path = null) {
     $root = dirname(phutil_get_library_root('phabricator'));

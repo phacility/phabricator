@@ -39,7 +39,9 @@ JX.behavior('phabricator-watch-anchor', function() {
       var n = 50;
       var try_anchor_again = function () {
         try {
-          window.scrollTo(0, JX.$V(JX.$(anchor)).y - 60);
+          var node = JX.$(anchor);
+          var pos = JX.Vector.getPosWithScroll(node);
+          JX.DOM.scrollToPosition(0, pos.y - 60);
           defer_highlight();
         } catch (e) {
           if (n--) {

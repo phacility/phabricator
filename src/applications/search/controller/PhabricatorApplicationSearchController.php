@@ -254,13 +254,14 @@ final class PhabricatorApplicationSearchController
     }
 
     if ($named_query) {
-      $title = pht('Query: %s', $named_query->getQueryName());
+      $title = $named_query->getQueryName();
     } else {
       $title = pht('Advanced Search');
     }
 
     $crumbs = $parent
       ->buildApplicationCrumbs()
+      ->setBorder(true)
       ->addTextCrumb($title);
 
     $nav->setCrumbs($crumbs);

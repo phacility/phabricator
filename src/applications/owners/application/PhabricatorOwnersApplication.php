@@ -14,6 +14,10 @@ final class PhabricatorOwnersApplication extends PhabricatorApplication {
     return 'owners';
   }
 
+  public function getFontIcon() {
+    return 'fa-gift';
+  }
+
   public function getShortDescription() {
     return pht('Own Source Code');
   }

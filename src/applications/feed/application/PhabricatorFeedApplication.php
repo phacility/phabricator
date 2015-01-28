@@ -18,6 +18,10 @@ final class PhabricatorFeedApplication extends PhabricatorApplication {
     return 'feed';
   }
 
+  public function getFontIcon() {
+    return 'fa-newspaper-o';
+  }
+
   public function canUninstall() {
     return false;
   }

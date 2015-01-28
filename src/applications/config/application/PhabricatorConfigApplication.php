@@ -10,6 +10,10 @@ final class PhabricatorConfigApplication extends PhabricatorApplication {
     return 'setup';
   }
 
+  public function getFontIcon() {
+    return 'fa-sliders';
+  }
+
   public function isPinnedByDefault(PhabricatorUser $viewer) {
     return $viewer->getIsAdmin();
   }

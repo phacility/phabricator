@@ -18,6 +18,10 @@ final class PhabricatorChatLogApplication extends PhabricatorApplication {
     return 'chatlog';
   }
 
+  public function getFontIcon() {
+    return 'fa-coffee';
+  }
+
   public function isPrototype() {
     return true;
   }

@@ -122,7 +122,7 @@
 .aphront-mini-panel-view {
   background: #fff;
   padding: 10px;
-  margin: 4px 16px;
+  margin: 16px 16px 0 16px;
   border: 1px solid {$lightgreyborder};
   border-bottom: 1px solid {$greyborder};
 }

@@ -214,12 +214,14 @@
 }
 
 .phabricator-main-search-typeahead-result .phabricator-search-icon {
-  display: inline-block;
   width: 28px;
   height: 28px;
   position: absolute;
-  top: 9px;
-  left: 9px;
+  top: 8px;
+  left: 8px;
+  font-size: 24px;
+  text-align: center;
+  vertical-align: bottom;
 }
 
 .phabricator-main-search-typeahead-result {

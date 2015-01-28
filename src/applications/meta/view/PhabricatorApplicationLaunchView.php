@@ -31,7 +31,6 @@ final class PhabricatorApplicationLaunchView extends AphrontTagView {
     $application = $this->application;
 
     require_celerity_resource('phabricator-application-launch-view-css');
-    require_celerity_resource('sprite-apps-large-css');
 
     $content = array();
     $icon = null;
@@ -113,9 +112,9 @@ final class PhabricatorApplicationLaunchView extends AphrontTagView {
       if ($application->getIconURI()) {
         $styles[] = 'background-image: url('.$application->getIconURI().')';
       } else {
-        $icon = $application->getIconName();
-        $classes[] = 'sprite-apps-large';
-        $classes[] = 'apps-'.$icon.'-dark-large';
+        $classes[] = $application->getFontIcon();
+        $classes[] = 'phui-icon-view';
+        $classes[] = 'phui-font-fa';
       }
 
       $icon = phutil_tag(

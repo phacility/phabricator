@@ -65,7 +65,7 @@ class AphrontDefaultApplicationConfiguration
     }
 
     // For non-workflow requests, return a Ajax response.
-    if ($request->isAjax() && !$request->isJavelinWorkflow()) {
+    if ($request->isAjax() && !$request->isWorkflow()) {
       // Log these; they don't get shown on the client and can be difficult
       // to debug.
       phlog($ex);

@@ -24,7 +24,7 @@ final class PHUIFeedStoryExample extends PhabricatorUIExample {
       ->setImage(celerity_get_resource_uri('/rsrc/image/people/harding.png'))
       ->setImageHref('http://en.wikipedia.org/wiki/Warren_G._Harding')
       ->setEpoch(1)
-      ->setAppIcon('differential-dark')
+      ->setAppIcon('fa-star')
       ->setUser($user);
 
     /* Text Story, useful in Blogs, Ponders, Status */
@@ -48,7 +48,7 @@ final class PHUIFeedStoryExample extends PhabricatorUIExample {
       ->setImage(celerity_get_resource_uri('/rsrc/image/people/lincoln.png'))
       ->setImageHref('http://en.wikipedia.org/wiki/Abraham_Lincoln')
       ->setEpoch(strtotime('November 19, 1863'))
-      ->setAppIcon('phame-dark')
+      ->setAppIcon('fa-star')
       ->setUser($user)
       ->setTokenBar($tokenview)
       ->setPontification('Four score and seven years ago our fathers brought '.
@@ -80,7 +80,7 @@ final class PHUIFeedStoryExample extends PhabricatorUIExample {
       ->appendChild($token)
       ->setEpoch(1)
       ->addAction($action1)
-      ->setAppIcon('token-dark')
+      ->setAppIcon('fa-trophy')
       ->setUser($user);
 
     /* Image Story, used in Pholio, Macro */
@@ -97,7 +97,7 @@ final class PHUIFeedStoryExample extends PhabricatorUIExample {
       ->setImage(celerity_get_resource_uri('/rsrc/image/people/harding.png'))
       ->setImageHref('http://en.wikipedia.org/wiki/Warren_G._Harding')
       ->setEpoch(1)
-      ->setAppIcon('ponder-dark')
+      ->setAppIcon('fa-cogs')
       ->setPontification('Why does inline-block add space under my spans and '.
         'anchors?')
       ->addAction($action1)
@@ -112,7 +112,7 @@ final class PHUIFeedStoryExample extends PhabricatorUIExample {
       ->setImage(celerity_get_resource_uri('/rsrc/image/people/lincoln.png'))
       ->setImageHref('http://en.wikipedia.org/wiki/Abraham_Lincoln')
       ->setEpoch(strtotime('November 19, 1863'))
-      ->setAppIcon('phame-dark')
+      ->setAppIcon('fa-rocket')
       ->setUser($user)
       ->setPontification('If we ever create a lightweight status app '.
       'this story would be how that would be displayed.');
@@ -126,7 +126,7 @@ final class PHUIFeedStoryExample extends PhabricatorUIExample {
       ->setImage(celerity_get_resource_uri('/rsrc/image/people/harding.png'))
       ->setImageHref('http://en.wikipedia.org/wiki/Warren_G._Harding')
       ->setEpoch(1)
-      ->setAppIcon('differential-dark')
+      ->setAppIcon('fa-wifi')
       ->setUser($user);
 
 

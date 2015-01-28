@@ -23,7 +23,6 @@ final class PhabricatorFeedStoryPhriction extends PhabricatorFeedStory {
     $document_phid = $data->getValue('phid');
 
     $view = $this->newStoryView();
-    $view->setAppIcon('phriction-dark');
 
     $action = $data->getValue('action');
     $verb = PhrictionActionConstants::getActionPastTenseVerb($action);

@@ -55,7 +55,6 @@ final class PhabricatorFeedStoryManiphestAggregate
     }
 
     $view = $this->newStoryView();
-    $view->setAppIcon('maniphest-dark');
     $view->setTitle($title);
 
     $href = $this->getHandle($data->getValue('taskPHID'))->getURI();

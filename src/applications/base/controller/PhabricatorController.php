@@ -242,8 +242,18 @@ abstract class PhabricatorController extends AphrontController {
   public function buildStandardPageResponse($view, array $data) {
     $page = $this->buildStandardPageView();
     $page->appendChild($view);
-    $response = new AphrontWebpageResponse();
-    $response->setContent($page->render());
+    return $this->buildPageResponse($page);
+  }
+
+  private function buildPageResponse($page) {
+    if ($this->getRequest()->isQuicksand()) {
+      $response = id(new AphrontAjaxResponse())
+        ->setContent($page->renderForQuicksand());
+    } else {
+      $response = id(new AphrontWebpageResponse())
+        ->setContent($page->render());
+    }
+
     return $response;
   }
 
@@ -303,8 +313,7 @@ abstract class PhabricatorController extends AphrontController {
       $page->setApplicationMenu($application_menu);
     }
 
-    $response = new AphrontWebpageResponse();
-    return $response->setContent($page->render());
+    return $this->buildPageResponse($page);
   }
 
   public function didProcessRequest($response) {
@@ -331,7 +340,7 @@ abstract class PhabricatorController extends AphrontController {
     }
 
     if ($response instanceof AphrontDialogResponse) {
-      if (!$request->isAjax()) {
+      if (!$request->isAjax() && !$request->isQuicksand()) {
         $dialog = $response->getDialog();
 
         $title = $dialog->getTitle();
@@ -434,18 +443,18 @@ abstract class PhabricatorController extends AphrontController {
 
     $application = $this->getCurrentApplication();
     if ($application) {
-      $sprite = $application->getIconName();
-      if (!$sprite) {
-        $sprite = 'application';
+      $icon = $application->getFontIcon();
+      if (!$icon) {
+        $icon = 'fa-puzzle';
       }
 
-      $crumbs[] = id(new PhabricatorCrumbView())
+      $crumbs[] = id(new PHUICrumbView())
         ->setHref($this->getApplicationURI())
-        ->setAural($application->getName())
-        ->setIcon($sprite);
+        ->setName($application->getName())
+        ->setIcon($icon);
     }
 
-    $view = new PhabricatorCrumbsView();
+    $view = new PHUICrumbsView();
     foreach ($crumbs as $crumb) {
       $view->addCrumb($crumb);
     }

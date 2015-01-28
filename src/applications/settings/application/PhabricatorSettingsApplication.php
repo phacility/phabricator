@@ -18,6 +18,10 @@ final class PhabricatorSettingsApplication extends PhabricatorApplication {
     return 'settings';
   }
 
+  public function getFontIcon() {
+    return 'fa-wrench';
+  }
+
   public function canUninstall() {
     return false;
   }

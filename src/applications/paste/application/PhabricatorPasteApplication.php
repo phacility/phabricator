@@ -14,6 +14,10 @@ final class PhabricatorPasteApplication extends PhabricatorApplication {
     return 'paste';
   }
 
+  public function getFontIcon() {
+    return 'fa-paste';
+  }
+
   public function getTitleGlyph() {
     return "\xE2\x9C\x8E";
   }

@@ -105,16 +105,23 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
       $revision_panel = null;
     }
 
-    return array(
-      $welcome_panel,
-      $unbreak_panel,
-      $triage_panel,
-      $revision_panel,
-      $tasks_panel,
-      $audit_panel,
-      $commit_panel,
-      $this->minipanels,
-    );
+    require_celerity_resource('homepage-panel-css');
+    $home = phutil_tag(
+      'div',
+      array(
+        'class' => 'homepage-panel',
+      ),
+      array(
+        $welcome_panel,
+        $unbreak_panel,
+        $triage_panel,
+        $revision_panel,
+        $tasks_panel,
+        $audit_panel,
+        $commit_panel,
+        $this->minipanels,
+      ));
+      return $home;
   }
 
   private function buildUnbreakNowPanel() {
@@ -146,10 +153,9 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
       implode(',', ManiphestTaskStatus::getOpenStatusConstants()),
       $unbreak_now);
     $title = pht('Unbreak Now!');
-    $panel = new AphrontPanelView();
+    $panel = new PHUIObjectBoxView();
     $panel->setHeader($this->renderSectionHeader($title, $href));
     $panel->appendChild($this->buildTaskListView($tasks));
-    $panel->setNoBackground();
 
     return $panel;
   }
@@ -195,10 +201,9 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
       implode(',', ManiphestTaskStatus::getOpenStatusConstants()),
       $needs_triage,
       $user->getPHID());
-    $panel = new AphrontPanelView();
+    $panel = new PHUIObjectBoxView();
     $panel->setHeader($this->renderSectionHeader($title, $href));
     $panel->appendChild($this->buildTaskListView($tasks));
-    $panel->setNoBackground();
 
     return $panel;
   }
@@ -229,7 +234,7 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
 
     $title = pht('Revisions Waiting on You');
     $href = '/differential';
-    $panel = new AphrontPanelView();
+    $panel = new PHUIObjectBoxView();
     $panel->setHeader($this->renderSectionHeader($title, $href));
 
     $revision_view = id(new DifferentialRevisionListView())
@@ -247,17 +252,16 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
     $list_view->setFlush(true);
 
     $panel->appendChild($list_view);
-    $panel->setNoBackground();
 
     return $panel;
   }
 
   private function buildWelcomePanel() {
-    $panel = new AphrontPanelView();
+    $panel = new PHUIObjectBoxView();
+    $panel->setHeaderText(pht('Welcome'));
     $panel->appendChild(
       phutil_safe_html(
         PhabricatorEnv::getEnvConfig('welcome.html')));
-    $panel->setNoBackground();
 
     return $panel;
   }
@@ -285,10 +289,9 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
 
     $title = pht('Assigned Tasks');
     $href = '/maniphest';
-    $panel = new AphrontPanelView();
+    $panel = new PHUIObjectBoxView();
     $panel->setHeader($this->renderSectionHeader($title, $href));
     $panel->appendChild($this->buildTaskListView($tasks));
-    $panel->setNoBackground();
 
     return $panel;
   }
@@ -312,12 +315,14 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
   }
 
   private function renderSectionHeader($title, $href) {
-    $header = phutil_tag(
+    $title = phutil_tag(
       'a',
       array(
         'href' => $href,
       ),
       $title);
+    $header = id(new PHUIHeaderView())
+      ->setHeader($title);
     return $header;
   }
 
@@ -368,10 +373,9 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
 
     $title = pht('Audits');
     $href = '/audit/';
-    $panel = new AphrontPanelView();
+    $panel = new PHUIObjectBoxView();
     $panel->setHeader($this->renderSectionHeader($title, $href));
     $panel->appendChild($view);
-    $panel->setNoBackground();
 
     return $panel;
   }
@@ -408,10 +412,9 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
 
     $title = pht('Problem Commits');
     $href = '/audit/';
-    $panel = new AphrontPanelView();
+    $panel = new PHUIObjectBoxView();
     $panel->setHeader($this->renderSectionHeader($title, $href));
     $panel->appendChild($view);
-    $panel->setNoBackground();
 
     return $panel;
   }

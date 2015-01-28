@@ -18,6 +18,10 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
     return 'phortune';
   }
 
+  public function getFontIcon() {
+    return 'fa-diamond';
+  }
+
   public function getTitleGlyph() {
     return "\xE2\x9C\x98";
   }
@@ -41,6 +45,8 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
           ),
           'order/(?:query/(?P<queryKey>[^/]+)/)?'
             => 'PhortuneCartListController',
+          'subscription/(?:query/(?P<queryKey>[^/]+)/)?'
+            => 'PhortuneSubscriptionListController',
           'charge/(?:query/(?P<queryKey>[^/]+)/)?'
             => 'PhortuneChargeListController',
         ),
@@ -73,8 +79,10 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
         'merchant/' => array(
           '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhortuneMerchantListController',
           'edit/(?:(?P<id>\d+)/)?' => 'PhortuneMerchantEditController',
-          'orders/(?P<merchantID>\d+)/(?:query/(?P<querKey>[^/]+)/)?'
+          'orders/(?P<merchantID>\d+)/(?:query/(?P<queryKey>[^/]+)/)?'
             => 'PhortuneCartListController',
+          'subscription/(?P<merchantID>\d+)/(?:query/(?P<queryKey>[^/]+)/)?'
+            => 'PhortuneSubscriptionListController',
           '(?P<id>\d+)/' => 'PhortuneMerchantViewController',
         ),
       ),

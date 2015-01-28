@@ -22,6 +22,10 @@ final class PhabricatorPeopleApplication extends PhabricatorApplication {
     return 'people';
   }
 
+  public function getFontIcon() {
+    return 'fa-users';
+  }
+
   public function isPinnedByDefault(PhabricatorUser $viewer) {
     return $viewer->getIsAdmin();
   }

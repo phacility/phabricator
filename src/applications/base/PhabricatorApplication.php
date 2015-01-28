@@ -157,6 +157,10 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
     return 'application';
   }
 
+  public function getFontIcon() {
+    return 'fa-puzzle-piece';
+  }
+
   public function getApplicationOrder() {
     return PHP_INT_MAX;
   }

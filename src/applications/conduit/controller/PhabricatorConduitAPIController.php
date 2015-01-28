@@ -34,11 +34,14 @@ final class PhabricatorConduitAPIController
 
       $result = null;
 
-      // TODO: Straighten out the auth pathway here. We shouldn't be creating
-      // a ConduitAPIRequest at this level, but some of the auth code expects
-      // it. Landing a halfway version of this to unblock T945.
+      // TODO: The relationship between ConduitAPIRequest and ConduitCall is a
+      // little odd here and could probably be improved. Specifically, the
+      // APIRequest is a sub-object of the Call, which does not parallel the
+      // role of AphrontRequest (which is an indepenent object).
+      // In particular, the setUser() and getUser() existing independently on
+      // the Call and APIRequest is very awkward.
 
-      $api_request = new ConduitAPIRequest($params);
+      $api_request = $call->getAPIRequest();
 
       $allow_unguarded_writes = false;
       $auth_error = null;
@@ -284,6 +287,9 @@ final class PhabricatorConduitAPIController
         }
 
         $user = PhabricatorUser::getOmnipotentUser();
+
+        // Flag this as an intracluster request.
+        $api_request->setIsClusterRequest(true);
       }
 
       return $this->validateAuthenticatedUser(
@@ -380,6 +386,9 @@ final class PhabricatorConduitAPIController
               'cluster address range. Requests signed with cluster API '.
               'tokens must originate from within the cluster.'),);
         }
+
+        // Flag this as an intracluster request.
+        $api_request->setIsClusterRequest(true);
       }
 
       $user = $token->getObject();

@@ -53,7 +53,7 @@ final class AphrontSideNavFilterView extends AphrontView {
     return $object;
   }
 
-  public function setCrumbs(PhabricatorCrumbsView $crumbs) {
+  public function setCrumbs(PHUICrumbsView $crumbs) {
     $this->crumbs = $crumbs;
     return $this;
   }

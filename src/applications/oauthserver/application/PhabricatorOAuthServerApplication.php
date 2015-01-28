@@ -18,6 +18,10 @@ final class PhabricatorOAuthServerApplication extends PhabricatorApplication {
     return 'oauthserver';
   }
 
+  public function getFontIcon() {
+    return 'fa-hotel';
+  }
+
   public function getTitleGlyph() {
     return "\xE2\x99\x86";
   }

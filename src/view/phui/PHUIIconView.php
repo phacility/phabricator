@@ -2,7 +2,6 @@
 
 final class PHUIIconView extends AphrontTagView {
 
-  const SPRITE_APPS = 'apps';
   const SPRITE_TOKENS = 'tokens';
   const SPRITE_LOGIN = 'login';
   const SPRITE_PROJECTS = 'projects';
@@ -607,6 +606,47 @@ final class PHUIIconView extends AphrontTagView {
       'fa-sheqel',
       'fa-ils',
       'fa-meanpath',
+      'fa-buysellads',
+      'fa-connectdevelop',
+      'fa-dashcube',
+      'fa-forumbee',
+      'fa-leanpub',
+      'fa-sellsy',
+      'fa-shirtsinbulk',
+      'fa-simplybuilt',
+      'fa-skyatlas',
+      'fa-cart-plus',
+      'fa-cart-arrow-down',
+      'fa-diamond',
+      'fa-ship',
+      'fa-user-secret',
+      'fa-motorcycle',
+      'fa-street-view',
+      'fa-heartbeat',
+      'fa-venus',
+      'fa-mars',
+      'fa-mercury',
+      'fa-transgender',
+      'fa-transgender-alt',
+      'fa-venus-double',
+      'fa-mars-double',
+      'fa-venus-mars',
+      'fa-mars-stroke',
+      'fa-mars-stroke-v',
+      'fa-mars-stroke-h',
+      'fa-neuter',
+      'fa-facebook-official',
+      'fa-pinterest-p',
+      'fa-whatsapp',
+      'fa-server',
+      'fa-user-plus',
+      'fa-user-times',
+      'fa-hotel',
+      'fa-bed',
+      'fa-viacoin',
+      'fa-train',
+      'fa-subway',
+      'fa-medium',
     );
   }
 

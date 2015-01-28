@@ -20,6 +20,10 @@ final class PhabricatorHomeApplication extends PhabricatorApplication {
     return 'home';
   }
 
+  public function getFontIcon() {
+    return 'fa-home';
+  }
+
   public function getRoutes() {
     return array(
       '/' => 'PhabricatorHomeMainController',
