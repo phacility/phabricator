@@ -144,11 +144,15 @@ final class DiffusionSubversionServeSSHWorkflow
       throw new Exception('Expected `svnserve -t`!');
     }
 
-    $command = csprintf(
-      'svnserve -t --tunnel-user=%s',
-      $this->getUser()->getUsername());
-    $command = PhabricatorDaemon::sudoCommandAsDaemonUser($command);
+    if ($this->shouldProxy()) {
+      $command = $this->getProxyCommand();
+    } else {
+      $command = csprintf(
+        'svnserve -t --tunnel-user=%s',
+        $this->getUser()->getUsername());
+    }
 
+    $command = PhabricatorDaemon::sudoCommandAsDaemonUser($command);
     $future = new ExecFuture('%C', $command);
 
     $this->inProtocol = new DiffusionSubversionWireProtocol();

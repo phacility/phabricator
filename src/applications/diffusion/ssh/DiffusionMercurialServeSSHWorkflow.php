@@ -42,7 +42,13 @@ final class DiffusionMercurialServeSSHWorkflow
       throw new Exception('Expected `hg ... serve`!');
     }
 
-    $command = csprintf('hg -R %s serve --stdio', $repository->getLocalPath());
+    if ($this->shouldProxy()) {
+      $command = $this->getProxyCommand();
+    } else {
+      $command = csprintf(
+        'hg -R %s serve --stdio',
+        $repository->getLocalPath());
+    }
     $command = PhabricatorDaemon::sudoCommandAsDaemonUser($command);
 
     $future = id(new ExecFuture('%C', $command))

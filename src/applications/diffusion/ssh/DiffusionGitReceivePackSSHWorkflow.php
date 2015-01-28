@@ -19,7 +19,11 @@ final class DiffusionGitReceivePackSSHWorkflow extends DiffusionGitSSHWorkflow {
     // This is a write, and must have write access.
     $this->requireWriteAccess();
 
-    $command = csprintf('git-receive-pack %s', $repository->getLocalPath());
+    if ($this->shouldProxy()) {
+      $command = $this->getProxyCommand();
+    } else {
+      $command = csprintf('git-receive-pack %s', $repository->getLocalPath());
+    }
     $command = PhabricatorDaemon::sudoCommandAsDaemonUser($command);
 
     $future = id(new ExecFuture('%C', $command))

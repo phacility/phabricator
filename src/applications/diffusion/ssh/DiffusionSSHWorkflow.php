@@ -5,6 +5,7 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
   private $args;
   private $repository;
   private $hasWriteAccess;
+  private $proxyURI;
 
   public function getRepository() {
     if (!$this->repository) {
@@ -49,14 +50,82 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
     return $this;
   }
 
+  protected function shouldProxy() {
+    return (bool)$this->proxyURI;
+  }
+
+  protected function getProxyCommand() {
+    $uri = new PhutilURI($this->proxyURI);
+
+    $username = PhabricatorEnv::getEnvConfig('cluster.instance');
+    if (!strlen($username)) {
+      $username = PhabricatorEnv::getEnvConfig('diffusion.ssh-user');
+      if (!strlen($username)) {
+        throw new Exception(
+          pht(
+            'Unable to determine the username to connect with when trying '.
+            'to proxy an SSH request within the Phabricator cluster.'));
+      }
+    }
+
+    $port = $uri->getPort();
+    $host = $uri->getDomain();
+    $key_path = AlmanacKeys::getKeyPath('device.key');
+    if (!Filesystem::pathExists($key_path)) {
+      throw new Exception(
+        pht(
+          'Unable to proxy this SSH request within the cluster: this device '.
+          'is not registered and has a missing device key (expected to '.
+          'find key at "%s").',
+          $key_path));
+    }
+
+    $options = array();
+    $options[] = '-o';
+    $options[] = 'StrictHostKeyChecking=no';
+    $options[] = '-o';
+    $options[] = 'UserKnownHostsFile=/dev/null';
+
+    // This is suppressing "added <address> to the list of known hosts"
+    // messages, which are confusing and irrelevant when they arise from
+    // proxied requests. It might also be suppressing lots of useful errors,
+    // of course. Ideally, we would enforce host keys eventually.
+    $options[] = '-o';
+    $options[] = 'LogLevel=quiet';
+
+    // NOTE: We prefix the command with "@username", which the far end of the
+    // connection will parse in order to act as the specified user. This
+    // behavior is only available to cluster requests signed by a trusted
+    // device key.
+
+    return csprintf(
+      'ssh %Ls -l %s -i %s -p %s %s -- %s %Ls',
+      $options,
+      $username,
+      $key_path,
+      $port,
+      $host,
+      '@'.$this->getUser()->getUsername(),
+      $this->getOriginalArguments());
+  }
+
   final public function execute(PhutilArgumentParser $args) {
     $this->args = $args;
 
     $repository = $this->identifyRepository();
     $this->setRepository($repository);
 
-    // TODO: Here, we would make a proxying decision, had I implemented
-    // proxying yet.
+    $is_cluster_request = $this->getIsClusterRequest();
+    $uri = $repository->getAlmanacServiceURI(
+      $this->getUser(),
+      $is_cluster_request,
+      array(
+        'ssh',
+      ));
+
+    if ($uri) {
+      $this->proxyURI = $uri;
+    }
 
     try {
       return $this->executeRepositoryOperations();

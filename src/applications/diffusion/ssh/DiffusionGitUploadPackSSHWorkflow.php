@@ -16,7 +16,11 @@ final class DiffusionGitUploadPackSSHWorkflow extends DiffusionGitSSHWorkflow {
   protected function executeRepositoryOperations() {
     $repository = $this->getRepository();
 
-    $command = csprintf('git-upload-pack -- %s', $repository->getLocalPath());
+    if ($this->shouldProxy()) {
+      $command = $this->getProxyCommand();
+    } else {
+      $command = csprintf('git-upload-pack -- %s', $repository->getLocalPath());
+    }
     $command = PhabricatorDaemon::sudoCommandAsDaemonUser($command);
 
     $future = id(new ExecFuture('%C', $command))
