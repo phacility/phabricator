@@ -8,9 +8,14 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
 
   public function getRepository() {
     if (!$this->repository) {
-      throw new Exception('Call loadRepository() before getRepository()!');
+      throw new Exception(pht('Repository is not available yet!'));
     }
     return $this->repository;
+  }
+
+  private function setRepository(PhabricatorRepository $repository) {
+    $this->repository = $repository;
+    return $this;
   }
 
   public function getArgs() {
@@ -33,6 +38,10 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
     return $env;
   }
 
+  /**
+   * Identify and load the affected repository.
+   */
+  abstract protected function identifyRepository();
   abstract protected function executeRepositoryOperations();
 
   protected function writeError($message) {
@@ -43,6 +52,12 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
   final public function execute(PhutilArgumentParser $args) {
     $this->args = $args;
 
+    $repository = $this->identifyRepository();
+    $this->setRepository($repository);
+
+    // TODO: Here, we would make a proxying decision, had I implemented
+    // proxying yet.
+
     try {
       return $this->executeRepositoryOperations();
     } catch (Exception $ex) {
@@ -51,7 +66,7 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
     }
   }
 
-  protected function loadRepository($path) {
+  protected function loadRepositoryWithPath($path) {
     $viewer = $this->getUser();
 
     $regex = '@^/?diffusion/(?P<callsign>[A-Z]+)(?:/|\z)@';
@@ -87,8 +102,6 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
         throw new Exception(
           pht('This repository is not available over SSH.'));
     }
-
-    $this->repository = $repository;
 
     return $repository;
   }

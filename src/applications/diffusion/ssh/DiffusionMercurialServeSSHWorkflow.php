@@ -24,11 +24,14 @@ final class DiffusionMercurialServeSSHWorkflow
       ));
   }
 
-  protected function executeRepositoryOperations() {
+  protected function identifyRepository() {
     $args = $this->getArgs();
     $path = $args->getArg('repository');
-    $repository = $this->loadRepository($path);
+    return $this->loadRepositoryWithPath($path);
+  }
 
+  protected function executeRepositoryOperations() {
+    $repository = $this->getRepository();
     $args = $this->getArgs();
 
     if (!$args->getArg('stdio')) {

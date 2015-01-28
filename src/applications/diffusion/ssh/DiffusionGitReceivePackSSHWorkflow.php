@@ -14,9 +14,7 @@ final class DiffusionGitReceivePackSSHWorkflow extends DiffusionGitSSHWorkflow {
   }
 
   protected function executeRepositoryOperations() {
-    $args = $this->getArgs();
-    $path = head($args->getArg('dir'));
-    $repository = $this->loadRepository($path);
+    $repository = $this->getRepository();
 
     // This is a write, and must have write access.
     $this->requireWriteAccess();
