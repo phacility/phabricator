@@ -29,13 +29,6 @@ JX.behavior('phabricator-show-older-transactions', function(config) {
   function check_hash() {
     if (hash_is_hidden()) {
       load_older(load_hidden_hash_callback);
-    } else {
-      try {
-        var target = JX.$(get_hash());
-        JX.DOM.scrollTo(target);
-      } catch (ignored) {
-        // We did our best.
-      }
     }
   }
 
@@ -71,7 +64,9 @@ JX.behavior('phabricator-show-older-transactions', function(config) {
 
   var load_hidden_hash_callback = function(swap, r) {
     show_older(swap, r);
-    check_hash();
+
+    // We aren't actually doing a scroll position because
+    // `behavior-watch-anchor` will handle that for us.
   };
 
   var load_all_older_callback = function(swap, r) {
@@ -102,7 +97,6 @@ JX.behavior('phabricator-show-older-transactions', function(config) {
       JX.Router.getInstance().queue(routable);
     });
 
-  JX.Stratcom.listen('hashchange', null, check_hash);
   check_hash();
 
   new JX.KeyboardShortcut(['@'], 'Show all older changes in the timeline.')

@@ -980,7 +980,8 @@ JX.install('DOM', {
      * @return void
      */
     scrollTo : function(node) {
-      JX.DOM.scrollToPosition(0, JX.$V(node).y);
+      var pos = JX.Vector.getPosWithScroll(node);
+      JX.DOM.scrollToPosition(0, pos.y);
     },
 
     /**

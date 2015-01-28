@@ -160,7 +160,12 @@ JX.install('Scrollbar', {
           var link = JX.$N('a', {href: '#', className: 'jx-scrollbar-link'});
           JX.DOM.listen(link, 'blur', null, function() {
             // When the user clicks anything else, remove this.
-            JX.DOM.remove(link);
+            try {
+              JX.DOM.remove(link);
+            } catch (ignored) {
+              // We can get a second blur event, likey related to T447.
+              // Fix doesn't seem trivial so just ignore it.
+            }
           });
           JX.DOM.listen(link, 'click', null, function(e) {
             // Don't respond to clicks. Since the link isn't visible, this
