@@ -46,7 +46,7 @@
   makeHoldingQueue('behavior');
   makeHoldingQueue('install-init');
 
-  window['__DEV__'] = window['__DEV__'] || 0;
+  window.__DEV__ = window.__DEV__ || 0;
 
   var loaded = false;
   var onload = [];
