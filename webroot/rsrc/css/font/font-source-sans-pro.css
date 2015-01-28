@@ -8,8 +8,8 @@
   font-weight: 400;
   src: local('Source Sans Pro'),
        local('SourceSansPro-Regular'),
-       url(/rsrc/externals/font/sourcesans/SourceSansPro.woff)
-       format('woff');
+       url(/rsrc/externals/font/sourcesans/SourceSansPro-Regular.woff2) format('woff2'),
+       url(/rsrc/externals/font/sourcesans/SourceSansPro.woff) format('woff');
 }
 
 @font-face {
@@ -18,6 +18,6 @@
   font-weight: 700;
   src: local('Source Sans Pro Bold'),
        local('SourceSansPro-Bold'),
-       url(/rsrc/externals/font/sourcesans/SourceSansProBold.woff)
-       format('woff');
+       url(/rsrc/externals/font/sourcesans/SourceSansPro-Bold.woff2) format('woff2'),
+       url(/rsrc/externals/font/sourcesans/SourceSansProBold.woff) format('woff');
 }
