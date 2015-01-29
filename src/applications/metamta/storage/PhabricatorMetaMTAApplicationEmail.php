@@ -61,6 +61,27 @@ final class PhabricatorMetaMTAApplicationEmail
     return idx($this->configData, $key, $default);
   }
 
+
+  public function getInUseMessage() {
+    $applications = PhabricatorApplication::getAllApplications();
+    $applications = mpull($applications, null, 'getPHID');
+    $application = idx(
+      $applications,
+      $this->getApplicationPHID());
+    if ($application) {
+      $message = pht(
+        'The address %s is configured to be used by the %s Application.',
+        $this->getAddress(),
+        $application->getName());
+    } else {
+      $message = pht(
+        'The address %s is configured to be used by an application.',
+        $this->getAddress());
+    }
+
+    return $message;
+  }
+
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
 

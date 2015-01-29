@@ -62,6 +62,18 @@ final class PhabricatorAuthRegisterController
     if (!PhabricatorUserEmail::isValidAddress($default_email)) {
       $default_email = null;
     }
+    if ($default_email !== null) {
+      // We should bypass policy here becase e.g. limiting an application use
+      // to a subset of users should not allow the others to overwrite
+      // configured application emails
+      $application_email = id(new PhabricatorMetaMTAApplicationEmailQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withAddresses(array($default_email))
+        ->executeOne();
+      if ($application_email) {
+        $default_email = null;
+      }
+    }
 
     if ($default_email !== null) {
       // If the account source provided an email, but it's not allowed by
@@ -86,7 +98,6 @@ final class PhabricatorAuthRegisterController
       // If the account source provided an email, but another account already
       // has that email, just pretend we didn't get an email.
 
-      // TODO: See T3340.
       // TODO: See T3472.
 
       if ($default_email !== null) {
