@@ -93,6 +93,7 @@ final class PhabricatorBinariesSetupCheck extends PhabricatorSetupCheck {
         $this->raiseWarning($binary, $message);
       }
 
+      $version = null;
       switch ($binary) {
         case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
           $minimum_version = null;
@@ -118,25 +119,37 @@ final class PhabricatorBinariesSetupCheck extends PhabricatorSetupCheck {
                          'leak, fixed in 2.2.1. Pushing fails with this '.
                          'version as well; see T3046#54922.'),);
           list($err, $stdout, $stderr) = exec_manual('hg --version --quiet');
-          $version = rtrim(
-            substr($stdout, strlen('Mercurial Distributed SCM (version ')),
-            ")\n");
+
+          // NOTE: At least on OSX, recent versions of Mercurial report this
+          // string in this format:
+          //
+          //   Mercurial Distributed SCM (version 3.1.1+20140916)
+
+          $matches = null;
+          $pattern = '/^Mercurial Distributed SCM \(version ([\d.]+)/m';
+          if (preg_match($pattern, $stdout, $matches)) {
+            $version = $matches[1];
+          }
           break;
       }
 
-      if ($minimum_version &&
-        version_compare($version, $minimum_version, '<')) {
-        $this->raiseMinimumVersionWarning(
-          $binary,
-          $minimum_version,
-          $version);
-      }
-
-      foreach ($bad_versions as $bad_version => $details) {
-        if ($bad_version === $version) {
-          $this->raiseBadVersionWarning(
+      if ($version === null) {
+        $this->raiseUnknownVersionWarning($binary);
+      } else {
+        if ($minimum_version &&
+          version_compare($version, $minimum_version, '<')) {
+          $this->raiseMinimumVersionWarning(
             $binary,
-            $bad_version);
+            $minimum_version,
+            $version);
+        }
+
+        foreach ($bad_versions as $bad_version => $details) {
+          if ($bad_version === $version) {
+            $this->raiseBadVersionWarning(
+              $binary,
+              $bad_version);
+          }
         }
       }
     }
@@ -173,6 +186,43 @@ final class PhabricatorBinariesSetupCheck extends PhabricatorSetupCheck {
       ->addPhabricatorConfig('environment.append-paths');
   }
 
+  private function raiseUnknownVersionWarning($binary) {
+    $summary = pht(
+      'Unable to determine the version number of "%s".',
+      $binary);
+
+    $message = pht(
+      'Unable to determine the version number of "%s". Usually, this means '.
+      'the program changed its version format string recently and Phabricator '.
+      'does not know how to parse the new one yet, but might indicate that '.
+      'you have a very old (or broken) binary.'.
+      "\n\n".
+      'Because we can not determine the version number, checks against '.
+      'minimum and known-bad versions will be skipped, so we might fail '.
+      'to detect an incompatible binary.'.
+      "\n\n".
+      'You may be able to resolve this issue by updating Phabricator, since '.
+      'a newer version of Phabricator is likely to be able to parse the '.
+      'newer version string.'.
+      "\n\n".
+      'If updating Phabricator does not fix this, you can report the issue '.
+      'to the upstream so we can adjust the parser.'.
+      "\n\n".
+      'If you are confident you have a recent version of "%s" installed and '.
+      'working correctly, it is usually safe to ignore this warning.',
+      $binary,
+      $binary);
+
+    $this->newIssue('bin.'.$binary.'.unknown-version')
+      ->setShortName(pht("Unknown '%s' Version", $binary))
+      ->setName(pht("Unknown '%s' Version", $binary))
+      ->setSummary($summary)
+      ->setMessage($message)
+      ->addLink(
+        PhabricatorEnv::getDoclink('Contributing Bug Reports'),
+        pht('Report this Issue to the Upstream'));
+  }
+
   private function raiseMinimumVersionWarning(
     $binary,
     $minimum_version,
@@ -200,8 +250,6 @@ final class PhabricatorBinariesSetupCheck extends PhabricatorSetupCheck {
           ->setMessage($summary.' '.$message);
         break;
       }
-
-
   }
 
   private function raiseBadVersionWarning($binary, $bad_version) {
