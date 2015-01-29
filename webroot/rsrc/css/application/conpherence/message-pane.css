@@ -136,7 +136,7 @@
 
 .conpherence-message-pane .date-marker {
   border-top: 1px solid #d7d7d7;
-  margin: 5px 15px;
+  margin: 12px 15px 4px;
   min-height: auto;
 }
 .device-phone .conpherence-message-pane .date-marker {
@@ -144,11 +144,11 @@
 }
 .conpherence-message-pane .date-marker .date {
   position: relative;
-  top: -8px;
+  top: -11px;
   left: 40px;
   background-color: #FFF;
-  color: #bfbfbf;
-  font-size: 11px;
+  color: {$bluetext};
+  font-size: 12px;
   padding: 0px 5px;
 }
 .device-phone .conpherence-message-pane .phabricator-transaction-detail {
