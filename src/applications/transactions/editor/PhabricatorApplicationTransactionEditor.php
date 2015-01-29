@@ -1242,25 +1242,6 @@ abstract class PhabricatorApplicationTransactionEditor
       return $block_xactions;
     }
 
-    if ($object instanceof PhabricatorProjectInterface) {
-      $phids = $mentioned_phids;
-      $project_type = PhabricatorProjectProjectPHIDType::TYPECONST;
-      foreach ($phids as $key => $phid) {
-        if (phid_get_type($phid) != $project_type) {
-          unset($phids[$key]);
-        }
-      }
-
-      if ($phids) {
-        $edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
-        $block_xactions[] = newv(get_class(head($xactions)), array())
-          ->setIgnoreOnNoEffect(true)
-          ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-          ->setMetadataValue('edge:type', $edge_type)
-          ->setNewValue(array('+' => $phids));
-      }
-    }
-
     $mentioned_objects = id(new PhabricatorObjectQuery())
       ->setViewer($this->getActor())
       ->withPHIDs($mentioned_phids)
