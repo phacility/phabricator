@@ -10,7 +10,7 @@ $config_key =
 if ($value) {
   $app_emails = id(new PhabricatorMetaMTAApplicationEmailQuery())
     ->setViewer(PhabricatorUser::getOmnipotentUser())
-    ->withApplicationPHIDs($maniphest->getPHID())
+    ->withApplicationPHIDs(array($maniphest->getPHID()))
     ->execute();
 
   foreach ($app_emails as $app_email) {
