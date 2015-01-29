@@ -32,7 +32,6 @@ final class PhabricatorStorageManagementDumpWorkflow
     list($host, $port) = $this->getBareHostAndPort($api->getHost());
 
     $flag_password = '';
-
     $password = $api->getPassword();
     if ($password) {
       if (strlen($password->openEnvelope())) {
@@ -52,21 +51,6 @@ final class PhabricatorStorageManagementDumpWorkflow
       $host,
       $flag_port,
       $databases);
-  }
-
-  private function getBareHostAndPort($host) {
-    // Split out port information, since the command-line client requires a
-    // separate flag for the port.
-    $uri = new PhutilURI('mysql://'.$host);
-    if ($uri->getPort()) {
-      $port = $uri->getPort();
-      $bare_hostname = $uri->getDomain();
-    } else {
-      $port = null;
-      $bare_hostname = $host;
-    }
-
-    return array($bare_hostname, $port);
   }
 
 }
