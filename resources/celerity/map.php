@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => '8815f87d',
+    'core.pkg.css' => '024a3170',
     'core.pkg.js' => '65e04767',
     'darkconsole.pkg.js' => '8ab24e01',
     'differential.pkg.css' => '8af45893',
@@ -151,7 +151,7 @@ return array(
     'rsrc/css/sprite-gradient.css' => '4bdb98a7',
     'rsrc/css/sprite-login.css' => 'a355d921',
     'rsrc/css/sprite-main-header.css' => '92720ee2',
-    'rsrc/css/sprite-menu.css' => '9457345d',
+    'rsrc/css/sprite-menu.css' => '5033f9a1',
     'rsrc/css/sprite-projects.css' => 'b0d9e24f',
     'rsrc/css/sprite-tokens.css' => '1706b943',
     'rsrc/externals/font/fontawesome/fontawesome-webfont.eot' => '5fb6fb0e',
@@ -322,8 +322,8 @@ return array(
     'rsrc/image/sprite-login-X2.png' => '5ae6de3a',
     'rsrc/image/sprite-login.png' => '07f2c67c',
     'rsrc/image/sprite-main-header.png' => '83521873',
-    'rsrc/image/sprite-menu-X2.png' => 'acea7012',
-    'rsrc/image/sprite-menu.png' => '24e76f8a',
+    'rsrc/image/sprite-menu-X2.png' => '670cb5d7',
+    'rsrc/image/sprite-menu.png' => '8c056996',
     'rsrc/image/sprite-projects-X2.png' => '8c91c839',
     'rsrc/image/sprite-projects.png' => 'ef9dc9b5',
     'rsrc/image/sprite-tokens-X2.png' => 'b4776580',
@@ -816,7 +816,7 @@ return array(
     'sprite-gradient-css' => '4bdb98a7',
     'sprite-login-css' => 'a355d921',
     'sprite-main-header-css' => '92720ee2',
-    'sprite-menu-css' => '9457345d',
+    'sprite-menu-css' => '5033f9a1',
     'sprite-projects-css' => 'b0d9e24f',
     'sprite-tokens-css' => '1706b943',
     'syntax-highlighting-css' => '56c1ba38',
