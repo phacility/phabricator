@@ -172,11 +172,15 @@ JX.install('Workflow', {
           [],
           JX.Workflow._onsyntheticsubmit);
 
-        var frame = JX.DOM.getContentFrame();
-        frame.appendChild(this._root);
+        // Note that even in the presence of a content frame, we're doing
+        // everything here at top level: dialogs are fully modal and cover
+        // the entire window.
+
+        document.body.appendChild(this._root);
+
         var d = JX.Vector.getDim(this._root);
-        var v = JX.Vector.getDim(frame);
-        var s = JX.Vector.getAggregateScrollForNode(frame);
+        var v = JX.Vector.getViewport();
+        var s = JX.Vector.getScroll();
 
         // Normally, we position dialogs 100px from the top of the screen.
         // Use more space if the dialog is large (at least roughly the size
@@ -206,7 +210,9 @@ JX.install('Workflow', {
         // The `focus()` call may have scrolled the window. Scroll it back to
         // where it was before -- we want to focus the control, but not adjust
         // the scroll position.
-        JX.DOM.scrollToPosition(s.x, s.y);
+
+        // Dialogs are window-level, so scroll the window explicitly.
+        window.scrollTo(s.x, s.y);
 
       } else if (this.getHandler()) {
         this.getHandler()(r);
