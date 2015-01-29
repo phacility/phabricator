@@ -9,22 +9,7 @@ final class ManiphestCreateMailReceiver extends PhabricatorMailReceiver {
 
   public function canAcceptMail(PhabricatorMetaMTAReceivedMail $mail) {
     $maniphest_app = new PhabricatorManiphestApplication();
-    $application_emails = id(new PhabricatorMetaMTAApplicationEmailQuery())
-      ->setViewer($this->getViewer())
-      ->withApplicationPHIDs(array($maniphest_app->getPHID()))
-      ->execute();
-
-    foreach ($mail->getToAddresses() as $to_address) {
-      foreach ($application_emails as $application_email) {
-        $create_address = $application_email->getAddress();
-        if ($this->matchAddresses($create_address, $to_address)) {
-          $this->setApplicationEmail($application_email);
-          return true;
-        }
-      }
-    }
-
-    return false;
+    return $this->canAcceptApplicationMail($maniphest_app, $mail);
   }
 
   protected function processReceivedMail(
