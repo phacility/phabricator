@@ -171,6 +171,7 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
       ->setContinueOnNoEffect(true)
       ->setContinueOnMissingFields(true)
       ->setContentSource($content_source)
+      ->setApplicationEmail($this->getApplicationEmail())
       ->applyTransactions($task, $xactions);
 
     $event = new PhabricatorEvent(

@@ -41,6 +41,7 @@ final class ManiphestCreateMailReceiver extends PhabricatorMailReceiver {
     $handler->setActor($sender);
     $handler->setExcludeMailRecipientPHIDs(
       $mail->loadExcludeMailRecipientPHIDs());
+    $handler->setApplicationEmail($this->getApplicationEmail());
     $handler->processEmail($mail);
 
     $mail->setRelatedPHID($task->getPHID());

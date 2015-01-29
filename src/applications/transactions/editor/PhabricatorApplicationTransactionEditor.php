@@ -22,6 +22,7 @@ abstract class PhabricatorApplicationTransactionEditor
   private $heraldTranscript;
   private $subscribers;
   private $unmentionablePHIDMap = array();
+  private $applicationEmail;
 
   private $isPreview;
   private $isHeraldEditor;
@@ -183,6 +184,16 @@ abstract class PhabricatorApplicationTransactionEditor
 
   public function getUnmentionablePHIDMap() {
     return $this->unmentionablePHIDMap;
+  }
+
+  public function setApplicationEmail(
+    PhabricatorMetaMTAApplicationEmail $email) {
+    $this->applicationEmail = $email;
+    return $this;
+  }
+
+  public function getApplicationEmail() {
+    return $this->applicationEmail;
   }
 
   public function getTransactionTypes() {
@@ -2427,6 +2438,7 @@ abstract class PhabricatorApplicationTransactionEditor
     $adapter = $this->buildHeraldAdapter($object, $xactions);
     $adapter->setContentSource($this->getContentSource());
     $adapter->setIsNewObject($this->getIsNewObject());
+    $adapter->setApplicationEmail($this->getApplicationEmail());
     $xscript = HeraldEngine::loadAndApplyRules($adapter);
 
     $this->setHeraldAdapter($adapter);
