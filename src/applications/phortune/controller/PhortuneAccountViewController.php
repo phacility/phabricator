@@ -275,8 +275,11 @@ final class PhortuneAccountViewController extends PhortuneController {
     $subscriptions_uri = $this->getApplicationURI(
       $account->getID().'/subscription/');
 
+    $handles = $this->loadViewerHandles(mpull($subscriptions, 'getPHID'));
+
     $table = id(new PhortuneSubscriptionTableView())
       ->setUser($viewer)
+      ->setHandles($handles)
       ->setSubscriptions($subscriptions);
 
     $header = id(new PHUIHeaderView())

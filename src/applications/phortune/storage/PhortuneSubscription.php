@@ -58,17 +58,64 @@ final class PhortuneSubscription extends PhortuneDAO
       PhortuneSubscriptionPHIDType::TYPECONST);
   }
 
-  public static function initializeNewSubscription() {
-    return id(new PhortuneSubscription());
+  public static function initializeNewSubscription(
+    PhortuneAccount $account,
+    PhortuneMerchant $merchant,
+    PhabricatorUser $author,
+    PhortuneSubscriptionImplementation $implementation,
+    PhabricatorTriggerClock $clock) {
+
+    $trigger = id(new PhabricatorWorkerTrigger())
+      ->setClock($clock);
+
+    return id(new PhortuneSubscription())
+      ->setStatus(self::STATUS_ACTIVE)
+      ->setAccountPHID($account->getPHID())
+      ->attachAccount($account)
+      ->setMerchantPHID($merchant->getPHID())
+      ->attachMerchant($merchant)
+      ->setAuthorPHID($author->getPHID())
+      ->setSubscriptionClass(get_class($implementation))
+      ->setSubscriptionRef($implementation->getRef())
+      ->attachImplementation($implementation)
+      ->attachTrigger($trigger);
   }
 
   public function attachImplementation(
     PhortuneSubscriptionImplementation $impl) {
     $this->implementation = $impl;
+    return $this;
   }
 
   public function getImplementation() {
     return $this->assertAttached($this->implementation);
+  }
+
+  public function attachAccount(PhortuneAccount $account) {
+    $this->account = $account;
+    return $this;
+  }
+
+  public function getAccount() {
+    return $this->assertAttached($this->account);
+  }
+
+  public function attachMerchant(PhortuneMerchant $merchant) {
+    $this->merchant = $merchant;
+    return $this;
+  }
+
+  public function getMerchant() {
+    return $this->assertAttached($this->merchant);
+  }
+
+  public function attachTrigger(PhabricatorWorkerTrigger $trigger) {
+    $this->trigger = $trigger;
+    return $this;
+  }
+
+  public function getTrigger() {
+    return $this->assertAttached($this->trigger);
   }
 
   public function save() {
@@ -78,7 +125,44 @@ final class PhortuneSubscription extends PhortuneDAO
     $this->subscriptionRefKey = PhabricatorHash::digestForIndex(
       $this->subscriptionRef);
 
-    return parent::save();
+    $trigger = $this->getTrigger();
+    $is_new = (!$this->getID());
+
+    $this->openTransaction();
+
+      // If we're saving this subscription for the first time, we're also
+      // going to set up the trigger for it.
+      if ($is_new) {
+        $trigger_phid = PhabricatorPHID::generateNewPHID(
+          PhabricatorWorkerTriggerPHIDType::TYPECONST);
+        $this->setTriggerPHID($trigger_phid);
+      }
+
+      $result = parent::save();
+
+      if ($is_new) {
+        $trigger_action = new PhabricatorScheduleTaskTriggerAction(
+          array(
+            'class' => 'PhortuneSubscriptionWorker',
+            'data' => array(
+              'subscriptionPHID' => $this->getPHID(),
+            ),
+            'options' => array(
+              'objectPHID' => $this->getPHID(),
+              'priority' => PhabricatorWorker::PRIORITY_BULK,
+            ),
+          ));
+
+        $trigger->setAction($trigger_action);
+        $trigger->save();
+      }
+    $this->saveTransaction();
+
+    return $result;
+  }
+
+  public function getSubscriptionName() {
+    return $this->getImplementation()->getName($this);
   }
 
 

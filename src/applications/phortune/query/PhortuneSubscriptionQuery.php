@@ -85,13 +85,16 @@ final class PhortuneSubscriptionQuery
     $subscription_map = mgroup($subscriptions, 'getSubscriptionClass');
     foreach ($subscription_map as $class => $class_subscriptions) {
       $sub = newv($class, array());
-      $implementations += $sub->loadImplementationsForSubscriptions(
+      $impl_objects = $sub->loadImplementationsForRefs(
         $this->getViewer(),
-        $class_subscriptions);
+        mpull($class_subscriptions, 'getSubscriptionRef'));
+
+      $implementations += mpull($impl_objects, null, 'getRef');
     }
 
     foreach ($subscriptions as $key => $subscription) {
-      $implementation = idx($implementations, $key);
+      $ref = $subscription->getSubscriptionRef();
+      $implementation = idx($implementations, $ref);
       if (!$implementation) {
         unset($subscriptions[$key]);
         continue;
