@@ -32,6 +32,7 @@ final class DifferentialRevisionQuery
   private $reviewers = array();
   private $revIDs = array();
   private $commitHashes = array();
+  private $commitPHIDs = array();
   private $phids = array();
   private $responsibles = array();
   private $branches = array();
@@ -150,6 +151,20 @@ final class DifferentialRevisionQuery
    */
   public function withCommitHashes(array $commit_hashes) {
     $this->commitHashes = $commit_hashes;
+    return $this;
+  }
+
+  /**
+   * Filter results to revisions that have one of the provided PHIDs as
+   * commits. Calling this function will clear anything set by previous calls
+   * to @{method:withCommitPHIDs}.
+   *
+   * @param array List of PHIDs of commits
+   * @return this
+   * @task config
+   */
+  public function withCommitPHIDs(array $commit_phids) {
+    $this->commitPHIDs = $commit_phids;
     return $this;
   }
 
@@ -653,6 +668,13 @@ final class DifferentialRevisionQuery
         $this->draftAuthors);
     }
 
+    if ($this->commitPHIDs) {
+      $joins[] = qsprintf(
+        $conn_r,
+        'JOIN %T commits ON commits.revisionID = r.id',
+        DifferentialRevision::TABLE_COMMIT);
+    }
+
     $joins = implode(' ', $joins);
 
     return $joins;
@@ -712,6 +734,13 @@ final class DifferentialRevisionQuery
       }
       $hash_clauses = '('.implode(' OR ', $hash_clauses).')';
       $where[] = $hash_clauses;
+    }
+
+    if ($this->commitPHIDs) {
+      $where[] = qsprintf(
+        $conn_r,
+        'commits.commitPHID IN (%Ls)',
+        $this->commitPHIDs);
     }
 
     if ($this->phids) {
