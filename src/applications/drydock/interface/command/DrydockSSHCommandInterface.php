@@ -16,6 +16,12 @@ final class DrydockSSHCommandInterface extends DrydockCommandInterface {
       ->needSecrets(true)
       ->executeOne();
 
+    if ($credential === null) {
+      throw new Exception(pht(
+        'There is no credential with ID %d.',
+        $this->getConfig('credential')));
+    }
+
     if ($credential->getProvidesType() !==
       PassphraseCredentialTypeSSHPrivateKey::PROVIDES_TYPE) {
       throw new Exception('Only private key credentials are supported.');

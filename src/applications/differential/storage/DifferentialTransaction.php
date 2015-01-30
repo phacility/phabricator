@@ -393,14 +393,14 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
 
               if ($committer_name && ($committer_name != $author_name)) {
                 return pht(
-                  '%s closed %s by commit %s (authored by %s).',
+                  '%s closed %s by committing %s (authored by %s).',
                   $author_link,
                   $object_link,
                   $commit_name,
                   $author_name);
               } else {
                 return pht(
-                  '%s closed %s by commit %s.',
+                  '%s closed %s by committing %s.',
                   $author_link,
                   $object_link,
                   $commit_name);

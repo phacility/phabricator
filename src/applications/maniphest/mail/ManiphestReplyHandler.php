@@ -170,8 +170,11 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
       ->setExcludeMailRecipientPHIDs($this->getExcludeMailRecipientPHIDs())
       ->setContinueOnNoEffect(true)
       ->setContinueOnMissingFields(true)
-      ->setContentSource($content_source)
-      ->applyTransactions($task, $xactions);
+      ->setContentSource($content_source);
+    if ($this->getApplicationEmail()) {
+      $editor->setApplicationEmail($this->getApplicationEmail());
+    }
+    $editor->applyTransactions($task, $xactions);
 
     $event = new PhabricatorEvent(
       PhabricatorEventType::TYPE_MANIPHEST_DIDEDITTASK,

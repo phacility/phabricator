@@ -1,5 +1,14 @@
-#!/usr/bin/env php
+#!/usr/bin/env TERM=dumb php
 <?php
+
+// NOTE: Note that we're specifying TERM=dumb above when invoking the PHP
+// interpreter. This suppresses an error which looks like this:
+//
+//   No entry for terminal type "unknown";
+//   using dumb terminal settings.
+//
+// This arises from somewhere in the PHP startup machinery if TERM is not
+// set to a recognized value.
 
 // Commit hooks execute in an unusual context where the environment may be
 // unavailable, particularly in SVN. The first parameter to this script is

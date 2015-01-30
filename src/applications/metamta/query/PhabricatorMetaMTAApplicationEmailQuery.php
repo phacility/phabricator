@@ -6,6 +6,7 @@ final class PhabricatorMetaMTAApplicationEmailQuery
   private $ids;
   private $phids;
   private $addresses;
+  private $addressPrefix;
   private $applicationPHIDs;
 
   public function withIDs(array $ids) {
@@ -20,6 +21,11 @@ final class PhabricatorMetaMTAApplicationEmailQuery
 
   public function withAddresses(array $addresses) {
     $this->addresses = $addresses;
+    return $this;
+  }
+
+  public function withAddressPrefix($prefix) {
+    $this->addressPrefix = $prefix;
     return $this;
   }
 
@@ -73,6 +79,13 @@ final class PhabricatorMetaMTAApplicationEmailQuery
         $conn_r,
         'appemail.address IN (%Ls)',
         $this->addresses);
+    }
+
+    if ($this->addressPrefix !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'appemail.address LIKE %>',
+        $this->addressPrefix);
     }
 
     if ($this->applicationPHIDs !== null) {

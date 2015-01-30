@@ -220,10 +220,17 @@ final class PhabricatorApplicationEditEmailController
     $e_email = true;
     $email   = null;
     $errors  = array();
+    $default_user_key =
+      PhabricatorMetaMTAApplicationEmail::CONFIG_DEFAULT_AUTHOR;
     if ($request->isDialogFormPost()) {
       $email = trim($request->getStr('email'));
       list($e_email, $errors) = $this->validateApplicationEmail($email);
       $email_object->setAddress($email);
+      $default_user = $request->getArr($default_user_key);
+      $default_user = reset($default_user);
+      if ($default_user) {
+        $email_object->setConfigValue($default_user_key, $default_user);
+      }
 
       if (!$errors) {
         try {
@@ -244,6 +251,13 @@ final class PhabricatorApplicationEditEmailController
         ->setErrors($errors);
     }
 
+    $default_user = $email_object->getConfigValue($default_user_key);
+    if ($default_user) {
+      $default_user_handle = $this->loadViewerHandles(array($default_user));
+    } else {
+      $default_user_handle = array();
+    }
+
     $form = id(new PHUIFormLayoutView())
       ->appendChild(
         id(new AphrontFormTextControl())
@@ -251,11 +265,25 @@ final class PhabricatorApplicationEditEmailController
           ->setName('email')
           ->setValue($email_object->getAddress())
           ->setCaption(PhabricatorUserEmail::describeAllowedAddresses())
-          ->setError($e_email));
-
+          ->setError($e_email))
+      ->appendChild(
+        id(new AphrontFormTokenizerControl())
+          ->setDatasource(new PhabricatorPeopleDatasource())
+          ->setLabel(pht('Default Author'))
+          ->setName($default_user_key)
+          ->setLimit(1)
+          ->setValue($default_user_handle)
+          ->setCaption(pht(
+            'Used if the "From:" address does not map to a known account.')));
+    if ($is_new) {
+      $title = pht('New Address');
+    } else {
+      $title = pht('Edit Address');
+    }
     $dialog = id(new AphrontDialogView())
       ->setUser($viewer)
-      ->setTitle(pht('New Address'))
+      ->setWidth(AphrontDialogView::WIDTH_FORM)
+      ->setTitle($title)
       ->appendChild($errors)
       ->appendChild($form)
       ->addSubmitButton(pht('Save'))

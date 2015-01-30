@@ -222,6 +222,7 @@ JX.install('HeraldRuleEditor', {
         case 'taskstatus':
         case 'arcanistprojects':
         case 'legaldocuments':
+        case 'applicationemail':
           var tokenizer = this._newTokenizer(type);
           input = tokenizer[0];
           get_fn = tokenizer[1];

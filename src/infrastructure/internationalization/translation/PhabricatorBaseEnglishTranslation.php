@@ -885,6 +885,11 @@ abstract class PhabricatorBaseEnglishTranslation
 
       '%s edited %s edge(s) for %s, added %s: %s; removed %s: %s.' =>
         '%s edited edges for %3$s, added: %5$s; removed %7$s.',
+
+      '%d related link(s):' => array(
+        'Related link:',
+        'Related links:',
+      ),
     );
   }
 

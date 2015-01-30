@@ -22,6 +22,7 @@ abstract class PhabricatorApplicationTransactionEditor
   private $heraldTranscript;
   private $subscribers;
   private $unmentionablePHIDMap = array();
+  private $applicationEmail;
 
   private $isPreview;
   private $isHeraldEditor;
@@ -183,6 +184,16 @@ abstract class PhabricatorApplicationTransactionEditor
 
   public function getUnmentionablePHIDMap() {
     return $this->unmentionablePHIDMap;
+  }
+
+  public function setApplicationEmail(
+    PhabricatorMetaMTAApplicationEmail $email) {
+    $this->applicationEmail = $email;
+    return $this;
+  }
+
+  public function getApplicationEmail() {
+    return $this->applicationEmail;
   }
 
   public function getTransactionTypes() {
@@ -1229,25 +1240,6 @@ abstract class PhabricatorApplicationTransactionEditor
 
     if (!$mentioned_phids) {
       return $block_xactions;
-    }
-
-    if ($object instanceof PhabricatorProjectInterface) {
-      $phids = $mentioned_phids;
-      $project_type = PhabricatorProjectProjectPHIDType::TYPECONST;
-      foreach ($phids as $key => $phid) {
-        if (phid_get_type($phid) != $project_type) {
-          unset($phids[$key]);
-        }
-      }
-
-      if ($phids) {
-        $edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
-        $block_xactions[] = newv(get_class(head($xactions)), array())
-          ->setIgnoreOnNoEffect(true)
-          ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-          ->setMetadataValue('edge:type', $edge_type)
-          ->setNewValue(array('+' => $phids));
-      }
     }
 
     $mentioned_objects = id(new PhabricatorObjectQuery())
@@ -2427,6 +2419,9 @@ abstract class PhabricatorApplicationTransactionEditor
     $adapter = $this->buildHeraldAdapter($object, $xactions);
     $adapter->setContentSource($this->getContentSource());
     $adapter->setIsNewObject($this->getIsNewObject());
+    if ($this->getApplicationEmail()) {
+      $adapter->setApplicationEmail($this->getApplicationEmail());
+    }
     $xscript = HeraldEngine::loadAndApplyRules($adapter);
 
     $this->setHeraldAdapter($adapter);

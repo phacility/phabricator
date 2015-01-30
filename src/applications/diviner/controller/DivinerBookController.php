@@ -26,6 +26,7 @@ final class DivinerBookController extends DivinerController {
     }
 
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setBorder(true);
 
     $crumbs->addTextCrumb(
       $book->getShortTitle(),

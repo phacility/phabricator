@@ -8,8 +8,10 @@
   font-weight: 400;
   src: local('Source Sans Pro'),
        local('SourceSansPro-Regular'),
+       url(/rsrc/externals/font/sourcesans/SourceSansPro-Regular.woff2)
+        format('woff2'),
        url(/rsrc/externals/font/sourcesans/SourceSansPro.woff)
-       format('woff');
+        format('woff');
 }
 
 @font-face {
@@ -18,6 +20,34 @@
   font-weight: 700;
   src: local('Source Sans Pro Bold'),
        local('SourceSansPro-Bold'),
+       url(/rsrc/externals/font/sourcesans/SourceSansPro-Bold.woff2)
+        format('woff2'),
        url(/rsrc/externals/font/sourcesans/SourceSansProBold.woff)
-       format('woff');
+        format('woff');
+}
+
+@font-face{
+    font-family: 'Source Sans Pro';
+    font-weight: 400;
+    font-style: italic;
+    font-stretch: normal;
+    src: local('Source Sans Pro It'),
+         local('SourceSansPro-It'),
+         url(/rsrc/externals/font/sourcesans/SourceSansPro-It.woff2)
+          format('woff2'),
+         url(/rsrc/externals/font/sourcesans/SourceSansPro-It.woff)
+          format('woff');
+}
+
+@font-face{
+    font-family: 'Source Sans Pro';
+    font-weight: 700;
+    font-style: italic;
+    font-stretch: normal;
+    src: local('Source Sans Pro Bold It'),
+         local('SourceSansPro-BoldIt'),
+         url(/rsrc/externals/font/sourcesans/SourceSansPro-BoldIt.woff2)
+          format('woff'),
+         url(/rsrc/externals/font/sourcesans/SourceSansPro-BoldIt.woff)
+          format('woff');
 }

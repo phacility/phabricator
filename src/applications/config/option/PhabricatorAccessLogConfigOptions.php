@@ -37,6 +37,7 @@ final class PhabricatorAccessLogConfigOptions
     $ssh_map = $common_map + array(
       's' => pht('The system user.'),
       'S' => pht('The system sudo user.'),
+      'k' => pht('ID of the SSH key used to authenticate the request.'),
     );
 
     $http_desc = pht(

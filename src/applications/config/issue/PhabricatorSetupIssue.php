@@ -17,6 +17,7 @@ final class PhabricatorSetupIssue {
   private $commands = array();
   private $mysqlConfig = array();
   private $originalPHPConfigValues = array();
+  private $links;
 
   public function addCommand($command) {
     $this->commands[] = $command;
@@ -162,4 +163,17 @@ final class PhabricatorSetupIssue {
   public function getIsIgnored() {
     return $this->isIgnored;
   }
+
+  public function addLink($href, $name) {
+    $this->links[] = array(
+      'href' => $href,
+      'name' => $name,
+    );
+    return $this;
+  }
+
+  public function getLinks() {
+    return $this->links;
+  }
+
 }

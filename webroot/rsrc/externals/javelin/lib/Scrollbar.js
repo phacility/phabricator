@@ -308,22 +308,30 @@ JX.install('Scrollbar', {
      * Figure out the correct size and offset of the scrollbar handle.
      */
     _resizeBar: function() {
+      // We're hiding and showing the bar itself, not just the handle, because
+      // pages that contain other panels may have scrollbars underneath the
+      // bar. If we don't hide the bar, it ends up eating clicks targeting
+      // these panels.
+
+      // Because the bar may be hidden, we can't measure it. Measure the
+      // viewport instead.
+
       var cdim = JX.Vector.getDim(this._content);
       var spos = JX.Vector.getAggregateScrollForNode(this._viewport);
-      var bdim = JX.Vector.getDim(this._bar);
+      var vdim = JX.Vector.getDim(this._viewport);
 
-      var ratio = bdim.y / cdim.y;
+      var ratio = vdim.y / cdim.y;
 
       var offset = Math.round(ratio * spos.y) + 2;
-      var size = Math.floor(ratio * (bdim.y - 2)) - 2;
+      var size = Math.floor(ratio * (vdim.y - 2)) - 2;
 
       if (size < cdim.y) {
         this._handle.style.top = offset + 'px';
         this._handle.style.height = size + 'px';
 
-        JX.DOM.show(this._handle);
+        JX.DOM.show(this._bar);
       } else {
-        JX.DOM.hide(this._handle);
+        JX.DOM.hide(this._bar);
       }
     },
 

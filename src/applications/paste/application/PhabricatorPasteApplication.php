@@ -49,6 +49,20 @@ final class PhabricatorPasteApplication extends PhabricatorApplication {
     );
   }
 
+  public function supportsEmailIntegration() {
+    return true;
+  }
+
+  public function getAppEmailBlurb() {
+    return pht(
+      'Send email to these addresses to create pastes. %s',
+      phutil_tag(
+        'a',
+        array(
+          'href' => $this->getInboundEmailSupportLink(),),
+        pht('Learn More')));
+  }
+
   protected function getCustomCapabilities() {
     return array(
       PasteDefaultViewCapability::CAPABILITY => array(

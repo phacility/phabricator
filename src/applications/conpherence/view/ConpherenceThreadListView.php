@@ -113,6 +113,9 @@ final class ConpherenceThreadListView extends AphrontView {
       $menu->addMenuItem($item);
     }
 
+    $header = $this->renderMenuItemHeader(pht('Recent'));
+    $menu->addMenuItem($header);
+
     foreach ($conpherences as $conpherence) {
       $item = $this->renderThreadItem($conpherence);
       $menu->addMenuItem($item);
@@ -128,6 +131,13 @@ final class ConpherenceThreadListView extends AphrontView {
     }
 
     return $menu;
+  }
+
+  private function renderMenuItemHeader($title) {
+    $item = id(new PHUIListItemView())
+      ->setType(PHUIListItemView::TYPE_LABEL)
+      ->setName($title);
+    return $item;
   }
 
   public function getScrollMenuItem(
@@ -159,7 +169,7 @@ final class ConpherenceThreadListView extends AphrontView {
       array(
         'class' => 'no-conpherences-menu-item',
       ),
-      pht('No conpherences.'));
+      pht('No Conpherences'));
 
     return id(new PHUIListItemView())
       ->setType(PHUIListItemView::TYPE_CUSTOM)

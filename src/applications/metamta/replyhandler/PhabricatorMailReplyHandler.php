@@ -3,6 +3,7 @@
 abstract class PhabricatorMailReplyHandler {
 
   private $mailReceiver;
+  private $applicationEmail;
   private $actor;
   private $excludePHIDs = array();
 
@@ -14,6 +15,16 @@ abstract class PhabricatorMailReplyHandler {
 
   final public function getMailReceiver() {
     return $this->mailReceiver;
+  }
+
+  public function setApplicationEmail(
+    PhabricatorMetaMTAApplicationEmail $email) {
+    $this->applicationEmail = $email;
+    return $this;
+  }
+
+  public function getApplicationEmail() {
+    return $this->applicationEmail;
   }
 
   final public function setActor(PhabricatorUser $actor) {

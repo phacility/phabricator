@@ -43,6 +43,7 @@ final class PhabricatorSSHPassthruCommand extends Phobject {
   private $execFuture;
   private $willWriteCallback;
   private $willReadCallback;
+  private $pauseIOReads;
 
   public function setCommandChannelFromExecFuture(ExecFuture $exec_future) {
     $exec_channel = new PhutilExecChannel($exec_future);
@@ -76,6 +77,11 @@ final class PhabricatorSSHPassthruCommand extends Phobject {
 
   public function writeErrorIOCallback(PhutilChannel $channel, $data) {
     $this->errorChannel->write($data);
+  }
+
+  public function setPauseIOReads($pause) {
+    $this->pauseIOReads = $pause;
+    return $this;
   }
 
   public function execute() {
@@ -140,16 +146,15 @@ final class PhabricatorSSHPassthruCommand extends Phobject {
       $done = !$command_channel->isOpenForReading() &&
                $command_channel->isReadBufferEmpty();
 
-      $in_message = $io_channel->read();
-      if ($in_message !== null) {
-        $in_message = $this->willWriteData($in_message);
+      if (!$this->pauseIOReads) {
+        $in_message = $io_channel->read();
         if ($in_message !== null) {
-          $command_channel->write($in_message);
+          $this->writeIORead($in_message);
         }
       }
 
       $out_message = $command_channel->read();
-      if ($out_message !== null) {
+      if (strlen($out_message)) {
         $out_message = $this->willReadData($out_message);
         if ($out_message !== null) {
           $io_channel->write($out_message);
@@ -183,6 +188,13 @@ final class PhabricatorSSHPassthruCommand extends Phobject {
       ->resolve();
 
     return $err;
+  }
+
+  public function writeIORead($in_message) {
+    $in_message = $this->willWriteData($in_message);
+    if (strlen($in_message)) {
+      $this->commandChannel->write($in_message);
+    }
   }
 
   public function willWriteData($message) {

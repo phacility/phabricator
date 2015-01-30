@@ -44,6 +44,21 @@ final class PhabricatorFilesApplication extends PhabricatorApplication {
     );
   }
 
+  public function supportsEmailIntegration() {
+    return true;
+  }
+
+  public function getAppEmailBlurb() {
+    return pht(
+      'Send emails with file attachments to these addresses to upload '.
+      'files. %s',
+      phutil_tag(
+        'a',
+        array(
+          'href' => $this->getInboundEmailSupportLink(),),
+        pht('Learn More')));
+  }
+
   protected function getCustomCapabilities() {
     return array(
       FilesDefaultViewCapability::CAPABILITY => array(

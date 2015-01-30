@@ -10,6 +10,8 @@ final class PhabricatorMetaMTAApplicationEmail
 
   private $application = self::ATTACHABLE;
 
+  const CONFIG_DEFAULT_AUTHOR = 'config:default:author';
+
   protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
@@ -48,6 +50,36 @@ final class PhabricatorMetaMTAApplicationEmail
 
   public function getApplication() {
     return self::assertAttached($this->application);
+  }
+
+  public function setConfigValue($key, $value) {
+    $this->configData[$key] = $value;
+    return $this;
+  }
+
+  public function getConfigValue($key, $default = null) {
+    return idx($this->configData, $key, $default);
+  }
+
+
+  public function getInUseMessage() {
+    $applications = PhabricatorApplication::getAllApplications();
+    $applications = mpull($applications, null, 'getPHID');
+    $application = idx(
+      $applications,
+      $this->getApplicationPHID());
+    if ($application) {
+      $message = pht(
+        'The address %s is configured to be used by the %s Application.',
+        $this->getAddress(),
+        $application->getName());
+    } else {
+      $message = pht(
+        'The address %s is configured to be used by an application.',
+        $this->getAddress());
+    }
+
+    return $message;
   }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */

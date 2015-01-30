@@ -39,6 +39,7 @@ abstract class HeraldAdapter {
   const FIELD_AUTHOR_RAW             = 'author-raw';
   const FIELD_COMMITTER_RAW          = 'committer-raw';
   const FIELD_IS_NEW_OBJECT          = 'new-object';
+  const FIELD_APPLICATION_EMAIL      = 'applicaton-email';
   const FIELD_TASK_PRIORITY          = 'taskpriority';
   const FIELD_TASK_STATUS            = 'taskstatus';
   const FIELD_ARCANIST_PROJECT       = 'arcanist-project';
@@ -98,11 +99,13 @@ abstract class HeraldAdapter {
   const VALUE_BUILD_PLAN      = 'buildplan';
   const VALUE_TASK_PRIORITY   = 'taskpriority';
   const VALUE_TASK_STATUS     = 'taskstatus';
-  const VALUE_ARCANIST_PROJECT = 'arcanistprojects';
-  const VALUE_LEGAL_DOCUMENTS = 'legaldocuments';
+  const VALUE_ARCANIST_PROJECT  = 'arcanistprojects';
+  const VALUE_LEGAL_DOCUMENTS   = 'legaldocuments';
+  const VALUE_APPLICATION_EMAIL = 'applicationemail';
 
   private $contentSource;
   private $isNewObject;
+  private $applicationEmail;
   private $customFields = false;
   private $customActions = null;
   private $queuedTransactions = array();
@@ -156,6 +159,16 @@ abstract class HeraldAdapter {
     return $this;
   }
 
+  public function setApplicationEmail(
+    PhabricatorMetaMTAApplicationEmail $email) {
+    $this->applicationEmail = $email;
+    return $this;
+  }
+
+  public function getApplicationEmail() {
+    return $this->applicationEmail;
+  }
+
   abstract public function getPHID();
   abstract public function getHeraldName();
 
@@ -169,6 +182,14 @@ abstract class HeraldAdapter {
         return true;
       case self::FIELD_IS_NEW_OBJECT:
         return $this->getIsNewObject();
+      case self::FIELD_APPLICATION_EMAIL:
+        $value = array();
+        // while there is only one match by implementation, we do set
+        // comparisons on phids, so return an array with just the phid
+        if ($this->getApplicationEmail()) {
+          $value[] = $this->getApplicationEmail()->getPHID();
+        }
+        return $value;
       default:
         if ($this->isHeraldCustomKey($field_name)) {
           return $this->getCustomFieldValue($field_name);
@@ -312,6 +333,7 @@ abstract class HeraldAdapter {
       self::FIELD_AUTHOR_RAW => pht('Raw author name'),
       self::FIELD_COMMITTER_RAW => pht('Raw committer name'),
       self::FIELD_IS_NEW_OBJECT => pht('Is newly created?'),
+      self::FIELD_APPLICATION_EMAIL => pht('Receiving email address'),
       self::FIELD_TASK_PRIORITY => pht('Task priority'),
       self::FIELD_TASK_STATUS => pht('Task status'),
       self::FIELD_ARCANIST_PROJECT => pht('Arcanist Project'),
@@ -396,6 +418,13 @@ abstract class HeraldAdapter {
       case self::FIELD_REPOSITORY_PROJECTS:
         return array(
           self::CONDITION_INCLUDE_ALL,
+          self::CONDITION_INCLUDE_ANY,
+          self::CONDITION_INCLUDE_NONE,
+          self::CONDITION_EXISTS,
+          self::CONDITION_NOT_EXISTS,
+        );
+      case self::FIELD_APPLICATION_EMAIL:
+        return array(
           self::CONDITION_INCLUDE_ANY,
           self::CONDITION_INCLUDE_NONE,
           self::CONDITION_EXISTS,
@@ -874,6 +903,8 @@ abstract class HeraldAdapter {
             return self::VALUE_PROJECT;
           case self::FIELD_REVIEWERS:
             return self::VALUE_USER_OR_PROJECT;
+          case self::FIELD_APPLICATION_EMAIL:
+            return self::VALUE_APPLICATION_EMAIL;
           default:
             return self::VALUE_USER;
         }
