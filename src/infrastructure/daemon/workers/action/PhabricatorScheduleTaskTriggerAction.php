@@ -38,7 +38,10 @@ final class PhabricatorScheduleTaskTriggerAction
   public function execute($last_epoch, $this_epoch) {
     PhabricatorWorker::scheduleTask(
       $this->getProperty('class'),
-      $this->getProperty('data'),
+      $this->getProperty('data') + array(
+        'trigger.last-epoch' => $last_epoch,
+        'trigger.this-epoch' => $this_epoch,
+      ),
       $this->getProperty('options'));
   }
 

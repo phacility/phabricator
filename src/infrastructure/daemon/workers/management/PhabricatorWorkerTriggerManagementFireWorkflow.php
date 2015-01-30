@@ -47,12 +47,12 @@ final class PhabricatorWorkerTriggerManagementFireWorkflow
     $triggers = $this->loadTriggers($args);
 
     $now = $args->getArg('now');
-    $now = $this->parseTime($now);
+    $now = $this->parseTimeArgument($now);
     if (!$now) {
       $now = PhabricatorTime::getNow();
     }
 
-    PhabricatorTime::pushTime($now, date_default_timezone_get());
+    $time_guard = PhabricatorTime::pushTime($now, date_default_timezone_get());
 
     $console->writeOut(
       "%s\n",
@@ -60,8 +60,8 @@ final class PhabricatorWorkerTriggerManagementFireWorkflow
         'Set current time to %s.',
         phabricator_datetime(PhabricatorTime::getNow(), $viewer)));
 
-    $last_time = $this->parseTime($args->getArg('last'));
-    $next_time = $this->parseTime($args->getArg('next'));
+    $last_time = $this->parseTimeArgument($args->getArg('last'));
+    $next_time = $this->parseTimeArgument($args->getArg('next'));
 
     PhabricatorWorker::setRunAllTasksInProcess(true);
 
@@ -84,7 +84,7 @@ final class PhabricatorWorkerTriggerManagementFireWorkflow
         $console->writeOut(
           "%s\n",
           pht(
-            'Trigger is not scheduled to execute. Use --at to simluate '.
+            'Trigger is not scheduled to execute. Use --next to simluate '.
             'a scheduled event.'));
         continue;
       } else {
