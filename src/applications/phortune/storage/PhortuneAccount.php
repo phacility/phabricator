@@ -32,7 +32,7 @@ final class PhortuneAccount extends PhortuneDAO
     $xactions = array();
     $xactions[] = id(new PhortuneAccountTransaction())
       ->setTransactionType(PhortuneAccountTransaction::TYPE_NAME)
-      ->setNewValue(pht('Personal Account'));
+      ->setNewValue(pht('Default Account'));
 
     $xactions[] = id(new PhortuneAccountTransaction())
       ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)

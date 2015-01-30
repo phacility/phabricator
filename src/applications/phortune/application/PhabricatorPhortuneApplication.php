@@ -23,7 +23,7 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
   }
 
   public function getTitleGlyph() {
-    return "\xE2\x9C\x98";
+    return "\xE2\x97\x87";
   }
 
   public function getApplicationGroup() {
@@ -45,8 +45,12 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
           ),
           'order/(?:query/(?P<queryKey>[^/]+)/)?'
             => 'PhortuneCartListController',
-          'subscription/(?:query/(?P<queryKey>[^/]+)/)?'
-            => 'PhortuneSubscriptionListController',
+          'subscription/' => array(
+            '(?:query/(?P<queryKey>[^/]+)/)?'
+              => 'PhortuneSubscriptionListController',
+            'view/(?P<id>\d+)/'
+              => 'PhortuneSubscriptionViewController',
+          ),
           'charge/(?:query/(?P<queryKey>[^/]+)/)?'
             => 'PhortuneChargeListController',
         ),
@@ -81,8 +85,12 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
           'edit/(?:(?P<id>\d+)/)?' => 'PhortuneMerchantEditController',
           'orders/(?P<merchantID>\d+)/(?:query/(?P<queryKey>[^/]+)/)?'
             => 'PhortuneCartListController',
-          'subscription/(?P<merchantID>\d+)/(?:query/(?P<queryKey>[^/]+)/)?'
-            => 'PhortuneSubscriptionListController',
+          '(?P<merchantID>\d+)/subscription/' => array(
+            '(?:query/(?P<queryKey>[^/]+)/)?'
+              => 'PhortuneSubscriptionListController',
+            'view/(?P<id>\d+)/'
+              => 'PhortuneSubscriptionViewController',
+          ),
           '(?P<id>\d+)/' => 'PhortuneMerchantViewController',
         ),
       ),

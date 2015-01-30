@@ -144,6 +144,7 @@ final class PhortuneSubscriptionSearchEngine
     $merchant = $this->getMerchant();
     if ($merchant) {
       $header = pht('Subscriptions for %s', $merchant->getName());
+      $table->setIsMerchantView(true);
     } else {
       $header = pht('Your Subscriptions');
     }

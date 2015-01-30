@@ -7,11 +7,31 @@ abstract class PhortuneController extends PhabricatorController {
     PhortuneAccount $account,
     $link = true) {
 
-    $name = pht('Account');
+    $name = $account->getName();
     $href = null;
 
     if ($link) {
       $href = $this->getApplicationURI($account->getID().'/');
+      $crumbs->addTextCrumb($name, $href);
+    } else {
+      $crumbs->addTextCrumb($name);
+    }
+  }
+
+  protected function addMerchantCrumb(
+    $crumbs,
+    PhortuneMerchant $merchant,
+    $link = true) {
+
+    $name = $merchant->getName();
+    $href = null;
+
+    $crumbs->addTextCrumb(
+      pht('Merchants'),
+      $this->getApplicationURI('merchant/'));
+
+    if ($link) {
+      $href = $this->getApplicationURI('merchant/'.$merchant->getID().'/');
       $crumbs->addTextCrumb($name, $href);
     } else {
       $crumbs->addTextCrumb($name);

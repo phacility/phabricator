@@ -153,6 +153,7 @@ final class PhortuneSubscription extends PhortuneDAO
             ),
           ));
 
+        $trigger->setPHID($trigger_phid);
         $trigger->setAction($trigger_action);
         $trigger->save();
       }
@@ -163,6 +164,19 @@ final class PhortuneSubscription extends PhortuneDAO
 
   public function getSubscriptionName() {
     return $this->getImplementation()->getName($this);
+  }
+
+  public function getURI() {
+    $account_id = $this->getAccount()->getID();
+    $id = $this->getID();
+
+    return "/phortune/{$account_id}/subscription/view/{$id}/";
+  }
+
+  public function getMerchantURI() {
+    $merchant_id = $this->getMerchant()->getID();
+    $id = $this->getID();
+    return "/phortune/merchant/{$merchant_id}/subscription/view/{$id}/";
   }
 
 

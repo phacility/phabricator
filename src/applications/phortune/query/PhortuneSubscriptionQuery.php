@@ -9,6 +9,8 @@ final class PhortuneSubscriptionQuery
   private $merchantPHIDs;
   private $statuses;
 
+  private $needTriggers;
+
   public function withIDs(array $ids) {
     $this->ids = $ids;
     return $this;
@@ -31,6 +33,11 @@ final class PhortuneSubscriptionQuery
 
   public function withStatuses(array $statuses) {
     $this->statuses = $statuses;
+    return $this;
+  }
+
+  public function needTriggers($need_triggers) {
+    $this->needTriggers = $need_triggers;
     return $this;
   }
 
@@ -100,6 +107,24 @@ final class PhortuneSubscriptionQuery
         continue;
       }
       $subscription->attachImplementation($implementation);
+    }
+
+    if ($this->needTriggers) {
+      $trigger_phids = mpull($subscriptions, 'getTriggerPHID');
+      $triggers = id(new PhabricatorWorkerTriggerQuery())
+        ->setViewer($this->getViewer())
+        ->withPHIDs($trigger_phids)
+        ->needEvents(true)
+        ->execute();
+      $triggers = mpull($triggers, null, 'getPHID');
+      foreach ($subscriptions as $key => $subscription) {
+        $trigger = idx($triggers, $subscription->getTriggerPHID());
+        if (!$trigger) {
+          unset($subscriptions[$key]);
+          continue;
+        }
+        $subscription->attachTrigger($trigger);
+      }
     }
 
     return $subscriptions;
