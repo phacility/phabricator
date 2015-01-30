@@ -14,10 +14,6 @@ final class PhabricatorPhluxApplication extends PhabricatorApplication {
     return pht('Key/Value Configuration Store');
   }
 
-  public function getIconName() {
-    return 'phlux';
-  }
-
   public function getFontIcon() {
     return 'fa-copy';
   }

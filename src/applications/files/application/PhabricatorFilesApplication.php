@@ -14,10 +14,6 @@ final class PhabricatorFilesApplication extends PhabricatorApplication {
     return pht('Store and Share Files');
   }
 
-  public function getIconName() {
-    return 'files';
-  }
-
   public function getFontIcon() {
     return 'fa-file';
   }

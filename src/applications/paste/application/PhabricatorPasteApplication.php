@@ -10,10 +10,6 @@ final class PhabricatorPasteApplication extends PhabricatorApplication {
     return '/paste/';
   }
 
-  public function getIconName() {
-    return 'paste';
-  }
-
   public function getFontIcon() {
     return 'fa-paste';
   }

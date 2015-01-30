@@ -10,10 +10,6 @@ final class PhabricatorOwnersApplication extends PhabricatorApplication {
     return '/owners/';
   }
 
-  public function getIconName() {
-    return 'owners';
-  }
-
   public function getFontIcon() {
     return 'fa-gift';
   }

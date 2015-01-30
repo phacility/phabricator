@@ -14,10 +14,6 @@ final class PhabricatorChatLogApplication extends PhabricatorApplication {
     return pht('IRC Logs');
   }
 
-  public function getIconName() {
-    return 'chatlog';
-  }
-
   public function getFontIcon() {
     return 'fa-coffee';
   }

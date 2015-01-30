@@ -14,10 +14,6 @@ final class PhabricatorReleephApplication extends PhabricatorApplication {
     return '/releeph/';
   }
 
-  public function getIconName() {
-    return 'releeph';
-  }
-
   public function getFontIcon() {
     return 'fa-flag-checkered';
   }

@@ -10,10 +10,6 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
     return '/auth/';
   }
 
-  public function getIconName() {
-    return 'authentication';
-  }
-
   public function getFontIcon() {
     return 'fa-key';
   }

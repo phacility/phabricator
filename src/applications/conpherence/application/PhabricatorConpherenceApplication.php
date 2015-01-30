@@ -14,10 +14,6 @@ final class PhabricatorConpherenceApplication extends PhabricatorApplication {
     return pht('Send Messages');
   }
 
-  public function getIconName() {
-    return 'conpherence';
-  }
-
   public function getFontIcon() {
     return 'fa-comments';
   }
