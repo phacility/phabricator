@@ -162,6 +162,22 @@ EOTEXT
     return $status;
   }
 
+  public function supportsEmailIntegration() {
+    return true;
+  }
+
+  public function getAppEmailBlurb() {
+    return pht(
+      'Send email to these addresses to create revisions. The body of the '.
+      'message and / or one or more attachments should be the output of a '.
+      '"diff" command. %s',
+      phutil_tag(
+        'a',
+        array(
+          'href' => $this->getInboundEmailSupportLink(),),
+        pht('Learn More')));
+  }
+
   protected function getCustomCapabilities() {
     return array(
       DifferentialDefaultViewCapability::CAPABILITY => array(
