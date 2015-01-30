@@ -15,6 +15,8 @@ final class PhortuneSubscriptionViewController extends PhortuneController {
     }
 
     $is_merchant = (bool)$request->getURIData('merchantID');
+    $merchant = $subscription->getMerchant();
+    $account = $subscription->getAccount();
 
     $title = pht('Subscription: %s', $subscription->getSubscriptionName());
 
@@ -27,9 +29,9 @@ final class PhortuneSubscriptionViewController extends PhortuneController {
 
     $crumbs = $this->buildApplicationCrumbs();
     if ($is_merchant) {
-      $this->addMerchantCrumb($crumbs, $subscription->getMerchant());
+      $this->addMerchantCrumb($crumbs, $merchant);
     } else {
-      $this->addAccountCrumb($crumbs, $subscription->getAccount());
+      $this->addAccountCrumb($crumbs, $account);
     }
     $crumbs->addTextCrumb(pht('Subscription %d', $subscription->getID()));
 
@@ -46,10 +48,66 @@ final class PhortuneSubscriptionViewController extends PhortuneController {
       ->setHeader($header)
       ->addPropertyList($properties);
 
+    $carts = id(new PhortuneCartQuery())
+      ->setViewer($viewer)
+      ->withSubscriptionPHIDs(array($subscription->getPHID()))
+      ->needPurchases(true)
+      ->withStatuses(
+        array(
+          PhortuneCart::STATUS_PURCHASING,
+          PhortuneCart::STATUS_CHARGED,
+          PhortuneCart::STATUS_HOLD,
+          PhortuneCart::STATUS_REVIEW,
+          PhortuneCart::STATUS_PURCHASED,
+        ))
+      ->execute();
+
+    $phids = array();
+    foreach ($carts as $cart) {
+      $phids[] = $cart->getPHID();
+      foreach ($cart->getPurchases() as $purchase) {
+        $phids[] = $purchase->getPHID();
+      }
+    }
+    $handles = $this->loadViewerHandles($phids);
+
+    $invoice_table = id(new PhortuneOrderTableView())
+      ->setUser($viewer)
+      ->setCarts($carts)
+      ->setHandles($handles);
+
+    $account_id = $account->getID();
+    $merchant_id = $merchant->getID();
+    $subscription_id = $subscription->getID();
+
+    if ($is_merchant) {
+      $invoices_uri = $this->getApplicationURI(
+        "merchant/{$merchant_id}/subscription/order/{$subscription_id}/");
+    } else {
+      $invoices_uri = $this->getApplicationURI(
+        "{$account_id}/subscription/order/{$subscription_id}/");
+    }
+
+    $invoice_header = id(new PHUIHeaderView())
+      ->setHeader(pht('Recent Invoices'))
+      ->addActionLink(
+        id(new PHUIButtonView())
+          ->setTag('a')
+          ->setIcon(
+            id(new PHUIIconView())
+              ->setIconFont('fa-list'))
+          ->setHref($invoices_uri)
+          ->setText(pht('View All Invoices')));
+
+    $invoice_box = id(new PHUIObjectBoxView())
+      ->setHeader($invoice_header)
+      ->appendChild($invoice_table);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $object_box,
+        $invoice_box,
       ),
       array(
         'title' => $title,

@@ -50,6 +50,8 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
               => 'PhortuneSubscriptionListController',
             'view/(?P<id>\d+)/'
               => 'PhortuneSubscriptionViewController',
+            'order/(?P<subscriptionID>\d+)/'
+              => 'PhortuneCartListController',
           ),
           'charge/(?:query/(?P<queryKey>[^/]+)/)?'
             => 'PhortuneChargeListController',
@@ -90,6 +92,8 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
               => 'PhortuneSubscriptionListController',
             'view/(?P<id>\d+)/'
               => 'PhortuneSubscriptionViewController',
+            'order/(?P<subscriptionID>\d+)/'
+              => 'PhortuneCartListController',
           ),
           '(?P<id>\d+)/' => 'PhortuneMerchantViewController',
         ),

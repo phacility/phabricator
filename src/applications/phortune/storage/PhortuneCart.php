@@ -16,6 +16,7 @@ final class PhortuneCart extends PhortuneDAO
   protected $accountPHID;
   protected $authorPHID;
   protected $merchantPHID;
+  protected $subscriptionPHID;
   protected $cartClass;
   protected $status;
   protected $metadata = array();
@@ -518,6 +519,7 @@ final class PhortuneCart extends PhortuneDAO
         'status' => 'text32',
         'cartClass' => 'text128',
         'mailKey' => 'bytes20',
+        'subscriptionPHID' => 'phid?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_account' => array(
@@ -525,6 +527,9 @@ final class PhortuneCart extends PhortuneDAO
         ),
         'key_merchant' => array(
           'columns' => array('merchantPHID'),
+        ),
+        'key_subscription' => array(
+          'columns' => array('subscriptionPHID'),
         ),
       ),
     ) + parent::getConfiguration();

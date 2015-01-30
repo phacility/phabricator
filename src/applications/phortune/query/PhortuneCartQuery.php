@@ -7,6 +7,7 @@ final class PhortuneCartQuery
   private $phids;
   private $accountPHIDs;
   private $merchantPHIDs;
+  private $subscriptionPHIDs;
   private $statuses;
 
   private $needPurchases;
@@ -28,6 +29,11 @@ final class PhortuneCartQuery
 
   public function withMerchantPHIDs(array $merchant_phids) {
     $this->merchantPHIDs = $merchant_phids;
+    return $this;
+  }
+
+  public function withSubscriptionPHIDs(array $subscription_phids) {
+    $this->subscriptionPHIDs = $subscription_phids;
     return $this;
   }
 
@@ -156,6 +162,13 @@ final class PhortuneCartQuery
         $conn,
         'cart.merchantPHID IN (%Ls)',
         $this->merchantPHIDs);
+    }
+
+    if ($this->subscriptionPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn,
+        'cart.subscriptionPHID IN (%Ls)',
+        $this->subscriptionPHIDs);
     }
 
     if ($this->statuses !== null) {

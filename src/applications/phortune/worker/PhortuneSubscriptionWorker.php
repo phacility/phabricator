@@ -8,8 +8,55 @@ final class PhortuneSubscriptionWorker extends PhabricatorWorker {
     $range = $this->getBillingPeriodRange($subscription);
     list($last_epoch, $next_epoch) = $range;
 
-    // TODO: Actual billing.
-    echo "Bill from {$last_epoch} to {$next_epoch}.\n";
+    $account = $subscription->getAccount();
+    $merchant = $subscription->getMerchant();
+
+    $viewer = PhabricatorUser::getOmnipotentUser();
+
+    $product = id(new PhortuneProductQuery())
+      ->setViewer($viewer)
+      ->withClassAndRef('PhortuneSubscriptionProduct', $subscription->getPHID())
+      ->executeOne();
+
+    $cart_implementation = id(new PhortuneSubscriptionCart())
+      ->setSubscription($subscription);
+
+
+    // TODO: This isn't really ideal. It would be better to use an application
+    // actor than the original author of the subscription. In particular, if
+    // someone initiates a subscription, adds some other account managers, and
+    // later leaves the company, they'll continue "acting" here indefinitely.
+    // However, for now, some of the stuff later in the pipeline requires a
+    // valid actor with a real PHID. The subscription should eventually be
+    // able to create these invoices "as" the application it is acting on
+    // behalf of.
+    $actor = id(new PhabricatorPeopleQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($subscription->getAuthorPHID()))
+      ->executeOne();
+    if (!$actor) {
+      throw new Exception(pht('Failed to load actor to bill subscription!'));
+    }
+
+    $cart = $account->newCart($actor, $cart_implementation, $merchant);
+
+    $purchase = $cart->newPurchase($actor, $product);
+
+    // TODO: Consider allowing subscriptions to cost an amount other than one
+    // dollar and twenty-three cents.
+    $currency = PhortuneCurrency::newFromUserInput($actor, '1.23 USD');
+
+    $purchase
+      ->setBasePriceAsCurrency($currency)
+      ->setMetadataValue('subscriptionPHID', $subscription->getPHID())
+      ->save();
+
+    $cart->setSubscriptionPHID($subscription->getPHID());
+    $cart->activateCart();
+
+    // TODO: Autocharge this, etc.; this is still mostly faked up.
+    echo 'Okay, made a cart here: ';
+    echo $cart->getCheckoutURI()."\n\n";
   }
 
 
