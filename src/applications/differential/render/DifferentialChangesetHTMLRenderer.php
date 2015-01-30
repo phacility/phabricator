@@ -443,8 +443,9 @@ abstract class DifferentialChangesetHTMLRenderer
     $user = $this->getUser();
     $edit = $user &&
             ($comment->getAuthorPHID() == $user->getPHID()) &&
-            ($comment->isDraft());
-    $allow_reply = (bool)$user;
+            ($comment->isDraft())
+            && $this->getShowEditAndReplyLinks();
+    $allow_reply = (bool)$user && $this->getShowEditAndReplyLinks();
 
     return id(new DifferentialInlineCommentView())
       ->setInlineComment($comment)

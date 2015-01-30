@@ -29,9 +29,18 @@ abstract class DifferentialChangesetRenderer {
   private $mask;
   private $depths;
   private $originalCharacterEncoding;
+  private $showEditAndReplyLinks;
 
   private $oldFile = false;
   private $newFile = false;
+
+  public function setShowEditAndReplyLinks($bool) {
+    $this->showEditAndReplyLinks = $bool;
+    return $this;
+  }
+  public function getShowEditAndReplyLinks() {
+    return $this->showEditAndReplyLinks;
+  }
 
   public function setOriginalCharacterEncoding($original_character_encoding) {
     $this->originalCharacterEncoding = $original_character_encoding;
