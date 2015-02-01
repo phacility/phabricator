@@ -387,12 +387,11 @@ abstract class DiffusionRequest {
     if (empty($this->repositoryCommit)) {
       $repository = $this->getRepository();
 
-      // TODO: (T603) This should be a real query, but we need to sort out
-      // the viewer.
-      $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
-        'repositoryID = %d AND commitIdentifier = %s',
-        $repository->getID(),
-        $this->getStableCommit());
+      $commit = id(new DiffusionCommitQuery())
+        ->setViewer($this->getUser())
+        ->withRepositoryIDs(array($repository->getID()))
+        ->withIdentifiers(array($this->getStableCommit()))
+        ->executeOne();
       if ($commit) {
         $commit->attachRepository($repository);
       }
