@@ -8,9 +8,7 @@ final class DivinerLivePublisher extends DivinerPublisher {
     if (!$this->book) {
       $book_name = $this->getConfig('name');
 
-      $book = id(new DivinerLiveBook())->loadOneWhere(
-        'name = %s',
-        $book_name);
+      $book = id(new DivinerLiveBook())->loadOneWhere('name = %s', $book_name);
       if (!$book) {
         $book = id(new DivinerLiveBook())
           ->setName($book_name)
@@ -19,9 +17,9 @@ final class DivinerLivePublisher extends DivinerPublisher {
       }
 
       $book->setConfigurationData($this->getConfigurationData())->save();
-
       $this->book = $book;
     }
+
     return $this->book;
   }
 
@@ -75,7 +73,6 @@ final class DivinerLivePublisher extends DivinerPublisher {
   protected function deleteDocumentsByHash(array $hashes) {
     $atom_table = new DivinerLiveAtom();
     $symbol_table = new DivinerLiveSymbol();
-
     $conn_w = $symbol_table->establishConnection('w');
 
     $strings = array();
@@ -149,7 +146,6 @@ final class DivinerLivePublisher extends DivinerPublisher {
 
   public function findAtomByRef(DivinerAtomRef $ref) {
     // TODO: Actually implement this.
-
     return null;
   }
 
