@@ -62,6 +62,22 @@ final class PhortuneSubscriptionProduct
     return;
   }
 
+  public function getPurchaseName(
+    PhortuneProduct $product,
+    PhortunePurchase $purchase) {
+    return $this->getSubscription()->getPurchaseName(
+      $product,
+      $purchase);
+  }
+
+  public function getPurchaseURI(
+    PhortuneProduct $product,
+    PhortunePurchase $purchase) {
+    return $this->getSubscription()->getPurchaseURI(
+      $product,
+      $purchase);
+  }
+
   public function loadImplementationsForRefs(
     PhabricatorUser $viewer,
     array $refs) {

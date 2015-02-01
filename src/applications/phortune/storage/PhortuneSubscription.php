@@ -168,6 +168,14 @@ final class PhortuneSubscription extends PhortuneDAO
     return $this->getImplementation()->getName($this);
   }
 
+  public function getSubscriptionFullName() {
+    return $this->getImplementation()->getFullName($this);
+  }
+
+  public function getSubscriptionCrumbName() {
+    return $this->getImplementation()->getCrumbName($this);
+  }
+
   public function getCartName(PhortuneCart $cart) {
     return $this->getImplementation()->getCartName($this, $cart);
   }
@@ -190,6 +198,24 @@ final class PhortuneSubscription extends PhortuneDAO
       $this,
       $start_epoch,
       $end_epoch);
+  }
+
+  public function getPurchaseName(
+    PhortuneProduct $product,
+    PhortunePurchase $purchase) {
+    return $this->getImplementation()->getPurchaseName(
+      $this,
+      $product,
+      $purchase);
+  }
+
+  public function getPurchaseURI(
+    PhortuneProduct $product,
+    PhortunePurchase $purchase) {
+    return $this->getImplementation()->getPurchaseURI(
+      $this,
+      $product,
+      $purchase);
   }
 
 

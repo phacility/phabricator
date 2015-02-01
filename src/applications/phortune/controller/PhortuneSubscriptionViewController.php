@@ -26,10 +26,10 @@ final class PhortuneSubscriptionViewController extends PhortuneController {
     $account_id = $account->getID();
     $subscription_id = $subscription->getID();
 
-    $title = pht('Subscription: %s', $subscription->getSubscriptionName());
+    $title = $subscription->getSubscriptionFullName();
 
     $header = id(new PHUIHeaderView())
-      ->setHeader($subscription->getSubscriptionName());
+      ->setHeader($title);
 
     $actions = id(new PhabricatorActionListView())
       ->setUser($viewer)
@@ -53,7 +53,7 @@ final class PhortuneSubscriptionViewController extends PhortuneController {
     } else {
       $this->addAccountCrumb($crumbs, $account);
     }
-    $crumbs->addTextCrumb(pht('Subscription %d', $subscription->getID()));
+    $crumbs->addTextCrumb($subscription->getSubscriptionCrumbName());
 
     $properties = id(new PHUIPropertyListView())
       ->setUser($viewer)

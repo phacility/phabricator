@@ -55,7 +55,7 @@ final class PhortuneSubscriptionTableView extends AphrontView {
           array(
             'href' => $uri,
           ),
-          $subscription->getSubscriptionName()),
+          $subscription->getSubscriptionFullName()),
         phabricator_datetime($subscription->getDateCreated(), $viewer),
       );
     }

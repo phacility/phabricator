@@ -49,6 +49,8 @@ final class PhortuneSubscriptionWorker extends PhabricatorWorker {
     $purchase
       ->setBasePriceAsCurrency($currency)
       ->setMetadataValue('subscriptionPHID', $subscription->getPHID())
+      ->setMetadataValue('epoch.start', $last_epoch)
+      ->setMetadataValue('epoch.end', $next_epoch)
       ->save();
 
     $cart->setSubscriptionPHID($subscription->getPHID());

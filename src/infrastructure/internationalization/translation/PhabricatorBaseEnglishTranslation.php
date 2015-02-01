@@ -901,6 +901,11 @@ abstract class PhabricatorBaseEnglishTranslation
         'Related link:',
         'Related links:',
       ),
+
+      'You have %d unpaid invoice(s).' => array(
+        'You have an unpaid invoice.',
+        'You have unpaid invoices.',
+      ),
     );
   }
 

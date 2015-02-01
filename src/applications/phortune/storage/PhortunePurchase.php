@@ -87,6 +87,10 @@ final class PhortunePurchase extends PhortuneDAO
     return $this->getProduct()->getPurchaseName($this);
   }
 
+  public function getURI() {
+    return $this->getProduct()->getPurchaseURI($this);
+  }
+
   public function getTotalPriceAsCurrency() {
     return $this->getBasePriceAsCurrency();
   }
