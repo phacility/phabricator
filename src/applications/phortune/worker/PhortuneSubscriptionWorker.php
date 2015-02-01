@@ -42,9 +42,9 @@ final class PhortuneSubscriptionWorker extends PhabricatorWorker {
 
     $purchase = $cart->newPurchase($actor, $product);
 
-    // TODO: Consider allowing subscriptions to cost an amount other than one
-    // dollar and twenty-three cents.
-    $currency = PhortuneCurrency::newFromUserInput($actor, '1.23 USD');
+    $currency = $subscription->getCostForBillingPeriodAsCurrency(
+      $last_epoch,
+      $next_epoch);
 
     $purchase
       ->setBasePriceAsCurrency($currency)

@@ -183,6 +183,13 @@ final class PhortuneSubscription extends PhortuneDAO
     return "/phortune/merchant/{$merchant_id}/subscription/view/{$id}/";
   }
 
+  public function getCostForBillingPeriodAsCurrency($start_epoch, $end_epoch) {
+    return $this->getImplementation()->getCostForBillingPeriodAsCurrency(
+      $this,
+      $start_epoch,
+      $end_epoch);
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

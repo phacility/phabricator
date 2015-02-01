@@ -43,6 +43,7 @@ final class PhortuneSubscriptionProduct
   }
 
   public function getPriceAsCurrency(PhortuneProduct $product) {
+    // Prices are calculated by the SubscriptionImplementation.
     return PhortuneCurrency::newEmptyCurrency();
   }
 

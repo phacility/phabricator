@@ -8,6 +8,10 @@ abstract class PhortuneSubscriptionImplementation {
 
   abstract public function getRef();
   abstract public function getName(PhortuneSubscription $subscription);
+  abstract public function getCostForBillingPeriodAsCurrency(
+    PhortuneSubscription $subscription,
+    $start_epoch,
+    $end_epoch);
 
   protected function getContentSource() {
     return PhabricatorContentSource::newForSource(
