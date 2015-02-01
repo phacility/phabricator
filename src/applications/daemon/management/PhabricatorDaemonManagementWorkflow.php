@@ -340,6 +340,7 @@ abstract class PhabricatorDaemonManagementWorkflow
     $daemons = array(
       array('PhabricatorRepositoryPullLocalDaemon', array()),
       array('PhabricatorGarbageCollectorDaemon', array()),
+      array('PhabricatorTriggerDaemon', array()),
     );
 
     $taskmasters = PhabricatorEnv::getEnvConfig('phd.start-taskmasters');
