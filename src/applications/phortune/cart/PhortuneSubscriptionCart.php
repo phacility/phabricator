@@ -25,7 +25,7 @@ final class PhortuneSubscriptionCart
   }
 
   public function getName(PhortuneCart $cart) {
-    return pht('Subscription');
+    return $this->getSubscription()->getCartName($cart);
   }
 
   public function willCreateCart(

@@ -15,4 +15,10 @@ abstract class PhortuneSubscriptionImplementation {
       array());
   }
 
+  public function getCartName(
+    PhortuneSubscription $subscription,
+    PhortuneCart $cart) {
+    return pht('Subscription');
+  }
+
 }

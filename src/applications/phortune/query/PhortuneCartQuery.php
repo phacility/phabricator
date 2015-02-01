@@ -9,6 +9,7 @@ final class PhortuneCartQuery
   private $merchantPHIDs;
   private $subscriptionPHIDs;
   private $statuses;
+  private $invoices;
 
   private $needPurchases;
 
@@ -39,6 +40,18 @@ final class PhortuneCartQuery
 
   public function withStatuses(array $statuses) {
     $this->statuses = $statuses;
+    return $this;
+  }
+
+
+  /**
+   * Include or exclude carts which represent invoices with payments due.
+   *
+   * @param bool `true` to select invoices; `false` to exclude invoices.
+   * @return this
+   */
+  public function withInvoices($invoices) {
+    $this->invoices = $invoices;
     return $this;
   }
 
@@ -176,6 +189,20 @@ final class PhortuneCartQuery
         $conn,
         'cart.status IN (%Ls)',
         $this->statuses);
+    }
+
+    if ($this->invoices !== null) {
+      if ($this->invoices) {
+        $where[] = qsprintf(
+          $conn,
+          'cart.status = %s AND cart.subscriptionPHID IS NOT NULL',
+          PhortuneCart::STATUS_READY);
+      } else {
+        $where[] = qsprintf(
+          $conn,
+          'cart.status != %s OR cart.subscriptionPHID IS NULL',
+          PhortuneCart::STATUS_READY);
+      }
     }
 
     return $this->formatWhereClause($where);

@@ -166,6 +166,10 @@ final class PhortuneSubscription extends PhortuneDAO
     return $this->getImplementation()->getName($this);
   }
 
+  public function getCartName(PhortuneCart $cart) {
+    return $this->getImplementation()->getCartName($this, $cart);
+  }
+
   public function getURI() {
     $account_id = $this->getAccount()->getID();
     $id = $this->getID();
