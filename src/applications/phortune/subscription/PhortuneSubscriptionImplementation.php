@@ -22,12 +22,6 @@ abstract class PhortuneSubscriptionImplementation {
     $start_epoch,
     $end_epoch);
 
-  protected function getContentSource() {
-    return PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_PHORTUNE,
-      array());
-  }
-
   public function getCartName(
     PhortuneSubscription $subscription,
     PhortuneCart $cart) {

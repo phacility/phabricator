@@ -73,9 +73,27 @@ final class PhortuneSubscriptionWorker extends PhabricatorWorker {
       return;
     }
 
-    // TODO: Send an email telling the user that we weren't able to autopay
-    // so they need to pay this manually.
-    throw new Exception(implode("\n", $issues));
+    // We're shoving this through the CartEditor because it has all the logic
+    // for sending mail about carts. This doesn't really affect the state of
+    // the cart, but reduces the amount of code duplication.
+
+    $xactions = array();
+    $xactions[] = id(new PhortuneCartTransaction())
+      ->setTransactionType(PhortuneCartTransaction::TYPE_INVOICED)
+      ->setNewValue(true);
+
+    $content_source = PhabricatorContentSource::newForSource(
+      PhabricatorContentSource::SOURCE_PHORTUNE,
+      array());
+
+    $acting_phid = id(new PhabricatorPhortuneApplication())->getPHID();
+    $editor = id(new PhortuneCartEditor())
+      ->setActor($viewer)
+      ->setActingAsPHID($acting_phid)
+      ->setContentSource($content_source)
+      ->setContinueOnMissingFields(true)
+      ->setInvoiceIssues($issues)
+      ->applyTransactions($cart, $xactions);
   }
 
 
