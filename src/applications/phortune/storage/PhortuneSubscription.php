@@ -13,6 +13,7 @@ final class PhortuneSubscription extends PhortuneDAO
   protected $merchantPHID;
   protected $triggerPHID;
   protected $authorPHID;
+  protected $defaultPaymentMethodPHID;
   protected $subscriptionClassKey;
   protected $subscriptionClass;
   protected $subscriptionRefKey;
@@ -32,6 +33,7 @@ final class PhortuneSubscription extends PhortuneDAO
         'metadata' => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
+        'defaultPaymentMethodPHID' => 'phid?',
         'subscriptionClassKey' => 'bytes12',
         'subscriptionClass' => 'text128',
         'subscriptionRefKey' => 'bytes12',
@@ -125,7 +127,6 @@ final class PhortuneSubscription extends PhortuneDAO
     $this->subscriptionRefKey = PhabricatorHash::digestForIndex(
       $this->subscriptionRef);
 
-    $trigger = $this->getTrigger();
     $is_new = (!$this->getID());
 
     $this->openTransaction();
@@ -153,6 +154,7 @@ final class PhortuneSubscription extends PhortuneDAO
             ),
           ));
 
+        $trigger = $this->getTrigger();
         $trigger->setPHID($trigger_phid);
         $trigger->setAction($trigger_action);
         $trigger->save();

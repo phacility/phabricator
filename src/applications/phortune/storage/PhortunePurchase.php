@@ -31,6 +31,7 @@ final class PhortunePurchase extends PhortuneDAO
     return id(new PhortunePurchase())
       ->setAuthorPHID($actor->getPHID())
       ->setProductPHID($product->getPHID())
+      ->attachProduct($product)
       ->setQuantity(1)
       ->setStatus(self::STATUS_PENDING)
       ->setBasePriceAsCurrency($product->getPriceAsCurrency());

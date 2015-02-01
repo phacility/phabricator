@@ -14,9 +14,17 @@ final class PhortuneSubscriptionViewController extends PhortuneController {
       return new Aphront404Response();
     }
 
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $subscription,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
     $is_merchant = (bool)$request->getURIData('merchantID');
     $merchant = $subscription->getMerchant();
     $account = $subscription->getAccount();
+
+    $account_id = $account->getID();
+    $subscription_id = $subscription->getID();
 
     $title = pht('Subscription: %s', $subscription->getSubscriptionName());
 
@@ -26,6 +34,18 @@ final class PhortuneSubscriptionViewController extends PhortuneController {
     $actions = id(new PhabricatorActionListView())
       ->setUser($viewer)
       ->setObjectURI($request->getRequestURI());
+
+    $edit_uri = $this->getApplicationURI(
+      "{$account_id}/subscription/edit/{$subscription_id}/");
+
+    $actions->addAction(
+      id(new PhabricatorActionView())
+        ->setIcon('fa-pencil')
+        ->setName(pht('Edit Subscription'))
+        ->setHref($edit_uri)
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
+
 
     $crumbs = $this->buildApplicationCrumbs();
     if ($is_merchant) {
@@ -44,11 +64,83 @@ final class PhortuneSubscriptionViewController extends PhortuneController {
       pht('Next Invoice'),
       phabricator_datetime($next_invoice, $viewer));
 
+    $default_method = $subscription->getDefaultPaymentMethodPHID();
+    if ($default_method) {
+      $handles = $this->loadViewerHandles(array($default_method));
+      $autopay_method = $handles[$default_method]->renderLink();
+    } else {
+      $autopay_method = phutil_tag(
+        'em',
+        array(),
+        pht('No Autopay Method Configured'));
+    }
+
+    $properties->addProperty(
+      pht('Autopay With'),
+      $autopay_method);
+
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->addPropertyList($properties);
 
-    $carts = id(new PhortuneCartQuery())
+    $due_box = $this->buildDueInvoices($subscription, $is_merchant);
+    $invoice_box = $this->buildPastInvoices($subscription, $is_merchant);
+
+    return $this->buildApplicationPage(
+      array(
+        $crumbs,
+        $object_box,
+        $due_box,
+        $invoice_box,
+      ),
+      array(
+        'title' => $title,
+      ));
+  }
+
+  private function buildDueInvoices(
+    PhortuneSubscription $subscription,
+    $is_merchant) {
+    $viewer = $this->getViewer();
+
+    $invoices = id(new PhortuneCartQuery())
+      ->setViewer($viewer)
+      ->withSubscriptionPHIDs(array($subscription->getPHID()))
+      ->needPurchases(true)
+      ->withInvoices(true)
+      ->execute();
+
+    $phids = array();
+    foreach ($invoices as $invoice) {
+      $phids[] = $invoice->getPHID();
+      $phids[] = $invoice->getMerchantPHID();
+      foreach ($invoice->getPurchases() as $purchase) {
+        $phids[] = $purchase->getPHID();
+      }
+    }
+    $handles = $this->loadViewerHandles($phids);
+
+    $invoice_table = id(new PhortuneOrderTableView())
+      ->setUser($viewer)
+      ->setCarts($invoices)
+      ->setIsInvoices(true)
+      ->setIsMerchantView($is_merchant)
+      ->setHandles($handles);
+
+    $invoice_header = id(new PHUIHeaderView())
+      ->setHeader(pht('Invoices Due'));
+
+    return id(new PHUIObjectBoxView())
+      ->setHeader($invoice_header)
+      ->appendChild($invoice_table);
+  }
+
+  private function buildPastInvoices(
+    PhortuneSubscription $subscription,
+    $is_merchant) {
+    $viewer = $this->getViewer();
+
+    $invoices = id(new PhortuneCartQuery())
       ->setViewer($viewer)
       ->withSubscriptionPHIDs(array($subscription->getPHID()))
       ->needPurchases(true)
@@ -60,12 +152,13 @@ final class PhortuneSubscriptionViewController extends PhortuneController {
           PhortuneCart::STATUS_REVIEW,
           PhortuneCart::STATUS_PURCHASED,
         ))
+      ->setLimit(50)
       ->execute();
 
     $phids = array();
-    foreach ($carts as $cart) {
-      $phids[] = $cart->getPHID();
-      foreach ($cart->getPurchases() as $purchase) {
+    foreach ($invoices as $invoice) {
+      $phids[] = $invoice->getPHID();
+      foreach ($invoice->getPurchases() as $purchase) {
         $phids[] = $purchase->getPHID();
       }
     }
@@ -73,8 +166,11 @@ final class PhortuneSubscriptionViewController extends PhortuneController {
 
     $invoice_table = id(new PhortuneOrderTableView())
       ->setUser($viewer)
-      ->setCarts($carts)
+      ->setCarts($invoices)
       ->setHandles($handles);
+
+    $account = $subscription->getAccount();
+    $merchant = $subscription->getMerchant();
 
     $account_id = $account->getID();
     $merchant_id = $merchant->getID();
@@ -89,7 +185,7 @@ final class PhortuneSubscriptionViewController extends PhortuneController {
     }
 
     $invoice_header = id(new PHUIHeaderView())
-      ->setHeader(pht('Recent Invoices'))
+      ->setHeader(pht('Past Invoices'))
       ->addActionLink(
         id(new PHUIButtonView())
           ->setTag('a')
@@ -99,19 +195,9 @@ final class PhortuneSubscriptionViewController extends PhortuneController {
           ->setHref($invoices_uri)
           ->setText(pht('View All Invoices')));
 
-    $invoice_box = id(new PHUIObjectBoxView())
+    return id(new PHUIObjectBoxView())
       ->setHeader($invoice_header)
       ->appendChild($invoice_table);
-
-    return $this->buildApplicationPage(
-      array(
-        $crumbs,
-        $object_box,
-        $invoice_box,
-      ),
-      array(
-        'title' => $title,
-      ));
   }
 
 }

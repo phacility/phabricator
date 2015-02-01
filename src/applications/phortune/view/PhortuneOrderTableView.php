@@ -6,6 +6,7 @@ final class PhortuneOrderTableView extends AphrontView {
   private $handles;
   private $noDataString;
   private $isInvoices;
+  private $isMerchantView;
 
   public function setHandles(array $handles) {
     $this->handles = $handles;
@@ -43,12 +44,22 @@ final class PhortuneOrderTableView extends AphrontView {
     return $this->noDataString;
   }
 
+  public function setIsMerchantView($is_merchant_view) {
+    $this->isMerchantView = $is_merchant_view;
+    return $this;
+  }
+
+  public function getIsMerchantView() {
+    return $this->isMerchantView;
+  }
+
   public function render() {
     $carts = $this->getCarts();
     $handles = $this->getHandles();
     $viewer = $this->getUser();
 
     $is_invoices = $this->getIsInvoices();
+    $is_merchant = $this->getIsMerchantView();
 
     $rows = array();
     $rowc = array();
@@ -138,7 +149,7 @@ final class PhortuneOrderTableView extends AphrontView {
           '',
           'right',
           'right',
-          '',
+          'action',
         ))
       ->setColumnVisibility(
         array(
@@ -150,7 +161,10 @@ final class PhortuneOrderTableView extends AphrontView {
           !$is_invoices,
           !$is_invoices,
           $is_invoices,
-          $is_invoices,
+
+          // We show "Pay Now" for due invoices, but not if the viewer is the
+          // merchant, since it doesn't make sense for them to pay.
+          ($is_invoices && !$is_merchant),
         ));
 
     return $table;

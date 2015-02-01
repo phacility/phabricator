@@ -46,6 +46,8 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
               => 'PhortuneSubscriptionListController',
             'view/(?P<id>\d+)/'
               => 'PhortuneSubscriptionViewController',
+            'edit/(?P<id>\d+)/'
+              => 'PhortuneSubscriptionEditController',
             'order/(?P<subscriptionID>\d+)/'
               => 'PhortuneCartListController',
           ),

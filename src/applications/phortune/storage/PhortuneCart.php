@@ -35,7 +35,9 @@ final class PhortuneCart extends PhortuneDAO
       ->setAuthorPHID($actor->getPHID())
       ->setStatus(self::STATUS_BUILDING)
       ->setAccountPHID($account->getPHID())
-      ->setMerchantPHID($merchant->getPHID());
+      ->attachAccount($account)
+      ->setMerchantPHID($merchant->getPHID())
+      ->attachMerchant($merchant);
 
     $cart->account = $account;
     $cart->purchases = array();
