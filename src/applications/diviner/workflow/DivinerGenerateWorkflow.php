@@ -19,6 +19,12 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
             'param' => 'path',
             'help' => pht('Path to a Diviner book configuration.'),
           ),
+          array(
+            'name' => 'publisher',
+            'param' => 'class',
+            'help' => pht('Specify a subclass of %s.', 'DivinerPublisher'),
+            'default' => 'DivinerLivePublisher',
+          ),
         ));
   }
 
@@ -164,7 +170,22 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
     $this->buildAtomCache();
     $this->buildGraphCache();
 
-    $this->publishDocumentation($args->getArg('clean'));
+    $publisher_class = $args->getArg('publisher');
+    $symbols = id(new PhutilSymbolLoader())
+      ->setName($publisher_class)
+      ->setConcreteOnly(true)
+      ->setAncestorClass('DivinerPublisher')
+      ->selectAndLoadSymbols();
+    if (!$symbols) {
+      throw new Exception(
+        pht(
+          "Publisher class '%s' must be a concrete subclass of %s.",
+          $publisher_class,
+          'DivinerPublisher'));
+    }
+    $publisher = newv($publisher_class, array());
+
+    $this->publishDocumentation($args->getArg('clean'), $publisher);
   }
 
 /* -(  Atom Cache  )--------------------------------------------------------- */
@@ -497,18 +518,18 @@ final class DivinerGenerateWorkflow extends DivinerWorkflow {
     return md5(serialize($inputs)).'G';
   }
 
-  private function publishDocumentation($clean) {
+  private function publishDocumentation($clean, DivinerPublisher $publisher) {
     $atom_cache = $this->getAtomCache();
     $graph_map = $atom_cache->getGraphMap();
 
     $this->log(pht('PUBLISHING DOCUMENTATION'));
 
-    $publisher = new DivinerLivePublisher();
-    $publisher->setDropCaches($clean);
-    $publisher->setConfig($this->getAllConfig());
-    $publisher->setAtomCache($atom_cache);
-    $publisher->setRenderer(new DivinerDefaultRenderer());
-    $publisher->publishAtoms(array_values($graph_map));
+    $publisher
+      ->setDropCaches($clean)
+      ->setConfig($this->getAllConfig())
+      ->setAtomCache($atom_cache)
+      ->setRenderer(new DivinerDefaultRenderer())
+      ->publishAtoms(array_values($graph_map));
 
     $this->log(pht('Done.'));
   }

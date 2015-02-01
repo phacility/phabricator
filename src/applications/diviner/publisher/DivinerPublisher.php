@@ -42,6 +42,7 @@ abstract class DivinerPublisher {
     $this->atomCache = $cache;
     $graph_map = $this->atomCache->getGraphMap();
     $this->atomGraphHashToNodeHashMap = array_flip($graph_map);
+    return $this;
   }
 
   protected function getAtomFromGraphHash($graph_hash) {
