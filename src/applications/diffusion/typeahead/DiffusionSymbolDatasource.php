@@ -19,6 +19,7 @@ final class DiffusionSymbolDatasource
 
     if (strlen($raw_query)) {
       $symbols = id(new DiffusionSymbolQuery())
+        ->setViewer($viewer)
         ->setNamePrefix($raw_query)
         ->setLimit(15)
         ->needArcanistProjects(true)
