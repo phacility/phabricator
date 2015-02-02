@@ -11,6 +11,7 @@ final class ConduitDeprecatedCallSetupCheck extends PhabricatorSetupCheck {
       return;
     }
 
+    $methods = mpull($methods, null, 'getAPIMethodName');
     $method_names = mpull($methods, 'getAPIMethodName');
 
     $table = new PhabricatorConduitMethodCallLog();
