@@ -34,7 +34,7 @@ final class ReleephBranchTemplate {
     if ($arc_project->getRepositoryID()) {
       $repository = id(new PhabricatorRepositoryQuery())
         ->setViewer($viewer)
-        ->withRepositoryIDs(array($arc_project->getRepositoryID()))
+        ->withIDs(array($arc_project->getRepositoryID()))
         ->executeOne();
     }
     $fake_handle = 'SOFAKE';
