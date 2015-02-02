@@ -103,7 +103,7 @@ a.phui-crumbs-action .phui-icon-view {
   border-bottom: 1px solid rgba(205, 207, 211, 1);
 }
 
-.phui-crumbs-view + .phui-object-box {
+body .phui-crumbs-view + .phui-object-box {
   margin-top: 0;
 }
 
