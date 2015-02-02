@@ -42,7 +42,7 @@ final class ArcanistProjectInfoConduitAPIMethod
     if ($project->getRepositoryID()) {
       $repository = id(new PhabricatorRepositoryQuery())
         ->setViewer($request->getUser())
-        ->withRepositoryIDs(array($project->getRepositoryID()))
+        ->withIDs(array($project->getRepositoryID()))
         ->executeOne();
     }
 
