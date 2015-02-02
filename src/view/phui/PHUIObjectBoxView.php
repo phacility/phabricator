@@ -93,7 +93,7 @@ final class PHUIObjectBoxView extends AphrontView {
 
   public function setFormErrors(array $errors, $title = null) {
     if ($errors) {
-      $this->formErrors = id(new AphrontErrorView())
+      $this->formErrors = id(new PHUIErrorView())
         ->setTitle($title)
         ->setErrors($errors);
     }
@@ -105,15 +105,15 @@ final class PHUIObjectBoxView extends AphrontView {
       $text = pht('Changes saved.');
     }
     if ($saved) {
-      $save = id(new AphrontErrorView())
-        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+      $save = id(new PHUIErrorView())
+        ->setSeverity(PHUIErrorView::SEVERITY_NOTICE)
         ->appendChild($text);
       $this->formSaved = $save;
     }
     return $this;
   }
 
-  public function setErrorView(AphrontErrorView $view) {
+  public function setErrorView(PHUIErrorView $view) {
     $this->errorView = $view;
     return $this;
   }
@@ -192,7 +192,7 @@ final class PHUIObjectBoxView extends AphrontView {
         $messages[] = $error->getMessage();
       }
       if ($messages) {
-        $exception_errors = id(new AphrontErrorView())
+        $exception_errors = id(new PHUIErrorView())
           ->setErrors($messages);
       }
     }

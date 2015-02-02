@@ -85,9 +85,7 @@ final class PhortuneSubscriptionListController
     $merchant = $this->merchant;
     if ($merchant) {
       $id = $merchant->getID();
-      $crumbs->addTextCrumb(
-        $merchant->getName(),
-        $this->getApplicationURI("merchant/{$id}/"));
+      $this->addMerchantCrumb($crumbs, $merchant);
       $crumbs->addTextCrumb(
         pht('Subscriptions'),
         $this->getApplicationURI("merchant/subscriptions/{$id}/"));
@@ -96,9 +94,7 @@ final class PhortuneSubscriptionListController
     $account = $this->account;
     if ($account) {
       $id = $account->getID();
-      $crumbs->addTextCrumb(
-        $account->getName(),
-        $this->getApplicationURI("{$id}/"));
+      $this->addAccountCrumb($crumbs, $account);
       $crumbs->addTextCrumb(
         pht('Subscriptions'),
         $this->getApplicationURI("{$id}/subscription/"));

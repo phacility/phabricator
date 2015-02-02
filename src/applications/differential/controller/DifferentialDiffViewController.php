@@ -24,8 +24,8 @@ final class DifferentialDiffViewController extends DifferentialController {
       return new Aphront404Response();
     }
 
-    $error_view = id(new AphrontErrorView())
-        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
+    $error_view = id(new PHUIErrorView())
+        ->setSeverity(PHUIErrorView::SEVERITY_NOTICE);
     if ($diff->getRevisionID()) {
       $error_view->appendChild(
           pht(

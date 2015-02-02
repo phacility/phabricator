@@ -444,8 +444,8 @@ final class PhabricatorAuthRegisterController
 
     $welcome_view = null;
     if ($is_setup) {
-      $welcome_view = id(new AphrontErrorView())
-        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+      $welcome_view = id(new PHUIErrorView())
+        ->setSeverity(PHUIErrorView::SEVERITY_NOTICE)
         ->setTitle(pht('Welcome to Phabricator'))
         ->appendChild(
           pht(

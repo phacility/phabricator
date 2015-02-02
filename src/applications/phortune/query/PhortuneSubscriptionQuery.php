@@ -9,6 +9,8 @@ final class PhortuneSubscriptionQuery
   private $merchantPHIDs;
   private $statuses;
 
+  private $needTriggers;
+
   public function withIDs(array $ids) {
     $this->ids = $ids;
     return $this;
@@ -31,6 +33,11 @@ final class PhortuneSubscriptionQuery
 
   public function withStatuses(array $statuses) {
     $this->statuses = $statuses;
+    return $this;
+  }
+
+  public function needTriggers($need_triggers) {
+    $this->needTriggers = $need_triggers;
     return $this;
   }
 
@@ -85,18 +92,39 @@ final class PhortuneSubscriptionQuery
     $subscription_map = mgroup($subscriptions, 'getSubscriptionClass');
     foreach ($subscription_map as $class => $class_subscriptions) {
       $sub = newv($class, array());
-      $implementations += $sub->loadImplementationsForSubscriptions(
+      $impl_objects = $sub->loadImplementationsForRefs(
         $this->getViewer(),
-        $class_subscriptions);
+        mpull($class_subscriptions, 'getSubscriptionRef'));
+
+      $implementations += mpull($impl_objects, null, 'getRef');
     }
 
     foreach ($subscriptions as $key => $subscription) {
-      $implementation = idx($implementations, $key);
+      $ref = $subscription->getSubscriptionRef();
+      $implementation = idx($implementations, $ref);
       if (!$implementation) {
         unset($subscriptions[$key]);
         continue;
       }
       $subscription->attachImplementation($implementation);
+    }
+
+    if ($this->needTriggers) {
+      $trigger_phids = mpull($subscriptions, 'getTriggerPHID');
+      $triggers = id(new PhabricatorWorkerTriggerQuery())
+        ->setViewer($this->getViewer())
+        ->withPHIDs($trigger_phids)
+        ->needEvents(true)
+        ->execute();
+      $triggers = mpull($triggers, null, 'getPHID');
+      foreach ($subscriptions as $key => $subscription) {
+        $trigger = idx($triggers, $subscription->getTriggerPHID());
+        if (!$trigger) {
+          unset($subscriptions[$key]);
+          continue;
+        }
+        $subscription->attachTrigger($trigger);
+      }
     }
 
     return $subscriptions;

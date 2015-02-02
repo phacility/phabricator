@@ -69,8 +69,8 @@ final class PhabricatorPeopleLdapController
     $emails = $request->getArr('email');
     $names = $request->getArr('name');
 
-    $notice_view = new AphrontErrorView();
-    $notice_view->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
+    $notice_view = new PHUIErrorView();
+    $notice_view->setSeverity(PHUIErrorView::SEVERITY_NOTICE);
     $notice_view->setTitle(pht('Import Successful'));
     $notice_view->setErrors(array(
       pht('Successfully imported users from LDAP'),

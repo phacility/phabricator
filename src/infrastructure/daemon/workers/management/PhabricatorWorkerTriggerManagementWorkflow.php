@@ -42,17 +42,4 @@ abstract class PhabricatorWorkerTriggerManagementWorkflow
     return pht('Trigger %d', $trigger->getID());
   }
 
-  protected function parseTime($time) {
-    if (!strlen($time)) {
-      return null;
-    }
-
-    $epoch = strtotime($time);
-    if ($epoch <= 0) {
-      throw new PhutilArgumentUsageException(
-        pht('Unable to parse time "%s".', $time));
-    }
-    return $epoch;
-  }
-
 }

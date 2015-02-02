@@ -6,10 +6,6 @@ final class PhabricatorConfigApplication extends PhabricatorApplication {
     return '/config/';
   }
 
-  public function getIconName() {
-    return 'setup';
-  }
-
   public function getFontIcon() {
     return 'fa-sliders';
   }

@@ -14,10 +14,6 @@ final class PhabricatorFundApplication extends PhabricatorApplication {
     return pht('Donate');
   }
 
-  public function getIconName() {
-    return 'phund';
-  }
-
   public function getFontIcon() {
     return 'fa-heart';
   }

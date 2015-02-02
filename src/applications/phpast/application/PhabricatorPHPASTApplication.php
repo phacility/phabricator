@@ -10,10 +10,6 @@ final class PhabricatorPHPASTApplication extends PhabricatorApplication {
     return '/xhpast/';
   }
 
-  public function getIconName() {
-    return 'phpast';
-  }
-
   public function getFontIcon() {
     return 'fa-ambulance';
   }

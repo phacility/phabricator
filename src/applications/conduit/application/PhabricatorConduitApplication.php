@@ -6,10 +6,6 @@ final class PhabricatorConduitApplication extends PhabricatorApplication {
     return '/conduit/';
   }
 
-  public function getIconName() {
-    return 'conduit';
-  }
-
   public function getFontIcon() {
     return 'fa-tty';
   }

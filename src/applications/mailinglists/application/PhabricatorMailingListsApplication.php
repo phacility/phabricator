@@ -14,10 +14,6 @@ final class PhabricatorMailingListsApplication extends PhabricatorApplication {
     return 'Manage External Lists';
   }
 
-  public function getIconName() {
-    return 'mail';
-  }
-
   public function getFontIcon() {
     return 'fa-mail-reply-all';
   }

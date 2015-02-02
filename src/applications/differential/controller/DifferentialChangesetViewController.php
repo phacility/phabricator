@@ -207,11 +207,12 @@ final class DifferentialChangesetViewController extends DifferentialController {
 
     $engine->process();
     $parser->setMarkupEngine($engine);
+    $parser->setUser($request->getUser());
 
     if ($request->isAjax()) {
-      // TODO: This is sort of lazy, the effect is just to not render "Edit"
-      // and "Reply" links on the "standalone view".
-      $parser->setUser($request->getUser());
+      $parser->setShowEditAndReplyLinks(true);
+    } else {
+      $parser->setShowEditAndReplyLinks(false);
     }
 
     $output = $parser->render($range_s, $range_e, $mask);

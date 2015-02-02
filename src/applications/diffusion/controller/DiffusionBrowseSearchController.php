@@ -81,7 +81,7 @@ final class DiffusionBrowseSearchController extends DiffusionBrowseController {
     } catch (ConduitException $ex) {
       $err = $ex->getErrorDescription();
       if ($err != '') {
-        return id(new AphrontErrorView())
+        return id(new PHUIErrorView())
           ->setTitle(pht('Search Error'))
           ->appendChild($err);
       }

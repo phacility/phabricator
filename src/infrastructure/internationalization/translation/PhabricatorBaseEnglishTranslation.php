@@ -19,6 +19,7 @@ abstract class PhabricatorBaseEnglishTranslation
       ),
       'Task(s)' => array('Task', 'Tasks'),
 
+      'ERROR(S)' => array('ERROR', 'ERRORS'),
       '%d Error(s)' => array('%d Error', '%d Errors'),
       '%d Warning(s)' => array('%d Warning', '%d Warnings'),
       '%d Auto-Fix(es)' => array('%d Auto-Fix', '%d Auto-Fixes'),
@@ -30,6 +31,16 @@ abstract class PhabricatorBaseEnglishTranslation
       '%d line(s)' => array('%d line', '%d lines'),
       '%d path(s)' => array('%d path', '%d paths'),
       '%d diff(s)' => array('%d diff', '%d diffs'),
+
+      'DIFF LINK(S)' => array('DIFF LINK', 'DIFF LINKS'),
+      'You successfully created %d diff(s).' => array(
+        'You successfully created %d diff.',
+        'You successfully created %d diffs.',
+      ),
+      'Diff creation failed; see body for error(s).' => array(
+        'Diff creation failed; see body for error.',
+        'Diff creation failed; see body for errors.',
+      ),
 
       'There are %d raw fact(s) in storage.' => array(
         'There is %d raw fact in storage.',
@@ -889,6 +900,11 @@ abstract class PhabricatorBaseEnglishTranslation
       '%d related link(s):' => array(
         'Related link:',
         'Related links:',
+      ),
+
+      'You have %d unpaid invoice(s).' => array(
+        'You have an unpaid invoice.',
+        'You have unpaid invoices.',
       ),
     );
   }

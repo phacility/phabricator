@@ -243,8 +243,8 @@ abstract class DiffusionController extends PhabricatorController {
   }
 
   protected function renderStatusMessage($title, $body) {
-    return id(new AphrontErrorView())
-      ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
+    return id(new PHUIErrorView())
+      ->setSeverity(PHUIErrorView::SEVERITY_WARNING)
       ->setTitle($title)
       ->appendChild($body);
   }

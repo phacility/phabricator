@@ -61,8 +61,8 @@ final class PhabricatorConduitCertificateSettingsPanel
     }
 
     if ($request->getStr('regenerated')) {
-      $notice = new AphrontErrorView();
-      $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
+      $notice = new PHUIErrorView();
+      $notice->setSeverity(PHUIErrorView::SEVERITY_NOTICE);
       $notice->setTitle(pht('Certificate Regenerated'));
       $notice->appendChild(phutil_tag(
         'p',

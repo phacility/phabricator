@@ -12,8 +12,9 @@ abstract class DifferentialConduitAPIMethod extends ConduitAPIMethod {
     $uri = PhabricatorEnv::getProductionURI($uri);
 
     return array(
-      'id'  => $diff->getID(),
-      'uri' => $uri,
+      'id'   => $diff->getID(),
+      'phid' => $diff->getPHID(),
+      'uri'  => $uri,
     );
   }
 

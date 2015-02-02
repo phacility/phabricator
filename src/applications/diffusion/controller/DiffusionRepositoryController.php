@@ -68,9 +68,9 @@ final class DiffusionRepositoryController extends DiffusionController {
     if ($page_has_content) {
       $content[] = $this->buildNormalContent($drequest);
     } else {
-      $content[] = id(new AphrontErrorView())
+      $content[] = id(new PHUIErrorView())
         ->setTitle($empty_title)
-        ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
+        ->setSeverity(PHUIErrorView::SEVERITY_WARNING)
         ->setErrors(array($empty_message));
     }
 

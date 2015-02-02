@@ -258,8 +258,8 @@ final class DiffusionSetPasswordSettingsPanel extends PhabricatorSettingsPanel {
 
     $saved = null;
     if ($request->getBool('saved')) {
-      $saved = id(new AphrontErrorView())
-        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+      $saved = id(new PHUIErrorView())
+        ->setSeverity(PHUIErrorView::SEVERITY_NOTICE)
         ->setTitle(pht('Password Updated'))
         ->appendChild(pht('Your VCS password has been updated.'));
     }

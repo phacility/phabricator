@@ -10,10 +10,6 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
     return '/phame/';
   }
 
-  public function getIconName() {
-    return 'phame';
-  }
-
   public function getFontIcon() {
     return 'fa-star';
   }

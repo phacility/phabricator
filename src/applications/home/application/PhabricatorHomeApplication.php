@@ -16,10 +16,6 @@ final class PhabricatorHomeApplication extends PhabricatorApplication {
     return pht('Command Center');
   }
 
-  public function getIconName() {
-    return 'home';
-  }
-
   public function getFontIcon() {
     return 'fa-home';
   }

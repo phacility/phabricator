@@ -153,10 +153,6 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
     return null;
   }
 
-  public function getIconName() {
-    return 'application';
-  }
-
   public function getFontIcon() {
     return 'fa-puzzle-piece';
   }

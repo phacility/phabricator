@@ -194,7 +194,7 @@ final class PhabricatorPasswordAuthProvider extends PhabricatorAuthProvider {
     }
 
     if ($errors) {
-      $errors = id(new AphrontErrorView())->setErrors($errors);
+      $errors = id(new PHUIErrorView())->setErrors($errors);
     }
 
     $form = id(new PHUIFormLayoutView())
