@@ -7,7 +7,7 @@ final class DivinerPHPAtomizer extends DivinerAtomizer {
   }
 
   protected function executeAtomize($file_name, $file_data) {
-    $future = xhpast_get_parser_future($file_data);
+    $future = PhutilXHPASTBinary::getParserFuture($file_data);
     $tree = XHPASTTree::newFromDataAndResolvedExecFuture(
       $file_data,
       $future->resolve());

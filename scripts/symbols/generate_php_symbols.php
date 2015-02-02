@@ -20,7 +20,7 @@ $futures = array();
 foreach ($input as $file) {
   $file = Filesystem::readablePath($file);
   $data[$file] = Filesystem::readFile($file);
-  $futures[$file] = xhpast_get_parser_future($data[$file]);
+  $futures[$file] = PhutilXHPASTBinary::getParserFuture($data[$file]);
 }
 
 $futures = id(new FutureIterator($futures))
