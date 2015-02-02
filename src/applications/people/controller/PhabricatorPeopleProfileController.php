@@ -30,7 +30,7 @@ final class PhabricatorPeopleProfileController
     $profile = $user->loadUserProfile();
     $username = phutil_escape_uri($user->getUserName());
 
-    $picture = $user->loadProfileImageURI();
+    $picture = $user->getProfileImageURI();
 
     $header = id(new PHUIHeaderView())
       ->setHeader($user->getFullName())

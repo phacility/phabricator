@@ -126,7 +126,12 @@ final class PhabricatorPeopleApplication extends PhabricatorApplication {
     $items = array();
 
     if ($user->isLoggedIn() && $user->isUserActivated()) {
-      $image = $user->loadProfileImageURI();
+      $profile = id(new PhabricatorPeopleQuery())
+        ->setViewer($user)
+        ->needProfileImage(true)
+        ->withPHIDs(array($user->getPHID()))
+        ->executeOne();
+      $image = $profile->getProfileImageURI();
 
       $item = id(new PHUIListItemView())
         ->setName($user->getUsername())

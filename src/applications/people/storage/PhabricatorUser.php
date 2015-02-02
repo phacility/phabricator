@@ -683,27 +683,6 @@ EOBODY;
     return $this->assertAttached($this->profileImage);
   }
 
-  public function loadProfileImageURI() {
-    if ($this->profileImage && ($this->profileImage !== self::ATTACHABLE)) {
-      return $this->profileImage;
-    }
-
-    $src_phid = $this->getProfileImagePHID();
-
-    if ($src_phid) {
-      // TODO: (T603) Can we get rid of this entirely and move it to
-      // PeopleQuery with attach/attachable?
-      $file = id(new PhabricatorFile())->loadOneWhere('phid = %s', $src_phid);
-      if ($file) {
-        $this->profileImage = $file->getBestURI();
-        return $this->profileImage;
-      }
-    }
-
-    $this->profileImage = self::getDefaultProfileImageURI();
-    return $this->profileImage;
-  }
-
   public function getFullName() {
     if (strlen($this->getRealName())) {
       return $this->getUsername().' ('.$this->getRealName().')';

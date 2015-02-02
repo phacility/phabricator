@@ -25,7 +25,7 @@ final class PhabricatorPeopleCalendarController
       return new Aphront404Response();
     }
 
-    $picture = $user->loadProfileImageURI();
+    $picture = $user->getProfileImageURI();
 
     $now     = time();
     $request = $this->getRequest();
