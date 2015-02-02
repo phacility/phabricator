@@ -23,7 +23,7 @@
 
 .device-phone .phui-crumbs-view {
   padding-left: 8px;
-  padding-right: 8px;
+  padding-right: 0;
 }
 
 .phui-crumbs-view a.phui-crumbs-action-disabled {
@@ -43,12 +43,14 @@
   padding: 8px 0;
 }
 
-.device-phone .phui-crumb-view.phabricator-last-crumb,
-.device-phone .phui-crumb-view.phui-crumb-has-icon {
+.device-phone .phui-crumb-view.phabricator-last-crumb .phui-crumb-name,
+.device-phone .phui-crumb-view.phui-crumb-has-icon,
+.device-phone .phui-crumb-has-icon + .phui-crumb-divider {
   display: inline-block;
 }
 
-.device-phone .phui-crumb-has-icon .phui-crumb-name {
+.device-phone .phui-crumb-name,
+.device-phone .phui-crumb-divider {
   display: none;
 }
 
@@ -73,7 +75,7 @@
 }
 
 .device-phone a.phui-crumbs-action {
-  padding: 7px;
+  padding: 8px 6px;
 }
 
 .device-desktop .phui-crumbs-view a:hover,
