@@ -20,6 +20,7 @@ final class PhabricatorPeopleProfilePictureController
     $user = id(new PhabricatorPeopleQuery())
       ->setViewer($viewer)
       ->withIDs(array($this->id))
+      ->needProfileImage(true)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -91,9 +92,6 @@ final class PhabricatorPeopleProfilePictureController
     }
 
     $title = pht('Edit Profile Picture');
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($user->getUsername(), $profile_uri);
-    $crumbs->addTextCrumb($title);
 
     $form = id(new PHUIFormLayoutView())
       ->setUser($viewer);
@@ -242,11 +240,14 @@ final class PhabricatorPeopleProfilePictureController
       ->setHeaderText(pht('Upload New Picture'))
       ->setForm($upload_form);
 
+    $nav = $this->buildIconNavView($user);
+    $nav->selectFilter('/');
+    $nav->appendChild($form_box);
+    $nav->appendChild($upload_box);
+
     return $this->buildApplicationPage(
       array(
-        $crumbs,
-        $form_box,
-        $upload_box,
+        $nav,
       ),
       array(
         'title' => $title,

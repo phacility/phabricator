@@ -24,7 +24,6 @@ final class PhabricatorConpherenceApplication extends PhabricatorApplication {
 
   public function getEventListeners() {
     return array(
-      new ConpherenceActionMenuEventListener(),
       new ConpherenceHovercardEventListener(),
     );
   }

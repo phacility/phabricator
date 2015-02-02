@@ -62,11 +62,13 @@ final class PhabricatorPeopleApplication extends PhabricatorApplication {
           'PhabricatorPeopleProfileEditController',
         'picture/(?P<id>[1-9]\d*)/' =>
           'PhabricatorPeopleProfilePictureController',
-      ),
+        ),
       '/p/(?P<username>[\w._-]+)/'
         => 'PhabricatorPeopleProfileController',
       '/p/(?P<username>[\w._-]+)/calendar/'
         => 'PhabricatorPeopleCalendarController',
+      '/p/(?P<username>[\w._-]+)/feed/'
+        => 'PhabricatorPeopleFeedController',
     );
   }
 
