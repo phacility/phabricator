@@ -28,9 +28,10 @@ ul.phui-object-item-list-view {
   margin: 0;
 }
 
-.phui-object-item-list-view .phui-error-view {
-  margin: 4px 0 8px 0;
+.phui-object-box .phui-object-item-list-view .phui-error-view {
+  margin: 4px 0;
   color: {$greytext};
+  border: none;
 }
 
 .phui-object-item {
