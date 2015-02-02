@@ -11,6 +11,10 @@ final class PhabricatorSMSConfigOptions
     return pht('Configure SMS.');
   }
 
+  public function getFontIcon() {
+    return 'fa-mobile';
+  }
+
   public function getOptions() {
     $adapter_description = $this->deformat(pht(<<<EODOC
 Adapter class to use to transmit SMS to an external provider. A given external

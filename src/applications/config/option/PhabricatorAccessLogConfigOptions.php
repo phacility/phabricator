@@ -11,6 +11,10 @@ final class PhabricatorAccessLogConfigOptions
     return pht('Configure the access logs, which log HTTP/SSH requests.');
   }
 
+  public function getFontIcon() {
+    return 'fa-list';
+  }
+
   public function getOptions() {
     $common_map = array(
       'C' => pht('The controller or workflow which handled the request.'),

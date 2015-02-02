@@ -11,6 +11,10 @@ final class PhabricatorMySQLConfigOptions
     return pht('Database configuration.');
   }
 
+  public function getFontIcon() {
+    return 'fa-database';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('mysql.host', 'string', 'localhost')

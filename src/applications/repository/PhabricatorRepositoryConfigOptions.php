@@ -11,6 +11,10 @@ final class PhabricatorRepositoryConfigOptions
     return pht('Configure repositories.');
   }
 
+  public function getFontIcon() {
+    return 'fa-hdd-o';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('repository.default-local-path', 'string', '/var/repo/')

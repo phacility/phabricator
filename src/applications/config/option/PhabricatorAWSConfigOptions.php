@@ -11,6 +11,10 @@ final class PhabricatorAWSConfigOptions
     return pht('Configure integration with AWS (EC2, SES, S3, etc).');
   }
 
+  public function getFontIcon() {
+    return 'fa-server';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('amazon-ses.access-key', 'string', null)

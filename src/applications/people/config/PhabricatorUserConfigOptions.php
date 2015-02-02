@@ -11,6 +11,10 @@ final class PhabricatorUserConfigOptions
     return pht('User profiles configuration.');
   }
 
+  public function getFontIcon() {
+    return 'fa-users';
+  }
+
   public function getOptions() {
 
     $default = array(

@@ -11,6 +11,10 @@ final class PhabricatorDifferentialConfigOptions
     return pht('Configure Differential code review.');
   }
 
+  public function getFontIcon() {
+    return 'fa-cog';
+  }
+
   public function getOptions() {
     $custom_field_type = 'custom:PhabricatorCustomFieldConfigOptionType';
 

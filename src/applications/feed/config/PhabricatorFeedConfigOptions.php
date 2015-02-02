@@ -11,6 +11,10 @@ final class PhabricatorFeedConfigOptions
     return pht('Feed options.');
   }
 
+  public function getFontIcon() {
+    return 'fa-newspaper-o';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('feed.public', 'bool', false)

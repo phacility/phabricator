@@ -11,6 +11,10 @@ final class PhabricatorDisqusConfigOptions
     return pht('Disqus authentication and integration options.');
   }
 
+  public function getFontIcon() {
+    return 'fa-comment';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('disqus.shortname', 'string', null)
