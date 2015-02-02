@@ -247,7 +247,7 @@ final class PhabricatorApplicationEditEmailController
     }
 
     if ($errors) {
-      $errors = id(new AphrontErrorView())
+      $errors = id(new PHUIErrorView())
         ->setErrors($errors);
     }
 

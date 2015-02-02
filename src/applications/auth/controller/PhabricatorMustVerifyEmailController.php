@@ -28,8 +28,8 @@ final class PhabricatorMustVerifyEmailController
     $sent = null;
     if ($request->isFormPost()) {
       $email->sendVerificationEmail($user);
-      $sent = new AphrontErrorView();
-      $sent->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
+      $sent = new PHUIErrorView();
+      $sent->setSeverity(PHUIErrorView::SEVERITY_NOTICE);
       $sent->setTitle(pht('Email Sent'));
       $sent->appendChild(
         pht(

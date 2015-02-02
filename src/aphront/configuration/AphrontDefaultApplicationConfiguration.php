@@ -205,7 +205,7 @@ class AphrontDefaultApplicationConfiguration
     }
 
     if ($ex instanceof AphrontUsageException) {
-      $error = new AphrontErrorView();
+      $error = new PHUIErrorView();
       $error->setTitle($ex->getTitle());
       $error->appendChild($ex->getMessage());
 

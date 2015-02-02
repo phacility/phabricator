@@ -161,7 +161,7 @@ final class PhabricatorApplicationSearchController
     $errors = $engine->getErrors();
     if ($errors) {
       $run_query = false;
-      $errors = id(new AphrontErrorView())
+      $errors = id(new PHUIErrorView())
         ->setTitle(pht('Query Errors'))
         ->setErrors($errors);
     }

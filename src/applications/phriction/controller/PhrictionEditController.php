@@ -94,8 +94,8 @@ final class PhrictionEditController
         ),
         pht('discard this draft'));
 
-      $draft_note = new AphrontErrorView();
-      $draft_note->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
+      $draft_note = new PHUIErrorView();
+      $draft_note->setSeverity(PHUIErrorView::SEVERITY_NOTICE);
       $draft_note->setTitle('Recovered Draft');
       $draft_note->appendChild(hsprintf(
         '<p>Showing a saved draft of your edits, you can %s.</p>',

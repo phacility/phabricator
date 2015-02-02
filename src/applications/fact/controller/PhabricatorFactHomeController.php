@@ -97,8 +97,8 @@ final class PhabricatorFactHomeController extends PhabricatorFactController {
     }
 
     if (!$options) {
-      return id(new AphrontErrorView())
-        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+      return id(new PHUIErrorView())
+        ->setSeverity(PHUIErrorView::SEVERITY_NOTICE)
         ->setTitle(pht('No Chartable Facts'))
         ->appendChild(phutil_tag(
           'p',

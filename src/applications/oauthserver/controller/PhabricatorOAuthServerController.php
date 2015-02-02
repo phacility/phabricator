@@ -55,8 +55,8 @@ abstract class PhabricatorOAuthServerController
   }
 
   protected function buildErrorView($error_message) {
-    $error = new AphrontErrorView();
-    $error->setSeverity(AphrontErrorView::SEVERITY_ERROR);
+    $error = new PHUIErrorView();
+    $error->setSeverity(PHUIErrorView::SEVERITY_ERROR);
     $error->setTitle($error_message);
 
     return $error;

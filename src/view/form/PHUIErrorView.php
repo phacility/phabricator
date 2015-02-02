@@ -1,6 +1,6 @@
 <?php
 
-final class AphrontErrorView extends AphrontView {
+final class PHUIErrorView extends AphrontView {
 
   const SEVERITY_ERROR = 'error';
   const SEVERITY_WARNING = 'warning';
@@ -34,7 +34,7 @@ final class AphrontErrorView extends AphrontView {
 
   final public function render() {
 
-    require_celerity_resource('aphront-error-view-css');
+    require_celerity_resource('phui-error-view-css');
 
     $errors = $this->errors;
     if ($errors) {
@@ -48,7 +48,7 @@ final class AphrontErrorView extends AphrontView {
       $list = phutil_tag(
         'ul',
         array(
-          'class' => 'aphront-error-view-list',
+          'class' => 'phui-error-view-list',
         ),
         $list);
     } else {
@@ -60,7 +60,7 @@ final class AphrontErrorView extends AphrontView {
       $title = phutil_tag(
         'h1',
         array(
-          'class' => 'aphront-error-view-head',
+          'class' => 'phui-error-view-head',
         ),
         $title);
     } else {
@@ -70,12 +70,24 @@ final class AphrontErrorView extends AphrontView {
     $this->severity = nonempty($this->severity, self::SEVERITY_ERROR);
 
     $classes = array();
-    $classes[] = 'aphront-error-view';
-    $classes[] = 'aphront-error-severity-'.$this->severity;
+    $classes[] = 'phui-error-view';
+    $classes[] = 'phui-error-severity-'.$this->severity;
     $classes = implode(' ', $classes);
 
     $children = $this->renderChildren();
-    $children[] = $list;
+    if ($list) {
+      $children[] = $list;
+    }
+
+    $body = null;
+    if (!empty($children)) {
+      $body = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-error-view-body',
+        ),
+        $children);
+    }
 
     return phutil_tag(
       'div',
@@ -85,12 +97,7 @@ final class AphrontErrorView extends AphrontView {
       ),
       array(
         $title,
-        phutil_tag(
-          'div',
-          array(
-            'class' => 'aphront-error-view-body',
-          ),
-          $children),
+        $body,
       ));
   }
 }

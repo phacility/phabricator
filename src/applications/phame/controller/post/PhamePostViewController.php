@@ -49,8 +49,8 @@ final class PhamePostViewController extends PhameController {
 
     if ($post->isDraft()) {
       $object_box->appendChild(
-        id(new AphrontErrorView())
-          ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+        id(new PHUIErrorView())
+          ->setSeverity(PHUIErrorView::SEVERITY_NOTICE)
           ->setTitle(pht('Draft Post'))
           ->appendChild(
             pht('Only you can see this draft until you publish it. '.
@@ -59,8 +59,8 @@ final class PhamePostViewController extends PhameController {
 
     if (!$post->getBlog()) {
       $object_box->appendChild(
-        id(new AphrontErrorView())
-          ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
+        id(new PHUIErrorView())
+          ->setSeverity(PHUIErrorView::SEVERITY_WARNING)
           ->setTitle(pht('Not On A Blog'))
           ->appendChild(
             pht('This post is not associated with a blog (the blog may have '.

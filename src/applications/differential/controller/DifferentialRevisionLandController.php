@@ -52,7 +52,7 @@ final class DifferentialRevisionLandController extends DifferentialController {
         } else {
           $text = phutil_tag('pre', array(), $ex->getMessage());
         }
-        $text = id(new AphrontErrorView())
+        $text = id(new PHUIErrorView())
            ->appendChild($text);
       }
 
