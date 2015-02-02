@@ -149,6 +149,7 @@ final class PhabricatorAuthStartController
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Login'));
+    $crumbs->setBorder(true);
 
     return $this->buildApplicationPage(
       array(

@@ -58,6 +58,7 @@ final class DivinerAtomController extends DivinerController {
 
     $atom = $symbol->getAtom();
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setBorder(true);
 
     $crumbs->addTextCrumb(
       $book->getShortTitle(),
