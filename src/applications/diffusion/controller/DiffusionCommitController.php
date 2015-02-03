@@ -873,21 +873,23 @@ final class DiffusionCommitController extends DiffusionController {
 
   private function buildMergesTable(PhabricatorRepositoryCommit $commit) {
     $drequest = $this->getDiffusionRequest();
+    $repository = $drequest->getRepository();
+
+    $vcs = $repository->getVersionControlSystem();
+    switch ($vcs) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        // These aren't supported under SVN.
+        return null;
+    }
+
     $limit = 50;
 
-    $merges = array();
-    try {
-      $merges = $this->callConduitWithDiffusionRequest(
-        'diffusion.mergedcommitsquery',
-        array(
-          'commit' => $drequest->getCommit(),
-          'limit' => $limit + 1,
-        ));
-    } catch (ConduitException $ex) {
-      if ($ex->getMessage() != 'ERR-UNSUPPORTED-VCS') {
-        throw $ex;
-      }
-    }
+    $merges = $this->callConduitWithDiffusionRequest(
+      'diffusion.mergedcommitsquery',
+      array(
+        'commit' => $drequest->getCommit(),
+        'limit' => $limit + 1,
+      ));
 
     if (!$merges) {
       return null;
