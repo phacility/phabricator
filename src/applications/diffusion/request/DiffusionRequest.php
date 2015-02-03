@@ -389,7 +389,7 @@ abstract class DiffusionRequest {
 
       $commit = id(new DiffusionCommitQuery())
         ->setViewer($this->getUser())
-        ->withRepositoryIDs(array($repository->getID()))
+        ->withRepository($repository)
         ->withIdentifiers(array($this->getStableCommit()))
         ->executeOne();
       if ($commit) {
