@@ -87,9 +87,11 @@ final class PhabricatorOwnersEditController
         $package->attachUnsavedPaths($path_refs);
         $package->attachOldAuditingEnabled($old_auditing_enabled);
         $package->attachOldPrimaryOwnerPHID($old_primary);
-        $package->attachActorPHID($user->getPHID());
         try {
-          $package->save();
+          id(new PhabricatorOwnersPackageEditor())
+            ->setActor($user)
+            ->setPackage($package)
+            ->save();
           return id(new AphrontRedirectResponse())
             ->setURI('/owners/package/'.$package->getID().'/');
         } catch (AphrontDuplicateKeyQueryException $ex) {
