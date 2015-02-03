@@ -256,8 +256,6 @@ final class PhabricatorRepositoryCommit
       case PhabricatorPolicyCapability::CAN_VIEW:
         return $this->getRepository()->getPolicy($capability);
       case PhabricatorPolicyCapability::CAN_EDIT:
-        // TODO: (T603) Who should be able to edit a commit? For now, retain
-        // the existing policy.
         return PhabricatorPolicies::POLICY_USER;
     }
   }
