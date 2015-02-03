@@ -81,15 +81,18 @@ h1.phui-error-view-head {
   list-style: disc;
 }
 
-.phui-object-box .phui-error-severity-error {
+.phui-object-box .phui-error-severity-error,
+.aphront-dialog-body .phui-error-severity-error {
   color: {$red};
 }
 
-.phui-object-box .phui-error-severity-warning {
+.phui-object-box .phui-error-severity-warning,
+.aphront-dialog-body .phui-error-severity-warning {
   color: #bc7837;
 }
 
-.phui-object-box .phui-error-severity-notice {
+.phui-object-box .phui-error-severity-notice,
+.aphront-dialog-body .phui-error-severity-notice {
   color: {$blue};
 }
 
