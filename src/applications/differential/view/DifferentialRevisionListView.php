@@ -179,8 +179,15 @@ final class DifferentialRevisionListView extends AphrontView {
       $list->addItem($item);
     }
 
-    $list->setHeader($this->header);
     $list->setNoDataString($this->noDataString);
+
+
+    if ($this->header) {
+      $list->setFlush(true);
+      $list = id(new PHUIObjectBoxView())
+        ->setHeaderText($this->header)
+        ->appendChild($list);
+    }
 
     return $list;
   }

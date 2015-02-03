@@ -778,6 +778,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $user = $this->getRequest()->getUser();
 
     $view = id(new DifferentialRevisionListView())
+      ->setHeader(pht('Open Revisions Affecting These Files'))
       ->setRevisions($revisions)
       ->setUser($user);
 
@@ -785,9 +786,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $handles = $this->loadViewerHandles($phids);
     $view->setHandles($handles);
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Open Revisions Affecting These Files'))
-      ->appendChild($view);
+    return $view;
   }
 
 

@@ -61,6 +61,10 @@ ul.phui-object-item-list-view {
   margin: 0 0 4px 0;
 }
 
+.phui-object-box .phui-object-list-flush .phui-object-item {
+  margin: 0;
+}
+
 .phui-object-item-name {
   font-weight: bold;
   padding: 8px 8px 0;
