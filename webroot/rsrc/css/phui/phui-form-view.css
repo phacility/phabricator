@@ -71,6 +71,10 @@
   padding-top: 5px;
 }
 
+.aphront-form-label .aphront-form-error {
+  display: none;
+}
+
 .aphront-dialog-body .phui-form-full-width {
   margin-top: -10px;
 }
@@ -81,8 +85,15 @@
 
 .device-phone .aphront-form-error,
 .phui-form-full-width .aphront-form-error {
-  float: none;
-  width: 100%;
+  display: none;
+}
+
+.device-phone .aphront-form-label .aphront-form-error,
+.phui-form-full-width .aphront-form-label .aphront-form-error {
+  display: block;
+  float: right;
+  padding: 0;
+  width: auto;
 }
 
 .device-phone .aphront-form-drag-and-drop-upload {
