@@ -556,11 +556,51 @@ final class PhabricatorFile extends PhabricatorFileDAO
         'You must save a file before you can generate a view URI.');
     }
 
+    return $this->getCDNURI(null);
+  }
+
+  private function getCDNURI($token) {
     $name = phutil_escape_uri($this->getName());
 
-    $path = '/file/data/'.$this->getSecretKey().'/'.$this->getPHID().'/'.$name;
+    $parts = array();
+    $parts[] = 'file';
+    $parts[] = 'data';
+
+    // If this is an instanced install, add the instance identifier to the URI.
+    // Instanced configurations behind a CDN may not be able to control the
+    // request domain used by the CDN (as with AWS CloudFront). Embedding the
+    // instance identity in the path allows us to distinguish between requests
+    // originating from different instances but served through the same CDN.
+    $instance = PhabricatorEnv::getEnvConfig('cluster.instance');
+    if (strlen($instance)) {
+      $parts[] = '@'.$instance;
+    }
+
+    $parts[] = $this->getSecretKey();
+    $parts[] = $this->getPHID();
+    if ($token) {
+      $parts[] = $token;
+    }
+    $parts[] = $name;
+
+    $path = implode('/', $parts);
+
     return PhabricatorEnv::getCDNURI($path);
   }
+
+  /**
+   * Get the CDN URI for this file, including a one-time-use security token.
+   *
+   */
+  public function getCDNURIWithToken() {
+    if (!$this->getPHID()) {
+      throw new Exception(
+        'You must save a file before you can generate a CDN URI.');
+    }
+
+    return $this->getCDNURI($this->generateOneTimeToken());
+  }
+
 
   public function getInfoURI() {
     return '/'.$this->getMonogram();
@@ -962,26 +1002,6 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
     return $token;
   }
-
-  /** Get the CDN uri for this file
-   * This will generate a one-time-use token if
-   * security.alternate_file_domain is set in the config.
-   */
-  public function getCDNURIWithToken() {
-    if (!$this->getPHID()) {
-      throw new Exception(
-        'You must save a file before you can generate a CDN URI.');
-    }
-    $name = phutil_escape_uri($this->getName());
-
-    $path = '/file/data'
-          .'/'.$this->getSecretKey()
-          .'/'.$this->getPHID()
-          .'/'.$this->generateOneTimeToken()
-          .'/'.$name;
-    return PhabricatorEnv::getCDNURI($path);
-  }
-
 
 
   /**
