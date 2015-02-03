@@ -150,6 +150,18 @@ a.handle-disabled {
   right: 0;
 }
 
+/* Fixes so pages actually print when magic scrollbar is present */
+!print .main-page-frame {
+  position: static;
+  overflow: visible;
+}
+
+!print .jx-scrollbar-viewport {
+  position: static;
+  width: auto !important;
+  height: auto !important;
+}
+
 .jx-scrollbar-test {
   position: absolute;
   left: -300px;
