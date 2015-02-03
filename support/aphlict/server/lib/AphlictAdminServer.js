@@ -55,7 +55,7 @@ JX.install('AphlictAdminServer', {
 
               self.getLogger().log(
                 'Received notification: ' + JSON.stringify(msg));
-              ++this._messagesIn;
+              ++self._messagesIn;
 
               try {
                 self._transmit(msg);
