@@ -38,6 +38,7 @@ final class PhabricatorConfigIssueViewController
 
     $crumbs = $this
       ->buildApplicationCrumbs()
+      ->setBorder(true)
       ->addTextCrumb(pht('Setup Issues'), $this->getApplicationURI('issue/'))
       ->addTextCrumb($title, $request->getRequestURI());
 
