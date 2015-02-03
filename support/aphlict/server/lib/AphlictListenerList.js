@@ -42,7 +42,7 @@ JX.install('AphlictListenerList', {
     },
 
     getActiveListenerCount: function() {
-      return this._listeners.length;
+      return Object.keys(this._listeners).length;
     },
 
     getTotalListenerCount: function() {
