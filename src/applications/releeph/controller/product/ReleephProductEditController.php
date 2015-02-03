@@ -93,7 +93,7 @@ final class ReleephProductEditController extends ReleephProductController {
         ->setDetail('testPaths', $test_paths);
 
       $fake_commit_handle =
-        ReleephBranchTemplate::getFakeCommitHandleFor($arc_project_id);
+        ReleephBranchTemplate::getFakeCommitHandleFor($arc_project_id, $viewer);
 
       if ($branch_template) {
         list($branch_name, $template_errors) = id(new ReleephBranchTemplate())

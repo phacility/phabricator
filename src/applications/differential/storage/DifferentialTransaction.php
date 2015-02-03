@@ -380,18 +380,31 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
                 $this->getMetadataValue('commitPHID'));
               $committer_phid = $this->getMetadataValue('committerPHID');
               $author_phid = $this->getMetadataValue('authorPHID');
+
               if ($this->getHandleIfExists($committer_phid)) {
                 $committer_name = $this->renderHandleLink($committer_phid);
               } else {
                 $committer_name = $this->getMetadataValue('committerName');
               }
+
               if ($this->getHandleIfExists($author_phid)) {
                 $author_name = $this->renderHandleLink($author_phid);
               } else {
                 $author_name = $this->getMetadataValue('authorName');
               }
 
-              if ($committer_name && ($committer_name != $author_name)) {
+              // Check if the committer and author are the same. They're the
+              // same if both resolved and are the same user, or if neither
+              // resolved and the text is identical.
+              if ($committer_phid && $author_phid) {
+                $same_author = ($committer_phid == $author_phid);
+              } else if (!$committer_phid && !$author_phid) {
+                $same_author = ($committer_name == $author_name);
+              } else {
+                $same_author = false;
+              }
+
+              if ($committer_name && !$same_author) {
                 return pht(
                   '%s closed %s by committing %s (authored by %s).',
                   $author_link,

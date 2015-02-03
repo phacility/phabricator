@@ -325,9 +325,10 @@ abstract class PhabricatorMailReplyHandler {
       return $body;
     }
 
-    // TODO: (T603) What's the policy here?
-    $files = id(new PhabricatorFile())
-      ->loadAllWhere('phid in (%Ls)', $attachments);
+    $files = id(new PhabricatorFileQuery())
+      ->setViewer($this->getActor())
+      ->withPHIDs($attachments)
+      ->execute();
 
     // if we have some text then double return before adding our file list
     if ($body) {

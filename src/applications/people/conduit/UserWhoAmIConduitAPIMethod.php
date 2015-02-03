@@ -27,7 +27,13 @@ final class UserWhoAmIConduitAPIMethod extends UserConduitAPIMethod {
   }
 
   protected function execute(ConduitAPIRequest $request) {
-    return $this->buildUserInformationDictionary($request->getUser());
+    $person = id(new PhabricatorPeopleQuery())
+      ->setViewer($request->getUser())
+      ->needProfileImage(true)
+      ->withPHIDs(array($request->getUser()->getPHID()))
+      ->executeOne();
+
+    return $this->buildUserInformationDictionary($person);
   }
 
 }

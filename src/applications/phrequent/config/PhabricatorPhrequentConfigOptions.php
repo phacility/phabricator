@@ -11,6 +11,10 @@ final class PhabricatorPhrequentConfigOptions
     return pht('Configure Phrequent.');
   }
 
+  public function getFontIcon() {
+    return 'fa-clock-o';
+  }
+
   public function getOptions() {
     return array();
   }

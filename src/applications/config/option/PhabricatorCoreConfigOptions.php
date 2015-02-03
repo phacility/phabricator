@@ -11,6 +11,10 @@ final class PhabricatorCoreConfigOptions
     return pht('Configure core options, including URIs.');
   }
 
+  public function getFontIcon() {
+    return 'fa-bullseye';
+  }
+
   public function getOptions() {
     if (phutil_is_windows()) {
       $paths = array();

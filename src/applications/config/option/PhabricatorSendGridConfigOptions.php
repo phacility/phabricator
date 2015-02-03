@@ -11,6 +11,10 @@ final class PhabricatorSendGridConfigOptions
     return pht('Configure SendGrid integration.');
   }
 
+  public function getFontIcon() {
+    return 'fa-send-o';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('sendgrid.api-user', 'string', null)

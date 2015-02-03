@@ -69,6 +69,11 @@ JX.install('AphlictClientServer', {
           }
         });
 
+        ws.on('close', function() {
+          self.getListenerList().removeListener(listener);
+          log('Disconnected.');
+        });
+
         wss.on('close', function() {
           self.getListenerList().removeListener(listener);
           log('Disconnected.');

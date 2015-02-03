@@ -28,7 +28,14 @@ final class ReleephProductCreateController extends ReleephProductController {
       }
 
       $arc_project = $arc_projects[$arc_pr_id];
-      $pr_repository = $arc_project->loadRepository();
+      $pr_repository = null;
+      if ($arc_project->getRepositoryID()) {
+        $pr_repository = id(new PhabricatorRepositoryQuery())
+          ->setViewer($request->getUser())
+          ->withIDs(array($arc_project->getRepositoryID()))
+          ->executeOne();
+      }
+
 
       if (!$errors) {
         $releeph_product = id(new ReleephProject())

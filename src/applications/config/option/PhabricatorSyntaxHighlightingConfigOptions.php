@@ -11,6 +11,10 @@ final class PhabricatorSyntaxHighlightingConfigOptions
     return pht('Options relating to syntax highlighting source code.');
   }
 
+  public function getFontIcon() {
+    return 'fa-code';
+  }
+
   public function getOptions() {
 
     $caches_href = PhabricatorEnv::getDocLink('Managing Caches');

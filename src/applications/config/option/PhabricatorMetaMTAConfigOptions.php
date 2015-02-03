@@ -11,6 +11,10 @@ final class PhabricatorMetaMTAConfigOptions
     return pht('Configure Mail.');
   }
 
+  public function getFontIcon() {
+    return 'fa-send';
+  }
+
   public function getOptions() {
     $send_as_user_desc = $this->deformat(pht(<<<EODOC
 When a user takes an action which generates an email notification (like

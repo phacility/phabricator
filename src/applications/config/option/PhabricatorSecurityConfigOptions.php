@@ -11,6 +11,10 @@ final class PhabricatorSecurityConfigOptions
     return pht('Security options.');
   }
 
+  public function getFontIcon() {
+    return 'fa-lock';
+  }
+
   public function getOptions() {
     $support_href = PhabricatorEnv::getDoclink('Give Feedback! Get Support!');
 

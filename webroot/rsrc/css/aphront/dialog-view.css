@@ -29,7 +29,7 @@
 .aphront-dialog-head .phui-action-header
   .phui-action-header-title {
   font-size: 15px;
-  color: {$bluetext};
+  color: {$darkbluetext};
   text-shadow: 0 1px 2px #fff;
 }
 

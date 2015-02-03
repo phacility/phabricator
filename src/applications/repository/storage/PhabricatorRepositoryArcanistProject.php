@@ -45,14 +45,6 @@ final class PhabricatorRepositoryArcanistProject
       PhabricatorRepositoryArcanistProjectPHIDType::TYPECONST);
   }
 
-  // TODO: Remove. Also, T603.
-  public function loadRepository() {
-    if (!$this->getRepositoryID()) {
-      return null;
-    }
-    return id(new PhabricatorRepository())->load($this->getRepositoryID());
-  }
-
   public function delete() {
     $this->openTransaction();
 

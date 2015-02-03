@@ -11,6 +11,10 @@ final class PhabricatorProjectConfigOptions
     return pht('Configure Projects.');
   }
 
+  public function getFontIcon() {
+    return 'fa-briefcase';
+  }
+
   public function getOptions() {
     $default_fields = array(
       'std:project:internal:description' => true,

@@ -26,12 +26,6 @@ final class PhabricatorAuditApplication extends PhabricatorApplication {
     return PhabricatorEnv::getDoclink('Audit User Guide');
   }
 
-  public function getEventListeners() {
-    return array(
-      new AuditActionMenuEventListener(),
-    );
-  }
-
   public function getRoutes() {
     return array(
       '/audit/' => array(

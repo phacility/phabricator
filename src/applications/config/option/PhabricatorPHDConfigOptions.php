@@ -11,6 +11,10 @@ final class PhabricatorPHDConfigOptions
     return pht('Options relating to PHD (daemons).');
   }
 
+  public function getFontIcon() {
+    return 'fa-pied-piper-alt';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('phd.pid-directory', 'string', '/var/tmp/phd/pid')

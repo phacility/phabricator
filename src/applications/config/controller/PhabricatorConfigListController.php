@@ -47,7 +47,8 @@ final class PhabricatorConfigListController
       $item = id(new PHUIObjectItemView())
         ->setHeader($group->getName())
         ->setHref('/config/group/'.$group->getKey().'/')
-        ->addAttribute($group->getDescription());
+        ->addAttribute($group->getDescription())
+        ->setFontIcon($group->getFontIcon());
       $list->addItem($item);
     }
 

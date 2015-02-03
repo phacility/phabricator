@@ -11,6 +11,10 @@ final class PhabricatorManiphestConfigOptions
     return pht('Configure Maniphest.');
   }
 
+  public function getFontIcon() {
+    return 'fa-anchor';
+  }
+
   public function getOptions() {
 
     $priority_defaults = array(

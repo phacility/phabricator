@@ -11,6 +11,10 @@ final class PhabricatorUIConfigOptions
     return pht('Configure the Phabricator UI, including colors.');
   }
 
+  public function getFontIcon() {
+    return 'fa-magnet';
+  }
+
   public function getOptions() {
     $manifest = PHUIIconView::getSheetManifest('main-header');
 

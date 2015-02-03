@@ -11,6 +11,10 @@ final class PhabricatorMacroConfigOptions
     return pht('Configure Macro.');
   }
 
+  public function getFontIcon() {
+    return 'fa-file-image-o';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('metamta.macro.reply-handler-domain', 'string', null)

@@ -23,36 +23,36 @@
 }
 
 .setup-issue table {
-  width: 90%;
-  margin: auto;
+  width: 100%;
   border-collapse: collapse;
-  border: 1px solid #dfdfdf;
+  border: 1px solid #BFCFDA;
 }
 
 .setup-issue table th {
   text-align: right;
   width: 30%;
-  background: #efefef;
-  border: 1px solid #dfdfdf;
+  background: #F8F9FC;
+  border: 1px solid #BFCFDA;
   padding: 8px;
 }
 
 .setup-issue table td {
-  border: 1px solid #dfdfdf;
+  border: 1px solid #BFCFDA;
   padding: 8px;
 }
 
 .setup-issue pre {
-  width: 95%;
-  margin: auto;
-  border: 1px solid #dfdfdf;
+  width: auto;
+  border: 1px solid #BFCFDA;
   padding: 10px 2%;
-  background: #efefef;
+  background: #F8F9FC;
   overflow-x: auto;
 }
 
 .setup-issue tt {
-  color: #74777D;
+  color: black;
+  background: #EBECEE;
+  padding: 2px 4px;
 }
 
 .setup-issue em {
@@ -77,7 +77,7 @@
 }
 
 .setup-issue-name {
-  color: #6B748C;
+  color: #464C5C;
   text-shadow: 0 1px #fff;
   padding: 16px 12px;
   border-bottom: 1px solid #BFCFDA;
@@ -93,10 +93,9 @@
 
 .setup-issue-status {
   padding: 12px;
-  background: #f3f3f3;
-  color: #666666;
-  border-bottom: 1px solid #dfdfdf;
-  font-style: italic;
+  background: #FDF5D4;
+  color: #bc7837;
+  border-bottom: 1px solid #BFCFDA;
 }
 
 .setup-issue-actions {

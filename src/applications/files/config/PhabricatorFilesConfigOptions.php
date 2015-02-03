@@ -11,6 +11,10 @@ final class PhabricatorFilesConfigOptions
     return pht('Configure files and file storage.');
   }
 
+  public function getFontIcon() {
+    return 'fa-file';
+  }
+
   public function getOptions() {
     $viewable_default = array(
       'image/jpeg'  => 'image/jpeg',
