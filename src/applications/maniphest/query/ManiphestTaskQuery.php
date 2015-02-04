@@ -56,6 +56,8 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   private $blockingTasks;
   private $blockedTasks;
 
+  private $projectPolicyCheckFailed = false;
+
   const DEFAULT_PAGE_SIZE   = 1000;
 
   public function withAuthors(array $authors) {
@@ -222,12 +224,34 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $this;
   }
 
+  protected function willExecute() {
+    // Make sure the user can see any projects specified in this
+    // query FIRST.
+    if ($this->projectPHIDs) {
+      $projects = id(new PhabricatorProjectQuery())
+        ->setViewer($this->getViewer())
+        ->withPHIDs($this->projectPHIDs)
+        ->execute();
+      $projects = mpull($projects, null, 'getPHID');
+      foreach ($this->projectPHIDs as $index => $phid) {
+        $project = idx($projects, $phid);
+        if (!$project) {
+          unset($this->projectPHIDs[$index]);
+          continue;
+        }
+      }
+      if (!$this->projectPHIDs) {
+        $this->projectPolicyCheckFailed = true;
+      }
+      $this->projectPHIDs = array_values($this->projectPHIDs);
+    }
+  }
+
   protected function loadPage() {
-    // TODO: (T603) It is possible for a user to find the PHID of a project
-    // they can't see, then query for tasks in that project and deduce the
-    // identity of unknown/invisible projects. Before we allow the user to
-    // execute a project-based PHID query, we should verify that they
-    // can see the project.
+
+    if ($this->projectPolicyCheckFailed) {
+      throw new PhabricatorEmptyQueryException();
+    }
 
     $task_dao = new ManiphestTask();
     $conn = $task_dao->establishConnection('r');

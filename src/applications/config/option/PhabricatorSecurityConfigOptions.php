@@ -18,31 +18,25 @@ final class PhabricatorSecurityConfigOptions
   public function getOptions() {
     $support_href = PhabricatorEnv::getDoclink('Give Feedback! Get Support!');
 
+    $doc_href = PhabricatorEnv::getDoclink('Configuring a File Domain');
+    $doc_name = pht('Configuration Guide: Configuring a File Domain');
+
     return array(
       $this->newOption('security.alternate-file-domain', 'string', null)
         ->setLocked(true)
         ->setSummary(pht('Alternate domain to serve files from.'))
         ->setDescription(
           pht(
-            "IMPORTANT: By default, Phabricator serves files from the same ".
-            "domain the application lives on. This is convenient but not ".
-            "secure: it creates a large class of vulnerabilities which can ".
-            "not be generally mitigated.\n\n".
-
-            "To avoid this, you should configure a second domain in the same ".
-            "way you have the primary domain configured (i.e., point it at ".
-            "the same machine and set up the same vhost rules) and provide ".
-            "it here. For instance, if your primary install is on ".
-            "'http://www.phabricator-example.com/', you could configure ".
-            "'http://www.phabricator-files.com/' and specify the entire ".
-            "domain (with protocol) here. This will enforce that files are ".
-            "served only from the alternate domain. Ideally, you should use ".
-            "a completely separate domain name rather than just a different ".
-            "subdomain.\n\n".
-
-            "It is **STRONGLY RECOMMENDED** that you configure this. Your ".
-            "install is **NOT SECURE** unless you do so."))
-        ->addExample('http://www.phabricator-files.com/', pht('Valid Setting')),
+            'By default, Phabricator serves files from the same domain '.
+            'the application is served from. This is convenient, but '.
+            'presents a security risk.'.
+            "\n\n".
+            'You should configure a CDN or alternate file domain to mitigate '.
+            'this risk. Configuring a CDN will also improve performance. See '.
+            '[[ %s | %s ]] for instructions.',
+            $doc_href,
+            $doc_name))
+        ->addExample('https://files.phabcdn.net/', pht('Valid Setting')),
       $this->newOption(
         'security.hmac-key',
         'string',

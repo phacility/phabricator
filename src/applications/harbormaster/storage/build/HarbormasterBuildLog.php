@@ -133,7 +133,7 @@ final class HarbormasterBuildLog extends HarbormasterDAO
       queryfx(
         $conn,
         'UPDATE harbormaster_buildlogchunk '.
-        'SET chunk = CONCAT(chunk, %s), size = LENGTH(CONCAT(chunk, %s))'.
+        'SET chunk = CONCAT(chunk, %B), size = LENGTH(CONCAT(chunk, %B))'.
         'WHERE id = %d',
         $content,
         $content,

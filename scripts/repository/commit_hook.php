@@ -1,14 +1,13 @@
-#!/usr/bin/env TERM=dumb php
+#!/usr/bin/env php
 <?php
 
-// NOTE: Note that we're specifying TERM=dumb above when invoking the PHP
-// interpreter. This suppresses an error which looks like this:
+// NOTE: This script will sometimes emit a warning like this on startup:
 //
 //   No entry for terminal type "unknown";
 //   using dumb terminal settings.
 //
-// This arises from somewhere in the PHP startup machinery if TERM is not
-// set to a recognized value.
+// This can be fixed by adding "TERM=dumb" to the shebang line, but doing so
+// causes some systems to hang mysteriously. See T7119.
 
 // Commit hooks execute in an unusual context where the environment may be
 // unavailable, particularly in SVN. The first parameter to this script is
