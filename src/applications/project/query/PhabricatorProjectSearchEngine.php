@@ -7,7 +7,7 @@ final class PhabricatorProjectSearchEngine
     return pht('Projects');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorProjectApplication';
   }
 

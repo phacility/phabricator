@@ -7,7 +7,7 @@ final class PhabricatorSearchApplicationSearchEngine
     return pht('Fulltext Results');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorSearchApplication';
   }
 

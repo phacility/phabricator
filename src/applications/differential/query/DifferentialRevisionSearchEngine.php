@@ -7,7 +7,7 @@ final class DifferentialRevisionSearchEngine
     return pht('Differential Revisions');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorDifferentialApplication';
   }
 

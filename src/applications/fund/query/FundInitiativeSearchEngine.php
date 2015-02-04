@@ -7,7 +7,7 @@ final class FundInitiativeSearchEngine
     return pht('Fund Initiatives');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorFundApplication';
   }
 

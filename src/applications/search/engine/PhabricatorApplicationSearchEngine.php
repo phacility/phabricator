@@ -243,9 +243,7 @@ abstract class PhabricatorApplicationSearchEngine {
     return $this->application;
   }
 
-  protected function getApplicationClassName() {
-    throw new PhutilMethodNotImplementedException();
-  }
+  abstract public function getApplicationClassName();
 
 
 /* -(  Constructing Engines  )----------------------------------------------- */

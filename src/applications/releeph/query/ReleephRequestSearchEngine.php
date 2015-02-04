@@ -10,6 +10,10 @@ final class ReleephRequestSearchEngine
     return pht('Releeph Pull Requests');
   }
 
+  public function getApplicationClassName() {
+    return 'PhabricatorReleephApplication';
+  }
+
   public function setBranch(ReleephBranch $branch) {
     $this->branch = $branch;
     return $this;

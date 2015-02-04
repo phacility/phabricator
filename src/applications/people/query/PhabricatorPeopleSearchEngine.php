@@ -7,7 +7,7 @@ final class PhabricatorPeopleSearchEngine
     return pht('Users');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorPeopleApplication';
   }
 

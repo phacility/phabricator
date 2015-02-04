@@ -7,7 +7,7 @@ final class DrydockBlueprintSearchEngine
     return pht('Drydock Blueprints');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorDrydockApplication';
   }
 

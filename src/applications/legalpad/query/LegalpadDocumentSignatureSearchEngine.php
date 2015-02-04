@@ -9,7 +9,7 @@ final class LegalpadDocumentSignatureSearchEngine
     return pht('Legalpad Signatures');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorLegalpadApplication';
   }
 

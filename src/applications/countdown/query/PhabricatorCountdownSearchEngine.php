@@ -7,7 +7,7 @@ final class PhabricatorCountdownSearchEngine
     return pht('Countdowns');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorCountdownApplication';
   }
 

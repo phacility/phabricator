@@ -7,7 +7,7 @@ final class PhabricatorOAuthServerClientSearchEngine
     return pht('OAuth Clients');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorOAuthServerApplication';
   }
 

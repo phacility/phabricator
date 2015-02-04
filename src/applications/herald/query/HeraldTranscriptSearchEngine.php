@@ -7,7 +7,7 @@ final class HeraldTranscriptSearchEngine
     return pht('Herald Transcripts');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorHeraldApplication';
   }
 

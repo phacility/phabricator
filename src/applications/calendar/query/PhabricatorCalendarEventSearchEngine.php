@@ -7,7 +7,7 @@ final class PhabricatorCalendarEventSearchEngine
     return pht('Calendar Events');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorCalendarApplication';
   }
 

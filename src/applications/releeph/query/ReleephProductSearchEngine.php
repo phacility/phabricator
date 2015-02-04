@@ -7,7 +7,7 @@ final class ReleephProductSearchEngine
     return pht('Releeph Products');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorReleephApplication';
   }
 

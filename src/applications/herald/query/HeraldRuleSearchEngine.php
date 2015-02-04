@@ -6,7 +6,7 @@ final class HeraldRuleSearchEngine extends PhabricatorApplicationSearchEngine {
     return pht('Herald Rules');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorHeraldApplication';
   }
 

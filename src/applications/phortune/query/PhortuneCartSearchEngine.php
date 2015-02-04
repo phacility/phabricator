@@ -38,6 +38,10 @@ final class PhortuneCartSearchEngine
     return pht('Phortune Orders');
   }
 
+  public function getApplicationClassName() {
+    return 'PhabricatorPhortuneApplication';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 

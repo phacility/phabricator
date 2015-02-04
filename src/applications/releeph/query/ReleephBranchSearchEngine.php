@@ -9,6 +9,10 @@ final class ReleephBranchSearchEngine
     return pht('Releeph Branches');
   }
 
+  public function getApplicationClassName() {
+    return 'PhabricatorReleephApplication';
+  }
+
   public function setProduct(ReleephProject $product) {
     $this->product = $product;
     return $this;
