@@ -906,6 +906,11 @@ abstract class PhabricatorBaseEnglishTranslation
         'You have an unpaid invoice.',
         'You have unpaid invoices.',
       ),
+
+      'The configurations differ in the following %s way(s):' => array(
+        'The configurations differ:',
+        'The configurations differ in these ways:',
+      ),
     );
   }
 

@@ -92,11 +92,36 @@ final class PhabricatorDaemonsSetupCheck extends PhabricatorSetupCheck {
           'At least one daemon is currently running with different '.
           'configuration than the Phabricator web application.');
 
+        $list_section = null;
+        $env_info = $daemon->getEnvInfo();
+        if ($env_info) {
+          $issues = PhabricatorEnv::compareEnvironmentInfo(
+            PhabricatorEnv::calculateEnvironmentInfo(),
+            $env_info);
+
+          if ($issues) {
+            foreach ($issues as $key => $issue) {
+              $issues[$key] = phutil_tag('li', array(), $issue);
+            }
+
+            $list_section = array(
+              pht(
+                'The configurations differ in the following %s way(s):',
+                new PhutilNumber(count($issues))),
+              phutil_tag(
+                'ul',
+                array(),
+                $issues),
+            );
+          }
+        }
+
+
         $message = pht(
           'At least one daemon is currently running with a different '.
           'configuration (config checksum %s) than the web application '.
           '(config checksum %s).'.
-          "\n\n".
+          "\n\n%s".
           'This usually means that you have just made a configuration change '.
           'from the web UI, but have not yet restarted the daemons. You '.
           'need to restart the daemons after making configuration changes '.
@@ -130,6 +155,7 @@ final class PhabricatorDaemonsSetupCheck extends PhabricatorSetupCheck {
 
           phutil_tag('tt', array(), substr($daemon->getEnvHash(), 0, 12)),
           phutil_tag('tt', array(), substr($environment_hash, 0, 12)),
+          $list_section,
           phutil_tag('tt', array(), 'bin/phd restart'),
           phutil_tag(
             'a',
