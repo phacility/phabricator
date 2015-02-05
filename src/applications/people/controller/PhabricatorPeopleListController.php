@@ -29,4 +29,21 @@ final class PhabricatorPeopleListController
     return $this->delegateToController($controller);
   }
 
+  protected function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
+    $viewer = $this->getRequest()->getUser();
+
+    $can_create = $this->hasApplicationCapability(
+      PeopleCreateUsersCapability::CAPABILITY);
+    $crumbs->addAction(
+      id(new PHUIListItemView())
+      ->setName(pht('Create New User'))
+      ->setHref($this->getApplicationURI('create/'))
+      ->setDisabled(!$can_create)
+      ->setIcon('fa-plus-square'));
+
+    return $crumbs;
+  }
+
+
 }
