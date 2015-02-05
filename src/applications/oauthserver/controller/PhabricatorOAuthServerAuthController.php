@@ -39,8 +39,23 @@ final class PhabricatorOAuthServerAuthController
     // one giant try / catch around all the exciting database stuff so we
     // can return a 'server_error' response if something goes wrong!
     try {
-      $client = id(new PhabricatorOAuthServerClient())
-        ->loadOneWhere('phid = %s', $client_phid);
+      try {
+        $client = id(new PhabricatorOAuthServerClientQuery())
+          ->setViewer($viewer)
+          ->withPHIDs(array($client_phid))
+          ->executeOne();
+      } catch (PhabricatorPolicyException $ex) {
+        // We require that users must be able to see an OAuth application
+        // in order to authorize it. This allows an application's visibility
+        // policy to be used to restrict authorized users.
+
+        // None of the OAuth error responses are a perfect fit for this, but
+        // 'invalid_client' seems closest.
+        return $this->buildErrorResponse(
+          'invalid_client',
+          pht('Not Authorized'),
+          pht('You are not authorized to authenticate.'));
+      }
 
       if (!$client) {
         return $this->buildErrorResponse(
