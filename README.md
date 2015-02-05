@@ -19,11 +19,15 @@ Phabricator is developed and maintained by [Phacility](http://phacility.com). Th
 
 **BUG REPORTS**
 
-Please update your install to **HEAD** before filing bug reports. You can follow our [bug reporting guide](https://secure.phabricator.com/book/phabcontrib/article/bug_reports/) or and file the issue in [Maniphest](https://secure.phabricator.com/maniphest/task/create/).
+Please update your install to **HEAD** before filing bug reports. Follow our [bug reporting guide](https://secure.phabricator.com/book/phabcontrib/article/bug_reports/) for complete instructions.
 
 **FEATURE REQUESTS**
 
 We're big fans of feature requests that state core problems, not just 'add this'. We've compiled a short guide to effective upstream requests [here](https://secure.phabricator.com/book/phabcontrib/article/feature_requests/).
+
+**COMMUNITY CHAT**
+
+Please visit our [IRC Channel (#phabricator on FreeNode)](irc://chat.freenode.net/phabricator) to talk with other members of the Phabricator community. There might be someone there who can help you with setup issues or what image to choose for a macro.
 
 **SECURITY ISSUES**
 
