@@ -44,7 +44,7 @@ final class PhabricatorStorageManagementDumpWorkflow
       : '';
 
     return phutil_passthru(
-      'mysqldump --single-transaction --default-character-set=utf8 '.
+      'mysqldump --hex-blob --single-transaction --default-character-set=utf8 '.
       '-u %s %C -h %s %C --databases %Ls',
       $api->getUser(),
       $flag_password,
