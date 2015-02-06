@@ -4,13 +4,13 @@ final class PhabricatorPeopleNewController
   extends PhabricatorPeopleController {
 
   public function handleRequest(AphrontRequest $request) {
-    $this->requireApplicationCapability(
-      PeopleCreateUsersCapability::CAPABILITY);
     $type = $request->getURIData('type');
     $admin = $request->getUser();
 
     switch ($type) {
       case 'standard':
+        $this->requireApplicationCapability(
+          PeopleCreateUsersCapability::CAPABILITY);
         $is_bot = false;
         break;
       case 'bot':

@@ -6,7 +6,7 @@ final class PeopleCreateUsersCapability
   const CAPABILITY = 'people.create.users';
 
   public function getCapabilityName() {
-    return pht('Can Create Users');
+    return pht('Can Create (non-bot) Users');
   }
 
   public function describeCapabilityRejection() {

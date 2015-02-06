@@ -164,11 +164,22 @@ final class PhabricatorPeopleApplication extends PhabricatorApplication {
   public function getQuickCreateItems(PhabricatorUser $viewer) {
     $items = array();
 
-    if ($viewer->getIsAdmin()) {
+    $can_create = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $this,
+      PeopleCreateUsersCapability::CAPABILITY);
+
+    if ($can_create) {
       $item = id(new PHUIListItemView())
         ->setName(pht('User Account'))
         ->setIcon('fa-users')
         ->setHref($this->getBaseURI().'create/');
+      $items[] = $item;
+    } else if ($viewer->getIsAdmin()) {
+      $item = id(new PHUIListItemView())
+        ->setName(pht('Bot Account'))
+        ->setIcon('fa-android')
+        ->setHref($this->getBaseURI().'new/bot/');
       $items[] = $item;
     }
 
