@@ -7,8 +7,7 @@ final class PhabricatorAuthStartController
     return false;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getUser();
 
     if ($viewer->isLoggedIn()) {
@@ -95,6 +94,19 @@ final class PhabricatorAuthStartController
         PhabricatorCookies::setNextURICookie($request, $next_uri);
       }
       PhabricatorCookies::setClientIDCookie($request);
+    }
+
+    if (!$request->getURIData('loggedout') && count($providers) == 1) {
+      $auto_login_provider = head($providers);
+      $auto_login_config = $auto_login_provider->getProviderConfig();
+      if ($auto_login_provider instanceof PhabricatorPhabricatorAuthProvider &&
+          $auto_login_config->getShouldAutoLogin()) {
+        $auto_login_adapter = $provider->getAdapter();
+        $auto_login_adapter->setState($provider->getAuthCSRFCode($request));
+        return id(new AphrontRedirectResponse())
+          ->setIsExternal(true)
+          ->setURI($provider->getAdapter()->getAuthenticateURI());
+      }
     }
 
     $not_buttons = array();
