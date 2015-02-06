@@ -18,22 +18,42 @@ final class PhabricatorOAuthServerScope {
     );
   }
 
-  static public function getCheckboxControl($current_scopes) {
+  static public function getDefaultScope() {
+    return self::SCOPE_WHOAMI;
+  }
+
+  static public function getCheckboxControl(
+    array $current_scopes) {
+
+    $have_options = false;
     $scopes = self::getScopesDict();
     $scope_keys = array_keys($scopes);
     sort($scope_keys);
+    $default_scope = self::getDefaultScope();
 
     $checkboxes = new AphrontFormCheckboxControl();
     foreach ($scope_keys as $scope) {
+      if ($scope == $default_scope) {
+        continue;
+      }
+      if (!isset($current_scopes[$scope])) {
+        continue;
+      }
+
       $checkboxes->addCheckbox(
         $name = $scope,
         $value = 1,
         $label = self::getCheckboxLabel($scope),
         $checked = isset($current_scopes[$scope]));
+      $have_options = true;
     }
-    $checkboxes->setLabel('Scope');
 
-    return $checkboxes;
+    if ($have_options) {
+      $checkboxes->setLabel(pht('Scope'));
+      return $checkboxes;
+    }
+
+    return null;
   }
 
   static private function getCheckboxLabel($scope) {
@@ -58,6 +78,7 @@ final class PhabricatorOAuthServerScope {
         $requested_scopes[$scope] = 1;
       }
     }
+    $requested_scopes[self::getDefaultScope()] = 1;
     return $requested_scopes;
   }
 

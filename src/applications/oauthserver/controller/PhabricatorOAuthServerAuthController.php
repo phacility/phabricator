@@ -13,7 +13,7 @@ final class PhabricatorOAuthServerAuthController
 
     $server        = new PhabricatorOAuthServer();
     $client_phid   = $request->getStr('client_id');
-    $scope         = $request->getStr('scope', array());
+    $scope         = $request->getStr('scope');
     $redirect_uri  = $request->getStr('redirect_uri');
     $response_type = $request->getStr('response_type');
 
@@ -119,6 +119,13 @@ final class PhabricatorOAuthServerAuthController
               phutil_tag('strong', array(), 'scope')));
         }
         $scope = PhabricatorOAuthServerScope::scopesListToDict($scope);
+      } else {
+        return $this->buildErrorResponse(
+          'invalid_request',
+          pht('Malformed Request'),
+          pht(
+            'Required parameter %s was not present in the request.',
+            phutil_tag('strong', array(), 'scope')));
       }
 
       // NOTE: We're always requiring a confirmation dialog to redirect.
@@ -130,7 +137,6 @@ final class PhabricatorOAuthServerAuthController
       list($is_authorized, $authorization) = $auth_info;
 
       if ($request->isFormPost()) {
-        // TODO: We should probably validate this more? It feels a little funky.
         $scope = PhabricatorOAuthServerScope::getScopesFromRequest($request);
 
         if ($authorization) {
@@ -194,25 +200,16 @@ final class PhabricatorOAuthServerAuthController
     }
 
     // Here, we're confirming authorization for the application.
-
-    if ($scope) {
-      if ($authorization) {
-        $desired_scopes = array_merge($scope,
-                                      $authorization->getScope());
-      } else {
-        $desired_scopes = $scope;
-      }
-      if (!PhabricatorOAuthServerScope::validateScopesDict($desired_scopes)) {
-        return $this->buildErrorResponse(
-          'invalid_scope',
-          pht('Invalid Scope'),
-          pht('The requested scope is invalid, unknown, or malformed.'));
-      }
+    if ($authorization) {
+      $desired_scopes = array_merge($scope, $authorization->getScope());
     } else {
-      $desired_scopes = array(
-        PhabricatorOAuthServerScope::SCOPE_WHOAMI         => 1,
-        PhabricatorOAuthServerScope::SCOPE_OFFLINE_ACCESS => 1,
-      );
+      $desired_scopes = $scope;
+    }
+    if (!PhabricatorOAuthServerScope::validateScopesDict($desired_scopes)) {
+      return $this->buildErrorResponse(
+        'invalid_scope',
+        pht('Invalid Scope'),
+        pht('The requested scope is invalid, unknown, or malformed.'));
     }
 
     $form = id(new AphrontFormView())
