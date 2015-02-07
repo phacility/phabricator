@@ -911,6 +911,19 @@ abstract class PhabricatorBaseEnglishTranslation
         'The configurations differ:',
         'The configurations differ in these ways:',
       ),
+
+      'Phabricator is configured with an email domain whitelist (in %s), so '.
+      'only users with a verified email address at one of these %s '.
+      'allowed domain(s) will be able to register an account: %s' => array(
+        array(
+          'Phabricator is configured with an email domain whitelist (in %s), '.
+          'so only users with a verified email address at %3$s will be '.
+          'allowed to register an account.',
+          'Phabricator is configured with an email domain whitelist (in %s), '.
+          'so only users with a verified email address at one of these '.
+          'allowed domains will be able to register an account: %3$s',
+        ),
+      ),
     );
   }
 

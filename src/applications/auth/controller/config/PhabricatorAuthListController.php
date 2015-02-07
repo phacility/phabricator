@@ -92,36 +92,58 @@ final class PhabricatorAuthListController
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Auth Providers'));
 
-    $config_name = 'auth.email-domains';
-    $config_href = '/config/edit/'.$config_name.'/';
-    $config_link = phutil_tag(
-      'a',
-      array(
-        'href' => $config_href,
-        'target' => '_blank',
-      ),
-      $config_name);
+    $domains_key = 'auth.email-domains';
+    $domains_link = $this->renderConfigLink($domains_key);
+    $domains_value = PhabricatorEnv::getEnvConfig($domains_key);
 
-    $warning = new PHUIErrorView();
+    $approval_key = 'auth.require-approval';
+    $approval_link = $this->renderConfigLink($approval_key);
+    $approval_value = PhabricatorEnv::getEnvConfig($approval_key);
 
-    $email_domains = PhabricatorEnv::getEnvConfig($config_name);
-    if ($email_domains) {
-      $warning->setSeverity(PHUIErrorView::SEVERITY_NOTICE);
-      $warning->appendChild(
-        pht(
-          'Only users with a verified email address at one of the %s domains '.
-          'will be able to register a Phabricator account: %s',
-          $config_link,
-          phutil_tag('strong', array(), implode(', ', $email_domains))));
+    $issues = array();
+    if ($domains_value) {
+      $issues[] = pht(
+        'Phabricator is configured with an email domain whitelist (in %s), so '.
+        'only users with a verified email address at one of these %s '.
+        'allowed domain(s) will be able to register an account: %s',
+        $domains_link,
+        new PhutilNumber(count($domains_value)),
+        phutil_tag('strong', array(), implode(', ', $domains_value)));
     } else {
-      $warning->setSeverity(PHUIErrorView::SEVERITY_WARNING);
-      $warning->appendChild(
-        pht(
-          'Anyone who can browse to this Phabricator install will be able to '.
-          'register an account. To restrict who can register an account, '.
-          'configure %s.',
-          $config_link));
+      $issues[] = pht(
+        'Anyone who can browse to this Phabricator install will be able to '.
+        'register an account. To add email domain restrictions, configure '.
+        '%s.',
+        $domains_link);
     }
+
+    if ($approval_value) {
+      $issues[] = pht(
+        'Administrative approvals are enabled (in %s), so all new users must '.
+        'have their accounts approved by an administrator.',
+        $approval_link);
+    } else {
+      $issues[] = pht(
+        'Administrative approvals are disabled, so users who register will '.
+        'be able to use their accounts immediately. To enable approvals, '.
+        'configure %s.',
+        $approval_link);
+    }
+
+    if (!$domains_value && !$approval_value) {
+      $severity = PHUIErrorView::SEVERITY_WARNING;
+      $issues[] = pht(
+        'You can safely ignore this warning if the install itself has '.
+        'access controls (for example, it is deployed on a VPN) or if all of '.
+        'the configured providers have access controls (for example, they are '.
+        'all private LDAP or OAuth servers).');
+    } else {
+      $severity = PHUIErrorView::SEVERITY_NOTICE;
+    }
+
+    $warning = id(new PHUIErrorView())
+      ->setSeverity($severity)
+      ->setErrors($issues);
 
     $image = id(new PHUIIconView())
           ->setIconFont('fa-plus');
@@ -150,6 +172,16 @@ final class PhabricatorAuthListController
       array(
         'title' => pht('Authentication Providers'),
       ));
+  }
+
+  private function renderConfigLink($key) {
+    return phutil_tag(
+      'a',
+      array(
+        'href' => '/config/edit/'.$key.'/',
+        'target' => '_blank',
+      ),
+      $key);
   }
 
 }
