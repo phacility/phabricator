@@ -12,6 +12,7 @@ final class PhabricatorAuthListController
       ->execute();
 
     $list = new PHUIObjectItemListView();
+
     foreach ($configs as $config) {
       $item = new PHUIObjectItemView();
 
@@ -28,8 +29,7 @@ final class PhabricatorAuthListController
         $name = $config->getProviderType().' ('.$config->getProviderClass().')';
       }
 
-      $item
-        ->setHeader($name);
+      $item->setHeader($name);
 
       if ($provider) {
         $item->setHref($edit_uri);
@@ -52,7 +52,7 @@ final class PhabricatorAuthListController
       $can_manage = $this->hasApplicationCapability(
         AuthManageProvidersCapability::CAPABILITY);
       if ($config->getIsEnabled()) {
-        $item->setBarColor('green');
+        $item->setState(PHUIObjectItemView::STATE_SUCCESS);
         $item->addAction(
           id(new PHUIListItemView())
             ->setIcon('fa-times')
@@ -60,7 +60,7 @@ final class PhabricatorAuthListController
             ->setDisabled(!$can_manage)
             ->addSigil('workflow'));
       } else {
-        $item->setBarColor('grey');
+        $item->setState(PHUIObjectItemView::STATE_FAIL);
         $item->addIcon('fa-times grey', pht('Disabled'));
         $item->addAction(
           id(new PHUIListItemView())
@@ -90,7 +90,6 @@ final class PhabricatorAuthListController
           pht('Add Authentication Provider'))));
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->setBorder(true);
     $crumbs->addTextCrumb(pht('Auth Providers'));
 
     $config_name = 'auth.email-domains';
@@ -108,7 +107,6 @@ final class PhabricatorAuthListController
     $email_domains = PhabricatorEnv::getEnvConfig($config_name);
     if ($email_domains) {
       $warning->setSeverity(PHUIErrorView::SEVERITY_NOTICE);
-      $warning->setTitle(pht('Registration is Restricted'));
       $warning->appendChild(
         pht(
           'Only users with a verified email address at one of the %s domains '.
@@ -117,7 +115,6 @@ final class PhabricatorAuthListController
           phutil_tag('strong', array(), implode(', ', $email_domains))));
     } else {
       $warning->setSeverity(PHUIErrorView::SEVERITY_WARNING);
-      $warning->setTitle(pht('Anyone Can Register an Account'));
       $warning->appendChild(
         pht(
           'Anyone who can browse to this Phabricator install will be able to '.
@@ -126,10 +123,28 @@ final class PhabricatorAuthListController
           $config_link));
     }
 
+    $image = id(new PHUIIconView())
+          ->setIconFont('fa-plus');
+    $button = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setColor(PHUIButtonView::SIMPLE)
+        ->setHref($this->getApplicationURI('config/new/'))
+        ->setIcon($image)
+        ->setText(pht('Add Provider'));
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Authentication Providers'))
+      ->addActionLink($button);
+
+    $list->setFlush(true);
+    $list = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->setErrorView($warning)
+      ->appendChild($list);
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $warning,
         $list,
       ),
       array(

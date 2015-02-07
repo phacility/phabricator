@@ -19,6 +19,10 @@ ul.phui-object-item-list-view {
   padding: 0;
 }
 
+.phui-object-box .phui-object-list-flush .phui-object-item {
+  margin: 0;
+}
+
 .device-phone .phui-object-box
   .phui-object-item-list-view.phui-object-list-flush {
   padding: 4px;
