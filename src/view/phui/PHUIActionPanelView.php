@@ -6,12 +6,14 @@ final class PHUIActionPanelView extends AphrontTagView {
   private $fontIcon;
   private $header;
   private $subHeader;
+  private $bigText;
   private $state;
   private $status;
 
   const STATE_WARN = 'phui-action-panel-warn';
   const STATE_INFO = 'phui-action-panel-info';
   const STATE_ERROR = 'phui-action-panel-error';
+  const STATE_SUCCESS = 'phui-action-panel-success';
   const STATE_PROGRESS = 'phui-action-panel-progress';
   const STATE_NONE = 'phui-action-panel-none';
 
@@ -22,6 +24,11 @@ final class PHUIActionPanelView extends AphrontTagView {
 
   public function setFontIcon($image) {
     $this->fontIcon = $image;
+    return $this;
+  }
+
+  public function setBigText($text) {
+    $this->bigText = $text;
     return $this;
   }
 
@@ -60,8 +67,11 @@ final class PHUIActionPanelView extends AphrontTagView {
       case self::STATE_PROGRESS:
         $icon->setIconFont('fa-refresh ph-spin msr');
       break;
+      case self::STATE_SUCCESS:
+        $icon->setIconFont('fa-check msr');
+      break;
       case self::STATE_NONE:
-        $icon->setIconFont('fa-info-circle msr');
+        return null;
       break;
     }
     return $icon;
@@ -85,9 +95,18 @@ final class PHUIActionPanelView extends AphrontTagView {
   protected function getTagContent() {
 
     $icon = null;
-    if ($this->fontIcon) {
-      $fonticon = id(new PHUIIconView())
-        ->setIconFont($this->fontIcon);
+    if ($this->fontIcon || $this->bigText) {
+      if ($this->fontIcon) {
+        $fonticon = id(new PHUIIconView())
+          ->setIconFont($this->fontIcon);
+      } else {
+        $fonticon = phutil_tag(
+          'span',
+          array(
+            'class' => 'phui-action-panel-bigtext',
+          ),
+          $this->bigText);
+      }
       if ($this->href) {
         $fonticon = phutil_tag(
           'a',

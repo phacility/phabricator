@@ -14,8 +14,23 @@
   vertical-align: bottom;
 }
 
-.phui-action-panel-icon a:hover .phui-icon-view {
+.phui-action-panel-bigtext {
+  font-size: 40px;
+  color: {$lightgreytext};
+  line-height: 96px;
+}
+
+.phui-action-panel-icon a {
+  display: block;
+}
+
+.phui-action-panel-icon a:hover .phui-icon-view,
+.phui-action-panel-icon a:hover .phui-action-panel-bigtext {
   color: {$blue};
+}
+
+.phui-action-panel-icon a:hover {
+  text-decoration: none;
 }
 
 .phui-action-panel-icon .phui-icon-view {
@@ -86,6 +101,16 @@
 
 .phui-action-panel-info .phui-action-panel-status .phui-icon-view {
   color: {$blue};
+}
+
+.phui-action-panel-success .phui-action-panel-status {
+  background-color: {$lightgreen};
+  color: {$green};
+  border-left: 4px solid {$green};
+}
+
+.phui-action-panel-success .phui-action-panel-status .phui-icon-view {
+  color: {$green};
 }
 
 .phui-action-panel-progress .phui-action-panel-status {
