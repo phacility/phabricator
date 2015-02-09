@@ -620,46 +620,52 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return (string) $uri;
   }
 
-  public function getProfileThumbURI() {
-    $path = '/file/xform/thumb-profile/'.$this->getPHID().'/'
-      .$this->getSecretKey().'/';
+  private function getTransformedURI($transform) {
+    $parts = array();
+    $parts[] = 'file';
+    $parts[] = 'xform';
+
+    $instance = PhabricatorEnv::getEnvConfig('cluster.instance');
+    if (strlen($instance)) {
+      $parts[] = '@'.$instance;
+    }
+
+    $parts[] = $transform;
+    $parts[] = $this->getPHID();
+    $parts[] = $this->getSecretKey();
+
+    $path = implode('/', $parts);
+    $path = $path.'/';
+
     return PhabricatorEnv::getCDNURI($path);
+  }
+
+  public function getProfileThumbURI() {
+    return $this->getTransformedURI('thumb-profile');
   }
 
   public function getThumb60x45URI() {
-    $path = '/file/xform/thumb-60x45/'.$this->getPHID().'/'
-      .$this->getSecretKey().'/';
-    return PhabricatorEnv::getCDNURI($path);
+    return $this->getTransformedURI('thumb-60x45');
   }
 
   public function getThumb160x120URI() {
-    $path = '/file/xform/thumb-160x120/'.$this->getPHID().'/'
-      .$this->getSecretKey().'/';
-    return PhabricatorEnv::getCDNURI($path);
+    return $this->getTransformedURI('thumb-160x120');
   }
 
   public function getPreview100URI() {
-    $path = '/file/xform/preview-100/'.$this->getPHID().'/'
-      .$this->getSecretKey().'/';
-    return PhabricatorEnv::getCDNURI($path);
+    return $this->getTransformedURI('preview-100');
   }
 
   public function getPreview220URI() {
-    $path = '/file/xform/preview-220/'.$this->getPHID().'/'
-      .$this->getSecretKey().'/';
-    return PhabricatorEnv::getCDNURI($path);
+    return $this->getTransformedURI('preview-220');
   }
 
   public function getThumb220x165URI() {
-    $path = '/file/xform/thumb-220x165/'.$this->getPHID().'/'
-      .$this->getSecretKey().'/';
-    return PhabricatorEnv::getCDNURI($path);
+    return $this->getTransfomredURI('thumb-220x165');
   }
 
   public function getThumb280x210URI() {
-    $path = '/file/xform/thumb-280x210/'.$this->getPHID().'/'
-      .$this->getSecretKey().'/';
-    return PhabricatorEnv::getCDNURI($path);
+    return $this->getTransformedURI('thumb-280x210');
   }
 
   public function isViewableInBrowser() {
