@@ -15,6 +15,10 @@ final class PhabricatorSecurityConfigOptions
     return 'fa-lock';
   }
 
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
     $support_href = PhabricatorEnv::getDoclink('Give Feedback! Get Support!');
 

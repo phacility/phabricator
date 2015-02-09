@@ -15,6 +15,10 @@ final class PhabricatorLegalpadConfigOptions
     return 'fa-gavel';
   }
 
+  public function getGroup() {
+    return 'apps';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption(

@@ -15,6 +15,10 @@ final class PhabricatorMetaMTAConfigOptions
     return 'fa-send';
   }
 
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
     $send_as_user_desc = $this->deformat(pht(<<<EODOC
 When a user takes an action which generates an email notification (like

@@ -2286,7 +2286,7 @@ phutil_register_library_map(array(
     'PhabricatorRepositoryCommitParserWorker' => 'applications/repository/worker/PhabricatorRepositoryCommitParserWorker.php',
     'PhabricatorRepositoryCommitRef' => 'applications/repository/engine/PhabricatorRepositoryCommitRef.php',
     'PhabricatorRepositoryCommitSearchIndexer' => 'applications/repository/search/PhabricatorRepositoryCommitSearchIndexer.php',
-    'PhabricatorRepositoryConfigOptions' => 'applications/repository/PhabricatorRepositoryConfigOptions.php',
+    'PhabricatorRepositoryConfigOptions' => 'applications/repository/config/PhabricatorRepositoryConfigOptions.php',
     'PhabricatorRepositoryController' => 'applications/repository/controller/PhabricatorRepositoryController.php',
     'PhabricatorRepositoryDAO' => 'applications/repository/storage/PhabricatorRepositoryDAO.php',
     'PhabricatorRepositoryDiscoveryEngine' => 'applications/repository/engine/PhabricatorRepositoryDiscoveryEngine.php',

@@ -15,6 +15,10 @@ final class PhabricatorMacroConfigOptions
     return 'fa-file-image-o';
   }
 
+  public function getGroup() {
+    return 'apps';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('metamta.macro.reply-handler-domain', 'string', null)

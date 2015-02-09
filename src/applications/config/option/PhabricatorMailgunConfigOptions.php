@@ -15,6 +15,10 @@ final class PhabricatorMailgunConfigOptions
     return 'fa-send-o';
   }
 
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('mailgun.domain', 'string', null)

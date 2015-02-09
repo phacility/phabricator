@@ -15,6 +15,10 @@ final class PhabricatorHarbormasterConfigOptions
     return 'fa-ship';
   }
 
+  public function getGroup() {
+    return 'apps';
+  }
+
   public function getOptions() {
     return array();
   }

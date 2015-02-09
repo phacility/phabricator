@@ -15,6 +15,10 @@ final class PhabricatorFeedConfigOptions
     return 'fa-newspaper-o';
   }
 
+  public function getGroup() {
+    return 'apps';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('feed.public', 'bool', false)

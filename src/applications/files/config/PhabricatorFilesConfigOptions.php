@@ -15,6 +15,10 @@ final class PhabricatorFilesConfigOptions
     return 'fa-file';
   }
 
+  public function getGroup() {
+    return 'apps';
+  }
+
   public function getOptions() {
     $viewable_default = array(
       'image/jpeg'  => 'image/jpeg',

@@ -15,6 +15,10 @@ final class PhabricatorDiffusionConfigOptions
     return 'fa-code';
   }
 
+  public function getGroup() {
+    return 'apps';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption(

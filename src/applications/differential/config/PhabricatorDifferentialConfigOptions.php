@@ -15,6 +15,10 @@ final class PhabricatorDifferentialConfigOptions
     return 'fa-cog';
   }
 
+  public function getGroup() {
+    return 'apps';
+  }
+
   public function getOptions() {
     $custom_field_type = 'custom:PhabricatorCustomFieldConfigOptionType';
 

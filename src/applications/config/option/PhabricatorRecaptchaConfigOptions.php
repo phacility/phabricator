@@ -15,6 +15,10 @@ final class PhabricatorRecaptchaConfigOptions
     return 'fa-recycle';
   }
 
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
 
     return array(

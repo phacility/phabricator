@@ -15,6 +15,10 @@ final class PhabricatorPHPMailerConfigOptions
     return 'fa-send-o';
   }
 
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('phpmailer.mailer', 'string', 'smtp')

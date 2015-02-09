@@ -15,6 +15,10 @@ final class PhabricatorTranslationsConfigOptions
     return 'fa-globe';
   }
 
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption(

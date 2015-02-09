@@ -15,6 +15,10 @@ final class PhabricatorRepositoryConfigOptions
     return 'fa-hdd-o';
   }
 
+  public function getGroup() {
+    return 'apps';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('repository.default-local-path', 'string', '/var/repo/')

@@ -15,6 +15,10 @@ final class PhabricatorAWSConfigOptions
     return 'fa-server';
   }
 
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('amazon-ses.access-key', 'string', null)

@@ -15,6 +15,10 @@ final class PhabricatorPolicyConfigOptions
     return 'fa-lock';
   }
 
+  public function getGroup() {
+    return 'apps';
+  }
+
   public function getOptions() {
     $policy_locked_type = 'custom:PolicyLockOptionType';
     $policy_locked_example = array(

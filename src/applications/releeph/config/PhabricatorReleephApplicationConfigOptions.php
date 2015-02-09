@@ -15,6 +15,10 @@ final class PhabricatorReleephApplicationConfigOptions
     return 'fa-flag-checkered';
   }
 
+  public function getGroup() {
+    return 'apps';
+  }
+
   public function getOptions() {
     $default_fields = array(
       new ReleephSummaryFieldSpecification(),

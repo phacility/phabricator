@@ -15,6 +15,10 @@ final class PhabricatorCoreConfigOptions
     return 'fa-bullseye';
   }
 
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
     if (phutil_is_windows()) {
       $paths = array();

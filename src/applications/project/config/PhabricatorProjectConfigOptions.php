@@ -15,6 +15,10 @@ final class PhabricatorProjectConfigOptions
     return 'fa-briefcase';
   }
 
+  public function getGroup() {
+    return 'apps';
+  }
+
   public function getOptions() {
     $default_fields = array(
       'std:project:internal:description' => true,

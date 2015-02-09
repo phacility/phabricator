@@ -15,6 +15,10 @@ final class PhabricatorDisqusConfigOptions
     return 'fa-comment';
   }
 
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('disqus.shortname', 'string', null)

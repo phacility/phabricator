@@ -15,6 +15,10 @@ final class PhabricatorNotificationConfigOptions
     return 'fa-bell';
   }
 
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('notification.enabled', 'bool', false)

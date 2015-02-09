@@ -15,6 +15,10 @@ final class PhabricatorSearchConfigOptions
     return 'fa-search';
   }
 
+  public function getGroup() {
+    return 'apps';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption(

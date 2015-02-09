@@ -15,6 +15,10 @@ final class PhabricatorManiphestConfigOptions
     return 'fa-anchor';
   }
 
+  public function getGroup() {
+    return 'apps';
+  }
+
   public function getOptions() {
 
     $priority_defaults = array(

@@ -15,6 +15,10 @@ final class PhabricatorMySQLConfigOptions
     return 'fa-database';
   }
 
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('mysql.host', 'string', 'localhost')
