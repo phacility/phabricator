@@ -71,8 +71,8 @@
     "text": {
       "type": "text",
       "exclude": [
-        "(^\\.arclint)",
-        "(^resources/sql/quickstart.sql)"
+        "(^\\.arclint$)",
+        "(^resources/sql/quickstart.sql$)"
       ]
     },
     "text-without-length": {
@@ -81,8 +81,8 @@
         "3": "disabled"
       },
       "include": [
-        "(^\\.arclint)",
-        "(^resources/sql/quickstart.sql)"
+        "(^\\.arclint$)",
+        "(^resources/sql/quickstart.sql$)"
       ]
     },
     "xhpast": {
