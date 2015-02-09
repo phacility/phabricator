@@ -182,6 +182,12 @@ final class PhabricatorOAuthServerAuthController
           'state' => $state,
         ));
 
+      if ($client->getIsTrusted()) {
+        return id(new AphrontRedirectResponse())
+          ->setIsExternal(true)
+          ->setURI((string)$full_uri);
+      }
+
       // TODO: It would be nice to give the user more options here, like
       // reviewing permissions, canceling the authorization, or aborting
       // the workflow.
