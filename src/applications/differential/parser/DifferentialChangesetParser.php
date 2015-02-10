@@ -105,10 +105,7 @@ final class DifferentialChangesetParser {
 
   const WHITESPACE_SHOW_ALL         = 'show-all';
   const WHITESPACE_IGNORE_TRAILING  = 'ignore-trailing';
-
-  // TODO: This is now "Ignore Most" in the UI.
-  const WHITESPACE_IGNORE_ALL       = 'ignore-all';
-
+  const WHITESPACE_IGNORE_MOST      = 'ignore-most';
   const WHITESPACE_IGNORE_FORCE     = 'ignore-force';
 
   public function setOldLines(array $lines) {
@@ -499,11 +496,11 @@ final class DifferentialChangesetParser {
       case self::WHITESPACE_IGNORE_FORCE:
         break;
       default:
-        $whitespace_mode = self::WHITESPACE_IGNORE_ALL;
+        $whitespace_mode = self::WHITESPACE_IGNORE_MOST;
         break;
     }
 
-    $skip_cache = ($whitespace_mode != self::WHITESPACE_IGNORE_ALL);
+    $skip_cache = ($whitespace_mode != self::WHITESPACE_IGNORE_MOST);
     if ($this->disableCache) {
       $skip_cache = true;
     }
@@ -539,7 +536,7 @@ final class DifferentialChangesetParser {
     $whitespace_mode = $this->whitespaceMode;
     $changeset = $this->changeset;
 
-    $ignore_all = (($whitespace_mode == self::WHITESPACE_IGNORE_ALL) ||
+    $ignore_all = (($whitespace_mode == self::WHITESPACE_IGNORE_MOST) ||
                   ($whitespace_mode == self::WHITESPACE_IGNORE_FORCE));
 
     $force_ignore = ($whitespace_mode == self::WHITESPACE_IGNORE_FORCE);
