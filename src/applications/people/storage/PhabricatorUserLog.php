@@ -26,6 +26,7 @@ final class PhabricatorUserLog extends PhabricatorUserDAO
   const ACTION_EMAIL_REMOVE     = 'email-remove';
   const ACTION_EMAIL_ADD        = 'email-add';
   const ACTION_EMAIL_VERIFY     = 'email-verify';
+  const ACTION_EMAIL_REASSIGN   = 'email-reassign';
 
   const ACTION_CHANGE_PASSWORD  = 'change-password';
   const ACTION_CHANGE_USERNAME  = 'change-username';
@@ -69,6 +70,7 @@ final class PhabricatorUserLog extends PhabricatorUserDAO
       self::ACTION_EMAIL_ADD => pht('Email: Add Address'),
       self::ACTION_EMAIL_REMOVE => pht('Email: Remove Address'),
       self::ACTION_EMAIL_VERIFY => pht('Email: Verify'),
+      self::ACTION_EMAIL_REASSIGN => pht('Email: Reassign'),
       self::ACTION_CHANGE_PASSWORD => pht('Change Password'),
       self::ACTION_CHANGE_USERNAME => pht('Change Username'),
       self::ACTION_ENTER_HISEC => pht('Hisec: Enter'),

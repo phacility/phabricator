@@ -554,7 +554,58 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
 
       $user->endWriteLocking();
     $user->saveTransaction();
+  }
 
+
+  /**
+   * Reassign an unverified email address.
+   */
+  public function reassignEmail(
+    PhabricatorUser $user,
+    PhabricatorUserEmail $email) {
+    $actor = $this->requireActor();
+
+    if (!$user->getID()) {
+      throw new Exception(pht('User has not been created yet!'));
+    }
+
+    if (!$email->getID()) {
+      throw new Exception(pht('Email has not been created yet!'));
+    }
+
+    $user->openTransaction();
+      $user->beginWriteLocking();
+
+        $user->reload();
+        $email->reload();
+
+        $old_user = $email->getUserPHID();
+
+        if ($old_user != $user->getPHID()) {
+          if ($email->getIsVerified()) {
+            throw new Exception(
+              pht(
+                'Verified email addresses can not be reassigned.'));
+          }
+          if ($email->getIsPrimary()) {
+            throw new Exception(
+              pht(
+                'Primary email addresses can not be reassigned.'));
+          }
+
+          $email->setUserPHID($user->getPHID());
+          $email->save();
+
+          $log = PhabricatorUserLog::initializeNewLog(
+            $actor,
+            $user->getPHID(),
+            PhabricatorUserLog::ACTION_EMAIL_REASSIGN);
+          $log->setNewValue($email->getAddress());
+          $log->save();
+        }
+
+      $user->endWriteLocking();
+    $user->saveTransaction();
   }
 
 
