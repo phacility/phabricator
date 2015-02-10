@@ -6,6 +6,11 @@ abstract class PhabricatorSetupCheck {
 
   abstract protected function executeChecks();
 
+  const GROUP_OTHER       = 'other';
+  const GROUP_MYSQL       = 'mysql';
+  const GROUP_PHP         = 'php';
+  const GROUP_IMPORTANT   = 'important';
+
   public function getExecutionOrder() {
     return 1;
   }
@@ -14,6 +19,7 @@ abstract class PhabricatorSetupCheck {
     $issue = id(new PhabricatorSetupIssue())
       ->setIssueKey($key);
     $this->issues[$key] = $issue;
+    $issue->setGroup($this->getDefaultGroup());
 
     return $issue;
   }

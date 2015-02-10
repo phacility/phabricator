@@ -2,6 +2,10 @@
 
 final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
 
+  public function getDefaultGroup() {
+    return self::GROUP_OTHER;
+  }
+
   protected function executeChecks() {
     $ancient_config = self::getAncientConfig();
 

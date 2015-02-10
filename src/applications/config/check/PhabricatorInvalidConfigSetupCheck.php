@@ -2,6 +2,10 @@
 
 final class PhabricatorInvalidConfigSetupCheck extends PhabricatorSetupCheck {
 
+  public function getDefaultGroup() {
+    return self::GROUP_OTHER;
+  }
+
   protected function executeChecks() {
     $groups = PhabricatorApplicationConfigOptions::loadAll();
     foreach ($groups as $group) {

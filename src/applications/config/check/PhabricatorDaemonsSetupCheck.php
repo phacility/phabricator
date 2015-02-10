@@ -2,6 +2,10 @@
 
 final class PhabricatorDaemonsSetupCheck extends PhabricatorSetupCheck {
 
+  public function getDefaultGroup() {
+    return self::GROUP_IMPORTANT;
+  }
+
   protected function executeChecks() {
 
     $task_daemon = id(new PhabricatorDaemonLogQuery())

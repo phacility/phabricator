@@ -2,6 +2,9 @@
 
 final class PhabricatorBinariesSetupCheck extends PhabricatorSetupCheck {
 
+  public function getDefaultGroup() {
+    return self::GROUP_OTHER;
+  }
 
   protected function executeChecks() {
 

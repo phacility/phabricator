@@ -8,6 +8,7 @@ final class PhabricatorSetupIssue {
   private $isFatal;
   private $summary;
   private $shortName;
+  private $group;
 
   private $isIgnored = false;
   private $phpExtensions = array();
@@ -38,6 +39,19 @@ final class PhabricatorSetupIssue {
       return $this->getName();
     }
     return $this->shortName;
+  }
+
+  public function setGroup($group) {
+    $this->group = $group;
+    return $this;
+  }
+
+  public function getGroup() {
+    if ($this->group) {
+      return $this->group;
+    } else {
+      return PhabricatorSetupCheck::GROUP_OTHER;
+    }
   }
 
   public function setName($name) {
