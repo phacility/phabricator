@@ -37,7 +37,9 @@ final class PhabricatorRemarkupCowsayBlockInterpreter
     if ($err) {
       return $this->markupError(
         pht(
-          'Execution of `cowsay` failed:', $stderr));
+          'Execution of `%s` failed: %s',
+          'cowsay',
+          $stderr));
     }
 
 

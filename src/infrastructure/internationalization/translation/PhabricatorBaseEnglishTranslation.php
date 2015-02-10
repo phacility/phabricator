@@ -17,9 +17,9 @@ abstract class PhabricatorBaseEnglishTranslation
         'This configuration value is related:',
         'These configuration values are related:',
       ),
-      'Task(s)' => array('Task', 'Tasks'),
+      '%s Task(s)' => array('Task', 'Tasks'),
 
-      'ERROR(S)' => array('ERROR', 'ERRORS'),
+      '%s ERROR(S)' => array('ERROR', 'ERRORS'),
       '%d Error(s)' => array('%d Error', '%d Errors'),
       '%d Warning(s)' => array('%d Warning', '%d Warnings'),
       '%d Auto-Fix(es)' => array('%d Auto-Fix', '%d Auto-Fixes'),
@@ -32,12 +32,12 @@ abstract class PhabricatorBaseEnglishTranslation
       '%d path(s)' => array('%d path', '%d paths'),
       '%d diff(s)' => array('%d diff', '%d diffs'),
 
-      'DIFF LINK(S)' => array('DIFF LINK', 'DIFF LINKS'),
+      '%s DIFF LINK(S)' => array('DIFF LINK', 'DIFF LINKS'),
       'You successfully created %d diff(s).' => array(
         'You successfully created %d diff.',
         'You successfully created %d diffs.',
       ),
-      'Diff creation failed; see body for error(s).' => array(
+      'Diff creation failed; see body for %s error(s).' => array(
         'Diff creation failed; see body for error.',
         'Diff creation failed; see body for errors.',
       ),
@@ -499,7 +499,7 @@ abstract class PhabricatorBaseEnglishTranslation
         'here:',
       ),
 
-      'PHP also loaded these configuration file(s):' => array(
+      'PHP also loaded these %s configuration file(s):' => array(
         'PHP also loaded this configuration file:',
         'PHP also loaded these configuration files:',
       ),

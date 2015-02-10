@@ -192,7 +192,7 @@ final class AlmanacManagementRegisterWorkflow
 
     $console->writeOut(
       "%s\n",
-      pht('Installing device ID...', $raw_device));
+      pht('Installing device %s...', $raw_device));
 
     // The permissions on this file are more open because the webserver also
     // needs to read it.
