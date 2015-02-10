@@ -205,11 +205,11 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       ));
 
     $options = array(
-      DifferentialChangesetParser::WHITESPACE_IGNORE_FORCE => 'Ignore All',
-      DifferentialChangesetParser::WHITESPACE_IGNORE_MOST => 'Ignore Most',
+      DifferentialChangesetParser::WHITESPACE_IGNORE_ALL => pht('Ignore All'),
+      DifferentialChangesetParser::WHITESPACE_IGNORE_MOST => pht('Ignore Most'),
       DifferentialChangesetParser::WHITESPACE_IGNORE_TRAILING =>
-        'Ignore Trailing',
-      DifferentialChangesetParser::WHITESPACE_SHOW_ALL => 'Show All',
+        pht('Ignore Trailing'),
+      DifferentialChangesetParser::WHITESPACE_SHOW_ALL => pht('Show All'),
     );
 
     foreach ($options as $value => $label) {
