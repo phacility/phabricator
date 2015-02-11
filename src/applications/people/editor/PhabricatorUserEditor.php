@@ -93,6 +93,10 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
 
     $user->saveTransaction();
 
+    if ($email->getIsVerified()) {
+      $this->didVerifyEmail($user, $email);
+    }
+
     return $this;
   }
 
@@ -574,6 +578,8 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
 
       $user->endWriteLocking();
     $user->saveTransaction();
+
+    $this->didVerifyEmail($user, $email);
   }
 
 
@@ -673,5 +679,21 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
         PhabricatorAuthSessionEngine::PASSWORD_TEMPORARY_TOKEN_TYPE,
       ));
   }
+
+  private function didVerifyEmail(
+    PhabricatorUser $user,
+    PhabricatorUserEmail $email) {
+
+    $event_type = PhabricatorEventType::TYPE_AUTH_DIDVERIFYEMAIL;
+    $event_data = array(
+      'user' => $user,
+      'email' => $email,
+    );
+
+    $event = id(new PhabricatorEvent($event_type, $event_data))
+      ->setUser($user);
+    PhutilEventEngine::dispatchEvent($event);
+  }
+
 
 }
