@@ -11,6 +11,7 @@
  */
 final class DiffusionSymbolQuery extends PhabricatorOffsetPagedQuery {
 
+  private $viewer;
   private $context;
   private $namePrefix;
   private $name;
@@ -26,6 +27,20 @@ final class DiffusionSymbolQuery extends PhabricatorOffsetPagedQuery {
 
 /* -(  Configuring the Query  )---------------------------------------------- */
 
+  /**
+   * @task config
+   */
+  public function setViewer(PhabricatorUser $viewer) {
+    $this->viewer = $viewer;
+    return $this;
+  }
+
+  /**
+   * @task config
+   */
+  public function getViewer() {
+    return $this->viewer;
+  }
 
   /**
    * @task config
@@ -263,10 +278,10 @@ final class DiffusionSymbolQuery extends PhabricatorOffsetPagedQuery {
     $repo_ids = array_filter($repo_ids);
 
     if ($repo_ids) {
-      // TODO: (T603) Provide a viewer here.
-      $repos = id(new PhabricatorRepository())->loadAllWhere(
-        'id IN (%Ld)',
-        $repo_ids);
+      $repos = id(new PhabricatorRepositoryQuery())
+        ->setViewer($this->getViewer())
+        ->withIDs($repo_ids)
+        ->execute();
     } else {
       $repos = array();
     }

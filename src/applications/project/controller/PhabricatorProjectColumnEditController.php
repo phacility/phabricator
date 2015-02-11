@@ -23,6 +23,7 @@ final class PhabricatorProjectColumnEditController
           PhabricatorPolicyCapability::CAN_EDIT,
         ))
       ->withIDs(array($this->projectID))
+      ->needImages(true)
       ->executeOne();
 
     if (!$project) {
@@ -135,11 +136,9 @@ final class PhabricatorProjectColumnEditController
     if ($is_new) {
       $title = pht('Create Column');
       $submit = pht('Create Column');
-      $crumb_text = pht('Create Column');
     } else {
       $title = pht('Edit %s', $column->getDisplayName());
       $submit = pht('Save Column');
-      $crumb_text = pht('Edit');
     }
 
     $form->appendChild(
@@ -147,28 +146,17 @@ final class PhabricatorProjectColumnEditController
         ->setValue($submit)
         ->addCancelButton($view_uri));
 
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(
-      pht('Board'),
-      $this->getApplicationURI('board/'.$project->getID().'/'));
-
-    if (!$is_new) {
-      $crumbs->addTextCrumb(
-        $column->getDisplayName(),
-        $view_uri);
-    }
-
-    $crumbs->addTextCrumb($crumb_text);
-
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setValidationException($validation_exception)
       ->setForm($form);
 
+    $nav = $this->buildIconNavView($project);
+    $nav->appendChild($form_box);
+
     return $this->buildApplicationPage(
       array(
-        $crumbs,
-        $form_box,
+        $nav,
       ),
       array(
         'title' => $title,

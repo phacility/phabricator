@@ -152,7 +152,7 @@ final class PhabricatorPeopleLogSearchEngine
     return '/people/logs/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array(
       'all' => pht('All'),
     );

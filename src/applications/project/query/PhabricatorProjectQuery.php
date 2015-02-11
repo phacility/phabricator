@@ -138,8 +138,8 @@ final class PhabricatorProjectQuery
       $viewer_phid = $this->getViewer()->getPHID();
       $project_phids = mpull($projects, 'getPHID');
 
-      $member_type = PhabricatorEdgeConfig::TYPE_PROJ_MEMBER;
-      $watcher_type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_WATCHER;
+      $member_type = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
+      $watcher_type = PhabricatorObjectHasWatcherEdgeType::EDGECONST;
 
       $need_edge_types = array();
       if ($this->needMembers) {
@@ -278,15 +278,10 @@ final class PhabricatorProjectQuery
     }
 
     if ($this->slugs !== null) {
-      $slugs = array();
-      foreach ($this->slugs as $slug) {
-        $slugs[] = rtrim(PhabricatorSlug::normalize($slug), '/');
-      }
-
       $where[] = qsprintf(
         $conn_r,
         'slug.slug IN (%Ls)',
-        $slugs);
+        $this->slugs);
     }
 
     if ($this->phrictionSlugs !== null) {
@@ -338,7 +333,7 @@ final class PhabricatorProjectQuery
         $conn_r,
         'LEFT JOIN %T vm ON vm.src = p.phid AND vm.type = %d AND vm.dst = %s',
         PhabricatorEdgeConfig::TABLE_NAME_EDGE,
-        PhabricatorEdgeConfig::TYPE_PROJ_MEMBER,
+        PhabricatorProjectProjectHasMemberEdgeType::EDGECONST,
         $this->getViewer()->getPHID());
     }
 
@@ -347,7 +342,7 @@ final class PhabricatorProjectQuery
         $conn_r,
         'JOIN %T e ON e.src = p.phid AND e.type = %d',
         PhabricatorEdgeConfig::TABLE_NAME_EDGE,
-        PhabricatorEdgeConfig::TYPE_PROJ_MEMBER);
+        PhabricatorProjectProjectHasMemberEdgeType::EDGECONST);
     }
 
     if ($this->slugs !== null) {

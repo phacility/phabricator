@@ -11,4 +11,10 @@ interface PhabricatorSSHPublicKeyInterface {
    */
   public function getSSHPublicKeyManagementURI(PhabricatorUser $viewer);
 
+
+  /**
+   * Provide a default name for generated SSH keys.
+   */
+  public function getSSHKeyDefaultName();
+
 }

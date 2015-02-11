@@ -11,6 +11,14 @@ final class PhabricatorMetaMTAConfigOptions
     return pht('Configure Mail.');
   }
 
+  public function getFontIcon() {
+    return 'fa-send';
+  }
+
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
     $send_as_user_desc = $this->deformat(pht(<<<EODOC
 When a user takes an action which generates an email notification (like
@@ -97,6 +105,12 @@ This may improve the behavior of some auto-responder software and prevent it
 from replying. However, it may also cause deliverability issues -- notably, you
 currently can not send this header via Amazon SES, and enabling this option with
 SES will prevent delivery of any affected mail.
+EODOC
+));
+
+    $email_preferences_description = $this->deformat(pht(<<<EODOC
+You can disable the email preference link in emails if users prefer smaller
+emails.
 EODOC
 ));
 
@@ -257,6 +271,14 @@ EODOC
           ))
         ->setSummary(pht('Show "To:" and "Cc:" footer hints in email.'))
         ->setDescription($recipient_hints_description),
+      $this->newOption('metamta.email-preferences', 'bool', true)
+        ->setBoolOptions(
+          array(
+            pht('Show Email Preferences Link'),
+            pht('No Email Preferences Link'),
+          ))
+        ->setSummary(pht('Show email preferences link in email.'))
+        ->setDescription($email_preferences_description),
       $this->newOption('metamta.precedence-bulk', 'bool', false)
         ->setBoolOptions(
           array(

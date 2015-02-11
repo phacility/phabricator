@@ -12,7 +12,7 @@ abstract class AlmanacQuery
       $property_query = id(new AlmanacPropertyQuery())
         ->setViewer($this->getViewer())
         ->setParentQuery($this)
-        ->withObjectPHIDs(mpull($objects, null, 'getPHID'));
+        ->withObjectPHIDs(mpull($objects, 'getPHID'));
 
       // NOTE: We disable policy filtering and object attachment to avoid
       // a cyclic dependency where objects need their properties and properties
@@ -21,6 +21,7 @@ abstract class AlmanacQuery
       $property_query->setDisablePolicyFilteringAndAttachment(true);
 
       $properties = $property_query->execute();
+
       $properties = mgroup($properties, 'getObjectPHID');
       foreach ($objects as $object) {
         $object_properties = idx($properties, $object->getPHID(), array());

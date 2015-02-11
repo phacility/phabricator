@@ -6,7 +6,8 @@ final class PhrictionDocument extends PhrictionDAO
     PhabricatorSubscribableInterface,
     PhabricatorFlaggableInterface,
     PhabricatorTokenReceiverInterface,
-    PhabricatorDestructibleInterface {
+    PhabricatorDestructibleInterface,
+    PhabricatorApplicationTransactionInterface {
 
   protected $slug;
   protected $depth;
@@ -19,7 +20,7 @@ final class PhrictionDocument extends PhrictionDAO
   private $contentObject = self::ATTACHABLE;
   private $ancestors = array();
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID   => true,
       self::CONFIG_TIMESTAMPS => false,
@@ -144,26 +145,6 @@ final class PhrictionDocument extends PhrictionDAO
     return $this;
   }
 
-  public static function isProjectSlug($slug) {
-    $slug = PhabricatorSlug::normalize($slug);
-    $prefix = 'projects/';
-    if ($slug == $prefix) {
-      // The 'projects/' document is not itself a project slug.
-      return false;
-    }
-    return !strncmp($slug, $prefix, strlen($prefix));
-  }
-
-  public static function getProjectSlugIdentifier($slug) {
-    if (!self::isProjectSlug($slug)) {
-      throw new Exception("Slug '{$slug}' is not a project slug!");
-    }
-
-    $slug = PhabricatorSlug::normalize($slug);
-    $parts = explode('/', $slug);
-    return $parts[1].'/';
-  }
-
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -218,6 +199,28 @@ final class PhrictionDocument extends PhrictionDAO
 
   public function shouldAllowSubscription($phid) {
     return true;
+  }
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhrictionTransactionEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhrictionTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
   }
 
 

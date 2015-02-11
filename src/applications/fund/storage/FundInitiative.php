@@ -50,7 +50,7 @@ final class FundInitiative extends FundDAO
       ->setTotalAsCurrency(PhortuneCurrency::newEmptyCurrency());
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
@@ -147,6 +147,13 @@ final class FundInitiative extends FundDAO
 
   public function getApplicationTransactionTemplate() {
     return new FundInitiativeTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
   }
 
 

@@ -9,7 +9,7 @@ final class PhabricatorTrivialTestCase extends PhabricatorTestCase {
 
   private $two;
 
-  public function willRunOneTest($test_name) {
+  protected function willRunOneTest($test_name) {
     // You can execute setup steps which will run before each test in this
     // method.
     $this->two = 2;

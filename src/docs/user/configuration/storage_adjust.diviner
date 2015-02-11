@@ -118,7 +118,7 @@ twice as much time performing schemata adjustments.
 Troubleshooting
 ===============
 
-When you apply adjustments, some adjustments may fail. The two most common
+When you apply adjustments, some adjustments may fail. Some of the most common
 errors you may encounter are:
 
   - **#1406 Data Too Long**: Usually this is caused by a very long object name
@@ -145,3 +145,47 @@ In general, adjustments are not critical. If you run into issues applying
 adjustments, it is safe to file a task in the upstream describing the problem
 you've encountered and continue using Phabricator normally until the issue can
 be resolved.
+
+Surplus Schemata
+================
+
+After performing adjustment, you may receive an error that a table or column is
+"Surplus". The error looks something like this:
+
+| Target | Error |
+| --- | --- |
+| phabricator_example.example_table | Surplus |
+
+Generally, "Surplus" means that Phabricator does not expect the table or column
+to exist. These surpluses usually exist because you (or someone else
+with database access) added the table or column manually. Rarely, they can
+also exist for other reasons. They are usually safe to delete, but because
+deleting them destroys data and Phabricator can not be sure that the table or
+column doesn't have anything important in it, it does not delete them
+automatically.
+
+If you recognize the schema causing the issue as something you added and you
+don't need it anymore, you can safely delete it. If you aren't sure whether
+you added it or not, you can move the data somewhere else and delete it later.
+
+To move a table, first create a database for it like `my_backups`. Then, rename
+the table to move it into that database (use the table name given in the error
+message):
+
+```lang=sql
+CREATE DATABASE my_backups;
+RENAME TABLE phabricator_example.example_table
+  TO my_backups.example_table;
+```
+
+Phabricator will ignore tables that aren't in databases it owns, so you can
+safely move anything you aren't sure about outside of the Phabricator databases.
+
+If you're sure you don't need a table, use `DROP TABLE` to destroy it,
+specifying the correct table name (the one given in the error message):
+
+```lang=sql
+DROP TABLE phabricator_example.example_table;
+```
+
+This will destroy the table permanently.

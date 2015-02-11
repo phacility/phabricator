@@ -13,7 +13,7 @@ final class DoorkeeperExternalObject extends DoorkeeperDAO
   protected $properties = array();
   protected $viewPolicy;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(

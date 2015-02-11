@@ -16,7 +16,7 @@ final class PhabricatorConfigEditController
 
     $options = PhabricatorApplicationConfigOptions::loadAllOptions();
     if (empty($options[$this->key])) {
-      $ancient = PhabricatorSetupCheckExtraConfig::getAncientConfig();
+      $ancient = PhabricatorExtraConfigSetupCheck::getAncientConfig();
       if (isset($ancient[$this->key])) {
         $desc = pht(
           "This configuration has been removed. You can safely delete ".
@@ -108,25 +108,23 @@ final class PhabricatorConfigEditController
 
     $error_view = null;
     if ($errors) {
-      $error_view = id(new AphrontErrorView())
+      $error_view = id(new PHUIErrorView())
         ->setErrors($errors);
     } else if ($option->getHidden()) {
       $msg = pht(
         'This configuration is hidden and can not be edited or viewed from '.
         'the web interface.');
 
-      $error_view = id(new AphrontErrorView())
+      $error_view = id(new PHUIErrorView())
         ->setTitle(pht('Configuration Hidden'))
-        ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
+        ->setSeverity(PHUIErrorView::SEVERITY_WARNING)
         ->appendChild(phutil_tag('p', array(), $msg));
     } else if ($option->getLocked()) {
-      $msg = pht(
-        'This configuration is locked and can not be edited from the web '.
-        'interface. Use `./bin/config` in `phabricator/` to edit it.');
 
-      $error_view = id(new AphrontErrorView())
+      $msg = $option->getLockedMessage();
+      $error_view = id(new PHUIErrorView())
         ->setTitle(pht('Configuration Locked'))
-        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+        ->setSeverity(PHUIErrorView::SEVERITY_NOTICE)
         ->appendChild(phutil_tag('p', array(), $msg));
     }
 
@@ -216,21 +214,16 @@ final class PhabricatorConfigEditController
 
     $crumbs->addTextCrumb($this->key, '/config/edit/'.$this->key);
 
-    $xactions = id(new PhabricatorConfigTransactionQuery())
-      ->withObjectPHIDs(array($config_entry->getPHID()))
-      ->setViewer($user)
-      ->execute();
-
-    $xaction_view = id(new PhabricatorApplicationTransactionView())
-      ->setUser($user)
-      ->setObjectPHID($config_entry->getPHID())
-      ->setTransactions($xactions);
+    $timeline = $this->buildTransactionTimeline(
+      $config_entry,
+      new PhabricatorConfigTransactionQuery());
+    $timeline->setShouldTerminate(true);
 
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $form_box,
-        $xaction_view,
+        $timeline,
       ),
       array(
         'title' => $title,

@@ -71,16 +71,48 @@ final class DifferentialRevisionEditController
       ->setViewer($viewer)
       ->readFieldsFromStorage($revision);
 
+    if ($request->getStr('viaDiffView') && $diff) {
+      $repo_key = id(new DifferentialRepositoryField())->getFieldKey();
+      $repository_field = idx(
+        $field_list->getFields(),
+        $repo_key);
+      if ($repository_field) {
+        $repository_field->setValue($request->getStr($repo_key));
+      }
+      $view_policy_key = id(new DifferentialViewPolicyField())->getFieldKey();
+      $view_policy_field = idx(
+        $field_list->getFields(),
+        $view_policy_key);
+      if ($view_policy_field) {
+        $view_policy_field->setValue($diff->getViewPolicy());
+      }
+    }
+
     $validation_exception = null;
     if ($request->isFormPost() && !$request->getStr('viaDiffView')) {
+
+      $editor = id(new DifferentialTransactionEditor())
+        ->setActor($viewer)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true);
+
       $xactions = $field_list->buildFieldTransactionsFromRequest(
         new DifferentialTransaction(),
         $request);
 
       if ($diff) {
+        $repository_phid = null;
+        $repository_tokenizer = $request->getArr(
+          id(new DifferentialRepositoryField())->getFieldKey());
+        if ($repository_tokenizer) {
+          $repository_phid = reset($repository_tokenizer);
+        }
+
         $xactions[] = id(new DifferentialTransaction())
           ->setTransactionType(DifferentialTransaction::TYPE_UPDATE)
           ->setNewValue($diff->getPHID());
+
+        $editor->setRepositoryPHIDOverride($repository_phid);
       }
 
       $comments = $request->getStr('comments');
@@ -91,11 +123,6 @@ final class DifferentialRevisionEditController
             id(new DifferentialTransactionComment())
               ->setContent($comments));
       }
-
-      $editor = id(new DifferentialTransactionEditor())
-        ->setActor($viewer)
-        ->setContentSourceFromRequest($request)
-        ->setContinueOnNoEffect(true);
 
       try {
         $editor->applyTransactions($revision, $xactions);

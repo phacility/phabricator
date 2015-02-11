@@ -14,8 +14,8 @@ final class PhabricatorPholioApplication extends PhabricatorApplication {
     return pht('Review Mocks and Design');
   }
 
-  public function getIconName() {
-    return 'pholio';
+  public function getFontIcon() {
+    return 'fa-camera-retro';
   }
 
   public function getTitleGlyph() {

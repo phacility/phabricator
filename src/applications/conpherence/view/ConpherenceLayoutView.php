@@ -54,6 +54,9 @@ final class ConpherenceLayoutView extends AphrontView {
     require_celerity_resource('conpherence-message-pane-css');
     require_celerity_resource('conpherence-widget-pane-css');
 
+    require_celerity_resource('phui-fontkit-css');
+    require_celerity_resource('font-source-sans-pro');
+
     $layout_id = celerity_generate_unique_node_id();
 
     $selected_id = null;
@@ -207,7 +210,7 @@ final class ConpherenceLayoutView extends AphrontView {
             javelin_tag(
               'div',
               array(
-                'class' => 'conpherence-message-pane',
+                'class' => 'conpherence-message-pane phui-font-source-sans',
                 'id' => 'conpherence-message-pane',
                 'sigil' => 'conpherence-message-pane',
               ),

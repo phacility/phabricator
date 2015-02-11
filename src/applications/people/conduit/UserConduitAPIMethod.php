@@ -40,7 +40,7 @@ abstract class UserConduitAPIMethod extends ConduitAPIMethod {
       'phid'      => $user->getPHID(),
       'userName'  => $user->getUserName(),
       'realName'  => $user->getRealName(),
-      'image'     => $user->loadProfileImageURI(),
+      'image'     => $user->getProfileImageURI(),
       'uri'       => PhabricatorEnv::getURI('/p/'.$user->getUsername().'/'),
       'roles'     => $roles,
     );

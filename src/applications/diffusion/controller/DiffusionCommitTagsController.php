@@ -6,13 +6,8 @@ final class DiffusionCommitTagsController extends DiffusionController {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $data['user'] = $this->getRequest()->getUser();
-    $this->diffusionRequest = DiffusionRequest::newFromDictionary($data);
-  }
-
-  public function processRequest() {
-    $request = $this->getDiffusionRequest();
+  protected function processDiffusionRequest(AphrontRequest $request) {
+    $drequest = $this->getDiffusionRequest();
     $tag_limit = 10;
 
     $tags = array();
@@ -21,7 +16,7 @@ final class DiffusionCommitTagsController extends DiffusionController {
         $this->callConduitWithDiffusionRequest(
           'diffusion.tagsquery',
           array(
-            'commit' => $request->getCommit(),
+            'commit' => $drequest->getCommit(),
             'limit' => $tag_limit + 1,
           )));
     } catch (ConduitException $ex) {
@@ -38,7 +33,7 @@ final class DiffusionCommitTagsController extends DiffusionController {
       $tag_links[] = phutil_tag(
         'a',
         array(
-          'href' => $request->generateURI(
+          'href' => $drequest->generateURI(
             array(
               'action'  => 'browse',
               'commit'  => $tag->getName(),
@@ -51,7 +46,7 @@ final class DiffusionCommitTagsController extends DiffusionController {
       $tag_links[] = phutil_tag(
         'a',
         array(
-          'href' => $request->generateURI(
+          'href' => $drequest->generateURI(
             array(
               'action'  => 'tags',
             )),

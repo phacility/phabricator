@@ -50,7 +50,7 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
   /**
    * @task config
    */
-  public function establishLiveConnection($mode) {
+  protected function establishLiveConnection($mode) {
     $namespace = self::getStorageNamespace();
 
     $conf = PhabricatorEnv::newObjectFromConfig(

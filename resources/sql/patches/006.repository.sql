@@ -4,7 +4,7 @@ create table {$NAMESPACE}_repository.repository_commitdata (
   authorName varchar(255) not null,
   commitMessage longblob not null,
   unique key (commitID),
-  key (authorName)
+  key (authorName(128))
 );
 
 ALTER TABLE {$NAMESPACE}_worker.worker_task drop priority;

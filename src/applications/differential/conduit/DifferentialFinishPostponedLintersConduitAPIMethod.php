@@ -103,7 +103,6 @@ final class DifferentialFinishPostponedLintersConduitAPIMethod
         'name' => 'arc:lint',
         'data' => json_encode($messages),
       ));
-    $call->setForceLocal(true);
     $call->setUser($request->getUser());
     $call->execute();
     $call = new ConduitCall(
@@ -113,10 +112,7 @@ final class DifferentialFinishPostponedLintersConduitAPIMethod
         'name' => 'arc:lint-postponed',
         'data' => json_encode($postponed_linters),
       ));
-    $call->setForceLocal(true);
     $call->setUser($request->getUser());
     $call->execute();
-
   }
-
 }

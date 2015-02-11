@@ -71,7 +71,7 @@ final class PholioMockSearchEngine extends PhabricatorApplicationSearchEngine {
     return '/pholio/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array(
       'open' => pht('Open Mocks'),
       'all' => pht('All Mocks'),

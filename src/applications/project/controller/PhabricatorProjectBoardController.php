@@ -13,12 +13,10 @@ abstract class PhabricatorProjectBoardController
     return $this->project;
   }
 
-  protected function buildApplicationCrumbs() {
-    $project = $this->getProject();
-    $crumbs = parent::buildApplicationCrumbs();
-    $crumbs->addTextCrumb(
-      $project->getName(),
-      $this->getApplicationURI('view/'.$project->getID().'/'));
-    return $crumbs;
+  public function buildIconNavView(PhabricatorProject $project) {
+    $id = $project->getID();
+    $nav = parent::buildIconNavView($project);
+    $nav->selectFilter("board/{$id}/");
+    return $nav;
   }
 }

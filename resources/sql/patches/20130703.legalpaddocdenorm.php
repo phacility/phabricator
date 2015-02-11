@@ -24,7 +24,7 @@ foreach (new LiskMigrationIterator($table) as $document) {
   if (!$document->getContributorCount() ||
       !$document->getRecentContributorPHIDs()) {
     $updated = true;
-    $type = PhabricatorEdgeConfig::TYPE_OBJECT_HAS_CONTRIBUTOR;
+    $type = PhabricatorObjectHasContributorEdgeType::EDGECONST;
     $contributors = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $document->getPHID(),
       $type);

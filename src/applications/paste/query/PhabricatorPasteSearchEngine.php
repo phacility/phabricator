@@ -7,6 +7,10 @@ final class PhabricatorPasteSearchEngine
     return pht('Pastes');
   }
 
+  public function getApplicationClassName() {
+    return 'PhabricatorPasteApplication';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
     $saved->setParameter(
@@ -98,7 +102,7 @@ final class PhabricatorPasteSearchEngine
     return '/paste/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array(
       'all' => pht('All Pastes'),
     );

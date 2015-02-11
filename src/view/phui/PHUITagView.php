@@ -142,7 +142,7 @@ final class PHUITagView extends AphrontTagView {
     return $attributes + array('class' => $classes);
   }
 
-  public function getTagContent() {
+  protected function getTagContent() {
     if (!$this->type) {
       throw new Exception(pht('You must call setType() before render()!'));
     }

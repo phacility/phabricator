@@ -103,7 +103,7 @@ final class HeraldRuleSearchEngine extends PhabricatorApplicationSearchEngine {
     return '/herald/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array();
 
     if ($this->requireViewer()->isLoggedIn()) {

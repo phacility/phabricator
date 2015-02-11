@@ -411,7 +411,11 @@ final class PhabricatorPolicyFilter {
     $viewer = $this->viewer;
     $viewer_phid = $viewer->getPHID();
 
-    $policy = $this->customPolicies[$viewer_phid][$policy_phid];
+    $policy = idx($this->customPolicies[$viewer_phid], $policy_phid);
+    if (!$policy) {
+      // Reject, this policy is bogus.
+      return false;
+    }
 
     $objects = $policy->getRuleObjects();
     $action = null;

@@ -17,14 +17,14 @@
 }
 
 .phui-feed-story-head {
- padding: 8px;
- overflow: hidden;
- color: {$greytext};
+  padding: 8px;
+  overflow: hidden;
+  color: {$greytext};
 }
 
 .phui-feed-story-head .phui-link-person {
- color: {$darkgreytext};
- font-weight: bold;
+  color: {$darkgreytext};
+  font-weight: bold;
 }
 
 .phui-feed-story-body {
@@ -52,8 +52,6 @@
 }
 
 .phui-feed-story-foot .phui-icon-view {
-  float: left;
-  display: inline-block;
   margin-right: 5px;
 }
 

@@ -42,7 +42,7 @@ final class PhabricatorProjectUpdateController
       return new Aphront404Response();
     }
 
-    $project_uri = '/project/view/'.$project->getID().'/';
+    $project_uri = $this->getApplicationURI('profile/'.$project->getID().'/');
 
     if ($process_action) {
 
@@ -56,7 +56,7 @@ final class PhabricatorProjectUpdateController
           break;
       }
 
-      $type_member = PhabricatorEdgeConfig::TYPE_PROJ_MEMBER;
+      $type_member = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
       $member_spec = array(
         $edge_action => array($user->getPHID() => $user->getPHID()),
       );

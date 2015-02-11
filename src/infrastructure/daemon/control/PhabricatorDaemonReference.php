@@ -32,11 +32,16 @@ final class PhabricatorDaemonReference {
     $ref->pid   = idx($dict, 'pid');
     $ref->start = idx($dict, 'start');
 
-    $ref->daemonLog = id(new PhabricatorDaemonLog())->loadOneWhere(
-      'daemon = %s AND pid = %d AND dateCreated = %d',
-      $ref->name,
-      $ref->pid,
-      $ref->start);
+    try {
+      $ref->daemonLog = id(new PhabricatorDaemonLog())->loadOneWhere(
+        'daemon = %s AND pid = %d AND dateCreated = %d',
+        $ref->name,
+        $ref->pid,
+        $ref->start);
+    } catch (AphrontQueryException $ex) {
+      // Ignore the exception. We want to be able to terminate the daemons,
+      // even if MySQL is down.
+    }
 
     return $ref;
   }

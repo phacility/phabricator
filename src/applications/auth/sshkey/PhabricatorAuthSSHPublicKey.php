@@ -99,4 +99,57 @@ final class PhabricatorAuthSSHPublicKey extends Phobject {
     return PhabricatorHash::digestForIndex($body);
   }
 
+  public function getEntireKey() {
+    $key = $this->type.' '.$this->body;
+    if (strlen($this->comment)) {
+      $key = $key.' '.$this->comment;
+    }
+    return $key;
+  }
+
+  public function toPKCS8() {
+    $entire_key = $this->getEntireKey();
+    $cache_key = $this->getPKCS8CacheKey($entire_key);
+
+    $cache = PhabricatorCaches::getImmutableCache();
+    $pkcs8_key = $cache->getKey($cache_key);
+    if ($pkcs8_key) {
+      return $pkcs8_key;
+    }
+
+    $tmp = new TempFile();
+    Filesystem::writeFile($tmp, $this->getEntireKey());
+    try {
+      list($pkcs8_key) = execx(
+        'ssh-keygen -e -m PKCS8 -f %s',
+        $tmp);
+    } catch (CommandException $ex) {
+      unset($tmp);
+      throw new PhutilProxyException(
+        pht(
+          'Failed to convert public key into PKCS8 format. If you are '.
+          'developing on OSX, you may be able to use `bin/auth cache-pkcs8` '.
+          'to work around this issue. %s',
+          $ex->getMessage()),
+        $ex);
+    }
+    unset($tmp);
+
+    $cache->setKey($cache_key, $pkcs8_key);
+
+    return $pkcs8_key;
+  }
+
+  public function forcePopulatePKCS8Cache($pkcs8_key) {
+    $entire_key = $this->getEntireKey();
+    $cache_key = $this->getPKCS8CacheKey($entire_key);
+
+    $cache = PhabricatorCaches::getImmutableCache();
+    $cache->setKey($cache_key, $pkcs8_key);
+  }
+
+  private function getPKCS8CacheKey($entire_key) {
+    return 'pkcs8:'.PhabricatorHash::digestForIndex($entire_key);
+  }
+
 }

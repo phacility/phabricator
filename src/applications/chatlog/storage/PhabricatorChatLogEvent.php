@@ -13,7 +13,7 @@ final class PhabricatorChatLogEvent
 
   private $channel = self::ATTACHABLE;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_TIMESTAMPS => false,
       self::CONFIG_COLUMN_SCHEMA => array(

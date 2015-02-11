@@ -69,6 +69,10 @@ form.compose-dialog {
   background-color: {$violet};
 }
 
+.compose-dialog .compose-background-pink {
+  background-color: {$pink};
+}
+
 .compose-dialog .compose-background-charcoal {
   background-color: {$charcoal};
 }

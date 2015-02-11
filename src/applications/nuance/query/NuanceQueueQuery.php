@@ -16,7 +16,7 @@ final class NuanceQueueQuery
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $table = new NuanceQueue();
     $conn_r = $table->establishConnection('r');
 

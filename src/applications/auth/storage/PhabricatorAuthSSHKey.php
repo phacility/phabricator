@@ -10,10 +10,11 @@ final class PhabricatorAuthSSHKey
   protected $keyIndex;
   protected $keyBody;
   protected $keyComment = '';
+  protected $isTrusted = 0;
 
   private $object = self::ATTACHABLE;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'text255',
@@ -21,6 +22,7 @@ final class PhabricatorAuthSSHKey
         'keyIndex' => 'bytes12',
         'keyBody' => 'text',
         'keyComment' => 'text255',
+        'isTrusted' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_object' => array(

@@ -13,7 +13,7 @@ final class PhabricatorAuthNeedsMultiFactorController
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
-    $panel = id(new PhabricatorSettingsPanelMultiFactor())
+    $panel = id(new PhabricatorMultiFactorSettingsPanel())
       ->setUser($viewer)
       ->setViewer($viewer)
       ->setOverrideURI($this->getApplicationURI('/multifactor/'))
@@ -29,9 +29,9 @@ final class PhabricatorAuthNeedsMultiFactorController
     $viewer->updateMultiFactorEnrollment();
 
     if (!$viewer->getIsEnrolledInMultiFactor()) {
-      $help = id(new AphrontErrorView())
+      $help = id(new PHUIErrorView())
         ->setTitle(pht('Add Multi-Factor Authentication To Your Account'))
-        ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
+        ->setSeverity(PHUIErrorView::SEVERITY_WARNING)
         ->setErrors(
           array(
             pht(
@@ -53,9 +53,9 @@ final class PhabricatorAuthNeedsMultiFactorController
               'account.'),
           ));
     } else {
-      $help = id(new AphrontErrorView())
+      $help = id(new PHUIErrorView())
         ->setTitle(pht('Multi-Factor Authentication Configured'))
-        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+        ->setSeverity(PHUIErrorView::SEVERITY_NOTICE)
         ->setErrors(
           array(
             pht(

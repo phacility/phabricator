@@ -11,19 +11,18 @@ final class DiffusionCommitController extends DiffusionController {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    // This controller doesn't use blob/path stuff, just pass the dictionary
-    // in directly instead of using the AphrontRequest parsing mechanism.
-    $data['user'] = $this->getRequest()->getUser();
-    $drequest = DiffusionRequest::newFromDictionary($data);
-    $this->diffusionRequest = $drequest;
+  protected function shouldLoadDiffusionRequest() {
+    return false;
   }
 
-  public function processRequest() {
-    $drequest = $this->getDiffusionRequest();
-
-    $request = $this->getRequest();
+  protected function processDiffusionRequest(AphrontRequest $request) {
     $user = $request->getUser();
+    // This controller doesn't use blob/path stuff, just pass the dictionary
+    // in directly instead of using the AphrontRequest parsing mechanism.
+    $data = $request->getURIMap();
+    $data['user'] = $user;
+    $drequest = DiffusionRequest::newFromDictionary($data);
+    $this->diffusionRequest = $drequest;
 
     if ($request->getStr('diff')) {
       return $this->buildRawDiffResponse($drequest);
@@ -53,7 +52,7 @@ final class DiffusionCommitController extends DiffusionController {
         return new Aphront404Response();
       }
 
-      $error = id(new AphrontErrorView())
+      $error = id(new PHUIErrorView())
         ->setTitle(pht('Commit Still Parsing'))
         ->appendChild(
           pht(
@@ -67,14 +66,8 @@ final class DiffusionCommitController extends DiffusionController {
         ),
         array(
           'title' => pht('Commit Still Parsing'),
-          'device' => false,
         ));
     }
-
-
-    $top_anchor = id(new PhabricatorAnchorView())
-      ->setAnchorName('top')
-      ->setNavigationMarker(true);
 
     $audit_requests = $commit->getAudits();
     $this->auditAuthorityPHIDs =
@@ -86,16 +79,15 @@ final class DiffusionCommitController extends DiffusionController {
     if ($is_foreign) {
       $subpath = $commit_data->getCommitDetail('svn-subpath');
 
-      $error_panel = new AphrontErrorView();
+      $error_panel = new PHUIErrorView();
       $error_panel->setTitle(pht('Commit Not Tracked'));
-      $error_panel->setSeverity(AphrontErrorView::SEVERITY_WARNING);
+      $error_panel->setSeverity(PHUIErrorView::SEVERITY_WARNING);
       $error_panel->appendChild(
         pht("This Diffusion repository is configured to track only one ".
         "subdirectory of the entire Subversion repository, and this commit ".
         "didn't affect the tracked subdirectory ('%s'), so no ".
         "information is available.", $subpath));
       $content[] = $error_panel;
-      $content[] = $top_anchor;
     } else {
       $engine = PhabricatorMarkupEngine::newDifferentialMarkupEngine();
       $engine->setConfig('viewer', $user);
@@ -153,7 +145,6 @@ final class DiffusionCommitController extends DiffusionController {
             'class' => 'diffusion-commit-message phabricator-remarkup',
           ),
           $message));
-      $content[] = $top_anchor;
 
       $object_box = id(new PHUIObjectBoxView())
         ->setHeader($headsup_view)
@@ -260,8 +251,8 @@ final class DiffusionCommitController extends DiffusionController {
           ->setTag('a')
           ->setIcon($icon);
 
-        $warning_view = id(new AphrontErrorView())
-          ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
+        $warning_view = id(new PHUIErrorView())
+          ->setSeverity(PHUIErrorView::SEVERITY_WARNING)
           ->setTitle('Very Large Commit')
           ->appendChild(
             pht('This commit is very large. Load each file individually.'));
@@ -276,6 +267,7 @@ final class DiffusionCommitController extends DiffusionController {
       $content[] = $change_panel;
 
       $changesets = DiffusionPathChange::convertToDifferentialChangesets(
+        $user,
         $changes);
 
       $vcs = $repository->getVersionControlSystem();
@@ -382,7 +374,6 @@ final class DiffusionCommitController extends DiffusionController {
 
     if ($changesets && $show_filetree) {
       $nav = id(new DifferentialChangesetFileTreeSideNavBuilder())
-        ->setAnchorName('top')
         ->setTitle($short_name)
         ->setBaseURI(new PhutilURI('/'.$commit_id))
         ->build($changesets)
@@ -399,7 +390,6 @@ final class DiffusionCommitController extends DiffusionController {
       array(
         'title' => $commit_id,
         'pageObjects' => array($commit->getPHID()),
-        'device' => false,
       ));
   }
 
@@ -419,18 +409,22 @@ final class DiffusionCommitController extends DiffusionController {
       ->withSourcePHIDs(array($commit_phid))
       ->withEdgeTypes(array(
         DiffusionCommitHasTaskEdgeType::EDGECONST,
-        PhabricatorEdgeConfig::TYPE_COMMIT_HAS_PROJECT,
-        PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV,
+        DiffusionCommitHasRevisionEdgeType::EDGECONST,
+        DiffusionCommitRevertsCommitEdgeType::EDGECONST,
+        DiffusionCommitRevertedByCommitEdgeType::EDGECONST,
       ));
 
     $edges = $edge_query->execute();
 
     $task_phids = array_keys(
       $edges[$commit_phid][DiffusionCommitHasTaskEdgeType::EDGECONST]);
-    $proj_phids = array_keys(
-      $edges[$commit_phid][PhabricatorEdgeConfig::TYPE_COMMIT_HAS_PROJECT]);
     $revision_phid = key(
-      $edges[$commit_phid][PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV]);
+      $edges[$commit_phid][DiffusionCommitHasRevisionEdgeType::EDGECONST]);
+
+    $reverts_phids = array_keys(
+      $edges[$commit_phid][DiffusionCommitRevertsCommitEdgeType::EDGECONST]);
+    $reverted_by_phids = array_keys(
+      $edges[$commit_phid][DiffusionCommitRevertedByCommitEdgeType::EDGECONST]);
 
     $phids = $edge_query->getDestinationPHIDs(array($commit_phid));
 
@@ -619,6 +613,17 @@ final class DiffusionCommitController extends DiffusionController {
       $props['References'] = $refs;
     }
 
+    if ($reverts_phids) {
+      $this->loadHandles($reverts_phids);
+      $props[pht('Reverts')] = $this->renderHandlesForPHIDs($reverts_phids);
+    }
+
+    if ($reverted_by_phids) {
+      $this->loadHandles($reverted_by_phids);
+      $props[pht('Reverted By')] = $this->renderHandlesForPHIDs(
+        $reverted_by_phids);
+    }
+
     if ($task_phids) {
       $task_list = array();
       foreach ($task_phids as $phid) {
@@ -628,50 +633,15 @@ final class DiffusionCommitController extends DiffusionController {
       $props['Tasks'] = $task_list;
     }
 
-    if ($proj_phids) {
-      $proj_list = array();
-      foreach ($proj_phids as $phid) {
-        $proj_list[] = $handles[$phid]->renderLink();
-      }
-      $proj_list = phutil_implode_html(phutil_tag('br'), $proj_list);
-      $props['Projects'] = $proj_list;
-    }
-
     return $props;
   }
 
   private function buildComments(PhabricatorRepositoryCommit $commit) {
-    $viewer = $this->getRequest()->getUser();
-
-    $xactions = id(new PhabricatorAuditTransactionQuery())
-      ->setViewer($viewer)
-      ->withObjectPHIDs(array($commit->getPHID()))
-      ->needComments(true)
-      ->execute();
-
-    $path_ids = array();
-    foreach ($xactions as $xaction) {
-      if ($xaction->hasComment()) {
-        $path_id = $xaction->getComment()->getPathID();
-        if ($path_id) {
-          $path_ids[] = $path_id;
-        }
-      }
-    }
-
-    $path_map = array();
-    if ($path_ids) {
-      $path_map = id(new DiffusionPathQuery())
-        ->withPathIDs($path_ids)
-        ->execute();
-      $path_map = ipull($path_map, 'path', 'id');
-    }
-
-    return id(new PhabricatorAuditTransactionView())
-      ->setUser($viewer)
-      ->setObjectPHID($commit->getPHID())
-      ->setPathMap($path_map)
-      ->setTransactions($xactions);
+    $timeline = $this->buildTransactionTimeline(
+      $commit,
+      new PhabricatorAuditTransactionQuery());
+    $commit->willRenderTimeline($timeline, $this->getRequest());
+    return $timeline;
   }
 
   private function renderAddCommentPanel(
@@ -903,21 +873,23 @@ final class DiffusionCommitController extends DiffusionController {
 
   private function buildMergesTable(PhabricatorRepositoryCommit $commit) {
     $drequest = $this->getDiffusionRequest();
+    $repository = $drequest->getRepository();
+
+    $vcs = $repository->getVersionControlSystem();
+    switch ($vcs) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        // These aren't supported under SVN.
+        return null;
+    }
+
     $limit = 50;
 
-    $merges = array();
-    try {
-      $merges = $this->callConduitWithDiffusionRequest(
-        'diffusion.mergedcommitsquery',
-        array(
-          'commit' => $drequest->getCommit(),
-          'limit' => $limit + 1,
-        ));
-    } catch (ConduitException $ex) {
-      if ($ex->getMessage() != 'ERR-UNSUPPORTED-VCS') {
-        throw $ex;
-      }
-    }
+    $merges = $this->callConduitWithDiffusionRequest(
+      'diffusion.mergedcommitsquery',
+      array(
+        'commit' => $drequest->getCommit(),
+        'limit' => $limit + 1,
+      ));
 
     if (!$merges) {
       return null;

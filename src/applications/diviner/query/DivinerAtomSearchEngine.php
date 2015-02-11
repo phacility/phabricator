@@ -73,7 +73,7 @@ final class DivinerAtomSearchEngine extends PhabricatorApplicationSearchEngine {
     return '/diviner/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     return array(
       'all' => pht('All'),
     );

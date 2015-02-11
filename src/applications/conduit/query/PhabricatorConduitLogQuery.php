@@ -10,7 +10,7 @@ final class PhabricatorConduitLogQuery
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $table = new PhabricatorConduitMethodCallLog();
     $conn_r = $table->establishConnection('r');
 

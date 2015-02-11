@@ -218,7 +218,7 @@ JX.behavior('differential-dropdown-menus', function(config) {
       visible_item
         .setDisabled(true)
         .setIcon('fa-expand')
-        .setName(pht("Can't Toggle Unloaded File"));
+        .setName(pht('Can\'t Toggle Unloaded File'));
       var diffs = JX.DOM.scry(
         JX.$(data.containerID),
         'table',
@@ -229,7 +229,7 @@ JX.behavior('differential-dropdown-menus', function(config) {
           'More than one node with sigil "differential-diff" was found in "'+
           data.containerID+'."');
       } else if (diffs.length == 1) {
-        diff = diffs[0];
+        var diff = diffs[0];
         visible_item.setDisabled(false);
         if (JX.Stratcom.getData(diff).hidden) {
           visible_item

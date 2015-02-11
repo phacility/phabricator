@@ -5,7 +5,7 @@
  */
 final class HarbormasterBuildWorker extends HarbormasterWorker {
 
-  public function doWork() {
+  protected function doWork() {
     $data = $this->getTaskData();
     $id = idx($data, 'buildID');
     $viewer = $this->getViewer();

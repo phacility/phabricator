@@ -12,7 +12,7 @@ final class PhabricatorNamedQuery extends PhabricatorSearchDAO
   protected $isDisabled = 0;
   protected $sequence   = 0;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'engineClassName' => 'text128',

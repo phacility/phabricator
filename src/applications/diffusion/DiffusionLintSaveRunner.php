@@ -236,7 +236,6 @@ final class DiffusionLintSaveRunner {
     foreach ($this->blame as $path => $lines) {
       $drequest = DiffusionRequest::newFromDictionary(array(
         'user' => PhabricatorUser::getOmnipotentUser(),
-        'initFromConduit' => false,
         'repository' => $repository,
         'branch' => $this->branch->getName(),
         'path' => $path,
@@ -250,7 +249,9 @@ final class DiffusionLintSaveRunner {
 
     $authors = array();
 
-    foreach (Futures($futures)->limit(8) as $path => $future) {
+    $futures = id(new FutureIterator($futures))
+      ->limit(8);
+    foreach ($futures as $path => $future) {
       $queries[$path]->loadFileContentFromFuture($future);
       list(, $rev_list, $blame_dict) = $queries[$path]->getBlameData();
       foreach (array_keys($this->blame[$path]) as $line) {

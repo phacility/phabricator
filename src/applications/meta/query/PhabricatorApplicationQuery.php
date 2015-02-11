@@ -62,7 +62,7 @@ final class PhabricatorApplicationQuery
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $apps = PhabricatorApplication::getAllApplications();
 
     if ($this->classes) {

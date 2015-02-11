@@ -6,8 +6,8 @@ final class PhabricatorSlowvoteApplication extends PhabricatorApplication {
     return '/vote/';
   }
 
-  public function getIconName() {
-    return 'slowvote';
+  public function getFontIcon() {
+    return 'fa-bar-chart';
   }
 
   public function getName() {
@@ -55,7 +55,7 @@ final class PhabricatorSlowvoteApplication extends PhabricatorApplication {
     );
   }
 
-  public function getCustomCapabilities() {
+  protected function getCustomCapabilities() {
     return array(
       PhabricatorSlowvoteDefaultViewCapability::CAPABILITY => array(
         'caption' => pht('Default view policy for new polls.'),

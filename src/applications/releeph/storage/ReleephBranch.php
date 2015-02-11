@@ -1,7 +1,9 @@
 <?php
 
 final class ReleephBranch extends ReleephDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorPolicyInterface {
 
   protected $releephProjectID;
   protected $isActive;
@@ -23,7 +25,7 @@ final class ReleephBranch extends ReleephDAO
   private $project = self::ATTACHABLE;
   private $cutPointCommit = self::ATTACHABLE;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
@@ -65,7 +67,7 @@ final class ReleephBranch extends ReleephDAO
     return $this;
   }
 
-  public function willWriteData(array &$data) {
+  protected function willWriteData(array &$data) {
     // If symbolicName is omitted, set it to the basename.
     //
     // This means that we can enforce symbolicName as a UNIQUE column in the
@@ -146,6 +148,29 @@ final class ReleephBranch extends ReleephDAO
 
   public function getCutPointCommit() {
     return $this->assertAttached($this->cutPointCommit);
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new ReleephBranchEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new ReleephBranchTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
   }
 
 

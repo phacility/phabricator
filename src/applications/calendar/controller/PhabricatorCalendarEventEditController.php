@@ -103,7 +103,7 @@ final class PhabricatorCalendarEventEditController
 
     $error_view = null;
     if ($errors) {
-      $error_view = id(new AphrontErrorView())
+      $error_view = id(new PHUIErrorView())
         ->setTitle(pht('Status can not be set!'))
         ->setErrors($errors);
     }

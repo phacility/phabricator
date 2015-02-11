@@ -38,7 +38,7 @@
   z-index: 3;
 }
 
-.phabricator-crumbs-view {
+.phui-crumbs-view {
   z-index: 3;
 }
 
@@ -94,6 +94,10 @@
 }
 
 .device-desktop .phabricator-notification-menu {
+  z-index: 9;
+}
+
+.jx-scrollbar-bar {
   z-index: 9;
 }
 

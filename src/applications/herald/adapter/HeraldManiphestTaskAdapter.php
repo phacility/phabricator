@@ -89,7 +89,9 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
         self::FIELD_CONTENT_SOURCE,
         self::FIELD_PROJECTS,
         self::FIELD_TASK_PRIORITY,
+        self::FIELD_TASK_STATUS,
         self::FIELD_IS_NEW_OBJECT,
+        self::FIELD_APPLICATION_EMAIL,
       ),
       parent::getFields());
   }
@@ -138,13 +140,16 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
       case self::FIELD_ASSIGNEE:
         return $this->getTask()->getOwnerPHID();
       case self::FIELD_CC:
-        return $this->getTask()->getCCPHIDs();
+        return PhabricatorSubscribersQuery::loadSubscribersForPHID(
+          $this->getTask()->getPHID());
       case self::FIELD_PROJECTS:
         return PhabricatorEdgeQuery::loadDestinationPHIDs(
           $this->getTask()->getPHID(),
           PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
       case self::FIELD_TASK_PRIORITY:
         return $this->getTask()->getPriority();
+      case self::FIELD_TASK_STATUS:
+        return $this->getTask()->getStatus();
     }
 
     return parent::getHeraldField($field);

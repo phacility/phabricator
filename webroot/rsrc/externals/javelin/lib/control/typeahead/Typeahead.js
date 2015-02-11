@@ -137,9 +137,9 @@ JX.install('Typeahead', {
       if (__DEV__) {
         if (!this._datasource) {
           throw new Error(
-            "JX.Typeahead.start(): " +
-            "No datasource configured. Create a datasource and call " +
-            "setDatasource().");
+            'JX.Typeahead.start(): ' +
+            'No datasource configured. Create a datasource and call ' +
+            'setDatasource().');
         }
       }
       this.updatePlaceholder();
@@ -402,7 +402,7 @@ JX.install('Typeahead', {
         this._choose(this._display[this._focus]);
         return true;
       } else {
-        result = this.invoke('query', this._control.value);
+        var result = this.invoke('query', this._control.value);
         if (result.getPrevented()) {
           return true;
         }

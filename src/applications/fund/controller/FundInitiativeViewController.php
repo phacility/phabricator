@@ -54,21 +54,16 @@ final class FundInitiativeViewController
     $properties = $this->buildPropertyListView($initiative);
     $actions = $this->buildActionListView($initiative);
     $properties->setActionList($actions);
-    $crumbs->setActionList($actions);
 
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->appendChild($properties);
 
-    $xactions = id(new FundInitiativeTransactionQuery())
-      ->setViewer($viewer)
-      ->withObjectPHIDs(array($initiative->getPHID()))
-      ->execute();
 
-    $timeline = id(new PhabricatorApplicationTransactionView())
-      ->setUser($viewer)
-      ->setObjectPHID($initiative->getPHID())
-      ->setTransactions($xactions)
+    $timeline = $this->buildTransactionTimeline(
+      $initiative,
+      new FundInitiativeTransactionQuery());
+    $timeline
       ->setShouldTerminate(true);
 
     return $this->buildApplicationPage(

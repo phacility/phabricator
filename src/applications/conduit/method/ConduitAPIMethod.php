@@ -149,6 +149,35 @@ abstract class ConduitAPIMethod
     return 'string-constant<'.$constants.'>';
   }
 
+  public static function getParameterMetadataKey($key) {
+    if (strncmp($key, 'api.', 4) === 0) {
+      // All keys passed beginning with "api." are always metadata keys.
+      return substr($key, 4);
+    } else {
+      switch ($key) {
+        // These are real keys which always belong to request metadata.
+        case 'access_token':
+        case 'scope':
+        case 'output':
+
+        // This is not a real metadata key; it is included here only to
+        // prevent Conduit methods from defining it.
+        case '__conduit__':
+
+        // This is prevented globally as a blanket defense against OAuth
+        // redirection attacks. It is included here to stop Conduit methods
+        // from defining it.
+        case 'code':
+
+        // This is not a real metadata key, but the presence of this
+        // parameter triggers an alternate request decoding pathway.
+        case 'params':
+          return $key;
+      }
+    }
+
+    return null;
+  }
 
 /* -(  Paging Results  )----------------------------------------------------- */
 

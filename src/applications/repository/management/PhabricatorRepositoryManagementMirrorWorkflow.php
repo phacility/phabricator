@@ -3,7 +3,7 @@
 final class PhabricatorRepositoryManagementMirrorWorkflow
   extends PhabricatorRepositoryManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('mirror')
       ->setExamples('**mirror** [__options__] __repository__ ...')

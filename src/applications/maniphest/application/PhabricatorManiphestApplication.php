@@ -14,8 +14,12 @@ final class PhabricatorManiphestApplication extends PhabricatorApplication {
     return '/maniphest/';
   }
 
-  public function getIconName() {
-    return 'maniphest';
+  public function getFontIcon() {
+    return 'fa-anchor';
+  }
+
+  public function getTitleGlyph() {
+    return "\xE2\x9A\x93";
   }
 
   public function isPinnedByDefault(PhabricatorUser $viewer) {
@@ -35,7 +39,6 @@ final class PhabricatorManiphestApplication extends PhabricatorApplication {
   public function getEventListeners() {
     return array(
       new ManiphestNameIndexEventListener(),
-      new ManiphestActionMenuEventListener(),
       new ManiphestHovercardEventListener(),
     );
   }
@@ -66,8 +69,6 @@ final class PhabricatorManiphestApplication extends PhabricatorApplication {
         ),
         'export/(?P<key>[^/]+)/' => 'ManiphestExportController',
         'subpriority/' => 'ManiphestSubpriorityController',
-        'subscribe/(?P<action>add|rem)/(?P<id>[1-9]\d*)/'
-          => 'ManiphestSubscribeController',
       ),
     );
   }
@@ -75,16 +76,25 @@ final class PhabricatorManiphestApplication extends PhabricatorApplication {
   public function loadStatus(PhabricatorUser $user) {
     $status = array();
 
+    if (!$user->isLoggedIn()) {
+      return $status;
+    }
+
     $query = id(new ManiphestTaskQuery())
       ->setViewer($user)
       ->withStatuses(ManiphestTaskStatus::getOpenStatusConstants())
-      ->withOwners(array($user->getPHID()));
+      ->withOwners(array($user->getPHID()))
+      ->setLimit(self::MAX_STATUS_ITEMS);
     $count = count($query->execute());
+    $count_str = self::formatStatusCount(
+      $count,
+      '%s Assigned Tasks',
+      '%d Assigned Task(s)');
 
     $type = PhabricatorApplicationStatusView::TYPE_WARNING;
     $status[] = id(new PhabricatorApplicationStatusView())
       ->setType($type)
-      ->setText(pht('%s Assigned Task(s)', new PhutilNumber($count)))
+      ->setText($count_str)
       ->setCount($count);
 
     return $status;
@@ -100,6 +110,20 @@ final class PhabricatorManiphestApplication extends PhabricatorApplication {
     $items[] = $item;
 
     return $items;
+  }
+
+  public function supportsEmailIntegration() {
+    return true;
+  }
+
+  public function getAppEmailBlurb() {
+    return pht(
+      'Send email to these addresses to create tasks. %s',
+      phutil_tag(
+        'a',
+        array(
+          'href' => $this->getInboundEmailSupportLink(),),
+        pht('Learn More')));
   }
 
   protected function getCustomCapabilities() {

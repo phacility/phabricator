@@ -261,9 +261,9 @@ final class ManiphestReportController extends ManiphestController {
     }
 
     if ($caption) {
-      $caption = id(new AphrontErrorView())
+      $caption = id(new PHUIErrorView())
         ->appendChild($caption)
-        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
+        ->setSeverity(PHUIErrorView::SEVERITY_NOTICE);
     }
 
     $panel = new PHUIObjectBoxView();
@@ -395,6 +395,12 @@ final class ManiphestReportController extends ManiphestController {
     $query = id(new ManiphestTaskQuery())
       ->setViewer($user)
       ->withStatuses(ManiphestTaskStatus::getOpenStatusConstants());
+
+    switch ($this->view) {
+      case 'project':
+        $query->needProjectPHIDs(true);
+        break;
+    }
 
     $project_phid = $request->getStr('project');
     $project_handle = null;
@@ -694,10 +700,17 @@ final class ManiphestReportController extends ManiphestController {
 
     $ids = ipull($rows, 'id');
 
-    return id(new ManiphestTaskQuery())
+    $query = id(new ManiphestTaskQuery())
       ->setViewer($this->getRequest()->getUser())
-      ->withIDs($ids)
-      ->execute();
+      ->withIDs($ids);
+
+    switch ($this->view) {
+      case 'project':
+        $query->needProjectPHIDs(true);
+        break;
+    }
+
+    return $query->execute();
   }
 
   /**

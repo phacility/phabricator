@@ -94,8 +94,13 @@ final class AlmanacDeviceEditor
           $interface
             ->setNetworkPHID($new['networkPHID'])
             ->setAddress($new['address'])
-            ->setPort((int)$new['port'])
-            ->save();
+            ->setPort((int)$new['port']);
+
+          if (idx($new, 'phid')) {
+            $interface->setPHID($new['phid']);
+          }
+
+          $interface->save();
         } else {
           $interface->delete();
         }
@@ -209,6 +214,21 @@ final class AlmanacDeviceEditor
                   'Port numbers must be between 1 and 65535, inclusive.'),
                 $xaction);
               $errors[] = $error;
+            }
+
+            $phid = idx($new, 'phid');
+            if ($phid) {
+              $interface_phid_type = AlmanacInterfacePHIDType::TYPECONST;
+              if (phid_get_type($phid) !== $interface_phid_type) {
+                $error = new PhabricatorApplicationTransactionValidationError(
+                  $type,
+                  pht('Invalid'),
+                  pht(
+                    'Precomputed interface PHIDs must be of type '.
+                    'AlmanacInterfacePHIDType.'),
+                  $xaction);
+                $errors[] = $error;
+              }
             }
           }
         }

@@ -62,6 +62,8 @@ final class PhabricatorOAuthClientViewController
       ->withClientPHIDs(array($client->getPHID()))
       ->executeOne();
     $is_authorized = (bool)$authorization;
+    $id = $client->getID();
+    $phid = $client->getPHID();
 
     $view = id(new PhabricatorActionListView())
       ->setUser($viewer);
@@ -73,6 +75,14 @@ final class PhabricatorOAuthClientViewController
         ->setWorkflow(!$can_edit)
         ->setDisabled(!$can_edit)
         ->setHref($client->getEditURI()));
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('Show Application Secret'))
+        ->setIcon('fa-eye')
+        ->setHref($this->getApplicationURI("client/secret/{$phid}/"))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(true));
 
     $view->addAction(
       id(new PhabricatorActionView())
@@ -88,7 +98,7 @@ final class PhabricatorOAuthClientViewController
         ->setIcon('fa-wrench')
         ->setWorkflow(true)
         ->setDisabled($is_authorized)
-        ->setHref($this->getApplicationURI('test/'.$client->getID().'/')));
+        ->setHref($this->getApplicationURI('test/'.$id.'/')));
 
     return $view;
   }
@@ -102,10 +112,6 @@ final class PhabricatorOAuthClientViewController
     $view->addProperty(
       pht('Client ID'),
       $client->getPHID());
-
-    $view->addProperty(
-      pht('Client Secret'),
-      $client->getSecret());
 
     $view->addProperty(
       pht('Redirect URI'),

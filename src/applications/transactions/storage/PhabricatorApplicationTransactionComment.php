@@ -25,7 +25,7 @@ abstract class PhabricatorApplicationTransactionComment
       PhabricatorPHIDConstants::PHID_TYPE_XCMT);
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
@@ -143,8 +143,9 @@ abstract class PhabricatorApplicationTransactionComment
   }
 
   public function describeAutomaticCapability($capability) {
-    // TODO: (T603) Policies are murky.
-    return null;
+    return pht(
+      'Comments are visible to users who can see the object which was '.
+      'commented on. Comments can be edited by their authors.');
   }
 
 

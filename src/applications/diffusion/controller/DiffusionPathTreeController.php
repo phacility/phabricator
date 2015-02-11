@@ -2,7 +2,7 @@
 
 final class DiffusionPathTreeController extends DiffusionController {
 
-  public function processRequest() {
+  protected function processDiffusionRequest(AphrontRequest $request) {
     $drequest = $this->getDiffusionRequest();
 
     if (!$drequest->getRepository()->canUsePathTree()) {

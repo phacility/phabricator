@@ -11,9 +11,18 @@ final class PhabricatorFeedConfigOptions
     return pht('Feed options.');
   }
 
+  public function getFontIcon() {
+    return 'fa-newspaper-o';
+  }
+
+  public function getGroup() {
+    return 'apps';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('feed.public', 'bool', false)
+        ->setLocked(true)
         ->setBoolOptions(
           array(
             pht('Allow anyone to view the feed'),
@@ -30,6 +39,7 @@ final class PhabricatorFeedConfigOptions
             "NOTE: You must also set `policy.allow-public` to true for this ".
             "setting to work properly.")),
       $this->newOption('feed.http-hooks', 'list<string>', array())
+        ->setLocked(true)
         ->setSummary(pht('POST notifications of feed events.'))
         ->setDescription(
           pht(

@@ -83,7 +83,7 @@ final class PhabricatorConfigKeySchema
     return $size;
   }
 
-  public function compareToSimilarSchema(
+  protected function compareToSimilarSchema(
     PhabricatorConfigStorageSchema $expect) {
 
     $issues = array();

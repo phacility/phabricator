@@ -35,4 +35,10 @@ abstract class PhortuneProductImplementation {
     return;
   }
 
+  public function getPurchaseURI(
+    PhortuneProduct $product,
+    PhortunePurchase $purchase) {
+    return null;
+  }
+
 }

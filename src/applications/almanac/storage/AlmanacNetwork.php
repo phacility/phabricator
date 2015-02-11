@@ -2,7 +2,10 @@
 
 final class AlmanacNetwork
   extends AlmanacDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorPolicyInterface,
+    PhabricatorDestructibleInterface {
 
   protected $name;
   protected $mailKey;
@@ -15,7 +18,7 @@ final class AlmanacNetwork
       ->setEditPolicy(PhabricatorPolicies::POLICY_ADMIN);
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
@@ -38,7 +41,30 @@ final class AlmanacNetwork
   }
 
   public function getURI() {
-    return '/almanac/network/view/'.$this->getName().'/';
+    return '/almanac/network/'.$this->getID().'/';
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new AlmanacNetworkEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new AlmanacNetworkTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
   }
 
 
@@ -67,6 +93,25 @@ final class AlmanacNetwork
 
   public function describeAutomaticCapability($capability) {
     return null;
+  }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $interfaces = id(new AlmanacInterfaceQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withNetworkPHIDs(array($this->getPHID()))
+      ->execute();
+
+    foreach ($interfaces as $interface) {
+      $engine->destroyObject($interface);
+    }
+
+    $this->delete();
   }
 
 }

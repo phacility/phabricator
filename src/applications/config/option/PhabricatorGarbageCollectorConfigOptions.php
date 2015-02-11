@@ -11,6 +11,14 @@ final class PhabricatorGarbageCollectorConfigOptions
     return pht('Configure the GC for old logs, caches, etc.');
   }
 
+  public function getFontIcon() {
+    return 'fa-trash-o';
+  }
+
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
 
     $options = array(

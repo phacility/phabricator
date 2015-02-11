@@ -27,7 +27,7 @@ final class DrydockLeaseQuery extends DrydockQuery {
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $table = new DrydockLease();
     $conn_r = $table->establishConnection('r');
 
@@ -42,7 +42,7 @@ final class DrydockLeaseQuery extends DrydockQuery {
     return $table->loadAllFromArray($data);
   }
 
-  public function willFilterPage(array $leases) {
+  protected function willFilterPage(array $leases) {
     $resource_ids = array_filter(mpull($leases, 'getResourceID'));
     if ($resource_ids) {
       $resources = id(new DrydockResourceQuery())

@@ -30,7 +30,7 @@ final class HarbormasterTargetWorker extends HarbormasterWorker {
     return $target;
   }
 
-  public function doWork() {
+  protected function doWork() {
     $target = $this->loadBuildTarget();
     $build = $target->getBuild();
     $viewer = $this->getViewer();

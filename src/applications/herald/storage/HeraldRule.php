@@ -2,6 +2,7 @@
 
 final class HeraldRule extends HeraldDAO
   implements
+    PhabricatorApplicationTransactionInterface,
     PhabricatorFlaggableInterface,
     PhabricatorPolicyInterface,
     PhabricatorDestructibleInterface {
@@ -18,7 +19,7 @@ final class HeraldRule extends HeraldDAO
   protected $isDisabled = 0;
   protected $triggerObjectPHID;
 
-  protected $configVersion = 37;
+  protected $configVersion = 38;
 
   // PHIDs for which this rule has been applied
   private $ruleApplied = self::ATTACHABLE;
@@ -28,7 +29,7 @@ final class HeraldRule extends HeraldDAO
   private $actions;
   private $triggerObject = self::ATTACHABLE;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
@@ -262,6 +263,29 @@ final class HeraldRule extends HeraldDAO
     }
 
     return sprintf('~%d%010d', $type_order, $this->getID());
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new HeraldRuleEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new HeraldRuleTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
   }
 
 

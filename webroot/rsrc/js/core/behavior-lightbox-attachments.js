@@ -69,11 +69,15 @@ JX.behavior('lightbox-attachments', function (config) {
                           );
     }
 
+    var alt_name = '';
+    if (typeof target_data.name != 'undefined') {
+      alt_name = target_data.name;
+    }
+
     var img = JX.$N('img',
                     {
                       className : 'loading',
-                      alt       : target_data.name,
-                      title     : target_data.name
+                      alt       : alt_name
                     }
                    );
 

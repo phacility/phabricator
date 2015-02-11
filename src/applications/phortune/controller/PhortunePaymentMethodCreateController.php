@@ -125,7 +125,7 @@ final class PhortunePaymentMethodCreateController
         $dialog = id(new AphrontDialogView())
           ->setUser($viewer)
           ->setTitle(pht('Error Adding Payment Method'))
-          ->appendChild(id(new AphrontErrorView())->setErrors($errors))
+          ->appendChild(id(new PHUIErrorView())->setErrors($errors))
           ->addCancelButton($request->getRequestURI());
 
         return id(new AphrontDialogResponse())->setDialog($dialog);

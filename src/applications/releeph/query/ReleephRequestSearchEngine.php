@@ -10,6 +10,10 @@ final class ReleephRequestSearchEngine
     return pht('Releeph Pull Requests');
   }
 
+  public function getApplicationClassName() {
+    return 'PhabricatorReleephApplication';
+  }
+
   public function setBranch(ReleephBranch $branch) {
     $this->branch = $branch;
     return $this;
@@ -94,7 +98,7 @@ final class ReleephRequestSearchEngine
     return $this->baseURI.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array(
       'open' => pht('Open Requests'),
       'all' => pht('All Requests'),

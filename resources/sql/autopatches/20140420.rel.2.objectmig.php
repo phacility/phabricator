@@ -26,7 +26,7 @@ foreach (new LiskMigrationIterator($pull_table) as $pull) {
 
   $revision_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
     $commit_phid,
-    PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV);
+    DiffusionCommitHasRevisionEdgeType::EDGECONST);
 
   if ($revision_phids) {
     $object_phid = head($revision_phids);

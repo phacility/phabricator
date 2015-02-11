@@ -49,7 +49,7 @@ final class ReleephProductSearchEngine
     return '/releeph/project/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     return array(
       'active' => pht('Active'),
       'all' => pht('All'),

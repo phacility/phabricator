@@ -4,6 +4,7 @@ final class AlmanacServiceTransaction
   extends PhabricatorApplicationTransaction {
 
   const TYPE_NAME = 'almanac:service:name';
+  const TYPE_LOCK = 'almanac:service:lock';
 
   public function getApplicationName() {
     return 'almanac';
@@ -35,6 +36,17 @@ final class AlmanacServiceTransaction
             $this->renderHandleLink($author_phid),
             $old,
             $new);
+        }
+        break;
+      case self::TYPE_LOCK:
+        if ($new) {
+          return pht(
+            '%s locked this service.',
+            $this->renderHandleLink($author_phid));
+        } else {
+          return pht(
+            '%s unlocked this service.',
+            $this->renderHandleLink($author_phid));
         }
         break;
     }

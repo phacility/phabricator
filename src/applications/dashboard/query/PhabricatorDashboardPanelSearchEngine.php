@@ -59,7 +59,7 @@ final class PhabricatorDashboardPanelSearchEngine
     return '/dashboard/panel/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     return array(
       'active' => pht('Active Panels'),
       'all'    => pht('All Panels'),

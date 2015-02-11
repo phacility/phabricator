@@ -1,0 +1,12 @@
+CREATE TABLE {$NAMESPACE}_metamta.metamta_applicationemail (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  phid VARBINARY(64) NOT NULL,
+  applicationPHID VARBINARY(64) NOT NULL,
+  address VARCHAR(128) NOT NULL COLLATE {$COLLATE_SORT},
+  configData LONGTEXT NOT NULL COLLATE {$COLLATE_TEXT},
+  dateCreated INT UNSIGNED NOT NULL,
+  dateModified INT UNSIGNED NOT NULL,
+  KEY `key_application` (applicationPHID),
+  UNIQUE KEY `key_address` (address),
+  UNIQUE KEY `key_phid` (phid)
+) ENGINE=MyISAM DEFAULT CHARSET={$CHARSET} COLLATE={$COLLATE_TEXT};

@@ -13,11 +13,11 @@ final class PHUIButtonBarView extends AphrontTagView {
     return array('class' => 'phui-button-bar');
   }
 
-  public function getTagName() {
+  protected function getTagName() {
     return 'div';
   }
 
-  public function getTagContent() {
+  protected function getTagContent() {
     require_celerity_resource('phui-button-css');
 
     $i = 1;

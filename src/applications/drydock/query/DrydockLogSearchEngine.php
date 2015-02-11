@@ -26,7 +26,7 @@ final class DrydockLogSearchEngine extends PhabricatorApplicationSearchEngine {
     return '/drydock/log/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     return array(
       'all' => pht('All Logs'),
     );

@@ -24,7 +24,7 @@ abstract class PhabricatorCalendarController extends PhabricatorController {
     return $this->buildSideNavView()->getMenu();
   }
 
-  public function buildApplicationCrumbs() {
+  protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
     $crumbs->addAction(

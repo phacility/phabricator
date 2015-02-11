@@ -38,7 +38,7 @@ final class PhabricatorMailingListSearchEngine
     return '/mailinglists/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     return array(
       'all' => pht('All Lists'),
     );

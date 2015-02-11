@@ -2,6 +2,7 @@
 
 final class HarbormasterBuildPlan extends HarbormasterDAO
   implements
+    PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
     PhabricatorSubscribableInterface {
 
@@ -18,7 +19,7 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
       ->setPlanStatus(self::STATUS_ACTIVE);
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
@@ -66,6 +67,29 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
 
   public function shouldAllowSubscription($phid) {
     return true;
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new HarbormasterBuildPlanEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new HarbormasterBuildPlanTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
   }
 
 

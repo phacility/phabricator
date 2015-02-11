@@ -2,12 +2,17 @@
 
 final class PhabricatorOAuthServerClient
   extends PhabricatorOAuthServerDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorDestructibleInterface {
 
   protected $secret;
   protected $name;
   protected $redirectURI;
   protected $creatorPHID;
+  protected $isTrusted = 0;
+  protected $viewPolicy;
+  protected $editPolicy;
 
   public function getEditURI() {
     return '/oauthserver/client/edit/'.$this->getPHID().'/';
@@ -24,16 +29,19 @@ final class PhabricatorOAuthServerClient
   public static function initializeNewClient(PhabricatorUser $actor) {
     return id(new PhabricatorOAuthServerClient())
       ->setCreatorPHID($actor->getPHID())
-      ->setSecret(Filesystem::readRandomCharacters(32));
+      ->setSecret(Filesystem::readRandomCharacters(32))
+      ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
+      ->setEditPolicy($actor->getPHID());
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'text255',
         'secret' => 'text32',
         'redirectURI' => 'text255',
+        'isTrusted' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
@@ -67,26 +75,47 @@ final class PhabricatorOAuthServerClient
   public function getPolicy($capability) {
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
-        return PhabricatorPolicies::POLICY_USER;
+        return $this->getViewPolicy();
       case PhabricatorPolicyCapability::CAN_EDIT:
-        return PhabricatorPolicies::POLICY_NOONE;
+        return $this->getEditPolicy();
     }
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    switch ($capability) {
-      case PhabricatorPolicyCapability::CAN_EDIT:
-        return ($viewer->getPHID() == $this->getCreatorPHID());
-    }
     return false;
   }
 
   public function describeAutomaticCapability($capability) {
-    switch ($capability) {
-      case PhabricatorPolicyCapability::CAN_EDIT:
-        return pht("Only an application's creator can edit it.");
-    }
     return null;
   }
 
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+      $this->delete();
+
+      $authorizations = id(new PhabricatorOAuthClientAuthorization())
+        ->loadAllWhere('clientPHID = %s', $this->getPHID());
+      foreach ($authorizations as $authorization) {
+        $authorization->delete();
+      }
+
+      $tokens = id(new PhabricatorOAuthServerAccessToken())
+        ->loadAllWhere('clientPHID = %s', $this->getPHID());
+      foreach ($tokens as $token) {
+        $token->delete();
+      }
+
+      $codes = id(new PhabricatorOAuthServerAuthorizationCode())
+        ->loadAllWhere('clientPHID = %s', $this->getPHID());
+      foreach ($codes as $code) {
+        $code->delete();
+      }
+
+    $this->saveTransaction();
+
+  }
 }

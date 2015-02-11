@@ -3,7 +3,7 @@
 final class PhabricatorFilesManagementRebuildWorkflow
   extends PhabricatorFilesManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('rebuild')
       ->setSynopsis('Rebuild metadata of old files.')

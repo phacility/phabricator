@@ -4,16 +4,13 @@ final class DiffusionSymbolController extends DiffusionController {
 
   private $name;
 
-  public function willProcessRequest(array $data) {
-    $this->name = $data['name'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
+  protected function processDiffusionRequest(AphrontRequest $request) {
     $user = $request->getUser();
+    $this->name = $request->getURIData('name');
 
-    $query = new DiffusionSymbolQuery();
-    $query->setName($this->name);
+    $query = id(new DiffusionSymbolQuery())
+      ->setViewer($user)
+      ->setName($this->name);
 
     if ($request->getStr('context') !== null) {
       $query->setContext($request->getStr('context'));

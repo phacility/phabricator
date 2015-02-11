@@ -14,7 +14,7 @@ final class DiffusionBrowseDirectoryController
     return $this->browseQueryResults;
   }
 
-  public function processRequest() {
+  protected function processDiffusionRequest(AphrontRequest $request) {
     $drequest = $this->diffusionRequest;
 
     $results = $this->getBrowseQueryResults();
@@ -35,7 +35,7 @@ final class DiffusionBrowseDirectoryController
       $empty_result = new DiffusionEmptyResultView();
       $empty_result->setDiffusionRequest($drequest);
       $empty_result->setDiffusionBrowseResultSet($results);
-      $empty_result->setView($this->getRequest()->getStr('view'));
+      $empty_result->setView($request->getStr('view'));
       $content[] = $empty_result;
     } else {
       $phids = array();
@@ -55,7 +55,7 @@ final class DiffusionBrowseDirectoryController
       $browse_table->setDiffusionRequest($drequest);
       $browse_table->setHandles($handles);
       $browse_table->setPaths($results->getPaths());
-      $browse_table->setUser($this->getRequest()->getUser());
+      $browse_table->setUser($request->getUser());
 
       $browse_panel = new AphrontPanelView();
       $browse_panel->appendChild($browse_table);
@@ -66,22 +66,21 @@ final class DiffusionBrowseDirectoryController
 
     $content[] = $this->buildOpenRevisions();
 
-    $readme = $this->callConduitWithDiffusionRequest(
-      'diffusion.readmequery',
-      array(
-        'paths' => $results->getPathDicts(),
-        'commit' => $drequest->getStableCommit(),
-      ));
-    if ($readme) {
-      $box = new PHUIBoxView();
-      $box->appendChild($readme);
-      $box->addPadding(PHUI::PADDING_LARGE);
 
-      $object_box = id(new PHUIObjectBoxView())
-        ->setHeaderText(pht('README'))
-        ->appendChild($box);
-
-      $content[] = $object_box;
+    $readme_path = $results->getReadmePath();
+    if ($readme_path) {
+      $readme_content = $this->callConduitWithDiffusionRequest(
+        'diffusion.filecontentquery',
+        array(
+          'path' => $readme_path,
+          'commit' => $drequest->getStableCommit(),
+        ));
+      if ($readme_content) {
+        $content[] = id(new DiffusionReadmeView())
+          ->setUser($this->getViewer())
+          ->setPath($readme_path)
+          ->setContent($readme_content['corpus']);
+      }
     }
 
     $crumbs = $this->buildCrumbs(

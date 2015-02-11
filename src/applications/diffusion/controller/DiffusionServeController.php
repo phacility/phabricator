@@ -2,6 +2,10 @@
 
 final class DiffusionServeController extends DiffusionController {
 
+  protected function shouldLoadDiffusionRequest() {
+    return false;
+  }
+
   public static function isVCSRequest(AphrontRequest $request) {
     if (!self::getCallsign($request)) {
       return null;
@@ -55,8 +59,7 @@ final class DiffusionServeController extends DiffusionController {
     return $matches['callsign'];
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
+  protected function processDiffusionRequest(AphrontRequest $request) {
     $callsign = self::getCallsign($request);
 
     // If authentication credentials have been provided, try to find a user
@@ -202,10 +205,8 @@ final class DiffusionServeController extends DiffusionController {
     } else {
       switch ($vcs_type) {
         case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
-          $result = $this->serveGitRequest($repository, $viewer);
-          break;
         case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
-          $result = $this->serveMercurialRequest($repository, $viewer);
+          $result = $this->serveVCSRequest($repository, $viewer);
           break;
         case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
           $result = new PhabricatorVCSResponse(
@@ -230,6 +231,42 @@ final class DiffusionServeController extends DiffusionController {
           PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE,
           PhabricatorRepositoryStatusMessage::CODE_OKAY);
       unset($unguarded);
+    }
+
+    return $result;
+  }
+
+  private function serveVCSRequest(
+    PhabricatorRepository $repository,
+    PhabricatorUser $viewer) {
+
+    // If this repository is hosted on a service, we need to proxy the request
+    // to a host which can serve it.
+    $is_cluster_request = $this->getRequest()->isProxiedClusterRequest();
+
+    $uri = $repository->getAlmanacServiceURI(
+      $viewer,
+      $is_cluster_request,
+      array(
+        'http',
+        'https',
+      ));
+    if ($uri) {
+      $future = $this->getRequest()->newClusterProxyFuture($uri);
+      return id(new AphrontHTTPProxyResponse())
+        ->setHTTPFuture($future);
+    }
+
+    // Otherwise, we're going to handle the request locally.
+
+    $vcs_type = $repository->getVersionControlSystem();
+    switch ($vcs_type) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
+        $result = $this->serveGitRequest($repository, $viewer);
+        break;
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
+        $result = $this->serveMercurialRequest($repository, $viewer);
+        break;
     }
 
     return $result;

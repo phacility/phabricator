@@ -16,6 +16,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
   private $pageObjects = array();
   private $applicationMenu;
   private $showFooter = true;
+  private $showDurableColumn = true;
 
   public function setShowFooter($show_footer) {
     $this->showFooter = $show_footer;
@@ -71,6 +72,15 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     foreach ($objs as $obj) {
       $this->pageObjects[] = $obj;
     }
+  }
+
+  public function setShowDurableColumn($show) {
+    $this->showDurableColumn = $show;
+    return $this;
+  }
+
+  public function getShowDurableColumn() {
+    return $this->showDurableColumn;
   }
 
   public function getTitle() {
@@ -262,10 +272,11 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     return hsprintf(
       '%s<style type="text/css">'.
       '.PhabricatorMonospaced, '.
-      '.phabricator-remarkup .remarkup-code-block { font: %s; } '.
+      '.phabricator-remarkup .remarkup-code-block '.
+        '.remarkup-code { font: %s; } '.
       '.platform-windows .PhabricatorMonospaced, '.
       '.platform-windows .phabricator-remarkup '.
-        '.remarkup-code-block { font: %s; }'.
+        '.remarkup-code-block .remarkup-code { font: %s; }'.
       '</style>%s',
       parent::getHead(),
       phutil_safe_html($monospaced),
@@ -300,8 +311,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
   }
 
   protected function getBody() {
-    $console = $this->getConsole();
-
     $user = null;
     $request = $this->getRequest();
     if ($request) {
@@ -339,22 +348,56 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       }
     }
 
-    return phutil_tag(
+    Javelin::initBehavior(
+      'scrollbar',
+      array(
+        'nodeID' => 'phabricator-standard-page',
+        'isMainContent' => true,
+      ));
+
+    $main_page = phutil_tag(
       'div',
       array(
-        'id' => 'base-page',
+        'id' => 'phabricator-standard-page',
         'class' => 'phabricator-standard-page',
       ),
       array(
         $developer_warning,
         $setup_warning,
         $header_chrome,
-        phutil_tag_div('phabricator-standard-page-body', array(
-          ($console ? hsprintf('<darkconsole />') : null),
-          parent::getBody(),
-          $this->renderFooter(),
-        )),
+        phutil_tag(
+          'div',
+          array(
+            'id' => 'phabricator-standard-page-body',
+            'class' => 'phabricator-standard-page-body',
+          ),
+          $this->renderPageBodyContent()),
       ));
+
+    $durable_column = null;
+    if ($this->getShowDurableColumn()) {
+      $durable_column = new PHUIDurableColumn();
+    }
+
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'main-page-frame',
+      ),
+      array(
+        $main_page,
+        $durable_column,
+      ));
+  }
+
+  private function renderPageBodyContent() {
+    $console = $this->getConsole();
+
+    return array(
+      ($console ? hsprintf('<darkconsole />') : null),
+      parent::getBody(),
+      $this->renderFooter(),
+    );
   }
 
   protected function getTail() {
@@ -370,9 +413,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     if (PhabricatorEnv::getEnvConfig('notification.enabled')) {
       if ($user && $user->isLoggedIn()) {
 
-        $aphlict_object_id = celerity_generate_unique_node_id();
-        $aphlict_container_id = celerity_generate_unique_node_id();
-
         $client_uri = PhabricatorEnv::getEnvConfig('notification.client-uri');
         $client_uri = new PhutilURI($client_uri);
         if ($client_uri->getDomain() == 'localhost') {
@@ -381,37 +421,24 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
           $client_uri->setDomain($this_host->getDomain());
         }
 
-        $map = CelerityResourceMap::getNamedInstance('phabricator');
-        $swf_uri = $response->getURI($map, 'rsrc/swf/aphlict.swf', true);
-
-        $enable_debug = PhabricatorEnv::getEnvConfig('notification.debug');
-
         $subscriptions = $this->pageObjects;
         if ($user) {
           $subscriptions[] = $user->getPHID();
         }
 
+        if ($request->isHTTPS()) {
+          $client_uri->setProtocol('wss');
+        } else {
+          $client_uri->setProtocol('ws');
+        }
+
         Javelin::initBehavior(
           'aphlict-listen',
           array(
-            'id'            => $aphlict_object_id,
-            'containerID'   => $aphlict_container_id,
-            'server'        => $client_uri->getDomain(),
-            'port'          => $client_uri->getPort(),
-            'debug'         => $enable_debug,
-            'swfURI'        => $swf_uri,
+            'websocketURI'  => (string)$client_uri,
             'pageObjects'   => array_fill_keys($this->pageObjects, true),
             'subscriptions' => $subscriptions,
           ));
-
-        $tail[] = phutil_tag(
-          'div',
-          array(
-            'id' => $aphlict_container_id,
-            'style' =>
-              'position: absolute; width: 0; height: 0; overflow: hidden;',
-          ),
-          '');
       }
     }
 
@@ -512,4 +539,15 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       $foot);
   }
 
+  public function renderForQuicksand() {
+    // TODO: We could run a lighter version of this and skip some work. In
+    // particular, we end up including many redundant resources.
+    $this->willRenderPage();
+    $response = $this->renderPageBodyContent();
+    $response = $this->willSendResponse($response);
+
+    return array(
+      'content' => hsprintf('%s', $response),
+    );
+  }
 }

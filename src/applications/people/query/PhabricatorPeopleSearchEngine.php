@@ -163,7 +163,7 @@ final class PhabricatorPeopleSearchEngine
     return '/people/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array(
       'all' => pht('All'),
     );

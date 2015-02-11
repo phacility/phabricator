@@ -1,8 +1,10 @@
 <?php
 
 final class PassphraseCredential extends PassphraseDAO
-  implements PhabricatorPolicyInterface,
-  PhabricatorDestructibleInterface {
+  implements
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorPolicyInterface,
+    PhabricatorDestructibleInterface {
 
   protected $name;
   protected $credentialType;
@@ -32,7 +34,7 @@ final class PassphraseCredential extends PassphraseDAO
     return 'K'.$this->getID();
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
@@ -78,6 +80,29 @@ final class PassphraseCredential extends PassphraseDAO
   public function getCredentialTypeImplementation() {
     $type = $this->getCredentialType();
     return PassphraseCredentialType::getTypeByConstant($type);
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PassphraseCredentialTransactionEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PassphraseCredentialTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
   }
 
 

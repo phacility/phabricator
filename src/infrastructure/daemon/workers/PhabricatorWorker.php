@@ -9,10 +9,14 @@ abstract class PhabricatorWorker {
   private static $runAllTasksInProcess = false;
   private $queuedTasks = array();
 
-  const PRIORITY_ALERTS  = 4000;
-  const PRIORITY_DEFAULT = 3000;
-  const PRIORITY_BULK    = 2000;
-  const PRIORITY_IMPORT  = 1000;
+  // NOTE: Lower priority numbers execute first. The priority numbers have to
+  // have the same ordering that IDs do (lowest first) so MySQL can use a
+  // multipart key across both of them efficiently.
+
+  const PRIORITY_ALERTS  = 1000;
+  const PRIORITY_DEFAULT = 2000;
+  const PRIORITY_BULK    = 3000;
+  const PRIORITY_IMPORT  = 4000;
 
 
 /* -(  Configuring Retries and Failures  )----------------------------------- */
@@ -90,16 +94,19 @@ abstract class PhabricatorWorker {
   final public static function scheduleTask(
     $task_class,
     $data,
-    $priority = null) {
+    $options = array()) {
 
+    $priority = idx($options, 'priority');
     if ($priority === null) {
       $priority = self::PRIORITY_DEFAULT;
     }
+    $object_phid = idx($options, 'objectPHID');
 
     $task = id(new PhabricatorWorkerActiveTask())
       ->setTaskClass($task_class)
       ->setData($data)
-      ->setPriority($priority);
+      ->setPriority($priority)
+      ->setObjectPHID($object_phid);
 
     if (self::$runAllTasksInProcess) {
       // Do the work in-process.
@@ -110,7 +117,8 @@ abstract class PhabricatorWorker {
           $worker->doWork();
           foreach ($worker->getQueuedTasks() as $queued_task) {
             list($queued_class, $queued_data, $queued_priority) = $queued_task;
-            self::scheduleTask($queued_class, $queued_data, $queued_priority);
+            $queued_options = array('priority' => $queued_priority);
+            self::scheduleTask($queued_class, $queued_data, $queued_options);
           }
           break;
         } catch (PhabricatorWorkerYieldException $ex) {
@@ -190,9 +198,8 @@ abstract class PhabricatorWorker {
       }
     }
 
-    $tasks = id(new PhabricatorWorkerArchiveTask())->loadAllWhere(
-      'id IN (%Ld)',
-      $task_ids);
+    $tasks = id(new PhabricatorWorkerArchiveTaskQuery())
+      ->withIDs($task_ids);
 
     foreach ($tasks as $task) {
       if ($task->getResult() != PhabricatorWorkerArchiveTask::RESULT_SUCCESS) {

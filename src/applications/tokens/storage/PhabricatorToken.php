@@ -7,7 +7,7 @@ final class PhabricatorToken extends PhabricatorTokenDAO
   protected $name;
   protected $filePHID;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_NO_TABLE => true,

@@ -55,13 +55,19 @@
   margin-bottom: 4px;
 }
 
-.device .phui-property-list-key,
-.phui-property-list-properties.phui-property-list-stacked
-  .phui-property-list-key {
-  padding-left: 12px;
-  text-align: left;
-  margin-left: 0;
+.phui-property-list-properties-wrap.phui-property-list-stacked {
   width: auto;
+  float: none;
+}
+
+.device .phui-property-list-key,
+.phui-property-list-stacked .phui-property-list-properties
+  .phui-property-list-key {
+    padding-left: 12px;
+    text-align: left;
+    margin-left: 0;
+    width: auto;
+    float: none;
 }
 
 .phui-property-list-value {
@@ -77,12 +83,13 @@
 }
 
 .device .phui-property-list-value,
-.phui-property-list-properties.phui-property-list-stacked
+.phui-property-list-stacked .phui-property-list-properties
   .phui-property-list-value {
-  padding: 0 16px;
-  margin-bottom: 8px;
-  width: auto;
-  word-break: break-word;
+    padding: 0 16px;
+    margin-bottom: 8px;
+    width: auto;
+    word-break: break-word;
+    float: none;
 }
 
 .phui-property-list-section-header {

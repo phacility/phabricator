@@ -91,7 +91,7 @@ final class PhrequentSearchEngine extends PhabricatorApplicationSearchEngine {
     return '/phrequent/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     return array(
       'tracking' => pht('Currently Tracking'),
       'all' => pht('All Tracked'),

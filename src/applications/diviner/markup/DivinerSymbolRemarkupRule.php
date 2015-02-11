@@ -140,6 +140,10 @@ final class DivinerSymbolRemarkupRule extends PhutilRemarkupRule {
           $link = $title;
         }
       } else if ($href) {
+        if ($this->getEngine()->isHTMLMailMode()) {
+          $href = PhabricatorEnv::getProductionURI($href);
+        }
+
         $link = $this->newTag(
           'a',
           array(

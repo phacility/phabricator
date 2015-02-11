@@ -32,6 +32,11 @@
   margin: 16px 0px 16px 0px;
 }
 
+.conpherence-layout .phui-crumbs-view {
+  padding: 0 0 0 8px;
+  background: #EBECEE;
+}
+
 .conpherence-show-older-messages {
   display: block;
   background: #e0e3ec;
@@ -115,7 +120,7 @@
 }
 
 .conpherence-message-pane .phabricator-transaction-view {
-  margin: 5px 15px;
+  margin: 4px 12px;
   background-size: 35px;
   min-height: auto;
 }
@@ -131,7 +136,7 @@
 
 .conpherence-message-pane .date-marker {
   border-top: 1px solid #d7d7d7;
-  margin: 5px 15px;
+  margin: 12px 12px 4px;
   min-height: auto;
 }
 .device-phone .conpherence-message-pane .date-marker {
@@ -139,11 +144,11 @@
 }
 .conpherence-message-pane .date-marker .date {
   position: relative;
-  top: -8px;
+  top: -11px;
   left: 40px;
   background-color: #FFF;
-  color: #bfbfbf;
-  font-size: 11px;
+  color: {$bluetext};
+  font-size: 12px;
   padding: 0px 5px;
 }
 .device-phone .conpherence-message-pane .phabricator-transaction-detail {
@@ -161,12 +166,18 @@
 }
 
 .conpherence-message-pane .conpherence-edited .phabricator-transaction-content {
- padding: 0 0 5px 45px;
- font-style: italic;
+  padding: 0 0 4px 45px;
 }
 
-.device-phone .conpherence-message-pane .conpherence-edited .phabricator-transaction-content {
- padding: 0 0 5px 35px;
+.conpherence-message-pane .conpherence-edited
+  .phabricator-transaction-content a {
+  font-weight: bold;
+  color: {$darkbluetext};
+}
+
+.device-phone .conpherence-message-pane .conpherence-edited
+  .phabricator-transaction-content {
+  padding: 0 0 5px 35px;
 }
 
 .conpherence-message-pane .phabricator-transaction-info,
@@ -180,6 +191,10 @@
 .conpherence-message-pane .phabricator-transaction-content {
   background: none;
   padding: 0;
+}
+
+.conpherence-message-pane .phabricator-transaction-header a {
+  color: {$darkbluetext};
 }
 
 .conpherence-message-pane .phabricator-transaction-content {
@@ -212,7 +227,7 @@
 
 .device .conpherence-message-pane .remarkup-assist-textarea {
   margin: 4px 8px;
-  padding: 6px 6px;
+  padding: 8px;
   width: 97%;
   height: 28px;
   resize: none;

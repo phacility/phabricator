@@ -7,8 +7,7 @@ final class PhabricatorAuthStartController
     return false;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getUser();
 
     if ($viewer->isLoggedIn()) {
@@ -77,28 +76,54 @@ final class PhabricatorAuthStartController
     }
 
     $next_uri = $request->getStr('next');
-    if (!$next_uri) {
-      $next_uri_path = $this->getRequest()->getPath();
-      if ($next_uri_path == '/auth/start/') {
-        $next_uri = '/';
-      } else {
-        $next_uri = $this->getRequest()->getRequestURI();
+    if (!strlen($next_uri)) {
+      if ($this->getDelegatingController()) {
+        // Only set a next URI from the request path if this controller was
+        // delegated to, which happens when a user tries to view a page which
+        // requires them to login.
+
+        // If this controller handled the request directly, we're on the main
+        // login page, and never want to redirect the user back here after they
+        // login.
+        $next_uri = (string)$this->getRequest()->getRequestURI();
       }
     }
 
     if (!$request->isFormPost()) {
-      PhabricatorCookies::setNextURICookie($request, $next_uri);
+      if (strlen($next_uri)) {
+        PhabricatorCookies::setNextURICookie($request, $next_uri);
+      }
       PhabricatorCookies::setClientIDCookie($request);
     }
+
+    if (!$request->getURIData('loggedout') && count($providers) == 1) {
+      $auto_login_provider = head($providers);
+      $auto_login_config = $auto_login_provider->getProviderConfig();
+      if ($auto_login_provider instanceof PhabricatorPhabricatorAuthProvider &&
+          $auto_login_config->getShouldAutoLogin()) {
+        $auto_login_adapter = $provider->getAdapter();
+        $auto_login_adapter->setState($provider->getAuthCSRFCode($request));
+        return id(new AphrontRedirectResponse())
+          ->setIsExternal(true)
+          ->setURI($provider->getAdapter()->getAuthenticateURI());
+      }
+    }
+
+    $invite = $this->loadInvite();
 
     $not_buttons = array();
     $are_buttons = array();
     $providers = msort($providers, 'getLoginOrder');
     foreach ($providers as $provider) {
-      if ($provider->isLoginFormAButton()) {
-        $are_buttons[] = $provider->buildLoginForm($this);
+      if ($invite) {
+        $form = $provider->buildInviteForm($this);
       } else {
-        $not_buttons[] = $provider->buildLoginForm($this);
+        $form = $provider->buildLoginForm($this);
+      }
+      if ($provider->isLoginFormAButton()) {
+        $are_buttons[] = $form;
+      } else {
+        $not_buttons[] = $form;
       }
     }
 
@@ -141,13 +166,20 @@ final class PhabricatorAuthStartController
     $login_message = PhabricatorEnv::getEnvConfig('auth.login-message');
     $login_message = phutil_safe_html($login_message);
 
+    $invite_message = null;
+    if ($invite) {
+      $invite_message = $this->renderInviteHeader($invite);
+    }
+
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Login'));
+    $crumbs->setBorder(true);
 
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $login_message,
+        $invite_message,
         $out,
       ),
       array(

@@ -7,7 +7,7 @@ final class PhabricatorSearchDocumentRelationship extends PhabricatorSearchDAO {
   protected $relatedType;
   protected $relatedTime;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_TIMESTAMPS => false,
       self::CONFIG_IDS        => self::IDS_MANUAL,

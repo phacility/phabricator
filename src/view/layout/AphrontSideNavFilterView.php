@@ -27,6 +27,7 @@ final class AphrontSideNavFilterView extends AphrontView {
   private $crumbs;
   private $classes = array();
   private $menuID;
+  private $iconNav;
 
   public function setMenuID($menu_id) {
     $this->menuID = $menu_id;
@@ -52,13 +53,18 @@ final class AphrontSideNavFilterView extends AphrontView {
     return $object;
   }
 
-  public function setCrumbs(PhabricatorCrumbsView $crumbs) {
+  public function setCrumbs(PHUICrumbsView $crumbs) {
     $this->crumbs = $crumbs;
     return $this;
   }
 
   public function getCrumbs() {
     return $this->crumbs;
+  }
+
+  public function setIconNav($nav) {
+    $this->iconNav = $nav;
+    return $this;
   }
 
   public function setActive($active) {
@@ -94,6 +100,26 @@ final class AphrontSideNavFilterView extends AphrontView {
       $key, $name, $uri, PHUIListItemView::TYPE_LINK);
   }
 
+  public function addIcon($key, $name, $icon, $image = null, $uri = null) {
+    if (!$uri) {
+      $href = clone $this->baseURI;
+      $href->setPath(rtrim($href->getPath().$key, '/').'/');
+      $href = (string)$href;
+    } else {
+      $href = $uri;
+    }
+
+    $item = id(new PHUIListItemView())
+      ->setKey($key)
+      ->setRenderNameAsTooltip(true)
+      ->setType(PHUIListItemView::TYPE_ICON_NAV)
+      ->setIcon($icon)
+      ->setHref($href)
+      ->setName($name)
+      ->setProfileImage($image);
+    return $this->addMenuItem($item);
+  }
+
   public function addButton($key, $name, $uri = null) {
     return $this->addThing(
       $key, $name, $uri, PHUIListItemView::TYPE_BUTTON);
@@ -108,6 +134,7 @@ final class AphrontSideNavFilterView extends AphrontView {
     $item = id(new PHUIListItemView())
       ->setName($name)
       ->setType($type);
+
 
     if (strlen($key)) {
       $item->setKey($key);
@@ -192,6 +219,9 @@ final class AphrontSideNavFilterView extends AphrontView {
 
     $nav_classes = array();
     $nav_classes[] = 'phabricator-nav';
+    if ($this->iconNav) {
+      $nav_classes[] = 'phabricator-icon-nav';
+    }
 
     $nav_id = null;
     $drag_id = null;

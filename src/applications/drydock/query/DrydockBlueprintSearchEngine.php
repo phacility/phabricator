@@ -27,7 +27,7 @@ final class DrydockBlueprintSearchEngine
     return '/drydock/blueprint/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     return array(
       'all' => pht('All Blueprints'),
     );
@@ -45,7 +45,7 @@ final class DrydockBlueprintSearchEngine
     return parent::buildSavedQueryFromBuiltin($query_key);
   }
 
-  public function renderResultList(
+  protected function renderResultList(
     array $blueprints,
     PhabricatorSavedQuery $query,
     array $handles) {

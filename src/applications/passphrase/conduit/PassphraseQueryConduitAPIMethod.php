@@ -79,6 +79,7 @@ final class PassphraseQueryConduitAPIMethod
             $material['publicKey'] = $public_key;
           }
           break;
+        case PassphraseCredentialTypeSSHGeneratedKey::CREDENTIAL_TYPE:
         case PassphraseCredentialTypeSSHPrivateKeyText::CREDENTIAL_TYPE:
           if ($secret) {
             $material['privateKey'] = $secret;

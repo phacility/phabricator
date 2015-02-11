@@ -9,6 +9,14 @@
   line-height: 20px;
 }
 
+.phui-font-source-sans.conpherence-message-pane,
+.phui-font-source-sans.conpherence-message-pane .remarkup-assist-textarea {
+  font-family: 'Source Sans Pro', 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 18px;
+}
+
 .phui-font-source-sans .phabricator-remarkup h2.remarkup-header {
   padding: 8px 24px 8px 0;
   border-bottom: 1px solid {$thinblueborder};

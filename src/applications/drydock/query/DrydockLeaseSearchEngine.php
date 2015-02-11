@@ -57,7 +57,7 @@ final class DrydockLeaseSearchEngine
     return '/drydock/lease/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     return array(
       'active' => pht('Active Leases'),
       'all' => pht('All Leases'),

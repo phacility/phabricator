@@ -11,6 +11,14 @@ final class PhabricatorDeveloperConfigOptions
     return pht('Options for Phabricator developers, including debugging.');
   }
 
+  public function getFontIcon() {
+    return 'fa-bug';
+  }
+
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('darkconsole.enabled', 'bool', false)

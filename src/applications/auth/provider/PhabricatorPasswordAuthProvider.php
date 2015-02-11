@@ -135,6 +135,29 @@ final class PhabricatorPasswordAuthProvider extends PhabricatorAuthProvider {
     return $this->renderPasswordLoginForm($request);
   }
 
+  public function buildInviteForm(
+    PhabricatorAuthStartController $controller) {
+    $request = $controller->getRequest();
+    $viewer = $request->getViewer();
+
+    $form = id(new AphrontFormView())
+      ->setUser($viewer)
+      ->addHiddenInput('invite', true)
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setLabel(pht('Username'))
+          ->setName('username'));
+
+    $dialog = id(new AphrontDialogView())
+      ->setUser($viewer)
+      ->setTitle(pht('Register an Account'))
+      ->appendForm($form)
+      ->setSubmitURI('/auth/register/')
+      ->addSubmitButton(pht('Continue'));
+
+    return $dialog;
+  }
+
   public function buildLinkForm(
     PhabricatorAuthLinkController $controller) {
     throw new Exception("Password providers can't be linked.");
@@ -194,7 +217,7 @@ final class PhabricatorPasswordAuthProvider extends PhabricatorAuthProvider {
     }
 
     if ($errors) {
-      $errors = id(new AphrontErrorView())->setErrors($errors);
+      $errors = id(new PHUIErrorView())->setErrors($errors);
     }
 
     $form = id(new PHUIFormLayoutView())

@@ -5,6 +5,8 @@ abstract class PhabricatorSSHWorkflow extends PhabricatorManagementWorkflow {
   private $user;
   private $iochannel;
   private $errorChannel;
+  private $isClusterRequest;
+  private $originalArguments;
 
   public function isExecutable() {
     return false;
@@ -61,6 +63,24 @@ abstract class PhabricatorSSHWorkflow extends PhabricatorManagementWorkflow {
   protected function newPassthruCommand() {
     return id(new PhabricatorSSHPassthruCommand())
       ->setErrorChannel($this->getErrorChannel());
+  }
+
+  public function setIsClusterRequest($is_cluster_request) {
+    $this->isClusterRequest = $is_cluster_request;
+    return $this;
+  }
+
+  public function getIsClusterRequest() {
+    return $this->isClusterRequest;
+  }
+
+  public function setOriginalArguments(array $original_arguments) {
+    $this->originalArguments = $original_arguments;
+    return $this;
+  }
+
+  public function getOriginalArguments() {
+    return $this->originalArguments;
   }
 
 }

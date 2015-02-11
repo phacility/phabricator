@@ -6,8 +6,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
   private $lintMessages;
   private $coverage;
 
-  public function processRequest() {
-    $request = $this->getRequest();
+  protected function processDiffusionRequest(AphrontRequest $request) {
     $drequest = $this->getDiffusionRequest();
     $viewer = $request->getUser();
 
@@ -119,8 +118,8 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
 
     $follow  = $request->getStr('follow');
     if ($follow) {
-      $notice = new AphrontErrorView();
-      $notice->setSeverity(AphrontErrorView::SEVERITY_WARNING);
+      $notice = new PHUIErrorView();
+      $notice->setSeverity(PHUIErrorView::SEVERITY_WARNING);
       $notice->setTitle(pht('Unable to Continue'));
       switch ($follow) {
         case 'first':
@@ -139,8 +138,8 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
 
     $renamed = $request->getStr('renamed');
     if ($renamed) {
-      $notice = new AphrontErrorView();
-      $notice->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
+      $notice = new PHUIErrorView();
+      $notice->setSeverity(PHUIErrorView::SEVERITY_NOTICE);
       $notice->setTitle(pht('File Renamed'));
       $notice->appendChild(
         pht("File history passes through a rename from '%s' to '%s'.",
@@ -167,7 +166,6 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
       ),
       array(
         'title' => $basename,
-        'device' => false,
       ));
   }
 

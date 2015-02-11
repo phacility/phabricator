@@ -31,6 +31,10 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
     return new DifferentialTransactionComment();
   }
 
+  public function getApplicationTransactionViewObject() {
+    return new DifferentialTransactionView();
+  }
+
   public function shouldHide() {
     $old = $this->getOldValue();
     $new = $this->getNewValue();
@@ -197,7 +201,7 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
         break;
       case PhabricatorTransactions::TYPE_EDGE:
         switch ($this->getMetadataValue('edge:type')) {
-          case PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER:
+          case DifferentialRevisionHasReviewerEdgeType::EDGECONST:
             $tags[] = MetaMTANotificationType::TYPE_DIFFERENTIAL_REVIEWERS;
             break;
         }
@@ -322,7 +326,7 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
     return parent::renderExtraInformationLink();
   }
 
-  public function getTitleForFeed(PhabricatorFeedStory $story) {
+  public function getTitleForFeed() {
     $author_phid = $this->getAuthorPHID();
     $object_phid = $this->getObjectPHID();
 
@@ -376,27 +380,40 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
                 $this->getMetadataValue('commitPHID'));
               $committer_phid = $this->getMetadataValue('committerPHID');
               $author_phid = $this->getMetadataValue('authorPHID');
+
               if ($this->getHandleIfExists($committer_phid)) {
                 $committer_name = $this->renderHandleLink($committer_phid);
               } else {
                 $committer_name = $this->getMetadataValue('committerName');
               }
+
               if ($this->getHandleIfExists($author_phid)) {
                 $author_name = $this->renderHandleLink($author_phid);
               } else {
                 $author_name = $this->getMetadataValue('authorName');
               }
 
-              if ($committer_name && ($committer_name != $author_name)) {
+              // Check if the committer and author are the same. They're the
+              // same if both resolved and are the same user, or if neither
+              // resolved and the text is identical.
+              if ($committer_phid && $author_phid) {
+                $same_author = ($committer_phid == $author_phid);
+              } else if (!$committer_phid && !$author_phid) {
+                $same_author = ($committer_name == $author_name);
+              } else {
+                $same_author = false;
+              }
+
+              if ($committer_name && !$same_author) {
                 return pht(
-                  '%s closed %s by commit %s (authored by %s).',
+                  '%s closed %s by committing %s (authored by %s).',
                   $author_link,
                   $object_link,
                   $commit_name,
                   $author_name);
               } else {
                 return pht(
-                  '%s closed %s by commit %s.',
+                  '%s closed %s by committing %s.',
                   $author_link,
                   $object_link,
                   $commit_name);
@@ -448,7 +465,7 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
         }
     }
 
-    return parent::getTitleForFeed($story);
+    return parent::getTitleForFeed();
   }
 
   public function getIcon() {
@@ -491,7 +508,7 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
         }
       case PhabricatorTransactions::TYPE_EDGE:
         switch ($this->getMetadataValue('edge:type')) {
-          case PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER:
+          case DifferentialRevisionHasReviewerEdgeType::EDGECONST:
             return 'fa-user';
         }
     }
@@ -537,13 +554,13 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
       case self::TYPE_ACTION:
         switch ($this->getNewValue()) {
           case DifferentialAction::ACTION_CLOSE:
-            return PhabricatorTransactions::COLOR_BLUE;
+            return PhabricatorTransactions::COLOR_INDIGO;
           case DifferentialAction::ACTION_ACCEPT:
             return PhabricatorTransactions::COLOR_GREEN;
           case DifferentialAction::ACTION_REJECT:
             return PhabricatorTransactions::COLOR_RED;
           case DifferentialAction::ACTION_ABANDON:
-            return PhabricatorTransactions::COLOR_BLACK;
+            return PhabricatorTransactions::COLOR_INDIGO;
           case DifferentialAction::ACTION_RETHINK:
             return PhabricatorTransactions::COLOR_RED;
           case DifferentialAction::ACTION_REQUEST:
@@ -567,7 +584,7 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_EDGE:
         switch ($this->getMetadataValue('edge:type')) {
-          case PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER:
+          case DifferentialRevisionHasReviewerEdgeType::EDGECONST:
             return pht(
               'The reviewers you are trying to add are already reviewing '.
               'this revision.');

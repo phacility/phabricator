@@ -12,7 +12,7 @@ final class PhabricatorFileTransactionComment
     return ($this->getTransactionPHID() != null);
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     $config = parent::getConfiguration();
     $config[self::CONFIG_KEY_SCHEMA] = array(
       'key_draft' => array(

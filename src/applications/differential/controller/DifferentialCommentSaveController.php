@@ -33,7 +33,7 @@ final class DifferentialCommentSaveController
     $type_comment = PhabricatorTransactions::TYPE_COMMENT;
     $type_inline = DifferentialTransaction::TYPE_INLINE;
 
-    $edge_reviewer = PhabricatorEdgeConfig::TYPE_DREV_HAS_REVIEWER;
+    $edge_reviewer = DifferentialRevisionHasReviewerEdgeType::EDGECONST;
 
     $xactions = array();
 
@@ -127,8 +127,9 @@ final class DifferentialCommentSaveController
         ->setCancelURI($revision_uri)
         ->setException($ex);
     } catch (PhabricatorApplicationTransactionValidationException $ex) {
-      // TODO: Provide a nice Response for rendering these in a clean way.
-      throw $ex;
+      return id(new PhabricatorApplicationTransactionValidationResponse())
+        ->setCancelURI($revision_uri)
+        ->setException($ex);
     }
 
     $user = $request->getUser();

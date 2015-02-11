@@ -11,6 +11,14 @@ final class PhabricatorOwnersConfigOptions
     return pht('Configure Owners.');
   }
 
+  public function getFontIcon() {
+    return 'fa-gift';
+  }
+
+  public function getGroup() {
+    return 'apps';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption(

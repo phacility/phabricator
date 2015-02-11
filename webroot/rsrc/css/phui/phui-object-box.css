@@ -13,16 +13,15 @@ div.phui-object-box.phui-object-box-flush {
 }
 
 .phui-object-box .phui-header-image {
-  margin: 1px 8px 0px -7px;
+  margin: 1px 8px -7px -7px;
 }
 
 .phui-object-box .phui-header-shell h1 {
-  color: {$bluetext};
   text-shadow: 0 1px #fff;
   padding: 8px 0;
 }
 
-.phui-object-box .phui-header-shell + .aphront-error-view {
+.phui-object-box .phui-header-shell + .phui-error-view {
   margin: 0;
   border-width: 0;
   border-bottom: 1px solid {$lightblueborder};

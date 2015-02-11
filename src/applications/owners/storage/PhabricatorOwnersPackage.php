@@ -9,8 +9,8 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
   protected $description;
   protected $primaryOwnerPHID;
 
-  private $unsavedOwners;
-  private $unsavedPaths;
+  private $unsavedOwners = self::ATTACHABLE;
+  private $unsavedPaths = self::ATTACHABLE;
   private $actorPHID;
   private $oldPrimaryOwnerPHID;
   private $oldAuditingEnabled;
@@ -33,7 +33,7 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
     return null;
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       // This information is better available from the history table.
       self::CONFIG_TIMESTAMPS => false,
@@ -68,9 +68,17 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
     return $this;
   }
 
+  public function getUnsavedOwners() {
+    return $this->assertAttached($this->unsavedOwners);
+  }
+
   public function attachUnsavedPaths(array $paths) {
     $this->unsavedPaths = $paths;
     return $this;
+  }
+
+  public function getUnsavedPaths() {
+    return $this->assertAttached($this->unsavedPaths);
   }
 
   public function attachActorPHID($actor_phid) {
@@ -246,183 +254,6 @@ final class PhabricatorOwnersPackage extends PhabricatorOwnersDAO
     }
 
     return $ids;
-  }
-
-  private function getActor() {
-    // TODO: This should be cleaner, but we'd likely need to move the whole
-    // thing to an Editor (T603).
-    return PhabricatorUser::getOmnipotentUser();
-  }
-
-  public function save() {
-
-    if ($this->getID()) {
-      $is_new = false;
-    } else {
-      $is_new = true;
-    }
-
-    $this->openTransaction();
-
-    $ret = parent::save();
-
-    $add_owners = array();
-    $remove_owners = array();
-    $all_owners = array();
-    if ($this->unsavedOwners) {
-      $new_owners = array_fill_keys($this->unsavedOwners, true);
-      $cur_owners = array();
-      foreach ($this->loadOwners() as $owner) {
-        if (empty($new_owners[$owner->getUserPHID()])) {
-          $remove_owners[$owner->getUserPHID()] = true;
-          $owner->delete();
-          continue;
-        }
-        $cur_owners[$owner->getUserPHID()] = true;
-      }
-
-      $add_owners = array_diff_key($new_owners, $cur_owners);
-      $all_owners = array_merge(
-        array($this->getPrimaryOwnerPHID() => true),
-        $new_owners,
-        $remove_owners);
-      foreach ($add_owners as $phid => $ignored) {
-        $owner = new PhabricatorOwnersOwner();
-        $owner->setPackageID($this->getID());
-        $owner->setUserPHID($phid);
-        $owner->save();
-      }
-      unset($this->unsavedOwners);
-    }
-
-    $add_paths = array();
-    $remove_paths = array();
-    $touched_repos = array();
-    if ($this->unsavedPaths) {
-      $new_paths = igroup($this->unsavedPaths, 'repositoryPHID', 'path');
-      $cur_paths = $this->loadPaths();
-      foreach ($cur_paths as $key => $path) {
-        $repository_phid = $path->getRepositoryPHID();
-        $new_path = head(idx(
-          idx($new_paths, $repository_phid, array()),
-          $path->getPath(),
-          array()));
-        $excluded = $path->getExcluded();
-        if (!$new_path || idx($new_path, 'excluded') != $excluded) {
-          $touched_repos[$repository_phid] = true;
-          $remove_paths[$repository_phid][$path->getPath()] = $excluded;
-          $path->delete();
-          unset($cur_paths[$key]);
-        }
-      }
-
-      $cur_paths = mgroup($cur_paths, 'getRepositoryPHID', 'getPath');
-      foreach ($new_paths as $repository_phid => $paths) {
-        // TODO: (T603) Thread policy stuff in here.
-
-        // get repository object for path validation
-        $repository = id(new PhabricatorRepository())->loadOneWhere(
-          'phid = %s',
-          $repository_phid);
-        if (!$repository) {
-          continue;
-        }
-        foreach ($paths as $path => $dicts) {
-          $path = ltrim($path, '/');
-          // build query to validate path
-          $drequest = DiffusionRequest::newFromDictionary(
-            array(
-              'user' => $this->getActor(),
-              'repository'  => $repository,
-              'path'        => $path,
-            ));
-          $results = DiffusionBrowseResultSet::newFromConduit(
-            DiffusionQuery::callConduitWithDiffusionRequest(
-              $this->getActor(),
-              $drequest,
-              'diffusion.browsequery',
-              array(
-                'commit' => $drequest->getCommit(),
-                'path' => $path,
-                'needValidityOnly' => true,
-              )));
-          $valid = $results->isValidResults();
-          $is_directory = true;
-          if (!$valid) {
-            switch ($results->getReasonForEmptyResultSet()) {
-              case DiffusionBrowseResultSet::REASON_IS_FILE:
-                $valid = true;
-                $is_directory = false;
-                break;
-              case DiffusionBrowseResultSet::REASON_IS_EMPTY:
-                $valid = true;
-                break;
-            }
-          }
-          if ($is_directory && substr($path, -1) != '/') {
-            $path .= '/';
-          }
-          if (substr($path, 0, 1) != '/') {
-            $path = '/'.$path;
-          }
-          if (empty($cur_paths[$repository_phid][$path]) && $valid) {
-            $touched_repos[$repository_phid] = true;
-            $excluded = idx(reset($dicts), 'excluded', 0);
-            $add_paths[$repository_phid][$path] = $excluded;
-            $obj = new PhabricatorOwnersPath();
-            $obj->setPackageID($this->getID());
-            $obj->setRepositoryPHID($repository_phid);
-            $obj->setPath($path);
-            $obj->setExcluded($excluded);
-            $obj->save();
-          }
-        }
-      }
-      unset($this->unsavedPaths);
-    }
-
-    $this->saveTransaction();
-
-    if ($is_new) {
-      $mail = new PackageCreateMail($this);
-    } else {
-      $mail = new PackageModifyMail(
-        $this,
-        array_keys($add_owners),
-        array_keys($remove_owners),
-        array_keys($all_owners),
-        array_keys($touched_repos),
-        $add_paths,
-        $remove_paths);
-    }
-    $mail->setActor($this->getActor());
-    $mail->send();
-
-    return $ret;
-  }
-
-  public function delete() {
-    $mails = id(new PackageDeleteMail($this))
-      ->setActor($this->getActor())
-      ->prepareMails();
-
-    $this->openTransaction();
-    foreach ($this->loadOwners() as $owner) {
-      $owner->delete();
-    }
-    foreach ($this->loadPaths() as $path) {
-      $path->delete();
-    }
-
-    $ret = parent::delete();
-
-    $this->saveTransaction();
-
-    foreach ($mails as $mail) {
-      $mail->saveAndSend();
-    }
-
-    return $ret;
   }
 
   private static function splitPath($path) {

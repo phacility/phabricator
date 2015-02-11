@@ -9,6 +9,10 @@ final class ReleephBranchSearchEngine
     return pht('Releeph Branches');
   }
 
+  public function getApplicationClassName() {
+    return 'PhabricatorReleephApplication';
+  }
+
   public function setProduct(ReleephProject $product) {
     $this->product = $product;
     return $this;
@@ -56,7 +60,7 @@ final class ReleephBranchSearchEngine
     return '/releeph/product/'.$this->getProduct()->getID().'/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array(
       'open' => pht('Open'),
       'all' => pht('All'),

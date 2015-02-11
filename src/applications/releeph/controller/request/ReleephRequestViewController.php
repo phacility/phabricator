@@ -56,15 +56,9 @@ final class ReleephRequestViewController
       ->setCustomFields($field_list)
       ->setPullRequest($pull);
 
-    $xactions = id(new ReleephRequestTransactionQuery())
-      ->setViewer($viewer)
-      ->withObjectPHIDs(array($pull->getPHID()))
-      ->execute();
-
-    $timeline = id(new PhabricatorApplicationTransactionView())
-      ->setUser($request->getUser())
-      ->setObjectPHID($pull->getPHID())
-      ->setTransactions($xactions);
+    $timeline = $this->buildTransactionTimeline(
+      $pull,
+      new ReleephRequestTransactionQuery());
 
     $add_comment_header = pht('Plea or Yield');
 

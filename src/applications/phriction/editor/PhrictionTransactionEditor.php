@@ -3,6 +3,9 @@
 final class PhrictionTransactionEditor
   extends PhabricatorApplicationTransactionEditor {
 
+  const VALIDATE_CREATE_ANCESTRY = 'create';
+  const VALIDATE_MOVE_ANCESTRY   = 'move';
+
   private $description;
   private $oldContent;
   private $newContent;
@@ -10,6 +13,7 @@ final class PhrictionTransactionEditor
   private $skipAncestorCheck;
   private $contentVersion;
   private $processContentVersionError = true;
+  private $heraldEmailPHIDs = array();
 
   public function setDescription($description) {
     $this->description = $description;
@@ -359,6 +363,16 @@ final class PhrictionTransactionEditor
     );
   }
 
+  protected function getMailCC(PhabricatorLiskDAO $object) {
+    $phids = array();
+
+    foreach ($this->heraldEmailPHIDs as $phid) {
+      $phids[] = $phid;
+    }
+
+    return $phids;
+  }
+
   public function getMailTagsMap() {
     return array(
       PhrictionTransaction::MAILTAG_TITLE =>
@@ -394,6 +408,24 @@ final class PhrictionTransactionEditor
       $body->addTextSection(
         pht('DOCUMENT CONTENT'),
         $object->getContent()->getContent());
+    } else {
+
+      foreach ($xactions as $xaction) {
+        switch ($xaction->getTransactionType()) {
+          case PhrictionTransaction::TYPE_CONTENT:
+            $diff_uri = id(new PhutilURI(
+              '/phriction/diff/'.$object->getID().'/'))
+              ->alter('l', $this->getOldContent()->getVersion())
+              ->alter('r', $this->getNewContent()->getVersion());
+            $body->addLinkSection(
+              pht('DOCUMENT DIFF'),
+              PhabricatorEnv::getProductionURI($diff_uri));
+            break 2;
+          default:
+            break;
+        }
+      }
+
     }
 
     $body->addLinkSection(
@@ -490,6 +522,18 @@ final class PhrictionTransactionEditor
               $errors[] = $error;
             }
           }
+
+          if ($this->getIsNewObject()) {
+            $ancestry_errors = $this->validateAncestry(
+              $object,
+              $type,
+              $xaction,
+              self::VALIDATE_CREATE_ANCESTRY);
+            if ($ancestry_errors) {
+              $errors = array_merge($errors, $ancestry_errors);
+            }
+          }
+
           break;
 
         case PhrictionTransaction::TYPE_MOVE_TO:
@@ -518,21 +562,39 @@ final class PhrictionTransactionEditor
             $errors[] = $error;
           }
 
-          // NOTE: We use the ominpotent user because we can't let users
-          // overwrite documents even if they can't see them.
+          $ancestry_errors = $this->validateAncestry(
+            $object,
+            $type,
+            $xaction,
+            self::VALIDATE_MOVE_ANCESTRY);
+          if ($ancestry_errors) {
+            $errors = array_merge($errors, $ancestry_errors);
+          }
+
           $target_document = id(new PhrictionDocumentQuery())
             ->setViewer(PhabricatorUser::getOmnipotentUser())
             ->withSlugs(array($object->getSlug()))
             ->needContent(true)
             ->executeOne();
 
-          // Considering to overwrite existing docs? Nuke this!
+          // Prevent overwrites and no-op moves.
           $exists = PhrictionDocumentStatus::STATUS_EXISTS;
-          if ($target_document && $target_document->getStatus() == $exists) {
+          if ($target_document) {
+            if ($target_document->getSlug() == $source_document->getSlug()) {
+              $message = pht(
+                'You can not move a document to its existing location. '.
+                'Choose a different location to move the document to.');
+            } else if ($target_document->getStatus() == $exists) {
+              $message = pht(
+                'You can not move this document there, because it would '.
+                'overwrite an existing document which is already at that '.
+                'location. Move or delete the existing document first.');
+            }
+
             $error = new PhabricatorApplicationTransactionValidationError(
               $type,
-              pht('Can not move document.'),
-              pht('Can not overwrite existing target document.'),
+              pht('Invalid'),
+              $message,
               $xaction);
             $errors[] = $error;
           }
@@ -563,6 +625,59 @@ final class PhrictionTransactionEditor
       }
     }
 
+    return $errors;
+  }
+
+  private function validateAncestry(
+    PhabricatorLiskDAO $object,
+    $type,
+    PhabricatorApplicationTransaction $xaction,
+    $verb) {
+
+    $errors = array();
+    // NOTE: We use the ominpotent user for these checks because policy
+    // doesn't matter; existence does.
+    $other_doc_viewer = PhabricatorUser::getOmnipotentUser();
+    $ancestral_slugs = PhabricatorSlug::getAncestry($object->getSlug());
+    if ($ancestral_slugs) {
+      $ancestors = id(new PhrictionDocumentQuery())
+        ->setViewer($other_doc_viewer)
+        ->withSlugs($ancestral_slugs)
+        ->execute();
+      $ancestors = mpull($ancestors, null, 'getSlug');
+      foreach ($ancestral_slugs as $slug) {
+        $ancestor_doc = idx($ancestors, $slug);
+        if (!$ancestor_doc) {
+          $create_uri = '/phriction/edit/?slug='.$slug;
+          $create_link = phutil_tag(
+            'a',
+            array(
+              'href' => $create_uri,
+            ),
+            $slug);
+          switch ($verb) {
+            case self::VALIDATE_MOVE_ANCESTRY:
+              $message = pht(
+                'Can not move document because the parent document with '.
+                'slug %s does not exist!',
+                $create_link);
+              break;
+            case self::VALIDATE_CREATE_ANCESTRY:
+              $message = pht(
+                'Can not create document because the parent document with '.
+                'slug %s does not exist!',
+                $create_link);
+              break;
+          }
+          $error = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Missing Ancestor'),
+            $message,
+            $xaction);
+          $errors[] = $error;
+        }
+      }
+    }
     return $errors;
   }
 
@@ -647,7 +762,35 @@ final class PhrictionTransactionEditor
   protected function shouldApplyHeraldRules(
     PhabricatorLiskDAO $object,
     array $xactions) {
-    return false;
+    return true;
+  }
+
+  protected function buildHeraldAdapter(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    return id(new PhrictionDocumentHeraldAdapter())
+      ->setDocument($object);
+  }
+
+  protected function didApplyHeraldRules(
+    PhabricatorLiskDAO $object,
+    HeraldAdapter $adapter,
+    HeraldTranscript $transcript) {
+
+    $xactions = array();
+
+    $cc_phids = $adapter->getCcPHIDs();
+    if ($cc_phids) {
+      $value = array_fuse($cc_phids);
+      $xactions[] = id(new PhrictionTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+        ->setNewValue(array('+' => $value));
+    }
+
+    $this->heraldEmailPHIDs = $adapter->getEmailPHIDs();
+
+    return $xactions;
   }
 
   private function buildNewContentTemplate(

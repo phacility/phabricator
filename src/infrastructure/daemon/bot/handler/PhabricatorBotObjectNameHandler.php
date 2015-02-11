@@ -131,20 +131,27 @@ final class PhabricatorBotObjectNameHandler extends PhabricatorBotHandler {
         if ($paste_ids) {
           foreach ($paste_ids as $paste_id) {
             $paste = $this->getConduit()->callMethodSynchronous(
-              'paste.info',
+              'paste.query',
               array(
-                'paste_id' => $paste_id,
+                'ids' => array($paste_id),
               ));
-            // Eventually I'd like to show the username of the paster as well,
-            // however that will need something like a user.username_from_phid
-            // since we (ideally) want to keep the bot to Conduit calls...and
-            // not call to Phabricator-specific stuff (like actually loading
-            // the User object and fetching his/her username.)
+            $paste = head($paste);
+
             $output[$paste['phid']] = 'P'.$paste['id'].': '.$paste['uri'].' - '.
               $paste['title'];
 
             if ($paste['language']) {
               $output[$paste['phid']] .= ' ('.$paste['language'].')';
+            }
+
+            $user = $this->getConduit()->callMethodSynchronous(
+              'user.query',
+              array(
+                'phids' => array($paste['authorPHID']),
+              ));
+            $user = head($user);
+            if ($user) {
+              $output[$paste['phid']] .= ' by '.$user['userName'];
             }
           }
         }

@@ -8,19 +8,8 @@ final class FileCreateMailReceiver extends PhabricatorMailReceiver {
   }
 
   public function canAcceptMail(PhabricatorMetaMTAReceivedMail $mail) {
-    $config_key = 'metamta.files.public-create-email';
-    $create_address = PhabricatorEnv::getEnvConfig($config_key);
-    if (!$create_address) {
-      return false;
-    }
-
-    foreach ($mail->getToAddresses() as $to_address) {
-      if ($this->matchAddresses($create_address, $to_address)) {
-        return true;
-      }
-    }
-
-    return false;
+    $files_app = new PhabricatorFilesApplication();
+    return $this->canAcceptApplicationMail($files_app, $mail);
   }
 
   protected function processReceivedMail(

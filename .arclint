@@ -1,7 +1,7 @@
 {
   "exclude": [
     "(^externals/)",
-    "(^webroot/rsrc/externals/)",
+    "(^webroot/rsrc/externals/(?!javelin/))",
     "(/__tests__/data/)"
   ],
   "linters": {
@@ -21,10 +21,22 @@
         "(^support/aphlict/)"
       ]
     },
-    "jshint": {
+    "jshint-browser": {
       "type": "jshint",
       "include": "(\\.js$)",
-      "jshint.jshintrc": "support/lint/jshintrc"
+      "exclude": [
+        "(^support/aphlict/server/.*\\.js$)",
+        "(^webroot/rsrc/externals/javelin/core/init_node\\.js$)"
+      ],
+      "jshint.jshintrc": "support/lint/browser.jshintrc"
+    },
+    "jshint-node": {
+      "type": "jshint",
+      "include": [
+        "(^support/aphlict/server/.*\\.js$)",
+        "(^webroot/rsrc/externals/javelin/core/init_node\\.js$)"
+      ],
+      "jshint.jshintrc": "support/lint/node.jshintrc"
     },
     "json": {
       "type": "json",
@@ -59,8 +71,8 @@
     "text": {
       "type": "text",
       "exclude": [
-        "(^\\.arclint)",
-        "(^resources/sql/quickstart.sql)"
+        "(^\\.arclint$)",
+        "(^resources/sql/quickstart.sql$)"
       ]
     },
     "text-without-length": {
@@ -69,8 +81,8 @@
         "3": "disabled"
       },
       "include": [
-        "(^\\.arclint)",
-        "(^resources/sql/quickstart.sql)"
+        "(^\\.arclint$)",
+        "(^resources/sql/quickstart.sql$)"
       ]
     },
     "xhpast": {
@@ -79,6 +91,9 @@
       "severity": {
         "16": "advice",
         "34": "error"
+      },
+      "xhpast.blacklisted.function": {
+        "eval": "The eval() function should be avoided. It is potentially unsafe and makes debugging more difficult."
       },
       "xhpast.php-version": "5.2.3",
       "xhpast.php-version.windows": "5.3.0"

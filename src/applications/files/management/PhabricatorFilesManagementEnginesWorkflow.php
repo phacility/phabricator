@@ -3,7 +3,7 @@
 final class PhabricatorFilesManagementEnginesWorkflow
   extends PhabricatorFilesManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('engines')
       ->setSynopsis('List available storage engines.')

@@ -11,6 +11,14 @@ final class PhabricatorMailgunConfigOptions
     return pht('Configure Mailgun integration.');
   }
 
+  public function getFontIcon() {
+    return 'fa-send-o';
+  }
+
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('mailgun.domain', 'string', null)

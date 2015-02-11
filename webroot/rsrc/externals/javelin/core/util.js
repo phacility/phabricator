@@ -283,7 +283,7 @@ if (!window.console || !window.console.log) {
   if (window.opera && window.opera.postError) {
     window.console = {log: function(m) { window.opera.postError(m); }};
   } else {
-    window.console = {log: function(m) { }};
+    window.console = {log: function() {}};
   }
 }
 
@@ -319,7 +319,7 @@ if (__DEV__) {
 
       if (recent_alerts.length >= 3 &&
           (recent_alerts[recent_alerts.length - 1] - recent_alerts[0]) < 5000) {
-        if (confirm(msg + "\n\nLots of alert()s recently. Kill them?")) {
+        if (window.confirm(msg + '\n\nLots of alert()s recently. Kill them?')) {
           window.alert = JX.bag;
         }
       } else {

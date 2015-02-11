@@ -6,7 +6,7 @@ final class PhabricatorFactAggregate extends PhabricatorFactDAO {
   protected $objectPHID;
   protected $valueX;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'id' => 'auto64',

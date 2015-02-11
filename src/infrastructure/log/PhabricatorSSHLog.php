@@ -2,7 +2,7 @@
 
 final class PhabricatorSSHLog extends Phobject {
 
-  static $log;
+  private static $log;
 
   public static function getLog() {
     if (!self::$log) {

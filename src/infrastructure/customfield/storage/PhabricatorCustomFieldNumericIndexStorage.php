@@ -3,7 +3,7 @@
 abstract class PhabricatorCustomFieldNumericIndexStorage
   extends PhabricatorCustomFieldIndexStorage {
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'indexKey' => 'bytes12',

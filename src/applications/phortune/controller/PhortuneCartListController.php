@@ -3,29 +3,35 @@
 final class PhortuneCartListController
   extends PhortuneController {
 
-  private $accountID;
-  private $merchantID;
-  private $queryKey;
-
   private $merchant;
   private $account;
+  private $subscription;
 
-  public function willProcessRequest(array $data) {
-    $this->merchantID = idx($data, 'merchantID');
-    $this->accountID = idx($data, 'accountID');
-    $this->queryKey = idx($data, 'queryKey');
-  }
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
-  public function processRequest() {
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+    $merchant_id = $request->getURIData('merchantID');
+    $account_id = $request->getURIData('accountID');
+    $subscription_id = $request->getURIData('subscriptionID');
 
     $engine = new PhortuneCartSearchEngine();
 
-    if ($this->merchantID) {
+    if ($subscription_id) {
+      $subscription = id(new PhortuneSubscriptionQuery())
+        ->setViewer($viewer)
+        ->withIDs(array($subscription_id))
+        ->executeOne();
+      if (!$subscription) {
+        return new Aphront404Response();
+      }
+      $this->subscription = $subscription;
+      $engine->setSubscription($subscription);
+    }
+
+    if ($merchant_id) {
       $merchant = id(new PhortuneMerchantQuery())
         ->setViewer($viewer)
-        ->withIDs(array($this->merchantID))
+        ->withIDs(array($merchant_id))
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
@@ -37,10 +43,10 @@ final class PhortuneCartListController
       }
       $this->merchant = $merchant;
       $engine->setMerchant($merchant);
-    } else if ($this->accountID) {
+    } else if ($account_id) {
       $account = id(new PhortuneAccountQuery())
         ->setViewer($viewer)
-        ->withIDs(array($this->accountID))
+        ->withIDs(array($account_id))
         ->requireCapabilities(
           array(
             PhabricatorPolicyCapability::CAN_VIEW,
@@ -57,7 +63,7 @@ final class PhortuneCartListController
     }
 
     $controller = id(new PhabricatorApplicationSearchController())
-      ->setQueryKey($this->queryKey)
+      ->setQueryKey($request->getURIData('queryKey'))
       ->setSearchEngine($engine)
       ->setNavigation($this->buildSideNavView());
 
@@ -79,29 +85,42 @@ final class PhortuneCartListController
     return $nav;
   }
 
-  public function buildApplicationCrumbs() {
+  protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
+
+    $subscription = $this->subscription;
 
     $merchant = $this->merchant;
     if ($merchant) {
       $id = $merchant->getID();
-      $crumbs->addTextCrumb(
-        $merchant->getName(),
-        $this->getApplicationURI("merchant/{$id}/"));
-      $crumbs->addTextCrumb(
-        pht('Orders'),
-        $this->getApplicationURI("merchant/orders/{$id}/"));
+      $this->addMerchantCrumb($crumbs, $merchant);
+      if (!$subscription) {
+        $crumbs->addTextCrumb(
+          pht('Orders'),
+          $this->getApplicationURI("merchant/orders/{$id}/"));
+      }
     }
 
     $account = $this->account;
     if ($account) {
       $id = $account->getID();
+      $this->addAccountCrumb($crumbs, $account);
+      if (!$subscription) {
+        $crumbs->addTextCrumb(
+          pht('Orders'),
+          $this->getApplicationURI("{$id}/order/"));
+      }
+    }
+
+    if ($subscription) {
+      if ($merchant) {
+        $subscription_uri = $subscription->getMerchantURI();
+      } else {
+        $subscription_uri = $subscription->getURI();
+      }
       $crumbs->addTextCrumb(
-        $account->getName(),
-        $this->getApplicationURI("{$id}/"));
-      $crumbs->addTextCrumb(
-        pht('Orders'),
-        $this->getApplicationURI("{$id}/order/"));
+        $subscription->getSubscriptionName(),
+        $subscription_uri);
     }
 
     return $crumbs;

@@ -46,7 +46,6 @@ final class DrydockLeaseViewController extends DrydockLeaseController {
     $log_table->appendChild($pager);
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->setActionList($actions);
     $crumbs->addTextCrumb($title, $lease_uri);
 
     $object_box = id(new PHUIObjectBoxView())

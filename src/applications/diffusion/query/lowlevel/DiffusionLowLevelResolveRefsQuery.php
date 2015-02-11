@@ -4,6 +4,11 @@
  * Resolves references (like short commit names, branch names, tag names, etc.)
  * into canonical, stable commit identifiers. This query works for all
  * repository types.
+ *
+ * This query will always resolve refs which can be resolved, but may need to
+ * perform VCS operations. A faster (but less complete) counterpart query is
+ * available in @{class:DiffusionCachedResolveRefsQuery}; that query can
+ * resolve most refs without VCS operations.
  */
 final class DiffusionLowLevelResolveRefsQuery
   extends DiffusionLowLevelQuery {
@@ -15,7 +20,7 @@ final class DiffusionLowLevelResolveRefsQuery
     return $this;
   }
 
-  public function executeQuery() {
+  protected function executeQuery() {
     if (!$this->refs) {
       return array();
     }
@@ -142,7 +147,7 @@ final class DiffusionLowLevelResolveRefsQuery
     }
 
     $results = array();
-    foreach (Futures($futures) as $ref => $future) {
+    foreach (new FutureIterator($futures) as $ref => $future) {
       try {
         list($stdout) = $future->resolvex();
       } catch (CommandException $ex) {
@@ -169,51 +174,12 @@ final class DiffusionLowLevelResolveRefsQuery
   }
 
   private function resolveSubversionRefs() {
-    $repository = $this->getRepository();
-
-    $max_commit = id(new PhabricatorRepositoryCommit())
-      ->loadOneWhere(
-        'repositoryID = %d ORDER BY epoch DESC, id DESC LIMIT 1',
-        $repository->getID());
-    if (!$max_commit) {
-      // This repository is empty or hasn't parsed yet, so none of the refs are
-      // going to resolve.
-      return array();
-    }
-
-    $max_commit_id = (int)$max_commit->getCommitIdentifier();
-
-    $results = array();
-    foreach ($this->refs as $ref) {
-      if ($ref == 'HEAD') {
-        // Resolve "HEAD" to mean "the most recent commit".
-        $results[$ref][] = array(
-          'type' => 'commit',
-          'identifier' => $max_commit_id,
-        );
-        continue;
-      }
-
-      if (!preg_match('/^\d+$/', $ref)) {
-        // This ref is non-numeric, so it doesn't resolve to anything.
-        continue;
-      }
-
-      // Resolve other commits if we can deduce their existence.
-
-      // TODO: When we import only part of a repository, we won't necessarily
-      // have all of the smaller commits. Should we fail to resolve them here
-      // for repositories with a subpath? It might let us simplify other things
-      // elsewhere.
-      if ((int)$ref <= $max_commit_id) {
-        $results[$ref][] = array(
-          'type' => 'commit',
-          'identifier' => (int)$ref,
-        );
-      }
-    }
-
-    return $results;
+    // We don't have any VCS logic for Subversion, so just use the cached
+    // query.
+    return id(new DiffusionCachedResolveRefsQuery())
+      ->setRepository($this->getRepository())
+      ->withRefs($this->refs)
+      ->execute();
   }
 
 }

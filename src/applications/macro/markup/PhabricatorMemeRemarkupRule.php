@@ -34,6 +34,10 @@ final class PhabricatorMemeRemarkupRule extends PhutilRemarkupRule {
       ->alter('uppertext', $options['above'])
       ->alter('lowertext', $options['below']);
 
+    if ($this->getEngine()->isHTMLMailMode()) {
+      $uri = PhabricatorEnv::getProductionURI($uri);
+    }
+
     if ($this->getEngine()->isTextMode()) {
       $img =
         ($options['above'] != '' ? "\"{$options['above']}\"\n" : '').

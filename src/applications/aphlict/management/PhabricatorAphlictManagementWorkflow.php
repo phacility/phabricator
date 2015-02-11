@@ -3,8 +3,53 @@
 abstract class PhabricatorAphlictManagementWorkflow
   extends PhabricatorManagementWorkflow {
 
+  private $debug = false;
+  private $clientHost;
+  private $clientPort;
+
+  protected function didConstruct() {
+    $this
+      ->setArguments(
+        array(
+          array(
+            'name'  => 'client-host',
+            'param' => 'hostname',
+            'help'  => pht('Hostname to bind to for the client server.'),
+          ),
+          array(
+            'name'  => 'client-port',
+            'param' => 'port',
+            'help'  => pht('Port to bind to for the client server.'),
+          ),
+        ));
+  }
+
+  public function execute(PhutilArgumentParser $args) {
+    $this->clientHost = $args->getArg('client-host');
+    $this->clientPort = $args->getArg('client-port');
+    return 0;
+  }
+
   final public function getPIDPath() {
     return PhabricatorEnv::getEnvConfig('notification.pidfile');
+  }
+
+  final public function getLogPath() {
+    $path = PhabricatorEnv::getEnvConfig('notification.log');
+
+    try {
+      $dir = dirname($path);
+      if (!Filesystem::pathExists($dir)) {
+        Filesystem::createDirectory($dir, 0755, true);
+      }
+    } catch (FilesystemException $ex) {
+      throw new Exception(
+        pht(
+          "Failed to create '%s'. You should manually create this directory.",
+          $dir));
+    }
+
+    return $path;
   }
 
   final public function getPID() {
@@ -25,6 +70,10 @@ abstract class PhabricatorAphlictManagementWorkflow
     Filesystem::remove($this->getPIDPath());
 
     exit(1);
+  }
+
+  protected final function setDebug($debug) {
+    $this->debug = $debug;
   }
 
   public static function requireExtensions() {
@@ -61,25 +110,35 @@ abstract class PhabricatorAphlictManagementWorkflow
           'running. Use `aphlict restart` to restart it.'));
     }
 
-    if (posix_getuid() != 0) {
+    if (posix_getuid() == 0) {
       throw new PhutilArgumentUsageException(
         pht(
-          'You must run this script as root; the Aphlict server needs to bind '.
-          'to privileged ports.'));
+          // TODO: Update this message after a while.
+          'The notification server should not be run as root. It no '.
+          'longer requires access to privileged ports.'));
     }
 
-    // This will throw if we can't find an appropriate `node`.
-    $this->getNodeBinary();
+    // Make sure we can write to the PID file.
+    if (!$this->debug) {
+      Filesystem::writeFile($this->getPIDPath(), '');
+    }
+
+    // First, start the server in configuration test mode with --test. This
+    // will let us error explicitly if there are missing modules, before we
+    // fork and lose access to the console.
+    $test_argv = $this->getServerArgv();
+    $test_argv[] = '--test=true';
+
+    execx(
+      '%s %s %Ls',
+      $this->getNodeBinary(),
+      $this->getAphlictScriptPath(),
+      $test_argv);
   }
 
-  final protected function launch($debug = false) {
-    $console = PhutilConsole::getConsole();
-
-    if ($debug) {
-      $console->writeOut(pht("Starting Aphlict server in foreground...\n"));
-    } else {
-      Filesystem::writeFile($this->getPIDPath(), getmypid());
-    }
+  private function getServerArgv() {
+    $ssl_key = PhabricatorEnv::getEnvConfig('notification.ssl-key');
+    $ssl_cert = PhabricatorEnv::getEnvConfig('notification.ssl-cert');
 
     $server_uri = PhabricatorEnv::getEnvConfig('notification.server-uri');
     $server_uri = new PhutilURI($server_uri);
@@ -87,36 +146,60 @@ abstract class PhabricatorAphlictManagementWorkflow
     $client_uri = PhabricatorEnv::getEnvConfig('notification.client-uri');
     $client_uri = new PhutilURI($client_uri);
 
-    $user = PhabricatorEnv::getEnvConfig('notification.user');
-    $log  = PhabricatorEnv::getEnvConfig('notification.log');
+    $log = $this->getLogPath();
 
     $server_argv = array();
-    $server_argv[] = csprintf('--port=%s', $client_uri->getPort());
-    $server_argv[] = csprintf('--admin=%s', $server_uri->getPort());
-    $server_argv[] = csprintf('--host=%s', $server_uri->getDomain());
+    $server_argv[] = '--client-port='.coalesce(
+      $this->clientPort,
+      $client_uri->getPort());
+    $server_argv[] = '--admin-port='.$server_uri->getPort();
+    $server_argv[] = '--admin-host='.$server_uri->getDomain();
 
-    if ($user) {
-      $server_argv[] = csprintf('--user=%s', $user);
+    if ($ssl_key) {
+      $server_argv[] = '--ssl-key='.$ssl_key;
     }
 
-    if (!$debug) {
-      $server_argv[] = csprintf('--log=%s', $log);
+    if ($ssl_cert) {
+      $server_argv[] = '--ssl-cert='.$ssl_cert;
+    }
+
+    $server_argv[] = '--log='.$log;
+
+    if ($this->clientHost) {
+      $server_argv[] = '--client-host='.$this->clientHost;
+    }
+
+    return $server_argv;
+  }
+
+  private function getAphlictScriptPath() {
+    $root = dirname(phutil_get_library_root('phabricator'));
+    return $root.'/support/aphlict/server/aphlict_server.js';
+  }
+
+  final protected function launch() {
+    $console = PhutilConsole::getConsole();
+
+    if ($this->debug) {
+      $console->writeOut(pht("Starting Aphlict server in foreground...\n"));
+    } else {
+      Filesystem::writeFile($this->getPIDPath(), getmypid());
     }
 
     $command = csprintf(
-      '%s %s %C',
+      '%s %s %Ls',
       $this->getNodeBinary(),
-      dirname(__FILE__).'/../../../../support/aphlict/server/aphlict_server.js',
-      implode(' ', $server_argv));
+      $this->getAphlictScriptPath(),
+      $this->getServerArgv());
 
-    if (!$debug) {
+    if (!$this->debug) {
       declare(ticks = 1);
       pcntl_signal(SIGINT, array($this, 'cleanup'));
       pcntl_signal(SIGTERM, array($this, 'cleanup'));
     }
     register_shutdown_function(array($this, 'cleanup'));
 
-    if ($debug) {
+    if ($this->debug) {
       $console->writeOut("Launching server:\n\n    $ ".$command."\n\n");
 
       $err = phutil_passthru('%C', $command);
@@ -158,6 +241,7 @@ abstract class PhabricatorAphlictManagementWorkflow
     // in another script using passthru().)
     fclose(STDOUT);
     fclose(STDERR);
+
 
     $this->launch();
     return 0;

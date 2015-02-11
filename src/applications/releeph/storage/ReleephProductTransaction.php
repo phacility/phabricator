@@ -70,7 +70,7 @@ final class ReleephProductTransaction
     return parent::getTitle();
   }
 
-  public function getTitleForFeed(PhabricatorFeedStory $story) {
+  public function getTitleForFeed() {
     $author_phid = $this->getAuthorPHID();
     $object_phid = $this->getObjectPHID();
 
@@ -93,7 +93,7 @@ final class ReleephProductTransaction
         break;
     }
 
-    return parent::getTitleForFeed($story);
+    return parent::getTitleForFeed();
   }
 
   public function getNoEffectDescription() {

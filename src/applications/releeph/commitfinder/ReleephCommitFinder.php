@@ -30,13 +30,16 @@ final class ReleephCommitFinder {
     $matches = array();
     if (preg_match('/^D([1-9]\d*)$/', $partial_string, $matches)) {
       $diff_id = $matches[1];
-      // TOOD: (T603) This is all slated for annihilation.
-      $diff_rev = id(new DifferentialRevision())->load($diff_id);
+      $diff_rev = id(new DifferentialRevisionQuery())
+        ->setViewer($this->getUser())
+        ->withIDs(array($diff_id))
+        ->needCommitPHIDs(true)
+        ->executeOne();
       if (!$diff_rev) {
         throw new ReleephCommitFinderException(
           "{$partial_string} does not refer to an existing diff.");
       }
-      $commit_phids = $diff_rev->loadCommitPHIDs();
+      $commit_phids = $diff_rev->getCommitPHIDs();
 
       if (!$commit_phids) {
         throw new ReleephCommitFinderException(
@@ -45,9 +48,11 @@ final class ReleephCommitFinder {
 
       $this->objectPHID = $diff_rev->getPHID();
 
-      $commits = id(new PhabricatorRepositoryCommit())->loadAllWhere(
-        'phid IN (%Ls) ORDER BY epoch ASC',
-        $commit_phids);
+      $commits = id(new DiffusionCommitQuery())
+        ->setViewer($this->getUser())
+        ->withPHIDs($commit_phids)
+        ->execute();
+      $commits = msort($commits, 'getEpoch');
       return head($commits);
     }
 
@@ -94,7 +99,7 @@ final class ReleephCommitFinder {
     // right rule in the future.
     $phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $phabricator_repository_commit->getPHID(),
-      PhabricatorEdgeConfig::TYPE_COMMIT_HAS_DREV);
+      DiffusionCommitHasRevisionEdgeType::EDGECONST);
     if ($phids) {
       $this->objectPHID = head($phids);
     }

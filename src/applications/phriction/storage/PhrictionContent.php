@@ -28,7 +28,7 @@ final class PhrictionContent extends PhrictionDAO
       $viewer);
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'version' => 'uint32',

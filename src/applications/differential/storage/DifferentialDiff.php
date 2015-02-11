@@ -33,13 +33,15 @@ final class DifferentialDiff
 
   protected $description;
 
+  protected $viewPolicy;
+
   private $unsavedChangesets = array();
   private $changesets = self::ATTACHABLE;
   private $arcanistProject = self::ATTACHABLE;
   private $revision = self::ATTACHABLE;
   private $properties = array();
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
@@ -136,9 +138,40 @@ final class DifferentialDiff
     return $ret;
   }
 
-  public static function newFromRawChanges(array $changes) {
+  public static function initializeNewDiff(PhabricatorUser $actor) {
+    $app = id(new PhabricatorApplicationQuery())
+      ->setViewer($actor)
+      ->withClasses(array('PhabricatorDifferentialApplication'))
+      ->executeOne();
+    $view_policy = $app->getPolicy(
+      DifferentialDefaultViewCapability::CAPABILITY);
+
+    $diff = id(new DifferentialDiff())
+      ->setViewPolicy($view_policy);
+
+    return $diff;
+  }
+
+  public static function newFromRawChanges(
+    PhabricatorUser $actor,
+    array $changes) {
+
     assert_instances_of($changes, 'ArcanistDiffChange');
-    $diff = new DifferentialDiff();
+
+    $diff = self::initializeNewDiff($actor);
+    return self::buildChangesetsFromRawChanges($diff, $changes);
+  }
+
+  public static function newEphemeralFromRawChanges(array $changes) {
+    assert_instances_of($changes, 'ArcanistDiffChange');
+
+    $diff = id(new DifferentialDiff())->makeEphemeral();
+    return self::buildChangesetsFromRawChanges($diff, $changes);
+  }
+
+  private static function buildChangesetsFromRawChanges(
+    DifferentialDiff $diff,
+    array $changes) {
 
     // There may not be any changes; initialize the changesets list so that
     // we don't throw later when accessing it.
@@ -160,7 +193,7 @@ final class DifferentialDiff
       $hunks = $change->getHunks();
       if ($hunks) {
         foreach ($hunks as $hunk) {
-          $dhunk = new DifferentialHunkModern();
+          $dhunk = new DifferentialModernHunk();
           $dhunk->setOldOffset($hunk->getOldOffset());
           $dhunk->setOldLen($hunk->getOldLength());
           $dhunk->setNewOffset($hunk->getNewOffset());
@@ -289,6 +322,10 @@ final class DifferentialDiff
     return $changes;
   }
 
+  public function hasRevision() {
+    return $this->revision !== self::ATTACHABLE;
+  }
+
   public function getRevision() {
     return $this->assertAttached($this->revision);
   }
@@ -318,27 +355,27 @@ final class DifferentialDiff
   }
 
   public function getPolicy($capability) {
-    if ($this->getRevision()) {
+    if ($this->hasRevision()) {
       return $this->getRevision()->getPolicy($capability);
     }
 
-    return PhabricatorPolicies::POLICY_USER;
+    return $this->viewPolicy;
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
-    if ($this->getRevision()) {
+    if ($this->hasRevision()) {
       return $this->getRevision()->hasAutomaticCapability($capability, $viewer);
     }
 
-    return false;
+    return ($this->getAuthorPHID() == $viewer->getPhid());
   }
 
   public function describeAutomaticCapability($capability) {
-    if ($this->getRevision()) {
+    if ($this->hasRevision()) {
       return pht(
         'This diff is attached to a revision, and inherits its policies.');
     }
-    return null;
+    return pht('The author of a diff can see it.');
   }
 
 
@@ -398,25 +435,22 @@ final class DifferentialDiff
 
 
   public function getApplicationTransactionEditor() {
-    if (!$this->getRevisionID()) {
-      return null;
-    }
-    return $this->getRevision()->getApplicationTransactionEditor();
+    return new DifferentialDiffEditor();
   }
 
-
   public function getApplicationTransactionObject() {
-    if (!$this->getRevisionID()) {
-      return null;
-    }
-    return $this->getRevision();
+    return $this;
   }
 
   public function getApplicationTransactionTemplate() {
-    if (!$this->getRevisionID()) {
-      return null;
-    }
-    return $this->getRevision()->getApplicationTransactionTemplate();
+    return new DifferentialDiffTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
   }
 
 

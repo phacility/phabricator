@@ -80,20 +80,30 @@ final class PhabricatorNavigationRemarkupRule extends PhutilRemarkupRule {
       $out[] = $tag;
     }
 
+    if ($this->getEngine()->isHTMLMailMode()) {
+      $arrow_attr = array(
+        'style' => 'color: #92969D;',
+      );
+      $nav_attr = array();
+    } else {
+      $arrow_attr = array(
+        'class' => 'remarkup-nav-sequence-arrow',
+      );
+      $nav_attr = array(
+        'class' => 'remarkup-nav-sequence',
+      );
+    }
+
     $joiner = phutil_tag(
       'span',
-      array(
-        'class' => 'remarkup-nav-sequence-arrow',
-      ),
+      $arrow_attr,
       " \xE2\x86\x92 ");
 
     $out = phutil_implode_html($joiner, $out);
 
     $out = phutil_tag(
       'span',
-      array(
-        'class' => 'remarkup-nav-sequence',
-      ),
+      $nav_attr,
       $out);
 
     return $this->getEngine()->storeText($out);

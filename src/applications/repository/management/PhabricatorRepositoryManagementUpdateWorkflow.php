@@ -14,7 +14,7 @@ final class PhabricatorRepositoryManagementUpdateWorkflow
     return $this->verbose;
   }
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('update')
       ->setExamples('**update** [options] __repository__')

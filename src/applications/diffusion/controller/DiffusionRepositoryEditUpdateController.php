@@ -3,8 +3,7 @@
 final class DiffusionRepositoryEditUpdateController
   extends DiffusionRepositoryEditController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
+  protected function processDiffusionRequest(AphrontRequest $request) {
     $viewer = $request->getUser();
     $drequest = $this->diffusionRequest;
     $repository = $drequest->getRepository();

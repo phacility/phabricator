@@ -7,6 +7,7 @@ abstract class PhabricatorApplicationTransactionQuery
   private $objectPHIDs;
   private $authorPHIDs;
   private $transactionTypes;
+  private $reversePaging = true;
 
   private $needComments = true;
   private $needHandles  = true;
@@ -17,8 +18,13 @@ abstract class PhabricatorApplicationTransactionQuery
     return array();
   }
 
+  public function setReversePaging($bool) {
+    $this->reversePaging = $bool;
+    return $this;
+  }
+
   protected function getReversePaging() {
-    return true;
+    return $this->reversePaging;
   }
 
   public function withPHIDs(array $phids) {

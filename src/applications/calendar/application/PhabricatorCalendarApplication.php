@@ -18,8 +18,8 @@ final class PhabricatorCalendarApplication extends PhabricatorApplication {
     return '/calendar/';
   }
 
-  public function getIconName() {
-    return 'calendar';
+  public function getFontIcon() {
+    return 'fa-calendar';
   }
 
   public function getTitleGlyph() {

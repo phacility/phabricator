@@ -201,12 +201,12 @@ abstract class PhragmentController extends PhabricatorController {
       ->addPropertyList($properties);
   }
 
-  function renderConfigurationWarningIfRequired() {
+  public function renderConfigurationWarningIfRequired() {
     $alt = PhabricatorEnv::getEnvConfig('security.alternate-file-domain');
     if ($alt === null) {
-      return id(new AphrontErrorView())
+      return id(new PHUIErrorView())
         ->setTitle(pht('security.alternate-file-domain must be configured!'))
-        ->setSeverity(AphrontErrorView::SEVERITY_ERROR)
+        ->setSeverity(PHUIErrorView::SEVERITY_ERROR)
         ->appendChild(phutil_tag('p', array(), pht(
           'Because Phragment generates files (such as ZIP archives and '.
           'patches) as they are requested, it requires that you configure '.
@@ -225,7 +225,7 @@ abstract class PhragmentController extends PhabricatorController {
    * are configured otherwise (because the Files app does not support showing
    * the info page to viewers who are not logged in).
    */
-  function isCorrectlyConfigured() {
+  public function isCorrectlyConfigured() {
     $alt = PhabricatorEnv::getEnvConfig('security.alternate-file-domain');
     return $alt !== null;
   }

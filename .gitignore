@@ -13,8 +13,9 @@
 /conf/local/local.json
 /conf/local/ENVIRONMENT
 /conf/local/VERSION
-/conf/local/HOSTKEY
-/conf/local/HOSTID
+/conf/keys/device.pub
+/conf/keys/device.key
+/conf/keys/device.id
 
 # Impact Font
 /resources/font/impact.ttf
@@ -30,3 +31,6 @@
 
 # User extensions
 /src/extensions/*
+
+# NPM local packages
+/support/aphlict/server/node_modules/

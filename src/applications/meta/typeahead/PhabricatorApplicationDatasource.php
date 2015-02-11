@@ -24,7 +24,7 @@ final class PhabricatorApplicationDatasource
         continue;
       }
       $name = $application->getName().' '.$application->getShortDescription();
-      $img = 'apps-'.$application->getIconName().'-dark-large';
+      $img = 'phui-font-fa phui-icon-view '.$application->getFontIcon();
       $results[] = id(new PhabricatorTypeaheadResult())
         ->setName($name)
         ->setURI($uri)
@@ -34,7 +34,7 @@ final class PhabricatorApplicationDatasource
         ->setDisplayType($application->getShortDescription())
         ->setImageuRI($application->getIconURI())
         ->setPriorityType('apps')
-        ->setImageSprite('phabricator-search-icon sprite-apps-large '.$img);
+        ->setImageSprite('phabricator-search-icon '.$img);
     }
 
     return $results;

@@ -2,36 +2,41 @@
  * @provides inline-comment-summary-css
  */
 
-.phabricator-inline-summary {
-  color: {$bluetext};
-  padding-top: 12px;
-  margin-top: 12px;
-  border-top: 1px solid {$thinblueborder};
-}
-
-.phabricator-remarkup + .phabricator-inline-summary {
-  padding-top: 16px;
+.transaction-comment + .phabricator-inline-summary-table {
+  margin-top: 8px;
 }
 
 .phabricator-inline-summary-table {
+  border-collapse: collapse;
+  border-style: hidden;
   width: 100%;
+  margin-top: -16px;
 }
 
 .phabricator-inline-summary-table th {
-  padding: 6px 0px;
-  color: {$lightgreytext};
+  font-weight: bold;
+  padding: 16px 1px 8px;
+  background: #fff;
+  color: #000;
+  border-bottom: 1px solid {$thinblueborder};
 }
 
 .phabricator-inline-summary-table td  {
-  padding: 0px 4px 6px;
+  padding: 4px 8px;
   white-space: nowrap;
   color: {$darkbluetext};
+  background: white;
 }
 
 .phabricator-inline-summary-table td.inline-line-number {
-  padding-left: 0px;
+  padding: 0;
   width: 100px;
   white-space: nowrap;
+  background: #F8F9FC;
+  font-family: "Menlo", "Consolas", monospace;
+  font-size: 11px;
+  color: {$bluetext};
+  border-right: 1px solid {$thinblueborder};
 }
 
 .phabricator-inline-summary-table td.inline-which-diff {
@@ -49,17 +54,15 @@
    target (by highlighting the entire cell). */
 
 .phabricator-inline-summary-table td.inline-line-number a.num {
-  padding-left: 4px;
+  padding: 4px 8px;
   display: block;
-  font-weight: bold;
-  color: {$blue};
+  color: {$bluetext};
 }
 
-.phabricator-inline-summary-table td.inline-line-number a.num:hover {
-  background: {$blue};
-  border-radius: 3px;
-  color: white;
+.phabricator-inline-summary-table td.inline-line-number:hover a.num {
+  background: rgba(150,150,150,.1);
   text-decoration: none;
+  color: {$darkbluetext};
 }
 
 .phui-timeline-core-content .phabricator-inline-summary:first-child {

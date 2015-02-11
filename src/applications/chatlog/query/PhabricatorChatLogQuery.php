@@ -33,7 +33,7 @@ final class PhabricatorChatLogQuery
     return $logs;
   }
 
-  public function willFilterPage(array $events) {
+  protected function willFilterPage(array $events) {
     $channel_ids = mpull($events, 'getChannelID', 'getChannelID');
 
     $channels = id(new PhabricatorChatLogChannelQuery())

@@ -7,7 +7,7 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
   private $serverTime;
   private $localTime;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     $parent = parent::getConfiguration();
 
     $config = array(
@@ -33,7 +33,7 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
         'leaseOwner_2' => array(
           'columns' => array('leaseOwner', 'priority', 'id'),
         ),
-      ),
+      ) + $parent[self::CONFIG_KEY_SCHEMA],
     );
 
     $config[self::CONFIG_COLUMN_SCHEMA] = array(
@@ -119,6 +119,7 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
       ->setFailureCount($this->getFailureCount())
       ->setDataID($this->getDataID())
       ->setPriority($this->getPriority())
+      ->setObjectPHID($this->getObjectPHID())
       ->setResult($result)
       ->setDuration($duration);
 
@@ -134,6 +135,7 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
     $this->checkLease();
 
     $did_succeed = false;
+    $worker = null;
     try {
       $worker = $this->getWorkerInstance();
 
@@ -181,7 +183,11 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
       $this->setFailureCount($this->getFailureCount() + 1);
       $this->setFailureTime(time());
 
-      $retry = $worker->getWaitBeforeRetry($this);
+      $retry = null;
+      if ($worker) {
+        $retry = $worker->getWaitBeforeRetry($this);
+      }
+
       $retry = coalesce(
         $retry,
         PhabricatorWorkerLeaseQuery::getDefaultWaitBeforeRetry());
@@ -197,7 +203,12 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
     if ($did_succeed) {
       foreach ($worker->getQueuedTasks() as $task) {
         list($class, $data) = $task;
-        PhabricatorWorker::scheduleTask($class, $data, $this->getPriority());
+        PhabricatorWorker::scheduleTask(
+          $class,
+          $data,
+          array(
+            'priority' => $this->getPriority(),
+          ));
       }
     }
 

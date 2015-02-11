@@ -62,12 +62,19 @@ JX.behavior('phabricator-search-typeahead', function(config) {
     var ii;
     for (ii = 0; ii < list.length; ii++) {
       var item = list[ii];
+
+      for (var jj = 0; jj < tokens.length; jj++) {
+        if (item.name.indexOf(tokens[jj]) === 0) {
+          priority_hits[item.id] = true;
+        }
+      }
+
       if (!item.priority) {
         continue;
       }
 
-      for (var jj = 0; jj < tokens.length; jj++) {
-        if (item.priority.substr(0, tokens[jj].length) == tokens[jj]) {
+      for (var hh = 0; hh < tokens.length; hh++) {
+        if (item.priority.substr(0, tokens[hh].length) == tokens[hh]) {
           priority_hits[item.id] = true;
         }
       }

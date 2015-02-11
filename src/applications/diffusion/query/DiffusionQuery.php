@@ -60,14 +60,28 @@ abstract class DiffusionQuery extends PhabricatorQuery {
       $core_params['branch'] = $drequest->getBranch();
     }
 
+    // If the method we're calling doesn't actually take some of the implicit
+    // parameters we derive from the DiffusionRequest, omit them.
+    $method_object = ConduitAPIMethod::getConduitMethod($method);
+    $method_params = $method_object->defineParamTypes();
+    foreach ($core_params as $key => $value) {
+      if (empty($method_params[$key])) {
+        unset($core_params[$key]);
+      }
+    }
+
     $params = $params + $core_params;
 
-    return id(new ConduitCall(
-      $method,
-      $params
-    ))
-    ->setUser($user)
-    ->execute();
+    $client = $repository->newConduitClient(
+      $user,
+      $drequest->getIsClusterRequest());
+    if (!$client) {
+      return id(new ConduitCall($method, $params))
+        ->setUser($user)
+        ->execute();
+    } else {
+      return $client->callMethodSynchronous($method, $params);
+    }
   }
 
   public function execute() {

@@ -33,15 +33,6 @@
   margin-left: 16px;
 }
 
-.profile-activity-view.profile-has-calendar .profile-feed {
-  margin-left: 332px;
-}
-
-.device-phone .profile-activity-view .profile-calendar {
-  float: none;
-  margin: 0 8px;
-}
-
 .device-phone .profile-activity-view .profile-feed {
   float: none;
   margin: 0 8px;
@@ -50,4 +41,14 @@
 .device-desktop .phabricator-project-layout .profile-feed,
 .device-tablet .phabricator-project-layout .profile-feed {
   padding: 16px;
+}
+
+.phabricator-project-feed {
+  padding: 4px 0 12px 12px;
+  max-width: 640px;
+}
+
+.device-phone .phabricator-project-feed {
+  padding: 0 12px;
+  width: auto;
 }

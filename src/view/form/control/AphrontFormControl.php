@@ -181,6 +181,22 @@ abstract class AphrontFormControl extends AphrontView {
       array('class' => 'aphront-form-input'),
       $this->renderInput());
 
+    $error = null;
+    if (strlen($this->getError())) {
+      $error = $this->getError();
+      if ($error === true) {
+        $error = phutil_tag(
+          'span',
+          array('class' => 'aphront-form-error aphront-form-required'),
+          pht('Required'));
+      } else {
+        $error = phutil_tag(
+          'span',
+          array('class' => 'aphront-form-error'),
+          $error);
+      }
+    }
+
     if (strlen($this->getLabel())) {
       $label = phutil_tag(
         'label',
@@ -188,27 +204,12 @@ abstract class AphrontFormControl extends AphrontView {
           'class' => 'aphront-form-label',
           'for' => $this->getID(),
         ),
-        $this->getLabel());
+        array(
+          $this->getLabel(),
+          $error,));
     } else {
       $label = null;
       $custom_class .= ' aphront-form-control-nolabel';
-    }
-
-    if (strlen($this->getError())) {
-      $error = $this->getError();
-      if ($error === true) {
-        $error = phutil_tag(
-          'div',
-          array('class' => 'aphront-form-error aphront-form-required'),
-          pht('Required'));
-      } else {
-        $error = phutil_tag(
-          'div',
-          array('class' => 'aphront-form-error'),
-          $error);
-      }
-    } else {
-      $error = null;
     }
 
     if (strlen($this->getCaption())) {
@@ -222,6 +223,7 @@ abstract class AphrontFormControl extends AphrontView {
 
     $classes = array();
     $classes[] = 'aphront-form-control';
+    $classes[] = 'grouped';
     $classes[] = $custom_class;
 
     $style = $this->controlStyle;
@@ -241,9 +243,6 @@ abstract class AphrontFormControl extends AphrontView {
         $error,
         $input,
         $caption,
-
-        // TODO: Remove this once the redesign finishes up.
-        phutil_tag('div', array('style' => 'clear: both;'), ''),
       ));
   }
 }

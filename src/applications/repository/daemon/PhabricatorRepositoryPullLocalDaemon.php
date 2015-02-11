@@ -34,7 +34,7 @@ final class PhabricatorRepositoryPullLocalDaemon
   /**
    * @task pull
    */
-  public function run() {
+  protected function run() {
     $argv = $this->getArgv();
     array_unshift($argv, __CLASS__);
     $args = new PhutilArgumentParser($argv);
@@ -344,13 +344,6 @@ final class PhabricatorRepositoryPullLocalDaemon
         $stderr);
       phlog($stderr_msg);
     }
-
-    // For now, continue respecting this deprecated setting for raising the
-    // minimum pull frequency.
-    // TODO: Remove this some day once this code has been completely stable
-    // for a while.
-    $sleep_for = (int)$repository->getDetail('pull-frequency');
-    $min_sleep = max($sleep_for, $min_sleep);
 
     $smart_wait = $repository->loadUpdateInterval($min_sleep);
 

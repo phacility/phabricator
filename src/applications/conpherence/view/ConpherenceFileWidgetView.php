@@ -3,7 +3,6 @@
 final class ConpherenceFileWidgetView extends ConpherenceWidgetView {
 
   public function render() {
-    require_celerity_resource('sprite-docs-css');
     $conpherence = $this->getConpherence();
     $widget_data = $conpherence->getWidgetData();
     $files = $widget_data['files'];
@@ -15,7 +14,7 @@ final class ConpherenceFileWidgetView extends ConpherenceWidgetView {
       $icon_view = phutil_tag(
         'div',
         array(
-          'class' => 'file-icon sprite-docs '.$icon_class,
+          'class' => 'file-icon phui-font-fa phui-icon-view '.$icon_class,
         ),
         '');
       $file_view = id(new PhabricatorFileLinkView())

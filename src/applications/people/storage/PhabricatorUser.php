@@ -82,6 +82,10 @@ final class PhabricatorUser
    * @return bool True if this is a standard, usable account.
    */
   public function isUserActivated() {
+    if ($this->isOmnipotent()) {
+      return true;
+    }
+
     if ($this->getIsDisabled()) {
       return false;
     }
@@ -111,7 +115,7 @@ final class PhabricatorUser
     return $this->getPHID() && (phid_get_type($this->getPHID()) == $type_user);
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
@@ -679,27 +683,6 @@ EOBODY;
     return $this->assertAttached($this->profileImage);
   }
 
-  public function loadProfileImageURI() {
-    if ($this->profileImage && ($this->profileImage !== self::ATTACHABLE)) {
-      return $this->profileImage;
-    }
-
-    $src_phid = $this->getProfileImagePHID();
-
-    if ($src_phid) {
-      // TODO: (T603) Can we get rid of this entirely and move it to
-      // PeopleQuery with attach/attachable?
-      $file = id(new PhabricatorFile())->loadOneWhere('phid = %s', $src_phid);
-      if ($file) {
-        $this->profileImage = $file->getBestURI();
-        return $this->profileImage;
-      }
-    }
-
-    $this->profileImage = self::getDefaultProfileImageURI();
-    return $this->profileImage;
-  }
-
   public function getFullName() {
     if (strlen($this->getRealName())) {
       return $this->getUsername().' ('.$this->getRealName().')';
@@ -941,6 +924,10 @@ EOBODY;
       // Otherwise, take them to the administrative panel for this user.
       return '/settings/'.$this->getID().'/panel/ssh/';
     }
+  }
+
+  public function getSSHKeyDefaultName() {
+    return 'id_rsa_phabricator';
   }
 
 }

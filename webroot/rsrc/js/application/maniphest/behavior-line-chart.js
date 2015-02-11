@@ -49,7 +49,7 @@ JX.behavior('line-chart', function(config) {
       text[k].attr({text: ''});
     } else {
       var cur = text[k].attr('text');
-      str = format(cur, config.xformat);
+      var str = format(cur, config.xformat);
       text[k].attr({text: str});
     }
   }

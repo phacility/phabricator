@@ -6,7 +6,7 @@ final class PhabricatorFileUploadController extends PhabricatorFileController {
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
-    $file = new PhabricatorFile();
+    $file = PhabricatorFile::initializeNewFile();
 
     $e_file = true;
     $errors = array();

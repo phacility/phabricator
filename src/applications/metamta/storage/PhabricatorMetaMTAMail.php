@@ -27,7 +27,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     parent::__construct();
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_SERIALIZATION => array(
         'parameters'  => self::SERIALIZATION_JSON,
@@ -342,7 +342,9 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       $mailer_task = PhabricatorWorker::scheduleTask(
         'PhabricatorMetaMTAWorker',
         $this->getID(),
-        PhabricatorWorker::PRIORITY_ALERTS);
+        array(
+          'priority' => PhabricatorWorker::PRIORITY_ALERTS,
+        ));
 
     $this->saveTransaction();
 

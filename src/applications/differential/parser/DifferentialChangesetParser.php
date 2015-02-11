@@ -43,6 +43,15 @@ final class DifferentialChangesetParser {
   private $renderer;
   private $characterEncoding;
   private $highlightAs;
+  private $showEditAndReplyLinks = true;
+
+  public function setShowEditAndReplyLinks($bool) {
+    $this->showEditAndReplyLinks = $bool;
+    return $this;
+  }
+  public function getShowEditAndReplyLinks() {
+    return $this->showEditAndReplyLinks;
+  }
 
   public function setHighlightAs($highlight_as) {
     $this->highlightAs = $highlight_as;
@@ -62,7 +71,7 @@ final class DifferentialChangesetParser {
     return $this->characterEncoding;
   }
 
-  public function setRenderer($renderer) {
+  public function setRenderer(DifferentialChangesetRenderer $renderer) {
     $this->renderer = $renderer;
     return $this;
   }
@@ -90,16 +99,14 @@ final class DifferentialChangesetParser {
   const ATTR_DELETED    = 'attr:deleted';
   const ATTR_UNCHANGED  = 'attr:unchanged';
   const ATTR_WHITELINES = 'attr:white';
+  const ATTR_MOVEAWAY   = 'attr:moveaway';
 
   const LINES_CONTEXT = 8;
 
   const WHITESPACE_SHOW_ALL         = 'show-all';
   const WHITESPACE_IGNORE_TRAILING  = 'ignore-trailing';
-
-  // TODO: This is now "Ignore Most" in the UI.
+  const WHITESPACE_IGNORE_MOST      = 'ignore-most';
   const WHITESPACE_IGNORE_ALL       = 'ignore-all';
-
-  const WHITESPACE_IGNORE_FORCE     = 'ignore-force';
 
   public function setOldLines(array $lines) {
     $this->old = $lines;
@@ -249,6 +256,10 @@ final class DifferentialChangesetParser {
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
     return $this;
+  }
+
+  public function getUser() {
+    return $this->user;
   }
 
   public function setCoverage($coverage) {
@@ -438,6 +449,10 @@ final class DifferentialChangesetParser {
     return idx($this->specialAttributes, self::ATTR_WHITELINES, false);
   }
 
+  public function isMoveAway() {
+    return idx($this->specialAttributes, self::ATTR_MOVEAWAY, false);
+  }
+
   private function applyIntraline(&$render, $intra, $corpus) {
 
     foreach ($render as $key => $text) {
@@ -478,14 +493,14 @@ final class DifferentialChangesetParser {
     switch ($whitespace_mode) {
       case self::WHITESPACE_SHOW_ALL:
       case self::WHITESPACE_IGNORE_TRAILING:
-      case self::WHITESPACE_IGNORE_FORCE:
+      case self::WHITESPACE_IGNORE_ALL:
         break;
       default:
-        $whitespace_mode = self::WHITESPACE_IGNORE_ALL;
+        $whitespace_mode = self::WHITESPACE_IGNORE_MOST;
         break;
     }
 
-    $skip_cache = ($whitespace_mode != self::WHITESPACE_IGNORE_ALL);
+    $skip_cache = ($whitespace_mode != self::WHITESPACE_IGNORE_MOST);
     if ($this->disableCache) {
       $skip_cache = true;
     }
@@ -521,10 +536,10 @@ final class DifferentialChangesetParser {
     $whitespace_mode = $this->whitespaceMode;
     $changeset = $this->changeset;
 
-    $ignore_all = (($whitespace_mode == self::WHITESPACE_IGNORE_ALL) ||
-                  ($whitespace_mode == self::WHITESPACE_IGNORE_FORCE));
+    $ignore_all = (($whitespace_mode == self::WHITESPACE_IGNORE_MOST) ||
+                  ($whitespace_mode == self::WHITESPACE_IGNORE_ALL));
 
-    $force_ignore = ($whitespace_mode == self::WHITESPACE_IGNORE_FORCE);
+    $force_ignore = ($whitespace_mode == self::WHITESPACE_IGNORE_ALL);
 
     if (!$force_ignore) {
       if ($ignore_all && $changeset->getWhitespaceMatters()) {
@@ -594,6 +609,7 @@ final class DifferentialChangesetParser {
       }
     }
 
+    $moveaway = false;
     $changetype = $this->changeset->getChangeType();
     if ($changetype == DifferentialChangeType::TYPE_MOVE_AWAY) {
       // sometimes we show moved files as unchanged, sometimes deleted,
@@ -601,12 +617,14 @@ final class DifferentialChangesetParser {
       // destination of the move. Rather than make a false claim,
       // omit the 'not changed' notice if this is the source of a move
       $unchanged = false;
+      $moveaway = true;
     }
 
     $this->setSpecialAttributes(array(
       self::ATTR_UNCHANGED  => $unchanged,
       self::ATTR_DELETED    => $hunk_parser->getIsDeleted(),
       self::ATTR_WHITELINES => !$hunk_parser->getHasTextChanges(),
+      self::ATTR_MOVEAWAY   => $moveaway,
     ));
 
     $hunk_parser->generateIntraLineDiffs();
@@ -645,7 +663,7 @@ final class DifferentialChangesetParser {
     );
 
     $this->highlightErrors = false;
-    foreach (Futures($futures) as $key => $future) {
+    foreach (new FutureIterator($futures) as $key => $future) {
       try {
         try {
           $highlighted = $future->resolve();
@@ -731,6 +749,7 @@ final class DifferentialChangesetParser {
       count($this->new));
 
     $renderer = $this->getRenderer()
+      ->setUser($this->getUser())
       ->setChangeset($this->changeset)
       ->setRenderPropertyChangeHeader($render_pch)
       ->setIsTopLevel($this->isTopLevel)
@@ -747,11 +766,8 @@ final class DifferentialChangesetParser {
       ->setHandles($this->handles)
       ->setOldLines($this->old)
       ->setNewLines($this->new)
-      ->setOriginalCharacterEncoding($encoding);
-
-    if ($this->user) {
-      $renderer->setUser($this->user);
-    }
+      ->setOriginalCharacterEncoding($encoding)
+      ->setShowEditAndReplyLinks($this->getShowEditAndReplyLinks());
 
     $shield = null;
     if ($this->isTopLevel && !$this->comments) {
@@ -775,6 +791,8 @@ final class DifferentialChangesetParser {
         $shield = $renderer->renderShield(
           pht('The contents of this file were not changed.'),
           $type);
+      } else if ($this->isMoveAway()) {
+        $shield = null;
       } else if ($this->isWhitespaceOnly()) {
         $shield = $renderer->renderShield(
           pht('This file was changed only by adding or removing whitespace.'),
@@ -895,10 +913,10 @@ final class DifferentialChangesetParser {
             $file_phids[] = $new_phid;
           }
 
-          // TODO: (T603) Probably fine to use omnipotent viewer here?
-          $files = id(new PhabricatorFile())->loadAllWhere(
-            'phid IN (%Ls)',
-            $file_phids);
+          $files = id(new PhabricatorFileQuery())
+            ->setViewer($this->getUser())
+            ->withPHIDs($file_phids)
+            ->execute();
           foreach ($files as $file) {
             if (empty($file)) {
               continue;

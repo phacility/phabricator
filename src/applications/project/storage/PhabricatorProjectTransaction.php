@@ -42,6 +42,52 @@ final class PhabricatorProjectTransaction
     return array_merge($req_phids, parent::getRequiredHandlePHIDs());
   }
 
+  public function getColor() {
+
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    switch ($this->getTransactionType()) {
+      case PhabricatorProjectTransaction::TYPE_STATUS:
+        if ($old == 0) {
+          return 'red';
+        } else {
+          return 'green';
+        }
+      }
+    return parent::getColor();
+  }
+
+  public function getIcon() {
+
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    switch ($this->getTransactionType()) {
+      case PhabricatorProjectTransaction::TYPE_STATUS:
+        if ($old == 0) {
+          return 'fa-ban';
+        } else {
+          return 'fa-check';
+        }
+      case PhabricatorProjectTransaction::TYPE_LOCKED:
+        if ($new) {
+          return 'fa-lock';
+        } else {
+          return 'fa-unlock';
+        }
+      case PhabricatorProjectTransaction::TYPE_ICON:
+        return $new;
+      case PhabricatorProjectTransaction::TYPE_IMAGE:
+        return 'fa-photo';
+      case PhabricatorProjectTransaction::TYPE_MEMBERS:
+        return 'fa-user';
+      case PhabricatorProjectTransaction::TYPE_SLUGS:
+        return 'fa-tag';
+    }
+    return parent::getIcon();
+  }
+
   public function getTitle() {
     $old = $this->getOldValue();
     $new = $this->getNewValue();
@@ -63,11 +109,11 @@ final class PhabricatorProjectTransaction
       case PhabricatorProjectTransaction::TYPE_STATUS:
         if ($old == 0) {
           return pht(
-            '%s closed this project.',
+            '%s archived this project.',
             $author_handle);
         } else {
           return pht(
-            '%s reopened this project.',
+            '%s activated this project.',
             $author_handle);
         }
       case PhabricatorProjectTransaction::TYPE_IMAGE:
@@ -118,7 +164,7 @@ final class PhabricatorProjectTransaction
 
         if ($add && $rem) {
           return pht(
-            '%s changed project hashtag(s), added %d: %s; removed %d: %s',
+            '%s changed project hashtag(s), added %d: %s; removed %d: %s.',
             $author_handle,
             count($add),
             $this->renderSlugList($add),
@@ -126,13 +172,13 @@ final class PhabricatorProjectTransaction
             $this->renderSlugList($rem));
         } else if ($add) {
           return pht(
-            '%s added %d project hashtag(s): %s',
+            '%s added %d project hashtag(s): %s.',
             $author_handle,
             count($add),
             $this->renderSlugList($add));
         } else if ($rem) {
             return pht(
-              '%s removed %d project hashtag(s): %s',
+              '%s removed %d project hashtag(s): %s.',
               $author_handle,
               count($rem),
               $this->renderSlugList($rem));
@@ -144,7 +190,7 @@ final class PhabricatorProjectTransaction
 
         if ($add && $rem) {
           return pht(
-            '%s changed project member(s), added %d: %s; removed %d: %s',
+            '%s changed project member(s), added %d: %s; removed %d: %s.',
             $author_handle,
             count($add),
             $this->renderHandleList($add),
@@ -157,7 +203,7 @@ final class PhabricatorProjectTransaction
               $author_handle);
           } else {
             return pht(
-              '%s added %d project member(s): %s',
+              '%s added %d project member(s): %s.',
               $author_handle,
               count($add),
               $this->renderHandleList($add));
@@ -169,7 +215,7 @@ final class PhabricatorProjectTransaction
               $author_handle);
           } else {
             return pht(
-              '%s removed %d project member(s): %s',
+              '%s removed %d project member(s): %s.',
               $author_handle,
               count($rem),
               $this->renderHandleList($rem));

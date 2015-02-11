@@ -90,7 +90,7 @@ final class PhabricatorRepositoryPushLogSearchEngine
     return '/diffusion/pushlog/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     return array(
       'all' => pht('All Push Logs'),
     );

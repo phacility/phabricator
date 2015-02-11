@@ -5,6 +5,7 @@ final class PhabricatorRepositoryCommit
   implements
     PhabricatorPolicyInterface,
     PhabricatorFlaggableInterface,
+    PhabricatorProjectInterface,
     PhabricatorTokenReceiverInterface,
     PhabricatorSubscribableInterface,
     PhabricatorMentionableInterface,
@@ -66,7 +67,7 @@ final class PhabricatorRepositoryCommit
     return $this;
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID   => true,
       self::CONFIG_TIMESTAMPS => false,
@@ -255,8 +256,6 @@ final class PhabricatorRepositoryCommit
       case PhabricatorPolicyCapability::CAN_VIEW:
         return $this->getRepository()->getPolicy($capability);
       case PhabricatorPolicyCapability::CAN_EDIT:
-        // TODO: (T603) Who should be able to edit a commit? For now, retain
-        // the existing policy.
         return PhabricatorPolicies::POLICY_USER;
     }
   }
@@ -399,6 +398,33 @@ final class PhabricatorRepositoryCommit
 
   public function getApplicationTransactionTemplate() {
     return new PhabricatorAuditTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    $xactions = $timeline->getTransactions();
+
+    $path_ids = array();
+    foreach ($xactions as $xaction) {
+      if ($xaction->hasComment()) {
+        $path_id = $xaction->getComment()->getPathID();
+        if ($path_id) {
+          $path_ids[] = $path_id;
+        }
+      }
+    }
+
+    $path_map = array();
+    if ($path_ids) {
+      $path_map = id(new DiffusionPathQuery())
+        ->withPathIDs($path_ids)
+        ->execute();
+      $path_map = ipull($path_map, 'path', 'id');
+    }
+
+    return $timeline->setPathMap($path_map);
   }
 
 }

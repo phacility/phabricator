@@ -11,6 +11,14 @@ final class PhabricatorPHPMailerConfigOptions
     return pht('Configure PHPMailer.');
   }
 
+  public function getFontIcon() {
+    return 'fa-send-o';
+  }
+
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('phpmailer.mailer', 'string', 'smtp')

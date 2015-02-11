@@ -34,12 +34,15 @@ final class PhabricatorDaemonEventListener extends PhabricatorEventListener {
 
   private function handleLaunchEvent(PhutilEvent $event) {
     $id = $event->getValue('id');
+    $current_user = posix_getpwuid(posix_geteuid());
 
     $daemon = id(new PhabricatorDaemonLog())
       ->setDaemon($event->getValue('daemonClass'))
       ->setHost(php_uname('n'))
       ->setPID(getmypid())
+      ->setRunningAsUser($current_user['name'])
       ->setEnvHash(PhabricatorEnv::calculateEnvironmentHash())
+      ->setEnvInfo(PhabricatorEnv::calculateEnvironmentInfo())
       ->setStatus(PhabricatorDaemonLog::STATUS_RUNNING)
       ->setArgv($event->getValue('argv'))
       ->setExplicitArgv($event->getValue('explicitArgv'))

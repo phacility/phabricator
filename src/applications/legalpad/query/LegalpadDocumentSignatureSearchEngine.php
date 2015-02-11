@@ -123,7 +123,7 @@ final class LegalpadDocumentSignatureSearchEngine
     }
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array(
       'all' => pht('All Signatures'),
     );
@@ -293,8 +293,8 @@ final class LegalpadDocumentSignatureSearchEngine
       ->appendChild($table);
 
     if (!$this->document) {
-      $policy_notice = id(new AphrontErrorView())
-        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+      $policy_notice = id(new PHUIErrorView())
+        ->setSeverity(PHUIErrorView::SEVERITY_NOTICE)
         ->setErrors(
           array(
             pht(

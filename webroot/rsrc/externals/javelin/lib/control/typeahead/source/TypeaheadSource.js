@@ -147,7 +147,7 @@ JX.install('TypeaheadSource', {
       this._startListener.remove();
     },
 
-    didChange : function(value) {
+    didChange : function() {
       return;
     },
 
@@ -187,8 +187,8 @@ JX.install('TypeaheadSource', {
         for (var k in {name : 1, id : 1, display : 1, uri : 1}) {
           if (!(k in obj)) {
             throw new Error(
-              "JX.TypeaheadSource.addResult(): " +
-              "result must have properties 'name', 'id', 'uri' and 'display'.");
+              'JX.TypeaheadSource.addResult(): result must have ' +
+              'properties \'name\', \'id\', \'uri\' and \'display\'.');
           }
         }
       }

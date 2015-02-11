@@ -3,7 +3,7 @@
 final class PhabricatorInternationalizationManagementExtractWorkflow
   extends PhabricatorInternationalizationManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('extract')
       ->setSynopsis(pht('Extract translatable strings.'))
@@ -31,7 +31,7 @@ final class PhabricatorInternationalizationManagementExtractWorkflow
       foreach ($path_files as $file) {
         $full_path = $root.DIRECTORY_SEPARATOR.$file;
         $data = Filesystem::readFile($full_path);
-        $futures[$full_path] = xhpast_get_parser_future($data);
+        $futures[$full_path] = PhutilXHPASTBinary::getParserFuture($data);
       }
     }
 
@@ -43,7 +43,10 @@ final class PhabricatorInternationalizationManagementExtractWorkflow
 
     $bar = id(new PhutilConsoleProgressBar())
       ->setTotal(count($futures));
-    foreach (Futures($futures)->limit(8) as $full_path => $future) {
+
+    $futures = id(new FutureIterator($futures))
+      ->limit(8);
+    foreach ($futures as $full_path => $future) {
       $bar->update(1);
 
       $tree = XHPASTTree::newFromDataAndResolvedExecFuture(

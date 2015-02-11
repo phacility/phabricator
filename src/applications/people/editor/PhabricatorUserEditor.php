@@ -23,14 +23,25 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
    */
   public function createNewUser(
     PhabricatorUser $user,
-    PhabricatorUserEmail $email) {
+    PhabricatorUserEmail $email,
+    $allow_reassign = false) {
 
     if ($user->getID()) {
       throw new Exception('User has already been created!');
     }
 
+    $is_reassign = false;
     if ($email->getID()) {
-      throw new Exception('Email has already been created!');
+      if ($allow_reassign) {
+        if ($email->getIsPrimary()) {
+          throw new Exception(
+            pht(
+              'Primary email addresses can not be reassigned.'));
+        }
+        $is_reassign = true;
+      } else {
+        throw new Exception('Email has already been created!');
+      }
     }
 
     if (!PhabricatorUser::validateUsername($user->getUsername())) {
@@ -70,6 +81,15 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
         PhabricatorUserLog::ACTION_CREATE);
       $log->setNewValue($email->getAddress());
       $log->save();
+
+      if ($is_reassign) {
+        $log = PhabricatorUserLog::initializeNewLog(
+          $this->requireActor(),
+          $user->getPHID(),
+          PhabricatorUserLog::ACTION_EMAIL_REASSIGN);
+        $log->setNewValue($email->getAddress());
+        $log->save();
+      }
 
     $user->saveTransaction();
 
@@ -554,7 +574,58 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
 
       $user->endWriteLocking();
     $user->saveTransaction();
+  }
 
+
+  /**
+   * Reassign an unverified email address.
+   */
+  public function reassignEmail(
+    PhabricatorUser $user,
+    PhabricatorUserEmail $email) {
+    $actor = $this->requireActor();
+
+    if (!$user->getID()) {
+      throw new Exception(pht('User has not been created yet!'));
+    }
+
+    if (!$email->getID()) {
+      throw new Exception(pht('Email has not been created yet!'));
+    }
+
+    $user->openTransaction();
+      $user->beginWriteLocking();
+
+        $user->reload();
+        $email->reload();
+
+        $old_user = $email->getUserPHID();
+
+        if ($old_user != $user->getPHID()) {
+          if ($email->getIsVerified()) {
+            throw new Exception(
+              pht(
+                'Verified email addresses can not be reassigned.'));
+          }
+          if ($email->getIsPrimary()) {
+            throw new Exception(
+              pht(
+                'Primary email addresses can not be reassigned.'));
+          }
+
+          $email->setUserPHID($user->getPHID());
+          $email->save();
+
+          $log = PhabricatorUserLog::initializeNewLog(
+            $actor,
+            $user->getPHID(),
+            PhabricatorUserLog::ACTION_EMAIL_REASSIGN);
+          $log->setNewValue($email->getAddress());
+          $log->save();
+        }
+
+      $user->endWriteLocking();
+    $user->saveTransaction();
   }
 
 
@@ -577,6 +648,14 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
 
     if (!PhabricatorUserEmail::isAllowedAddress($email->getAddress())) {
       throw new Exception(PhabricatorUserEmail::describeAllowedAddresses());
+    }
+
+    $application_email = id(new PhabricatorMetaMTAApplicationEmailQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withAddresses(array($email->getAddress()))
+      ->executeOne();
+    if ($application_email) {
+      throw new Exception($application_email->getInUseMessage());
     }
   }
 

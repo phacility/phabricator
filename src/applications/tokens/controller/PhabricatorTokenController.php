@@ -2,7 +2,6 @@
 
 abstract class PhabricatorTokenController extends PhabricatorController {
 
-
   protected function buildSideNav() {
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
@@ -18,7 +17,7 @@ abstract class PhabricatorTokenController extends PhabricatorController {
     return $this->buildSideNav()->getMenu();
   }
 
-  public function buildApplicationCrumbs() {
+  protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
     return $crumbs;
   }

@@ -215,8 +215,8 @@ final class PhabricatorOAuthServer {
 
   /**
    * If there's a URI specified in an OAuth request, it must be validated in
-   * its own right. Further, it must have the same domain and (at least) the
-   * same query parameters as the primary URI.
+   * its own right. Further, it must have the same domain, the same path, the
+   * same port, and (at least) the same query parameters as the primary URI.
    */
   public function validateSecondaryRedirectURI(
     PhutilURI $secondary_uri,
@@ -229,6 +229,16 @@ final class PhabricatorOAuthServer {
 
     // Both URIs must point at the same domain.
     if ($secondary_uri->getDomain() != $primary_uri->getDomain()) {
+      return false;
+    }
+
+    // Both URIs must have the same path
+    if ($secondary_uri->getPath() != $primary_uri->getPath()) {
+      return false;
+    }
+
+    // Both URIs must have the same port
+    if ($secondary_uri->getPort() != $primary_uri->getPort()) {
       return false;
     }
 

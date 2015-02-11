@@ -48,7 +48,7 @@ final class LegalpadDocument extends LegalpadDAO
       ->setEditPolicy($edit_policy);
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
@@ -211,6 +211,13 @@ final class LegalpadDocument extends LegalpadDAO
 
   public function getApplicationTransactionTemplate() {
     return new LegalpadTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
   }
 
 

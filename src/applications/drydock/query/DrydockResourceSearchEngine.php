@@ -56,7 +56,7 @@ final class DrydockResourceSearchEngine
     return '/drydock/resource/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     return array(
       'active' => pht('Active Resources'),
       'all' => pht('All Resources'),

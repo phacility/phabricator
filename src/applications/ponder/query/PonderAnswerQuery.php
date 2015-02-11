@@ -65,7 +65,7 @@ final class PonderAnswerQuery
     return $this->formatWhereClause($where);
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $answer = new PonderAnswer();
     $conn_r = $answer->establishConnection('r');
 
@@ -80,7 +80,7 @@ final class PonderAnswerQuery
     return $answer->loadAllFromArray($data);
   }
 
-  public function willFilterPage(array $answers) {
+  protected function willFilterPage(array $answers) {
     $questions = id(new PonderQuestionQuery())
       ->setViewer($this->getViewer())
       ->withIDs(mpull($answers, 'getQuestionID'))
@@ -98,7 +98,7 @@ final class PonderAnswerQuery
     if ($this->needViewerVotes) {
       $viewer_phid = $this->getViewer()->getPHID();
 
-      $etype = PhabricatorEdgeConfig::TYPE_ANSWER_HAS_VOTING_USER;
+      $etype = PonderAnswerHasVotingUserEdgeType::EDGECONST;
       $edges = id(new PhabricatorEdgeQuery())
         ->withSourcePHIDs(mpull($answers, 'getPHID'))
         ->withDestinationPHIDs(array($viewer_phid))

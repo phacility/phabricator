@@ -37,7 +37,8 @@ final class DiffusionFindSymbolsConduitAPIMethod
     $language = $request->getValue('language');
     $type = $request->getValue('type');
 
-    $query = new DiffusionSymbolQuery();
+    $query = id(new DiffusionSymbolQuery())
+      ->setViewer($request->getUser());
     if ($name !== null) {
       $query->setName($name);
     }

@@ -68,7 +68,7 @@ final class PhabricatorCountdownSearchEngine
     return '/countdown/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array(
       'upcoming' => pht('Upcoming'),
       'all' => pht('All'),

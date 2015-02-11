@@ -32,7 +32,6 @@ final class PhortuneProductViewController extends PhortuneController {
       ->setObjectURI($request->getRequestURI());
 
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->setActionList($actions);
     $crumbs->addTextCrumb(
       pht('Products'),
       $this->getApplicationURI('product/'));

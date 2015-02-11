@@ -18,6 +18,10 @@ final class PhortuneChargeSearchEngine
     return pht('Phortune Charges');
   }
 
+  public function getApplicationClassName() {
+    return 'PhabricatorPhortuneApplication';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 
@@ -69,7 +73,7 @@ final class PhortuneChargeSearchEngine
     }
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array(
       'all' => pht('All Charges'),
     );

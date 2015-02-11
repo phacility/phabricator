@@ -11,6 +11,14 @@ final class PhabricatorSearchConfigOptions
     return pht('Options relating to Search.');
   }
 
+  public function getFontIcon() {
+    return 'fa-search';
+  }
+
+  public function getGroup() {
+    return 'apps';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption(

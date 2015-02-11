@@ -11,7 +11,6 @@ final class PhabricatorPHIDConstants {
 
   const PHID_TYPE_XCMT    = 'XCMT';
 
-  const PHID_TYPE_AUTH    = 'AUTH';
   const PHID_TYPE_XOBJ    = 'XOBJ';
 
   const PHID_TYPE_VOID    = 'VOID';

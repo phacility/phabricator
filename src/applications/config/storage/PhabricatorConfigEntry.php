@@ -1,14 +1,17 @@
 <?php
 
-final class PhabricatorConfigEntry extends PhabricatorConfigEntryDAO
-  implements PhabricatorPolicyInterface {
+final class PhabricatorConfigEntry
+  extends PhabricatorConfigEntryDAO
+  implements
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorPolicyInterface {
 
   protected $namespace;
   protected $configKey;
   protected $value;
   protected $isDeleted;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
@@ -43,10 +46,34 @@ final class PhabricatorConfigEntry extends PhabricatorConfigEntryDAO
     if (!$config_entry) {
       $config_entry = id(new PhabricatorConfigEntry())
         ->setConfigKey($key)
-        ->setNamespace('default');
+        ->setNamespace('default')
+        ->setIsDeleted(0);
     }
 
     return $config_entry;
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhabricatorConfigEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhabricatorConfigTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
   }
 
 

@@ -60,7 +60,7 @@ final class ConduitConnectConduitAPIMethod extends ConduitAPIMethod {
     $client_version = (int)$request->getValue('clientVersion');
     $client_description = (string)$request->getValue('clientDescription');
     $client_description = id(new PhutilUTF8StringTruncator())
-      ->setMaximumCodepoints(255)
+      ->setMaximumBytes(255)
       ->truncateString($client_description);
     $username = (string)$request->getValue('user');
 

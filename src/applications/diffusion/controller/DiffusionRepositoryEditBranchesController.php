@@ -3,7 +3,7 @@
 final class DiffusionRepositoryEditBranchesController
   extends DiffusionRepositoryEditController {
 
-  public function processRequest() {
+  protected function processDiffusionRequest(AphrontRequest $request) {
     $request = $this->getRequest();
     $viewer = $request->getUser();
     $drequest = $this->diffusionRequest;

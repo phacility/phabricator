@@ -27,6 +27,7 @@ final class PhabricatorDashboardHistoryController
     $title = $dashboard->getName();
 
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setBorder(true);
     $crumbs->addTextCrumb(
       pht('Dashboard %d', $dashboard->getID()),
       $dashboard_view_uri);
@@ -35,7 +36,10 @@ final class PhabricatorDashboardHistoryController
       $dashboard_manage_uri);
     $crumbs->addTextCrumb(pht('History'));
 
-    $timeline = $this->buildTransactions($dashboard);
+    $timeline = $this->buildTransactionTimeline(
+      $dashboard,
+      new PhabricatorDashboardTransactionQuery());
+    $timeline->setShouldTerminate(true);
 
     return $this->buildApplicationPage(
       array(
@@ -45,23 +49,6 @@ final class PhabricatorDashboardHistoryController
       array(
         'title' => $title,
       ));
-  }
-
-  private function buildTransactions(PhabricatorDashboard $dashboard) {
-    $viewer = $this->getRequest()->getUser();
-
-    $xactions = id(new PhabricatorDashboardTransactionQuery())
-      ->setViewer($viewer)
-      ->withObjectPHIDs(array($dashboard->getPHID()))
-      ->execute();
-
-    $timeline = id(new PhabricatorApplicationTransactionView())
-      ->setUser($viewer)
-      ->setShouldTerminate(true)
-      ->setObjectPHID($dashboard->getPHID())
-      ->setTransactions($xactions);
-
-    return $timeline;
   }
 
 }

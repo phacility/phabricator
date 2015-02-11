@@ -3,7 +3,7 @@
 final class CelerityManagementMapWorkflow
   extends CelerityManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('map')
       ->setExamples('**map** [options]')

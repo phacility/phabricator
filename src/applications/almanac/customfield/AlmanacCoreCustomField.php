@@ -8,17 +8,29 @@ final class AlmanacCoreCustomField
     return 'almanac:core';
   }
 
-  public function createFields($object) {
-    $specs = array();
+  public function getFieldKey() {
+    return $this->getProxy()->getRawStandardFieldKey();
+  }
 
+  public function getFieldName() {
+    return $this->getFieldKey();
+  }
+
+  public function createFields($object) {
+
+    $specs = $object->getAlmanacPropertyFieldSpecifications();
+
+    $default_specs = array();
     foreach ($object->getAlmanacProperties() as $property) {
-      $specs[$property->getFieldName()] = array(
+      $default_specs[$property->getFieldName()] = array(
         'name' => $property->getFieldName(),
         'type' => 'text',
       );
     }
 
-    return PhabricatorStandardCustomField::buildStandardFields($this, $specs);
+    return PhabricatorStandardCustomField::buildStandardFields(
+      $this,
+      $specs + $default_specs);
   }
 
   public function shouldUseStorage() {
@@ -26,8 +38,11 @@ final class AlmanacCoreCustomField
   }
 
   public function readValueFromObject(PhabricatorCustomFieldInterface $object) {
-    $key = $this->getProxy()->getRawStandardFieldKey();
-    $this->setValueFromStorage($object->getAlmanacPropertyValue($key));
+    $key = $this->getFieldKey();
+
+    if ($object->hasAlmanacProperty($key)) {
+      $this->setValueFromStorage($object->getAlmanacPropertyValue($key));
+    }
   }
 
   public function applyApplicationTransactionInternalEffects(
@@ -40,7 +55,7 @@ final class AlmanacCoreCustomField
 
     $object = $this->getObject();
     $phid = $object->getPHID();
-    $key = $this->getProxy()->getRawStandardFieldKey();
+    $key = $this->getFieldKey();
 
     $property = id(new AlmanacPropertyQuery())
       ->setViewer($this->getViewer())

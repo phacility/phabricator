@@ -14,8 +14,8 @@ final class PhabricatorPonderApplication extends PhabricatorApplication {
     return pht('Questions and Answers');
   }
 
-  public function getIconName() {
-    return 'ponder';
+  public function getFontIcon() {
+    return 'fa-university';
   }
 
   public function getFactObjectsForAnalysis() {
@@ -30,6 +30,7 @@ final class PhabricatorPonderApplication extends PhabricatorApplication {
 
   public function loadStatus(PhabricatorUser $user) {
     // replace with "x new unanswered questions" or some such
+    // make sure to use self::formatStatusCount and friends...!
     $status = array();
 
     return $status;

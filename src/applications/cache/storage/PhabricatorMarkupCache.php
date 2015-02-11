@@ -6,7 +6,7 @@ final class PhabricatorMarkupCache extends PhabricatorCacheDAO {
   protected $cacheData;
   protected $metadata;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_SERIALIZATION => array(
         'cacheData' => self::SERIALIZATION_PHP,

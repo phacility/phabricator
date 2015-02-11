@@ -14,8 +14,8 @@ final class PhabricatorFlagsApplication extends PhabricatorApplication {
     return '/flag/';
   }
 
-  public function getIconName() {
-    return 'flags';
+  public function getFontIcon() {
+    return 'fa-flag';
   }
 
   public function getEventListeners() {
@@ -38,13 +38,18 @@ final class PhabricatorFlagsApplication extends PhabricatorApplication {
     $flags = id(new PhabricatorFlagQuery())
       ->setViewer($user)
       ->withOwnerPHIDs(array($user->getPHID()))
+      ->setLimit(self::MAX_STATUS_ITEMS)
       ->execute();
 
     $count = count($flags);
+    $count_str = self::formatStatusCount(
+      $count,
+      '%s Flagged Objects',
+      '%d Flagged Object(s)');
     $type = PhabricatorApplicationStatusView::TYPE_WARNING;
     $status[] = id(new PhabricatorApplicationStatusView())
       ->setType($type)
-      ->setText(pht('%d Flagged Object(s)', $count))
+      ->setText($count_str)
       ->setCount($count);
 
     return $status;

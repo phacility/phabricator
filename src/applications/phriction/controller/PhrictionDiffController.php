@@ -71,6 +71,7 @@ final class PhrictionDiffController extends PhrictionController {
     $whitespace_mode = DifferentialChangesetParser::WHITESPACE_SHOW_ALL;
 
     $parser = new DifferentialChangesetParser();
+    $parser->setUser($user);
     $parser->setChangeset($changeset);
     $parser->setRenderingReference("{$l},{$r}");
     $parser->setWhitespaceMode($whitespace_mode);

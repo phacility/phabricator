@@ -38,12 +38,16 @@ div.phabricator-application-launch-container {
 }
 
 .phabricator-application-launch-icon {
-  display: block;
   position: absolute;
   width: 28px;
   height: 28px;
-  top: 8px;
-  left: 8px;
+  top: 12px;
+  left: 6px;
+  font-size: 20px;
+  text-align: center;
+  vertical-align: bottom;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.9);
+  color: {$darkbluetext};
 }
 
 .device-desktop a.phabricator-application-launch-container:hover {
@@ -56,14 +60,14 @@ div.phabricator-application-launch-container {
   font-weight: bold;
   color: {$darkbluetext};
   font-size: 13px;
-  margin: 6px 0 2px 44px;
+  margin: 6px 0 2px 38px;
   text-shadow: 0 1px 1px rgba(255, 255, 255, 0.9);
 }
 
 .phabricator-application-launch-description {
-  color: {$bluetext};
+  color: {$darkbluetext};
   font-size: 11px;
-  margin-left: 44px;
+  margin-left: 38px;
   text-shadow: 0 1px 1px rgba(255, 255, 255, 0.9);
   text-overflow: ellipsis;
   width: 150px;

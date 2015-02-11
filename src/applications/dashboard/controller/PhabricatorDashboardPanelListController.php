@@ -36,7 +36,7 @@ final class PhabricatorDashboardPanelListController
     return $nav;
   }
 
-  public function buildApplicationCrumbs() {
+  protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
     $crumbs->addTextCrumb(pht('Panels'), $this->getApplicationURI().'panel/');

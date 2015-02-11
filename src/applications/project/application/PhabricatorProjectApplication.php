@@ -18,8 +18,8 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
     return '/project/';
   }
 
-  public function getIconName() {
-    return 'projects';
+  public function getFontIcon() {
+    return 'fa-briefcase';
   }
 
   public function getFlavorText() {
@@ -43,7 +43,6 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
       '/project/' => array(
         '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhabricatorProjectListController',
         'filter/(?P<filter>[^/]+)/' => 'PhabricatorProjectListController',
-        'edit/(?P<id>[1-9]\d*)/' => 'PhabricatorProjectEditMainController',
         'details/(?P<id>[1-9]\d*)/'
           => 'PhabricatorProjectEditDetailsController',
         'archive/(?P<id>[1-9]\d*)/'
@@ -52,8 +51,12 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
           => 'PhabricatorProjectMembersEditController',
         'members/(?P<id>[1-9]\d*)/remove/'
           => 'PhabricatorProjectMembersRemoveController',
-        'view/(?P<id>[1-9]\d*)/'
+        'profile/(?P<id>[1-9]\d*)/'
           => 'PhabricatorProjectProfileController',
+        'feed/(?P<id>[1-9]\d*)/'
+          => 'PhabricatorProjectFeedController',
+        'view/(?P<id>[1-9]\d*)/'
+          => 'PhabricatorProjectViewController',
         'picture/(?P<id>[1-9]\d*)/'
           => 'PhabricatorProjectEditPictureController',
         'icon/(?P<id>[1-9]\d*)/'
@@ -83,13 +86,30 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
         'history/(?P<id>[1-9]\d*)/' => 'PhabricatorProjectHistoryController',
         '(?P<action>watch|unwatch)/(?P<id>[1-9]\d*)/'
           => 'PhabricatorProjectWatchController',
-
       ),
       '/tag/' => array(
-        '(?P<slug>[^/]+)/' => 'PhabricatorProjectProfileController',
+        '(?P<slug>[^/]+)/' => 'PhabricatorProjectViewController',
         '(?P<slug>[^/]+)/board/' => 'PhabricatorProjectBoardViewController',
       ),
     );
+  }
+
+  public function getQuickCreateItems(PhabricatorUser $viewer) {
+    $can_create = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $this,
+      ProjectCreateProjectsCapability::CAPABILITY);
+
+    $items = array();
+    if ($can_create) {
+      $item = id(new PHUIListItemView())
+        ->setName(pht('Project'))
+        ->setIcon('fa-briefcase')
+        ->setHref($this->getBaseURI().'create/');
+      $items[] = $item;
+    }
+
+    return $items;
   }
 
   protected function getCustomCapabilities() {
@@ -97,6 +117,18 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
       ProjectCreateProjectsCapability::CAPABILITY => array(),
       ProjectCanLockProjectsCapability::CAPABILITY => array(
         'default' => PhabricatorPolicies::POLICY_ADMIN,
+      ),
+      ProjectDefaultViewCapability::CAPABILITY => array(
+        'caption' => pht(
+          'Default view policy for newly created projects.'),
+      ),
+      ProjectDefaultEditCapability::CAPABILITY => array(
+        'caption' => pht(
+          'Default edit policy for newly created projects.'),
+      ),
+      ProjectDefaultJoinCapability::CAPABILITY => array(
+        'caption' => pht(
+          'Default join policy for newly created projects.'),
       ),
     );
   }

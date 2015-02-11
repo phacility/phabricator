@@ -38,7 +38,13 @@ final class ArcanistProjectInfoConduitAPIMethod
       throw new ConduitException('ERR-BAD-ARCANIST-PROJECT');
     }
 
-    $repository = $project->loadRepository();
+    $repository = null;
+    if ($project->getRepositoryID()) {
+      $repository = id(new PhabricatorRepositoryQuery())
+        ->setViewer($request->getUser())
+        ->withIDs(array($project->getRepositoryID()))
+        ->executeOne();
+    }
 
     $repository_phid = null;
     $tracked = false;

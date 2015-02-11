@@ -86,7 +86,7 @@ final class FundBackerSearchEngine
     }
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array();
     $names['all'] = pht('All Backers');
 

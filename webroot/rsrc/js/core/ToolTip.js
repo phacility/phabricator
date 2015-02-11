@@ -22,20 +22,25 @@ JX.install('Tooltip', {
             break;
           default:
             JX.$E(
-              "Only alignments 'N' (north), 'E' (east), 'S' (south), " +
-              "and 'W' (west) are supported."
+              'Only alignments "N" (north), "E" (east), "S" (south), ' +
+              'and "W" (west) are supported.'
             );
             break;
         }
       }
 
-      var node = JX.$N(
+      var node_inner = JX.$N(
         'div',
-        { className: 'jx-tooltip-container' },
+        { className: 'jx-tooltip-inner' },
         [
           JX.$N('div', { className: 'jx-tooltip' }, content),
           JX.$N('div', { className: 'jx-tooltip-anchor' })
         ]);
+
+      var node = JX.$N(
+        'div',
+        { className: 'jx-tooltip-container' },
+        node_inner);
 
       node.style.maxWidth  = scale + 'px';
 

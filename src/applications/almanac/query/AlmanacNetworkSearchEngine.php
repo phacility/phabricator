@@ -7,7 +7,7 @@ final class AlmanacNetworkSearchEngine
     return pht('Almanac Networks');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorAlmanacApplication';
   }
 
@@ -31,7 +31,7 @@ final class AlmanacNetworkSearchEngine
     return '/almanac/network/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array(
       'all' => pht('All Networks'),
     );

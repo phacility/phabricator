@@ -6,7 +6,7 @@ final class PhabricatorFactDaemon extends PhabricatorDaemon {
 
   const RAW_FACT_BUFFER_LIMIT = 128;
 
-  public function run() {
+  protected function run() {
     $this->setEngines(PhabricatorFactEngine::loadAllEngines());
     while (!$this->shouldExit()) {
       $iterators = $this->getAllApplicationIterators();

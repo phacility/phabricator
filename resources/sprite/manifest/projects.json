@@ -1,291 +1,371 @@
 {
-  "version" : 1,
-  "sprites" : {
-    "projects-8ball"         : {
-      "name" : "projects-8ball",
-      "rule" : ".projects-8ball",
-      "hash" : "1571c4d51926d3af7711b825c5816e2e"
+  "version": 1,
+  "sprites": {
+    "projects-8ball": {
+      "name": "projects-8ball",
+      "rule": ".projects-8ball",
+      "hash": "1571c4d51926d3af7711b825c5816e2e"
     },
-    "projects-alien"         : {
-      "name" : "projects-alien",
-      "rule" : ".projects-alien",
-      "hash" : "384f920ae335dca04edaf29663d3a074"
+    "projects-alien": {
+      "name": "projects-alien",
+      "rule": ".projects-alien",
+      "hash": "384f920ae335dca04edaf29663d3a074"
     },
-    "projects-announce"      : {
-      "name" : "projects-announce",
-      "rule" : ".projects-announce",
-      "hash" : "94329cedd509fc27a6fb577927581118"
+    "projects-announce": {
+      "name": "projects-announce",
+      "rule": ".projects-announce",
+      "hash": "94329cedd509fc27a6fb577927581118"
     },
-    "projects-art"           : {
-      "name" : "projects-art",
-      "rule" : ".projects-art",
-      "hash" : "85c545e5130f00ff1b93c0af0d540974"
+    "projects-art": {
+      "name": "projects-art",
+      "rule": ".projects-art",
+      "hash": "85c545e5130f00ff1b93c0af0d540974"
     },
-    "projects-award"         : {
-      "name" : "projects-award",
-      "rule" : ".projects-award",
-      "hash" : "fad6d89e4938e16f22f3c9db7cf5d696"
+    "projects-award": {
+      "name": "projects-award",
+      "rule": ".projects-award",
+      "hash": "fad6d89e4938e16f22f3c9db7cf5d696"
     },
-    "projects-bacon"         : {
-      "name" : "projects-bacon",
-      "rule" : ".projects-bacon",
-      "hash" : "f6300cdfa5a96a223f53f13dd0d3acc3"
+    "projects-bacon": {
+      "name": "projects-bacon",
+      "rule": ".projects-bacon",
+      "hash": "f6300cdfa5a96a223f53f13dd0d3acc3"
     },
-    "projects-bandaid"       : {
-      "name" : "projects-bandaid",
-      "rule" : ".projects-bandaid",
-      "hash" : "c463dffa161997277fc6697155f4085b"
+    "projects-bandaid": {
+      "name": "projects-bandaid",
+      "rule": ".projects-bandaid",
+      "hash": "c463dffa161997277fc6697155f4085b"
     },
-    "projects-beer"          : {
-      "name" : "projects-beer",
-      "rule" : ".projects-beer",
-      "hash" : "81c7580f322d9fb40c77db56cd92d61d"
+    "projects-beer": {
+      "name": "projects-beer",
+      "rule": ".projects-beer",
+      "hash": "81c7580f322d9fb40c77db56cd92d61d"
     },
-    "projects-bomb"          : {
-      "name" : "projects-bomb",
-      "rule" : ".projects-bomb",
-      "hash" : "1123da7cc56313891c9979b004cc02f7"
+    "projects-bomb": {
+      "name": "projects-bomb",
+      "rule": ".projects-bomb",
+      "hash": "1123da7cc56313891c9979b004cc02f7"
     },
-    "projects-briefcase"     : {
-      "name" : "projects-briefcase",
-      "rule" : ".projects-briefcase",
-      "hash" : "9b4b413ddb250ce1d3fbe18a5a5698cd"
+    "projects-briefcase": {
+      "name": "projects-briefcase",
+      "rule": ".projects-briefcase",
+      "hash": "9b4b413ddb250ce1d3fbe18a5a5698cd"
     },
-    "projects-bug"           : {
-      "name" : "projects-bug",
-      "rule" : ".projects-bug",
-      "hash" : "9678702aed00c4779759ebbdfe97fe48"
+    "projects-bug": {
+      "name": "projects-bug",
+      "rule": ".projects-bug",
+      "hash": "9678702aed00c4779759ebbdfe97fe48"
     },
-    "projects-calendar"      : {
-      "name" : "projects-calendar",
-      "rule" : ".projects-calendar",
-      "hash" : "e7dc5d1b11fc55ed239fcbfe527ed0e7"
+    "projects-calendar": {
+      "name": "projects-calendar",
+      "rule": ".projects-calendar",
+      "hash": "e7dc5d1b11fc55ed239fcbfe527ed0e7"
     },
-    "projects-cloud"         : {
-      "name" : "projects-cloud",
-      "rule" : ".projects-cloud",
-      "hash" : "d38bf58580b3c36fbd3149a13f7d0e5e"
+    "projects-cloud": {
+      "name": "projects-cloud",
+      "rule": ".projects-cloud",
+      "hash": "d38bf58580b3c36fbd3149a13f7d0e5e"
     },
-    "projects-coffee"        : {
-      "name" : "projects-coffee",
-      "rule" : ".projects-coffee",
-      "hash" : "a9c10862139d8e7f56c9f892496f9666"
+    "projects-coffee": {
+      "name": "projects-coffee",
+      "rule": ".projects-coffee",
+      "hash": "a9c10862139d8e7f56c9f892496f9666"
     },
-    "projects-creditcard"    : {
-      "name" : "projects-creditcard",
-      "rule" : ".projects-creditcard",
-      "hash" : "db2c179cb4935da8b9950ac30da8c0d1"
+    "projects-creditcard": {
+      "name": "projects-creditcard",
+      "rule": ".projects-creditcard",
+      "hash": "db2c179cb4935da8b9950ac30da8c0d1"
     },
-    "projects-death"         : {
-      "name" : "projects-death",
-      "rule" : ".projects-death",
-      "hash" : "cdea72dfdcb3fc64873b9fff78addb3c"
+    "projects-death": {
+      "name": "projects-death",
+      "rule": ".projects-death",
+      "hash": "cdea72dfdcb3fc64873b9fff78addb3c"
     },
-    "projects-desktop"       : {
-      "name" : "projects-desktop",
-      "rule" : ".projects-desktop",
-      "hash" : "19d2ef34e3dd53615cdad91eb987d6fe"
+    "projects-desktop": {
+      "name": "projects-desktop",
+      "rule": ".projects-desktop",
+      "hash": "19d2ef34e3dd53615cdad91eb987d6fe"
     },
-    "projects-dropbox"       : {
-      "name" : "projects-dropbox",
-      "rule" : ".projects-dropbox",
-      "hash" : "10231bf468769b96ed40cf983abfa269"
+    "projects-dropbox": {
+      "name": "projects-dropbox",
+      "rule": ".projects-dropbox",
+      "hash": "10231bf468769b96ed40cf983abfa269"
     },
-    "projects-education"     : {
-      "name" : "projects-education",
-      "rule" : ".projects-education",
-      "hash" : "ce3d0ca75d519b2ac427a690d30475f8"
+    "projects-education": {
+      "name": "projects-education",
+      "rule": ".projects-education",
+      "hash": "ce3d0ca75d519b2ac427a690d30475f8"
     },
-    "projects-experimental"  : {
-      "name" : "projects-experimental",
-      "rule" : ".projects-experimental",
-      "hash" : "311ef712f8daca057c20c8fd78fa77ce"
+    "projects-experimental": {
+      "name": "projects-experimental",
+      "rule": ".projects-experimental",
+      "hash": "311ef712f8daca057c20c8fd78fa77ce"
     },
-    "projects-facebook"      : {
-      "name" : "projects-facebook",
-      "rule" : ".projects-facebook",
-      "hash" : "16581191e4ce9e0115d447b479c886cb"
+    "projects-fa-briefcase": {
+      "name": "projects-fa-briefcase",
+      "rule": ".projects-fa-briefcase",
+      "hash": "f3dd4c94ce9f1cc74068af3ea9a4bc65"
     },
-    "projects-facility"      : {
-      "name" : "projects-facility",
-      "rule" : ".projects-facility",
-      "hash" : "d8893f9d2b75ec047b6f3898a386055c"
+    "projects-fa-bug": {
+      "name": "projects-fa-bug",
+      "rule": ".projects-fa-bug",
+      "hash": "e85895919b8fdbdbbcf43e476e70adcc"
     },
-    "projects-film"          : {
-      "name" : "projects-film",
-      "rule" : ".projects-film",
-      "hash" : "57497050fa09ba1533d981a9c1550ba9"
+    "projects-fa-building": {
+      "name": "projects-fa-building",
+      "rule": ".projects-fa-building",
+      "hash": "5ba0272ba1d3dee530cf72bd14b060e1"
     },
-    "projects-forked"        : {
-      "name" : "projects-forked",
-      "rule" : ".projects-forked",
-      "hash" : "f575428e1079981840297bd444e51c43"
+    "projects-fa-calendar": {
+      "name": "projects-fa-calendar",
+      "rule": ".projects-fa-calendar",
+      "hash": "38b05d30e454285b56c7021d19ca7c93"
     },
-    "projects-games"         : {
-      "name" : "projects-games",
-      "rule" : ".projects-games",
-      "hash" : "b802cff3e76051675b37165bd9702088"
+    "projects-fa-cloud": {
+      "name": "projects-fa-cloud",
+      "rule": ".projects-fa-cloud",
+      "hash": "9202ca72998bb07180464064258f43ff"
     },
-    "projects-ghost"         : {
-      "name" : "projects-ghost",
-      "rule" : ".projects-ghost",
-      "hash" : "7c8622cad29bddc5179f6a6d5f15fbe9"
+    "projects-fa-credit-card": {
+      "name": "projects-fa-credit-card",
+      "rule": ".projects-fa-credit-card",
+      "hash": "0b73456cbdb383ae2b211c7c8b90b712"
     },
-    "projects-gift"          : {
-      "name" : "projects-gift",
-      "rule" : ".projects-gift",
-      "hash" : "f2ca678906a6806f421b60abddaa6cae"
+    "projects-fa-envelope": {
+      "name": "projects-fa-envelope",
+      "rule": ".projects-fa-envelope",
+      "hash": "73a2c4560e4d12125dbb3a3d1cab3f3f"
     },
-    "projects-globe"         : {
-      "name" : "projects-globe",
-      "rule" : ".projects-globe",
-      "hash" : "87515a83cc0c840804aca594677d1eae"
+    "projects-fa-flag-checkered": {
+      "name": "projects-fa-flag-checkered",
+      "rule": ".projects-fa-flag-checkered",
+      "hash": "57b7474e5d81c84fa5020cb57f82d1ca"
     },
-    "projects-golf"          : {
-      "name" : "projects-golf",
-      "rule" : ".projects-golf",
-      "hash" : "1ee7556fab3d46d925deb00322dad858"
+    "projects-fa-flask": {
+      "name": "projects-fa-flask",
+      "rule": ".projects-fa-flask",
+      "hash": "ae9edea912a19440c15fefdbf728def4"
     },
-    "projects-heart"         : {
-      "name" : "projects-heart",
-      "rule" : ".projects-heart",
-      "hash" : "3da64839e37ee245333017d0a310cc2e"
+    "projects-fa-folder": {
+      "name": "projects-fa-folder",
+      "rule": ".projects-fa-folder",
+      "hash": "d3c6eb3334d6b6f1b8a1159d9d9e7397"
     },
-    "projects-intergalactic" : {
-      "name" : "projects-intergalactic",
-      "rule" : ".projects-intergalactic",
-      "hash" : "94dca756cb267bdb4e0ed58467320780"
+    "projects-fa-lock": {
+      "name": "projects-fa-lock",
+      "rule": ".projects-fa-lock",
+      "hash": "fa1eabe664aa26fa4732a18849a4d581"
     },
-    "projects-lock"          : {
-      "name" : "projects-lock",
-      "rule" : ".projects-lock",
-      "hash" : "9d4c8ad3a4ac4163f284461da7df2763"
+    "projects-fa-tags": {
+      "name": "projects-fa-tags",
+      "rule": ".projects-fa-tags",
+      "hash": "f167c28072cf39a388ae0056d5f5f757"
     },
-    "projects-mail"          : {
-      "name" : "projects-mail",
-      "rule" : ".projects-mail",
-      "hash" : "963f5ce26c6caf86e72d754f7b6e8865"
+    "projects-fa-trash-o": {
+      "name": "projects-fa-trash-o",
+      "rule": ".projects-fa-trash-o",
+      "hash": "82fb2b427b0b331652d19fd3654905a2"
     },
-    "projects-martini"       : {
-      "name" : "projects-martini",
-      "rule" : ".projects-martini",
-      "hash" : "24d4d5fb5c334621ece4c35a9196471e"
+    "projects-fa-truck": {
+      "name": "projects-fa-truck",
+      "rule": ".projects-fa-truck",
+      "hash": "89136aa2b52a6543b7c20dbdf0727191"
     },
-    "projects-medical"       : {
-      "name" : "projects-medical",
-      "rule" : ".projects-medical",
-      "hash" : "e0cb3ef5557321d166e8eb49c10d3599"
+    "projects-fa-umbrella": {
+      "name": "projects-fa-umbrella",
+      "rule": ".projects-fa-umbrella",
+      "hash": "55f6a65e425c5725e953e3a59cb50f49"
     },
-    "projects-mobile"        : {
-      "name" : "projects-mobile",
-      "rule" : ".projects-mobile",
-      "hash" : "37dec95d1a4a937743d52acac319c3b6"
+    "projects-fa-users": {
+      "name": "projects-fa-users",
+      "rule": ".projects-fa-users",
+      "hash": "bd449bd0dea0d29031dc8fddad7bb66b"
     },
-    "projects-music"         : {
-      "name" : "projects-music",
-      "rule" : ".projects-music",
-      "hash" : "e7a814194685ac25be0db05b04074607"
+    "projects-facebook": {
+      "name": "projects-facebook",
+      "rule": ".projects-facebook",
+      "hash": "16581191e4ce9e0115d447b479c886cb"
     },
-    "projects-news"          : {
-      "name" : "projects-news",
-      "rule" : ".projects-news",
-      "hash" : "6861f3ee827d09b0592166514f4941e8"
+    "projects-facility": {
+      "name": "projects-facility",
+      "rule": ".projects-facility",
+      "hash": "d8893f9d2b75ec047b6f3898a386055c"
     },
-    "projects-orgchart"      : {
-      "name" : "projects-orgchart",
-      "rule" : ".projects-orgchart",
-      "hash" : "20c51c59788fb2bc8184fdd5687d33dc"
+    "projects-film": {
+      "name": "projects-film",
+      "rule": ".projects-film",
+      "hash": "57497050fa09ba1533d981a9c1550ba9"
     },
-    "projects-peoples"       : {
-      "name" : "projects-peoples",
-      "rule" : ".projects-peoples",
-      "hash" : "c949ba6d09e68317a9a11482e75e5140"
+    "projects-forked": {
+      "name": "projects-forked",
+      "rule": ".projects-forked",
+      "hash": "f575428e1079981840297bd444e51c43"
     },
-    "projects-piechart"      : {
-      "name" : "projects-piechart",
-      "rule" : ".projects-piechart",
-      "hash" : "051138560e30982a029aa5e4ea87bc17"
+    "projects-games": {
+      "name": "projects-games",
+      "rule": ".projects-games",
+      "hash": "b802cff3e76051675b37165bd9702088"
     },
-    "projects-poison"        : {
-      "name" : "projects-poison",
-      "rule" : ".projects-poison",
-      "hash" : "56ddafd138e421f198b9cb38e5dc7455"
+    "projects-ghost": {
+      "name": "projects-ghost",
+      "rule": ".projects-ghost",
+      "hash": "7c8622cad29bddc5179f6a6d5f15fbe9"
     },
-    "projects-putabirdonit"  : {
-      "name" : "projects-putabirdonit",
-      "rule" : ".projects-putabirdonit",
-      "hash" : "ee298fff82c34341b986a3e1b77bea11"
+    "projects-gift": {
+      "name": "projects-gift",
+      "rule": ".projects-gift",
+      "hash": "f2ca678906a6806f421b60abddaa6cae"
     },
-    "projects-radiate"       : {
-      "name" : "projects-radiate",
-      "rule" : ".projects-radiate",
-      "hash" : "9cfb918089b3de8506a5d270a119052c"
+    "projects-globe": {
+      "name": "projects-globe",
+      "rule": ".projects-globe",
+      "hash": "87515a83cc0c840804aca594677d1eae"
     },
-    "projects-savings"       : {
-      "name" : "projects-savings",
-      "rule" : ".projects-savings",
-      "hash" : "9e92bc5e64f79d2f4842ac24a8b57fcb"
+    "projects-golf": {
+      "name": "projects-golf",
+      "rule": ".projects-golf",
+      "hash": "1ee7556fab3d46d925deb00322dad858"
     },
-    "projects-search"        : {
-      "name" : "projects-search",
-      "rule" : ".projects-search",
-      "hash" : "a42c1c31f2929838b0f181f417c0b6a4"
+    "projects-heart": {
+      "name": "projects-heart",
+      "rule": ".projects-heart",
+      "hash": "3da64839e37ee245333017d0a310cc2e"
     },
-    "projects-shield"        : {
-      "name" : "projects-shield",
-      "rule" : ".projects-shield",
-      "hash" : "40c6e1bec7c07c165668ac45c218847a"
+    "projects-intergalactic": {
+      "name": "projects-intergalactic",
+      "rule": ".projects-intergalactic",
+      "hash": "94dca756cb267bdb4e0ed58467320780"
     },
-    "projects-speed"         : {
-      "name" : "projects-speed",
-      "rule" : ".projects-speed",
-      "hash" : "2b70c194d07f5a9d95abc51d84fb22ed"
+    "projects-lock": {
+      "name": "projects-lock",
+      "rule": ".projects-lock",
+      "hash": "9d4c8ad3a4ac4163f284461da7df2763"
     },
-    "projects-sprint"        : {
-      "name" : "projects-sprint",
-      "rule" : ".projects-sprint",
-      "hash" : "655ef9a3043eab23eac1da21baeb36b3"
+    "projects-mail": {
+      "name": "projects-mail",
+      "rule": ".projects-mail",
+      "hash": "963f5ce26c6caf86e72d754f7b6e8865"
     },
-    "projects-star"          : {
-      "name" : "projects-star",
-      "rule" : ".projects-star",
-      "hash" : "a46e3c18f68bc13a65b410496e27b5d7"
+    "projects-martini": {
+      "name": "projects-martini",
+      "rule": ".projects-martini",
+      "hash": "24d4d5fb5c334621ece4c35a9196471e"
     },
-    "projects-storage"       : {
-      "name" : "projects-storage",
-      "rule" : ".projects-storage",
-      "hash" : "bb19baa77bb7596f43f77e5dbbddb006"
+    "projects-medical": {
+      "name": "projects-medical",
+      "rule": ".projects-medical",
+      "hash": "e0cb3ef5557321d166e8eb49c10d3599"
     },
-    "projects-tablet"        : {
-      "name" : "projects-tablet",
-      "rule" : ".projects-tablet",
-      "hash" : "830dcf6637288ca122c8f5034cae3769"
+    "projects-mobile": {
+      "name": "projects-mobile",
+      "rule": ".projects-mobile",
+      "hash": "37dec95d1a4a937743d52acac319c3b6"
     },
-    "projects-travel"        : {
-      "name" : "projects-travel",
-      "rule" : ".projects-travel",
-      "hash" : "86ec4dcd025879a43435b101fd542a1b"
+    "projects-music": {
+      "name": "projects-music",
+      "rule": ".projects-music",
+      "hash": "e7a814194685ac25be0db05b04074607"
     },
-    "projects-twitter"       : {
-      "name" : "projects-twitter",
-      "rule" : ".projects-twitter",
-      "hash" : "75b8680dd1e4ecce4ca3a39c87e1ed80"
+    "projects-news": {
+      "name": "projects-news",
+      "rule": ".projects-news",
+      "hash": "6861f3ee827d09b0592166514f4941e8"
     },
-    "projects-warning"       : {
-      "name" : "projects-warning",
-      "rule" : ".projects-warning",
-      "hash" : "3ac48b6f963675e1f4bb4ac75aad936f"
+    "projects-orgchart": {
+      "name": "projects-orgchart",
+      "rule": ".projects-orgchart",
+      "hash": "20c51c59788fb2bc8184fdd5687d33dc"
     },
-    "projects-whale"         : {
-      "name" : "projects-whale",
-      "rule" : ".projects-whale",
-      "hash" : "569b584c7e80a0a9b965280abd27c723"
+    "projects-peoples": {
+      "name": "projects-peoples",
+      "rule": ".projects-peoples",
+      "hash": "c949ba6d09e68317a9a11482e75e5140"
+    },
+    "projects-piechart": {
+      "name": "projects-piechart",
+      "rule": ".projects-piechart",
+      "hash": "051138560e30982a029aa5e4ea87bc17"
+    },
+    "projects-poison": {
+      "name": "projects-poison",
+      "rule": ".projects-poison",
+      "hash": "56ddafd138e421f198b9cb38e5dc7455"
+    },
+    "projects-putabirdonit": {
+      "name": "projects-putabirdonit",
+      "rule": ".projects-putabirdonit",
+      "hash": "ee298fff82c34341b986a3e1b77bea11"
+    },
+    "projects-radiate": {
+      "name": "projects-radiate",
+      "rule": ".projects-radiate",
+      "hash": "9cfb918089b3de8506a5d270a119052c"
+    },
+    "projects-savings": {
+      "name": "projects-savings",
+      "rule": ".projects-savings",
+      "hash": "9e92bc5e64f79d2f4842ac24a8b57fcb"
+    },
+    "projects-search": {
+      "name": "projects-search",
+      "rule": ".projects-search",
+      "hash": "a42c1c31f2929838b0f181f417c0b6a4"
+    },
+    "projects-shield": {
+      "name": "projects-shield",
+      "rule": ".projects-shield",
+      "hash": "40c6e1bec7c07c165668ac45c218847a"
+    },
+    "projects-speed": {
+      "name": "projects-speed",
+      "rule": ".projects-speed",
+      "hash": "2b70c194d07f5a9d95abc51d84fb22ed"
+    },
+    "projects-sprint": {
+      "name": "projects-sprint",
+      "rule": ".projects-sprint",
+      "hash": "655ef9a3043eab23eac1da21baeb36b3"
+    },
+    "projects-star": {
+      "name": "projects-star",
+      "rule": ".projects-star",
+      "hash": "a46e3c18f68bc13a65b410496e27b5d7"
+    },
+    "projects-storage": {
+      "name": "projects-storage",
+      "rule": ".projects-storage",
+      "hash": "bb19baa77bb7596f43f77e5dbbddb006"
+    },
+    "projects-tablet": {
+      "name": "projects-tablet",
+      "rule": ".projects-tablet",
+      "hash": "830dcf6637288ca122c8f5034cae3769"
+    },
+    "projects-travel": {
+      "name": "projects-travel",
+      "rule": ".projects-travel",
+      "hash": "86ec4dcd025879a43435b101fd542a1b"
+    },
+    "projects-twitter": {
+      "name": "projects-twitter",
+      "rule": ".projects-twitter",
+      "hash": "75b8680dd1e4ecce4ca3a39c87e1ed80"
+    },
+    "projects-warning": {
+      "name": "projects-warning",
+      "rule": ".projects-warning",
+      "hash": "3ac48b6f963675e1f4bb4ac75aad936f"
+    },
+    "projects-whale": {
+      "name": "projects-whale",
+      "rule": ".projects-whale",
+      "hash": "569b584c7e80a0a9b965280abd27c723"
     }
   },
-  "scales"  : [
+  "scales": [
     1,
     2
   ],
-  "header"  : "\/**\n * @provides sprite-projects-css\n * @generated\n *\/\n\n.sprite-projects {\n  background-image: url(\/rsrc\/image\/sprite-projects.png);\n  background-repeat: no-repeat;\n}\n\n@media\nonly screen and (min-device-pixel-ratio: 1.5),\nonly screen and (-webkit-min-device-pixel-ratio: 1.5) {\n  .sprite-projects {\n    background-image: url(\/rsrc\/image\/sprite-projects-X2.png);\n    background-size: {X}px {Y}px;\n  }\n}\n",
-  "type"    : "standard"
+  "header": "\/**\n * @provides sprite-projects-css\n * @generated\n *\/\n\n.sprite-projects {\n  background-image: url(\/rsrc\/image\/sprite-projects.png);\n  background-repeat: no-repeat;\n}\n\n@media\nonly screen and (min-device-pixel-ratio: 1.5),\nonly screen and (-webkit-min-device-pixel-ratio: 1.5) {\n  .sprite-projects {\n    background-image: url(\/rsrc\/image\/sprite-projects-X2.png);\n    background-size: {X}px {Y}px;\n  }\n}\n",
+  "type": "standard"
 }

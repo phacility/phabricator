@@ -3,7 +3,7 @@
 final class PhabricatorSystemRemoveDestroyWorkflow
   extends PhabricatorSystemRemoveWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('destroy')
       ->setSynopsis(pht('Permanently destroy objects.'))

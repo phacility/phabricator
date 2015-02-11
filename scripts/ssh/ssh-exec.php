@@ -8,12 +8,14 @@ require_once $root.'/scripts/__init_script__.php';
 
 $ssh_log = PhabricatorSSHLog::getLog();
 
-// First, figure out the authenticated user.
 $args = new PhutilArgumentParser($argv);
-$args->setTagline('receive SSH requests');
+$args->setTagline('execute SSH requests');
 $args->setSynopsis(<<<EOSYNOPSIS
 **ssh-exec** --phabricator-ssh-user __user__ [--ssh-command __commmand__]
-    Receive SSH requests.
+**ssh-exec** --phabricator-ssh-device __device__ [--ssh-command __commmand__]
+    Execute authenticated SSH requests. This script is normally invoked
+    via SSHD, but can be invoked manually for testing.
+
 EOSYNOPSIS
 );
 
@@ -22,24 +24,150 @@ $args->parse(
     array(
       'name'  => 'phabricator-ssh-user',
       'param' => 'username',
+      'help' => pht(
+        'If the request authenticated with a user key, the name of the '.
+        'user.'),
+    ),
+    array(
+      'name' => 'phabricator-ssh-device',
+      'param' => 'name',
+      'help' => pht(
+        'If the request authenticated with a device key, the name of the '.
+        'device.'),
+    ),
+    array(
+      'name' => 'phabricator-ssh-key',
+      'param' => 'id',
+      'help' => pht(
+        'The ID of the SSH key which authenticated this request. This is '.
+        'used to allow logs to report when specific keys were used, to make '.
+        'it easier to manage credentials.'),
     ),
     array(
       'name' => 'ssh-command',
       'param' => 'command',
+      'help' => pht(
+        'Provide a command to execute. This makes testing this script '.
+        'easier. When running normally, the command is read from the '.
+        'environment (SSH_ORIGINAL_COMMAND), which is populated by sshd.'),
     ),
   ));
 
 try {
-  $user_name = $args->getArg('phabricator-ssh-user');
-  if (!strlen($user_name)) {
-    throw new Exception('No username.');
+  $remote_address = null;
+  $ssh_client = getenv('SSH_CLIENT');
+  if ($ssh_client) {
+    // This has the format "<ip> <remote-port> <local-port>". Grab the IP.
+    $remote_address = head(explode(' ', $ssh_client));
+    $ssh_log->setData(
+      array(
+        'r' => $remote_address,
+      ));
   }
 
-  $user = id(new PhabricatorUser())->loadOneWhere(
-    'userName = %s',
-    $user_name);
-  if (!$user) {
-    throw new Exception('Invalid username.');
+  $key_id = $args->getArg('phabricator-ssh-key');
+  if ($key_id) {
+    $ssh_log->setData(
+      array(
+        'k' => $key_id,
+      ));
+  }
+
+  $user_name = $args->getArg('phabricator-ssh-user');
+  $device_name = $args->getArg('phabricator-ssh-device');
+
+  $user = null;
+  $device = null;
+  $is_cluster_request = false;
+
+  if ($user_name && $device_name) {
+    throw new Exception(
+      pht(
+        'The --phabricator-ssh-user and --phabricator-ssh-device flags are '.
+        'mutually exclusive. You can not authenticate as both a user ("%s") '.
+        'and a device ("%s"). Specify one or the other, but not both.',
+        $user_name,
+        $device_name));
+  } else if (strlen($user_name)) {
+    $user = id(new PhabricatorPeopleQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withUsernames(array($user_name))
+      ->executeOne();
+    if (!$user) {
+      throw new Exception(
+        pht(
+          'Invalid username ("%s"). There is no user with this username.',
+          $user_name));
+    }
+  } else if (strlen($device_name)) {
+    if (!$remote_address) {
+      throw new Exception(
+        pht(
+          'Unable to identify remote address from the SSH_CLIENT environment '.
+          'variable. Device authentication is accepted only from trusted '.
+          'sources.'));
+    }
+
+    if (!PhabricatorEnv::isClusterAddress($remote_address)) {
+      throw new Exception(
+        pht(
+          'This request originates from outside of the Phabricator cluster '.
+          'address range. Requests signed with a trusted device key must '.
+          'originate from trusted hosts.'));
+    }
+
+    $device = id(new AlmanacDeviceQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withNames(array($device_name))
+      ->executeOne();
+    if (!$device) {
+      throw new Exception(
+        pht(
+          'Invalid device name ("%s"). There is no device with this name.',
+          $device->getName()));
+    }
+
+    // We're authenticated as a device, but we're going to read the user out of
+    // the command below.
+    $is_cluster_request = true;
+  } else {
+    throw new Exception(
+      pht(
+        'This script must be invoked with either the --phabricator-ssh-user '.
+        'or --phabricator-ssh-device flag.'));
+  }
+
+  if ($args->getArg('ssh-command')) {
+    $original_command = $args->getArg('ssh-command');
+  } else {
+    $original_command = getenv('SSH_ORIGINAL_COMMAND');
+  }
+
+  $original_argv = id(new PhutilShellLexer())
+    ->splitArguments($original_command);
+
+  if ($device) {
+    $act_as_name = array_shift($original_argv);
+    if (!preg_match('/^@/', $act_as_name)) {
+      throw new Exception(
+        pht(
+          'Commands executed by devices must identify an acting user in the '.
+          'first command argument. This request was not constructed '.
+          'properly.'));
+    }
+
+    $act_as_name = substr($act_as_name, 1);
+    $user = id(new PhabricatorPeopleQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withUsernames(array($act_as_name))
+      ->executeOne();
+    if (!$user) {
+      throw new Exception(
+        pht(
+          'Device request identifies an acting user with an invalid '.
+          'username ("%s"). There is no user with this username.',
+          $act_as_name));
+    }
   }
 
   $ssh_log->setData(
@@ -49,13 +177,11 @@ try {
     ));
 
   if (!$user->isUserActivated()) {
-    throw new Exception(pht('Your account is not activated.'));
-  }
-
-  if ($args->getArg('ssh-command')) {
-    $original_command = $args->getArg('ssh-command');
-  } else {
-    $original_command = getenv('SSH_ORIGINAL_COMMAND');
+    throw new Exception(
+      pht(
+        'Your account ("%s") is not activated. Visit the web interface '.
+        'for more information.',
+        $user->getUsername()));
   }
 
   $workflows = id(new PhutilSymbolLoader())
@@ -64,9 +190,6 @@ try {
 
   $workflow_names = mpull($workflows, 'getName', 'getName');
 
-  // Now, rebuild the original command.
-  $original_argv = id(new PhutilShellLexer())
-    ->splitArguments($original_command);
   if (!$original_argv) {
     throw new Exception(
       pht(
@@ -82,7 +205,7 @@ try {
         implode(', ', $workflow_names)));
   }
 
-  $log_argv = implode(' ', array_slice($original_argv, 1));
+  $log_argv = implode(' ', $original_argv);
   $log_argv = id(new PhutilUTF8StringTruncator())
     ->setMaximumCodepoints(128)
     ->truncateString($log_argv);
@@ -94,16 +217,20 @@ try {
     ));
 
   $command = head($original_argv);
-  array_unshift($original_argv, 'phabricator-ssh-exec');
 
-  $original_args = new PhutilArgumentParser($original_argv);
+  $parseable_argv = $original_argv;
+  array_unshift($parseable_argv, 'phabricator-ssh-exec');
+
+  $parsed_args = new PhutilArgumentParser($parseable_argv);
 
   if (empty($workflow_names[$command])) {
     throw new Exception('Invalid command.');
   }
 
-  $workflow = $original_args->parseWorkflows($workflows);
+  $workflow = $parsed_args->parseWorkflows($workflows);
   $workflow->setUser($user);
+  $workflow->setOriginalArguments($original_argv);
+  $workflow->setIsClusterRequest($is_cluster_request);
 
   $sock_stdin = fopen('php://stdin', 'r');
   if (!$sock_stdin) {
@@ -130,7 +257,7 @@ try {
 
   $rethrow = null;
   try {
-    $err = $workflow->execute($original_args);
+    $err = $workflow->execute($parsed_args);
 
     $metrics_channel->flush();
     $error_channel->flush();

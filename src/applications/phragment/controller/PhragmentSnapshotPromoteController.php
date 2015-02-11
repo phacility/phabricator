@@ -162,7 +162,7 @@ final class PhragmentSnapshotPromoteController extends PhragmentController {
     return $this->createDialog();
   }
 
-  function createDialog() {
+  public function createDialog() {
     $request = $this->getRequest();
     $viewer = $request->getUser();
 

@@ -112,7 +112,7 @@ final class PhabricatorConduitSearchEngine
     return '/conduit/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     return array(
       'modern' => pht('Modern Methods'),
       'all'    => pht('All Methods'),

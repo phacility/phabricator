@@ -1,0 +1,31 @@
+@title User Guide: Phabricator Clusters
+@group config
+
+Guide on scaling Phabricator across multiple machines, for large installs.
+
+Overview
+========
+
+IMPORTANT: Phabricator clustering is in its infancy and does not work at all
+yet. This document is mostly a placeholder.
+
+Locking Services
+================
+
+Because cluster configuration is defined in Phabricator itself, an attacker
+who compromises an account that can edit the cluster definition has significant
+power. For example, the attacker might be able to configure Phabricator to
+replicate the database to a server they control.
+
+To mitigate this attack, services in Almanac can be locked to prevent them
+from being edited from the web UI. An attacker would then need significantly
+greater access (to the CLI, or directly to the database) in order to change
+the cluster configuration.
+
+You should normally keep cluster services in a locked state, and unlock them
+only to edit them. Once you're finished making changes, lock the service again.
+The web UI will warn you when you're viewing an unlocked cluster service, as
+a reminder that you should lock it again once you're finished editing.
+
+For details on how to lock and unlock a service, see
+@{article:Almanac User Guide}.

@@ -2,6 +2,7 @@
 
 final class HarbormasterBuildStep extends HarbormasterDAO
   implements
+    PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
     PhabricatorCustomFieldInterface {
 
@@ -20,7 +21,7 @@ final class HarbormasterBuildStep extends HarbormasterDAO
     return id(new HarbormasterBuildStep());
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
@@ -85,6 +86,29 @@ final class HarbormasterBuildStep extends HarbormasterDAO
     }
 
     return $this->implementation;
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new HarbormasterBuildStepEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new HarbormasterBuildStepTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
   }
 
 

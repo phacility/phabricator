@@ -159,7 +159,7 @@ final class HarbormasterBuildableSearchEngine
     return '/harbormaster/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     return array(
       'all' => pht('All Buildables'),
     );

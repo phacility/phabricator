@@ -1,7 +1,9 @@
 <?php
 
 final class PhortuneMerchant extends PhortuneDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorPolicyInterface {
 
   protected $name;
   protected $viewPolicy;
@@ -15,7 +17,7 @@ final class PhortuneMerchant extends PhortuneDAO
       ->attachMemberPHIDs(array());
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
@@ -37,6 +39,29 @@ final class PhortuneMerchant extends PhortuneDAO
   public function attachMemberPHIDs(array $member_phids) {
     $this->memberPHIDs = $member_phids;
     return $this;
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhortuneMerchantEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhortuneMerchantTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
   }
 
 

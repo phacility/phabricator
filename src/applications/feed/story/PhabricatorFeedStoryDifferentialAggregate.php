@@ -55,7 +55,6 @@ final class PhabricatorFeedStoryDifferentialAggregate
     }
 
     $view = $this->newStoryView();
-    $view->setAppIcon('differential-dark');
     $view->setTitle($title);
 
     $href = $this->getHandle($data->getValue('revision_phid'))->getURI();

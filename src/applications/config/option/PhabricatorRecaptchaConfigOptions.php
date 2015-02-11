@@ -11,6 +11,14 @@ final class PhabricatorRecaptchaConfigOptions
     return pht('Configure Recaptcha captchas.');
   }
 
+  public function getFontIcon() {
+    return 'fa-recycle';
+  }
+
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
 
     return array(

@@ -20,7 +20,7 @@ JX.behavior('slowvote-embed', function() {
 
       var request = new JX.Request(voteURI, function(r) {
         var updated_poll = JX.$H(r.contentHTML);
-        var root = JX.$('base-page');
+        var root = JX.$('phabricator-standard-page');
 
         var polls = JX.DOM.scry(root, 'div', 'slowvote-embed');
 

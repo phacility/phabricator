@@ -1,0 +1,40 @@
+@title Almanac User Guide
+@group userguide
+
+Using Almanac to manage services.
+
+= Overview =
+
+IMPORTANT: Almanac is a prototype application. See
+@{article:User Guide: Prototype Applications}.
+
+Locking and Unlocking Services
+==============================
+
+Services can be locked to prevent edits from the web UI. This primarily hardens
+Almanac against attacks involving account compromise. Notably, locking cluster
+services prevents an attacker from modifying the Phabricator cluster definition.
+For more details on this scenario, see
+@{article:User Guide: Phabricator Clusters}.
+
+Beyond hardening cluster definitions, you might also want to lock a service to
+prevent accidental edits.
+
+To lock a service, run:
+
+  phabricator/ $ ./bin/almanac lock <service>
+
+To unlock a service later, run:
+
+  phabricator/ $ ./bin/almanac unlock <service>
+
+Locking a service also locks all of the service's bindings and properties, as
+well as the devices connected to the service. Generally, no part of the
+service definition can be modified while it is locked.
+
+Devices (and their properties) will remain locked as long as they are bound to
+at least one locked service. To edit a device, you'll need to unlock all the
+services it is bound to.
+
+Locked services and devices will show that they are locked in the web UI, and
+editing options will be unavailable.

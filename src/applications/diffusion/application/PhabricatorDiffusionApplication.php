@@ -14,8 +14,8 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
     return '/diffusion/';
   }
 
-  public function getIconName() {
-    return 'diffusion';
+  public function getFontIcon() {
+    return 'fa-code';
   }
 
   public function isPinnedByDefault(PhabricatorUser $viewer) {
@@ -40,8 +40,9 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
 
   public function getRemarkupRules() {
     return array(
-      new DiffusionRepositoryRemarkupRule(),
       new DiffusionCommitRemarkupRule(),
+      new DiffusionRepositoryRemarkupRule(),
+      new DiffusionRepositoryByIDRemarkupRule(),
     );
   }
 
@@ -88,7 +89,7 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
             'actions/' => 'DiffusionRepositoryEditActionsController',
             '(?P<edit>remote)/' => 'DiffusionRepositoryCreateController',
             '(?P<edit>policy)/' => 'DiffusionRepositoryCreateController',
-            'local/' => 'DiffusionRepositoryEditLocalController',
+            'storage/' => 'DiffusionRepositoryEditStorageController',
             'delete/' => 'DiffusionRepositoryEditDeleteController',
             'hosting/' => 'DiffusionRepositoryEditHostingController',
             '(?P<serve>serve)/' => 'DiffusionRepositoryEditHostingController',

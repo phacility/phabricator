@@ -37,8 +37,8 @@ abstract class PhameController extends PhabricatorController {
 
     foreach ($posts as $post) {
       $blogger = $this->getHandle($post->getBloggerPHID())->renderLink();
-      $bloggerURI = $this->getHandle($post->getBloggerPHID())->getURI();
-      $bloggerImage = $this->getHandle($post->getBloggerPHID())->getImageURI();
+      $blogger_uri = $this->getHandle($post->getBloggerPHID())->getURI();
+      $blogger_image = $this->getHandle($post->getBloggerPHID())->getImageURI();
 
       $blog = null;
       if ($post->getBlog()) {
@@ -71,9 +71,9 @@ abstract class PhameController extends PhabricatorController {
 
       $story = id(new PHUIFeedStoryView())
         ->setTitle($title)
-        ->setImage($bloggerImage)
-        ->setImageHref($bloggerURI)
-        ->setAppIcon('phame-dark')
+        ->setImage($blogger_image)
+        ->setImageHref($blogger_uri)
+        ->setAppIcon('fa-star')
         ->setUser($viewer)
         ->setPontification($phame_post, $phame_title);
 
@@ -95,8 +95,8 @@ abstract class PhameController extends PhabricatorController {
     }
 
     if (empty($stories)) {
-      return id(new AphrontErrorView())
-        ->setSeverity(AphrontErrorView::SEVERITY_NODATA)
+      return id(new PHUIErrorView())
+        ->setSeverity(PHUIErrorView::SEVERITY_NODATA)
         ->appendChild($nodata);
     }
 

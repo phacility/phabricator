@@ -149,7 +149,7 @@ final class PhabricatorRepositorySearchEngine
     return '/diffusion/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array(
       'active' => pht('Active Repositories'),
       'all' => pht('All Repositories'),

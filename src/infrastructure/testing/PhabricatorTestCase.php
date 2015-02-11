@@ -218,5 +218,12 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
     }
   }
 
+  protected function requireBinaryForTest($binary) {
+    if (!Filesystem::binaryExists($binary)) {
+      $this->assertSkipped(
+        pht('No binary "%s" found on this system, skipping test.', $binary));
+    }
+  }
+
 
 }

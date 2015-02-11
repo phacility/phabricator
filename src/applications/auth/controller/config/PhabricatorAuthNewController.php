@@ -3,7 +3,9 @@
 final class PhabricatorAuthNewController
   extends PhabricatorAuthProviderConfigController {
 
-  public function processRequest() {
+  public function handleRequest(AphrontRequest $request) {
+    $this->requireApplicationCapability(
+      AuthManageProvidersCapability::CAPABILITY);
     $request = $this->getRequest();
     $viewer = $request->getUser();
 

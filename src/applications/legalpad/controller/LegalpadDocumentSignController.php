@@ -65,8 +65,8 @@ final class LegalpadDocumentSignController extends LegalpadController {
         // If they aren't logged in, we can't be as sure, so don't show
         // anything.
         if ($viewer->isLoggedIn()) {
-          $signed_status = id(new AphrontErrorView())
-            ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
+          $signed_status = id(new PHUIErrorView())
+            ->setSeverity(PHUIErrorView::SEVERITY_WARNING)
             ->setErrors(
               array(
                 pht('You have not signed this document yet.'),
@@ -95,8 +95,8 @@ final class LegalpadDocumentSignController extends LegalpadController {
             phabricator_datetime($signed_at, $viewer));
         }
 
-        $signed_status = id(new AphrontErrorView())
-          ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+        $signed_status = id(new PHUIErrorView())
+          ->setSeverity(PHUIErrorView::SEVERITY_NOTICE)
           ->setErrors(array($signed_text));
       }
 
@@ -121,8 +121,8 @@ final class LegalpadDocumentSignController extends LegalpadController {
         $login_text = pht(
           'This document requires a corporate signatory. You must log in to '.
           'accept this document on behalf of a company you represent.');
-        $signed_status = id(new AphrontErrorView())
-          ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
+        $signed_status = id(new PHUIErrorView())
+          ->setSeverity(PHUIErrorView::SEVERITY_WARNING)
           ->setErrors(array($login_text));
       }
 
@@ -254,7 +254,7 @@ final class LegalpadDocumentSignController extends LegalpadController {
     if (!$has_signed) {
       $error_view = null;
       if ($errors) {
-        $error_view = id(new AphrontErrorView())
+        $error_view = id(new PHUIErrorView())
           ->setErrors($errors);
       }
 
@@ -276,6 +276,7 @@ final class LegalpadDocumentSignController extends LegalpadController {
     }
 
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setBorder(true);
     $crumbs->addTextCrumb($document->getMonogram());
 
     return $this->buildApplicationPage(

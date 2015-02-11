@@ -14,18 +14,16 @@ final class PhabricatorDaemonTaskGarbageCollector
     $data_table = new PhabricatorWorkerTaskData();
     $conn_w = $table->establishConnection('w');
 
-    $rows = queryfx_all(
-      $conn_w,
-      'SELECT id, dataID FROM %T WHERE dateCreated < %d LIMIT 100',
-      $table->getTableName(),
-      time() - $ttl);
+    $tasks = id(new PhabricatorWorkerArchiveTaskQuery())
+      ->withDateCreatedBefore(time() - $ttl)
+      ->execute();
 
-    if (!$rows) {
+    if (!$tasks) {
       return false;
     }
 
-    $data_ids = array_filter(ipull($rows, 'dataID'));
-    $task_ids = ipull($rows, 'id');
+    $data_ids = array_filter(mpull($tasks, 'getDataID'));
+    $task_ids = mpull($tasks, 'getID');
 
     $table->openTransaction();
       if ($data_ids) {

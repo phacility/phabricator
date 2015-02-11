@@ -39,7 +39,7 @@
 }
 
 .device-phone .phui-sidenav-view .phui-document-inner {
- margin: 0;
+  margin: 0;
 }
 
 .phui-sidenav-view .phui-document-inner {
@@ -81,12 +81,12 @@
 .phui-document-content
   .phui-header-shell.phui-header-no-backgound
   .phui-header-view {
- padding: 8px 0 4px;
- font-size: 15px;
+  padding: 8px 0 4px;
+  font-size: 15px;
 }
 
 .phui-document-content .phui-header-view {
-  color: {$bluetext};
+  color: {$darkbluetext};
   text-shadow: 0 1px 2px #fff;
 }
 

@@ -30,7 +30,7 @@ final class DifferentialAsanaRepresentationField
   public function renderPropertyViewValue(array $handles) {
     $viewer = $this->getViewer();
     $src_phid = $this->getObject()->getPHID();
-    $edge_type = PhabricatorEdgeConfig::TYPE_PHOB_HAS_ASANATASK;
+    $edge_type = PhabricatorObjectHasAsanaTaskEdgeType::EDGECONST;
 
     $query = id(new PhabricatorEdgeQuery())
       ->withSourcePHIDs(array($src_phid))

@@ -3,7 +3,7 @@
 final class PhabricatorRepositoryManagementEditWorkflow
   extends PhabricatorRepositoryManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('edit')
       ->setExamples('**edit** --as __username__ __repository__ ...')

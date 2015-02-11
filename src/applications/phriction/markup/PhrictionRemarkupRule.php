@@ -29,9 +29,12 @@ final class PhrictionRemarkupRule extends PhutilRemarkupRule {
     $slug     = PhrictionDocument::getSlugURI($slug);
     $href     = (string)id(new PhutilURI($slug))->setFragment($fragment);
 
+    $text_mode = $this->getEngine()->isTextMode();
+    $mail_mode = $this->getEngine()->isHTMLMailMode();
+
     if ($this->getEngine()->getState('toc')) {
       $text = $name;
-    } else if ($this->getEngine()->isTextMode()) {
+    } else if ($text_mode || $mail_mode) {
       return PhabricatorEnv::getProductionURI($href);
     } else {
       $text = $this->newTag(

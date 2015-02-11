@@ -17,8 +17,13 @@
 
 .herald-action-table td,
 .herald-condition-table td {
-  padding: 2px 4px;
+  padding: 2px 8px 2px 0;
   vertical-align: middle;
+}
+
+.herald-action-table td.remove-column,
+.herald-condition-table td.remove-column {
+  padding: 2px 0 2px 4px;
 }
 
 .herald-condition-table td.value {

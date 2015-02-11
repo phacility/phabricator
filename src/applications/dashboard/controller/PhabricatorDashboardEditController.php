@@ -297,7 +297,7 @@ final class PhabricatorDashboardEditController
       ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
       ->setMetadataValue(
         'edge:type',
-        PhabricatorEdgeConfig::TYPE_DASHBOARD_HAS_PANEL)
+        PhabricatorDashboardDashboardHasPanelEdgeType::EDGECONST)
       ->setNewValue(
         array(
           '+' => array_fuse($panel_phids),

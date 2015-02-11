@@ -10,11 +10,12 @@ abstract class PhabricatorWorkerTask extends PhabricatorWorkerDAO {
   protected $failureCount;
   protected $dataID;
   protected $priority;
+  protected $objectPHID;
 
   private $data;
   private $executionException;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'taskClass' => 'text64',
@@ -23,6 +24,12 @@ abstract class PhabricatorWorkerTask extends PhabricatorWorkerDAO {
         'failureCount' => 'uint32',
         'failureTime' => 'epoch?',
         'priority' => 'uint32',
+        'objectPHID' => 'phid?',
+      ),
+      self::CONFIG_KEY_SCHEMA => array(
+        'key_object' => array(
+          'columns' => array('objectPHID'),
+        ),
       ),
     ) + parent::getConfiguration();
   }

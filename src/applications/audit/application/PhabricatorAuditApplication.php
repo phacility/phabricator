@@ -6,8 +6,8 @@ final class PhabricatorAuditApplication extends PhabricatorApplication {
     return '/audit/';
   }
 
-  public function getIconName() {
-    return 'audit';
+  public function getFontIcon() {
+    return 'fa-check-circle-o';
   }
 
   public function getName() {
@@ -24,12 +24,6 @@ final class PhabricatorAuditApplication extends PhabricatorApplication {
 
   public function getHelpURI() {
     return PhabricatorEnv::getDoclink('Audit User Guide');
-  }
-
-  public function getEventListeners() {
-    return array(
-      new AuditActionMenuEventListener(),
-    );
   }
 
   public function getRoutes() {
@@ -54,28 +48,38 @@ final class PhabricatorAuditApplication extends PhabricatorApplication {
     $query = id(new DiffusionCommitQuery())
       ->setViewer($user)
       ->withAuthorPHIDs(array($user->getPHID()))
-      ->withAuditStatus(DiffusionCommitQuery::AUDIT_STATUS_CONCERN);
+      ->withAuditStatus(DiffusionCommitQuery::AUDIT_STATUS_CONCERN)
+      ->setLimit(self::MAX_STATUS_ITEMS);
     $commits = $query->execute();
 
     $count = count($commits);
+    $count_str = self::formatStatusCount(
+      $count,
+      '%s Problem Commits',
+      '%d Problem Commit(s)');
     $type = PhabricatorApplicationStatusView::TYPE_NEEDS_ATTENTION;
     $status[] = id(new PhabricatorApplicationStatusView())
       ->setType($type)
-      ->setText(pht('%d Problem Commit(s)', $count))
+      ->setText($count_str)
       ->setCount($count);
 
     $query = id(new DiffusionCommitQuery())
       ->setViewer($user)
       ->withAuditorPHIDs($phids)
       ->withAuditStatus(DiffusionCommitQuery::AUDIT_STATUS_OPEN)
-      ->withAuditAwaitingUser($user);
+      ->withAuditAwaitingUser($user)
+      ->setLimit(self::MAX_STATUS_ITEMS);
     $commits = $query->execute();
 
     $count = count($commits);
+    $count_str = self::formatStatusCount(
+      $count,
+      '%s Commits Awaiting Audit',
+      '%d Commit(s) Awaiting Audit');
     $type = PhabricatorApplicationStatusView::TYPE_WARNING;
     $status[] = id(new PhabricatorApplicationStatusView())
       ->setType($type)
-      ->setText(pht('%d Commit(s) Awaiting Audit', $count))
+      ->setText($count_str)
       ->setCount($count);
 
     return $status;

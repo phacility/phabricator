@@ -1,7 +1,9 @@
 <?php
 
 final class HarbormasterBuild extends HarbormasterDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorPolicyInterface {
 
   protected $buildablePHID;
   protected $buildPlanPHID;
@@ -140,7 +142,7 @@ final class HarbormasterBuild extends HarbormasterDAO
     return $result;
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
@@ -212,7 +214,7 @@ final class HarbormasterBuild extends HarbormasterDAO
     $log_type) {
 
     $log_source = id(new PhutilUTF8StringTruncator())
-      ->setMaximumCodepoints(250)
+      ->setMaximumBytes(250)
       ->truncateString($log_source);
 
     $log = HarbormasterBuildLog::initializeNewBuildLog($build_target)
@@ -399,6 +401,29 @@ final class HarbormasterBuild extends HarbormasterDAO
     }
 
     return $this;
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new HarbormasterBuildTransactionEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new HarbormasterBuildTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
   }
 
 

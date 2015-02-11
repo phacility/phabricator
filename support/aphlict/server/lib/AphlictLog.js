@@ -1,34 +1,31 @@
-var JX = require('javelin').JX;
+'use strict';
+
+var JX = require('./javelin').JX;
 
 var fs = require('fs');
 var util = require('util');
 
 JX.install('AphlictLog', {
   construct: function() {
-    this._writeToLogs = [];
-    this._writeToConsoles = [];
+    this._consoles = [];
+    this._logs = [];
   },
 
   members: {
-    _writeToConsoles: null,
-    _writeToLogs: null,
+    _consoles: null,
+    _logs: null,
 
-    addLogfile: function(path) {
-      var options = {
-        flags: 'a',
-        encoding: 'utf8',
-        mode: 066
-      };
-
-      var logfile = fs.createWriteSteam(path, options);
-
-      this._writeToLogs.push(logfile);
-
+    addConsole: function(console) {
+      this._consoles.push(console);
       return this;
     },
 
-    addConsole: function(console) {
-      this._writeToConsoles.push(console);
+    addLog: function(path) {
+      this._logs.push(fs.createWriteStream(path, {
+        flags: 'a',
+        encoding: 'utf8',
+        mode: '0664',
+      }));
       return this;
     },
 
@@ -38,15 +35,13 @@ JX.install('AphlictLog', {
       str = '[' + date + '] ' + str;
 
       var ii;
-      for (ii = 0; ii < this._writeToConsoles.length; ii++) {
-        this._writeToConsoles[ii].log(str);
+      for (ii = 0; ii < this._consoles.length; ii++) {
+        this._consoles[ii].log(str);
       }
 
-      for (ii = 0; ii < this._writeToLogs.length; ii++) {
-        this._writeToLogs[ii].write(str + '\n');
+      for (ii = 0; ii < this._logs.length; ii++) {
+        this._logs[ii].write(str + '\n');
       }
-    }
-
-  }
-
+    },
+  },
 });

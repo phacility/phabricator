@@ -234,7 +234,7 @@ abstract class HarbormasterBuildStepImplementation {
     HarbormasterBuildTarget $target,
     Future $future) {
 
-    $futures = Futures(array($future));
+    $futures = new FutureIterator(array($future));
     foreach ($futures->setUpdateInterval(5) as $key => $future) {
       if ($future === null) {
         $build->reload();

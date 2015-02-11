@@ -70,8 +70,8 @@ final class PhamePostNewController extends PhameController {
     $nav->appendChild($crumbs);
 
     if (!$blogs) {
-      $notification = id(new AphrontErrorView())
-        ->setSeverity(AphrontErrorView::SEVERITY_NODATA)
+      $notification = id(new PHUIErrorView())
+        ->setSeverity(PHUIErrorView::SEVERITY_NODATA)
         ->appendChild(
           pht('You do not have permission to join any blogs. Create a blog '.
               'first, then you can post to it.'));

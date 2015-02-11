@@ -58,7 +58,7 @@ final class HarbormasterBuildPlanSearchEngine
     return '/harbormaster/plan/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     return array(
       'active' => pht('Active Plans'),
       'all' => pht('All Plans'),

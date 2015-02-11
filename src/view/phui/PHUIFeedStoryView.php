@@ -192,9 +192,8 @@ final class PHUIFeedStoryView extends AphrontView {
 
     $icon = null;
     if ($this->appIcon) {
-      $icon = new PHUIIconView();
-      $icon->setSpriteIcon($this->appIcon);
-      $icon->setSpriteSheet(PHUIIconView::SPRITE_APPS);
+      $icon = id(new PHUIIconView())
+        ->setIconFont($this->appIcon);
     }
 
     $action_list = array();
@@ -275,23 +274,4 @@ final class PHUIFeedStoryView extends AphrontView {
       ->appendChild(array($head, $body, $foot));
   }
 
-  public function setAppIconFromPHID($phid) {
-    switch (phid_get_type($phid)) {
-      case PholioMockPHIDType::TYPECONST:
-        $this->setAppIcon('pholio-dark');
-        break;
-      case PhabricatorMacroMacroPHIDType::TYPECONST:
-        $this->setAppIcon('macro-dark');
-        break;
-      case ManiphestTaskPHIDType::TYPECONST:
-        $this->setAppIcon('maniphest-dark');
-        break;
-      case DifferentialRevisionPHIDType::TYPECONST:
-        $this->setAppIcon('differential-dark');
-        break;
-      case PhabricatorCalendarEventPHIDType::TYPECONST:
-        $this->setAppIcon('calendar-dark');
-        break;
-    }
-  }
 }

@@ -169,7 +169,7 @@ final class PhabricatorSearchApplicationSearchEngine
     return '/search/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     return array(
       'all' => pht('All Documents'),
       'open' => pht('Open Documents'),

@@ -16,6 +16,7 @@ final class PhabricatorFileComposeController
       'sky' => pht('Wide Open Sky'),
       'indigo' => pht('Pleated Khaki'),
       'violet' => pht('Aged Merlot'),
+      'pink' => pht('Easter Bunny'),
       'charcoal' => pht('Gemstone'),
       'backdrop' => pht('Driven Snow'),
     );
@@ -23,24 +24,71 @@ final class PhabricatorFileComposeController
     $manifest = PHUIIconView::getSheetManifest(PHUIIconView::SPRITE_PROJECTS);
 
     if ($request->isFormPost()) {
-      $icon = $request->getStr('icon');
-      $color = $request->getStr('color');
+      $project_phid = $request->getStr('projectPHID');
+      if ($project_phid) {
+        $project = id(new PhabricatorProjectQuery())
+          ->setViewer($viewer)
+          ->withPHIDs(array($project_phid))
+          ->requireCapabilities(
+            array(
+              PhabricatorPolicyCapability::CAN_VIEW,
+              PhabricatorPolicyCapability::CAN_EDIT,
+            ))
+          ->executeOne();
+        if (!$project) {
+          return new Aphront404Response();
+        }
+        $icon = $project->getIcon();
+        $color = $project->getColor();
+        switch ($color) {
+          case 'grey':
+            $color = 'charcoal';
+            break;
+          case 'checkered':
+            $color = 'backdrop';
+            break;
+        }
+      } else {
+        $icon = $request->getStr('icon');
+        $color = $request->getStr('color');
+      }
 
-      if (isset($colors[$color]) && isset($manifest['projects-'.$icon])) {
-        $root = dirname(phutil_get_library_root('phabricator'));
-        $icon_file = $root.'/resources/sprite/projects_1x/'.$icon.'.png';
-        $icon_data = Filesystem::readFile($icon_file);
+      if (!isset($colors[$color]) || !isset($manifest['projects-'.$icon])) {
+        return new Aphront404Response();
+      }
+
+      $root = dirname(phutil_get_library_root('phabricator'));
+      $icon_file = $root.'/resources/sprite/projects_1x/'.$icon.'.png';
+      $icon_data = Filesystem::readFile($icon_file);
 
 
-        $data = $this->composeImage($color, $icon_data);
+      $data = $this->composeImage($color, $icon_data);
 
-        $file = PhabricatorFile::buildFromFileDataOrHash(
-          $data,
-          array(
-            'name' => 'project.png',
-            'canCDN' => true,
-          ));
+      $file = PhabricatorFile::buildFromFileDataOrHash(
+        $data,
+        array(
+          'name' => 'project.png',
+          'canCDN' => true,
+        ));
 
+      if ($project_phid) {
+        $edit_uri = '/project/profile/'.$project->getID().'/';
+
+        $xactions = array();
+        $xactions[] = id(new PhabricatorProjectTransaction())
+          ->setTransactionType(PhabricatorProjectTransaction::TYPE_IMAGE)
+          ->setNewValue($file->getPHID());
+
+        $editor = id(new PhabricatorProjectTransactionEditor())
+          ->setActor($viewer)
+          ->setContentSourceFromRequest($request)
+          ->setContinueOnMissingFields(true)
+          ->setContinueOnNoEffect(true);
+
+        $editor->applyTransactions($project, $xactions);
+
+        return id(new AphrontRedirectResponse())->setURI($edit_uri);
+      } else {
         $content = array(
           'phid' => $file->getPHID(),
         );
@@ -71,6 +119,30 @@ final class PhabricatorFileComposeController
         id(new PHUIIconView())
           ->addClass('compose-background-'.$color));
     }
+
+     $sort_these_first = array(
+      'projects-fa-briefcase',
+      'projects-fa-tags',
+      'projects-fa-folder',
+      'projects-fa-group',
+      'projects-fa-bug',
+      'projects-fa-trash-o',
+      'projects-fa-calendar',
+      'projects-fa-flag-checkered',
+      'projects-fa-envelope',
+      'projects-fa-truck',
+      'projects-fa-lock',
+      'projects-fa-umbrella',
+      'projects-fa-cloud',
+      'projects-fa-building',
+      'projects-fa-credit-card',
+      'projects-fa-flask',
+    );
+
+    $manifest = array_select_keys(
+      $manifest,
+      $sort_these_first)
+    + $manifest;
 
     $icons = array();
 
@@ -131,6 +203,22 @@ final class PhabricatorFileComposeController
       'twitter' => pht('Bird Stencil'),
       'warning' => pht('No Caution Required, Everything Looks Safe'),
       'whale' => pht('Friendly Walrus'),
+      'fa-flask' => pht('Experimental'),
+      'fa-briefcase' => pht('Briefcase'),
+      'fa-bug' => pht('Bug'),
+      'fa-building' => pht('Company'),
+      'fa-calendar' => pht('Deadline'),
+      'fa-cloud' => pht('The Cloud'),
+      'fa-credit-card' => pht('Accounting'),
+      'fa-envelope' => pht('Communication'),
+      'fa-flag-checkered' => pht('Goal'),
+      'fa-folder' => pht('Folder'),
+      'fa-group' => pht('Team'),
+      'fa-lock' => pht('Policy'),
+      'fa-tags' => pht('Tag'),
+      'fa-trash-o' => pht('Garbage'),
+      'fa-truck' => pht('Release'),
+      'fa-umbrella' => pht('An Umbrella'),
     );
 
     foreach ($manifest as $icon => $spec) {

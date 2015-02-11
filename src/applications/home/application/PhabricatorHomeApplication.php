@@ -16,8 +16,8 @@ final class PhabricatorHomeApplication extends PhabricatorApplication {
     return pht('Command Center');
   }
 
-  public function getIconName() {
-    return 'home';
+  public function getFontIcon() {
+    return 'fa-home';
   }
 
   public function getRoutes() {
@@ -46,9 +46,12 @@ final class PhabricatorHomeApplication extends PhabricatorApplication {
     PhabricatorUser $user,
     PhabricatorController $controller = null) {
 
+    $quick_create_items = $this->loadAllQuickCreateItems($user);
     $items = array();
 
-    if ($user->isLoggedIn() && $user->isUserActivated()) {
+    if ($user->isLoggedIn() &&
+        $user->isUserActivated() &&
+        $quick_create_items) {
       $create_id = celerity_generate_unique_node_id();
       Javelin::initBehavior(
         'aphlict-dropdown',
@@ -62,7 +65,7 @@ final class PhabricatorHomeApplication extends PhabricatorApplication {
 
       $item = id(new PHUIListItemView())
         ->setName(pht('Create New...'))
-        ->setIcon('new-sm')
+        ->setIcon('fa-plus')
         ->addClass('core-menu-item')
         ->setHref('/home/create/')
         ->addSigil('quick-create-menu')
@@ -98,20 +101,24 @@ final class PhabricatorHomeApplication extends PhabricatorApplication {
 
     $items = $this->loadAllQuickCreateItems($viewer);
 
-    $view = new PHUIListView();
-    $view->newLabel(pht('Create New...'));
-    foreach ($items as $item) {
-      $view->addMenuItem($item);
-    }
+    $view = null;
+    if ($items) {
+      $view = new PHUIListView();
+      $view->newLabel(pht('Create New...'));
+      foreach ($items as $item) {
+        $view->addMenuItem($item);
+      }
 
-    return phutil_tag(
-      'div',
-      array(
-        'id' => 'phabricator-quick-create-menu',
-        'class' => 'phabricator-main-menu-dropdown phui-list-sidenav',
-        'style' => 'display: none',
-      ),
-      $view);
+      return phutil_tag(
+        'div',
+        array(
+          'id' => 'phabricator-quick-create-menu',
+          'class' => 'phabricator-main-menu-dropdown phui-list-sidenav',
+          'style' => 'display: none',
+        ),
+        $view);
+    }
+    return $view;
   }
 
 }

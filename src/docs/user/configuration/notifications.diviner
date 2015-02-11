@@ -3,7 +3,8 @@
 
 Guide to setting up notifications.
 
-= Overview =
+Overview
+========
 
 By default, Phabricator delivers information about events (like users creating
 tasks or commenting on code reviews) through email and in-application
@@ -20,62 +21,150 @@ To enable real-time notifications:
 
 This document describes the process in detail.
 
-= Running the Aphlict Server =
 
-Phabricator implements realtime notifications using a Node.js server called
-"Aphlict". To run it:
+Supported Browsers
+==================
 
-  - Install node.js.
-  - Run `bin/aphlict start` (this script must be run as root).
+Notifications are supported for browsers which support WebSockets. This covers
+most modern browsers (like Chrome, Firefox, Safari, and recent versions of
+Internet Explorer) and many mobile browsers.
 
-The server must be able to listen on port **843** and port **22280** for Aphlict
-to work. You can change the latter port in the `notification.client-uri` config,
-but port 843 is used by Flash and can not be changed. In particular, if you're
-running in EC2, you need to unblock both of these ports in the server's security
-group configuration.
+IE8 and IE9 do not support WebSockets, so real-time notifications won't work in
+those browsers.
 
-You may want to adjust these settings:
+
+Installing Node and Modules
+===========================
+
+The notification server uses Node.js, so you'll need to install it first.
+
+To install Node.js, follow the instructions on
+[[ http://nodejs.org | nodejs.org ]].
+
+You will also need to install the `ws` module for Node. This needs to be
+installed into the notification server directory:
+
+  phabricator/ $ cd support/aphlict/server/
+  phabricator/support/aphlict/server/ $ npm install ws
+
+Once Node.js and the `ws` module are installed, you're ready to start the
+server.
+
+
+Running the Aphlict Server
+==========================
+
+After installing Node.js, you can control the notification server with the
+`bin/aphlict` command. To start the server:
+
+  phabricator/ $ bin/aphlict start
+
+The server must be able to listen on port **22280** for Aphlict to work. In
+particular, if you're running in EC2, you need to unblock this port in the
+server's security group configuration. You can change this port in the
+`notification.client-uri` config.
+
+You may need to adjust these settings:
+
+  - `notification.ssl-cert` Point this at an SSL certificate for secure
+    WebSockets.
+  - `notification.ssl-key` Point this at an SSL keyfile for secure WebSockets.
+
+In particular, if your server uses HTTPS, you **must** configure these options.
+Browsers will not allow you to use non-SSL websockets from an SSL web page.
+
+You may also want to adjust these settings:
 
   - `notification.client-uri` Externally-facing host and port that browsers will
     connect to in order to listen for notifications.
   - `notification.server-uri` Internally-facing host and port that Phabricator
     will connect to in order to publish notifications.
   - `notification.log` Log file location for the server.
-  - `notification.user` Non-root user to drop permissions to after binding to
-    privileged ports.
   - `notification.pid` Pidfile location used to stop any running server when
     aphlict is restarted.
 
-In most cases, the defaults are appropriate, except that you should set
-`notification.user` to some valid system user so Aphlict isn't running as root.
 
-== Verifying Server Status ==
+Verifying Server Status
+=======================
 
 Access `/notification/status/` to verify the server is operational. You should
 see a table showing stats like "uptime" and connection/message counts if the
 server is working. If it isn't working, you should see an error.
 
-== Testing the Server ==
+You can also send a test notification by clicking the button in the upper right
+corner of this screen.
 
-The easiest way to test the server is to have two users login and comment on
-the same Maniphest Task or Differential Revision. They should receive in-browser
-notifications about the other user's activity.
 
-NOTE: This is cumbersome. There will be better testing tools at some point.
-
-== Debugging Server Problems ==
+Troubleshooting
+===============
 
 You can run `aphlict` in the foreground to get output to your console:
 
-  phabricator/ $ sudo ./bin/aphlict debug
+  phabricator/ $ ./bin/aphlict debug
 
-You can run `support/aphlict/client/aphlict_test_client.php` to connect to the
-Aphlict server from the command line. Messages the client receives will be
-printed to stdout.
-
-You can set `notification.debug` in your configuration to get additional
-output in your browser.
+Because the notification server uses WebSockets, your browser error console
+may also have information that is useful in figuring out what's wrong.
 
 The server also generates a log, by default in `/var/log/aphlict.log`. You can
 change this location by changing `notification.log` in your configuration. The
 log may contain information useful in resolving issues.
+
+
+Advanced Usage
+==============
+
+It is possible to route the WebSockets traffic for Aphlict through a reverse
+proxy such as `nginx` (see @{article:Configuration Guide} for instructions on
+configuring `nginx`). In order to do this with `nginx`, you will require at
+least version 1.3. You can read some more information about using `nginx` with
+WebSockets at http://nginx.com/blog/websocket-nginx/.
+
+There are a few benefits of this approach:
+
+  - SSL is terminated at the `nginx` layer and consequently there is no need to
+    configure `notificaton.ssl-cert` and `notification.ssl-key` (in fact, with
+    this approach you should //not// configure these options because otherwise
+    the Aphlict server will not accept HTTP traffic).
+  - You don't have to open up a separate port on the server.
+  - Clients don't need to be able to connect to Aphlict over a non-standard
+    port which may be blocked by a firewall or anti-virus software.
+
+The following files show an example `nginx` configuration. Note that this is an
+example only and you may need to adjust this to suit your own setup.
+
+```lang=nginx, name=/etc/nginx/conf.d/connection_upgrade.conf
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    '' close;
+}
+```
+
+```lang=nginx, name=/etc/nginx/conf.d/websocket_pool.conf
+upstream websocket_pool {
+    ip_hash;
+    server 127.0.0.1:22280;
+}
+```
+
+```lang=nginx, name=/etc/nginx/sites-enabled/phabricator.example.com.conf
+server {
+  server_name phabricator.example.com;
+  root        /path/to/phabricator/webroot;
+
+  // ...
+
+  location = /ws/ {
+    proxy_pass http://websocket_pool;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_read_timeout 999999999;
+  }
+}
+```
+
+With this approach, you should set `notification.client-uri` to
+`http://localhost/ws/`. Additionally, there is no need for the Aphlict server
+to bind to `0.0.0.0` anymore (which is the default behavior), so you could
+start the Aphlict server with `./bin/aphlict start --client-host=localhost`
+instead.

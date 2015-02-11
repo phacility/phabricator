@@ -69,13 +69,25 @@ class PhabricatorApplicationTransactionFeedStory
     $handle = $this->getHandle($this->getPrimaryObjectPHID());
     $view->setHref($handle->getURI());
 
-    $view->setAppIconFromPHID($handle->getPHID());
+    $type = phid_get_type($handle->getPHID());
+    $phid_types = PhabricatorPHIDType::getAllTypes();
+    $icon = null;
+    if (!empty($phid_types[$type])) {
+      $phid_type = $phid_types[$type];
+      $class = $phid_type->getPHIDTypeApplicationClass();
+      if ($class) {
+        $application = PhabricatorApplication::getByClass($class);
+        $icon = $application->getFontIcon();
+      }
+    }
+
+    $view->setAppIcon($icon);
 
     $xaction_phids = $this->getValue('transactionPHIDs');
     $xaction = $this->getPrimaryTransaction();
 
     $xaction->setHandles($this->getHandles());
-    $view->setTitle($xaction->getTitleForFeed($this));
+    $view->setTitle($xaction->getTitleForFeed());
 
     foreach ($xaction_phids as $xaction_phid) {
       $secondary_xaction = $this->getObject($xaction_phid);
@@ -99,7 +111,7 @@ class PhabricatorApplicationTransactionFeedStory
     $new_target = PhabricatorApplicationTransaction::TARGET_TEXT;
     $xaction->setRenderingTarget($new_target);
     $xaction->setHandles($this->getHandles());
-    $text = $xaction->getTitleForFeed($this);
+    $text = $xaction->getTitleForFeed();
     $xaction->setRenderingTarget($old_target);
     return $text;
   }

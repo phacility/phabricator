@@ -87,30 +87,11 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       ->addMargin(PHUI::MARGIN_LARGE_TOP);
 
     $crumbs = $this->buildApplicationCrumbs($this->buildSideNavView())
-      ->setActionList($actions)
       ->addTextCrumb('P'.$paste->getID(), '/P'.$paste->getID());
 
-    $xactions = id(new PhabricatorPasteTransactionQuery())
-      ->setViewer($request->getUser())
-      ->withObjectPHIDs(array($paste->getPHID()))
-      ->execute();
-
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($user);
-    foreach ($xactions as $xaction) {
-      if ($xaction->getComment()) {
-        $engine->addObject(
-          $xaction->getComment(),
-          PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
-      }
-    }
-    $engine->process();
-
-    $timeline = id(new PhabricatorApplicationTransactionView())
-      ->setUser($user)
-      ->setObjectPHID($paste->getPHID())
-      ->setTransactions($xactions)
-      ->setMarkupEngine($engine);
+    $timeline = $this->buildTransactionTimeline(
+      $paste,
+      new PhabricatorPasteTransactionQuery());
 
     $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
 

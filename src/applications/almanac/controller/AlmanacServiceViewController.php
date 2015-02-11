@@ -35,21 +35,26 @@ final class AlmanacServiceViewController
       ->setHeader($header)
       ->addPropertyList($property_list);
 
+    $messages = $service->getServiceType()->getStatusMessages($service);
+    if ($messages) {
+      $box->setFormErrors($messages);
+    }
+
+    if ($service->getIsLocked()) {
+      $this->addLockMessage(
+        $box,
+        pht('This service is locked, and can not be edited.'));
+    }
+
     $bindings = $this->buildBindingList($service);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($service->getName());
 
-    $xactions = id(new AlmanacServiceTransactionQuery())
-      ->setViewer($viewer)
-      ->withObjectPHIDs(array($service->getPHID()))
-      ->execute();
-
-    $xaction_view = id(new PhabricatorApplicationTransactionView())
-      ->setUser($viewer)
-      ->setObjectPHID($service->getPHID())
-      ->setTransactions($xactions)
-      ->setShouldTerminate(true);
+    $timeline = $this->buildTransactionTimeline(
+      $service,
+      new AlmanacServiceTransactionQuery());
+    $timeline->setShouldTerminate(true);
 
     return $this->buildApplicationPage(
       array(
@@ -57,7 +62,7 @@ final class AlmanacServiceViewController
         $box,
         $bindings,
         $this->buildAlmanacPropertiesTable($service),
-        $xaction_view,
+        $timeline,
       ),
       array(
         'title' => $title,
@@ -70,6 +75,10 @@ final class AlmanacServiceViewController
     $properties = id(new PHUIPropertyListView())
       ->setUser($viewer)
       ->setObject($service);
+
+    $properties->addProperty(
+      pht('Service Type'),
+      $service->getServiceType()->getServiceTypeShortName());
 
     return $properties;
   }

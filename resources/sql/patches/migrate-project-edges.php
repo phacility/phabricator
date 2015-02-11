@@ -25,7 +25,7 @@ foreach (new LiskMigrationIterator($table) as $proj) {
   foreach ($members as $user_phid) {
     $editor->addEdge(
       $proj->getPHID(),
-      PhabricatorEdgeConfig::TYPE_PROJ_MEMBER,
+      PhabricatorProjectProjectHasMemberEdgeType::EDGECONST,
       $user_phid);
   }
   $editor->save();

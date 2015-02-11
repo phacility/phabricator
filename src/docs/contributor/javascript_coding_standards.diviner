@@ -18,7 +18,6 @@ guidelines, you can probably get away with skimming this document.
 
   - Use two spaces for indentation. Don't use literal tab characters.
   - Use Unix linebreaks ("\n"), not MSDOS ("\r\n") or OS9 ("\r").
-  - Use K&R style braces and spacing.
   - Put a space after control keywords like ##if## and ##for##.
   - Put a space after commas in argument lists.
   - Put space around operators like ##=##, ##<##, etc.

@@ -12,6 +12,12 @@ final class PhabricatorRepositoryQuery
   private $remoteURIs;
   private $anyProjectPHIDs;
 
+  private $numericIdentifiers;
+  private $callsignIdentifiers;
+  private $phidIdentifiers;
+
+  private $identifierMap;
+
   const STATUS_OPEN = 'status-open';
   const STATUS_CLOSED = 'status-closed';
   const STATUS_ALL = 'status-all';
@@ -44,6 +50,27 @@ final class PhabricatorRepositoryQuery
 
   public function withCallsigns(array $callsigns) {
     $this->callsigns = $callsigns;
+    return $this;
+  }
+
+  public function withIdentifiers(array $identifiers) {
+    $ids = array(); $callsigns = array(); $phids = array();
+    foreach ($identifiers as $identifier) {
+      if (ctype_digit($identifier)) {
+        $ids[$identifier] = $identifier;
+      } else {
+        $repository_type = PhabricatorRepositoryRepositoryPHIDType::TYPECONST;
+        if (phid_get_type($identifier) === $repository_type) {
+          $phids[$identifier] = $identifier;
+        } else {
+          $callsigns[$identifier] = $identifier;
+        }
+      }
+    }
+
+    $this->numericIdentifiers = $ids;
+    $this->callsignIdentifiers = $callsigns;
+    $this->phidIdentifiers = $phids;
     return $this;
   }
 
@@ -102,9 +129,21 @@ final class PhabricatorRepositoryQuery
     return $this;
   }
 
+  public function getIdentifierMap() {
+    if ($this->identifierMap === null) {
+      throw new Exception(
+        'You must execute() the query before accessing the identifier map.');
+    }
+    return $this->identifierMap;
+  }
+
   protected function loadPage() {
     $table = new PhabricatorRepository();
     $conn_r = $table->establishConnection('r');
+
+    if ($this->identifierMap === null) {
+      $this->identifierMap = array();
+    }
 
     $data = queryfx_all(
       $conn_r,
@@ -147,7 +186,7 @@ final class PhabricatorRepositoryQuery
     return $repositories;
   }
 
-  public function willFilterPage(array $repositories) {
+  protected function willFilterPage(array $repositories) {
     assert_instances_of($repositories, 'PhabricatorRepository');
 
     // TODO: Denormalize repository status into the PhabricatorRepository
@@ -202,10 +241,39 @@ final class PhabricatorRepositoryQuery
       }
     }
 
+    // Build the identifierMap
+    if ($this->numericIdentifiers) {
+      foreach ($this->numericIdentifiers as $id) {
+        if (isset($repositories[$id])) {
+          $this->identifierMap[$id] = $repositories[$id];
+        }
+      }
+    }
+
+    if ($this->callsignIdentifiers) {
+      $repository_callsigns = mpull($repositories, null, 'getCallsign');
+
+      foreach ($this->callsignIdentifiers as $callsign) {
+        if (isset($repository_callsigns[$callsign])) {
+          $this->identifierMap[$callsign] = $repository_callsigns[$callsign];
+        }
+      }
+    }
+
+    if ($this->phidIdentifiers) {
+      $repository_phids = mpull($repositories, null, 'getPHID');
+
+      foreach ($this->phidIdentifiers as $phid) {
+        if (isset($repository_phids[$phid])) {
+          $this->identifierMap[$phid] = $repository_phids[$phid];
+        }
+      }
+    }
+
     return $repositories;
   }
 
-  public function didFilterPage(array $repositories) {
+  protected function didFilterPage(array $repositories) {
     if ($this->needProjectPHIDs) {
       $type_project = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
 
@@ -226,7 +294,7 @@ final class PhabricatorRepositoryQuery
     return $repositories;
   }
 
-  public function getReversePaging() {
+  protected function getReversePaging() {
     switch ($this->order) {
       case self::ORDER_CALLSIGN:
       case self::ORDER_NAME:
@@ -387,6 +455,35 @@ final class PhabricatorRepositoryQuery
         $this->callsigns);
     }
 
+    if ($this->numericIdentifiers ||
+      $this->callsignIdentifiers ||
+      $this->phidIdentifiers) {
+      $identifier_clause = array();
+
+      if ($this->numericIdentifiers) {
+        $identifier_clause[] = qsprintf(
+          $conn_r,
+          'r.id IN (%Ld)',
+          $this->numericIdentifiers);
+      }
+
+      if ($this->callsignIdentifiers) {
+        $identifier_clause[] = qsprintf(
+          $conn_r,
+          'r.callsign IN (%Ls)',
+          $this->callsignIdentifiers);
+      }
+
+      if ($this->phidIdentifiers) {
+        $identifier_clause[] = qsprintf(
+          $conn_r,
+          'r.phid IN (%Ls)',
+          $this->phidIdentifiers);
+      }
+
+      $where = array('('.implode(' OR ', $identifier_clause).')');
+    }
+
     if ($this->types) {
       $where[] = qsprintf(
         $conn_r,
@@ -419,7 +516,6 @@ final class PhabricatorRepositoryQuery
 
     return $this->formatWhereClause($where);
   }
-
 
   public function getQueryApplicationClass() {
     return 'PhabricatorDiffusionApplication';

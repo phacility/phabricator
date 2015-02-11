@@ -82,6 +82,7 @@ final class PhabricatorProjectTransactionEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorProjectTransaction::TYPE_NAME:
         $object->setName($xaction->getNewValue());
+        // TODO - this is really "setPrimarySlug"
         $object->setPhrictionSlug($xaction->getNewValue());
         return;
       case PhabricatorProjectTransaction::TYPE_SLUGS:
@@ -101,6 +102,7 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorProjectTransaction::TYPE_LOCKED:
         $object->setIsMembershipLocked($xaction->getNewValue());
         return;
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
       case PhabricatorTransactions::TYPE_EDGE:
         return;
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
@@ -126,19 +128,12 @@ final class PhabricatorProjectTransactionEditor
 
     switch ($xaction->getTransactionType()) {
       case PhabricatorProjectTransaction::TYPE_NAME:
-        // First, remove the old and new slugs. Removing the old slug is
-        // important when changing the project's capitalization or punctuation.
-        // Removing the new slug is important when changing the project's name
-        // so that one of its secondary slugs is now the primary slug.
+        // First, add the old name as a secondary slug; this is helpful
+        // for renames and generally a good thing to do.
         if ($old !== null) {
-          $this->removeSlug($object, $old);
+          $this->addSlug($object, $old);
         }
-        $this->removeSlug($object, $new);
-
-        $new_slug = id(new PhabricatorProjectSlug())
-          ->setSlug($object->getPrimarySlug())
-          ->setProjectPHID($object->getPHID())
-          ->save();
+        $this->addSlug($object, $new);
 
         return;
       case PhabricatorProjectTransaction::TYPE_SLUGS:
@@ -165,6 +160,7 @@ final class PhabricatorProjectTransactionEditor
         }
 
         return;
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
@@ -177,8 +173,8 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorTransactions::TYPE_EDGE:
         $edge_type = $xaction->getMetadataValue('edge:type');
         switch ($edge_type) {
-          case PhabricatorEdgeConfig::TYPE_PROJ_MEMBER:
-          case PhabricatorEdgeConfig::TYPE_OBJECT_HAS_WATCHER:
+          case PhabricatorProjectProjectHasMemberEdgeType::EDGECONST:
+          case PhabricatorObjectHasWatcherEdgeType::EDGECONST:
             $old = $xaction->getOldValue();
             $new = $xaction->getNewValue();
 
@@ -188,7 +184,8 @@ final class PhabricatorProjectTransactionEditor
             // When removing members, we remove their subscription too.
             // When unwatching, we leave subscriptions, since it's fine to be
             // subscribed to a project but not be a member of it.
-            if ($edge_type == PhabricatorEdgeConfig::TYPE_PROJ_MEMBER) {
+            $edge_const = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
+            if ($edge_type == $edge_const) {
               $rem = array_keys(array_diff_key($old, $new));
             } else {
               $rem = array();
@@ -218,7 +215,7 @@ final class PhabricatorProjectTransactionEditor
               foreach ($rem as $rem_phid) {
                 $edge_editor->removeEdge(
                   $object->getPHID(),
-                  PhabricatorEdgeConfig::TYPE_OBJECT_HAS_WATCHER,
+                  PhabricatorObjectHasWatcherEdgeType::EDGECONST,
                   $rem_phid);
               }
               $edge_editor->save();
@@ -326,7 +323,7 @@ final class PhabricatorProjectTransactionEditor
             $type,
             pht('Invalid'),
             pht(
-              '%d project hashtag(s) are already used: %s',
+              '%d project hashtag(s) are already used: %s.',
               count($used_slug_strs),
               implode(', ', $used_slug_strs)),
             $slug_xaction);
@@ -364,7 +361,7 @@ final class PhabricatorProjectTransactionEditor
         return;
       case PhabricatorTransactions::TYPE_EDGE:
         switch ($xaction->getMetadataValue('edge:type')) {
-          case PhabricatorEdgeConfig::TYPE_PROJ_MEMBER:
+          case PhabricatorProjectProjectHasMemberEdgeType::EDGECONST:
             $old = $xaction->getOldValue();
             $new = $xaction->getNewValue();
 
@@ -426,7 +423,7 @@ final class PhabricatorProjectTransactionEditor
     return parent::extractFilePHIDsFromCustomTransaction($object, $xaction);
   }
 
-  private function removeSlug(
+  private function addSlug(
     PhabricatorLiskDAO $object,
     $name) {
 
@@ -438,16 +435,13 @@ final class PhabricatorProjectTransactionEditor
       'slug = %s',
       $slug);
 
-    if (!$slug_object) {
+    if ($slug_object) {
       return;
     }
 
-    if ($slug_object->getProjectPHID() != $object->getPHID()) {
-      throw new Exception(
-        pht('Trying to remove slug owned by another project!'));
-    }
-
-    $slug_object->delete();
+    $new_slug = id(new PhabricatorProjectSlug())
+      ->setSlug($slug)
+      ->setProjectPHID($object->getPHID())
+      ->save();
   }
-
 }

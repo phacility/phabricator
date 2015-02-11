@@ -1,9 +1,9 @@
 <?php
 
 /**
- * @task data   Accessing Request Data
- * @task cookie Managing Cookies
- *
+ * @task data     Accessing Request Data
+ * @task cookie   Managing Cookies
+ * @task cluster  Working With a Phabricator Cluster
  */
 final class AphrontRequest {
 
@@ -19,6 +19,7 @@ final class AphrontRequest {
   const TYPE_CONTINUE = '__continue__';
   const TYPE_PREVIEW = '__preview__';
   const TYPE_HISEC = '__hisec__';
+  const TYPE_QUICKSAND = '__quicksand__';
 
   private $host;
   private $path;
@@ -194,8 +195,12 @@ final class AphrontRequest {
     return $this->getExists(self::TYPE_AJAX);
   }
 
-  final public function isJavelinWorkflow() {
+  final public function isWorkflow() {
     return $this->getExists(self::TYPE_WORKFLOW);
+  }
+
+  final public function isQuicksand() {
+    return $this->getExists(self::TYPE_QUICKSAND);
   }
 
   final public function isConduit() {
@@ -333,7 +338,6 @@ final class AphrontRequest {
   }
 
   final public function clearCookie($name) {
-    $name = $this->getPrefixedCookieName($name);
     $this->setCookieWithExpiration($name, '', time() - (60 * 60 * 24 * 30));
     unset($_COOKIE[$name]);
   }
@@ -625,5 +629,131 @@ final class AphrontRequest {
 
     return $default;
   }
+
+
+/* -(  Working With a Phabricator Cluster  )--------------------------------- */
+
+
+  /**
+   * Is this a proxied request originating from within the Phabricator cluster?
+   *
+   * IMPORTANT: This means the request is dangerous!
+   *
+   * These requests are **more dangerous** than normal requests (they can not
+   * be safely proxied, because proxying them may cause a loop). Cluster
+   * requests are not guaranteed to come from a trusted source, and should
+   * never be treated as safer than normal requests. They are strictly less
+   * safe.
+   */
+  public function isProxiedClusterRequest() {
+    return (bool)AphrontRequest::getHTTPHeader('X-Phabricator-Cluster');
+  }
+
+
+  /**
+   * Build a new @{class:HTTPSFuture} which proxies this request to another
+   * node in the cluster.
+   *
+   * IMPORTANT: This is very dangerous!
+   *
+   * The future forwards authentication information present in the request.
+   * Proxied requests must only be sent to trusted hosts. (We attempt to
+   * enforce this.)
+   *
+   * This is not a general-purpose proxying method; it is a specialized
+   * method with niche applications and severe security implications.
+   *
+   * @param string URI identifying the host we are proxying the request to.
+   * @return HTTPSFuture New proxy future.
+   *
+   * @phutil-external-symbol class PhabricatorStartup
+   */
+  public function newClusterProxyFuture($uri) {
+    $uri = new PhutilURI($uri);
+
+    $domain = $uri->getDomain();
+    $ip = gethostbyname($domain);
+    if (!$ip) {
+      throw new Exception(
+        pht(
+          'Unable to resolve domain "%s"!',
+          $domain));
+    }
+
+    if (!PhabricatorEnv::isClusterAddress($ip)) {
+      throw new Exception(
+        pht(
+          'Refusing to proxy a request to IP address ("%s") which is not '.
+          'in the cluster address block (this address was derived by '.
+          'resolving the domain "%s").',
+          $ip,
+          $domain));
+    }
+
+    $uri->setPath($this->getPath());
+    $uri->setQueryParams(self::flattenData($_GET));
+
+    $input = PhabricatorStartup::getRawInput();
+
+    $future = id(new HTTPSFuture($uri))
+      ->addHeader('Host', self::getHost())
+      ->addHeader('X-Phabricator-Cluster', true)
+      ->setMethod($_SERVER['REQUEST_METHOD'])
+      ->write($input);
+
+    if (isset($_SERVER['PHP_AUTH_USER'])) {
+      $future->setHTTPBasicAuthCredentials(
+        $_SERVER['PHP_AUTH_USER'],
+        new PhutilOpaqueEnvelope(idx($_SERVER, 'PHP_AUTH_PW', '')));
+    }
+
+    $headers = array();
+    $seen = array();
+
+    // NOTE: apache_request_headers() might provide a nicer way to do this,
+    // but isn't available under FCGI until PHP 5.4.0.
+    foreach ($_SERVER as $key => $value) {
+      if (preg_match('/^HTTP_/', $key)) {
+        // Unmangle the header as best we can.
+        $key = str_replace('_', ' ', $key);
+        $key = strtolower($key);
+        $key = ucwords($key);
+        $key = str_replace(' ', '-', $key);
+
+        $headers[] = array($key, $value);
+        $seen[$key] = true;
+      }
+    }
+
+    // In some situations, this may not be mapped into the HTTP_X constants.
+    // CONTENT_LENGTH is similarly affected, but we trust cURL to take care
+    // of that if it matters, since we're handing off a request body.
+    if (empty($seen['Content-Type'])) {
+      if (isset($_SERVER['CONTENT_TYPE'])) {
+        $headers[] = array('Content-Type', $_SERVER['CONTENT_TYPE']);
+      }
+    }
+
+    foreach ($headers as $header) {
+      list($key, $value) = $header;
+      switch ($key) {
+        case 'Host':
+        case 'Authorization':
+          // Don't forward these headers, we've already handled them elsewhere.
+          unset($headers[$key]);
+          break;
+        default:
+          break;
+      }
+    }
+
+    foreach ($headers as $header) {
+      list($key, $value) = $header;
+      $future->addHeader($key, $value);
+    }
+
+    return $future;
+  }
+
 
 }

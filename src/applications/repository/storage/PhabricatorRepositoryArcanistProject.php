@@ -14,7 +14,7 @@ final class PhabricatorRepositoryArcanistProject
 
   private $repository = self::ATTACHABLE;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID   => true,
       self::CONFIG_TIMESTAMPS => false,
@@ -43,14 +43,6 @@ final class PhabricatorRepositoryArcanistProject
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
       PhabricatorRepositoryArcanistProjectPHIDType::TYPECONST);
-  }
-
-  // TODO: Remove. Also, T603.
-  public function loadRepository() {
-    if (!$this->getRepositoryID()) {
-      return null;
-    }
-    return id(new PhabricatorRepository())->load($this->getRepositoryID());
   }
 
   public function delete() {

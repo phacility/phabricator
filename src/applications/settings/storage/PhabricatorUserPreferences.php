@@ -40,7 +40,7 @@ final class PhabricatorUserPreferences extends PhabricatorUserDAO {
   protected $userPHID;
   protected $preferences = array();
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_SERIALIZATION => array(
         'preferences' => self::SERIALIZATION_JSON,

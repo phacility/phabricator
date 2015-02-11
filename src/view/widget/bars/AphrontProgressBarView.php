@@ -8,7 +8,7 @@ final class AphrontProgressBarView extends AphrontBarView {
   private $max = 100;
   private $alt = '';
 
-  public function getDefaultColor() {
+  protected function getDefaultColor() {
     return AphrontBarView::COLOR_AUTO_BADNESS;
   }
 

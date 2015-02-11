@@ -53,6 +53,26 @@ final class PhabricatorUserEditorTestCase extends PhabricatorTestCase {
     $this->assertTrue($caught instanceof Exception);
   }
 
+  public function testRegistrationEmailApplicationEmailCollide() {
+    $app_email = 'bugs@whitehouse.gov';
+    $app_email_object =
+      PhabricatorMetaMTAApplicationEmail::initializeNewAppEmail(
+        $this->generateNewTestUser());
+    $app_email_object->setAddress($app_email);
+    $app_email_object->setApplicationPHID('test');
+    $app_email_object->save();
+
+    $caught = null;
+    try {
+      $this->registerUser(
+        'PhabricatorUserEditorTestCaseDomain',
+        $app_email);
+    } catch (Exception $ex) {
+      $caught = $ex;
+    }
+    $this->assertTrue($caught instanceof Exception);
+  }
+
   private function registerUser($username, $email) {
     $user = id(new PhabricatorUser())
       ->setUsername($username)

@@ -23,7 +23,7 @@ final class NuanceItemQuery
   }
 
 
-  public function loadPage() {
+  protected function loadPage() {
     $table = new NuanceItem();
     $conn_r = $table->establishConnection('r');
 

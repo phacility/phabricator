@@ -9,70 +9,71 @@
  *           javelin-json
  *           javelin-router
  *           javelin-util
+ *           javelin-leader
  *           phabricator-notification
  */
 
 JX.behavior('aphlict-listen', function(config) {
-
   var showing_reload = false;
 
-  JX.Stratcom.listen('aphlict-receive-message', null, function(e) {
+  JX.Stratcom.listen('aphlict-server-message', null, function(e) {
     var message = e.getData();
 
     if (message.type != 'notification') {
       return;
     }
 
-    var request = new JX.Request(
-      '/notification/individual/',
-      onnotification);
+    JX.Leader.callIfLeader(function() {
+      var request = new JX.Request(
+        '/notification/individual/',
+        onNotification);
 
-    var routable = request
-      .addData({key: message.key})
-      .getRoutable();
+      var routable = request
+        .addData({key: message.key})
+        .getRoutable();
 
-    routable
-      .setType('notification')
-      .setPriority(250);
+      routable
+        .setType('notification')
+        .setPriority(250);
 
-    JX.Router.getInstance().queue(routable);
+      JX.Router.getInstance().queue(routable);
+    });
   });
-
 
   // Respond to a notification from the Aphlict notification server. We send
   // a request to Phabricator to get notification details.
-  function onaphlictmessage(type, message) {
-    switch (type) {
-      case 'receive':
-        JX.Stratcom.invoke('aphlict-receive-message', null, message);
+  function onAphlictMessage(message) {
+    switch (message.type) {
+      case 'aphlict.server':
+        JX.Stratcom.invoke('aphlict-server-message', null, message.data);
         break;
 
-      default:
-      case 'error':
-      case 'log':
-      case 'status':
-        if (config.debug) {
-          var details = message ? JX.JSON.stringify(message) : '';
-          JX.log('(Aphlict) [' + type + '] ' + details);
-        }
+      case 'notification.individual':
+        JX.Stratcom.invoke('aphlict-notification-message', null, message.data);
         break;
     }
   }
 
-
   // Respond to a response from Phabricator about a specific notification.
-  function onnotification(response) {
+  function onNotification(response) {
     if (!response.pertinent) {
       return;
     }
 
+    JX.Leader.broadcast(null, {
+      type: 'notification.individual',
+      data: response
+    });
+  }
+
+  JX.Stratcom.listen('aphlict-notification-message', null, function(e) {
     JX.Stratcom.invoke('notification-panel-update', null, {});
+    var response = e.getData();
 
     // Show the notification itself.
     new JX.Notification()
       .setContent(JX.$H(response.content))
       .show();
-
 
     // If the notification affected an object on this page, show a
     // permanent reload notification if we aren't already.
@@ -86,16 +87,14 @@ JX.behavior('aphlict-listen', function(config) {
 
       showing_reload = true;
     }
-  }
+  });
 
   var client = new JX.Aphlict(
-    config.id,
-    config.server,
-    config.port,
+    config.websocketURI,
     config.subscriptions);
 
   client
-    .setHandler(onaphlictmessage)
-    .start(JX.$(config.containerID), config.swfURI);
+    .setHandler(onAphlictMessage)
+    .start();
 
 });

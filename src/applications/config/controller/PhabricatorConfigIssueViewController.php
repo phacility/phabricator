@@ -18,8 +18,8 @@ final class PhabricatorConfigIssueViewController
       PhabricatorSetupCheck::countUnignoredIssues($issues));
 
     if (empty($issues[$this->issueKey])) {
-      $content = id(new AphrontErrorView())
-        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
+      $content = id(new PHUIErrorView())
+        ->setSeverity(PHUIErrorView::SEVERITY_NOTICE)
         ->setTitle(pht('Issue Resolved'))
         ->appendChild(pht('This setup issue has been resolved. '))
         ->appendChild(
@@ -38,6 +38,7 @@ final class PhabricatorConfigIssueViewController
 
     $crumbs = $this
       ->buildApplicationCrumbs()
+      ->setBorder(true)
       ->addTextCrumb(pht('Setup Issues'), $this->getApplicationURI('issue/'))
       ->addTextCrumb($title, $request->getRequestURI());
 

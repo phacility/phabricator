@@ -23,7 +23,6 @@ final class ManiphestTransactionEditor
     $types[] = ManiphestTransaction::TYPE_TITLE;
     $types[] = ManiphestTransaction::TYPE_DESCRIPTION;
     $types[] = ManiphestTransaction::TYPE_OWNER;
-    $types[] = ManiphestTransaction::TYPE_CCS;
     $types[] = ManiphestTransaction::TYPE_SUBPRIORITY;
     $types[] = ManiphestTransaction::TYPE_PROJECT_COLUMN;
     $types[] = ManiphestTransaction::TYPE_MERGED_INTO;
@@ -62,8 +61,6 @@ final class ManiphestTransactionEditor
         return $object->getDescription();
       case ManiphestTransaction::TYPE_OWNER:
         return nonempty($object->getOwnerPHID(), null);
-      case ManiphestTransaction::TYPE_CCS:
-        return array_values(array_unique($object->getCCPHIDs()));
       case ManiphestTransaction::TYPE_PROJECT_COLUMN:
         // These are pre-populated.
         return $xaction->getOldValue();
@@ -82,8 +79,6 @@ final class ManiphestTransactionEditor
     switch ($xaction->getTransactionType()) {
       case ManiphestTransaction::TYPE_PRIORITY:
         return (int)$xaction->getNewValue();
-      case ManiphestTransaction::TYPE_CCS:
-        return array_values(array_unique($xaction->getNewValue()));
       case ManiphestTransaction::TYPE_OWNER:
         return nonempty($xaction->getNewValue(), null);
       case ManiphestTransaction::TYPE_STATUS:
@@ -106,10 +101,6 @@ final class ManiphestTransactionEditor
     $new = $xaction->getNewValue();
 
     switch ($xaction->getTransactionType()) {
-      case ManiphestTransaction::TYPE_CCS:
-        sort($old);
-        sort($new);
-        return ($old !== $new);
       case ManiphestTransaction::TYPE_PROJECT_COLUMN:
         $new_column_phids = $new['columnPHIDs'];
         $old_column_phids = $old['columnPHIDs'];
@@ -155,8 +146,6 @@ final class ManiphestTransactionEditor
         }
 
         return $object->setOwnerPHID($phid);
-      case ManiphestTransaction::TYPE_CCS:
-        return $object->setCCPHIDs($xaction->getNewValue());
       case ManiphestTransaction::TYPE_SUBPRIORITY:
         $data = $xaction->getNewValue();
         $new_sub = $this->getNextSubpriority(
@@ -373,13 +362,15 @@ final class ManiphestTransactionEditor
     if ($unblock_xaction !== null) {
       $blocked_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
         $object->getPHID(),
-        PhabricatorEdgeConfig::TYPE_TASK_DEPENDED_ON_BY_TASK);
+        ManiphestTaskDependedOnByTaskEdgeType::EDGECONST);
       if ($blocked_phids) {
         // In theory we could apply these through policies, but that seems a
         // little bit surprising. For now, use the actor's vision.
         $blocked_tasks = id(new ManiphestTaskQuery())
           ->setViewer($this->getActor())
           ->withPHIDs($blocked_phids)
+          ->needSubscriberPHIDs(true)
+          ->needProjectPHIDs(true)
           ->execute();
 
         $old = $unblock_xaction->getOldValue();
@@ -432,10 +423,6 @@ final class ManiphestTransactionEditor
 
   protected function getMailCC(PhabricatorLiskDAO $object) {
     $phids = array();
-
-    foreach ($object->getCCPHIDs() as $phid) {
-      $phids[] = $phid;
-    }
 
     foreach (parent::getMailCC($object) as $phid) {
       $phids[] = $phid;
@@ -501,6 +488,34 @@ final class ManiphestTransactionEditor
       pht('TASK DETAIL'),
       PhabricatorEnv::getProductionURI('/T'.$object->getID()));
 
+
+    $board_phids = array();
+    $type_column = ManiphestTransaction::TYPE_PROJECT_COLUMN;
+    foreach ($xactions as $xaction) {
+      if ($xaction->getTransactionType() == $type_column) {
+        $new = $xaction->getNewValue();
+        $project_phid = idx($new, 'projectPHID');
+        if ($project_phid) {
+          $board_phids[] = $project_phid;
+        }
+      }
+    }
+
+    if ($board_phids) {
+      $projects = id(new PhabricatorProjectQuery())
+        ->setViewer($this->requireActor())
+        ->withPHIDs($board_phids)
+        ->execute();
+
+      foreach ($projects as $project) {
+        $body->addLinkSection(
+          pht('WORKBOARD'),
+          PhabricatorEnv::getProductionURI(
+            '/project/board/'.$project->getID().'/'));
+      }
+    }
+
+
     return $body;
   }
 
@@ -533,21 +548,15 @@ final class ManiphestTransactionEditor
     HeraldAdapter $adapter,
     HeraldTranscript $transcript) {
 
-    // TODO: Convert these to transactions. The way Maniphest deals with these
-    // transactions is currently unconventional and messy.
+    $this->heraldEmailPHIDs = $adapter->getEmailPHIDs();
+    $xactions = array();
 
-    $save_again = false;
     $cc_phids = $adapter->getCcPHIDs();
     if ($cc_phids) {
-      $existing_cc = $object->getCCPHIDs();
-      $new_cc = array_unique(array_merge($cc_phids, $existing_cc));
-      $object->setCCPHIDs($new_cc);
-      $object->save();
+      $xactions[] = id(new ManiphestTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+        ->setNewValue(array('+' => $cc_phids));
     }
-
-    $this->heraldEmailPHIDs = $adapter->getEmailPHIDs();
-
-    $xactions = array();
 
     $assign_phid = $adapter->getAssignPHID();
     if ($assign_phid) {

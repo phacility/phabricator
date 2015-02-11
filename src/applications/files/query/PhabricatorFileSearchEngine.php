@@ -86,7 +86,7 @@ final class PhabricatorFileSearchEngine
     return '/file/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array();
 
     if ($this->requireViewer()->isLoggedIn()) {

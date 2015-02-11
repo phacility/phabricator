@@ -29,7 +29,7 @@ final class NuanceSourceQuery
   }
 
 
-  public function loadPage() {
+  protected function loadPage() {
     $table = new NuanceSource();
     $conn_r = $table->establishConnection('r');
 

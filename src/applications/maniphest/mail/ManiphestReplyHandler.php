@@ -106,14 +106,14 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
           break;
         case 'unsubscribe':
           $is_unsub = true;
-          $ttype = ManiphestTransaction::TYPE_CCS;
-          $ccs = $task->getCCPHIDs();
+          $ttype = PhabricatorTransactions::TYPE_SUBSCRIBERS;
+          $ccs = $task->getSubscriberPHIDs();
           foreach ($ccs as $k => $phid) {
             if ($phid == $user->getPHID()) {
               unset($ccs[$k]);
             }
           }
-          $new_value = array_values($ccs);
+          $new_value = array('=' => array_values($ccs));
           break;
       }
 
@@ -135,7 +135,7 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
     }
 
     $ccs = $mail->loadCCPHIDs();
-    $old_ccs = $task->getCCPHIDs();
+    $old_ccs = $task->getSubscriberPHIDs();
     $new_ccs = array_merge($old_ccs, $ccs);
     if (!$is_unsub) {
       $new_ccs[] = $user->getPHID();
@@ -144,8 +144,9 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
 
     if (array_diff($new_ccs, $old_ccs)) {
       $cc_xaction = clone $template;
-      $cc_xaction->setTransactionType(ManiphestTransaction::TYPE_CCS);
-      $cc_xaction->setNewValue($new_ccs);
+      $cc_xaction->setTransactionType(
+        PhabricatorTransactions::TYPE_SUBSCRIBERS);
+      $cc_xaction->setNewValue(array('=' => $new_ccs));
       $xactions[] = $cc_xaction;
     }
 
@@ -169,8 +170,11 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
       ->setExcludeMailRecipientPHIDs($this->getExcludeMailRecipientPHIDs())
       ->setContinueOnNoEffect(true)
       ->setContinueOnMissingFields(true)
-      ->setContentSource($content_source)
-      ->applyTransactions($task, $xactions);
+      ->setContentSource($content_source);
+    if ($this->getApplicationEmail()) {
+      $editor->setApplicationEmail($this->getApplicationEmail());
+    }
+    $editor->applyTransactions($task, $xactions);
 
     $event = new PhabricatorEvent(
       PhabricatorEventType::TYPE_MANIPHEST_DIDEDITTASK,

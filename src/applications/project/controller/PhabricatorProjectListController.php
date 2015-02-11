@@ -22,7 +22,11 @@ final class PhabricatorProjectListController
     return $this->delegateToController($controller);
   }
 
-  public function buildApplicationCrumbs() {
+  public function buildApplicationMenu() {
+    return $this->buildSideNavView(true)->getMenu();
+  }
+
+  protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
     $can_create = $this->hasApplicationCapability(

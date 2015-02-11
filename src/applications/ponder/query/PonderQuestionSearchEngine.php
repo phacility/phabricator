@@ -95,7 +95,7 @@ final class PonderQuestionSearchEngine
     return '/ponder/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array(
       'open' => pht('Open Questions'),
       'all' => pht('All Questions'),

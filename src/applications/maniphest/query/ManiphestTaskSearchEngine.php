@@ -67,6 +67,13 @@ final class ManiphestTaskSearchEngine
       'priorities',
       $this->readListFromRequest($request, 'priorities'));
 
+    $saved->setParameter(
+      'blocking',
+      $this->readBoolFromRequest($request, 'blocking'));
+    $saved->setParameter(
+      'blocked',
+      $this->readBoolFromRequest($request, 'blocked'));
+
     $saved->setParameter('group', $request->getStr('group'));
     $saved->setParameter('order', $request->getStr('order'));
 
@@ -119,7 +126,8 @@ final class ManiphestTaskSearchEngine
   }
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new ManiphestTaskQuery());
+    $query = id(new ManiphestTaskQuery())
+      ->needProjectPHIDs(true);
 
     $author_phids = $saved->getParameter('authorPHIDs');
     if ($author_phids) {
@@ -150,6 +158,10 @@ final class ManiphestTaskSearchEngine
     if ($priorities) {
       $query->withPriorities($priorities);
     }
+
+
+    $query->withBlockingTasks($saved->getParameter('blocking'));
+    $query->withBlockedTasks($saved->getParameter('blocked'));
 
     $this->applyOrderByToQuery(
       $query,
@@ -301,6 +313,23 @@ final class ManiphestTaskSearchEngine
         isset($priorities[$pri]));
     }
 
+    $blocking_control = id(new AphrontFormSelectControl())
+      ->setLabel(pht('Blocking'))
+      ->setName('blocking')
+      ->setValue($this->getBoolFromQuery($saved, 'blocking'))
+      ->setOptions(array(
+        '' => pht('Show All Tasks'),
+        'true' => pht('Show Tasks Blocking Other Tasks'),
+        'false' => pht('Show Tasks Not Blocking Other Tasks'),));
+    $blocked_control = id(new AphrontFormSelectControl())
+      ->setLabel(pht('Blocked'))
+      ->setName('blocked')
+      ->setValue($this->getBoolFromQuery($saved, 'blocked'))
+      ->setOptions(array(
+        '' => pht('Show All Tasks'),
+        'true' => pht('Show Tasks Blocked By Other Tasks'),
+        'false' => pht('Show Tasks Not Blocked By Other Tasks'),));
+
     $ids = $saved->getParameter('ids', array());
 
     $builtin_orders = $this->getOrderOptions();
@@ -370,8 +399,15 @@ final class ManiphestTaskSearchEngine
           ->setName('subscribers')
           ->setLabel(pht('Subscribers'))
           ->setValue($subscriber_handles))
+      ->appendChild(
+        id(new AphrontFormTextControl())
+          ->setName('fulltext')
+          ->setLabel(pht('Contains Words'))
+          ->setValue($saved->getParameter('fulltext')))
       ->appendChild($status_control)
-      ->appendChild($priority_control);
+      ->appendChild($priority_control)
+      ->appendChild($blocking_control)
+      ->appendChild($blocked_control);
 
     if (!$this->getIsBoardView()) {
       $form
@@ -390,11 +426,6 @@ final class ManiphestTaskSearchEngine
     }
 
     $form
-      ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setName('fulltext')
-          ->setLabel(pht('Contains Words'))
-          ->setValue($saved->getParameter('fulltext')))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('ids')
@@ -436,7 +467,7 @@ final class ManiphestTaskSearchEngine
     return '/maniphest/'.$path;
   }
 
-  public function getBuiltinQueryNames() {
+  protected function getBuiltinQueryNames() {
     $names = array();
 
     if ($this->requireViewer()->isLoggedIn()) {

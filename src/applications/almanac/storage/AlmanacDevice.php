@@ -8,13 +8,15 @@ final class AlmanacDevice
     PhabricatorApplicationTransactionInterface,
     PhabricatorProjectInterface,
     PhabricatorSSHPublicKeyInterface,
-    AlmanacPropertyInterface {
+    AlmanacPropertyInterface,
+    PhabricatorDestructibleInterface {
 
   protected $name;
   protected $nameIndex;
   protected $mailKey;
   protected $viewPolicy;
   protected $editPolicy;
+  protected $isLocked;
 
   private $customFields = self::ATTACHABLE;
   private $almanacProperties = self::ATTACHABLE;
@@ -22,16 +24,19 @@ final class AlmanacDevice
   public static function initializeNewDevice() {
     return id(new AlmanacDevice())
       ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
-      ->setEditPolicy(PhabricatorPolicies::POLICY_ADMIN);
+      ->setEditPolicy(PhabricatorPolicies::POLICY_ADMIN)
+      ->attachAlmanacProperties(array())
+      ->setIsLocked(0);
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'text128',
         'nameIndex' => 'bytes12',
         'mailKey' => 'bytes20',
+        'isLocked' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_name' => array(
@@ -66,6 +71,37 @@ final class AlmanacDevice
   }
 
 
+  /**
+   * Find locked services which are bound to this device, updating the device
+   * lock flag if necessary.
+   *
+   * @return list<phid> List of locking service PHIDs.
+   */
+  public function rebuildDeviceLocks() {
+    $services = id(new AlmanacServiceQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withDevicePHIDs(array($this->getPHID()))
+      ->withLocked(true)
+      ->execute();
+
+    $locked = (bool)count($services);
+
+    if ($locked != $this->getIsLocked()) {
+      $this->setIsLocked((int)$locked);
+      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+        queryfx(
+          $this->establishConnection('w'),
+          'UPDATE %T SET isLocked = %d WHERE id = %d',
+          $this->getTableName(),
+          $this->getIsLocked(),
+          $this->getID());
+      unset($unguarded);
+    }
+
+    return $this;
+  }
+
+
 /* -(  AlmanacPropertyInterface  )------------------------------------------- */
 
 
@@ -96,6 +132,10 @@ final class AlmanacDevice
     }
   }
 
+  public function getAlmanacPropertyFieldSpecifications() {
+    return array();
+  }
+
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -112,7 +152,11 @@ final class AlmanacDevice
       case PhabricatorPolicyCapability::CAN_VIEW:
         return $this->getViewPolicy();
       case PhabricatorPolicyCapability::CAN_EDIT:
-        return $this->getEditPolicy();
+        if ($this->getIsLocked()) {
+          return PhabricatorPolicies::POLICY_NOONE;
+        } else {
+          return $this->getEditPolicy();
+        }
     }
   }
 
@@ -121,6 +165,14 @@ final class AlmanacDevice
   }
 
   public function describeAutomaticCapability($capability) {
+    if ($capability === PhabricatorPolicyCapability::CAN_EDIT) {
+      if ($this->getIsLocked()) {
+        return pht(
+          'This device is bound to a locked service, so it can not '.
+          'be edited.');
+      }
+    }
+
     return null;
   }
 
@@ -161,6 +213,13 @@ final class AlmanacDevice
     return new AlmanacDeviceTransaction();
   }
 
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
+  }
+
 
 /* -(  PhabricatorSSHPublicKeyInterface  )----------------------------------- */
 
@@ -169,5 +228,26 @@ final class AlmanacDevice
     return $this->getURI();
   }
 
+  public function getSSHKeyDefaultName() {
+    return $this->getName();
+  }
+
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $interfaces = id(new AlmanacInterfaceQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withDevicePHIDs(array($this->getPHID()))
+      ->execute();
+    foreach ($interfaces as $interface) {
+      $engine->destroyObject($interface);
+    }
+
+    $this->delete();
+  }
 
 }

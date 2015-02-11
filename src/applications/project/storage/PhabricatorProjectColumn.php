@@ -3,6 +3,7 @@
 final class PhabricatorProjectColumn
   extends PhabricatorProjectDAO
   implements
+    PhabricatorApplicationTransactionInterface,
     PhabricatorPolicyInterface,
     PhabricatorDestructibleInterface {
 
@@ -27,7 +28,7 @@ final class PhabricatorProjectColumn
       ->setStatus(self::STATUS_ACTIVE);
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
@@ -132,6 +133,29 @@ final class PhabricatorProjectColumn
   public function setPointLimit($limit) {
     $this->setProperty('pointLimit', $limit);
     return $this;
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhabricatorProjectColumnTransactionEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhabricatorProjectColumnTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
   }
 
 

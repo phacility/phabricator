@@ -3,9 +3,9 @@
 final class PhabricatorPeopleLdapController
   extends PhabricatorPeopleController {
 
-  public function processRequest() {
-
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
+    $this->requireApplicationCapability(
+      PeopleCreateUsersCapability::CAPABILITY);
     $admin = $request->getUser();
 
     $content = array();
@@ -32,11 +32,9 @@ final class PhabricatorPeopleLdapController
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Search')));
 
-    $panel = id(new AphrontPanelView())
-      ->setHeader(pht('Import LDAP Users'))
-      ->setNoBackground()
-      ->setWidth(AphrontPanelView::WIDTH_FORM)
-      ->appendChild($form);
+    $panel = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Import LDAP Users'))
+      ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(
@@ -71,8 +69,8 @@ final class PhabricatorPeopleLdapController
     $emails = $request->getArr('email');
     $names = $request->getArr('name');
 
-    $notice_view = new AphrontErrorView();
-    $notice_view->setSeverity(AphrontErrorView::SEVERITY_NOTICE);
+    $notice_view = new PHUIErrorView();
+    $notice_view->setSeverity(PHUIErrorView::SEVERITY_NOTICE);
     $notice_view->setTitle(pht('Import Successful'));
     $notice_view->setErrors(array(
       pht('Successfully imported users from LDAP'),
