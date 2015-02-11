@@ -86,7 +86,21 @@ final class PhabricatorAuthInviteSearchEngine
       );
     }
 
-    $table = new AphrontTableView($rows);
+    $table = id(new AphrontTableView($rows))
+      ->setHeaders(
+        array(
+          pht('Email Address'),
+          pht('Sent By'),
+          pht('Accepted By'),
+          pht('Invited'),
+        ))
+      ->setColumnClasses(
+        array(
+          '',
+          '',
+          'wide',
+          'right',
+        ));
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Email Invitations'))

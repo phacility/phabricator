@@ -189,4 +189,22 @@ final class PhabricatorAuthInviteAction extends Phobject {
     return $results;
   }
 
+  public function sendInvite(PhabricatorUser $actor, $template) {
+    if (!$this->willSend()) {
+      throw new Exception(pht('Invite action is not a send action!'));
+    }
+
+    if (!preg_match('/{\$INVITE_URI}/', $template)) {
+      throw new Exception(pht('Invite template does not include invite URI!'));
+    }
+
+    PhabricatorWorker::scheduleTask(
+      'PhabricatorAuthInviteWorker',
+      array(
+        'address' => $this->getEmailAddress(),
+        'template' => $template,
+        'authorPHID' => $actor->getPHID(),
+      ));
+  }
+
 }

@@ -35,9 +35,10 @@ final class PhabricatorAuthInviteEngine extends Phobject {
   public function processInviteCode($code) {
     $viewer = $this->getViewer();
 
-    $invite = id(new PhabricatorAuthInvite())->loadOneWhere(
-      'verificationHash = %s',
-      PhabricatorHash::digestForIndex($code));
+    $invite = id(new PhabricatorAuthInviteQuery())
+      ->setViewer($viewer)
+      ->withVerificationCodes(array($code))
+      ->executeOne();
     if (!$invite) {
       throw id(new PhabricatorAuthInviteInvalidException(
         pht('Bad Invite Code'),

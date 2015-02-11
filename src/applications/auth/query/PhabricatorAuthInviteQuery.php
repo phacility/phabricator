@@ -88,6 +88,7 @@ final class PhabricatorAuthInviteQuery
       foreach ($this->verificationCodes as $code) {
         $hashes[] = PhabricatorHash::digestForIndex($code);
       }
+
       $where[] = qsprintf(
         $conn_r,
         'verificationHash IN (%Ls)',

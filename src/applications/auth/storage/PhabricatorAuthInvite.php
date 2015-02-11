@@ -38,15 +38,21 @@ final class PhabricatorAuthInvite
       PhabricatorAuthInvitePHIDType::TYPECONST);
   }
 
+  public function regenerateVerificationCode() {
+    $this->verificationCode = Filesystem::readRandomCharacters(16);
+    $this->verificationHash = null;
+    return $this;
+  }
+
   public function getVerificationCode() {
-    if (!$this->getVerificationHash()) {
+    if (!$this->verificationCode) {
       if ($this->verificationHash) {
         throw new Exception(
           pht(
             'Verification code can not be regenerated after an invite is '.
             'created.'));
       }
-      $this->verificationCode = Filesystem::readRandomCharacters(16);
+      $this->regenerateVerificationCode();
     }
     return $this->verificationCode;
   }

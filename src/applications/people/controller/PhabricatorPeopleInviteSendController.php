@@ -44,9 +44,8 @@ final class PhabricatorPeopleInviteSendController
 
         $any_valid = false;
         $all_valid = true;
-        $action_send = PhabricatorAuthInviteAction::ACTION_SEND;
         foreach ($actions as $action) {
-          if ($action->getAction() == $action_send) {
+          if ($action->willSend()) {
             $any_valid = true;
           } else {
             $all_valid = false;
@@ -72,8 +71,44 @@ final class PhabricatorPeopleInviteSendController
         }
 
         if ($any_valid && $request->getBool('confirm')) {
-          throw new Exception(
-            pht('TODO: This workflow is not yet fully implemented.'));
+
+          // TODO: The copywriting on this mail could probably be more
+          // engaging and we could have a fancy HTML version.
+
+          $template = array();
+          $template[] = pht(
+            '%s has invited you to join Phabricator.',
+            $viewer->getFullName());
+
+          if (strlen(trim($message))) {
+            $template[] = $message;
+          }
+
+          $template[] = pht(
+            'To register an account and get started, follow this link:');
+
+          // This isn't a variable; it will be replaced later on in the
+          // daemons once they generate the URI.
+          $template[] = '{$INVITE_URI}';
+
+          $template[] = pht(
+            'If you already have an account, you can follow the link to '.
+            'quickly verify this email address.');
+
+          $template = implode("\n\n", $template);
+
+          foreach ($actions as $action) {
+            if ($action->willSend()) {
+              $action->sendInvite($viewer, $template);
+            }
+          }
+
+          // TODO: This is a bit anticlimactic. We don't really have anything
+          // to show the user because the action is happening in the background
+          // and the invites won't exist yet. After T5166 we can show a
+          // better progress bar.
+          return id(new AphrontRedirectResponse())
+            ->setURI($this->getApplicationURI());
         }
       }
     }
