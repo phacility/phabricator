@@ -23,14 +23,25 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
    */
   public function createNewUser(
     PhabricatorUser $user,
-    PhabricatorUserEmail $email) {
+    PhabricatorUserEmail $email,
+    $allow_reassign = false) {
 
     if ($user->getID()) {
       throw new Exception('User has already been created!');
     }
 
+    $is_reassign = false;
     if ($email->getID()) {
-      throw new Exception('Email has already been created!');
+      if ($allow_reassign) {
+        if ($email->getIsPrimary()) {
+          throw new Exception(
+            pht(
+              'Primary email addresses can not be reassigned.'));
+        }
+        $is_reassign = true;
+      } else {
+        throw new Exception('Email has already been created!');
+      }
     }
 
     if (!PhabricatorUser::validateUsername($user->getUsername())) {
@@ -70,6 +81,15 @@ final class PhabricatorUserEditor extends PhabricatorEditor {
         PhabricatorUserLog::ACTION_CREATE);
       $log->setNewValue($email->getAddress());
       $log->save();
+
+      if ($is_reassign) {
+        $log = PhabricatorUserLog::initializeNewLog(
+          $this->requireActor(),
+          $user->getPHID(),
+          PhabricatorUserLog::ACTION_EMAIL_REASSIGN);
+        $log->setNewValue($email->getAddress());
+        $log->save();
+      }
 
     $user->saveTransaction();
 

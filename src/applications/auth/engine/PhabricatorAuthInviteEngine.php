@@ -250,7 +250,7 @@ final class PhabricatorAuthInviteEngine extends Phobject {
   }
 
   private function getLogoutURI() {
-    return '/auth/logout/';
+    return '/logout/';
   }
 
 }

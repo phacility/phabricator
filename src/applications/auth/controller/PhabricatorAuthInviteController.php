@@ -17,8 +17,10 @@ final class PhabricatorAuthInviteController
       $engine->setUserHasConfirmedVerify(true);
     }
 
+    $invite_code = $request->getURIData('code');
+
     try {
-      $invite = $engine->processInviteCode($request->getURIData('code'));
+      $invite = $engine->processInviteCode($invite_code);
     } catch (PhabricatorAuthInviteDialogException $ex) {
       $response = $this->newDialog()
         ->setTitle($ex->getTitle())
@@ -48,10 +50,13 @@ final class PhabricatorAuthInviteController
       return id(new AphrontRedirectResponse())->setURI('/');
     }
 
+    // Give the user a cookie with the invite code and send them through
+    // normal registration. We'll adjust the flow there.
+    $request->setCookie(
+      PhabricatorCookies::COOKIE_INVITE,
+      $invite_code);
 
-    // TODO: This invite is good, but we need to drive the user through
-    // registration.
-    throw new Exception(pht('TODO: Build invite/registration workflow.'));
+    return id(new AphrontRedirectResponse())->setURI('/auth/start/');
   }
 
 

@@ -109,14 +109,21 @@ final class PhabricatorAuthStartController
       }
     }
 
+    $invite = $this->loadInvite();
+
     $not_buttons = array();
     $are_buttons = array();
     $providers = msort($providers, 'getLoginOrder');
     foreach ($providers as $provider) {
-      if ($provider->isLoginFormAButton()) {
-        $are_buttons[] = $provider->buildLoginForm($this);
+      if ($invite) {
+        $form = $provider->buildInviteForm($this);
       } else {
-        $not_buttons[] = $provider->buildLoginForm($this);
+        $form = $provider->buildLoginForm($this);
+      }
+      if ($provider->isLoginFormAButton()) {
+        $are_buttons[] = $form;
+      } else {
+        $not_buttons[] = $form;
       }
     }
 
@@ -159,6 +166,11 @@ final class PhabricatorAuthStartController
     $login_message = PhabricatorEnv::getEnvConfig('auth.login-message');
     $login_message = phutil_safe_html($login_message);
 
+    $invite_message = null;
+    if ($invite) {
+      $invite_message = $this->renderInviteHeader($invite);
+    }
+
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Login'));
     $crumbs->setBorder(true);
@@ -167,6 +179,7 @@ final class PhabricatorAuthStartController
       array(
         $crumbs,
         $login_message,
+        $invite_message,
         $out,
       ),
       array(

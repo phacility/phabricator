@@ -158,6 +158,10 @@ abstract class PhabricatorAuthProvider {
     return $this->renderLoginForm($controller->getRequest(), $mode = 'start');
   }
 
+  public function buildInviteForm(PhabricatorAuthStartController $controller) {
+    return $this->renderLoginForm($controller->getRequest(), $mode = 'invite');
+  }
+
   abstract public function processLoginRequest(
     PhabricatorAuthLoginController $controller);
 
@@ -401,6 +405,8 @@ abstract class PhabricatorAuthProvider {
       $button_text = pht('Link External Account');
     } else if ($mode == 'refresh') {
       $button_text = pht('Refresh Account Link');
+    } else if ($mode == 'invite') {
+      $button_text = pht('Register Account');
     } else if ($this->shouldAllowRegistration()) {
       $button_text = pht('Login or Register');
     } else {
