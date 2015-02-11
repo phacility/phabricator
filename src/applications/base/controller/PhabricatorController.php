@@ -96,13 +96,9 @@ abstract class PhabricatorController extends AphrontController {
       $request->setUser($user);
     }
 
-    $translation = $user->getTranslation();
-    if ($translation &&
-        $translation != PhabricatorEnv::getEnvConfig('translation.provider')) {
-      $translation = newv($translation, array());
-      PhutilTranslator::getInstance()
-        ->setLanguage($translation->getLanguage())
-        ->addTranslations($translation->getCleanTranslations());
+    $locale_code = $user->getTranslation();
+    if ($locale_code) {
+      PhabricatorEnv::setLocaleCode($locale_code);
     }
 
     $preferences = $user->loadPreferences();

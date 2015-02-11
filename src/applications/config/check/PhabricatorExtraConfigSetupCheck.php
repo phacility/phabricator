@@ -203,6 +203,9 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
         'the server as the user you want it to run under.'),
       'notification.debug' => pht(
         'Notifications no longer have a dedicated debugging mode.'),
+      'translation.provider' => pht(
+        'The translation implementation has changed and providers are no '.
+        'longer used or supported.'),
     );
 
     return $ancient_config;
