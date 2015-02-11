@@ -19,13 +19,20 @@ abstract class PhabricatorSetupCheck {
     $issue = id(new PhabricatorSetupIssue())
       ->setIssueKey($key);
     $this->issues[$key] = $issue;
-    $issue->setGroup($this->getDefaultGroup());
+
+    if ($this->getDefaultGroup()) {
+      $issue->setGroup($this->getDefaultGroup());
+    }
 
     return $issue;
   }
 
   final public function getIssues() {
     return $this->issues;
+  }
+
+  public function getDefaultGroup() {
+    return null;
   }
 
   final public function runSetupChecks() {
