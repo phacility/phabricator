@@ -678,11 +678,20 @@ ul.phui-object-item-icons {
 .dashboard-panel .phui-object-item-empty .phui-error-view {
   border: none;
   border-bottom: 1px solid {$thinblueborder};
+  margin: 0;
 }
 
 .device-desktop .aphront-multi-column-fluid .aphront-multi-column-2-up
  .aphront-multi-column-column-outer.third .phui-object-item-col2 {
    display: none;
+ }
+
+ .dashboard-panel .phui-object-box .phui-header-shell {
+   display: none;
+ }
+
+ .dashboard-panel .phui-object-box {
+   margin: 0;
  }
 
 
