@@ -11,8 +11,8 @@ final class PhabricatorConfigIssueListController
     $nav->selectFilter('issue/');
 
     $issues = PhabricatorSetupCheck::runAllChecks();
-    PhabricatorSetupCheck::setOpenSetupIssueCount(
-      PhabricatorSetupCheck::countUnignoredIssues($issues));
+    PhabricatorSetupCheck::setOpenSetupIssueKeys(
+      PhabricatorSetupCheck::getUnignoredIssueKeys($issues));
 
     $important = $this->buildIssueList(
       $issues, PhabricatorSetupCheck::GROUP_IMPORTANT);
