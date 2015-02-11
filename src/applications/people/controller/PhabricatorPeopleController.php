@@ -34,6 +34,7 @@ abstract class PhabricatorPeopleController extends PhabricatorController {
         }
 
         $nav->addFilter('logs', pht('Activity Logs'));
+        $nav->addFilter('invite', pht('Email Invitations'));
       }
     }
 

@@ -1,22 +1,20 @@
 <?php
 
-final class PhabricatorAuthAuthFactorPHIDType extends PhabricatorPHIDType {
+final class PhabricatorAuthInvitePHIDType extends PhabricatorPHIDType {
 
-  const TYPECONST = 'AFTR';
+  const TYPECONST = 'AINV';
 
   public function getTypeName() {
-    return pht('Auth Factor');
+    return pht('Auth Invite');
   }
 
   public function newObject() {
-    return new PhabricatorAuthFactorConfig();
+    return new PhabricatorAuthInvite();
   }
 
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {
-
-    // TODO: Maybe we need this eventually?
     throw new PhutilMethodNotImplementedException();
   }
 
@@ -26,9 +24,7 @@ final class PhabricatorAuthAuthFactorPHIDType extends PhabricatorPHIDType {
     array $objects) {
 
     foreach ($handles as $phid => $handle) {
-      $factor = $objects[$phid];
-
-      $handle->setName($factor->getFactorName());
+      $invite = $objects[$phid];
     }
   }
 

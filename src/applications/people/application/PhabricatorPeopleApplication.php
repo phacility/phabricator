@@ -46,6 +46,12 @@ final class PhabricatorPeopleApplication extends PhabricatorApplication {
         '(query/(?P<key>[^/]+)/)?' => 'PhabricatorPeopleListController',
         'logs/(?:query/(?P<queryKey>[^/]+)/)?'
           => 'PhabricatorPeopleLogsController',
+        'invite/' => array(
+          '(?:query/(?P<queryKey>[^/]+)/)?'
+            => 'PhabricatorPeopleInviteListController',
+          'send/'
+            => 'PhabricatorPeopleInviteSendController',
+        ),
         'approve/(?P<id>[1-9]\d*)/' => 'PhabricatorPeopleApproveController',
         '(?P<via>disapprove)/(?P<id>[1-9]\d*)/'
           => 'PhabricatorPeopleDisableController',
