@@ -53,6 +53,10 @@ abstract class PhabricatorController extends AphrontController {
     return PhabricatorEnv::getEnvConfig('security.require-multi-factor-auth');
   }
 
+  public function shouldAllowLegallyNonCompliantUsers() {
+    return false;
+  }
+
   public function willBeginExecution() {
     $request = $this->getRequest();
 
@@ -218,6 +222,47 @@ abstract class PhabricatorController extends AphrontController {
           ->setViewer($user)
           ->withPHIDs(array($application->getPHID()))
           ->executeOne();
+      }
+    }
+
+
+    if (!$this->shouldAllowLegallyNonCompliantUsers()) {
+      $legalpad_class = 'PhabricatorLegalpadApplication';
+      $legalpad = id(new PhabricatorApplicationQuery())
+        ->setViewer($user)
+        ->withClasses(array($legalpad_class))
+        ->withInstalled(true)
+        ->execute();
+      $legalpad = head($legalpad);
+
+      $doc_query = id(new LegalpadDocumentQuery())
+        ->setViewer($user)
+        ->withSignatureRequired(1)
+        ->needViewerSignatures(true);
+
+      if ($user->hasSession() &&
+          !$user->getSession()->getIsPartial() &&
+          !$user->getSession()->getSignedLegalpadDocuments() &&
+          $user->isLoggedIn() &&
+          $legalpad) {
+
+        $sign_docs = $doc_query->execute();
+        $must_sign_docs = array();
+        foreach ($sign_docs as $sign_doc) {
+          if (!$sign_doc->getUserSignature($user->getPHID())) {
+            $must_sign_docs[] = $sign_doc;
+          }
+        }
+        if ($must_sign_docs) {
+          $controller = new LegalpadDocumentSignController();
+          $this->getRequest()->setURIMap(array(
+            'id' => head($must_sign_docs)->getID(),));
+          $this->setCurrentApplication($legalpad);
+          return $this->delegateToController($controller);
+        } else {
+          $engine = id(new PhabricatorAuthSessionEngine())
+            ->signLegalpadDocuments($user, $sign_docs);
+        }
       }
     }
 
