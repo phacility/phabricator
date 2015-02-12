@@ -17,11 +17,6 @@ final class LegalpadReplyHandler extends PhabricatorMailReplyHandler {
     return $this->getDefaultPublicReplyHandlerEmailAddress('L');
   }
 
-  public function getReplyHandlerDomain() {
-    return PhabricatorEnv::getEnvConfig(
-      'metamta.reply-handler-domain');
-  }
-
   public function getReplyHandlerInstructions() {
     if ($this->supportsReplies()) {
       return pht('Reply to comment or !unsubscribe.');
