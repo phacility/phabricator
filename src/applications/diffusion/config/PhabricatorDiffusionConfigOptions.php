@@ -30,6 +30,7 @@ final class PhabricatorDiffusionConfigOptions
         'metamta.diffusion.reply-handler-domain',
         'string',
         null)
+        ->setLocked(true)
         ->setDescription(
           pht(
             'See {{metamta.maniphest.reply-handler}}. This does the same '.
@@ -38,6 +39,7 @@ final class PhabricatorDiffusionConfigOptions
         'metamta.diffusion.reply-handler',
         'class',
         'PhabricatorAuditReplyHandler')
+        ->setLocked(true)
         ->setBaseClass('PhabricatorMailReplyHandler')
         ->setDescription(pht('Override mail reply handler class.')),
       $this->newOption(

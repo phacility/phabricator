@@ -90,9 +90,10 @@ final class PhabricatorCoreConfigOptions
         ->addExample('America/Boise', pht('US Mountain (MDT)'))
         ->addExample('America/Los_Angeles', pht('US West (PDT)')),
       $this->newOption('phabricator.cookie-prefix', 'string', null)
+        ->setLocked(true)
         ->setSummary(
           pht('Set a string Phabricator should use to prefix '.
-              'cookie names'))
+              'cookie names.'))
         ->setDescription(
           pht(
             'Cookies set for x.com are also sent for y.x.com. Assuming '.

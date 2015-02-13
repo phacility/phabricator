@@ -244,6 +244,7 @@ EODOC
         'metamta.reply-handler-domain',
         'string',
         null)
+        ->setLocked(true)
         ->setDescription(pht(
           'Domain used for reply email addresses. Some applications can '.
           'override this configuration with a different domain.'))
