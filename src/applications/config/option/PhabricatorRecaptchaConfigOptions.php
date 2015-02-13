@@ -38,7 +38,7 @@ final class PhabricatorRecaptchaConfigOptions
         ->setDescription(
           pht('Recaptcha public key, obtained by signing up for Recaptcha.')),
       $this->newOption('recaptcha.private-key', 'string', null)
-        ->setMasked(true)
+        ->setHidden(true)
         ->setDescription(
           pht('Recaptcha private key, obtained by signing up for Recaptcha.')),
     );

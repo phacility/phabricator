@@ -50,7 +50,7 @@ final class PhabricatorPHPMailerConfigOptions
         ->setLocked(true)
         ->setDescription(pht('Username for SMTP.')),
       $this->newOption('phpmailer.smtp-password', 'string', null)
-        ->setMasked(true)
+        ->setHidden(true)
         ->setDescription(pht('Password for SMTP.')),
       $this->newOption('phpmailer.smtp-encoding', 'string', '8bit')
         ->setSummary(pht('Configure how mail is encoded.'))

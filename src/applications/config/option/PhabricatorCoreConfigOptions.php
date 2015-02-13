@@ -179,9 +179,6 @@ final class PhabricatorCoreConfigOptions
       $this->newOption('config.hide', 'set', array())
         ->setLocked(true)
         ->setDescription(pht('Additional configuration options to hide.')),
-      $this->newOption('config.mask', 'set', array())
-        ->setLocked(true)
-        ->setDescription(pht('Additional configuration options to mask.')),
       $this->newOption('config.ignore-issues', 'set', array())
         ->setLocked(true)
         ->setDescription(pht('Setup issues to ignore.')),

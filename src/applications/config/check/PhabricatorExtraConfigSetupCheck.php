@@ -206,6 +206,8 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'translation.provider' => pht(
         'The translation implementation has changed and providers are no '.
         'longer used or supported.'),
+      'config.mask' => pht(
+        'Use `config.hide` instead of this option.'),
     );
 
     return $ancient_config;
