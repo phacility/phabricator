@@ -108,7 +108,9 @@ final class PhabricatorAuthInviteQuery
   }
 
   public function getQueryApplicationClass() {
-    return 'PhabricatorAuthApplication';
+    // NOTE: This query is issued by logged-out users, who often will not be
+    // able to see applications. They still need to be able to see invites.
+    return null;
   }
 
 }
