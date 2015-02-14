@@ -30,7 +30,8 @@ final class PhortuneSubscriptionPHIDType extends PhabricatorPHIDType {
 
       $id = $subscription->getID();
 
-      // TODO: Flesh this out.
+      $handle->setName($subscription->getSubscriptionName());
+      $handle->setURI($subscription->getURI());
 
     }
   }
