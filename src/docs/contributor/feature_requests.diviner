@@ -169,12 +169,8 @@ to solve, you're ready to file a feature request:
 
 https://secure.phabricator.com/maniphest/task/create/
 
-You can file feature requests in places other than Maniphest (like GitHub), but
-we can address them far more effectively if you file them in the upstream.
-Feature requests filed elsewhere will generally be moved to the upstream.
-
 If you have a quick question or want to discuss something before filing a
-request, IRC is a great way to get a quick answer. You can find information
+request, IRC is the best way to get a quick answer. You can find information
 about IRC and other support channels in @{article: Give Feedback! Get Support!}.
 
 

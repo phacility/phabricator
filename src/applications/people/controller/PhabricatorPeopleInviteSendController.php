@@ -188,8 +188,7 @@ final class PhabricatorPeopleInviteSendController
         id(new AphrontFormTextAreaControl())
           ->setLabel(pht('Message'))
           ->setName(pht('message'))
-          ->setValue($message)
-          ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_SHORT))
+          ->setValue($message))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(

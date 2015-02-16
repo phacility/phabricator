@@ -18,7 +18,7 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
   }
 
   public function getReplyHandlerDomain() {
-    return PhabricatorEnv::getEnvConfig(
+    return $this->getCustomReplyHandlerDomainIfExists(
       'metamta.maniphest.reply-handler-domain');
   }
 

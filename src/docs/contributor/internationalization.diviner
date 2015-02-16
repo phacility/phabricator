@@ -1,33 +1,33 @@
 @title Internationalization
 @group developer
 
-What is required from developers to get Phabricator translatable.
+Describes Phabricator translation and localization.
 
-= API =
+Overview
+========
 
-Translator API is provided by libphutil. It gives us
-@{class@libphutil:PhutilTranslator} class and global @{function@libphutil:pht}
-function built on top of it.
+Phabricator partially supports internationalization, but many of the tools
+are missing or in a prototype state.
 
-Developers are supposed to call @{function@libphutil:pht} on all strings that
-require translation.
+This document very briefly summarizes some of what exists today.
 
-Phabricator provides translations for this translator through
-@{class:PhabricatorTranslation} class.
+Writing Translatable Code
+========
 
-= Adding a New Translation =
+Strings are marked for translation with @{function@libphutil:pht}.
 
-Adding a translation which uses the same language rules as some already existing
-translation is relatively simple: Just extend @{class:PhabricatorTranslation}
-and you will be able to specify this class in the global configuration
-'translation.provider' and users will be able to select it in their preferences.
+Adding a New Locale
+=========
 
-= Adding a New Language =
+To add a new locale, subclass @{class:PhutilLocale}.
 
-Adding a language involves all steps as adding a translation plus specifying the
-language rules in @{method@libphutil:PhutilTranslator::chooseVariant}.
+Translating Strings
+========
 
-= Singular and Plural =
+To translate strings, subclass @{class:PhutilTranslation}.
+
+Singular and Plural
+========
 
 Different languages have various rules for using singular and plural. All you
 need to do is to call @{function@libphutil:pht} with a text that is suitable for
@@ -46,7 +46,8 @@ Translators will translate this text for all different forms the language uses:
 The ugly identifier passed to @{function@libphutil:pht} will remain in the text
 only if the translation doesn't exist.
 
-= Male and Female =
+Male and Female
+========
 
 Different languages use different words for talking about males, females and
 unknown genders. Callsites have to call @{function@libphutil:pht} passing

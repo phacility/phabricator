@@ -63,10 +63,28 @@ final class PhabricatorApplicationUninstallController
       }
     } else {
       if ($selected->canUninstall()) {
-        $dialog->setTitle('Confirmation')
-               ->appendChild(
-                 'Really Uninstall '.$selected->getName().' application?')
-               ->addSubmitButton('Uninstall');
+        $dialog->setTitle(pht('Really Uninstall Application?'));
+
+        if ($selected instanceof PhabricatorHomeApplication) {
+          $dialog
+            ->appendParagraph(
+              pht(
+                'Are you absolutely certain you want to uninstall the Home '.
+                'application?'))
+            ->appendParagraph(
+              pht(
+                'This is very unusual and will leave you without any '.
+                'content on the Phabricator home page. You should only '.
+                'do this if you are certain you know what you are doing.'))
+            ->addSubmitButton(pht('Completely Break Phabricator'));
+        } else {
+          $dialog
+            ->appendParagraph(
+              pht(
+                'Really uninstall the %s application?',
+                $selected->getName()))
+            ->addSubmitButton(pht('Uninstall'));
+        }
       } else {
         $dialog->setTitle('Information')
                ->appendChild(

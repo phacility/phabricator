@@ -40,25 +40,25 @@ abstract class PhabricatorSetupCheck {
     $this->executeChecks();
   }
 
-  final public static function getOpenSetupIssueCount() {
+  final public static function getOpenSetupIssueKeys() {
     $cache = PhabricatorCaches::getSetupCache();
-    return $cache->getKey('phabricator.setup.issues');
+    return $cache->getKey('phabricator.setup.issue-keys');
   }
 
-  final public static function setOpenSetupIssueCount($count) {
+  final public static function setOpenSetupIssueKeys(array $keys) {
     $cache = PhabricatorCaches::getSetupCache();
-    $cache->setKey('phabricator.setup.issues', $count);
+    $cache->setKey('phabricator.setup.issue-keys', $keys);
   }
 
-  final public static function countUnignoredIssues(array $all_issues) {
+  final public static function getUnignoredIssueKeys(array $all_issues) {
     assert_instances_of($all_issues, 'PhabricatorSetupIssue');
-    $count = 0;
+    $keys = array();
     foreach ($all_issues as $issue) {
       if (!$issue->getIsIgnored()) {
-        $count++;
+        $keys[] = $issue->getIssueKey();
       }
     }
-    return $count;
+    return $keys;
   }
 
   final public static function getConfigNeedsRepair() {
@@ -76,13 +76,13 @@ abstract class PhabricatorSetupCheck {
     $cache->deleteKeys(
       array(
         'phabricator.setup.needs-repair',
-        'phabricator.setup.issues',
+        'phabricator.setup.issue-keys',
       ));
   }
 
   final public static function willProcessRequest() {
-    $issue_count = self::getOpenSetupIssueCount();
-    if ($issue_count === null) {
+    $issue_keys = self::getOpenSetupIssueKeys();
+    if ($issue_keys === null) {
       $issues = self::runAllChecks();
       foreach ($issues as $issue) {
         if ($issue->getIsFatal()) {
@@ -92,7 +92,7 @@ abstract class PhabricatorSetupCheck {
             ->setView($view);
         }
       }
-      self::setOpenSetupIssueCount(self::countUnignoredIssues($issues));
+      self::setOpenSetupIssueKeys(self::getUnignoredIssueKeys($issues));
     }
 
     // Try to repair configuration unless we have a clean bill of health on it.

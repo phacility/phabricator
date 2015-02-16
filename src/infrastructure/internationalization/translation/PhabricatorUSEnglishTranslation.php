@@ -1,13 +1,13 @@
 <?php
 
-abstract class PhabricatorBaseEnglishTranslation
-  extends PhabricatorTranslation {
+final class PhabricatorUSEnglishTranslation
+  extends PhutilTranslation {
 
-  final public function getLanguage() {
-    return 'en';
+  public function getLocaleCode() {
+    return 'en_US';
   }
 
-  public function getTranslations() {
+  protected function getTranslations() {
     return array(
       'No daemon(s) with id(s) "%s" exist!' => array(
         'No daemon with id %s exists!',

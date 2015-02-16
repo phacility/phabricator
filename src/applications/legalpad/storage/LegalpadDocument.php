@@ -18,6 +18,7 @@ final class LegalpadDocument extends LegalpadDAO
   protected $mailKey;
   protected $signatureType;
   protected $preamble;
+  protected $requireSignature;
 
   const SIGNATURE_TYPE_INDIVIDUAL = 'user';
   const SIGNATURE_TYPE_CORPORATION = 'corp';
@@ -44,6 +45,7 @@ final class LegalpadDocument extends LegalpadDAO
       ->attachSignatures(array())
       ->setSignatureType(self::SIGNATURE_TYPE_INDIVIDUAL)
       ->setPreamble('')
+      ->setRequireSignature(0)
       ->setViewPolicy($view_policy)
       ->setEditPolicy($edit_policy);
   }
@@ -61,10 +63,14 @@ final class LegalpadDocument extends LegalpadDAO
         'mailKey' => 'bytes20',
         'signatureType' => 'text4',
         'preamble' => 'text',
+        'requireSignature' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_creator' => array(
           'columns' => array('creatorPHID', 'dateModified'),
+        ),
+        'key_required' => array(
+          'columns' => array('requireSignature', 'dateModified'),
         ),
       ),
     ) + parent::getConfiguration();

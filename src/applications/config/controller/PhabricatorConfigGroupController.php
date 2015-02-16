@@ -72,7 +72,7 @@ final class PhabricatorConfigGroupController
         ->setHref('/config/edit/'.$option->getKey().'/')
         ->addAttribute($summary);
 
-      if (!$option->getHidden() && !$option->getMasked()) {
+      if (!$option->getHidden()) {
         $current_value = PhabricatorEnv::getEnvConfig($option->getKey());
         $current_value = PhabricatorConfigJSON::prettyPrintJSON(
           $current_value);
@@ -96,8 +96,6 @@ final class PhabricatorConfigGroupController
 
       if ($option->getHidden()) {
         $item->addIcon('unpublish', pht('Hidden'));
-      } else if ($option->getMasked()) {
-        $item->addIcon('unpublish-grey', pht('Masked'));
       } else if ($option->getLocked()) {
         $item->addIcon('lock', pht('Locked'));
       }

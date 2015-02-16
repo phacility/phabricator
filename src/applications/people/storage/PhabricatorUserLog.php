@@ -8,6 +8,7 @@ final class PhabricatorUserLog extends PhabricatorUserDAO
   const ACTION_LOGIN_FULL     = 'login-full';
   const ACTION_LOGOUT         = 'logout';
   const ACTION_LOGIN_FAILURE  = 'login-fail';
+  const ACTION_LOGIN_LEGALPAD = 'login-legalpad';
   const ACTION_RESET_PASSWORD = 'reset-pass';
 
   const ACTION_CREATE         = 'create';
@@ -53,6 +54,8 @@ final class PhabricatorUserLog extends PhabricatorUserDAO
       self::ACTION_LOGIN_PARTIAL => pht('Login: Partial Login'),
       self::ACTION_LOGIN_FULL => pht('Login: Upgrade to Full'),
       self::ACTION_LOGIN_FAILURE => pht('Login: Failure'),
+      self::ACTION_LOGIN_LEGALPAD =>
+        pht('Login: Signed Required Legalpad Documents'),
       self::ACTION_LOGOUT => pht('Logout'),
       self::ACTION_RESET_PASSWORD => pht('Reset Password'),
       self::ACTION_CREATE => pht('Create Account'),

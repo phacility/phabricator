@@ -49,9 +49,20 @@ abstract class PhabricatorMailReplyHandler {
   abstract public function getPrivateReplyHandlerEmailAddress(
     PhabricatorObjectHandle $handle);
   public function getReplyHandlerDomain() {
+    return $this->getDefaultReplyHandlerDomain();
+  }
+  protected function getCustomReplyHandlerDomainIfExists($config_key) {
+    $domain = PhabricatorEnv::getEnvConfig($config_key);
+    if ($domain) {
+      return $domain;
+    }
+    return $this->getDefaultReplyHandlerDomain();
+  }
+  private function getDefaultReplyHandlerDomain() {
     return PhabricatorEnv::getEnvConfig(
       'metamta.reply-handler-domain');
   }
+
   abstract public function getReplyHandlerInstructions();
   abstract protected function receiveEmail(
     PhabricatorMetaMTAReceivedMail $mail);

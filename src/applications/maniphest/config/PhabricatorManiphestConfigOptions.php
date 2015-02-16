@@ -276,6 +276,7 @@ EOTEXT
         'metamta.maniphest.reply-handler-domain',
         'string',
         null)
+        ->setLocked(true)
         ->setSummary(pht('Enable replying to tasks via email.'))
         ->setDescription(
           pht(
@@ -296,6 +297,7 @@ EOTEXT
         'metamta.maniphest.reply-handler',
         'class',
         'ManiphestReplyHandler')
+        ->setLocked(true)
         ->setBaseClass('PhabricatorMailReplyHandler')
         ->setDescription(pht('Override reply handler class.')),
       $this->newOption(

@@ -7,8 +7,8 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => '871df527',
-    'core.pkg.js' => '65e04767',
+    'core.pkg.css' => '86353aff',
+    'core.pkg.js' => '23d653bb',
     'darkconsole.pkg.js' => '8ab24e01',
     'differential.pkg.css' => '380f07e5',
     'differential.pkg.js' => '7b5a4aa4',
@@ -138,7 +138,7 @@ return array(
     'rsrc/css/phui/phui-info-panel.css' => '27ea50a1',
     'rsrc/css/phui/phui-list.css' => '53deb25c',
     'rsrc/css/phui/phui-object-box.css' => 'b8b7fd78',
-    'rsrc/css/phui/phui-object-item-list-view.css' => '79aeec9e',
+    'rsrc/css/phui/phui-object-item-list-view.css' => 'da095b41',
     'rsrc/css/phui/phui-pinboard-view.css' => '3dd4a269',
     'rsrc/css/phui/phui-property-list-view.css' => '51480060',
     'rsrc/css/phui/phui-remarkup-preview.css' => '19ad512b',
@@ -210,7 +210,7 @@ return array(
     'rsrc/externals/javelin/lib/Scrollbar.js' => '5b2f5a08',
     'rsrc/externals/javelin/lib/URI.js' => '6eff08aa',
     'rsrc/externals/javelin/lib/Vector.js' => '2caa8fb8',
-    'rsrc/externals/javelin/lib/WebSocket.js' => '3f840822',
+    'rsrc/externals/javelin/lib/WebSocket.js' => 'e292eaf4',
     'rsrc/externals/javelin/lib/Workflow.js' => '84d6aea0',
     'rsrc/externals/javelin/lib/__tests__/Cookie.js' => '5ed109e8',
     'rsrc/externals/javelin/lib/__tests__/DOM.js' => 'c984504b',
@@ -697,7 +697,7 @@ return array(
     'javelin-view-interpreter' => 'f829edb3',
     'javelin-view-renderer' => '6c2b09a2',
     'javelin-view-visitor' => 'efe49472',
-    'javelin-websocket' => '3f840822',
+    'javelin-websocket' => 'e292eaf4',
     'javelin-workflow' => '84d6aea0',
     'lightbox-attachment-css' => '7acac05d',
     'maniphest-batch-editor' => '8f380ebc',
@@ -792,7 +792,7 @@ return array(
     'phui-info-panel-css' => '27ea50a1',
     'phui-list-view-css' => '53deb25c',
     'phui-object-box-css' => 'b8b7fd78',
-    'phui-object-item-list-view-css' => '79aeec9e',
+    'phui-object-item-list-view-css' => 'da095b41',
     'phui-pinboard-view-css' => '3dd4a269',
     'phui-property-list-view-css' => '51480060',
     'phui-remarkup-preview-css' => '19ad512b',
@@ -1063,9 +1063,6 @@ return array(
       'javelin-behavior',
       'javelin-dom',
       'phortune-credit-card-form',
-    ),
-    '3f840822' => array(
-      'javelin-install',
     ),
     '40a6a403' => array(
       'javelin-install',
@@ -1806,6 +1803,9 @@ return array(
       'javelin-behavior',
       'javelin-stratcom',
       'javelin-dom',
+    ),
+    'e292eaf4' => array(
+      'javelin-install',
     ),
     'e32d14ab' => array(
       'javelin-behavior',

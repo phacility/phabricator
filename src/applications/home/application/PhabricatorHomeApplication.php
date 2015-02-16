@@ -34,10 +34,6 @@ final class PhabricatorHomeApplication extends PhabricatorApplication {
     return false;
   }
 
-  public function canUninstall() {
-    return false;
-  }
-
   public function getApplicationOrder() {
     return 9;
   }

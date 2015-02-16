@@ -32,6 +32,9 @@ final class PhabricatorAppSearchEngine
     $saved->setParameter(
       'launchable',
       $this->readBoolFromRequest($request, 'launchable'));
+    $saved->setParameter(
+      'appemails',
+      $this->readBoolFromRequest($request, 'appemails'));
 
     return $saved;
   }
@@ -71,6 +74,11 @@ final class PhabricatorAppSearchEngine
     $launchable = $saved->getParameter('launchable');
     if ($launchable !== null) {
       $query->withLaunchable($launchable);
+    }
+
+    $appemails = $saved->getParameter('appemails');
+    if ($appemails !== null) {
+      $query->withApplicationEmailSupport($appemails);
     }
 
     return $query;
@@ -129,6 +137,17 @@ final class PhabricatorAppSearchEngine
               '' => pht('Show All Applications'),
               'true' => pht('Show Launchable Applications'),
               'false' => pht('Show Non-Launchable Applications'),
+            )))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setLabel(pht('Application Emails'))
+          ->setName('appemails')
+          ->setValue($this->getBoolFromQuery($saved, 'appemails'))
+          ->setOptions(
+            array(
+              '' => pht('Show All Applications'),
+              'true' => pht('Show Applications w/ App Email Support'),
+              'false' => pht('Show Applications w/o App Email Support'),
             )));
   }
 

@@ -44,6 +44,7 @@ final class PhabricatorNotificationStatusController
           $value = phutil_format_relative_time_detailed($value);
           break;
         case 'log':
+        case 'instance':
           break;
         default:
           $value = number_format($value);

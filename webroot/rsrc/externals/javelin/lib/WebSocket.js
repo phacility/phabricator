@@ -11,6 +11,7 @@ JX.install('WebSocket', {
 
   construct: function(uri) {
     this.setURI(uri);
+    this._resetDelay();
   },
 
   properties: {
@@ -70,7 +71,6 @@ JX.install('WebSocket', {
       }
 
       this._shouldClose = false;
-      this._resetDelay();
 
       this._socket = new WebSocket(this.getURI());
       this._socket.onopen = JX.bind(this, this._onopen);
@@ -171,6 +171,9 @@ JX.install('WebSocket', {
       // connection, the close handler will send us back here. We'll reconnect
       // more and more slowly until we eventually get a valid connection.
       this._delayUntilReconnect = this._delayUntilReconnect * 2;
+
+      // Max out at 5 minutes between attempts.
+      this._delayUntilReconnect = Math.min(this._delayUntilReconnect, 300000);
       this.open();
     }
 

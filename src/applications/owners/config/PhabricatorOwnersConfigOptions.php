@@ -25,6 +25,7 @@ final class PhabricatorOwnersConfigOptions
         'metamta.package.reply-handler',
         'class',
         'OwnersPackageReplyHandler')
+        ->setLocked(true)
         ->setBaseClass('PhabricatorMailReplyHandler')
         ->setDescription(pht('Reply handler for owners mail.')),
       $this->newOption('metamta.package.subject-prefix', 'string', '[Package]')

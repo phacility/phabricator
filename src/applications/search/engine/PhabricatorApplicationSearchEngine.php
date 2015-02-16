@@ -46,6 +46,10 @@ abstract class PhabricatorApplicationSearchEngine {
     return ($this->context == self::CONTEXT_PANEL);
   }
 
+  public function canUseInPanelContext() {
+    return true;
+  }
+
   public function saveQuery(PhabricatorSavedQuery $query) {
     $query->setEngineClassName(get_class($this));
 

@@ -18,6 +18,10 @@ abstract class CelerityResourceController extends PhabricatorController {
     return true;
   }
 
+  public function shouldAllowLegallyNonCompliantUsers() {
+    return true;
+  }
+
   abstract public function getCelerityResourceMap();
 
   protected function serveResource($path, $package_hash = null) {

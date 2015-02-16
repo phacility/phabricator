@@ -1,15 +1,15 @@
 {
-  "name" : "phabflavor",
-  "title" : "Phabricator Flavor Text",
-  "short" : "Flavor Text",
-  "preface" : "Recommendations, lore, and dark rituals.",
-  "root" : "../../../",
-  "uri.source" :
+  "name": "phabflavor",
+  "title": "Phabricator Flavor Text",
+  "short": "Flavor Text",
+  "preface": "Recommendations, lore, and dark rituals.",
+  "root": "../../../",
+  "uri.source":
     "https://secure.phabricator.com/diffusion/P/browse/master/%f$%l",
-  "rules" : {
-    "(\\.diviner$)" : "DivinerArticleAtomizer"
+  "rules": {
+    "(\\.diviner$)": "DivinerArticleAtomizer"
   },
-  "exclude" : [
+  "exclude": [
     "(^externals/)",
     "(^webroot/rsrc/externals/)",
     "(^scripts/)",
@@ -19,24 +19,24 @@
     "(^src/docs/tech/)",
     "(^src/docs/contributor/)"
   ],
-  "groups" : {
-    "overview" : {
-      "name" : "Overview"
+  "groups": {
+    "overview": {
+      "name": "Overview"
     },
-    "review" : {
-      "name" : "Revision Control and Code Review"
+    "review": {
+      "name": "Revision Control and Code Review"
     },
-    "sundry" : {
-      "name" : "Sundries"
+    "sundry": {
+      "name": "Sundries"
     },
-    "lore" : {
-      "name" : "Phabricator Lore"
+    "lore": {
+      "name": "Phabricator Lore"
     },
-    "php" : {
-      "name" : "PHP"
+    "php": {
+      "name": "PHP"
     },
-    "javascript" : {
-      "name" : "Javascript"
+    "javascript": {
+      "name": "Javascript"
     }
   }
 }

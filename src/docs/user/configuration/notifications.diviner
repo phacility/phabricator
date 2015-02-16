@@ -80,7 +80,7 @@ You may also want to adjust these settings:
   - `notification.server-uri` Internally-facing host and port that Phabricator
     will connect to in order to publish notifications.
   - `notification.log` Log file location for the server.
-  - `notification.pid` Pidfile location used to stop any running server when
+  - `notification.pidfile` Pidfile location used to stop any running server when
     aphlict is restarted.
 
 

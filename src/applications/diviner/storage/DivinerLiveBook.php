@@ -1,7 +1,9 @@
 <?php
 
 final class DivinerLiveBook extends DivinerDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorDestructibleInterface {
 
   protected $name;
   protected $viewPolicy;
@@ -80,6 +82,27 @@ final class DivinerLiveBook extends DivinerDAO
 
   public function describeAutomaticCapability($capability) {
     return null;
+  }
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+      $atoms = id(new DivinerAtomQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withBookPHIDs(array($this->getPHID()))
+        ->withIncludeGhosts(true)
+        ->withIncludeUndocumentable(true)
+        ->execute();
+
+      foreach ($atoms as $atom) {
+        $engine->destroyObject($atom);
+      }
+
+      $this->delete();
+    $this->saveTransaction();
   }
 
 }

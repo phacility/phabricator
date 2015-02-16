@@ -25,7 +25,7 @@ final class PhabricatorSendGridConfigOptions
         ->setLocked(true)
         ->setDescription(pht('SendGrid API username.')),
       $this->newOption('sendgrid.api-key', 'string', null)
-        ->setMasked(true)
+        ->setHidden(true)
         ->setDescription(pht('SendGrid API key.')),
     );
   }

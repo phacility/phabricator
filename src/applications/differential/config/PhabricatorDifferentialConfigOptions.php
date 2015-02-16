@@ -240,12 +240,14 @@ final class PhabricatorDifferentialConfigOptions
         'metamta.differential.reply-handler-domain',
         'string',
         null)
+        ->setLocked(true)
         ->setDescription(
           pht('Inbound email domain for Differential replies.')),
       $this->newOption(
         'metamta.differential.reply-handler',
         'class',
         'DifferentialReplyHandler')
+        ->setLocked(true)
         ->setBaseClass('PhabricatorMailReplyHandler')
         ->setDescription(pht('Alternate reply handler class.')),
       $this->newOption(

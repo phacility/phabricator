@@ -45,8 +45,7 @@ final class PhabricatorSecurityConfigOptions
         'security.hmac-key',
         'string',
         '[D\t~Y7eNmnQGJ;rnH6aF;m2!vJ8@v8C=Cs:aQS\.Qw')
-        ->setMasked(true)
-        ->setLocked(true)
+        ->setHidden(true)
         ->setSummary(
           pht('Key for HMAC digests.'))
         ->setDescription(
@@ -104,8 +103,7 @@ final class PhabricatorSecurityConfigOptions
         'phabricator.csrf-key',
         'string',
         '0b7ec0592e0a2829d8b71df2fa269b2c6172eca3')
-        ->setMasked(true)
-        ->setLocked(true)
+        ->setHidden(true)
         ->setSummary(
           pht('Hashed with other inputs to generate CSRF tokens.'))
         ->setDescription(
@@ -120,8 +118,7 @@ final class PhabricatorSecurityConfigOptions
          'phabricator.mail-key',
          'string',
          '5ce3e7e8787f6e40dfae861da315a5cdf1018f12')
-        ->setMasked(true)
-        ->setLocked(true)
+        ->setHidden(true)
         ->setSummary(
           pht('Hashed with other inputs to generate mail tokens.'))
         ->setDescription(

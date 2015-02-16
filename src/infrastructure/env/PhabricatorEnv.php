@@ -55,6 +55,7 @@ final class PhabricatorEnv {
   private static $overrideSource;
   private static $requestBaseURI;
   private static $cache;
+  private static $localeCode;
 
   /**
    * @phutil-external-symbol class PhabricatorStartup
@@ -123,10 +124,34 @@ final class PhabricatorEnv {
 
     PhabricatorEventEngine::initialize();
 
-    $translation = PhabricatorEnv::newObjectFromConfig('translation.provider');
-    PhutilTranslator::getInstance()
-      ->setLanguage($translation->getLanguage())
-      ->addTranslations($translation->getCleanTranslations());
+    // TODO: Add a "locale.default" config option once we have some reasonable
+    // defaults which aren't silly nonsense.
+    self::setLocaleCode('en_US');
+  }
+
+  public static function setLocaleCode($locale_code) {
+    if ($locale_code == self::$localeCode) {
+      return;
+    }
+
+    try {
+      $locale = PhutilLocale::loadLocale($locale_code);
+      $translations = PhutilTranslation::getTranslationMapForLocale(
+        $locale_code);
+
+      $override = PhabricatorEnv::getEnvConfig('translation.override');
+      if (!is_array($override)) {
+        $override = array();
+      }
+
+      PhutilTranslator::getInstance()
+        ->setLocale($locale)
+        ->setTranslations($override + $translations);
+
+      self::$localeCode = $locale_code;
+    } catch (Exception $ex) {
+      // Just ignore this; the user likely has an out-of-date locale code.
+    }
   }
 
   private static function buildConfigurationSourceStack() {

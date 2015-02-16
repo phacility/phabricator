@@ -10,6 +10,7 @@ final class LegalpadDocumentQuery
   private $signerPHIDs;
   private $dateCreatedAfter;
   private $dateCreatedBefore;
+  private $signatureRequired;
 
   private $needDocumentBodies;
   private $needContributors;
@@ -38,6 +39,11 @@ final class LegalpadDocumentQuery
 
   public function withSignerPHIDs(array $phids) {
     $this->signerPHIDs = $phids;
+    return $this;
+  }
+
+  public function withSignatureRequired($bool) {
+    $this->signatureRequired = $bool;
     return $this;
   }
 
@@ -202,6 +208,13 @@ final class LegalpadDocumentQuery
         $conn_r,
         'contributor.dst IN (%Ls)',
         $this->contributorPHIDs);
+    }
+
+    if ($this->signatureRequired !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'd.requireSignature = %d',
+        $this->signatureRequired);
     }
 
     $where[] = $this->buildPagingClause($conn_r);

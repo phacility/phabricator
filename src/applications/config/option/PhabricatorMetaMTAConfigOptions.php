@@ -243,10 +243,12 @@ EODOC
       $this->newOption(
         'metamta.reply-handler-domain',
         'string',
-        'phabricator.example.com')
+        null)
+        ->setLocked(true)
         ->setDescription(pht(
           'Domain used for reply email addresses. Some applications can '.
-          'configure this domain.')),
+          'override this configuration with a different domain.'))
+        ->addExample('phabricator.example.com', ''),
       $this->newOption('metamta.reply.show-hints', 'bool', true)
         ->setBoolOptions(
           array(

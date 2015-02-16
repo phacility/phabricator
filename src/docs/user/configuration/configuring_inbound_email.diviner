@@ -2,8 +2,7 @@
 @group config
 
 This document contains instructions for configuring inbound email, so users
-may update Differential and Maniphest by replying to messages and create
-Maniphest tasks via email.
+may interact with some Phabricator applications via email.
 
 = Preamble =
 
@@ -33,20 +32,13 @@ in Phabricator and users will not be able to take actions like claiming tasks or
 requesting changes to revisions.
 
 To change this behavior so that users can interact with objects in Phabricator
-over email, set these configuration keys:
-
-  - ##metamta.differential.reply-handler-domain##: enables email replies for
-    Differential.
-  - ##metamta.maniphest.reply-handler-domain##: enables email replies for
-    Maniphest.
-
-Set these keys to some domain which you configure according to the instructions
-below, e.g. `phabricator.example.com`. You can set these both to the same
-domain, and will generally want to. Once you set these keys, emails will use a
-'Reply-To' like `T123+273+af310f9220ad@example.com`, which -- when
+over email, change the configuration key `metamta.reply-handler-domain` to some
+domain you configure according to the instructions below, e.g.
+`phabricator.example.com`. Once you set this key, emails will use a
+'Reply-To' like `T123+273+af310f9220ad@phabricator.example.com`, which -- when
 configured correctly, according to the instructions below -- will parse incoming
-email and allow users to interact with Maniphest tasks and Differential
-revisions over email.
+email and allow users to interact with Differential revisions, Maniphest tasks,
+etc. over email.
 
 If you don't want Phabricator to take up an entire domain (or subdomain) you
 can configure a general prefix so you can use a single mailbox to receive mail
@@ -56,10 +48,15 @@ mail address. This works because everything up to the first (optional) '+'
 character in an email-address is considered the receiver, and everything
 after is essentially ignored.
 
-You can also set up a task creation email address, like `bugs@example.com`,
-which will create a Maniphest task out of any email which is set to it. To do
-this, set `metamta.maniphest.public-create-email` in your configuration. This
-has some mild security implications, see below.
+You can also set up application email addresses to allow users to create
+application objects via email. For example, you could configure
+`bugs@phabricator.example.com` to create a Maniphest task out of any email
+which is sent to it. To do this, see application settings for a given
+application at
+
+{nav icon=home, name=Home >
+name=Applications >
+icon=cog, name=Settings}
 
 = Security =
 
@@ -93,8 +90,8 @@ practically, is a reasonable setting for many installs. The reply-to address
 will still contain a hash unique to the object it represents, so users who have
 not received an email about an object can not blindly interact with it.
 
-If you enable `metamta.maniphest.public-create-email`, that address also uses
-the weaker "From" authentication mechanism.
+If you enable application email addresses, those addresses also use the weaker
+"From" authentication mechanism.
 
 NOTE: Phabricator does not currently attempt to verify "From" addresses because
 this is technically complex, seems unreasonably difficult in the general case,
