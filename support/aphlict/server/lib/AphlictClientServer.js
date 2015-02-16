@@ -5,19 +5,28 @@ var JX = require('./javelin').JX;
 require('./AphlictListenerList');
 require('./AphlictLog');
 
+var url = require('url');
 var util = require('util');
 var WebSocket = require('ws');
 
 JX.install('AphlictClientServer', {
 
   construct: function(server) {
-    this.setListenerList(new JX.AphlictListenerList());
     this.setLogger(new JX.AphlictLog());
     this._server = server;
+    this._lists = {};
   },
 
   members: {
     _server: null,
+    _lists: null,
+
+    getListenerList: function(path) {
+      if (!this._lists[path]) {
+        this._lists[path] = new JX.AphlictListenerList(path);
+      }
+      return this._lists[path];
+    },
 
     listen: function() {
       var self = this;
@@ -25,7 +34,8 @@ JX.install('AphlictClientServer', {
       var wss = new WebSocket.Server({server: server});
 
       wss.on('connection', function(ws) {
-        var listener = self.getListenerList().addListener(ws);
+        var path = url.parse(ws.upgradeReq.url).pathname;
+        var listener = self.getListenerList(path).addListener(ws);
 
         function log() {
           self.getLogger().log(
@@ -70,12 +80,12 @@ JX.install('AphlictClientServer', {
         });
 
         ws.on('close', function() {
-          self.getListenerList().removeListener(listener);
+          self.getListenerList(path).removeListener(listener);
           log('Disconnected.');
         });
 
         wss.on('close', function() {
-          self.getListenerList().removeListener(listener);
+          self.getListenerList(path).removeListener(listener);
           log('Disconnected.');
         });
 
@@ -90,7 +100,6 @@ JX.install('AphlictClientServer', {
   },
 
   properties: {
-    listenerList: null,
     logger: null,
   }
 

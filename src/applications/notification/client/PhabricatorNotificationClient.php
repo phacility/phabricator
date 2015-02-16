@@ -2,12 +2,13 @@
 
 final class PhabricatorNotificationClient {
 
-  const EXPECT_VERSION = 6;
+  const EXPECT_VERSION = 7;
 
   public static function getServerStatus() {
     $uri = PhabricatorEnv::getEnvConfig('notification.server-uri');
     $uri = id(new PhutilURI($uri))
-      ->setPath('/status/');
+      ->setPath('/status/')
+      ->setQueryParam('instance', self::getInstance());
 
     list($body) = id(new HTTPSFuture($uri))
       ->setTimeout(3)
@@ -40,12 +41,18 @@ final class PhabricatorNotificationClient {
   private static function postMessage(array $data) {
     $server_uri = PhabricatorEnv::getEnvConfig('notification.server-uri');
     $server_uri = id(new PhutilURI($server_uri))
-      ->setPath('/');
+      ->setPath('/')
+      ->setQueryParam('instance', self::getInstance());
 
     id(new HTTPSFuture($server_uri, json_encode($data)))
       ->setMethod('POST')
       ->setTimeout(1)
       ->resolvex();
+  }
+
+  private static function getInstance() {
+    $client_uri = PhabricatorEnv::getEnvConfig('notification.client-uri');
+    return id(new PhutilURI($client_uri))->getPath();
   }
 
 }
