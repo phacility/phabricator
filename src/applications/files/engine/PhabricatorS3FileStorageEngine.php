@@ -32,12 +32,19 @@ final class PhabricatorS3FileStorageEngine
     // files more browsable with web/debugging tools like the S3 administration
     // tool.
     $seed = Filesystem::readRandomCharacters(20);
-    $parts = array(
-      substr($seed, 0, 2),
-      substr($seed, 2, 2),
-      substr($seed, 4),
-    );
-    $name = 'phabricator/'.implode('/', $parts);
+    $parts = array();
+    $parts[] = 'phabricator';
+
+    $instance_name = PhabricatorEnv::getEnvConfig('cluster.instance');
+    if (strlen($instance_name)) {
+      $parts[] = $instance_name;
+    }
+
+    $parts[] = substr($seed, 0, 2);
+    $parts[] = substr($seed, 2, 2);
+    $parts[] = substr($seed, 4);
+
+    $name = implode('/', $parts);
 
     AphrontWriteGuard::willWrite();
     $profiler = PhutilServiceProfiler::getInstance();
