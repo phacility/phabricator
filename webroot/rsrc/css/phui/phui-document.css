@@ -102,12 +102,7 @@
 }
 
 .phui-document-content {
-  min-height: 240px;
   background: #fff;
-
-  /* NOTE: This fixes margins, not floats, and can not be replaced with
-     the ".group" class. See T3150.
-  */
   overflow: hidden;
 }
 
@@ -151,4 +146,8 @@
 
 .phui-document-view .phui-property-list-view {
   border-bottom: 1px solid {$thinblueborder};
+}
+
+.phui-document-view .phui-error-severity-nodata {
+  background-color: {$lightgreybackground};
 }
