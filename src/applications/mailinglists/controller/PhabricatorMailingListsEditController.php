@@ -3,21 +3,19 @@
 final class PhabricatorMailingListsEditController
   extends PhabricatorMailingListsController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
+  public function handleRequest(AphrontRequest $request) {
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
-    if ($this->id) {
+    $this->requireApplicationCapability(
+      PhabricatorMailingListsManageCapability::CAPABILITY);
+
+    $list_id = $request->getURIData('id');
+    if ($list_id) {
       $page_title = pht('Edit Mailing List');
       $list = id(new PhabricatorMailingListQuery())
         ->setViewer($viewer)
-        ->withIDs(array($this->id))
+        ->withIDs(array($list_id))
         ->executeOne();
       if (!$list) {
         return new Aphront404Response();
