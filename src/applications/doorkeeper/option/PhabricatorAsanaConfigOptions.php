@@ -15,6 +15,10 @@ final class PhabricatorAsanaConfigOptions
     return 'fa-exchange';
   }
 
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('asana.workspace-id', 'string', null)

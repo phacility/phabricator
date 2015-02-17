@@ -7,6 +7,10 @@ final class PhabricatorFeedSearchEngine
     return pht('Feed Stories');
   }
 
+  public function getApplicationClassName() {
+    return 'PhabricatorFeedApplication';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 

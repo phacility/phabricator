@@ -16,7 +16,6 @@ final class PhabricatorConfigOption
   private $locked;
   private $lockedMessage;
   private $hidden;
-  private $masked;
   private $baseClass;
   private $customData;
   private $customObject;
@@ -28,26 +27,6 @@ final class PhabricatorConfigOption
 
   public function getBaseClass() {
     return $this->baseClass;
-  }
-
-  public function setMasked($masked) {
-    $this->masked = $masked;
-    return $this;
-  }
-
-  public function getMasked() {
-    if ($this->masked) {
-      return true;
-    }
-
-    if ($this->getHidden()) {
-      return true;
-    }
-
-    return idx(
-      PhabricatorEnv::getEnvConfig('config.mask'),
-      $this->getKey(),
-      false);
   }
 
   public function setHidden($hidden) {

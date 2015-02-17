@@ -7,7 +7,7 @@ final class PhabricatorMacroSearchEngine
     return pht('Macros');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorMacroApplication';
   }
 

@@ -7,7 +7,7 @@ final class PhabricatorMailingListSearchEngine
     return pht('Mailing Lists');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorMailingListsApplication';
   }
 

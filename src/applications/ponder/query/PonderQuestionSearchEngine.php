@@ -7,7 +7,7 @@ final class PonderQuestionSearchEngine
     return pht('Ponder Questions');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorPonderApplication';
   }
 

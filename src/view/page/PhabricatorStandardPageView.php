@@ -335,7 +335,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     // Render the "you have unresolved setup issues..." warning.
     $setup_warning = null;
     if ($user && $user->getIsAdmin()) {
-      $open = PhabricatorSetupCheck::getOpenSetupIssueCount();
+      $open = PhabricatorSetupCheck::getOpenSetupIssueKeys();
       if ($open) {
         $setup_warning = phutil_tag_div(
           'setup-warning-callout',
@@ -343,8 +343,9 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
             'a',
             array(
               'href' => '/config/issue/',
+              'title' => implode(', ', $open),
             ),
-            pht('You have %d unresolved setup issue(s)...', $open)));
+            pht('You have %d unresolved setup issue(s)...', count($open))));
       }
     }
 

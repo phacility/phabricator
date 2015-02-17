@@ -97,6 +97,8 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
         ),
         'login/(?P<pkey>[^/]+)/(?:(?P<extra>[^/]+)/)?'
           => 'PhabricatorAuthLoginController',
+        '(?P<loggedout>loggedout)/' => 'PhabricatorAuthStartController',
+        'invite/(?P<code>[^/]+)/' => 'PhabricatorAuthInviteController',
         'register/(?:(?P<akey>[^/]+)/)?' => 'PhabricatorAuthRegisterController',
         'start/' => 'PhabricatorAuthStartController',
         'validate/' => 'PhabricatorAuthValidateController',

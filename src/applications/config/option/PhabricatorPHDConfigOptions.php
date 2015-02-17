@@ -15,6 +15,10 @@ final class PhabricatorPHDConfigOptions
     return 'fa-pied-piper-alt';
   }
 
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('phd.pid-directory', 'string', '/var/tmp/phd/pid')

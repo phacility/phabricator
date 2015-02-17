@@ -15,6 +15,10 @@ final class PhabricatorAccessLogConfigOptions
     return 'fa-list';
   }
 
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
     $common_map = array(
       'C' => pht('The controller or workflow which handled the request.'),

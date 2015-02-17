@@ -34,7 +34,7 @@ final class ManiphestTaskSearchEngine
     return pht('Tasks');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorManiphestApplication';
   }
 

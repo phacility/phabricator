@@ -7,8 +7,7 @@ final class PhabricatorAuthStartController
     return false;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getUser();
 
     if ($viewer->isLoggedIn()) {
@@ -97,14 +96,34 @@ final class PhabricatorAuthStartController
       PhabricatorCookies::setClientIDCookie($request);
     }
 
+    if (!$request->getURIData('loggedout') && count($providers) == 1) {
+      $auto_login_provider = head($providers);
+      $auto_login_config = $auto_login_provider->getProviderConfig();
+      if ($auto_login_provider instanceof PhabricatorPhabricatorAuthProvider &&
+          $auto_login_config->getShouldAutoLogin()) {
+        $auto_login_adapter = $provider->getAdapter();
+        $auto_login_adapter->setState($provider->getAuthCSRFCode($request));
+        return id(new AphrontRedirectResponse())
+          ->setIsExternal(true)
+          ->setURI($provider->getAdapter()->getAuthenticateURI());
+      }
+    }
+
+    $invite = $this->loadInvite();
+
     $not_buttons = array();
     $are_buttons = array();
     $providers = msort($providers, 'getLoginOrder');
     foreach ($providers as $provider) {
-      if ($provider->isLoginFormAButton()) {
-        $are_buttons[] = $provider->buildLoginForm($this);
+      if ($invite) {
+        $form = $provider->buildInviteForm($this);
       } else {
-        $not_buttons[] = $provider->buildLoginForm($this);
+        $form = $provider->buildLoginForm($this);
+      }
+      if ($provider->isLoginFormAButton()) {
+        $are_buttons[] = $form;
+      } else {
+        $not_buttons[] = $form;
       }
     }
 
@@ -147,6 +166,11 @@ final class PhabricatorAuthStartController
     $login_message = PhabricatorEnv::getEnvConfig('auth.login-message');
     $login_message = phutil_safe_html($login_message);
 
+    $invite_message = null;
+    if ($invite) {
+      $invite_message = $this->renderInviteHeader($invite);
+    }
+
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Login'));
     $crumbs->setBorder(true);
@@ -155,6 +179,7 @@ final class PhabricatorAuthStartController
       array(
         $crumbs,
         $login_message,
+        $invite_message,
         $out,
       ),
       array(

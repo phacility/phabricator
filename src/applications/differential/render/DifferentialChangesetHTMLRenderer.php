@@ -10,40 +10,27 @@ abstract class DifferentialChangesetHTMLRenderer
     $file = $changeset->getFileType();
 
     $messages = array();
-    $none = hsprintf('');
     switch ($change) {
 
       case DifferentialChangeType::TYPE_ADD:
         switch ($file) {
           case DifferentialChangeType::FILE_TEXT:
-            $messages[] = pht(
-              'This file was <strong>added</strong>.',
-              $none);
+            $messages[] = pht('This file was added.');
             break;
           case DifferentialChangeType::FILE_IMAGE:
-            $messages[] = pht(
-              'This image was <strong>added</strong>.',
-              $none);
+            $messages[] = pht('This image was added.');
             break;
           case DifferentialChangeType::FILE_DIRECTORY:
-            $messages[] = pht(
-              'This directory was <strong>added</strong>.',
-              $none);
+            $messages[] = pht('This directory was added.');
             break;
           case DifferentialChangeType::FILE_BINARY:
-            $messages[] = pht(
-              'This binary file was <strong>added</strong>.',
-              $none);
+            $messages[] = pht('This binary file was added.');
             break;
           case DifferentialChangeType::FILE_SYMLINK:
-            $messages[] = pht(
-              'This symlink was <strong>added</strong>.',
-              $none);
+            $messages[] = pht('This symlink was added.');
             break;
           case DifferentialChangeType::FILE_SUBMODULE:
-            $messages[] = pht(
-              'This submodule was <strong>added</strong>.',
-              $none);
+            $messages[] = pht('This submodule was added.');
             break;
         }
         break;
@@ -51,34 +38,22 @@ abstract class DifferentialChangesetHTMLRenderer
       case DifferentialChangeType::TYPE_DELETE:
         switch ($file) {
           case DifferentialChangeType::FILE_TEXT:
-            $messages[] = pht(
-              'This file was <strong>deleted</strong>.',
-              $none);
+            $messages[] = pht('This file was deleted.');
             break;
           case DifferentialChangeType::FILE_IMAGE:
-            $messages[] = pht(
-              'This image was <strong>deleted</strong>.',
-              $none);
+            $messages[] = pht('This image was deleted.');
             break;
           case DifferentialChangeType::FILE_DIRECTORY:
-            $messages[] = pht(
-              'This directory was <strong>deleted</strong>.',
-              $none);
+            $messages[] = pht('This directory was deleted.');
             break;
           case DifferentialChangeType::FILE_BINARY:
-            $messages[] = pht(
-              'This binary file was <strong>deleted</strong>.',
-              $none);
+            $messages[] = pht('This binary file was deleted.');
             break;
           case DifferentialChangeType::FILE_SYMLINK:
-            $messages[] = pht(
-              'This symlink was <strong>deleted</strong>.',
-              $none);
+            $messages[] = pht('This symlink was deleted.');
             break;
           case DifferentialChangeType::FILE_SUBMODULE:
-            $messages[] = pht(
-              'This submodule was <strong>deleted</strong>.',
-              $none);
+            $messages[] = pht('This submodule was deleted.');
             break;
         }
         break;

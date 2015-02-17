@@ -7,6 +7,10 @@ final class PhrictionSearchEngine
     return pht('Wiki Documents');
   }
 
+  public function getApplicationClassName() {
+    return 'PhabricatorPhrictionApplication';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 

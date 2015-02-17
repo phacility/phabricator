@@ -2,6 +2,9 @@
 
 final class PhabricatorBinariesSetupCheck extends PhabricatorSetupCheck {
 
+  public function getDefaultGroup() {
+    return self::GROUP_OTHER;
+  }
 
   protected function executeChecks() {
 
@@ -102,11 +105,11 @@ final class PhabricatorBinariesSetupCheck extends PhabricatorSetupCheck {
           $version = trim(substr($stdout, strlen('git version ')));
           break;
         case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-          $minimum_version = null;
+          $minimum_version = '1.5';
           $bad_versions = array(
             '1.7.1' => pht('This version of Subversion has a bug where '.
                            '"svn diff -c N" does not work for files added '.
-                           'in rN (Subverison issue #2873), fixed in 1.7.2.'),);
+                           'in rN (Subversion issue #2873), fixed in 1.7.2.'),);
           list($err, $stdout, $stderr) = exec_manual('svn --version --quiet');
           $version = trim($stdout);
           break;
@@ -232,7 +235,6 @@ final class PhabricatorBinariesSetupCheck extends PhabricatorSetupCheck {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
-        break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
         $summary = pht(
           "The '%s' binary is version %s and Phabricator requires version ".

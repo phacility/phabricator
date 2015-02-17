@@ -15,6 +15,10 @@ final class PhabricatorPHPMailerConfigOptions
     return 'fa-send-o';
   }
 
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('phpmailer.mailer', 'string', 'smtp')
@@ -46,7 +50,7 @@ final class PhabricatorPHPMailerConfigOptions
         ->setLocked(true)
         ->setDescription(pht('Username for SMTP.')),
       $this->newOption('phpmailer.smtp-password', 'string', null)
-        ->setMasked(true)
+        ->setHidden(true)
         ->setDescription(pht('Password for SMTP.')),
       $this->newOption('phpmailer.smtp-encoding', 'string', '8bit')
         ->setSummary(pht('Configure how mail is encoded.'))

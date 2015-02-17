@@ -2,6 +2,10 @@
 
 final class PhabricatorTimezoneSetupCheck extends PhabricatorSetupCheck {
 
+  public function getDefaultGroup() {
+    return self::GROUP_OTHER;
+  }
+
   protected function executeChecks() {
     $php_value = ini_get('date.timezone');
     if ($php_value) {

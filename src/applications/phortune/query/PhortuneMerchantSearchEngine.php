@@ -7,6 +7,10 @@ final class PhortuneMerchantSearchEngine
     return pht('Phortune Merchants');
   }
 
+  public function getApplicationClassName() {
+    return 'PhabricatorPhortuneApplication';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 

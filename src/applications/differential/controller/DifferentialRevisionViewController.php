@@ -235,7 +235,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $whitespace = $request->getStr(
       'whitespace',
-      DifferentialChangesetParser::WHITESPACE_IGNORE_ALL);
+      DifferentialChangesetParser::WHITESPACE_IGNORE_MOST);
 
     $arc_project = $target->getArcanistProject();
     if ($arc_project) {

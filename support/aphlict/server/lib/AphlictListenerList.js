@@ -5,17 +5,22 @@ var JX = require('./javelin').JX;
 require('./AphlictListener');
 
 JX.install('AphlictListenerList', {
-  construct: function() {
+  construct: function(path) {
+    this._path = path;
     this._listeners = {};
   },
 
   members: {
     _listeners: null,
+    _path: null,
     _nextID: 0,
     _totalListenerCount: 0,
 
     addListener: function(socket) {
-      var listener = new JX.AphlictListener(this._generateNextID(), socket);
+      var listener = new JX.AphlictListener(
+        this._generateNextID(),
+        socket,
+        this._path);
 
       this._listeners[listener.getID()] = listener;
       this._totalListenerCount++;

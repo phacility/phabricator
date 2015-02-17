@@ -15,6 +15,10 @@ final class PhabricatorManiphestConfigOptions
     return 'fa-anchor';
   }
 
+  public function getGroup() {
+    return 'apps';
+  }
+
   public function getOptions() {
 
     $priority_defaults = array(
@@ -179,6 +183,11 @@ The keys you can provide in a specification are:
     to this status by writing `Closes T123 as invalid`, even if another status
     is selected by the "Closes" prefix.
 
+Statuses will appear in the UI in the order specified. Note the status marked
+`special` as `duplicate` is not settable directly and will not appear in UI
+elements, and that any status marked `silly` does not appear if Phabricator
+is configured with `phabricator.serious-business` set to true.
+
 Examining the default configuration and examples below will probably be helpful
 in understanding these options.
 
@@ -267,6 +276,7 @@ EOTEXT
         'metamta.maniphest.reply-handler-domain',
         'string',
         null)
+        ->setLocked(true)
         ->setSummary(pht('Enable replying to tasks via email.'))
         ->setDescription(
           pht(
@@ -287,6 +297,7 @@ EOTEXT
         'metamta.maniphest.reply-handler',
         'class',
         'ManiphestReplyHandler')
+        ->setLocked(true)
         ->setBaseClass('PhabricatorMailReplyHandler')
         ->setDescription(pht('Override reply handler class.')),
       $this->newOption(

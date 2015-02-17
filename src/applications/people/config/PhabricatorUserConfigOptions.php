@@ -15,6 +15,10 @@ final class PhabricatorUserConfigOptions
     return 'fa-users';
   }
 
+  public function getGroup() {
+    return 'apps';
+  }
+
   public function getOptions() {
 
     $default = array(

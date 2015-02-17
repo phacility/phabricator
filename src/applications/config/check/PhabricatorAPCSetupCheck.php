@@ -2,6 +2,10 @@
 
 final class PhabricatorAPCSetupCheck extends PhabricatorSetupCheck {
 
+  public function getDefaultGroup() {
+    return self::GROUP_OTHER;
+  }
+
   protected function executeChecks() {
     if (!extension_loaded('apc')) {
       $message = pht(

@@ -3,7 +3,9 @@
 final class PhabricatorTaskmasterDaemon extends PhabricatorDaemon {
 
   protected function run() {
-    $sleep = 0;
+    $taskmaster_count = PhabricatorEnv::getEnvConfig('phd.start-taskmasters');
+    $offset = mt_rand(0, $taskmaster_count - 1);
+
     do {
       $tasks = id(new PhabricatorWorkerLeaseQuery())
         ->setLimit(1)
@@ -40,7 +42,21 @@ final class PhabricatorTaskmasterDaemon extends PhabricatorDaemon {
 
         $sleep = 0;
       } else {
-        $sleep = min($sleep + 1, 30);
+        // When there's no work, sleep for as many seconds as there are
+        // active taskmasters.
+
+        // On average, this starts tasks added to an empty queue after one
+        // second. This keeps responsiveness high even on small instances
+        // without much work to do.
+
+        // It also means an empty queue has an average load of one query
+        // per second even if there are a very large number of taskmasters
+        // launched.
+
+        // The first time we sleep, we add a random offset to try to spread
+        // the sleep times out somewhat evenly.
+        $sleep = $taskmaster_count + $offset;
+        $offset = 0;
       }
 
       $this->sleep($sleep);

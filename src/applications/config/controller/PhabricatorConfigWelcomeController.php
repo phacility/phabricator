@@ -46,7 +46,7 @@ final class PhabricatorConfigWelcomeController
       true,
       $content);
 
-    $issues_resolved = !PhabricatorSetupCheck::getOpenSetupIssueCount();
+    $issues_resolved = !PhabricatorSetupCheck::getOpenSetupIssueKeys();
 
     $setup_href = PhabricatorEnv::getURI('/config/issue/');
     if ($issues_resolved) {

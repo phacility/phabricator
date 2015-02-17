@@ -15,6 +15,10 @@ final class PhabricatorMailgunConfigOptions
     return 'fa-send-o';
   }
 
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('mailgun.domain', 'string', null)
@@ -24,7 +28,7 @@ final class PhabricatorMailgunConfigOptions
             'Mailgun domain name. See https://mailgun.com/cp/domains'))
         ->addExample('mycompany.com', 'Use specific domain'),
       $this->newOption('mailgun.api-key', 'string', null)
-        ->setMasked(true)
+        ->setHidden(true)
         ->setDescription(pht('Mailgun API key.')),
     );
 

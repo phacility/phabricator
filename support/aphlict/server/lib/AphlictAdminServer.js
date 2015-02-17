@@ -5,6 +5,7 @@ var JX = require('./javelin').JX;
 require('./AphlictListenerList');
 
 var http = require('http');
+var url = require('url');
 
 JX.install('AphlictAdminServer', {
 
@@ -25,12 +26,8 @@ JX.install('AphlictAdminServer', {
     _server: null,
     _startTime: null,
 
-    getListeners: function() {
-      return this.getListenerList().getListeners();
-    },
-
-    getListenerList: function() {
-      return this.getClientServer().getListenerList();
+    getListenerList: function(instance) {
+      return this.getClientServer().getListenerList(instance);
     },
 
     listen: function() {
@@ -39,9 +36,11 @@ JX.install('AphlictAdminServer', {
 
     _handler: function(request, response) {
       var self = this;
+      var u = url.parse(request.url, true);
+      var instance = u.query.instance || '/';
 
       // Publishing a notification.
-      if (request.url == '/') {
+      if (u.pathname == '/') {
         if (request.method == 'POST') {
           var body = '';
 
@@ -54,11 +53,12 @@ JX.install('AphlictAdminServer', {
               var msg = JSON.parse(body);
 
               self.getLogger().log(
-                'Received notification: ' + JSON.stringify(msg));
+                'Received notification (' + instance + '): ' +
+                JSON.stringify(msg));
               ++self._messagesIn;
 
               try {
-                self._transmit(msg);
+                self._transmit(instance, msg);
                 response.writeHead(200, {'Content-Type': 'text/plain'});
               } catch (err) {
                 self.getLogger().log(
@@ -81,14 +81,17 @@ JX.install('AphlictAdminServer', {
           response.writeHead(405, 'Method Not Allowed');
           response.end();
         }
-      } else if (request.url == '/status/') {
+      } else if (u.pathname == '/status/') {
         var status = {
+          'instance': instance,
           'uptime': (new Date().getTime() - this._startTime),
-          'clients.active': this.getListenerList().getActiveListenerCount(),
-          'clients.total': this.getListenerList().getTotalListenerCount(),
+          'clients.active': this.getListenerList(instance)
+            .getActiveListenerCount(),
+          'clients.total': this.getListenerList(instance)
+            .getTotalListenerCount(),
           'messages.in': this._messagesIn,
           'messages.out': this._messagesOut,
-          'version': 6
+          'version': 7
         };
 
         response.writeHead(200, {'Content-Type': 'application/json'});
@@ -103,10 +106,12 @@ JX.install('AphlictAdminServer', {
     /**
      * Transmits a message to all subscribed listeners.
      */
-    _transmit: function(message) {
-      var listeners = this.getListeners().filter(function(client) {
-        return client.isSubscribedToAny(message.subscribers);
-      });
+    _transmit: function(instance, message) {
+      var listeners = this.getListenerList(instance)
+        .getListeners()
+        .filter(function(client) {
+          return client.isSubscribedToAny(message.subscribers);
+        });
 
       for (var i = 0; i < listeners.length; i++) {
         var listener = listeners[i];
@@ -119,7 +124,7 @@ JX.install('AphlictAdminServer', {
             '<%s> Wrote Message',
             listener.getDescription());
         } catch (error) {
-          this.getListenerList().removeListener(listener);
+          this.getListenerList(instance).removeListener(listener);
           this.getLogger().log(
             '<%s> Write Error: %s',
             listener.getDescription(),

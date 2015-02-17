@@ -15,6 +15,10 @@ final class PhabricatorPasteConfigOptions
     return 'fa-paste';
   }
 
+  public function getGroup() {
+    return 'apps';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption(

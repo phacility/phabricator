@@ -15,6 +15,10 @@ final class PhabricatorGarbageCollectorConfigOptions
     return 'fa-trash-o';
   }
 
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
 
     $options = array(

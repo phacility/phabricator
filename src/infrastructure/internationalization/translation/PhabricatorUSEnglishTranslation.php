@@ -1,13 +1,13 @@
 <?php
 
-abstract class PhabricatorBaseEnglishTranslation
-  extends PhabricatorTranslation {
+final class PhabricatorUSEnglishTranslation
+  extends PhutilTranslation {
 
-  final public function getLanguage() {
-    return 'en';
+  public function getLocaleCode() {
+    return 'en_US';
   }
 
-  public function getTranslations() {
+  protected function getTranslations() {
     return array(
       'No daemon(s) with id(s) "%s" exist!' => array(
         'No daemon with id %s exists!',
@@ -17,9 +17,9 @@ abstract class PhabricatorBaseEnglishTranslation
         'This configuration value is related:',
         'These configuration values are related:',
       ),
-      'Task(s)' => array('Task', 'Tasks'),
+      '%s Task(s)' => array('Task', 'Tasks'),
 
-      'ERROR(S)' => array('ERROR', 'ERRORS'),
+      '%s ERROR(S)' => array('ERROR', 'ERRORS'),
       '%d Error(s)' => array('%d Error', '%d Errors'),
       '%d Warning(s)' => array('%d Warning', '%d Warnings'),
       '%d Auto-Fix(es)' => array('%d Auto-Fix', '%d Auto-Fixes'),
@@ -32,12 +32,12 @@ abstract class PhabricatorBaseEnglishTranslation
       '%d path(s)' => array('%d path', '%d paths'),
       '%d diff(s)' => array('%d diff', '%d diffs'),
 
-      'DIFF LINK(S)' => array('DIFF LINK', 'DIFF LINKS'),
+      '%s DIFF LINK(S)' => array('DIFF LINK', 'DIFF LINKS'),
       'You successfully created %d diff(s).' => array(
         'You successfully created %d diff.',
         'You successfully created %d diffs.',
       ),
-      'Diff creation failed; see body for error(s).' => array(
+      'Diff creation failed; see body for %s error(s).' => array(
         'Diff creation failed; see body for error.',
         'Diff creation failed; see body for errors.',
       ),
@@ -499,7 +499,7 @@ abstract class PhabricatorBaseEnglishTranslation
         'here:',
       ),
 
-      'PHP also loaded these configuration file(s):' => array(
+      'PHP also loaded these %s configuration file(s):' => array(
         'PHP also loaded this configuration file:',
         'PHP also loaded these configuration files:',
       ),
@@ -905,6 +905,24 @@ abstract class PhabricatorBaseEnglishTranslation
       'You have %d unpaid invoice(s).' => array(
         'You have an unpaid invoice.',
         'You have unpaid invoices.',
+      ),
+
+      'The configurations differ in the following %s way(s):' => array(
+        'The configurations differ:',
+        'The configurations differ in these ways:',
+      ),
+
+      'Phabricator is configured with an email domain whitelist (in %s), so '.
+      'only users with a verified email address at one of these %s '.
+      'allowed domain(s) will be able to register an account: %s' => array(
+        array(
+          'Phabricator is configured with an email domain whitelist (in %s), '.
+          'so only users with a verified email address at %3$s will be '.
+          'allowed to register an account.',
+          'Phabricator is configured with an email domain whitelist (in %s), '.
+          'so only users with a verified email address at one of these '.
+          'allowed domains will be able to register an account: %3$s',
+        ),
       ),
     );
   }

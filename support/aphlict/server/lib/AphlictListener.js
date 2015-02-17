@@ -3,15 +3,18 @@
 var JX = require('./javelin').JX;
 
 JX.install('AphlictListener', {
-  construct: function(id, socket) {
+  construct: function(id, socket, path) {
     this._id = id;
     this._socket = socket;
+    this._path = path;
+    this._subscriptions = {};
   },
 
   members: {
     _id: null,
     _socket: null,
-    _subscriptions: {},
+    _path: null,
+    _subscriptions: null,
 
     getID: function() {
       return this._id;
@@ -47,7 +50,7 @@ JX.install('AphlictListener', {
     },
 
     getDescription: function() {
-      return 'Listener/' + this.getID();
+      return 'Listener/' + this.getID() + this._path;
     },
 
     writeMessage: function(message) {

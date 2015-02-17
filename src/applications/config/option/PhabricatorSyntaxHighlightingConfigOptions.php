@@ -15,6 +15,10 @@ final class PhabricatorSyntaxHighlightingConfigOptions
     return 'fa-code';
   }
 
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
 
     $caches_href = PhabricatorEnv::getDocLink('Managing Caches');

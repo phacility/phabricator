@@ -2,6 +2,10 @@
 
 final class PhabricatorFileinfoSetupCheck extends PhabricatorSetupCheck {
 
+  public function getDefaultGroup() {
+    return self::GROUP_OTHER;
+  }
+
   protected function executeChecks() {
     if (!extension_loaded('fileinfo')) {
       $message = pht(

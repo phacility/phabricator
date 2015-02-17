@@ -38,19 +38,25 @@ final class PhabricatorAuthRegisterController
       return $response;
     }
 
+    $invite = $this->loadInvite();
+
     if (!$provider->shouldAllowRegistration()) {
+      if ($invite) {
+        // If the user has an invite, we allow them to register with any
+        // provider, even a login-only provider.
+      } else {
+        // TODO: This is a routine error if you click "Login" on an external
+        // auth source which doesn't allow registration. The error should be
+        // more tailored.
 
-      // TODO: This is a routine error if you click "Login" on an external
-      // auth source which doesn't allow registration. The error should be
-      // more tailored.
-
-      return $this->renderError(
-        pht(
-          'The account you are attempting to register with uses an '.
-          'authentication provider ("%s") which does not allow registration. '.
-          'An administrator may have recently disabled registration with this '.
-          'provider.',
-          $provider->getProviderName()));
+        return $this->renderError(
+          pht(
+            'The account you are attempting to register with uses an '.
+            'authentication provider ("%s") which does not allow '.
+            'registration. An administrator may have recently disabled '.
+            'registration with this provider.',
+            $provider->getProviderName()));
+      }
     }
 
     $user = new PhabricatorUser();
@@ -59,9 +65,15 @@ final class PhabricatorAuthRegisterController
     $default_realname = $account->getRealName();
 
     $default_email = $account->getEmail();
+
+    if ($invite) {
+      $default_email = $invite->getEmailAddress();
+    }
+
     if (!PhabricatorUserEmail::isValidAddress($default_email)) {
       $default_email = null;
     }
+
     if ($default_email !== null) {
       // We should bypass policy here becase e.g. limiting an application use
       // to a subset of users should not allow the others to overwrite
@@ -105,7 +117,13 @@ final class PhabricatorAuthRegisterController
           'address = %s',
           $default_email);
         if ($same_email) {
-          $default_email = null;
+          if ($invite) {
+            // We're allowing this to continue. The fact that we loaded the
+            // invite means that the address is nonprimary and unverified and
+            // we're OK to steal it.
+          } else {
+            $default_email = null;
+          }
         }
       }
     }
@@ -166,7 +184,13 @@ final class PhabricatorAuthRegisterController
     $min_len = PhabricatorEnv::getEnvConfig('account.minimum-password-length');
     $min_len = (int)$min_len;
 
-    if ($request->isFormPost() || !$can_edit_anything) {
+    $from_invite = $request->getStr('invite');
+    if ($from_invite && $can_edit_username) {
+      $value_username = $request->getStr('username');
+      $e_username = null;
+    }
+
+    if (($request->isFormPost() || !$can_edit_anything) && !$from_invite) {
       $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
 
       if ($must_set_password) {
@@ -252,27 +276,47 @@ final class PhabricatorAuthRegisterController
         }
 
         try {
+          $verify_email = false;
+
           if ($force_verify) {
             $verify_email = true;
-          } else {
-            $verify_email =
-              ($account->getEmailVerified()) &&
-              ($value_email === $default_email);
           }
 
-          if ($provider->shouldTrustEmails() &&
-              $value_email === $default_email) {
-            $verify_email = true;
+          if ($value_email === $default_email) {
+            if ($account->getEmailVerified()) {
+              $verify_email = true;
+            }
+
+            if ($provider->shouldTrustEmails()) {
+              $verify_email = true;
+            }
+
+            if ($invite) {
+              $verify_email = true;
+            }
           }
 
-          $email_obj = id(new PhabricatorUserEmail())
-            ->setAddress($value_email)
-            ->setIsVerified((int)$verify_email);
+          $email_obj = null;
+          if ($invite) {
+            // If we have a valid invite, this email may exist but be
+            // nonprimary and unverified, so we'll reassign it.
+            $email_obj = id(new PhabricatorUserEmail())->loadOneWhere(
+              'address = %s',
+              $value_email);
+          }
+          if (!$email_obj) {
+            $email_obj = id(new PhabricatorUserEmail())
+              ->setAddress($value_email);
+          }
+
+          $email_obj->setIsVerified((int)$verify_email);
 
           $user->setUsername($value_username);
           $user->setRealname($value_realname);
 
           if ($is_setup) {
+            $must_approve = false;
+          } else if ($invite) {
             $must_approve = false;
           } else {
             $must_approve = PhabricatorEnv::getEnvConfig(
@@ -285,12 +329,18 @@ final class PhabricatorAuthRegisterController
             $user->setIsApproved(1);
           }
 
+          if ($invite) {
+            $allow_reassign_email = true;
+          } else {
+            $allow_reassign_email = false;
+          }
+
           $user->openTransaction();
 
             $editor = id(new PhabricatorUserEditor())
               ->setActor($user);
 
-            $editor->createNewUser($user, $email_obj);
+            $editor->createNewUser($user, $email_obj, $allow_reassign_email);
             if ($must_set_password) {
               $envelope = new PhutilOpaqueEnvelope($value_password);
               $editor->changePassword($user, $envelope);
@@ -312,6 +362,10 @@ final class PhabricatorAuthRegisterController
 
           if ($must_approve) {
             $this->sendWaitingForApprovalEmail($user);
+          }
+
+          if ($invite) {
+            $invite->setAcceptedByPHID($user->getPHID())->save();
           }
 
           return $this->loginUser($user);
@@ -374,21 +428,30 @@ final class PhabricatorAuthRegisterController
           ->setError($e_username));
     }
 
+    if ($can_edit_realname) {
+      $form->appendChild(
+        id(new AphrontFormTextControl())
+          ->setLabel(pht('Real Name'))
+          ->setName('realName')
+          ->setValue($value_realname)
+          ->setError($e_realname));
+    }
+
     if ($must_set_password) {
       $form->appendChild(
         id(new AphrontFormPasswordControl())
           ->setLabel(pht('Password'))
           ->setName('password')
+          ->setError($e_password));
+      $form->appendChild(
+        id(new AphrontFormPasswordControl())
+          ->setLabel(pht('Confirm Password'))
+          ->setName('confirm')
           ->setError($e_password)
           ->setCaption(
             $min_len
               ? pht('Minimum length of %d characters.', $min_len)
               : null));
-      $form->appendChild(
-        id(new AphrontFormPasswordControl())
-          ->setLabel(pht('Confirm Password'))
-          ->setName('confirm')
-          ->setError($e_password));
     }
 
     if ($can_edit_email) {
@@ -399,15 +462,6 @@ final class PhabricatorAuthRegisterController
           ->setValue($value_email)
           ->setCaption(PhabricatorUserEmail::describeAllowedAddresses())
           ->setError($e_email));
-    }
-
-    if ($can_edit_realname) {
-      $form->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel(pht('Real Name'))
-          ->setName('realName')
-          ->setValue($value_realname)
-          ->setError($e_realname));
     }
 
     if ($must_set_password) {
@@ -459,10 +513,16 @@ final class PhabricatorAuthRegisterController
       ->setForm($form)
       ->setFormErrors($errors);
 
+    $invite_header = null;
+    if ($invite) {
+      $invite_header = $this->renderInviteHeader($invite);
+    }
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $welcome_view,
+        $invite_header,
         $object_box,
       ),
       array(

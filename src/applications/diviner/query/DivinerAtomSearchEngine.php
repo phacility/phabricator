@@ -6,7 +6,7 @@ final class DivinerAtomSearchEngine extends PhabricatorApplicationSearchEngine {
     return pht('Documentation Atoms');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorDivinerApplication';
   }
 

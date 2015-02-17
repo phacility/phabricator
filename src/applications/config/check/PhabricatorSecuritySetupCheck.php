@@ -2,6 +2,10 @@
 
 final class PhabricatorSecuritySetupCheck extends PhabricatorSetupCheck {
 
+  public function getDefaultGroup() {
+    return self::GROUP_OTHER;
+  }
+
   protected function executeChecks() {
 
     // This checks for a version of bash with the "Shellshock" vulnerability.

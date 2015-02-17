@@ -7,7 +7,7 @@ final class PassphraseCredentialSearchEngine
     return pht('Passphrase Credentials');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorPassphraseApplication';
   }
 

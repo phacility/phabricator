@@ -79,15 +79,15 @@ final class DifferentialCreateMailReceiver extends PhabricatorMailReceiver {
         count($diffs));
     } else {
       $subject = pht(
-        'Diff creation failed; see body for error(s).',
-        count($errors));
+        'Diff creation failed; see body for %s error(s).',
+        new PhutilNumber(count($errors)));
     }
     $body = new PhabricatorMetaMTAMailBody();
     $body->addRawSection($subject);
     if (count($diffs)) {
       $text_body = '';
       $html_body = array();
-      $body_label = pht('DIFF LINK(S)', count($diffs));
+      $body_label = pht('%s DIFF LINK(S)', new PhutilNumber(count($diffs)));
       foreach ($diffs as $filename => $diff_uri) {
         $text_body .= $filename.': '.$diff_uri."\n";
         $html_body[] = phutil_tag(
@@ -104,7 +104,7 @@ final class DifferentialCreateMailReceiver extends PhabricatorMailReceiver {
 
     if (count($errors)) {
       $body_section = new PhabricatorMetaMTAMailSection();
-      $body_label = pht('ERROR(S)', count($errors));
+      $body_label = pht('%s ERROR(S)', new PhutilNumber(count($errors)));
       foreach ($errors as $error) {
         $body_section->addFragment($error);
       }

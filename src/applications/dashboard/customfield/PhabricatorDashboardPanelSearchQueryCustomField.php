@@ -16,6 +16,7 @@ final class PhabricatorDashboardPanelSearchQueryCustomField
     $engines = id(new PhutilSymbolLoader())
       ->setAncestorClass('PhabricatorApplicationSearchEngine')
       ->loadObjects();
+    $engines = mfilter($engines, 'canUseInPanelContext');
 
     $value = $this->getFieldValue();
 

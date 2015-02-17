@@ -82,6 +82,7 @@ final class PhabricatorProjectTransactionEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorProjectTransaction::TYPE_NAME:
         $object->setName($xaction->getNewValue());
+        // TODO - this is really "setPrimarySlug"
         $object->setPhrictionSlug($xaction->getNewValue());
         return;
       case PhabricatorProjectTransaction::TYPE_SLUGS:
@@ -127,19 +128,12 @@ final class PhabricatorProjectTransactionEditor
 
     switch ($xaction->getTransactionType()) {
       case PhabricatorProjectTransaction::TYPE_NAME:
-        // First, remove the old and new slugs. Removing the old slug is
-        // important when changing the project's capitalization or punctuation.
-        // Removing the new slug is important when changing the project's name
-        // so that one of its secondary slugs is now the primary slug.
+        // First, add the old name as a secondary slug; this is helpful
+        // for renames and generally a good thing to do.
         if ($old !== null) {
-          $this->removeSlug($object, $old);
+          $this->addSlug($object, $old);
         }
-        $this->removeSlug($object, $new);
-
-        $new_slug = id(new PhabricatorProjectSlug())
-          ->setSlug($object->getPrimarySlug())
-          ->setProjectPHID($object->getPHID())
-          ->save();
+        $this->addSlug($object, $new);
 
         return;
       case PhabricatorProjectTransaction::TYPE_SLUGS:
@@ -429,7 +423,7 @@ final class PhabricatorProjectTransactionEditor
     return parent::extractFilePHIDsFromCustomTransaction($object, $xaction);
   }
 
-  private function removeSlug(
+  private function addSlug(
     PhabricatorLiskDAO $object,
     $name) {
 
@@ -441,16 +435,13 @@ final class PhabricatorProjectTransactionEditor
       'slug = %s',
       $slug);
 
-    if (!$slug_object) {
+    if ($slug_object) {
       return;
     }
 
-    if ($slug_object->getProjectPHID() != $object->getPHID()) {
-      throw new Exception(
-        pht('Trying to remove slug owned by another project!'));
-    }
-
-    $slug_object->delete();
+    $new_slug = id(new PhabricatorProjectSlug())
+      ->setSlug($slug)
+      ->setProjectPHID($object->getPHID())
+      ->save();
   }
-
 }

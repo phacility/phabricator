@@ -115,7 +115,16 @@ final class AlmanacManagementRegisterWorkflow
       }
     }
 
-    list($raw_public_key) = execx('ssh-keygen -y -f %s', $private_key_path);
+    // NOTE: We're writing the private key here so we can change permissions
+    // on it without causing weird side effects to the file specified with
+    // the `--private-key` flag. The file needs to have restrictive permissions
+    // before `ssh-keygen` will willingly operate on it.
+    $tmp_private = new TempFile();
+    Filesystem::changePermissions($tmp_private, 0600);
+    execx('chown %s %s', $phd_user, $tmp_private);
+    Filesystem::writeFile($tmp_private, $raw_private_key);
+
+    list($raw_public_key) = execx('ssh-keygen -y -f %s', $tmp_private);
 
     $key_object = PhabricatorAuthSSHPublicKey::newFromRawKey($raw_public_key);
 
@@ -173,11 +182,6 @@ final class AlmanacManagementRegisterWorkflow
     $console->writeOut(
       "%s\n",
       pht('Installing private key...'));
-
-    $tmp_private = new TempFile();
-    Filesystem::changePermissions($tmp_private, 0600);
-    execx('chown %s %s', $phd_user, $tmp_private);
-    Filesystem::writeFile($tmp_private, $raw_private_key);
     execx('mv -f %s %s', $tmp_private, $stored_private_path);
 
     $raw_device = $device_name;
@@ -188,7 +192,7 @@ final class AlmanacManagementRegisterWorkflow
 
     $console->writeOut(
       "%s\n",
-      pht('Installing device ID...', $raw_device));
+      pht('Installing device %s...', $raw_device));
 
     // The permissions on this file are more open because the webserver also
     // needs to read it.

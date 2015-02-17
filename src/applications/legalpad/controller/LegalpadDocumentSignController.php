@@ -2,23 +2,16 @@
 
 final class LegalpadDocumentSignController extends LegalpadController {
 
-  private $id;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getUser();
 
     $document = id(new LegalpadDocumentQuery())
       ->setViewer($viewer)
-      ->withIDs(array($this->id))
+      ->withIDs(array($request->getURIData('id')))
       ->needDocumentBodies(true)
       ->executeOne();
     if (!$document) {

@@ -7,7 +7,7 @@ final class PhabricatorNotificationSearchEngine
     return pht('Notifications');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorNotificationsApplication';
   }
 

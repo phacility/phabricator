@@ -7,7 +7,7 @@ final class PhabricatorRepositorySearchEngine
     return pht('Repositories');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorDiffusionApplication';
   }
 

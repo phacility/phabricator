@@ -84,7 +84,11 @@ final class PhabricatorFilesApplication extends PhabricatorApplication {
           '.*'
           => 'PhabricatorFileDataController',
         'proxy/' => 'PhabricatorFileProxyController',
-        'xform/(?P<transform>[^/]+)/(?P<phid>[^/]+)/(?P<key>[^/]+)/'
+        'xform/'.
+          '(?:@(?P<instance>[^/]+)/)?'.
+          '(?P<transform>[^/]+)/'.
+          '(?P<phid>[^/]+)/'.
+          '(?P<key>[^/]+)/'
           => 'PhabricatorFileTransformController',
         'uploaddialog/' => 'PhabricatorFileUploadDialogController',
         'download/(?P<phid>[^/]+)/' => 'PhabricatorFileDialogController',

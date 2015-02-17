@@ -22,7 +22,13 @@ final class AphrontUnhandledExceptionResponse
   }
 
   protected function getResponseTitle() {
-    return pht('Unhandled Exception');
+    $ex = $this->exception;
+
+    if ($ex instanceof AphrontUsageException) {
+      return $ex->getTitle();
+    } else {
+      return pht('Unhandled Exception');
+    }
   }
 
   protected function getResponseBodyClass() {

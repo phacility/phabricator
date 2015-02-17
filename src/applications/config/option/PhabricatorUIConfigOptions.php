@@ -15,6 +15,10 @@ final class PhabricatorUIConfigOptions
     return 'fa-magnet';
   }
 
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
     $manifest = PHUIIconView::getSheetManifest('main-header');
 

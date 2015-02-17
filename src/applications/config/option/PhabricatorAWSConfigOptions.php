@@ -15,19 +15,23 @@ final class PhabricatorAWSConfigOptions
     return 'fa-server';
   }
 
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('amazon-ses.access-key', 'string', null)
         ->setLocked(true)
         ->setDescription(pht('Access key for Amazon SES.')),
       $this->newOption('amazon-ses.secret-key', 'string', null)
-        ->setMasked(true)
+        ->setHidden(true)
         ->setDescription(pht('Secret key for Amazon SES.')),
       $this->newOption('amazon-s3.access-key', 'string', null)
         ->setLocked(true)
         ->setDescription(pht('Access key for Amazon S3.')),
       $this->newOption('amazon-s3.secret-key', 'string', null)
-        ->setMasked(true)
+        ->setHidden(true)
         ->setDescription(pht('Secret key for Amazon S3.')),
       $this->newOption('amazon-s3.endpoint', 'string', null)
         ->setLocked(true)
@@ -41,7 +45,7 @@ final class PhabricatorAWSConfigOptions
         ->setLocked(true)
         ->setDescription(pht('Access key for Amazon EC2.')),
       $this->newOption('amazon-ec2.secret-key', 'string', null)
-        ->setMasked(true)
+        ->setHidden(true)
         ->setDescription(pht('Secret key for Amazon EC2.')),
     );
   }

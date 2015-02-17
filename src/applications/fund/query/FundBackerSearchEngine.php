@@ -18,7 +18,7 @@ final class FundBackerSearchEngine
     return pht('Fund Backers');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorFundApplication';
   }
 

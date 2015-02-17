@@ -24,7 +24,9 @@ final class PhabricatorRemarkupFigletBlockInterpreter
     if ($err) {
       return $this->markupError(
         pht(
-          'Execution of `figlet` failed:', $stderr));
+          'Execution of `%s` failed: %s',
+          'figlet',
+          $stderr));
     }
 
 

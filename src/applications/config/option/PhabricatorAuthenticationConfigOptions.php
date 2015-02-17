@@ -15,6 +15,10 @@ final class PhabricatorAuthenticationConfigOptions
     return 'fa-key';
   }
 
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('auth.require-email-verification', 'bool', false)

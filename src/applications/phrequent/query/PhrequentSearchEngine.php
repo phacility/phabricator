@@ -6,7 +6,7 @@ final class PhrequentSearchEngine extends PhabricatorApplicationSearchEngine {
     return pht('Phrequent Time');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorPhrequentApplication';
   }
 

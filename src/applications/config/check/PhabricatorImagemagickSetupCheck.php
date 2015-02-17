@@ -2,6 +2,10 @@
 
 final class PhabricatorImagemagickSetupCheck extends PhabricatorSetupCheck {
 
+  public function getDefaultGroup() {
+    return self::GROUP_OTHER;
+  }
+
   protected function executeChecks() {
     $imagemagick = PhabricatorEnv::getEnvConfig('files.enable-imagemagick');
     if ($imagemagick) {

@@ -6,7 +6,7 @@ final class DrydockLogSearchEngine extends PhabricatorApplicationSearchEngine {
     return pht('Drydock Logs');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorDrydockApplication';
   }
 

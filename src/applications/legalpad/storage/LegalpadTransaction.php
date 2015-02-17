@@ -54,6 +54,17 @@ final class LegalpadTransaction extends PhabricatorApplicationTransaction {
         return pht(
           '%s updated the preamble.',
           $this->renderHandleLink($author_phid));
+      case LegalpadTransactionType::TYPE_REQUIRE_SIGNATURE:
+        if ($new) {
+          $text = pht(
+            '%s set the document to require signatures.',
+            $this->renderHandleLink($author_phid));
+        } else {
+          $text = pht(
+            '%s set the document to not require signatures.',
+            $this->renderHandleLink($author_phid));
+        }
+        return $text;
     }
 
     return parent::getTitle();

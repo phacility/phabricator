@@ -7,7 +7,7 @@ final class PhabricatorDashboardPanelSearchEngine
     return pht('Dashboard Panels');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorDashboardApplication';
   }
 

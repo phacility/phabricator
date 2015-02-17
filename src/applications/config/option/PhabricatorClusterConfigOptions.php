@@ -15,6 +15,10 @@ final class PhabricatorClusterConfigOptions
     return 'fa-sitemap';
   }
 
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('cluster.addresses', 'list<string>', array())

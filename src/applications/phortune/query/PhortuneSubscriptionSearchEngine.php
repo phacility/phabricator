@@ -28,6 +28,10 @@ final class PhortuneSubscriptionSearchEngine
     return pht('Phortune Subscriptions');
   }
 
+  public function getApplicationClassName() {
+    return 'PhabricatorPhortuneApplication';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 

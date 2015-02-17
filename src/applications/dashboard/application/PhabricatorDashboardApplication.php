@@ -55,8 +55,4 @@ final class PhabricatorDashboardApplication extends PhabricatorApplication {
     );
   }
 
-  public function canUninstall() {
-    return false;
-  }
-
 }

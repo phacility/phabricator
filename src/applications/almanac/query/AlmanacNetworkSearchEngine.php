@@ -7,7 +7,7 @@ final class AlmanacNetworkSearchEngine
     return pht('Almanac Networks');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorAlmanacApplication';
   }
 

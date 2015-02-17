@@ -20,10 +20,6 @@ final class PhrictionReplyHandler extends PhabricatorMailReplyHandler {
       PhrictionDocumentPHIDType::TYPECONST);
   }
 
-  public function getReplyHandlerDomain() {
-    return PhabricatorEnv::getEnvConfig('metamta.reply-handler-domain');
-  }
-
   public function getReplyHandlerInstructions() {
     if ($this->supportsReplies()) {
       // TODO: Implement.

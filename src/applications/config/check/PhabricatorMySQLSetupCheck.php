@@ -2,6 +2,10 @@
 
 final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
 
+  public function getDefaultGroup() {
+    return self::GROUP_MYSQL;
+  }
+
   public static function loadRawConfigValue($key) {
     $conn_raw = id(new PhabricatorUser())->establishConnection('w');
 

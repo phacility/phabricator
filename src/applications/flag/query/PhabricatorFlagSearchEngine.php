@@ -7,7 +7,7 @@ final class PhabricatorFlagSearchEngine
     return pht('Flags');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorFlagsApplication';
   }
 
