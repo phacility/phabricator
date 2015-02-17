@@ -361,15 +361,25 @@ abstract class PhabricatorDaemonManagementWorkflow
 
   protected final function executeStopCommand(
     array $pids,
-    $grace_period,
-    $force) {
+    array $options) {
 
     $console = PhutilConsole::getConsole();
+
+    $grace_period = idx($options, 'graceful', 15);
+    $force = idx($options, 'force');
+    $gently = idx($options, 'gently');
+
+    if ($gently && $force) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'You can not specify conflicting options --gently and --force '.
+          'together.'));
+    }
 
     $daemons = $this->loadRunningDaemons();
     if (!$daemons) {
       $survivors = array();
-      if (!$pids) {
+      if (!$pids && !$gently) {
         $survivors = $this->processRogueDaemons(
           $grace_period,
           $warn = true,
@@ -421,7 +431,9 @@ abstract class PhabricatorDaemonManagementWorkflow
       }
     }
 
-    $this->processRogueDaemons($grace_period, !$pids, $force);
+    if (!$gently) {
+      $this->processRogueDaemons($grace_period, !$pids, $force);
+    }
 
     return 0;
   }

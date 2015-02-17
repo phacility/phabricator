@@ -20,6 +20,12 @@ final class PhabricatorDaemonManagementRestartWorkflow
             'default' => 15,
           ),
           array(
+            'name' => 'gently',
+            'help' => pht(
+              'Ignore running processes that look like daemons but do not '.
+              'have corresponding PID files.'),
+          ),
+          array(
             'name' => 'force',
             'help' => pht(
               'Also stop running processes that look like daemons but do '.
@@ -29,12 +35,17 @@ final class PhabricatorDaemonManagementRestartWorkflow
   }
 
   public function execute(PhutilArgumentParser $args) {
-    $graceful = $args->getArg('graceful');
-    $force = $args->getArg('force');
-    $err = $this->executeStopCommand(array(), $graceful, $force);
+    $err = $this->executeStopCommand(
+      array(),
+      array(
+        'graceful' => $args->getArg('graceful'),
+        'force' => $args->getArg('force'),
+        'gently' => $args->getArg('gently'),
+      ));
     if ($err) {
       return $err;
     }
+
     return $this->executeStartCommand();
   }
 
