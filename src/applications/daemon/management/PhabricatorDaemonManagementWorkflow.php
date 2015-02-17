@@ -508,7 +508,9 @@ abstract class PhabricatorDaemonManagementWorkflow
       $pid = $daemon->getPID();
       $name = $daemon->getName();
 
-      if (!$pid && !$force) {
+      if (!$pid) {
+        // NOTE: We must have a PID to signal a daemon, since sending a signal
+        // to PID 0 kills this process.
         $console->writeOut("%s\n", pht("Daemon '%s' has no PID!", $name));
         unset($daemons[$key]);
         continue;
