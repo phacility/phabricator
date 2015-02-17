@@ -23,8 +23,10 @@ abstract class UserConduitAPIMethod extends ConduitAPIMethod {
 
     $primary = $user->loadPrimaryEmail();
     if ($primary && $primary->getIsVerified()) {
+      $email = $primary->getAddress();
       $roles[] = 'verified';
     } else {
+      $email = null;
       $roles[] = 'unverified';
     }
 
@@ -37,12 +39,13 @@ abstract class UserConduitAPIMethod extends ConduitAPIMethod {
     }
 
     $return = array(
-      'phid'      => $user->getPHID(),
-      'userName'  => $user->getUserName(),
-      'realName'  => $user->getRealName(),
-      'image'     => $user->getProfileImageURI(),
-      'uri'       => PhabricatorEnv::getURI('/p/'.$user->getUsername().'/'),
-      'roles'     => $roles,
+      'phid'         => $user->getPHID(),
+      'userName'     => $user->getUserName(),
+      'realName'     => $user->getRealName(),
+      'primaryEmail' => $email,
+      'image'        => $user->getProfileImageURI(),
+      'uri'          => PhabricatorEnv::getURI('/p/'.$user->getUsername().'/'),
+      'roles'        => $roles,
     );
 
     if ($current_status) {
