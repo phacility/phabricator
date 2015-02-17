@@ -894,6 +894,7 @@ final class DiffusionCommitController extends DiffusionController {
     if (!$merges) {
       return null;
     }
+    $merges = DiffusionPathChange::newFromConduit($merges);
 
     $caption = null;
     if (count($merges) > $limit) {
