@@ -52,39 +52,37 @@ final class DiffusionBrowseSearchController extends DiffusionBrowseController {
 
     $search_mode = null;
 
-    try {
-      if (strlen($this->getRequest()->getStr('grep'))) {
-        $search_mode = 'grep';
-        $query_string = $this->getRequest()->getStr('grep');
-        $results = $this->callConduitWithDiffusionRequest(
-          'diffusion.searchquery',
-          array(
-            'grep' => $query_string,
-            'commit' => $drequest->getStableCommit(),
-            'path' => $drequest->getPath(),
-            'limit' => $limit + 1,
-            'offset' => $page,
-          ));
-      } else { // Filename search.
-        $search_mode = 'find';
-        $query_string = $this->getRequest()->getStr('find');
-        $results = $this->callConduitWithDiffusionRequest(
-          'diffusion.querypaths',
-          array(
-            'pattern' => $query_string,
-            'commit' => $drequest->getStableCommit(),
-            'path' => $drequest->getPath(),
-            'limit' => $limit + 1,
-            'offset' => $page,
-          ));
-      }
-    } catch (ConduitException $ex) {
-      $err = $ex->getErrorDescription();
-      if ($err != '') {
-        return id(new PHUIErrorView())
-          ->setTitle(pht('Search Error'))
-          ->appendChild($err);
-      }
+    switch ($repository->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        $results = array();
+        break;
+      default:
+        if (strlen($this->getRequest()->getStr('grep'))) {
+          $search_mode = 'grep';
+          $query_string = $this->getRequest()->getStr('grep');
+          $results = $this->callConduitWithDiffusionRequest(
+            'diffusion.searchquery',
+            array(
+              'grep' => $query_string,
+              'commit' => $drequest->getStableCommit(),
+              'path' => $drequest->getPath(),
+              'limit' => $limit + 1,
+              'offset' => $page,
+            ));
+        } else { // Filename search.
+          $search_mode = 'find';
+          $query_string = $this->getRequest()->getStr('find');
+          $results = $this->callConduitWithDiffusionRequest(
+            'diffusion.querypaths',
+            array(
+              'pattern' => $query_string,
+              'commit' => $drequest->getStableCommit(),
+              'path' => $drequest->getPath(),
+              'limit' => $limit + 1,
+              'offset' => $page,
+            ));
+        }
+        break;
     }
 
     $results = $pager->sliceResults($results);
