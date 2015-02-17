@@ -244,7 +244,8 @@ final class PhabricatorOAuthServerAuthController
       ->appendParagraph(
         pht(
           'Do you want to authorize the external application "%s" to '.
-          'access your Phabricator account data?',
+          'access your Phabricator account data, including your primary '.
+          'email address?',
           phutil_tag('strong', array(), $name)))
       ->appendChild($form->buildLayoutView())
       ->addSubmitButton(pht('Authorize Access'))
