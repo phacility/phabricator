@@ -54,7 +54,7 @@ final class PhabricatorXHProfProfileTopLevelView
 
     $rows = array();
     $rows[] = array(
-      'Total',
+      pht('Total'),
       number_format($totals['ct']),
       number_format($totals['wt']).' us',
       '100.0%',
@@ -82,16 +82,16 @@ final class PhabricatorXHProfProfileTopLevelView
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
-        'Symbol',
-        'Count',
+        pht('Symbol'),
+        pht('Count'),
         javelin_tag(
           'span',
           array(
             'sigil' => 'has-tooltip',
             'meta'  => array(
-              'tip' => 'Total wall time spent in this function and all of '.
+              'tip' => pht('Total wall time spent in this function and all of '.
                        'its children (children are other functions it called '.
-                       'while executing).',
+                       'while executing).'),
               'size' => 200,
             ),
           ),
@@ -102,9 +102,9 @@ final class PhabricatorXHProfProfileTopLevelView
           array(
             'sigil' => 'has-tooltip',
             'meta'  => array(
-              'tip' => 'Wall time spent in this function, excluding time '.
+              'tip' => pht('Wall time spent in this function, excluding time '.
                        'spent in children (children are other functions it '.
-                       'called while executing).',
+                       'called while executing).'),
               'size' => 200,
             ),
           ),
@@ -121,18 +121,19 @@ final class PhabricatorXHProfProfileTopLevelView
         'n',
       ));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader('XHProf Profile');
+    $panel = new PHUIObjectBoxView();
+    $header = id(new PHUIHeaderView())
+      ->setHeaderText(pht('XHProf Profile'));
 
     if ($this->file) {
-      $panel->addButton(
-        phutil_tag(
+      $button = phutil_tag(
           'a',
           array(
             'href' => $this->file->getBestURI(),
             'class' => 'green button',
           ),
-          'Download .xhprof Profile'));
+          pht('Download .xhprof Profile'));
+      $header->addActionLink($button);
     }
 
     $panel->appendChild($table);
