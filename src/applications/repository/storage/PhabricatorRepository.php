@@ -1006,6 +1006,11 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       $uri->setUser($ssh_user);
     }
 
+    $ssh_host = PhabricatorEnv::getEnvConfig('diffusion.ssh-host');
+    if (strlen($ssh_host)) {
+      $uri->setDomain($ssh_host);
+    }
+
     $uri->setPort(PhabricatorEnv::getEnvConfig('diffusion.ssh-port'));
 
     return $uri;
