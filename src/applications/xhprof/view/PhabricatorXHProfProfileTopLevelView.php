@@ -123,16 +123,13 @@ final class PhabricatorXHProfProfileTopLevelView
 
     $panel = new PHUIObjectBoxView();
     $header = id(new PHUIHeaderView())
-      ->setHeaderText(pht('XHProf Profile'));
+      ->setHeader(pht('XHProf Profile'));
 
     if ($this->file) {
-      $button = phutil_tag(
-          'a',
-          array(
-            'href' => $this->file->getBestURI(),
-            'class' => 'green button',
-          ),
-          pht('Download .xhprof Profile'));
+      $button = id(new PHUIButtonView())
+        ->setHref($this->file->getBestURI())
+        ->setText(pht('Download .xhprof Profile'))
+        ->setTag('a');
       $header->addActionLink($button);
     }
 
