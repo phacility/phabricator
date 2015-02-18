@@ -11,7 +11,7 @@
 }
 
 .phabricator-remarkup .remarkup-code-block {
-  margin: 12px;
+  margin: 12px 0;
   white-space: pre;
   font-family: "Monaco", monospace;
   font-size: 10px;
@@ -30,8 +30,8 @@
 }
 
 .phabricator-remarkup .remarkup-code-block pre {
-  background: {$lightyellow};
-  border: 1px solid {$yellow};
+  background: {$sh-yellowbackground};
+  border: 1px solid {$sh-lightyellowborder};
   display: block;
   color: #000000;
   overflow: auto;
@@ -455,7 +455,7 @@ var.remarkup-assist-textarea {
 }
 
 .jx-order-mask {
-  background: #ffffff;
+  background: white;
   opacity: 1.0;
 }
 

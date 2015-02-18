@@ -20,7 +20,8 @@ final class LegalpadDocument extends LegalpadDAO
   protected $preamble;
   protected $requireSignature;
 
-  const SIGNATURE_TYPE_INDIVIDUAL = 'user';
+  const SIGNATURE_TYPE_NONE        = 'none';
+  const SIGNATURE_TYPE_INDIVIDUAL  = 'user';
   const SIGNATURE_TYPE_CORPORATION = 'corp';
 
   private $documentBody = self::ATTACHABLE;
@@ -134,6 +135,7 @@ final class LegalpadDocument extends LegalpadDAO
     return array(
       self::SIGNATURE_TYPE_INDIVIDUAL => pht('Individuals'),
       self::SIGNATURE_TYPE_CORPORATION => pht('Corporations'),
+      self::SIGNATURE_TYPE_NONE => pht('No One'),
     );
   }
 
@@ -145,6 +147,7 @@ final class LegalpadDocument extends LegalpadDAO
   public function getSignatureTypeIcon() {
     $type = $this->getSignatureType();
     $map = array(
+      self::SIGNATURE_TYPE_NONE => '',
       self::SIGNATURE_TYPE_INDIVIDUAL => 'fa-user grey',
       self::SIGNATURE_TYPE_CORPORATION => 'fa-building-o grey',
     );

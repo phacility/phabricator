@@ -101,6 +101,19 @@ final class PhabricatorProjectBoardViewController
     if ($request->isFormPost()) {
       $saved = $engine->buildSavedQueryFromRequest($request);
       $engine->saveQuery($saved);
+      $filter_form = id(new AphrontFormView())
+        ->setUser($viewer);
+      $engine->buildSearchForm($filter_form, $saved);
+      if ($engine->getErrors()) {
+        return $this->newDialog()
+          ->setWidth(AphrontDialogView::WIDTH_FULL)
+          ->setTitle(pht('Advanced Filter'))
+          ->appendChild($filter_form->buildLayoutView())
+          ->setErrors($engine->getErrors())
+          ->setSubmitURI($board_uri)
+          ->addSubmitButton(pht('Apply Filter'))
+          ->addCancelButton($board_uri);
+      }
       return id(new AphrontRedirectResponse())->setURI(
         $this->getURIWithState(
           $engine->getQueryResultsPageURI($saved->getQueryKey())));

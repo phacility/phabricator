@@ -207,10 +207,13 @@ final class PhabricatorFilesConfigOptions
          array(
            pht('Enable'),
            pht('Disable'),
-         ))->setDescription(
-             pht("This option will enable animated gif images".
-                  "to be set as profile pictures. The 'convert' binary ".
-                  "should be available to the webserver for this to work")),
+         ))
+        ->setDescription(
+          pht(
+            'This option will use Imagemagick to rescale images, so animated '.
+            'GIFs can be thumbnailed and set as profile pictures. Imagemagick '.
+            'must be installed and the "convert" binary must be available to '.
+            'the webserver for this to work.')),
 
     );
   }

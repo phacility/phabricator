@@ -51,7 +51,7 @@ final class LegalpadDocumentEditor
       case LegalpadTransactionType::TYPE_PREAMBLE:
         return $object->getPreamble();
       case LegalpadTransactionType::TYPE_REQUIRE_SIGNATURE:
-        return $object->getRequireSignature();
+        return (bool)$object->getRequireSignature();
     }
   }
 
@@ -64,8 +64,9 @@ final class LegalpadDocumentEditor
       case LegalpadTransactionType::TYPE_TEXT:
       case LegalpadTransactionType::TYPE_SIGNATURE_TYPE:
       case LegalpadTransactionType::TYPE_PREAMBLE:
-      case LegalpadTransactionType::TYPE_REQUIRE_SIGNATURE:
         return $xaction->getNewValue();
+      case LegalpadTransactionType::TYPE_REQUIRE_SIGNATURE:
+        return (bool)$xaction->getNewValue();
     }
   }
 
@@ -92,7 +93,7 @@ final class LegalpadDocumentEditor
         $object->setPreamble($xaction->getNewValue());
         break;
       case LegalpadTransactionType::TYPE_REQUIRE_SIGNATURE:
-        $object->setRequireSignature($xaction->getNewValue());
+        $object->setRequireSignature((int)$xaction->getNewValue());
         break;
     }
   }

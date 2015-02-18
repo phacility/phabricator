@@ -64,6 +64,11 @@ final class PhabricatorMailingListSearchEngine
 
     $view = id(new PHUIObjectItemListView());
 
+    $can_manage = PhabricatorPolicyFilter::hasCapability(
+      $this->requireViewer(),
+      $this->getApplication(),
+      PhabricatorMailingListsManageCapability::CAPABILITY);
+
     foreach ($lists as $list) {
       $item = new PHUIObjectItemView();
 
@@ -73,7 +78,9 @@ final class PhabricatorMailingListSearchEngine
       $item->addAction(
         id(new PHUIListItemView())
           ->setIcon('fa-pencil')
-          ->setHref($this->getApplicationURI('/edit/'.$list->getID().'/')));
+          ->setHref($this->getApplicationURI('/edit/'.$list->getID().'/'))
+          ->setDisabled(!$can_manage)
+          ->setWorkflow(!$can_manage));
 
       $view->addItem($item);
     }
