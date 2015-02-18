@@ -269,6 +269,9 @@ final class DivinerPHPAtomizer extends DivinerAtomizer {
     $metadata = $atom->getDocblockMeta();
     $return = idx($metadata, 'return');
 
+    $type = null;
+    $docs = null;
+
     if (!$return) {
       $return = idx($metadata, 'returns');
       if ($return) {
@@ -306,7 +309,6 @@ final class DivinerPHPAtomizer extends DivinerAtomizer {
         $type = $type.' &';
       }
 
-      $docs = null;
       if (!empty($split[1])) {
         $docs = $split[1];
       }
