@@ -412,17 +412,17 @@ final class PhabricatorUSEnglishTranslation
         ),
       ),
 
-      '%s edited watcher(s), added %d: %s; removed %d: %s.' =>
+      '%s edited watcher(s), added %s: %s; removed %d: %s.' =>
         '%s edited watchers, added: %3$s; removed: %5$s.',
 
-      '%s added %d watcher(s): %s.' => array(
+      '%s added %s watcher(s): %s.' => array(
         array(
           '%s added a watcher: %3$s.',
           '%s added watchers: %3$s.',
         ),
       ),
 
-      '%s removed %d watcher(s): %s.' => array(
+      '%s removed %s watcher(s): %s.' => array(
         array(
           '%s removed a watcher: %3$s.',
           '%s removed watchers: %3$s.',
