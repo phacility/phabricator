@@ -33,15 +33,13 @@ a.phui-tag-view:hover {
   padding: 1px 6px;
 }
 
-.phui-tag-view .phui-icon-view {
-  position: absolute;
-  display: inline-block;
-  top: 1px;
-  left: 5px;
+.phui-tag-view.phui-tag-type-state .phui-icon-view {
+  margin: 0 6px 0 0;
 }
 
-.phui-tag-icon-view .phui-tag-core {
-  padding-left: 22px;
+.phui-tag-view .phui-icon-view {
+  display: inline-block;
+  margin: 0 4px 0 2px;
 }
 
 .phui-tag-dot {
@@ -154,22 +152,14 @@ a.phui-tag-view:hover
 
 .phui-tag-shade .phui-icon-view {
   font-size: 12px;
-  top: 2px;
-  left: 6px;
 }
 
 .phui-tag-shade-slim .phui-icon-view {
   font-size: 11px;
-  top: 3px;
-  left: 6px;
 }
 
 .phui-tag-shade-slim .phui-tag-core {
   font-size: 12px;
-}
-
-.phui-tag-shade-slim.phui-tag-icon-view .phui-tag-core {
-  padding-left: 20px;
 }
 
 .phui-tag-shade-red .phui-tag-core {
