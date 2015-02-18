@@ -187,6 +187,13 @@ final class PhortuneSubscription extends PhortuneDAO
     return "/phortune/{$account_id}/subscription/view/{$id}/";
   }
 
+  public function getEditURI() {
+    $account_id = $this->getAccount()->getID();
+    $id = $this->getID();
+
+    return "/phortune/{$account_id}/subscription/edit/{$id}/";
+  }
+
   public function getMerchantURI() {
     $merchant_id = $this->getMerchant()->getID();
     $id = $this->getID();
