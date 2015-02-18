@@ -4,6 +4,9 @@
 
 .phui-action-panel {
   position: relative;
+}
+
+.phui-action-panel-has-state.phui-action-panel {
   padding-bottom: 44px;
 }
 
