@@ -133,6 +133,7 @@ final class PhabricatorXHProfProfileTopLevelView
       $header->addActionLink($button);
     }
 
+    $panel->setHeader($header);
     $panel->appendChild($table);
 
     return $panel->render();
