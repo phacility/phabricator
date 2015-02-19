@@ -24,6 +24,24 @@ abstract class AphrontResponse {
       $headers[] = array('X-Frame-Options', 'Deny');
     }
 
+    if ($this->getRequest() && $this->getRequest()->isHTTPS()) {
+      $hsts_key = 'security.strict-transport-security';
+      $use_hsts = PhabricatorEnv::getEnvConfig($hsts_key);
+      if ($use_hsts) {
+        $duration = phutil_units('365 days in seconds');
+      } else {
+        // If HSTS has been disabled, tell browsers to turn it off. This may
+        // not be effective because we can only disable it over a valid HTTPS
+        // connection, but it best represents the configured intent.
+        $duration = 0;
+      }
+
+      $headers[] = array(
+        'Strict-Transport-Security',
+        "max-age={$duration}; includeSubdomains; preload",
+      );
+    }
+
     return $headers;
   }
 
