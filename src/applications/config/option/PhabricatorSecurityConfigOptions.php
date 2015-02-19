@@ -241,7 +241,7 @@ final class PhabricatorSecurityConfigOptions
               "\n\n".
               'Do not enable this option if you serve (or plan to ever serve) '.
               'unsecured content over plain HTTP. It is very difficult to '.
-              'undo this change once users browsers have accepted the '.
+              'undo this change once users\' browsers have accepted the '.
               'setting.')),
         $this->newOption('security.allow-conduit-act-as-user', 'bool', false)
           ->setBoolOptions(

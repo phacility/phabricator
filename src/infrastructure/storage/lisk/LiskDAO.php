@@ -172,6 +172,7 @@ abstract class LiskDAO {
   const CONFIG_COLUMN_SCHEMA        = 'col-schema';
   const CONFIG_KEY_SCHEMA           = 'key-schema';
   const CONFIG_NO_TABLE             = 'no-table';
+  const CONFIG_NO_MUTATE            = 'no-mutate';
 
   const SERIALIZATION_NONE          = 'id';
   const SERIALIZATION_JSON          = 'json';
@@ -355,6 +356,13 @@ abstract class LiskDAO {
    * CONFIG_NO_TABLE
    * Allows you to specify that this object does not actually have a table in
    * the database.
+   *
+   * CONFIG_NO_MUTATE
+   * Provide a map of columns which should not be included in UPDATE statements.
+   * If you have some columns which are always written to explicitly and should
+   * never be overwritten by a save(), you can specify them here. This is an
+   * advanced, specialized feature and there are usually better approaches for
+   * most locking/contention problems.
    *
    * @return dictionary  Map of configuration options to values.
    *
@@ -1084,6 +1092,15 @@ abstract class LiskDAO {
 
     $this->willSaveObject();
     $data = $this->getAllLiskPropertyValues();
+
+    // Remove colums flagged as nonmutable from the update statement.
+    $no_mutate = $this->getConfigOption(self::CONFIG_NO_MUTATE);
+    if ($no_mutate) {
+      foreach ($no_mutate as $column) {
+        unset($data[$column]);
+      }
+    }
+
     $this->willWriteData($data);
 
     $map = array();
