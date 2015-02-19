@@ -55,7 +55,7 @@
   border: none;
   background: {$lightgreybackground};
   padding: 8px 16px;
-  border-top: 1px solid #d4dadf;
+  border-top: 1px solid {$thinblueborder};
 }
 
 .aphront-dialog-foot {
@@ -95,21 +95,14 @@
 
 .aphront-exception-dialog .exception-message {
   font-size: 14px;
-  background: #efefef;
-  padding: 1em;
+  background: {$sh-yellowbackground};
+  border: 1px solid {$sh-yellowborder};
+  padding: 12px;
   white-space: pre-wrap;
 }
 
 .aphront-exception-dialog .exception-trace {
-  margin-top: 15px;
-}
-
-.aphront-exception-dialog .exception-trace-header {
-  font-size: 11px;
-  color: {$greytext};
-  border-bottom: 1px solid #aaaaaa;
-  padding-bottom: .5em;
-  margin-bottom: .5em;
+  margin-top: 16px;
 }
 
 .aphront-access-dialog {

@@ -92,10 +92,10 @@ final class AphrontStackTraceView extends AphrontView {
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
-        'Depth',
-        'Library',
-        'File',
-        'Where',
+        pht('Depth'),
+        pht('Library'),
+        pht('File'),
+        pht('Where'),
       ));
     $table->setColumnClasses(
       array(
@@ -107,14 +107,10 @@ final class AphrontStackTraceView extends AphrontView {
 
     return phutil_tag(
       'div',
-      array('class' => 'exception-trace'),
       array(
-        phutil_tag(
-          'div',
-          array('class' => 'exception-trace-header'),
-          pht('Stack Trace')),
-        $table->render(),
-      ));
+        'class' => 'exception-trace',
+      ),
+      $table->render());
   }
 
 }
