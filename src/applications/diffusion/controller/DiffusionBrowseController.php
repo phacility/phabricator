@@ -208,6 +208,7 @@ abstract class DiffusionBrowseController extends DiffusionController {
     }
 
     $view = id(new DifferentialRevisionListView())
+      ->setHeader(pht('Pending Differential Revisions'))
       ->setRevisions($revisions)
       ->setUser($user);
 
@@ -215,9 +216,7 @@ abstract class DiffusionBrowseController extends DiffusionController {
     $handles = $this->loadViewerHandles($phids);
     $view->setHandles($handles);
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Pending Differential Revisions'))
-      ->appendChild($view);
+    return $view;
   }
 
 }

@@ -70,6 +70,10 @@
   margin: 0;
 }
 
+.dashboard-panel .phui-object-item-empty .phui-error-view {
+  margin: 0;
+}
+
 .dashboard-panel .dashboard-box {
   padding: 12px;
   background: #fff;
