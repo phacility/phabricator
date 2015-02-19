@@ -50,9 +50,9 @@
 .phabricator-main-menu-logo {
   position: absolute;
   width: 96px;
-  height: 26px;
+  height: 40px;
   left: 52px;
-  top: 9px;
+  top: 2px;
 }
 
 .phabricator-main-menu-eye {

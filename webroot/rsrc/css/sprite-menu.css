@@ -13,7 +13,7 @@ only screen and (min-device-pixel-ratio: 1.5),
 only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   .sprite-menu {
     background-image: url(/rsrc/image/sprite-menu-X2.png);
-    background-size: 97px 68px;
+    background-size: 97px 82px;
   }
 }
 
@@ -23,5 +23,5 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
 }
 
 .phabricator-main-menu-eye {
-  background-position: 0px -27px;
+  background-position: 0px -41px;
 }
