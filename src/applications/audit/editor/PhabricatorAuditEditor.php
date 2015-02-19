@@ -524,12 +524,14 @@ final class PhabricatorAuditEditor
     array $xactions) {
 
     // not every code path loads the repository so tread carefully
+    // TODO: They should, and then we should simplify this.
     if ($object->getRepository($assert_attached = false)) {
       $repository = $object->getRepository();
-      if ($repository->isImporting()) {
+      if (!$repository->shouldPublish()) {
         return false;
       }
     }
+
     return $this->isCommitMostlyImported($object);
   }
 
@@ -822,10 +824,7 @@ final class PhabricatorAuditEditor
       switch ($xaction->getTransactionType()) {
         case PhabricatorAuditTransaction::TYPE_COMMIT:
           $repository = $object->getRepository();
-          if ($repository->isImporting()) {
-            return false;
-          }
-          if ($repository->getDetail('herald-disabled')) {
+          if (!$repository->shouldPublish()) {
             return false;
           }
           return true;

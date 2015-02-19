@@ -676,6 +676,25 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
 
+  /**
+   * Should this repository publish feed, notifications, audits, and email?
+   *
+   * We do not publish information about repositories during initial import,
+   * or if the repository has been set not to publish.
+   */
+  public function shouldPublish() {
+    if ($this->isImporting()) {
+      return false;
+    }
+
+    if ($this->getDetail('disable-herald')) {
+      return false;
+    }
+
+    return true;
+  }
+
+
 /* -(  Autoclose  )---------------------------------------------------------- */
 
 
