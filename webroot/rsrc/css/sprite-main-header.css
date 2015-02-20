@@ -31,18 +31,22 @@
   background-position: 0px -180px;
 }
 
-.main-header-nightmaremoon {
+.main-header-indigo {
   background-position: 0px -225px;
 }
 
-.main-header-red {
+.main-header-nightmaremoon {
   background-position: 0px -270px;
 }
 
-.main-header-scootaloo {
+.main-header-red {
   background-position: 0px -315px;
 }
 
-.main-header-yellow {
+.main-header-scootaloo {
   background-position: 0px -360px;
+}
+
+.main-header-yellow {
+  background-position: 0px -405px;
 }

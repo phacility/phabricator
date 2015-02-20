@@ -63,7 +63,7 @@
 }
 
 .device-desktop .phabricator-main-menu-brand:hover {
-  background-color: rgba(0,0,0,.6);
+  background-color: rgba(0,0,0,.33);
   cursor: hand;
 }
 
@@ -280,6 +280,10 @@
   float: left;
 }
 
+.alert-notifications .phui-icon-view {
+  color: rgba(200,200,200, .5);
+}
+
 .alert-notifications:hover .phui-icon-view {
   color: #fff;
 }
@@ -416,7 +420,7 @@
   font-size: 20px;
   height: 20px;
   width: 20px;
-  color: #d7d7d7;
+  color: rgba(255,255,255,.8);
   margin: 8px;
   text-align: center;
   vertical-align: middle;
@@ -441,14 +445,9 @@
   display: block;
 }
 
-.device-desktop .main-header-dark .phabricator-application-menu
- .core-menu-item.phui-list-item-view:hover {
-  background-color: rgba(0,0,0,.6);
-}
-
 .device-desktop .phabricator-application-menu
  .core-menu-item.phui-list-item-view:hover {
-  box-shadow: inset 0 5px 10px rgba(0,0,0,0.5);
+  background-color: rgba(0,0,0,.33);
   border-radius: 3px;
   color: #fff;
 }
