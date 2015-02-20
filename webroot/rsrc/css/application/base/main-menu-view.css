@@ -285,12 +285,12 @@
   text-shadow: 0px -1px 0px rgba(0, 0, 0, 0.1);
 }
 
-.alert-notifications:hover {
-  margin-top: -1px;
-  transition-duration: .1s;
+.device-desktop .alert-notifications:hover {
+  margin-top: -2px;
+  transition-duration: .2s;
 }
 
-.alert-notifications:hover .phui-icon-view {
+.device-desktop .alert-notifications:hover .phui-icon-view {
   color: #fff;
 }
 
