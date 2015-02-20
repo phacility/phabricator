@@ -35,8 +35,7 @@ final class PhortuneSubscriptionViewController extends PhortuneController {
       ->setUser($viewer)
       ->setObjectURI($request->getRequestURI());
 
-    $edit_uri = $this->getApplicationURI(
-      "{$account_id}/subscription/edit/{$subscription_id}/");
+    $edit_uri = $this->getApplicationURI($subscription->getEditURI());
 
     $actions->addAction(
       id(new PhabricatorActionView())

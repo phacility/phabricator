@@ -18,6 +18,10 @@ final class PhortuneSubscriptionEditController extends PhortuneController {
       return new Aphront404Response();
     }
 
+    id(new PhabricatorAuthSessionEngine())->requireHighSecuritySession(
+      $viewer,
+      $request,
+      $this->getApplicationURI($subscription->getEditURI()));
     $merchant = $subscription->getMerchant();
     $account = $subscription->getAccount();
 

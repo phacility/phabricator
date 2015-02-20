@@ -53,27 +53,28 @@ final class PhabricatorRepositoryManagementUpdateWorkflow
     $repository = head($repos);
     $callsign = $repository->getCallsign();
 
-    $no_discovery = $args->getArg('no-discovery');
-
-    id(new PhabricatorRepositoryPullEngine())
-      ->setRepository($repository)
-      ->setVerbose($this->getVerbose())
-      ->pullRepository();
-
-    if ($no_discovery) {
-      return;
-    }
-
-    // TODO: It would be nice to discover only if we pulled something, but this
-    // isn't totally trivial. It's slightly more complicated with hosted
-    // repositories, too.
-
-    $lock_name = get_class($this).':'.$callsign;
-    $lock = PhabricatorGlobalLock::newLock($lock_name);
-
-    $lock->lock();
-
     try {
+      $lock_name = get_class($this).':'.$callsign;
+      $lock = PhabricatorGlobalLock::newLock($lock_name);
+
+      $lock->lock();
+
+      $no_discovery = $args->getArg('no-discovery');
+
+      id(new PhabricatorRepositoryPullEngine())
+        ->setRepository($repository)
+        ->setVerbose($this->getVerbose())
+        ->pullRepository();
+
+      if ($no_discovery) {
+        $lock->unlock();
+        return;
+      }
+
+      // TODO: It would be nice to discover only if we pulled something, but
+      // this isn't totally trivial. It's slightly more complicated with hosted
+      // repositories, too.
+
       $repository->writeStatusMessage(
         PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE,
         null);

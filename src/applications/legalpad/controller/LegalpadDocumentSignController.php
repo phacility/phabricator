@@ -180,11 +180,19 @@ final class LegalpadDocumentSignController extends LegalpadController {
       if (!$errors) {
         $signature->save();
 
-        // If the viewer is logged in, send them to the document page, which
-        // will show that they have signed the document. Otherwise, send them
-        // to a completion page.
+        // If the viewer is logged in, signing for themselves, send them to
+        // the document page, which will show that they have signed the
+        // document. Unless of course they were required to sign the
+        // document to use Phabricator; in that case try really hard to
+        // re-direct them to where they wanted to go.
+        //
+        // Otherwise, send them to a completion page.
         if ($viewer->isLoggedIn() && $is_individual) {
           $next_uri = '/'.$document->getMonogram();
+          if ($document->getRequireSignature()) {
+            $request_uri = $request->getRequestURI();
+            $next_uri = (string) $request_uri;
+          }
         } else {
           $this->sendVerifySignatureEmail(
             $document,
@@ -401,11 +409,19 @@ final class LegalpadDocumentSignController extends LegalpadController {
             'agree',
             'agree',
             pht('I agree to the terms laid forth above.'),
-            false))
+            false));
+    if ($document->getRequireSignature()) {
+      $cancel_uri = '/logout/';
+      $cancel_text = pht('Log Out');
+    } else {
+      $cancel_uri = $this->getApplicationURI();
+      $cancel_text = pht('Cancel');
+    }
+    $form
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Sign Document'))
-          ->addCancelButton($this->getApplicationURI()));
+          ->addCancelButton($cancel_uri, $cancel_text));
 
     return $form;
   }

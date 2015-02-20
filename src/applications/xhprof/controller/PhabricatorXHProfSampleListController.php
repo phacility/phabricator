@@ -80,12 +80,15 @@ final class PhabricatorXHProfSampleListController
     }
 
     $list->setPager($pager);
+    $list->setNoDataString(pht('There are no profiling samples.'));
 
-    return $this->buildStandardPageResponse(
-      $list,
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(pht('XHProf Samples'));
+
+    return $this->buildApplicationPage(
+      array($crumbs, $list),
       array(
         'title' => pht('XHProf Samples'),
-        'device' => true,
       ));
 
   }

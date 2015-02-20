@@ -25,7 +25,7 @@ final class PhabricatorRepositoryCommitOwnersWorker
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {
 
-    if ($repository->getDetail('herald-disabled')) {
+    if (!$repository->shouldPublish()) {
       return;
     }
 

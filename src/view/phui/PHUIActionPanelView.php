@@ -83,7 +83,9 @@ final class PHUIActionPanelView extends AphrontTagView {
     $classes = array();
     $classes[] = 'phui-action-panel';
     if ($this->state) {
+      $classes[] = 'phui-action-panel-has-state';
       $classes[] = $this->state;
+
     }
 
     return array(

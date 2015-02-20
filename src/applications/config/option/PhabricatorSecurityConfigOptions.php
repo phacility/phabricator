@@ -223,6 +223,26 @@ final class PhabricatorSecurityConfigOptions
             pht(
               'If you enable this, you are allowing Phabricator to '.
               'potentially make requests to external servers.')),
+        $this->newOption('security.strict-transport-security', 'bool', false)
+          ->setLocked(true)
+          ->setBoolOptions(
+            array(
+              pht('Use HSTS'),
+              pht('Do Not Use HSTS'),
+            ))
+          ->setSummary(pht('Enable HTTP Strict Transport Security (HSTS).'))
+          ->setDescription(
+            pht(
+              'HTTP Strict Transport Security (HSTS) sends a header which '.
+              'instructs browsers that the site should only be accessed '.
+              'over HTTPS, never HTTP. This defuses an attack where an '.
+              'adversary gains access to your network, then proxies requests '.
+              'through an unsecured link.'.
+              "\n\n".
+              'Do not enable this option if you serve (or plan to ever serve) '.
+              'unsecured content over plain HTTP. It is very difficult to '.
+              'undo this change once users\' browsers have accepted the '.
+              'setting.')),
         $this->newOption('security.allow-conduit-act-as-user', 'bool', false)
           ->setBoolOptions(
             array(

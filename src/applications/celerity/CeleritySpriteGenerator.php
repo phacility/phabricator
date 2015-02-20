@@ -8,7 +8,7 @@ final class CeleritySpriteGenerator {
     $sources = array(
       'logo' => array(
         'x' => 96,
-        'y' => 26,
+        'y' => 40,
         'css' => '.phabricator-main-menu-logo',
       ),
       'eye' => array(

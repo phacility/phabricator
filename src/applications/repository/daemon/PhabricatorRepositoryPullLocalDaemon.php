@@ -77,7 +77,7 @@ final class PhabricatorRepositoryPullLocalDaemon
 
       // If any repositories have the NEEDS_UPDATE flag set, pull them
       // as soon as possible.
-      $need_update_messages = $this->loadRepositoryUpdateMessages();
+      $need_update_messages = $this->loadRepositoryUpdateMessages(true);
       foreach ($need_update_messages as $message) {
         $repo = idx($pullable, $message->getRepositoryID());
         if (!$repo) {
@@ -256,9 +256,18 @@ final class PhabricatorRepositoryPullLocalDaemon
 
 
   /**
+   * Check for repositories that should be updated immediately.
+   *
+   * With the `$consume` flag, an internal cursor will also be incremented so
+   * that these messages are not returned by subsequent calls.
+   *
+   * @param bool Pass `true` to consume these messages, so the process will
+   *   not see them again.
+   * @return list<wild> Pending update messages.
+   *
    * @task pull
    */
-  private function loadRepositoryUpdateMessages() {
+  private function loadRepositoryUpdateMessages($consume = false) {
     $type_need_update = PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE;
     $messages = id(new PhabricatorRepositoryStatusMessage())->loadAllWhere(
       'statusType = %s AND id > %d',
@@ -272,10 +281,12 @@ final class PhabricatorRepositoryPullLocalDaemon
     // immediately retry. Instead, messages are only permitted to trigger
     // an immediate update once.
 
-    foreach ($messages as $message) {
-      $this->statusMessageCursor = max(
-        $this->statusMessageCursor,
-        $message->getID());
+    if ($consume) {
+      foreach ($messages as $message) {
+        $this->statusMessageCursor = max(
+          $this->statusMessageCursor,
+          $message->getID());
+      }
     }
 
     return $messages;

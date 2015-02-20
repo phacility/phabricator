@@ -43,10 +43,13 @@ final class PhabricatorXHProfProfileController
     $view->setIsFramed($is_framed);
     $view->setProfileData($data);
 
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(pht('%s Profile', $symbol));
+
     return $this->buildStandardPageResponse(
-      $view,
+      array($crumbs, $view),
       array(
-        'title' => 'Profile',
+        'title' => pht('Profile'),
         'frame' => $is_framed,
       ));
   }

@@ -261,7 +261,8 @@ final class DifferentialRevisionSearchEngine
 
     $viewer = $this->requireViewer();
     $template = id(new DifferentialRevisionListView())
-      ->setUser($viewer);
+      ->setUser($viewer)
+      ->setNoBox($this->isPanelContext());
 
     $views = array();
     if ($query->getQueryKey() == 'active') {

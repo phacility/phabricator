@@ -113,6 +113,7 @@ final class PhabricatorDiffusionConfigOptions
             "Consider using SSH for authenticated access to repositories ".
             "instead of HTTP.")),
       $this->newOption('diffusion.ssh-user', 'string', null)
+        ->setLocked(true)
         ->setSummary(pht('Login username for SSH connections to repositories.'))
         ->setDescription(
           pht(
@@ -120,12 +121,22 @@ final class PhabricatorDiffusionConfigOptions
             'fill in this login username. If you have configured a VCS user '.
             'like `git`, you should provide it here.')),
       $this->newOption('diffusion.ssh-port', 'int', null)
+        ->setLocked(true)
         ->setSummary(pht('Port for SSH connections to repositories.'))
         ->setDescription(
           pht(
             'When constructing clone URIs to show to users, Diffusion by '.
             'default will not display a port assuming the default for your '.
             'VCS. Explicitly declare when running on a non-standard port.')),
+      $this->newOption('diffusion.ssh-host', 'string', null)
+        ->setLocked(true)
+        ->setSummary(pht('Host for SSH connections to repositories.'))
+        ->setDescription(
+          pht(
+            'If you accept Phabricator SSH traffic on a different host '.
+            'from web traffic (for example, if you use different SSH and '.
+            'web load balancers), you can set the SSH hostname here. This '.
+            'is an advanced option.')),
     );
   }
 
