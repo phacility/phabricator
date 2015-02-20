@@ -423,13 +423,13 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $page_pane = id(new DifferentialPrimaryPaneView())
       ->setID($pane_id)
       ->appendChild(array(
-        $comment_view,
-        $diff_history,
         $warning,
         $local_view,
         $toc_view,
         $other_view,
         $changeset_view,
+        $diff_history,
+        $comment_view,
       ));
     if ($comment_form) {
 
@@ -509,13 +509,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $this->requireResource('phabricator-object-selector-css');
     $this->requireResource('javelin-behavior-phabricator-object-selector');
 
-    $actions[] = id(new PhabricatorActionView())
-      ->setIcon('fa-link')
-      ->setName(pht('Edit Dependencies'))
-      ->setHref("/search/attach/{$revision_phid}/DREV/dependencies/")
-      ->setWorkflow(true)
-      ->setDisabled(!$can_edit);
-
     $maniphest = 'PhabricatorManiphestApplication';
     if (PhabricatorApplication::isClassInstalled($maniphest)) {
       $actions[] = id(new PhabricatorActionView())
@@ -525,12 +518,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
         ->setWorkflow(true)
         ->setDisabled(!$can_edit);
     }
-
-    $request_uri = $this->getRequest()->getRequestURI();
-    $actions[] = id(new PhabricatorActionView())
-      ->setIcon('fa-download')
-      ->setName(pht('Download Raw Diff'))
-      ->setHref($request_uri->alter('download', 'true'));
 
     return $actions;
   }
