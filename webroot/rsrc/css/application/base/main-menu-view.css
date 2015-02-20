@@ -281,16 +281,17 @@
 }
 
 .alert-notifications .phui-icon-view {
-  color: rgba(200,200,200, .5);
+  color: rgba(200,200,200, .4);
+  text-shadow: 0px -1px 0px rgba(0, 0, 0, 0.1);
+}
+
+.alert-notifications:hover {
+  margin-top: -1px;
+  transition-duration: .1s;
 }
 
 .alert-notifications:hover .phui-icon-view {
   color: #fff;
-}
-
-.alert-unread:hover .phabricator-main-menu-alert-icon.phui-icon-view,
-.message-unread:hover .phabricator-main-menu-message-icon.phui-icon-view {
-  color: {$sky};
 }
 
 .phabricator-main-menu-alert-icon,
@@ -327,7 +328,7 @@
 
 .alert-unread .phabricator-main-menu-alert-icon,
 .message-unread .phabricator-main-menu-message-icon  {
-  color: {$sky};
+  color: #fff;
 }
 
 .alert-unread .phabricator-main-menu-alert-count,
@@ -449,7 +450,6 @@
  .core-menu-item.phui-list-item-view:hover {
   background-color: rgba(0,0,0,.33);
   border-radius: 3px;
-  color: #fff;
 }
 
 .device-desktop .phabricator-application-menu .phui-list-item-view {
