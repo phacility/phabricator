@@ -137,7 +137,7 @@ final class PonderQuestionQuery
     return $question->loadAllFromArray($data);
   }
 
-  public function willFilterPage(array $questions) {
+  protected function willFilterPage(array $questions) {
     if ($this->needAnswers) {
       $aquery = id(new PonderAnswerQuery())
         ->setViewer($this->getViewer())

@@ -2,17 +2,11 @@
 
 final class LegalpadDocumentEditController extends LegalpadController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = idx($data, 'id');
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
 
-    if (!$this->id) {
+    $id = $request->getURIData('id');
+    if (!$id) {
       $is_create = true;
 
       $this->requireApplicationCapability(
@@ -34,7 +28,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
             PhabricatorPolicyCapability::CAN_VIEW,
             PhabricatorPolicyCapability::CAN_EDIT,
           ))
-        ->withIDs(array($this->id))
+        ->withIDs(array($id))
         ->executeOne();
       if (!$document) {
         return new Aphront404Response();
@@ -48,6 +42,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
     $text = $document->getDocumentBody()->getText();
     $v_signature_type = $document->getSignatureType();
     $v_preamble = $document->getPreamble();
+    $v_require_signature = $document->getRequireSignature();
 
     $errors = array();
     $can_view = null;
@@ -97,6 +92,24 @@ final class LegalpadDocumentEditController extends LegalpadController {
         ->setTransactionType(LegalpadTransactionType::TYPE_PREAMBLE)
         ->setNewValue($v_preamble);
 
+      $v_require_signature = $request->getBool('requireSignature', 0);
+      if ($v_require_signature) {
+        if (!$user->getIsAdmin()) {
+          $errors[] = pht('Only admins may require signature.');
+        }
+        $individual = LegalpadDocument::SIGNATURE_TYPE_INDIVIDUAL;
+        if ($v_signature_type != $individual) {
+          $errors[] = pht(
+            'Only documents with signature type "individual" may require '.
+            'signing to use Phabricator.');
+        }
+      }
+      if ($user->getIsAdmin()) {
+        $xactions[] = id(new LegalpadTransaction())
+          ->setTransactionType(LegalpadTransactionType::TYPE_REQUIRE_SIGNATURE)
+          ->setNewValue($v_require_signature);
+      }
+
       if (!$errors) {
         $editor = id(new LegalpadDocumentEditor())
           ->setContentSourceFromRequest($request)
@@ -133,11 +146,31 @@ final class LegalpadDocumentEditController extends LegalpadController {
           ->setName(pht('signatureType'))
           ->setValue($v_signature_type)
           ->setOptions(LegalpadDocument::getSignatureTypeMap()));
+      $show_require = true;
+      $caption = pht('Applies only to documents individuals sign.');
     } else {
       $form->appendChild(
         id(new AphrontFormMarkupControl())
           ->setLabel(pht('Who Should Sign?'))
           ->setValue($document->getSignatureTypeName()));
+      $individual = LegalpadDocument::SIGNATURE_TYPE_INDIVIDUAL;
+      $show_require = $document->getSignatureType() == $individual;
+      $caption = null;
+    }
+
+    if ($show_require) {
+      $form
+        ->appendChild(
+          id(new AphrontFormCheckboxControl())
+          ->setDisabled(!$user->getIsAdmin())
+          ->setLabel(pht('Require Signature'))
+          ->addCheckbox(
+            'requireSignature',
+            'requireSignature',
+            pht(
+              'Should signing this document be required to use Phabricator?'),
+            $v_require_signature)
+          ->setCaption($caption));
     }
 
     $form

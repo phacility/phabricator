@@ -53,6 +53,10 @@ abstract class PhabricatorController extends AphrontController {
     return PhabricatorEnv::getEnvConfig('security.require-multi-factor-auth');
   }
 
+  public function shouldAllowLegallyNonCompliantUsers() {
+    return false;
+  }
+
   public function willBeginExecution() {
     $request = $this->getRequest();
 
@@ -96,13 +100,9 @@ abstract class PhabricatorController extends AphrontController {
       $request->setUser($user);
     }
 
-    $translation = $user->getTranslation();
-    if ($translation &&
-        $translation != PhabricatorEnv::getEnvConfig('translation.provider')) {
-      $translation = newv($translation, array());
-      PhutilTranslator::getInstance()
-        ->setLanguage($translation->getLanguage())
-        ->addTranslations($translation->getCleanTranslations());
+    $locale_code = $user->getTranslation();
+    if ($locale_code) {
+      PhabricatorEnv::setLocaleCode($locale_code);
     }
 
     $preferences = $user->loadPreferences();
@@ -225,6 +225,47 @@ abstract class PhabricatorController extends AphrontController {
       }
     }
 
+
+    if (!$this->shouldAllowLegallyNonCompliantUsers()) {
+      $legalpad_class = 'PhabricatorLegalpadApplication';
+      $legalpad = id(new PhabricatorApplicationQuery())
+        ->setViewer($user)
+        ->withClasses(array($legalpad_class))
+        ->withInstalled(true)
+        ->execute();
+      $legalpad = head($legalpad);
+
+      $doc_query = id(new LegalpadDocumentQuery())
+        ->setViewer($user)
+        ->withSignatureRequired(1)
+        ->needViewerSignatures(true);
+
+      if ($user->hasSession() &&
+          !$user->getSession()->getIsPartial() &&
+          !$user->getSession()->getSignedLegalpadDocuments() &&
+          $user->isLoggedIn() &&
+          $legalpad) {
+
+        $sign_docs = $doc_query->execute();
+        $must_sign_docs = array();
+        foreach ($sign_docs as $sign_doc) {
+          if (!$sign_doc->getUserSignature($user->getPHID())) {
+            $must_sign_docs[] = $sign_doc;
+          }
+        }
+        if ($must_sign_docs) {
+          $controller = new LegalpadDocumentSignController();
+          $this->getRequest()->setURIMap(array(
+            'id' => head($must_sign_docs)->getID(),));
+          $this->setCurrentApplication($legalpad);
+          return $this->delegateToController($controller);
+        } else {
+          $engine = id(new PhabricatorAuthSessionEngine())
+            ->signLegalpadDocuments($user, $sign_docs);
+        }
+      }
+    }
+
     // NOTE: We do this last so that users get a login page instead of a 403
     // if they need to login.
     if ($this->shouldRequireAdmin() && !$user->getIsAdmin()) {
@@ -242,8 +283,18 @@ abstract class PhabricatorController extends AphrontController {
   public function buildStandardPageResponse($view, array $data) {
     $page = $this->buildStandardPageView();
     $page->appendChild($view);
-    $response = new AphrontWebpageResponse();
-    $response->setContent($page->render());
+    return $this->buildPageResponse($page);
+  }
+
+  private function buildPageResponse($page) {
+    if ($this->getRequest()->isQuicksand()) {
+      $response = id(new AphrontAjaxResponse())
+        ->setContent($page->renderForQuicksand());
+    } else {
+      $response = id(new AphrontWebpageResponse())
+        ->setContent($page->render());
+    }
+
     return $response;
   }
 
@@ -303,8 +354,7 @@ abstract class PhabricatorController extends AphrontController {
       $page->setApplicationMenu($application_menu);
     }
 
-    $response = new AphrontWebpageResponse();
-    return $response->setContent($page->render());
+    return $this->buildPageResponse($page);
   }
 
   public function didProcessRequest($response) {
@@ -331,7 +381,7 @@ abstract class PhabricatorController extends AphrontController {
     }
 
     if ($response instanceof AphrontDialogResponse) {
-      if (!$request->isAjax()) {
+      if (!$request->isAjax() && !$request->isQuicksand()) {
         $dialog = $response->getDialog();
 
         $title = $dialog->getTitle();
@@ -425,7 +475,7 @@ abstract class PhabricatorController extends AphrontController {
       array_filter($phids));
   }
 
-  protected function buildApplicationMenu() {
+  public function buildApplicationMenu() {
     return null;
   }
 
@@ -434,18 +484,18 @@ abstract class PhabricatorController extends AphrontController {
 
     $application = $this->getCurrentApplication();
     if ($application) {
-      $sprite = $application->getIconName();
-      if (!$sprite) {
-        $sprite = 'application';
+      $icon = $application->getFontIcon();
+      if (!$icon) {
+        $icon = 'fa-puzzle';
       }
 
-      $crumbs[] = id(new PhabricatorCrumbView())
+      $crumbs[] = id(new PHUICrumbView())
         ->setHref($this->getApplicationURI())
-        ->setAural($application->getName())
-        ->setIcon($sprite);
+        ->setName($application->getName())
+        ->setIcon($icon);
     }
 
-    $view = new PhabricatorCrumbsView();
+    $view = new PHUICrumbsView();
     foreach ($crumbs as $crumb) {
       $view->addCrumb($crumb);
     }

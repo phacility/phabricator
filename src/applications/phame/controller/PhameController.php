@@ -73,7 +73,7 @@ abstract class PhameController extends PhabricatorController {
         ->setTitle($title)
         ->setImage($blogger_image)
         ->setImageHref($blogger_uri)
-        ->setAppIcon('phame-dark')
+        ->setAppIcon('fa-star')
         ->setUser($viewer)
         ->setPontification($phame_post, $phame_title);
 
@@ -95,15 +95,15 @@ abstract class PhameController extends PhabricatorController {
     }
 
     if (empty($stories)) {
-      return id(new AphrontErrorView())
-        ->setSeverity(AphrontErrorView::SEVERITY_NODATA)
+      return id(new PHUIErrorView())
+        ->setSeverity(PHUIErrorView::SEVERITY_NODATA)
         ->appendChild($nodata);
     }
 
     return $stories;
   }
 
-  protected function buildApplicationMenu() {
+  public function buildApplicationMenu() {
     return $this->renderSideNavFilterView()->getMenu();
   }
 

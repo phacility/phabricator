@@ -14,8 +14,8 @@ final class PhabricatorDifferentialApplication extends PhabricatorApplication {
     return pht('Review Code');
   }
 
-  public function getIconName() {
-    return 'differential';
+  public function getFontIcon() {
+    return 'fa-cog';
   }
 
   public function isPinnedByDefault(PhabricatorUser $viewer) {
@@ -156,6 +156,22 @@ EOTEXT
     }
 
     return $status;
+  }
+
+  public function supportsEmailIntegration() {
+    return true;
+  }
+
+  public function getAppEmailBlurb() {
+    return pht(
+      'Send email to these addresses to create revisions. The body of the '.
+      'message and / or one or more attachments should be the output of a '.
+      '"diff" command. %s',
+      phutil_tag(
+        'a',
+        array(
+          'href' => $this->getInboundEmailSupportLink(),),
+        pht('Learn More')));
   }
 
   protected function getCustomCapabilities() {

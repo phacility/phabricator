@@ -10,7 +10,7 @@ final class PhabricatorOAuthServerAuthorizationCode
   protected $userPHID;
   protected $redirectURI;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'code' => 'text32',

@@ -1,16 +1,16 @@
 {
-  "name" : "phabdev",
-  "title" : "Phabricator Technical Documentation",
-  "short" : "Phabricator Tech Docs",
-  "preface" : "Technical documentation intended for Phabricator developers.",
-  "root" : "../../../",
-  "uri.source" :
+  "name": "phabdev",
+  "title": "Phabricator Technical Documentation",
+  "short": "Phabricator Tech Docs",
+  "preface": "Technical documentation intended for Phabricator developers.",
+  "root": "../../../",
+  "uri.source":
     "https://secure.phabricator.com/diffusion/P/browse/master/%f$%l",
-  "rules" : {
-    "(\\.php$)" : "DivinerPHPAtomizer",
-    "(\\.diviner$)" : "DivinerArticleAtomizer"
+  "rules": {
+    "(\\.php$)": "DivinerPHPAtomizer",
+    "(\\.diviner$)": "DivinerArticleAtomizer"
   },
-  "exclude" : [
+  "exclude": [
     "(^externals/)",
     "(^webroot/rsrc/externals/)",
     "(^scripts/)",
@@ -20,254 +20,254 @@
     "(^src/docs/flavor/)",
     "(^src/docs/contributor/)"
   ],
-  "groups" : {
-    "arcanist" : {
-      "name" : "Arcanist Integration",
-      "include" : "(^src/applications/arcanist/)"
+  "groups": {
+    "arcanist": {
+      "name": "Arcanist Integration",
+      "include": "(^src/applications/arcanist/)"
     },
-    "audit" : {
-      "name" : "Audit",
-      "include" : "(^src/applications/audit/)"
+    "audit": {
+      "name": "Audit",
+      "include": "(^src/applications/audit/)"
     },
-    "auth" : {
-      "name" : "Auth",
-      "include" : "(^src/applications/auth/)"
+    "auth": {
+      "name": "Auth",
+      "include": "(^src/applications/auth/)"
     },
-    "baseapp" : {
-      "name" : "Application Basics",
-      "include" : "(^src/applications/base/)"
+    "baseapp": {
+      "name": "Application Basics",
+      "include": "(^src/applications/base/)"
     },
-    "cache" : {
-      "name" : "Cache",
-      "include" : "(^src/applications/cache/)"
+    "cache": {
+      "name": "Cache",
+      "include": "(^src/applications/cache/)"
     },
-    "calendar" : {
-      "name" : "Calendar",
-      "include" : "(^src/applications/calendar/)"
+    "calendar": {
+      "name": "Calendar",
+      "include": "(^src/applications/calendar/)"
     },
-    "chatlog" : {
-      "name" : "Chatlog",
-      "include" : "(^src/applications/chatlog/)"
+    "chatlog": {
+      "name": "Chatlog",
+      "include": "(^src/applications/chatlog/)"
     },
-    "conduit" : {
-      "name" : "Conduit",
-      "include" : "(^src/applications/conduit/)"
+    "conduit": {
+      "name": "Conduit",
+      "include": "(^src/applications/conduit/)"
     },
-    "config" : {
-      "name" : "Config",
-      "include" : "(^src/applications/config/)"
+    "config": {
+      "name": "Config",
+      "include": "(^src/applications/config/)"
     },
-    "conpherence" : {
-      "name" : "Conpherence",
-      "include" : "(^src/applications/conpherence/)"
+    "conpherence": {
+      "name": "Conpherence",
+      "include": "(^src/applications/conpherence/)"
     },
-    "countdown" : {
-      "name" : "Countdown",
-      "include" : "(^src/applications/countdown/)"
+    "countdown": {
+      "name": "Countdown",
+      "include": "(^src/applications/countdown/)"
     },
-    "daemon" : {
-      "name" : "Daemons",
-      "include" : "(^src/applications/daemon/)"
+    "daemon": {
+      "name": "Daemons",
+      "include": "(^src/applications/daemon/)"
     },
-    "differential" : {
-      "name" : "Differential",
-      "include" : "(^src/applications/differential/)"
+    "differential": {
+      "name": "Differential",
+      "include": "(^src/applications/differential/)"
     },
-    "diffusion" : {
-      "name" : "Diffusion",
-      "include" : "(^src/applications/diffusion/)"
+    "diffusion": {
+      "name": "Diffusion",
+      "include": "(^src/applications/diffusion/)"
     },
-    "directory" : {
-      "name" : "Directory",
-      "include" : "(^src/applications/directory/)"
+    "directory": {
+      "name": "Directory",
+      "include": "(^src/applications/directory/)"
     },
-    "diviner" : {
-      "name" : "Diviner",
-      "include" : "(^src/applications/diviner/)"
+    "diviner": {
+      "name": "Diviner",
+      "include": "(^src/applications/diviner/)"
     },
-    "doorkeeper" : {
-      "name" : "Doorkeeper",
-      "include" : "(^src/applications/doorkeeper/)"
+    "doorkeeper": {
+      "name": "Doorkeeper",
+      "include": "(^src/applications/doorkeeper/)"
     },
-    "draft" : {
-      "name" : "Draft",
-      "include" : "(^src/applications/draft/)"
+    "draft": {
+      "name": "Draft",
+      "include": "(^src/applications/draft/)"
     },
-    "drydock" : {
-      "name" : "Drydock",
-      "include" : "(^src/applications/drydock/)"
+    "drydock": {
+      "name": "Drydock",
+      "include": "(^src/applications/drydock/)"
     },
-    "fact" : {
-      "name" : "Fact",
-      "include" : "(^src/applications/fact/)"
+    "fact": {
+      "name": "Fact",
+      "include": "(^src/applications/fact/)"
     },
-    "feed" : {
-      "name" : "Feed",
-      "include" : "(^src/applications/feed/)"
+    "feed": {
+      "name": "Feed",
+      "include": "(^src/applications/feed/)"
     },
-    "files" : {
-      "name" : "Files",
-      "include" : "(^src/applications/files/)"
+    "files": {
+      "name": "Files",
+      "include": "(^src/applications/files/)"
     },
-    "flag" : {
-      "name" : "Flags",
-      "include" : "(^src/applications/flag/)"
+    "flag": {
+      "name": "Flags",
+      "include": "(^src/applications/flag/)"
     },
-    "harbormaster" : {
-      "name" : "Harbormaster",
-      "include" : "(^src/applications/harbormaster/)"
+    "harbormaster": {
+      "name": "Harbormaster",
+      "include": "(^src/applications/harbormaster/)"
     },
-    "help" : {
-      "name" : "Help",
-      "include" : "(^src/applications/help/)"
+    "help": {
+      "name": "Help",
+      "include": "(^src/applications/help/)"
     },
-    "herald" : {
-      "name" : "Herald",
-      "include" : "(^src/applications/herald/)"
+    "herald": {
+      "name": "Herald",
+      "include": "(^src/applications/herald/)"
     },
-    "legalpad" : {
-      "name" : "Legalpad",
-      "include" : "(^src/applications/legalpad/)"
+    "legalpad": {
+      "name": "Legalpad",
+      "include": "(^src/applications/legalpad/)"
     },
-    "lipsum" : {
-      "name" : "Lipsum",
-      "include" : "(^src/applications/lipsum/)"
+    "lipsum": {
+      "name": "Lipsum",
+      "include": "(^src/applications/lipsum/)"
     },
-    "macro" : {
-      "name" : "Macro",
-      "include" : "(^src/applications/macro/)"
+    "macro": {
+      "name": "Macro",
+      "include": "(^src/applications/macro/)"
     },
-    "mailinglists" : {
-      "name" : "Mailing Lists",
-      "include" : "(^src/applications/mailinglists/)"
+    "mailinglists": {
+      "name": "Mailing Lists",
+      "include": "(^src/applications/mailinglists/)"
     },
-    "maniphest" : {
-      "name" : "Maniphest",
-      "include" : "(^src/applications/maniphest/)"
+    "maniphest": {
+      "name": "Maniphest",
+      "include": "(^src/applications/maniphest/)"
     },
-    "meta" : {
-      "name" : "Meta",
-      "include" : "(^src/applications/meta/)"
+    "meta": {
+      "name": "Meta",
+      "include": "(^src/applications/meta/)"
     },
-    "metamta" : {
-      "name" : "MetaMTA",
-      "include" : "(^src/applications/metamta/)"
+    "metamta": {
+      "name": "MetaMTA",
+      "include": "(^src/applications/metamta/)"
     },
-    "notification" : {
-      "name" : "Notifications",
-      "include" : "(^src/applications/notification/)"
+    "notification": {
+      "name": "Notifications",
+      "include": "(^src/applications/notification/)"
     },
-    "oauthserver" : {
-      "name" : "OAuth Server",
-      "include" : "(^src/applications/oauthserver/)"
+    "oauthserver": {
+      "name": "OAuth Server",
+      "include": "(^src/applications/oauthserver/)"
     },
-    "owners" : {
-      "name" : "Owners",
-      "include" : "(^src/applications/owners/)"
+    "owners": {
+      "name": "Owners",
+      "include": "(^src/applications/owners/)"
     },
-    "paste" : {
-      "name" : "Paste",
-      "include" : "(^src/applications/paste/)"
+    "paste": {
+      "name": "Paste",
+      "include": "(^src/applications/paste/)"
     },
-    "people" : {
-      "name" : "People",
-      "include" : "(^src/applications/people/)"
+    "people": {
+      "name": "People",
+      "include": "(^src/applications/people/)"
     },
-    "phame" : {
-      "name" : "Phame",
-      "include" : "(^src/applications/phame/)"
+    "phame": {
+      "name": "Phame",
+      "include": "(^src/applications/phame/)"
     },
-    "phid" : {
-      "name" : "PHIDs",
-      "include" : "(^src/applications/phid/)"
+    "phid": {
+      "name": "PHIDs",
+      "include": "(^src/applications/phid/)"
     },
-    "phlux" : {
-      "name" : "Phlux",
-      "include" : "(^src/applications/phlux/)"
+    "phlux": {
+      "name": "Phlux",
+      "include": "(^src/applications/phlux/)"
     },
-    "pholio" : {
-      "name" : "Pholio",
-      "include" : "(^src/applications/pholio/)"
+    "pholio": {
+      "name": "Pholio",
+      "include": "(^src/applications/pholio/)"
     },
-    "phortune" : {
-      "name" : "Phortune",
-      "include" : "(^src/applications/phortune/)"
+    "phortune": {
+      "name": "Phortune",
+      "include": "(^src/applications/phortune/)"
     },
-    "phpast" : {
-      "name" : "PHPAST",
-      "include" : "(^src/applications/phpast/)"
+    "phpast": {
+      "name": "PHPAST",
+      "include": "(^src/applications/phpast/)"
     },
-    "phrequent" : {
-      "name" : "Phrequent",
-      "include" : "(^src/applications/phrequent/)"
+    "phrequent": {
+      "name": "Phrequent",
+      "include": "(^src/applications/phrequent/)"
     },
-    "phriction" : {
-      "name" : "Phriction",
-      "include" : "(^src/applications/phriction/)"
+    "phriction": {
+      "name": "Phriction",
+      "include": "(^src/applications/phriction/)"
     },
-    "policy" : {
-      "name" : "Policy",
-      "include" : "(^src/applications/policy/)"
+    "policy": {
+      "name": "Policy",
+      "include": "(^src/applications/policy/)"
     },
-    "ponder" : {
-      "name" : "Ponder",
-      "include" : "(^src/applications/ponder/)"
+    "ponder": {
+      "name": "Ponder",
+      "include": "(^src/applications/ponder/)"
     },
-    "project" : {
-      "name" : "Projects",
-      "include" : "(^src/applications/project/)"
+    "project": {
+      "name": "Projects",
+      "include": "(^src/applications/project/)"
     },
-    "releeph" : {
-      "name" : "Releeph",
-      "include" : "(^src/applications/releeph/)"
+    "releeph": {
+      "name": "Releeph",
+      "include": "(^src/applications/releeph/)"
     },
-    "remarkup" : {
-      "name" : "Remarkup",
-      "include" : "(^src/applications/remarkup/)"
+    "remarkup": {
+      "name": "Remarkup",
+      "include": "(^src/applications/remarkup/)"
     },
-    "repository" : {
-      "name" : "Repositories",
-      "include" : "(^src/applications/repository/)"
+    "repository": {
+      "name": "Repositories",
+      "include": "(^src/applications/repository/)"
     },
-    "search" : {
-      "name" : "Search",
-      "include" : "(^src/applications/search/)"
+    "search": {
+      "name": "Search",
+      "include": "(^src/applications/search/)"
     },
-    "settings" : {
-      "name" : "Settings",
-      "include" : "(^src/applications/settings/)"
+    "settings": {
+      "name": "Settings",
+      "include": "(^src/applications/settings/)"
     },
-    "slowvote" : {
-      "name" : "Slowvote",
-      "include" : "(^src/applications/slowvote/)"
+    "slowvote": {
+      "name": "Slowvote",
+      "include": "(^src/applications/slowvote/)"
     },
-    "subscriptions" : {
-      "name" : "Subscriptions",
-      "include" : "(^src/applications/subscriptions/)"
+    "subscriptions": {
+      "name": "Subscriptions",
+      "include": "(^src/applications/subscriptions/)"
     },
-    "system" : {
-      "name" : "System",
-      "include" : "(^src/applications/system/)"
+    "system": {
+      "name": "System",
+      "include": "(^src/applications/system/)"
     },
-    "tokens" : {
-      "name" : "Tokens",
-      "include" : "(^src/applications/tokens/)"
+    "tokens": {
+      "name": "Tokens",
+      "include": "(^src/applications/tokens/)"
     },
-    "transactions" : {
-      "name" : "Transactions",
-      "include" : "(^src/applications/transactions/)"
+    "transactions": {
+      "name": "Transactions",
+      "include": "(^src/applications/transactions/)"
     },
-    "typeahead" : {
-      "name" : "Typeahead",
-      "include" : "(^src/applications/typeahead/)"
+    "typeahead": {
+      "name": "Typeahead",
+      "include": "(^src/applications/typeahead/)"
     },
-    "uiexample" : {
-      "name" : "UI Examples",
-      "include" : "(^src/applications/uiexample/)"
+    "uiexample": {
+      "name": "UI Examples",
+      "include": "(^src/applications/uiexample/)"
     },
-    "xhprof" : {
-      "name" : "XHProf",
-      "include" : "(^src/applications/xhprof/)"
+    "xhprof": {
+      "name": "XHProf",
+      "include": "(^src/applications/xhprof/)"
     }
   }
 }

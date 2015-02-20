@@ -40,8 +40,8 @@ JX.behavior('differential-show-more', function(config) {
       JX.DOM.setContent(container, 'Loading...');
       JX.DOM.alterClass(context, 'differential-show-more-loading', true);
 
-      if (!data['whitespace']) {
-        data['whitespace'] = config.whitespace;
+      if (!data.whitespace) {
+        data.whitespace = config.whitespace;
       }
 
       new JX.Workflow(config.uri, data)

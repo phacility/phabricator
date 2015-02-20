@@ -13,7 +13,7 @@ final class PHUIStatusListView extends AphrontTagView {
     return false;
   }
 
-  public function getTagName() {
+  protected function getTagName() {
     return 'table';
   }
 

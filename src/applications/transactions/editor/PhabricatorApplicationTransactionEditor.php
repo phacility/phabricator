@@ -22,6 +22,7 @@ abstract class PhabricatorApplicationTransactionEditor
   private $heraldTranscript;
   private $subscribers;
   private $unmentionablePHIDMap = array();
+  private $applicationEmail;
 
   private $isPreview;
   private $isHeraldEditor;
@@ -183,6 +184,16 @@ abstract class PhabricatorApplicationTransactionEditor
 
   public function getUnmentionablePHIDMap() {
     return $this->unmentionablePHIDMap;
+  }
+
+  public function setApplicationEmail(
+    PhabricatorMetaMTAApplicationEmail $email) {
+    $this->applicationEmail = $email;
+    return $this;
+  }
+
+  public function getApplicationEmail() {
+    return $this->applicationEmail;
   }
 
   public function getTransactionTypes() {
@@ -1231,25 +1242,6 @@ abstract class PhabricatorApplicationTransactionEditor
       return $block_xactions;
     }
 
-    if ($object instanceof PhabricatorProjectInterface) {
-      $phids = $mentioned_phids;
-      $project_type = PhabricatorProjectProjectPHIDType::TYPECONST;
-      foreach ($phids as $key => $phid) {
-        if (phid_get_type($phid) != $project_type) {
-          unset($phids[$key]);
-        }
-      }
-
-      if ($phids) {
-        $edge_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
-        $block_xactions[] = newv(get_class(head($xactions)), array())
-          ->setIgnoreOnNoEffect(true)
-          ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-          ->setMetadataValue('edge:type', $edge_type)
-          ->setNewValue(array('+' => $phids));
-      }
-    }
-
     $mentioned_objects = id(new PhabricatorObjectQuery())
       ->setViewer($this->getActor())
       ->withPHIDs($mentioned_phids)
@@ -2191,6 +2183,21 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     array $xactions) {
 
+    $body = new PhabricatorMetaMTAMailBody();
+    $body->setViewer($this->requireActor());
+
+    $this->addHeadersAndCommentsToMailBody($body, $xactions);
+    $this->addCustomFieldsToMailBody($body, $object, $xactions);
+    return $body;
+  }
+
+  /**
+   * @task mail
+   */
+  protected function addHeadersAndCommentsToMailBody(
+    PhabricatorMetaMTAMailBody $body,
+    array $xactions) {
+
     $headers = array();
     $comments = array();
 
@@ -2209,14 +2216,20 @@ abstract class PhabricatorApplicationTransactionEditor
         $comments[] = $comment;
       }
     }
-
-    $body = new PhabricatorMetaMTAMailBody();
-    $body->setViewer($this->requireActor());
     $body->addRawSection(implode("\n", $headers));
 
     foreach ($comments as $comment) {
       $body->addRemarkupSection($comment);
     }
+  }
+
+  /**
+   * @task mail
+   */
+  protected function addCustomFieldsToMailBody(
+    PhabricatorMetaMTAMailBody $body,
+    PhabricatorLiskDAO $object,
+    array $xactions) {
 
     if ($object instanceof PhabricatorCustomFieldInterface) {
       $field_list = PhabricatorCustomField::getObjectFields(
@@ -2232,9 +2245,8 @@ abstract class PhabricatorApplicationTransactionEditor
           $xactions);
       }
     }
-
-    return $body;
   }
+
 
 
 /* -(  Publishing Feed Stories  )-------------------------------------------- */
@@ -2407,6 +2419,9 @@ abstract class PhabricatorApplicationTransactionEditor
     $adapter = $this->buildHeraldAdapter($object, $xactions);
     $adapter->setContentSource($this->getContentSource());
     $adapter->setIsNewObject($this->getIsNewObject());
+    if ($this->getApplicationEmail()) {
+      $adapter->setApplicationEmail($this->getApplicationEmail());
+    }
     $xscript = HeraldEngine::loadAndApplyRules($adapter);
 
     $this->setHeraldAdapter($adapter);

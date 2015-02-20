@@ -10,7 +10,7 @@ final class PhabricatorHandleQuery
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $types = PhabricatorPHIDType::getAllTypes();
 
     $phids = array_unique($this->phids);

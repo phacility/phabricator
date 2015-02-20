@@ -6,6 +6,10 @@ abstract class PhabricatorApplicationConfigOptions extends Phobject {
   abstract public function getDescription();
   abstract public function getOptions();
 
+  public function getFontIcon() {
+    return 'fa-sliders';
+  }
+
   public function validateOption(PhabricatorConfigOption $option, $value) {
     if ($value === $option->getDefault()) {
       return;

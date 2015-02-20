@@ -26,7 +26,7 @@ final class PhabricatorProjectEditIconController
       if (!$project) {
         return new Aphront404Response();
       }
-      $cancel_uri = $this->getApplicationURI('edit/'.$project->getID().'/');
+      $cancel_uri = $this->getApplicationURI('profile/'.$project->getID().'/');
       $project_icon = $project->getIcon();
     } else {
       $this->requireApplicationCapability(

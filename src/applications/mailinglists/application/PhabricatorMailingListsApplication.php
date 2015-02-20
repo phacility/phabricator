@@ -14,8 +14,8 @@ final class PhabricatorMailingListsApplication extends PhabricatorApplication {
     return 'Manage External Lists';
   }
 
-  public function getIconName() {
-    return 'mail';
+  public function getFontIcon() {
+    return 'fa-mail-reply-all';
   }
 
   public function getApplicationGroup() {
@@ -35,6 +35,14 @@ final class PhabricatorMailingListsApplication extends PhabricatorApplication {
 
   public function getTitleGlyph() {
     return '@';
+  }
+
+  protected function getCustomCapabilities() {
+    return array(
+      PhabricatorMailingListsManageCapability::CAPABILITY => array(
+        'default' => PhabricatorPolicies::POLICY_ADMIN,
+      ),
+    );
   }
 
 }

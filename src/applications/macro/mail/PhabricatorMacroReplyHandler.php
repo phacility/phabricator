@@ -18,7 +18,7 @@ final class PhabricatorMacroReplyHandler extends PhabricatorMailReplyHandler {
   }
 
   public function getReplyHandlerDomain() {
-    return PhabricatorEnv::getEnvConfig(
+    return $this->getCustomReplyHandlerDomainIfExists(
       'metamta.macro.reply-handler-domain');
   }
 

@@ -7,7 +7,7 @@ final class LegalpadDocumentSearchEngine
     return pht('Legalpad Documents');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorLegalpadApplication';
   }
 

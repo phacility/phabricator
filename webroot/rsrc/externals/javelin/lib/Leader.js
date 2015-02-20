@@ -97,6 +97,7 @@ JX.install('Leader', {
      * callback.
      */
     _callIf: function(leader_callback, follower_callback) {
+      var self = JX.Leader;
 
       if (!window.localStorage) {
         // If we don't have localStorage, pretend we're the only tab.
@@ -104,8 +105,6 @@ JX.install('Leader', {
         leader_callback();
         return;
       }
-
-      var self = JX.Leader;
 
       // If we don't have an ID for this tab yet, generate one and register
       // event listeners.
@@ -219,7 +218,7 @@ JX.install('Leader', {
     _read: function() {
       var self = JX.Leader;
 
-      leader = window.localStorage.getItem(self._leaderKey) || '0:0';
+      var leader = window.localStorage.getItem(self._leaderKey) || '0:0';
       leader = leader.split(':');
 
       return {
@@ -305,4 +304,3 @@ JX.install('Leader', {
 
   }
 });
-

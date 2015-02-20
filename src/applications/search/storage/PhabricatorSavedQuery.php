@@ -7,7 +7,7 @@ final class PhabricatorSavedQuery extends PhabricatorSearchDAO
   protected $queryKey;
   protected $engineClassName;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_SERIALIZATION => array(
         'parameters' => self::SERIALIZATION_JSON,

@@ -7,7 +7,7 @@ final class PhabricatorConduitSearchEngine
     return pht('Conduit Methods');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorConduitApplication';
   }
 

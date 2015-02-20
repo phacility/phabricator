@@ -33,15 +33,6 @@
   margin-left: 16px;
 }
 
-.profile-activity-view.profile-has-calendar .profile-feed {
-  margin-left: 332px;
-}
-
-.device-phone .profile-activity-view .profile-calendar {
-  float: none;
-  margin: 0 8px;
-}
-
 .device-phone .profile-activity-view .profile-feed {
   float: none;
   margin: 0 8px;

@@ -16,7 +16,7 @@ final class NuanceRequestorQuery
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $table = new NuanceRequestor();
     $conn_r = $table->establishConnection('r');
 

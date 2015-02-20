@@ -50,7 +50,6 @@ final class PhabricatorProject extends PhabricatorProjectDAO
       ProjectDefaultJoinCapability::CAPABILITY);
 
     return id(new PhabricatorProject())
-      ->setName('')
       ->setAuthorPHID($actor->getPHID())
       ->setIcon(self::DEFAULT_ICON)
       ->setColor(self::DEFAULT_COLOR)
@@ -129,7 +128,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
     return $this;
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(

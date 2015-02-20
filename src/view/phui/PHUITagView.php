@@ -142,7 +142,7 @@ final class PHUITagView extends AphrontTagView {
     return $attributes + array('class' => $classes);
   }
 
-  public function getTagContent() {
+  protected function getTagContent() {
     if (!$this->type) {
       throw new Exception(pht('You must call setType() before render()!'));
     }
@@ -176,7 +176,7 @@ final class PHUITagView extends AphrontTagView {
       array(
         'class' => 'phui-tag-core '.$color,
       ),
-      array($dot, $this->name));
+      array($dot, $icon, $this->name));
 
     if ($this->closed) {
       $content = phutil_tag(
@@ -184,10 +184,10 @@ final class PHUITagView extends AphrontTagView {
         array(
           'class' => 'phui-tag-core-closed',
         ),
-        $content);
+        array($icon, $content));
     }
 
-    return array($icon, $content);
+    return $content;
   }
 
   public static function getTagTypes() {

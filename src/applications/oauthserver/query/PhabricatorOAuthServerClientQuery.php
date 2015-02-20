@@ -22,7 +22,7 @@ final class PhabricatorOAuthServerClientQuery
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $table  = new PhabricatorOAuthServerClient();
     $conn_r = $table->establishConnection('r');
 

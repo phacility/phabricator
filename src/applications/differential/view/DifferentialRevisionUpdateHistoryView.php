@@ -62,6 +62,7 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
     }
 
     $max_id = $diff->getID();
+    $revision_id = $diff->getRevisionID();
 
     $idx = 0;
     $rows = array();
@@ -169,12 +170,21 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       }
       $last_base = $base;
 
-      $id_link = phutil_tag(
-        'a',
-        array(
-          'href' => '/differential/diff/'.$id.'/',
-        ),
-        $id);
+      if ($revision_id) {
+        $id_link = phutil_tag(
+          'a',
+          array(
+            'href' => '/D'.$revision_id.'?id='.$id,
+          ),
+          $id);
+      } else {
+        $id_link = phutil_tag(
+          'a',
+          array(
+            'href' => '/differential/diff/'.$id.'/',
+          ),
+          $id);
+      }
 
       $rows[] = array(
         $name,
@@ -205,11 +215,11 @@ final class DifferentialRevisionUpdateHistoryView extends AphrontView {
       ));
 
     $options = array(
-      DifferentialChangesetParser::WHITESPACE_IGNORE_FORCE => 'Ignore All',
-      DifferentialChangesetParser::WHITESPACE_IGNORE_ALL => 'Ignore Most',
+      DifferentialChangesetParser::WHITESPACE_IGNORE_ALL => pht('Ignore All'),
+      DifferentialChangesetParser::WHITESPACE_IGNORE_MOST => pht('Ignore Most'),
       DifferentialChangesetParser::WHITESPACE_IGNORE_TRAILING =>
-        'Ignore Trailing',
-      DifferentialChangesetParser::WHITESPACE_SHOW_ALL => 'Show All',
+        pht('Ignore Trailing'),
+      DifferentialChangesetParser::WHITESPACE_SHOW_ALL => pht('Show All'),
     );
 
     foreach ($options as $value => $label) {

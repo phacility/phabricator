@@ -18,6 +18,10 @@ abstract class CelerityResourceController extends PhabricatorController {
     return true;
   }
 
+  public function shouldAllowLegallyNonCompliantUsers() {
+    return true;
+  }
+
   abstract public function getCelerityResourceMap();
 
   protected function serveResource($path, $package_hash = null) {
@@ -98,7 +102,7 @@ abstract class CelerityResourceController extends PhabricatorController {
 
     // NOTE: This is a piece of magic required to make WOFF fonts work in
     // Firefox. Possibly we should generalize this.
-    if ($type == 'woff') {
+    if ($type == 'woff' || $type == 'woff2') {
       // We could be more tailored here, but it's not currently trivial to
       // generate a comprehensive list of valid origins (an install may have
       // arbitrarily many Phame blogs, for example), and we lose nothing by
@@ -118,6 +122,7 @@ abstract class CelerityResourceController extends PhabricatorController {
       'jpg' => 'image/jpeg',
       'swf' => 'application/x-shockwave-flash',
       'woff' => 'font/woff',
+      'woff2' => 'font/woff2',
       'eot' => 'font/eot',
       'ttf' => 'font/ttf',
     );

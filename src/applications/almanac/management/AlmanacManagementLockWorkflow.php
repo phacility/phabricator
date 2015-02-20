@@ -3,7 +3,7 @@
 final class AlmanacManagementLockWorkflow
   extends AlmanacManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('lock')
       ->setSynopsis(pht('Lock a service to prevent it from being edited.'))

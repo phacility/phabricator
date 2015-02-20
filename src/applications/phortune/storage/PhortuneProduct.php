@@ -14,7 +14,7 @@ final class PhortuneProduct extends PhortuneDAO
 
   private $implementation = self::ATTACHABLE;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
@@ -87,6 +87,11 @@ final class PhortuneProduct extends PhortuneDAO
       $amount);
   }
 
+  public function getPurchaseURI(PhortunePurchase $purchase) {
+    return $this->getImplementation()->getPurchaseURI(
+      $this,
+      $purchase);
+  }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

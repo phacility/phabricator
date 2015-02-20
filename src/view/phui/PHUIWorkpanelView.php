@@ -55,13 +55,13 @@ final class PHUIWorkpanelView extends AphrontTagView {
     return $this;
   }
 
-  public function getTagAttributes() {
+  protected function getTagAttributes() {
     return array(
       'class' => 'phui-workpanel-view',
     );
   }
 
-  public function getTagContent() {
+  protected function getTagContent() {
     require_celerity_resource('phui-workpanel-view-css');
 
     $classes = array();

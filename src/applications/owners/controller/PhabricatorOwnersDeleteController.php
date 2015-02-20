@@ -19,8 +19,10 @@ final class PhabricatorOwnersDeleteController
     }
 
     if ($request->isDialogFormPost()) {
-      $package->attachActorPHID($user->getPHID());
-      $package->delete();
+      id(new PhabricatorOwnersPackageEditor())
+        ->setActor($user)
+        ->setPackage($package)
+        ->delete();
       return id(new AphrontRedirectResponse())->setURI('/owners/');
     }
 

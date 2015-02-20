@@ -14,8 +14,8 @@ final class PhabricatorLegalpadApplication extends PhabricatorApplication {
     return pht('Agreements and Signatures');
   }
 
-  public function getIconName() {
-    return 'legalpad';
+  public function getFontIcon() {
+    return 'fa-gavel';
   }
 
   public function getTitleGlyph() {

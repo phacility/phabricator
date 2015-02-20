@@ -3,7 +3,7 @@
 /**
  * @task page   Managing Pages
  */
-final class PHUIPagedFormView extends AphrontTagView {
+final class PHUIPagedFormView extends AphrontView {
 
   private $name = 'pages';
   private $pages = array();
@@ -220,7 +220,7 @@ final class PHUIPagedFormView extends AphrontTagView {
     return $this->cancelURI;
   }
 
-  public function getTagContent() {
+  public function render() {
     $form = id(new AphrontFormView())
       ->setUser($this->getUser());
 

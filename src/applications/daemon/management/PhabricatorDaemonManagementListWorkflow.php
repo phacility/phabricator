@@ -3,7 +3,7 @@
 final class PhabricatorDaemonManagementListWorkflow
   extends PhabricatorDaemonManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('list')
       ->setSynopsis(pht('Show a list of available daemons.'))

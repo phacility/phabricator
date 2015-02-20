@@ -175,11 +175,13 @@
   font-size: 11px;
 }
 
+.conpherence-menu-item-header {
+  font-weight: bold;
+  text-transform: uppercase;
+  color: {$bluetext};
+}
+
 .no-conpherences-menu-item {
-  color: #a1a5a9;
-  border-top: solid 1px #3B3D3E;
-  padding: 20px 0;
-  margin: 0px auto;
-  width: 280px;
-  text-align: center;
+  color: {$bluetext};
+  padding: 4px 12px;
 }

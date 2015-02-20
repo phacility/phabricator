@@ -27,7 +27,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     parent::__construct();
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_SERIALIZATION => array(
         'parameters'  => self::SERIALIZATION_JSON,

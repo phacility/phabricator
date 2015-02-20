@@ -7,7 +7,7 @@ final class AlmanacDeviceSearchEngine
     return pht('Almanac Devices');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorAlmanacApplication';
   }
 

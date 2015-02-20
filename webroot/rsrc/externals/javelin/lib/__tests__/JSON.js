@@ -7,7 +7,7 @@ describe('JSON', function() {
   it('should encode and decode an object', function() {
     var object = {
       a: [0, 1, 2],
-      s: "Javelin Stuffs",
+      s: 'Javelin Stuffs',
       u: '\x01',
       n: 1,
       f: 3.14,

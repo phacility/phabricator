@@ -2,6 +2,10 @@
 
 final class PhabricatorStorageSetupCheck extends PhabricatorSetupCheck {
 
+  public function getDefaultGroup() {
+    return self::GROUP_OTHER;
+  }
+
   /**
    * @phutil-external-symbol class PhabricatorStartup
    */

@@ -7,7 +7,7 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
   private $serverTime;
   private $localTime;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     $parent = parent::getConfiguration();
 
     $config = array(
@@ -135,6 +135,7 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
     $this->checkLease();
 
     $did_succeed = false;
+    $worker = null;
     try {
       $worker = $this->getWorkerInstance();
 
@@ -182,7 +183,11 @@ final class PhabricatorWorkerActiveTask extends PhabricatorWorkerTask {
       $this->setFailureCount($this->getFailureCount() + 1);
       $this->setFailureTime(time());
 
-      $retry = $worker->getWaitBeforeRetry($this);
+      $retry = null;
+      if ($worker) {
+        $retry = $worker->getWaitBeforeRetry($this);
+      }
+
       $retry = coalesce(
         $retry,
         PhabricatorWorkerLeaseQuery::getDefaultWaitBeforeRetry());

@@ -2,8 +2,9 @@
  * @provides phui-object-item-list-view-css
  */
 
-.phui-object-item-list-view {
-  padding: 8px 6px;
+ul.phui-object-item-list-view {
+  padding: 8px;
+  list-style: none;
 }
 
 .device-desktop .phui-object-item-list-view {
@@ -18,9 +19,8 @@
   padding: 0;
 }
 
-.phui-object-box .phui-object-item-list-view.phui-object-list-flush {
-  padding: 8px 8px 4px 8px;
-  background-color: #E5E8EE;
+.phui-object-box .phui-object-list-flush .phui-object-item {
+  margin: 0;
 }
 
 .device-phone .phui-object-box
@@ -28,9 +28,18 @@
   padding: 4px;
 }
 
-.phui-object-item-list-view .aphront-error-view {
-  margin: 4px 0 8px 0;
+.homepage-panel .phui-object-list-flush .phui-object-item {
+  margin: 0;
+}
+
+.phui-object-item-list-view .phui-error-view {
+  margin: 0;
+}
+
+.phui-object-box .phui-object-item-list-view .phui-error-view {
+  margin: 4px 0;
   color: {$greytext};
+  border: none;
 }
 
 .phui-object-item {
@@ -58,6 +67,10 @@
 
 .device-desktop .phui-object-item {
   margin: 0 0 4px 0;
+}
+
+.phui-object-box .phui-object-list-flush .phui-object-item {
+  margin: 0;
 }
 
 .phui-object-item-name {
@@ -615,14 +628,12 @@ ul.phui-object-item-icons {
 */
 
 .phui-object-item-ficon {
-  width: 26px;
+  width: 48px;
   height: 26px;
-  margin: 11px 9px 7px 12px;
+  margin-top: 12px;
   position: absolute;
-}
-
-.device-desktop .phui-object-list-states .phui-object-item {
-  margin: 0;
+  text-align: center;
+  font-size: 24px;
 }
 
 .phui-object-item-with-ficon .phui-object-item-content-box {
@@ -633,28 +644,9 @@ ul.phui-object-item-icons {
   padding: 0;
 }
 
-.phui-object-list-states .aphront-error-view {
+.phui-object-list-states .phui-error-view {
   margin: 0;
   border: none;
-}
-
-.phui-object-box .phui-object-list-states li:last-child
-  .phui-object-item-frame {
-  border: none;
-  padding-bottom: 0;
-}
-
-.phui-object-list-states .phui-object-item-frame {
-  border: none;
-  border-bottom: 1px solid {$thinblueborder};
-}
-
-.phui-object-list-states .phui-object-item {
-  border: none;
-}
-
-.phui-object-list-states .phui-object-item-frame {
-  min-height: 44px;
 }
 
 /* - Dashboards ------------------------------------------------------------ */
@@ -667,14 +659,16 @@ ul.phui-object-item-icons {
   margin-bottom: -1px;
 }
 
-.dashboard-panel .phui-object-item-list-view .phui-object-item {
+.dashboard-panel .phui-object-item-list-view .phui-object-item,
+.phui-object-box .phui-object-item-list-view.phui-object-list-flush {
   margin: 0;
   background-image: none;
   background-color: #fff;
   border-left-width: 4px;
 }
 
-.dashboard-panel .phui-object-item-frame {
+.dashboard-panel .phui-object-item-frame,
+.phui-object-box .phui-object-list-flush .phui-object-item-frame {
   border: none;
   border-bottom: 1px solid {$thinblueborder};
 }
@@ -689,14 +683,23 @@ ul.phui-object-item-icons {
   -webkit-font-smoothing: antialiased;
 }
 
-.dashboard-panel .phui-object-item-empty .aphront-error-view {
+.dashboard-panel .phui-object-item-empty .phui-error-view {
   border: none;
   border-bottom: 1px solid {$thinblueborder};
+  margin: 0;
 }
 
 .device-desktop .aphront-multi-column-fluid .aphront-multi-column-2-up
  .aphront-multi-column-column-outer.third .phui-object-item-col2 {
    display: none;
+ }
+
+ .dashboard-panel .phui-object-box .phui-header-shell {
+   display: none;
+ }
+
+ .dashboard-panel .phui-object-box {
+   margin: 0;
  }
 
 
@@ -736,10 +739,13 @@ ul.phui-object-item-icons {
 
 .phui-object-item-image-icon .phui-icon-view {
   position: absolute;
-  width: 28px;
-  height: 28px;
-  left: 8px;
-  top: 8px;
+  width: 24px;
+  height: 24px;
+  left: 6px;
+  top: 10px;
+  font-size: 24px;
+  text-align: center;
+  vertical-align: bottom;
 }
 
 .phui-object-item-with-image-icon .phui-object-item-frame {
@@ -747,7 +753,7 @@ ul.phui-object-item-icons {
 }
 
 .phui-object-item-with-image-icon .phui-object-item-content-box {
-  margin-left: 44px;
+  margin-left: 36px;
 }
 
 .device-desktop .phui-object-item-launcher-list .phui-object-item-content {

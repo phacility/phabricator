@@ -1,7 +1,10 @@
 <?php
 
 final class DivinerLiveSymbol extends DivinerDAO
-  implements PhabricatorPolicyInterface, PhabricatorMarkupInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorMarkupInterface,
+    PhabricatorDestructibleInterface {
 
   protected $bookPHID;
   protected $context;
@@ -23,7 +26,7 @@ final class DivinerLiveSymbol extends DivinerDAO
   private $extends = self::ATTACHABLE;
   private $children = self::ATTACHABLE;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_TIMESTAMPS => false,
@@ -240,6 +243,24 @@ final class DivinerLiveSymbol extends DivinerDAO
 
   public function shouldUseMarkupCache($field) {
     return true;
+  }
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+      $conn_w = $this->establishConnection('w');
+
+      queryfx(
+        $conn_w,
+        'DELETE FROM %T WHERE symbolPHID = %s',
+        id(new DivinerLiveAtom())->getTableName(),
+        $this->getPHID());
+
+      $this->delete();
+    $this->saveTransaction();
   }
 
 }

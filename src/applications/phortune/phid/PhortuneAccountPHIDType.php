@@ -30,7 +30,7 @@ final class PhortuneAccountPHIDType extends PhabricatorPHIDType {
 
       $id = $account->getID();
 
-      $handle->setName(pht('Account %d', $id));
+      $handle->setName($account->getName());
       $handle->setURI("/phortune/{$id}/");
     }
   }

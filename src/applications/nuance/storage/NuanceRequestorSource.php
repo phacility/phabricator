@@ -8,7 +8,7 @@ final class NuanceRequestorSource
   protected $sourceKey;
   protected $data;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_SERIALIZATION => array(
         'data' => self::SERIALIZATION_JSON,

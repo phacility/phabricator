@@ -370,3 +370,7 @@ a.phui-timeline-menu .phui-icon-view {
 .phui-timeline-menu.phuix-dropdown-open {
   background: {$hovergrey};
 }
+
+.phui-timeline-view + .phui-object-box {
+  margin-top: 0;
+}

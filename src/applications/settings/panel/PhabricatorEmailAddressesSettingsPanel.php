@@ -185,6 +185,16 @@ final class PhabricatorEmailAddressesSettingsPanel
         $e_email = pht('Disallowed');
         $errors[] = PhabricatorUserEmail::describeAllowedAddresses();
       }
+      if ($e_email === true) {
+        $application_email = id(new PhabricatorMetaMTAApplicationEmailQuery())
+          ->setViewer(PhabricatorUser::getOmnipotentUser())
+          ->withAddresses(array($email))
+          ->executeOne();
+        if ($application_email) {
+          $e_email = pht('In Use');
+          $errors[] = $application_email->getInUseMessage();
+        }
+      }
 
       if (!$errors) {
         $object = id(new PhabricatorUserEmail())
@@ -218,7 +228,7 @@ final class PhabricatorEmailAddressesSettingsPanel
     }
 
     if ($errors) {
-      $errors = id(new AphrontErrorView())
+      $errors = id(new PHUIErrorView())
         ->setErrors($errors);
     }
 

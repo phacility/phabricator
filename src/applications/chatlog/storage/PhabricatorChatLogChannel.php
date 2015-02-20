@@ -10,7 +10,7 @@ final class PhabricatorChatLogChannel
   protected $viewPolicy;
   protected $editPolicy;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'serviceName' => 'text64',

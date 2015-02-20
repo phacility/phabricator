@@ -3,7 +3,7 @@
 final class PhabricatorStorageManagementStatusWorkflow
   extends PhabricatorStorageManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('status')
       ->setExamples('**status** [__options__]')

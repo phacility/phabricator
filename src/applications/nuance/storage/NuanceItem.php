@@ -23,7 +23,7 @@ final class NuanceItem
       ->setStatus(NuanceItem::STATUS_OPEN);
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(

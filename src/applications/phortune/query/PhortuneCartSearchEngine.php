@@ -5,6 +5,7 @@ final class PhortuneCartSearchEngine
 
   private $merchant;
   private $account;
+  private $subscription;
 
   public function setAccount(PhortuneAccount $account) {
     $this->account = $account;
@@ -24,8 +25,21 @@ final class PhortuneCartSearchEngine
     return $this->merchant;
   }
 
+  public function setSubscription(PhortuneSubscription $subscription) {
+    $this->subscription = $subscription;
+    return $this;
+  }
+
+  public function getSubscription() {
+    return $this->subscription;
+  }
+
   public function getResultTypeDescription() {
     return pht('Phortune Orders');
+  }
+
+  public function getApplicationClassName() {
+    return 'PhabricatorPhortuneApplication';
   }
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
@@ -81,6 +95,11 @@ final class PhortuneCartSearchEngine
       } else {
         throw new Exception(pht('You have no accounts!'));
       }
+    }
+
+    $subscription = $this->getSubscription();
+    if ($subscription) {
+      $query->withSubscriptionPHIDs(array($subscription->getPHID()));
     }
 
     return $query;

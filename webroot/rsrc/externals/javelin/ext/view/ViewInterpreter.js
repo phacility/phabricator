@@ -56,7 +56,7 @@ JX.install('ViewInterpreter', {
         if (properties instanceof JX.View ||
             properties instanceof JX.HTML ||
             properties.nodeType ||
-            typeof properties === "string") {
+            typeof properties === 'string') {
           children.unshift(properties);
           properties = {};
         }

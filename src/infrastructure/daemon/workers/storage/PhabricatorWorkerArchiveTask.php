@@ -9,7 +9,7 @@ final class PhabricatorWorkerArchiveTask extends PhabricatorWorkerTask {
   protected $duration;
   protected $result;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     $parent = parent::getConfiguration();
 
     $config = array(

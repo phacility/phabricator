@@ -536,13 +536,6 @@ final class ManiphestTransaction
             $new_name);
         }
 
-      case self::TYPE_EDGE:
-        // TODO: Remove this when we switch to real edges. Just reuse the
-        // code in the parent;
-        $clone = clone $this;
-        $clone->setTransactionType(PhabricatorTransactions::TYPE_EDGE);
-        return $clone->getTitle();
-
       case self::TYPE_ATTACH:
         $old = nonempty($old, array());
         $new = nonempty($new, array());
@@ -793,13 +786,6 @@ final class ManiphestTransaction
             $old_name,
             $new_name);
         }
-
-      case self::TYPE_EDGE:
-        // TODO: Remove this when we switch to real edges. Just reuse the
-        // code in the parent;
-        $clone = clone $this;
-        $clone->setTransactionType(PhabricatorTransactions::TYPE_EDGE);
-        return $clone->getTitleForFeed();
 
       case self::TYPE_ATTACH:
         $old = nonempty($old, array());

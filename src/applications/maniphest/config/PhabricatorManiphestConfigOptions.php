@@ -11,6 +11,14 @@ final class PhabricatorManiphestConfigOptions
     return pht('Configure Maniphest.');
   }
 
+  public function getFontIcon() {
+    return 'fa-anchor';
+  }
+
+  public function getGroup() {
+    return 'apps';
+  }
+
   public function getOptions() {
 
     $priority_defaults = array(
@@ -175,6 +183,11 @@ The keys you can provide in a specification are:
     to this status by writing `Closes T123 as invalid`, even if another status
     is selected by the "Closes" prefix.
 
+Statuses will appear in the UI in the order specified. Note the status marked
+`special` as `duplicate` is not settable directly and will not appear in UI
+elements, and that any status marked `silly` does not appear if Phabricator
+is configured with `phabricator.serious-business` set to true.
+
 Examining the default configuration and examples below will probably be helpful
 in understanding these options.
 
@@ -263,6 +276,7 @@ EOTEXT
         'metamta.maniphest.reply-handler-domain',
         'string',
         null)
+        ->setLocked(true)
         ->setSummary(pht('Enable replying to tasks via email.'))
         ->setDescription(
           pht(
@@ -283,6 +297,7 @@ EOTEXT
         'metamta.maniphest.reply-handler',
         'class',
         'ManiphestReplyHandler')
+        ->setLocked(true)
         ->setBaseClass('PhabricatorMailReplyHandler')
         ->setDescription(pht('Override reply handler class.')),
       $this->newOption(
@@ -294,9 +309,16 @@ EOTEXT
         'metamta.maniphest.public-create-email',
         'string',
         null)
-        ->setSummary(pht('Allow filing bugs via email.'))
+        ->setLocked(true)
+        ->setLockedMessage(pht(
+          'This configuration is deprecated. See description for details.'))
+        ->setSummary(pht('DEPRECATED - Allow filing bugs via email.'))
         ->setDescription(
           pht(
+            'This config has been deprecated in favor of [[ '.
+            '/applications/view/PhabricatorManiphestApplication/ | '.
+            'application settings ]], which allow for multiple email '.
+            'addresses and other functionality.'."\n\n".
             'You can configure an email address like '.
             '"bugs@phabricator.example.com" which will automatically create '.
             'Maniphest tasks when users send email to it. This relies on the '.
@@ -311,9 +333,18 @@ EOTEXT
         'metamta.maniphest.default-public-author',
         'string',
         null)
-        ->setSummary(pht('Username anonymous bugs are filed under.'))
+        ->setLocked(true)
+        ->setLockedMessage(pht(
+          'This configuration is deprecated. See description for details.'))
+        ->setSummary(pht(
+          'DEPRECATED - Username anonymous bugs are filed under.'))
         ->setDescription(
           pht(
+            'This config has been deprecated in favor of [[ '.
+            '/applications/view/PhabricatorManiphestApplication/ | '.
+            'application settings ]], which allow for multiple email '.
+            'addresses each with its own default author, and other '.
+            'functionality.'."\n\n".
             'If you enable `metamta.maniphest.public-create-email` and create '.
             'an email address like "bugs@phabricator.example.com", it will '.
             'default to rejecting mail which doesn\'t come from a known user. '.

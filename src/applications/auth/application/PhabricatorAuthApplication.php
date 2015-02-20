@@ -10,8 +10,8 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
     return '/auth/';
   }
 
-  public function getIconName() {
-    return 'authentication';
+  public function getFontIcon() {
+    return 'fa-key';
   }
 
   public function isPinnedByDefault(PhabricatorUser $viewer) {
@@ -97,6 +97,8 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
         ),
         'login/(?P<pkey>[^/]+)/(?:(?P<extra>[^/]+)/)?'
           => 'PhabricatorAuthLoginController',
+        '(?P<loggedout>loggedout)/' => 'PhabricatorAuthStartController',
+        'invite/(?P<code>[^/]+)/' => 'PhabricatorAuthInviteController',
         'register/(?:(?P<akey>[^/]+)/)?' => 'PhabricatorAuthRegisterController',
         'start/' => 'PhabricatorAuthStartController',
         'validate/' => 'PhabricatorAuthValidateController',
@@ -144,4 +146,11 @@ final class PhabricatorAuthApplication extends PhabricatorApplication {
     );
   }
 
+  protected function getCustomCapabilities() {
+    return array(
+      AuthManageProvidersCapability::CAPABILITY => array(
+        'default' => PhabricatorPolicies::POLICY_ADMIN,
+      ),
+    );
+  }
 }

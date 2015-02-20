@@ -3,7 +3,7 @@
 final class PhabricatorRepositoryPushMailWorker
   extends PhabricatorWorker {
 
-  public function doWork() {
+  protected function doWork() {
     $viewer = PhabricatorUser::getOmnipotentUser();
 
     $task_data = $this->getTaskData();
@@ -22,13 +22,8 @@ final class PhabricatorRepositoryPushMailWorker
       ->executeOne();
 
     $repository = $event->getRepository();
-    if ($repository->isImporting()) {
+    if (!$repository->shouldPublish()) {
       // If the repository is still importing, don't send email.
-      return;
-    }
-
-    if ($repository->getDetail('herald-disabled')) {
-      // If publishing is disabled, don't send email.
       return;
     }
 

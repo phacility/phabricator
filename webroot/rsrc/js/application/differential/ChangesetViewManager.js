@@ -257,7 +257,7 @@ JX.install('ChangesetViewManager', {
           if (near_bot || above_mid) {
             // Figure out how much taller the document got.
             var delta = (JX.Vector.getDocument().y - old_dim.y);
-            window.scrollTo(old_pos.x, old_pos.y + delta);
+            JX.DOM.scrollToPosition(old_pos.x, old_pos.y + delta);
           }
         }
         this._stabilize = false;

@@ -144,8 +144,13 @@ final class PHUIObjectItemView extends AphrontTagView {
         $fi = 'fa-refresh ph-spin sky';
       break;
     }
+    $this->setFontIcon($fi);
+    return $this;
+  }
+
+  public function setFontIcon($icon) {
     $this->fontIcon = id(new PHUIIconView())
-      ->setIconFont($fi.' fa-2x');
+      ->setIconFont($icon);
     return $this;
   }
 
@@ -307,7 +312,7 @@ final class PHUIObjectItemView extends AphrontTagView {
     );
   }
 
-  public function getTagContent() {
+  protected function getTagContent() {
     $content_classes = array();
     $content_classes[] = 'phui-object-item-content';
 
@@ -537,15 +542,6 @@ final class PHUIObjectItemView extends AphrontTagView {
         $this->getImageIcon());
     }
 
-    if ($image && $this->href) {
-      $image = phutil_tag(
-        'a',
-        array(
-          'href' => $this->href,
-        ),
-        $image);
-    }
-
     $ficon = null;
     if ($this->fontIcon) {
       $image = phutil_tag(
@@ -554,6 +550,15 @@ final class PHUIObjectItemView extends AphrontTagView {
           'class' => 'phui-object-item-ficon',
         ),
         $this->fontIcon);
+    }
+
+    if ($image && $this->href) {
+      $image = phutil_tag(
+        'a',
+        array(
+          'href' => $this->href,
+        ),
+        $image);
     }
 
     /* Build a fake table */

@@ -7,6 +7,10 @@ final class PhabricatorSlowvoteSearchEngine
     return pht('Slowvotes');
   }
 
+  public function getApplicationClassName() {
+    return 'PhabricatorSlowvoteApplication';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
     $saved->setParameter(

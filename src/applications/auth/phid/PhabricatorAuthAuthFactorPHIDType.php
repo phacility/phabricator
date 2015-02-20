@@ -17,7 +17,7 @@ final class PhabricatorAuthAuthFactorPHIDType extends PhabricatorPHIDType {
     array $phids) {
 
     // TODO: Maybe we need this eventually?
-    throw new Exception(pht('Not Supported'));
+    throw new PhutilMethodNotImplementedException();
   }
 
   public function loadHandles(

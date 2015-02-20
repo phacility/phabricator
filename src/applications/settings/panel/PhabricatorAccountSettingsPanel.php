@@ -64,20 +64,28 @@ final class PhabricatorAccountSettingsPanel extends PhabricatorSettingsPanel {
       PhutilPerson::SEX_FEMALE => $label_her,
     );
 
+    $locales = PhutilLocale::loadAllLocales();
+    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
+    $is_dev = PhabricatorEnv::getEnvConfig('phabricator.developer-mode');
+
     $translations = array();
-    $symbols = id(new PhutilSymbolLoader())
-      ->setType('class')
-      ->setAncestorClass('PhabricatorTranslation')
-      ->setConcreteOnly(true)
-      ->selectAndLoadSymbols();
-    foreach ($symbols as $symbol) {
-      $class = $symbol['name'];
-      $translations[$class] = newv($class, array())->getName();
+    foreach ($locales as $locale) {
+      if ($is_serious && $locale->isSillyLocale()) {
+        // Omit silly locales on serious business installs.
+        continue;
+      }
+      if (!$is_dev && $locale->isTestLocale()) {
+        // Omit test locales on installs which aren't in development mode.
+        continue;
+      }
+      $translations[$locale->getLocaleCode()] = $locale->getLocaleName();
     }
+
     asort($translations);
-    $default = PhabricatorEnv::newObjectFromConfig('translation.provider');
+    // TODO: Implement "locale.default" and use it here.
+    $default = 'en_US';
     $translations = array(
-      '' => pht('Server Default (%s)', $default->getName()),
+      '' => pht('Server Default: %s', $locales[$default]->getLocaleName()),
     ) + $translations;
 
     $form = new AphrontFormView();

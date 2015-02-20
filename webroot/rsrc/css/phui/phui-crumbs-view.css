@@ -1,0 +1,114 @@
+/**
+ * @provides phui-crumbs-view-css
+ */
+
+.phui-crumbs-view {
+  overflow: hidden;
+  vertical-align: top;
+  padding: 0 8px 0 16px;
+  /* TODO: Position this over the slider for Differential's file tree view.
+     Remove this once that gets sorted out. */
+  position: relative;
+  -webkit-font-smoothing: antialiased;
+}
+
+.phui-crumbs-view,
+.phui-crumbs-view a.phui-crumb-view,
+.phui-crumbs-view a.phui-crumbs-action {
+  color: {$darkbluetext};
+  font-weight: bold;
+  text-decoration: none;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.9);
+}
+
+.device-phone .phui-crumbs-view {
+  padding-left: 8px;
+  padding-right: 0;
+}
+
+.phui-crumbs-view a.phui-crumbs-action-disabled {
+  color: {$lightgreytext};
+}
+
+.phui-crumbs-view + .phui-header-shell {
+  border-top: none;
+}
+
+.device-desktop .phui-crumbs-view a:hover {
+  text-decoration: underline;
+}
+
+.phui-crumb-view {
+  float: left;
+  padding: 8px 0;
+}
+
+.device-phone .phui-crumb-view.phabricator-last-crumb .phui-crumb-name,
+.device-phone .phui-crumb-view.phui-crumb-has-icon,
+.device-phone .phui-crumb-has-icon + .phui-crumb-divider {
+  display: inline-block;
+}
+
+.device-phone .phui-crumb-name,
+.device-phone .phui-crumb-divider {
+  display: none;
+}
+
+.phui-crumb-has-icon .phui-icon-view {
+  margin: 0 4px;
+}
+
+.device-phone .phui-crumb-icon {
+  margin-left: 7px;
+}
+
+.phui-crumbs-actions {
+  float: right;
+  white-space: nowrap;
+}
+
+.phui-crumbs-action {
+  display: inline-block;
+  height: 17px;
+  padding: 8px 12px;
+  position: relative;
+}
+
+.device-phone a.phui-crumbs-action {
+  padding: 8px 6px;
+}
+
+.device-desktop .phui-crumbs-view a:hover,
+.device-desktop .phui-crumbs-view a:hover .phui-icon-view {
+  color: {$sky};
+  text-decoration: none;
+}
+
+.device-phone .phui-crumbs-action-name {
+  display: none;
+}
+
+a.phui-crumbs-action .phui-icon-view {
+  margin-right: 5px;
+  color: {$darkbluetext};
+}
+
+.device-phone a.phui-crumbs-action .phui-icon-view {
+  margin-left: 5px;
+}
+
+.phui-crumb-divider {
+  margin: 2px 8px;
+}
+
+.phui-crumbs-view.phui-crumbs-border {
+  border-bottom: 1px solid rgba(205, 207, 211, 1);
+}
+
+body .phui-crumbs-view + .phui-object-box {
+  margin-top: 0;
+}
+
+body .phui-crumbs-view + .phui-object-item-list-view {
+  padding-top: 0;
+}

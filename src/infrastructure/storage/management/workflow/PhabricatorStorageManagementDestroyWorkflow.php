@@ -3,7 +3,7 @@
 final class PhabricatorStorageManagementDestroyWorkflow
   extends PhabricatorStorageManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('destroy')
       ->setExamples('**destroy** [__options__]')

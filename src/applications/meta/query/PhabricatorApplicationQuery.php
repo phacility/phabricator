@@ -10,6 +10,7 @@ final class PhabricatorApplicationQuery
   private $unlisted;
   private $classes;
   private $launchable;
+  private $applicationEmailSupport;
   private $phids;
 
   const ORDER_APPLICATION = 'order:application';
@@ -47,6 +48,11 @@ final class PhabricatorApplicationQuery
     return $this;
   }
 
+  public function withApplicationEmailSupport($appemails) {
+    $this->applicationEmailSupport = $appemails;
+    return $this;
+  }
+
   public function withClasses(array $classes) {
     $this->classes = $classes;
     return $this;
@@ -62,7 +68,7 @@ final class PhabricatorApplicationQuery
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $apps = PhabricatorApplication::getAllApplications();
 
     if ($this->classes) {
@@ -131,6 +137,14 @@ final class PhabricatorApplicationQuery
       }
     }
 
+    if ($this->applicationEmailSupport !== null) {
+      foreach ($apps as $key => $app) {
+        if ($app->supportsEmailIntegration() !=
+            $this->applicationEmailSupport) {
+          unset($apps[$key]);
+        }
+      }
+    }
 
     switch ($this->order) {
       case self::ORDER_NAME:

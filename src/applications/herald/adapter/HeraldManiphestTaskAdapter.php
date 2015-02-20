@@ -91,6 +91,7 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
         self::FIELD_TASK_PRIORITY,
         self::FIELD_TASK_STATUS,
         self::FIELD_IS_NEW_OBJECT,
+        self::FIELD_APPLICATION_EMAIL,
       ),
       parent::getFields());
   }

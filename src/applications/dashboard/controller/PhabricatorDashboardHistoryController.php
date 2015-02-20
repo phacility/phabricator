@@ -27,6 +27,7 @@ final class PhabricatorDashboardHistoryController
     $title = $dashboard->getName();
 
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setBorder(true);
     $crumbs->addTextCrumb(
       pht('Dashboard %d', $dashboard->getID()),
       $dashboard_view_uri);

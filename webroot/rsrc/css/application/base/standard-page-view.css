@@ -112,3 +112,196 @@ a.handle-disabled {
   display: inline-block;
   margin: 2px 2px -2px 0;
 }
+
+.main-page-frame {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  overflow: hidden;
+}
+
+.phabricator-standard-page {
+  /* If we don't activate JX.Scrollbar because the default scrollbars are
+     satisfactory, make sure the page still has sensible behavior. These
+     settings will be overwritten by .jx-scrollbar-frame if JX.Scrollbar
+     activates. */
+  position: relative;
+  height: 100%;
+  overflow-y: scroll;
+
+  -webkit-overflow-scrolling: touch;
+}
+
+.jx-scrollbar-frame {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
+
+.jx-scrollbar-viewport {
+  position: absolute;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+/* Fixes so pages actually print when magic scrollbar is present */
+!print .main-page-frame {
+  position: static;
+  overflow: visible;
+}
+
+!print .jx-scrollbar-viewport {
+  position: static;
+  width: auto !important;
+  height: auto !important;
+}
+
+.jx-scrollbar-test {
+  position: absolute;
+  left: -300px;
+}
+
+.jx-scrollbar-bar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 7px;
+  width: 11px;
+}
+
+.jx-scrollbar-bar .jx-scrollbar-handle {
+  position: absolute;
+  right: 2px;
+  -webkit-border-radius: 7px;
+  -moz-border-radius: 7px;
+  border-radius: 7px;
+  min-height: 10px;
+  width: 7px;
+  opacity: 0;
+  -webkit-transition: opacity 0.2s linear;
+  -moz-transition: opacity 0.2s linear;
+  -o-transition: opacity 0.2s linear;
+  -ms-transition: opacity 0.2s linear;
+  transition: opacity 0.2s linear;
+  background: #6c6e71;
+  -webkit-background-clip: padding-box;
+  -moz-background-clip: padding;
+}
+
+.jx-scrollbar-bar:hover .jx-scrollbar-handle {
+  opacity: 0.7;
+  -webkit-transition: opacity 0 linear;
+  -moz-transition: opacity 0 linear;
+  -o-transition: opacity 0 linear;
+  -ms-transition: opacity 0 linear;
+  transition: opacity 0 linear;
+}
+
+.jx-scrollbar-bar .jx-scrollbar-visible {
+  opacity: 0.7;
+}
+
+.jx-scrollbar-link {
+  position: absolute;
+  left: -50px;
+}
+
+.with-durable-column {
+  margin-right: 300px;
+}
+
+.phui-durable-column {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 300px;
+  background: #ffffff;
+  display: none;
+}
+
+.phui-durable-column-header {
+  height: 44px;
+  border-left: 1px solid #000000;
+}
+
+.phui-durable-column-header-text {
+  padding: 12px 16px;
+  font-size: 15px;
+  color: {$lightgreytext};
+}
+
+.phui-durable-column-icon-bar {
+  height: 34px;
+  padding: 5px 16px;
+  border-bottom: 1px solid {$lightblueborder};
+}
+
+.phui-durable-column-body {
+  position: absolute;
+  top: 44px;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  border-left: 1px solid {$lightgreyborder};
+}
+
+.phui-durable-column-main {
+  position: absolute;
+  top: 44px;
+  bottom: 144px;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+}
+
+.phui-durable-column-content {
+  padding: 8px 16px;
+}
+
+.phui-durable-column-textarea {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 44px;
+  height: 100px;
+  margin: 0;
+  border-width: 1px 0;
+  border-style: solid;
+  border-top-color: {$lightblueborder};
+  border-bottom-color: {$lightblueborder};
+  padding: 8px 16px;
+  resize: none;
+}
+
+.phui-durable-column-textarea:focus {
+  outline: 0;
+  border-top-color: {$sky};
+  border-bottom-color: {$sky};
+  box-shadow: none;
+}
+
+.phui-durable-column-footer {
+  position: absolute;
+  height: 28px;
+  padding: 8px 16px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.phui-durable-column-footer button {
+  float: right;
+}
+
+.phui-durable-column-status {
+  vertical-align: middle;
+  line-height: 28px;
+  color: {$lightgreytext};
+}

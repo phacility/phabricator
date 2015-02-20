@@ -3,7 +3,7 @@
 final class PhabricatorDaemonManagementLogWorkflow
   extends PhabricatorDaemonManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('log')
       ->setExamples('**log** [__options__]')

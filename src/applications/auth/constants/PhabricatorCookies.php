@@ -57,6 +57,12 @@ final class PhabricatorCookies extends Phobject {
   const COOKIE_HISEC          = 'jump_to_hisec';
 
 
+  /**
+   * Stores an invite code.
+   */
+  const COOKIE_INVITE = 'invite';
+
+
 /* -(  Client ID Cookie  )--------------------------------------------------- */
 
 

@@ -3,7 +3,7 @@
 final class DrydockManagementCreateResourceWorkflow
   extends DrydockManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('create-resource')
       ->setSynopsis('Create a resource manually.')

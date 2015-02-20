@@ -25,7 +25,7 @@ final class ReleephBranch extends ReleephDAO
   private $project = self::ATTACHABLE;
   private $cutPointCommit = self::ATTACHABLE;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
@@ -67,7 +67,7 @@ final class ReleephBranch extends ReleephDAO
     return $this;
   }
 
-  public function willWriteData(array &$data) {
+  protected function willWriteData(array &$data) {
     // If symbolicName is omitted, set it to the basename.
     //
     // This means that we can enforce symbolicName as a UNIQUE column in the

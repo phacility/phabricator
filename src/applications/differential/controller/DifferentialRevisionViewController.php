@@ -137,9 +137,9 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $large = $request->getStr('large');
     if (count($changesets) > $limit && !$large) {
       $count = count($changesets);
-      $warning = new AphrontErrorView();
+      $warning = new PHUIErrorView();
       $warning->setTitle('Very Large Diff');
-      $warning->setSeverity(AphrontErrorView::SEVERITY_WARNING);
+      $warning->setSeverity(PHUIErrorView::SEVERITY_WARNING);
       $warning->appendChild(hsprintf(
         '%s <strong>%s</strong>',
         pht(
@@ -235,7 +235,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $whitespace = $request->getStr(
       'whitespace',
-      DifferentialChangesetParser::WHITESPACE_IGNORE_ALL);
+      DifferentialChangesetParser::WHITESPACE_IGNORE_MOST);
 
     $arc_project = $target->getArcanistProject();
     if ($arc_project) {
@@ -258,8 +258,8 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $warning_handle_map,
       $handles);
     if ($revision_warnings) {
-      $revision_warnings = id(new AphrontErrorView())
-        ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
+      $revision_warnings = id(new PHUIErrorView())
+        ->setSeverity(PHUIErrorView::SEVERITY_WARNING)
         ->setErrors($revision_warnings);
       $revision_detail_box->setErrorView($revision_warnings);
     }
@@ -386,8 +386,8 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $review_warnings = array_mergev($review_warnings);
 
       if ($review_warnings) {
-        $review_warnings_panel = id(new AphrontErrorView())
-          ->setSeverity(AphrontErrorView::SEVERITY_WARNING)
+        $review_warnings_panel = id(new PHUIErrorView())
+          ->setSeverity(PHUIErrorView::SEVERITY_WARNING)
           ->setErrors($review_warnings);
         $comment_form->setErrorView($review_warnings_panel);
       }
@@ -442,15 +442,9 @@ final class DifferentialRevisionViewController extends DifferentialController {
           ->setRequestURI($request->getRequestURI()));
     }
 
-
     $object_id = 'D'.$revision->getID();
 
-    $top_anchor = id(new PhabricatorAnchorView())
-      ->setAnchorName('top')
-      ->setNavigationMarker(true);
-
     $content = array(
-      $top_anchor,
       $revision_detail_box,
       $page_pane,
     );
@@ -467,7 +461,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
         false);
 
       $nav = id(new DifferentialChangesetFileTreeSideNavBuilder())
-        ->setAnchorName('top')
         ->setTitle('D'.$revision->getID())
         ->setBaseURI(new PhutilURI('/D'.$revision->getID()))
         ->setCollapsed((bool)$collapsed)
@@ -772,6 +765,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $user = $this->getRequest()->getUser();
 
     $view = id(new DifferentialRevisionListView())
+      ->setHeader(pht('Open Revisions Affecting These Files'))
       ->setRevisions($revisions)
       ->setUser($user);
 
@@ -779,9 +773,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $handles = $this->loadViewerHandles($phids);
     $view->setHandles($handles);
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Open Revisions Affecting These Files'))
-      ->appendChild($view);
+    return $view;
   }
 
 

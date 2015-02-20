@@ -31,7 +31,7 @@ final class PhortunePurchasePHIDType extends PhabricatorPHIDType {
       $id = $purchase->getID();
 
       $handle->setName($purchase->getFullDisplayName());
-      $handle->setURI("/phortune/purchase/{$id}/");
+      $handle->setURI($purchase->getURI());
     }
   }
 

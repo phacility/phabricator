@@ -42,6 +42,52 @@ final class PhabricatorProjectTransaction
     return array_merge($req_phids, parent::getRequiredHandlePHIDs());
   }
 
+  public function getColor() {
+
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    switch ($this->getTransactionType()) {
+      case PhabricatorProjectTransaction::TYPE_STATUS:
+        if ($old == 0) {
+          return 'red';
+        } else {
+          return 'green';
+        }
+      }
+    return parent::getColor();
+  }
+
+  public function getIcon() {
+
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    switch ($this->getTransactionType()) {
+      case PhabricatorProjectTransaction::TYPE_STATUS:
+        if ($old == 0) {
+          return 'fa-ban';
+        } else {
+          return 'fa-check';
+        }
+      case PhabricatorProjectTransaction::TYPE_LOCKED:
+        if ($new) {
+          return 'fa-lock';
+        } else {
+          return 'fa-unlock';
+        }
+      case PhabricatorProjectTransaction::TYPE_ICON:
+        return $new;
+      case PhabricatorProjectTransaction::TYPE_IMAGE:
+        return 'fa-photo';
+      case PhabricatorProjectTransaction::TYPE_MEMBERS:
+        return 'fa-user';
+      case PhabricatorProjectTransaction::TYPE_SLUGS:
+        return 'fa-tag';
+    }
+    return parent::getIcon();
+  }
+
   public function getTitle() {
     $old = $this->getOldValue();
     $new = $this->getNewValue();
@@ -63,11 +109,11 @@ final class PhabricatorProjectTransaction
       case PhabricatorProjectTransaction::TYPE_STATUS:
         if ($old == 0) {
           return pht(
-            '%s closed this project.',
+            '%s archived this project.',
             $author_handle);
         } else {
           return pht(
-            '%s reopened this project.',
+            '%s activated this project.',
             $author_handle);
         }
       case PhabricatorProjectTransaction::TYPE_IMAGE:

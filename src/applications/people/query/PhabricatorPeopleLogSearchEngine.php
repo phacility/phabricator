@@ -7,7 +7,7 @@ final class PhabricatorPeopleLogSearchEngine
     return pht('Account Activity');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorPeopleApplication';
   }
 

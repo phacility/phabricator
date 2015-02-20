@@ -3,7 +3,7 @@
 final class PhabricatorStorageManagementDatabasesWorkflow
   extends PhabricatorStorageManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('databases')
       ->setExamples('**databases** [__options__]')

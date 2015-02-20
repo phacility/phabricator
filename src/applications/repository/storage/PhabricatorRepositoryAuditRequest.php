@@ -11,7 +11,7 @@ final class PhabricatorRepositoryAuditRequest
 
   private $commit = self::ATTACHABLE;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_TIMESTAMPS => false,
       self::CONFIG_SERIALIZATION => array(

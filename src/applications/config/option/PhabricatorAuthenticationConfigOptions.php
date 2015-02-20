@@ -11,6 +11,14 @@ final class PhabricatorAuthenticationConfigOptions
     return pht('Options relating to authentication.');
   }
 
+  public function getFontIcon() {
+    return 'fa-key';
+  }
+
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('auth.require-email-verification', 'bool', false)

@@ -31,8 +31,7 @@ final class PhabricatorPeopleApproveController
 
       $title = pht(
         'Phabricator Account "%s" Approved',
-        $user->getUsername(),
-        $admin->getUsername());
+        $user->getUsername());
 
       $body = pht(
         "Your Phabricator account (%s) has been approved by %s. You can ".

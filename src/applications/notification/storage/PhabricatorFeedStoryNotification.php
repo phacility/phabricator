@@ -7,7 +7,7 @@ final class PhabricatorFeedStoryNotification extends PhabricatorFeedDAO {
   protected $chronologicalKey;
   protected $hasViewed;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_IDS          => self::IDS_MANUAL,
       self::CONFIG_TIMESTAMPS   => false,

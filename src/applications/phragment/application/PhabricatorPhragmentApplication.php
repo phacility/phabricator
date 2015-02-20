@@ -14,8 +14,8 @@ final class PhabricatorPhragmentApplication extends PhabricatorApplication {
     return pht('Versioned Artifact Storage');
   }
 
-  public function getIconName() {
-    return 'phragment';
+  public function getFontIcon() {
+    return 'fa-floppy-o';
   }
 
   public function getTitleGlyph() {

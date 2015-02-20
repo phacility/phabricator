@@ -3,7 +3,7 @@
 final class PhabricatorRepositoryManagementLookupUsersWorkflow
   extends PhabricatorRepositoryManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('lookup-users')
       ->setExamples('**lookup-users** __commit__ ...')
@@ -48,7 +48,9 @@ final class PhabricatorRepositoryManagementLookupUsersWorkflow
 
       if (empty($refs_raw['data'])) {
         throw new Exception(
-          pht('Unable to retrieve details for commit "%s"!'));
+          pht(
+            'Unable to retrieve details for commit "%s"!',
+            $commit->getPHID()));
       }
 
       $ref = DiffusionCommitRef::newFromConduitResult(head($refs_raw['data']));

@@ -41,6 +41,9 @@ final class PhabricatorCalendarViewController
     $month_view->setBrowseURI($request->getRequestURI());
     $month_view->setUser($user);
     $month_view->setHolidays($holidays);
+    if ($this->getNoticeView()) {
+      $month_view->setErrorView($this->getNoticeView());
+    }
 
     $phids = mpull($statuses, 'getUserPHID');
     $handles = $this->loadViewerHandles($phids);
@@ -65,7 +68,6 @@ final class PhabricatorCalendarViewController
     $nav->appendChild(
       array(
         $crumbs,
-        $this->getNoticeView(),
         $month_view,
       ));
 
@@ -81,23 +83,23 @@ final class PhabricatorCalendarViewController
     $view    = null;
 
     if ($request->getExists('created')) {
-      $view = id(new AphrontErrorView())
-        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-        ->setTitle(pht('Successfully created your status.'));
+      $view = id(new PHUIErrorView())
+        ->setSeverity(PHUIErrorView::SEVERITY_NOTICE)
+        ->appendChild(pht('Successfully created your status.'));
     } else if ($request->getExists('updated')) {
-      $view = id(new AphrontErrorView())
-        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-        ->setTitle(pht('Successfully updated your status.'));
+      $view = id(new PHUIErrorView())
+        ->setSeverity(PHUIErrorView::SEVERITY_NOTICE)
+        ->appendChild(pht('Successfully updated your status.'));
     } else if ($request->getExists('deleted')) {
-      $view = id(new AphrontErrorView())
-        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-        ->setTitle(pht('Successfully deleted your status.'));
+      $view = id(new PHUIErrorView())
+        ->setSeverity(PHUIErrorView::SEVERITY_NOTICE)
+        ->appendChild(pht('Successfully deleted your status.'));
     } else if (!$request->getUser()->isLoggedIn()) {
       $login_uri = id(new PhutilURI('/auth/start/'))
         ->setQueryParam('next', '/calendar/');
-      $view = id(new AphrontErrorView())
-        ->setSeverity(AphrontErrorView::SEVERITY_NOTICE)
-        ->setTitle(
+      $view = id(new PHUIErrorView())
+        ->setSeverity(PHUIErrorView::SEVERITY_NOTICE)
+        ->appendChild(
           pht(
             'You are not logged in. %s to see your calendar events.',
             phutil_tag(

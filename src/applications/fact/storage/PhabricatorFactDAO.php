@@ -6,7 +6,7 @@ abstract class PhabricatorFactDAO extends PhabricatorLiskDAO {
     return 'fact';
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_TIMESTAMPS => false,
     ) + parent::getConfiguration();

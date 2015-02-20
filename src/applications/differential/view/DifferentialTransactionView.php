@@ -143,15 +143,13 @@ final class DifferentialTransactionView
 
           $is_visible = ($changeset_diff_id == $visible_diff_id);
           if (!$is_visible) {
-            $item['where'] = pht('(On Diff #%d)', $changeset_diff_id);
-
             $revision_id = $this->getRevision()->getID();
             $comment_id = $comment->getID();
-
             $item['href'] =
               '/D'.$revision_id.
               '?id='.$changeset_diff_id.
               '#inline-'.$comment_id;
+            $item['where'] = pht('(On Diff #%d)', $changeset_diff_id);
           }
 
           $items[] = $item;

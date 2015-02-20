@@ -37,7 +37,7 @@ final class PhabricatorRepositoryRefCursorQuery
     return $table->loadAllFromArray($data);
   }
 
-  public function willFilterPage(array $refs) {
+  protected function willFilterPage(array $refs) {
     $repository_phids = mpull($refs, 'getRepositoryPHID');
 
     $repositories = id(new PhabricatorRepositoryQuery())

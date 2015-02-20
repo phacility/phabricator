@@ -11,9 +11,18 @@ final class PhabricatorPholioConfigOptions
     return pht('Configure Pholio.');
   }
 
+  public function getFontIcon() {
+    return 'fa-camera-retro';
+  }
+
+  public function getGroup() {
+    return 'apps';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('metamta.pholio.reply-handler-domain', 'string', null)
+        ->setLocked(true)
         ->setDescription(
           pht(
             'Like {{metamta.maniphest.reply-handler-domain}}, but affects '.

@@ -66,7 +66,7 @@ final class PhabricatorTokenGivenQuery
     return $this->formatWhereClause($where);
   }
 
-  public function willFilterPage(array $results) {
+  protected function willFilterPage(array $results) {
     $object_phids = array_filter(mpull($results, 'getObjectPHID'));
     if (!$object_phids) {
       return array();

@@ -14,8 +14,8 @@ final class PhabricatorOAuthServerApplication extends PhabricatorApplication {
     return pht('OAuth Login Provider');
   }
 
-  public function getIconName() {
-    return 'oauthserver';
+  public function getFontIcon() {
+    return 'fa-hotel';
   }
 
   public function getTitleGlyph() {
@@ -51,6 +51,7 @@ final class PhabricatorOAuthServerApplication extends PhabricatorApplication {
           'delete/(?P<phid>[^/]+)/' => 'PhabricatorOAuthClientDeleteController',
           'edit/(?P<phid>[^/]+)/' => 'PhabricatorOAuthClientEditController',
           'view/(?P<phid>[^/]+)/' => 'PhabricatorOAuthClientViewController',
+          'secret/(?P<phid>[^/]+)/' => 'PhabricatorOAuthClientSecretController',
         ),
       ),
     );

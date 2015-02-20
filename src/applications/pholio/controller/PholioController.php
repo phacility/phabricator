@@ -33,7 +33,7 @@ abstract class PholioController extends PhabricatorController {
     return $crumbs;
   }
 
-  protected function buildApplicationMenu() {
+  public function buildApplicationMenu() {
     return $this->buildSideNavView(true)->getMenu();
   }
 

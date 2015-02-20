@@ -1,6 +1,7 @@
 {
   "bitwise": true,
   "curly": true,
+  "freeze": true,
   "immed": true,
   "indent": 2,
   "latedef": true,
@@ -12,6 +13,7 @@
 
   "expr": true,
   "loopfunc": true,
+  "strict": true,
   "sub": true,
 
   "globals": {

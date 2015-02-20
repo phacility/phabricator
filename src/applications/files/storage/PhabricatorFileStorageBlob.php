@@ -7,7 +7,7 @@ final class PhabricatorFileStorageBlob extends PhabricatorFileDAO {
 
   protected $data;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_BINARY => array(
         'data' => true,

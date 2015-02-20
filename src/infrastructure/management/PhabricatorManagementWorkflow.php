@@ -13,4 +13,17 @@ abstract class PhabricatorManagementWorkflow extends PhutilArgumentWorkflow {
     return PhabricatorUser::getOmnipotentUser();
   }
 
+  protected function parseTimeArgument($time) {
+    if (!strlen($time)) {
+      return null;
+    }
+
+    $epoch = strtotime($time);
+    if ($epoch <= 0) {
+      throw new PhutilArgumentUsageException(
+        pht('Unable to parse time "%s".', $time));
+    }
+    return $epoch;
+  }
+
 }

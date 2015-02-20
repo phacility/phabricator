@@ -59,7 +59,6 @@ final class DivinerStaticPublisher extends DivinerPublisher {
 
   protected function createDocumentsByHash(array $hashes) {
     $indexes = array();
-
     $cache = $this->getPublishCache();
 
     foreach ($hashes as $hash) {
@@ -89,7 +88,6 @@ final class DivinerStaticPublisher extends DivinerPublisher {
     }
 
     $this->publishIndex();
-
     $cache->writePathMap();
     $cache->writeIndex();
   }
@@ -97,6 +95,7 @@ final class DivinerStaticPublisher extends DivinerPublisher {
   private function publishIndex() {
     $index = $this->getPublishCache()->getIndex();
     $refs = array();
+
     foreach ($index as $hash => $dictionary) {
       $refs[$hash] = DivinerAtomRef::newFromDictionary($dictionary);
     }
@@ -135,7 +134,7 @@ final class DivinerStaticPublisher extends DivinerPublisher {
 
     $candidates = $this->atomNameMap[$name];
     foreach ($candidates as $key => $dict) {
-      $candidates[$key] = DivinerAtomRef::newFromDict($dict);
+      $candidates[$key] = DivinerAtomRef::newFromDictionary($dict);
       if ($ref->getType()) {
         if ($candidates[$key]->getType() != $ref->getType()) {
           unset($candidates[$key]);

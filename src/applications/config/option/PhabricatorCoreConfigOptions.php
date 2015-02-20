@@ -11,6 +11,14 @@ final class PhabricatorCoreConfigOptions
     return pht('Configure core options, including URIs.');
   }
 
+  public function getFontIcon() {
+    return 'fa-bullseye';
+  }
+
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
     if (phutil_is_windows()) {
       $paths = array();
@@ -82,9 +90,10 @@ final class PhabricatorCoreConfigOptions
         ->addExample('America/Boise', pht('US Mountain (MDT)'))
         ->addExample('America/Los_Angeles', pht('US West (PDT)')),
       $this->newOption('phabricator.cookie-prefix', 'string', null)
+        ->setLocked(true)
         ->setSummary(
           pht('Set a string Phabricator should use to prefix '.
-              'cookie names'))
+              'cookie names.'))
         ->setDescription(
           pht(
             'Cookies set for x.com are also sent for y.x.com. Assuming '.
@@ -171,9 +180,6 @@ final class PhabricatorCoreConfigOptions
       $this->newOption('config.hide', 'set', array())
         ->setLocked(true)
         ->setDescription(pht('Additional configuration options to hide.')),
-      $this->newOption('config.mask', 'set', array())
-        ->setLocked(true)
-        ->setDescription(pht('Additional configuration options to mask.')),
       $this->newOption('config.ignore-issues', 'set', array())
         ->setLocked(true)
         ->setDescription(pht('Setup issues to ignore.')),

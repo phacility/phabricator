@@ -15,6 +15,7 @@ final class DivinerMainController extends DivinerController {
       ->execute();
 
     $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->setBorder(true);
     $crumbs->addTextCrumb(pht('Books'));
 
     $search_icon = id(new PHUIIconView())

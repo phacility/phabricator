@@ -33,7 +33,7 @@ final class DrydockResourceQuery extends DrydockQuery {
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $table = new DrydockResource();
     $conn_r = $table->establishConnection('r');
 

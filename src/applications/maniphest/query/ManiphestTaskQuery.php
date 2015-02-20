@@ -53,6 +53,11 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   private $needSubscriberPHIDs;
   private $needProjectPHIDs;
 
+  private $blockingTasks;
+  private $blockedTasks;
+
+  private $projectPolicyCheckFailed = false;
+
   const DEFAULT_PAGE_SIZE   = 1000;
 
   public function withAuthors(array $authors) {
@@ -161,6 +166,34 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $this;
   }
 
+  /**
+   * True returns tasks that are blocking other tasks only.
+   * False returns tasks that are not blocking other tasks only.
+   * Null returns tasks regardless of blocking status.
+   */
+  public function withBlockingTasks($mode) {
+    $this->blockingTasks = $mode;
+    return $this;
+  }
+
+  public function shouldJoinBlockingTasks() {
+    return $this->blockingTasks !== null;
+  }
+
+  /**
+   * True returns tasks that are blocked by other tasks only.
+   * False returns tasks that are not blocked by other tasks only.
+   * Null returns tasks regardless of blocked by status.
+   */
+  public function withBlockedTasks($mode) {
+    $this->blockedTasks = $mode;
+    return $this;
+  }
+
+  public function shouldJoinBlockedTasks() {
+    return $this->blockedTasks !== null;
+  }
+
   public function withDateCreatedBefore($date_created_before) {
     $this->dateCreatedBefore = $date_created_before;
     return $this;
@@ -191,12 +224,34 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return $this;
   }
 
-  public function loadPage() {
-    // TODO: (T603) It is possible for a user to find the PHID of a project
-    // they can't see, then query for tasks in that project and deduce the
-    // identity of unknown/invisible projects. Before we allow the user to
-    // execute a project-based PHID query, we should verify that they
-    // can see the project.
+  protected function willExecute() {
+    // Make sure the user can see any projects specified in this
+    // query FIRST.
+    if ($this->projectPHIDs) {
+      $projects = id(new PhabricatorProjectQuery())
+        ->setViewer($this->getViewer())
+        ->withPHIDs($this->projectPHIDs)
+        ->execute();
+      $projects = mpull($projects, null, 'getPHID');
+      foreach ($this->projectPHIDs as $index => $phid) {
+        $project = idx($projects, $phid);
+        if (!$project) {
+          unset($this->projectPHIDs[$index]);
+          continue;
+        }
+      }
+      if (!$this->projectPHIDs) {
+        $this->projectPolicyCheckFailed = true;
+      }
+      $this->projectPHIDs = array_values($this->projectPHIDs);
+    }
+  }
+
+  protected function loadPage() {
+
+    if ($this->projectPolicyCheckFailed) {
+      throw new PhabricatorEmptyQueryException();
+    }
 
     $task_dao = new ManiphestTask();
     $conn = $task_dao->establishConnection('r');
@@ -207,6 +262,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     $where[] = $this->buildStatusWhereClause($conn);
     $where[] = $this->buildStatusesWhereClause($conn);
     $where[] = $this->buildPrioritiesWhereClause($conn);
+    $where[] = $this->buildDependenciesWhereClause($conn);
     $where[] = $this->buildAuthorWhereClause($conn);
     $where[] = $this->buildOwnerWhereClause($conn);
     $where[] = $this->buildProjectWhereClause($conn);
@@ -520,6 +576,38 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       $fulltext_results);
   }
 
+  private function buildDependenciesWhereClause(
+    AphrontDatabaseConnection $conn) {
+
+    if (!$this->shouldJoinBlockedTasks() &&
+        !$this->shouldJoinBlockingTasks()) {
+      return null;
+    }
+
+    $parts = array();
+    if ($this->blockingTasks === true) {
+      $parts[] = qsprintf(
+        $conn,
+        'blocking.dst IS NOT NULL');
+    } else if ($this->blockingTasks === false) {
+      $parts[] = qsprintf(
+        $conn,
+        'blocking.dst IS NULL');
+    }
+
+    if ($this->blockedTasks === true) {
+      $parts[] = qsprintf(
+        $conn,
+        'blocked.dst IS NOT NULL');
+    } else if ($this->blockedTasks === false) {
+      $parts[] = qsprintf(
+        $conn,
+        'blocked.dst IS NULL');
+    }
+
+    return '('.implode(') OR (', $parts).')';
+  }
+
   private function buildProjectWhereClause(AphrontDatabaseConnection $conn) {
     if (!$this->projectPHIDs && !$this->includeNoProject) {
       return null;
@@ -699,6 +787,23 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
     }
 
+    if ($this->shouldJoinBlockingTasks()) {
+      $joins[] = qsprintf(
+        $conn_r,
+        'LEFT JOIN %T blocking ON blocking.src = task.phid '.
+        'AND blocking.type = %d',
+        $edge_table,
+        ManiphestTaskDependedOnByTaskEdgeType::EDGECONST);
+    }
+    if ($this->shouldJoinBlockedTasks()) {
+      $joins[] = qsprintf(
+        $conn_r,
+        'LEFT JOIN %T blocked ON blocked.src = task.phid '.
+        'AND blocked.type = %d',
+        $edge_table,
+        ManiphestTaskDependsOnTaskEdgeType::EDGECONST);
+    }
+
     if ($this->anyProjectPHIDs || $this->anyUserProjectPHIDs) {
       $joins[] = qsprintf(
         $conn_r,
@@ -766,6 +871,8 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   private function buildGroupClause(AphrontDatabaseConnection $conn_r) {
     $joined_multiple_rows = (count($this->projectPHIDs) > 1) ||
                             (count($this->anyProjectPHIDs) > 1) ||
+                            $this->shouldJoinBlockingTasks() ||
+                            $this->shouldJoinBlockedTasks() ||
                             ($this->getApplicationSearchMayJoinMultipleRows());
 
     $joined_project_name = ($this->groupBy == self::GROUP_PROJECT);

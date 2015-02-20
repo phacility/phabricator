@@ -12,7 +12,7 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
   protected $message;
   protected $messageIDHash = '';
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_SERIALIZATION => array(
         'headers'     => self::SERIALIZATION_JSON,

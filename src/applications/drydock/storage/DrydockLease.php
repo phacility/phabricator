@@ -37,7 +37,7 @@ final class DrydockLease extends DrydockDAO
     return pht('Lease %d', $this->getID());
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(

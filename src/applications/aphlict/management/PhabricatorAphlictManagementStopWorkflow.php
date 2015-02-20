@@ -3,7 +3,7 @@
 final class PhabricatorAphlictManagementStopWorkflow
   extends PhabricatorAphlictManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('stop')
       ->setSynopsis(pht('Stop the notifications server.'))

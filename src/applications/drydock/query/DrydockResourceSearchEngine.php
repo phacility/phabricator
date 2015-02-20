@@ -7,7 +7,7 @@ final class DrydockResourceSearchEngine
     return pht('Drydock Resources');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorDrydockApplication';
   }
 

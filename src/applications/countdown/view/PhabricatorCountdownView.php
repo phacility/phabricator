@@ -17,7 +17,7 @@ final class PhabricatorCountdownView extends AphrontTagView {
   }
 
 
-  public function getTagContent() {
+  protected function getTagContent() {
     $countdown = $this->countdown;
 
     require_celerity_resource('phabricator-countdown-css');

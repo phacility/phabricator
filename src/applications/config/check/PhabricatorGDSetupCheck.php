@@ -2,6 +2,10 @@
 
 final class PhabricatorGDSetupCheck extends PhabricatorSetupCheck {
 
+  public function getDefaultGroup() {
+    return self::GROUP_OTHER;
+  }
+
   protected function executeChecks() {
     if (!extension_loaded('gd')) {
       $message = pht(

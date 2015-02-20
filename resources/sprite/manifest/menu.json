@@ -1,26 +1,21 @@
 {
-  "version" : 1,
-  "sprites" : {
-    "arrow-right" : {
-      "name" : "arrow-right",
-      "rule" : ".phabricator-crumb-divider",
-      "hash" : "87affa58adbe8da437a1cea6ffc5d8a4"
+  "version": 1,
+  "sprites": {
+    "eye": {
+      "name": "eye",
+      "rule": ".phabricator-main-menu-eye",
+      "hash": "e05c1397d1732d2ada78116ec50d6932"
     },
-    "eye"         : {
-      "name" : "eye",
-      "rule" : ".phabricator-main-menu-eye",
-      "hash" : "35f24014f23142275574136a63dcb73f"
-    },
-    "logo"        : {
-      "name" : "logo",
-      "rule" : ".phabricator-main-menu-logo",
-      "hash" : "668b04729a4b9460b0c89cb6ef6db4d4"
+    "logo": {
+      "name": "logo",
+      "rule": ".phabricator-main-menu-logo",
+      "hash": "168faf0d69b31bd626fa7e1b7cad464b"
     }
   },
-  "scales"  : [
+  "scales": [
     1,
     2
   ],
-  "header"  : "\/**\n * @provides sprite-menu-css\n * @generated\n *\/\n\n.sprite-menu {\n  background-image: url(\/rsrc\/image\/sprite-menu.png);\n  background-repeat: no-repeat;\n}\n\n@media\nonly screen and (min-device-pixel-ratio: 1.5),\nonly screen and (-webkit-min-device-pixel-ratio: 1.5) {\n  .sprite-menu {\n    background-image: url(\/rsrc\/image\/sprite-menu-X2.png);\n    background-size: {X}px {Y}px;\n  }\n}\n",
-  "type"    : "standard"
+  "header": "\/**\n * @provides sprite-menu-css\n * @generated\n *\/\n\n.sprite-menu {\n  background-image: url(\/rsrc\/image\/sprite-menu.png);\n  background-repeat: no-repeat;\n}\n\n@media\nonly screen and (min-device-pixel-ratio: 1.5),\nonly screen and (-webkit-min-device-pixel-ratio: 1.5) {\n  .sprite-menu {\n    background-image: url(\/rsrc\/image\/sprite-menu-X2.png);\n    background-size: {X}px {Y}px;\n  }\n}\n",
+  "type": "standard"
 }

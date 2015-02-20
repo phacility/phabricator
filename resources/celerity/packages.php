@@ -94,12 +94,10 @@ return array(
     'phabricator-transaction-view-css',
     'aphront-tooltip-css',
     'phabricator-flag-css',
-    'aphront-error-view-css',
+    'phui-error-view-css',
 
     'sprite-gradient-css',
     'sprite-menu-css',
-    'sprite-apps-css',
-    'sprite-apps-large-css',
 
     'phabricator-main-menu-view',
     'phabricator-notification-css',
@@ -109,7 +107,7 @@ return array(
     'phabricator-filetree-view-css',
     'phabricator-nav-view-css',
     'phabricator-side-menu-view-css',
-    'phabricator-crumbs-view-css',
+    'phui-crumbs-view-css',
     'phui-object-item-list-view-css',
     'global-drag-and-drop-css',
     'phui-spacing-css',

@@ -43,7 +43,7 @@ describe('Javelin URI', function() {
   });
 
   function charRange(from, to) {
-    res = '';
+    var res = '';
     for (var i = from.charCodeAt(0); i <= to.charCodeAt(0); i++) {
       res += String.fromCharCode(i);
     }
@@ -284,9 +284,8 @@ describe('Javelin URI', function() {
   });
 
   it('no global state interference', function() {
-    var uri1 = JX.$U('/?key=value');
-    var uri2 = JX.$U();
-    expect(uri2.getQueryParams()).not.toEqual({'key' : 'value'});
+    var uri = JX.$U();
+    expect(uri.getQueryParams()).not.toEqual({'key' : 'value'});
   });
 
   it('should not loop indefinitely when parsing empty params', function() {

@@ -6,7 +6,7 @@ final class PhabricatorTransformedFile extends PhabricatorFileDAO {
   protected $transform;
   protected $transformedPHID;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'transform' => 'text128',

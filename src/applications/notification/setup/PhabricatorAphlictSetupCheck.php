@@ -37,8 +37,8 @@ final class PhabricatorAphlictSetupCheck extends PhabricatorSetupCheck {
         ->addRelatedPhabricatorConfig('notification.server-uri')
         ->addCommand(
           pht(
-            "(To start the server, run this command.)\n".
-            "phabricator/ $ ./bin/aphlict start"));
+            "(To start the server, run this command.)\n%s",
+            'phabricator/ $ ./bin/aphlict start'));
 
       return;
     }

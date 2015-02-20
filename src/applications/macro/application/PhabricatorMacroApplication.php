@@ -14,8 +14,8 @@ final class PhabricatorMacroApplication extends PhabricatorApplication {
     return pht('Image Macros and Memes');
   }
 
-  public function getIconName() {
-    return 'macro';
+  public function getFontIcon() {
+    return 'fa-file-image-o';
   }
 
   public function getTitleGlyph() {

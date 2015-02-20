@@ -10,7 +10,7 @@ final class HarbormasterBuildCommand extends HarbormasterDAO {
   protected $targetPHID;
   protected $command;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'command' => 'text128',

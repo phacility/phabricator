@@ -3,23 +3,18 @@
 final class PhabricatorApplicationDetailViewController
   extends PhabricatorApplicationsController {
 
-  private $application;
 
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->application = $data['application'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
+    $application = $request->getURIData('application');
 
     $selected = id(new PhabricatorApplicationQuery())
       ->setViewer($user)
-      ->withClasses(array($this->application))
+      ->withClasses(array($application))
       ->executeOne();
     if (!$selected) {
       return new Aphront404Response();
@@ -119,6 +114,26 @@ final class PhabricatorApplicationDetailViewController
         idx($descriptions, $capability));
     }
 
+    if ($application->supportsEmailIntegration()) {
+      $properties->addSectionHeader(pht('Application Emails'));
+      $properties->addTextContent($application->getAppEmailBlurb());
+      $email_addresses = id(new PhabricatorMetaMTAApplicationEmailQuery())
+        ->setViewer($viewer)
+        ->withApplicationPHIDs(array($application->getPHID()))
+        ->execute();
+      if (empty($email_addresses)) {
+        $properties->addProperty(
+          null,
+          pht('No email addresses configured.'));
+      } else {
+        foreach ($email_addresses as $email_address) {
+          $properties->addProperty(
+            null,
+            $email_address->getAddress());
+        }
+      }
+    }
+
     return $properties;
   }
 
@@ -152,6 +167,18 @@ final class PhabricatorApplicationDetailViewController
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit)
         ->setHref($edit_uri));
+
+    if ($selected->supportsEmailIntegration()) {
+      $edit_email_uri = $this->getApplicationURI(
+        'editemail/'.get_class($selected).'/');
+      $view->addAction(
+        id(new PhabricatorActionView())
+        ->setName(pht('Edit Application Emails'))
+        ->setIcon('fa-envelope')
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit)
+        ->setHref($edit_email_uri));
+    }
 
     if ($selected->canUninstall()) {
       if ($selected->isInstalled()) {

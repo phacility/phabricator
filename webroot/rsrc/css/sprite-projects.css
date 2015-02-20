@@ -138,27 +138,27 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: -255px -153px;
 }
 
-.projects-fa-group {
+.projects-fa-lock {
   background-position: -306px -153px;
 }
 
-.projects-fa-lock {
+.projects-fa-tags {
   background-position: -357px -153px;
 }
 
-.projects-fa-tags {
+.projects-fa-trash-o {
   background-position: 0px -204px;
 }
 
-.projects-fa-trash-o {
+.projects-fa-truck {
   background-position: -51px -204px;
 }
 
-.projects-fa-truck {
+.projects-fa-umbrella {
   background-position: -102px -204px;
 }
 
-.projects-fa-umbrella {
+.projects-fa-users {
   background-position: -153px -204px;
 }
 

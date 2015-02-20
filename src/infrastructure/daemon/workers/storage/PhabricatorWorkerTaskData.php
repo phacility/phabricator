@@ -4,7 +4,7 @@ final class PhabricatorWorkerTaskData extends PhabricatorWorkerDAO {
 
   protected $data;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_TIMESTAMPS => false,
       self::CONFIG_SERIALIZATION => array(

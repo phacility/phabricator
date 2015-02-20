@@ -11,6 +11,14 @@ final class PhabricatorLegalpadConfigOptions
     return pht('Configure Legalpad.');
   }
 
+  public function getFontIcon() {
+    return 'fa-gavel';
+  }
+
+  public function getGroup() {
+    return 'apps';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption(

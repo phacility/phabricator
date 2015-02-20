@@ -13,7 +13,7 @@ final class PhabricatorOAuthServerAuthController
 
     $server        = new PhabricatorOAuthServer();
     $client_phid   = $request->getStr('client_id');
-    $scope         = $request->getStr('scope', array());
+    $scope         = $request->getStr('scope');
     $redirect_uri  = $request->getStr('redirect_uri');
     $response_type = $request->getStr('response_type');
 
@@ -39,8 +39,23 @@ final class PhabricatorOAuthServerAuthController
     // one giant try / catch around all the exciting database stuff so we
     // can return a 'server_error' response if something goes wrong!
     try {
-      $client = id(new PhabricatorOAuthServerClient())
-        ->loadOneWhere('phid = %s', $client_phid);
+      try {
+        $client = id(new PhabricatorOAuthServerClientQuery())
+          ->setViewer($viewer)
+          ->withPHIDs(array($client_phid))
+          ->executeOne();
+      } catch (PhabricatorPolicyException $ex) {
+        // We require that users must be able to see an OAuth application
+        // in order to authorize it. This allows an application's visibility
+        // policy to be used to restrict authorized users.
+
+        // None of the OAuth error responses are a perfect fit for this, but
+        // 'invalid_client' seems closest.
+        return $this->buildErrorResponse(
+          'invalid_client',
+          pht('Not Authorized'),
+          pht('You are not authorized to authenticate.'));
+      }
 
       if (!$client) {
         return $this->buildErrorResponse(
@@ -104,6 +119,13 @@ final class PhabricatorOAuthServerAuthController
               phutil_tag('strong', array(), 'scope')));
         }
         $scope = PhabricatorOAuthServerScope::scopesListToDict($scope);
+      } else {
+        return $this->buildErrorResponse(
+          'invalid_request',
+          pht('Malformed Request'),
+          pht(
+            'Required parameter %s was not present in the request.',
+            phutil_tag('strong', array(), 'scope')));
       }
 
       // NOTE: We're always requiring a confirmation dialog to redirect.
@@ -115,7 +137,6 @@ final class PhabricatorOAuthServerAuthController
       list($is_authorized, $authorization) = $auth_info;
 
       if ($request->isFormPost()) {
-        // TODO: We should probably validate this more? It feels a little funky.
         $scope = PhabricatorOAuthServerScope::getScopesFromRequest($request);
 
         if ($authorization) {
@@ -161,6 +182,12 @@ final class PhabricatorOAuthServerAuthController
           'state' => $state,
         ));
 
+      if ($client->getIsTrusted()) {
+        return id(new AphrontRedirectResponse())
+          ->setIsExternal(true)
+          ->setURI((string)$full_uri);
+      }
+
       // TODO: It would be nice to give the user more options here, like
       // reviewing permissions, canceling the authorization, or aborting
       // the workflow.
@@ -179,25 +206,16 @@ final class PhabricatorOAuthServerAuthController
     }
 
     // Here, we're confirming authorization for the application.
-
-    if ($scope) {
-      if ($authorization) {
-        $desired_scopes = array_merge($scope,
-                                      $authorization->getScope());
-      } else {
-        $desired_scopes = $scope;
-      }
-      if (!PhabricatorOAuthServerScope::validateScopesDict($desired_scopes)) {
-        return $this->buildErrorResponse(
-          'invalid_scope',
-          pht('Invalid Scope'),
-          pht('The requested scope is invalid, unknown, or malformed.'));
-      }
+    if ($authorization) {
+      $desired_scopes = array_merge($scope, $authorization->getScope());
     } else {
-      $desired_scopes = array(
-        PhabricatorOAuthServerScope::SCOPE_WHOAMI         => 1,
-        PhabricatorOAuthServerScope::SCOPE_OFFLINE_ACCESS => 1,
-      );
+      $desired_scopes = $scope;
+    }
+    if (!PhabricatorOAuthServerScope::validateScopesDict($desired_scopes)) {
+      return $this->buildErrorResponse(
+        'invalid_scope',
+        pht('Invalid Scope'),
+        pht('The requested scope is invalid, unknown, or malformed.'));
     }
 
     $form = id(new AphrontFormView())
@@ -226,7 +244,8 @@ final class PhabricatorOAuthServerAuthController
       ->appendParagraph(
         pht(
           'Do you want to authorize the external application "%s" to '.
-          'access your Phabricator account data?',
+          'access your Phabricator account data, including your primary '.
+          'email address?',
           phutil_tag('strong', array(), $name)))
       ->appendChild($form->buildLayoutView())
       ->addSubmitButton(pht('Authorize Access'))

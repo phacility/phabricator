@@ -27,7 +27,7 @@ abstract class PhabricatorRepositoryCommitParserWorker
     return $this->commit = $commit;
   }
 
-  final public function doWork() {
+  final protected function doWork() {
     if (!$this->loadCommit()) {
       return;
     }

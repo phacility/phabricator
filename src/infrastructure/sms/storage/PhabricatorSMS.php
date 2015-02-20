@@ -43,7 +43,7 @@ final class PhabricatorSMS
       ->setProviderSMSID(Filesystem::readRandomCharacters(40));
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'providerShortName' => 'text16',

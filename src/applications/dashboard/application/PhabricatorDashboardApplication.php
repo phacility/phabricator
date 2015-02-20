@@ -14,8 +14,8 @@ final class PhabricatorDashboardApplication extends PhabricatorApplication {
     return pht('Create Custom Pages');
   }
 
-  public function getIconName() {
-    return 'fancyhome';
+  public function getFontIcon() {
+    return 'fa-dashboard';
   }
 
   public function getRoutes() {
@@ -53,10 +53,6 @@ final class PhabricatorDashboardApplication extends PhabricatorApplication {
     return array(
       new PhabricatorDashboardRemarkupRule(),
     );
-  }
-
-  public function canUninstall() {
-    return false;
   }
 
 }

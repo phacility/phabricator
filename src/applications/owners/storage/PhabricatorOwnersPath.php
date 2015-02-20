@@ -7,7 +7,7 @@ final class PhabricatorOwnersPath extends PhabricatorOwnersDAO {
   protected $path;
   protected $excluded;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_TIMESTAMPS => false,
       self::CONFIG_COLUMN_SCHEMA => array(

@@ -2,7 +2,7 @@
 
 final class DiffusionGitReceivePackSSHWorkflow extends DiffusionGitSSHWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this->setName('git-receive-pack');
     $this->setArguments(
       array(
@@ -14,14 +14,16 @@ final class DiffusionGitReceivePackSSHWorkflow extends DiffusionGitSSHWorkflow {
   }
 
   protected function executeRepositoryOperations() {
-    $args = $this->getArgs();
-    $path = head($args->getArg('dir'));
-    $repository = $this->loadRepository($path);
+    $repository = $this->getRepository();
 
     // This is a write, and must have write access.
     $this->requireWriteAccess();
 
-    $command = csprintf('git-receive-pack %s', $repository->getLocalPath());
+    if ($this->shouldProxy()) {
+      $command = $this->getProxyCommand();
+    } else {
+      $command = csprintf('git-receive-pack %s', $repository->getLocalPath());
+    }
     $command = PhabricatorDaemon::sudoCommandAsDaemonUser($command);
 
     $future = id(new ExecFuture('%C', $command))

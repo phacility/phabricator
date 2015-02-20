@@ -9,4 +9,14 @@ final class AlmanacKeys extends Phobject {
     return $keys.ltrim($key_name, '/');
   }
 
+  public static function getDeviceID() {
+    $device_id_path = self::getKeyPath('device.id');
+
+    if (Filesystem::pathExists($device_id_path)) {
+      return trim(Filesystem::readFile($device_id_path));
+    }
+
+    return null;
+  }
+
 }

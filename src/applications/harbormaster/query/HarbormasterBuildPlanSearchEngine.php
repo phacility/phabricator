@@ -7,7 +7,7 @@ final class HarbormasterBuildPlanSearchEngine
     return pht('Harbormaster Build Plans');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorHarbormasterApplication';
   }
 

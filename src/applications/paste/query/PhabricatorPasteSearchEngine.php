@@ -7,6 +7,10 @@ final class PhabricatorPasteSearchEngine
     return pht('Pastes');
   }
 
+  public function getApplicationClassName() {
+    return 'PhabricatorPasteApplication';
+  }
+
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
     $saved->setParameter(

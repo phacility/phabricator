@@ -10,17 +10,22 @@ final class HarbormasterScratchTable extends HarbormasterDAO {
 
   protected $data;
   protected $bigData;
+  protected $nonmutableData;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'data' => 'text64',
         'bigData' => 'text?',
+        'nonmutableData' => 'text64?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'data' => array(
           'columns' => array('data'),
         ),
+      ),
+      self::CONFIG_NO_MUTATE => array(
+        'nonmutableData',
       ),
     ) + parent::getConfiguration();
   }

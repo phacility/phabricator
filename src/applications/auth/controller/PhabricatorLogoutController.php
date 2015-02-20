@@ -21,7 +21,11 @@ final class PhabricatorLogoutController
     return true;
   }
 
-  public function processRequest() {
+  public function shouldAllowLegallyNonCompliantUsers() {
+    return true;
+  }
+
+  public function handleRequest(AphrontRequest $request) {
     $request = $this->getRequest();
     $user = $request->getUser();
 
@@ -49,7 +53,7 @@ final class PhabricatorLogoutController
       $request->clearCookie(PhabricatorCookies::COOKIE_SESSION);
 
       return id(new AphrontRedirectResponse())
-        ->setURI('/login/');
+        ->setURI('/auth/loggedout/');
     }
 
     if ($user->getPHID()) {

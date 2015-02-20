@@ -2,6 +2,10 @@
 
 final class PhabricatorPygmentSetupCheck extends PhabricatorSetupCheck {
 
+  public function getDefaultGroup() {
+    return self::GROUP_OTHER;
+  }
+
   protected function executeChecks() {
     $pygment = PhabricatorEnv::getEnvConfig('pygments.enabled');
 

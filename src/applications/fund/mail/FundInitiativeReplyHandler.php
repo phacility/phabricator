@@ -17,10 +17,6 @@ final class FundInitiativeReplyHandler extends PhabricatorMailReplyHandler {
     return $this->getDefaultPublicReplyHandlerEmailAddress('I');
   }
 
-  public function getReplyHandlerDomain() {
-    return PhabricatorEnv::getEnvConfig('metamta.reply-handler-domain');
-  }
-
   public function getReplyHandlerInstructions() {
     if ($this->supportsReplies()) {
       // TODO: Implement.

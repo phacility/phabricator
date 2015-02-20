@@ -11,6 +11,14 @@ final class PhabricatorNotificationConfigOptions
     return pht('Configure real-time notifications.');
   }
 
+  public function getFontIcon() {
+    return 'fa-bell';
+  }
+
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('notification.enabled', 'bool', false)

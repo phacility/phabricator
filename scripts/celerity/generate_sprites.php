@@ -28,8 +28,6 @@ $generator = new CeleritySpriteGenerator();
 
 $sheets = array(
   'menu' => $generator->buildMenuSheet(),
-  'apps' => $generator->buildAppsSheet(),
-  'apps-large' => $generator->buildAppsLargeSheet(),
   'tokens' => $generator->buildTokenSheet(),
   'gradient' => $generator->buildGradientSheet(),
   'main-header' => $generator->buildMainHeaderSheet(),

@@ -7,7 +7,7 @@ abstract class PhabricatorFileController extends PhabricatorController {
     return AphrontSideNavFilterView::newFromMenu($menu);
   }
 
-  protected function buildApplicationMenu() {
+  public function buildApplicationMenu() {
     return $this->buildMenu($for_devices = true);
   }
 

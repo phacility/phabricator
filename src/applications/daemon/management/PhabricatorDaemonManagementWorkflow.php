@@ -340,6 +340,7 @@ abstract class PhabricatorDaemonManagementWorkflow
     $daemons = array(
       array('PhabricatorRepositoryPullLocalDaemon', array()),
       array('PhabricatorGarbageCollectorDaemon', array()),
+      array('PhabricatorTriggerDaemon', array()),
     );
 
     $taskmasters = PhabricatorEnv::getEnvConfig('phd.start-taskmasters');
@@ -360,15 +361,25 @@ abstract class PhabricatorDaemonManagementWorkflow
 
   protected final function executeStopCommand(
     array $pids,
-    $grace_period,
-    $force) {
+    array $options) {
 
     $console = PhutilConsole::getConsole();
+
+    $grace_period = idx($options, 'graceful', 15);
+    $force = idx($options, 'force');
+    $gently = idx($options, 'gently');
+
+    if ($gently && $force) {
+      throw new PhutilArgumentUsageException(
+        pht(
+          'You can not specify conflicting options --gently and --force '.
+          'together.'));
+    }
 
     $daemons = $this->loadRunningDaemons();
     if (!$daemons) {
       $survivors = array();
-      if (!$pids) {
+      if (!$pids && !$gently) {
         $survivors = $this->processRogueDaemons(
           $grace_period,
           $warn = true,
@@ -420,7 +431,9 @@ abstract class PhabricatorDaemonManagementWorkflow
       }
     }
 
-    $this->processRogueDaemons($grace_period, !$pids, $force);
+    if (!$gently) {
+      $this->processRogueDaemons($grace_period, !$pids, $force);
+    }
 
     return 0;
   }
@@ -495,7 +508,9 @@ abstract class PhabricatorDaemonManagementWorkflow
       $pid = $daemon->getPID();
       $name = $daemon->getName();
 
-      if (!$pid && !$force) {
+      if (!$pid) {
+        // NOTE: We must have a PID to signal a daemon, since sending a signal
+        // to PID 0 kills this process.
         $console->writeOut("%s\n", pht("Daemon '%s' has no PID!", $name));
         unset($daemons[$key]);
         continue;

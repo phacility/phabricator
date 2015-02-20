@@ -16,7 +16,7 @@ final class PhabricatorBot extends PhabricatorDaemon {
   private $config;
   private $pollFrequency;
 
-  public function run() {
+  protected function run() {
     $argv = $this->getArgv();
     if (count($argv) !== 1) {
       throw new Exception('usage: PhabricatorBot <json_config_file>');

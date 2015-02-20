@@ -15,7 +15,7 @@ abstract class PhabricatorWorkerTask extends PhabricatorWorkerDAO {
   private $data;
   private $executionException;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'taskClass' => 'text64',

@@ -134,14 +134,6 @@ abstract class PhabricatorStorageManagementWorkflow
 
     $console->writeOut(
       "%s\n",
-      pht('Dropping caches, for faster migrations...'));
-
-    $root = dirname(phutil_get_library_root('phabricator'));
-    $bin = $root.'/bin/cache';
-    phutil_passthru('%s purge --purge-all', $bin);
-
-    $console->writeOut(
-      "%s\n",
       pht('Fixing schema issues...'));
 
     $conn = $api->getConn(null);
@@ -669,6 +661,21 @@ abstract class PhabricatorStorageManagementWorkflow
     }
 
     return 2;
+  }
+
+  protected final function getBareHostAndPort($host) {
+    // Split out port information, since the command-line client requires a
+    // separate flag for the port.
+    $uri = new PhutilURI('mysql://'.$host);
+    if ($uri->getPort()) {
+      $port = $uri->getPort();
+      $bare_hostname = $uri->getDomain();
+    } else {
+      $port = null;
+      $bare_hostname = $host;
+    }
+
+    return array($bare_hostname, $port);
   }
 
 }

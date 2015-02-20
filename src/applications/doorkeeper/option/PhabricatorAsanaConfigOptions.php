@@ -11,6 +11,14 @@ final class PhabricatorAsanaConfigOptions
     return pht('Asana integration options.');
   }
 
+  public function getFontIcon() {
+    return 'fa-exchange';
+  }
+
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
     return array(
       $this->newOption('asana.workspace-id', 'string', null)

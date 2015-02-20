@@ -8,15 +8,6 @@ $keys = id(new PhabricatorAuthSSHKeyQuery())
   ->setViewer(PhabricatorUser::getOmnipotentUser())
   ->execute();
 
-foreach ($keys as $key => $ssh_key) {
-  // For now, filter out any keys which don't belong to users. Eventually we
-  // may allow devices to use this channel.
-  if (!($ssh_key->getObject() instanceof PhabricatorUser)) {
-    unset($keys[$key]);
-    continue;
-  }
-}
-
 if (!$keys) {
   echo pht('No keys found.')."\n";
   exit(1);
@@ -24,9 +15,34 @@ if (!$keys) {
 
 $bin = $root.'/bin/ssh-exec';
 foreach ($keys as $ssh_key) {
-  $user = $ssh_key->getObject()->getUsername();
+  $key_argv = array();
+  $object = $ssh_key->getObject();
+  if ($object instanceof PhabricatorUser) {
+    $key_argv[] = '--phabricator-ssh-user';
+    $key_argv[] = $object->getUsername();
+  } else if ($object instanceof AlmanacDevice) {
+    if (!$ssh_key->getIsTrusted()) {
+      // If this key is not a trusted device key, don't allow SSH
+      // authentication.
+      continue;
+    }
+    $key_argv[] = '--phabricator-ssh-device';
+    $key_argv[] = $object->getName();
+  } else {
+    // We don't know what sort of key this is; don't permit SSH auth.
+    continue;
+  }
 
-  $cmd = csprintf('%s --phabricator-ssh-user %s', $bin, $user);
+  $key_argv[] = '--phabricator-ssh-key';
+  $key_argv[] = $ssh_key->getID();
+
+  $cmd = csprintf('%s %Ls', $bin, $key_argv);
+
+  $instance = PhabricatorEnv::getEnvConfig('cluster.instance');
+  if (strlen($instance)) {
+    $cmd = csprintf('PHABRICATOR_INSTANCE=%s %C', $instance, $cmd);
+  }
+
   // This is additional escaping for the SSH 'command="..."' string.
   $cmd = addcslashes($cmd, '"\\');
 

@@ -11,7 +11,7 @@ final class PhabricatorSMSSendWorker
     return phutil_units('1 minute in seconds');
   }
 
-  public function doWork() {
+  protected function doWork() {
     $viewer = PhabricatorUser::getOmnipotentUser();
 
     $task_data = $this->getTaskData();

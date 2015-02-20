@@ -18,7 +18,7 @@ final class PhabricatorPeopleLogsController
     return $this->delegateToController($controller);
   }
 
-  public function buildSideNavView() {
+  public function buildSideNavView($for_app = false) {
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 

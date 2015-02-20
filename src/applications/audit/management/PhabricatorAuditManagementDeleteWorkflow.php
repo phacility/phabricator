@@ -3,7 +3,7 @@
 final class PhabricatorAuditManagementDeleteWorkflow
   extends PhabricatorAuditManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('delete')
       ->setExamples('**delete** [--dry-run] ...')

@@ -9,11 +9,11 @@ final class PHUITextView extends AphrontTagView {
     return $this;
   }
 
-  public function getTagName() {
+  protected function getTagName() {
     return 'span';
   }
 
-  public function getTagAttributes() {
+  protected function getTagAttributes() {
     require_celerity_resource('phui-text-css');
     return array();
   }

@@ -7,7 +7,7 @@ final class HeraldRuleEdit extends HeraldDAO {
   protected $ruleName;
   protected $action;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_COLUMN_SCHEMA => array(
         'ruleName' => 'text255',

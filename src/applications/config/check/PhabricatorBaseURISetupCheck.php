@@ -2,6 +2,10 @@
 
 final class PhabricatorBaseURISetupCheck extends PhabricatorSetupCheck {
 
+  public function getDefaultGroup() {
+    return self::GROUP_IMPORTANT;
+  }
+
   protected function executeChecks() {
     $base_uri = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
 

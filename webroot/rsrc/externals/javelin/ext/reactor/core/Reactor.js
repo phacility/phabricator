@@ -38,7 +38,7 @@ JX.install('Reactor', {
      * For internal use by the Reactor system.
      */
     _postOrder : function(node, result, pending) {
-      if (typeof result === "undefined") {
+      if (typeof result === 'undefined') {
         result = [];
         pending = {};
       }

@@ -4,6 +4,7 @@
  * @task  info  Application Information
  * @task  ui    UI Integration
  * @task  uri   URI Routing
+ * @task  mail  Email integration
  * @task  fact  Fact Integration
  * @task  meta  Application Management
  */
@@ -152,8 +153,8 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
     return null;
   }
 
-  public function getIconName() {
-    return 'application';
+  public function getFontIcon() {
+    return 'fa-puzzle-piece';
   }
 
   public function getApplicationOrder() {
@@ -190,6 +191,22 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
 
   public function getRoutes() {
     return array();
+  }
+
+
+/* -(  Email Integration  )-------------------------------------------------- */
+
+
+  public function supportsEmailIntegration() {
+    return false;
+  }
+
+  protected function getInboundEmailSupportLink() {
+    return PhabricatorEnv::getDocLink('Configuring Inbound Email');
+  }
+
+  public function getAppEmailBlurb() {
+    throw new Exception('Not Implemented.');
   }
 
 
@@ -440,6 +457,11 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
   private function getCustomPolicySetting($capability) {
     if (!$this->isCapabilityEditable($capability)) {
       return null;
+    }
+
+    $policy_locked = PhabricatorEnv::getEnvConfig('policy.locked');
+    if (isset($policy_locked[$capability])) {
+      return $policy_locked[$capability];
     }
 
     $config = PhabricatorEnv::getEnvConfig('phabricator.application-settings');

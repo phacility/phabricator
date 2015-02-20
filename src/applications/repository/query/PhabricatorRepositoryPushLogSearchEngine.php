@@ -7,7 +7,7 @@ final class PhabricatorRepositoryPushLogSearchEngine
     return pht('Push Logs');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorDiffusionApplication';
   }
 

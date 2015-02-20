@@ -3,7 +3,7 @@
 final class PhabricatorRepositoryManagementParentsWorkflow
   extends PhabricatorRepositoryManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('parents')
       ->setExamples('**parents** [options] [__repository__] ...')

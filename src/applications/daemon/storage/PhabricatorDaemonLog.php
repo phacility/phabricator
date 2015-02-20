@@ -17,13 +17,15 @@ final class PhabricatorDaemonLog extends PhabricatorDaemonDAO
   protected $argv;
   protected $explicitArgv = array();
   protected $envHash;
+  protected $envInfo;
   protected $status;
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_SERIALIZATION => array(
         'argv' => self::SERIALIZATION_JSON,
         'explicitArgv' => self::SERIALIZATION_JSON,
+        'envInfo' => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'daemon' => 'text255',

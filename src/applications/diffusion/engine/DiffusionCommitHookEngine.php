@@ -173,6 +173,23 @@ final class DiffusionCommitHookEngine extends Phobject {
       throw $caught;
     }
 
+    // If this went through cleanly, detect pushes which are actually imports
+    // of an existing repository rather than an addition of new commits. If
+    // this push is importing a bunch of stuff, set the importing flag on
+    // the repository. It will be cleared once we fully process everything.
+
+    if ($this->isInitialImport($all_updates)) {
+      $repository = $this->getRepository();
+
+      $repository->openTransaction();
+        $repository->beginReadLocking();
+          $repository = $repository->reload();
+          $repository->setDetail('importing', true);
+          $repository->save();
+        $repository->endReadLocking();
+      $repository->saveTransaction();
+    }
+
     if ($this->emailPHIDs) {
       // If Herald rules triggered email to users, queue a worker to send the
       // mail. We do this out-of-process so that we block pushes as briefly
@@ -1188,6 +1205,60 @@ final class DiffusionCommitHookEngine extends Phobject {
     }
 
     return $map;
+  }
+
+  private function isInitialImport(array $all_updates) {
+    $repository = $this->getRepository();
+
+    $vcs = $repository->getVersionControlSystem();
+    switch ($vcs) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        // There is no meaningful way to import history into Subversion by
+        // pushing.
+        return false;
+      default:
+        break;
+    }
+
+    // Now, apply a heuristic to guess whether this is a normal commit or
+    // an initial import. We guess something is an initial import if:
+    //
+    //   - the repository is currently empty; and
+    //   - it pushes more than 7 commits at once.
+    //
+    // The number "7" is chosen arbitrarily as seeming reasonable. We could
+    // also look at author data (do the commits come from multiple different
+    // authors?) and commit date data (is the oldest commit more than 48 hours
+    // old), but we don't have immediate access to those and this simple
+    // heruistic might be good enough.
+
+    $commit_count = 0;
+    $type_commit = PhabricatorRepositoryPushLog::REFTYPE_COMMIT;
+    foreach ($all_updates as $update) {
+      if ($update->getRefType() != $type_commit) {
+        continue;
+      }
+      $commit_count++;
+    }
+
+    if ($commit_count <= 7) {
+      // If this pushes a very small number of commits, assume it's an
+      // initial commit or stack of a few initial commits.
+      return false;
+    }
+
+    $any_commits = id(new DiffusionCommitQuery())
+      ->setViewer($this->getViewer())
+      ->withRepository($repository)
+      ->setLimit(1)
+      ->execute();
+
+    if ($any_commits) {
+      // If the repository already has commits, this isn't an import.
+      return false;
+    }
+
+    return true;
   }
 
 }

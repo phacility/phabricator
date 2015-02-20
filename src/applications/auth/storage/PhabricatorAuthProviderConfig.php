@@ -16,6 +16,7 @@ final class PhabricatorAuthProviderConfig
   protected $shouldAllowLink          = 0;
   protected $shouldAllowUnlink        = 0;
   protected $shouldTrustEmails        = 0;
+  protected $shouldAutoLogin          = 0;
 
   protected $properties = array();
 
@@ -26,7 +27,7 @@ final class PhabricatorAuthProviderConfig
       PhabricatorAuthAuthProviderPHIDType::TYPECONST);
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
@@ -42,6 +43,7 @@ final class PhabricatorAuthProviderConfig
         'shouldAllowLink' => 'bool',
         'shouldAllowUnlink' => 'bool',
         'shouldTrustEmails' => 'bool',
+        'shouldAutoLogin' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_provider' => array(

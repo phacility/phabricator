@@ -26,7 +26,7 @@ final class DiffusionLowLevelCommitFieldsQuery
     return $this;
   }
 
-  public function executeQuery() {
+  protected function executeQuery() {
     $ref = $this->ref;
     $message = $ref->getMessage();
     $hashes = $ref->getHashes();

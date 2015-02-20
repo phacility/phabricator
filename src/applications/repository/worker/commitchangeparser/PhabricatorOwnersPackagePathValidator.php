@@ -8,16 +8,25 @@ final class PhabricatorOwnersPackagePathValidator {
    * paths.
    */
   public static function updateOwnersPackagePaths(
-    PhabricatorRepositoryCommit $commit) {
-    $changes = self::loadDiffusionChangesForCommit($commit);
+    PhabricatorRepositoryCommit $commit,
+    PhabricatorUser $actor) {
+
+    $repository = id(new PhabricatorRepositoryQuery())
+      ->setViewer($actor)
+      ->withIDs(array($commit->getRepositoryID()))
+      ->executeOne();
+    if (!$repository) {
+      return;
+    }
+    $changes = self::loadDiffusionChangesForCommit(
+      $repository,
+      $commit,
+      $actor);
 
     if (!$changes) {
       return;
     }
 
-    // TODO: (T603) This should be policy-aware.
-    $repository =
-      id(new PhabricatorRepository())->load($commit->getRepositoryID());
     $move_map = array();
     foreach ($changes as $change) {
       if ($change->getChangeType() == DifferentialChangeType::TYPE_MOVE_HERE) {
@@ -82,12 +91,12 @@ final class PhabricatorOwnersPackagePathValidator {
     }
   }
 
-  private static function loadDiffusionChangesForCommit($commit) {
-    $repository =
-      id(new PhabricatorRepository())->load($commit->getRepositoryID());
+  private static function loadDiffusionChangesForCommit(
+    PhabricatorRepository $repository,
+    PhabricatorRepositoryCommit $commit,
+    PhabricatorUser $actor) {
     $data = array(
-      'user' => PhabricatorUser::getOmnipotentUser(),
-      'initFromConduit' => false,
+      'user' => $actor,
       'repository' => $repository,
       'commit' => $commit->getCommitIdentifier(),
     );

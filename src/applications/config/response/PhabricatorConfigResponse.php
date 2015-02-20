@@ -34,8 +34,8 @@ final class PhabricatorConfigResponse extends AphrontStandaloneHTMLResponse {
 
   protected function buildPlainTextResponseString() {
     return pht(
-      'This install has a fatal setup error, access the internet web '.
-      'version to view details and resolve it.');
+      'This install has a fatal setup error, access the web interface '.
+      'to view details and resolve it.');
   }
 
 }

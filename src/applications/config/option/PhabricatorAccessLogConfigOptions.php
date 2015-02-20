@@ -11,6 +11,14 @@ final class PhabricatorAccessLogConfigOptions
     return pht('Configure the access logs, which log HTTP/SSH requests.');
   }
 
+  public function getFontIcon() {
+    return 'fa-list';
+  }
+
+  public function getGroup() {
+    return 'core';
+  }
+
   public function getOptions() {
     $common_map = array(
       'C' => pht('The controller or workflow which handled the request.'),
@@ -37,6 +45,7 @@ final class PhabricatorAccessLogConfigOptions
     $ssh_map = $common_map + array(
       's' => pht('The system user.'),
       'S' => pht('The system sudo user.'),
+      'k' => pht('ID of the SSH key used to authenticate the request.'),
     );
 
     $http_desc = pht(

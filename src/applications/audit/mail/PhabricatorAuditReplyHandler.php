@@ -18,7 +18,7 @@ final class PhabricatorAuditReplyHandler extends PhabricatorMailReplyHandler {
   }
 
   public function getReplyHandlerDomain() {
-    return PhabricatorEnv::getEnvConfig(
+    return $this->getCustomReplyHandlerDomainIfExists(
       'metamta.diffusion.reply-handler-domain');
   }
 

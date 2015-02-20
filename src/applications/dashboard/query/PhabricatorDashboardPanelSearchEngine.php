@@ -7,13 +7,14 @@ final class PhabricatorDashboardPanelSearchEngine
     return pht('Dashboard Panels');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorDashboardApplication';
   }
 
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
     $saved->setParameter('status', $request->getStr('status'));
+    $saved->setParameter('paneltype', $request->getStr('paneltype'));
     return $saved;
   }
 
@@ -32,6 +33,11 @@ final class PhabricatorDashboardPanelSearchEngine
         break;
     }
 
+    $paneltype = $saved->getParameter('paneltype');
+    if ($paneltype) {
+      $query->withPanelTypes(array($paneltype));
+    }
+
     return $query;
   }
 
@@ -40,6 +46,12 @@ final class PhabricatorDashboardPanelSearchEngine
     PhabricatorSavedQuery $saved_query) {
 
     $status = $saved_query->getParameter('status', '');
+    $paneltype = $saved_query->getParameter('paneltype', '');
+
+    $panel_types = PhabricatorDashboardPanelType::getAllPanelTypes();
+    $panel_types = mpull($panel_types, 'getPanelTypeName', 'getPanelTypeKey');
+    asort($panel_types);
+    $panel_types = (array('' => pht('(All Types)')) + $panel_types);
 
     $form
       ->appendChild(
@@ -52,7 +64,13 @@ final class PhabricatorDashboardPanelSearchEngine
               '' => pht('(All Panels)'),
               'active' => pht('Active Panels'),
               'archived' => pht('Archived Panels'),
-            )));
+            )))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setLabel(pht('Panel Type'))
+          ->setName('paneltype')
+          ->setValue($paneltype)
+          ->setOptions($panel_types));
   }
 
   protected function getURI($path) {

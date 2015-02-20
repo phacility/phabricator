@@ -41,11 +41,11 @@ final class PHUIImageMaskView extends AphrontTagView {
     return $this;
   }
 
-  public function getTagName() {
+  protected function getTagName() {
     return 'div';
   }
 
-  public function getTagAttributes() {
+  protected function getTagAttributes() {
     require_celerity_resource('phui-image-mask-css');
 
     $classes = array();
@@ -62,7 +62,7 @@ final class PHUIImageMaskView extends AphrontTagView {
 
   }
 
-  public function getTagContent() {
+  protected function getTagContent() {
 
     /* Center it in the middle of the selected area */
     $center_x = round($this->centerX + ($this->maskW / 2));

@@ -22,7 +22,7 @@ final class HeraldTranscriptQuery
     return $this;
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $transcript = new HeraldTranscript();
     $conn_r = $transcript->establishConnection('r');
 
@@ -67,7 +67,7 @@ final class HeraldTranscriptQuery
     return $transcripts;
   }
 
-  public function willFilterPage(array $transcripts) {
+  protected function willFilterPage(array $transcripts) {
     $phids = mpull($transcripts, 'getObjectPHID');
 
     $objects = id(new PhabricatorObjectQuery())

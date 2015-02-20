@@ -172,9 +172,9 @@ If you're up to date, supported, have collected information about the problem,
 and have the best reproduction instructions you can come up with, you're ready
 to file an issue.
 
-We'll look at any issue report we can find (we monitor IRC, email, GitHub,
-StackOverflow, Quora, Facebook and Twitter), but the upstream Maniphest is
-the authoritative bug tracker and the best place to file:
+We'll look at any issue report we can find (we monitor IRC, email,
+StackOverflow, Quora, Facebook and Twitter), but the upstream Maniphest is the
+authoritative bug tracker and the best place to file:
 
 https://secure.phabricator.com/maniphest/task/create/
 
@@ -186,7 +186,6 @@ filed against the upstream than if they're filed somewhere else.
 | Effectiveness | Filing Method |
 |---|---|
 | Best | Upstream Maniphest |
-| Okay | GitHub |
 | Ehhh | Quora, StackOverflow, Facebook, email, etc. |
 | What | Passive-aggressive tweet |
 

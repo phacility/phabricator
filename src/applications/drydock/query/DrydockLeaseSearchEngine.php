@@ -7,7 +7,7 @@ final class DrydockLeaseSearchEngine
     return pht('Drydock Leases');
   }
 
-  protected function getApplicationClassName() {
+  public function getApplicationClassName() {
     return 'PhabricatorDrydockApplication';
   }
 

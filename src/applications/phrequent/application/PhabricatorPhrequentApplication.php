@@ -18,8 +18,8 @@ final class PhabricatorPhrequentApplication extends PhabricatorApplication {
     return true;
   }
 
-  public function getIconName() {
-    return 'phrequent';
+  public function getFontIcon() {
+    return 'fa-clock-o';
   }
 
   public function getApplicationGroup() {

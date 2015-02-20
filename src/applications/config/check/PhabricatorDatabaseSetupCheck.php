@@ -2,6 +2,10 @@
 
 final class PhabricatorDatabaseSetupCheck extends PhabricatorSetupCheck {
 
+  public function getDefaultGroup() {
+    return self::GROUP_IMPORTANT;
+  }
+
   public function getExecutionOrder() {
     // This must run after basic PHP checks, but before most other checks.
     return 0.5;

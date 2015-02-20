@@ -160,7 +160,7 @@ final class PhabricatorEmbedFileRemarkupRule
     }
 
     return phutil_tag(
-      'div',
+      ($options['layout'] == 'inline' ? 'span' : 'div'),
       array(
         'class' => $layout_class,
       ),

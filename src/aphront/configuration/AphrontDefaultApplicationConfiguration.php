@@ -65,7 +65,7 @@ class AphrontDefaultApplicationConfiguration
     }
 
     // For non-workflow requests, return a Ajax response.
-    if ($request->isAjax() && !$request->isJavelinWorkflow()) {
+    if ($request->isAjax() && !$request->isWorkflow()) {
       // Log these; they don't get shown on the client and can be difficult
       // to debug.
       phlog($ex);
@@ -205,7 +205,7 @@ class AphrontDefaultApplicationConfiguration
     }
 
     if ($ex instanceof AphrontUsageException) {
-      $error = new AphrontErrorView();
+      $error = new PHUIErrorView();
       $error->setTitle($ex->getTitle());
       $error->appendChild($ex->getMessage());
 

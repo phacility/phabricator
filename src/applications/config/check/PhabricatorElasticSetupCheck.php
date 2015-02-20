@@ -2,6 +2,10 @@
 
 final class PhabricatorElasticSetupCheck extends PhabricatorSetupCheck {
 
+  public function getDefaultGroup() {
+    return self::GROUP_OTHER;
+  }
+
   protected function executeChecks() {
     if (PhabricatorDefaultSearchEngineSelector::shouldUseElasticSearch()) {
       $engine = PhabricatorSearchEngineSelector::newSelector()->newEngine();

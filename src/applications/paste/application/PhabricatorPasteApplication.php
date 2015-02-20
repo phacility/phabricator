@@ -10,8 +10,8 @@ final class PhabricatorPasteApplication extends PhabricatorApplication {
     return '/paste/';
   }
 
-  public function getIconName() {
-    return 'paste';
+  public function getFontIcon() {
+    return 'fa-paste';
   }
 
   public function getTitleGlyph() {
@@ -43,6 +43,20 @@ final class PhabricatorPasteApplication extends PhabricatorApplication {
         'comment/(?P<id>[1-9]\d*)/' => 'PhabricatorPasteCommentController',
       ),
     );
+  }
+
+  public function supportsEmailIntegration() {
+    return true;
+  }
+
+  public function getAppEmailBlurb() {
+    return pht(
+      'Send email to these addresses to create pastes. %s',
+      phutil_tag(
+        'a',
+        array(
+          'href' => $this->getInboundEmailSupportLink(),),
+        pht('Learn More')));
   }
 
   protected function getCustomCapabilities() {

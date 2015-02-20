@@ -14,8 +14,8 @@ final class PhabricatorPonderApplication extends PhabricatorApplication {
     return pht('Questions and Answers');
   }
 
-  public function getIconName() {
-    return 'ponder';
+  public function getFontIcon() {
+    return 'fa-university';
   }
 
   public function getFactObjectsForAnalysis() {

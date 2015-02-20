@@ -3,7 +3,7 @@
 final class HarbormasterManagementUpdateWorkflow
   extends HarbormasterManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('update')
       ->setExamples('**update** [__options__] __buildable__')

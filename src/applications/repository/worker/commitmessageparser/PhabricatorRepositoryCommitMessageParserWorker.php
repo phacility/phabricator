@@ -3,6 +3,41 @@
 abstract class PhabricatorRepositoryCommitMessageParserWorker
   extends PhabricatorRepositoryCommitParserWorker {
 
+  abstract protected function parseCommitWithRef(
+    PhabricatorRepository $repository,
+    PhabricatorRepositoryCommit $commit,
+    DiffusionCommitRef $ref);
+
+  final protected function parseCommit(
+    PhabricatorRepository $repository,
+    PhabricatorRepositoryCommit $commit) {
+
+    $viewer = PhabricatorUser::getOmnipotentUser();
+
+    $refs_raw = DiffusionQuery::callConduitWithDiffusionRequest(
+      $viewer,
+      DiffusionRequest::newFromDictionary(
+        array(
+          'repository' => $repository,
+          'user' => $viewer,
+        )),
+      'diffusion.querycommits',
+      array(
+        'phids' => array($commit->getPHID()),
+        'bypassCache' => true,
+        'needMessages' => true,
+      ));
+
+    if (empty($refs_raw['data'])) {
+      throw new Exception(
+        pht('Unable to retrieve details for commit "%s"!'));
+    }
+
+    $ref = DiffusionCommitRef::newFromConduitResult(head($refs_raw['data']));
+
+    $this->parseCommitWithRef($repository, $commit, $ref);
+  }
+
   final protected function updateCommitData(DiffusionCommitRef $ref) {
     $commit = $this->commit;
     $author = $ref->getAuthor();
@@ -375,7 +410,6 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
         }
         $drequest = DiffusionRequest::newFromDictionary(array(
           'user' => PhabricatorUser::getOmnipotentUser(),
-          'initFromConduit' => false,
           'repository' => $this->repository,
           'commit' => $this->commit->getCommitIdentifier(),
           'path' => $path,
@@ -402,8 +436,8 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
         //   -echo "test";
         //   -(empty line)
 
-        $hunk = id(new DifferentialHunkModern())->setChanges($context);
-        $vs_hunk = id(new DifferentialHunkModern())->setChanges($vs_context);
+        $hunk = id(new DifferentialModernHunk())->setChanges($context);
+        $vs_hunk = id(new DifferentialModernHunk())->setChanges($vs_context);
         if ($hunk->makeOldFile() != $vs_hunk->makeOldFile() ||
             $hunk->makeNewFile() != $vs_hunk->makeNewFile()) {
           return $vs_diff;

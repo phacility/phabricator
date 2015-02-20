@@ -60,7 +60,7 @@ final class DifferentialHovercardEventListener
       implode_selected_handle_links(', ', $handles, $reviewer_phids));
 
     if ($tasks) {
-      $hovercard->addField(pht('Task(s)', count($tasks)),
+      $hovercard->addField(pht('%s Task(s)', new PhutilNumber(count($tasks))),
         implode_selected_handle_links(', ', $handles, $tasks));
     }
 

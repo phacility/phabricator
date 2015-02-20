@@ -2,6 +2,10 @@
 
 final class PhabricatorPathSetupCheck extends PhabricatorSetupCheck {
 
+  public function getDefaultGroup() {
+    return self::GROUP_OTHER;
+  }
+
   protected function executeChecks() {
     // NOTE: We've already appended `environment.append-paths`, so we don't
     // need to explicitly check for it.

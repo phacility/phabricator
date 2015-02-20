@@ -25,7 +25,7 @@ JX.install('Resource', {
      */
     load: function(list, callback) {
       var resources = {},
-        uri, resource, path, type;
+        uri, resource, path;
 
       list = JX.$AX(list);
 

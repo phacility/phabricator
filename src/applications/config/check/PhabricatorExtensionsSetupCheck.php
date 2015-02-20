@@ -2,6 +2,10 @@
 
 final class PhabricatorExtensionsSetupCheck extends PhabricatorSetupCheck {
 
+  public function getDefaultGroup() {
+    return self::GROUP_PHP;
+  }
+
   public function getExecutionOrder() {
     return 0;
   }

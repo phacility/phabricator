@@ -1,8 +1,7 @@
 {
   "exclude": [
     "(^externals/)",
-    "(^webroot/rsrc/externals/)",
-    "(/__tests__/data/)"
+    "(^webroot/rsrc/externals/(?!javelin/))"
   ],
   "linters": {
     "chmod": {
@@ -25,14 +24,16 @@
       "type": "jshint",
       "include": "(\\.js$)",
       "exclude": [
-        "(^support/aphlict/server/.*\\.js$)"
+        "(^support/aphlict/server/.*\\.js$)",
+        "(^webroot/rsrc/externals/javelin/core/init_node\\.js$)"
       ],
       "jshint.jshintrc": "support/lint/browser.jshintrc"
     },
     "jshint-node": {
       "type": "jshint",
       "include": [
-        "(^support/aphlict/server/.*\\.js$)"
+        "(^support/aphlict/server/.*\\.js$)",
+        "(^webroot/rsrc/externals/javelin/core/init_node\\.js$)"
       ],
       "jshint.jshintrc": "support/lint/node.jshintrc"
     },
@@ -67,21 +68,7 @@
       "type": "spelling"
     },
     "text": {
-      "type": "text",
-      "exclude": [
-        "(^\\.arclint)",
-        "(^resources/sql/quickstart.sql)"
-      ]
-    },
-    "text-without-length": {
-      "type": "text",
-      "severity": {
-        "3": "disabled"
-      },
-      "include": [
-        "(^\\.arclint)",
-        "(^resources/sql/quickstart.sql)"
-      ]
+      "type": "text"
     },
     "xhpast": {
       "type": "xhpast",

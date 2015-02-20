@@ -65,7 +65,7 @@ final class PonderAnswerQuery
     return $this->formatWhereClause($where);
   }
 
-  public function loadPage() {
+  protected function loadPage() {
     $answer = new PonderAnswer();
     $conn_r = $answer->establishConnection('r');
 
@@ -80,7 +80,7 @@ final class PonderAnswerQuery
     return $answer->loadAllFromArray($data);
   }
 
-  public function willFilterPage(array $answers) {
+  protected function willFilterPage(array $answers) {
     $questions = id(new PonderQuestionQuery())
       ->setViewer($this->getViewer())
       ->withIDs(mpull($answers, 'getQuestionID'))

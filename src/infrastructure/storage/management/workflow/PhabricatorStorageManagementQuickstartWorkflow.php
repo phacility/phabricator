@@ -3,7 +3,7 @@
 final class PhabricatorStorageManagementQuickstartWorkflow
   extends PhabricatorStorageManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('quickstart')
       ->setExamples('**quickstart** [__options__]')
@@ -83,12 +83,13 @@ final class PhabricatorStorageManagementQuickstartWorkflow
       $dump);
 
     // NOTE: This is a hack. We can not use `binary` for these columns, because
-    // they are a part of a fulltext index.
+    // they are a part of a fulltext index. This regex is avoiding matching a
+    // possible NOT NULL at the end of the line.
     $old = $dump;
     $dump = preg_replace(
-      '/`corpus` longtext CHARACTER SET .* COLLATE .*,/mi',
+      '/`corpus` longtext CHARACTER SET .*? COLLATE [^\s,]+/mi',
       '`corpus` longtext CHARACTER SET {$CHARSET_FULLTEXT} '.
-        'COLLATE {$COLLATE_FULLTEXT},',
+        'COLLATE {$COLLATE_FULLTEXT}',
       $dump);
     if ($dump == $old) {
       // If we didn't make any changes, yell about it. We'll produce an invalid

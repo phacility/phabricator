@@ -186,6 +186,14 @@ final class PhortuneMerchantViewController
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('View Subscriptions'))
+        ->setIcon('fa-moon-o')
+        ->setHref($this->getApplicationURI("merchant/{$id}/subscription/"))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
+
     return $view;
   }
 

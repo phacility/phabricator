@@ -24,6 +24,7 @@ abstract class DiffusionRequest {
   protected $repositoryCommitData;
   protected $arcanistProjects;
 
+  private $isClusterRequest = false;
   private $initFromConduit = true;
   private $user;
   private $branchObject = false;
@@ -99,7 +100,17 @@ abstract class DiffusionRequest {
     $object = self::newFromCallsign($callsign, $request->getUser());
 
     $use_branches = $object->supportsBranches();
-    $parsed = self::parseRequestBlob(idx($data, 'dblob'), $use_branches);
+
+    if (isset($data['dblob'])) {
+      $parsed = self::parseRequestBlob(idx($data, 'dblob'), $use_branches);
+    } else {
+      $parsed = array(
+        'commit' => idx($data, 'commit'),
+        'path' => idx($data, 'path'),
+        'line' => idx($data, 'line'),
+        'branch' => idx($data, 'branch'),
+      );
+    }
 
     $object->setUser($request->getUser());
     $object->initializeFromDictionary($parsed);
@@ -202,10 +213,6 @@ abstract class DiffusionRequest {
     }
 
     $this->didInitialize();
-  }
-
-  final protected function shouldInitFromConduit() {
-    return $this->initFromConduit;
   }
 
   final public function setUser(PhabricatorUser $user) {
@@ -380,12 +387,11 @@ abstract class DiffusionRequest {
     if (empty($this->repositoryCommit)) {
       $repository = $this->getRepository();
 
-      // TODO: (T603) This should be a real query, but we need to sort out
-      // the viewer.
-      $commit = id(new PhabricatorRepositoryCommit())->loadOneWhere(
-        'repositoryID = %d AND commitIdentifier = %s',
-        $repository->getID(),
-        $this->getStableCommit());
+      $commit = id(new DiffusionCommitQuery())
+        ->setViewer($this->getUser())
+        ->withRepository($repository)
+        ->withIdentifiers(array($this->getStableCommit()))
+        ->executeOne();
       if ($commit) {
         $commit->attachRepository($repository);
       }
@@ -739,8 +745,24 @@ abstract class DiffusionRequest {
   }
 
   private function resolveRefs(array $refs) {
-    if ($this->shouldInitFromConduit()) {
-      return DiffusionQuery::callConduitWithDiffusionRequest(
+    // First, try to resolve refs from fast cache sources.
+    $cached_results = id(new DiffusionCachedResolveRefsQuery())
+      ->setRepository($this->getRepository())
+      ->withRefs($refs)
+      ->execute();
+
+    // Throw away all the refs we resolved. Hopefully, we'll throw away
+    // everything here.
+    foreach ($refs as $key => $ref) {
+      if (isset($cached_results[$ref])) {
+        unset($refs[$key]);
+      }
+    }
+
+    // If we couldn't pull everything out of the cache, execute the underlying
+    // VCS operation.
+    if ($refs) {
+      $vcs_results = DiffusionQuery::callConduitWithDiffusionRequest(
         $this->getUser(),
         $this,
         'diffusion.resolverefs',
@@ -748,12 +770,19 @@ abstract class DiffusionRequest {
           'refs' => $refs,
         ));
     } else {
-      return id(new DiffusionLowLevelResolveRefsQuery())
-        ->setRepository($this->getRepository())
-        ->withRefs($refs)
-        ->execute();
+      $vcs_results = array();
     }
+
+    return $vcs_results + $cached_results;
   }
 
+  public function setIsClusterRequest($is_cluster_request) {
+    $this->isClusterRequest = $is_cluster_request;
+    return $this;
+  }
+
+  public function getIsClusterRequest() {
+    return $this->isClusterRequest;
+  }
 
 }

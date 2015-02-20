@@ -134,6 +134,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
           s.sessionStart AS s_sessionStart,
           s.highSecurityUntil AS s_highSecurityUntil,
           s.isPartial AS s_isPartial,
+          s.signedLegalpadDocuments as s_signedLegalpadDocuments,
           u.*
         FROM %T u JOIN %T s ON u.phid = s.userPHID
         AND s.type = %s AND s.sessionKey = %s',
@@ -232,6 +233,7 @@ final class PhabricatorAuthSessionEngine extends Phobject {
         ->setSessionStart(time())
         ->setSessionExpires(time() + $session_ttl)
         ->setIsPartial($partial ? 1 : 0)
+        ->setSignedLegalpadDocuments(0)
         ->save();
 
       $log = PhabricatorUserLog::initializeNewLog(
@@ -549,6 +551,52 @@ final class PhabricatorAuthSessionEngine extends Phobject {
         $viewer->getPHID(),
         PhabricatorUserLog::ACTION_LOGIN_FULL);
       $log->save();
+    unset($unguarded);
+  }
+
+
+/* -(  Legalpad Documents )-------------------------------------------------- */
+
+
+  /**
+   * Upgrade a session to have all legalpad documents signed.
+   *
+   * @param PhabricatorUser User whose session should upgrade.
+   * @param array LegalpadDocument objects
+   * @return void
+   * @task partial
+   */
+  public function signLegalpadDocuments(PhabricatorUser $viewer, array $docs) {
+
+    if (!$viewer->hasSession()) {
+      throw new Exception(
+        pht('Signing session legalpad documents of user with no session!'));
+    }
+
+    $session = $viewer->getSession();
+
+    if ($session->getSignedLegalpadDocuments()) {
+      throw new Exception(pht(
+        'Session has already signed required legalpad documents!'));
+    }
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+      $session->setSignedLegalpadDocuments(1);
+
+      queryfx(
+        $session->establishConnection('w'),
+        'UPDATE %T SET signedLegalpadDocuments = %d WHERE id = %d',
+        $session->getTableName(),
+        1,
+        $session->getID());
+
+      if (!empty($docs)) {
+        $log = PhabricatorUserLog::initializeNewLog(
+          $viewer,
+          $viewer->getPHID(),
+          PhabricatorUserLog::ACTION_LOGIN_LEGALPAD);
+        $log->save();
+      }
     unset($unguarded);
   }
 

@@ -2,6 +2,10 @@
 
 final class PhabricatorAuthSetupCheck extends PhabricatorSetupCheck {
 
+  public function getDefaultGroup() {
+    return self::GROUP_IMPORTANT;
+  }
+
   protected function executeChecks() {
     // NOTE: We're not actually building these providers. Building providers
     // can require additional configuration to be present (e.g., to build

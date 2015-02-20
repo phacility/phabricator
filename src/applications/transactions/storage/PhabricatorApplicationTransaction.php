@@ -99,7 +99,7 @@ abstract class PhabricatorApplicationTransaction
     return PhabricatorPHID::generateNewPHID($type, $subtype);
   }
 
-  public function getConfiguration() {
+  protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
@@ -1140,8 +1140,10 @@ abstract class PhabricatorApplicationTransaction
   }
 
   public function describeAutomaticCapability($capability) {
-    // TODO: (T603) Exact policies are unclear here.
-    return null;
+    return pht(
+      'Transactions are visible to users that can see the object which was '.
+      'acted upon. Some transactions - in particular, comments - are '.
+      'editable by the transaction author.');
   }
 
 

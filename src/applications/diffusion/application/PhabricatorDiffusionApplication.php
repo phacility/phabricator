@@ -14,8 +14,8 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
     return '/diffusion/';
   }
 
-  public function getIconName() {
-    return 'diffusion';
+  public function getFontIcon() {
+    return 'fa-code';
   }
 
   public function isPinnedByDefault(PhabricatorUser $viewer) {

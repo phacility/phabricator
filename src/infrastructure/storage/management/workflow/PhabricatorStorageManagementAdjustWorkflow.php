@@ -3,7 +3,7 @@
 final class PhabricatorStorageManagementAdjustWorkflow
   extends PhabricatorStorageManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('adjust')
       ->setExamples('**adjust** [__options__]')

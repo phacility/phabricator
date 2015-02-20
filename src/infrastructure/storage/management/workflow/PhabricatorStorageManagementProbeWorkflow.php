@@ -3,7 +3,7 @@
 final class PhabricatorStorageManagementProbeWorkflow
   extends PhabricatorStorageManagementWorkflow {
 
-  public function didConstruct() {
+  protected function didConstruct() {
     $this
       ->setName('probe')
       ->setExamples('**probe**')
