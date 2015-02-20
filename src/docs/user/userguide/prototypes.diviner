@@ -26,9 +26,9 @@ Some applications leave the prototype phase quickly, but other applications may
 not. We build some prototypes just to make sure a specific technical barrier is
 surmountable, and may not finish the application for a very long time. In other
 cases, the prototype seems less interesting or useful once it starts working
-than we might have imagined it would be, or be far more challenging than we
-thought. We may lower the priority of a project or put it on hold indefinitely
-if we're less excited about it after we begin building it.
+than we might have imagined it would be, or turns out to be far more
+challenging than we thought. We may lower the priority of a project or put it
+on hold indefinitely if we're less excited about it after we begin building it.
 
 If you're interested in previewing upcoming applications, you can use the
 `phabricator.show-prototypes` configuration setting to enable prototypes.
