@@ -330,7 +330,8 @@
 .phabricator-remarkup h5.remarkup-header:first-child,
 .phabricator-remarkup h6.remarkup-header:first-child,
 .phabricator-remarkup blockquote:first-child,
-.phabricator-remarkup table.remarkup-table:first-child {
+.phabricator-remarkup table.remarkup-table:first-child,
+.phabricator-remarkup .remarkup-note:first-child {
   margin-top: 0;
 }
 
@@ -345,7 +346,8 @@
 .phabricator-remarkup h5.remarkup-header:last-child,
 .phabricator-remarkup h6.remarkup-header:last-child,
 .phabricator-remarkup blockquote:last-child,
-.phabricator-remarkup table.remarkup-table:last-child {
+.phabricator-remarkup table.remarkup-table:last-child,
+.phabricator-remarkup .remarkup-note:last-child {
   margin-bottom: 0;
 }
 
