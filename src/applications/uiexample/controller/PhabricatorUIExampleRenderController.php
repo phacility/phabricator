@@ -53,7 +53,6 @@ final class PhabricatorUIExampleRenderController extends PhabricatorController {
       array(
         $crumbs,
         $header,
-        phutil_tag('br'),
         $result,
       ));
 
