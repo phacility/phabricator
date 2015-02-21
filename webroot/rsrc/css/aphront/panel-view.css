@@ -118,16 +118,3 @@
   background: #ccffcc;
   border-color: #669966;
 }
-
-.aphront-mini-panel-view {
-  background: #fff;
-  padding: 10px;
-  margin: 16px 16px 0 16px;
-  border: 1px solid {$lightgreyborder};
-  border-bottom: 1px solid {$greyborder};
-}
-
-.aphront-mini-panel-view p {
-  font-size: 12px;
-  color: {$greytext};
-}
