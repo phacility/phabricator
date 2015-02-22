@@ -105,13 +105,18 @@ abstract class PhabricatorDaemonManagementWorkflow
     return head($match);
   }
 
-  protected final function launchDaemon(
-    $class,
-    array $argv,
+  protected final function launchDaemons(
+    array $daemons,
     $debug,
     $run_as_current_user = false) {
 
-    $daemon = $this->findDaemonClass($class);
+    // Convert any shorthand classnames like "taskmaster" into proper class
+    // names.
+    foreach ($daemons as $key => $daemon) {
+      $class = $this->findDaemonClass($daemon[0]);
+      $daemons[$key][0] = $class;
+    }
+
     $console = PhutilConsole::getConsole();
 
     if (!$run_as_current_user) {
@@ -136,34 +141,7 @@ abstract class PhabricatorDaemonManagementWorkflow
       }
     }
 
-    if ($debug) {
-      if ($argv) {
-        $console->writeOut(
-          pht(
-            "Launching daemon \"%s\" in debug mode (not daemonized) ".
-            "with arguments %s.\n",
-            $daemon,
-            csprintf('%LR', $argv)));
-      } else {
-        $console->writeOut(
-          pht(
-            "Launching daemon \"%s\" in debug mode (not daemonized).\n",
-            $daemon));
-      }
-    } else {
-      if ($argv) {
-        $console->writeOut(
-          pht(
-            "Launching daemon \"%s\" with arguments %s.\n",
-            $daemon,
-            csprintf('%LR', $argv)));
-      } else {
-        $console->writeOut(
-          pht(
-            "Launching daemon \"%s\".\n",
-            $daemon));
-      }
-    }
+    $this->printLaunchingDaemons($daemons, $debug);
 
     $flags = array();
     if ($debug || PhabricatorEnv::getEnvConfig('phd.trace')) {
@@ -172,6 +150,12 @@ abstract class PhabricatorDaemonManagementWorkflow
 
     if ($debug || PhabricatorEnv::getEnvConfig('phd.verbose')) {
       $flags[] = '--verbose';
+    }
+
+    $instance = PhabricatorEnv::getEnvConfig('cluster.instance');
+    if ($instance) {
+      $flags[] = '-l';
+      $flags[] = $instance;
     }
 
     $config = array();
@@ -193,12 +177,14 @@ abstract class PhabricatorDaemonManagementWorkflow
 
     $config['piddir'] = $pid_dir;
 
-    $config['daemons'] = array(
-      array(
-        'class' => $daemon,
+    $config['daemons'] = array();
+    foreach ($daemons as $daemon) {
+      list($class, $argv) = $daemon;
+      $config['daemons'][] = array(
+        'class' => $class,
         'argv' => $argv,
-      ),
-    );
+      );
+    }
 
     $command = csprintf('./phd-daemon %Ls', $flags);
 
@@ -304,14 +290,6 @@ abstract class PhabricatorDaemonManagementWorkflow
     }
   }
 
-  protected final function willLaunchDaemons() {
-    $console = PhutilConsole::getConsole();
-    $console->writeErr(pht('Preparing to launch daemons.')."\n");
-
-    $log_dir = $this->getLogDirectory().'/daemons.log';
-    $console->writeErr(pht("NOTE: Logs will appear in '%s'.", $log_dir)."\n\n");
-  }
-
 
 /* -(  Commands  )----------------------------------------------------------- */
 
@@ -359,12 +337,7 @@ abstract class PhabricatorDaemonManagementWorkflow
       $daemons[] = array('PhabricatorTaskmasterDaemon', array());
     }
 
-    $this->willLaunchDaemons();
-
-    foreach ($daemons as $spec) {
-      list($name, $argv) = $spec;
-      $this->launchDaemon($name, $argv, $is_debug = false);
-    }
+    $this->launchDaemons($daemons, $is_debug = false);
 
     $console->writeErr(pht('Done.')."\n");
     return 0;
@@ -577,6 +550,28 @@ abstract class PhabricatorDaemonManagementWorkflow
         WHERE leaseExpires > UNIX_TIMESTAMP()',
       $task_table->getTableName());
     return $conn_w->getAffectedRows();
+  }
+
+
+  private function printLaunchingDaemons(array $daemons, $debug) {
+    $console = PhutilConsole::getConsole();
+
+    if ($debug) {
+      $console->writeOut(pht('Launching daemons (in debug mode):'));
+    } else {
+      $console->writeOut(pht('Launching daemons:'));
+    }
+
+    $log_dir = $this->getLogDirectory().'/daemons.log';
+    $console->writeOut(
+      "\n%s\n\n",
+      pht('(Logs will appear in "%s".)', $log_dir));
+
+    foreach ($daemons as $daemon) {
+      list($class, $argv) = $daemon;
+      $console->writeOut("    %s %s\n", $class, implode(' ', $argv));
+    }
+    $console->writeOut("\n");
   }
 
 }

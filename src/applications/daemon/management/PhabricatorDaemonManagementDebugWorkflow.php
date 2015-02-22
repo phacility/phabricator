@@ -39,9 +39,10 @@ final class PhabricatorDaemonManagementDebugWorkflow
     }
 
     $daemon_class = array_shift($argv);
-    return $this->launchDaemon(
-      $daemon_class,
-      $argv,
+    return $this->launchDaemons(
+      array(
+        array($daemon_class, $argv),
+      ),
       $is_debug = true,
       $run_as_current_user);
   }
