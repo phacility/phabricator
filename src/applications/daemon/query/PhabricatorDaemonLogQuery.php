@@ -13,11 +13,11 @@ final class PhabricatorDaemonLogQuery
   private $allowStatusWrites;
 
   public static function getTimeUntilUnknown() {
-    return 3 * PhutilDaemonOverseer::HEARTBEAT_WAIT;
+    return 3 * PhutilDaemonHandle::getHeartbeatEventFrequency();
   }
 
   public static function getTimeUntilDead() {
-    return 30 * PhutilDaemonOverseer::HEARTBEAT_WAIT;
+    return 30 * PhutilDaemonHandle::getHeartbeatEventFrequency();
   }
 
   public function withIDs(array $ids) {

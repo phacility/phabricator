@@ -5,28 +5,28 @@ final class PhabricatorDaemonEventListener extends PhabricatorEventListener {
   private $daemons = array();
 
   public function register() {
-    $this->listen(PhutilDaemonOverseer::EVENT_DID_LAUNCH);
-    $this->listen(PhutilDaemonOverseer::EVENT_DID_LOG);
-    $this->listen(PhutilDaemonOverseer::EVENT_DID_HEARTBEAT);
-    $this->listen(PhutilDaemonOverseer::EVENT_WILL_GRACEFUL);
-    $this->listen(PhutilDaemonOverseer::EVENT_WILL_EXIT);
+    $this->listen(PhutilDaemonHandle::EVENT_DID_LAUNCH);
+    $this->listen(PhutilDaemonHandle::EVENT_DID_LOG);
+    $this->listen(PhutilDaemonHandle::EVENT_DID_HEARTBEAT);
+    $this->listen(PhutilDaemonHandle::EVENT_WILL_GRACEFUL);
+    $this->listen(PhutilDaemonHandle::EVENT_WILL_EXIT);
   }
 
   public function handleEvent(PhutilEvent $event) {
     switch ($event->getType()) {
-      case PhutilDaemonOverseer::EVENT_DID_LAUNCH:
+      case PhutilDaemonHandle::EVENT_DID_LAUNCH:
         $this->handleLaunchEvent($event);
         break;
-      case PhutilDaemonOverseer::EVENT_DID_HEARTBEAT:
+      case PhutilDaemonHandle::EVENT_DID_HEARTBEAT:
         $this->handleHeartbeatEvent($event);
         break;
-      case PhutilDaemonOverseer::EVENT_DID_LOG:
+      case PhutilDaemonHandle::EVENT_DID_LOG:
         $this->handleLogEvent($event);
         break;
-      case PhutilDaemonOverseer::EVENT_WILL_GRACEFUL:
+      case PhutilDaemonHandle::EVENT_WILL_GRACEFUL:
         $this->handleGracefulEvent($event);
         break;
-      case PhutilDaemonOverseer::EVENT_WILL_EXIT:
+      case PhutilDaemonHandle::EVENT_WILL_EXIT:
         $this->handleExitEvent($event);
         break;
     }
