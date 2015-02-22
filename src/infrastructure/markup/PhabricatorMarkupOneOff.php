@@ -17,6 +17,7 @@ final class PhabricatorMarkupOneOff implements PhabricatorMarkupInterface {
   private $content;
   private $preserveLinebreaks;
   private $engineRuleset;
+  private $disableCache;
 
   public function setEngineRuleset($engine_ruleset) {
     $this->engineRuleset = $engine_ruleset;
@@ -39,6 +40,15 @@ final class PhabricatorMarkupOneOff implements PhabricatorMarkupInterface {
 
   public function getContent() {
     return $this->content;
+  }
+
+  public function setDisableCache($disable_cache) {
+    $this->disableCache = $disable_cache;
+    return $this;
+  }
+
+  public function getDisableCache() {
+    return $this->disableCache;
   }
 
   public function getMarkupFieldKey($field) {
@@ -74,6 +84,10 @@ final class PhabricatorMarkupOneOff implements PhabricatorMarkupInterface {
   }
 
   public function shouldUseMarkupCache($field) {
+    if ($this->getDisableCache()) {
+      return false;
+    }
+
     return true;
   }
 

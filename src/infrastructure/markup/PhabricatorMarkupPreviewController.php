@@ -12,6 +12,7 @@ final class PhabricatorMarkupPreviewController
     $output = PhabricatorMarkupEngine::renderOneObject(
       id(new PhabricatorMarkupOneOff())
         ->setPreserveLinebreaks(true)
+        ->setDisableCache(true)
         ->setContent($text),
       'default',
       $viewer);
