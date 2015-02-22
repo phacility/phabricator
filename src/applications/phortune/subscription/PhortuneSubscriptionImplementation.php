@@ -22,6 +22,13 @@ abstract class PhortuneSubscriptionImplementation {
     $start_epoch,
     $end_epoch);
 
+  public function shouldInvoiceForBillingPeriod(
+    PhortuneSubscription $subscription,
+    $start_epoch,
+    $end_epoch) {
+    return true;
+  }
+
   public function getCartName(
     PhortuneSubscription $subscription,
     PhortuneCart $cart) {

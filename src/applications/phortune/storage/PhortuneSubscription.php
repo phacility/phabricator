@@ -207,6 +207,13 @@ final class PhortuneSubscription extends PhortuneDAO
       $end_epoch);
   }
 
+  public function shouldInvoiceForBillingPeriod($start_epoch, $end_epoch) {
+    return $this->getImplementation()->shouldInvoiceForBillingPeriod(
+      $this,
+      $start_epoch,
+      $end_epoch);
+  }
+
   public function getPurchaseName(
     PhortuneProduct $product,
     PhortunePurchase $purchase) {
