@@ -10,7 +10,7 @@ final class PhabricatorDaemonReference {
 
   private $daemonLog;
 
-  public static function newFromFile($path) {
+  public static function loadReferencesFromFile($path) {
     $pid_data = Filesystem::readFile($path);
 
     try {
@@ -19,89 +19,50 @@ final class PhabricatorDaemonReference {
       $dict = array();
     }
 
-    $ref = self::newFromDictionary($dict);
-    $ref->pidFile = $path;
-    return $ref;
-  }
+    $refs = array();
+    $daemons = idx($dict, 'daemons', array());
 
-  public static function newFromDictionary(array $dict) {
-    $ref = new PhabricatorDaemonReference();
+    foreach ($daemons as $daemon) {
+      $ref = new PhabricatorDaemonReference();
 
-    // TODO: This is a little rough during the transition from one-to-one
-    // overseers to one-to-many.
-    $config = idx($dict, 'config', array());
+      // NOTE: This is the overseer PID, not the actual daemon process PID.
+      // This is correct for checking status and sending signals (the only
+      // things we do with it), but might be confusing. $daemon['pid'] has
+      // the daemon PID, and we could expose that if we had some use for it.
 
-    $daemon_list = null;
-    if ($config) {
-      $daemon_list = idx($config, 'daemons');
+      $ref->pid = idx($dict, 'pid');
+      $ref->start = idx($dict, 'start');
+
+      $ref->name = idx($daemon, 'class');
+      $ref->argv = idx($daemon, 'argv', array());
+
+
+      // TODO: We previously identified daemon logs by using a <class, pid,
+      // epoch> tuple, but now all daemons under a single overseer will share
+      // that identifier. We can uniquely identify daemons by $daemon['id'],
+      // but that isn't currently written into the daemon logs. We should
+      // start writing it, then load the logs here. This would give us a
+      // slightly greater ability to keep the web UI in sync when daemons
+      // get killed forcefully and clean up `phd status` a bit.
+
+      $ref->pidFile = $path;
+      $refs[] = $ref;
     }
 
-    if ($daemon_list) {
-      $ref->name = pht('Overseer Daemon Group');
-      $ref->argv = array();
-    } else {
-      $ref->name  = idx($dict, 'name', 'Unknown');
-      $ref->argv  = idx($dict, 'argv', array());
-    }
-
-    $ref->pid   = idx($dict, 'pid');
-    $ref->start = idx($dict, 'start');
-
-    try {
-      $ref->daemonLog = id(new PhabricatorDaemonLog())->loadOneWhere(
-        'daemon = %s AND pid = %d AND dateCreated = %d',
-        $ref->name,
-        $ref->pid,
-        $ref->start);
-    } catch (AphrontQueryException $ex) {
-      // Ignore the exception. We want to be able to terminate the daemons,
-      // even if MySQL is down.
-    }
-
-    return $ref;
-  }
-
-  /**
-   * Appropriate for getting @{class:PhabricatorDaemonReference} objects from
-   * the data from @{class:PhabricatorDaemonManagementWorkflow}'s method
-   * @{method:findRunningDaemons}.
-   *
-   * NOTE: the objects are not fully featured and should be used with caution.
-   */
-  public static function newFromRogueDictionary(array $dict) {
-    $ref = new PhabricatorDaemonReference();
-    $ref->name = pht('Rogue %s', idx($dict, 'type'));
-    $ref->pid = idx($dict, 'pid');
-
-    return $ref;
+    return $refs;
   }
 
   public function updateStatus($new_status) {
-    try {
-      if (!$this->daemonLog) {
-        $this->daemonLog = id(new PhabricatorDaemonLog())->loadOneWhere(
-          'daemon = %s AND pid = %d AND dateCreated = %d',
-          $this->name,
-          $this->pid,
-          $this->start);
-      }
+    if (!$this->daemonLog) {
+      return;
+    }
 
-      if ($this->daemonLog) {
-        $this->daemonLog
-          ->setStatus($new_status)
-          ->save();
-      }
+    try {
+      $this->daemonLog
+        ->setStatus($new_status)
+        ->save();
     } catch (AphrontQueryException $ex) {
-      // Ignore anything that goes wrong here. We anticipate at least two
-      // specific failure modes:
-      //
-      //   - Upgrade scripts which run `git pull`, then `phd stop`, then
-      //     `bin/storage upgrade` will fail when trying to update the `status`
-      //     column, as it does not exist yet.
-      //   - Daemons running on machines which do not have access to MySQL
-      //     (like an IRC bot) will not be able to load or save the log.
-      //
-      //
+      // Ignore anything that goes wrong here.
     }
   }
 
