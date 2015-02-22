@@ -165,10 +165,6 @@ abstract class PhabricatorDaemonManagementWorkflow
       }
     }
 
-    foreach ($argv as $key => $arg) {
-      $argv[$key] = escapeshellarg($arg);
-    }
-
     $flags = array();
     if ($debug || PhabricatorEnv::getEnvConfig('phd.trace')) {
       $flags[] = '--trace';
@@ -178,13 +174,14 @@ abstract class PhabricatorDaemonManagementWorkflow
       $flags[] = '--verbose';
     }
 
+    $config = array();
+
     if (!$debug) {
-      $flags[] = '--daemonize';
+      $config['daemonize'] = true;
     }
 
     if (!$debug) {
-      $log_file = $this->getLogDirectory().'/daemons.log';
-      $flags[] = csprintf('--log=%s', $log_file);
+      $config['log'] = $this->getLogDirectory().'/daemons.log';
     }
 
     $pid_dir = $this->getPIDDirectory();
@@ -194,13 +191,16 @@ abstract class PhabricatorDaemonManagementWorkflow
     Filesystem::assertIsDirectory($pid_dir);
     Filesystem::assertWritable($pid_dir);
 
-    $flags[] = csprintf('--phd=%s', $pid_dir);
+    $config['piddir'] = $pid_dir;
 
-    $command = csprintf(
-      './phd-daemon %s %C %C',
-      $daemon,
-      implode(' ', $flags),
-      implode(' ', $argv));
+    $config['daemons'] = array(
+      array(
+        'class' => $daemon,
+        'argv' => $argv,
+      ),
+    );
+
+    $command = csprintf('./phd-daemon %Ls', $flags);
 
     $phabricator_root = dirname(phutil_get_library_root('phabricator'));
     $daemon_script_dir = $phabricator_root.'/scripts/daemon/';
@@ -214,12 +214,20 @@ abstract class PhabricatorDaemonManagementWorkflow
 
       echo "\n    phabricator/scripts/daemon/ \$ {$command}\n\n";
 
-      phutil_passthru('(cd %s && exec %C)', $daemon_script_dir, $command);
+      $tempfile = new TempFile('daemon.config');
+      Filesystem::writeFile($tempfile, json_encode($config));
+
+      phutil_passthru(
+        '(cd %s && exec %C < %s)',
+        $daemon_script_dir,
+        $command,
+        $tempfile);
     } else {
       try {
         $this->executeDaemonLaunchCommand(
           $command,
           $daemon_script_dir,
+          $config,
           $this->runDaemonsAsUser);
       } catch (Exception $e) {
         // Retry without sudo
@@ -227,7 +235,8 @@ abstract class PhabricatorDaemonManagementWorkflow
           "sudo command failed. Starting daemon as current user\n"));
         $this->executeDaemonLaunchCommand(
           $command,
-          $daemon_script_dir);
+          $daemon_script_dir,
+          $config);
       }
     }
   }
@@ -235,6 +244,7 @@ abstract class PhabricatorDaemonManagementWorkflow
   private function executeDaemonLaunchCommand(
     $command,
     $daemon_script_dir,
+    array $config,
     $run_as_user = null) {
 
     $is_sudo = false;
@@ -250,6 +260,7 @@ abstract class PhabricatorDaemonManagementWorkflow
     $future = new ExecFuture('exec %C', $command);
     // Play games to keep 'ps' looking reasonable.
     $future->setCWD($daemon_script_dir);
+    $future->write(json_encode($config));
     list($stdout, $stderr) = $future->resolvex();
 
     if ($is_sudo) {

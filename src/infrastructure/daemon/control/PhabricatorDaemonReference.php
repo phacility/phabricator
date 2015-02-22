@@ -27,8 +27,23 @@ final class PhabricatorDaemonReference {
   public static function newFromDictionary(array $dict) {
     $ref = new PhabricatorDaemonReference();
 
-    $ref->name  = idx($dict, 'name', 'Unknown');
-    $ref->argv  = idx($dict, 'argv', array());
+    // TODO: This is a little rough during the transition from one-to-one
+    // overseers to one-to-many.
+    $config = idx($dict, 'config', array());
+
+    $daemon_list = null;
+    if ($config) {
+      $daemon_list = idx($config, 'daemons');
+    }
+
+    if ($daemon_list) {
+      $ref->name = pht('Overseer Daemon Group');
+      $ref->argv = array();
+    } else {
+      $ref->name  = idx($dict, 'name', 'Unknown');
+      $ref->argv  = idx($dict, 'argv', array());
+    }
+
     $ref->pid   = idx($dict, 'pid');
     $ref->start = idx($dict, 'start');
 
