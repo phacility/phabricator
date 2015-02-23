@@ -286,25 +286,28 @@ abstract class PhabricatorDaemonManagementWorkflow
 /* -(  Commands  )----------------------------------------------------------- */
 
 
-  protected final function executeStartCommand($keep_leases = false) {
+  protected final function executeStartCommand($keep_leases, $force) {
     $console = PhutilConsole::getConsole();
 
-    $running = $this->loadRunningDaemons();
+    if (!$force) {
+      $running = $this->loadRunningDaemons();
 
-    // This may include daemons which were launched but which are no longer
-    // running; check that we actually have active daemons before failing.
-    foreach ($running as $daemon) {
-      if ($daemon->isRunning()) {
-        $message = pht(
-          "phd start: Unable to start daemons because daemons are already ".
-          "running.\n".
-          "You can view running daemons with 'phd status'.\n".
-          "You can stop running daemons with 'phd stop'.\n".
-          "You can use 'phd restart' to stop all daemons before starting new ".
-          "daemons.");
+      // This may include daemons which were launched but which are no longer
+      // running; check that we actually have active daemons before failing.
+      foreach ($running as $daemon) {
+        if ($daemon->isRunning()) {
+          $message = pht(
+            "phd start: Unable to start daemons because daemons are already ".
+            "running.\n\n".
+            "You can view running daemons with 'phd status'.\n".
+            "You can stop running daemons with 'phd stop'.\n".
+            "You can use 'phd restart' to stop all daemons before starting ".
+            "new daemons.\n".
+            "You can force daemons to start anyway with --force.");
 
-        $console->writeErr("%s\n", $message);
-        exit(1);
+          $console->writeErr("%s\n", $message);
+          exit(1);
+        }
       }
     }
 

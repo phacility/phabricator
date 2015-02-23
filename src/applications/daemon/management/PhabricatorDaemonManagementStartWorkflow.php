@@ -19,11 +19,18 @@ final class PhabricatorDaemonManagementStartWorkflow
               'By default, **phd start** will free all task leases held by '.
               'the daemons. With this flag, this step will be skipped.'),
           ),
+          array(
+            'name' => 'force',
+            'help' => pht(
+              'Start daemons even if daemons are already running.'),
+          ),
         ));
   }
 
   public function execute(PhutilArgumentParser $args) {
-    return $this->executeStartCommand($args->getArg('keep-leases'));
+    return $this->executeStartCommand(
+      $args->getArg('keep-leases'),
+      $args->getArg('force'));
   }
 
 }
