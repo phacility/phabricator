@@ -25,6 +25,7 @@ abstract class PhabricatorProjectController extends PhabricatorController {
 
     $viewer = $this->getViewer();
 
+    $id = null;
     if ($for_app) {
       if ($project) {
         $id = $project->getID();
