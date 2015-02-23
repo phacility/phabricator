@@ -6,11 +6,13 @@ final class PHUIErrorView extends AphrontView {
   const SEVERITY_WARNING = 'warning';
   const SEVERITY_NOTICE = 'notice';
   const SEVERITY_NODATA = 'nodata';
+  const SEVERITY_SUCCESS = 'success';
 
   private $title;
   private $errors;
   private $severity;
   private $id;
+  private $buttons = array();
 
   public function setTitle($title) {
     $this->title = $title;
@@ -29,6 +31,11 @@ final class PHUIErrorView extends AphrontView {
 
   public function setID($id) {
     $this->id = $id;
+    return $this;
+  }
+
+  public function addButton($button) {
+    $this->buttons[] = $button;
     return $this;
   }
 
@@ -72,6 +79,7 @@ final class PHUIErrorView extends AphrontView {
     $classes = array();
     $classes[] = 'phui-error-view';
     $classes[] = 'phui-error-severity-'.$this->severity;
+    $classes[] = 'grouped';
     $classes = implode(' ', $classes);
 
     $children = $this->renderChildren();
@@ -89,6 +97,16 @@ final class PHUIErrorView extends AphrontView {
         $children);
     }
 
+    $buttons = null;
+    if (!empty($this->buttons)) {
+      $buttons = phutil_tag(
+        'div',
+        array(
+          'class' => 'phui-error-view-actions',
+        ),
+        $this->buttons);
+    }
+
     return phutil_tag(
       'div',
       array(
@@ -96,6 +114,7 @@ final class PHUIErrorView extends AphrontView {
         'class' => $classes,
       ),
       array(
+        $buttons,
         $title,
         $body,
       ));
