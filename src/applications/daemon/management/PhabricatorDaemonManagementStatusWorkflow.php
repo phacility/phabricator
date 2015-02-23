@@ -37,22 +37,25 @@ final class PhabricatorDaemonManagementStatusWorkflow
     $table = id(new PhutilConsoleTable())
       ->addColumns(array(
         'id' => array(
-          'title' => 'ID',
+          'title' => pht('Log'),
+        ),
+        'daemonID' => array(
+          'title' => pht('Daemon'),
         ),
         'host' => array(
-          'title' => 'Host',
+          'title' => pht('Host'),
         ),
         'pid' => array(
-          'title' => 'PID',
+          'title' => pht('Overseer'),
         ),
         'started' => array(
-          'title' => 'Started',
+          'title' => pht('Started'),
         ),
         'daemon' => array(
-          'title' => 'Daemon',
+          'title' => pht('Class'),
         ),
         'argv' => array(
-          'title' => 'Arguments',
+          'title' => pht('Arguments'),
         ),
       ));
 
@@ -60,6 +63,7 @@ final class PhabricatorDaemonManagementStatusWorkflow
       if ($daemon instanceof PhabricatorDaemonLog) {
         $table->addRow(array(
           'id'      => $daemon->getID(),
+          'daemonID' => $daemon->getDaemonID(),
           'host'    => $daemon->getHost(),
           'pid'     => $daemon->getPID(),
           'started' => date('M j Y, g:i:s A', $daemon->getDateCreated()),
@@ -76,12 +80,15 @@ final class PhabricatorDaemonManagementStatusWorkflow
 
         $daemon_log = $daemon->getDaemonLog();
         $id = null;
+        $daemon_id = null;
         if ($daemon_log) {
           $id = $daemon_log->getID();
+          $daemon_id = $daemon_log->getDaemonID();
         }
 
         $table->addRow(array(
           'id'      => $id,
+          'daemonID' => $daemon_id,
           'host'    => 'localhost',
           'pid'     => $daemon->getPID(),
           'started' => $daemon->getEpochStarted()

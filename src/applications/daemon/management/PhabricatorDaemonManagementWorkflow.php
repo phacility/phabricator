@@ -63,11 +63,15 @@ abstract class PhabricatorDaemonManagementWorkflow
       }
     }
 
-    $remote_daemons = id(new PhabricatorDaemonLogQuery())
+    $daemon_query = id(new PhabricatorDaemonLogQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withoutIDs($local_ids)
-      ->withStatus(PhabricatorDaemonLogQuery::STATUS_ALIVE)
-      ->execute();
+      ->withStatus(PhabricatorDaemonLogQuery::STATUS_ALIVE);
+
+    if ($local_ids) {
+      $daemon_query->withoutIDs($local_ids);
+    }
+
+    $remote_daemons = $daemon_query->execute();
 
     return array_merge($local_daemons, $remote_daemons);
   }

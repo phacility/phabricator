@@ -37,6 +37,7 @@ final class PhabricatorDaemonEventListener extends PhabricatorEventListener {
     $current_user = posix_getpwuid(posix_geteuid());
 
     $daemon = id(new PhabricatorDaemonLog())
+      ->setDaemonID($id)
       ->setDaemon($event->getValue('daemonClass'))
       ->setHost(php_uname('n'))
       ->setPID(getmypid())
@@ -114,7 +115,7 @@ final class PhabricatorDaemonEventListener extends PhabricatorEventListener {
     if (isset($this->daemons[$id])) {
       return $this->daemons[$id];
     }
-    throw new Exception("No such daemon '{$id}'!");
+    throw new Exception(pht('No such daemon "%s"!', $id));
   }
 
 }

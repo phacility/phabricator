@@ -22,6 +22,24 @@ final class PhabricatorDaemonReference {
     $refs = array();
     $daemons = idx($dict, 'daemons', array());
 
+    $logs = array();
+
+    $daemon_ids = ipull($daemons, 'id');
+    if ($daemon_ids) {
+      try {
+        $logs = id(new PhabricatorDaemonLogQuery())
+          ->setViewer(PhabricatorUser::getOmnipotentUser())
+          ->withDaemonIDs($daemon_ids)
+          ->execute();
+      } catch (AphrontQueryException $ex) {
+        // Ignore any issues here; getting this information only allows us
+        // to provide a more complete picture of daemon status, and we want
+        // these commands to work if the database is inaccessible.
+      }
+
+      $logs = mpull($logs, null, 'getDaemonID');
+    }
+
     foreach ($daemons as $daemon) {
       $ref = new PhabricatorDaemonReference();
 
@@ -33,17 +51,14 @@ final class PhabricatorDaemonReference {
       $ref->pid = idx($dict, 'pid');
       $ref->start = idx($dict, 'start');
 
-      $ref->name = idx($daemon, 'class');
-      $ref->argv = idx($daemon, 'argv', array());
+      $config = idx($daemon, 'config', array());
+      $ref->name = idx($config, 'class');
+      $ref->argv = idx($config, 'argv', array());
 
-
-      // TODO: We previously identified daemon logs by using a <class, pid,
-      // epoch> tuple, but now all daemons under a single overseer will share
-      // that identifier. We can uniquely identify daemons by $daemon['id'],
-      // but that isn't currently written into the daemon logs. We should
-      // start writing it, then load the logs here. This would give us a
-      // slightly greater ability to keep the web UI in sync when daemons
-      // get killed forcefully and clean up `phd status` a bit.
+      $log = idx($logs, idx($daemon, 'id'));
+      if ($log) {
+        $ref->daemonLog = $log;
+      }
 
       $ref->pidFile = $path;
       $refs[] = $ref;
