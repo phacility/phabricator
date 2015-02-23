@@ -12,6 +12,8 @@ final class PhabricatorTaskmasterDaemon extends PhabricatorDaemon {
         ->execute();
 
       if ($tasks) {
+        $this->willBeginWork();
+
         foreach ($tasks as $task) {
           $id = $task->getID();
           $class = $task->getTaskClass();
@@ -55,6 +57,7 @@ final class PhabricatorTaskmasterDaemon extends PhabricatorDaemon {
 
         // The first time we sleep, we add a random offset to try to spread
         // the sleep times out somewhat evenly.
+        $this->willBeginIdle();
         $sleep = $taskmaster_count + $offset;
         $offset = 0;
       }

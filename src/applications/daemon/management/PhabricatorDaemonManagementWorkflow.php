@@ -113,8 +113,8 @@ abstract class PhabricatorDaemonManagementWorkflow
     // Convert any shorthand classnames like "taskmaster" into proper class
     // names.
     foreach ($daemons as $key => $daemon) {
-      $class = $this->findDaemonClass($daemon[0]);
-      $daemons[$key][0] = $class;
+      $class = $this->findDaemonClass($daemon['class']);
+      $daemons[$key]['class'] = $class;
     }
 
     $console = PhutilConsole::getConsole();
@@ -176,15 +176,7 @@ abstract class PhabricatorDaemonManagementWorkflow
     Filesystem::assertWritable($pid_dir);
 
     $config['piddir'] = $pid_dir;
-
-    $config['daemons'] = array();
-    foreach ($daemons as $daemon) {
-      list($class, $argv) = $daemon;
-      $config['daemons'][] = array(
-        'class' => $class,
-        'argv' => $argv,
-      );
-    }
+    $config['daemons'] = $daemons;
 
     $command = csprintf('./phd-daemon %Ls', $flags);
 
@@ -327,14 +319,22 @@ abstract class PhabricatorDaemonManagementWorkflow
     }
 
     $daemons = array(
-      array('PhabricatorRepositoryPullLocalDaemon', array()),
-      array('PhabricatorGarbageCollectorDaemon', array()),
-      array('PhabricatorTriggerDaemon', array()),
+      array(
+        'class' => 'PhabricatorRepositoryPullLocalDaemon',
+      ),
+      array(
+        'class' => 'PhabricatorGarbageCollectorDaemon',
+      ),
+      array(
+        'class' => 'PhabricatorTriggerDaemon',
+      ),
     );
 
     $taskmasters = PhabricatorEnv::getEnvConfig('phd.start-taskmasters');
     for ($ii = 0; $ii < $taskmasters; $ii++) {
-      $daemons[] = array('PhabricatorTaskmasterDaemon', array());
+      $daemons[] = array(
+        'class' => 'PhabricatorTaskmasterDaemon',
+      );
     }
 
     $this->launchDaemons($daemons, $is_debug = false);
@@ -568,8 +568,18 @@ abstract class PhabricatorDaemonManagementWorkflow
       pht('(Logs will appear in "%s".)', $log_dir));
 
     foreach ($daemons as $daemon) {
-      list($class, $argv) = $daemon;
-      $console->writeOut("    %s %s\n", $class, implode(' ', $argv));
+      $is_autoscale = isset($daemon['autoscale']['group']);
+      if ($is_autoscale) {
+        $autoscale = pht('(Autoscaling)');
+      } else {
+        $autoscale = pht('(Static)');
+      }
+
+      $console->writeOut(
+        "    %s %s\n",
+        $daemon['class'],
+        $autoscale,
+        implode(' ', idx($daemon, 'argv', array())));
     }
     $console->writeOut("\n");
   }

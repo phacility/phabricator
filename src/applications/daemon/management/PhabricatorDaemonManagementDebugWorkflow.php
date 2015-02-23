@@ -26,6 +26,10 @@ final class PhabricatorDaemonManagementDebugWorkflow
             'help' => 'Run the daemon as the current user '.
               'instead of the configured phd.user',
           ),
+          array(
+            'name' => 'autoscale',
+            'help' => pht('Put the daemon in an autoscale group.'),
+          ),
         ));
   }
 
@@ -38,10 +42,20 @@ final class PhabricatorDaemonManagementDebugWorkflow
         pht('You must specify which daemon to debug.'));
     }
 
-    $daemon_class = array_shift($argv);
+    $config = array();
+
+    $config['class'] = array_shift($argv);
+    $config['argv'] = $argv;
+
+    if ($args->getArg('autoscale')) {
+      $config['autoscale'] = array(
+        'group' => 'debug',
+      );
+    }
+
     return $this->launchDaemons(
       array(
-        array($daemon_class, $argv),
+        $config,
       ),
       $is_debug = true,
       $run_as_current_user);
