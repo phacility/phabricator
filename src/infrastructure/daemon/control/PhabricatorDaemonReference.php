@@ -40,6 +40,20 @@ final class PhabricatorDaemonReference {
       $logs = mpull($logs, null, 'getDaemonID');
     }
 
+    // Support PID files that use the old daemon format, where each overseer
+    // had exactly one daemon. We can eventually remove this; they will still
+    // be stopped by `phd stop --force` even if we don't identify them here.
+    if (!$daemons && idx($dict, 'name')) {
+      $daemons = array(
+        array(
+          'config' => array(
+            'class' => idx($dict, 'name'),
+            'argv' => idx($dict, 'argv', array()),
+          ),
+        ),
+      );
+    }
+
     foreach ($daemons as $daemon) {
       $ref = new PhabricatorDaemonReference();
 
