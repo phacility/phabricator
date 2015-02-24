@@ -338,9 +338,6 @@ abstract class PhabricatorDaemonManagementWorkflow
         'class' => 'PhabricatorRepositoryPullLocalDaemon',
       ),
       array(
-        'class' => 'PhabricatorGarbageCollectorDaemon',
-      ),
-      array(
         'class' => 'PhabricatorTriggerDaemon',
       ),
       array(

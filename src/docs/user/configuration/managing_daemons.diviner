@@ -70,7 +70,8 @@ You can get a list of launchable daemons with **phd list**:
   - **PhabricatorTaskmasterDaemon** performs work from a task queue;
   - **PhabricatorRepositoryPullLocalDaemon** daemons track repositories, for
     more information see @{article:Diffusion User Guide}; and
-  - **PhabricatorGarbageCollectorDaemon** cleans up old logs and caches.
+  - **PhabricatorTriggerDaemon** schedules event triggers and cleans up old
+    logs and caches.
 
 = Debugging and Tuning =
 
@@ -120,7 +121,7 @@ daemons launch, and split daemons across machines like this:
   - `PhabricatorRepositoryPullLocalDaemon`: Run one copy on any machine.
     On each web frontend which is not running a normal copy, run a copy
     with the `--no-discovery` flag.
-  - `PhabricatorGarbageCollectorDaemon`: Run one copy on any machine.
+  - `PhabricatorTriggerDaemon`: Run one copy on any machine.
   - `PhabricatorTaskmasterDaemon`: Run as many copies as you need to keep
     tasks from backing up. You can run them all on one machine or split them
     across machines.
