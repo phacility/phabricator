@@ -24,13 +24,17 @@ final class PhabricatorDaemonManagementStartWorkflow
             'help' => pht(
               'Start daemons even if daemons are already running.'),
           ),
+          $this->getAutoscaleReserveArgument(),
         ));
   }
 
   public function execute(PhutilArgumentParser $args) {
     return $this->executeStartCommand(
-      $args->getArg('keep-leases'),
-      $args->getArg('force'));
+      array(
+        'keep-leases' => $args->getArg('keep-leases'),
+        'force' => $args->getArg('force'),
+        'reserve' => (float)$args->getArg('autoscale-reserve', 0.0),
+      ));
   }
 
 }

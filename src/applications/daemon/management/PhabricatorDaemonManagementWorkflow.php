@@ -290,10 +290,18 @@ abstract class PhabricatorDaemonManagementWorkflow
 /* -(  Commands  )----------------------------------------------------------- */
 
 
-  protected final function executeStartCommand($keep_leases, $force) {
+  protected final function executeStartCommand(array $options) {
+    PhutilTypeSpec::checkMap(
+      $options,
+      array(
+        'keep-leases' => 'optional bool',
+        'force' => 'optional bool',
+        'reserve' => 'optional float',
+      ));
+
     $console = PhutilConsole::getConsole();
 
-    if (!$force) {
+    if (!idx($options, 'force')) {
       $running = $this->loadRunningDaemons();
 
       // This may include daemons which were launched but which are no longer
@@ -315,7 +323,7 @@ abstract class PhabricatorDaemonManagementWorkflow
       }
     }
 
-    if ($keep_leases) {
+    if (idx($options, 'keep-leases')) {
       $console->writeErr("%s\n", pht('Not touching active task queue leases.'));
     } else {
       $console->writeErr("%s\n", pht('Freeing active task leases...'));
@@ -335,14 +343,15 @@ abstract class PhabricatorDaemonManagementWorkflow
       array(
         'class' => 'PhabricatorTriggerDaemon',
       ),
-    );
-
-    $taskmasters = PhabricatorEnv::getEnvConfig('phd.start-taskmasters');
-    for ($ii = 0; $ii < $taskmasters; $ii++) {
-      $daemons[] = array(
+      array(
         'class' => 'PhabricatorTaskmasterDaemon',
-      );
-    }
+        'autoscale' => array(
+          'group' => 'task',
+          'pool' => PhabricatorEnv::getEnvConfig('phd.taskmasters'),
+          'reserve' => idx($options, 'reserve', 0),
+        ),
+      ),
+    );
 
     $this->launchDaemons($daemons, $is_debug = false);
 
@@ -577,7 +586,13 @@ abstract class PhabricatorDaemonManagementWorkflow
     foreach ($daemons as $daemon) {
       $is_autoscale = isset($daemon['autoscale']['group']);
       if ($is_autoscale) {
-        $autoscale = pht('(Autoscaling)');
+        $autoscale = $daemon['autoscale'];
+        foreach ($autoscale as $key => $value) {
+          $autoscale[$key] = $key.'='.$value;
+        }
+        $autoscale = implode(', ', $autoscale);
+
+        $autoscale = pht('(Autoscaling: %s)', $autoscale);
       } else {
         $autoscale = pht('(Static)');
       }
@@ -589,6 +604,18 @@ abstract class PhabricatorDaemonManagementWorkflow
         implode(' ', idx($daemon, 'argv', array())));
     }
     $console->writeOut("\n");
+  }
+
+  protected function getAutoscaleReserveArgument() {
+    return array(
+      'name' => 'autoscale-reserve',
+      'param' => 'ratio',
+      'help' => pht(
+        'Specify a proportion of machine memory which must be free '.
+        'before autoscale pools will grow. For example, a value of 0.25 '.
+        'means that pools will not grow unless the machine has at least '.
+        '25%% of its RAM free.'),
+    );
   }
 
 }

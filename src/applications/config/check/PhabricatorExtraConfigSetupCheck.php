@@ -208,6 +208,9 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
         'longer used or supported.'),
       'config.mask' => pht(
         'Use `config.hide` instead of this option.'),
+      'phd.start-taskmasters' => pht(
+        'Taskmasters now use an autoscaling pool. You can configure the '.
+        'pool size with `phd.taskmasters`.'),
     );
 
     return $ancient_config;
