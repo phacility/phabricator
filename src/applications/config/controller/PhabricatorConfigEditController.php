@@ -270,6 +270,7 @@ final class PhabricatorConfigEditController
           }
           break;
         case 'string':
+        case 'text':
         case 'enum':
           $set_value = (string)$value;
           break;
@@ -360,6 +361,7 @@ final class PhabricatorConfigEditController
       switch ($type) {
         case 'int':
         case 'string':
+        case 'text':
         case 'enum':
         case 'class':
           return $value;
@@ -392,6 +394,11 @@ final class PhabricatorConfigEditController
         case 'int':
         case 'string':
           $control = id(new AphrontFormTextControl());
+          break;
+        case 'text':
+          $control = id(new AphrontFormTextAreaControl())
+            ->setHeight(AphrontFormTextAreaControl::HEIGHT_VERY_TALL)
+            ->setCustomClass('PhabricatorMonospaced');
           break;
         case 'bool':
           $control = id(new AphrontFormSelectControl())
