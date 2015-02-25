@@ -128,6 +128,7 @@ final class PhortuneAccountViewController extends PhortuneController {
 
     $list = id(new PHUIObjectItemListView())
       ->setUser($viewer)
+      ->setFlush(true)
       ->setNoDataString(
         pht('No payment methods associated with this account.'));
 
