@@ -2,6 +2,10 @@
  * @provides phabricator-zindex-css
  */
 
+.phabricator-nav-column-background {
+  z-index: -1;
+}
+
 .keyboard-focus-focus-reticle {
   z-index: 1;
 }
@@ -31,10 +35,6 @@
 }
 
 .phui-timeline-icon-fill {
-  z-index: 3;
-}
-
-.phabricator-nav-column-background {
   z-index: 3;
 }
 
