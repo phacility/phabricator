@@ -50,6 +50,20 @@ EOJSON;
           pht(
             'Sets the color of the main header.'))
         ->setEnumOptions($options),
+      $this->newOption('ui.custom-css', 'text', null)
+        ->setSummary(
+          pht(
+            'Adds CSS rules to customize the Phabricator UI.'))
+        ->setDescription(
+          pht(
+            'Adds CSS rules to customize the Phabricator UI styling. '.
+            'You know, for when you have mad design skillz.'))
+        ->addExample(
+          'body { font-size: 200%; }',
+          pht('Really Big Text'))
+        ->addExample(
+          'textarea { font-family: monospace; }',
+          pht('Monospace Input')),
       $this->newOption('ui.footer-items', 'list<wild>', array())
         ->setSummary(
           pht(

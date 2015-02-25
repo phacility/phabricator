@@ -277,10 +277,12 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       '.platform-windows .PhabricatorMonospaced, '.
       '.platform-windows .phabricator-remarkup '.
         '.remarkup-code-block .remarkup-code { font: %s; }'.
+      '%s'.
       '</style>%s',
       parent::getHead(),
       phutil_safe_html($monospaced),
       phutil_safe_html($monospaced_win),
+      phutil_safe_html(PhabricatorEnv::getEnvConfigIfExists('ui.custom-css')),
       $response->renderSingleResource('javelin-magical-init', 'phabricator'));
   }
 
