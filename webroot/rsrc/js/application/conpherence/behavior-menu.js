@@ -57,14 +57,6 @@ JX.behavior('conpherence-menu', function(config) {
   /**
    * Selecting threads
    */
-  JX.Stratcom.listen(
-    'conpherence-selectthread',
-    null,
-    function (e) {
-      selectThreadByID(e.getData().id);
-    }
-  );
-
   function selectThreadByID(id, update_page_data) {
     var thread = JX.$(id);
     selectThread(thread, update_page_data);
@@ -134,6 +126,7 @@ JX.behavior('conpherence-menu', function(config) {
         .start();
     } else if (config.hasThread) {
       _scrollMessageWindow();
+      _focusTextarea();
     } else {
       didRedrawThread();
     }
@@ -269,21 +262,33 @@ JX.behavior('conpherence-menu', function(config) {
    * - notably when the widget selector is used to invoke the message pane.
    * The following three functions get 'er done.
    */
-   function didRedrawThread(build_device_widget_selector) {
-     _scrollMessageWindow();
-     JX.Stratcom.invoke(
-       'conpherence-did-redraw-thread',
-       null,
-       {
-         widget : getDefaultWidget(),
-         threadID : _thread.selected,
-         buildDeviceWidgetSelector : build_device_widget_selector
-       });
+  function didRedrawThread(build_device_widget_selector) {
+    _scrollMessageWindow();
+    _focusTextarea();
+    JX.Stratcom.invoke(
+      'conpherence-did-redraw-thread',
+      null,
+      {
+        widget : getDefaultWidget(),
+        threadID : _thread.selected,
+        buildDeviceWidgetSelector : build_device_widget_selector
+      });
   }
   function _scrollMessageWindow() {
     var root = JX.DOM.find(document, 'div', 'conpherence-layout');
     var messages_root = JX.DOM.find(root, 'div', 'conpherence-messages');
     messages_root.scrollTop = messages_root.scrollHeight;
+  }
+  function _focusTextarea() {
+    var root = JX.DOM.find(document, 'div', 'conpherence-layout');
+    var form_root = JX.DOM.find(root, 'div', 'conpherence-form');
+    var textarea = JX.DOM.find(form_root, 'textarea');
+    // We may have a draft so do this JS trick so we end up focused at the
+    // end of the draft.
+    var textarea_value = textarea.value;
+    textarea.value = '';
+    JX.DOM.focus(textarea);
+    textarea.value = textarea_value;
   }
   JX.Stratcom.listen(
     'conpherence-redraw-thread',
@@ -334,11 +339,7 @@ JX.behavior('conpherence-menu', function(config) {
             JX.$(r.conpherence_phid + '-nav-item'),
             JX.$H(r.nav_item)
           );
-          JX.Stratcom.invoke(
-            'conpherence-selectthread',
-            null,
-            { id : r.conpherence_phid + '-nav-item' }
-          );
+          selectThreadByID(r.conpherence_phid + '-nav-item');
         } catch (ex) {
           // Ignore; this view may not have a menu.
         }
@@ -514,11 +515,7 @@ JX.behavior('conpherence-menu', function(config) {
     menu_root.scrollTop += scroll_y;
 
     if (reselect_id) {
-      JX.Stratcom.invoke(
-        'conpherence-selectthread',
-        null,
-        { id : reselect_id }
-      );
+      selectThreadByID(reselect_id);
     }
   };
 
