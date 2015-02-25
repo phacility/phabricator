@@ -77,6 +77,7 @@ phutil_register_library_map(array(
     'AlmanacPropertyInterface' => 'applications/almanac/property/AlmanacPropertyInterface.php',
     'AlmanacPropertyQuery' => 'applications/almanac/query/AlmanacPropertyQuery.php',
     'AlmanacQuery' => 'applications/almanac/query/AlmanacQuery.php',
+    'AlmanacQueryDevicesConduitAPIMethod' => 'applications/almanac/conduit/AlmanacQueryDevicesConduitAPIMethod.php',
     'AlmanacQueryServicesConduitAPIMethod' => 'applications/almanac/conduit/AlmanacQueryServicesConduitAPIMethod.php',
     'AlmanacSchemaSpec' => 'applications/almanac/storage/AlmanacSchemaSpec.php',
     'AlmanacService' => 'applications/almanac/storage/AlmanacService.php',
@@ -3218,6 +3219,7 @@ phutil_register_library_map(array(
     'AlmanacPropertyEditController' => 'AlmanacDeviceController',
     'AlmanacPropertyQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'AlmanacQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
+    'AlmanacQueryDevicesConduitAPIMethod' => 'AlmanacConduitAPIMethod',
     'AlmanacQueryServicesConduitAPIMethod' => 'AlmanacConduitAPIMethod',
     'AlmanacSchemaSpec' => 'PhabricatorConfigSchemaSpec',
     'AlmanacService' => array(
