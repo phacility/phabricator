@@ -31,6 +31,7 @@ final class PhabricatorDaemonManagementRestartWorkflow
               'Also stop running processes that look like daemons but do '.
               'not have corresponding PID files.'),
           ),
+          $this->getAutoscaleReserveArgument(),
         ));
   }
 
@@ -46,7 +47,10 @@ final class PhabricatorDaemonManagementRestartWorkflow
       return $err;
     }
 
-    return $this->executeStartCommand();
+    return $this->executeStartCommand(
+      array(
+        'reserve' => (float)$args->getArg('autoscale-reserve', 0.0),
+      ));
   }
 
 }

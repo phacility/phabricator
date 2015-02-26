@@ -20,7 +20,13 @@ final class PHUIErrorExample extends PhabricatorUIExample {
       PHUIErrorView::SEVERITY_WARNING  => 'Warning',
       PHUIErrorView::SEVERITY_NOTICE   => 'Notice',
       PHUIErrorView::SEVERITY_NODATA   => 'No Data',
+      PHUIErrorView::SEVERITY_SUCCESS   => 'Success',
     );
+
+    $button = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setText('Resolve Issue')
+        ->addClass('grey');
 
     $views = array();
     // Only Title
@@ -35,6 +41,7 @@ final class PHUIErrorExample extends PhabricatorUIExample {
       $view = new PHUIErrorView();
       $view->setSeverity($sev);
       $view->appendChild('Several issues were encountered.');
+      $view->addButton($button);
       $views[] = $view;
     }
     // Only Errors

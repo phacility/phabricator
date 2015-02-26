@@ -51,8 +51,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 body {
-  font: 13px/1.231 'Segoe UI', 'Segoe UI Web Regular', 'Segoe UI Symbol',
-    'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font: {$basefont};
   direction: ltr;
   text-align: left;
   unicode-bidi: embed;

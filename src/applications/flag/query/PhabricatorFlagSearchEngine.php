@@ -152,6 +152,11 @@ final class PhabricatorFlagSearchEngine
         ->setHeader($flag->getHandle()->getFullName())
         ->setHref($flag->getHandle()->getURI());
 
+      $status_open = PhabricatorObjectHandleStatus::STATUS_OPEN;
+      if ($flag->getHandle()->getStatus() != $status_open) {
+        $item->setDisabled(true);
+      }
+
       $item->addAction(
         id(new PHUIListItemView())
           ->setIcon('fa-pencil')

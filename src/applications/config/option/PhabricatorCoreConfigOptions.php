@@ -36,6 +36,8 @@ final class PhabricatorCoreConfigOptions
       'User Guide: Prototype Applications');
     $proto_doc_name = pht('User Guide: Prototype Applications');
     $applications_app_href = '/applications/';
+    $custom_header_example =
+      PhabricatorCustomHeaderConfigType::getExampleConfig();
 
     return array(
       $this->newOption('phabricator.base-uri', 'string', null)
@@ -209,6 +211,27 @@ final class PhabricatorCoreConfigOptions
         ->setLocked(true)
         ->setDescription(
           pht('Custom HTML to show on the main Phabricator dashboard.')),
+      $this->newOption(
+        'ui.custom-header',
+        'custom:PhabricatorCustomHeaderConfigType',
+        null)
+        ->setSummary(
+          pht('Customize the Phabricator logo.'))
+        ->setDescription(
+          pht('You can customize the Phabricator logo by specifying the '.
+              'phid for a viewable image you have uploaded to Phabricator '.
+              'via the [[ /file/ | Files application]]. This image should '.
+              'be:'."\n".
+              ' - 192px X 80px; while not enforced, images with these '.
+              'dimensions will look best across devices.'."\n".
+              ' - have view policy public if [[ '.
+              '/config/edit/policy.allow-public | `policy.allow-public`]] '.
+              'is true and otherwise view policy user; mismatches in these '.
+              'policy settings will result in a broken logo for some users.'.
+              "\n\n".
+              'You should restart your webserver after updating this value '.
+              'to see this change take effect.'))
+        ->addExample($custom_header_example, pht('Valid Config')),
       $this->newOption('phabricator.cache-namespace', 'string', null)
         ->setLocked(true)
         ->setDescription(pht('Cache namespace.')),

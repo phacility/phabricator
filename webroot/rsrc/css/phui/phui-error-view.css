@@ -24,6 +24,12 @@
   line-height: 1.45em;
 }
 
+.phui-error-view-actions {
+  margin-top: -3px;
+  margin-bottom: -4px;
+  float: right;
+}
+
 .phui-error-view-head + .phui-error-view-body {
   padding-top: 4px;
 }
@@ -44,24 +50,59 @@ h1.phui-error-view-head {
   line-height: 1.5em;
 }
 
-.phui-error-severity-error {
+.phui-error-view .phui-error-view-actions .button:hover {
+  background: #fff;
+  box-shadow: none;
+}
+
+.phui-error-severity-error,
+.phui-error-severity-error .button {
   border-color: {$red};
   background: {$lightred};
 }
 
-.phui-error-severity-warning {
+.phui-error-severity-error .button {
+  color: {$red};
+}
+
+.phui-error-severity-warning,
+.phui-error-severity-warning .button {
   border-color: {$yellow};
   background: {$lightyellow};
 }
 
-.phui-error-severity-notice {
+.phui-error-severity-warning .button {
+  color: #bc7837;
+}
+
+.phui-error-severity-notice,
+.phui-error-severity-notice .button {
   border-color: {$blue};
   background: {$lightblue};
 }
 
-.phui-error-severity-nodata {
+.phui-error-severity-notice .button {
+  color: {$blue};
+}
+
+.phui-error-severity-nodata,
+.phui-error-severity-nodata .button {
   border-color: {$lightgreyborder};
-  background-color: #fff;
+  background: #fff;
+}
+
+.phui-error-severity-nodata .button {
+  color: {$greytext};
+}
+
+.phui-error-severity-success,
+.phui-error-severity-success .button {
+  border-color: {$green};
+  background: {$lightgreen};
+}
+
+.phui-error-severity-success .button {
+  color: {$green};
 }
 
 .legalpad .phui-error-view {
@@ -94,6 +135,11 @@ h1.phui-error-view-head {
 .phui-object-box .phui-error-severity-notice,
 .aphront-dialog-body .phui-error-severity-notice {
   color: {$blue};
+}
+
+.phui-object-box .phui-error-severity-success,
+.aphront-dialog-body .phui-error-severity-success {
+  color: {$green};
 }
 
 .phui-crumbs-view + .phui-error-view {

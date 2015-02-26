@@ -29,13 +29,13 @@ final class PhabricatorPHDConfigOptions
         ->setDescription(
           pht(
             'Directory that the daemons should use to store log files.')),
-      $this->newOption('phd.start-taskmasters', 'int', 4)
-        ->setSummary(pht('Number of TaskMaster daemons to start by default.'))
+      $this->newOption('phd.taskmasters', 'int', 4)
+        ->setSummary(pht('Maximum taskmaster daemon pool size.'))
         ->setDescription(
           pht(
-            "Number of 'TaskMaster' daemons that 'phd start' should start. ".
-            "You can raise this if you have a task backlog, or explicitly ".
-            "launch more with 'phd launch <N> taskmaster'.")),
+            'Maximum number of taskmaster daemons to run at once. Raising '.
+            'this can increase the maximum throughput of the task queue. The '.
+            'pool will automatically scale down when unutilized.')),
       $this->newOption('phd.verbose', 'bool', false)
         ->setBoolOptions(
           array(

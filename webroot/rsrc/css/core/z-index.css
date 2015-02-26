@@ -2,6 +2,10 @@
  * @provides phabricator-zindex-css
  */
 
+.phabricator-nav-column-background {
+  z-index: -1;
+}
+
 .keyboard-focus-focus-reticle {
   z-index: 1;
 }
@@ -31,10 +35,6 @@
 }
 
 .phui-timeline-icon-fill {
-  z-index: 3;
-}
-
-.phabricator-nav-column-background {
   z-index: 3;
 }
 
@@ -84,10 +84,6 @@
   z-index: 6;
 }
 
-.jx-notification-container {
-  z-index: 7;
-}
-
 .differential-haunt-mode-1 .differential-add-comment-panel,
 .differential-haunt-mode-2 .differential-add-comment-panel {
   z-index: 8;
@@ -103,6 +99,10 @@
 
 .jx-mask {
   z-index: 10;
+}
+
+.jx-notification-container {
+  z-index: 11;
 }
 
 .phabricator-global-upload-instructions {
