@@ -3,18 +3,18 @@
  */
 
 .paste-embed {
-  padding: 5px;
-  background: #f7f7f7;
-  border: 1px solid #dbdbdb;
+  background: {$lightbluebackground};
+  border: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$blueborder};
 }
 
 .paste-embed-head {
-  border-bottom: 1px solid #dbdbdb;
-  margin:2px;
+  border-bottom: 1px solid {$thinblueborder};
+  padding: 6px 10px;
 }
 
 .paste-embed-head a {
-  color: #282828;
+  color: {$darkbluetext};
   font-weight: bold;
 }
 
