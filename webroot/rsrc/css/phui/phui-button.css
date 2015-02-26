@@ -5,7 +5,7 @@
 
 button,
 a.button {
-  font: 13px/1.231 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font: {$basefont};
   -webkit-font-smoothing: antialiased;
   -webkit-user-select: none;
   -moz-user-select: none;

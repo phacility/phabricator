@@ -24,7 +24,7 @@ div.jx-tokenizer-container {
   line-height: 18px;
   color: #333;
   vertical-align: middle;
-  font: 13px 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font: {$basefont};
   -webkit-font-smoothing: antialiased;
 }
 
