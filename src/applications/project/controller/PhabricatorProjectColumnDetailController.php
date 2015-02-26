@@ -62,9 +62,7 @@ final class PhabricatorProjectColumnDetailController
     $nav->appendChild($timeline);
 
     return $this->buildApplicationPage(
-      array(
-        $nav,
-      ),
+      $nav,
       array(
         'title' => $title,
       ));

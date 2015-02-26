@@ -296,9 +296,7 @@ final class PhabricatorProjectEditPictureController
     $nav->appendChild($upload_box);
 
     return $this->buildApplicationPage(
-      array(
-        $nav,
-      ),
+      $nav,
       array(
         'title' => $title,
       ));

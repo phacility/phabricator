@@ -157,9 +157,7 @@ final class PhabricatorPeopleProfileController
     $nav->appendChild($object_box);
 
     return $this->buildApplicationPage(
-      array(
-        $nav,
-      ),
+      $nav,
       array(
         'title' => $user->getUsername(),
       ));

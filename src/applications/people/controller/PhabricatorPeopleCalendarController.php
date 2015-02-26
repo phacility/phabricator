@@ -80,11 +80,9 @@ final class PhabricatorPeopleCalendarController
     $nav->appendChild($month_view);
 
     return $this->buildApplicationPage(
+      $nav,
       array(
-        $nav,
-     ),
-     array(
-       'title' => pht('Calendar'),
-     ));
+        'title' => pht('Calendar'),
+      ));
   }
 }

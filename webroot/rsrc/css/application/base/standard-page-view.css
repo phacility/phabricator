@@ -25,6 +25,10 @@
   margin-left: 221px;
 }
 
+.device-desktop div.phabricator-icon-nav + .phabricator-standard-page-footer {
+  margin-left: 58px;
+}
+
 .keyboard-shortcut-help td,
 .keyboard-shortcut-help th {
   padding: 8px;

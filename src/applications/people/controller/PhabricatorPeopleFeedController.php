@@ -50,11 +50,9 @@ final class PhabricatorPeopleFeedController
     $nav->appendChild($feed);
 
     return $this->buildApplicationPage(
+      $nav,
       array(
-        $nav,
-     ),
-     array(
-       'title' => pht('Feed'),
-     ));
+        'title' => pht('Feed'),
+      ));
   }
 }
