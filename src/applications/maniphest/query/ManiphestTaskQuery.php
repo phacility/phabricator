@@ -791,17 +791,25 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       $joins[] = qsprintf(
         $conn_r,
         'LEFT JOIN %T blocking ON blocking.src = task.phid '.
-        'AND blocking.type = %d',
+        'AND blocking.type = %d '.
+        'JOIN %T blockingtask ON blocking.dst = blockingtask.phid '.
+        'AND blockingtask.status IN (%Ls)',
         $edge_table,
-        ManiphestTaskDependedOnByTaskEdgeType::EDGECONST);
+        ManiphestTaskDependedOnByTaskEdgeType::EDGECONST,
+        id(new ManiphestTask())->getTableName(),
+        ManiphestTaskStatus::getOpenStatusConstants());
     }
     if ($this->shouldJoinBlockedTasks()) {
       $joins[] = qsprintf(
         $conn_r,
         'LEFT JOIN %T blocked ON blocked.src = task.phid '.
-        'AND blocked.type = %d',
+        'AND blocked.type = %d '.
+        'JOIN %T blockedtask ON blocked.dst = blockedtask.phid '.
+        'AND blockedtask.status IN (%Ls)',
         $edge_table,
-        ManiphestTaskDependsOnTaskEdgeType::EDGECONST);
+        ManiphestTaskDependsOnTaskEdgeType::EDGECONST,
+        id(new ManiphestTask())->getTableName(),
+        ManiphestTaskStatus::getOpenStatusConstants());
     }
 
     if ($this->anyProjectPHIDs || $this->anyUserProjectPHIDs) {
