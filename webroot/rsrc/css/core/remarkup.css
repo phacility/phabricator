@@ -10,6 +10,21 @@
   margin: 0 0 12px;
 }
 
+.PhabricatorMonospaced,
+.phabricator-remarkup .remarkup-code-block .remarkup-code {
+  font: 10px "Menlo", "Consolas", "Monaco", monospace;
+}
+
+.platform-windows .PhabricatorMonospaced,
+.platform-windows .phabricator-remarkup .remarkup-code-block .remarkup-code {
+  font: 11px "Menlo", "Consolas", "Monaco", monospace;
+}
+
+.phabricator-remarkup .remarkup-code-block {
+  margin: 12px 0;
+  white-space: pre;
+}
+
 .phabricator-remarkup .remarkup-code-header {
   padding: 4px 1px;
   font-size: 13px;
