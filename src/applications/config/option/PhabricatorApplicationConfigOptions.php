@@ -4,6 +4,7 @@ abstract class PhabricatorApplicationConfigOptions extends Phobject {
 
   abstract public function getName();
   abstract public function getDescription();
+  abstract public function getGroup();
   abstract public function getOptions();
 
   public function getFontIcon() {
