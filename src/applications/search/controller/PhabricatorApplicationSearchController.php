@@ -50,19 +50,23 @@ final class PhabricatorApplicationSearchController
 
     if (!$parent) {
       throw new Exception(
-        'You must delegate to this controller, not invoke it directly.');
+        pht('You must delegate to this controller, not invoke it directly.'));
     }
 
     $engine = $this->getSearchEngine();
     if (!$engine) {
       throw new Exception(
-        'Call setEngine() before delegating to this controller!');
+        pht(
+          'Call %s before delegating to this controller!',
+          'setEngine()'));
     }
 
     $nav = $this->getNavigation();
     if (!$nav) {
       throw new Exception(
-        'Call setNavigation() before delegating to this controller!');
+        pht(
+          'Call %s before delegating to this controller!',
+          'setNavigation()'));
     }
 
     $engine->setViewer($this->getRequest()->getUser());
