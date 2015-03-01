@@ -30,7 +30,9 @@ abstract class PhabricatorRepositoryCommitMessageParserWorker
 
     if (empty($refs_raw['data'])) {
       throw new Exception(
-        pht('Unable to retrieve details for commit "%s"!'));
+        pht(
+          'Unable to retrieve details for commit "%s"!',
+          $commit->getPHID()));
     }
 
     $ref = DiffusionCommitRef::newFromConduitResult(head($refs_raw['data']));
