@@ -73,9 +73,13 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
 
       // if the user can see the file, generate a token;
       // redirect to the alt domain with the token;
+      $token_uri = $file->getCDNURIWithToken();
+      $token_uri = new PhutilURI($token_uri);
+      $token_uri = $this->addURIParameters($token_uri);
+
       return id(new AphrontRedirectResponse())
         ->setIsExternal(true)
-        ->setURI($file->getCDNURIWithToken());
+        ->setURI($token_uri);
 
     } else {
       // We are using the alternate domain
@@ -93,7 +97,7 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
 
       $acquire_token_uri = id(new PhutilURI($file->getViewURI()))
         ->setDomain($main_domain);
-
+      $acquire_token_uri = $this->addURIParameters($acquire_token_uri);
 
       if ($this->token) {
         // validate the token, if it is valid, continue
@@ -186,4 +190,19 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
 
     return $response;
   }
+
+  /**
+   * Add passthrough parameters to the URI so they aren't lost when we
+   * redirect to acquire tokens.
+   */
+  private function addURIParameters(PhutilURI $uri) {
+    $request = $this->getRequest();
+
+    if ($request->getBool('download')) {
+      $uri->setQueryParam('download', 1);
+    }
+
+    return $uri;
+  }
+
 }
