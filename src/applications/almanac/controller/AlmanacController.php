@@ -188,8 +188,8 @@ abstract class AlmanacController
       ),
       pht('Learn More'));
 
-    $error_view = id(new PHUIErrorView())
-      ->setSeverity(PHUIErrorView::SEVERITY_WARNING)
+    $error_view = id(new PHUIInfoView())
+      ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
       ->setErrors(
         array(
           array($message, ' ', $doc_link),

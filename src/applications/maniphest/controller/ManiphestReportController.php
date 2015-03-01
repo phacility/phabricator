@@ -262,9 +262,9 @@ final class ManiphestReportController extends ManiphestController {
     }
 
     if ($caption) {
-      $caption = id(new PHUIErrorView())
+      $caption = id(new PHUIInfoView())
         ->appendChild($caption)
-        ->setSeverity(PHUIErrorView::SEVERITY_NOTICE);
+        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
     }
 
     $panel = new PHUIObjectBoxView();

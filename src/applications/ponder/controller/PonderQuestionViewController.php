@@ -30,8 +30,8 @@ final class PonderQuestionViewController extends PonderController {
 
     $authors = mpull($question->getAnswers(), null, 'getAuthorPHID');
     if (isset($authors[$user->getPHID()])) {
-      $answer_add_panel = id(new PHUIErrorView())
-        ->setSeverity(PHUIErrorView::SEVERITY_NODATA)
+      $answer_add_panel = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NODATA)
         ->appendChild(
           pht(
             'You have already answered this question. You can not answer '.

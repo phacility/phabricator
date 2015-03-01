@@ -292,7 +292,7 @@ final class AphrontDialogView extends AphrontView {
 
     if ($errors) {
       $children = array(
-        id(new PHUIErrorView())->setErrors($errors),
+        id(new PHUIInfoView())->setErrors($errors),
         $children,
       );
     }

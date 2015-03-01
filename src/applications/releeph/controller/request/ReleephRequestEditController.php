@@ -210,8 +210,8 @@ final class ReleephRequestEditController extends ReleephBranchController {
           $age_string,
           $handles[$pull->getRequestUserPHID()]->renderLink()),
       );
-      $notice_view = id(new PHUIErrorView())
-        ->setSeverity(PHUIErrorView::SEVERITY_NOTICE)
+      $notice_view = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
         ->setErrors($notice_messages);
     }
 

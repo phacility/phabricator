@@ -29,8 +29,8 @@ final class DifferentialDiffViewController extends DifferentialController {
         ->setURI('/D'.$diff->getRevisionID().'?id='.$diff->getID());
     }
 
-    $error_view = id(new PHUIErrorView())
-        ->setSeverity(PHUIErrorView::SEVERITY_NOTICE);
+    $error_view = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
     // TODO: implement optgroup support in AphrontFormSelectControl?
     $select = array();
     $select[] = hsprintf('<optgroup label="%s">', pht('Create New Revision'));

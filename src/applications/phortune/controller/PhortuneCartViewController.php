@@ -86,8 +86,8 @@ final class PhortuneCartViewController
         }
         break;
       case PhortuneCart::STATUS_PURCHASED:
-        $error_view = id(new PHUIErrorView())
-          ->setSeverity(PHUIErrorView::SEVERITY_NOTICE)
+        $error_view = id(new PHUIInfoView())
+          ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
           ->appendChild(pht('This purchase has been completed.'));
 
         break;

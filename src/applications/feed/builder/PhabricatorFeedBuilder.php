@@ -88,8 +88,8 @@ final class PhabricatorFeedBuilder {
         $nodatastring = $this->noDataString;
       }
 
-      $view = id(new PHUIErrorView())
-        ->setSeverity(PHUIErrorView::SEVERITY_NODATA)
+      $view = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NODATA)
         ->appendChild($nodatastring);
       $null_view->appendChild($view);
     }

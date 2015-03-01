@@ -15,7 +15,7 @@ abstract class PhabricatorAuthController extends PhabricatorController {
   }
 
   protected function renderErrorPage($title, array $messages) {
-    $view = new PHUIErrorView();
+    $view = new PHUIInfoView();
     $view->setTitle($title);
     $view->setErrors($messages);
 

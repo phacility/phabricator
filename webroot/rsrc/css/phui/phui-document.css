@@ -148,6 +148,6 @@
   border-bottom: 1px solid {$thinblueborder};
 }
 
-.phui-document-view .phui-error-severity-nodata {
+.phui-document-view .phui-info-severity-nodata {
   background-color: {$lightgreybackground};
 }

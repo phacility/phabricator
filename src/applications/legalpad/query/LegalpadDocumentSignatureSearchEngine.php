@@ -293,8 +293,8 @@ final class LegalpadDocumentSignatureSearchEngine
       ->appendChild($table);
 
     if (!$this->document) {
-      $policy_notice = id(new PHUIErrorView())
-        ->setSeverity(PHUIErrorView::SEVERITY_NOTICE)
+      $policy_notice = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
         ->setErrors(
           array(
             pht(

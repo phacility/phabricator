@@ -1,6 +1,6 @@
 <?php
 
-final class PHUIErrorView extends AphrontView {
+final class PHUIInfoView extends AphrontView {
 
   const SEVERITY_ERROR = 'error';
   const SEVERITY_WARNING = 'warning';
@@ -41,7 +41,7 @@ final class PHUIErrorView extends AphrontView {
 
   final public function render() {
 
-    require_celerity_resource('phui-error-view-css');
+    require_celerity_resource('phui-info-view-css');
 
     $errors = $this->errors;
     if ($errors) {
@@ -55,7 +55,7 @@ final class PHUIErrorView extends AphrontView {
       $list = phutil_tag(
         'ul',
         array(
-          'class' => 'phui-error-view-list',
+          'class' => 'phui-info-view-list',
         ),
         $list);
     } else {
@@ -67,7 +67,7 @@ final class PHUIErrorView extends AphrontView {
       $title = phutil_tag(
         'h1',
         array(
-          'class' => 'phui-error-view-head',
+          'class' => 'phui-info-view-head',
         ),
         $title);
     } else {
@@ -77,8 +77,8 @@ final class PHUIErrorView extends AphrontView {
     $this->severity = nonempty($this->severity, self::SEVERITY_ERROR);
 
     $classes = array();
-    $classes[] = 'phui-error-view';
-    $classes[] = 'phui-error-severity-'.$this->severity;
+    $classes[] = 'phui-info-view';
+    $classes[] = 'phui-info-severity-'.$this->severity;
     $classes[] = 'grouped';
     $classes = implode(' ', $classes);
 
@@ -92,7 +92,7 @@ final class PHUIErrorView extends AphrontView {
       $body = phutil_tag(
         'div',
         array(
-          'class' => 'phui-error-view-body',
+          'class' => 'phui-info-view-body',
         ),
         $children);
     }
@@ -102,7 +102,7 @@ final class PHUIErrorView extends AphrontView {
       $buttons = phutil_tag(
         'div',
         array(
-          'class' => 'phui-error-view-actions',
+          'class' => 'phui-info-view-actions',
         ),
         $this->buttons);
     }

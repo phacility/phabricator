@@ -69,9 +69,9 @@ final class DiffusionExternalController extends DiffusionController {
       }
       $desc .= $id;
 
-      $content = id(new PHUIErrorView())
+      $content = id(new PHUIInfoView())
         ->setTitle(pht('Unknown External'))
-        ->setSeverity(PHUIErrorView::SEVERITY_WARNING)
+        ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
         ->appendChild(phutil_tag(
           'p',
           array(),

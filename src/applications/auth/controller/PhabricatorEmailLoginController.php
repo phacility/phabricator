@@ -128,7 +128,7 @@ EOBODY;
 
     $error_view = null;
     if ($errors) {
-      $error_view = new PHUIErrorView();
+      $error_view = new PHUIInfoView();
       $error_view->setErrors($errors);
     }
 

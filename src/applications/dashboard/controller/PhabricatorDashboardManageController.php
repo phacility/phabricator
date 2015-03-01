@@ -56,8 +56,8 @@ final class PhabricatorDashboardManageController
         'make changes, make a copy first.');
 
       $box->setErrorView(
-        id(new PHUIErrorView())
-          ->setSeverity(PHUIErrorView::SEVERITY_NOTICE)
+        id(new PHUIInfoView())
+          ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
           ->setErrors(array($no_edit)));
     }
 
