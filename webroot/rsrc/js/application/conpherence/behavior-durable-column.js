@@ -24,7 +24,7 @@ JX.behavior('durable-column', function() {
     })
     .register();
 
-  new JX.Scrollbar(JX.$('phui-durable-column-content'));
+  new JX.Scrollbar(JX.$('conpherence-durable-column-content'));
 
   JX.Quicksand.start();
 
