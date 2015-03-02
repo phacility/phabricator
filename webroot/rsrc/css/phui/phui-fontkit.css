@@ -82,6 +82,7 @@
 body .phui-font-source-sans
   .phui-header-shell.phui-bleed-header .phui-header-view {
   font-size: 18px;
+  font-weight: normal;
 }
 
 .phui-font-source-sans .phui-form-view {
