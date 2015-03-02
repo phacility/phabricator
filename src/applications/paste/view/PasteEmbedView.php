@@ -5,7 +5,7 @@ final class PasteEmbedView extends AphrontView {
   private $paste;
   private $handle;
   private $highlights = array();
-  private $lines = 30;
+  private $lines = 24;
 
   public function setPaste(PhabricatorPaste $paste) {
     $this->paste = $paste;

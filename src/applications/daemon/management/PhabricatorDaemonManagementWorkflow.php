@@ -389,28 +389,7 @@ abstract class PhabricatorDaemonManagementWorkflow
       return 0;
     }
 
-    $running_pids = array_fuse(mpull($daemons, 'getPID'));
-    if (!$pids) {
-      $stop_pids = $running_pids;
-    } else {
-      // We were given a PID or set of PIDs to kill.
-      $stop_pids = array();
-      foreach ($pids as $key => $pid) {
-        if (!preg_match('/^\d+$/', $pid)) {
-          $console->writeErr(pht("PID '%s' is not a valid PID.", $pid)."\n");
-          continue;
-        } else if (empty($running_pids[$pid])) {
-          $console->writeErr(
-            pht(
-              'PID "%d" is not a known Phabricator daemon PID. It will not '.
-              'be killed.',
-              $pid)."\n");
-          continue;
-        } else {
-          $stop_pids[$pid] = $pid;
-        }
-      }
-    }
+    $stop_pids = $this->selectDaemonPIDs($daemons, $pids);
 
     if (!$stop_pids) {
       $console->writeErr(pht('No daemons to kill.')."\n");
@@ -447,6 +426,35 @@ abstract class PhabricatorDaemonManagementWorkflow
 
     if (!$gently) {
       $this->processRogueDaemons($grace_period, !$pids, $force);
+    }
+
+    return 0;
+  }
+
+  protected final function executeReloadCommand(array $pids) {
+    $console = PhutilConsole::getConsole();
+
+    $daemons = $this->loadRunningDaemons();
+    if (!$daemons) {
+      $console->writeErr(
+        "%s\n",
+        pht('There are no running daemons to reload.'));
+      return 0;
+    }
+
+    $reload_pids = $this->selectDaemonPIDs($daemons, $pids);
+    if (!$reload_pids) {
+      $console->writeErr(
+        "%s\n",
+        pht('No daemons to reload.'));
+      return 0;
+    }
+
+    foreach ($reload_pids as $pid) {
+      $console->writeOut(
+        "%s\n",
+        pht('Reloading process %d...', $pid));
+      posix_kill($pid, SIGHUP);
     }
 
     return 0;
@@ -613,6 +621,35 @@ abstract class PhabricatorDaemonManagementWorkflow
         'means that pools will not grow unless the machine has at least '.
         '25%% of its RAM free.'),
     );
+  }
+
+  private function selectDaemonPIDs(array $daemons, array $pids) {
+    $console = PhutilConsole::getConsole();
+
+    $running_pids = array_fuse(mpull($daemons, 'getPID'));
+    if (!$pids) {
+      $select_pids = $running_pids;
+    } else {
+      // We were given a PID or set of PIDs to kill.
+      $select_pids = array();
+      foreach ($pids as $key => $pid) {
+        if (!preg_match('/^\d+$/', $pid)) {
+          $console->writeErr(pht("PID '%s' is not a valid PID.", $pid)."\n");
+          continue;
+        } else if (empty($running_pids[$pid])) {
+          $console->writeErr(
+            "%s\n",
+            pht(
+              'PID "%d" is not a known Phabricator daemon PID.',
+              $pid));
+          continue;
+        } else {
+          $select_pids[$pid] = $pid;
+        }
+      }
+    }
+
+    return $select_pids;
   }
 
 }

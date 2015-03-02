@@ -17,6 +17,21 @@
   line-height: 18px;
 }
 
+.PhabricatorMonospaced .phui-document-view .phui-font-source-sans,
+.phui-document-view .phui-font-source-sans .phabricator-remarkup
+  .remarkup-code-block .remarkup-code {
+  font-size: 11px;
+  line-height: 1.3em;
+}
+
+.platform-windows .PhabricatorMonospaced .phui-document-view
+  .phui-font-source-sans,
+.platform-windows .phui-document-view .phui-font-source-sans
+  .phabricator-remarkup .remarkup-code-block .remarkup-code {
+  font-size: 12px;
+  line-height: 1.3em;
+}
+
 .phui-font-source-sans .phabricator-remarkup h2.remarkup-header {
   padding: 8px 24px 8px 0;
   border-bottom: 1px solid {$thinblueborder};

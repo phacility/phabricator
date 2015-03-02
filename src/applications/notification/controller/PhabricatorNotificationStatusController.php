@@ -8,7 +8,7 @@ final class PhabricatorNotificationStatusController
       $status = PhabricatorNotificationClient::getServerStatus();
       $status = $this->renderServerStatus($status);
     } catch (Exception $ex) {
-      $status = new PHUIErrorView();
+      $status = new PHUIInfoView();
       $status->setTitle('Notification Server Issue');
       $status->appendChild(hsprintf(
         'Unable to determine server status. This probably means the server '.

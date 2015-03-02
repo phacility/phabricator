@@ -222,6 +222,15 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
     $finfo->addProperty(pht('Viewable Image'), $image_string);
     $finfo->addProperty(pht('Cacheable'), $cache_string);
 
+    $builtin = $file->getBuiltinName();
+    if ($builtin === null) {
+      $builtin_string = pht('No');
+    } else {
+      $builtin_string = $builtin;
+    }
+
+    $finfo->addProperty(pht('Builtin'), $builtin_string);
+
     $storage_properties = new PHUIPropertyListView();
     $box->addPropertyList($storage_properties, pht('Storage'));
 

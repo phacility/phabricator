@@ -41,6 +41,7 @@ final class PholioMock extends PholioDAO
     return id(new PholioMock())
       ->setAuthorPHID($actor->getPHID())
       ->attachImages(array())
+      ->setStatus('open')
       ->setViewPolicy($view_policy)
       ->setEditPolicy($edit_policy);
   }

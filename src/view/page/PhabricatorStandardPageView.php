@@ -133,6 +133,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     require_celerity_resource('phui-form-css');
     require_celerity_resource('sprite-gradient-css');
     require_celerity_resource('phabricator-standard-page-view');
+    require_celerity_resource('conpherence-durable-column-view');
 
     Javelin::initBehavior('workflow', array());
 
@@ -269,18 +270,31 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
     $response = CelerityAPI::getStaticResourceResponse();
 
+    $font_css = null;
+    if (!empty($monospaced)) {
+      $font_css = hsprintf(
+        '<style type="text/css">'.
+        '.PhabricatorMonospaced, '.
+        '.phabricator-remarkup .remarkup-code-block '.
+          '.remarkup-code { font: %s !important; } '.
+        '</style>', $monospaced);
+    }
+
+    $font_css_win = null;
+    if (!empty($monospaced_win)) {
+      $font_css_win = hsprintf(
+        '<style type="text/css">'.
+        '.platform-windows .PhabricatorMonospaced, '.
+        '.platform-windows .phabricator-remarkup '.
+          '.remarkup-code-block .remarkup-code { font: %s !important; }'.
+        '</style>', $monospaced_win);
+    }
+
     return hsprintf(
-      '%s<style type="text/css">'.
-      '.PhabricatorMonospaced, '.
-      '.phabricator-remarkup .remarkup-code-block '.
-        '.remarkup-code { font: %s; } '.
-      '.platform-windows .PhabricatorMonospaced, '.
-      '.platform-windows .phabricator-remarkup '.
-        '.remarkup-code-block .remarkup-code { font: %s; }'.
-      '</style>%s',
+      '%s%s%s%s',
       parent::getHead(),
-      phutil_safe_html($monospaced),
-      phutil_safe_html($monospaced_win),
+      $font_css,
+      $font_css_win,
       $response->renderSingleResource('javelin-magical-init', 'phabricator'));
   }
 
@@ -377,7 +391,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
     $durable_column = null;
     if ($this->getShowDurableColumn()) {
-      $durable_column = new PHUIDurableColumn();
+      $durable_column = new ConpherenceDurableColumnView();
     }
 
     return phutil_tag(

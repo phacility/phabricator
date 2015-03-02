@@ -16,7 +16,7 @@ final class AlmanacQueryServicesConduitAPIMethod
       'ids' => 'optional list<id>',
       'phids' => 'optional list<phid>',
       'names' => 'optional list<phid>',
-      'devicePHIDs' => 'option list<phid>',
+      'devicePHIDs' => 'optional list<phid>',
       'serviceClasses' => 'optional list<string>',
     ) + self::getPagerParamTypes();
   }

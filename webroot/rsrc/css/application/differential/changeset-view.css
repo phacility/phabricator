@@ -61,7 +61,6 @@
   color:              {$bluetext};
   cursor:             pointer;
   border-right:       1px solid {$thinblueborder};
-  font-size:          11px;
   overflow:           hidden;
 
   -moz-user-select:     -moz-none;

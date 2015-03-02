@@ -107,7 +107,7 @@ You can use the `bin/mail` utility to test and review inbound mail. This can
 help you determine if mail is being delivered to Phabricator or not:
 
   phabricator/ $ ./bin/mail list-inbound   # List inbound messages.
-  phabricator/ $ ./bin-mail show-inbound   # Show details about a message.
+  phabricator/ $ ./bin/mail show-inbound   # Show details about a message.
 
 You can also test receiving mail, but note that this just simulates receiving
 the mail and doesn't send any information over the network. It is

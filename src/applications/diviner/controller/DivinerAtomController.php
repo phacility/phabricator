@@ -92,10 +92,10 @@ final class DivinerAtomController extends DivinerController {
 
     $warnings = $atom->getWarnings();
     if ($warnings) {
-      $warnings = id(new PHUIErrorView())
+      $warnings = id(new PHUIInfoView())
         ->setErrors($warnings)
         ->setTitle(pht('Documentation Warnings'))
-        ->setSeverity(PHUIErrorView::SEVERITY_WARNING);
+        ->setSeverity(PHUIInfoView::SEVERITY_WARNING);
     }
 
     $methods = $this->composeMethods($symbol);

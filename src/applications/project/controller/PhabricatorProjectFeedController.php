@@ -51,9 +51,7 @@ final class PhabricatorProjectFeedController
     $nav->appendChild($content);
 
     return $this->buildApplicationPage(
-      array(
-        $nav,
-      ),
+      $nav,
       array(
         'title' => $project->getName(),
       ));

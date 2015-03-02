@@ -113,6 +113,16 @@ final class PhabricatorStorageManagementQuickstartWorkflow
       '{$CHARSET}',
       $dump);
 
+    $old = $dump;
+    $dump = preg_replace(
+      '/CHARACTER SET {\$CHARSET} COLLATE {\$COLLATE_SORT}/mi',
+      'CHARACTER SET {$CHARSET_SORT} COLLATE {$COLLATE_SORT}',
+      $dump);
+    if ($dump == $old) {
+      throw new PhutilArgumentUsageException(
+        pht('Failed to adjust SORT columns!'));
+    }
+
     // Strip out a bunch of unnecessary commands which make the dump harder
     // to handle and slower to import.
 

@@ -6,6 +6,11 @@
       "rule": ".main-header-applebloom",
       "hash": "64822776b129e724709983db1ac5a712"
     },
+    "main-header-blindigo": {
+      "name": "main-header-blindigo",
+      "rule": ".main-header-blindigo",
+      "hash": "8c4f5b1f1f3faceb6ca6e8278a1b082f"
+    },
     "main-header-blue": {
       "name": "main-header-blue",
       "rule": ".main-header-blue",

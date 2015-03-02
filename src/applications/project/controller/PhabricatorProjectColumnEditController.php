@@ -155,9 +155,7 @@ final class PhabricatorProjectColumnEditController
     $nav->appendChild($form_box);
 
     return $this->buildApplicationPage(
-      array(
-        $nav,
-      ),
+      $nav,
       array(
         'title' => $title,
       ));

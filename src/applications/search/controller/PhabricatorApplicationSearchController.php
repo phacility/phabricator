@@ -50,19 +50,23 @@ final class PhabricatorApplicationSearchController
 
     if (!$parent) {
       throw new Exception(
-        'You must delegate to this controller, not invoke it directly.');
+        pht('You must delegate to this controller, not invoke it directly.'));
     }
 
     $engine = $this->getSearchEngine();
     if (!$engine) {
       throw new Exception(
-        'Call setEngine() before delegating to this controller!');
+        pht(
+          'Call %s before delegating to this controller!',
+          'setEngine()'));
     }
 
     $nav = $this->getNavigation();
     if (!$nav) {
       throw new Exception(
-        'Call setNavigation() before delegating to this controller!');
+        pht(
+          'Call %s before delegating to this controller!',
+          'setNavigation()'));
     }
 
     $engine->setViewer($this->getRequest()->getUser());
@@ -161,7 +165,7 @@ final class PhabricatorApplicationSearchController
     $errors = $engine->getErrors();
     if ($errors) {
       $run_query = false;
-      $errors = id(new PHUIErrorView())
+      $errors = id(new PHUIInfoView())
         ->setTitle(pht('Query Errors'))
         ->setErrors($errors);
     }
@@ -269,7 +273,7 @@ final class PhabricatorApplicationSearchController
     return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => $title,
+        'title' => pht('Query: %s', $title),
       ));
   }
 

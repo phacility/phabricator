@@ -43,10 +43,6 @@
   text-shadow: 0 1px 2px #fff;
 }
 
-.phriction-document-history-diff .phui-object-item-list-view {
-  padding: 0 16px;
-}
-
 .phriction-revert-table {
   width: 100%;
 }
@@ -67,10 +63,7 @@
 .phriction-history-nav-table td {
   width: 50%;
   color: {$darkgreytext};
-}
-
-.phriction-history-nav-table td {
-  padding: 0 12px 12px;
+  padding: 12px;
   background-color: #E5E8EE;
 }
 

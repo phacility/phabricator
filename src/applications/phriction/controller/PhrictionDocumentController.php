@@ -42,8 +42,8 @@ final class PhrictionDocumentController
 
       $create_uri = '/phriction/edit/?slug='.$slug;
 
-      $notice = new PHUIErrorView();
-      $notice->setSeverity(PHUIErrorView::SEVERITY_NODATA);
+      $notice = new PHUIInfoView();
+      $notice->setSeverity(PHUIInfoView::SEVERITY_NODATA);
       $notice->setTitle(pht('No content here!'));
       $notice->appendChild(
         pht(
@@ -67,8 +67,8 @@ final class PhrictionDocumentController
 
         if ($content->getID() != $document->getContentID()) {
           $vdate = phabricator_datetime($content->getDateCreated(), $user);
-          $version_note = new PHUIErrorView();
-          $version_note->setSeverity(PHUIErrorView::SEVERITY_NOTICE);
+          $version_note = new PHUIInfoView();
+          $version_note->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
           $version_note->appendChild(
             pht('You are viewing an older version of this document, as it '.
             'appeared on %s.', $vdate));
@@ -88,16 +88,16 @@ final class PhrictionDocumentController
 
         $core_content = $content->renderContent($user);
       } else if ($current_status == PhrictionChangeType::CHANGE_DELETE) {
-        $notice = new PHUIErrorView();
-        $notice->setSeverity(PHUIErrorView::SEVERITY_NOTICE);
+        $notice = new PHUIInfoView();
+        $notice->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
         $notice->setTitle(pht('Document Deleted'));
         $notice->appendChild(
           pht('This document has been deleted. You can edit it to put new '.
           'content here, or use history to revert to an earlier version.'));
         $core_content = $notice->render();
       } else if ($current_status == PhrictionChangeType::CHANGE_STUB) {
-        $notice = new PHUIErrorView();
-        $notice->setSeverity(PHUIErrorView::SEVERITY_NOTICE);
+        $notice = new PHUIInfoView();
+        $notice->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
         $notice->setTitle(pht('Empty Document'));
         $notice->appendChild(
           pht('This document is empty. You can edit it to put some proper '.
@@ -119,8 +119,8 @@ final class PhrictionDocumentController
           $slug_uri = PhrictionDocument::getSlugURI($new_doc->getSlug());
         }
 
-        $notice = id(new PHUIErrorView())
-          ->setSeverity(PHUIErrorView::SEVERITY_NOTICE);
+        $notice = id(new PHUIInfoView())
+          ->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
 
         if ($slug_uri) {
           $notice->appendChild(
@@ -164,8 +164,8 @@ final class PhrictionDocumentController
           $slug_uri = PhrictionDocument::getSlugURI($from_doc->getSlug());
         }
 
-        $move_notice = id(new PHUIErrorView())
-          ->setSeverity(PHUIErrorView::SEVERITY_NOTICE);
+        $move_notice = id(new PHUIInfoView())
+          ->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
 
         if ($slug_uri) {
           $move_notice->appendChild(

@@ -138,7 +138,7 @@ final class PhabricatorPolicyEditController
       ));
 
     if ($errors) {
-      $errors = id(new PHUIErrorView())
+      $errors = id(new PHUIInfoView())
         ->setErrors($errors);
     }
 

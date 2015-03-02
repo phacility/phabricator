@@ -63,7 +63,7 @@ final class HarbormasterPlanRunController extends HarbormasterController {
     }
 
     if ($errors) {
-      $errors = id(new PHUIErrorView())->setErrors($errors);
+      $errors = id(new PHUIInfoView())->setErrors($errors);
     }
 
     $title = pht('Run Build Plan Manually');

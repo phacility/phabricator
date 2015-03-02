@@ -121,7 +121,7 @@ final class PhabricatorLDAPAuthProvider extends PhabricatorAuthProvider {
           ->setError($e_pass));
 
     if ($errors) {
-      $errors = id(new PHUIErrorView())->setErrors($errors);
+      $errors = id(new PHUIInfoView())->setErrors($errors);
     }
 
     $dialog->appendChild($errors);

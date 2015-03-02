@@ -1,14 +1,14 @@
 <?php
 
-final class PHUIErrorExample extends PhabricatorUIExample {
+final class PHUIInfoExample extends PhabricatorUIExample {
 
   public function getName() {
-    return 'Errors';
+    return 'Info View';
   }
 
   public function getDescription() {
     return hsprintf(
-      'Use <tt>PHUIErrorView</tt> to render errors, warnings and notices.');
+      'Use <tt>PHUIInfoView</tt> to render errors, warnings and notices.');
   }
 
   public function renderExample() {
@@ -16,37 +16,41 @@ final class PHUIErrorExample extends PhabricatorUIExample {
     $user = $request->getUser();
 
     $sevs = array(
-      PHUIErrorView::SEVERITY_ERROR    => 'Error',
-      PHUIErrorView::SEVERITY_WARNING  => 'Warning',
-      PHUIErrorView::SEVERITY_NOTICE   => 'Notice',
-      PHUIErrorView::SEVERITY_NODATA   => 'No Data',
-      PHUIErrorView::SEVERITY_SUCCESS   => 'Success',
+      PHUIInfoView::SEVERITY_ERROR    => 'Error',
+      PHUIInfoView::SEVERITY_WARNING  => 'Warning',
+      PHUIInfoView::SEVERITY_NODATA   => 'No Data',
+      PHUIInfoView::SEVERITY_NOTICE   => 'Notice',
+      PHUIInfoView::SEVERITY_SUCCESS   => 'Success',
     );
 
     $button = id(new PHUIButtonView())
         ->setTag('a')
         ->setText('Resolve Issue')
-        ->addClass('grey');
+        ->setHref('#');
 
     $views = array();
     // Only Title
     foreach ($sevs as $sev => $title) {
-      $view = new PHUIErrorView();
+      $view = new PHUIInfoView();
       $view->setSeverity($sev);
       $view->setTitle($title);
       $views[] = $view;
     }
+    $views[] = phutil_tag('br', array(), null);
+
     // Only Body
     foreach ($sevs as $sev => $title) {
-      $view = new PHUIErrorView();
+      $view = new PHUIInfoView();
       $view->setSeverity($sev);
       $view->appendChild('Several issues were encountered.');
       $view->addButton($button);
       $views[] = $view;
     }
+    $views[] = phutil_tag('br', array(), null);
+
     // Only Errors
     foreach ($sevs as $sev => $title) {
-      $view = new PHUIErrorView();
+      $view = new PHUIInfoView();
       $view->setSeverity($sev);
       $view->setErrors(
         array(
@@ -56,9 +60,11 @@ final class PHUIErrorExample extends PhabricatorUIExample {
         ));
       $views[] = $view;
     }
+    $views[] = phutil_tag('br', array(), null);
+
     // All
     foreach ($sevs as $sev => $title) {
-      $view = new PHUIErrorView();
+      $view = new PHUIInfoView();
       $view->setSeverity($sev);
       $view->setTitle($title);
       $view->appendChild('Several issues were encountered.');

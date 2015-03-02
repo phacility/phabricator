@@ -95,8 +95,8 @@ abstract class PhameController extends PhabricatorController {
     }
 
     if (empty($stories)) {
-      return id(new PHUIErrorView())
-        ->setSeverity(PHUIErrorView::SEVERITY_NODATA)
+      return id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NODATA)
         ->appendChild($nodata);
     }
 

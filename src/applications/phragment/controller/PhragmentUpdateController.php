@@ -43,7 +43,7 @@ final class PhragmentUpdateController extends PhragmentController {
         return id(new AphrontRedirectResponse())
           ->setURI('/phragment/browse/'.$fragment->getPath());
       } else {
-        $error_view = id(new PHUIErrorView())
+        $error_view = id(new PHUIInfoView())
           ->setErrors($errors)
           ->setTitle(pht('Errors while updating fragment'));
       }

@@ -14,6 +14,7 @@
  *   | isExplicitUpload | Used to show users files they explicitly uploaded.
  *   | canCDN | Allows the file to be cached and delivered over a CDN.
  *   | mime-type | Optional, explicit file MIME type.
+ *   | builtin | Optional filename, identifies this as a builtin.
  *
  */
 final class PhabricatorFile extends PhabricatorFileDAO
@@ -31,6 +32,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
   const METADATA_IMAGE_WIDTH  = 'width';
   const METADATA_IMAGE_HEIGHT = 'height';
   const METADATA_CAN_CDN = 'canCDN';
+  const METADATA_BUILTIN = 'builtin';
 
   protected $name;
   protected $mimeType;
@@ -895,6 +897,8 @@ final class PhabricatorFile extends PhabricatorFileDAO
       $params = array(
         'name' => $name,
         'ttl'  => time() + (60 * 60 * 24 * 7),
+        'canCDN' => true,
+        'builtin' => $name,
       );
 
       $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
@@ -978,6 +982,19 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
   public function setCanCDN($can_cdn) {
     $this->metadata[self::METADATA_CAN_CDN] = $can_cdn ? 1 : 0;
+    return $this;
+  }
+
+  public function isBuiltin() {
+    return ($this->getBuiltinName() !== null);
+  }
+
+  public function getBuiltinName() {
+    return idx($this->metadata, self::METADATA_BUILTIN);
+  }
+
+  public function setBuiltinName($name) {
+    $this->metadata[self::METADATA_BUILTIN] = $name;
     return $this;
   }
 
@@ -1078,6 +1095,11 @@ final class PhabricatorFile extends PhabricatorFileDAO
       $this->setCanCDN(true);
     }
 
+    $builtin = idx($params, 'builtin');
+    if ($builtin) {
+      $this->setBuiltinName($builtin);
+    }
+
     $mime_type = idx($params, 'mime-type');
     if ($mime_type) {
       $this->setMimeType($mime_type);
@@ -1142,6 +1164,9 @@ final class PhabricatorFile extends PhabricatorFileDAO
   public function getPolicy($capability) {
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
+        if ($this->isBuiltin()) {
+          return PhabricatorPolicies::getMostOpenPolicy();
+        }
         return $this->getViewPolicy();
       case PhabricatorPolicyCapability::CAN_EDIT:
         return PhabricatorPolicies::POLICY_NOONE;

@@ -438,7 +438,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
     return qsprintf(
       $conn,
-      'id in (%Ld)',
+      'task.id in (%Ld)',
       $this->taskIDs);
   }
 
@@ -449,7 +449,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
     return qsprintf(
       $conn,
-      'phid in (%Ls)',
+      'task.phid in (%Ls)',
       $this->taskPHIDs);
   }
 
@@ -468,12 +468,12 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       case self::STATUS_OPEN:
         return qsprintf(
           $conn,
-          'status IN (%Ls)',
+          'task.status IN (%Ls)',
           ManiphestTaskStatus::getOpenStatusConstants());
       case self::STATUS_CLOSED:
         return qsprintf(
           $conn,
-          'status IN (%Ls)',
+          'task.status IN (%Ls)',
           ManiphestTaskStatus::getClosedStatusConstants());
       default:
         $constant = idx($map, $this->status);
@@ -482,7 +482,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         }
         return qsprintf(
           $conn,
-          'status = %s',
+          'task.status = %s',
           $constant);
     }
   }
@@ -491,7 +491,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     if ($this->statuses) {
       return qsprintf(
         $conn,
-        'status IN (%Ls)',
+        'task.status IN (%Ls)',
         $this->statuses);
     }
     return null;
@@ -501,7 +501,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     if ($this->priorities) {
       return qsprintf(
         $conn,
-        'priority IN (%Ld)',
+        'task.priority IN (%Ld)',
         $this->priorities);
     }
 
@@ -515,7 +515,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
     return qsprintf(
       $conn,
-      'authorPHID in (%Ls)',
+      'task.authorPHID in (%Ls)',
       $this->authorPHIDs);
   }
 
@@ -526,23 +526,23 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       } else if ($this->includeUnowned) {
         return qsprintf(
           $conn,
-          'ownerPHID IS NULL');
+          'task.ownerPHID IS NULL');
       } else {
         return qsprintf(
           $conn,
-          'ownerPHID IS NOT NULL');
+          'task.ownerPHID IS NOT NULL');
       }
     }
 
     if ($this->includeUnowned) {
       return qsprintf(
         $conn,
-        'ownerPHID IN (%Ls) OR ownerPHID IS NULL',
+        'task.ownerPHID IN (%Ls) OR task.ownerPHID IS NULL',
         $this->ownerPHIDs);
     } else {
       return qsprintf(
         $conn,
-        'ownerPHID IN (%Ls)',
+        'task.ownerPHID IN (%Ls)',
         $this->ownerPHIDs);
     }
   }
@@ -572,7 +572,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
     return qsprintf(
       $conn,
-      'phid IN (%Ls)',
+      'task.phid IN (%Ls)',
       $fulltext_results);
   }
 
@@ -680,13 +680,13 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       case self::GROUP_NONE:
         break;
       case self::GROUP_PRIORITY:
-        $order[] = 'priority';
+        $order[] = 'task.priority';
         break;
       case self::GROUP_OWNER:
-        $order[] = 'ownerOrdering';
+        $order[] = 'task.ownerOrdering';
         break;
       case self::GROUP_STATUS:
-        $order[] = 'status';
+        $order[] = 'task.status';
         break;
       case self::GROUP_PROJECT:
         $order[] = '<group.project>';
@@ -700,18 +700,18 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     if (!$app_order) {
       switch ($this->orderBy) {
         case self::ORDER_PRIORITY:
-          $order[] = 'priority';
-          $order[] = 'subpriority';
-          $order[] = 'dateModified';
+          $order[] = 'task.priority';
+          $order[] = 'task.subpriority';
+          $order[] = 'task.dateModified';
           break;
         case self::ORDER_CREATED:
-          $order[] = 'id';
+          $order[] = 'task.id';
           break;
         case self::ORDER_MODIFIED:
-          $order[] = 'dateModified';
+          $order[] = 'task.dateModified';
           break;
         case self::ORDER_TITLE:
-          $order[] = 'title';
+          $order[] = 'task.title';
           break;
         default:
           throw new Exception("Unknown order query '{$this->orderBy}'!");
@@ -730,9 +730,9 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         case 'ownerOrdering':
         case 'title':
           if ($reverse) {
-            $order[$k] = "task.{$column} DESC";
+            $order[$k] = "{$column} DESC";
           } else {
-            $order[$k] = "task.{$column} ASC";
+            $order[$k] = "{$column} ASC";
           }
           break;
         case '<group.project>':
@@ -749,9 +749,9 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
           break;
         default:
           if ($reverse) {
-            $order[$k] = "task.{$column} ASC";
+            $order[$k] = "{$column} ASC";
           } else {
-            $order[$k] = "task.{$column} DESC";
+            $order[$k] = "{$column} DESC";
           }
           break;
       }
@@ -791,17 +791,25 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       $joins[] = qsprintf(
         $conn_r,
         'LEFT JOIN %T blocking ON blocking.src = task.phid '.
-        'AND blocking.type = %d',
+        'AND blocking.type = %d '.
+        'JOIN %T blockingtask ON blocking.dst = blockingtask.phid '.
+        'AND blockingtask.status IN (%Ls)',
         $edge_table,
-        ManiphestTaskDependedOnByTaskEdgeType::EDGECONST);
+        ManiphestTaskDependedOnByTaskEdgeType::EDGECONST,
+        id(new ManiphestTask())->getTableName(),
+        ManiphestTaskStatus::getOpenStatusConstants());
     }
     if ($this->shouldJoinBlockedTasks()) {
       $joins[] = qsprintf(
         $conn_r,
         'LEFT JOIN %T blocked ON blocked.src = task.phid '.
-        'AND blocked.type = %d',
+        'AND blocked.type = %d '.
+        'JOIN %T blockedtask ON blocked.dst = blockedtask.phid '.
+        'AND blockedtask.status IN (%Ls)',
         $edge_table,
-        ManiphestTaskDependsOnTaskEdgeType::EDGECONST);
+        ManiphestTaskDependsOnTaskEdgeType::EDGECONST,
+        id(new ManiphestTask())->getTableName(),
+        ManiphestTaskStatus::getOpenStatusConstants());
     }
 
     if ($this->anyProjectPHIDs || $this->anyUserProjectPHIDs) {

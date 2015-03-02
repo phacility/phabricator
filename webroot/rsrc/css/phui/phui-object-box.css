@@ -21,7 +21,7 @@ div.phui-object-box.phui-object-box-flush {
   padding: 8px 0;
 }
 
-.phui-object-box .phui-header-shell + .phui-error-view {
+.phui-object-box .phui-header-shell + .phui-info-view {
   margin: 0;
   border-width: 0;
   border-bottom: 1px solid {$lightblueborder};

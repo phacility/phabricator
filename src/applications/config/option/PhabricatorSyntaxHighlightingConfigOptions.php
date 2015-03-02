@@ -140,7 +140,7 @@ final class PhabricatorSyntaxHighlightingConfigOptions
       $this->newOption(
         'style.monospace',
         'string',
-        '10px "Menlo", "Consolas", "Monaco", monospace')
+        null)
         ->setLocked(true)
         ->setSummary(
           pht('Default monospace font.'))
@@ -151,7 +151,7 @@ final class PhabricatorSyntaxHighlightingConfigOptions
       $this->newOption(
         'style.monospace.windows',
         'string',
-        '11px "Menlo", "Consolas", "Monaco", monospace')
+        null)
         ->setLocked(true)
         ->setSummary(
           pht('Default monospace font for clients on Windows.'))

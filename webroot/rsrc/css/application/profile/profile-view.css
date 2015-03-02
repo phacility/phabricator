@@ -48,6 +48,10 @@
   max-width: 640px;
 }
 
+.phabricator-project-feed .phui-info-view {
+  margin: 12px 0;
+}
+
 .device-phone .phabricator-project-feed {
   padding: 0 12px;
   width: auto;

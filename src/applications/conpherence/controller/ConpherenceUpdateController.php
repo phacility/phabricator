@@ -165,7 +165,7 @@ final class ConpherenceUpdateController
     }
 
     if ($errors) {
-      $error_view = id(new PHUIErrorView())
+      $error_view = id(new PHUIInfoView())
         ->setErrors($errors);
     }
 

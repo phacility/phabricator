@@ -1,11 +1,11 @@
 <?php
 
-final class PHUIDurableColumn extends AphrontTagView {
+final class ConpherenceDurableColumnView extends AphrontTagView {
 
   protected function getTagAttributes() {
     return array(
       'id' => 'durable-column',
-      'class' => 'phui-durable-column',
+      'class' => 'conpherence-durable-column',
     );
   }
 
@@ -13,7 +13,7 @@ final class PHUIDurableColumn extends AphrontTagView {
     Javelin::initBehavior('durable-column');
 
     $classes = array();
-    $classes[] = 'phui-durable-column-header';
+    $classes[] = 'conpherence-durable-column-header';
     $classes[] = 'sprite-main-header';
     $classes[] = 'main-header-'.PhabricatorEnv::getEnvConfig('ui.header-color');
 
@@ -25,14 +25,14 @@ final class PHUIDurableColumn extends AphrontTagView {
       phutil_tag(
         'div',
         array(
-          'class' => 'phui-durable-column-header-text',
+          'class' => 'conpherence-durable-column-header-text',
         ),
         pht('Column Prototype')));
 
     $icon_bar = phutil_tag(
       'div',
       array(
-        'class' => 'phui-durable-column-icon-bar',
+        'class' => 'conpherence-durable-column-icon-bar',
       ),
       null); // <-- TODO: Icon buttons go here.
 
@@ -45,32 +45,32 @@ final class PHUIDurableColumn extends AphrontTagView {
     $content = phutil_tag(
       'div',
       array(
-        'class' => 'phui-durable-column-main',
+        'class' => 'conpherence-durable-column-main',
       ),
       phutil_tag(
         'div',
         array(
-          'id' => 'phui-durable-column-content',
-          'class' => 'phui-durable-column-frame',
+          'id' => 'conpherence-durable-column-content',
+          'class' => 'conpherence-durable-column-frame',
         ),
         phutil_tag(
           'div',
           array(
-            'class' => 'phui-durable-column-content',
+            'class' => 'conpherence-durable-column-content',
           ),
           $copy)));
 
     $input = phutil_tag(
       'textarea',
       array(
-        'class' => 'phui-durable-column-textarea',
+        'class' => 'conpherence-durable-column-textarea',
         'placeholder' => pht('Box for text...'),
       ));
 
     $footer = phutil_tag(
       'div',
       array(
-        'class' => 'phui-durable-column-footer',
+        'class' => 'conpherence-durable-column-footer',
       ),
       array(
         phutil_tag(
@@ -82,7 +82,7 @@ final class PHUIDurableColumn extends AphrontTagView {
         phutil_tag(
           'div',
           array(
-            'class' => 'phui-durable-column-status',
+            'class' => 'conpherence-durable-column-status',
           ),
           pht('Status Text')),
       ));
@@ -92,7 +92,7 @@ final class PHUIDurableColumn extends AphrontTagView {
       phutil_tag(
         'div',
         array(
-          'class' => 'phui-durable-column-body',
+          'class' => 'conpherence-durable-column-body',
         ),
         array(
           $icon_bar,

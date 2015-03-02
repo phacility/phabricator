@@ -333,9 +333,7 @@ final class PhabricatorProjectBoardViewController
     $nav->appendChild($board_box);
 
     return $this->buildApplicationPage(
-      array(
-        $nav,
-      ),
+      $nav,
       array(
         'title' => pht('%s Board', $project->getName()),
         'showFooter' => false,

@@ -42,8 +42,8 @@ final class HeraldTranscriptController extends HeraldController {
 
     $object_xscript = $xscript->getObjectTranscript();
     if (!$object_xscript) {
-      $notice = id(new PHUIErrorView())
-        ->setSeverity(PHUIErrorView::SEVERITY_NOTICE)
+      $notice = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
         ->setTitle(pht('Old Transcript'))
         ->appendChild(phutil_tag(
           'p',
@@ -75,8 +75,8 @@ final class HeraldTranscriptController extends HeraldController {
       $this->handles = $handles;
 
       if ($xscript->getDryRun()) {
-        $notice = new PHUIErrorView();
-        $notice->setSeverity(PHUIErrorView::SEVERITY_NOTICE);
+        $notice = new PHUIInfoView();
+        $notice->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
         $notice->setTitle(pht('Dry Run'));
         $notice->appendChild(pht('This was a dry run to test Herald '.
           'rules, no actions were executed.'));
@@ -319,8 +319,8 @@ final class HeraldTranscriptController extends HeraldController {
           } else {
             return $panel;
           }
-          $panel = id(new PHUIErrorView())
-            ->setSeverity(PHUIErrorView::SEVERITY_WARNING)
+          $panel = id(new PHUIInfoView())
+            ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
             ->setTitle($title)
             ->appendChild($body);
         }
