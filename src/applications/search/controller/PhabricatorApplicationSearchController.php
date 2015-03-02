@@ -273,7 +273,7 @@ final class PhabricatorApplicationSearchController
     return $this->buildApplicationPage(
       $nav,
       array(
-        'title' => $title,
+        'title' => pht('Query: %s', $title),
       ));
   }
 
