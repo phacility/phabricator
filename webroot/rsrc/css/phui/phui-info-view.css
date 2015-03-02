@@ -30,6 +30,10 @@
   float: right;
 }
 
+.phui-info-view-actions .button {
+  margin-left: 4px;
+}
+
 .phui-info-view-head + .phui-info-view-body {
   padding-top: 4px;
 }

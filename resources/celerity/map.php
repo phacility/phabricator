@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => '2e669d0e',
+    'core.pkg.css' => 'cb58febe',
     'core.pkg.js' => '23d653bb',
     'darkconsole.pkg.js' => '8ab24e01',
     'differential.pkg.css' => '4c3242f8',
@@ -17,7 +17,6 @@ return array(
     'maniphest.pkg.css' => '68d4dd3d',
     'maniphest.pkg.js' => 'df4aa49f',
     'rsrc/css/aphront/aphront-bars.css' => '231ac33c',
-    'rsrc/css/aphront/context-bar.css' => '1c3b0529',
     'rsrc/css/aphront/dark-console.css' => '6378ef3d',
     'rsrc/css/aphront/dialog-view.css' => 'd2e76b88',
     'rsrc/css/aphront/lightbox-attachment.css' => '7acac05d',
@@ -128,7 +127,6 @@ return array(
     'rsrc/css/phui/phui-button.css' => '21cb97f9',
     'rsrc/css/phui/phui-crumbs-view.css' => '594d719e',
     'rsrc/css/phui/phui-document.css' => '620b1eec',
-    'rsrc/css/phui/phui-error-view.css' => 'ffc48131',
     'rsrc/css/phui/phui-feed-story.css' => 'c9f3a0b5',
     'rsrc/css/phui/phui-fontkit.css' => '4394f216',
     'rsrc/css/phui/phui-form-view.css' => '8b78a986',
@@ -137,6 +135,7 @@ return array(
     'rsrc/css/phui/phui-icon.css' => 'd35aa857',
     'rsrc/css/phui/phui-image-mask.css' => '5a8b09c8',
     'rsrc/css/phui/phui-info-panel.css' => '27ea50a1',
+    'rsrc/css/phui/phui-info-view.css' => '0c8e5d50',
     'rsrc/css/phui/phui-list.css' => '53deb25c',
     'rsrc/css/phui/phui-object-box.css' => 'd68ce5dc',
     'rsrc/css/phui/phui-object-item-list-view.css' => '9db65899',
@@ -500,7 +499,6 @@ return array(
   'symbols' => array(
     'almanac-css' => 'dbb9b3af',
     'aphront-bars' => '231ac33c',
-    'aphront-contextbar-view-css' => '1c3b0529',
     'aphront-dark-console-css' => '6378ef3d',
     'aphront-dialog-view-css' => 'd2e76b88',
     'aphront-list-filter-view-css' => '2ae43867',
@@ -791,7 +789,7 @@ return array(
     'phui-icon-view-css' => 'd35aa857',
     'phui-image-mask-css' => '5a8b09c8',
     'phui-info-panel-css' => '27ea50a1',
-    'phui-info-view-css' => 'ffc48131',
+    'phui-info-view-css' => '0c8e5d50',
     'phui-list-view-css' => '53deb25c',
     'phui-object-box-css' => 'd68ce5dc',
     'phui-object-item-list-view-css' => '9db65899',
