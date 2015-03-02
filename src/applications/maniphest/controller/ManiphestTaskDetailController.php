@@ -94,6 +94,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $info_view->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
       $info_view->addButton(
         id(new PHUIButtonView())
+          ->setTag('a')
           ->setHref('/maniphest/task/create/?parent='.$parent_task->getID())
           ->setText(pht('Create Another Subtask')));
 
@@ -105,10 +106,12 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $info_view->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
       $info_view->addButton(
         id(new PHUIButtonView())
+          ->setTag('a')
           ->setHref('/maniphest/task/create/?template='.$task->getID())
           ->setText(pht('Similar Task')));
       $info_view->addButton(
         id(new PHUIButtonView())
+          ->setTag('a')
           ->setHref('/maniphest/task/create/')
           ->setText(pht('Empty Task')));
       $info_view->appendChild(pht('New task created. Create another?'));

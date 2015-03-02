@@ -26,7 +26,7 @@ final class PHUIInfoExample extends PhabricatorUIExample {
     $button = id(new PHUIButtonView())
         ->setTag('a')
         ->setText('Resolve Issue')
-        ->addClass('grey');
+        ->setHref('#');
 
     $views = array();
     // Only Title

@@ -60,52 +60,52 @@ h1.phui-info-view-head {
 }
 
 .phui-info-severity-error,
-.phui-info-severity-error .button {
+.phui-info-severity-error a.button {
   border-color: {$red};
   background: {$lightred};
 }
 
-.phui-info-severity-error .button {
+.phui-info-severity-error a.button {
   color: {$red};
 }
 
 .phui-info-severity-warning,
-.phui-info-severity-warning .button {
+.phui-info-severity-warning a.button {
   border-color: {$yellow};
   background: {$lightyellow};
 }
 
-.phui-info-severity-warning .button {
+.phui-info-severity-warning a.button {
   color: #bc7837;
 }
 
 .phui-info-severity-notice,
-.phui-info-severity-notice .button {
+.phui-info-severity-notice a.button {
   border-color: {$blue};
   background: {$lightblue};
 }
 
-.phui-info-severity-notice .button {
+.phui-info-severity-notice a.button {
   color: {$blue};
 }
 
 .phui-info-severity-nodata,
-.phui-info-severity-nodata .button {
+.phui-info-severity-nodata a.button {
   border-color: {$lightgreyborder};
   background: #fff;
 }
 
-.phui-info-severity-nodata .button {
+.phui-info-severity-nodata a.button {
   color: {$greytext};
 }
 
 .phui-info-severity-success,
-.phui-info-severity-success .button {
+.phui-info-severity-success a.button {
   border-color: {$green};
   background: {$lightgreen};
 }
 
-.phui-info-severity-success .button {
+.phui-info-severity-success a.button {
   color: {$green};
 }
 
