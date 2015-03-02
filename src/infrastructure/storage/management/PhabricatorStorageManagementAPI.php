@@ -11,6 +11,7 @@ final class PhabricatorStorageManagementAPI {
   private $disableUTF8MB4;
 
   const CHARSET_DEFAULT = 'CHARSET';
+  const CHARSET_SORT = 'CHARSET_SORT';
   const CHARSET_FULLTEXT = 'CHARSET_FULLTEXT';
   const COLLATE_TEXT = 'COLLATE_TEXT';
   const COLLATE_SORT = 'COLLATE_SORT';
@@ -254,6 +255,7 @@ final class PhabricatorStorageManagementAPI {
       // collation. This is most correct, and will sort properly.
 
       $charset = 'utf8mb4';
+      $charset_sort = 'utf8mb4';
       $charset_full = 'utf8mb4';
       $collate_text = 'utf8mb4_bin';
       $collate_sort = 'utf8mb4_unicode_ci';
@@ -282,6 +284,7 @@ final class PhabricatorStorageManagementAPI {
       // are not giving up too much.
 
       $charset = 'binary';
+      $charset_sort = 'utf8';
       $charset_full = 'utf8';
       $collate_text = 'binary';
       $collate_sort = 'utf8_general_ci';
@@ -290,6 +293,7 @@ final class PhabricatorStorageManagementAPI {
 
     return array(
       self::CHARSET_DEFAULT => $charset,
+      self::CHARSET_SORT => $charset_sort,
       self::CHARSET_FULLTEXT => $charset_full,
       self::COLLATE_TEXT => $collate_text,
       self::COLLATE_SORT => $collate_sort,
