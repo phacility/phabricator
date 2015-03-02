@@ -8,6 +8,13 @@ final class PhortuneSubscriptionWorker extends PhabricatorWorker {
     $range = $this->getBillingPeriodRange($subscription);
     list($last_epoch, $next_epoch) = $range;
 
+    $should_invoice = $subscription->shouldInvoiceForBillingPeriod(
+      $last_epoch,
+      $next_epoch);
+    if (!$should_invoice) {
+      return;
+    }
+
     $account = $subscription->getAccount();
     $merchant = $subscription->getMerchant();
 
@@ -20,7 +27,6 @@ final class PhortuneSubscriptionWorker extends PhabricatorWorker {
 
     $cart_implementation = id(new PhortuneSubscriptionCart())
       ->setSubscription($subscription);
-
 
     // TODO: This isn't really ideal. It would be better to use an application
     // actor than the original author of the subscription. In particular, if

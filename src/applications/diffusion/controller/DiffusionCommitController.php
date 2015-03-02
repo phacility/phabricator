@@ -52,7 +52,7 @@ final class DiffusionCommitController extends DiffusionController {
         return new Aphront404Response();
       }
 
-      $error = id(new PHUIErrorView())
+      $error = id(new PHUIInfoView())
         ->setTitle(pht('Commit Still Parsing'))
         ->appendChild(
           pht(
@@ -79,9 +79,9 @@ final class DiffusionCommitController extends DiffusionController {
     if ($is_foreign) {
       $subpath = $commit_data->getCommitDetail('svn-subpath');
 
-      $error_panel = new PHUIErrorView();
+      $error_panel = new PHUIInfoView();
       $error_panel->setTitle(pht('Commit Not Tracked'));
-      $error_panel->setSeverity(PHUIErrorView::SEVERITY_WARNING);
+      $error_panel->setSeverity(PHUIInfoView::SEVERITY_WARNING);
       $error_panel->appendChild(
         pht("This Diffusion repository is configured to track only one ".
         "subdirectory of the entire Subversion repository, and this commit ".
@@ -251,8 +251,8 @@ final class DiffusionCommitController extends DiffusionController {
           ->setTag('a')
           ->setIcon($icon);
 
-        $warning_view = id(new PHUIErrorView())
-          ->setSeverity(PHUIErrorView::SEVERITY_WARNING)
+        $warning_view = id(new PHUIInfoView())
+          ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
           ->setTitle('Very Large Commit')
           ->appendChild(
             pht('This commit is very large. Load each file individually.'));

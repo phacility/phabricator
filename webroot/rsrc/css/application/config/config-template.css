@@ -6,7 +6,8 @@ body {
   background: #f9f9f9;
   margin: 0;
   padding: 0;
-  font: 13px/1.231 'Helvetica Neue', Arial, sans-serif;
+  font: 13px/1.231 'Segoe UI', 'Segoe UI Web Regular', 'Segoe UI Symbol',
+    'Helvetica Neue', Helvetica, Arial, sans-serif;
   text-align: left;
   -webkit-text-size-adjust: none;
 }

@@ -228,7 +228,7 @@ final class PhabricatorEmailAddressesSettingsPanel
     }
 
     if ($errors) {
-      $errors = id(new PHUIErrorView())
+      $errors = id(new PHUIInfoView())
         ->setErrors($errors);
     }
 

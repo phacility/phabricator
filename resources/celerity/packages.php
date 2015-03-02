@@ -94,7 +94,7 @@ return array(
     'phabricator-transaction-view-css',
     'aphront-tooltip-css',
     'phabricator-flag-css',
-    'phui-error-view-css',
+    'phui-info-view-css',
 
     'sprite-gradient-css',
     'sprite-menu-css',

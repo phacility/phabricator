@@ -64,9 +64,7 @@ final class PhabricatorProjectProfileController
     $nav->appendChild($timeline);
 
     return $this->buildApplicationPage(
-      array(
-        $nav,
-      ),
+      $nav,
       array(
         'title' => $project->getName(),
       ));

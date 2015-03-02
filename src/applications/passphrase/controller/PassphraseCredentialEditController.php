@@ -322,7 +322,7 @@ final class PassphraseCredentialEditController extends PassphraseController {
 
     if ($request->isAjax()) {
       if ($errors) {
-        $errors = id(new PHUIErrorView())->setErrors($errors);
+        $errors = id(new PHUIInfoView())->setErrors($errors);
       }
 
       $dialog = id(new AphrontDialogView())

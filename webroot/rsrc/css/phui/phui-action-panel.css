@@ -6,7 +6,7 @@
   position: relative;
 }
 
-.phui-action-panel-has-state.phui-action-panel {
+.phui-action-panel-has-status.phui-action-panel {
   padding-bottom: 44px;
 }
 
@@ -64,6 +64,10 @@
   bottom: 0;
   left: 0;
   right: 0;
+}
+
+.phui-action-panel-status:hover {
+  text-decoration: none;
 }
 
 .phui-action-panel-none .phui-action-panel-status {

@@ -82,8 +82,8 @@ final class PHUIActionPanelView extends AphrontTagView {
 
     $classes = array();
     $classes[] = 'phui-action-panel';
-    if ($this->state) {
-      $classes[] = 'phui-action-panel-has-state';
+    if ($this->status) {
+      $classes[] = 'phui-action-panel-has-status';
       $classes[] = $this->state;
 
     }
@@ -158,9 +158,10 @@ final class PHUIActionPanelView extends AphrontTagView {
     if ($this->status && $this->state) {
       $state_icon = $this->getStateIcon();
       $status = phutil_tag(
-        'div',
+        ($this->href) ? 'a' : 'div',
         array(
           'class' => 'phui-action-panel-status',
+          'href' => ($this->href) ? $this->href : null,
         ),
         array($state_icon, $this->status));
     }

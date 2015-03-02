@@ -43,13 +43,13 @@ final class PhabricatorDaemonManagementLaunchWorkflow
         pht('You must specify which daemon to launch.'));
     }
 
-    $daemon_class = array_shift($argv);
+    $daemon = array();
+    $daemon['class'] = array_shift($argv);
+    $daemon['argv'] = $argv;
 
-    $this->willLaunchDaemons();
+    $daemons = array_fill(0, $daemon_count, $daemon);
 
-    for ($ii = 0; $ii < $daemon_count; $ii++) {
-      $this->launchDaemon($daemon_class, $argv, $is_debug = false);
-    }
+    $this->launchDaemons($daemons, $is_debug = false);
 
     return 0;
   }

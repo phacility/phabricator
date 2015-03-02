@@ -11,13 +11,14 @@ final class PhabricatorDaemonLogQuery
   private $status = self::STATUS_ALL;
   private $daemonClasses;
   private $allowStatusWrites;
+  private $daemonIDs;
 
   public static function getTimeUntilUnknown() {
-    return 3 * PhutilDaemonOverseer::HEARTBEAT_WAIT;
+    return 3 * PhutilDaemonHandle::getHeartbeatEventFrequency();
   }
 
   public static function getTimeUntilDead() {
-    return 30 * PhutilDaemonOverseer::HEARTBEAT_WAIT;
+    return 30 * PhutilDaemonHandle::getHeartbeatEventFrequency();
   }
 
   public function withIDs(array $ids) {
@@ -42,6 +43,11 @@ final class PhabricatorDaemonLogQuery
 
   public function setAllowStatusWrites($allow) {
     $this->allowStatusWrites = $allow;
+    return $this;
+  }
+
+  public function withDaemonIDs(array $daemon_ids) {
+    $this->daemonIDs = $daemon_ids;
     return $this;
   }
 
@@ -120,14 +126,14 @@ final class PhabricatorDaemonLogQuery
   private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn_r,
         'id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->notIDs) {
+    if ($this->notIDs !== null) {
       $where[] = qsprintf(
         $conn_r,
         'id NOT IN (%Ld)',
@@ -141,11 +147,18 @@ final class PhabricatorDaemonLogQuery
         $this->getStatusConstants());
     }
 
-    if ($this->daemonClasses) {
+    if ($this->daemonClasses !== null) {
       $where[] = qsprintf(
         $conn_r,
         'daemon IN (%Ls)',
         $this->daemonClasses);
+    }
+
+    if ($this->daemonIDs !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'daemonID IN (%Ls)',
+        $this->daemonIDs);
     }
 
     $where[] = $this->buildPagingClause($conn_r);
@@ -165,7 +178,7 @@ final class PhabricatorDaemonLogQuery
           PhabricatorDaemonLog::STATUS_EXITING,
         );
       default:
-        throw new Exception("Unknown status '{$status}'!");
+        throw new Exception(pht('Unknown status "%s"!', $status));
     }
   }
 

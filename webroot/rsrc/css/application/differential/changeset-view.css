@@ -62,7 +62,6 @@
   color:              {$bluetext};
   cursor:             pointer;
   border-right:       1px solid {$thinblueborder};
-  font-size:          11px;
   overflow:           hidden;
 
   -moz-user-select:     -moz-none;
@@ -179,7 +178,7 @@ td.cov-I {
 
 .differential-diff td.show-more,
 .differential-diff td.differential-shield {
-  font-family: "Helvetica Neue", "Arial", sans-serif;
+  font: {$basefont};
   font-size:   12px;
   white-space: normal;
 }
@@ -256,7 +255,7 @@ td.cov-I {
 .differential-inline-comment-edit {
   background:         #ffffee;
   border:             1px solid #ccccaa;
-  font-family:        "Helvetica Neue", "Arial", sans-serif;
+  font:               {$basefont};
   font-size:          12px;
   margin:             6px 0px;
   padding:            8px 10px;

@@ -5,28 +5,28 @@ final class PhabricatorDaemonEventListener extends PhabricatorEventListener {
   private $daemons = array();
 
   public function register() {
-    $this->listen(PhutilDaemonOverseer::EVENT_DID_LAUNCH);
-    $this->listen(PhutilDaemonOverseer::EVENT_DID_LOG);
-    $this->listen(PhutilDaemonOverseer::EVENT_DID_HEARTBEAT);
-    $this->listen(PhutilDaemonOverseer::EVENT_WILL_GRACEFUL);
-    $this->listen(PhutilDaemonOverseer::EVENT_WILL_EXIT);
+    $this->listen(PhutilDaemonHandle::EVENT_DID_LAUNCH);
+    $this->listen(PhutilDaemonHandle::EVENT_DID_LOG);
+    $this->listen(PhutilDaemonHandle::EVENT_DID_HEARTBEAT);
+    $this->listen(PhutilDaemonHandle::EVENT_WILL_GRACEFUL);
+    $this->listen(PhutilDaemonHandle::EVENT_WILL_EXIT);
   }
 
   public function handleEvent(PhutilEvent $event) {
     switch ($event->getType()) {
-      case PhutilDaemonOverseer::EVENT_DID_LAUNCH:
+      case PhutilDaemonHandle::EVENT_DID_LAUNCH:
         $this->handleLaunchEvent($event);
         break;
-      case PhutilDaemonOverseer::EVENT_DID_HEARTBEAT:
+      case PhutilDaemonHandle::EVENT_DID_HEARTBEAT:
         $this->handleHeartbeatEvent($event);
         break;
-      case PhutilDaemonOverseer::EVENT_DID_LOG:
+      case PhutilDaemonHandle::EVENT_DID_LOG:
         $this->handleLogEvent($event);
         break;
-      case PhutilDaemonOverseer::EVENT_WILL_GRACEFUL:
+      case PhutilDaemonHandle::EVENT_WILL_GRACEFUL:
         $this->handleGracefulEvent($event);
         break;
-      case PhutilDaemonOverseer::EVENT_WILL_EXIT:
+      case PhutilDaemonHandle::EVENT_WILL_EXIT:
         $this->handleExitEvent($event);
         break;
     }
@@ -37,6 +37,7 @@ final class PhabricatorDaemonEventListener extends PhabricatorEventListener {
     $current_user = posix_getpwuid(posix_geteuid());
 
     $daemon = id(new PhabricatorDaemonLog())
+      ->setDaemonID($id)
       ->setDaemon($event->getValue('daemonClass'))
       ->setHost(php_uname('n'))
       ->setPID(getmypid())
@@ -114,7 +115,7 @@ final class PhabricatorDaemonEventListener extends PhabricatorEventListener {
     if (isset($this->daemons[$id])) {
       return $this->daemons[$id];
     }
-    throw new Exception("No such daemon '{$id}'!");
+    throw new Exception(pht('No such daemon "%s"!', $id));
   }
 
 }

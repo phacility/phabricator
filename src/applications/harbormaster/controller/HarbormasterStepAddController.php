@@ -50,7 +50,7 @@ final class HarbormasterStepAddController extends HarbormasterController {
     }
 
     if ($errors) {
-      $errors = id(new PHUIErrorView())
+      $errors = id(new PHUIInfoView())
         ->setErrors($errors);
     }
 

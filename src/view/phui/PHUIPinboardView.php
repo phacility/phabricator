@@ -20,8 +20,8 @@ final class PHUIPinboardView extends AphrontView {
 
     if (!$this->items) {
       $string = nonempty($this->noDataString, pht('No data.'));
-      return id(new PHUIErrorView())
-        ->setSeverity(PHUIErrorView::SEVERITY_NODATA)
+      return id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NODATA)
         ->appendChild($string)
         ->render();
     }

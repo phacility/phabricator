@@ -131,17 +131,17 @@ final class PhabricatorAuthListController
     }
 
     if (!$domains_value && !$approval_value) {
-      $severity = PHUIErrorView::SEVERITY_WARNING;
+      $severity = PHUIInfoView::SEVERITY_WARNING;
       $issues[] = pht(
         'You can safely ignore this warning if the install itself has '.
         'access controls (for example, it is deployed on a VPN) or if all of '.
         'the configured providers have access controls (for example, they are '.
         'all private LDAP or OAuth servers).');
     } else {
-      $severity = PHUIErrorView::SEVERITY_NOTICE;
+      $severity = PHUIInfoView::SEVERITY_NOTICE;
     }
 
-    $warning = id(new PHUIErrorView())
+    $warning = id(new PHUIInfoView())
       ->setSeverity($severity)
       ->setErrors($issues);
 

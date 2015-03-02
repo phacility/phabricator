@@ -108,8 +108,8 @@ final class PHUIObjectItemListView extends AphrontTagView {
       $items = null;
     } else {
       $string = nonempty($this->noDataString, pht('No data.'));
-      $string = id(new PHUIErrorView())
-        ->setSeverity(PHUIErrorView::SEVERITY_NODATA)
+      $string = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NODATA)
         ->appendChild($string);
       $items = phutil_tag(
         'li',

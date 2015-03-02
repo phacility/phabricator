@@ -17,6 +17,21 @@
   line-height: 18px;
 }
 
+.PhabricatorMonospaced .phui-document-view .phui-font-source-sans,
+.phui-document-view .phui-font-source-sans .phabricator-remarkup
+  .remarkup-code-block .remarkup-code {
+  font-size: 11px;
+  line-height: 1.3em;
+}
+
+.platform-windows .PhabricatorMonospaced .phui-document-view
+  .phui-font-source-sans,
+.platform-windows .phui-document-view .phui-font-source-sans
+  .phabricator-remarkup .remarkup-code-block .remarkup-code {
+  font-size: 12px;
+  line-height: 1.3em;
+}
+
 .phui-font-source-sans .phabricator-remarkup h2.remarkup-header {
   padding: 8px 24px 8px 0;
   border-bottom: 1px solid {$thinblueborder};
@@ -50,13 +65,13 @@
 
 .phui-font-source-sans .phui-property-list-container {
   padding-bottom: 6px;
-  font-family: 'Helvetica Neue', Arial, sans-serif;
-  font-size: 13px;
+  font: {$basefont};
   line-height: 16px;
 }
 
 .phui-font-source-sans .phabricator-action-view {
-  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font: {$basefont};
+  font-size: 12px;
 }
 
 .phui-font-source-sans a.atom-ref,
@@ -70,7 +85,7 @@ body .phui-font-source-sans
 }
 
 .phui-font-source-sans .phui-form-view {
-  font: 13px/1.231 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font: {$basefont};
   font-weight: normal;
 }
 

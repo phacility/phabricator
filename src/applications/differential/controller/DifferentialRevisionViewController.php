@@ -137,9 +137,9 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $large = $request->getStr('large');
     if (count($changesets) > $limit && !$large) {
       $count = count($changesets);
-      $warning = new PHUIErrorView();
+      $warning = new PHUIInfoView();
       $warning->setTitle('Very Large Diff');
-      $warning->setSeverity(PHUIErrorView::SEVERITY_WARNING);
+      $warning->setSeverity(PHUIInfoView::SEVERITY_WARNING);
       $warning->appendChild(hsprintf(
         '%s <strong>%s</strong>',
         pht(
@@ -258,8 +258,8 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $warning_handle_map,
       $handles);
     if ($revision_warnings) {
-      $revision_warnings = id(new PHUIErrorView())
-        ->setSeverity(PHUIErrorView::SEVERITY_WARNING)
+      $revision_warnings = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
         ->setErrors($revision_warnings);
       $revision_detail_box->setErrorView($revision_warnings);
     }
@@ -386,8 +386,8 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $review_warnings = array_mergev($review_warnings);
 
       if ($review_warnings) {
-        $review_warnings_panel = id(new PHUIErrorView())
-          ->setSeverity(PHUIErrorView::SEVERITY_WARNING)
+        $review_warnings_panel = id(new PHUIInfoView())
+          ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
           ->setErrors($review_warnings);
         $comment_form->setErrorView($review_warnings_panel);
       }
