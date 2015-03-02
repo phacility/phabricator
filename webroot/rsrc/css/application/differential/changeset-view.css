@@ -6,6 +6,7 @@
   position: relative;
   margin: 0;
   padding-top: 32px;
+  border-bottom: 1px solid {$lightblueborder};
   overflow-x: auto;
 }
 

@@ -1,6 +1,6 @@
 {
-  "project.name" : "phabricator",
-  "phabricator.uri" : "https://secure.phabricator.com/",
+  "project.name" : "custom_phabricator",
+  "phabricator.uri" : "http://ec2-54-69-108-116.us-west-2.compute.amazonaws.com/",
   "unit.engine" : "PhutilUnitTestEngine",
   "load" : ["src/"]
 }
