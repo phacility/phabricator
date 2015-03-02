@@ -7,8 +7,8 @@ final class PhabricatorPholioMockTestDataGenerator
     $author_phid = $this->loadPhabrictorUserPHID();
     $author = id(new PhabricatorUser())
           ->loadOneWhere('phid = %s', $author_phid);
-    $mock = id(new PholioMock())
-      ->setAuthorPHID($author_phid);
+    $mock = PholioMock::initializeNewMock($author);
+
     $content_source = PhabricatorContentSource::newForSource(
       PhabricatorContentSource::SOURCE_UNKNOWN,
       array());
