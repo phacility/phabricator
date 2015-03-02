@@ -87,10 +87,34 @@ final class PhabricatorConfigManagementSetWorkflow
       default:
         $value = json_decode($value, true);
         if (!is_array($value)) {
-          throw new PhutilArgumentUsageException(pht(
-            "Config key '%s' is of type '%s'. Specify it in JSON.",
-            $key,
-            $type));
+          switch ($type) {
+            case 'set':
+              $message = pht(
+                "Config key '%s' is of type '%s'. Specify it in JSON. ".
+                "For example:\n\n".
+                '    ./bin/config set \'{"value1": true, "value2": true}\''.
+                "\n",
+                $key,
+                $type);
+              break;
+            default:
+              if (preg_match('/^list</', $type)) {
+                $message = pht(
+                  "Config key '%s' is of type '%s'. Specify it in JSON. ".
+                  "For example:\n\n".
+                  '    ./bin/config set \'["a", "b", "c"]\''.
+                  "\n",
+                  $key,
+                  $type);
+              } else {
+                $message = pht(
+                  'Config key "%s" is of type "%s". Specify it in JSON.',
+                  $key,
+                  $type);
+              }
+              break;
+          }
+          throw new PhutilArgumentUsageException($message);
         }
         break;
     }
