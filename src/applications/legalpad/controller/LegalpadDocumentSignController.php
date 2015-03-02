@@ -6,6 +6,10 @@ final class LegalpadDocumentSignController extends LegalpadController {
     return true;
   }
 
+  public function shouldAllowLegallyNonCompliantUsers() {
+    return true;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getUser();
 
