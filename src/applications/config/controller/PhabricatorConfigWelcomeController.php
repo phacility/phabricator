@@ -28,10 +28,8 @@ final class PhabricatorConfigWelcomeController
 
   public function buildWelcomeScreen(AphrontRequest $request) {
     $viewer = $request->getUser();
-    $this->requireResource('config-welcome-css');
 
     $content = pht(
-      "**Welcome to Phabricator!**\n\n".
       "You have successfully installed Phabricator. This screen will guide ".
       "you through configuration and orientation.\n\n".
       "These steps are optional, and you can go through them in any order.\n\n".
@@ -344,45 +342,29 @@ final class PhabricatorConfigWelcomeController
   }
 
   private function newColumns($title, array $items) {
-    $col1 = array();
-    $col2 = array();
-    for ($ii = 0; $ii < count($items); $ii += 2) {
-      $col1[] = $items[$ii];
-      if (isset($items[$ii + 1])) {
-        $col2[] = $items[$ii + 1];
-      }
-    }
-
-    $header = id(new PHUIHeaderView())->setHeader($title);
-
-    $columns = id(new AphrontMultiColumnView())
-      ->addColumn($col1)
-      ->addColumn($col2)
-      ->setFluidLayout(true);
-
-    return phutil_tag(
+    $items =  phutil_tag(
       'div',
       array(
         'class' => 'config-welcome',
       ),
-      array(
-        $header,
-        $columns,
-      ));
+      $items);
+
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText($title)
+      ->appendChild($items);
   }
 
   private function newItem(AphrontRequest $request, $title, $done, $content) {
     $viewer = $request->getUser();
 
-    $box = new PHUIObjectBoxView();
-    $header = new PHUIActionHeaderView();
-    $header->setHeaderTitle($title);
+    $box = new PHUIInfoView();
+    $box->setTitle($title);
     if ($done === true) {
-      $box->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTGREEN);
-      $header->addAction(id(new PHUIIconView())->setIconFont('fa-check'));
+      $box->setSeverity(PHUIInfoView::SEVERITY_SUCCESS);
     } else if ($done === false) {
-      $box->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTVIOLET);
-      $header->addAction(id(new PHUIIconView())->setIconFont('fa-exclamation'));
+      $box->setSeverity(PHUIInfoView::SEVERITY_WARNING);
+    } else {
+      $box->setSeverity(PHUIInfoView::SEVERITY_NODATA);
     }
 
     $content = PhabricatorMarkupEngine::renderOneObject(
@@ -397,7 +379,6 @@ final class PhabricatorConfigWelcomeController
       ),
       $content);
 
-    $box->setHeader($header);
     $box->appendChild($content);
 
     return $box;

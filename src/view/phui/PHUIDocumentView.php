@@ -17,6 +17,7 @@ final class PHUIDocumentView extends AphrontTagView {
   private $mobileview;
   private $fontKit;
   private $actionListID;
+  private $fluid;
 
   public function setOffset($offset) {
     $this->offset = $offset;
@@ -63,12 +64,21 @@ final class PHUIDocumentView extends AphrontTagView {
     return $this;
   }
 
+  public function setFluid($fluid) {
+    $this->fluid = $fluid;
+    return $this;
+  }
+
   protected function getTagAttributes() {
     $classes = array();
 
     if ($this->offset) {
       $classes[] = 'phui-document-offset';
     };
+
+    if ($this->fluid) {
+      $classes[] = 'phui-document-fluid';
+    }
 
     return array(
       'class' => $classes,
