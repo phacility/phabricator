@@ -10,7 +10,6 @@ a navigational command into the box and press return.
 
 = Supported Commands =
 
-  - **help** - Jump to this document.
   - **T** - Jump to Maniphest.
   - **T123** - Jump to Maniphest Task 123.
   - **D** - Jump to Differential.
