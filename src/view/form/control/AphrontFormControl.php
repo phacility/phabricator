@@ -14,6 +14,7 @@ abstract class AphrontFormControl extends AphrontView {
   private $formPage;
   private $required;
   private $hidden;
+  private $classes;
 
   public function setHidden($hidden) {
     $this->hidden = $hidden;
@@ -162,6 +163,11 @@ abstract class AphrontFormControl extends AphrontView {
     return true;
   }
 
+  public function addClass($class) {
+    $this->classes[] = $class;
+    return $this;
+  }
+
   final public function render() {
     if (!$this->shouldRender()) {
       return null;
@@ -225,6 +231,11 @@ abstract class AphrontFormControl extends AphrontView {
     $classes[] = 'aphront-form-control';
     $classes[] = 'grouped';
     $classes[] = $custom_class;
+    if ($this->classes) {
+      foreach ($this->classes as $class) {
+        $classes[] = $class;
+      }
+    }
 
     $style = $this->controlStyle;
     if ($this->hidden) {

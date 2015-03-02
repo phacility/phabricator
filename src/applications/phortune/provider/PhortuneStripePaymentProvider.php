@@ -277,6 +277,8 @@ final class PhortuneStripePaymentProvider extends PhortunePaymentProvider {
     array $errors) {
 
     $ccform = id(new PhortuneCreditCardForm())
+      ->setSecurityAssurance(
+        pht('Payments are processed securely by Stripe.'))
       ->setUser($request->getUser())
       ->setErrors($errors)
       ->addScript('https://js.stripe.com/v2/');

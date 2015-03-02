@@ -103,6 +103,20 @@ final class PhortuneSubscriptionEditController extends PhortuneController {
       $view_uri);
     $crumbs->addTextCrumb(pht('Edit'));
 
+
+    $uri = $this->getApplicationURI($account->getID().'/card/new/');
+    $uri = new PhutilURI($uri);
+    $uri->setQueryParam('merchantID', $merchant->getID());
+    $uri->setQueryParam('subscriptionID', $subscription->getID());
+
+    $add_method_button = phutil_tag(
+      'a',
+      array(
+        'href' => $uri,
+        'class' => 'button grey',
+      ),
+      pht('Add Payment Method...'));
+
     $form = id(new AphrontFormView())
       ->setUser($viewer)
       ->appendChild(
@@ -111,6 +125,9 @@ final class PhortuneSubscriptionEditController extends PhortuneController {
           ->setLabel(pht('Autopay With'))
           ->setValue($current_phid)
           ->setOptions($options))
+      ->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setValue($add_method_button))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Save Changes'))

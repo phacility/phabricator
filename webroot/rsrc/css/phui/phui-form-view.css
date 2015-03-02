@@ -111,6 +111,10 @@
   width: 100%;
 }
 
+.aphront-form-cvc-input input {
+  width: 64px;
+}
+
 .aphront-form-input textarea {
   display: block;
   width: 100%;

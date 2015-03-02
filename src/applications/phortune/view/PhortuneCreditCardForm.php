@@ -10,6 +10,16 @@ final class PhortuneCreditCardForm {
   private $cardNumberError;
   private $cardCVCError;
   private $cardExpirationError;
+  private $securityAssurance;
+
+  public function setSecurityAssurance($security_assurance) {
+    $this->securityAssurance = $security_assurance;
+    return $this;
+  }
+
+  public function getSecurityAssurance() {
+    return $this->securityAssurance;
+  }
 
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
@@ -57,11 +67,11 @@ final class PhortuneCreditCardForm {
     $errors = $this->errors;
     $e_number = isset($errors[PhortuneErrCode::ERR_CC_INVALID_NUMBER])
       ? pht('Invalid')
-      : true;
+      : null;
 
     $e_cvc = isset($errors[PhortuneErrCode::ERR_CC_INVALID_CVC])
       ? pht('Invalid')
-      : true;
+      : null;
 
     $e_expiry = isset($errors[PhortuneErrCode::ERR_CC_INVALID_EXPIRY])
       ? pht('Invalid')
@@ -70,37 +80,42 @@ final class PhortuneCreditCardForm {
     $form
       ->setID($form_id)
       ->appendChild(
-        id(new AphrontFormMarkupControl())
-        ->setLabel('')
-        ->setValue(
-          javelin_tag(
-            'div',
-            array(
-              'class' => 'credit-card-logos',
-              'sigil' => 'has-tooltip',
-              'meta' => array(
-                'tip'  => 'We support Visa, Mastercard, American Express, '.
-                          'Discover, JCB, and Diners Club.',
-                'size' => 440,
-              ),
-            ))))
+        id(new AphrontFormTextControl())
+          ->setLabel('Card Number')
+          ->setDisableAutocomplete(true)
+          ->setSigil('number-input')
+          ->setError($e_number))
       ->appendChild(
         id(new AphrontFormTextControl())
-        ->setLabel('Card Number')
-        ->setDisableAutocomplete(true)
-        ->setSigil('number-input')
-        ->setError($e_number))
-      ->appendChild(
-        id(new AphrontFormTextControl())
-        ->setLabel('CVC')
-        ->setDisableAutocomplete(true)
-        ->setSigil('cvc-input')
-        ->setError($e_cvc))
+          ->setLabel('CVC')
+          ->setDisableAutocomplete(true)
+          ->addClass('aphront-form-cvc-input')
+          ->setSigil('cvc-input')
+          ->setError($e_cvc))
       ->appendChild(
         id(new PhortuneMonthYearExpiryControl())
-        ->setLabel('Expiration')
-        ->setUser($this->user)
-        ->setError($e_expiry));
+          ->setLabel('Expiration')
+          ->setUser($this->user)
+          ->setError($e_expiry));
+
+    $assurance = $this->getSecurityAssurance();
+    if ($assurance) {
+      $assurance = phutil_tag(
+        'div',
+        array(
+          'class' => 'phortune-security-assurance',
+        ),
+        array(
+          id(new PHUIIconView())
+            ->setIconFont('fa-lock grey'),
+          ' ',
+          $assurance,
+        ));
+
+      $form->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setValue($assurance));
+    }
 
     return $form;
   }
