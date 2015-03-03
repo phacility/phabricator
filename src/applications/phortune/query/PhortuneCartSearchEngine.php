@@ -7,6 +7,11 @@ final class PhortuneCartSearchEngine
   private $account;
   private $subscription;
 
+  public function canUseInPanelContext() {
+    // These only make sense in an account or merchant context.
+    return false;
+  }
+
   public function setAccount(PhortuneAccount $account) {
     $this->account = $account;
     return $this;
