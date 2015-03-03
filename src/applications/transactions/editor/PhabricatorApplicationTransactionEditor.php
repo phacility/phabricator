@@ -1397,9 +1397,14 @@ abstract class PhabricatorApplicationTransactionEditor
   }
 
   protected function getPHIDTransactionNewValue(
-    PhabricatorApplicationTransaction $xaction) {
+    PhabricatorApplicationTransaction $xaction,
+    $old = null) {
 
-    $old = array_fuse($xaction->getOldValue());
+    if ($old) {
+      $old = array_fuse($old);
+    } else {
+      $old = array_fuse($xaction->getOldValue());
+    }
 
     $new = $xaction->getNewValue();
     $new_add = idx($new, '+', array());
