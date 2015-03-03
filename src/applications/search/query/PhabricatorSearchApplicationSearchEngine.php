@@ -251,33 +251,24 @@ final class PhabricatorSearchApplicationSearchEngine
         ->withPHIDs(mpull($results, 'getPHID'))
         ->execute();
 
-      $output = array();
+      $list = new PHUIObjectItemListView();
       foreach ($results as $phid => $handle) {
         $view = id(new PhabricatorSearchResultView())
           ->setHandle($handle)
           ->setQuery($query)
-          ->setObject(idx($objects, $phid));
-        $output[] = $view->render();
+          ->setObject(idx($objects, $phid))
+          ->render();
+        $list->addItem($view);
       }
 
-      $results = phutil_tag_div(
-        'phabricator-search-result-list',
-        $output);
+      $results = $list;
     } else {
-      $results = phutil_tag_div(
-        'phabricator-search-result-list',
-        phutil_tag(
-          'p',
-          array('class' => 'phabricator-search-no-results'),
-          pht('No search results.')));
+      $results = id(new PHUIInfoView())
+        ->appendChild(pht('No results returned for that query.'))
+        ->setSeverity(PHUIInfoView::SEVERITY_NODATA);
     }
 
-    return id(new PHUIBoxView())
-      ->addMargin(PHUI::MARGIN_LARGE)
-      ->addPadding(PHUI::PADDING_LARGE)
-      ->setBorder(true)
-      ->appendChild($results)
-      ->addClass('phabricator-search-result-box');
+    return $results;
   }
 
 }
