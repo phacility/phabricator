@@ -35,6 +35,11 @@ final class PhortuneSubscriptionEditController extends PhortuneController {
     $valid_methods = id(new PhortunePaymentMethodQuery())
       ->setViewer($viewer)
       ->withAccountPHIDs(array($account->getPHID()))
+      ->withStatuses(
+        array(
+          PhortunePaymentMethod::STATUS_ACTIVE,
+        ))
+      ->withMerchantPHIDs(array($merchant->getPHID()))
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
