@@ -195,8 +195,8 @@ final class PhortuneCart extends PhortuneDAO
     // TODO: Perform purchase review. Here, we would apply rules to determine
     // whether the charge needs manual review (maybe making the decision via
     // Herald, configuration, or by examining provider fraud data). For now,
-    // always require review.
-    $needs_review = true;
+    // don't require review.
+    $needs_review = false;
 
     if ($needs_review) {
       $this->willReviewCart();
