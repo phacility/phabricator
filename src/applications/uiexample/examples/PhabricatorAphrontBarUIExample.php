@@ -11,19 +11,19 @@ final class PhabricatorAphrontBarUIExample extends PhabricatorUIExample {
   }
 
   public function renderExample() {
-    $out = '';
-    $out .= $this->renderTestThings('AphrontProgressBarView', 13, 10);
-    $out .= $this->renderTestThings('AphrontGlyphBarView', 13, 10);
-    $out .= $this->renderWeirdOrderGlyphBars();
-    $out .= $this->renderAsciiStarBar();
-    return phutil_safe_html($out);
+    $out = array();
+    $out[] = $this->renderTestThings('AphrontProgressBarView', 13, 10);
+    $out[] = $this->renderTestThings('AphrontGlyphBarView', 13, 10);
+    $out[] = $this->renderWeirdOrderGlyphBars();
+    $out[] = $this->renderAsciiStarBar();
+    return $out;
   }
 
   private function wrap($title, $thing) {
-    return id(new AphrontPanelView())
-      ->setHeader($title)
-      ->appendChild($thing)
-      ->render();
+    $thing = phutil_tag_div('ml grouped', $thing);
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText($title)
+      ->appendChild($thing);
   }
 
   private function renderTestThings($class, $max, $incr) {
@@ -34,9 +34,7 @@ final class PhabricatorAphrontBarUIExample extends PhabricatorUIExample {
         ->setMax($max * $incr)
         ->setCaption("{$ii} outta {$max} ain't bad!");
     }
-    return $this->wrap(
-      "Test {$class}",
-      phutil_implode_html('', mpull($bars, 'render')));
+    return $this->wrap("Test {$class}", $bars);
   }
 
   private function renderWeirdOrderGlyphBars() {
@@ -50,26 +48,25 @@ final class PhabricatorAphrontBarUIExample extends PhabricatorUIExample {
         ->setNumGlyphs(5)
         ->setCaption("Lol score is {$index}/{$max}")
         ->setGlyph(hsprintf('%s', 'LOL!'))
-        ->setBackgroundGlyph(hsprintf('%s', '____'))
-        ->render();
+        ->setBackgroundGlyph(hsprintf('%s', '____'));
       $views[] = hsprintf('<div style="clear:both;"></div>');
     }
 
     return $this->wrap(
       'Glyph bars in weird order',
-      phutil_implode_html('', $views));
+      $views);
   }
 
   private function renderAsciiStarBar() {
-    return $this->wrap(
-      'Ascii star glyph bar',
-      id(new AphrontGlyphBarView())
+    $bar = id(new AphrontGlyphBarView())
         ->setValue(50)
         ->setMax(100)
         ->setCaption('Glyphs!')
         ->setNumGlyphs(10)
-        ->setGlyph(hsprintf('%s', '*'))
-        ->render());
+        ->setGlyph(hsprintf('%s', '*'));
+
+    return $this->wrap(
+      'Ascii star glyph bar', $bar);
   }
 
 }

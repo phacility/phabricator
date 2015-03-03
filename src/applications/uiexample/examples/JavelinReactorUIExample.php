@@ -82,7 +82,8 @@ final class JavelinReactorUIExample extends PhabricatorUIExample {
 
     $table = new AphrontTableView($rows);
 
-    $panel = new AphrontPanelView();
+    $panel = new PHUIObjectBoxView();
+    $panel->setHeaderText(pht('Example'));
     $panel->appendChild($table);
 
     return $panel;
