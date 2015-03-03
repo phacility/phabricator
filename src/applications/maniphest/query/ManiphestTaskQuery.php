@@ -792,7 +792,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         $conn_r,
         'LEFT JOIN %T blocking ON blocking.src = task.phid '.
         'AND blocking.type = %d '.
-        'JOIN %T blockingtask ON blocking.dst = blockingtask.phid '.
+        'LEFT JOIN %T blockingtask ON blocking.dst = blockingtask.phid '.
         'AND blockingtask.status IN (%Ls)',
         $edge_table,
         ManiphestTaskDependedOnByTaskEdgeType::EDGECONST,
@@ -804,7 +804,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         $conn_r,
         'LEFT JOIN %T blocked ON blocked.src = task.phid '.
         'AND blocked.type = %d '.
-        'JOIN %T blockedtask ON blocked.dst = blockedtask.phid '.
+        'LEFT JOIN %T blockedtask ON blocked.dst = blockedtask.phid '.
         'AND blockedtask.status IN (%Ls)',
         $edge_table,
         ManiphestTaskDependsOnTaskEdgeType::EDGECONST,
