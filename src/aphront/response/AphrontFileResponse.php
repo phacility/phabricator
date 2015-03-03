@@ -15,9 +15,8 @@ final class AphrontFileResponse extends AphrontResponse {
   }
 
   public function setDownload($download) {
-    $download = preg_replace('/[^A-Za-z0-9_.-]/', '_', $download);
     if (!strlen($download)) {
-      $download = 'untitled_document.txt';
+      $download = 'untitled';
     }
     $this->download = $download;
     return $this;
@@ -73,9 +72,10 @@ final class AphrontFileResponse extends AphrontResponse {
       $headers[] = array('X-Download-Options', 'noopen');
 
       $filename = $this->getDownload();
+      $filename = addcslashes($filename, '"\\');
       $headers[] = array(
         'Content-Disposition',
-        'attachment; filename='.$filename,
+        'attachment; filename="'.$filename.'"',
       );
     }
 
