@@ -91,6 +91,10 @@ final class PhortuneCartQuery
       $cart->attachAccount($account);
     }
 
+    if (!$carts) {
+      return array();
+    }
+
     $merchants = id(new PhortuneMerchantQuery())
       ->setViewer($this->getViewer())
       ->withPHIDs(mpull($carts, 'getMerchantPHID'))
@@ -104,6 +108,10 @@ final class PhortuneCartQuery
         continue;
       }
       $cart->attachMerchant($merchant);
+    }
+
+    if (!$carts) {
+      return array();
     }
 
     $implementations = array();

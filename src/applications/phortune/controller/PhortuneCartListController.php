@@ -42,6 +42,7 @@ final class PhortuneCartListController
         return new Aphront404Response();
       }
       $this->merchant = $merchant;
+      $viewer->grantAuthority($merchant);
       $engine->setMerchant($merchant);
     } else if ($account_id) {
       $account = id(new PhortuneAccountQuery())

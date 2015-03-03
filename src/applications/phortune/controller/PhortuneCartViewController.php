@@ -13,6 +13,11 @@ final class PhortuneCartViewController
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
+    $authority = $this->loadMerchantAuthority();
+
+    // TODO: This (and the rest of the Cart controllers) need to be updated
+    // to use merchant URIs and merchant authority.
+
     $cart = id(new PhortuneCartQuery())
       ->setViewer($viewer)
       ->withIDs(array($this->id))
@@ -157,7 +162,11 @@ final class PhortuneCartViewController
     $account = $cart->getAccount();
 
     $crumbs = $this->buildApplicationCrumbs();
-    $this->addAccountCrumb($crumbs, $cart->getAccount());
+    if ($authority) {
+      $this->addMerchantCrumb($crumbs, $authority);
+    } else {
+      $this->addAccountCrumb($crumbs, $cart->getAccount());
+    }
     $crumbs->addTextCrumb(pht('Cart %d', $cart->getID()));
 
     $timeline = $this->buildTransactionTimeline(

@@ -36,6 +36,7 @@ final class PhortuneSubscriptionListController
         return new Aphront404Response();
       }
       $this->merchant = $merchant;
+      $viewer->grantAuthority($merchant);
       $engine->setMerchant($merchant);
     } else if ($this->accountID) {
       $account = id(new PhortuneAccountQuery())

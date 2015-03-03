@@ -5,6 +5,8 @@ final class PhortuneSubscriptionViewController extends PhortuneController {
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
 
+    $is_merchant = (bool)$this->loadMerchantAuthority();
+
     $subscription = id(new PhortuneSubscriptionQuery())
       ->setViewer($viewer)
       ->withIDs(array($request->getURIData('id')))
@@ -19,7 +21,6 @@ final class PhortuneSubscriptionViewController extends PhortuneController {
       $subscription,
       PhabricatorPolicyCapability::CAN_EDIT);
 
-    $is_merchant = (bool)$request->getURIData('merchantID');
     $merchant = $subscription->getMerchant();
     $account = $subscription->getAccount();
 

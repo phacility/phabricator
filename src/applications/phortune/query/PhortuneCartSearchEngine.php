@@ -166,8 +166,21 @@ final class PhortuneCartSearchEngine
     foreach ($carts as $cart) {
       $merchant = $cart->getMerchant();
 
+      if ($this->getMerchant()) {
+        $href = $this->getApplicationURI(
+          'merchant/'.$merchant->getID().'/cart/'.$cart->getID().'/');
+      } else {
+        $href = $cart->getDetailURI();
+      }
+
       $rows[] = array(
         $cart->getID(),
+        phutil_tag(
+          'a',
+          array(
+            'href' => $href,
+          ),
+          $cart->getName()),
         $handles[$cart->getPHID()]->renderLink(),
         $handles[$merchant->getPHID()]->renderLink(),
         $handles[$cart->getAuthorPHID()]->renderLink(),
