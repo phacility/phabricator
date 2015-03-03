@@ -9,11 +9,13 @@ final class ConpherenceThreadMailReceiver
   }
 
   protected function getObjectPattern() {
-    return 'E[1-9]\d*';
+    // TODO: Only recognize "Z" once we get closer to shipping Calendar.
+    return '[EZ][1-9]\d*';
   }
 
   protected function loadObject($pattern, PhabricatorUser $viewer) {
-    $id = (int)trim($pattern, 'E');
+    // TODO: Only recognize "Z" once we get closer to shipping Calendar.
+    $id = (int)trim($pattern, 'EZ');
 
     return id(new ConpherenceThreadQuery())
       ->setViewer($viewer)
