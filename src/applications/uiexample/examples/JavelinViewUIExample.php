@@ -35,8 +35,10 @@ final class JavelinViewUIExample extends PhabricatorUIExample {
     $child_server_template->appendChild($child_client_template);
     $child_client_template->appendChild('Hey, it worked.');
 
-    $panel = new AphrontPanelView();
-    $panel->appendChild($parent_server_template);
+    $panel = new PHUIObjectBoxView();
+    $panel->setHeaderText(pht('Example'));
+    $panel->appendChild(
+      phutil_tag_div('ml', $parent_server_template));
 
     return $panel;
   }

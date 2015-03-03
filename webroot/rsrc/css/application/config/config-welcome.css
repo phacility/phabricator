@@ -2,26 +2,22 @@
  * @provides config-welcome-css
  */
 
-.config-welcome {
-  margin-top: -1px;
+.phui-document-content .config-welcome-box .phabricator-remarkup {
+  padding: 0 16px 16px;
+  position: relative;
 }
 
-.config-welcome .phui-object-box {
-  margin: 12px;
+.config-welcome-box {
+  padding: 8px 0;
 }
 
-.config-welcome .aphront-multi-column-column-last .phui-object-box {
-  margin-left: 0;
+.config-welcome-content {
+  margin-left: 44px;
 }
 
-.config-welcome-box .phui-action-header-title {
-  padding: 10px 4px;
-}
-
-.config-welcome-box-content {
-  padding: 12px;
-}
-
-.config-welcome .phui-object-box .phui-action-header {
-  padding: 2px 8px 2px 12px;
+.config-welcome-box .config-welcome-icon {
+  width: 32px;
+  float: left;
+  text-align: center;
+  margin-left: 16px;
 }

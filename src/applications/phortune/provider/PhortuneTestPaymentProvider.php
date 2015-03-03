@@ -144,6 +144,8 @@ final class PhortuneTestPaymentProvider extends PhortunePaymentProvider {
     array $errors) {
 
     $ccform = id(new PhortuneCreditCardForm())
+      ->setSecurityAssurance(
+        pht('This is a test payment provider.'))
       ->setUser($request->getUser())
       ->setErrors($errors);
 
