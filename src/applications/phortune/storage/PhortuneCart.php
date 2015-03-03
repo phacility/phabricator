@@ -453,8 +453,13 @@ final class PhortuneCart extends PhortuneDAO
     return $this->getImplementation()->getCancelURI($this);
   }
 
-  public function getDetailURI() {
-    return '/phortune/cart/'.$this->getID().'/';
+  public function getDetailURI(PhortuneMerchant $authority = null) {
+    if ($authority) {
+      $prefix = 'merchant/'.$authority->getID().'/';
+    } else {
+      $prefix = '';
+    }
+    return '/phortune/'.$prefix.'cart/'.$this->getID().'/';
   }
 
   public function getCheckoutURI() {

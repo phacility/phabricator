@@ -5,13 +5,18 @@ final class PhortuneSubscriptionViewController extends PhortuneController {
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
 
-    $is_merchant = (bool)$this->loadMerchantAuthority();
+    $authority = $this->loadMerchantAuthority();
 
-    $subscription = id(new PhortuneSubscriptionQuery())
+    $subscription_query = id(new PhortuneSubscriptionQuery())
       ->setViewer($viewer)
       ->withIDs(array($request->getURIData('id')))
-      ->needTriggers(true)
-      ->executeOne();
+      ->needTriggers(true);
+
+    if ($authority) {
+      $subscription_query->withMerchantPHIDs(array($authority->getPHID()));
+    }
+
+    $subscription = $subscription_query->executeOne();
     if (!$subscription) {
       return new Aphront404Response();
     }
@@ -48,7 +53,7 @@ final class PhortuneSubscriptionViewController extends PhortuneController {
 
 
     $crumbs = $this->buildApplicationCrumbs();
-    if ($is_merchant) {
+    if ($authority) {
       $this->addMerchantCrumb($crumbs, $merchant);
     } else {
       $this->addAccountCrumb($crumbs, $account);
@@ -83,8 +88,8 @@ final class PhortuneSubscriptionViewController extends PhortuneController {
       ->setHeader($header)
       ->addPropertyList($properties);
 
-    $due_box = $this->buildDueInvoices($subscription, $is_merchant);
-    $invoice_box = $this->buildPastInvoices($subscription, $is_merchant);
+    $due_box = $this->buildDueInvoices($subscription, $authority);
+    $invoice_box = $this->buildPastInvoices($subscription, $authority);
 
     return $this->buildApplicationPage(
       array(
@@ -100,7 +105,7 @@ final class PhortuneSubscriptionViewController extends PhortuneController {
 
   private function buildDueInvoices(
     PhortuneSubscription $subscription,
-    $is_merchant) {
+    $authority) {
     $viewer = $this->getViewer();
 
     $invoices = id(new PhortuneCartQuery())
@@ -124,7 +129,7 @@ final class PhortuneSubscriptionViewController extends PhortuneController {
       ->setUser($viewer)
       ->setCarts($invoices)
       ->setIsInvoices(true)
-      ->setIsMerchantView($is_merchant)
+      ->setIsMerchantView((bool)$authority)
       ->setHandles($handles);
 
     $invoice_header = id(new PHUIHeaderView())
@@ -137,7 +142,7 @@ final class PhortuneSubscriptionViewController extends PhortuneController {
 
   private function buildPastInvoices(
     PhortuneSubscription $subscription,
-    $is_merchant) {
+    $authority) {
     $viewer = $this->getViewer();
 
     $invoices = id(new PhortuneCartQuery())
@@ -176,7 +181,7 @@ final class PhortuneSubscriptionViewController extends PhortuneController {
     $merchant_id = $merchant->getID();
     $subscription_id = $subscription->getID();
 
-    if ($is_merchant) {
+    if ($authority) {
       $invoices_uri = $this->getApplicationURI(
         "merchant/{$merchant_id}/subscription/order/{$subscription_id}/");
     } else {

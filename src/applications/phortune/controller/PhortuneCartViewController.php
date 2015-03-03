@@ -15,9 +15,6 @@ final class PhortuneCartViewController
 
     $authority = $this->loadMerchantAuthority();
 
-    // TODO: This (and the rest of the Cart controllers) need to be updated
-    // to use merchant URIs and merchant authority.
-
     $cart = id(new PhortuneCartQuery())
       ->setViewer($viewer)
       ->withIDs(array($this->id))
@@ -26,11 +23,6 @@ final class PhortuneCartViewController
     if (!$cart) {
       return new Aphront404Response();
     }
-
-    $can_admin = PhabricatorPolicyFilter::hasCapability(
-      $viewer,
-      $cart->getMerchant(),
-      PhabricatorPolicyCapability::CAN_EDIT);
 
     $cart_table = $this->buildCartContentTable($cart);
 
@@ -78,7 +70,7 @@ final class PhortuneCartViewController
         }
         break;
       case PhortuneCart::STATUS_REVIEW:
-        if ($can_admin) {
+        if ($authority) {
           $errors[] = pht(
             'This order has been flagged for manual review. Review the order '.
             'and choose %s to accept it or %s to reject it.',
@@ -102,7 +94,7 @@ final class PhortuneCartViewController
     $actions = $this->buildActionListView(
       $cart,
       $can_edit,
-      $can_admin,
+      $authority,
       $resume_uri);
     $properties->setActionList($actions);
 
@@ -228,7 +220,7 @@ final class PhortuneCartViewController
   private function buildActionListView(
     PhortuneCart $cart,
     $can_edit,
-    $can_admin,
+    $authority,
     $resume_uri) {
 
     $viewer = $this->getRequest()->getUser();
@@ -240,10 +232,16 @@ final class PhortuneCartViewController
 
     $can_cancel = ($can_edit && $cart->canCancelOrder());
 
-    $cancel_uri = $this->getApplicationURI("cart/{$id}/cancel/");
-    $refund_uri = $this->getApplicationURI("cart/{$id}/refund/");
-    $update_uri = $this->getApplicationURI("cart/{$id}/update/");
-    $accept_uri = $this->getApplicationURI("cart/{$id}/accept/");
+    if ($authority) {
+      $prefix = 'merchant/'.$authority->getID().'/';
+    } else {
+      $prefix = '';
+    }
+
+    $cancel_uri = $this->getApplicationURI("{$prefix}cart/{$id}/cancel/");
+    $refund_uri = $this->getApplicationURI("{$prefix}cart/{$id}/refund/");
+    $update_uri = $this->getApplicationURI("{$prefix}cart/{$id}/update/");
+    $accept_uri = $this->getApplicationURI("{$prefix}cart/{$id}/accept/");
 
     $view->addAction(
       id(new PhabricatorActionView())
@@ -253,7 +251,7 @@ final class PhortuneCartViewController
         ->setWorkflow(true)
         ->setHref($cancel_uri));
 
-    if ($can_admin) {
+    if ($authority) {
       if ($cart->getStatus() == PhortuneCart::STATUS_REVIEW) {
         $view->addAction(
           id(new PhabricatorActionView())
