@@ -186,6 +186,10 @@ abstract class PhabricatorApplicationTransactionEditor
     return $this->unmentionablePHIDMap;
   }
 
+  protected function shouldEnableMentions() {
+    return true;
+  }
+
   public function setApplicationEmail(
     PhabricatorMetaMTAApplicationEmail $email) {
     $this->applicationEmail = $email;
@@ -1052,10 +1056,14 @@ abstract class PhabricatorApplicationTransactionEditor
       return null;
     }
 
-    $texts = array_mergev($blocks);
-    $phids = PhabricatorMarkupEngine::extractPHIDsFromMentions(
-      $this->getActor(),
-      $texts);
+    if ($this->shouldEnableMentions($object, $xactions)) {
+      $texts = array_mergev($blocks);
+      $phids = PhabricatorMarkupEngine::extractPHIDsFromMentions(
+        $this->getActor(),
+        $texts);
+    } else {
+      $phids = array();
+    }
 
     $this->mentionedPHIDs = $phids;
 
@@ -1229,12 +1237,14 @@ abstract class PhabricatorApplicationTransactionEditor
       $engine);
 
     $mentioned_phids = array();
-    foreach ($blocks as $key => $xaction_blocks) {
-      foreach ($xaction_blocks as $block) {
-        $engine->markupText($block);
-        $mentioned_phids += $engine->getTextMetadata(
-          PhabricatorObjectRemarkupRule::KEY_MENTIONED_OBJECTS,
-          array());
+    if ($this->shouldEnableMentions($object, $xactions)) {
+      foreach ($blocks as $key => $xaction_blocks) {
+        foreach ($xaction_blocks as $block) {
+          $engine->markupText($block);
+          $mentioned_phids += $engine->getTextMetadata(
+            PhabricatorObjectRemarkupRule::KEY_MENTIONED_OBJECTS,
+            array());
+        }
       }
     }
 
@@ -1248,19 +1258,22 @@ abstract class PhabricatorApplicationTransactionEditor
       ->execute();
 
     $mentionable_phids = array();
-    foreach ($mentioned_objects as $mentioned_object) {
-      if ($mentioned_object instanceof PhabricatorMentionableInterface) {
-        $mentioned_phid = $mentioned_object->getPHID();
-        if (idx($this->getUnmentionablePHIDMap(), $mentioned_phid)) {
-          continue;
+    if ($this->shouldEnableMentions($object, $xactions)) {
+      foreach ($mentioned_objects as $mentioned_object) {
+        if ($mentioned_object instanceof PhabricatorMentionableInterface) {
+          $mentioned_phid = $mentioned_object->getPHID();
+          if (idx($this->getUnmentionablePHIDMap(), $mentioned_phid)) {
+            continue;
+          }
+          // don't let objects mention themselves
+          if ($object->getPHID() && $mentioned_phid == $object->getPHID()) {
+            continue;
+          }
+          $mentionable_phids[$mentioned_phid] = $mentioned_phid;
         }
-        // don't let objects mention themselves
-        if ($object->getPHID() && $mentioned_phid == $object->getPHID()) {
-          continue;
-        }
-        $mentionable_phids[$mentioned_phid] = $mentioned_phid;
       }
     }
+
     if ($mentionable_phids) {
       $edge_type = PhabricatorObjectMentionsObjectEdgeType::EDGECONST;
       $block_xactions[] = newv(get_class(head($xactions)), array())
