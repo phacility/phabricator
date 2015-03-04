@@ -490,7 +490,7 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
         foreach ($xactions as $xaction) {
           $phids = $this->getPHIDTransactionNewValue(
             $xaction,
-            $object->getParticipantPHIDs());
+            nonempty($object->getParticipantPHIDs(), array()));
 
           if (!$phids) {
             continue;

@@ -1413,7 +1413,7 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorApplicationTransaction $xaction,
     $old = null) {
 
-    if ($old) {
+    if ($old !== null) {
       $old = array_fuse($old);
     } else {
       $old = array_fuse($xaction->getOldValue());
