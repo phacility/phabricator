@@ -108,7 +108,6 @@ final class PhrictionDiffController extends PhrictionController {
     Javelin::initBehavior('differential-populate', array(
       'changesetViewIDs' => array($output->getID()),
     ));
-    Javelin::initBehavior('differential-show-more');
 
     $slug = $document->getSlug();
 

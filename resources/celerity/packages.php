@@ -156,7 +156,6 @@ return array(
     'javelin-behavior-differential-feedback-preview',
     'javelin-behavior-differential-edit-inline-comments',
     'javelin-behavior-differential-populate',
-    'javelin-behavior-differential-show-more',
     'javelin-behavior-differential-diff-radios',
     'javelin-behavior-differential-comment-jump',
     'javelin-behavior-differential-add-reviewers-and-ccs',

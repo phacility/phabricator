@@ -209,7 +209,6 @@ final class DifferentialChangesetListView extends AphrontView {
       'changesetViewIDs' => $ids,
     ));
 
-    $this->initBehavior('differential-show-more');
     $this->initBehavior('differential-comment-jump', array());
 
     if ($this->inlineURI) {

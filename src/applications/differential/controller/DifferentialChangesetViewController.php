@@ -240,7 +240,6 @@ final class DifferentialChangesetViewController extends DifferentialController {
       'changesetViewIDs' => array($detail->getID()),
     ));
 
-    Javelin::initBehavior('differential-show-more');
     Javelin::initBehavior('differential-comment-jump', array());
 
     $panel = new DifferentialPrimaryPaneView();
