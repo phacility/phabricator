@@ -188,6 +188,19 @@ final class DifferentialChangesetDetailView extends AphrontView {
     $icon = id(new PHUIIconView())
       ->setIconFont($display_icon);
 
+    $renderer = null;
+
+    // If the viewer prefers unified diffs, always set the renderer to unified.
+    // Otherwise, we leave it unspecified and the client will choose a
+    // renderer based on the screen size.
+
+    $viewer = $this->getUser();
+    $prefs = $viewer->loadPreferences();
+    $pref_unified = PhabricatorUserPreferences::PREFERENCE_DIFF_UNIFIED;
+    if ($prefs->getPreference($pref_unified) == 'unified') {
+      $renderer = '1up';
+    }
+
     return javelin_tag(
       'div',
       array(
@@ -200,7 +213,7 @@ final class DifferentialChangesetDetailView extends AphrontView {
           'renderURI' => $this->getRenderURI(),
           'whitespace' => $this->getWhitespace(),
           'highlight' => null,
-          'renderer' => null,
+          'renderer' => $renderer,
           'ref' => $this->getRenderingRef(),
           'autoload' => $this->getAutoload(),
         ),

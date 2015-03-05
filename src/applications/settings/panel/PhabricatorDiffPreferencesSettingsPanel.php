@@ -19,6 +19,7 @@ final class PhabricatorDiffPreferencesSettingsPanel
     $user = $request->getUser();
     $preferences = $user->loadPreferences();
 
+    $pref_unified = PhabricatorUserPreferences::PREFERENCE_DIFF_UNIFIED;
     $pref_filetree = PhabricatorUserPreferences::PREFERENCE_DIFF_FILETREE;
 
     if ($request->isFormPost()) {
@@ -32,6 +33,9 @@ final class PhabricatorDiffPreferencesSettingsPanel
 
       $preferences->setPreference($pref_filetree, $filetree);
 
+      $unified = $request->getStr($pref_unified);
+      $preferences->setPreference($pref_unified, $unified);
+
       $preferences->save();
       return id(new AphrontRedirectResponse())
         ->setURI($this->getPanelURI('?saved=true'));
@@ -39,6 +43,23 @@ final class PhabricatorDiffPreferencesSettingsPanel
 
     $form = id(new AphrontFormView())
       ->setUser($user)
+      ->appendRemarkupInstructions(
+        pht(
+          'Phabricator normally shows diffs in a side-by-side layout on '.
+          'large screens, and automatically switches to a unified '.
+          'view on small screens (like mobile phones). If you prefer '.
+          'unified diffs even on large screens, you can select them as '.
+          'the default layout.'))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setLabel(pht('Show Unified Diffs'))
+          ->setName($pref_unified)
+          ->setValue($preferences->getPreference($pref_unified))
+          ->setOptions(
+            array(
+              'default' => pht('On Small Screens'),
+              'unified' => pht('Always'),
+            )))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel(pht('Show Filetree'))

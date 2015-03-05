@@ -240,10 +240,11 @@ final class DifferentialChangesetViewController extends DifferentialController {
     // undergoing like six kinds of refactoring anyway.
     $output = phutil_safe_html($output);
 
-    $detail = new DifferentialChangesetDetailView();
-    $detail->setChangeset($changeset);
-    $detail->appendChild($output);
-    $detail->setVsChangesetID($left_source);
+    $detail = id(new DifferentialChangesetDetailView())
+      ->setUser($this->getViewer())
+      ->setChangeset($changeset)
+      ->appendChild($output)
+      ->setVsChangesetID($left_source);
 
     $panel = new DifferentialPrimaryPaneView();
     $panel->appendChild(

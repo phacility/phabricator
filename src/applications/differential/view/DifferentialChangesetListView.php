@@ -130,7 +130,7 @@ final class DifferentialChangesetListView extends AphrontView {
           'Configure Editor' => pht('Configure Editor'),
           'Load Changes' => pht('Load Changes'),
           'View Side-by-Side' => pht('View Side-by-Side'),
-          'View Unified' => pht('View Unified (Barely Works!)'),
+          'View Unified' => pht('View Unified'),
           'Change Text Encoding...' => pht('Change Text Encoding...'),
           'Highlight As...' => pht('Highlight As...'),
         ),
@@ -148,7 +148,8 @@ final class DifferentialChangesetListView extends AphrontView {
 
       $ref = $this->references[$key];
 
-      $detail = new DifferentialChangesetDetailView();
+      $detail = id(new DifferentialChangesetDetailView())
+        ->setUser($this->getUser());
 
       $uniq_id = 'diff-'.$changeset->getAnchorName();
       $detail->setID($uniq_id);
