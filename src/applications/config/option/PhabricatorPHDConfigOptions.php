@@ -70,7 +70,7 @@ final class PhabricatorPHDConfigOptions
             "Launch daemons in 'trace' mode by default. This creates an ".
             "ENORMOUS amount of output, but can help debug issues. Daemons ".
             "launched in debug mode with 'phd debug' are always launched in ".
-            "trace mdoe. See also 'phd.verbose'.")),
+            "trace mode. See also 'phd.verbose'.")),
       $this->newOption('phd.variant-config', 'list<string>', array())
         ->setDescription(
           pht(
