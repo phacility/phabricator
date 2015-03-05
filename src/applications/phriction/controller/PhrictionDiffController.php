@@ -59,6 +59,8 @@ final class PhrictionDiffController extends PhrictionController {
     $engine = new PhabricatorDifferenceEngine();
     $changeset = $engine->generateChangesetFromFileContent($text_l, $text_r);
 
+    $changeset->setFilename($content_r->getTitle());
+
     $changeset->setOldProperties(
       array(
         'Title'   => $content_l->getTitle(),
@@ -84,6 +86,7 @@ final class PhrictionDiffController extends PhrictionController {
     $spec = $request->getStr('range');
     list($range_s, $range_e, $mask) =
       DifferentialChangesetParser::parseRangeSpecification($spec);
+
     $output = $parser->render($range_s, $range_e, $mask);
 
     if ($request->isAjax()) {
@@ -91,9 +94,18 @@ final class PhrictionDiffController extends PhrictionController {
         ->setRenderedChangeset($output);
     }
 
+    $output = id(new DifferentialChangesetDetailView())
+      ->setUser($this->getViewer())
+      ->setChangeset($changeset)
+      ->appendChild($output);
+
     require_celerity_resource('differential-changeset-view-css');
     require_celerity_resource('syntax-highlighting-css');
     require_celerity_resource('phriction-document-css');
+
+    Javelin::initBehavior('differential-populate', array(
+      'changesetViewIDs' => array($output->getID()),
+    ));
 
     Javelin::initBehavior('differential-show-more', array(
       'uri'         => '/phriction/diff/'.$document->getID().'/',

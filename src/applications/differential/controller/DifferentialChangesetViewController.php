@@ -162,7 +162,6 @@ final class DifferentialChangesetViewController extends DifferentialController {
       $parser->setRenderer(new DifferentialChangesetOneUpRenderer());
     }
 
-
     if ($left && $right) {
       $parser->setOriginals($left, $right);
     }
@@ -229,13 +228,6 @@ final class DifferentialChangesetViewController extends DifferentialController {
         ->setCoverage($coverage);
     }
 
-    Javelin::initBehavior('differential-show-more', array(
-      'uri' => '/differential/changeset/',
-      'whitespace' => $request->getStr('whitespace'),
-    ));
-
-    Javelin::initBehavior('differential-comment-jump', array());
-
     // TODO: [HTML] Clean up DifferentialChangesetParser output, but it's
     // undergoing like six kinds of refactoring anyway.
     $output = phutil_safe_html($output);
@@ -245,6 +237,17 @@ final class DifferentialChangesetViewController extends DifferentialController {
       ->setChangeset($changeset)
       ->appendChild($output)
       ->setVsChangesetID($left_source);
+
+    Javelin::initBehavior('differential-populate', array(
+      'changesetViewIDs' => array($detail->getID()),
+    ));
+
+    Javelin::initBehavior('differential-show-more', array(
+      'uri' => '/differential/changeset/',
+      'whitespace' => $request->getStr('whitespace'),
+    ));
+
+    Javelin::initBehavior('differential-comment-jump', array());
 
     $panel = new DifferentialPrimaryPaneView();
     $panel->appendChild(
