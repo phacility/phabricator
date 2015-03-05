@@ -519,7 +519,6 @@ abstract class DifferentialChangesetHTMLRenderer
         'sigil' => 'show-more',
         'meta' => array(
           'type' => ($is_all ? 'all' : null),
-          'ref' => $reference,
           'range' => $range,
         ),
       ),

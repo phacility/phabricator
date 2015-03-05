@@ -34,6 +34,8 @@ abstract class DifferentialChangesetRenderer {
   private $oldFile = false;
   private $newFile = false;
 
+  abstract public function getRendererKey();
+
   public function setShowEditAndReplyLinks($bool) {
     $this->showEditAndReplyLinks = $bool;
     return $this;

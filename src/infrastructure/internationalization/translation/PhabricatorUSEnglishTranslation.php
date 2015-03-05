@@ -948,8 +948,8 @@ final class PhabricatorUSEnglishTranslation
       ),
 
       "\xE2\x96\xB2 Show %d Line(s)" => array(
-        "\xE2\x96\xB2 Show %d Line(s)",
-        "\xE2\x96\xB2 Show %d Line(s)",
+        "\xE2\x96\xB2 Show Line",
+        "\xE2\x96\xB2 Show %d Lines",
       ),
 
       'Show All %d Line(s)' => array(

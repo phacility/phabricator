@@ -118,25 +118,12 @@ JX.install('ChangesetViewManager', {
       this._loaded = true;
       this._sequence++;
 
-      var params = {
-        ref: this._ref,
-        whitespace: this._whitespace || '',
-        renderer: this.getRenderer() || '',
-        highlight: this._highlight || '',
-        encoding: this._encoding || ''
-      };
+      var params = this._getViewParameters();
 
       var workflow = new JX.Workflow(this._renderURI, params)
         .setHandler(JX.bind(this, this._onresponse, this._sequence));
 
-      var routable = workflow.getRoutable();
-
-      routable
-        .setPriority(500)
-        .setType('content')
-        .setKey(this._getRoutableKey());
-
-      JX.Router.getInstance().queue(routable);
+      this._startContentWorkflow(workflow);
 
       JX.DOM.setContent(
         this._getContentFrame(),
@@ -148,6 +135,95 @@ JX.install('ChangesetViewManager', {
       return this;
     },
 
+    /**
+     * Load missing context in a changeset.
+     *
+     * We do this when the user clicks "Show X Lines". We also expand all of
+     * the missing context when they "Show Entire File".
+     *
+     * @param string Line range specification, like "0-40/0-20".
+     * @param node Row where the context should be rendered after loading.
+     * @param bool True if this is a bulk load of multiple context blocks.
+     * @return this
+     */
+    loadContext: function(range, target, bulk) {
+      var params = this._getViewParameters();
+      params.range = range;
+
+      var container = JX.DOM.scry(target, 'td')[0];
+      // TODO: pht()
+      JX.DOM.setContent(container, 'Loading...');
+      JX.DOM.alterClass(target, 'differential-show-more-loading', true);
+
+      var workflow = new JX.Workflow(this._renderURI, params)
+        .setHandler(JX.bind(this, this._oncontext, target));
+
+      if (bulk) {
+        // If we're loading a bunch of these because the viewer clicked
+        // "Show Entire File Content" or similar, use lower-priority requests
+        // and draw a progress bar.
+        this._startContentWorkflow(workflow);
+      } else {
+        // If this is a single click on a context link, use a higher priority
+        // load without a chrome change.
+        workflow.start();
+      }
+
+      return this;
+    },
+
+    _startContentWorkflow: function(workflow) {
+      var routable = workflow.getRoutable();
+
+      routable
+        .setPriority(500)
+        .setType('content')
+        .setKey(this._getRoutableKey());
+
+      JX.Router.getInstance().queue(routable);
+    },
+
+
+    /**
+     * Receive a response to a context request.
+     */
+    _oncontext: function(target, response) {
+      var table = JX.$H(response.changeset).getNode();
+      var root = target.parentNode;
+      this._moveRows(table, root, target);
+      root.removeChild(target);
+    },
+
+    _moveRows: function(src, dst, before) {
+      var rows = JX.DOM.scry(src, 'tr');
+      for (var ii = 0; ii < rows.length; ii++) {
+
+        // Find the table this <tr /> belongs to. If it's a sub-table, like a
+        // table in an inline comment, don't copy it.
+        if (JX.DOM.findAbove(rows[ii], 'table') !== src) {
+          continue;
+        }
+
+        if (before) {
+          dst.insertBefore(rows[ii], before);
+        } else {
+          dst.appendChild(rows[ii]);
+        }
+      }
+    },
+
+    /**
+     * Get parameters which define the current rendering options.
+     */
+    _getViewParameters: function() {
+      return {
+        ref: this._ref,
+        whitespace: this._whitespace || '',
+        renderer: this.getRenderer() || '',
+        highlight: this._highlight || '',
+        encoding: this._encoding || ''
+      };
+    },
 
     /**
      * Get the active @{class:JX.Routable} for this changeset.
@@ -176,9 +252,7 @@ JX.install('ChangesetViewManager', {
       // a different one we don't re-render the diffs, because it's a
       // complicated mess and you could lose inline comments, cursor positions,
       // etc.
-      var renderer = (JX.Device.getDevice() == 'desktop') ? '2up' : '1up';
-
-      return renderer;
+      return (JX.Device.getDevice() == 'desktop') ? '2up' : '1up';
     },
 
     setEncoding: function(encoding) {

@@ -92,6 +92,44 @@ final class DifferentialChangesetParser {
     return $this->disableCache;
   }
 
+  public static function getDefaultRendererForViewer(PhabricatorUser $viewer) {
+    $prefs = $viewer->loadPreferences();
+    $pref_unified = PhabricatorUserPreferences::PREFERENCE_DIFF_UNIFIED;
+    if ($prefs->getPreference($pref_unified) == 'unified') {
+      return '1up';
+    }
+    return null;
+  }
+
+  public function readParametersFromRequest(AphrontRequest $request) {
+    $this->setWhitespaceMode($request->getStr('whitespace'));
+    $this->setCharacterEncoding($request->getStr('encoding'));
+    $this->setHighlightAs($request->getStr('highlight'));
+
+    $renderer = null;
+
+    // If the viewer prefers unified diffs, always set the renderer to unified.
+    // Otherwise, we leave it unspecified and the client will choose a
+    // renderer based on the screen size.
+
+    if ($request->getStr('renderer')) {
+      $renderer = $request->getStr('renderer');
+    } else {
+      $renderer = self::getDefaultRendererForViewer($request->getViewer());
+    }
+
+    switch ($renderer) {
+      case '1up':
+        $this->setRenderer(new DifferentialChangesetOneUpRenderer());
+        break;
+      default:
+        $this->setRenderer(new DifferentialChangesetTwoUpRenderer());
+        break;
+    }
+
+    return $this;
+  }
+
   const CACHE_VERSION = 11;
   const CACHE_MAX_SIZE = 8e6;
 

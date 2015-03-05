@@ -11,6 +11,10 @@ final class DifferentialChangesetOneUpRenderer
     return 'diff-1up';
   }
 
+  public function getRendererKey() {
+    return '1up';
+  }
+
   protected function renderColgroup() {
     return phutil_tag('colgroup', array(), array(
       phutil_tag('col', array('class' => 'num')),

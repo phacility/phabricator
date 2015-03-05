@@ -7,4 +7,8 @@ final class DifferentialChangesetTwoUpTestRenderer
     return false;
   }
 
+  public function getRendererKey() {
+    return '2up-test';
+  }
+
 }

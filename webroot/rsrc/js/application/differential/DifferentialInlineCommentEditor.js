@@ -43,6 +43,25 @@ JX.install('DifferentialInlineCommentEditor', {
       var table = this.getTable();
       var target = exact_row ? row : this._skipOverInlineCommentRows(row);
 
+      function copyRows(dst, src, before) {
+        var rows = JX.DOM.scry(src, 'tr');
+        for (var ii = 0; ii < rows.length; ii++) {
+
+          // Find the table this <tr /> belongs to. If it's a sub-table, like a
+          // table in an inline comment, don't copy it.
+          if (JX.DOM.findAbove(rows[ii], 'table') !== src) {
+            continue;
+          }
+
+          if (before) {
+            dst.insertBefore(rows[ii], before);
+          } else {
+            dst.appendChild(rows[ii]);
+          }
+        }
+        return rows;
+      }
+
       return copyRows(table, content, target);
     },
     _removeUndoLink : function() {

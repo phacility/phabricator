@@ -136,6 +136,9 @@ final class DifferentialChangesetListView extends AphrontView {
         ),
       ));
 
+    $renderer = DifferentialChangesetParser::getDefaultRendererForViewer(
+      $this->getUser());
+
     $output = array();
     $ids = array();
     foreach ($changesets as $key => $changeset) {
@@ -169,6 +172,7 @@ final class DifferentialChangesetListView extends AphrontView {
 
       $detail->setRenderURI($this->renderURI);
       $detail->setWhitespace($this->whitespace);
+      $detail->setRenderer($renderer);
 
       if (isset($this->visibleChangesets[$key])) {
         $load = 'Loading...';
@@ -205,11 +209,7 @@ final class DifferentialChangesetListView extends AphrontView {
       'changesetViewIDs' => $ids,
     ));
 
-    $this->initBehavior('differential-show-more', array(
-      'uri' => $this->renderURI,
-      'whitespace' => $this->whitespace,
-    ));
-
+    $this->initBehavior('differential-show-more');
     $this->initBehavior('differential-comment-jump', array());
 
     if ($this->inlineURI) {

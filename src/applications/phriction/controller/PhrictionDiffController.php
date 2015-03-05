@@ -97,6 +97,8 @@ final class PhrictionDiffController extends PhrictionController {
     $output = id(new DifferentialChangesetDetailView())
       ->setUser($this->getViewer())
       ->setChangeset($changeset)
+      ->setRenderingRef("{$l},{$r}")
+      ->setRenderURI('/phriction/diff/'.$document->getID().'/')
       ->appendChild($output);
 
     require_celerity_resource('differential-changeset-view-css');
@@ -106,11 +108,7 @@ final class PhrictionDiffController extends PhrictionController {
     Javelin::initBehavior('differential-populate', array(
       'changesetViewIDs' => array($output->getID()),
     ));
-
-    Javelin::initBehavior('differential-show-more', array(
-      'uri'         => '/phriction/diff/'.$document->getID().'/',
-      'whitespace'  => $whitespace_mode,
-    ));
+    Javelin::initBehavior('differential-show-more');
 
     $slug = $document->getSlug();
 

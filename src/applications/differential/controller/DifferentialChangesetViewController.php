@@ -154,13 +154,8 @@ final class DifferentialChangesetViewController extends DifferentialController {
     $parser->setRenderCacheKey($render_cache_key);
     $parser->setRightSideCommentMapping($right_source, $right_new);
     $parser->setLeftSideCommentMapping($left_source, $left_new);
-    $parser->setWhitespaceMode($request->getStr('whitespace'));
-    $parser->setCharacterEncoding($request->getStr('encoding'));
-    $parser->setHighlightAs($request->getStr('highlight'));
 
-    if ($request->getStr('renderer') == '1up') {
-      $parser->setRenderer(new DifferentialChangesetOneUpRenderer());
-    }
+    $parser->readParametersFromRequest($request);
 
     if ($left && $right) {
       $parser->setOriginals($left, $right);
@@ -235,6 +230,9 @@ final class DifferentialChangesetViewController extends DifferentialController {
     $detail = id(new DifferentialChangesetDetailView())
       ->setUser($this->getViewer())
       ->setChangeset($changeset)
+      ->setRenderingRef($rendering_reference)
+      ->setRenderURI('/differential/changeset/')
+      ->setRenderer($parser->getRenderer()->getRendererKey())
       ->appendChild($output)
       ->setVsChangesetID($left_source);
 
@@ -242,11 +240,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
       'changesetViewIDs' => array($detail->getID()),
     ));
 
-    Javelin::initBehavior('differential-show-more', array(
-      'uri' => '/differential/changeset/',
-      'whitespace' => $request->getStr('whitespace'),
-    ));
-
+    Javelin::initBehavior('differential-show-more');
     Javelin::initBehavior('differential-comment-jump', array());
 
     $panel = new DifferentialPrimaryPaneView();
