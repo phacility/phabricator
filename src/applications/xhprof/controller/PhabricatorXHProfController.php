@@ -10,6 +10,7 @@ abstract class PhabricatorXHProfController extends PhabricatorController {
     $page->setTitle(idx($data, 'title'));
     $page->setGlyph("\xE2\x98\x84");
     $page->appendChild($view);
+    $page->setDeviceReady(true);
 
     $response = new AphrontWebpageResponse();
 
