@@ -88,72 +88,14 @@ final class DifferentialChangesetTwoUpRenderer
         // increments $ii by the entire size of the gap and then continues
         // the loop.
         $gap = array_pop($gaps);
-
-        // TODO: Move this to renderShowContextLinks() once that is stable.
-
         $top = $gap[0];
         $len = $gap[1];
 
-        $end   = $top + $len - 20;
-
-        $contents = array();
-
-        if ($len > 40) {
-          $is_first_block = false;
-          if ($ii == 0) {
-            $is_first_block = true;
-          }
-
-          $contents[] = javelin_tag(
-            'a',
-            array(
-              'href' => '#',
-              'mustcapture' => true,
-              'sigil'       => 'show-more',
-              'meta'        => array(
-                'ref'    => $reference,
-                'range' => "{$top}-{$len}/{$top}-20",
-              ),
-            ),
-            $is_first_block
-              ? pht('Show First 20 Lines')
-              : pht("\xE2\x96\xB2 Show 20 Lines"));
-        }
-
-        $contents[] = javelin_tag(
-          'a',
-          array(
-            'href' => '#',
-            'mustcapture' => true,
-            'sigil'       => 'show-more',
-            'meta'        => array(
-              'type'   => 'all',
-              'ref'    => $reference,
-              'range'  => "{$top}-{$len}/{$top}-{$len}",
-            ),
-          ),
-          pht('Show All %d Lines', $len));
+        $contents = $this->renderShowContextLinks($top, $len, $rows);
 
         $is_last_block = false;
         if ($ii + $len >= $rows) {
           $is_last_block = true;
-        }
-
-        if ($len > 40) {
-          $contents[] = javelin_tag(
-            'a',
-            array(
-              'href' => '#',
-              'mustcapture' => true,
-              'sigil'       => 'show-more',
-              'meta'        => array(
-                'ref'    => $reference,
-                'range' => "{$top}-{$len}/{$end}-20",
-              ),
-            ),
-            $is_last_block
-              ? pht('Show Last 20 Lines')
-              : pht("\xE2\x96\xBC Show 20 Lines"));
         }
 
         $context = null;
@@ -181,9 +123,7 @@ final class DifferentialChangesetTwoUpRenderer
                 'colspan' => 2,
                 'class' => 'show-more',
               ),
-              phutil_implode_html(
-                " \xE2\x80\xA2 ", // Bullet
-                $contents)),
+              $contents),
             phutil_tag(
               'th',
               array(
