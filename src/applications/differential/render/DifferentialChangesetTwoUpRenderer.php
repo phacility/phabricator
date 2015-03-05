@@ -7,6 +7,10 @@ final class DifferentialChangesetTwoUpRenderer
     return false;
   }
 
+  protected function getRendererTableClass() {
+    return 'diff-2up';
+  }
+
   protected function renderColgroup() {
     return phutil_tag('colgroup', array(), array(
       phutil_tag('col', array('class' => 'num')),

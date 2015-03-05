@@ -3,6 +3,8 @@
 abstract class DifferentialChangesetHTMLRenderer
   extends DifferentialChangesetRenderer {
 
+  abstract protected function getRendererTableClass();
+
   protected function renderChangeTypeHeader($force) {
     $changeset = $this->getChangeset();
 
@@ -392,10 +394,16 @@ abstract class DifferentialChangesetHTMLRenderer
       return null;
     }
 
+    $classes = array();
+    $classes[] = 'differential-diff';
+    $classes[] = 'remarkup-code';
+    $classes[] = 'PhabricatorMonospaced';
+    $classes[] = $this->getRendererTableClass();
+
     return javelin_tag(
       'table',
       array(
-        'class' => 'differential-diff remarkup-code PhabricatorMonospaced',
+        'class' => implode(' ', $classes),
         'sigil' => 'differential-diff',
       ),
       array(
