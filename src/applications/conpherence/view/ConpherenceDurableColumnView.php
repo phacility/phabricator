@@ -146,21 +146,17 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
       $dropdown_id = celerity_generate_unique_node_id();
 
       $settings_list = new PHUIListView();
-      $cw_registry =
-        ConpherenceWidgetConfigConstants::getWidgetRegistry();
-      $first = true;
-      foreach ($cw_registry as $widget => $config) {
+      $header_actions = $this->getHeaderActionsConfig($conpherence);
+      foreach ($header_actions as $action) {
         $settings_list->addMenuItem(
           id(new PHUIListItemView())
-          ->setHref('#')
-          ->setDisabled($first)
-          ->setName($config['name'])
-          ->setIcon($config['icon'])
-          ->addSigil('conpherence-durable-column-widget-selected')
+          ->setHref($action['href'])
+          ->setName($action['name'])
+          ->setIcon($action['icon'])
+          ->addSigil('conpherence-durable-column-header-action')
           ->setMetadata(array(
-            'widget' => $widget,
+            'action' => $action['key'],
           )));
-        $first = false;
       }
 
       $settings_menu = phutil_tag(
@@ -218,6 +214,28 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
           $settings_button,
           $settings_menu,));
 
+  }
+
+  private function getHeaderActionsConfig(ConpherenceThread $conpherence) {
+    return array(
+      array(
+        'name' => pht('Add Participants'),
+        'href' => '/conpherence/update/'.$conpherence->getID().'/',
+        'icon' => 'fa-plus',
+        'key' => ConpherenceUpdateActions::ADD_PERSON,
+      ),
+      array(
+        'name' => pht('View in Conpherence'),
+        'href' => '/conpherence/'.$conpherence->getID().'/',
+        'icon' => 'fa-comments',
+        'key' => 'go_conpherence',
+      ),
+      array(
+        'name' => pht('Close Window'),
+        'href' => '#',
+        'icon' => 'fa-times',
+        'key' => 'close_window',
+      ),);
   }
 
   private function buildTransactions() {

@@ -6,7 +6,6 @@
  *           javelin-scrollbar
  *           javelin-quicksand
  *           phabricator-keyboard-shortcut
- *           javelin-behavior-conpherence-widget-pane
  */
 
 JX.behavior('durable-column', function() {
@@ -102,20 +101,25 @@ JX.behavior('durable-column', function() {
   // end copy / hack of stuff with big ole TODO on it
 
 
+  function _toggleColumn() {
+    if (window.location.pathname.indexOf('/conpherence/') === 0) {
+      return;
+    }
+    show = !show;
+    JX.DOM.alterClass(frame, 'with-durable-column', show);
+    var column = JX.$('conpherence-durable-column');
+    if (show) {
+      JX.DOM.show(column);
+      loadThreadContent(loadThreadID);
+    } else {
+      JX.DOM.hide(column);
+    }
+    JX.Stratcom.invoke('resize');
+    JX.Quicksand.setFrame(show ? quick : null);
+  }
+
   new JX.KeyboardShortcut('\\', 'Toggle Conpherence Column')
-    .setHandler(function() {
-      show = !show;
-      JX.DOM.alterClass(frame, 'with-durable-column', show);
-      var column = JX.$('conpherence-durable-column');
-      if (show) {
-        JX.DOM.show(column);
-        loadThreadContent(loadThreadID);
-      } else {
-        JX.DOM.hide(column);
-      }
-      JX.Stratcom.invoke('resize');
-      JX.Quicksand.setFrame(show ? quick : null);
-    })
+    .setHandler(_toggleColumn)
     .register();
 
   new JX.Scrollbar(JX.$('conpherence-durable-column-content'));
@@ -124,29 +128,49 @@ JX.behavior('durable-column', function() {
 
   JX.Stratcom.listen(
     'click',
-    'conpherence-durable-column-widget-selected',
+    'conpherence-durable-column-header-action',
     function (e) {
       e.kill();
-      var data = e.getNodeData('conpherence-durable-column-widget-selected');
-      var widget = data.widget;
-      if (widget == 'conpherence-message-pane') {
-        return loadThreadContent(loadThreadID);
+      var data = e.getNodeData('conpherence-durable-column-header-action');
+      var action = data.action;
+      var link = e.getNode('tag:a');
+
+      switch (action) {
+        case 'add_person':
+          JX.Stratcom.invoke('notification-panel-close');
+          var params = {
+            action: action,
+            latest_transaction_id: latestTransactionID,
+            minimal_display: true
+          };
+          var workflow = new JX.Workflow.newFromLink(link)
+            .setData(params)
+            .setHandler(function(r) {
+              var messages = _getColumnMessagesNode();
+              JX.DOM.appendContent(messages, JX.$H(r.transactions));
+              messages.scrollTop = messages.scrollHeight;
+
+              latestTransactionID = r.latest_transaction_id;
+              // since this is a two step workflow, and the "finally" method
+              // gets called on the first form load, restore "updating" if
+              // necessary
+              if (updating === null) {
+                updating = {
+                  threadPHID: loadedThreadPHID,
+                  knownID: latestTransactionID
+                };
+              }
+            });
+          sync_workflow(workflow);
+          break;
+        case 'go_conpherence':
+          JX.$U(link.href).go();
+          break;
+        case 'close_window':
+          JX.Stratcom.invoke('notification-panel-close');
+          _toggleColumn();
+          break;
       }
-
-      _markLoading(true);
-      var uri = '/conpherence/widget/' + loadThreadID + '/';
-      loadedThreadID = null;
-
-      var params = { widget : widget };
-      new JX.Workflow(uri)
-        .setData(params)
-        .setHandler(function(r) {
-          var body = _getColumnBodyNode();
-          JX.DOM.setContent(body, JX.$H(r));
-          new JX.Scrollbar(JX.$('conpherence-durable-column-content'));
-          _markLoading(false);
-        })
-       .start();
     });
 
   function _getColumnNode() {

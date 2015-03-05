@@ -170,4 +170,8 @@ JX.behavior('aphlict-dropdown', function(config, statics) {
     dirty = true;
     refresh();
   });
+
+  JX.Stratcom.listen('notification-panel-close', null, function() {
+    set_visible(null);
+  });
 });
