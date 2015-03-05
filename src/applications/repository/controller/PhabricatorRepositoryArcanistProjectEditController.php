@@ -71,7 +71,7 @@ final class PhabricatorRepositoryArcanistProjectEditController
       ->setUser($user)
       ->appendChild(
         id(new AphrontFormStaticControl())
-          ->setLabel('Name')
+          ->setLabel(pht('Name'))
           ->setValue($project->getName()))
       ->appendChild(
         id(new AphrontFormStaticControl())
@@ -79,13 +79,13 @@ final class PhabricatorRepositoryArcanistProjectEditController
           ->setValue($project->getPHID()))
       ->appendChild(
         id(new AphrontFormSelectControl())
-          ->setLabel('Repository')
+          ->setLabel(pht('Repository'))
           ->setOptions($repos)
           ->setName('repository')
           ->setValue($project->getRepositoryID()))
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Indexed Languages')
+          ->setLabel(pht('Indexed Languages'))
           ->setName('symbolIndexLanguages')
           ->setCaption(pht(
             'Separate with commas, for example: %s',
@@ -93,7 +93,7 @@ final class PhabricatorRepositoryArcanistProjectEditController
           ->setValue($langs))
       ->appendChild(
         id(new AphrontFormTokenizerControl())
-          ->setLabel('Uses Symbols From')
+          ->setLabel(pht('Uses Symbols From'))
           ->setName('symbolIndexProjects')
           ->setDatasource(new DiffusionArcanistProjectDatasource())
           ->setValue($uses))
@@ -102,15 +102,20 @@ final class PhabricatorRepositoryArcanistProjectEditController
           ->addCancelButton('/repository/')
           ->setValue('Save'));
 
-    $panel = new AphrontPanelView();
-    $panel->setWidth(AphrontPanelView::WIDTH_WIDE);
-    $panel->setHeader('Edit Arcanist Project');
-    $panel->appendChild($form);
+    $panel = new PHUIObjectBoxView();
+    $panel->setHeaderText(pht('Edit Arcanist Project'));
+    $panel->setForm($form);
 
-    return $this->buildStandardPageResponse(
-      $panel,
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(pht('Edit Project'));
+
+    return $this->buildApplicationPage(
       array(
-        'title' => 'Edit Project',
+        $crumbs,
+        $panel,
+      ),
+      array(
+        'title' => pht('Edit Project'),
       ));
   }
 

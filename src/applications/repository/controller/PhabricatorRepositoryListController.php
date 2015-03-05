@@ -23,7 +23,7 @@ final class PhabricatorRepositoryListController
           array(
             'href' => '/diffusion/'.$repo->getCallsign().'/',
           ),
-          'View in Diffusion');
+          pht('View in Diffusion'));
       } else {
         $diffusion_link = phutil_tag('em', array(), 'Not Tracked');
       }
@@ -40,17 +40,18 @@ final class PhabricatorRepositoryListController
             'class' => 'button small grey',
             'href'  => '/diffusion/'.$repo->getCallsign().'/edit/',
           ),
-          'Edit'),
+          pht('Edit')),
       );
     }
 
     $table = new AphrontTableView($rows);
+    $table->setNoDataString(pht('No Repositories'));
     $table->setHeaders(
       array(
-        'Callsign',
-        'Repository',
-        'Type',
-        'Diffusion',
+        pht('Callsign'),
+        pht('Repository'),
+        pht('Type'),
+        pht('Diffusion'),
         '',
       ));
     $table->setColumnClasses(
@@ -71,13 +72,18 @@ final class PhabricatorRepositoryListController
         $is_admin,
       ));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader('Repositories');
+    $panel = new PHUIObjectBoxView();
+    $header = new PHUIHeaderView();
+    $header->setHeader(pht('Repositories'));
     if ($is_admin) {
-      $panel->setCreateButton('Create New Repository', '/diffusion/new/');
+      $button = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setText(pht('Create New Repository'))
+        ->setHref('/diffusion/new/');
+      $header->addActionLink($button);
     }
+    $panel->setHeader($header);
     $panel->appendChild($table);
-    $panel->setNoBackground();
 
     $projects = id(new PhabricatorRepositoryArcanistProject())->loadAll();
 
@@ -99,7 +105,7 @@ final class PhabricatorRepositoryListController
             'href' => '/repository/project/edit/'.$project->getID().'/',
             'class' => 'button grey small',
           ),
-          'Edit'),
+          pht('Edit')),
         javelin_tag(
           'a',
           array(
@@ -107,16 +113,17 @@ final class PhabricatorRepositoryListController
             'class' => 'button grey small',
             'sigil' => 'workflow',
           ),
-          'Delete'),
+          pht('Delete')),
       );
 
     }
 
     $project_table = new AphrontTableView($rows);
+    $project_table->setNoDataString(pht('No Arcanist Projects'));
     $project_table->setHeaders(
       array(
-        'Project ID',
-        'Repository',
+        pht('Project ID'),
+        pht('Repository'),
         '',
         '',
       ));
@@ -136,18 +143,21 @@ final class PhabricatorRepositoryListController
         $is_admin,
       ));
 
-    $project_panel = new AphrontPanelView();
-    $project_panel->setHeader('Arcanist Projects');
+    $project_panel = new PHUIObjectBoxView();
+    $project_panel->setHeaderText(pht('Arcanist Projects'));
     $project_panel->appendChild($project_table);
-    $project_panel->setNoBackground();
 
-    return $this->buildStandardPageResponse(
+    $crumbs = $this->buildApplicationCrumbs();
+    $crumbs->addTextCrumb(pht('Repository List'));
+
+    return $this->buildApplicationPage(
       array(
+        $crumbs,
         $panel,
         $project_panel,
       ),
       array(
-        'title' => 'Repository List',
+        'title' => pht('Repository List'),
       ));
   }
 
