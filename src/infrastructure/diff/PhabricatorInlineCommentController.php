@@ -19,6 +19,7 @@ abstract class PhabricatorInlineCommentController
   private $commentText;
   private $operation;
   private $commentID;
+  private $renderer;
 
   public function getCommentID() {
     return $this->commentID;
@@ -52,6 +53,14 @@ abstract class PhabricatorInlineCommentController
     return $this->isNewFile;
   }
 
+  public function setRenderer($renderer) {
+    $this->renderer = $renderer;
+    return $this;
+  }
+
+  public function getRenderer() {
+    return $this->renderer;
+  }
 
   public function processRequest() {
     $request = $this->getRequest();
@@ -113,7 +122,6 @@ abstract class PhabricatorInlineCommentController
         return id(new AphrontAjaxResponse())
           ->setContent($edit_dialog->render());
       case 'create':
-
         $text = $this->getCommentText();
 
         if (!$request->isFormPost() || !strlen($text)) {
@@ -157,6 +165,7 @@ abstract class PhabricatorInlineCommentController
         $edit_dialog->addHiddenInput('is_new', $is_new);
         $edit_dialog->addHiddenInput('number', $number);
         $edit_dialog->addHiddenInput('length', $length);
+        $edit_dialog->addHiddenInput('renderer', $this->getRenderer());
 
         $text_area = $this->renderTextArea($this->getCommentText());
         $edit_dialog->appendChild($text_area);
@@ -171,27 +180,29 @@ abstract class PhabricatorInlineCommentController
 
     // NOTE: This isn't necessarily a DifferentialChangeset ID, just an
     // application identifier for the changeset. In Diffusion, it's a Path ID.
-    $this->changesetID    = $request->getInt('changeset');
+    $this->changesetID = $request->getInt('changeset');
 
-    $this->isNewFile      = (int)$request->getBool('is_new');
-    $this->isOnRight      = $request->getBool('on_right');
-    $this->lineNumber     = $request->getInt('number');
-    $this->lineLength     = $request->getInt('length');
-    $this->commentText    = $request->getStr('text');
-    $this->commentID      = $request->getInt('id');
-    $this->operation      = $request->getStr('op');
+    $this->isNewFile = (int)$request->getBool('is_new');
+    $this->isOnRight = $request->getBool('on_right');
+    $this->lineNumber = $request->getInt('number');
+    $this->lineLength = $request->getInt('length');
+    $this->commentText = $request->getStr('text');
+    $this->commentID = $request->getInt('id');
+    $this->operation = $request->getStr('op');
+    $this->renderer = $request->getStr('renderer');
   }
 
   private function buildEditDialog() {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $edit_dialog = new DifferentialInlineCommentEditView();
-    $edit_dialog->setUser($user);
-    $edit_dialog->setSubmitURI($request->getRequestURI());
-    $edit_dialog->setOnRight($this->getIsOnRight());
-    $edit_dialog->setNumber($this->getLineNumber());
-    $edit_dialog->setLength($this->getLineLength());
+    $edit_dialog = id(new DifferentialInlineCommentEditView())
+      ->setUser($user)
+      ->setSubmitURI($request->getRequestURI())
+      ->setOnRight($this->getIsOnRight())
+      ->setNumber($this->getLineNumber())
+      ->setLength($this->getLineLength())
+      ->setRenderer($this->getRenderer());
 
     return $edit_dialog;
   }
@@ -200,7 +211,7 @@ abstract class PhabricatorInlineCommentController
     return id(new AphrontAjaxResponse())
       ->setContent(
         array(
-          'markup'          => '',
+          'markup' => '',
         ));
   }
 
@@ -222,13 +233,14 @@ abstract class PhabricatorInlineCommentController
 
     $handles = $this->loadViewerHandles($phids);
 
-    $view = new DifferentialInlineCommentView();
-    $view->setInlineComment($inline);
-    $view->setOnRight($on_right);
-    $view->setBuildScaffolding(true);
-    $view->setMarkupEngine($engine);
-    $view->setHandles($handles);
-    $view->setEditable(true);
+    $view = id(new DifferentialInlineCommentView())
+      ->setInlineComment($inline)
+      ->setOnRight($on_right)
+      ->setBuildScaffolding(true)
+      ->setMarkupEngine($engine)
+      ->setHandles($handles)
+      ->setEditable(true)
+      ->setRenderer($this->getRenderer());
 
     return id(new AphrontAjaxResponse())
       ->setContent(

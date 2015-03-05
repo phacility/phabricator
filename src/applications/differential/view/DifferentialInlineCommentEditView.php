@@ -8,6 +8,16 @@ final class DifferentialInlineCommentEditView extends AphrontView {
   private $onRight;
   private $number;
   private $length;
+  private $renderer;
+
+  public function setRenderer($renderer) {
+    $this->renderer = $renderer;
+    return $this;
+  }
+
+  public function getRenderer() {
+    return $this->renderer;
+  }
 
   public function addHiddenInput($key, $value) {
     $this->inputs[] = array($key, $value);
@@ -60,10 +70,17 @@ final class DifferentialInlineCommentEditView extends AphrontView {
         $this->renderBody(),
       ));
 
-    return phutil_tag('table', array(), phutil_tag(
-      'tr',
-      array('class' => 'inline-comment-splint'),
-      array(
+    if ($this->renderer == '1up') {
+      $cells = array(
+        phutil_tag('th', array()),
+        phutil_tag('th', array()),
+        phutil_tag(
+          'td',
+          array('colspan' => 3, 'class' => 'right3'),
+          $content),
+      );
+    } else {
+      $cells = array(
         phutil_tag('th', array()),
         phutil_tag(
           'td',
@@ -74,7 +91,11 @@ final class DifferentialInlineCommentEditView extends AphrontView {
           'td',
           array('colspan' => 3, 'class' => 'right3'),
           $this->onRight ? $content : null),
-      )));
+      );
+    }
+
+    $row = phutil_tag('tr', array('class' => 'inline-comment-splint'), $cells);
+    return phutil_tag('table', array(), $row);
   }
 
   private function renderInputs() {

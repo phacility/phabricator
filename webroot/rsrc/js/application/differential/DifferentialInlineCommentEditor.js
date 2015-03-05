@@ -35,7 +35,8 @@ JX.install('DifferentialInlineCommentEditor', {
         is_new : this.getIsNew(),
         length : this.getLength(),
         changeset : this.getChangeset(),
-        text : this.getText() || ''
+        text : this.getText() || '',
+        renderer: this.getRenderer()
       };
     },
     _draw : function(content, exact_row) {
@@ -288,7 +289,8 @@ JX.install('DifferentialInlineCommentEditor', {
     isNew : null,
     text : null,
     templates : null,
-    originalText : null
+    originalText : null,
+    renderer: null
   }
 
 });

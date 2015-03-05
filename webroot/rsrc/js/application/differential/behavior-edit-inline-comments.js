@@ -150,6 +150,8 @@ JX.behavior('differential-edit-inline-comments', function(config) {
         insert = target.parentNode;
       }
 
+      var view = JX.ChangesetViewManager.getForNode(root);
+
       editor = new JX.DifferentialInlineCommentEditor(config.uri)
         .setTemplates(config.undo_templates)
         .setOperation('new')
@@ -160,6 +162,7 @@ JX.behavior('differential-edit-inline-comments', function(config) {
         .setOnRight(isOnRight(target) ? 1 : 0)
         .setRow(insert.nextSibling)
         .setTable(insert.parentNode)
+        .setRenderer(view.getRenderer())
         .start();
 
       set_link_state(true);

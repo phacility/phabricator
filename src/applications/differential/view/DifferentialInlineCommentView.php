@@ -10,6 +10,7 @@ final class DifferentialInlineCommentView extends AphrontView {
   private $editable;
   private $preview;
   private $allowReply;
+  private $renderer;
 
   public function setInlineComment(PhabricatorInlineCommentInterface $comment) {
     $this->inlineComment = $comment;
@@ -50,6 +51,15 @@ final class DifferentialInlineCommentView extends AphrontView {
   public function setAllowReply($allow_reply) {
     $this->allowReply = $allow_reply;
     return $this;
+  }
+
+  public function setRenderer($renderer) {
+    $this->renderer = $renderer;
+    return $this;
+  }
+
+  public function getRenderer() {
+    return $this->renderer;
   }
 
   public function render() {
@@ -251,11 +261,20 @@ final class DifferentialInlineCommentView extends AphrontView {
       return $markup;
     }
 
-    $left_markup = !$this->onRight ? $markup : '';
-    $right_markup = $this->onRight ? $markup : '';
+    if ($this->renderer == '1up') {
+      $cells = array(
+        phutil_tag('th', array()),
+        phutil_tag('th', array()),
+        phutil_tag(
+          'td',
+          array('colspan' => 3, 'class' => 'right3'),
+          $markup),
+      );
+    } else {
+      $left_markup = !$this->onRight ? $markup : '';
+      $right_markup = $this->onRight ? $markup : '';
 
-    return phutil_tag('table', array(),
-      phutil_tag('tr', array(), array(
+      $cells = array(
         phutil_tag('th', array()),
         phutil_tag('td', array('class' => 'left'), $left_markup),
         phutil_tag('th', array()),
@@ -263,7 +282,11 @@ final class DifferentialInlineCommentView extends AphrontView {
           'td',
           array('colspan' => 3, 'class' => 'right3'),
           $right_markup),
-      )));
+      );
+    }
+
+    $row = phutil_tag('tr', array(), $cells);
+    return phutil_tag('table', array(), $row);
   }
 
 }
