@@ -518,7 +518,14 @@ abstract class DifferentialChangesetRenderer {
           $out[] = $old_buf;
           $old_buf = array();
         }
-        $new_buf[] = $primitive;
+        if (!$primitive['htype']) {
+          // If this line is the same in both versions of the file, put it in
+          // the old line buffer. This makes sure inlines on old, unchanged
+          // lines end up in the right place.
+          $old_buf[] = $primitive;
+        } else {
+          $new_buf[] = $primitive;
+        }
       } else if ($type == 'context' || $type == 'no-context') {
         $out[] = $old_buf;
         $out[] = $new_buf;
