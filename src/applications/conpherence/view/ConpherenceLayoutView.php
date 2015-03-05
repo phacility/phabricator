@@ -79,52 +79,7 @@ final class ConpherenceLayoutView extends AphrontView {
 
     $this->initBehavior(
       'conpherence-widget-pane',
-      array(
-        'widgetBaseUpdateURI' => $this->baseURI.'update/',
-        'widgetRegistry' => array(
-          'conpherence-message-pane' => array(
-            'name' => pht('Thread'),
-            'icon' => 'fa-comment',
-            'deviceOnly' => true,
-            'hasCreate' => false,
-          ),
-          'widgets-people' => array(
-            'name' => pht('Participants'),
-            'icon' => 'fa-users',
-            'deviceOnly' => false,
-            'hasCreate' => true,
-            'createData' => array(
-              'refreshFromResponse' => true,
-              'action' => ConpherenceUpdateActions::ADD_PERSON,
-              'customHref' => null,
-            ),
-          ),
-          'widgets-files' => array(
-            'name' => pht('Files'),
-            'icon' => 'fa-files-o',
-            'deviceOnly' => false,
-            'hasCreate' => false,
-          ),
-          'widgets-calendar' => array(
-            'name' => pht('Calendar'),
-            'icon' => 'fa-calendar',
-            'deviceOnly' => false,
-            'hasCreate' => true,
-            'createData' => array(
-              'refreshFromResponse' => false,
-              'action' => ConpherenceUpdateActions::ADD_STATUS,
-              'customHref' => '/calendar/event/create/',
-            ),
-          ),
-          'widgets-settings' => array(
-            'name' => pht('Settings'),
-            'icon' => 'fa-wrench',
-            'deviceOnly' => false,
-            'hasCreate' => false,
-          ),
-        ),
-      ));
-
+      ConpherenceWidgetConfigConstants::getWidgetPaneBehaviorConfig());
 
     return javelin_tag(
       'div',

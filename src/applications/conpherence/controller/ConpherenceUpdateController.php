@@ -309,7 +309,12 @@ final class ConpherenceUpdateController
       ->executeOne();
 
     if ($need_transactions) {
-      $data = $this->renderConpherenceTransactions($conpherence);
+      $data = ConpherenceTransactionView::renderTransactions(
+        $user,
+        $conpherence,
+        !$this->getRequest()->getExists('minimal_display'));
+      $participant_obj = $conpherence->getParticipant($user->getPHID());
+      $participant_obj->markUpToDate($conpherence, $data['latest_transaction']);
     } else {
       $data = array();
     }

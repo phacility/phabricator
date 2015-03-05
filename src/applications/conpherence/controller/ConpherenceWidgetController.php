@@ -2,8 +2,6 @@
 
 final class ConpherenceWidgetController extends ConpherenceController {
 
-  private $conpherenceID;
-  private $conpherence;
   private $userPreferences;
 
   public function setUserPreferences(PhabricatorUserPreferences $pref) {
@@ -15,33 +13,11 @@ final class ConpherenceWidgetController extends ConpherenceController {
     return $this->userPreferences;
   }
 
-  public function setConpherence(ConpherenceThread $conpherence) {
-    $this->conpherence = $conpherence;
-    return $this;
-  }
-
-  public function getConpherence() {
-    return $this->conpherence;
-  }
-
-  public function setConpherenceID($conpherence_id) {
-    $this->conpherenceID = $conpherence_id;
-    return $this;
-  }
-
-  public function getConpherenceID() {
-    return $this->conpherenceID;
-  }
-
-  public function willProcessRequest(array $data) {
-    $this->setConpherenceID(idx($data, 'id'));
-  }
-
-  public function processRequest() {
+  public function handleRequest(AphrontRequest $request) {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $conpherence_id = $this->getConpherenceID();
+    $conpherence_id = $request->getURIData('id');
     if (!$conpherence_id) {
       return new Aphront404Response();
     }
@@ -54,8 +30,25 @@ final class ConpherenceWidgetController extends ConpherenceController {
 
     $this->setUserPreferences($user->loadPreferences());
 
-    $widgets = $this->renderWidgetPaneContent();
-    $content = $widgets;
+    switch ($request->getStr('widget')) {
+      case 'widgets-people':
+        $content = $this->renderPeopleWidgetPaneContent();
+        break;
+      case 'widgets-files':
+        $content = $this->renderFileWidgetPaneContent();
+        break;
+      case 'widgets-calendar':
+        $widget = $this->renderCalendarWidgetPaneContent();
+        $content = phutil_implode_html('', $widget);
+        break;
+      case 'widgets-settings':
+        $content = $this->renderSettingsWidgetPaneContent();
+        break;
+      default:
+        $widgets = $this->renderWidgetPaneContent();
+        $content = $widgets;
+        break;
+    }
     return id(new AphrontAjaxResponse())->setContent($content);
   }
 
@@ -89,11 +82,8 @@ final class ConpherenceWidgetController extends ConpherenceController {
         'id' => 'widgets-people',
         'sigil' => 'widgets-people',
       ),
-      id(new ConpherencePeopleWidgetView())
-      ->setUser($user)
-      ->setConpherence($conpherence)
-      ->setUpdateURI($this->getWidgetURI()));
-    $widgets[] = javelin_tag(
+      $this->renderPeopleWidgetPaneContent());
+   $widgets[] = javelin_tag(
       'div',
       array(
         'class' => 'widgets-body',
@@ -101,11 +91,8 @@ final class ConpherenceWidgetController extends ConpherenceController {
         'sigil' => 'widgets-files',
         'style' => 'display: none;',
       ),
-      id(new ConpherenceFileWidgetView())
-      ->setUser($user)
-      ->setConpherence($conpherence)
-      ->setUpdateURI($this->getWidgetURI()));
-    $widgets[] = phutil_tag(
+      $this->renderFileWidgetPaneContent());
+   $widgets[] = phutil_tag(
       'div',
       array(
         'class' => 'widgets-body',
@@ -127,11 +114,25 @@ final class ConpherenceWidgetController extends ConpherenceController {
     return array('widgets' => phutil_implode_html('', $widgets));
   }
 
+  private function renderPeopleWidgetPaneContent() {
+    return id(new ConpherencePeopleWidgetView())
+      ->setUser($this->getViewer())
+      ->setConpherence($this->getConpherence())
+      ->setUpdateURI($this->getWidgetURI());
+  }
+
+  private function renderFileWidgetPaneContent() {
+    return  id(new ConpherenceFileWidgetView())
+      ->setUser($this->getViewer())
+      ->setConpherence($this->getConpherence())
+      ->setUpdateURI($this->getWidgetURI());
+  }
+
   private function renderSettingsWidgetPaneContent() {
-    $user = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
     $conpherence = $this->getConpherence();
     $participants = $conpherence->getParticipants();
-    $participant = $participants[$user->getPHID()];
+    $participant = $participants[$viewer->getPHID()];
     $default = ConpherenceSettings::EMAIL_ALWAYS;
     $preference = $this->getUserPreferences();
     if ($preference) {
@@ -177,7 +178,7 @@ final class ConpherenceWidgetController extends ConpherenceController {
     );
 
     return phabricator_form(
-      $user,
+      $viewer,
       array(
         'method' => 'POST',
         'action' => $this->getWidgetURI(),

@@ -3,34 +3,10 @@
 final class ConpherenceViewController extends
   ConpherenceController {
 
-  private $conpherenceID;
-  private $conpherence;
-
-  public function setConpherence(ConpherenceThread $conpherence) {
-    $this->conpherence = $conpherence;
-    return $this;
-  }
-  public function getConpherence() {
-    return $this->conpherence;
-  }
-
-  public function setConpherenceID($conpherence_id) {
-    $this->conpherenceID = $conpherence_id;
-    return $this;
-  }
-  public function getConpherenceID() {
-    return $this->conpherenceID;
-  }
-
-  public function willProcessRequest(array $data) {
-    $this->setConpherenceID(idx($data, 'id'));
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
 
-    $conpherence_id = $this->getConpherenceID();
+    $conpherence_id = $request->getURIData('id');
     if (!$conpherence_id) {
       return new Aphront404Response();
     }
@@ -53,13 +29,15 @@ final class ConpherenceViewController extends
 
     $participant = $conpherence->getParticipant($user->getPHID());
     $transactions = $conpherence->getTransactions();
-    $latest_transaction = end($transactions);
+    $latest_transaction = head($transactions);
     $write_guard = AphrontWriteGuard::beginScopedUnguardedWrites();
     $participant->markUpToDate($conpherence, $latest_transaction);
     unset($write_guard);
 
-    $data = $this->renderConpherenceTransactions($conpherence);
-    $messages = $this->renderMessagePaneContent(
+    $data = ConpherenceTransactionView::renderTransactions(
+      $user,
+      $conpherence);
+    $messages = ConpherenceTransactionView::renderMessagePaneContent(
       $data['transactions'],
       $data['oldest_transaction_id']);
     if ($before_transaction_id) {
@@ -76,6 +54,12 @@ final class ConpherenceViewController extends
       );
     }
 
+    $title = $conpherence->getTitle();
+    if (!$title) {
+      $title = pht('[No Title]');
+    }
+    $content['title'] = $title;
+
     if ($request->isAjax()) {
       return id(new AphrontAjaxResponse())->setContent($content);
     }
@@ -88,39 +72,12 @@ final class ConpherenceViewController extends
       ->setReplyForm($form)
       ->setRole('thread');
 
-    $title = $conpherence->getTitle();
-    if (!$title) {
-      $title = pht('[No Title]');
-    }
-    return $this->buildApplicationPage(
+   return $this->buildApplicationPage(
       $layout,
       array(
         'title' => $title,
         'pageObjects' => array($conpherence->getPHID()),
       ));
-  }
-
-  private function renderMessagePaneContent(
-    array $transactions,
-    $oldest_transaction_id) {
-
-    $scrollbutton = '';
-    if ($oldest_transaction_id) {
-      $scrollbutton = javelin_tag(
-        'a',
-        array(
-          'href' => '#',
-          'mustcapture' => true,
-          'sigil' => 'show-older-messages',
-          'class' => 'conpherence-show-older-messages',
-          'meta' => array(
-            'oldest_transaction_id' => $oldest_transaction_id,
-          ),
-        ),
-        pht('Show Older Messages'));
-    }
-
-    return hsprintf('%s%s', $scrollbutton, $transactions);
   }
 
   private function renderFormContent($latest_transaction_id) {
@@ -167,5 +124,6 @@ final class ConpherenceViewController extends
 
     return $form;
   }
+
 
 }

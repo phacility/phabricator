@@ -75,6 +75,7 @@
   z-index: 5;
 }
 
+.conpherence-durable-column-header,
 .phabricator-main-menu {
   z-index: 6;
 }
