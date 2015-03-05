@@ -186,7 +186,9 @@ abstract class PhabricatorApplicationTransactionEditor
     return $this->unmentionablePHIDMap;
   }
 
-  protected function shouldEnableMentions() {
+  protected function shouldEnableMentions(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
     return true;
   }
 
