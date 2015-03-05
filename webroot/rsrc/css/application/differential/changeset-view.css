@@ -39,6 +39,10 @@
   width: 49.25%;
 }
 
+.differential-diff.diff-1up col.unified {
+  width: 99.5%;
+}
+
 .differential-diff col.copy {
   width: 0.5%;
 }

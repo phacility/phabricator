@@ -19,6 +19,7 @@ final class DifferentialChangesetOneUpRenderer
     return phutil_tag('colgroup', array(), array(
       phutil_tag('col', array('class' => 'num')),
       phutil_tag('col', array('class' => 'num')),
+      phutil_tag('col', array('class' => 'copy')),
       phutil_tag('col', array('class' => 'unified')),
     ));
   }
@@ -31,6 +32,11 @@ final class DifferentialChangesetOneUpRenderer
     $primitives = $this->buildPrimitives($range_start, $range_len);
 
     list($left_prefix, $right_prefix) = $this->getLineIDPrefixes();
+
+    $no_copy = phutil_tag('td', array('class' => 'copy'));
+    $no_coverage = null;
+
+    $column_width = 4;
 
     $out = array();
     foreach ($primitives as $p) {
@@ -54,7 +60,9 @@ final class DifferentialChangesetOneUpRenderer
             $out[] = phutil_tag('th', array('id' => $left_id), $p['line']);
 
             $out[] = phutil_tag('th', array());
+            $out[] = $no_copy;
             $out[] = phutil_tag('td', array('class' => $class), $p['render']);
+            $out[] = $no_coverage;
           } else {
             if ($p['htype']) {
               $class = 'right new';
@@ -76,26 +84,41 @@ final class DifferentialChangesetOneUpRenderer
             }
             $out[] = phutil_tag('th', array('id' => $right_id), $p['line']);
 
+
+            $out[] = $no_copy;
             $out[] = phutil_tag('td', array('class' => $class), $p['render']);
+            $out[] = $no_coverage;
           }
           $out[] = hsprintf('</tr>');
           break;
         case 'inline':
-          $out[] = hsprintf('<tr><th /><th />');
-          $out[] = hsprintf('<td>');
-
           $inline = $this->buildInlineComment(
             $p['comment'],
             $p['right']);
           $inline->setBuildScaffolding(false);
-          $out[] = $inline->render();
 
-          $out[] = hsprintf('</td></tr>');
+          $out[] = phutil_tag(
+            'tr',
+            array(),
+            array(
+              phutil_tag('th'),
+              phutil_tag('th'),
+              $no_copy,
+              phutil_tag('td', array(), $inline),
+              $no_coverage,
+            ));
           break;
         case 'no-context':
-          $out[] = hsprintf(
-            '<tr><td class="show-more" colspan="3">%s</td></tr>',
-            pht('Context not available.'));
+          $out[] = phutil_tag(
+            'tr',
+            array(),
+            phutil_tag(
+              'td',
+              array(
+                'class' => 'show-more',
+                'colspan' => $column_width,
+              ),
+              pht('Context not available.')));
           break;
         case 'context':
           $top = $p['top'];
@@ -112,7 +135,7 @@ final class DifferentialChangesetOneUpRenderer
               'td',
               array(
                 'class' => 'show-more',
-                'colspan' => 3,
+                'colspan' => $column_width,
               ),
               $links));
           break;

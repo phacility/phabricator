@@ -533,12 +533,20 @@ abstract class DifferentialChangesetRenderer {
         $new_buf = array();
         $out[] = array($primitive);
       } else if ($type == 'inline') {
-        $out[] = $old_buf;
-        $out[] = $new_buf;
+
+        // If this inline is on the left side, put it after the old lines.
+        if (!$primitive['right']) {
+          $out[] = $old_buf;
+          $out[] = array($primitive);
+          $out[] = $new_buf;
+        } else {
+          $out[] = $old_buf;
+          $out[] = $new_buf;
+          $out[] = array($primitive);
+        }
+
         $old_buf = array();
         $new_buf = array();
-
-        $out[] = array($primitive);
       } else {
         throw new Exception("Unknown primitive type '{$primitive}'!");
       }

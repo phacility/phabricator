@@ -188,6 +188,7 @@ JX.behavior('differential-edit-inline-comments', function(config) {
           var td = JX.DOM.findAbove(comment, 'td');
           var th = td.previousSibling;
 
+          // TODO: For one-up views, this is incorrect!
           var new_part = isNewFile(th) ? 'N' : 'O';
           var prefix = 'C' + id_part + new_part + 'L';
 
