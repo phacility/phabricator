@@ -63,6 +63,11 @@ final class DifferentialChangesetOneUpRenderer
 
           $out[] = hsprintf('</td></tr>');
           break;
+        case 'no-context':
+          $out[] = hsprintf(
+            '<tr><td class="show-more" colspan="3">%s</th></tr>',
+            pht('Context not available.'));
+          break;
         default:
           $out[] = hsprintf('<tr><th /><th /><td>%s</td></tr>', $type);
           break;
