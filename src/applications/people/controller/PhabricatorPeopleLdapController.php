@@ -124,7 +124,7 @@ final class PhabricatorPeopleLdapController
   }
 
   private function processSearchRequest($request) {
-    $panel = new AphrontPanelView();
+    $panel = new PHUIBoxView();
     $admin = $request->getUser();
 
     $search = $request->getStr('query');
