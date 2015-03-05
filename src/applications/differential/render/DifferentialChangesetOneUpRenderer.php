@@ -69,8 +69,27 @@ final class DifferentialChangesetOneUpRenderer
           break;
         case 'no-context':
           $out[] = hsprintf(
-            '<tr><td class="show-more" colspan="3">%s</th></tr>',
+            '<tr><td class="show-more" colspan="3">%s</td></tr>',
             pht('Context not available.'));
+          break;
+        case 'context':
+          $top = $p['top'];
+          $len = $p['len'];
+
+          $links = $this->renderShowContextLinks($top, $len, $rows);
+
+          $out[] = javelin_tag(
+            'tr',
+            array(
+              'sigil' => 'context-target',
+            ),
+            phutil_tag(
+              'td',
+              array(
+                'class' => 'show-more',
+                'colspan' => 3,
+              ),
+              $links));
           break;
         default:
           $out[] = hsprintf('<tr><th /><th /><td>%s</td></tr>', $type);

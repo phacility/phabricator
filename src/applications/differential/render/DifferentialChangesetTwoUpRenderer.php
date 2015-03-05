@@ -84,6 +84,9 @@ final class DifferentialChangesetTwoUpRenderer
         // increments $ii by the entire size of the gap and then continues
         // the loop.
         $gap = array_pop($gaps);
+
+        // TODO: Move this to renderShowContextLinks() once that is stable.
+
         $top = $gap[0];
         $len = $gap[1];
 

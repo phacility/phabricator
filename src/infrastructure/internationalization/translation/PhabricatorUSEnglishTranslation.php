@@ -941,6 +941,32 @@ final class PhabricatorUSEnglishTranslation
           'allowed domains will be able to register an account: %3$s',
         ),
       ),
+
+      'Show First %d Line(s)' => array(
+        'Show First Line',
+        'Show First %d Lines',
+      ),
+
+      "\xE2\x96\xB2 Show %d Line(s)" => array(
+        "\xE2\x96\xB2 Show %d Line(s)",
+        "\xE2\x96\xB2 Show %d Line(s)",
+      ),
+
+      'Show All %d Line(s)' => array(
+        'Show Line',
+        'Show All %d Lines',
+      ),
+
+      "\xE2\x96\xBC Show %d Line(s)" => array(
+        "\xE2\x96\xBC Show Line",
+        "\xE2\x96\xBC Show %d Lines",
+      ),
+
+      'Show Last %d Line(s)' => array(
+        'Show Last Line',
+        'Show Last %d Lines',
+      ),
+
     );
   }
 

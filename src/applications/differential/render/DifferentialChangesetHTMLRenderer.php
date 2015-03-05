@@ -439,4 +439,92 @@ abstract class DifferentialChangesetHTMLRenderer
       ->setAllowReply($allow_reply);
   }
 
+
+  /**
+   * Build links which users can click to show more context in a changeset.
+   *
+   * @param int Beginning of the line range to build links for.
+   * @param int Length of the line range to build links for.
+   * @param int Total number of lines in the changeset.
+   * @return markup Rendered links.
+   */
+  protected function renderShowContextLinks($top, $len, $changeset_length) {
+    $block_size = 20;
+    $end = ($top + $len) - $block_size;
+
+    // If this is a large block, such that the "top" and "bottom" ranges are
+    // non-overlapping, we'll provide options to show the top, bottom or entire
+    // block. For smaller blocks, we only provide an option to show the entire
+    // block, since it would be silly to show the bottom 20 lines of a 25-line
+    // block.
+    $is_large_block = ($len > ($block_size * 2));
+
+    $links = array();
+
+    if ($is_large_block) {
+      $is_first_block = ($top == 0);
+      if ($is_first_block) {
+        $text = pht('Show First %d Line(s)', $block_size);
+      } else {
+        $text = pht("\xE2\x96\xB2 Show %d Line(s)", $block_size);
+      }
+
+      $links[] = $this->renderShowContextLink(
+        false,
+        "{$top}-{$len}/{$top}-20",
+        $text);
+    }
+
+    $links[] = $this->renderShowContextLink(
+      true,
+      "{$top}-{$len}/{$top}-{$len}",
+      pht('Show All %d Line(s)', $len));
+
+    if ($is_large_block) {
+      $is_last_block = (($top + $len) >= $changeset_length);
+      if ($is_last_block) {
+        $text = pht('Show Last %d Line(s)', $block_size);
+      } else {
+        $text = pht("\xE2\x96\xBC Show %d Line(s)", $block_size);
+      }
+
+      $links[] = $this->renderShowContextLink(
+        false,
+        "{$top}-{$len}/{$end}-20",
+        $text);
+    }
+
+    return phutil_implode_html(" \xE2\x80\xA2 ", $links);
+  }
+
+
+  /**
+   * Build a link that shows more context in a changeset.
+   *
+   * See @{method:renderShowContextLinks}.
+   *
+   * @param bool Does this link show all context when clicked?
+   * @param string Range specification for lines to show.
+   * @param string Text of the link.
+   * @return markup Rendered link.
+   */
+  private function renderShowContextLink($is_all, $range, $text) {
+    $reference = $this->getRenderingReference();
+
+    return javelin_tag(
+      'a',
+      array(
+        'href' => '#',
+        'mustcapture' => true,
+        'sigil' => 'show-more',
+        'meta' => array(
+          'type' => ($is_all ? 'all' : null),
+          'ref' => $reference,
+          'range' => $range,
+        ),
+      ),
+      $text);
+  }
+
+
 }
