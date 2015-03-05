@@ -55,19 +55,8 @@ final class DifferentialChangesetTwoUpRenderer
     $new_lines = $this->getNewLines();
     $gaps = $this->getGaps();
     $reference = $this->getRenderingReference();
-    $left_id = $this->getOldChangesetID();
-    $right_id = $this->getNewChangesetID();
 
-    // "N" stands for 'new' and means the comment should attach to the new file
-    // when stored, i.e. DifferentialInlineComment->setIsNewFile().
-    // "O" stands for 'old' and means the comment should attach to the old file.
-
-    $left_char = $this->getOldAttachesToNewFile()
-      ? 'N'
-      : 'O';
-    $right_char = $this->getNewAttachesToNewFile()
-      ? 'N'
-      : 'O';
+    list($left_prefix, $right_prefix) = $this->getLineIDPrefixes();
 
     $changeset = $this->getChangeset();
     $copy_lines = idx($changeset->getMetadata(), 'copy:lines', array());
@@ -234,14 +223,14 @@ final class DifferentialChangesetTwoUpRenderer
         $html[] = $context_not_available;
       }
 
-      if ($o_num && $left_id) {
-        $o_id = 'C'.$left_id.$left_char.'L'.$o_num;
+      if ($o_num && $left_prefix) {
+        $o_id = $left_prefix.$o_num;
       } else {
         $o_id = null;
       }
 
-      if ($n_num && $right_id) {
-        $n_id = 'C'.$right_id.$right_char.'L'.$n_num;
+      if ($n_num && $right_prefix) {
+        $n_id = $right_prefix.$n_num;
       } else {
         $n_id = null;
       }
@@ -250,9 +239,6 @@ final class DifferentialChangesetTwoUpRenderer
       // intercepting 'copy' events to make sure sensible text ends up on the
       // clipboard. See the 'phabricator-oncopy' behavior.
       $zero_space = "\xE2\x80\x8B";
-
-      // NOTE: The Javascript is sensitive to whitespace changes in this
-      // block!
 
       $html[] = phutil_tag('tr', array(), array(
         phutil_tag('th', array('id' => $o_id), $o_num),

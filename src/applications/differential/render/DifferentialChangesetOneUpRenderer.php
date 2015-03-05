@@ -30,6 +30,8 @@ final class DifferentialChangesetOneUpRenderer
 
     $primitives = $this->buildPrimitives($range_start, $range_len);
 
+    list($left_prefix, $right_prefix) = $this->getLineIDPrefixes();
+
     $out = array();
     foreach ($primitives as $p) {
       $type = $p['type'];
@@ -43,18 +45,37 @@ final class DifferentialChangesetOneUpRenderer
             } else {
               $class = 'left';
             }
-            $out[] = phutil_tag('th', array(), $p['line']);
+
+            if ($left_prefix) {
+              $left_id = $left_prefix.$p['line'];
+            } else {
+              $left_id = null;
+            }
+            $out[] = phutil_tag('th', array('id' => $left_id), $p['line']);
+
             $out[] = phutil_tag('th', array());
             $out[] = phutil_tag('td', array('class' => $class), $p['render']);
-          } else if ($type == 'new') {
+          } else {
             if ($p['htype']) {
               $class = 'right new';
               $out[] = phutil_tag('th', array());
             } else {
               $class = 'right';
-              $out[] = phutil_tag('th', array(), $p['oline']);
+              if ($left_prefix) {
+                $left_id = $left_prefix.$p['oline'];
+              } else {
+                $left_id = null;
+              }
+              $out[] = phutil_tag('th', array('id' => $left_id), $p['oline']);
             }
-            $out[] = phutil_tag('th', array(), $p['line']);
+
+            if ($right_prefix) {
+              $right_id = $right_prefix.$p['line'];
+            } else {
+              $right_id = null;
+            }
+            $out[] = phutil_tag('th', array('id' => $right_id), $p['line']);
+
             $out[] = phutil_tag('td', array('class' => $class), $p['render']);
           }
           $out[] = hsprintf('</tr>');

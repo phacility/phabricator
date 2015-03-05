@@ -525,5 +525,48 @@ abstract class DifferentialChangesetHTMLRenderer
       $text);
   }
 
+  /**
+   * Build the prefixes for line IDs used to track inline comments.
+   *
+   * @return pair<wild, wild> Left and right prefixes.
+   */
+  protected function getLineIDPrefixes() {
+    // These look like "C123NL45", which means the line is line 45 on the
+    // "new" side of the file in changeset 123.
+
+    // The "C" stands for "changeset", and is followed by a changeset ID.
+
+    // "N" stands for "new" and means the comment should attach to the new file
+    // when stored. "O" stands for "old" and means the comment should attach to
+    // the old file. These are important because either the old or new part
+    // of a file may appear on the left or right side of the diff in the
+    // diff-of-diffs view.
+
+    // The "L" stands for "line" and is followed by the line number.
+
+    if ($this->getOldChangesetID()) {
+      $left_prefix = array();
+      $left_prefix[] = 'C';
+      $left_prefix[] = $this->getOldChangesetID();
+      $left_prefix[] = $this->getOldAttachesToNewFile() ? 'N' : 'O';
+      $left_prefix[] = 'L';
+      $left_prefix = implode('', $left_prefix);
+    } else {
+      $left_prefix = null;
+    }
+
+    if ($this->getNewChangesetID()) {
+      $right_prefix = array();
+      $right_prefix[] = 'C';
+      $right_prefix[] = $this->getNewChangesetID();
+      $right_prefix[] = $this->getNewAttachesToNewFile() ? 'N' : 'O';
+      $right_prefix[] = 'L';
+      $right_prefix = implode('', $right_prefix);
+    } else {
+      $right_prefix = null;
+    }
+
+    return array($left_prefix, $right_prefix);
+  }
 
 }
