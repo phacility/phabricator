@@ -612,11 +612,6 @@ final class DifferentialChangesetParser {
     $moveaway = false;
     $changetype = $this->changeset->getChangeType();
     if ($changetype == DifferentialChangeType::TYPE_MOVE_AWAY) {
-      // sometimes we show moved files as unchanged, sometimes deleted,
-      // and sometimes inconsistent with what actually happened at the
-      // destination of the move. Rather than make a false claim,
-      // omit the 'not changed' notice if this is the source of a move
-      $unchanged = false;
       $moveaway = true;
     }
 
@@ -776,6 +771,16 @@ final class DifferentialChangesetParser {
           pht(
             'This file contains generated code, which does not normally '.
             'need to be reviewed.'));
+      } else if ($this->isMoveAway()) {
+        // We put an empty shield on these files. Normally, they do not have
+        // any diff content anyway. However, if they come through `arc`, they
+        // may have content. We don't want to show it (it's not useful) and
+        // we bailed out of fully processing it earlier anyway.
+
+        // We could show a message like "this file was moved", but we show
+        // that as a change header anyway, so it would be redundant. Instead,
+        // just render an empty shield to skip rendering the diff body.
+        $shield = '';
       } else if ($this->isUnchanged()) {
         $type = 'text';
         if (!$rows) {
@@ -791,8 +796,6 @@ final class DifferentialChangesetParser {
         $shield = $renderer->renderShield(
           pht('The contents of this file were not changed.'),
           $type);
-      } else if ($this->isMoveAway()) {
-        $shield = null;
       } else if ($this->isWhitespaceOnly()) {
         $shield = $renderer->renderShield(
           pht('This file was changed only by adding or removing whitespace.'),
@@ -809,7 +812,7 @@ final class DifferentialChangesetParser {
       }
     }
 
-    if ($shield) {
+    if ($shield !== null) {
       return $renderer->renderChangesetTable($shield);
     }
 

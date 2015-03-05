@@ -1,0 +1,10 @@
+diff --git a/GENERATED b/GENERATED
+index 5dcff7f..eff82ef 100644
+--- a/GENERATED
++++ b/GENERATED
+@@ -1,4 +1,4 @@
+ @generated
+
+-This is a generated file.
++This is a generated file, full of generated code.
+

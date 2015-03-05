@@ -1,0 +1,8 @@
+O 1 . @generated\n~
+N 1 . @generated\n~
+O 2 - \n~
+N 2 + \n~
+O 3 - This is a generated file.\n~
+N 3 + This is a generated file{(, full of generated code)}.\n~
+O 4 . \n~
+N 4 . \n~

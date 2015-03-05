@@ -96,7 +96,7 @@ final class DifferentialHunkParser {
   public function setOldLineTypeMap(array $map) {
     $lines = $this->getOldLines();
     foreach ($lines as $key => $data) {
-      $lines[$key]['type'] = $map[$data['line']];
+      $lines[$key]['type'] = idx($map, $data['line']);
     }
     $this->oldLines = $lines;
     return $this;
@@ -117,7 +117,7 @@ final class DifferentialHunkParser {
   public function setNewLineTypeMap(array $map) {
     $lines = $this->getNewLines();
     foreach ($lines as $key => $data) {
-      $lines[$key]['type'] = $map[$data['line']];
+      $lines[$key]['type'] = idx($map, $data['line']);
     }
     $this->newLines = $lines;
     return $this;
