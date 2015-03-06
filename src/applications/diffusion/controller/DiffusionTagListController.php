@@ -66,10 +66,9 @@ final class DiffusionTagListController extends DiffusionController {
       $handles = $this->loadViewerHandles($phids);
       $view->setHandles($handles);
 
-      $panel = id(new AphrontPanelView())
-        ->setNoBackground(true)
-        ->appendChild($view)
-        ->appendChild($pager);
+      $panel = id(new PHUIObjectBoxView())
+        ->setHeaderText(pht('Tags'))
+        ->appendChild($view);
 
       $content = $panel;
     }
@@ -84,6 +83,7 @@ final class DiffusionTagListController extends DiffusionController {
       array(
         $crumbs,
         $content,
+        $pager,
       ),
       array(
         'title' => array(

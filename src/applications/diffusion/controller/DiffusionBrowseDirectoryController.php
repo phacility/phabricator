@@ -57,9 +57,9 @@ final class DiffusionBrowseDirectoryController
       $browse_table->setPaths($results->getPaths());
       $browse_table->setUser($request->getUser());
 
-      $browse_panel = new AphrontPanelView();
+      $browse_panel = new PHUIObjectBoxView();
+      $browse_panel->setHeaderText($drequest->getPath(), '/');
       $browse_panel->appendChild($browse_table);
-      $browse_panel->setNoBackground();
 
       $content[] = $browse_panel;
     }
