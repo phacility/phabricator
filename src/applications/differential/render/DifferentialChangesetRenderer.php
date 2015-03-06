@@ -522,6 +522,13 @@ abstract class DifferentialChangesetRenderer {
           // If this line is the same in both versions of the file, put it in
           // the old line buffer. This makes sure inlines on old, unchanged
           // lines end up in the right place.
+
+          // First, we need to flush the new line buffer if there's anything
+          // in it.
+          if ($new_buf) {
+            $out[] = $new_buf;
+            $new_buf = array();
+          }
           $old_buf[] = $primitive;
         } else {
           $new_buf[] = $primitive;

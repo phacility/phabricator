@@ -92,11 +92,14 @@ abstract class DifferentialChangesetTestRenderer
             ),
             $render);
 
-          $render = html_entity_decode($render);
+          $render = html_entity_decode($render, ENT_QUOTES);
 
           $t = ($type == 'old') ? 'O' : 'N';
 
           $out[] = "{$t} {$num} {$htype} {$render}~";
+          break;
+        case 'no-context':
+          $out[] = 'X <MISSING-CONTEXT>';
           break;
         default:
           $out[] = $type;
