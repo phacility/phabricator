@@ -30,7 +30,10 @@ final class DifferentialChangesetOneUpRenderer
     $rows) {
 
     $primitives = $this->buildPrimitives($range_start, $range_len);
+    return $this->renderPrimitives($primitives, $rows);
+  }
 
+  protected function renderPrimitives(array $primitives, $rows) {
     list($left_prefix, $right_prefix) = $this->getLineIDPrefixes();
 
     $no_copy = phutil_tag('td', array('class' => 'copy'));
@@ -44,12 +47,20 @@ final class DifferentialChangesetOneUpRenderer
       switch ($type) {
         case 'old':
         case 'new':
-          $out[] = hsprintf('<tr>');
-          if ($type == 'old') {
+        case 'old-file':
+        case 'new-file':
+          $is_old = ($type == 'old' || $type == 'old-file');
+
+          $cells = array();
+          if ($is_old) {
             if ($p['htype']) {
               $class = 'left old';
             } else {
               $class = 'left';
+            }
+
+            if ($type == 'old-file') {
+              $class = "{$class} differential-old-image";
             }
 
             if ($left_prefix) {
@@ -57,16 +68,16 @@ final class DifferentialChangesetOneUpRenderer
             } else {
               $left_id = null;
             }
-            $out[] = phutil_tag('th', array('id' => $left_id), $p['line']);
+            $cells[] = phutil_tag('th', array('id' => $left_id), $p['line']);
 
-            $out[] = phutil_tag('th', array());
-            $out[] = $no_copy;
-            $out[] = phutil_tag('td', array('class' => $class), $p['render']);
-            $out[] = $no_coverage;
+            $cells[] = phutil_tag('th', array());
+            $cells[] = $no_copy;
+            $cells[] = phutil_tag('td', array('class' => $class), $p['render']);
+            $cells[] = $no_coverage;
           } else {
             if ($p['htype']) {
               $class = 'right new';
-              $out[] = phutil_tag('th', array());
+              $cells[] = phutil_tag('th', array());
             } else {
               $class = 'right';
               if ($left_prefix) {
@@ -74,7 +85,11 @@ final class DifferentialChangesetOneUpRenderer
               } else {
                 $left_id = null;
               }
-              $out[] = phutil_tag('th', array('id' => $left_id), $p['oline']);
+              $cells[] = phutil_tag('th', array('id' => $left_id), $p['oline']);
+            }
+
+            if ($type == 'new-file') {
+              $class = "{$class} differential-new-image";
             }
 
             if ($right_prefix) {
@@ -82,14 +97,16 @@ final class DifferentialChangesetOneUpRenderer
             } else {
               $right_id = null;
             }
-            $out[] = phutil_tag('th', array('id' => $right_id), $p['line']);
+            $cells[] = phutil_tag('th', array('id' => $right_id), $p['line']);
 
 
-            $out[] = $no_copy;
-            $out[] = phutil_tag('td', array('class' => $class), $p['render']);
-            $out[] = $no_coverage;
+            $cells[] = $no_copy;
+            $cells[] = phutil_tag('td', array('class' => $class), $p['render']);
+            $cells[] = $no_coverage;
           }
-          $out[] = hsprintf('</tr>');
+
+          $out[] = phutil_tag('tr', array(), $cells);
+
           break;
         case 'inline':
           $inline = $this->buildInlineComment(
@@ -137,6 +154,7 @@ final class DifferentialChangesetOneUpRenderer
     if ($out) {
       return $this->wrapChangeInTable(phutil_implode_html('', $out));
     }
+
     return null;
   }
 
@@ -146,7 +164,55 @@ final class DifferentialChangesetOneUpRenderer
     $id = 0,
     $vs = 0) {
 
-    throw new PhutilMethodNotImplementedException();
+    // TODO: This should eventually merge into the normal primitives pathway,
+    // but fake it for now and just share as much code as possible.
+
+    $primitives = array();
+    if ($old_file) {
+      $primitives[] = array(
+        'type' => 'old-file',
+        'htype' => ($new_file ? 'new-file' : null),
+        'file' => $old_file,
+        'line' => 1,
+        'render' => $this->renderImageStage($old_file),
+      );
+    }
+
+    if ($new_file) {
+      $primitives[] = array(
+        'type' => 'new-file',
+        'htype' => ($old_file ? 'old-file' : null),
+        'file' => $new_file,
+        'line' => 1,
+        'oline' => ($old_file ? 1 : null),
+        'render' => $this->renderImageStage($old_file),
+      );
+    }
+
+    // TODO: We'd like to share primitive code here, but buildPrimitives()
+    // currently chokes on changesets with no textual data.
+    foreach ($this->getOldComments() as $line => $group) {
+      foreach ($group as $comment) {
+        $primitives[] = array(
+          'type' => 'inline',
+          'comment' => $comment,
+          'right' => false,
+        );
+      }
+    }
+
+    foreach ($this->getNewComments() as $line => $group) {
+      foreach ($group as $comment) {
+        $primitives[] = array(
+          'type' => 'inline',
+          'comment' => $comment,
+          'right' => true,
+        );
+      }
+    }
+
+    $output = $this->renderPrimitives($primitives, 1);
+    return $this->renderChangesetTable($output);
   }
 
   public function getRowScaffoldForInline(PHUIDiffInlineCommentView $view) {

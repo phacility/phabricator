@@ -304,30 +304,12 @@ final class DifferentialChangesetTwoUpRenderer
                                    $vs = 0) {
     $old = null;
     if ($old_file) {
-      $old = phutil_tag(
-        'div',
-        array(
-          'class' => 'differential-image-stage',
-        ),
-        phutil_tag(
-          'img',
-          array(
-            'src' => $old_file->getBestURI(),
-          )));
+      $old = $this->renderImageStage($old_file);
     }
 
     $new = null;
     if ($new_file) {
-      $new = phutil_tag(
-        'div',
-        array(
-          'class' => 'differential-image-stage',
-        ),
-        phutil_tag(
-          'img',
-          array(
-            'src' => $new_file->getBestURI(),
-          )));
+      $new = $this->renderImageStage($new_file);
     }
 
     $html_old = array();
