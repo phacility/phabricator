@@ -503,10 +503,6 @@ abstract class DifferentialChangesetRenderer {
           // Ignore it when rendering a one-up diff.
           continue;
         }
-        if ($new_buf) {
-          $out[] = $new_buf;
-          $new_buf = array();
-        }
         $old_buf[] = $primitive;
       } else if ($type == 'new') {
         if ($primitive['line'] === null) {
@@ -514,17 +510,16 @@ abstract class DifferentialChangesetRenderer {
           // old file. Ignore it when rendering a one-up diff.
           continue;
         }
-        if ($old_buf) {
-          $out[] = $old_buf;
-          $old_buf = array();
-        }
         if (!$primitive['htype']) {
           // If this line is the same in both versions of the file, put it in
           // the old line buffer. This makes sure inlines on old, unchanged
           // lines end up in the right place.
 
-          // First, we need to flush the new line buffer if there's anything
-          // in it.
+          // First, we need to flush the line buffers if they're not empty.
+          if ($old_buf) {
+            $out[] = $old_buf;
+            $old_buf = array();
+          }
           if ($new_buf) {
             $out[] = $new_buf;
             $new_buf = array();
@@ -545,15 +540,15 @@ abstract class DifferentialChangesetRenderer {
         if (!$primitive['right']) {
           $out[] = $old_buf;
           $out[] = array($primitive);
-          $out[] = $new_buf;
+          $old_buf = array();
         } else {
           $out[] = $old_buf;
           $out[] = $new_buf;
           $out[] = array($primitive);
+          $old_buf = array();
+          $new_buf = array();
         }
 
-        $old_buf = array();
-        $new_buf = array();
       } else {
         throw new Exception("Unknown primitive type '{$primitive}'!");
       }

@@ -1,0 +1,16 @@
+diff --git a/style b/style
+index a5fc249..18edce4 100644
+--- a/style
++++ b/style
+@@ -57,8 +57,8 @@
+ .dashboard-panel div.phabricator-feed-frame {
+   background: #fff;
+   margin: 0;
+-  border-left: 1px solid {$lightblueborder};
+-  border-right: 1px solid {$lightblueborder};
+-  border-bottom: 1px solid {$blueborder};
++  border-back: 1px solid {$lightblueborder};
++  border-front: 1px solid {$lightblueborder};
++  border-inside: 1px solid {$blueborder};
+   max-width: none;
+ }
