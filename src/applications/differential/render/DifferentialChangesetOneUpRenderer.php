@@ -95,17 +95,7 @@ final class DifferentialChangesetOneUpRenderer
           $inline = $this->buildInlineComment(
             $p['comment'],
             $p['right']);
-
-          $out[] = phutil_tag(
-            'tr',
-            array(),
-            array(
-              phutil_tag('th'),
-              phutil_tag('th'),
-              $no_copy,
-              phutil_tag('td', array(), $inline),
-              $no_coverage,
-            ));
+          $out[] = $this->getRowScaffoldForInline($inline);
           break;
         case 'no-context':
           $out[] = phutil_tag(
