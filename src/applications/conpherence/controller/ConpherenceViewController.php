@@ -105,7 +105,7 @@ final class ConpherenceViewController extends
         ->setValue($draft->getDraft()))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue(pht('Send Message')))
+          ->setValue(pht('Send')))
       ->appendChild(
         javelin_tag(
           'input',

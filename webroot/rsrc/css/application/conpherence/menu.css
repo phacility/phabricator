@@ -39,11 +39,16 @@
   overflow-y: auto;
   top: 0;
   bottom: 0;
+  background: #dbdde0;
+  border-right: 1px solid {$hovergrey}
 }
 
-.device-desktop .conpherence-layout .conpherence-menu-pane,
-.device-desktop .conpherence-layout .phabricator-nav-column-background {
-  width: 239px;
+.conpherence-menu-pane.phabricator-side-menu .phui-list-item-type-label {
+  padding: 12px 0 8px 6px;
+}
+
+.device-desktop .conpherence-layout .conpherence-menu-pane {
+  width: 204px;
 }
 
 .device .conpherence-menu-pane {
@@ -60,7 +65,6 @@
 
 .conpherence-layout .phabricator-nav-column-background {
   display: block;
-  width: 100%;
 }
 
 .device .phabricator-nav-column-background {
@@ -73,7 +77,7 @@
 }
 
 .device-desktop .conpherence-content-pane {
-  margin-left: 240px;
+  margin-left: 205px;
 }
 
 .conpherence-content-pane {
@@ -94,12 +98,10 @@
   overflow: hidden;
   position: relative;
   text-decoration: none;
-  border-left: 4px solid transparent;
 }
 
 .conpherence-menu .conpherence-selected {
   background: {$hovergrey};
-  border-left: 4px solid {$sky};
 }
 
 .device-desktop .conpherence-menu
@@ -137,7 +139,7 @@
   color: {$darkbluetext};
   text-shadow: 0px 1px 1px #fff;
   overflow: hidden;
-  width: 160px;
+  width: 150px;
   text-overflow: ellipsis;
 }
 

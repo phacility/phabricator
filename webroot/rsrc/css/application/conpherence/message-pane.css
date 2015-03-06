@@ -7,7 +7,7 @@
 .loading .messages-loading-icon,
 .conpherence-layout .conpherence-no-threads {
   position: fixed;
-  left: 240px;
+  left: 205px;
   right: 241px;
   top: 76px;
   bottom: 0px;
@@ -52,10 +52,10 @@
 
 .conpherence-message-pane .conpherence-messages {
   position: fixed;
-  left: 240px;
+  left: 205px;
   right: 241px;
   top: 76px;
-  bottom: 185px;
+  bottom: 172px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -81,12 +81,18 @@
 .conpherence-message-pane .phui-form-view {
   border-width: 0;
   background-color: {$lightgreybackground};
-  height: 185px;
-  padding: 0;
+  height: 156px;
+  padding: 8px;
   position: fixed;
   bottom: 0;
-  left: 240px;
+  border-top: 1px solid {$thinblueborder};
+  left: 205px;
   right: 241px;
+}
+
+.conpherence-message-pane .aphront-form-control-submit button,
+.conpherence-message-pane .aphront-form-control-submit a.button {
+  margin-top: 6px;
 }
 
 /**
@@ -99,6 +105,10 @@
 .remarkup-fullscreen-mode .conpherence-message-pane .phui-form-view,
 .remarkup-fullscreen-mode .conpherence-layout {
   position: static;
+}
+
+.conpherence-message-pane .remarkup-assist-bar {
+  border-color: {$lightblueborder};
 }
 
 .device .conpherence-message-pane .remarkup-assist-bar {
@@ -205,20 +215,11 @@
   padding: 0;
 }
 
-.conpherence-message-pane .aphront-form-control-submit {
-  margin: 0 8px 0 0;
-}
-.conpherence-message-pane .remarkup-assist-bar {
-  border-width: 1px 0 0;
-  border-color: {$hovergrey};
-  border-bottom: transparent;
-}
-
 .conpherence-message-pane .remarkup-assist-textarea {
-  height: 124px;
+  height: 100px;
   padding: 6px;
-  border-width: 1px 0;
-  border-color: {$thinblueborder};
+  border-color: {$lightblueborder};
+  border-top-color: {$thinblueborder};
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
@@ -226,15 +227,20 @@
 }
 
 .device .conpherence-message-pane .remarkup-assist-textarea {
-  margin: 4px 8px;
+  margin: 0px 0px;
   padding: 8px;
   width: 97%;
-  height: 28px;
+  height: 34px;
   resize: none;
 }
 
 .conpherence-message-pane .remarkup-assist-textarea:focus {
   outline: none;
+}
+
+.device .conpherence-message-pane .aphront-form-control {
+  padding: 0 8px 0 0;
+  float: left;
 }
 
 .device .conpherence-message-pane .aphront-form-control-textarea {
