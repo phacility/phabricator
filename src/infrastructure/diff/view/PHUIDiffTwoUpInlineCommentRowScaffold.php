@@ -66,7 +66,7 @@ final class PHUIDiffTwoUpInlineCommentRowScaffold
       phutil_tag('td', $right_attrs, $right_side),
     );
 
-    return phutil_tag('tr', array(), $cells);
+    return phutil_tag('tr', $this->getRowAttributes(), $cells);
   }
 
 }

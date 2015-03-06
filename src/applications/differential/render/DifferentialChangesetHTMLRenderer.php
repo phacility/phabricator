@@ -425,13 +425,6 @@ abstract class DifferentialChangesetHTMLRenderer
       ));
   }
 
-  protected function renderInlineComment(
-    PhabricatorInlineCommentInterface $comment,
-    $on_right = false) {
-
-    return $this->buildInlineComment($comment, $on_right)->render();
-  }
-
   protected function buildInlineComment(
     PhabricatorInlineCommentInterface $comment,
     $on_right = false) {

@@ -27,7 +27,7 @@ final class PHUIDiffOneUpInlineCommentRowScaffold
       phutil_tag('td', $attrs, $inline),
     );
 
-    return phutil_tag('tr', array(), $cells);
+    return phutil_tag('tr', $this->getRowAttributes(), $cells);
   }
 
 }
