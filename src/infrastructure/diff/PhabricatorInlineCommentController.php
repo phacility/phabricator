@@ -114,6 +114,7 @@ abstract class PhabricatorInlineCommentController
 
         $edit_dialog->addHiddenInput('id', $this->getCommentID());
         $edit_dialog->addHiddenInput('op', 'edit');
+        $edit_dialog->addHiddenInput('renderer', $this->getRenderer());
 
         $edit_dialog->appendChild(
           $this->renderTextArea(
@@ -236,11 +237,16 @@ abstract class PhabricatorInlineCommentController
     $view = id(new PHUIDiffInlineCommentDetailView())
       ->setInlineComment($inline)
       ->setOnRight($on_right)
-      ->setBuildScaffolding(true)
       ->setMarkupEngine($engine)
       ->setHandles($handles)
-      ->setEditable(true)
-      ->setRenderer($this->getRenderer());
+      ->setEditable(true);
+
+    $renderer = DifferentialChangesetHTMLRenderer::getHTMLRendererByKey(
+      $this->getRenderer());
+
+    $view = $renderer->getRowScaffoldForInline($view);
+    $view = id(new PHUIDiffInlineCommentTableScaffold())
+      ->addRowScaffold($view);
 
     return id(new AphrontAjaxResponse())
       ->setContent(

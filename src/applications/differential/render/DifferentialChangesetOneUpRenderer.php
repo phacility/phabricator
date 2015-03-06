@@ -95,7 +95,6 @@ final class DifferentialChangesetOneUpRenderer
           $inline = $this->buildInlineComment(
             $p['comment'],
             $p['right']);
-          $inline->setBuildScaffolding(false);
 
           $out[] = phutil_tag(
             'tr',
@@ -158,6 +157,11 @@ final class DifferentialChangesetOneUpRenderer
     $vs = 0) {
 
     throw new PhutilMethodNotImplementedException();
+  }
+
+  public function getRowScaffoldForInline(PHUIDiffInlineCommentView $view) {
+    return id(new PHUIDiffOneUpInlineCommentRowScaffold())
+      ->addInlineView($view);
   }
 
 }

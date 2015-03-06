@@ -397,4 +397,9 @@ final class DifferentialChangesetTwoUpRenderer
     return $this->renderChangesetTable($output);
   }
 
+  public function getRowScaffoldForInline(PHUIDiffInlineCommentView $view) {
+    return id(new PHUIDiffTwoUpInlineCommentRowScaffold())
+      ->addInlineView($view);
+  }
+
 }

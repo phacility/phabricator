@@ -5,13 +5,16 @@ final class PHUIDiffInlineCommentDetailView
 
   private $inlineComment;
   private $onRight;
-  private $buildScaffolding;
   private $handles;
   private $markupEngine;
   private $editable;
   private $preview;
   private $allowReply;
   private $renderer;
+
+  public function getIsOnRight() {
+    return $this->onRight;
+  }
 
   public function setInlineComment(PhabricatorInlineCommentInterface $comment) {
     $this->inlineComment = $comment;
@@ -20,11 +23,6 @@ final class PHUIDiffInlineCommentDetailView
 
   public function setOnRight($on_right) {
     $this->onRight = $on_right;
-    return $this;
-  }
-
-  public function setBuildScaffolding($scaffold) {
-    $this->buildScaffolding = $scaffold;
     return $this;
   }
 
@@ -254,40 +252,7 @@ final class PHUIDiffInlineCommentDetailView
           phutil_tag_div('phabricator-remarkup', $content)),
       ));
 
-    return $this->scaffoldMarkup($markup);
-  }
-
-  private function scaffoldMarkup($markup) {
-    if (!$this->buildScaffolding) {
-      return $markup;
-    }
-
-    if ($this->renderer == '1up') {
-      $cells = array(
-        phutil_tag('th', array()),
-        phutil_tag('th', array()),
-        phutil_tag(
-          'td',
-          array('colspan' => 3, 'class' => 'right3'),
-          $markup),
-      );
-    } else {
-      $left_markup = !$this->onRight ? $markup : '';
-      $right_markup = $this->onRight ? $markup : '';
-
-      $cells = array(
-        phutil_tag('th', array()),
-        phutil_tag('td', array('class' => 'left'), $left_markup),
-        phutil_tag('th', array()),
-        phutil_tag(
-          'td',
-          array('colspan' => 3, 'class' => 'right3'),
-          $right_markup),
-      );
-    }
-
-    $row = phutil_tag('tr', array(), $cells);
-    return phutil_tag('table', array(), $row);
+    return $markup;
   }
 
 }

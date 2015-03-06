@@ -11,6 +11,10 @@ final class PHUIDiffInlineCommentEditView
   private $length;
   private $renderer;
 
+  public function getIsOnRight() {
+    return $this->onRight;
+  }
+
   public function setRenderer($renderer) {
     $this->renderer = $renderer;
     return $this;

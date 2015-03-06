@@ -3,7 +3,20 @@
 abstract class DifferentialChangesetHTMLRenderer
   extends DifferentialChangesetRenderer {
 
+  public static function getHTMLRendererByKey($key) {
+    switch ($key) {
+      case '1up':
+        return new DifferentialChangesetOneUpRenderer();
+      case '2up':
+      default:
+        return new DifferentialChangesetTwoUpRenderer();
+    }
+    throw new Exception(pht('Unknown HTML renderer "%s"!', $key));
+  }
+
   abstract protected function getRendererTableClass();
+  abstract public function getRowScaffoldForInline(
+    PHUIDiffInlineCommentView $view);
 
   protected function renderChangeTypeHeader($force) {
     $changeset = $this->getChangeset();
