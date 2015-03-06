@@ -196,7 +196,7 @@ abstract class PhabricatorInlineCommentController
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $edit_dialog = id(new DifferentialInlineCommentEditView())
+    $edit_dialog = id(new PHUIDiffInlineCommentEditView())
       ->setUser($user)
       ->setSubmitURI($request->getRequestURI())
       ->setOnRight($this->getIsOnRight())
@@ -233,7 +233,7 @@ abstract class PhabricatorInlineCommentController
 
     $handles = $this->loadViewerHandles($phids);
 
-    $view = id(new DifferentialInlineCommentView())
+    $view = id(new PHUIDiffInlineCommentDetailView())
       ->setInlineComment($inline)
       ->setOnRight($on_right)
       ->setBuildScaffolding(true)

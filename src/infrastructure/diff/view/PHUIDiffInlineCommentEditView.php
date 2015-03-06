@@ -1,6 +1,7 @@
 <?php
 
-final class DifferentialInlineCommentEditView extends AphrontView {
+final class PHUIDiffInlineCommentEditView
+  extends PHUIDiffInlineCommentView {
 
   private $inputs = array();
   private $uri;

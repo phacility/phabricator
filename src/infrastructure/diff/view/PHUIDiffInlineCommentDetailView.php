@@ -1,6 +1,7 @@
 <?php
 
-final class DifferentialInlineCommentView extends AphrontView {
+final class PHUIDiffInlineCommentDetailView
+  extends PHUIDiffInlineCommentView {
 
   private $inlineComment;
   private $onRight;

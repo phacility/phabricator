@@ -430,7 +430,7 @@ abstract class DifferentialChangesetHTMLRenderer
             && $this->getShowEditAndReplyLinks();
     $allow_reply = (bool)$user && $this->getShowEditAndReplyLinks();
 
-    return id(new DifferentialInlineCommentView())
+    return id(new PHUIDiffInlineCommentDetailView())
       ->setInlineComment($comment)
       ->setOnRight($on_right)
       ->setHandles($this->getHandles())

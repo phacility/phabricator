@@ -845,7 +845,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
 
     $rows = array();
     foreach ($inlines as $inline) {
-      $inline_view = id(new DifferentialInlineCommentView())
+      $inline_view = id(new PHUIDiffInlineCommentDetailView())
         ->setMarkupEngine($engine)
         ->setInlineComment($inline)
         ->render();
