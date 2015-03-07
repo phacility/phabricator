@@ -201,6 +201,7 @@ abstract class PhabricatorInlineCommentController
       ->setUser($user)
       ->setSubmitURI($request->getRequestURI())
       ->setOnRight($this->getIsOnRight())
+      ->setIsNewFile($this->getIsNewFile())
       ->setNumber($this->getLineNumber())
       ->setLength($this->getLineLength())
       ->setRenderer($this->getRenderer());

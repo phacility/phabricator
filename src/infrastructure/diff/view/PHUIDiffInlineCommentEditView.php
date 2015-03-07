@@ -10,6 +10,16 @@ final class PHUIDiffInlineCommentEditView
   private $number;
   private $length;
   private $renderer;
+  private $isNewFile;
+
+  public function setIsNewFile($is_new_file) {
+    $this->isNewFile = $is_new_file;
+    return $this;
+  }
+
+  public function getIsNewFile() {
+    return $this->isNewFile;
+  }
 
   public function getIsOnRight() {
     return $this->onRight;
@@ -160,7 +170,8 @@ final class PHUIDiffInlineCommentEditView
         'class' => 'differential-inline-comment-edit',
         'sigil' => 'differential-inline-comment',
         'meta' => array(
-          'on_right' => $this->onRight,
+          'on_right' => $this->getIsOnRight(),
+          'isNewFile' => (bool)$this->getIsNewFile(),
           'number' => $this->number,
           'length' => $this->length,
         ),

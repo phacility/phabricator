@@ -269,20 +269,11 @@ JX.behavior('differential-edit-inline-comments', function(config) {
       } else {
         root = e.getNode('differential-changeset');
         if (root) {
-
           var data = e.getNodeData('differential-inline-comment');
           var change = e.getNodeData('differential-changeset');
 
-          var id_part  = data.on_right ? change.right : change.left;
-
-          // NOTE: We can't just look for 'tag:td' because the event might be
-          // inside a table which is inside an inline comment.
-          var comment = e.getNode('differential-inline-comment');
-          var td = JX.DOM.findAbove(comment, 'td');
-          var th = td.previousSibling;
-
-          // TODO: For one-up views, this is incorrect!
-          var new_part = isNewFile(th) ? 'N' : 'O';
+          var id_part = data.on_right ? change.right : change.left;
+          var new_part = data.isNewFile ? 'N' : 'O';
           var prefix = 'C' + id_part + new_part + 'L';
 
           origin = JX.$(prefix + data.number);

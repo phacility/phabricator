@@ -78,6 +78,7 @@ final class PHUIDiffInlineCommentDetailView
       'id' => $inline->getID(),
       'number' => $inline->getLineNumber(),
       'length' => $inline->getLineLength(),
+      'isNewFile' => (bool)$inline->getIsNewFile(),
       'on_right' => $this->onRight,
       'original' => $inline->getContent(),
     );
