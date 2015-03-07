@@ -31,15 +31,31 @@ JX.behavior('differential-edit-inline-comments', function(config) {
       top = bot;
       bot = tmp;
     }
-    var code = target.nextSibling;
 
-    var pos = JX.$V(top)
-      .add(JX.Vector.getAggregateScrollForNode(top))
-      .add(1 + JX.Vector.getDim(target).x, 0);
-    var dim = JX.Vector.getDim(code).add(-4, 0);
-    if (isOnRight(target)) {
-      dim.x += JX.Vector.getDim(code.nextSibling).x;
+    // Find the leftmost cell that we're going to highlight: this is the next
+    // <td /> in the row. In 2up views, it should be directly adjacent. In
+    // 1up views, we may have to skip over the other line number column.
+    var l = top;
+    while (JX.DOM.isType(l, 'th')) {
+      l = l.nextSibling;
     }
+
+    // Find the rightmost cell that we're going to highlight: this is the
+    // farthest consecutive, adjacent <td /> in the row. Sometimes the left
+    // and right nodes are the same (left side of 2up view); sometimes we're
+    // going to highlight several nodes (copy + code + coverage).
+    var r = l;
+    while (r.nextSibling && JX.DOM.isType(r.nextSibling, 'td')) {
+      r = r.nextSibling;
+    }
+
+    var pos = JX.$V(l)
+      .add(JX.Vector.getAggregateScrollForNode(l));
+
+    var dim = JX.$V(r)
+      .add(JX.Vector.getAggregateScrollForNode(r))
+      .add(-pos.x, -pos.y)
+      .add(JX.Vector.getDim(r));
 
     var bpos = JX.$V(bot)
       .add(JX.Vector.getAggregateScrollForNode(bot));

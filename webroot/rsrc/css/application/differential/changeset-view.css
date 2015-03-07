@@ -268,6 +268,7 @@ td.cov-I {
   opacity: 0.5;
   top: 0px;
   left: 0px;
+  box-sizing: border-box;
 }
 
 .differential-inline-comment,
