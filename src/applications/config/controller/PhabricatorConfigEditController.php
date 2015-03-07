@@ -202,7 +202,7 @@ final class PhabricatorConfigEditController
       ->setForm($form);
 
     if ($error_view) {
-       $form_box->setErrorView($error_view);
+       $form_box->setInfoView($error_view);
     }
 
     $crumbs = $this->buildApplicationCrumbs();

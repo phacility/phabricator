@@ -158,7 +158,7 @@ final class PhabricatorPeopleInviteSendController
       }
 
       $confirm_box = id(new PHUIObjectBoxView())
-        ->setErrorView(
+        ->setInfoView(
           id(new PHUIInfoView())
             ->setErrors($confirm_errors)
             ->setSeverity($severity))

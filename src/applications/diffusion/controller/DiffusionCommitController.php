@@ -257,7 +257,7 @@ final class DiffusionCommitController extends DiffusionController {
           ->appendChild(
             pht('This commit is very large. Load each file individually.'));
 
-        $change_panel->setErrorView($warning_view);
+        $change_panel->setInfoView($warning_view);
         $header->addActionLink($button);
       }
 
@@ -920,7 +920,7 @@ final class DiffusionCommitController extends DiffusionController {
     $panel->setHeaderText(pht('Merged Changes'));
     $panel->appendChild($history_table);
     if ($caption) {
-      $panel->setErrorView($caption);
+      $panel->setInfoView($caption);
     }
 
     return $panel;

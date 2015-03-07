@@ -161,7 +161,7 @@ final class PhabricatorAuthListController
     $list->setFlush(true);
     $list = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setErrorView($warning)
+      ->setInfoView($warning)
       ->appendChild($list);
 
     return $this->buildApplicationPage(

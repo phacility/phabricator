@@ -195,7 +195,7 @@ abstract class AlmanacController
           array($message, ' ', $doc_link),
         ));
 
-    $box->setErrorView($error_view);
+    $box->setInfoView($error_view);
   }
 
 }

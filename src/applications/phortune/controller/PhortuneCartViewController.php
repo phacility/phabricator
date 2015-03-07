@@ -123,7 +123,7 @@ final class PhortuneCartViewController
     if ($errors) {
       $cart_box->setFormErrors($errors);
     } else if ($error_view) {
-      $cart_box->setErrorView($error_view);
+      $cart_box->setInfoView($error_view);
     }
 
     $charges = id(new PhortuneChargeQuery())

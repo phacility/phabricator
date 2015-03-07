@@ -261,7 +261,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $revision_warnings = id(new PHUIInfoView())
         ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
         ->setErrors($revision_warnings);
-      $revision_detail_box->setErrorView($revision_warnings);
+      $revision_detail_box->setInfoView($revision_warnings);
     }
 
     $comment_view = $this->buildTransactions(
@@ -389,7 +389,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
         $review_warnings_panel = id(new PHUIInfoView())
           ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
           ->setErrors($review_warnings);
-        $comment_form->setErrorView($review_warnings_panel);
+        $comment_form->setInfoView($review_warnings_panel);
       }
 
       $comment_form->setActions($this->getRevisionCommentActions($revision));

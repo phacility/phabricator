@@ -6,7 +6,7 @@ final class PHUIObjectBoxView extends AphrontView {
   private $headerColor;
   private $formErrors = null;
   private $formSaved = false;
-  private $errorView;
+  private $infoView;
   private $form;
   private $validationException;
   private $header;
@@ -113,8 +113,8 @@ final class PHUIObjectBoxView extends AphrontView {
     return $this;
   }
 
-  public function setErrorView(PHUIInfoView $view) {
-    $this->errorView = $view;
+  public function setInfoView(PHUIInfoView $view) {
+    $this->infoView = $view;
     return $this;
   }
 
@@ -269,7 +269,7 @@ final class PHUIObjectBoxView extends AphrontView {
       ->appendChild(
         array(
           $header,
-          $this->errorView,
+          $this->infoView,
           $this->formErrors,
           $this->formSaved,
           $exception_errors,

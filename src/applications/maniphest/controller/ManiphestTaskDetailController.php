@@ -351,7 +351,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ->addPropertyList($properties);
 
     if ($info_view) {
-      $object_box->setErrorView($info_view);
+      $object_box->setInfoView($info_view);
     }
 
     if ($description) {
