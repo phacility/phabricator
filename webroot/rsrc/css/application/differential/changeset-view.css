@@ -85,6 +85,10 @@
   user-select:          none;
 }
 
+.differential-diff th.selected {
+  background: {$hovergrey};
+}
+
 .differential-changeset-immutable .differential-diff th {
   cursor: auto;
 }

@@ -12,6 +12,7 @@ JX.behavior('differential-edit-inline-comments', function(config) {
 
   var selecting = false;
   var reticle = JX.$N('div', {className: 'differential-reticle'});
+  var old_cells = [];
   JX.DOM.hide(reticle);
 
   var origin = null;
@@ -65,10 +66,44 @@ JX.behavior('differential-edit-inline-comments', function(config) {
     dim.setDim(reticle);
 
     JX.DOM.show(reticle);
+
+    // Find all the cells in the same row position between the top and bottom
+    // cell, so we can highlight them.
+    var seq = 0;
+    var row = top.parentNode;
+    for (seq = 0; seq < row.childNodes.length; seq++) {
+      if (row.childNodes[seq] == top) {
+        break;
+      }
+    }
+
+    var cells = [];
+    while (true) {
+      cells.push(row.childNodes[seq]);
+      if (row.childNodes[seq] == bot) {
+        break;
+      }
+      row = row.nextSibling;
+    }
+
+    setSelectedCells(cells);
+  }
+
+  function setSelectedCells(new_cells) {
+    updateSelectedCellsClass(old_cells, false);
+    updateSelectedCellsClass(new_cells, true);
+    old_cells = new_cells;
+  }
+
+  function updateSelectedCellsClass(cells, selected) {
+    for (var ii = 0; ii < cells.length; ii++) {
+      JX.DOM.alterClass(cells[ii], 'selected', selected);
+    }
   }
 
   function hideReticle() {
     JX.DOM.hide(reticle);
+    setSelectedCells([]);
   }
 
   JX.DifferentialInlineCommentEditor.listen('done', function() {
@@ -128,20 +163,59 @@ JX.behavior('differential-edit-inline-comments', function(config) {
     });
 
   JX.Stratcom.listen(
-    'mouseover',
+    ['mouseover', 'mouseout'],
     ['differential-changeset', 'tag:th'],
     function(e) {
-      if (!selecting ||
-          editor ||
-          (getRowNumber(e.getTarget()) === undefined) ||
-          (isOnRight(e.getTarget()) != isOnRight(origin)) ||
-          (e.getNode('differential-changeset') !== root)) {
+      if (editor) {
+        // Don't update the reticle if we're editing a comment, since this
+        // would be distracting and we want to keep the lines corresponding
+        // to the comment highlighted during the edit.
         return;
       }
 
-      target = e.getTarget();
+      if (getRowNumber(e.getTarget()) === undefined) {
+        // Don't update the reticle if this "<th />" doesn't correspond to a
+        // line number. For instance, this may be a dead line number, like the
+        // empty line numbers on the left hand side of a newly added file.
+        return;
+      }
 
-      updateReticle();
+      if (selecting) {
+        if (isOnRight(e.getTarget()) != isOnRight(origin)) {
+          // Don't update the reticle if we're selecting a line range and the
+          // "<th />" under the cursor is on the wrong side of the file. You
+          // can only leave inline comments on the left or right side of a
+          // file, not across lines on both sides.
+          return;
+        }
+
+        if (e.getNode('differential-changeset') !== root) {
+          // Don't update the reticle if we're selecting a line range and
+          // the "<th />" under the cursor corresponds to a different file.
+          // You can only leave inline comments on lines in a single file,
+          // not across multiple files.
+          return;
+        }
+      }
+
+      if (e.getType() == 'mouseout') {
+        if (selecting) {
+          // Don't hide the reticle if we're selecting, since we want to
+          // keep showing the line range that will be used if the mouse is
+          // released.
+          return;
+        }
+        hideReticle();
+      } else {
+        target = e.getTarget();
+        if (!selecting) {
+          // If we're just hovering the mouse and not selecting a line range,
+          // set the origin to the current row so we highlight it.
+          origin = target;
+        }
+
+        updateReticle();
+      }
     });
 
   JX.Stratcom.listen(
