@@ -171,11 +171,6 @@
   margin: 0;
 }
 
-/* override for when inside an aphront-panel-view */
-.aphront-panel-view .phui-form-view h1 {
-  padding: 0em 0em .8em 0em;
-}
-
 .aphront-form-instructions {
   width: 60%;
   margin-left: 20%;
