@@ -207,7 +207,7 @@ return array(
     'rsrc/externals/javelin/lib/Resource.js' => '44959b73',
     'rsrc/externals/javelin/lib/Routable.js' => 'b3e7d692',
     'rsrc/externals/javelin/lib/Router.js' => '29274e2b',
-    'rsrc/externals/javelin/lib/Scrollbar.js' => '5b2f5a08',
+    'rsrc/externals/javelin/lib/Scrollbar.js' => '1ed54a27',
     'rsrc/externals/javelin/lib/URI.js' => '6eff08aa',
     'rsrc/externals/javelin/lib/Vector.js' => '2caa8fb8',
     'rsrc/externals/javelin/lib/WebSocket.js' => 'e292eaf4',
@@ -676,7 +676,7 @@ return array(
     'javelin-resource' => '44959b73',
     'javelin-routable' => 'b3e7d692',
     'javelin-router' => '29274e2b',
-    'javelin-scrollbar' => '5b2f5a08',
+    'javelin-scrollbar' => '1ed54a27',
     'javelin-stratcom' => '6c53634d',
     'javelin-tokenizer' => '7644823e',
     'javelin-typeahead' => '70baed2f',
@@ -942,6 +942,12 @@ return array(
       'javelin-dom',
       'javelin-reactor-dom',
     ),
+    '1ed54a27' => array(
+      'javelin-install',
+      'javelin-dom',
+      'javelin-stratcom',
+      'javelin-vector',
+    ),
     '2035b9cb' => array(
       'javelin-behavior',
       'javelin-dom',
@@ -1174,12 +1180,6 @@ return array(
       'javelin-stratcom',
       'javelin-vector',
       'javelin-dom',
-    ),
-    '5b2f5a08' => array(
-      'javelin-install',
-      'javelin-dom',
-      'javelin-stratcom',
-      'javelin-vector',
     ),
     '5bc2cb21' => array(
       'javelin-behavior',
