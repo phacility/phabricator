@@ -70,20 +70,28 @@
 .conpherence-durable-column-main {
   position: absolute;
   top: 44px;
-  bottom: 144px;
+  bottom: 136px;
   left: 0;
   right: 0;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .conpherence-durable-column-transactions {
-  padding: 8px 12px;
+  padding: 8px 12px 0;
 }
 
 .conpherence-durable-column-transactions .phabricator-transaction-view {
   background: none;
   margin: 0 10px 0 0;
-  padding: 0;
+  padding: 4px 0;
+  min-height: 0;
+}
+
+.conpherence-durable-column-transactions
+  .phabricator-transaction-view
+  .conpherence-message {
+  word-wrap: break-word;
 }
 
 .conpherence-durable-column-transactions .phabricator-transaction-detail {
