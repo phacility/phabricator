@@ -23,6 +23,7 @@ JX.install('ChangesetViewManager', {
     this._renderer = data.renderer;
     this._highlight = data.highlight;
     this._encoding = data.encoding;
+    this._loaded = data.loaded;
   },
 
   members: {

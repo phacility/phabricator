@@ -147,13 +147,13 @@ final class DifferentialChangesetViewController extends DifferentialController {
     list($range_s, $range_e, $mask) =
       DifferentialChangesetParser::parseRangeSpecification($spec);
 
-    $parser = new DifferentialChangesetParser();
-    $parser->setCoverage($coverage);
-    $parser->setChangeset($changeset);
-    $parser->setRenderingReference($rendering_reference);
-    $parser->setRenderCacheKey($render_cache_key);
-    $parser->setRightSideCommentMapping($right_source, $right_new);
-    $parser->setLeftSideCommentMapping($left_source, $left_new);
+    $parser = id(new DifferentialChangesetParser())
+      ->setCoverage($coverage)
+      ->setChangeset($changeset)
+      ->setRenderingReference($rendering_reference)
+      ->setRenderCacheKey($render_cache_key)
+      ->setRightSideCommentMapping($right_source, $right_new)
+      ->setLeftSideCommentMapping($left_source, $left_new);
 
     $parser->readParametersFromRequest($request);
 
@@ -200,66 +200,51 @@ final class DifferentialChangesetViewController extends DifferentialController {
     }
 
     $engine->process();
-    $parser->setMarkupEngine($engine);
-    $parser->setUser($request->getUser());
+
+    $parser
+      ->setUser($request->getUser())
+      ->setMarkupEngine($engine)
+      ->setShowEditAndReplyLinks(true)
+      ->setRange($range_s, $range_e)
+      ->setMask($mask);
 
     if ($request->isAjax()) {
-      $parser->setShowEditAndReplyLinks(true);
-    } else {
-      $parser->setShowEditAndReplyLinks(false);
-    }
+      $mcov = $parser->renderModifiedCoverage();
 
-    $output = $parser->render($range_s, $range_e, $mask);
-
-    $mcov = $parser->renderModifiedCoverage();
-
-    if ($request->isAjax()) {
       $coverage = array(
         'differential-mcoverage-'.md5($changeset->getFilename()) => $mcov,
       );
 
       return id(new PhabricatorChangesetResponse())
-        ->setRenderedChangeset($output)
+        ->setRenderedChangeset($parser->renderChangeset())
         ->setCoverage($coverage);
     }
 
-    // TODO: [HTML] Clean up DifferentialChangesetParser output, but it's
-    // undergoing like six kinds of refactoring anyway.
-    $output = phutil_safe_html($output);
+    $diff = $changeset->getDiff();
 
-    $detail = id(new DifferentialChangesetDetailView())
+    $detail = id(new DifferentialChangesetListView())
       ->setUser($this->getViewer())
-      ->setChangeset($changeset)
-      ->setRenderingRef($rendering_reference)
+      ->setChangesets(array($changeset))
+      ->setVisibleChangesets(array($changeset))
+      ->setRenderingReferences(array($rendering_reference))
       ->setRenderURI('/differential/changeset/')
-      ->setRenderer($parser->getRenderer()->getRendererKey())
-      ->appendChild($output)
-      ->setVsChangesetID($left_source);
+      ->setDiff($diff)
+      ->setTitle(pht('Standalone View'))
+      ->setParser($parser);
 
-    Javelin::initBehavior('differential-populate', array(
-      'changesetViewIDs' => array($detail->getID()),
-    ));
-
-    Javelin::initBehavior('differential-comment-jump', array());
-
-    $panel = new DifferentialPrimaryPaneView();
-    $panel->appendChild(
-      phutil_tag(
-      'div',
-      array(
-        'class' => 'differential-review-stage',
-        'id'    => 'differential-review-stage',
-      ),
-      $detail->render()));
+    $revision_id = $diff->getRevisionID();
+    if ($revision_id) {
+      $detail->setInlineCommentControllerURI(
+        '/differential/comment/inline/edit/'.$revision_id.'/');
+    }
 
     $crumbs = $this->buildApplicationCrumbs();
 
-    $revision_id = $changeset->getDiff()->getRevisionID();
     if ($revision_id) {
       $crumbs->addTextCrumb('D'.$revision_id, '/D'.$revision_id);
     }
 
-    $diff_id = $changeset->getDiff()->getID();
+    $diff_id = $diff->getID();
     if ($diff_id) {
       $crumbs->addTextCrumb(
         pht('Diff %d', $diff_id),
@@ -268,14 +253,10 @@ final class DifferentialChangesetViewController extends DifferentialController {
 
     $crumbs->addTextCrumb($changeset->getDisplayFilename());
 
-    $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Standalone View'))
-      ->appendChild($panel);
-
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $box,
+        $detail,
       ),
       array(
         'title' => pht('Changeset View'),

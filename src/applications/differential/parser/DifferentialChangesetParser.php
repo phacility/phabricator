@@ -45,6 +45,25 @@ final class DifferentialChangesetParser {
   private $highlightAs;
   private $showEditAndReplyLinks = true;
 
+  private $rangeStart;
+  private $rangeEnd;
+  private $mask;
+
+  public function setRange($start, $end) {
+    $this->rangeStart = $start;
+    $this->rangeEnd = $end;
+    return $this;
+  }
+
+  public function setMask(array $mask) {
+    $this->mask = $mask;
+    return $this;
+  }
+
+  public function renderChangeset() {
+    return $this->render($this->rangeStart, $this->rangeEnd, $this->mask);
+  }
+
   public function setShowEditAndReplyLinks($bool) {
     $this->showEditAndReplyLinks = $bool;
     return $this;

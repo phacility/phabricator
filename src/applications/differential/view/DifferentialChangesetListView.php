@@ -20,6 +20,16 @@ final class DifferentialChangesetListView extends AphrontView {
   private $vsMap = array();
 
   private $title;
+  private $parser;
+
+  public function setParser(DifferentialChangesetParser $parser) {
+    $this->parser = $parser;
+    return $this;
+  }
+
+  public function getParser() {
+    return $this->parser;
+  }
 
   public function setTitle($title) {
     $this->title = $title;
@@ -168,38 +178,46 @@ final class DifferentialChangesetListView extends AphrontView {
       $detail->setVsChangesetID(idx($this->vsMap, $changeset->getID()));
       $detail->setEditable(true);
       $detail->setRenderingRef($ref);
-      $detail->setAutoload(isset($this->visibleChangesets[$key]));
 
       $detail->setRenderURI($this->renderURI);
       $detail->setWhitespace($this->whitespace);
       $detail->setRenderer($renderer);
 
-      if (isset($this->visibleChangesets[$key])) {
-        $load = 'Loading...';
+      if ($this->getParser()) {
+        $detail->appendChild($this->getParser()->renderChangeset());
+        $detail->setLoaded(true);
       } else {
-        $load = javelin_tag(
-          'a',
-          array(
-            'class' => 'button grey',
-            'href' => '#'.$uniq_id,
-            'sigil' => 'differential-load',
-            'meta' => array(
-              'id' => $detail->getID(),
-              'kill' => true,
+        $detail->setAutoload(isset($this->visibleChangesets[$key]));
+        if (isset($this->visibleChangesets[$key])) {
+          $load = 'Loading...';
+        } else {
+          $load = javelin_tag(
+            'a',
+            array(
+              'class' => 'button grey',
+              'href' => '#'.$uniq_id,
+              'sigil' => 'differential-load',
+              'meta' => array(
+                'id' => $detail->getID(),
+                'kill' => true,
+              ),
+              'mustcapture' => true,
             ),
-            'mustcapture' => true,
-          ),
-          pht('Load File'));
+            pht('Load File'));
+        }
+        $detail->appendChild(
+          phutil_tag(
+            'div',
+            array(
+              'id' => $uniq_id,
+            ),
+            phutil_tag(
+              'div',
+              array('class' => 'differential-loading'),
+              $load)));
       }
-      $detail->appendChild(
-        phutil_tag(
-          'div',
-          array(
-            'id' => $uniq_id,
-          ),
-          phutil_tag('div', array('class' => 'differential-loading'), $load)));
-      $output[] = $detail->render();
 
+      $output[] = $detail->render();
       $ids[] = $detail->getID();
     }
 
