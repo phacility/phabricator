@@ -104,32 +104,7 @@ final class PHUIDiffInlineCommentEditView
         $this->renderBody(),
       ));
 
-    if ($this->renderer == '1up') {
-      $cells = array(
-        phutil_tag('th', array()),
-        phutil_tag('th', array()),
-        phutil_tag(
-          'td',
-          array('colspan' => 3, 'class' => 'right3'),
-          $content),
-      );
-    } else {
-      $cells = array(
-        phutil_tag('th', array()),
-        phutil_tag(
-          'td',
-          array('class' => 'left'),
-          $this->onRight ? null : $content),
-        phutil_tag('th', array()),
-        phutil_tag(
-          'td',
-          array('colspan' => 3, 'class' => 'right3'),
-          $this->onRight ? $content : null),
-      );
-    }
-
-    $row = phutil_tag('tr', array('class' => 'inline-comment-splint'), $cells);
-    return phutil_tag('table', array(), $row);
+    return $content;
   }
 
   private function renderInputs() {

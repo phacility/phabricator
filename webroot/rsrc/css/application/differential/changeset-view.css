@@ -423,13 +423,6 @@ td.cov-I {
   text-decoration: none;
 }
 
-/*  Create a wide band of color behind the inline edit interface so it is easy
-    to find by skimming the page while scrolling.
-*/
-tr.inline-comment-splint {
-  background: #f9f1d5;
-}
-
 tr.differential-inline-hidden {
   display: none;
 }

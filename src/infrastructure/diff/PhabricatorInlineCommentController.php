@@ -130,8 +130,10 @@ abstract class PhabricatorInlineCommentController
           $this->renderTextArea(
             nonempty($text, $inline->getContent())));
 
+        $view = $this->buildScaffoldForView($edit_dialog);
+
         return id(new AphrontAjaxResponse())
-          ->setContent($edit_dialog->render());
+          ->setContent($view->render());
       case 'create':
         $text = $this->getCommentText();
 
@@ -184,8 +186,10 @@ abstract class PhabricatorInlineCommentController
         $text_area = $this->renderTextArea($this->getCommentText());
         $edit_dialog->appendChild($text_area);
 
+        $view = $this->buildScaffoldForView($edit_dialog);
+
         return id(new AphrontAjaxResponse())
-          ->setContent($edit_dialog->render());
+          ->setContent($view->render());
     }
   }
 
@@ -276,12 +280,7 @@ abstract class PhabricatorInlineCommentController
       ->setHandles($handles)
       ->setEditable(true);
 
-    $renderer = DifferentialChangesetHTMLRenderer::getHTMLRendererByKey(
-      $this->getRenderer());
-
-    $view = $renderer->getRowScaffoldForInline($view);
-    $view = id(new PHUIDiffInlineCommentTableScaffold())
-      ->addRowScaffold($view);
+    $view = $this->buildScaffoldForView($view);
 
     return id(new AphrontAjaxResponse())
       ->setContent(
@@ -298,6 +297,16 @@ abstract class PhabricatorInlineCommentController
       ->setName('text')
       ->setValue($text)
       ->setDisableFullScreen(true);
+  }
+
+  private function buildScaffoldForView(PHUIDiffInlineCommentView $view) {
+    $renderer = DifferentialChangesetHTMLRenderer::getHTMLRendererByKey(
+      $this->getRenderer());
+
+    $view = $renderer->getRowScaffoldForInline($view);
+
+    return id(new PHUIDiffInlineCommentTableScaffold())
+      ->addRowScaffold($view);
   }
 
 }
