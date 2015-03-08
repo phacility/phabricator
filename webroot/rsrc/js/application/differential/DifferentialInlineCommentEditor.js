@@ -34,9 +34,10 @@ JX.install('DifferentialInlineCommentEditor', {
         number : this.getLineNumber(),
         is_new : this.getIsNew(),
         length : this.getLength(),
-        changeset : this.getChangeset(),
+        changesetID : this.getChangesetID(),
         text : this.getText() || '',
-        renderer: this.getRenderer()
+        renderer: this.getRenderer(),
+        replyToCommentPHID: this.getReplyToCommentPHID() || '',
       };
     },
     _draw : function(content, exact_row) {
@@ -284,13 +285,14 @@ JX.install('DifferentialInlineCommentEditor', {
     onRight : null,
     ID : null,
     lineNumber : null,
-    changeset : null,
+    changesetID : null,
     length : null,
     isNew : null,
     text : null,
     templates : null,
     originalText : null,
-    renderer: null
+    renderer: null,
+    replyToCommentPHID: null
   }
 
 });

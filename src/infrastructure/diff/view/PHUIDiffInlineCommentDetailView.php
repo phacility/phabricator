@@ -76,11 +76,14 @@ final class PHUIDiffInlineCommentDetailView
 
     $metadata = array(
       'id' => $inline->getID(),
+      'phid' => $inline->getPHID(),
+      'changesetID' => $inline->getChangesetID(),
       'number' => $inline->getLineNumber(),
       'length' => $inline->getLineLength(),
       'isNewFile' => (bool)$inline->getIsNewFile(),
       'on_right' => $this->onRight,
       'original' => $inline->getContent(),
+      'replyToCommentPHID' => $inline->getReplyToCommentPHID(),
     );
 
     $sigil = 'differential-inline-comment';
@@ -102,6 +105,15 @@ final class PHUIDiffInlineCommentDetailView
     if ($inline->isDraft() && !$is_synthetic) {
       $links[] = pht('Not Submitted Yet');
       $is_draft = true;
+    }
+
+
+    // TODO: This stuff is nonfinal, just making it do something.
+    if ($inline->getHasReplies()) {
+      $links[] = pht('Has Reply');
+    }
+    if ($inline->getReplyToCommentPHID()) {
+      $links[] = pht('Is Reply');
     }
 
     if (!$this->preview) {

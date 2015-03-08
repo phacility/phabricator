@@ -6,6 +6,7 @@ abstract class PhabricatorInlineCommentController
   abstract protected function createComment();
   abstract protected function loadComment($id);
   abstract protected function loadCommentForEdit($id);
+  abstract protected function loadCommentByPHID($phid);
   abstract protected function deleteComment(
     PhabricatorInlineCommentInterface $inline);
   abstract protected function saveComment(
@@ -20,6 +21,7 @@ abstract class PhabricatorInlineCommentController
   private $operation;
   private $commentID;
   private $renderer;
+  private $replyToCommentPHID;
 
   public function getCommentID() {
     return $this->commentID;
@@ -60,6 +62,15 @@ abstract class PhabricatorInlineCommentController
 
   public function getRenderer() {
     return $this->renderer;
+  }
+
+  public function setReplyToCommentPHID($phid) {
+    $this->replyToCommentPHID = $phid;
+    return $this;
+  }
+
+  public function getReplyToCommentPHID() {
+    return $this->replyToCommentPHID;
   }
 
   public function processRequest() {
@@ -114,7 +125,6 @@ abstract class PhabricatorInlineCommentController
 
         $edit_dialog->addHiddenInput('id', $this->getCommentID());
         $edit_dialog->addHiddenInput('op', 'edit');
-        $edit_dialog->addHiddenInput('renderer', $this->getRenderer());
 
         $edit_dialog->appendChild(
           $this->renderTextArea(
@@ -136,6 +146,11 @@ abstract class PhabricatorInlineCommentController
           ->setLineLength($this->getLineLength())
           ->setIsNewFile($this->getIsNewFile())
           ->setContent($text);
+
+        if ($this->getReplyToCommentPHID()) {
+          $inline->setReplyToCommentPHID($this->getReplyToCommentPHID());
+        }
+
         $this->saveComment($inline);
 
         return $this->buildRenderedCommentResponse(
@@ -162,11 +177,9 @@ abstract class PhabricatorInlineCommentController
         }
 
         $edit_dialog->addHiddenInput('op', 'create');
-        $edit_dialog->addHiddenInput('changeset', $changeset);
         $edit_dialog->addHiddenInput('is_new', $is_new);
         $edit_dialog->addHiddenInput('number', $number);
         $edit_dialog->addHiddenInput('length', $length);
-        $edit_dialog->addHiddenInput('renderer', $this->getRenderer());
 
         $text_area = $this->renderTextArea($this->getCommentText());
         $edit_dialog->appendChild($text_area);
@@ -181,7 +194,7 @@ abstract class PhabricatorInlineCommentController
 
     // NOTE: This isn't necessarily a DifferentialChangeset ID, just an
     // application identifier for the changeset. In Diffusion, it's a Path ID.
-    $this->changesetID = $request->getInt('changeset');
+    $this->changesetID = $request->getInt('changesetID');
 
     $this->isNewFile = (int)$request->getBool('is_new');
     $this->isOnRight = $request->getBool('on_right');
@@ -191,6 +204,25 @@ abstract class PhabricatorInlineCommentController
     $this->commentID = $request->getInt('id');
     $this->operation = $request->getStr('op');
     $this->renderer = $request->getStr('renderer');
+    $this->replyToCommentPHID = $request->getStr('replyToCommentPHID');
+
+    if ($this->getReplyToCommentPHID()) {
+      $reply_phid = $this->getReplyToCommentPHID();
+      $reply_comment = $this->loadCommentByPHID($reply_phid);
+      if (!$reply_comment) {
+        throw new Exception(
+          pht('Failed to load comment "%s".', $reply_phid));
+      }
+
+      if ($reply_comment->getChangesetID() != $this->getChangesetID()) {
+        throw new Exception(
+          pht(
+            'Comment "%s" belongs to wrong changeset (%s vs %s).',
+            $reply_phid,
+            $reply_comment->getChangesetID(),
+            $this->getChangesetID()));
+      }
+    }
   }
 
   private function buildEditDialog() {
@@ -204,7 +236,9 @@ abstract class PhabricatorInlineCommentController
       ->setIsNewFile($this->getIsNewFile())
       ->setNumber($this->getLineNumber())
       ->setLength($this->getLineLength())
-      ->setRenderer($this->getRenderer());
+      ->setRenderer($this->getRenderer())
+      ->setReplyToCommentPHID($this->getReplyToCommentPHID())
+      ->setChangesetID($this->getChangesetID());
 
     return $edit_dialog;
   }

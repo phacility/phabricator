@@ -19,6 +19,12 @@ interface PhabricatorInlineCommentInterface extends PhabricatorMarkupInterface {
   public function setLineLength($length);
   public function getLineLength();
 
+  public function setReplyToCommentPHID($phid);
+  public function getReplyToCommentPHID();
+
+  public function setHasReplies($has_replies);
+  public function getHasReplies();
+
   public function setContent($content);
   public function getContent();
 

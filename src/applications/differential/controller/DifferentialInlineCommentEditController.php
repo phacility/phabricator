@@ -40,6 +40,12 @@ final class DifferentialInlineCommentEditController
       ->executeOne();
   }
 
+  protected function loadCommentByPHID($phid) {
+    return id(new DifferentialInlineCommentQuery())
+      ->withPHIDs(array($phid))
+      ->executeOne();
+  }
+
   protected function loadCommentForEdit($id) {
     $request = $this->getRequest();
     $user = $request->getUser();

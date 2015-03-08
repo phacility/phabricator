@@ -47,6 +47,16 @@ final class PhabricatorAuditInlineComment
     return head(self::buildProxies($inlines));
   }
 
+  public static function loadPHID($phid) {
+    $inlines = id(new PhabricatorAuditTransactionComment())->loadAllWhere(
+      'phid = %s',
+      $phid);
+    if (!$inlines) {
+      return null;
+    }
+    return head(self::buildProxies($inlines));
+  }
+
   public static function loadDraftComments(
     PhabricatorUser $viewer,
     $commit_phid) {
@@ -254,6 +264,24 @@ final class PhabricatorAuditInlineComment
 
   public function getChangesetID() {
     return $this->getPathID();
+  }
+
+  public function setReplyToCommentPHID($phid) {
+    $this->proxy->setReplyToCommentPHID($phid);
+    return $this;
+  }
+
+  public function getReplyToCommentPHID() {
+    return $this->proxy->getReplyToCommentPHID();
+  }
+
+  public function setHasReplies($has_replies) {
+    $this->proxy->setHasReplies($has_replies);
+    return $this;
+  }
+
+  public function getHasReplies() {
+    return $this->proxy->getHasReplies();
   }
 
 

@@ -43,6 +43,10 @@ final class DiffusionInlineCommentController
     return PhabricatorAuditInlineComment::loadID($id);
   }
 
+  protected function loadCommentByPHID($phid) {
+    return PhabricatorAuditInlineComment::loadPHID($phid);
+  }
+
   protected function loadCommentForEdit($id) {
     $request = $this->getRequest();
     $user = $request->getUser();

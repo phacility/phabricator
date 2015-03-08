@@ -245,7 +245,7 @@ JX.behavior('differential-edit-inline-comments', function(config) {
       editor = new JX.DifferentialInlineCommentEditor(config.uri)
         .setTemplates(config.undo_templates)
         .setOperation('new')
-        .setChangeset(changeset)
+        .setChangesetID(changeset)
         .setLineNumber(o)
         .setLength(len)
         .setIsNew(isNewFile(target) ? 1 : 0)
@@ -320,16 +320,25 @@ JX.behavior('differential-edit-inline-comments', function(config) {
     }
 
     var original = data.original;
+    var reply_phid = null;
     if (op == 'reply') {
       // If the user hit "reply", the original text is empty (a new reply), not
       // the text of the comment they're replying to.
       original = '';
+      reply_phid = data.phid;
     }
+
+    var changeset_root = JX.DOM.findAbove(
+      node,
+      'div',
+      'differential-changeset');
+    var view = JX.ChangesetViewManager.getForNode(changeset_root);
 
     editor = new JX.DifferentialInlineCommentEditor(config.uri)
       .setTemplates(config.undo_templates)
       .setOperation(op)
       .setID(data.id)
+      .setChangesetID(data.changesetID)
       .setLineNumber(data.number)
       .setLength(data.length)
       .setOnRight(data.on_right)
@@ -337,6 +346,8 @@ JX.behavior('differential-edit-inline-comments', function(config) {
       .setRow(row)
       .setOtherRows(other_rows)
       .setTable(row.parentNode)
+      .setReplyToCommentPHID(reply_phid)
+      .setRenderer(view.getRenderer())
       .start();
 
     set_link_state(true);

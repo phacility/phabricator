@@ -11,6 +11,8 @@ final class PHUIDiffInlineCommentEditView
   private $length;
   private $renderer;
   private $isNewFile;
+  private $replyToCommentPHID;
+  private $changesetID;
 
   public function setIsNewFile($is_new_file) {
     $this->isNewFile = $is_new_file;
@@ -49,9 +51,26 @@ final class PHUIDiffInlineCommentEditView
     return $this;
   }
 
+  public function setReplyToCommentPHID($reply_to_phid) {
+    $this->replyToCommentPHID = $reply_to_phid;
+    return $this;
+  }
+
+  public function getReplyToCommentPHID() {
+    return $this->replyToCommentPHID;
+  }
+
+  public function setChangesetID($changeset_id) {
+    $this->changesetID = $changeset_id;
+    return $this;
+  }
+
+  public function getChangesetID() {
+    return $this->changesetID;
+  }
+
   public function setOnRight($on_right) {
     $this->onRight = $on_right;
-    $this->addHiddenInput('on_right', $on_right);
     return $this;
   }
 
@@ -114,8 +133,15 @@ final class PHUIDiffInlineCommentEditView
   }
 
   private function renderInputs() {
+    $inputs = $this->inputs;
     $out = array();
-    foreach ($this->inputs as $input) {
+
+    $inputs[] = array('on_right', (bool)$this->getIsOnRight());
+    $inputs[] = array('replyToCommentPHID', $this->getReplyToCommentPHID());
+    $inputs[] = array('renderer', $this->getRenderer());
+    $inputs[] = array('changesetID', $this->getChangesetID());
+
+    foreach ($inputs as $input) {
       list($name, $value) = $input;
       $out[] = phutil_tag(
         'input',
@@ -170,10 +196,12 @@ final class PHUIDiffInlineCommentEditView
         'class' => 'differential-inline-comment-edit',
         'sigil' => 'differential-inline-comment',
         'meta' => array(
+          'changesetID' => $this->getChangesetID(),
           'on_right' => $this->getIsOnRight(),
           'isNewFile' => (bool)$this->getIsNewFile(),
           'number' => $this->number,
           'length' => $this->length,
+          'replyToCommentPHID' => $this->getReplyToCommentPHID(),
         ),
       ),
       array(
