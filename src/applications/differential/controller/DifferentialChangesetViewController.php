@@ -217,7 +217,8 @@ final class DifferentialChangesetViewController extends DifferentialController {
 
       return id(new PhabricatorChangesetResponse())
         ->setRenderedChangeset($parser->renderChangeset())
-        ->setCoverage($coverage);
+        ->setCoverage($coverage)
+        ->setUndoTemplates($parser->getRenderer()->renderUndoTemplates());
     }
 
     $diff = $changeset->getDiff();

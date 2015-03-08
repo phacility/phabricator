@@ -208,6 +208,9 @@ final class DifferentialChangesetDetailView extends AphrontView {
     $icon = id(new PHUIIconView())
       ->setIconFont($display_icon);
 
+    $renderer = DifferentialChangesetHTMLRenderer::getHTMLRendererByKey(
+      $this->getRenderer());
+
     return javelin_tag(
       'div',
       array(
@@ -224,6 +227,7 @@ final class DifferentialChangesetDetailView extends AphrontView {
           'ref' => $this->getRenderingRef(),
           'autoload' => $this->getAutoload(),
           'loaded' => $this->getLoaded(),
+          'undoTemplates' => $renderer->renderUndoTemplates(),
         ),
         'class' => $class,
         'id'    => $id,
@@ -251,5 +255,6 @@ final class DifferentialChangesetDetailView extends AphrontView {
           $this->renderChildren()),
       ));
   }
+
 
 }

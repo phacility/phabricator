@@ -38,6 +38,7 @@ JX.install('ChangesetViewManager', {
     _renderer: null,
     _highlight: null,
     _encoding: null,
+    _undoTemplates: null,
 
 
     /**
@@ -193,6 +194,8 @@ JX.install('ChangesetViewManager', {
       var root = target.parentNode;
       this._moveRows(table, root, target);
       root.removeChild(target);
+
+      this._onchangesetresponse(response);
     },
 
     _moveRows: function(src, dst, before) {
@@ -254,6 +257,10 @@ JX.install('ChangesetViewManager', {
       // complicated mess and you could lose inline comments, cursor positions,
       // etc.
       return (JX.Device.getDevice() == 'desktop') ? '2up' : '1up';
+    },
+
+    getUndoTemplates: function() {
+      return this._undoTemplates;
     },
 
     setEncoding: function(encoding) {
@@ -333,6 +340,12 @@ JX.install('ChangesetViewManager', {
         this._stabilize = false;
       }
 
+      this._onchangesetresponse(response);
+    },
+
+    _onchangesetresponse: function(response) {
+      // Code shared by autoload and context responses.
+
       if (response.coverage) {
         for (var k in response.coverage) {
           try {
@@ -341,6 +354,10 @@ JX.install('ChangesetViewManager', {
             // Not terribly important.
           }
         }
+      }
+
+      if (response.undoTemplates) {
+        this._undoTemplates = response.undoTemplates;
       }
     },
 

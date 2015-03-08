@@ -379,10 +379,12 @@ td.cov-I {
 .differential-inline-undo {
   padding: 4px;
   text-align: center;
-  background: #ffeeaa;
+  background: {$lightyellow};
+  border: 1px solid {$yellow};
   margin: 3px 0 1px;
-  font: 12px;
-  color: 444444;
+  color: {$darkgreytext};
+  font: {$basefont};
+  font-size: 12px;
 }
 
 .differential-inline-undo a {

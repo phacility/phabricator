@@ -243,7 +243,7 @@ JX.behavior('differential-edit-inline-comments', function(config) {
       var view = JX.ChangesetViewManager.getForNode(root);
 
       editor = new JX.DifferentialInlineCommentEditor(config.uri)
-        .setTemplates(config.undo_templates)
+        .setTemplates(view.getUndoTemplates())
         .setOperation('new')
         .setChangesetID(changeset)
         .setLineNumber(o)
@@ -335,7 +335,7 @@ JX.behavior('differential-edit-inline-comments', function(config) {
     var view = JX.ChangesetViewManager.getForNode(changeset_root);
 
     editor = new JX.DifferentialInlineCommentEditor(config.uri)
-      .setTemplates(config.undo_templates)
+      .setTemplates(view.getUndoTemplates())
       .setOperation(op)
       .setID(data.id)
       .setChangesetID(data.changesetID)

@@ -130,6 +130,7 @@ final class DiffusionDiffController extends DiffusionController {
     $parser->setMask($mask);
 
     return id(new PhabricatorChangesetResponse())
-      ->setRenderedChangeset($parser->renderChangeset());
+      ->setRenderedChangeset($parser->renderChangeset())
+      ->setUndoTemplates($parser->getRenderer()->renderUndoTemplates());
   }
 }

@@ -600,4 +600,19 @@ abstract class DifferentialChangesetRenderer {
     return array($old, $new);
   }
 
+  public function renderUndoTemplates() {
+    $views = array(
+      'l' => id(new PHUIDiffInlineCommentUndoView())->setIsOnRight(false),
+      'r' => id(new PHUIDiffInlineCommentUndoView())->setIsOnRight(true),
+    );
+
+    foreach ($views as $key => $view) {
+      $scaffold = $this->getRowScaffoldForInline($view);
+      $views[$key] = id(new PHUIDiffInlineCommentTableScaffold())
+        ->addRowScaffold($scaffold);
+    }
+
+    return $views;
+  }
+
 }

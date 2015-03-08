@@ -123,6 +123,7 @@ final class DifferentialChangesetListView extends AphrontView {
         'collapsed' => pht('This file content has been collapsed.'),
       ),
     ));
+
     Javelin::initBehavior(
       'differential-dropdown-menus',
       array(
@@ -230,11 +231,8 @@ final class DifferentialChangesetListView extends AphrontView {
     $this->initBehavior('differential-comment-jump', array());
 
     if ($this->inlineURI) {
-      $undo_templates = $this->renderUndoTemplates();
-
       Javelin::initBehavior('differential-edit-inline-comments', array(
         'uri'             => $this->inlineURI,
-        'undo_templates'  => $undo_templates,
         'stage'           => 'differential-review-stage',
       ));
     }
@@ -255,44 +253,6 @@ final class DifferentialChangesetListView extends AphrontView {
       ->appendChild($content);
 
     return $object_box;
-  }
-
-  /**
-   * Render the "Undo" markup for the inline comment undo feature.
-   */
-  private function renderUndoTemplates() {
-    $link = javelin_tag(
-      'a',
-      array(
-        'href'  => '#',
-        'sigil' => 'differential-inline-comment-undo',
-      ),
-      pht('Undo'));
-
-    $div = phutil_tag(
-      'div',
-      array(
-        'class' => 'differential-inline-undo',
-      ),
-      array('Changes discarded. ', $link));
-
-    return array(
-      'l' => phutil_tag('table', array(),
-        phutil_tag('tr', array(), array(
-          phutil_tag('th', array()),
-          phutil_tag('td', array(), $div),
-          phutil_tag('th', array()),
-          phutil_tag('td', array('colspan' => 3)),
-        ))),
-
-      'r' => phutil_tag('table', array(),
-        phutil_tag('tr', array(), array(
-          phutil_tag('th', array()),
-          phutil_tag('td', array()),
-          phutil_tag('th', array()),
-          phutil_tag('td', array('colspan' => 3), $div),
-        ))),
-    );
   }
 
   private function renderViewOptionsDropdown(
