@@ -54,10 +54,7 @@ final class ConpherenceViewController extends
       );
     }
 
-    $title = $conpherence->getTitle();
-    if (!$title) {
-      $title = pht('[No Title]');
-    }
+    $title = $this->getConpherenceTitle($conpherence);
     $content['title'] = $title;
 
     if ($request->isAjax()) {

@@ -90,7 +90,7 @@ JX.behavior('durable-column', function() {
       knownID: latestTransactionID
     };
     workflow.listen('finally', function() {
-      var need_sync = (updating.knownID > latestTransactionID);
+      var need_sync = (updating && updating.knownID > latestTransactionID);
       updating = null;
       if (need_sync) {
         update_thread();
@@ -134,11 +134,43 @@ JX.behavior('durable-column', function() {
       var data = e.getNodeData('conpherence-durable-column-header-action');
       var action = data.action;
       var link = e.getNode('tag:a');
+      var params = null;
 
       switch (action) {
+        case 'metadata':
+          JX.Stratcom.invoke('notification-panel-close');
+          params = {
+            action: action,
+            latest_transaction_id: latestTransactionID,
+            minimal_display: true,
+            force_ajax: true
+          };
+          var workflow = new JX.Workflow.newFromLink(link)
+            .setData(params)
+            .setHandler(function(r) {
+              var messages = _getColumnMessagesNode();
+              JX.DOM.appendContent(messages, JX.$H(r.transactions));
+              messages.scrollTop = messages.scrollHeight;
+
+              var title = _getColumnTitleNode();
+              JX.DOM.setContent(title, r.conpherence_title);
+
+              latestTransactionID = r.latest_transaction_id;
+              // since this is a two step workflow, and the "finally" method
+              // gets called on the first form load, restore "updating" if
+              // necessary
+              if (updating === null) {
+                updating = {
+                  threadPHID: loadedThreadPHID,
+                  knownID: latestTransactionID
+                };
+              }
+            });
+          sync_workflow(workflow);
+          break;
         case 'add_person':
           JX.Stratcom.invoke('notification-panel-close');
-          var params = {
+          params = {
             action: action,
             latest_transaction_id: latestTransactionID,
             minimal_display: true
@@ -193,6 +225,14 @@ JX.behavior('durable-column', function() {
       'conpherence-durable-column-transactions');
   }
 
+  function _getColumnTitleNode() {
+    var column = JX.$('conpherence-durable-column');
+    return JX.DOM.find(
+      column,
+      'div',
+      'conpherence-durable-column-header-text');
+  }
+
   function _getColumnFormNode() {
     var column = JX.$('conpherence-durable-column');
     return JX.DOM.find(
@@ -231,7 +271,6 @@ JX.behavior('durable-column', function() {
     // We can pick a thread from the server the first time
     if (shouldInit) {
       shouldInit = false;
-      params = { shouldInit : true };
     } else {
       params = { id : thread_id };
     }
@@ -282,9 +321,9 @@ JX.behavior('durable-column', function() {
   }
 
   JX.Stratcom.listen(
-      'click',
-      'conpherence-send-message',
-      _sendMessage);
+    'click',
+    'conpherence-send-message',
+    _sendMessage);
 
   JX.Stratcom.listen(
     ['submit', 'didSyntheticSubmit'],

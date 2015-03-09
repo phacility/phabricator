@@ -205,9 +205,10 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
           'class' => 'conpherence-durable-column-header',
         ),
         array(
-          phutil_tag(
+          javelin_tag(
             'div',
             array(
+              'sigil' => 'conpherence-durable-column-header-text',
               'class' => 'conpherence-durable-column-header-text',
             ),
             $title),
@@ -223,6 +224,12 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
         'href' => '/conpherence/update/'.$conpherence->getID().'/',
         'icon' => 'fa-plus',
         'key' => ConpherenceUpdateActions::ADD_PERSON,
+      ),
+      array(
+        'name' => pht('Rename Thread'),
+        'href' => '/conpherence/update/'.$conpherence->getID().'/',
+        'icon' => 'fa-pencil',
+        'key' => ConpherenceUpdateActions::METADATA,
       ),
       array(
         'name' => pht('View in Conpherence'),

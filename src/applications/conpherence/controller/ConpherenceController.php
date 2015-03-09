@@ -62,11 +62,7 @@ abstract class ConpherenceController extends PhabricatorController {
 
   protected function buildHeaderPaneContent(ConpherenceThread $conpherence) {
     $crumbs = $this->buildApplicationCrumbs();
-    if ($conpherence->getTitle()) {
-      $title = $conpherence->getTitle();
-    } else {
-      $title = pht('[No Title]');
-    }
+    $title = $this->getConpherenceTitle($conpherence);
     $crumbs->addCrumb(
       id(new PHUICrumbView())
       ->setName($title)
@@ -85,4 +81,14 @@ abstract class ConpherenceController extends PhabricatorController {
         $crumbs,
       ));
   }
+
+  protected function getConpherenceTitle(ConpherenceThread $conpherence) {
+    if ($conpherence->getTitle()) {
+      $title = $conpherence->getTitle();
+    } else {
+      $title = pht('[No Title]');
+    }
+    return $title;
+  }
+
 }
