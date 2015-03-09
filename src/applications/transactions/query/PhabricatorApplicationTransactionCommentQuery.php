@@ -8,6 +8,7 @@ abstract class PhabricatorApplicationTransactionCommentQuery
   private $phids;
   private $transactionPHIDs;
   private $isDeleted;
+  private $hasTransaction;
 
   abstract protected function getTemplate();
 
@@ -31,8 +32,13 @@ abstract class PhabricatorApplicationTransactionCommentQuery
     return $this;
   }
 
-  public function withDeleted($deleted) {
+  public function withIsDeleted($deleted) {
     $this->isDeleted = $deleted;
+    return $this;
+  }
+
+  public function withHasTransaction($has_transaction) {
+    $this->hasTransaction = $has_transaction;
     return $this;
   }
 
@@ -51,7 +57,13 @@ abstract class PhabricatorApplicationTransactionCommentQuery
     return $table->loadAllFromArray($data);
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+    return $this->formatWhereClause($this->buildWhereClauseComponents($conn_r));
+  }
+
+  protected function buildWhereClauseComponents(
+    AphrontDatabaseConnection $conn_r) {
+
     $where = array();
 
     if ($this->ids !== null) {
@@ -89,7 +101,19 @@ abstract class PhabricatorApplicationTransactionCommentQuery
         (int)$this->isDeleted);
     }
 
-    return $this->formatWhereClause($where);
+    if ($this->hasTransaction !== null) {
+      if ($this->hasTransaction) {
+        $where[] = qsprintf(
+          $conn_r,
+          'xcomment.transactionPHID IS NOT NULL');
+      } else {
+        $where[] = qsprintf(
+          $conn_r,
+          'xcomment.transactionPHID IS NULL');
+      }
+    }
+
+    return $where;
   }
 
   public function getQueryApplicationClass() {
