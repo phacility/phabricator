@@ -67,7 +67,7 @@ final class PhabricatorMacroEditController extends PhabricatorMacroController {
             'isExplicitUpload' => true,
             'canCDN' => true,
           ));
-      } else if ($request->getStr('url')) {
+      } else if ($request->getStr('url') && $can_fetch) {
         try {
           $file = PhabricatorFile::newFromFileDownload(
             $request->getStr('url'),
