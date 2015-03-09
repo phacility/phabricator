@@ -236,7 +236,7 @@ abstract class PhabricatorInlineCommentController
     $edit_dialog = id(new PHUIDiffInlineCommentEditView())
       ->setUser($user)
       ->setSubmitURI($request->getRequestURI())
-      ->setOnRight($this->getIsOnRight())
+      ->setIsOnRight($this->getIsOnRight())
       ->setIsNewFile($this->getIsNewFile())
       ->setNumber($this->getLineNumber())
       ->setLength($this->getLineLength())
@@ -275,7 +275,7 @@ abstract class PhabricatorInlineCommentController
 
     $view = id(new PHUIDiffInlineCommentDetailView())
       ->setInlineComment($inline)
-      ->setOnRight($on_right)
+      ->setIsOnRight($on_right)
       ->setMarkupEngine($engine)
       ->setHandles($handles)
       ->setEditable(true);
