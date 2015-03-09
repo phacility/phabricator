@@ -26,7 +26,7 @@ abstract class PhabricatorInlineCommentPreviewController
 
     $views = array();
     foreach ($inlines as $inline) {
-      $view = new DifferentialInlineCommentView();
+      $view = new PHUIDiffInlineCommentDetailView();
       $view->setInlineComment($inline);
       $view->setMarkupEngine($engine);
       $view->setHandles($handles);

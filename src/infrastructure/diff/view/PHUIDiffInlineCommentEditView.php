@@ -1,6 +1,7 @@
 <?php
 
-final class DifferentialInlineCommentEditView extends AphrontView {
+final class PHUIDiffInlineCommentEditView
+  extends PHUIDiffInlineCommentView {
 
   private $inputs = array();
   private $uri;
@@ -8,6 +9,32 @@ final class DifferentialInlineCommentEditView extends AphrontView {
   private $onRight;
   private $number;
   private $length;
+  private $renderer;
+  private $isNewFile;
+  private $replyToCommentPHID;
+  private $changesetID;
+
+  public function setIsNewFile($is_new_file) {
+    $this->isNewFile = $is_new_file;
+    return $this;
+  }
+
+  public function getIsNewFile() {
+    return $this->isNewFile;
+  }
+
+  public function getIsOnRight() {
+    return $this->onRight;
+  }
+
+  public function setRenderer($renderer) {
+    $this->renderer = $renderer;
+    return $this;
+  }
+
+  public function getRenderer() {
+    return $this->renderer;
+  }
 
   public function addHiddenInput($key, $value) {
     $this->inputs[] = array($key, $value);
@@ -24,9 +51,26 @@ final class DifferentialInlineCommentEditView extends AphrontView {
     return $this;
   }
 
+  public function setReplyToCommentPHID($reply_to_phid) {
+    $this->replyToCommentPHID = $reply_to_phid;
+    return $this;
+  }
+
+  public function getReplyToCommentPHID() {
+    return $this->replyToCommentPHID;
+  }
+
+  public function setChangesetID($changeset_id) {
+    $this->changesetID = $changeset_id;
+    return $this;
+  }
+
+  public function getChangesetID() {
+    return $this->changesetID;
+  }
+
   public function setOnRight($on_right) {
     $this->onRight = $on_right;
-    $this->addHiddenInput('on_right', $on_right);
     return $this;
   }
 
@@ -60,26 +104,19 @@ final class DifferentialInlineCommentEditView extends AphrontView {
         $this->renderBody(),
       ));
 
-    return phutil_tag('table', array(), phutil_tag(
-      'tr',
-      array('class' => 'inline-comment-splint'),
-      array(
-        phutil_tag('th', array()),
-        phutil_tag(
-          'td',
-          array('class' => 'left'),
-          $this->onRight ? null : $content),
-        phutil_tag('th', array()),
-        phutil_tag(
-          'td',
-          array('colspan' => 3, 'class' => 'right3'),
-          $this->onRight ? $content : null),
-      )));
+    return $content;
   }
 
   private function renderInputs() {
+    $inputs = $this->inputs;
     $out = array();
-    foreach ($this->inputs as $input) {
+
+    $inputs[] = array('on_right', (bool)$this->getIsOnRight());
+    $inputs[] = array('replyToCommentPHID', $this->getReplyToCommentPHID());
+    $inputs[] = array('renderer', $this->getRenderer());
+    $inputs[] = array('changesetID', $this->getChangesetID());
+
+    foreach ($inputs as $input) {
       list($name, $value) = $input;
       $out[] = phutil_tag(
         'input',
@@ -134,9 +171,12 @@ final class DifferentialInlineCommentEditView extends AphrontView {
         'class' => 'differential-inline-comment-edit',
         'sigil' => 'differential-inline-comment',
         'meta' => array(
-          'on_right' => $this->onRight,
+          'changesetID' => $this->getChangesetID(),
+          'on_right' => $this->getIsOnRight(),
+          'isNewFile' => (bool)$this->getIsNewFile(),
           'number' => $this->number,
           'length' => $this->length,
+          'replyToCommentPHID' => $this->getReplyToCommentPHID(),
         ),
       ),
       array(

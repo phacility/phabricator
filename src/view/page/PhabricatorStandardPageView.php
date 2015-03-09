@@ -80,7 +80,14 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
   }
 
   public function getShowDurableColumn() {
-    return $this->showDurableColumn;
+    $request = $this->getRequest();
+    if ($request) {
+      $viewer = $request->getUser();
+      return PhabricatorApplication::isClassInstalledForViewer(
+        'PhabricatorConpherenceApplication',
+        $viewer);
+    }
+    return false;
   }
 
   public function getTitle() {
@@ -391,7 +398,12 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
     $durable_column = null;
     if ($this->getShowDurableColumn()) {
-      $durable_column = new ConpherenceDurableColumnView();
+      $durable_column = id(new ConpherenceDurableColumnView())
+        ->setSelectedConpherence(null)
+        ->setUser($user);
+      Javelin::initBehavior(
+        'durable-column',
+        array());
     }
 
     return phutil_tag(

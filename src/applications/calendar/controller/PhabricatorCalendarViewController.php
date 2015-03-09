@@ -42,7 +42,7 @@ final class PhabricatorCalendarViewController
     $month_view->setUser($user);
     $month_view->setHolidays($holidays);
     if ($this->getNoticeView()) {
-      $month_view->setErrorView($this->getNoticeView());
+      $month_view->setInfoView($this->getNoticeView());
     }
 
     $phids = mpull($statuses, 'getUserPHID');

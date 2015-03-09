@@ -12,6 +12,8 @@ final class PhabricatorAuthListController
       ->execute();
 
     $list = new PHUIObjectItemListView();
+    $can_manage = $this->hasApplicationCapability(
+        AuthManageProvidersCapability::CAPABILITY);
 
     foreach ($configs as $config) {
       $item = new PHUIObjectItemView();
@@ -47,10 +49,10 @@ final class PhabricatorAuthListController
 
       if ($config->getShouldAllowRegistration()) {
         $item->addAttribute(pht('Allows Registration'));
+      } else {
+        $item->addAttribute(pht('Does Not Allow Registration'));
       }
 
-      $can_manage = $this->hasApplicationCapability(
-        AuthManageProvidersCapability::CAPABILITY);
       if ($config->getIsEnabled()) {
         $item->setState(PHUIObjectItemView::STATE_SUCCESS);
         $item->addAction(
@@ -152,6 +154,7 @@ final class PhabricatorAuthListController
         ->setColor(PHUIButtonView::SIMPLE)
         ->setHref($this->getApplicationURI('config/new/'))
         ->setIcon($image)
+        ->setDisabled(!$can_manage)
         ->setText(pht('Add Provider'));
 
     $header = id(new PHUIHeaderView())
@@ -161,7 +164,7 @@ final class PhabricatorAuthListController
     $list->setFlush(true);
     $list = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setErrorView($warning)
+      ->setInfoView($warning)
       ->appendChild($list);
 
     return $this->buildApplicationPage(

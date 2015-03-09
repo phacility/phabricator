@@ -1,0 +1,13 @@
+CTYPE 6 1 (unforced)
+SRC
+DST
+-
+N 1 . Apples\n~
+O 2 - B{(anana)}s\n~
+N 2 + B{(lueberrie)}s\n~
+N 3 . Cherries\n~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CTYPE 4 1 (forced)
+-
+SRC
+DST

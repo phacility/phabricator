@@ -588,21 +588,25 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     if ($this->blockingTasks === true) {
       $parts[] = qsprintf(
         $conn,
-        'blocking.dst IS NOT NULL');
+        'blocking.dst IS NOT NULL AND blockingtask.status IN (%Ls)',
+        ManiphestTaskStatus::getOpenStatusConstants());
     } else if ($this->blockingTasks === false) {
       $parts[] = qsprintf(
         $conn,
-        'blocking.dst IS NULL');
+        'blocking.dst IS NULL OR blockingtask.status NOT IN (%Ls)',
+        ManiphestTaskStatus::getOpenStatusConstants());
     }
 
     if ($this->blockedTasks === true) {
       $parts[] = qsprintf(
         $conn,
-        'blocked.dst IS NOT NULL');
+        'blocked.dst IS NOT NULL AND blockedtask.status IN (%Ls)',
+        ManiphestTaskStatus::getOpenStatusConstants());
     } else if ($this->blockedTasks === false) {
       $parts[] = qsprintf(
         $conn,
-        'blocked.dst IS NULL');
+        'blocked.dst IS NULL OR blockedtask.status NOT IN (%Ls)',
+        ManiphestTaskStatus::getOpenStatusConstants());
     }
 
     return '('.implode(') OR (', $parts).')';
@@ -792,24 +796,20 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         $conn_r,
         'LEFT JOIN %T blocking ON blocking.src = task.phid '.
         'AND blocking.type = %d '.
-        'LEFT JOIN %T blockingtask ON blocking.dst = blockingtask.phid '.
-        'AND blockingtask.status IN (%Ls)',
+        'LEFT JOIN %T blockingtask ON blocking.dst = blockingtask.phid',
         $edge_table,
         ManiphestTaskDependedOnByTaskEdgeType::EDGECONST,
-        id(new ManiphestTask())->getTableName(),
-        ManiphestTaskStatus::getOpenStatusConstants());
+        id(new ManiphestTask())->getTableName());
     }
     if ($this->shouldJoinBlockedTasks()) {
       $joins[] = qsprintf(
         $conn_r,
         'LEFT JOIN %T blocked ON blocked.src = task.phid '.
         'AND blocked.type = %d '.
-        'LEFT JOIN %T blockedtask ON blocked.dst = blockedtask.phid '.
-        'AND blockedtask.status IN (%Ls)',
+        'LEFT JOIN %T blockedtask ON blocked.dst = blockedtask.phid',
         $edge_table,
         ManiphestTaskDependsOnTaskEdgeType::EDGECONST,
-        id(new ManiphestTask())->getTableName(),
-        ManiphestTaskStatus::getOpenStatusConstants());
+        id(new ManiphestTask())->getTableName());
     }
 
     if ($this->anyProjectPHIDs || $this->anyUserProjectPHIDs) {

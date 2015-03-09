@@ -152,10 +152,6 @@ final class DiffusionRepositoryCreateController
           // transactions to apply this change.
           $repository->setCallsign($callsign);
 
-          // Put the repository in "Importing" mode until we finish
-          // parsing it.
-          $repository->setDetail('importing', true);
-
           $xactions[] = id(clone $template)
             ->setTransactionType($type_name)
             ->setNewValue(

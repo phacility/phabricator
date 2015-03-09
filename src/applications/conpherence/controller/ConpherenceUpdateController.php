@@ -209,14 +209,19 @@ final class ConpherenceUpdateController
         ->setDatasource(new PhabricatorPeopleDatasource()));
 
     require_celerity_resource('conpherence-update-css');
-    return id(new AphrontDialogView())
+    $view = id(new AphrontDialogView())
       ->setTitle(pht('Add Participants'))
       ->addHiddenInput('action', 'add_person')
       ->addHiddenInput(
         'latest_transaction_id',
         $request->getInt('latest_transaction_id'))
       ->appendChild($form);
+
+    if ($request->getExists('minimal_display')) {
+      $view->addHiddenInput('minimal_display', true);
     }
+    return $view;
+  }
 
   private function renderRemovePersonDialogue(
     ConpherenceThread $conpherence) {
@@ -309,7 +314,12 @@ final class ConpherenceUpdateController
       ->executeOne();
 
     if ($need_transactions) {
-      $data = $this->renderConpherenceTransactions($conpherence);
+      $data = ConpherenceTransactionView::renderTransactions(
+        $user,
+        $conpherence,
+        !$this->getRequest()->getExists('minimal_display'));
+      $participant_obj = $conpherence->getParticipant($user->getPHID());
+      $participant_obj->markUpToDate($conpherence, $data['latest_transaction']);
     } else {
       $data = array();
     }

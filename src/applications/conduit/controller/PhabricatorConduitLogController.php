@@ -35,6 +35,9 @@ final class PhabricatorConduitLogController
     }
 
     $table = $this->renderCallTable($calls, $conns);
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Call Logs'))
+      ->appendChild($table);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Call Logs'));
@@ -42,11 +45,11 @@ final class PhabricatorConduitLogController
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $table,
+        $box,
         $pager,
       ),
       array(
-        'title' => 'Conduit Logs',
+        'title' => pht('Conduit Logs'),
       ));
   }
 
@@ -100,18 +103,17 @@ final class PhabricatorConduitLogController
       );
     }
 
-    $table = id(new AphrontTableView($rows))
-      ->setDeviceReadyTable(true);
+    $table = id(new AphrontTableView($rows));
 
     $table->setHeaders(
       array(
-        'Connection',
-        'User',
-        'Method',
-        'Status',
-        'Error',
-        'Duration',
-        'Date',
+        pht('Connection'),
+        pht('User'),
+        pht('Method'),
+        pht('Status'),
+        pht('Error'),
+        pht('Duration'),
+        pht('Date'),
       ));
     $table->setColumnClasses(
       array(

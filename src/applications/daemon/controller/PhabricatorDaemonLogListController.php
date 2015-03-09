@@ -19,13 +19,17 @@ final class PhabricatorDaemonLogListController
     $daemon_table->setUser($request->getUser());
     $daemon_table->setDaemonLogs($logs);
 
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('All Daemons'))
+      ->appendChild($daemon_table);
+
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('All Daemons'));
 
     $nav = $this->buildSideNavView();
     $nav->selectFilter('log');
     $nav->setCrumbs($crumbs);
-    $nav->appendChild($daemon_table);
+    $nav->appendChild($box);
     $nav->appendChild($pager);
 
     return $this->buildApplicationPage(

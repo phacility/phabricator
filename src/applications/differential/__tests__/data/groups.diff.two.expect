@@ -1,0 +1,22 @@
+CTYPE 2 1 (unforced)
+style
+style
+-
+X <MISSING-CONTEXT>
+O 57 . .dashboard-panel div.phabricator-feed-frame {\n~
+N 57 . .dashboard-panel div.phabricator-feed-frame {\n~
+O 58 .   background: #fff;\n~
+N 58 .   background: #fff;\n~
+O 59 .   margin: 0;\n~
+N 59 .   margin: 0;\n~
+O 60 -   border-{(left)}: 1px solid {$lightblueborder};\n~
+N 60 +   border-{(back)}: 1px solid {$lightblueborder};\n~
+O 61 -   border-{(righ)}t: 1px solid {$lightblueborder};\n~
+N 61 +   border-{(fron)}t: 1px solid {$lightblueborder};\n~
+O 62 -   border-{(bottom)}: 1px solid {$blueborder};\n~
+N 62 +   border-{(inside)}: 1px solid {$blueborder};\n~
+O 63 .   max-width: none;\n~
+N 63 .   max-width: none;\n~
+O 64 . }\n~
+N 64 . }\n~
+X <MISSING-CONTEXT>

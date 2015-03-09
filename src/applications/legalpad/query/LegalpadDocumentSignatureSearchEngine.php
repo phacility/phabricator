@@ -301,7 +301,7 @@ final class LegalpadDocumentSignatureSearchEngine
               'NOTE: You can only see your own signatures and signatures on '.
               'documents you have permission to edit.'),
           ));
-      $box->setErrorView($policy_notice);
+      $box->setInfoView($policy_notice);
     }
 
     return $box;

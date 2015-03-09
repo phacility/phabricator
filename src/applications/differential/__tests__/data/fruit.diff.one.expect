@@ -1,12 +1,14 @@
 CTYPE 1 1 (unforced)
 -
+fruit
 -
-N 1 + apple~
-N 2 + banana~
-N 3 + cherry~
-N 4 + date~
-N 5 + elderberry~
-N 6 + fig~
-N 7 + grape~
-N 8 + honeydew~
-N 9 + ~
+N 1 + apple\n~
+N 2 + banana\n~
+N 3 + cherry\n~
+N 4 + date\n~
+N 5 + elderberry\n~
+N 6 + fig\n~
+N 7 + grape\n~
+N 8 + honeydew\n~
+N 9 + \n~
+O X <EMPTY>

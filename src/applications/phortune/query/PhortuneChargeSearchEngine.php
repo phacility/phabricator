@@ -5,6 +5,11 @@ final class PhortuneChargeSearchEngine
 
   private $account;
 
+  public function canUseInPanelContext() {
+    // These only make sense in an account context.
+    return false;
+  }
+
   public function setAccount(PhortuneAccount $account) {
     $this->account = $account;
     return $this;

@@ -253,11 +253,11 @@ final class PhabricatorDaemonConsoleController
       ->setNoDataString(pht('There are no upcoming event triggers.'))
       ->setHeaders(
         array(
-          'ID',
-          'Clock',
-          'Action',
-          'Last',
-          'Next',
+          pht('ID'),
+          pht('Clock'),
+          pht('Action'),
+          pht('Last'),
+          pht('Next'),
         ))
       ->setColumnClasses(
         array(

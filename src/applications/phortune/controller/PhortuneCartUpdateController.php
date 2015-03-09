@@ -13,11 +13,18 @@ final class PhortuneCartUpdateController
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
-    $cart = id(new PhortuneCartQuery())
+    $authority = $this->loadMerchantAuthority();
+
+    $cart_query = id(new PhortuneCartQuery())
       ->setViewer($viewer)
       ->withIDs(array($this->id))
-      ->needPurchases(true)
-      ->executeOne();
+      ->needPurchases(true);
+
+    if ($authority) {
+      $cart_query->withMerchantPHIDs(array($authority->getPHID()));
+    }
+
+    $cart = $cart_query->executeOne();
     if (!$cart) {
       return new Aphront404Response();
     }
@@ -59,7 +66,7 @@ final class PhortuneCartUpdateController
     }
 
     return id(new AphrontRedirectResponse())
-      ->setURI($cart->getDetailURI());
+      ->setURI($cart->getDetailURI($authority));
   }
 
 }

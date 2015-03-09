@@ -257,7 +257,7 @@ final class DiffusionCommitController extends DiffusionController {
           ->appendChild(
             pht('This commit is very large. Load each file individually.'));
 
-        $change_panel->setErrorView($warning_view);
+        $change_panel->setInfoView($warning_view);
         $header->addActionLink($button);
       }
 
@@ -899,9 +899,11 @@ final class DiffusionCommitController extends DiffusionController {
     $caption = null;
     if (count($merges) > $limit) {
       $merges = array_slice($merges, 0, $limit);
-      $caption =
-        "This commit merges more than {$limit} changes. Only the first ".
-        "{$limit} are shown.";
+      $caption = new PHUIInfoView();
+      $caption->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
+      $caption->appendChild(
+        pht('This commit merges more than %d changes. Only the first '.
+        '%d are shown.', $limit));
     }
 
     $history_table = new DiffusionHistoryTableView();
@@ -914,11 +916,12 @@ final class DiffusionCommitController extends DiffusionController {
     $handles = $this->loadViewerHandles($phids);
     $history_table->setHandles($handles);
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('Merged Changes'));
-    $panel->setCaption($caption);
+    $panel = new PHUIObjectBoxView();
+    $panel->setHeaderText(pht('Merged Changes'));
     $panel->appendChild($history_table);
-    $panel->setNoBackground();
+    if ($caption) {
+      $panel->setInfoView($caption);
+    }
 
     return $panel;
   }

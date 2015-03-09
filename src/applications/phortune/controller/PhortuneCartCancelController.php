@@ -15,11 +15,18 @@ final class PhortuneCartCancelController
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
-    $cart = id(new PhortuneCartQuery())
+    $authority = $this->loadMerchantAuthority();
+
+    $cart_query = id(new PhortuneCartQuery())
       ->setViewer($viewer)
       ->withIDs(array($this->id))
-      ->needPurchases(true)
-      ->executeOne();
+      ->needPurchases(true);
+
+    if ($authority) {
+      $cart_query->withMerchantPHIDs(array($authority->getPHID()));
+    }
+
+    $cart = $cart_query->executeOne();
     if (!$cart) {
       return new Aphront404Response();
     }
@@ -45,7 +52,7 @@ final class PhortuneCartCancelController
         return new Aphront404Response();
     }
 
-    $cancel_uri = $cart->getDetailURI();
+    $cancel_uri = $cart->getDetailURI($authority);
     $merchant = $cart->getMerchant();
 
     try {

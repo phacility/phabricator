@@ -44,8 +44,11 @@ abstract class PhabricatorOwnersController extends PhabricatorController {
         break;
     }
 
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($title);
+    return $nav;
+  }
+
+  protected function buildApplicationCrumbs() {
+    $crumbs = parent::buildApplicationCrumbs();
 
     $crumbs->addAction(
       id(new PHUIListItemView())
@@ -53,9 +56,7 @@ abstract class PhabricatorOwnersController extends PhabricatorController {
         ->setHref('/owners/new/')
         ->setIcon('fa-plus-square'));
 
-    $nav->setCrumbs($crumbs);
-
-    return $nav;
+    return $crumbs;
   }
 
   public function buildApplicationMenu() {

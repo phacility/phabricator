@@ -148,7 +148,11 @@ JX.behavior('aphlict-dropdown', function(config, statics) {
       JX.DOM.show(dropdown);
 
       p.y = null;
-      if (config.right) {
+      if (config.containerDivID) {
+        var pc = JX.$V(JX.$(config.containerDivID));
+        p.x -= (JX.Vector.getDim(dropdown).x - JX.Vector.getDim(bubble).x +
+            pc.x);
+      } else if (config.right) {
         p.x -= (JX.Vector.getDim(dropdown).x - JX.Vector.getDim(bubble).x);
       } else {
         p.x -= 6;
@@ -165,5 +169,9 @@ JX.behavior('aphlict-dropdown', function(config, statics) {
     }
     dirty = true;
     refresh();
+  });
+
+  JX.Stratcom.listen('notification-panel-close', null, function() {
+    set_visible(null);
   });
 });

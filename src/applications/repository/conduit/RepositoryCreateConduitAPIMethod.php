@@ -16,7 +16,7 @@ final class RepositoryCreateConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return 'Create a new repository (Admin Only).';
+    return pht('Create a new repository.');
   }
 
   public function defineParamTypes() {
@@ -48,8 +48,6 @@ final class RepositoryCreateConduitAPIMethod
 
   public function defineErrorTypes() {
     return array(
-      'ERR-PERMISSIONS' =>
-        'You do not have the authority to call this method.',
       'ERR-DUPLICATE'   =>
         'Duplicate repository callsign.',
       'ERR-BAD-CALLSIGN' =>

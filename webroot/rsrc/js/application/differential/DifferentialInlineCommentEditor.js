@@ -34,14 +34,35 @@ JX.install('DifferentialInlineCommentEditor', {
         number : this.getLineNumber(),
         is_new : this.getIsNew(),
         length : this.getLength(),
-        changeset : this.getChangeset(),
-        text : this.getText() || ''
+        changesetID : this.getChangesetID(),
+        text : this.getText() || '',
+        renderer: this.getRenderer(),
+        replyToCommentPHID: this.getReplyToCommentPHID() || '',
       };
     },
     _draw : function(content, exact_row) {
       var row = this.getRow();
       var table = this.getTable();
       var target = exact_row ? row : this._skipOverInlineCommentRows(row);
+
+      function copyRows(dst, src, before) {
+        var rows = JX.DOM.scry(src, 'tr');
+        for (var ii = 0; ii < rows.length; ii++) {
+
+          // Find the table this <tr /> belongs to. If it's a sub-table, like a
+          // table in an inline comment, don't copy it.
+          if (JX.DOM.findAbove(rows[ii], 'table') !== src) {
+            continue;
+          }
+
+          if (before) {
+            dst.insertBefore(rows[ii], before);
+          } else {
+            dst.appendChild(rows[ii]);
+          }
+        }
+        return rows;
+      }
 
       return copyRows(table, content, target);
     },
@@ -264,12 +285,14 @@ JX.install('DifferentialInlineCommentEditor', {
     onRight : null,
     ID : null,
     lineNumber : null,
-    changeset : null,
+    changesetID : null,
     length : null,
     isNew : null,
     text : null,
     templates : null,
-    originalText : null
+    originalText : null,
+    renderer: null,
+    replyToCommentPHID: null
   }
 
 });

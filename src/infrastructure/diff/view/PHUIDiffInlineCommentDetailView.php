@@ -1,15 +1,20 @@
 <?php
 
-final class DifferentialInlineCommentView extends AphrontView {
+final class PHUIDiffInlineCommentDetailView
+  extends PHUIDiffInlineCommentView {
 
   private $inlineComment;
   private $onRight;
-  private $buildScaffolding;
   private $handles;
   private $markupEngine;
   private $editable;
   private $preview;
   private $allowReply;
+  private $renderer;
+
+  public function getIsOnRight() {
+    return $this->onRight;
+  }
 
   public function setInlineComment(PhabricatorInlineCommentInterface $comment) {
     $this->inlineComment = $comment;
@@ -18,11 +23,6 @@ final class DifferentialInlineCommentView extends AphrontView {
 
   public function setOnRight($on_right) {
     $this->onRight = $on_right;
-    return $this;
-  }
-
-  public function setBuildScaffolding($scaffold) {
-    $this->buildScaffolding = $scaffold;
     return $this;
   }
 
@@ -52,6 +52,15 @@ final class DifferentialInlineCommentView extends AphrontView {
     return $this;
   }
 
+  public function setRenderer($renderer) {
+    $this->renderer = $renderer;
+    return $this;
+  }
+
+  public function getRenderer() {
+    return $this->renderer;
+  }
+
   public function render() {
 
     $inline = $this->inlineComment;
@@ -67,10 +76,14 @@ final class DifferentialInlineCommentView extends AphrontView {
 
     $metadata = array(
       'id' => $inline->getID(),
+      'phid' => $inline->getPHID(),
+      'changesetID' => $inline->getChangesetID(),
       'number' => $inline->getLineNumber(),
       'length' => $inline->getLineLength(),
+      'isNewFile' => (bool)$inline->getIsNewFile(),
       'on_right' => $this->onRight,
       'original' => $inline->getContent(),
+      'replyToCommentPHID' => $inline->getReplyToCommentPHID(),
     );
 
     $sigil = 'differential-inline-comment';
@@ -92,6 +105,15 @@ final class DifferentialInlineCommentView extends AphrontView {
     if ($inline->isDraft() && !$is_synthetic) {
       $links[] = pht('Not Submitted Yet');
       $is_draft = true;
+    }
+
+
+    // TODO: This stuff is nonfinal, just making it do something.
+    if ($inline->getHasReplies()) {
+      $links[] = pht('Has Reply');
+    }
+    if ($inline->getReplyToCommentPHID()) {
+      $links[] = pht('Is Reply');
     }
 
     if (!$this->preview) {
@@ -243,27 +265,7 @@ final class DifferentialInlineCommentView extends AphrontView {
           phutil_tag_div('phabricator-remarkup', $content)),
       ));
 
-    return $this->scaffoldMarkup($markup);
-  }
-
-  private function scaffoldMarkup($markup) {
-    if (!$this->buildScaffolding) {
-      return $markup;
-    }
-
-    $left_markup = !$this->onRight ? $markup : '';
-    $right_markup = $this->onRight ? $markup : '';
-
-    return phutil_tag('table', array(),
-      phutil_tag('tr', array(), array(
-        phutil_tag('th', array()),
-        phutil_tag('td', array('class' => 'left'), $left_markup),
-        phutil_tag('th', array()),
-        phutil_tag(
-          'td',
-          array('colspan' => 3, 'class' => 'right3'),
-          $right_markup),
-      )));
+    return $markup;
   }
 
 }

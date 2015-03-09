@@ -519,22 +519,6 @@ final class PhabricatorAuditEditor
   }
 
 
-  protected function shouldSendMail(
-    PhabricatorLiskDAO $object,
-    array $xactions) {
-
-    // not every code path loads the repository so tread carefully
-    // TODO: They should, and then we should simplify this.
-    if ($object->getRepository($assert_attached = false)) {
-      $repository = $object->getRepository();
-      if (!$repository->shouldPublish()) {
-        return false;
-      }
-    }
-
-    return $this->isCommitMostlyImported($object);
-  }
-
   protected function buildReplyHandler(PhabricatorLiskDAO $object) {
     $reply_handler = PhabricatorEnv::newObjectFromConfig(
       'metamta.diffusion.reply-handler');
@@ -808,14 +792,6 @@ final class PhabricatorAuditEditor
     );
   }
 
-
-
-  protected function shouldPublishFeedStory(
-    PhabricatorLiskDAO $object,
-    array $xactions) {
-    return $this->shouldSendMail($object, $xactions);
-  }
-
   protected function shouldApplyHeraldRules(
     PhabricatorLiskDAO $object,
     array $xactions) {
@@ -914,6 +890,41 @@ final class PhabricatorAuditEditor
     $mask = ($has_message | $has_changes);
 
     return $object->isPartiallyImported($mask);
+  }
+
+
+  private function shouldPublishRepositoryActivity(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    // not every code path loads the repository so tread carefully
+    // TODO: They should, and then we should simplify this.
+    if ($object->getRepository($assert_attached = false)) {
+      $repository = $object->getRepository();
+      if (!$repository->shouldPublish()) {
+        return false;
+      }
+    }
+
+    return $this->isCommitMostlyImported($object);
+  }
+
+  protected function shouldSendMail(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return $this->shouldPublishRepositoryActivity($object, $xactions);
+  }
+
+  protected function shouldEnableMentions(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return $this->shouldPublishRepositoryActivity($object, $xactions);
+  }
+
+  protected function shouldPublishFeedStory(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return $this->shouldPublishRepositoryActivity($object, $xactions);
   }
 
 }

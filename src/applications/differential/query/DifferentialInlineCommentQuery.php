@@ -9,6 +9,7 @@ final class DifferentialInlineCommentQuery
   private $revisionIDs;
   private $notDraft;
   private $ids;
+  private $phids;
   private $commentIDs;
 
   private $viewerAndChangesetIDs;
@@ -27,6 +28,11 @@ final class DifferentialInlineCommentQuery
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
+    return $this;
+  }
+
+  public function withPHIDs(array $phids) {
+    $this->phids = $phids;
     return $this;
   }
 
@@ -109,6 +115,13 @@ final class DifferentialInlineCommentQuery
         $conn_r,
         'id IN (%Ld)',
         $this->ids);
+    }
+
+    if ($this->phids !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'phid IN (%Ls)',
+        $this->phids);
     }
 
     if ($this->viewerAndChangesetIDs) {

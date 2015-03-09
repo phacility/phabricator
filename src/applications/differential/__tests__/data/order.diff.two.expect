@@ -1,0 +1,44 @@
+CTYPE 2 1 (unforced)
+src/applications/conpherence/controller/ConpherenceUpdateController
+src/applications/conpherence/controller/ConpherenceUpdateController
+-
+X <MISSING-CONTEXT>
+O 209 .         ->setDatasource(new PhabricatorPeopleDatasource()));\n~
+N 209 .         ->setDatasource(new PhabricatorPeopleDatasource()));\n~
+O 210 . \n~
+N 210 . \n~
+O 211 .     require_celerity_resource('conpherence-update-css');\n~
+N 211 .     require_celerity_resource('conpherence-update-css');\n~
+O 212 -     {(return)} id(new AphrontDialogView())\n~
+N 212 +     {($view =)} id(new AphrontDialogView())\n~
+O 213 .       ->setTitle(pht('Add Participants'))\n~
+N 213 .       ->setTitle(pht('Add Participants'))\n~
+O 214 .       ->addHiddenInput('action', 'add_person')\n~
+N 214 .       ->addHiddenInput('action', 'add_person')\n~
+O 215 .       ->addHiddenInput(\n~
+N 215 .       ->addHiddenInput(\n~
+O 216 .         'latest_transaction_id',\n~
+N 216 .         'latest_transaction_id',\n~
+O 217 .         $request->getInt('latest_transaction_id'))\n~
+N 217 .         $request->getInt('latest_transaction_id'))\n~
+O 218 .       ->appendChild($form);\n~
+N 218 .       ->appendChild($form);\n~
+O - . ~
+N 219 + \n~
+O - . ~
+N 220 +     if ($request->getExists('minimal_display')) {\n~
+O - . ~
+N 221 +       $view->addHiddenInput('minimal_display', true);\n~
+O 219 .     }\n~
+N 222 .     }\n~
+O - . ~
+N 223 +     return $view;\n~
+O - . ~
+N 224 +   }\n~
+O 220 . \n~
+N 225 . \n~
+O 221 .   private function renderRemovePersonDialogue(\n~
+N 226 .   private function renderRemovePersonDialogue(\n~
+O 222 .     ConpherenceThread $conpherence) {\n~
+N 227 .     ConpherenceThread $conpherence) {\n~
+X <MISSING-CONTEXT>

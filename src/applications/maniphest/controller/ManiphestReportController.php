@@ -270,7 +270,7 @@ final class ManiphestReportController extends ManiphestController {
     $panel = new PHUIObjectBoxView();
     $panel->setHeaderText($header);
     if ($caption) {
-      $panel->setErrorView($caption);
+      $panel->setInfoView($caption);
     }
     $panel->appendChild($table);
 

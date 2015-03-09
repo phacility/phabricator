@@ -75,6 +75,7 @@
   z-index: 5;
 }
 
+.conpherence-durable-column-header,
 .phabricator-main-menu {
   z-index: 6;
 }
@@ -84,16 +85,16 @@
   z-index: 6;
 }
 
+.jx-scrollbar-bar {
+  z-index: 7;
+}
+
 .differential-haunt-mode-1 .differential-add-comment-panel,
 .differential-haunt-mode-2 .differential-add-comment-panel {
   z-index: 8;
 }
 
 .device-desktop .phabricator-notification-menu {
-  z-index: 9;
-}
-
-.jx-scrollbar-bar {
   z-index: 9;
 }
 

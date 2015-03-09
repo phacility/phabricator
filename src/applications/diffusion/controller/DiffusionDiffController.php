@@ -77,8 +77,7 @@ final class DiffusionDiffController extends DiffusionController {
         'action' => 'rendering-ref',
       )));
 
-    $parser->setCharacterEncoding($request->getStr('encoding'));
-    $parser->setHighlightAs($request->getStr('highlight'));
+    $parser->readParametersFromRequest($request);
 
     $coverage = $drequest->loadCoverage();
     if ($coverage) {
@@ -126,9 +125,12 @@ final class DiffusionDiffController extends DiffusionController {
     $spec = $request->getStr('range');
     list($range_s, $range_e, $mask) =
       DifferentialChangesetParser::parseRangeSpecification($spec);
-    $output = $parser->render($range_s, $range_e, $mask);
+
+    $parser->setRange($range_s, $range_e);
+    $parser->setMask($mask);
 
     return id(new PhabricatorChangesetResponse())
-      ->setRenderedChangeset($output);
+      ->setRenderedChangeset($parser->renderChangeset())
+      ->setUndoTemplates($parser->getRenderer()->renderUndoTemplates());
   }
 }

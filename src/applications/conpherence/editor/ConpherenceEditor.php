@@ -478,4 +478,43 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     );
   }
 
+  protected function validateTransaction(
+    PhabricatorLiskDAO $object,
+    $type,
+    array $xactions) {
+
+    $errors = parent::validateTransaction($object, $type, $xactions);
+
+    switch ($type) {
+      case ConpherenceTransactionType::TYPE_PARTICIPANTS:
+        foreach ($xactions as $xaction) {
+          $phids = $this->getPHIDTransactionNewValue(
+            $xaction,
+            nonempty($object->getParticipantPHIDs(), array()));
+
+          if (!$phids) {
+            continue;
+          }
+
+          $users = id(new PhabricatorPeopleQuery())
+            ->setViewer($this->requireActor())
+            ->withPHIDs($phids)
+            ->execute();
+          $users = mpull($users, null, 'getPHID');
+          foreach ($phids as $phid) {
+            if (isset($users[$phid])) {
+              continue;
+            }
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht('New thread member "%s" is not a valid user.', $phid),
+              $xaction);
+          }
+        }
+        break;
+    }
+
+    return $errors;
+  }
 }

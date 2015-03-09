@@ -45,10 +45,9 @@ final class DiffusionBranchTableController extends DiffusionController {
         ->setCommits($commits)
         ->setDiffusionRequest($drequest);
 
-      $panel = id(new AphrontPanelView())
-        ->setNoBackground(true)
-        ->appendChild($view)
-        ->appendChild($pager);
+      $panel = id(new PHUIObjectBoxView())
+        ->setHeaderText(pht('Branches'))
+        ->appendChild($view);
 
       $content = $panel;
     }
@@ -62,6 +61,7 @@ final class DiffusionBranchTableController extends DiffusionController {
       array(
         $crumbs,
         $content,
+        $pager,
       ),
       array(
         'title' => array(
