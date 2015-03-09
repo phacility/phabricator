@@ -25,7 +25,8 @@ final class DifferentialTransactionQuery
       'SELECT phid FROM %T
         WHERE revisionPHID = %s
           AND authorPHID = %s
-          AND transactionPHID IS NULL',
+          AND transactionPHID IS NULL
+          AND isDeleted = 0',
       $table->getTableName(),
       $revision->getPHID(),
       $viewer->getPHID());
@@ -35,11 +36,17 @@ final class DifferentialTransactionQuery
       return array();
     }
 
-    return id(new PhabricatorApplicationTransactionCommentQuery())
+    $comments = id(new PhabricatorApplicationTransactionCommentQuery())
       ->setTemplate(new DifferentialTransactionComment())
       ->setViewer($viewer)
       ->withPHIDs($phids)
       ->execute();
+
+    $comments = PhabricatorInlineCommentController::loadAndAttachReplies(
+      $viewer,
+      $comments);
+
+    return $comments;
   }
 
 }

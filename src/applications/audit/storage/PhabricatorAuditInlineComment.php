@@ -63,9 +63,14 @@ final class PhabricatorAuditInlineComment
 
     $inlines = id(new PhabricatorAuditTransactionComment())->loadAllWhere(
       'authorPHID = %s AND commitPHID = %s AND transactionPHID IS NULL
-        AND pathID IS NOT NULL',
+        AND pathID IS NOT NULL
+        AND isDeleted = 0',
       $viewer->getPHID(),
       $commit_phid);
+
+    $inlines = PhabricatorInlineCommentController::loadAndAttachReplies(
+      $viewer,
+      $inlines);
 
     return self::buildProxies($inlines);
   }
@@ -96,7 +101,7 @@ final class PhabricatorAuditInlineComment
     } else {
       $inlines = id(new PhabricatorAuditTransactionComment())->loadAllWhere(
         'commitPHID = %s AND pathID = %d AND
-          (authorPHID = %s OR transactionPHID IS NOT NULL)',
+          ((authorPHID = %s AND isDeleted = 0) OR transactionPHID IS NOT NULL)',
         $commit_phid,
         $path_id,
         $viewer->getPHID());

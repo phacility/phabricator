@@ -309,4 +309,44 @@ abstract class PhabricatorInlineCommentController
       ->addRowScaffold($view);
   }
 
+  public static function loadAndAttachReplies(
+    PhabricatorUser $viewer,
+    array $comments) {
+    // TODO: This code doesn't really belong here, but we don't have a much
+    // better place to put it at the moment.
+
+    if (!$comments) {
+      return $comments;
+    }
+
+    $template = head($comments);
+
+    $reply_phids = array();
+    foreach ($comments as $comment) {
+      $reply_phid = $comment->getReplyToCommentPHID();
+      if ($reply_phid) {
+        $reply_phids[] = $reply_phid;
+      }
+    }
+
+    if ($reply_phids) {
+      $reply_comments = id(new PhabricatorApplicationTransactionCommentQuery())
+        ->setTemplate($template)
+        ->setViewer($viewer)
+        ->withPHIDs($reply_phids)
+        ->execute();
+      $reply_comments = mpull($reply_comments, null, 'getPHID');
+    } else {
+      $reply_comments = array();
+    }
+
+    foreach ($comments as $comment) {
+      $reply_phid = $comment->getReplyToCommentPHID();
+      $reply = idx($reply_comments, $reply_phid);
+      $comment->attachReplyToComment($reply);
+    }
+
+    return $comments;
+  }
+
 }

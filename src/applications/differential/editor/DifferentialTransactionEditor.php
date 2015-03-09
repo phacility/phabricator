@@ -534,7 +534,12 @@ final class DifferentialTransactionEditor
       case PhabricatorTransactions::TYPE_EDGE:
       case PhabricatorTransactions::TYPE_COMMENT:
       case DifferentialTransaction::TYPE_ACTION:
+        return;
       case DifferentialTransaction::TYPE_INLINE:
+        $reply = $xaction->getComment()->getReplyToComment();
+        if ($reply && !$reply->getHasReplies()) {
+          $reply->setHasReplies(1)->save();
+        }
         return;
       case DifferentialTransaction::TYPE_UPDATE:
         // Now that we're inside the transaction, do a final check.
