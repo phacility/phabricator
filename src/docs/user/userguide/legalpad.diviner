@@ -56,6 +56,10 @@ After you've done this, all new reviews created in Differential by authors who
 have not signed the document will trigger a signature requirement. These reviews
 can not be accepted until the document has been signed.
 
+The content of these revisions will also be hidden until the document has been
+signed. This prevents reviewers from being tainted by examining the changes if
+the author ultimately declines to sign the CLA.
+
 If the author has already signed all of the required documents, Herald will not
 take any actions. This reduces the amount of noise the CLA process generates for
 regular contributors.
