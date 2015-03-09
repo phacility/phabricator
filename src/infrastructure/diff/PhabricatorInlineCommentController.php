@@ -330,11 +330,12 @@ abstract class PhabricatorInlineCommentController
     }
 
     if ($reply_phids) {
-      $reply_comments = id(new PhabricatorApplicationTransactionCommentQuery())
-        ->setTemplate($template)
-        ->setViewer($viewer)
-        ->withPHIDs($reply_phids)
-        ->execute();
+      $reply_comments =
+        id(new PhabricatorApplicationTransactionTemplatedCommentQuery())
+          ->setTemplate($template)
+          ->setViewer($viewer)
+          ->withPHIDs($reply_phids)
+          ->execute();
       $reply_comments = mpull($reply_comments, null, 'getPHID');
     } else {
       $reply_comments = array();

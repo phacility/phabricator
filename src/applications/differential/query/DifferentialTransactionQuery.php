@@ -11,11 +11,7 @@ final class DifferentialTransactionQuery
     PhabricatorUser $viewer,
     DifferentialRevision $revision) {
 
-    // TODO: This probably needs to move somewhere more central as we move
-    // away from DifferentialInlineCommentQuery, but
-    // PhabricatorApplicationTransactionCommentQuery is currently `final` and
-    // I'm not yet decided on how to approach that. For now, just get the PHIDs
-    // and then execute a PHID-based query through the standard stack.
+    // TODO: Subclass ApplicationTransactionCommentQuery to do this for real.
 
     $table = new DifferentialTransactionComment();
     $conn_r = $table->establishConnection('r');
@@ -36,7 +32,7 @@ final class DifferentialTransactionQuery
       return array();
     }
 
-    $comments = id(new PhabricatorApplicationTransactionCommentQuery())
+    $comments = id(new PhabricatorApplicationTransactionTemplatedCommentQuery())
       ->setTemplate(new DifferentialTransactionComment())
       ->setViewer($viewer)
       ->withPHIDs($phids)
