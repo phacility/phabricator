@@ -850,9 +850,19 @@ final class DifferentialChangesetParser {
           // we'll never have it so we need to be prepared to not render a link.
           $type = 'none';
         }
-        $shield = $renderer->renderShield(
-          pht('The contents of this file were not changed.'),
-          $type);
+
+        $type_add = DifferentialChangeType::TYPE_ADD;
+        if ($this->changeset->getChangeType() == $type_add) {
+          // Although the generic message is sort of accurate in a technical
+          // sense, this more-tailored message is less confusing.
+          $shield = $renderer->renderShield(
+            pht('This is an empty file.'),
+            $type);
+        } else {
+          $shield = $renderer->renderShield(
+            pht('The contents of this file were not changed.'),
+            $type);
+        }
       } else if ($this->isWhitespaceOnly()) {
         $shield = $renderer->renderShield(
           pht('This file was changed only by adding or removing whitespace.'),
