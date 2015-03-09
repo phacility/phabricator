@@ -61,16 +61,15 @@ final class PhabricatorAuditInlineComment
     PhabricatorUser $viewer,
     $commit_phid) {
 
-    $inlines = id(new PhabricatorAuditTransactionComment())->loadAllWhere(
-      'authorPHID = %s AND commitPHID = %s AND transactionPHID IS NULL
-        AND pathID IS NOT NULL
-        AND isDeleted = 0',
-      $viewer->getPHID(),
-      $commit_phid);
-
-    $inlines = PhabricatorInlineCommentController::loadAndAttachReplies(
-      $viewer,
-      $inlines);
+    $inlines = id(new DiffusionDiffInlineCommentQuery())
+      ->setViewer($viewer)
+      ->withAuthorPHIDs(array($viewer->getPHID()))
+      ->withCommitPHIDs(array($commit_phid))
+      ->withHasTransaction(false)
+      ->withHasPath(true)
+      ->withIsDeleted(false)
+      ->needReplyToComments(true)
+      ->execute();
 
     return self::buildProxies($inlines);
   }
@@ -79,10 +78,12 @@ final class PhabricatorAuditInlineComment
     PhabricatorUser $viewer,
     $commit_phid) {
 
-    $inlines = id(new PhabricatorAuditTransactionComment())->loadAllWhere(
-      'commitPHID = %s AND transactionPHID IS NOT NULL
-        AND pathID IS NOT NULL',
-      $commit_phid);
+    $inlines = id(new DiffusionDiffInlineCommentQuery())
+      ->setViewer($viewer)
+      ->withCommitPHIDs(array($commit_phid))
+      ->withHasTransaction(true)
+      ->withHasPath(true)
+      ->execute();
 
     return self::buildProxies($inlines);
   }
