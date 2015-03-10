@@ -336,6 +336,17 @@ td.cov-I {
   font-style:   normal;
 }
 
+input.differential-inline-done[type="checkbox"] {
+  margin: 0;
+  display: inline;
+  cursor: pointer;
+}
+
+input.differential-inline-done[disabled="disabled"] {
+  cursor: auto;
+}
+
+
 .differential-inline-comment-edit-body .aphront-form-input {
   margin: 0;
   width: 100%;

@@ -435,6 +435,7 @@ abstract class DifferentialChangesetHTMLRenderer
             ($comment->isDraft())
             && $this->getShowEditAndReplyLinks();
     $allow_reply = (bool)$user && $this->getShowEditAndReplyLinks();
+    $allow_done = !$comment->isDraft() && $this->getCanMarkDone();
 
     return id(new PHUIDiffInlineCommentDetailView())
       ->setInlineComment($comment)
@@ -442,7 +443,8 @@ abstract class DifferentialChangesetHTMLRenderer
       ->setHandles($this->getHandles())
       ->setMarkupEngine($this->getMarkupEngine())
       ->setEditable($edit)
-      ->setAllowReply($allow_reply);
+      ->setAllowReply($allow_reply)
+      ->setCanMarkDone($allow_done);
   }
 
 

@@ -44,6 +44,7 @@ final class DifferentialChangesetParser {
   private $characterEncoding;
   private $highlightAs;
   private $showEditAndReplyLinks = true;
+  private $canMarkDone;
 
   private $rangeStart;
   private $rangeEnd;
@@ -109,6 +110,15 @@ final class DifferentialChangesetParser {
 
   public function getDisableCache() {
     return $this->disableCache;
+  }
+
+  public function setCanMarkDone($can_mark_done) {
+    $this->canMarkDone = $can_mark_done;
+    return $this;
+  }
+
+  public function getCanMarkDone() {
+    return $this->canMarkDone;
   }
 
   public static function getDefaultRendererForViewer(PhabricatorUser $viewer) {
@@ -819,7 +829,8 @@ final class DifferentialChangesetParser {
       ->setOldLines($this->old)
       ->setNewLines($this->new)
       ->setOriginalCharacterEncoding($encoding)
-      ->setShowEditAndReplyLinks($this->getShowEditAndReplyLinks());
+      ->setShowEditAndReplyLinks($this->getShowEditAndReplyLinks())
+      ->setCanMarkDone($this->getCanMarkDone());
 
     $shield = null;
     if ($this->isTopLevel && !$this->comments) {

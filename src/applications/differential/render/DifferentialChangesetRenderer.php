@@ -30,6 +30,7 @@ abstract class DifferentialChangesetRenderer {
   private $depths;
   private $originalCharacterEncoding;
   private $showEditAndReplyLinks;
+  private $canMarkDone;
 
   private $oldFile = false;
   private $newFile = false;
@@ -289,6 +290,7 @@ abstract class DifferentialChangesetRenderer {
     $this->renderPropertyChangeHeader = $should_render;
     return $this;
   }
+
   private function shouldRenderPropertyChangeHeader() {
     return $this->renderPropertyChangeHeader;
   }
@@ -297,8 +299,18 @@ abstract class DifferentialChangesetRenderer {
     $this->isTopLevel = $is;
     return $this;
   }
+
   private function getIsTopLevel() {
     return $this->isTopLevel;
+  }
+
+  public function setCanMarkDone($can_mark_done) {
+    $this->canMarkDone = $can_mark_done;
+    return $this;
+  }
+
+  public function getCanMarkDone() {
+    return $this->canMarkDone;
   }
 
   final public function renderChangesetTable($content) {

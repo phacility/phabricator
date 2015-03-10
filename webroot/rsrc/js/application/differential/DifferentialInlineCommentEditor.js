@@ -256,7 +256,6 @@ JX.install('DifferentialInlineCommentEditor', {
       var data = this._buildRequestData();
       var op = this.getOperation();
 
-
       if (op == 'delete' || op == 'refdelete' || op == 'undelete') {
         this._setRowState('loading');
 
@@ -285,14 +284,32 @@ JX.install('DifferentialInlineCommentEditor', {
     deleteByID: function(id) {
       var data = {
         op: 'refdelete',
-        changesetID: id
+        id: id
       };
 
       new JX.Workflow(this._uri, data)
-        .setHandler(function() {
-          JX.Stratcom.invoke('differential-inline-comment-update');
-        })
+        .setHandler(JX.bind(this, function() {
+          this._didUpdate();
+        }))
         .start();
+    },
+
+    toggleCheckbox: function(id, checkbox) {
+      var data = {
+        op: 'done',
+        id: id
+      };
+
+      new JX.Workflow(this._uri, data)
+        .setHandler(JX.bind(this, function() {
+          checkbox.checked = !checkbox.checked;
+          this._didUpdate();
+        }))
+        .start();
+    },
+
+    _didUpdate: function() {
+      JX.Stratcom.invoke('differential-inline-comment-update');
     }
 
   },
