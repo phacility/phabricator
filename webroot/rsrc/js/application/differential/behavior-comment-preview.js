@@ -49,42 +49,51 @@ JX.behavior('differential-feedback-preview', function(config) {
 
   request.start();
 
-
   function refreshInlinePreview() {
     new JX.Request(config.inlineuri, function(r) {
-        var inline = JX.$(config.inline);
+      var inline = JX.$(config.inline);
 
-        JX.DOM.setContent(inline, JX.$H(r));
-        JX.Stratcom.invoke('differential-preview-update', null, {
-          container: inline
-        });
+      JX.DOM.setContent(inline, JX.$H(r));
+      JX.Stratcom.invoke('differential-preview-update', null, {
+        container: inline
+      });
 
-        // Go through the previews and activate any "View" links where the
-        // actual comment appears in the document.
-
-        var links = JX.DOM.scry(
-          inline,
-          'a',
-          'differential-inline-preview-jump');
-        for (var ii = 0; ii < links.length; ii++) {
-          var data = JX.Stratcom.getData(links[ii]);
-          try {
-            JX.$(data.anchor);
-            links[ii].href = '#' + data.anchor;
-            JX.DOM.setContent(links[ii], 'View');
-          } catch (ignored) {
-            // This inline comment isn't visible, e.g. on some other diff.
-          }
-        }
-      })
-      .setTimeout(5000)
-      .send();
+      updateLinks();
+    })
+    .setTimeout(5000)
+    .send();
   }
+
+  function updateLinks() {
+    var inline = JX.$(config.inline);
+
+    var links = JX.DOM.scry(
+      inline,
+      'a',
+      'differential-inline-preview-jump');
+
+    for (var ii = 0; ii < links.length; ii++) {
+      var data = JX.Stratcom.getData(links[ii]);
+      try {
+        JX.$(data.anchor);
+        links[ii].href = '#' + data.anchor;
+        JX.DOM.setContent(links[ii], 'View');
+      } catch (ignored) {
+        // This inline comment isn't visible, e.g. on some other diff.
+      }
+    }
+  }
+
 
   JX.Stratcom.listen(
     'differential-inline-comment-update',
     null,
     refreshInlinePreview);
+
+  JX.Stratcom.listen(
+    'differential-inline-comment-refresh',
+    null,
+    updateLinks);
 
   refreshInlinePreview();
 });

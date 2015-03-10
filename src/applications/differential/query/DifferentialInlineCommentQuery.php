@@ -129,7 +129,7 @@ final class DifferentialInlineCommentQuery
       $where[] = qsprintf(
         $conn_r,
         'changesetID IN (%Ld) AND
-          (authorPHID = %s OR transactionPHID IS NOT NULL)',
+          ((authorPHID = %s AND isDeleted = 0) OR transactionPHID IS NOT NULL)',
         $ids,
         $phid);
     }
@@ -151,7 +151,8 @@ final class DifferentialInlineCommentQuery
 
       $where[] = qsprintf(
         $conn_r,
-        'authorPHID = %s AND revisionPHID = %s AND transactionPHID IS NULL',
+        'authorPHID = %s AND revisionPHID = %s AND transactionPHID IS NULL
+          AND isDeleted = 0',
         $phid,
         $rev_phid);
     }
@@ -159,7 +160,7 @@ final class DifferentialInlineCommentQuery
     if ($this->draftsByAuthors) {
       $where[] = qsprintf(
         $conn_r,
-        'authorPHID IN (%Ls) AND transactionPHID IS NULL',
+        'authorPHID IN (%Ls) AND isDeleted = 0 AND transactionPHID IS NULL',
         $this->draftsByAuthors);
     }
 

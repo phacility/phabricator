@@ -207,6 +207,15 @@ final class DifferentialInlineComment
     return $this->proxy->getHasReplies();
   }
 
+  public function setIsDeleted($is_deleted) {
+    $this->proxy->setIsDeleted($is_deleted);
+    return $this;
+  }
+
+  public function getIsDeleted() {
+    return $this->proxy->getIsDeleted();
+  }
+
 
 /* -(  PhabricatorMarkupInterface Implementation  )-------------------------- */
 

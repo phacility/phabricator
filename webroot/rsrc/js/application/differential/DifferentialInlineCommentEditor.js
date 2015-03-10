@@ -19,6 +19,7 @@ JX.install('DifferentialInlineCommentEditor', {
   members : {
     _uri : null,
     _undoText : null,
+    _completed: false,
     _skipOverInlineCommentRows : function(node) {
       // TODO: Move this semantic information out of class names.
       while (node && node.className.indexOf('inline') !== -1) {
@@ -73,11 +74,17 @@ JX.install('DifferentialInlineCommentEditor', {
           JX.DOM.remove(rows[ii]);
         }
       }
+      JX.DifferentialInlineCommentEditor._undoRows = [];
     },
     _undo : function() {
       this._removeUndoLink();
 
-      this.setText(this._undoText);
+      if (this._undoText) {
+        this.setText(this._undoText);
+      } else {
+        this.setOperation('undelete');
+      }
+
       this.start();
     },
     _registerUndoListener : function() {
@@ -146,8 +153,17 @@ JX.install('DifferentialInlineCommentEditor', {
         'inline-edit-form',
         onsubmit);
     },
+
+
     _didCompleteWorkflow : function(response) {
       var op = this.getOperation();
+
+      if (op == 'delete' || op == 'refdelete') {
+        this._undoText = null;
+        this._drawUndo();
+      } else {
+        this._removeUndoLink();
+      }
 
       // We don't get any markup back if the user deletes a comment, or saves
       // an empty comment (which effects a delete).
@@ -156,31 +172,34 @@ JX.install('DifferentialInlineCommentEditor', {
       }
 
       // These operations remove the old row (edit adds a new row first).
-      var remove_old = (op == 'edit' || op == 'delete');
+      var remove_old = (op == 'edit' || op == 'delete' || op == 'refdelete');
       if (remove_old) {
-        JX.DOM.remove(this.getRow());
-        var other_rows = this.getOtherRows();
-        for(var i = 0; i < other_rows.length; ++i) {
-          JX.DOM.remove(other_rows[i]);
-        }
+        this._setRowState('hidden');
       }
 
-      // Once the user saves something, get rid of the 'undo' option. A
-      // particular case where we need this is saving a delete, when we might
-      // otherwise leave around an 'undo' for an earlier edit to the same
-      // comment.
-      this._removeUndoLink();
+      if (op == 'undelete') {
+        this._setRowState('visible');
+      }
+
+      this._completed = true;
 
       JX.Stratcom.invoke('differential-inline-comment-update');
       this.invoke('done');
     },
+
+
     _didCancelWorkflow : function() {
       this.invoke('done');
 
-      var op = this.getOperation();
-      if (op == 'delete') {
-        // No undo for delete, we prompt the user explicitly.
-        return;
+      switch (this.getOperation()) {
+        case 'delete':
+        case 'refdelete':
+          if (!this._completed) {
+            this._setRowState('visible');
+          }
+          return;
+        case 'undelete':
+          return;
       }
 
       var textarea;
@@ -209,6 +228,10 @@ JX.install('DifferentialInlineCommentEditor', {
       // Save the text so we can 'undo' back to it.
       this._undoText = text;
 
+      this._drawUndo();
+    },
+
+    _drawUndo: function() {
       var templates = this.getTemplates();
       var template = this.getOnRight() ? templates.r : templates.l;
       template = JX.$H(template).getNode();
@@ -231,21 +254,18 @@ JX.install('DifferentialInlineCommentEditor', {
       this._registerUndoListener();
 
       var data = this._buildRequestData();
-
       var op = this.getOperation();
 
 
-      if (op == 'delete') {
+      if (op == 'delete' || op == 'refdelete' || op == 'undelete') {
         this._setRowState('loading');
+
         var oncomplete = JX.bind(this, this._didCompleteWorkflow);
-        var onclose = JX.bind(this, function() {
-          this._setRowState('visible');
-          this._didCancelWorkflow();
-        });
+        var oncancel = JX.bind(this, this._didCancelWorkflow);
 
         new JX.Workflow(this._uri, data)
           .setHandler(oncomplete)
-          .setCloseHandler(onclose)
+          .setCloseHandler(oncancel)
           .start();
       } else {
         var handler = JX.bind(this, this._didContinueWorkflow);
@@ -260,7 +280,21 @@ JX.install('DifferentialInlineCommentEditor', {
       }
 
       return this;
+    },
+
+    deleteByID: function(id) {
+      var data = {
+        op: 'refdelete',
+        changesetID: id
+      };
+
+      new JX.Workflow(this._uri, data)
+        .setHandler(function() {
+          JX.Stratcom.invoke('differential-inline-comment-update');
+        })
+        .start();
     }
+
   },
 
   statics : {
@@ -280,7 +314,6 @@ JX.install('DifferentialInlineCommentEditor', {
   properties : {
     operation : null,
     row : null,
-    otherRows: [],
     table : null,
     onRight : null,
     ID : null,
