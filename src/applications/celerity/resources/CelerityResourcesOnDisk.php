@@ -37,6 +37,7 @@ abstract class CelerityResourcesOnDisk extends CelerityPhysicalResources {
       'woff2',
       'ttf',
       'eot',
+      'mp3',
     );
   }
 

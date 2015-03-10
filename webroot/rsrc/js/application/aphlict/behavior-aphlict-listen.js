@@ -10,6 +10,7 @@
  *           javelin-router
  *           javelin-util
  *           javelin-leader
+ *           javelin-sound
  *           phabricator-notification
  */
 
@@ -96,5 +97,18 @@ JX.behavior('aphlict-listen', function(config) {
   client
     .setHandler(onAphlictMessage)
     .start();
+
+  JX.Leader.listen('onReceiveBroadcast', function(message, is_leader) {
+    if (message.type !== 'sound') {
+      return;
+    }
+
+    if (!is_leader) {
+      return;
+    }
+
+    JX.Sound.play(message.data);
+  });
+
 
 });
