@@ -81,21 +81,31 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
   public function getShowDurableColumn() {
     $request = $this->getRequest();
-    if ($request) {
-      if (strncmp(
-        $request->getRequestURI()->getPath(),
-        '/conpherence',
-        strlen('/conpherence')) === 0) {
+    if (!$request) {
+      return false;
+    }
+
+    $viewer = $request->getUser();
+    if (!$viewer->isLoggedIn()) {
+      return false;
+    }
+
+    $conpherence_installed = PhabricatorApplication::isClassInstalledForViewer(
+      'PhabricatorConpherenceApplication',
+      $viewer);
+    if (!$conpherence_installed) {
+      return false;
+    }
+
+    $patterns = $this->getQuicksandURIPatternBlacklist();
+    $path = $request->getRequestURI()->getPath();
+    foreach ($patterns as $pattern) {
+      if (preg_match('(^'.$pattern.'$)', $path)) {
         return false;
       }
-      $viewer = $request->getUser();
-      if ($viewer->isLoggedIn()) {
-        return PhabricatorApplication::isClassInstalledForViewer(
-          'PhabricatorConpherenceApplication',
-        $viewer);
-      }
     }
-    return false;
+
+    return true;
   }
 
   public function getTitle() {
@@ -414,6 +424,10 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
         array());
     }
 
+    Javelin::initBehavior('quicksand-blacklist', array(
+      'patterns' => $this->getQuicksandURIPatternBlacklist(),
+    ));
+
     return phutil_tag(
       'div',
       array(
@@ -585,4 +599,16 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       'content' => hsprintf('%s', $response),
     );
   }
+
+  private function getQuicksandURIPatternBlacklist() {
+    $applications = PhabricatorApplication::getAllApplications();
+
+    $blacklist = array();
+    foreach ($applications as $application) {
+      $blacklist[] = $application->getQuicksandURIPatternBlacklist();
+    }
+
+    return array_mergev($blacklist);
+  }
+
 }

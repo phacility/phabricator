@@ -34,6 +34,7 @@ JX.install('Quicksand', {
     _started: false,
     _frameNode: null,
     _contentNode: null,
+    _uriPatternBlacklist: [],
 
     /**
      * Start Quicksand, accepting a fate of eternal torment.
@@ -121,6 +122,11 @@ JX.install('Quicksand', {
 
         // TODO: This technically gets links which change query parameters
         // wrong: they are navigation events but we won't Quicksand them.
+        return;
+      }
+
+      if (self._isURIOnBlacklist(uri)) {
+        // This URI is blacklisted as not navigable via Quicksand.
         return;
       }
 
@@ -276,7 +282,53 @@ JX.install('Quicksand', {
         .setPort(null)
         .setDomain(null)
         .toString();
+    },
+
+
+    /**
+     * Set a list of regular expressions which blacklist URIs as not navigable
+     * via Quicksand.
+     *
+     * If a user clicks a link to one of these URIs, a normal page navigation
+     * event will occur instead of a Quicksand navigation.
+     *
+     * @param list<string> List of regular expressions.
+     * @return self
+     */
+    setURIPatternBlacklist: function(items) {
+      var self = JX.Quicksand;
+
+      var list = [];
+      for (var ii = 0; ii < items.length; ii++) {
+        list.push(new RegExp('^' + items[ii] + '$'));
+      }
+
+      self._uriPatternBlacklist = list;
+
+      return self;
+    },
+
+
+    /**
+     * Test if a @{class:JX.URI} is on the URI pattern blacklist.
+     *
+     * @param JX.URI URI to test.
+     * @return bool True if the URI is on the blacklist.
+     */
+    _isURIOnBlacklist: function(uri) {
+      var self = JX.Quicksand;
+      var list = self._uriPatternBlacklist;
+
+      var path = uri.getPath();
+      for (var ii = 0; ii < list.length; ii++) {
+        if (list[ii].test(path)) {
+          return true;
+        }
+      }
+
+      return false;
     }
+
   }
 
 });

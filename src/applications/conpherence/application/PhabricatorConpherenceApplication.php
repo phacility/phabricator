@@ -56,4 +56,10 @@ final class PhabricatorConpherenceApplication extends PhabricatorApplication {
     return $items;
   }
 
+  public function getQuicksandURIPatternBlacklist() {
+    return array(
+      '/conpherence/.*',
+    );
+  }
+
 }
