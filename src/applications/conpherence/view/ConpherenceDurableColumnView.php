@@ -129,7 +129,36 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
   }
 
   private function buildIconBar() {
-    return null;
+    $icons = array();
+    $selected_conpherence = $this->getSelectedConpherence();
+    $conpherences = $this->getConpherences();
+
+    foreach ($conpherences as $conpherence) {
+      $classes = array('conpherence-durable-column-thread-icon');
+      if ($selected_conpherence->getID() == $conpherence->getID()) {
+        $classes[] = 'selected';
+      }
+      $data = $conpherence->getDisplayData($this->getUser());
+      $image = $data['image'];
+      $icons[] =
+        javelin_tag(
+          'a',
+          array(
+            'href' => '/conpherence/columnview/',
+            'class' => implode(' ', $classes),
+            'sigil' => 'conpherence-durable-column-thread-icon',
+            'meta' => array(
+              'threadID' => $conpherence->getID(),
+            ),
+          ),
+          phutil_tag(
+            'span',
+            array(
+              'style' => 'background-image: url('.$image.')',
+            ),
+            ''));
+    }
+    return $icons;
   }
 
   private function buildHeader() {

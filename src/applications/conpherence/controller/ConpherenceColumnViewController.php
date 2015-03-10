@@ -6,6 +6,24 @@ final class ConpherenceColumnViewController extends
   public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
 
+    $latest_conpherences = array();
+    $latest_participant = id(new ConpherenceParticipantQuery())
+      ->withParticipantPHIDs(array($user->getPHID()))
+      ->setLimit(6)
+      ->execute();
+    if ($latest_participant) {
+      $conpherence_phids = mpull($latest_participant, 'getConpherencePHID');
+      $latest_conpherences = id(new ConpherenceThreadQuery())
+        ->setViewer($user)
+        ->withPHIDs($conpherence_phids)
+        ->needParticipantCache(true)
+        ->execute();
+      $latest_conpherences = mpull($latest_conpherences, null, 'getPHID');
+      $latest_conpherences = array_select_keys(
+        $latest_conpherences,
+        $conpherence_phids);
+    }
+
     $conpherence = null;
     if ($request->getInt('id')) {
       $conpherence = id(new ConpherenceThreadQuery())
@@ -14,13 +32,7 @@ final class ConpherenceColumnViewController extends
         ->needTransactions(true)
         ->setTransactionLimit(ConpherenceThreadQuery::TRANSACTION_LIMIT)
         ->executeOne();
-    } else {
-      // TODO - should be pulling more data than this to build the
-      // icon bar, etc, kind of always
-      $latest_participant = id(new ConpherenceParticipantQuery())
-        ->withParticipantPHIDs(array($user->getPHID()))
-        ->setLimit(1)
-        ->execute();
+    } else if ($latest_participant) {
       $participant = head($latest_participant);
       $conpherence = id(new ConpherenceThreadQuery())
         ->setViewer($user)
@@ -45,6 +57,7 @@ final class ConpherenceColumnViewController extends
     $durable_column = id(new ConpherenceDurableColumnView())
       ->setUser($user)
       ->setSelectedConpherence($conpherence)
+      ->setConpherences($latest_conpherences)
       ->setStyle(null);
 
     $response = array(

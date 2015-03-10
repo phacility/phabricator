@@ -55,8 +55,34 @@
 
 .conpherence-durable-column-icon-bar {
   height: 34px;
-  padding: 5px 16px;
+  padding: 5px 12px;
   border-bottom: 1px solid {$thinblueborder};
+}
+
+.conpherence-durable-column-icon-bar .conpherence-durable-column-thread-icon {
+  float: left;
+  display: block;
+  width: 30px;
+  height: 30px;
+  margin: 0px 8px 0px 0px;
+  border: 2px solid transparent;
+  border-radius: 3px;
+}
+
+.conpherence-durable-column-icon-bar
+.conpherence-durable-column-thread-icon.selected {
+  border-color: {$blueborder};
+}
+
+.conpherence-durable-column-icon-bar
+.conpherence-durable-column-thread-icon span {
+  position: relative;
+  display: block;
+  width: 26px;
+  height: 26px;
+  top: 2px;
+  left: 2px;
+  background-size: 26px 26px;
 }
 
 .conpherence-durable-column-body {

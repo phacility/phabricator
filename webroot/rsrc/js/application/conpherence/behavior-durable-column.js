@@ -141,6 +141,15 @@ JX.behavior('durable-column', function() {
       }
     });
 
+  JX.Stratcom.listen(
+    'click',
+    'conpherence-durable-column-thread-icon',
+    function (e) {
+      e.kill();
+      var data = e.getNodeData('conpherence-durable-column-thread-icon');
+      threadManager.loadThreadByID(data.threadID);
+    });
+
   function _getColumnBodyNode() {
     var column = JX.$('conpherence-durable-column');
     return JX.DOM.find(
