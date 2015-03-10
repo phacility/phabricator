@@ -82,10 +82,18 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
   public function getShowDurableColumn() {
     $request = $this->getRequest();
     if ($request) {
+      if (strncmp(
+        $request->getRequestURI()->getPath(),
+        '/conpherence',
+        strlen('/conpherence')) === 0) {
+        return false;
+      }
       $viewer = $request->getUser();
-      return PhabricatorApplication::isClassInstalledForViewer(
-        'PhabricatorConpherenceApplication',
+      if ($viewer->isLoggedIn()) {
+        return PhabricatorApplication::isClassInstalledForViewer(
+          'PhabricatorConpherenceApplication',
         $viewer);
+      }
     }
     return false;
   }

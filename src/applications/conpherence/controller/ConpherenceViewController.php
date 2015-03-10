@@ -46,7 +46,7 @@ final class ConpherenceViewController extends
       $content = array('messages' => $messages);
     } else {
       $header = $this->buildHeaderPaneContent($conpherence);
-      $form = $this->renderFormContent($data['latest_transaction_id']);
+      $form = $this->renderFormContent();
       $content = array(
         'header' => $header,
         'messages' => $messages,
@@ -77,7 +77,7 @@ final class ConpherenceViewController extends
       ));
   }
 
-  private function renderFormContent($latest_transaction_id) {
+  private function renderFormContent() {
 
     $conpherence = $this->getConpherence();
     $user = $this->getRequest()->getUser();
@@ -103,20 +103,6 @@ final class ConpherenceViewController extends
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Send')))
-      ->appendChild(
-        javelin_tag(
-          'input',
-          array(
-            'type' => 'hidden',
-            'name' => 'latest_transaction_id',
-            'value' => $latest_transaction_id,
-            'sigil' => 'latest-transaction-id',
-            'meta' => array(
-              'threadPHID' => $conpherence->getPHID(),
-              'threadID' => $conpherence->getID(),
-            ),
-          ),
-          ''))
       ->render();
 
     return $form;

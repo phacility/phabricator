@@ -9,10 +9,10 @@
  *           javelin-history
  *           javelin-vector
  *           phabricator-shaped-request
+ *           conpherence-thread-manager
  */
 
 JX.behavior('conpherence-menu', function(config) {
-
   /**
    * State for displayed thread.
    */
@@ -21,6 +21,45 @@ JX.behavior('conpherence-menu', function(config) {
     visible: null,
     node: null
   };
+
+  // TODO - move more logic into the ThreadManager
+  var threadManager = new JX.ConpherenceThreadManager();
+  threadManager.setMessagesNodeFunction(function () {
+    return JX.DOM.find(document, 'div', 'conpherence-messages');
+  });
+  threadManager.setWillSendMessageCallback(function () {
+    var root = JX.DOM.find(document, 'div', 'conpherence-layout');
+    var form_root = JX.DOM.find(root, 'div', 'conpherence-form');
+    markThreadLoading(true);
+    JX.DOM.alterClass(form_root, 'loading', true);
+  });
+  threadManager.setDidSendMessageCallback(function (r) {
+    var root = JX.DOM.find(document, 'div', 'conpherence-layout');
+    var form_root = JX.DOM.find(root, 'div', 'conpherence-form');
+    var messages_root = JX.DOM.find(root, 'div', 'conpherence-message-pane');
+    var messages = JX.DOM.find(messages_root, 'div', 'conpherence-messages');
+    var fileWidget = null;
+    try {
+      fileWidget = JX.DOM.find(root, 'div', 'widgets-files');
+    } catch (ex) {
+      // Ignore; maybe no files widget
+    }
+    JX.DOM.appendContent(messages, JX.$H(r.transactions));
+    messages.scrollTop = messages.scrollHeight;
+
+    if (fileWidget) {
+      JX.DOM.setContent(
+        fileWidget,
+        JX.$H(r.file_widget)
+        );
+    }
+    var textarea = JX.DOM.find(form_root, 'textarea');
+    textarea.value = '';
+    markThreadLoading(false);
+
+    setTimeout(function() { JX.DOM.focus(textarea); }, 100);
+  });
+  threadManager.start();
 
   /**
    * Current role of this behavior. The two possible roles are to show a 'list'
@@ -65,9 +104,6 @@ JX.behavior('conpherence-menu', function(config) {
   function selectThread(node, update_page_data) {
     if (_thread.node) {
       JX.DOM.alterClass(_thread.node, 'conpherence-selected', false);
-      // keep the unread-count hidden still. big TODO once we ajax in updates
-      // to threads to make this work right and move threads between read /
-      // unread
     }
 
     JX.DOM.alterClass(node, 'conpherence-selected', true);
