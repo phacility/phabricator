@@ -73,10 +73,11 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
 
     $transactions = $this->buildTransactions();
 
-    $content = phutil_tag(
+    $content = javelin_tag(
       'div',
       array(
         'class' => 'conpherence-durable-column-main',
+        'sigil' => 'conpherence-durable-column-main',
       ),
       phutil_tag(
         'div',

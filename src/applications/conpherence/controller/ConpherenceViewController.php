@@ -67,6 +67,7 @@ final class ConpherenceViewController extends
       ->setHeader($header)
       ->setMessages($messages)
       ->setReplyForm($form)
+      ->setLatestTransactionID($data['latest_transaction_id'])
       ->setRole('thread');
 
    return $this->buildApplicationPage(

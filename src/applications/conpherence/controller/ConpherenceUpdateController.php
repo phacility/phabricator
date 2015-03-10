@@ -299,8 +299,12 @@ final class ConpherenceUpdateController
 
     $need_widget_data = false;
     $need_transactions = false;
+    $need_participant_cache = false;
     switch ($action) {
       case ConpherenceUpdateActions::METADATA:
+        $need_participant_cache = true;
+        $need_transactions = true;
+        break;
       case ConpherenceUpdateActions::LOAD:
         $need_transactions = true;
         break;
@@ -319,6 +323,7 @@ final class ConpherenceUpdateController
     $conpherence = id(new ConpherenceThreadQuery())
       ->setViewer($user)
       ->setAfterTransactionID($latest_transaction_id)
+      ->needParticipantCache($need_participant_cache)
       ->needWidgetData($need_widget_data)
       ->needTransactions($need_transactions)
       ->withIDs(array($conpherence_id))

@@ -13,12 +13,18 @@ JX.behavior('durable-column', function() {
 
   var show = false;
   var loadThreadID = null;
+  var scrollbar = null;
 
   var frame = JX.$('phabricator-standard-page');
   var quick = JX.$('phabricator-standard-page-body');
 
-  function _getColumnContentNode() {
-    return JX.$('conpherence-durable-column-content');
+  function _getColumnNode() {
+    return JX.$('conpherence-durable-column');
+  }
+
+  function _getColumnScrollNode() {
+    var column = _getColumnNode();
+    return JX.DOM.find(column, 'div', 'conpherence-durable-column-main');
   }
 
   function _toggleColumn() {
@@ -42,7 +48,7 @@ JX.behavior('durable-column', function() {
     .setHandler(_toggleColumn)
     .register();
 
-  new JX.Scrollbar(_getColumnContentNode());
+  scrollbar = new JX.Scrollbar(_getColumnScrollNode());
 
   JX.Quicksand.start();
 
@@ -51,29 +57,33 @@ JX.behavior('durable-column', function() {
    */
   var threadManager = new JX.ConpherenceThreadManager();
   threadManager.setMinimalDisplay(true);
-  threadManager.setMessagesNodeFunction(_getColumnMessagesNode);
-  threadManager.setTitleNodeFunction(_getColumnTitleNode);
   threadManager.setLoadThreadURI('/conpherence/columnview/');
-  threadManager.setWillLoadThreadCallback(function () {
+  threadManager.setWillLoadThreadCallback(function() {
     _markLoading(true);
   });
-  threadManager.setDidLoadThreadCallback(function (r) {
+  threadManager.setDidLoadThreadCallback(function(r) {
     var column = _getColumnNode();
     var new_column = JX.$H(r.content);
     JX.DOM.replace(column, new_column);
     JX.DOM.show(_getColumnNode());
-    new JX.Scrollbar(_getColumnContentNode());
+    var messages = _getColumnMessagesNode();
+    scrollbar = new JX.Scrollbar(_getColumnScrollNode());
+    scrollbar.scrollTo(messages.scrollHeight);
     _markLoading(false);
     loadThreadID = threadManager.getLoadedThreadID();
   });
-  threadManager.setWillSendMessageCallback(function () {
-    _markLoading(true);
-  });
-  threadManager.setDidSendMessageCallback(function (r) {
+  threadManager.setDidUpdateThreadCallback(function(r) {
     var messages = _getColumnMessagesNode();
     JX.DOM.appendContent(messages, JX.$H(r.transactions));
-    var content = _getColumnContentNode();
-    content.scrollTop = content.scrollHeight;
+    scrollbar.scrollTo(messages.scrollHeight);
+  });
+  threadManager.setWillSendMessageCallback(function() {
+    _markLoading(true);
+  });
+  threadManager.setDidSendMessageCallback(function(r) {
+    var messages = _getColumnMessagesNode();
+    JX.DOM.appendContent(messages, JX.$H(r.transactions));
+    scrollbar.scrollTo(messages.scrollHeight);
 
     var textarea = _getColumnTextareaNode();
     textarea.value = '';
@@ -81,6 +91,15 @@ JX.behavior('durable-column', function() {
     _markLoading(false);
 
     _focusColumnTextareaNode();
+  });
+  threadManager.setWillUpdateWorkflowCallback(function() {
+    JX.Stratcom.invoke('notification-panel-close');
+  });
+  threadManager.setDidUpdateWorkflowCallback(function(r) {
+    var messages = this._getMessagesNode();
+    JX.DOM.appendContent(messages, JX.$H(r.transactions));
+    scrollbar.scrollTo(messages.scrollHeight);
+    JX.DOM.setContent(_getColumnTitleNode(), r.conpherence_title);
   });
   threadManager.start();
 
@@ -96,7 +115,6 @@ JX.behavior('durable-column', function() {
 
       switch (action) {
         case 'metadata':
-          JX.Stratcom.invoke('notification-panel-close');
           threadManager.runUpdateWorkflowFromLink(
             link,
             {
@@ -106,7 +124,6 @@ JX.behavior('durable-column', function() {
             });
           break;
         case 'add_person':
-          JX.Stratcom.invoke('notification-panel-close');
           threadManager.runUpdateWorkflowFromLink(
             link,
             {
@@ -124,10 +141,6 @@ JX.behavior('durable-column', function() {
       }
     });
 
-  function _getColumnNode() {
-    return JX.$('conpherence-durable-column');
-  }
-
   function _getColumnBodyNode() {
     var column = JX.$('conpherence-durable-column');
     return JX.DOM.find(
@@ -135,7 +148,6 @@ JX.behavior('durable-column', function() {
       'div',
       'conpherence-durable-column-body');
   }
-
 
   function _getColumnMessagesNode() {
     var column = JX.$('conpherence-durable-column');

@@ -24,8 +24,31 @@ JX.behavior('conpherence-menu', function(config) {
 
   // TODO - move more logic into the ThreadManager
   var threadManager = new JX.ConpherenceThreadManager();
-  threadManager.setMessagesNodeFunction(function () {
-    return JX.DOM.find(document, 'div', 'conpherence-messages');
+  threadManager.setWillLoadThreadCallback(function() {
+    markThreadLoading(true);
+  });
+  threadManager.setDidLoadThreadCallback(function(r) {
+    var header = JX.$H(r.header);
+    var messages = JX.$H(r.messages);
+    var form = JX.$H(r.form);
+    var root = JX.DOM.find(document, 'div', 'conpherence-layout');
+    var header_root = JX.DOM.find(root, 'div', 'conpherence-header-pane');
+    var messages_root = JX.DOM.find(root, 'div', 'conpherence-messages');
+    var form_root = JX.DOM.find(root, 'div', 'conpherence-form');
+    JX.DOM.setContent(header_root, header);
+    JX.DOM.setContent(messages_root, messages);
+    JX.DOM.setContent(form_root, form);
+
+    markThreadLoading(false);
+
+    didRedrawThread(true);
+  });
+  threadManager.setDidUpdateThreadCallback(function(r) {
+    var root = JX.DOM.find(document, 'div', 'conpherence-layout');
+    var messages_root = JX.DOM.find(root, 'div', 'conpherence-message-pane');
+    var messages = JX.DOM.find(messages_root, 'div', 'conpherence-messages');
+    JX.DOM.appendContent(messages, JX.$H(r.transactions));
+    messages.scrollTop = messages.scrollHeight;
   });
   threadManager.setWillSendMessageCallback(function () {
     var root = JX.DOM.find(document, 'div', 'conpherence-layout');
@@ -155,12 +178,13 @@ JX.behavior('conpherence-menu', function(config) {
     var data = JX.Stratcom.getData(_thread.node);
 
     if (_thread.visible !== null || !config.hasThread) {
-      markThreadLoading(true);
-      var uri = config.baseURI + data.threadID + '/';
-      new JX.Workflow(uri, {})
-        .setHandler(JX.bind(null, onLoadThreadResponse, data.threadID))
-        .start();
+      threadManager.setLoadThreadURI('/conpherence/' + data.threadID + '/');
+      threadManager.loadThreadByID(data.threadID);
     } else if (config.hasThread) {
+      // we loaded the thread via the server so let the thread manager know
+      threadManager.setLoadedThreadID(config.selectedThreadID);
+      threadManager.setLoadedThreadPHID(config.selectedThreadPHID);
+      threadManager.setLatestTransactionID(config.latestTransactionID);
       _scrollMessageWindow();
       _focusTextarea();
     } else {
@@ -268,27 +292,6 @@ JX.behavior('conpherence-menu', function(config) {
       widget = 'widgets-people';
     }
     return widget;
-  }
-
-  function onLoadThreadResponse(thread_id, response) {
-    // we got impatient and this is no longer the right answer :/
-    if (_thread.selected != thread_id) {
-      return;
-    }
-    var header = JX.$H(response.header);
-    var messages = JX.$H(response.messages);
-    var form = JX.$H(response.form);
-    var root = JX.DOM.find(document, 'div', 'conpherence-layout');
-    var header_root = JX.DOM.find(root, 'div', 'conpherence-header-pane');
-    var messages_root = JX.DOM.find(root, 'div', 'conpherence-messages');
-    var form_root = JX.DOM.find(root, 'div', 'conpherence-form');
-    JX.DOM.setContent(header_root, header);
-    JX.DOM.setContent(messages_root, messages);
-    JX.DOM.setContent(form_root, form);
-
-    markThreadLoading(false);
-
-    didRedrawThread(true);
   }
 
   /**

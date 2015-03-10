@@ -28,12 +28,13 @@ JX.install('ConpherenceThreadManager', {
     _latestTransactionID: null,
     _updating:  null,
     _minimalDisplay: false,
-    _getMessagesNodeFunction:  JX.bag,
-    _getTitleNodeFunction:  JX.bag,
     _willLoadThreadCallback: JX.bag,
     _didLoadThreadCallback: JX.bag,
+    _didUpdateThreadCallback:  JX.bag,
     _willSendMessageCallback: JX.bag,
     _didSendMessageCallback: JX.bag,
+    _willUpdateWorkflowCallback: JX.bag,
+    _didUpdateWorkflowCallback: JX.bag,
 
     setLoadThreadURI: function(uri) {
       this._loadThreadURI = uri;
@@ -56,8 +57,18 @@ JX.install('ConpherenceThreadManager', {
       return this._loadedThreadID;
     },
 
+    setLoadedThreadID: function(id) {
+      this._loadedThreadID = id;
+      return this;
+    },
+
     getLoadedThreadPHID: function() {
       return this._loadedThreadPHID;
+    },
+
+    setLoadedThreadPHID: function(phid) {
+      this._loadedThreadPHID = phid;
+      return this;
     },
 
     getLatestTransactionID: function() {
@@ -67,24 +78,6 @@ JX.install('ConpherenceThreadManager', {
     setLatestTransactionID: function(id) {
       this._latestTransactionID = id;
       return this;
-    },
-
-    setMessagesNodeFunction: function(callback) {
-      this._getMessagesNodeFunction = callback;
-      return this;
-    },
-
-    _getMessagesNode: function() {
-      return this._getMessagesNodeFunction();
-    },
-
-    setTitleNodeFunction: function(callback) {
-      this._getTitleNodeFunction = callback;
-      return this;
-    },
-
-    _getTitleNode: function() {
-      return this._getTitleNodeFunction();
     },
 
     setMinimalDisplay: function(bool) {
@@ -102,6 +95,11 @@ JX.install('ConpherenceThreadManager', {
       return this;
     },
 
+    setDidUpdateThreadCallback: function(callback) {
+      this._didUpdateThreadCallback = callback;
+      return this;
+    },
+
     setWillSendMessageCallback: function(callback) {
       this._willSendMessageCallback = callback;
       return this;
@@ -109,6 +107,16 @@ JX.install('ConpherenceThreadManager', {
 
     setDidSendMessageCallback: function(callback) {
       this._didSendMessageCallback = callback;
+      return this;
+    },
+
+    setWillUpdateWorkflowCallback: function(callback) {
+      this._willUpdateWorkflowCallback = callback;
+      return this;
+    },
+
+    setDidUpdateWorkflowCallback: function(callback) {
+      this._didUpdateWorkflowCallback = callback;
       return this;
     },
 
@@ -121,6 +129,7 @@ JX.install('ConpherenceThreadManager', {
       }
       return base_params;
     },
+
     start: function() {
       JX.Stratcom.listen(
         'aphlict-server-message',
@@ -142,7 +151,6 @@ JX.install('ConpherenceThreadManager', {
             // Message event for something we already know about.
             return;
           }
-
           // If we're currently updating, wait for the update to complete.
           // If this notification tells us about a message which is newer than
           // the newest one we know to exist, keep track of it so we can
@@ -170,10 +178,7 @@ JX.install('ConpherenceThreadManager', {
         .setData(params)
         .setHandler(JX.bind(this, function(r) {
           this._latestTransactionID = r.latest_transaction_id;
-
-          var messages = this._getMessagesNode();
-          JX.DOM.appendContent(messages, JX.$H(r.transactions));
-          messages.scrollTop = messages.scrollHeight;
+          this._didUpdateThreadCallback(r);
         }));
 
       this.syncWorkflow(workflow, 'finally');
@@ -197,17 +202,12 @@ JX.install('ConpherenceThreadManager', {
 
     runUpdateWorkflowFromLink: function(link, params) {
       params = this._getParams(params);
-
+      this._willUpdateWorkflowCallback();
       var workflow = new JX.Workflow.newFromLink(link)
         .setData(params)
         .setHandler(JX.bind(this, function(r) {
           this._latestTransactionID = r.latest_transaction_id;
-
-          var messages = this._getMessagesNode();
-          JX.DOM.appendContent(messages, JX.$H(r.transactions));
-          messages.scrollTop = messages.scrollHeight;
-
-          JX.DOM.setContent(this._getTitleNode(), r.conpherence_title);
+          this._didUpdateWorkflowCallback(r);
         }));
       this.syncWorkflow(workflow, params.stage);
     },
@@ -230,7 +230,6 @@ JX.install('ConpherenceThreadManager', {
       var handler = JX.bind(this, function(r) {
         this._loadedThreadID = r.threadID;
         this._loadedThreadPHID = r.threadPHID;
-        this._loadThreadID = r.threadID;
         this._latestTransactionID = r.latestTransactionID;
 
         this._didLoadThreadCallback(r);

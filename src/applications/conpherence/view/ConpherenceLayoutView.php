@@ -9,6 +9,7 @@ final class ConpherenceLayoutView extends AphrontView {
   private $header;
   private $messages;
   private $replyForm;
+  private $latestTransactionID;
 
   public function setMessages($messages) {
     $this->messages = $messages;
@@ -49,6 +50,11 @@ final class ConpherenceLayoutView extends AphrontView {
     return $this;
   }
 
+  public function setLatestTransactionID($id) {
+    $this->latestTransactionID = $id;
+    return $this;
+  }
+
   public function render() {
     require_celerity_resource('conpherence-menu-css');
     require_celerity_resource('conpherence-message-pane-css');
@@ -71,6 +77,8 @@ final class ConpherenceLayoutView extends AphrontView {
         'layoutID' => $layout_id,
         'selectedID' => $selected_id,
         'selectedThreadID' => $selected_thread_id,
+        'selectedThreadPHID' => $this->thread->getPHID(),
+        'latestTransactionID' => $this->latestTransactionID,
         'role' => $this->role,
         'hasThreadList' => (bool)$this->threadView,
         'hasThread' => (bool)$this->messages,
