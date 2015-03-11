@@ -63,6 +63,8 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
 
   protected function getTagContent() {
     $column_key = PhabricatorUserPreferences::PREFERENCE_CONPHERENCE_COLUMN;
+    require_celerity_resource('conpherence-durable-column-view');
+    require_celerity_resource('font-source-sans-pro');
 
     Javelin::initBehavior(
       'durable-column',
@@ -240,6 +242,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
         ->addClass('core-menu-item')
         ->addSigil('conpherence-settings-menu')
         ->setID($bubble_id)
+        ->setHref('#')
         ->setAural(pht('Settings'))
         ->setOrder(300);
       $settings_button = id(new PHUIListView())

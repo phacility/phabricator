@@ -1,5 +1,6 @@
 /**
  * @provides font-source-sans-pro
+ * @requires phui-fontkit-css
  */
 
 @font-face {

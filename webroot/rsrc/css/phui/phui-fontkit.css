@@ -10,7 +10,9 @@
 }
 
 .phui-font-source-sans.conpherence-message-pane,
-.phui-font-source-sans.conpherence-message-pane .remarkup-assist-textarea {
+.phui-font-source-sans.conpherence-message-pane .remarkup-assist-textarea,
+.conpherence-durable-column-body,
+.conpherence-durable-column-body .remarkup-assist-textarea  {
   font-family: 'Source Sans Pro', 'Helvetica Neue', Arial, sans-serif;
   font-weight: 400;
   font-size: 14px;
