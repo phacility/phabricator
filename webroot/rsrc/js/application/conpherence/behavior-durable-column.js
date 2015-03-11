@@ -152,9 +152,9 @@ JX.behavior('durable-column', function(config, statics) {
         case 'go_conpherence':
           JX.$U(link.href).go();
           break;
-        case 'close_window':
+        case 'hide_column':
           JX.Stratcom.invoke('notification-panel-close');
-          _toggleColumn();
+          _toggleColumn(true);
           break;
       }
     });

@@ -296,10 +296,10 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
         'key' => 'go_conpherence',
       ),
       array(
-        'name' => pht('Close Window'),
+        'name' => pht('Hide Column'),
         'href' => '#',
         'icon' => 'fa-times',
-        'key' => 'close_window',
+        'key' => 'hide_column',
       ),);
   }
 
