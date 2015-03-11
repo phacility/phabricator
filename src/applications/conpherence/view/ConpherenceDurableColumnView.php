@@ -7,6 +7,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
   private $selectedConpherence;
   private $transactions;
   private $visible;
+  private $initialLoad = false;
 
   public function setConpherences(array $conpherences) {
     assert_instances_of($conpherences, 'ConpherenceThread');
@@ -56,16 +57,29 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
     return $this->visible;
   }
 
+  public function setInitialLoad($bool) {
+    $this->initialLoad = $bool;
+    return $this;
+  }
+
+  public function getInitialLoad() {
+    return $this->initialLoad;
+  }
+
   protected function getTagAttributes() {
     if ($this->getVisible()) {
       $style = null;
     } else {
       $style = 'display: none;';
     }
+    $classes = array('conpherence-durable-column');
+    if ($this->getInitialLoad()) {
+      $classes[] = 'loading';
+    }
 
     return array(
       'id' => 'conpherence-durable-column',
-      'class' => 'conpherence-durable-column',
+      'class' => implode(' ', $classes),
       'style' => $style,
       'sigil' => 'conpherence-durable-column',
     );
@@ -73,7 +87,6 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
 
   protected function getTagContent() {
     $column_key = PhabricatorUserPreferences::PREFERENCE_CONPHERENCE_COLUMN;
-    require_celerity_resource('conpherence-durable-column-view');
     require_celerity_resource('font-source-sans-pro');
 
     Javelin::initBehavior(
@@ -317,7 +330,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
   private function buildTransactions() {
     $conpherence = $this->getSelectedConpherence();
     if (!$conpherence) {
-      if (!$this->getVisible()) {
+      if (!$this->getVisible() || $this->getInitialLoad()) {
         return pht('Loading...');
       }
       return array(

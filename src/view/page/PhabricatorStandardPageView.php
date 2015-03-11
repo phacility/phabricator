@@ -160,6 +160,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     require_celerity_resource('phui-form-css');
     require_celerity_resource('sprite-gradient-css');
     require_celerity_resource('phabricator-standard-page-view');
+    require_celerity_resource('conpherence-durable-column-view');
 
     Javelin::initBehavior('workflow', array());
 
@@ -420,7 +421,8 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       $durable_column = id(new ConpherenceDurableColumnView())
         ->setSelectedConpherence(null)
         ->setUser($user)
-        ->setVisible($is_visible);
+        ->setVisible($is_visible)
+        ->setInitialLoad(true);
     }
 
     Javelin::initBehavior('quicksand-blacklist', array(
