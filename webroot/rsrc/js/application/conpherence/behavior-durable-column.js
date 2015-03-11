@@ -164,7 +164,20 @@ JX.behavior('durable-column', function(config, statics) {
     'conpherence-durable-column-thread-icon',
     function (e) {
       e.kill();
+      var icons = JX.DOM.scry(
+        JX.$('conpherence-durable-column'),
+        'a',
+        'conpherence-durable-column-thread-icon');
       var data = e.getNodeData('conpherence-durable-column-thread-icon');
+      var cdata = null;
+      for (var i = 0; i < icons.length; i++) {
+        cdata = JX.Stratcom.getData(icons[i]);
+        JX.DOM.alterClass(
+          icons[i],
+          'selected',
+          cdata.threadID == data.threadID);
+      }
+      JX.DOM.setContent(_getColumnTitleNode(), data.threadTitle);
       threadManager.loadThreadByID(data.threadID);
     });
 

@@ -186,6 +186,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
             'sigil' => 'conpherence-durable-column-thread-icon',
             'meta' => array(
               'threadID' => $conpherence->getID(),
+              'threadTitle' => $data['js_title'],
             ),
           ),
           phutil_tag(
