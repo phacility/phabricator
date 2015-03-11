@@ -49,7 +49,6 @@ return array(
     'phabricator-notification',
     'javelin-behavior-aphlict-listen',
     'javelin-behavior-phabricator-search-typeahead',
-    'javelin-behavior-konami',
     'javelin-behavior-aphlict-dropdown',
     'javelin-behavior-history-install',
     'javelin-behavior-phabricator-gesture',
