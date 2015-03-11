@@ -5,6 +5,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
   private $conpherences;
   private $selectedConpherence;
   private $transactions;
+  private $visible;
 
   public function setConpherences(array $conpherences) {
     assert_instances_of($conpherences, 'ConpherenceThread');
@@ -36,16 +37,40 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
     return $this->transactions;
   }
 
+  public function setVisible($visible) {
+    $this->visible = $visible;
+    return $this;
+  }
+
+  public function getVisible() {
+    return $this->visible;
+  }
+
   protected function getTagAttributes() {
+    if ($this->getVisible()) {
+      $style = null;
+    } else {
+      $style = 'display: none;';
+    }
+
     return array(
       'id' => 'conpherence-durable-column',
       'class' => 'conpherence-durable-column',
-      'style' => 'display: none;',
+      'style' => $style,
       'sigil' => 'conpherence-durable-column',
     );
   }
 
   protected function getTagContent() {
+    $column_key = PhabricatorUserPreferences::PREFERENCE_CONPHERENCE_COLUMN;
+
+    Javelin::initBehavior(
+      'durable-column',
+      array(
+        'visible' => $this->getVisible(),
+        'settingsURI' => '/settings/adjust/?key='.$column_key,
+      ));
+
     $classes = array();
     $classes[] = 'conpherence-durable-column-header';
     $classes[] = 'sprite-main-header';

@@ -9,7 +9,19 @@
  *           conpherence-thread-manager
  */
 
-JX.behavior('durable-column', function() {
+JX.behavior('durable-column', function(config, statics) {
+  // TODO: Currently, updating the column sends the entire column back. This
+  // includes the `durable-column` behavior itself, which tries to re-initialize
+  // the column. Detect this and bail.
+  //
+  // If ThreadManager gets separated into a UI part and a thread part (which
+  // seems likely), responses may no longer ship back the entire column. This
+  // might let us remove this check.
+  if (statics.initialized) {
+    return;
+  } else {
+    statics.initialized = true;
+  }
 
   var show = false;
   var loadThreadID = null;
@@ -27,10 +39,7 @@ JX.behavior('durable-column', function() {
     return JX.DOM.find(column, 'div', 'conpherence-durable-column-main');
   }
 
-  function _toggleColumn() {
-    if (window.location.pathname.indexOf('/conpherence/') === 0) {
-      return;
-    }
+  function _toggleColumn(explicit) {
     show = !show;
     JX.DOM.alterClass(frame, 'with-durable-column', show);
     var column = JX.$('conpherence-durable-column');
@@ -42,10 +51,18 @@ JX.behavior('durable-column', function() {
     }
     JX.Stratcom.invoke('resize');
     JX.Quicksand.setFrame(show ? quick : null);
+
+    // If this was an explicit toggle action from the user, save their
+    // preference.
+    if (explicit) {
+      new JX.Request(config.settingsURI)
+        .setData({value: (show ? 1 : 0)})
+        .send();
+    }
   }
 
   new JX.KeyboardShortcut('\\', 'Toggle Conpherence Column')
-    .setHandler(_toggleColumn)
+    .setHandler(JX.bind(null, _toggleColumn, true))
     .register();
 
   scrollbar = new JX.Scrollbar(_getColumnScrollNode());
@@ -55,6 +72,7 @@ JX.behavior('durable-column', function() {
   /* Conpherence Thread Manager configuration - lots of display
    * callbacks.
    */
+
   var threadManager = new JX.ConpherenceThreadManager();
   threadManager.setMinimalDisplay(true);
   threadManager.setLoadThreadURI('/conpherence/columnview/');
@@ -215,5 +233,9 @@ JX.behavior('durable-column', function() {
     ['submit', 'didSyntheticSubmit'],
     'conpherence-message-form',
     _sendMessage);
+
+  if (config.visible) {
+    _toggleColumn(false);
+  }
 
 });
