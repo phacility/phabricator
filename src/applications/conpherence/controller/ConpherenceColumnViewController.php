@@ -25,6 +25,7 @@ final class ConpherenceColumnViewController extends
     }
 
     $conpherence = null;
+    $should_404 = false;
     if ($request->getInt('id')) {
       $conpherence = id(new ConpherenceThreadQuery())
         ->setViewer($user)
@@ -32,6 +33,7 @@ final class ConpherenceColumnViewController extends
         ->needTransactions(true)
         ->setTransactionLimit(ConpherenceThreadQuery::TRANSACTION_LIMIT)
         ->executeOne();
+      $should_404 = true;
     } else if ($latest_participant) {
       $participant = head($latest_participant);
       $conpherence = id(new ConpherenceThreadQuery())
@@ -40,31 +42,44 @@ final class ConpherenceColumnViewController extends
         ->needTransactions(true)
         ->setTransactionLimit(ConpherenceThreadQuery::TRANSACTION_LIMIT)
         ->executeOne();
+      $should_404 = true;
     }
-
-    if (!$conpherence) {
-      return new Aphront404Response();
-    }
-    $this->setConpherence($conpherence);
-
-    $participant = $conpherence->getParticipant($user->getPHID());
-    $transactions = $conpherence->getTransactions();
-    $latest_transaction = head($transactions);
-    $write_guard = AphrontWriteGuard::beginScopedUnguardedWrites();
-    $participant->markUpToDate($conpherence, $latest_transaction);
-    unset($write_guard);
 
     $durable_column = id(new ConpherenceDurableColumnView())
       ->setUser($user)
-      ->setSelectedConpherence($conpherence)
-      ->setConpherences($latest_conpherences)
-      ->setStyle(null);
+      ->setVisible(true);
+    if (!$conpherence) {
+      if ($should_404) {
+        return new Aphront404Response();
+      }
+
+      $conpherence_id = null;
+      $conpherence_phid = null;
+      $latest_transaction_id = null;
+
+    } else {
+      $this->setConpherence($conpherence);
+
+      $participant = $conpherence->getParticipant($user->getPHID());
+      $transactions = $conpherence->getTransactions();
+      $latest_transaction = head($transactions);
+      $write_guard = AphrontWriteGuard::beginScopedUnguardedWrites();
+      $participant->markUpToDate($conpherence, $latest_transaction);
+      unset($write_guard);
+
+      $durable_column
+        ->setSelectedConpherence($conpherence)
+        ->setConpherences($latest_conpherences);
+      $conpherence_id = $conpherence->getID();
+      $conpherence_phid = $conpherence->getPHID();
+      $latest_transaction_id = $latest_transaction->getID();
+    }
 
     $response = array(
       'content' => hsprintf('%s', $durable_column),
-      'threadID' => $conpherence->getID(),
-      'threadPHID' => $conpherence->getPHID(),
-      'latestTransactionID' => $latest_transaction->getID(),);
+      'threadID' => $conpherence_id,
+      'threadPHID' => $conpherence_phid,
+      'latestTransactionID' => $latest_transaction_id,);
 
     return id(new AphrontAjaxResponse())->setContent($response);
   }

@@ -193,7 +193,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
 
     if (!$conpherence) {
 
-      $title = pht('Loading...');
+      $title = null;
       $settings_button = null;
       $settings_menu = null;
 
@@ -306,7 +306,24 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
   private function buildTransactions() {
     $conpherence = $this->getSelectedConpherence();
     if (!$conpherence) {
-      return pht('Loading...');
+      if (!$this->getVisible()) {
+        return pht('Loading...');
+      }
+      return array(
+        phutil_tag(
+          'div',
+          array(
+            'class' => 'mmb',
+          ),
+          pht('You do not have any messages yet.')),
+        javelin_tag(
+          'a',
+          array(
+            'href' => '/conpherence/new/',
+            'class' => 'button grey',
+            'sigil' => 'workflow',
+          ),
+          pht('Send a Message')),);
     }
 
     $data = ConpherenceTransactionView::renderTransactions(
@@ -322,6 +339,10 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
 
   private function buildTextInput() {
     $conpherence = $this->getSelectedConpherence();
+    if (!$conpherence) {
+      return null;
+    }
+
     $textarea = javelin_tag(
       'textarea',
       array(
@@ -330,10 +351,6 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
         'sigil' => 'conpherence-durable-column-textarea',
         'placeholder' => pht('Send a message...'),
       ));
-    if (!$conpherence) {
-      return $textarea;
-    }
-
     $id = $conpherence->getID();
     return phabricator_form(
       $this->getUser(),
@@ -358,6 +375,11 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
   }
 
   private function buildSendButton() {
+    $conpherence = $this->getSelectedConpherence();
+    if (!$conpherence) {
+      return null;
+    }
+
     return javelin_tag(
       'button',
       array(
