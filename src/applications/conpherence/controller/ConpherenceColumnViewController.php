@@ -67,7 +67,12 @@ final class ConpherenceColumnViewController extends
       $participant->markUpToDate($conpherence, $latest_transaction);
       unset($write_guard);
 
+      $draft = PhabricatorDraft::newFromUserAndKey(
+        $user,
+        $conpherence->getPHID());
+
       $durable_column
+        ->setDraft($draft)
         ->setSelectedConpherence($conpherence)
         ->setConpherences($latest_conpherences);
       $conpherence_id = $conpherence->getID();

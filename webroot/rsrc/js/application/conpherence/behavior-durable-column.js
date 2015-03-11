@@ -234,6 +234,13 @@ JX.behavior('durable-column', function(config, statics) {
     'conpherence-message-form',
     _sendMessage);
 
+  JX.Stratcom.listen(
+    ['keydown'],
+    'conpherence-durable-column-textarea',
+    function (e) {
+      threadManager.handleDraftKeydown(e);
+    });
+
   if (config.visible) {
     _toggleColumn(false);
   }

@@ -2,7 +2,8 @@
 
 final class ConpherenceDurableColumnView extends AphrontTagView {
 
-  private $conpherences;
+  private $conpherences = array();
+  private $draft;
   private $selectedConpherence;
   private $transactions;
   private $visible;
@@ -15,6 +16,15 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
 
   public function getConpherences() {
     return $this->conpherences;
+  }
+
+  public function setDraft(PhabricatorDraft $draft) {
+    $this->draft = $draft;
+    return $this;
+  }
+
+  public function getDraft() {
+    return $this->draft;
   }
 
   public function setSelectedConpherence(
@@ -343,6 +353,12 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
       return null;
     }
 
+    $draft = $this->getDraft();
+    $draft_value = null;
+    if ($draft) {
+      $draft_value = $draft->getDraft();
+    }
+
     $textarea = javelin_tag(
       'textarea',
       array(
@@ -350,7 +366,8 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
         'class' => 'conpherence-durable-column-textarea',
         'sigil' => 'conpherence-durable-column-textarea',
         'placeholder' => pht('Send a message...'),
-      ));
+      ),
+      $draft_value);
     $id = $conpherence->getID();
     return phabricator_form(
       $this->getUser(),

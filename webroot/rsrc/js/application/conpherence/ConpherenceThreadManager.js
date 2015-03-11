@@ -252,6 +252,25 @@ JX.install('ConpherenceThreadManager', {
           this._didSendMessageCallback(r);
         }));
       this.syncWorkflow(workflow, 'finally');
+    },
+
+    handleDraftKeydown: function(e) {
+      var form = e.getNode('tag:form');
+      var data = e.getNodeData('tag:form');
+
+      if (!data.preview) {
+        var uri = '/conpherence/update/' + this._loadedThreadID + '/';
+        data.preview = new JX.PhabricatorShapedRequest(
+          uri,
+          JX.bag,
+          JX.bind(this, function () {
+            var data = JX.DOM.convertFormToDictionary(form);
+            data.action = 'draft';
+            data = this._getParams(data);
+            return data;
+          }));
+      }
+      data.preview.trigger();
     }
   },
 
