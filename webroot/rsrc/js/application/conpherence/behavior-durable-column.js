@@ -3,6 +3,7 @@
  * @requires javelin-behavior
  *           javelin-dom
  *           javelin-stratcom
+ *           javelin-behavior-device
  *           javelin-scrollbar
  *           javelin-quicksand
  *           phabricator-keyboard-shortcut
@@ -40,9 +41,16 @@ JX.behavior('durable-column', function(config, statics) {
   }
 
   function _toggleColumn(explicit) {
+    if (explicit) {
+      var device = JX.Device.getDevice();
+      // don't allow users to invoke the column from devices
+      if (device != 'desktop') {
+        return;
+      }
+    }
     show = !show;
     JX.DOM.alterClass(frame, 'with-durable-column', show);
-    var column = JX.$('conpherence-durable-column');
+    var column = _getColumnNode();
     if (show) {
       JX.DOM.show(column);
       threadManager.loadThreadByID(loadThreadID);
@@ -181,6 +189,33 @@ JX.behavior('durable-column', function(config, statics) {
       threadManager.loadThreadByID(data.threadID);
     });
 
+  var resizeClose = false;
+  JX.Stratcom.listen(
+    'phabricator-device-change',
+    null,
+    function() {
+      var device = JX.Device.getDevice();
+      switch (device) {
+        case 'phone':
+        case 'tablet':
+          if (show === true) {
+            _toggleColumn(false);
+            resizeClose = true;
+          }
+          break;
+        case 'desktop':
+          if (resizeClose) {
+            resizeClose = false;
+            if (show === false) {
+              _toggleColumn(false);
+            }
+          }
+          break;
+        default:
+          break;
+      }
+    });
+
   function _getColumnBodyNode() {
     var column = JX.$('conpherence-durable-column');
     return JX.DOM.find(
@@ -255,7 +290,15 @@ JX.behavior('durable-column', function(config, statics) {
     });
 
   if (config.visible) {
-    _toggleColumn(false);
+    var device = JX.Device.getDevice();
+    if (device == 'desktop') {
+      _toggleColumn(false);
+    } else {
+      // pretend we closed due to resize so if we do resize later things work
+      // correctly
+      resizeClose = true;
+      JX.DOM.hide(_getColumnNode());
+    }
   }
 
 });

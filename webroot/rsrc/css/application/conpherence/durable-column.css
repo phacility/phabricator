@@ -15,6 +15,10 @@
   background: #fff;
 }
 
+.device .conpherence-durable-column {
+  display: none;
+}
+
 .conpherence-durable-column .loading-mask {
   position: absolute;
   top: 90px;
@@ -27,7 +31,7 @@
   z-index: 2;
 }
 
-.conpherence-durable-column.loading .loading-mask {
+.device-desktop .conpherence-durable-column.loading .loading-mask {
   display: block;
 }
 
