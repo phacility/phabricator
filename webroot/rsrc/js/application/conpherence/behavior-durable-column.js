@@ -28,7 +28,6 @@ JX.behavior('durable-column', function(config, statics) {
   var loadThreadID = null;
   var scrollbar = null;
 
-  var frame = JX.$('phabricator-standard-page');
   var quick = JX.$('phabricator-standard-page-body');
 
   function _getColumnNode() {
@@ -49,7 +48,7 @@ JX.behavior('durable-column', function(config, statics) {
       }
     }
     show = !show;
-    JX.DOM.alterClass(frame, 'with-durable-column', show);
+    JX.DOM.alterClass(document.body, 'with-durable-column', show);
     var column = _getColumnNode();
     if (show) {
       JX.DOM.show(column);

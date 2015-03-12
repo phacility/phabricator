@@ -2,8 +2,18 @@
  * @provides conpherence-durable-column-view
  */
 
-.with-durable-column {
+.with-durable-column .phabricator-standard-page {
   margin-right: 300px;
+}
+
+.with-durable-column
+.phabricator-global-upload-instructions {
+  font-size: 28px;
+  width: 50%;
+}
+
+.with-durable-column .global-upload-mask {
+  right: 300px;
 }
 
 .conpherence-durable-column {
