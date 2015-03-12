@@ -12,9 +12,12 @@
   width: 50%;
 }
 
+.global-upload-mask {
+  pointer-events: none;
+}
+
 .with-durable-column .global-upload-mask {
   right: 300px;
-  pointer-events: none;
 }
 
 .conpherence-durable-column {
