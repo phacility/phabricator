@@ -190,16 +190,19 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
       }
       $data = $conpherence->getDisplayData($this->getUser());
       $image = $data['image'];
+      Javelin::initBehavior('phabricator-tooltips');
       $icons[] =
         javelin_tag(
           'a',
           array(
             'href' => '/conpherence/columnview/',
             'class' => implode(' ', $classes),
-            'sigil' => 'conpherence-durable-column-thread-icon',
+            'sigil' => 'conpherence-durable-column-thread-icon has-tooltip',
             'meta' => array(
               'threadID' => $conpherence->getID(),
               'threadTitle' => $data['js_title'],
+              'tip' => $data['js_title'],
+              'align' => 'S',
             ),
           ),
           phutil_tag(
