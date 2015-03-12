@@ -1,26 +1,76 @@
 <?php
 
-final class PhabricatorApplicationEditEmailController
-  extends PhabricatorApplicationsController {
+final class PhabricatorMetaMTAApplicationEmailPanel
+  extends PhabricatorApplicationConfigurationPanel {
 
-  public function handleRequest(AphrontRequest $request) {
-    $viewer = $request->getUser();
-    $application = $request->getURIData('application');
+  public function getPanelKey() {
+    return 'email';
+  }
 
-    $application = id(new PhabricatorApplicationQuery())
+  public function shouldShowForApplication(
+    PhabricatorApplication $application) {
+    return $application->supportsEmailIntegration();
+  }
+
+  public function buildConfigurationPagePanel() {
+    $viewer = $this->getViewer();
+    $application = $this->getApplication();
+
+    $addresses = id(new PhabricatorMetaMTAApplicationEmailQuery())
       ->setViewer($viewer)
-      ->withClasses(array($application))
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
-      ->executeOne();
-    if (!$application) {
-      return new Aphront404Response();
+      ->withApplicationPHIDs(array($application->getPHID()))
+      ->execute();
+
+    $rows = array();
+    foreach ($addresses as $address) {
+      $rows[] = array(
+        $address->getAddress(),
+      );
     }
 
-    $title = $application->getName();
+    $table = id(new AphrontTableView($rows))
+      ->setNoDataString(pht('No email addresses configured.'))
+      ->setHeaders(
+        array(
+          pht('Address'),
+        ));
+
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $viewer,
+      $application,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Application Emails'))
+      ->addActionLink(
+        id(new PHUIButtonView())
+          ->setTag('a')
+          ->setText(pht('Edit Application Emails'))
+          ->setIcon(
+            id(new PHUIIconView())
+              ->setIconFont('fa-pencil'))
+          ->setHref($this->getPanelURI())
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(!$can_edit));
+
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->appendChild($table);
+
+    return $box;
+  }
+
+  public function handlePanelRequest(
+    AphrontRequest $request,
+    PhabricatorController $controller) {
+    $viewer = $request->getViewer();
+    $application = $this->getApplication();
+
+    $path = $request->getURIData('path');
+    if (strlen($path)) {
+      return new Aphront404Response();
+    }
 
     $uri = $request->getRequestURI();
     $uri->setQueryParams(array());
@@ -106,13 +156,12 @@ final class PhabricatorApplicationEditEmailController
     $form = id(new AphrontFormView())
       ->setUser($viewer);
 
-    $view_uri = $this->getApplicationURI('view/'.get_class($application).'/');
-    $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($application->getName(), $view_uri);
+    $crumbs = $controller->buildPanelCrumbs($this);
     $crumbs->addTextCrumb(pht('Edit Application Emails'));
 
     $header = id(new PHUIHeaderView())
-      ->setHeader(pht('Edit Application Emails: %s', $application->getName()));
+      ->setHeader(pht('Edit Application Emails: %s', $application->getName()))
+      ->setSubheader($application->getAppEmailBlurb());
 
     $icon = id(new PHUIIconView())
       ->setIconFont('fa-plus');
@@ -126,13 +175,12 @@ final class PhabricatorApplicationEditEmailController
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($table)
-      ->appendChild(
-        id(new PHUIBoxView())
-        ->appendChild($application->getAppEmailBlurb())
-        ->addPadding(PHUI::PADDING_MEDIUM));
+      ->appendChild($table);
 
-    return $this->buildApplicationPage(
+    $title = $application->getName();
+
+    return $controller->buildPanelPage(
+      $this,
       array(
         $crumbs,
         $object_box,
@@ -253,7 +301,10 @@ final class PhabricatorApplicationEditEmailController
 
     $default_user = $email_object->getConfigValue($default_user_key);
     if ($default_user) {
-      $default_user_handle = $this->loadViewerHandles(array($default_user));
+      $default_user_handle = id(new PhabricatorHandleQuery())
+        ->setViewer($viewer)
+        ->withPHIDs(array($default_user))
+        ->execute();
     } else {
       $default_user_handle = array();
     }
