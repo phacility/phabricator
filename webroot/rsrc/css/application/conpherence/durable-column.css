@@ -198,7 +198,6 @@
   border-top-color: {$sky};
   border-bottom-color: {$sky};
   box-shadow: none;
-  opacity: 0.6;
 }
 
 .conpherence-durable-column-footer {
