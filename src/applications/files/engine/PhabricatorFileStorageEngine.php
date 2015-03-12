@@ -41,6 +41,78 @@ abstract class PhabricatorFileStorageEngine {
   abstract public function getEngineIdentifier();
 
 
+  /**
+   * Prioritize this engine relative to other engines.
+   *
+   * Engines with a smaller priority number get an opportunity to write files
+   * first. Generally, lower-latency filestores should have lower priority
+   * numbers, and higher-latency filestores should have higher priority
+   * numbers. Setting priority to approximately the number of milliseconds of
+   * read latency will generally produce reasonable results.
+   *
+   * In conjunction with filesize limits, the goal is to store small files like
+   * profile images, thumbnails, and text snippets in lower-latency engines,
+   * and store large files in higher-capacity engines.
+   *
+   * @return float Engine priority.
+   * @task meta
+   */
+  abstract public function getEnginePriority();
+
+
+  /**
+   * Return `true` if the engine is currently writable.
+   *
+   * Engines that are disabled or missing configuration should return `false`
+   * to prevent new writes. If writes were made with this engine in the past,
+   * the application may still try to perform reads.
+   *
+   * @return bool True if this engine can support new writes.
+   * @task meta
+   */
+  abstract public function canWriteFiles();
+
+
+  /**
+   * Return `true` if the engine has a filesize limit on storable files.
+   *
+   * The @{method:getFilesizeLimit} method can retrieve the actual limit. This
+   * method just removes the ambiguity around the meaning of a `0` limit.
+   *
+   * @return bool `true` if the engine has a filesize limit.
+   * @task meta
+   */
+  abstract public function hasFilesizeLimit();
+
+
+  /**
+   * Return maximum storable file size, in bytes.
+   *
+   * Not all engines have a limit; use @{method:getFilesizeLimit} to check if
+   * an engine has a limit. Engines without a limit can store files of any
+   * size.
+   *
+   * @return int Maximum storable file size, in bytes.
+   * @task meta
+   */
+  public function getFilesizeLimit() {
+    throw new PhutilMethodNotImplementedException();
+  }
+
+
+  /**
+   * Identifies storage engines that support unit tests.
+   *
+   * These engines are not used for production writes.
+   *
+   * @return bool True if this is a test engine.
+   * @task meta
+   */
+  public function isTestEngine() {
+    return false;
+  }
+
+
 /* -(  Managing File Data  )------------------------------------------------- */
 
 
@@ -89,5 +161,83 @@ abstract class PhabricatorFileStorageEngine {
    * @task file
    */
   abstract public function deleteFile($handle);
+
+
+  /**
+   * Select viable default storage engines according to configuration. We'll
+   * select the MySQL and Local Disk storage engines if they are configured
+   * to allow a given file.
+   *
+   * @param int File size in bytes.
+   */
+  public static function loadStorageEngines($length) {
+    $engines = self::loadWritableEngines();
+
+    $writable = array();
+    foreach ($engines as $key => $engine) {
+      if ($engine->hasFilesizeLimit()) {
+        $limit = $engine->getFilesizeLimit();
+        if ($limit < $length) {
+          continue;
+        }
+      }
+
+      $writable[$key] = $engine;
+    }
+
+    return $writable;
+  }
+
+  public static function loadAllEngines() {
+    static $engines;
+
+    if ($engines === null) {
+      $objects = id(new PhutilSymbolLoader())
+        ->setAncestorClass(__CLASS__)
+        ->loadObjects();
+
+      $map = array();
+      foreach ($objects as $engine) {
+        $key = $engine->getEngineIdentifier();
+        if (empty($map[$key])) {
+          $map[$key] = $engine;
+        } else {
+          throw new Exception(
+            pht(
+              'Storage engines "%s" and "%s" have the same engine '.
+              'identifier "%s". Each storage engine must have a unique '.
+              'identifier.',
+              get_class($engine),
+              get_class($map[$key]),
+              $key));
+        }
+      }
+
+      $map = msort($map, 'getEnginePriority');
+
+      $engines = $map;
+    }
+
+    return $engines;
+  }
+
+  public static function loadWritableEngines() {
+    $engines = self::loadAllEngines();
+
+    $writable = array();
+    foreach ($engines as $key => $engine) {
+      if ($engine->isTestEngine()) {
+        continue;
+      }
+
+      if (!$engine->canWriteFiles()) {
+        continue;
+      }
+
+      $writable[$key] = $engine;
+    }
+
+    return $writable;
+  }
 
 }

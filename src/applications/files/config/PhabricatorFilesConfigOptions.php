@@ -147,22 +147,6 @@ final class PhabricatorFilesConfigOptions
             "Set this to a valid Amazon S3 bucket to store files there. You ".
             "must also configure S3 access keys in the 'Amazon Web Services' ".
             "group.")),
-     $this->newOption(
-       'storage.engine-selector',
-       'class',
-       'PhabricatorDefaultFileStorageEngineSelector')
-        ->setBaseClass('PhabricatorFileStorageEngineSelector')
-        ->setSummary(pht('Storage engine selector.'))
-        ->setDescription(
-          pht(
-            'Phabricator uses a storage engine selector to choose which '.
-            'storage engine to use when writing file data. If you add new '.
-            'storage engines or want to provide very custom rules (e.g., '.
-            'write images to one storage engine and other files to a '.
-            'different one), you can provide an alternate implementation '.
-            'here. The default engine will use choose MySQL, Local Disk, and '.
-            'S3, in that order, if they have valid configurations above and '.
-            'a file fits within configured limits.')),
      $this->newOption('storage.upload-size-limit', 'string', null)
         ->setSummary(
           pht('Limit to users in interfaces which allow uploading.'))

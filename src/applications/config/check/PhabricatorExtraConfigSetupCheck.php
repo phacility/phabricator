@@ -211,6 +211,9 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'phd.start-taskmasters' => pht(
         'Taskmasters now use an autoscaling pool. You can configure the '.
         'pool size with `phd.taskmasters`.'),
+      'storage.engine-selector' => pht(
+        'Phabricator now automatically discovers available storage engines '.
+        'at runtime.'),
     );
 
     return $ancient_config;

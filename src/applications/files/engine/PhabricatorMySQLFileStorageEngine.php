@@ -7,30 +7,47 @@
  * It uses the @{class:PhabricatorFileStorageBlob} to actually access the
  * underlying database table.
  *
- * @task impl     Implementation
  * @task internal Internals
  */
 final class PhabricatorMySQLFileStorageEngine
   extends PhabricatorFileStorageEngine {
 
-/* -(  Implementation  )----------------------------------------------------- */
+
+/* -(  Engine Metadata  )---------------------------------------------------- */
 
 
   /**
    * For historical reasons, this engine identifies as "blob".
-   *
-   * @task impl
    */
   public function getEngineIdentifier() {
     return 'blob';
   }
 
+  public function getEnginePriority() {
+    return 1;
+  }
+
+  public function canWriteFiles() {
+    return ($this->getFilesizeLimit() > 0);
+  }
+
+
+  public function hasFilesizeLimit() {
+    return true;
+  }
+
+
+  public function getFilesizeLimit() {
+    return PhabricatorEnv::getEnvConfig('storage.mysql-engine.max-size');
+  }
+
+
+/* -(  Managing File Data  )------------------------------------------------- */
+
 
   /**
    * Write file data into the big blob store table in MySQL. Returns the row
    * ID as the file data handle.
-   *
-   * @task impl
    */
   public function writeFile($data, array $params) {
     $blob = new PhabricatorFileStorageBlob();
@@ -43,7 +60,6 @@ final class PhabricatorMySQLFileStorageEngine
 
   /**
    * Load a stored blob from MySQL.
-   * @task impl
    */
   public function readFile($handle) {
     return $this->loadFromMySQLFileStorage($handle)->getData();
@@ -52,7 +68,6 @@ final class PhabricatorMySQLFileStorageEngine
 
   /**
    * Delete a blob from MySQL.
-   * @task impl
    */
   public function deleteFile($handle) {
     $this->loadFromMySQLFileStorage($handle)->delete();
