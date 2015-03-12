@@ -103,7 +103,6 @@
   left: 0;
   right: 0;
   overflow-x: hidden;
-  overflow-y: auto;
   border-top: 1px solid {$thinblueborder};
 }
 
@@ -132,33 +131,46 @@
 .conpherence-durable-column-transactions .phabricator-transaction-detail
 .phabricator-transaction-header {
   background: none;
-  padding: 0;
+  padding: 0 0 4px 0;
 }
 
 .conpherence-durable-column-transactions .date-marker {
   border-top: 1px solid {$thinblueborder};
-  margin: 20px 0px 4px;
+  margin: 20px 0px 8px;
 }
 
 .conpherence-durable-column-transactions .date-marker .date {
   position: relative;
   top: -11px;
-  left: 8px;
+  left: 0;
   background-color: #fff;
-  color: {$lightgreytext};
+  color: {$lightbluetext};
   font-size: 12px;
-  padding: 0 4px;
+  padding: 0 6px 0 0;
 }
 
 .conpherence-durable-column-transactions .phabricator-transaction-detail
 .phabricator-transaction-header .phabricator-transaction-info {
-  margin: 3px 0px 0px 0px;
-  color: {$lightgreytext};
+  color: {$lightbluetext};
+  float: none;
+  font-size: 12px;
+}
+
+.conpherence-durable-column-transactions .phabricator-transaction-detail
+.phabricator-transaction-header .phui-link-person {
+  color: {$darkbluetext};
+  padding: 0 8px 0 0;
+}
+
+.conpherence-durable-column-transactions .phabricator-transaction-detail
+.phabricator-transaction-content .phui-link-person {
+  font-weight: bold;
+  color: {$darkbluetext};
 }
 
 .conpherence-durable-column-transactions .phabricator-transaction-detail
 .phabricator-transaction-content {
-  padding: 0;
+  padding: 0 0 8px 0;
 }
 
 .conpherence-durable-column-textarea {
@@ -182,6 +194,7 @@
   border-top-color: {$sky};
   border-bottom-color: {$sky};
   box-shadow: none;
+  opacity: 0.6;
 }
 
 .conpherence-durable-column-footer {
