@@ -438,7 +438,7 @@ abstract class DifferentialChangesetHTMLRenderer
 
     return id(new PHUIDiffInlineCommentDetailView())
       ->setInlineComment($comment)
-      ->setOnRight($on_right)
+      ->setIsOnRight($on_right)
       ->setHandles($this->getHandles())
       ->setMarkupEngine($this->getMarkupEngine())
       ->setEditable($edit)

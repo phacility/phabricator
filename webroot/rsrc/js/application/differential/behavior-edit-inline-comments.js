@@ -298,25 +298,40 @@ JX.behavior('differential-edit-inline-comments', function(config) {
 
   var handle_inline_action = function(node, op) {
     var data = JX.Stratcom.getData(node);
-    var row  = node.parentNode.parentNode;
-    var other_rows = [];
+
+    // If you click an action in the preview at the bottom of the page, we
+    // find the corresponding node and simulate clicking that, if it's
+    // present on the page. This gives the editor a more consistent view
+    // of the document.
     if (JX.Stratcom.hasSigil(node, 'differential-inline-comment-preview')) {
-      // The DOM structure around the comment is different if it's part of the
-      // preview, so make sure not to pass the wrong container.
-      row = node;
-      if (op === 'delete') {
-        // Furthermore, deleting a comment in the preview does not automatically
-        // delete other occurrences of the same comment, so do that manually.
-        var nodes = JX.DOM.scry(
-          JX.DOM.getContentFrame(),
-          'div',
-          'differential-inline-comment');
-        for (var i = 0; i < nodes.length; ++i) {
-          if (JX.Stratcom.getData(nodes[i]).id === data.id) {
-            other_rows.push(nodes[i]);
-          }
+      var nodes = JX.DOM.scry(
+        JX.DOM.getContentFrame(),
+        'div',
+        'differential-inline-comment');
+
+      var found = false;
+      var node_data;
+      for (var ii = 0; ii < nodes.length; ++ii) {
+        if (nodes[ii] == node) {
+          // Don't match the preview itself.
+          continue;
+        }
+        node_data = JX.Stratcom.getData(nodes[ii]);
+        if (node_data.id == data.id) {
+          node = nodes[ii];
+          data = node_data;
+          found = true;
+          break;
         }
       }
+
+      if (!found) {
+        new JX.DifferentialInlineCommentEditor(config.uri)
+          .deleteByID(data.id);
+        return;
+      }
+
+      op = 'refdelete';
     }
 
     var original = data.original;
@@ -328,6 +343,7 @@ JX.behavior('differential-edit-inline-comments', function(config) {
       reply_phid = data.phid;
     }
 
+    var row = JX.DOM.findAbove(node, 'tr');
     var changeset_root = JX.DOM.findAbove(
       node,
       'div',
@@ -344,7 +360,6 @@ JX.behavior('differential-edit-inline-comments', function(config) {
       .setOnRight(data.on_right)
       .setOriginalText(original)
       .setRow(row)
-      .setOtherRows(other_rows)
       .setTable(row.parentNode)
       .setReplyToCommentPHID(reply_phid)
       .setRenderer(view.getRenderer())

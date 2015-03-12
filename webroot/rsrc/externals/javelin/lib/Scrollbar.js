@@ -377,6 +377,15 @@ JX.install('Scrollbar', {
         clearTimeout(this._timeout);
         this._timeout = null;
       }
+    },
+
+    scrollTo: function(scroll) {
+      if (this._viewport !== null) {
+        this._viewport.scrollTop = scroll;
+      } else {
+        this._frame.scrollTop = scroll;
+      }
+      return this;
     }
   }
 

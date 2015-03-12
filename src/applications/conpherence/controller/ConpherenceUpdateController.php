@@ -108,7 +108,9 @@ final class ConpherenceUpdateController
               ->setTransactionType(ConpherenceTransactionType::TYPE_TITLE)
               ->setNewValue($title);
             $updated = true;
-            $response_mode = 'redirect';
+            if (!$request->getExists('force_ajax')) {
+              $response_mode = 'redirect';
+            }
           }
           if (!$updated) {
             $errors[] = pht(
@@ -271,7 +273,7 @@ final class ConpherenceUpdateController
         ->setValue($conpherence->getTitle()));
 
     require_celerity_resource('conpherence-update-css');
-    return id(new AphrontDialogView())
+    $view = id(new AphrontDialogView())
       ->setTitle(pht('Update Conpherence'))
       ->addHiddenInput('action', 'metadata')
       ->addHiddenInput(
@@ -279,6 +281,15 @@ final class ConpherenceUpdateController
         $request->getInt('latest_transaction_id'))
       ->addHiddenInput('__continue__', true)
       ->appendChild($form);
+
+    if ($request->getExists('minimal_display')) {
+      $view->addHiddenInput('minimal_display', true);
+    }
+    if ($request->getExists('force_ajax')) {
+      $view->addHiddenInput('force_ajax', true);
+    }
+
+    return $view;
   }
 
   private function loadAndRenderUpdates(
@@ -288,8 +299,12 @@ final class ConpherenceUpdateController
 
     $need_widget_data = false;
     $need_transactions = false;
+    $need_participant_cache = false;
     switch ($action) {
       case ConpherenceUpdateActions::METADATA:
+        $need_participant_cache = true;
+        $need_transactions = true;
+        break;
       case ConpherenceUpdateActions::LOAD:
         $need_transactions = true;
         break;
@@ -308,6 +323,7 @@ final class ConpherenceUpdateController
     $conpherence = id(new ConpherenceThreadQuery())
       ->setViewer($user)
       ->setAfterTransactionID($latest_transaction_id)
+      ->needParticipantCache($need_participant_cache)
       ->needWidgetData($need_widget_data)
       ->needTransactions($need_transactions)
       ->withIDs(array($conpherence_id))
@@ -361,8 +377,10 @@ final class ConpherenceUpdateController
     if ($people_widget) {
       $people_html = hsprintf('%s', $people_widget->render());
     }
+    $title = $this->getConpherenceTitle($conpherence);
     $content = array(
       'transactions' => hsprintf('%s', $rendered_transactions),
+      'conpherence_title' => (string) $title,
       'latest_transaction_id' => $new_latest_transaction_id,
       'nav_item' => hsprintf('%s', $nav_item),
       'conpherence_phid' => $conpherence->getPHID(),

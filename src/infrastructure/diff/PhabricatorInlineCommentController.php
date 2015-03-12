@@ -79,32 +79,40 @@ abstract class PhabricatorInlineCommentController
 
     $this->readRequestParameters();
 
-    switch ($this->getOperation()) {
+    $op = $this->getOperation();
+    switch ($op) {
       case 'delete':
-        $inline = $this->loadCommentForEdit($this->getCommentID());
-
-        if ($request->isFormPost()) {
-          $this->deleteComment($inline);
-          return $this->buildEmptyResponse();
+      case 'undelete':
+      case 'refdelete':
+        if (!$request->validateCSRF()) {
+          return new Aphront404Response();
         }
 
-        $dialog = new AphrontDialogView();
-        $dialog->setUser($user);
-        $dialog->setSubmitURI($request->getRequestURI());
+        // NOTE: For normal deletes, we just process the delete immediately
+        // and show an "Undo" action. For deletes by reference from the
+        // preview ("refdelete"), we prompt first (because the "Undo" may
+        // not draw, or may not be easy to locate).
 
-        $dialog->setTitle(pht('Really delete this comment?'));
-        $dialog->addHiddenInput('id', $this->getCommentID());
-        $dialog->addHiddenInput('op', 'delete');
-        $dialog->appendChild(
-          phutil_tag('p', array(), pht('Delete this inline comment?')));
+        if ($op == 'refdelete') {
+          if (!$request->isFormPost()) {
+            return $this->newDialog()
+              ->setTitle(pht('Really delete comment?'))
+              ->addHiddenInput('id', $this->getCommentID())
+              ->addHiddenInput('op', $op)
+              ->appendParagraph(pht('Delete this inline comment?'))
+              ->addCancelButton('#')
+              ->addSubmitButton(pht('Delete'));
+          }
+        }
 
-        $dialog->addCancelButton('#');
-        $dialog->addSubmitButton(pht('Delete'));
+        $is_delete = ($op == 'delete' || $op == 'refdelete');
 
-        return id(new AphrontDialogResponse())->setDialog($dialog);
+        $inline = $this->loadCommentForEdit($this->getCommentID());
+        $inline->setIsDeleted((int)$is_delete)->save();
+
+        return $this->buildEmptyResponse();
       case 'edit':
         $inline = $this->loadCommentForEdit($this->getCommentID());
-
         $text = $this->getCommentText();
 
         if ($request->isFormPost()) {
@@ -236,7 +244,7 @@ abstract class PhabricatorInlineCommentController
     $edit_dialog = id(new PHUIDiffInlineCommentEditView())
       ->setUser($user)
       ->setSubmitURI($request->getRequestURI())
-      ->setOnRight($this->getIsOnRight())
+      ->setIsOnRight($this->getIsOnRight())
       ->setIsNewFile($this->getIsNewFile())
       ->setNumber($this->getLineNumber())
       ->setLength($this->getLineLength())
@@ -275,7 +283,7 @@ abstract class PhabricatorInlineCommentController
 
     $view = id(new PHUIDiffInlineCommentDetailView())
       ->setInlineComment($inline)
-      ->setOnRight($on_right)
+      ->setIsOnRight($on_right)
       ->setMarkupEngine($engine)
       ->setHandles($handles)
       ->setEditable(true);

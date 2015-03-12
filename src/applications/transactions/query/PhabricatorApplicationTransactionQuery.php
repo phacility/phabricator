@@ -80,11 +80,12 @@ abstract class PhabricatorApplicationTransactionQuery
 
       $comments = array();
       if ($comment_phids) {
-        $comments = id(new PhabricatorApplicationTransactionCommentQuery())
-          ->setTemplate($table->getApplicationTransactionCommentObject())
-          ->setViewer($this->getViewer())
-          ->withPHIDs($comment_phids)
-          ->execute();
+        $comments =
+          id(new PhabricatorApplicationTransactionTemplatedCommentQuery())
+            ->setTemplate($table->getApplicationTransactionCommentObject())
+            ->setViewer($this->getViewer())
+            ->withPHIDs($comment_phids)
+            ->execute();
         $comments = mpull($comments, null, 'getPHID');
       }
 

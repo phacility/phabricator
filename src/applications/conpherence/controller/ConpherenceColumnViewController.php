@@ -6,7 +6,26 @@ final class ConpherenceColumnViewController extends
   public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
 
+    $latest_conpherences = array();
+    $latest_participant = id(new ConpherenceParticipantQuery())
+      ->withParticipantPHIDs(array($user->getPHID()))
+      ->setLimit(6)
+      ->execute();
+    if ($latest_participant) {
+      $conpherence_phids = mpull($latest_participant, 'getConpherencePHID');
+      $latest_conpherences = id(new ConpherenceThreadQuery())
+        ->setViewer($user)
+        ->withPHIDs($conpherence_phids)
+        ->needParticipantCache(true)
+        ->execute();
+      $latest_conpherences = mpull($latest_conpherences, null, 'getPHID');
+      $latest_conpherences = array_select_keys(
+        $latest_conpherences,
+        $conpherence_phids);
+    }
+
     $conpherence = null;
+    $should_404 = false;
     if ($request->getInt('id')) {
       $conpherence = id(new ConpherenceThreadQuery())
         ->setViewer($user)
@@ -14,13 +33,8 @@ final class ConpherenceColumnViewController extends
         ->needTransactions(true)
         ->setTransactionLimit(ConpherenceThreadQuery::TRANSACTION_LIMIT)
         ->executeOne();
-    } else {
-      // TODO - should be pulling more data than this to build the
-      // icon bar, etc, kind of always
-      $latest_participant = id(new ConpherenceParticipantQuery())
-        ->withParticipantPHIDs(array($user->getPHID()))
-        ->setLimit(1)
-        ->execute();
+      $should_404 = true;
+    } else if ($latest_participant) {
       $participant = head($latest_participant);
       $conpherence = id(new ConpherenceThreadQuery())
         ->setViewer($user)
@@ -28,30 +42,49 @@ final class ConpherenceColumnViewController extends
         ->needTransactions(true)
         ->setTransactionLimit(ConpherenceThreadQuery::TRANSACTION_LIMIT)
         ->executeOne();
+      $should_404 = true;
     }
-
-    if (!$conpherence) {
-      return new Aphront404Response();
-    }
-    $this->setConpherence($conpherence);
-
-    $participant = $conpherence->getParticipant($user->getPHID());
-    $transactions = $conpherence->getTransactions();
-    $latest_transaction = head($transactions);
-    $write_guard = AphrontWriteGuard::beginScopedUnguardedWrites();
-    $participant->markUpToDate($conpherence, $latest_transaction);
-    unset($write_guard);
 
     $durable_column = id(new ConpherenceDurableColumnView())
       ->setUser($user)
-      ->setSelectedConpherence($conpherence)
-      ->setStyle(null);
+      ->setVisible(true);
+    if (!$conpherence) {
+      if ($should_404) {
+        return new Aphront404Response();
+      }
+
+      $conpherence_id = null;
+      $conpherence_phid = null;
+      $latest_transaction_id = null;
+
+    } else {
+      $this->setConpherence($conpherence);
+
+      $participant = $conpherence->getParticipant($user->getPHID());
+      $transactions = $conpherence->getTransactions();
+      $latest_transaction = head($transactions);
+      $write_guard = AphrontWriteGuard::beginScopedUnguardedWrites();
+      $participant->markUpToDate($conpherence, $latest_transaction);
+      unset($write_guard);
+
+      $draft = PhabricatorDraft::newFromUserAndKey(
+        $user,
+        $conpherence->getPHID());
+
+      $durable_column
+        ->setDraft($draft)
+        ->setSelectedConpherence($conpherence)
+        ->setConpherences($latest_conpherences);
+      $conpherence_id = $conpherence->getID();
+      $conpherence_phid = $conpherence->getPHID();
+      $latest_transaction_id = $latest_transaction->getID();
+    }
 
     $response = array(
       'content' => hsprintf('%s', $durable_column),
-      'threadID' => $conpherence->getID(),
-      'threadPHID' => $conpherence->getPHID(),
-      'latestTransactionID' => $latest_transaction->getID(),);
+      'threadID' => $conpherence_id,
+      'threadPHID' => $conpherence_phid,
+      'latestTransactionID' => $latest_transaction_id,);
 
     return id(new AphrontAjaxResponse())->setContent($response);
   }

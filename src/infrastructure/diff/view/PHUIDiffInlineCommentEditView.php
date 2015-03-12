@@ -6,7 +6,6 @@ final class PHUIDiffInlineCommentEditView
   private $inputs = array();
   private $uri;
   private $title;
-  private $onRight;
   private $number;
   private $length;
   private $renderer;
@@ -21,10 +20,6 @@ final class PHUIDiffInlineCommentEditView
 
   public function getIsNewFile() {
     return $this->isNewFile;
-  }
-
-  public function getIsOnRight() {
-    return $this->onRight;
   }
 
   public function setRenderer($renderer) {
@@ -67,11 +62,6 @@ final class PHUIDiffInlineCommentEditView
 
   public function getChangesetID() {
     return $this->changesetID;
-  }
-
-  public function setOnRight($on_right) {
-    $this->onRight = $on_right;
-    return $this;
   }
 
   public function setNumber($number) {

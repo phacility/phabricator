@@ -185,6 +185,10 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
     return array();
   }
 
+  public function getQuicksandURIPatternBlacklist() {
+    return array();
+  }
+
 
 /* -(  URI Routing  )-------------------------------------------------------- */
 

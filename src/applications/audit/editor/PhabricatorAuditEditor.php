@@ -135,8 +135,13 @@ final class PhabricatorAuditEditor
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
       case PhabricatorTransactions::TYPE_EDGE:
       case PhabricatorAuditActionConstants::ACTION:
-      case PhabricatorAuditActionConstants::INLINE:
       case PhabricatorAuditTransaction::TYPE_COMMIT:
+        return;
+      case PhabricatorAuditActionConstants::INLINE:
+        $reply = $xaction->getComment()->getReplyToComment();
+        if ($reply && !$reply->getHasReplies()) {
+          $reply->setHasReplies(1)->save();
+        }
         return;
       case PhabricatorAuditActionConstants::ADD_AUDITORS:
         $new = $xaction->getNewValue();

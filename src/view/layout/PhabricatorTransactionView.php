@@ -63,7 +63,7 @@ final class PhabricatorTransactionView extends AphrontView {
     $transaction_id = $this->anchorName ? 'anchor-'.$this->anchorName : null;
 
     $header = phutil_tag_div(
-      'phabricator-transaction-header',
+      'phabricator-transaction-header grouped',
       array($info, $actions));
 
     return phutil_tag(

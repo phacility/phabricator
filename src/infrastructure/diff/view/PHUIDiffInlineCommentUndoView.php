@@ -9,17 +9,6 @@
 final class PHUIDiffInlineCommentUndoView
   extends PHUIDiffInlineCommentView {
 
-  private $isOnRight;
-
-  public function setIsOnRight($is_on_right) {
-    $this->isOnRight = $is_on_right;
-    return $this;
-  }
-
-  public function getIsOnRight() {
-    return $this->isOnRight;
-  }
-
   public function render() {
     $link = javelin_tag(
       'a',

@@ -2,6 +2,15 @@
 
 abstract class PHUIDiffInlineCommentView extends AphrontView {
 
-  abstract public function getIsOnRight();
+  private $isOnRight;
+
+  public function getIsOnRight() {
+    return $this->isOnRight;
+  }
+
+  public function setIsOnRight($on_right) {
+    $this->isOnRight = $on_right;
+    return $this;
+  }
 
 }

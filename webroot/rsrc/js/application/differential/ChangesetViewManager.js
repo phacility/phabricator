@@ -359,6 +359,8 @@ JX.install('ChangesetViewManager', {
       if (response.undoTemplates) {
         this._undoTemplates = response.undoTemplates;
       }
+
+      JX.Stratcom.invoke('differential-inline-comment-refresh');
     },
 
     _getContentFrame: function() {

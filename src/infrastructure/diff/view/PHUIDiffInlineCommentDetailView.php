@@ -4,7 +4,6 @@ final class PHUIDiffInlineCommentDetailView
   extends PHUIDiffInlineCommentView {
 
   private $inlineComment;
-  private $onRight;
   private $handles;
   private $markupEngine;
   private $editable;
@@ -12,17 +11,8 @@ final class PHUIDiffInlineCommentDetailView
   private $allowReply;
   private $renderer;
 
-  public function getIsOnRight() {
-    return $this->onRight;
-  }
-
   public function setInlineComment(PhabricatorInlineCommentInterface $comment) {
     $this->inlineComment = $comment;
-    return $this;
-  }
-
-  public function setOnRight($on_right) {
-    $this->onRight = $on_right;
     return $this;
   }
 
@@ -81,7 +71,7 @@ final class PHUIDiffInlineCommentDetailView
       'number' => $inline->getLineNumber(),
       'length' => $inline->getLineLength(),
       'isNewFile' => (bool)$inline->getIsNewFile(),
-      'on_right' => $this->onRight,
+      'on_right' => $this->getIsOnRight(),
       'original' => $inline->getContent(),
       'replyToCommentPHID' => $inline->getReplyToCommentPHID(),
     );

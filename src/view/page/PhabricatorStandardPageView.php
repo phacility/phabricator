@@ -81,25 +81,45 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
   public function getShowDurableColumn() {
     $request = $this->getRequest();
-    if ($request) {
-      $viewer = $request->getUser();
-      return PhabricatorApplication::isClassInstalledForViewer(
-        'PhabricatorConpherenceApplication',
-        $viewer);
+    if (!$request) {
+      return false;
     }
-    return false;
+
+    $viewer = $request->getUser();
+    if (!$viewer->isLoggedIn()) {
+      return false;
+    }
+
+    $conpherence_installed = PhabricatorApplication::isClassInstalledForViewer(
+      'PhabricatorConpherenceApplication',
+      $viewer);
+    if (!$conpherence_installed) {
+      return false;
+    }
+
+    $patterns = $this->getQuicksandURIPatternBlacklist();
+    $path = $request->getRequestURI()->getPath();
+    foreach ($patterns as $pattern) {
+      if (preg_match('(^'.$pattern.'$)', $path)) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
-  public function getTitle() {
-    $use_glyph = true;
+  public function getDurableColumnVisible() {
+    $column_key = PhabricatorUserPreferences::PREFERENCE_CONPHERENCE_COLUMN;
+    return (bool)$this->getUserPreference($column_key, 0);
+  }
 
-    $request = $this->getRequest();
-    if ($request) {
-      $user = $request->getUser();
-      if ($user && $user->loadPreferences()->getPreference(
-            PhabricatorUserPreferences::PREFERENCE_TITLES) !== 'glyph') {
-        $use_glyph = false;
-      }
+
+  public function getTitle() {
+    $glyph_key = PhabricatorUserPreferences::PREFERENCE_TITLES;
+    if ($this->getUserPreference($glyph_key) == 'text') {
+      $use_glyph = false;
+    } else {
+      $use_glyph = true;
     }
 
     $title = parent::getTitle();
@@ -177,7 +197,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
     Javelin::initBehavior('aphront-form-disable-on-submit');
     Javelin::initBehavior('toggle-class', array());
-    Javelin::initBehavior('konami', array());
     Javelin::initBehavior('history-install');
     Javelin::initBehavior('phabricator-gesture');
 
@@ -398,13 +417,17 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
     $durable_column = null;
     if ($this->getShowDurableColumn()) {
+      $is_visible = $this->getDurableColumnVisible();
       $durable_column = id(new ConpherenceDurableColumnView())
         ->setSelectedConpherence(null)
-        ->setUser($user);
-      Javelin::initBehavior(
-        'durable-column',
-        array());
+        ->setUser($user)
+        ->setVisible($is_visible)
+        ->setInitialLoad(true);
     }
+
+    Javelin::initBehavior('quicksand-blacklist', array(
+      'patterns' => $this->getQuicksandURIPatternBlacklist(),
+    ));
 
     return phutil_tag(
       'div',
@@ -577,4 +600,30 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       'content' => hsprintf('%s', $response),
     );
   }
+
+  private function getQuicksandURIPatternBlacklist() {
+    $applications = PhabricatorApplication::getAllApplications();
+
+    $blacklist = array();
+    foreach ($applications as $application) {
+      $blacklist[] = $application->getQuicksandURIPatternBlacklist();
+    }
+
+    return array_mergev($blacklist);
+  }
+
+  private function getUserPreference($key, $default = null) {
+    $request = $this->getRequest();
+    if (!$request) {
+      return $default;
+    }
+
+    $user = $request->getUser();
+    if (!$user) {
+      return $default;
+    }
+
+    return $user->loadPreferences()->getPreference($key, $default);
+  }
+
 }

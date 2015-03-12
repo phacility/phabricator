@@ -25,6 +25,9 @@ interface PhabricatorInlineCommentInterface extends PhabricatorMarkupInterface {
   public function setHasReplies($has_replies);
   public function getHasReplies();
 
+  public function setIsDeleted($deleted);
+  public function getIsDeleted();
+
   public function setContent($content);
   public function getContent();
 

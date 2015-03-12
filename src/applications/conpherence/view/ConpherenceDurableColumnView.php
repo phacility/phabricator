@@ -2,9 +2,12 @@
 
 final class ConpherenceDurableColumnView extends AphrontTagView {
 
-  private $conpherences;
+  private $conpherences = array();
+  private $draft;
   private $selectedConpherence;
   private $transactions;
+  private $visible;
+  private $initialLoad = false;
 
   public function setConpherences(array $conpherences) {
     assert_instances_of($conpherences, 'ConpherenceThread');
@@ -14,6 +17,15 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
 
   public function getConpherences() {
     return $this->conpherences;
+  }
+
+  public function setDraft(PhabricatorDraft $draft) {
+    $this->draft = $draft;
+    return $this;
+  }
+
+  public function getDraft() {
+    return $this->draft;
   }
 
   public function setSelectedConpherence(
@@ -36,16 +48,54 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
     return $this->transactions;
   }
 
+  public function setVisible($visible) {
+    $this->visible = $visible;
+    return $this;
+  }
+
+  public function getVisible() {
+    return $this->visible;
+  }
+
+  public function setInitialLoad($bool) {
+    $this->initialLoad = $bool;
+    return $this;
+  }
+
+  public function getInitialLoad() {
+    return $this->initialLoad;
+  }
+
   protected function getTagAttributes() {
+    if ($this->getVisible()) {
+      $style = null;
+    } else {
+      $style = 'display: none;';
+    }
+    $classes = array('conpherence-durable-column');
+    if ($this->getInitialLoad()) {
+      $classes[] = 'loading';
+    }
+
     return array(
       'id' => 'conpherence-durable-column',
-      'class' => 'conpherence-durable-column',
-      'style' => 'display: none;',
+      'class' => implode(' ', $classes),
+      'style' => $style,
       'sigil' => 'conpherence-durable-column',
     );
   }
 
   protected function getTagContent() {
+    $column_key = PhabricatorUserPreferences::PREFERENCE_CONPHERENCE_COLUMN;
+    require_celerity_resource('font-source-sans-pro');
+
+    Javelin::initBehavior(
+      'durable-column',
+      array(
+        'visible' => $this->getVisible(),
+        'settingsURI' => '/settings/adjust/?key='.$column_key,
+      ));
+
     $classes = array();
     $classes[] = 'conpherence-durable-column-header';
     $classes[] = 'sprite-main-header';
@@ -73,10 +123,11 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
 
     $transactions = $this->buildTransactions();
 
-    $content = phutil_tag(
+    $content = javelin_tag(
       'div',
       array(
         'class' => 'conpherence-durable-column-main',
+        'sigil' => 'conpherence-durable-column-main',
       ),
       phutil_tag(
         'div',
@@ -128,7 +179,37 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
   }
 
   private function buildIconBar() {
-    return null;
+    $icons = array();
+    $selected_conpherence = $this->getSelectedConpherence();
+    $conpherences = $this->getConpherences();
+
+    foreach ($conpherences as $conpherence) {
+      $classes = array('conpherence-durable-column-thread-icon');
+      if ($selected_conpherence->getID() == $conpherence->getID()) {
+        $classes[] = 'selected';
+      }
+      $data = $conpherence->getDisplayData($this->getUser());
+      $image = $data['image'];
+      $icons[] =
+        javelin_tag(
+          'a',
+          array(
+            'href' => '/conpherence/columnview/',
+            'class' => implode(' ', $classes),
+            'sigil' => 'conpherence-durable-column-thread-icon',
+            'meta' => array(
+              'threadID' => $conpherence->getID(),
+              'threadTitle' => $data['js_title'],
+            ),
+          ),
+          phutil_tag(
+            'span',
+            array(
+              'style' => 'background-image: url('.$image.')',
+            ),
+            ''));
+    }
+    return $icons;
   }
 
   private function buildHeader() {
@@ -136,7 +217,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
 
     if (!$conpherence) {
 
-      $title = pht('Loading...');
+      $title = null;
       $settings_button = null;
       $settings_menu = null;
 
@@ -185,6 +266,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
         ->addClass('core-menu-item')
         ->addSigil('conpherence-settings-menu')
         ->setID($bubble_id)
+        ->setHref('#')
         ->setAural(pht('Settings'))
         ->setOrder(300);
       $settings_button = id(new PHUIListView())
@@ -205,9 +287,10 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
           'class' => 'conpherence-durable-column-header',
         ),
         array(
-          phutil_tag(
+          javelin_tag(
             'div',
             array(
+              'sigil' => 'conpherence-durable-column-header-text',
               'class' => 'conpherence-durable-column-header-text',
             ),
             $title),
@@ -225,23 +308,46 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
         'key' => ConpherenceUpdateActions::ADD_PERSON,
       ),
       array(
+        'name' => pht('Rename Thread'),
+        'href' => '/conpherence/update/'.$conpherence->getID().'/',
+        'icon' => 'fa-pencil',
+        'key' => ConpherenceUpdateActions::METADATA,
+      ),
+      array(
         'name' => pht('View in Conpherence'),
         'href' => '/conpherence/'.$conpherence->getID().'/',
         'icon' => 'fa-comments',
         'key' => 'go_conpherence',
       ),
       array(
-        'name' => pht('Close Window'),
+        'name' => pht('Hide Column'),
         'href' => '#',
         'icon' => 'fa-times',
-        'key' => 'close_window',
+        'key' => 'hide_column',
       ),);
   }
 
   private function buildTransactions() {
     $conpherence = $this->getSelectedConpherence();
     if (!$conpherence) {
-      return pht('Loading...');
+      if (!$this->getVisible() || $this->getInitialLoad()) {
+        return pht('Loading...');
+      }
+      return array(
+        phutil_tag(
+          'div',
+          array(
+            'class' => 'mmb',
+          ),
+          pht('You do not have any messages yet.')),
+        javelin_tag(
+          'a',
+          array(
+            'href' => '/conpherence/new/',
+            'class' => 'button grey',
+            'sigil' => 'workflow',
+          ),
+          pht('Send a Message')),);
     }
 
     $data = ConpherenceTransactionView::renderTransactions(
@@ -257,6 +363,16 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
 
   private function buildTextInput() {
     $conpherence = $this->getSelectedConpherence();
+    if (!$conpherence) {
+      return null;
+    }
+
+    $draft = $this->getDraft();
+    $draft_value = null;
+    if ($draft) {
+      $draft_value = $draft->getDraft();
+    }
+
     $textarea = javelin_tag(
       'textarea',
       array(
@@ -264,11 +380,8 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
         'class' => 'conpherence-durable-column-textarea',
         'sigil' => 'conpherence-durable-column-textarea',
         'placeholder' => pht('Send a message...'),
-      ));
-    if (!$conpherence) {
-      return $textarea;
-    }
-
+      ),
+      $draft_value);
     $id = $conpherence->getID();
     return phabricator_form(
       $this->getUser(),
@@ -293,6 +406,11 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
   }
 
   private function buildSendButton() {
+    $conpherence = $this->getSelectedConpherence();
+    if (!$conpherence) {
+      return null;
+    }
+
     return javelin_tag(
       'button',
       array(
