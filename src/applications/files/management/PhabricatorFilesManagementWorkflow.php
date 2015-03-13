@@ -15,26 +15,29 @@ abstract class PhabricatorFilesManagementWorkflow
     }
 
     if ($names) {
-      $query = id(new PhabricatorObjectQuery())
-        ->setViewer($this->getViewer())
-        ->withNames($names)
-        ->withTypes(array(PhabricatorFileFilePHIDType::TYPECONST));
-
-      $query->execute();
-      $files = $query->getNamedResults();
-
-      foreach ($names as $name) {
-        if (empty($files[$name])) {
-          throw new PhutilArgumentUsageException(
-            "No file '{$name}' exists!");
-        }
-      }
-
-      return array_values($files);
+      return $this->loadFilesWithNames($names);
     }
 
     return null;
   }
 
+  protected function loadFilesWithNames(array $names) {
+    $query = id(new PhabricatorObjectQuery())
+      ->setViewer($this->getViewer())
+      ->withNames($names)
+      ->withTypes(array(PhabricatorFileFilePHIDType::TYPECONST));
+
+    $query->execute();
+    $files = $query->getNamedResults();
+
+    foreach ($names as $name) {
+      if (empty($files[$name])) {
+        throw new PhutilArgumentUsageException(
+          "No file '{$name}' exists!");
+      }
+    }
+
+    return array_values($files);
+  }
 
 }
