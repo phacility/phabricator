@@ -79,7 +79,8 @@ final class ConpherenceTransactionView extends AphrontView {
     $author = $handles[$transaction->getAuthorPHID()];
     $transaction_view = id(new PhabricatorTransactionView())
       ->setUser($user)
-      ->setEpoch($transaction->getDateCreated());
+      ->setEpoch($transaction->getDateCreated())
+      ->setTimeOnly(true);
     if ($this->getShowContentSource()) {
       $transaction_view->setContentSource($transaction->getContentSource());
     }

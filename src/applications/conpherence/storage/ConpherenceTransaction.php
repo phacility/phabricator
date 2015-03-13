@@ -55,18 +55,18 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
       case ConpherenceTransactionType::TYPE_TITLE:
         if ($old && $new) {
           $title = pht(
-            '%s renamed this conpherence from "%s" to "%s".',
+            '%s renamed this thread from "%s" to "%s".',
             $this->renderHandleLink($author_phid),
             $old,
             $new);
         } else if ($old) {
           $title = pht(
-            '%s deleted the conpherence name "%s".',
+            '%s deleted the thread name "%s".',
             $this->renderHandleLink($author_phid),
             $old);
         } else {
           $title = pht(
-            '%s named this conpherence "%s".',
+            '%s named this thread "%s".',
             $this->renderHandleLink($author_phid),
             $new);
         }

@@ -190,16 +190,19 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
       }
       $data = $conpherence->getDisplayData($this->getUser());
       $image = $data['image'];
+      Javelin::initBehavior('phabricator-tooltips');
       $icons[] =
         javelin_tag(
           'a',
           array(
             'href' => '/conpherence/columnview/',
             'class' => implode(' ', $classes),
-            'sigil' => 'conpherence-durable-column-thread-icon',
+            'sigil' => 'conpherence-durable-column-thread-icon has-tooltip',
             'meta' => array(
               'threadID' => $conpherence->getID(),
               'threadTitle' => $data['js_title'],
+              'tip' => $data['js_title'],
+              'align' => 'S',
             ),
           ),
           phutil_tag(
@@ -373,15 +376,24 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
       $draft_value = $draft->getDraft();
     }
 
+    $textarea_id = celerity_generate_unique_node_id();
     $textarea = javelin_tag(
       'textarea',
       array(
+        'id' => $textarea_id,
         'name' => 'text',
         'class' => 'conpherence-durable-column-textarea',
         'sigil' => 'conpherence-durable-column-textarea',
         'placeholder' => pht('Send a message...'),
       ),
       $draft_value);
+    Javelin::initBehavior(
+      'aphront-drag-and-drop-textarea',
+      array(
+        'target'          => $textarea_id,
+        'activatedClass'  => 'aphront-textarea-drag-and-drop',
+        'uri'             => '/file/dropupload/',
+      ));
     $id = $conpherence->getID();
     return phabricator_form(
       $this->getUser(),
