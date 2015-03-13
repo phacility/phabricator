@@ -121,10 +121,20 @@ final class FileAllocateConduitAPIMethod
     }
 
     // None of the storage engines can accept this file.
+    if (PhabricatorFileStorageEngine::loadWritableEngines()) {
+      $error = pht(
+        'Unable to upload file: this file is too large for any '.
+        'configured storage engine.');
+    } else {
+      $error = pht(
+        'Unable to upload file: the server is not configured with any '.
+        'writable storage engines.');
+    }
 
     return array(
       'upload' => false,
       'filePHID' => null,
+      'error' => $error,
     );
   }
 

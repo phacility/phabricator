@@ -255,4 +255,40 @@ abstract class PhabricatorFileStorageEngine {
     return $writable;
   }
 
+
+  /**
+   * Return the largest file size which can be uploaded without chunking.
+   *
+   * Files smaller than this will always upload in one request, so clients
+   * can safely skip the allocation step.
+   *
+   * @return int|null Byte size, or `null` if there is no chunk support.
+   */
+  public static function getChunkThreshold() {
+    $engines = self::loadWritableEngines();
+
+    $min = null;
+    foreach ($engines as $engine) {
+      if (!$engine->isChunkEngine()) {
+        continue;
+      }
+
+      if (!$min) {
+        $min = $engine;
+        continue;
+      }
+
+      if ($min->getChunkSize() > $engine->getChunkSize()) {
+        $min = $engine->getChunkSize();
+      }
+    }
+
+    if (!$min) {
+      return null;
+    }
+
+    return $engine->getChunkSize();
+  }
+
+
 }

@@ -162,7 +162,7 @@ final class PhabricatorChunkedFileStorageEngine
     return false;
   }
 
-  private function getChunkSize() {
+  public function getChunkSize() {
     // TODO: This is an artificially small size to make it easier to
     // test chunking.
     return 32;

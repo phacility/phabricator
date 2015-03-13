@@ -23,7 +23,8 @@ JX.behavior('global-drag-and-drop', function(config) {
   var page = JX.$('phabricator-standard-page');
   var drop = new JX.PhabricatorDragAndDropFileUpload(page)
     .setURI(config.uploadURI)
-    .setViewPolicy(config.viewPolicy);
+    .setViewPolicy(config.viewPolicy)
+    .setChunkThreshold(config.chunkThreshold);
 
   drop.listen('didBeginDrag', function() {
     JX.Mask.show('global-upload-mask');
