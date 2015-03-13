@@ -2779,7 +2779,6 @@ phutil_register_library_map(array(
     'PhortuneAccountTransaction' => 'applications/phortune/storage/PhortuneAccountTransaction.php',
     'PhortuneAccountTransactionQuery' => 'applications/phortune/query/PhortuneAccountTransactionQuery.php',
     'PhortuneAccountViewController' => 'applications/phortune/controller/PhortuneAccountViewController.php',
-    'PhortuneBalancedPaymentProvider' => 'applications/phortune/provider/PhortuneBalancedPaymentProvider.php',
     'PhortuneCart' => 'applications/phortune/storage/PhortuneCart.php',
     'PhortuneCartAcceptController' => 'applications/phortune/controller/PhortuneCartAcceptController.php',
     'PhortuneCartCancelController' => 'applications/phortune/controller/PhortuneCartCancelController.php',
@@ -6176,7 +6175,6 @@ phutil_register_library_map(array(
     'PhortuneAccountTransaction' => 'PhabricatorApplicationTransaction',
     'PhortuneAccountTransactionQuery' => 'PhabricatorApplicationTransactionQuery',
     'PhortuneAccountViewController' => 'PhortuneController',
-    'PhortuneBalancedPaymentProvider' => 'PhortunePaymentProvider',
     'PhortuneCart' => array(
       'PhortuneDAO',
       'PhabricatorApplicationTransactionInterface',
