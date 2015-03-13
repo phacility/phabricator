@@ -53,7 +53,7 @@ final class FileAllocateConduitAPIMethod
         $hash,
         $properties);
 
-      if ($file && !$force_chunking) {
+      if ($file) {
         return array(
           'upload' => false,
           'filePHID' => $file->getPHID(),
@@ -70,7 +70,7 @@ final class FileAllocateConduitAPIMethod
 
       if ($file) {
         return array(
-          'upload' => $file->isPartial(),
+          'upload' => (bool)$file->getIsPartial(),
           'filePHID' => $file->getPHID(),
         );
       }
@@ -103,7 +103,7 @@ final class FileAllocateConduitAPIMethod
         // Otherwise, this is a large file and we need to perform a chunked
         // upload.
 
-        $chunk_properties = array();
+        $chunk_properties = $properties;
 
         if ($hash) {
           $chunk_properties += array(

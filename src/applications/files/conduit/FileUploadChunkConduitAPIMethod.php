@@ -57,16 +57,19 @@ final class FileUploadChunkConduitAPIMethod
 
     // NOTE: These files have a view policy which prevents normal access. They
     // are only accessed through the storage engine.
-    $file = PhabricatorFile::newFromFileData(
+    $chunk_data = PhabricatorFile::newFromFileData(
       $data,
       array(
         'name' => $file->getMonogram().'.chunk-'.$chunk->getID(),
         'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
       ));
 
-    $chunk->setDataFilePHID($file->getPHID())->save();
+    $chunk->setDataFilePHID($chunk_data->getPHID())->save();
 
-    // TODO: If all chunks are up, mark the file as complete.
+    $missing = $this->loadAnyMissingChunk($viewer, $file);
+    if (!$missing) {
+      $file->setIsPartial(0)->save();
+    }
 
     return null;
   }

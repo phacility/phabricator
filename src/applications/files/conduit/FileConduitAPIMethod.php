@@ -89,6 +89,16 @@ abstract class FileConduitAPIMethod extends ConduitAPIMethod {
     return $data;
   }
 
+  protected function loadAnyMissingChunk(
+    PhabricatorUser $viewer,
+    PhabricatorFile $file) {
+
+    return $this->newChunkQuery($viewer, $file)
+      ->withIsComplete(false)
+      ->setLimit(1)
+      ->execute();
+  }
+
   private function newChunkQuery(
     PhabricatorUser $viewer,
     PhabricatorFile $file) {
@@ -105,5 +115,6 @@ abstract class FileConduitAPIMethod extends ConduitAPIMethod {
       ->setViewer($viewer)
       ->withChunkHandles(array($file->getStorageHandle()));
   }
+
 
 }

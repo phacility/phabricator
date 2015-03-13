@@ -52,9 +52,19 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
     $ttl = $file->getTTL();
     if ($ttl !== null) {
       $ttl_tag = id(new PHUITagView())
-        ->setType(PHUITagView::TYPE_OBJECT)
+        ->setType(PHUITagView::TYPE_STATE)
+        ->setBackgroundColor(PHUITagView::COLOR_YELLOW)
         ->setName(pht('Temporary'));
       $header->addTag($ttl_tag);
+    }
+
+    $partial = $file->getIsPartial();
+    if ($partial) {
+      $partial_tag = id(new PHUITagView())
+        ->setType(PHUITagView::TYPE_STATE)
+        ->setBackgroundColor(PHUITagView::COLOR_ORANGE)
+        ->setName(pht('Partial Upload'));
+      $header->addTag($partial_tag);
     }
 
     $actions = $this->buildActionView($file);
@@ -126,21 +136,27 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       ->setObjectURI($this->getRequest()->getRequestURI())
       ->setObject($file);
 
+    $can_download = !$file->getIsPartial();
+
     if ($file->isViewableInBrowser()) {
       $view->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('View File'))
           ->setIcon('fa-file-o')
-          ->setHref($file->getViewURI()));
+          ->setHref($file->getViewURI())
+          ->setDisabled(!$can_download)
+          ->setWorkflow(!$can_download));
     } else {
       $view->addAction(
         id(new PhabricatorActionView())
           ->setUser($viewer)
-          ->setRenderAsForm(true)
-          ->setDownload(true)
+          ->setRenderAsForm($can_download)
+          ->setDownload($can_download)
           ->setName(pht('Download File'))
           ->setIcon('fa-download')
-          ->setHref($file->getViewURI()));
+          ->setHref($file->getViewURI())
+          ->setDisabled(!$can_download)
+          ->setWorkflow(!$can_download));
     }
 
     $view->addAction(

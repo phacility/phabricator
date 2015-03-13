@@ -6,6 +6,7 @@ final class PhabricatorFileChunkQuery
   private $chunkHandles;
   private $rangeStart;
   private $rangeEnd;
+  private $isComplete;
   private $needDataFiles;
 
   public function withChunkHandles(array $handles) {
@@ -16,6 +17,11 @@ final class PhabricatorFileChunkQuery
   public function withByteRange($start, $end) {
     $this->rangeStart = $start;
     $this->rangeEnd = $end;
+    return $this;
+  }
+
+  public function withIsComplete($complete) {
+    $this->isComplete = $complete;
     return $this;
   }
 
@@ -102,6 +108,18 @@ final class PhabricatorFileChunkQuery
         $conn_r,
         'byteStart < %d',
         $this->rangeEnd);
+    }
+
+    if ($this->isComplete !== null) {
+      if ($this->isComplete) {
+        $where[] = qsprintf(
+          $conn_r,
+          'dataFilePHID IS NOT NULL');
+      } else {
+        $where[] = qsprintf(
+          $conn_r,
+          'dataFilePHID IS NULL');
+      }
     }
 
     $where[] = $this->buildPagingClause($conn_r);

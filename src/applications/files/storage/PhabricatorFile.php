@@ -51,6 +51,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
   protected $ttl;
   protected $isExplicitUpload = 1;
   protected $viewPolicy = PhabricatorPolicies::POLICY_USER;
+  protected $isPartial = 0;
 
   private $objects = self::ATTACHABLE;
   private $objectPHIDs = self::ATTACHABLE;
@@ -67,6 +68,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
     return id(new PhabricatorFile())
       ->setViewPolicy($view_policy)
+      ->setIsPartial(0)
       ->attachOriginalFile(null)
       ->attachObjects(array())
       ->attachObjectPHIDs(array());
@@ -91,6 +93,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
         'ttl' => 'epoch?',
         'isExplicitUpload' => 'bool?',
         'mailKey' => 'bytes20',
+        'isPartial' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
@@ -109,6 +112,9 @@ final class PhabricatorFile extends PhabricatorFileDAO
         ),
         'key_dateCreated' => array(
           'columns' => array('dateCreated'),
+        ),
+        'key_partial' => array(
+          'columns' => array('authorPHID', 'isPartial'),
         ),
       ),
     ) + parent::getConfiguration();
@@ -294,6 +300,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
     $file->setStorageEngine($engine->getEngineIdentifier());
     $file->setStorageHandle(PhabricatorFileChunk::newChunkHandle());
     $file->setStorageFormat(self::STORAGE_FORMAT_RAW);
+    $file->setIsPartial(1);
 
     $file->readPropertiesFromParameters($params);
 
@@ -628,9 +635,16 @@ final class PhabricatorFile extends PhabricatorFileDAO
     }
     $parts[] = $name;
 
-    $path = implode('/', $parts);
+    $path = '/'.implode('/', $parts);
 
-    return PhabricatorEnv::getCDNURI($path);
+    // If this file is only partially uploaded, we're just going to return a
+    // local URI to make sure that Ajax works, since the page is inevitably
+    // going to give us an error back.
+    if ($this->getIsPartial()) {
+      return PhabricatorEnv::getURI($path);
+    } else {
+      return PhabricatorEnv::getCDNURI($path);
+    }
   }
 
   /**
@@ -1168,11 +1182,6 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return id(new AphrontRedirectResponse())
       ->setIsExternal($is_external)
       ->setURI($uri);
-  }
-
-  public function isPartial() {
-    // TODO: Placeholder for resumable uploads.
-    return false;
   }
 
 
