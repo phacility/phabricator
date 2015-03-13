@@ -295,6 +295,67 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
 
       $box->addPropertyList($media);
     }
+
+    $engine = null;
+    try {
+      $engine = $file->instantiateStorageEngine();
+    } catch (Exception $ex) {
+      // Don't bother raising this anywhere for now.
+    }
+
+    if ($engine) {
+      if ($engine->isChunkEngine()) {
+        $chunkinfo = new PHUIPropertyListView();
+        $box->addPropertyList($chunkinfo, pht('Chunks'));
+
+        $chunks = id(new PhabricatorFileChunkQuery())
+          ->setViewer($user)
+          ->withChunkHandles(array($file->getStorageHandle()))
+          ->execute();
+        $chunks = msort($chunks, 'getByteStart');
+
+        $rows = array();
+        $completed = array();
+        foreach ($chunks as $chunk) {
+          $is_complete = $chunk->getDataFilePHID();
+
+          $rows[] = array(
+            $chunk->getByteStart(),
+            $chunk->getByteEnd(),
+            ($is_complete ? pht('Yes') : pht('No')),
+          );
+
+          if ($is_complete) {
+            $completed[] = $chunk;
+          }
+        }
+
+        $table = id(new AphrontTableView($rows))
+          ->setHeaders(
+            array(
+              pht('Offset'),
+              pht('End'),
+              pht('Complete'),
+            ))
+          ->setColumnClasses(
+            array(
+              '',
+              '',
+              'wide',
+            ));
+
+        $chunkinfo->addProperty(
+          pht('Total Chunks'),
+          count($chunks));
+
+        $chunkinfo->addProperty(
+          pht('Completed Chunks'),
+          count($completed));
+
+        $chunkinfo->addRawContent($table);
+      }
+    }
+
   }
 
 }

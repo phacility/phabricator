@@ -3,6 +3,7 @@
 final class FileUploadHashConduitAPIMethod extends FileConduitAPIMethod {
 
   public function getAPIMethodName() {
+    // TODO: Deprecate this in favor of `file.allocate`.
     return 'file.uploadhash';
   }
 

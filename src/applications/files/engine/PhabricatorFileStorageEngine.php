@@ -113,6 +113,21 @@ abstract class PhabricatorFileStorageEngine {
   }
 
 
+  /**
+   * Identifies chunking storage engines.
+   *
+   * If this is a storage engine which splits files into chunks and stores the
+   * chunks in other engines, it can return `true` to signal that other
+   * chunking engines should not try to store data here.
+   *
+   * @return bool True if this is a chunk engine.
+   * @task meta
+   */
+  public function isChunkEngine() {
+    return false;
+  }
+
+
 /* -(  Managing File Data  )------------------------------------------------- */
 
 

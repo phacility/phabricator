@@ -33,6 +33,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
   const METADATA_IMAGE_HEIGHT = 'height';
   const METADATA_CAN_CDN = 'canCDN';
   const METADATA_BUILTIN = 'builtin';
+  const METADATA_PARTIAL = 'partial';
 
   protected $name;
   protected $mimeType;
@@ -260,6 +261,41 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
       return $new_file;
     }
+
+    return $file;
+  }
+
+  public static function newChunkedFile(
+    PhabricatorFileStorageEngine $engine,
+    $length,
+    array $params) {
+
+    $file = PhabricatorFile::initializeNewFile();
+
+    $file->setByteSize($length);
+
+    // TODO: We might be able to test the first chunk in order to figure
+    // this out more reliably, since MIME detection usually examines headers.
+    // However, enormous files are probably always either actually raw data
+    // or reasonable to treat like raw data.
+    $file->setMimeType('application/octet-stream');
+
+    $chunked_hash = idx($params, 'chunkedHash');
+    if ($chunked_hash) {
+      $file->setContentHash($chunked_hash);
+    } else {
+      // See PhabricatorChunkedFileStorageEngine::getChunkedHash() for some
+      // discussion of this.
+      $file->setContentHash(
+        PhabricatorHash::digest(
+          Filesystem::readRandomBytes(64)));
+    }
+
+    $file->setStorageEngine($engine->getEngineIdentifier());
+    $file->setStorageHandle(PhabricatorFileChunk::newChunkHandle());
+    $file->setStorageFormat(self::STORAGE_FORMAT_RAW);
+
+    $file->readPropertiesFromParameters($params);
 
     return $file;
   }
@@ -1132,6 +1168,11 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return id(new AphrontRedirectResponse())
       ->setIsExternal($is_external)
       ->setURI($uri);
+  }
+
+  public function isPartial() {
+    // TODO: Placeholder for resumable uploads.
+    return false;
   }
 
 
