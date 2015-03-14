@@ -292,9 +292,10 @@ final class PhabricatorFile extends PhabricatorFileDAO
     } else {
       // See PhabricatorChunkedFileStorageEngine::getChunkedHash() for some
       // discussion of this.
-      $file->setContentHash(
-        PhabricatorHash::digest(
-          Filesystem::readRandomBytes(64)));
+      $seed = Filesystem::readRandomBytes(64);
+      $hash = PhabricatorChunkedFileStorageEngine::getChunkedHashForInput(
+        $seed);
+      $file->setContentHash($hash);
     }
 
     $file->setStorageEngine($engine->getEngineIdentifier());

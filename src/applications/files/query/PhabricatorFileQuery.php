@@ -11,6 +11,10 @@ final class PhabricatorFileQuery
   private $dateCreatedAfter;
   private $dateCreatedBefore;
   private $contentHashes;
+  private $minLength;
+  private $maxLength;
+  private $names;
+  private $isPartial;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -86,6 +90,22 @@ final class PhabricatorFileQuery
     }
 
     $this->transforms = $specs;
+    return $this;
+  }
+
+  public function withLengthBetween($min, $max) {
+    $this->minLength = $min;
+    $this->maxLength = $max;
+    return $this;
+  }
+
+  public function withNames(array $names) {
+    $this->names = $names;
+    return $this;
+  }
+
+  public function withIsPartial($partial) {
+    $this->isPartial = $partial;
     return $this;
   }
 
@@ -213,34 +233,34 @@ final class PhabricatorFileQuery
 
     $where[] = $this->buildPagingClause($conn_r);
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn_r,
         'f.id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn_r,
         'f.phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->authorPHIDs) {
+    if ($this->authorPHIDs !== null) {
       $where[] = qsprintf(
         $conn_r,
         'f.authorPHID IN (%Ls)',
         $this->authorPHIDs);
     }
 
-    if ($this->explicitUploads) {
+    if ($this->explicitUploads !== null) {
       $where[] = qsprintf(
         $conn_r,
         'f.isExplicitUpload = true');
     }
 
-    if ($this->transforms) {
+    if ($this->transforms !== null) {
       $clauses = array();
       foreach ($this->transforms as $transform) {
         if ($transform['transform'] === true) {
@@ -259,25 +279,53 @@ final class PhabricatorFileQuery
       $where[] = qsprintf($conn_r, '(%Q)', implode(') OR (', $clauses));
     }
 
-    if ($this->dateCreatedAfter) {
+    if ($this->dateCreatedAfter !== null) {
       $where[] = qsprintf(
         $conn_r,
         'f.dateCreated >= %d',
         $this->dateCreatedAfter);
     }
 
-    if ($this->dateCreatedBefore) {
+    if ($this->dateCreatedBefore !== null) {
       $where[] = qsprintf(
         $conn_r,
         'f.dateCreated <= %d',
         $this->dateCreatedBefore);
     }
 
-    if ($this->contentHashes) {
+    if ($this->contentHashes !== null) {
       $where[] = qsprintf(
         $conn_r,
         'f.contentHash IN (%Ls)',
         $this->contentHashes);
+    }
+
+    if ($this->minLength !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'byteSize >= %d',
+        $this->minLength);
+    }
+
+    if ($this->maxLength !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'byteSize <= %d',
+        $this->maxLength);
+    }
+
+    if ($this->names !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'name in (%Ls)',
+        $this->names);
+    }
+
+    if ($this->isPartial !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'isPartial = %d',
+        (int)$this->isPartial);
     }
 
     return $this->formatWhereClause($where);

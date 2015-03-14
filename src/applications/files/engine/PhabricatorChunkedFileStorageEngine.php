@@ -105,7 +105,16 @@ final class PhabricatorChunkedFileStorageEngine
     }
 
     $input = $viewer->getAccountSecret().':'.$hash.':'.$viewer->getPHID();
-    return PhabricatorHash::digest($input);
+    return self::getChunkedHashForInput($input);
+  }
+
+  public static function getChunkedHashForInput($input) {
+    $rehash = PhabricatorHash::digest($input);
+
+    // Add a suffix to identify this as a chunk hash.
+    $rehash = substr($rehash, 0, -2).'-C';
+
+    return $rehash;
   }
 
   public function allocateChunks($length, array $properties) {

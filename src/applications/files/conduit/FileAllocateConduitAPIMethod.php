@@ -37,7 +37,7 @@ final class FileAllocateConduitAPIMethod
     $hash = $request->getValue('contentHash');
     $name = $request->getValue('name');
     $view_policy = $request->getValue('viewPolicy');
-    $content_length = $request->getValue('contentLength');
+    $length = $request->getValue('contentLength');
 
     $force_chunking = $request->getValue('forceChunking');
 
@@ -48,18 +48,14 @@ final class FileAllocateConduitAPIMethod
       'isExplicitUpload' => true,
     );
 
+    $file = null;
     if ($hash) {
       $file = PhabricatorFile::newFileFromContentHash(
         $hash,
         $properties);
+    }
 
-      if ($file) {
-        return array(
-          'upload' => false,
-          'filePHID' => $file->getPHID(),
-        );
-      }
-
+    if ($hash && !$file) {
       $chunked_hash = PhabricatorChunkedFileStorageEngine::getChunkedHash(
         $viewer,
         $hash);
@@ -67,17 +63,34 @@ final class FileAllocateConduitAPIMethod
         ->setViewer($viewer)
         ->withContentHashes(array($chunked_hash))
         ->executeOne();
+    }
 
-      if ($file) {
-        return array(
-          'upload' => (bool)$file->getIsPartial(),
-          'filePHID' => $file->getPHID(),
-        );
+    if (strlen($name) && !$hash && !$file) {
+      if ($length > PhabricatorFileStorageEngine::getChunkThreshold()) {
+        // If we don't have a hash, but this file is large enough to store in
+        // chunks and thus may be resumable, try to find a partially uploaded
+        // file by the same author with the same name and same length. This
+        // allows us to resume uploads in Javascript where we can't efficiently
+        // compute file hashes.
+        $file = id(new PhabricatorFileQuery())
+          ->setViewer($viewer)
+          ->withAuthorPHIDs(array($viewer->getPHID()))
+          ->withNames(array($name))
+          ->withLengthBetween($length, $length)
+          ->withIsPartial(true)
+          ->setLimit(1)
+          ->executeOne();
       }
     }
 
-    $engines = PhabricatorFileStorageEngine::loadStorageEngines(
-      $content_length);
+    if ($file) {
+      return array(
+        'upload' => (bool)$file->getIsPartial(),
+        'filePHID' => $file->getPHID(),
+      );
+    }
+
+    $engines = PhabricatorFileStorageEngine::loadStorageEngines($length);
     if ($engines) {
 
       if ($force_chunking) {
@@ -111,7 +124,7 @@ final class FileAllocateConduitAPIMethod
           );
         }
 
-        $file = $engine->allocateChunks($content_length, $chunk_properties);
+        $file = $engine->allocateChunks($length, $chunk_properties);
 
         return array(
           'upload' => true,
