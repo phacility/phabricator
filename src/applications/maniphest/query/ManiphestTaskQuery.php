@@ -979,7 +979,9 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
     $cursor = $this->loadCursorObject($task_id);
     if (!$cursor) {
-      return null;
+      // We may loop if we have a cursor and don't build a paging clause; fail
+      // instead.
+      throw new PhabricatorEmptyQueryException();
     }
 
     $columns = array();
