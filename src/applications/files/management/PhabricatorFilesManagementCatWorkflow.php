@@ -11,6 +11,16 @@ final class PhabricatorFilesManagementCatWorkflow
       ->setArguments(
         array(
           array(
+            'name' => 'begin',
+            'param' => 'bytes',
+            'help' => pht('Begin printing at a specific offset.'),
+          ),
+          array(
+            'name' => 'end',
+            'param' => 'bytes',
+            'help' => pht('End printing at a specific offset.'),
+          ),
+          array(
             'name'      => 'names',
             'wildcard'  => true,
           ),
@@ -31,7 +41,13 @@ final class PhabricatorFilesManagementCatWorkflow
 
     $file = head($this->loadFilesWithNames($names));
 
-    echo $file->loadFileData();
+    $begin = $args->getArg('begin');
+    $end = $args->getArg('end');
+
+    $iterator = $file->getFileDataIterator($begin, $end);
+    foreach ($iterator as $data) {
+      echo $data;
+    }
 
     return 0;
   }

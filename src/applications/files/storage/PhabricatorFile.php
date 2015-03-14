@@ -603,6 +603,31 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return $data;
   }
 
+
+  /**
+   * Return an iterable which emits file content bytes.
+   *
+   * @param int Offset for the start of data.
+   * @param int Offset for the end of data.
+   * @return Iterable Iterable object which emits requested data.
+   */
+  public function getFileDataIterator($begin = null, $end = null) {
+    // The default implementation is trivial and just loads the entire file
+    // upfront.
+    $data = $this->loadFileData();
+
+    if ($begin !== null && $end !== null) {
+      $data = substr($data, $begin, ($end - $begin));
+    } else if ($begin !== null) {
+      $data = substr($data, $begin);
+    } else if ($end !== null) {
+      $data = substr($data, 0, $end);
+    }
+
+    return array($data);
+  }
+
+
   public function getViewURI() {
     if (!$this->getPHID()) {
       throw new Exception(
