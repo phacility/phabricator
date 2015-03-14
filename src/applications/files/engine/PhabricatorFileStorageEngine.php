@@ -290,5 +290,20 @@ abstract class PhabricatorFileStorageEngine {
     return $engine->getChunkSize();
   }
 
+  public function getFileDataIterator(PhabricatorFile $file, $begin, $end) {
+    // The default implementation is trivial and just loads the entire file
+    // upfront.
+    $data = $file->loadFileData();
+
+    if ($begin !== null && $end !== null) {
+      $data = substr($data, $begin, ($end - $begin));
+    } else if ($begin !== null) {
+      $data = substr($data, $begin);
+    } else if ($end !== null) {
+      $data = substr($data, 0, $end);
+    }
+
+    return array($data);
+  }
 
 }

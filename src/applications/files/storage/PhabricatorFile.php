@@ -612,19 +612,8 @@ final class PhabricatorFile extends PhabricatorFileDAO
    * @return Iterable Iterable object which emits requested data.
    */
   public function getFileDataIterator($begin = null, $end = null) {
-    // The default implementation is trivial and just loads the entire file
-    // upfront.
-    $data = $this->loadFileData();
-
-    if ($begin !== null && $end !== null) {
-      $data = substr($data, $begin, ($end - $begin));
-    } else if ($begin !== null) {
-      $data = substr($data, $begin);
-    } else if ($end !== null) {
-      $data = substr($data, 0, $end);
-    }
-
-    return array($data);
+    $engine = $this->instantiateStorageEngine();
+    return $engine->getFileDataIterator($this, $begin, $end);
   }
 
 

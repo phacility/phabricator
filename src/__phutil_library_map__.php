@@ -1795,6 +1795,7 @@ phutil_register_library_map(array(
     'PhabricatorFile' => 'applications/files/storage/PhabricatorFile.php',
     'PhabricatorFileBundleLoader' => 'applications/files/query/PhabricatorFileBundleLoader.php',
     'PhabricatorFileChunk' => 'applications/files/storage/PhabricatorFileChunk.php',
+    'PhabricatorFileChunkIterator' => 'applications/files/engine/PhabricatorFileChunkIterator.php',
     'PhabricatorFileChunkQuery' => 'applications/files/query/PhabricatorFileChunkQuery.php',
     'PhabricatorFileCommentController' => 'applications/files/controller/PhabricatorFileCommentController.php',
     'PhabricatorFileComposeController' => 'applications/files/controller/PhabricatorFileComposeController.php',
@@ -5095,6 +5096,10 @@ phutil_register_library_map(array(
       'PhabricatorFileDAO',
       'PhabricatorPolicyInterface',
       'PhabricatorDestructibleInterface',
+    ),
+    'PhabricatorFileChunkIterator' => array(
+      'Phobject',
+      'Iterator',
     ),
     'PhabricatorFileChunkQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorFileCommentController' => 'PhabricatorFileController',

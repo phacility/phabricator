@@ -177,4 +177,15 @@ final class PhabricatorChunkedFileStorageEngine
     return 32;
   }
 
+  public function getFileDataIterator(PhabricatorFile $file, $begin, $end) {
+    $chunks = id(new PhabricatorFileChunkQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withChunkHandles(array($file->getStorageHandle()))
+      ->withByteRange($begin, $end)
+      ->needDataFiles(true)
+      ->execute();
+
+    return new PhabricatorFileChunkIterator($chunks, $begin, $end);
+  }
+
 }
