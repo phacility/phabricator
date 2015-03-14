@@ -25,8 +25,12 @@ final class PhabricatorFileSearchEngine
   }
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new PhabricatorFileQuery())
-      ->withAuthorPHIDs($saved->getParameter('authorPHIDs', array()));
+    $query = id(new PhabricatorFileQuery());
+
+    $author_phids = $saved->getParameter('authorPHIDs', array());
+    if ($author_phids) {
+      $query->withAuthorPHIDs($author_phids);
+    }
 
     if ($saved->getParameter('explicit')) {
       $query->showOnlyExplicitUploads(true);

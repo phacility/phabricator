@@ -117,12 +117,13 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
       }
     }
 
-    $data = $file->loadFileData();
     $response = new AphrontFileResponse();
-    $response->setContent($data);
     if ($cache_response) {
       $response->setCacheDurationInSeconds(60 * 60 * 24 * 30);
     }
+
+    $begin = null;
+    $end = null;
 
     // NOTE: It's important to accept "Range" requests when playing audio.
     // If we don't, Safari has difficulty figuring out how long sounds are
@@ -133,14 +134,18 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
     if ($range) {
       $matches = null;
       if (preg_match('/^bytes=(\d+)-(\d+)$/', $range, $matches)) {
+        // Note that the "Range" header specifies bytes differently than
+        // we do internally: the range 0-1 has 2 bytes (byte 0 and byte 1).
+        $begin = (int)$matches[1];
+        $end = (int)$matches[2] + 1;
+
         $response->setHTTPResponseCode(206);
-        $response->setRange((int)$matches[1], (int)$matches[2]);
+        $response->setRange($begin, ($end - 1));
       }
     } else if (isset($validated_token)) {
-      // consume the one-time token if we have one.
-      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-        $validated_token->delete();
-      unset($unguarded);
+      // We set this on the response, and the response deletes it after the
+      // transfer completes. This allows transfers to be resumed, in theory.
+      $response->setTemporaryFileToken($validated_token);
     }
 
     $is_viewable = $file->isViewableInBrowser();
@@ -164,6 +169,11 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
       $response->setMimeType($file->getMimeType());
       $response->setDownload($file->getName());
     }
+
+    $iterator = $file->getFileDataIterator($begin, $end);
+
+    $response->setContentLength($file->getByteSize());
+    $response->setContentIterator($iterator);
 
     return $response;
   }
