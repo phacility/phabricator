@@ -245,13 +245,16 @@ JX.install('ConpherenceThreadManager', {
     sendMessage: function(form, params) {
       params = this._getParams(params);
 
-      this._willSendMessageCallback();
-      var workflow = JX.Workflow.newFromForm(form, params)
+      var keep_enabled = true;
+
+      var workflow = JX.Workflow.newFromForm(form, params, keep_enabled)
         .setHandler(JX.bind(this, function(r) {
           this._latestTransactionID = r.latest_transaction_id;
           this._didSendMessageCallback(r);
         }));
       this.syncWorkflow(workflow, 'finally');
+
+      this._willSendMessageCallback();
     },
 
     handleDraftKeydown: function(e) {
