@@ -29,22 +29,27 @@ JX.install('Workflow', {
 
   statics : {
     _stack   : [],
-    newFromForm : function(form, data) {
+    newFromForm : function(form, data, keep_enabled) {
       var pairs = JX.DOM.convertFormToListOfPairs(form);
       for (var k in data) {
         pairs.push([k, data[k]]);
       }
 
-      // Disable form elements during the request
-      var inputs = [].concat(
-        JX.DOM.scry(form, 'input'),
-        JX.DOM.scry(form, 'button'),
-        JX.DOM.scry(form, 'textarea'));
-      for (var ii = 0; ii < inputs.length; ii++) {
-        if (inputs[ii].disabled) {
-          delete inputs[ii];
-        } else {
-          inputs[ii].disabled = true;
+      var inputs;
+      if (keep_enabled) {
+        inputs = [];
+      } else {
+        // Disable form elements during the request
+        inputs = [].concat(
+          JX.DOM.scry(form, 'input'),
+          JX.DOM.scry(form, 'button'),
+          JX.DOM.scry(form, 'textarea'));
+        for (var ii = 0; ii < inputs.length; ii++) {
+          if (inputs[ii].disabled) {
+            delete inputs[ii];
+          } else {
+            inputs[ii].disabled = true;
+          }
         }
       }
 
@@ -57,6 +62,7 @@ JX.install('Workflow', {
           inputs[ii] && (inputs[ii].disabled = false);
         }
       });
+
       return workflow;
     },
     newFromLink : function(link) {
