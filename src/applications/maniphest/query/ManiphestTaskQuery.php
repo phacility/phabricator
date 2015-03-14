@@ -1066,8 +1066,8 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
           }
           $columns[] = array(
             'name' => 'task.subpriority',
-            'value' => (int)$cursor->getSubpriority(),
-            'type' => 'int',
+            'value' => $cursor->getSubpriority(),
+            'type' => 'float',
             'reverse' => true,
           );
           $columns[] = array(
