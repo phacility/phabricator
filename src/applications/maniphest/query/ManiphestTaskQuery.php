@@ -1054,11 +1054,6 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     $app_columns = $this->buildApplicationSearchPagination($conn_r, $cursor);
     if ($app_columns) {
       $columns = array_merge($columns, $app_columns);
-      $columns[] = array(
-        'name' => 'task.id',
-        'value' => (int)$cursor->getID(),
-        'type' => 'int',
-      );
     } else {
       switch ($this->orderBy) {
         case self::ORDER_PRIORITY:
@@ -1082,11 +1077,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
           );
           break;
         case self::ORDER_CREATED:
-          $columns[] = array(
-            'name' => 'task.id',
-            'value' => (int)$cursor->getID(),
-            'type' => 'int',
-          );
+          // This just uses the ID column, below.
           break;
         case self::ORDER_MODIFIED:
           $columns[] = array(
@@ -1101,16 +1092,17 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
             'value' => $cursor->getTitle(),
             'type' => 'string',
           );
-          $columns[] = array(
-            'name' => 'task.id',
-            'value' => $cursor->getID(),
-            'type' => 'int',
-          );
           break;
         default:
           throw new Exception("Unknown order query '{$this->orderBy}'!");
       }
     }
+
+    $columns[] = array(
+      'name' => 'task.id',
+      'value' => $cursor->getID(),
+      'type' => 'int',
+    );
 
     return $this->buildPagingClauseFromMultipleColumns(
       $conn_r,
