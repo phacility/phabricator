@@ -281,6 +281,21 @@ JX.behavior('durable-column', function(config, statics) {
     'conpherence-message-form',
     _sendMessage);
 
+  // Send on enter if the shift key is not held.
+  JX.Stratcom.listen(
+    'keydown',
+    'conpherence-message-form',
+    function(e) {
+      if (e.getSpecialKey() != 'return') {
+        return;
+      }
+      var raw = e.getRawEvent();
+      if (raw.shiftKey) {
+        return;
+      }
+      _sendMessage(e);
+    });
+
   JX.Stratcom.listen(
     ['keydown'],
     'conpherence-durable-column-textarea',
