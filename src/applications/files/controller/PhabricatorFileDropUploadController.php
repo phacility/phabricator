@@ -42,9 +42,6 @@ final class PhabricatorFileDropUploadController
         'name' => $name,
         'contentLength' => $request->getInt('length'),
         'viewPolicy' => $view_policy,
-
-        // TODO: Remove.
-        // 'forceChunking' => true,
       );
 
       $result = id(new ConduitCall('file.allocate', $params))

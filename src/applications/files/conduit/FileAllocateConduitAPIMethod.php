@@ -17,9 +17,6 @@ final class FileAllocateConduitAPIMethod
       'contentLength' => 'int',
       'contentHash' => 'optional string',
       'viewPolicy' => 'optional string',
-
-      // TODO: Remove this, it's just here to make testing easier.
-      'forceChunking' => 'optional bool',
     );
   }
 
@@ -38,8 +35,6 @@ final class FileAllocateConduitAPIMethod
     $name = $request->getValue('name');
     $view_policy = $request->getValue('viewPolicy');
     $length = $request->getValue('contentLength');
-
-    $force_chunking = $request->getValue('forceChunking');
 
     $properties = array(
       'name' => $name,
@@ -92,14 +87,6 @@ final class FileAllocateConduitAPIMethod
 
     $engines = PhabricatorFileStorageEngine::loadStorageEngines($length);
     if ($engines) {
-
-      if ($force_chunking) {
-        foreach ($engines as $key => $engine) {
-          if (!$engine->isChunkEngine()) {
-            unset($engines[$key]);
-          }
-        }
-      }
 
       // Pick the first engine. If the file is small enough to fit into a
       // single engine without chunking, this will be a non-chunk engine and
