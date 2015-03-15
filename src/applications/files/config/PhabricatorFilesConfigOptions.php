@@ -147,26 +147,6 @@ final class PhabricatorFilesConfigOptions
             "Set this to a valid Amazon S3 bucket to store files there. You ".
             "must also configure S3 access keys in the 'Amazon Web Services' ".
             "group.")),
-     $this->newOption('storage.upload-size-limit', 'string', null)
-        ->setSummary(
-          pht('Limit to users in interfaces which allow uploading.'))
-        ->setDescription(
-          pht(
-            "Set the size of the largest file a user may upload. This is ".
-            "used to render text like 'Maximum file size: 10MB' on ".
-            "interfaces where users can upload files, and files larger than ".
-            "this size will be rejected. \n\n".
-            "NOTE: **Setting this to a large size is NOT sufficient to ".
-            "allow users to upload large files. You must also configure a ".
-            "number of other settings.** To configure file upload limits, ".
-            "consult the article 'Configuring File Upload Limits' in the ".
-            "documentation. Once you've configured some limit across all ".
-            "levels of the server, you can set this limit to an appropriate ".
-            "value and the UI will then reflect the actual configured ".
-            "limit.\n\n".
-            "Specify this limit in bytes, or using a 'K', 'M', or 'G' ".
-            "suffix."))
-        ->addExample('10M', pht('Allow Uploads 10MB or Smaller')),
      $this->newOption(
         'metamta.files.public-create-email',
         'string',
