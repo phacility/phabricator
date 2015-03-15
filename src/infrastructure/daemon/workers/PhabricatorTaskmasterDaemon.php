@@ -21,17 +21,15 @@ final class PhabricatorTaskmasterDaemon extends PhabricatorDaemon {
           $ex = $task->getExecutionException();
           if ($ex) {
             if ($ex instanceof PhabricatorWorkerPermanentFailureException) {
-              $this->log(
-                pht(
-                  'Task %s failed permanently: %s',
-                  $id,
-                  $ex->getMessage()));
+              throw new PhutilProxyException(
+                pht('Permanent failure while executing Task ID %d.', $id),
+                $ex);
             } else if ($ex instanceof PhabricatorWorkerYieldException) {
               $this->log(pht('Task %s yielded.', $id));
             } else {
               $this->log("Task {$id} failed!");
               throw new PhutilProxyException(
-                "Error while executing task ID {$id} from queue.",
+                pht('Error while executing Task ID %d.', $id),
                 $ex);
             }
           } else {
