@@ -61,7 +61,6 @@ final class PhabricatorFileDropUploadController
     // vanilla upload, so we need it.
     $data = PhabricatorStartup::getRawInput();
 
-
     $is_chunk_upload = $request->getBool('uploadchunk');
     if ($is_chunk_upload) {
       $params = array(

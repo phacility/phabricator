@@ -14,8 +14,6 @@ final class PhabricatorChunkedFileStorageEngine
   /**
    * We can write chunks if we have at least one valid storage engine
    * underneath us.
-   *
-   * This engine must not also be a chunk engine.
    */
   public function canWriteFiles() {
     return (bool)$this->getWritableEngine();
@@ -26,11 +24,6 @@ final class PhabricatorChunkedFileStorageEngine
   }
 
   public function isChunkEngine() {
-    return true;
-  }
-
-  public function isTestEngine() {
-    // TODO: For now, prevent this from actually being selected.
     return true;
   }
 
@@ -142,6 +135,12 @@ final class PhabricatorChunkedFileStorageEngine
     return $file;
   }
 
+  /**
+   * Find a storage engine which is suitable for storing chunks.
+   *
+   * This engine must be a writable engine, have a filesize limit larger than
+   * the chunk limit, and must not be a chunk engine itself.
+   */
   private function getWritableEngine() {
     // NOTE: We can't just load writable engines or we'll loop forever.
     $engines = PhabricatorFileStorageEngine::loadAllEngines();
@@ -172,9 +171,7 @@ final class PhabricatorChunkedFileStorageEngine
   }
 
   public function getChunkSize() {
-    // TODO: This is an artificially small size to make it easier to
-    // test chunking.
-    return 32;
+    return (4 * 1024 * 1024);
   }
 
   public function getFileDataIterator(PhabricatorFile $file, $begin, $end) {

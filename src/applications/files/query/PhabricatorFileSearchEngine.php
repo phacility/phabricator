@@ -176,6 +176,10 @@ final class PhabricatorFileSearchEngine
         $item->addIcon('blame', pht('Temporary'));
       }
 
+      if ($file->getIsPartial()) {
+        $item->addIcon('fa-exclamation-triangle orange', pht('Partial'));
+      }
+
       if (isset($highlighted_ids[$id])) {
         $item->setEffect('highlighted');
       }

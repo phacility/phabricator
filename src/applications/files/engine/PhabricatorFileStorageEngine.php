@@ -82,7 +82,9 @@ abstract class PhabricatorFileStorageEngine {
    * @return bool `true` if the engine has a filesize limit.
    * @task meta
    */
-  abstract public function hasFilesizeLimit();
+  public function hasFilesizeLimit() {
+    return true;
+  }
 
 
   /**
@@ -92,11 +94,19 @@ abstract class PhabricatorFileStorageEngine {
    * an engine has a limit. Engines without a limit can store files of any
    * size.
    *
+   * By default, engines define a limit which supports chunked storage of
+   * large files. In most cases, you should not change this limit, even if an
+   * engine has vast storage capacity: chunked storage makes large files more
+   * manageable and enables features like resumable uploads.
+   *
    * @return int Maximum storable file size, in bytes.
    * @task meta
    */
   public function getFilesizeLimit() {
-    throw new PhutilMethodNotImplementedException();
+    // NOTE: This 8MB limit is selected to be larger than the 4MB chunk size,
+    // but not much larger. Files between 0MB and 8MB will be stored normally;
+    // files larger than 8MB will be chunked.
+    return (1024 * 1024 * 8);
   }
 
 

@@ -264,31 +264,13 @@ JX.install('PhabricatorDragAndDropFileUpload', {
       for (var ii = 0; ii < chunks.length; ii++) {
         chunk = chunks[ii];
         if (!chunk.complete) {
-          this._readChunk(
-            file,
-            chunk,
-            JX.bind(this, this._didReadChunk, file, chunk));
+          this._uploadChunk(file, chunk);
           break;
         }
       }
     },
 
-    _readChunk: function(file, chunk, callback) {
-      var reader = new FileReader();
-      var blob = file.getRawFileObject().slice(chunk.byteStart, chunk.byteEnd);
-
-      reader.onload = function() {
-        callback(reader.result);
-      };
-
-      reader.onerror = function() {
-        this._failUpload(file, {error: reader.error.message});
-      };
-
-      reader.readAsBinaryString(blob);
-    },
-
-    _didReadChunk: function(file, chunk, data) {
+    _uploadChunk: function(file, chunk, callback) {
       file
         .setStatus('upload')
         .update();
@@ -316,8 +298,10 @@ JX.install('PhabricatorDragAndDropFileUpload', {
       req.listen('error', JX.bind(this, this._onUploadError, req, file));
       req.listen('uploadprogress', onprogress);
 
+      var blob = file.getRawFileObject().slice(chunk.byteStart, chunk.byteEnd);
+
       req
-        .setRawData(data)
+        .setRawData(blob)
         .send();
     },
 
@@ -390,7 +374,7 @@ JX.install('PhabricatorDragAndDropFileUpload', {
       this.invoke('didError', file);
     },
 
-    _onUploadError: function(file, req, error) {
+    _onUploadError: function(req, file, error) {
       file.setStatus('error');
 
       if (error) {
