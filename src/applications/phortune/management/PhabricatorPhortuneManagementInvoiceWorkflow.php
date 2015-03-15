@@ -153,7 +153,8 @@ final class PhabricatorPhortuneManagementInvoiceWorkflow
       array(
         'subscriptionPHID' => $subscription->getPHID(),
         'trigger.last-epoch' => $last_time,
-        'trigger.next-epoch' => $next_time,
+        'trigger.this-epoch' => $next_time,
+        'manual' => true,
       ),
       array(
         'objectPHID' => $subscription->getPHID(),
