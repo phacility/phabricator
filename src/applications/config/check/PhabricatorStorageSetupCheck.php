@@ -45,7 +45,7 @@ final class PhabricatorStorageSetupCheck extends PhabricatorSetupCheck {
     $post_max_size = ini_get('post_max_size');
     if ($post_max_size && ((int)$post_max_size > 0)) {
       $post_max_bytes = phutil_parse_bytes($post_max_size);
-      $post_max_need = (32 * 1024 * 1024) * 100;
+      $post_max_need = (32 * 1024 * 1024);
       if ($post_max_need > $post_max_bytes) {
         $summary = pht(
           'Set %s in your PHP configuration to at least 32MB '.
