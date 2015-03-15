@@ -5,6 +5,7 @@ final class PhabricatorDaemonLogQuery
 
   const STATUS_ALL = 'status-all';
   const STATUS_ALIVE = 'status-alive';
+  const STATUS_RUNNING = 'status-running';
 
   private $ids;
   private $notIDs;
@@ -170,6 +171,10 @@ final class PhabricatorDaemonLogQuery
     switch ($status) {
       case self::STATUS_ALL:
         return array();
+      case self::STATUS_RUNNING:
+        return array(
+          PhabricatorDaemonLog::STATUS_RUNNING,
+        );
       case self::STATUS_ALIVE:
         return array(
           PhabricatorDaemonLog::STATUS_UNKNOWN,
