@@ -296,6 +296,10 @@ JX.behavior('durable-column', function(config, statics) {
         return;
       }
 
+      // From here on, interpret this as a "send" action, not a literal
+      // newline.
+      e.kill();
+
       var textarea = _getColumnTextareaNode();
       if (!textarea.value.length) {
         // If there's no text, don't try to submit the form.
