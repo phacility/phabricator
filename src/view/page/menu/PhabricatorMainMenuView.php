@@ -375,6 +375,7 @@ final class PhabricatorMainMenuView extends AphrontView {
           'uri'         => '/conpherence/panel/',
           'countType'   => 'messages',
           'countNumber' => $message_count_number,
+          'unreadClass' => 'message-unread',
         ));
 
       $message_notification_dropdown = javelin_tag(
@@ -458,6 +459,7 @@ final class PhabricatorMainMenuView extends AphrontView {
           'uri'         => '/notification/panel/',
           'countType'   => 'notifications',
           'countNumber' => $count_number,
+          'unreadClass' => 'alert-unread',
         ));
 
       $notification_dropdown = javelin_tag(

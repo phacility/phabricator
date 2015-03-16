@@ -49,9 +49,9 @@ JX.behavior('aphlict-dropdown', function(config, statics) {
 
       JX.DOM.setContent(count, display);
       if (response.number === 0) {
-        JX.DOM.alterClass(bubble, 'alert-unread', false);
+        JX.DOM.alterClass(bubble, config.unreadClass, false);
       } else {
-        JX.DOM.alterClass(bubble, 'alert-unread', true);
+        JX.DOM.alterClass(bubble, config.unreadClass, true);
       }
       dirty = false;
       JX.DOM.alterClass(
