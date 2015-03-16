@@ -21,10 +21,13 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
 
   protected function executeChecks() {
     $max_allowed_packet = self::loadRawConfigValue('max_allowed_packet');
-    $recommended_minimum = 1024 * 1024;
+
+    // This primarily supports setting the filesize limit for MySQL to 8MB,
+    // which may produce a >16MB packet after escaping.
+    $recommended_minimum = (32 * 1024 * 1024);
     if ($max_allowed_packet < $recommended_minimum) {
       $message = pht(
-        "MySQL is configured with a very small 'max_allowed_packet' (%d), ".
+        "MySQL is configured with a small 'max_allowed_packet' (%d), ".
         "which may cause some large writes to fail. Strongly consider raising ".
         "this to at least %d in your MySQL configuration.",
         $max_allowed_packet,

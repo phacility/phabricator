@@ -33,6 +33,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
   const METADATA_IMAGE_HEIGHT = 'height';
   const METADATA_CAN_CDN = 'canCDN';
   const METADATA_BUILTIN = 'builtin';
+  const METADATA_PARTIAL = 'partial';
 
   protected $name;
   protected $mimeType;
@@ -50,6 +51,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
   protected $ttl;
   protected $isExplicitUpload = 1;
   protected $viewPolicy = PhabricatorPolicies::POLICY_USER;
+  protected $isPartial = 0;
 
   private $objects = self::ATTACHABLE;
   private $objectPHIDs = self::ATTACHABLE;
@@ -66,6 +68,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
     return id(new PhabricatorFile())
       ->setViewPolicy($view_policy)
+      ->setIsPartial(0)
       ->attachOriginalFile(null)
       ->attachObjects(array())
       ->attachObjectPHIDs(array());
@@ -90,6 +93,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
         'ttl' => 'epoch?',
         'isExplicitUpload' => 'bool?',
         'mailKey' => 'bytes20',
+        'isPartial' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
@@ -108,6 +112,9 @@ final class PhabricatorFile extends PhabricatorFileDAO
         ),
         'key_dateCreated' => array(
           'columns' => array('dateCreated'),
+        ),
+        'key_partial' => array(
+          'columns' => array('authorPHID', 'isPartial'),
         ),
       ),
     ) + parent::getConfiguration();
@@ -155,8 +162,6 @@ final class PhabricatorFile extends PhabricatorFileDAO
       throw new Exception('File size disagrees with uploaded size.');
     }
 
-    self::validateFileSize(strlen($file_data));
-
     return $file_data;
   }
 
@@ -174,20 +179,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
   }
 
   public static function newFromXHRUpload($data, array $params = array()) {
-    self::validateFileSize(strlen($data));
     return self::newFromFileData($data, $params);
-  }
-
-  private static function validateFileSize($size) {
-    $limit = PhabricatorEnv::getEnvConfig('storage.upload-size-limit');
-    if (!$limit) {
-      return;
-    }
-
-    $limit = phutil_parse_bytes($limit);
-    if ($size > $limit) {
-      throw new PhabricatorFileUploadException(-1000);
-    }
   }
 
 
@@ -260,6 +252,43 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
       return $new_file;
     }
+
+    return $file;
+  }
+
+  public static function newChunkedFile(
+    PhabricatorFileStorageEngine $engine,
+    $length,
+    array $params) {
+
+    $file = PhabricatorFile::initializeNewFile();
+
+    $file->setByteSize($length);
+
+    // TODO: We might be able to test the first chunk in order to figure
+    // this out more reliably, since MIME detection usually examines headers.
+    // However, enormous files are probably always either actually raw data
+    // or reasonable to treat like raw data.
+    $file->setMimeType('application/octet-stream');
+
+    $chunked_hash = idx($params, 'chunkedHash');
+    if ($chunked_hash) {
+      $file->setContentHash($chunked_hash);
+    } else {
+      // See PhabricatorChunkedFileStorageEngine::getChunkedHash() for some
+      // discussion of this.
+      $seed = Filesystem::readRandomBytes(64);
+      $hash = PhabricatorChunkedFileStorageEngine::getChunkedHashForInput(
+        $seed);
+      $file->setContentHash($hash);
+    }
+
+    $file->setStorageEngine($engine->getEngineIdentifier());
+    $file->setStorageHandle(PhabricatorFileChunk::newChunkHandle());
+    $file->setStorageFormat(self::STORAGE_FORMAT_RAW);
+    $file->setIsPartial(1);
+
+    $file->readPropertiesFromParameters($params);
 
     return $file;
   }
@@ -559,6 +588,20 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return $data;
   }
 
+
+  /**
+   * Return an iterable which emits file content bytes.
+   *
+   * @param int Offset for the start of data.
+   * @param int Offset for the end of data.
+   * @return Iterable Iterable object which emits requested data.
+   */
+  public function getFileDataIterator($begin = null, $end = null) {
+    $engine = $this->instantiateStorageEngine();
+    return $engine->getFileDataIterator($this, $begin, $end);
+  }
+
+
   public function getViewURI() {
     if (!$this->getPHID()) {
       throw new Exception(
@@ -592,9 +635,16 @@ final class PhabricatorFile extends PhabricatorFileDAO
     }
     $parts[] = $name;
 
-    $path = implode('/', $parts);
+    $path = '/'.implode('/', $parts);
 
-    return PhabricatorEnv::getCDNURI($path);
+    // If this file is only partially uploaded, we're just going to return a
+    // local URI to make sure that Ajax works, since the page is inevitably
+    // going to give us an error back.
+    if ($this->getIsPartial()) {
+      return PhabricatorEnv::getURI($path);
+    } else {
+      return PhabricatorEnv::getCDNURI($path);
+    }
   }
 
   /**

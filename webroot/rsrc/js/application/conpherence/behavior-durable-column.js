@@ -102,21 +102,20 @@ JX.behavior('durable-column', function(config, statics) {
     JX.DOM.appendContent(messages, JX.$H(r.transactions));
     scrollbar.scrollTo(messages.scrollHeight);
   });
+
   threadManager.setWillSendMessageCallback(function() {
-    _markLoading(true);
+    // Wipe the textarea immediately so the user can start typing more text.
+    var textarea = _getColumnTextareaNode();
+    textarea.value = '';
+    _focusColumnTextareaNode();
   });
+
   threadManager.setDidSendMessageCallback(function(r) {
     var messages = _getColumnMessagesNode();
     JX.DOM.appendContent(messages, JX.$H(r.transactions));
     scrollbar.scrollTo(messages.scrollHeight);
-
-    var textarea = _getColumnTextareaNode();
-    textarea.value = '';
-
-    _markLoading(false);
-
-    _focusColumnTextareaNode();
   });
+
   threadManager.setWillUpdateWorkflowCallback(function() {
     JX.Stratcom.invoke('notification-panel-close');
   });
@@ -281,11 +280,62 @@ JX.behavior('durable-column', function(config, statics) {
     'conpherence-message-form',
     _sendMessage);
 
+  // Send on enter if the shift key is not held.
+  JX.Stratcom.listen(
+    'keydown',
+    'conpherence-message-form',
+    function(e) {
+      if (e.getSpecialKey() != 'return') {
+        return;
+      }
+
+      var raw = e.getRawEvent();
+      if (raw.shiftKey) {
+        // If the shift key is pressed, let the browser write a newline into
+        // the textarea.
+        return;
+      }
+
+      // From here on, interpret this as a "send" action, not a literal
+      // newline.
+      e.kill();
+
+      var textarea = _getColumnTextareaNode();
+      if (!textarea.value.length) {
+        // If there's no text, don't try to submit the form.
+        return;
+      }
+
+      _sendMessage(e);
+    });
+
   JX.Stratcom.listen(
     ['keydown'],
     'conpherence-durable-column-textarea',
     function (e) {
       threadManager.handleDraftKeydown(e);
+    });
+
+  // HTML5 placeholders are rendered as long as the input is empty, even if the
+  // input is currently focused. This is undesirable for the chat input,
+  // especially immediately after sending a message. Hide the placeholder while
+  // the input is focused.
+  JX.Stratcom.listen(
+    ['focus', 'blur'],
+    'conpherence-durable-column-textarea',
+    function (e) {
+      var node = e.getTarget();
+      if (e.getType() == 'focus') {
+        if (node.placeholder) {
+          node.placeholderStorage = node.placeholder;
+          node.placeholder = '';
+        }
+      } else {
+        if (node.placeholderStorage) {
+          node.placeholder = node.placeholderStorage;
+          node.placeholderStorage = '';
+        }
+      }
     });
 
   if (config.visible) {

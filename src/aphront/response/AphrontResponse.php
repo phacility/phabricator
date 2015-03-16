@@ -18,6 +18,22 @@ abstract class AphrontResponse {
     return $this->request;
   }
 
+
+/* -(  Content  )------------------------------------------------------------ */
+
+
+  public function getContentIterator() {
+    return array($this->buildResponseString());
+  }
+
+  public function buildResponseString() {
+    throw new PhutilMethodNotImplementedException();
+  }
+
+
+/* -(  Metadata  )----------------------------------------------------------- */
+
+
   public function getHeaders() {
     $headers = array();
     if (!$this->frameable) {
@@ -165,6 +181,8 @@ abstract class AphrontResponse {
     return gmdate('D, d M Y H:i:s', $epoch_timestamp).' GMT';
   }
 
-  abstract public function buildResponseString();
+  public function didCompleteWrite($aborted) {
+    return;
+  }
 
 }

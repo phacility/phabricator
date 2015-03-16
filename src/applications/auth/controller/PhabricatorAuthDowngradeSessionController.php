@@ -42,7 +42,7 @@ final class PhabricatorAuthDowngradeSessionController
           'On the plus side, that purple notification bubble will '.
           'disappear.'))
       ->addSubmitButton(pht('Leave High Security'))
-      ->addCancelButton($panel_uri, pht('Stay in High Security'));
+      ->addCancelButton($panel_uri, pht('Stay'));
   }
 
 

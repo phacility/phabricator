@@ -159,7 +159,6 @@ final class PhortuneCartCheckoutController
         array(
           'class' => 'button grey',
           'href'  => $payment_method_uri,
-          'sigil' => 'workflow',
         ),
         pht('Add New Payment Method'));
       $form->appendChild(

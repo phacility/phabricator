@@ -21,6 +21,15 @@ final class AphrontPHPHTTPSink extends AphrontHTTPSink {
 
   protected function emitData($data) {
     echo $data;
+
+    // Try to push the data to the browser. This has a lot of caveats around
+    // browser buffering and display behavior, but approximately works most
+    // of the time.
+    flush();
+  }
+
+  protected function isWritable() {
+    return !connection_aborted();
   }
 
 }

@@ -5,6 +5,7 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
   private $phid;
   private $key;
   private $token;
+  private $file;
 
   public function willProcessRequest(array $data) {
     $this->phid = $data['phid'];
@@ -16,20 +17,9 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
     return false;
   }
 
-  protected function checkFileAndToken($file) {
-    if (!$file) {
-      return new Aphront404Response();
-    }
-
-    if (!$file->validateSecretKey($this->key)) {
-      return new Aphront403Response();
-    }
-
-    return null;
-  }
-
   public function processRequest() {
     $request = $this->getRequest();
+    $viewer = $this->getViewer();
 
     $alt = PhabricatorEnv::getEnvConfig('security.alternate-file-domain');
     $base_uri = PhabricatorEnv::getEnvConfig('phabricator.base-uri');
@@ -44,32 +34,22 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
       // Alternate files domain isn't configured or it's set
       // to the same as the default domain
 
-      // load the file with permissions checks;
-      $file = id(new PhabricatorFileQuery())
-        ->setViewer($request->getUser())
-        ->withPHIDs(array($this->phid))
-        ->executeOne();
-
-      $error_response = $this->checkFileAndToken($file);
-      if ($error_response) {
-        return $error_response;
+      $response = $this->loadFile($viewer);
+      if ($response) {
+        return $response;
       }
+      $file = $this->getFile();
 
       // when the file is not CDNable, don't allow cache
       $cache_response = $file->getCanCDN();
     } else if ($req_domain != $alt_domain) {
       // Alternate domain is configured but this request isn't using it
 
-      // load the file with permissions checks;
-      $file = id(new PhabricatorFileQuery())
-        ->setViewer($request->getUser())
-        ->withPHIDs(array($this->phid))
-        ->executeOne();
-
-      $error_response = $this->checkFileAndToken($file);
-      if ($error_response) {
-        return $error_response;
+      $response = $this->loadFile($viewer);
+      if ($response) {
+        return $response;
       }
+      $file = $this->getFile();
 
       // if the user can see the file, generate a token;
       // redirect to the alt domain with the token;
@@ -82,18 +62,15 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
         ->setURI($token_uri);
 
     } else {
-      // We are using the alternate domain
+      // We are using the alternate domain. We don't have authentication
+      // on this domain, so we bypass policy checks when loading the file.
 
-      // load the file, bypassing permission checks;
-      $file = id(new PhabricatorFileQuery())
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
-        ->withPHIDs(array($this->phid))
-        ->executeOne();
-
-      $error_response = $this->checkFileAndToken($file);
-      if ($error_response) {
-        return $error_response;
+      $bypass_policies = PhabricatorUser::getOmnipotentUser();
+      $response = $this->loadFile($bypass_policies);
+      if ($response) {
+        return $response;
       }
+      $file = $this->getFile();
 
       $acquire_token_uri = id(new PhutilURI($file->getViewURI()))
         ->setDomain($main_domain);
@@ -140,12 +117,13 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
       }
     }
 
-    $data = $file->loadFileData();
     $response = new AphrontFileResponse();
-    $response->setContent($data);
     if ($cache_response) {
       $response->setCacheDurationInSeconds(60 * 60 * 24 * 30);
     }
+
+    $begin = null;
+    $end = null;
 
     // NOTE: It's important to accept "Range" requests when playing audio.
     // If we don't, Safari has difficulty figuring out how long sounds are
@@ -156,14 +134,18 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
     if ($range) {
       $matches = null;
       if (preg_match('/^bytes=(\d+)-(\d+)$/', $range, $matches)) {
+        // Note that the "Range" header specifies bytes differently than
+        // we do internally: the range 0-1 has 2 bytes (byte 0 and byte 1).
+        $begin = (int)$matches[1];
+        $end = (int)$matches[2] + 1;
+
         $response->setHTTPResponseCode(206);
-        $response->setRange((int)$matches[1], (int)$matches[2]);
+        $response->setRange($begin, ($end - 1));
       }
     } else if (isset($validated_token)) {
-      // consume the one-time token if we have one.
-      $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-        $validated_token->delete();
-      unset($unguarded);
+      // We set this on the response, and the response deletes it after the
+      // transfer completes. This allows transfers to be resumed, in theory.
+      $response->setTemporaryFileToken($validated_token);
     }
 
     $is_viewable = $file->isViewableInBrowser();
@@ -188,6 +170,11 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
       $response->setDownload($file->getName());
     }
 
+    $iterator = $file->getFileDataIterator($begin, $end);
+
+    $response->setContentLength($file->getByteSize());
+    $response->setContentIterator($iterator);
+
     return $response;
   }
 
@@ -203,6 +190,46 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
     }
 
     return $uri;
+  }
+
+  private function loadFile(PhabricatorUser $viewer) {
+    $file = id(new PhabricatorFileQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($this->phid))
+      ->executeOne();
+
+    if (!$file) {
+      return new Aphront404Response();
+    }
+
+    if (!$file->validateSecretKey($this->key)) {
+      return new Aphront403Response();
+    }
+
+    if ($file->getIsPartial()) {
+      // We may be on the CDN domain, so we need to use a fully-qualified URI
+      // here to make sure we end up back on the main domain.
+      $info_uri = PhabricatorEnv::getURI($file->getInfoURI());
+
+      return $this->newDialog()
+        ->setTitle(pht('Partial Upload'))
+        ->appendParagraph(
+          pht(
+            'This file has only been partially uploaded. It must be '.
+            'uploaded completely before you can download it.'))
+        ->addCancelButton($info_uri);
+    }
+
+    $this->file = $file;
+
+    return null;
+  }
+
+  private function getFile() {
+    if (!$this->file) {
+      throw new Exception(pht('Call loadFile() before getFile()!'));
+    }
+    return $this->file;
   }
 
 }

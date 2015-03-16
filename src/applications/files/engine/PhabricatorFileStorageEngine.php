@@ -82,7 +82,9 @@ abstract class PhabricatorFileStorageEngine {
    * @return bool `true` if the engine has a filesize limit.
    * @task meta
    */
-  abstract public function hasFilesizeLimit();
+  public function hasFilesizeLimit() {
+    return true;
+  }
 
 
   /**
@@ -92,11 +94,19 @@ abstract class PhabricatorFileStorageEngine {
    * an engine has a limit. Engines without a limit can store files of any
    * size.
    *
+   * By default, engines define a limit which supports chunked storage of
+   * large files. In most cases, you should not change this limit, even if an
+   * engine has vast storage capacity: chunked storage makes large files more
+   * manageable and enables features like resumable uploads.
+   *
    * @return int Maximum storable file size, in bytes.
    * @task meta
    */
   public function getFilesizeLimit() {
-    throw new PhutilMethodNotImplementedException();
+    // NOTE: This 8MB limit is selected to be larger than the 4MB chunk size,
+    // but not much larger. Files between 0MB and 8MB will be stored normally;
+    // files larger than 8MB will be chunked.
+    return (1024 * 1024 * 8);
   }
 
 
@@ -109,6 +119,21 @@ abstract class PhabricatorFileStorageEngine {
    * @task meta
    */
   public function isTestEngine() {
+    return false;
+  }
+
+
+  /**
+   * Identifies chunking storage engines.
+   *
+   * If this is a storage engine which splits files into chunks and stores the
+   * chunks in other engines, it can return `true` to signal that other
+   * chunking engines should not try to store data here.
+   *
+   * @return bool True if this is a chunk engine.
+   * @task meta
+   */
+  public function isChunkEngine() {
     return false;
   }
 
@@ -238,6 +263,57 @@ abstract class PhabricatorFileStorageEngine {
     }
 
     return $writable;
+  }
+
+
+  /**
+   * Return the largest file size which can be uploaded without chunking.
+   *
+   * Files smaller than this will always upload in one request, so clients
+   * can safely skip the allocation step.
+   *
+   * @return int|null Byte size, or `null` if there is no chunk support.
+   */
+  public static function getChunkThreshold() {
+    $engines = self::loadWritableEngines();
+
+    $min = null;
+    foreach ($engines as $engine) {
+      if (!$engine->isChunkEngine()) {
+        continue;
+      }
+
+      if (!$min) {
+        $min = $engine;
+        continue;
+      }
+
+      if ($min->getChunkSize() > $engine->getChunkSize()) {
+        $min = $engine->getChunkSize();
+      }
+    }
+
+    if (!$min) {
+      return null;
+    }
+
+    return $engine->getChunkSize();
+  }
+
+  public function getFileDataIterator(PhabricatorFile $file, $begin, $end) {
+    // The default implementation is trivial and just loads the entire file
+    // upfront.
+    $data = $file->loadFileData();
+
+    if ($begin !== null && $end !== null) {
+      $data = substr($data, $begin, ($end - $begin));
+    } else if ($begin !== null) {
+      $data = substr($data, $begin);
+    } else if ($end !== null) {
+      $data = substr($data, 0, $end);
+    }
+
+    return array($data);
   }
 
 }

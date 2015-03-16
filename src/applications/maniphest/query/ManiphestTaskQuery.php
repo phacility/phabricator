@@ -979,7 +979,9 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
     $cursor = $this->loadCursorObject($task_id);
     if (!$cursor) {
-      return null;
+      // We may loop if we have a cursor and don't build a paging clause; fail
+      // instead.
+      throw new PhabricatorEmptyQueryException();
     }
 
     $columns = array();
@@ -1052,11 +1054,6 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     $app_columns = $this->buildApplicationSearchPagination($conn_r, $cursor);
     if ($app_columns) {
       $columns = array_merge($columns, $app_columns);
-      $columns[] = array(
-        'name' => 'task.id',
-        'value' => (int)$cursor->getID(),
-        'type' => 'int',
-      );
     } else {
       switch ($this->orderBy) {
         case self::ORDER_PRIORITY:
@@ -1069,8 +1066,8 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
           }
           $columns[] = array(
             'name' => 'task.subpriority',
-            'value' => (int)$cursor->getSubpriority(),
-            'type' => 'int',
+            'value' => $cursor->getSubpriority(),
+            'type' => 'float',
             'reverse' => true,
           );
           $columns[] = array(
@@ -1080,11 +1077,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
           );
           break;
         case self::ORDER_CREATED:
-          $columns[] = array(
-            'name' => 'task.id',
-            'value' => (int)$cursor->getID(),
-            'type' => 'int',
-          );
+          // This just uses the ID column, below.
           break;
         case self::ORDER_MODIFIED:
           $columns[] = array(
@@ -1099,16 +1092,17 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
             'value' => $cursor->getTitle(),
             'type' => 'string',
           );
-          $columns[] = array(
-            'name' => 'task.id',
-            'value' => $cursor->getID(),
-            'type' => 'int',
-          );
           break;
         default:
           throw new Exception("Unknown order query '{$this->orderBy}'!");
       }
     }
+
+    $columns[] = array(
+      'name' => 'task.id',
+      'value' => $cursor->getID(),
+      'type' => 'int',
+    );
 
     return $this->buildPagingClauseFromMultipleColumns(
       $conn_r,

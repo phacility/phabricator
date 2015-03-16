@@ -161,13 +161,25 @@
   font-size: 12px;
   padding: 0px 5px;
 }
+
 .device-phone .conpherence-message-pane .phabricator-transaction-detail {
   min-height: auto;
 }
 
-.conpherence-message-pane .conpherence-edited {
+.conpherence-message-pane .conpherence-edited .phabricator-transaction-content {
   color: {$lightgreytext};
+  font-size: 13px;
   margin: 0;
+  padding: 0;
+  float: left;
+}
+
+.conpherence-message-pane .conpherence-edited .phabricator-transaction-header {
+  float: right;
+}
+
+.conpherence-message-pane .conpherence-edited {
+  padding-top: 12px;
 }
 
 .device-phone .conpherence-message-pane .conpherence-edited {
@@ -175,13 +187,8 @@
   margin: 0 10px;
 }
 
-.conpherence-message-pane .conpherence-edited .phabricator-transaction-content {
-  padding: 0 0 4px 45px;
-}
-
 .conpherence-message-pane .conpherence-edited
   .phabricator-transaction-content a {
-  font-weight: bold;
   color: {$darkbluetext};
 }
 
@@ -192,8 +199,9 @@
 
 .conpherence-message-pane .phabricator-transaction-info,
 .conpherence-message-pane .phabricator-content-source-view {
-  color: #b7b7b7;
+  color: {$lightbluetext};
   line-height: 16px;
+  font-size: 12px;
 }
 
 .conpherence-message-pane .phabricator-transaction-header,

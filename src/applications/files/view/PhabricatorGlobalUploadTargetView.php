@@ -24,11 +24,12 @@ final class PhabricatorGlobalUploadTargetView extends AphrontView {
     require_celerity_resource('global-drag-and-drop-css');
 
     Javelin::initBehavior('global-drag-and-drop', array(
-      'ifSupported'   => $this->showIfSupportedID,
-      'instructions'  => $instructions_id,
-      'uploadURI'     => '/file/dropupload/',
-      'browseURI'     => '/file/query/authored/',
-      'viewPolicy'    => PhabricatorPolicies::getMostOpenPolicy(),
+      'ifSupported' => $this->showIfSupportedID,
+      'instructions' => $instructions_id,
+      'uploadURI' => '/file/dropupload/',
+      'browseURI' => '/file/query/authored/',
+      'viewPolicy' => PhabricatorPolicies::getMostOpenPolicy(),
+      'chunkThreshold' => PhabricatorFileStorageEngine::getChunkThreshold(),
     ));
 
     return phutil_tag(

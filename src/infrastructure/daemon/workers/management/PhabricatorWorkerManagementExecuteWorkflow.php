@@ -47,7 +47,7 @@ final class PhabricatorWorkerManagementExecuteWorkflow
 
       $console->writeOut("Executing task {$id} ({$class})...");
 
-      $task->executeTask();
+      $task = $task->executeTask();
       $ex = $task->getExecutionException();
 
       if ($ex) {

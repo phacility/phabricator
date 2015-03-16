@@ -33,11 +33,6 @@ final class PhabricatorS3FileStorageEngine
   }
 
 
-  public function hasFilesizeLimit() {
-    return false;
-  }
-
-
 /* -(  Managing File Data  )------------------------------------------------- */
 
 

@@ -252,6 +252,9 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         case 'int':
           $value = qsprintf($conn, '%d', $column['value']);
           break;
+        case 'float':
+          $value = qsprintf($conn, '%f', $column['value']);
+          break;
         case 'string':
           $value = qsprintf($conn, '%s', $column['value']);
           break;
