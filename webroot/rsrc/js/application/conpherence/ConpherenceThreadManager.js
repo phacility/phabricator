@@ -167,6 +167,23 @@ JX.install('ConpherenceThreadManager', {
         }));
     },
 
+    _shouldUpdateDOM: function(r) {
+      if (this._updating &&
+          this._updating.threadPHID == this._loadedThreadPHID) {
+        // we have a different, more current update in progress so
+        // return early
+        if (r.latest_transaction_id < this._updating.knownID) {
+          return false;
+        }
+        // we need to let the update code handle things here
+        if (r.latest_transaction_id > this._updating.knownID) {
+          this._updating.knownID = r.latest_transaction_id;
+          return false;
+        }
+      }
+      return true;
+    },
+
     _updateThread: function() {
       var params = this._getParams({
         action: 'load',
@@ -177,7 +194,16 @@ JX.install('ConpherenceThreadManager', {
       var workflow = new JX.Workflow(uri)
         .setData(params)
         .setHandler(JX.bind(this, function(r) {
+          if (this._updating &&
+              this._updating.threadPHID == this._loadedThreadPHID) {
+            // we have a different, more current update in progress so
+            // return early
+            if (r.latest_transaction_id < this._updating.knownID) {
+              return;
+            }
+          }
           this._latestTransactionID = r.latest_transaction_id;
+          this._updating.knownID = r.latest_transaction_id;
           this._didUpdateThreadCallback(r);
         }));
 
@@ -191,10 +217,10 @@ JX.install('ConpherenceThreadManager', {
       };
       workflow.listen(stage, JX.bind(this, function() {
         // TODO - do we need to handle if we switch threads somehow?
-        var need_sync = (this._updating.knownID > this._latestTransactionID);
-        this._updating = null;
+        var need_sync = this._updating &&
+          (this._updating.knownID > this._latestTransactionID);
         if (need_sync) {
-          this._updateThread();
+          return this._updateThread();
         }
       }));
       workflow.start();
@@ -206,8 +232,10 @@ JX.install('ConpherenceThreadManager', {
       var workflow = new JX.Workflow.newFromLink(link)
         .setData(params)
         .setHandler(JX.bind(this, function(r) {
-          this._latestTransactionID = r.latest_transaction_id;
-          this._didUpdateWorkflowCallback(r);
+          if (this._shouldUpdateDOM(r)) {
+            this._latestTransactionID = r.latest_transaction_id;
+            this._didUpdateWorkflowCallback(r);
+          }
         }));
       this.syncWorkflow(workflow, params.stage);
     },
@@ -249,8 +277,10 @@ JX.install('ConpherenceThreadManager', {
 
       var workflow = JX.Workflow.newFromForm(form, params, keep_enabled)
         .setHandler(JX.bind(this, function(r) {
-          this._latestTransactionID = r.latest_transaction_id;
-          this._didSendMessageCallback(r);
+          if (this._shouldUpdateDOM(r)) {
+            this._latestTransactionID = r.latest_transaction_id;
+            this._didSendMessageCallback(r);
+          }
         }));
       this.syncWorkflow(workflow, 'finally');
 
