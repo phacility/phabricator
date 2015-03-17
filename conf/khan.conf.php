@@ -90,7 +90,6 @@ return array(
 
   // Let people upload giant files.
   'storage.mysql-engine.max-size' => 0,
-  'storage.upload-size-limit' => '20M',
 
   // pygments doesn't know .q files are sql or that jsx is javascript(-ish).
   // We add that.  (The .arcconfig comes default.conf; I'm not sure if
