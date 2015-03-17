@@ -202,8 +202,10 @@ JX.install('ConpherenceThreadManager', {
               return;
             }
           }
-          this._latestTransactionID = r.latest_transaction_id;
           this._updating.knownID = r.latest_transaction_id;
+          this._latestTransactionID = r.latest_transaction_id;
+          JX.Stratcom.invoke('notification-panel-update', null, {});
+
           this._didUpdateThreadCallback(r);
         }));
 
@@ -234,6 +236,8 @@ JX.install('ConpherenceThreadManager', {
         .setHandler(JX.bind(this, function(r) {
           if (this._shouldUpdateDOM(r)) {
             this._latestTransactionID = r.latest_transaction_id;
+            JX.Stratcom.invoke('notification-panel-update', null, {});
+
             this._didUpdateWorkflowCallback(r);
           }
         }));
@@ -259,6 +263,7 @@ JX.install('ConpherenceThreadManager', {
         this._loadedThreadID = r.threadID;
         this._loadedThreadPHID = r.threadPHID;
         this._latestTransactionID = r.latestTransactionID;
+        JX.Stratcom.invoke('notification-panel-update', null, {});
 
         this._didLoadThreadCallback(r);
       });
@@ -279,6 +284,8 @@ JX.install('ConpherenceThreadManager', {
         .setHandler(JX.bind(this, function(r) {
           if (this._shouldUpdateDOM(r)) {
             this._latestTransactionID = r.latest_transaction_id;
+            JX.Stratcom.invoke('notification-panel-update', null, {});
+
             this._didSendMessageCallback(r);
           }
         }));
