@@ -4,6 +4,7 @@ final class ConpherenceThread extends ConpherenceDAO
   implements PhabricatorPolicyInterface {
 
   protected $title;
+  protected $isRoom = 0;
   protected $messageCount;
   protected $recentParticipantPHIDs = array();
   protected $mailKey;
@@ -29,10 +30,13 @@ final class ConpherenceThread extends ConpherenceDAO
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'title' => 'text255?',
+        'isRoom' => 'bool',
         'messageCount' => 'uint64',
         'mailKey' => 'text20',
       ),
       self::CONFIG_KEY_SCHEMA => array(
+        'key_room' => array(
+          'columns' => array('isRoom', 'dateModified'),),
         'key_phid' => null,
         'phid' => array(
           'columns' => array('phid'),
