@@ -188,6 +188,7 @@ abstract class LiskDAO {
   private static $transactionIsolationLevel = 0;
 
   private $ephemeral = false;
+  private $forcedConnection;
 
   private static $connections       = array();
 
@@ -276,6 +277,21 @@ abstract class LiskDAO {
     }
 
     self::$connections[$key] = $connection;
+    return $this;
+  }
+
+
+  /**
+   * Force an object to use a specific connection.
+   *
+   * This overrides all connection management and forces the object to use
+   * a specific connection when interacting with the database.
+   *
+   * @param AphrontDatabaseConnection Connection to force this object to use.
+   * @task conn
+   */
+  public function setForcedConnection(AphrontDatabaseConnection $connection) {
+    $this->forcedConnection = $connection;
     return $this;
   }
 
@@ -939,6 +955,10 @@ abstract class LiskDAO {
   public function establishConnection($mode, $force_new = false) {
     if ($mode != 'r' && $mode != 'w') {
       throw new Exception("Unknown mode '{$mode}', should be 'r' or 'w'.");
+    }
+
+    if ($this->forcedConnection) {
+      return $this->forcedConnection;
     }
 
     if (self::shouldIsolateAllLiskEffectsToCurrentProcess()) {
