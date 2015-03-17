@@ -45,7 +45,7 @@ final class FileInfoConduitAPIMethod extends FileConduitAPIMethod {
       throw new ConduitException('ERR-NOT-FOUND');
     }
 
-    $uri = $file->getBestURI();
+    $uri = $file->getInfoURI();
 
     return array(
       'id'            => $file->getID(),
