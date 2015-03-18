@@ -3,6 +3,11 @@
 final class FeedPublisherHTTPWorker extends FeedPushWorker {
 
   protected function doWork() {
+    if (PhabricatorEnv::getEnvConfig('phabricator.silent')) {
+      // Don't invoke hooks in silent mode.
+      return;
+    }
+
     $story = $this->loadFeedStory();
     $data = $story->getStoryData();
 

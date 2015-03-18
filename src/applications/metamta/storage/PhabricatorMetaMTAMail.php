@@ -633,6 +633,15 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
         }
       }
 
+      if (PhabricatorEnv::getEnvConfig('phabricator.silent')) {
+        $this->setStatus(self::STATUS_VOID);
+        $this->setMessage(
+          pht(
+            'Phabricator is running in silent mode. See `phabricator.silent` '.
+            'in the configuration to change this setting.'));
+        return $this->save();
+      }
+
       $mailer->addHeader('X-Phabricator-Sent-This-Message', 'Yes');
       $mailer->addHeader('X-Mail-Transport-Agent', 'MetaMTA');
 

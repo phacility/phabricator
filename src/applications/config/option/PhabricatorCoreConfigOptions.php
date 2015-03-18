@@ -214,12 +214,35 @@ final class PhabricatorCoreConfigOptions
         ->setDescription(pht('Cache namespace.')),
       $this->newOption('phabricator.allow-email-users', 'bool', false)
         ->setBoolOptions(
-            array(
-              pht('Allow'),
-              pht('Disallow'),
-              ))->setDescription(
-                 pht(
-                   'Allow non-members to interact with tasks over email.')),
+          array(
+            pht('Allow'),
+            pht('Disallow'),
+          ))
+        ->setDescription(
+           pht('Allow non-members to interact with tasks over email.')),
+      $this->newOption('phabricator.silent', 'bool', false)
+        ->setLocked(true)
+        ->setBoolOptions(
+          array(
+            pht('Run Silently'),
+            pht('Run Normally'),
+          ))
+        ->setSummary(pht('Stop Phabricator from sending any email, etc.'))
+        ->setDescription(
+          pht(
+            'This option allows you to stop Phabricator from sending '.
+            'any data to external services. Among other things, it will '.
+            'disable email, SMS, repository mirroring, and HTTP hooks.'.
+            "\n\n".
+            'This option is intended to allow a Phabricator instance to '.
+            'be exported, copied, imported, and run in a test environment '.
+            'without impacting users. For example, if you are migrating '.
+            'to new hardware, you could perform a test migration first, '.
+            'make sure things work, and then do a production cutover '.
+            'later with higher confidence and less disruption. Without '.
+            'this flag, users would receive duplicate email during the '.
+            'time the test instance and old production instance were '.
+            'both in operation.')),
       );
 
   }
