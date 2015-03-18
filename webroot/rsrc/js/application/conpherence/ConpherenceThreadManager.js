@@ -175,13 +175,14 @@ JX.install('ConpherenceThreadManager', {
         if (r.latest_transaction_id < this._updating.knownID) {
           return false;
         }
-        // we need to let the update code handle things here
-        if (r.latest_transaction_id > this._updating.knownID) {
-          this._updating.knownID = r.latest_transaction_id;
-          return false;
-        }
       }
       return true;
+    },
+
+    _markUpdated: function(r) {
+      this._updating.knownID = r.latest_transaction_id;
+      this._latestTransactionID = r.latest_transaction_id;
+      JX.Stratcom.invoke('notification-panel-update', null, {});
     },
 
     _updateThread: function() {
@@ -194,19 +195,11 @@ JX.install('ConpherenceThreadManager', {
       var workflow = new JX.Workflow(uri)
         .setData(params)
         .setHandler(JX.bind(this, function(r) {
-          if (this._updating &&
-              this._updating.threadPHID == this._loadedThreadPHID) {
-            // we have a different, more current update in progress so
-            // return early
-            if (r.latest_transaction_id < this._updating.knownID) {
-              return;
-            }
-          }
-          this._updating.knownID = r.latest_transaction_id;
-          this._latestTransactionID = r.latest_transaction_id;
-          JX.Stratcom.invoke('notification-panel-update', null, {});
+          if (this._shouldUpdateDOM(r)) {
+            this._markUpdated(r);
 
-          this._didUpdateThreadCallback(r);
+            this._didUpdateThreadCallback(r);
+          }
         }));
 
       this.syncWorkflow(workflow, 'finally');
@@ -235,8 +228,7 @@ JX.install('ConpherenceThreadManager', {
         .setData(params)
         .setHandler(JX.bind(this, function(r) {
           if (this._shouldUpdateDOM(r)) {
-            this._latestTransactionID = r.latest_transaction_id;
-            JX.Stratcom.invoke('notification-panel-update', null, {});
+            this._markUpdated(r);
 
             this._didUpdateWorkflowCallback(r);
           }
@@ -283,8 +275,7 @@ JX.install('ConpherenceThreadManager', {
       var workflow = JX.Workflow.newFromForm(form, params, keep_enabled)
         .setHandler(JX.bind(this, function(r) {
           if (this._shouldUpdateDOM(r)) {
-            this._latestTransactionID = r.latest_transaction_id;
-            JX.Stratcom.invoke('notification-panel-update', null, {});
+            this._markUpdated(r);
 
             this._didSendMessageCallback(r);
           }
