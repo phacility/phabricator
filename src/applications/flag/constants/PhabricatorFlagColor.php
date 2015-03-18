@@ -39,7 +39,7 @@ final class PhabricatorFlagColor extends PhabricatorFlagConstants {
       self::COLOR_YELLOW    => 'fa-flag yellow',
       self::COLOR_GREEN     => 'fa-flag green',
       self::COLOR_BLUE      => 'fa-flag blue',
-      self::COLOR_PINK      => 'fa-flag indigo', // whhaaaa
+      self::COLOR_PINK      => 'fa-flag pink',
       self::COLOR_PURPLE    => 'fa-flag violet',
       self::COLOR_CHECKERED => 'fa-flag-checkered',
     );
