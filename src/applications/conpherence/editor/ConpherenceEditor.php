@@ -20,10 +20,7 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     $message,
     PhabricatorContentSource $source) {
 
-    $conpherence = id(new ConpherenceThread())
-      ->attachParticipants(array())
-      ->attachFilePHIDs(array())
-      ->setMessageCount(0);
+    $conpherence = ConpherenceThread::initializeNewThread($creator);
     $files = array();
     $errors = array();
     if (empty($participant_phids)) {
