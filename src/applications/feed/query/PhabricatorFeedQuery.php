@@ -83,11 +83,11 @@ final class PhabricatorFeedQuery
   }
 
   private function buildGroupClause(AphrontDatabaseConnection $conn_r) {
-    return qsprintf(
-      $conn_r,
-      'GROUP BY '.($this->filterPHIDs
-        ? 'ref.chronologicalKey'
-        : 'story.chronologicalKey'));
+    if ($this->filterPHIDs) {
+      return qsprintf($conn_r, 'GROUP BY ref.chronologicalKey');
+    } else {
+      return qsprintf($conn_r, 'GROUP BY story.chronologicalKey');
+    }
   }
 
   protected function getPagingColumn() {

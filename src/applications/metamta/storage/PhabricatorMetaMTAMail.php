@@ -206,6 +206,11 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     return $this;
   }
 
+  public function setRawFrom($raw_email, $raw_name) {
+    $this->setParam('raw-from', array($raw_email, $raw_name));
+    return $this;
+  }
+
   public function setReplyTo($reply_to) {
     $this->setParam('reply-to', $reply_to);
     return $this;
@@ -430,6 +435,10 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
 
       foreach ($params as $key => $value) {
         switch ($key) {
+          case 'raw-from':
+            list($from_email, $from_name) = $value;
+            $mailer->setFrom($from_email, $from_name);
+            break;
           case 'from':
             $from = $value;
             $actor_email = null;
@@ -622,6 +631,15 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
               'message.'));
           return $this->save();
         }
+      }
+
+      if (PhabricatorEnv::getEnvConfig('phabricator.silent')) {
+        $this->setStatus(self::STATUS_VOID);
+        $this->setMessage(
+          pht(
+            'Phabricator is running in silent mode. See `phabricator.silent` '.
+            'in the configuration to change this setting.'));
+        return $this->save();
       }
 
       $mailer->addHeader('X-Phabricator-Sent-This-Message', 'Yes');

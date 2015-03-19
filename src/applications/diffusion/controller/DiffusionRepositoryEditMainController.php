@@ -126,7 +126,15 @@ final class DiffusionRepositoryEditMainController
 
       $boxes[] = id(new PhabricatorAnchorView())->setAnchorName('mirrors');
 
+      $mirror_info = array();
+      if (PhabricatorEnv::getEnvConfig('phabricator.silent')) {
+        $mirror_info[] = pht(
+          'Phabricator is running in silent mode, so changes will not '.
+          'be pushed to mirrors.');
+      }
+
       $boxes[] = id(new PHUIObjectBoxView())
+        ->setFormErrors($mirror_info)
         ->setHeaderText(pht('Mirrors'))
         ->addPropertyList($mirror_properties);
 

@@ -58,6 +58,9 @@ final class ConpherenceViewController extends
     $content['title'] = $title;
 
     if ($request->isAjax()) {
+      $content['threadID'] = $conpherence->getID();
+      $content['threadPHID'] = $conpherence->getPHID();
+      $content['latestTransactionID'] = $data['latest_transaction_id'];
       return id(new AphrontAjaxResponse())->setContent($content);
     }
 

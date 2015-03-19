@@ -67,7 +67,6 @@ final class ConpherenceWidgetController extends ConpherenceController {
         'class' => 'widgets-header',
       ),
       id(new PHUIActionHeaderView())
-      ->setHeaderColor(PHUIActionHeaderView::HEADER_GREY)
       ->setHeaderTitle(pht('Participants'))
       ->setHeaderHref('#')
       ->setDropdown(true)

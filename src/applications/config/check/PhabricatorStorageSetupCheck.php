@@ -10,15 +10,8 @@ final class PhabricatorStorageSetupCheck extends PhabricatorSetupCheck {
    * @phutil-external-symbol class PhabricatorStartup
    */
   protected function executeChecks() {
-    $chunk_engine_active = false;
-
-    $engines = PhabricatorFileStorageEngine::loadWritableEngines();
-    foreach ($engines as $engine) {
-      if ($engine->isChunkEngine()) {
-        $chunk_engine_active = true;
-        break;
-      }
-    }
+    $engines = PhabricatorFileStorageEngine::loadWritableChunkEngines();
+    $chunk_engine_active = (bool)$engines;
 
     if (!$chunk_engine_active) {
       $doc_href = PhabricatorEnv::getDocLink('Configuring File Storage');

@@ -157,13 +157,10 @@ final class PhabricatorOwnersDetailController
       $commit_views[] = array(
         'view'    => $view,
         'header'  => pht('Commits in this Package that Need Attention'),
-        'button'  => phutil_tag(
-          'a',
-          array(
-            'href'  => $commit_uri->alter('status', 'open'),
-            'class' => 'button grey',
-          ),
-          pht('View All Problem Commits')),
+        'button'  => id(new PHUIButtonView())
+          ->setTag('a')
+          ->setHref($commit_uri->alter('status', 'open'))
+          ->setText(pht('View All Problem Commits')),
       );
     }
 

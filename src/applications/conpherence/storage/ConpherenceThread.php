@@ -4,9 +4,13 @@ final class ConpherenceThread extends ConpherenceDAO
   implements PhabricatorPolicyInterface {
 
   protected $title;
+  protected $isRoom = 0;
   protected $messageCount;
   protected $recentParticipantPHIDs = array();
   protected $mailKey;
+  protected $viewPolicy;
+  protected $editPolicy;
+  protected $joinPolicy;
 
   private $participants = self::ATTACHABLE;
   private $transactions = self::ATTACHABLE;
@@ -18,7 +22,24 @@ final class ConpherenceThread extends ConpherenceDAO
   public static function initializeNewThread(PhabricatorUser $sender) {
     return id(new ConpherenceThread())
       ->setMessageCount(0)
-      ->setTitle('');
+      ->setTitle('')
+      ->attachParticipants(array())
+      ->attachFilePHIDs(array())
+      ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
+      ->setEditPolicy(PhabricatorPolicies::POLICY_USER)
+      ->setJoinPolicy(PhabricatorPolicies::POLICY_USER);
+  }
+
+  public static function initializeNewRoom(PhabricatorUser $creator) {
+    return id(new ConpherenceThread())
+      ->setIsRoom(1)
+      ->setMessageCount(0)
+      ->setTitle('')
+      ->attachParticipants(array())
+      ->attachFilePHIDs(array())
+      ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
+      ->setEditPolicy($creator->getPHID())
+      ->setJoinPolicy(PhabricatorPolicies::POLICY_USER);
   }
 
   protected function getConfiguration() {
@@ -29,10 +50,14 @@ final class ConpherenceThread extends ConpherenceDAO
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'title' => 'text255?',
+        'isRoom' => 'bool',
         'messageCount' => 'uint64',
         'mailKey' => 'text20',
+        'joinPolicy' => 'policy',
       ),
       self::CONFIG_KEY_SCHEMA => array(
+        'key_room' => array(
+          'columns' => array('isRoom', 'dateModified'),),
         'key_phid' => null,
         'phid' => array(
           'columns' => array('phid'),
@@ -186,10 +211,21 @@ final class ConpherenceThread extends ConpherenceDAO
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
       PhabricatorPolicyCapability::CAN_EDIT,
+      PhabricatorPolicyCapability::CAN_JOIN,
     );
   }
 
   public function getPolicy($capability) {
+    if ($this->getIsRoom()) {
+      switch ($capability) {
+        case PhabricatorPolicyCapability::CAN_VIEW:
+          return $this->getViewPolicy();
+        case PhabricatorPolicyCapability::CAN_EDIT:
+          return $this->getEditPolicy();
+        case PhabricatorPolicyCapability::CAN_JOIN:
+          return $this->getJoinPolicy();
+      }
+    }
     return PhabricatorPolicies::POLICY_NOONE;
   }
 
@@ -198,6 +234,15 @@ final class ConpherenceThread extends ConpherenceDAO
     if (!$this->getID()) {
       return true;
     }
+
+    if ($this->getIsRoom()) {
+      switch ($capability) {
+        case PhabricatorPolicyCapability::CAN_EDIT:
+        case PhabricatorPolicyCapability::CAN_JOIN:
+          return false;
+      }
+    }
+
     $participants = $this->getParticipants();
     return isset($participants[$user->getPHID()]);
   }

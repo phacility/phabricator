@@ -13,6 +13,12 @@ final class PhabricatorRepositoryMirrorEngine
       return;
     }
 
+    if (PhabricatorEnv::getEnvConfig('phabricator.silent')) {
+      $this->log(
+        pht('Phabricator is running in silent mode; declining to mirror.'));
+      return;
+    }
+
     $mirrors = id(new PhabricatorRepositoryMirrorQuery())
       ->setViewer($this->getViewer())
       ->withRepositoryPHIDs(array($repository->getPHID()))

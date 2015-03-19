@@ -119,6 +119,9 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
     $this->env->overrideEnvConfig(
       'phabricator.base-uri',
       'http://phabricator.example.com');
+
+    // Tests do their own stubbing/voiding for events.
+    $this->env->overrideEnvConfig('phabricator.silent', false);
   }
 
   protected function didRunTests() {

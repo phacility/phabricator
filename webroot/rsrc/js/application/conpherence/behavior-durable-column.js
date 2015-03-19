@@ -120,7 +120,7 @@ JX.behavior('durable-column', function(config, statics) {
     JX.Stratcom.invoke('notification-panel-close');
   });
   threadManager.setDidUpdateWorkflowCallback(function(r) {
-    var messages = this._getMessagesNode();
+    var messages = _getColumnMessagesNode();
     JX.DOM.appendContent(messages, JX.$H(r.transactions));
     scrollbar.scrollTo(messages.scrollHeight);
     JX.DOM.setContent(_getColumnTitleNode(), r.conpherence_title);

@@ -157,6 +157,11 @@ abstract class DoorkeeperFeedWorker extends FeedPushWorker {
    * @{method:publishFeedStory}.
    */
   final protected function doWork() {
+    if (PhabricatorEnv::getEnvConfig('phabricator.silent')) {
+      $this->log(pht('Phabricator is running in silent mode.'));
+      return;
+    }
+
     if (!$this->isEnabled()) {
       $this->log("Doorkeeper worker '%s' is not enabled.\n", get_class($this));
       return;
