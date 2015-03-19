@@ -12,6 +12,7 @@
  * @task construct Constructing an Engine
  * @task meta Engine Metadata
  * @task file Managing File Data
+ * @task load Loading Storage Engines
  */
 abstract class PhabricatorFileStorageEngine {
 
@@ -188,12 +189,17 @@ abstract class PhabricatorFileStorageEngine {
   abstract public function deleteFile($handle);
 
 
+
+/* -(  Loading Storage Engines  )-------------------------------------------- */
+
+
   /**
    * Select viable default storage engines according to configuration. We'll
    * select the MySQL and Local Disk storage engines if they are configured
    * to allow a given file.
    *
    * @param int File size in bytes.
+   * @task load
    */
   public static function loadStorageEngines($length) {
     $engines = self::loadWritableEngines();
@@ -213,6 +219,10 @@ abstract class PhabricatorFileStorageEngine {
     return $writable;
   }
 
+
+  /**
+   * @task load
+   */
   public static function loadAllEngines() {
     static $engines;
 
@@ -246,28 +256,72 @@ abstract class PhabricatorFileStorageEngine {
     return $engines;
   }
 
-  public static function loadWritableEngines() {
+
+  /**
+   * @task load
+   */
+  private static function loadProductionEngines() {
     $engines = self::loadAllEngines();
 
-    $writable = array();
+    $active = array();
     foreach ($engines as $key => $engine) {
       if ($engine->isTestEngine()) {
         continue;
       }
 
+      $active[$key] = $engine;
+    }
+
+    return $active;
+  }
+
+
+  /**
+   * @task load
+   */
+  public static function loadWritableEngines() {
+    $engines = self::loadProductionEngines();
+
+    $writable = array();
+    foreach ($engines as $key => $engine) {
       if (!$engine->canWriteFiles()) {
         continue;
       }
 
+      if ($engine->isChunkEngine()) {
+        // Don't select chunk engines as writable.
+        continue;
+      }
       $writable[$key] = $engine;
     }
 
     return $writable;
   }
 
+  /**
+   * @task load
+   */
+  public static function loadWritableChunkEngines() {
+    $engines = self::loadProductionEngines();
+
+    $chunk = array();
+    foreach ($engines as $key => $engine) {
+      if (!$engine->canWriteFiles()) {
+        continue;
+      }
+      if (!$engine->isChunkEngine()) {
+        continue;
+      }
+      $chunk[$key] = $engine;
+    }
+
+    return $chunk;
+  }
+
+
 
   /**
-   * Return the largest file size which can be uploaded without chunking.
+   * Return the largest file size which can not be uploaded in chunks.
    *
    * Files smaller than this will always upload in one request, so clients
    * can safely skip the allocation step.
@@ -275,14 +329,10 @@ abstract class PhabricatorFileStorageEngine {
    * @return int|null Byte size, or `null` if there is no chunk support.
    */
   public static function getChunkThreshold() {
-    $engines = self::loadWritableEngines();
+    $engines = self::loadWritableChunkEngines();
 
     $min = null;
     foreach ($engines as $engine) {
-      if (!$engine->isChunkEngine()) {
-        continue;
-      }
-
       if (!$min) {
         $min = $engine;
         continue;

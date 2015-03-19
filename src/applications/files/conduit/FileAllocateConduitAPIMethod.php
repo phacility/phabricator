@@ -85,39 +85,35 @@ final class FileAllocateConduitAPIMethod
       );
     }
 
+    // If there are any non-chunk engines which this file can fit into,
+    // just tell the client to upload the file.
     $engines = PhabricatorFileStorageEngine::loadStorageEngines($length);
     if ($engines) {
+      return array(
+        'upload' => true,
+        'filePHID' => null,
+      );
+    }
 
-      // Pick the first engine. If the file is small enough to fit into a
-      // single engine without chunking, this will be a non-chunk engine and
-      // we'll just tell the client to upload the file.
-      $engine = head($engines);
-      if ($engine) {
-        if (!$engine->isChunkEngine()) {
-          return array(
-            'upload' => true,
-            'filePHID' => null,
-          );
-        }
+    // Otherwise, this is a large file and we want to perform a chunked
+    // upload if we have a chunk engine available.
+    $chunk_engines = PhabricatorFileStorageEngine::loadWritableChunkEngines();
+    if ($chunk_engines) {
+      $chunk_properties = $properties;
 
-        // Otherwise, this is a large file and we need to perform a chunked
-        // upload.
-
-        $chunk_properties = $properties;
-
-        if ($hash) {
-          $chunk_properties += array(
-            'chunkedHash' => $chunked_hash,
-          );
-        }
-
-        $file = $engine->allocateChunks($length, $chunk_properties);
-
-        return array(
-          'upload' => true,
-          'filePHID' => $file->getPHID(),
+      if ($hash) {
+        $chunk_properties += array(
+          'chunkedHash' => $chunked_hash,
         );
       }
+
+      $chunk_engine = head($chunk_engines);
+      $file = $chunk_engine->allocateChunks($length, $chunk_properties);
+
+      return array(
+        'upload' => true,
+        'filePHID' => $file->getPHID(),
+      );
     }
 
     // None of the storage engines can accept this file.

@@ -18,6 +18,7 @@ final class PhabricatorFilesApplicationStorageEnginePanel
 
     $engines = PhabricatorFileStorageEngine::loadAllEngines();
     $writable_engines = PhabricatorFileStorageEngine::loadWritableEngines();
+    $chunk_engines = PhabricatorFileStorageEngine::loadWritableChunkEngines();
 
     $yes = pht('Yes');
     $no = pht('No');
@@ -44,7 +45,7 @@ final class PhabricatorFilesApplicationStorageEnginePanel
         $test = $no;
       }
 
-      if (isset($writable_engines[$key])) {
+      if (isset($writable_engines[$key]) || isset($chunk_engines[$key])) {
         $rowc[] = 'highlighted';
       } else {
         $rowc[] = null;
