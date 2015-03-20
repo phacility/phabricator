@@ -153,6 +153,12 @@ final class DiffusionLastModifiedController extends DiffusionController {
         number_format($lint));
     }
 
+    // The client treats these results as markup, so make sure they have been
+    // escaped correctly.
+    foreach ($return as $key => $value) {
+      $return[$key] = hsprintf('%s', $value);
+    }
+
     return $return;
   }
 
