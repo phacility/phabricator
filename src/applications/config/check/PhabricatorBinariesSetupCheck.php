@@ -121,18 +121,7 @@ final class PhabricatorBinariesSetupCheck extends PhabricatorSetupCheck {
             '2.2' => pht('This version of Mercurial has a significant memory '.
                          'leak, fixed in 2.2.1. Pushing fails with this '.
                          'version as well; see T3046#54922.'),);
-          list($err, $stdout, $stderr) = exec_manual('hg --version --quiet');
-
-          // NOTE: At least on OSX, recent versions of Mercurial report this
-          // string in this format:
-          //
-          //   Mercurial Distributed SCM (version 3.1.1+20140916)
-
-          $matches = null;
-          $pattern = '/^Mercurial Distributed SCM \(version ([\d.]+)/m';
-          if (preg_match($pattern, $stdout, $matches)) {
-            $version = $matches[1];
-          }
+          $version = PhabricatorRepositoryVersion::getMercurialVersion();
           break;
       }
 
