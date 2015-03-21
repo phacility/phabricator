@@ -18,6 +18,7 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
   const TYPE_UPDATE = 'differential:update';
   const TYPE_ACTION = 'differential:action';
   const TYPE_STATUS = 'differential:status';
+  const TYPE_INLINEDONE = 'differential:inlinedone';
 
   public function getApplicationName() {
     return 'differential';
@@ -33,6 +34,15 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
 
   public function getApplicationTransactionViewObject() {
     return new DifferentialTransactionView();
+  }
+
+  public function shouldGenerateOldValue() {
+    switch ($this->getTransactionType()) {
+      case DifferentialTransaction::TYPE_INLINEDONE:
+        return false;
+    }
+
+    return parent::shouldGenerateOldValue();
   }
 
   public function shouldHide() {
@@ -231,6 +241,35 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
         return pht(
           '%s added inline comments.',
           $author_handle);
+      case self::TYPE_INLINEDONE:
+        $done = 0;
+        $undone = 0;
+        foreach ($new as $phid => $state) {
+          if ($state == PhabricatorInlineCommentInterface::STATE_DONE) {
+            $done++;
+          } else {
+            $undone++;
+          }
+        }
+        if ($done && $undone) {
+          return pht(
+            '%s marked %s inline comment(s) as done and %s inline comment(s) '.
+            'as not done.',
+            $author_handle,
+            new PhutilNumber($done),
+            new PhutilNumber($undone));
+        } else if ($done) {
+          return pht(
+            '%s marked %s inline comment(s) as done.',
+            $author_handle,
+            new PhutilNumber($done));
+        } else {
+          return pht(
+            '%s marked %s inline comment(s) as not done.',
+            $author_handle,
+            new PhutilNumber($undone));
+        }
+        break;
       case self::TYPE_UPDATE:
         if ($this->getMetadataValue('isCommitUpdate')) {
           return pht(

@@ -3,11 +3,31 @@
 abstract class PhabricatorDiffInlineCommentQuery
   extends PhabricatorApplicationTransactionCommentQuery {
 
+  private $fixedStates;
   private $needReplyToComments;
+
+  public function withFixedStates(array $states) {
+    $this->fixedStates = $states;
+    return $this;
+  }
 
   public function needReplyToComments($need_reply_to) {
     $this->needReplyToComments = $need_reply_to;
     return $this;
+  }
+
+  protected function buildWhereClauseComponents(
+    AphrontDatabaseConnection $conn_r) {
+    $where = parent::buildWhereClauseComponents($conn_r);
+
+    if ($this->fixedStates !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'fixedState IN (%Ls)',
+        $this->fixedStates);
+    }
+
+    return $where;
   }
 
   protected function willFilterPage(array $comments) {

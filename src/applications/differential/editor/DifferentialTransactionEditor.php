@@ -7,6 +7,7 @@ final class DifferentialTransactionEditor
   private $changedPriorToCommitURI;
   private $isCloseByCommit;
   private $repositoryPHIDOverride = false;
+  private $expandedDone = false;
 
   public function getEditorApplicationClass() {
     return 'PhabricatorDifferentialApplication';
@@ -99,6 +100,7 @@ final class DifferentialTransactionEditor
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case DifferentialTransaction::TYPE_ACTION:
       case DifferentialTransaction::TYPE_UPDATE:
+      case DifferentialTransaction::TYPE_INLINEDONE:
         return $xaction->getNewValue();
       case DifferentialTransaction::TYPE_INLINE:
         return null;
@@ -197,6 +199,7 @@ final class DifferentialTransactionEditor
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
       case PhabricatorTransactions::TYPE_COMMENT:
       case DifferentialTransaction::TYPE_INLINE:
+      case DifferentialTransaction::TYPE_INLINEDONE:
         return;
       case PhabricatorTransactions::TYPE_EDGE:
         return;
@@ -524,6 +527,52 @@ final class DifferentialTransactionEditor
       break;
     }
 
+    if (!$this->expandedDone) {
+      switch ($xaction->getTransactionType()) {
+        case PhabricatorTransactions::TYPE_COMMENT:
+        case DifferentialTransaction::TYPE_ACTION:
+        case DifferentialTransaction::TYPE_UPDATE:
+        case DifferentialTransaction::TYPE_INLINE:
+          $this->expandedDone = true;
+
+          $actor_phid = $this->getActingAsPHID();
+          $actor_is_author = ($object->getAuthorPHID() == $actor_phid);
+          if (!$actor_is_author) {
+            break;
+          }
+
+          $state_map = array(
+            PhabricatorInlineCommentInterface::STATE_DRAFT =>
+              PhabricatorInlineCommentInterface::STATE_DONE,
+            PhabricatorInlineCommentInterface::STATE_UNDRAFT =>
+              PhabricatorInlineCommentInterface::STATE_UNDONE,
+          );
+
+          $inlines = id(new DifferentialDiffInlineCommentQuery())
+            ->setViewer($this->getActor())
+            ->withRevisionPHIDs(array($object->getPHID()))
+            ->withFixedStates(array_keys($state_map))
+            ->execute();
+
+          if (!$inlines) {
+            break;
+          }
+
+          $old_value = mpull($inlines, 'getFixedState', 'getPHID');
+          $new_value = array();
+          foreach ($old_value as $key => $state) {
+            $new_value[$key] = $state_map[$state];
+          }
+
+          $results[] = id(new DifferentialTransaction())
+            ->setTransactionType(DifferentialTransaction::TYPE_INLINEDONE)
+            ->setIgnoreOnNoEffect(true)
+            ->setOldValue($old_value)
+            ->setNewValue($new_value);
+          break;
+      }
+    }
+
     return $results;
   }
 
@@ -544,6 +593,18 @@ final class DifferentialTransactionEditor
         $reply = $xaction->getComment()->getReplyToComment();
         if ($reply && !$reply->getHasReplies()) {
           $reply->setHasReplies(1)->save();
+        }
+        return;
+      case DifferentialTransaction::TYPE_INLINEDONE:
+        $table = new DifferentialTransactionComment();
+        $conn_w = $table->establishConnection('w');
+        foreach ($xaction->getNewValue() as $phid => $state) {
+          queryfx(
+            $conn_w,
+            'UPDATE %T SET fixedState = %s WHERE phid = %s',
+            $table->getTableName(),
+            $state,
+            $phid);
         }
         return;
       case DifferentialTransaction::TYPE_UPDATE:
