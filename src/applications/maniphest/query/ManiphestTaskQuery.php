@@ -21,6 +21,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   private $dateCreatedBefore;
   private $dateModifiedAfter;
   private $dateModifiedBefore;
+  private $reversePaging;
 
   private $fullTextSearch   = '';
 
@@ -765,12 +766,12 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       foreach ($app_order as $order_by) {
         $order[] = $order_by;
       }
+    }
 
-      if ($reverse) {
-        $order[] = 'task.id ASC';
-      } else {
-        $order[] = 'task.id DESC';
-      }
+    if ($reverse) {
+      $order[] = 'task.id ASC';
+    } else {
+      $order[] = 'task.id DESC';
     }
 
     return 'ORDER BY '.implode(', ', $order);
@@ -1068,7 +1069,6 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
             'name' => 'task.subpriority',
             'value' => $cursor->getSubpriority(),
             'type' => 'float',
-            'reverse' => true,
           );
           $columns[] = array(
             'name' => 'task.dateModified',
@@ -1118,6 +1118,15 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   public function getQueryApplicationClass() {
     return 'PhabricatorManiphestApplication';
+  }
+
+  public function setReversePaging($reverse_paging) {
+    $this->reversePaging = $reverse_paging;
+    return $this;
+  }
+
+  protected function getReversePaging() {
+    return $this->reversePaging;
   }
 
 }
