@@ -4,7 +4,6 @@ final class PhabricatorAuditTransaction
   extends PhabricatorApplicationTransaction {
 
   const TYPE_COMMIT = 'audit:commit';
-  const TYPE_INLINEDONE = 'audit:inlinedone';
 
   const MAILTAG_ACTION_CONCERN = 'audit-action-concern';
   const MAILTAG_ACTION_ACCEPT  = 'audit-action-accept';
@@ -182,36 +181,6 @@ final class PhabricatorAuditTransaction
             $commit);
         }
         return $title;
-
-      case self::TYPE_INLINEDONE:
-        $done = 0;
-        $undone = 0;
-        foreach ($new as $phid => $state) {
-          if ($state == PhabricatorInlineCommentInterface::STATE_DONE) {
-            $done++;
-          } else {
-            $undone++;
-          }
-        }
-        if ($done && $undone) {
-          return pht(
-            '%s marked %s inline comment(s) as done and %s inline comment(s) '.
-            'as not done.',
-            $author_handle,
-            new PhutilNumber($done),
-            new PhutilNumber($undone));
-        } else if ($done) {
-          return pht(
-            '%s marked %s inline comment(s) as done.',
-            $author_handle,
-            new PhutilNumber($done));
-        } else {
-          return pht(
-            '%s marked %s inline comment(s) as not done.',
-            $author_handle,
-            new PhutilNumber($undone));
-        }
-        break;
 
       case PhabricatorAuditActionConstants::INLINE:
         return pht(
@@ -418,39 +387,17 @@ final class PhabricatorAuditTransaction
     return parent::getBodyForFeed($story);
   }
 
-
-  public function shouldGenerateOldValue() {
+  public function isInlineCommentTransaction() {
     switch ($this->getTransactionType()) {
-      case self::TYPE_INLINEDONE:
-        return false;
+      case PhabricatorAuditActionConstants::INLINE:
+        return true;
     }
 
-    return parent::shouldGenerateOldValue();
-  }
-
-
-  // TODO: These two mail methods can likely be abstracted by introducing a
-  // formal concept of "inline comment" transactions.
-
-  public function shouldHideForMail(array $xactions) {
-    $type_inline = PhabricatorAuditActionConstants::INLINE;
-    switch ($this->getTransactionType()) {
-      case $type_inline:
-        foreach ($xactions as $xaction) {
-          if ($xaction->getTransactionType() != $type_inline) {
-            return true;
-          }
-        }
-        return ($this !== head($xactions));
-    }
-
-    return parent::shouldHideForMail($xactions);
+    return parent::isInlineCommentTransaction();
   }
 
   public function getBodyForMail() {
     switch ($this->getTransactionType()) {
-      case PhabricatorAuditActionConstants::INLINE:
-        return null;
       case self::TYPE_COMMIT:
         $data = $this->getNewValue();
         return $data['description'];
