@@ -7,7 +7,7 @@ final class DifferentialTransactionEditor
   private $changedPriorToCommitURI;
   private $isCloseByCommit;
   private $repositoryPHIDOverride = false;
-  private $expandedDone = false;
+  private $didExpandInlineState = false;
 
   public function getEditorApplicationClass() {
     return 'PhabricatorDifferentialApplication';
@@ -100,7 +100,6 @@ final class DifferentialTransactionEditor
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case DifferentialTransaction::TYPE_ACTION:
       case DifferentialTransaction::TYPE_UPDATE:
-      case DifferentialTransaction::TYPE_INLINEDONE:
         return $xaction->getNewValue();
       case DifferentialTransaction::TYPE_INLINE:
         return null;
@@ -199,7 +198,6 @@ final class DifferentialTransactionEditor
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
       case PhabricatorTransactions::TYPE_COMMENT:
       case DifferentialTransaction::TYPE_INLINE:
-      case DifferentialTransaction::TYPE_INLINEDONE:
         return;
       case PhabricatorTransactions::TYPE_EDGE:
         return;
@@ -527,13 +525,13 @@ final class DifferentialTransactionEditor
       break;
     }
 
-    if (!$this->expandedDone) {
+    if (!$this->didExpandInlineState) {
       switch ($xaction->getTransactionType()) {
         case PhabricatorTransactions::TYPE_COMMENT:
         case DifferentialTransaction::TYPE_ACTION:
         case DifferentialTransaction::TYPE_UPDATE:
         case DifferentialTransaction::TYPE_INLINE:
-          $this->expandedDone = true;
+          $this->didExpandInlineState = true;
 
           $actor_phid = $this->getActingAsPHID();
           $actor_is_author = ($object->getAuthorPHID() == $actor_phid);
@@ -541,12 +539,7 @@ final class DifferentialTransactionEditor
             break;
           }
 
-          $state_map = array(
-            PhabricatorInlineCommentInterface::STATE_DRAFT =>
-              PhabricatorInlineCommentInterface::STATE_DONE,
-            PhabricatorInlineCommentInterface::STATE_UNDRAFT =>
-              PhabricatorInlineCommentInterface::STATE_UNDONE,
-          );
+          $state_map = PhabricatorTransactions::getInlineStateMap();
 
           $inlines = id(new DifferentialDiffInlineCommentQuery())
             ->setViewer($this->getActor())
@@ -565,7 +558,7 @@ final class DifferentialTransactionEditor
           }
 
           $results[] = id(new DifferentialTransaction())
-            ->setTransactionType(DifferentialTransaction::TYPE_INLINEDONE)
+            ->setTransactionType(PhabricatorTransactions::TYPE_INLINESTATE)
             ->setIgnoreOnNoEffect(true)
             ->setOldValue($old_value)
             ->setNewValue($new_value);
@@ -595,18 +588,6 @@ final class DifferentialTransactionEditor
           $reply->setHasReplies(1)->save();
         }
         return;
-      case DifferentialTransaction::TYPE_INLINEDONE:
-        $table = new DifferentialTransactionComment();
-        $conn_w = $table->establishConnection('w');
-        foreach ($xaction->getNewValue() as $phid => $state) {
-          queryfx(
-            $conn_w,
-            'UPDATE %T SET fixedState = %s WHERE phid = %s',
-            $table->getTableName(),
-            $state,
-            $phid);
-        }
-        return;
       case DifferentialTransaction::TYPE_UPDATE:
         // Now that we're inside the transaction, do a final check.
         $diff = $this->requireDiff($xaction->getNewValue());
@@ -629,6 +610,28 @@ final class DifferentialTransactionEditor
     }
 
     return parent::applyCustomExternalTransaction($object, $xaction);
+  }
+
+  protected function applyBuiltinExternalTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_INLINESTATE:
+        $table = new DifferentialTransactionComment();
+        $conn_w = $table->establishConnection('w');
+        foreach ($xaction->getNewValue() as $phid => $state) {
+          queryfx(
+            $conn_w,
+            'UPDATE %T SET fixedState = %s WHERE phid = %s',
+            $table->getTableName(),
+            $state,
+            $phid);
+        }
+        return;
+    }
+
+    return parent::applyBuiltinExternalTransaction($object, $xaction);
   }
 
   protected function mergeEdgeData($type, array $u, array $v) {

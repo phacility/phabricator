@@ -18,7 +18,6 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
   const TYPE_UPDATE = 'differential:update';
   const TYPE_ACTION = 'differential:action';
   const TYPE_STATUS = 'differential:status';
-  const TYPE_INLINEDONE = 'differential:inlinedone';
 
   public function getApplicationName() {
     return 'differential';
@@ -34,15 +33,6 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
 
   public function getApplicationTransactionViewObject() {
     return new DifferentialTransactionView();
-  }
-
-  public function shouldGenerateOldValue() {
-    switch ($this->getTransactionType()) {
-      case DifferentialTransaction::TYPE_INLINEDONE:
-        return false;
-    }
-
-    return parent::shouldGenerateOldValue();
   }
 
   public function shouldHide() {
@@ -80,33 +70,13 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
     return parent::shouldHide();
   }
 
-  public function shouldHideForMail(array $xactions) {
+  public function isInlineCommentTransaction() {
     switch ($this->getTransactionType()) {
       case self::TYPE_INLINE:
-        // Hide inlines when rendering mail transactions if any other
-        // transaction type exists.
-        foreach ($xactions as $xaction) {
-          if ($xaction->getTransactionType() != self::TYPE_INLINE) {
-            return true;
-          }
-        }
-
-        // If only inline transactions exist, we just render the first one.
-        return ($this !== head($xactions));
+        return true;
     }
 
-    return parent::shouldHideForMail($xactions);
-  }
-
-  public function getBodyForMail() {
-    switch ($this->getTransactionType()) {
-      case self::TYPE_INLINE:
-        // Don't render inlines into the mail body; they render into a special
-        // section immediately after the body instead.
-        return null;
-    }
-
-    return parent::getBodyForMail();
+    return parent::isInlineCommentTransaction();
   }
 
   public function getRequiredHandlePHIDs() {
@@ -145,8 +115,6 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
         return 3;
       case self::TYPE_UPDATE:
         return 2;
-      case self::TYPE_INLINE:
-        return 0.25;
     }
 
     return parent::getActionStrength();
@@ -241,35 +209,6 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
         return pht(
           '%s added inline comments.',
           $author_handle);
-      case self::TYPE_INLINEDONE:
-        $done = 0;
-        $undone = 0;
-        foreach ($new as $phid => $state) {
-          if ($state == PhabricatorInlineCommentInterface::STATE_DONE) {
-            $done++;
-          } else {
-            $undone++;
-          }
-        }
-        if ($done && $undone) {
-          return pht(
-            '%s marked %s inline comment(s) as done and %s inline comment(s) '.
-            'as not done.',
-            $author_handle,
-            new PhutilNumber($done),
-            new PhutilNumber($undone));
-        } else if ($done) {
-          return pht(
-            '%s marked %s inline comment(s) as done.',
-            $author_handle,
-            new PhutilNumber($done));
-        } else {
-          return pht(
-            '%s marked %s inline comment(s) as not done.',
-            $author_handle,
-            new PhutilNumber($undone));
-        }
-        break;
       case self::TYPE_UPDATE:
         if ($this->getMetadataValue('isCommitUpdate')) {
           return pht(

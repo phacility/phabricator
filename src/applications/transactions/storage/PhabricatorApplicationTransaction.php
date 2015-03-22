@@ -550,6 +550,8 @@ abstract class PhabricatorApplicationTransaction
             break;
         }
         break;
+     case PhabricatorTransactions::TYPE_INLINESTATE:
+       return true;
     }
 
     return $this->shouldHide();
@@ -944,6 +946,10 @@ abstract class PhabricatorApplicationTransaction
   }
 
   public function getActionStrength() {
+    if ($this->isInlineCommentTransaction()) {
+      return 0.25;
+    }
+
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_COMMENT:
         return 0.5;
