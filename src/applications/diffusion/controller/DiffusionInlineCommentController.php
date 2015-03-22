@@ -70,7 +70,7 @@ final class DiffusionInlineCommentController
     $commit = id(new DiffusionCommitQuery())
       ->setViewer($viewer)
       ->withPHIDs(array($inline->getCommitPHID()))
-      ->exeucteOne();
+      ->executeOne();
     if (!$commit) {
       throw new Exception(pht('Failed to load commit.'));
     }

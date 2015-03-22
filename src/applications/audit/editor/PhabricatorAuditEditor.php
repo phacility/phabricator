@@ -9,6 +9,7 @@ final class PhabricatorAuditEditor
   private $heraldEmailPHIDs = array();
   private $affectedFiles;
   private $rawPatch;
+  private $expandedDone;
 
   public function addAuditReason($phid, $reason) {
     if (!isset($this->auditReasonMap[$phid])) {
@@ -54,6 +55,7 @@ final class PhabricatorAuditEditor
     $types[] = PhabricatorTransactions::TYPE_EDGE;
 
     $types[] = PhabricatorAuditTransaction::TYPE_COMMIT;
+    $types[] = PhabricatorAuditTransaction::TYPE_INLINEDONE;
 
     // TODO: These will get modernized eventually, but that can happen one
     // at a time later on.
@@ -102,6 +104,7 @@ final class PhabricatorAuditEditor
       case PhabricatorAuditActionConstants::INLINE:
       case PhabricatorAuditActionConstants::ADD_AUDITORS:
       case PhabricatorAuditTransaction::TYPE_COMMIT:
+      case PhabricatorAuditTransaction::TYPE_INLINEDONE:
         return $xaction->getNewValue();
     }
 
@@ -120,6 +123,7 @@ final class PhabricatorAuditEditor
       case PhabricatorAuditActionConstants::INLINE:
       case PhabricatorAuditActionConstants::ADD_AUDITORS:
       case PhabricatorAuditTransaction::TYPE_COMMIT:
+      case PhabricatorAuditTransaction::TYPE_INLINEDONE:
         return;
     }
 
@@ -141,6 +145,18 @@ final class PhabricatorAuditEditor
         $reply = $xaction->getComment()->getReplyToComment();
         if ($reply && !$reply->getHasReplies()) {
           $reply->setHasReplies(1)->save();
+        }
+        return;
+      case PhabricatorAuditTransaction::TYPE_INLINEDONE:
+        $table = new PhabricatorAuditTransactionComment();
+        $conn_w = $table->establishConnection('w');
+        foreach ($xaction->getNewValue() as $phid => $state) {
+          queryfx(
+            $conn_w,
+            'UPDATE %T SET fixedState = %s WHERE phid = %s',
+            $table->getTableName(),
+            $state,
+            $phid);
         }
         return;
       case PhabricatorAuditActionConstants::ADD_AUDITORS:
@@ -344,6 +360,52 @@ final class PhabricatorAuditEditor
       default:
         break;
     }
+
+    if (!$this->expandedDone) {
+
+      switch ($xaction->getTransactionType()) {
+        case PhabricatorTransactions::TYPE_COMMENT:
+        case PhabricatorAuditActionConstants::ACTION:
+          $this->expandedDone = true;
+
+          $actor_phid = $this->getActingAsPHID();
+          $actor_is_author = ($object->getAuthorPHID() == $actor_phid);
+          if (!$actor_is_author) {
+            break;
+          }
+
+          $state_map = array(
+            PhabricatorInlineCommentInterface::STATE_DRAFT =>
+              PhabricatorInlineCommentInterface::STATE_DONE,
+            PhabricatorInlineCommentInterface::STATE_UNDRAFT =>
+              PhabricatorInlineCommentInterface::STATE_UNDONE,
+          );
+
+          $inlines = id(new DiffusionDiffInlineCommentQuery())
+            ->setViewer($this->getActor())
+            ->withCommitPHIDs(array($object->getPHID()))
+            ->withFixedStates(array_keys($state_map))
+            ->execute();
+
+          if (!$inlines) {
+            break;
+          }
+
+          $old_value = mpull($inlines, 'getFixedState', 'getPHID');
+          $new_value = array();
+          foreach ($old_value as $key => $state) {
+            $new_value[$key] = $state_map[$state];
+          }
+
+          $xactions[] = id(new PhabricatorAuditTransaction())
+            ->setTransactionType(PhabricatorAuditTransaction::TYPE_INLINEDONE)
+            ->setIgnoreOnNoEffect(true)
+            ->setOldValue($old_value)
+            ->setNewValue($new_value);
+          break;
+      }
+    }
+
     return $xactions;
   }
 
