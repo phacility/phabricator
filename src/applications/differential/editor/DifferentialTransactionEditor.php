@@ -249,6 +249,11 @@ final class DifferentialTransactionEditor
           case DifferentialAction::ACTION_CLAIM:
             $object->setAuthorPHID($this->getActingAsPHID());
             return;
+          default:
+            throw new Exception(
+              pht(
+                'Differential action "%s" is not a valid action!',
+                $xaction->getNewValue()));
         }
         break;
     }
