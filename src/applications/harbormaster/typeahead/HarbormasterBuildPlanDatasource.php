@@ -21,8 +21,14 @@ final class HarbormasterBuildPlanDatasource
       ->setViewer($viewer)
       ->execute();
     foreach ($plans as $plan) {
+      $closed = null;
+      if ($plan->isDisabled()) {
+        $closed = pht('Disabled');
+      }
+
       $results[] = id(new PhabricatorTypeaheadResult())
         ->setName($plan->getName())
+        ->setClosed($closed)
         ->setPHID($plan->getPHID());
     }
 
