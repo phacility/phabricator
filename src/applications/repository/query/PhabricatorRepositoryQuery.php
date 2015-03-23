@@ -27,6 +27,7 @@ final class PhabricatorRepositoryQuery
   const ORDER_COMMITTED = 'order-committed';
   const ORDER_CALLSIGN = 'order-callsign';
   const ORDER_NAME = 'order-name';
+  const ORDER_SIZE = 'order-size';
   private $order = self::ORDER_CREATED;
 
   const HOSTED_PHABRICATOR = 'hosted-phab';
@@ -151,7 +152,7 @@ final class PhabricatorRepositoryQuery
       $table->getTableName(),
       $this->buildJoinsClause($conn_r),
       $this->buildWhereClause($conn_r),
-      $this->buildOrderClause($conn_r),
+      $this->buildCustomOrderClause($conn_r),
       $this->buildLimitClause($conn_r));
 
     $repositories = $table->loadAllFromArray($data);
@@ -294,29 +295,44 @@ final class PhabricatorRepositoryQuery
     return $repositories;
   }
 
-  protected function getReversePaging() {
-    switch ($this->order) {
-      case self::ORDER_CALLSIGN:
-      case self::ORDER_NAME:
-        return true;
-    }
-    return false;
-  }
+  protected function buildCustomOrderClause(AphrontDatabaseConnection $conn) {
+    $parts = array();
 
-  protected function getPagingColumn() {
     $order = $this->order;
     switch ($order) {
       case self::ORDER_CREATED:
-        return 'r.id';
+        break;
       case self::ORDER_COMMITTED:
-        return 's.epoch';
+        $parts[] = array(
+          'name' => 's.epoch',
+        );
+        break;
       case self::ORDER_CALLSIGN:
-        return 'r.callsign';
+        $parts[] = array(
+          'name' => 'r.callsign',
+          'reverse' => true,
+        );
+        break;
       case self::ORDER_NAME:
-        return 'r.name';
+        $parts[] = array(
+          'name' => 'r.name',
+          'reverse' => true,
+        );
+        break;
+      case self::ORDER_SIZE:
+        $parts[] = array(
+          'name' => 's.size',
+        );
+        break;
       default:
         throw new Exception("Unknown order '{$order}!'");
     }
+
+    $parts[] = array(
+      'name' => 'r.id',
+    );
+
+    return $this->formatOrderClause($conn, $parts);
   }
 
   private function loadCursorObject($id) {
@@ -326,6 +342,10 @@ final class PhabricatorRepositoryQuery
 
     if ($this->order == self::ORDER_COMMITTED) {
       $query->needMostRecentCommits(true);
+    }
+
+    if ($this->order == self::ORDER_SIZE) {
+      $query->needCommitCounts(true);
     }
 
     $results = $query->execute();
@@ -394,6 +414,14 @@ final class PhabricatorRepositoryQuery
         );
         $columns[] = $id_column;
         break;
+      case self::ORDER_SIZE:
+        $columns[] = array(
+          'name' => 's.size',
+          'type' => 'int',
+          'value' => $cursor->getCommitCount(),
+        );
+        $columns[] = $id_column;
+        break;
       default:
         throw new Exception("Unknown order '{$order}'!");
     }
@@ -402,9 +430,7 @@ final class PhabricatorRepositoryQuery
       $conn_r,
       $columns,
       array(
-        // TODO: Clean up the column ordering stuff and then make this
-        // depend on getReversePaging().
-        'reversed' => (bool)($before_id),
+        'reversed' => ($this->getReversePaging() xor (bool)($before_id)),
       ));
   }
 
@@ -413,7 +439,8 @@ final class PhabricatorRepositoryQuery
 
     $join_summary_table = $this->needCommitCounts ||
                           $this->needMostRecentCommits ||
-                          ($this->order == self::ORDER_COMMITTED);
+                          ($this->order == self::ORDER_COMMITTED) ||
+                          ($this->order == self::ORDER_SIZE);
 
     if ($join_summary_table) {
       $joins[] = qsprintf(

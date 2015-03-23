@@ -195,6 +195,7 @@ final class PhabricatorRepositorySearchEngine
       'name' => pht('Name'),
       'callsign' => pht('Callsign'),
       'created' => pht('Date Created'),
+      'size' => pht('Commit Count'),
     );
   }
 
@@ -204,6 +205,7 @@ final class PhabricatorRepositorySearchEngine
       'name' => PhabricatorRepositoryQuery::ORDER_NAME,
       'callsign' => PhabricatorRepositoryQuery::ORDER_CALLSIGN,
       'created' => PhabricatorRepositoryQuery::ORDER_CREATED,
+      'size' => PhabricatorRepositoryQuery::ORDER_SIZE,
     );
   }
 
