@@ -92,6 +92,7 @@ final class ConpherenceTransactionView extends AphrontView {
       case ConpherenceTransactionType::TYPE_TITLE:
         $content = $transaction->getTitle();
         $transaction_view->addClass('conpherence-edited');
+        $transaction_view->addClass('grouped');
         break;
       case ConpherenceTransactionType::TYPE_FILES:
         $content = $transaction->getTitle();
@@ -99,6 +100,7 @@ final class ConpherenceTransactionView extends AphrontView {
       case ConpherenceTransactionType::TYPE_PARTICIPANTS:
         $content = $transaction->getTitle();
         $transaction_view->addClass('conpherence-edited');
+        $transaction_view->addClass('grouped');
         break;
       case PhabricatorTransactions::TYPE_COMMENT:
         $comment = $transaction->getComment();

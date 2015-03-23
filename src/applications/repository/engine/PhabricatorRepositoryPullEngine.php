@@ -367,9 +367,37 @@ final class PhabricatorRepositoryPullEngine
         'init -- %s',
         $path);
     } else {
+      $remote = $repository->getRemoteURIEnvelope();
+
+      // NOTE: Mercurial prior to 3.2.4 has an severe command injection
+      // vulnerability. See: <http://bit.ly/19B58E9>
+
+      // On vulnerable versions of Mercurial, we refuse to clone remotes which
+      // contain characters which may be interpreted by the shell.
+      $hg_version = PhabricatorRepositoryVersion::getMercurialVersion();
+      $is_vulnerable = version_compare($hg_version, '3.2.4', '<');
+      if ($is_vulnerable) {
+        $cleartext = $remote->openEnvelope();
+        // The use of "%R" here is an attempt to limit collateral damage
+        // for normal URIs because it isn't clear how long this vulnerability
+        // has been around for.
+
+        $escaped = csprintf('%R', $cleartext);
+        if ((string)$escaped !== (string)$cleartext) {
+          throw new Exception(
+            pht(
+              'You have an old version of Mercurial (%s) which has a severe '.
+              'command injection security vulnerability. The remote URI for '.
+              'this repository (%s) is potentially unsafe. Upgrade Mercurial '.
+              'to at least 3.2.4 to clone it.',
+              $hg_version,
+              $repository->getMonogram()));
+        }
+      }
+
       $repository->execxRemoteCommand(
         'clone --noupdate -- %P %s',
-        $repository->getRemoteURIEnvelope(),
+        $remote,
         $path);
     }
   }

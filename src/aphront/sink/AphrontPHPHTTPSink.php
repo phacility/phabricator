@@ -22,10 +22,11 @@ final class AphrontPHPHTTPSink extends AphrontHTTPSink {
   protected function emitData($data) {
     echo $data;
 
-    // Try to push the data to the browser. This has a lot of caveats around
-    // browser buffering and display behavior, but approximately works most
-    // of the time.
-    flush();
+    // NOTE: We don't call flush() here because it breaks HTTPS under Apache.
+    // See T7620 for discussion. Even without an explicit flush, PHP appears to
+    // have reasonable behavior here: the echo will block if internal buffers
+    // are full, and data will be sent to the client once enough of it has
+    // been buffered.
   }
 
   protected function isWritable() {

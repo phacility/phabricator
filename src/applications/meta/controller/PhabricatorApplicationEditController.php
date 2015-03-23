@@ -3,10 +3,6 @@
 final class PhabricatorApplicationEditController
   extends PhabricatorApplicationsController {
 
-  public function shouldRequireAdmin() {
-    return true;
-  }
-
   public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
     $application = $request->getURIData('application');

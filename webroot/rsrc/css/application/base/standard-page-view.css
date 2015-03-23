@@ -29,6 +29,10 @@
   margin-left: 58px;
 }
 
+.device .phabricator-side-menu-home + .phabricator-standard-page-footer {
+  display: none;
+}
+
 .keyboard-shortcut-help td,
 .keyboard-shortcut-help th {
   padding: 8px;
