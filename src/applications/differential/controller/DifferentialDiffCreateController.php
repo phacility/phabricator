@@ -2,10 +2,27 @@
 
 final class DifferentialDiffCreateController extends DifferentialController {
 
-  public function processRequest() {
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
+    // If we're on the "Update Diff" workflow, load the revision we're going
+    // to update.
+    $revision = null;
+    $revision_id = $request->getURIData('revisionID');
+    if ($revision_id) {
+      $revision = id(new DifferentialRevisionQuery())
+        ->setViewer($viewer)
+        ->withIDs(array($revision_id))
+        ->requireCapabilities(
+          array(
+            PhabricatorPolicyCapability::CAN_VIEW,
+            PhabricatorPolicyCapability::CAN_EDIT,
+          ))
+        ->executeOne();
+      if (!$revision) {
+        return new Aphront404Response();
+      }
+    }
 
     $diff = null;
     // This object is just for policy stuff
@@ -32,8 +49,8 @@ final class DifferentialDiffCreateController extends DifferentialController {
 
       if (!strlen($diff)) {
         $errors[] = pht(
-          'You can not create an empty diff. Copy/paste a diff, or upload a '.
-          'diff file.');
+          'You can not create an empty diff. Paste a diff or upload a '.
+          'file containing a diff.');
         $e_diff = pht('Required');
         $e_file = pht('Required');
       }
@@ -48,8 +65,16 @@ final class DifferentialDiffCreateController extends DifferentialController {
               'viewPolicy' => $request->getStr('viewPolicy'),));
           $call->setUser($viewer);
           $result = $call->execute();
-          $path = id(new PhutilURI($result['uri']))->getPath();
-          return id(new AphrontRedirectResponse())->setURI($path);
+
+          $diff_id = $result['id'];
+
+          $uri = $this->getApplicationURI("diff/{$diff_id}/");
+          $uri = new PhutilURI($uri);
+          if ($revision) {
+            $uri->setQueryParam('revisionID', $revision->getID());
+          }
+
+          return id(new AphrontRedirectResponse())->setURI($uri);
         } catch (PhabricatorApplicationTransactionValidationException $ex) {
           $validation_exception = $ex;
         }
@@ -64,7 +89,7 @@ final class DifferentialDiffCreateController extends DifferentialController {
         'href' => $arcanist_href,
         'target' => '_blank',
       ),
-      'Arcanist');
+      'Learn More');
 
     $cancel_uri = $this->getApplicationURI();
 
@@ -77,19 +102,53 @@ final class DifferentialDiffCreateController extends DifferentialController {
       ->setObject($diff_object)
       ->execute();
 
+    $info_view = null;
+    if (!$request->isFormPost()) {
+      $info_view = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
+        ->setErrors(
+          array(
+            array(
+              pht(
+                'The best way to create a diff is to use the Arcanist '.
+                'command-line tool.'),
+              ' ',
+              $arcanist_link,
+            ),
+            pht(
+              'You can also paste a diff below, or upload a file '.
+              'containing a diff (for example, from %s, %s or %s).',
+              phutil_tag('tt', array(), 'svn diff'),
+              phutil_tag('tt', array(), 'git diff'),
+              phutil_tag('tt', array(), 'hg diff --git')),
+          ));
+    }
+
+    if ($revision) {
+      $title = pht('Update Diff');
+      $header = pht('Update Diff');
+      $button = pht('Continue');
+    } else {
+      $title = pht('Create Diff');
+      $header = pht('Create New Diff');
+      $button = pht('Create Diff');
+    }
+
     $form
-      ->setAction('/differential/diff/create/')
       ->setEncType('multipart/form-data')
-      ->setUser($viewer)
-      ->appendInstructions(
-        pht(
-          'The best way to create a Differential diff is by using %s, but you '.
-          'can also just paste a diff (for example, from %s, %s or %s) into '.
-          'this box, or upload a diff file.',
-          $arcanist_link,
-          phutil_tag('tt', array(), 'svn diff'),
-          phutil_tag('tt', array(), 'git diff'),
-          phutil_tag('tt', array(), 'hg diff --git')))
+      ->setUser($viewer);
+
+    if ($revision) {
+      $revision_handles = $this->loadViewerHandles(array($revision->getPHID()));
+      $revision_handle = head($revision_handles);
+
+      $form->appendChild(
+        id(new AphrontFormMarkupControl())
+          ->setLabel(pht('Updating Revision'))
+          ->setValue($revision_handle->renderLink()));
+    }
+
+    $form
       ->appendChild(
         id(new AphrontFormTextAreaControl())
           ->setLabel(pht('Raw Diff'))
@@ -119,16 +178,25 @@ final class DifferentialDiffCreateController extends DifferentialController {
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton($cancel_uri)
-          ->setValue(pht('Create Diff')));
+          ->setValue($button));
 
     $form_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Create New Diff'))
+      ->setHeaderText($header)
       ->setValidationException($validation_exception)
       ->setForm($form)
       ->setFormErrors($errors);
 
+    if ($info_view) {
+      $form_box->setInfoView($info_view);
+    }
+
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb(pht('Create Diff'));
+    if ($revision) {
+      $crumbs->addTextCrumb(
+        $revision->getMonogram(),
+        '/'.$revision->getMonogram());
+    }
+    $crumbs->addTextCrumb($title);
 
     return $this->buildApplicationPage(
       array(
@@ -136,7 +204,7 @@ final class DifferentialDiffCreateController extends DifferentialController {
         $form_box,
       ),
       array(
-        'title' => pht('Create Diff'),
+        'title' => $title,
       ));
   }
 

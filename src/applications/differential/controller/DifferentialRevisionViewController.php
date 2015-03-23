@@ -525,6 +525,13 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ->setDisabled(!$can_edit)
       ->setWorkflow(!$can_edit);
 
+    $actions[] = id(new PhabricatorActionView())
+      ->setIcon('fa-upload')
+      ->setHref("/differential/revision/update/{$revision_id}/")
+      ->setName(pht('Update Diff'))
+      ->setDisabled(!$can_edit)
+      ->setWorkflow(!$can_edit);
+
     $this->requireResource('phabricator-object-selector-css');
     $this->requireResource('javelin-behavior-phabricator-object-selector');
 

@@ -29,8 +29,6 @@ final class DifferentialDiffViewController extends DifferentialController {
         ->setURI('/D'.$diff->getRevisionID().'?id='.$diff->getID());
     }
 
-    $error_view = id(new PHUIInfoView())
-        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
     // TODO: implement optgroup support in AphrontFormSelectControl?
     $select = array();
     $select[] = hsprintf('<optgroup label="%s">', pht('Create New Revision'));
@@ -44,17 +42,31 @@ final class DifferentialDiffViewController extends DifferentialController {
       ->setViewer($viewer)
       ->withAuthors(array($viewer->getPHID()))
       ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
       ->execute();
+
+    $selected_id = $request->getInt('revisionID');
 
     if ($revisions) {
       $select[] = hsprintf(
         '<optgroup label="%s">',
         pht('Update Existing Revision'));
       foreach ($revisions as $revision) {
+        if ($selected_id == $revision->getID()) {
+          $selected = 'selected';
+        } else {
+          $selected = null;
+        }
+
         $select[] = phutil_tag(
           'option',
           array(
             'value' => $revision->getID(),
+            'selected' => $selected,
           ),
           id(new PhutilUTF8StringTruncator())
           ->setMaximumGlyphs(128)
@@ -88,8 +100,6 @@ final class DifferentialDiffViewController extends DifferentialController {
       ->appendChild(
         id(new AphrontFormSubmitControl())
         ->setValue(pht('Continue')));
-
-    $error_view->appendChild($form);
 
     $props = id(new DifferentialDiffProperty())->loadAllWhere(
     'diffID = %d',
@@ -129,7 +139,7 @@ final class DifferentialDiffViewController extends DifferentialController {
     $prop_box = id(new PHUIObjectBoxView())
       ->setHeader($property_head)
       ->addPropertyList($property_view)
-      ->setInfoView($error_view);
+      ->appendChild($form);
 
     return $this->buildApplicationPage(
       array(
