@@ -71,7 +71,7 @@ final class PhabricatorNavigationRemarkupRule extends PhutilRemarkupRule {
       }
 
       if ($item['href'] !== null) {
-        if (PhabricatorEnv::isValidWebResource($item['href'])) {
+        if (PhabricatorEnv::isValidRemoteURIForLink($item['href'])) {
           $tag->setHref($item['href']);
           $tag->setExternal(true);
         }

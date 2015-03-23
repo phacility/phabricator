@@ -54,7 +54,7 @@ final class PhabricatorMailingListsEditController
       }
 
       if ($list->getURI()) {
-        if (!PhabricatorEnv::isValidWebResource($list->getURI())) {
+        if (!PhabricatorEnv::isValidRemoteURIForLink($list->getURI())) {
           $e_uri = pht('Invalid');
           $errors[] = pht('Mailing list URI must point to a valid web page.');
         }

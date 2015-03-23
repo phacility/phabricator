@@ -198,7 +198,7 @@ final class PhabricatorOAuthServer {
    * for details on what makes a given redirect URI "valid".
    */
   public function validateRedirectURI(PhutilURI $uri) {
-    if (!PhabricatorEnv::isValidRemoteWebResource($uri)) {
+    if (!PhabricatorEnv::isValidRemoteURIForLink($uri)) {
       return false;
     }
 

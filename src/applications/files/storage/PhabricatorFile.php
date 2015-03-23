@@ -452,25 +452,14 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
 
   public static function newFromFileDownload($uri, array $params = array()) {
-    // Make sure we're allowed to make a request first
-    if (!PhabricatorEnv::getEnvConfig('security.allow-outbound-http')) {
-      throw new Exception('Outbound HTTP requests are disabled!');
-    }
-
-    $uri = new PhutilURI($uri);
-
-    $protocol = $uri->getProtocol();
-    switch ($protocol) {
-      case 'http':
-      case 'https':
-        break;
-      default:
-        // Make sure we are not accessing any file:// URIs or similar.
-        return null;
-    }
+    PhabricatorEnv::requireValidRemoteURIForFetch(
+      $uri,
+      array(
+        'http',
+        'https',
+      ));
 
     $timeout = 5;
-
     list($file_data) = id(new HTTPSFuture($uri))
         ->setTimeout($timeout)
         ->resolvex();
