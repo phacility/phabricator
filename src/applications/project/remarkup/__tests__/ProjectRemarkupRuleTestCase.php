@@ -70,6 +70,17 @@ final class ProjectRemarkupRuleTestCase extends PhabricatorTestCase {
           ),
         ),
       ),
+
+      '#s3' => array(
+        'embed' => array(),
+        'ref' => array(
+          array(
+            'offset' => 1,
+            'id' => 's3',
+          ),
+        ),
+      ),
+
     );
 
     foreach ($cases as $input => $expect) {
