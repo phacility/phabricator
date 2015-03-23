@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => 'a7f3dc55',
+    'core.pkg.css' => '404f1f98',
     'core.pkg.js' => '75599122',
     'darkconsole.pkg.js' => '8ab24e01',
     'differential.pkg.css' => '1940be3f',
@@ -37,7 +37,7 @@ return array(
     'rsrc/css/application/base/main-menu-view.css' => '58db7ad2',
     'rsrc/css/application/base/notification-menu.css' => '6aa0a74b',
     'rsrc/css/application/base/phabricator-application-launch-view.css' => '16ca323f',
-    'rsrc/css/application/base/standard-page-view.css' => '18d237bc',
+    'rsrc/css/application/base/standard-page-view.css' => 'd2a6518d',
     'rsrc/css/application/chatlog/chatlog.css' => '852140ff',
     'rsrc/css/application/config/config-options.css' => '7fedf08b',
     'rsrc/css/application/config/config-template.css' => '8e6c6fcd',
@@ -743,7 +743,7 @@ return array(
     'phabricator-side-menu-view-css' => '7e8c6341',
     'phabricator-slowvote-css' => '266df6a1',
     'phabricator-source-code-view-css' => '2ceee894',
-    'phabricator-standard-page-view' => '18d237bc',
+    'phabricator-standard-page-view' => 'd2a6518d',
     'phabricator-textareautils' => '5c93c52c',
     'phabricator-title' => '5c1c758c',
     'phabricator-tooltip' => '1d298e3a',
