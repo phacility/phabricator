@@ -1347,12 +1347,10 @@ final class DifferentialChangesetParser {
       $copies = array();
       foreach ($changeset->getHunks() as $hunk) {
         $added = $hunk->getStructuredNewFile();
+        $atype = array();
 
         foreach ($added as $line => $info) {
-          if ($info['type'] != '+') {
-            unset($added[$line]);
-            continue;
-          }
+          $atype[$line] = $info['type'];
           $added[$line] = trim($info['text']);
         }
 
@@ -1362,6 +1360,12 @@ final class DifferentialChangesetParser {
             // We're skipping lines that we already processed because we
             // extended a block above them downward to include them.
             $skip_lines--;
+            continue;
+          }
+
+          if ($atype[$line] !== '+') {
+            // This line hasn't been changed in the new file, so don't try
+            // to figure out where it came from.
             continue;
           }
 
