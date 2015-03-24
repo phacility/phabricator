@@ -143,7 +143,8 @@ final class ConpherenceTransactionView extends AphrontView {
     $handles = $conpherence->getHandles();
     $rendered_transactions = array();
     $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($user);
+      ->setViewer($user)
+      ->setContextObject($conpherence);
     foreach ($transactions as $key => $transaction) {
       if ($transaction->shouldHide()) {
         unset($transactions[$key]);
