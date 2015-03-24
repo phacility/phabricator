@@ -8,3 +8,13 @@
   padding: 0 4px;
   border-radius: 3px;
 }
+
+.phui-source-fragment {
+  color: {$darkgreytext};
+}
+
+.phui-source-fragment strong {
+  background-color: {$lightyellow};
+  font-weight: normal;
+  color: #000000;
+}
