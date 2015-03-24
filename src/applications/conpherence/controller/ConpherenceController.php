@@ -39,24 +39,38 @@ abstract class ConpherenceController extends PhabricatorController {
   }
 
   protected function buildApplicationCrumbs() {
+    return $this->buildConpherenceApplicationCrumbs();
+  }
+
+  protected function buildConpherenceApplicationCrumbs($is_rooms = false) {
     $crumbs = parent::buildApplicationCrumbs();
     $crumbs->setBorder(true);
 
-    $crumbs
-      ->addAction(
-        id(new PHUIListItemView())
-        ->setName(pht('New Message'))
-        ->setHref($this->getApplicationURI('new/'))
-        ->setIcon('fa-plus-square')
-        ->setWorkflow(true))
-      ->addAction(
-        id(new PHUIListItemView())
-        ->setName(pht('Thread'))
-        ->setHref('#')
-        ->setIcon('fa-bars')
-        ->setStyle('display: none;')
-        ->addClass('device-widgets-selector')
-        ->addSigil('device-widgets-selector'));
+    if ($is_rooms) {
+      $crumbs
+        ->addAction(
+          id(new PHUIListItemView())
+          ->setName(pht('New Room'))
+          ->setHref($this->getApplicationURI('room/new/'))
+          ->setIcon('fa-plus-square')
+          ->setWorkflow(true));
+    } else {
+      $crumbs
+        ->addAction(
+          id(new PHUIListItemView())
+          ->setName(pht('New Message'))
+          ->setHref($this->getApplicationURI('new/'))
+          ->setIcon('fa-plus-square')
+          ->setWorkflow(true))
+        ->addAction(
+          id(new PHUIListItemView())
+          ->setName(pht('Thread'))
+          ->setHref('#')
+          ->setIcon('fa-bars')
+          ->setStyle('display: none;')
+          ->addClass('device-widgets-selector')
+          ->addSigil('device-widgets-selector'));
+    }
     return $crumbs;
   }
 
