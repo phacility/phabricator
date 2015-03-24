@@ -773,40 +773,30 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
    * Get all of the recipients for this mail, after preference filters are
    * applied. This list has all objects to whom delivery will be attempted.
    *
+   * Note that this expands recipients into their members, because delivery
+   * is never directly attempted to aggregate actors like projects.
+   *
    * @return  list<phid>  A list of all recipients to whom delivery will be
    *                      attempted.
    * @task recipients
    */
   public function buildRecipientList() {
-    $actors = $this->loadActors(
-      array_merge(
-        $this->getToPHIDs(),
-        $this->getCcPHIDs()));
+    $actors = $this->loadAllActors();
     $actors = $this->filterDeliverableActors($actors);
     return mpull($actors, 'getPHID');
   }
 
   public function loadAllActors() {
-    $actor_phids = array_merge(
-      array($this->getParam('from')),
-      $this->getToPHIDs(),
-      $this->getCcPHIDs());
-
-    $this->loadRecipientExpansions($actor_phids);
+    $actor_phids = $this->getAllActorPHIDs();
     $actor_phids = $this->expandRecipients($actor_phids);
-
     return $this->loadActors($actor_phids);
   }
 
-  private function loadRecipientExpansions(array $phids) {
-    $expansions = id(new PhabricatorMetaMTAMemberQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withPHIDs($phids)
-      ->execute();
-
-    $this->recipientExpansionMap = $expansions;
-
-    return $this;
+  private function getAllActorPHIDs() {
+    return array_merge(
+      array($this->getParam('from')),
+      $this->getToPHIDs(),
+      $this->getCcPHIDs());
   }
 
   /**
@@ -821,19 +811,17 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
    */
   private function expandRecipients(array $phids) {
     if ($this->recipientExpansionMap === null) {
-      throw new Exception(
-        pht(
-          'Call loadRecipientExpansions() before expandRecipients()!'));
+      $all_phids = $this->getAllActorPHIDs();
+      $this->recipientExpansionMap = id(new PhabricatorMetaMTAMemberQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withPHIDs($all_phids)
+        ->execute();
     }
 
     $results = array();
     foreach ($phids as $phid) {
-      if (!isset($this->recipientExpansionMap[$phid])) {
-        $results[$phid] = $phid;
-      } else {
-        foreach ($this->recipientExpansionMap[$phid] as $recipient_phid) {
-          $results[$recipient_phid] = $recipient_phid;
-        }
+      foreach ($this->recipientExpansionMap[$phid] as $recipient_phid) {
+        $results[$recipient_phid] = $recipient_phid;
       }
     }
 
