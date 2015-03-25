@@ -91,6 +91,10 @@ final class PHUIDiffInlineCommentDetailView
       $sigil = $sigil.' differential-inline-comment-preview';
     }
 
+    $classes = array(
+      'differential-inline-comment',
+    );
+
     $content = $inline->getContent();
     $handles = $this->handles;
 
@@ -111,6 +115,7 @@ final class PHUIDiffInlineCommentDetailView
     // TODO: This stuff is nonfinal, just making it do something.
     if ($inline->getHasReplies()) {
       $links[] = pht('Has Reply');
+      $classes[] = 'inline-has-reply';
     }
     if ($inline->getReplyToCommentPHID()) {
       $links[] = pht('Is Reply');
@@ -197,12 +202,15 @@ final class PHUIDiffInlineCommentDetailView
     }
 
     if (!$is_synthetic) {
+      $draft_state = false;
       switch ($inline->getFixedState()) {
         case PhabricatorInlineCommentInterface::STATE_DRAFT:
           $is_done = ($this->getCanMarkDone());
+          $draft_state = true;
           break;
         case PhabricatorInlineCommentInterface::STATE_UNDRAFT:
           $is_done = !($this->getCanMarkDone());
+          $draft_state = true;
           break;
         case PhabricatorInlineCommentInterface::STATE_DONE:
           $is_done = true;
@@ -211,6 +219,14 @@ final class PHUIDiffInlineCommentDetailView
         case PhabricatorInlineCommentInterface::STATE_UNDONE:
           $is_done = false;
           break;
+      }
+
+      if ($is_done) {
+        $classes[] = 'inline-is-done';
+      }
+
+      if ($draft_state) {
+        $classes[] = 'inline-state-is-draft';
       }
 
       $links[] = javelin_tag(
@@ -250,9 +266,6 @@ final class PHUIDiffInlineCommentDetailView
         '');
     }
 
-    $classes = array(
-      'differential-inline-comment',
-    );
     if ($is_draft) {
       $classes[] = 'differential-inline-comment-unsaved-draft';
     }
