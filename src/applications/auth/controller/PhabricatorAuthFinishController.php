@@ -74,7 +74,7 @@ final class PhabricatorAuthFinishController
     $request->clearCookie(PhabricatorCookies::COOKIE_NEXTURI);
     $request->clearCookie(PhabricatorCookies::COOKIE_HISEC);
 
-    if (!PhabricatorEnv::isValidLocalWebResource($next)) {
+    if (!PhabricatorEnv::isValidLocalURIForLink($next)) {
       $next = '/';
     }
 

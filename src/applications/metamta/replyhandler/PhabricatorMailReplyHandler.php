@@ -360,21 +360,10 @@ abstract class PhabricatorMailReplyHandler {
     }
 
     $phids = mpull($handles, 'getPHID');
-    $map = id(new PhabricatorMetaMTAMemberQuery())
+    $results = id(new PhabricatorMetaMTAMemberQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withPHIDs($phids)
-      ->execute();
-
-    $results = array();
-    foreach ($phids as $phid) {
-      if (isset($map[$phid])) {
-        foreach ($map[$phid] as $expanded_phid) {
-          $results[$expanded_phid] = $expanded_phid;
-        }
-      } else {
-        $results[$phid] = $phid;
-      }
-    }
+      ->executeExpansion();
 
     return id(new PhabricatorHandleQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())

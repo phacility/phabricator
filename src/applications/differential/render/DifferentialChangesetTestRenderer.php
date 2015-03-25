@@ -20,6 +20,10 @@ abstract class DifferentialChangesetTestRenderer
            "{$away}\n";
   }
 
+  protected function renderUndershieldHeader() {
+    return null;
+  }
+
   public function renderShield($message, $force = 'default') {
     return "SHIELD ({$force}) {$message}\n";
   }

@@ -217,6 +217,9 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'storage.upload-size-limit' => pht(
         'Phabricator now supports arbitrarily large files. Consult the '.
         'documentation for configuration details.'),
+      'security.allow-outbound-http' => pht(
+        'This option has been replaced with the more granular option '.
+        '`security.outbound-blacklist`.'),
     );
 
     return $ancient_config;

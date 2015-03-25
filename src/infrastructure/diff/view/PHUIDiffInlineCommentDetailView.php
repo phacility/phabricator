@@ -10,6 +10,7 @@ final class PHUIDiffInlineCommentDetailView
   private $preview;
   private $allowReply;
   private $renderer;
+  private $canMarkDone;
 
   public function setInlineComment(PhabricatorInlineCommentInterface $comment) {
     $this->inlineComment = $comment;
@@ -49,6 +50,15 @@ final class PHUIDiffInlineCommentDetailView
 
   public function getRenderer() {
     return $this->renderer;
+  }
+
+  public function setCanMarkDone($can_mark_done) {
+    $this->canMarkDone = $can_mark_done;
+    return $this;
+  }
+
+  public function getCanMarkDone() {
+    return $this->canMarkDone;
   }
 
   public function render() {
@@ -184,6 +194,34 @@ final class PHUIDiffInlineCommentDetailView
           'sigil'       => 'differential-inline-delete',
         ),
         pht('Delete'));
+    }
+
+    if (!$is_synthetic) {
+      switch ($inline->getFixedState()) {
+        case PhabricatorInlineCommentInterface::STATE_DRAFT:
+          $is_done = ($this->getCanMarkDone());
+          break;
+        case PhabricatorInlineCommentInterface::STATE_UNDRAFT:
+          $is_done = !($this->getCanMarkDone());
+          break;
+        case PhabricatorInlineCommentInterface::STATE_DONE:
+          $is_done = true;
+          break;
+        default:
+        case PhabricatorInlineCommentInterface::STATE_UNDONE:
+          $is_done = false;
+          break;
+      }
+
+      $links[] = javelin_tag(
+        'input',
+        array(
+          'type' => 'checkbox',
+          'checked' => ($is_done ? 'checked' : null),
+          'disabled' => ($this->getCanMarkDone() ? null : 'disabled'),
+          'class' => 'differential-inline-done',
+          'sigil' => 'differential-inline-done',
+        ));
     }
 
     if ($links) {

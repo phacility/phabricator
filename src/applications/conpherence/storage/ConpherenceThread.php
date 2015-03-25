@@ -31,6 +31,8 @@ final class ConpherenceThread extends ConpherenceDAO
   }
 
   public static function initializeNewRoom(PhabricatorUser $creator) {
+    $participant_phids = array($creator->getPHID());
+
     return id(new ConpherenceThread())
       ->setIsRoom(1)
       ->setMessageCount(0)
@@ -39,7 +41,8 @@ final class ConpherenceThread extends ConpherenceDAO
       ->attachFilePHIDs(array())
       ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
       ->setEditPolicy($creator->getPHID())
-      ->setJoinPolicy(PhabricatorPolicies::POLICY_USER);
+      ->setJoinPolicy(PhabricatorPolicies::POLICY_USER)
+      ->setRecentParticipantPHIDs($participant_phids);
   }
 
   protected function getConfiguration() {
@@ -79,6 +82,10 @@ final class ConpherenceThread extends ConpherenceDAO
     return parent::save();
   }
 
+  public function getMonogram() {
+    return 'Z'.$this->getID();
+  }
+
   public function attachParticipants(array $participants) {
     assert_instances_of($participants, 'ConpherenceParticipant');
     $this->participants = $participants;
@@ -91,6 +98,11 @@ final class ConpherenceThread extends ConpherenceDAO
     $participants = $this->getParticipants();
     return $participants[$phid];
   }
+  public function getParticipantIfExists($phid, $default = null) {
+    $participants = $this->getParticipants();
+    return idx($participants, $phid, $default);
+  }
+
   public function getParticipantPHIDs() {
     $participants = $this->getParticipants();
     return array_keys($participants);
@@ -191,10 +203,13 @@ final class ConpherenceThread extends ConpherenceDAO
       $final = $count == 3;
     }
 
-    $participants = $this->getParticipants();
-    $user_participation = $participants[$user->getPHID()];
-    $unread_count = $this->getMessageCount() -
-      $user_participation->getSeenMessageCount();
+    $user_participation = $this->getParticipantIfExists($user->getPHID());
+    if ($user_participation) {
+      $user_seen_count = $user_participation->getSeenMessageCount();
+    } else {
+      $user_seen_count = 0;
+    }
+    $unread_count = $this->getMessageCount() - $user_seen_count;
 
     return array(
       'title' => $title,
@@ -206,7 +221,10 @@ final class ConpherenceThread extends ConpherenceDAO
     );
   }
 
+
 /* -(  PhabricatorPolicyInterface Implementation  )-------------------------- */
+
+
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,

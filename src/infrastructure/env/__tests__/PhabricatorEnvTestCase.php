@@ -2,7 +2,7 @@
 
 final class PhabricatorEnvTestCase extends PhabricatorTestCase {
 
-  public function testLocalWebResource() {
+  public function testLocalURIForLink() {
     $map = array(
       '/'                     => true,
       '/D123'                 => true,
@@ -19,23 +19,66 @@ final class PhabricatorEnvTestCase extends PhabricatorTestCase {
     foreach ($map as $uri => $expect) {
       $this->assertEqual(
         $expect,
-        PhabricatorEnv::isValidLocalWebResource($uri),
+        PhabricatorEnv::isValidLocalURIForLink($uri),
         "Valid local resource: {$uri}");
     }
   }
 
-  public function testRemoteWebResource() {
+  public function testRemoteURIForLink() {
     $map = array(
-      'http://example.com/'   => true,
-      'derp://example.com/'   => false,
-      'javascript:alert(1)'   => false,
+      'http://example.com/' => true,
+      'derp://example.com/' => false,
+      'javascript:alert(1)' => false,
+      'http://127.0.0.1/' => true,
+      'http://169.254.169.254/latest/meta-data/hostname' => true,
     );
 
     foreach ($map as $uri => $expect) {
       $this->assertEqual(
         $expect,
-        PhabricatorEnv::isValidRemoteWebResource($uri),
-        "Valid remote resource: {$uri}");
+        PhabricatorEnv::isValidRemoteURIForLink($uri),
+        "Valid linkable remote URI: {$uri}");
+    }
+  }
+
+  public function testRemoteURIForFetch() {
+    $map = array(
+      'http://example.com/' => true,
+
+      // No domain or protocol.
+      '' => false,
+
+      // No domain.
+      'http://' => false,
+
+      // No protocol.
+      'evil.com' => false,
+
+      // No protocol.
+      '//evil.com' => false,
+
+      // Bad protocol.
+      'javascript://evil.com/' => false,
+      'file:///etc/shadow' => false,
+
+      // Unresolvable hostname.
+      'http://u1VcxwUp368SIFzl7rkWWg23KM5JPB2kTHHngxjXCQc.zzz/' => false,
+
+      // Domains explicitly in blacklisted IP space.
+      'http://127.0.0.1/' => false,
+      'http://169.254.169.254/latest/meta-data/hostname' => false,
+
+      // Domain resolves into blacklisted IP space.
+      'http://localhost/' => false,
+    );
+
+    $protocols = array('http', 'https');
+
+    foreach ($map as $uri => $expect) {
+      $this->assertEqual(
+        $expect,
+        PhabricatorEnv::isValidRemoteURIForFetch($uri, $protocols),
+        "Valid fetchable remote URI: {$uri}");
     }
   }
 

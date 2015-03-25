@@ -321,13 +321,17 @@ JX.behavior('conpherence-menu', function(config) {
   function _focusTextarea() {
     var root = JX.DOM.find(document, 'div', 'conpherence-layout');
     var form_root = JX.DOM.find(root, 'div', 'conpherence-form');
-    var textarea = JX.DOM.find(form_root, 'textarea');
-    // We may have a draft so do this JS trick so we end up focused at the
-    // end of the draft.
-    var textarea_value = textarea.value;
-    textarea.value = '';
-    JX.DOM.focus(textarea);
-    textarea.value = textarea_value;
+    try {
+      var textarea = JX.DOM.find(form_root, 'textarea');
+      // We may have a draft so do this JS trick so we end up focused at the
+      // end of the draft.
+      var textarea_value = textarea.value;
+      textarea.value = '';
+      JX.DOM.focus(textarea);
+      textarea.value = textarea_value;
+    } catch (ex) {
+      // no textarea? no problem
+    }
   }
   JX.Stratcom.listen(
     'conpherence-redraw-thread',

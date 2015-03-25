@@ -967,6 +967,38 @@ final class PhabricatorUSEnglishTranslation
         'Show Last %d Lines',
       ),
 
+      '%s marked %s inline comment(s) as done and %s inline comment(s) as '.
+      'not done.' => array(
+        array(
+          array(
+            '%s marked an inline comment as done and an inline comment '.
+            'as not done.',
+            '%s marked an inline comment as done and %3$s inline comments '.
+            'as not done.',
+          ),
+          array(
+            '%s marked %s inline comments as done and an inline comment '.
+            'as not done.',
+            '%s marked %s inline comments as done and %s inline comments '.
+            'as done.',
+          ),
+        ),
+      ),
+
+      '%s marked %s inline comment(s) as done.' => array(
+        array(
+          '%s marked an inline comment as done.',
+          '%s marked %s inline comments as done.',
+        ),
+      ),
+
+      '%s marked %s inline comment(s) as not done.' => array(
+        array(
+          '%s marked an inline comment as not done.',
+          '%s marked %s inline comments as not done.',
+        ),
+      ),
+
     );
   }
 

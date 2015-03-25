@@ -299,6 +299,15 @@ final class PhabricatorAuditInlineComment
     return $this->proxy->getIsDeleted();
   }
 
+  public function setFixedState($state) {
+    $this->proxy->setFixedState($state);
+    return $this;
+  }
+
+  public function getFixedState() {
+    return $this->proxy->getFixedState();
+  }
+
 
 /* -(  PhabricatorMarkupInterface Implementation  )-------------------------- */
 

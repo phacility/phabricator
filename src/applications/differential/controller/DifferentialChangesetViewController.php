@@ -8,8 +8,9 @@ final class DifferentialChangesetViewController extends DifferentialController {
 
   public function processRequest() {
     $request = $this->getRequest();
+    $viewer = $this->getViewer();
 
-    $author_phid = $request->getUser()->getPHID();
+    $author_phid = $viewer->getPHID();
 
     $rendering_reference = $request->getStr('ref');
     $parts = explode('/', $rendering_reference);
@@ -29,7 +30,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
     }
 
     $changesets = id(new DifferentialChangesetQuery())
-      ->setViewer($request->getUser())
+      ->setViewer($viewer)
       ->withIDs($load_ids)
       ->needHunks(true)
       ->execute();
@@ -191,7 +192,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
     $parser->setHandles($handles);
 
     $engine = new PhabricatorMarkupEngine();
-    $engine->setViewer($request->getUser());
+    $engine->setViewer($viewer);
 
     foreach ($inlines as $inline) {
       $engine->addObject(
@@ -201,10 +202,25 @@ final class DifferentialChangesetViewController extends DifferentialController {
 
     $engine->process();
 
+    $diff = $changeset->getDiff();
+    $revision_id = $diff->getRevisionID();
+
+    $can_mark = false;
+    if ($revision_id) {
+      $revision = id(new DifferentialRevisionQuery())
+        ->setViewer($viewer)
+        ->withIDs(array($revision_id))
+        ->executeOne();
+      if ($revision) {
+        $can_mark = ($revision->getAuthorPHID() == $viewer->getPHID());
+      }
+    }
+
     $parser
-      ->setUser($request->getUser())
+      ->setUser($viewer)
       ->setMarkupEngine($engine)
       ->setShowEditAndReplyLinks(true)
+      ->setCanMarkDone($can_mark)
       ->setRange($range_s, $range_e)
       ->setMask($mask);
 
@@ -221,8 +237,6 @@ final class DifferentialChangesetViewController extends DifferentialController {
         ->setUndoTemplates($parser->getRenderer()->renderUndoTemplates());
     }
 
-    $diff = $changeset->getDiff();
-
     $detail = id(new DifferentialChangesetListView())
       ->setUser($this->getViewer())
       ->setChangesets(array($changeset))
@@ -233,7 +247,6 @@ final class DifferentialChangesetViewController extends DifferentialController {
       ->setTitle(pht('Standalone View'))
       ->setParser($parser);
 
-    $revision_id = $diff->getRevisionID();
     if ($revision_id) {
       $detail->setInlineCommentControllerURI(
         '/differential/comment/inline/edit/'.$revision_id.'/');
@@ -280,7 +293,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
     DifferentialChangeset $changeset,
     $is_new) {
 
-    $viewer = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
 
     if ($is_new) {
       $key = 'raw:new:phid';

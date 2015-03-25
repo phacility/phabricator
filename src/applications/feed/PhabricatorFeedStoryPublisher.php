@@ -192,6 +192,8 @@ final class PhabricatorFeedStoryPublisher {
    * @return list<phid> List of actual subscribers.
    */
   private function filterSubscribedPHIDs(array $phids) {
+    $phids = $this->expandRecipients($phids);
+
     $tags = $this->getMailTags();
     if ($tags) {
       $all_prefs = id(new PhabricatorUserPreferences())->loadAllWhere(
@@ -232,6 +234,13 @@ final class PhabricatorFeedStoryPublisher {
     }
 
     return array_values(array_unique($keep));
+  }
+
+  private function expandRecipients(array $phids) {
+    return id(new PhabricatorMetaMTAMemberQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withPHIDs($phids)
+      ->executeExpansion();
   }
 
   /**

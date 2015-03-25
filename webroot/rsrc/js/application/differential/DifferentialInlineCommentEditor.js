@@ -158,17 +158,17 @@ JX.install('DifferentialInlineCommentEditor', {
     _didCompleteWorkflow : function(response) {
       var op = this.getOperation();
 
+      // We don't get any markup back if the user deletes a comment, or saves
+      // an empty comment (which effects a delete).
+      if (response.markup) {
+        this._draw(JX.$H(response.markup).getNode());
+      }
+
       if (op == 'delete' || op == 'refdelete') {
         this._undoText = null;
         this._drawUndo();
       } else {
         this._removeUndoLink();
-      }
-
-      // We don't get any markup back if the user deletes a comment, or saves
-      // an empty comment (which effects a delete).
-      if (response.markup) {
-        this._draw(JX.$H(response.markup).getNode());
       }
 
       // These operations remove the old row (edit adds a new row first).
@@ -256,7 +256,6 @@ JX.install('DifferentialInlineCommentEditor', {
       var data = this._buildRequestData();
       var op = this.getOperation();
 
-
       if (op == 'delete' || op == 'refdelete' || op == 'undelete') {
         this._setRowState('loading');
 
@@ -285,14 +284,32 @@ JX.install('DifferentialInlineCommentEditor', {
     deleteByID: function(id) {
       var data = {
         op: 'refdelete',
-        changesetID: id
+        id: id
       };
 
       new JX.Workflow(this._uri, data)
-        .setHandler(function() {
-          JX.Stratcom.invoke('differential-inline-comment-update');
-        })
+        .setHandler(JX.bind(this, function() {
+          this._didUpdate();
+        }))
         .start();
+    },
+
+    toggleCheckbox: function(id, checkbox) {
+      var data = {
+        op: 'done',
+        id: id
+      };
+
+      new JX.Workflow(this._uri, data)
+        .setHandler(JX.bind(this, function() {
+          checkbox.checked = !checkbox.checked;
+          this._didUpdate();
+        }))
+        .start();
+    },
+
+    _didUpdate: function() {
+      JX.Stratcom.invoke('differential-inline-comment-update');
     }
 
   },

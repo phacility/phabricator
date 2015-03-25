@@ -57,6 +57,46 @@ final class DifferentialInlineCommentEditController
     return $inline;
   }
 
+  protected function loadCommentForDone($id) {
+    $request = $this->getRequest();
+    $viewer = $request->getUser();
+
+    $inline = $this->loadComment($id);
+    if (!$inline) {
+      throw new Exception(pht('Unable to load inline "%d".', $id));
+    }
+
+    $changeset = id(new DifferentialChangesetQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($inline->getChangesetID()))
+      ->executeOne();
+    if (!$changeset) {
+      throw new Exception(pht('Unable to load changeset.'));
+    }
+
+    $diff = id(new DifferentialDiffQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($changeset->getDiffID()))
+      ->executeOne();
+    if (!$diff) {
+      throw new Exception(pht('Unable to load diff.'));
+    }
+
+    $revision = id(new DifferentialRevisionQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($diff->getRevisionID()))
+      ->executeOne();
+    if (!$revision) {
+      throw new Exception(pht('Unable to load revision.'));
+    }
+
+    if ($revision->getAuthorPHID() !== $viewer->getPHID()) {
+      throw new Exception(pht('You are not the revision owner.'));
+    }
+
+    return $inline;
+  }
+
   private function canEditInlineComment(
     PhabricatorUser $user,
     DifferentialInlineComment $inline) {

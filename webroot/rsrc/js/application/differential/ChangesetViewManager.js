@@ -190,7 +190,19 @@ JX.install('ChangesetViewManager', {
      * Receive a response to a context request.
      */
     _oncontext: function(target, response) {
-      var table = JX.$H(response.changeset).getNode();
+      // TODO: This should be better structured.
+      // If the response comes back with several top-level nodes, the last one
+      // is the actual context; the others are headers. Add any headers first,
+      // then copy the new rows into the document.
+      var markup = JX.$H(response.changeset).getFragment();
+      var len = markup.childNodes.length;
+      var diff = JX.DOM.findAbove(target, 'table', 'differential-diff');
+
+      for (var ii = 0; ii < len - 1; ii++) {
+        diff.parentNode.insertBefore(markup.firstChild, diff);
+      }
+
+      var table = markup.firstChild;
       var root = target.parentNode;
       this._moveRows(table, root, target);
       root.removeChild(target);

@@ -376,3 +376,15 @@
 .conpherence-widget-pane .notifications-update {
   margin: 3px 0px 0px 4px;
 }
+
+.conpherence-widget-pane .no-settings {
+  width: 200px;
+  padding: 20px;
+  text-align: center;
+  color: {$greytext};
+}
+
+.device .conpherence-widget-pane .no-settings {
+  width: 60px;
+  margin: 0 auto 0 auto;
+}

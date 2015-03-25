@@ -88,7 +88,7 @@ final class DiffusionBrowseSearchController extends DiffusionBrowseController {
     $results = $pager->sliceResults($results);
 
     if ($search_mode == 'grep') {
-      $table = $this->renderGrepResults($results);
+      $table = $this->renderGrepResults($results, $query_string);
       $header = pht(
         'File content matching "%s" under "%s"',
         $query_string,
@@ -112,28 +112,10 @@ final class DiffusionBrowseSearchController extends DiffusionBrowseController {
     return array($box, $pager_box);
   }
 
-  private function renderGrepResults(array $results) {
+  private function renderGrepResults(array $results, $pattern) {
     $drequest = $this->getDiffusionRequest();
 
-    require_celerity_resource('syntax-highlighting-css');
-
-    // NOTE: This can be wrong because we may find the string inside the
-    // comment. But it's correct in most cases and highlighting the whole file
-    // would be too expensive.
-    $futures = array();
-    $engine = PhabricatorSyntaxHighlighter::newEngine();
-    foreach ($results as $result) {
-      list($path, $line, $string) = $result;
-      $futures["{$path}:{$line}"] = $engine->getHighlightFuture(
-        $engine->getLanguageFromFilename($path),
-        ltrim($string));
-    }
-
-    try {
-      id(new FutureIterator($futures))
-        ->limit(8)
-        ->resolveAll();
-    } catch (PhutilSyntaxHighlighterException $ex) {}
+    require_celerity_resource('phabricator-search-results-css');
 
     $rows = array();
     foreach ($results as $result) {
@@ -145,14 +127,57 @@ final class DiffusionBrowseSearchController extends DiffusionBrowseController {
         'line' => $line,
       ));
 
-      try {
-        $string = $futures["{$path}:{$line}"]->resolve();
-      } catch (PhutilSyntaxHighlighterException $ex) {}
+      $matches = null;
+      $count = @preg_match_all(
+        '('.$pattern.')u',
+        $string,
+        $matches,
+        PREG_OFFSET_CAPTURE);
+
+      if (!$count) {
+        $output = ltrim($string);
+      } else {
+        $output = array();
+        $cursor = 0;
+        $length = strlen($string);
+        foreach ($matches[0] as $match) {
+          $offset = $match[1];
+          if ($cursor != $offset) {
+            $output[] = array(
+              'text' => substr($string, $cursor, $offset),
+              'highlight' => false,
+            );
+          }
+          $output[] = array(
+            'text' => $match[0],
+            'highlight' => true,
+          );
+          $cursor = $offset + strlen($match[0]);
+        }
+        if ($cursor != $length) {
+          $output[] = array(
+            'text' => substr($string, $cursor),
+            'highlight' => false,
+          );
+        }
+
+        if ($output) {
+          $output[0]['text'] =  ltrim($output[0]['text']);
+        }
+
+        foreach ($output as $key => $segment) {
+          if ($segment['highlight']) {
+            $output[$key] = phutil_tag('strong', array(), $segment['text']);
+          } else {
+            $output[$key] = $segment['text'];
+          }
+        }
+      }
 
       $string = phutil_tag(
         'pre',
-        array('class' => 'PhabricatorMonospaced'),
-        $string);
+        array('class' => 'PhabricatorMonospaced phui-source-fragment'),
+        $output);
 
       $path = Filesystem::readablePath($path, $drequest->getPath());
 

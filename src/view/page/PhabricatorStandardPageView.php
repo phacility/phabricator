@@ -562,7 +562,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       $name = idx($item, 'name', pht('Unnamed Footer Item'));
 
       $href = idx($item, 'href');
-      if (!PhabricatorEnv::isValidWebResource($href)) {
+      if (!PhabricatorEnv::isValidURIForLink($href)) {
         $href = null;
       }
 

@@ -7,6 +7,11 @@ interface PhabricatorInlineCommentInterface extends PhabricatorMarkupInterface {
 
   const MARKUP_FIELD_BODY = 'markup:body';
 
+  const STATE_UNDONE = 'undone';
+  const STATE_DRAFT = 'draft';
+  const STATE_UNDRAFT = 'undraft';
+  const STATE_DONE = 'done';
+
   public function setChangesetID($id);
   public function getChangesetID();
 
@@ -27,6 +32,9 @@ interface PhabricatorInlineCommentInterface extends PhabricatorMarkupInterface {
 
   public function setIsDeleted($deleted);
   public function getIsDeleted();
+
+  public function setFixedState($state);
+  public function getFixedState();
 
   public function setContent($content);
   public function getContent();

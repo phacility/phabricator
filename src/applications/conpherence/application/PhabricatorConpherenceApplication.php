@@ -36,6 +36,10 @@ final class PhabricatorConpherenceApplication extends PhabricatorApplication {
         '(?P<id>[1-9]\d*)/'        => 'ConpherenceViewController',
         'columnview/'              => 'ConpherenceColumnViewController',
         'new/'                     => 'ConpherenceNewController',
+        'room/'                    => array(
+          '(?:query/(?P<queryKey>[^/]+)/)?' => 'ConpherenceRoomListController',
+          'new/'                            => 'ConpherenceNewRoomController',
+        ),
         'panel/'                   => 'ConpherenceNotificationPanelController',
         'widget/(?P<id>[1-9]\d*)/' => 'ConpherenceWidgetController',
         'update/(?P<id>[1-9]\d*)/' => 'ConpherenceUpdateController',

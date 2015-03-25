@@ -10,6 +10,8 @@ final class PhabricatorAuditEditor
   private $affectedFiles;
   private $rawPatch;
 
+  private $didExpandInlineState;
+
   public function addAuditReason($phid, $reason) {
     if (!isset($this->auditReasonMap[$phid])) {
       $this->auditReasonMap[$phid] = array();
@@ -52,6 +54,7 @@ final class PhabricatorAuditEditor
 
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
     $types[] = PhabricatorTransactions::TYPE_EDGE;
+    $types[] = PhabricatorTransactions::TYPE_INLINESTATE;
 
     $types[] = PhabricatorAuditTransaction::TYPE_COMMIT;
 
@@ -186,6 +189,28 @@ final class PhabricatorAuditEditor
     }
 
     return parent::applyCustomExternalTransaction($object, $xaction);
+  }
+
+  protected function applyBuiltinExternalTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_INLINESTATE:
+        $table = new PhabricatorAuditTransactionComment();
+        $conn_w = $table->establishConnection('w');
+        foreach ($xaction->getNewValue() as $phid => $state) {
+          queryfx(
+            $conn_w,
+            'UPDATE %T SET fixedState = %s WHERE phid = %s',
+            $table->getTableName(),
+            $state,
+            $phid);
+        }
+        return;
+    }
+
+    return parent::applyBuiltinExternalTransaction($object, $xaction);
   }
 
   protected function applyFinalEffects(
@@ -344,6 +369,46 @@ final class PhabricatorAuditEditor
       default:
         break;
     }
+
+    if (!$this->didExpandInlineState) {
+      switch ($xaction->getTransactionType()) {
+        case PhabricatorTransactions::TYPE_COMMENT:
+        case PhabricatorAuditActionConstants::ACTION:
+          $this->didExpandInlineState = true;
+
+          $actor_phid = $this->getActingAsPHID();
+          $actor_is_author = ($object->getAuthorPHID() == $actor_phid);
+          if (!$actor_is_author) {
+            break;
+          }
+
+          $state_map = PhabricatorTransactions::getInlineStateMap();
+
+          $inlines = id(new DiffusionDiffInlineCommentQuery())
+            ->setViewer($this->getActor())
+            ->withCommitPHIDs(array($object->getPHID()))
+            ->withFixedStates(array_keys($state_map))
+            ->execute();
+
+          if (!$inlines) {
+            break;
+          }
+
+          $old_value = mpull($inlines, 'getFixedState', 'getPHID');
+          $new_value = array();
+          foreach ($old_value as $key => $state) {
+            $new_value[$key] = $state_map[$state];
+          }
+
+          $xactions[] = id(new PhabricatorAuditTransaction())
+            ->setTransactionType(PhabricatorTransactions::TYPE_INLINESTATE)
+            ->setIgnoreOnNoEffect(true)
+            ->setOldValue($old_value)
+            ->setNewValue($new_value);
+          break;
+      }
+    }
+
     return $xactions;
   }
 

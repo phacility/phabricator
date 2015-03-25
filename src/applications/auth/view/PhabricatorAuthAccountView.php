@@ -71,7 +71,7 @@ final class PhabricatorAuthAccountView extends AphrontView {
       // Make sure we don't link a "javascript:" URI if a user somehow
       // managed to get one here.
 
-      if (PhabricatorEnv::isValidRemoteWebResource($account_uri)) {
+      if (PhabricatorEnv::isValidRemoteURIForLink($account_uri)) {
         $account_uri = phutil_tag(
           'a',
           array(
