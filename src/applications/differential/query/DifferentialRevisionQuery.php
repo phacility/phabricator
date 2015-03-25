@@ -38,6 +38,8 @@ final class DifferentialRevisionQuery
   private $branches = array();
   private $arcanistProjectPHIDs = array();
   private $repositoryPHIDs;
+  private $updatedEpochMin;
+  private $updatedEpochMax;
 
   private $order            = 'order-modified';
   const ORDER_MODIFIED      = 'order-modified';
@@ -250,6 +252,12 @@ final class DifferentialRevisionQuery
 
   public function withRepositoryPHIDs(array $repository_phids) {
     $this->repositoryPHIDs = $repository_phids;
+    return $this;
+  }
+
+  public function withUpdatedEpochBetween($min, $max) {
+    $this->updatedEpochMin = $min;
+    $this->updatedEpochMax = $max;
     return $this;
   }
 
@@ -762,6 +770,20 @@ final class DifferentialRevisionQuery
         $conn_r,
         'r.arcanistProjectPHID in (%Ls)',
         $this->arcanistProjectPHIDs);
+    }
+
+    if ($this->updatedEpochMin !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'r.dateModified >= %d',
+        $this->updatedEpochMin);
+    }
+
+    if ($this->updatedEpochMax !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'r.dateModified <= %d',
+        $this->updatedEpochMax);
     }
 
     switch ($this->status) {
