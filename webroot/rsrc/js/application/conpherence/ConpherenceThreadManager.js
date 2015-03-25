@@ -26,6 +26,7 @@ JX.install('ConpherenceThreadManager', {
     _loadedThreadID: null,
     _loadedThreadPHID: null,
     _latestTransactionID: null,
+    _canEditLoadedThread: null,
     _updating:  null,
     _minimalDisplay: false,
     _willLoadThreadCallback: JX.bag,
@@ -78,6 +79,18 @@ JX.install('ConpherenceThreadManager', {
     setLatestTransactionID: function(id) {
       this._latestTransactionID = id;
       return this;
+    },
+
+    setCanEditLoadedThread: function(bool) {
+      this._canEditLoadedThread = bool;
+      return this;
+    },
+
+    getCanEditLoadedThread: function() {
+      if (this._canEditLoadedThread === null) {
+        return false;
+      }
+      return this._canEditLoadedThread;
     },
 
     setMinimalDisplay: function(bool) {
@@ -255,6 +268,7 @@ JX.install('ConpherenceThreadManager', {
         this._loadedThreadID = r.threadID;
         this._loadedThreadPHID = r.threadPHID;
         this._latestTransactionID = r.latestTransactionID;
+        this._canEditLoadedThread = r.canEdit;
         JX.Stratcom.invoke('notification-panel-update', null, {});
 
         this._didLoadThreadCallback(r);

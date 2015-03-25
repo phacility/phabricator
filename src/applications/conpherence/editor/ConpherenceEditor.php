@@ -369,6 +369,51 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     return $xactions;
   }
 
+  protected function requireCapabilities(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    parent::requireCapabilities($object, $xaction);
+
+    switch ($xaction->getTransactionType()) {
+      case ConpherenceTransactionType::TYPE_PARTICIPANTS:
+        $old_map = array_fuse($xaction->getOldValue());
+        $new_map = array_fuse($xaction->getNewValue());
+
+        $add = array_keys(array_diff_key($new_map, $old_map));
+        $rem = array_keys(array_diff_key($old_map, $new_map));
+
+        $actor_phid = $this->requireActor()->getPHID();
+
+        $is_join = (($add === array($actor_phid)) && !$rem);
+        $is_leave = (($rem === array($actor_phid)) && !$add);
+
+        if ($is_join) {
+          // You need CAN_JOIN to join a thread / room.
+          PhabricatorPolicyFilter::requireCapability(
+            $this->requireActor(),
+            $object,
+            PhabricatorPolicyCapability::CAN_JOIN);
+        } else if ($is_leave) {
+          // You don't need any capabilities to leave a conpherence thread.
+        } else {
+          // You need CAN_EDIT to change participants other than yourself.
+          PhabricatorPolicyFilter::requireCapability(
+            $this->requireActor(),
+            $object,
+            PhabricatorPolicyCapability::CAN_EDIT);
+        }
+        break;
+      case ConpherenceTransactionType::TYPE_FILES:
+      case ConpherenceTransactionType::TYPE_TITLE:
+        PhabricatorPolicyFilter::requireCapability(
+          $this->requireActor(),
+          $object,
+          PhabricatorPolicyCapability::CAN_EDIT);
+        break;
+    }
+  }
+
   protected function mergeTransactions(
     PhabricatorApplicationTransaction $u,
     PhabricatorApplicationTransaction $v) {
@@ -496,7 +541,7 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
 
     switch ($type) {
       case ConpherenceTransactionType::TYPE_TITLE:
-        if (!$object->getIsRoom() && $this->getIsNewObject()) {
+        if (!$object->getIsRoom()) {
           continue;
         }
         $missing = $this->validateIsEmptyTextField(

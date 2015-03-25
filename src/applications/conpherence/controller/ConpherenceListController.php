@@ -152,6 +152,7 @@ final class ConpherenceListController extends ConpherenceController {
       case self::UNSELECTED_MODE:
       default:
         $layout = id(new ConpherenceLayoutView())
+          ->setUser($user)
           ->setBaseURI($this->getApplicationURI())
           ->setThreadView($thread_view)
           ->setRole('list');

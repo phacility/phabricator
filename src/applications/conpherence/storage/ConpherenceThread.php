@@ -266,7 +266,15 @@ final class ConpherenceThread extends ConpherenceDAO
   }
 
   public function describeAutomaticCapability($capability) {
-    return pht('Participants in a thread can always view and edit it.');
+    if ($this->getIsRoom()) {
+      switch ($capability) {
+        case PhabricatorPolicyCapability::CAN_VIEW:
+          return pht('Participants in a room can always view it.');
+          break;
+      }
+    } else {
+      return pht('Participants in a thread can always view and edit it.');
+    }
   }
 
 }

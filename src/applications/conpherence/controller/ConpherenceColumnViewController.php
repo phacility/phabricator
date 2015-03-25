@@ -84,7 +84,12 @@ final class ConpherenceColumnViewController extends
       'content' => hsprintf('%s', $durable_column),
       'threadID' => $conpherence_id,
       'threadPHID' => $conpherence_phid,
-      'latestTransactionID' => $latest_transaction_id,);
+      'latestTransactionID' => $latest_transaction_id,
+      'canEdit' => PhabricatorPolicyFilter::hasCapability(
+        $user,
+        $conpherence,
+        PhabricatorPolicyCapability::CAN_EDIT),
+    );
 
     return id(new AphrontAjaxResponse())->setContent($response);
   }

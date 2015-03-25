@@ -237,6 +237,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
           ->setHref($action['href'])
           ->setName($action['name'])
           ->setIcon($action['icon'])
+          ->setDisabled($action['disabled'])
           ->addSigil('conpherence-durable-column-header-action')
           ->setMetadata(array(
             'action' => $action['key'],
@@ -303,27 +304,41 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
   }
 
   private function getHeaderActionsConfig(ConpherenceThread $conpherence) {
+    if ($conpherence->getIsRoom()) {
+      $rename_label = pht('Rename Room');
+    } else {
+      $rename_label = pht('Rename Thread');
+    }
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $this->getUser(),
+      $conpherence,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
     return array(
       array(
         'name' => pht('Add Participants'),
+        'disabled' => !$can_edit,
         'href' => '/conpherence/update/'.$conpherence->getID().'/',
         'icon' => 'fa-plus',
         'key' => ConpherenceUpdateActions::ADD_PERSON,
       ),
       array(
-        'name' => pht('Rename Thread'),
+        'name' => $rename_label,
+        'disabled' => !$can_edit,
         'href' => '/conpherence/update/'.$conpherence->getID().'/',
         'icon' => 'fa-pencil',
         'key' => ConpherenceUpdateActions::METADATA,
       ),
       array(
         'name' => pht('View in Conpherence'),
+        'disabled' => false,
         'href' => '/conpherence/'.$conpherence->getID().'/',
         'icon' => 'fa-comments',
         'key' => 'go_conpherence',
       ),
       array(
         'name' => pht('Hide Column'),
+        'disabled' => false,
         'href' => '#',
         'icon' => 'fa-times',
         'key' => 'hide_column',
