@@ -321,6 +321,15 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     PhabricatorLiskDAO $object,
     array $xactions) {
 
+    $message_count = 0;
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case PhabricatorTransactions::TYPE_COMMENT:
+          $message_count++;
+          break;
+      }
+    }
+
     // update everyone's participation status on the last xaction -only-
     $xaction = end($xactions);
     $xaction_phid = $xaction->getPHID();
@@ -333,8 +342,8 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
       if ($phid != $user->getPHID()) {
         if ($participant->getParticipationStatus() != $behind) {
           $participant->setBehindTransactionPHID($xaction_phid);
-          // decrement one as this is the message putting them behind!
-          $participant->setSeenMessageCount($object->getMessageCount() - 1);
+          $participant->setSeenMessageCount(
+            $object->getMessageCount() - $message_count);
         }
         $participant->setParticipationStatus($behind);
         $participant->setDateTouched($time);

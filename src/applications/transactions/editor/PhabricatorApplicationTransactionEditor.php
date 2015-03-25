@@ -393,6 +393,10 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         $object->setEditPolicy($xaction->getNewValue());
         break;
+      case PhabricatorTransactions::TYPE_JOIN_POLICY:
+        $object->setJoinPolicy($xaction->getNewValue());
+        break;
+
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $field = $this->getCustomFieldForTransaction($object, $xaction);
         return $field->applyApplicationTransactionInternalEffects($xaction);

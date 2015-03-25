@@ -98,9 +98,9 @@ final class ConpherenceThread extends ConpherenceDAO
     $participants = $this->getParticipants();
     return $participants[$phid];
   }
-  public function getParticipantIfExists($phid) {
+  public function getParticipantIfExists($phid, $default = null) {
     $participants = $this->getParticipants();
-    return idx($participants, $phid);
+    return idx($participants, $phid, $default);
   }
 
   public function getParticipantPHIDs() {
@@ -221,7 +221,10 @@ final class ConpherenceThread extends ConpherenceDAO
     );
   }
 
+
 /* -(  PhabricatorPolicyInterface Implementation  )-------------------------- */
+
+
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,

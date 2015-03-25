@@ -69,11 +69,23 @@ final class ConpherenceListController extends ConpherenceController {
         if ($conpherence->getTitle()) {
           $title = $conpherence->getTitle();
         }
-        $cursor = $conpherence->getParticipant($user->getPHID());
-        $data = $this->loadParticipationWithMidCursor($cursor);
-        $all_participation = $data['participation'];
-        $scroll_up_participant = $data['scroll_up_participant'];
-        $scroll_down_participant = $data['scroll_down_participant'];
+        $cursor = $conpherence->getParticipantIfExists($user->getPHID());
+        if ($cursor) {
+          $data = $this->loadParticipationWithMidCursor($cursor);
+          $all_participation = $data['all_participation'];
+          $scroll_up_participant = $data['scroll_up_participant'];
+          $scroll_down_participant = $data['scroll_down_participant'];
+        } else {
+          $data = $this->loadDefaultParticipation($too_many);
+          $all_participation = $data['all_participation'];
+          $scroll_down_participant = $data['scroll_down_participant'];
+          $menu_participation = $this->getEmptyParticipant()
+            ->setConpherencePHID($conpherence->getPHID())
+            ->setParticipantPHID($user->getPHID());
+          $all_participation =
+            array($conpherence->getPHID() => $menu_participation) +
+            $all_participation;
+        }
         break;
       case self::PAGING_MODE:
         $direction = $request->getStr('direction');
@@ -108,16 +120,9 @@ final class ConpherenceListController extends ConpherenceController {
         break;
       case self::UNSELECTED_MODE:
       default:
-        $too_many = ConpherenceParticipantQuery::LIMIT + 1;
-        $all_participation = id(new ConpherenceParticipantQuery())
-          ->withParticipantPHIDs(array($user->getPHID()))
-          ->setLimit($too_many)
-          ->execute();
-        if (count($all_participation) == $too_many) {
-          $node = end($all_participation);
-          unset($all_participation[$node->getConpherencePHID()]);
-          $scroll_down_participant = $node;
-        }
+        $data = $this->loadDefaultParticipation($too_many);
+        $all_participation = $data['all_participation'];
+        $scroll_down_participant = $data['scroll_down_participant'];
         break;
     }
 
@@ -169,6 +174,26 @@ final class ConpherenceListController extends ConpherenceController {
 
     return $response;
 
+  }
+
+  private function loadDefaultParticipation($too_many) {
+    $viewer = $this->getRequest()->getUser();
+
+    $scroll_down_participant = $this->getEmptyParticipant();
+
+    $all_participation = id(new ConpherenceParticipantQuery())
+      ->withParticipantPHIDs(array($viewer->getPHID()))
+      ->setLimit($too_many)
+      ->execute();
+    if (count($all_participation) == $too_many) {
+      $node = end($all_participation);
+      unset($all_participation[$node->getConpherencePHID()]);
+      $scroll_down_participant = $node;
+    }
+
+    return array(
+      'all_participation' => $all_participation,
+      'scroll_down_participant' => $scroll_down_participant,);
   }
 
   /**
@@ -224,7 +249,7 @@ final class ConpherenceListController extends ConpherenceController {
     return array(
       'scroll_up_participant' => $scroll_up_participant,
       'scroll_down_participant' => $scroll_down_participant,
-      'participation' => $participation,
+      'all_participation' => $participation,
     );
   }
 

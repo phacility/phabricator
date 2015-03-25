@@ -27,12 +27,14 @@ final class ConpherenceViewController extends
     }
     $this->setConpherence($conpherence);
 
-    $participant = $conpherence->getParticipant($user->getPHID());
     $transactions = $conpherence->getTransactions();
     $latest_transaction = head($transactions);
-    $write_guard = AphrontWriteGuard::beginScopedUnguardedWrites();
-    $participant->markUpToDate($conpherence, $latest_transaction);
-    unset($write_guard);
+    $participant = $conpherence->getParticipantIfExists($user->getPHID());
+    if ($participant) {
+      $write_guard = AphrontWriteGuard::beginScopedUnguardedWrites();
+      $participant->markUpToDate($conpherence, $latest_transaction);
+      unset($write_guard);
+    }
 
     $data = ConpherenceTransactionView::renderTransactions(
       $user,
@@ -85,9 +87,24 @@ final class ConpherenceViewController extends
 
     $conpherence = $this->getConpherence();
     $user = $this->getRequest()->getUser();
+    $can_join = PhabricatorPolicyFilter::hasCapability(
+      $user,
+      $conpherence,
+      PhabricatorPolicyCapability::CAN_JOIN);
+    $participating = $conpherence->getParticipantIfExists($user->getPHID());
+    if (!$can_join && !$participating) {
+      return null;
+    }
     $draft = PhabricatorDraft::newFromUserAndKey(
       $user,
       $conpherence->getPHID());
+    if ($participating) {
+      $action = ConpherenceUpdateActions::MESSAGE;
+      $button_text = pht('Send');
+    } else {
+      $action = ConpherenceUpdateActions::JOIN_ROOM;
+      $button_text = pht('Join');
+    }
     $update_uri = $this->getApplicationURI('update/'.$conpherence->getID().'/');
 
     $this->initBehavior('conpherence-pontificate');
@@ -98,7 +115,7 @@ final class ConpherenceViewController extends
       ->addSigil('conpherence-pontificate')
       ->setWorkflow(true)
       ->setUser($user)
-      ->addHiddenInput('action', 'message')
+      ->addHiddenInput('action', $action)
       ->appendChild(
         id(new PhabricatorRemarkupControl())
         ->setUser($user)
@@ -106,7 +123,7 @@ final class ConpherenceViewController extends
         ->setValue($draft->getDraft()))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue(pht('Send')))
+        ->setValue($button_text))
       ->render();
 
     return $form;

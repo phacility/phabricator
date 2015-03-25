@@ -53,6 +53,28 @@ final class ConpherenceUpdateController
           $draft->setDraft($request->getStr('text'));
           $draft->replaceOrDelete();
           return new AphrontAjaxResponse();
+        case ConpherenceUpdateActions::JOIN_ROOM:
+          PhabricatorPolicyFilter::requireCapability(
+            $user,
+            $conpherence,
+            PhabricatorPolicyCapability::CAN_JOIN);
+          $xactions[] = id(new ConpherenceTransaction())
+            ->setTransactionType(
+              ConpherenceTransactionType::TYPE_PARTICIPANTS)
+            ->setNewValue(array('+' => array($user->getPHID())));
+          $delete_draft = true;
+          $message = $request->getStr('text');
+          if ($message) {
+            $message_xactions = $editor->generateTransactionsFromText(
+              $user,
+              $conpherence,
+              $message);
+            $xactions = array_merge($xactions, $message_xactions);
+          }
+          // for now, just redirect back to the conpherence so everything
+          // will work okay...!
+          $response_mode = 'redirect';
+          break;
         case ConpherenceUpdateActions::MESSAGE:
           $message = $request->getStr('text');
           $xactions = $editor->generateTransactionsFromText(
@@ -86,7 +108,10 @@ final class ConpherenceUpdateController
           break;
         case ConpherenceUpdateActions::NOTIFICATIONS:
           $notifications = $request->getStr('notifications');
-          $participant = $conpherence->getParticipant($user->getPHID());
+          $participant = $conpherence->getParticipantIfExists($user->getPHID());
+          if (!$participant) {
+            return id(new Aphront404Response());
+          }
           $participant->setSettings(array('notifications' => $notifications));
           $participant->save();
           $result = pht(
@@ -126,23 +151,23 @@ final class ConpherenceUpdateController
           break;
       }
 
-      if ($xactions || ($action == ConpherenceUpdateActions::LOAD)) {
-        if ($xactions) {
-          try {
-            $xactions = $editor->applyTransactions($conpherence, $xactions);
-            if ($delete_draft) {
-              $draft = PhabricatorDraft::newFromUserAndKey(
-                $user,
-                $conpherence->getPHID());
-              $draft->delete();
-            }
-          } catch (PhabricatorApplicationTransactionNoEffectException $ex) {
-            return id(new PhabricatorApplicationTransactionNoEffectResponse())
-              ->setCancelURI($this->getApplicationURI($conpherence_id.'/'))
-              ->setException($ex);
+      if ($xactions) {
+        try {
+          $xactions = $editor->applyTransactions($conpherence, $xactions);
+          if ($delete_draft) {
+            $draft = PhabricatorDraft::newFromUserAndKey(
+              $user,
+              $conpherence->getPHID());
+            $draft->delete();
           }
+        } catch (PhabricatorApplicationTransactionNoEffectException $ex) {
+          return id(new PhabricatorApplicationTransactionNoEffectResponse())
+            ->setCancelURI($this->getApplicationURI($conpherence_id.'/'))
+            ->setException($ex);
         }
+      }
 
+      if ($xactions || ($action == ConpherenceUpdateActions::LOAD)) {
         switch ($response_mode) {
           case 'ajax':
             $latest_transaction_id = $request->getInt('latest_transaction_id');

@@ -130,8 +130,24 @@ final class ConpherenceWidgetController extends ConpherenceController {
   private function renderSettingsWidgetPaneContent() {
     $viewer = $this->getViewer();
     $conpherence = $this->getConpherence();
-    $participants = $conpherence->getParticipants();
-    $participant = $participants[$viewer->getPHID()];
+    $participant = $conpherence->getParticipantIfExists($viewer->getPHID());
+    if (!$participant) {
+      $can_join = PhabricatorPolicyFilter::hasCapability(
+        $viewer,
+        $conpherence,
+        PhabricatorPolicyCapability::CAN_JOIN);
+      if ($can_join) {
+        $text = pht('Settings are available after joining the room.');
+      } else {
+        $text = pht('Settings not applicable to rooms you can not join.');
+      }
+      return phutil_tag(
+        'div',
+        array(
+          'class' => 'no-settings',
+        ),
+        $text);
+    }
     $default = ConpherenceSettings::EMAIL_ALWAYS;
     $preference = $this->getUserPreferences();
     if ($preference) {
