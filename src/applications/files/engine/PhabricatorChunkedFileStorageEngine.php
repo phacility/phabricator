@@ -51,7 +51,7 @@ final class PhabricatorChunkedFileStorageEngine
 
   public function deleteFile($handle) {
     $engine = new PhabricatorDestructionEngine();
-    $chunks = $this->loadAllChunks($handle);
+    $chunks = $this->loadAllChunks($handle, true);
     foreach ($chunks as $chunk) {
       $engine->destroyObject($chunk);
     }
