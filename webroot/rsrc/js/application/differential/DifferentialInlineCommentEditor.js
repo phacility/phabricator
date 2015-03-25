@@ -158,17 +158,17 @@ JX.install('DifferentialInlineCommentEditor', {
     _didCompleteWorkflow : function(response) {
       var op = this.getOperation();
 
+      // We don't get any markup back if the user deletes a comment, or saves
+      // an empty comment (which effects a delete).
+      if (response.markup) {
+        this._draw(JX.$H(response.markup).getNode());
+      }
+
       if (op == 'delete' || op == 'refdelete') {
         this._undoText = null;
         this._drawUndo();
       } else {
         this._removeUndoLink();
-      }
-
-      // We don't get any markup back if the user deletes a comment, or saves
-      // an empty comment (which effects a delete).
-      if (response.markup) {
-        this._draw(JX.$H(response.markup).getNode());
       }
 
       // These operations remove the old row (edit adds a new row first).
