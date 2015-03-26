@@ -37,7 +37,7 @@ final class ConpherenceCreateThreadConduitAPIMethod
     $message = $request->getValue('message');
     $title = $request->getValue('title');
 
-    list($errors, $conpherence) = ConpherenceEditor::createConpherence(
+    list($errors, $conpherence) = ConpherenceEditor::createThread(
       $request->getUser(),
       $participant_phids,
       $title,

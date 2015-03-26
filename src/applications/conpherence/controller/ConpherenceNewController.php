@@ -19,7 +19,7 @@ final class ConpherenceNewController extends ConpherenceController {
     if ($request->isFormPost()) {
       $participants = $request->getArr('participants');
       $message = $request->getStr('message');
-      list($error_codes, $conpherence) = ConpherenceEditor::createConpherence(
+      list($error_codes, $conpherence) = ConpherenceEditor::createThread(
         $user,
         $participants,
         $conpherence_title = null,
