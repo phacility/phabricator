@@ -61,6 +61,7 @@ final class PhortuneSubscriptionTableView extends AphrontView {
     }
 
     $table = id(new AphrontTableView($rows))
+      ->setTallTable(true)
       ->setHeaders(
         array(
           pht('ID'),
