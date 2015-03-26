@@ -216,7 +216,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
     $icon = $conpherence->getPolicyIconName($policy_objects);
     return id(new PHUIIconView())
       ->addClass('mmr')
-      ->setIconFont($icon.' lightgreytext');
+      ->setIconFont($icon);
   }
 
   private function buildIconBar() {

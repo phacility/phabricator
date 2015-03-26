@@ -73,6 +73,10 @@
   border-left: 1px solid rgba(0,0,0,.2);
 }
 
+.conpherence-durable-column-header-text .phui-icon-view {
+  color: rgba(255, 255, 255, 0.8);
+}
+
 .conpherence-durable-column-icon-bar {
   height: 38px;
   padding: 4px 8px;
