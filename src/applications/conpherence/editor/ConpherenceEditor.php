@@ -135,6 +135,9 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
       case ConpherenceTransactionType::TYPE_TITLE:
         return $object->getTitle();
       case ConpherenceTransactionType::TYPE_PARTICIPANTS:
+        if ($this->getIsNewObject()) {
+          return array();
+        }
         return $object->getParticipantPHIDs();
       case ConpherenceTransactionType::TYPE_FILES:
         return $object->getFilePHIDs();
