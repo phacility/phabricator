@@ -66,16 +66,24 @@ final class PhabricatorCalendarEventEditController
       $end_value   = $end_time->readValueFromRequest($request);
       $description = $request->getStr('description');
 
-      try {
-        $status
-          ->setUserPHID($user->getPHID())
-          ->setStatus($type)
-          ->setDateFrom($start_value)
-          ->setDateTo($end_value)
-          ->setDescription($description)
-          ->save();
-      } catch (PhabricatorCalendarEventInvalidEpochException $e) {
-        $errors[] = pht('Start must be before end.');
+      if ($start_time->getError()) {
+        $errors[] = pht('Invalid start time; reset to default.');
+      }
+      if ($end_time->getError()) {
+        $errors[] = pht('Invalid end time; reset to default.');
+      }
+      if (!$errors) {
+        try {
+          $status
+            ->setUserPHID($user->getPHID())
+            ->setStatus($type)
+            ->setDateFrom($start_value)
+            ->setDateTo($end_value)
+            ->setDescription($description)
+            ->save();
+        } catch (PhabricatorCalendarEventInvalidEpochException $e) {
+          $errors[] = pht('Start must be before end.');
+        }
       }
 
       if (!$errors) {
