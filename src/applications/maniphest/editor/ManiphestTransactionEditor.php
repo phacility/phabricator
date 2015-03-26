@@ -679,21 +679,57 @@ final class ManiphestTransactionEditor
     // return the result.
     if ($adjacent) {
       // If the adjacent task has a subpriority that is identical or very
-      // close to the task we're looking at, we're going to move it a little
-      // farther down the subpriority list.
+      // close to the task we're looking at, we're going to move it and all
+      // tasks with the same subpriority a little farther down the subpriority
+      // scale.
       if (abs($adjacent->getSubpriority() - $base) < 0.01) {
+        $conn_w = $adjacent->establishConnection('w');
+
+        // Get all of the tasks with the same subpriority as the adjacent
+        // task, including the adjacent task itself.
+        $shift_base = $adjacent->getSubpriority();
+        $shift_all = id(new ManiphestTaskQuery())
+          ->setViewer(PhabricatorUser::getOmnipotentUser())
+          ->setOrderBy(ManiphestTaskQuery::ORDER_PRIORITY)
+          ->withPriorities(array($adjacent->getPriority()))
+          ->withSubpriorities(array($shift_base))
+          ->setReversePaging(!$is_after)
+          ->execute();
+        $shift_last = last($shift_all);
+
+        // Find the subpriority before or after the task at the end of the
+        // block.
         list($shift_pri, $shift_sub) = self::getAdjacentSubpriority(
-          $adjacent,
+          $shift_last,
           $is_after);
 
-        queryfx(
-          $adjacent->establishConnection('r'),
-          'UPDATE %T SET subpriority = %f WHERE id = %d',
-          $adjacent->getTableName(),
-          $shift_sub,
-          $adjacent->getID());
+        $delta = ($shift_sub - $shift_base);
+        $count = count($shift_all);
 
-        $adjacent->setSubpriority($shift_sub);
+        $shift = array();
+        $cursor = 1;
+        foreach ($shift_all as $shift_task) {
+          $shift_target = $shift_base + (($cursor / $count) * $delta);
+          $cursor++;
+
+          queryfx(
+            $conn_w,
+            'UPDATE %T SET subpriority = %f WHERE id = %d',
+            $adjacent->getTableName(),
+            $shift_target,
+            $shift_task->getID());
+
+          // If we're shifting the adjacent task, update it.
+          if ($shift_task->getID() == $adjacent->getID()) {
+            $adjacent->setSubpriority($shift_target);
+          }
+
+          // If we're shifting the original target task, update the base
+          // subpriority.
+          if ($shift_task->getID() == $dst->getID()) {
+            $base = $shift_target;
+          }
+        }
       }
 
       $sub = ($adjacent->getSubpriority() + $base) / 2;
