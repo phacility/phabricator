@@ -157,13 +157,20 @@ final class ConpherenceListController extends ConpherenceController {
           ->setThreadView($thread_view)
           ->setRole('list');
         if ($conpherence) {
-          $layout->setHeader($this->buildHeaderPaneContent($conpherence));
+          $policy_objects = id(new PhabricatorPolicyQuery())
+            ->setViewer($user)
+            ->setObject($conpherence)
+            ->execute();
+          $layout->setHeader($this->buildHeaderPaneContent(
+            $conpherence,
+            $policy_objects));
           $layout->setThread($conpherence);
         } else {
           $layout->setHeader(
             $this->buildHeaderPaneContent(
               id(new ConpherenceThread())
-              ->makeEphemeral()));
+              ->makeEphemeral(),
+              array()));
         }
         $response = $this->buildApplicationPage(
           $layout,

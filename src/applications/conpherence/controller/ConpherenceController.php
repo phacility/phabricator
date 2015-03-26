@@ -74,11 +74,21 @@ abstract class ConpherenceController extends PhabricatorController {
     return $crumbs;
   }
 
-  protected function buildHeaderPaneContent(ConpherenceThread $conpherence) {
+  protected function buildHeaderPaneContent(
+    ConpherenceThread $conpherence,
+    array $policy_objects) {
+    assert_instances_of($policy_objects, 'PhabricatorPolicy');
+
     $crumbs = $this->buildApplicationCrumbs();
     $title = $this->getConpherenceTitle($conpherence);
+    if ($conpherence->getID()) {
+      $icon = $conpherence->getPolicyIconName($policy_objects);
+    } else {
+      $icon = null;
+    }
     $crumbs->addCrumb(
       id(new PHUICrumbView())
+      ->setIcon($icon)
       ->setName($title)
       ->setHref($this->getApplicationURI('update/'.$conpherence->getID().'/'))
       ->setWorkflow(true));

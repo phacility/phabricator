@@ -377,7 +377,11 @@ final class ConpherenceUpdateController
     $file_widget = null;
     switch ($action) {
       case ConpherenceUpdateActions::METADATA:
-        $header = $this->buildHeaderPaneContent($conpherence);
+        $policy_objects = id(new PhabricatorPolicyQuery())
+          ->setViewer($user)
+          ->setObject($conpherence)
+          ->execute();
+        $header = $this->buildHeaderPaneContent($conpherence, $policy_objects);
         $nav_item = id(new ConpherenceThreadListView())
           ->setUser($user)
           ->setBaseURI($this->getApplicationURI())

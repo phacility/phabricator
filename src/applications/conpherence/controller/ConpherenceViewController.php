@@ -47,7 +47,11 @@ final class ConpherenceViewController extends
       $form = null;
       $content = array('messages' => $messages);
     } else {
-      $header = $this->buildHeaderPaneContent($conpherence);
+      $policy_objects = id(new PhabricatorPolicyQuery())
+        ->setViewer($user)
+        ->setObject($conpherence)
+        ->execute();
+      $header = $this->buildHeaderPaneContent($conpherence, $policy_objects);
       $form = $this->renderFormContent();
       $content = array(
         'header' => $header,

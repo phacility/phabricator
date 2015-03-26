@@ -31,7 +31,6 @@ final class ConpherenceThread extends ConpherenceDAO
   }
 
   public static function initializeNewRoom(PhabricatorUser $creator) {
-    $participant_phids = array($creator->getPHID());
 
     return id(new ConpherenceThread())
       ->setIsRoom(1)
@@ -41,8 +40,7 @@ final class ConpherenceThread extends ConpherenceDAO
       ->attachFilePHIDs(array())
       ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
       ->setEditPolicy($creator->getPHID())
-      ->setJoinPolicy(PhabricatorPolicies::POLICY_USER)
-      ->setRecentParticipantPHIDs($participant_phids);
+      ->setJoinPolicy(PhabricatorPolicies::POLICY_USER);
   }
 
   protected function getConfiguration() {
@@ -275,6 +273,19 @@ final class ConpherenceThread extends ConpherenceDAO
     } else {
       return pht('Participants in a thread can always view and edit it.');
     }
+  }
+
+  public function getPolicyIconName(array $policy_objects) {
+    assert_instances_of($policy_objects, 'PhabricatorPolicy');
+
+    if ($this->getIsRoom()) {
+      $icon = $policy_objects[$this->getViewPolicy()]->getIcon();
+    } else if (count($this->getRecentParticipantPHIDs()) > 2) {
+      $icon = 'fa-users';
+    } else {
+      $icon = 'fa-user';
+    }
+    return $icon;
   }
 
 }
