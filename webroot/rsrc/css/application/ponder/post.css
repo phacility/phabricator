@@ -21,23 +21,5 @@
 }
 
 .ponder-question {
-   background : white;
-}
-
-.phabricator-transaction-view .ponder-question {
-    background : white;
-}
-
-.phabricator-transaction-detail .ponder-question {
-    border : none;
-}
-
-
-.phabricator-transaction-view .ponder-answer {
-    background : white;
-    margin-bottom : 0;
-}
-
-.phabricator-transaction-content {
-    background : white;
+   background: white;
 }

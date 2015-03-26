@@ -720,8 +720,6 @@ final class DiffusionCommitController extends DiffusionController {
     $header->setHeader(
       $is_serious ? pht('Audit Commit') : pht('Creative Accounting'));
 
-    require_celerity_resource('phabricator-transaction-view-css');
-
     $mailable_source = new PhabricatorMetaMTAMailableDatasource();
     $auditor_source = new DiffusionAuditorDatasource();
 

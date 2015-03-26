@@ -99,9 +99,9 @@ final class ConpherenceTransactionView extends AphrontView {
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
         $content = $transaction->getTitle();
         $transaction_view->addClass('conpherence-edited');
-        $transaction_view->addClass('grouped');
         break;
       case PhabricatorTransactions::TYPE_COMMENT:
+        $transaction_view->addClass('conpherence-comment');
         $comment = $transaction->getComment();
         $content = $this->markupEngine->getOutput(
           $comment,

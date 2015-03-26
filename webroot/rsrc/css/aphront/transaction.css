@@ -13,13 +13,6 @@
   margin: 10px 0;
 }
 
-.phabricator-transaction-detail {
-  border-color: #dddddd;
-  border-width: 1px 4px;
-  border-style: solid;
-  margin-left: 60px;
-}
-
 .device-phone .phabricator-transaction-detail {
   margin: 0;
   min-height: 50px;
@@ -33,6 +26,7 @@
 
 .phabricator-transaction-header a {
   font-weight: bold;
+  color: {$darkbluetext};
 }
 
 .phabricator-transaction-info {

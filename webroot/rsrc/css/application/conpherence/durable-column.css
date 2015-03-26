@@ -128,10 +128,12 @@
   padding: 8px 12px 0;
 }
 
-.conpherence-durable-column-transactions .conpherence-edited {
-  color: {$lightgreytext};
-  font-size: 12px;
-  margin: 0;
+.conpherence-durable-column-transactions
+  .phabricator-transaction-view.conpherence-edited {
+    color: {$lightgreytext};
+    font-size: 12px;
+    margin: 0;
+    padding: 0;
 }
 
 .conpherence-durable-column-transactions .conpherence-edited
@@ -173,7 +175,8 @@
   top: -11px;
   left: 0;
   background-color: #fff;
-  color: {$lightbluetext};
+  color: {$darkbluetext};
+  font-weight: bold;
   font-size: 12px;
   padding: 0 6px 0 0;
 }
@@ -187,7 +190,6 @@
 
 .conpherence-durable-column-transactions .phabricator-transaction-detail
 .phabricator-transaction-header .phui-link-person {
-  color: {$darkbluetext};
   margin: 0 8px 0 0;
 }
 
