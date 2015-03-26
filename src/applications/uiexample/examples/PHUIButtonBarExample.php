@@ -55,6 +55,7 @@ final class PHUIButtonBarExample extends PhabricatorUIExample {
         ->setTag('a')
         ->setColor(PHUIButtonView::SIMPLE)
         ->setTitle($text)
+        ->setTooltip($text)
         ->setIcon($image);
 
       $button_bar3->addButton($button);
