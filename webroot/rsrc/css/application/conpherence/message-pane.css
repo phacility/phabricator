@@ -60,6 +60,10 @@
   -webkit-overflow-scrolling: touch;
 }
 
+.conpherence-messages > .conpherence-edited:first-child {
+  padding-top: 20px;
+}
+
 .device .conpherence-message-pane .conpherence-messages {
   left: 0;
   right: 0;
