@@ -72,6 +72,13 @@ final class PhabricatorMacroEditController extends PhabricatorMacroController {
           ));
       } else if ($uri) {
         try {
+          // Rate limit outbound fetches to make this mechanism less useful for
+          // scanning networks and ports.
+          PhabricatorSystemActionEngine::willTakeAction(
+            array($user->getPHID()),
+            new PhabricatorFilesOutboundRequestAction(),
+            1);
+
           $file = PhabricatorFile::newFromFileDownload(
             $uri,
             array(

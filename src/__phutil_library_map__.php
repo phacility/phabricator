@@ -1844,6 +1844,7 @@ phutil_register_library_map(array(
     'PhabricatorFilesManagementPurgeWorkflow' => 'applications/files/management/PhabricatorFilesManagementPurgeWorkflow.php',
     'PhabricatorFilesManagementRebuildWorkflow' => 'applications/files/management/PhabricatorFilesManagementRebuildWorkflow.php',
     'PhabricatorFilesManagementWorkflow' => 'applications/files/management/PhabricatorFilesManagementWorkflow.php',
+    'PhabricatorFilesOutboundRequestAction' => 'applications/files/action/PhabricatorFilesOutboundRequestAction.php',
     'PhabricatorFlag' => 'applications/flag/storage/PhabricatorFlag.php',
     'PhabricatorFlagColor' => 'applications/flag/constants/PhabricatorFlagColor.php',
     'PhabricatorFlagConstants' => 'applications/flag/constants/PhabricatorFlagConstants.php',
@@ -5160,6 +5161,7 @@ phutil_register_library_map(array(
     'PhabricatorFilesManagementPurgeWorkflow' => 'PhabricatorFilesManagementWorkflow',
     'PhabricatorFilesManagementRebuildWorkflow' => 'PhabricatorFilesManagementWorkflow',
     'PhabricatorFilesManagementWorkflow' => 'PhabricatorManagementWorkflow',
+    'PhabricatorFilesOutboundRequestAction' => 'PhabricatorSystemAction',
     'PhabricatorFlag' => array(
       'PhabricatorFlagDAO',
       'PhabricatorPolicyInterface',
