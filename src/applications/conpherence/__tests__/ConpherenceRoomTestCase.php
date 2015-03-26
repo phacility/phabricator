@@ -100,6 +100,32 @@ final class ConpherenceRoomTestCase extends ConpherenceTestCase {
       $conpherence->getRecentParticipantPHIDs());
   }
 
+  public function testRoomParticipantDeletion() {
+    $creator = $this->generateNewTestUser();
+    $friend_1 = $this->generateNewTestUser();
+    $friend_2 = $this->generateNewTestUser();
+    $friend_3 = $this->generateNewTestUser();
+
+    $participant_map = array(
+      $creator->getPHID() => $creator,
+      $friend_1->getPHID() => $friend_1,
+      $friend_2->getPHID() => $friend_2,
+      $friend_3->getPHID() => $friend_3,
+    );
+
+    $conpherence = $this->createRoom(
+      $creator,
+      array_keys($participant_map));
+
+    foreach ($participant_map as $phid => $user) {
+      $this->removeParticipants($user, $conpherence, array($phid));
+      unset($participant_map[$phid]);
+      $this->assertEqual(
+        count($participant_map),
+        count($conpherence->getParticipants()));
+    }
+  }
+
   private function createRoom(
     PhabricatorUser $creator,
     array $participant_phids) {
