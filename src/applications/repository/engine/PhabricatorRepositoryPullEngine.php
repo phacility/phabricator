@@ -395,10 +395,16 @@ final class PhabricatorRepositoryPullEngine
         }
       }
 
-      $repository->execxRemoteCommand(
-        'clone --noupdate -- %P %s',
-        $remote,
-        $path);
+      try {
+        $repository->execxRemoteCommand(
+          'clone --noupdate -- %P %s',
+          $remote,
+          $path);
+      } catch (Exception $ex) {
+        $message = $ex->getMessage();
+        $message = $this->censorMercurialErrorMessage($message);
+        throw new Exception($message);
+      }
     }
   }
 
@@ -438,9 +444,35 @@ final class PhabricatorRepositoryPullEngine
       if ($err == 1 && preg_match('/no changes found/', $stdout)) {
         return;
       } else {
-        throw $ex;
+        $message = $ex->getMessage();
+        $message = $this->censorMercurialErrorMessage($message);
+        throw new Exception($message);
       }
     }
+  }
+
+
+  /**
+   * Censor response bodies from Mercurial error messages.
+   *
+   * When Mercurial attempts to clone an HTTP repository but does not
+   * receive a response it expects, it emits the response body in the
+   * command output.
+   *
+   * This represents a potential SSRF issue, because an attacker with
+   * permission to create repositories can create one which points at the
+   * remote URI for some local service, then read the response from the
+   * error message. To prevent this, censor response bodies out of error
+   * messages.
+   *
+   * @param string Uncensored Mercurial command output.
+   * @return string Censored Mercurial command output.
+   */
+  private function censorMercurialErrorMessage($message) {
+    return preg_replace(
+      '/^---%<---.*/sm',
+      pht('<Response body omitted from Mercurial error message.>')."\n",
+      $message);
   }
 
 
