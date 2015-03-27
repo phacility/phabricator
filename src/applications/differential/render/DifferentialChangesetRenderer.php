@@ -32,6 +32,7 @@ abstract class DifferentialChangesetRenderer {
   private $originalCharacterEncoding;
   private $showEditAndReplyLinks;
   private $canMarkDone;
+  private $objectOwnerPHID;
   private $highlightingDisabled;
 
   private $oldFile = false;
@@ -332,6 +333,15 @@ abstract class DifferentialChangesetRenderer {
 
   public function getCanMarkDone() {
     return $this->canMarkDone;
+  }
+
+  public function setObjectOwnerPHID($phid) {
+    $this->objectOwnerPHID = $phid;
+    return $this;
+  }
+
+  public function getObjectOwnerPHID() {
+    return $this->objectOwnerPHID;
   }
 
   final public function renderChangesetTable($content) {

@@ -307,13 +307,18 @@ abstract class PhabricatorInlineCommentController
 
     $handles = $this->loadViewerHandles($phids);
 
+    // TODO: This is not correct, but figuring it out is a little bit
+    // involved and it only affects drafts.
+    $object_owner_phid = null;
+
     $view = id(new PHUIDiffInlineCommentDetailView())
       ->setInlineComment($inline)
       ->setIsOnRight($on_right)
       ->setMarkupEngine($engine)
       ->setHandles($handles)
       ->setEditable(true)
-      ->setCanMarkDone(false);
+      ->setCanMarkDone(false)
+      ->setObjectOwnerPHID($object_owner_phid);
 
     $view = $this->buildScaffoldForView($view);
 

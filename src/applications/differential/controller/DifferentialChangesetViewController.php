@@ -206,6 +206,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
     $revision_id = $diff->getRevisionID();
 
     $can_mark = false;
+    $object_owner_phid = null;
     if ($revision_id) {
       $revision = id(new DifferentialRevisionQuery())
         ->setViewer($viewer)
@@ -213,6 +214,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
         ->executeOne();
       if ($revision) {
         $can_mark = ($revision->getAuthorPHID() == $viewer->getPHID());
+        $object_owner_phid = $revision->getAuthorPHID();
       }
     }
 
@@ -221,6 +223,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
       ->setMarkupEngine($engine)
       ->setShowEditAndReplyLinks(true)
       ->setCanMarkDone($can_mark)
+      ->setObjectOwnerPHID($object_owner_phid)
       ->setRange($range_s, $range_e)
       ->setMask($mask);
 

@@ -49,6 +49,7 @@ final class DifferentialChangesetParser {
   private $highlightingDisabled;
   private $showEditAndReplyLinks = true;
   private $canMarkDone;
+  private $objectOwnerPHID;
 
   private $rangeStart;
   private $rangeEnd;
@@ -124,6 +125,15 @@ final class DifferentialChangesetParser {
 
   public function getCanMarkDone() {
     return $this->canMarkDone;
+  }
+
+  public function setObjectOwnerPHID($phid) {
+    $this->objectOwnerPHID = $phid;
+    return $this;
+  }
+
+  public function getObjectOwnerPHID() {
+    return $this->objectOwnerPHID;
   }
 
   public static function getDefaultRendererForViewer(PhabricatorUser $viewer) {
@@ -843,6 +853,7 @@ final class DifferentialChangesetParser {
       ->setOriginalCharacterEncoding($encoding)
       ->setShowEditAndReplyLinks($this->getShowEditAndReplyLinks())
       ->setCanMarkDone($this->getCanMarkDone())
+      ->setObjectOwnerPHID($this->getObjectOwnerPHID())
       ->setHighlightingDisabled($this->highlightingDisabled);
 
     $shield = null;

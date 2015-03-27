@@ -11,6 +11,7 @@ final class PHUIDiffInlineCommentDetailView
   private $allowReply;
   private $renderer;
   private $canMarkDone;
+  private $objectOwnerPHID;
 
   public function setInlineComment(PhabricatorInlineCommentInterface $comment) {
     $this->inlineComment = $comment;
@@ -60,6 +61,17 @@ final class PHUIDiffInlineCommentDetailView
   public function getCanMarkDone() {
     return $this->canMarkDone;
   }
+
+  public function setObjectOwnerPHID($phid) {
+    $this->objectOwnerPHID = $phid;
+    return $this;
+  }
+
+  public function getObjectOwnerPHID() {
+    return $this->objectOwnerPHID;
+  }
+
+
 
   public function render() {
 
