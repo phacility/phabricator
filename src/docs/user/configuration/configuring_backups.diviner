@@ -77,9 +77,18 @@ way to do this is to check them into a private repository somewhere and just use
 whatever backup process you already have in place for repositories. Just copying
 them somewhere will work fine too, of course.
 
+In particular, you should backup this configuration file which Phabricator
+creates:
+
+  phabricator/conf/local/local.json
+
+This file contains all of the configuration settings that have been adjusted
+by using `bin/config set <key> <value>`.
+
 = Restore: Configuration Files =
 
-To restore configuration files, just copy them into the right locations.
+To restore configuration files, just copy them into the right locations. Copy
+your backup of `local.json` to `phabricator/conf/local/local.json`.
 
 = Security =
 
