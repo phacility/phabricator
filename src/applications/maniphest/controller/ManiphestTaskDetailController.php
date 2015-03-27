@@ -88,38 +88,33 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $handles = $this->getLoadedHandles();
 
-    $context_bar = null;
-
+    $info_view = null;
     if ($parent_task) {
-      $context_bar = new AphrontContextBarView();
-      $context_bar->addButton(phutil_tag(
-      'a',
-      array(
-        'href' => '/maniphest/task/create/?parent='.$parent_task->getID(),
-        'class' => 'green button',
-      ),
-      pht('Create Another Subtask')));
-      $context_bar->appendChild(hsprintf(
+      $info_view = new PHUIInfoView();
+      $info_view->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
+      $info_view->addButton(
+        id(new PHUIButtonView())
+          ->setTag('a')
+          ->setHref('/maniphest/task/create/?parent='.$parent_task->getID())
+          ->setText(pht('Create Another Subtask')));
+
+      $info_view->appendChild(hsprintf(
         'Created a subtask of <strong>%s</strong>',
         $this->getHandle($parent_task->getPHID())->renderLink()));
     } else if ($workflow == 'create') {
-      $context_bar = new AphrontContextBarView();
-      $context_bar->addButton(phutil_tag('label', array(), 'Create Another'));
-      $context_bar->addButton(phutil_tag(
-        'a',
-        array(
-          'href' => '/maniphest/task/create/?template='.$task->getID(),
-          'class' => 'green button',
-        ),
-        pht('Similar Task')));
-      $context_bar->addButton(phutil_tag(
-        'a',
-        array(
-          'href' => '/maniphest/task/create/',
-          'class' => 'green button',
-        ),
-        pht('Empty Task')));
-      $context_bar->appendChild(pht('New task created.'));
+      $info_view = new PHUIInfoView();
+      $info_view->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
+      $info_view->addButton(
+        id(new PHUIButtonView())
+          ->setTag('a')
+          ->setHref('/maniphest/task/create/?template='.$task->getID())
+          ->setText(pht('Similar Task')));
+      $info_view->addButton(
+        id(new PHUIButtonView())
+          ->setTag('a')
+          ->setHref('/maniphest/task/create/')
+          ->setText(pht('Empty Task')));
+      $info_view->appendChild(pht('New task created. Create another?'));
     }
 
     $engine = new PhabricatorMarkupEngine();
@@ -355,6 +350,10 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ->setHeader($header)
       ->addPropertyList($properties);
 
+    if ($info_view) {
+      $object_box->setInfoView($info_view);
+    }
+
     if ($description) {
       $object_box->addPropertyList($description);
     }
@@ -362,7 +361,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $context_bar,
         $object_box,
         $timeline,
         $comment_box,

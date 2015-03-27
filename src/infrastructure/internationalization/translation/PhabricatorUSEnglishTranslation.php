@@ -412,6 +412,23 @@ final class PhabricatorUSEnglishTranslation
         ),
       ),
 
+      '%s edited watcher(s), added %s: %s; removed %d: %s.' =>
+        '%s edited watchers, added: %3$s; removed: %5$s.',
+
+      '%s added %s watcher(s): %s.' => array(
+        array(
+          '%s added a watcher: %3$s.',
+          '%s added watchers: %3$s.',
+        ),
+      ),
+
+      '%s removed %s watcher(s): %s.' => array(
+        array(
+          '%s removed a watcher: %3$s.',
+          '%s removed watchers: %3$s.',
+        ),
+      ),
+
       '%s edited participant(s), added %d: %s; removed %d: %s.' =>
         '%s edited participants, added: %3$s; removed: %5$s.',
 
@@ -924,6 +941,64 @@ final class PhabricatorUSEnglishTranslation
           'allowed domains will be able to register an account: %3$s',
         ),
       ),
+
+      'Show First %d Line(s)' => array(
+        'Show First Line',
+        'Show First %d Lines',
+      ),
+
+      "\xE2\x96\xB2 Show %d Line(s)" => array(
+        "\xE2\x96\xB2 Show Line",
+        "\xE2\x96\xB2 Show %d Lines",
+      ),
+
+      'Show All %d Line(s)' => array(
+        'Show Line',
+        'Show All %d Lines',
+      ),
+
+      "\xE2\x96\xBC Show %d Line(s)" => array(
+        "\xE2\x96\xBC Show Line",
+        "\xE2\x96\xBC Show %d Lines",
+      ),
+
+      'Show Last %d Line(s)' => array(
+        'Show Last Line',
+        'Show Last %d Lines',
+      ),
+
+      '%s marked %s inline comment(s) as done and %s inline comment(s) as '.
+      'not done.' => array(
+        array(
+          array(
+            '%s marked an inline comment as done and an inline comment '.
+            'as not done.',
+            '%s marked an inline comment as done and %3$s inline comments '.
+            'as not done.',
+          ),
+          array(
+            '%s marked %s inline comments as done and an inline comment '.
+            'as not done.',
+            '%s marked %s inline comments as done and %s inline comments '.
+            'as done.',
+          ),
+        ),
+      ),
+
+      '%s marked %s inline comment(s) as done.' => array(
+        array(
+          '%s marked an inline comment as done.',
+          '%s marked %s inline comments as done.',
+        ),
+      ),
+
+      '%s marked %s inline comment(s) as not done.' => array(
+        array(
+          '%s marked an inline comment as not done.',
+          '%s marked %s inline comments as not done.',
+        ),
+      ),
+
     );
   }
 

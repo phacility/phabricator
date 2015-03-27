@@ -131,14 +131,16 @@ final class PhrictionTransactionEditor
         $dict = array(
           'id' => $document->getID(),
           'phid' => $document->getPHID(),
-          'content' => $document->getContent()->getContent(),);
+          'content' => $document->getContent()->getContent(),
+          'title' => $document->getContent()->getTitle(),);
         return $dict;
       case PhrictionTransaction::TYPE_MOVE_AWAY:
         $document = $xaction->getNewValue();
         $dict = array(
           'id' => $document->getID(),
           'phid' => $document->getPHID(),
-          'content' => $document->getContent()->getContent(),);
+          'content' => $document->getContent()->getContent(),
+          'title' => $document->getContent()->getTitle(),);
         return $dict;
     }
   }
@@ -201,7 +203,8 @@ final class PhrictionTransactionEditor
         if ($content === '') {
           $xactions[] = id(new PhrictionTransaction())
             ->setTransactionType(PhrictionTransaction::TYPE_DELETE)
-            ->setNewValue(true);
+            ->setNewValue(true)
+            ->setMetadataValue('contentDelete', true);
         }
         break;
       case PhrictionTransaction::TYPE_MOVE_TO:
@@ -240,6 +243,7 @@ final class PhrictionTransactionEditor
       case PhrictionTransaction::TYPE_MOVE_TO:
         $dict = $xaction->getNewValue();
         $this->getNewContent()->setContent($dict['content']);
+        $this->getNewContent()->setTitle($dict['title']);
         $this->getNewContent()->setChangeType(
           PhrictionChangeType::CHANGE_MOVE_HERE);
         $this->getNewContent()->setChangeRef($dict['id']);
@@ -603,7 +607,14 @@ final class PhrictionTransactionEditor
         case PhrictionTransaction::TYPE_DELETE:
           switch ($object->getStatus()) {
             case PhrictionDocumentStatus::STATUS_DELETED:
-              $e_text = pht('An already deleted document can not be deleted.');
+              if ($xaction->getMetadataValue('contentDelete')) {
+                $e_text = pht(
+                  'This document is already deleted. You must specify '.
+                  'content to re-create the document and make further edits.');
+              } else {
+                $e_text = pht(
+                  'An already deleted document can not be deleted.');
+              }
               break;
             case PhrictionDocumentStatus::STATUS_MOVED:
               $e_text = pht('A moved document can not be deleted.');

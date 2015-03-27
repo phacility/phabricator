@@ -563,11 +563,11 @@ final class PhabricatorEnv {
 
 
   /**
-   * Detect if a URI satisfies either @{method:isValidLocalWebResource} or
-   * @{method:isValidRemoteWebResource}, i.e. is a page on this server or the
+   * Detect if a URI satisfies either @{method:isValidLocalURIForLink} or
+   * @{method:isValidRemoteURIForLink}, i.e. is a page on this server or the
    * URI of some other resource which has a valid protocol. This rejects
    * garbage URIs and URIs with protocols which do not appear in the
-   * ##uri.allowed-protocols## configuration, notably 'javascript:' URIs.
+   * `uri.allowed-protocols` configuration, notably 'javascript:' URIs.
    *
    * NOTE: This method is generally intended to reject URIs which it may be
    * unsafe to put in an "href" link attribute.
@@ -576,9 +576,9 @@ final class PhabricatorEnv {
    * @return bool True if the URI identifies a web resource.
    * @task uri
    */
-  public static function isValidWebResource($uri) {
-    return self::isValidLocalWebResource($uri) ||
-           self::isValidRemoteWebResource($uri);
+  public static function isValidURIForLink($uri) {
+    return self::isValidLocalURIForLink($uri) ||
+           self::isValidRemoteURIForLink($uri);
   }
 
 
@@ -592,7 +592,7 @@ final class PhabricatorEnv {
    * @return bool True if the URI identifies a local page.
    * @task uri
    */
-  public static function isValidLocalWebResource($uri) {
+  public static function isValidLocalURIForLink($uri) {
     $uri = (string)$uri;
 
     if (!strlen($uri)) {
@@ -628,27 +628,172 @@ final class PhabricatorEnv {
 
 
   /**
-   * Detect if a URI identifies some valid remote resource.
+   * Detect if a URI identifies some valid linkable remote resource.
    *
    * @param string URI to test.
    * @return bool True if a URI idenfies a remote resource with an allowed
    *              protocol.
    * @task uri
    */
-  public static function isValidRemoteWebResource($uri) {
-    $uri = (string)$uri;
-
-    $proto = id(new PhutilURI($uri))->getProtocol();
-    if (!$proto) {
+  public static function isValidRemoteURIForLink($uri) {
+    try {
+      self::requireValidRemoteURIForLink($uri);
+      return true;
+    } catch (Exception $ex) {
       return false;
     }
+  }
 
-    $allowed = self::getEnvConfig('uri.allowed-protocols');
-    if (empty($allowed[$proto])) {
-      return false;
+
+  /**
+   * Detect if a URI identifies a valid linkable remote resource, throwing a
+   * detailed message if it does not.
+   *
+   * A valid linkable remote resource can be safely linked or redirected to.
+   * This is primarily a protocol whitelist check.
+   *
+   * @param string URI to test.
+   * @return void
+   * @task uri
+   */
+  public static function requireValidRemoteURIForLink($uri) {
+    $uri = new PhutilURI($uri);
+
+    $proto = $uri->getProtocol();
+    if (!strlen($proto)) {
+      throw new Exception(
+        pht(
+          'URI "%s" is not a valid linkable resource. A valid linkable '.
+          'resource URI must specify a protocol.',
+          $uri));
     }
 
-    return true;
+    $protocols = self::getEnvConfig('uri.allowed-protocols');
+    if (!isset($protocols[$proto])) {
+      throw new Exception(
+        pht(
+          'URI "%s" is not a valid linkable resource. A valid linkable '.
+          'resource URI must use one of these protocols: %s.',
+          $uri,
+          implode(', ', array_keys($protocols))));
+    }
+
+    $domain = $uri->getDomain();
+    if (!strlen($domain)) {
+      throw new Exception(
+        pht(
+          'URI "%s" is not a valid linkable resource. A valid linkable '.
+          'resource URI must specify a domain.',
+          $uri));
+    }
+  }
+
+
+  /**
+   * Detect if a URI identifies a valid fetchable remote resource.
+   *
+   * @param string URI to test.
+   * @param list<string> Allowed protocols.
+   * @return bool True if the URI is a valid fetchable remote resource.
+   * @task uri
+   */
+  public static function isValidRemoteURIForFetch($uri, array $protocols) {
+    try {
+      self::requireValidRemoteURIForFetch($uri, $protocols);
+      return true;
+    } catch (Exception $ex) {
+      return false;
+    }
+  }
+
+
+  /**
+   * Detect if a URI identifies a valid fetchable remote resource, throwing
+   * a detailed message if it does not.
+   *
+   * A valid fetchable remote resource can be safely fetched using a request
+   * originating on this server. This is a primarily an address check against
+   * the outbound address blacklist.
+   *
+   * @param string URI to test.
+   * @param list<string> Allowed protocols.
+   * @return pair<string, string> Pre-resolved URI and domain.
+   * @task uri
+   */
+  public static function requireValidRemoteURIForFetch(
+    $uri,
+    array $protocols) {
+
+    $uri = new PhutilURI($uri);
+
+    $proto = $uri->getProtocol();
+    if (!strlen($proto)) {
+      throw new Exception(
+        pht(
+          'URI "%s" is not a valid fetchable resource. A valid fetchable '.
+          'resource URI must specify a protocol.',
+          $uri));
+    }
+
+    $protocols = array_fuse($protocols);
+    if (!isset($protocols[$proto])) {
+      throw new Exception(
+        pht(
+          'URI "%s" is not a valid fetchable resource. A valid fetchable '.
+          'resource URI must use one of these protocols: %s.',
+          $uri,
+          implode(', ', array_keys($protocols))));
+    }
+
+    $domain = $uri->getDomain();
+    if (!strlen($domain)) {
+      throw new Exception(
+        pht(
+          'URI "%s" is not a valid fetchable resource. A valid fetchable '.
+          'resource URI must specify a domain.',
+          $uri));
+    }
+
+    $addresses = gethostbynamel($domain);
+    if (!$addresses) {
+      throw new Exception(
+        pht(
+          'URI "%s" is not a valid fetchable resource. The domain "%s" could '.
+          'not be resolved.',
+          $uri,
+          $domain));
+    }
+
+    foreach ($addresses as $address) {
+      if (self::isBlacklistedOutboundAddress($address)) {
+        throw new Exception(
+          pht(
+            'URI "%s" is not a valid fetchable resource. The domain "%s" '.
+            'resolves to the address "%s", which is blacklisted for '.
+            'outbound requests.',
+            $uri,
+            $domain,
+            $address));
+      }
+    }
+
+    $resolved_uri = clone $uri;
+    $resolved_uri->setDomain(head($addresses));
+
+    return array($resolved_uri, $domain);
+  }
+
+
+  /**
+   * Determine if an IP address is in the outbound address blacklist.
+   *
+   * @param string IP address.
+   * @return bool True if the address is blacklisted.
+   */
+  public static function isBlacklistedOutboundAddress($address) {
+    $blacklist = self::getEnvConfig('security.outbound-blacklist');
+
+    return PhutilCIDRList::newList($blacklist)->containsAddress($address);
   }
 
   public static function isClusterRemoteAddress() {

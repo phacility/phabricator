@@ -4,23 +4,33 @@
  * Local disk storage engine. Keeps files on local disk. This engine is easy
  * to set up, but it doesn't work if you have multiple web frontends!
  *
- * @task impl     Implementation
  * @task internal Internals
  */
 final class PhabricatorLocalDiskFileStorageEngine
   extends PhabricatorFileStorageEngine {
 
 
-/* -(  Implementation  )----------------------------------------------------- */
+/* -(  Engine Metadata  )---------------------------------------------------- */
 
 
   /**
    * This engine identifies as "local-disk".
-   * @task impl
    */
   public function getEngineIdentifier() {
     return 'local-disk';
   }
+
+  public function getEnginePriority() {
+    return 5;
+  }
+
+  public function canWriteFiles() {
+    $path = PhabricatorEnv::getEnvConfig('storage.local-disk.path');
+    return (bool)strlen($path);
+  }
+
+
+/* -(  Managing File Data  )------------------------------------------------- */
 
 
   /**

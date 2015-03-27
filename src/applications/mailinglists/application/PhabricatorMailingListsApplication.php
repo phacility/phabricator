@@ -37,4 +37,12 @@ final class PhabricatorMailingListsApplication extends PhabricatorApplication {
     return '@';
   }
 
+  protected function getCustomCapabilities() {
+    return array(
+      PhabricatorMailingListsManageCapability::CAPABILITY => array(
+        'default' => PhabricatorPolicies::POLICY_ADMIN,
+      ),
+    );
+  }
+
 }

@@ -21,6 +21,10 @@ final class AphrontIsolatedHTTPSink extends AphrontHTTPSink {
     $this->data .= $data;
   }
 
+  protected function isWritable() {
+    return true;
+  }
+
   public function getEmittedHTTPStatus() {
     return $this->status;
   }

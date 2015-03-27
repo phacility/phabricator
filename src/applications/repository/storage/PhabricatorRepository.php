@@ -69,10 +69,16 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     $edit_policy = $app->getPolicy(DiffusionDefaultEditCapability::CAPABILITY);
     $push_policy = $app->getPolicy(DiffusionDefaultPushCapability::CAPABILITY);
 
-    return id(new PhabricatorRepository())
+    $repository = id(new PhabricatorRepository())
       ->setViewPolicy($view_policy)
       ->setEditPolicy($edit_policy)
       ->setPushPolicy($push_policy);
+
+    // Put the repository in "Importing" mode until we finish
+    // parsing it.
+    $repository->setDetail('importing', true);
+
+    return $repository;
   }
 
   protected function getConfiguration() {
@@ -676,6 +682,25 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
 
+  /**
+   * Should this repository publish feed, notifications, audits, and email?
+   *
+   * We do not publish information about repositories during initial import,
+   * or if the repository has been set not to publish.
+   */
+  public function shouldPublish() {
+    if ($this->isImporting()) {
+      return false;
+    }
+
+    if ($this->getDetail('disable-herald')) {
+      return false;
+    }
+
+    return true;
+  }
+
+
 /* -(  Autoclose  )---------------------------------------------------------- */
 
 
@@ -1004,6 +1029,11 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     $ssh_user = PhabricatorEnv::getEnvConfig('diffusion.ssh-user');
     if ($ssh_user) {
       $uri->setUser($ssh_user);
+    }
+
+    $ssh_host = PhabricatorEnv::getEnvConfig('diffusion.ssh-host');
+    if (strlen($ssh_host)) {
+      $uri->setDomain($ssh_host);
     }
 
     $uri->setPort(PhabricatorEnv::getEnvConfig('diffusion.ssh-port'));

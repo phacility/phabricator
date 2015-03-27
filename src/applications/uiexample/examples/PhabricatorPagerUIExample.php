@@ -32,7 +32,8 @@ final class PhabricatorPagerUIExample extends PhabricatorUIExample {
       array(
         'Item',
       ));
-    $panel = new AphrontPanelView();
+    $panel = new PHUIObjectBoxView();
+    $panel->setHeaderText(pht('Example'));
     $panel->appendChild($table);
 
     $panel->appendChild(hsprintf(

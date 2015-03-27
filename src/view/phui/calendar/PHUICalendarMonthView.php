@@ -29,7 +29,7 @@ final class PHUICalendarMonthView extends AphrontView {
     return $this;
   }
 
-  public function setErrorView(PHUIErrorView $error) {
+  public function setInfoView(PHUIInfoView $error) {
     $this->error = $error;
     return $this;
   }
@@ -192,7 +192,7 @@ final class PHUICalendarMonthView extends AphrontView {
       ->setHeader($this->renderCalendarHeader($first))
       ->appendChild($table);
     if ($this->error) {
-      $box->setErrorView($this->error);
+      $box->setInfoView($this->error);
 
     }
 

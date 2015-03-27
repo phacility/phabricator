@@ -24,82 +24,76 @@ final class DifferentialDiffViewController extends DifferentialController {
       return new Aphront404Response();
     }
 
-    $error_view = id(new PHUIErrorView())
-        ->setSeverity(PHUIErrorView::SEVERITY_NOTICE);
     if ($diff->getRevisionID()) {
-      $error_view->appendChild(
-          pht(
-            'This diff belongs to revision %s.',
-            phutil_tag(
-              'a',
-              array(
-                'href' => '/D'.$diff->getRevisionID(),
-              ),
-              'D'.$diff->getRevisionID())));
-    } else {
-      // TODO: implement optgroup support in AphrontFormSelectControl?
-      $select = array();
-      $select[] = hsprintf('<optgroup label="%s">', pht('Create New Revision'));
-      $select[] = phutil_tag(
-        'option',
-        array('value' => ''),
-        pht('Create a new Revision...'));
-      $select[] = hsprintf('</optgroup>');
-
-      $revisions = id(new DifferentialRevisionQuery())
-        ->setViewer($viewer)
-        ->withAuthors(array($viewer->getPHID()))
-        ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
-        ->execute();
-
-      if ($revisions) {
-        $select[] = hsprintf(
-          '<optgroup label="%s">',
-          pht('Update Existing Revision'));
-        foreach ($revisions as $revision) {
-          $select[] = phutil_tag(
-            'option',
-            array(
-              'value' => $revision->getID(),
-            ),
-            id(new PhutilUTF8StringTruncator())
-            ->setMaximumGlyphs(128)
-            ->truncateString(
-              'D'.$revision->getID().' '.$revision->getTitle()));
-        }
-        $select[] = hsprintf('</optgroup>');
-      }
-
-      $select = phutil_tag(
-        'select',
-        array('name' => 'revisionID'),
-        $select);
-
-      $form = id(new AphrontFormView())
-        ->setUser($request->getUser())
-        ->setAction('/differential/revision/edit/')
-        ->addHiddenInput('diffID', $diff->getID())
-        ->addHiddenInput('viaDiffView', 1)
-        ->addHiddenInput(
-          id(new DifferentialRepositoryField())->getFieldKey(),
-          $diff->getRepositoryPHID())
-        ->appendRemarkupInstructions(
-          pht(
-            'Review the diff for correctness. When you are satisfied, either '.
-            '**create a new revision** or **update an existing revision**.'))
-        ->appendChild(
-          id(new AphrontFormMarkupControl())
-          ->setLabel(pht('Attach To'))
-          ->setValue($select))
-        ->appendChild(
-          id(new AphrontFormSubmitControl())
-          ->setValue(pht('Continue')));
-
-        $error_view->appendChild($form);
+      return id(new AphrontRedirectResponse())
+        ->setURI('/D'.$diff->getRevisionID().'?id='.$diff->getID());
     }
 
+    // TODO: implement optgroup support in AphrontFormSelectControl?
+    $select = array();
+    $select[] = hsprintf('<optgroup label="%s">', pht('Create New Revision'));
+    $select[] = phutil_tag(
+      'option',
+      array('value' => ''),
+      pht('Create a new Revision...'));
+    $select[] = hsprintf('</optgroup>');
+
+    $selected_id = $request->getInt('revisionID');
+
+    $revisions = $this->loadSelectableRevisions($viewer, $selected_id);
+
+    if ($revisions) {
+      $select[] = hsprintf(
+        '<optgroup label="%s">',
+        pht('Update Existing Revision'));
+      foreach ($revisions as $revision) {
+        if ($selected_id == $revision->getID()) {
+          $selected = 'selected';
+        } else {
+          $selected = null;
+        }
+
+        $select[] = phutil_tag(
+          'option',
+          array(
+            'value' => $revision->getID(),
+            'selected' => $selected,
+          ),
+          id(new PhutilUTF8StringTruncator())
+          ->setMaximumGlyphs(128)
+          ->truncateString(
+            'D'.$revision->getID().' '.$revision->getTitle()));
+      }
+      $select[] = hsprintf('</optgroup>');
+    }
+
+    $select = phutil_tag(
+      'select',
+      array('name' => 'revisionID'),
+      $select);
+
+    $form = id(new AphrontFormView())
+      ->setUser($request->getUser())
+      ->setAction('/differential/revision/edit/')
+      ->addHiddenInput('diffID', $diff->getID())
+      ->addHiddenInput('viaDiffView', 1)
+      ->addHiddenInput(
+        id(new DifferentialRepositoryField())->getFieldKey(),
+        $diff->getRepositoryPHID())
+      ->appendRemarkupInstructions(
+        pht(
+          'Review the diff for correctness. When you are satisfied, either '.
+          '**create a new revision** or **update an existing revision**.'))
+      ->appendChild(
+        id(new AphrontFormMarkupControl())
+        ->setLabel(pht('Attach To'))
+        ->setValue($select))
+      ->appendChild(
+        id(new AphrontFormSubmitControl())
+        ->setValue(pht('Continue')));
+
     $props = id(new DifferentialDiffProperty())->loadAllWhere(
-      'diffID = %d',
+    'diffID = %d',
       $diff->getID());
     $props = mpull($props, 'getData', 'getName');
 
@@ -136,7 +130,7 @@ final class DifferentialDiffViewController extends DifferentialController {
     $prop_box = id(new PHUIObjectBoxView())
       ->setHeader($property_head)
       ->addPropertyList($property_view)
-      ->setErrorView($error_view);
+      ->appendChild($form);
 
     return $this->buildApplicationPage(
       array(
@@ -149,5 +143,46 @@ final class DifferentialDiffViewController extends DifferentialController {
         'title' => pht('Diff View'),
       ));
   }
+
+  private function loadSelectableRevisions(
+    PhabricatorUser $viewer,
+    $selected_id) {
+
+    $revisions = id(new DifferentialRevisionQuery())
+      ->setViewer($viewer)
+      ->withAuthors(array($viewer->getPHID()))
+      ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->execute();
+    $revisions = mpull($revisions, null, 'getID');
+
+    // If a specific revision is selected (for example, because the user is
+    // following the "Update Diff" workflow), but not present in the dropdown,
+    // try to add it to the dropdown even if it is closed. This allows the
+    // workflow to be used to update abandoned revisions.
+
+    if ($selected_id) {
+      if (empty($revisions[$selected_id])) {
+        $selected = id(new DifferentialRevisionQuery())
+          ->setViewer($viewer)
+          ->withAuthors(array($viewer->getPHID()))
+          ->withIDs(array($selected_id))
+          ->requireCapabilities(
+            array(
+              PhabricatorPolicyCapability::CAN_VIEW,
+              PhabricatorPolicyCapability::CAN_EDIT,
+            ))
+          ->execute();
+        $revisions = mpull($selected, null, 'getID') + $revisions;
+      }
+    }
+
+    return $revisions;
+  }
+
 
 }

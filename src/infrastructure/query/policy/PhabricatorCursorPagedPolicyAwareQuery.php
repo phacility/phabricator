@@ -252,6 +252,9 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         case 'int':
           $value = qsprintf($conn, '%d', $column['value']);
           break;
+        case 'float':
+          $value = qsprintf($conn, '%f', $column['value']);
+          break;
         case 'string':
           $value = qsprintf($conn, '%s', $column['value']);
           break;
@@ -279,6 +282,44 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     }
 
     return '('.implode(') OR (', $clauses).')';
+  }
+
+  protected function formatOrderClause(
+    AphrontDatabaseConnection $conn,
+    array $parts) {
+
+    $is_query_reversed = false;
+    if ($this->getReversePaging()) {
+      $is_query_reversed = !$is_query_reversed;
+    }
+
+    if ($this->getBeforeID()) {
+      $is_query_reversed = !$is_query_reversed;
+    }
+
+    $sql = array();
+    foreach ($parts as $key => $part) {
+      $is_column_reversed = !empty($part['reverse']);
+
+      $descending = true;
+      if ($is_query_reversed) {
+        $descending = !$descending;
+      }
+
+      if ($is_column_reversed) {
+        $descending = !$descending;
+      }
+
+      $name = $part['name'];
+
+      if ($descending) {
+        $sql[] = qsprintf($conn, '%Q DESC', $name);
+      } else {
+        $sql[] = qsprintf($conn, '%Q ASC', $name);
+      }
+    }
+
+    return qsprintf($conn, 'ORDER BY %Q', implode(', ', $sql));
   }
 
 

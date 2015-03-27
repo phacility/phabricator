@@ -192,10 +192,13 @@ abstract class DiffusionBrowseController extends DiffusionController {
       return null;
     }
 
+    $recent = (PhabricatorTime::getNow() - phutil_units('30 days in seconds'));
+
     $revisions = id(new DifferentialRevisionQuery())
       ->setViewer($user)
       ->withPath($repository->getID(), $path_id)
       ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
+      ->withUpdatedEpochBetween($recent, null)
       ->setOrder(DifferentialRevisionQuery::ORDER_PATH_MODIFIED)
       ->setLimit(10)
       ->needRelationships(true)
@@ -207,7 +210,13 @@ abstract class DiffusionBrowseController extends DiffusionController {
       return null;
     }
 
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Open Revisions'))
+      ->setSubheader(
+        pht('Recently updated open revisions affecting this file.'));
+
     $view = id(new DifferentialRevisionListView())
+      ->setHeader($header)
       ->setRevisions($revisions)
       ->setUser($user);
 
@@ -215,9 +224,7 @@ abstract class DiffusionBrowseController extends DiffusionController {
     $handles = $this->loadViewerHandles($phids);
     $view->setHandles($handles);
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Pending Differential Revisions'))
-      ->appendChild($view);
+    return $view;
   }
 
 }

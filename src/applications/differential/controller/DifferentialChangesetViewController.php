@@ -8,8 +8,9 @@ final class DifferentialChangesetViewController extends DifferentialController {
 
   public function processRequest() {
     $request = $this->getRequest();
+    $viewer = $this->getViewer();
 
-    $author_phid = $request->getUser()->getPHID();
+    $author_phid = $viewer->getPHID();
 
     $rendering_reference = $request->getStr('ref');
     $parts = explode('/', $rendering_reference);
@@ -29,7 +30,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
     }
 
     $changesets = id(new DifferentialChangesetQuery())
-      ->setViewer($request->getUser())
+      ->setViewer($viewer)
       ->withIDs($load_ids)
       ->needHunks(true)
       ->execute();
@@ -147,21 +148,15 @@ final class DifferentialChangesetViewController extends DifferentialController {
     list($range_s, $range_e, $mask) =
       DifferentialChangesetParser::parseRangeSpecification($spec);
 
-    $parser = new DifferentialChangesetParser();
-    $parser->setCoverage($coverage);
-    $parser->setChangeset($changeset);
-    $parser->setRenderingReference($rendering_reference);
-    $parser->setRenderCacheKey($render_cache_key);
-    $parser->setRightSideCommentMapping($right_source, $right_new);
-    $parser->setLeftSideCommentMapping($left_source, $left_new);
-    $parser->setWhitespaceMode($request->getStr('whitespace'));
-    $parser->setCharacterEncoding($request->getStr('encoding'));
-    $parser->setHighlightAs($request->getStr('highlight'));
+    $parser = id(new DifferentialChangesetParser())
+      ->setCoverage($coverage)
+      ->setChangeset($changeset)
+      ->setRenderingReference($rendering_reference)
+      ->setRenderCacheKey($render_cache_key)
+      ->setRightSideCommentMapping($right_source, $right_new)
+      ->setLeftSideCommentMapping($left_source, $left_new);
 
-    if ($request->getStr('renderer') == '1up') {
-      $parser->setRenderer(new DifferentialChangesetOneUpRenderer());
-    }
-
+    $parser->readParametersFromRequest($request);
 
     if ($left && $right) {
       $parser->setOriginals($left, $right);
@@ -197,7 +192,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
     $parser->setHandles($handles);
 
     $engine = new PhabricatorMarkupEngine();
-    $engine->setViewer($request->getUser());
+    $engine->setViewer($viewer);
 
     foreach ($inlines as $inline) {
       $engine->addObject(
@@ -206,63 +201,67 @@ final class DifferentialChangesetViewController extends DifferentialController {
     }
 
     $engine->process();
-    $parser->setMarkupEngine($engine);
-    $parser->setUser($request->getUser());
 
-    if ($request->isAjax()) {
-      $parser->setShowEditAndReplyLinks(true);
-    } else {
-      $parser->setShowEditAndReplyLinks(false);
+    $diff = $changeset->getDiff();
+    $revision_id = $diff->getRevisionID();
+
+    $can_mark = false;
+    $object_owner_phid = null;
+    if ($revision_id) {
+      $revision = id(new DifferentialRevisionQuery())
+        ->setViewer($viewer)
+        ->withIDs(array($revision_id))
+        ->executeOne();
+      if ($revision) {
+        $can_mark = ($revision->getAuthorPHID() == $viewer->getPHID());
+        $object_owner_phid = $revision->getAuthorPHID();
+      }
     }
 
-    $output = $parser->render($range_s, $range_e, $mask);
-
-    $mcov = $parser->renderModifiedCoverage();
+    $parser
+      ->setUser($viewer)
+      ->setMarkupEngine($engine)
+      ->setShowEditAndReplyLinks(true)
+      ->setCanMarkDone($can_mark)
+      ->setObjectOwnerPHID($object_owner_phid)
+      ->setRange($range_s, $range_e)
+      ->setMask($mask);
 
     if ($request->isAjax()) {
+      $mcov = $parser->renderModifiedCoverage();
+
       $coverage = array(
         'differential-mcoverage-'.md5($changeset->getFilename()) => $mcov,
       );
 
       return id(new PhabricatorChangesetResponse())
-        ->setRenderedChangeset($output)
-        ->setCoverage($coverage);
+        ->setRenderedChangeset($parser->renderChangeset())
+        ->setCoverage($coverage)
+        ->setUndoTemplates($parser->getRenderer()->renderUndoTemplates());
     }
 
-    Javelin::initBehavior('differential-show-more', array(
-      'uri' => '/differential/changeset/',
-      'whitespace' => $request->getStr('whitespace'),
-    ));
+    $detail = id(new DifferentialChangesetListView())
+      ->setUser($this->getViewer())
+      ->setChangesets(array($changeset))
+      ->setVisibleChangesets(array($changeset))
+      ->setRenderingReferences(array($rendering_reference))
+      ->setRenderURI('/differential/changeset/')
+      ->setDiff($diff)
+      ->setTitle(pht('Standalone View'))
+      ->setParser($parser);
 
-    Javelin::initBehavior('differential-comment-jump', array());
-
-    // TODO: [HTML] Clean up DifferentialChangesetParser output, but it's
-    // undergoing like six kinds of refactoring anyway.
-    $output = phutil_safe_html($output);
-
-    $detail = new DifferentialChangesetDetailView();
-    $detail->setChangeset($changeset);
-    $detail->appendChild($output);
-    $detail->setVsChangesetID($left_source);
-
-    $panel = new DifferentialPrimaryPaneView();
-    $panel->appendChild(
-      phutil_tag(
-      'div',
-      array(
-        'class' => 'differential-review-stage',
-        'id'    => 'differential-review-stage',
-      ),
-      $detail->render()));
+    if ($revision_id) {
+      $detail->setInlineCommentControllerURI(
+        '/differential/comment/inline/edit/'.$revision_id.'/');
+    }
 
     $crumbs = $this->buildApplicationCrumbs();
 
-    $revision_id = $changeset->getDiff()->getRevisionID();
     if ($revision_id) {
       $crumbs->addTextCrumb('D'.$revision_id, '/D'.$revision_id);
     }
 
-    $diff_id = $changeset->getDiff()->getID();
+    $diff_id = $diff->getID();
     if ($diff_id) {
       $crumbs->addTextCrumb(
         pht('Diff %d', $diff_id),
@@ -271,14 +270,10 @@ final class DifferentialChangesetViewController extends DifferentialController {
 
     $crumbs->addTextCrumb($changeset->getDisplayFilename());
 
-    $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Standalone View'))
-      ->appendChild($panel);
-
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $box,
+        $detail,
       ),
       array(
         'title' => pht('Changeset View'),
@@ -301,7 +296,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
     DifferentialChangeset $changeset,
     $is_new) {
 
-    $viewer = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
 
     if ($is_new) {
       $key = 'raw:new:phid';

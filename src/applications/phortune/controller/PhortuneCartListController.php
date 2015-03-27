@@ -16,18 +16,6 @@ final class PhortuneCartListController
 
     $engine = new PhortuneCartSearchEngine();
 
-    if ($subscription_id) {
-      $subscription = id(new PhortuneSubscriptionQuery())
-        ->setViewer($viewer)
-        ->withIDs(array($subscription_id))
-        ->executeOne();
-      if (!$subscription) {
-        return new Aphront404Response();
-      }
-      $this->subscription = $subscription;
-      $engine->setSubscription($subscription);
-    }
-
     if ($merchant_id) {
       $merchant = id(new PhortuneMerchantQuery())
         ->setViewer($viewer)
@@ -42,6 +30,7 @@ final class PhortuneCartListController
         return new Aphront404Response();
       }
       $this->merchant = $merchant;
+      $viewer->grantAuthority($merchant);
       $engine->setMerchant($merchant);
     } else if ($account_id) {
       $account = id(new PhortuneAccountQuery())
@@ -60,6 +49,20 @@ final class PhortuneCartListController
       $engine->setAccount($account);
     } else {
       return new Aphront404Response();
+    }
+
+    // NOTE: We must process this after processing the merchant authority, so
+    // it becomes visible in merchant contexts.
+    if ($subscription_id) {
+      $subscription = id(new PhortuneSubscriptionQuery())
+        ->setViewer($viewer)
+        ->withIDs(array($subscription_id))
+        ->executeOne();
+      if (!$subscription) {
+        return new Aphront404Response();
+      }
+      $this->subscription = $subscription;
+      $engine->setSubscription($subscription);
     }
 
     $controller = id(new PhabricatorApplicationSearchController())

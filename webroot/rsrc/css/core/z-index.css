@@ -2,6 +2,10 @@
  * @provides phabricator-zindex-css
  */
 
+.phabricator-nav-column-background {
+  z-index: -1;
+}
+
 .keyboard-focus-focus-reticle {
   z-index: 1;
 }
@@ -31,10 +35,6 @@
 }
 
 .phui-timeline-icon-fill {
-  z-index: 3;
-}
-
-.phabricator-nav-column-background {
   z-index: 3;
 }
 
@@ -75,6 +75,7 @@
   z-index: 5;
 }
 
+.conpherence-durable-column-header,
 .phabricator-main-menu {
   z-index: 6;
 }
@@ -84,7 +85,7 @@
   z-index: 6;
 }
 
-.jx-notification-container {
+.jx-scrollbar-bar {
   z-index: 7;
 }
 
@@ -97,12 +98,12 @@
   z-index: 9;
 }
 
-.jx-scrollbar-bar {
-  z-index: 9;
-}
-
 .jx-mask {
   z-index: 10;
+}
+
+.jx-notification-container {
+  z-index: 11;
 }
 
 .phabricator-global-upload-instructions {

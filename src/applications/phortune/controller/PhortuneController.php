@@ -84,4 +84,30 @@ abstract class PhortuneController extends PhabricatorController {
     return $providers;
   }
 
+  protected function loadMerchantAuthority() {
+    $request = $this->getRequest();
+    $viewer = $this->getViewer();
+
+    $is_merchant = (bool)$request->getURIData('merchantID');
+    if (!$is_merchant) {
+      return null;
+    }
+
+    $merchant = id(new PhortuneMerchantQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($request->getURIData('merchantID')))
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->executeOne();
+    if (!$merchant) {
+      return null;
+    }
+
+    $viewer->grantAuthority($merchant);
+    return $merchant;
+  }
+
 }

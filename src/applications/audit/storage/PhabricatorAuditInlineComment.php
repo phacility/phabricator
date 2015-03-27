@@ -47,15 +47,29 @@ final class PhabricatorAuditInlineComment
     return head(self::buildProxies($inlines));
   }
 
+  public static function loadPHID($phid) {
+    $inlines = id(new PhabricatorAuditTransactionComment())->loadAllWhere(
+      'phid = %s',
+      $phid);
+    if (!$inlines) {
+      return null;
+    }
+    return head(self::buildProxies($inlines));
+  }
+
   public static function loadDraftComments(
     PhabricatorUser $viewer,
     $commit_phid) {
 
-    $inlines = id(new PhabricatorAuditTransactionComment())->loadAllWhere(
-      'authorPHID = %s AND commitPHID = %s AND transactionPHID IS NULL
-        AND pathID IS NOT NULL',
-      $viewer->getPHID(),
-      $commit_phid);
+    $inlines = id(new DiffusionDiffInlineCommentQuery())
+      ->setViewer($viewer)
+      ->withAuthorPHIDs(array($viewer->getPHID()))
+      ->withCommitPHIDs(array($commit_phid))
+      ->withHasTransaction(false)
+      ->withHasPath(true)
+      ->withIsDeleted(false)
+      ->needReplyToComments(true)
+      ->execute();
 
     return self::buildProxies($inlines);
   }
@@ -64,10 +78,12 @@ final class PhabricatorAuditInlineComment
     PhabricatorUser $viewer,
     $commit_phid) {
 
-    $inlines = id(new PhabricatorAuditTransactionComment())->loadAllWhere(
-      'commitPHID = %s AND transactionPHID IS NOT NULL
-        AND pathID IS NOT NULL',
-      $commit_phid);
+    $inlines = id(new DiffusionDiffInlineCommentQuery())
+      ->setViewer($viewer)
+      ->withCommitPHIDs(array($commit_phid))
+      ->withHasTransaction(true)
+      ->withHasPath(true)
+      ->execute();
 
     return self::buildProxies($inlines);
   }
@@ -86,7 +102,7 @@ final class PhabricatorAuditInlineComment
     } else {
       $inlines = id(new PhabricatorAuditTransactionComment())->loadAllWhere(
         'commitPHID = %s AND pathID = %d AND
-          (authorPHID = %s OR transactionPHID IS NOT NULL)',
+          ((authorPHID = %s AND isDeleted = 0) OR transactionPHID IS NOT NULL)',
         $commit_phid,
         $path_id,
         $viewer->getPHID());
@@ -254,6 +270,42 @@ final class PhabricatorAuditInlineComment
 
   public function getChangesetID() {
     return $this->getPathID();
+  }
+
+  public function setReplyToCommentPHID($phid) {
+    $this->proxy->setReplyToCommentPHID($phid);
+    return $this;
+  }
+
+  public function getReplyToCommentPHID() {
+    return $this->proxy->getReplyToCommentPHID();
+  }
+
+  public function setHasReplies($has_replies) {
+    $this->proxy->setHasReplies($has_replies);
+    return $this;
+  }
+
+  public function getHasReplies() {
+    return $this->proxy->getHasReplies();
+  }
+
+  public function setIsDeleted($is_deleted) {
+    $this->proxy->setIsDeleted($is_deleted);
+    return $this;
+  }
+
+  public function getIsDeleted() {
+    return $this->proxy->getIsDeleted();
+  }
+
+  public function setFixedState($state) {
+    $this->proxy->setFixedState($state);
+    return $this;
+  }
+
+  public function getFixedState() {
+    return $this->proxy->getFixedState();
   }
 
 

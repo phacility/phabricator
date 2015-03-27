@@ -27,7 +27,8 @@ JX.behavior('aphront-drag-and-drop-textarea', function(config) {
 
   if (JX.PhabricatorDragAndDropFileUpload.isSupported()) {
     var drop = new JX.PhabricatorDragAndDropFileUpload(target)
-      .setURI(config.uri);
+      .setURI(config.uri)
+      .setChunkThreshold(config.chunkThreshold);
     drop.listen('didBeginDrag', function() {
       JX.DOM.alterClass(target, config.activatedClass, true);
     });

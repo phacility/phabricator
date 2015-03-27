@@ -306,9 +306,7 @@ final class PhabricatorProjectEditDetailsController
     }
 
     return $this->buildApplicationPage(
-      array(
-        $nav,
-      ),
+      $nav,
       array(
         'title' => $title,
       ));

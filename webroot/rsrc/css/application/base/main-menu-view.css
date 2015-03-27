@@ -11,7 +11,6 @@
 */
 
 .phabricator-main-menu {
-  background: #2d3236;
   background-repeat: repeat-x;
   position: relative;
   min-height: 44px;
@@ -50,9 +49,9 @@
 .phabricator-main-menu-logo {
   position: absolute;
   width: 96px;
-  height: 26px;
+  height: 40px;
   left: 52px;
-  top: 9px;
+  top: 2px;
 }
 
 .phabricator-main-menu-eye {
@@ -63,7 +62,7 @@
 }
 
 .device-desktop .phabricator-main-menu-brand:hover {
-  background-color: rgba(0,0,0,.6);
+  background-color: rgba(0,0,0,.33);
   cursor: hand;
 }
 
@@ -280,13 +279,18 @@
   float: left;
 }
 
-.alert-notifications:hover .phui-icon-view {
-  color: #fff;
+.alert-notifications .phui-icon-view {
+  color: rgba(200,200,200, .4);
+  text-shadow: 0px -1px 0px rgba(0, 0, 0, 0.1);
 }
 
-.alert-unread:hover .phabricator-main-menu-alert-icon.phui-icon-view,
-.message-unread:hover .phabricator-main-menu-message-icon.phui-icon-view {
-  color: {$sky};
+.device-desktop .alert-notifications:hover {
+  margin-top: -2px;
+  transition-duration: .2s;
+}
+
+.device-desktop .alert-notifications:hover .phui-icon-view {
+  color: #fff;
 }
 
 .phabricator-main-menu-alert-icon,
@@ -323,7 +327,7 @@
 
 .alert-unread .phabricator-main-menu-alert-icon,
 .message-unread .phabricator-main-menu-message-icon  {
-  color: {$sky};
+  color: #fff;
 }
 
 .alert-unread .phabricator-main-menu-alert-count,
@@ -416,7 +420,7 @@
   font-size: 20px;
   height: 20px;
   width: 20px;
-  color: #d7d7d7;
+  color: rgba(255,255,255,.8);
   margin: 8px;
   text-align: center;
   vertical-align: middle;
@@ -441,16 +445,10 @@
   display: block;
 }
 
-.device-desktop .main-header-dark .phabricator-application-menu
- .core-menu-item.phui-list-item-view:hover {
-  background-color: rgba(0,0,0,.6);
-}
-
 .device-desktop .phabricator-application-menu
  .core-menu-item.phui-list-item-view:hover {
-  box-shadow: inset 0 5px 10px rgba(0,0,0,0.5);
+  background-color: rgba(0,0,0,.33);
   border-radius: 3px;
-  color: #fff;
 }
 
 .device-desktop .phabricator-application-menu .phui-list-item-view {

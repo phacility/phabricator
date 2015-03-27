@@ -55,6 +55,7 @@ final class PhabricatorMemeRemarkupRule extends PhutilRemarkupRule {
         array(
           'src' => $uri,
           'alt' => $alt_text,
+          'class' => 'phabricator-remarkup-macro',
         ));
     }
 

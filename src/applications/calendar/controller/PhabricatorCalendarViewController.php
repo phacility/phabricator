@@ -42,7 +42,7 @@ final class PhabricatorCalendarViewController
     $month_view->setUser($user);
     $month_view->setHolidays($holidays);
     if ($this->getNoticeView()) {
-      $month_view->setErrorView($this->getNoticeView());
+      $month_view->setInfoView($this->getNoticeView());
     }
 
     $phids = mpull($statuses, 'getUserPHID');
@@ -83,22 +83,22 @@ final class PhabricatorCalendarViewController
     $view    = null;
 
     if ($request->getExists('created')) {
-      $view = id(new PHUIErrorView())
-        ->setSeverity(PHUIErrorView::SEVERITY_NOTICE)
+      $view = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
         ->appendChild(pht('Successfully created your status.'));
     } else if ($request->getExists('updated')) {
-      $view = id(new PHUIErrorView())
-        ->setSeverity(PHUIErrorView::SEVERITY_NOTICE)
+      $view = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
         ->appendChild(pht('Successfully updated your status.'));
     } else if ($request->getExists('deleted')) {
-      $view = id(new PHUIErrorView())
-        ->setSeverity(PHUIErrorView::SEVERITY_NOTICE)
+      $view = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
         ->appendChild(pht('Successfully deleted your status.'));
     } else if (!$request->getUser()->isLoggedIn()) {
       $login_uri = id(new PhutilURI('/auth/start/'))
         ->setQueryParam('next', '/calendar/');
-      $view = id(new PHUIErrorView())
-        ->setSeverity(PHUIErrorView::SEVERITY_NOTICE)
+      $view = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
         ->appendChild(
           pht(
             'You are not logged in. %s to see your calendar events.',

@@ -235,7 +235,9 @@ final class DiffusionSubversionServeSSHWorkflow
             $message_raw = $proto->serializeStruct($struct);
             break;
           case 'add-file':
+          case 'add-dir':
             // ( add-file ( path dir-token file-token [ copy-path copy-rev ] ) )
+            // ( add-dir ( path parent child [ copy-path copy-rev ] ) )
             if (isset($struct[1]['value'][3]['value'][0]['value'])) {
               $copy_from = $struct[1]['value'][3]['value'][0]['value'];
               $copy_from = $this->makeInternalURI($copy_from);

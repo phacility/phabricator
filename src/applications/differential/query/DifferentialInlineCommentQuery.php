@@ -9,6 +9,7 @@ final class DifferentialInlineCommentQuery
   private $revisionIDs;
   private $notDraft;
   private $ids;
+  private $phids;
   private $commentIDs;
 
   private $viewerAndChangesetIDs;
@@ -27,6 +28,11 @@ final class DifferentialInlineCommentQuery
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
+    return $this;
+  }
+
+  public function withPHIDs(array $phids) {
+    $this->phids = $phids;
     return $this;
   }
 
@@ -111,12 +117,19 @@ final class DifferentialInlineCommentQuery
         $this->ids);
     }
 
+    if ($this->phids !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'phid IN (%Ls)',
+        $this->phids);
+    }
+
     if ($this->viewerAndChangesetIDs) {
       list($phid, $ids) = $this->viewerAndChangesetIDs;
       $where[] = qsprintf(
         $conn_r,
         'changesetID IN (%Ld) AND
-          (authorPHID = %s OR transactionPHID IS NOT NULL)',
+          ((authorPHID = %s AND isDeleted = 0) OR transactionPHID IS NOT NULL)',
         $ids,
         $phid);
     }
@@ -138,7 +151,8 @@ final class DifferentialInlineCommentQuery
 
       $where[] = qsprintf(
         $conn_r,
-        'authorPHID = %s AND revisionPHID = %s AND transactionPHID IS NULL',
+        'authorPHID = %s AND revisionPHID = %s AND transactionPHID IS NULL
+          AND isDeleted = 0',
         $phid,
         $rev_phid);
     }
@@ -146,7 +160,7 @@ final class DifferentialInlineCommentQuery
     if ($this->draftsByAuthors) {
       $where[] = qsprintf(
         $conn_r,
-        'authorPHID IN (%Ls) AND transactionPHID IS NULL',
+        'authorPHID IN (%Ls) AND isDeleted = 0 AND transactionPHID IS NULL',
         $this->draftsByAuthors);
     }
 

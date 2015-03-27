@@ -168,42 +168,49 @@ final class LegalpadDocumentSearchEngine
 
       $title = $document->getTitle();
 
-      $type_name = $document->getSignatureTypeName();
-      $type_icon = $document->getSignatureTypeIcon();
-
       $item = id(new PHUIObjectItemView())
         ->setObjectName($document->getMonogram())
         ->setHeader($title)
         ->setHref('/'.$document->getMonogram())
-        ->setObject($document)
-        ->addIcon($type_icon, $type_name)
-        ->addIcon(
-          'fa-pencil grey',
-          pht('Version %d (%s)', $document->getVersions(), $last_updated));
+        ->setObject($document);
 
-      if ($viewer->getPHID()) {
-        $signature = $document->getUserSignature($viewer->getPHID());
+      $no_signatures = LegalpadDocument::SIGNATURE_TYPE_NONE;
+      if ($document->getSignatureType() == $no_signatures) {
+        $item->addIcon('none', pht('Not Signable'));
       } else {
-        $signature = null;
+
+        $type_name = $document->getSignatureTypeName();
+        $type_icon = $document->getSignatureTypeIcon();
+        $item->addIcon($type_icon, $type_name);
+
+        if ($viewer->getPHID()) {
+          $signature = $document->getUserSignature($viewer->getPHID());
+        } else {
+          $signature = null;
+        }
+
+        if ($signature) {
+          $item->addAttribute(
+            array(
+              id(new PHUIIconView())->setIconFont('fa-check-square-o', 'green'),
+              ' ',
+              pht(
+                'Signed on %s',
+                phabricator_date($signature->getDateCreated(), $viewer)),
+            ));
+        } else {
+          $item->addAttribute(
+            array(
+              id(new PHUIIconView())->setIconFont('fa-square-o', 'grey'),
+              ' ',
+              pht('Not Signed'),
+            ));
+        }
       }
 
-      if ($signature) {
-        $item->addAttribute(
-          array(
-            id(new PHUIIconView())->setIconFont('fa-check-square-o', 'green'),
-            ' ',
-            pht(
-              'Signed on %s',
-              phabricator_date($signature->getDateCreated(), $viewer)),
-          ));
-      } else {
-        $item->addAttribute(
-          array(
-            id(new PHUIIconView())->setIconFont('fa-square-o', 'grey'),
-            ' ',
-            pht('Not Signed'),
-          ));
-      }
+      $item->addIcon(
+        'fa-pencil grey',
+        pht('Version %d (%s)', $document->getVersions(), $last_updated));
 
       $list->addItem($item);
     }

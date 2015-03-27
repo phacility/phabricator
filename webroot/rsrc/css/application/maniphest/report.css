@@ -4,29 +4,22 @@
 
 table.aphront-table-view tr.aggregate,
 table.aphront-table-view tr.alt-aggregate {
-  background: #bb5577;
+  font-size: 13px;
+  font-weight: bold;
 }
 
 table.aphront-table-view tr.month,
 table.aphront-table-view tr.alt-month {
-  background: #ee77aa;
-}
-
-table.aphront-table-view tr.week,
-table.aphront-table-view tr.alt-week {
-  background: #ffccdd;
+  background: {$backdrop};
+  font-weight: bold;
 }
 
 span.red {
-  color: #aa0000;
+  color: {$red};
   font-weight: bold;
 }
 
 span.green {
-  color: #00aa00;
+  color: {$green};
   font-weight: bold;
-}
-
-.aphront-panel-view-caption p {
-  padding: 6px 0 0;
 }

@@ -6,20 +6,6 @@ final class ConpherenceListController extends ConpherenceController {
   const UNSELECTED_MODE = 'unselected';
   const PAGING_MODE = 'paging';
 
-  private $conpherenceID;
-
-  public function setConpherenceID($conpherence_id) {
-    $this->conpherenceID = $conpherence_id;
-    return $this;
-  }
-  public function getConpherenceID() {
-    return $this->conpherenceID;
-  }
-
-  public function willProcessRequest(array $data) {
-    $this->setConpherenceID(idx($data, 'id'));
-  }
-
   /**
    * Three main modes of operation...
    *
@@ -44,8 +30,8 @@ final class ConpherenceListController extends ConpherenceController {
 
     return $mode;
   }
-  public function processRequest() {
-    $request = $this->getRequest();
+
+  public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
     $title = pht('Conpherence');
     $conpherence = null;
@@ -58,7 +44,7 @@ final class ConpherenceListController extends ConpherenceController {
     $mode = $this->determineMode();
     switch ($mode) {
       case self::SELECTED_MODE:
-        $conpherence_id = $this->getConpherenceID();
+        $conpherence_id = $request->getURIData('id');
         $conpherence = id(new ConpherenceThreadQuery())
           ->setViewer($user)
           ->withIDs(array($conpherence_id))
@@ -69,11 +55,24 @@ final class ConpherenceListController extends ConpherenceController {
         if ($conpherence->getTitle()) {
           $title = $conpherence->getTitle();
         }
-        $cursor = $conpherence->getParticipant($user->getPHID());
-        $data = $this->loadParticipationWithMidCursor($cursor);
-        $all_participation = $data['participation'];
-        $scroll_up_participant = $data['scroll_up_participant'];
-        $scroll_down_participant = $data['scroll_down_participant'];
+        $cursor = $conpherence->getParticipantIfExists($user->getPHID());
+        if (!$cursor || $conpherence->getIsRoom()) {
+          $data = $this->loadDefaultParticipation($too_many);
+          $all_participation = $data['all_participation'];
+          $scroll_down_participant = $data['scroll_down_participant'];
+          $menu_participation = $this->getEmptyParticipant()
+            ->setConpherencePHID($conpherence->getPHID())
+            ->setParticipantPHID($user->getPHID());
+          $all_participation =
+            array($conpherence->getPHID() => $menu_participation) +
+            $all_participation;
+
+        } else {
+          $data = $this->loadParticipationWithMidCursor($cursor);
+          $all_participation = $data['all_participation'];
+          $scroll_up_participant = $data['scroll_up_participant'];
+          $scroll_down_participant = $data['scroll_down_participant'];
+        }
         break;
       case self::PAGING_MODE:
         $direction = $request->getStr('direction');
@@ -108,16 +107,9 @@ final class ConpherenceListController extends ConpherenceController {
         break;
       case self::UNSELECTED_MODE:
       default:
-        $too_many = ConpherenceParticipantQuery::LIMIT + 1;
-        $all_participation = id(new ConpherenceParticipantQuery())
-          ->withParticipantPHIDs(array($user->getPHID()))
-          ->setLimit($too_many)
-          ->execute();
-        if (count($all_participation) == $too_many) {
-          $node = end($all_participation);
-          unset($all_participation[$node->getConpherencePHID()]);
-          $scroll_down_participant = $node;
-        }
+        $data = $this->loadDefaultParticipation($too_many);
+        $all_participation = $data['all_participation'];
+        $scroll_down_participant = $data['scroll_down_participant'];
         break;
     }
 
@@ -147,17 +139,25 @@ final class ConpherenceListController extends ConpherenceController {
       case self::UNSELECTED_MODE:
       default:
         $layout = id(new ConpherenceLayoutView())
+          ->setUser($user)
           ->setBaseURI($this->getApplicationURI())
           ->setThreadView($thread_view)
           ->setRole('list');
         if ($conpherence) {
-          $layout->setHeader($this->buildHeaderPaneContent($conpherence));
+          $policy_objects = id(new PhabricatorPolicyQuery())
+            ->setViewer($user)
+            ->setObject($conpherence)
+            ->execute();
+          $layout->setHeader($this->buildHeaderPaneContent(
+            $conpherence,
+            $policy_objects));
           $layout->setThread($conpherence);
         } else {
           $layout->setHeader(
             $this->buildHeaderPaneContent(
               id(new ConpherenceThread())
-              ->makeEphemeral()));
+              ->makeEphemeral(),
+              array()));
         }
         $response = $this->buildApplicationPage(
           $layout,
@@ -169,6 +169,26 @@ final class ConpherenceListController extends ConpherenceController {
 
     return $response;
 
+  }
+
+  private function loadDefaultParticipation($too_many) {
+    $viewer = $this->getRequest()->getUser();
+
+    $scroll_down_participant = $this->getEmptyParticipant();
+
+    $all_participation = id(new ConpherenceParticipantQuery())
+      ->withParticipantPHIDs(array($viewer->getPHID()))
+      ->setLimit($too_many)
+      ->execute();
+    if (count($all_participation) == $too_many) {
+      $node = end($all_participation);
+      unset($all_participation[$node->getConpherencePHID()]);
+      $scroll_down_participant = $node;
+    }
+
+    return array(
+      'all_participation' => $all_participation,
+      'scroll_down_participant' => $scroll_down_participant,);
   }
 
   /**
@@ -224,7 +244,7 @@ final class ConpherenceListController extends ConpherenceController {
     return array(
       'scroll_up_participant' => $scroll_up_participant,
       'scroll_down_participant' => $scroll_down_participant,
-      'participation' => $participation,
+      'all_participation' => $participation,
     );
   }
 

@@ -130,6 +130,14 @@ final class PhabricatorDashboardQueryPanelType
           $class));
     }
 
+    if (!$engine->canUseInPanelContext()) {
+      throw new Exception(
+        pht(
+          'Application search engines of class "%s" can not be used to build '.
+          'dashboard panels.',
+          $class));
+    }
+
     return $engine;
   }
 

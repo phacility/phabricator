@@ -57,6 +57,7 @@ abstract class PhabricatorApplicationTransaction
       case PhabricatorTransactions::TYPE_BUILDABLE:
       case PhabricatorTransactions::TYPE_TOKEN:
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
+      case PhabricatorTransactions::TYPE_INLINESTATE:
         return false;
     }
     return true;
@@ -501,6 +502,26 @@ abstract class PhabricatorApplicationTransaction
         break;
     }
 
+    // If a transaction publishes an inline comment:
+    //
+    //   - Don't show it if there are other kinds of transactions. The
+    //     rationale here is that application mail will make the presence
+    //     of inline comments obvious enough by including them prominently
+    //     in the body. We could change this in the future if the obviousness
+    //     needs to be increased.
+    //   - If there are only inline transactions, only show the first
+    //     transaction. The rationale is that seeing multiple "added an inline
+    //     comment" transactions is not useful.
+
+    if ($this->isInlineCommentTransaction()) {
+      foreach ($xactions as $xaction) {
+        if (!$xaction->isInlineCommentTransaction()) {
+          return true;
+        }
+      }
+      return ($this !== head($xactions));
+    }
+
     return $this->shouldHide();
   }
 
@@ -529,6 +550,8 @@ abstract class PhabricatorApplicationTransaction
             break;
         }
         break;
+     case PhabricatorTransactions::TYPE_INLINESTATE:
+       return true;
     }
 
     return $this->shouldHide();
@@ -539,10 +562,18 @@ abstract class PhabricatorApplicationTransaction
   }
 
   public function getBodyForMail() {
+    if ($this->isInlineCommentTransaction()) {
+      // We don't return inline comment content as mail body content, because
+      // applications need to contextualize it (by adding line numbers, for
+      // example) in order for it to make sense.
+      return null;
+    }
+
     $comment = $this->getComment();
     if ($comment && strlen($comment->getContent())) {
       return $comment->getContent();
     }
+
     return null;
   }
 
@@ -720,6 +751,36 @@ abstract class PhabricatorApplicationTransaction
             return null;
         }
 
+      case PhabricatorTransactions::TYPE_INLINESTATE:
+        $done = 0;
+        $undone = 0;
+        foreach ($new as $phid => $state) {
+          if ($state == PhabricatorInlineCommentInterface::STATE_DONE) {
+            $done++;
+          } else {
+            $undone++;
+          }
+        }
+        if ($done && $undone) {
+          return pht(
+            '%s marked %s inline comment(s) as done and %s inline comment(s) '.
+            'as not done.',
+            $this->renderHandleLink($author_phid),
+            new PhutilNumber($done),
+            new PhutilNumber($undone));
+        } else if ($done) {
+          return pht(
+            '%s marked %s inline comment(s) as done.',
+            $this->renderHandleLink($author_phid),
+            new PhutilNumber($done));
+        } else {
+          return pht(
+            '%s marked %s inline comment(s) as not done.',
+            $this->renderHandleLink($author_phid),
+            new PhutilNumber($undone));
+        }
+        break;
+
       default:
         return pht(
           '%s edited this %s.',
@@ -885,6 +946,10 @@ abstract class PhabricatorApplicationTransaction
   }
 
   public function getActionStrength() {
+    if ($this->isInlineCommentTransaction()) {
+      return 0.25;
+    }
+
     switch ($this->getTransactionType()) {
       case PhabricatorTransactions::TYPE_COMMENT:
         return 0.5;
@@ -929,6 +994,10 @@ abstract class PhabricatorApplicationTransaction
         return true;
     }
 
+    return false;
+  }
+
+  public function isInlineCommentTransaction() {
     return false;
   }
 

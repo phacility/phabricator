@@ -70,7 +70,8 @@ You can get a list of launchable daemons with **phd list**:
   - **PhabricatorTaskmasterDaemon** performs work from a task queue;
   - **PhabricatorRepositoryPullLocalDaemon** daemons track repositories, for
     more information see @{article:Diffusion User Guide}; and
-  - **PhabricatorGarbageCollectorDaemon** cleans up old logs and caches.
+  - **PhabricatorTriggerDaemon** schedules event triggers and cleans up old
+    logs and caches.
 
 = Debugging and Tuning =
 
@@ -99,8 +100,9 @@ This daemon will daemonize and run normally.
 
 == General Tips ==
 
-  - You can set the number of taskmasters that `phd start` starts by the config
-    key `phd.start-taskmasters`. If you have a task backlog, try increasing it.
+  - You can set the maximum number of taskmasters that will run at once
+    by adjusting `phd.taskmasters`. If you have a task backlog, try increasing
+    it.
   - When you `phd launch` or `phd debug` a daemon, you can type any unique
     substring of its name, so `phd launch pull` will work correctly.
   - `phd stop` and `phd restart` stop **all** of the daemons on the machine, not
@@ -119,7 +121,7 @@ daemons launch, and split daemons across machines like this:
   - `PhabricatorRepositoryPullLocalDaemon`: Run one copy on any machine.
     On each web frontend which is not running a normal copy, run a copy
     with the `--no-discovery` flag.
-  - `PhabricatorGarbageCollectorDaemon`: Run one copy on any machine.
+  - `PhabricatorTriggerDaemon`: Run one copy on any machine.
   - `PhabricatorTaskmasterDaemon`: Run as many copies as you need to keep
     tasks from backing up. You can run them all on one machine or split them
     across machines.

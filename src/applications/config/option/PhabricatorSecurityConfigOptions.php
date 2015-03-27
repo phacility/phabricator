@@ -25,6 +25,26 @@ final class PhabricatorSecurityConfigOptions
     $doc_href = PhabricatorEnv::getDoclink('Configuring a File Domain');
     $doc_name = pht('Configuration Guide: Configuring a File Domain');
 
+    // This is all of the IANA special/reserved blocks in IPv4 space.
+    $default_address_blacklist = array(
+      '0.0.0.0/8',
+      '10.0.0.0/8',
+      '100.64.0.0/10',
+      '127.0.0.0/8',
+      '169.254.0.0/16',
+      '172.16.0.0/12',
+      '192.0.0.0/24',
+      '192.0.2.0/24',
+      '192.88.99.0/24',
+      '192.168.0.0/16',
+      '198.18.0.0/15',
+      '198.51.100.0/24',
+      '203.0.113.0/24',
+      '224.0.0.0/4',
+      '240.0.0.0/4',
+      '255.255.255.255/32',
+    );
+
     return array(
       $this->newOption('security.alternate-file-domain', 'string', null)
         ->setLocked(true)
@@ -210,19 +230,52 @@ final class PhabricatorSecurityConfigOptions
             "inline. This has mild security implications (you'll leak ".
             "referrers to YouTube) and is pretty silly (but sort of ".
             "awesome).")),
-        $this->newOption('security.allow-outbound-http', 'bool', true)
-          ->setBoolOptions(
-            array(
-              pht('Allow'),
-              pht('Disallow'),
-            ))
+        $this->newOption(
+          'security.outbound-blacklist',
+          'list<string>',
+          $default_address_blacklist)
           ->setLocked(true)
           ->setSummary(
-            pht('Allow outbound HTTP requests.'))
+            pht(
+              'Blacklist subnets to prevent user-initiated outbound '.
+              'requests.'))
           ->setDescription(
             pht(
-              'If you enable this, you are allowing Phabricator to '.
-              'potentially make requests to external servers.')),
+              'Phabricator users can make requests to other services from '.
+              'the Phabricator host in some circumstances (for example, by '.
+              'creating a repository with a remote URL or having Phabricator '.
+              'fetch an image from a remote server).'.
+              "\n\n".
+              'This may represent a security vulnerability if services on '.
+              'the same subnet will accept commands or reveal private '.
+              'information over unauthenticated HTTP GET, based on the source '.
+              'IP address. In particular, all hosts in EC2 have access to '.
+              'such a service.'.
+              "\n\n".
+              'This option defines a list of netblocks which Phabricator '.
+              'will decline to connect to. Generally, you should list all '.
+              'private IP space here.'))
+          ->addExample(array('0.0.0.0/0'), pht('No Outbound Requests')),
+        $this->newOption('security.strict-transport-security', 'bool', false)
+          ->setLocked(true)
+          ->setBoolOptions(
+            array(
+              pht('Use HSTS'),
+              pht('Do Not Use HSTS'),
+            ))
+          ->setSummary(pht('Enable HTTP Strict Transport Security (HSTS).'))
+          ->setDescription(
+            pht(
+              'HTTP Strict Transport Security (HSTS) sends a header which '.
+              'instructs browsers that the site should only be accessed '.
+              'over HTTPS, never HTTP. This defuses an attack where an '.
+              'adversary gains access to your network, then proxies requests '.
+              'through an unsecured link.'.
+              "\n\n".
+              'Do not enable this option if you serve (or plan to ever serve) '.
+              'unsecured content over plain HTTP. It is very difficult to '.
+              'undo this change once users\' browsers have accepted the '.
+              'setting.')),
         $this->newOption('security.allow-conduit-act-as-user', 'bool', false)
           ->setBoolOptions(
             array(

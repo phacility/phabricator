@@ -35,9 +35,10 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
     Javelin::initBehavior(
       'aphront-drag-and-drop-textarea',
       array(
-        'target'          => $id,
-        'activatedClass'  => 'aphront-textarea-drag-and-drop',
-        'uri'             => '/file/dropupload/',
+        'target' => $id,
+        'activatedClass' => 'aphront-textarea-drag-and-drop',
+        'uri' => '/file/dropupload/',
+        'chunkThreshold' => PhabricatorFileStorageEngine::getChunkThreshold(),
       ));
 
     Javelin::initBehavior(

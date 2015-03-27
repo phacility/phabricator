@@ -3,34 +3,36 @@
 final class ConpherenceUpdateController
   extends ConpherenceController {
 
-  private $conpherenceID;
-
-  public function setConpherenceID($conpherence_id) {
-    $this->conpherenceID = $conpherence_id;
-    return $this;
-  }
-  public function getConpherenceID() {
-    return $this->conpherenceID;
-  }
-  public function willProcessRequest(array $data) {
-    $this->setConpherenceID(idx($data, 'id'));
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
-    $conpherence_id = $this->getConpherenceID();
+    $conpherence_id = $request->getURIData('id');
     if (!$conpherence_id) {
       return new Aphront404Response();
     }
 
+    $needed_capabilities = array(PhabricatorPolicyCapability::CAN_VIEW);
+    $action = $request->getStr('action', ConpherenceUpdateActions::METADATA);
+    switch ($action) {
+      case ConpherenceUpdateActions::REMOVE_PERSON:
+        $person_phid = $request->getStr('remove_person');
+        if ($person_phid != $user->getPHID()) {
+          $needed_capabilities[] = PhabricatorPolicyCapability::CAN_EDIT;
+        }
+        break;
+      case ConpherenceUpdateActions::ADD_PERSON:
+      case ConpherenceUpdateActions::METADATA:
+        $needed_capabilities[] = PhabricatorPolicyCapability::CAN_EDIT;
+        break;
+      case ConpherenceUpdateActions::JOIN_ROOM:
+        $needed_capabilities[] = PhabricatorPolicyCapability::CAN_JOIN;
+        break;
+    }
     $conpherence = id(new ConpherenceThreadQuery())
       ->setViewer($user)
       ->withIDs(array($conpherence_id))
       ->needFilePHIDs(true)
+      ->requireCapabilities($needed_capabilities)
       ->executeOne();
-
-    $action = $request->getStr('action', ConpherenceUpdateActions::METADATA);
 
     $latest_transaction_id = null;
     $response_mode = $request->isAjax() ? 'ajax' : 'redirect';
@@ -53,6 +55,24 @@ final class ConpherenceUpdateController
           $draft->setDraft($request->getStr('text'));
           $draft->replaceOrDelete();
           return new AphrontAjaxResponse();
+        case ConpherenceUpdateActions::JOIN_ROOM:
+          $xactions[] = id(new ConpherenceTransaction())
+            ->setTransactionType(
+              ConpherenceTransactionType::TYPE_PARTICIPANTS)
+            ->setNewValue(array('+' => array($user->getPHID())));
+          $delete_draft = true;
+          $message = $request->getStr('text');
+          if ($message) {
+            $message_xactions = $editor->generateTransactionsFromText(
+              $user,
+              $conpherence,
+              $message);
+            $xactions = array_merge($xactions, $message_xactions);
+          }
+          // for now, just redirect back to the conpherence so everything
+          // will work okay...!
+          $response_mode = 'redirect';
+          break;
         case ConpherenceUpdateActions::MESSAGE:
           $message = $request->getStr('text');
           $xactions = $editor->generateTransactionsFromText(
@@ -86,7 +106,10 @@ final class ConpherenceUpdateController
           break;
         case ConpherenceUpdateActions::NOTIFICATIONS:
           $notifications = $request->getStr('notifications');
-          $participant = $conpherence->getParticipant($user->getPHID());
+          $participant = $conpherence->getParticipantIfExists($user->getPHID());
+          if (!$participant) {
+            return id(new Aphront404Response());
+          }
           $participant->setSettings(array('notifications' => $notifications));
           $participant->save();
           $result = pht(
@@ -108,7 +131,9 @@ final class ConpherenceUpdateController
               ->setTransactionType(ConpherenceTransactionType::TYPE_TITLE)
               ->setNewValue($title);
             $updated = true;
-            $response_mode = 'redirect';
+            if (!$request->getExists('force_ajax')) {
+              $response_mode = 'redirect';
+            }
           }
           if (!$updated) {
             $errors[] = pht(
@@ -124,23 +149,23 @@ final class ConpherenceUpdateController
           break;
       }
 
-      if ($xactions || ($action == ConpherenceUpdateActions::LOAD)) {
-        if ($xactions) {
-          try {
-            $xactions = $editor->applyTransactions($conpherence, $xactions);
-            if ($delete_draft) {
-              $draft = PhabricatorDraft::newFromUserAndKey(
-                $user,
-                $conpherence->getPHID());
-              $draft->delete();
-            }
-          } catch (PhabricatorApplicationTransactionNoEffectException $ex) {
-            return id(new PhabricatorApplicationTransactionNoEffectResponse())
-              ->setCancelURI($this->getApplicationURI($conpherence_id.'/'))
-              ->setException($ex);
+      if ($xactions) {
+        try {
+          $xactions = $editor->applyTransactions($conpherence, $xactions);
+          if ($delete_draft) {
+            $draft = PhabricatorDraft::newFromUserAndKey(
+              $user,
+              $conpherence->getPHID());
+            $draft->delete();
           }
+        } catch (PhabricatorApplicationTransactionNoEffectException $ex) {
+          return id(new PhabricatorApplicationTransactionNoEffectResponse())
+            ->setCancelURI($this->getApplicationURI($conpherence_id.'/'))
+            ->setException($ex);
         }
+      }
 
+      if ($xactions || ($action == ConpherenceUpdateActions::LOAD)) {
         switch ($response_mode) {
           case 'ajax':
             $latest_transaction_id = $request->getInt('latest_transaction_id');
@@ -165,7 +190,7 @@ final class ConpherenceUpdateController
     }
 
     if ($errors) {
-      $error_view = id(new PHUIErrorView())
+      $error_view = id(new PHUIInfoView())
         ->setErrors($errors);
     }
 
@@ -209,14 +234,19 @@ final class ConpherenceUpdateController
         ->setDatasource(new PhabricatorPeopleDatasource()));
 
     require_celerity_resource('conpherence-update-css');
-    return id(new AphrontDialogView())
+    $view = id(new AphrontDialogView())
       ->setTitle(pht('Add Participants'))
       ->addHiddenInput('action', 'add_person')
       ->addHiddenInput(
         'latest_transaction_id',
         $request->getInt('latest_transaction_id'))
       ->appendChild($form);
+
+    if ($request->getExists('minimal_display')) {
+      $view->addHiddenInput('minimal_display', true);
     }
+    return $view;
+  }
 
   private function renderRemovePersonDialogue(
     ConpherenceThread $conpherence) {
@@ -225,14 +255,19 @@ final class ConpherenceUpdateController
     $user = $request->getUser();
     $remove_person = $request->getStr('remove_person');
     $participants = $conpherence->getParticipants();
-    $message = pht(
-      'Are you sure you want to remove yourself from this conpherence? ');
-    if (count($participants) == 1) {
-      $message .= pht(
-        'The conpherence will be inaccessible forever and ever.');
+    if ($conpherence->getIsRoom()) {
+      $message = pht(
+        'Are you sure you want to remove yourself from this room?');
     } else {
-      $message .= pht(
-        'Someone else in the conpherence can add you back later.');
+      $message = pht(
+        'Are you sure you want to remove yourself from this thread?');
+      if (count($participants) == 1) {
+        $message .= pht(
+          'The thread will be inaccessible forever and ever.');
+      } else {
+        $message .= pht(
+          'Someone else in the thread can add you back later.');
+      }
     }
     $body = phutil_tag(
       'p',
@@ -266,7 +301,7 @@ final class ConpherenceUpdateController
         ->setValue($conpherence->getTitle()));
 
     require_celerity_resource('conpherence-update-css');
-    return id(new AphrontDialogView())
+    $view = id(new AphrontDialogView())
       ->setTitle(pht('Update Conpherence'))
       ->addHiddenInput('action', 'metadata')
       ->addHiddenInput(
@@ -274,6 +309,15 @@ final class ConpherenceUpdateController
         $request->getInt('latest_transaction_id'))
       ->addHiddenInput('__continue__', true)
       ->appendChild($form);
+
+    if ($request->getExists('minimal_display')) {
+      $view->addHiddenInput('minimal_display', true);
+    }
+    if ($request->getExists('force_ajax')) {
+      $view->addHiddenInput('force_ajax', true);
+    }
+
+    return $view;
   }
 
   private function loadAndRenderUpdates(
@@ -283,8 +327,12 @@ final class ConpherenceUpdateController
 
     $need_widget_data = false;
     $need_transactions = false;
+    $need_participant_cache = false;
     switch ($action) {
       case ConpherenceUpdateActions::METADATA:
+        $need_participant_cache = true;
+        $need_transactions = true;
+        break;
       case ConpherenceUpdateActions::LOAD:
         $need_transactions = true;
         break;
@@ -303,13 +351,19 @@ final class ConpherenceUpdateController
     $conpherence = id(new ConpherenceThreadQuery())
       ->setViewer($user)
       ->setAfterTransactionID($latest_transaction_id)
+      ->needParticipantCache($need_participant_cache)
       ->needWidgetData($need_widget_data)
       ->needTransactions($need_transactions)
       ->withIDs(array($conpherence_id))
       ->executeOne();
 
     if ($need_transactions) {
-      $data = $this->renderConpherenceTransactions($conpherence);
+      $data = ConpherenceTransactionView::renderTransactions(
+        $user,
+        $conpherence,
+        !$this->getRequest()->getExists('minimal_display'));
+      $participant_obj = $conpherence->getParticipant($user->getPHID());
+      $participant_obj->markUpToDate($conpherence, $data['latest_transaction']);
     } else {
       $data = array();
     }
@@ -323,7 +377,11 @@ final class ConpherenceUpdateController
     $file_widget = null;
     switch ($action) {
       case ConpherenceUpdateActions::METADATA:
-        $header = $this->buildHeaderPaneContent($conpherence);
+        $policy_objects = id(new PhabricatorPolicyQuery())
+          ->setViewer($user)
+          ->setObject($conpherence)
+          ->execute();
+        $header = $this->buildHeaderPaneContent($conpherence, $policy_objects);
         $nav_item = id(new ConpherenceThreadListView())
           ->setUser($user)
           ->setBaseURI($this->getApplicationURI())
@@ -351,8 +409,10 @@ final class ConpherenceUpdateController
     if ($people_widget) {
       $people_html = hsprintf('%s', $people_widget->render());
     }
+    $title = $this->getConpherenceTitle($conpherence);
     $content = array(
       'transactions' => hsprintf('%s', $rendered_transactions),
+      'conpherence_title' => (string) $title,
       'latest_transaction_id' => $new_latest_transaction_id,
       'nav_item' => hsprintf('%s', $nav_item),
       'conpherence_phid' => $conpherence->getPHID(),

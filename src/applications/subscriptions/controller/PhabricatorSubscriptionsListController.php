@@ -9,6 +9,10 @@ final class PhabricatorSubscriptionsListController
     $this->phid = idx($data, 'phid');
   }
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function processRequest() {
     $request = $this->getRequest();
 

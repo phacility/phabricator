@@ -57,10 +57,9 @@ final class DiffusionHistoryController extends DiffusionController {
       $history_table->setIsHead($offset == 0);
     }
 
-    $history_panel = new AphrontPanelView();
+    $history_panel = new PHUIObjectBoxView();
+    $history_panel->setHeaderText(pht('History'));
     $history_panel->appendChild($history_table);
-    $history_panel->appendChild($pager);
-    $history_panel->setNoBackground();
 
     $content[] = $history_panel;
 
@@ -88,6 +87,7 @@ final class DiffusionHistoryController extends DiffusionController {
         $crumbs,
         $object_box,
         $content,
+        $pager,
       ),
       array(
         'title' => array(

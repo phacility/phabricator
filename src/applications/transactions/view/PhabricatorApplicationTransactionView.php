@@ -462,7 +462,9 @@ class PhabricatorApplicationTransactionView extends AphrontView {
         $event->setIsEdited(true);
       }
 
-      $event->setIsNormalComment(true);
+      if (!$has_removed_comment) {
+        $event->setIsNormalComment(true);
+      }
 
       // If we have a place for quoted text to go and this is a quotable
       // comment, pass the quote target ID to the event view.

@@ -42,8 +42,8 @@ final class PhabricatorFactHomeController extends PhabricatorFactController {
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
-        'Fact',
-        'Value',
+        pht('Fact'),
+        pht('Value'),
       ));
     $table->setColumnClasses(
       array(
@@ -51,8 +51,8 @@ final class PhabricatorFactHomeController extends PhabricatorFactController {
         'n',
       ));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader('Facts!');
+    $panel = new PHUIObjectBoxView();
+    $panel->setHeaderText(pht('Facts'));
     $panel->appendChild($table);
 
     $chart_form = $this->buildChartForm();
@@ -67,8 +67,7 @@ final class PhabricatorFactHomeController extends PhabricatorFactController {
         $panel,
       ),
       array(
-        'title' => 'Facts',
-        'device' => false,
+        'title' => pht('Facts'),
       ));
   }
 
@@ -97,8 +96,8 @@ final class PhabricatorFactHomeController extends PhabricatorFactController {
     }
 
     if (!$options) {
-      return id(new PHUIErrorView())
-        ->setSeverity(PHUIErrorView::SEVERITY_NOTICE)
+      return id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NODATA)
         ->setTitle(pht('No Chartable Facts'))
         ->appendChild(phutil_tag(
           'p',
@@ -115,12 +114,11 @@ final class PhabricatorFactHomeController extends PhabricatorFactController {
           ->setOptions($options))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Plot Chart'));
+          ->setValue(pht('Plot Chart')));
 
-    $panel = new AphrontPanelView();
-    $panel->appendChild($form);
-    $panel->setWidth(AphrontPanelView::WIDTH_FORM);
-    $panel->setHeader('Plot Chart');
+    $panel = new PHUIObjectBoxView();
+    $panel->setForm($form);
+    $panel->setHeaderText(pht('Plot Chart'));
 
     return $panel;
   }

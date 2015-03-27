@@ -83,9 +83,7 @@ final class PhabricatorPeopleProfileEditController
     $nav->appendChild($form_box);
 
     return $this->buildApplicationPage(
-      array(
-        $nav,
-      ),
+      $nav,
       array(
         'title' => $title,
       ));

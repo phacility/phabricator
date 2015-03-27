@@ -20,17 +20,19 @@ JX.behavior('global-drag-and-drop', function(config) {
     JX.$(config.ifSupported).style.display = '';
   }
 
-  var drop = new JX.PhabricatorDragAndDropFileUpload(document.documentElement)
+  var page = JX.$('phabricator-standard-page');
+  var drop = new JX.PhabricatorDragAndDropFileUpload(page)
     .setURI(config.uploadURI)
-    .setViewPolicy(config.viewPolicy);
+    .setViewPolicy(config.viewPolicy)
+    .setChunkThreshold(config.chunkThreshold);
 
   drop.listen('didBeginDrag', function() {
-    JX.Mask.show();
+    JX.Mask.show('global-upload-mask');
     JX.DOM.show(JX.$(config.instructions));
   });
 
   drop.listen('didEndDrag', function() {
-    JX.Mask.hide();
+    JX.Mask.hide('global-upload-mask');
     JX.DOM.hide(JX.$(config.instructions));
   });
 

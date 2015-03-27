@@ -320,10 +320,15 @@ JX.install('Scrollbar', {
       var spos = JX.Vector.getAggregateScrollForNode(this._viewport);
       var vdim = JX.Vector.getDim(this._viewport);
 
-      var ratio = vdim.y / cdim.y;
+      var ratio = (vdim.y / cdim.y);
+
+      // We're scaling things down very slightly to leave a 2px margin at
+      // either end of the scroll gutter, so the bar doesn't quite bump up
+      // against the chrome.
+      ratio = ratio * (vdim.y / (vdim.y + 4));
 
       var offset = Math.round(ratio * spos.y) + 2;
-      var size = Math.floor(ratio * (vdim.y - 2)) - 2;
+      var size = Math.floor(ratio * vdim.y);
 
       if (size < cdim.y) {
         this._handle.style.top = offset + 'px';
@@ -372,6 +377,15 @@ JX.install('Scrollbar', {
         clearTimeout(this._timeout);
         this._timeout = null;
       }
+    },
+
+    scrollTo: function(scroll) {
+      if (this._viewport !== null) {
+        this._viewport.scrollTop = scroll;
+      } else {
+        this._frame.scrollTop = scroll;
+      }
+      return this;
     }
   }
 

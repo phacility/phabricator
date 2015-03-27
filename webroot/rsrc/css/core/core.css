@@ -2,14 +2,6 @@
  * @provides phabricator-core-css
  */
 
-.device-phone {
-  /* By default, the iPhone zooms all text on the page by some percentage when
-     you rotate from portrait mode to landscape mode. Disable this, since it
-     breaks lots of things and prevents you from using landscape to see more
-     columns in source code views. */
-  -webkit-text-size-adjust: none;
-}
-
 body, div, dl, dt, dd, ul, ol, li,
 h1, h2, h3, h4, h5, h6,
 pre, form, fieldset,
@@ -51,11 +43,17 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 body {
-  font: 13px/1.231 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font: {$basefont};
   direction: ltr;
   text-align: left;
   unicode-bidi: embed;
   background: #ebecee;
+
+  /* By default, the iPhone zooms all text on the page by some percentage when
+     you rotate from portrait mode to landscape mode. Disable this, since it
+     breaks lots of things and prevents you from using landscape to see more
+     columns in source code views. */
+  -webkit-text-size-adjust: none;
 }
 
 textarea {

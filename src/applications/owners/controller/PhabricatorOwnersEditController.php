@@ -251,7 +251,15 @@ final class PhabricatorOwnersEditController
       ->setFormErrors($errors)
       ->setForm($form);
 
+    $crumbs = $this->buildApplicationCrumbs();
+    if ($package->getID()) {
+      $crumbs->addTextCrumb(pht('Edit %s', $package->getName()));
+    } else {
+      $crumbs->addTextCrumb(pht('New Package'));
+    }
+
     $nav = $this->buildSideNavView();
+    $nav->appendChild($crumbs);
     $nav->appendChild($form_box);
 
     return $this->buildApplicationPage(

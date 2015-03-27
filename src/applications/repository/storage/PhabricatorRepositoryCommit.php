@@ -99,6 +99,9 @@ final class PhabricatorRepositoryCommit
           'unique' => true,
         ),
       ),
+      self::CONFIG_NO_MUTATE => array(
+        'importStatus',
+      ),
     ) + parent::getConfiguration();
   }
 

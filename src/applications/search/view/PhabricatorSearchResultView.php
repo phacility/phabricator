@@ -27,53 +27,26 @@ final class PhabricatorSearchResultView extends AphrontView {
       return;
     }
 
-    $type_name = nonempty($handle->getTypeName(), 'Document');
-
     require_celerity_resource('phabricator-search-results-css');
 
-    $link = phutil_tag(
-      'a',
-      array(
-        'href' => $handle->getURI(),
-      ),
-      PhabricatorEnv::getProductionURI($handle->getURI()));
-
-    $img = $handle->getImageURI();
-
-    if ($img) {
-      $img = phutil_tag(
-        'div',
-        array(
-          'class' => 'result-image',
-          'style' => "background-image: url('{$img}');",
-        ),
-        '');
-    }
+    $type_name = nonempty($handle->getTypeName(), pht('Document'));
 
     $title = $this->emboldenQuery($handle->getFullName());
     if ($handle->getStatus() == PhabricatorObjectHandleStatus::STATUS_CLOSED) {
-      $title = phutil_tag('del', array(), $title);
     }
 
-    return hsprintf(
-      '<div class="phabricator-search-result">'.
-        '%s'.
-        '<div class="result-desc">'.
-          '%s'.
-          '<div class="result-type">%s &middot; %s</div>'.
-        '</div>'.
-        '<div style="clear: both;"></div>'.
-      '</div>',
-      $img,
-      phutil_tag(
-        'a',
-        array(
-          'class' => 'result-name',
-          'href' => $handle->getURI(),
-        ),
-        $title),
-      $type_name,
-      $link);
+    $item = id(new PHUIObjectItemView())
+      ->setHeader($title)
+      ->setHref($handle->getURI())
+      ->setImageURI($handle->getImageURI())
+      ->addAttribute($type_name);
+
+    if ($handle->getStatus() == PhabricatorObjectHandleStatus::STATUS_CLOSED) {
+      $item->setDisabled(true);
+      $item->addAttribute(pht('Closed'));
+    }
+
+    return $item;
   }
 
 

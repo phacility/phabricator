@@ -66,7 +66,11 @@
 
 .aphront-multi-column-fluid
 .aphront-multi-column-column-outer
-.aphront-multi-column-column .phui-error-view {
+.aphront-multi-column-column .phui-info-view {
+  margin: 0;
+}
+
+.dashboard-panel .phui-object-item-empty .phui-info-view {
   margin: 0;
 }
 

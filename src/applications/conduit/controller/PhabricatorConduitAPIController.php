@@ -532,7 +532,6 @@ final class PhabricatorConduitAPIController
     }
 
     $param_table = new AphrontTableView($param_rows);
-    $param_table->setDeviceReadyTable(true);
     $param_table->setColumnClasses(
       array(
         'header',
@@ -548,26 +547,19 @@ final class PhabricatorConduitAPIController
     }
 
     $result_table = new AphrontTableView($result_rows);
-    $result_table->setDeviceReadyTable(true);
     $result_table->setColumnClasses(
       array(
         'header',
         'wide',
       ));
 
-    $param_panel = new AphrontPanelView();
-    $param_panel->setHeader('Method Parameters');
+    $param_panel = new PHUIObjectBoxView();
+    $param_panel->setHeaderText(pht('Method Parameters'));
     $param_panel->appendChild($param_table);
 
-    $result_panel = new AphrontPanelView();
-    $result_panel->setHeader('Method Result');
+    $result_panel = new PHUIObjectBoxView();
+    $result_panel->setHeaderText(pht('Method Result'));
     $result_panel->appendChild($result_table);
-
-    $param_head = id(new PHUIHeaderView())
-      ->setHeader(pht('Method Parameters'));
-
-    $result_head = id(new PHUIHeaderView())
-      ->setHeader(pht('Method Result'));
 
     $method_uri = $this->getApplicationURI('method/'.$method.'/');
 
@@ -578,13 +570,11 @@ final class PhabricatorConduitAPIController
     return $this->buildApplicationPage(
       array(
         $crumbs,
-        $param_head,
-        $param_table,
-        $result_head,
-        $result_table,
+        $param_panel,
+        $result_panel,
       ),
       array(
-        'title' => 'Method Call Result',
+        'title' => pht('Method Call Result'),
       ));
   }
 

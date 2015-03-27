@@ -43,6 +43,10 @@ final class DiffusionInlineCommentController
     return PhabricatorAuditInlineComment::loadID($id);
   }
 
+  protected function loadCommentByPHID($phid) {
+    return PhabricatorAuditInlineComment::loadPHID($phid);
+  }
+
   protected function loadCommentForEdit($id) {
     $request = $this->getRequest();
     $user = $request->getUser();
@@ -51,6 +55,31 @@ final class DiffusionInlineCommentController
     if (!$this->canEditInlineComment($user, $inline)) {
       throw new Exception('That comment is not editable!');
     }
+    return $inline;
+  }
+
+  protected function loadCommentForDone($id) {
+    $request = $this->getRequest();
+    $viewer = $request->getUser();
+
+    $inline = $this->loadComment($id);
+    if (!$inline) {
+      throw new Exception(pht('Failed to load comment "%d".', $id));
+    }
+
+    $commit = id(new DiffusionCommitQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($inline->getCommitPHID()))
+      ->executeOne();
+    if (!$commit) {
+      throw new Exception(pht('Failed to load commit.'));
+    }
+
+    if ((!$commit->getAuthorPHID()) ||
+        ($commit->getAuthorPHID() != $viewer->getPHID())) {
+      throw new Exception(pht('You can not mark this comment as complete.'));
+    }
+
     return $inline;
   }
 

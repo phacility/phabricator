@@ -63,12 +63,16 @@ EOTEXT
           'create/' => 'DifferentialDiffCreateController',
         ),
         'changeset/' => 'DifferentialChangesetViewController',
-        'revision/edit/(?:(?P<id>[1-9]\d*)/)?'
-          => 'DifferentialRevisionEditController',
-        'revision/land/(?:(?P<id>[1-9]\d*))/(?P<strategy>[^/]+)/'
-          => 'DifferentialRevisionLandController',
-        'revision/closedetails/(?P<phid>[^/]+)/'
-          => 'DifferentialRevisionCloseDetailsController',
+        'revision/' => array(
+          'edit/(?:(?P<id>[1-9]\d*)/)?'
+            => 'DifferentialRevisionEditController',
+          'land/(?:(?P<id>[1-9]\d*))/(?P<strategy>[^/]+)/'
+            => 'DifferentialRevisionLandController',
+          'closedetails/(?P<phid>[^/]+)/'
+            => 'DifferentialRevisionCloseDetailsController',
+          'update/(?P<revisionID>[1-9]\d*)/'
+            => 'DifferentialDiffCreateController',
+        ),
         'comment/' => array(
           'preview/(?P<id>[1-9]\d*)/' => 'DifferentialCommentPreviewController',
           'save/(?P<id>[1-9]\d*)/' => 'DifferentialCommentSaveController',

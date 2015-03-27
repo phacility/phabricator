@@ -293,15 +293,15 @@ final class LegalpadDocumentSignatureSearchEngine
       ->appendChild($table);
 
     if (!$this->document) {
-      $policy_notice = id(new PHUIErrorView())
-        ->setSeverity(PHUIErrorView::SEVERITY_NOTICE)
+      $policy_notice = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
         ->setErrors(
           array(
             pht(
               'NOTE: You can only see your own signatures and signatures on '.
               'documents you have permission to edit.'),
           ));
-      $box->setErrorView($policy_notice);
+      $box->setInfoView($policy_notice);
     }
 
     return $box;

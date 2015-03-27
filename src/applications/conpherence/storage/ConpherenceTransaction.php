@@ -53,24 +53,15 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
 
     switch ($this->getTransactionType()) {
       case ConpherenceTransactionType::TYPE_TITLE:
-        if ($old && $new) {
-          $title = pht(
-            '%s renamed this conpherence from "%s" to "%s".',
-            $this->renderHandleLink($author_phid),
-            $old,
-            $new);
-        } else if ($old) {
-          $title = pht(
-            '%s deleted the conpherence name "%s".',
-            $this->renderHandleLink($author_phid),
-            $old);
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+      case PhabricatorTransactions::TYPE_EDIT_POLICY:
+      case PhabricatorTransactions::TYPE_JOIN_POLICY:
+        if ($this->getObject()->getIsRoom()) {
+          return $this->getRoomTitle();
         } else {
-          $title = pht(
-            '%s named this conpherence "%s".',
-            $this->renderHandleLink($author_phid),
-            $new);
+          return $this->getThreadTitle();
         }
-        return $title;
+        break;
       case ConpherenceTransactionType::TYPE_FILES:
         $add = array_diff($new, $old);
         $rem = array_diff($old, $new);
@@ -126,6 +117,108 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
     return parent::getTitle();
   }
 
+  private function getRoomTitle() {
+    $author_phid = $this->getAuthorPHID();
+
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    switch ($this->getTransactionType()) {
+      case ConpherenceTransactionType::TYPE_TITLE:
+        if ($old && $new) {
+          $title = pht(
+            '%s renamed this room from "%s" to "%s".',
+            $this->renderHandleLink($author_phid),
+            $old,
+            $new);
+        } else if ($old) {
+          $title = pht(
+            '%s deleted the room name "%s".',
+            $this->renderHandleLink($author_phid),
+            $old);
+        } else {
+          $title = pht(
+            '%s named this room "%s".',
+            $this->renderHandleLink($author_phid),
+            $new);
+        }
+        return $title;
+        break;
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+        return pht(
+          '%s changed the visibility of this room from "%s" to "%s".',
+          $this->renderHandleLink($author_phid),
+          $this->renderPolicyName($old, 'old'),
+          $this->renderPolicyName($new, 'new'));
+        break;
+      case PhabricatorTransactions::TYPE_EDIT_POLICY:
+        return pht(
+          '%s changed the edit policy of this room from "%s" to "%s".',
+          $this->renderHandleLink($author_phid),
+          $this->renderPolicyName($old, 'old'),
+          $this->renderPolicyName($new, 'new'));
+        break;
+      case PhabricatorTransactions::TYPE_JOIN_POLICY:
+        return pht(
+          '%s changed the join policy of this room from "%s" to "%s".',
+          $this->renderHandleLink($author_phid),
+          $this->renderPolicyName($old, 'old'),
+          $this->renderPolicyName($new, 'new'));
+        break;
+    }
+  }
+
+  private function getThreadTitle() {
+    $author_phid = $this->getAuthorPHID();
+
+    $old = $this->getOldValue();
+    $new = $this->getNewValue();
+
+    switch ($this->getTransactionType()) {
+      case ConpherenceTransactionType::TYPE_TITLE:
+        if ($old && $new) {
+          $title = pht(
+            '%s renamed this thread from "%s" to "%s".',
+            $this->renderHandleLink($author_phid),
+            $old,
+            $new);
+        } else if ($old) {
+          $title = pht(
+            '%s deleted the thread name "%s".',
+            $this->renderHandleLink($author_phid),
+            $old);
+        } else {
+          $title = pht(
+            '%s named this thread "%s".',
+            $this->renderHandleLink($author_phid),
+            $new);
+        }
+        return $title;
+        break;
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+        return pht(
+          '%s changed the visibility of this thread from "%s" to "%s".',
+          $this->renderHandleLink($author_phid),
+          $this->renderPolicyName($old, 'old'),
+          $this->renderPolicyName($new, 'new'));
+        break;
+      case PhabricatorTransactions::TYPE_EDIT_POLICY:
+        return pht(
+          '%s changed the edit policy of this thread from "%s" to "%s".',
+          $this->renderHandleLink($author_phid),
+          $this->renderPolicyName($old, 'old'),
+          $this->renderPolicyName($new, 'new'));
+        break;
+      case PhabricatorTransactions::TYPE_JOIN_POLICY:
+        return pht(
+          '%s changed the join policy of this thread from "%s" to "%s".',
+          $this->renderHandleLink($author_phid),
+          $this->renderPolicyName($old, 'old'),
+          $this->renderPolicyName($new, 'new'));
+        break;
+    }
+  }
+
   public function getRequiredHandlePHIDs() {
     $phids = parent::getRequiredHandlePHIDs();
 
@@ -146,5 +239,4 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
 
     return $phids;
   }
-
 }

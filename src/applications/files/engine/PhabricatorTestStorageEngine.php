@@ -13,6 +13,22 @@ final class PhabricatorTestStorageEngine
     return 'unit-test';
   }
 
+  public function getEnginePriority() {
+    return 1000;
+  }
+
+  public function isTestEngine() {
+    return true;
+  }
+
+  public function canWriteFiles() {
+    return true;
+  }
+
+  public function hasFilesizeLimit() {
+    return false;
+  }
+
   public function writeFile($data, array $params) {
     AphrontWriteGuard::willWrite();
     self::$storage[self::$nextHandle] = $data;

@@ -1,0 +1,2 @@
+ALTER TABLE {$NAMESPACE}_file.file
+  ADD isPartial BOOL NOT NULL DEFAULT 0;

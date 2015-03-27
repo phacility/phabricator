@@ -9,11 +9,11 @@ final class PhabricatorApplicationDetailViewController
   }
 
   public function handleRequest(AphrontRequest $request) {
-    $user = $request->getUser();
+    $viewer = $this->getViewer();
     $application = $request->getURIData('application');
 
     $selected = id(new PhabricatorApplicationQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withClasses(array($application))
       ->executeOne();
     if (!$selected) {
@@ -27,7 +27,7 @@ final class PhabricatorApplicationDetailViewController
 
     $header = id(new PHUIHeaderView())
       ->setHeader($title)
-      ->setUser($user)
+      ->setUser($viewer)
       ->setPolicyObject($selected);
 
     if ($selected->isInstalled()) {
@@ -36,17 +36,30 @@ final class PhabricatorApplicationDetailViewController
       $header->setStatus('fa-ban', 'dark', pht('Uninstalled'));
     }
 
-    $actions = $this->buildActionView($user, $selected);
+    $actions = $this->buildActionView($viewer, $selected);
     $properties = $this->buildPropertyView($selected, $actions);
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->addPropertyList($properties);
 
+    $configs =
+      PhabricatorApplicationConfigurationPanel::loadAllPanelsForApplication(
+        $selected);
+
+    $panels = array();
+    foreach ($configs as $config) {
+      $config->setViewer($viewer);
+      $config->setApplication($selected);
+
+      $panels[] = $config->buildConfigurationPagePanel();
+    }
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $object_box,
+        $panels,
       ),
       array(
         'title' => $title,
@@ -114,26 +127,6 @@ final class PhabricatorApplicationDetailViewController
         idx($descriptions, $capability));
     }
 
-    if ($application->supportsEmailIntegration()) {
-      $properties->addSectionHeader(pht('Application Emails'));
-      $properties->addTextContent($application->getAppEmailBlurb());
-      $email_addresses = id(new PhabricatorMetaMTAApplicationEmailQuery())
-        ->setViewer($viewer)
-        ->withApplicationPHIDs(array($application->getPHID()))
-        ->execute();
-      if (empty($email_addresses)) {
-        $properties->addProperty(
-          null,
-          pht('No email addresses configured.'));
-      } else {
-        foreach ($email_addresses as $email_address) {
-          $properties->addProperty(
-            null,
-            $email_address->getAddress());
-        }
-      }
-    }
-
     return $properties;
   }
 
@@ -167,18 +160,6 @@ final class PhabricatorApplicationDetailViewController
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit)
         ->setHref($edit_uri));
-
-    if ($selected->supportsEmailIntegration()) {
-      $edit_email_uri = $this->getApplicationURI(
-        'editemail/'.get_class($selected).'/');
-      $view->addAction(
-        id(new PhabricatorActionView())
-        ->setName(pht('Edit Application Emails'))
-        ->setIcon('fa-envelope')
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(!$can_edit)
-        ->setHref($edit_email_uri));
-    }
 
     if ($selected->canUninstall()) {
       if ($selected->isInstalled()) {

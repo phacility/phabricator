@@ -25,6 +25,14 @@
   margin-left: 221px;
 }
 
+.device-desktop div.phabricator-icon-nav + .phabricator-standard-page-footer {
+  margin-left: 58px;
+}
+
+.device .phabricator-side-menu-home + .phabricator-standard-page-footer {
+  display: none;
+}
+
 .keyboard-shortcut-help td,
 .keyboard-shortcut-help th {
   padding: 8px;
@@ -136,7 +144,6 @@ a.handle-disabled {
 
 .jx-scrollbar-frame {
   position: relative;
-  height: 100%;
   overflow: hidden;
 }
 
@@ -210,98 +217,4 @@ a.handle-disabled {
 .jx-scrollbar-link {
   position: absolute;
   left: -50px;
-}
-
-.with-durable-column {
-  margin-right: 300px;
-}
-
-.phui-durable-column {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  width: 300px;
-  background: #ffffff;
-  display: none;
-}
-
-.phui-durable-column-header {
-  height: 44px;
-  border-left: 1px solid #000000;
-}
-
-.phui-durable-column-header-text {
-  padding: 12px 16px;
-  font-size: 15px;
-  color: {$lightgreytext};
-}
-
-.phui-durable-column-icon-bar {
-  height: 34px;
-  padding: 5px 16px;
-  border-bottom: 1px solid {$lightblueborder};
-}
-
-.phui-durable-column-body {
-  position: absolute;
-  top: 44px;
-  bottom: 0;
-  right: 0;
-  left: 0;
-  border-left: 1px solid {$lightgreyborder};
-}
-
-.phui-durable-column-main {
-  position: absolute;
-  top: 44px;
-  bottom: 144px;
-  left: 0;
-  right: 0;
-  overflow: hidden;
-}
-
-.phui-durable-column-content {
-  padding: 8px 16px;
-}
-
-.phui-durable-column-textarea {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 44px;
-  height: 100px;
-  margin: 0;
-  border-width: 1px 0;
-  border-style: solid;
-  border-top-color: {$lightblueborder};
-  border-bottom-color: {$lightblueborder};
-  padding: 8px 16px;
-  resize: none;
-}
-
-.phui-durable-column-textarea:focus {
-  outline: 0;
-  border-top-color: {$sky};
-  border-bottom-color: {$sky};
-  box-shadow: none;
-}
-
-.phui-durable-column-footer {
-  position: absolute;
-  height: 28px;
-  padding: 8px 16px;
-  left: 0;
-  right: 0;
-  bottom: 0;
-}
-
-.phui-durable-column-footer button {
-  float: right;
-}
-
-.phui-durable-column-status {
-  vertical-align: middle;
-  line-height: 28px;
-  color: {$lightgreytext};
 }

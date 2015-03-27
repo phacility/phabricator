@@ -10,28 +10,30 @@
   margin: 0 0 12px;
 }
 
+.PhabricatorMonospaced,
+.phabricator-remarkup .remarkup-code-block .remarkup-code {
+  font: 10px "Menlo", "Consolas", "Monaco", monospace;
+}
+
+.platform-windows .PhabricatorMonospaced,
+.platform-windows .phabricator-remarkup .remarkup-code-block .remarkup-code {
+  font: 11px "Menlo", "Consolas", "Monaco", monospace;
+}
+
 .phabricator-remarkup .remarkup-code-block {
-  margin: 12px;
+  margin: 12px 0;
   white-space: pre;
-  font-family: "Monaco", monospace;
-  font-size: 10px;
 }
 
 .phabricator-remarkup .remarkup-code-header {
-  padding: 6px 8px;
-  background: {$lightyellow};
-  color: rgba(0,0,0,.75);
+  padding: 4px 1px;
+  font-size: 13px;
   font-weight: bold;
-  display: inline-block;
-  border-top: 1px solid {$yellow};
-  border-left: 1px solid {$yellow};
-  border-right: 1px solid {$yellow};
-  margin-bottom: -1px;
 }
 
 .phabricator-remarkup .remarkup-code-block pre {
-  background: {$lightyellow};
-  border: 1px solid {$yellow};
+  background: {$sh-yellowbackground};
+  border: 1px solid {$sh-lightyellowborder};
   display: block;
   color: #000000;
   overflow: auto;
@@ -298,6 +300,7 @@
 }
 
 .phabricator-remarkup-embed-image-full img {
+  height: auto;
   max-width: 100%;
 }
 
@@ -330,7 +333,8 @@
 .phabricator-remarkup h5.remarkup-header:first-child,
 .phabricator-remarkup h6.remarkup-header:first-child,
 .phabricator-remarkup blockquote:first-child,
-.phabricator-remarkup table.remarkup-table:first-child {
+.phabricator-remarkup table.remarkup-table:first-child,
+.phabricator-remarkup .remarkup-note:first-child {
   margin-top: 0;
 }
 
@@ -345,7 +349,8 @@
 .phabricator-remarkup h5.remarkup-header:last-child,
 .phabricator-remarkup h6.remarkup-header:last-child,
 .phabricator-remarkup blockquote:last-child,
-.phabricator-remarkup table.remarkup-table:last-child {
+.phabricator-remarkup table.remarkup-table:last-child,
+.phabricator-remarkup .remarkup-note:last-child {
   margin-bottom: 0;
 }
 
@@ -455,7 +460,7 @@ var.remarkup-assist-textarea {
 }
 
 .jx-order-mask {
-  background: #ffffff;
+  background: white;
   opacity: 1.0;
 }
 
@@ -482,6 +487,11 @@ var.remarkup-assist-textarea {
 .phabricator-image-macro-hero {
   margin: auto;
   max-width: 95%;
+}
+
+.phabricator-remarkup-macro {
+  height: auto;
+  max-width: 100%;
 }
 
 .remarkup-nav-sequence-arrow {

@@ -76,8 +76,8 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
       'colors' => array('#0000ff'),
     ));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader('Count of '.$spec->getName());
+    $panel = new PHUIObjectBoxView();
+    $panel->setHeaderText(pht('Count of %s', $spec->getName()));
     $panel->appendChild($chart);
 
     $crumbs = $this->buildApplicationCrumbs();
@@ -89,8 +89,7 @@ final class PhabricatorFactChartController extends PhabricatorFactController {
         $panel,
       ),
       array(
-        'title' => 'Chart',
-        'device' => false,
+        'title' => pht('Chart'),
       ));
   }
 

@@ -144,7 +144,7 @@ final class PhabricatorMainMenuView extends AphrontView {
         'meta'  => array(
           'map' => array(
             $header_id => 'phabricator-application-menu-expanded',
-            $button_id => 'sky',
+            $button_id => 'white',
           ),
         ),
       ),
@@ -207,7 +207,7 @@ final class PhabricatorMainMenuView extends AphrontView {
         'meta'  => array(
           'map' => array(
             $header_id => 'phabricator-search-menu-expanded',
-            $button_id => 'sky',
+            $button_id => 'white',
           ),
         ),
       ),
@@ -236,6 +236,29 @@ final class PhabricatorMainMenuView extends AphrontView {
   }
 
   private function renderPhabricatorLogo() {
+    $style_logo = null;
+    $custom_header = PhabricatorEnv::getEnvConfig('ui.custom-header');
+    if ($custom_header) {
+      $cache = PhabricatorCaches::getImmutableCache();
+      $cache_key_logo = 'ui.custom-header.logo-phid.v1.'.$custom_header;
+      $logo_uri = $cache->getKey($cache_key_logo);
+      if (!$logo_uri) {
+        $file = id(new PhabricatorFileQuery())
+          ->setViewer($this->getUser())
+          ->withPHIDs(array($custom_header))
+          ->executeOne();
+        if ($file) {
+          $logo_uri = $file->getViewURI();
+          $cache->setKey($cache_key_logo, $logo_uri);
+        }
+      }
+      if ($logo_uri) {
+        $style_logo =
+          'background-size: 96px 40px; '.
+          'background-position: 0px 0px; '.
+          'background-image: url('.$logo_uri.');';
+      }
+    }
 
     return phutil_tag(
       'a',
@@ -260,6 +283,7 @@ final class PhabricatorMainMenuView extends AphrontView {
           'span',
           array(
             'class' => 'sprite-menu phabricator-main-menu-logo',
+            'style' => $style_logo,
           ),
           ''),
       ));
@@ -351,6 +375,7 @@ final class PhabricatorMainMenuView extends AphrontView {
           'uri'         => '/conpherence/panel/',
           'countType'   => 'messages',
           'countNumber' => $message_count_number,
+          'unreadClass' => 'message-unread',
         ));
 
       $message_notification_dropdown = javelin_tag(
@@ -434,6 +459,7 @@ final class PhabricatorMainMenuView extends AphrontView {
           'uri'         => '/notification/panel/',
           'countType'   => 'notifications',
           'countNumber' => $count_number,
+          'unreadClass' => 'alert-unread',
         ));
 
       $notification_dropdown = javelin_tag(

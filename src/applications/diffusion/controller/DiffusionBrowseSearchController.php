@@ -52,45 +52,43 @@ final class DiffusionBrowseSearchController extends DiffusionBrowseController {
 
     $search_mode = null;
 
-    try {
-      if (strlen($this->getRequest()->getStr('grep'))) {
-        $search_mode = 'grep';
-        $query_string = $this->getRequest()->getStr('grep');
-        $results = $this->callConduitWithDiffusionRequest(
-          'diffusion.searchquery',
-          array(
-            'grep' => $query_string,
-            'commit' => $drequest->getStableCommit(),
-            'path' => $drequest->getPath(),
-            'limit' => $limit + 1,
-            'offset' => $page,
-          ));
-      } else { // Filename search.
-        $search_mode = 'find';
-        $query_string = $this->getRequest()->getStr('find');
-        $results = $this->callConduitWithDiffusionRequest(
-          'diffusion.querypaths',
-          array(
-            'pattern' => $query_string,
-            'commit' => $drequest->getStableCommit(),
-            'path' => $drequest->getPath(),
-            'limit' => $limit + 1,
-            'offset' => $page,
-          ));
-      }
-    } catch (ConduitException $ex) {
-      $err = $ex->getErrorDescription();
-      if ($err != '') {
-        return id(new PHUIErrorView())
-          ->setTitle(pht('Search Error'))
-          ->appendChild($err);
-      }
+    switch ($repository->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        $results = array();
+        break;
+      default:
+        if (strlen($this->getRequest()->getStr('grep'))) {
+          $search_mode = 'grep';
+          $query_string = $this->getRequest()->getStr('grep');
+          $results = $this->callConduitWithDiffusionRequest(
+            'diffusion.searchquery',
+            array(
+              'grep' => $query_string,
+              'commit' => $drequest->getStableCommit(),
+              'path' => $drequest->getPath(),
+              'limit' => $limit + 1,
+              'offset' => $page,
+            ));
+        } else { // Filename search.
+          $search_mode = 'find';
+          $query_string = $this->getRequest()->getStr('find');
+          $results = $this->callConduitWithDiffusionRequest(
+            'diffusion.querypaths',
+            array(
+              'pattern' => $query_string,
+              'commit' => $drequest->getStableCommit(),
+              'path' => $drequest->getPath(),
+              'limit' => $limit + 1,
+              'offset' => $page,
+            ));
+        }
+        break;
     }
 
     $results = $pager->sliceResults($results);
 
     if ($search_mode == 'grep') {
-      $table = $this->renderGrepResults($results);
+      $table = $this->renderGrepResults($results, $query_string);
       $header = pht(
         'File content matching "%s" under "%s"',
         $query_string,
@@ -114,28 +112,10 @@ final class DiffusionBrowseSearchController extends DiffusionBrowseController {
     return array($box, $pager_box);
   }
 
-  private function renderGrepResults(array $results) {
+  private function renderGrepResults(array $results, $pattern) {
     $drequest = $this->getDiffusionRequest();
 
-    require_celerity_resource('syntax-highlighting-css');
-
-    // NOTE: This can be wrong because we may find the string inside the
-    // comment. But it's correct in most cases and highlighting the whole file
-    // would be too expensive.
-    $futures = array();
-    $engine = PhabricatorSyntaxHighlighter::newEngine();
-    foreach ($results as $result) {
-      list($path, $line, $string) = $result;
-      $futures["{$path}:{$line}"] = $engine->getHighlightFuture(
-        $engine->getLanguageFromFilename($path),
-        ltrim($string));
-    }
-
-    try {
-      id(new FutureIterator($futures))
-        ->limit(8)
-        ->resolveAll();
-    } catch (PhutilSyntaxHighlighterException $ex) {}
+    require_celerity_resource('phabricator-search-results-css');
 
     $rows = array();
     foreach ($results as $result) {
@@ -147,14 +127,57 @@ final class DiffusionBrowseSearchController extends DiffusionBrowseController {
         'line' => $line,
       ));
 
-      try {
-        $string = $futures["{$path}:{$line}"]->resolve();
-      } catch (PhutilSyntaxHighlighterException $ex) {}
+      $matches = null;
+      $count = @preg_match_all(
+        '('.$pattern.')u',
+        $string,
+        $matches,
+        PREG_OFFSET_CAPTURE);
+
+      if (!$count) {
+        $output = ltrim($string);
+      } else {
+        $output = array();
+        $cursor = 0;
+        $length = strlen($string);
+        foreach ($matches[0] as $match) {
+          $offset = $match[1];
+          if ($cursor != $offset) {
+            $output[] = array(
+              'text' => substr($string, $cursor, $offset),
+              'highlight' => false,
+            );
+          }
+          $output[] = array(
+            'text' => $match[0],
+            'highlight' => true,
+          );
+          $cursor = $offset + strlen($match[0]);
+        }
+        if ($cursor != $length) {
+          $output[] = array(
+            'text' => substr($string, $cursor),
+            'highlight' => false,
+          );
+        }
+
+        if ($output) {
+          $output[0]['text'] =  ltrim($output[0]['text']);
+        }
+
+        foreach ($output as $key => $segment) {
+          if ($segment['highlight']) {
+            $output[$key] = phutil_tag('strong', array(), $segment['text']);
+          } else {
+            $output[$key] = $segment['text'];
+          }
+        }
+      }
 
       $string = phutil_tag(
         'pre',
-        array('class' => 'PhabricatorMonospaced'),
-        $string);
+        array('class' => 'PhabricatorMonospaced phui-source-fragment'),
+        $output);
 
       $path = Filesystem::readablePath($path, $drequest->getPath());
 

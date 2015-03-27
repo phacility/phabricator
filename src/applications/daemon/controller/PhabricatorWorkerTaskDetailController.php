@@ -24,13 +24,13 @@ final class PhabricatorWorkerTaskDetailController
     if (!$task) {
       $title = pht('Task Does Not Exist');
 
-      $error_view = new PHUIErrorView();
+      $error_view = new PHUIInfoView();
       $error_view->setTitle(pht('No Such Task'));
       $error_view->appendChild(phutil_tag(
         'p',
         array(),
         pht('This task may have recently been garbage collected.')));
-      $error_view->setSeverity(PHUIErrorView::SEVERITY_NODATA);
+      $error_view->setSeverity(PHUIInfoView::SEVERITY_NODATA);
 
       $content = $error_view;
     } else {

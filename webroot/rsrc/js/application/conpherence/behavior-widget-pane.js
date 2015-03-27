@@ -9,6 +9,7 @@
  *           phuix-dropdown-menu
  *           phuix-action-list-view
  *           phuix-action-view
+ *           conpherence-thread-manager
  * @provides javelin-behavior-conpherence-widget-pane
  */
 
@@ -183,6 +184,8 @@ JX.behavior('conpherence-widget-pane', function(config) {
       var widget_pane = JX.DOM.find(root, 'div', 'conpherence-widget-pane');
       var widget_header = JX.DOM.find(widget_pane, 'a', 'widgets-selector');
       var adder = JX.DOM.find(widget_pane, 'a', 'conpherence-widget-adder');
+      var threadManager = JX.ConpherenceThreadManager.getInstance();
+      var disabled = !threadManager.getCanEditLoadedThread();
       JX.DOM.setContent(
         widget_header,
         widget_data.name);
@@ -191,6 +194,10 @@ JX.behavior('conpherence-widget-pane', function(config) {
         JX.$N('span', { className : 'caret' }));
       if (widget_data.hasCreate) {
         JX.DOM.show(adder);
+        JX.DOM.alterClass(
+          adder,
+          'disabled',
+          disabled);
       } else {
         JX.DOM.hide(adder);
       }
@@ -270,19 +277,18 @@ JX.behavior('conpherence-widget-pane', function(config) {
         href = create_data.customHref;
       }
 
-      var root = JX.DOM.find(document, 'div', 'conpherence-layout');
-      var latest_transaction_dom = JX.DOM.find(
-        root,
-        'input',
-        'latest-transaction-id');
+      var threadManager = JX.ConpherenceThreadManager.getInstance();
+      var latest_transaction_id = threadManager.getLatestTransactionID();
       var data = {
-        latest_transaction_id : latest_transaction_dom.value,
+        latest_transaction_id : latest_transaction_id,
         action : create_data.action
       };
 
-      new JX.Workflow(href, data)
+      var workflow = new JX.Workflow(href, data)
         .setHandler(function (r) {
-          latest_transaction_dom.value = r.latest_transaction_id;
+          var threadManager = JX.ConpherenceThreadManager.getInstance();
+          threadManager.setLatestTransactionID(r.latest_transaction_id);
+          var root = JX.DOM.find(document, 'div', 'conpherence-layout');
           if (create_data.refreshFromResponse) {
             var messages = null;
             try {
@@ -315,8 +321,8 @@ JX.behavior('conpherence-widget-pane', function(config) {
                 widget : widget_to_update
               });
           }
-        })
-        .start();
+        });
+      threadManager.syncWorkflow(workflow, 'submit');
     }
   );
 

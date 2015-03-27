@@ -12,6 +12,8 @@ final class PhabricatorAuthListController
       ->execute();
 
     $list = new PHUIObjectItemListView();
+    $can_manage = $this->hasApplicationCapability(
+        AuthManageProvidersCapability::CAPABILITY);
 
     foreach ($configs as $config) {
       $item = new PHUIObjectItemView();
@@ -47,10 +49,10 @@ final class PhabricatorAuthListController
 
       if ($config->getShouldAllowRegistration()) {
         $item->addAttribute(pht('Allows Registration'));
+      } else {
+        $item->addAttribute(pht('Does Not Allow Registration'));
       }
 
-      $can_manage = $this->hasApplicationCapability(
-        AuthManageProvidersCapability::CAPABILITY);
       if ($config->getIsEnabled()) {
         $item->setState(PHUIObjectItemView::STATE_SUCCESS);
         $item->addAction(
@@ -131,17 +133,17 @@ final class PhabricatorAuthListController
     }
 
     if (!$domains_value && !$approval_value) {
-      $severity = PHUIErrorView::SEVERITY_WARNING;
+      $severity = PHUIInfoView::SEVERITY_WARNING;
       $issues[] = pht(
         'You can safely ignore this warning if the install itself has '.
         'access controls (for example, it is deployed on a VPN) or if all of '.
         'the configured providers have access controls (for example, they are '.
         'all private LDAP or OAuth servers).');
     } else {
-      $severity = PHUIErrorView::SEVERITY_NOTICE;
+      $severity = PHUIInfoView::SEVERITY_NOTICE;
     }
 
-    $warning = id(new PHUIErrorView())
+    $warning = id(new PHUIInfoView())
       ->setSeverity($severity)
       ->setErrors($issues);
 
@@ -152,6 +154,7 @@ final class PhabricatorAuthListController
         ->setColor(PHUIButtonView::SIMPLE)
         ->setHref($this->getApplicationURI('config/new/'))
         ->setIcon($image)
+        ->setDisabled(!$can_manage)
         ->setText(pht('Add Provider'));
 
     $header = id(new PHUIHeaderView())
@@ -161,7 +164,7 @@ final class PhabricatorAuthListController
     $list->setFlush(true);
     $list = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->setErrorView($warning)
+      ->setInfoView($warning)
       ->appendChild($list);
 
     return $this->buildApplicationPage(

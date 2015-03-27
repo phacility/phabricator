@@ -48,7 +48,7 @@ final class PhabricatorXHProfProfileSymbolView
 
     $rows = array();
     $rows[] = array(
-      'Metrics for this Call',
+      pht('Metrics for this Call'),
       '',
       '',
       '',
@@ -62,7 +62,7 @@ final class PhabricatorXHProfProfileSymbolView
       ));
 
     $rows[] = array(
-      'Parent Calls',
+      pht('Parent Calls'),
       '',
       '',
       '',
@@ -79,7 +79,7 @@ final class PhabricatorXHProfProfileSymbolView
 
 
     $rows[] = array(
-      'Child Calls',
+      pht('Child Calls'),
       '',
       '',
       '',
@@ -102,9 +102,9 @@ final class PhabricatorXHProfProfileSymbolView
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
-        'Symbol',
-        'Count',
-        'Wall Time',
+        pht('Symbol'),
+        pht('Count'),
+        pht('Wall Time'),
         '%',
       ));
     $table->setColumnClasses(
@@ -115,8 +115,8 @@ final class PhabricatorXHProfProfileSymbolView
         'n',
       ));
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader('XHProf Profile');
+    $panel = new PHUIObjectBoxView();
+    $panel->setHeaderText(pht('XHProf Profile'));
     $panel->appendChild($table);
 
     return $panel->render();

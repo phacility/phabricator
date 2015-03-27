@@ -118,8 +118,8 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
 
     $follow  = $request->getStr('follow');
     if ($follow) {
-      $notice = new PHUIErrorView();
-      $notice->setSeverity(PHUIErrorView::SEVERITY_WARNING);
+      $notice = new PHUIInfoView();
+      $notice->setSeverity(PHUIInfoView::SEVERITY_WARNING);
       $notice->setTitle(pht('Unable to Continue'));
       switch ($follow) {
         case 'first':
@@ -138,8 +138,8 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
 
     $renamed = $request->getStr('renamed');
     if ($renamed) {
-      $notice = new PHUIErrorView();
-      $notice->setSeverity(PHUIErrorView::SEVERITY_NOTICE);
+      $notice = new PHUIInfoView();
+      $notice->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
       $notice->setTitle(pht('File Renamed'));
       $notice->appendChild(
         pht("File history passes through a rename from '%s' to '%s'.",
@@ -845,7 +845,7 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
 
     $rows = array();
     foreach ($inlines as $inline) {
-      $inline_view = id(new DifferentialInlineCommentView())
+      $inline_view = id(new PHUIDiffInlineCommentDetailView())
         ->setMarkupEngine($engine)
         ->setInlineComment($inline)
         ->render();

@@ -2,36 +2,19 @@
  * @provides phabricator-search-results-css
  */
 
-.phabricator-search-result {
-  margin: 4px 0 16px;
+.phui-object-item-link strong {
+  background-color: {$lightyellow};
+  color: black;
+  padding: 0 4px;
+  border-radius: 3px;
 }
 
-.device-phone .phabricator-search-result-box .phui-box {
-  margin: 20px 0;
+.phui-source-fragment {
+  color: {$darkgreytext};
 }
 
-.phabricator-search-result .result-image {
-  position: relative;
-  float: left;
-  width: 50px;
-  height: 50px;
-  margin-right: 10px;
-}
-
-.phabricator-search-result .result-type {
-  margin-top: 4px;
-  word-break: break-word;
-}
-
-.phabricator-search-result .result-name {
-  font-size: 16px;
-}
-
-.search-results-pager .aphront-pager-view {
-  text-align: center;
-}
-
-.phabricator-search-no-results {
-  color: {$lightgreytext};
-  font-size: 18px;
+.phui-source-fragment strong {
+  background-color: {$lightyellow};
+  font-weight: normal;
+  color: #000000;
 }

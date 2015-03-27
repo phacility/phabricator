@@ -69,9 +69,9 @@ final class DiffusionExternalController extends DiffusionController {
       }
       $desc .= $id;
 
-      $content = id(new PHUIErrorView())
+      $content = id(new PHUIInfoView())
         ->setTitle(pht('Unknown External'))
-        ->setSeverity(PHUIErrorView::SEVERITY_WARNING)
+        ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
         ->appendChild(phutil_tag(
           'p',
           array(),
@@ -124,10 +124,14 @@ final class DiffusionExternalController extends DiffusionController {
           'wide',
         ));
 
-      $content = new AphrontPanelView();
-      $content->setHeader(pht('Multiple Matching Commits'));
-      $content->setCaption(
-        pht('This external reference matches multiple known commits.'));
+      $caption = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
+        ->appendChild(
+          pht('This external reference matches multiple known commits.'));
+
+      $content = new PHUIObjectBoxView();
+      $content->setHeaderText(pht('Multiple Matching Commits'));
+      $content->setInfoView($caption);
       $content->appendChild($table);
     }
 

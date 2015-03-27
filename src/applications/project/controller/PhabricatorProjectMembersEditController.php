@@ -110,9 +110,7 @@ final class PhabricatorProjectMembersEditController
     $nav->appendChild($member_list);
 
     return $this->buildApplicationPage(
-      array(
-        $nav,
-      ),
+      $nav,
       array(
         'title' => $title,
       ));

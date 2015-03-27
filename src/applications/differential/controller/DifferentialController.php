@@ -2,18 +2,6 @@
 
 abstract class DifferentialController extends PhabricatorController {
 
-  protected function buildApplicationCrumbs() {
-    $crumbs = parent::buildApplicationCrumbs();
-
-    $crumbs->addAction(
-      id(new PHUIListItemView())
-        ->setHref($this->getApplicationURI('/diff/create/'))
-        ->setName(pht('Create Diff'))
-        ->setIcon('fa-plus-square'));
-
-    return $crumbs;
-  }
-
   public function buildSideNavView($for_app = false) {
     $viewer = $this->getRequest()->getUser();
 

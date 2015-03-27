@@ -17,19 +17,30 @@
 .differential-diff {
   background: #fff;
   width: 100%;
-  min-width: 780px;
   border-top: 1px solid {$lightblueborder};
   border-bottom: 1px solid {$lightblueborder};
   table-layout: fixed;
+}
+
+.differential-diff.diff-2up {
+  min-width: 780px;
 }
 
 .differential-diff col.num {
   width: 45px;
 }
 
-.differential-diff col.left,
-.differential-diff col.right {
+.device .differential-diff.diff-1up col.num {
+  width: 32px;
+}
+
+.differential-diff.diff-2up col.left,
+.differential-diff.diff-2up col.right {
   width: 49.25%;
+}
+
+.differential-diff.diff-1up col.unified {
+  width: 99.5%;
 }
 
 .differential-diff col.copy {
@@ -48,6 +59,10 @@
   line-height:        16px;
 }
 
+.device .differential-diff td {
+  padding: 0 4px 1px;
+}
+
 .differential-diff td .zwsp {
   position: absolute;
   width: 0;
@@ -61,7 +76,6 @@
   color:              {$bluetext};
   cursor:             pointer;
   border-right:       1px solid {$thinblueborder};
-  font-size:          11px;
   overflow:           hidden;
 
   -moz-user-select:     -moz-none;
@@ -69,6 +83,10 @@
   -webkit-user-select:  none;
   -ms-user-select:      none;
   user-select:          none;
+}
+
+.differential-diff th.selected {
+  background: {$hovergrey};
 }
 
 .differential-changeset-immutable .differential-diff th {
@@ -164,8 +182,6 @@ td.cov-I {
   background: #f3f6ff;
 }
 
-
-
 .differential-diff td.show-more,
 .differential-diff th.show-context-line,
 .differential-diff td.show-context,
@@ -176,9 +192,16 @@ td.cov-I {
   border-bottom: 1px solid {$thinblueborder};
 }
 
+.device .differential-diff td.show-more,
+.device .differential-diff th.show-context-line,
+.device .differential-diff td.show-context,
+.device .differential-diff td.differential-shield {
+  padding: 6px 0;
+}
+
 .differential-diff td.show-more,
 .differential-diff td.differential-shield {
-  font-family: "Helvetica Neue", "Arial", sans-serif;
+  font: {$basefont};
   font-size:   12px;
   white-space: normal;
 }
@@ -249,13 +272,14 @@ td.cov-I {
   opacity: 0.5;
   top: 0px;
   left: 0px;
+  box-sizing: border-box;
 }
 
 .differential-inline-comment,
 .differential-inline-comment-edit {
   background:         #ffffee;
   border:             1px solid #ccccaa;
-  font-family:        "Helvetica Neue", "Arial", sans-serif;
+  font:               {$basefont};
   font-size:          12px;
   margin:             6px 0px;
   padding:            8px 10px;
@@ -312,6 +336,17 @@ td.cov-I {
   font-style:   normal;
 }
 
+input.differential-inline-done[type="checkbox"] {
+  margin: 0;
+  display: inline;
+  cursor: pointer;
+}
+
+input.differential-inline-done[disabled="disabled"] {
+  cursor: auto;
+}
+
+
 .differential-inline-comment-edit-body .aphront-form-input {
   margin: 0;
   width: 100%;
@@ -355,10 +390,12 @@ td.cov-I {
 .differential-inline-undo {
   padding: 4px;
   text-align: center;
-  background: #ffeeaa;
+  background: {$lightyellow};
+  border: 1px solid {$yellow};
   margin: 3px 0 1px;
-  font: 12px;
-  color: 444444;
+  color: {$darkgreytext};
+  font: {$basefont};
+  font-size: 12px;
 }
 
 .differential-inline-undo a {
@@ -397,13 +434,6 @@ td.cov-I {
   color: {$lightgreytext};
   cursor: normal;
   text-decoration: none;
-}
-
-/*  Create a wide band of color behind the inline edit interface so it is easy
-    to find by skimming the page while scrolling.
-*/
-tr.inline-comment-splint {
-  background: #f9f1d5;
 }
 
 tr.differential-inline-hidden {
@@ -458,4 +488,12 @@ tr.differential-inline-loading {
 
 .device-phone .differential-file-icon-header .phui-icon-view {
   display: none;
+}
+
+.inline-is-done {
+  opacity: 0.75;
+}
+
+.inline-state-is-draft input.differential-inline-done[type="checkbox"] {
+  /* TODO: Possibly style this. */
 }

@@ -94,8 +94,10 @@ abstract class AphrontHTTPSink {
    * @return void
    */
   final public function writeResponse(AphrontResponse $response) {
-    // Do this first, in case it throws.
-    $response_string = $response->buildResponseString();
+    // Build the content iterator first, in case it throws. Ideally, we'd
+    // prefer to handle exceptions before we emit the response status or any
+    // HTTP headers.
+    $data = $response->getContentIterator();
 
     $all_headers = array_merge(
       $response->getHeaders(),
@@ -105,7 +107,17 @@ abstract class AphrontHTTPSink {
       $response->getHTTPResponseCode(),
       $response->getHTTPResponseMessage());
     $this->writeHeaders($all_headers);
-    $this->writeData($response_string);
+
+    $abort = false;
+    foreach ($data as $block) {
+      if (!$this->isWritable()) {
+        $abort = true;
+        break;
+      }
+      $this->writeData($block);
+    }
+
+    $response->didCompleteWrite($abort);
   }
 
 
@@ -115,5 +127,6 @@ abstract class AphrontHTTPSink {
   abstract protected function emitHTTPStatus($code, $message = '');
   abstract protected function emitHeader($name, $value);
   abstract protected function emitData($data);
+  abstract protected function isWritable();
 
 }

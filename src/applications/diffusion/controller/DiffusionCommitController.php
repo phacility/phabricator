@@ -52,7 +52,7 @@ final class DiffusionCommitController extends DiffusionController {
         return new Aphront404Response();
       }
 
-      $error = id(new PHUIErrorView())
+      $error = id(new PHUIInfoView())
         ->setTitle(pht('Commit Still Parsing'))
         ->appendChild(
           pht(
@@ -79,9 +79,9 @@ final class DiffusionCommitController extends DiffusionController {
     if ($is_foreign) {
       $subpath = $commit_data->getCommitDetail('svn-subpath');
 
-      $error_panel = new PHUIErrorView();
+      $error_panel = new PHUIInfoView();
       $error_panel->setTitle(pht('Commit Not Tracked'));
-      $error_panel->setSeverity(PHUIErrorView::SEVERITY_WARNING);
+      $error_panel->setSeverity(PHUIInfoView::SEVERITY_WARNING);
       $error_panel->appendChild(
         pht("This Diffusion repository is configured to track only one ".
         "subdirectory of the entire Subversion repository, and this commit ".
@@ -251,13 +251,13 @@ final class DiffusionCommitController extends DiffusionController {
           ->setTag('a')
           ->setIcon($icon);
 
-        $warning_view = id(new PHUIErrorView())
-          ->setSeverity(PHUIErrorView::SEVERITY_WARNING)
+        $warning_view = id(new PHUIInfoView())
+          ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
           ->setTitle('Very Large Commit')
           ->appendChild(
             pht('This commit is very large. Load each file individually.'));
 
-        $change_panel->setErrorView($warning_view);
+        $change_panel->setInfoView($warning_view);
         $header->addActionLink($button);
       }
 
@@ -720,8 +720,6 @@ final class DiffusionCommitController extends DiffusionController {
     $header->setHeader(
       $is_serious ? pht('Audit Commit') : pht('Creative Accounting'));
 
-    require_celerity_resource('phabricator-transaction-view-css');
-
     $mailable_source = new PhabricatorMetaMTAMailableDatasource();
     $auditor_source = new DiffusionAuditorDatasource();
 
@@ -894,13 +892,18 @@ final class DiffusionCommitController extends DiffusionController {
     if (!$merges) {
       return null;
     }
+    $merges = DiffusionPathChange::newFromConduit($merges);
 
     $caption = null;
     if (count($merges) > $limit) {
       $merges = array_slice($merges, 0, $limit);
-      $caption =
-        "This commit merges more than {$limit} changes. Only the first ".
-        "{$limit} are shown.";
+      $caption = new PHUIInfoView();
+      $caption->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
+      $caption->appendChild(
+        pht(
+          'This commit merges a very large number of changes. Only the first '.
+          '%s are shown.',
+          new PhutilNumber($limit)));
     }
 
     $history_table = new DiffusionHistoryTableView();
@@ -913,11 +916,12 @@ final class DiffusionCommitController extends DiffusionController {
     $handles = $this->loadViewerHandles($phids);
     $history_table->setHandles($handles);
 
-    $panel = new AphrontPanelView();
-    $panel->setHeader(pht('Merged Changes'));
-    $panel->setCaption($caption);
+    $panel = new PHUIObjectBoxView();
+    $panel->setHeaderText(pht('Merged Changes'));
     $panel->appendChild($history_table);
-    $panel->setNoBackground();
+    if ($caption) {
+      $panel->setInfoView($caption);
+    }
 
     return $panel;
   }

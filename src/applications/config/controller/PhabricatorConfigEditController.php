@@ -108,23 +108,23 @@ final class PhabricatorConfigEditController
 
     $error_view = null;
     if ($errors) {
-      $error_view = id(new PHUIErrorView())
+      $error_view = id(new PHUIInfoView())
         ->setErrors($errors);
     } else if ($option->getHidden()) {
       $msg = pht(
         'This configuration is hidden and can not be edited or viewed from '.
         'the web interface.');
 
-      $error_view = id(new PHUIErrorView())
+      $error_view = id(new PHUIInfoView())
         ->setTitle(pht('Configuration Hidden'))
-        ->setSeverity(PHUIErrorView::SEVERITY_WARNING)
+        ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
         ->appendChild(phutil_tag('p', array(), $msg));
     } else if ($option->getLocked()) {
 
       $msg = $option->getLockedMessage();
-      $error_view = id(new PHUIErrorView())
+      $error_view = id(new PHUIInfoView())
         ->setTitle(pht('Configuration Locked'))
-        ->setSeverity(PHUIErrorView::SEVERITY_NOTICE)
+        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
         ->appendChild(phutil_tag('p', array(), $msg));
     }
 
@@ -202,7 +202,7 @@ final class PhabricatorConfigEditController
       ->setForm($form);
 
     if ($error_view) {
-       $form_box->setErrorView($error_view);
+       $form_box->setInfoView($error_view);
     }
 
     $crumbs = $this->buildApplicationCrumbs();

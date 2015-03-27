@@ -1,0 +1,252 @@
+/**
+ * @provides conpherence-durable-column-view
+ */
+
+.with-durable-column .phabricator-standard-page {
+  margin-right: 300px;
+}
+
+.with-durable-column
+.phabricator-global-upload-instructions {
+  font-size: 28px;
+  width: 50%;
+}
+
+.global-upload-mask {
+  pointer-events: none;
+}
+
+.with-durable-column .global-upload-mask {
+  right: 300px;
+}
+
+.conpherence-durable-column {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 300px;
+  background: #fff;
+}
+
+.device .conpherence-durable-column {
+  display: none;
+}
+
+.conpherence-durable-column .loading-mask {
+  position: absolute;
+  top: 90px;
+  bottom: 0;
+  right: 1px;
+  width: 298px;
+  background: #fff;
+  display: none;
+  opacity: .6;
+  z-index: 2;
+}
+
+.device-desktop .conpherence-durable-column.loading .loading-mask {
+  display: block;
+}
+
+.conpherence-durable-column-header {
+  height: 44px;
+}
+
+.conpherence-durable-column-header .conpherence-settings-dropdown {
+  z-index: 1;
+}
+
+.conpherence-durable-column-header .phabricator-application-menu {
+  padding-right: 4px;
+}
+
+.conpherence-durable-column-header-text {
+  float: left;
+  padding: 13px 0 12px 12px;
+  font-size: 15px;
+  color: rgba(255,255,255,.8);
+  width: 230px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  border-left: 1px solid rgba(0,0,0,.2);
+}
+
+.conpherence-durable-column-header-text .phui-icon-view {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.conpherence-durable-column-icon-bar {
+  height: 38px;
+  padding: 4px 8px;
+  background-color: {$lightgreybackground};
+}
+
+.conpherence-durable-column-icon-bar .conpherence-durable-column-thread-icon {
+  float: left;
+  display: block;
+  width: 34px;
+  height: 34px;
+  margin: 0 4px 0 0;
+  border: 2px solid transparent;
+  border-radius: 3px;
+}
+
+.conpherence-durable-column-icon-bar
+.conpherence-durable-column-thread-icon.selected {
+  border-color: {$sky};
+}
+
+.conpherence-durable-column-icon-bar
+.conpherence-durable-column-thread-icon span {
+  position: relative;
+  display: block;
+  width: 30px;
+  height: 30px;
+  top: 2px;
+  left: 2px;
+  background-size: 30px 30px;
+}
+
+.conpherence-durable-column-body {
+  position: absolute;
+  top: 44px;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  border-left: 1px solid {$lightblueborder};
+}
+
+.conpherence-durable-column-main {
+  position: absolute;
+  top: 46px;
+  bottom: 134px;
+  left: 0;
+  right: 0;
+  overflow-x: hidden;
+  border-top: 1px solid {$thinblueborder};
+}
+
+.conpherence-durable-column-transactions {
+  padding: 8px 12px 0;
+}
+
+.conpherence-durable-column-transactions
+  .phabricator-transaction-view.conpherence-edited {
+    color: {$lightgreytext};
+    font-size: 12px;
+    margin: 0;
+    padding: 0;
+}
+
+.conpherence-durable-column-transactions .conpherence-edited
+  .phabricator-transaction-header {
+    display: none;
+}
+
+.conpherence-durable-column-transactions .phabricator-transaction-view {
+  background: none;
+  margin: 0;
+  padding: 4px 0;
+  min-height: 0;
+}
+
+.conpherence-durable-column-transactions
+  .phabricator-transaction-view
+  .conpherence-message {
+  word-wrap: break-word;
+}
+
+.conpherence-durable-column-transactions .phabricator-transaction-detail {
+  border: 0;
+  margin: 0;
+}
+
+.conpherence-durable-column-transactions .phabricator-transaction-detail
+.phabricator-transaction-header {
+  background: none;
+  padding: 0 0 2px 0;
+}
+
+.conpherence-durable-column-transactions .date-marker {
+  border-top: 1px solid {$thinblueborder};
+  margin: 20px 0px 8px;
+}
+
+.conpherence-durable-column-transactions .date-marker .date {
+  position: relative;
+  top: -11px;
+  left: 0;
+  background-color: #fff;
+  color: {$darkbluetext};
+  font-weight: bold;
+  font-size: 12px;
+  padding: 0 6px 0 0;
+}
+
+.conpherence-durable-column-transactions .phabricator-transaction-detail
+.phabricator-transaction-header .phabricator-transaction-info {
+  color: {$lightbluetext};
+  float: none;
+  font-size: 12px;
+}
+
+.conpherence-durable-column-transactions .phabricator-transaction-detail
+.phabricator-transaction-header .phui-link-person {
+  margin: 0 8px 0 0;
+}
+
+.conpherence-durable-column-transactions .phabricator-transaction-detail
+.phabricator-transaction-content .phui-link-person {
+  color: {$darkbluetext};
+}
+
+.conpherence-durable-column-transactions .phabricator-transaction-detail
+.phabricator-transaction-content {
+  padding: 0 0 8px 0;
+}
+
+.conpherence-durable-column-textarea {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 34px;
+  height: 100px;
+  margin: 0;
+  border-width: 1px 0;
+  border-style: solid;
+  border-top-color: {$thinblueborder};
+  border-bottom-color: {$thinblueborder};
+  padding: 8px 12px;
+  width: 100%;
+  resize: none;
+}
+
+.conpherence-durable-column-textarea:focus {
+  outline: 0;
+  border-top-color: {$sky};
+  border-bottom-color: {$sky};
+  box-shadow: none;
+}
+
+.conpherence-durable-column-footer {
+  position: absolute;
+  height: 26px;
+  padding: 4px 8px 4px 12px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: {$lightgreybackground};
+}
+
+.conpherence-durable-column-footer button {
+  float: right;
+}
+
+.conpherence-durable-column-status {
+  vertical-align: middle;
+  line-height: 24px;
+  font-size: 12px;
+  color: {$lightbluetext};
+}

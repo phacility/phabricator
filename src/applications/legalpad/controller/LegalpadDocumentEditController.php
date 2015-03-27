@@ -97,8 +97,8 @@ final class LegalpadDocumentEditController extends LegalpadController {
         if (!$user->getIsAdmin()) {
           $errors[] = pht('Only admins may require signature.');
         }
-        $corp = LegalpadDocument::SIGNATURE_TYPE_CORPORATION;
-        if ($v_signature_type == $corp) {
+        $individual = LegalpadDocument::SIGNATURE_TYPE_INDIVIDUAL;
+        if ($v_signature_type != $individual) {
           $errors[] = pht(
             'Only documents with signature type "individual" may require '.
             'signing to use Phabricator.');
@@ -147,6 +147,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
           ->setValue($v_signature_type)
           ->setOptions(LegalpadDocument::getSignatureTypeMap()));
       $show_require = true;
+      $caption = pht('Applies only to documents individuals sign.');
     } else {
       $form->appendChild(
         id(new AphrontFormMarkupControl())
@@ -154,6 +155,7 @@ final class LegalpadDocumentEditController extends LegalpadController {
           ->setValue($document->getSignatureTypeName()));
       $individual = LegalpadDocument::SIGNATURE_TYPE_INDIVIDUAL;
       $show_require = $document->getSignatureType() == $individual;
+      $caption = null;
     }
 
     if ($show_require) {
@@ -166,9 +168,9 @@ final class LegalpadDocumentEditController extends LegalpadController {
             'requireSignature',
             'requireSignature',
             pht(
-              'Should signing this document be required to use Phabricator? '.
-              'Applies to invidivuals only.'),
-            $v_require_signature));
+              'Should signing this document be required to use Phabricator?'),
+            $v_require_signature)
+          ->setCaption($caption));
     }
 
     $form

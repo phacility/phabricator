@@ -104,7 +104,6 @@ final class DiffusionLintController extends DiffusionController {
 
     $content = array();
 
-    $link = null;
     if (!$this->diffusionRequest) {
       $form = id(new AphrontFormView())
         ->setUser($user)
@@ -122,9 +121,8 @@ final class DiffusionLintController extends DiffusionController {
       $content[] = id(new AphrontListFilterView())->appendChild($form);
     }
 
-    $content[] = id(new AphrontPanelView())
-      ->setNoBackground(true)
-      ->setCaption($link)
+    $content[] = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Lint'))
       ->appendChild($table);
 
     $title = array('Lint');

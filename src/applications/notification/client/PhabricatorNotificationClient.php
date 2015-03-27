@@ -10,6 +10,11 @@ final class PhabricatorNotificationClient {
       ->setPath('/status/')
       ->setQueryParam('instance', self::getInstance());
 
+    // We always use HTTP to connect to the server itself: it's simpler and
+    // there's no meaningful security benefit to securing this link today.
+    // Force the protocol to HTTP in case users have set it to something else.
+    $uri->setProtocol('http');
+
     list($body) = id(new HTTPSFuture($uri))
       ->setTimeout(3)
       ->resolvex();

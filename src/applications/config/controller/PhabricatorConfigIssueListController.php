@@ -49,11 +49,11 @@ final class PhabricatorConfigIssueListController
     }
 
     if (empty($setup_issues)) {
-      $setup_issues[] = id(new PHUIErrorView())
+      $setup_issues[] = id(new PHUIInfoView())
         ->setTitle(pht('No Issues'))
         ->appendChild(
           pht('Your install has no current setup issues to resolve.'))
-        ->setSeverity(PHUIErrorView::SEVERITY_NOTICE);
+        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
     }
 
     $nav->appendChild($setup_issues);

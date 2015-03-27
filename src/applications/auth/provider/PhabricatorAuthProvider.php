@@ -247,13 +247,19 @@ abstract class PhabricatorAuthProvider {
             $image_uri,
             array(
               'name' => $name,
-              'canCDN' => true,
+              'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
             ));
+          if ($image_file->isViewableImage()) {
+            $image_file
+              ->setViewPolicy(PhabricatorPolicies::getMostOpenPolicy())
+              ->setCanCDN(true)
+              ->save();
+            $account->setProfileImagePHID($image_file->getPHID());
+          } else {
+            $image_file->delete();
+          }
         unset($unguarded);
 
-        if ($image_file) {
-          $account->setProfileImagePHID($image_file->getPHID());
-        }
       } catch (Exception $ex) {
         // Log this but proceed, it's not especially important that we
         // be able to pull profile images.

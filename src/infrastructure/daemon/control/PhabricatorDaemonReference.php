@@ -10,7 +10,7 @@ final class PhabricatorDaemonReference {
 
   private $daemonLog;
 
-  public static function newFromFile($path) {
+  public static function loadReferencesFromFile($path) {
     $pid_data = Filesystem::readFile($path);
 
     try {
@@ -19,74 +19,79 @@ final class PhabricatorDaemonReference {
       $dict = array();
     }
 
-    $ref = self::newFromDictionary($dict);
-    $ref->pidFile = $path;
-    return $ref;
-  }
+    $refs = array();
+    $daemons = idx($dict, 'daemons', array());
 
-  public static function newFromDictionary(array $dict) {
-    $ref = new PhabricatorDaemonReference();
+    $logs = array();
 
-    $ref->name  = idx($dict, 'name', 'Unknown');
-    $ref->argv  = idx($dict, 'argv', array());
-    $ref->pid   = idx($dict, 'pid');
-    $ref->start = idx($dict, 'start');
+    $daemon_ids = ipull($daemons, 'id');
+    if ($daemon_ids) {
+      try {
+        $logs = id(new PhabricatorDaemonLogQuery())
+          ->setViewer(PhabricatorUser::getOmnipotentUser())
+          ->withDaemonIDs($daemon_ids)
+          ->execute();
+      } catch (AphrontQueryException $ex) {
+        // Ignore any issues here; getting this information only allows us
+        // to provide a more complete picture of daemon status, and we want
+        // these commands to work if the database is inaccessible.
+      }
 
-    try {
-      $ref->daemonLog = id(new PhabricatorDaemonLog())->loadOneWhere(
-        'daemon = %s AND pid = %d AND dateCreated = %d',
-        $ref->name,
-        $ref->pid,
-        $ref->start);
-    } catch (AphrontQueryException $ex) {
-      // Ignore the exception. We want to be able to terminate the daemons,
-      // even if MySQL is down.
+      $logs = mpull($logs, null, 'getDaemonID');
     }
 
-    return $ref;
-  }
+    // Support PID files that use the old daemon format, where each overseer
+    // had exactly one daemon. We can eventually remove this; they will still
+    // be stopped by `phd stop --force` even if we don't identify them here.
+    if (!$daemons && idx($dict, 'name')) {
+      $daemons = array(
+        array(
+          'config' => array(
+            'class' => idx($dict, 'name'),
+            'argv' => idx($dict, 'argv', array()),
+          ),
+        ),
+      );
+    }
 
-  /**
-   * Appropriate for getting @{class:PhabricatorDaemonReference} objects from
-   * the data from @{class:PhabricatorDaemonManagementWorkflow}'s method
-   * @{method:findRunningDaemons}.
-   *
-   * NOTE: the objects are not fully featured and should be used with caution.
-   */
-  public static function newFromRogueDictionary(array $dict) {
-    $ref = new PhabricatorDaemonReference();
-    $ref->name = pht('Rogue %s', idx($dict, 'type'));
-    $ref->pid = idx($dict, 'pid');
+    foreach ($daemons as $daemon) {
+      $ref = new PhabricatorDaemonReference();
 
-    return $ref;
+      // NOTE: This is the overseer PID, not the actual daemon process PID.
+      // This is correct for checking status and sending signals (the only
+      // things we do with it), but might be confusing. $daemon['pid'] has
+      // the daemon PID, and we could expose that if we had some use for it.
+
+      $ref->pid = idx($dict, 'pid');
+      $ref->start = idx($dict, 'start');
+
+      $config = idx($daemon, 'config', array());
+      $ref->name = idx($config, 'class');
+      $ref->argv = idx($config, 'argv', array());
+
+      $log = idx($logs, idx($daemon, 'id'));
+      if ($log) {
+        $ref->daemonLog = $log;
+      }
+
+      $ref->pidFile = $path;
+      $refs[] = $ref;
+    }
+
+    return $refs;
   }
 
   public function updateStatus($new_status) {
-    try {
-      if (!$this->daemonLog) {
-        $this->daemonLog = id(new PhabricatorDaemonLog())->loadOneWhere(
-          'daemon = %s AND pid = %d AND dateCreated = %d',
-          $this->name,
-          $this->pid,
-          $this->start);
-      }
+    if (!$this->daemonLog) {
+      return;
+    }
 
-      if ($this->daemonLog) {
-        $this->daemonLog
-          ->setStatus($new_status)
-          ->save();
-      }
+    try {
+      $this->daemonLog
+        ->setStatus($new_status)
+        ->save();
     } catch (AphrontQueryException $ex) {
-      // Ignore anything that goes wrong here. We anticipate at least two
-      // specific failure modes:
-      //
-      //   - Upgrade scripts which run `git pull`, then `phd stop`, then
-      //     `bin/storage upgrade` will fail when trying to update the `status`
-      //     column, as it does not exist yet.
-      //   - Daemons running on machines which do not have access to MySQL
-      //     (like an IRC bot) will not be able to load or save the log.
-      //
-      //
+      // Ignore anything that goes wrong here.
     }
   }
 

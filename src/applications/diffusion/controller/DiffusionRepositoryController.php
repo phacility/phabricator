@@ -68,9 +68,9 @@ final class DiffusionRepositoryController extends DiffusionController {
     if ($page_has_content) {
       $content[] = $this->buildNormalContent($drequest);
     } else {
-      $content[] = id(new PHUIErrorView())
+      $content[] = id(new PHUIInfoView())
         ->setTitle($empty_title)
-        ->setSeverity(PHUIErrorView::SEVERITY_WARNING)
+        ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
         ->setErrors(array($empty_message));
     }
 
@@ -374,23 +374,23 @@ final class DiffusionRepositoryController extends DiffusionController {
 
   private function buildTagListTable(DiffusionRequest $drequest) {
     $viewer = $this->getRequest()->getUser();
+    $repository = $drequest->getRepository();
 
+    switch ($repository->getVersionControlSystem()) {
+      case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
+        // no tags in SVN
+        return null;
+    }
     $tag_limit = 15;
     $tags = array();
-    try {
-      $tags = DiffusionRepositoryTag::newFromConduit(
-        $this->callConduitWithDiffusionRequest(
-          'diffusion.tagsquery',
-          array(
-            // On the home page, we want to find tags on any branch.
-            'commit' => null,
-            'limit' => $tag_limit + 1,
-          )));
-    } catch (ConduitException $e) {
-      if ($e->getMessage() != 'ERR-UNSUPPORTED-VCS') {
-        throw $e;
-      }
-    }
+    $tags = DiffusionRepositoryTag::newFromConduit(
+      $this->callConduitWithDiffusionRequest(
+        'diffusion.tagsquery',
+        array(
+          // On the home page, we want to find tags on any branch.
+          'commit' => null,
+          'limit' => $tag_limit + 1,
+        )));
 
     if (!$tags) {
       return null;
@@ -402,7 +402,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     $commits = id(new DiffusionCommitQuery())
       ->setViewer($viewer)
       ->withIdentifiers(mpull($tags, 'getCommitIdentifier'))
-      ->withRepository($drequest->getRepository())
+      ->withRepository($repository)
       ->needCommitData(true)
       ->execute();
 

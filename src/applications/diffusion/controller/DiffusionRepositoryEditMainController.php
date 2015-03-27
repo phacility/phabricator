@@ -126,7 +126,15 @@ final class DiffusionRepositoryEditMainController
 
       $boxes[] = id(new PhabricatorAnchorView())->setAnchorName('mirrors');
 
+      $mirror_info = array();
+      if (PhabricatorEnv::getEnvConfig('phabricator.silent')) {
+        $mirror_info[] = pht(
+          'Phabricator is running in silent mode, so changes will not '.
+          'be pushed to mirrors.');
+      }
+
       $boxes[] = id(new PHUIObjectBoxView())
+        ->setFormErrors($mirror_info)
         ->setHeaderText(pht('Mirrors'))
         ->addPropertyList($mirror_properties);
 
@@ -963,11 +971,34 @@ final class DiffusionRepositoryEditMainController
     if ($message) {
       switch ($message->getStatusCode()) {
         case PhabricatorRepositoryStatusMessage::CODE_ERROR:
+          $message = $message->getParameter('message');
+
+          $suggestion = null;
+          if (preg_match('/Permission denied \(publickey\)./', $message)) {
+            $suggestion = pht(
+              'Public Key Error: This error usually indicates that the '.
+              'keypair you have configured does not have permission to '.
+              'access the repository.');
+          }
+
+          $message = phutil_escape_html_newlines($message);
+
+          if ($suggestion !== null) {
+            $message = array(
+              phutil_tag('strong', array(), $suggestion),
+              phutil_tag('br'),
+              phutil_tag('br'),
+              phutil_tag('em', array(), pht('Raw Error')),
+              phutil_tag('br'),
+              $message,
+            );
+          }
+
           $view->addItem(
             id(new PHUIStatusItemView())
               ->setIcon(PHUIStatusItemView::ICON_WARNING, 'red')
               ->setTarget(pht('Update Error'))
-              ->setNote($message->getParameter('message')));
+              ->setNote($message));
           return $view;
         case PhabricatorRepositoryStatusMessage::CODE_OKAY:
           $ago = (PhabricatorTime::getNow() - $message->getEpoch());

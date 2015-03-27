@@ -27,6 +27,7 @@
 final class PhabricatorRepositoryPullLocalDaemon
   extends PhabricatorDaemon {
 
+  private $statusMessageCursor = 0;
 
 /* -(  Pulling Repositories  )----------------------------------------------- */
 
@@ -76,7 +77,7 @@ final class PhabricatorRepositoryPullLocalDaemon
 
       // If any repositories have the NEEDS_UPDATE flag set, pull them
       // as soon as possible.
-      $need_update_messages = $this->loadRepositoryUpdateMessages();
+      $need_update_messages = $this->loadRepositoryUpdateMessages(true);
       foreach ($need_update_messages as $message) {
         $repo = idx($pullable, $message->getRepositoryID());
         if (!$repo) {
@@ -255,12 +256,40 @@ final class PhabricatorRepositoryPullLocalDaemon
 
 
   /**
+   * Check for repositories that should be updated immediately.
+   *
+   * With the `$consume` flag, an internal cursor will also be incremented so
+   * that these messages are not returned by subsequent calls.
+   *
+   * @param bool Pass `true` to consume these messages, so the process will
+   *   not see them again.
+   * @return list<wild> Pending update messages.
+   *
    * @task pull
    */
-  private function loadRepositoryUpdateMessages() {
+  private function loadRepositoryUpdateMessages($consume = false) {
     $type_need_update = PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE;
-    return id(new PhabricatorRepositoryStatusMessage())
-      ->loadAllWhere('statusType = %s', $type_need_update);
+    $messages = id(new PhabricatorRepositoryStatusMessage())->loadAllWhere(
+      'statusType = %s AND id > %d',
+      $type_need_update,
+      $this->statusMessageCursor);
+
+    // Keep track of messages we've seen so that we don't load them again.
+    // If we reload messages, we can get stuck a loop if we have a failing
+    // repository: we update immediately in response to the message, but do
+    // not clear the message because the update does not succeed. We then
+    // immediately retry. Instead, messages are only permitted to trigger
+    // an immediate update once.
+
+    if ($consume) {
+      foreach ($messages as $message) {
+        $this->statusMessageCursor = max(
+          $this->statusMessageCursor,
+          $message->getID());
+      }
+    }
+
+    return $messages;
   }
 
 

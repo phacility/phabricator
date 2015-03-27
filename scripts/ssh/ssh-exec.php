@@ -19,6 +19,7 @@ $args->setSynopsis(<<<EOSYNOPSIS
 EOSYNOPSIS
 );
 
+$args->parseStandardArguments();
 $args->parse(
   array(
     array(

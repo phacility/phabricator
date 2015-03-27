@@ -30,10 +30,8 @@
 .phabricator-source-line {
   text-align: right;
   padding: 2px 6px 1px 12px;
-
-  border-right: 1px solid #dbdbdb;
-  font-weight: bold;
-  color: #555555;
+  border-right: 1px solid {$thinblueborder};
+  color: {$darkbluetext};
 
   /* When the user selects rows of source, don't visibly select the line
      numbers beside them. We use JS to strip the line numbers out when the user
@@ -45,8 +43,16 @@
   user-select: none;
 }
 
+th.phabricator-source-line a {
+  color: {$darkbluetext};
+}
+
+th.phabricator-source-line:hover {
+  background-color: {$greybackground};
+}
+
 .phabricator-source-highlight {
-  background: #ff0;
+  background: {$lightyellow};
 }
 
 .phabricator-source-code-summary {

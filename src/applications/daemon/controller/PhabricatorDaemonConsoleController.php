@@ -57,7 +57,8 @@ final class PhabricatorDaemonConsoleController
     if ($failed) {
       // Add the time it takes to restart the daemons. This includes a guess
       // about other overhead of 2X.
-      $usage_total += PhutilDaemonOverseer::RESTART_WAIT * count($failed) * 2;
+      $restart_delay = PhutilDaemonHandle::getWaitBeforeRestart();
+      $usage_total += $restart_delay * count($failed) * 2;
       foreach ($failed as $failed_task) {
         $usage_start = min($usage_start, $failed_task->getFailureTime());
       }
@@ -252,11 +253,11 @@ final class PhabricatorDaemonConsoleController
       ->setNoDataString(pht('There are no upcoming event triggers.'))
       ->setHeaders(
         array(
-          'ID',
-          'Clock',
-          'Action',
-          'Last',
-          'Next',
+          pht('ID'),
+          pht('Clock'),
+          pht('Action'),
+          pht('Last'),
+          pht('Next'),
         ))
       ->setColumnClasses(
         array(

@@ -10,7 +10,7 @@ final class PhabricatorDaemonsSetupCheck extends PhabricatorSetupCheck {
 
     $task_daemon = id(new PhabricatorDaemonLogQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withStatus(PhabricatorDaemonLogQuery::STATUS_ALIVE)
+      ->withStatus(PhabricatorDaemonLogQuery::STATUS_RUNNING)
       ->withDaemonClasses(array('PhabricatorTaskmasterDaemon'))
       ->setLimit(1)
       ->execute();

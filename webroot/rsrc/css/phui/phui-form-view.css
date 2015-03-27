@@ -111,6 +111,10 @@
   width: 100%;
 }
 
+.aphront-form-cvc-input input {
+  width: 64px;
+}
+
 .aphront-form-input textarea {
   display: block;
   width: 100%;
@@ -165,11 +169,6 @@
 .device-phone .phui-form-view .aphront-form-caption,
 .phui-form-full-width .phui-form-view .aphront-form-caption {
   margin: 0;
-}
-
-/* override for when inside an aphront-panel-view */
-.aphront-panel-view .phui-form-view h1 {
-  padding: 0em 0em .8em 0em;
 }
 
 .aphront-form-instructions {

@@ -2,8 +2,7 @@
 
 final class ConpherenceNewController extends ConpherenceController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
 
     $title = pht('New Message');
@@ -19,7 +18,7 @@ final class ConpherenceNewController extends ConpherenceController {
     if ($request->isFormPost()) {
       $participants = $request->getArr('participants');
       $message = $request->getStr('message');
-      list($error_codes, $conpherence) = ConpherenceEditor::createConpherence(
+      list($error_codes, $conpherence) = ConpherenceEditor::createThread(
         $user,
         $participants,
         $conpherence_title = null,

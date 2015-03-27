@@ -21,10 +21,13 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
 
   protected function executeChecks() {
     $max_allowed_packet = self::loadRawConfigValue('max_allowed_packet');
-    $recommended_minimum = 1024 * 1024;
+
+    // This primarily supports setting the filesize limit for MySQL to 8MB,
+    // which may produce a >16MB packet after escaping.
+    $recommended_minimum = (32 * 1024 * 1024);
     if ($max_allowed_packet < $recommended_minimum) {
       $message = pht(
-        "MySQL is configured with a very small 'max_allowed_packet' (%d), ".
+        "MySQL is configured with a small 'max_allowed_packet' (%d), ".
         "which may cause some large writes to fail. Strongly consider raising ".
         "this to at least %d in your MySQL configuration.",
         $max_allowed_packet,
@@ -313,6 +316,26 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
         ->setSummary($summary)
         ->setMessage($message)
         ->addMySQLConfig('innodb_buffer_pool_size');
+    }
+
+    $ok = PhabricatorStorageManagementAPI::isCharacterSetAvailableOnConnection(
+      'utf8mb4',
+      id(new PhabricatorUser())->establishConnection('w'));
+    if (!$ok) {
+      $summary = pht(
+        'You are using an old version of MySQL, and should upgrade.');
+
+      $message = pht(
+        'You are using an old version of MySQL which has poor unicode '.
+        'support (it does not support the "utf8mb4" collation set). You will '.
+        'encounter limitations when working with some unicode data.'.
+        "\n\n".
+        'We strongly recommend you upgrade to MySQL 5.5 or newer.');
+
+      $this->newIssue('mysql.utf8mb4')
+        ->setName(pht('Old MySQL Version'))
+        ->setSummary($summary)
+        ->setMessage($message);
     }
 
   }

@@ -10,6 +10,7 @@ final class PhabricatorTransactionView extends AphrontView {
   private $anchorText;
   private $isPreview;
   private $classes = array();
+  private $timeOnly;
 
   public function setImageURI($uri) {
     $this->imageURI = $uri;
@@ -47,6 +48,11 @@ final class PhabricatorTransactionView extends AphrontView {
     return $this;
   }
 
+  public function setTimeOnly($time) {
+    $this->timeOnly = $time;
+    return $this;
+  }
+
   public function render() {
     if (!$this->user) {
       throw new Exception(pht('Call setUser() before render()!'));
@@ -63,18 +69,18 @@ final class PhabricatorTransactionView extends AphrontView {
     $transaction_id = $this->anchorName ? 'anchor-'.$this->anchorName : null;
 
     $header = phutil_tag_div(
-      'phabricator-transaction-header',
-      array($info, $actions));
+      'phabricator-transaction-header grouped',
+      array($actions, $info));
 
     return phutil_tag(
       'div',
       array(
-        'class' => 'phabricator-transaction-view',
+        'class' => 'phabricator-transaction-view '.$classes,
         'id'    => $transaction_id,
         'style' => $style,
       ),
       phutil_tag_div(
-        'phabricator-transaction-detail '.$classes,
+        'phabricator-transaction-detail grouped',
         array($header, $content)));
 
   }
@@ -93,9 +99,13 @@ final class PhabricatorTransactionView extends AphrontView {
     }
 
     if ($this->isPreview) {
-      $info[] = 'PREVIEW';
+      $info[] = pht('PREVIEW');
     } else if ($this->epoch) {
-      $info[] = phabricator_datetime($this->epoch, $this->user);
+      if ($this->timeOnly) {
+        $info[] = phabricator_time($this->epoch, $this->user);
+      } else {
+        $info[] = phabricator_datetime($this->epoch, $this->user);
+      }
     }
 
     if ($this->anchorName) {
@@ -118,7 +128,8 @@ final class PhabricatorTransactionView extends AphrontView {
 
     return phutil_tag(
       'span',
-      array('class' => 'phabricator-transaction-info'),
+      array(
+        'class' => 'phabricator-transaction-info',),
       $info);
   }
 

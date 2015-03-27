@@ -4,6 +4,7 @@
 
 .jx-tooltip-container {
   position: absolute;
+  padding: 5px;
 }
 
 .jx-tooltip-inner {

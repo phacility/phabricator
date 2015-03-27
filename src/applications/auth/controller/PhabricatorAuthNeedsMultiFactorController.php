@@ -29,9 +29,9 @@ final class PhabricatorAuthNeedsMultiFactorController
     $viewer->updateMultiFactorEnrollment();
 
     if (!$viewer->getIsEnrolledInMultiFactor()) {
-      $help = id(new PHUIErrorView())
+      $help = id(new PHUIInfoView())
         ->setTitle(pht('Add Multi-Factor Authentication To Your Account'))
-        ->setSeverity(PHUIErrorView::SEVERITY_WARNING)
+        ->setSeverity(PHUIInfoView::SEVERITY_WARNING)
         ->setErrors(
           array(
             pht(
@@ -53,9 +53,9 @@ final class PhabricatorAuthNeedsMultiFactorController
               'account.'),
           ));
     } else {
-      $help = id(new PHUIErrorView())
+      $help = id(new PHUIInfoView())
         ->setTitle(pht('Multi-Factor Authentication Configured'))
-        ->setSeverity(PHUIErrorView::SEVERITY_NOTICE)
+        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
         ->setErrors(
           array(
             pht(

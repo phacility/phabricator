@@ -16,7 +16,7 @@ final class PhabricatorPeopleInviteSendController
 
     $message = $request->getStr('message');
     $emails = $request->getStr('emails');
-    $severity = PHUIErrorView::SEVERITY_ERROR;
+    $severity = PHUIInfoView::SEVERITY_ERROR;
     if ($request->isFormPost()) {
       // NOTE: We aren't using spaces as a delimiter here because email
       // addresses with names often include spaces.
@@ -61,13 +61,13 @@ final class PhabricatorPeopleInviteSendController
           $confirm_errors[] = pht(
             'All of the addresses appear to be valid invite recipients. '.
             'Confirm the actions below to continue.');
-          $severity = PHUIErrorView::SEVERITY_NOTICE;
+          $severity = PHUIInfoView::SEVERITY_NOTICE;
         } else {
           $confirm_errors[] = pht(
             'Some of the addresses you entered do not appear to be '.
             'valid recipients. Review the table below. You can revise '.
             'the address list, or ignore these errors and continue.');
-          $severity = PHUIErrorView::SEVERITY_WARNING;
+          $severity = PHUIInfoView::SEVERITY_WARNING;
         }
 
         if ($any_valid && $request->getBool('confirm')) {
@@ -158,8 +158,8 @@ final class PhabricatorPeopleInviteSendController
       }
 
       $confirm_box = id(new PHUIObjectBoxView())
-        ->setErrorView(
-          id(new PHUIErrorView())
+        ->setInfoView(
+          id(new PHUIInfoView())
             ->setErrors($confirm_errors)
             ->setSeverity($severity))
         ->setHeaderText(pht('Confirm Invites'))

@@ -70,33 +70,13 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
     return parent::shouldHide();
   }
 
-  public function shouldHideForMail(array $xactions) {
+  public function isInlineCommentTransaction() {
     switch ($this->getTransactionType()) {
       case self::TYPE_INLINE:
-        // Hide inlines when rendering mail transactions if any other
-        // transaction type exists.
-        foreach ($xactions as $xaction) {
-          if ($xaction->getTransactionType() != self::TYPE_INLINE) {
-            return true;
-          }
-        }
-
-        // If only inline transactions exist, we just render the first one.
-        return ($this !== head($xactions));
+        return true;
     }
 
-    return parent::shouldHideForMail($xactions);
-  }
-
-  public function getBodyForMail() {
-    switch ($this->getTransactionType()) {
-      case self::TYPE_INLINE:
-        // Don't render inlines into the mail body; they render into a special
-        // section immediately after the body instead.
-        return null;
-    }
-
-    return parent::getBodyForMail();
+    return parent::isInlineCommentTransaction();
   }
 
   public function getRequiredHandlePHIDs() {
@@ -135,8 +115,6 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
         return 3;
       case self::TYPE_UPDATE:
         return 2;
-      case self::TYPE_INLINE:
-        return 0.25;
     }
 
     return parent::getActionStrength();

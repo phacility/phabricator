@@ -1,0 +1,150 @@
+/**
+ * @provides phui-info-view-css
+ */
+
+.phui-info-view {
+  border-style: solid;
+  border-left-width: 4px;
+}
+
+.phui-info-view {
+  margin: 16px;
+  padding: 12px;
+}
+
+.device-phone .phui-info-view {
+  margin: 8px;
+}
+
+.phui-info-view .phui-form-view {
+  padding: 0;
+}
+
+.phui-info-view-body {
+  line-height: 1.45em;
+}
+
+.phui-info-view-actions {
+  margin-top: -3px;
+  margin-bottom: -4px;
+  float: right;
+}
+
+.phui-info-view-actions .button {
+  margin-left: 4px;
+}
+
+.phui-info-view-head + .phui-info-view-body {
+  padding-top: 4px;
+}
+
+h1.phui-info-view-head {
+  font-weight: bold;
+  font-size: 15px;
+}
+
+.phui-info-view-list {
+  margin: 0 0 0 16px;
+  list-style: disc;
+  line-height: 1.5em;
+}
+
+.phui-info-view .phui-info-view-actions .button:hover {
+  background: #fff;
+  box-shadow: none;
+}
+
+.phui-info-severity-error,
+.phui-info-severity-error a.button {
+  border-color: {$red};
+  background: {$lightred};
+}
+
+.phui-info-severity-error a.button {
+  color: {$red};
+}
+
+.phui-info-severity-warning,
+.phui-info-severity-warning a.button {
+  border-color: {$yellow};
+  background: {$lightyellow};
+}
+
+.phui-info-severity-warning a.button {
+  color: #bc7837;
+}
+
+.phui-info-severity-notice,
+.phui-info-severity-notice a.button {
+  border-color: {$blue};
+  background: {$lightblue};
+}
+
+.phui-info-severity-notice a.button {
+  color: {$blue};
+}
+
+.phui-info-severity-nodata,
+.phui-info-severity-nodata a.button {
+  border-color: {$lightgreyborder};
+  background: #fff;
+}
+
+.phui-info-severity-nodata a.button {
+  color: {$greytext};
+}
+
+.phui-info-severity-success,
+.phui-info-severity-success a.button {
+  border-color: {$green};
+  background: {$lightgreen};
+}
+
+.phui-info-severity-success a.button {
+  color: {$green};
+}
+
+.legalpad .phui-info-view {
+  margin: 0;
+  border-width: 0 0 1px 0;
+  border-bottom: 1px solid {$lightblueborder};
+}
+
+.aphront-dialog-body .phui-info-view {
+  margin: -16px -16px 16px -16px;
+  border-width: 0 0 1px 0;
+  border-bottom: 1px solid {$lightblueborder};
+}
+
+.aphront-dialog-body .phui-info-view .phui-info-view-list {
+  margin: 0 0 0 16px;
+  list-style: disc;
+}
+
+.phui-object-box .phui-info-severity-error,
+.aphront-dialog-body .phui-info-severity-error {
+  color: {$red};
+}
+
+.phui-object-box .phui-info-severity-warning,
+.aphront-dialog-body .phui-info-severity-warning {
+  color: #bc7837;
+}
+
+.phui-object-box .phui-info-severity-notice,
+.aphront-dialog-body .phui-info-severity-notice {
+  color: {$blue};
+}
+
+.phui-object-box .phui-info-severity-success,
+.aphront-dialog-body .phui-info-severity-success {
+  color: {$green};
+}
+
+.phui-crumbs-view + .phui-info-view {
+  margin-top: 0;
+}
+
+.phui-crumbs-view.phui-crumbs-border + .phui-info-view {
+  margin-top: 16px;
+}

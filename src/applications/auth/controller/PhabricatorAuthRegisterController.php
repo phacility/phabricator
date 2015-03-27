@@ -181,6 +181,13 @@ final class PhabricatorAuthRegisterController
     $e_password = true;
     $e_captcha = true;
 
+    $skip_captcha = false;
+    if ($invite) {
+      // If the user is accepting an invite, assume they're trustworthy enough
+      // that we don't need to CAPTCHA them.
+      $skip_captcha = true;
+    }
+
     $min_len = PhabricatorEnv::getEnvConfig('account.minimum-password-length');
     $min_len = (int)$min_len;
 
@@ -193,7 +200,7 @@ final class PhabricatorAuthRegisterController
     if (($request->isFormPost() || !$can_edit_anything) && !$from_invite) {
       $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
 
-      if ($must_set_password) {
+      if ($must_set_password && !$skip_captcha) {
         $e_captcha = pht('Again');
 
         $captcha_ok = AphrontFormRecaptchaControl::processCaptcha($request);
@@ -464,7 +471,7 @@ final class PhabricatorAuthRegisterController
           ->setError($e_email));
     }
 
-    if ($must_set_password) {
+    if ($must_set_password && !$skip_captcha) {
       $form->appendChild(
         id(new AphrontFormRecaptchaControl())
           ->setLabel(pht('Captcha'))
@@ -498,8 +505,8 @@ final class PhabricatorAuthRegisterController
 
     $welcome_view = null;
     if ($is_setup) {
-      $welcome_view = id(new PHUIErrorView())
-        ->setSeverity(PHUIErrorView::SEVERITY_NOTICE)
+      $welcome_view = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
         ->setTitle(pht('Welcome to Phabricator'))
         ->appendChild(
           pht(

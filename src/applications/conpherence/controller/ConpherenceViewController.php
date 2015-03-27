@@ -3,34 +3,10 @@
 final class ConpherenceViewController extends
   ConpherenceController {
 
-  private $conpherenceID;
-  private $conpherence;
-
-  public function setConpherence(ConpherenceThread $conpherence) {
-    $this->conpherence = $conpherence;
-    return $this;
-  }
-  public function getConpherence() {
-    return $this->conpherence;
-  }
-
-  public function setConpherenceID($conpherence_id) {
-    $this->conpherenceID = $conpherence_id;
-    return $this;
-  }
-  public function getConpherenceID() {
-    return $this->conpherenceID;
-  }
-
-  public function willProcessRequest(array $data) {
-    $this->setConpherenceID(idx($data, 'id'));
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
 
-    $conpherence_id = $this->getConpherenceID();
+    $conpherence_id = $request->getURIData('id');
     if (!$conpherence_id) {
       return new Aphront404Response();
     }
@@ -51,15 +27,19 @@ final class ConpherenceViewController extends
     }
     $this->setConpherence($conpherence);
 
-    $participant = $conpherence->getParticipant($user->getPHID());
     $transactions = $conpherence->getTransactions();
-    $latest_transaction = end($transactions);
-    $write_guard = AphrontWriteGuard::beginScopedUnguardedWrites();
-    $participant->markUpToDate($conpherence, $latest_transaction);
-    unset($write_guard);
+    $latest_transaction = head($transactions);
+    $participant = $conpherence->getParticipantIfExists($user->getPHID());
+    if ($participant) {
+      $write_guard = AphrontWriteGuard::beginScopedUnguardedWrites();
+      $participant->markUpToDate($conpherence, $latest_transaction);
+      unset($write_guard);
+    }
 
-    $data = $this->renderConpherenceTransactions($conpherence);
-    $messages = $this->renderMessagePaneContent(
+    $data = ConpherenceTransactionView::renderTransactions(
+      $user,
+      $conpherence);
+    $messages = ConpherenceTransactionView::renderMessagePaneContent(
       $data['transactions'],
       $data['oldest_transaction_id']);
     if ($before_transaction_id) {
@@ -67,8 +47,12 @@ final class ConpherenceViewController extends
       $form = null;
       $content = array('messages' => $messages);
     } else {
-      $header = $this->buildHeaderPaneContent($conpherence);
-      $form = $this->renderFormContent($data['latest_transaction_id']);
+      $policy_objects = id(new PhabricatorPolicyQuery())
+        ->setViewer($user)
+        ->setObject($conpherence)
+        ->execute();
+      $header = $this->buildHeaderPaneContent($conpherence, $policy_objects);
+      $form = $this->renderFormContent();
       $content = array(
         'header' => $header,
         'messages' => $messages,
@@ -76,23 +60,31 @@ final class ConpherenceViewController extends
       );
     }
 
+    $title = $this->getConpherenceTitle($conpherence);
+    $content['title'] = $title;
+
     if ($request->isAjax()) {
+      $content['threadID'] = $conpherence->getID();
+      $content['threadPHID'] = $conpherence->getPHID();
+      $content['latestTransactionID'] = $data['latest_transaction_id'];
+      $content['canEdit'] = PhabricatorPolicyFilter::hasCapability(
+        $user,
+        $conpherence,
+        PhabricatorPolicyCapability::CAN_EDIT);
       return id(new AphrontAjaxResponse())->setContent($content);
     }
 
     $layout = id(new ConpherenceLayoutView())
+      ->setUser($user)
       ->setBaseURI($this->getApplicationURI())
       ->setThread($conpherence)
       ->setHeader($header)
       ->setMessages($messages)
       ->setReplyForm($form)
+      ->setLatestTransactionID($data['latest_transaction_id'])
       ->setRole('thread');
 
-    $title = $conpherence->getTitle();
-    if (!$title) {
-      $title = pht('[No Title]');
-    }
-    return $this->buildApplicationPage(
+   return $this->buildApplicationPage(
       $layout,
       array(
         'title' => $title,
@@ -100,36 +92,28 @@ final class ConpherenceViewController extends
       ));
   }
 
-  private function renderMessagePaneContent(
-    array $transactions,
-    $oldest_transaction_id) {
-
-    $scrollbutton = '';
-    if ($oldest_transaction_id) {
-      $scrollbutton = javelin_tag(
-        'a',
-        array(
-          'href' => '#',
-          'mustcapture' => true,
-          'sigil' => 'show-older-messages',
-          'class' => 'conpherence-show-older-messages',
-          'meta' => array(
-            'oldest_transaction_id' => $oldest_transaction_id,
-          ),
-        ),
-        pht('Show Older Messages'));
-    }
-
-    return hsprintf('%s%s', $scrollbutton, $transactions);
-  }
-
-  private function renderFormContent($latest_transaction_id) {
+  private function renderFormContent() {
 
     $conpherence = $this->getConpherence();
     $user = $this->getRequest()->getUser();
+    $can_join = PhabricatorPolicyFilter::hasCapability(
+      $user,
+      $conpherence,
+      PhabricatorPolicyCapability::CAN_JOIN);
+    $participating = $conpherence->getParticipantIfExists($user->getPHID());
+    if (!$can_join && !$participating) {
+      return null;
+    }
     $draft = PhabricatorDraft::newFromUserAndKey(
       $user,
       $conpherence->getPHID());
+    if ($participating) {
+      $action = ConpherenceUpdateActions::MESSAGE;
+      $button_text = pht('Send');
+    } else {
+      $action = ConpherenceUpdateActions::JOIN_ROOM;
+      $button_text = pht('Join');
+    }
     $update_uri = $this->getApplicationURI('update/'.$conpherence->getID().'/');
 
     $this->initBehavior('conpherence-pontificate');
@@ -140,7 +124,7 @@ final class ConpherenceViewController extends
       ->addSigil('conpherence-pontificate')
       ->setWorkflow(true)
       ->setUser($user)
-      ->addHiddenInput('action', 'message')
+      ->addHiddenInput('action', $action)
       ->appendChild(
         id(new PhabricatorRemarkupControl())
         ->setUser($user)
@@ -148,24 +132,11 @@ final class ConpherenceViewController extends
         ->setValue($draft->getDraft()))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue(pht('Send Message')))
-      ->appendChild(
-        javelin_tag(
-          'input',
-          array(
-            'type' => 'hidden',
-            'name' => 'latest_transaction_id',
-            'value' => $latest_transaction_id,
-            'sigil' => 'latest-transaction-id',
-            'meta' => array(
-              'threadPHID' => $conpherence->getPHID(),
-              'threadID' => $conpherence->getID(),
-            ),
-          ),
-          ''))
+        ->setValue($button_text))
       ->render();
 
     return $form;
   }
+
 
 }

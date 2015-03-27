@@ -14,6 +14,11 @@
   margin: 16px auto;
 }
 
+.device-desktop .phui-document-fluid .phui-document-view {
+  max-width: none;
+  margin: 16px;
+}
+
 .device-desktop .phui-document-view.phui-offset-view {
   max-width: 800px;
 }
@@ -148,6 +153,6 @@
   border-bottom: 1px solid {$thinblueborder};
 }
 
-.phui-document-view .phui-error-severity-nodata {
+.phui-document-view .phui-info-severity-nodata {
   background-color: {$lightgreybackground};
 }

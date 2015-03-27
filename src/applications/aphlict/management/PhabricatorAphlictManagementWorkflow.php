@@ -31,7 +31,21 @@ abstract class PhabricatorAphlictManagementWorkflow
   }
 
   final public function getPIDPath() {
-    return PhabricatorEnv::getEnvConfig('notification.pidfile');
+    $path = PhabricatorEnv::getEnvConfig('notification.pidfile');
+
+    try {
+      $dir = dirname($path);
+      if (!Filesystem::pathExists($dir)) {
+        Filesystem::createDirectory($dir, 0755, true);
+      }
+    } catch (FilesystemException $ex) {
+      throw new Exception(
+        pht(
+          "Failed to create '%s'. You should manually create this directory.",
+          $dir));
+    }
+
+    return $path;
   }
 
   final public function getLogPath() {

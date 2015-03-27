@@ -327,7 +327,8 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
   }
 
   private function renderMiniPanel($title, $body) {
-    $panel = new AphrontMiniPanelView();
+    $panel = new PHUIInfoView();
+    $panel->setSeverity(PHUIInfoView::SEVERITY_NODATA);
     $panel->appendChild(
       phutil_tag(
         'p',

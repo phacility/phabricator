@@ -19,6 +19,7 @@ final class PhabricatorDaemonLogListView extends AphrontView {
 
     $env_hash = PhabricatorEnv::calculateEnvironmentHash();
     $list = new PHUIObjectItemListView();
+    $list->setFlush(true);
     foreach ($this->daemonLogs as $log) {
       $id = $log->getID();
       $epoch = $log->getDateCreated();

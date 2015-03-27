@@ -15,7 +15,9 @@ final class PhabricatorVeryWowEnglishTranslation
       'Cancel' => 'Nope!',
       'Advanced Search' => 'Much Search!',
       'No search results.' => 'No results! Wow!',
-      'Send Message' => 'Bark! Bark Bark!',
+      'Send' => 'Bark Bark!',
+      'Partial' => 'Pawtial',
+      'Partial Upload' => 'Pawtial Upload',
     );
   }
 

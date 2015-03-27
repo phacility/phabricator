@@ -55,9 +55,9 @@ final class PhabricatorDashboardManageController
         'You do not have permission to edit this dashboard. If you want to '.
         'make changes, make a copy first.');
 
-      $box->setErrorView(
-        id(new PHUIErrorView())
-          ->setSeverity(PHUIErrorView::SEVERITY_NOTICE)
+      $box->setInfoView(
+        id(new PHUIInfoView())
+          ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
           ->setErrors(array($no_edit)));
     }
 

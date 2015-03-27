@@ -6,7 +6,7 @@ final class PHUIObjectBoxView extends AphrontView {
   private $headerColor;
   private $formErrors = null;
   private $formSaved = false;
-  private $errorView;
+  private $infoView;
   private $form;
   private $validationException;
   private $header;
@@ -93,7 +93,7 @@ final class PHUIObjectBoxView extends AphrontView {
 
   public function setFormErrors(array $errors, $title = null) {
     if ($errors) {
-      $this->formErrors = id(new PHUIErrorView())
+      $this->formErrors = id(new PHUIInfoView())
         ->setTitle($title)
         ->setErrors($errors);
     }
@@ -105,16 +105,16 @@ final class PHUIObjectBoxView extends AphrontView {
       $text = pht('Changes saved.');
     }
     if ($saved) {
-      $save = id(new PHUIErrorView())
-        ->setSeverity(PHUIErrorView::SEVERITY_NOTICE)
+      $save = id(new PHUIInfoView())
+        ->setSeverity(PHUIInfoView::SEVERITY_NOTICE)
         ->appendChild($text);
       $this->formSaved = $save;
     }
     return $this;
   }
 
-  public function setErrorView(PHUIErrorView $view) {
-    $this->errorView = $view;
+  public function setInfoView(PHUIInfoView $view) {
+    $this->infoView = $view;
     return $this;
   }
 
@@ -192,7 +192,7 @@ final class PHUIObjectBoxView extends AphrontView {
         $messages[] = $error->getMessage();
       }
       if ($messages) {
-        $exception_errors = id(new PHUIErrorView())
+        $exception_errors = id(new PHUIInfoView())
           ->setErrors($messages);
       }
     }
@@ -269,7 +269,7 @@ final class PHUIObjectBoxView extends AphrontView {
       ->appendChild(
         array(
           $header,
-          $this->errorView,
+          $this->infoView,
           $this->formErrors,
           $this->formSaved,
           $exception_errors,

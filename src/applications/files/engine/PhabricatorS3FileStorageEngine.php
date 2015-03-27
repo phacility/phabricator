@@ -10,7 +10,7 @@ final class PhabricatorS3FileStorageEngine
   extends PhabricatorFileStorageEngine {
 
 
-/* -(  Implementation  )----------------------------------------------------- */
+/* -(  Engine Metadata  )---------------------------------------------------- */
 
 
   /**
@@ -19,6 +19,21 @@ final class PhabricatorS3FileStorageEngine
   public function getEngineIdentifier() {
     return 'amazon-s3';
   }
+
+  public function getEnginePriority() {
+    return 100;
+  }
+
+  public function canWriteFiles() {
+    $bucket = PhabricatorEnv::getEnvConfig('storage.s3.bucket');
+    $access_key = PhabricatorEnv::getEnvConfig('amazon-s3.access-key');
+    $secret_key = PhabricatorEnv::getEnvConfig('amazon-s3.secret-key');
+
+    return (strlen($bucket) && strlen($access_key) && strlen($secret_key));
+  }
+
+
+/* -(  Managing File Data  )------------------------------------------------- */
 
 
   /**

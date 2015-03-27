@@ -52,9 +52,19 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
     $ttl = $file->getTTL();
     if ($ttl !== null) {
       $ttl_tag = id(new PHUITagView())
-        ->setType(PHUITagView::TYPE_OBJECT)
+        ->setType(PHUITagView::TYPE_STATE)
+        ->setBackgroundColor(PHUITagView::COLOR_YELLOW)
         ->setName(pht('Temporary'));
       $header->addTag($ttl_tag);
+    }
+
+    $partial = $file->getIsPartial();
+    if ($partial) {
+      $partial_tag = id(new PHUITagView())
+        ->setType(PHUITagView::TYPE_STATE)
+        ->setBackgroundColor(PHUITagView::COLOR_ORANGE)
+        ->setName(pht('Partial Upload'));
+      $header->addTag($partial_tag);
     }
 
     $actions = $this->buildActionView($file);
@@ -126,21 +136,27 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
       ->setObjectURI($this->getRequest()->getRequestURI())
       ->setObject($file);
 
+    $can_download = !$file->getIsPartial();
+
     if ($file->isViewableInBrowser()) {
       $view->addAction(
         id(new PhabricatorActionView())
           ->setName(pht('View File'))
           ->setIcon('fa-file-o')
-          ->setHref($file->getViewURI()));
+          ->setHref($file->getViewURI())
+          ->setDisabled(!$can_download)
+          ->setWorkflow(!$can_download));
     } else {
       $view->addAction(
         id(new PhabricatorActionView())
           ->setUser($viewer)
-          ->setRenderAsForm(true)
-          ->setDownload(true)
+          ->setRenderAsForm($can_download)
+          ->setDownload($can_download)
           ->setName(pht('Download File'))
           ->setIcon('fa-download')
-          ->setHref($file->getViewURI()));
+          ->setHref($file->getViewURI())
+          ->setDisabled(!$can_download)
+          ->setWorkflow(!$can_download));
     }
 
     $view->addAction(
@@ -222,6 +238,15 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
     $finfo->addProperty(pht('Viewable Image'), $image_string);
     $finfo->addProperty(pht('Cacheable'), $cache_string);
 
+    $builtin = $file->getBuiltinName();
+    if ($builtin === null) {
+      $builtin_string = pht('No');
+    } else {
+      $builtin_string = $builtin;
+    }
+
+    $finfo->addProperty(pht('Builtin'), $builtin_string);
+
     $storage_properties = new PHUIPropertyListView();
     $box->addPropertyList($storage_properties, pht('Storage'));
 
@@ -286,6 +311,67 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
 
       $box->addPropertyList($media);
     }
+
+    $engine = null;
+    try {
+      $engine = $file->instantiateStorageEngine();
+    } catch (Exception $ex) {
+      // Don't bother raising this anywhere for now.
+    }
+
+    if ($engine) {
+      if ($engine->isChunkEngine()) {
+        $chunkinfo = new PHUIPropertyListView();
+        $box->addPropertyList($chunkinfo, pht('Chunks'));
+
+        $chunks = id(new PhabricatorFileChunkQuery())
+          ->setViewer($user)
+          ->withChunkHandles(array($file->getStorageHandle()))
+          ->execute();
+        $chunks = msort($chunks, 'getByteStart');
+
+        $rows = array();
+        $completed = array();
+        foreach ($chunks as $chunk) {
+          $is_complete = $chunk->getDataFilePHID();
+
+          $rows[] = array(
+            $chunk->getByteStart(),
+            $chunk->getByteEnd(),
+            ($is_complete ? pht('Yes') : pht('No')),
+          );
+
+          if ($is_complete) {
+            $completed[] = $chunk;
+          }
+        }
+
+        $table = id(new AphrontTableView($rows))
+          ->setHeaders(
+            array(
+              pht('Offset'),
+              pht('End'),
+              pht('Complete'),
+            ))
+          ->setColumnClasses(
+            array(
+              '',
+              '',
+              'wide',
+            ));
+
+        $chunkinfo->addProperty(
+          pht('Total Chunks'),
+          count($chunks));
+
+        $chunkinfo->addProperty(
+          pht('Completed Chunks'),
+          count($completed));
+
+        $chunkinfo->addRawContent($table);
+      }
+    }
+
   }
 
 }

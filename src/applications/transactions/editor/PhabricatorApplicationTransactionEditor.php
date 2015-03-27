@@ -186,6 +186,12 @@ abstract class PhabricatorApplicationTransactionEditor
     return $this->unmentionablePHIDMap;
   }
 
+  protected function shouldEnableMentions(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return true;
+  }
+
   public function setApplicationEmail(
     PhabricatorMetaMTAApplicationEmail $email) {
     $this->applicationEmail = $email;
@@ -288,6 +294,7 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
       case PhabricatorTransactions::TYPE_BUILDABLE:
       case PhabricatorTransactions::TYPE_TOKEN:
+      case PhabricatorTransactions::TYPE_INLINESTATE:
         return $xaction->getNewValue();
       case PhabricatorTransactions::TYPE_EDGE:
         return $this->getEdgeTransactionNewValue($xaction);
@@ -386,9 +393,15 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         $object->setEditPolicy($xaction->getNewValue());
         break;
+      case PhabricatorTransactions::TYPE_JOIN_POLICY:
+        $object->setJoinPolicy($xaction->getNewValue());
+        break;
+
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $field = $this->getCustomFieldForTransaction($object, $xaction);
         return $field->applyApplicationTransactionInternalEffects($xaction);
+      case PhabricatorTransactions::TYPE_INLINESTATE:
+        return $this->applyBuiltinInternalTransaction($object, $xaction);
     }
 
     return $this->applyCustomInternalTransaction($object, $xaction);
@@ -483,6 +496,8 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $field = $this->getCustomFieldForTransaction($object, $xaction);
         return $field->applyApplicationTransactionExternalEffects($xaction);
+      case PhabricatorTransactions::TYPE_INLINESTATE:
+        return $this->applyBuiltinExternalTransaction($object, $xaction);
     }
 
     return $this->applyCustomExternalTransaction($object, $xaction);
@@ -504,6 +519,23 @@ abstract class PhabricatorApplicationTransactionEditor
     throw new Exception(
       "Transaction type '{$type}' is missing an external apply ".
       "implementation!");
+  }
+
+  // TODO: Write proper documentation for these hooks. These are like the
+  // "applyCustom" hooks, except that implementation is optional, so you do
+  // not need to handle all of the builtin transaction types. See T6403. These
+  // are not completely implemented.
+
+  protected function applyBuiltinInternalTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+    return;
+  }
+
+  protected function applyBuiltinExternalTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+    return;
   }
 
   /**
@@ -1052,10 +1084,14 @@ abstract class PhabricatorApplicationTransactionEditor
       return null;
     }
 
-    $texts = array_mergev($blocks);
-    $phids = PhabricatorMarkupEngine::extractPHIDsFromMentions(
-      $this->getActor(),
-      $texts);
+    if ($this->shouldEnableMentions($object, $xactions)) {
+      $texts = array_mergev($blocks);
+      $phids = PhabricatorMarkupEngine::extractPHIDsFromMentions(
+        $this->getActor(),
+        $texts);
+    } else {
+      $phids = array();
+    }
 
     $this->mentionedPHIDs = $phids;
 
@@ -1229,12 +1265,14 @@ abstract class PhabricatorApplicationTransactionEditor
       $engine);
 
     $mentioned_phids = array();
-    foreach ($blocks as $key => $xaction_blocks) {
-      foreach ($xaction_blocks as $block) {
-        $engine->markupText($block);
-        $mentioned_phids += $engine->getTextMetadata(
-          PhabricatorObjectRemarkupRule::KEY_MENTIONED_OBJECTS,
-          array());
+    if ($this->shouldEnableMentions($object, $xactions)) {
+      foreach ($blocks as $key => $xaction_blocks) {
+        foreach ($xaction_blocks as $block) {
+          $engine->markupText($block);
+          $mentioned_phids += $engine->getTextMetadata(
+            PhabricatorObjectRemarkupRule::KEY_MENTIONED_OBJECTS,
+            array());
+        }
       }
     }
 
@@ -1248,19 +1286,22 @@ abstract class PhabricatorApplicationTransactionEditor
       ->execute();
 
     $mentionable_phids = array();
-    foreach ($mentioned_objects as $mentioned_object) {
-      if ($mentioned_object instanceof PhabricatorMentionableInterface) {
-        $mentioned_phid = $mentioned_object->getPHID();
-        if (idx($this->getUnmentionablePHIDMap(), $mentioned_phid)) {
-          continue;
+    if ($this->shouldEnableMentions($object, $xactions)) {
+      foreach ($mentioned_objects as $mentioned_object) {
+        if ($mentioned_object instanceof PhabricatorMentionableInterface) {
+          $mentioned_phid = $mentioned_object->getPHID();
+          if (idx($this->getUnmentionablePHIDMap(), $mentioned_phid)) {
+            continue;
+          }
+          // don't let objects mention themselves
+          if ($object->getPHID() && $mentioned_phid == $object->getPHID()) {
+            continue;
+          }
+          $mentionable_phids[$mentioned_phid] = $mentioned_phid;
         }
-        // don't let objects mention themselves
-        if ($object->getPHID() && $mentioned_phid == $object->getPHID()) {
-          continue;
-        }
-        $mentionable_phids[$mentioned_phid] = $mentioned_phid;
       }
     }
+
     if ($mentionable_phids) {
       $edge_type = PhabricatorObjectMentionsObjectEdgeType::EDGECONST;
       $block_xactions[] = newv(get_class(head($xactions)), array())
@@ -1397,9 +1438,14 @@ abstract class PhabricatorApplicationTransactionEditor
   }
 
   protected function getPHIDTransactionNewValue(
-    PhabricatorApplicationTransaction $xaction) {
+    PhabricatorApplicationTransaction $xaction,
+    $old = null) {
 
-    $old = array_fuse($xaction->getOldValue());
+    if ($old !== null) {
+      $old = array_fuse($old);
+    } else {
+      $old = array_fuse($xaction->getOldValue());
+    }
 
     $new = $xaction->getNewValue();
     $new_add = idx($new, '+', array());

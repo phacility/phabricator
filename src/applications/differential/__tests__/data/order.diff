@@ -1,0 +1,24 @@
+diff --git a/src/applications/conpherence/controller/ConpherenceUpdateController b/src/applications/conpherence/controller/ConpherenceUpdateController
+--- a/src/applications/conpherence/controller/ConpherenceUpdateController
++++ b/src/applications/conpherence/controller/ConpherenceUpdateController
+@@ -209,14 +209,19 @@
+         ->setDatasource(new PhabricatorPeopleDatasource()));
+
+     require_celerity_resource('conpherence-update-css');
+-    return id(new AphrontDialogView())
++    $view = id(new AphrontDialogView())
+       ->setTitle(pht('Add Participants'))
+       ->addHiddenInput('action', 'add_person')
+       ->addHiddenInput(
+         'latest_transaction_id',
+         $request->getInt('latest_transaction_id'))
+       ->appendChild($form);
++
++    if ($request->getExists('minimal_display')) {
++      $view->addHiddenInput('minimal_display', true);
+     }
++    return $view;
++  }
+
+   private function renderRemovePersonDialogue(
+     ConpherenceThread $conpherence) {

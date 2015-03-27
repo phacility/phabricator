@@ -171,6 +171,10 @@ final class CelerityResourceTransformer {
 
   public static function getCSSVariableMap() {
     return array(
+      // Fonts
+      'basefont' => "13px/1.231 'Segoe UI', 'Segoe UI Web Regular', ".
+        "'Segoe UI Symbol', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+
       // Base Colors
       'red'           => '#c0392b',
       'lightred'      => '#f4dddb',

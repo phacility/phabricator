@@ -204,9 +204,9 @@ abstract class PhragmentController extends PhabricatorController {
   public function renderConfigurationWarningIfRequired() {
     $alt = PhabricatorEnv::getEnvConfig('security.alternate-file-domain');
     if ($alt === null) {
-      return id(new PHUIErrorView())
+      return id(new PHUIInfoView())
         ->setTitle(pht('security.alternate-file-domain must be configured!'))
-        ->setSeverity(PHUIErrorView::SEVERITY_ERROR)
+        ->setSeverity(PHUIInfoView::SEVERITY_ERROR)
         ->appendChild(phutil_tag('p', array(), pht(
           'Because Phragment generates files (such as ZIP archives and '.
           'patches) as they are requested, it requires that you configure '.

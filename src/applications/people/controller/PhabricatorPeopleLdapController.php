@@ -69,8 +69,8 @@ final class PhabricatorPeopleLdapController
     $emails = $request->getArr('email');
     $names = $request->getArr('name');
 
-    $notice_view = new PHUIErrorView();
-    $notice_view->setSeverity(PHUIErrorView::SEVERITY_NOTICE);
+    $notice_view = new PHUIInfoView();
+    $notice_view->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
     $notice_view->setTitle(pht('Import Successful'));
     $notice_view->setErrors(array(
       pht('Successfully imported users from LDAP'),
@@ -124,7 +124,7 @@ final class PhabricatorPeopleLdapController
   }
 
   private function processSearchRequest($request) {
-    $panel = new AphrontPanelView();
+    $panel = new PHUIBoxView();
     $admin = $request->getUser();
 
     $search = $request->getStr('query');

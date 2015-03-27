@@ -4,16 +4,17 @@ Phabricator includes applications for:
 
   - reviewing and auditing source code;
   - hosting and browsing repositories;
-  - assembling a party to venture forth;
   - tracking bugs;
   - managing projects;
+  - conversing with team members;
+  - assembling a party to venture forth;
   - writing stuff down and reading it later;
   - hiding stuff from coworkers; and
   - also some other things.
 
 You can learn more about the project (and find links to documentation and resources) at [Phabricator.org](http://phabricator.org)
 
-Phabricator is developed and maintained by [Phacility](http://phacility.com). The first version of Phabricator was originally built at Facebook.
+Phabricator is developed and maintained by [Phacility](http://phacility.com).
 
 ----------
 

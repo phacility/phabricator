@@ -206,6 +206,11 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
     return $this;
   }
 
+  public function setRawFrom($raw_email, $raw_name) {
+    $this->setParam('raw-from', array($raw_email, $raw_name));
+    return $this;
+  }
+
   public function setReplyTo($reply_to) {
     $this->setParam('reply-to', $reply_to);
     return $this;
@@ -430,6 +435,10 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
 
       foreach ($params as $key => $value) {
         switch ($key) {
+          case 'raw-from':
+            list($from_email, $from_name) = $value;
+            $mailer->setFrom($from_email, $from_name);
+            break;
           case 'from':
             $from = $value;
             $actor_email = null;
@@ -624,6 +633,15 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
         }
       }
 
+      if (PhabricatorEnv::getEnvConfig('phabricator.silent')) {
+        $this->setStatus(self::STATUS_VOID);
+        $this->setMessage(
+          pht(
+            'Phabricator is running in silent mode. See `phabricator.silent` '.
+            'in the configuration to change this setting.'));
+        return $this->save();
+      }
+
       $mailer->addHeader('X-Phabricator-Sent-This-Message', 'Yes');
       $mailer->addHeader('X-Mail-Transport-Agent', 'MetaMTA');
 
@@ -755,40 +773,30 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
    * Get all of the recipients for this mail, after preference filters are
    * applied. This list has all objects to whom delivery will be attempted.
    *
+   * Note that this expands recipients into their members, because delivery
+   * is never directly attempted to aggregate actors like projects.
+   *
    * @return  list<phid>  A list of all recipients to whom delivery will be
    *                      attempted.
    * @task recipients
    */
   public function buildRecipientList() {
-    $actors = $this->loadActors(
-      array_merge(
-        $this->getToPHIDs(),
-        $this->getCcPHIDs()));
+    $actors = $this->loadAllActors();
     $actors = $this->filterDeliverableActors($actors);
     return mpull($actors, 'getPHID');
   }
 
   public function loadAllActors() {
-    $actor_phids = array_merge(
-      array($this->getParam('from')),
-      $this->getToPHIDs(),
-      $this->getCcPHIDs());
-
-    $this->loadRecipientExpansions($actor_phids);
+    $actor_phids = $this->getAllActorPHIDs();
     $actor_phids = $this->expandRecipients($actor_phids);
-
     return $this->loadActors($actor_phids);
   }
 
-  private function loadRecipientExpansions(array $phids) {
-    $expansions = id(new PhabricatorMetaMTAMemberQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withPHIDs($phids)
-      ->execute();
-
-    $this->recipientExpansionMap = $expansions;
-
-    return $this;
+  private function getAllActorPHIDs() {
+    return array_merge(
+      array($this->getParam('from')),
+      $this->getToPHIDs(),
+      $this->getCcPHIDs());
   }
 
   /**
@@ -803,19 +811,17 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
    */
   private function expandRecipients(array $phids) {
     if ($this->recipientExpansionMap === null) {
-      throw new Exception(
-        pht(
-          'Call loadRecipientExpansions() before expandRecipients()!'));
+      $all_phids = $this->getAllActorPHIDs();
+      $this->recipientExpansionMap = id(new PhabricatorMetaMTAMemberQuery())
+        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withPHIDs($all_phids)
+        ->execute();
     }
 
     $results = array();
     foreach ($phids as $phid) {
-      if (!isset($this->recipientExpansionMap[$phid])) {
-        $results[$phid] = $phid;
-      } else {
-        foreach ($this->recipientExpansionMap[$phid] as $recipient_phid) {
-          $results[$recipient_phid] = $recipient_phid;
-        }
+      foreach ($this->recipientExpansionMap[$phid] as $recipient_phid) {
+        $results[$recipient_phid] = $recipient_phid;
       }
     }
 

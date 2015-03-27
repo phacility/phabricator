@@ -27,6 +27,12 @@ final class PhabricatorDaemonManagementStopWorkflow
               'not have corresponding PID files.'),
           ),
           array(
+            'name' => 'gently',
+            'help' => pht(
+              'Ignore running processes that look like daemons but do not '.
+              'have corresponding PID files.'),
+          ),
+          array(
             'name' => 'pids',
             'wildcard' => true,
           ),
@@ -34,10 +40,13 @@ final class PhabricatorDaemonManagementStopWorkflow
   }
 
   public function execute(PhutilArgumentParser $args) {
-    $pids = $args->getArg('pids');
-    $graceful = $args->getArg('graceful');
-    $force = $args->getArg('force');
-    return $this->executeStopCommand($pids, $graceful, $force);
+    return $this->executeStopCommand(
+      $args->getArg('pids'),
+      array(
+        'graceful' => $args->getArg('graceful'),
+        'force' => $args->getArg('force'),
+        'gently' => $args->getArg('gently'),
+      ));
   }
 
 }

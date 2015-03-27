@@ -94,6 +94,9 @@ final class PHUITimelineView extends AphrontView {
     $hide = array();
     $show = array();
 
+    // Bucket timeline events into events we'll hide by default (because they
+    // predate your most recent interaction with the object) and events we'll
+    // show by default.
     foreach ($this->events as $event) {
       if ($event->getHideByDefault()) {
         $hide[] = $event;
@@ -102,8 +105,18 @@ final class PHUITimelineView extends AphrontView {
       }
     }
 
+    // If you've never interacted with the object, all the events will be shown
+    // by default. We may still need to paginate if there are a large number
+    // of events.
+    $more = (bool)$hide;
+    if ($this->getPager()) {
+      if ($this->getPager()->getHasMoreResults()) {
+        $more = true;
+      }
+    }
+
     $events = array();
-    if ($hide && $this->getPager()) {
+    if ($more && $this->getPager()) {
       $uri = $this->getPager()->getNextPageURI();
       $uri->setQueryParam('quoteTargetID', $this->getQuoteTargetID());
       $uri->setQueryParam('quoteRef', $this->getQuoteRef());
@@ -125,10 +138,10 @@ final class PHUITimelineView extends AphrontView {
             ),
             pht('Show older changes.')),
         ));
-    }
 
-    if ($hide && $show) {
-      $events[] = $spacer;
+      if ($show) {
+        $events[] = $spacer;
+      }
     }
 
     if ($show) {

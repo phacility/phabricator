@@ -29,13 +29,13 @@ final class PhabricatorPHDConfigOptions
         ->setDescription(
           pht(
             'Directory that the daemons should use to store log files.')),
-      $this->newOption('phd.start-taskmasters', 'int', 4)
-        ->setSummary(pht('Number of TaskMaster daemons to start by default.'))
+      $this->newOption('phd.taskmasters', 'int', 4)
+        ->setSummary(pht('Maximum taskmaster daemon pool size.'))
         ->setDescription(
           pht(
-            "Number of 'TaskMaster' daemons that 'phd start' should start. ".
-            "You can raise this if you have a task backlog, or explicitly ".
-            "launch more with 'phd launch <N> taskmaster'.")),
+            'Maximum number of taskmaster daemons to run at once. Raising '.
+            'this can increase the maximum throughput of the task queue. The '.
+            'pool will automatically scale down when unutilized.')),
       $this->newOption('phd.verbose', 'bool', false)
         ->setBoolOptions(
           array(
@@ -70,7 +70,7 @@ final class PhabricatorPHDConfigOptions
             "Launch daemons in 'trace' mode by default. This creates an ".
             "ENORMOUS amount of output, but can help debug issues. Daemons ".
             "launched in debug mode with 'phd debug' are always launched in ".
-            "trace mdoe. See also 'phd.verbose'.")),
+            "trace mode. See also 'phd.verbose'.")),
       $this->newOption('phd.variant-config', 'list<string>', array())
         ->setDescription(
           pht(

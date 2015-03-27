@@ -189,6 +189,43 @@ final class DifferentialInlineComment
     return $this;
   }
 
+  public function setReplyToCommentPHID($phid) {
+    $this->proxy->setReplyToCommentPHID($phid);
+    return $this;
+  }
+
+  public function getReplyToCommentPHID() {
+    return $this->proxy->getReplyToCommentPHID();
+  }
+
+  public function setHasReplies($has_replies) {
+    $this->proxy->setHasReplies($has_replies);
+    return $this;
+  }
+
+  public function getHasReplies() {
+    return $this->proxy->getHasReplies();
+  }
+
+  public function setIsDeleted($is_deleted) {
+    $this->proxy->setIsDeleted($is_deleted);
+    return $this;
+  }
+
+  public function getIsDeleted() {
+    return $this->proxy->getIsDeleted();
+  }
+
+  public function setFixedState($state) {
+    $this->proxy->setFixedState($state);
+    return $this;
+  }
+
+  public function getFixedState() {
+    return $this->proxy->getFixedState();
+  }
+
+
 /* -(  PhabricatorMarkupInterface Implementation  )-------------------------- */
 
 

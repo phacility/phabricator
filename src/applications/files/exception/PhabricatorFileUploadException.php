@@ -20,11 +20,6 @@ final class PhabricatorFileUploadException extends Exception {
         'Unable to write file: failed to write to temporary directory.',
       UPLOAD_ERR_EXTENSION =>
         'Unable to upload: a PHP extension stopped the upload.',
-
-      -1000 =>
-        pht("Uploaded file is too large: current limit is %s. To adjust this ".
-          "limit change 'storage.upload-size-limit' in the Phabricator config.",
-          PhabricatorEnv::getEnvConfig('storage.upload-size-limit')),
     );
 
     $message = idx($map, $code, 'Upload failed: unknown error.');

@@ -13,22 +13,23 @@ final class PhortuneCartAcceptController
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
+    // You must control the merchant to accept orders.
+    $authority = $this->loadMerchantAuthority();
+    if (!$authority) {
+      return new Aphront404Response();
+    }
+
     $cart = id(new PhortuneCartQuery())
       ->setViewer($viewer)
       ->withIDs(array($this->id))
+      ->withMerchantPHIDs(array($authority->getPHID()))
       ->needPurchases(true)
       ->executeOne();
     if (!$cart) {
       return new Aphront404Response();
     }
 
-    // You must control the merchant to accept orders.
-    PhabricatorPolicyFilter::requireCapability(
-      $viewer,
-      $cart->getMerchant(),
-      PhabricatorPolicyCapability::CAN_EDIT);
-
-    $cancel_uri = $cart->getDetailURI();
+    $cancel_uri = $cart->getDetailURI($authority);
 
     if ($cart->getStatus() !== PhortuneCart::STATUS_REVIEW) {
       return $this->newDialog()

@@ -21,6 +21,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   private $dateCreatedBefore;
   private $dateModifiedAfter;
   private $dateModifiedBefore;
+  private $reversePaging;
 
   private $fullTextSearch   = '';
 
@@ -36,6 +37,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $statuses;
   private $priorities;
+  private $subpriorities;
 
   private $groupBy          = 'group-none';
   const GROUP_NONE          = 'group-none';
@@ -133,6 +135,11 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   public function withPriorities(array $priorities) {
     $this->priorities = $priorities;
+    return $this;
+  }
+
+  public function withSubpriorities(array $subpriorities) {
+    $this->subpriorities = $subpriorities;
     return $this;
   }
 
@@ -438,7 +445,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
     return qsprintf(
       $conn,
-      'id in (%Ld)',
+      'task.id in (%Ld)',
       $this->taskIDs);
   }
 
@@ -449,7 +456,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
     return qsprintf(
       $conn,
-      'phid in (%Ls)',
+      'task.phid in (%Ls)',
       $this->taskPHIDs);
   }
 
@@ -468,12 +475,12 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       case self::STATUS_OPEN:
         return qsprintf(
           $conn,
-          'status IN (%Ls)',
+          'task.status IN (%Ls)',
           ManiphestTaskStatus::getOpenStatusConstants());
       case self::STATUS_CLOSED:
         return qsprintf(
           $conn,
-          'status IN (%Ls)',
+          'task.status IN (%Ls)',
           ManiphestTaskStatus::getClosedStatusConstants());
       default:
         $constant = idx($map, $this->status);
@@ -482,7 +489,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         }
         return qsprintf(
           $conn,
-          'status = %s',
+          'task.status = %s',
           $constant);
     }
   }
@@ -491,7 +498,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     if ($this->statuses) {
       return qsprintf(
         $conn,
-        'status IN (%Ls)',
+        'task.status IN (%Ls)',
         $this->statuses);
     }
     return null;
@@ -501,8 +508,15 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     if ($this->priorities) {
       return qsprintf(
         $conn,
-        'priority IN (%Ld)',
+        'task.priority IN (%Ld)',
         $this->priorities);
+    }
+
+    if ($this->subpriorities) {
+      return qsprintf(
+        $conn,
+        'task.subpriority IN (%Lf)',
+        $this->subpriorities);
     }
 
     return null;
@@ -515,7 +529,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
     return qsprintf(
       $conn,
-      'authorPHID in (%Ls)',
+      'task.authorPHID in (%Ls)',
       $this->authorPHIDs);
   }
 
@@ -526,23 +540,23 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       } else if ($this->includeUnowned) {
         return qsprintf(
           $conn,
-          'ownerPHID IS NULL');
+          'task.ownerPHID IS NULL');
       } else {
         return qsprintf(
           $conn,
-          'ownerPHID IS NOT NULL');
+          'task.ownerPHID IS NOT NULL');
       }
     }
 
     if ($this->includeUnowned) {
       return qsprintf(
         $conn,
-        'ownerPHID IN (%Ls) OR ownerPHID IS NULL',
+        'task.ownerPHID IN (%Ls) OR task.ownerPHID IS NULL',
         $this->ownerPHIDs);
     } else {
       return qsprintf(
         $conn,
-        'ownerPHID IN (%Ls)',
+        'task.ownerPHID IN (%Ls)',
         $this->ownerPHIDs);
     }
   }
@@ -572,7 +586,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
     return qsprintf(
       $conn,
-      'phid IN (%Ls)',
+      'task.phid IN (%Ls)',
       $fulltext_results);
   }
 
@@ -588,21 +602,25 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     if ($this->blockingTasks === true) {
       $parts[] = qsprintf(
         $conn,
-        'blocking.dst IS NOT NULL');
+        'blocking.dst IS NOT NULL AND blockingtask.status IN (%Ls)',
+        ManiphestTaskStatus::getOpenStatusConstants());
     } else if ($this->blockingTasks === false) {
       $parts[] = qsprintf(
         $conn,
-        'blocking.dst IS NULL');
+        'blocking.dst IS NULL OR blockingtask.status NOT IN (%Ls)',
+        ManiphestTaskStatus::getOpenStatusConstants());
     }
 
     if ($this->blockedTasks === true) {
       $parts[] = qsprintf(
         $conn,
-        'blocked.dst IS NOT NULL');
+        'blocked.dst IS NOT NULL AND blockedtask.status IN (%Ls)',
+        ManiphestTaskStatus::getOpenStatusConstants());
     } else if ($this->blockedTasks === false) {
       $parts[] = qsprintf(
         $conn,
-        'blocked.dst IS NULL');
+        'blocked.dst IS NULL OR blockedtask.status NOT IN (%Ls)',
+        ManiphestTaskStatus::getOpenStatusConstants());
     }
 
     return '('.implode(') OR (', $parts).')';
@@ -680,13 +698,13 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       case self::GROUP_NONE:
         break;
       case self::GROUP_PRIORITY:
-        $order[] = 'priority';
+        $order[] = 'task.priority';
         break;
       case self::GROUP_OWNER:
-        $order[] = 'ownerOrdering';
+        $order[] = 'task.ownerOrdering';
         break;
       case self::GROUP_STATUS:
-        $order[] = 'status';
+        $order[] = 'task.status';
         break;
       case self::GROUP_PROJECT:
         $order[] = '<group.project>';
@@ -700,18 +718,18 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     if (!$app_order) {
       switch ($this->orderBy) {
         case self::ORDER_PRIORITY:
-          $order[] = 'priority';
-          $order[] = 'subpriority';
-          $order[] = 'dateModified';
+          $order[] = 'task.priority';
+          $order[] = 'task.subpriority';
+          $order[] = 'task.dateModified';
           break;
         case self::ORDER_CREATED:
-          $order[] = 'id';
+          $order[] = 'task.id';
           break;
         case self::ORDER_MODIFIED:
-          $order[] = 'dateModified';
+          $order[] = 'task.dateModified';
           break;
         case self::ORDER_TITLE:
-          $order[] = 'title';
+          $order[] = 'task.title';
           break;
         default:
           throw new Exception("Unknown order query '{$this->orderBy}'!");
@@ -730,9 +748,9 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         case 'ownerOrdering':
         case 'title':
           if ($reverse) {
-            $order[$k] = "task.{$column} DESC";
+            $order[$k] = "{$column} DESC";
           } else {
-            $order[$k] = "task.{$column} ASC";
+            $order[$k] = "{$column} ASC";
           }
           break;
         case '<group.project>':
@@ -749,9 +767,9 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
           break;
         default:
           if ($reverse) {
-            $order[$k] = "task.{$column} ASC";
+            $order[$k] = "{$column} ASC";
           } else {
-            $order[$k] = "task.{$column} DESC";
+            $order[$k] = "{$column} DESC";
           }
           break;
       }
@@ -761,12 +779,12 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       foreach ($app_order as $order_by) {
         $order[] = $order_by;
       }
+    }
 
-      if ($reverse) {
-        $order[] = 'task.id ASC';
-      } else {
-        $order[] = 'task.id DESC';
-      }
+    if ($reverse) {
+      $order[] = 'task.id ASC';
+    } else {
+      $order[] = 'task.id DESC';
     }
 
     return 'ORDER BY '.implode(', ', $order);
@@ -791,17 +809,21 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       $joins[] = qsprintf(
         $conn_r,
         'LEFT JOIN %T blocking ON blocking.src = task.phid '.
-        'AND blocking.type = %d',
+        'AND blocking.type = %d '.
+        'LEFT JOIN %T blockingtask ON blocking.dst = blockingtask.phid',
         $edge_table,
-        ManiphestTaskDependedOnByTaskEdgeType::EDGECONST);
+        ManiphestTaskDependedOnByTaskEdgeType::EDGECONST,
+        id(new ManiphestTask())->getTableName());
     }
     if ($this->shouldJoinBlockedTasks()) {
       $joins[] = qsprintf(
         $conn_r,
         'LEFT JOIN %T blocked ON blocked.src = task.phid '.
-        'AND blocked.type = %d',
+        'AND blocked.type = %d '.
+        'LEFT JOIN %T blockedtask ON blocked.dst = blockedtask.phid',
         $edge_table,
-        ManiphestTaskDependsOnTaskEdgeType::EDGECONST);
+        ManiphestTaskDependsOnTaskEdgeType::EDGECONST,
+        id(new ManiphestTask())->getTableName());
     }
 
     if ($this->anyProjectPHIDs || $this->anyUserProjectPHIDs) {
@@ -971,7 +993,9 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
     $cursor = $this->loadCursorObject($task_id);
     if (!$cursor) {
-      return null;
+      // We may loop if we have a cursor and don't build a paging clause; fail
+      // instead.
+      throw new PhabricatorEmptyQueryException();
     }
 
     $columns = array();
@@ -1044,11 +1068,6 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     $app_columns = $this->buildApplicationSearchPagination($conn_r, $cursor);
     if ($app_columns) {
       $columns = array_merge($columns, $app_columns);
-      $columns[] = array(
-        'name' => 'task.id',
-        'value' => (int)$cursor->getID(),
-        'type' => 'int',
-      );
     } else {
       switch ($this->orderBy) {
         case self::ORDER_PRIORITY:
@@ -1061,9 +1080,8 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
           }
           $columns[] = array(
             'name' => 'task.subpriority',
-            'value' => (int)$cursor->getSubpriority(),
-            'type' => 'int',
-            'reverse' => true,
+            'value' => $cursor->getSubpriority(),
+            'type' => 'float',
           );
           $columns[] = array(
             'name' => 'task.dateModified',
@@ -1072,11 +1090,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
           );
           break;
         case self::ORDER_CREATED:
-          $columns[] = array(
-            'name' => 'task.id',
-            'value' => (int)$cursor->getID(),
-            'type' => 'int',
-          );
+          // This just uses the ID column, below.
           break;
         case self::ORDER_MODIFIED:
           $columns[] = array(
@@ -1091,16 +1105,17 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
             'value' => $cursor->getTitle(),
             'type' => 'string',
           );
-          $columns[] = array(
-            'name' => 'task.id',
-            'value' => $cursor->getID(),
-            'type' => 'int',
-          );
           break;
         default:
           throw new Exception("Unknown order query '{$this->orderBy}'!");
       }
     }
+
+    $columns[] = array(
+      'name' => 'task.id',
+      'value' => $cursor->getID(),
+      'type' => 'int',
+    );
 
     return $this->buildPagingClauseFromMultipleColumns(
       $conn_r,
@@ -1116,6 +1131,15 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   public function getQueryApplicationClass() {
     return 'PhabricatorManiphestApplication';
+  }
+
+  public function setReversePaging($reverse_paging) {
+    $this->reversePaging = $reverse_paging;
+    return $this;
+  }
+
+  protected function getReversePaging() {
+    return $this->reversePaging;
   }
 
 }

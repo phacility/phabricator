@@ -10,7 +10,7 @@ final class DifferentialAddCommentView extends AphrontView {
   private $ccs = array();
   private $errorView;
 
-  public function setErrorView(PHUIErrorView $error_view) {
+  public function setInfoView(PHUIInfoView $error_view) {
     $this->errorView = $error_view;
     return $this;
   }
@@ -188,7 +188,7 @@ final class DifferentialAddCommentView extends AphrontView {
       ->appendChild($form);
 
     if ($this->errorView) {
-      $comment_box->setErrorView($this->errorView);
+      $comment_box->setInfoView($this->errorView);
     }
 
     return array($comment_box, $preview);

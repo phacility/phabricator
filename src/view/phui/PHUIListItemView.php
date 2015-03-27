@@ -146,6 +146,10 @@ final class PHUIListItemView extends AphrontTagView {
       $classes[] = 'phui-list-item-selected';
     }
 
+    if ($this->disabled) {
+      $classes[] = 'phui-list-item-disabled';
+    }
+
     if ($this->statusColor) {
       $classes[] = $this->statusColor;
     }

@@ -59,6 +59,7 @@ final class PhabricatorAuthSSHPublicKey extends Phobject {
       'ssh-dsa',
       'ssh-dss',
       'ssh-rsa',
+      'ssh-ed25519',
       'ecdsa-sha2-nistp256',
       'ecdsa-sha2-nistp384',
       'ecdsa-sha2-nistp521',

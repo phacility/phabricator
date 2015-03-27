@@ -50,7 +50,6 @@ final class PhabricatorProject extends PhabricatorProjectDAO
       ProjectDefaultJoinCapability::CAPABILITY);
 
     return id(new PhabricatorProject())
-      ->setName('')
       ->setAuthorPHID($actor->getPHID())
       ->setIcon(self::DEFAULT_ICON)
       ->setColor(self::DEFAULT_COLOR)

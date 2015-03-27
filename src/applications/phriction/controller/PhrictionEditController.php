@@ -94,8 +94,8 @@ final class PhrictionEditController
         ),
         pht('discard this draft'));
 
-      $draft_note = new PHUIErrorView();
-      $draft_note->setSeverity(PHUIErrorView::SEVERITY_NOTICE);
+      $draft_note = new PHUIInfoView();
+      $draft_note->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
       $draft_note->setTitle('Recovered Draft');
       $draft_note->appendChild(hsprintf(
         '<p>Showing a saved draft of your edits, you can %s.</p>',
@@ -156,10 +156,12 @@ final class PhrictionEditController
         return id(new AphrontRedirectResponse())->setURI($uri);
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
         $validation_exception = $ex;
-        $e_title = $ex->getShortMessage(
-          PhrictionTransaction::TYPE_TITLE);
-        $e_content = $ex->getShortMessage(
-          PhrictionTransaction::TYPE_CONTENT);
+        $e_title = nonempty(
+          $ex->getShortMessage(PhrictionTransaction::TYPE_TITLE),
+          true);
+        $e_content = nonempty(
+          $ex->getShortMessage(PhrictionTransaction::TYPE_CONTENT),
+          true);
 
         // if we're not supposed to process the content version error, then
         // overwrite that content...!

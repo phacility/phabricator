@@ -7,6 +7,8 @@ final class ConpherenceThreadQuery
 
   private $phids;
   private $ids;
+  private $participantPHIDs;
+  private $isRoom;
   private $needWidgetData;
   private $needTransactions;
   private $needParticipantCache;
@@ -45,6 +47,16 @@ final class ConpherenceThreadQuery
     return $this;
   }
 
+  public function withParticipantPHIDs(array $phids) {
+    $this->participantPHIDs = $phids;
+    return $this;
+  }
+
+  public function withIsRoom($bool) {
+    $this->isRoom = $bool;
+    return $this;
+  }
+
   public function setAfterTransactionID($id) {
     $this->afterTransactionID = $id;
     return $this;
@@ -70,8 +82,9 @@ final class ConpherenceThreadQuery
 
     $data = queryfx_all(
       $conn_r,
-      'SELECT conpherence_thread.* FROM %T conpherence_thread %Q %Q %Q',
+      'SELECT conpherence_thread.* FROM %T conpherence_thread %Q %Q %Q %Q',
       $table->getTableName(),
+      $this->buildJoinClause($conn_r),
       $this->buildWhereClause($conn_r),
       $this->buildOrderClause($conn_r),
       $this->buildLimitClause($conn_r));
@@ -100,23 +113,59 @@ final class ConpherenceThreadQuery
     return $conpherences;
   }
 
+  private function buildGroupClause($conn_r) {
+    if ($this->participantPHIDs !== null) {
+      return 'GROUP BY conpherence_thread.id';
+    } else {
+      return $this->buildApplicationSearchGroupClause($conn_r);
+    }
+  }
+
+  private function buildJoinClause($conn_r) {
+    $joins = array();
+
+    if ($this->participantPHIDs !== null) {
+      $joins[] = qsprintf(
+        $conn_r,
+        'JOIN %T p ON p.conpherencePHID = conpherence_thread.phid',
+        id(new ConpherenceParticipant())->getTableName());
+    }
+
+    $joins[] = $this->buildApplicationSearchJoinClause($conn_r);
+    return implode(' ', $joins);
+  }
+
   protected function buildWhereClause($conn_r) {
     $where = array();
 
     $where[] = $this->buildPagingClause($conn_r);
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn_r,
-        'id IN (%Ld)',
+        'conpherence_thread.id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn_r,
-        'phid IN (%Ls)',
+        'conpherence_thread.phid IN (%Ls)',
         $this->phids);
+    }
+
+    if ($this->participantPHIDs !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'p.participantPHID IN (%Ls)',
+        $this->participantPHIDs);
+    }
+
+    if ($this->isRoom !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'conpherence_thread.isRoom = %d',
+        (int)$this->isRoom);
     }
 
     return $this->formatWhereClause($where);
