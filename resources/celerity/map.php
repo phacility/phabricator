@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => 'f4d1cd07',
+    'core.pkg.css' => '1601392f',
     'core.pkg.js' => '75599122',
     'darkconsole.pkg.js' => '8ab24e01',
     'differential.pkg.css' => '5a0b221c',
@@ -28,7 +28,7 @@ return array(
     'rsrc/css/aphront/phabricator-nav-view.css' => '7aeaf435',
     'rsrc/css/aphront/table-view.css' => '3e77fefe',
     'rsrc/css/aphront/tokenizer.css' => '82ce2142',
-    'rsrc/css/aphront/tooltip.css' => '4099b97e',
+    'rsrc/css/aphront/tooltip.css' => '7672b60f',
     'rsrc/css/aphront/transaction.css' => '042fc4bb',
     'rsrc/css/aphront/two-column.css' => '16ab3ad2',
     'rsrc/css/aphront/typeahead.css' => '0e403212',
@@ -506,7 +506,7 @@ return array(
     'aphront-panel-view-css' => '8427b78d',
     'aphront-table-view-css' => '3e77fefe',
     'aphront-tokenizer-control-css' => '82ce2142',
-    'aphront-tooltip-css' => '4099b97e',
+    'aphront-tooltip-css' => '7672b60f',
     'aphront-two-column-view-css' => '16ab3ad2',
     'aphront-typeahead-control-css' => '0e403212',
     'auth-css' => '1e655982',
