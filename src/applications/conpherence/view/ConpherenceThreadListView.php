@@ -35,7 +35,7 @@ final class ConpherenceThreadListView extends AphrontView {
 
     $grouped = mgroup($this->threads, 'getIsRoom');
     $rooms = idx($grouped, true, array());
-    $rooms = array_slice($grouped[true], 0, 5);
+    $rooms = array_slice($rooms, 0, 5);
 
     $policies = array();
     foreach ($rooms as $room) {
