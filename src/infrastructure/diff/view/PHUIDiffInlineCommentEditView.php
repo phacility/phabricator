@@ -122,7 +122,7 @@ final class PHUIDiffInlineCommentEditView
   private function renderBody() {
     $buttons = array();
 
-    $buttons[] = phutil_tag('button', array(), pht('Ready'));
+    $buttons[] = phutil_tag('button', array(), pht('Save Draft'));
     $buttons[] = javelin_tag(
       'button',
       array(
@@ -148,11 +148,10 @@ final class PHUIDiffInlineCommentEditView
     $edit = phutil_tag(
       'div',
       array(
-        'class' => 'differential-inline-comment-edit-buttons',
+        'class' => 'differential-inline-comment-edit-buttons grouped',
       ),
       array(
         $buttons,
-        phutil_tag('div', array('style' => 'clear: both'), ''),
       ));
 
     return javelin_tag(
