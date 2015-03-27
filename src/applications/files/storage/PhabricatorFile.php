@@ -471,17 +471,39 @@ final class PhabricatorFile extends PhabricatorFileDAO
             pht('Too many redirects trying to fetch remote URI.'));
         }
 
-        PhabricatorEnv::requireValidRemoteURIForFetch(
+        $resolved = PhabricatorEnv::requireValidRemoteURIForFetch(
           $current,
           array(
             'http',
             'https',
           ));
 
-        list($status, $body, $headers) = id(new HTTPSFuture($current))
+        list($resolved_uri, $resolved_domain) = $resolved;
+
+        $current = new PhutilURI($current);
+        if ($current->getProtocol() == 'http') {
+          // For HTTP, we can use a pre-resolved URI to defuse DNS rebinding.
+          $fetch_uri = $resolved_uri;
+          $fetch_host = $resolved_domain;
+        } else {
+          // For HTTPS, we can't: cURL won't verify the SSL certificate if
+          // the domain has been replaced with an IP. But internal services
+          // presumably will not have valid certificates for rebindable
+          // domain names on attacker-controlled domains, so the DNS rebinding
+          // attack should generally not be possible anyway.
+          $fetch_uri = $current;
+          $fetch_host = null;
+        }
+
+        $future = id(new HTTPSFuture($fetch_uri))
           ->setFollowLocation(false)
-          ->setTimeout($timeout)
-          ->resolve();
+          ->setTimeout($timeout);
+
+        if ($fetch_host !== null) {
+          $future->addHeader('Host', $fetch_host);
+        }
+
+        list($status, $body, $headers) = $future->resolve();
 
         if ($status->isRedirect()) {
           // This is an HTTP 3XX status, so look for a "Location" header.

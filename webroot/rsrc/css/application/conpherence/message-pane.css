@@ -60,6 +60,10 @@
   -webkit-overflow-scrolling: touch;
 }
 
+.conpherence-messages > .conpherence-edited:first-child {
+  padding-top: 20px;
+}
+
 .device .conpherence-message-pane .conpherence-messages {
   left: 0;
   right: 0;
@@ -149,17 +153,20 @@
   margin: 12px 12px 4px;
   min-height: auto;
 }
+
 .device-phone .conpherence-message-pane .date-marker {
   margin: 5px 0;
 }
+
 .conpherence-message-pane .date-marker .date {
   position: relative;
   top: -11px;
   left: 40px;
   background-color: #FFF;
-  color: {$bluetext};
-  font-size: 12px;
+  color: {$darkbluetext};
+  font-size: 13px;
   padding: 0px 5px;
+  font-weight: bold;
 }
 
 .device-phone .conpherence-message-pane .phabricator-transaction-detail {
@@ -174,12 +181,19 @@
   float: left;
 }
 
-.conpherence-message-pane .conpherence-edited .phabricator-transaction-header {
-  float: right;
+.conpherence-message-pane .conpherence-edited {
+  padding: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  min-height: inherit;
 }
 
-.conpherence-message-pane .conpherence-edited {
-  padding-top: 12px;
+.conpherence-message-pane .conpherence-edited + .conpherence-comment {
+  margin-top: 20px;
+}
+
+.conpherence-message-pane .conpherence-edited .phabricator-transaction-header {
+  float: right;
 }
 
 .device-phone .conpherence-message-pane .conpherence-edited {
@@ -209,10 +223,6 @@
 .conpherence-message-pane .phabricator-transaction-content {
   background: none;
   padding: 0;
-}
-
-.conpherence-message-pane .phabricator-transaction-header a {
-  color: {$darkbluetext};
 }
 
 .conpherence-message-pane .phabricator-transaction-content {

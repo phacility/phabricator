@@ -125,6 +125,7 @@ final class PhortuneOrderTableView extends AphrontView {
     }
 
     $table = id(new AphrontTableView($rows))
+      ->setTallTable(true)
       ->setNoDataString($this->getNoDataString())
       ->setRowClasses($rowc)
       ->setHeaders(

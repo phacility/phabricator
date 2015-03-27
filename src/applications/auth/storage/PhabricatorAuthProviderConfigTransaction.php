@@ -104,7 +104,7 @@ final class PhabricatorAuthProviderConfigTransaction
       case self::TYPE_LINK:
         if ($new) {
           return pht(
-            '%s enabled accont linking.',
+            '%s enabled account linking.',
             $this->renderHandleLink($author_phid));
         } else {
           return pht(

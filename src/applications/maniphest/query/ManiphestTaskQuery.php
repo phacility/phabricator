@@ -37,6 +37,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   private $statuses;
   private $priorities;
+  private $subpriorities;
 
   private $groupBy          = 'group-none';
   const GROUP_NONE          = 'group-none';
@@ -134,6 +135,11 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   public function withPriorities(array $priorities) {
     $this->priorities = $priorities;
+    return $this;
+  }
+
+  public function withSubpriorities(array $subpriorities) {
+    $this->subpriorities = $subpriorities;
     return $this;
   }
 
@@ -504,6 +510,13 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         $conn,
         'task.priority IN (%Ld)',
         $this->priorities);
+    }
+
+    if ($this->subpriorities) {
+      return qsprintf(
+        $conn,
+        'task.subpriority IN (%Lf)',
+        $this->subpriorities);
     }
 
     return null;

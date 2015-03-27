@@ -465,7 +465,8 @@ abstract class DifferentialChangesetHTMLRenderer
       ->setMarkupEngine($this->getMarkupEngine())
       ->setEditable($edit)
       ->setAllowReply($allow_reply)
-      ->setCanMarkDone($allow_done);
+      ->setCanMarkDone($allow_done)
+      ->setObjectOwnerPHID($this->getObjectOwnerPHID());
   }
 
 

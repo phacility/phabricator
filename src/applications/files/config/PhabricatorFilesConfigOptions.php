@@ -89,8 +89,14 @@ final class PhabricatorFilesConfigOptions
 
     ) + array_fill_keys(array_keys($image_default), 'fa-file-image-o');
 
+    // NOTE: These options are locked primarily because adding "text/plain"
+    // as an image MIME type increases SSRF vulnerability by allowing users
+    // to load text files from remote servers as "images" (see T6755 for
+    // discussion).
+
     return array(
       $this->newOption('files.viewable-mime-types', 'wild', $viewable_default)
+        ->setLocked(true)
         ->setSummary(
           pht('Configure which MIME types are viewable in the browser.'))
         ->setDescription(
@@ -104,18 +110,21 @@ final class PhabricatorFilesConfigOptions
             'the MIME types they are delivered as when they are viewed in '.
             'the browser.')),
       $this->newOption('files.image-mime-types', 'set', $image_default)
+        ->setLocked(true)
         ->setSummary(pht('Configure which MIME types are images.'))
         ->setDescription(
           pht(
             'List of MIME types which can be used as the `src` for an '.
             '`<img />` tag.')),
       $this->newOption('files.audio-mime-types', 'set', $audio_default)
+        ->setLocked(true)
         ->setSummary(pht('Configure which MIME types are audio.'))
         ->setDescription(
           pht(
             'List of MIME types which can be used to render an '.
             '`<audio />` tag.')),
       $this->newOption('files.icon-mime-types', 'wild', $icon_default)
+        ->setLocked(true)
         ->setSummary(pht('Configure which MIME types map to which icons.'))
         ->setDescription(
           pht(

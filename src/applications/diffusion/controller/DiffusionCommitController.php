@@ -720,8 +720,6 @@ final class DiffusionCommitController extends DiffusionController {
     $header->setHeader(
       $is_serious ? pht('Audit Commit') : pht('Creative Accounting'));
 
-    require_celerity_resource('phabricator-transaction-view-css');
-
     $mailable_source = new PhabricatorMetaMTAMailableDatasource();
     $auditor_source = new DiffusionAuditorDatasource();
 
@@ -902,8 +900,10 @@ final class DiffusionCommitController extends DiffusionController {
       $caption = new PHUIInfoView();
       $caption->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
       $caption->appendChild(
-        pht('This commit merges more than %d changes. Only the first '.
-        '%d are shown.', $limit));
+        pht(
+          'This commit merges a very large number of changes. Only the first '.
+          '%s are shown.',
+          new PhutilNumber($limit)));
     }
 
     $history_table = new DiffusionHistoryTableView();

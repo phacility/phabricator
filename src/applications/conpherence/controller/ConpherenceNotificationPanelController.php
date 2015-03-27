@@ -3,8 +3,7 @@
 final class ConpherenceNotificationPanelController
   extends ConpherenceController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
     $conpherences = array();
     $unread_status = ConpherenceParticipationStatus::BEHIND;

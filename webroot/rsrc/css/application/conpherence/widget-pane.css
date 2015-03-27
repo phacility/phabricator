@@ -57,6 +57,10 @@
   border-top-color: #000;
 }
 
+.conpherence-widget-pane .widgets-header .phui-icon-view.disabled {
+  color: {$lightgreytext};
+}
+
 .device-desktop .conpherence-layout .device-widgets-selector {
   display: none;
 }

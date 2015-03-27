@@ -489,3 +489,11 @@ tr.differential-inline-loading {
 .device-phone .differential-file-icon-header .phui-icon-view {
   display: none;
 }
+
+.inline-is-done {
+  opacity: 0.75;
+}
+
+.inline-state-is-draft input.differential-inline-done[type="checkbox"] {
+  /* TODO: Possibly style this. */
+}

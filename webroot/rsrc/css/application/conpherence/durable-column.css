@@ -73,6 +73,10 @@
   border-left: 1px solid rgba(0,0,0,.2);
 }
 
+.conpherence-durable-column-header-text .phui-icon-view {
+  color: rgba(255, 255, 255, 0.8);
+}
+
 .conpherence-durable-column-icon-bar {
   height: 38px;
   padding: 4px 8px;
@@ -128,10 +132,12 @@
   padding: 8px 12px 0;
 }
 
-.conpherence-durable-column-transactions .conpherence-edited {
-  color: {$lightgreytext};
-  font-size: 12px;
-  margin: 0;
+.conpherence-durable-column-transactions
+  .phabricator-transaction-view.conpherence-edited {
+    color: {$lightgreytext};
+    font-size: 12px;
+    margin: 0;
+    padding: 0;
 }
 
 .conpherence-durable-column-transactions .conpherence-edited
@@ -173,7 +179,8 @@
   top: -11px;
   left: 0;
   background-color: #fff;
-  color: {$lightbluetext};
+  color: {$darkbluetext};
+  font-weight: bold;
   font-size: 12px;
   padding: 0 6px 0 0;
 }
@@ -187,7 +194,6 @@
 
 .conpherence-durable-column-transactions .phabricator-transaction-detail
 .phabricator-transaction-header .phui-link-person {
-  color: {$darkbluetext};
   margin: 0 8px 0 0;
 }
 

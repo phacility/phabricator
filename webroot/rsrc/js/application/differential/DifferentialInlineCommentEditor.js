@@ -303,6 +303,15 @@ JX.install('DifferentialInlineCommentEditor', {
       new JX.Workflow(this._uri, data)
         .setHandler(JX.bind(this, function() {
           checkbox.checked = !checkbox.checked;
+
+          var comment = JX.DOM.findAbove(
+            checkbox,
+            'div',
+            'differential-inline-comment');
+          JX.DOM.alterClass(comment, 'inline-is-done', !!checkbox.checked);
+
+          // TODO: Dynamically update the "inline-state-is-draft" class.
+
           this._didUpdate();
         }))
         .start();

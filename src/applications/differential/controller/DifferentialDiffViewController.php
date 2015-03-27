@@ -38,18 +38,9 @@ final class DifferentialDiffViewController extends DifferentialController {
       pht('Create a new Revision...'));
     $select[] = hsprintf('</optgroup>');
 
-    $revisions = id(new DifferentialRevisionQuery())
-      ->setViewer($viewer)
-      ->withAuthors(array($viewer->getPHID()))
-      ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
-      ->requireCapabilities(
-        array(
-          PhabricatorPolicyCapability::CAN_VIEW,
-          PhabricatorPolicyCapability::CAN_EDIT,
-        ))
-      ->execute();
-
     $selected_id = $request->getInt('revisionID');
+
+    $revisions = $this->loadSelectableRevisions($viewer, $selected_id);
 
     if ($revisions) {
       $select[] = hsprintf(
@@ -152,5 +143,46 @@ final class DifferentialDiffViewController extends DifferentialController {
         'title' => pht('Diff View'),
       ));
   }
+
+  private function loadSelectableRevisions(
+    PhabricatorUser $viewer,
+    $selected_id) {
+
+    $revisions = id(new DifferentialRevisionQuery())
+      ->setViewer($viewer)
+      ->withAuthors(array($viewer->getPHID()))
+      ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
+      ->execute();
+    $revisions = mpull($revisions, null, 'getID');
+
+    // If a specific revision is selected (for example, because the user is
+    // following the "Update Diff" workflow), but not present in the dropdown,
+    // try to add it to the dropdown even if it is closed. This allows the
+    // workflow to be used to update abandoned revisions.
+
+    if ($selected_id) {
+      if (empty($revisions[$selected_id])) {
+        $selected = id(new DifferentialRevisionQuery())
+          ->setViewer($viewer)
+          ->withAuthors(array($viewer->getPHID()))
+          ->withIDs(array($selected_id))
+          ->requireCapabilities(
+            array(
+              PhabricatorPolicyCapability::CAN_VIEW,
+              PhabricatorPolicyCapability::CAN_EDIT,
+            ))
+          ->execute();
+        $revisions = mpull($selected, null, 'getID') + $revisions;
+      }
+    }
+
+    return $revisions;
+  }
+
 
 }

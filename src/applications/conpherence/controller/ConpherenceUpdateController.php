@@ -3,34 +3,36 @@
 final class ConpherenceUpdateController
   extends ConpherenceController {
 
-  private $conpherenceID;
-
-  public function setConpherenceID($conpherence_id) {
-    $this->conpherenceID = $conpherence_id;
-    return $this;
-  }
-  public function getConpherenceID() {
-    return $this->conpherenceID;
-  }
-  public function willProcessRequest(array $data) {
-    $this->setConpherenceID(idx($data, 'id'));
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
-    $conpherence_id = $this->getConpherenceID();
+    $conpherence_id = $request->getURIData('id');
     if (!$conpherence_id) {
       return new Aphront404Response();
     }
 
+    $needed_capabilities = array(PhabricatorPolicyCapability::CAN_VIEW);
+    $action = $request->getStr('action', ConpherenceUpdateActions::METADATA);
+    switch ($action) {
+      case ConpherenceUpdateActions::REMOVE_PERSON:
+        $person_phid = $request->getStr('remove_person');
+        if ($person_phid != $user->getPHID()) {
+          $needed_capabilities[] = PhabricatorPolicyCapability::CAN_EDIT;
+        }
+        break;
+      case ConpherenceUpdateActions::ADD_PERSON:
+      case ConpherenceUpdateActions::METADATA:
+        $needed_capabilities[] = PhabricatorPolicyCapability::CAN_EDIT;
+        break;
+      case ConpherenceUpdateActions::JOIN_ROOM:
+        $needed_capabilities[] = PhabricatorPolicyCapability::CAN_JOIN;
+        break;
+    }
     $conpherence = id(new ConpherenceThreadQuery())
       ->setViewer($user)
       ->withIDs(array($conpherence_id))
       ->needFilePHIDs(true)
+      ->requireCapabilities($needed_capabilities)
       ->executeOne();
-
-    $action = $request->getStr('action', ConpherenceUpdateActions::METADATA);
 
     $latest_transaction_id = null;
     $response_mode = $request->isAjax() ? 'ajax' : 'redirect';
@@ -54,10 +56,6 @@ final class ConpherenceUpdateController
           $draft->replaceOrDelete();
           return new AphrontAjaxResponse();
         case ConpherenceUpdateActions::JOIN_ROOM:
-          PhabricatorPolicyFilter::requireCapability(
-            $user,
-            $conpherence,
-            PhabricatorPolicyCapability::CAN_JOIN);
           $xactions[] = id(new ConpherenceTransaction())
             ->setTransactionType(
               ConpherenceTransactionType::TYPE_PARTICIPANTS)
@@ -257,14 +255,19 @@ final class ConpherenceUpdateController
     $user = $request->getUser();
     $remove_person = $request->getStr('remove_person');
     $participants = $conpherence->getParticipants();
-    $message = pht(
-      'Are you sure you want to remove yourself from this conpherence? ');
-    if (count($participants) == 1) {
-      $message .= pht(
-        'The conpherence will be inaccessible forever and ever.');
+    if ($conpherence->getIsRoom()) {
+      $message = pht(
+        'Are you sure you want to remove yourself from this room?');
     } else {
-      $message .= pht(
-        'Someone else in the conpherence can add you back later.');
+      $message = pht(
+        'Are you sure you want to remove yourself from this thread?');
+      if (count($participants) == 1) {
+        $message .= pht(
+          'The thread will be inaccessible forever and ever.');
+      } else {
+        $message .= pht(
+          'Someone else in the thread can add you back later.');
+      }
     }
     $body = phutil_tag(
       'p',
@@ -374,7 +377,11 @@ final class ConpherenceUpdateController
     $file_widget = null;
     switch ($action) {
       case ConpherenceUpdateActions::METADATA:
-        $header = $this->buildHeaderPaneContent($conpherence);
+        $policy_objects = id(new PhabricatorPolicyQuery())
+          ->setViewer($user)
+          ->setObject($conpherence)
+          ->execute();
+        $header = $this->buildHeaderPaneContent($conpherence, $policy_objects);
         $nav_item = id(new ConpherenceThreadListView())
           ->setUser($user)
           ->setBaseURI($this->getApplicationURI())

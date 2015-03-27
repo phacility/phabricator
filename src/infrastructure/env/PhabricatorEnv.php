@@ -717,7 +717,7 @@ final class PhabricatorEnv {
    *
    * @param string URI to test.
    * @param list<string> Allowed protocols.
-   * @return void
+   * @return pair<string, string> Pre-resolved URI and domain.
    * @task uri
    */
   public static function requireValidRemoteURIForFetch(
@@ -776,6 +776,11 @@ final class PhabricatorEnv {
             $address));
       }
     }
+
+    $resolved_uri = clone $uri;
+    $resolved_uri->setDomain(head($addresses));
+
+    return array($resolved_uri, $domain);
   }
 
 

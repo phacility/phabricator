@@ -183,7 +183,7 @@ JX.behavior('durable-column', function(config, statics) {
           'selected',
           cdata.threadID == data.threadID);
       }
-      JX.DOM.setContent(_getColumnTitleNode(), data.threadTitle);
+      JX.DOM.setContent(_getColumnTitleNode(), JX.$H(data.threadTitle));
       threadManager.loadThreadByID(data.threadID);
     });
 

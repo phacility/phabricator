@@ -8,6 +8,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
   private $transactions;
   private $visible;
   private $initialLoad = false;
+  private $policyObjects;
 
   public function setConpherences(array $conpherences) {
     assert_instances_of($conpherences, 'ConpherenceThread');
@@ -66,6 +67,17 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
     return $this->initialLoad;
   }
 
+  public function setPolicyObjects(array $objects) {
+    assert_instances_of($objects, 'PhabricatorPolicy');
+
+    $this->policyObjects = $objects;
+    return $this;
+  }
+
+  public function getPolicyObjects() {
+    return $this->policyObjects;
+  }
+
   protected function getTagAttributes() {
     if ($this->getVisible()) {
       $style = null;
@@ -95,6 +107,23 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
         'visible' => $this->getVisible(),
         'settingsURI' => '/settings/adjust/?key='.$column_key,
       ));
+
+    $policies = array();
+    $conpherences = $this->getConpherences();
+    foreach ($conpherences as $conpherence) {
+      if (!$conpherence->getIsRoom()) {
+        continue;
+      }
+      $policies[] = $conpherence->getViewPolicy();
+    }
+    $policy_objects = array();
+    if ($policies) {
+      $policy_objects = id(new PhabricatorPolicyQuery())
+        ->setViewer($this->getUser())
+        ->withPHIDs($policies)
+        ->execute();
+    }
+    $this->setPolicyObjects($policy_objects);
 
     $classes = array();
     $classes[] = 'conpherence-durable-column-header';
@@ -178,6 +207,18 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
     );
   }
 
+  private function getPolicyIcon(
+    ConpherenceThread $conpherence,
+    array $policy_objects) {
+
+    assert_instances_of($policy_objects, 'PhabricatorPolicy');
+
+    $icon = $conpherence->getPolicyIconName($policy_objects);
+    return id(new PHUIIconView())
+      ->addClass('mmr')
+      ->setIconFont($icon);
+  }
+
   private function buildIconBar() {
     $icons = array();
     $selected_conpherence = $this->getSelectedConpherence();
@@ -189,6 +230,14 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
         $classes[] = 'selected';
       }
       $data = $conpherence->getDisplayData($this->getUser());
+      $icon = $this->getPolicyIcon($conpherence, $this->getPolicyObjects());
+      $thread_title = phutil_tag(
+        'span',
+        array(),
+        array(
+          $icon,
+          $data['js_title'],
+        ));
       $image = $data['image'];
       Javelin::initBehavior('phabricator-tooltips');
       $icons[] =
@@ -200,7 +249,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
             'sigil' => 'conpherence-durable-column-thread-icon has-tooltip',
             'meta' => array(
               'threadID' => $conpherence->getID(),
-              'threadTitle' => $data['js_title'],
+              'threadTitle' => hsprintf('%s', $thread_title),
               'tip' => $data['js_title'],
               'align' => 'S',
             ),
@@ -220,7 +269,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
 
     if (!$conpherence) {
 
-      $title = null;
+      $header = null;
       $settings_button = null;
       $settings_menu = null;
 
@@ -237,6 +286,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
           ->setHref($action['href'])
           ->setName($action['name'])
           ->setIcon($action['icon'])
+          ->setDisabled($action['disabled'])
           ->addSigil('conpherence-durable-column-header-action')
           ->setMetadata(array(
             'action' => $action['key'],
@@ -281,6 +331,13 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
       if (!$title) {
         $title = pht('[No Title]');
       }
+      $header = phutil_tag(
+        'span',
+        array(),
+        array(
+          $this->getPolicyIcon($conpherence, $this->getPolicyObjects()),
+          $title,
+        ));
     }
 
     return
@@ -296,34 +353,48 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
               'sigil' => 'conpherence-durable-column-header-text',
               'class' => 'conpherence-durable-column-header-text',
             ),
-            $title),
+            $header),
           $settings_button,
           $settings_menu,));
 
   }
 
   private function getHeaderActionsConfig(ConpherenceThread $conpherence) {
+    if ($conpherence->getIsRoom()) {
+      $rename_label = pht('Rename Room');
+    } else {
+      $rename_label = pht('Rename Thread');
+    }
+    $can_edit = PhabricatorPolicyFilter::hasCapability(
+      $this->getUser(),
+      $conpherence,
+      PhabricatorPolicyCapability::CAN_EDIT);
+
     return array(
       array(
         'name' => pht('Add Participants'),
+        'disabled' => !$can_edit,
         'href' => '/conpherence/update/'.$conpherence->getID().'/',
         'icon' => 'fa-plus',
         'key' => ConpherenceUpdateActions::ADD_PERSON,
       ),
       array(
-        'name' => pht('Rename Thread'),
+        'name' => $rename_label,
+        'disabled' => !$can_edit,
         'href' => '/conpherence/update/'.$conpherence->getID().'/',
         'icon' => 'fa-pencil',
         'key' => ConpherenceUpdateActions::METADATA,
       ),
       array(
         'name' => pht('View in Conpherence'),
+        'disabled' => false,
         'href' => '/conpherence/'.$conpherence->getID().'/',
         'icon' => 'fa-comments',
         'key' => 'go_conpherence',
       ),
       array(
         'name' => pht('Hide Column'),
+        'disabled' => false,
         'href' => '#',
         'icon' => 'fa-times',
         'key' => 'hide_column',

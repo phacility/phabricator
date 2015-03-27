@@ -47,7 +47,11 @@ final class ConpherenceViewController extends
       $form = null;
       $content = array('messages' => $messages);
     } else {
-      $header = $this->buildHeaderPaneContent($conpherence);
+      $policy_objects = id(new PhabricatorPolicyQuery())
+        ->setViewer($user)
+        ->setObject($conpherence)
+        ->execute();
+      $header = $this->buildHeaderPaneContent($conpherence, $policy_objects);
       $form = $this->renderFormContent();
       $content = array(
         'header' => $header,
@@ -63,10 +67,15 @@ final class ConpherenceViewController extends
       $content['threadID'] = $conpherence->getID();
       $content['threadPHID'] = $conpherence->getPHID();
       $content['latestTransactionID'] = $data['latest_transaction_id'];
+      $content['canEdit'] = PhabricatorPolicyFilter::hasCapability(
+        $user,
+        $conpherence,
+        PhabricatorPolicyCapability::CAN_EDIT);
       return id(new AphrontAjaxResponse())->setContent($content);
     }
 
     $layout = id(new ConpherenceLayoutView())
+      ->setUser($user)
       ->setBaseURI($this->getApplicationURI())
       ->setThread($conpherence)
       ->setHeader($header)

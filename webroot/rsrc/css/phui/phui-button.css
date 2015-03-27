@@ -104,7 +104,7 @@ button[disabled] {
 
 body button:active,
 body a.button:active {
-  box-shadow: inset 0 0 8px rgba(0,0,0,.6);
+  box-shadow: inset 0 0 4px rgba(0,0,0,.4);
 }
 
 button.grey:active,
@@ -128,9 +128,9 @@ button:hover {
 a.button.simple:hover,
 button.simple:hover {
   background-color: #fff;
-  border: 1px solid {$lightgreyborder};
+  border-color: {$blueborder};
   background-image: none;
-  border-bottom: 1px solid {$greyborder};
+  border-bottom-color: {$darkblueborder};
   box-shadow: none;
 }
 
@@ -329,7 +329,7 @@ a.toggle-fixed {
 
 /* PHUI Button Bar */
 
-.phui-button-bar a.button {
+.phui-button-bar a.button.has-icon {
   display: inline-block;
   height: 16px;
   width: 12px;
@@ -349,4 +349,69 @@ a.toggle-fixed {
   border-left: none;
   border-top-left-radius: 0px;
   border-bottom-left-radius: 0px;
+}
+
+.phui-button-bar .button.simple:hover {
+  border-color: {$lightblueborder};
+  color: {$sky};
+}
+
+.phui-button-bar .button.simple:hover .phui-icon-view {
+  border-color: {$lightblueborder};
+  color: {$sky};
+}
+
+/* Simple Button Colors */
+a.simple.simple-blue,
+button.simple.simple-blue {
+  border-color: {$blue};
+  background: {$lightblue};
+  color: {$blue};
+}
+
+a.simple.simple-blue:hover,
+button.simple.simple-blue:hover {
+  color: {$blue};
+  border-color: {$blue};
+}
+
+a.simple.simple-blue .phui-icon-view,
+button.simple.simple-blue .phui-icon-view {
+  color: {$blue};
+}
+
+a.simple.simple-yellow,
+button.simple.simple-yellow {
+  border-color: #bc7837;
+  background: {$lightyellow};
+  color: #bc7837;
+}
+
+a.simple.simple-yellow:hover,
+button.simple.simple-yellow:hover {
+  color: #bc7837;
+  border-color: #bc7837;
+}
+
+a.simple.simple-yellow .phui-icon-view,
+button.simple.simple-yellow .phui-icon-view {
+  color: #bc7837;
+}
+
+a.simple.simple-grey,
+button.simple.simple-grey {
+  border-color: {$greyborder};
+  background: {$lightgreybackground};
+  color: {$greytext};
+}
+
+a.simple.simple-grey:hover,
+button.simple.simple-grey:hover {
+  color: {$greytext};
+  border-color: {$greyborder};
+}
+
+a.simple.simple-grey .phui-icon-view,
+button.simple.simple-grey .phui-icon-view {
+  color: {$greytext};
 }

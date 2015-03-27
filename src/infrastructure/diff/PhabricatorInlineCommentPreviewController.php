@@ -26,13 +26,17 @@ abstract class PhabricatorInlineCommentPreviewController
 
     $views = array();
     foreach ($inlines as $inline) {
+      // TODO: This is incorrect, but figuring it out is somewhat involved.
+      $object_owner_phid = null;
+
       $view = id(new PHUIDiffInlineCommentDetailView())
         ->setInlineComment($inline)
         ->setMarkupEngine($engine)
         ->setHandles($handles)
         ->setEditable(false)
         ->setPreview(true)
-        ->setCanMarkDone(false);
+        ->setCanMarkDone(false)
+        ->setObjectOwnerPHID($object_owner_phid);
       $views[] = $view->render();
     }
     $views = phutil_implode_html("\n", $views);

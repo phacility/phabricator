@@ -187,6 +187,7 @@ final class DifferentialTransactionEditor
     $status_review = ArcanistDifferentialRevisionStatus::NEEDS_REVIEW;
     $status_revision = ArcanistDifferentialRevisionStatus::NEEDS_REVISION;
     $status_plan = ArcanistDifferentialRevisionStatus::CHANGES_PLANNED;
+    $status_abandoned = ArcanistDifferentialRevisionStatus::ABANDONED;
 
     switch ($xaction->getTransactionType()) {
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
@@ -202,10 +203,14 @@ final class DifferentialTransactionEditor
       case PhabricatorTransactions::TYPE_EDGE:
         return;
       case DifferentialTransaction::TYPE_UPDATE:
-        if (!$this->getIsCloseByCommit() &&
-            (($object->getStatus() == $status_revision) ||
-             ($object->getStatus() == $status_plan))) {
-          $object->setStatus($status_review);
+        if (!$this->getIsCloseByCommit()) {
+          switch ($object->getStatus()) {
+            case $status_revision:
+            case $status_plan:
+            case $status_abandoned:
+              $object->setStatus($status_review);
+              break;
+          }
         }
 
         $diff = $this->requireDiff($xaction->getNewValue());
