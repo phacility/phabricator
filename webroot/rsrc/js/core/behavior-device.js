@@ -10,12 +10,24 @@
 JX.install('Device', {
   statics : {
     _device : null,
+    _tabletBreakpoint: 768,
+
+    setTabletBreakpoint: function(width) {
+      var self = JX.Device;
+      self._tabletBreakpoint = width;
+      self.recalculate();
+    },
+
+    getTabletBreakpoint: function() {
+      return JX.Device._tabletBreakpoint;
+    },
+
     recalculate: function() {
       var v = JX.Vector.getViewport();
       var self = JX.Device;
 
       var device = 'desktop';
-      if (v.x <= 768) {
+      if (v.x <= self._tabletBreakpoint) {
         device = 'tablet';
       }
       if (v.x <= 480) {
