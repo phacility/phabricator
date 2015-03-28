@@ -131,7 +131,7 @@ JX.install('History', {
           JX.History._initialPath = null;
         }
         history.pushState(state || null, null, path);
-        JX.History._fire(path);
+        JX.History._fire(path, state);
       } else {
         location.hash = JX.History._composeFragment(path);
       }
