@@ -3,20 +3,30 @@
 final class DifferentialInlineCommentPreviewController
 extends PhabricatorInlineCommentPreviewController {
 
-  private $revisionID;
-
-  public function willProcessRequest(array $data) {
-    $this->revisionID = $data['id'];
-  }
-
   protected function loadInlineComments() {
-    $user = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
 
-    $inlines = id(new DifferentialInlineCommentQuery())
-      ->withDraftComments($user->getPHID(), $this->revisionID)
+    return id(new DifferentialInlineCommentQuery())
+      ->withDraftComments($viewer->getPHID(), $this->getRevisionID())
       ->execute();
-
-    return $inlines;
   }
 
+  protected function loadObjectOwnerPHID() {
+    $viewer = $this->getViewer();
+
+    $revision = id(new DifferentialRevisionQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($this->getRevisionID()))
+      ->executeOne();
+    if (!$revision) {
+      return null;
+    }
+
+    return $revision->getAuthorPHID();
+  }
+
+
+  private function getRevisionID() {
+    return $this->getRequest()->getURIData('id');
+  }
 }

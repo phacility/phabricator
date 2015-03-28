@@ -4,6 +4,7 @@ abstract class PhabricatorInlineCommentPreviewController
   extends PhabricatorController {
 
   abstract protected function loadInlineComments();
+  abstract protected function loadObjectOwnerPHID();
 
   public function processRequest() {
     $request = $this->getRequest();
@@ -23,13 +24,12 @@ abstract class PhabricatorInlineCommentPreviewController
 
     $phids = array($viewer->getPHID());
     $handles = $this->loadViewerHandles($phids);
+    $object_owner_phid = $this->loadObjectOwnerPHID();
 
     $views = array();
     foreach ($inlines as $inline) {
-      // TODO: This is incorrect, but figuring it out is somewhat involved.
-      $object_owner_phid = null;
-
       $view = id(new PHUIDiffInlineCommentDetailView())
+        ->setUser($viewer)
         ->setInlineComment($inline)
         ->setMarkupEngine($engine)
         ->setHandles($handles)

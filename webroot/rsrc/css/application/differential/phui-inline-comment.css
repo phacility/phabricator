@@ -244,6 +244,11 @@
   cursor: pointer;
 }
 
+.inline-state-is-draft .differential-inline-done-label {
+  /* TODO: Placeholder style. */
+  border-style: dashed;
+}
+
 .differential-inline-done-label .differential-inline-done {
   margin: 0 6px 0 0;
   display: inline;

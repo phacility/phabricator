@@ -130,9 +130,14 @@ final class PHUIDiffInlineCommentDetailView
     if ($inline->getReplyToCommentPHID()) {
       $classes[] = 'inline-comment-is-reply';
     }
-    // Might break?
-    if ($this->getCanMarkDone()) {
-      $classes[] = 'viewer-is-diff-author';
+
+    $viewer_phid = $this->getUser()->getPHID();
+    $owner_phid = $this->getObjectOwnerPHID();
+
+    if ($viewer_phid) {
+      if ($viewer_phid == $owner_phid) {
+        $classes[] = 'viewer-is-object-owner';
+      }
     }
 
     $action_buttons = new PHUIButtonBarView();
