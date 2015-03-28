@@ -119,7 +119,11 @@ JX.behavior('durable-column', function(config, statics) {
     var column = _getColumnNode();
     var new_column = JX.$H(r.content);
     JX.DOM.replace(column, new_column);
-    JX.DOM.show(_getColumnNode());
+    if (show) {
+      JX.DOM.show(_getColumnNode());
+    } else {
+      JX.DOM.hide(_getColumnNode());
+    }
     var messages = _getColumnMessagesNode();
     scrollbar = new JX.Scrollbar(_getColumnScrollNode());
     scrollbar.scrollTo(messages.scrollHeight);
