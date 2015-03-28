@@ -39,8 +39,8 @@
   border-radius: 3px;
 }
 
-.differential-inline-comment-unsaved-draft {
-  border: 1px solid {$lightgreyborder};
+.inline-state-is-draft {
+  border: 1px dashed {$greyborder};
 }
 
 .differential-inline-comment-head {
@@ -61,8 +61,8 @@
   padding: 12px;
 }
 
-.differential-inline-comment-unsaved-draft .differential-inline-comment-head {
-  border-bottom: 1px solid {$lightgreyborder};
+.inline-state-is-draft .differential-inline-comment-head {
+  border-bottom: 1px dashed {$lightgreyborder};
   background-color: {$lightgreybackground};
 }
 
@@ -164,11 +164,11 @@
   font-size: 14px;
 }
 
-.differential-inline-comment-unsaved-draft .phui-button-bar .button {
+.inline-state-is-draft .phui-button-bar .button {
   border-color: {$lightgreyborder};
 }
 
-.differential-inline-comment-unsaved-draft .phui-button-bar .phui-icon-view {
+.inline-state-is-draft .phui-button-bar .phui-icon-view {
   color: {$lightgreytext};
 }
 
@@ -210,20 +210,20 @@
   color: {$sh-yellowicon};
 }
 
-.differential-inline-comment.differential-inline-comment-unsaved-draft
+.differential-inline-comment.inline-state-is-draft
   .differential-inline-done-label,
-.differential-inline-comment.differential-inline-comment-unsaved-draft
+.differential-inline-comment.inline-state-is-draft
   .button.simple {
   border-color: {$lightgreyborder};
   color: {$lightgreytext};
 }
 
-.differential-inline-comment.differential-inline-comment-unsaved-draft
+.differential-inline-comment.inline-state-is-draft
   .button.simple .phui-icon-view {
   color: {$lightgreytext};
 }
 
-.device-desktop .differential-inline-comment-unsaved-draft
+.device-desktop .inline-state-is-draft
   a.button.simple:hover {
     border-color: {$lightgreyborder};
 }
@@ -244,19 +244,10 @@
   cursor: pointer;
 }
 
-.inline-state-is-draft .differential-inline-done-label {
-  /* TODO: Placeholder style. */
-  border-style: dashed;
-}
-
 .differential-inline-done-label .differential-inline-done {
   margin: 0 6px 0 0;
   display: inline;
   cursor: pointer;
-}
-
-input.differential-inline-done[disabled="disabled"] {
-  cursor: auto;
 }
 
 .device-desktop .differential-inline-comment.inline-is-done
@@ -268,50 +259,37 @@ input.differential-inline-done[disabled="disabled"] {
     border-color: {$lightblueborder};
 }
 
-.differential-inline-comment .differential-inline-comment-head
-  .differential-inline-done-label.done-is-disabled {
-  color: {$sh-yellowtext};
-  border-color: {$sh-yellowborder};
-  opacity: .5;
-}
-
-.differential-inline-comment.differential-inline-comment-unsaved-draft
-  .differential-inline-done-label.done-is-disabled {
-  color: {$lightgreytext};
-  border-color: {$lightgreyborder};
-  opacity: .5;
-}
-
-.device-desktop
-  .differential-inline-comment.differential-inline-comment-unsaved-draft
-  .differential-inline-done-label.done-is-disabled:hover {
-    background-color: transparent;
-    cursor: auto;
-}
-
-.differential-inline-comment
-  .differential-inline-done-label.done-is-disabled {
-    border-color: {$sh-lightyellowborder};
-    color: {$sh-yellowtext};
-}
-
-.device-desktop .differential-inline-comment
-  .differential-inline-done-label.done-is-disabled:hover {
-    background-color: transparent;
-    cursor: auto;
-}
-
 .differential-inline-comment.inline-is-done
   .differential-inline-done-label {
     background-color: #fff;
     border-color: {$lightblueborder};
-    color: {$sky} !important;
+    color: {$sky};
     opacity: 1;
 }
 
 .device-desktop .differential-inline-comment.inline-is-done
   .differential-inline-done-label:hover {
     background-color: #fff;
+    color: {$sky};
+}
+
+.differential-inline-comment.inline-state-is-draft
+  .button-not-done:hover {
+  color: {$lightgreytext} !important;
+  background-color: transparent;
+  border-color: {$lightgreyborder};
+  cursor: auto;
+}
+
+.differential-inline-comment.inline-is-done .differential-inline-comment-head
+  .button.simple.button-done {
+    background-color: #fff;
+    color: {$sky};
+    border-color: {$sky};
+}
+
+.differential-inline-comment.inline-is-done .differential-inline-comment-head
+  .button.simple.button-done .phui-icon-view {
     color: {$sky};
 }
 
@@ -333,11 +311,16 @@ input.differential-inline-done[disabled="disabled"] {
 }
 
 .differential-inline-comment.inline-is-done .differential-inline-comment-head
-  .button.simple,
-.differential-inline-comment.inline-is-done .differential-inline-comment-head
-  .differential-inline-done-label {
+  .button.simple {
     border-color: {$lightgreyborder};
     color: {$lightgreytext};
+}
+
+.differential-inline-comment.inline-is-done .differential-inline-comment-head
+  .differential-inline-done-label {
+    color: {$sky};
+    background-color: #fff;
+    border-color: {$sky};
 }
 
 .differential-inline-comment.inline-is-done
@@ -347,7 +330,7 @@ input.differential-inline-done[disabled="disabled"] {
 
 
 
-/* - Unsaved Draft ------------------------------------------------------------
+/* - Inline State is Draft ----------------------------------------------------
 
   The Unsubmitted state of the comment / done checkbox styles.
 
@@ -357,9 +340,12 @@ input.differential-inline-done[disabled="disabled"] {
   display: none;
 }
 
-.differential-inline-comment.differential-inline-comment-unsaved-draft
-  .inline-draft-text {
+.differential-inline-comment.inline-state-is-draft .inline-draft-text {
     display: inline-block;
+}
+
+.inline-state-is-draft .differential-inline-done-label {
+  border-style: dashed;
 }
 
 

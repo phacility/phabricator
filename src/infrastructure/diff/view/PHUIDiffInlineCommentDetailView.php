@@ -260,25 +260,40 @@ final class PHUIDiffInlineCommentDetailView
         $classes[] = 'inline-state-is-draft';
       }
 
-      $done_input = javelin_tag(
-        'input',
-        array(
-          'type' => 'checkbox',
-          'checked' => ($is_done ? 'checked' : null),
-          'disabled' => ($this->getCanMarkDone() ? null : 'disabled'),
-          'class' => 'differential-inline-done',
-          'sigil' => 'differential-inline-done',
-        ));
-      $done_button = phutil_tag(
-        'label',
-        array(
-          'class' => 'differential-inline-done-label '.
-                      ($this->getCanMarkDone() ? null : 'done-is-disabled'),
-        ),
-        array(
-          $done_input,
-          pht('Done'),
-        ));
+      if ($this->getCanMarkDone()) {
+        $done_input = javelin_tag(
+          'input',
+          array(
+            'type' => 'checkbox',
+            'checked' => ($is_done ? 'checked' : null),
+            'disabled' => ($this->getCanMarkDone() ? null : 'disabled'),
+            'class' => 'differential-inline-done',
+            'sigil' => 'differential-inline-done',
+          ));
+        $done_button = phutil_tag(
+          'label',
+          array(
+            'class' => 'differential-inline-done-label '.
+                        ($this->getCanMarkDone() ? null : 'done-is-disabled'),
+          ),
+          array(
+            $done_input,
+            pht('Done'),
+          ));
+      } else {
+        $done_button = id(new PHUIButtonView())
+          ->setTag('a')
+          ->setColor(PHUIButtonView::SIMPLE)
+          ->addClass('mml');
+        if ($is_done) {
+          $done_button->setIconFont('fa-check');
+          $done_button->setText(pht('Done'));
+          $done_button->addClass('button-done');
+        } else {
+          $done_button->addClass('button-not-done');
+          $done_button->setText(pht('Not Done'));
+        }
+      }
     }
 
     $content = $this->markupEngine->getOutput(
@@ -299,7 +314,7 @@ final class PHUIDiffInlineCommentDetailView
     }
 
     if ($inline->isDraft() && !$is_synthetic) {
-      $classes[] = 'differential-inline-comment-unsaved-draft';
+      $classes[] = 'inline-state-is-draft';
     }
     if ($is_synthetic) {
       $classes[] = 'differential-inline-comment-synthetic';
