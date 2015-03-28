@@ -88,8 +88,6 @@ JX.behavior('durable-column', function(config, statics) {
     JX.Device.setTabletBreakpoint(
       show ? (breakpoint + columnWidth) : (breakpoint - columnWidth));
 
-    JX.log(JX.Device.getTabletBreakpoint());
-
     // If this was an explicit toggle action from the user, save their
     // preference.
     if (explicit) {
