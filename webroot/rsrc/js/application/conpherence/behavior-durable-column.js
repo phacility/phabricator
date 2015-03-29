@@ -24,7 +24,8 @@ JX.behavior('durable-column', function(config, statics) {
     statics.initialized = true;
   }
 
-  var show = false;
+  var userVisible = config.visible;
+  var show = null;
   var loadThreadID = null;
   var scrollbar = null;
 
@@ -43,62 +44,54 @@ JX.behavior('durable-column', function(config, statics) {
     return JX.DOM.find(column, 'div', 'conpherence-durable-column-main');
   }
 
-  function _autocloseColumn() {
+  function _isViewportWideEnoughForColumn() {
     var viewport = JX.Vector.getViewport();
     if (viewport.x < minimumViewportWidth) {
-      if (show) {
-        _toggleColumn(false);
-        resizeClose = true;
-      }
-      return true;
+      return false;
     } else {
-      if (resizeClose) {
-        resizeClose = false;
-        if (!show) {
-          _toggleColumn(false);
-        }
-      }
+      return true;
     }
+  }
 
-    return false;
+  function _updateColumnVisibility() {
+    var new_value = (userVisible && _isViewportWideEnoughForColumn());
+    if (new_value !== show) {
+      show = new_value;
+      _drawColumn(show);
+    }
   }
 
   function _toggleColumn(explicit) {
-    if (explicit) {
-      if (_autocloseColumn()) {
-        return;
-      }
-    }
+    userVisible = !userVisible;
+    _updateColumnVisibility();
 
-    show = !show;
-    JX.DOM.alterClass(document.body, 'with-durable-column', show);
+    new JX.Request(config.settingsURI)
+      .setData({value: (show ? 1 : 0)})
+      .send();
+  }
+
+  function _drawColumn(visible) {
+    JX.DOM.alterClass(document.body, 'with-durable-column', visible);
     var column = _getColumnNode();
-    if (show) {
+    if (visible) {
       JX.DOM.show(column);
       threadManager.loadThreadByID(loadThreadID);
     } else {
       JX.DOM.hide(column);
     }
-    JX.Stratcom.invoke('resize');
-    JX.Quicksand.setFrame(show ? quick : null);
+    JX.Quicksand.setFrame(visible ? quick : null);
 
     // When we activate the column, adjust the tablet breakpoint so that we
     // convert the left side of the screen to tablet mode on narrow displays.
     var breakpoint = JX.Device.getTabletBreakpoint();
     JX.Device.setTabletBreakpoint(
-      show ? (breakpoint + columnWidth) : (breakpoint - columnWidth));
+      visible ? (breakpoint + columnWidth) : (breakpoint - columnWidth));
 
-    // If this was an explicit toggle action from the user, save their
-    // preference.
-    if (explicit) {
-      new JX.Request(config.settingsURI)
-        .setData({value: (show ? 1 : 0)})
-        .send();
-    }
+    JX.Stratcom.invoke('resize');
   }
 
   new JX.KeyboardShortcut('\\', 'Toggle Conpherence Column')
-    .setHandler(JX.bind(null, _toggleColumn, true))
+    .setHandler(_toggleColumn)
     .register();
 
   scrollbar = new JX.Scrollbar(_getColumnScrollNode());
@@ -193,7 +186,7 @@ JX.behavior('durable-column', function(config, statics) {
           break;
         case 'hide_column':
           JX.Stratcom.invoke('notification-panel-close');
-          _toggleColumn(true);
+          _toggleColumn();
           break;
       }
     });
@@ -220,8 +213,7 @@ JX.behavior('durable-column', function(config, statics) {
       threadManager.loadThreadByID(data.threadID);
     });
 
-  var resizeClose = false;
-  JX.Stratcom.listen('resize', null, _autocloseColumn);
+  JX.Stratcom.listen('resize', null, _updateColumnVisibility);
 
   function _getColumnBodyNode() {
     var column = JX.$('conpherence-durable-column');
@@ -347,9 +339,6 @@ JX.behavior('durable-column', function(config, statics) {
       }
     });
 
-  if (config.visible) {
-    _toggleColumn(false);
-    _autocloseColumn();
-  }
+  _updateColumnVisibility();
 
 });
