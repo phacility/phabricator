@@ -66,7 +66,10 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
         $input,
         phutil_tag(
           'button',
-          array('id' => $button_id),
+          array(
+            'id' => $button_id,
+            'class' => 'phui-icon-view phui-font-fa fa-search lightgreytext',
+            ),
           pht('Search')),
         $primary_input,
         $target,
