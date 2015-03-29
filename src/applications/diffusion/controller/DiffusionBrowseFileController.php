@@ -845,7 +845,11 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
 
     $rows = array();
     foreach ($inlines as $inline) {
+
+      // TODO: This should use modern scaffolding code.
+
       $inline_view = id(new PHUIDiffInlineCommentDetailView())
+        ->setUser($this->getViewer())
         ->setMarkupEngine($engine)
         ->setInlineComment($inline)
         ->render();

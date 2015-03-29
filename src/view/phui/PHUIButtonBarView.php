@@ -14,7 +14,7 @@ final class PHUIButtonBarView extends AphrontTagView {
   }
 
   protected function getTagName() {
-    return 'div';
+    return 'span';
   }
 
   protected function getTagContent() {

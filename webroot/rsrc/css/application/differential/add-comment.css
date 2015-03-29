@@ -3,6 +3,15 @@
  */
 
 #inline-comment-preview {
-  margin-left: 60px;
-  width: 550px;
+  margin-left: 62px;
+  width: 640px;
+}
+
+#inline-comment-preview .differential-inline-comment {
+  margin: 12px 0;
+}
+
+#inline-comment-preview
+  .differential-inline-comment + .differential-inline-comment {
+  margin: 0 0 12px 0;
 }

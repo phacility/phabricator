@@ -3,27 +3,30 @@
 final class DifferentialInlineCommentEditController
   extends PhabricatorInlineCommentController {
 
-  private $revisionID;
-
-  public function willProcessRequest(array $data) {
-    $this->revisionID = $data['id'];
+  private function getRevisionID() {
+    return $this->getRequest()->getURIData('id');
   }
 
-  protected function createComment() {
+  private function loadRevision() {
+    $viewer = $this->getViewer();
+    $revision_id = $this->getRevisionID();
 
-    // Verify revision and changeset correspond to actual objects.
-    $revision_id = $this->revisionID;
-    $changeset_id = $this->getChangesetID();
-
-    $viewer = $this->getRequest()->getUser();
     $revision = id(new DifferentialRevisionQuery())
       ->setViewer($viewer)
       ->withIDs(array($revision_id))
       ->executeOne();
-
-    if (!$revision) {
-      throw new Exception('Invalid revision ID!');
+   if (!$revision) {
+      throw new Exception(pht('Invalid revision ID "%s".', $revision_id));
     }
+
+    return $revision;
+  }
+
+  protected function createComment() {
+    // Verify revision and changeset correspond to actual objects.
+    $changeset_id = $this->getChangesetID();
+
+    $revision = $this->loadRevision();
 
     if (!id(new DifferentialChangeset())->load($changeset_id)) {
       throw new Exception('Invalid changeset ID!');
@@ -113,7 +116,7 @@ final class DifferentialInlineCommentEditController
     }
 
     // Inline must be attached to the active revision.
-    if ($inline->getRevisionID() != $this->revisionID) {
+    if ($inline->getRevisionID() != $this->getRevisionID()) {
       return false;
     }
 
@@ -139,4 +142,10 @@ final class DifferentialInlineCommentEditController
         $inline->getPHID());
     $inline->saveTransaction();
   }
+
+  protected function loadObjectOwnerPHID(
+    PhabricatorInlineCommentInterface $inline) {
+    return $this->loadRevision()->getAuthorPHID();
+  }
+
 }

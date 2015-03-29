@@ -29,10 +29,6 @@
   background: #fff;
 }
 
-.device .conpherence-durable-column {
-  display: none;
-}
-
 .conpherence-durable-column .loading-mask {
   position: absolute;
   top: 90px;

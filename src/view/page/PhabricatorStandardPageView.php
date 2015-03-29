@@ -590,9 +590,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
   }
 
   public function renderForQuicksand() {
-    // TODO: We could run a lighter version of this and skip some work. In
-    // particular, we end up including many redundant resources.
-    $this->willRenderPage();
+    parent::willRenderPage();
     $response = $this->renderPageBodyContent();
     $response = $this->willSendResponse($response);
 
