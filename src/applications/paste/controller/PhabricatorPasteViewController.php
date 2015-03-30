@@ -58,14 +58,6 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
       ->execute();
     $fork_phids = mpull($forks, 'getPHID');
 
-    $this->loadHandles(
-      array_merge(
-        array(
-          $paste->getAuthorPHID(),
-          $paste->getParentPHID(),
-        ),
-        $fork_phids));
-
     $header = $this->buildHeaderView($paste);
     $actions = $this->buildActionView($user, $paste, $file);
     $properties = $this->buildPropertyView($paste, $fork_phids, $actions);

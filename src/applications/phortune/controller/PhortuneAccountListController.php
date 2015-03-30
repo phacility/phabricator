@@ -35,7 +35,6 @@ final class PhortuneAccountListController extends PhortuneController {
           'accounts are used to make purchases.'));
 
     foreach ($accounts as $account) {
-      $this->loadHandles($account->getMemberPHIDs());
       $item = id(new PHUIObjectItemView())
         ->setObjectName(pht('Account %d', $account->getID()))
         ->setHeader($account->getName())

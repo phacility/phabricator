@@ -1021,9 +1021,7 @@ final class DiffusionCommitController extends DiffusionController {
 
   private function renderAuditStatusView(array $audit_requests) {
     assert_instances_of($audit_requests, 'PhabricatorRepositoryAuditRequest');
-
-    $phids = mpull($audit_requests, 'getAuditorPHID');
-    $this->loadHandles($phids);
+    $viewer = $this->getViewer();
 
     $authority_map = array_fill_keys($this->auditAuthorityPHIDs, true);
 
@@ -1043,7 +1041,7 @@ final class DiffusionCommitController extends DiffusionController {
       $item->setNote($note);
 
       $auditor_phid = $request->getAuditorPHID();
-      $target = $this->getHandle($auditor_phid)->renderLink();
+      $target = $viewer->renderHandle($auditor_phid);
       $item->setTarget($target);
 
       if (isset($authority_map[$auditor_phid])) {

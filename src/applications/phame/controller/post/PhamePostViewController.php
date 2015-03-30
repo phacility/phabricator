@@ -23,11 +23,6 @@ final class PhamePostViewController extends PhameController {
 
     $nav = $this->renderSideNavFilterView();
 
-    $this->loadHandles(
-      array(
-        $post->getBlogPHID(),
-        $post->getBloggerPHID(),
-      ));
     $actions = $this->renderActions($post, $user);
     $properties = $this->renderProperties($post, $user, $actions);
 
@@ -168,13 +163,11 @@ final class PhamePostViewController extends PhameController {
 
     $properties->addProperty(
       pht('Blog'),
-      $post->getBlogPHID()
-        ? $this->getHandle($post->getBlogPHID())->renderLink()
-        : null);
+      $user->renderHandle($post->getBlogPHID()));
 
     $properties->addProperty(
       pht('Blogger'),
-      $this->getHandle($post->getBloggerPHID())->renderLink());
+      $user->renderHandle($post->getBloggerPHID()));
 
     $properties->addProperty(
       pht('Published'),

@@ -426,20 +426,6 @@ abstract class PhabricatorController extends AphrontController {
     return $response;
   }
 
-  protected function getHandle($phid) {
-    if (empty($this->handles[$phid])) {
-      throw new Exception(
-        "Attempting to access handle which wasn't loaded: {$phid}");
-    }
-    return $this->handles[$phid];
-  }
-
-  protected function loadHandles(array $phids) {
-    $phids = array_filter($phids);
-    $this->handles = $this->loadViewerHandles($phids);
-    return $this;
-  }
-
   protected function loadViewerHandles(array $phids) {
     return id(new PhabricatorHandleQuery())
       ->setViewer($this->getRequest()->getUser())
