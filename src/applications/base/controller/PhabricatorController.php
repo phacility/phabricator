@@ -414,7 +414,7 @@ abstract class PhabricatorController extends AphrontController {
           ));
       }
     } else if ($response instanceof AphrontRedirectResponse) {
-      if ($request->isAjax()) {
+      if ($request->isAjax() || $request->isQuicksand()) {
         return id(new AphrontAjaxResponse())
           ->setContent(
             array(
