@@ -176,35 +176,35 @@ final class PhabricatorPasteViewController extends PhabricatorPasteController {
     PhabricatorPaste $paste,
     array $child_phids,
     PhabricatorActionListView $actions) {
+    $viewer = $this->getViewer();
 
-    $user = $this->getRequest()->getUser();
     $properties = id(new PHUIPropertyListView())
-      ->setUser($user)
+      ->setUser($viewer)
       ->setObject($paste)
       ->setActionList($actions);
 
     $properties->addProperty(
       pht('Author'),
-      $this->getHandle($paste->getAuthorPHID())->renderLink());
+      $viewer->renderHandle($paste->getAuthorPHID()));
 
     $properties->addProperty(
       pht('Created'),
-      phabricator_datetime($paste->getDateCreated(), $user));
+      phabricator_datetime($paste->getDateCreated(), $viewer));
 
     if ($paste->getParentPHID()) {
       $properties->addProperty(
         pht('Forked From'),
-        $this->getHandle($paste->getParentPHID())->renderLink());
+        $viewer->renderHandle($paste->getParentPHID()));
     }
 
     if ($child_phids) {
       $properties->addProperty(
         pht('Forks'),
-        $this->renderHandlesForPHIDs($child_phids));
+        $viewer->renderHandleList($child_phids));
     }
 
     $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
-      $user,
+      $viewer,
       $paste);
 
     return $properties;

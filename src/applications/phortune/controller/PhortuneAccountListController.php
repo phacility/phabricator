@@ -36,12 +36,10 @@ final class PhortuneAccountListController extends PhortuneController {
 
     foreach ($accounts as $account) {
       $this->loadHandles($account->getMemberPHIDs());
-      $members = $this->renderHandlesForPHIDs($account->getMemberPHIDs(), ',');
       $item = id(new PHUIObjectItemView())
         ->setObjectName(pht('Account %d', $account->getID()))
         ->setHeader($account->getName())
         ->setHref($this->getApplicationURI($account->getID().'/'))
-        ->addAttribute(pht('Members: %s', $members))
         ->setObject($account);
 
       $payment_list->addItem($item);

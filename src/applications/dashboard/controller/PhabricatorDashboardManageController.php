@@ -165,12 +165,9 @@ final class PhabricatorDashboardManageController
       pht('Editable By'),
       $descriptions[PhabricatorPolicyCapability::CAN_EDIT]);
 
-    $panel_phids = $dashboard->getPanelPHIDs();
-    $this->loadHandles($panel_phids);
-
     $properties->addProperty(
       pht('Panels'),
-      $this->renderHandlesForPHIDs($panel_phids));
+      $viewer->renderHandleList($dashboard->getPanelPHIDs()));
 
     return $properties;
   }

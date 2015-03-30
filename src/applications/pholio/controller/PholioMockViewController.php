@@ -42,8 +42,6 @@ final class PholioMockViewController extends PholioController {
       $mock->getPHID(),
       PholioMockHasTaskEdgeType::EDGECONST);
     $this->setManiphestTaskPHIDs($phids);
-    $phids[] = $mock->getAuthorPHID();
-    $this->loadHandles($phids);
 
     $engine = id(new PhabricatorMarkupEngine())
       ->setViewer($user);
@@ -167,7 +165,7 @@ final class PholioMockViewController extends PholioController {
 
     $properties->addProperty(
       pht('Author'),
-      $this->getHandle($mock->getAuthorPHID())->renderLink());
+      $user->renderHandle($mock->getAuthorPHID()));
 
     $properties->addProperty(
       pht('Created'),
@@ -176,7 +174,7 @@ final class PholioMockViewController extends PholioController {
     if ($this->getManiphestTaskPHIDs()) {
       $properties->addProperty(
         pht('Maniphest Tasks'),
-        $this->renderHandlesForPHIDs($this->getManiphestTaskPHIDs()));
+        $user->renderHandleList($this->getManiphestTaskPHIDs()));
     }
 
     $properties->invokeWillRenderEvent();
