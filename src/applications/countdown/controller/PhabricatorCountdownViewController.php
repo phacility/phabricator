@@ -100,10 +100,8 @@ final class PhabricatorCountdownViewController
     PhabricatorCountdown $countdown,
     PhabricatorActionListView $actions) {
 
-    $request = $this->getRequest();
-    $viewer = $request->getUser();
-
-    $this->loadHandles(array($countdown->getAuthorPHID()));
+    $viewer = $this->getViewer();
+    $handles = $viewer->loadHandles(array($countdown->getAuthorPHID()));
 
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
@@ -111,7 +109,7 @@ final class PhabricatorCountdownViewController
 
     $view->addProperty(
       pht('Author'),
-      $this->getHandle($countdown->getAuthorPHID())->renderLink());
+      $handles[$countdown->getAuthorPHID()]->renderLink());
 
     return $view;
   }

@@ -51,6 +51,7 @@ final class PhabricatorUser
   private $session = self::ATTACHABLE;
 
   private $authorities = array();
+  private $handlePool;
 
   protected function readField($field) {
     switch ($field) {
@@ -797,6 +798,26 @@ EOBODY;
       $user->makeEphemeral();
     }
     return $user;
+  }
+
+
+/* -(  Handles  )------------------------------------------------------------ */
+
+
+  /**
+   * Get a @{class:PhabricatorHandleList} which benefits from this viewer's
+   * internal handle pool.
+   *
+   * @param list<phid> List of PHIDs to load.
+   * @return PhabricatorHandleList Handle list object.
+   */
+  public function loadHandles(array $phids) {
+    if ($this->handlePool === null) {
+      $this->handlePool = id(new PhabricatorHandlePool())
+        ->setViewer($this);
+    }
+
+    return $this->handlePool->newHandleList($phids);
   }
 
 
