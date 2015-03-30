@@ -493,14 +493,14 @@ final class PhabricatorRepositoryPullEngine
 
     // This hook handles normal pushes.
     $data[] = csprintf(
-      'pretxnchangegroup.phabricator = %s %s %s',
+      'pretxnchangegroup.phabricator = TERM=dumb %s %s %s',
       $bin,
       $identifier,
       'pretxnchangegroup');
 
     // This one handles creating bookmarks.
     $data[] = csprintf(
-      'prepushkey.phabricator = %s %s %s',
+      'prepushkey.phabricator = TERM=dumb %s %s %s',
       $bin,
       $identifier,
       'prepushkey');
