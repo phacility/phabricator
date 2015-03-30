@@ -178,7 +178,7 @@ final class ConpherenceThreadListView extends AphrontView {
 
     $more_item = id(new PHUIListItemView())
       ->setType(PHUIListItemView::TYPE_LINK)
-      ->setHref('/conpherence/room/query/participant/')
+      ->setHref('/conpherence/search/query/participant/')
       ->setName(pht('See More'));
     $menu->addMenuItem($more_item);
 
