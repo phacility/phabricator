@@ -83,10 +83,11 @@ final class ManiphestTaskDetailController extends ManiphestController {
     }
 
     $phids = array_keys($phids);
+    $handles = $user->loadHandles($phids);
 
+    // TODO: This is double-loading because we have a separate call to
+    // renderHandlesForPHIDs(). Clean this up in the next pass.
     $this->loadHandles($phids);
-
-    $handles = $this->getLoadedHandles();
 
     $info_view = null;
     if ($parent_task) {
@@ -100,7 +101,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
       $info_view->appendChild(hsprintf(
         'Created a subtask of <strong>%s</strong>',
-        $this->getHandle($parent_task->getPHID())->renderLink()));
+        $handles[$parent_task->getPHID()]->renderLink()));
     } else if ($workflow == 'create') {
       $info_view = new PHUIInfoView();
       $info_view->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
@@ -327,7 +328,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $header = $this->buildHeaderView($task);
     $properties = $this->buildPropertyView(
-      $task, $field_list, $edges, $actions);
+      $task, $field_list, $edges, $actions, $handles);
     $description = $this->buildDescriptionView($task, $engine);
 
     if (!$user->isLoggedIn()) {
@@ -443,7 +444,8 @@ final class ManiphestTaskDetailController extends ManiphestController {
     ManiphestTask $task,
     PhabricatorCustomFieldList $field_list,
     array $edges,
-    PhabricatorActionListView $actions) {
+    PhabricatorActionListView $actions,
+    $handles) {
 
     $viewer = $this->getRequest()->getUser();
 
@@ -455,8 +457,8 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $view->addProperty(
       pht('Assigned To'),
       $task->getOwnerPHID()
-      ? $this->getHandle($task->getOwnerPHID())->renderLink()
-      : phutil_tag('em', array(), pht('None')));
+        ? $handles[$task->getOwnerPHID()]->renderLink()
+        : phutil_tag('em', array(), pht('None')));
 
     $view->addProperty(
       pht('Priority'),
@@ -464,7 +466,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $view->addProperty(
       pht('Author'),
-      $this->getHandle($task->getAuthorPHID())->renderLink());
+      $handles[$task->getAuthorPHID()]->renderLink());
 
     $source = $task->getOriginalEmailSource();
     if ($source) {
@@ -491,7 +493,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
     );
 
     $revisions_commits = array();
-    $handles = $this->getLoadedHandles();
 
     $commit_phids = array_keys(
       $edges[ManiphestTaskHasCommitEdgeType::EDGECONST]);
@@ -505,7 +506,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
       foreach ($commit_phids as $phid) {
         $revisions_commits[$phid] = $handles[$phid]->renderLink();
         $revision_phid = key($drev_edges[$phid][$commit_drev]);
-        $revision_handle = idx($handles, $revision_phid);
+        $revision_handle = $handles->getHandleIfExists($revision_phid);
         if ($revision_handle) {
           $task_drev = ManiphestTaskHasRevisionEdgeType::EDGECONST;
           unset($edges[$task_drev][$revision_phid]);

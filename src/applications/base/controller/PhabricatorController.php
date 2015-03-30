@@ -440,10 +440,6 @@ abstract class PhabricatorController extends AphrontController {
     return $this;
   }
 
-  protected function getLoadedHandles() {
-    return $this->handles;
-  }
-
   protected function loadViewerHandles(array $phids) {
     return id(new PhabricatorHandleQuery())
       ->setViewer($this->getRequest()->getUser())
@@ -471,7 +467,7 @@ abstract class PhabricatorController extends AphrontController {
     }
 
     return implode_selected_handle_links($style_map[$style],
-      $this->getLoadedHandles(),
+      $this->handles,
       array_filter($phids));
   }
 

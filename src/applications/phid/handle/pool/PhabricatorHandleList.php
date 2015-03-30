@@ -57,6 +57,20 @@ final class PhabricatorHandleList
   }
 
 
+  /**
+   * Get a handle from this list if it exists.
+   *
+   * This has similar semantics to @{function:idx}.
+   */
+  public function getHandleIfExists($phid, $default = null) {
+    if ($this->handles === null) {
+      $this->loadHandles();
+    }
+
+    return idx($this->handles, $phid, $default);
+  }
+
+
 /* -(  Iterator  )----------------------------------------------------------- */
 
 
