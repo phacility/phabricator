@@ -11,20 +11,20 @@ final class PHUIHandleListView
   extends AphrontTagView {
 
   private $handleList;
-  private $inline;
+  private $asInline;
 
   public function setHandleList(PhabricatorHandleList $list) {
     $this->handleList = $list;
     return $this;
   }
 
-  public function setInline($inline) {
-    $this->inline = $inline;
+  public function setAsInline($inline) {
+    $this->asInline = $inline;
     return $this;
   }
 
-  public function getInline() {
-    return $this->inline;
+  public function getAsInline() {
+    return $this->asInline;
   }
 
   protected function getTagName() {
@@ -39,7 +39,7 @@ final class PHUIHandleListView
       $items[] = $handle->renderLink();
     }
 
-    if ($this->getInline()) {
+    if ($this->getAsInline()) {
       $items = phutil_implode_html(', ', $items);
     } else {
       $items = phutil_implode_html(phutil_tag('br'), $items);

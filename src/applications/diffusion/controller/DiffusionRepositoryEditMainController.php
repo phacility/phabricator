@@ -265,8 +265,7 @@ final class DiffusionRepositoryEditMainController
       $repository->getPHID(),
       PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
     if ($project_phids) {
-      $this->loadHandles($project_phids);
-      $project_text = $this->renderHandlesForPHIDs($project_phids);
+      $project_text = $viewer->renderHandleList($project_phids);
     } else {
       $project_text = phutil_tag('em', array(), pht('None'));
     }
@@ -546,10 +545,9 @@ final class DiffusionRepositoryEditMainController
 
     $credential_phid = $repository->getCredentialPHID();
     if ($credential_phid) {
-      $this->loadHandles(array($credential_phid));
       $view->addProperty(
         pht('Credential'),
-        $this->getHandle($credential_phid)->renderLink());
+        $viewer->renderHandle($credential_phid));
     }
 
     return $view;
@@ -584,8 +582,7 @@ final class DiffusionRepositoryEditMainController
 
     $service_phid = $repository->getAlmanacServicePHID();
     if ($service_phid) {
-      $handles = $this->loadViewerHandles(array($service_phid));
-      $v_service = $handles[$service_phid]->renderLink();
+      $v_service = $viewer->renderHandle($service_phid);
     } else {
       $v_service = phutil_tag(
         'em',

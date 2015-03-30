@@ -447,30 +447,6 @@ abstract class PhabricatorController extends AphrontController {
       ->execute();
   }
 
-  /**
-   * Render a list of links to handles, identified by PHIDs. The handles must
-   * already be loaded.
-   *
-   * @param   list<phid>  List of PHIDs to render links to.
-   * @param   string      Style, one of "\n" (to put each item on its own line)
-   *                      or "," (to list items inline, separated by commas).
-   * @return  string      Rendered list of handle links.
-   */
-  protected function renderHandlesForPHIDs(array $phids, $style = "\n") {
-    $style_map = array(
-      "\n"  => phutil_tag('br'),
-      ','   => ', ',
-    );
-
-    if (empty($style_map[$style])) {
-      throw new Exception("Unknown handle list style '{$style}'!");
-    }
-
-    return implode_selected_handle_links($style_map[$style],
-      $this->handles,
-      array_filter($phids));
-  }
-
   public function buildApplicationMenu() {
     return null;
   }

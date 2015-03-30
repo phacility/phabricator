@@ -13,6 +13,7 @@ final class PHUIHandleView
 
   private $handleList;
   private $handlePHID;
+  private $asTag;
 
   public function setHandleList(PhabricatorHandleList $list) {
     $this->handleList = $list;
@@ -24,8 +25,18 @@ final class PHUIHandleView
     return $this;
   }
 
+  public function setAsTag($tag) {
+    $this->asTag = $tag;
+    return $this;
+  }
+
   public function render() {
-    return $this->handleList[$this->handlePHID]->renderLink();
+    $handle = $this->handleList[$this->handlePHID];
+    if ($this->asTag) {
+      return $handle->renderTag();
+    } else {
+      return $handle->renderLink();
+    }
   }
 
 }

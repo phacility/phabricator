@@ -614,13 +614,11 @@ final class DiffusionCommitController extends DiffusionController {
     }
 
     if ($reverts_phids) {
-      $this->loadHandles($reverts_phids);
-      $props[pht('Reverts')] = $this->renderHandlesForPHIDs($reverts_phids);
+      $props[pht('Reverts')] = $viewer->renderHandleList($reverts_phids);
     }
 
     if ($reverted_by_phids) {
-      $this->loadHandles($reverted_by_phids);
-      $props[pht('Reverted By')] = $this->renderHandlesForPHIDs(
+      $props[pht('Reverted By')] = $viewer->renderHandleList(
         $reverted_by_phids);
     }
 
