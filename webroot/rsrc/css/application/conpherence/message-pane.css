@@ -64,6 +64,10 @@
   padding-top: 20px;
 }
 
+.conpherence-messages > .conpherence-edited:last-child {
+  padding-bottom: 20px;
+}
+
 .device .conpherence-message-pane .conpherence-messages {
   left: 0;
   right: 0;

@@ -143,7 +143,8 @@
     'touchstart',
     'touchmove',
     'touchend',
-    'touchcancel'
+    'touchcancel',
+    'load'
   ];
 
   //  Simulate focus and blur in old versions of IE using focusin and focusout

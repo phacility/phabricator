@@ -192,11 +192,11 @@ final class AphrontRequest {
   }
 
   final public function isAjax() {
-    return $this->getExists(self::TYPE_AJAX);
+    return $this->getExists(self::TYPE_AJAX) && !$this->isQuicksand();
   }
 
   final public function isWorkflow() {
-    return $this->getExists(self::TYPE_WORKFLOW);
+    return $this->getExists(self::TYPE_WORKFLOW) && !$this->isQuicksand();
   }
 
   final public function isQuicksand() {

@@ -111,7 +111,7 @@ final class ConpherenceThreadListView extends AphrontView {
       array(),
       array(
         id(new PHUIIconView())
-        ->addClass('mmr')
+        ->addClass('msr')
         ->setIconFont($thread->getPolicyIconName($policy_objects)),
         $data['title'],
       ));
@@ -188,7 +188,8 @@ final class ConpherenceThreadListView extends AphrontView {
       $menu->addMenuItem($item);
     }
 
-    $header = $this->renderMenuItemHeader(pht('Messages'));
+    $header = $this->renderMenuItemHeader(
+      pht('Messages'), 'conpherence-message-list-header');
     $menu->addMenuItem($header);
 
     foreach ($conpherences as $conpherence) {
@@ -208,10 +209,11 @@ final class ConpherenceThreadListView extends AphrontView {
     return $menu;
   }
 
-  private function renderMenuItemHeader($title) {
+  private function renderMenuItemHeader($title, $class = null) {
     $item = id(new PHUIListItemView())
       ->setType(PHUIListItemView::TYPE_LABEL)
-      ->setName($title);
+      ->setName($title)
+      ->addClass($class);
     return $item;
   }
 

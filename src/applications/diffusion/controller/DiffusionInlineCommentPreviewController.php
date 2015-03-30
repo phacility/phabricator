@@ -3,19 +3,30 @@
 final class DiffusionInlineCommentPreviewController
   extends PhabricatorInlineCommentPreviewController {
 
-  private $commitPHID;
-
-  public function willProcessRequest(array $data) {
-    $this->commitPHID = $data['phid'];
-  }
-
   protected function loadInlineComments() {
-    $user = $this->getRequest()->getUser();
+    $viewer = $this->getViewer();
 
-    $inlines = PhabricatorAuditInlineComment::loadDraftComments(
-      $user,
-      $this->commitPHID);
-
-    return $inlines;
+    return PhabricatorAuditInlineComment::loadDraftComments(
+      $viewer,
+      $this->getCommitPHID());
   }
+
+  protected function loadObjectOwnerPHID() {
+    $viewer = $this->getViewer();
+
+    $commit = id(new DiffusionCommitQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($this->getCommitPHID()))
+      ->executeOne();
+    if (!$commit) {
+      return null;
+    }
+
+    return $commit->getAuthorPHID();
+  }
+
+  private function getCommitPHID() {
+    return $this->getRequest()->getURIData('phid');
+  }
+
 }

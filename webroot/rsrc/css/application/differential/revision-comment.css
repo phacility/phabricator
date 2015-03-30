@@ -51,12 +51,3 @@
 .differential-haunt-mode-1 {
   padding-bottom: 250px;
 }
-
-.differential-comment-list .anchor-target {
-  background-color: #ffffdd;
-  border-color: #ffff00;
-}
-
-.differential-inline-comment-content {
-  overflow: auto;
-}

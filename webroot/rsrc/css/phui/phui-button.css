@@ -132,6 +132,11 @@ button.simple:hover {
   background-image: none;
   border-bottom-color: {$darkblueborder};
   box-shadow: none;
+  text-decoration: none;
+}
+
+a.button.simple .phui-icon-view {
+  border: none;
 }
 
 a.button.simple.phuix-dropdown-open {
@@ -299,7 +304,7 @@ a.toggle-fixed {
 }
 
 .phui-button-bar .button .phui-icon-view {
-  left: 12px;
+  left: 9px;
 }
 
 .button.has-icon .phui-button-text {
@@ -332,7 +337,7 @@ a.toggle-fixed {
 .phui-button-bar a.button.has-icon {
   display: inline-block;
   height: 16px;
-  width: 12px;
+  width: 6px;
 }
 
 .phui-button-bar .phui-button-bar-first {

@@ -92,11 +92,12 @@ img {
   position: fixed;
   bottom: 16px;
   right: 16px;
-  width: 44px;
-  height: 44px;
-  border-radius: 5px;
-  opacity: 0.4;
-  background: #000 url(/rsrc/image/loading/compass_24.gif) center no-repeat;
+  width: 40px;
+  height: 40px;
+}
+
+.busy .phui-icon-view {
+  font-size: 40px;
 }
 
 .grouped:after {
