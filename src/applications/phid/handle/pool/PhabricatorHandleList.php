@@ -26,6 +26,7 @@ final class PhabricatorHandleList
   private $phids;
   private $handles;
   private $cursor;
+  private $map;
 
   public function setHandlePool(PhabricatorHandlePool $pool) {
     $this->handlePool = $pool;
@@ -71,6 +72,33 @@ final class PhabricatorHandleList
   }
 
 
+/* -(  Rendering  )---------------------------------------------------------- */
+
+
+  /**
+   * Return a @{class:PHUIHandleListView} which can render the handles in
+   * this list.
+   */
+  public function renderList() {
+    return id(new PHUIHandleListView())
+      ->setHandleList($this);
+  }
+
+
+  /**
+   * Return a @{class:PHUIHandleView} which can render a specific handle.
+   */
+  public function renderHandle($phid) {
+    if (!isset($this[$phid])) {
+      throw new Exception(
+        pht('Trying to render a handle which does not exist!'));
+    }
+
+    return id(new PHUIHandleView())
+      ->setHandleList($this)
+      ->setHandlePHID($phid);
+  }
+
 /* -(  Iterator  )----------------------------------------------------------- */
 
 
@@ -99,10 +127,15 @@ final class PhabricatorHandleList
 
 
   public function offsetExists($offset) {
-    if ($this->handles === null) {
-      $this->loadHandles();
+    // NOTE: We're intentionally not loading handles here so that isset()
+    // checks do not trigger fetches. This gives us better bulk loading
+    // behavior, particularly when invoked through methods like renderHandle().
+
+    if ($this->map === null) {
+      $this->map = array_fill_keys($this->phids, true);
     }
-    return isset($this->handles[$offset]);
+
+    return isset($this->map[$offset]);
   }
 
   public function offsetGet($offset) {

@@ -85,10 +85,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $phids = array_keys($phids);
     $handles = $user->loadHandles($phids);
 
-    // TODO: This is double-loading because we have a separate call to
-    // renderHandlesForPHIDs(). Clean this up in the next pass.
-    $this->loadHandles($phids);
-
     $info_view = null;
     if ($parent_task) {
       $info_view = new PHUIInfoView();
@@ -100,8 +96,8 @@ final class ManiphestTaskDetailController extends ManiphestController {
           ->setText(pht('Create Another Subtask')));
 
       $info_view->appendChild(hsprintf(
-        'Created a subtask of <strong>%s</strong>',
-        $handles[$parent_task->getPHID()]->renderLink()));
+        'Created a subtask of <strong>%s</strong>.',
+        $handles->renderHandle($parent_task->getPHID())));
     } else if ($workflow == 'create') {
       $info_view = new PHUIInfoView();
       $info_view->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
@@ -457,7 +453,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $view->addProperty(
       pht('Assigned To'),
       $task->getOwnerPHID()
-        ? $handles[$task->getOwnerPHID()]->renderLink()
+        ? $handles->renderHandle($task->getOwnerPHID())
         : phutil_tag('em', array(), pht('None')));
 
     $view->addProperty(
@@ -466,7 +462,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $view->addProperty(
       pht('Author'),
-      $handles[$task->getAuthorPHID()]->renderLink());
+      $handles->renderHandle($task->getAuthorPHID()));
 
     $source = $task->getOriginalEmailSource();
     if ($source) {
@@ -504,7 +500,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
         ->execute();
 
       foreach ($commit_phids as $phid) {
-        $revisions_commits[$phid] = $handles[$phid]->renderLink();
+        $revisions_commits[$phid] = $handles->renderHandle($phid);
         $revision_phid = key($drev_edges[$phid][$commit_drev]);
         $revision_handle = $handles->getHandleIfExists($revision_phid);
         if ($revision_handle) {
@@ -520,9 +516,10 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     foreach ($edge_types as $edge_type => $edge_name) {
       if ($edges[$edge_type]) {
+        $edge_handles = $viewer->loadHandles(array_keys($edges[$edge_type]));
         $view->addProperty(
           $edge_name,
-          $this->renderHandlesForPHIDs(array_keys($edges[$edge_type])));
+          $edge_handles->renderList());
       }
     }
 
