@@ -67,11 +67,7 @@ final class ConpherenceThreadSearchEngine
   }
 
   protected function getURI($path) {
-    if ($this->isRooms) {
-      return '/conpherence/room/'.$path;
-    } else {
-      // TODO - will need a path if / when "thread" search happens
-    }
+    return '/conpherence/search/'.$path;
   }
 
   protected function getBuiltinQueryNames() {
@@ -83,7 +79,7 @@ final class ConpherenceThreadSearchEngine
       );
 
       if ($this->requireViewer()->isLoggedIn()) {
-        $names['participant'] = pht('Participated');
+        $names['participant'] = pht('Joined Rooms');
       }
     }
 

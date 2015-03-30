@@ -56,7 +56,7 @@ final class ConpherenceNewRoomController extends ConpherenceController {
       ->execute();
 
     $submit_uri = $this->getApplicationURI('room/new/');
-    $cancel_uri = $this->getApplicationURI('room/');
+    $cancel_uri = $this->getApplicationURI('search/');
 
     $dialog = $this->newDialog()
       ->setWidth(AphrontDialogView::WIDTH_FORM)

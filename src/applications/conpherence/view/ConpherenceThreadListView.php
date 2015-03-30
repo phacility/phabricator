@@ -144,13 +144,20 @@ final class ConpherenceThreadListView extends AphrontView {
     array $conpherences,
     array $policy_objects) {
 
-    $header = $this->renderMenuItemHeader(pht('Rooms'));
+    $header = $this->renderMenuItemHeader(
+      pht('Rooms'),
+      'conpherence-room-list-header');
+    $header->appendChild(
+      id(new PHUIIconView())
+      ->setIconFont('fa-search')
+      ->setHref('/conpherence/search/')
+      ->setText(pht('Search')));
     $menu->addMenuItem($header);
 
     if (empty($conpherences)) {
       $join_item = id(new PHUIListItemView())
         ->setType(PHUIListItemView::TYPE_LINK)
-        ->setHref('/conpherence/room/')
+        ->setHref('/conpherence/search/')
         ->setName(pht('Join a Room'));
       $menu->addMenuItem($join_item);
 

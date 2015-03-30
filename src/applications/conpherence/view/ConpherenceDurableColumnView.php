@@ -261,7 +261,26 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
             ),
             ''));
     }
+    $icons[] = $this->buildSearchButton();
+
     return $icons;
+  }
+
+  private function buildSearchButton() {
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'conpherence-durable-column-search-button',
+      ),
+      id(new PHUIButtonBarView())
+      ->addButton(
+        id(new PHUIButtonView())
+        ->setTag('a')
+        ->setHref('/conpherence/search/')
+        ->setColor(PHUIButtonView::GREY)
+        ->setIcon(
+          id(new PHUIIconView())
+          ->setIconFont('fa-search'))));
   }
 
   private function buildHeader() {

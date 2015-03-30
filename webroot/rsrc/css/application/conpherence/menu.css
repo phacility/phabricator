@@ -47,6 +47,19 @@
   padding: 10px 0 9px 8px;
 }
 
+.conpherence-menu-pane .conpherence-room-list-header
+.phui-icon-view {
+  font-weight: bold;
+  float: right;
+  text-transform: none;
+  margin: 0px 8px 0px 0px;
+}
+
+.conpherence-menu-pane .conpherence-room-list-header
+.phui-icon-view:hover {
+  color: {$sky};
+}
+
 .conpherence-menu-pane .conpherence-message-list-header {
   margin-top: 12px;
 }
