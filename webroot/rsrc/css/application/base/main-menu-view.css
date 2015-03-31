@@ -189,9 +189,10 @@
   min-width: 0;
 
   height: 24px;
-  width: 24px;
+  width: 16px;
   top: 10px;
   right: 10px;
+  padding: 0;
 }
 
 .device .phabricator-main-menu-search button {

@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => '20d3b672',
+    'core.pkg.css' => '6088c5b0',
     'core.pkg.js' => '0c88e7f6',
     'darkconsole.pkg.js' => '8ab24e01',
     'differential.pkg.css' => '3500921f',
@@ -34,7 +34,7 @@ return array(
     'rsrc/css/aphront/typeahead.css' => '0e403212',
     'rsrc/css/application/almanac/almanac.css' => 'dbb9b3af',
     'rsrc/css/application/auth/auth.css' => '1e655982',
-    'rsrc/css/application/base/main-menu-view.css' => 'cfa2ec0f',
+    'rsrc/css/application/base/main-menu-view.css' => '361a51f9',
     'rsrc/css/application/base/notification-menu.css' => '6aa0a74b',
     'rsrc/css/application/base/phabricator-application-launch-view.css' => '16ca323f',
     'rsrc/css/application/base/standard-page-view.css' => 'd2a6518d',
@@ -729,7 +729,7 @@ return array(
     'phabricator-hovercard-view-css' => '893f4783',
     'phabricator-keyboard-shortcut' => '1ae869f2',
     'phabricator-keyboard-shortcut-manager' => 'c1700f6f',
-    'phabricator-main-menu-view' => 'cfa2ec0f',
+    'phabricator-main-menu-view' => '361a51f9',
     'phabricator-nav-view-css' => '7aeaf435',
     'phabricator-notification' => '0c6946e7',
     'phabricator-notification-css' => '9c279160',
