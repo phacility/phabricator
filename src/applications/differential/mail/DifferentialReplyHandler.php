@@ -29,53 +29,6 @@ class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
       'metamta.differential.reply-handler-domain');
   }
 
-  /*
-   * Generate text like the following from the supported commands.
-   * "
-   *
-   * ACTIONS
-   * Reply to comment, or !accept, !reject, !abandon, !resign, !reclaim.
-   *
-   * "
-   */
-  public function getReplyHandlerInstructions() {
-    if (!$this->supportsReplies()) {
-      return null;
-    }
-
-    $supported_commands = $this->getSupportedCommands();
-    $text = '';
-    if (empty($supported_commands)) {
-      return $text;
-    }
-
-    $comment_command_printed = false;
-    if (in_array(DifferentialAction::ACTION_COMMENT, $supported_commands)) {
-      $text .= pht('Reply to comment');
-      $comment_command_printed = true;
-
-      $supported_commands = array_diff(
-        $supported_commands, array(DifferentialAction::ACTION_COMMENT));
-    }
-
-    if (!empty($supported_commands)) {
-      if ($comment_command_printed) {
-        $text .= ', or ';
-      }
-
-      $modified_commands = array();
-      foreach ($supported_commands as $command) {
-        $modified_commands[] = '!'.$command;
-      }
-
-      $text .= implode(', ', $modified_commands);
-    }
-
-    $text .= '.';
-
-    return $text;
-  }
-
   public function getSupportedCommands() {
     $actions = array(
       DifferentialAction::ACTION_COMMENT,

@@ -20,15 +20,6 @@ final class PhrictionReplyHandler extends PhabricatorMailReplyHandler {
       PhrictionDocumentPHIDType::TYPECONST);
   }
 
-  public function getReplyHandlerInstructions() {
-    if ($this->supportsReplies()) {
-      // TODO: Implement.
-      return null;
-    } else {
-      return null;
-    }
-  }
-
   protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
     // TODO: Implement.
     return null;

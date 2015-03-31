@@ -17,14 +17,6 @@ final class LegalpadReplyHandler extends PhabricatorMailReplyHandler {
     return $this->getDefaultPublicReplyHandlerEmailAddress('L');
   }
 
-  public function getReplyHandlerInstructions() {
-    if ($this->supportsReplies()) {
-      return pht('Reply to comment or !unsubscribe.');
-    } else {
-      return null;
-    }
-  }
-
   protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
     $actor = $this->getActor();
     $document = $this->getMailReceiver();

@@ -220,6 +220,8 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'security.allow-outbound-http' => pht(
         'This option has been replaced with the more granular option '.
         '`security.outbound-blacklist`.'),
+      'metamta.reply.show-hints' => pht(
+        'Phabricator no longer shows reply hints in mail.'),
     );
 
     return $ancient_config;

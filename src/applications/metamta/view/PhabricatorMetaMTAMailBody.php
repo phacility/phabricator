@@ -160,26 +160,6 @@ final class PhabricatorMetaMTAMailBody {
 
 
   /**
-   * Add a section with reply handler instructions.
-   *
-   * @param string Reply handler instructions.
-   * @return this
-   * @task compose
-   */
-  public function addReplySection($instructions) {
-    if (!PhabricatorEnv::getEnvConfig('metamta.reply.show-hints')) {
-      return $this;
-    }
-    if (!strlen($instructions)) {
-      return $this;
-    }
-
-    $this->addTextSection(pht('REPLY HANDLER ACTIONS'), $instructions);
-
-    return $this;
-  }
-
-  /**
    * Add a section with a link to email preferences.
    *
    * @return this
@@ -196,6 +176,7 @@ final class PhabricatorMetaMTAMailBody {
 
     return $this;
   }
+
 
   /**
    * Add an attachment.

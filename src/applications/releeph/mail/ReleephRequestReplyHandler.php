@@ -17,14 +17,6 @@ final class ReleephRequestReplyHandler extends PhabricatorMailReplyHandler {
     return $this->getDefaultPublicReplyHandlerEmailAddress('RERQ');
   }
 
-  public function getReplyHandlerInstructions() {
-    if ($this->supportsReplies()) {
-      return pht('Reply to comment.');
-    } else {
-      return null;
-    }
-  }
-
   protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
     $rq = $this->getMailReceiver();
     $user = $this->getActor();

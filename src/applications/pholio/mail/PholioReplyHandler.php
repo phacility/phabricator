@@ -22,16 +22,6 @@ final class PholioReplyHandler extends PhabricatorMailReplyHandler {
       'metamta.pholio.reply-handler-domain');
   }
 
-  public function getReplyHandlerInstructions() {
-    if ($this->supportsReplies()) {
-      // TODO: Implement.
-      return null;
-      return pht('Reply to comment.');
-    } else {
-      return null;
-    }
-  }
-
   protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
     // TODO: Implement this.
     return null;

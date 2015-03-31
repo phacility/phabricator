@@ -22,16 +22,6 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
       'metamta.maniphest.reply-handler-domain');
   }
 
-  public function getReplyHandlerInstructions() {
-    if ($this->supportsReplies()) {
-      return pht(
-        'Reply to comment or attach files, or !close, !claim, '.
-        '!unsubscribe or !assign <username>.');
-    } else {
-      return null;
-    }
-  }
-
   protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
     // NOTE: We'll drop in here on both the "reply to a task" and "create a
     // new task" workflows! Make sure you test both if you make changes!

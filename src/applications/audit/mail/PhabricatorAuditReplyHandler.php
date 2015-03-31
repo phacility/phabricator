@@ -22,14 +22,6 @@ final class PhabricatorAuditReplyHandler extends PhabricatorMailReplyHandler {
       'metamta.diffusion.reply-handler-domain');
   }
 
-  public function getReplyHandlerInstructions() {
-    if ($this->supportsReplies()) {
-      return pht('Reply to comment.');
-    } else {
-      return null;
-    }
-  }
-
   protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
     $commit = $this->getMailReceiver();
     $actor = $this->getActor();

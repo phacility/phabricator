@@ -17,15 +17,6 @@ final class FundInitiativeReplyHandler extends PhabricatorMailReplyHandler {
     return $this->getDefaultPublicReplyHandlerEmailAddress('I');
   }
 
-  public function getReplyHandlerInstructions() {
-    if ($this->supportsReplies()) {
-      // TODO: Implement.
-      return null;
-    } else {
-      return null;
-    }
-  }
-
   protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
     // TODO: Implement.
     return null;

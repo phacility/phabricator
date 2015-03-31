@@ -17,10 +17,6 @@ final class PonderQuestionReplyHandler extends PhabricatorMailReplyHandler {
     return $this->getDefaultPublicReplyHandlerEmailAddress('Q');
   }
 
-  public function getReplyHandlerInstructions() {
-    return null;
-  }
-
   protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
     // ignore this entirely for now
   }

@@ -63,7 +63,6 @@ abstract class PhabricatorMailReplyHandler {
       'metamta.reply-handler-domain');
   }
 
-  abstract public function getReplyHandlerInstructions();
   abstract protected function receiveEmail(
     PhabricatorMetaMTAReceivedMail $mail);
 
