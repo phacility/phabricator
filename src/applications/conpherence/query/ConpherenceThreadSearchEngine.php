@@ -101,7 +101,9 @@ final class ConpherenceThreadSearchEngine
           array($this->requireViewer()->getPHID()));
       case 'messages':
         $this->setIsRooms(false);
-        return $query;
+        return $query->setParameter(
+          'participantPHIDs',
+          array($this->requireViewer()->getPHID()));
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
