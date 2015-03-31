@@ -32,22 +32,23 @@ final class FileReplyHandler extends PhabricatorMailReplyHandler {
       ));
 
     $xactions = array();
-    $command = $body_data['body'];
-
-    switch ($command) {
-      case 'unsubscribe':
-        $xaction = id(new PhabricatorFileTransaction())
-          ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
-          ->setNewValue(array('-' => array($actor->getPHID())));
-        $xactions[] = $xaction;
-        break;
+    $commands = $body_data['commands'];
+    foreach ($commands as $command) {
+      switch (head($command)) {
+        case 'unsubscribe':
+          $xaction = id(new PhabricatorFileTransaction())
+            ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+            ->setNewValue(array('-' => array($actor->getPHID())));
+          $xactions[] = $xaction;
+          break;
+      }
     }
 
     $xactions[] = id(new PhabricatorFileTransaction())
       ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
       ->attachComment(
-       id(new PhabricatorFileTransactionComment())
-        ->setContent($body));
+        id(new PhabricatorFileTransactionComment())
+          ->setContent($body));
 
     $editor = id(new PhabricatorFileEditor())
       ->setActor($actor)
@@ -55,15 +56,7 @@ final class FileReplyHandler extends PhabricatorMailReplyHandler {
       ->setContinueOnNoEffect(true)
       ->setIsPreview(false);
 
-    try {
-      $xactions = $editor->applyTransactions($file, $xactions);
-    } catch (PhabricatorApplicationTransactionNoEffectException $ex) {
-      // just do nothing, though unclear why you're sending a blank email
-      return true;
-    }
-
-    $head_xaction = head($xactions);
-    return $head_xaction->getID();
+    $editor->applyTransactions($file, $xactions);
   }
 
 }

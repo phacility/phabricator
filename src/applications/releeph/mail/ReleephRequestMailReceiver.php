@@ -8,11 +8,11 @@ final class ReleephRequestMailReceiver extends PhabricatorObjectMailReceiver {
   }
 
   protected function getObjectPattern() {
-    return 'RQ[1-9]\d*';
+    return 'Y[1-9]\d*';
   }
 
   protected function loadObject($pattern, PhabricatorUser $viewer) {
-    $id = (int)substr($pattern, 2);
+    $id = (int)substr($pattern, 1);
 
     return id(new ReleephRequestQuery())
       ->setViewer($viewer)

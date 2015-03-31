@@ -16,34 +16,64 @@ final class PhabricatorMetaMTAEmailBodyParser {
    *   please, take this task I took; its hard
    *
    * This function parses such an email body and returns a dictionary
-   * containing a clean body text (e.g. "taking this task"), a $command
-   * (e.g. !claim, !assign) and a $command_value (e.g. "epriestley" in the
-   * !assign example.)
+   * containing a clean body text (e.g. "taking this task"), and a list of
+   * commands. For example, this body above might parse as:
    *
-   * @return dict
+   *   array(
+   *     'body' => 'please, take this task I took; its hard',
+   *     'commands' => array(
+   *       array('assign', 'epriestley'),
+   *     ),
+   *   )
+   *
+   * @param   string  Raw mail text body.
+   * @return  dict    Parsed body.
    */
   public function parseBody($body) {
     $body = $this->stripTextBody($body);
-    $lines = explode("\n", trim($body));
-    $first_line = head($lines);
 
-    $command = null;
-    $command_value = null;
-    $matches = null;
-    if (preg_match('/^!(\w+)\s*(\S+)?/', $first_line, $matches)) {
-      $lines = array_slice($lines, 1);
-      $body = implode("\n", $lines);
-      $body = trim($body);
+    $commands = array();
 
-      $command = $matches[1];
-      $command_value = idx($matches, 2);
-    }
+    $lines = phutil_split_lines($body, $retain_endings = true);
+
+    // We'll match commands at the beginning and end of the mail, but not
+    // in the middle of the mail body.
+    list($top_commands, $lines) = $this->stripCommands($lines);
+    list($end_commands, $lines) = $this->stripCommands(array_reverse($lines));
+    $lines = array_reverse($lines);
+    $commands = array_merge($top_commands, array_reverse($end_commands));
+
+    $lines = rtrim(implode('', $lines));
 
     return array(
-      'body' => $body,
-      'command' => $command,
-      'command_value' => $command_value,
+      'body' => $lines,
+      'commands' => $commands,
     );
+  }
+
+  private function stripCommands(array $lines) {
+    $saw_command = false;
+    $commands = array();
+    foreach ($lines as $key => $line) {
+      if (!strlen(trim($line)) && $saw_command) {
+        unset($lines[$key]);
+        continue;
+      }
+
+      $matches = null;
+      if (!preg_match('/^\s*!(\w+.*$)/', $line, $matches)) {
+        break;
+      }
+
+      $arg_str = $matches[1];
+      $argv = preg_split('/[,\s]+/', trim($arg_str));
+      $commands[] = $argv;
+      unset($lines[$key]);
+
+      $saw_command = true;
+    }
+
+    return array($commands, $lines);
   }
 
   public function stripTextBody($body) {

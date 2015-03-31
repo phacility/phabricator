@@ -63,8 +63,16 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
 
     } else {
 
-      $command = $body_data['command'];
-      $command_value = $body_data['command_value'];
+      $commands = $body_data['commands'];
+
+      // TODO: Support multiple commands.
+      if ($commands) {
+        $command_argv = head($commands);
+      } else {
+        $command_argv = array();
+      }
+      $command = idx($command_argv, 0);
+      $command_value = idx($command_argv, 1);
 
       $ttype = PhabricatorTransactions::TYPE_COMMENT;
       $new_value = null;

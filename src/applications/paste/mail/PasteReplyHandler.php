@@ -35,15 +35,17 @@ final class PasteReplyHandler extends PhabricatorMailReplyHandler {
     $first_line = head($lines);
 
     $xactions = array();
-    $command = $body_data['command'];
 
-    switch ($command) {
-      case 'unsubscribe':
-        $xaction = id(new PhabricatorPasteTransaction())
-          ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
-          ->setNewValue(array('-' => array($actor->getPHID())));
-        $xactions[] = $xaction;
-        break;
+    $commands = $body_data['commands'];
+    foreach ($commands as $command) {
+      switch (head($command)) {
+        case 'unsubscribe':
+          $xaction = id(new PhabricatorPasteTransaction())
+            ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+            ->setNewValue(array('-' => array($actor->getPHID())));
+          $xactions[] = $xaction;
+          break;
+      }
     }
 
     $xactions[] = id(new PhabricatorPasteTransaction())
@@ -58,15 +60,7 @@ final class PasteReplyHandler extends PhabricatorMailReplyHandler {
       ->setContinueOnNoEffect(true)
       ->setIsPreview(false);
 
-    try {
-      $xactions = $editor->applyTransactions($paste, $xactions);
-    } catch (PhabricatorApplicationTransactionNoEffectException $ex) {
-      // just do nothing, though unclear why you're sending a blank email
-      return true;
-    }
-
-    $head_xaction = head($xactions);
-    return $head_xaction->getID();
+    $editor->applyTransactions($paste, $xactions);
   }
 
 }

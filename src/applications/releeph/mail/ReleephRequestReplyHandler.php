@@ -10,11 +10,11 @@ final class ReleephRequestReplyHandler extends PhabricatorMailReplyHandler {
 
   public function getPrivateReplyHandlerEmailAddress(
     PhabricatorObjectHandle $handle) {
-    return $this->getDefaultPrivateReplyHandlerEmailAddress($handle, 'RERQ');
+    return $this->getDefaultPrivateReplyHandlerEmailAddress($handle, 'Y');
   }
 
   public function getPublicReplyHandlerEmailAddress() {
-    return $this->getDefaultPublicReplyHandlerEmailAddress('RERQ');
+    return $this->getDefaultPublicReplyHandlerEmailAddress('Y');
   }
 
   protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
@@ -27,11 +27,6 @@ final class ReleephRequestReplyHandler extends PhabricatorMailReplyHandler {
         'id' => $mail->getID(),
       ));
 
-    $editor = id(new ReleephRequestTransactionalEditor())
-      ->setActor($user)
-      ->setContentSource($content_source)
-      ->setParentMessageID($mail->getMessageID());
-
     $body = $mail->getCleanTextBody();
 
     $xactions = array();
@@ -39,9 +34,13 @@ final class ReleephRequestReplyHandler extends PhabricatorMailReplyHandler {
       ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
       ->attachComment($body);
 
-    $editor->applyTransactions($rq, $xactions);
+    $editor = id(new ReleephRequestTransactionalEditor())
+      ->setActor($user)
+      ->setContentSource($content_source)
+      ->setContinueOnNoEffect(true)
+      ->setParentMessageID($mail->getMessageID());
 
-    return $rq;
+    $editor->applyTransactions($rq, $xactions);
   }
 
 }
