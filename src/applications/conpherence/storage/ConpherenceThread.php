@@ -174,11 +174,10 @@ final class ConpherenceThread extends ConpherenceDAO
     }
 
     $title = $js_title = $this->getTitle();
-    if (!$title) {
-      $title = $lucky_handle->getName();
-      $js_title = pht('[No Title]');
+    $img_src = null;
+    if ($lucky_handle) {
+      $img_src = $lucky_handle->getImageURI();
     }
-    $img_src = $lucky_handle->getImageURI();
 
     $count = 0;
     $final = false;
@@ -199,6 +198,9 @@ final class ConpherenceThread extends ConpherenceDAO
       $subtitle .= $handle->getName();
       $count++;
       $final = $count == 3;
+    }
+    if (!$title) {
+      $title = $js_title = $subtitle;
     }
 
     $user_participation = $this->getParticipantIfExists($user->getPHID());

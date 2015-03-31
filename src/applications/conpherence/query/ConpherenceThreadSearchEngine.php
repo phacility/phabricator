@@ -80,6 +80,7 @@ final class ConpherenceThreadSearchEngine
 
       if ($this->requireViewer()->isLoggedIn()) {
         $names['participant'] = pht('Joined Rooms');
+        $names['messages'] = pht('All Messages');
       }
     }
 
@@ -98,6 +99,9 @@ final class ConpherenceThreadSearchEngine
         return $query->setParameter(
           'participantPHIDs',
           array($this->requireViewer()->getPHID()));
+      case 'messages':
+        $this->setIsRooms(false);
+        return $query;
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);

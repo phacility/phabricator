@@ -43,6 +43,10 @@
   border-right: 1px solid {$hovergrey}
 }
 
+.conpherence-menu-pane .phui-list-item-view.hidden {
+  display: none;
+}
+
 .conpherence-menu-pane.phabricator-side-menu .phui-list-item-type-label {
   padding: 10px 0 9px 8px;
 }

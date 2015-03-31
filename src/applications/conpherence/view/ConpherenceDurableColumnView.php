@@ -213,10 +213,14 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
 
     assert_instances_of($policy_objects, 'PhabricatorPolicy');
 
-    $icon = $conpherence->getPolicyIconName($policy_objects);
-    return id(new PHUIIconView())
-      ->addClass('mmr')
-      ->setIconFont($icon);
+    $icon = null;
+    if ($conpherence->getIsRoom()) {
+      $icon = $conpherence->getPolicyIconName($policy_objects);
+      $icon = id(new PHUIIconView())
+        ->addClass('mmr')
+        ->setIconFont($icon);
+    }
+    return $icon;
   }
 
   private function buildIconBar() {
@@ -346,16 +350,13 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
         ->addClass('phabricator-dark-menu')
         ->addClass('phabricator-application-menu');
 
-      $title = $conpherence->getTitle();
-      if (!$title) {
-        $title = pht('[No Title]');
-      }
+      $data = $conpherence->getDisplayData($this->getUser());
       $header = phutil_tag(
         'span',
         array(),
         array(
           $this->getPolicyIcon($conpherence, $this->getPolicyObjects()),
-          $title,
+          $data['title'],
         ));
     }
 

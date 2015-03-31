@@ -2,26 +2,14 @@
 
 final class ConpherenceThreadListView extends AphrontView {
 
+  const SEE_MORE_LIMIT = 5;
+
   private $baseURI;
   private $threads;
-  private $scrollUpParticipant;
-  private $scrollDownParticipant;
 
   public function setThreads(array $threads) {
     assert_instances_of($threads, 'ConpherenceThread');
     $this->threads = $threads;
-    return $this;
-  }
-
-  public function setScrollUpParticipant(
-    ConpherenceParticipant $participant) {
-    $this->scrollUpParticipant = $participant;
-    return $this;
-  }
-
-  public function setScrollDownParticipant(
-    ConpherenceParticipant $participant) {
-    $this->scrollDownParticipant = $participant;
     return $this;
   }
 
@@ -35,7 +23,6 @@ final class ConpherenceThreadListView extends AphrontView {
 
     $grouped = mgroup($this->threads, 'getIsRoom');
     $rooms = idx($grouped, true, array());
-    $rooms = array_slice($rooms, 0, 5);
 
     $policies = array();
     foreach ($rooms as $room) {
@@ -55,7 +42,7 @@ final class ConpherenceThreadListView extends AphrontView {
 
     $this->addRoomsToMenu($menu, $rooms, $policy_objects);
     $messages = idx($grouped, false, array());
-    $this->addThreadsToMenu($menu, $messages);
+    $this->addMessagesToMenu($menu, $messages);
 
     return $menu;
   }
@@ -71,20 +58,8 @@ final class ConpherenceThreadListView extends AphrontView {
   public function renderThreadsHTML() {
     $thread_html = array();
 
-    if ($this->scrollUpParticipant->getID()) {
-      $thread_html[] = $this->getScrollMenuItem(
-        $this->scrollUpParticipant,
-        'up');
-    }
-
     foreach ($this->threads as $thread) {
       $thread_html[] = $this->renderSingleThread($thread);
-    }
-
-    if ($this->scrollDownParticipant->getID()) {
-      $thread_html[] = $this->getScrollMenuItem(
-        $this->scrollDownParticipant,
-        'down');
     }
 
     return phutil_implode_html('', $thread_html);
@@ -106,13 +81,17 @@ final class ConpherenceThreadListView extends AphrontView {
 
     $uri = $this->baseURI.$thread->getID().'/';
     $data = $thread->getDisplayData($user);
+    $icon = null;
+    if ($thread->getIsRoom()) {
+      $icon = id(new PHUIIconView())
+        ->addClass('msr')
+        ->setIconFont($thread->getPolicyIconName($policy_objects));
+    }
     $title = phutil_tag(
       'span',
       array(),
       array(
-        id(new PHUIIconView())
-        ->addClass('msr')
-        ->setIconFont($thread->getPolicyIconName($policy_objects)),
+        $icon,
         $data['title'],
       ));
     $subtitle = $data['subtitle'];
@@ -141,7 +120,7 @@ final class ConpherenceThreadListView extends AphrontView {
 
   private function addRoomsToMenu(
     PHUIListView $menu,
-    array $conpherences,
+    array $rooms,
     array $policy_objects) {
 
     $header = $this->renderMenuItemHeader(
@@ -154,7 +133,7 @@ final class ConpherenceThreadListView extends AphrontView {
       ->setText(pht('Search')));
     $menu->addMenuItem($header);
 
-    if (empty($conpherences)) {
+    if (empty($rooms)) {
       $join_item = id(new PHUIListItemView())
         ->setType(PHUIListItemView::TYPE_LINK)
         ->setHref('/conpherence/search/')
@@ -171,46 +150,95 @@ final class ConpherenceThreadListView extends AphrontView {
       return $menu;
     }
 
-    foreach ($conpherences as $conpherence) {
-      $item = $this->renderThreadItem($conpherence, $policy_objects);
-      $menu->addMenuItem($item);
+    $this->addThreadsToMenu($menu, $rooms, $policy_objects);
+    return $menu;
+  }
+
+  private function addMessagesToMenu(
+    PHUIListView $menu,
+    array $conpherences) {
+
+    $header = $this->renderMenuItemHeader(
+      pht('Messages'),
+      'conpherence-message-list-header');
+    $menu->addMenuItem($header);
+
+    if (empty($conpherences)) {
+      $menu->addMenuItem($this->getNoConpherencesMenuItem());
+      return $menu;
     }
 
-    $more_item = id(new PHUIListItemView())
-      ->setType(PHUIListItemView::TYPE_LINK)
-      ->setHref('/conpherence/search/query/participant/')
-      ->setName(pht('See More'));
-    $menu->addMenuItem($more_item);
+    $this->addThreadsToMenu($menu, $conpherences, array());
 
     return $menu;
   }
 
-
   private function addThreadsToMenu(
     PHUIListView $menu,
-    array $conpherences) {
+    array $threads,
+    array $policy_objects) {
 
-    if ($this->scrollUpParticipant->getID()) {
-      $item = $this->getScrollMenuItem($this->scrollUpParticipant, 'up');
-      $menu->addMenuItem($item);
+    // If we have self::SEE_MORE_LIMIT or less, we can just render
+    // all the threads at once. Otherwise, we render a "See more"
+    // UI element, which toggles a show / hide on the remaining rooms
+    $show_threads = $threads;
+    $more_threads = array();
+    if (count($threads) > self::SEE_MORE_LIMIT) {
+      $show_threads = array_slice($threads, 0, self::SEE_MORE_LIMIT);
+      $more_threads = array_slice($threads, self::SEE_MORE_LIMIT);
     }
 
-    $header = $this->renderMenuItemHeader(
-      pht('Messages'), 'conpherence-message-list-header');
-    $menu->addMenuItem($header);
-
-    foreach ($conpherences as $conpherence) {
-      $item = $this->renderThreadItem($conpherence);
+    $is_room = false;
+    foreach ($show_threads as $thread) {
+      $item = $this->renderThreadItem($thread, $policy_objects);
       $menu->addMenuItem($item);
+      $is_room = $thread->getIsRoom();
     }
 
-    if (empty($conpherences)) {
-      $menu->addMenuItem($this->getNoConpherencesMenuItem());
-    }
+    if ($more_threads) {
+      if ($is_room) {
+        $search_uri = '/conpherence/search/query/participant/';
+        $sigil = 'more-room';
+      } else {
+        $search_uri = '/conpherence/search/query/messages/';
+        $sigil = 'more-message';
+      }
 
-    if ($this->scrollDownParticipant->getID()) {
-      $item = $this->getScrollMenuItem($this->scrollDownParticipant, 'down');
-      $menu->addMenuItem($item);
+      $more_item = id(new PHUIListItemView())
+        ->setType(PHUIListItemView::TYPE_LINK)
+        ->setHref($search_uri)
+        ->addSigil('conpherence-menu-see-more')
+        ->setMetadata(array('moreSigil' => $sigil))
+        ->setName(pht('See More'));
+      $menu->addMenuItem($more_item);
+      $show_more_threads = $more_threads;
+      $even_more_threads = array();
+      if (count($more_threads) > self::SEE_MORE_LIMIT) {
+        $show_more_threads = array_slice(
+          $more_threads,
+          0,
+          self::SEE_MORE_LIMIT);
+        $even_more_threads = array_slice(
+          $more_threads,
+          self::SEE_MORE_LIMIT);
+      }
+      foreach ($show_more_threads as $thread) {
+        $item = $this->renderThreadItem($thread, $policy_objects)
+          ->addSigil($sigil)
+          ->addClass('hidden');
+        $menu->addMenuItem($item);
+      }
+
+      if ($even_more_threads) {
+        // kick them to application search here
+        $even_more_item = id(new PHUIListItemView())
+          ->setType(PHUIListItemView::TYPE_LINK)
+          ->setHref($search_uri)
+          ->addSigil($sigil)
+          ->addClass('hidden')
+          ->setName(pht('See More'));
+        $menu->addMenuItem($even_more_item);
+      }
     }
 
     return $menu;
@@ -221,29 +249,6 @@ final class ConpherenceThreadListView extends AphrontView {
       ->setType(PHUIListItemView::TYPE_LABEL)
       ->setName($title)
       ->addClass($class);
-    return $item;
-  }
-
-  public function getScrollMenuItem(
-    ConpherenceParticipant $participant,
-    $direction) {
-
-    if ($direction == 'up') {
-      $name = pht('Load Newer Threads');
-    } else {
-      $name = pht('Load Older Threads');
-    }
-    $item = id(new PHUIListItemView())
-      ->addSigil('conpherence-menu-scroller')
-      ->setName($name)
-      ->setHref($this->baseURI)
-      ->setType(PHUIListItemView::TYPE_BUTTON)
-      ->setMetadata(array(
-        'participant_id' => $participant->getID(),
-        'conpherence_phid' => $participant->getConpherencePHID(),
-        'date_touched' => $participant->getDateTouched(),
-        'direction' => $direction,
-      ));
     return $item;
   }
 

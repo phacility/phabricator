@@ -31,6 +31,7 @@ final class ConpherenceUpdateController
       ->setViewer($user)
       ->withIDs(array($conpherence_id))
       ->needFilePHIDs(true)
+      ->needParticipantCache(true)
       ->requireCapabilities($needed_capabilities)
       ->executeOne();
 
@@ -409,10 +410,10 @@ final class ConpherenceUpdateController
     if ($people_widget) {
       $people_html = hsprintf('%s', $people_widget->render());
     }
-    $title = $this->getConpherenceTitle($conpherence);
+    $data = $conpherence->getDisplayData($user);
     $content = array(
       'transactions' => hsprintf('%s', $rendered_transactions),
-      'conpherence_title' => (string) $title,
+      'conpherence_title' => (string) $data['title'],
       'latest_transaction_id' => $new_latest_transaction_id,
       'nav_item' => hsprintf('%s', $nav_item),
       'conpherence_phid' => $conpherence->getPHID(),
