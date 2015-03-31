@@ -14,7 +14,7 @@ final class FileMailReceiver extends PhabricatorObjectMailReceiver {
   protected function loadObject($pattern, PhabricatorUser $viewer) {
     $id = (int)trim($pattern, 'F');
 
-    return id(new PhabricatorPasteQuery())
+    return id(new PhabricatorFileQuery())
       ->setViewer($viewer)
       ->withIDs(array($id))
       ->executeOne();
