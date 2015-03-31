@@ -12,7 +12,7 @@ final class AphrontFormView extends AphrontView {
   private $shaded = false;
   private $sigils = array();
   private $metadata;
-
+  private $controls = array();
 
   public function setMetadata($metadata) {
     $this->metadata = $metadata;
@@ -87,8 +87,29 @@ final class AphrontFormView extends AphrontView {
       ->appendChild($this->renderChildren());
   }
 
+
+  /**
+   * Append a control to the form.
+   *
+   * This method behaves like @{method:appendChild}, but it only takes
+   * controls. It will propagate some information from the form to the
+   * control to simplify rendering.
+   *
+   * @param AphrontFormControl Control to append.
+   * @return this
+   */
+  public function appendControl(AphrontFormControl $control) {
+    $this->controls[] = $control;
+    return $this->appendChild($control);
+  }
+
+
   public function render() {
     require_celerity_resource('phui-form-view-css');
+
+    foreach ($this->controls as $control) {
+      $control->setUser($this->getUser());
+    }
 
     $layout = $this->buildLayoutView();
 

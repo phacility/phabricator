@@ -35,7 +35,37 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
     $name = $this->getName();
     $values = nonempty($this->getValue(), array());
 
-    assert_instances_of($values, 'PhabricatorObjectHandle');
+    // Values may either be handles (which are now legacy/deprecated) or
+    // strings. Load handles for any PHIDs.
+    $load = array();
+    $handles = array();
+    $select = array();
+    foreach ($values as $value) {
+      if ($value instanceof PhabricatorObjectHandle) {
+        $handles[$value->getPHID()] = $value;
+        $select[] = $value->getPHID();
+      } else {
+        $load[] = $value;
+        $select[] = $value;
+      }
+    }
+
+    // TODO: Once this code path simplifies, move this prefetch to setValue()
+    // so we can bulk load across multiple controls.
+
+    if ($load) {
+      $viewer = $this->getUser();
+      if (!$viewer) {
+        // TODO: Clean this up when handles go away.
+        throw new Exception(
+          pht('Call setUser() before rendering tokenizer string values.'));
+      }
+      $loaded_handles = $viewer->loadHandles($load);
+      $handles = $handles + iterator_to_array($loaded_handles);
+    }
+
+    // Reorder the list into input order.
+    $handles = array_select_keys($handles, $select);
 
     if ($this->getID()) {
       $id = $this->getID();
@@ -55,7 +85,7 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
     $template = new AphrontTokenizerTemplateView();
     $template->setName($name);
     $template->setID($id);
-    $template->setValue($values);
+    $template->setValue($handles);
 
     $username = null;
     if ($this->user) {
@@ -71,8 +101,8 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
       Javelin::initBehavior('aphront-basic-tokenizer', array(
         'id'          => $id,
         'src'         => $datasource_uri,
-        'value'       => mpull($values, 'getFullName', 'getPHID'),
-        'icons'       => mpull($values, 'getIcon', 'getPHID'),
+        'value'       => mpull($handles, 'getFullName', 'getPHID'),
+        'icons'       => mpull($handles, 'getIcon', 'getPHID'),
         'limit'       => $this->limit,
         'username'    => $username,
         'placeholder' => $placeholder,
