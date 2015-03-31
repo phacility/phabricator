@@ -245,9 +245,7 @@ EODOC
         'string',
         null)
         ->setLocked(true)
-        ->setDescription(pht(
-          'Domain used for reply email addresses. Some applications can '.
-          'override this configuration with a different domain.'))
+        ->setDescription(pht('Domain used for reply email addresses.'))
         ->addExample('phabricator.example.com', ''),
       $this->newOption('metamta.herald.show-hints', 'bool', true)
         ->setBoolOptions(

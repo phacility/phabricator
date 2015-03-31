@@ -17,11 +17,6 @@ final class PholioReplyHandler extends PhabricatorMailReplyHandler {
     return $this->getDefaultPublicReplyHandlerEmailAddress('M');
   }
 
-  public function getReplyHandlerDomain() {
-    return $this->getCustomReplyHandlerDomainIfExists(
-      'metamta.pholio.reply-handler-domain');
-  }
-
   protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
     // TODO: Implement this.
     return null;

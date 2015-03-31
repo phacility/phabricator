@@ -273,27 +273,6 @@ EOTEXT
             '{{maniphest.priorities}} configuration option. The default value '.
             '(`90`) corresponds to the default "Needs Triage" priority.')),
       $this->newOption(
-        'metamta.maniphest.reply-handler-domain',
-        'string',
-        null)
-        ->setLocked(true)
-        ->setSummary(pht('Enable replying to tasks via email.'))
-        ->setDescription(
-          pht(
-            'You can configure a reply handler domain so that email sent from '.
-            'Maniphest will have a special "Reply To" address like '.
-            '"T123+82+af19f@example.com" that allows recipients to reply by '.
-            'email and interact with tasks. For instructions on configurating '.
-            'reply handlers, see the article "Configuring Inbound Email" in '.
-            'the Phabricator documentation. By default, this is set to `null` '.
-            'and Phabricator will use a generic `noreply@` address or the '.
-            'address of the acting user instead of a special reply handler '.
-            'address (see `metamta.default-address`). If you set a domain '.
-            'here, Phabricator will begin generating private reply handler '.
-            'addresses. See also `metamta.maniphest.reply-handler` to further '.
-            'configure behavior. This key should be set to the domain part '.
-            'after the @, like "example.com".')),
-      $this->newOption(
         'metamta.maniphest.reply-handler',
         'class',
         'ManiphestReplyHandler')

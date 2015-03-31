@@ -17,11 +17,6 @@ final class DifferentialReplyHandler extends PhabricatorMailReplyHandler {
     return $this->getDefaultPublicReplyHandlerEmailAddress('D');
   }
 
-  public function getReplyHandlerDomain() {
-    return $this->getCustomReplyHandlerDomainIfExists(
-      'metamta.differential.reply-handler-domain');
-  }
-
   public function getSupportedCommands() {
     $actions = array(
       DifferentialAction::ACTION_COMMENT,

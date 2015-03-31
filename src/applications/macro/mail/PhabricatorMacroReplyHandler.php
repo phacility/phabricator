@@ -17,11 +17,6 @@ final class PhabricatorMacroReplyHandler extends PhabricatorMailReplyHandler {
     return $this->getDefaultPublicReplyHandlerEmailAddress('MCRO');
   }
 
-  public function getReplyHandlerDomain() {
-    return $this->getCustomReplyHandlerDomainIfExists(
-      'metamta.macro.reply-handler-domain');
-  }
-
   protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
     // TODO: Implement this.
     return null;

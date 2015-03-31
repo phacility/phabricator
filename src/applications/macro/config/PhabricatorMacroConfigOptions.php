@@ -21,10 +21,6 @@ final class PhabricatorMacroConfigOptions
 
   public function getOptions() {
     return array(
-      $this->newOption('metamta.macro.reply-handler-domain', 'string', null)
-        ->setLocked(true)
-        ->setDescription(pht(
-          'As {{metamta.maniphest.reply-handler-domain}}, but affects Macro.')),
       $this->newOption('metamta.macro.subject-prefix', 'string', '[Macro]')
         ->setDescription(pht('Subject prefix for Macro email.')),
     );

@@ -27,15 +27,6 @@ final class PhabricatorDiffusionConfigOptions
         '[Diffusion]')
         ->setDescription(pht('Subject prefix for Diffusion mail.')),
       $this->newOption(
-        'metamta.diffusion.reply-handler-domain',
-        'string',
-        null)
-        ->setLocked(true)
-        ->setDescription(
-          pht(
-            'See {{metamta.maniphest.reply-handler}}. This does the same '.
-            'thing, but affects Diffusion.')),
-      $this->newOption(
         'metamta.diffusion.reply-handler',
         'class',
         'PhabricatorAuditReplyHandler')

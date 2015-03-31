@@ -17,11 +17,6 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
     return $this->getDefaultPublicReplyHandlerEmailAddress('T');
   }
 
-  public function getReplyHandlerDomain() {
-    return $this->getCustomReplyHandlerDomainIfExists(
-      'metamta.maniphest.reply-handler-domain');
-  }
-
   protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
     // NOTE: We'll drop in here on both the "reply to a task" and "create a
     // new task" workflows! Make sure you test both if you make changes!

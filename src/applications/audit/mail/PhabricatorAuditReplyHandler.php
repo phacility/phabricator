@@ -17,11 +17,6 @@ final class PhabricatorAuditReplyHandler extends PhabricatorMailReplyHandler {
     return $this->getDefaultPublicReplyHandlerEmailAddress('C');
   }
 
-  public function getReplyHandlerDomain() {
-    return $this->getCustomReplyHandlerDomainIfExists(
-      'metamta.diffusion.reply-handler-domain');
-  }
-
   protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
     $commit = $this->getMailReceiver();
     $actor = $this->getActor();
