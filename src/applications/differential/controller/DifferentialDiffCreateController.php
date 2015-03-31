@@ -28,7 +28,6 @@ final class DifferentialDiffCreateController extends DifferentialController {
     // This object is just for policy stuff
     $diff_object = DifferentialDiff::initializeNewDiff($viewer);
     $repository_phid = null;
-    $repository_value = array();
     $errors = array();
     $e_diff = null;
     $e_file = null;
@@ -62,7 +61,8 @@ final class DifferentialDiffCreateController extends DifferentialController {
             array(
               'diff' => $diff,
               'repositoryPHID' => $repository_phid,
-              'viewPolicy' => $request->getStr('viewPolicy'),));
+              'viewPolicy' => $request->getStr('viewPolicy'),
+            ));
           $call->setUser($viewer);
           $result = $call->execute();
 
@@ -92,10 +92,6 @@ final class DifferentialDiffCreateController extends DifferentialController {
       'Learn More');
 
     $cancel_uri = $this->getApplicationURI();
-
-    if ($repository_phid) {
-      $repository_value = $this->loadViewerHandles(array($repository_phid));
-    }
 
     $policies = id(new PhabricatorPolicyQuery())
       ->setViewer($viewer)
@@ -148,6 +144,12 @@ final class DifferentialDiffCreateController extends DifferentialController {
           ->setValue($revision_handle->renderLink()));
     }
 
+    if ($repository_phid) {
+      $repository_value = array($repository_phid);
+    } else {
+      $repository_value = array();
+    }
+
     $form
       ->appendChild(
         id(new AphrontFormTextAreaControl())
@@ -161,20 +163,20 @@ final class DifferentialDiffCreateController extends DifferentialController {
           ->setLabel(pht('Raw Diff From File'))
           ->setName('diff-file')
           ->setError($e_file))
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
-        ->setName(id(new DifferentialRepositoryField())->getFieldKey())
-        ->setLabel(pht('Repository'))
-        ->setDatasource(new DiffusionRepositoryDatasource())
-        ->setValue($repository_value)
-        ->setLimit(1))
+          ->setName(id(new DifferentialRepositoryField())->getFieldKey())
+          ->setLabel(pht('Repository'))
+          ->setDatasource(new DiffusionRepositoryDatasource())
+          ->setValue($repository_value)
+          ->setLimit(1))
       ->appendChild(
         id(new AphrontFormPolicyControl())
-        ->setUser($viewer)
-        ->setName('viewPolicy')
-        ->setPolicyObject($diff_object)
-        ->setPolicies($policies)
-        ->setCapability(PhabricatorPolicyCapability::CAN_VIEW))
+          ->setUser($viewer)
+          ->setName('viewPolicy')
+          ->setPolicyObject($diff_object)
+          ->setPolicies($policies)
+          ->setCapability(PhabricatorPolicyCapability::CAN_VIEW))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton($cancel_uri)

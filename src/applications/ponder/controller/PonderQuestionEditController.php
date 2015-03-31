@@ -105,17 +105,11 @@ final class PonderQuestionEditController extends PonderController {
           ->setLabel(pht('Description'))
           ->setUser($user));
 
-    if ($v_projects) {
-      $project_handles = $this->loadViewerHandles($v_projects);
-    } else {
-      $project_handles = array();
-    }
-
-    $form->appendChild(
+    $form->appendControl(
       id(new AphrontFormTokenizerControl())
         ->setLabel(pht('Projects'))
         ->setName('projects')
-        ->setValue($project_handles)
+        ->setValue($v_projects)
         ->setDatasource(new PhabricatorProjectDatasource()));
 
     $form ->appendChild(

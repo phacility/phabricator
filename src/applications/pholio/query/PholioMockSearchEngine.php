@@ -37,11 +37,7 @@ final class PholioMockSearchEngine extends PhabricatorApplicationSearchEngine {
     AphrontFormView $form,
     PhabricatorSavedQuery $saved_query) {
 
-    $phids = $saved_query->getParameter('authorPHIDs', array());
-    $author_handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->requireViewer())
-      ->withPHIDs($phids)
-      ->execute();
+    $author_phids = $saved_query->getParameter('authorPHIDs', array());
 
     $statuses = array(
       '' => pht('Any Status'),
@@ -53,12 +49,12 @@ final class PholioMockSearchEngine extends PhabricatorApplicationSearchEngine {
     $status = head($status);
 
     $form
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('authors')
           ->setLabel(pht('Authors'))
-          ->setValue($author_handles))
+          ->setValue($author_phids))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel(pht('Status'))

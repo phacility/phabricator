@@ -97,8 +97,6 @@ final class PhortuneAccountEditController extends PhortuneController {
       $submit_button = pht('Save Changes');
     }
 
-    $member_handles = $this->loadViewerHandles($v_members);
-
     $form = id(new AphrontFormView())
       ->setUser($viewer)
       ->appendChild(
@@ -107,12 +105,12 @@ final class PhortuneAccountEditController extends PhortuneController {
           ->setLabel(pht('Name'))
           ->setValue($v_name)
           ->setError($e_name))
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
           ->setLabel(pht('Members'))
           ->setName('memberPHIDs')
-          ->setValue($member_handles)
+          ->setValue($v_members)
           ->setError($e_members))
       ->appendChild(
         id(new AphrontFormSubmitControl())

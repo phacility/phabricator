@@ -56,26 +56,15 @@ final class FundBackerSearchEngine
     AphrontFormView $form,
     PhabricatorSavedQuery $saved) {
 
-
     $backer_phids = $saved->getParameter('backerPHIDs', array());
 
-    $all_phids = array_mergev(
-      array(
-        $backer_phids,
-      ));
-
-    $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->requireViewer())
-      ->withPHIDs($all_phids)
-      ->execute();
-
     $form
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Backers'))
           ->setName('backers')
           ->setDatasource(new PhabricatorPeopleDatasource())
-          ->setValue(array_select_keys($handles, $backer_phids)));
+          ->setValue($backer_phids));
   }
 
   protected function getURI($path) {

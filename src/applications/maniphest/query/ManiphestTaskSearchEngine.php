@@ -258,34 +258,6 @@ final class ManiphestTaskSearchEngine
       array());
     $subscriber_phids = $saved->getParameter('subscriberPHIDs', array());
 
-    $all_phids = array_merge(
-      $assigned_phids,
-      $author_phids,
-      $all_project_phids,
-      $any_project_phids,
-      $exclude_project_phids,
-      $user_project_phids,
-      $subscriber_phids);
-
-    if ($all_phids) {
-      $handles = id(new PhabricatorHandleQuery())
-        ->setViewer($this->requireViewer())
-        ->withPHIDs($all_phids)
-        ->execute();
-    } else {
-      $handles = array();
-    }
-
-    $assigned_handles = array_select_keys($handles, $assigned_phids);
-    $author_handles = array_select_keys($handles, $author_phids);
-    $all_project_handles = array_select_keys($handles, $all_project_phids);
-    $any_project_handles = array_select_keys($handles, $any_project_phids);
-    $exclude_project_handles = array_select_keys(
-      $handles,
-      $exclude_project_phids);
-    $user_project_handles = array_select_keys($handles, $user_project_phids);
-    $subscriber_handles = array_select_keys($handles, $subscriber_phids);
-
     $with_unassigned = $saved->getParameter('withUnassigned');
     $with_no_projects = $saved->getParameter('withNoProject');
 
@@ -320,7 +292,9 @@ final class ManiphestTaskSearchEngine
       ->setOptions(array(
         '' => pht('Show All Tasks'),
         'true' => pht('Show Tasks Blocking Other Tasks'),
-        'false' => pht('Show Tasks Not Blocking Other Tasks'),));
+        'false' => pht('Show Tasks Not Blocking Other Tasks'),
+      ));
+
     $blocked_control = id(new AphrontFormSelectControl())
       ->setLabel(pht('Blocked'))
       ->setName('blocked')
@@ -328,7 +302,8 @@ final class ManiphestTaskSearchEngine
       ->setOptions(array(
         '' => pht('Show All Tasks'),
         'true' => pht('Show Tasks Blocked By Other Tasks'),
-        'false' => pht('Show Tasks Not Blocked By Other Tasks'),));
+        'false' => pht('Show Tasks Not Blocked By Other Tasks'),
+      ));
 
     $ids = $saved->getParameter('ids', array());
 
@@ -337,12 +312,12 @@ final class ManiphestTaskSearchEngine
     $all_orders = $builtin_orders + $custom_orders;
 
     $form
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('assigned')
           ->setLabel(pht('Assigned To'))
-          ->setValue($assigned_handles))
+          ->setValue($assigned_phids))
       ->appendChild(
         id(new AphrontFormCheckboxControl())
           ->addCheckbox(
@@ -350,12 +325,12 @@ final class ManiphestTaskSearchEngine
             1,
             pht('Show only unassigned tasks.'),
             $with_unassigned))
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorProjectDatasource())
           ->setName('allProjects')
           ->setLabel(pht('In All Projects'))
-          ->setValue($all_project_handles));
+          ->setValue($all_project_phids));
 
     if (!$this->getIsBoardView()) {
       $form
@@ -369,36 +344,36 @@ final class ManiphestTaskSearchEngine
     }
 
     $form
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorProjectDatasource())
           ->setName('anyProjects')
           ->setLabel(pht('In Any Project'))
-          ->setValue($any_project_handles))
-      ->appendChild(
+          ->setValue($any_project_phids))
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorProjectDatasource())
           ->setName('excludeProjects')
           ->setLabel(pht('Not In Projects'))
-          ->setValue($exclude_project_handles))
-      ->appendChild(
+          ->setValue($exclude_project_phids))
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('userProjects')
           ->setLabel(pht('In Users\' Projects'))
-          ->setValue($user_project_handles))
-      ->appendChild(
+          ->setValue($user_project_phids))
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('authors')
           ->setLabel(pht('Authors'))
-          ->setValue($author_handles))
-      ->appendChild(
+          ->setValue($author_phids))
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorMetaMTAMailableDatasource())
           ->setName('subscribers')
           ->setLabel(pht('Subscribers'))
-          ->setValue($subscriber_handles))
+          ->setValue($subscriber_phids))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('fulltext')

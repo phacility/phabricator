@@ -225,14 +225,14 @@ final class ConpherenceUpdateController
     $user = $request->getUser();
     $add_person = $request->getStr('add_person');
 
-    $form = id(new PHUIFormLayoutView())
+    $form = id(new AphrontFormView())
       ->setUser($user)
       ->setFullWidth(true)
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
-        ->setName('add_person')
-        ->setUser($user)
-        ->setDatasource(new PhabricatorPeopleDatasource()));
+          ->setName('add_person')
+          ->setUser($user)
+          ->setDatasource(new PhabricatorPeopleDatasource()));
 
     require_celerity_resource('conpherence-update-css');
     $view = id(new AphrontDialogView())
@@ -241,7 +241,7 @@ final class ConpherenceUpdateController
       ->addHiddenInput(
         'latest_transaction_id',
         $request->getInt('latest_transaction_id'))
-      ->appendChild($form);
+      ->appendForm($form);
 
     if ($request->getExists('minimal_display')) {
       $view->addHiddenInput('minimal_display', true);

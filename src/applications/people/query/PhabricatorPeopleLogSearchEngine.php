@@ -89,22 +89,6 @@ final class PhabricatorPeopleLogSearchEngine
     $actor_phids = $saved->getParameter('actorPHIDs', array());
     $user_phids = $saved->getParameter('userPHIDs', array());
 
-    $all_phids = array_merge(
-      $actor_phids,
-      $user_phids);
-
-    if ($all_phids) {
-      $handles = id(new PhabricatorHandleQuery())
-        ->setViewer($this->requireViewer())
-        ->withPHIDs($all_phids)
-        ->execute();
-    } else {
-      $handles = array();
-    }
-
-    $actor_handles = array_select_keys($handles, $actor_phids);
-    $user_handles = array_select_keys($handles, $user_phids);
-
     $actions = $saved->getParameter('actions', array());
     $remote_prefix = $saved->getParameter('ip');
     $sessions = $saved->getParameter('sessions', array());
@@ -122,18 +106,18 @@ final class PhabricatorPeopleLogSearchEngine
     }
 
     $form
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('actors')
           ->setLabel(pht('Actors'))
-          ->setValue($actor_handles))
-      ->appendChild(
+          ->setValue($actor_phids))
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('users')
           ->setLabel(pht('Users'))
-          ->setValue($user_handles))
+          ->setValue($user_phids))
       ->appendChild($action_control)
       ->appendChild(
         id(new AphrontFormTextControl())

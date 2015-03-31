@@ -52,18 +52,15 @@ final class ConpherenceThreadSearchEngine
     AphrontFormView $form,
     PhabricatorSavedQuery $saved) {
 
-    $phids = $saved->getParameter('participantPHIDs', array());
-    $participant_handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->requireViewer())
-      ->withPHIDs($phids)
-      ->execute();
+    $participant_phids = $saved->getParameter('participantPHIDs', array());
+
     $form
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
-        ->setDatasource(new PhabricatorPeopleDatasource())
-        ->setName('participants')
-        ->setLabel(pht('Participants'))
-        ->setValue($participant_handles));
+          ->setDatasource(new PhabricatorPeopleDatasource())
+          ->setName('participants')
+          ->setLabel(pht('Participants'))
+          ->setValue($participant_phids));
   }
 
   protected function getURI($path) {

@@ -80,7 +80,7 @@ final class DifferentialAddCommentView extends AphrontView {
           ->setValue($action)
           ->setID('comment-action')
           ->setOptions($this->actions))
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel($enable_reviewers ? $add_reviewers_labels[$action] :
             $add_reviewers_labels['add_reviewers'])
@@ -89,7 +89,7 @@ final class DifferentialAddCommentView extends AphrontView {
           ->setControlStyle($enable_reviewers ? null : 'display: none')
           ->setID('add-reviewers-tokenizer')
           ->setDisableBehavior(true))
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Add Subscribers'))
           ->setName('ccs')

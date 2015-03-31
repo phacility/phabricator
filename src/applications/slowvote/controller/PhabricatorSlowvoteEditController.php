@@ -145,12 +145,6 @@ final class PhabricatorSlowvoteEditController
         pht('Resolve issues and build consensus through '.
           'protracted deliberation.'));
 
-    if ($v_projects) {
-      $project_handles = $this->loadViewerHandles($v_projects);
-    } else {
-      $project_handles = array();
-    }
-
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->appendChild($instructions)
@@ -167,11 +161,11 @@ final class PhabricatorSlowvoteEditController
           ->setLabel(pht('Description'))
           ->setName('description')
           ->setValue($v_description))
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Projects'))
           ->setName('projects')
-          ->setValue($project_handles)
+          ->setValue($v_projects)
           ->setDatasource(new PhabricatorProjectDatasource()));
 
     if ($is_new) {

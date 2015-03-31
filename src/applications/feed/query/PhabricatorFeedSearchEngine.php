@@ -68,30 +68,21 @@ final class PhabricatorFeedSearchEngine
 
     $user_phids = $saved_query->getParameter('userPHIDs', array());
     $proj_phids = $saved_query->getParameter('projectPHIDs', array());
-
-    $phids = array_merge($user_phids, $proj_phids);
-    $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->requireViewer())
-      ->withPHIDs($phids)
-      ->execute();
-    $user_handles = array_select_keys($handles, $user_phids);
-    $proj_handles = array_select_keys($handles, $proj_phids);
-
     $viewer_projects = $saved_query->getParameter('viewerProjects');
 
     $form
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('users')
           ->setLabel(pht('Include Users'))
-          ->setValue($user_handles))
-      ->appendChild(
+          ->setValue($user_phids))
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorProjectDatasource())
           ->setName('projectPHIDs')
           ->setLabel(pht('Include Projects'))
-          ->setValue($proj_handles))
+          ->setValue($proj_phids))
       ->appendChild(
         id(new AphrontFormCheckboxControl())
           ->addCheckbox(

@@ -202,7 +202,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
           ->setControlID('resolution')
           ->setControlStyle('display: none')
           ->setOptions($resolution_types))
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Assign To'))
           ->setName('assign_to')
@@ -210,7 +210,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
           ->setControlStyle('display: none')
           ->setID('assign-tokenizer')
           ->setDisableBehavior(true))
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('CCs'))
           ->setName('ccs')
@@ -226,7 +226,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
           ->setControlID('priority')
           ->setControlStyle('display: none')
           ->setValue($task->getPriority()))
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Projects'))
           ->setName('projects')

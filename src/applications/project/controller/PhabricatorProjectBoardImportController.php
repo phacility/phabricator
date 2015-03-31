@@ -74,6 +74,7 @@ final class PhabricatorProjectBoardImportController
       ->setDatasource(id(new PhabricatorProjectDatasource())
         ->setParameters(array('mustHaveColumns' => true))
       ->setLimit(1));
+
     return $this->newDialog()
       ->setTitle(pht('Import Columns'))
       ->setWidth(AphrontDialogView::WIDTH_FORM)

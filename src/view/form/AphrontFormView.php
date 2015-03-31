@@ -13,6 +13,7 @@ final class AphrontFormView extends AphrontView {
   private $sigils = array();
   private $metadata;
   private $controls = array();
+  private $fullWidth = false;
 
   public function setMetadata($metadata) {
     $this->metadata = $metadata;
@@ -63,6 +64,15 @@ final class AphrontFormView extends AphrontView {
     return $this;
   }
 
+  public function setFullWidth($full_width) {
+    $this->fullWidth = $full_width;
+    return $this;
+  }
+
+  public function getFullWidth() {
+    return $this->fullWidth;
+  }
+
   public function appendInstructions($text) {
     return $this->appendChild(
       phutil_tag(
@@ -83,6 +93,7 @@ final class AphrontFormView extends AphrontView {
 
   public function buildLayoutView() {
     return id(new PHUIFormLayoutView())
+      ->setFullWidth($this->getFullWidth())
       ->appendChild($this->renderDataInputs())
       ->appendChild($this->renderChildren());
   }

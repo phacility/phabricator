@@ -36,19 +36,15 @@ final class PhabricatorOAuthServerClientSearchEngine
     AphrontFormView $form,
     PhabricatorSavedQuery $saved_query) {
 
-    $phids = $saved_query->getParameter('creatorPHIDs', array());
-    $creator_handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->requireViewer())
-      ->withPHIDs($phids)
-      ->execute();
+    $creator_phids = $saved_query->getParameter('creatorPHIDs', array());
 
     $form
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('creators')
           ->setLabel(pht('Creators'))
-          ->setValue($creator_handles));
+          ->setValue($creator_phids));
   }
 
   protected function getURI($path) {

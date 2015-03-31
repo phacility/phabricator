@@ -59,10 +59,7 @@ final class PhabricatorRepositoryArcanistProjectEditController
     }
 
     if ($project->getSymbolIndexProjects()) {
-      $uses = id(new PhabricatorHandleQuery())
-        ->setViewer($user)
-        ->withPHIDs($project->getSymbolIndexProjects())
-        ->execute();
+      $uses = $project->getSymbolIndexProjects();
     } else {
       $uses = array();
     }
@@ -91,7 +88,7 @@ final class PhabricatorRepositoryArcanistProjectEditController
             'Separate with commas, for example: %s',
             phutil_tag('tt', array(), 'php, py')))
           ->setValue($langs))
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Uses Symbols From'))
           ->setName('symbolIndexProjects')
