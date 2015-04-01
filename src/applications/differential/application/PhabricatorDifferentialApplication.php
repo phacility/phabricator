@@ -186,4 +186,12 @@ EOTEXT
     );
   }
 
+  public function getMailCommandObjects() {
+    return array(
+      'revision' => array(
+        'object' => new DifferentialRevision(),
+      ),
+    );
+  }
+
 }

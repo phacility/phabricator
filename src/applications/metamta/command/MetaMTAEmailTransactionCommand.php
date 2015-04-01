@@ -1,10 +1,49 @@
 <?php
 
+/**
+ * @task docs Command Documentation
+ */
 abstract class MetaMTAEmailTransactionCommand extends Phobject {
 
   abstract public function getCommand();
+
+  /**
+   * Return a brief human-readable description of the command effect.
+   *
+   * This should normally be one or two sentences briefly describing the
+   * command behavior.
+   *
+   * @return string Brief human-readable remarkup.
+   * @task docs
+   */
+  abstract public function getCommandSummary();
+
+
+  /**
+   * Return a one-line Remarkup description of command syntax for documentation.
+   *
+   * @return string Brief human-readable remarkup.
+   * @task docs
+   */
+  public function getCommandSyntax() {
+    return '**!'.$this->getCommand().'**';
+  }
+
+  /**
+   * Return a longer human-readable description of the command effect.
+   *
+   * This can be as long as necessary to explain the command.
+   *
+   * @return string Human-readable remarkup of whatever length is desired.
+   * @task docs
+   */
+  public function getCommandDescription() {
+    return null;
+  }
+
   abstract public function isCommandSupportedForObject(
     PhabricatorApplicationTransactionInterface $object);
+
   abstract public function buildTransactions(
     PhabricatorUser $viewer,
     PhabricatorApplicationTransactionInterface $object,

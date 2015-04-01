@@ -7,6 +7,10 @@ final class ManiphestClaimEmailCommand
     return 'claim';
   }
 
+  public function getCommandSummary() {
+    return pht('Assign yourself as the owner of a task.');
+  }
+
   public function buildTransactions(
     PhabricatorUser $viewer,
     PhabricatorApplicationTransactionInterface $object,

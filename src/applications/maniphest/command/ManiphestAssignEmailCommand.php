@@ -7,6 +7,23 @@ final class ManiphestAssignEmailCommand
     return 'assign';
   }
 
+  public function getCommandSyntax() {
+    return '**!assign** //username//';
+  }
+
+  public function getCommandSummary() {
+    return pht('Assign a task to a specific user.');
+  }
+
+  public function getCommandDescription() {
+    return pht(
+      'To assign a task to another user, provide their username. For example, '.
+      'to assign a task to `alincoln`, write `!assign alincoln`.'.
+      "\n\n".
+      'If you omit the username or the username is not valid, this behaves '.
+      'like `!claim` and assigns the task to you instead.');
+  }
+
   public function buildTransactions(
     PhabricatorUser $viewer,
     PhabricatorApplicationTransactionInterface $object,

@@ -7,6 +7,10 @@ final class PhabricatorSubscriptionsUnsubscribeEmailCommand
     return 'unsubscribe';
   }
 
+  public function getCommandSummary() {
+    return pht('Remove yourself as a subscriber.');
+  }
+
   public function isCommandSupportedForObject(
     PhabricatorApplicationTransactionInterface $object) {
     return ($object instanceof PhabricatorSubscribableInterface);

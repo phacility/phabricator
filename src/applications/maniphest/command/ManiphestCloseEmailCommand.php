@@ -7,6 +7,10 @@ final class ManiphestCloseEmailCommand
     return 'close';
   }
 
+  public function getCommandSummary() {
+    return pht('Close a task.');
+  }
+
   public function buildTransactions(
     PhabricatorUser $viewer,
     PhabricatorApplicationTransactionInterface $object,

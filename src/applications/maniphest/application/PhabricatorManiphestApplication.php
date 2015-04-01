@@ -143,4 +143,12 @@ final class PhabricatorManiphestApplication extends PhabricatorApplication {
     );
   }
 
+  public function getMailCommandObjects() {
+    return array(
+      'task' => array(
+        'object' => new ManiphestTask(),
+      ),
+    );
+  }
+
 }

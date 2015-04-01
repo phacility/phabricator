@@ -189,6 +189,10 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
     return array();
   }
 
+  public function getMailCommandObjects() {
+    return array();
+  }
+
 
 /* -(  URI Routing  )-------------------------------------------------------- */
 
