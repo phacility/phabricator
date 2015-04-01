@@ -26,31 +26,37 @@ final class PhabricatorManiphestConfigOptions
         'name'  => pht('Unbreak Now!'),
         'short' => pht('Unbreak!'),
         'color' => 'indigo',
+        'keywords' => array('unbreak'),
       ),
       90 => array(
         'name' => pht('Needs Triage'),
         'short' => pht('Triage'),
         'color' => 'violet',
+        'keywords' => array('triage'),
       ),
       80 => array(
         'name' => pht('High'),
         'short' => pht('High'),
         'color' => 'red',
+        'keywords' => array('high'),
       ),
       50 => array(
         'name' => pht('Normal'),
         'short' => pht('Normal'),
         'color' => 'orange',
+        'keywords' => array('normal'),
       ),
       25 => array(
         'name' => pht('Low'),
         'short' => pht('Low'),
         'color' => 'yellow',
+        'keywords' => array('low'),
       ),
       0 => array(
         'name' => pht('Wishlist'),
         'short' => pht('Wish'),
         'color' => 'sky',
+        'keywords' => array('wish', 'wishlist'),
       ),
     );
 
@@ -80,6 +86,7 @@ final class PhabricatorManiphestConfigOptions
           'as resolved',
           'as fixed',
         ),
+        'keywords' => array('closed', 'fixed', 'resolved'),
       ),
       'wontfix' => array(
         'name' => pht('Wontfix'),
@@ -182,6 +189,9 @@ The keys you can provide in a specification are:
     providing "as invalid" here will allow users to move tasks
     to this status by writing `Closes T123 as invalid`, even if another status
     is selected by the "Closes" prefix.
+  - `keywords` //Optional list<string>.// Allows you to specify a list
+    of keywords which can be used with `!status` commands in email to select
+    this status.
 
 Statuses will appear in the UI in the order specified. Note the status marked
 `special` as `duplicate` is not settable directly and will not appear in UI
@@ -257,6 +267,9 @@ EOTEXT
             '  - `short` Alternate shorter name, used in UIs where there is '.
             '    not much space available.'."\n".
             '  - `color` A color for this priority, like "red" or "blue".'.
+            '  - `keywords` An optional list of keywords which can '.
+            '     be used to select this priority when using `!priority` '.
+            '     commands in email.'.
             "\n\n".
             'You can choose which priority is the default for newly created '.
             'tasks with `maniphest.default-priority`.')),

@@ -38,6 +38,37 @@ final class ManiphestTaskStatus extends ManiphestConstants {
     return ipull(self::getEnabledStatusMap(), 'name');
   }
 
+
+  /**
+   * Get the statuses and their command keywords.
+   *
+   * @return map Statuses to lists of command keywords.
+   */
+  public static function getTaskStatusKeywordsMap() {
+    $map = self::getEnabledStatusMap();
+    foreach ($map as $key => $spec) {
+      $words = idx($spec, 'keywords', array());
+      if (!is_array($words)) {
+        $words = array($words);
+      }
+
+      // For statuses, we include the status name because it's usually
+      // at least somewhat meaningful.
+      $words[] = $key;
+
+      foreach ($words as $word_key => $word) {
+        $words[$word_key] = phutil_utf8_strtolower($word);
+      }
+
+      $words = array_unique($words);
+
+      $map[$key] = $words;
+    }
+
+    return $map;
+  }
+
+
   public static function getTaskStatusName($status) {
     return self::getStatusAttribute($status, 'name', pht('Unknown Status'));
   }
@@ -231,6 +262,7 @@ final class ManiphestTaskStatus extends ManiphestConstants {
           'silly' => 'optional bool',
           'prefixes' => 'optional list<string>',
           'suffixes' => 'optional list<string>',
+          'keywords' => 'optional list<string>',
         ));
     }
 

@@ -17,6 +17,32 @@ final class ManiphestTaskPriority extends ManiphestConstants {
 
 
   /**
+   * Get the priorities and their command keywords.
+   *
+   * @return map Priorities to lists of command keywords.
+   */
+  public static function getTaskPriorityKeywordsMap() {
+    $map = self::getConfig();
+    foreach ($map as $key => $spec) {
+      $words = idx($spec, 'keywords', array());
+      if (!is_array($words)) {
+        $words = array($words);
+      }
+
+      foreach ($words as $word_key => $word) {
+        $words[$word_key] = phutil_utf8_strtolower($word);
+      }
+
+      $words = array_unique($words);
+
+      $map[$key] = $words;
+    }
+
+    return $map;
+  }
+
+
+  /**
    * Get the priorities and their related short (one-word) descriptions.
    *
    * @return  map Priorities to short descriptions.
