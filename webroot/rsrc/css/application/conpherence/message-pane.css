@@ -68,6 +68,10 @@
   padding-bottom: 20px;
 }
 
+.conpherence-message-pane .conpherence-edited + .date-marker  {
+  margin-top: 24px;
+}
+
 .device .conpherence-message-pane .conpherence-messages {
   left: 0;
   right: 0;

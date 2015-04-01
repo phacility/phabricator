@@ -7,6 +7,7 @@
   margin: 1em 0 1.25em;
   min-height: 50px;
   padding: 2px 0px;
+  position: relative;
 }
 
 .device-phone .phabricator-transaction-view {
@@ -58,4 +59,14 @@
 
 div.phabricator-remarkup + .phabricator-transaction-subheader {
   margin-top: 12px;
+}
+
+.phabricator-transaction-image {
+  float: left;
+  border-radius: 3px;
+  height: 35px;
+  width: 35px;
+  background-size: 35px;
+  position: absolute;
+  top: 5px;
 }
