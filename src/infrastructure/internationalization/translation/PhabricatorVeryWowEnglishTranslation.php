@@ -18,6 +18,7 @@ final class PhabricatorVeryWowEnglishTranslation
       'Send' => 'Bark Bark!',
       'Partial' => 'Pawtial',
       'Partial Upload' => 'Pawtial Upload',
+      'Submit' => 'Such Send!',
     );
   }
 
