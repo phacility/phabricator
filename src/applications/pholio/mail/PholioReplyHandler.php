@@ -1,6 +1,7 @@
 <?php
 
-final class PholioReplyHandler extends PhabricatorMailReplyHandler {
+final class PholioReplyHandler
+  extends PhabricatorApplicationTransactionReplyHandler {
 
   public function validateMailReceiver($mail_receiver) {
     if (!($mail_receiver instanceof PholioMock)) {
@@ -8,18 +9,8 @@ final class PholioReplyHandler extends PhabricatorMailReplyHandler {
     }
   }
 
-  public function getPrivateReplyHandlerEmailAddress(
-    PhabricatorObjectHandle $handle) {
-    return $this->getDefaultPrivateReplyHandlerEmailAddress($handle, 'M');
-  }
-
-  public function getPublicReplyHandlerEmailAddress() {
-    return $this->getDefaultPublicReplyHandlerEmailAddress('M');
-  }
-
-  protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
-    // TODO: Implement this.
-    return null;
+  public function getObjectPrefix() {
+    return 'M';
   }
 
 }

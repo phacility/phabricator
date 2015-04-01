@@ -1,6 +1,7 @@
 <?php
 
-final class FileReplyHandler extends PhabricatorMailReplyHandler {
+final class FileReplyHandler
+  extends PhabricatorApplicationTransactionReplyHandler {
 
   public function validateMailReceiver($mail_receiver) {
     if (!($mail_receiver instanceof PhabricatorFile)) {
@@ -8,31 +9,14 @@ final class FileReplyHandler extends PhabricatorMailReplyHandler {
     }
   }
 
-  public function getPrivateReplyHandlerEmailAddress(
-    PhabricatorObjectHandle $handle) {
-    return $this->getDefaultPrivateReplyHandlerEmailAddress($handle, 'F');
+  public function getObjectPrefix() {
+    return 'F';
   }
 
-  public function getPublicReplyHandlerEmailAddress() {
-    return $this->getDefaultPublicReplyHandlerEmailAddress('F');
-  }
-
-  protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
-    $actor = $this->getActor();
-    $file = $this->getMailReceiver();
-
-    $body_data = $mail->parseBody();
-    $body = $body_data['body'];
-    $body = $this->enhanceBodyWithAttachments($body, $mail->getAttachments());
-
-    $content_source = PhabricatorContentSource::newForSource(
-      PhabricatorContentSource::SOURCE_EMAIL,
-      array(
-        'id' => $mail->getID(),
-      ));
+  protected function processMailCommands(array $commands) {
+   $actor = $this->getActor();
 
     $xactions = array();
-    $commands = $body_data['commands'];
     foreach ($commands as $command) {
       switch (head($command)) {
         case 'unsubscribe':
@@ -44,19 +28,7 @@ final class FileReplyHandler extends PhabricatorMailReplyHandler {
       }
     }
 
-    $xactions[] = id(new PhabricatorFileTransaction())
-      ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
-      ->attachComment(
-        id(new PhabricatorFileTransactionComment())
-          ->setContent($body));
-
-    $editor = id(new PhabricatorFileEditor())
-      ->setActor($actor)
-      ->setContentSource($content_source)
-      ->setContinueOnNoEffect(true)
-      ->setIsPreview(false);
-
-    $editor->applyTransactions($file, $xactions);
+    return $xactions;
   }
 
 }

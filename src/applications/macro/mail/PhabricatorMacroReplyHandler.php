@@ -1,6 +1,7 @@
 <?php
 
-final class PhabricatorMacroReplyHandler extends PhabricatorMailReplyHandler {
+final class PhabricatorMacroReplyHandler
+  extends PhabricatorApplicationTransactionReplyHandler {
 
   public function validateMailReceiver($mail_receiver) {
     if (!($mail_receiver instanceof PhabricatorFileImageMacro)) {
@@ -8,18 +9,8 @@ final class PhabricatorMacroReplyHandler extends PhabricatorMailReplyHandler {
     }
   }
 
-  public function getPrivateReplyHandlerEmailAddress(
-    PhabricatorObjectHandle $handle) {
-    return $this->getDefaultPrivateReplyHandlerEmailAddress($handle, 'MCRO');
-  }
-
-  public function getPublicReplyHandlerEmailAddress() {
-    return $this->getDefaultPublicReplyHandlerEmailAddress('MCRO');
-  }
-
-  protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
-    // TODO: Implement this.
-    return null;
+  public function getObjectPrefix() {
+    return 'MCRO';
   }
 
 }
