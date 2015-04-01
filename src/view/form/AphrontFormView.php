@@ -92,6 +92,10 @@ final class AphrontFormView extends AphrontView {
   }
 
   public function buildLayoutView() {
+    foreach ($this->controls as $control) {
+      $control->setUser($this->getUser());
+    }
+
     return id(new PHUIFormLayoutView())
       ->setFullWidth($this->getFullWidth())
       ->appendChild($this->renderDataInputs())
@@ -117,10 +121,6 @@ final class AphrontFormView extends AphrontView {
 
   public function render() {
     require_celerity_resource('phui-form-view-css');
-
-    foreach ($this->controls as $control) {
-      $control->setUser($this->getUser());
-    }
 
     $layout = $this->buildLayoutView();
 
