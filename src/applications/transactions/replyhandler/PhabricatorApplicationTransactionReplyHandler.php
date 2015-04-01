@@ -43,15 +43,25 @@ abstract class PhabricatorApplicationTransactionReplyHandler
     return $this->getMailReceiver()->getApplicationTransactionTemplate();
   }
 
+  protected function didReceiveMail(
+    PhabricatorMetaMTAReceivedMail $mail,
+    $body) {
+    return array();
+  }
+
+  protected function shouldCreateCommentFromMailBody() {
+    return (bool)$this->getMailReceiver()->getID();
+  }
+
   final protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
     $viewer = $this->getActor();
     $object = $this->getMailReceiver();
 
     $body_data = $mail->parseBody();
+    $body = $body_data['body'];
+    $body = $this->enhanceBodyWithAttachments($body, $mail->getAttachments());
 
-    $xactions = $this->processMailCommands(
-      $mail,
-      $body_data['commands']);
+    $xactions = $this->didReceiveMail($mail, $body);
 
     // If this object is subscribable, subscribe all the users who were
     // CC'd on the message.
@@ -67,17 +77,23 @@ abstract class PhabricatorApplicationTransactionReplyHandler
       }
     }
 
-    $body = $body_data['body'];
-    $body = $this->enhanceBodyWithAttachments($body, $mail->getAttachments());
+    $command_xactions = $this->processMailCommands(
+      $mail,
+      $body_data['commands']);
+    foreach ($command_xactions as $xaction) {
+      $xactions[] = $xaction;
+    }
 
-    $comment = $this
-      ->newTransaction()
-      ->getApplicationTransactionCommentObject()
-      ->setContent($body);
+    if ($this->shouldCreateCommentFromMailBody()) {
+      $comment = $this
+        ->newTransaction()
+        ->getApplicationTransactionCommentObject()
+        ->setContent($body);
 
-    $xactions[] = $this->newTransaction()
-      ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
-      ->attachComment($comment);
+      $xactions[] = $this->newTransaction()
+        ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
+        ->attachComment($comment);
+    }
 
     $target = $object->getApplicationTransactionObject();
 
