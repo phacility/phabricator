@@ -3,22 +3,8 @@
 final class ConpherenceThreadSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
-  // For now, we only search for rooms, but write this code so its easy to
-  // change that decision later
-  private $isRooms = true;
-
-  public function setIsRooms($bool) {
-    $this->isRooms = $bool;
-    return $this;
-  }
-
   public function getResultTypeDescription() {
-    if ($this->isRooms) {
-      $type = pht('Rooms');
-    } else {
-      $type = pht('Threads');
-    }
-    return $type;
+    return pht('Threads');
   }
 
   public function getApplicationClassName() {
@@ -32,17 +18,35 @@ final class ConpherenceThreadSearchEngine
       'participantPHIDs',
       $this->readUsersFromRequest($request, 'participants'));
 
+    $saved->setParameter(
+      'threadType',
+      $request->getStr('threadType'));
+
     return $saved;
   }
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new ConpherenceThreadQuery())
-      ->withIsRoom($this->isRooms)
       ->needParticipantCache(true);
 
     $participant_phids = $saved->getParameter('participantPHIDs', array());
     if ($participant_phids && is_array($participant_phids)) {
       $query->withParticipantPHIDs($participant_phids);
+    }
+
+    $thread_type = $saved->getParameter('threadType');
+    if (idx($this->getTypeOptions(), $thread_type)) {
+      switch ($thread_type) {
+        case 'rooms':
+          $query->withIsRoom(true);
+          break;
+        case 'messages':
+          $query->withIsRoom(false);
+          break;
+        case 'both':
+          $query->withIsRoom(null);
+          break;
+      }
     }
 
     return $query;
@@ -60,7 +64,13 @@ final class ConpherenceThreadSearchEngine
           ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('participants')
           ->setLabel(pht('Participants'))
-          ->setValue($participant_phids));
+          ->setValue($participant_phids))
+      ->appendControl(
+        id(new AphrontFormSelectControl())
+        ->setLabel(pht('Type'))
+        ->setName('threadType')
+        ->setOptions($this->getTypeOptions())
+        ->setValue($saved->getParameter('threadType')));
   }
 
   protected function getURI($path) {
@@ -70,15 +80,13 @@ final class ConpherenceThreadSearchEngine
   protected function getBuiltinQueryNames() {
     $names = array();
 
-    if ($this->isRooms) {
-      $names = array(
-        'all' => pht('All Rooms'),
-      );
+    $names = array(
+      'all' => pht('All Rooms'),
+    );
 
-      if ($this->requireViewer()->isLoggedIn()) {
-        $names['participant'] = pht('Joined Rooms');
-        $names['messages'] = pht('All Messages');
-      }
+    if ($this->requireViewer()->isLoggedIn()) {
+      $names['participant'] = pht('Joined Rooms');
+      $names['messages'] = pht('All Messages');
     }
 
     return $names;
@@ -91,13 +99,15 @@ final class ConpherenceThreadSearchEngine
 
     switch ($query_key) {
       case 'all':
+        $query->setParameter('threadType', 'rooms');
         return $query;
       case 'participant':
+        $query->setParameter('threadType', 'rooms');
         return $query->setParameter(
           'participantPHIDs',
           array($this->requireViewer()->getPHID()));
       case 'messages':
-        $this->setIsRooms(false);
+        $query->setParameter('threadType', 'messages');
         return $query->setParameter(
           'participantPHIDs',
           array($this->requireViewer()->getPHID()));
@@ -122,6 +132,10 @@ final class ConpherenceThreadSearchEngine
 
     $viewer = $this->requireViewer();
 
+    $policy_objects = ConpherenceThread::loadPolicyObjects(
+      $viewer,
+      $conpherences);
+
     $list = new PHUIObjectItemListView();
     $list->setUser($viewer);
     foreach ($conpherences as $conpherence) {
@@ -129,6 +143,13 @@ final class ConpherenceThreadSearchEngine
       $data = $conpherence->getDisplayData($viewer);
       $title = $data['title'];
 
+      if ($conpherence->getIsRoom()) {
+        $icon_name = $conpherence->getPolicyIconName($policy_objects);
+      } else {
+        $icon_name = 'fa-envelope-o';
+      }
+      $icon = id(new PHUIIconView())
+        ->setIconFont($icon_name);
       $item = id(new PHUIObjectItemView())
         ->setObjectName($conpherence->getMonogram())
         ->setHeader($title)
@@ -140,7 +161,7 @@ final class ConpherenceThreadSearchEngine
           pht('Messages: %d', $conpherence->getMessageCount()))
         ->addAttribute(
           array(
-            id(new PHUIIconView())->setIconFont('fa-envelope-o', 'green'),
+            $icon,
             ' ',
             pht(
               'Last updated %s',
@@ -152,4 +173,12 @@ final class ConpherenceThreadSearchEngine
 
     return $list;
   }
+
+  private function getTypeOptions() {
+    return array(
+      'rooms' => pht('Rooms'),
+      'messages' => pht('Messages'),
+      'both' => pht('Both'),);
+  }
+
 }

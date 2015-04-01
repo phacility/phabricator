@@ -21,25 +21,16 @@ final class ConpherenceThreadListView extends AphrontView {
   public function render() {
     require_celerity_resource('conpherence-menu-css');
 
-    $grouped = mgroup($this->threads, 'getIsRoom');
-    $rooms = idx($grouped, 1, array());
-
-    $policies = array();
-    foreach ($rooms as $room) {
-      $policies[] = $room->getViewPolicy();
-    }
-    $policy_objects = array();
-    if ($policies) {
-      $policy_objects = id(new PhabricatorPolicyQuery())
-        ->setViewer($this->getUser())
-        ->withPHIDs($policies)
-        ->execute();
-    }
-
     $menu = id(new PHUIListView())
       ->addClass('conpherence-menu')
       ->setID('conpherence-menu');
 
+    $policy_objects = ConpherenceThread::loadPolicyObjects(
+      $this->getUser(),
+      $this->threads);
+
+    $grouped = mgroup($this->threads, 'getIsRoom');
+    $rooms = idx($grouped, 1, array());
     $this->addRoomsToMenu($menu, $rooms, $policy_objects);
     $messages = idx($grouped, 0, array());
     $this->addMessagesToMenu($menu, $messages);

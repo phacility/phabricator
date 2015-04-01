@@ -279,6 +279,30 @@ final class ConpherenceThread extends ConpherenceDAO
     }
   }
 
+  public static function loadPolicyObjects(
+    PhabricatorUser $viewer,
+    array $conpherences) {
+
+    assert_instances_of($conpherences, 'ConpherenceThread');
+
+    $grouped = mgroup($conpherences, 'getIsRoom');
+    $rooms = idx($grouped, 1, array());
+
+    $policies = array();
+    foreach ($rooms as $room) {
+      $policies[] = $room->getViewPolicy();
+    }
+    $policy_objects = array();
+    if ($policies) {
+      $policy_objects = id(new PhabricatorPolicyQuery())
+        ->setViewer($viewer)
+        ->withPHIDs($policies)
+        ->execute();
+    }
+
+    return $policy_objects;
+  }
+
   public function getPolicyIconName(array $policy_objects) {
     assert_instances_of($policy_objects, 'PhabricatorPolicy');
 
