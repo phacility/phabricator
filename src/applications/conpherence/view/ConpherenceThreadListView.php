@@ -22,7 +22,7 @@ final class ConpherenceThreadListView extends AphrontView {
     require_celerity_resource('conpherence-menu-css');
 
     $grouped = mgroup($this->threads, 'getIsRoom');
-    $rooms = idx($grouped, true, array());
+    $rooms = idx($grouped, 1, array());
 
     $policies = array();
     foreach ($rooms as $room) {
@@ -41,7 +41,7 @@ final class ConpherenceThreadListView extends AphrontView {
       ->setID('conpherence-menu');
 
     $this->addRoomsToMenu($menu, $rooms, $policy_objects);
-    $messages = idx($grouped, false, array());
+    $messages = idx($grouped, 0, array());
     $this->addMessagesToMenu($menu, $messages);
 
     return $menu;
@@ -164,7 +164,7 @@ final class ConpherenceThreadListView extends AphrontView {
     $menu->addMenuItem($header);
 
     if (empty($conpherences)) {
-      $menu->addMenuItem($this->getNoConpherencesMenuItem());
+      $menu->addMenuItem($this->getNoMessagesMenuItem());
       return $menu;
     }
 
