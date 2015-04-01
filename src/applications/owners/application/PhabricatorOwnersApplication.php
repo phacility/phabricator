@@ -22,8 +22,13 @@ final class PhabricatorOwnersApplication extends PhabricatorApplication {
     return "\xE2\x98\x81";
   }
 
-  public function getHelpURI() {
-    return PhabricatorEnv::getDoclink('Owners Tool User Guide');
+  public function getHelpDocumentationArticles(PhabricatorUser $viewer) {
+    return array(
+      array(
+        'name' => pht('Owners User Guide'),
+        'href' => PhabricatorEnv::getDoclink('Owners Tool User Guide'),
+      ),
+    );
   }
 
   public function getFlavorText() {

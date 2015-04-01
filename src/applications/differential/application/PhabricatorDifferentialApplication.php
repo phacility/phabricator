@@ -22,8 +22,13 @@ final class PhabricatorDifferentialApplication extends PhabricatorApplication {
     return true;
   }
 
-  public function getHelpURI() {
-    return PhabricatorEnv::getDoclink('Differential User Guide');
+  public function getHelpDocumentationArticles(PhabricatorUser $viewer) {
+    return array(
+      array(
+        'name' => pht('Differential User Guide'),
+        'href' => PhabricatorEnv::getDoclink('Differential User Guide'),
+      ),
+    );
   }
 
   public function getFactObjectsForAnalysis() {
@@ -189,6 +194,7 @@ EOTEXT
   public function getMailCommandObjects() {
     return array(
       'revision' => array(
+        'name' => pht('Email Commands: Revisions'),
         'object' => new DifferentialRevision(),
       ),
     );

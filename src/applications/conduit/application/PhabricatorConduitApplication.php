@@ -14,8 +14,13 @@ final class PhabricatorConduitApplication extends PhabricatorApplication {
     return false;
   }
 
-  public function getHelpURI() {
-    return PhabricatorEnv::getDoclink('Conduit Technical Documentation');
+  public function getHelpDocumentationArticles(PhabricatorUser $viewer) {
+    return array(
+      array(
+        'name' => pht('Conduit Technical Documentation'),
+        'href' => PhabricatorEnv::getDoclink('Conduit Technical Documentation'),
+      ),
+    );
   }
 
   public function getName() {

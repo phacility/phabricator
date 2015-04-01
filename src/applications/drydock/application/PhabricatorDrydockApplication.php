@@ -34,8 +34,13 @@ final class PhabricatorDrydockApplication extends PhabricatorApplication {
     return true;
   }
 
-  public function getHelpURI() {
-    return PhabricatorEnv::getDoclink('Drydock User Guide');
+  public function getHelpDocumentationArticles(PhabricatorUser $viewer) {
+    return array(
+      array(
+        'name' => pht('Drydock User Guide'),
+        'href' => PhabricatorEnv::getDoclink('Drydock User Guide'),
+      ),
+    );
   }
 
   public function getRoutes() {

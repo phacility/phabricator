@@ -22,8 +22,13 @@ final class PhabricatorHeraldApplication extends PhabricatorApplication {
     return "\xE2\x98\xBF";
   }
 
-  public function getHelpURI() {
-    return PhabricatorEnv::getDoclink('Herald User Guide');
+  public function getHelpDocumentationArticles(PhabricatorUser $viewer) {
+    return array(
+      array(
+        'name' => pht('Herald User Guide'),
+        'href' => PhabricatorEnv::getDoclink('Herald User Guide'),
+      ),
+    );
   }
 
   public function getFlavorText() {

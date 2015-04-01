@@ -32,8 +32,13 @@ final class PhabricatorLegalpadApplication extends PhabricatorApplication {
     );
   }
 
-  public function getHelpURI() {
-    return PhabricatorEnv::getDoclink('Legalpad User Guide');
+  public function getHelpDocumentationArticles(PhabricatorUser $viewer) {
+    return array(
+      array(
+        'name' => pht('Legalpad User Guide'),
+        'href' => PhabricatorEnv::getDoclink('Legalpad User Guide'),
+      ),
+    );
   }
 
   public function getOverview() {

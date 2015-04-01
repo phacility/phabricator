@@ -78,9 +78,11 @@ final class PhabricatorApplicationEmailCommandsController
 
     $content = implode("\n\n", $content);
 
+    $title = $spec['name'];
+
     $crumbs = $this->buildApplicationCrumbs();
     $this->addApplicationCrumb($crumbs, $selected);
-    $crumbs->addTextCrumb(pht('Mail Commands'));
+    $crumbs->addTextCrumb($title);
 
     $content_box = id(new PHUIBoxView())
       ->addMargin(PHUI::MARGIN_LARGE)
@@ -91,7 +93,7 @@ final class PhabricatorApplicationEmailCommandsController
           $viewer));
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Mail Commands'))
+      ->setHeaderText($title)
       ->appendChild($content_box);
 
     return $this->buildApplicationPage(
@@ -100,7 +102,7 @@ final class PhabricatorApplicationEmailCommandsController
         $box,
       ),
       array(
-        'title' => 'asdf',
+        'title' => $title,
       ));
 
   }
