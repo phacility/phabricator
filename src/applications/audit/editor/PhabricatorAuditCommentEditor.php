@@ -38,12 +38,6 @@ final class PhabricatorAuditCommentEditor extends PhabricatorEditor {
     return array_keys($phids);
   }
 
-  public static function newReplyHandlerForCommit($commit) {
-    $reply_handler = new PhabricatorAuditReplyHandler();
-    $reply_handler->setMailReceiver($commit);
-    return $reply_handler;
-  }
-
   public static function getMailThreading(
     PhabricatorRepository $repository,
     PhabricatorRepositoryCommit $commit) {

@@ -148,4 +148,17 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
     );
   }
 
+  public function getMailCommandObjects() {
+    return array(
+      'commit' => array(
+        'name' => pht('Email Commands: Commits'),
+        'header' => pht('Interacting with Commits'),
+        'object' => new PhabricatorRepositoryCommit(),
+        'summary' => pht(
+          'This page documents the commands you can use to interact with '.
+          'commits and audits in Diffusion.'),
+      ),
+    );
+  }
+
 }

@@ -66,4 +66,17 @@ final class PhabricatorPonderApplication extends PhabricatorApplication {
     );
   }
 
+  public function getMailCommandObjects() {
+    return array(
+      'question' => array(
+        'name' => pht('Email Commands: Questions'),
+        'header' => pht('Interacting with Ponder Questions'),
+        'object' => new PonderQuestion(),
+        'summary' => pht(
+          'This page documents the commands you can use to interact with '.
+          'questions in Ponder.'),
+      ),
+    );
+  }
+
 }

@@ -1,7 +1,9 @@
 <?php
 
 final class ConpherenceThread extends ConpherenceDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorApplicationTransactionInterface {
 
   protected $title;
   protected $isRoom = 0;
@@ -288,6 +290,28 @@ final class ConpherenceThread extends ConpherenceDAO
       $icon = 'fa-user';
     }
     return $icon;
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new ConpherenceEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new ConpherenceTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+    return $timeline;
   }
 
 }

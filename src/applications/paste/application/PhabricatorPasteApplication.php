@@ -82,4 +82,17 @@ final class PhabricatorPasteApplication extends PhabricatorApplication {
     return $items;
   }
 
+  public function getMailCommandObjects() {
+    return array(
+      'paste' => array(
+        'name' => pht('Email Commands: Pastes'),
+        'header' => pht('Interacting with Pastes'),
+        'object' => new PhabricatorPaste(),
+        'summary' => pht(
+          'This page documents the commands you can use to interact with '.
+          'pastes.'),
+      ),
+    );
+  }
+
 }

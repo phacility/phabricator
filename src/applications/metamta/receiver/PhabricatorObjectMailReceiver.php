@@ -39,10 +39,26 @@ abstract class PhabricatorObjectMailReceiver extends PhabricatorMailReceiver {
     return $this;
   }
 
-  abstract protected function processReceivedObjectMail(
+  protected function processReceivedObjectMail(
     PhabricatorMetaMTAReceivedMail $mail,
     PhabricatorLiskDAO $object,
-    PhabricatorUser $sender);
+    PhabricatorUser $sender) {
+
+    $handler = $this->getTransactionReplyHandler();
+    if ($handler) {
+      return $handler
+        ->setMailReceiver($object)
+        ->setActor($sender)
+        ->setExcludeMailRecipientPHIDs($mail->loadExcludeMailRecipientPHIDs())
+        ->processEmail($mail);
+    }
+
+    throw new PhutilMethodNotImplementedException();
+  }
+
+  protected function getTransactionReplyHandler() {
+    return null;
+  }
 
   public function loadMailReceiverObject($pattern, PhabricatorUser $viewer) {
     return $this->loadObject($pattern, $viewer);

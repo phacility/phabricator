@@ -80,4 +80,17 @@ final class PhabricatorLegalpadApplication extends PhabricatorApplication {
     );
   }
 
+  public function getMailCommandObjects() {
+    return array(
+      'document' => array(
+        'name' => pht('Email Commands: Legalpad Documents'),
+        'header' => pht('Interacting with Legalpad Documents'),
+        'object' => new LegalpadDocument(),
+        'summary' => pht(
+          'This page documents the commands you can use to interact with '.
+          'documents in Legalpad.'),
+      ),
+    );
+  }
+
 }
