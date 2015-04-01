@@ -1,6 +1,6 @@
 <?php
 
-final class PasteMockMailReceiver extends PhabricatorObjectMailReceiver {
+final class PasteMailReceiver extends PhabricatorObjectMailReceiver {
 
   public function isEnabled() {
     $app_class = 'PhabricatorPasteApplication';
