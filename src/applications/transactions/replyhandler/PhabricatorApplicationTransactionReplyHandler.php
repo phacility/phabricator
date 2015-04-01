@@ -49,7 +49,9 @@ abstract class PhabricatorApplicationTransactionReplyHandler
 
     $body_data = $mail->parseBody();
 
-    $xactions = $this->processMailCommands($body_data['commands']);
+    $xactions = $this->processMailCommands(
+      $mail,
+      $body_data['commands']);
 
     // If this object is subscribable, subscribe all the users who were
     // CC'd on the message.
@@ -84,9 +86,60 @@ abstract class PhabricatorApplicationTransactionReplyHandler
       ->applyTransactions($target, $xactions);
   }
 
-  protected function processMailCommands(array $commands) {
-    // TODO: Modularize this.
-    return array();
+  private function processMailCommands(
+    PhabricatorMetaMTAReceivedMail $mail,
+    array $command_list) {
+
+    $viewer = $this->getActor();
+    $object = $this->getMailReceiver();
+
+    $list = MetaMTAEmailTransactionCommand::getAllCommandsForObject($object);
+    $map = MetaMTAEmailTransactionCommand::getCommandMap($list);
+
+    $xactions = array();
+    foreach ($command_list as $command_argv) {
+      $command = head($command_argv);
+      $argv = array_slice($command_argv, 1);
+
+      $handler = idx($map, phutil_utf8_strtolower($command));
+      if ($handler) {
+        $results = $handler->buildTransactions(
+          $viewer,
+          $object,
+          $mail,
+          $command,
+          $argv);
+        foreach ($results as $result) {
+          $xactions[] = $result;
+        }
+      } else {
+        $valid_commands = array();
+        foreach ($list as $valid_command) {
+          $aliases = $valid_command->getCommandAliases();
+          if ($aliases) {
+            foreach ($aliases as $key => $alias) {
+              $aliases[$key] = '!'.$alias;
+            }
+            $aliases = implode(', ', $aliases);
+            $valid_commands[] = pht(
+              '!%s (or %s)',
+              $valid_command->getCommand(),
+              $aliases);
+          } else {
+            $valid_commands[] = '!'.$valid_command->getCommand();
+          }
+        }
+
+        throw new Exception(
+          pht(
+            'The command "!%s" is not a supported mail command. Valid '.
+            'commands for this object are: %s.',
+            $command,
+            implode(', ', $valid_commands)));
+      }
+    }
+
+    return $xactions;
   }
 
 }

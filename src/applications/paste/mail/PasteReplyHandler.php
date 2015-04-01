@@ -13,22 +13,4 @@ final class PasteReplyHandler
     return 'P';
   }
 
-  protected function processMailCommands(array $commands) {
-   $actor = $this->getActor();
-
-    $xactions = array();
-    foreach ($commands as $command) {
-      switch (head($command)) {
-        case 'unsubscribe':
-          $xaction = id(new PhabricatorPasteTransaction())
-            ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
-            ->setNewValue(array('-' => array($actor->getPHID())));
-          $xactions[] = $xaction;
-          break;
-      }
-    }
-
-    return $xactions;
-  }
-
 }
