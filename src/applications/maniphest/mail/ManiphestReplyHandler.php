@@ -20,18 +20,15 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
   protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
     // NOTE: We'll drop in here on both the "reply to a task" and "create a
     // new task" workflows! Make sure you test both if you make changes!
-
     $task = $this->getMailReceiver();
+    $viewer = $this->getActor();
 
     $is_new_task = !$task->getID();
-
-    $user = $this->getActor();
 
     $body_data = $mail->parseBody();
     $body = $body_data['body'];
     $body = $this->enhanceBodyWithAttachments($body, $mail->getAttachments());
 
-    $xactions = array();
     $content_source = PhabricatorContentSource::newForSource(
       PhabricatorContentSource::SOURCE_EMAIL,
       array(
@@ -40,107 +37,78 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
 
     $template = new ManiphestTransaction();
 
-    $is_unsub = false;
+    $xactions = array();
     if ($is_new_task) {
-      $task = ManiphestTask::initializeNewTask($user);
-
-      $xactions[] = id(new ManiphestTransaction())
-        ->setTransactionType(ManiphestTransaction::TYPE_STATUS)
-        ->setNewValue(ManiphestTaskStatus::getDefaultStatus());
-
-      $xactions[] = id(new ManiphestTransaction())
+      $xactions[] = id(clone $template)
         ->setTransactionType(ManiphestTransaction::TYPE_TITLE)
         ->setNewValue(nonempty($mail->getSubject(), pht('Untitled Task')));
 
-      $xactions[] = id(new ManiphestTransaction())
+      $xactions[] = id(clone $template)
         ->setTransactionType(ManiphestTransaction::TYPE_DESCRIPTION)
         ->setNewValue($body);
-
     } else {
-
-      $commands = $body_data['commands'];
-
-      // TODO: Support multiple commands.
-      if ($commands) {
-        $command_argv = head($commands);
-      } else {
-        $command_argv = array();
-      }
-      $command = idx($command_argv, 0);
-      $command_value = idx($command_argv, 1);
-
-      $ttype = PhabricatorTransactions::TYPE_COMMENT;
-      $new_value = null;
-      switch ($command) {
-        case 'close':
-          $ttype = ManiphestTransaction::TYPE_STATUS;
-          $new_value = ManiphestTaskStatus::getDefaultClosedStatus();
-          break;
-        case 'claim':
-          $ttype = ManiphestTransaction::TYPE_OWNER;
-          $new_value = $user->getPHID();
-          break;
-        case 'assign':
-          $ttype = ManiphestTransaction::TYPE_OWNER;
-          if ($command_value) {
-            $assign_users = id(new PhabricatorPeopleQuery())
-              ->setViewer($user)
-              ->withUsernames(array($command_value))
-              ->execute();
-            if ($assign_users) {
-              $assign_user = head($assign_users);
-              $new_value = $assign_user->getPHID();
-            }
-          }
-          // assign to the user by default
-          if (!$new_value) {
-            $new_value = $user->getPHID();
-          }
-          break;
-        case 'unsubscribe':
-          $is_unsub = true;
-          $ttype = PhabricatorTransactions::TYPE_SUBSCRIBERS;
-          $ccs = $task->getSubscriberPHIDs();
-          foreach ($ccs as $k => $phid) {
-            if ($phid == $user->getPHID()) {
-              unset($ccs[$k]);
-            }
-          }
-          $new_value = array('=' => array_values($ccs));
-          break;
-      }
-
-      if ($ttype != PhabricatorTransactions::TYPE_COMMENT) {
-        $xaction = clone $template;
-        $xaction->setTransactionType($ttype);
-        $xaction->setNewValue($new_value);
-        $xactions[] = $xaction;
-      }
-
-      if (strlen($body)) {
-        $xaction = clone $template;
-        $xaction->setTransactionType(PhabricatorTransactions::TYPE_COMMENT);
-        $xaction->attachComment(
+      $xactions[] = id(clone $template)
+        ->setTransactionType(PhabricatorTransactions::TYPE_COMMENT)
+        ->attachComment(
           id(new ManiphestTransactionComment())
             ->setContent($body));
-        $xactions[] = $xaction;
+    }
+
+    $commands = $body_data['commands'];
+    foreach ($commands as $command_argv) {
+      $command = head($command_argv);
+      $args = array_slice($command_argv, 1);
+      switch ($command) {
+        case 'close':
+          $xactions[] = id(clone $template)
+            ->setTransactionType(ManiphestTransaction::TYPE_STATUS)
+            ->setNewValue(ManiphestTaskStatus::getDefaultClosedStatus());
+          break;
+        case 'claim':
+          $xactions[] = id(clone $template)
+            ->setTransactionType(ManiphestTransaction::TYPE_OWNER)
+            ->setNewValue($viewer->getPHID());
+          break;
+        case 'assign':
+          $assign_to = head($args);
+          if ($assign_to) {
+            $assign_user = id(new PhabricatorPeopleQuery())
+              ->setViewer($viewer)
+              ->withUsernames(array($assign_to))
+              ->executeOne();
+            if ($assign_user) {
+              $assign_phid = $assign_user->getPHID();
+            }
+          }
+
+          // Treat bad "!assign" like "!claim".
+          if (!$assign_phid) {
+            $assign_phid = $viewer->getPHID();
+          }
+
+          $xactions[] = id(clone $template)
+            ->setTransactionType(ManiphestTransaction::TYPE_OWNER)
+            ->setNewValue($assign_phid);
+          break;
+        case 'unsubscribe':
+          $xactions[] = id(clone $template)
+            ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+            ->setNewValue(
+              array(
+                '-' => array($viewer->getPHID()),
+              ));
+          break;
       }
     }
 
     $ccs = $mail->loadCCPHIDs();
-    $old_ccs = $task->getSubscriberPHIDs();
-    $new_ccs = array_merge($old_ccs, $ccs);
-    if (!$is_unsub) {
-      $new_ccs[] = $user->getPHID();
-    }
-    $new_ccs = array_unique($new_ccs);
-
-    if (array_diff($new_ccs, $old_ccs)) {
-      $cc_xaction = clone $template;
-      $cc_xaction->setTransactionType(
-        PhabricatorTransactions::TYPE_SUBSCRIBERS);
-      $cc_xaction->setNewValue(array('=' => $new_ccs));
-      $xactions[] = $cc_xaction;
+    if ($ccs) {
+      $xactions[] = id(clone $template)
+        ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
+        ->setNewValue(
+          array(
+            '+' => array($viewer->getPHID()),
+          ));
     }
 
     $event = new PhabricatorEvent(
@@ -151,22 +119,24 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
         'new'           => $is_new_task,
         'transactions'  => $xactions,
       ));
-    $event->setUser($user);
+    $event->setUser($viewer);
     PhutilEventEngine::dispatchEvent($event);
 
     $task = $event->getValue('task');
     $xactions = $event->getValue('transactions');
 
     $editor = id(new ManiphestTransactionEditor())
-      ->setActor($user)
+      ->setActor($viewer)
       ->setParentMessageID($mail->getMessageID())
       ->setExcludeMailRecipientPHIDs($this->getExcludeMailRecipientPHIDs())
       ->setContinueOnNoEffect(true)
       ->setContinueOnMissingFields(true)
       ->setContentSource($content_source);
+
     if ($this->getApplicationEmail()) {
       $editor->setApplicationEmail($this->getApplicationEmail());
     }
+
     $editor->applyTransactions($task, $xactions);
 
     $event = new PhabricatorEvent(
@@ -176,7 +146,7 @@ final class ManiphestReplyHandler extends PhabricatorMailReplyHandler {
         'new'           => $is_new_task,
         'transactions'  => $xactions,
       ));
-    $event->setUser($user);
+    $event->setUser($viewer);
     PhutilEventEngine::dispatchEvent($event);
   }
 
