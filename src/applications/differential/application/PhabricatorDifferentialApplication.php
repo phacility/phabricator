@@ -195,7 +195,11 @@ EOTEXT
     return array(
       'revision' => array(
         'name' => pht('Email Commands: Revisions'),
+        'header' => pht('Interacting with Differential Revisions'),
         'object' => new DifferentialRevision(),
+        'summary' => pht(
+          'This page documents the commands you can use to interact with '.
+          'revisions in Differential.'),
       ),
     );
   }
