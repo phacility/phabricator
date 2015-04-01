@@ -27,13 +27,6 @@ final class PhabricatorDiffusionConfigOptions
         '[Diffusion]')
         ->setDescription(pht('Subject prefix for Diffusion mail.')),
       $this->newOption(
-        'metamta.diffusion.reply-handler',
-        'class',
-        'PhabricatorAuditReplyHandler')
-        ->setLocked(true)
-        ->setBaseClass('PhabricatorMailReplyHandler')
-        ->setDescription(pht('Override mail reply handler class.')),
-      $this->newOption(
         'metamta.diffusion.attach-patches',
         'bool',
         false)

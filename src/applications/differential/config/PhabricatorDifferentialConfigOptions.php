@@ -245,13 +245,6 @@ final class PhabricatorDifferentialConfigOptions
             "Similar to `differential.days-fresh` but marks stale revisions. ".
             "If the revision is even older than it is when marked as 'old'.")),
       $this->newOption(
-        'metamta.differential.reply-handler',
-        'class',
-        'DifferentialReplyHandler')
-        ->setLocked(true)
-        ->setBaseClass('PhabricatorMailReplyHandler')
-        ->setDescription(pht('Alternate reply handler class.')),
-      $this->newOption(
         'metamta.differential.subject-prefix',
         'string',
         '[Differential]')

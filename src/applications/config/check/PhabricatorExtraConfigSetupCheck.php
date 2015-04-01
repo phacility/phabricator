@@ -164,6 +164,9 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'Configure a reply domain with "%s".',
       'metamta.reply-handler-domain');
 
+    $reply_handler_reason = pht(
+      'Reply handlers can no longer be overridden with configuration.');
+
     $ancient_config += array(
       'phid.external-loaders' =>
         pht(
@@ -233,6 +236,11 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'metamta.macro.reply-handler-domain' => $reply_domain_reason,
       'metamta.maniphest.reply-handler-domain' => $reply_domain_reason,
       'metamta.pholio.reply-handler-domain' => $reply_domain_reason,
+
+      'metamta.diffusion.reply-handler' => $reply_handler_reason,
+      'metamta.differential.reply-handler' => $reply_handler_reason,
+      'metamta.maniphest.reply-handler' => $reply_handler_reason,
+      'metamta.package.reply-handler' => $reply_handler_reason,
     );
 
     return $ancient_config;

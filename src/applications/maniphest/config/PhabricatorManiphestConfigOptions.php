@@ -273,13 +273,6 @@ EOTEXT
             '{{maniphest.priorities}} configuration option. The default value '.
             '(`90`) corresponds to the default "Needs Triage" priority.')),
       $this->newOption(
-        'metamta.maniphest.reply-handler',
-        'class',
-        'ManiphestReplyHandler')
-        ->setLocked(true)
-        ->setBaseClass('PhabricatorMailReplyHandler')
-        ->setDescription(pht('Override reply handler class.')),
-      $this->newOption(
         'metamta.maniphest.subject-prefix',
         'string',
         '[Maniphest]')
