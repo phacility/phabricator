@@ -39,7 +39,20 @@ final class PhabricatorGlobalLock extends PhutilLock {
 
   public static function newLock($name) {
     $namespace = PhabricatorLiskDAO::getStorageNamespace();
-    $full_name = 'global:'.$namespace.':'.$name;
+    $namespace = PhabricatorHash::digestToLength($namespace, 20);
+
+    $full_name = $namespace.'-g:'.$name;
+
+    $length_limit = 64;
+    if (strlen($full_name) > $length_limit) {
+      throw new Exception(
+        pht(
+          'Lock name "%s" is too long (full lock name is "%s"). The '.
+          'full lock name must not be longer than %s bytes.',
+          $name,
+          $full_name,
+          new PhutilNumber($length_limit)));
+    }
 
     $lock = self::getLock($full_name);
     if (!$lock) {

@@ -51,10 +51,9 @@ final class PhabricatorRepositoryManagementUpdateWorkflow
     }
 
     $repository = head($repos);
-    $callsign = $repository->getCallsign();
 
     try {
-      $lock_name = get_class($this).':'.$callsign;
+      $lock_name = 'repository.update:'.$repository->getID();
       $lock = PhabricatorGlobalLock::newLock($lock_name);
 
       $lock->lock();
@@ -135,7 +134,7 @@ final class PhabricatorRepositoryManagementUpdateWorkflow
       $proxy = new PhutilProxyException(
         pht(
           'Error while pushing "%s" repository to mirrors.',
-          $repository->getCallsign()),
+          $repository->getMonogram()),
         $ex);
       phlog($proxy);
     }
