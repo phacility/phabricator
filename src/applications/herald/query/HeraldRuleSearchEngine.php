@@ -186,6 +186,8 @@ final class HeraldRuleSearchEngine extends PhabricatorApplicationSearchEngine {
           pht(
             'Authored by %s',
             $handles[$rule->getAuthorPHID()]->renderLink()));
+      } else if ($rule->isObjectRule()) {
+        $item->addIcon('fa-briefcase', pht('Object Rule'));
       } else {
         $item->addIcon('fa-globe', pht('Global Rule'));
       }
