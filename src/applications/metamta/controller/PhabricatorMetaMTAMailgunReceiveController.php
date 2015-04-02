@@ -56,7 +56,7 @@ final class PhabricatorMetaMTAMailgunReceiveController
         $file = PhabricatorFile::newFromPHPUpload(
           $file_raw,
           array(
-            'authorPHID' => $user->getPHID(),
+            'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
           ));
         $file_phids[] = $file->getPHID();
       } catch (Exception $ex) {

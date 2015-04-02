@@ -327,11 +327,8 @@ abstract class PhabricatorMailReplyHandler {
       return $body;
     }
 
-    // NOTE: This is safe, but not entirely correct. Clean it up after
-    // T7712. These files have the install-default policy right now, which
-    // may or may not be permissive.
     $files = id(new PhabricatorFileQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->setViewer($this->getActor())
       ->withPHIDs($attachments)
       ->execute();
 

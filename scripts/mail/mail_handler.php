@@ -77,6 +77,7 @@ foreach ($parser->getAttachments() as $attachment) {
     $attachment->getContent(),
     array(
       'name' => $attachment->getFilename(),
+      'viewPolicy' => PhabricatorPolicies::POLICY_NOONE,
     ));
   $attachments[] = $file->getPHID();
 }
