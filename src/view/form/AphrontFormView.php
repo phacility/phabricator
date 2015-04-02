@@ -94,6 +94,7 @@ final class AphrontFormView extends AphrontView {
   public function buildLayoutView() {
     foreach ($this->controls as $control) {
       $control->setUser($this->getUser());
+      $control->willRender();
     }
 
     return id(new PHUIFormLayoutView())

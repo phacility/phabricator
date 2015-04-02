@@ -89,10 +89,6 @@ abstract class AphrontTagView extends AphrontView {
     return $this->renderChildren();
   }
 
-  protected function willRender() {
-    return;
-  }
-
   final public function render() {
     $this->willRender();
 
