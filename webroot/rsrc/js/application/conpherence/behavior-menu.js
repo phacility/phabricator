@@ -8,6 +8,7 @@
  *           javelin-behavior-device
  *           javelin-history
  *           javelin-vector
+ *           phabricator-title
  *           phabricator-shaped-request
  *           conpherence-thread-manager
  */
@@ -151,10 +152,10 @@ JX.behavior('conpherence-menu', function(config) {
     }
     JX.History.replace(config.baseURI + uri_suffix);
     if (data.title) {
-      document.title = data.title;
+      JX.Title.setTitle(data.title);
     } else if (_thread.node) {
       var threadData = JX.Stratcom.getData(_thread.node);
-      document.title = threadData.title;
+      JX.Title.setTitle(threadData.title);
     }
   }
 
