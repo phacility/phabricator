@@ -7,8 +7,8 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => '0e73b9f2',
-    'core.pkg.js' => '0c88e7f6',
+    'core.pkg.css' => '559c85eb',
+    'core.pkg.js' => '6be6b2fa',
     'darkconsole.pkg.js' => '8ab24e01',
     'differential.pkg.css' => '3500921f',
     'differential.pkg.js' => 'c0506961',
@@ -105,7 +105,7 @@ return array(
     'rsrc/css/application/slowvote/slowvote.css' => '266df6a1',
     'rsrc/css/application/tokens/tokens.css' => '3d0f239e',
     'rsrc/css/application/uiexample/example.css' => '528b19de',
-    'rsrc/css/core/core.css' => 'd17c2099',
+    'rsrc/css/core/core.css' => '76e8ee93',
     'rsrc/css/core/remarkup.css' => 'bc65f3cc',
     'rsrc/css/core/syntax.css' => '56c1ba38',
     'rsrc/css/core/z-index.css' => '2db67397',
@@ -437,7 +437,7 @@ return array(
     'rsrc/js/application/uiexample/busy-example.js' => '60479091',
     'rsrc/js/application/uiexample/gesture-example.js' => '558829c2',
     'rsrc/js/application/uiexample/notification-example.js' => '8ce821c5',
-    'rsrc/js/core/Busy.js' => 'f13d6d1d',
+    'rsrc/js/core/Busy.js' => '59a7976a',
     'rsrc/js/core/DragAndDropFileUpload.js' => '7fa4b248',
     'rsrc/js/core/DraggableList.js' => 'a16ec1c6',
     'rsrc/js/core/FileUpload.js' => '477359c8',
@@ -712,10 +712,10 @@ return array(
     'people-profile-css' => '25970776',
     'phabricator-action-list-view-css' => '9ee9910a',
     'phabricator-application-launch-view-css' => '16ca323f',
-    'phabricator-busy' => 'f13d6d1d',
+    'phabricator-busy' => '59a7976a',
     'phabricator-chatlog-css' => '852140ff',
     'phabricator-content-source-view-css' => '4b8b05d4',
-    'phabricator-core-css' => 'd17c2099',
+    'phabricator-core-css' => '76e8ee93',
     'phabricator-countdown-css' => '86b7b0a0',
     'phabricator-dashboard-css' => '17937d22',
     'phabricator-drag-and-drop-file-upload' => '7fa4b248',
@@ -1192,6 +1192,11 @@ return array(
       'javelin-router',
       'javelin-behavior-device',
       'javelin-vector',
+    ),
+    '59a7976a' => array(
+      'javelin-install',
+      'javelin-dom',
+      'javelin-fx',
     ),
     '59b251eb' => array(
       'javelin-behavior',
@@ -1912,11 +1917,6 @@ return array(
     'efe49472' => array(
       'javelin-install',
       'javelin-util',
-    ),
-    'f13d6d1d' => array(
-      'javelin-install',
-      'javelin-dom',
-      'javelin-fx',
     ),
     'f24f3253' => array(
       'javelin-behavior',
