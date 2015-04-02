@@ -60,19 +60,13 @@ final class PhrequentSearchEngine extends PhabricatorApplicationSearchEngine {
     $order = $saved_query->getParameter(
       'order', PhrequentUserTimeQuery::ORDER_ENDED_DESC);
 
-    $phids = array_merge($user_phids);
-    $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->requireViewer())
-      ->withPHIDs($phids)
-      ->execute();
-
     $form
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('users')
           ->setLabel(pht('Users'))
-          ->setValue($handles))
+          ->setValue($user_phids))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel(pht('Ended'))

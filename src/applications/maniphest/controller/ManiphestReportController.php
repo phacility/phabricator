@@ -320,13 +320,14 @@ final class ManiphestReportController extends ManiphestController {
 
     $form = id(new AphrontFormView())
       ->setUser($user)
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorProjectDatasource())
           ->setLabel(pht('Project'))
           ->setLimit(1)
           ->setName('set_project')
-          ->setValue($tokens));
+          // TODO: This is silly, but this is Maniphest reports.
+          ->setValue(mpull($tokens, 'getPHID')));
 
     if ($has_window) {
       list($window_str, $ignored, $window_error) = $this->getWindow();

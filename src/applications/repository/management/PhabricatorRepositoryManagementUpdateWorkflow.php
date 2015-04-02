@@ -58,38 +58,42 @@ final class PhabricatorRepositoryManagementUpdateWorkflow
       $lock = PhabricatorGlobalLock::newLock($lock_name);
 
       $lock->lock();
+      try {
+        $no_discovery = $args->getArg('no-discovery');
 
-      $no_discovery = $args->getArg('no-discovery');
+        id(new PhabricatorRepositoryPullEngine())
+          ->setRepository($repository)
+          ->setVerbose($this->getVerbose())
+          ->pullRepository();
 
-      id(new PhabricatorRepositoryPullEngine())
-        ->setRepository($repository)
-        ->setVerbose($this->getVerbose())
-        ->pullRepository();
+        if ($no_discovery) {
+          $lock->unlock();
+          return;
+        }
 
-      if ($no_discovery) {
+        // TODO: It would be nice to discover only if we pulled something, but
+        // this isn't totally trivial. It's slightly more complicated with
+        // hosted repositories, too.
+
+        $repository->writeStatusMessage(
+          PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE,
+          null);
+
+        $this->discoverRepository($repository);
+
+        $this->checkIfRepositoryIsFullyImported($repository);
+
+        $this->updateRepositoryRefs($repository);
+
+        $this->mirrorRepository($repository);
+
+        $repository->writeStatusMessage(
+          PhabricatorRepositoryStatusMessage::TYPE_FETCH,
+          PhabricatorRepositoryStatusMessage::CODE_OKAY);
+      } catch (Exception $ex) {
         $lock->unlock();
-        return;
+        throw $ex;
       }
-
-      // TODO: It would be nice to discover only if we pulled something, but
-      // this isn't totally trivial. It's slightly more complicated with hosted
-      // repositories, too.
-
-      $repository->writeStatusMessage(
-        PhabricatorRepositoryStatusMessage::TYPE_NEEDS_UPDATE,
-        null);
-
-      $this->discoverRepository($repository);
-
-      $this->checkIfRepositoryIsFullyImported($repository);
-
-      $this->updateRepositoryRefs($repository);
-
-      $this->mirrorRepository($repository);
-
-      $repository->writeStatusMessage(
-        PhabricatorRepositoryStatusMessage::TYPE_FETCH,
-        PhabricatorRepositoryStatusMessage::CODE_OKAY);
     } catch (Exception $ex) {
       $repository->writeStatusMessage(
         PhabricatorRepositoryStatusMessage::TYPE_FETCH,
@@ -98,8 +102,6 @@ final class PhabricatorRepositoryManagementUpdateWorkflow
           'message' => pht(
             'Error updating working copy: %s', $ex->getMessage()),
         ));
-
-      $lock->unlock();
       throw $ex;
     }
 

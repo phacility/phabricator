@@ -1,6 +1,6 @@
 <?php
 
-final class PasteMockMailReceiver extends PhabricatorObjectMailReceiver {
+final class PasteMailReceiver extends PhabricatorObjectMailReceiver {
 
   public function isEnabled() {
     $app_class = 'PhabricatorPasteApplication';
@@ -20,18 +20,8 @@ final class PasteMockMailReceiver extends PhabricatorObjectMailReceiver {
       ->executeOne();
   }
 
-  protected function processReceivedObjectMail(
-    PhabricatorMetaMTAReceivedMail $mail,
-    PhabricatorLiskDAO $object,
-    PhabricatorUser $sender) {
-
-    $handler = id(new PasteReplyHandler())
-      ->setMailReceiver($object);
-
-    $handler->setActor($sender);
-    $handler->setExcludeMailRecipientPHIDs(
-      $mail->loadExcludeMailRecipientPHIDs());
-    $handler->processEmail($mail);
+  protected function getTransactionReplyHandler() {
+    return new PasteReplyHandler();
   }
 
 }

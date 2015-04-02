@@ -57,20 +57,14 @@ abstract class PhragmentController extends PhabricatorController {
 
     $viewer = $this->getRequest()->getUser();
 
-    $phids = array();
-    $phids[] = $fragment->getLatestVersionPHID();
-
     $snapshot_phids = array();
     $snapshots = id(new PhragmentSnapshotQuery())
       ->setViewer($viewer)
       ->withPrimaryFragmentPHIDs(array($fragment->getPHID()))
       ->execute();
     foreach ($snapshots as $snapshot) {
-      $phids[] = $snapshot->getPHID();
       $snapshot_phids[] = $snapshot->getPHID();
     }
-
-    $this->loadHandles($phids);
 
     $file = null;
     $file_uri = null;
@@ -183,7 +177,7 @@ abstract class PhragmentController extends PhabricatorController {
       }
       $properties->addProperty(
         pht('Latest Version'),
-        $this->renderHandlesForPHIDs(array($fragment->getLatestVersionPHID())));
+        $viewer->renderHandle($fragment->getLatestVersionPHID()));
     } else {
       $properties->addProperty(
         pht('Type'),
@@ -193,7 +187,7 @@ abstract class PhragmentController extends PhabricatorController {
     if (count($snapshot_phids) > 0) {
       $properties->addProperty(
         pht('Snapshots'),
-        $this->renderHandlesForPHIDs($snapshot_phids));
+        $viewer->renderHandleList($snapshot_phids));
     }
 
     return id(new PHUIObjectBoxView())

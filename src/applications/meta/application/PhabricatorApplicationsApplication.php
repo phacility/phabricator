@@ -41,6 +41,8 @@ final class PhabricatorApplicationsApplication extends PhabricatorApplication {
           => 'PhabricatorApplicationDetailViewController',
         'edit/(?P<application>\w+)/'
           => 'PhabricatorApplicationEditController',
+        'mailcommands/(?P<application>\w+)/(?P<type>\w+)/'
+          => 'PhabricatorApplicationEmailCommandsController',
         '(?P<application>\w+)/(?P<action>install|uninstall)/'
           => 'PhabricatorApplicationUninstallController',
         'panel/(?P<application>\w+)/(?P<panel>\w+)/(?P<path>.*)'

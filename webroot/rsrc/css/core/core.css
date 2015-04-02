@@ -90,14 +90,18 @@ img {
 
 .busy {
   position: fixed;
-  bottom: 16px;
-  right: 16px;
-  width: 40px;
-  height: 40px;
+  bottom: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+}
+
+.with-durable-column .busy {
+  right: 308px;
 }
 
 .busy .phui-icon-view {
-  font-size: 40px;
+  font-size: 32px;
 }
 
 .grouped:after {

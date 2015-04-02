@@ -62,7 +62,7 @@ final class PhabricatorTransactionView extends AphrontView {
 
     $info = $this->renderTransactionInfo();
     $actions = $this->renderTransactionActions();
-    $style = $this->renderTransactionStyle();
+    $image = $this->renderTransactionImage();
     $content = $this->renderTransactionContent();
     $classes = implode(' ', $this->classes);
 
@@ -77,11 +77,11 @@ final class PhabricatorTransactionView extends AphrontView {
       array(
         'class' => 'phabricator-transaction-view '.$classes,
         'id'    => $transaction_id,
-        'style' => $style,
       ),
-      phutil_tag_div(
-        'phabricator-transaction-detail grouped',
-        array($header, $content)));
+      array(
+        $image,
+        phutil_tag_div('phabricator-transaction-detail grouped',
+          array($header, $content)),));
 
   }
 
@@ -137,9 +137,14 @@ final class PhabricatorTransactionView extends AphrontView {
     return $this->actions;
   }
 
-  private function renderTransactionStyle() {
+  private function renderTransactionImage() {
     if ($this->imageURI) {
-      return 'background-image: url('.$this->imageURI.');';
+      return phutil_tag(
+        'span',
+        array(
+          'class' => 'phabricator-transaction-image',
+          'style' => 'background-image: url('.$this->imageURI.');',
+        ));
     } else {
       return null;
     }

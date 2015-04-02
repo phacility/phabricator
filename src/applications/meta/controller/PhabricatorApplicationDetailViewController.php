@@ -138,14 +138,6 @@ final class PhabricatorApplicationDetailViewController
       ->setUser($user)
       ->setObjectURI($this->getRequest()->getRequestURI());
 
-    if ($selected->getHelpURI()) {
-      $view->addAction(
-        id(new PhabricatorActionView())
-          ->setName(pht('Help / Documentation'))
-          ->setIcon('fa-life-ring')
-          ->setHref($selected->getHelpURI()));
-    }
-
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $user,
       $selected,

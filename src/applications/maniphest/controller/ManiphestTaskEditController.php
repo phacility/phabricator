@@ -506,20 +506,6 @@ final class ManiphestTaskEditController extends ManiphestController {
       }
     }
 
-    $phids = array_merge(
-      array($task->getOwnerPHID()),
-      $task->getSubscriberPHIDs(),
-      $task->getProjectPHIDs());
-
-    if ($parent_task) {
-      $phids[] = $parent_task->getPHID();
-    }
-
-    $phids = array_filter($phids);
-    $phids = array_unique($phids);
-
-    $handles = $this->loadViewerHandles($phids);
-
     $error_view = null;
     if ($errors) {
       $error_view = new PHUIInfoView();
@@ -529,19 +515,19 @@ final class ManiphestTaskEditController extends ManiphestController {
     $priority_map = ManiphestTaskPriority::getTaskPriorityMap();
 
     if ($task->getOwnerPHID()) {
-      $assigned_value = array($handles[$task->getOwnerPHID()]);
+      $assigned_value = array($task->getOwnerPHID());
     } else {
       $assigned_value = array();
     }
 
     if ($task->getSubscriberPHIDs()) {
-      $cc_value = array_select_keys($handles, $task->getSubscriberPHIDs());
+      $cc_value = $task->getSubscriberPHIDs();
     } else {
       $cc_value = array();
     }
 
     if ($task->getProjectPHIDs()) {
-      $projects_value = array_select_keys($handles, $task->getProjectPHIDs());
+      $projects_value = $task->getProjectPHIDs();
     } else {
       $projects_value = array();
     }
@@ -583,7 +569,7 @@ final class ManiphestTaskEditController extends ManiphestController {
         ->appendChild(
           id(new AphrontFormStaticControl())
             ->setLabel(pht('Parent Task'))
-            ->setValue($handles[$parent_task->getPHID()]->getFullName()))
+            ->setValue($user->renderHandle($parent_task->getPHID())))
         ->addHiddenInput('parent', $parent_task->getID());
     }
 
@@ -620,7 +606,7 @@ final class ManiphestTaskEditController extends ManiphestController {
       ->execute();
 
     if ($can_edit_assign) {
-      $form->appendChild(
+      $form->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Assigned To'))
           ->setName('assigned_to')
@@ -631,7 +617,7 @@ final class ManiphestTaskEditController extends ManiphestController {
     }
 
     $form
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('CC'))
           ->setName('cc')
@@ -680,7 +666,7 @@ final class ManiphestTaskEditController extends ManiphestController {
           pht('Create New Project'));
       }
       $form
-        ->appendChild(
+        ->appendControl(
           id(new AphrontFormTokenizerControl())
             ->setLabel(pht('Projects'))
             ->setName('projects')

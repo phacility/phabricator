@@ -83,10 +83,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
     }
 
     $phids = array_keys($phids);
-
-    $this->loadHandles($phids);
-
-    $handles = $this->getLoadedHandles();
+    $handles = $user->loadHandles($phids);
 
     $info_view = null;
     if ($parent_task) {
@@ -99,8 +96,8 @@ final class ManiphestTaskDetailController extends ManiphestController {
           ->setText(pht('Create Another Subtask')));
 
       $info_view->appendChild(hsprintf(
-        'Created a subtask of <strong>%s</strong>',
-        $this->getHandle($parent_task->getPHID())->renderLink()));
+        'Created a subtask of <strong>%s</strong>.',
+        $handles->renderHandle($parent_task->getPHID())));
     } else if ($workflow == 'create') {
       $info_view = new PHUIInfoView();
       $info_view->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
@@ -205,7 +202,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
           ->setControlID('resolution')
           ->setControlStyle('display: none')
           ->setOptions($resolution_types))
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Assign To'))
           ->setName('assign_to')
@@ -213,7 +210,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
           ->setControlStyle('display: none')
           ->setID('assign-tokenizer')
           ->setDisableBehavior(true))
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('CCs'))
           ->setName('ccs')
@@ -229,7 +226,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
           ->setControlID('priority')
           ->setControlStyle('display: none')
           ->setValue($task->getPriority()))
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Projects'))
           ->setName('projects')
@@ -327,7 +324,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $header = $this->buildHeaderView($task);
     $properties = $this->buildPropertyView(
-      $task, $field_list, $edges, $actions);
+      $task, $field_list, $edges, $actions, $handles);
     $description = $this->buildDescriptionView($task, $engine);
 
     if (!$user->isLoggedIn()) {
@@ -443,7 +440,8 @@ final class ManiphestTaskDetailController extends ManiphestController {
     ManiphestTask $task,
     PhabricatorCustomFieldList $field_list,
     array $edges,
-    PhabricatorActionListView $actions) {
+    PhabricatorActionListView $actions,
+    $handles) {
 
     $viewer = $this->getRequest()->getUser();
 
@@ -455,8 +453,8 @@ final class ManiphestTaskDetailController extends ManiphestController {
     $view->addProperty(
       pht('Assigned To'),
       $task->getOwnerPHID()
-      ? $this->getHandle($task->getOwnerPHID())->renderLink()
-      : phutil_tag('em', array(), pht('None')));
+        ? $handles->renderHandle($task->getOwnerPHID())
+        : phutil_tag('em', array(), pht('None')));
 
     $view->addProperty(
       pht('Priority'),
@@ -464,7 +462,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     $view->addProperty(
       pht('Author'),
-      $this->getHandle($task->getAuthorPHID())->renderLink());
+      $handles->renderHandle($task->getAuthorPHID()));
 
     $source = $task->getOriginalEmailSource();
     if ($source) {
@@ -491,7 +489,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
     );
 
     $revisions_commits = array();
-    $handles = $this->getLoadedHandles();
 
     $commit_phids = array_keys(
       $edges[ManiphestTaskHasCommitEdgeType::EDGECONST]);
@@ -503,9 +500,9 @@ final class ManiphestTaskDetailController extends ManiphestController {
         ->execute();
 
       foreach ($commit_phids as $phid) {
-        $revisions_commits[$phid] = $handles[$phid]->renderLink();
+        $revisions_commits[$phid] = $handles->renderHandle($phid);
         $revision_phid = key($drev_edges[$phid][$commit_drev]);
-        $revision_handle = idx($handles, $revision_phid);
+        $revision_handle = $handles->getHandleIfExists($revision_phid);
         if ($revision_handle) {
           $task_drev = ManiphestTaskHasRevisionEdgeType::EDGECONST;
           unset($edges[$task_drev][$revision_phid]);
@@ -519,9 +516,10 @@ final class ManiphestTaskDetailController extends ManiphestController {
 
     foreach ($edge_types as $edge_type => $edge_name) {
       if ($edges[$edge_type]) {
+        $edge_handles = $viewer->loadHandles(array_keys($edges[$edge_type]));
         $view->addProperty(
           $edge_name,
-          $this->renderHandlesForPHIDs(array_keys($edges[$edge_type])));
+          $edge_handles->renderList());
       }
     }
 

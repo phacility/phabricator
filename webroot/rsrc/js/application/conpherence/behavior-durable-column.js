@@ -83,9 +83,13 @@ JX.behavior('durable-column', function(config, statics) {
 
     // When we activate the column, adjust the tablet breakpoint so that we
     // convert the left side of the screen to tablet mode on narrow displays.
-    var breakpoint = JX.Device.getTabletBreakpoint();
-    JX.Device.setTabletBreakpoint(
-      visible ? (breakpoint + columnWidth) : (breakpoint - columnWidth));
+    var breakpoint;
+    if (visible) {
+      breakpoint = minimumViewportWidth + columnWidth;
+    } else {
+      breakpoint = minimumViewportWidth;
+    }
+    JX.Device.setTabletBreakpoint(breakpoint);
 
     JX.Stratcom.invoke('resize');
   }

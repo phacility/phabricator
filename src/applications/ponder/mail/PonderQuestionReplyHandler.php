@@ -1,6 +1,7 @@
 <?php
 
-final class PonderQuestionReplyHandler extends PhabricatorMailReplyHandler {
+final class PonderQuestionReplyHandler
+  extends PhabricatorApplicationTransactionReplyHandler {
 
   public function validateMailReceiver($mail_receiver) {
     if (!($mail_receiver instanceof PonderQuestion)) {
@@ -8,20 +9,8 @@ final class PonderQuestionReplyHandler extends PhabricatorMailReplyHandler {
     }
   }
 
-  public function getPrivateReplyHandlerEmailAddress(
-    PhabricatorObjectHandle $handle) {
-    return $this->getDefaultPrivateReplyHandlerEmailAddress($handle, 'Q');
+  public function getObjectPrefix() {
+    return 'Q';
   }
 
-  public function getPublicReplyHandlerEmailAddress() {
-    return $this->getDefaultPublicReplyHandlerEmailAddress('Q');
-  }
-
-  public function getReplyHandlerInstructions() {
-    return null;
-  }
-
-  protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
-    // ignore this entirely for now
-  }
 }

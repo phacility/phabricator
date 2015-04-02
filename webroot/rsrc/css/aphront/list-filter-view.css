@@ -14,14 +14,24 @@
   padding: 0;
 }
 
+.device-phone .aphront-list-filter-view {
+  padding: 0 8px 8px;
+}
+
 .device-phone .aphront-list-filter-wrap {
-  margin: 0 8px;
+  margin: 0;
+  border: none;
+  border-bottom: 1px solid {$lightblueborder};
 }
 
 .aphront-list-filter-view-content .phui-form-view {
   border-left: none;
   border-right: none;
   padding: 12px 0 6px;
+}
+
+.device-phone .aphront-list-filter-view-content .phui-form-view {
+  padding: 0;
 }
 
 /* When a list filter view contains two consecuitive forms, lay them out

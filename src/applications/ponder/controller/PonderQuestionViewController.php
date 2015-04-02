@@ -141,15 +141,13 @@ final class PonderQuestionViewController extends PonderController {
       ->setObject($question)
       ->setActionList($actions);
 
-    $this->loadHandles(array($question->getAuthorPHID()));
-
     $view->addProperty(
       pht('Status'),
       PonderQuestionStatus::getQuestionStatusFullName($question->getStatus()));
 
     $view->addProperty(
       pht('Author'),
-      $this->getHandle($question->getAuthorPHID())->renderLink());
+      $viewer->renderHandle($question->getAuthorPHID()));
 
     $view->addProperty(
       pht('Created'),
@@ -221,9 +219,6 @@ final class PonderQuestionViewController extends PonderController {
 
     $out = array();
 
-    $phids = mpull($answers, 'getAuthorPHID');
-    $this->loadHandles($phids);
-
     $xactions = id(new PonderAnswerTransactionQuery())
       ->setViewer($viewer)
       ->withTransactionTypes(array(PhabricatorTransactions::TYPE_COMMENT))
@@ -253,7 +248,7 @@ final class PonderQuestionViewController extends PonderController {
       $out[] = id(new PhabricatorAnchorView())
         ->setAnchorName("A$id");
       $header = id(new PHUIHeaderView())
-        ->setHeader($this->getHandle($author_phid)->getFullName());
+        ->setHeader($viewer->renderHandle($author_phid));
 
       $actions = $this->buildAnswerActions($answer);
       $properties = $this->buildAnswerProperties($answer, $actions);

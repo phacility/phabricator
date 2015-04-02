@@ -16,14 +16,6 @@ final class OwnersPackageReplyHandler extends PhabricatorMailReplyHandler {
     return null;
   }
 
-  public function getReplyHandlerDomain() {
-    return null;
-  }
-
-  public function getReplyHandlerInstructions() {
-    return null;
-  }
-
   protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
     return;
   }

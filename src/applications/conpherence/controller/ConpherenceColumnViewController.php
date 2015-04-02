@@ -56,6 +56,7 @@ final class ConpherenceColumnViewController extends
       $conpherence_id = null;
       $conpherence_phid = null;
       $latest_transaction_id = null;
+      $can_edit = false;
 
     } else {
       $this->setConpherence($conpherence);
@@ -78,6 +79,10 @@ final class ConpherenceColumnViewController extends
       $conpherence_id = $conpherence->getID();
       $conpherence_phid = $conpherence->getPHID();
       $latest_transaction_id = $latest_transaction->getID();
+      $can_edit = PhabricatorPolicyFilter::hasCapability(
+        $user,
+        $conpherence,
+        PhabricatorPolicyCapability::CAN_EDIT);
     }
 
     $response = array(
@@ -85,10 +90,7 @@ final class ConpherenceColumnViewController extends
       'threadID' => $conpherence_id,
       'threadPHID' => $conpherence_phid,
       'latestTransactionID' => $latest_transaction_id,
-      'canEdit' => PhabricatorPolicyFilter::hasCapability(
-        $user,
-        $conpherence,
-        PhabricatorPolicyCapability::CAN_EDIT),
+      'canEdit' => $can_edit,
     );
 
     return id(new AphrontAjaxResponse())->setContent($response);

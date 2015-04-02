@@ -189,10 +189,9 @@ final class PassphraseCredentialViewController extends PassphraseController {
       PhabricatorCredentialsUsedByObjectEdgeType::EDGECONST);
 
     if ($used_by_phids) {
-      $this->loadHandles($used_by_phids);
       $properties->addProperty(
         pht('Used By'),
-        $this->renderHandlesForPHIDs($used_by_phids));
+        $viewer->renderHandleList($used_by_phids));
     }
 
     $description = $credential->getDescription();

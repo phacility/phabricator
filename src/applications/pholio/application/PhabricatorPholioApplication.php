@@ -77,4 +77,17 @@ final class PhabricatorPholioApplication extends PhabricatorApplication {
     );
   }
 
+  public function getMailCommandObjects() {
+    return array(
+      'mock' => array(
+        'name' => pht('Email Commands: Mocks'),
+        'header' => pht('Interacting with Pholio Mocks'),
+        'object' => new PholioMock(),
+        'summary' => pht(
+          'This page documents the commands you can use to interact with '.
+          'mocks in Pholio.'),
+      ),
+    );
+  }
+
 }

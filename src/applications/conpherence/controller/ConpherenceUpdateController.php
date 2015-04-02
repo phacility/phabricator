@@ -31,6 +31,7 @@ final class ConpherenceUpdateController
       ->setViewer($user)
       ->withIDs(array($conpherence_id))
       ->needFilePHIDs(true)
+      ->needParticipantCache(true)
       ->requireCapabilities($needed_capabilities)
       ->executeOne();
 
@@ -224,14 +225,14 @@ final class ConpherenceUpdateController
     $user = $request->getUser();
     $add_person = $request->getStr('add_person');
 
-    $form = id(new PHUIFormLayoutView())
+    $form = id(new AphrontFormView())
       ->setUser($user)
       ->setFullWidth(true)
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
-        ->setName('add_person')
-        ->setUser($user)
-        ->setDatasource(new PhabricatorPeopleDatasource()));
+          ->setName('add_person')
+          ->setUser($user)
+          ->setDatasource(new PhabricatorPeopleDatasource()));
 
     require_celerity_resource('conpherence-update-css');
     $view = id(new AphrontDialogView())
@@ -240,7 +241,7 @@ final class ConpherenceUpdateController
       ->addHiddenInput(
         'latest_transaction_id',
         $request->getInt('latest_transaction_id'))
-      ->appendChild($form);
+      ->appendForm($form);
 
     if ($request->getExists('minimal_display')) {
       $view->addHiddenInput('minimal_display', true);
@@ -409,10 +410,10 @@ final class ConpherenceUpdateController
     if ($people_widget) {
       $people_html = hsprintf('%s', $people_widget->render());
     }
-    $title = $this->getConpherenceTitle($conpherence);
+    $data = $conpherence->getDisplayData($user);
     $content = array(
       'transactions' => hsprintf('%s', $rendered_transactions),
-      'conpherence_title' => (string) $title,
+      'conpherence_title' => (string) $data['title'],
       'latest_transaction_id' => $new_latest_transaction_id,
       'nav_item' => hsprintf('%s', $nav_item),
       'conpherence_phid' => $conpherence->getPHID(),

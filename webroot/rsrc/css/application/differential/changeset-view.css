@@ -8,6 +8,10 @@
   margin: 0;
   padding-top: 32px;
   overflow-x: auto;
+
+  /* Fixes what seems to be a layout bug in Firefox which causes scrollbars,
+     to appear unpredictably, see discussion in T7690. */
+  overflow-y: hidden;
 }
 
 .device-phone .differential-changeset {

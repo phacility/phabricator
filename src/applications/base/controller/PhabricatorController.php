@@ -414,7 +414,7 @@ abstract class PhabricatorController extends AphrontController {
           ));
       }
     } else if ($response instanceof AphrontRedirectResponse) {
-      if ($request->isAjax()) {
+      if ($request->isAjax() || $request->isQuicksand()) {
         return id(new AphrontAjaxResponse())
           ->setContent(
             array(
@@ -426,53 +426,11 @@ abstract class PhabricatorController extends AphrontController {
     return $response;
   }
 
-  protected function getHandle($phid) {
-    if (empty($this->handles[$phid])) {
-      throw new Exception(
-        "Attempting to access handle which wasn't loaded: {$phid}");
-    }
-    return $this->handles[$phid];
-  }
-
-  protected function loadHandles(array $phids) {
-    $phids = array_filter($phids);
-    $this->handles = $this->loadViewerHandles($phids);
-    return $this;
-  }
-
-  protected function getLoadedHandles() {
-    return $this->handles;
-  }
-
   protected function loadViewerHandles(array $phids) {
     return id(new PhabricatorHandleQuery())
       ->setViewer($this->getRequest()->getUser())
       ->withPHIDs($phids)
       ->execute();
-  }
-
-  /**
-   * Render a list of links to handles, identified by PHIDs. The handles must
-   * already be loaded.
-   *
-   * @param   list<phid>  List of PHIDs to render links to.
-   * @param   string      Style, one of "\n" (to put each item on its own line)
-   *                      or "," (to list items inline, separated by commas).
-   * @return  string      Rendered list of handle links.
-   */
-  protected function renderHandlesForPHIDs(array $phids, $style = "\n") {
-    $style_map = array(
-      "\n"  => phutil_tag('br'),
-      ','   => ', ',
-    );
-
-    if (empty($style_map[$style])) {
-      throw new Exception("Unknown handle list style '{$style}'!");
-    }
-
-    return implode_selected_handle_links($style_map[$style],
-      $this->getLoadedHandles(),
-      array_filter($phids));
   }
 
   public function buildApplicationMenu() {

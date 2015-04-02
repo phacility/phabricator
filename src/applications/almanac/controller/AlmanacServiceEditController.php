@@ -122,12 +122,6 @@ final class AlmanacServiceEditController
       ->setObject($service)
       ->execute();
 
-    if ($v_projects) {
-      $project_handles = $this->loadViewerHandles($v_projects);
-    } else {
-      $project_handles = array();
-    }
-
     $form = id(new AphrontFormView())
       ->setUser($viewer)
       ->addHiddenInput('edit', true)
@@ -150,11 +144,11 @@ final class AlmanacServiceEditController
           ->setPolicyObject($service)
           ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
           ->setPolicies($policies))
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Projects'))
           ->setName('projects')
-          ->setValue($project_handles)
+          ->setValue($v_projects)
           ->setDatasource(new PhabricatorProjectDatasource()))
       ->appendChild(
         id(new AphrontFormSubmitControl())

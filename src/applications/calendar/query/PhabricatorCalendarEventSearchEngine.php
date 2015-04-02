@@ -87,35 +87,19 @@ final class PhabricatorCalendarEventSearchEngine
     $invited_phids = $saved->getParameter('invitedPHIDs', array());
     $creator_phids = $saved->getParameter('creatorPHIDs', array());
 
-    $all_phids = array_merge(
-      $invited_phids,
-      $creator_phids);
-
-    if ($all_phids) {
-      $handles = id(new PhabricatorHandleQuery())
-        ->setViewer($this->requireViewer())
-        ->withPHIDs($all_phids)
-        ->execute();
-    } else {
-      $handles = array();
-    }
-
-    $invited_handles = array_select_keys($handles, $invited_phids);
-    $creator_handles = array_select_keys($handles, $creator_phids);
-
     $form
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('creators')
           ->setLabel(pht('Created By'))
-          ->setValue($creator_handles))
-      ->appendChild(
+          ->setValue($creator_phids))
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('invited')
           ->setLabel(pht('Invited'))
-          ->setValue($invited_handles))
+          ->setValue($invited_phids))
       ->appendChild(
         id(new AphrontFormDateControl())
           ->setLabel(pht('Occurs After'))

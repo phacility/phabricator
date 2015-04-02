@@ -57,4 +57,17 @@ final class PhabricatorMacroApplication extends PhabricatorApplication {
     );
   }
 
+  public function getMailCommandObjects() {
+    return array(
+      'macro' => array(
+        'name' => pht('Email Commands: Macros'),
+        'header' => pht('Interacting with Macros'),
+        'object' => new PhabricatorFileImageMacro(),
+        'summary' => pht(
+          'This page documents the commands you can use to interact with '.
+          'image macros.'),
+      ),
+    );
+  }
+
 }

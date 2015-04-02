@@ -87,19 +87,14 @@ final class FundInitiativeViewController
 
     $owner_phid = $initiative->getOwnerPHID();
     $merchant_phid = $initiative->getMerchantPHID();
-    $this->loadHandles(
-      array(
-        $owner_phid,
-        $merchant_phid,
-      ));
 
     $view->addProperty(
       pht('Owner'),
-      $this->getHandle($owner_phid)->renderLink());
+      $viewer->renderHandle($owner_phid));
 
     $view->addProperty(
       pht('Payable to Merchant'),
-      $this->getHandle($merchant_phid)->renderLink());
+      $viewer->renderHandle($merchant_phid));
 
     $view->addProperty(
       pht('Total Funding'),

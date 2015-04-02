@@ -107,12 +107,6 @@ final class AlmanacDeviceEditController
       ->setObject($device)
       ->execute();
 
-    if ($v_projects) {
-      $project_handles = $this->loadViewerHandles($v_projects);
-    } else {
-      $project_handles = array();
-    }
-
     $form = id(new AphrontFormView())
       ->setUser($viewer)
       ->appendChild(
@@ -133,11 +127,11 @@ final class AlmanacDeviceEditController
           ->setPolicyObject($device)
           ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
           ->setPolicies($policies))
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Projects'))
           ->setName('projects')
-          ->setValue($project_handles)
+          ->setValue($v_projects)
           ->setDatasource(new PhabricatorProjectDatasource()))
       ->appendChild(
         id(new AphrontFormSubmitControl())

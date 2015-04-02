@@ -588,10 +588,8 @@ final class PhabricatorAuditEditor
     return $result;
   }
 
-
   protected function buildReplyHandler(PhabricatorLiskDAO $object) {
-    $reply_handler = PhabricatorEnv::newObjectFromConfig(
-      'metamta.diffusion.reply-handler');
+    $reply_handler = new PhabricatorAuditReplyHandler();
     $reply_handler->setMailReceiver($object);
     return $reply_handler;
   }

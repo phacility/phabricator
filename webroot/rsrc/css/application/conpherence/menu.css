@@ -43,8 +43,25 @@
   border-right: 1px solid {$hovergrey}
 }
 
+.conpherence-menu-pane .phui-list-item-view.hidden {
+  display: none;
+}
+
 .conpherence-menu-pane.phabricator-side-menu .phui-list-item-type-label {
   padding: 10px 0 9px 8px;
+}
+
+.conpherence-menu-pane .conpherence-room-list-header
+.phui-icon-view {
+  font-weight: bold;
+  float: right;
+  text-transform: none;
+  margin: 0px 8px 0px 0px;
+}
+
+.conpherence-menu-pane .conpherence-room-list-header
+.phui-icon-view:hover {
+  color: {$sky};
 }
 
 .conpherence-menu-pane .conpherence-message-list-header {

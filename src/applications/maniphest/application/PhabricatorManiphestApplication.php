@@ -143,4 +143,18 @@ final class PhabricatorManiphestApplication extends PhabricatorApplication {
     );
   }
 
+  public function getMailCommandObjects() {
+    return array(
+      'task' => array(
+        'name' => pht('Email Commands: Tasks'),
+        'header' => pht('Interacting with Maniphest Tasks'),
+        'object' => new ManiphestTask(),
+        'summary' => pht(
+          'This page documents the commands you can use to interact with '.
+          'tasks in Maniphest. These commands work when creating new tasks '.
+          'via email and when replying to existing tasks.'),
+      ),
+    );
+  }
+
 }

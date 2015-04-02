@@ -1,7 +1,9 @@
 <?php
 
 final class ConpherenceThread extends ConpherenceDAO
-  implements PhabricatorPolicyInterface {
+  implements
+    PhabricatorPolicyInterface,
+    PhabricatorApplicationTransactionInterface {
 
   protected $title;
   protected $isRoom = 0;
@@ -174,11 +176,10 @@ final class ConpherenceThread extends ConpherenceDAO
     }
 
     $title = $js_title = $this->getTitle();
-    if (!$title) {
-      $title = $lucky_handle->getName();
-      $js_title = pht('[No Title]');
+    $img_src = null;
+    if ($lucky_handle) {
+      $img_src = $lucky_handle->getImageURI();
     }
-    $img_src = $lucky_handle->getImageURI();
 
     $count = 0;
     $final = false;
@@ -199,6 +200,9 @@ final class ConpherenceThread extends ConpherenceDAO
       $subtitle .= $handle->getName();
       $count++;
       $final = $count == 3;
+    }
+    if (!$title) {
+      $title = $js_title = $subtitle;
     }
 
     $user_participation = $this->getParticipantIfExists($user->getPHID());
@@ -275,6 +279,30 @@ final class ConpherenceThread extends ConpherenceDAO
     }
   }
 
+  public static function loadPolicyObjects(
+    PhabricatorUser $viewer,
+    array $conpherences) {
+
+    assert_instances_of($conpherences, 'ConpherenceThread');
+
+    $grouped = mgroup($conpherences, 'getIsRoom');
+    $rooms = idx($grouped, 1, array());
+
+    $policies = array();
+    foreach ($rooms as $room) {
+      $policies[] = $room->getViewPolicy();
+    }
+    $policy_objects = array();
+    if ($policies) {
+      $policy_objects = id(new PhabricatorPolicyQuery())
+        ->setViewer($viewer)
+        ->withPHIDs($policies)
+        ->execute();
+    }
+
+    return $policy_objects;
+  }
+
   public function getPolicyIconName(array $policy_objects) {
     assert_instances_of($policy_objects, 'PhabricatorPolicy');
 
@@ -286,6 +314,28 @@ final class ConpherenceThread extends ConpherenceDAO
       $icon = 'fa-user';
     }
     return $icon;
+  }
+
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new ConpherenceEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new ConpherenceTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+    return $timeline;
   }
 
 }

@@ -22,8 +22,13 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
     return "\xe2\x9c\xa9";
   }
 
-  public function getHelpURI() {
-    return PhabricatorEnv::getDoclink('Phame User Guide');
+  public function getHelpDocumentationArticles(PhabricatorUser $viewer) {
+    return array(
+      array(
+        'name' => pht('Phame User Guide'),
+        'href' => PhabricatorEnv::getDoclink('Phame User Guide'),
+      ),
+    );
   }
 
   public function isPrototype() {

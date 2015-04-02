@@ -1,6 +1,7 @@
 <?php
 
-final class FundInitiativeReplyHandler extends PhabricatorMailReplyHandler {
+final class FundInitiativeReplyHandler
+  extends PhabricatorApplicationTransactionReplyHandler {
 
   public function validateMailReceiver($mail_receiver) {
     if (!($mail_receiver instanceof FundInitiative)) {
@@ -8,27 +9,8 @@ final class FundInitiativeReplyHandler extends PhabricatorMailReplyHandler {
     }
   }
 
-  public function getPrivateReplyHandlerEmailAddress(
-    PhabricatorObjectHandle $handle) {
-    return $this->getDefaultPrivateReplyHandlerEmailAddress($handle, 'I');
-  }
-
-  public function getPublicReplyHandlerEmailAddress() {
-    return $this->getDefaultPublicReplyHandlerEmailAddress('I');
-  }
-
-  public function getReplyHandlerInstructions() {
-    if ($this->supportsReplies()) {
-      // TODO: Implement.
-      return null;
-    } else {
-      return null;
-    }
-  }
-
-  protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
-    // TODO: Implement.
-    return null;
+  public function getObjectPrefix() {
+    return 'I';
   }
 
 }

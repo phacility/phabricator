@@ -21,12 +21,6 @@ final class PhabricatorPholioConfigOptions
 
   public function getOptions() {
     return array(
-      $this->newOption('metamta.pholio.reply-handler-domain', 'string', null)
-        ->setLocked(true)
-        ->setDescription(
-          pht(
-            'Like {{metamta.maniphest.reply-handler-domain}}, but affects '.
-            'Pholio.')),
       $this->newOption('metamta.pholio.subject-prefix', 'string', '[Pholio]')
         ->setDescription(pht('Subject prefix for Pholio email.')),
     );

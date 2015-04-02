@@ -1,6 +1,6 @@
 <?php
 
-final class LegalpadMockMailReceiver extends PhabricatorObjectMailReceiver {
+final class LegalpadMailReceiver extends PhabricatorObjectMailReceiver {
 
   public function isEnabled() {
     $app_class = 'PhabricatorLegalpadApplication';
@@ -21,18 +21,8 @@ final class LegalpadMockMailReceiver extends PhabricatorObjectMailReceiver {
       ->executeOne();
   }
 
-  protected function processReceivedObjectMail(
-    PhabricatorMetaMTAReceivedMail $mail,
-    PhabricatorLiskDAO $object,
-    PhabricatorUser $sender) {
-
-    $handler = id(new LegalpadReplyHandler())
-      ->setMailReceiver($object)
-      ->setActor($sender)
-      ->setExcludeMailRecipientPHIDs(
-        $mail->loadExcludeMailRecipientPHIDs());
-
-    return $handler->processEmail($mail);
+  protected function getTransactionReplyHandler() {
+    return new LegalpadReplyHandler();
   }
 
 }

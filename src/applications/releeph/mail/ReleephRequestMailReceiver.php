@@ -8,11 +8,11 @@ final class ReleephRequestMailReceiver extends PhabricatorObjectMailReceiver {
   }
 
   protected function getObjectPattern() {
-    return 'RQ[1-9]\d*';
+    return 'Y[1-9]\d*';
   }
 
   protected function loadObject($pattern, PhabricatorUser $viewer) {
-    $id = (int)substr($pattern, 2);
+    $id = (int)substr($pattern, 1);
 
     return id(new ReleephRequestQuery())
       ->setViewer($viewer)
@@ -20,13 +20,8 @@ final class ReleephRequestMailReceiver extends PhabricatorObjectMailReceiver {
       ->executeOne();
   }
 
-  protected function processReceivedObjectMail(
-    PhabricatorMetaMTAReceivedMail $mail,
-    PhabricatorLiskDAO $object,
-    PhabricatorUser $sender) {
-
-    // TODO: For now, we just drop this mail on the floor.
-
+  protected function getTransactionReplyHandler() {
+    return new ReleephRequestReplyHandler();
   }
 
 }

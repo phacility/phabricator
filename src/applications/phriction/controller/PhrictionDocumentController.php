@@ -250,13 +250,9 @@ final class PhrictionDocumentController
       ->setUser($viewer)
       ->setObject($document);
 
-    $phids = array($content->getAuthorPHID());
-
-    $this->loadHandles($phids);
-
     $view->addProperty(
       pht('Last Author'),
-      $this->getHandle($content->getAuthorPHID())->renderLink());
+      $viewer->renderHandle($content->getAuthorPHID()));
 
     $age = time() - $content->getDateCreated();
     $age = floor($age / (60 * 60 * 24));

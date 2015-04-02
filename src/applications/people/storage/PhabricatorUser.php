@@ -1,7 +1,8 @@
 <?php
 
 /**
- * @task factors  Multi-Factor Authentication
+ * @task factors Multi-Factor Authentication
+ * @task handles Managing Handles
  */
 final class PhabricatorUser
   extends PhabricatorUserDAO
@@ -51,6 +52,7 @@ final class PhabricatorUser
   private $session = self::ATTACHABLE;
 
   private $authorities = array();
+  private $handlePool;
 
   protected function readField($field) {
     switch ($field) {
@@ -797,6 +799,55 @@ EOBODY;
       $user->makeEphemeral();
     }
     return $user;
+  }
+
+
+/* -(  Managing Handles  )--------------------------------------------------- */
+
+
+  /**
+   * Get a @{class:PhabricatorHandleList} which benefits from this viewer's
+   * internal handle pool.
+   *
+   * @param list<phid> List of PHIDs to load.
+   * @return PhabricatorHandleList Handle list object.
+   * @task handle
+   */
+  public function loadHandles(array $phids) {
+    if ($this->handlePool === null) {
+      $this->handlePool = id(new PhabricatorHandlePool())
+        ->setViewer($this);
+    }
+
+    return $this->handlePool->newHandleList($phids);
+  }
+
+
+  /**
+   * Get a @{class:PHUIHandleView} for a single handle.
+   *
+   * This benefits from the viewer's internal handle pool.
+   *
+   * @param phid PHID to render a handle for.
+   * @return PHUIHandleView View of the handle.
+   * @task handle
+   */
+  public function renderHandle($phid) {
+    return $this->loadHandles(array($phid))->renderHandle($phid);
+  }
+
+
+  /**
+   * Get a @{class:PHUIHandleListView} for a list of handles.
+   *
+   * This benefits from the viewer's internal handle pool.
+   *
+   * @param list<phid> List of PHIDs to render.
+   * @return PHUIHandleListView View of the handles.
+   * @task handle
+   */
+  public function renderHandleList(array $phids) {
+    return $this->loadHandles($phids)->renderList();
   }
 
 
