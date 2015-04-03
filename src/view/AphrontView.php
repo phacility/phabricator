@@ -149,6 +149,22 @@ abstract class AphrontView extends Phobject
 /* -(  Rendering  )---------------------------------------------------------- */
 
 
+  /**
+   * Inconsistent, unreliable pre-rendering hook.
+   *
+   * This hook //may// fire before views render. It is not fired reliably, and
+   * may fire multiple times.
+   *
+   * If it does fire, views might use it to register data for later loads, but
+   * almost no datasources support this now; this is currently only useful for
+   * tokenizers. This mechanism might eventually see wider support or might be
+   * removed.
+   */
+  public function willRender() {
+    return;
+  }
+
+
   abstract public function render();
 
 

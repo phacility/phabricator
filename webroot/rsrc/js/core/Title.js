@@ -18,6 +18,12 @@ JX.install('Title', {
       self._update();
     },
 
+    setTitle: function(title) {
+      var self = JX.Title;
+      self._title = title;
+      self._update();
+    },
+
     _update: function() {
       var self = JX.Title;
 

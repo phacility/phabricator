@@ -6,6 +6,7 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
   private $disableBehavior;
   private $limit;
   private $placeholder;
+  private $handles;
 
   public function setDatasource(PhabricatorTypeaheadDatasource $datasource) {
     $this->datasource = $datasource;
@@ -31,41 +32,17 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
     return $this;
   }
 
+  public function willRender() {
+    // Load the handles now so we'll get a bulk load later on when we actually
+    // render them.
+    $this->loadHandles();
+  }
+
   protected function renderInput() {
     $name = $this->getName();
-    $values = nonempty($this->getValue(), array());
 
-    // Values may either be handles (which are now legacy/deprecated) or
-    // strings. Load handles for any PHIDs.
-    $load = array();
-    $handles = array();
-    $select = array();
-    foreach ($values as $value) {
-      if ($value instanceof PhabricatorObjectHandle) {
-        $handles[$value->getPHID()] = $value;
-        $select[] = $value->getPHID();
-      } else {
-        $load[] = $value;
-        $select[] = $value;
-      }
-    }
-
-    // TODO: Once this code path simplifies, move this prefetch to setValue()
-    // so we can bulk load across multiple controls.
-
-    if ($load) {
-      $viewer = $this->getUser();
-      if (!$viewer) {
-        // TODO: Clean this up when handles go away.
-        throw new Exception(
-          pht('Call setUser() before rendering tokenizer string values.'));
-      }
-      $loaded_handles = $viewer->loadHandles($load);
-      $handles = $handles + iterator_to_array($loaded_handles);
-    }
-
-    // Reorder the list into input order.
-    $handles = array_select_keys($handles, $select);
+    $handles = $this->loadHandles();
+    $handles = iterator_to_array($handles);
 
     if ($this->getID()) {
       $id = $this->getID();
@@ -110,6 +87,23 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
     }
 
     return $template->render();
+  }
+
+  private function loadHandles() {
+    if ($this->handles === null) {
+      $viewer = $this->getUser();
+      if (!$viewer) {
+        throw new Exception(
+          pht(
+            'Call setUser() before rendering tokenizers. Use appendControl() '.
+            'on AphrontFormView to do this easily.'));
+      }
+
+      $values = nonempty($this->getValue(), array());
+      $this->handles = $viewer->loadHandles($values);
+    }
+
+    return $this->handles;
   }
 
 }

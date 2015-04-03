@@ -1,7 +1,8 @@
 <?php
 
-final class PhabricatorHash {
+final class PhabricatorHash extends Phobject {
 
+  const INDEX_DIGEST_LENGTH = 12;
 
   /**
    * Digest a string for general use, including use which relates to security.
@@ -68,11 +69,56 @@ final class PhabricatorHash {
     }
 
     $result = '';
-    for ($ii = 0; $ii < 12; $ii++) {
+    for ($ii = 0; $ii < self::INDEX_DIGEST_LENGTH; $ii++) {
       $result .= $map[(ord($hash[$ii]) & 0x3F)];
     }
 
     return $result;
   }
+
+
+  /**
+   * Shorten a string to a maximum byte length in a collision-resistant way
+   * while retaining some degree of human-readability.
+   *
+   * This function converts an input string into a prefix plus a hash. For
+   * example, a very long string beginning with "crabapplepie..." might be
+   * digested to something like "crabapp-N1wM1Nz3U84k".
+   *
+   * This allows the maximum length of identifiers to be fixed while
+   * maintaining a high degree of collision resistance and a moderate degree
+   * of human readability.
+   *
+   * @param string The string to shorten.
+   * @param int Maximum length of the result.
+   * @return string String shortened in a collision-resistant way.
+   */
+  public static function digestToLength($string, $length) {
+    // We need at least two more characters than the hash length to fit in a
+    // a 1-character prefix and a separator.
+    $min_length = self::INDEX_DIGEST_LENGTH + 2;
+    if ($length < $min_length) {
+      throw new Exception(
+        pht(
+          'Length parameter in digestToLength() must be at least %s, '.
+          'but %s was provided.',
+          new PhutilNumber($min_length),
+          new PhutilNumber($length)));
+    }
+
+    // We could conceivably return the string unmodified if it's shorter than
+    // the specified length. Instead, always hash it. This makes the output of
+    // the method more recognizable and consistent (no surprising new behavior
+    // once you hit a string longer than `$length`) and prevents an attacker
+    // who can control the inputs from intentionally using the hashed form
+    // of a string to cause a collision.
+
+    $hash = PhabricatorHash::digestForIndex($string);
+
+    $prefix = substr($string, 0, ($length - ($min_length - 1)));
+
+    return $prefix.'-'.$hash;
+  }
+
 
 }

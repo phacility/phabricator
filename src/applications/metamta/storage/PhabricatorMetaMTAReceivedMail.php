@@ -121,6 +121,19 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
 
       $this->setAuthorPHID($sender->getPHID());
 
+      // Now that we've identified the sender, mark them as the author of
+      // any attached files.
+      $attachments = $this->getAttachments();
+      if ($attachments) {
+        $files = id(new PhabricatorFileQuery())
+          ->setViewer(PhabricatorUser::getOmnipotentUser())
+          ->withPHIDs($attachments)
+          ->execute();
+        foreach ($files as $file) {
+          $file->setAuthorPHID($sender->getPHID())->save();
+        }
+      }
+
       $receiver->receiveMail($this, $sender);
     } catch (PhabricatorMetaMTAReceivedMailProcessingException $ex) {
       switch ($ex->getStatusCode()) {

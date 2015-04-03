@@ -5235,6 +5235,7 @@ phutil_register_library_map(array(
     'PhabricatorHandleQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorHarbormasterApplication' => 'PhabricatorApplication',
     'PhabricatorHarbormasterConfigOptions' => 'PhabricatorApplicationConfigOptions',
+    'PhabricatorHash' => 'Phobject',
     'PhabricatorHashTestCase' => 'PhabricatorTestCase',
     'PhabricatorHelpApplication' => 'PhabricatorApplication',
     'PhabricatorHelpController' => 'PhabricatorController',
