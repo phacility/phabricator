@@ -120,25 +120,28 @@ final class ConpherenceUpdateController
             ->setContent($result);
           break;
         case ConpherenceUpdateActions::METADATA:
-          $updated = false;
           // all metadata updates are continue requests
           if (!$request->isContinueRequest()) {
             break;
           }
 
           $title = $request->getStr('title');
-          if ($title != $conpherence->getTitle()) {
+          $xactions[] = id(new ConpherenceTransaction())
+            ->setTransactionType(ConpherenceTransactionType::TYPE_TITLE)
+            ->setNewValue($title);
+          if ($conpherence->getIsRoom()) {
             $xactions[] = id(new ConpherenceTransaction())
-              ->setTransactionType(ConpherenceTransactionType::TYPE_TITLE)
-              ->setNewValue($title);
-            $updated = true;
-            if (!$request->getExists('force_ajax')) {
-              $response_mode = 'redirect';
-            }
+              ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
+              ->setNewValue($request->getStr('viewPolicy'));
+            $xactions[] = id(new ConpherenceTransaction())
+              ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
+              ->setNewValue($request->getStr('editPolicy'));
+            $xactions[] = id(new ConpherenceTransaction())
+              ->setTransactionType(PhabricatorTransactions::TYPE_JOIN_POLICY)
+              ->setNewValue($request->getStr('joinPolicy'));
           }
-          if (!$updated) {
-            $errors[] = pht(
-              'That was a non-update. Try cancel.');
+          if (!$request->getExists('force_ajax')) {
+            $response_mode = 'redirect';
           }
           break;
         case ConpherenceUpdateActions::LOAD:
@@ -163,6 +166,11 @@ final class ConpherenceUpdateController
           return id(new PhabricatorApplicationTransactionNoEffectResponse())
             ->setCancelURI($this->getApplicationURI($conpherence_id.'/'))
             ->setException($ex);
+        }
+        // xactions had no effect...!
+        if (empty($xactions)) {
+          $errors[] = pht(
+            'That was a non-update. Try cancel.');
         }
       }
 
@@ -293,6 +301,8 @@ final class ConpherenceUpdateController
     $error_view) {
 
     $request = $this->getRequest();
+    $user = $request->getUser();
+
     $form = id(new PHUIFormLayoutView())
       ->appendChild($error_view)
       ->appendChild(
@@ -301,9 +311,38 @@ final class ConpherenceUpdateController
         ->setName('title')
         ->setValue($conpherence->getTitle()));
 
+    if ($conpherence->getIsRoom()) {
+      $title = pht('Update Room');
+      $policies = id(new PhabricatorPolicyQuery())
+        ->setViewer($user)
+        ->setObject($conpherence)
+        ->execute();
+
+      $form->appendChild(
+        id(new AphrontFormPolicyControl())
+        ->setName('viewPolicy')
+        ->setPolicyObject($conpherence)
+        ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
+        ->setPolicies($policies))
+      ->appendChild(
+        id(new AphrontFormPolicyControl())
+        ->setName('editPolicy')
+        ->setPolicyObject($conpherence)
+        ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
+        ->setPolicies($policies))
+      ->appendChild(
+        id(new AphrontFormPolicyControl())
+        ->setName('joinPolicy')
+        ->setPolicyObject($conpherence)
+        ->setCapability(PhabricatorPolicyCapability::CAN_JOIN)
+        ->setPolicies($policies));
+    } else {
+      $title = pht('Update Thread');
+    }
+
     require_celerity_resource('conpherence-update-css');
     $view = id(new AphrontDialogView())
-      ->setTitle(pht('Update Conpherence'))
+      ->setTitle($title)
       ->addHiddenInput('action', 'metadata')
       ->addHiddenInput(
         'latest_transaction_id',
