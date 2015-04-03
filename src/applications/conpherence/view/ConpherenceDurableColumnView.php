@@ -381,7 +381,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
 
   private function getHeaderActionsConfig(ConpherenceThread $conpherence) {
     if ($conpherence->getIsRoom()) {
-      $rename_label = pht('Rename Room');
+      $rename_label = pht('Edit Room');
     } else {
       $rename_label = pht('Rename Thread');
     }
