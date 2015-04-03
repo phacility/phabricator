@@ -241,6 +241,10 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'metamta.differential.reply-handler' => $reply_handler_reason,
       'metamta.maniphest.reply-handler' => $reply_handler_reason,
       'metamta.package.reply-handler' => $reply_handler_reason,
+
+      'metamta.precedence-bulk' => pht(
+        'Phabricator now always sends transaction mail with '.
+        '"Precedence: bulk" to improve deliverability.'),
     );
 
     return $ancient_config;

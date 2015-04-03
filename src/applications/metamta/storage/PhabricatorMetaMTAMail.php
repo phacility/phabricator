@@ -545,9 +545,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
             break;
           case 'is-bulk':
             if ($value) {
-              if (PhabricatorEnv::getEnvConfig('metamta.precedence-bulk')) {
-                $mailer->addHeader('Precedence', 'bulk');
-              }
+              $mailer->addHeader('Precedence', 'bulk');
             }
             break;
           case 'thread-id':
