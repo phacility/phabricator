@@ -38,30 +38,21 @@ final class DifferentialHovercardEventListener
     $edge_query->execute();
     $tasks = $edge_query->getDestinationPHIDs();
 
-    $phids = array_merge(
-      array(
-        $rev->getAuthorPHID(),
-      ),
-      $reviewer_phids,
-      $tasks);
-
-    $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($viewer)
-      ->withPHIDs($phids)
-      ->execute();
-
     $hovercard->setTitle('D'.$rev->getID());
     $hovercard->setDetail($rev->getTitle());
 
-    $hovercard->addField(pht('Author'),
-      $handles[$rev->getAuthorPHID()]->renderLink());
+    $hovercard->addField(
+      pht('Author'),
+      $viewer->renderHandle($rev->getAuthorPHID()));
 
-    $hovercard->addField(pht('Reviewers'),
-      implode_selected_handle_links(', ', $handles, $reviewer_phids));
+    $hovercard->addField(
+      pht('Reviewers'),
+      $viewer->renderHandleList($reviewer_phids)->setAsInline(true));
 
     if ($tasks) {
-      $hovercard->addField(pht('%s Task(s)', new PhutilNumber(count($tasks))),
-        implode_selected_handle_links(', ', $handles, $tasks));
+      $hovercard->addField(
+        pht('Tasks'),
+        $viewer->renderHandleList($tasks)->setAsInline(true));
     }
 
     if ($rev->getSummary()) {

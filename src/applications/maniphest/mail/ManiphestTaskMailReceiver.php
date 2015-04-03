@@ -24,19 +24,8 @@ final class ManiphestTaskMailReceiver extends PhabricatorObjectMailReceiver {
     return head($results);
   }
 
-  protected function processReceivedObjectMail(
-    PhabricatorMetaMTAReceivedMail $mail,
-    PhabricatorLiskDAO $object,
-    PhabricatorUser $sender) {
-
-    $handler = PhabricatorEnv::newObjectFromConfig(
-      'metamta.maniphest.reply-handler');
-    $handler->setMailReceiver($object);
-
-    $handler->setActor($sender);
-    $handler->setExcludeMailRecipientPHIDs(
-      $mail->loadExcludeMailRecipientPHIDs());
-    $handler->processEmail($mail);
+  protected function getTransactionReplyHandler() {
+    return new ManiphestReplyHandler();
   }
 
 }

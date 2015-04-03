@@ -33,16 +33,24 @@ abstract class PhameController extends PhabricatorController {
     $nodata) {
     assert_instances_of($posts, 'PhamePost');
 
-    $stories = array();
-
+    $handle_phids = array();
     foreach ($posts as $post) {
-      $blogger = $this->getHandle($post->getBloggerPHID())->renderLink();
-      $blogger_uri = $this->getHandle($post->getBloggerPHID())->getURI();
-      $blogger_image = $this->getHandle($post->getBloggerPHID())->getImageURI();
+      $handle_phids[] = $post->getBloggerPHID();
+      if ($post->getBlog()) {
+        $handle_phids[] = $post->getBlog()->getPHID();
+      }
+    }
+    $handles = $viewer->loadHandles($handle_phids);
+
+    $stories = array();
+    foreach ($posts as $post) {
+      $blogger = $handles[$post->getBloggerPHID()]->renderLink();
+      $blogger_uri = $handles[$post->getBloggerPHID()]->getURI();
+      $blogger_image = $handles[$post->getBloggerPHID()]->getImageURI();
 
       $blog = null;
       if ($post->getBlog()) {
-        $blog = $this->getHandle($post->getBlog()->getPHID())->renderLink();
+        $blog = $handles[$post->getBlog()->getPHID()]->renderLink();
       }
 
       $phame_post = '';

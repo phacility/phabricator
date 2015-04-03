@@ -51,16 +51,6 @@ final class FundInitiativeSearchEngine
 
     $owner_phids = $saved->getParameter('ownerPHIDs', array());
 
-    $all_phids = array_mergev(
-      array(
-        $owner_phids,
-      ));
-
-    $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->requireViewer())
-      ->withPHIDs($all_phids)
-      ->execute();
-
     $status_map = FundInitiative::getStatusNameMap();
     $status_control = id(new AphrontFormCheckboxControl())
       ->setLabel(pht('Statuses'));
@@ -73,12 +63,12 @@ final class FundInitiativeSearchEngine
     }
 
     $form
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Owners'))
           ->setName('owners')
           ->setDatasource(new PhabricatorPeopleDatasource())
-          ->setValue(array_select_keys($handles, $owner_phids)))
+          ->setValue($owner_phids))
       ->appendChild($status_control);
   }
 

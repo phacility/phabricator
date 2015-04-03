@@ -135,11 +135,9 @@ final class PhortuneMerchantViewController
 
     $view->addProperty(pht('Status'), $status_view);
 
-    $this->loadHandles($merchant->getMemberPHIDs());
-
     $view->addProperty(
       pht('Members'),
-      $this->renderHandlesForPHIDs($merchant->getMemberPHIDs()));
+      $viewer->renderHandleList($merchant->getMemberPHIDs()));
 
     $view->invokeWillRenderEvent();
 

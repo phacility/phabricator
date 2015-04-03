@@ -26,9 +26,11 @@ JX.install('Busy', {
     start : function() {
       var self = JX.Busy;
       if (!self._depth) {
-        self._indicator = JX.$N('div', {className: 'busy'});
+        var icon = JX.$N('span',
+          {className: 'phui-icon-view phui-font-fa fa-gear ph-spin'});
+        self._indicator = JX.$N('div', {className: 'busy'}, icon);
         self._indicator.style.opacity = 0;
-        document.body.appendChild(self._indicator);
+        JX.$('phabricator-standard-page').appendChild(self._indicator);
 
         // Don't actually show the indicator for a little while, to prevent
         // it from flashing briefly for every Ajax request.

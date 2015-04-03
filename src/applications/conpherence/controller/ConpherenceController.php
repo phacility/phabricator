@@ -80,8 +80,8 @@ abstract class ConpherenceController extends PhabricatorController {
     assert_instances_of($policy_objects, 'PhabricatorPolicy');
 
     $crumbs = $this->buildApplicationCrumbs();
-    $title = $this->getConpherenceTitle($conpherence);
-    if ($conpherence->getID()) {
+    $data = $conpherence->getDisplayData($this->getViewer());
+    if ($conpherence->getID() && $conpherence->getIsRoom()) {
       $icon = $conpherence->getPolicyIconName($policy_objects);
     } else {
       $icon = null;
@@ -89,7 +89,7 @@ abstract class ConpherenceController extends PhabricatorController {
     $crumbs->addCrumb(
       id(new PHUICrumbView())
       ->setIcon($icon)
-      ->setName($title)
+      ->setName($data['title'])
       ->setHref($this->getApplicationURI('update/'.$conpherence->getID().'/'))
       ->setWorkflow(true));
 
@@ -104,15 +104,6 @@ abstract class ConpherenceController extends PhabricatorController {
           ''),
         $crumbs,
       ));
-  }
-
-  protected function getConpherenceTitle(ConpherenceThread $conpherence) {
-    if ($conpherence->getTitle()) {
-      $title = $conpherence->getTitle();
-    } else {
-      $title = pht('[No Title]');
-    }
-    return $title;
   }
 
 }

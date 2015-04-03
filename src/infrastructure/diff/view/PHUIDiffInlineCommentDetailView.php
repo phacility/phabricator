@@ -252,6 +252,12 @@ final class PHUIDiffInlineCommentDetailView
           break;
       }
 
+      // If you don't have permission to mark the comment as "Done", you also
+      // can not see the draft state.
+      if (!$this->getCanMarkDone()) {
+        $draft_state = false;
+      }
+
       if ($is_done) {
         $classes[] = 'inline-is-done';
       }

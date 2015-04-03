@@ -114,16 +114,12 @@ final class PhabricatorOwnersEditController
       }
     }
 
-    $handles = $this->loadViewerHandles($owners);
-
     $primary = $package->getPrimaryOwnerPHID();
-    if ($primary && isset($handles[$primary])) {
-      $handle_primary_owner = array($handles[$primary]);
+    if ($primary) {
+      $value_primary_owner = array($primary);
     } else {
-      $handle_primary_owner = array();
+      $value_primary_owner = array();
     }
-
-    $handles_all_owners = array_select_keys($handles, $owners);
 
     if ($package->getID()) {
       $title = pht('Edit Package');
@@ -182,20 +178,20 @@ final class PhabricatorOwnersEditController
           ->setName('name')
           ->setValue($package->getName())
           ->setError($e_name))
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorProjectOrUserDatasource())
           ->setLabel(pht('Primary Owner'))
           ->setName('primary')
           ->setLimit(1)
-          ->setValue($handle_primary_owner)
+          ->setValue($value_primary_owner)
           ->setError($e_primary))
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorProjectOrUserDatasource())
           ->setLabel(pht('Owners'))
           ->setName('owners')
-          ->setValue($handles_all_owners))
+          ->setValue($owners))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setName('auditing')

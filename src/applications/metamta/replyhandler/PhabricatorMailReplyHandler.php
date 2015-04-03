@@ -48,22 +48,11 @@ abstract class PhabricatorMailReplyHandler {
   abstract public function validateMailReceiver($mail_receiver);
   abstract public function getPrivateReplyHandlerEmailAddress(
     PhabricatorObjectHandle $handle);
+
   public function getReplyHandlerDomain() {
-    return $this->getDefaultReplyHandlerDomain();
-  }
-  protected function getCustomReplyHandlerDomainIfExists($config_key) {
-    $domain = PhabricatorEnv::getEnvConfig($config_key);
-    if ($domain) {
-      return $domain;
-    }
-    return $this->getDefaultReplyHandlerDomain();
-  }
-  private function getDefaultReplyHandlerDomain() {
-    return PhabricatorEnv::getEnvConfig(
-      'metamta.reply-handler-domain');
+    return PhabricatorEnv::getEnvConfig('metamta.reply-handler-domain');
   }
 
-  abstract public function getReplyHandlerInstructions();
   abstract protected function receiveEmail(
     PhabricatorMetaMTAReceivedMail $mail);
 
@@ -111,9 +100,11 @@ abstract class PhabricatorMailReplyHandler {
     if (!PhabricatorEnv::getEnvConfig('metamta.public-replies')) {
       return false;
     }
+
     if (!$this->getReplyHandlerDomain()) {
       return false;
     }
+
     return (bool)$this->getPublicReplyHandlerEmailAddress();
   }
 
@@ -328,10 +319,10 @@ abstract class PhabricatorMailReplyHandler {
     return $this->getSingleReplyHandlerPrefix($address);
   }
 
- final protected function enhanceBodyWithAttachments(
+  final protected function enhanceBodyWithAttachments(
     $body,
-    array $attachments,
-    $format = '- {F%d, layout=link}') {
+    array $attachments) {
+
     if (!$attachments) {
       return $body;
     }
@@ -341,17 +332,40 @@ abstract class PhabricatorMailReplyHandler {
       ->withPHIDs($attachments)
       ->execute();
 
-    // if we have some text then double return before adding our file list
-    if ($body) {
-      $body .= "\n\n";
-    }
+    $output = array();
+    $output[] = $body;
 
+    // We're going to put all the non-images first in a list, then embed
+    // the images.
+    $head = array();
+    $tail = array();
     foreach ($files as $file) {
-      $file_str = sprintf($format, $file->getID());
-      $body .= $file_str."\n";
+      if ($file->isViewableImage()) {
+        $tail[] = $file;
+      } else {
+        $head[] = $file;
+      }
     }
 
-    return rtrim($body);
+    if ($head) {
+      $list = array();
+      foreach ($head as $file) {
+        $list[] = '  - {'.$file->getMonogram().', layout=link}';
+      }
+      $output[] = implode("\n", $list);
+    }
+
+    if ($tail) {
+      $list = array();
+      foreach ($tail as $file) {
+        $list[] = '{'.$file->getMonogram().'}';
+      }
+      $output[] = implode("\n\n", $list);
+    }
+
+    $output = implode("\n\n", $output);
+
+    return rtrim($output);
   }
 
   private function expandRecipientHandles(array $handles) {

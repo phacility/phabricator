@@ -39,11 +39,6 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
 
     $phid = $file->getPHID();
 
-    $handle_phids = array_merge(
-      array($file->getAuthorPHID()),
-      $file->getObjectPHIDs());
-
-    $this->loadHandles($handle_phids);
     $header = id(new PHUIHeaderView())
       ->setUser($user)
       ->setPolicyObject($file)
@@ -185,7 +180,6 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-
     $properties = id(new PHUIPropertyListView());
     $properties->setActionList($actions);
     $box->addPropertyList($properties, pht('Details'));
@@ -193,7 +187,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
     if ($file->getAuthorPHID()) {
       $properties->addProperty(
         pht('Author'),
-        $this->getHandle($file->getAuthorPHID())->renderLink());
+        $user->renderHandle($file->getAuthorPHID()));
     }
 
     $properties->addProperty(
@@ -270,7 +264,7 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
 
       $attached->addProperty(
         pht('Attached To'),
-        $this->renderHandlesForPHIDs($phids));
+        $user->renderHandleList($phids));
     }
 
 

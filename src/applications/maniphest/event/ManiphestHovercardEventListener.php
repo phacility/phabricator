@@ -43,21 +43,16 @@ final class ManiphestHovercardEventListener extends PhabricatorEventListener {
 
     $owner_phid = $task->getOwnerPHID();
 
-    $phids = array_filter(array_merge(
-      array($owner_phid),
-      $edge_phids));
-
-    $viewer_handles = $this->loadHandles($phids, $viewer);
-
-    $hovercard->setTitle(pht('T%d', $task->getID()))
+    $hovercard
+      ->setTitle(pht('T%d', $task->getID()))
       ->setDetail($task->getTitle());
 
-    $owner = phutil_tag('em', array(), pht('None'));
     if ($owner_phid) {
-      $owner = $viewer_handles[$owner_phid]->renderLink();
+      $owner = $viewer->renderHandle($owner_phid);
+    } else {
+      $owner = phutil_tag('em', array(), pht('None'));
     }
-
-    $hovercard->addField(pht('Assigned to'), $owner);
+    $hovercard->addField(pht('Assigned To'), $owner);
 
     if ($edge_phids) {
       $edge_types = array(
@@ -79,9 +74,10 @@ final class ManiphestHovercardEventListener extends PhabricatorEventListener {
 
           $hovercard->addField(
             $edge_name,
-            implode_selected_handle_links(', ', $viewer_handles,
-              array_keys($edges[$edge_type]))
-                ->appendHTML($edge_overflow));
+            array(
+              $viewer->renderHandleList(array_keys($edges[$edge_type])),
+              $edge_overflow,
+            ));
         }
       }
     }
@@ -89,13 +85,6 @@ final class ManiphestHovercardEventListener extends PhabricatorEventListener {
     $hovercard->addTag(ManiphestView::renderTagForTask($task));
 
     $event->setValue('hovercard', $hovercard);
-  }
-
-  protected function loadHandles(array $phids, $viewer) {
-    return id(new PhabricatorHandleQuery())
-      ->setViewer($viewer)
-      ->withPHIDs($phids)
-      ->execute();
   }
 
 }

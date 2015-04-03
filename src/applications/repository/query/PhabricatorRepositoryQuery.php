@@ -138,13 +138,13 @@ final class PhabricatorRepositoryQuery
     return $this->identifierMap;
   }
 
+  protected function willExecute() {
+    $this->identifierMap = array();
+  }
+
   protected function loadPage() {
     $table = new PhabricatorRepository();
     $conn_r = $table->establishConnection('r');
-
-    if ($this->identifierMap === null) {
-      $this->identifierMap = array();
-    }
 
     $data = queryfx_all(
       $conn_r,

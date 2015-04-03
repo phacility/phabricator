@@ -35,11 +35,6 @@ final class PhameBlogViewController extends PhameController {
       ->setUser($user)
       ->setPolicyObject($blog);
 
-    $handle_phids = array_merge(
-      mpull($posts, 'getBloggerPHID'),
-      mpull($posts, 'getBlogPHID'));
-    $this->loadHandles($handle_phids);
-
     $actions = $this->renderActions($blog, $user);
     $properties = $this->renderProperties($blog, $user, $actions);
     $post_list = $this->renderPostList(

@@ -53,24 +53,8 @@ final class ConpherenceNewController extends ConpherenceController {
       }
     }
 
-
-    $participant_handles = array();
-    if ($participants) {
-      $participant_handles = id(new PhabricatorHandleQuery())
-        ->setViewer($user)
-        ->withPHIDs($participants)
-        ->execute();
-    }
-
     $submit_uri = $this->getApplicationURI('new/');
     $cancel_uri = $this->getApplicationURI();
-
-    // TODO - we can get a better cancel_uri once we get better at crazy
-    // ajax jonx T2086
-    if ($participant_prefill) {
-      $handle = $participant_handles[$participant_prefill];
-      $cancel_uri = $handle->getURI();
-    }
 
     $dialog = id(new AphrontDialogView())
       ->setWidth(AphrontDialogView::WIDTH_FORM)
@@ -80,17 +64,17 @@ final class ConpherenceNewController extends ConpherenceController {
       ->addCancelButton($cancel_uri)
       ->addSubmitButton(pht('Send Message'));
 
-    $form = id(new PHUIFormLayoutView())
+    $form = id(new AphrontFormView())
       ->setUser($user)
       ->setFullWidth(true)
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
-        ->setName('participants')
-        ->setValue($participant_handles)
-        ->setUser($user)
-        ->setDatasource(new PhabricatorPeopleDatasource())
-        ->setLabel(pht('To'))
-        ->setError($e_participants))
+          ->setName('participants')
+          ->setValue($participants)
+          ->setUser($user)
+          ->setDatasource(new PhabricatorPeopleDatasource())
+          ->setLabel(pht('To'))
+          ->setError($e_participants))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
           ->setUser($user)
@@ -99,7 +83,7 @@ final class ConpherenceNewController extends ConpherenceController {
           ->setLabel(pht('Message'))
           ->setError($e_message));
 
-    $dialog->appendChild($form);
+    $dialog->appendForm($form);
 
     return id(new AphrontDialogResponse())->setDialog($dialog);
   }

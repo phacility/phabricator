@@ -8,6 +8,7 @@
  *           javelin-behavior-device
  *           javelin-history
  *           javelin-vector
+ *           phabricator-title
  *           phabricator-shaped-request
  *           conpherence-thread-manager
  */
@@ -151,10 +152,10 @@ JX.behavior('conpherence-menu', function(config) {
     }
     JX.History.replace(config.baseURI + uri_suffix);
     if (data.title) {
-      document.title = data.title;
+      JX.Title.setTitle(data.title);
     } else if (_thread.node) {
       var threadData = JX.Stratcom.getData(_thread.node);
-      document.title = threadData.title;
+      JX.Title.setTitle(threadData.title);
     }
   }
 
@@ -478,8 +479,6 @@ JX.behavior('conpherence-menu', function(config) {
 
     config.selectedID && selectThreadByID(config.selectedID);
 
-    _thread.node.scrollIntoView();
-
     markThreadsLoading(false);
   }
 
@@ -504,70 +503,19 @@ JX.behavior('conpherence-menu', function(config) {
     }
   }
 
-  var handleThreadScrollers = function (e) {
-    e.kill();
-
-    var data = e.getNodeData('conpherence-menu-scroller');
-    var scroller = e.getNode('conpherence-menu-scroller');
-    JX.DOM.alterClass(scroller, 'loading', true);
-    JX.DOM.setContent(scroller.firstChild, 'Loading...');
-    new JX.Workflow(scroller.href, data)
-      .setHandler(
-        JX.bind(null, threadScrollerResponse, scroller, data.direction))
-      .start();
-  };
-
-  var threadScrollerResponse = function (scroller, direction, r) {
-    var html = JX.$H(r.html);
-
-    var thread_phids = r.phids;
-    var reselect_id = null;
-    // remove any threads that are in the list that we just got back
-    // in the result set; things have changed and they'll be in the
-    // right place soon
-    for (var ii = 0; ii < thread_phids.length; ii++) {
-      try {
-        var node_id = thread_phids[ii] + '-nav-item';
-        var node = JX.$(node_id);
-        var node_data = JX.Stratcom.getData(node);
-        if (node_data.id == _thread.selected) {
-          reselect_id = node_id;
-        }
-        JX.DOM.remove(node);
-      } catch (ex) {
-        // ignore , just haven't seen this thread yet
-      }
-    }
-
-    var root = JX.DOM.find(document, 'div', 'conpherence-layout');
-    var menu_root = JX.DOM.find(root, 'div', 'conpherence-menu-pane');
-    var scroll_y = 0;
-    // we have to do some hyjinx in the up case to make the menu scroll to
-    // where it should
-    if (direction == 'up') {
-      var style = {
-        position: 'absolute',
-        left:     '-10000px'
-      };
-      var test_size = JX.$N('div', {style: style}, html);
-      document.body.appendChild(test_size);
-      var html_size = JX.Vector.getDim(test_size);
-      JX.DOM.remove(test_size);
-      scroll_y = html_size.y;
-    }
-    JX.DOM.replace(scroller, html);
-    menu_root.scrollTop += scroll_y;
-
-    if (reselect_id) {
-      selectThreadByID(reselect_id);
-    }
-  };
-
   JX.Stratcom.listen(
     ['click'],
-    'conpherence-menu-scroller',
-    handleThreadScrollers
-  );
+    'conpherence-menu-see-more',
+    function (e) {
+      e.kill();
+      var sigil = e.getNodeData('conpherence-menu-see-more').moreSigil;
+      var root = JX.$('conpherence-menu-pane');
+      var more = JX.DOM.scry(root, 'li', sigil);
+      for (var i = 0; i < more.length; i++) {
+        JX.DOM.alterClass(more[i], 'hidden', false);
+      }
+      JX.DOM.hide(e.getNode('conpherence-menu-see-more'));
+    });
 
   JX.Stratcom.listen(
     ['keydown'],

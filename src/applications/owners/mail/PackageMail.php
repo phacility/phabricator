@@ -201,8 +201,7 @@ abstract class PackageMail extends PhabricatorMail {
   }
 
   private function newReplyHandler() {
-    $reply_handler = PhabricatorEnv::newObjectFromConfig(
-      'metamta.package.reply-handler');
+    $reply_handler = new OwnersPackageReplyHandler();
     $reply_handler->setMailReceiver($this->getPackage());
     return $reply_handler;
   }

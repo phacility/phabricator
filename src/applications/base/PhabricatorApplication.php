@@ -169,8 +169,48 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
     return null;
   }
 
-  public function getHelpURI() {
-    return null;
+  public function getHelpMenuItems(PhabricatorUser $viewer) {
+    $items = array();
+
+    $articles = $this->getHelpDocumentationArticles($viewer);
+    if ($articles) {
+      $items[] = id(new PHUIListItemView())
+        ->setType(PHUIListItemView::TYPE_LABEL)
+        ->setName(pht('%s Documentation', $this->getName()));
+      foreach ($articles as $article) {
+        $item = id(new PHUIListItemView())
+          ->setName($article['name'])
+          ->setIcon('fa-book')
+          ->setHref($article['href']);
+
+        $items[] = $item;
+      }
+    }
+
+    $command_specs = $this->getMailCommandObjects();
+    if ($command_specs) {
+      $items[] = id(new PHUIListItemView())
+        ->setType(PHUIListItemView::TYPE_LABEL)
+        ->setName(pht('Email Help'));
+      foreach ($command_specs as $key => $spec) {
+        $object = $spec['object'];
+
+        $class = get_class($this);
+        $href = '/applications/mailcommands/'.$class.'/'.$key.'/';
+
+        $item = id(new PHUIListItemView())
+          ->setName($spec['name'])
+          ->setIcon('fa-envelope-o')
+          ->setHref($href);
+        $items[] = $item;
+      }
+    }
+
+    return $items;
+  }
+
+  public function getHelpDocumentationArticles(PhabricatorUser $viewer) {
+    return array();
   }
 
   public function getOverview() {
@@ -186,6 +226,10 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
   }
 
   public function getQuicksandURIPatternBlacklist() {
+    return array();
+  }
+
+  public function getMailCommandObjects() {
     return array();
   }
 

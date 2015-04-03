@@ -245,11 +245,6 @@ final class PholioMockEditController extends PholioController {
     $mock->setViewPolicy($v_view);
     $mock->setEditPolicy($v_edit);
 
-    $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($user)
-      ->withPHIDs($v_cc)
-      ->execute();
-
     $image_elements = array();
     if ($posted_mock_images) {
       $display_mock_images = $posted_mock_images;
@@ -307,12 +302,6 @@ final class PholioMockEditController extends PholioController {
         ),
       ));
 
-    if ($v_projects) {
-      $project_handles = $this->loadViewerHandles($v_projects);
-    } else {
-      $project_handles = array();
-    }
-
     require_celerity_resource('pholio-edit-css');
     $form = id(new AphrontFormView())
       ->setUser($user)
@@ -342,17 +331,17 @@ final class PholioMockEditController extends PholioController {
     }
 
     $form
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Projects'))
           ->setName('projects')
-          ->setValue($project_handles)
+          ->setValue($v_projects)
           ->setDatasource(new PhabricatorProjectDatasource()))
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('CC'))
           ->setName('cc')
-          ->setValue($handles)
+          ->setValue($v_cc)
           ->setUser($user)
           ->setDatasource(new PhabricatorMetaMTAMailableDatasource()))
       ->appendChild(

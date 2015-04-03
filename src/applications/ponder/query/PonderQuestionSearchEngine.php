@@ -64,25 +64,19 @@ final class PonderQuestionSearchEngine
     $status = $saved_query->getParameter(
       'status', PonderQuestionStatus::STATUS_OPEN);
 
-    $phids = array_merge($author_phids, $answerer_phids);
-    $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->requireViewer())
-      ->withPHIDs($phids)
-      ->execute();
-
     $form
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('authors')
           ->setLabel(pht('Authors'))
-          ->setValue(array_select_keys($handles, $author_phids)))
-      ->appendChild(
+          ->setValue($author_phids))
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('answerers')
           ->setLabel(pht('Answered By'))
-          ->setValue(array_select_keys($handles, $answerer_phids)))
+          ->setValue($answerer_phids))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel(pht('Status'))

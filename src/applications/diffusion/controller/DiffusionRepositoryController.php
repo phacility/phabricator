@@ -234,10 +234,9 @@ final class DiffusionRepositoryController extends DiffusionController {
       $repository->getPHID(),
       PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
     if ($project_phids) {
-      $this->loadHandles($project_phids);
       $view->addProperty(
         pht('Projects'),
-        $this->renderHandlesForPHIDs($project_phids));
+        $user->renderHandleList($project_phids));
     }
 
     if ($repository->isHosted()) {

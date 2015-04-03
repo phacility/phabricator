@@ -57,11 +57,9 @@ final class PhortuneAccountViewController extends PhortuneController {
       ->setObject($account)
       ->setUser($viewer);
 
-    $this->loadHandles($account->getMemberPHIDs());
-
     $properties->addProperty(
       pht('Members'),
-      $this->renderHandlesForPHIDs($account->getMemberPHIDs()));
+      $viewer->renderHandleList($account->getMemberPHIDs()));
 
     $status_items = $this->getStatusItemsForAccount($account, $invoices);
     $status_view = new PHUIStatusListView();
@@ -136,10 +134,6 @@ final class PhortuneAccountViewController extends PhortuneController {
       ->setViewer($viewer)
       ->withAccountPHIDs(array($account->getPHID()))
       ->execute();
-
-    if ($methods) {
-      $this->loadHandles(mpull($methods, 'getAuthorPHID'));
-    }
 
     foreach ($methods as $method) {
       $id = $method->getID();

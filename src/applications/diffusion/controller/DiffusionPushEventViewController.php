@@ -70,9 +70,6 @@ final class DiffusionPushEventViewController
 
   private function buildPropertyList(PhabricatorRepositoryPushEvent $event) {
     $viewer = $this->getRequest()->getUser();
-
-    $this->loadHandles(array($event->getPusherPHID()));
-
     $view = new PHUIPropertyListView();
 
     $view->addProperty(
@@ -81,7 +78,7 @@ final class DiffusionPushEventViewController
 
     $view->addProperty(
       pht('Pushed By'),
-      $this->getHandle($event->getPusherPHID())->renderLink());
+      $viewer->renderHandle($event->getPusherPHID()));
 
     $view->addProperty(
       pht('Pushed Via'),

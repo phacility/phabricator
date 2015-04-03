@@ -6,6 +6,7 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
   private $disableBehavior;
   private $limit;
   private $placeholder;
+  private $handles;
 
   public function setDatasource(PhabricatorTypeaheadDatasource $datasource) {
     $this->datasource = $datasource;
@@ -31,11 +32,17 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
     return $this;
   }
 
+  public function willRender() {
+    // Load the handles now so we'll get a bulk load later on when we actually
+    // render them.
+    $this->loadHandles();
+  }
+
   protected function renderInput() {
     $name = $this->getName();
-    $values = nonempty($this->getValue(), array());
 
-    assert_instances_of($values, 'PhabricatorObjectHandle');
+    $handles = $this->loadHandles();
+    $handles = iterator_to_array($handles);
 
     if ($this->getID()) {
       $id = $this->getID();
@@ -55,7 +62,7 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
     $template = new AphrontTokenizerTemplateView();
     $template->setName($name);
     $template->setID($id);
-    $template->setValue($values);
+    $template->setValue($handles);
 
     $username = null;
     if ($this->user) {
@@ -71,8 +78,8 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
       Javelin::initBehavior('aphront-basic-tokenizer', array(
         'id'          => $id,
         'src'         => $datasource_uri,
-        'value'       => mpull($values, 'getFullName', 'getPHID'),
-        'icons'       => mpull($values, 'getIcon', 'getPHID'),
+        'value'       => mpull($handles, 'getFullName', 'getPHID'),
+        'icons'       => mpull($handles, 'getIcon', 'getPHID'),
         'limit'       => $this->limit,
         'username'    => $username,
         'placeholder' => $placeholder,
@@ -80,6 +87,23 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
     }
 
     return $template->render();
+  }
+
+  private function loadHandles() {
+    if ($this->handles === null) {
+      $viewer = $this->getUser();
+      if (!$viewer) {
+        throw new Exception(
+          pht(
+            'Call setUser() before rendering tokenizers. Use appendControl() '.
+            'on AphrontFormView to do this easily.'));
+      }
+
+      $values = nonempty($this->getValue(), array());
+      $this->handles = $viewer->loadHandles($values);
+    }
+
+    return $this->handles;
   }
 
 }

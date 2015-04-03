@@ -33,11 +33,6 @@ final class PhragmentVersionController extends PhragmentController {
     $crumbs = $this->buildApplicationCrumbsWithPath($parents);
     $crumbs->addTextCrumb(pht('View Version %d', $version->getSequence()));
 
-    $phids = array();
-    $phids[] = $version->getFilePHID();
-
-    $this->loadHandles($phids);
-
     $file = id(new PhabricatorFileQuery())
       ->setViewer($viewer)
       ->withPHIDs(array($version->getFilePHID()))
@@ -71,7 +66,7 @@ final class PhragmentVersionController extends PhragmentController {
       ->setActionList($actions);
     $properties->addProperty(
       pht('File'),
-      $this->renderHandlesForPHIDs(array($version->getFilePHID())));
+      $viewer->renderHandle($version->getFilePHID()));
 
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)

@@ -1983,10 +1983,6 @@ abstract class PhabricatorApplicationTransactionEditor
     $action = $this->getMailAction($object, $xactions);
 
     $reply_handler = $this->buildReplyHandler($object);
-    $reply_section = $reply_handler->getReplyHandlerInstructions();
-    if ($reply_section !== null) {
-      $body->addReplySection($reply_section);
-    }
 
     $body->addEmailPreferenceSection();
 

@@ -92,7 +92,6 @@ final class DiffusionRepositoryEditBasicController
     $crumbs->addTextCrumb(pht('Edit Basics'));
 
     $title = pht('Edit %s', $repository->getName());
-    $project_handles = $this->loadViewerHandles($repository->getProjectPHIDs());
 
     $form = id(new AphrontFormView())
       ->setUser($user)
@@ -123,12 +122,12 @@ final class DiffusionRepositoryEditBasicController
           ->setName('description')
           ->setLabel(pht('Description'))
           ->setValue($v_desc))
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorProjectDatasource())
           ->setName('projectPHIDs')
           ->setLabel(pht('Projects'))
-          ->setValue($project_handles))
+          ->setValue($repository->getProjectPHIDs()))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Save'))

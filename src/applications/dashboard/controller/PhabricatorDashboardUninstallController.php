@@ -53,7 +53,6 @@ final class PhabricatorDashboardUninstallController
     }
 
     $installer_phid = $viewer->getPHID();
-    $handles = $this->loadHandles(array($object_phid, $installer_phid));
 
     if ($request->isFormPost()) {
       $dashboard_install->delete();
@@ -83,6 +82,8 @@ final class PhabricatorDashboardUninstallController
     $object_phid,
     $installer_phid) {
 
+    $viewer = $this->getViewer();
+
     $body = array();
     switch ($application_class) {
       case 'PhabricatorHomeApplication':
@@ -106,7 +107,7 @@ final class PhabricatorDashboardUninstallController
             pht(
               'Are you sure you want to uninstall this dashboard as the home '.
               'page for %s?',
-              $this->getHandle($object_phid)->getName()));
+              $viewer->renderHandle($object_phid)));
         }
         break;
     }

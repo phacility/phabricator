@@ -138,12 +138,6 @@ final class FundInitiativeEditController
       ->setObject($initiative)
       ->execute();
 
-    if ($v_projects) {
-      $project_handles = $this->loadViewerHandles($v_projects);
-    } else {
-      $project_handles = array();
-    }
-
     $merchants = id(new PhortuneMerchantQuery())
       ->setViewer($viewer)
       ->requireCapabilities(
@@ -210,11 +204,11 @@ final class FundInitiativeEditController
           ->setName('risks')
           ->setLabel(pht('Risks/Challenges'))
           ->setValue($v_risk))
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Projects'))
           ->setName('projects')
-          ->setValue($project_handles)
+          ->setValue($v_projects)
           ->setDatasource(new PhabricatorProjectDatasource()))
       ->appendChild(
         id(new AphrontFormPolicyControl())

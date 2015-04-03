@@ -1074,8 +1074,9 @@ abstract class HeraldAdapter {
     return $map;
   }
 
-  public function renderRuleAsText(HeraldRule $rule, array $handles) {
-    assert_instances_of($handles, 'PhabricatorObjectHandle');
+  public function renderRuleAsText(
+    HeraldRule $rule,
+    PhabricatorHandleList $handles) {
 
     require_celerity_resource('herald-css');
 
@@ -1150,7 +1151,7 @@ abstract class HeraldAdapter {
 
   private function renderConditionAsText(
     HeraldCondition $condition,
-    array $handles) {
+    PhabricatorHandleList $handles) {
 
     $field_type = $condition->getFieldName();
 
@@ -1170,7 +1171,7 @@ abstract class HeraldAdapter {
 
   private function renderActionAsText(
     HeraldAction $action,
-    array $handles) {
+    PhabricatorHandleList $handles) {
     $rule_global = HeraldRuleTypeConfig::RULE_TYPE_GLOBAL;
 
     $action_type = $action->getAction();
@@ -1183,7 +1184,7 @@ abstract class HeraldAdapter {
 
   private function renderConditionValueAsText(
     HeraldCondition $condition,
-    array $handles) {
+    PhabricatorHandleList $handles) {
 
     $value = $condition->getValue();
     if (!is_array($value)) {
@@ -1220,7 +1221,7 @@ abstract class HeraldAdapter {
         break;
       default:
         foreach ($value as $index => $val) {
-          $handle = idx($handles, $val);
+          $handle = $handles->getHandleIfExists($val);
           if ($handle) {
             $value[$index] = $handle->renderLink();
           }
@@ -1233,7 +1234,7 @@ abstract class HeraldAdapter {
 
   private function renderActionTargetAsText(
     HeraldAction $action,
-    array $handles) {
+    PhabricatorHandleList $handles) {
 
     $target = $action->getTarget();
     if (!is_array($target)) {
@@ -1245,7 +1246,7 @@ abstract class HeraldAdapter {
           $target[$index] = PhabricatorFlagColor::getColorName($val);
           break;
         default:
-          $handle = idx($handles, $val);
+          $handle = $handles->getHandleIfExists($val);
           if ($handle) {
             $target[$index] = $handle->renderLink();
           }

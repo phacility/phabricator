@@ -32,8 +32,13 @@ final class PhabricatorLegalpadApplication extends PhabricatorApplication {
     );
   }
 
-  public function getHelpURI() {
-    return PhabricatorEnv::getDoclink('Legalpad User Guide');
+  public function getHelpDocumentationArticles(PhabricatorUser $viewer) {
+    return array(
+      array(
+        'name' => pht('Legalpad User Guide'),
+        'href' => PhabricatorEnv::getDoclink('Legalpad User Guide'),
+      ),
+    );
   }
 
   public function getOverview() {
@@ -72,6 +77,19 @@ final class PhabricatorLegalpadApplication extends PhabricatorApplication {
       LegalpadCreateDocumentsCapability::CAPABILITY => array(),
       LegalpadDefaultViewCapability::CAPABILITY => array(),
       LegalpadDefaultEditCapability::CAPABILITY => array(),
+    );
+  }
+
+  public function getMailCommandObjects() {
+    return array(
+      'document' => array(
+        'name' => pht('Email Commands: Legalpad Documents'),
+        'header' => pht('Interacting with Legalpad Documents'),
+        'object' => new LegalpadDocument(),
+        'summary' => pht(
+          'This page documents the commands you can use to interact with '.
+          'documents in Legalpad.'),
+      ),
     );
   }
 

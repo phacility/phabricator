@@ -74,12 +74,7 @@ final class PhabricatorMacroSearchEngine
     AphrontFormView $form,
     PhabricatorSavedQuery $saved_query) {
 
-    $phids = $saved_query->getParameter('authorPHIDs', array());
-    $author_handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->requireViewer())
-      ->withPHIDs($phids)
-      ->execute();
-
+    $author_phids = $saved_query->getParameter('authorPHIDs', array());
     $status = $saved_query->getParameter('status');
     $names = implode(', ', $saved_query->getParameter('names', array()));
     $like = $saved_query->getParameter('nameLike');
@@ -92,12 +87,12 @@ final class PhabricatorMacroSearchEngine
           ->setLabel(pht('Status'))
           ->setOptions(PhabricatorMacroQuery::getStatusOptions())
           ->setValue($status))
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('authors')
           ->setLabel(pht('Authors'))
-          ->setValue($author_handles))
+          ->setValue($author_phids))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('nameLike')

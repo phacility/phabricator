@@ -167,11 +167,6 @@ final class PhabricatorProjectProfileController
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
-    $this->loadHandles(
-      array_merge(
-        $project->getMemberPHIDs(),
-        $project->getWatcherPHIDs()));
-
     $view = id(new PHUIPropertyListView())
       ->setUser($viewer)
       ->setObject($project)
@@ -189,24 +184,26 @@ final class PhabricatorProjectProfileController
     $view->addProperty(
       pht('Members'),
       $project->getMemberPHIDs()
-        ? $this->renderHandlesForPHIDs($project->getMemberPHIDs(), ',')
+        ? $viewer
+          ->renderHandleList($project->getMemberPHIDs())
+          ->setAsInline(true)
         : phutil_tag('em', array(), pht('None')));
 
     $view->addProperty(
       pht('Watchers'),
       $project->getWatcherPHIDs()
-        ? $this->renderHandlesForPHIDs($project->getWatcherPHIDs(), ',')
+        ? $viewer
+          ->renderHandleList($project->getWatcherPHIDs())
+          ->setAsInline(true)
         : phutil_tag('em', array(), pht('None')));
 
     $descriptions = PhabricatorPolicyQuery::renderPolicyDescriptions(
       $viewer,
       $project);
 
-    $this->loadHandles(array($project->getPHID()));
-
     $view->addProperty(
       pht('Looks Like'),
-      $this->getHandle($project->getPHID())->renderTag());
+      $viewer->renderHandle($project->getPHID())->setAsTag(true));
 
     $view->addProperty(
       pht('Joinable By'),

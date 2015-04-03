@@ -17,6 +17,7 @@ final class PhabricatorConpherenceThreadPHIDType extends PhabricatorPHIDType {
     array $phids) {
 
     return id(new ConpherenceThreadQuery())
+      ->needParticipantCache(true)
       ->withPHIDs($phids);
   }
 
@@ -27,12 +28,9 @@ final class PhabricatorConpherenceThreadPHIDType extends PhabricatorPHIDType {
 
     foreach ($handles as $phid => $handle) {
       $thread = $objects[$phid];
-      $name = $thread->getTitle();
-      if (!strlen($name)) {
-        $name = pht('[No Title]');
-      }
-      $handle->setName($name);
-      $handle->setFullName($name);
+      $data = $thread->getDisplayData($query->getViewer());
+      $handle->setName($data['title']);
+      $handle->setFullName($data['title']);
       $handle->setURI('/conpherence/'.$thread->getID().'/');
     }
   }

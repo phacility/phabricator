@@ -60,8 +60,8 @@ final class ConpherenceViewController extends
       );
     }
 
-    $title = $this->getConpherenceTitle($conpherence);
-    $content['title'] = $title;
+    $d_data = $conpherence->getDisplayData($user);
+    $content['title'] = $title = $d_data['title'];
 
     if ($request->isAjax()) {
       $content['threadID'] = $conpherence->getID();

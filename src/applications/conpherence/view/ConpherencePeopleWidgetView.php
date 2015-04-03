@@ -17,6 +17,8 @@ final class ConpherencePeopleWidgetView extends ConpherenceWidgetView {
       $handle = $handles[$user_phid];
       $remove_html = '';
       if ($user_phid == $user->getPHID()) {
+        $icon = id(new PHUIIconView())
+          ->setIconFont('fa-times lightbluetext');
         $remove_html = javelin_tag(
           'a',
           array(
@@ -27,7 +29,7 @@ final class ConpherencePeopleWidgetView extends ConpherenceWidgetView {
               'action' => 'remove_person',
             ),
           ),
-          hsprintf('<span class="close-icon">&times;</span>'));
+          $icon);
       }
       $body[] = phutil_tag(
         'div',
@@ -39,6 +41,7 @@ final class ConpherencePeopleWidgetView extends ConpherenceWidgetView {
             'a',
             array(
               'class' => 'pic',
+              'href' => $handle->getURI(),
             ),
             phutil_tag(
               'img',

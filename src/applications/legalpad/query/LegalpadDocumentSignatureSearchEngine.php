@@ -77,32 +77,26 @@ final class LegalpadDocumentSignatureSearchEngine
     $document_phids = $saved_query->getParameter('documentPHIDs', array());
     $signer_phids = $saved_query->getParameter('signerPHIDs', array());
 
-    $phids = array_merge($document_phids, $signer_phids);
-    $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->requireViewer())
-      ->withPHIDs($phids)
-      ->execute();
-
     if (!$this->document) {
       $form
-        ->appendChild(
+        ->appendControl(
           id(new AphrontFormTokenizerControl())
             ->setDatasource(new LegalpadDocumentDatasource())
             ->setName('documents')
             ->setLabel(pht('Documents'))
-            ->setValue(array_select_keys($handles, $document_phids)));
+            ->setValue($document_phids));
     }
 
     $name_contains = $saved_query->getParameter('nameContains', '');
     $email_contains = $saved_query->getParameter('emailContains', '');
 
     $form
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('signers')
           ->setLabel(pht('Signers'))
-          ->setValue(array_select_keys($handles, $signer_phids)))
+          ->setValue($signer_phids))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Name Contains'))

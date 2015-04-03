@@ -73,11 +73,6 @@ final class LegalpadDocumentSearchEngine
     $creator_phids = $saved_query->getParameter('creatorPHIDs', array());
     $contributor_phids = $saved_query->getParameter(
       'contributorPHIDs', array());
-    $phids = array_merge($creator_phids, $contributor_phids);
-    $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->requireViewer())
-      ->withPHIDs($phids)
-      ->execute();
 
     $viewer_signature = $saved_query->getParameter('withViewerSignature');
     if (!$this->requireViewer()->getPHID()) {
@@ -93,18 +88,18 @@ final class LegalpadDocumentSearchEngine
             pht('Show only documents I have signed.'),
             $viewer_signature)
           ->setDisabled(!$this->requireViewer()->getPHID()))
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('creators')
           ->setLabel(pht('Creators'))
-          ->setValue(array_select_keys($handles, $creator_phids)))
-      ->appendChild(
+          ->setValue($creator_phids))
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('contributors')
           ->setLabel(pht('Contributors'))
-          ->setValue(array_select_keys($handles, $contributor_phids)));
+          ->setValue($contributor_phids));
 
     $this->buildDateRange(
       $form,

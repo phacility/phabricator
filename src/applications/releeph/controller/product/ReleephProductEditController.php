@@ -120,13 +120,6 @@ final class ReleephProductEditController extends ReleephProductController {
       'pushers',
       $product->getDetail('pushers', array()));
 
-    $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($request->getUser())
-      ->withPHIDs($pusher_phids)
-      ->execute();
-
-    $pusher_handles = array_select_keys($handles, $pusher_phids);
-
     $form = id(new AphrontFormView())
       ->setUser($request->getUser())
       ->appendChild(
@@ -191,12 +184,12 @@ final class ReleephProductEditController extends ReleephProductController {
       ->addStatic('projectName', $product->getName());
 
     $form
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Pushers'))
           ->setName('pushers')
           ->setDatasource(new PhabricatorPeopleDatasource())
-          ->setValue($pusher_handles))
+          ->setValue($pusher_phids))
       ->appendChild($branch_template_input)
       ->appendChild($branch_template_preview)
       ->appendRemarkupInstructions($this->getBranchHelpText());

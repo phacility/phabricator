@@ -90,13 +90,18 @@ img {
 
 .busy {
   position: fixed;
-  bottom: 16px;
-  right: 16px;
-  width: 44px;
-  height: 44px;
-  border-radius: 5px;
-  opacity: 0.4;
-  background: #000 url(/rsrc/image/loading/compass_24.gif) center no-repeat;
+  bottom: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+}
+
+.with-durable-column .busy {
+  right: 308px;
+}
+
+.busy .phui-icon-view {
+  font-size: 32px;
 }
 
 .grouped:after {

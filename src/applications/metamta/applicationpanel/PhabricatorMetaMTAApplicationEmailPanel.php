@@ -301,15 +301,13 @@ final class PhabricatorMetaMTAApplicationEmailPanel
 
     $default_user = $email_object->getConfigValue($default_user_key);
     if ($default_user) {
-      $default_user_handle = id(new PhabricatorHandleQuery())
-        ->setViewer($viewer)
-        ->withPHIDs(array($default_user))
-        ->execute();
+      $default_user_value = array($default_user);
     } else {
-      $default_user_handle = array();
+      $default_user_value = array();
     }
 
-    $form = id(new PHUIFormLayoutView())
+    $form = id(new AphrontFormView())
+      ->setUser($viewer)
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Email'))
@@ -317,13 +315,13 @@ final class PhabricatorMetaMTAApplicationEmailPanel
           ->setValue($email_object->getAddress())
           ->setCaption(PhabricatorUserEmail::describeAllowedAddresses())
           ->setError($e_email))
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
           ->setLabel(pht('Default Author'))
           ->setName($default_user_key)
           ->setLimit(1)
-          ->setValue($default_user_handle)
+          ->setValue($default_user_value)
           ->setCaption(pht(
             'Used if the "From:" address does not map to a known account.')));
     if ($is_new) {
@@ -336,7 +334,7 @@ final class PhabricatorMetaMTAApplicationEmailPanel
       ->setWidth(AphrontDialogView::WIDTH_FORM)
       ->setTitle($title)
       ->appendChild($errors)
-      ->appendChild($form)
+      ->appendForm($form)
       ->addSubmitButton(pht('Save'))
       ->addCancelButton($uri);
 

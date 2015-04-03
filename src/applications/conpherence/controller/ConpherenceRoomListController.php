@@ -8,8 +8,7 @@ final class ConpherenceRoomListController extends ConpherenceController {
     $controller = id(new PhabricatorApplicationSearchController())
       ->setQueryKey($request->getURIData('queryKey'))
       ->setSearchEngine(
-        id(new ConpherenceThreadSearchEngine())
-        ->setIsRooms(true))
+        new ConpherenceThreadSearchEngine())
       ->setNavigation($this->buildRoomsSideNavView());
 
     return $this->delegateToController($controller);

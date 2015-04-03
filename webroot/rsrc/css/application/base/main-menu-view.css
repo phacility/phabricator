@@ -146,9 +146,9 @@
   right: 0;
   position: absolute;
   font-size: 13px;
-  border: 1px solid #333;
+  border-color: rgba(0,0,0,.6);
   border-radius: 12px;
-  background-color: #222;
+  background-color: rgba(0,0,0,.5);
   opacity: .8;
   height: 26px;
   line-height: 12px;
@@ -157,7 +157,8 @@
 }
 
 .phabricator-main-menu.main-header-dark .phabricator-main-menu-search input {
-  background-color: #555;
+  background-color: rgba(150,150,150,.5);
+  border-color: #333;
 }
 
 .device .phabricator-main-menu-search input {
@@ -170,7 +171,7 @@
   background: #fff;
   opacity: 1;
   color: #333;
-  border-color: #e7e7e7;
+  border-color: {$lightgreyborder};
   box-shadow: none;
 }
 
@@ -180,18 +181,18 @@
 
 .phabricator-main-menu-search button {
   position: absolute;
-  color: transparent;
-  background: transparent 5px 6px url(/rsrc/image/search-white.png) no-repeat;
+  background: transparent;
   border: none;
   outline: none;
   box-shadow: none;
   text-shadow: none;
   min-width: 0;
 
-  height: 20px;
-  width: 20px;
+  height: 24px;
+  width: 16px;
   top: 10px;
-  right: 6px;
+  right: 10px;
+  padding: 0;
 }
 
 .device .phabricator-main-menu-search button {

@@ -36,10 +36,9 @@ final class PhabricatorConpherenceApplication extends PhabricatorApplication {
         '(?P<id>[1-9]\d*)/'        => 'ConpherenceViewController',
         'columnview/'              => 'ConpherenceColumnViewController',
         'new/'                     => 'ConpherenceNewController',
-        'room/'                    => array(
-          '(?:query/(?P<queryKey>[^/]+)/)?' => 'ConpherenceRoomListController',
-          'new/'                            => 'ConpherenceNewRoomController',
-        ),
+        'room/new/'                => 'ConpherenceNewRoomController',
+        'search/(?:query/(?P<queryKey>[^/]+)/)?'
+           => 'ConpherenceRoomListController',
         'panel/'                   => 'ConpherenceNotificationPanelController',
         'widget/(?P<id>[1-9]\d*)/' => 'ConpherenceWidgetController',
         'update/(?P<id>[1-9]\d*)/' => 'ConpherenceUpdateController',
@@ -64,6 +63,16 @@ final class PhabricatorConpherenceApplication extends PhabricatorApplication {
     return array(
       '/conpherence/.*',
     );
+  }
+
+  public function getMailCommandObjects() {
+
+    // TODO: Conpherence threads don't currently support any commands directly,
+    // so the documentation page we end up generating is empty and funny
+    // looking. Add support here once we support "!add", "!leave", "!topic",
+    // or whatever else.
+
+    return array();
   }
 
 }

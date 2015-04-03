@@ -58,22 +58,17 @@ final class HeraldRuleSearchEngine extends PhabricatorApplicationSearchEngine {
     AphrontFormView $form,
     PhabricatorSavedQuery $saved_query) {
 
-    $phids = $saved_query->getParameter('authorPHIDs', array());
-    $author_handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->requireViewer())
-      ->withPHIDs($phids)
-      ->execute();
-
+    $author_phids = $saved_query->getParameter('authorPHIDs', array());
     $content_type = $saved_query->getParameter('contentType');
     $rule_type = $saved_query->getParameter('ruleType');
 
     $form
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('authors')
           ->setLabel(pht('Authors'))
-          ->setValue($author_handles))
+          ->setValue($author_phids))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setName('contentType')
@@ -191,6 +186,8 @@ final class HeraldRuleSearchEngine extends PhabricatorApplicationSearchEngine {
           pht(
             'Authored by %s',
             $handles[$rule->getAuthorPHID()]->renderLink()));
+      } else if ($rule->isObjectRule()) {
+        $item->addIcon('fa-briefcase', pht('Object Rule'));
       } else {
         $item->addIcon('fa-globe', pht('Global Rule'));
       }

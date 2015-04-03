@@ -124,51 +124,37 @@ final class DifferentialRevisionSearchEngine
     $repository_phids = $saved->getParameter('repositoryPHIDs', array());
     $only_draft = $saved->getParameter('draft', false);
 
-    $all_phids = array_mergev(
-      array(
-        $responsible_phids,
-        $author_phids,
-        $reviewer_phids,
-        $subscriber_phids,
-        $repository_phids,
-      ));
-
-    $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->requireViewer())
-      ->withPHIDs($all_phids)
-      ->execute();
-
     $form
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Responsible Users'))
           ->setName('responsibles')
           ->setDatasource(new PhabricatorPeopleDatasource())
-          ->setValue(array_select_keys($handles, $responsible_phids)))
-      ->appendChild(
+          ->setValue($responsible_phids))
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Authors'))
           ->setName('authors')
           ->setDatasource(new PhabricatorPeopleDatasource())
-          ->setValue(array_select_keys($handles, $author_phids)))
-      ->appendChild(
+          ->setValue($author_phids))
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Reviewers'))
           ->setName('reviewers')
           ->setDatasource(new PhabricatorProjectOrUserDatasource())
-          ->setValue(array_select_keys($handles, $reviewer_phids)))
-      ->appendChild(
+          ->setValue($reviewer_phids))
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Subscribers'))
           ->setName('subscribers')
           ->setDatasource(new PhabricatorMetaMTAMailableDatasource())
-          ->setValue(array_select_keys($handles, $subscriber_phids)))
-      ->appendChild(
+          ->setValue($subscriber_phids))
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Repositories'))
           ->setName('repositories')
           ->setDatasource(new DiffusionRepositoryDatasource())
-          ->setValue(array_select_keys($handles, $repository_phids)))
+          ->setValue($repository_phids))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel(pht('Status'))

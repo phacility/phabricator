@@ -152,7 +152,7 @@ final class PHUIListView extends AphrontTagView {
     return $this->items;
   }
 
-  protected function willRender() {
+  public function willRender() {
     $key_map = array();
     foreach ($this->items as $item) {
       $key = $item->getKey();

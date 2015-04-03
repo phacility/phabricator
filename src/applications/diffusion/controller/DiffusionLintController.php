@@ -24,7 +24,6 @@ final class DiffusionLintController extends DiffusionController {
       } else {
         $owners = array(head($request->getArr('owner')));
       }
-      $owner_handles = $this->loadViewerHandles($owners);
     }
 
     $codes = $this->loadLintCodes($owners);
@@ -108,13 +107,13 @@ final class DiffusionLintController extends DiffusionController {
       $form = id(new AphrontFormView())
         ->setUser($user)
         ->setMethod('GET')
-        ->appendChild(
+        ->appendControl(
           id(new AphrontFormTokenizerControl())
             ->setDatasource(new PhabricatorPeopleDatasource())
             ->setLimit(1)
             ->setName('owner')
             ->setLabel(pht('Owner'))
-            ->setValue($owner_handles))
+            ->setValue($owners))
         ->appendChild(
           id(new AphrontFormSubmitControl())
             ->setValue('Filter'));

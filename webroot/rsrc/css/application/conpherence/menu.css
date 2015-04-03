@@ -43,8 +43,29 @@
   border-right: 1px solid {$hovergrey}
 }
 
+.conpherence-menu-pane .phui-list-item-view.hidden {
+  display: none;
+}
+
 .conpherence-menu-pane.phabricator-side-menu .phui-list-item-type-label {
-  padding: 8px 0 6px 8px;
+  padding: 10px 0 9px 8px;
+}
+
+.conpherence-menu-pane .conpherence-room-list-header
+.phui-icon-view {
+  font-weight: bold;
+  float: right;
+  text-transform: none;
+  margin: 0px 8px 0px 0px;
+}
+
+.conpherence-menu-pane .conpherence-room-list-header
+.phui-icon-view:hover {
+  color: {$sky};
+}
+
+.conpherence-menu-pane .conpherence-message-list-header {
+  margin-top: 12px;
 }
 
 .device-desktop .conpherence-layout .conpherence-menu-pane {
@@ -93,7 +114,7 @@
 
 .conpherence-menu .conpherence-menu-item-view {
   display: block;
-  height: 38px;
+  height: 36px;
   overflow: hidden;
   position: relative;
   text-decoration: none;
@@ -103,6 +124,10 @@
 .conpherence-menu .conpherence-selected {
   background: {$hovergrey};
   border-left: 3px solid {$sky};
+}
+
+.conpherence-menu .phui-list-item-type-link .phui-list-item-href {
+  padding: 8px 0 8px 8px;
 }
 
 .device-desktop .conpherence-menu
@@ -119,7 +144,7 @@
 }
 
 .conpherence-menu .conpherence-menu-item-view .conpherence-menu-item-image {
-  top: 5px;
+  top: 4px;
   left: 6px;
   display: block;
   position: absolute;
@@ -131,7 +156,7 @@
 
 .conpherence-menu .conpherence-menu-item-view .conpherence-menu-item-title {
   display: block;
-  margin-top: 10px;
+  margin-top: 9px;
   margin-left: 40px;
   text-align: left;
   font-weight: bold;
@@ -151,7 +176,7 @@
 .conpherence-menu-item-unread-count {
   position: absolute;
   right: 4px;
-  top: 11px;
+  top: 10px;
   background: {$blue};
   border-radius: 2px;
   color: #fff;

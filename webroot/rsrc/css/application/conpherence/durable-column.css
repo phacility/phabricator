@@ -75,18 +75,30 @@
 
 .conpherence-durable-column-icon-bar {
   height: 38px;
-  padding: 4px 8px;
+  padding: 4px;
   background-color: {$lightgreybackground};
 }
 
 .conpherence-durable-column-icon-bar .conpherence-durable-column-thread-icon {
   float: left;
   display: block;
-  width: 34px;
   height: 34px;
-  margin: 0 4px 0 0;
+  width: 34px;
   border: 2px solid transparent;
   border-radius: 3px;
+  margin: 0 4px 0 0;
+}
+
+.conpherence-durable-column-icon-bar .conpherence-durable-column-search-button {
+  margin: 4px 0px 0px 0px;
+}
+.conpherence-durable-column-icon-bar .phui-button-bar {
+}
+.conpherence-durable-column-icon-bar .phui-button-bar a.button.has-icon {
+  height: 21px;
+}
+.conpherence-durable-column-icon-bar .phui-button-bar .button .phui-icon-view {
+  top: 8px;
 }
 
 .conpherence-durable-column-icon-bar

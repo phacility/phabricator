@@ -62,11 +62,6 @@ final class PhamePostListController extends PhameController {
 
     $posts = $query->executeWithCursorPager($pager);
 
-    $handle_phids = array_merge(
-      mpull($posts, 'getBloggerPHID'),
-      mpull($posts, 'getBlogPHID'));
-    $this->loadHandles($handle_phids);
-
     require_celerity_resource('phame-css');
     $post_list = $this->renderPostList($posts, $user, $nodata);
     $post_list = id(new PHUIBoxView())

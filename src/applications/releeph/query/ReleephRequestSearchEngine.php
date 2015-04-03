@@ -67,11 +67,7 @@ final class ReleephRequestSearchEngine
     AphrontFormView $form,
     PhabricatorSavedQuery $saved_query) {
 
-    $phids = $saved_query->getParameter('requestorPHIDs', array());
-    $requestor_handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->requireViewer())
-      ->withPHIDs($phids)
-      ->execute();
+    $requestor_phids = $saved_query->getParameter('requestorPHIDs', array());
 
     $form
       ->appendChild(
@@ -86,12 +82,12 @@ final class ReleephRequestSearchEngine
           ->setLabel(pht('Severity'))
           ->setValue($saved_query->getParameter('severity'))
           ->setOptions($this->getSeverityOptions()))
-      ->appendChild(
+      ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
           ->setName('requestors')
           ->setLabel(pht('Requestors'))
-          ->setValue($requestor_handles));
+          ->setValue($requestor_phids));
   }
 
   protected function getURI($path) {

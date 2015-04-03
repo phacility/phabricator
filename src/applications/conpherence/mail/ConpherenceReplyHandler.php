@@ -27,14 +27,6 @@ final class ConpherenceReplyHandler extends PhabricatorMailReplyHandler {
     return $this->getDefaultPublicReplyHandlerEmailAddress('Z');
   }
 
-  public function getReplyHandlerInstructions() {
-    if ($this->supportsReplies()) {
-      return pht('Reply to comment and attach files.');
-    } else {
-      return null;
-    }
-  }
-
   protected function receiveEmail(PhabricatorMetaMTAReceivedMail $mail) {
     $conpherence = $this->getMailReceiver();
     $user = $this->getActor();
@@ -66,11 +58,7 @@ final class ConpherenceReplyHandler extends PhabricatorMailReplyHandler {
       ->setParentMessageID($mail->getMessageID());
 
     $body = $mail->getCleanTextBody();
-    $file_phids = $mail->getAttachments();
-    $body = $this->enhanceBodyWithAttachments(
-      $body,
-      $file_phids,
-      '{F%d}');
+    $body = $this->enhanceBodyWithAttachments($body, $mail->getAttachments());
 
     $xactions = array();
     if ($this->getMailAddedParticipantPHIDs()) {

@@ -90,11 +90,6 @@ final class PhragmentSnapshotViewController extends PhragmentController {
 
     $viewer = $this->getRequest()->getUser();
 
-    $phids = array();
-    $phids[] = $snapshot->getPrimaryFragmentPHID();
-
-    $this->loadHandles($phids);
-
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('"%s" Snapshot', $snapshot->getName()))
       ->setPolicyObject($snapshot)
@@ -146,7 +141,7 @@ final class PhragmentSnapshotViewController extends PhragmentController {
       $snapshot->getName());
     $properties->addProperty(
       pht('Fragment'),
-      $this->renderHandlesForPHIDs(array($snapshot->getPrimaryFragmentPHID())));
+      $viewer->renderHandle($snapshot->getPrimaryFragmentPHID()));
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
