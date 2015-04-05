@@ -376,7 +376,8 @@ final class PhrictionDocumentController
       $child_dict = array(
         'slug' => $child->getSlug(),
         'depth' => $child->getDepth(),
-        'title' => $child->getContent()->getTitle(),);
+        'title' => $child->getContent()->getTitle(),
+      );
       if ($child->getDepth() == $d_child) {
         $children_dicts[] = $child_dict;
         continue;

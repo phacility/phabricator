@@ -305,7 +305,8 @@ final class AphrontTableView extends AphrontView {
     $html = phutil_tag(
       'table',
       array(
-        'class' => implode(' ', $classes),),
+        'class' => implode(' ', $classes),
+      ),
       $table);
     return phutil_tag_div('aphront-table-wrap', $html);
   }

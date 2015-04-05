@@ -132,7 +132,8 @@ final class PhrictionTransactionEditor
           'id' => $document->getID(),
           'phid' => $document->getPHID(),
           'content' => $document->getContent()->getContent(),
-          'title' => $document->getContent()->getTitle(),);
+          'title' => $document->getContent()->getTitle(),
+        );
         return $dict;
       case PhrictionTransaction::TYPE_MOVE_AWAY:
         $document = $xaction->getNewValue();
@@ -140,7 +141,8 @@ final class PhrictionTransactionEditor
           'id' => $document->getID(),
           'phid' => $document->getPHID(),
           'content' => $document->getContent()->getContent(),
-          'title' => $document->getContent()->getTitle(),);
+          'title' => $document->getContent()->getTitle(),
+        );
         return $dict;
     }
   }

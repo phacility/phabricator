@@ -435,7 +435,8 @@ final class PHUITimelineEventView extends AphrontView {
           'class' => 'phui-timeline-event-view '.
                      'phui-timeline-spacer '.
                      'phui-timeline-spacer-bold',
-        '',));
+          '',
+        ));
     }
 
     return array(
@@ -453,7 +454,8 @@ final class PHUITimelineEventView extends AphrontView {
             'class' => implode(' ', $classes),
           ),
           $content)),
-      $major_event,);
+      $major_event,
+    );
   }
 
   private function renderExtra(array $events) {

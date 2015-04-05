@@ -212,7 +212,8 @@ abstract class AphrontFormControl extends AphrontView {
         ),
         array(
           $this->getLabel(),
-          $error,));
+          $error,
+        ));
     } else {
       $label = null;
       $custom_class .= ' aphront-form-control-nolabel';

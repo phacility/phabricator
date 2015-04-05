@@ -53,11 +53,13 @@ final class DifferentialCreateRawDiffConduitAPIMethod
       'authorPHID' => $viewer->getPHID(),
       'repositoryPHID' => $repository_phid,
       'lintStatus' => DifferentialLintStatus::LINT_SKIP,
-      'unitStatus' => DifferentialUnitStatus::UNIT_SKIP,);
+      'unitStatus' => DifferentialUnitStatus::UNIT_SKIP,
+    );
 
     $xactions = array(id(new DifferentialTransaction())
       ->setTransactionType(DifferentialDiffTransaction::TYPE_DIFF_CREATE)
-      ->setNewValue($diff_data_dict),);
+      ->setNewValue($diff_data_dict),
+    );
 
     if ($request->getValue('viewPolicy')) {
       $xactions[] = id(new DifferentialTransaction())

@@ -81,7 +81,8 @@ final class PhabricatorTransactionView extends AphrontView {
       array(
         $image,
         phutil_tag_div('phabricator-transaction-detail grouped',
-          array($header, $content)),));
+          array($header, $content)),
+      ));
 
   }
 
@@ -129,7 +130,8 @@ final class PhabricatorTransactionView extends AphrontView {
     return phutil_tag(
       'span',
       array(
-        'class' => 'phabricator-transaction-info',),
+        'class' => 'phabricator-transaction-info',
+      ),
       $info);
   }
 

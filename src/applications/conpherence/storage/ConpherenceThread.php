@@ -60,7 +60,8 @@ final class ConpherenceThread extends ConpherenceDAO
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_room' => array(
-          'columns' => array('isRoom', 'dateModified'),),
+          'columns' => array('isRoom', 'dateModified'),
+        ),
         'key_phid' => null,
         'phid' => array(
           'columns' => array('phid'),

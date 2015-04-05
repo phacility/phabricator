@@ -581,7 +581,8 @@ final class PHUIObjectItemView extends AphrontTagView {
         ),
         array(
           $icons,
-          $bylines,));
+          $bylines,
+        ));
     }
 
     $table = phutil_tag(
