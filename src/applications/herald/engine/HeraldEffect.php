@@ -8,7 +8,6 @@ final class HeraldEffect {
 
   private $ruleID;
   private $rulePHID;
-  private $effector;
 
   private $reason;
 
@@ -55,15 +54,6 @@ final class HeraldEffect {
 
   public function getRulePHID() {
     return $this->rulePHID;
-  }
-
-  public function setEffector($effector) {
-    $this->effector = $effector;
-    return $this;
-  }
-
-  public function getEffector() {
-    return $this->effector;
   }
 
   public function setReason($reason) {

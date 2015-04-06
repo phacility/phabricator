@@ -4,12 +4,8 @@ final class HeraldApplyTranscript extends Phobject {
 
   private $action;
   private $target;
-
   private $ruleID;
-  private $effector;
-
   private $reason;
-
   private $applied;
   private $appliedReason;
 
@@ -21,7 +17,6 @@ final class HeraldApplyTranscript extends Phobject {
     $this->setAction($effect->getAction());
     $this->setTarget($effect->getTarget());
     $this->setRuleID($effect->getRuleID());
-    $this->setEffector($effect->getEffector());
     $this->setReason($effect->getReason());
     $this->setApplied($applied);
     $this->setAppliedReason($reason);
@@ -52,15 +47,6 @@ final class HeraldApplyTranscript extends Phobject {
 
   public function getRuleID() {
     return $this->ruleID;
-  }
-
-  public function setEffector($effector) {
-    $this->effector = $effector;
-    return $this;
-  }
-
-  public function getEffector() {
-    return $this->effector;
   }
 
   public function setReason($reason) {
