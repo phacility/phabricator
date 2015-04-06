@@ -587,9 +587,9 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
         break;
       case ConpherenceTransactionType::TYPE_PARTICIPANTS:
         foreach ($xactions as $xaction) {
-          $phids = $this->getPHIDTransactionNewValue(
-            $xaction,
-            nonempty($object->getParticipantPHIDs(), array()));
+          $new_phids = $this->getPHIDTransactionNewValue($xaction, array());
+          $old_phids = nonempty($object->getParticipantPHIDs(), array());
+          $phids = array_diff($new_phids, $old_phids);
 
           if (!$phids) {
             continue;
