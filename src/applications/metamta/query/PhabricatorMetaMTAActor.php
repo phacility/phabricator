@@ -16,6 +16,7 @@ final class PhabricatorMetaMTAActor {
   const REASON_MAILTAGS = 'mailtags';
   const REASON_BOT = 'bot';
   const REASON_FORCE = 'force';
+  const REASON_FORCE_HERALD = 'force-herald';
 
   private $phid;
   private $emailAddress;
@@ -108,6 +109,9 @@ final class PhabricatorMetaMTAActor {
         'Mail which uses forced delivery is usually related to account '.
         'management or authentication. For example, password reset email '.
         'ignores mail preferences.'),
+      self::REASON_FORCE_HERALD => pht(
+        'This recipient was added by a "Send me an Email" rule in Herald, '.
+        'which overrides some delivery settings.'),
     );
 
     return idx($descriptions, $reason, pht('Unknown Reason ("%s")', $reason));

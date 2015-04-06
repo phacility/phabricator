@@ -110,9 +110,14 @@ abstract class HeraldAdapter {
   private $customActions = null;
   private $queuedTransactions = array();
   private $emailPHIDs = array();
+  private $forcedEmailPHIDs = array();
 
   public function getEmailPHIDs() {
     return array_values($this->emailPHIDs);
+  }
+
+  public function getForcedEmailPHIDs() {
+    return array_values($this->forcedEmailPHIDs);
   }
 
   public function getCustomActions() {
@@ -1038,6 +1043,14 @@ abstract class HeraldAdapter {
 
     foreach ($effect->getTarget() as $phid) {
       $this->emailPHIDs[$phid] = $phid;
+
+      // If this is a personal rule, we'll force delivery of a real email. This
+      // effect is stronger than notification preferences, so you get an actual
+      // email even if your preferences are set to "Notify" or "Ignore".
+      $rule = $effect->getRule();
+      if ($rule->isPersonalRule()) {
+        $this->forcedEmailPHIDs[$phid] = $phid;
+      }
     }
 
     return new HeraldApplyTranscript(
