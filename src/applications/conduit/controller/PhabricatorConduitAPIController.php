@@ -283,7 +283,8 @@ final class PhabricatorConduitAPIController
             pht(
               'This request originates from outside of the Phabricator '.
               'cluster address range. Requests signed with trusted '.
-              'device keys must originate from within the cluster.'),);
+              'device keys must originate from within the cluster.'),
+          );
         }
 
         $user = PhabricatorUser::getOmnipotentUser();
@@ -384,7 +385,8 @@ final class PhabricatorConduitAPIController
             pht(
               'This request originates from outside of the Phabricator '.
               'cluster address range. Requests signed with cluster API '.
-              'tokens must originate from within the cluster.'),);
+              'tokens must originate from within the cluster.'),
+          );
         }
 
         // Flag this as an intracluster request.

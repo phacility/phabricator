@@ -265,6 +265,10 @@ final class HeraldRule extends HeraldDAO
     return sprintf('~%d%010d', $type_order, $this->getID());
   }
 
+  public function getMonogram() {
+    return 'H'.$this->getID();
+  }
+
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 

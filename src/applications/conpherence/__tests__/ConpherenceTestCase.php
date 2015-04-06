@@ -9,7 +9,8 @@ abstract class ConpherenceTestCase extends PhabricatorTestCase {
 
     $xactions = array(id(new ConpherenceTransaction())
       ->setTransactionType(ConpherenceTransactionType::TYPE_PARTICIPANTS)
-      ->setNewValue(array('+' => $participant_phids)),);
+      ->setNewValue(array('+' => $participant_phids)),
+    );
     $editor = id(new ConpherenceEditor())
       ->setActor($actor)
       ->setContentSource(PhabricatorContentSource::newConsoleSource())
@@ -24,7 +25,8 @@ abstract class ConpherenceTestCase extends PhabricatorTestCase {
 
     $xactions = array(id(new ConpherenceTransaction())
       ->setTransactionType(ConpherenceTransactionType::TYPE_PARTICIPANTS)
-      ->setNewValue(array('-' => $participant_phids)),);
+      ->setNewValue(array('-' => $participant_phids)),
+    );
     $editor = id(new ConpherenceEditor())
       ->setActor($actor)
       ->setContentSource(PhabricatorContentSource::newConsoleSource())

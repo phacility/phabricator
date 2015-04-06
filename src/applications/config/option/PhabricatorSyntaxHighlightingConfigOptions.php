@@ -137,28 +137,6 @@ final class PhabricatorSyntaxHighlightingConfigOptions
         pht(
           "Treat all '*.x.bak' file as '.x'. NOTE: We map to capturing group ".
           "1 by specifying the mapping as '1'")),
-      $this->newOption(
-        'style.monospace',
-        'string',
-        null)
-        ->setLocked(true)
-        ->setSummary(
-          pht('Default monospace font.'))
-        ->setDescription(
-          pht(
-            "Set the default monospaced font style for users who haven't set ".
-            "a custom style.")),
-      $this->newOption(
-        'style.monospace.windows',
-        'string',
-        null)
-        ->setLocked(true)
-        ->setSummary(
-          pht('Default monospace font for clients on Windows.'))
-        ->setDescription(
-          pht(
-            "Set the default monospaced font style for users who haven't set ".
-            "a custom style and are using Windows.")),
     );
   }
 

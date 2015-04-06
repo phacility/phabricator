@@ -163,11 +163,13 @@ final class DifferentialCreateDiffConduitAPIMethod
         $request->getValue('sourceControlBaseRevision'),
       'arcanistProjectPHID' => $project_phid,
       'lintStatus' => $lint_status,
-      'unitStatus' => $unit_status,);
+      'unitStatus' => $unit_status,
+    );
 
     $xactions = array(id(new DifferentialTransaction())
       ->setTransactionType(DifferentialDiffTransaction::TYPE_DIFF_CREATE)
-      ->setNewValue($diff_data_dict),);
+      ->setNewValue($diff_data_dict),
+    );
 
     id(new DifferentialDiffEditor())
       ->setActor($viewer)

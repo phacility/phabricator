@@ -174,7 +174,8 @@ final class PHUIDocumentView extends AphrontTagView {
         'map' => array(
           $this->actionListID => 'phabricator-action-list-toggle',
           $icon_id => 'phuix-dropdown-open',
-        ),);
+        ),
+      );
       $mobile_menu = id(new PHUIButtonView())
         ->setTag('a')
         ->setText(pht('Actions'))

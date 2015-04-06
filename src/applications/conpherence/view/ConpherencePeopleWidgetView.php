@@ -9,12 +9,12 @@ final class ConpherencePeopleWidgetView extends ConpherenceWidgetView {
     $conpherence = $this->getConpherence();
     $participants = $conpherence->getParticipants();
     $handles = $conpherence->getHandles();
+    $handles = msort($handles, 'getName');
+    $head_handles = array_select_keys($handles, array($user->getPHID()));
+    $handles = $head_handles + $handles;
 
     $body = array();
-    // future proof by using participants to iterate through handles;
-    // we may have non-people handles sooner or later
-    foreach ($participants as $user_phid => $participant) {
-      $handle = $handles[$user_phid];
+    foreach ($handles as $user_phid => $handle) {
       $remove_html = '';
       if ($user_phid == $user->getPHID()) {
         $icon = id(new PHUIIconView())

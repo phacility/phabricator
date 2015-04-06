@@ -145,12 +145,7 @@ final class DifferentialDiffEditor
           }
 
           if ($blocking_effect) {
-            $rule = idx($rules, $effect->getRuleID());
-            if ($rule && strlen($rule->getName())) {
-              $rule_name = $rule->getName();
-            } else {
-              $rule_name = pht('Unnamed Herald Rule');
-            }
+            $rule = $blocking_effect->getRule();
 
             $message = $effect->getTarget();
             if (!strlen($message)) {
@@ -164,8 +159,8 @@ final class DifferentialDiffEditor
                 "Creation of this diff was rejected by Herald rule %s.\n".
                 "  Rule: %s\n".
                 "Reason: %s",
-                'H'.$effect->getRuleID(),
-                $rule_name,
+                $rule->getMonogram(),
+                $rule->getName(),
                 $message));
           }
           break;

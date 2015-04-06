@@ -82,7 +82,7 @@ final class PhabricatorInternationalizationManagementExtractWorkflow
 
     $out = array();
     $out[] = '<?php';
-    $out[] = '// @nolint';
+    $out[] = '// @no'.'lint';
     $out[] = 'return array(';
     foreach ($results as $string => $locations) {
       foreach ($locations as $location) {

@@ -368,16 +368,14 @@ final class HeraldEngine {
 
     $effects = array();
     foreach ($rule->getActions() as $action) {
-      $effect = new HeraldEffect();
-      $effect->setObjectPHID($object->getPHID());
-      $effect->setAction($action->getAction());
-      $effect->setTarget($action->getTarget());
-
-      $effect->setRuleID($rule->getID());
-      $effect->setRulePHID($rule->getPHID());
+      $effect = id(new HeraldEffect())
+        ->setObjectPHID($object->getPHID())
+        ->setAction($action->getAction())
+        ->setTarget($action->getTarget())
+        ->setRule($rule);
 
       $name = $rule->getName();
-      $id   = $rule->getID();
+      $id = $rule->getID();
       $effect->setReason(
         pht(
           'Conditions were met for %s',

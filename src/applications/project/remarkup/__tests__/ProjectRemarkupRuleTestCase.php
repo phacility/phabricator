@@ -81,6 +81,36 @@ final class ProjectRemarkupRuleTestCase extends PhabricatorTestCase {
         ),
       ),
 
+      'Is this #urgent?' => array(
+        'embed' => array(),
+        'ref' => array(
+          array(
+            'offset' => 9,
+            'id' => 'urgent',
+          ),
+        ),
+      ),
+
+      'This is "#urgent".' => array(
+        'embed' => array(),
+        'ref' => array(
+          array(
+            'offset' => 10,
+            'id' => 'urgent',
+          ),
+        ),
+      ),
+
+      'This is \'#urgent\'.' => array(
+        'embed' => array(),
+        'ref' => array(
+          array(
+            'offset' => 10,
+            'id' => 'urgent',
+          ),
+        ),
+      ),
+
     );
 
     foreach ($cases as $input => $expect) {

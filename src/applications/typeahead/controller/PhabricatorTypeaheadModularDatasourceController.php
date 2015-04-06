@@ -3,17 +3,11 @@
 final class PhabricatorTypeaheadModularDatasourceController
   extends PhabricatorTypeaheadDatasourceController {
 
-  private $class;
-
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->class = idx($data, 'class');
-  }
-
-  public function processRequest() {
+  public function handleRequest(AphrontRequest $request) {
     $request = $this->getRequest();
     $viewer = $request->getUser();
     $query = $request->getStr('q');
@@ -22,14 +16,21 @@ final class PhabricatorTypeaheadModularDatasourceController
     $raw_query = nonempty($request->getStr('raw'), $query);
 
     // This makes form submission easier in the debug view.
-    $this->class = nonempty($request->getStr('class'), $this->class);
+    $class = nonempty($request->getURIData('class'), $request->getStr('class'));
 
     $sources = id(new PhutilSymbolLoader())
       ->setAncestorClass('PhabricatorTypeaheadDatasource')
       ->loadObjects();
+    if (isset($sources[$class])) {
+      $source = $sources[$class];
+      if ($source->getDatasourceApplicationClass()) {
+        if (!PhabricatorApplication::isClassInstalledForViewer(
+            $source->getDatasourceApplicationClass(),
+            $viewer)) {
+          return id(new Aphront404Response());
+        }
+      }
 
-    if (isset($sources[$this->class])) {
-      $source = $sources[$this->class];
       $source->setParameters($request->getRequestData());
 
       $composite = new PhabricatorTypeaheadRuntimeCompositeDatasource();
@@ -54,6 +55,18 @@ final class PhabricatorTypeaheadModularDatasourceController
     // If there's a non-Ajax request to this endpoint, show results in a tabular
     // format to make it easier to debug typeahead output.
 
+    foreach ($sources as $key => $source) {
+      // This can happen with composite sources like user or project, as well
+      // generic ones like NoOwner
+      if (!$source->getDatasourceApplicationClass()) {
+        continue;
+      }
+      if (!PhabricatorApplication::isClassInstalledForViewer(
+        $source->getDatasourceApplicationClass(),
+        $viewer)) {
+        unset($sources[$key]);
+      }
+    }
     $options = array_fuse(array_keys($sources));
     asort($options);
 
@@ -64,7 +77,7 @@ final class PhabricatorTypeaheadModularDatasourceController
         id(new AphrontFormSelectControl())
           ->setLabel(pht('Source Class'))
           ->setName('class')
-          ->setValue($this->class)
+          ->setValue($class)
           ->setOptions($options))
       ->appendChild(
         id(new AphrontFormTextControl())
@@ -101,7 +114,7 @@ final class PhabricatorTypeaheadModularDatasourceController
       ));
 
     $result_box = id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Token Results (%s)', $this->class))
+      ->setHeaderText(pht('Token Results (%s)', $class))
       ->appendChild($table);
 
     return $this->buildApplicationPage(

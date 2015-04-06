@@ -49,7 +49,8 @@ final class PhabricatorApplicationTransactionShowOlderController
 
     return id(new AphrontAjaxResponse())
       ->setContent(array(
-        'timeline' => hsprintf('%s', $events),));
+        'timeline' => hsprintf('%s', $events),
+      ));
   }
 
 }

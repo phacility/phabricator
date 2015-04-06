@@ -337,20 +337,14 @@ final class DiffusionCommitHookEngine extends Phobject {
     }
 
     if ($blocking_effect) {
+      $rule = $blocking_effect->getRule();
+
       $this->rejectCode = PhabricatorRepositoryPushLog::REJECT_HERALD;
-      $this->rejectDetails = $blocking_effect->getRulePHID();
+      $this->rejectDetails = $rule->getPHID();
 
       $message = $blocking_effect->getTarget();
       if (!strlen($message)) {
         $message = pht('(None.)');
-      }
-
-      $rules = mpull($rules, null, 'getID');
-      $rule = idx($rules, $effect->getRuleID());
-      if ($rule && strlen($rule->getName())) {
-        $rule_name = $rule->getName();
-      } else {
-        $rule_name = pht('Unnamed Herald Rule');
       }
 
       $blocked_ref_name = coalesce(
@@ -364,9 +358,9 @@ final class DiffusionCommitHookEngine extends Phobject {
           "Change: %s\n".
           "  Rule: %s\n".
           "Reason: %s",
-          'H'.$blocking_effect->getRuleID(),
+          $rule->getMonogram(),
           $blocked_name,
-          $rule_name,
+          $rule->getName(),
           $message));
     }
   }
