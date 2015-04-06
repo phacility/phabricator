@@ -127,9 +127,10 @@ final class PhabricatorMailManagementShowOutboundWorkflow
           $info[] = '  '.coalesce($actor->getName(), $actor->getPHID());
         } else {
           $info[] = '! '.coalesce($actor->getName(), $actor->getPHID());
-          foreach ($actor->getUndeliverableReasons() as $reason) {
-            $info[] = '    - '.$reason;
-          }
+        }
+        foreach ($actor->getDeliverabilityReasons() as $reason) {
+          $desc = PhabricatorMetaMTAActor::getReasonDescription($reason);
+          $info[] = '    - '.$desc;
         }
       }
 

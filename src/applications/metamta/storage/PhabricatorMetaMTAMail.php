@@ -852,6 +852,9 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
 
     if ($this->getForceDelivery()) {
       // If we're forcing delivery, skip all the opt-out checks.
+      foreach ($actors as $actor) {
+        $actor->setDeliverable(PhabricatorMetaMTAActor::REASON_FORCE);
+      }
       return $actors;
     }
 
@@ -861,13 +864,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
       if (!$actor) {
         continue;
       }
-      $actor->setUndeliverable(
-        pht(
-          'This message is a response to another email message, and this '.
-          'recipient received the original email message, so we are not '.
-          'sending them this substantially similar message (for example, '.
-          'the sender used "Reply All" instead of "Reply" in response to '.
-          'mail from Phabricator).'));
+      $actor->setUndeliverable(PhabricatorMetaMTAActor::REASON_RESPONSE);
     }
 
     // Exclude the actor if their preferences are set.
@@ -885,12 +882,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
           ->loadPreferences()
           ->getPreference($pref_key);
         if ($exclude_self) {
-          $from_actor->setUndeliverable(
-            pht(
-              'This recipient is the user whose actions caused delivery of '.
-              'this message, but they have set preferences so they do not '.
-              'receive mail about their own actions (Settings > Email '.
-              'Preferences > Self Actions).'));
+          $from_actor->setUndeliverable(PhabricatorMetaMTAActor::REASON_SELF);
         }
       }
     }
@@ -907,9 +899,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
         false);
       if ($exclude) {
         $actors[$phid]->setUndeliverable(
-          pht(
-            'This recipient has disabled all email notifications '.
-            '(Settings > Email Preferences > Email Notifications).'));
+          PhabricatorMetaMTAActor::REASON_MAIL_DISABLED);
       }
     }
 
@@ -937,10 +927,7 @@ final class PhabricatorMetaMTAMail extends PhabricatorMetaMTADAO {
 
         if (!$send) {
           $actors[$phid]->setUndeliverable(
-            pht(
-              'This mail has tags which control which users receive it, and '.
-              'this recipient has not elected to receive mail with any of '.
-              'the tags on this message (Settings > Email Preferences).'));
+            PhabricatorMetaMTAActor::REASON_MAILTAGS);
         }
       }
     }
