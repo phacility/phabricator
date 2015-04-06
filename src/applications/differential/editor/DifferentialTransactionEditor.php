@@ -1731,8 +1731,7 @@ final class DifferentialTransactionEditor
     }
 
     // Save extra email PHIDs for later.
-    $email_phids = $adapter->getEmailPHIDsAddedByHerald();
-    $this->heraldEmailPHIDs = array_keys($email_phids);
+    $this->heraldEmailPHIDs = $adapter->getEmailPHIDs();
 
     // Apply build plans.
     HarbormasterBuildable::applyBuildPlans(

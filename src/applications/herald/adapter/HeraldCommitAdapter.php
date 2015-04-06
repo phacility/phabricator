@@ -13,7 +13,6 @@ final class HeraldCommitAdapter extends HeraldAdapter {
   protected $commitData;
   private $commitDiff;
 
-  protected $emailPHIDs = array();
   protected $addCCPHIDs = array();
   protected $auditMap = array();
   protected $buildPlans = array();
@@ -215,10 +214,6 @@ final class HeraldCommitAdapter extends HeraldAdapter {
 
   public function getPHID() {
     return $this->commit->getPHID();
-  }
-
-  public function getEmailPHIDs() {
-    return array_keys($this->emailPHIDs);
   }
 
   public function getAddCCMap() {
@@ -499,13 +494,7 @@ final class HeraldCommitAdapter extends HeraldAdapter {
             pht('Great success at doing nothing.'));
           break;
         case self::ACTION_EMAIL:
-          foreach ($effect->getTarget() as $phid) {
-            $this->emailPHIDs[$phid] = true;
-          }
-          $result[] = new HeraldApplyTranscript(
-            $effect,
-            true,
-            pht('Added address to email targets.'));
+          $result[] = $this->applyEmailEffect($effect);
           break;
         case self::ACTION_ADD_CC:
           foreach ($effect->getTarget() as $phid) {

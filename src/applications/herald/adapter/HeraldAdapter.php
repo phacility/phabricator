@@ -109,6 +109,11 @@ abstract class HeraldAdapter {
   private $customFields = false;
   private $customActions = null;
   private $queuedTransactions = array();
+  private $emailPHIDs = array();
+
+  public function getEmailPHIDs() {
+    return array_values($this->emailPHIDs);
+  }
 
   public function getCustomActions() {
     if ($this->customActions === null) {
@@ -1030,6 +1035,18 @@ abstract class HeraldAdapter {
       $effect,
       true,
       pht('Added flag.'));
+  }
+
+  protected function applyEmailEffect(HeraldEffect $effect) {
+
+    foreach ($effect->getTarget() as $phid) {
+      $this->emailPHIDs[$phid] = $phid;
+    }
+
+    return new HeraldApplyTranscript(
+      $effect,
+      true,
+      pht('Added mailable to mail targets.'));
   }
 
   public static function getAllAdapters() {

@@ -6,11 +6,6 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
   private $ccPHIDs = array();
   private $assignPHID;
   private $projectPHIDs = array();
-  private $emailPHIDs = array();
-
-  public function getEmailPHIDs() {
-    return $this->emailPHIDs;
-  }
 
   public function getAdapterApplicationClass() {
     return 'PhabricatorManiphestApplication';
@@ -178,13 +173,7 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
             pht('Added addresses to cc list.'));
           break;
         case self::ACTION_EMAIL:
-          foreach ($effect->getTarget() as $phid) {
-            $this->emailPHIDs[] = $phid;
-          }
-          $result[] = new HeraldApplyTranscript(
-            $effect,
-            true,
-            pht('Added addresses to email list.'));
+          $result[] = $this->applyEmailEffect($effect);
           break;
         case self::ACTION_FLAG:
           $result[] = parent::applyFlagEffect(
