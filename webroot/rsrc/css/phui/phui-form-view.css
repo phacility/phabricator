@@ -43,6 +43,8 @@
 }
 
 .device-phone .aphront-form-input,
+.device .aphront-form-input select,
+.device .aphront-form-input pre,
 .phui-form-full-width .aphront-form-input {
   margin-left: 0%;
   margin-right: 0%;
