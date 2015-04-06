@@ -16,7 +16,9 @@ final class HeraldApplyTranscript extends Phobject {
 
     $this->setAction($effect->getAction());
     $this->setTarget($effect->getTarget());
-    $this->setRuleID($effect->getRule()->getID());
+    if ($effect->getRule()) {
+      $this->setRuleID($effect->getRule()->getID());
+    }
     $this->setReason($effect->getReason());
     $this->setApplied($applied);
     $this->setAppliedReason($reason);
