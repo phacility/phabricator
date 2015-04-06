@@ -61,7 +61,7 @@ final class DarkConsoleDataController extends PhabricatorController {
 
         // Because cookie names can now be prefixed, wipe out any cookie value
         // with the session cookie name anywhere in its name.
-        $pattern = '#'.preg_quote(PhabricatorCookies::COOKIE_SESSION, '#').'#';
+        $pattern = '('.preg_quote(PhabricatorCookies::COOKIE_SESSION).')';
         foreach ($_COOKIE as $cookie_name => $cookie_value) {
           if (preg_match($pattern, $cookie_name)) {
             $panel = PhutilSafeHTML::applyFunction(
