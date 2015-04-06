@@ -280,17 +280,14 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
 
   protected function getHead() {
-    $monospaced = PhabricatorEnv::getEnvConfig('style.monospace');
-    $monospaced_win = PhabricatorEnv::getEnvConfig('style.monospace.windows');
+    $monospaced = null;
 
     $request = $this->getRequest();
     if ($request) {
       $user = $request->getUser();
       if ($user) {
-        $pref = $user->loadPreferences()->getPreference(
+        $monospaced = $user->loadPreferences()->getPreference(
             PhabricatorUserPreferences::PREFERENCE_MONOSPACED);
-        $monospaced = nonempty($pref, $monospaced);
-        $monospaced_win = nonempty($pref, $monospaced_win);
       }
     }
 
@@ -306,21 +303,10 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
         '</style>', $monospaced);
     }
 
-    $font_css_win = null;
-    if (!empty($monospaced_win)) {
-      $font_css_win = hsprintf(
-        '<style type="text/css">'.
-        '.platform-windows .PhabricatorMonospaced, '.
-        '.platform-windows .phabricator-remarkup '.
-          '.remarkup-code-block .remarkup-code { font: %s !important; }'.
-        '</style>', $monospaced_win);
-    }
-
     return hsprintf(
-      '%s%s%s%s',
+      '%s%s%s',
       parent::getHead(),
       $font_css,
-      $font_css_win,
       $response->renderSingleResource('javelin-magical-init', 'phabricator'));
   }
 

@@ -90,8 +90,6 @@ EXAMPLE;
       ),
       pht('User Guide: Configuring an External Editor'));
 
-    $font_default = PhabricatorEnv::getEnvConfig('style.monospace');
-
     $pref_monospaced_textareas_value = $preferences
       ->getPreference($pref_monospaced_textareas);
     if (!$pref_monospaced_textareas_value) {
@@ -139,12 +137,8 @@ EXAMPLE;
         id(new AphrontFormTextControl())
         ->setLabel(pht('Monospaced Font'))
         ->setName($pref_monospaced)
-        // Check plz
-        ->setCaption(hsprintf(
-          '%s<br />(%s: %s)',
-          pht('Overrides default fonts in tools like Differential.'),
-          pht('Default'),
-          $font_default))
+        ->setCaption(
+          pht('Overrides default fonts in tools like Differential.'))
         ->setValue($preferences->getPreference($pref_monospaced)))
       ->appendChild(
         id(new AphrontFormMarkupControl())
