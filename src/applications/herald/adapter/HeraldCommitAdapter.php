@@ -501,7 +501,7 @@ final class HeraldCommitAdapter extends HeraldAdapter {
             if (empty($this->addCCPHIDs[$phid])) {
               $this->addCCPHIDs[$phid] = array();
             }
-            $this->addCCPHIDs[$phid][] = $effect->getRuleID();
+            $this->addCCPHIDs[$phid][] = $effect->getRule()->getID();
           }
           $result[] = new HeraldApplyTranscript(
             $effect,
@@ -513,7 +513,7 @@ final class HeraldCommitAdapter extends HeraldAdapter {
             if (empty($this->auditMap[$phid])) {
               $this->auditMap[$phid] = array();
             }
-            $this->auditMap[$phid][] = $effect->getRuleID();
+            $this->auditMap[$phid][] = $effect->getRule()->getID();
           }
           $result[] = new HeraldApplyTranscript(
             $effect,

@@ -5,10 +5,7 @@ final class HeraldEffect {
   private $objectPHID;
   private $action;
   private $target;
-
-  private $ruleID;
-  private $rulePHID;
-
+  private $rule;
   private $reason;
 
   public function setObjectPHID($object_phid) {
@@ -38,22 +35,13 @@ final class HeraldEffect {
     return $this->target;
   }
 
-  public function setRuleID($rule_id) {
-    $this->ruleID = $rule_id;
+  public function setRule(HeraldRule $rule) {
+    $this->rule = $rule;
     return $this;
   }
 
-  public function getRuleID() {
-    return $this->ruleID;
-  }
-
-  public function setRulePHID($rule_phid) {
-    $this->rulePHID = $rule_phid;
-    return $this;
-  }
-
-  public function getRulePHID() {
-    return $this->rulePHID;
+  public function getRule() {
+    return $this->rule;
   }
 
   public function setReason($reason) {

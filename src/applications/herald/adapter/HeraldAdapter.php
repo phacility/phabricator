@@ -999,11 +999,8 @@ abstract class HeraldAdapter {
   public static function applyFlagEffect(HeraldEffect $effect, $phid) {
     $color = $effect->getTarget();
 
-    // TODO: Silly that we need to load this again here.
-    $rule = id(new HeraldRule())->load($effect->getRuleID());
-    $user = id(new PhabricatorUser())->loadOneWhere(
-      'phid = %s',
-      $rule->getAuthorPHID());
+    $rule = $effect->getRule();
+    $user = $rule->getAuthor();
 
     $flag = PhabricatorFlagQuery::loadUserFlag($user, $phid);
     if ($flag) {
