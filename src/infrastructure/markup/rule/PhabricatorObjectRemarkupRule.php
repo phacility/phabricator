@@ -163,15 +163,15 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
 
   private function getObjectEmbedPattern() {
     $prefix = $this->getObjectNamePrefix();
-    $prefix = preg_quote($prefix, '#');
+    $prefix = preg_quote($prefix);
     $id = $this->getObjectIDPattern();
 
-    return '#\B{'.$prefix.'('.$id.')([,\s](?:[^}\\\\]|\\\\.)*)?}\B#u';
+    return '(\B{'.$prefix.'('.$id.')([,\s](?:[^}\\\\]|\\\\.)*)?}\B)u';
   }
 
   private function getObjectReferencePattern() {
     $prefix = $this->getObjectNamePrefix();
-    $prefix = preg_quote($prefix, '@');
+    $prefix = preg_quote($prefix);
 
     $id = $this->getObjectIDPattern();
 
@@ -192,7 +192,7 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
     // The "\b" allows us to link "(abcdef)" or similar without linking things
     // in the middle of words.
 
-    return '@(?<![#-])'.$boundary.$prefix.'('.$id.')(?:#([-\w\d]+))?(?!\w)@u';
+    return '((?<![#-])'.$boundary.$prefix.'('.$id.')(?:#([-\w\d]+))?(?!\w))u';
   }
 
 
