@@ -52,9 +52,48 @@ final class PhabricatorConfigCacheController
 
     $this->renderCommonProperties($properties, $cache);
 
+    $table = null;
+    if ($cache->getName() !== null) {
+      $total_memory = $cache->getTotalMemory();
+
+      $summary = $cache->getCacheSummary();
+      $summary = isort($summary, 'total');
+      $summary = array_reverse($summary, true);
+
+      $rows = array();
+      foreach ($summary as $key => $info) {
+        $rows[] = array(
+          $key,
+          pht('%s', new PhutilNumber($info['count'])),
+          phutil_format_bytes($info['max']),
+          phutil_format_bytes($info['total']),
+          sprintf('%.1f%%', (100 * ($info['total'] / $total_memory))),
+        );
+      }
+
+      $table = id(new AphrontTableView($rows))
+        ->setHeaders(
+          array(
+            pht('Pattern'),
+            pht('Count'),
+            pht('Largest'),
+            pht('Total'),
+            pht('Usage'),
+          ))
+        ->setColumnClasses(
+          array(
+            'wide',
+            'n',
+            'n',
+            'n',
+            'n',
+          ));
+    }
+
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Data Cache'))
-      ->addPropertyList($properties);
+      ->addPropertyList($properties)
+      ->appendChild($table);
   }
 
   private function renderCommonProperties(
