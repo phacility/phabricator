@@ -21,6 +21,12 @@ final class PhabricatorOpcodeCacheSpec extends PhabricatorCacheSpec {
 
     if (ini_get('apc.enabled')) {
       $spec->setIsEnabled(true);
+
+      $mem = apc_sma_info();
+      $spec->setTotalMemory($mem['num_seg'] * $mem['seg_size']);
+
+      $info = apc_cache_info();
+      $spec->setUsedMemory($info['mem_size']);
     } else {
       $spec->setIsEnabled(false);
       $spec->newIssue(
@@ -41,6 +47,16 @@ final class PhabricatorOpcodeCacheSpec extends PhabricatorCacheSpec {
 
     if (ini_get('opcache.enable')) {
       $spec->setIsEnabled(true);
+
+      $status = opcache_get_status();
+      $memory = $status['memory_usage'];
+
+      $mem_used = $memory['used_memory'];
+      $mem_free = $memory['free_memory'];
+      $mem_junk = $memory['wasted_memory'];
+      $spec->setUsedMemory($mem_used + $mem_junk);
+      $spec->setTotalMemory($mem_used + $mem_junk + $mem_free);
+      $spec->setEntryCount($status['opcache_statistics']['num_cached_keys']);
     } else {
       $spec->setIsEnabled(false);
       $spec->newissue(

@@ -40,10 +40,11 @@ final class PhabricatorAPCSetupCheck extends PhabricatorSetupCheck {
     }
 
     $is_dev = PhabricatorEnv::getEnvConfig('phabricator.developer-mode');
+    $is_apcu = extension_loaded('apcu');
     $is_stat_enabled = ini_get('apc.stat');
 
     $issue_key = null;
-    if ($is_stat_enabled && !$is_dev) {
+    if ($is_stat_enabled && !$is_dev && !$is_apcu) {
       $issue_key = 'extension.apc.stat-enabled';
       $short = pht("'apc.stat' Enabled");
       $long = pht("'apc.stat' Enabled in Production");
@@ -56,7 +57,7 @@ final class PhabricatorAPCSetupCheck extends PhabricatorSetupCheck {
         "updates safer (PHP won't read in the middle of a 'git pull').\n\n".
         "(If you are developing for Phabricator, leave 'apc.stat' enabled but ".
         "enable 'phabricator.developer-mode'.)");
-    } else if (!$is_stat_enabled && $is_dev) {
+    } else if (!$is_stat_enabled && $is_dev && !$is_apcu) {
       $issue_key = 'extension.apc.stat-disabled';
       $short = pht("'apc.stat' Disabled");
       $long = pht("'apc.stat' Disabled in Development");

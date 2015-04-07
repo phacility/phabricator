@@ -21,6 +21,7 @@ final class PhabricatorDataCacheSpec extends PhabricatorCacheSpec {
 
     if (ini_get('apc.enabled')) {
       $spec->setIsEnabled(true);
+      self::getAPCCommonSpec($spec);
     } else {
       $spec->setIsEnabled(false);
       $spec->newIssue(
@@ -41,6 +42,7 @@ final class PhabricatorDataCacheSpec extends PhabricatorCacheSpec {
 
     if (ini_get('apc.enabled')) {
       $spec->setIsEnabled(true);
+      self::getAPCCommonSpec($spec);
     } else {
       $spec->setIsEnabled(false);
       $spec->newissue(
@@ -68,6 +70,15 @@ final class PhabricatorDataCacheSpec extends PhabricatorCacheSpec {
     }
 
     return $spec;
+  }
+
+  private static function getAPCCommonSpec(PhabricatorDataCacheSpec $spec) {
+    $mem = apc_sma_info();
+    $spec->setTotalMemory($mem['num_seg'] * $mem['seg_size']);
+
+    $info = apc_cache_info('user');
+    $spec->setUsedMemory($info['mem_size']);
+    $spec->setEntryCount(count($info['cache_list']));
   }
 
 }

@@ -79,6 +79,32 @@ final class PhabricatorConfigCacheController
     if ($version) {
       $properties->addProperty(pht('Version'), $this->renderInfo($version));
     }
+
+    if ($cache->getName() === null) {
+      return;
+    }
+
+    $mem_total = $cache->getTotalMemory();
+    $mem_used = $cache->getUsedMemory();
+
+    if ($mem_total) {
+      $percent = 100 * ($mem_used / $mem_total);
+
+      $properties->addProperty(
+        pht('Memory Usage'),
+        pht(
+          '%s of %s',
+          phutil_tag('strong', array(), sprintf('%.1f%%', $percent)),
+          phutil_format_bytes($mem_total)));
+    }
+
+    $entry_count = $cache->getEntryCount();
+    if ($entry_count !== null) {
+      $properties->addProperty(
+        pht('Cache Entries'),
+        pht('%s', new PhutilNumber($entry_count)));
+    }
+
   }
 
   private function renderIssues(array $issues) {
