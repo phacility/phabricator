@@ -125,7 +125,8 @@ final class ConpherenceListController extends ConpherenceController {
       ->execute();
 
     return array(
-      'all_participation' => $all_participation,);
+      'all_participation' => $all_participation,
+    );
   }
 
   private function loadConpherenceThreadData($participation) {

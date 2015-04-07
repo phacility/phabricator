@@ -178,7 +178,8 @@ final class ConpherenceThreadSearchEngine
     return array(
       'rooms' => pht('Rooms'),
       'messages' => pht('Messages'),
-      'both' => pht('Both'),);
+      'both' => pht('Both'),
+    );
   }
 
 }

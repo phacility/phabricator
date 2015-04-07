@@ -271,14 +271,6 @@ EODOC
           ))
         ->setSummary(pht('Show email preferences link in email.'))
         ->setDescription($email_preferences_description),
-      $this->newOption('metamta.precedence-bulk', 'bool', false)
-        ->setBoolOptions(
-          array(
-            pht('Add "Precedence: bulk" Header'),
-            pht('No "Precedence: bulk" Header'),
-          ))
-        ->setSummary(pht('Control the "Precedence: bulk" header.'))
-        ->setDescription($bulk_description),
       $this->newOption('metamta.re-prefix', 'bool', false)
         ->setBoolOptions(
           array(

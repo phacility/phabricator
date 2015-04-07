@@ -13,7 +13,6 @@ final class PhrictionTransactionEditor
   private $skipAncestorCheck;
   private $contentVersion;
   private $processContentVersionError = true;
-  private $heraldEmailPHIDs = array();
 
   public function setDescription($description) {
     $this->description = $description;
@@ -132,7 +131,8 @@ final class PhrictionTransactionEditor
           'id' => $document->getID(),
           'phid' => $document->getPHID(),
           'content' => $document->getContent()->getContent(),
-          'title' => $document->getContent()->getTitle(),);
+          'title' => $document->getContent()->getTitle(),
+        );
         return $dict;
       case PhrictionTransaction::TYPE_MOVE_AWAY:
         $document = $xaction->getNewValue();
@@ -140,7 +140,8 @@ final class PhrictionTransactionEditor
           'id' => $document->getID(),
           'phid' => $document->getPHID(),
           'content' => $document->getContent()->getContent(),
-          'title' => $document->getContent()->getTitle(),);
+          'title' => $document->getContent()->getTitle(),
+        );
         return $dict;
     }
   }
@@ -365,16 +366,6 @@ final class PhrictionTransactionEditor
       $object->getContent()->getAuthorPHID(),
       $this->getActingAsPHID(),
     );
-  }
-
-  protected function getMailCC(PhabricatorLiskDAO $object) {
-    $phids = array();
-
-    foreach ($this->heraldEmailPHIDs as $phid) {
-      $phids[] = $phid;
-    }
-
-    return $phids;
   }
 
   public function getMailTagsMap() {
@@ -798,8 +789,6 @@ final class PhrictionTransactionEditor
         ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
         ->setNewValue(array('+' => $value));
     }
-
-    $this->heraldEmailPHIDs = $adapter->getEmailPHIDs();
 
     return $xactions;
   }

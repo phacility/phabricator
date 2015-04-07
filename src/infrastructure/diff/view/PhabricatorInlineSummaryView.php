@@ -39,7 +39,8 @@ final class PhabricatorInlineSummaryView extends AphrontView {
         ),
         array(
           $icon,
-          $group,));
+          $group,
+        ));
       $rows[] = phutil_tag('tr', array(), $header);
 
       foreach ($items as $item) {

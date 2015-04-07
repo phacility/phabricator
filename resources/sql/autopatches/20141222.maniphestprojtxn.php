@@ -6,7 +6,8 @@ $conn_w = $table->establishConnection('w');
 echo "Converting Maniphest project transactions to modern EDGE ".
   "transactions...\n";
 $metadata = array(
-  'edge:type' => PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,);
+  'edge:type' => PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+);
 foreach (new LiskMigrationIterator($table) as $txn) {
   // ManiphestTransaction::TYPE_PROJECTS
   if ($txn->getTransactionType() == 'projects') {

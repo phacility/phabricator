@@ -256,7 +256,8 @@ abstract class PhabricatorController extends AphrontController {
         if ($must_sign_docs) {
           $controller = new LegalpadDocumentSignController();
           $this->getRequest()->setURIMap(array(
-            'id' => head($must_sign_docs)->getID(),));
+            'id' => head($must_sign_docs)->getID(),
+          ));
           $this->setCurrentApplication($legalpad);
           return $this->delegateToController($controller);
         } else {

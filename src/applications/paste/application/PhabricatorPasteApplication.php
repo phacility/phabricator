@@ -55,7 +55,8 @@ final class PhabricatorPasteApplication extends PhabricatorApplication {
       phutil_tag(
         'a',
         array(
-          'href' => $this->getInboundEmailSupportLink(),),
+          'href' => $this->getInboundEmailSupportLink(),
+        ),
         pht('Learn More')));
   }
 

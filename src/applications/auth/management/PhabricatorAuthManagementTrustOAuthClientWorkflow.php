@@ -18,7 +18,8 @@ final class PhabricatorAuthManagementTrustOAuthClientWorkflow
             'name' => 'id',
             'param' => 'id',
             'help' => pht('The id of the OAuth client.'),
-          ),));
+          ),
+        ));
   }
 
   public function execute(PhutilArgumentParser $args) {

@@ -4,7 +4,6 @@ final class PhrictionDocumentHeraldAdapter extends HeraldAdapter {
 
   private $document;
   private $ccPHIDs = array();
-  private $emailPHIDs = array();
 
   public function getAdapterApplicationClass() {
     return 'PhabricatorPhrictionApplication';
@@ -30,14 +29,10 @@ final class PhrictionDocumentHeraldAdapter extends HeraldAdapter {
     $this->ccPHIDs = $cc_phids;
     return $this;
   }
+
   public function getCcPHIDs() {
     return $this->ccPHIDs;
   }
-
-  public function getEmailPHIDs() {
-    return $this->emailPHIDs;
-  }
-
 
   public function getAdapterContentName() {
     return pht('Phriction Documents');
@@ -143,13 +138,7 @@ final class PhrictionDocumentHeraldAdapter extends HeraldAdapter {
             $this->getDocument()->getPHID());
           break;
         case self::ACTION_EMAIL:
-          foreach ($effect->getTarget() as $phid) {
-            $this->emailPHIDs[] = $phid;
-          }
-          $result[] = new HeraldApplyTranscript(
-            $effect,
-            true,
-            pht('Added addresses to email list.'));
+          $result[] = $this->applyEmailEffect($effect);
           break;
         default:
           $custom_result = parent::handleCustomHeraldEffect($effect);

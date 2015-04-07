@@ -18,6 +18,15 @@ final class PhabricatorDivinerApplication extends PhabricatorApplication {
     return pht('Documentation');
   }
 
+  public function getHelpDocumentationArticles(PhabricatorUser $viewer) {
+    return array(
+      array(
+        'name' => pht('Diviner User Guide'),
+        'href' => PhabricatorEnv::getDoclink('Diviner User Guide'),
+      ),
+    );
+  }
+
   public function getTitleGlyph() {
     return "\xE2\x97\x89";
   }
