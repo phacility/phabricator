@@ -3,10 +3,6 @@
 final class ConduitDeprecatedCallSetupCheck extends PhabricatorSetupCheck {
 
   protected function executeChecks() {
-    // NOTE: We still call deprecated methods, so don't enable this until at
-    // least 30 days after fixing T7111, T7112 and T7113.
-    return;
-
     $methods = id(new PhabricatorConduitMethodQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
       ->withIsDeprecated(true)
