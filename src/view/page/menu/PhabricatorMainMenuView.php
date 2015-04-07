@@ -144,7 +144,7 @@ final class PhabricatorMainMenuView extends AphrontView {
         'meta'  => array(
           'map' => array(
             $header_id => 'phabricator-application-menu-expanded',
-            $button_id => 'white',
+            $button_id => 'sky',
           ),
         ),
       ),
@@ -207,7 +207,7 @@ final class PhabricatorMainMenuView extends AphrontView {
         'meta'  => array(
           'map' => array(
             $header_id => 'phabricator-search-menu-expanded',
-            $button_id => 'white',
+            $button_id => 'sky',
           ),
         ),
       ),
