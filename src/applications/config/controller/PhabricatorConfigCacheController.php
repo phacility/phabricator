@@ -15,23 +15,15 @@ final class PhabricatorConfigCacheController
       ->buildApplicationCrumbs()
       ->addTextCrumb(pht('Cache Status'));
 
-    $nav->setCrumbs($crumbs);
+    $code_box = $this->renderCodeBox();
+    $data_box = $this->renderDataBox();
 
-    list($remedy, $properties) = $this->getProperties();
-
-    $property_list = id(new PHUIPropertyListView());
-    foreach ($properties as $property) {
-      list($name, $value) = $property;
-      $property_list->addProperty($name, $value);
-    }
-
-
-    $box = id(new PHUIObjectBoxView())
-      ->setFormErrors($remedy)
-      ->setHeaderText(pht('Cache'))
-      ->addPropertyList($property_list);
-
-    $nav->appendChild($box);
+    $nav->appendChild(
+      array(
+        $crumbs,
+        $code_box,
+        $data_box,
+      ));
 
     return $this->buildApplicationPage(
       $nav,
@@ -40,109 +32,67 @@ final class PhabricatorConfigCacheController
       ));
   }
 
-  private function getProperties() {
-    $remedy = array();
+  private function renderCodeBox() {
+    $cache = PhabricatorOpcodeCacheSpec::getActiveCacheSpec();
 
-    $properties = array();
+    $properties = id(new PHUIPropertyListView());
 
-    // NOTE: If APCu is installed, it reports that APC is installed.
-    if (extension_loaded('apc') && !extension_loaded('apcu')) {
-      $cache_installed = true;
-      $cache_name = pht('APC');
-      $cache_version = phpversion('apc');
-      $cache_enabled = (bool)ini_get('apc.enabled');
-      if (!$cache_enabled) {
-        $remedy[] = pht('Enable APC');
-      }
-      $datacache_installed = true;
-      $datacache_name = pht('APC User Cache');
-      $datacache_version = phpversion('apc');
-      $datacache_enabled = true;
+    $this->renderCommonProperties($properties, $cache);
+
+    return id(new PHUIObjectBoxView())
+      ->setFormErrors($this->renderIssues($cache->getIssues()))
+      ->setHeaderText(pht('Opcode Cache'))
+      ->addPropertyList($properties);
+  }
+
+  private function renderDataBox() {
+    $cache = PhabricatorDataCacheSpec::getActiveCacheSpec();
+
+    $properties = id(new PHUIPropertyListView());
+
+    $this->renderCommonProperties($properties, $cache);
+
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Data Cache'))
+      ->addPropertyList($properties);
+  }
+
+  private function renderCommonProperties(
+    PHUIPropertyListView $properties,
+    PhabricatorCacheSpec $cache) {
+
+    if ($cache->getName() !== null) {
+      $name = $this->renderYes($cache->getName());
     } else {
-      if (extension_loaded('Zend OPcache')) {
-        $cache_installed = true;
-        $cache_name = pht('Zend Opcache');
-        $cache_enabled = (bool)ini_get('opcache.enable');
-        $cache_version = phpversion('Zend OPcache');
-        if (!$cache_enabled) {
-          $remedy[] = pht('Enable Opcache.');
-        }
-      } else {
-        if (version_compare(phpversion(), '5.5', '>=')) {
-          $remedy[] = pht('Install OPcache.');
-        } else {
-          $remedy[] = pht('Install APC.');
-        }
-
-        $cache_installed = false;
-        $cache_name = pht('None');
-        $cache_enabled = false;
-        $cache_version = null;
-      }
-
-      if (extension_loaded('apcu')) {
-        $datacache_installed = true;
-        $datacache_name = pht('APCu');
-        $datacache_version = phpversion('apcu');
-        $datacache_enabled = (bool)ini_get('apc.enabled');
-      } else {
-        if (version_compare(phpversion(), '5.5', '>=')) {
-          $remedy[] = pht('Install APCu.');
-        } else {
-          // We already suggested installing APC above.
-        }
-
-        $datacache_installed = false;
-        $datacache_name = pht('None');
-        $datacache_version = null;
-        $datacache_enabled = false;
-      }
+      $name = $this->renderNo(pht('None'));
     }
+    $properties->addProperty(pht('Cache'), $name);
 
-    if ($cache_installed) {
-      $cache_property = $this->renderYes($cache_name);
+    if ($cache->getIsEnabled()) {
+      $enabled = $this->renderYes(pht('Enabled'));
     } else {
-      $cache_property = $this->renderNo($cache_name);
+      $enabled = $this->renderNo(pht('Not Enabled'));
     }
+    $properties->addProperty(pht('Enabled'), $enabled);
 
-    if ($cache_enabled) {
-      $cache_enabled_property = $this->renderYes(pht('Enabled'));
-    } else {
-      $cache_enabled_property = $this->renderNo(pht('Not Enabled'));
+    $version = $cache->getVersion();
+    if ($version) {
+      $properties->addProperty(pht('Version'), $this->renderInfo($version));
     }
+  }
 
-    $properties[] = array(pht('Opcode Cache'), $cache_property);
-    $properties[] = array(pht('Enabled'), $cache_enabled_property);
-    if ($cache_version) {
-      $properties[] = array(
-        pht('Version'),
-        $this->renderInfo($cache_version),
+  private function renderIssues(array $issues) {
+    $result = array();
+    foreach ($issues as $issue) {
+      $title = $issue['title'];
+      $body = $issue['body'];
+      $result[] = array(
+        phutil_tag('strong', array(), $title.':'),
+        ' ',
+        $body,
       );
     }
-
-    if ($datacache_installed) {
-      $datacache_property = $this->renderYes($datacache_name);
-    } else {
-      $datacache_property = $this->renderNo($datacache_name);
-    }
-
-    if ($datacache_enabled) {
-      $datacache_enabled_property = $this->renderYes(pht('Enabled'));
-    } else {
-      $datacache_enabled_property = $this->renderNo(pht('Not Enabled'));
-    }
-
-    $properties[] = array(pht('Data Cache'), $datacache_property);
-    $properties[] = array(pht('Enabled'), $datacache_enabled_property);
-    if ($datacache_version) {
-      $properties[] = array(
-        pht('Version'),
-        $this->renderInfo($datacache_version),
-      );
-    }
-
-
-    return array($remedy, $properties);
+    return $result;
   }
 
   private function renderYes($info) {
