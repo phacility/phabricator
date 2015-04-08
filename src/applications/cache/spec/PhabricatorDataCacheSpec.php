@@ -49,7 +49,7 @@ final class PhabricatorDataCacheSpec extends PhabricatorCacheSpec {
 
     if (ini_get('apc.enabled')) {
       $this->setIsEnabled(true);
-      $this->getAPCCommonSpec();
+      $this->initAPCCommonSpec();
     } else {
       $this->setIsEnabled(false);
       $this->raiseEnableAPCIssue();
@@ -72,7 +72,7 @@ final class PhabricatorDataCacheSpec extends PhabricatorCacheSpec {
     }
   }
 
-  private function getAPCCommonSpec() {
+  private function initAPCCommonSpec() {
     $mem = apc_sma_info();
     $this->setTotalMemory($mem['num_seg'] * $mem['seg_size']);
 
