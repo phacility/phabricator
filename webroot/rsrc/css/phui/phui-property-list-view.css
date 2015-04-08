@@ -171,6 +171,7 @@
 .device .phui-property-list-properties-wrap {
   width: auto;
   border: none;
+  float: none;
 }
 
 .phui-property-list-actions {
