@@ -31,6 +31,29 @@ final class PhabricatorOpcodeCacheSpec extends PhabricatorCacheSpec {
       $info = apc_cache_info();
       $this->setUsedMemory($info['mem_size']);
 
+      $write_lock = ini_get('apc.write_lock');
+      $slam_defense = ini_get('apc.slam_defense');
+
+      if (!$write_lock || $slam_defense) {
+        $summary = pht(
+          'Adjust APC settings to quiet unnecessary errors.');
+
+        $message = pht(
+          'Some versions of APC may emit unnecessary errors into the '.
+          'error log under the current APC settings. To resolve this, '.
+          'enable "apc.write_lock" and disable "apc.slam_defense" in '.
+          'your PHP configuration.');
+
+        $this
+          ->newIssue('extension.apc.write-lock')
+          ->setShortName(pht('Noisy APC'))
+          ->setName(pht('APC Has Noisy Configuration'))
+          ->setSummary($summary)
+          ->setMessage($message)
+          ->addPHPConfig('apc.write_lock')
+          ->addPHPConfig('apc.slam_defense');
+      }
+
       $is_dev = PhabricatorEnv::getEnvConfig('phabricator.developer-mode');
       $is_stat_enabled = ini_get('apc.stat');
       if ($is_stat_enabled && !$is_dev) {
