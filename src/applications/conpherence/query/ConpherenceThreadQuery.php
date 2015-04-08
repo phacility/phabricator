@@ -133,7 +133,7 @@ final class ConpherenceThreadQuery
     }
 
     $viewer = $this->getViewer();
-    if ($viewer->isLoggedIn()) {
+    if ($this->shouldJoinForViewer($viewer)) {
       $joins[] = qsprintf(
         $conn_r,
         'LEFT JOIN %T v ON v.conpherencePHID = conpherence_thread.phid '.
@@ -145,6 +145,15 @@ final class ConpherenceThreadQuery
 
     $joins[] = $this->buildApplicationSearchJoinClause($conn_r);
     return implode(' ', $joins);
+  }
+
+  private function shouldJoinForViewer(PhabricatorUser $viewer) {
+    if ($viewer->isLoggedIn() &&
+      $this->ids === null &&
+      $this->phids === null) {
+      return true;
+    }
+    return false;
   }
 
   protected function buildWhereClause($conn_r) {
@@ -181,11 +190,11 @@ final class ConpherenceThreadQuery
     }
 
     $viewer = $this->getViewer();
-    if ($viewer->isLoggedIn()) {
+    if ($this->shouldJoinForViewer($viewer)) {
       $where[] = qsprintf(
         $conn_r,
         'conpherence_thread.isRoom = 1 OR v.participantPHID IS NOT NULL');
-    } else {
+    } else if ($this->phids === null && $this->ids === null) {
       $where[] = qsprintf(
         $conn_r,
         'conpherence_thread.isRoom = 1');

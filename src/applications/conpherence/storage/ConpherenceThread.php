@@ -3,7 +3,8 @@
 final class ConpherenceThread extends ConpherenceDAO
   implements
     PhabricatorPolicyInterface,
-    PhabricatorApplicationTransactionInterface {
+    PhabricatorApplicationTransactionInterface,
+    PhabricatorDestructibleInterface {
 
   protected $title;
   protected $isRoom = 0;
@@ -339,4 +340,23 @@ final class ConpherenceThread extends ConpherenceDAO
     return $timeline;
   }
 
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+      $this->delete();
+
+      $participants = id(new ConpherenceParticipant())
+        ->loadAllWhere('conpherencePHID = %s', $this->getPHID());
+      foreach ($participants as $participant) {
+        $participant->delete();
+      }
+
+    $this->saveTransaction();
+
+  }
 }

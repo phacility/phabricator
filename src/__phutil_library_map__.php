@@ -3446,6 +3446,7 @@ phutil_register_library_map(array(
       'ConpherenceDAO',
       'PhabricatorPolicyInterface',
       'PhabricatorApplicationTransactionInterface',
+      'PhabricatorDestructibleInterface',
     ),
     'ConpherenceThreadIndexer' => 'PhabricatorSearchDocumentIndexer',
     'ConpherenceThreadListView' => 'AphrontView',
