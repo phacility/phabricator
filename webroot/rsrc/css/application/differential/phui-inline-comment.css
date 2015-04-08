@@ -274,8 +274,8 @@
 }
 
 .device-desktop .differential-inline-comment.inline-state-is-draft
-  .button-not-done:hover {
-  color: {$lightgreytext} !important;
+  .differential-inline-comment-head .button.simple.button-not-done:hover {
+  color: {$lightgreytext};
   background-color: transparent;
   border-color: {$lightgreyborder};
   cursor: auto;
@@ -294,6 +294,7 @@
     background-color: #fff;
     color: {$sky};
     border-color: {$sky};
+    cursor: auto;
 }
 
 .differential-inline-comment.inline-is-done .differential-inline-comment-head

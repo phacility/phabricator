@@ -19,7 +19,20 @@ final class PhabricatorVeryWowEnglishTranslation
       'Partial' => 'Pawtial',
       'Partial Upload' => 'Pawtial Upload',
       'Submit' => 'Such Send!',
+      'Create Task' => 'Very Create Task',
+      'Create' => 'Very Create',
+      'Host and Browse Repositories' => 'Many Repositories',
+      'Okay' => 'Wow!',
+      'Save Preferences' => 'Make Such Saves',
+      'Edit Query' => 'Play With Query',
+      'Hide Query' => 'Bury Query',
+      'Execute Query' => 'Throw the Query',
+      'Wiki' => 'Wow-ki',
+      'Get Organized' => 'Such Organized',
+      'Explore More Applications' => 'Browse For More Wow',
+      'Prototype' => 'Chew Toy',
+      'Continue' => 'Bark And Run',
+      'Countdown to Events' => 'To the Moon!',
     );
   }
-
 }

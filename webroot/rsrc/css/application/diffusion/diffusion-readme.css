@@ -1,0 +1,14 @@
+/**
+ * @provides diffusion-readme-css
+ */
+
+.device .diffusion-readme-view {
+  margin: 16px 8px 0;
+  background-color: #fff;
+  border: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$blueborder};
+}
+
+.device-tablet .diffusion-readme-view {
+  margin: 16px;
+}

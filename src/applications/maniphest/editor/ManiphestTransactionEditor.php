@@ -386,10 +386,14 @@ final class ManiphestTransactionEditor
   }
 
   protected function getMailTo(PhabricatorLiskDAO $object) {
-    return array(
-      $object->getOwnerPHID(),
-      $this->getActingAsPHID(),
-    );
+    $phids = array();
+
+    if ($object->getOwnerPHID()) {
+      $phids[] = $object->getOwnerPHID();
+    }
+    $phids[] = $this->getActingAsPHID();
+
+    return $phids;
   }
 
   public function getMailTagsMap() {

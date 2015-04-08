@@ -110,7 +110,7 @@
 }
 
 .phabricator-main-menu-search-container {
-  padding: 9px 0 10px 0;
+  padding: 8px 0;
   position: relative;
   height: 24px;
   margin: 0 8px;
@@ -146,14 +146,18 @@
   right: 0;
   position: absolute;
   font-size: 13px;
+  border-width: 2px;
   border-color: rgba(0,0,0,.6);
-  border-radius: 12px;
+  border-radius: 3px 0 0 3px;
   background-color: rgba(0,0,0,.5);
   opacity: .8;
-  height: 26px;
+  height: 28px;
   line-height: 12px;
   box-shadow: 0px 1px 1px rgba(128, 128, 128, 0.25);
-  padding: 6px 32px 6px 10px;
+  padding: 6px;
+  float: left;
+  width: 175px;
+  left: 0;
 }
 
 .phabricator-main-menu.main-header-dark .phabricator-main-menu-search input {
@@ -162,16 +166,16 @@
 }
 
 .device .phabricator-main-menu-search input {
-  height: 30px;
+  height: 32px;
   font-size: 15px;
-  border-radius: 15px;
+  width: 100%;
 }
 
 .phabricator-main-menu .phabricator-main-menu-search input:focus {
   background: #fff;
   opacity: 1;
   color: #333;
-  border-color: {$lightgreyborder};
+  border-color: {$sky};
   box-shadow: none;
 }
 
@@ -180,23 +184,31 @@
 }
 
 .phabricator-main-menu-search button {
+  color: rgba(255,255,255,.8);
   position: absolute;
-  background: transparent;
+  background: #000;
   border: none;
   outline: none;
   box-shadow: none;
   text-shadow: none;
   min-width: 0;
-
-  height: 24px;
-  width: 16px;
-  top: 10px;
-  right: 10px;
+  height: 28px;
+  width: 30px;
+  top: 8px;
+  right: -7px;
+  margin: 0 8px 0 0;
   padding: 0;
+  border-bottom-left-radius: 0;
+  border-top-left-radius: 0;
+}
+
+.phabricator-main-menu-search button:hover {
+  color: #fff;
 }
 
 .device .phabricator-main-menu-search button {
-  top: 7px;
+  top: 6px;
+  border-radius: 0;
 }
 
 .phabricator-main-menu-search-target div.jx-typeahead-results {
@@ -461,7 +473,7 @@
 }
 
 .device-desktop .phabricator-core-menu-icon {
-  top: 5px;
+  top: 4px;
   left: 4px;
 }
 
