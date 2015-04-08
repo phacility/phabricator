@@ -15,81 +15,70 @@ final class PhabricatorDataCacheSpec extends PhabricatorCacheSpec {
 
   public static function getActiveCacheSpec() {
     $spec = new PhabricatorDataCacheSpec();
+
     // NOTE: If APCu is installed, it reports that APC is installed.
     if (extension_loaded('apc') && !extension_loaded('apcu')) {
-      return self::getAPCSpec($spec);
+      $spec->initAPCSpec();
     } else if (extension_loaded('apcu')) {
-      return self::getAPCuSpec($spec);
+      $spec->initAPCuSpec();
     } else {
-      return self::getNoneSpec($spec);
+      $spec->initNoneSpec();
     }
+
+    return $spec;
   }
 
-  private static function getAPCSpec(PhabricatorDataCacheSpec $spec) {
-    $spec
+  private function initAPCSpec() {
+    $this
       ->setName(pht('APC User Cache'))
       ->setVersion(phpversion('apc'));
 
     if (ini_get('apc.enabled')) {
-      $spec->setIsEnabled(true);
-      self::getAPCCommonSpec($spec);
+      $this->setIsEnabled(true);
+      $this->initAPCCommonSpec();
     } else {
-      $spec->setIsEnabled(false);
-      $spec->newIssue(
-        pht('Enable APC'),
-        pht(
-          'The "APC" extension is currently disabled. Set "apc.enabled" to '.
-          'true to provide caching.'),
-        'apc.enabled');
+      $this->setIsEnabled(false);
+      $this->raiseEnableAPCIssue();
     }
-
-    return $spec;
   }
 
-  private static function getAPCuSpec(PhabricatorDataCacheSpec $spec) {
-    $spec
+  private function initAPCuSpec() {
+    $this
       ->setName(pht('APCu'))
       ->setVersion(phpversion('apcu'));
 
     if (ini_get('apc.enabled')) {
-      $spec->setIsEnabled(true);
-      self::getAPCCommonSpec($spec);
+      $this->setIsEnabled(true);
+      $this->getAPCCommonSpec();
     } else {
-      $spec->setIsEnabled(false);
-      $spec->newissue(
-        pht('Enable APCu'),
-        pht(
-          'The "APCu" extension is currently disabled. Set '.
-          '"apc.enabled" to true to provide caching.'),
-        'apc.enabled');
+      $this->setIsEnabled(false);
+      $this->raiseEnableAPCIssue();
     }
-
-    return $spec;
   }
 
-  private static function getNoneSpec(PhabricatorDataCacheSpec $spec) {
+  private function getNoneSpec() {
     if (version_compare(phpversion(), '5.5', '>=')) {
-      $spec->newIssue(
-        pht('Install APCu'),
-        pht(
-          'Install the "APCu" PHP extension to provide data caching.'));
-    } else {
-      $spec->newIssue(
-        pht('Install APC'),
-        pht(
-          'Install the "APC" PHP extension to provide data caching.'));
-    }
+      $message = pht(
+        'Installing the "APCu" PHP extension will improve performance.');
 
-    return $spec;
+      $this
+        ->newIssue('extension.apcu')
+        ->setShortName(pht('APCu'))
+        ->setName(pht('PHP Extension "APCu" Not Installed'))
+        ->setMessage($message)
+        ->addPHPExtension('apcu');
+    } else {
+      $this->raiseInstallAPCIssue();
+    }
   }
 
-  private static function getAPCCommonSpec(PhabricatorDataCacheSpec $spec) {
+  private function getAPCCommonSpec() {
     $mem = apc_sma_info();
-    $spec->setTotalMemory($mem['num_seg'] * $mem['seg_size']);
+    $this->setTotalMemory($mem['num_seg'] * $mem['seg_size']);
 
     $info = apc_cache_info('user');
-    $spec->setUsedMemory($info['mem_size']);
-    $spec->setEntryCount(count($info['cache_list']));
+    $this->setUsedMemory($info['mem_size']);
+    $this->setEntryCount(count($info['cache_list']));
 
     $cache = $info['cache_list'];
     $state = array();
@@ -107,7 +96,7 @@ final class PhabricatorDataCacheSpec extends PhabricatorCacheSpec {
       $state[$key]['count']++;
     }
 
-    $spec->setCacheSummary($state);
+    $this->setCacheSummary($state);
   }
 
   private static function getKeyPattern($key) {

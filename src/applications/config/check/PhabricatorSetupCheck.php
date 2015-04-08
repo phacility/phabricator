@@ -31,6 +31,11 @@ abstract class PhabricatorSetupCheck {
     return $this->issues;
   }
 
+  protected function addIssue(PhabricatorSetupIssue $issue) {
+    $this->issues[$issue->getIssueKey()] = $issue;
+    return $this;
+  }
+
   public function getDefaultGroup() {
     return null;
   }

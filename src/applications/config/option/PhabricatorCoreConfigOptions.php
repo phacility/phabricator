@@ -209,7 +209,7 @@ final class PhabricatorCoreConfigOptions
         ->setLocked(true)
         ->setDescription(
           pht('Custom HTML to show on the main Phabricator dashboard.')),
-      $this->newOption('phabricator.cache-namespace', 'string', null)
+      $this->newOption('phabricator.cache-namespace', 'string', 'phabricator')
         ->setLocked(true)
         ->setDescription(pht('Cache namespace.')),
       $this->newOption('phabricator.allow-email-users', 'bool', false)

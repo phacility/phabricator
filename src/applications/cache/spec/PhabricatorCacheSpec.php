@@ -38,14 +38,10 @@ abstract class PhabricatorCacheSpec extends Phobject {
     return $this->version;
   }
 
-  protected function newIssue($title, $body, $option = null) {
-    $issue = array(
-      'title' => $title,
-      'body' => $body,
-      'option' => $option,
-    );
-
-    $this->issues[] = $issue;
+  protected function newIssue($key) {
+    $issue = id(new PhabricatorSetupIssue())
+      ->setIssueKey($key);
+    $this->issues[$key] = $issue;
 
     return $issue;
   }
@@ -81,6 +77,35 @@ abstract class PhabricatorCacheSpec extends Phobject {
     return $this->entryCount;
   }
 
+  protected function raiseInstallAPCIssue() {
+    $message = pht(
+      "Installing the PHP extension 'APC' (Alternative PHP Cache) will ".
+      "dramatically improve performance. Note that APC versions 3.1.14 and ".
+      "3.1.15 are broken; 3.1.13 is recommended instead.");
 
+    return $this
+      ->newIssue('extension.apc')
+      ->setShortName(pht('APC'))
+      ->setName(pht("PHP Extension 'APC' Not Installed"))
+      ->setMessage($message)
+      ->addPHPExtension('apc');
+  }
+
+  protected function raiseEnableAPCIssue() {
+    $summary = pht('Enabling APC/APCu will improve performance.');
+    $message = pht(
+      'The APC or APCu PHP extensions are installed, but not enabled in your '.
+      'PHP configuration. Enabling these extensions will improve Phabricator '.
+      'performance. Edit the "apc.enabled" setting to enable these '.
+      'extensions.');
+
+    return $this
+      ->newIssue('extension.apc.enabled')
+      ->setShortName(pht('APC/APCu Disabled'))
+      ->setName(pht('APC/APCu Extensions Not Enabled'))
+      ->setSummary($summary)
+      ->setMessage($message)
+      ->addPHPConfig('apc.enabled');
+  }
 
 }
