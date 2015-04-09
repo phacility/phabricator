@@ -7,16 +7,15 @@ final class PhabricatorCalendarBrowseController
     return true;
   }
 
-  public function processRequest() {
-    $now     = time();
-    $request = $this->getRequest();
-    $user    = $request->getUser();
-    $year_d  = phabricator_format_local_time($now, $user, 'Y');
-    $year    = $request->getInt('year', $year_d);
-    $month_d = phabricator_format_local_time($now, $user, 'm');
-    $month   = $request->getInt('month', $month_d);
-    $day   = phabricator_format_local_time($now, $user, 'j');
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
+    $now     = time();
+    $year_d  = phabricator_format_local_time($now, $viewer, 'Y');
+    $year    = $request->getInt('year', $year_d);
+    $month_d = phabricator_format_local_time($now, $viewer, 'm');
+    $month   = $request->getInt('month', $month_d);
+    $day   = phabricator_format_local_time($now, $viewer, 'j');
 
     $holidays = id(new PhabricatorCalendarHoliday())->loadAllWhere(
       'day BETWEEN %s AND %s',
@@ -24,7 +23,7 @@ final class PhabricatorCalendarBrowseController
       "{$year}-{$month}-31");
 
     $statuses = id(new PhabricatorCalendarEventQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withDateRange(
         strtotime("{$year}-{$month}-01"),
         strtotime("{$year}-{$month}-01 next month"))
@@ -37,11 +36,11 @@ final class PhabricatorCalendarBrowseController
     }
 
     $month_view->setBrowseURI($request->getRequestURI());
-    $month_view->setUser($user);
+    $month_view->setUser($viewer);
     $month_view->setHolidays($holidays);
 
     $phids = mpull($statuses, 'getUserPHID');
-    $handles = $this->loadViewerHandles($phids);
+    $handles = $viewer->loadHandles($phids);
 
     /* Assign Colors */
     $unique = array_unique($phids);
