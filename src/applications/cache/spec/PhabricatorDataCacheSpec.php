@@ -56,7 +56,7 @@ final class PhabricatorDataCacheSpec extends PhabricatorCacheSpec {
     }
   }
 
-  private function getNoneSpec() {
+  private function initNoneSpec() {
     if (version_compare(phpversion(), '5.5', '>=')) {
       $message = pht(
         'Installing the "APCu" PHP extension will improve performance.');
