@@ -76,11 +76,17 @@ final class ConpherenceUpdateController
           break;
         case ConpherenceUpdateActions::MESSAGE:
           $message = $request->getStr('text');
-          $xactions = $editor->generateTransactionsFromText(
-            $user,
-            $conpherence,
-            $message);
-          $delete_draft = true;
+          if (strlen($message)) {
+            $xactions = $editor->generateTransactionsFromText(
+              $user,
+              $conpherence,
+              $message);
+            $delete_draft = true;
+          } else {
+            $action = ConpherenceUpdateActions::LOAD;
+            $updated = false;
+            $response_mode = 'ajax';
+          }
           break;
         case ConpherenceUpdateActions::ADD_PERSON:
           $person_phids = $request->getArr('add_person');
@@ -397,13 +403,17 @@ final class ConpherenceUpdateController
       ->withIDs(array($conpherence_id))
       ->executeOne();
 
-    if ($need_transactions) {
+    $non_update = false;
+    if ($need_transactions && $conpherence->getTransactions()) {
       $data = ConpherenceTransactionView::renderTransactions(
         $user,
         $conpherence,
         !$this->getRequest()->getExists('minimal_display'));
       $participant_obj = $conpherence->getParticipant($user->getPHID());
       $participant_obj->markUpToDate($conpherence, $data['latest_transaction']);
+    } else if ($need_transactions) {
+      $non_update = true;
+      $data = array();
     } else {
       $data = array();
     }
@@ -451,6 +461,7 @@ final class ConpherenceUpdateController
     }
     $data = $conpherence->getDisplayData($user);
     $content = array(
+      'non_update' => $non_update,
       'transactions' => hsprintf('%s', $rendered_transactions),
       'conpherence_title' => (string) $data['title'],
       'latest_transaction_id' => $new_latest_transaction_id,

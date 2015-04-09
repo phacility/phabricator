@@ -57,28 +57,30 @@ JX.behavior('conpherence-menu', function(config) {
     markThreadLoading(true);
     JX.DOM.alterClass(form_root, 'loading', true);
   });
-  threadManager.setDidSendMessageCallback(function (r) {
+  threadManager.setDidSendMessageCallback(function (r, non_update) {
     var root = JX.DOM.find(document, 'div', 'conpherence-layout');
     var form_root = JX.DOM.find(root, 'div', 'conpherence-form');
-    var messages_root = JX.DOM.find(root, 'div', 'conpherence-message-pane');
-    var messages = JX.DOM.find(messages_root, 'div', 'conpherence-messages');
-    var fileWidget = null;
-    try {
-      fileWidget = JX.DOM.find(root, 'div', 'widgets-files');
-    } catch (ex) {
-      // Ignore; maybe no files widget
-    }
-    JX.DOM.appendContent(messages, JX.$H(r.transactions));
-    messages.scrollTop = messages.scrollHeight;
-
-    if (fileWidget) {
-      JX.DOM.setContent(
-        fileWidget,
-        JX.$H(r.file_widget)
-        );
-    }
     var textarea = JX.DOM.find(form_root, 'textarea');
-    textarea.value = '';
+    if (!non_update) {
+      var messages_root = JX.DOM.find(root, 'div', 'conpherence-message-pane');
+      var messages = JX.DOM.find(messages_root, 'div', 'conpherence-messages');
+      var fileWidget = null;
+      try {
+        fileWidget = JX.DOM.find(root, 'div', 'widgets-files');
+      } catch (ex) {
+        // Ignore; maybe no files widget
+      }
+      JX.DOM.appendContent(messages, JX.$H(r.transactions));
+      messages.scrollTop = messages.scrollHeight;
+
+      if (fileWidget) {
+        JX.DOM.setContent(
+          fileWidget,
+          JX.$H(r.file_widget)
+          );
+      }
+      textarea.value = '';
+    }
     markThreadLoading(false);
 
     setTimeout(function() { JX.DOM.focus(textarea); }, 100);
