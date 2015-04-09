@@ -15,7 +15,7 @@ Arcanist, and which Phabricator loads at runtime and runs in-process. They
 require somewhat more effort upfront than simple configuration switches, but are
 the most direct and powerful way to respond to events.
 
-= Installing Event Listeners (Phabicator) =
+= Installing Event Listeners (Phabricator) =
 
 To install event listeners in Phabricator, follow these steps:
 
