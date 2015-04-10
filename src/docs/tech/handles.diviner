@@ -1,0 +1,101 @@
+@title Handles Technical Documentation
+@group handles
+
+Technical overview of Handles.
+
+Overview
+========
+
+Most objects in Phabricator have PHIDs, which are globally unique identifiers
+that look like `PHID-USER-2zw4hwdt4i5b5ypikv6x`. If you know the PHID for an
+object, you can load a **handle** for that object to get more information
+about it.
+
+Handles are lightweight reference objects which provide some basic information
+common across all objects (like their type, icons, names, monograms, URIs, and
+whether they are open or closed). Applications don't need to know anything about
+other types of objects in order to load and use handles. There are uniform
+mechanisms available to load and work with handles which work across all types
+of objects in every application.
+
+
+Loading Handles
+===============
+
+To load handles, you'll usually call `loadHandles(...)` on the viewer:
+
+  $handles = $viewer->loadHandles($phids);
+
+This returns a @{class:PhabricatorHandleList}. This object behaves like an
+array, and you can access handle objects by using their PHIDs as indexes:
+
+  $handle = $handles[$phid];
+
+Handles will always load, even if the PHID is invalid or the object it
+identifies is restricted or broken. In these cases, the handle will accurately
+represent the state of the associated object. This means that you generally do
+not need to check if a handle loaded.
+
+
+Rendering Handles
+=================
+
+After loading handles, you'll usually call `renderHandle($phid)` to render a
+link to an object:
+
+  $view = $handles->renderHandle($phid);
+
+This returns a @{class:PHUIHandleView}. The class exposes some methods which
+can adjust how the handle renders.
+
+If you want to render a list of handles, you can use `renderList()`:
+
+  $list_view = $handles->renderList();
+
+This returns a @{class:PHUIHandleListView}. This class also exposes some
+methods to adjust how the list renders.
+
+Convenience methods for these operations are also available on the viewer
+object itself:
+
+  $view = $viewer->renderHandle($phid);
+  $list_view = $viewer->renderHandleList($phids);
+
+When you only need to render a handle once, these methods make it easier.
+
+
+Fetch Semantics
+===============
+
+When you load and render handles through the viewer, the actual data fetching
+occurs just-in-time. Specifically, all of the required PHIDs are queued up
+until a concrete representation //needs// to be produced. Handles are then bulk
+loaded.
+
+This means that, unlike most other types of data fetching, it's OK to
+single-fetch handles, because they won't //really// single-fetch. This code is
+correct and desirable:
+
+  $list->addProperty(pht('Pilot'), $viewer->renderHandle($pilot_phid));
+  $list->addProperty(pht('Copilot'), $viewer->renderHandle($copilot_phid));
+
+If you're rendering a very large number of handles (for example, 100+ handles
+in a result list view) it's //slightly// more efficient to render them through
+a @{class:PhabricatorHandleList}:
+
+  $handles = $viewer->loadHandles($phids);
+  foreach ($items as $item) {
+    // ...
+    $view = $handles->renderHandle($item->getPHID());
+    // ...
+  }
+
+This shaves off a tiny bit of internal bookkeeping overhead. This does not
+change the underlying semantics of the data fetch.
+
+Handles are particularly well suited to use this just-in-time fetch pattern
+because they're ubiquitous and code essentially never makes decisions based on
+handles, so it's very rare that they need to be made concrete until final page
+rendering. Most other kinds of data do not have the same sort of
+application-level semantics. This generally makes other objects much less
+suitable to be fetched just-in-time.
