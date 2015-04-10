@@ -97,7 +97,8 @@ final class ConpherenceThreadQuery
       $this->loadParticipantsAndInitHandles($conpherences);
       if ($this->needParticipantCache) {
         $this->loadCoreHandles($conpherences, 'getRecentParticipantPHIDs');
-      } else if ($this->needWidgetData) {
+      }
+      if ($this->needWidgetData) {
         $this->loadCoreHandles($conpherences, 'getParticipantPHIDs');
       }
       if ($this->needTransactions) {
@@ -244,7 +245,8 @@ final class ConpherenceThreadQuery
       ->execute();
     foreach ($handle_phids as $conpherence_phid => $phids) {
       $conpherence = $conpherences[$conpherence_phid];
-      $conpherence->attachHandles(array_select_keys($handles, $phids));
+      $conpherence->attachHandles(
+        $conpherence->getHandles() + array_select_keys($handles, $phids));
     }
     return $this;
   }

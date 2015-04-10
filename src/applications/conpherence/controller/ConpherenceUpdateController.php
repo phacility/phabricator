@@ -10,6 +10,7 @@ final class ConpherenceUpdateController
       return new Aphront404Response();
     }
 
+    $need_participants = false;
     $needed_capabilities = array(PhabricatorPolicyCapability::CAN_VIEW);
     $action = $request->getStr('action', ConpherenceUpdateActions::METADATA);
     switch ($action) {
@@ -26,12 +27,17 @@ final class ConpherenceUpdateController
       case ConpherenceUpdateActions::JOIN_ROOM:
         $needed_capabilities[] = PhabricatorPolicyCapability::CAN_JOIN;
         break;
+      case ConpherenceUpdateActions::NOTIFICATIONS:
+        $need_participants = true;
+        break;
+      case ConpherenceUpdateActions::LOAD:
+        break;
     }
     $conpherence = id(new ConpherenceThreadQuery())
       ->setViewer($user)
       ->withIDs(array($conpherence_id))
       ->needFilePHIDs(true)
-      ->needParticipantCache(true)
+      ->needParticipants($need_participants)
       ->requireCapabilities($needed_capabilities)
       ->executeOne();
 
@@ -373,10 +379,9 @@ final class ConpherenceUpdateController
 
     $need_widget_data = false;
     $need_transactions = false;
-    $need_participant_cache = false;
+    $need_participant_cache = true;
     switch ($action) {
       case ConpherenceUpdateActions::METADATA:
-        $need_participant_cache = true;
         $need_transactions = true;
         break;
       case ConpherenceUpdateActions::LOAD:
