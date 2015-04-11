@@ -54,7 +54,6 @@ final class PhabricatorHeraldApplication extends PhabricatorApplication {
         'edit/(?:(?P<id>[1-9]\d*)/)?' => 'HeraldRuleController',
         'disable/(?P<id>[1-9]\d*)/(?P<action>\w+)/'
           => 'HeraldDisableController',
-        'history/(?:(?P<id>[1-9]\d*)/)?' => 'HeraldRuleEditHistoryController',
         'test/' => 'HeraldTestConsoleController',
         'transcript/' => array(
           '' => 'HeraldTranscriptListController',

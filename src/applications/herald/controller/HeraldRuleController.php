@@ -328,7 +328,6 @@ final class HeraldRuleController extends HeraldController {
         $rule->save();
         $rule->saveConditions($conditions);
         $rule->saveActions($actions);
-        $rule->logEdit($request->getUser()->getPHID(), $edit_action);
       $rule->saveTransaction();
     }
 
