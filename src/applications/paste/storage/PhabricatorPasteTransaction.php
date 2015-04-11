@@ -120,7 +120,7 @@ final class PhabricatorPasteTransaction
         break;
       case PhabricatorPasteTransaction::TYPE_LANGUAGE:
         return pht(
-          '%s update the language for %s.',
+          '%s updated the language for %s.',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
         break;
