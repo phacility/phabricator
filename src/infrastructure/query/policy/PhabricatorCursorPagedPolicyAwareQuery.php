@@ -310,12 +310,21 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         $descending = !$descending;
       }
 
-      $name = $part['name'];
+      $table = idx($part, 'table');
+      $column = $part['column'];
 
       if ($descending) {
-        $sql[] = qsprintf($conn, '%Q DESC', $name);
+        if ($table !== null) {
+          $sql[] = qsprintf($conn, '%T.%T DESC', $table, $column);
+        } else {
+          $sql[] = qsprintf($conn, '%T DESC', $column);
+        }
       } else {
-        $sql[] = qsprintf($conn, '%Q ASC', $name);
+        if ($table !== null) {
+          $sql[] = qsprintf($conn, '%T.%T ASC', $table, $column);
+        } else {
+          $sql[] = qsprintf($conn, '%T ASC', $column);
+        }
       }
     }
 

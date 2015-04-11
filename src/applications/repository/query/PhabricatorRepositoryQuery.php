@@ -304,24 +304,28 @@ final class PhabricatorRepositoryQuery
         break;
       case self::ORDER_COMMITTED:
         $parts[] = array(
-          'name' => 's.epoch',
+          'table' => 's',
+          'column' => 'epoch',
         );
         break;
       case self::ORDER_CALLSIGN:
         $parts[] = array(
-          'name' => 'r.callsign',
+          'table' => 'r',
+          'column' => 'callsign',
           'reverse' => true,
         );
         break;
       case self::ORDER_NAME:
         $parts[] = array(
-          'name' => 'r.name',
+          'table' => 'r',
+          'column' => 'name',
           'reverse' => true,
         );
         break;
       case self::ORDER_SIZE:
         $parts[] = array(
-          'name' => 's.size',
+          'table' => 's',
+          'column' => 'size',
         );
         break;
       default:
@@ -329,7 +333,8 @@ final class PhabricatorRepositoryQuery
     }
 
     $parts[] = array(
-      'name' => 'r.id',
+      'table' => 'r',
+      'column' => 'id',
     );
 
     return $this->formatOrderClause($conn, $parts);
