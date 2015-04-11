@@ -5,6 +5,7 @@
  * performant than offset-based paging in the presence of policy filtering.
  *
  * @task appsearch Integration with ApplicationSearch
+ * @task order Result Ordering
  */
 abstract class PhabricatorCursorPagedPolicyAwareQuery
   extends PhabricatorPolicyAwareQuery {
@@ -14,6 +15,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   private $applicationSearchConstraints = array();
   private $applicationSearchOrders = array();
   private $internalPaging;
+  private $orderVector;
 
   protected function getPagingColumn() {
     return 'id';
@@ -129,22 +131,6 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     }
 
     return null;
-  }
-
-  final protected function buildOrderClause(AphrontDatabaseConnection $conn_r) {
-    if ($this->beforeID) {
-      return qsprintf(
-        $conn_r,
-        'ORDER BY %Q %Q',
-        $this->getPagingColumn(),
-        $this->getReversePaging() ? 'DESC' : 'ASC');
-    } else {
-      return qsprintf(
-        $conn_r,
-        'ORDER BY %Q %Q',
-        $this->getPagingColumn(),
-        $this->getReversePaging() ? 'ASC' : 'DESC');
-    }
   }
 
   final protected function didLoadResults(array $results) {
@@ -284,6 +270,121 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     return '('.implode(') OR (', $clauses).')';
   }
 
+
+/* -(  Result Ordering  )---------------------------------------------------- */
+
+
+  /**
+   * @task order
+   */
+  public function setOrderVector($vector) {
+    $vector = PhabricatorQueryOrderVector::newFromVector($vector);
+
+    $orderable = $this->getOrderableColumns();
+    foreach ($vector as $order) {
+      $key = $vector->getOrderKey();
+      if (empty($orderable[$key])) {
+        $valid = implode(', ', array_keys($orderable));
+        throw new Exception(
+          pht(
+            'This query ("%s") does not support sorting by order key "%s". '.
+            'Supported orders are: %s.',
+            get_class($this),
+            $valid));
+      }
+    }
+
+    $this->orderVector = $vector;
+    return $this;
+  }
+
+
+  /**
+   * @task order
+   */
+  private function getOrderVector() {
+    if (!$this->orderVector) {
+      $vector = $this->getDefaultOrderVector();
+      $vector = PhabricatorQueryOrderVector::newFromVector($vector);
+      $this->orderVector = $vector;
+    }
+
+    return $this->orderVector;
+  }
+
+
+  /**
+   * @task order
+   */
+  protected function getDefaultOrderVector() {
+    return array('id');
+  }
+
+
+  /**
+   * @task order
+   */
+  public function getOrderableColumns() {
+    // TODO: Remove this once all subclasses move off the old stuff.
+    if ($this->getPagingColumn() !== 'id') {
+      // This class has bad old custom logic around paging, so return nothing
+      // here. This deactivates the new order code.
+      return array();
+    }
+
+    return array(
+      'id' => array(
+        'table' => null,
+        'column' => 'id',
+        'reverse' => false,
+      ),
+    );
+  }
+
+
+  /**
+   * @task order
+   */
+  final protected function buildOrderClause(AphrontDatabaseConnection $conn) {
+    $orderable = $this->getOrderableColumns();
+
+    // TODO: Remove this once all subclasses move off the old stuff. We'll
+    // only enter this block for code using older ordering mechanisms. New
+    // code should expose an orderable column list.
+    if (!$orderable) {
+      if ($this->beforeID) {
+        return qsprintf(
+          $conn,
+          'ORDER BY %Q %Q',
+          $this->getPagingColumn(),
+          $this->getReversePaging() ? 'DESC' : 'ASC');
+      } else {
+        return qsprintf(
+          $conn,
+          'ORDER BY %Q %Q',
+          $this->getPagingColumn(),
+          $this->getReversePaging() ? 'ASC' : 'DESC');
+      }
+    }
+
+    $vector = $this->getOrderVector();
+
+    $parts = array();
+    foreach ($vector as $order) {
+      $part = $orderable[$order->getOrderKey()];
+      if ($order->getIsReversed()) {
+        $part['reverse'] = !idx($part, 'reverse', false);
+      }
+      $parts[] = $part;
+    }
+
+    return $this->formatOrderClause($conn, $parts);
+  }
+
+
+  /**
+   * @task order
+   */
   protected function formatOrderClause(
     AphrontDatabaseConnection $conn,
     array $parts) {
