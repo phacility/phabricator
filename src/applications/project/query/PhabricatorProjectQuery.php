@@ -95,16 +95,30 @@ final class PhabricatorProjectQuery
     return $this;
   }
 
-  protected function getPagingColumn() {
-    return 'name';
+  protected function getDefaultOrderVector() {
+    return array('name');
+  }
+
+  public function getOrderableColumns() {
+    return array(
+      'name' => array(
+        'table' => $this->getPrimaryTableAlias(),
+        'column' => 'name',
+        'reverse' => true,
+        'type' => 'string',
+        'unique' => true,
+      ),
+    );
+  }
+
+  protected function getPagingValueMap($cursor, array $keys) {
+    return array(
+      'name' => $cursor,
+    );
   }
 
   protected function getPagingValue($result) {
     return $result->getName();
-  }
-
-  protected function getReversePaging() {
-    return true;
   }
 
   protected function loadPage() {
