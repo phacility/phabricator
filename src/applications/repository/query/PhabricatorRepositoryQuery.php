@@ -340,7 +340,7 @@ final class PhabricatorRepositoryQuery
     return $this->formatOrderClause($conn, $parts);
   }
 
-  private function loadCursorObject($id) {
+  protected function loadCursorObject($id) {
     $query = id(new PhabricatorRepositoryQuery())
       ->setViewer($this->getPagingViewer())
       ->withIDs(array((int)$id));

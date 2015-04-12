@@ -861,14 +861,6 @@ final class DifferentialRevisionQuery
     }
   }
 
-  private function loadCursorObject($id) {
-    $results = id(new DifferentialRevisionQuery())
-      ->setViewer($this->getPagingViewer())
-      ->withIDs(array((int)$id))
-      ->execute();
-    return head($results);
-  }
-
   protected function buildPagingClause(AphrontDatabaseConnection $conn_r) {
     $default = parent::buildPagingClause($conn_r);
 

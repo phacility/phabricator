@@ -244,6 +244,22 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     );
   }
 
+  protected function loadCursorObject($cursor) {
+    $query = newv(get_class($this), array())
+      ->setViewer($this->getPagingViewer())
+      ->withIDs(array((int)$cursor));
+
+    $object = $query->executeOne();
+    if (!$object) {
+      throw new Exception(
+        pht(
+          'Cursor "%s" does not identify a valid object.',
+          $cursor));
+    }
+
+    return $object;
+  }
+
 
   /**
    * Simplifies the task of constructing a paging clause across multiple

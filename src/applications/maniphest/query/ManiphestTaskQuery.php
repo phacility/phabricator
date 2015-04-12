@@ -949,14 +949,6 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return array_mergev($phids);
   }
 
-  private function loadCursorObject($id) {
-    $results = id(new ManiphestTaskQuery())
-      ->setViewer($this->getPagingViewer())
-      ->withIDs(array((int)$id))
-      ->execute();
-    return head($results);
-  }
-
   protected function getPagingValue($result) {
     $id = $result->getID();
 
