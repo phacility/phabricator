@@ -249,6 +249,8 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       ->setViewer($this->getPagingViewer())
       ->withIDs(array((int)$cursor));
 
+    $this->willExecuteCursorQuery($query);
+
     $object = $query->executeOne();
     if (!$object) {
       throw new Exception(
@@ -258,6 +260,11 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     }
 
     return $object;
+  }
+
+  protected function willExecuteCursorQuery(
+    PhabricatorCursorPagedPolicyAwareQuery $query) {
+    return;
   }
 
 
@@ -446,7 +453,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   /**
    * @task order
    */
-  private function getOrderVector() {
+  protected function getOrderVector() {
     if (!$this->orderVector) {
       $vector = $this->getDefaultOrderVector();
       $vector = PhabricatorQueryOrderVector::newFromVector($vector);

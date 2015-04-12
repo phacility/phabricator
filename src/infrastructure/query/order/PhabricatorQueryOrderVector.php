@@ -92,6 +92,10 @@ final class PhabricatorQueryOrderVector
     return implode(', ', $scalars);
   }
 
+  public function containsKey($key) {
+    return isset($this->items[$key]);
+  }
+
 
 /* -(  Iterator Interface  )------------------------------------------------- */
 
