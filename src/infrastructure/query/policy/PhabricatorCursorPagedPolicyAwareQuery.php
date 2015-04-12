@@ -19,23 +19,35 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   private $orderVector;
   private $builtinOrder;
 
-  protected function getPagingValue($result) {
-    if (!is_object($result)) {
-      // This interface can't be typehinted and PHP gets really angry if we
-      // call a method on a non-object, so add an explicit check here.
-      throw new Exception(pht('Expected object, got "%s"!', gettype($result)));
+  protected function getPageCursors(array $page) {
+    return array(
+      $this->getResultCursor(head($page)),
+      $this->getResultCursor(last($page)),
+    );
+  }
+
+  protected function getResultCursor($object) {
+    if (!is_object($object)) {
+      throw new Exception(
+        pht(
+          'Expected object, got "%s".',
+          gettype($object)));
     }
-    return $result->getID();
+
+    return $object->getID();
   }
 
   protected function nextPage(array $page) {
     // See getPagingViewer() for a description of this flag.
     $this->internalPaging = true;
 
-    if ($this->beforeID) {
-      $this->beforeID = $this->getPagingValue(last($page));
+    if ($this->beforeID !== null) {
+      $page = array_reverse($page, $preserve_keys = true);
+      list($before, $after) = $this->getPageCursors($page);
+      $this->beforeID = $before;
     } else {
-      $this->afterID = $this->getPagingValue(last($page));
+      list($before, $after) = $this->getPageCursors($page);
+      $this->afterID = $after;
     }
   }
 
@@ -113,7 +125,9 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   }
 
   final public function executeWithCursorPager(AphrontCursorPagerView $pager) {
-    $this->setLimit($pager->getPageSize() + 1);
+    $limit = $pager->getPageSize();
+
+    $this->setLimit($limit + 1);
 
     if ($pager->getAfterID()) {
       $this->setAfterID($pager->getAfterID());
@@ -122,17 +136,19 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     }
 
     $results = $this->execute();
+    $count = count($results);
 
     $sliced_results = $pager->sliceResults($results);
-
     if ($sliced_results) {
-      if ($pager->getBeforeID() || (count($results) > $pager->getPageSize())) {
-        $pager->setNextPageID($this->getPagingValue(last($sliced_results)));
+      list($before, $after) = $this->getPageCursors($sliced_results);
+
+      if ($pager->getBeforeID() || ($count > $limit)) {
+        $pager->setNextPageID($after);
       }
 
       if ($pager->getAfterID() ||
-         ($pager->getBeforeID() && (count($results) > $pager->getPageSize()))) {
-        $pager->setPrevPageID($this->getPagingValue(head($sliced_results)));
+         ($pager->getBeforeID() && ($count > $limit))) {
+        $pager->setPrevPageID($before);
       }
     }
 

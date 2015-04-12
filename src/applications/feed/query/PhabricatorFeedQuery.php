@@ -112,7 +112,7 @@ final class PhabricatorFeedQuery
     );
   }
 
-  protected function getPagingValue($item) {
+  protected function getResultCursor($item) {
     if ($item instanceof PhabricatorFeedStory) {
       return $item->getChronologicalKey();
     }

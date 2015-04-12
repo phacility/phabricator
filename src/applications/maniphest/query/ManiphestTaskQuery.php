@@ -896,20 +896,14 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return array_mergev($phids);
   }
 
-  protected function getPagingValue($result) {
+  protected function getResultCursor($result) {
     $id = $result->getID();
 
-    switch ($this->groupBy) {
-      case self::GROUP_NONE:
-      case self::GROUP_STATUS:
-      case self::GROUP_PRIORITY:
-      case self::GROUP_OWNER:
-        return $id;
-      case self::GROUP_PROJECT:
-        return rtrim($id.'.'.$result->getGroupByProjectPHID(), '.');
-      default:
-        throw new Exception("Unknown group query '{$this->groupBy}'!");
+    if ($this->groupBy == self::GROUP_PROJECT) {
+      return rtrim($id.'.'.$result->getGroupByProjectPHID(), '.');;
     }
+
+    return $id;
   }
 
   public function getOrderableColumns() {
