@@ -14,7 +14,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   private $afterID;
   private $beforeID;
   private $applicationSearchConstraints = array();
-  private $applicationSearchOrders = array();
+  protected $applicationSearchOrders = array();
   private $internalPaging;
   private $orderVector;
 
@@ -158,6 +158,10 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    * @return string Alias for the primary table.
    */
   protected function getPrimaryTableAlias() {
+    return null;
+  }
+
+  protected function newResultObject() {
     return null;
   }
 
@@ -546,7 +550,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       return array();
     }
 
-    return array(
+    $columns = array(
       'id' => array(
         'table' => $this->getPrimaryTableAlias(),
         'column' => 'id',
@@ -555,6 +559,32 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         'unique' => true,
       ),
     );
+
+    $object = $this->newResultObject();
+    if ($object instanceof PhabricatorCustomFieldInterface) {
+      $list = PhabricatorCustomField::getObjectFields(
+        $object,
+        PhabricatorCustomField::ROLE_APPLICATIONSEARCH);
+      foreach ($list->getFields() as $field) {
+        $index = $field->buildOrderIndex();
+        if (!$index) {
+          continue;
+        }
+
+        $key = $field->getFieldKey();
+        $digest = $field->getFieldIndex();
+
+        $full_key = 'custom:'.$key;
+        $columns[$full_key] = array(
+          'table' => 'appsearch_order_'.$digest,
+          'column' => 'indexValue',
+          'type' => $index->getIndexValueType(),
+          'null' => 'tail',
+        );
+      }
+    }
+
+    return $columns;
   }
 
 
@@ -961,8 +991,8 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
     foreach ($this->applicationSearchOrders as $key => $order) {
       $table = $order['table'];
-      $alias = 'appsearch_order_'.$key;
       $index = $order['index'];
+      $alias = 'appsearch_order_'.$index;
       $phid_column = $this->getApplicationSearchObjectPHIDColumn();
 
       $joins[] = qsprintf(
@@ -980,51 +1010,27 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     return implode(' ', $joins);
   }
 
-  protected function buildApplicationSearchOrders(
-    AphrontDatabaseConnection $conn_r,
-    $reverse) {
-
-    $orders = array();
-    foreach ($this->applicationSearchOrders as $key => $order) {
-      $alias = 'appsearch_order_'.$key;
-
-      if ($order['ascending'] xor $reverse) {
-        $orders[] = qsprintf($conn_r, '%T.indexValue ASC', $alias);
-      } else {
-        $orders[] = qsprintf($conn_r, '%T.indexValue DESC', $alias);
-      }
-    }
-
-    return $orders;
-  }
-
-  protected function buildApplicationSearchPagination(
-    AphrontDatabaseConnection $conn_r,
-    $cursor) {
+  protected function getPagingValueMapForCustomFields(
+    PhabricatorCustomFieldInterface $object) {
 
     // We have to get the current field values on the cursor object.
     $fields = PhabricatorCustomField::getObjectFields(
-      $cursor,
+      $object,
       PhabricatorCustomField::ROLE_APPLICATIONSEARCH);
     $fields->setViewer($this->getViewer());
-    $fields->readFieldsFromStorage($cursor);
+    $fields->readFieldsFromStorage($object);
 
-    $fields = mpull($fields->getFields(), null, 'getFieldKey');
-
-    $columns = array();
-    foreach ($this->applicationSearchOrders as $key => $order) {
-      $alias = 'appsearch_order_'.$key;
-
-      $field = idx($fields, $order['key']);
-
-      $columns[] = array(
-        'name' => $alias.'.indexValue',
-        'value' => $field->getValueForStorage(),
-        'type' => $order['type'],
-      );
+    $map = array();
+    foreach ($fields->getFields() as $field) {
+      $map['custom:'.$field->getFieldKey()] = $field->getValueForStorage();
     }
 
-    return $columns;
+    return $map;
+  }
+
+  protected function isCustomFieldOrderKey($key) {
+    $prefix = 'custom:';
+    return !strncmp($key, $prefix, strlen($prefix));
   }
 
 }
