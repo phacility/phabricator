@@ -320,6 +320,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
           'type' => 'string',
           'reverse' => 'optional bool',
           'unique' => 'optional bool',
+          'null' => 'optional string|null',
         ));
     }
 
@@ -336,21 +337,36 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     $last_key = last_key($columns);
     foreach ($columns as $key => $column) {
       $type = $column['type'];
-      switch ($type) {
-        case 'null':
-          $value = qsprintf($conn, '%d', ($column['value'] ? 0 : 1));
-          break;
-        case 'int':
-          $value = qsprintf($conn, '%d', $column['value']);
-          break;
-        case 'float':
-          $value = qsprintf($conn, '%f', $column['value']);
-          break;
-        case 'string':
-          $value = qsprintf($conn, '%s', $column['value']);
-          break;
-        default:
-          throw new Exception("Unknown column type '{$type}'!");
+
+      $null = idx($column, 'null');
+      if ($column['value'] === null) {
+        if ($null) {
+          $value = null;
+        } else {
+          throw new Exception(
+            pht(
+              'Column "%s" has null value, but does not specify a null '.
+              'behavior.',
+              $key));
+        }
+      } else {
+        switch ($type) {
+          case 'int':
+            $value = qsprintf($conn, '%d', $column['value']);
+            break;
+          case 'float':
+            $value = qsprintf($conn, '%f', $column['value']);
+            break;
+          case 'string':
+            $value = qsprintf($conn, '%s', $column['value']);
+            break;
+          default:
+            throw new Exception(
+              pht(
+                'Column "%s" has unknown column type "%s".',
+                $column['column'],
+                $type));
+        }
       }
 
       $is_column_reversed = idx($column, 'reverse', false);
@@ -366,23 +382,67 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         $field = qsprintf($conn, '%T', $column_name);
       }
 
-      if ($type == 'null') {
-        $field = qsprintf($conn, '(%Q IS NULL)', $field);
+      $parts = array();
+      if ($null) {
+        $can_page_if_null = ($null === 'head');
+        $can_page_if_nonnull = ($null === 'tail');
+
+        if ($reverse) {
+          $can_page_if_null = !$can_page_if_null;
+          $can_page_if_nonnull = !$can_page_if_nonnull;
+        }
+
+        $subclause = null;
+        if ($can_page_if_null && $value === null) {
+          $parts[] = qsprintf(
+            $conn,
+            '(%Q IS NOT NULL)',
+            $field);
+        } else if ($can_page_if_nonnull && $value !== null) {
+          $parts[] = qsprintf(
+            $conn,
+            '(%Q IS NULL)',
+            $field);
+        }
       }
 
-      $clause[] = qsprintf(
-        $conn,
-        '%Q %Q %Q',
-        $field,
-        $reverse ? '>' : '<',
-        $value);
-      $clauses[] = '('.implode(') AND (', $clause).')';
+      if ($value !== null) {
+        $parts[] = qsprintf(
+          $conn,
+          '%Q %Q %Q',
+          $field,
+          $reverse ? '>' : '<',
+          $value);
+      }
 
-      $accumulated[] = qsprintf(
-        $conn,
-        '%Q = %Q',
-        $field,
-        $value);
+      if ($parts) {
+        if (count($parts) > 1) {
+          $clause[] = '('.implode(') OR (', $parts).')';
+        } else {
+          $clause[] = head($parts);
+        }
+      }
+
+      if ($clause) {
+        if (count($clause) > 1) {
+          $clauses[] = '('.implode(') AND (', $clause).')';
+        } else {
+          $clauses[] = head($clause);
+        }
+      }
+
+      if ($value === null) {
+        $accumulated[] = qsprintf(
+          $conn,
+          '%Q IS NULL',
+          $field);
+      } else {
+        $accumulated[] = qsprintf(
+          $conn,
+          '%Q = %Q',
+          $field,
+          $value);
+      }
     }
 
     return '('.implode(') OR (', $clauses).')';
@@ -576,8 +636,28 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         $field = qsprintf($conn, '%T', $column);
       }
 
-      if (idx($part, 'type') === 'null') {
-        $field = qsprintf($conn, '(%Q IS NULL)', $field);
+      $null = idx($part, 'null');
+      if ($null) {
+        switch ($null) {
+          case 'head':
+            $null_field = qsprintf($conn, '(%Q IS NULL)', $field);
+            break;
+          case 'tail':
+            $null_field = qsprintf($conn, '(%Q IS NOT NULL)', $field);
+            break;
+          default:
+            throw new Exception(
+              pht(
+                'NULL value "%s" is invalid. Valid values are "head" and '.
+                '"tail".',
+                $null));
+        }
+
+        if ($descending) {
+          $sql[] = qsprintf($conn, '%Q DESC', $null_field);
+        } else {
+          $sql[] = qsprintf($conn, '%Q ASC', $null_field);
+        }
       }
 
       if ($descending) {

@@ -56,10 +56,10 @@ final class PhrequentUserTimeQuery
         $this->setOrderVector(array('start', 'id'));
         break;
       case self::ORDER_ENDED_ASC:
-        $this->setOrderVector(array('-ongoing', '-end', '-id'));
+        $this->setOrderVector(array('-end', '-id'));
         break;
       case self::ORDER_ENDED_DESC:
-        $this->setOrderVector(array('ongoing', 'end', 'id'));
+        $this->setOrderVector(array('end', 'id'));
         break;
       default:
         throw new Exception(pht('Unknown order "%s".', $order));
@@ -125,13 +125,10 @@ final class PhrequentUserTimeQuery
         'column' => 'dateStarted',
         'type' => 'int',
       ),
-      'ongoing' => array(
-        'column' => 'dateEnded',
-        'type' => 'null',
-      ),
       'end' => array(
         'column' => 'dateEnded',
         'type' => 'int',
+        'null' => 'head',
       ),
     );
   }
@@ -141,7 +138,6 @@ final class PhrequentUserTimeQuery
     return array(
       'id' => $usertime->getID(),
       'start' => $usertime->getDateStarted(),
-      'ongoing' => $usertime->getDateEnded(),
       'end' => $usertime->getDateEnded(),
     );
   }

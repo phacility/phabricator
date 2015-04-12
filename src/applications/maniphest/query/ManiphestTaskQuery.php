@@ -969,13 +969,11 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   }
 
   protected function buildPagingClause(AphrontDatabaseConnection $conn_r) {
-    $default = parent::buildPagingClause($conn_r);
-
     $before_id = $this->getBeforeID();
     $after_id = $this->getAfterID();
 
     if (!$before_id && !$after_id) {
-      return $default;
+      return '';
     }
 
     $cursor_id = nonempty($before_id, $after_id);
@@ -1004,28 +1002,24 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         );
         break;
       case self::GROUP_OWNER:
-        $columns[] = array(
-          'table' => 'task',
-          'column' => 'ownerOrdering',
-          'value' => strlen($group_id),
-          'type' => 'null',
-        );
+        $value = null;
         if ($group_id) {
           $paging_users = id(new PhabricatorPeopleQuery())
             ->setViewer($this->getViewer())
             ->withPHIDs(array($group_id))
             ->execute();
-          if (!$paging_users) {
-            return null;
+          if ($paging_users) {
+            $value = head($paging_users)->getUsername();
           }
-          $columns[] = array(
-            'table' => 'task',
-            'column' => 'ownerOrdering',
-            'value' => head($paging_users)->getUsername(),
-            'type' => 'string',
-            'reverse' => true,
-          );
         }
+        $columns[] = array(
+          'table' => 'task',
+          'column' => 'ownerOrdering',
+          'value' => $value,
+          'type' => 'string',
+          'null' => 'head',
+          'reverse' => true,
+        );
         break;
       case self::GROUP_STATUS:
         $columns[] = array(
@@ -1036,28 +1030,25 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         );
         break;
       case self::GROUP_PROJECT:
-        $columns[] = array(
-          'table' => 'projectGroupName',
-          'column' => 'indexedObjectName',
-          'value' => strlen($group_id),
-          'type' => 'null',
-        );
+        $value = null;
         if ($group_id) {
           $paging_projects = id(new PhabricatorProjectQuery())
             ->setViewer($this->getViewer())
             ->withPHIDs(array($group_id))
             ->execute();
-          if (!$paging_projects) {
-            return null;
+          if ($paging_projects) {
+            $value = head($paging_projects)->getName();
           }
-          $columns[] = array(
-            'table' => 'projectGroupName',
-            'column' => 'indexedObjectName',
-            'value' => head($paging_projects)->getName(),
-            'type' => 'string',
-            'reverse' => true,
-          );
         }
+
+        $columns[] = array(
+          'table' => 'projectGroupName',
+          'column' => 'indexedObjectName',
+          'value' => $value,
+          'type' => 'string',
+          'null' => 'head',
+          'reverse' => true,
+        );
         break;
       default:
         throw new Exception("Unknown group query '{$this->groupBy}'!");

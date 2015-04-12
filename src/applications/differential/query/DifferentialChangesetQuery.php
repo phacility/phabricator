@@ -150,8 +150,4 @@ final class DifferentialChangesetQuery
     return 'PhabricatorDifferentialApplication';
   }
 
-  protected function getReversePaging() {
-    return true;
-  }
-
 }
