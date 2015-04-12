@@ -111,12 +111,6 @@
   overflow: hidden;
 }
 
-.device-phone .phui-document-content .phabricator-action-list-view {
-  margin: 0;
-  border-bottom: 1px solid #c0c5d1;
-  background: {$lightgreybackground};
-}
-
 .phui-document-content .phabricator-remarkup {
   padding: 16px;
 }
