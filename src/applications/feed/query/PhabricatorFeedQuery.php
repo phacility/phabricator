@@ -90,10 +90,26 @@ final class PhabricatorFeedQuery
     }
   }
 
-  protected function getPagingColumn() {
-    return ($this->filterPHIDs
-      ? 'ref.chronologicalKey'
-      : 'story.chronologicalKey');
+  protected function getDefaultOrderVector() {
+    return array('key');
+  }
+
+  public function getOrderableColumns() {
+    $table = ($this->filterPHIDs ? 'ref' : 'story');
+    return array(
+      'key' => array(
+        'table' => $table,
+        'column' => 'chronologicalKey',
+        'type' => 'int',
+        'unique' => true,
+      ),
+    );
+  }
+
+  protected function getPagingValueMap($cursor, array $keys) {
+    return array(
+      'key' => $cursor,
+    );
   }
 
   protected function getPagingValue($item) {
