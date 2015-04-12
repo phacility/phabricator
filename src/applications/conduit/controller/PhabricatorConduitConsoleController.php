@@ -48,7 +48,7 @@ final class PhabricatorConduitConsoleController
         break;
     }
 
-    $error_types = $method->defineErrorTypes();
+    $error_types = $method->getErrorTypes();
     $error_types['ERR-CONDUIT-CORE'] = pht('See error message for details.');
     $error_description = array();
     foreach ($error_types as $error => $meaning) {
@@ -70,7 +70,7 @@ final class PhabricatorConduitConsoleController
       ->appendChild(
         id(new AphrontFormStaticControl())
           ->setLabel('Returns')
-          ->setValue($method->defineReturnType()))
+          ->setValue($method->getReturnType()))
       ->appendChild(
         id(new AphrontFormMarkupControl())
           ->setLabel('Errors')
@@ -80,7 +80,7 @@ final class PhabricatorConduitConsoleController
         '<strong>JSON</strong>. For instance, to enter a list, type: '.
         '<tt>["apple", "banana", "cherry"]</tt>'));
 
-    $params = $method->defineParamTypes();
+    $params = $method->getParamTypes();
     foreach ($params as $param => $desc) {
       $form->appendChild(
         id(new AphrontFormTextControl())

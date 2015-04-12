@@ -11,7 +11,7 @@ final class DiffusionExistsQueryConduitAPIMethod
     return 'Determine if code exists in a version control system.';
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'bool';
   }
 

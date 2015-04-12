@@ -10,7 +10,7 @@ final class UserQueryConduitAPIMethod extends UserConduitAPIMethod {
     return 'Query users.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'usernames'    => 'optional list<string>',
       'emails'       => 'optional list<string>',
@@ -22,11 +22,11 @@ final class UserQueryConduitAPIMethod extends UserConduitAPIMethod {
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'list<dict>';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
       'ERR-INVALID-PARAMETER' => 'Missing or malformed parameter.',
     );

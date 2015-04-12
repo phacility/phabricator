@@ -12,17 +12,17 @@ final class ReleephProjectInfoConduitAPIMethod extends ReleephConduitAPIMethod {
       'for a given Arcanist project.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'arcProjectName' => 'optional string',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'dict<string, wild>';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
       'ERR_UNKNOWN_ARC' =>
         "The given Arcanist project name doesn't exist in the ".

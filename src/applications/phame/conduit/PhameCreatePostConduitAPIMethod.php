@@ -14,7 +14,7 @@ final class PhameCreatePostConduitAPIMethod extends PhameConduitAPIMethod {
     return self::METHOD_STATUS_UNSTABLE;
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'blogPHID'      => 'required phid',
       'title'         => 'required string',
@@ -25,11 +25,11 @@ final class PhameCreatePostConduitAPIMethod extends PhameConduitAPIMethod {
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'list<dict>';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
       'ERR-INVALID-PARAMETER' =>
         pht('Missing or malformed parameter.'),

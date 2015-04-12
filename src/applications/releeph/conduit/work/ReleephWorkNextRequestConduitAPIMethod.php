@@ -20,18 +20,18 @@ final class ReleephWorkNextRequestConduitAPIMethod
       'and pick and revert ReleephRequests';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'branchPHID'  => 'required phid',
       'seen'        => 'required map<string, bool>',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return '';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
       'ERR-NOT-PUSHER' =>
         'You are not listed as a pusher for thie Releeph project!',

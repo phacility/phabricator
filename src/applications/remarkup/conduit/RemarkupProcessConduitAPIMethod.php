@@ -14,18 +14,18 @@ final class RemarkupProcessConduitAPIMethod extends ConduitAPIMethod {
     return 'Process text through remarkup in phabricator context.';
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
       'ERR-NO-CONTENT' => 'Content may not be empty.',
       'ERR-INVALID-ENGINE' => 'Invalid markup engine.',
     );
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     $available_contexts = array_keys($this->getEngineContexts());
     $available_const = $this->formatStringConstants($available_contexts);
 

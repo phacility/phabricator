@@ -11,7 +11,7 @@ final class AlmanacQueryDevicesConduitAPIMethod
     return pht('Query Almanac devices.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'ids' => 'optional list<id>',
       'phids' => 'optional list<phid>',
@@ -19,12 +19,8 @@ final class AlmanacQueryDevicesConduitAPIMethod
     ) + self::getPagerParamTypes();
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'list<wild>';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

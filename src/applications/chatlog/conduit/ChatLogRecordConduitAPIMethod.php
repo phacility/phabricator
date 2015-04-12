@@ -14,18 +14,14 @@ final class ChatLogRecordConduitAPIMethod extends ChatLogConduitAPIMethod {
     return 'Record chatter.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'logs' => 'required list<dict>',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'list<id>';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

@@ -15,7 +15,7 @@ final class DiffusionDiffQueryConduitAPIMethod
       '(optional) commit.';
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'array';
   }
 

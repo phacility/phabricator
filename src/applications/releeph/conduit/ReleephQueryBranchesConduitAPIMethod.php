@@ -11,7 +11,7 @@ final class ReleephQueryBranchesConduitAPIMethod
     return pht('Query information about Releeph branches.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'ids' => 'optional list<id>',
       'phids' => 'optional list<phid>',
@@ -19,12 +19,8 @@ final class ReleephQueryBranchesConduitAPIMethod
     ) + $this->getPagerParamTypes();
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'query-results';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

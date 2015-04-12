@@ -10,18 +10,18 @@ final class FileInfoConduitAPIMethod extends FileConduitAPIMethod {
     return 'Get information about a file.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'phid' => 'optional phid',
       'id'   => 'optional id',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
       'ERR-NOT-FOUND'     => 'No such file exists.',
     );

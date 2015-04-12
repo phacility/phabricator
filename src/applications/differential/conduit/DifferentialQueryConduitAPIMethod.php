@@ -11,7 +11,7 @@ final class DifferentialQueryConduitAPIMethod
     return 'Query Differential revisions which match certain criteria.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     $hash_types = ArcanistDifferentialRevisionHash::getTypes();
     $hash_const = $this->formatStringConstants($hash_types);
 
@@ -48,11 +48,11 @@ final class DifferentialQueryConduitAPIMethod
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'list<dict>';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
       'ERR-INVALID-PARAMETER' => 'Missing or malformed parameter.',
     );

@@ -13,12 +13,29 @@ abstract class ConduitAPIMethod
   const METHOD_STATUS_DEPRECATED  = 'deprecated';
 
   abstract public function getMethodDescription();
-  abstract public function defineParamTypes();
-  abstract public function defineReturnType();
-  abstract public function defineErrorTypes();
+  abstract protected function defineParamTypes();
+  abstract protected function defineReturnType();
+
+  protected function defineErrorTypes() {
+    return array();
+  }
+
   abstract protected function execute(ConduitAPIRequest $request);
 
+
   public function __construct() {}
+
+  public function getParamTypes() {
+    return $this->defineParamTypes();
+  }
+
+  public function getReturnType() {
+    return $this->defineReturnType();
+  }
+
+  public function getErrorTypes() {
+    return $this->defineErrorTypes();
+  }
 
   /**
    * This is mostly for compatibility with
@@ -53,7 +70,7 @@ abstract class ConduitAPIMethod
   }
 
   public function getErrorDescription($error_code) {
-    return idx($this->defineErrorTypes(), $error_code, 'Unknown Error');
+    return idx($this->getErrorTypes(), $error_code, 'Unknown Error');
   }
 
   public function getRequiredScope() {

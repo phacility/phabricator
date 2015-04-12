@@ -11,18 +11,14 @@ final class FileQueryChunksConduitAPIMethod
     return pht('Get information about file chunks.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'filePHID' => 'phid',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'list<wild>';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

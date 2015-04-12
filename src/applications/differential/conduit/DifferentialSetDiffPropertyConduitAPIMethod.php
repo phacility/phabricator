@@ -11,7 +11,7 @@ final class DifferentialSetDiffPropertyConduitAPIMethod
     return 'Attach properties to Differential diffs.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'diff_id' => 'required diff_id',
       'name'    => 'required string',
@@ -19,11 +19,11 @@ final class DifferentialSetDiffPropertyConduitAPIMethod
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'void';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
       'ERR_NOT_FOUND' => 'Diff was not found.',
     );

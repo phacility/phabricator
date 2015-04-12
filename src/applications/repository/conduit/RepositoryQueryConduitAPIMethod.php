@@ -19,7 +19,7 @@ final class RepositoryQueryConduitAPIMethod
     return pht('Query repositories.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'ids' => 'optional list<int>',
       'phids' => 'optional list<phid>',
@@ -30,13 +30,8 @@ final class RepositoryQueryConduitAPIMethod
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'list<dict>';
-  }
-
-  public function defineErrorTypes() {
-    return array(
-    );
   }
 
   protected function execute(ConduitAPIRequest $request) {

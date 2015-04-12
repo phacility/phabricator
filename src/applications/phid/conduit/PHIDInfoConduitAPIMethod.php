@@ -18,17 +18,17 @@ final class PHIDInfoConduitAPIMethod extends PHIDConduitAPIMethod {
     return 'Retrieve information about an arbitrary PHID.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'phid' => 'required phid',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict<string, wild>';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
       'ERR-BAD-PHID' => 'No such object exists.',
     );

@@ -11,11 +11,11 @@ final class DiffusionQueryCommitsConduitAPIMethod
     return pht('Retrieve information about commits.');
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'map<string, dict>';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'ids'               => 'optional list<int>',
       'phids'             => 'optional list<phid>',
@@ -24,10 +24,6 @@ final class DiffusionQueryCommitsConduitAPIMethod
       'needMessages'      => 'optional bool',
       'bypassCache'       => 'optional bool',
     ) + $this->getPagerParamTypes();
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

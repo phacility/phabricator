@@ -20,18 +20,14 @@ final class DifferentialGetAllDiffsConduitAPIMethod
     return 'Load all diffs for given revisions from Differential.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'revision_ids' => 'required list<int>',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'dict';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

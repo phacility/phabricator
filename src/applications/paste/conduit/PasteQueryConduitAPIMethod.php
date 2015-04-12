@@ -10,7 +10,7 @@ final class PasteQueryConduitAPIMethod extends PasteConduitAPIMethod {
     return 'Query Pastes.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'ids'           => 'optional list<int>',
       'phids'         => 'optional list<phid>',
@@ -20,12 +20,8 @@ final class PasteQueryConduitAPIMethod extends PasteConduitAPIMethod {
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'list<dict>';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

@@ -11,7 +11,7 @@ final class DifferentialCreateRawDiffConduitAPIMethod
     return pht('Create a new Differential diff from a raw diff source.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'diff' => 'required string',
       'repositoryPHID' => 'optional string',
@@ -19,13 +19,8 @@ final class DifferentialCreateRawDiffConduitAPIMethod
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
-  }
-
-  public function defineErrorTypes() {
-    return array(
-    );
   }
 
   protected function execute(ConduitAPIRequest $request) {

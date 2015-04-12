@@ -15,10 +15,10 @@ final class ConduitCall {
   private $user;
 
   public function __construct($method, array $params) {
-    $this->method     = $method;
-    $this->handler    = $this->buildMethodHandler($method);
+    $this->method = $method;
+    $this->handler = $this->buildMethodHandler($method);
 
-    $param_types = $this->handler->defineParamTypes();
+    $param_types = $this->handler->getParamTypes();
 
     foreach ($param_types as $key => $spec) {
       if (ConduitAPIMethod::getParameterMetadataKey($key) !== null) {

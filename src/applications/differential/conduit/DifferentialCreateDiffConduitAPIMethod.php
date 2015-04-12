@@ -11,7 +11,7 @@ final class DifferentialCreateDiffConduitAPIMethod
     return 'Create a new Differential diff.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
 
     $vcs_const = $this->formatStringConstants(
       array(
@@ -51,13 +51,8 @@ final class DifferentialCreateDiffConduitAPIMethod
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
-  }
-
-  public function defineErrorTypes() {
-    return array(
-    );
   }
 
   protected function execute(ConduitAPIRequest $request) {

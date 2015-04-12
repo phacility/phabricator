@@ -11,19 +11,14 @@ final class ManiphestGetTaskTransactionsConduitAPIMethod
     return 'Retrieve Maniphest Task Transactions.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'ids' => 'required list<int>',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty list<dict<string, wild>>';
-  }
-
-  public function defineErrorTypes() {
-    return array(
-    );
   }
 
   protected function execute(ConduitAPIRequest $request) {

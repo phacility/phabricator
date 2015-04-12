@@ -10,19 +10,15 @@ final class ProjectCreateConduitAPIMethod extends ProjectConduitAPIMethod {
     return pht('Create a project.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'name'       => 'required string',
       'members'    => 'optional list<phid>',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'dict';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

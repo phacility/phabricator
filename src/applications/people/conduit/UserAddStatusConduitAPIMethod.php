@@ -20,7 +20,7 @@ final class UserAddStatusConduitAPIMethod extends UserConduitAPIMethod {
       'Calendar application.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     $status_const = $this->formatStringConstants(array('away', 'sporadic'));
 
     return array(
@@ -31,11 +31,11 @@ final class UserAddStatusConduitAPIMethod extends UserConduitAPIMethod {
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'void';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
       'ERR-BAD-EPOCH' => "'toEpoch' must be bigger than 'fromEpoch'.",
       'ERR-OVERLAP'   =>
