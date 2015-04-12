@@ -786,7 +786,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ->setViewer($this->getRequest()->getUser())
       ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
       ->withUpdatedEpochBetween($recent, null)
-      ->setOrder(DifferentialRevisionQuery::ORDER_PATH_MODIFIED)
+      ->setOrder(DifferentialRevisionQuery::ORDER_MODIFIED)
       ->setLimit(10)
       ->needFlags(true)
       ->needDrafts(true)

@@ -44,14 +44,6 @@ final class DifferentialRevisionQuery
   private $order            = 'order-modified';
   const ORDER_MODIFIED      = 'order-modified';
   const ORDER_CREATED       = 'order-created';
-  /**
-   * This is essentially a denormalized copy of the revision modified time that
-   * should perform better for path queries with a LIMIT. Critically, when you
-   * browse "/", every revision in that repository for all time will match so
-   * the query benefits from being able to stop before fully materializing the
-   * result set.
-   */
-  const ORDER_PATH_MODIFIED = 'order-path-modified';
 
   private $needRelationships  = false;
   private $needActiveDiffs    = false;
@@ -894,14 +886,6 @@ final class DifferentialRevisionQuery
           'type' => 'int',
         );
         break;
-      case self::ORDER_PATH_MODIFIED:
-        $columns[] = array(
-          'table' => 'p',
-          'column' => 'epoch',
-          'value' => $cursor->getDateCreated(),
-          'type' => 'int',
-        );
-        break;
     }
 
     $columns[] = array(
@@ -932,12 +916,6 @@ final class DifferentialRevisionQuery
           return 'id';
         }
         return 'r.id';
-      case self::ORDER_PATH_MODIFIED:
-        if (!$this->pathIDs) {
-          throw new Exception(
-            'To use ORDER_PATH_MODIFIED, you must specify withPath().');
-        }
-        return 'p.epoch';
       default:
         throw new Exception("Unknown query order constant '{$this->order}'.");
     }
