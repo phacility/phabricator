@@ -17,6 +17,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   protected $applicationSearchOrders = array();
   private $internalPaging;
   private $orderVector;
+  private $builtinOrder;
 
   protected function getPagingValue($result) {
     if (!is_object($result)) {
@@ -427,6 +428,134 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
 
   /**
+   * Select a result ordering.
+   *
+   * This is a high-level method which selects an ordering from a predefined
+   * list of builtin orders, as provided by @{method:getBuiltinOrders}. These
+   * options are user-facing and not exhaustive, but are generally convenient
+   * and meaningful.
+   *
+   * You can also use @{method:setOrderVector} to specify a low-level ordering
+   * across individual orderable columns. This offers greater control but is
+   * also more involved.
+   *
+   * @param string Key of a builtin order supported by this query.
+   * @return this
+   * @task order
+   */
+  public function setOrder($order) {
+    $orders = $this->getBuiltinOrders();
+
+    if (empty($orders[$order])) {
+      throw new Exception(
+        pht(
+          'Query "%s" does not support a builtin order "%s". Supported orders '.
+          'are: %s.',
+          get_class($this),
+          $order,
+          implode(', ', array_keys($orders))));
+    }
+
+    $this->builtinOrder = $order;
+    $this->orderVector = null;
+
+    return $this;
+  }
+
+
+  /**
+   * Select the default builtin result ordering.
+   *
+   * This sets the result order to the default order among the builtin result
+   * orders (see @{method:getBuiltinOrders}). This is often the same as the
+   * query's builtin default order vector, but some objects have different
+   * default vectors (which are internally-facing) and builtin orders (which
+   * are user-facing).
+   *
+   * For example, repositories sort by ID internally (which is efficient and
+   * consistent), but sort by most recent commit as a default builtin (which
+   * better aligns with user expectations).
+   *
+   * @return this
+   */
+  public function setDefaultBuiltinOrder() {
+    return $this->setOrder(head_key($this->getBuiltinOrders()));
+  }
+
+
+  /**
+   * Get builtin orders for this class.
+   *
+   * In application UIs, we want to be able to present users with a small
+   * selection of meaningful order options (like "Order by Title") rather than
+   * an exhaustive set of column ordering options.
+   *
+   * Meaningful user-facing orders are often really orders across multiple
+   * columns: for example, a "title" ordering is usually implemented as a
+   * "title, id" ordering under the hood.
+   *
+   * Builtin orders provide a mapping from convenient, understandable
+   * user-facing orders to implementations.
+   *
+   * A builtin order should provide these keys:
+   *
+   *   - `vector` (`list<string>`): The actual order vector to use.
+   *   - `name` (`string`): Human-readable order name.
+   *
+   * @return map<string, wild> Map from builtin order keys to specification.
+   * @task order
+   */
+  public function getBuiltinOrders() {
+    $orders = array(
+      'newest' => array(
+        'vector' => array('id'),
+        'name' => pht('Creation (Newest First)'),
+        'aliases' => array('created'),
+      ),
+      'oldest' => array(
+        'vector' => array('-id'),
+        'name' => pht('Creation (Oldest First)'),
+      ),
+    );
+
+    $object = $this->newResultObject();
+    if ($object instanceof PhabricatorCustomFieldInterface) {
+      $list = PhabricatorCustomField::getObjectFields(
+        $object,
+        PhabricatorCustomField::ROLE_APPLICATIONSEARCH);
+      foreach ($list->getFields() as $field) {
+        $index = $field->buildOrderIndex();
+        if (!$index) {
+          continue;
+        }
+
+        $key = $field->getFieldKey();
+        $digest = $field->getFieldIndex();
+
+        $full_key = 'custom:'.$key;
+        $orders[$full_key] = array(
+          'vector' => array($full_key, 'id'),
+          'name' => $field->getFieldName(),
+        );
+      }
+    }
+
+    return $orders;
+  }
+
+
+  /**
+   * Set a low-level column ordering.
+   *
+   * This is a low-level method which offers granular control over column
+   * ordering. In most cases, applications can more easily use
+   * @{method:setOrder} to choose a high-level builtin order.
+   *
+   * To set an order vector, specify a list of order keys as provided by
+   * @{method:getOrderableColumns}.
+   *
+   * @param PhabricatorQueryOrderVector|list<string> List of order keys.
+   * @return this
    * @task order
    */
   public function setOrderVector($vector) {
@@ -485,11 +614,19 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
 
   /**
+   * Get the effective order vector.
+   *
+   * @return PhabricatorQueryOrderVector Effective vector.
    * @task order
    */
   protected function getOrderVector() {
     if (!$this->orderVector) {
-      $vector = $this->getDefaultOrderVector();
+      if ($this->builtinOrder !== null) {
+        $builtin_order = idx($this->getBuiltinOrders(), $this->builtinOrder);
+        $vector = $builtin_order['vector'];
+      } else {
+        $vector = $this->getDefaultOrderVector();
+      }
       $vector = PhabricatorQueryOrderVector::newFromVector($vector);
 
       // We call setOrderVector() here to apply checks to the default vector.

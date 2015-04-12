@@ -153,7 +153,7 @@ final class PhabricatorOwnersListController
     $callsigns = array('' => pht('(Any Repository)'));
     $repositories = id(new PhabricatorRepositoryQuery())
       ->setViewer($user)
-      ->setOrder(PhabricatorRepositoryQuery::ORDER_CALLSIGN)
+      ->setOrder('callsign')
       ->execute();
     foreach ($repositories as $repository) {
       $callsigns[$repository->getCallsign()] =

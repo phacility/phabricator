@@ -9,6 +9,7 @@
  * @task builtin    Builtin Queries
  * @task uri        Query URIs
  * @task dates      Date Filters
+ * @task order      Result Ordering
  * @task read       Reading Utilities
  * @task exec       Paging and Executing Queries
  * @task render     Rendering Results
@@ -576,6 +577,24 @@ abstract class PhabricatorApplicationSearchEngine {
           ->setValue($end_str));
   }
 
+
+/* -(  Result Ordering  )---------------------------------------------------- */
+
+  protected function appendOrderFieldsToForm(
+    AphrontFormView $form,
+    PhabricatorSavedQuery $saved,
+    PhabricatorCursorPagedPolicyAwareQuery $query) {
+
+    $orders = $query->getBuiltinOrders();
+    $orders = ipull($orders, 'name');
+
+    $form->appendControl(
+      id(new AphrontFormSelectControl())
+        ->setLabel(pht('Order'))
+        ->setName('order')
+        ->setOptions($orders)
+        ->setValue($saved->getParameter('order')));
+  }
 
 /* -(  Paging and Executing Queries  )--------------------------------------- */
 

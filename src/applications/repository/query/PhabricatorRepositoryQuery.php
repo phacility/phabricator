@@ -23,12 +23,6 @@ final class PhabricatorRepositoryQuery
   const STATUS_ALL = 'status-all';
   private $status = self::STATUS_ALL;
 
-  const ORDER_CREATED = 'order-created';
-  const ORDER_COMMITTED = 'order-committed';
-  const ORDER_CALLSIGN = 'order-callsign';
-  const ORDER_NAME = 'order-name';
-  const ORDER_SIZE = 'order-size';
-
   const HOSTED_PHABRICATOR = 'hosted-phab';
   const HOSTED_REMOTE = 'hosted-remote';
   const HOSTED_ALL = 'hosted-all';
@@ -124,27 +118,25 @@ final class PhabricatorRepositoryQuery
     return $this;
   }
 
-  public function setOrder($order) {
-    switch ($order) {
-      case self::ORDER_CREATED:
-        $this->setOrderVector(array('id'));
-        break;
-      case self::ORDER_COMMITTED:
-        $this->setOrderVector(array('committed', 'id'));
-        break;
-      case self::ORDER_CALLSIGN:
-        $this->setOrderVector(array('callsign'));
-        break;
-      case self::ORDER_NAME:
-        $this->setOrderVector(array('name', 'id'));
-        break;
-      case self::ORDER_SIZE:
-        $this->setOrderVector(array('size', 'id'));
-        break;
-      default:
-        throw new Exception(pht('Unknown order "%s".', $order));
-    }
-    return $this;
+  public function getBuiltinOrders() {
+    return array(
+      'committed' => array(
+        'vector' => array('committed', 'id'),
+        'name' => pht('Most Recent Commit'),
+      ),
+      'name' => array(
+        'vector' => array('name', 'id'),
+        'name' => pht('Name'),
+      ),
+      'callsign' => array(
+        'vector' => array('callsign'),
+        'name' => pht('Callsign'),
+      ),
+      'size' => array(
+        'vector' => array('size', 'id'),
+        'name' => pht('Size'),
+      ),
+    ) + parent::getBuiltinOrders();
   }
 
   public function getIdentifierMap() {
