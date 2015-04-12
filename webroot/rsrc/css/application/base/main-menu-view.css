@@ -148,15 +148,15 @@
   font-size: 13px;
   border-width: 2px;
   border-color: rgba(0,0,0,.6);
-  border-radius: 3px 0 0 3px;
+  border-radius: 3px;
   background-color: rgba(0,0,0,.5);
   opacity: .8;
   height: 28px;
   line-height: 12px;
   box-shadow: 0px 1px 1px rgba(128, 128, 128, 0.25);
-  padding: 6px;
+  padding: 6px 30px 6px 6px;
   float: left;
-  width: 175px;
+  width: 205px;
   left: 0;
 }
 
@@ -192,14 +192,13 @@
   box-shadow: none;
   text-shadow: none;
   min-width: 0;
-  height: 28px;
-  width: 30px;
-  top: 8px;
+  height: 24px;
+  width: 28px;
+  top: 10px;
   right: -7px;
   margin: 0 8px 0 0;
   padding: 0;
-  border-bottom-left-radius: 0;
-  border-top-left-radius: 0;
+  border-radius: 0;
 }
 
 .phabricator-main-menu-search button:hover {
@@ -209,6 +208,8 @@
 .device .phabricator-main-menu-search button {
   top: 6px;
   border-radius: 0;
+  height: 28px;
+  right: -6px;
 }
 
 .phabricator-main-menu-search-target div.jx-typeahead-results {
