@@ -119,7 +119,65 @@ final class PhabricatorConduitConsoleController
     $form_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->setFormErrors($errors)
-      ->setForm($form);
+      ->appendChild($form);
+
+    $content = array();
+
+    $query = $method->newQueryObject();
+    if ($query) {
+      $orders = $query->getBuiltinOrders();
+
+      $rows = array();
+      foreach ($orders as $key => $order) {
+        $rows[] = array(
+          $key,
+          $order['name'],
+          implode(', ', $order['vector']),
+        );
+      }
+
+      $table = id(new AphrontTableView($rows))
+        ->setHeaders(
+          array(
+            pht('Key'),
+            pht('Description'),
+            pht('Columns'),
+          ))
+        ->setColumnClasses(
+          array(
+            'pri',
+            '',
+            'wide',
+          ));
+      $content[] = id(new PHUIObjectBoxView())
+        ->setHeaderText(pht('Builtin Orders'))
+        ->appendChild($table);
+
+      $columns = $query->getOrderableColumns();
+
+      $rows = array();
+      foreach ($columns as $key => $column) {
+        $rows[] = array(
+          $key,
+          idx($column, 'unique') ? pht('Yes') : pht('No'),
+        );
+      }
+
+      $table = id(new AphrontTableView($rows))
+        ->setHeaders(
+          array(
+            pht('Key'),
+            pht('Unique'),
+          ))
+        ->setColumnClasses(
+          array(
+            'pri',
+            'wide',
+          ));
+      $content[] = id(new PHUIObjectBoxView())
+        ->setHeaderText(pht('Column Orders'))
+        ->appendChild($table);
+    }
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($method->getAPIMethodName());
@@ -128,6 +186,7 @@ final class PhabricatorConduitConsoleController
       array(
         $crumbs,
         $form_box,
+        $content,
       ),
       array(
         'title' => $method->getAPIMethodName(),

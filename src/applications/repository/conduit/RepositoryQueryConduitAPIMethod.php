@@ -19,6 +19,10 @@ final class RepositoryQueryConduitAPIMethod
     return pht('Query repositories.');
   }
 
+  public function newQueryObject() {
+    return new PhabricatorRepositoryQuery();
+  }
+
   protected function defineParamTypes() {
     return array(
       'ids' => 'optional list<int>',
@@ -35,8 +39,7 @@ final class RepositoryQueryConduitAPIMethod
   }
 
   protected function execute(ConduitAPIRequest $request) {
-    $query = id(new PhabricatorRepositoryQuery())
-      ->setViewer($request->getUser());
+    $query = $this->newQueryForRequest($request);
 
     $ids = $request->getValue('ids', array());
     if ($ids) {
@@ -68,7 +71,8 @@ final class RepositoryQueryConduitAPIMethod
       $query->withUUIDs($uuids);
     }
 
-    $repositories = $query->execute();
+    $pager = $this->newPager($request);
+    $repositories = $query->executeWithCursorPager($pager);
 
     $results = array();
     foreach ($repositories as $repository) {
