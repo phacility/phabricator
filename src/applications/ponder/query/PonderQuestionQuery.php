@@ -141,6 +141,7 @@ final class PonderQuestionQuery
     if ($this->needAnswers) {
       $aquery = id(new PonderAnswerQuery())
         ->setViewer($this->getViewer())
+        ->setOrderVector(array('-id'))
         ->withQuestionIDs(mpull($questions, 'getID'));
 
       if ($this->needViewerVotes) {

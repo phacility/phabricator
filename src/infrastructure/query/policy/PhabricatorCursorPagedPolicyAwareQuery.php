@@ -18,10 +18,6 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   private $internalPaging;
   private $orderVector;
 
-  protected function getPagingColumn() {
-    return 'id';
-  }
-
   protected function getPagingValue($result) {
     if (!is_object($result)) {
       // This interface can't be typehinted and PHP gets really angry if we
@@ -29,10 +25,6 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       throw new Exception(pht('Expected object, got "%s"!', gettype($result)));
     }
     return $result->getID();
-  }
-
-  protected function getReversePaging() {
-    return false;
   }
 
   protected function nextPage(array $page) {
@@ -171,28 +163,6 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
   protected function buildPagingClause(AphrontDatabaseConnection $conn) {
     $orderable = $this->getOrderableColumns();
-
-    // TODO: Remove this once subqueries modernize.
-    if (!$orderable) {
-      if ($this->beforeID) {
-        return qsprintf(
-          $conn,
-          '%Q %Q %s',
-          $this->getPagingColumn(),
-          $this->getReversePaging() ? '<' : '>',
-          $this->beforeID);
-      } else if ($this->afterID) {
-        return qsprintf(
-          $conn,
-          '%Q %Q %s',
-          $this->getPagingColumn(),
-          $this->getReversePaging() ? '>' : '<',
-          $this->afterID);
-      } else {
-        return null;
-      }
-    }
-
     $vector = $this->getOrderVector();
 
     if ($this->beforeID !== null) {
@@ -543,13 +513,6 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    * @task order
    */
   public function getOrderableColumns() {
-    // TODO: Remove this once all subclasses move off the old stuff.
-    if ($this->getPagingColumn() !== 'id') {
-      // This class has bad old custom logic around paging, so return nothing
-      // here. This deactivates the new order code.
-      return array();
-    }
-
     $columns = array(
       'id' => array(
         'table' => $this->getPrimaryTableAlias(),
@@ -593,26 +556,6 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    */
   final protected function buildOrderClause(AphrontDatabaseConnection $conn) {
     $orderable = $this->getOrderableColumns();
-
-    // TODO: Remove this once all subclasses move off the old stuff. We'll
-    // only enter this block for code using older ordering mechanisms. New
-    // code should expose an orderable column list.
-    if (!$orderable) {
-      if ($this->beforeID) {
-        return qsprintf(
-          $conn,
-          'ORDER BY %Q %Q',
-          $this->getPagingColumn(),
-          $this->getReversePaging() ? 'DESC' : 'ASC');
-      } else {
-        return qsprintf(
-          $conn,
-          'ORDER BY %Q %Q',
-          $this->getPagingColumn(),
-          $this->getReversePaging() ? 'ASC' : 'DESC');
-      }
-    }
-
     $vector = $this->getOrderVector();
 
     $parts = array();
@@ -636,10 +579,6 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     array $parts) {
 
     $is_query_reversed = false;
-    if ($this->getReversePaging()) {
-      $is_query_reversed = !$is_query_reversed;
-    }
-
     if ($this->getBeforeID()) {
       $is_query_reversed = !$is_query_reversed;
     }

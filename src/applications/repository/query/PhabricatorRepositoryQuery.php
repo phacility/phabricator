@@ -312,7 +312,7 @@ final class PhabricatorRepositoryQuery
     return $repositories;
   }
 
-  public function getPrimaryTableAlias() {
+  protected function getPrimaryTableAlias() {
     return 'r';
   }
 

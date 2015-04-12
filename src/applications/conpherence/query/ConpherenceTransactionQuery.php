@@ -7,8 +7,9 @@ final class ConpherenceTransactionQuery
     return new ConpherenceTransaction();
   }
 
-  protected function getReversePaging() {
-    return false;
+  protected function getDefaultOrderVector() {
+    // TODO: Can we get rid of this?
+    return array('-id');
   }
 
 }

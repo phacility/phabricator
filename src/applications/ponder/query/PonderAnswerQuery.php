@@ -118,10 +118,6 @@ final class PonderAnswerQuery
     return $answers;
   }
 
-  protected function getReversePaging() {
-    return true;
-  }
-
   public function getQueryApplicationClass() {
     return 'PhabricatorPonderApplication';
   }

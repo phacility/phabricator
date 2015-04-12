@@ -112,8 +112,9 @@ final class DifferentialHunkQuery
     return 'PhabricatorDifferentialApplication';
   }
 
-  protected function getReversePaging() {
-    return true;
+  protected function getDefaultOrderVector() {
+    // TODO: Do we need this?
+    return array('-id');
   }
 
 }
