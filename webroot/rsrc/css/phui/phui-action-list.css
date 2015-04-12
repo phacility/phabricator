@@ -21,7 +21,9 @@
   display: block;
 }
 
-.device .phabricator-action-list-view.phabricator-action-list-toggle {
+.device .phabricator-action-list-view.phabricator-action-list-toggle,
+.device-desktop .phui-document-content
+  .phabricator-action-list-view.phabricator-action-list-toggle {
   display: block;
   width: 200px;
   border: 1px solid {$lightblueborder};

@@ -205,7 +205,6 @@ final class PhrictionDocumentController
     $actions->setID($action_id);
 
     $page_content = id(new PHUIDocumentView())
-      ->setOffset(true)
       ->setFontKit(PHUIDocumentView::FONT_SOURCE_SANS)
       ->setHeader($header)
       ->setActionListID($action_id)
@@ -218,20 +217,11 @@ final class PhrictionDocumentController
           $core_content,
         ));
 
-    $core_page = phutil_tag(
-      'div',
-        array(
-          'class' => 'phriction-offset',
-        ),
-        array(
-          $page_content,
-          $children,
-        ));
-
     return $this->buildApplicationPage(
       array(
         $crumbs->render(),
-        $core_page,
+        $page_content,
+        $children,
       ),
       array(
         'pageObjects' => array($document->getPHID()),
@@ -442,7 +432,6 @@ final class PhrictionDocumentController
     );
 
     return id(new PHUIDocumentView())
-      ->setOffset(true)
       ->appendChild($content);
   }
 

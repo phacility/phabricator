@@ -115,19 +115,16 @@
   padding: 16px;
 }
 
+.phui-document-view .phui-header-action-links .phui-mobile-menu {
+  display: block;
+}
+
 .device-phone .phui-document-content .phabricator-remarkup {
   padding: 8px;
 }
 
 .device-desktop .phui-document-content .phabricator-action-list-view {
-  position: absolute;
-  top: 16px;
-  right: -160px;
-  float: none;
-  border-radius: 0;
-  box-shadow: none;
-  border: none;
-  width: 160px;
+  display: none;
 }
 
 .device-phone .phui-document-content .phabricator-remarkup-toc {
