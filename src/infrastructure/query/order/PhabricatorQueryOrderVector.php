@@ -72,7 +72,7 @@ final class PhabricatorQueryOrderVector
             'Order vector "%s" specifies order "%s" twice. Each component '.
             'of an ordering must be unique.',
             implode(', ', $vector),
-            $item));
+            $item->getOrderKey()));
       }
 
       $items[$item->getOrderKey()] = $item;
@@ -82,6 +82,14 @@ final class PhabricatorQueryOrderVector
     $obj->items = $items;
     $obj->keys = array_keys($items);
     return $obj;
+  }
+
+  public function getAsString() {
+    $scalars = array();
+    foreach ($this->items as $item) {
+      $scalars[] = $item->getAsScalar();
+    }
+    return implode(', ', $scalars);
   }
 
 

@@ -5,6 +5,7 @@
  * performant than offset-based paging in the presence of policy filtering.
  *
  * @task appsearch Integration with ApplicationSearch
+ * @task paging Paging
  * @task order Result Ordering
  */
 abstract class PhabricatorCursorPagedPolicyAwareQuery
@@ -111,28 +112,6 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     }
   }
 
-  protected function buildPagingClause(
-    AphrontDatabaseConnection $conn_r) {
-
-    if ($this->beforeID) {
-      return qsprintf(
-        $conn_r,
-        '%Q %Q %s',
-        $this->getPagingColumn(),
-        $this->getReversePaging() ? '<' : '>',
-        $this->beforeID);
-    } else if ($this->afterID) {
-      return qsprintf(
-        $conn_r,
-        '%Q %Q %s',
-        $this->getPagingColumn(),
-        $this->getReversePaging() ? '>' : '<',
-        $this->afterID);
-    }
-
-    return null;
-  }
-
   final protected function didLoadResults(array $results) {
     if ($this->beforeID) {
       $results = array_reverse($results, $preserve_keys = true);
@@ -165,6 +144,89 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     }
 
     return $sliced_results;
+  }
+
+
+/* -(  Paging  )------------------------------------------------------------- */
+
+
+  protected function buildPagingClause(AphrontDatabaseConnection $conn) {
+    $orderable = $this->getOrderableColumns();
+
+    // TODO: Remove this once subqueries modernize.
+    if (!$orderable) {
+      if ($this->beforeID) {
+        return qsprintf(
+          $conn,
+          '%Q %Q %s',
+          $this->getPagingColumn(),
+          $this->getReversePaging() ? '<' : '>',
+          $this->beforeID);
+      } else if ($this->afterID) {
+        return qsprintf(
+          $conn,
+          '%Q %Q %s',
+          $this->getPagingColumn(),
+          $this->getReversePaging() ? '>' : '<',
+          $this->afterID);
+      } else {
+        return null;
+      }
+    }
+
+    $vector = $this->getOrderVector();
+
+    if ($this->beforeID !== null) {
+      $cursor = $this->beforeID;
+      $reversed = true;
+    } else if ($this->afterID !== null) {
+      $cursor = $this->afterID;
+      $reversed = false;
+    } else {
+      // No paging is being applied to this query so we do not need to
+      // construct a paging clause.
+      return '';
+    }
+
+    $keys = array();
+    foreach ($vector as $order) {
+      $keys[] = $order->getOrderKey();
+    }
+
+    $value_map = $this->getPagingValueMap($cursor, $keys);
+
+    $columns = array();
+    foreach ($vector as $order) {
+      $key = $order->getOrderKey();
+
+      if (!array_key_exists($key, $value_map)) {
+        throw new Exception(
+          pht(
+            'Query "%s" failed to return a value from getPagingValueMap() '.
+            'for column "%s".',
+            get_class($this),
+            $key));
+      }
+
+      $column = $orderable[$key];
+      $column['value'] = $value_map[$key];
+
+      $columns[] = $column;
+    }
+
+    return $this->buildPagingClauseFromMultipleColumns(
+      $conn,
+      $columns,
+      array(
+        'reversed' => $reversed,
+      ));
+  }
+
+  protected function getPagingValueMap($cursor, array $keys) {
+    // TODO: This is a hack to make this work with existing classes for now.
+    return array(
+      'id' => $cursor,
+    );
   }
 
 
@@ -214,11 +276,12 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       PhutilTypeSpec::checkMap(
         $column,
         array(
-          'table' => 'optional string',
+          'table' => 'optional string|null',
           'column' => 'string',
           'value' => 'wild',
           'type' => 'string',
           'reverse' => 'optional bool',
+          'unique' => 'optional bool',
         ));
     }
 
@@ -298,8 +361,11 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     $vector = PhabricatorQueryOrderVector::newFromVector($vector);
 
     $orderable = $this->getOrderableColumns();
+
+    // Make sure that all the components identify valid columns.
+    $unique = array();
     foreach ($vector as $order) {
-      $key = $vector->getOrderKey();
+      $key = $order->getOrderKey();
       if (empty($orderable[$key])) {
         $valid = implode(', ', array_keys($orderable));
         throw new Exception(
@@ -307,7 +373,37 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
             'This query ("%s") does not support sorting by order key "%s". '.
             'Supported orders are: %s.',
             get_class($this),
+            $key,
             $valid));
+      }
+
+      $unique[$key] = idx($orderable[$key], 'unique', false);
+    }
+
+    // Make sure that the last column is unique so that this is a strong
+    // ordering which can be used for paging.
+    $last = last($unique);
+    if ($last !== true) {
+      throw new Exception(
+        pht(
+          'Order vector "%s" is invalid: the last column in an order must '.
+          'be a column with unique values, but "%s" is not unique.',
+          $vector->getAsString(),
+          last_key($unique)));
+    }
+
+    // Make sure that other columns are not unique; an ordering like "id, name"
+    // does not make sense because only "id" can ever have an effect.
+    array_pop($unique);
+    foreach ($unique as $key => $is_unique) {
+      if ($is_unique) {
+        throw new Exception(
+          pht(
+            'Order vector "%s" is invalid: only the last column in an order '.
+            'may be unique, but "%s" is a unique column and not the last '.
+            'column in the order.',
+            $vector->getAsString(),
+            $key));
       }
     }
 
@@ -323,7 +419,10 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     if (!$this->orderVector) {
       $vector = $this->getDefaultOrderVector();
       $vector = PhabricatorQueryOrderVector::newFromVector($vector);
-      $this->orderVector = $vector;
+
+      // We call setOrderVector() here to apply checks to the default vector.
+      // This catches any errors in the implementation.
+      $this->setOrderVector($vector);
     }
 
     return $this->orderVector;
@@ -354,6 +453,8 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         'table' => null,
         'column' => 'id',
         'reverse' => false,
+        'type' => 'int',
+        'unique' => true,
       ),
     );
   }
