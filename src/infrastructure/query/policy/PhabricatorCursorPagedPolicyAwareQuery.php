@@ -570,18 +570,20 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       $table = idx($part, 'table');
       $column = $part['column'];
 
-      if ($descending) {
-        if ($table !== null) {
-          $sql[] = qsprintf($conn, '%T.%T DESC', $table, $column);
-        } else {
-          $sql[] = qsprintf($conn, '%T DESC', $column);
-        }
+      if ($table !== null) {
+        $field = qsprintf($conn, '%T.%T', $table, $column);
       } else {
-        if ($table !== null) {
-          $sql[] = qsprintf($conn, '%T.%T ASC', $table, $column);
-        } else {
-          $sql[] = qsprintf($conn, '%T ASC', $column);
-        }
+        $field = qsprintf($conn, '%T', $column);
+      }
+
+      if (idx($part, 'type') === 'null') {
+        $field = qsprintf($conn, '(%Q IS NULL)', $field);
+      }
+
+      if ($descending) {
+        $sql[] = qsprintf($conn, '%Q DESC', $field);
+      } else {
+        $sql[] = qsprintf($conn, '%Q ASC', $field);
       }
     }
 
