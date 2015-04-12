@@ -288,12 +288,8 @@ final class PhabricatorPeopleQuery
     return $this->formatWhereClause($where);
   }
 
-  protected function getPagingColumn() {
-    return 'user.id';
-  }
-
-  protected function getApplicationSearchObjectPHIDColumn() {
-    return 'user.phid';
+  protected function getPrimaryTableAlias() {
+    return 'user';
   }
 
   public function getQueryApplicationClass() {

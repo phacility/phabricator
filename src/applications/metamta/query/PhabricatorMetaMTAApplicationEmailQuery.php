@@ -114,12 +114,8 @@ final class PhabricatorMetaMTAApplicationEmailQuery
     return $this->formatWhereClause($where);
   }
 
-  protected function getPagingColumn() {
-    return 'appemail.id';
-  }
-
-  protected function getApplicationSearchObjectPHIDColumn() {
-    return 'appemail.phid';
+  protected function getPrimaryTableAlias() {
+    return 'appemail';
   }
 
   public function getQueryApplicationClass() {

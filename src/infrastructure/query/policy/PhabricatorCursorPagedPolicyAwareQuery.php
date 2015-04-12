@@ -147,6 +147,21 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   }
 
 
+  /**
+   * Return the alias this query uses to identify the primary table.
+   *
+   * Some automatic query constructions may need to be qualified with a table
+   * alias if the query performs joins which make column names ambiguous. If
+   * this is the case, return the alias for the primary table the query
+   * uses; generally the object table which has `id` and `phid` columns.
+   *
+   * @return string Alias for the primary table.
+   */
+  protected function getPrimaryTableAlias() {
+    return null;
+  }
+
+
 /* -(  Paging  )------------------------------------------------------------- */
 
 
@@ -450,7 +465,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
     return array(
       'id' => array(
-        'table' => null,
+        'table' => $this->getPrimaryTableAlias(),
         'column' => 'id',
         'reverse' => false,
         'type' => 'int',
@@ -657,15 +672,23 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
   /**
    * Get the name of the query's primary object PHID column, for constructing
-   * JOIN clauses. Normally (and by default) this is just `"phid"`, but if the
-   * query construction requires a table alias it may be something like
-   * `"task.phid"`.
+   * JOIN clauses. Normally (and by default) this is just `"phid"`, but it may
+   * be something more exotic.
+   *
+   * See @{method:getPrimaryTableAlias} if the column needs to be qualified with
+   * a table alias.
    *
    * @return string Column name.
    * @task appsearch
    */
   protected function getApplicationSearchObjectPHIDColumn() {
-    return 'phid';
+    if ($this->getPrimaryTableAlias()) {
+      $prefix = $this->getPrimaryTableAlias().'.';
+    } else {
+      $prefix = '';
+    }
+
+    return $prefix.'phid';
   }
 
 

@@ -174,8 +174,8 @@ final class PhabricatorSlowvoteQuery
     return implode(' ', $joins);
   }
 
-  protected function getPagingColumn() {
-    return 'p.id';
+  protected function getPrimaryTableAlias() {
+    return 'p';
   }
 
   public function getQueryApplicationClass() {

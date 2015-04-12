@@ -1137,8 +1137,8 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       ));
   }
 
-  protected function getApplicationSearchObjectPHIDColumn() {
-    return 'task.phid';
+  protected function getPrimaryTableAlias() {
+    return 'task';
   }
 
   public function getQueryApplicationClass() {

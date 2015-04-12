@@ -225,8 +225,8 @@ final class PhabricatorMacroQuery
     return $macros;
   }
 
-  protected function getPagingColumn() {
-    return 'm.id';
+  protected function getPrimaryTableAlias() {
+    return 'm';
   }
 
   public function getQueryApplicationClass() {

@@ -380,8 +380,8 @@ final class PhabricatorProjectQuery
     return 'PhabricatorProjectApplication';
   }
 
-  protected function getApplicationSearchObjectPHIDColumn() {
-    return 'p.phid';
+  protected function getPrimaryTableAlias() {
+    return 'p';
   }
 
 }
