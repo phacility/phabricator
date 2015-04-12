@@ -1005,16 +1005,18 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         break;
       case self::GROUP_PRIORITY:
         $columns[] = array(
-          'name' => 'task.priority',
+          'table' => 'task',
+          'column' => 'priority',
           'value' => (int)$group_id,
           'type' => 'int',
         );
         break;
       case self::GROUP_OWNER:
         $columns[] = array(
-          'name' => '(task.ownerOrdering IS NULL)',
-          'value' => (int)(strlen($group_id) ? 0 : 1),
-          'type' => 'int',
+          'table' => 'task',
+          'column' => 'ownerOrdering',
+          'value' => strlen($group_id),
+          'type' => 'null',
         );
         if ($group_id) {
           $paging_users = id(new PhabricatorPeopleQuery())
@@ -1025,7 +1027,8 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
             return null;
           }
           $columns[] = array(
-            'name' => 'task.ownerOrdering',
+            'table' => 'task',
+            'column' => 'ownerOrdering',
             'value' => head($paging_users)->getUsername(),
             'type' => 'string',
             'reverse' => true,
@@ -1034,16 +1037,18 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         break;
       case self::GROUP_STATUS:
         $columns[] = array(
-          'name' => 'task.status',
+          'table' => 'task',
+          'column' => 'status',
           'value' => $group_id,
           'type' => 'string',
         );
         break;
       case self::GROUP_PROJECT:
         $columns[] = array(
-          'name' => '(projectGroupName.indexedObjectName IS NULL)',
-          'value' => (int)(strlen($group_id) ? 0 : 1),
-          'type' => 'int',
+          'table' => 'projectGroupName',
+          'column' => 'indexedObjectName',
+          'value' => strlen($group_id),
+          'type' => 'null',
         );
         if ($group_id) {
           $paging_projects = id(new PhabricatorProjectQuery())
@@ -1054,7 +1059,8 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
             return null;
           }
           $columns[] = array(
-            'name' => 'projectGroupName.indexedObjectName',
+            'table' => 'projectGroupName',
+            'column' => 'indexedObjectName',
             'value' => head($paging_projects)->getName(),
             'type' => 'string',
             'reverse' => true,
@@ -1073,18 +1079,21 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         case self::ORDER_PRIORITY:
           if ($this->groupBy != self::GROUP_PRIORITY) {
             $columns[] = array(
-              'name' => 'task.priority',
+              'table' => 'task',
+              'column' => 'priority',
               'value' => (int)$cursor->getPriority(),
               'type' => 'int',
             );
           }
           $columns[] = array(
-            'name' => 'task.subpriority',
+            'table' => 'task',
+            'column' => 'subpriority',
             'value' => $cursor->getSubpriority(),
             'type' => 'float',
           );
           $columns[] = array(
-            'name' => 'task.dateModified',
+            'table' => 'task',
+            'column' => 'dateModified',
             'value' => (int)$cursor->getDateModified(),
             'type' => 'int',
           );
@@ -1094,14 +1103,16 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
           break;
         case self::ORDER_MODIFIED:
           $columns[] = array(
-            'name' => 'task.dateModified',
+            'table' => 'task',
+            'column' => 'dateModified',
             'value' => (int)$cursor->getDateModified(),
             'type' => 'int',
           );
           break;
         case self::ORDER_TITLE:
           $columns[] = array(
-            'name' => 'task.title',
+            'table' => 'task',
+            'column' => 'title',
             'value' => $cursor->getTitle(),
             'type' => 'string',
           );
@@ -1112,7 +1123,8 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     }
 
     $columns[] = array(
-      'name' => 'task.id',
+      'table' => 'task',
+      'column' => 'id',
       'value' => $cursor->getID(),
       'type' => 'int',
     );

@@ -181,13 +181,15 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    *     $conn_r,
    *     array(
    *       array(
-   *         'name' => 'title',
+   *         'table' => 't',
+   *         'column' => 'title',
    *         'type' => 'string',
    *         'value' => $cursor->getTitle(),
    *         'reverse' => true,
    *       ),
    *       array(
-   *         'name' => 'id',
+   *         'table' => 't',
+   *         'column' => 'id',
    *         'type' => 'int',
    *         'value' => $cursor->getID(),
    *       ),
@@ -212,7 +214,8 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       PhutilTypeSpec::checkMap(
         $column,
         array(
-          'name' => 'string',
+          'table' => 'optional string',
+          'column' => 'string',
           'value' => 'wild',
           'type' => 'string',
           'reverse' => 'optional bool',
@@ -231,10 +234,11 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     $accumulated = array();
     $last_key = last_key($columns);
     foreach ($columns as $key => $column) {
-      $name = $column['name'];
-
       $type = $column['type'];
       switch ($type) {
+        case 'null':
+          $value = qsprintf($conn, '%d', ($column['value'] ? 0 : 1));
+          break;
         case 'int':
           $value = qsprintf($conn, '%d', $column['value']);
           break;
@@ -252,10 +256,23 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       $reverse = ($is_query_reversed xor $is_column_reversed);
 
       $clause = $accumulated;
+
+      $table_name = idx($column, 'table');
+      $column_name = $column['column'];
+      if ($table_name !== null) {
+        $field = qsprintf($conn, '%T.%T', $table_name, $column_name);
+      } else {
+        $field = qsprintf($conn, '%T', $column_name);
+      }
+
+      if ($type == 'null') {
+        $field = qsprintf($conn, '(%Q IS NULL)', $field);
+      }
+
       $clause[] = qsprintf(
         $conn,
         '%Q %Q %Q',
-        $name,
+        $field,
         $reverse ? '>' : '<',
         $value);
       $clauses[] = '('.implode(') AND (', $clause).')';
@@ -263,7 +280,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       $accumulated[] = qsprintf(
         $conn,
         '%Q = %Q',
-        $name,
+        $field,
         $value);
     }
 

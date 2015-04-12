@@ -896,14 +896,16 @@ final class DifferentialRevisionQuery
         return $default;
       case self::ORDER_MODIFIED:
         $columns[] = array(
-          'name' => 'r.dateModified',
+          'table' => 'r',
+          'column' => 'dateModified',
           'value' => $cursor->getDateModified(),
           'type' => 'int',
         );
         break;
       case self::ORDER_PATH_MODIFIED:
         $columns[] = array(
-          'name' => 'p.epoch',
+          'table' => 'p',
+          'column' => 'epoch',
           'value' => $cursor->getDateCreated(),
           'type' => 'int',
         );
@@ -911,7 +913,8 @@ final class DifferentialRevisionQuery
     }
 
     $columns[] = array(
-      'name' => 'r.id',
+      'table' => 'r',
+      'column' => 'id',
       'value' => $cursor->getID(),
       'type' => 'int',
     );

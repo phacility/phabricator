@@ -383,7 +383,8 @@ final class PhabricatorRepositoryQuery
     }
 
     $id_column = array(
-      'name' => 'r.id',
+      'table' => 'r',
+      'column' => 'id',
       'type' => 'int',
       'value' => $cursor->getID(),
     );
@@ -396,7 +397,8 @@ final class PhabricatorRepositoryQuery
           return null;
         }
         $columns[] = array(
-          'name' => 's.epoch',
+          'table' => 's',
+          'column' => 'epoch',
           'type' => 'int',
           'value' => $commit->getEpoch(),
         );
@@ -404,7 +406,8 @@ final class PhabricatorRepositoryQuery
         break;
       case self::ORDER_CALLSIGN:
         $columns[] = array(
-          'name' => 'r.callsign',
+          'table' => 'r',
+          'column' => 'callsign',
           'type' => 'string',
           'value' => $cursor->getCallsign(),
           'reverse' => true,
@@ -412,7 +415,8 @@ final class PhabricatorRepositoryQuery
         break;
       case self::ORDER_NAME:
         $columns[] = array(
-          'name' => 'r.name',
+          'table' => 'r',
+          'column' => 'name',
           'type' => 'string',
           'value' => $cursor->getName(),
           'reverse' => true,
@@ -421,7 +425,8 @@ final class PhabricatorRepositoryQuery
         break;
       case self::ORDER_SIZE:
         $columns[] = array(
-          'name' => 's.size',
+          'table' => 's',
+          'column' => 'size',
           'type' => 'int',
           'value' => $cursor->getCommitCount(),
         );
