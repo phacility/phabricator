@@ -155,11 +155,8 @@ JX.behavior('conpherence-menu', function(config) {
   }
 
   function updatePageData(data) {
-    var uri_suffix = _thread.selected + '/';
-    if (data.use_base_uri) {
-      uri_suffix = '';
-    }
-    JX.History.replace(config.baseURI + uri_suffix);
+    var uri = '/Z' + _thread.selected;
+    JX.History.replace(uri);
     if (data.title) {
       JX.Title.setTitle(data.title);
     } else if (_thread.node) {

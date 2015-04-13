@@ -408,7 +408,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
       array(
         'name' => pht('View in Conpherence'),
         'disabled' => false,
-        'href' => '/conpherence/'.$conpherence->getID().'/',
+        'href' => '/'.$conpherence->getMonogram(),
         'icon' => 'fa-comments',
         'key' => 'go_conpherence',
       ),

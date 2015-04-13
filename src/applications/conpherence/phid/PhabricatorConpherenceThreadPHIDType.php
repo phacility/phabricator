@@ -31,7 +31,7 @@ final class PhabricatorConpherenceThreadPHIDType extends PhabricatorPHIDType {
       $data = $thread->getDisplayData($query->getViewer());
       $handle->setName($data['title']);
       $handle->setFullName($data['title']);
-      $handle->setURI('/conpherence/'.$thread->getID().'/');
+      $handle->setURI('/'.$thread->getMonogram());
     }
   }
 

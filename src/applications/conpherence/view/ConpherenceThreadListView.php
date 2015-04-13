@@ -70,7 +70,7 @@ final class ConpherenceThreadListView extends AphrontView {
 
     $user = $this->getUser();
 
-    $uri = $this->baseURI.$thread->getID().'/';
+    $uri = '/'.$thread->getMonogram();
     $data = $thread->getDisplayData($user);
     $icon = null;
     if ($thread->getIsRoom()) {
