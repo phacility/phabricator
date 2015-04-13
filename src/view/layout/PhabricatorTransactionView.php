@@ -121,7 +121,10 @@ final class PhabricatorTransactionView extends AphrontView {
         $anchor,
         phutil_tag(
           'a',
-          array('href'  => '#'.$this->anchorName),
+          array(
+            'href'  => '#'.$this->anchorName,
+            'class' => 'anchor-link',
+          ),
           $this->anchorText));
     }
 

@@ -52,7 +52,7 @@ JX.behavior('conpherence-menu', function(config) {
     var messages_root = JX.DOM.find(root, 'div', 'conpherence-message-pane');
     var messages = JX.DOM.find(messages_root, 'div', 'conpherence-messages');
     JX.DOM.appendContent(messages, JX.$H(r.transactions));
-    scrollbar.scrollTo(messages.scrollHeight);
+    _scrollMessageWindow();
   });
   threadManager.setWillSendMessageCallback(function () {
     var root = JX.DOM.find(document, 'div', 'conpherence-layout');
@@ -74,7 +74,7 @@ JX.behavior('conpherence-menu', function(config) {
         // Ignore; maybe no files widget
       }
       JX.DOM.appendContent(messages, JX.$H(r.transactions));
-      scrollbar.scrollTo(messages.scrollHeight);
+      _scrollMessageWindow();
 
       if (fileWidget) {
         JX.DOM.setContent(
@@ -321,9 +321,17 @@ JX.behavior('conpherence-menu', function(config) {
         buildDeviceWidgetSelector : build_device_widget_selector
       });
   }
+  var _firstScroll = true;
   function _scrollMessageWindow() {
     var root = JX.DOM.find(document, 'div', 'conpherence-layout');
     var messages_root = JX.DOM.find(root, 'div', 'conpherence-messages');
+    if (_firstScroll) {
+      _firstScroll = false;
+      // let the standard #anchor tech take over
+      if (window.location.hash) {
+        return;
+      }
+    }
     scrollbar.scrollTo(messages_root.scrollHeight);
   }
   function _focusTextarea() {
@@ -377,7 +385,7 @@ JX.behavior('conpherence-menu', function(config) {
     new JX.Workflow.newFromForm(form, data)
       .setHandler(JX.bind(this, function(r) {
         JX.DOM.appendContent(messages, JX.$H(r.transactions));
-        scrollbar.scrollTo(messages.scrollHeight);
+        _scrollMessageWindow();
 
         JX.DOM.setContent(
           header,

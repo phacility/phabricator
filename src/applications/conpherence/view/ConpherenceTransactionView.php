@@ -5,6 +5,7 @@ final class ConpherenceTransactionView extends AphrontView {
   private $conpherenceTransaction;
   private $handles;
   private $markupEngine;
+  private $renderAnchors = true;
   private $showImages = true;
   private $showContentSource = true;
 
@@ -50,6 +51,15 @@ final class ConpherenceTransactionView extends AphrontView {
     return $this->showContentSource;
   }
 
+  public function setRenderAnchors($bool) {
+    $this->renderAnchors = $bool;
+    return $this;
+  }
+
+  private function getRenderAnchors() {
+    return $this->renderAnchors;
+  }
+
   public function render() {
     $user = $this->getUser();
     $transaction = $this->getConpherenceTransaction();
@@ -78,9 +88,17 @@ final class ConpherenceTransactionView extends AphrontView {
     $transaction->setHandles($handles);
     $author = $handles[$transaction->getAuthorPHID()];
     $transaction_view = id(new PhabricatorTransactionView())
-      ->setUser($user)
-      ->setEpoch($transaction->getDateCreated())
-      ->setTimeOnly(true);
+      ->setUser($user);
+    if ($this->getRenderAnchors()) {
+      $transaction_view
+        ->setAnchor(
+          $transaction->getID(),
+          phabricator_time($transaction->getDateCreated(), $user));
+    } else {
+      $transaction_view
+        ->setEpoch($transaction->getDateCreated())
+        ->setTimeOnly(true);
+    }
     if ($this->getShowContentSource()) {
       $transaction_view->setContentSource($transaction->getContentSource());
     }
@@ -169,6 +187,7 @@ final class ConpherenceTransactionView extends AphrontView {
       ->setHandles($handles)
       ->setShowImages($full_display)
       ->setShowContentSource($full_display)
+      ->setRenderAnchors($full_display)
       ->setMarkupEngine($engine);
     foreach ($transactions as $transaction) {
       if ($previous_transaction) {
@@ -192,6 +211,7 @@ final class ConpherenceTransactionView extends AphrontView {
         ->setConpherenceTransaction($transaction)
         ->setHandles($handles)
         ->setMarkupEngine($engine)
+        ->setRenderAnchors($full_display)
         ->setShowImages($full_display)
         ->setShowContentSource($full_display)
         ->render();

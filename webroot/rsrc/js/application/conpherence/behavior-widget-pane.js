@@ -210,7 +210,6 @@ JX.behavior('conpherence-widget-pane', function(config) {
         // as a widget, but shown always on the desktop
         if (widget == 'conpherence-message-pane') {
           JX.$(widget).style.display = 'block';
-          JX.Stratcom.invoke('conpherence-redraw-thread', null, {});
         }
         continue;
       }

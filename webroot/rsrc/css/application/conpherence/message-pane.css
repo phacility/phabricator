@@ -151,6 +151,21 @@
   margin: 0 10px 0 0;
 }
 
+.conpherence-message-pane .conpherence-comment.anchor-target,
+.conpherence-message-pane .conpherence-edited.anchor-target {
+  background: #fdf5d4;
+}
+
+.conpherence-message-pane .conpherence-comment.anchor-target {
+  margin: 4px 8px 4px 8px;
+  padding: 2px 4px 2px 4px;
+}
+
+.conpherence-message-pane .conpherence-edited.anchor-target {
+  margin: 0px 8px 0px 8px;
+  padding: 0px 4px 0px 4px;
+}
+
 .conpherence-message-pane .phabricator-transaction-detail {
   border-width: 0;
   margin-left: 45px;
@@ -220,6 +235,7 @@
 }
 
 .conpherence-message-pane .phabricator-transaction-info,
+.conpherence-message-pane .anchor-link,
 .conpherence-message-pane .phabricator-content-source-view {
   color: {$lightbluetext};
   line-height: 16px;
@@ -228,9 +244,13 @@
 
 .conpherence-message-pane .phabricator-transaction-header,
 .conpherence-message-pane .phabricator-transaction-info,
+.conpherence-message-pane .anchor-link,
 .conpherence-message-pane .phabricator-transaction-content {
   background: none;
   padding: 0;
+}
+.conpherence-message-pane .anchor-link {
+  font-weight: normal;
 }
 
 .conpherence-message-pane .phabricator-transaction-content {

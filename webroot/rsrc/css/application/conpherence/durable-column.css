@@ -198,10 +198,15 @@
 }
 
 .conpherence-durable-column-transactions .phabricator-transaction-detail
-.phabricator-transaction-header .phabricator-transaction-info {
+.phabricator-transaction-header .phabricator-transaction-info,
+.phabricator-transaction-header .anchor-link {
   color: {$lightbluetext};
   float: none;
   font-size: 12px;
+}
+
+.phabricator-transaction-header .anchor-link {
+  font-weight: normal;
 }
 
 .conpherence-durable-column-transactions .phabricator-transaction-detail
