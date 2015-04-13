@@ -16,6 +16,7 @@ final class ConpherenceColumnViewController extends
       $latest_conpherences = id(new ConpherenceThreadQuery())
         ->setViewer($user)
         ->withPHIDs($conpherence_phids)
+        ->needTransactions(true)
         ->needParticipantCache(true)
         ->execute();
       $latest_conpherences = mpull($latest_conpherences, null, 'getPHID');

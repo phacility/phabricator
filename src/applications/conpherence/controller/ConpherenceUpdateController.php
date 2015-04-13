@@ -380,16 +380,14 @@ final class ConpherenceUpdateController
     $need_widget_data = false;
     $need_transactions = false;
     $need_participant_cache = true;
+    $need_transactions = true;
     switch ($action) {
       case ConpherenceUpdateActions::METADATA:
-        $need_transactions = true;
         break;
       case ConpherenceUpdateActions::LOAD:
-        $need_transactions = true;
         break;
       case ConpherenceUpdateActions::MESSAGE:
       case ConpherenceUpdateActions::ADD_PERSON:
-        $need_transactions = true;
         $need_widget_data = true;
         break;
       case ConpherenceUpdateActions::REMOVE_PERSON:

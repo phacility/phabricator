@@ -100,6 +100,7 @@ final class ConpherenceListController extends ConpherenceController {
         } else {
           $thread = ConpherenceThread::initializeNewThread($user);
           $thread->attachHandles(array());
+          $thread->attachTransactions(array());
           $thread->makeEphemeral();
           $layout->setHeader(
             $this->buildHeaderPaneContent($thread, array()));
@@ -137,6 +138,7 @@ final class ConpherenceListController extends ConpherenceController {
       $conpherences = id(new ConpherenceThreadQuery())
         ->setViewer($user)
         ->withPHIDs($conpherence_phids)
+        ->needTransactions(true)
         ->needParticipantCache(true)
         ->execute();
 
