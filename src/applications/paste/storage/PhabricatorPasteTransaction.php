@@ -7,6 +7,10 @@ final class PhabricatorPasteTransaction
   const TYPE_TITLE = 'paste.title';
   const TYPE_LANGUAGE = 'paste.language';
 
+  const MAILTAG_CONTENT = 'paste-content';
+  const MAILTAG_OTHER = 'paste-other';
+  const MAILTAG_COMMENT = 'paste-comment';
+
   public function getApplicationName() {
     return 'pastebin';
   }
@@ -180,6 +184,24 @@ final class PhabricatorPasteTransaction
     }
 
     return parent::renderChangeDetails($viewer);
+  }
+
+  public function getMailTags() {
+    $tags = array();
+    switch ($this->getTransactionType()) {
+      case self::TYPE_TITLE:
+      case self::TYPE_CONTENT:
+      case self::TYPE_LANGUAGE:
+        $tags[] = self::MAILTAG_CONTENT;
+        break;
+      case PhabricatorTransactions::TYPE_COMMENT:
+        $tags[] = self::MAILTAG_COMMENT;
+        break;
+      default:
+        $tags[] = self::MAILTAG_OTHER;
+        break;
+    }
+    return $tags;
   }
 
 }
