@@ -7,9 +7,4 @@ final class ConpherenceTransactionQuery
     return new ConpherenceTransaction();
   }
 
-  protected function getDefaultOrderVector() {
-    // TODO: Can we get rid of this?
-    return array('-id');
-  }
-
 }
