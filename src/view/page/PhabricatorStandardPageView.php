@@ -348,6 +348,8 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       $header_chrome = $this->menuContent;
     }
 
+    $classes = array();
+    $classes[] = 'main-page-frame';
     $developer_warning = null;
     if (PhabricatorEnv::getEnvConfig('phabricator.developer-mode') &&
         DarkConsoleErrorLogPluginAPI::getErrors()) {
@@ -363,6 +365,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     if ($user && $user->getIsAdmin()) {
       $open = PhabricatorSetupCheck::getOpenSetupIssueKeys();
       if ($open) {
+        $classes[] = 'page-has-warning';
         $setup_warning = phutil_tag_div(
           'setup-warning-callout',
           phutil_tag(
@@ -389,8 +392,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
         'class' => 'phabricator-standard-page',
       ),
       array(
-        $developer_warning,
-        $setup_warning,
         $header_chrome,
         phutil_tag(
           'div',
@@ -418,9 +419,11 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     return phutil_tag(
       'div',
       array(
-        'class' => 'main-page-frame',
+        'class' => implode(' ', $classes),
       ),
       array(
+        $developer_warning,
+        $setup_warning,
         $main_page,
         $durable_column,
       ));
