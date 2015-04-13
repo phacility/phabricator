@@ -138,7 +138,6 @@ final class ConpherenceListController extends ConpherenceController {
       $conpherences = id(new ConpherenceThreadQuery())
         ->setViewer($user)
         ->withPHIDs($conpherence_phids)
-        ->needTransactions(true)
         ->needParticipantCache(true)
         ->execute();
 

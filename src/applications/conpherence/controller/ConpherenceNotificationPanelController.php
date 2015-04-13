@@ -18,6 +18,7 @@ final class ConpherenceNotificationPanelController
         ->setViewer($user)
         ->withPHIDs(array_keys($participant_data))
         ->needTransactions(true)
+        ->setTransactionLimit(3 * 5)
         ->needParticipantCache(true)
         ->execute();
     }

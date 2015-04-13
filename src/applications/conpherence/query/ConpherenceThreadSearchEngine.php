@@ -27,7 +27,6 @@ final class ConpherenceThreadSearchEngine
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new ConpherenceThreadQuery())
-      ->needTransactions(true)
       ->needParticipantCache(true);
 
     $participant_phids = $saved->getParameter('participantPHIDs', array());
