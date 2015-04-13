@@ -619,7 +619,7 @@ abstract class PhabricatorDaemonManagementWorkflow
         'Specify a proportion of machine memory which must be free '.
         'before autoscale pools will grow. For example, a value of 0.25 '.
         'means that pools will not grow unless the machine has at least '.
-        '25%% of its RAM free.'),
+        '25%%%% of its RAM free.'),
     );
   }
 

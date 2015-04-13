@@ -83,7 +83,8 @@ final class PhabricatorDataCacheSpec extends PhabricatorCacheSpec {
     $cache = $info['cache_list'];
     $state = array();
     foreach ($cache as $item) {
-      $key = self::getKeyPattern($item['info']);
+      $info = idx($item, 'info', '<unknown-key>');
+      $key = self::getKeyPattern($info);
       if (empty($state[$key])) {
         $state[$key] = array(
           'max' => 0,
