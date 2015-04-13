@@ -194,7 +194,8 @@ final class PhrictionDocumentController
     $header = id(new PHUIHeaderView())
       ->setUser($user)
       ->setPolicyObject($document)
-      ->setHeader($page_title);
+      ->setHeader($page_title)
+      ->setEpoch($content->getDateCreated());
 
     $prop_list = null;
     if ($properties) {
@@ -243,17 +244,6 @@ final class PhrictionDocumentController
     $view->addProperty(
       pht('Last Author'),
       $viewer->renderHandle($content->getAuthorPHID()));
-
-    $age = time() - $content->getDateCreated();
-    $age = floor($age / (60 * 60 * 24));
-    if ($age < 1) {
-      $when = pht('Today');
-    } else if ($age == 1) {
-      $when = pht('Yesterday');
-    } else {
-      $when = pht('%d Days Ago', $age);
-    }
-    $view->addProperty(pht('Last Updated'), $when);
 
     return $view;
   }
