@@ -297,7 +297,7 @@ JX.behavior('conpherence-widget-pane', function(config) {
             }
             if (messages) {
               JX.DOM.appendContent(messages, JX.$H(r.transactions));
-              messages.scrollTop = messages.scrollHeight;
+              JX.Stratcom.invoke('conpherence-redraw-thread', null, {});
             }
 
             if (r.people_widget) {

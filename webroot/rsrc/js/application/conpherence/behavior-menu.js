@@ -8,6 +8,7 @@
  *           javelin-behavior-device
  *           javelin-history
  *           javelin-vector
+ *           javelin-scrollbar
  *           phabricator-title
  *           phabricator-shaped-request
  *           conpherence-thread-manager
@@ -22,6 +23,8 @@ JX.behavior('conpherence-menu', function(config) {
     visible: null,
     node: null
   };
+
+  var scrollbar = null;
 
   // TODO - move more logic into the ThreadManager
   var threadManager = new JX.ConpherenceThreadManager();
@@ -49,7 +52,7 @@ JX.behavior('conpherence-menu', function(config) {
     var messages_root = JX.DOM.find(root, 'div', 'conpherence-message-pane');
     var messages = JX.DOM.find(messages_root, 'div', 'conpherence-messages');
     JX.DOM.appendContent(messages, JX.$H(r.transactions));
-    messages.scrollTop = messages.scrollHeight;
+    scrollbar.scrollTo(messages.scrollHeight);
   });
   threadManager.setWillSendMessageCallback(function () {
     var root = JX.DOM.find(document, 'div', 'conpherence-layout');
@@ -71,7 +74,7 @@ JX.behavior('conpherence-menu', function(config) {
         // Ignore; maybe no files widget
       }
       JX.DOM.appendContent(messages, JX.$H(r.transactions));
-      messages.scrollTop = messages.scrollHeight;
+      scrollbar.scrollTo(messages.scrollHeight);
 
       if (fileWidget) {
         JX.DOM.setContent(
@@ -116,6 +119,10 @@ JX.behavior('conpherence-menu', function(config) {
     }
     markWidgetLoading(true);
     onDeviceChange();
+    var root = JX.DOM.find(document, 'div', 'conpherence-layout');
+    var messages_root = JX.DOM.find(root, 'div', 'conpherence-message-pane');
+    var messages = JX.DOM.find(messages_root, 'div', 'conpherence-messages');
+    scrollbar = new JX.Scrollbar(messages);
   }
   init();
 
@@ -320,7 +327,7 @@ JX.behavior('conpherence-menu', function(config) {
   function _scrollMessageWindow() {
     var root = JX.DOM.find(document, 'div', 'conpherence-layout');
     var messages_root = JX.DOM.find(root, 'div', 'conpherence-messages');
-    messages_root.scrollTop = messages_root.scrollHeight;
+    scrollbar.scrollTo(messages_root.scrollHeight);
   }
   function _focusTextarea() {
     var root = JX.DOM.find(document, 'div', 'conpherence-layout');
@@ -373,7 +380,7 @@ JX.behavior('conpherence-menu', function(config) {
     new JX.Workflow.newFromForm(form, data)
       .setHandler(JX.bind(this, function(r) {
         JX.DOM.appendContent(messages, JX.$H(r.transactions));
-        messages.scrollTop = messages.scrollHeight;
+        scrollbar.scrollTo(messages.scrollHeight);
 
         JX.DOM.setContent(
           header,
