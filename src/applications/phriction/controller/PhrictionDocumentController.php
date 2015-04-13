@@ -35,6 +35,7 @@ final class PhrictionDocumentController
     $core_content = '';
     $move_notice = '';
     $properties = null;
+    $content = null;
 
     if (!$document) {
 
@@ -194,8 +195,11 @@ final class PhrictionDocumentController
     $header = id(new PHUIHeaderView())
       ->setUser($user)
       ->setPolicyObject($document)
-      ->setHeader($page_title)
-      ->setEpoch($content->getDateCreated());
+      ->setHeader($page_title);
+
+    if ($content) {
+      $header->setEpoch($content->getDateCreated());
+    }
 
     $prop_list = null;
     if ($properties) {
