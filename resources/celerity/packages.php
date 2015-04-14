@@ -90,7 +90,6 @@ return array(
     'phabricator-remarkup-css',
     'syntax-highlighting-css',
     'aphront-pager-view-css',
-    'phabricator-transaction-view-css',
     'aphront-tooltip-css',
     'phabricator-flag-css',
     'phui-info-view-css',

@@ -141,14 +141,25 @@
   width: 100%;
 }
 
-.conpherence-message-pane .phabricator-transaction-view {
+.conpherence-message-pane .conpherence-transaction-view {
+  padding: 2px 0px;
   margin: 4px 12px;
   background-size: 35px;
   min-height: auto;
 }
 
-.device-phone .conpherence-message-pane .phabricator-transaction-view {
+.device-phone .conpherence-message-pane .conpherence-transaction-view {
   margin: 0 10px 0 0;
+}
+
+.conpherence-message-pane .conpherence-transaction-image {
+  float: left;
+  border-radius: 3px;
+  height: 35px;
+  width: 35px;
+  background-size: 35px;
+  position: absolute;
+  top: 5px;
 }
 
 .conpherence-message-pane .conpherence-comment.anchor-target,
@@ -166,37 +177,35 @@
   padding: 0px 4px 0px 4px;
 }
 
-.conpherence-message-pane .phabricator-transaction-detail {
+.conpherence-message-pane .conpherence-transaction-detail {
   border-width: 0;
   margin-left: 45px;
 }
 
-.conpherence-message-pane .date-marker {
-  border-top: 1px solid #d7d7d7;
+.conpherence-message-pane .conpherence-transaction-view.date-marker {
+  padding: 0;
   margin: 12px 12px 4px;
   min-height: auto;
 }
 
-.device-phone .conpherence-message-pane .date-marker {
+.device-phone .conpherence-message-pane
+.conpherence-transaction-view.date-marker {
   margin: 5px 0;
 }
 
-.conpherence-message-pane .date-marker .date {
-  position: relative;
-  top: -11px;
+.conpherence-message-pane .conpherence-transaction-view.date-marker
+.date {
   left: 40px;
-  background-color: #FFF;
-  color: {$darkbluetext};
   font-size: 13px;
   padding: 0px 5px;
-  font-weight: bold;
 }
 
-.device-phone .conpherence-message-pane .phabricator-transaction-detail {
+.device-phone .conpherence-message-pane .conpherence-transaction-detail {
   min-height: auto;
+  margin: 0;
 }
 
-.conpherence-message-pane .conpherence-edited .phabricator-transaction-content {
+.conpherence-message-pane .conpherence-edited .conpherence-transaction-content {
   color: {$lightgreytext};
   font-size: 13px;
   margin: 0;
@@ -215,7 +224,7 @@
   margin-top: 20px;
 }
 
-.conpherence-message-pane .conpherence-edited .phabricator-transaction-header {
+.conpherence-message-pane .conpherence-edited .conpherence-transaction-header {
   float: right;
 }
 
@@ -225,35 +234,40 @@
 }
 
 .conpherence-message-pane .conpherence-edited
-  .phabricator-transaction-content a {
+  .conpherence-transaction-content a {
   color: {$darkbluetext};
 }
 
 .device-phone .conpherence-message-pane .conpherence-edited
-  .phabricator-transaction-content {
+  .conpherence-transaction-content {
   padding: 0 0 5px 35px;
 }
 
-.conpherence-message-pane .phabricator-transaction-info,
+.device-phone .conpherence-message-pane .conpherence-transaction-info {
+  display: none;
+}
+
+.conpherence-message-pane .conpherence-transaction-info,
 .conpherence-message-pane .anchor-link,
-.conpherence-message-pane .phabricator-content-source-view {
+.conpherence-message-pane .conpherence-content-source-view {
   color: {$lightbluetext};
   line-height: 16px;
   font-size: 12px;
 }
 
-.conpherence-message-pane .phabricator-transaction-header,
-.conpherence-message-pane .phabricator-transaction-info,
+.conpherence-message-pane .conpherence-transaction-info {
+  float: right;
+}
+
+.conpherence-message-pane .conpherence-transaction-header,
+.conpherence-message-pane .conpherence-transaction-info,
 .conpherence-message-pane .anchor-link,
-.conpherence-message-pane .phabricator-transaction-content {
+.conpherence-message-pane .conpherence-transaction-content {
   background: none;
   padding: 0;
 }
-.conpherence-message-pane .anchor-link {
-  font-weight: normal;
-}
 
-.conpherence-message-pane .phabricator-transaction-content {
+.conpherence-message-pane .conpherence-transaction-content {
   padding: 2px 0 8px 0;
 }
 

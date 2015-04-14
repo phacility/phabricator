@@ -98,8 +98,7 @@ final class ConpherenceTransactionView extends AphrontView {
       throw new Exception(pht('Call setUser() before render()!'));
     }
 
-    // TODO - rename / condense this...!
-    require_celerity_resource('phabricator-transaction-view-css');
+    require_celerity_resource('conpherence-transaction-css');
 
     $transaction = $this->getConpherenceTransaction();
     switch ($transaction->getTransactionType()) {
@@ -107,7 +106,7 @@ final class ConpherenceTransactionView extends AphrontView {
         return phutil_tag(
           'div',
           array(
-            'class' => 'date-marker',
+            'class' => 'conpherence-transaction-view date-marker',
           ),
           array(
             phutil_tag(
@@ -132,18 +131,18 @@ final class ConpherenceTransactionView extends AphrontView {
     $transaction_id = $this->anchorName ? 'anchor-'.$this->anchorName : null;
 
     $header = phutil_tag_div(
-      'phabricator-transaction-header grouped',
+      'conpherence-transaction-header grouped',
       array($actions, $info));
 
     return phutil_tag(
       'div',
       array(
-        'class' => 'phabricator-transaction-view '.$classes,
+        'class' => 'conpherence-transaction-view '.$classes,
         'id'    => $transaction_id,
       ),
       array(
         $image,
-        phutil_tag_div('phabricator-transaction-detail grouped',
+        phutil_tag_div('conpherence-transaction-detail grouped',
           array($header, $content)),
       ));
   }
@@ -203,7 +202,7 @@ final class ConpherenceTransactionView extends AphrontView {
     return phutil_tag(
       'span',
       array(
-        'class' => 'phabricator-transaction-info',
+        'class' => 'conpherence-transaction-info',
       ),
       $info);
   }
@@ -237,7 +236,7 @@ final class ConpherenceTransactionView extends AphrontView {
           $image = phutil_tag(
             'span',
             array(
-              'class' => 'phabricator-transaction-image',
+              'class' => 'conpherence-transaction-image',
               'style' => 'background-image: url('.$image_uri.');',
             ));
           break;
@@ -272,7 +271,7 @@ final class ConpherenceTransactionView extends AphrontView {
         $content = $this->getMarkupEngine()->getOutput(
           $comment,
           PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
-        $content_class = 'conpherence-message phabricator-remarkup';
+        $content_class = 'conpherence-message';
        break;
     }
 
@@ -285,7 +284,7 @@ final class ConpherenceTransactionView extends AphrontView {
         $content));
 
     return phutil_tag_div(
-      'phabricator-transaction-content',
+      'conpherence-transaction-content',
       $this->renderChildren());
   }
 
