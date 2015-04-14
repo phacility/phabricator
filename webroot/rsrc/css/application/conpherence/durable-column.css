@@ -199,13 +199,13 @@
 
 .conpherence-durable-column-transactions .phabricator-transaction-detail
 .phabricator-transaction-header .phabricator-transaction-info,
-.phabricator-transaction-header .anchor-link {
+.phabricator-transaction-header .epoch-link {
   color: {$lightbluetext};
   float: none;
   font-size: 12px;
 }
 
-.phabricator-transaction-header .anchor-link {
+.phabricator-transaction-header .epoch-link {
   font-weight: normal;
 }
 

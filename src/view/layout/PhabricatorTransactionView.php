@@ -5,6 +5,7 @@ final class PhabricatorTransactionView extends AphrontView {
   private $imageURI;
   private $actions = array();
   private $epoch;
+  private $epochHref;
   private $contentSource;
   private $anchorName;
   private $anchorText;
@@ -22,8 +23,9 @@ final class PhabricatorTransactionView extends AphrontView {
     return $this;
   }
 
-  public function setEpoch($epoch) {
+  public function setEpoch($epoch, $epoch_href = null) {
     $this->epoch = $epoch;
+    $this->epochHref = $epoch_href;
     return $this;
   }
 
@@ -103,10 +105,20 @@ final class PhabricatorTransactionView extends AphrontView {
       $info[] = pht('PREVIEW');
     } else if ($this->epoch) {
       if ($this->timeOnly) {
-        $info[] = phabricator_time($this->epoch, $this->user);
+        $epoch = phabricator_time($this->epoch, $this->user);
       } else {
-        $info[] = phabricator_datetime($this->epoch, $this->user);
+        $epoch = phabricator_datetime($this->epoch, $this->user);
       }
+      if ($this->epochHref) {
+        $epoch = phutil_tag(
+          'a',
+          array(
+            'href' => $this->epochHref,
+            'class' => 'epoch-link',
+          ),
+          $epoch);
+      }
+      $info[] = $epoch;
     }
 
     if ($this->anchorName) {

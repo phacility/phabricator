@@ -2,6 +2,7 @@
 
 final class ConpherenceTransactionView extends AphrontView {
 
+  private $conpherenceThread;
   private $conpherenceTransaction;
   private $handles;
   private $markupEngine;
@@ -22,6 +23,15 @@ final class ConpherenceTransactionView extends AphrontView {
 
   public function getHandles() {
     return $this->handles;
+  }
+
+  public function setConpherenceThread(ConpherenceThread $t) {
+    $this->conpherenceThread = $t;
+    return $this;
+  }
+
+  private function getConpherenceThread() {
+    return $this->conpherenceThread;
   }
 
   public function setConpherenceTransaction(ConpherenceTransaction $tx) {
@@ -62,6 +72,7 @@ final class ConpherenceTransactionView extends AphrontView {
 
   public function render() {
     $user = $this->getUser();
+
     $transaction = $this->getConpherenceTransaction();
     switch ($transaction->getTransactionType()) {
       case ConpherenceTransactionType::TYPE_DATE_MARKER:
@@ -84,6 +95,7 @@ final class ConpherenceTransactionView extends AphrontView {
         break;
     }
 
+    $conpherence = $this->getConpherenceThread();
     $handles = $this->getHandles();
     $transaction->setHandles($handles);
     $author = $handles[$transaction->getAuthorPHID()];
@@ -96,7 +108,9 @@ final class ConpherenceTransactionView extends AphrontView {
           phabricator_time($transaction->getDateCreated(), $user));
     } else {
       $transaction_view
-        ->setEpoch($transaction->getDateCreated())
+        ->setEpoch(
+          $transaction->getDateCreated(),
+          '/'.$conpherence->getMonogram().'#'.$transaction->getID())
         ->setTimeOnly(true);
     }
     if ($this->getShowContentSource()) {
@@ -185,6 +199,7 @@ final class ConpherenceTransactionView extends AphrontView {
     $date_marker_transaction_view = id(new ConpherenceTransactionView())
       ->setUser($user)
       ->setConpherenceTransaction($date_marker_transaction)
+      ->setConpherenceThread($conpherence)
       ->setHandles($handles)
       ->setShowImages($full_display)
       ->setShowContentSource($full_display)
@@ -210,6 +225,7 @@ final class ConpherenceTransactionView extends AphrontView {
       $rendered_transactions[] = id(new ConpherenceTransactionView())
         ->setUser($user)
         ->setConpherenceTransaction($transaction)
+        ->setConpherenceThread($conpherence)
         ->setHandles($handles)
         ->setMarkupEngine($engine)
         ->setRenderAnchors($full_display)
