@@ -446,11 +446,11 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
       );
     }
 
-    $data = ConpherenceTransactionView::renderTransactions(
+    $data = ConpherenceTransactionRenderer::renderTransactions(
       $this->getUser(),
       $conpherence,
       $full_display = false);
-    $messages = ConpherenceTransactionView::renderMessagePaneContent(
+    $messages = ConpherenceTransactionRenderer::renderMessagePaneContent(
       $data['transactions'],
       $data['oldest_transaction_id']);
 

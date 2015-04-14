@@ -408,7 +408,7 @@ final class ConpherenceUpdateController
 
     $non_update = false;
     if ($need_transactions && $conpherence->getTransactions()) {
-      $data = ConpherenceTransactionView::renderTransactions(
+      $data = ConpherenceTransactionRenderer::renderTransactions(
         $user,
         $conpherence,
         !$this->getRequest()->getExists('minimal_display'));
