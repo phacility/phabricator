@@ -56,15 +56,14 @@
   right: 241px;
   top: 76px;
   bottom: 172px;
-  overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
 
-.conpherence-messages > .conpherence-edited:first-child {
+.conpherence-messages .jx-scrollbar-content > .conpherence-edited:first-child {
   padding-top: 20px;
 }
 
-.conpherence-messages > .conpherence-edited:last-child {
+.conpherence-messages > .jx-scrollbar-content .conpherence-edited:last-child {
   padding-bottom: 20px;
 }
 
@@ -149,7 +148,7 @@
 }
 
 .device-phone .conpherence-message-pane .conpherence-transaction-view {
-  margin: 0 10px 0 0;
+  margin: 0 8px;
 }
 
 .conpherence-message-pane .conpherence-transaction-image {
@@ -162,9 +161,13 @@
   top: 5px;
 }
 
+.device-phone .conpherence-message-pane .conpherence-transaction-image {
+  display: none;
+}
+
 .conpherence-message-pane .conpherence-comment.anchor-target,
 .conpherence-message-pane .conpherence-edited.anchor-target {
-  background: #fdf5d4;
+  background: {$lightyellow};
 }
 
 .conpherence-message-pane .conpherence-comment.anchor-target {
@@ -182,9 +185,13 @@
   margin-left: 45px;
 }
 
+.device-phone .conpherence-message-pane .conpherence-transaction-detail {
+  margin: 0;
+}
+
 .conpherence-message-pane .conpherence-transaction-view.date-marker {
   padding: 0;
-  margin: 12px 12px 4px;
+  margin: 16px 12px 4px;
   min-height: auto;
 }
 
@@ -200,9 +207,10 @@
   padding: 0px 5px;
 }
 
-.device-phone .conpherence-message-pane .conpherence-transaction-detail {
-  min-height: auto;
-  margin: 0;
+.device-phone .conpherence-message-pane .conpherence-edited {
+  min-height: none;
+  color: {$lightgreytext};
+  margin: 0 8px;
 }
 
 .conpherence-message-pane .conpherence-edited .conpherence-transaction-content {
@@ -221,26 +229,21 @@
 }
 
 .conpherence-message-pane .conpherence-edited + .conpherence-comment {
-  margin-top: 20px;
+  margin-top: 16px;
+}
+
+.conpherence-transaction-view.conpherence-edited +
+  .conpherence-transaction-view.date-marker {
+    margin-top: 24px;
 }
 
 .conpherence-message-pane .conpherence-edited .conpherence-transaction-header {
   float: right;
 }
 
-.device-phone .conpherence-message-pane .conpherence-edited {
-  color: {$lightgreytext};
-  margin: 0 10px;
-}
-
 .conpherence-message-pane .conpherence-edited
   .conpherence-transaction-content a {
   color: {$darkbluetext};
-}
-
-.device-phone .conpherence-message-pane .conpherence-edited
-  .conpherence-transaction-content {
-  padding: 0 0 5px 35px;
 }
 
 .device-phone .conpherence-message-pane .conpherence-transaction-info {
