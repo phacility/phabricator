@@ -115,6 +115,7 @@ final class ConpherenceTransactionView extends AphrontView {
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
+      case PhabricatorTransactions::TYPE_EDGE:
         $content = $transaction->getTitle();
         $transaction_view->addClass('conpherence-edited');
         break;

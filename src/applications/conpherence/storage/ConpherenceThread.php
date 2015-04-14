@@ -4,6 +4,7 @@ final class ConpherenceThread extends ConpherenceDAO
   implements
     PhabricatorPolicyInterface,
     PhabricatorApplicationTransactionInterface,
+    PhabricatorMentionableInterface,
     PhabricatorDestructibleInterface {
 
   protected $title;
