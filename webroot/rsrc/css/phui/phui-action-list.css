@@ -33,6 +33,7 @@
   top: 42px;
   background: #fff;
   box-shadow: {$dropshadow};
+  padding: 4px 0;
 }
 
 .device-phone .phabricator-action-list-view.phabricator-action-list-toggle {
