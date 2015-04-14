@@ -19,7 +19,7 @@
 .phabricator-hovercard-container {
   float: left;
   width: 100%;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+  box-shadow: {$dropshadow};
   border: 1px solid {$blueborder};
   border-radius: 3px;
   background-color: #fff;

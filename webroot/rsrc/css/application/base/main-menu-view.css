@@ -222,7 +222,7 @@
   background: #ffffff;
   word-wrap: break-word;
   overflow-y: auto;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+  box-shadow: {$dropshadow};
   border: {$blueborder};
   border-radius: 3px;
   margin-left: 40px;
@@ -504,7 +504,7 @@
   background: #fff;
   top: 38px;
   padding: 2px;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+  box-shadow: {$dropshadow};
   border: {$blueborder};
   border-radius: 3px;
 }

@@ -27,7 +27,7 @@
 }
 
 .device-desktop .phui-pinboard-item-view:hover {
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.30);
+  box-shadow: {$dropshadow};
 }
 
 /* On phones, show a single column of items. */
