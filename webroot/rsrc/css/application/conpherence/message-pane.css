@@ -56,7 +56,13 @@
   right: 241px;
   top: 76px;
   bottom: 172px;
+  overflow-x: hidden;
+  overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+}
+
+.conpherence-messages.jx-scrollbar-frame {
+  overflow-y: hidden;
 }
 
 .conpherence-messages .jx-scrollbar-content > .conpherence-edited:first-child {
