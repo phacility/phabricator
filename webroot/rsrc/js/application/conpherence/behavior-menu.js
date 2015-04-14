@@ -37,50 +37,46 @@ JX.behavior('conpherence-menu', function(config) {
     var form = JX.$H(r.form);
     var root = JX.DOM.find(document, 'div', 'conpherence-layout');
     var header_root = JX.DOM.find(root, 'div', 'conpherence-header-pane');
-    var messages_root = JX.DOM.find(root, 'div', 'conpherence-messages');
     var form_root = JX.DOM.find(root, 'div', 'conpherence-form');
     JX.DOM.setContent(header_root, header);
-    JX.DOM.setContent(messages_root, messages);
+    JX.DOM.setContent(scrollbar.getContentNode(), messages);
     JX.DOM.setContent(form_root, form);
 
     markThreadLoading(false);
 
     didRedrawThread(true);
   });
+
   threadManager.setDidUpdateThreadCallback(function(r) {
-    var root = JX.DOM.find(document, 'div', 'conpherence-layout');
-    var messages_root = JX.DOM.find(root, 'div', 'conpherence-message-pane');
-    var messages = JX.DOM.find(messages_root, 'div', 'conpherence-messages');
-    JX.DOM.appendContent(messages, JX.$H(r.transactions));
+    JX.DOM.appendContent(scrollbar.getContentNode(), JX.$H(r.transactions));
     _scrollMessageWindow();
   });
+
   threadManager.setWillSendMessageCallback(function () {
     var root = JX.DOM.find(document, 'div', 'conpherence-layout');
     var form_root = JX.DOM.find(root, 'div', 'conpherence-form');
     markThreadLoading(true);
     JX.DOM.alterClass(form_root, 'loading', true);
   });
+
   threadManager.setDidSendMessageCallback(function (r, non_update) {
     var root = JX.DOM.find(document, 'div', 'conpherence-layout');
     var form_root = JX.DOM.find(root, 'div', 'conpherence-form');
     var textarea = JX.DOM.find(form_root, 'textarea');
     if (!non_update) {
-      var messages_root = JX.DOM.find(root, 'div', 'conpherence-message-pane');
-      var messages = JX.DOM.find(messages_root, 'div', 'conpherence-messages');
       var fileWidget = null;
       try {
         fileWidget = JX.DOM.find(root, 'div', 'widgets-files');
       } catch (ex) {
         // Ignore; maybe no files widget
       }
-      JX.DOM.appendContent(messages, JX.$H(r.transactions));
+      JX.DOM.appendContent(scrollbar.getContentNode(), JX.$H(r.transactions));
       _scrollMessageWindow();
 
       if (fileWidget) {
         JX.DOM.setContent(
           fileWidget,
-          JX.$H(r.file_widget)
-          );
+          JX.$H(r.file_widget));
       }
       textarea.value = '';
     }
@@ -323,8 +319,6 @@ JX.behavior('conpherence-menu', function(config) {
   }
   var _firstScroll = true;
   function _scrollMessageWindow() {
-    var root = JX.DOM.find(document, 'div', 'conpherence-layout');
-    var messages_root = JX.DOM.find(root, 'div', 'conpherence-messages');
     if (_firstScroll) {
       _firstScroll = false;
       // let the standard #anchor tech take over
@@ -332,7 +326,7 @@ JX.behavior('conpherence-menu', function(config) {
         return;
       }
     }
-    scrollbar.scrollTo(messages_root.scrollHeight);
+    scrollbar.scrollTo(scrollbar.getViewportNode().scrollHeight);
   }
   function _focusTextarea() {
     var root = JX.DOM.find(document, 'div', 'conpherence-layout');
