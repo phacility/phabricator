@@ -85,6 +85,10 @@ final class PhabricatorTypeaheadResult {
     return $this->phid;
   }
 
+  public function getSortKey() {
+    return phutil_utf8_strtolower($this->getName());
+  }
+
   public function getWireFormat() {
     $data = array(
       $this->name,

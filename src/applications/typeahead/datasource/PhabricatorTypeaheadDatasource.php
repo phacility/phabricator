@@ -88,4 +88,18 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
     return array_unique($tokens);
   }
 
+  public function getTokens() {
+    return self::tokenizeString($this->getRawQuery());
+  }
+
+  protected function executeQuery(
+    PhabricatorCursorPagedPolicyAwareQuery $query) {
+
+    return $query
+      ->setViewer($this->getViewer())
+      ->setOffset($this->getOffset())
+      ->setLimit($this->getLimit())
+      ->execute();
+  }
+
 }

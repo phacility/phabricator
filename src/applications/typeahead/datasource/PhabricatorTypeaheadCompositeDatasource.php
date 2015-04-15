@@ -28,12 +28,14 @@ abstract class PhabricatorTypeaheadCompositeDatasource
     }
 
     $results = array_mergev($results);
-    $results = msort($results, 'getName');
+    $results = msort($results, 'getSortKey');
 
+    $count = count($results);
     if ($offset || $limit) {
       if (!$limit) {
         $limit = count($results);
       }
+
       $results = array_slice($results, $offset, $limit, $preserve_keys = true);
     }
 
