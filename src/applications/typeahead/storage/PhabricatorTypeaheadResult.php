@@ -73,6 +73,18 @@ final class PhabricatorTypeaheadResult {
     return $this->name;
   }
 
+  public function getDisplayName() {
+    return coalesce($this->displayName, $this->getName());
+  }
+
+  public function getIcon() {
+    return nonempty($this->icon, $this->getDefaultIcon());
+  }
+
+  public function getPHID() {
+    return $this->phid;
+  }
+
   public function getWireFormat() {
     $data = array(
       $this->name,
@@ -83,7 +95,7 @@ final class PhabricatorTypeaheadResult {
       $this->displayType,
       $this->imageURI ? (string)$this->imageURI : null,
       $this->priorityType,
-      ($this->icon === null) ? $this->getDefaultIcon() : $this->icon,
+      $this->getIcon(),
       $this->closed,
       $this->imageSprite ? (string)$this->imageSprite : null,
     );

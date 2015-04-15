@@ -38,7 +38,7 @@ final class PhabricatorTypeaheadModularDatasourceController
         ->setRawQuery($raw_query);
 
       if ($is_browse) {
-        $limit = 3;
+        $limit = 10;
         $offset = $request->getInt('offset');
         $composite
           ->setLimit($limit + 1)
@@ -60,18 +60,22 @@ final class PhabricatorTypeaheadModularDatasourceController
             pht('Next Page'));
         }
 
-        $rows = array();
+        $items = array();
         foreach ($results as $result) {
-          // TODO: Render nicely.
-          $rows[] = array_slice($result->getWireFormat(), 0, 3, true);
+          $token = PhabricatorTypeaheadTokenView::newForTypeaheadResult(
+            $result);
+          $items[] = phutil_tag(
+            'div',
+            array(
+              'class' => 'grouped',
+            ),
+            $token);
         }
-
-        $table = id(new AphrontTableView($rows));
 
         return $this->newDialog()
           ->setWidth(AphrontDialogView::WIDTH_FORM)
           ->setTitle(get_class($source)) // TODO: Provide nice names.
-          ->appendChild($table)
+          ->appendChild($items)
           ->appendChild($next_link)
           ->addCancelButton('/', pht('Close'));
       }

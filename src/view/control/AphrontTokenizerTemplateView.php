@@ -71,38 +71,11 @@ final class AphrontTokenizerTemplateView extends AphrontView {
   }
 
   private function renderToken($key, $value, $icon) {
-    $input_name = $this->getName();
-    if ($input_name) {
-      $input_name .= '[]';
-    }
-
-    if ($icon) {
-      $value = array(
-        phutil_tag(
-          'span',
-          array(
-            'class' => 'phui-icon-view phui-font-fa bluetext '.$icon,
-          )),
-        $value,
-      );
-    }
-
-    return phutil_tag(
-      'a',
-      array(
-        'class' => 'jx-tokenizer-token',
-      ),
-      array(
-        $value,
-        phutil_tag(
-          'input',
-          array(
-            'type'  => 'hidden',
-            'name'  => $input_name,
-            'value' => $key,
-          )),
-        phutil_tag('span', array('class' => 'jx-tokenizer-x-placeholder'), ''),
-      ));
+    return id(new PhabricatorTypeaheadTokenView())
+      ->setKey($key)
+      ->setValue($value)
+      ->setIcon($icon)
+      ->setInputName($this->getName());
   }
 
 }
