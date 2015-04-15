@@ -113,17 +113,49 @@ final class PhabricatorTypeaheadModularDatasourceController
         $this->requireResource('typeahead-browse-css');
         $this->initBehavior('typeahead-browse');
 
-        $markup = phutil_tag(
+        $input_id = celerity_generate_unique_node_id();
+        $frame_id = celerity_generate_unique_node_id();
+
+        $config = array(
+          'inputID' => $input_id,
+          'frameID' => $frame_id,
+          'uri' => (string)$request->getRequestURI(),
+        );
+        $this->initBehavior('typeahead-search', $config);
+
+        $search = javelin_tag(
+          'input',
+          array(
+            'type' => 'text',
+            'id' => $input_id,
+            'class' => 'typeahead-browse-input',
+            'autocomplete' => 'off',
+            'placeholder' => $source->getPlaceholderText(),
+          ));
+
+        $frame = phutil_tag(
           'div',
           array(
             'class' => 'typeahead-browse-frame',
+            'id' => $frame_id,
           ),
           $markup);
 
+        $browser = array(
+          phutil_tag(
+            'div',
+            array(
+              'class' => 'typeahead-browse-header',
+            ),
+            $search),
+          $frame,
+        );
+
         return $this->newDialog()
           ->setWidth(AphrontDialogView::WIDTH_FORM)
+          ->setRenderDialogAsDiv(true)
           ->setTitle(get_class($source)) // TODO: Provide nice names.
-          ->appendChild($markup)
+          ->appendChild($browser)
           ->addCancelButton('/', pht('Close'));
       }
 

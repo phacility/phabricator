@@ -32,3 +32,16 @@
   height: 260px;
   border: 1px solid {$lightgreyborder};
 }
+
+.typeahead-browse-frame.loading {
+  opacity: 0.8;
+}
+
+.typeahead-browse-header {
+  padding: 4px 0;
+}
+
+input.typeahead-browse-input {
+  margin: 0;
+  width: 100%;
+}
