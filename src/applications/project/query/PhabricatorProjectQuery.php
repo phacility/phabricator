@@ -9,7 +9,7 @@ final class PhabricatorProjectQuery
   private $slugs;
   private $phrictionSlugs;
   private $names;
-  private $datasourceQuery;
+  private $nameTokens;
   private $icons;
   private $colors;
 
@@ -60,8 +60,8 @@ final class PhabricatorProjectQuery
     return $this;
   }
 
-  public function withDatasourceQuery($string) {
-    $this->datasourceQuery = $string;
+  public function withNameTokens(array $tokens) {
+    $this->nameTokens = array_values($tokens);
     return $this;
   }
 
@@ -329,7 +329,7 @@ final class PhabricatorProjectQuery
   }
 
   private function buildGroupClause($conn_r) {
-    if ($this->memberPHIDs || $this->datasourceQuery) {
+    if ($this->memberPHIDs || $this->nameTokens) {
       return 'GROUP BY p.id';
     } else {
       return $this->buildApplicationSearchGroupClause($conn_r);
@@ -363,23 +363,18 @@ final class PhabricatorProjectQuery
         id(new PhabricatorProjectSlug())->getTableName());
     }
 
-    if ($this->datasourceQuery !== null) {
-      $tokens = PhabricatorTypeaheadDatasource::tokenizeString(
-        $this->datasourceQuery);
-      if (!$tokens) {
-        throw new PhabricatorEmptyQueryException();
+    if ($this->nameTokens !== null) {
+      foreach ($this->nameTokens as $key => $token) {
+        $token_table = 'token_'.$key;
+        $joins[] = qsprintf(
+          $conn_r,
+          'JOIN %T %T ON %T.projectID = p.id AND %T.token LIKE %>',
+          PhabricatorProject::TABLE_DATASOURCE_TOKEN,
+          $token_table,
+          $token_table,
+          $token_table,
+          $token);
       }
-
-      $likes = array();
-      foreach ($tokens as $token) {
-        $likes[] = qsprintf($conn_r, 'token.token LIKE %>', $token);
-      }
-
-      $joins[] = qsprintf(
-        $conn_r,
-        'JOIN %T token ON token.projectID = p.id AND (%Q)',
-        PhabricatorProject::TABLE_DATASOURCE_TOKEN,
-        '('.implode(') OR (', $likes).')');
     }
 
     $joins[] = $this->buildApplicationSearchJoinClause($conn_r);

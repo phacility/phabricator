@@ -18,17 +18,18 @@ final class PhabricatorProjectDatasource
 
     // Allow users to type "#qa" or "qa" to find "Quality Assurance".
     $raw_query = ltrim($raw_query, '#');
+    $tokens = self::tokenizeString($raw_query);
 
-    if (!strlen($raw_query)) {
-      return array();
+    $query = id(new PhabricatorProjectQuery())
+      ->needImages(true)
+      ->needSlugs(true);
+
+    if ($tokens) {
+      $query->withNameTokens($tokens);
     }
 
-    $projs = id(new PhabricatorProjectQuery())
-      ->setViewer($viewer)
-      ->needImages(true)
-      ->needSlugs(true)
-      ->withDatasourceQuery($raw_query)
-      ->execute();
+    $projs = $this->executeQuery($query);
+
     $projs = mpull($projs, null, 'getPHID');
 
     $must_have_cols = $this->getParameter('mustHaveColumns', false);
