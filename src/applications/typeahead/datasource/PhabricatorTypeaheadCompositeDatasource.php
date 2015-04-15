@@ -10,17 +10,34 @@ abstract class PhabricatorTypeaheadCompositeDatasource
   }
 
   public function loadResults() {
+    $offset = $this->getOffset();
+    $limit = $this->getLimit();
+
     $results = array();
     foreach ($this->getUsableDatasources() as $source) {
       $source
         ->setRawQuery($this->getRawQuery())
         ->setQuery($this->getQuery())
-        ->setViewer($this->getViewer())
-        ->setLimit($this->getLimit());
+        ->setViewer($this->getViewer());
+
+      if ($limit) {
+        $source->setLimit($offset + $limit);
+      }
 
       $results[] = $source->loadResults();
     }
-    return array_mergev($results);
+
+    $results = array_mergev($results);
+    $results = msort($results, 'getName');
+
+    if ($offset || $limit) {
+      if (!$limit) {
+        $limit = count($results);
+      }
+      $results = array_slice($results, $offset, $limit, $preserve_keys = true);
+    }
+
+    return $results;
   }
 
   private function getUsableDatasources() {

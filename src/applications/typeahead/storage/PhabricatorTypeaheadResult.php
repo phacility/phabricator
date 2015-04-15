@@ -69,6 +69,10 @@ final class PhabricatorTypeaheadResult {
     return $this;
   }
 
+  public function getName() {
+    return $this->name;
+  }
+
   public function getWireFormat() {
     $data = array(
       $this->name,

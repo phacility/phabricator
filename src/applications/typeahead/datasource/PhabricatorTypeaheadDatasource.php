@@ -5,6 +5,7 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
   private $viewer;
   private $query;
   private $rawQuery;
+  private $offset;
   private $limit;
   private $parameters = array();
 
@@ -15,6 +16,15 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
 
   public function getLimit() {
     return $this->limit;
+  }
+
+  public function setOffset($offset) {
+    $this->offset = $offset;
+    return $this;
+  }
+
+  public function getOffset() {
+    return $this->offset;
   }
 
   public function setViewer(PhabricatorUser $viewer) {

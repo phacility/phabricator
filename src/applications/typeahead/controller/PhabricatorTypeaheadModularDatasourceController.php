@@ -11,6 +11,7 @@ final class PhabricatorTypeaheadModularDatasourceController
     $request = $this->getRequest();
     $viewer = $request->getUser();
     $query = $request->getStr('q');
+    $is_browse = ($request->getURIData('action') == 'browse');
 
     // Default this to the query string to make debugging a little bit easier.
     $raw_query = nonempty($request->getStr('raw'), $query);
@@ -23,16 +24,11 @@ final class PhabricatorTypeaheadModularDatasourceController
       ->loadObjects();
     if (isset($sources[$class])) {
       $source = $sources[$class];
-      if ($source->getDatasourceApplicationClass()) {
-        if (!PhabricatorApplication::isClassInstalledForViewer(
-            $source->getDatasourceApplicationClass(),
-            $viewer)) {
-          return id(new Aphront404Response());
-        }
-      }
-
       $source->setParameters($request->getRequestData());
 
+      // NOTE: Wrapping the source in a Composite datasource ensures we perform
+      // application visibility checks for the viewer, so we do not need to do
+      // those separately.
       $composite = new PhabricatorTypeaheadRuntimeCompositeDatasource();
       $composite->addDatasource($source);
 
@@ -41,7 +37,47 @@ final class PhabricatorTypeaheadModularDatasourceController
         ->setQuery($query)
         ->setRawQuery($raw_query);
 
+      if ($is_browse) {
+        $limit = 3;
+        $offset = $request->getInt('offset');
+        $composite
+          ->setLimit($limit + 1)
+          ->setOffset($offset);
+      }
+
       $results = $composite->loadResults();
+
+      if ($is_browse) {
+        $next_link = null;
+        if (count($results) > $limit) {
+          $results = array_slice($results, 0, $limit, $preserve_keys = true);
+          $next_link = phutil_tag(
+            'a',
+            array(
+              'href' => id(new PhutilURI($request->getRequestURI()))
+                ->setQueryParam('offset', $offset + $limit),
+            ),
+            pht('Next Page'));
+        }
+
+        $rows = array();
+        foreach ($results as $result) {
+          // TODO: Render nicely.
+          $rows[] = array_slice($result->getWireFormat(), 0, 3, true);
+        }
+
+        $table = id(new AphrontTableView($rows));
+
+        return $this->newDialog()
+          ->setWidth(AphrontDialogView::WIDTH_FORM)
+          ->setTitle(get_class($source)) // TODO: Provide nice names.
+          ->appendChild($table)
+          ->appendChild($next_link)
+          ->addCancelButton('/', pht('Close'));
+      }
+
+    } else if ($is_browse) {
+      return new Aphront404Response();
     } else {
       $results = array();
     }
