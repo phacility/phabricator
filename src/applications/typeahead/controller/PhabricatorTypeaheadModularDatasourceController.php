@@ -37,9 +37,18 @@ final class PhabricatorTypeaheadModularDatasourceController
         ->setQuery($query)
         ->setRawQuery($raw_query);
 
+      $hard_limit = 1000;
+
       if ($is_browse) {
         $limit = 10;
         $offset = $request->getInt('offset');
+
+        if (($offset + $limit) >= $hard_limit) {
+          // Offset-based paging is intrinsically slow; hard-cap how far we're
+          // willing to go with it.
+          return new Aphront404Response();
+        }
+
         $composite
           ->setLimit($limit + 1)
           ->setOffset($offset);
@@ -49,15 +58,32 @@ final class PhabricatorTypeaheadModularDatasourceController
 
       if ($is_browse) {
         $next_link = null;
+
         if (count($results) > $limit) {
           $results = array_slice($results, 0, $limit, $preserve_keys = true);
-          $next_link = phutil_tag(
-            'a',
-            array(
-              'href' => id(new PhutilURI($request->getRequestURI()))
-                ->setQueryParam('offset', $offset + $limit),
-            ),
-            pht('Next Page'));
+          if (($offset + (2 * $limit)) < $hard_limit) {
+            $next_uri = id(new PhutilURI($request->getRequestURI()))
+              ->setQueryParam('offset', $offset + $limit);
+
+            $next_link = javelin_tag(
+              'a',
+              array(
+                'href' => $next_uri,
+                'class' => 'typeahead-browse-more',
+                'sigil' => 'typeahead-browse-more',
+                'mustcapture' => true,
+              ),
+              pht('More Results'));
+          } else {
+            // If the user has paged through more than 1K results, don't
+            // offer to page any further.
+            $next_link = javelin_tag(
+              'div',
+              array(
+                'class' => 'typeahead-browse-hard-limit',
+              ),
+              pht('You reach the edge of the abyss.'));
+          }
         }
 
         $items = array();
@@ -72,11 +98,32 @@ final class PhabricatorTypeaheadModularDatasourceController
             $token);
         }
 
+        $markup = array(
+          $items,
+          $next_link,
+        );
+
+        if ($request->isAjax()) {
+          $content = array(
+            'markup' => hsprintf('%s', $markup),
+          );
+          return id(new AphrontAjaxResponse())->setContent($content);
+        }
+
+        $this->requireResource('typeahead-browse-css');
+        $this->initBehavior('typeahead-browse');
+
+        $markup = phutil_tag(
+          'div',
+          array(
+            'class' => 'typeahead-browse-frame',
+          ),
+          $markup);
+
         return $this->newDialog()
           ->setWidth(AphrontDialogView::WIDTH_FORM)
           ->setTitle(get_class($source)) // TODO: Provide nice names.
-          ->appendChild($items)
-          ->appendChild($next_link)
+          ->appendChild($markup)
           ->addCancelButton('/', pht('Close'));
       }
 

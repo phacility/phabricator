@@ -1,0 +1,34 @@
+/**
+ * @provides typeahead-browse-css
+ */
+
+.typeahead-browse-more,
+.typeahead-browse-hard-limit {
+  display: block;
+  padding: 8px;
+  margin: 8px 0 0;
+  text-align: center;
+}
+
+.typeahead-browse-more {
+  background: {$lightblue};
+  border: 1px solid {$lightblueborder};
+}
+
+.typeahead-browse-more.loading {
+  opacity: 0.8;
+}
+
+.typeahead-browse-hard-limit {
+  background: {$lightgreybackground};
+  border: 1px solid {$lightgreyborder};
+  color: {$lightgreytext};
+}
+
+.typeahead-browse-frame {
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 4px;
+  height: 260px;
+  border: 1px solid {$lightgreyborder};
+}
