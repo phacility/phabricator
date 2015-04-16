@@ -11,6 +11,7 @@ final class PhabricatorRepositoryQuery
   private $nameContains;
   private $remoteURIs;
   private $anyProjectPHIDs;
+  private $datasourceQuery;
 
   private $numericIdentifiers;
   private $callsignIdentifiers;
@@ -100,6 +101,11 @@ final class PhabricatorRepositoryQuery
 
   public function withAnyProjects(array $projects) {
     $this->anyProjectPHIDs = $projects;
+    return $this;
+  }
+
+  public function withDatasourceQuery($query) {
+    $this->datasourceQuery = $query;
     return $this;
   }
 
@@ -491,6 +497,21 @@ final class PhabricatorRepositoryQuery
         $conn_r,
         'e.dst IN (%Ls)',
         $this->anyProjectPHIDs);
+    }
+
+    if (strlen($this->datasourceQuery)) {
+      // This handles having "rP" match callsigns starting with "P...".
+      $query = trim($this->datasourceQuery);
+      if (preg_match('/^r/', $query)) {
+        $callsign = substr($query, 1);
+      } else {
+        $callsign = $query;
+      }
+      $where[] = qsprintf(
+        $conn_r,
+        'r.name LIKE %> OR r.callsign LIKE %>',
+        $query,
+        $callsign);
     }
 
     $where[] = $this->buildPagingClause($conn_r);
