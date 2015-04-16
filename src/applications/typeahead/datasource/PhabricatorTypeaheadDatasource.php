@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @task functions Token Functions
+ */
 abstract class PhabricatorTypeaheadDatasource extends Phobject {
 
   private $viewer;
@@ -182,5 +185,117 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
 
     return $results;
   }
+
+  protected function newFunctionResult() {
+    // TODO: Find a more consistent design.
+    return id(new PhabricatorTypeaheadResult())
+      ->setIcon('fa-magic indigo');
+  }
+
+  public function newInvalidToken($name) {
+    return id(new PhabricatorTypeaheadTokenView())
+      ->setKey(PhabricatorTypeaheadTokenView::KEY_INVALID)
+      ->setValue($name)
+      ->setIcon('fa-exclamation-circle red');
+  }
+
+/* -(  Token Functions  )---------------------------------------------------- */
+
+
+  /**
+   * @task functions
+   */
+  protected function canEvaluateFunction($function) {
+    return false;
+  }
+
+
+  /**
+   * @task functions
+   */
+  protected function evaluateFunction($function, array $argv_list) {
+    throw new PhutilMethodNotImplementedException();
+  }
+
+
+  /**
+   * @task functions
+   */
+  public function evaluateTokens(array $tokens) {
+    $results = array();
+    $evaluate = array();
+    foreach ($tokens as $token) {
+      if (!self::isFunctionToken($token)) {
+        $results[] = $token;
+      } else {
+        $evaluate[] = $token;
+      }
+    }
+
+    foreach ($evaluate as $function) {
+      $function = self::parseFunction($function);
+      if (!$function) {
+        throw new PhabricatorTypeaheadInvalidTokenException();
+      }
+
+      $name = $function['name'];
+      $argv = $function['argv'];
+
+      foreach ($this->evaluateFunction($name, array($argv)) as $phid) {
+        $results[] = $phid;
+      }
+    }
+
+    return $results;
+  }
+
+
+  /**
+   * @task functions
+   */
+  public static function isFunctionToken($token) {
+    // We're looking for a "(" so that a string like "members(q" is identified
+    // and parsed as a function call. This allows us to start generating
+    // results immeidately, before the user fully types out "members(quack)".
+    return (strpos($token, '(') !== false);
+  }
+
+
+  /**
+   * @task functions
+   */
+  public function parseFunction($token, $allow_partial = false) {
+    $matches = null;
+
+    if ($allow_partial) {
+      $ok = preg_match('/^([^(]+)\((.*)$/', $token, $matches);
+    } else {
+      $ok = preg_match('/^([^(]+)\((.*)\)$/', $token, $matches);
+    }
+
+    if (!$ok) {
+      return null;
+    }
+
+    $function = trim($matches[1]);
+
+    if (!$this->canEvaluateFunction($function)) {
+      return null;
+    }
+
+    return array(
+      'name' => $function,
+      'argv' => array(trim($matches[2])),
+    );
+  }
+
+
+  /**
+   * @task functions
+   */
+  public function renderFunctionTokens($function, array $argv_list) {
+    throw new PhutilMethodNotImplementedException();
+  }
+
 
 }

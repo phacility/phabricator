@@ -287,7 +287,8 @@ JX.install('Prefab', {
         icon: icon,
         closed: closed,
         type: fields[5],
-        sprite: fields[10]
+        sprite: fields[10],
+        unique: fields[11] || false
       };
     },
 

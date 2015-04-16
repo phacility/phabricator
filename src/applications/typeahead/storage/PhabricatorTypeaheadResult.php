@@ -13,6 +13,7 @@ final class PhabricatorTypeaheadResult {
   private $imageSprite;
   private $icon;
   private $closed;
+  private $unique;
 
   public function setIcon($icon) {
     $this->icon = $icon;
@@ -85,8 +86,21 @@ final class PhabricatorTypeaheadResult {
     return $this->phid;
   }
 
+  public function setUnique($unique) {
+    $this->unique = $unique;
+    return $this;
+  }
+
   public function getSortKey() {
-    return phutil_utf8_strtolower($this->getName());
+    // Put unique results (special parameter functions) ahead of other
+    // results.
+    if ($this->unique) {
+      $prefix = 'A';
+    } else {
+      $prefix = 'B';
+    }
+
+    return $prefix.phutil_utf8_strtolower($this->getName());
   }
 
   public function getWireFormat() {
@@ -102,6 +116,7 @@ final class PhabricatorTypeaheadResult {
       $this->getIcon(),
       $this->closed,
       $this->imageSprite ? (string)$this->imageSprite : null,
+      $this->unique ? 1 : null,
     );
     while (end($data) === null) {
       array_pop($data);

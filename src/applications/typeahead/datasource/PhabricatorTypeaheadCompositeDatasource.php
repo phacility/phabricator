@@ -72,6 +72,7 @@ abstract class PhabricatorTypeaheadCompositeDatasource
           }
         }
 
+        $source->setViewer($this->getViewer());
         $usable[] = $source;
       }
       $this->usable = $usable;
@@ -79,5 +80,38 @@ abstract class PhabricatorTypeaheadCompositeDatasource
 
     return $this->usable;
   }
+
+
+  protected function canEvaluateFunction($function) {
+    foreach ($this->getUsableDatasources() as $source) {
+      if ($source->canEvaluateFunction($function)) {
+        return true;
+      }
+    }
+
+    return parent::canEvaluateFunction($function);
+  }
+
+
+  protected function evaluateFunction($function, array $argv) {
+    foreach ($this->getUsableDatasources() as $source) {
+      if ($source->canEvaluateFunction($function)) {
+        return $source->evaluateFunction($function, $argv);
+      }
+    }
+
+    return parent::evaluateFunction($function, $argv);
+  }
+
+  public function renderFunctionTokens($function, array $argv_list) {
+    foreach ($this->getUsableDatasources() as $source) {
+      if ($source->canEvaluateFunction($function)) {
+        return $source->renderFunctionTokens($function, $argv_list);
+      }
+    }
+
+    return parent::renderFunctionTokens($function, $argv_list);
+  }
+
 
 }

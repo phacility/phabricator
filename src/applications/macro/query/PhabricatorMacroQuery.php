@@ -258,7 +258,7 @@ final class PhabricatorMacroQuery
     );
   }
 
-  public function getPagingValueMap($cursor, array $keys) {
+  protected function getPagingValueMap($cursor, array $keys) {
     $macro = $this->loadCursorObject($cursor);
     return array(
       'id' => $macro->getID(),

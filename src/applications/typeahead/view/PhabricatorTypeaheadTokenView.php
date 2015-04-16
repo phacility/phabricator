@@ -8,13 +8,24 @@ final class PhabricatorTypeaheadTokenView
   private $inputName;
   private $value;
 
-  public static function newForTypeaheadResult(
+  const KEY_INVALID = '<invalid>';
+
+  public static function newFromTypeaheadResult(
     PhabricatorTypeaheadResult $result) {
 
     return id(new PhabricatorTypeaheadTokenView())
       ->setKey($result->getPHID())
       ->setIcon($result->getIcon())
       ->setValue($result->getDisplayName());
+  }
+
+  public static function newFromHandle(
+    PhabricatorObjectHandle $handle) {
+
+    return id(new PhabricatorTypeaheadTokenView())
+      ->setKey($handle->getPHID())
+      ->setValue($handle->getFullName())
+      ->setIcon($handle->getIcon());
   }
 
   public function setKey($key) {

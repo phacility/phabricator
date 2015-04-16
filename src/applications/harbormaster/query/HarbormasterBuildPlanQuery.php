@@ -93,7 +93,7 @@ final class HarbormasterBuildPlanQuery
     );
   }
 
-  public function getPagingValueMap($cursor, array $keys) {
+  protected function getPagingValueMap($cursor, array $keys) {
     $plan = $this->loadCursorObject($cursor);
     return array(
       'id' => $plan->getID(),

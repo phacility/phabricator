@@ -383,7 +383,13 @@ abstract class PhabricatorApplicationSearchEngine {
       } else if (isset($allow_types[$type])) {
         $phids[] = $item;
       } else {
-        $names[] = $item;
+        if (PhabricatorTypeaheadDatasource::isFunctionToken($item)) {
+          // If this is a function, pass it through unchanged; we'll evaluate
+          // it later.
+          $phids[] = $item;
+        } else {
+          $names[] = $item;
+        }
       }
     }
 

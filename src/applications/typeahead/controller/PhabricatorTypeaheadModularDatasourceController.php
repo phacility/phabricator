@@ -49,13 +49,12 @@ final class PhabricatorTypeaheadModularDatasourceController
         ->setRawQuery($raw_query);
 
       $hard_limit = 1000;
+      $limit = 100;
 
       if ($is_browse) {
         if (!$composite->isBrowsable()) {
           return new Aphront404Response();
         }
-
-        $limit = 10;
 
         if (($offset + $limit) >= $hard_limit) {
           // Offset-based paging is intrinsically slow; hard-cap how far we're
@@ -140,7 +139,7 @@ final class PhabricatorTypeaheadModularDatasourceController
 
         $items = array();
         foreach ($results as $result) {
-          $token = PhabricatorTypeaheadTokenView::newForTypeaheadResult(
+          $token = PhabricatorTypeaheadTokenView::newFromTypeaheadResult(
             $result);
 
           // Disable already-selected tokens.

@@ -10,6 +10,7 @@ JX.behavior('typeahead-search', function(config) {
   var input = JX.$(config.inputID);
   var frame = JX.$(config.frameID);
   var last = input.value;
+  var in_flight = {};
 
   function update() {
     if (input.value == last) {
@@ -30,9 +31,17 @@ JX.behavior('typeahead-search', function(config) {
       return;
     }
 
+    if (value in in_flight) {
+      // We've already sent a request for this query.
+      return;
+    }
+    in_flight[value] = true;
+
     JX.DOM.alterClass(frame, 'loading', true);
     new JX.Workflow(config.uri, {q: value, format: 'html'})
       .setHandler(function(r) {
+        delete in_flight[value];
+
         if (value != input.value) {
           // The user typed some more stuff while the request was in flight,
           // so ignore the response.

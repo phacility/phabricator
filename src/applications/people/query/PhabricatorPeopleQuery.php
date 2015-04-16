@@ -338,7 +338,7 @@ final class PhabricatorPeopleQuery
     );
   }
 
-  public function getPagingValueMap($cursor, array $keys) {
+  protected function getPagingValueMap($cursor, array $keys) {
     $user = $this->loadCursorObject($cursor);
     return array(
       'id' => $user->getID(),

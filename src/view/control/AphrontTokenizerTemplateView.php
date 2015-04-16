@@ -18,7 +18,7 @@ final class AphrontTokenizerTemplateView extends AphrontView {
   }
 
   public function setValue(array $value) {
-    assert_instances_of($value, 'PhabricatorObjectHandle');
+    assert_instances_of($value, 'PhabricatorTypeaheadTokenView');
     $this->value = $value;
     return $this;
   }
@@ -41,15 +41,7 @@ final class AphrontTokenizerTemplateView extends AphrontView {
 
     $id = $this->id;
     $name = $this->getName();
-    $values = nonempty($this->getValue(), array());
-
-    $tokens = array();
-    foreach ($values as $key => $value) {
-      $tokens[] = $this->renderToken(
-        $value->getPHID(),
-        $value->getFullName(),
-        $value->getType());
-    }
+    $tokens = nonempty($this->getValue(), array());
 
     $input = javelin_tag(
       'input',
@@ -123,14 +115,6 @@ final class AphrontTokenizerTemplateView extends AphrontView {
         )));
 
     return $frame;
-  }
-
-  private function renderToken($key, $value, $icon) {
-    return id(new PhabricatorTypeaheadTokenView())
-      ->setKey($key)
-      ->setValue($value)
-      ->setIcon($icon)
-      ->setInputName($this->getName());
   }
 
 }

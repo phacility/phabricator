@@ -50,19 +50,52 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
       $id = celerity_generate_unique_node_id();
     }
 
+    $datasource = $this->datasource;
+    $datasource->setViewer($this->getUser());
+
     $placeholder = null;
     if (!strlen($this->placeholder)) {
-      if ($this->datasource) {
-        $placeholder = $this->datasource->getPlaceholderText();
+      if ($datasource) {
+        $placeholder = $datasource->getPlaceholderText();
       }
     } else {
       $placeholder = $this->placeholder;
     }
 
+    $tokens = array();
+    $values = nonempty($this->getValue(), array());
+    foreach ($values as $value) {
+      if (isset($handles[$value])) {
+        $token = PhabricatorTypeaheadTokenView::newFromHandle($handles[$value]);
+      } else {
+        $token = null;
+        if ($datasource) {
+          $function = $datasource->parseFunction($value);
+          if ($function) {
+            $token_list = $datasource->renderFunctionTokens(
+              $function['name'],
+              array($function['argv']));
+            $token = head($token_list);
+          }
+        }
+
+        if (!$token) {
+          $name = pht('Invalid Function: %s', $value);
+          $token = $datasource->newInvalidToken($name);
+        }
+
+        if ($token->getKey() == PhabricatorTypeaheadTokenView::KEY_INVALID) {
+          $token->setKey($value);
+        }
+      }
+      $token->setInputName($this->getName());
+      $tokens[] = $token;
+    }
+
     $template = new AphrontTokenizerTemplateView();
     $template->setName($name);
     $template->setID($id);
-    $template->setValue($handles);
+    $template->setValue($tokens);
 
     $username = null;
     if ($this->user) {
@@ -71,8 +104,6 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
 
     $datasource_uri = null;
     $browse_uri = null;
-
-    $datasource = $this->datasource;
     if ($datasource) {
       $datasource->setViewer($this->getUser());
 
@@ -88,8 +119,8 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
       Javelin::initBehavior('aphront-basic-tokenizer', array(
         'id'          => $id,
         'src'         => $datasource_uri,
-        'value'       => mpull($handles, 'getFullName', 'getPHID'),
-        'icons'       => mpull($handles, 'getIcon', 'getPHID'),
+        'value'       => mpull($tokens, 'getValue', 'getKey'),
+        'icons'       => mpull($tokens, 'getIcon', 'getKey'),
         'limit'       => $this->limit,
         'username'    => $username,
         'placeholder' => $placeholder,
@@ -111,7 +142,15 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
       }
 
       $values = nonempty($this->getValue(), array());
-      $this->handles = $viewer->loadHandles($values);
+
+      $phids = array();
+      foreach ($values as $value) {
+        if (!PhabricatorTypeaheadDatasource::isFunctionToken($value)) {
+          $phids[] = $value;
+        }
+      }
+
+      $this->handles = $viewer->loadHandles($phids);
     }
 
     return $this->handles;
