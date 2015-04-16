@@ -118,17 +118,20 @@ JX.behavior('policy-rule-editor', function(config) {
 
     switch (type) {
       case 'tokenizer':
-        node = JX.$H(template.markup).getNode();
-        node.id = '';
-
         var options = {
-          root: node,
           src: template.uri,
           placeholder: template.placeholder,
+          browseURI: template.browseURI,
           limit: template.limit
         };
 
-        var tokenizer = JX.Prefab.buildTokenizer(options).tokenizer;
+        var build = JX.Prefab.newTokenizerFromTemplate(
+          template.markup,
+          options);
+
+        node = build.node;
+
+        var tokenizer = build.tokenizer;
         tokenizer.start();
 
         get_fn = function() { return JX.keys(tokenizer.getTokens()); };

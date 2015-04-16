@@ -85,6 +85,7 @@ JX.install('Tokenizer', {
       }
 
       if (this._frame) {
+        JX.DOM.alterClass(this._frame, 'has-browse', !!this.getBrowseURI());
         JX.DOM.listen(
           this._frame,
           'click',

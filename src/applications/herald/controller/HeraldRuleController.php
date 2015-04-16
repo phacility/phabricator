@@ -605,9 +605,12 @@ final class HeraldRuleController extends HeraldController {
     );
 
     foreach ($sources as $key => $source) {
+      $source->setViewer($this->getViewer());
+
       $sources[$key] = array(
         'uri' => $source->getDatasourceURI(),
         'placeholder' => $source->getPlaceholderText(),
+        'browseURI' => $source->getBrowseURI(),
       );
     }
 

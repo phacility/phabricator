@@ -31,6 +31,17 @@ JX.install('Prefab', {
       return select;
     },
 
+    newTokenizerFromTemplate: function(markup, config) {
+      var template = JX.$H(markup).getFragment().firstChild;
+      var container = JX.DOM.find(template, 'div', 'tokenizer-container');
+
+      container.id = '';
+      config.root = container;
+
+      var build = JX.Prefab.buildTokenizer(config);
+      build.node = template;
+      return build;
+    },
 
     /**
      * Build a Phabricator tokenizer out of a configuration with application

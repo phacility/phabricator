@@ -109,7 +109,15 @@ a.jx-tokenizer-token:hover {
   width: 100%;
 }
 
-.jx-tokenizer-frame-input {
+.jx-tokenizer-frame .jx-tokenizer-frame-browse {
+  display: none;
+}
+
+.has-browse .jx-tokenizer-frame-browse {
+  display: table-cell;
+}
+
+.jx-tokenizer-frame td.jx-tokenizer-frame-input {
   width: 100%;
 }
 

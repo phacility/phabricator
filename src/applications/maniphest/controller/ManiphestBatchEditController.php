@@ -65,7 +65,9 @@ final class ManiphestBatchEditController extends ManiphestController {
 
     $projects_source = new PhabricatorProjectDatasource();
     $mailable_source = new PhabricatorMetaMTAMailableDatasource();
+    $mailable_source->setViewer($user);
     $owner_source = new PhabricatorTypeaheadOwnerDatasource();
+    $owner_source->setViewer($user);
 
     require_celerity_resource('maniphest-batch-editor');
     Javelin::initBehavior(
@@ -75,17 +77,20 @@ final class ManiphestBatchEditController extends ManiphestController {
         'tokenizerTemplate' => $template,
         'sources' => array(
           'project' => array(
-            'src'           => $projects_source->getDatasourceURI(),
-            'placeholder'   => $projects_source->getPlaceholderText(),
+            'src' => $projects_source->getDatasourceURI(),
+            'placeholder' => $projects_source->getPlaceholderText(),
+            'browseURI' => $projects_source->getBrowseURI(),
           ),
           'owner' => array(
-            'src'           => $owner_source->getDatasourceURI(),
-            'placeholder'   => $owner_source->getPlaceholderText(),
-            'limit'         => 1,
+            'src' => $owner_source->getDatasourceURI(),
+            'placeholder' => $owner_source->getPlaceholderText(),
+            'browseURI' => $owner_source->getBrowseURI(),
+            'limit' => 1,
           ),
-          'cc'    => array(
-            'src'           => $mailable_source->getDatasourceURI(),
-            'placeholder'   => $mailable_source->getPlaceholderText(),
+          'cc' => array(
+            'src' => $mailable_source->getDatasourceURI(),
+            'placeholder' => $mailable_source->getPlaceholderText(),
+            'browseURI' => $mailable_source->getBrowseURI(),
           ),
         ),
         'input' => 'batch-form-actions',

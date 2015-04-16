@@ -136,18 +136,14 @@ JX.behavior('maniphest-batch-editor', function(config) {
     });
 
   function build_tokenizer(tconfig) {
-    var template = JX.$N('div', JX.$H(config.tokenizerTemplate)).firstChild;
-    template.id = '';
-
-    var build_config = JX.copy({}, tconfig);
-    build_config.root = template;
-
-    var built = JX.Prefab.buildTokenizer(build_config);
+    var built = JX.Prefab.newTokenizerFromTemplate(
+      config.tokenizerTemplate,
+      JX.copy({}, tconfig));
     built.tokenizer.start();
 
     return {
       object: built.tokenizer,
-      template: template
+      template: built.node
     };
   }
 
