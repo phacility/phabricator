@@ -37,7 +37,7 @@ final class PhabricatorApplicationDatasource
         ->setImageSprite('phabricator-search-icon '.$img);
     }
 
-    return $results;
+    return $this->filterResultsAgainstTokens($results);
   }
 
 }

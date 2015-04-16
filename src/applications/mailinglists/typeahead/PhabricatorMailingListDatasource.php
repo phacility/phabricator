@@ -3,6 +3,11 @@
 final class PhabricatorMailingListDatasource
   extends PhabricatorTypeaheadDatasource {
 
+  public function isBrowsable() {
+    // TODO: Make this browsable if we don't delete it before then.
+    return false;
+  }
+
   public function getPlaceholderText() {
     return pht('Type a mailing list name...');
   }

@@ -25,6 +25,7 @@ final class PhabricatorTypeaheadModularDatasourceController
     if (isset($sources[$class])) {
       $source = $sources[$class];
       $source->setParameters($request->getRequestData());
+      $source->setViewer($viewer);
 
       // NOTE: Wrapping the source in a Composite datasource ensures we perform
       // application visibility checks for the viewer, so we do not need to do
@@ -40,6 +41,10 @@ final class PhabricatorTypeaheadModularDatasourceController
       $hard_limit = 1000;
 
       if ($is_browse) {
+        if (!$composite->isBrowsable()) {
+          return new Aphront404Response();
+        }
+
         $limit = 10;
         $offset = $request->getInt('offset');
 

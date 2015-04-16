@@ -3,7 +3,19 @@
 abstract class PhabricatorTypeaheadCompositeDatasource
   extends PhabricatorTypeaheadDatasource {
 
+  private $usable;
+
   abstract public function getComponentDatasources();
+
+  public function isBrowsable() {
+    foreach ($this->getUsableDatasources() as $datasource) {
+      if (!$datasource->isBrowsable()) {
+        return false;
+      }
+    }
+
+    return parent::isBrowsable();
+  }
 
   public function getDatasourceApplicationClass() {
     return null;
@@ -43,26 +55,29 @@ abstract class PhabricatorTypeaheadCompositeDatasource
   }
 
   private function getUsableDatasources() {
-    $sources = $this->getComponentDatasources();
+    if ($this->usable === null) {
+      $sources = $this->getComponentDatasources();
 
-    $usable = array();
-    foreach ($sources as $source) {
-      $application_class = $source->getDatasourceApplicationClass();
+      $usable = array();
+      foreach ($sources as $source) {
+        $application_class = $source->getDatasourceApplicationClass();
 
-      if ($application_class) {
-        $result = id(new PhabricatorApplicationQuery())
-          ->setViewer($this->getViewer())
-          ->withClasses(array($application_class))
-          ->execute();
-        if (!$result) {
-          continue;
+        if ($application_class) {
+          $result = id(new PhabricatorApplicationQuery())
+            ->setViewer($this->getViewer())
+            ->withClasses(array($application_class))
+            ->execute();
+          if (!$result) {
+            continue;
+          }
         }
-      }
 
-      $usable[] = $source;
+        $usable[] = $source;
+      }
+      $this->usable = $usable;
     }
 
-    return $usable;
+    return $this->usable;
   }
 
 }

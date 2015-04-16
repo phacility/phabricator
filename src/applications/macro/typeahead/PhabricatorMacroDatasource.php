@@ -2,6 +2,11 @@
 
 final class PhabricatorMacroDatasource extends PhabricatorTypeaheadDatasource {
 
+  public function isBrowsable() {
+    // TODO: This should be made browsable.
+    return false;
+  }
+
   public function getPlaceholderText() {
     return pht('Type a macro name...');
   }

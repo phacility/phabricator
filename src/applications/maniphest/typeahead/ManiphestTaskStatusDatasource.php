@@ -25,6 +25,6 @@ final class ManiphestTaskStatusDatasource
         ->setName($name);
     }
 
-    return $results;
+    return $this->filterResultsAgainstTokens($results);
   }
 }
