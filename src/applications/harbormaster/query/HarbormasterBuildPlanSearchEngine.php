@@ -18,11 +18,14 @@ final class HarbormasterBuildPlanSearchEngine
       'status',
       $this->readListFromRequest($request, 'status'));
 
+    $this->saveQueryOrder($saved, $request);
+
     return $saved;
   }
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new HarbormasterBuildPlanQuery());
+    $this->setQueryOrder($query, $saved);
 
     $status = $saved->getParameter('status', array());
     if ($status) {
@@ -34,9 +37,9 @@ final class HarbormasterBuildPlanSearchEngine
 
   public function buildSearchForm(
     AphrontFormView $form,
-    PhabricatorSavedQuery $saved_query) {
+    PhabricatorSavedQuery $saved) {
 
-    $status = $saved_query->getParameter('status', array());
+    $status = $saved->getParameter('status', array());
 
     $form
       ->appendChild(
@@ -52,6 +55,11 @@ final class HarbormasterBuildPlanSearchEngine
             HarbormasterBuildPlan::STATUS_DISABLED,
             pht('Disabled'),
             in_array(HarbormasterBuildPlan::STATUS_DISABLED, $status)));
+
+    $this->appendOrderFieldsToForm(
+      $form,
+      $saved,
+      new HarbormasterBuildPlanQuery());
   }
 
   protected function getURI($path) {
