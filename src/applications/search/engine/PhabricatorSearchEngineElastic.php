@@ -93,12 +93,20 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
   private function buildSpec(PhabricatorSavedQuery $query) {
     $spec = array();
     $filter = array();
+    $title_spec = array();
 
     if (strlen($query->getParameter('query'))) {
       $spec[] = array(
         'simple_query_string' => array(
           'query'  => $query->getParameter('query'),
           'fields' => array( 'field.corpus' ),
+        ),
+      );
+
+      $title_spec = array(
+        'simple_query_string' => array(
+          'query'  => $query->getParameter('query'),
+          'fields' => array('title'),
         ),
       );
     }
@@ -174,6 +182,9 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
 
     if ($spec) {
       $spec = array('query' => array('bool' => array('must' => $spec)));
+      if ($title_spec) {
+        $spec['query']['bool']['should'] = $title_spec;
+      }
     }
 
     if ($filter) {
