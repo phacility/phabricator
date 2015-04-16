@@ -329,4 +329,5 @@
 .device .conpherence-message-pane .aphront-form-control-textarea {
   float: left;
   height: 24px;
+  width: 100%;
 }
