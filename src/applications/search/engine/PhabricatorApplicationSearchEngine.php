@@ -602,18 +602,16 @@ abstract class PhabricatorApplicationSearchEngine {
     PhabricatorSavedQuery $saved) {
 
     $order = $saved->getParameter('order');
-    if (strlen($order)) {
-      $builtin = $query->getBuiltinOrders();
-      if (isset($builtin[$order])) {
-        $query->setOrder($order);
-      } else {
-        // If the order is invalid or not available, we choose the first
-        // builtin order. This isn't always the default order for the query,
-        // but is the first value in the "Order" dropdown, and makes the query
-        // behavior more consistent with the UI. In queries where the two
-        // orders differ, this order is the preferred order for humans.
-        $query->setOrder(head_key($builtin));
-      }
+    $builtin = $query->getBuiltinOrders();
+    if (strlen($order) && isset($builtin[$order])) {
+      $query->setOrder($order);
+    } else {
+      // If the order is invalid or not available, we choose the first
+      // builtin order. This isn't always the default order for the query,
+      // but is the first value in the "Order" dropdown, and makes the query
+      // behavior more consistent with the UI. In queries where the two
+      // orders differ, this order is the preferred order for humans.
+      $query->setOrder(head_key($builtin));
     }
 
     return $this;
