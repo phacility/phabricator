@@ -104,3 +104,17 @@ a.jx-tokenizer-token:hover {
 .tokenizer-closed {
   margin-top: 2px;
 }
+
+.jx-tokenizer-frame {
+  width: 100%;
+}
+
+.jx-tokenizer-frame-input {
+  width: 100%;
+}
+
+.jx-tokenizer-frame-browse {
+  width: 100px;
+  vertical-align: middle;
+  padding: 0 0 0 4px;
+}

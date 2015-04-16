@@ -31,7 +31,7 @@ JX.behavior('typeahead-search', function(config) {
     }
 
     JX.DOM.alterClass(frame, 'loading', true);
-    new JX.Workflow(config.uri, {q: value})
+    new JX.Workflow(config.uri, {q: value, format: 'html'})
       .setHandler(function(r) {
         if (value != input.value) {
           // The user typed some more stuff while the request was in flight,

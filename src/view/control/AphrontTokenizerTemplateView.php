@@ -5,6 +5,12 @@ final class AphrontTokenizerTemplateView extends AphrontView {
   private $value;
   private $name;
   private $id;
+  private $browseURI;
+
+  public function setBrowseURI($browse_uri) {
+    $this->browseURI = $browse_uri;
+    return $this;
+  }
 
   public function setID($id) {
     $this->id = $id;
@@ -61,13 +67,57 @@ final class AphrontTokenizerTemplateView extends AphrontView {
     $content[] = $input;
     $content[] = phutil_tag('div', array('style' => 'clear: both;'), '');
 
-    return phutil_tag(
+    $container = phutil_tag(
       'div',
       array(
         'id' => $id,
         'class' => 'jx-tokenizer-container',
       ),
       $content);
+
+    $browse = null;
+    if ($this->browseURI) {
+      $icon = id(new PHUIIconView())
+        ->setIconFont('fa-list-ul');
+
+      // TODO: This thing is ugly and the ugliness is not intentional.
+      // We have to give it text or PHUIButtonView collapses. It should likely
+      // just be an icon and look more integrated into the input.
+      $browse = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setIcon($icon)
+        ->addSigil('tokenizer-browse')
+        ->setColor(PHUIButtonView::GREY)
+        ->setSize(PHUIButtonView::SMALL)
+        ->setText(pht('Browse...'));
+    }
+
+    $frame = javelin_tag(
+      'table',
+      array(
+        'class' => 'jx-tokenizer-frame',
+        'sigil' => 'tokenizer-frame',
+      ),
+      phutil_tag(
+        'tr',
+        array(
+        ),
+        array(
+          phutil_tag(
+            'td',
+            array(
+              'class' => 'jx-tokenizer-frame-input',
+            ),
+            $container),
+          phutil_tag(
+            'td',
+            array(
+              'class' => 'jx-tokenizer-frame-browse',
+            ),
+            $browse),
+        )));
+
+    return $frame;
   }
 
   private function renderToken($key, $value, $icon) {

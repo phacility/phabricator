@@ -45,3 +45,16 @@ input.typeahead-browse-input {
   margin: 0;
   width: 100%;
 }
+
+.typeahead-browse-item {
+  padding: 2px 0;
+}
+
+.typeahead-browse-item + .typeahead-browse-item {
+  border-top: 1px solid {$thinblueborder};
+}
+
+.typeahead-browse-item button {
+  float: right;
+  margin: 2px 4px;
+}

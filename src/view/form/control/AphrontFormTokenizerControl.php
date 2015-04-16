@@ -70,8 +70,18 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
     }
 
     $datasource_uri = null;
-    if ($this->datasource) {
-      $datasource_uri = $this->datasource->getDatasourceURI();
+    $browse_uri = null;
+
+    $datasource = $this->datasource;
+    if ($datasource) {
+      $datasource->setViewer($this->getUser());
+
+      $datasource_uri = $datasource->getDatasourceURI();
+
+      $browse_uri = $datasource->getBrowseURI();
+      if ($browse_uri) {
+        $template->setBrowseURI($browse_uri);
+      }
     }
 
     if (!$this->disableBehavior) {
@@ -83,6 +93,7 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
         'limit'       => $this->limit,
         'username'    => $username,
         'placeholder' => $placeholder,
+        'browseURI' => $browse_uri,
       ));
     }
 

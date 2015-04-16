@@ -11,7 +11,17 @@ final class PhabricatorTypeaheadModularDatasourceController
     $request = $this->getRequest();
     $viewer = $request->getUser();
     $query = $request->getStr('q');
+    $offset = $request->getInt('offset');
+    $select_phid = null;
     $is_browse = ($request->getURIData('action') == 'browse');
+
+    $select = $request->getStr('select');
+    if ($select) {
+      $select = phutil_json_decode($select);
+      $query = idx($select, 'q');
+      $offset = idx($select, 'offset');
+      $select_phid = idx($select, 'phid');
+    }
 
     // Default this to the query string to make debugging a little bit easier.
     $raw_query = nonempty($request->getStr('raw'), $query);
@@ -46,7 +56,6 @@ final class PhabricatorTypeaheadModularDatasourceController
         }
 
         $limit = 10;
-        $offset = $request->getInt('offset');
 
         if (($offset + $limit) >= $hard_limit) {
           // Offset-based paging is intrinsically slow; hard-cap how far we're
@@ -62,13 +71,43 @@ final class PhabricatorTypeaheadModularDatasourceController
       $results = $composite->loadResults();
 
       if ($is_browse) {
-        $next_link = null;
+        // If this is a request for a specific token after the user clicks
+        // "Select", return the token in wire format so it can be added to
+        // the tokenizer.
+        if ($select_phid) {
+          $map = mpull($results, null, 'getPHID');
+          $token = idx($map, $select_phid);
+          if (!$token) {
+            return new Aphront404Response();
+          }
 
+          $payload = array(
+            'key' => $token->getPHID(),
+            'token' => $token->getWireFormat(),
+          );
+
+          return id(new AphrontAjaxResponse())->setContent($payload);
+        }
+
+        $format = $request->getStr('format');
+        switch ($format) {
+          case 'html':
+          case 'dialog':
+            // These are the acceptable response formats.
+            break;
+          default:
+            // Return a dialog if format information is missing or invalid.
+            $format = 'dialog';
+            break;
+        }
+
+        $next_link = null;
         if (count($results) > $limit) {
           $results = array_slice($results, 0, $limit, $preserve_keys = true);
           if (($offset + (2 * $limit)) < $hard_limit) {
             $next_uri = id(new PhutilURI($request->getRequestURI()))
-              ->setQueryParam('offset', $offset + $limit);
+              ->setQueryParam('offset', $offset + $limit)
+              ->setQueryParam('format', 'html');
 
             $next_link = javelin_tag(
               'a',
@@ -91,16 +130,44 @@ final class PhabricatorTypeaheadModularDatasourceController
           }
         }
 
+        $exclude = $request->getStrList('exclude');
+        $exclude = array_fuse($exclude);
+
+        $select = array(
+          'offset' => $offset,
+          'q' => $query,
+        );
+
         $items = array();
         foreach ($results as $result) {
           $token = PhabricatorTypeaheadTokenView::newForTypeaheadResult(
             $result);
+
+          // Disable already-selected tokens.
+          $disabled = isset($exclude[$result->getPHID()]);
+
+          $value = $select + array('phid' => $result->getPHID());
+          $value = json_encode($value);
+
+          $button = phutil_tag(
+            'button',
+            array(
+              'class' => 'small grey',
+              'name' => 'select',
+              'value' => $value,
+              'disabled' => $disabled ? 'disabled' : null,
+            ),
+            pht('Select'));
+
           $items[] = phutil_tag(
             'div',
             array(
-              'class' => 'grouped',
+              'class' => 'typeahead-browse-item grouped',
             ),
-            $token);
+            array(
+              $token,
+              $button,
+            ));
         }
 
         $markup = array(
@@ -108,7 +175,7 @@ final class PhabricatorTypeaheadModularDatasourceController
           $next_link,
         );
 
-        if ($request->isAjax()) {
+        if ($format == 'html') {
           $content = array(
             'markup' => hsprintf('%s', $markup),
           );

@@ -73,6 +73,16 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
     return (string)$uri;
   }
 
+  public function getBrowseURI() {
+    if (!$this->isBrowsable()) {
+      return null;
+    }
+
+    $uri = new PhutilURI('/typeahead/browse/'.get_class($this).'/');
+    $uri->setQueryParams($this->parameters);
+    return (string)$uri;
+  }
+
   abstract public function getPlaceholderText();
   abstract public function getDatasourceApplicationClass();
   abstract public function loadResults();

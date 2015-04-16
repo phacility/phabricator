@@ -194,6 +194,10 @@ JX.install('Prefab', {
         tokenizer.setInitialValue(config.value);
       }
 
+      if (config.browseURI) {
+        tokenizer.setBrowseURI(config.browseURI);
+      }
+
       JX.Stratcom.addData(root, {'tokenizer' : tokenizer});
 
       return {
