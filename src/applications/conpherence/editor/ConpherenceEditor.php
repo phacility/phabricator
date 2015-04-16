@@ -441,7 +441,14 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
             PhabricatorPolicyCapability::CAN_EDIT);
         }
         break;
+      // This is similar to PhabricatorTransactions::TYPE_COMMENT so
+      // use CAN_VIEW
       case ConpherenceTransactionType::TYPE_FILES:
+        PhabricatorPolicyFilter::requireCapability(
+          $this->requireActor(),
+          $object,
+          PhabricatorPolicyCapability::CAN_VIEW);
+        break;
       case ConpherenceTransactionType::TYPE_TITLE:
         PhabricatorPolicyFilter::requireCapability(
           $this->requireActor(),
