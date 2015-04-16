@@ -27,7 +27,6 @@ final class PhabricatorRepositorySearchEngine
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new PhabricatorRepositoryQuery())
-      ->setDefaultBuiltinOrder()
       ->needProjectPHIDs(true)
       ->needCommitCounts(true)
       ->needMostRecentCommits(true);
@@ -43,10 +42,7 @@ final class PhabricatorRepositorySearchEngine
       $query->withStatus($status);
     }
 
-    $order = $saved->getParameter('order');
-    if ($order) {
-      $query->setOrder($order);
-    }
+    $this->setQueryOrder($query, $saved);
 
     $hosted = $saved->getParameter('hosted');
     $hosted = idx($this->getHostedValues(), $hosted);

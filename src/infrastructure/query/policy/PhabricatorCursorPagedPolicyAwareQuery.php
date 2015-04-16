@@ -480,26 +480,6 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
 
   /**
-   * Select the default builtin result ordering.
-   *
-   * This sets the result order to the default order among the builtin result
-   * orders (see @{method:getBuiltinOrders}). This is often the same as the
-   * query's builtin default order vector, but some objects have different
-   * default vectors (which are internally-facing) and builtin orders (which
-   * are user-facing).
-   *
-   * For example, repositories sort by ID internally (which is efficient and
-   * consistent), but sort by most recent commit as a default builtin (which
-   * better aligns with user expectations).
-   *
-   * @return this
-   */
-  public function setDefaultBuiltinOrder() {
-    return $this->setOrder(head_key($this->getBuiltinOrders()));
-  }
-
-
-  /**
    * Get builtin orders for this class.
    *
    * In application UIs, we want to be able to present users with a small

@@ -16,10 +16,10 @@ final class AlmanacServiceDatasource
     $raw_query = $this->getRawQuery();
 
     $services = id(new AlmanacServiceQuery())
-      ->setViewer($viewer)
       ->withNamePrefix($raw_query)
-      ->setLimit($this->getLimit())
-      ->execute();
+      ->setOrder('name');
+
+    $services = $this->executeQuery($services);
 
     if ($services) {
       $handles = id(new PhabricatorHandleQuery())
