@@ -116,6 +116,7 @@ final class PhabricatorProjectMembersDatasource
       ->setDisplayName(pht('Members: %s', $project->getName()))
       ->setURI('/tag/'.$project->getPrimarySlug().'/')
       ->setPHID('members('.$project->getPHID().')')
+      ->setIcon('fa-users')
       ->setClosed($closed);
   }
 

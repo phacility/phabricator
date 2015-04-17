@@ -187,16 +187,16 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
   }
 
   protected function newFunctionResult() {
-    // TODO: Find a more consistent design.
     return id(new PhabricatorTypeaheadResult())
-      ->setIcon('fa-magic indigo');
+      ->setTokenType(PhabricatorTypeaheadTokenView::TYPE_FUNCTION)
+      ->setIcon('fa-asterisk');
   }
 
   public function newInvalidToken($name) {
     return id(new PhabricatorTypeaheadTokenView())
-      ->setKey(PhabricatorTypeaheadTokenView::KEY_INVALID)
       ->setValue($name)
-      ->setIcon('fa-exclamation-circle red');
+      ->setIcon('fa-exclamation-circle')
+      ->setTokenType(PhabricatorTypeaheadTokenView::TYPE_INVALID);
   }
 
 /* -(  Token Functions  )---------------------------------------------------- */

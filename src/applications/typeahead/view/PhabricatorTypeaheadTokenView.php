@@ -3,12 +3,16 @@
 final class PhabricatorTypeaheadTokenView
   extends AphrontTagView {
 
+  const TYPE_OBJECT = 'object';
+  const TYPE_DISABLED = 'disabled';
+  const TYPE_FUNCTION = 'function';
+  const TYPE_INVALID = 'invalid';
+
   private $key;
   private $icon;
   private $inputName;
   private $value;
-
-  const KEY_INVALID = '<invalid>';
+  private $tokenType = self::TYPE_OBJECT;
 
   public static function newFromTypeaheadResult(
     PhabricatorTypeaheadResult $result) {
@@ -16,16 +20,24 @@ final class PhabricatorTypeaheadTokenView
     return id(new PhabricatorTypeaheadTokenView())
       ->setKey($result->getPHID())
       ->setIcon($result->getIcon())
-      ->setValue($result->getDisplayName());
+      ->setValue($result->getDisplayName())
+      ->setTokenType($result->getTokenType());
   }
 
   public static function newFromHandle(
     PhabricatorObjectHandle $handle) {
 
-    return id(new PhabricatorTypeaheadTokenView())
+    $token = id(new PhabricatorTypeaheadTokenView())
       ->setKey($handle->getPHID())
       ->setValue($handle->getFullName())
-      ->setIcon($handle->getIcon());
+      ->setIcon(rtrim($handle->getIcon().' '.$handle->getIconColor()));
+
+    if ($handle->isDisabled() ||
+        $handle->getStatus() == PhabricatorObjectHandleStatus::STATUS_CLOSED) {
+      $token->setTokenType(self::TYPE_DISABLED);
+    }
+
+    return $token;
   }
 
   public function setKey($key) {
@@ -35,6 +47,15 @@ final class PhabricatorTypeaheadTokenView
 
   public function getKey() {
     return $this->key;
+  }
+
+  public function setTokenType($token_type) {
+    $this->tokenType = $token_type;
+    return $this;
+  }
+
+  public function getTokenType() {
+    return $this->tokenType;
   }
 
   public function setInputName($input_name) {
@@ -69,8 +90,25 @@ final class PhabricatorTypeaheadTokenView
   }
 
   protected function getTagAttributes() {
+    $classes = array();
+    $classes[] = 'jx-tokenizer-token';
+    switch ($this->getTokenType()) {
+      case self::TYPE_FUNCTION:
+        $classes[] = 'jx-tokenizer-token-function';
+        break;
+      case self::TYPE_INVALID:
+        $classes[] = 'jx-tokenizer-token-invalid';
+        break;
+      case self::TYPE_DISABLED:
+        $classes[] = 'jx-tokenizer-token-disabled';
+        break;
+      case self::TYPE_OBJECT:
+      default:
+        break;
+    }
+
     return array(
-      'class' => 'jx-tokenizer-token',
+      'class' => $classes,
     );
   }
 

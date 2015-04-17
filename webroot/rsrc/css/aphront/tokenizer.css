@@ -83,6 +83,51 @@ a.jx-tokenizer-token:hover {
   color: {$bluetext};
 }
 
+a.jx-tokenizer-token-function {
+  border-color: {$sh-lightyellowborder};
+  background: {$sh-yellowbackground};
+  color: {$sh-yellowtext};
+}
+
+a.jx-tokenizer-token-function:hover {
+  border-color: {$sh-yellowborder};
+  background: {$lightyellow};
+}
+
+.jx-tokenizer-token-function .phui-icon-view {
+  color: {$sh-yellowicon};
+}
+
+a.jx-tokenizer-token-disabled {
+  border-color: {$sh-lightgreyborder};
+  background: {$sh-greybackground};
+  color: {$sh-greytext};
+}
+
+a.jx-tokenizer-token-disabled:hover {
+  border-color: {$sh-greyborder};
+  background: {$greybackground};
+}
+
+.jx-tokenizer-token-disabled .phui-icon-view {
+  color: {$sh-greyicon};
+}
+
+a.jx-tokenizer-token-invalid {
+  border-color: {$sh-lightredborder};
+  background: {$sh-redbackground};
+  color: {$sh-redtext};
+}
+
+a.jx-tokenizer-token-invalid:hover {
+  border-color: {$sh-redborder};
+  background: {$lightred};
+}
+
+.jx-tokenizer-token-invalid .phui-icon-view {
+  color: {$sh-redicon};
+}
+
 .tokenizer-result {
   position: relative;
   padding: 5px 8px 5px 28px;

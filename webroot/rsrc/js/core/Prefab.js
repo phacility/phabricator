@@ -172,23 +172,27 @@ JX.install('Prefab', {
 
       var tokenizer = new JX.Tokenizer(root);
       tokenizer.setTypeahead(typeahead);
-      tokenizer.setRenderTokenCallback(function(value, key) {
+      tokenizer.setRenderTokenCallback(function(value, key, container) {
         var result = datasource.getResult(key);
 
         var icon;
+        var type;
         if (result) {
           icon = result.icon;
           value = result.displayName;
+          type = result.tokenType;
         } else {
           icon = config.icons[key];
+          type = config.types[key];
         }
 
         if (icon) {
           icon = JX.Prefab._renderIcon(icon);
         }
 
-        // TODO: Maybe we should render these closed tags in grey? Figure out
-        // how we're going to use color.
+        if (type) {
+          JX.DOM.alterClass(container, 'jx-tokenizer-token-' + type, true);
+        }
 
         return [icon, value];
       });
@@ -288,7 +292,8 @@ JX.install('Prefab', {
         closed: closed,
         type: fields[5],
         sprite: fields[10],
-        unique: fields[11] || false
+        tokenType: fields[11],
+        unique: fields[12] || false
       };
     },
 

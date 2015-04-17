@@ -50,6 +50,7 @@ final class PhabricatorViewerDatasource
     return $this->newFunctionResult()
       ->setName(pht('Current Viewer'))
       ->setPHID('viewer()')
+      ->setIcon('fa-user')
       ->setUnique(true);
   }
 

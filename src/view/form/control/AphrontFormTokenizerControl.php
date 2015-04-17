@@ -51,7 +51,9 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
     }
 
     $datasource = $this->datasource;
-    $datasource->setViewer($this->getUser());
+    if ($datasource) {
+      $datasource->setViewer($this->getUser());
+    }
 
     $placeholder = null;
     if (!strlen($this->placeholder)) {
@@ -84,7 +86,8 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
           $token = $datasource->newInvalidToken($name);
         }
 
-        if ($token->getKey() == PhabricatorTypeaheadTokenView::KEY_INVALID) {
+        $type = $token->getTokenType();
+        if ($type == PhabricatorTypeaheadTokenView::TYPE_INVALID) {
           $token->setKey($value);
         }
       }
@@ -117,12 +120,13 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
 
     if (!$this->disableBehavior) {
       Javelin::initBehavior('aphront-basic-tokenizer', array(
-        'id'          => $id,
-        'src'         => $datasource_uri,
-        'value'       => mpull($tokens, 'getValue', 'getKey'),
-        'icons'       => mpull($tokens, 'getIcon', 'getKey'),
-        'limit'       => $this->limit,
-        'username'    => $username,
+        'id' => $id,
+        'src' => $datasource_uri,
+        'value' => mpull($tokens, 'getValue', 'getKey'),
+        'icons' => mpull($tokens, 'getIcon', 'getKey'),
+        'types' => mpull($tokens, 'getTokenType', 'getKey'),
+        'limit' => $this->limit,
+        'username' => $username,
         'placeholder' => $placeholder,
         'browseURI' => $browse_uri,
       ));

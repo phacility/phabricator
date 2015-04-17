@@ -13,6 +13,7 @@ final class PhabricatorTypeaheadResult {
   private $imageSprite;
   private $icon;
   private $closed;
+  private $tokenType;
   private $unique;
 
   public function setIcon($icon) {
@@ -91,6 +92,18 @@ final class PhabricatorTypeaheadResult {
     return $this;
   }
 
+  public function setTokenType($type) {
+    $this->tokenType = $type;
+    return $this;
+  }
+
+  public function getTokenType() {
+    if ($this->closed && !$this->tokenType) {
+      return PhabricatorTypeaheadTokenView::TYPE_DISABLED;
+    }
+    return $this->tokenType;
+  }
+
   public function getSortKey() {
     // Put unique results (special parameter functions) ahead of other
     // results.
@@ -116,6 +129,7 @@ final class PhabricatorTypeaheadResult {
       $this->getIcon(),
       $this->closed,
       $this->imageSprite ? (string)$this->imageSprite : null,
+      $this->tokenType,
       $this->unique ? 1 : null,
     );
     while (end($data) === null) {

@@ -348,16 +348,22 @@ JX.install('Tokenizer', {
       }, '\u00d7'); // U+00D7 multiplication sign
 
       var display_token = value;
-      var render_callback = this.getRenderTokenCallback();
-      if (render_callback) {
-        display_token = render_callback(value, key);
-      }
 
-      return JX.$N('a', {
+      var attrs = {
         className: 'jx-tokenizer-token',
         sigil: 'token',
         meta: {key: key}
-      }, [display_token, input, remove]);
+      };
+      var container = JX.$N('a', attrs);
+
+      var render_callback = this.getRenderTokenCallback();
+      if (render_callback) {
+        display_token = render_callback(value, key, container);
+      }
+
+      JX.DOM.setContent(container, [display_token, input, remove]);
+
+      return container;
     },
 
     getTokens : function() {
