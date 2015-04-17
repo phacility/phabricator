@@ -43,13 +43,15 @@ final class PhabricatorTypeaheadModularDatasourceController
       $composite = new PhabricatorTypeaheadRuntimeCompositeDatasource();
       $composite->addDatasource($source);
 
+      $hard_limit = 1000;
+      $limit = 100;
+
       $composite
         ->setViewer($viewer)
         ->setQuery($query)
-        ->setRawQuery($raw_query);
+        ->setRawQuery($raw_query)
+        ->setLimit($limit);
 
-      $hard_limit = 1000;
-      $limit = 100;
 
       if ($is_browse) {
         if (!$composite->isBrowsable()) {
@@ -63,7 +65,6 @@ final class PhabricatorTypeaheadModularDatasourceController
         }
 
         $composite
-          ->setLimit($limit + 1)
           ->setOffset($offset);
       }
 
