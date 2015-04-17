@@ -11,7 +11,7 @@ final class DiffusionBranchQueryConduitAPIMethod
     return pht('Determine what branches exist for a repository.');
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'list<dict>';
   }
 

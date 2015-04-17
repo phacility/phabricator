@@ -232,6 +232,9 @@ final class LegalpadDocumentSignController extends LegalpadController {
 
     $header = id(new PHUIHeaderView())
       ->setHeader($title)
+      ->setUser($viewer)
+      ->setPolicyObject($document)
+      ->setEpoch($document->getDateModified())
       ->addActionLink(
         id(new PHUIButtonView())
           ->setTag('a')

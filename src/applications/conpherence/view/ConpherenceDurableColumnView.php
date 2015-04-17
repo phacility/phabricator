@@ -408,7 +408,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
       array(
         'name' => pht('View in Conpherence'),
         'disabled' => false,
-        'href' => '/conpherence/'.$conpherence->getID().'/',
+        'href' => '/'.$conpherence->getMonogram(),
         'icon' => 'fa-comments',
         'key' => 'go_conpherence',
       ),
@@ -446,11 +446,11 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
       );
     }
 
-    $data = ConpherenceTransactionView::renderTransactions(
+    $data = ConpherenceTransactionRenderer::renderTransactions(
       $this->getUser(),
       $conpherence,
       $full_display = false);
-    $messages = ConpherenceTransactionView::renderMessagePaneContent(
+    $messages = ConpherenceTransactionRenderer::renderMessagePaneContent(
       $data['transactions'],
       $data['oldest_transaction_id']);
 

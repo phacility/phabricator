@@ -16,20 +16,15 @@ final class PhrequentPushConduitAPIMethod extends PhrequentConduitAPIMethod {
     return self::METHOD_STATUS_UNSTABLE;
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'objectPHID' => 'required phid',
       'startTime' => 'int',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'phid';
-  }
-
-  public function defineErrorTypes() {
-    return array(
-    );
   }
 
   protected function execute(ConduitAPIRequest $request) {

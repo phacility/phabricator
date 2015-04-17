@@ -10,7 +10,7 @@ final class ManiphestQueryConduitAPIMethod extends ManiphestConduitAPIMethod {
     return 'Execute complex searches for Maniphest tasks.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     $statuses = array(
       ManiphestTaskQuery::STATUS_ANY,
       ManiphestTaskQuery::STATUS_OPEN,
@@ -47,12 +47,8 @@ final class ManiphestQueryConduitAPIMethod extends ManiphestConduitAPIMethod {
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'list';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

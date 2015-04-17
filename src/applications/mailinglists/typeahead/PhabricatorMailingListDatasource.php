@@ -15,11 +15,10 @@ final class PhabricatorMailingListDatasource
     $viewer = $this->getViewer();
     $raw_query = $this->getRawQuery();
 
-    $results = array();
+    $query = id(new PhabricatorMailingListQuery());
+    $lists = $this->executeQuery($query);
 
-    $lists = id(new PhabricatorMailingListQuery())
-      ->setViewer($viewer)
-      ->execute();
+    $results = array();
     foreach ($lists as $list) {
       $results[] = id(new PhabricatorTypeaheadResult())
         ->setName($list->getName())
@@ -27,7 +26,10 @@ final class PhabricatorMailingListDatasource
         ->setPHID($list->getPHID());
     }
 
-    return $results;
+    // TODO: It would be slightly preferable to do this as part of the query,
+    // this is just simpler for the moment.
+
+    return $this->filterResultsAgainstTokens($results);
   }
 
 }

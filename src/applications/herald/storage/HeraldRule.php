@@ -115,26 +115,6 @@ final class HeraldRule extends HeraldDAO
     return $this->actions;
   }
 
-  public function loadEdits() {
-    if (!$this->getID()) {
-      return array();
-    }
-    $edits = id(new HeraldRuleEdit())->loadAllWhere(
-      'ruleID = %d ORDER BY dateCreated DESC',
-      $this->getID());
-
-    return $edits;
-  }
-
-  public function logEdit($editor_phid, $action) {
-    id(new HeraldRuleEdit())
-      ->setRuleID($this->getID())
-      ->setRuleName($this->getName())
-      ->setEditorPHID($editor_phid)
-      ->setAction($action)
-      ->save();
-  }
-
   public function saveConditions(array $conditions) {
     assert_instances_of($conditions, 'HeraldCondition');
     return $this->saveChildren(

@@ -235,8 +235,8 @@
 }
 
 .phabricator-remarkup-toc-header {
-  font-size: 13px;
-  line-height: 12px;
+  font-size: 14px;
+  line-height: 13px;
   color: {$darkbluetext};
   font-weight: bold;
   margin-bottom: 4px;

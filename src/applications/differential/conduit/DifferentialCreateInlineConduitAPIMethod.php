@@ -11,7 +11,7 @@ final class DifferentialCreateInlineConduitAPIMethod
     return 'Add an inline comment to a Differential revision.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'revisionID' => 'optional revisionid',
       'diffID'     => 'optional diffid',
@@ -23,11 +23,11 @@ final class DifferentialCreateInlineConduitAPIMethod
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
       'ERR-BAD-REVISION' => 'Bad revision ID.',
       'ERR-BAD-DIFF'     => 'Bad diff ID, or diff does not belong to revision.',

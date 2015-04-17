@@ -17,9 +17,11 @@ final class HarbormasterBuildPlanDatasource
 
     $results = array();
 
-    $plans = id(new HarbormasterBuildPlanQuery())
-      ->setViewer($viewer)
-      ->execute();
+    $query = id(new HarbormasterBuildPlanQuery())
+      ->setOrder('name')
+      ->withDatasourceQuery($raw_query);
+
+    $plans = $this->executeQuery($query);
     foreach ($plans as $plan) {
       $closed = null;
       if ($plan->isDisabled()) {

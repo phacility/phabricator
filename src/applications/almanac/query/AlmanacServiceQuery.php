@@ -192,4 +192,33 @@ final class AlmanacServiceQuery
     return parent::didFilterPage($services);
   }
 
+  public function getOrderableColumns() {
+    return parent::getOrderableColumns() + array(
+      'name' => array(
+        'table' => 'service',
+        'column' => 'name',
+        'type' => 'string',
+        'unique' => true,
+        'reverse' => true,
+      ),
+    );
+  }
+
+  protected function getValueMap($cursor, array $keys) {
+    $service = $this->loadCursorObject($cursor);
+    return array(
+      'id' => $service->getID(),
+      'name' => $service->getServiceName(),
+    );
+  }
+
+  public function getBuiltinOrders() {
+    return array(
+      'name' => array(
+        'vector' => array('name'),
+        'name' => pht('Service Name'),
+      ),
+    ) + parent::getBuiltinOrders();
+  }
+
 }

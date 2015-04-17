@@ -331,8 +331,8 @@ final class PhabricatorFileQuery
     return $this->formatWhereClause($where);
   }
 
-  protected function getPagingColumn() {
-    return 'f.id';
+  protected function getPrimaryTableAlias() {
+    return 'f';
   }
 
   public function getQueryApplicationClass() {

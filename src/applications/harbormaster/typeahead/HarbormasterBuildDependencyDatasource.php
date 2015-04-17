@@ -3,6 +3,11 @@
 final class HarbormasterBuildDependencyDatasource
   extends PhabricatorTypeaheadDatasource {
 
+  public function isBrowsable() {
+    // TODO: This should be browsable, but fixing it is involved.
+    return false;
+  }
+
   public function getPlaceholderText() {
     return pht('Type another build step name...');
   }

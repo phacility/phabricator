@@ -111,14 +111,12 @@
   overflow: hidden;
 }
 
-.device-phone .phui-document-content .phabricator-action-list-view {
-  margin: 0;
-  border-bottom: 1px solid #c0c5d1;
-  background: {$lightgreybackground};
-}
-
 .phui-document-content .phabricator-remarkup {
   padding: 16px;
+}
+
+.phui-document-view .phui-header-action-links .phui-mobile-menu {
+  display: block;
 }
 
 .device-phone .phui-document-content .phabricator-remarkup {
@@ -126,14 +124,7 @@
 }
 
 .device-desktop .phui-document-content .phabricator-action-list-view {
-  position: absolute;
-  top: 16px;
-  right: -160px;
-  float: none;
-  border-radius: 0;
-  box-shadow: none;
-  border: none;
-  width: 160px;
+  display: none;
 }
 
 .device-phone .phui-document-content .phabricator-remarkup-toc {
@@ -155,4 +146,27 @@
 
 .phui-document-view .phui-info-severity-nodata {
   background-color: {$lightgreybackground};
+}
+
+.phui-document-view .phabricator-remarkup.remarkup-has-toc {
+  position: relative;
+  margin-right: 192px;
+}
+
+.phui-document-view .remarkup-has-toc .phabricator-remarkup-toc {
+  position: absolute;
+  top: 0;
+  right: -186px;
+  bottom: 0;
+  border-left: 1px solid {$thinblueborder};
+  padding: 16px 12px;
+  margin: 0;
+}
+
+.device-phone .phui-document-view .phabricator-remarkup.remarkup-has-toc {
+  margin-right: 0;
+}
+
+.device-phone .phui-document-view .remarkup-has-toc .phabricator-remarkup-toc {
+  display: none;
 }

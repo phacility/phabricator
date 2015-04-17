@@ -135,13 +135,10 @@ final class DifferentialDiffCreateController extends DifferentialController {
       ->setUser($viewer);
 
     if ($revision) {
-      $revision_handles = $this->loadViewerHandles(array($revision->getPHID()));
-      $revision_handle = head($revision_handles);
-
       $form->appendChild(
         id(new AphrontFormMarkupControl())
           ->setLabel(pht('Updating Revision'))
-          ->setValue($revision_handle->renderLink()));
+          ->setValue($viewer->renderHandle($revision->getPHID())));
     }
 
     if ($repository_phid) {

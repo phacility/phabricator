@@ -18,7 +18,7 @@ final class FeedQueryConduitAPIMethod extends FeedConduitAPIMethod {
     return 100;
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'filterPHIDs' => 'optional list <phid>',
       'limit' => 'optional int (default '.$this->getDefaultLimit().')',
@@ -37,7 +37,7 @@ final class FeedQueryConduitAPIMethod extends FeedConduitAPIMethod {
     );
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
 
     $view_types = array_keys($this->getSupportedViewTypes());
     $view_types = implode(', ', $view_types);
@@ -48,7 +48,7 @@ final class FeedQueryConduitAPIMethod extends FeedConduitAPIMethod {
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
   }
 

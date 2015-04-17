@@ -14,18 +14,28 @@ final class AlmanacServiceSearchEngine
   public function buildSavedQueryFromRequest(AphrontRequest $request) {
     $saved = new PhabricatorSavedQuery();
 
+    $this->saveQueryOrder($saved, $request);
+
     return $saved;
   }
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new AlmanacServiceQuery());
 
+    $this->setQueryOrder($query, $saved);
+
     return $query;
   }
 
   public function buildSearchForm(
     AphrontFormView $form,
-    PhabricatorSavedQuery $saved_query) {}
+    PhabricatorSavedQuery $saved) {
+
+    $this->appendOrderFieldsToForm(
+      $form,
+      $saved,
+      new AlmanacServiceQuery());
+  }
 
   protected function getURI($path) {
     return '/almanac/service/'.$path;

@@ -25,7 +25,7 @@ final class ManiphestTaskPriorityDatasource
         ->setName($name);
     }
 
-    return $results;
+    return $this->filterResultsAgainstTokens($results);
   }
 
 }

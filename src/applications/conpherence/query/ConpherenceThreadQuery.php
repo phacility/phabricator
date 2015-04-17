@@ -9,6 +9,7 @@ final class ConpherenceThreadQuery
   private $ids;
   private $participantPHIDs;
   private $isRoom;
+  private $needParticipants;
   private $needWidgetData;
   private $needTransactions;
   private $needParticipantCache;
@@ -24,6 +25,11 @@ final class ConpherenceThreadQuery
 
   public function needParticipantCache($participant_cache) {
     $this->needParticipantCache = $participant_cache;
+    return $this;
+  }
+
+  public function needParticipants($need) {
+    $this->needParticipants = $need;
     return $this;
   }
 
@@ -97,7 +103,8 @@ final class ConpherenceThreadQuery
       $this->loadParticipantsAndInitHandles($conpherences);
       if ($this->needParticipantCache) {
         $this->loadCoreHandles($conpherences, 'getRecentParticipantPHIDs');
-      } else if ($this->needWidgetData) {
+      }
+      if ($this->needWidgetData || $this->needParticipants) {
         $this->loadCoreHandles($conpherences, 'getParticipantPHIDs');
       }
       if ($this->needTransactions) {
@@ -133,7 +140,7 @@ final class ConpherenceThreadQuery
     }
 
     $viewer = $this->getViewer();
-    if ($viewer->isLoggedIn()) {
+    if ($this->shouldJoinForViewer($viewer)) {
       $joins[] = qsprintf(
         $conn_r,
         'LEFT JOIN %T v ON v.conpherencePHID = conpherence_thread.phid '.
@@ -145,6 +152,15 @@ final class ConpherenceThreadQuery
 
     $joins[] = $this->buildApplicationSearchJoinClause($conn_r);
     return implode(' ', $joins);
+  }
+
+  private function shouldJoinForViewer(PhabricatorUser $viewer) {
+    if ($viewer->isLoggedIn() &&
+      $this->ids === null &&
+      $this->phids === null) {
+      return true;
+    }
+    return false;
   }
 
   protected function buildWhereClause($conn_r) {
@@ -181,11 +197,11 @@ final class ConpherenceThreadQuery
     }
 
     $viewer = $this->getViewer();
-    if ($viewer->isLoggedIn()) {
+    if ($this->shouldJoinForViewer($viewer)) {
       $where[] = qsprintf(
         $conn_r,
         'conpherence_thread.isRoom = 1 OR v.participantPHID IS NOT NULL');
-    } else {
+    } else if ($this->phids === null && $this->ids === null) {
       $where[] = qsprintf(
         $conn_r,
         'conpherence_thread.isRoom = 1');
@@ -235,7 +251,8 @@ final class ConpherenceThreadQuery
       ->execute();
     foreach ($handle_phids as $conpherence_phid => $phids) {
       $conpherence = $conpherences[$conpherence_phid];
-      $conpherence->attachHandles(array_select_keys($handles, $phids));
+      $conpherence->attachHandles(
+        $conpherence->getHandles() + array_select_keys($handles, $phids));
     }
     return $this;
   }

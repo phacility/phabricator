@@ -36,10 +36,10 @@ final class ConpherenceViewController extends
       unset($write_guard);
     }
 
-    $data = ConpherenceTransactionView::renderTransactions(
+    $data = ConpherenceTransactionRenderer::renderTransactions(
       $user,
       $conpherence);
-    $messages = ConpherenceTransactionView::renderMessagePaneContent(
+    $messages = ConpherenceTransactionRenderer::renderMessagePaneContent(
       $data['transactions'],
       $data['oldest_transaction_id']);
     if ($before_transaction_id) {

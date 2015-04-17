@@ -15,21 +15,17 @@ final class DiffusionUpdateCoverageConduitAPIMethod
     return pht('Publish coverage information for a repository.');
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'void';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'repositoryPHID' => 'required phid',
       'branch' => 'required string',
       'commit' => 'required string',
       'coverage' => 'required map<string, string>',
     );
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

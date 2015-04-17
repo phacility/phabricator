@@ -10,16 +10,12 @@ final class UserWhoAmIConduitAPIMethod extends UserConduitAPIMethod {
     return 'Retrieve information about the logged-in user.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array();
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict<string, wild>';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   public function getRequiredScope() {

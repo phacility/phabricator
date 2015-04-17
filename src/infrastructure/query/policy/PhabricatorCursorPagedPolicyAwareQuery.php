@@ -5,6 +5,8 @@
  * performant than offset-based paging in the presence of policy filtering.
  *
  * @task appsearch Integration with ApplicationSearch
+ * @task paging Paging
+ * @task order Result Ordering
  */
 abstract class PhabricatorCursorPagedPolicyAwareQuery
   extends PhabricatorPolicyAwareQuery {
@@ -12,34 +14,40 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   private $afterID;
   private $beforeID;
   private $applicationSearchConstraints = array();
-  private $applicationSearchOrders = array();
+  protected $applicationSearchOrders = array();
   private $internalPaging;
+  private $orderVector;
+  private $builtinOrder;
 
-  protected function getPagingColumn() {
-    return 'id';
+  protected function getPageCursors(array $page) {
+    return array(
+      $this->getResultCursor(head($page)),
+      $this->getResultCursor(last($page)),
+    );
   }
 
-  protected function getPagingValue($result) {
-    if (!is_object($result)) {
-      // This interface can't be typehinted and PHP gets really angry if we
-      // call a method on a non-object, so add an explicit check here.
-      throw new Exception(pht('Expected object, got "%s"!', gettype($result)));
+  protected function getResultCursor($object) {
+    if (!is_object($object)) {
+      throw new Exception(
+        pht(
+          'Expected object, got "%s".',
+          gettype($object)));
     }
-    return $result->getID();
-  }
 
-  protected function getReversePaging() {
-    return false;
+    return $object->getID();
   }
 
   protected function nextPage(array $page) {
     // See getPagingViewer() for a description of this flag.
     $this->internalPaging = true;
 
-    if ($this->beforeID) {
-      $this->beforeID = $this->getPagingValue(last($page));
+    if ($this->beforeID !== null) {
+      $page = array_reverse($page, $preserve_keys = true);
+      list($before, $after) = $this->getPageCursors($page);
+      $this->beforeID = $before;
     } else {
-      $this->afterID = $this->getPagingValue(last($page));
+      list($before, $after) = $this->getPageCursors($page);
+      $this->afterID = $after;
     }
   }
 
@@ -109,44 +117,6 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     }
   }
 
-  protected function buildPagingClause(
-    AphrontDatabaseConnection $conn_r) {
-
-    if ($this->beforeID) {
-      return qsprintf(
-        $conn_r,
-        '%Q %Q %s',
-        $this->getPagingColumn(),
-        $this->getReversePaging() ? '<' : '>',
-        $this->beforeID);
-    } else if ($this->afterID) {
-      return qsprintf(
-        $conn_r,
-        '%Q %Q %s',
-        $this->getPagingColumn(),
-        $this->getReversePaging() ? '>' : '<',
-        $this->afterID);
-    }
-
-    return null;
-  }
-
-  final protected function buildOrderClause(AphrontDatabaseConnection $conn_r) {
-    if ($this->beforeID) {
-      return qsprintf(
-        $conn_r,
-        'ORDER BY %Q %Q',
-        $this->getPagingColumn(),
-        $this->getReversePaging() ? 'DESC' : 'ASC');
-    } else {
-      return qsprintf(
-        $conn_r,
-        'ORDER BY %Q %Q',
-        $this->getPagingColumn(),
-        $this->getReversePaging() ? 'ASC' : 'DESC');
-    }
-  }
-
   final protected function didLoadResults(array $results) {
     if ($this->beforeID) {
       $results = array_reverse($results, $preserve_keys = true);
@@ -155,7 +125,9 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   }
 
   final public function executeWithCursorPager(AphrontCursorPagerView $pager) {
-    $this->setLimit($pager->getPageSize() + 1);
+    $limit = $pager->getPageSize();
+
+    $this->setLimit($limit + 1);
 
     if ($pager->getAfterID()) {
       $this->setAfterID($pager->getAfterID());
@@ -164,21 +136,126 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     }
 
     $results = $this->execute();
+    $count = count($results);
 
     $sliced_results = $pager->sliceResults($results);
-
     if ($sliced_results) {
-      if ($pager->getBeforeID() || (count($results) > $pager->getPageSize())) {
-        $pager->setNextPageID($this->getPagingValue(last($sliced_results)));
+      list($before, $after) = $this->getPageCursors($sliced_results);
+
+      if ($pager->getBeforeID() || ($count > $limit)) {
+        $pager->setNextPageID($after);
       }
 
       if ($pager->getAfterID() ||
-         ($pager->getBeforeID() && (count($results) > $pager->getPageSize()))) {
-        $pager->setPrevPageID($this->getPagingValue(head($sliced_results)));
+         ($pager->getBeforeID() && ($count > $limit))) {
+        $pager->setPrevPageID($before);
       }
     }
 
     return $sliced_results;
+  }
+
+
+  /**
+   * Return the alias this query uses to identify the primary table.
+   *
+   * Some automatic query constructions may need to be qualified with a table
+   * alias if the query performs joins which make column names ambiguous. If
+   * this is the case, return the alias for the primary table the query
+   * uses; generally the object table which has `id` and `phid` columns.
+   *
+   * @return string Alias for the primary table.
+   */
+  protected function getPrimaryTableAlias() {
+    return null;
+  }
+
+  protected function newResultObject() {
+    return null;
+  }
+
+
+/* -(  Paging  )------------------------------------------------------------- */
+
+
+  protected function buildPagingClause(AphrontDatabaseConnection $conn) {
+    $orderable = $this->getOrderableColumns();
+    $vector = $this->getOrderVector();
+
+    if ($this->beforeID !== null) {
+      $cursor = $this->beforeID;
+      $reversed = true;
+    } else if ($this->afterID !== null) {
+      $cursor = $this->afterID;
+      $reversed = false;
+    } else {
+      // No paging is being applied to this query so we do not need to
+      // construct a paging clause.
+      return '';
+    }
+
+    $keys = array();
+    foreach ($vector as $order) {
+      $keys[] = $order->getOrderKey();
+    }
+
+    $value_map = $this->getPagingValueMap($cursor, $keys);
+
+    $columns = array();
+    foreach ($vector as $order) {
+      $key = $order->getOrderKey();
+
+      if (!array_key_exists($key, $value_map)) {
+        throw new Exception(
+          pht(
+            'Query "%s" failed to return a value from getPagingValueMap() '.
+            'for column "%s".',
+            get_class($this),
+            $key));
+      }
+
+      $column = $orderable[$key];
+      $column['value'] = $value_map[$key];
+
+      $columns[] = $column;
+    }
+
+    return $this->buildPagingClauseFromMultipleColumns(
+      $conn,
+      $columns,
+      array(
+        'reversed' => $reversed,
+      ));
+  }
+
+  protected function getPagingValueMap($cursor, array $keys) {
+    // TODO: This is a hack to make this work with existing classes for now.
+    return array(
+      'id' => $cursor,
+    );
+  }
+
+  protected function loadCursorObject($cursor) {
+    $query = newv(get_class($this), array())
+      ->setViewer($this->getPagingViewer())
+      ->withIDs(array((int)$cursor));
+
+    $this->willExecuteCursorQuery($query);
+
+    $object = $query->executeOne();
+    if (!$object) {
+      throw new Exception(
+        pht(
+          'Cursor "%s" does not identify a valid object.',
+          $cursor));
+    }
+
+    return $object;
+  }
+
+  protected function willExecuteCursorQuery(
+    PhabricatorCursorPagedPolicyAwareQuery $query) {
+    return;
   }
 
 
@@ -195,13 +272,15 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    *     $conn_r,
    *     array(
    *       array(
-   *         'name' => 'title',
+   *         'table' => 't',
+   *         'column' => 'title',
    *         'type' => 'string',
    *         'value' => $cursor->getTitle(),
    *         'reverse' => true,
    *       ),
    *       array(
-   *         'name' => 'id',
+   *         'table' => 't',
+   *         'column' => 'id',
    *         'type' => 'int',
    *         'value' => $cursor->getID(),
    *       ),
@@ -226,10 +305,13 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       PhutilTypeSpec::checkMap(
         $column,
         array(
-          'name' => 'string',
+          'table' => 'optional string|null',
+          'column' => 'string',
           'value' => 'wild',
           'type' => 'string',
           'reverse' => 'optional bool',
+          'unique' => 'optional bool',
+          'null' => 'optional string|null',
         ));
     }
 
@@ -245,54 +327,391 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     $accumulated = array();
     $last_key = last_key($columns);
     foreach ($columns as $key => $column) {
-      $name = $column['name'];
-
       $type = $column['type'];
-      switch ($type) {
-        case 'int':
-          $value = qsprintf($conn, '%d', $column['value']);
-          break;
-        case 'float':
-          $value = qsprintf($conn, '%f', $column['value']);
-          break;
-        case 'string':
-          $value = qsprintf($conn, '%s', $column['value']);
-          break;
-        default:
-          throw new Exception("Unknown column type '{$type}'!");
+
+      $null = idx($column, 'null');
+      if ($column['value'] === null) {
+        if ($null) {
+          $value = null;
+        } else {
+          throw new Exception(
+            pht(
+              'Column "%s" has null value, but does not specify a null '.
+              'behavior.',
+              $key));
+        }
+      } else {
+        switch ($type) {
+          case 'int':
+            $value = qsprintf($conn, '%d', $column['value']);
+            break;
+          case 'float':
+            $value = qsprintf($conn, '%f', $column['value']);
+            break;
+          case 'string':
+            $value = qsprintf($conn, '%s', $column['value']);
+            break;
+          default:
+            throw new Exception(
+              pht(
+                'Column "%s" has unknown column type "%s".',
+                $column['column'],
+                $type));
+        }
       }
 
       $is_column_reversed = idx($column, 'reverse', false);
       $reverse = ($is_query_reversed xor $is_column_reversed);
 
       $clause = $accumulated;
-      $clause[] = qsprintf(
-        $conn,
-        '%Q %Q %Q',
-        $name,
-        $reverse ? '>' : '<',
-        $value);
-      $clauses[] = '('.implode(') AND (', $clause).')';
 
-      $accumulated[] = qsprintf(
-        $conn,
-        '%Q = %Q',
-        $name,
-        $value);
+      $table_name = idx($column, 'table');
+      $column_name = $column['column'];
+      if ($table_name !== null) {
+        $field = qsprintf($conn, '%T.%T', $table_name, $column_name);
+      } else {
+        $field = qsprintf($conn, '%T', $column_name);
+      }
+
+      $parts = array();
+      if ($null) {
+        $can_page_if_null = ($null === 'head');
+        $can_page_if_nonnull = ($null === 'tail');
+
+        if ($reverse) {
+          $can_page_if_null = !$can_page_if_null;
+          $can_page_if_nonnull = !$can_page_if_nonnull;
+        }
+
+        $subclause = null;
+        if ($can_page_if_null && $value === null) {
+          $parts[] = qsprintf(
+            $conn,
+            '(%Q IS NOT NULL)',
+            $field);
+        } else if ($can_page_if_nonnull && $value !== null) {
+          $parts[] = qsprintf(
+            $conn,
+            '(%Q IS NULL)',
+            $field);
+        }
+      }
+
+      if ($value !== null) {
+        $parts[] = qsprintf(
+          $conn,
+          '%Q %Q %Q',
+          $field,
+          $reverse ? '>' : '<',
+          $value);
+      }
+
+      if ($parts) {
+        if (count($parts) > 1) {
+          $clause[] = '('.implode(') OR (', $parts).')';
+        } else {
+          $clause[] = head($parts);
+        }
+      }
+
+      if ($clause) {
+        if (count($clause) > 1) {
+          $clauses[] = '('.implode(') AND (', $clause).')';
+        } else {
+          $clauses[] = head($clause);
+        }
+      }
+
+      if ($value === null) {
+        $accumulated[] = qsprintf(
+          $conn,
+          '%Q IS NULL',
+          $field);
+      } else {
+        $accumulated[] = qsprintf(
+          $conn,
+          '%Q = %Q',
+          $field,
+          $value);
+      }
     }
 
     return '('.implode(') OR (', $clauses).')';
   }
 
+
+/* -(  Result Ordering  )---------------------------------------------------- */
+
+
+  /**
+   * Select a result ordering.
+   *
+   * This is a high-level method which selects an ordering from a predefined
+   * list of builtin orders, as provided by @{method:getBuiltinOrders}. These
+   * options are user-facing and not exhaustive, but are generally convenient
+   * and meaningful.
+   *
+   * You can also use @{method:setOrderVector} to specify a low-level ordering
+   * across individual orderable columns. This offers greater control but is
+   * also more involved.
+   *
+   * @param string Key of a builtin order supported by this query.
+   * @return this
+   * @task order
+   */
+  public function setOrder($order) {
+    $orders = $this->getBuiltinOrders();
+
+    if (empty($orders[$order])) {
+      throw new Exception(
+        pht(
+          'Query "%s" does not support a builtin order "%s". Supported orders '.
+          'are: %s.',
+          get_class($this),
+          $order,
+          implode(', ', array_keys($orders))));
+    }
+
+    $this->builtinOrder = $order;
+    $this->orderVector = null;
+
+    return $this;
+  }
+
+
+  /**
+   * Get builtin orders for this class.
+   *
+   * In application UIs, we want to be able to present users with a small
+   * selection of meaningful order options (like "Order by Title") rather than
+   * an exhaustive set of column ordering options.
+   *
+   * Meaningful user-facing orders are often really orders across multiple
+   * columns: for example, a "title" ordering is usually implemented as a
+   * "title, id" ordering under the hood.
+   *
+   * Builtin orders provide a mapping from convenient, understandable
+   * user-facing orders to implementations.
+   *
+   * A builtin order should provide these keys:
+   *
+   *   - `vector` (`list<string>`): The actual order vector to use.
+   *   - `name` (`string`): Human-readable order name.
+   *
+   * @return map<string, wild> Map from builtin order keys to specification.
+   * @task order
+   */
+  public function getBuiltinOrders() {
+    $orders = array(
+      'newest' => array(
+        'vector' => array('id'),
+        'name' => pht('Creation (Newest First)'),
+        'aliases' => array('created'),
+      ),
+      'oldest' => array(
+        'vector' => array('-id'),
+        'name' => pht('Creation (Oldest First)'),
+      ),
+    );
+
+    $object = $this->newResultObject();
+    if ($object instanceof PhabricatorCustomFieldInterface) {
+      $list = PhabricatorCustomField::getObjectFields(
+        $object,
+        PhabricatorCustomField::ROLE_APPLICATIONSEARCH);
+      foreach ($list->getFields() as $field) {
+        $index = $field->buildOrderIndex();
+        if (!$index) {
+          continue;
+        }
+
+        $key = $field->getFieldKey();
+        $digest = $field->getFieldIndex();
+
+        $full_key = 'custom:'.$key;
+        $orders[$full_key] = array(
+          'vector' => array($full_key, 'id'),
+          'name' => $field->getFieldName(),
+        );
+      }
+    }
+
+    return $orders;
+  }
+
+
+  /**
+   * Set a low-level column ordering.
+   *
+   * This is a low-level method which offers granular control over column
+   * ordering. In most cases, applications can more easily use
+   * @{method:setOrder} to choose a high-level builtin order.
+   *
+   * To set an order vector, specify a list of order keys as provided by
+   * @{method:getOrderableColumns}.
+   *
+   * @param PhabricatorQueryOrderVector|list<string> List of order keys.
+   * @return this
+   * @task order
+   */
+  public function setOrderVector($vector) {
+    $vector = PhabricatorQueryOrderVector::newFromVector($vector);
+
+    $orderable = $this->getOrderableColumns();
+
+    // Make sure that all the components identify valid columns.
+    $unique = array();
+    foreach ($vector as $order) {
+      $key = $order->getOrderKey();
+      if (empty($orderable[$key])) {
+        $valid = implode(', ', array_keys($orderable));
+        throw new Exception(
+          pht(
+            'This query ("%s") does not support sorting by order key "%s". '.
+            'Supported orders are: %s.',
+            get_class($this),
+            $key,
+            $valid));
+      }
+
+      $unique[$key] = idx($orderable[$key], 'unique', false);
+    }
+
+    // Make sure that the last column is unique so that this is a strong
+    // ordering which can be used for paging.
+    $last = last($unique);
+    if ($last !== true) {
+      throw new Exception(
+        pht(
+          'Order vector "%s" is invalid: the last column in an order must '.
+          'be a column with unique values, but "%s" is not unique.',
+          $vector->getAsString(),
+          last_key($unique)));
+    }
+
+    // Make sure that other columns are not unique; an ordering like "id, name"
+    // does not make sense because only "id" can ever have an effect.
+    array_pop($unique);
+    foreach ($unique as $key => $is_unique) {
+      if ($is_unique) {
+        throw new Exception(
+          pht(
+            'Order vector "%s" is invalid: only the last column in an order '.
+            'may be unique, but "%s" is a unique column and not the last '.
+            'column in the order.',
+            $vector->getAsString(),
+            $key));
+      }
+    }
+
+    $this->orderVector = $vector;
+    return $this;
+  }
+
+
+  /**
+   * Get the effective order vector.
+   *
+   * @return PhabricatorQueryOrderVector Effective vector.
+   * @task order
+   */
+  protected function getOrderVector() {
+    if (!$this->orderVector) {
+      if ($this->builtinOrder !== null) {
+        $builtin_order = idx($this->getBuiltinOrders(), $this->builtinOrder);
+        $vector = $builtin_order['vector'];
+      } else {
+        $vector = $this->getDefaultOrderVector();
+      }
+      $vector = PhabricatorQueryOrderVector::newFromVector($vector);
+
+      // We call setOrderVector() here to apply checks to the default vector.
+      // This catches any errors in the implementation.
+      $this->setOrderVector($vector);
+    }
+
+    return $this->orderVector;
+  }
+
+
+  /**
+   * @task order
+   */
+  protected function getDefaultOrderVector() {
+    return array('id');
+  }
+
+
+  /**
+   * @task order
+   */
+  public function getOrderableColumns() {
+    $columns = array(
+      'id' => array(
+        'table' => $this->getPrimaryTableAlias(),
+        'column' => 'id',
+        'reverse' => false,
+        'type' => 'int',
+        'unique' => true,
+      ),
+    );
+
+    $object = $this->newResultObject();
+    if ($object instanceof PhabricatorCustomFieldInterface) {
+      $list = PhabricatorCustomField::getObjectFields(
+        $object,
+        PhabricatorCustomField::ROLE_APPLICATIONSEARCH);
+      foreach ($list->getFields() as $field) {
+        $index = $field->buildOrderIndex();
+        if (!$index) {
+          continue;
+        }
+
+        $key = $field->getFieldKey();
+        $digest = $field->getFieldIndex();
+
+        $full_key = 'custom:'.$key;
+        $columns[$full_key] = array(
+          'table' => 'appsearch_order_'.$digest,
+          'column' => 'indexValue',
+          'type' => $index->getIndexValueType(),
+          'null' => 'tail',
+        );
+      }
+    }
+
+    return $columns;
+  }
+
+
+  /**
+   * @task order
+   */
+  final protected function buildOrderClause(AphrontDatabaseConnection $conn) {
+    $orderable = $this->getOrderableColumns();
+    $vector = $this->getOrderVector();
+
+    $parts = array();
+    foreach ($vector as $order) {
+      $part = $orderable[$order->getOrderKey()];
+      if ($order->getIsReversed()) {
+        $part['reverse'] = !idx($part, 'reverse', false);
+      }
+      $parts[] = $part;
+    }
+
+    return $this->formatOrderClause($conn, $parts);
+  }
+
+
+  /**
+   * @task order
+   */
   protected function formatOrderClause(
     AphrontDatabaseConnection $conn,
     array $parts) {
 
     $is_query_reversed = false;
-    if ($this->getReversePaging()) {
-      $is_query_reversed = !$is_query_reversed;
-    }
-
     if ($this->getBeforeID()) {
       $is_query_reversed = !$is_query_reversed;
     }
@@ -310,12 +729,43 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
         $descending = !$descending;
       }
 
-      $name = $part['name'];
+      $table = idx($part, 'table');
+      $column = $part['column'];
+
+      if ($table !== null) {
+        $field = qsprintf($conn, '%T.%T', $table, $column);
+      } else {
+        $field = qsprintf($conn, '%T', $column);
+      }
+
+      $null = idx($part, 'null');
+      if ($null) {
+        switch ($null) {
+          case 'head':
+            $null_field = qsprintf($conn, '(%Q IS NULL)', $field);
+            break;
+          case 'tail':
+            $null_field = qsprintf($conn, '(%Q IS NOT NULL)', $field);
+            break;
+          default:
+            throw new Exception(
+              pht(
+                'NULL value "%s" is invalid. Valid values are "head" and '.
+                '"tail".',
+                $null));
+        }
+
+        if ($descending) {
+          $sql[] = qsprintf($conn, '%Q DESC', $null_field);
+        } else {
+          $sql[] = qsprintf($conn, '%Q ASC', $null_field);
+        }
+      }
 
       if ($descending) {
-        $sql[] = qsprintf($conn, '%Q DESC', $name);
+        $sql[] = qsprintf($conn, '%Q DESC', $field);
       } else {
-        $sql[] = qsprintf($conn, '%Q ASC', $name);
+        $sql[] = qsprintf($conn, '%Q ASC', $field);
       }
     }
 
@@ -429,15 +879,23 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
   /**
    * Get the name of the query's primary object PHID column, for constructing
-   * JOIN clauses. Normally (and by default) this is just `"phid"`, but if the
-   * query construction requires a table alias it may be something like
-   * `"task.phid"`.
+   * JOIN clauses. Normally (and by default) this is just `"phid"`, but it may
+   * be something more exotic.
+   *
+   * See @{method:getPrimaryTableAlias} if the column needs to be qualified with
+   * a table alias.
    *
    * @return string Column name.
    * @task appsearch
    */
   protected function getApplicationSearchObjectPHIDColumn() {
-    return 'phid';
+    if ($this->getPrimaryTableAlias()) {
+      $prefix = $this->getPrimaryTableAlias().'.';
+    } else {
+      $prefix = '';
+    }
+
+    return $prefix.'phid';
   }
 
 
@@ -605,8 +1063,8 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
     foreach ($this->applicationSearchOrders as $key => $order) {
       $table = $order['table'];
-      $alias = 'appsearch_order_'.$key;
       $index = $order['index'];
+      $alias = 'appsearch_order_'.$index;
       $phid_column = $this->getApplicationSearchObjectPHIDColumn();
 
       $joins[] = qsprintf(
@@ -624,51 +1082,27 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     return implode(' ', $joins);
   }
 
-  protected function buildApplicationSearchOrders(
-    AphrontDatabaseConnection $conn_r,
-    $reverse) {
-
-    $orders = array();
-    foreach ($this->applicationSearchOrders as $key => $order) {
-      $alias = 'appsearch_order_'.$key;
-
-      if ($order['ascending'] xor $reverse) {
-        $orders[] = qsprintf($conn_r, '%T.indexValue ASC', $alias);
-      } else {
-        $orders[] = qsprintf($conn_r, '%T.indexValue DESC', $alias);
-      }
-    }
-
-    return $orders;
-  }
-
-  protected function buildApplicationSearchPagination(
-    AphrontDatabaseConnection $conn_r,
-    $cursor) {
+  protected function getPagingValueMapForCustomFields(
+    PhabricatorCustomFieldInterface $object) {
 
     // We have to get the current field values on the cursor object.
     $fields = PhabricatorCustomField::getObjectFields(
-      $cursor,
+      $object,
       PhabricatorCustomField::ROLE_APPLICATIONSEARCH);
     $fields->setViewer($this->getViewer());
-    $fields->readFieldsFromStorage($cursor);
+    $fields->readFieldsFromStorage($object);
 
-    $fields = mpull($fields->getFields(), null, 'getFieldKey');
-
-    $columns = array();
-    foreach ($this->applicationSearchOrders as $key => $order) {
-      $alias = 'appsearch_order_'.$key;
-
-      $field = idx($fields, $order['key']);
-
-      $columns[] = array(
-        'name' => $alias.'.indexValue',
-        'value' => $field->getValueForStorage(),
-        'type' => $order['type'],
-      );
+    $map = array();
+    foreach ($fields->getFields() as $field) {
+      $map['custom:'.$field->getFieldKey()] = $field->getValueForStorage();
     }
 
-    return $columns;
+    return $map;
+  }
+
+  protected function isCustomFieldOrderKey($key) {
+    $prefix = 'custom:';
+    return !strncmp($key, $prefix, strlen($prefix));
   }
 
 }

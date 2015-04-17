@@ -38,13 +38,7 @@ final class PhabricatorProjectsPolicyRule extends PhabricatorPolicyRule {
   }
 
   public function getValueControlTemplate() {
-    $projects_source = new PhabricatorProjectDatasource();
-
-    return array(
-      'markup' => new AphrontTokenizerTemplateView(),
-      'uri' => $projects_source->getDatasourceURI(),
-      'placeholder' => $projects_source->getPlaceholderText(),
-    );
+    return $this->getDatasourceTemplate(new PhabricatorProjectDatasource());
   }
 
   public function getRuleOrder() {

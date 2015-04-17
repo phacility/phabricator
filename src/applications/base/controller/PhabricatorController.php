@@ -427,6 +427,11 @@ abstract class PhabricatorController extends AphrontController {
     return $response;
   }
 
+  /**
+   * WARNING: Do not call this in new code.
+   *
+   * @deprecated See "Handles Technical Documentation".
+   */
   protected function loadViewerHandles(array $phids) {
     return id(new PhabricatorHandleQuery())
       ->setViewer($this->getRequest()->getUser())
@@ -554,7 +559,6 @@ abstract class PhabricatorController extends AphrontController {
       ->setViewer($viewer)
       ->withObjectPHIDs(array($object->getPHID()))
       ->needComments(true)
-      ->setReversePaging(false)
       ->executeWithCursorPager($pager);
     $xactions = array_reverse($xactions);
 

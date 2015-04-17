@@ -17,7 +17,7 @@ final class DiffusionCreateCommentConduitAPIMethod
            'be triggered. Defaults to "comment".';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'phid'    => 'required string',
       'action'  => 'optional string',
@@ -26,11 +26,11 @@ final class DiffusionCreateCommentConduitAPIMethod
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'bool';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
       'ERR_BAD_COMMIT' => 'No commit found with that PHID',
       'ERR_BAD_ACTION' => 'Invalid action type',

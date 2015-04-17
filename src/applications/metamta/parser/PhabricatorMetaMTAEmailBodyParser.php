@@ -135,9 +135,11 @@ final class PhabricatorMetaMTAEmailBodyParser {
       $body);
 
     // Mailbox seems to make an attempt to comply with the "standard" but
-    // omits the leading newline and uses an em dash?
+    // omits the leading newline and uses an em dash. This may or may not have
+    // the trailing space, but it's unique enough that there's no real ambiguity
+    // in detecting it.
     $body = preg_replace(
-      "/\s*\xE2\x80\x94 \nSent from Mailbox\s*\z/su",
+      "/\s*\xE2\x80\x94\s*\nSent from Mailbox\s*\z/su",
       '',
       $body);
 

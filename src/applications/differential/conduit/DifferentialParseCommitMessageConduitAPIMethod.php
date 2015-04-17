@@ -13,19 +13,15 @@ final class DifferentialParseCommitMessageConduitAPIMethod
     return pht('Parse commit messages for Differential fields.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'corpus'  => 'required string',
       'partial' => 'optional bool',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

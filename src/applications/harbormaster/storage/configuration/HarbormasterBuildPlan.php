@@ -23,12 +23,15 @@ final class HarbormasterBuildPlan extends HarbormasterDAO
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
-        'name' => 'text255',
+        'name' => 'sort128',
         'planStatus' => 'text32',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_status' => array(
           'columns' => array('planStatus'),
+        ),
+        'key_name' => array(
+          'columns' => array('name'),
         ),
       ),
     ) + parent::getConfiguration();

@@ -11,17 +11,17 @@ final class DifferentialCloseConduitAPIMethod
     return pht('Close a Differential revision.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'revisionID' => 'required int',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'void';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
       'ERR_NOT_FOUND' => 'Revision was not found.',
     );

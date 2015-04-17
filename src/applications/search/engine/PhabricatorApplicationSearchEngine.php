@@ -9,6 +9,7 @@
  * @task builtin    Builtin Queries
  * @task uri        Query URIs
  * @task dates      Date Filters
+ * @task order      Result Ordering
  * @task read       Reading Utilities
  * @task exec       Paging and Executing Queries
  * @task render     Rendering Results
@@ -382,7 +383,13 @@ abstract class PhabricatorApplicationSearchEngine {
       } else if (isset($allow_types[$type])) {
         $phids[] = $item;
       } else {
-        $names[] = $item;
+        if (PhabricatorTypeaheadDatasource::isFunctionToken($item)) {
+          // If this is a function, pass it through unchanged; we'll evaluate
+          // it later.
+          $phids[] = $item;
+        } else {
+          $names[] = $item;
+        }
       }
     }
 
@@ -576,6 +583,63 @@ abstract class PhabricatorApplicationSearchEngine {
           ->setValue($end_str));
   }
 
+
+/* -(  Result Ordering  )---------------------------------------------------- */
+
+
+  /**
+   * Save order selection to a @{class:PhabricatorSavedQuery}.
+   */
+  protected function saveQueryOrder(
+    PhabricatorSavedQuery $saved,
+    AphrontRequest $request) {
+
+    $saved->setParameter('order', $request->getStr('order'));
+
+    return $this;
+  }
+
+
+  /**
+   * Set query ordering from a saved value.
+   */
+  protected function setQueryOrder(
+    PhabricatorCursorPagedPolicyAwareQuery $query,
+    PhabricatorSavedQuery $saved) {
+
+    $order = $saved->getParameter('order');
+    $builtin = $query->getBuiltinOrders();
+    if (strlen($order) && isset($builtin[$order])) {
+      $query->setOrder($order);
+    } else {
+      // If the order is invalid or not available, we choose the first
+      // builtin order. This isn't always the default order for the query,
+      // but is the first value in the "Order" dropdown, and makes the query
+      // behavior more consistent with the UI. In queries where the two
+      // orders differ, this order is the preferred order for humans.
+      $query->setOrder(head_key($builtin));
+    }
+
+    return $this;
+  }
+
+
+
+  protected function appendOrderFieldsToForm(
+    AphrontFormView $form,
+    PhabricatorSavedQuery $saved,
+    PhabricatorCursorPagedPolicyAwareQuery $query) {
+
+    $orders = $query->getBuiltinOrders();
+    $orders = ipull($orders, 'name');
+
+    $form->appendControl(
+      id(new AphrontFormSelectControl())
+        ->setLabel(pht('Order'))
+        ->setName('order')
+        ->setOptions($orders)
+        ->setValue($saved->getParameter('order')));
+  }
 
 /* -(  Paging and Executing Queries  )--------------------------------------- */
 

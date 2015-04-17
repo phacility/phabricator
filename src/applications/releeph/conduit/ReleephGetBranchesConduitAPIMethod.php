@@ -10,18 +10,13 @@ final class ReleephGetBranchesConduitAPIMethod extends ReleephConduitAPIMethod {
     return 'Return information about all active Releeph branches.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty list<dict<string, wild>>';
-  }
-
-  public function defineErrorTypes() {
-    return array(
-    );
   }
 
   protected function execute(ConduitAPIRequest $request) {

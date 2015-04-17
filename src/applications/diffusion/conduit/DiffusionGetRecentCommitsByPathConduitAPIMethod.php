@@ -13,7 +13,7 @@ final class DiffusionGetRecentCommitsByPathConduitAPIMethod
     return 'Get commit identifiers for recent commits affecting a given path.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'callsign' => 'required string',
       'path' => 'required string',
@@ -22,13 +22,8 @@ final class DiffusionGetRecentCommitsByPathConduitAPIMethod
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty list<string>';
-  }
-
-  public function defineErrorTypes() {
-    return array(
-    );
   }
 
   protected function execute(ConduitAPIRequest $request) {

@@ -11,16 +11,12 @@ final class ManiphestQueryStatusesConduitAPIMethod
     return 'Retrieve information about possible Maniphest Task status values.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array();
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict<string, wild>';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

@@ -6,8 +6,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
     return true;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
 
     $author_phid = $viewer->getPHID();

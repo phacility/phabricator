@@ -11,7 +11,7 @@ final class DifferentialUpdateUnitResultsConduitAPIMethod
     return 'Update arc unit results for a postponed test.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'diff_id'   => 'required diff_id',
       'file'      => 'required string',
@@ -23,11 +23,11 @@ final class DifferentialUpdateUnitResultsConduitAPIMethod
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'void';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
       'ERR_BAD_DIFF'   => 'Bad diff ID.',
       'ERR_NO_RESULTS' => 'Could not find the postponed test',

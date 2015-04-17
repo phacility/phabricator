@@ -3,7 +3,6 @@
 final class PhabricatorConfigHistoryController
   extends PhabricatorConfigController {
 
-
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
@@ -11,7 +10,6 @@ final class PhabricatorConfigHistoryController
     $xactions = id(new PhabricatorConfigTransactionQuery())
       ->setViewer($user)
       ->needComments(true)
-      ->setReversePaging(false)
       ->execute();
 
     $object = new PhabricatorConfigEntry();

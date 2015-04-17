@@ -67,7 +67,11 @@ final class DifferentialRevisionSearchEngine
       ->needDrafts(true)
       ->needRelationships(true);
 
+    $datasource = id(new PhabricatorTypeaheadUserParameterizedDatasource())
+      ->setViewer($this->requireViewer());
+
     $responsible_phids = $saved->getParameter('responsiblePHIDs', array());
+    $responsible_phids = $datasource->evaluateTokens($responsible_phids);
     if ($responsible_phids) {
       $query->withResponsibleUsers($responsible_phids);
     }
@@ -129,7 +133,7 @@ final class DifferentialRevisionSearchEngine
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Responsible Users'))
           ->setName('responsibles')
-          ->setDatasource(new PhabricatorPeopleDatasource())
+          ->setDatasource(new PhabricatorTypeaheadUserParameterizedDatasource())
           ->setValue($responsible_phids))
       ->appendControl(
         id(new AphrontFormTokenizerControl())

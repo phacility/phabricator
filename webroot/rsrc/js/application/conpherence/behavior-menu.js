@@ -8,6 +8,7 @@
  *           javelin-behavior-device
  *           javelin-history
  *           javelin-vector
+ *           javelin-scrollbar
  *           phabricator-title
  *           phabricator-shaped-request
  *           conpherence-thread-manager
@@ -23,6 +24,8 @@ JX.behavior('conpherence-menu', function(config) {
     node: null
   };
 
+  var scrollbar = null;
+
   // TODO - move more logic into the ThreadManager
   var threadManager = new JX.ConpherenceThreadManager();
   threadManager.setWillLoadThreadCallback(function() {
@@ -34,51 +37,49 @@ JX.behavior('conpherence-menu', function(config) {
     var form = JX.$H(r.form);
     var root = JX.DOM.find(document, 'div', 'conpherence-layout');
     var header_root = JX.DOM.find(root, 'div', 'conpherence-header-pane');
-    var messages_root = JX.DOM.find(root, 'div', 'conpherence-messages');
     var form_root = JX.DOM.find(root, 'div', 'conpherence-form');
     JX.DOM.setContent(header_root, header);
-    JX.DOM.setContent(messages_root, messages);
+    JX.DOM.setContent(scrollbar.getContentNode(), messages);
     JX.DOM.setContent(form_root, form);
 
     markThreadLoading(false);
 
     didRedrawThread(true);
   });
+
   threadManager.setDidUpdateThreadCallback(function(r) {
-    var root = JX.DOM.find(document, 'div', 'conpherence-layout');
-    var messages_root = JX.DOM.find(root, 'div', 'conpherence-message-pane');
-    var messages = JX.DOM.find(messages_root, 'div', 'conpherence-messages');
-    JX.DOM.appendContent(messages, JX.$H(r.transactions));
-    messages.scrollTop = messages.scrollHeight;
+    JX.DOM.appendContent(scrollbar.getContentNode(), JX.$H(r.transactions));
+    _scrollMessageWindow();
   });
+
   threadManager.setWillSendMessageCallback(function () {
     var root = JX.DOM.find(document, 'div', 'conpherence-layout');
     var form_root = JX.DOM.find(root, 'div', 'conpherence-form');
     markThreadLoading(true);
     JX.DOM.alterClass(form_root, 'loading', true);
   });
-  threadManager.setDidSendMessageCallback(function (r) {
+
+  threadManager.setDidSendMessageCallback(function (r, non_update) {
     var root = JX.DOM.find(document, 'div', 'conpherence-layout');
     var form_root = JX.DOM.find(root, 'div', 'conpherence-form');
-    var messages_root = JX.DOM.find(root, 'div', 'conpherence-message-pane');
-    var messages = JX.DOM.find(messages_root, 'div', 'conpherence-messages');
-    var fileWidget = null;
-    try {
-      fileWidget = JX.DOM.find(root, 'div', 'widgets-files');
-    } catch (ex) {
-      // Ignore; maybe no files widget
-    }
-    JX.DOM.appendContent(messages, JX.$H(r.transactions));
-    messages.scrollTop = messages.scrollHeight;
-
-    if (fileWidget) {
-      JX.DOM.setContent(
-        fileWidget,
-        JX.$H(r.file_widget)
-        );
-    }
     var textarea = JX.DOM.find(form_root, 'textarea');
-    textarea.value = '';
+    if (!non_update) {
+      var fileWidget = null;
+      try {
+        fileWidget = JX.DOM.find(root, 'div', 'widgets-files');
+      } catch (ex) {
+        // Ignore; maybe no files widget
+      }
+      JX.DOM.appendContent(scrollbar.getContentNode(), JX.$H(r.transactions));
+      _scrollMessageWindow();
+
+      if (fileWidget) {
+        JX.DOM.setContent(
+          fileWidget,
+          JX.$H(r.file_widget));
+      }
+      textarea.value = '';
+    }
     markThreadLoading(false);
 
     setTimeout(function() { JX.DOM.focus(textarea); }, 100);
@@ -114,6 +115,10 @@ JX.behavior('conpherence-menu', function(config) {
     }
     markWidgetLoading(true);
     onDeviceChange();
+    var root = JX.DOM.find(document, 'div', 'conpherence-layout');
+    var messages_root = JX.DOM.find(root, 'div', 'conpherence-message-pane');
+    var messages = JX.DOM.find(messages_root, 'div', 'conpherence-messages');
+    scrollbar = new JX.Scrollbar(messages);
   }
   init();
 
@@ -146,11 +151,8 @@ JX.behavior('conpherence-menu', function(config) {
   }
 
   function updatePageData(data) {
-    var uri_suffix = _thread.selected + '/';
-    if (data.use_base_uri) {
-      uri_suffix = '';
-    }
-    JX.History.replace(config.baseURI + uri_suffix);
+    var uri = '/Z' + _thread.selected;
+    JX.History.replace(uri);
     if (data.title) {
       JX.Title.setTitle(data.title);
     } else if (_thread.node) {
@@ -315,10 +317,16 @@ JX.behavior('conpherence-menu', function(config) {
         buildDeviceWidgetSelector : build_device_widget_selector
       });
   }
+  var _firstScroll = true;
   function _scrollMessageWindow() {
-    var root = JX.DOM.find(document, 'div', 'conpherence-layout');
-    var messages_root = JX.DOM.find(root, 'div', 'conpherence-messages');
-    messages_root.scrollTop = messages_root.scrollHeight;
+    if (_firstScroll) {
+      _firstScroll = false;
+      // let the standard #anchor tech take over
+      if (window.location.hash) {
+        return;
+      }
+    }
+    scrollbar.scrollTo(scrollbar.getViewportNode().scrollHeight);
   }
   function _focusTextarea() {
     var root = JX.DOM.find(document, 'div', 'conpherence-layout');
@@ -371,7 +379,7 @@ JX.behavior('conpherence-menu', function(config) {
     new JX.Workflow.newFromForm(form, data)
       .setHandler(JX.bind(this, function(r) {
         JX.DOM.appendContent(messages, JX.$H(r.transactions));
-        messages.scrollTop = messages.scrollHeight;
+        _scrollMessageWindow();
 
         JX.DOM.setContent(
           header,

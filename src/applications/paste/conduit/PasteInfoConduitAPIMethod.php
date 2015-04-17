@@ -18,17 +18,17 @@ final class PasteInfoConduitAPIMethod extends PasteConduitAPIMethod {
     return 'Retrieve an array of information about a paste.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'paste_id' => 'required id',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
       'ERR_BAD_PASTE' => 'No such paste exists',
     );

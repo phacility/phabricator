@@ -11,18 +11,14 @@ final class DifferentialQueryDiffsConduitAPIMethod
     return pht('Query differential diffs which match certain criteria.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'ids' => 'optional list<uint>',
       'revisionIDs' => 'optional list<uint>',
     );
   }
 
-  public function defineErrorTypes() {
-    return array();
-  }
-
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'list<dict>';
   }
 

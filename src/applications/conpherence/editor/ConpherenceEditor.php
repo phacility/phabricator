@@ -235,6 +235,7 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
+    $make_author_recent_participant = true;
     switch ($xaction->getTransactionType()) {
       case PhabricatorTransactions::TYPE_COMMENT:
         $object->setMessageCount((int)$object->getMessageCount() + 1);
@@ -244,23 +245,38 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
         break;
       case ConpherenceTransactionType::TYPE_PARTICIPANTS:
         if (!$this->getIsNewObject()) {
-          // if we added people, add them to the end of "recent" participants
           $old_map = array_fuse($xaction->getOldValue());
           $new_map = array_fuse($xaction->getNewValue());
+          // if we added people, add them to the end of "recent" participants
           $add = array_keys(array_diff_key($new_map, $old_map));
-          if ($add) {
+          // if we remove people, then definintely remove them from "recent"
+          // participants
+          $del = array_keys(array_diff_key($old_map, $new_map));
+          if ($add || $del) {
             $participants = $object->getRecentParticipantPHIDs();
-            $participants = array_merge($participants, $add);
+            if ($add) {
+              $participants = array_merge($participants, $add);
+            }
+            if ($del) {
+              $participants = array_diff($participants, $del);
+              $actor = $this->requireActor();
+              if (in_array($actor->getPHID(), $del)) {
+                $make_author_recent_participant = false;
+              }
+            }
             $participants = array_slice(array_unique($participants), 0, 10);
             $object->setRecentParticipantPHIDs($participants);
           }
         }
         break;
     }
-    $this->updateRecentParticipantPHIDs($object, $xaction);
+
+    if ($make_author_recent_participant) {
+      $this->makeAuthorMostRecentParticipant($object, $xaction);
+    }
   }
 
-  private function updateRecentParticipantPHIDs(
+  private function makeAuthorMostRecentParticipant(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
@@ -425,7 +441,14 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
             PhabricatorPolicyCapability::CAN_EDIT);
         }
         break;
+      // This is similar to PhabricatorTransactions::TYPE_COMMENT so
+      // use CAN_VIEW
       case ConpherenceTransactionType::TYPE_FILES:
+        PhabricatorPolicyFilter::requireCapability(
+          $this->requireActor(),
+          $object,
+          PhabricatorPolicyCapability::CAN_VIEW);
+        break;
       case ConpherenceTransactionType::TYPE_TITLE:
         PhabricatorPolicyFilter::requireCapability(
           $this->requireActor(),

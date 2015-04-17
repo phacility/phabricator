@@ -13,6 +13,8 @@ final class PhabricatorTypeaheadResult {
   private $imageSprite;
   private $icon;
   private $closed;
+  private $tokenType;
+  private $unique;
 
   public function setIcon($icon) {
     $this->icon = $icon;
@@ -69,6 +71,51 @@ final class PhabricatorTypeaheadResult {
     return $this;
   }
 
+  public function getName() {
+    return $this->name;
+  }
+
+  public function getDisplayName() {
+    return coalesce($this->displayName, $this->getName());
+  }
+
+  public function getIcon() {
+    return nonempty($this->icon, $this->getDefaultIcon());
+  }
+
+  public function getPHID() {
+    return $this->phid;
+  }
+
+  public function setUnique($unique) {
+    $this->unique = $unique;
+    return $this;
+  }
+
+  public function setTokenType($type) {
+    $this->tokenType = $type;
+    return $this;
+  }
+
+  public function getTokenType() {
+    if ($this->closed && !$this->tokenType) {
+      return PhabricatorTypeaheadTokenView::TYPE_DISABLED;
+    }
+    return $this->tokenType;
+  }
+
+  public function getSortKey() {
+    // Put unique results (special parameter functions) ahead of other
+    // results.
+    if ($this->unique) {
+      $prefix = 'A';
+    } else {
+      $prefix = 'B';
+    }
+
+    return $prefix.phutil_utf8_strtolower($this->getName());
+  }
+
   public function getWireFormat() {
     $data = array(
       $this->name,
@@ -79,9 +126,11 @@ final class PhabricatorTypeaheadResult {
       $this->displayType,
       $this->imageURI ? (string)$this->imageURI : null,
       $this->priorityType,
-      ($this->icon === null) ? $this->getDefaultIcon() : $this->icon,
+      $this->getIcon(),
       $this->closed,
       $this->imageSprite ? (string)$this->imageSprite : null,
+      $this->tokenType,
+      $this->unique ? 1 : null,
     );
     while (end($data) === null) {
       array_pop($data);

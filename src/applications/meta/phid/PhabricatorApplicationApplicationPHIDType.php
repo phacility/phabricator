@@ -9,6 +9,10 @@ final class PhabricatorApplicationApplicationPHIDType
     return pht('Application');
   }
 
+  public function getTypeIcon() {
+    return 'fa-globe';
+  }
+
   public function newObject() {
     return null;
   }

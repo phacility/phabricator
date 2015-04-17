@@ -13,7 +13,7 @@ final class DiffusionBrowseQueryConduitAPIMethod
       '(optional) commit.';
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'array';
   }
 

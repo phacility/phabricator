@@ -55,6 +55,7 @@ final class PhabricatorConfigApplication extends PhabricatorApplication {
           '' => 'PhabricatorConfigIssueListController',
           '(?P<key>[^/]+)/' => 'PhabricatorConfigIssueViewController',
         ),
+        'cache/' => 'PhabricatorConfigCacheController',
       ),
     );
   }

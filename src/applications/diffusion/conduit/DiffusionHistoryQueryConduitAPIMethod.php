@@ -14,7 +14,7 @@ final class DiffusionHistoryQueryConduitAPIMethod
       'commit and path.';
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'array';
   }
 

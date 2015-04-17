@@ -11,7 +11,7 @@ final class DiffusionFileContentQueryConduitAPIMethod
     return 'Retrieve file content from a repository.';
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'array';
   }
 

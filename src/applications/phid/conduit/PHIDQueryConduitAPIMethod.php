@@ -10,18 +10,14 @@ final class PHIDQueryConduitAPIMethod extends PHIDConduitAPIMethod {
     return 'Retrieve information about arbitrary PHIDs.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'phids' => 'required list<phid>',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict<string, wild>';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

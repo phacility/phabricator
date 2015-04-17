@@ -302,8 +302,7 @@ JX.install('Scrollbar', {
      * height of the scroll area, and we may want to make adjustments.
      */
     _onload: function() {
-      var viewport = this._viewport || this._frame;
-
+      var viewport = this.getViewportNode();
       var height = viewport.scrollHeight;
       var visible = JX.Vector.getDim(viewport).y;
       if (this._lastHeight !== null && this._lastHeight != height) {
@@ -408,6 +407,14 @@ JX.install('Scrollbar', {
         clearTimeout(this._timeout);
         this._timeout = null;
       }
+    },
+
+    getContentNode: function() {
+      return this._content || this._frame;
+    },
+
+    getViewportNode: function() {
+      return this._viewport || this._frame;
     },
 
     scrollTo: function(scroll) {

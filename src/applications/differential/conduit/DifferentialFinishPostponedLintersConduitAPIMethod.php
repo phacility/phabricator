@@ -12,18 +12,18 @@ final class DifferentialFinishPostponedLintersConduitAPIMethod
            'linters as finished.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'diffID'   => 'required diffID',
       'linters'  => 'required dict',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'void';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
       'ERR-BAD-DIFF'   => 'Bad diff ID.',
       'ERR-BAD-LINTER' => 'No postponed linter by the given name',

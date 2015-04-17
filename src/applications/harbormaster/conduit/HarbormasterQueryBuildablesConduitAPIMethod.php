@@ -11,7 +11,7 @@ final class HarbormasterQueryBuildablesConduitAPIMethod
     return pht('Query Harbormaster buildables.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'ids' => 'optional list<id>',
       'phids' => 'optional list<phid>',
@@ -21,12 +21,8 @@ final class HarbormasterQueryBuildablesConduitAPIMethod
     ) + self::getPagerParamTypes();
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'wild';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

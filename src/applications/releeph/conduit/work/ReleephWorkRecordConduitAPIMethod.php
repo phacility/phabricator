@@ -29,7 +29,7 @@ final class ReleephWorkRecordConduitAPIMethod
       'to the upstream repository.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     $action_const = $this->formatStringConstants(
       array(
         'pick',
@@ -43,12 +43,8 @@ final class ReleephWorkRecordConduitAPIMethod
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'void';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

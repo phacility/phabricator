@@ -3,14 +3,10 @@
 final class PonderQuestionQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
-  const ORDER_CREATED = 'order-created';
-  const ORDER_HOTTEST = 'order-hottest';
-
   private $ids;
   private $phids;
   private $authorPHIDs;
   private $answererPHIDs;
-  private $order = self::ORDER_CREATED;
 
   private $status = 'status-any';
   const STATUS_ANY      = 'status-any';
@@ -52,11 +48,6 @@ final class PonderQuestionQuery
 
   public function needViewerVotes($need_viewer_votes) {
     $this->needViewerVotes = $need_viewer_votes;
-    return $this;
-  }
-
-  public function setOrder($order) {
-    $this->order = $order;
     return $this;
   }
 
@@ -110,17 +101,6 @@ final class PonderQuestionQuery
     return $this->formatWhereClause($where);
   }
 
-  private function buildOrderByClause(AphrontDatabaseConnection $conn_r) {
-    switch ($this->order) {
-      case self::ORDER_HOTTEST:
-        return qsprintf($conn_r, 'ORDER BY q.heat DESC, q.id DESC');
-      case self::ORDER_CREATED:
-        return qsprintf($conn_r, 'ORDER BY q.id DESC');
-      default:
-        throw new Exception("Unknown order '{$this->order}'!");
-    }
-  }
-
   protected function loadPage() {
     $question = new PonderQuestion();
     $conn_r = $question->establishConnection('r');
@@ -131,7 +111,7 @@ final class PonderQuestionQuery
       $question->getTableName(),
       $this->buildJoinsClause($conn_r),
       $this->buildWhereClause($conn_r),
-      $this->buildOrderByClause($conn_r),
+      $this->buildOrderClause($conn_r),
       $this->buildLimitClause($conn_r));
 
     return $question->loadAllFromArray($data);
@@ -141,6 +121,7 @@ final class PonderQuestionQuery
     if ($this->needAnswers) {
       $aquery = id(new PonderAnswerQuery())
         ->setViewer($this->getViewer())
+        ->setOrderVector(array('-id'))
         ->withQuestionIDs(mpull($questions, 'getID'));
 
       if ($this->needViewerVotes) {

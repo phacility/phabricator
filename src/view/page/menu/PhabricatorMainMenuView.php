@@ -152,7 +152,7 @@ final class PhabricatorMainMenuView extends AphrontView {
         'span',
         array(
           'class' => 'phabricator-menu-button-icon phui-icon-view '.
-                     'phui-font-fa fa-bars white',
+                     'phui-font-fa fa-bars',
           'id' => $button_id,
         ),
         ''));
@@ -215,7 +215,7 @@ final class PhabricatorMainMenuView extends AphrontView {
       'span',
       array(
         'class' => 'phabricator-menu-button-icon phui-icon-view '.
-                   'phui-font-fa fa-search white',
+                   'phui-font-fa fa-search',
         'id' => $button_id,
       ),
       ''));

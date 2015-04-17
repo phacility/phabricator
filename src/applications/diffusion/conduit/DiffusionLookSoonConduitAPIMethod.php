@@ -18,19 +18,15 @@ final class DiffusionLookSoonConduitAPIMethod
       'commits to that repository.');
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'void';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'callsigns' => 'required list<string>',
       'urgency' => 'optional string',
     );
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

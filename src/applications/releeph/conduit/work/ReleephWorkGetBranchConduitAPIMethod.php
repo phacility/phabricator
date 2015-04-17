@@ -15,18 +15,14 @@ final class ReleephWorkGetBranchConduitAPIMethod
     return 'Return information to help checkout / cut a Releeph branch.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'branchPHID'  => 'required string',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'dict<string, wild>';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

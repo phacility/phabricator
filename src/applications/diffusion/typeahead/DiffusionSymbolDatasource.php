@@ -3,6 +3,12 @@
 final class DiffusionSymbolDatasource
   extends PhabricatorTypeaheadDatasource {
 
+  public function isBrowsable() {
+    // This is slightly involved to make browsable, and browsing symbols
+    // does not seem likely to be very useful in any real software project.
+    return false;
+  }
+
   public function getPlaceholderText() {
     return pht('Type a symbol name...');
   }

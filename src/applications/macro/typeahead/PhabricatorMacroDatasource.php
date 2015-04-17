@@ -11,19 +11,23 @@ final class PhabricatorMacroDatasource extends PhabricatorTypeaheadDatasource {
   }
 
   public function loadResults() {
-    $viewer = $this->getViewer();
     $raw_query = $this->getRawQuery();
 
+    $query = id(new PhabricatorMacroQuery())
+      ->setOrder('name')
+      ->withNamePrefix($raw_query);
+    $macros = $this->executeQuery($query);
+
     $results = array();
-
-    $macros = id(new PhabricatorMacroQuery())
-      ->setViewer($viewer)
-      ->withStatus(PhabricatorMacroQuery::STATUS_ACTIVE)
-      ->execute();
-
     foreach ($macros as $macro) {
+      $closed = null;
+      if ($macro->getIsDisabled()) {
+        $closed = pht('Disabled');
+      }
+
       $results[] = id(new PhabricatorTypeaheadResult())
         ->setPHID($macro->getPHID())
+        ->setClosed($closed)
         ->setName($macro->getName());
     }
 

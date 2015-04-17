@@ -19,7 +19,7 @@ final class RepositoryCreateConduitAPIMethod
     return pht('Create a new repository.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     $vcs_const = $this->formatStringConstants(array('git', 'hg', 'svn'));
 
     return array(
@@ -42,11 +42,11 @@ final class RepositoryCreateConduitAPIMethod
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
       'ERR-DUPLICATE'   =>
         'Duplicate repository callsign.',
