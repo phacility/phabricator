@@ -238,6 +238,7 @@ final class PhabricatorTypeaheadModularDatasourceController
     }
 
     $content = mpull($results, 'getWireFormat');
+    $content = array_values($content);
 
     if ($request->isAjax()) {
       return id(new AphrontAjaxResponse())->setContent($content);
