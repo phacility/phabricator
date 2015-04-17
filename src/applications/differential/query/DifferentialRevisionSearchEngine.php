@@ -212,7 +212,7 @@ final class DifferentialRevisionSearchEngine
     switch ($query_key) {
       case 'active':
         return $query
-          ->setParameter('responsiblePHIDs', array('viewer()'))
+          ->setParameter('responsiblePHIDs', array($viewer->getPHID()))
           ->setParameter('status', DifferentialRevisionQuery::STATUS_OPEN);
       case 'authored':
         return $query
