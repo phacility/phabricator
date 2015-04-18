@@ -28,9 +28,9 @@
 .typeahead-browse-frame {
   overflow-x: hidden;
   overflow-y: auto;
-  padding: 4px;
   height: 260px;
-  border: 1px solid {$lightgreyborder};
+  border: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$blueborder};
 }
 
 .typeahead-browse-frame.loading {
@@ -38,7 +38,7 @@
 }
 
 .typeahead-browse-header {
-  padding: 4px 0;
+  padding: 0 0 8px 0;
 }
 
 input.typeahead-browse-input {
@@ -56,5 +56,10 @@ input.typeahead-browse-input {
 
 .typeahead-browse-item button {
   float: right;
-  margin: 2px 4px;
+  margin: 2px 6px;
+}
+
+.typeahead-browse-item a.jx-tokenizer-token {
+  margin-top: 1px;
+  margin-left: 6px;
 }
