@@ -76,7 +76,7 @@ final class DifferentialInlineCommentQuery
     return head($this->execute());
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     // Only find inline comments.

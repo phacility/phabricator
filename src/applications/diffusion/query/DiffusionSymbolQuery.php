@@ -184,7 +184,7 @@ final class DiffusionSymbolQuery extends PhabricatorOffsetPagedQuery {
   /**
    * @task internal
    */
-  private function buildWhereClause($conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if (isset($this->context)) {

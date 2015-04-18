@@ -49,7 +49,7 @@ final class PhabricatorWorkerArchiveTaskQuery
     return $task_table->loadAllFromArray($rows);
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->ids !== null) {

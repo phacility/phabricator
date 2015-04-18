@@ -73,7 +73,7 @@ final class PhrequentUserTimeQuery
     return $this;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
     if ($this->ids !== null) {

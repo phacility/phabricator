@@ -124,7 +124,7 @@ final class DifferentialChangesetQuery
     return $changesets;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->diffs !== null) {

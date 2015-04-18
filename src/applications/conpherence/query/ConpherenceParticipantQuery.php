@@ -79,7 +79,7 @@ final class ConpherenceParticipantQuery extends PhabricatorOffsetPagedQuery {
     return $participants;
   }
 
-  private function buildWhereClause($conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->participantPHIDs) {

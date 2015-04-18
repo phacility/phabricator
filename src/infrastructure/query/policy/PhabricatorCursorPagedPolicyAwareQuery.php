@@ -4,7 +4,9 @@
  * A query class which uses cursor-based paging. This paging is much more
  * performant than offset-based paging in the presence of policy filtering.
  *
+ * @task clauses Building Query Clauses
  * @task appsearch Integration with ApplicationSearch
+ * @task customfield Integration with CustomField
  * @task paging Paging
  * @task order Result Ordering
  */
@@ -175,9 +177,23 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   }
 
 
+/* -(  Building Query Clauses  )--------------------------------------------- */
+
+
+  /**
+   * @task clauses
+   */
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
+    throw new PhutilMethodNotImplementedException();
+  }
+
+
 /* -(  Paging  )------------------------------------------------------------- */
 
 
+  /**
+   * @task paging
+   */
   protected function buildPagingClause(AphrontDatabaseConnection $conn) {
     $orderable = $this->getOrderableColumns();
     $vector = $this->getOrderVector();
@@ -228,13 +244,20 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       ));
   }
 
+
+  /**
+   * @task paging
+   */
   protected function getPagingValueMap($cursor, array $keys) {
-    // TODO: This is a hack to make this work with existing classes for now.
     return array(
       'id' => $cursor,
     );
   }
 
+
+  /**
+   * @task paging
+   */
   protected function loadCursorObject($cursor) {
     $query = newv(get_class($this), array())
       ->setViewer($this->getPagingViewer())
@@ -253,6 +276,10 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     return $object;
   }
 
+
+  /**
+   * @task paging
+   */
   protected function willExecuteCursorQuery(
     PhabricatorCursorPagedPolicyAwareQuery $query) {
     return;
@@ -295,6 +322,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    * @param list<map> Column description dictionaries.
    * @param map Additional constuction options.
    * @return string Query clause.
+   * @task paging
    */
   final protected function buildPagingClauseFromMultipleColumns(
     AphrontDatabaseConnection $conn,
@@ -1082,6 +1110,13 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     return implode(' ', $joins);
   }
 
+
+/* -(  Integration with CustomField  )--------------------------------------- */
+
+
+  /**
+   * @task customfield
+   */
   protected function getPagingValueMapForCustomFields(
     PhabricatorCustomFieldInterface $object) {
 
@@ -1100,9 +1135,14 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     return $map;
   }
 
+
+  /**
+   * @task customfield
+   */
   protected function isCustomFieldOrderKey($key) {
     $prefix = 'custom:';
     return !strncmp($key, $prefix, strlen($prefix));
   }
+
 
 }

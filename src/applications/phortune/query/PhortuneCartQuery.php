@@ -152,7 +152,7 @@ final class PhortuneCartQuery
     return $carts;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
     $where = array();
 
     $where[] = $this->buildPagingClause($conn);

@@ -279,7 +279,7 @@ final class DiffusionCommitQuery
     return $commits;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->repositoryPHIDs !== null) {

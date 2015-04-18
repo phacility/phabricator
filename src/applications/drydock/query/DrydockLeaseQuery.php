@@ -69,7 +69,7 @@ final class DrydockLeaseQuery extends DrydockQuery {
     return $leases;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->resourceIDs) {

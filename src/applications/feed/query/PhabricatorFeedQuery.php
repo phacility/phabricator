@@ -49,7 +49,7 @@ final class PhabricatorFeedQuery
       $ref_table->getTableName());
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->filterPHIDs) {
