@@ -79,7 +79,7 @@ JX.install('Tokenizer', {
       this._tokenMap = {};
 
       try {
-        this._frame = JX.DOM.findAbove(this._orig, 'table', 'tokenizer-frame');
+        this._frame = JX.DOM.findAbove(this._orig, 'div', 'tokenizer-frame');
       } catch (e) {
         // Ignore, this tokenizer doesn't have a frame.
       }

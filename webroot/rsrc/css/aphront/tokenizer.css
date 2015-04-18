@@ -150,24 +150,36 @@ a.jx-tokenizer-token-invalid:hover {
   margin-top: 2px;
 }
 
-.jx-tokenizer-frame {
-  width: 100%;
-}
-
-.jx-tokenizer-frame .jx-tokenizer-frame-browse {
+.jx-tokenizer-frame .button.tokenizer-browse-button {
   display: none;
 }
 
-.has-browse .jx-tokenizer-frame-browse {
-  display: table-cell;
+.jx-tokenizer-frame.has-browse .button.tokenizer-browse-button {
+  display: block;
 }
 
-.jx-tokenizer-frame td.jx-tokenizer-frame-input {
-  width: 100%;
+.jx-tokenizer-frame.has-browse {
+  position: relative;
 }
 
-.jx-tokenizer-frame-browse {
-  width: 100px;
-  vertical-align: middle;
-  padding: 0 0 0 4px;
+.jx-tokenizer-frame.has-browse div.jx-tokenizer-container {
+  padding-right: 32px;
+}
+
+.button.tokenizer-browse-button {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  bottom: 1px;
+  border-radius: 0;
+  border-right: none;
+  border-top: none;
+  border-bottom: none;
+  padding: 0;
+  width: 30px;
+}
+
+.button.tokenizer-browse-button .phui-icon-view {
+  top: 7px;
+  left: 9px;
 }
