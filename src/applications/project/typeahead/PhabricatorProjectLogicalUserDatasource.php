@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorUserProjectsDatasource
+final class PhabricatorProjectLogicalUserDatasource
   extends PhabricatorTypeaheadCompositeDatasource {
 
   public function getPlaceholderText() {
@@ -29,9 +29,9 @@ final class PhabricatorUserProjectsDatasource
     foreach ($results as $result) {
       $result
         ->setTokenType(PhabricatorTypeaheadTokenView::TYPE_FUNCTION)
-        ->setIcon('fa-briefcase')
+        ->setIcon('fa-asterisk')
         ->setPHID('projects('.$result->getPHID().')')
-        ->setDisplayName(pht('Projects: %s', $result->getDisplayName()))
+        ->setDisplayName(pht("User's Projects: %s", $result->getDisplayName()))
         ->setName($result->getName().' projects');
     }
 
@@ -44,20 +44,19 @@ final class PhabricatorUserProjectsDatasource
       $phids[] = head($argv);
     }
 
-    $projects = id(new PhabricatorPeopleQuery())
+    $projects = id(new PhabricatorProjectQuery())
       ->setViewer($this->getViewer())
-      ->needMembers(true)
-      ->withPHIDs($phids)
+      ->withMemberPHIDs($phids)
       ->execute();
 
     $results = array();
     foreach ($projects as $project) {
-      foreach ($project->getMemberPHIDs() as $phid) {
-        $results[$phid] = $phid;
-      }
+      $results[] = new PhabricatorQueryConstraint(
+        PhabricatorQueryConstraint::OPERATOR_OR,
+        $project->getPHID());
     }
 
-    return array_values($results);
+    return $results;
   }
 
   public function renderFunctionTokens($function, array $argv_list) {
@@ -70,13 +69,13 @@ final class PhabricatorUserProjectsDatasource
     foreach ($tokens as $token) {
       if ($token->isInvalid()) {
         $token
-          ->setValue(pht('Projects: Invalid User'));
+          ->setValue(pht("User's Projects: Invalid User"));
       } else {
         $token
-          ->setIcon('fa-users')
+          ->setIcon('fa-asterisk')
           ->setTokenType(PhabricatorTypeaheadTokenView::TYPE_FUNCTION)
           ->setKey('projects('.$token->getKey().')')
-          ->setValue(pht('Projects: %s', $token->getValue()));
+          ->setValue(pht("User's Projects: %s", $token->getValue()));
       }
     }
 

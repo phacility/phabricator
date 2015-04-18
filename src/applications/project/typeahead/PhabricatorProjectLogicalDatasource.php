@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorProjectLogicDatasource
+final class PhabricatorProjectLogicalDatasource
   extends PhabricatorTypeaheadCompositeDatasource {
 
   public function getPlaceholderText() {
@@ -16,6 +16,8 @@ final class PhabricatorProjectLogicDatasource
       new PhabricatorProjectNoProjectsDatasource(),
       new PhabricatorProjectLogicalAndDatasource(),
       new PhabricatorProjectLogicalOrNotDatasource(),
+      new PhabricatorProjectLogicalViewerDatasource(),
+      new PhabricatorProjectLogicalUserDatasource(),
     );
   }
 
