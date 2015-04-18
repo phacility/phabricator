@@ -73,6 +73,7 @@ final class PhabricatorUserProjectsDatasource
           ->setValue(pht('Projects: Invalid User'));
       } else {
         $token
+          ->setIcon('fa-users')
           ->setTokenType(PhabricatorTypeaheadTokenView::TYPE_FUNCTION)
           ->setKey('projects('.$token->getKey().')')
           ->setValue(pht('Projects: %s', $token->getValue()));

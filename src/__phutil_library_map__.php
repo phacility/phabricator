@@ -5675,7 +5675,7 @@ phutil_register_library_map(array(
     'PhabricatorProjectIcon' => 'Phobject',
     'PhabricatorProjectListController' => 'PhabricatorProjectController',
     'PhabricatorProjectMemberOfProjectEdgeType' => 'PhabricatorEdgeType',
-    'PhabricatorProjectMembersDatasource' => 'PhabricatorTypeaheadDatasource',
+    'PhabricatorProjectMembersDatasource' => 'PhabricatorTypeaheadCompositeDatasource',
     'PhabricatorProjectMembersEditController' => 'PhabricatorProjectController',
     'PhabricatorProjectMembersRemoveController' => 'PhabricatorProjectController',
     'PhabricatorProjectMoveController' => 'PhabricatorProjectController',
