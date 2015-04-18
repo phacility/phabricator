@@ -51,17 +51,15 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
     }
 
     $datasource = $this->datasource;
-    if ($datasource) {
-      $datasource->setViewer($this->getUser());
+    if (!$datasource) {
+      throw new Exception(
+        pht('You must set a datasource to use a TokenizerControl.'));
     }
+    $datasource->setViewer($this->getUser());
 
     $placeholder = null;
     if (!strlen($this->placeholder)) {
-      if ($datasource) {
-        $placeholder = $datasource->getPlaceholderText();
-      }
-    } else {
-      $placeholder = $this->placeholder;
+      $placeholder = $datasource->getPlaceholderText();
     }
 
     $tokens = array();
@@ -71,14 +69,13 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
         $token = PhabricatorTypeaheadTokenView::newFromHandle($handles[$value]);
       } else {
         $token = null;
-        if ($datasource) {
-          $function = $datasource->parseFunction($value);
-          if ($function) {
-            $token_list = $datasource->renderFunctionTokens(
-              $function['name'],
-              array($function['argv']));
-            $token = head($token_list);
-          }
+
+        $function = $datasource->parseFunction($value);
+        if ($function) {
+          $token_list = $datasource->renderFunctionTokens(
+            $function['name'],
+            array($function['argv']));
+          $token = head($token_list);
         }
 
         if (!$token) {
@@ -105,17 +102,10 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
       $username = $this->user->getUsername();
     }
 
-    $datasource_uri = null;
-    $browse_uri = null;
-    if ($datasource) {
-      $datasource->setViewer($this->getUser());
-
-      $datasource_uri = $datasource->getDatasourceURI();
-
-      $browse_uri = $datasource->getBrowseURI();
-      if ($browse_uri) {
-        $template->setBrowseURI($browse_uri);
-      }
+    $datasource_uri = $datasource->getDatasourceURI();
+    $browse_uri = $datasource->getBrowseURI();
+    if ($browse_uri) {
+      $template->setBrowseURI($browse_uri);
     }
 
     if (!$this->disableBehavior) {
