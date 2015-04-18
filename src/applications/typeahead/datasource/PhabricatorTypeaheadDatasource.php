@@ -199,6 +199,62 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
       ->setTokenType(PhabricatorTypeaheadTokenView::TYPE_INVALID);
   }
 
+  public function renderTokens(array $values) {
+    $phids = array();
+    $setup = array();
+    $tokens = array();
+
+    foreach ($values as $key => $value) {
+      if (!self::isFunctionToken($value)) {
+        $phids[$key] = $value;
+      } else {
+        $function = $this->parseFunction($value);
+        if ($function) {
+          $setup[$function['name']][$key] = $function;
+        } else {
+          $name = pht('Invalid Function: %s', $value);
+          $tokens[$key] = $this->newInvalidToken($name)
+            ->setKey($value);
+        }
+      }
+    }
+
+    if ($phids) {
+      $handles = $this->getViewer()->loadHandles($phids);
+      foreach ($phids as $key => $phid) {
+        $handle = $handles[$phid];
+        $tokens[$key] = PhabricatorTypeaheadTokenView::newFromHandle($handle);
+      }
+    }
+
+    if ($setup) {
+      foreach ($setup as $function_name => $argv_list) {
+        // Render the function tokens.
+        $function_tokens = $this->renderFunctionTokens(
+          $function_name,
+          ipull($argv_list, 'argv'));
+
+        // Rekey the function tokens using the original array keys.
+        $function_tokens = array_combine(
+          array_keys($argv_list),
+          $function_tokens);
+
+        // For any functions which were invalid, set their value to the
+        // original input value before it was parsed.
+        foreach ($function_tokens as $key => $token) {
+          $type = $token->getTokenType();
+          if ($type == PhabricatorTypeaheadTokenView::TYPE_INVALID) {
+            $token->setKey($values[$key]);
+          }
+        }
+
+        $tokens += $function_tokens;
+      }
+    }
+
+    return array_select_keys($tokens, array_keys($values));
+  }
+
 /* -(  Token Functions  )---------------------------------------------------- */
 
 

@@ -62,34 +62,11 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
       $placeholder = $datasource->getPlaceholderText();
     }
 
-    $tokens = array();
     $values = nonempty($this->getValue(), array());
-    foreach ($values as $value) {
-      if (isset($handles[$value])) {
-        $token = PhabricatorTypeaheadTokenView::newFromHandle($handles[$value]);
-      } else {
-        $token = null;
+    $tokens = $datasource->renderTokens($values);
 
-        $function = $datasource->parseFunction($value);
-        if ($function) {
-          $token_list = $datasource->renderFunctionTokens(
-            $function['name'],
-            array($function['argv']));
-          $token = head($token_list);
-        }
-
-        if (!$token) {
-          $name = pht('Invalid Function: %s', $value);
-          $token = $datasource->newInvalidToken($name);
-        }
-
-        $type = $token->getTokenType();
-        if ($type == PhabricatorTypeaheadTokenView::TYPE_INVALID) {
-          $token->setKey($value);
-        }
-      }
+    foreach ($tokens as $token) {
       $token->setInputName($this->getName());
-      $tokens[] = $token;
     }
 
     $template = new AphrontTokenizerTemplateView();
