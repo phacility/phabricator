@@ -25,10 +25,22 @@ abstract class PhabricatorTypeaheadCompositeDatasource
     $offset = $this->getOffset();
     $limit = $this->getLimit();
 
+    // If the input query is a function like `members(platy`, and we can
+    // parse the function, we strip the function off and hand the stripped
+    // query to child sources. This makes it easier to implement function
+    // sources in terms of real object sources.
+    $raw_query = $this->getRawQuery();
+    if (self::isFunctionToken($raw_query)) {
+      $function = $this->parseFunction($raw_query, $allow_partial = true);
+      if ($function) {
+        $raw_query = head($function['argv']);
+      }
+    }
+
     $results = array();
     foreach ($this->getUsableDatasources() as $source) {
       $source
-        ->setRawQuery($this->getRawQuery())
+        ->setRawQuery($raw_query)
         ->setQuery($this->getQuery())
         ->setViewer($this->getViewer());
 
@@ -36,7 +48,9 @@ abstract class PhabricatorTypeaheadCompositeDatasource
         $source->setLimit($offset + $limit);
       }
 
-      $results[] = $source->loadResults();
+      $source_results = $source->loadResults();
+      $source_results = $source->didLoadResults($source_results);
+      $results[] = $source_results;
     }
 
     $results = array_mergev($results);

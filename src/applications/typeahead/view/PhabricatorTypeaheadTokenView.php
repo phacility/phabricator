@@ -44,6 +44,10 @@ final class PhabricatorTypeaheadTokenView
     return $token;
   }
 
+  public function isInvalid() {
+    return ($this->getTokenType() == self::TYPE_INVALID);
+  }
+
   public function setKey($key) {
     $this->key = $key;
     return $this;

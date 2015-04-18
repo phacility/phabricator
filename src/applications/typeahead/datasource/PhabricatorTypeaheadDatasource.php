@@ -90,6 +90,10 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
   abstract public function getDatasourceApplicationClass();
   abstract public function loadResults();
 
+  protected function didLoadResults(array $results) {
+    return $results;
+  }
+
   public static function tokenizeString($string) {
     $string = phutil_utf8_strtolower($string);
     $string = trim($string);
@@ -261,8 +265,17 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
   /**
    * @task functions
    */
+  public function getDatasourceFunctions() {
+    return array();
+  }
+
+
+  /**
+   * @task functions
+   */
   protected function canEvaluateFunction($function) {
-    return false;
+    $functions = $this->getDatasourceFunctions();
+    return isset($functions[$function]);
   }
 
 
