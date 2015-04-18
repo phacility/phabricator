@@ -121,7 +121,7 @@ final class ConpherenceThreadQuery
     return $conpherences;
   }
 
-  private function buildGroupClause($conn_r) {
+  protected function buildGroupClause(AphrontDatabaseConnection $conn_r) {
     if ($this->participantPHIDs !== null) {
       return 'GROUP BY conpherence_thread.id';
     } else {

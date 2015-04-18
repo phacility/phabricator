@@ -2324,6 +2324,7 @@ phutil_register_library_map(array(
     'PhabricatorProjectsPolicyRule' => 'applications/policy/rule/PhabricatorProjectsPolicyRule.php',
     'PhabricatorPygmentSetupCheck' => 'applications/config/check/PhabricatorPygmentSetupCheck.php',
     'PhabricatorQuery' => 'infrastructure/query/PhabricatorQuery.php',
+    'PhabricatorQueryConstraint' => 'infrastructure/query/constraint/PhabricatorQueryConstraint.php',
     'PhabricatorQueryOrderItem' => 'infrastructure/query/order/PhabricatorQueryOrderItem.php',
     'PhabricatorQueryOrderTestCase' => 'infrastructure/query/order/__tests__/PhabricatorQueryOrderTestCase.php',
     'PhabricatorQueryOrderVector' => 'infrastructure/query/order/PhabricatorQueryOrderVector.php',
@@ -5702,6 +5703,7 @@ phutil_register_library_map(array(
     'PhabricatorProjectWatchController' => 'PhabricatorProjectController',
     'PhabricatorProjectsPolicyRule' => 'PhabricatorPolicyRule',
     'PhabricatorPygmentSetupCheck' => 'PhabricatorSetupCheck',
+    'PhabricatorQueryConstraint' => 'Phobject',
     'PhabricatorQueryOrderItem' => 'Phobject',
     'PhabricatorQueryOrderTestCase' => 'PhabricatorTestCase',
     'PhabricatorQueryOrderVector' => array(

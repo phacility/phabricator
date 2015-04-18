@@ -186,7 +186,7 @@ final class PhabricatorPeopleQuery
     return $users;
   }
 
-  private function buildGroupClause(AphrontDatabaseConnection $conn) {
+  protected function buildGroupClause(AphrontDatabaseConnection $conn) {
     if ($this->nameTokens) {
       return qsprintf(
         $conn,

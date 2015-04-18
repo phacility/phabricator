@@ -157,7 +157,7 @@ final class LegalpadDocumentQuery
     return implode(' ', $joins);
   }
 
-  private function buildGroupClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildGroupClause(AphrontDatabaseConnection $conn_r) {
     if ($this->contributorPHIDs || $this->signerPHIDs) {
       return 'GROUP BY d.id';
     } else {

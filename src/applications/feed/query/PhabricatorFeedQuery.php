@@ -82,7 +82,7 @@ final class PhabricatorFeedQuery
     return $this->formatWhereClause($where);
   }
 
-  private function buildGroupClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildGroupClause(AphrontDatabaseConnection $conn_r) {
     if ($this->filterPHIDs) {
       return qsprintf($conn_r, 'GROUP BY ref.chronologicalKey');
     } else {

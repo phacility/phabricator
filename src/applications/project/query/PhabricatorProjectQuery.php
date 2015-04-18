@@ -328,7 +328,7 @@ final class PhabricatorProjectQuery
     return $this->formatWhereClause($where);
   }
 
-  private function buildGroupClause($conn_r) {
+  protected function buildGroupClause(AphrontDatabaseConnection $conn_r) {
     if ($this->memberPHIDs || $this->nameTokens) {
       return 'GROUP BY p.id';
     } else {

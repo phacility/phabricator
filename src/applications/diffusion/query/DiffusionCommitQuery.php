@@ -542,7 +542,7 @@ final class DiffusionCommitQuery
     }
   }
 
-  private function buildGroupClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildGroupClause(AphrontDatabaseConnection $conn_r) {
     $should_group = $this->shouldJoinAudits();
 
     // TODO: Currently, the audit table is missing a unique key, so we may

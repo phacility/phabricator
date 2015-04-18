@@ -837,7 +837,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return implode(' ', $joins);
   }
 
-  private function buildGroupClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildGroupClause(AphrontDatabaseConnection $conn_r) {
     $joined_multiple_rows = (count($this->projectPHIDs) > 1) ||
                             (count($this->anyProjectPHIDs) > 1) ||
                             $this->shouldJoinBlockingTasks() ||
