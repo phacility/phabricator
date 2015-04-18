@@ -50,8 +50,7 @@ final class PhabricatorTypeaheadModularDatasourceController
         ->setViewer($viewer)
         ->setQuery($query)
         ->setRawQuery($raw_query)
-        ->setLimit($limit);
-
+        ->setLimit($limit + 1);
 
       if ($is_browse) {
         if (!$composite->isBrowsable()) {
