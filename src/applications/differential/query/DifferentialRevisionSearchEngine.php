@@ -46,6 +46,11 @@ final class DifferentialRevisionSearchEngine
       'repositoryPHIDs',
       $request->getArr('repositories'));
 
+    // TODO: Implement "readProjectsFromRequest(...)" to improve this.
+    $saved->setParameter(
+      'projects',
+      $this->readListFromRequest($request, 'projects'));
+
     $saved->setParameter(
       'draft',
       $request->getBool('draft'));
@@ -75,6 +80,8 @@ final class DifferentialRevisionSearchEngine
     if ($responsible_phids) {
       $query->withResponsibleUsers($responsible_phids);
     }
+
+    $this->setQueryProjects($query, $saved);
 
     $author_phids = $saved->getParameter('authorPHIDs', array());
     if ($author_phids) {
@@ -127,6 +134,7 @@ final class DifferentialRevisionSearchEngine
     $subscriber_phids = $saved->getParameter('subscriberPHIDs', array());
     $repository_phids = $saved->getParameter('repositoryPHIDs', array());
     $only_draft = $saved->getParameter('draft', false);
+    $projects = $saved->getParameter('projects', array());
 
     $form
       ->appendControl(
@@ -159,6 +167,12 @@ final class DifferentialRevisionSearchEngine
           ->setName('repositories')
           ->setDatasource(new DiffusionRepositoryDatasource())
           ->setValue($repository_phids))
+      ->appendControl(
+        id(new AphrontFormTokenizerControl())
+          ->setLabel(pht('Projects'))
+          ->setName('projects')
+          ->setDatasource(new PhabricatorProjectLogicalDatasource())
+          ->setValue($projects))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel(pht('Status'))

@@ -117,6 +117,12 @@ abstract class PhabricatorTypeaheadCompositeDatasource
     return $this->usable;
   }
 
+  protected function didEvaluateTokens(array $results) {
+    foreach ($this->getUsableDatasources() as $source) {
+      $results = $source->didEvaluateTokens($results);
+    }
+    return $results;
+  }
 
   protected function canEvaluateFunction($function) {
     foreach ($this->getUsableDatasources() as $source) {

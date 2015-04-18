@@ -56,7 +56,7 @@ final class PhabricatorProjectLogicalViewerDatasource
     return $results;
   }
 
-  public function renderViewerProjectsFunctionTokens(
+  public function renderFunctionTokens(
     $function,
     array $argv_list) {
 

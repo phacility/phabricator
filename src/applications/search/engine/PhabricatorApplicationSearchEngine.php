@@ -219,6 +219,23 @@ abstract class PhabricatorApplicationSearchEngine {
     return $named_queries;
   }
 
+  protected function setQueryProjects(
+    PhabricatorCursorPagedPolicyAwareQuery $query,
+    PhabricatorSavedQuery $saved) {
+
+    $datasource = id(new PhabricatorProjectLogicalDatasource())
+      ->setViewer($this->requireViewer());
+
+    $projects = $saved->getParameter('projects', array());
+    $constraints = $datasource->evaluateTokens($projects);
+
+    if ($constraints) {
+      $query->withEdgeLogicConstraints(
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+        $constraints);
+    }
+  }
+
 
 /* -(  Applications  )------------------------------------------------------- */
 

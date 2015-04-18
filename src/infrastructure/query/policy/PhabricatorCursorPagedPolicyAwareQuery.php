@@ -21,6 +21,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   private $internalPaging;
   private $orderVector;
   private $builtinOrder;
+  private $edgeLogicConstraints = array();
 
   protected function getPageCursors(array $page) {
     return array(
@@ -1315,6 +1316,10 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
     $joins = array();
     foreach ($this->edgeLogicConstraints as $type => $constraints) {
+
+      $op_null = PhabricatorQueryConstraint::OPERATOR_NULL;
+      $has_null = isset($constraints[$op_null]);
+
       foreach ($constraints as $operator => $list) {
         $alias = $this->getEdgeLogicTableAlias($operator, $type);
         switch ($operator) {
@@ -1334,10 +1339,20 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
             break;
           case PhabricatorQueryConstraint::OPERATOR_AND:
           case PhabricatorQueryConstraint::OPERATOR_OR:
+            // If we're including results with no matches, we have to degrade
+            // this to a LEFT join. We'll use WHERE to select matching rows
+            // later.
+            if ($has_null) {
+              $join_type = 'LEFT';
+            } else {
+              $join_type = '';
+            }
+
             $joins[] = qsprintf(
               $conn,
-              'JOIN %T %T ON %Q = %T.src AND %T.type = %d
+              '%Q JOIN %T %T ON %Q = %T.src AND %T.type = %d
                 AND %T.dst IN (%Ls)',
+              $join_type,
               $edge_table,
               $alias,
               $phid_column,
@@ -1377,6 +1392,9 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       $full = array();
       $null = array();
 
+      $op_null = PhabricatorQueryConstraint::OPERATOR_NULL;
+      $has_null = isset($constraints[$op_null]);
+
       foreach ($constraints as $operator => $list) {
         $alias = $this->getEdgeLogicTableAlias($operator, $type);
         switch ($operator) {
@@ -1388,6 +1406,12 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
             break;
           case PhabricatorQueryConstraint::OPERATOR_AND:
           case PhabricatorQueryConstraint::OPERATOR_OR:
+            if ($has_null) {
+              $full[] = qsprintf(
+                $conn,
+                '%T.dst IS NOT NULL',
+                $alias);
+            }
             break;
           case PhabricatorQueryConstraint::OPERATOR_NULL:
             $null[] = qsprintf(

@@ -324,6 +324,16 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
       }
     }
 
+    $results = $this->didEvaluateTokens($results);
+
+    return $results;
+  }
+
+
+  /**
+   * @task functions
+   */
+  protected function didEvaluateTokens(array $results) {
     return $results;
   }
 

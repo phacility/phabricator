@@ -75,7 +75,7 @@ final class PhabricatorProjectLogicalOrNotDatasource
         $phid);
     }
 
-    return $phids;
+    return $results;
   }
 
   public function renderFunctionTokens($function, array $argv_list) {

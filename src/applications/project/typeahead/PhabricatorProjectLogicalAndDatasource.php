@@ -17,13 +17,13 @@ final class PhabricatorProjectLogicalAndDatasource
     );
   }
 
-  public function evaluateTokens(array $tokens) {
-    $results = parent::evaluateTokens($tokens);
-
+  protected function didEvaluateTokens(array $results) {
     foreach ($results as $key => $result) {
-      $results[$key] = new PhabricatorQueryConstraint(
-        PhabricatorQueryConstraint::OPERATOR_AND,
-        $result);
+      if (is_string($result)) {
+        $results[$key] = new PhabricatorQueryConstraint(
+          PhabricatorQueryConstraint::OPERATOR_AND,
+          $result);
+      }
     }
 
     return $results;
