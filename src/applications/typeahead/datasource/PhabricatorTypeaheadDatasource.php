@@ -11,6 +11,7 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
   private $offset;
   private $limit;
   private $parameters = array();
+  private $functionStack = array();
 
   public function setLimit($limit) {
     $this->limit = $limit;
@@ -274,6 +275,14 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
    * @task functions
    */
   protected function canEvaluateFunction($function) {
+    return $this->shouldStripFunction($function);
+  }
+
+
+  /**
+   * @task functions
+   */
+  protected function shouldStripFunction($function) {
     $functions = $this->getDatasourceFunctions();
     return isset($functions[$function]);
   }
@@ -337,7 +346,7 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
     $matches = null;
 
     if ($allow_partial) {
-      $ok = preg_match('/^([^(]+)\((.*)$/', $token, $matches);
+      $ok = preg_match('/^([^(]+)\((.*?)\)?$/', $token, $matches);
     } else {
       $ok = preg_match('/^([^(]+)\((.*)\)$/', $token, $matches);
     }
@@ -366,5 +375,29 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
     throw new PhutilMethodNotImplementedException();
   }
 
+
+  /**
+   * @task functions
+   */
+  public function setFunctionStack(array $function_stack) {
+    $this->functionStack = $function_stack;
+    return $this;
+  }
+
+
+  /**
+   * @task functions
+   */
+  public function getFunctionStack() {
+    return $this->functionStack;
+  }
+
+
+  /**
+   * @task functions
+   */
+  protected function getCurrentFunction() {
+    return nonempty(last($this->functionStack), null);
+  }
 
 }
