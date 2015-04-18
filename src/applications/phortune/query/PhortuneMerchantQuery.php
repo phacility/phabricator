@@ -82,7 +82,7 @@ final class PhortuneMerchantQuery
     return $this->formatWhereClause($where);
   }
 
-  private function buildJoinClause(AphrontDatabaseConnection $conn) {
+  protected function buildJoinClause(AphrontDatabaseConnection $conn) {
     $joins = array();
 
     if ($this->memberPHIDs !== null) {

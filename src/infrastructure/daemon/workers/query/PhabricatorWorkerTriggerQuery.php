@@ -145,7 +145,7 @@ final class PhabricatorWorkerTriggerQuery
     return $triggers;
   }
 
-  private function buildJoinClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildJoinClause(AphrontDatabaseConnection $conn_r) {
     $joins = array();
 
     if (($this->nextEpochMin !== null) ||

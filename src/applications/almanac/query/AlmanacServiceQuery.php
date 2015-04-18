@@ -75,7 +75,7 @@ final class AlmanacServiceQuery
     return $table->loadAllFromArray($data);
   }
 
-  protected function buildJoinClause($conn_r) {
+  protected function buildJoinClause(AphrontDatabaseConnection $conn_r) {
     $joins = array();
 
     if ($this->devicePHIDs !== null) {

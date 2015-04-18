@@ -129,7 +129,7 @@ final class ConpherenceThreadQuery
     }
   }
 
-  private function buildJoinClause($conn_r) {
+  protected function buildJoinClause(AphrontDatabaseConnection $conn_r) {
     $joins = array();
 
     if ($this->participantPHIDs !== null) {

@@ -336,7 +336,7 @@ final class PhabricatorProjectQuery
     }
   }
 
-  private function buildJoinClause($conn_r) {
+  protected function buildJoinClause(AphrontDatabaseConnection $conn_r) {
     $joins = array();
 
     if (!$this->needMembers !== null) {

@@ -215,7 +215,7 @@ final class PhabricatorFileQuery
     return $files;
   }
 
-  private function buildJoinClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildJoinClause(AphrontDatabaseConnection $conn_r) {
     $joins = array();
 
     if ($this->transforms) {

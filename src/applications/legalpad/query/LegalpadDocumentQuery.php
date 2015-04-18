@@ -134,7 +134,7 @@ final class LegalpadDocumentQuery
     return $documents;
   }
 
-  private function buildJoinClause($conn_r) {
+  protected function buildJoinClause(AphrontDatabaseConnection $conn_r) {
     $joins = array();
 
     if ($this->contributorPHIDs !== null) {

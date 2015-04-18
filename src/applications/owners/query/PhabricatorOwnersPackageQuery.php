@@ -35,7 +35,7 @@ final class PhabricatorOwnersPackageQuery
     return $table->loadAllFromArray($data);
   }
 
-  private function buildJoinClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildJoinClause(AphrontDatabaseConnection $conn_r) {
     $joins = array();
 
     if ($this->ownerPHIDs) {

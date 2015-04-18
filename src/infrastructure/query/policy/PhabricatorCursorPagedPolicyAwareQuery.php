@@ -183,8 +183,81 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   /**
    * @task clauses
    */
+  protected function buildSelectClause(AphrontDatabaseConnection $conn) {
+    $parts = $this->buildSelectClauseParts($conn);
+    return $this->formatSelectClause($parts);
+  }
+
+
+  /**
+   * @task clauses
+   */
+  protected function buildSelectClauseParts(AphrontDatabaseConnection $conn) {
+    $select = array();
+
+    $alias = $this->getPrimaryTableAlias();
+    if ($alias) {
+      $select[] = qsprintf($conn, '%T.*', $alias);
+    } else {
+      $select[] = '*';
+    }
+
+    return $select;
+  }
+
+
+  /**
+   * @task clauses
+   */
+  protected function buildJoinClause(AphrontDatabaseConnection $conn) {
+    $joins = $this->buildJoinClauseParts($conn);
+    return $this->formatJoinClause($joins);
+  }
+
+
+  /**
+   * @task clauses
+   */
+  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
+    $joins = array();
+    return $joins;
+  }
+
+
+  /**
+   * @task clauses
+   */
   protected function buildWhereClause(AphrontDatabaseConnection $conn) {
-    throw new PhutilMethodNotImplementedException();
+    $where = $this->buildWhereClauseParts($conn);
+    return $this->formatWhereClause($where);
+  }
+
+
+  /**
+   * @task clauses
+   */
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = array();
+    $where[] = $this->buildPagingClause($conn);
+    return $where;
+  }
+
+
+  /**
+   * @task clauses
+   */
+  protected function buildHavingClause(AphrontDatabaseConnection $conn) {
+    $having = $this->buildHavingClauseParts($conn);
+    return $this->formatHavingClause($having);
+  }
+
+
+  /**
+   * @task clauses
+   */
+  protected function buildHavingClauseParts(AphrontDatabaseConnection $conn) {
+    $having = array();
+    return $having;
   }
 
 

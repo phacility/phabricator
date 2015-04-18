@@ -511,7 +511,7 @@ final class DiffusionCommitQuery
     }
   }
 
-  private function buildJoinClause($conn_r) {
+  protected function buildJoinClause(AphrontDatabaseConnection $conn_r) {
     $joins = array();
     $audit_request = new PhabricatorRepositoryAuditRequest();
 

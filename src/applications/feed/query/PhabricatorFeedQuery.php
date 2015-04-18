@@ -37,7 +37,7 @@ final class PhabricatorFeedQuery
     return PhabricatorFeedStory::loadAllFromRows($data, $this->getViewer());
   }
 
-  private function buildJoinClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildJoinClause(AphrontDatabaseConnection $conn_r) {
     // NOTE: We perform this join unconditionally (even if we have no filter
     // PHIDs) to omit rows which have no story references. These story data
     // rows are notifications or realtime alerts.
