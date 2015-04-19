@@ -9,6 +9,10 @@ final class AlmanacInterfaceDatasource
     return false;
   }
 
+  public function getBrowseTitle() {
+    return pht('Browse Interfaces');
+  }
+
   public function getPlaceholderText() {
     return pht('Type an interface name...');
   }

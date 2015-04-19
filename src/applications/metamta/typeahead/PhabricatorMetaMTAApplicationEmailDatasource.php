@@ -8,6 +8,10 @@ final class PhabricatorMetaMTAApplicationEmailDatasource
     return false;
   }
 
+  public function getBrowseTitle() {
+    return pht('Browse Email Addresses');
+  }
+
   public function getPlaceholderText() {
     return pht('Type an application email address...');
   }

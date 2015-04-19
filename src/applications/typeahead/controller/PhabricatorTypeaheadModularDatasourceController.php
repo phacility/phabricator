@@ -225,7 +225,7 @@ final class PhabricatorTypeaheadModularDatasourceController
         return $this->newDialog()
           ->setWidth(AphrontDialogView::WIDTH_FORM)
           ->setRenderDialogAsDiv(true)
-          ->setTitle(get_class($source)) // TODO: Provide nice names.
+          ->setTitle($source->getBrowseTitle())
           ->appendChild($browser)
           ->addCancelButton('/', pht('Close'));
       }

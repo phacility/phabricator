@@ -3,6 +3,10 @@
 final class PhabricatorProjectNoProjectsDatasource
   extends PhabricatorTypeaheadDatasource {
 
+  public function getBrowseTitle() {
+    return pht('Browse Not In Any Projects');
+  }
+
   public function getPlaceholderText() {
     return pht('Type "not in any projects"...');
   }

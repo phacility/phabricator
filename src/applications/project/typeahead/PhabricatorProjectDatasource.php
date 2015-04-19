@@ -3,6 +3,10 @@
 final class PhabricatorProjectDatasource
   extends PhabricatorTypeaheadDatasource {
 
+  public function getBrowseTitle() {
+    return pht('Browse Projects');
+  }
+
   public function getPlaceholderText() {
     return pht('Type a project name...');
   }

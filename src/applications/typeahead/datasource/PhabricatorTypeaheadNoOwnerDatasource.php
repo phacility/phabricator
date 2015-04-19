@@ -3,6 +3,10 @@
 final class PhabricatorTypeaheadNoOwnerDatasource
   extends PhabricatorTypeaheadDatasource {
 
+  public function getBrowseTitle() {
+    return pht('Browse No Owner');
+  }
+
   public function getPlaceholderText() {
     return pht('Type "none"...');
   }

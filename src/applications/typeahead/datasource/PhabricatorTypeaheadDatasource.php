@@ -88,6 +88,11 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
   }
 
   abstract public function getPlaceholderText();
+
+  public function getBrowseTitle() {
+    return get_class($this);
+  }
+
   abstract public function getDatasourceApplicationClass();
   abstract public function loadResults();
 

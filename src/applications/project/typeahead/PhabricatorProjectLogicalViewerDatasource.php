@@ -3,6 +3,10 @@
 final class PhabricatorProjectLogicalViewerDatasource
   extends PhabricatorTypeaheadDatasource {
 
+  public function getBrowseTitle() {
+    return pht('Browse Viewer Projects');
+  }
+
   public function getPlaceholderText() {
     return pht('Type viewerprojects()...');
   }

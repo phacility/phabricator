@@ -3,6 +3,10 @@
 final class PhabricatorProjectLogicalOrNotDatasource
   extends PhabricatorTypeaheadCompositeDatasource {
 
+  public function getBrowseTitle() {
+    return pht('Browse Projects');
+  }
+
   public function getPlaceholderText() {
     return pht('Type any(<project>) or not(<project>)...');
   }

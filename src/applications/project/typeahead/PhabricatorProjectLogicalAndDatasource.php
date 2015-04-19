@@ -3,6 +3,10 @@
 final class PhabricatorProjectLogicalAndDatasource
   extends PhabricatorTypeaheadCompositeDatasource {
 
+  public function getBrowseTitle() {
+    return pht('Browse Projects');
+  }
+
   public function getPlaceholderText() {
     return pht('Type a project name...');
   }

@@ -3,6 +3,10 @@
 final class AlmanacServiceDatasource
   extends PhabricatorTypeaheadDatasource {
 
+  public function getBrowseTitle() {
+    return pht('Browse Services');
+  }
+
   public function getPlaceholderText() {
     return pht('Type a service name...');
   }

@@ -3,6 +3,10 @@
 final class PhabricatorMailingListDatasource
   extends PhabricatorTypeaheadDatasource {
 
+  public function getBrowseTitle() {
+    return pht('Browse Mailing Lists');
+  }
+
   public function getPlaceholderText() {
     return pht('Type a mailing list name...');
   }

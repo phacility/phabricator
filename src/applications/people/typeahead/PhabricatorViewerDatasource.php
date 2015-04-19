@@ -3,6 +3,10 @@
 final class PhabricatorViewerDatasource
   extends PhabricatorTypeaheadDatasource {
 
+  public function getBrowseTitle() {
+    return pht('Browse Viewer');
+  }
+
   public function getPlaceholderText() {
     return pht('Type viewer()...');
   }

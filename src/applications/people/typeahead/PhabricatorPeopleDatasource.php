@@ -15,6 +15,10 @@ final class PhabricatorPeopleDatasource
     return $this;
   }
 
+  public function getBrowseTitle() {
+    return pht('Browse Users');
+  }
+
   public function getPlaceholderText() {
     return pht('Type a username...');
   }

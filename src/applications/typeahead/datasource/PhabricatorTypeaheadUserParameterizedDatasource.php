@@ -3,8 +3,12 @@
 final class PhabricatorTypeaheadUserParameterizedDatasource
   extends PhabricatorTypeaheadCompositeDatasource {
 
+  public function getBrowseTitle() {
+    return pht('Browse Users');
+  }
+
   public function getPlaceholderText() {
-    return pht('Type a username or selector...');
+    return pht('Type a username or function...');
   }
 
   public function getComponentDatasources() {

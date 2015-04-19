@@ -3,6 +3,10 @@
 final class ManiphestTaskStatusDatasource
   extends PhabricatorTypeaheadDatasource {
 
+  public function getBrowseTitle() {
+    return pht('Browse Statuses');
+  }
+
   public function getPlaceholderText() {
     return pht('Type a task status name...');
   }
