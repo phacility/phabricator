@@ -126,7 +126,7 @@ final class PhabricatorSearchApplicationSearchEngine
         id(new AphrontFormTokenizerControl())
           ->setName('ownerPHIDs')
           ->setLabel('Owners')
-          ->setDatasource(new PhabricatorTypeaheadOwnerDatasource())
+          ->setDatasource(new ManiphestOwnerDatasource())
           ->setValue($owner_phids))
       ->appendChild(
         id(new AphrontFormCheckboxControl())

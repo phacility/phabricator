@@ -86,7 +86,7 @@ final class ManiphestBatchEditController extends ManiphestController {
     $projects_source = new PhabricatorProjectDatasource();
     $mailable_source = new PhabricatorMetaMTAMailableDatasource();
     $mailable_source->setViewer($viewer);
-    $owner_source = new PhabricatorTypeaheadOwnerDatasource();
+    $owner_source = new ManiphestAssigneeDatasource();
     $owner_source->setViewer($viewer);
 
     require_celerity_resource('maniphest-batch-editor');
@@ -265,7 +265,8 @@ final class ManiphestBatchEditController extends ManiphestController {
             continue 2;
           }
           $value = head($value);
-          if ($value === ManiphestTaskOwner::OWNER_UP_FOR_GRABS) {
+          $no_owner = ManiphestNoOwnerDatasource::FUNCTION_TOKEN;
+          if ($value === ManiphestNoOwnerDatasource::FUNCTION_TOKEN) {
             $value = null;
           }
           break;

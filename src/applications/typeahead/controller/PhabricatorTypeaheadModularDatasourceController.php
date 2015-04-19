@@ -247,8 +247,7 @@ final class PhabricatorTypeaheadModularDatasourceController
     // format to make it easier to debug typeahead output.
 
     foreach ($sources as $key => $source) {
-      // This can happen with composite sources like user or project, as well
-      // generic ones like NoOwner
+      // This can happen with composite or generic sources.
       if (!$source->getDatasourceApplicationClass()) {
         continue;
       }

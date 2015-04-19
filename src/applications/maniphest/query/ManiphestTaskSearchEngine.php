@@ -49,8 +49,6 @@ final class ManiphestTaskSearchEngine
       'assignedPHIDs',
       $this->readUsersFromRequest($request, 'assigned'));
 
-    $saved->setParameter('withUnassigned', $request->getBool('withUnassigned'));
-
     $saved->setParameter(
       'authorPHIDs',
       $this->readUsersFromRequest($request, 'authors'));
@@ -139,14 +137,13 @@ final class ManiphestTaskSearchEngine
       $query->withSubscribers($subscriber_phids);
     }
 
-    $with_unassigned = $saved->getParameter('withUnassigned');
-    if ($with_unassigned) {
-      $query->withOwners(array(null));
-    } else {
-      $assigned_phids = $saved->getParameter('assignedPHIDs', array());
-      if ($assigned_phids) {
-        $query->withOwners($assigned_phids);
-      }
+    $datasource = id(new ManiphestOwnerDatasource())
+      ->setViewer($this->requireViewer());
+
+    $assigned_phids = $this->readAssignedPHIDs($saved);
+    $assigned_phids = $datasource->evaluateTokens($assigned_phids);
+    if ($assigned_phids) {
+      $query->withOwners($assigned_phids);
     }
 
     $statuses = $saved->getParameter('statuses');
@@ -242,7 +239,8 @@ final class ManiphestTaskSearchEngine
     AphrontFormView $form,
     PhabricatorSavedQuery $saved) {
 
-    $assigned_phids = $saved->getParameter('assignedPHIDs', array());
+    $assigned_phids = $this->readAssignedPHIDs($saved);
+
     $author_phids = $saved->getParameter('authorPHIDs', array());
     $all_project_phids = $saved->getParameter(
       'allProjectPHIDs',
@@ -258,7 +256,6 @@ final class ManiphestTaskSearchEngine
       array());
     $subscriber_phids = $saved->getParameter('subscriberPHIDs', array());
 
-    $with_unassigned = $saved->getParameter('withUnassigned');
     $with_no_projects = $saved->getParameter('withNoProject');
 
     $statuses = $saved->getParameter('statuses', array());
@@ -314,17 +311,10 @@ final class ManiphestTaskSearchEngine
     $form
       ->appendControl(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorPeopleDatasource())
+          ->setDatasource(new ManiphestOwnerDatasource())
           ->setName('assigned')
           ->setLabel(pht('Assigned To'))
           ->setValue($assigned_phids))
-      ->appendChild(
-        id(new AphrontFormCheckboxControl())
-          ->addCheckbox(
-            'withUnassigned',
-            1,
-            pht('Show only unassigned tasks.'),
-            $with_unassigned))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorProjectDatasource())
@@ -561,6 +551,19 @@ final class ManiphestTaskSearchEngine
       ->setCanEditPriority($can_edit_priority)
       ->setCanBatchEdit($can_bulk_edit)
       ->setShowBatchControls($this->showBatchControls);
+  }
+
+  private function readAssignedPHIDs(PhabricatorSavedQuery $saved) {
+    $assigned_phids = $saved->getParameter('assignedPHIDs', array());
+
+    // This may be present in old saved queries from before parameterized
+    // typeaheads, and is retained for compatibility. We could remove it by
+    // migrating old saved queries.
+    if ($saved->getParameter('withUnassigned')) {
+      $assigned_phids[] = ManiphestNoOwnerDatasource::FUNCTION_TOKEN;
+    }
+
+    return $assigned_phids;
   }
 
 }
