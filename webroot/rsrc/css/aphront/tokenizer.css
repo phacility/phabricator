@@ -1,6 +1,7 @@
 /**
  * @provides aphront-tokenizer-control-css
  * @requires aphront-typeahead-control-css
+ * @requires phui-tag-view-css
  */
 
 body div.jx-tokenizer {
@@ -52,6 +53,7 @@ body input.jx-typeahead-placeholder {
 a.jx-tokenizer-x {
   margin-left: 4px;
   color: {$bluetext};
+  float: right;
 }
 
 a.jx-tokenizer-x:hover {
@@ -60,57 +62,50 @@ a.jx-tokenizer-x:hover {
 }
 
 a.jx-tokenizer-token {
-  padding: 2px 6px 3px;
+  padding: 2px 6px;
   border:  1px solid {$lightblueborder};
   margin: 3px 2px 0 4px;
-  background: #dee7f8;
+  background-color: {$sh-bluebackground};
   float: left;
   cursor: pointer;
   border-radius: 3px;
-  color: {$darkbluetext};
+  color: {$sh-bluetext};
   min-height: 16px;
 }
 
 a.jx-tokenizer-token:hover {
   text-decoration: none;
-  border-color: {$blueborder};
-  background: #CDD9F0;
+  border-color: {$sh-blueborder};
 }
 
 .jx-tokenizer-token .phui-icon-view {
   display: inline-block;
   margin: 2px 4px -3px 0;
-  color: {$bluetext};
+  color: {$sh-blueicon};
 }
 
 a.jx-tokenizer-token-function {
-  border-color: {$sh-lightyellowborder};
-  background: {$sh-yellowbackground};
-  color: {$sh-yellowtext};
+  border-color: {$sh-lightgreyborder};
+  background: #fff;
 }
 
 a.jx-tokenizer-token-function:hover {
-  border-color: {$sh-yellowborder};
-  background: {$lightyellow};
-}
-
-.jx-tokenizer-token-function .phui-icon-view {
-  color: {$sh-yellowicon};
+  background: #fff;
 }
 
 a.jx-tokenizer-token-disabled {
-  border-color: {$sh-lightgreyborder};
-  background: {$sh-greybackground};
-  color: {$sh-greytext};
+  background-color: {$sh-disabledbackground};
+  border-color: {$sh-lightdisabledborder};
+  color: {$sh-disabledtext};
 }
 
 a.jx-tokenizer-token-disabled:hover {
-  border-color: {$sh-greyborder};
-  background: {$greybackground};
+  border-color: {$sh-disabledborder};
+  background-color: {$sh-disabledbackground};
 }
 
 .jx-tokenizer-token-disabled .phui-icon-view {
-  color: {$sh-greyicon};
+  color: {$sh-disabledicon};
 }
 
 a.jx-tokenizer-token-invalid {
@@ -121,7 +116,7 @@ a.jx-tokenizer-token-invalid {
 
 a.jx-tokenizer-token-invalid:hover {
   border-color: {$sh-redborder};
-  background: {$lightred};
+  background: {$sh-redbackground};
 }
 
 .jx-tokenizer-token-invalid .phui-icon-view {
