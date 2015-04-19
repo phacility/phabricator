@@ -44,6 +44,8 @@ final class PhabricatorProjectLogicalUserDatasource
       $phids[] = head($argv);
     }
 
+    $phids = $this->resolvePHIDs($phids);
+
     $projects = id(new PhabricatorProjectQuery())
       ->setViewer($this->getViewer())
       ->withMemberPHIDs($phids)
@@ -65,6 +67,8 @@ final class PhabricatorProjectLogicalUserDatasource
       $phids[] = head($argv);
     }
 
+    $phids = $this->resolvePHIDs($phids);
+
     $tokens = $this->renderTokens($phids);
     foreach ($tokens as $token) {
       if ($token->isInvalid()) {
@@ -80,6 +84,40 @@ final class PhabricatorProjectLogicalUserDatasource
     }
 
     return $tokens;
+  }
+
+  private function resolvePHIDs(array $phids) {
+    // If we have a function like `projects(alincoln)`, try to resolve the
+    // username first. This won't happen normally, but can be passed in from
+    // the query string.
+
+    // The user might also give us an invalid username. In this case, we
+    // preserve it and return it in-place so we get an "invalid" token rendered
+    // in the UI. This shows the user where the issue is and  best represents
+    // the user's input.
+
+    $usernames = array();
+    foreach ($phids as $key => $phid) {
+      if (phid_get_type($phid) != PhabricatorPeopleUserPHIDType::TYPECONST) {
+        $usernames[$key] = $phid;
+      }
+    }
+
+    if ($usernames) {
+      $users = id(new PhabricatorPeopleQuery())
+        ->setViewer($this->getViewer())
+        ->withUsernames($usernames)
+        ->execute();
+      $users = mpull($users, null, 'getUsername');
+      foreach ($usernames as $key => $username) {
+        $user = idx($users, $username);
+        if ($user) {
+          $phids[$key] = $user->getPHID();
+        }
+      }
+    }
+
+    return $phids;
   }
 
 }

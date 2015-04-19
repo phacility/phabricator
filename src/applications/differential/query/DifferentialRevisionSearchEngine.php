@@ -40,16 +40,15 @@ final class DifferentialRevisionSearchEngine
 
     $saved->setParameter(
       'subscriberPHIDs',
-      $this->readUsersFromRequest($request, 'subscribers'));
+      $this->readSubscribersFromRequest($request, 'subscribers'));
 
     $saved->setParameter(
       'repositoryPHIDs',
       $request->getArr('repositories'));
 
-    // TODO: Implement "readProjectsFromRequest(...)" to improve this.
     $saved->setParameter(
       'projects',
-      $this->readListFromRequest($request, 'projects'));
+      $this->readProjectsFromRequest($request, 'projects'));
 
     $saved->setParameter(
       'draft',
