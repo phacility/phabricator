@@ -12,6 +12,7 @@ final class PhabricatorTypeaheadResult {
   private $priorityType;
   private $imageSprite;
   private $icon;
+  private $color;
   private $closed;
   private $tokenType;
   private $unique;
@@ -104,6 +105,15 @@ final class PhabricatorTypeaheadResult {
     return $this->tokenType;
   }
 
+  public function setColor($color) {
+    $this->color = $color;
+    return $this;
+  }
+
+  public function getColor() {
+    return $this->color;
+  }
+
   public function getSortKey() {
     // Put unique results (special parameter functions) ahead of other
     // results.
@@ -129,6 +139,7 @@ final class PhabricatorTypeaheadResult {
       $this->getIcon(),
       $this->closed,
       $this->imageSprite ? (string)$this->imageSprite : null,
+      $this->color,
       $this->tokenType,
       $this->unique ? 1 : null,
     );
@@ -151,7 +162,7 @@ final class PhabricatorTypeaheadResult {
       foreach ($types as $type) {
         $icon = $type->getTypeIcon();
         if ($icon !== null) {
-          $map[$type->getTypeConstant()] = "{$icon} bluegrey";
+          $map[$type->getTypeConstant()] = $icon;
         }
       }
 

@@ -24,8 +24,9 @@ final class PHUITypeaheadExample extends PhabricatorUIExample {
       ->setIcon('fa-user');
 
     $token_list[] = id(new PhabricatorTypeaheadTokenView())
-      ->setValue(pht('Custom Object'))
-      ->setIcon('fa-tag green');
+      ->setValue(pht('Object with Color'))
+      ->setIcon('fa-tag')
+      ->setColor('green');
 
     $token_list[] = id(new PhabricatorTypeaheadTokenView())
       ->setValue(pht('Function Token'))
