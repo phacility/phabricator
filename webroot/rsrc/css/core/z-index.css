@@ -6,6 +6,7 @@
   z-index: -1;
 }
 
+.setup-warning-callout,
 .keyboard-focus-focus-reticle {
   z-index: 1;
 }
@@ -86,7 +87,6 @@
   z-index: 6;
 }
 
-.setup-warning-callout,
 .aphront-developer-error-callout {
   z-index: 6;
 }

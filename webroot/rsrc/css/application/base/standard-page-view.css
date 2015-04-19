@@ -111,9 +111,14 @@ a.handle-disabled {
 }
 
 .setup-warning-callout {
-  position: relative;
   padding: 8px 16px;
-  background: {$lightyellow};
+  background: {$lightred};
+  border-bottom: 1px solid {$sh-redborder};
+  position: relative;
+}
+
+.setup-warning-callout a {
+  color: {$red};
 }
 
 .phui-handle .phui-icon-view {

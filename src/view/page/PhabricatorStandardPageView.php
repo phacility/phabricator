@@ -392,7 +392,9 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
         'class' => 'phabricator-standard-page',
       ),
       array(
+        $developer_warning,
         $header_chrome,
+        $setup_warning,
         phutil_tag(
           'div',
           array(
@@ -422,8 +424,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
         'class' => implode(' ', $classes),
       ),
       array(
-        $developer_warning,
-        $setup_warning,
         $main_page,
         $durable_column,
       ));
