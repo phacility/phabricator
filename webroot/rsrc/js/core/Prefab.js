@@ -184,9 +184,9 @@ JX.install('Prefab', {
           type = result.tokenType;
           color = result.color;
         } else {
-          icon = config.icons[key];
-          type = config.types[key];
-          color = config.colors[key];
+          icon = (config.icons || {})[key];
+          type = (config.types || {})[key];
+          color = (config.colors || {})[key];
         }
 
         if (icon) {
