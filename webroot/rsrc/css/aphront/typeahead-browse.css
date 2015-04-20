@@ -6,13 +6,14 @@
 .typeahead-browse-hard-limit {
   display: block;
   padding: 8px;
-  margin: 8px 0 0;
+  margin: 4px 6px 6px;
   text-align: center;
 }
 
 .typeahead-browse-more {
   background: {$lightblue};
   border: 1px solid {$lightblueborder};
+  color: {$blue};
 }
 
 .typeahead-browse-more.loading {
