@@ -122,6 +122,19 @@ final class PHUIDiffInlineCommentDetailView
         ->addClass('mml inline-draft-text');
     }
 
+    $ghost_tag = null;
+    if ($inline->getIsGhost()) {
+      // TODO: This could also be a newer comment, not necessarily an older
+      // comment.
+      $ghost_tag = id(new PHUITagView())
+        ->setType(PHUITagView::TYPE_SHADE)
+        ->setName(pht('Old Comment'))
+        ->setSlimShady(true)
+        ->setShade(PHUITagView::COLOR_BLUE)
+        ->addClass('mml');
+      $classes[] = 'inline-comment-ghost';
+    }
+
     // I think this is unused
     if ($inline->getHasReplies()) {
       $classes[] = 'inline-comment-has-reply';
@@ -351,6 +364,7 @@ final class PHUIDiffInlineCommentDetailView
         $author,
         $author_owner,
         $draft_text,
+        $ghost_tag,
       ));
 
     $group_right = phutil_tag(

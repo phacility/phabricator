@@ -13,7 +13,6 @@ final class DifferentialInlineCommentQuery
   private $phids;
   private $drafts;
   private $authorPHIDs;
-  private $changesetIDs;
   private $revisionPHIDs;
   private $deletedDrafts;
 
@@ -43,11 +42,6 @@ final class DifferentialInlineCommentQuery
 
   public function withAuthorPHIDs(array $author_phids) {
     $this->authorPHIDs = $author_phids;
-    return $this;
-  }
-
-  public function withChangesetIDs(array $ids) {
-    $this->changesetIDs = $ids;
     return $this;
   }
 
@@ -114,13 +108,6 @@ final class DifferentialInlineCommentQuery
         $conn_r,
         'revisionPHID IN (%Ls)',
         $this->revisionPHIDs);
-    }
-
-    if ($this->changesetIDs !== null) {
-      $where[] = qsprintf(
-        $conn_r,
-        'changesetID IN (%Ld)',
-        $this->changesetIDs);
     }
 
     if ($this->drafts === null) {

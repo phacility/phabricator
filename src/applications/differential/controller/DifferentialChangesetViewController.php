@@ -9,8 +9,6 @@ final class DifferentialChangesetViewController extends DifferentialController {
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
 
-    $author_phid = $viewer->getPHID();
-
     $rendering_reference = $request->getStr('ref');
     $parts = explode('/', $rendering_reference);
     if (count($parts) == 2) {
@@ -161,10 +159,33 @@ final class DifferentialChangesetViewController extends DifferentialController {
       $parser->setOriginals($left, $right);
     }
 
+    $diff = $changeset->getDiff();
+    $revision_id = $diff->getRevisionID();
+
+    $can_mark = false;
+    $object_owner_phid = null;
+    if ($revision_id) {
+      $revision = id(new DifferentialRevisionQuery())
+        ->setViewer($viewer)
+        ->withIDs(array($revision_id))
+        ->executeOne();
+      if ($revision) {
+        $can_mark = ($revision->getAuthorPHID() == $viewer->getPHID());
+        $object_owner_phid = $revision->getAuthorPHID();
+      }
+    }
+
     // Load both left-side and right-side inline comments.
-    $inlines = $this->loadInlineComments(
-      array($left_source, $right_source),
-      $author_phid);
+    if ($revision) {
+      $inlines = $this->loadInlineComments(
+        $revision,
+        nonempty($left, $right),
+        $left_new,
+        $right,
+        $right_new);
+    } else {
+      $inlines = array();
+    }
 
     if ($left_new) {
       $inlines = array_merge(
@@ -200,22 +221,6 @@ final class DifferentialChangesetViewController extends DifferentialController {
     }
 
     $engine->process();
-
-    $diff = $changeset->getDiff();
-    $revision_id = $diff->getRevisionID();
-
-    $can_mark = false;
-    $object_owner_phid = null;
-    if ($revision_id) {
-      $revision = id(new DifferentialRevisionQuery())
-        ->setViewer($viewer)
-        ->withIDs(array($revision_id))
-        ->executeOne();
-      if ($revision) {
-        $can_mark = ($revision->getAuthorPHID() == $viewer->getPHID());
-        $object_owner_phid = $revision->getAuthorPHID();
-      }
-    }
 
     $parser
       ->setUser($viewer)
@@ -280,16 +285,82 @@ final class DifferentialChangesetViewController extends DifferentialController {
       ));
   }
 
-  private function loadInlineComments(array $changeset_ids, $author_phid) {
-    $changeset_ids = array_unique(array_filter($changeset_ids));
-    if (!$changeset_ids) {
-      return;
+  private function loadInlineComments(
+    DifferentialRevision $revision,
+    DifferentialChangeset $left,
+    $left_new,
+    DifferentialChangeset $right,
+    $right_new) {
+
+    $viewer = $this->getViewer();
+    $all = array($left, $right);
+
+    $inlines = id(new DifferentialInlineCommentQuery())
+      ->setViewer($viewer)
+      ->withRevisionPHIDs(array($revision->getPHID()))
+      ->execute();
+
+    $changeset_ids = mpull($inlines, 'getChangesetID');
+    $changeset_ids = array_unique($changeset_ids);
+    if ($changeset_ids) {
+      $changesets = id(new DifferentialChangesetQuery())
+        ->setViewer($viewer)
+        ->withIDs($changeset_ids)
+        ->execute();
+      $changesets = mpull($changesets, null, 'getID');
+    } else {
+      $changesets = array();
+    }
+    $changesets += mpull($all, null, 'getID');
+
+    $id_map = array(
+      $left->getID() => $left->getID(),
+      $right->getID() => $right->getID(),
+    );
+
+    $name_map = array(
+      $left->getFilename() => $left->getID(),
+      $right->getFilename() => $right->getID(),
+    );
+
+    $results = array();
+    foreach ($inlines as $inline) {
+      $changeset_id = $inline->getChangesetID();
+      if (isset($id_map[$changeset_id])) {
+        // This inline is legitimately on one of the current changesets, so
+        // we can include it in the result set unmodified.
+        $results[] = $inline;
+        continue;
+      }
+
+      $changeset = idx($changesets, $changeset_id);
+      if (!$changeset) {
+        // Just discard this inline with bogus data.
+        continue;
+      }
+
+      $target_id = null;
+
+      $filename = $changeset->getFilename();
+      if (isset($name_map[$filename])) {
+        // This changeset is on a file with the same name as the current
+        // changeset, so we're going to port it forward or backward.
+        $target_id = $name_map[$filename];
+      }
+
+      // If we found a changeset to port this comment to, bring it forward
+      // or backward and mark it.
+      if ($target_id) {
+        $inline
+          ->makeEphemeral(true)
+          ->setChangesetID($target_id)
+          ->setIsGhost(true);
+
+        $results[] = $inline;
+      }
     }
 
-    return id(new DifferentialInlineCommentQuery())
-      ->setViewer($this->getViewer())
-      ->withChangesetIDs($changeset_ids)
-      ->execute();
+    return $results;
   }
 
   private function buildRawFileResponse(
