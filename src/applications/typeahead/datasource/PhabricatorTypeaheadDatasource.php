@@ -279,6 +279,14 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
   /**
    * @task functions
    */
+  public function getAllDatasourceFunctions() {
+    return $this->getDatasourceFunctions();
+  }
+
+
+  /**
+   * @task functions
+   */
   protected function canEvaluateFunction($function) {
     return $this->shouldStripFunction($function);
   }

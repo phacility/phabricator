@@ -24,7 +24,14 @@ final class PhabricatorProjectMembersDatasource
   public function getDatasourceFunctions() {
     return array(
       'members' => array(
-        'name' => pht('Find results for members of a project.'),
+        'name' => pht('Members: ...'),
+        'arguments' => pht('project'),
+        'summary' => pht('Find results for members of a project.'),
+        'description' => pht(
+          'This function allows you to find results for any of the members '.
+          'of a project:'.
+          "\n\n".
+          '> members(frontend)'),
       ),
     );
   }

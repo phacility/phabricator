@@ -24,10 +24,54 @@ final class PhabricatorProjectLogicalOrNotDatasource
   public function getDatasourceFunctions() {
     return array(
       'any' => array(
-        'name' => pht('Find results in any of several projects.'),
+        'name' => pht('In Any: ...'),
+        'arguments' => pht('project'),
+        'summary' => pht('Find results in any of several projects.'),
+        'description' => pht(
+          'This function allows you to find results in one of several '.
+          'projects. Another way to think of this function is that it '.
+          'allows you to perform an "or" query.'.
+          "\n\n".
+          'By default, if you enter several projects, results are returned '.
+          'only if they belong to all of the projects you enter. That is, '.
+          'this query will only return results in //both// projects:'.
+          "\n\n".
+          '> ios, android'.
+          "\n\n".
+          'If you want to find results in any of several projects, you can '.
+          'use the `any()` function. For example, you can use this query  to '.
+          'find results which are in //either// project:'.
+          "\n\n".
+          '> any(ios), any(android)'.
+          "\n\n".
+          'You can combine the `any()` function with normal project tokens '.
+          'to refine results. For example, use this query to find bugs in '.
+          '//either// iOS or Android:'.
+          "\n\n".
+          '> bug, any(ios), any(android)'),
       ),
       'not' => array(
-        'name' => pht('Find results not in specific projects.'),
+        'name' => pht('Not In: ...'),
+        'arguments' => pht('project'),
+        'summary' => pht('Find results not in specific projects.'),
+        'description' => pht(
+          'This function allows you to find results which are not in '.
+          'one or more projects. For example, use this query to find '.
+          'results which are not associated with a specific project:'.
+          "\n\n".
+          '> not(vanilla)'.
+          "\n\n".
+          'You can exclude multiple projects. This will cause the query '.
+          'to return only results which are not in any of the excluded '.
+          'projects:'.
+          "\n\n".
+          '> not(vanilla), not(chocolate)'.
+          "\n\n".
+          'You can combine this function with other functions to refine '.
+          'results. For example, use this query to find iOS results which '.
+          'are not bugs:'.
+          "\n\n".
+          '> ios, not(bug)'),
       ),
     );
   }

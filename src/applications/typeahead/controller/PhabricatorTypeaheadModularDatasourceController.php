@@ -222,11 +222,32 @@ final class PhabricatorTypeaheadModularDatasourceController
           $frame,
         );
 
+        $function_help = null;
+        if ($source->getAllDatasourceFunctions()) {
+          $reference_uri = '/typeahead/help/'.get_class($source).'/';
+
+          $reference_link = phutil_tag(
+            'a',
+            array(
+              'href' => $reference_uri,
+              'target' => '_blank',
+            ),
+            pht('Reference: Advanced Functions'));
+
+          $function_help = array(
+            id(new PHUIIconView())
+              ->setIconFont('fa-book'),
+            ' ',
+            $reference_link,
+          );
+        }
+
         return $this->newDialog()
           ->setWidth(AphrontDialogView::WIDTH_FORM)
           ->setRenderDialogAsDiv(true)
           ->setTitle($source->getBrowseTitle())
           ->appendChild($browser)
+          ->addFooter($function_help)
           ->addCancelButton('/', pht('Close'));
       }
 

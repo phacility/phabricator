@@ -18,7 +18,19 @@ final class PhabricatorProjectLogicalViewerDatasource
   public function getDatasourceFunctions() {
     return array(
       'viewerprojects' => array(
-        'name' => pht("Find results in any of the current viewer's projects."),
+        'name' => pht("Current Viewer's Projects"),
+        'summary' => pht(
+          "Find results in any of the current viewer's projects."),
+        'description' => pht(
+          "This function matches results in any of the current viewing ".
+          "user's projects:".
+          "\n\n".
+          "> viewerprojects()".
+          "\n\n".
+          "This normally means //your// projects, but if you save a query ".
+          "using this function and send it to someone else, it will mean ".
+          "//their// projects when they run it (they become the currnet ".
+          "viewer). This can be useful for building dashboard panels."),
       ),
     );
   }

@@ -117,6 +117,14 @@ abstract class PhabricatorTypeaheadCompositeDatasource
     return $this->usable;
   }
 
+  public function getAllDatasourceFunctions() {
+    $results = parent::getAllDatasourceFunctions();
+    foreach ($this->getUsableDatasources() as $source) {
+      $results += $source->getAllDatasourceFunctions();
+    }
+    return $results;
+  }
+
   protected function didEvaluateTokens(array $results) {
     foreach ($this->getUsableDatasources() as $source) {
       $results = $source->didEvaluateTokens($results);

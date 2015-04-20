@@ -24,7 +24,17 @@ final class PhabricatorProjectLogicalUserDatasource
   public function getDatasourceFunctions() {
     return array(
       'projects' => array(
-        'name' => pht("Find results in any of a user's projects."),
+        'name' => pht('Projects: ...'),
+        'arguments' => pht('username'),
+        'summary' => pht("Find results in any of a user's projects."),
+        'description' => pht(
+          'This function allows you to find results associated with any '.
+          'of the projects a specified user is a member of. For example, '.
+          'this will find results associated with all of the projects '.
+          '`alincoln` is a member of:'.
+          "\n\n".
+          '> projects(alincoln)'.
+          "\n\n"),
       ),
     );
   }
