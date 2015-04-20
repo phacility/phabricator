@@ -2,16 +2,31 @@
 
 final class ManiphestBatchEditController extends ManiphestController {
 
-  public function processRequest() {
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
+
     $this->requireApplicationCapability(
       ManiphestBulkEditCapability::CAPABILITY);
 
-    $request = $this->getRequest();
-    $user = $request->getUser();
+    $project = null;
+    $board_id = $request->getInt('board');
+    if ($board_id) {
+      $project = id(new PhabricatorProjectQuery())
+        ->setViewer($viewer)
+        ->withIDs(array($board_id))
+        ->executeOne();
+      if (!$project) {
+        return new Aphront404Response();
+      }
+    }
 
     $task_ids = $request->getArr('batch');
+    if (!$task_ids) {
+      $task_ids = $request->getStrList('batch');
+    }
+
     $tasks = id(new ManiphestTaskQuery())
-      ->setViewer($user)
+      ->setViewer($viewer)
       ->withIDs($task_ids)
       ->requireCapabilities(
         array(
@@ -21,6 +36,14 @@ final class ManiphestBatchEditController extends ManiphestController {
       ->needSubscriberPHIDs(true)
       ->needProjectPHIDs(true)
       ->execute();
+
+    if ($project) {
+      $cancel_uri = '/project/board/'.$project->getID().'/';
+      $redirect_uri = $cancel_uri;
+    } else {
+      $cancel_uri = '/maniphest/';
+      $redirect_uri = '/maniphest/?ids='.implode(',', mpull($tasks, 'getID'));
+    }
 
     $actions = $request->getStr('actions');
     if ($actions) {
@@ -39,7 +62,7 @@ final class ManiphestBatchEditController extends ManiphestController {
           // TODO: Set content source to "batch edit".
 
           $editor = id(new ManiphestTransactionEditor())
-            ->setActor($user)
+            ->setActor($viewer)
             ->setContentSourceFromRequest($request)
             ->setContinueOnNoEffect(true)
             ->setContinueOnMissingFields(true)
@@ -47,17 +70,14 @@ final class ManiphestBatchEditController extends ManiphestController {
         }
       }
 
-      $task_ids = implode(',', mpull($tasks, 'getID'));
-
-      return id(new AphrontRedirectResponse())
-        ->setURI('/maniphest/?ids='.$task_ids);
+      return id(new AphrontRedirectResponse())->setURI($redirect_uri);
     }
 
-    $handles = ManiphestTaskListView::loadTaskHandles($user, $tasks);
+    $handles = ManiphestTaskListView::loadTaskHandles($viewer, $tasks);
 
     $list = new ManiphestTaskListView();
     $list->setTasks($tasks);
-    $list->setUser($user);
+    $list->setUser($viewer);
     $list->setHandles($handles);
 
     $template = new AphrontTokenizerTemplateView();
@@ -65,9 +85,9 @@ final class ManiphestBatchEditController extends ManiphestController {
 
     $projects_source = new PhabricatorProjectDatasource();
     $mailable_source = new PhabricatorMetaMTAMailableDatasource();
-    $mailable_source->setViewer($user);
+    $mailable_source->setViewer($viewer);
     $owner_source = new PhabricatorTypeaheadOwnerDatasource();
-    $owner_source->setViewer($user);
+    $owner_source->setViewer($viewer);
 
     require_celerity_resource('maniphest-batch-editor');
     Javelin::initBehavior(
@@ -98,9 +118,10 @@ final class ManiphestBatchEditController extends ManiphestController {
         'statusMap'   => ManiphestTaskStatus::getTaskStatusMap(),
       ));
 
-    $form = new AphrontFormView();
-    $form->setUser($user);
-    $form->setID('maniphest-batch-edit-form');
+    $form = id(new AphrontFormView())
+      ->setUser($viewer)
+      ->addHiddenInput('board', $board_id)
+      ->setID('maniphest-batch-edit-form');
 
     foreach ($tasks as $task) {
       $form->appendChild(
@@ -143,7 +164,7 @@ final class ManiphestBatchEditController extends ManiphestController {
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Update Tasks'))
-          ->addCancelButton('/maniphest/'));
+          ->addCancelButton($cancel_uri));
 
     $title = pht('Batch Editor');
 
