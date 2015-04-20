@@ -96,7 +96,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $props = mpull($props, 'getData', 'getName');
 
     $all_changesets = $changesets;
-    $inlines = $revision->loadInlineComments($all_changesets);
+    $inlines = $revision->loadInlineComments($all_changesets, $user);
 
     $object_phids = array_merge(
       $revision->getReviewers(),
@@ -158,7 +158,10 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $warning = $warning->render();
 
       $my_inlines = id(new DifferentialInlineCommentQuery())
-        ->withDraftComments($user->getPHID(), $this->revisionID)
+        ->setViewer($user)
+        ->withDrafts(true)
+        ->withAuthorPHIDs(array($user->getPHID()))
+        ->withRevisionPHIDs(array($revision->getPHID()))
         ->execute();
 
       $visible_changesets = array();

@@ -6,24 +6,24 @@
 final class DifferentialInlineCommentQuery
   extends PhabricatorOffsetPagedQuery {
 
-  private $revisionIDs;
-  private $notDraft;
+  // TODO: Remove this when this query eventually moves to PolicyAware.
+  private $viewer;
+
   private $ids;
   private $phids;
-  private $commentIDs;
+  private $drafts;
+  private $authorPHIDs;
+  private $changesetIDs;
+  private $revisionPHIDs;
+  private $deletedDrafts;
 
-  private $viewerAndChangesetIDs;
-  private $draftComments;
-  private $draftsByAuthors;
-
-  public function withRevisionIDs(array $ids) {
-    $this->revisionIDs = $ids;
+  public function setViewer(PhabricatorUser $viewer) {
+    $this->viewer = $viewer;
     return $this;
   }
 
-  public function withNotDraft($not_draft) {
-    $this->notDraft = $not_draft;
-    return $this;
+  public function getViewer() {
+    return $this->viewer;
   }
 
   public function withIDs(array $ids) {
@@ -36,18 +36,28 @@ final class DifferentialInlineCommentQuery
     return $this;
   }
 
-  public function withViewerAndChangesetIDs($author_phid, array $ids) {
-    $this->viewerAndChangesetIDs = array($author_phid, $ids);
+  public function withDrafts($drafts) {
+    $this->drafts = $drafts;
     return $this;
   }
 
-  public function withDraftComments($author_phid, $revision_id) {
-    $this->draftComments = array($author_phid, $revision_id);
+  public function withAuthorPHIDs(array $author_phids) {
+    $this->authorPHIDs = $author_phids;
     return $this;
   }
 
-  public function withDraftsByAuthors(array $author_phids) {
-    $this->draftsByAuthors = $author_phids;
+  public function withChangesetIDs(array $ids) {
+    $this->changesetIDs = $ids;
+    return $this;
+  }
+
+  public function withRevisionPHIDs(array $revision_phids) {
+    $this->revisionPHIDs = $revision_phids;
+    return $this;
+  }
+
+  public function withDeletedDrafts($deleted_drafts) {
+    $this->deletedDrafts = $deleted_drafts;
     return $this;
   }
 
@@ -73,6 +83,7 @@ final class DifferentialInlineCommentQuery
   }
 
   public function executeOne() {
+    // TODO: Remove when this query moves to PolicyAware.
     return head($this->execute());
   }
 
@@ -84,33 +95,7 @@ final class DifferentialInlineCommentQuery
       $conn_r,
       'changesetID IS NOT NULL');
 
-    if ($this->revisionIDs) {
-
-      // Look up revision PHIDs.
-      $revision_phids = queryfx_all(
-        $conn_r,
-        'SELECT phid FROM %T WHERE id IN (%Ld)',
-        id(new DifferentialRevision())->getTableName(),
-        $this->revisionIDs);
-
-      if (!$revision_phids) {
-        throw new PhabricatorEmptyQueryException();
-      }
-      $revision_phids = ipull($revision_phids, 'phid');
-
-      $where[] = qsprintf(
-        $conn_r,
-        'revisionPHID IN (%Ls)',
-        $revision_phids);
-    }
-
-    if ($this->notDraft) {
-      $where[] = qsprintf(
-        $conn_r,
-        'transactionPHID IS NOT NULL');
-    }
-
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn_r,
         'id IN (%Ld)',
@@ -124,44 +109,42 @@ final class DifferentialInlineCommentQuery
         $this->phids);
     }
 
-    if ($this->viewerAndChangesetIDs) {
-      list($phid, $ids) = $this->viewerAndChangesetIDs;
+    if ($this->revisionPHIDs !== null) {
       $where[] = qsprintf(
         $conn_r,
-        'changesetID IN (%Ld) AND
-          ((authorPHID = %s AND isDeleted = 0) OR transactionPHID IS NOT NULL)',
-        $ids,
-        $phid);
+        'revisionPHID IN (%Ls)',
+        $this->revisionPHIDs);
     }
 
-    if ($this->draftComments) {
-      list($phid, $rev_id) = $this->draftComments;
-
-      $rev_phid = queryfx_one(
+    if ($this->changesetIDs !== null) {
+      $where[] = qsprintf(
         $conn_r,
-        'SELECT phid FROM %T WHERE id = %d',
-        id(new DifferentialRevision())->getTableName(),
-        $rev_id);
+        'changesetID IN (%Ld)',
+        $this->changesetIDs);
+    }
 
-      if (!$rev_phid) {
-        throw new PhabricatorEmptyQueryException();
+    if ($this->drafts === null) {
+      if ($this->deletedDrafts) {
+        $where[] = qsprintf(
+          $conn_r,
+          '(authorPHID = %s) OR (transactionPHID IS NOT NULL)',
+          $this->getViewer()->getPHID());
+      } else {
+        $where[] = qsprintf(
+          $conn_r,
+          '(authorPHID = %s AND isDeleted = 0)
+            OR (transactionPHID IS NOT NULL)',
+          $this->getViewer()->getPHID());
       }
-
-      $rev_phid = $rev_phid['phid'];
-
+    } else if ($this->drafts) {
       $where[] = qsprintf(
         $conn_r,
-        'authorPHID = %s AND revisionPHID = %s AND transactionPHID IS NULL
-          AND isDeleted = 0',
-        $phid,
-        $rev_phid);
-    }
-
-    if ($this->draftsByAuthors) {
+        '(authorPHID = %s AND isDeleted = 0) AND (transactionPHID IS NULL)',
+        $this->getViewer()->getPHID());
+    } else {
       $where[] = qsprintf(
         $conn_r,
-        'authorPHID IN (%Ls) AND isDeleted = 0 AND transactionPHID IS NULL',
-        $this->draftsByAuthors);
+        'transactionPHID IS NOT NULL');
     }
 
     return $this->formatWhereClause($where);

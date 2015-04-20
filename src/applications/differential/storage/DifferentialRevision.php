@@ -281,14 +281,16 @@ final class DifferentialRevision extends DifferentialDAO
   }
 
   public function loadInlineComments(
-    array &$changesets) {
+    array &$changesets,
+    PhabricatorUser $viewer) {
     assert_instances_of($changesets, 'DifferentialChangeset');
 
     $inline_comments = array();
 
     $inline_comments = id(new DifferentialInlineCommentQuery())
-      ->withRevisionIDs(array($this->getID()))
-      ->withNotDraft(true)
+      ->setViewer($viewer)
+      ->withDrafts(false)
+      ->withRevisionPHIDs(array($this->getPHID()))
       ->execute();
 
     $load_changesets = array();
@@ -535,7 +537,7 @@ final class DifferentialRevision extends DifferentialDAO
       ->execute();
     // NOTE: this mutates $changesets to include changesets for all inline
     // comments...!
-    $inlines = $this->loadInlineComments($changesets);
+    $inlines = $this->loadInlineComments($changesets, $request->getViewer());
     $changesets = mpull($changesets, null, 'getID');
 
     return $timeline
@@ -568,18 +570,6 @@ final class DifferentialRevision extends DifferentialDAO
         'DELETE FROM %T WHERE revisionID = %d',
         self::TABLE_COMMIT,
         $this->getID());
-
-      try {
-        $inlines = id(new DifferentialInlineCommentQuery())
-          ->withRevisionIDs(array($this->getID()))
-          ->execute();
-        foreach ($inlines as $inline) {
-          $inline->delete();
-        }
-      } catch (PhabricatorEmptyQueryException $ex) {
-        // TODO: There's still some funky legacy wrapping going on here, and
-        // we might catch a raw query exception.
-      }
 
       // we have to do paths a little differentally as they do not have
       // an id or phid column for delete() to act on
