@@ -167,13 +167,14 @@ final class PhortuneMerchantInvoiceCreateController
           ->setMetadataValue('adhoc.name', $v_name)
           ->save();
 
-        // TODO: Actually mark these as invoices. Right now, there's no easy
-        // way to do that.
+        $cart
+          ->setIsInvoice(1)
+          ->save();
 
         $cart->activateCart();
         $cart_id = $cart->getID();
 
-        $uri = "/merchant/{$merchant_id}/cart/{$cart_id}/?invoice=true";
+        $uri = "/merchant/{$merchant_id}/cart/{$cart_id}/";
         $uri = $this->getApplicationURI($uri);
 
         return id(new AphrontRedirectResponse())->setURI($uri);

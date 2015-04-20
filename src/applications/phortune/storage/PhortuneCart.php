@@ -21,6 +21,7 @@ final class PhortuneCart extends PhortuneDAO
   protected $status;
   protected $metadata = array();
   protected $mailKey;
+  protected $isInvoice;
 
   private $account = self::ATTACHABLE;
   private $purchases = self::ATTACHABLE;
@@ -35,6 +36,7 @@ final class PhortuneCart extends PhortuneDAO
       ->setAuthorPHID($actor->getPHID())
       ->setStatus(self::STATUS_BUILDING)
       ->setAccountPHID($account->getPHID())
+      ->setIsInvoice(0)
       ->attachAccount($account)
       ->setMerchantPHID($merchant->getPHID())
       ->attachMerchant($merchant);
@@ -531,6 +533,7 @@ final class PhortuneCart extends PhortuneDAO
         'cartClass' => 'text128',
         'mailKey' => 'bytes20',
         'subscriptionPHID' => 'phid?',
+        'isInvoice' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_account' => array(

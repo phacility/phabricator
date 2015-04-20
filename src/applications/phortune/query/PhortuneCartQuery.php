@@ -203,12 +203,12 @@ final class PhortuneCartQuery
       if ($this->invoices) {
         $where[] = qsprintf(
           $conn,
-          'cart.status = %s AND cart.subscriptionPHID IS NOT NULL',
+          'cart.status = %s AND cart.isInvoice = 1',
           PhortuneCart::STATUS_READY);
       } else {
         $where[] = qsprintf(
           $conn,
-          'cart.status != %s OR cart.subscriptionPHID IS NULL',
+          'cart.status != %s OR cart.isInvoice = 0',
           PhortuneCart::STATUS_READY);
       }
     }

@@ -59,7 +59,11 @@ final class PhortuneSubscriptionWorker extends PhabricatorWorker {
       ->setMetadataValue('epoch.end', $next_epoch)
       ->save();
 
-    $cart->setSubscriptionPHID($subscription->getPHID());
+    $cart
+      ->setSubscriptionPHID($subscription->getPHID())
+      ->setIsInvoice(1)
+      ->save();
+
     $cart->activateCart();
 
     try {

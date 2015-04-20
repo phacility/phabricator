@@ -41,7 +41,7 @@ final class PhortuneCartViewController
     $resume_uri = null;
     switch ($cart->getStatus()) {
       case PhortuneCart::STATUS_READY:
-        if ($authority && $request->getStr('invoice')) {
+        if ($authority && $cart->getIsInvoice()) {
           // We arrived here by following the ad-hoc invoice workflow, and
           // are acting with merchant authority.
 
