@@ -42,4 +42,26 @@ abstract class PhortuneCartController
     return $table;
   }
 
+  protected function renderCartDescription(PhortuneCart $cart) {
+    $description = $cart->getDescription();
+    if (!strlen($description)) {
+      return null;
+    }
+
+    $output = PhabricatorMarkupEngine::renderOneObject(
+      id(new PhabricatorMarkupOneOff())
+        ->setPreserveLinebreaks(true)
+        ->setContent($description),
+      'default',
+      $this->getViewer());
+
+    $box = id(new PHUIBoxView())
+      ->addMargin(PHUI::MARGIN_LARGE)
+      ->appendChild($output);
+
+    return id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Description'))
+      ->appendChild($box);
+  }
+
 }
