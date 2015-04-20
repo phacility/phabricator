@@ -410,6 +410,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       $durable_column = id(new ConpherenceDurableColumnView())
         ->setSelectedConpherence(null)
         ->setUser($user)
+        ->setQuicksandConfig($this->buildQuicksandConfig())
         ->setVisible($is_visible)
         ->setInitialLoad(true);
     }
@@ -585,7 +586,11 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
     return array(
       'content' => hsprintf('%s', $response),
-    );
+    ) + $this->buildQuicksandConfig();
+  }
+
+  private function buildQuicksandConfig() {
+    return array();
   }
 
   private function getQuicksandURIPatternBlacklist() {
