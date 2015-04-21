@@ -28,6 +28,17 @@ JX.behavior('aphlict-dropdown', function(config, statics) {
 
   JX.Title.setCount(config.countType, config.countNumber);
 
+  function _updateCount(number) {
+    JX.Title.setCount(config.countType, number);
+
+    JX.DOM.setContent(count, number);
+    if (number === 0) {
+      JX.DOM.alterClass(bubble, config.unreadClass, false);
+    } else {
+      JX.DOM.alterClass(bubble, config.unreadClass, true);
+    }
+  }
+
   function refresh() {
     if (dirty) {
       JX.DOM.setContent(dropdown, config.loadingText);
@@ -43,16 +54,8 @@ JX.behavior('aphlict-dropdown', function(config, statics) {
     }
 
     request = new JX.Request(config.uri, function(response) {
-      JX.Title.setCount(config.countType, response.number);
-
-      var display = (response.number > 999) ? '\u221E' : response.number;
-
-      JX.DOM.setContent(count, display);
-      if (response.number === 0) {
-        JX.DOM.alterClass(bubble, config.unreadClass, false);
-      } else {
-        JX.DOM.alterClass(bubble, config.unreadClass, true);
-      }
+      var number = response.number;
+      _updateCount(number);
       dirty = false;
       JX.DOM.alterClass(
         dropdown,
@@ -63,6 +66,35 @@ JX.behavior('aphlict-dropdown', function(config, statics) {
     });
     request.send();
   }
+
+  JX.Stratcom.listen(
+    'quicksand-redraw',
+    null,
+    function (e) {
+      if (config.local) {
+        return;
+      }
+
+      var data = e.getData();
+      if (!data.fromServer) {
+        return;
+      }
+      var updated = false;
+      var new_data = data.newResponse.aphlictDropdownData;
+      for (var ii = 0; ii < new_data.length; ii++) {
+        if (new_data[ii].countType != config.countType) {
+          continue;
+        }
+        if (!new_data[ii].isInstalled) {
+          continue;
+        }
+        updated = true;
+        _updateCount(parseInt(new_data[ii].count));
+      }
+      if (updated) {
+        dirty = true;
+      }
+    });
 
   function set_visible(menu, icon) {
     if (menu) {

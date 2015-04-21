@@ -192,7 +192,7 @@ JX.install('Quicksand', {
       // If it's the current page, draw it into the browser. It might not be
       // the current page if the user already clicked another link.
       if (self._current == id) {
-        self._draw();
+        self._draw(true);
       }
     },
 
@@ -203,7 +203,7 @@ JX.install('Quicksand', {
      * After a navigation event or the arrival of page content, we paint it
      * onto the page.
      */
-    _draw: function() {
+    _draw: function(from_server) {
       var self = JX.Quicksand;
 
       if (self._onpage == self._current) {
@@ -234,7 +234,8 @@ JX.install('Quicksand', {
         null,
         {
           newResponse: self._responses[self._current],
-          oldResponse: self._responses[self._onpage]
+          oldResponse: self._responses[self._onpage],
+          fromServer: from_server
         });
       self._onpage = self._current;
 
@@ -278,7 +279,7 @@ JX.install('Quicksand', {
         }
 
         // Redraw the page.
-        self._draw();
+        self._draw(false);
       }
     },
 

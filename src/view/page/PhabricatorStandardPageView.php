@@ -583,8 +583,18 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
   }
 
   private function buildQuicksandConfig() {
+    $user = $this->getRequest()->getUser();
+
+    $dropdown_query = id(new AphlictDropdownDataQuery())
+      ->setViewer($user);
+    $dropdown_query->execute();
+
     return array(
       'title' => $this->getTitle(),
+      'aphlictDropdownData' => array(
+        $dropdown_query->getNotificationData(),
+        $dropdown_query->getConpherenceData(),
+      ),
     ) + $this->buildAphlictListenConfigData();
   }
 

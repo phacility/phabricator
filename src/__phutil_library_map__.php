@@ -93,6 +93,7 @@ phutil_register_library_map(array(
     'AlmanacServiceTransactionQuery' => 'applications/almanac/query/AlmanacServiceTransactionQuery.php',
     'AlmanacServiceType' => 'applications/almanac/servicetype/AlmanacServiceType.php',
     'AlmanacServiceViewController' => 'applications/almanac/controller/AlmanacServiceViewController.php',
+    'AphlictDropdownDataQuery' => 'applications/aphlict/query/AphlictDropdownDataQuery.php',
     'Aphront304Response' => 'aphront/response/Aphront304Response.php',
     'Aphront400Response' => 'aphront/response/Aphront400Response.php',
     'Aphront403Response' => 'aphront/response/Aphront403Response.php',
