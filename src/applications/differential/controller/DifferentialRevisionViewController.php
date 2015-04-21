@@ -95,9 +95,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $target_manual->getID());
     $props = mpull($props, 'getData', 'getName');
 
-    $all_changesets = $changesets;
-    $inlines = $revision->loadInlineComments($all_changesets, $user);
-
     $object_phids = array_merge(
       $revision->getReviewers(),
       $revision->getCCPHIDs(),
@@ -157,15 +154,33 @@ final class DifferentialRevisionViewController extends DifferentialController {
           pht('Show All Files Inline'))));
       $warning = $warning->render();
 
-      $my_inlines = id(new DifferentialInlineCommentQuery())
+      $map = $vs_map;
+      if (!$map) {
+        $map = array_fill_keys(array_keys($changesets), 0);
+      }
+
+      $old = array();
+      $new = array();
+      foreach ($map as $id => $vs) {
+        if ($vs <= 0) {
+          $old[] = $id;
+          $new[] = $id;
+        } else {
+          $new[] = $id;
+          $new[] = $vs;
+        }
+      }
+      $old = array_select_keys($changesets, $old);
+      $new = array_select_keys($changesets, $new);
+
+      $query = id(new DifferentialInlineCommentQuery())
         ->setViewer($user)
-        ->withDrafts(true)
-        ->withAuthorPHIDs(array($user->getPHID()))
-        ->withRevisionPHIDs(array($revision->getPHID()))
-        ->execute();
+        ->withRevisionPHIDs(array($revision->getPHID()));
+      $inlines = $query->execute();
+      $inlines = $query->adjustInlinesForChangesets($inlines, $old, $new);
 
       $visible_changesets = array();
-      foreach ($inlines + $my_inlines as $inline) {
+      foreach ($inlines as $inline) {
         $changeset_id = $inline->getChangesetID();
         if (isset($changesets[$changeset_id])) {
           $visible_changesets[$changeset_id] = $changesets[$changeset_id];
@@ -270,8 +285,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $comment_view = $this->buildTransactions(
       $revision,
       $diff_vs ? $diffs[$diff_vs] : $target,
-      $target,
-      $all_changesets);
+      $target);
 
     if (!$viewer_is_anonymous) {
       $comment_view->setQuoteRef('D'.$revision->getID());
@@ -917,8 +931,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
   private function buildTransactions(
     DifferentialRevision $revision,
     DifferentialDiff $left_diff,
-    DifferentialDiff $right_diff,
-    array $changesets) {
+    DifferentialDiff $right_diff) {
 
     $timeline = $this->buildTransactionTimeline(
       $revision,
