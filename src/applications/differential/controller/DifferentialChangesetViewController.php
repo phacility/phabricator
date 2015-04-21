@@ -179,9 +179,9 @@ final class DifferentialChangesetViewController extends DifferentialController {
     if ($revision) {
       $inlines = $this->loadInlineComments(
         $revision,
-        nonempty($left, $right),
+        array(nonempty($left, $right)),
         $left_new,
-        $right,
+        array($right),
         $right_new);
     } else {
       $inlines = array();
@@ -287,13 +287,16 @@ final class DifferentialChangesetViewController extends DifferentialController {
 
   private function loadInlineComments(
     DifferentialRevision $revision,
-    DifferentialChangeset $left,
+    array $left,
     $left_new,
-    DifferentialChangeset $right,
+    array $right,
     $right_new) {
 
+    assert_instances_of($left, 'DifferentialChangeset');
+    assert_instances_of($right, 'DifferentialChangeset');
+
     $viewer = $this->getViewer();
-    $all = array($left, $right);
+    $all = array_merge($left, $right);
 
     $inlines = id(new DifferentialInlineCommentQuery())
       ->setViewer($viewer)
@@ -318,10 +321,32 @@ final class DifferentialChangesetViewController extends DifferentialController {
       $id_map[$changeset->getID()] = $changeset->getID();
     }
 
-    $name_map = array();
+    // Generate filename maps for older and newer comments. If we're bringing
+    // an older comment forward in a diff-of-diffs, we want to put it on the
+    // left side of the screen, not the right side. Both sides are "new" files
+    // with the same name, so they're both appropriate targets, but the left
+    // is a better target conceptually for users because it's more consistent
+    // with the rest of the UI, which shows old information on the left and
+    // new information on the right.
+    $name_map_old = array();
+    $name_map_new = array();
     foreach ($all as $changeset) {
-      $name_map[$changeset->getFilename()] = $changeset->getID();
+      $filename = $changeset->getFilename();
+      $changeset_id = $changeset->getID();
+
+      // We update the old map only if we don't already have an entry (oldest
+      // changeset persists).
+      if (empty($name_map_old[$filename])) {
+        $name_map_old[$filename] = $changeset_id;
+      }
+
+      // We always update the new map (newest changeset overwrites).
+      $name_map_new[$changeset->getFilename()] = $changeset_id;
     }
+
+    // Find the smallest "new" changeset ID. We'll consider everything
+    // larger than this to be "newer", and everything smaller to be "older".
+    $first_new_id = min(mpull($right, 'getID'));
 
     $results = array();
     foreach ($inlines as $inline) {
@@ -340,6 +365,12 @@ final class DifferentialChangesetViewController extends DifferentialController {
       }
 
       $target_id = null;
+
+      if ($changeset_id >= $first_new_id) {
+        $name_map = $name_map_new;
+      } else {
+        $name_map = $name_map_old;
+      }
 
       $filename = $changeset->getFilename();
       if (isset($name_map[$filename])) {
@@ -363,8 +394,12 @@ final class DifferentialChangesetViewController extends DifferentialController {
     // Filter out the inlines we ported forward which won't be visible because
     // they appear on the wrong side of a file.
     $keep_map = array();
-    $keep_map[$left->getID()][(int)$left_new] = true;
-    $keep_map[$right->getID()][(int)$right_new] = true;
+    foreach ($left as $changeset) {
+      $keep_map[$changeset->getID()][(int)$left_new] = true;
+    }
+    foreach ($right as $changeset) {
+      $keep_map[$changeset->getID()][(int)$right_new] = true;
+    }
     foreach ($results as $key => $inline) {
       $is_new = (int)$inline->getIsNewFile();
       $changeset_id = $inline->getChangesetID();
