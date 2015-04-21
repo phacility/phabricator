@@ -933,12 +933,50 @@ final class DifferentialChangesetParser {
     $feedback_mask = array();
 
     if ($this->comments) {
+      // If there are any comments which appear in sections of the file which
+      // we don't have, we're going to move them backwards to the closest
+      // earlier line. Two cases where this may happen are:
+      //
+      //   - Porting ghost comments forward into a file which was mostly
+      //     deleted.
+      //   - Porting ghost comments forward from a full-context diff to a
+      //     partial-context diff.
+
+      list($old_backmap, $new_backmap) = $this->buildLineBackmaps();
+
       foreach ($this->comments as $comment) {
+        $new_side = $this->isCommentOnRightSideWhenDisplayed($comment);
+
+        $line = $comment->getLineNumber();
+        if ($new_side) {
+          $back_line = $new_backmap[$line];
+        } else {
+          $back_line = $old_backmap[$line];
+        }
+
+        if ($back_line != $line) {
+          // TODO: This should probably be cleaner, but just be simple and
+          // obvious for now.
+          $ghost = $comment->getIsGhost();
+          if ($ghost) {
+            $moved = pht(
+              'This comment originally appeared on line %s, but that line '.
+              'does not exist in this version of the diff. It has been '.
+              'moved backward to the nearest line.',
+              new PhutilNumber($line));
+            $ghost['reason'] = $ghost['reason']."\n\n".$moved;
+            $comment->setIsGhost($ghost);
+          }
+
+          $comment->setLineNumber($back_line);
+          $comment->setLineLength(0);
+
+        }
+
         $start = max($comment->getLineNumber() - self::LINES_CONTEXT, 0);
         $end = $comment->getLineNumber() +
           $comment->getLineLength() +
           self::LINES_CONTEXT;
-        $new_side = $this->isCommentOnRightSideWhenDisplayed($comment);
         for ($ii = $start; $ii <= $end; $ii++) {
           if ($new_side) {
             $new_mask[$ii] = true;
@@ -959,6 +997,7 @@ final class DifferentialChangesetParser {
           $feedback_mask[$ii] = true;
         }
       }
+
       $this->comments = msort($this->comments, 'getID');
       foreach ($this->comments as $comment) {
         $final = $comment->getLineNumber() +
@@ -1481,6 +1520,50 @@ final class DifferentialChangesetParser {
       }
     }
     return $changesets;
+  }
+
+  /**
+   * Build maps from lines comments appear on to actual lines.
+   */
+  private function buildLineBackmaps() {
+    $old_back = array();
+    $new_back = array();
+    foreach ($this->old as $ii => $old) {
+      $old_back[$old['line']] = $old['line'];
+    }
+    foreach ($this->new as $ii => $new) {
+      $new_back[$new['line']] = $new['line'];
+    }
+
+    $max_old_line = 0;
+    $max_new_line = 0;
+    foreach ($this->comments as $comment) {
+      if ($this->isCommentOnRightSideWhenDisplayed($comment)) {
+        $max_new_line = max($max_new_line, $comment->getLineNumber());
+      } else {
+        $max_old_line = max($max_old_line, $comment->getLineNumber());
+      }
+    }
+
+    $cursor = 1;
+    for ($ii = 1; $ii <= $max_old_line; $ii++) {
+      if (empty($old_back[$ii])) {
+        $old_back[$ii] = $cursor;
+      } else {
+        $cursor = $old_back[$ii];
+      }
+    }
+
+    $cursor = 1;
+    for ($ii = 1; $ii <= $max_new_line; $ii++) {
+      if (empty($new_back[$ii])) {
+        $new_back[$ii] = $cursor;
+      } else {
+        $cursor = $new_back[$ii];
+      }
+    }
+
+    return array($old_back, $new_back);
   }
 
 }
