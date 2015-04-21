@@ -123,14 +123,25 @@ final class PHUIDiffInlineCommentDetailView
     }
 
     $ghost_tag = null;
-    if ($inline->getIsGhost()) {
-      // TODO: This could also be a newer comment, not necessarily an older
-      // comment.
+    $ghost = $inline->getIsGhost();
+    if ($ghost) {
+      if ($ghost['new']) {
+        $ghost_text = pht('Newer Comment');
+      } else {
+        $ghost_text = pht('Older Comment');
+      }
+
       $ghost_tag = id(new PHUITagView())
         ->setType(PHUITagView::TYPE_SHADE)
-        ->setName(pht('Old Comment'))
+        ->setName($ghost_text)
         ->setSlimShady(true)
         ->setShade(PHUITagView::COLOR_BLUE)
+        ->addSigil('has-tooltip')
+        ->setMetadata(
+          array(
+            'tip' => $ghost['reason'],
+            'size' => 300,
+          ))
         ->addClass('mml');
       $classes[] = 'inline-comment-ghost';
     }

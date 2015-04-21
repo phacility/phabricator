@@ -368,8 +368,10 @@ final class DifferentialChangesetViewController extends DifferentialController {
 
       if ($changeset_id >= $first_new_id) {
         $name_map = $name_map_new;
+        $is_new = true;
       } else {
         $name_map = $name_map_old;
+        $is_new = false;
       }
 
       $filename = $changeset->getFilename();
@@ -377,6 +379,15 @@ final class DifferentialChangesetViewController extends DifferentialController {
         // This changeset is on a file with the same name as the current
         // changeset, so we're going to port it forward or backward.
         $target_id = $name_map[$filename];
+        if ($is_new) {
+          $reason = pht(
+            'This comment was made on a file with the same name, but '.
+            'in a newer diff.');
+        } else {
+          $reason = pht(
+            'This comment was made on a file with the same name, but '.
+            'in an older diff.');
+        }
       }
 
       // If we found a changeset to port this comment to, bring it forward
@@ -385,7 +396,11 @@ final class DifferentialChangesetViewController extends DifferentialController {
         $inline
           ->makeEphemeral(true)
           ->setChangesetID($target_id)
-          ->setIsGhost(true);
+          ->setIsGhost(
+            array(
+              'new' => $is_new,
+              'reason' => $reason,
+            ));
 
         $results[] = $inline;
       }
