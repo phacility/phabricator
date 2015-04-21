@@ -90,6 +90,23 @@ final class DifferentialRevisionViewController extends DifferentialController {
         $repository);
     }
 
+    $map = $vs_map;
+    if (!$map) {
+      $map = array_fill_keys(array_keys($changesets), 0);
+    }
+
+    $old_ids = array();
+    $new_ids = array();
+    foreach ($map as $id => $vs) {
+      if ($vs <= 0) {
+        $old_ids[] = $id;
+        $new_ids[] = $id;
+      } else {
+        $new_ids[] = $id;
+        $new_ids[] = $vs;
+      }
+    }
+
     $props = id(new DifferentialDiffProperty())->loadAllWhere(
       'diffID = %d',
       $target_manual->getID());
@@ -154,24 +171,8 @@ final class DifferentialRevisionViewController extends DifferentialController {
           pht('Show All Files Inline'))));
       $warning = $warning->render();
 
-      $map = $vs_map;
-      if (!$map) {
-        $map = array_fill_keys(array_keys($changesets), 0);
-      }
-
-      $old = array();
-      $new = array();
-      foreach ($map as $id => $vs) {
-        if ($vs <= 0) {
-          $old[] = $id;
-          $new[] = $id;
-        } else {
-          $new[] = $id;
-          $new[] = $vs;
-        }
-      }
-      $old = array_select_keys($changesets, $old);
-      $new = array_select_keys($changesets, $new);
+      $old = array_select_keys($changesets, $old_ids);
+      $new = array_select_keys($changesets, $new_ids);
 
       $query = id(new DifferentialInlineCommentQuery())
         ->setViewer($user)
@@ -285,7 +286,9 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $comment_view = $this->buildTransactions(
       $revision,
       $diff_vs ? $diffs[$diff_vs] : $target,
-      $target);
+      $target,
+      $old_ids,
+      $new_ids);
 
     if (!$viewer_is_anonymous) {
       $comment_view->setQuoteRef('D'.$revision->getID());
@@ -931,7 +934,9 @@ final class DifferentialRevisionViewController extends DifferentialController {
   private function buildTransactions(
     DifferentialRevision $revision,
     DifferentialDiff $left_diff,
-    DifferentialDiff $right_diff) {
+    DifferentialDiff $right_diff,
+    array $old_ids,
+    array $new_ids) {
 
     $timeline = $this->buildTransactionTimeline(
       $revision,
@@ -940,6 +945,8 @@ final class DifferentialRevisionViewController extends DifferentialController {
       array(
         'left' => $left_diff->getID(),
         'right' => $right_diff->getID(),
+        'old' => implode(',', $old_ids),
+        'new' => implode(',', $new_ids),
       ));
 
     return $timeline;

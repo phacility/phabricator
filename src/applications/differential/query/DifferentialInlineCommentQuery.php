@@ -151,6 +151,18 @@ final class DifferentialInlineCommentQuery
 
     $changeset_ids = mpull($inlines, 'getChangesetID');
     $changeset_ids = array_unique($changeset_ids);
+
+    $all_map = mpull($all, null, 'getID');
+
+    // We already have at least some changesets, and we might not need to do
+    // any more data fetching. Remove everything we already have so we can
+    // tell if we need new stuff.
+    foreach ($changeset_ids as $key => $id) {
+      if (isset($all_map[$id])) {
+        unset($changeset_ids[$key]);
+      }
+    }
+
     if ($changeset_ids) {
       $changesets = id(new DifferentialChangesetQuery())
         ->setViewer($viewer)
@@ -160,7 +172,7 @@ final class DifferentialInlineCommentQuery
     } else {
       $changesets = array();
     }
-    $changesets += mpull($all, null, 'getID');
+    $changesets += $all_map;
 
     $id_map = array();
     foreach ($all as $changeset) {

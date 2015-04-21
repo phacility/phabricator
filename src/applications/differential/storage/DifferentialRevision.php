@@ -478,6 +478,7 @@ final class DifferentialRevision extends DifferentialDAO
   public function willRenderTimeline(
     PhabricatorApplicationTransactionView $timeline,
     AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     $render_data = $timeline->getRenderData();
     $left = $request->getInt('left', idx($render_data, 'left'));
@@ -491,10 +492,17 @@ final class DifferentialRevision extends DifferentialDAO
     $left_diff = $diffs[$left];
     $right_diff = $diffs[$right];
 
+    $old_ids = $request->getStr('old', idx($render_data, 'old'));
+    $new_ids = $request->getStr('new', idx($render_data, 'new'));
+    $old_ids = explode(',', $old_ids);
+    $new_ids = explode(',', $new_ids);
+
     $type_inline = DifferentialTransaction::TYPE_INLINE;
-    $changeset_ids = array();
+    $changeset_ids = array_merge($old_ids, $new_ids);
+    $inlines = array();
     foreach ($timeline->getTransactions() as $xaction) {
       if ($xaction->getTransactionType() == $type_inline) {
+        $inlines[] = $xaction->getComment();
         $changeset_ids[] = $xaction->getComment()->getChangesetID();
       }
     }
@@ -508,6 +516,22 @@ final class DifferentialRevision extends DifferentialDAO
     } else {
       $changesets = array();
     }
+
+    foreach ($inlines as $key => $inline) {
+      $inlines[$key] = DifferentialInlineComment::newFromModernComment(
+        $inline);
+    }
+
+    $query = id(new DifferentialInlineCommentQuery())
+      ->setViewer($viewer);
+
+    // NOTE: This is a bit sketchy: this method adjusts the inlines as a
+    // side effect, which means it will ultimately adjust the transaction
+    // comments and affect timeline rendering.
+    $query->adjustInlinesForChangesets(
+      $inlines,
+      array_select_keys($changesets, $old_ids),
+      array_select_keys($changesets, $new_ids));
 
     return $timeline
       ->setChangesets($changesets)
