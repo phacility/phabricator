@@ -328,20 +328,35 @@ final class DifferentialChangesetViewController extends DifferentialController {
     // is a better target conceptually for users because it's more consistent
     // with the rest of the UI, which shows old information on the left and
     // new information on the right.
+    $move_here = DifferentialChangeType::TYPE_MOVE_HERE;
+
     $name_map_old = array();
     $name_map_new = array();
+    $move_map = array();
     foreach ($all as $changeset) {
-      $filename = $changeset->getFilename();
       $changeset_id = $changeset->getID();
 
-      // We update the old map only if we don't already have an entry (oldest
-      // changeset persists).
-      if (empty($name_map_old[$filename])) {
-        $name_map_old[$filename] = $changeset_id;
+      $filenames = array();
+      $filenames[] = $changeset->getFilename();
+
+      // If this is the target of a move, also map comments on the old filename
+      // to this changeset.
+      if ($changeset->getChangeType() == $move_here) {
+        $old_file = $changeset->getOldFile();
+        $filenames[] = $old_file;
+        $move_map[$changeset_id][$old_file] = true;
       }
 
-      // We always update the new map (newest changeset overwrites).
-      $name_map_new[$changeset->getFilename()] = $changeset_id;
+      foreach ($filenames as $filename) {
+        // We update the old map only if we don't already have an entry (oldest
+        // changeset persists).
+        if (empty($name_map_old[$filename])) {
+          $name_map_old[$filename] = $changeset_id;
+        }
+
+        // We always update the new map (newest changeset overwrites).
+        $name_map_new[$changeset->getFilename()] = $changeset_id;
+      }
     }
 
     // Find the smallest "new" changeset ID. We'll consider everything
@@ -379,16 +394,52 @@ final class DifferentialChangesetViewController extends DifferentialController {
         // This changeset is on a file with the same name as the current
         // changeset, so we're going to port it forward or backward.
         $target_id = $name_map[$filename];
+
+        $is_move = isset($move_map[$target_id][$filename]);
         if ($is_new) {
-          $reason = pht(
-            'This comment was made on a file with the same name, but '.
-            'in a newer diff.');
+          if ($is_move) {
+            $reason = pht(
+              'This comment was made on a file with the same name as the '.
+              'file this file was moved from, but in a newer diff.');
+          } else {
+            $reason = pht(
+              'This comment was made on a file with the same name, but '.
+              'in a newer diff.');
+          }
         } else {
-          $reason = pht(
-            'This comment was made on a file with the same name, but '.
-            'in an older diff.');
+          if ($is_move) {
+            $reason = pht(
+              'This comment was made on a file with the same name as the '.
+              'file this file was moved from, but in an older diff.');
+          } else {
+            $reason = pht(
+              'This comment was made on a file with the same name, but '.
+              'in an older diff.');
+          }
         }
       }
+
+
+      // If we didn't find a target and this change is the target of a move,
+      // look for a match against the old filename.
+      if (!$target_id) {
+        if ($changeset->getChangeType() == $move_here) {
+          $filename = $changeset->getOldFile();
+          if (isset($name_map[$filename])) {
+            $target_id = $name_map[$filename];
+            if ($is_new) {
+              $reason = pht(
+                'This comment was made on a file which this file was moved '.
+                'to, but in a newer diff.');
+            } else {
+              $reason = pht(
+                'This comment was made on a file which this file was moved '.
+                'to, but in an older diff.');
+            }
+          }
+        }
+      }
+
 
       // If we found a changeset to port this comment to, bring it forward
       // or backward and mark it.
