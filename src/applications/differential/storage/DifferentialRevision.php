@@ -494,8 +494,8 @@ final class DifferentialRevision extends DifferentialDAO
 
     $old_ids = $request->getStr('old', idx($render_data, 'old'));
     $new_ids = $request->getStr('new', idx($render_data, 'new'));
-    $old_ids = explode(',', $old_ids);
-    $new_ids = explode(',', $new_ids);
+    $old_ids = array_filter(explode(',', $old_ids));
+    $new_ids = array_filter(explode(',', $new_ids));
 
     $type_inline = DifferentialTransaction::TYPE_INLINE;
     $changeset_ids = array_merge($old_ids, $new_ids);
