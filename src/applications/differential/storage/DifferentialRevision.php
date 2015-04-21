@@ -280,46 +280,6 @@ final class DifferentialRevision extends DifferentialDAO
     return $this;
   }
 
-  public function loadInlineComments(
-    array &$changesets,
-    PhabricatorUser $viewer) {
-    assert_instances_of($changesets, 'DifferentialChangeset');
-
-    $inline_comments = array();
-
-    $inline_comments = id(new DifferentialInlineCommentQuery())
-      ->setViewer($viewer)
-      ->withDrafts(false)
-      ->withRevisionPHIDs(array($this->getPHID()))
-      ->execute();
-
-    $load_changesets = array();
-    foreach ($inline_comments as $inline) {
-      $changeset_id = $inline->getChangesetID();
-      if (isset($changesets[$changeset_id])) {
-        continue;
-      }
-      $load_changesets[$changeset_id] = true;
-    }
-
-    $more_changesets = array();
-    if ($load_changesets) {
-      $changeset_ids = array_keys($load_changesets);
-      $more_changesets += id(new DifferentialChangeset())
-        ->loadAllWhere(
-          'id IN (%Ld)',
-          $changeset_ids);
-    }
-
-    if ($more_changesets) {
-      $changesets += $more_changesets;
-      $changesets = msort($changesets, 'getSortKey');
-    }
-
-    return $inline_comments;
-  }
-
-
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
@@ -531,14 +491,23 @@ final class DifferentialRevision extends DifferentialDAO
     $left_diff = $diffs[$left];
     $right_diff = $diffs[$right];
 
-    $changesets = id(new DifferentialChangesetQuery())
-      ->setViewer($request->getUser())
-      ->withDiffs(array($right_diff))
-      ->execute();
-    // NOTE: this mutates $changesets to include changesets for all inline
-    // comments...!
-    $inlines = $this->loadInlineComments($changesets, $request->getViewer());
-    $changesets = mpull($changesets, null, 'getID');
+    $type_inline = DifferentialTransaction::TYPE_INLINE;
+    $changeset_ids = array();
+    foreach ($timeline->getTransactions() as $xaction) {
+      if ($xaction->getTransactionType() == $type_inline) {
+        $changeset_ids[] = $xaction->getComment()->getChangesetID();
+      }
+    }
+
+    if ($changeset_ids) {
+      $changesets = id(new DifferentialChangesetQuery())
+        ->setViewer($request->getUser())
+        ->withIDs($changeset_ids)
+        ->execute();
+      $changesets = mpull($changesets, null, 'getID');
+    } else {
+      $changesets = array();
+    }
 
     return $timeline
       ->setChangesets($changesets)
