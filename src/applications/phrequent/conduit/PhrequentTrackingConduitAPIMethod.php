@@ -16,17 +16,12 @@ final class PhrequentTrackingConduitAPIMethod
     return self::METHOD_STATUS_UNSTABLE;
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array();
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'array';
-  }
-
-  public function defineErrorTypes() {
-    return array(
-    );
   }
 
   protected function execute(ConduitAPIRequest $request) {

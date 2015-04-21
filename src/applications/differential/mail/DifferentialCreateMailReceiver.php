@@ -59,7 +59,8 @@ final class DifferentialCreateMailReceiver extends PhabricatorMailReceiver {
       $call = new ConduitCall(
         'differential.createrawdiff',
         array(
-          'diff' => $body,));
+          'diff' => $body,
+        ));
       $call->setUser($sender);
       try {
         $result = $call->execute();

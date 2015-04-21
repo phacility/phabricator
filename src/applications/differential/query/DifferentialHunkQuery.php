@@ -90,7 +90,7 @@ final class DifferentialHunkQuery
     return $hunks;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if (!$this->changesets) {
@@ -112,8 +112,9 @@ final class DifferentialHunkQuery
     return 'PhabricatorDifferentialApplication';
   }
 
-  protected function getReversePaging() {
-    return true;
+  protected function getDefaultOrderVector() {
+    // TODO: Do we need this?
+    return array('-id');
   }
 
 }

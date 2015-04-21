@@ -11,7 +11,7 @@ final class DifferentialCreateDiffConduitAPIMethod
     return 'Create a new Differential diff.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
 
     $vcs_const = $this->formatStringConstants(
       array(
@@ -51,13 +51,8 @@ final class DifferentialCreateDiffConduitAPIMethod
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
-  }
-
-  public function defineErrorTypes() {
-    return array(
-    );
   }
 
   protected function execute(ConduitAPIRequest $request) {
@@ -163,11 +158,13 @@ final class DifferentialCreateDiffConduitAPIMethod
         $request->getValue('sourceControlBaseRevision'),
       'arcanistProjectPHID' => $project_phid,
       'lintStatus' => $lint_status,
-      'unitStatus' => $unit_status,);
+      'unitStatus' => $unit_status,
+    );
 
     $xactions = array(id(new DifferentialTransaction())
       ->setTransactionType(DifferentialDiffTransaction::TYPE_DIFF_CREATE)
-      ->setNewValue($diff_data_dict),);
+      ->setNewValue($diff_data_dict),
+    );
 
     id(new DifferentialDiffEditor())
       ->setActor($viewer)

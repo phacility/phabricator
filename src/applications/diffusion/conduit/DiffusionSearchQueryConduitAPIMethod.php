@@ -11,7 +11,7 @@ final class DiffusionSearchQueryConduitAPIMethod
     return 'Search (grep) a repository at a specific path and commit.';
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'array';
   }
 

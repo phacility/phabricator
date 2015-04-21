@@ -3,7 +3,6 @@
 final class DifferentialTransactionEditor
   extends PhabricatorApplicationTransactionEditor {
 
-  private $heraldEmailPHIDs;
   private $changedPriorToCommitURI;
   private $isCloseByCommit;
   private $repositoryPHIDOverride = false;
@@ -1154,18 +1153,6 @@ final class DifferentialTransactionEditor
     return $phids;
   }
 
-  protected function getMailCC(PhabricatorLiskDAO $object) {
-    $phids = parent::getMailCC($object);
-
-    if ($this->heraldEmailPHIDs) {
-      foreach ($this->heraldEmailPHIDs as $phid) {
-        $phids[] = $phid;
-      }
-    }
-
-    return $phids;
-  }
-
   protected function getMailAction(
     PhabricatorLiskDAO $object,
     array $xactions) {
@@ -1729,10 +1716,6 @@ final class DifferentialTransactionEditor
             ));
       }
     }
-
-    // Save extra email PHIDs for later.
-    $email_phids = $adapter->getEmailPHIDsAddedByHerald();
-    $this->heraldEmailPHIDs = array_keys($email_phids);
 
     // Apply build plans.
     HarbormasterBuildable::applyBuildPlans(

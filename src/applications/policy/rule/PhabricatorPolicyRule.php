@@ -22,6 +22,16 @@ abstract class PhabricatorPolicyRule {
     return null;
   }
 
+  protected function getDatasourceTemplate(
+    PhabricatorTypeaheadDatasource $datasource) {
+    return array(
+      'markup' => new AphrontTokenizerTemplateView(),
+      'uri' => $datasource->getDatasourceURI(),
+      'placeholder' => $datasource->getPlaceholderText(),
+      'browseURI' => $datasource->getBrowseURI(),
+    );
+  }
+
   public function getRuleOrder() {
     return 500;
   }

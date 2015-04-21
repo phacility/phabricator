@@ -280,17 +280,14 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
 
   protected function getHead() {
-    $monospaced = PhabricatorEnv::getEnvConfig('style.monospace');
-    $monospaced_win = PhabricatorEnv::getEnvConfig('style.monospace.windows');
+    $monospaced = null;
 
     $request = $this->getRequest();
     if ($request) {
       $user = $request->getUser();
       if ($user) {
-        $pref = $user->loadPreferences()->getPreference(
+        $monospaced = $user->loadPreferences()->getPreference(
             PhabricatorUserPreferences::PREFERENCE_MONOSPACED);
-        $monospaced = nonempty($pref, $monospaced);
-        $monospaced_win = nonempty($pref, $monospaced_win);
       }
     }
 
@@ -306,21 +303,10 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
         '</style>', $monospaced);
     }
 
-    $font_css_win = null;
-    if (!empty($monospaced_win)) {
-      $font_css_win = hsprintf(
-        '<style type="text/css">'.
-        '.platform-windows .PhabricatorMonospaced, '.
-        '.platform-windows .phabricator-remarkup '.
-          '.remarkup-code-block .remarkup-code { font: %s !important; }'.
-        '</style>', $monospaced_win);
-    }
-
     return hsprintf(
-      '%s%s%s%s',
+      '%s%s%s',
       parent::getHead(),
       $font_css,
-      $font_css_win,
       $response->renderSingleResource('javelin-magical-init', 'phabricator'));
   }
 
@@ -362,6 +348,8 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       $header_chrome = $this->menuContent;
     }
 
+    $classes = array();
+    $classes[] = 'main-page-frame';
     $developer_warning = null;
     if (PhabricatorEnv::getEnvConfig('phabricator.developer-mode') &&
         DarkConsoleErrorLogPluginAPI::getErrors()) {
@@ -377,6 +365,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     if ($user && $user->getIsAdmin()) {
       $open = PhabricatorSetupCheck::getOpenSetupIssueKeys();
       if ($open) {
+        $classes[] = 'page-has-warning';
         $setup_warning = phutil_tag_div(
           'setup-warning-callout',
           phutil_tag(
@@ -404,8 +393,8 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       ),
       array(
         $developer_warning,
-        $setup_warning,
         $header_chrome,
+        $setup_warning,
         phutil_tag(
           'div',
           array(
@@ -421,6 +410,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       $durable_column = id(new ConpherenceDurableColumnView())
         ->setSelectedConpherence(null)
         ->setUser($user)
+        ->setQuicksandConfig($this->buildQuicksandConfig())
         ->setVisible($is_visible)
         ->setInitialLoad(true);
     }
@@ -432,7 +422,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     return phutil_tag(
       'div',
       array(
-        'class' => 'main-page-frame',
+        'class' => implode(' ', $classes),
       ),
       array(
         $main_page,
@@ -471,11 +461,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
           $client_uri->setDomain($this_host->getDomain());
         }
 
-        $subscriptions = $this->pageObjects;
-        if ($user) {
-          $subscriptions[] = $user->getPHID();
-        }
-
         if ($request->isHTTPS()) {
           $client_uri->setProtocol('wss');
         } else {
@@ -486,9 +471,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
           'aphlict-listen',
           array(
             'websocketURI'  => (string)$client_uri,
-            'pageObjects'   => array_fill_keys($this->pageObjects, true),
-            'subscriptions' => $subscriptions,
-          ));
+          ) + $this->buildAphlictListenConfigData());
       }
     }
 
@@ -596,6 +579,21 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
     return array(
       'content' => hsprintf('%s', $response),
+    ) + $this->buildQuicksandConfig();
+  }
+
+  private function buildQuicksandConfig() {
+    return $this->buildAphlictListenConfigData();
+  }
+
+  private function buildAphlictListenConfigData() {
+    $user = $this->getRequest()->getUser();
+    $subscriptions = $this->pageObjects;
+    $subscriptions[] = $user->getPHID();
+
+    return array(
+      'pageObjects'   => array_fill_keys($this->pageObjects, true),
+      'subscriptions' => $subscriptions,
     );
   }
 

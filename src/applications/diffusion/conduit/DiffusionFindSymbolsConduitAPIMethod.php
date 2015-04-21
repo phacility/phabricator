@@ -11,7 +11,7 @@ final class DiffusionFindSymbolsConduitAPIMethod
     return 'Retrieve Diffusion symbol information.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'name'        => 'optional string',
       'namePrefix'  => 'optional string',
@@ -21,13 +21,8 @@ final class DiffusionFindSymbolsConduitAPIMethod
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty list<dict>';
-  }
-
-  public function defineErrorTypes() {
-    return array(
-    );
   }
 
   protected function execute(ConduitAPIRequest $request) {

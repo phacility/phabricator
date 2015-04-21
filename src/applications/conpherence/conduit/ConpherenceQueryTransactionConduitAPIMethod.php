@@ -15,7 +15,7 @@ final class ConpherenceQueryTransactionConduitAPIMethod
       'transactions within the conpherence for the logged in user.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'threadID' => 'optional int',
       'threadPHID' => 'optional phid',
@@ -24,11 +24,11 @@ final class ConpherenceQueryTransactionConduitAPIMethod
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
       'ERR_USAGE_NO_THREAD_ID' => pht(
         'You must specify a thread id or thread phid to query transactions '.

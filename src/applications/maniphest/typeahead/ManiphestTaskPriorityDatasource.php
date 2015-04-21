@@ -3,6 +3,10 @@
 final class ManiphestTaskPriorityDatasource
   extends PhabricatorTypeaheadDatasource {
 
+  public function getBrowseTitle() {
+    return pht('Browse Priorities');
+  }
+
   public function getPlaceholderText() {
     return pht('Type a task priority name...');
   }
@@ -25,7 +29,7 @@ final class ManiphestTaskPriorityDatasource
         ->setName($name);
     }
 
-    return $results;
+    return $this->filterResultsAgainstTokens($results);
   }
 
 }

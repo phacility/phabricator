@@ -9,6 +9,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
   private $visible;
   private $initialLoad = false;
   private $policyObjects;
+  private $quicksandConfig = array();
 
   public function setConpherences(array $conpherences) {
     assert_instances_of($conpherences, 'ConpherenceThread');
@@ -78,6 +79,15 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
     return $this->policyObjects;
   }
 
+  public function setQuicksandConfig(array $config) {
+    $this->quicksandConfig = $config;
+    return $this;
+  }
+
+  public function getQuicksandConfig() {
+    return $this->quicksandConfig;
+  }
+
   protected function getTagAttributes() {
     if ($this->getVisible()) {
       $style = null;
@@ -106,6 +116,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
       array(
         'visible' => $this->getVisible(),
         'settingsURI' => '/settings/adjust/?key='.$column_key,
+        'quicksandConfig' => $this->getQuicksandConfig(),
       ));
 
     $policies = array();
@@ -375,8 +386,8 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
             ),
             $header),
           $settings_button,
-          $settings_menu,));
-
+          $settings_menu,
+        ));
   }
 
   private function getHeaderActionsConfig(ConpherenceThread $conpherence) {
@@ -408,7 +419,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
       array(
         'name' => pht('View in Conpherence'),
         'disabled' => false,
-        'href' => '/conpherence/'.$conpherence->getID().'/',
+        'href' => '/'.$conpherence->getMonogram(),
         'icon' => 'fa-comments',
         'key' => 'go_conpherence',
       ),
@@ -418,7 +429,8 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
         'href' => '#',
         'icon' => 'fa-times',
         'key' => 'hide_column',
-      ),);
+      ),
+    );
   }
 
   private function buildTransactions() {
@@ -441,14 +453,15 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
             'class' => 'button grey',
             'sigil' => 'workflow',
           ),
-          pht('Send a Message')),);
+          pht('Send a Message')),
+      );
     }
 
-    $data = ConpherenceTransactionView::renderTransactions(
+    $data = ConpherenceTransactionRenderer::renderTransactions(
       $this->getUser(),
       $conpherence,
       $full_display = false);
-    $messages = ConpherenceTransactionView::renderMessagePaneContent(
+    $messages = ConpherenceTransactionRenderer::renderMessagePaneContent(
       $data['transactions'],
       $data['oldest_transaction_id']);
 
@@ -501,7 +514,8 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
           'type' => 'hidden',
           'name' => 'action',
           'value' => ConpherenceUpdateActions::MESSAGE,
-        )),));
+        )),
+      ));
   }
 
   private function buildStatusText() {

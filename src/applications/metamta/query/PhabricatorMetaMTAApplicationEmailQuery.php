@@ -71,7 +71,7 @@ final class PhabricatorMetaMTAApplicationEmailQuery
     return $app_emails;
   }
 
-  private function buildWhereClause($conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->addresses !== null) {
@@ -114,12 +114,8 @@ final class PhabricatorMetaMTAApplicationEmailQuery
     return $this->formatWhereClause($where);
   }
 
-  protected function getPagingColumn() {
-    return 'appemail.id';
-  }
-
-  protected function getApplicationSearchObjectPHIDColumn() {
-    return 'appemail.phid';
+  protected function getPrimaryTableAlias() {
+    return 'appemail';
   }
 
   public function getQueryApplicationClass() {

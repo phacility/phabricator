@@ -3,6 +3,15 @@
 final class DiffusionArcanistProjectDatasource
   extends PhabricatorTypeaheadDatasource {
 
+  public function isBrowsable() {
+    // TODO: We should probably make this browsable, or maybe remove it.
+    return false;
+  }
+
+  public function getBrowseTitle() {
+    return pht('Browse Arcanist Projects');
+  }
+
   public function getPlaceholderText() {
     return pht('Type an arcanist project name...');
   }

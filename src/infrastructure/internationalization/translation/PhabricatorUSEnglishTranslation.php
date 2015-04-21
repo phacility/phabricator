@@ -645,6 +645,23 @@ final class PhabricatorUSEnglishTranslation
       '%s edited reverted commit(s), added %s: %s; removed %s: %s.' =>
         '%s edited reverted commits, added %3$s; removed %5$s.',
 
+      '%s added %s reverted commit(s) for %s: %s.' => array(
+        array(
+          '%s added a reverted commit for %3$s: %4$s.',
+          '%s added reverted commits for %3$s: %4$s.',
+        ),
+      ),
+
+      '%s removed %s reverted commit(s) for %s: %s.' => array(
+        array(
+          '%s removed a reverted commit for %3$s: %4$s.',
+          '%s removed reverted commits for %3$s: %4$s.',
+        ),
+      ),
+
+      '%s edited reverted commit(s) for %s, added %s: %s; removed %s: %s.' =>
+        '%s edited reverted commits for %2$s, added %4$s; removed %6$s.',
+
       '%s added %s reverting commit(s): %s.' => array(
         array(
           '%s added a reverting commit: %3$s.',
@@ -661,6 +678,23 @@ final class PhabricatorUSEnglishTranslation
 
       '%s edited reverting commit(s), added %s: %s; removed %s: %s.' =>
         '%s edited reverting commits, added %3$s; removed %5$s.',
+
+      '%s added %s reverting commit(s) for %s: %s.' => array(
+        array(
+          '%s added a reverting commit for %3$s: %4$s.',
+          '%s added reverting commitsi for %3$s: %4$s.',
+        ),
+      ),
+
+      '%s removed %s reverting commit(s) for %s: %s.' => array(
+        array(
+          '%s removed a reverting commit for %3$s: %4$s.',
+          '%s removed reverting commits for %3$s: %4$s.',
+        ),
+      ),
+
+      '%s edited reverting commit(s) for %s, added %s: %s; removed %s: %s.' =>
+        '%s edited reverting commits for %s, added %4$s; removed %6$s.',
 
       '%s changed project member(s), added %d: %s; removed %d: %s.' =>
         '%s changed project members, added %3$s; removed %5$s.',

@@ -19,18 +19,18 @@ final class ConduitGetCertificateConduitAPIMethod extends ConduitAPIMethod {
     return 'Retrieve certificate information for a user.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'token' => 'required string',
       'host'  => 'required string',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'dict<string, any>';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
       'ERR-BAD-TOKEN' => 'Token does not exist or has expired.',
       'ERR-RATE-LIMIT' =>

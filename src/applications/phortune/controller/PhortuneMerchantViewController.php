@@ -192,6 +192,15 @@ final class PhortuneMerchantViewController
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
+
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('New Invoice'))
+        ->setIcon('fa-fax')
+        ->setHref($this->getApplicationURI("merchant/{$id}/invoice/new/"))
+        ->setDisabled(!$can_edit)
+        ->setWorkflow(!$can_edit));
+
     return $view;
   }
 

@@ -2,6 +2,10 @@
  * @provides phui-object-box-css
  */
 
+.phui-object-box {
+  position: relative;
+}
+
 div.phui-object-box.phui-object-box-flush {
   margin-top: 0;
 }

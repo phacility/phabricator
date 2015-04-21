@@ -6,6 +6,7 @@ final class HarbormasterBuildPlanQuery
   private $ids;
   private $phids;
   private $statuses;
+  private $datasourceQuery;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -19,6 +20,11 @@ final class HarbormasterBuildPlanQuery
 
   public function withStatuses(array $statuses) {
     $this->statuses = $statuses;
+    return $this;
+  }
+
+  public function withDatasourceQuery($query) {
+    $this->datasourceQuery = $query;
     return $this;
   }
 
@@ -37,7 +43,7 @@ final class HarbormasterBuildPlanQuery
     return $table->loadAllFromArray($data);
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->ids) {
@@ -61,6 +67,13 @@ final class HarbormasterBuildPlanQuery
         $this->statuses);
     }
 
+    if (strlen($this->datasourceQuery)) {
+      $where[] = qsprintf(
+        $conn_r,
+        'name LIKE %>',
+        $this->datasourceQuery);
+    }
+
     $where[] = $this->buildPagingClause($conn_r);
 
     return $this->formatWhereClause($where);
@@ -68,6 +81,33 @@ final class HarbormasterBuildPlanQuery
 
   public function getQueryApplicationClass() {
     return 'PhabricatorHarbormasterApplication';
+  }
+
+  public function getOrderableColumns() {
+    return parent::getOrderableColumns() + array(
+      'name' => array(
+        'column' => 'name',
+        'type' => 'string',
+        'reverse' => true,
+      ),
+    );
+  }
+
+  protected function getPagingValueMap($cursor, array $keys) {
+    $plan = $this->loadCursorObject($cursor);
+    return array(
+      'id' => $plan->getID(),
+      'name' => $plan->getName(),
+    );
+  }
+
+  public function getBuiltinOrders() {
+    return array(
+      'name' => array(
+        'vector' => array('name', 'id'),
+        'name' => pht('Name'),
+      ),
+    ) + parent::getBuiltinOrders();
   }
 
 }

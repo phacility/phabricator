@@ -14,18 +14,14 @@ final class ReleephWorkCanPushConduitAPIMethod extends ReleephConduitAPIMethod {
     return 'Return whether the conduit user is allowed to push.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'projectPHID' => 'required string',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'bool';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

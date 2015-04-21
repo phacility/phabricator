@@ -35,15 +35,13 @@ final class DivinerBookController extends DivinerController {
     $header = id(new PHUIHeaderView())
       ->setHeader($book->getTitle())
       ->setUser($viewer)
-      ->setPolicyObject($book);
+      ->setPolicyObject($book)
+      ->setEpoch($book->getDateModified());
 
     $document = new PHUIDocumentView();
     $document->setHeader($header);
     $document->addClass('diviner-view');
-
     $document->setFontKit(PHUIDocumentView::FONT_SOURCE_SANS);
-
-    $properties = $this->buildPropertyList($book);
 
     $atoms = id(new DivinerAtomQuery())
       ->setViewer($viewer)
@@ -87,7 +85,6 @@ final class DivinerBookController extends DivinerController {
           $viewer);
     }
 
-    $document->appendChild($properties);
     $document->appendChild($preface_view);
     $document->appendChild($out);
 
@@ -99,22 +96,6 @@ final class DivinerBookController extends DivinerController {
       array(
         'title' => $book->getTitle(),
       ));
-  }
-
-  private function buildPropertyList(DivinerLiveBook $book) {
-    $viewer = $this->getRequest()->getUser();
-    $view = id(new PHUIPropertyListView())
-      ->setUser($viewer);
-
-    $policies = PhabricatorPolicyQuery::renderPolicyDescriptions(
-      $viewer,
-      $book);
-
-    $view->addProperty(
-      pht('Updated'),
-      phabricator_datetime($book->getDateModified(), $viewer));
-
-    return $view;
   }
 
 }

@@ -100,6 +100,7 @@ final class ConpherenceListController extends ConpherenceController {
         } else {
           $thread = ConpherenceThread::initializeNewThread($user);
           $thread->attachHandles(array());
+          $thread->attachTransactions(array());
           $thread->makeEphemeral();
           $layout->setHeader(
             $this->buildHeaderPaneContent($thread, array()));
@@ -125,7 +126,8 @@ final class ConpherenceListController extends ConpherenceController {
       ->execute();
 
     return array(
-      'all_participation' => $all_participation,);
+      'all_participation' => $all_participation,
+    );
   }
 
   private function loadConpherenceThreadData($participation) {

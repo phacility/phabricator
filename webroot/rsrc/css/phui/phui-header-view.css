@@ -53,18 +53,13 @@ body .phui-header-shell.phui-bleed-header
 }
 
 .phui-object-box .phui-header-view .phui-header-action-links {
-  margin-right: 4px;
-  margin-top: -2px;
-  margin-bottom: -3px;
-}
-
-.phui-object-box .phui-header-has-image .phui-header-view
- .phui-header-action-links {
-  margin-top: 8px;
-}
-
-.phui-document-view .phui-header-view .phui-header-action-links {
+  margin-right: 12px;
   margin-top: 4px;
+}
+
+.device-phone .phui-object-box .phui-header-view .phui-header-action-links {
+  margin-right: 4px;
+  margin-top: -1px;
 }
 
 .device-phone .phui-header-action-link .phui-button-text {

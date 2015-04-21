@@ -119,17 +119,9 @@ final class AlmanacDeviceViewController
       ->withDevicePHIDs(array($device->getPHID()))
       ->execute();
 
-    $phids = array();
-    foreach ($interfaces as $interface) {
-      $phids[] = $interface->getNetworkPHID();
-      $phids[] = $interface->getDevicePHID();
-    }
-    $handles = $this->loadViewerHandles($phids);
-
     $table = id(new AlmanacInterfaceTableView())
       ->setUser($viewer)
       ->setInterfaces($interfaces)
-      ->setHandles($handles)
       ->setCanEdit($can_edit);
 
     $header = id(new PHUIHeaderView())
@@ -214,6 +206,7 @@ final class AlmanacDeviceViewController
   }
 
   private function buildServicesTable(AlmanacDevice $device) {
+    $viewer = $this->getViewer();
 
     // NOTE: We're loading all services so we can show hidden, locked services.
     // In general, we let you know about all the things the device is bound to,
@@ -226,19 +219,18 @@ final class AlmanacDeviceViewController
       ->withDevicePHIDs(array($device->getPHID()))
       ->execute();
 
-    $handles = $this->loadViewerHandles(mpull($services, 'getPHID'));
+    $handles = $viewer->loadHandles(mpull($services, 'getPHID'));
 
     $icon_lock = id(new PHUIIconView())
       ->setIconFont('fa-lock');
 
     $rows = array();
     foreach ($services as $service) {
-      $handle = $handles[$service->getPHID()];
       $rows[] = array(
         ($service->getIsLocked()
           ? $icon_lock
           : null),
-        $handle->renderLink(),
+        $handles->renderHandle($service->getPHID()),
       );
     }
 

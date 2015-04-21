@@ -37,7 +37,7 @@ final class PhabricatorFeedQuery
     return PhabricatorFeedStory::loadAllFromRows($data, $this->getViewer());
   }
 
-  private function buildJoinClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildJoinClause(AphrontDatabaseConnection $conn_r) {
     // NOTE: We perform this join unconditionally (even if we have no filter
     // PHIDs) to omit rows which have no story references. These story data
     // rows are notifications or realtime alerts.
@@ -49,7 +49,7 @@ final class PhabricatorFeedQuery
       $ref_table->getTableName());
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->filterPHIDs) {
@@ -82,7 +82,7 @@ final class PhabricatorFeedQuery
     return $this->formatWhereClause($where);
   }
 
-  private function buildGroupClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildGroupClause(AphrontDatabaseConnection $conn_r) {
     if ($this->filterPHIDs) {
       return qsprintf($conn_r, 'GROUP BY ref.chronologicalKey');
     } else {
@@ -90,13 +90,29 @@ final class PhabricatorFeedQuery
     }
   }
 
-  protected function getPagingColumn() {
-    return ($this->filterPHIDs
-      ? 'ref.chronologicalKey'
-      : 'story.chronologicalKey');
+  protected function getDefaultOrderVector() {
+    return array('key');
   }
 
-  protected function getPagingValue($item) {
+  public function getOrderableColumns() {
+    $table = ($this->filterPHIDs ? 'ref' : 'story');
+    return array(
+      'key' => array(
+        'table' => $table,
+        'column' => 'chronologicalKey',
+        'type' => 'int',
+        'unique' => true,
+      ),
+    );
+  }
+
+  protected function getPagingValueMap($cursor, array $keys) {
+    return array(
+      'key' => $cursor,
+    );
+  }
+
+  protected function getResultCursor($item) {
     if ($item instanceof PhabricatorFeedStory) {
       return $item->getChronologicalKey();
     }

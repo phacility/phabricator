@@ -19,7 +19,7 @@ final class DifferentialFindConduitAPIMethod
     return 'Query Differential revisions which match certain criteria.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     $types = array(
       'open',
       'committable',
@@ -33,13 +33,8 @@ final class DifferentialFindConduitAPIMethod
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty list<dict>';
-  }
-
-  public function defineErrorTypes() {
-    return array(
-    );
   }
 
   protected function execute(ConduitAPIRequest $request) {

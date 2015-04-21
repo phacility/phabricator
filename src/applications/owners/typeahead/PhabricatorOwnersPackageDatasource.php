@@ -3,6 +3,15 @@
 final class PhabricatorOwnersPackageDatasource
   extends PhabricatorTypeaheadDatasource {
 
+  public function isBrowsable() {
+    // TODO: Make this browsable.
+    return false;
+  }
+
+  public function getBrowseTitle() {
+    return pht('Browse Packages');
+  }
+
   public function getPlaceholderText() {
     return pht('Type a package name...');
   }

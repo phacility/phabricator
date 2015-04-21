@@ -3,6 +3,15 @@
 final class PhabricatorMetaMTAApplicationEmailDatasource
   extends PhabricatorTypeaheadDatasource {
 
+  public function isBrowsable() {
+    // TODO: Make this browsable.
+    return false;
+  }
+
+  public function getBrowseTitle() {
+    return pht('Browse Email Addresses');
+  }
+
   public function getPlaceholderText() {
     return pht('Type an application email address...');
   }

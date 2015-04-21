@@ -48,9 +48,8 @@ abstract class HeraldController extends PhabricatorController {
 
     $nav
       ->addLabel(pht('Utilities'))
-      ->addFilter('test',       pht('Test Console'))
-      ->addFilter('transcript', pht('Transcripts'))
-      ->addFilter('history',    pht('Edit Log'));
+      ->addFilter('test', pht('Test Console'))
+      ->addFilter('transcript', pht('Transcripts'));
 
     $nav->selectFilter(null);
 

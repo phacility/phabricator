@@ -13,7 +13,7 @@ final class DiffusionRawDiffQueryConduitAPIMethod
       '(optional) path.';
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'string';
   }
 

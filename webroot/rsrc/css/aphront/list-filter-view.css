@@ -24,6 +24,10 @@
   border-bottom: 1px solid {$lightblueborder};
 }
 
+.device-tablet .aphront-list-filter-wrap {
+  margin: 0 8px;
+}
+
 .aphront-list-filter-view-content .phui-form-view {
   border-left: none;
   border-right: none;

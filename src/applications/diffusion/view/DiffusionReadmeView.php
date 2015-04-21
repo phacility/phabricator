@@ -53,6 +53,7 @@ final class DiffusionReadmeView extends DiffusionView {
     $readme_path = $this->getPath();
     $readme_name = basename($readme_path);
     $interpreter = $this->getReadmeLanguage($readme_name);
+    require_celerity_resource('diffusion-readme-css');
 
     $content = $this->getContent();
 
@@ -86,7 +87,7 @@ final class DiffusionReadmeView extends DiffusionView {
         }
 
         $readme_content = $content;
-        $class = 'phabricator-remarkup';
+        $class = null;
         break;
       case 'rainbow':
         $content = id(new PhutilRainbowSyntaxHighlighter())
@@ -95,30 +96,25 @@ final class DiffusionReadmeView extends DiffusionView {
         $readme_content = phutil_escape_html_newlines($content);
 
         require_celerity_resource('syntax-highlighting-css');
-        $class = 'remarkup-code';
+        $class = 'remarkup-code ml';
         break;
       default:
       case 'text':
         $readme_content = phutil_escape_html_newlines($content);
+        $class = 'ml';
         break;
     }
 
-    $readme_content = phutil_tag(
-      'div',
-      array(
-        'class' => $class,
-      ),
-      $readme_content);
+    $readme_content = phutil_tag_div($class, $readme_content);
+    $header = id(new PHUIHeaderView())
+      ->setHeader($readme_name);
 
-    $box = new PHUIBoxView();
-    $box->appendChild($readme_content);
-    $box->addPadding(PHUI::PADDING_LARGE);
-
-    $object_box = id(new PHUIObjectBoxView())
-      ->setHeaderText($readme_name)
-      ->appendChild($box);
-
-    return $object_box;
+    return id(new PHUIDocumentView())
+      ->setFluid(true)
+      ->appendChild($readme_content)
+      ->addClass('diffusion-readme-view')
+      ->setHeader($header)
+      ->setFontKit(PHUIDocumentView::FONT_SOURCE_SANS);
   }
 
 }

@@ -256,7 +256,8 @@ abstract class PhabricatorController extends AphrontController {
         if ($must_sign_docs) {
           $controller = new LegalpadDocumentSignController();
           $this->getRequest()->setURIMap(array(
-            'id' => head($must_sign_docs)->getID(),));
+            'id' => head($must_sign_docs)->getID(),
+          ));
           $this->setCurrentApplication($legalpad);
           return $this->delegateToController($controller);
         } else {
@@ -426,6 +427,11 @@ abstract class PhabricatorController extends AphrontController {
     return $response;
   }
 
+  /**
+   * WARNING: Do not call this in new code.
+   *
+   * @deprecated See "Handles Technical Documentation".
+   */
   protected function loadViewerHandles(array $phids) {
     return id(new PhabricatorHandleQuery())
       ->setViewer($this->getRequest()->getUser())
@@ -553,7 +559,6 @@ abstract class PhabricatorController extends AphrontController {
       ->setViewer($viewer)
       ->withObjectPHIDs(array($object->getPHID()))
       ->needComments(true)
-      ->setReversePaging(false)
       ->executeWithCursorPager($pager);
     $xactions = array_reverse($xactions);
 

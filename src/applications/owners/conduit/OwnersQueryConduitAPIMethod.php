@@ -13,7 +13,7 @@ final class OwnersQueryConduitAPIMethod extends OwnersConduitAPIMethod {
       'of.) You should only provide at most one search query.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'userOwner'                  => 'optional string',
       'projectOwner'               => 'optional string',
@@ -23,11 +23,11 @@ final class OwnersQueryConduitAPIMethod extends OwnersConduitAPIMethod {
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'dict<phid -> dict of package info>';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
       'ERR-INVALID-USAGE' =>
         'Provide one of a single owner phid (user/project), a single '.

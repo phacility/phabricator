@@ -167,6 +167,10 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
     $reply_handler_reason = pht(
       'Reply handlers can no longer be overridden with configuration.');
 
+    $monospace_reason = pht(
+      'Phabricator no longer supports global customization of monospaced '.
+      'fonts.');
+
     $ancient_config += array(
       'phid.external-loaders' =>
         pht(
@@ -245,6 +249,9 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'metamta.precedence-bulk' => pht(
         'Phabricator now always sends transaction mail with '.
         '"Precedence: bulk" to improve deliverability.'),
+
+      'style.monospace' => $monospace_reason,
+      'style.monospace.windows' => $monospace_reason,
     );
 
     return $ancient_config;

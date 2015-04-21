@@ -15,6 +15,10 @@
   right: 0;
 }
 
+.device-desktop .page-has-warning .phui-workboard-view-shadow {
+  top: 148px;
+}
+
 .phui-workboard-view-shadow::-webkit-scrollbar {
   height: 12px;
   width: 12px;

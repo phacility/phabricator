@@ -31,6 +31,17 @@ JX.install('Prefab', {
       return select;
     },
 
+    newTokenizerFromTemplate: function(markup, config) {
+      var template = JX.$H(markup).getFragment().firstChild;
+      var container = JX.DOM.find(template, 'div', 'tokenizer-container');
+
+      container.id = '';
+      config.root = container;
+
+      var build = JX.Prefab.buildTokenizer(config);
+      build.node = template;
+      return build;
+    },
 
     /**
      * Build a Phabricator tokenizer out of a configuration with application
@@ -161,23 +172,33 @@ JX.install('Prefab', {
 
       var tokenizer = new JX.Tokenizer(root);
       tokenizer.setTypeahead(typeahead);
-      tokenizer.setRenderTokenCallback(function(value, key) {
+      tokenizer.setRenderTokenCallback(function(value, key, container) {
         var result = datasource.getResult(key);
 
         var icon;
+        var type;
+        var color;
         if (result) {
           icon = result.icon;
           value = result.displayName;
+          type = result.tokenType;
+          color = result.color;
         } else {
-          icon = config.icons[key];
+          icon = (config.icons || {})[key];
+          type = (config.types || {})[key];
+          color = (config.colors || {})[key];
         }
 
         if (icon) {
           icon = JX.Prefab._renderIcon(icon);
         }
 
-        // TODO: Maybe we should render these closed tags in grey? Figure out
-        // how we're going to use color.
+        type = type || 'object';
+        JX.DOM.alterClass(container, 'jx-tokenizer-token-' + type, true);
+
+        if (color) {
+          JX.DOM.alterClass(container, color, true);
+        }
 
         return [icon, value];
       });
@@ -192,6 +213,10 @@ JX.install('Prefab', {
 
       if (config.value) {
         tokenizer.setInitialValue(config.value);
+      }
+
+      if (config.browseURI) {
+        tokenizer.setBrowseURI(config.browseURI);
       }
 
       JX.Stratcom.addData(root, {'tokenizer' : tokenizer});
@@ -272,7 +297,10 @@ JX.install('Prefab', {
         icon: icon,
         closed: closed,
         type: fields[5],
-        sprite: fields[10]
+        sprite: fields[10],
+        color: fields[11],
+        tokenType: fields[12],
+        unique: fields[13] || false
       };
     },
 

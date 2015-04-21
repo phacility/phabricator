@@ -38,7 +38,7 @@
   font-weight: bold;
   font-size: 13px;
   color: {$darkgreytext};
-  width: 280px;
+  width: 314px;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
@@ -51,6 +51,10 @@
   font-size: 11px;
   margin-top: 2px;
   margin-left: 46px;
+  width: 290px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .phabricator-notification .conpherence-menu-item-view

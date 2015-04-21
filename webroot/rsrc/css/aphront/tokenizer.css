@@ -1,6 +1,7 @@
 /**
  * @provides aphront-tokenizer-control-css
  * @requires aphront-typeahead-control-css
+ * @requires phui-tag-view-css
  */
 
 body div.jx-tokenizer {
@@ -52,6 +53,7 @@ body input.jx-typeahead-placeholder {
 a.jx-tokenizer-x {
   margin-left: 4px;
   color: {$bluetext};
+  float: right;
 }
 
 a.jx-tokenizer-x:hover {
@@ -60,27 +62,65 @@ a.jx-tokenizer-x:hover {
 }
 
 a.jx-tokenizer-token {
-  padding: 2px 6px 3px;
+  padding: 2px 6px;
   border:  1px solid {$lightblueborder};
   margin: 3px 2px 0 4px;
-  background: #dee7f8;
+  background-color: {$sh-bluebackground};
   float: left;
   cursor: pointer;
   border-radius: 3px;
-  color: {$darkbluetext};
+  color: {$sh-bluetext};
   min-height: 16px;
 }
 
 a.jx-tokenizer-token:hover {
   text-decoration: none;
-  border-color: {$blueborder};
-  background: #CDD9F0;
+  border-color: {$sh-blueborder};
 }
 
 .jx-tokenizer-token .phui-icon-view {
   display: inline-block;
   margin: 2px 4px -3px 0;
-  color: {$bluetext};
+  color: {$sh-blueicon};
+}
+
+a.jx-tokenizer-token-function {
+  border-color: {$sh-lightgreyborder};
+  background: #fff;
+}
+
+a.jx-tokenizer-token-function:hover {
+  background: #fff;
+}
+
+a.jx-tokenizer-token-disabled {
+  background-color: {$sh-disabledbackground};
+  border-color: {$sh-lightdisabledborder};
+  color: {$sh-disabledtext};
+}
+
+a.jx-tokenizer-token-disabled:hover {
+  border-color: {$sh-disabledborder};
+  background-color: {$sh-disabledbackground};
+}
+
+.jx-tokenizer-token-disabled .phui-icon-view {
+  color: {$sh-disabledicon};
+}
+
+a.jx-tokenizer-token-invalid {
+  border-color: {$sh-lightredborder};
+  background: {$sh-redbackground};
+  color: {$sh-redtext};
+}
+
+a.jx-tokenizer-token-invalid:hover {
+  border-color: {$sh-redborder};
+  background: {$sh-redbackground};
+}
+
+.jx-tokenizer-token-invalid .phui-icon-view {
+  color: {$sh-redicon};
 }
 
 .tokenizer-result {
@@ -103,4 +143,38 @@ a.jx-tokenizer-token:hover {
 
 .tokenizer-closed {
   margin-top: 2px;
+}
+
+.jx-tokenizer-frame .button.tokenizer-browse-button {
+  display: none;
+}
+
+.jx-tokenizer-frame.has-browse .button.tokenizer-browse-button {
+  display: block;
+}
+
+.jx-tokenizer-frame.has-browse {
+  position: relative;
+}
+
+.jx-tokenizer-frame.has-browse div.jx-tokenizer-container {
+  padding-right: 32px;
+}
+
+.button.tokenizer-browse-button {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  bottom: 1px;
+  border-radius: 0;
+  border-right: none;
+  border-top: none;
+  border-bottom: none;
+  padding: 0;
+  width: 30px;
+}
+
+.button.tokenizer-browse-button .phui-icon-view {
+  top: 7px;
+  left: 9px;
 }

@@ -15,7 +15,8 @@
  */
 
 JX.behavior('aphlict-listen', function(config) {
-  var showing_reload = false;
+  var page_objects = config.pageObjects;
+  var reload_notification = null;
 
   JX.Stratcom.listen('aphlict-server-message', null, function(e) {
     var message = e.getData();
@@ -78,15 +79,28 @@ JX.behavior('aphlict-listen', function(config) {
 
     // If the notification affected an object on this page, show a
     // permanent reload notification if we aren't already.
-    if ((response.primaryObjectPHID in config.pageObjects) && !showing_reload) {
+    if ((response.primaryObjectPHID in page_objects) &&
+      reload_notification === null) {
+
       var reload = new JX.Notification()
         .setContent('Page updated, click to reload.')
         .alterClassName('jx-notification-alert', true)
         .setDuration(0);
-      reload.listen('activate', function() { JX.$U().go(); });
+      reload.listen(
+        'activate',
+        function() {
+          // double check we are still on the page where re-loading makes
+          // sense...!
+          if (response.primaryObjectPHID in page_objects) {
+            JX.$U().go();
+          }
+        });
       reload.show();
 
-      showing_reload = true;
+      reload_notification = {
+        dialog: reload,
+        phid: response.primaryObjectPHID
+      };
     }
   });
 
@@ -97,6 +111,25 @@ JX.behavior('aphlict-listen', function(config) {
   client
     .setHandler(onAphlictMessage)
     .start();
+
+  JX.Stratcom.listen(
+    'quicksand-redraw',
+    null,
+    function (e) {
+      var old_data = e.getData().oldResponse;
+      var new_data = e.getData().newResponse;
+      client.clearSubscriptions(old_data.subscriptions);
+      client.setSubscriptions(new_data.subscriptions);
+
+      page_objects = new_data.pageObjects;
+      if (reload_notification) {
+        if (reload_notification.phid in page_objects) {
+          return;
+        }
+        reload_notification.dialog.hide();
+        reload_notification = null;
+      }
+    });
 
   JX.Leader.listen('onReceiveBroadcast', function(message, is_leader) {
     if (message.type !== 'sound') {

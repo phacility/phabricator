@@ -8,6 +8,7 @@ final class PhabricatorMacroQuery
   private $authors;
   private $names;
   private $nameLike;
+  private $namePrefix;
   private $dateCreatedAfter;
   private $dateCreatedBefore;
   private $flagColor;
@@ -62,6 +63,11 @@ final class PhabricatorMacroQuery
 
   public function withNames(array $names) {
     $this->names = $names;
+    return $this;
+  }
+
+  public function withNamePrefix($prefix) {
+    $this->namePrefix = $prefix;
     return $this;
   }
 
@@ -141,6 +147,13 @@ final class PhabricatorMacroQuery
         $conn,
         'm.name IN (%Ls)',
         $this->names);
+    }
+
+    if (strlen($this->namePrefix)) {
+      $where[] = qsprintf(
+        $conn,
+        'm.name LIKE %>',
+        $this->namePrefix);
     }
 
     switch ($this->status) {
@@ -225,12 +238,41 @@ final class PhabricatorMacroQuery
     return $macros;
   }
 
-  protected function getPagingColumn() {
-    return 'm.id';
+  protected function getPrimaryTableAlias() {
+    return 'm';
   }
 
   public function getQueryApplicationClass() {
     return 'PhabricatorMacroApplication';
+  }
+
+  public function getOrderableColumns() {
+    return parent::getOrderableColumns() + array(
+      'name' => array(
+        'table' => 'm',
+        'column' => 'name',
+        'type' => 'string',
+        'reverse' => true,
+        'unique' => true,
+      ),
+    );
+  }
+
+  protected function getPagingValueMap($cursor, array $keys) {
+    $macro = $this->loadCursorObject($cursor);
+    return array(
+      'id' => $macro->getID(),
+      'name' => $macro->getName(),
+    );
+  }
+
+  public function getBuiltinOrders() {
+    return array(
+      'name' => array(
+        'vector' => array('name'),
+        'name' => pht('Name'),
+      ),
+    ) + parent::getBuiltinOrders();
   }
 
 }

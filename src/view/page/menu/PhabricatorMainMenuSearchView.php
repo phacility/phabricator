@@ -75,7 +75,7 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
           'button',
           array(
             'id' => $button_id,
-            'class' => 'phui-icon-view phui-font-fa fa-search lightgreytext',
+            'class' => 'phui-icon-view phui-font-fa fa-search',
             ),
           $search_text),
         $primary_input,

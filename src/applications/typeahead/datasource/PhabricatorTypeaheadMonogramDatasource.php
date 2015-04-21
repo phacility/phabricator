@@ -3,6 +3,17 @@
 final class PhabricatorTypeaheadMonogramDatasource
   extends PhabricatorTypeaheadDatasource {
 
+  public function isBrowsable() {
+    // This source isn't meaningfully browsable. Although it's technically
+    // possible to let users browse through every object on an install, there
+    // is no use case for it and it doesn't seem worth building.
+    return false;
+  }
+
+  public function getBrowseTitle() {
+    return pht('Browse Objects');
+  }
+
   public function getPlaceholderText() {
     return pht('Type an object name...');
   }

@@ -12,7 +12,7 @@ final class DiffusionMergedCommitsQueryConduitAPIMethod
       'Merged commit information for a specific commit in a repository.';
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'array';
   }
 

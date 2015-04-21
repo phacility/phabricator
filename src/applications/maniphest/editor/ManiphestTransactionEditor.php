@@ -3,8 +3,6 @@
 final class ManiphestTransactionEditor
   extends PhabricatorApplicationTransactionEditor {
 
-  private $heraldEmailPHIDs = array();
-
   public function getEditorApplicationClass() {
     return 'PhabricatorManiphestApplication';
   }
@@ -388,22 +386,12 @@ final class ManiphestTransactionEditor
   }
 
   protected function getMailTo(PhabricatorLiskDAO $object) {
-    return array(
-      $object->getOwnerPHID(),
-      $this->getActingAsPHID(),
-    );
-  }
-
-  protected function getMailCC(PhabricatorLiskDAO $object) {
     $phids = array();
 
-    foreach (parent::getMailCC($object) as $phid) {
-      $phids[] = $phid;
+    if ($object->getOwnerPHID()) {
+      $phids[] = $object->getOwnerPHID();
     }
-
-    foreach ($this->heraldEmailPHIDs as $phid) {
-      $phids[] = $phid;
-    }
+    $phids[] = $this->getActingAsPHID();
 
     return $phids;
   }
@@ -521,7 +509,6 @@ final class ManiphestTransactionEditor
     HeraldAdapter $adapter,
     HeraldTranscript $transcript) {
 
-    $this->heraldEmailPHIDs = $adapter->getEmailPHIDs();
     $xactions = array();
 
     $cc_phids = $adapter->getCcPHIDs();
@@ -625,12 +612,13 @@ final class ManiphestTransactionEditor
 
     $query = id(new ManiphestTaskQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->setOrderBy(ManiphestTaskQuery::ORDER_PRIORITY)
       ->withPriorities(array($priority))
       ->setLimit(1);
 
     if ($is_end) {
-      $query->setReversePaging(true);
+      $query->setOrderVector(array('-priority', '-subpriority', '-id'));
+    } else {
+      $query->setOrderVector(array('priority', 'subpriority', 'id'));
     }
 
     $result = $query->executeOne();
@@ -688,13 +676,18 @@ final class ManiphestTransactionEditor
         // Get all of the tasks with the same subpriority as the adjacent
         // task, including the adjacent task itself.
         $shift_base = $adjacent->getSubpriority();
-        $shift_all = id(new ManiphestTaskQuery())
+        $query = id(new ManiphestTaskQuery())
           ->setViewer(PhabricatorUser::getOmnipotentUser())
-          ->setOrderBy(ManiphestTaskQuery::ORDER_PRIORITY)
           ->withPriorities(array($adjacent->getPriority()))
-          ->withSubpriorities(array($shift_base))
-          ->setReversePaging(!$is_after)
-          ->execute();
+          ->withSubpriorities(array($shift_base));
+
+        if (!$is_after) {
+          $query->setOrderVector(array('-priority', '-subpriority', '-id'));
+        } else {
+          $query->setOrderVector(array('priority', 'subpriority', 'id'));
+        }
+
+        $shift_all = $query->execute();
         $shift_last = last($shift_all);
 
         // Find the subpriority before or after the task at the end of the

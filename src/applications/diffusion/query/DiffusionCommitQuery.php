@@ -149,8 +149,8 @@ final class DiffusionCommitQuery
     return $this->identifierMap;
   }
 
-  protected function getPagingColumn() {
-    return 'commit.id';
+  protected function getPrimaryTableAlias() {
+    return 'commit';
   }
 
   protected function willExecute() {
@@ -279,7 +279,7 @@ final class DiffusionCommitQuery
     return $commits;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->repositoryPHIDs !== null) {
@@ -511,7 +511,7 @@ final class DiffusionCommitQuery
     }
   }
 
-  private function buildJoinClause($conn_r) {
+  protected function buildJoinClause(AphrontDatabaseConnection $conn_r) {
     $joins = array();
     $audit_request = new PhabricatorRepositoryAuditRequest();
 
@@ -542,7 +542,7 @@ final class DiffusionCommitQuery
     }
   }
 
-  private function buildGroupClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildGroupClause(AphrontDatabaseConnection $conn_r) {
     $should_group = $this->shouldJoinAudits();
 
     // TODO: Currently, the audit table is missing a unique key, so we may

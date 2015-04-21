@@ -10,7 +10,7 @@ final class FileUploadConduitAPIMethod extends FileConduitAPIMethod {
     return 'Upload a file to the server.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'data_base64' => 'required nonempty base64-bytes',
       'name' => 'optional string',
@@ -19,13 +19,8 @@ final class FileUploadConduitAPIMethod extends FileConduitAPIMethod {
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty guid';
-  }
-
-  public function defineErrorTypes() {
-    return array(
-    );
   }
 
   protected function execute(ConduitAPIRequest $request) {

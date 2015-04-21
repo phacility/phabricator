@@ -1,0 +1,27 @@
+/**
+ * @provides conpherence-transaction-css
+ */
+
+.conpherence-transaction-view {
+  position: relative;
+}
+
+.conpherence-transaction-content {
+  overflow: auto;
+}
+
+.conpherence-transaction-header .phui-link-person {
+  font-weight: bold;
+  color: {$darkbluetext};
+}
+
+.conpherence-transaction-view.date-marker {
+  border-top: 1px solid {$thinblueborder};
+}
+.conpherence-transaction-view.date-marker .date {
+  position: relative;
+  top: -11px;
+  background-color: #fff;
+  color: {$darkbluetext};
+  font-weight: bold;
+}

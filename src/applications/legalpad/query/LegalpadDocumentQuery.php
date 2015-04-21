@@ -134,7 +134,7 @@ final class LegalpadDocumentQuery
     return $documents;
   }
 
-  private function buildJoinClause($conn_r) {
+  protected function buildJoinClause(AphrontDatabaseConnection $conn_r) {
     $joins = array();
 
     if ($this->contributorPHIDs !== null) {
@@ -157,7 +157,7 @@ final class LegalpadDocumentQuery
     return implode(' ', $joins);
   }
 
-  private function buildGroupClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildGroupClause(AphrontDatabaseConnection $conn_r) {
     if ($this->contributorPHIDs || $this->signerPHIDs) {
       return 'GROUP BY d.id';
     } else {
@@ -165,7 +165,7 @@ final class LegalpadDocumentQuery
     }
   }
 
-  protected function buildWhereClause($conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->ids !== null) {

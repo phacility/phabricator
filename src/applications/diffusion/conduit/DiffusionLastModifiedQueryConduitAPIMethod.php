@@ -11,7 +11,7 @@ final class DiffusionLastModifiedQueryConduitAPIMethod
     return pht('Get the commits at which paths were last modified.');
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'map<string, string>';
   }
 

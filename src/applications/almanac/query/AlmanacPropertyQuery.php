@@ -71,7 +71,7 @@ final class AlmanacPropertyQuery
     return $properties;
   }
 
-  protected function buildWhereClause($conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->ids !== null) {

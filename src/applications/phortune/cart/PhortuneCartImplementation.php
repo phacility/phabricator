@@ -16,6 +16,10 @@ abstract class PhortuneCartImplementation {
   abstract public function getCancelURI(PhortuneCart $cart);
   abstract public function getDoneURI(PhortuneCart $cart);
 
+  public function getDescription(PhortuneCart $cart) {
+    return null;
+  }
+
   public function getDoneActionName(PhortuneCart $cart) {
     return pht('Return to Application');
   }

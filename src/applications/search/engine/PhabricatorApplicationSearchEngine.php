@@ -9,6 +9,7 @@
  * @task builtin    Builtin Queries
  * @task uri        Query URIs
  * @task dates      Date Filters
+ * @task order      Result Ordering
  * @task read       Reading Utilities
  * @task exec       Paging and Executing Queries
  * @task render     Rendering Results
@@ -218,6 +219,23 @@ abstract class PhabricatorApplicationSearchEngine {
     return $named_queries;
   }
 
+  protected function setQueryProjects(
+    PhabricatorCursorPagedPolicyAwareQuery $query,
+    PhabricatorSavedQuery $saved) {
+
+    $datasource = id(new PhabricatorProjectLogicalDatasource())
+      ->setViewer($this->requireViewer());
+
+    $projects = $saved->getParameter('projects', array());
+    $constraints = $datasource->evaluateTokens($projects);
+
+    if ($constraints) {
+      $query->withEdgeLogicConstraints(
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+        $constraints);
+    }
+  }
+
 
 /* -(  Applications  )------------------------------------------------------- */
 
@@ -360,8 +378,7 @@ abstract class PhabricatorApplicationSearchEngine {
    * @param AphrontRequest  Request to read user PHIDs from.
    * @param string          Key to read in the request.
    * @param list<const>     Other permitted PHID types.
-   * @return list<phid>     List of user PHIDs.
-   *
+   * @return list<phid>     List of user PHIDs and selector functions.
    * @task read
    */
   protected function readUsersFromRequest(
@@ -374,7 +391,7 @@ abstract class PhabricatorApplicationSearchEngine {
     $phids = array();
     $names = array();
     $allow_types = array_fuse($allow_types);
-    $user_type = PhabricatorPHIDConstants::PHID_TYPE_USER;
+    $user_type = PhabricatorPeopleUserPHIDType::TYPECONST;
     foreach ($list as $item) {
       $type = phid_get_type($item);
       if ($type == $user_type) {
@@ -382,7 +399,13 @@ abstract class PhabricatorApplicationSearchEngine {
       } else if (isset($allow_types[$type])) {
         $phids[] = $item;
       } else {
-        $names[] = $item;
+        if (PhabricatorTypeaheadDatasource::isFunctionToken($item)) {
+          // If this is a function, pass it through unchanged; we'll evaluate
+          // it later.
+          $phids[] = $item;
+        } else {
+          $names[] = $item;
+        }
       }
     }
 
@@ -398,6 +421,71 @@ abstract class PhabricatorApplicationSearchEngine {
     }
 
     return $phids;
+  }
+
+
+  /**
+   * Read a list of project PHIDs from a request in a flexible way.
+   *
+   * @param AphrontRequest  Request to read user PHIDs from.
+   * @param string          Key to read in the request.
+   * @return list<phid>     List of projet PHIDs and selector functions.
+   * @task read
+   */
+  protected function readProjectsFromRequest(AphrontRequest $request, $key) {
+    $list = $this->readListFromRequest($request, $key);
+
+    $phids = array();
+    $slugs = array();
+    $project_type = PhabricatorProjectProjectPHIDType::TYPECONST;
+    foreach ($list as $item) {
+      $type = phid_get_type($item);
+      if ($type == $project_type) {
+        $phids[] = $item;
+      } else {
+        if (PhabricatorTypeaheadDatasource::isFunctionToken($item)) {
+          // If this is a function, pass it through unchanged; we'll evaluate
+          // it later.
+          $phids[] = $item;
+        } else {
+          $slugs[] = $item;
+        }
+      }
+    }
+
+    if ($slugs) {
+      $projects = id(new PhabricatorProjectQuery())
+        ->setViewer($this->requireViewer())
+        ->withSlugs($slugs)
+        ->execute();
+      foreach ($projects as $project) {
+        $phids[] = $project->getPHID();
+      }
+      $phids = array_unique($phids);
+    }
+
+    return $phids;
+  }
+
+
+  /**
+   * Read a list of subscribers from a request in a flexible way.
+   *
+   * @param AphrontRequest  Request to read PHIDs from.
+   * @param string          Key to read in the request.
+   * @return list<phid>     List of object PHIDs.
+   * @task read
+   */
+  protected function readSubscribersFromRequest(
+    AphrontRequest $request,
+    $key) {
+    return $this->readUsersFromRequest(
+      $request,
+      $key,
+      array(
+        PhabricatorProjectProjectPHIDType::TYPECONST,
+        PhabricatorMailingListListPHIDType::TYPECONST,
+      ));
   }
 
 
@@ -576,6 +664,63 @@ abstract class PhabricatorApplicationSearchEngine {
           ->setValue($end_str));
   }
 
+
+/* -(  Result Ordering  )---------------------------------------------------- */
+
+
+  /**
+   * Save order selection to a @{class:PhabricatorSavedQuery}.
+   */
+  protected function saveQueryOrder(
+    PhabricatorSavedQuery $saved,
+    AphrontRequest $request) {
+
+    $saved->setParameter('order', $request->getStr('order'));
+
+    return $this;
+  }
+
+
+  /**
+   * Set query ordering from a saved value.
+   */
+  protected function setQueryOrder(
+    PhabricatorCursorPagedPolicyAwareQuery $query,
+    PhabricatorSavedQuery $saved) {
+
+    $order = $saved->getParameter('order');
+    $builtin = $query->getBuiltinOrders();
+    if (strlen($order) && isset($builtin[$order])) {
+      $query->setOrder($order);
+    } else {
+      // If the order is invalid or not available, we choose the first
+      // builtin order. This isn't always the default order for the query,
+      // but is the first value in the "Order" dropdown, and makes the query
+      // behavior more consistent with the UI. In queries where the two
+      // orders differ, this order is the preferred order for humans.
+      $query->setOrder(head_key($builtin));
+    }
+
+    return $this;
+  }
+
+
+
+  protected function appendOrderFieldsToForm(
+    AphrontFormView $form,
+    PhabricatorSavedQuery $saved,
+    PhabricatorCursorPagedPolicyAwareQuery $query) {
+
+    $orders = $query->getBuiltinOrders();
+    $orders = ipull($orders, 'name');
+
+    $form->appendControl(
+      id(new AphrontFormSelectControl())
+        ->setLabel(pht('Order'))
+        ->setName('order')
+        ->setOptions($orders)
+        ->setValue($saved->getParameter('order')));
+  }
 
 /* -(  Paging and Executing Queries  )--------------------------------------- */
 

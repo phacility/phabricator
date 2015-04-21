@@ -62,7 +62,8 @@ final class DifferentialRevisionCloseDetailsController
         phutil_tag(
           'a',
           array(
-            'href' => $obj_handle->getURI(),),
+            'href' => $obj_handle->getURI(),
+          ),
           $obj_handle->getName()));
     } else if ($revision_match_data['foundURI']) {
       $body_why[] = pht(
@@ -96,7 +97,8 @@ final class DifferentialRevisionCloseDetailsController
       $diff_link = phutil_tag(
         'a',
         array(
-          'href' => $obj_handle->getURI(),),
+          'href' => $obj_handle->getURI(),
+        ),
         $obj_handle->getName());
       $body_why = pht(
         'This commit and the active diff of %s had the same %s hash '.

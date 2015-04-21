@@ -30,6 +30,7 @@ JX.install('Quicksand', {
     _cursor: 0,
     _current: 0,
     _content: {},
+    _responses: {},
     _history: [],
     _started: false,
     _frameNode: null,
@@ -39,7 +40,7 @@ JX.install('Quicksand', {
     /**
      * Start Quicksand, accepting a fate of eternal torment.
      */
-    start: function() {
+    start: function(first_response) {
       var self = JX.Quicksand;
       if (self._started) {
         return;
@@ -49,10 +50,11 @@ JX.install('Quicksand', {
       JX.Stratcom.listen('history:change', null, self._onchange);
 
       self._started = true;
-      self._history.push({
-        id: 0,
-        path: self._getRelativeURI(window.location)
-      });
+      var path = self._getRelativeURI(window.location);
+      var id = self._id;
+      self._history.push({path: path, id: id});
+
+      self._responses[id] = first_response;
     },
 
 
@@ -141,18 +143,18 @@ JX.install('Quicksand', {
       var discard = (self._history.length - self._cursor) - 1;
       for (var ii = 0; ii < discard; ii++) {
         var obsolete = self._history.pop();
-        self._content[obsolete.id] = false;
+        self._responses[obsolete.id] = false;
       }
 
-      // Set up the new state and fire a request to fetch the page content.
+      // Set up the new state and fire a request to fetch the page data.
       var path = self._getRelativeURI(uri);
       var id = ++self._id;
 
-      JX.History.push(path, id);
-
       self._history.push({path: path, id: id});
+      JX.History.push(path, {quicksand: id});
+
       self._cursor = (self._history.length - 1);
-      self._content[id] = null;
+      self._responses[id] = null;
       self._current = id;
 
       new JX.Workflow(href, {__quicksand__: true})
@@ -162,7 +164,7 @@ JX.install('Quicksand', {
 
 
     /**
-     * Receive a response from the server with page content.
+     * Receive a response from the server with page data e.g. content.
      *
      * Usually we'll dump it into the page, but if the user clicked very fast
      * it might already be out of date.
@@ -173,10 +175,10 @@ JX.install('Quicksand', {
       // Before possibly updating the document, check if this response is still
       // relevant.
 
-      // We don't save the new content if the user has already destroyed
+      // We don't save the new response if the user has already destroyed
       // the navigation. They can do this by pressing back, then clicking
-      // another link before the content can load.
-      if (self._content[id] === false) {
+      // another link before the response can load.
+      if (self._responses[id] === false) {
         return;
       }
 
@@ -185,6 +187,7 @@ JX.install('Quicksand', {
       // save it.
       var new_content = JX.$H(r.content).getFragment();
       self._content[id] = new_content;
+      self._responses[id] = r;
 
       // If it's the current page, draw it into the browser. It might not be
       // the current page if the user already clicked another link.
@@ -208,7 +211,7 @@ JX.install('Quicksand', {
         return;
       }
 
-      if (!self._content[self._current]) {
+      if (!self._responses[self._current]) {
         // If we don't have this page yet, we can't draw it. We'll draw it
         // when it arrives.
         return;
@@ -225,10 +228,18 @@ JX.install('Quicksand', {
 
       // Now, replace it with the new content.
       JX.DOM.setContent(self._frameNode, self._content[self._current]);
+      // Let other things redraw, etc as necessary
+      JX.Stratcom.invoke(
+        'quicksand-redraw',
+        null,
+        {
+          newResponse: self._responses[self._current],
+          oldResponse: self._responses[self._onpage]
+        });
+
+      self._responses[self._onpage] = self._responses[self._current];
       self._onpage = self._current;
-
       // Scroll to the top of the page and trigger any layout adjustments.
-
       // TODO: Maybe store the scroll position?
       JX.DOM.scrollToPosition(0, 0);
       JX.Stratcom.invoke('resize');
@@ -245,7 +256,7 @@ JX.install('Quicksand', {
       var self = JX.Quicksand;
 
       var data = e.getData();
-      data.state = data.state || null;
+      data.state = (data.state && data.state.quicksand) || null;
 
       // Check if we're going back to the first page we started Quicksand on.
       // We don't have a state value, but can look at the path.

@@ -18,19 +18,14 @@ final class UserFindConduitAPIMethod extends UserConduitAPIMethod {
     return pht('Lookup PHIDs by username. Obsoleted by "user.query".');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'aliases' => 'required list<string>',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict<string, phid>';
-  }
-
-  public function defineErrorTypes() {
-    return array(
-    );
   }
 
   protected function execute(ConduitAPIRequest $request) {

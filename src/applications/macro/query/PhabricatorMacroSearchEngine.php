@@ -24,6 +24,8 @@ final class PhabricatorMacroSearchEngine
     $saved->setParameter('createdEnd', $request->getStr('createdEnd'));
     $saved->setParameter('flagColor', $request->getStr('flagColor', '-1'));
 
+    $this->saveQueryOrder($saved, $request);
+
     return $saved;
   }
 
@@ -33,6 +35,8 @@ final class PhabricatorMacroSearchEngine
       ->withIDs($saved->getParameter('ids', array()))
       ->withPHIDs($saved->getParameter('phids', array()))
       ->withAuthorPHIDs($saved->getParameter('authorPHIDs', array()));
+
+    $this->setQueryOrder($query, $saved);
 
     $status = $saved->getParameter('status');
     $options = PhabricatorMacroQuery::getStatusOptions();
@@ -72,13 +76,13 @@ final class PhabricatorMacroSearchEngine
 
   public function buildSearchForm(
     AphrontFormView $form,
-    PhabricatorSavedQuery $saved_query) {
+    PhabricatorSavedQuery $saved) {
 
-    $author_phids = $saved_query->getParameter('authorPHIDs', array());
-    $status = $saved_query->getParameter('status');
-    $names = implode(', ', $saved_query->getParameter('names', array()));
-    $like = $saved_query->getParameter('nameLike');
-    $color = $saved_query->getParameter('flagColor', '-1');
+    $author_phids = $saved->getParameter('authorPHIDs', array());
+    $status = $saved->getParameter('status');
+    $names = implode(', ', $saved->getParameter('names', array()));
+    $like = $saved->getParameter('nameLike');
+    $color = $saved->getParameter('flagColor', '-1');
 
     $form
       ->appendChild(
@@ -112,11 +116,16 @@ final class PhabricatorMacroSearchEngine
 
     $this->buildDateRange(
       $form,
-      $saved_query,
+      $saved,
       'createdStart',
       pht('Created After'),
       'createdEnd',
       pht('Created Before'));
+
+    $this->appendOrderFieldsToForm(
+      $form,
+      $saved,
+      new PhabricatorMacroQuery());
   }
 
   protected function getURI($path) {

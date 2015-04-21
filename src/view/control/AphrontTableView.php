@@ -11,7 +11,6 @@ final class AphrontTableView extends AphrontView {
   protected $zebraStripes = true;
   protected $noDataString;
   protected $className;
-  protected $tallTable;
   protected $columnVisibility = array();
   private $deviceVisibility = array();
 
@@ -73,11 +72,6 @@ final class AphrontTableView extends AphrontView {
 
   public function setDeviceReadyTable($ready) {
     $this->deviceReadyTable = $ready;
-    return $this;
-  }
-
-  public function setTallTable($tall) {
-    $this->tallTable = $tall;
     return $this;
   }
 
@@ -295,9 +289,6 @@ final class AphrontTableView extends AphrontView {
     if ($this->className !== null) {
       $classes[] = $this->className;
     }
-    if ($this->tallTable) {
-      $classes[] = 'aphront-tall-table-view';
-    }
     if ($this->deviceReadyTable) {
       $classes[] = 'aphront-table-view-device-ready';
     }
@@ -305,7 +296,8 @@ final class AphrontTableView extends AphrontView {
     $html = phutil_tag(
       'table',
       array(
-        'class' => implode(' ', $classes),),
+        'class' => implode(' ', $classes),
+      ),
       $table);
     return phutil_tag_div('aphront-table-wrap', $html);
   }

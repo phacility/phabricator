@@ -1,13 +1,16 @@
 <?php
 
 final class PhrictionCreateConduitAPIMethod extends PhrictionConduitAPIMethod {
+
   public function getAPIMethodName() {
     return 'phriction.create';
   }
+
   public function getMethodDescription() {
     return pht('Create a Phriction document.');
   }
-  public function defineParamTypes() {
+
+  protected function defineParamTypes() {
     return array(
       'slug'          => 'required string',
       'title'         => 'required string',
@@ -15,13 +18,11 @@ final class PhrictionCreateConduitAPIMethod extends PhrictionConduitAPIMethod {
       'description'   => 'optional string',
     );
   }
-  public function defineReturnType() {
+
+  protected function defineReturnType() {
     return 'nonempty dict';
   }
-  public function defineErrorTypes() {
-    return array(
-    );
-  }
+
   protected function execute(ConduitAPIRequest $request) {
     $slug = $request->getValue('slug');
     if (!strlen($slug)) {

@@ -192,7 +192,7 @@ button.link:hover {
   background: #fff;
   margin-top: -1px;
   padding: 5px 0;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+  box-shadow: {$dropshadow};
   border: 1px solid {$lightgreyborder};
   border-bottom: 1px solid {$greyborder};
   border-radius: 3px;

@@ -61,7 +61,7 @@ JX.behavior('durable-column', function(config, statics) {
     }
   }
 
-  function _toggleColumn(explicit) {
+  function _toggleColumn() {
     userVisible = !userVisible;
     _updateColumnVisibility();
 
@@ -100,7 +100,8 @@ JX.behavior('durable-column', function(config, statics) {
 
   scrollbar = new JX.Scrollbar(_getColumnScrollNode());
 
-  JX.Quicksand.start();
+  JX.Quicksand.setFrame(userVisible ? quick : null);
+  JX.Quicksand.start(config.quicksandConfig);
 
   /* Conpherence Thread Manager configuration - lots of display
    * callbacks.
@@ -140,7 +141,10 @@ JX.behavior('durable-column', function(config, statics) {
     _focusColumnTextareaNode();
   });
 
-  threadManager.setDidSendMessageCallback(function(r) {
+  threadManager.setDidSendMessageCallback(function(r, non_update) {
+    if (non_update) {
+      return;
+    }
     var messages = _getColumnMessagesNode();
     JX.DOM.appendContent(messages, JX.$H(r.transactions));
     scrollbar.scrollTo(messages.scrollHeight);
@@ -304,12 +308,6 @@ JX.behavior('durable-column', function(config, statics) {
       // From here on, interpret this as a "send" action, not a literal
       // newline.
       e.kill();
-
-      var textarea = _getColumnTextareaNode();
-      if (!textarea.value.length) {
-        // If there's no text, don't try to submit the form.
-        return;
-      }
 
       _sendMessage(e);
     });

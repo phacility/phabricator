@@ -13,12 +13,37 @@ abstract class ConduitAPIMethod
   const METHOD_STATUS_DEPRECATED  = 'deprecated';
 
   abstract public function getMethodDescription();
-  abstract public function defineParamTypes();
-  abstract public function defineReturnType();
-  abstract public function defineErrorTypes();
+  abstract protected function defineParamTypes();
+  abstract protected function defineReturnType();
+
+  protected function defineErrorTypes() {
+    return array();
+  }
+
   abstract protected function execute(ConduitAPIRequest $request);
 
+
   public function __construct() {}
+
+  public function getParamTypes() {
+    $types = $this->defineParamTypes();
+
+    $query = $this->newQueryObject();
+    if ($query) {
+      $types['order'] = 'order';
+      $types += $this->getPagerParamTypes();
+    }
+
+    return $types;
+  }
+
+  public function getReturnType() {
+    return $this->defineReturnType();
+  }
+
+  public function getErrorTypes() {
+    return $this->defineErrorTypes();
+  }
 
   /**
    * This is mostly for compatibility with
@@ -53,7 +78,7 @@ abstract class ConduitAPIMethod
   }
 
   public function getErrorDescription($error_code) {
-    return idx($this->defineErrorTypes(), $error_code, 'Unknown Error');
+    return idx($this->getErrorTypes(), $error_code, 'Unknown Error');
   }
 
   public function getRequiredScope() {
@@ -233,6 +258,48 @@ abstract class ConduitAPIMethod
     );
 
     return $results;
+  }
+
+
+/* -(  Implementing Query Methods  )----------------------------------------- */
+
+
+  public function newQueryObject() {
+    return null;
+  }
+
+
+  protected function newQueryForRequest(ConduitAPIRequest $request) {
+    $query = $this->newQueryObject();
+
+    if (!$query) {
+      throw new Exception(
+        pht(
+          'You can not call newQueryFromRequest() in this method ("%s") '.
+          'because it does not implement newQueryObject().',
+          get_class($this)));
+    }
+
+    if (!($query instanceof PhabricatorCursorPagedPolicyAwareQuery)) {
+      throw new Exception(
+        pht(
+          'Call to method newQueryObject() did not return an object of class '.
+          '"%s".',
+          'PhabricatorCursorPagedPolicyAwareQuery'));
+    }
+
+    $query->setViewer($request->getUser());
+
+    $order = $request->getValue('order');
+    if ($order !== null) {
+      if (is_scalar($order)) {
+        $query->setOrder($order);
+      } else {
+        $query->setOrderVector($order);
+      }
+    }
+
+    return $query;
   }
 
 

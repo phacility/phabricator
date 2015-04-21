@@ -95,21 +95,13 @@ th.aphront-table-view-sortable-selected {
 */
 
 .aphront-table-view th {
-  padding: 8px 10px;
+  padding: 10px 10px;
   font-size: 13px;
 }
 
-.aphront-table-view.aphront-tall-table-view th {
-  padding: 10px 10px;
-}
-
 .aphront-table-view td {
-  padding: 6px 10px;
-  font-size: 12px;
-}
-
-.aphront-table-view.aphront-tall-table-view td {
   padding: 8px 10px;
+  font-size: 12px;
 }
 
 .device-tablet .aphront-table-view td,

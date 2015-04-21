@@ -2,15 +2,35 @@
 
 final class ConpherenceTransactionView extends AphrontView {
 
+  private $conpherenceThread;
   private $conpherenceTransaction;
   private $handles;
   private $markupEngine;
+  private $epoch;
+  private $epochHref;
+  private $contentSource;
+  private $anchorName;
+  private $anchorText;
+  private $classes = array();
+  private $timeOnly;
   private $showImages = true;
-  private $showContentSource = true;
 
-  public function setMarkupEngine(PhabricatorMarkupEngine $markup_engine) {
-    $this->markupEngine = $markup_engine;
+  public function setConpherenceThread(ConpherenceThread $t) {
+    $this->conpherenceThread = $t;
     return $this;
+  }
+
+  private function getConpherenceThread() {
+    return $this->conpherenceThread;
+  }
+
+  public function setConpherenceTransaction(ConpherenceTransaction $tx) {
+    $this->conpherenceTransaction = $tx;
+    return $this;
+  }
+
+  private function getConpherenceTransaction() {
+    return $this->conpherenceTransaction;
   }
 
   public function setHandles(array $handles) {
@@ -23,13 +43,44 @@ final class ConpherenceTransactionView extends AphrontView {
     return $this->handles;
   }
 
-  public function setConpherenceTransaction(ConpherenceTransaction $tx) {
-    $this->conpherenceTransaction = $tx;
+  public function setMarkupEngine(PhabricatorMarkupEngine $markup_engine) {
+    $this->markupEngine = $markup_engine;
     return $this;
   }
 
-  private function getConpherenceTransaction() {
-    return $this->conpherenceTransaction;
+  private function getMarkupEngine() {
+    return $this->markupEngine;
+  }
+
+  public function setEpoch($epoch, $epoch_href = null) {
+    $this->epoch = $epoch;
+    $this->epochHref = $epoch_href;
+    return $this;
+  }
+
+  public function setContentSource(PhabricatorContentSource $source) {
+    $this->contentSource = $source;
+    return $this;
+  }
+
+  private function getContentSource() {
+    return $this->contentSource;
+  }
+
+  public function setAnchor($anchor_name, $anchor_text) {
+    $this->anchorName = $anchor_name;
+    $this->anchorText = $anchor_text;
+    return $this;
+  }
+
+  public function addClass($class) {
+    $this->classes[] = $class;
+    return $this;
+  }
+
+  public function setTimeOnly($time) {
+    $this->timeOnly = $time;
+    return $this;
   }
 
   public function setShowImages($bool) {
@@ -41,24 +92,21 @@ final class ConpherenceTransactionView extends AphrontView {
     return $this->showImages;
   }
 
-  public function setShowContentSource($bool) {
-    $this->showContentSource = $bool;
-    return $this;
-  }
-
-  private function getShowContentSource() {
-    return $this->showContentSource;
-  }
-
   public function render() {
     $user = $this->getUser();
+    if (!$user) {
+      throw new Exception(pht('Call setUser() before render()!'));
+    }
+
+    require_celerity_resource('conpherence-transaction-css');
+
     $transaction = $this->getConpherenceTransaction();
     switch ($transaction->getTransactionType()) {
       case ConpherenceTransactionType::TYPE_DATE_MARKER:
         return phutil_tag(
           'div',
           array(
-            'class' => 'date-marker',
+            'class' => 'conpherence-transaction-view date-marker',
           ),
           array(
             phutil_tag(
@@ -74,20 +122,135 @@ final class ConpherenceTransactionView extends AphrontView {
         break;
     }
 
-    $handles = $this->getHandles();
-    $transaction->setHandles($handles);
-    $author = $handles[$transaction->getAuthorPHID()];
-    $transaction_view = id(new PhabricatorTransactionView())
-      ->setUser($user)
-      ->setEpoch($transaction->getDateCreated())
-      ->setTimeOnly(true);
-    if ($this->getShowContentSource()) {
-      $transaction_view->setContentSource($transaction->getContentSource());
+    $info = $this->renderTransactionInfo();
+    $actions = $this->renderTransactionActions();
+    $image = $this->renderTransactionImage();
+    $content = $this->renderTransactionContent();
+    $classes = implode(' ', $this->classes);
+
+    $transaction_id = $this->anchorName ? 'anchor-'.$this->anchorName : null;
+
+    $header = phutil_tag_div(
+      'conpherence-transaction-header grouped',
+      array($actions, $info));
+
+    return phutil_tag(
+      'div',
+      array(
+        'class' => 'conpherence-transaction-view '.$classes,
+        'id'    => $transaction_id,
+      ),
+      array(
+        $image,
+        phutil_tag_div('conpherence-transaction-detail grouped',
+          array($header, $content)),
+      ));
+  }
+
+  private function renderTransactionInfo() {
+    $info = array();
+
+    if ($this->getContentSource()) {
+      $content_source = id(new PhabricatorContentSourceView())
+        ->setContentSource($this->getContentSource())
+        ->setUser($this->user)
+        ->render();
+      if ($content_source) {
+        $info[] = $content_source;
+      }
     }
 
+    if ($this->epoch) {
+      if ($this->timeOnly) {
+        $epoch = phabricator_time($this->epoch, $this->user);
+      } else {
+        $epoch = phabricator_datetime($this->epoch, $this->user);
+      }
+      if ($this->epochHref) {
+        $epoch = phutil_tag(
+          'a',
+          array(
+            'href' => $this->epochHref,
+            'class' => 'epoch-link',
+          ),
+          $epoch);
+      }
+      $info[] = $epoch;
+    }
+
+    if ($this->anchorName) {
+      Javelin::initBehavior('phabricator-watch-anchor');
+
+      $anchor = id(new PhabricatorAnchorView())
+        ->setAnchorName($this->anchorName)
+        ->render();
+
+      $info[] = hsprintf(
+        '%s%s',
+        $anchor,
+        phutil_tag(
+          'a',
+          array(
+            'href'  => '#'.$this->anchorName,
+            'class' => 'anchor-link',
+          ),
+          $this->anchorText));
+    }
+
+    $info = phutil_implode_html(" \xC2\xB7 ", $info);
+
+    return phutil_tag(
+      'span',
+      array(
+        'class' => 'conpherence-transaction-info',
+      ),
+      $info);
+  }
+
+  private function renderTransactionActions() {
+    $transaction = $this->getConpherenceTransaction();
+
+    switch ($transaction->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_COMMENT:
+        $handles = $this->getHandles();
+        $author = $handles[$transaction->getAuthorPHID()];
+        $actions = array($author->renderLink());
+        break;
+      default:
+        $actions = null;
+        break;
+    }
+
+    return $actions;
+  }
+
+  private function renderTransactionImage() {
+    $image = null;
+    if ($this->getShowImages()) {
+      $transaction = $this->getConpherenceTransaction();
+      switch ($transaction->getTransactionType()) {
+        case PhabricatorTransactions::TYPE_COMMENT:
+          $handles = $this->getHandles();
+          $author = $handles[$transaction->getAuthorPHID()];
+          $image_uri = $author->getImageURI();
+          $image = phutil_tag(
+            'span',
+            array(
+              'class' => 'conpherence-transaction-image',
+              'style' => 'background-image: url('.$image_uri.');',
+            ));
+          break;
+      }
+    }
+    return $image;
+  }
+
+  private function renderTransactionContent() {
+    $transaction = $this->getConpherenceTransaction();
     $content = null;
     $content_class = null;
     $content = null;
+    $handles = $this->getHandles();
     switch ($transaction->getTransactionType()) {
       case ConpherenceTransactionType::TYPE_FILES:
         $content = $transaction->getTitle();
@@ -97,24 +260,22 @@ final class ConpherenceTransactionView extends AphrontView {
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
+      case PhabricatorTransactions::TYPE_EDGE:
         $content = $transaction->getTitle();
-        $transaction_view->addClass('conpherence-edited');
+        $this->addClass('conpherence-edited');
         break;
       case PhabricatorTransactions::TYPE_COMMENT:
-        $transaction_view->addClass('conpherence-comment');
+        $this->addClass('conpherence-comment');
+        $author = $handles[$transaction->getAuthorPHID()];
         $comment = $transaction->getComment();
-        $content = $this->markupEngine->getOutput(
+        $content = $this->getMarkupEngine()->getOutput(
           $comment,
           PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
-        $content_class = 'conpherence-message phabricator-remarkup';
-        if ($this->getShowImages()) {
-          $transaction_view->setImageURI($author->getImageURI());
-        }
-        $transaction_view->setActions(array($author->renderLink()));
-        break;
+        $content_class = 'conpherence-message';
+       break;
     }
 
-    $transaction_view->appendChild(
+    $this->appendChild(
       phutil_tag(
         'div',
         array(
@@ -122,112 +283,9 @@ final class ConpherenceTransactionView extends AphrontView {
         ),
         $content));
 
-    return $transaction_view->render();
-  }
-
-  public static function renderTransactions(
-    PhabricatorUser $user,
-    ConpherenceThread $conpherence,
-    $full_display = true) {
-
-    $transactions = $conpherence->getTransactions();
-    $oldest_transaction_id = 0;
-    $too_many = ConpherenceThreadQuery::TRANSACTION_LIMIT + 1;
-    if (count($transactions) == $too_many) {
-      $last_transaction = end($transactions);
-      unset($transactions[$last_transaction->getID()]);
-      $oldest_transaction = end($transactions);
-      $oldest_transaction_id = $oldest_transaction->getID();
-    }
-    $transactions = array_reverse($transactions);
-    $handles = $conpherence->getHandles();
-    $rendered_transactions = array();
-    $engine = id(new PhabricatorMarkupEngine())
-      ->setViewer($user)
-      ->setContextObject($conpherence);
-    foreach ($transactions as $key => $transaction) {
-      if ($transaction->shouldHide()) {
-        unset($transactions[$key]);
-        continue;
-      }
-      if ($transaction->getComment()) {
-        $engine->addObject(
-          $transaction->getComment(),
-          PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
-      }
-    }
-    $engine->process();
-    // we're going to insert a dummy date marker transaction for breaks
-    // between days. some setup required!
-    $previous_transaction = null;
-    $date_marker_transaction = id(new ConpherenceTransaction())
-      ->setTransactionType(ConpherenceTransactionType::TYPE_DATE_MARKER)
-      ->makeEphemeral();
-    $date_marker_transaction_view = id(new ConpherenceTransactionView())
-      ->setUser($user)
-      ->setConpherenceTransaction($date_marker_transaction)
-      ->setHandles($handles)
-      ->setShowImages($full_display)
-      ->setShowContentSource($full_display)
-      ->setMarkupEngine($engine);
-    foreach ($transactions as $transaction) {
-      if ($previous_transaction) {
-        $previous_day = phabricator_format_local_time(
-          $previous_transaction->getDateCreated(),
-          $user,
-          'Ymd');
-        $current_day = phabricator_format_local_time(
-          $transaction->getDateCreated(),
-          $user,
-          'Ymd');
-        // date marker transaction time!
-        if ($previous_day != $current_day) {
-          $date_marker_transaction->setDateCreated(
-            $transaction->getDateCreated());
-          $rendered_transactions[] = $date_marker_transaction_view->render();
-        }
-      }
-      $rendered_transactions[] = id(new ConpherenceTransactionView())
-        ->setUser($user)
-        ->setConpherenceTransaction($transaction)
-        ->setHandles($handles)
-        ->setMarkupEngine($engine)
-        ->setShowImages($full_display)
-        ->setShowContentSource($full_display)
-        ->render();
-      $previous_transaction = $transaction;
-    }
-    $latest_transaction_id = $transaction->getID();
-
-    return array(
-      'transactions' => $rendered_transactions,
-      'latest_transaction' => $transaction,
-      'latest_transaction_id' => $latest_transaction_id,
-      'oldest_transaction_id' => $oldest_transaction_id,
-    );
-  }
-
-  public static function renderMessagePaneContent(
-    array $transactions,
-    $oldest_transaction_id) {
-
-    $scrollbutton = '';
-    if ($oldest_transaction_id) {
-      $scrollbutton = javelin_tag(
-        'a',
-        array(
-          'href' => '#',
-          'mustcapture' => true,
-          'sigil' => 'show-older-messages',
-          'class' => 'conpherence-show-older-messages',
-          'meta' => array(
-            'oldest_transaction_id' => $oldest_transaction_id,
-          ),
-        ),
-        pht('Show Older Messages'));
-    }
-
-    return hsprintf('%s%s', $scrollbutton, $transactions);
+    return phutil_tag_div(
+      'conpherence-transaction-content',
+      $this->renderChildren());
   }
 
 }

@@ -13,7 +13,7 @@ final class HarbormasterSendMessageConduitAPIMethod
       'external system.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     $type_const = $this->formatStringConstants(array('pass', 'fail'));
 
     return array(
@@ -22,12 +22,8 @@ final class HarbormasterSendMessageConduitAPIMethod
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'void';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

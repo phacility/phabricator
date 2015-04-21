@@ -6,7 +6,6 @@ final class PhabricatorAuditEditor
   const MAX_FILES_SHOWN_IN_EMAIL = 1000;
 
   private $auditReasonMap = array();
-  private $heraldEmailPHIDs = array();
   private $affectedFiles;
   private $rawPatch;
 
@@ -627,9 +626,6 @@ final class PhabricatorAuditEditor
 
   protected function getMailTo(PhabricatorLiskDAO $object) {
     $phids = array();
-    if ($this->heraldEmailPHIDs) {
-      $phids = $this->heraldEmailPHIDs;
-    }
 
     if ($object->getAuthorPHID()) {
       $phids[] = $object->getAuthorPHID();
@@ -924,8 +920,6 @@ final class PhabricatorAuditEditor
       ->setTransactionType(PhabricatorTransactions::TYPE_SUBSCRIBERS)
       ->setNewValue($add_ccs);
 
-    $this->heraldEmailPHIDs = $adapter->getEmailPHIDs();
-
     HarbormasterBuildable::applyBuildPlans(
       $object->getPHID(),
       $object->getRepository()->getPHID(),
@@ -967,8 +961,8 @@ final class PhabricatorAuditEditor
 
     // not every code path loads the repository so tread carefully
     // TODO: They should, and then we should simplify this.
-    if ($object->getRepository($assert_attached = false)) {
-      $repository = $object->getRepository();
+    $repository = $object->getRepository($assert_attached = false);
+    if ($repository != PhabricatorLiskDAO::ATTACHABLE) {
       if (!$repository->shouldPublish()) {
         return false;
       }

@@ -42,13 +42,7 @@ final class PhabricatorRepositorySearchEngine
       $query->withStatus($status);
     }
 
-    $order = $saved->getParameter('order');
-    $order = idx($this->getOrderValues(), $order);
-    if ($order) {
-      $query->setOrder($order);
-    } else {
-      $query->setOrder(head($this->getOrderValues()));
-    }
+    $this->setQueryOrder($query, $saved);
 
     $hosted = $saved->getParameter('hosted');
     $hosted = idx($this->getHostedValues(), $hosted);
@@ -125,15 +119,12 @@ final class PhabricatorRepositorySearchEngine
         $name,
         isset($types[$key]));
     }
+    $form->appendChild($type_control);
 
-    $form
-      ->appendChild($type_control)
-      ->appendChild(
-        id(new AphrontFormSelectControl())
-          ->setName('order')
-          ->setLabel(pht('Order'))
-          ->setValue($saved_query->getParameter('order'))
-          ->setOptions($this->getOrderOptions()));
+    $this->appendOrderFieldsToForm(
+      $form,
+      $saved_query,
+      new PhabricatorRepositoryQuery());
   }
 
   protected function getURI($path) {
@@ -177,26 +168,6 @@ final class PhabricatorRepositorySearchEngine
       '' => PhabricatorRepositoryQuery::STATUS_ALL,
       'open' => PhabricatorRepositoryQuery::STATUS_OPEN,
       'closed' => PhabricatorRepositoryQuery::STATUS_CLOSED,
-    );
-  }
-
-  private function getOrderOptions() {
-    return array(
-      'committed' => pht('Most Recent Commit'),
-      'name' => pht('Name'),
-      'callsign' => pht('Callsign'),
-      'created' => pht('Date Created'),
-      'size' => pht('Commit Count'),
-    );
-  }
-
-  private function getOrderValues() {
-    return array(
-      'committed' => PhabricatorRepositoryQuery::ORDER_COMMITTED,
-      'name' => PhabricatorRepositoryQuery::ORDER_NAME,
-      'callsign' => PhabricatorRepositoryQuery::ORDER_CALLSIGN,
-      'created' => PhabricatorRepositoryQuery::ORDER_CREATED,
-      'size' => PhabricatorRepositoryQuery::ORDER_SIZE,
     );
   }
 
