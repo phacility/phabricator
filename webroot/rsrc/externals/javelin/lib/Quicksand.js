@@ -236,9 +236,8 @@ JX.install('Quicksand', {
           newResponse: self._responses[self._current],
           oldResponse: self._responses[self._onpage]
         });
-
-      self._responses[self._onpage] = self._responses[self._current];
       self._onpage = self._current;
+
       // Scroll to the top of the page and trigger any layout adjustments.
       // TODO: Maybe store the scroll position?
       JX.DOM.scrollToPosition(0, 0);

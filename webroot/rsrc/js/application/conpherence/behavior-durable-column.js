@@ -341,6 +341,14 @@ JX.behavior('durable-column', function(config, statics) {
       }
     });
 
+  JX.Stratcom.listen(
+    'quicksand-redraw',
+    null,
+    function (e) {
+      var new_data = e.getData().newResponse;
+      JX.Title.setTitle(new_data.title);
+    });
+
   _updateColumnVisibility();
 
 });

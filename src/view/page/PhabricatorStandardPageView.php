@@ -583,7 +583,9 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
   }
 
   private function buildQuicksandConfig() {
-    return $this->buildAphlictListenConfigData();
+    return array(
+      'title' => $this->getTitle(),
+    ) + $this->buildAphlictListenConfigData();
   }
 
   private function buildAphlictListenConfigData() {
