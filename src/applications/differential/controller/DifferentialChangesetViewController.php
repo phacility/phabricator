@@ -313,15 +313,15 @@ final class DifferentialChangesetViewController extends DifferentialController {
     }
     $changesets += mpull($all, null, 'getID');
 
-    $id_map = array(
-      $left->getID() => $left->getID(),
-      $right->getID() => $right->getID(),
-    );
+    $id_map = array();
+    foreach ($all as $changeset) {
+      $id_map[$changeset->getID()] = $changeset->getID();
+    }
 
-    $name_map = array(
-      $left->getFilename() => $left->getID(),
-      $right->getFilename() => $right->getID(),
-    );
+    $name_map = array();
+    foreach ($all as $changeset) {
+      $name_map[$changeset->getFilename()] = $changeset->getID();
+    }
 
     $results = array();
     foreach ($inlines as $inline) {
@@ -335,7 +335,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
 
       $changeset = idx($changesets, $changeset_id);
       if (!$changeset) {
-        // Just discard this inline with bogus data.
+        // Just discard this inline, as it has bogus data.
         continue;
       }
 
@@ -357,6 +357,20 @@ final class DifferentialChangesetViewController extends DifferentialController {
           ->setIsGhost(true);
 
         $results[] = $inline;
+      }
+    }
+
+    // Filter out the inlines we ported forward which won't be visible because
+    // they appear on the wrong side of a file.
+    $keep_map = array();
+    $keep_map[$left->getID()][(int)$left_new] = true;
+    $keep_map[$right->getID()][(int)$right_new] = true;
+    foreach ($results as $key => $inline) {
+      $is_new = (int)$inline->getIsNewFile();
+      $changeset_id = $inline->getChangesetID();
+      if (!isset($keep_map[$changeset_id][$is_new])) {
+        unset($results[$key]);
+        continue;
       }
     }
 
