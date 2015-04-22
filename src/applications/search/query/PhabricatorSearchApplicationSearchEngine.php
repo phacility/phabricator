@@ -88,17 +88,11 @@ final class PhabricatorSearchApplicationSearchEngine
     $type_values = $saved->getParameter('types', array());
     $type_values = array_fuse($type_values);
 
-    $types = self::getIndexableDocumentTypes($this->requireViewer());
-
-    $types_control = id(new AphrontFormCheckboxControl())
-      ->setLabel(pht('Document Types'));
-    foreach ($types as $type => $name) {
-      $types_control->addCheckbox(
-        'types[]',
-        $type,
-        $name,
-        isset($type_values[$type]));
-    }
+    $types_control = id(new AphrontFormTokenizerControl())
+      ->setLabel(pht('Document Types'))
+      ->setName('types')
+      ->setDatasource(new PhabricatorSearchDocumentTypeDatasource())
+      ->setValue($type_values);
 
     $form
       ->appendChild(
@@ -115,7 +109,7 @@ final class PhabricatorSearchApplicationSearchEngine
           ->setName('query')
           ->setValue($saved->getParameter('query')))
       ->appendChild($status_control)
-      ->appendChild($types_control)
+      ->appendControl($types_control)
       ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setName('authorPHIDs')
@@ -207,13 +201,6 @@ final class PhabricatorSearchApplicationSearchEngine
     }
 
     asort($results);
-
-    // Put tasks first, see T4606.
-    $results = array_select_keys(
-      $results,
-      array(
-        ManiphestTaskPHIDType::TYPECONST,
-      )) + $results;
 
     return $results;
   }

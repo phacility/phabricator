@@ -12,6 +12,10 @@ final class PassphraseCredentialPHIDType extends PhabricatorPHIDType {
     return new PassphraseCredential();
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorPassphraseApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {

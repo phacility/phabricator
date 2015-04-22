@@ -24,7 +24,7 @@ final class HeraldDifferentialRevisionAdapter
     return 'PhabricatorDifferentialApplication';
   }
 
-  public function newObject() {
+  protected function newObject() {
     return new DifferentialRevision();
   }
 

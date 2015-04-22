@@ -13,7 +13,7 @@ final class HeraldPholioMockAdapter extends HeraldAdapter {
     return pht('React to mocks being created or updated.');
   }
 
-  public function newObject() {
+  protected function newObject() {
     return new PholioMock();
   }
 
