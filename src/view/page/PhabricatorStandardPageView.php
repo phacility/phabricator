@@ -244,15 +244,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
       Javelin::initBehavior(
         'dark-console',
-        array(
-          // NOTE: We use a generic label here to prevent input reflection
-          // and mitigate compression attacks like BREACH. See discussion in
-          // T3684.
-          'uri' => pht('Main Request'),
-          'selected' => $user ? $user->getConsoleTab() : null,
-          'visible'  => $user ? (int)$user->getConsoleVisible() : true,
-          'headers' => $headers,
-        ));
+        $this->getConsoleConfig());
 
       // Change this to initBehavior when there is some behavior to initialize
       require_celerity_resource('javelin-behavior-error-log');
@@ -533,6 +525,28 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     return $this->getRequest()->getApplicationConfiguration()->getConsole();
   }
 
+  private function getConsoleConfig() {
+    $user = $this->getRequest()->getUser();
+
+    $headers = array();
+    if (DarkConsoleXHProfPluginAPI::isProfilerStarted()) {
+      $headers[DarkConsoleXHProfPluginAPI::getProfilerHeader()] = 'page';
+    }
+    if (DarkConsoleServicesPlugin::isQueryAnalyzerRequested()) {
+      $headers[DarkConsoleServicesPlugin::getQueryAnalyzerHeader()] = true;
+    }
+
+    return array(
+      // NOTE: We use a generic label here to prevent input reflection
+      // and mitigate compression attacks like BREACH. See discussion in
+      // T3684.
+      'uri' => pht('Main Request'),
+      'selected' => $user ? $user->getConsoleTab() : null,
+      'visible'  => $user ? (int)$user->getConsoleVisible() : true,
+      'headers' => $headers,
+    );
+  }
+
   private function renderFooter() {
     if (!$this->getShowChrome()) {
       return null;
@@ -590,18 +604,42 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
   }
 
   private function buildQuicksandConfig() {
-    $user = $this->getRequest()->getUser();
+    $viewer = $this->getRequest()->getUser();
 
     $dropdown_query = id(new AphlictDropdownDataQuery())
-      ->setViewer($user);
+      ->setViewer($viewer);
     $dropdown_query->execute();
 
+    $rendered_dropdowns = array();
+    $applications = array(
+      'PhabricatorHelpApplication',
+    );
+    foreach ($applications as $application_class) {
+      if (!PhabricatorApplication::isClassInstalledForViewer(
+        $application_class,
+        $viewer)) {
+        continue;
+      }
+      $application = PhabricatorApplication::getByClass($application_class);
+      $rendered_dropdowns[$application_class] =
+        $application->buildMainMenuExtraNodes(
+          $viewer,
+          $this->getController());
+    }
+
+    $console_config = null;
+    $console = $this->getConsole();
+    if ($console) {
+      $console_config = $this->getConsoleConfig();
+    }
     return array(
       'title' => $this->getTitle(),
       'aphlictDropdownData' => array(
         $dropdown_query->getNotificationData(),
         $dropdown_query->getConpherenceData(),
       ),
+      'aphlictDropdowns' => $rendered_dropdowns,
+      'consoleConfig' => $console_config,
     ) + $this->buildAphlictListenConfigData();
   }
 
