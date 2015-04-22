@@ -175,6 +175,7 @@ final class DifferentialChangesetViewController extends DifferentialController {
 
     $can_mark = false;
     $object_owner_phid = null;
+    $revision = null;
     if ($revision_id) {
       $revision = id(new DifferentialRevisionQuery())
         ->setViewer($viewer)
