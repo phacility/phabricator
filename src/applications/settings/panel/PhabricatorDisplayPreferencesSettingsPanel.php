@@ -100,6 +100,10 @@ EXAMPLE;
       'callsign, %%%% by literal %%. For documentation, see: %s',
       $editor_doc_link);
 
+    $font_instructions = pht('Overrides default fonts in tools like '.
+      'Differential. Input should be valid CSS "font" declaration, such as '.
+      '"13px Consolas"');
+
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->appendChild(
@@ -136,8 +140,7 @@ EXAMPLE;
         id(new AphrontFormTextControl())
         ->setLabel(pht('Monospaced Font'))
         ->setName($pref_monospaced)
-        ->setCaption(
-          pht('Overrides default fonts in tools like Differential.'))
+        ->setCaption($font_instructions)
         ->setValue($preferences->getPreference($pref_monospaced)))
       ->appendChild(
         id(new AphrontFormMarkupControl())
