@@ -287,7 +287,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       $user = $request->getUser();
       if ($user) {
         $monospaced = $user->loadPreferences()->getPreference(
-            PhabricatorUserPreferences::PREFERENCE_MONOSPACED);
+          PhabricatorUserPreferences::PREFERENCE_MONOSPACED);
       }
     }
 
@@ -295,12 +295,19 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
     $font_css = null;
     if (!empty($monospaced)) {
+      // We can't print this normally because escaping quotation marks will
+      // break the CSS. Instead, filter it strictly and then mark it as safe.
+      $monospaced = new PhutilSafeHTML(
+        PhabricatorUserPreferences::filterMonospacedCSSRule(
+          $monospaced));
+
       $font_css = hsprintf(
         '<style type="text/css">'.
         '.PhabricatorMonospaced, '.
         '.phabricator-remarkup .remarkup-code-block '.
           '.remarkup-code { font: %s !important; } '.
-        '</style>', $monospaced);
+        '</style>',
+        $monospaced);
     }
 
     return hsprintf(
