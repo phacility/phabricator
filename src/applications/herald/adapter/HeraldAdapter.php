@@ -244,7 +244,7 @@ abstract class HeraldAdapter {
   }
 
   protected function newTransaction() {
-    $object = $this->getObject();
+    $object = $this->newObject();
 
     if (!($object instanceof PhabricatorApplicationTransactionInterface)) {
       throw new Exception(
@@ -256,8 +256,6 @@ abstract class HeraldAdapter {
 
     return $object->getApplicationTransactionTemplate();
   }
-
-
 
 
   /**
@@ -272,6 +270,26 @@ abstract class HeraldAdapter {
   abstract public function getAdapterContentDescription();
   abstract public function getAdapterApplicationClass();
   abstract public function getObject();
+
+
+  /**
+   * Return a new characteristic object for this adapter.
+   *
+   * The adapter will use this object to test for interfaces, generate
+   * transactions, and interact with custom fields.
+   *
+   * Adapters must return an object from this method to enable custom
+   * field rules and various implicit actions.
+   *
+   * Normally, you'll return an empty version of the adapted object:
+   *
+   *   return new ApplicationObject();
+   *
+   * @return null|object Template object.
+   */
+  protected function newObject() {
+    return null;
+  }
 
   public function supportsRuleType($rule_type) {
     return false;
@@ -771,7 +789,19 @@ abstract class HeraldAdapter {
 
   public function getActions($rule_type) {
     $custom_actions = $this->getCustomActionsForRuleType($rule_type);
-    return mpull($custom_actions, 'getActionKey');
+    $custom_actions = mpull($custom_actions, 'getActionKey');
+
+    $actions = $custom_actions;
+
+    $object = $this->newObject();
+
+    if (($object instanceof PhabricatorProjectInterface)) {
+      if ($rule_type == HeraldRuleTypeConfig::RULE_TYPE_GLOBAL) {
+        $actions[] = self::ACTION_ADD_PROJECTS;
+      }
+    }
+
+    return $actions;
   }
 
   public function getActionNameMap($rule_type) {
@@ -1292,27 +1322,6 @@ abstract class HeraldAdapter {
 
 
   /**
-   * Return an object which custom fields can be generated from while editing
-   * rules. Adapters must return an object from this method to enable custom
-   * field rules.
-   *
-   * Normally, you'll return an empty version of the adapted object, assuming
-   * it implements @{interface:PhabricatorCustomFieldInterface}:
-   *
-   *   return new ApplicationObject();
-   *
-   * This is normally the only adapter method you need to override to enable
-   * Herald rules to run against custom fields.
-   *
-   * @return null|PhabricatorCustomFieldInterface Template object.
-   * @task customfield
-   */
-  protected function getCustomFieldTemplateObject() {
-    return null;
-  }
-
-
-  /**
    * Returns the prefix used to namespace Herald fields which are based on
    * custom fields.
    *
@@ -1363,8 +1372,8 @@ abstract class HeraldAdapter {
       $this->customFields = null;
 
 
-      $template_object = $this->getCustomFieldTemplateObject();
-      if ($template_object) {
+      $template_object = $this->newObject();
+      if ($template_object instanceof PhabricatorCustomFieldInterface) {
         $object = $this->getObject();
         if (!$object) {
           $object = $template_object;

@@ -26,6 +26,10 @@ final class HeraldCommitAdapter extends HeraldAdapter {
     return 'PhabricatorDiffusionApplication';
   }
 
+  public function newObject() {
+    return new PhabricatorRepositoryCommit();
+  }
+
   public function getObject() {
     return $this->commit;
   }

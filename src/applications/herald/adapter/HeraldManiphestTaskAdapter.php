@@ -6,6 +6,10 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
   private $ccPHIDs = array();
   private $assignPHID;
 
+  protected function newObject() {
+    return new ManiphestTask();
+  }
+
   public function getAdapterApplicationClass() {
     return 'PhabricatorManiphestApplication';
   }
@@ -90,7 +94,6 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
             self::ACTION_ADD_CC,
             self::ACTION_EMAIL,
             self::ACTION_ASSIGN_TASK,
-            self::ACTION_ADD_PROJECTS,
             self::ACTION_NOTHING,
           ),
           parent::getActions($rule_type));
@@ -178,10 +181,6 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
       }
     }
     return $result;
-  }
-
-  protected function getCustomFieldTemplateObject() {
-    return new ManiphestTask();
   }
 
 }

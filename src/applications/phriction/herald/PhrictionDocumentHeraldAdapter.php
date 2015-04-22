@@ -13,6 +13,10 @@ final class PhrictionDocumentHeraldAdapter extends HeraldAdapter {
     return pht('React to wiki documents being created or updated.');
   }
 
+  public function newObject() {
+    return new PhrictionDocument();
+  }
+
   public function getObject() {
     return $this->document;
   }
