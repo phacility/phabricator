@@ -21,6 +21,8 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   private $dateCreatedBefore;
   private $dateModifiedAfter;
   private $dateModifiedBefore;
+  private $subpriorityMin;
+  private $subpriorityMax;
 
   private $fullTextSearch   = '';
 
@@ -137,6 +139,12 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   public function withSubpriorities(array $subpriorities) {
     $this->subpriorities = $subpriorities;
+    return $this;
+  }
+
+  public function withSubpriorityBetween($min, $max) {
+    $this->subpriorityMin = $min;
+    $this->subpriorityMax = $max;
     return $this;
   }
 
@@ -379,6 +387,20 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         $conn,
         'task.subpriority IN (%Lf)',
         $this->subpriorities);
+    }
+
+    if ($this->subpriorityMin) {
+      $where[] = qsprintf(
+        $conn,
+        'task.subpriority >= %f',
+        $this->subpriorityMin);
+    }
+
+    if ($this->subpriorityMax) {
+      $where[] = qsprintf(
+        $conn,
+        'task.subpriority <= %f',
+        $this->subpriorityMax);
     }
 
     $where[] = $this->buildPagingClause($conn);
