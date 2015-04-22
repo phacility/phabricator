@@ -322,14 +322,6 @@ final class HeraldDifferentialRevisionAdapter
             true,
             pht('OK, did nothing.'));
           break;
-        case self::ACTION_FLAG:
-          $result[] = parent::applyFlagEffect(
-            $effect,
-            $this->revision->getPHID());
-          break;
-        case self::ACTION_EMAIL:
-          $result[] = $this->applyEmailEffect($effect);
-          break;
         case self::ACTION_ADD_CC:
           $base_target = $effect->getTarget();
           $forbidden = array();
@@ -412,14 +404,7 @@ final class HeraldDifferentialRevisionAdapter
             pht('Required signatures.'));
           break;
         default:
-          $custom_result = parent::handleCustomHeraldEffect($effect);
-          if ($custom_result === null) {
-            throw new Exception(pht(
-              "No rules to handle action '%s'.",
-              $action));
-          }
-
-          $result[] = $custom_result;
+          $result[] = $this->applyStandardEffect($effect);
           break;
       }
     }

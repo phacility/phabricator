@@ -1000,65 +1000,6 @@ abstract class HeraldAdapter {
     );
   }
 
-
-  public static function applyFlagEffect(HeraldEffect $effect, $phid) {
-    $color = $effect->getTarget();
-
-    $rule = $effect->getRule();
-    $user = $rule->getAuthor();
-
-    $flag = PhabricatorFlagQuery::loadUserFlag($user, $phid);
-    if ($flag) {
-      return new HeraldApplyTranscript(
-        $effect,
-        false,
-        pht('Object already flagged.'));
-    }
-
-    $handle = id(new PhabricatorHandleQuery())
-      ->setViewer($user)
-      ->withPHIDs(array($phid))
-      ->executeOne();
-
-    $flag = new PhabricatorFlag();
-    $flag->setOwnerPHID($user->getPHID());
-    $flag->setType($handle->getType());
-    $flag->setObjectPHID($handle->getPHID());
-
-    // TOOD: Should really be transcript PHID, but it doesn't exist yet.
-    $flag->setReasonPHID($user->getPHID());
-
-    $flag->setColor($color);
-    $flag->setNote(
-      pht('Flagged by Herald Rule "%s".', $rule->getName()));
-    $flag->save();
-
-    return new HeraldApplyTranscript(
-      $effect,
-      true,
-      pht('Added flag.'));
-  }
-
-  protected function applyEmailEffect(HeraldEffect $effect) {
-
-    foreach ($effect->getTarget() as $phid) {
-      $this->emailPHIDs[$phid] = $phid;
-
-      // If this is a personal rule, we'll force delivery of a real email. This
-      // effect is stronger than notification preferences, so you get an actual
-      // email even if your preferences are set to "Notify" or "Ignore".
-      $rule = $effect->getRule();
-      if ($rule->isPersonalRule()) {
-        $this->forcedEmailPHIDs[$phid] = $phid;
-      }
-    }
-
-    return new HeraldApplyTranscript(
-      $effect,
-      true,
-      pht('Added mailable to mail targets.'));
-  }
-
   public static function getAllAdapters() {
     static $adapters;
     if (!$adapters) {
@@ -1529,6 +1470,103 @@ abstract class HeraldAdapter {
     }
 
     return $field->getHeraldFieldValueType($condition);
+  }
+
+
+/* -(  Applying Effects  )--------------------------------------------------- */
+
+
+  /**
+   * @task apply
+   */
+  protected function applyStandardEffect(HeraldEffect $effect) {
+    $action = $effect->getAction();
+
+    switch ($action) {
+      case self::ACTION_FLAG:
+        return $this->applyFlagEffect($effect);
+      case self::ACTION_EMAIL:
+        return $this->applyEmailEffect($effect);
+      default:
+        break;
+    }
+
+    $result = $this->handleCustomHeraldEffect($effect);
+
+    if (!$result) {
+      throw new Exception(
+        pht(
+          'No custom action exists to handle rule action "%s".',
+          $action));
+    }
+
+    return $result;
+  }
+
+
+  /**
+   * @task apply
+   */
+  private function applyFlagEffect(HeraldEffect $effect) {
+    $phid = $this->getPHID();
+    $color = $effect->getTarget();
+
+    $rule = $effect->getRule();
+    $user = $rule->getAuthor();
+
+    $flag = PhabricatorFlagQuery::loadUserFlag($user, $phid);
+    if ($flag) {
+      return new HeraldApplyTranscript(
+        $effect,
+        false,
+        pht('Object already flagged.'));
+    }
+
+    $handle = id(new PhabricatorHandleQuery())
+      ->setViewer($user)
+      ->withPHIDs(array($phid))
+      ->executeOne();
+
+    $flag = new PhabricatorFlag();
+    $flag->setOwnerPHID($user->getPHID());
+    $flag->setType($handle->getType());
+    $flag->setObjectPHID($handle->getPHID());
+
+    // TOOD: Should really be transcript PHID, but it doesn't exist yet.
+    $flag->setReasonPHID($user->getPHID());
+
+    $flag->setColor($color);
+    $flag->setNote(
+      pht('Flagged by Herald Rule "%s".', $rule->getName()));
+    $flag->save();
+
+    return new HeraldApplyTranscript(
+      $effect,
+      true,
+      pht('Added flag.'));
+  }
+
+
+  /**
+   * @task apply
+   */
+  private function applyEmailEffect(HeraldEffect $effect) {
+    foreach ($effect->getTarget() as $phid) {
+      $this->emailPHIDs[$phid] = $phid;
+
+      // If this is a personal rule, we'll force delivery of a real email. This
+      // effect is stronger than notification preferences, so you get an actual
+      // email even if your preferences are set to "Notify" or "Ignore".
+      $rule = $effect->getRule();
+      if ($rule->isPersonalRule()) {
+        $this->forcedEmailPHIDs[$phid] = $phid;
+      }
+    }
+
+    return new HeraldApplyTranscript(
+      $effect,
+      true,
+      pht('Added mailable to mail targets.'));
   }
 
 

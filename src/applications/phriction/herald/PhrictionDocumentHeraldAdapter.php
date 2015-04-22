@@ -132,23 +132,8 @@ final class PhrictionDocumentHeraldAdapter extends HeraldAdapter {
             true,
             pht('Added address to cc list.'));
           break;
-        case self::ACTION_FLAG:
-          $result[] = parent::applyFlagEffect(
-            $effect,
-            $this->getDocument()->getPHID());
-          break;
-        case self::ACTION_EMAIL:
-          $result[] = $this->applyEmailEffect($effect);
-          break;
         default:
-          $custom_result = parent::handleCustomHeraldEffect($effect);
-          if ($custom_result === null) {
-            throw new Exception(pht(
-              "No rules to handle action '%s'.",
-              $action));
-          }
-
-          $result[] = $custom_result;
+          $result[] = $this->applyStandardEffect($effect);
           break;
       }
     }

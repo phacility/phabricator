@@ -172,14 +172,6 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
             true,
             pht('Added addresses to cc list.'));
           break;
-        case self::ACTION_EMAIL:
-          $result[] = $this->applyEmailEffect($effect);
-          break;
-        case self::ACTION_FLAG:
-          $result[] = parent::applyFlagEffect(
-            $effect,
-            $this->getTask()->getPHID());
-          break;
         case self::ACTION_ASSIGN_TASK:
           $target_array = $effect->getTarget();
           $assign_phid = reset($target_array);
@@ -199,14 +191,7 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
             pht('Added projects.'));
           break;
         default:
-          $custom_result = parent::handleCustomHeraldEffect($effect);
-          if ($custom_result === null) {
-            throw new Exception(pht(
-              "No rules to handle action '%s'.",
-              $action));
-          }
-
-          $result[] = $custom_result;
+          $result[] = $this->applyStandardEffect($effect);
           break;
       }
     }
