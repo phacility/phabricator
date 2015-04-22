@@ -57,4 +57,10 @@ final class PhabricatorPassphraseApplication extends PhabricatorApplication {
     );
   }
 
+  public function getApplicationSearchDocumentTypes() {
+    return array(
+      PassphraseCredentialPHIDType::TYPECONST,
+    );
+  }
+
 }

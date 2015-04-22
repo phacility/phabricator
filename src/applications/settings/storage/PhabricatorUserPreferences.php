@@ -19,6 +19,7 @@ final class PhabricatorUserPreferences extends PhabricatorUserDAO {
 
   const PREFERENCE_SEARCHBAR_JUMP       = 'searchbar-jump';
   const PREFERENCE_SEARCH_SHORTCUT      = 'search-shortcut';
+  const PREFERENCE_SEARCH_SCOPE = 'search-scope';
 
   const PREFERENCE_DIFFUSION_BLAME      = 'diffusion-blame';
   const PREFERENCE_DIFFUSION_COLOR      = 'diffusion-color';

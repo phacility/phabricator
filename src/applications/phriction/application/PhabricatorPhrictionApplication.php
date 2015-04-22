@@ -69,4 +69,10 @@ final class PhabricatorPhrictionApplication extends PhabricatorApplication {
     return 0.140;
   }
 
+  public function getApplicationSearchDocumentTypes() {
+    return array(
+      PhrictionDocumentPHIDType::TYPECONST,
+    );
+  }
+
 }

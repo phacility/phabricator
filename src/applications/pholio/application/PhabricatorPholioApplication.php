@@ -90,4 +90,10 @@ final class PhabricatorPholioApplication extends PhabricatorApplication {
     );
   }
 
+  public function getApplicationSearchDocumentTypes() {
+    return array(
+      PholioMockPHIDType::TYPECONST,
+    );
+  }
+
 }

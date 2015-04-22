@@ -114,6 +114,16 @@ final class PhabricatorMainMenuView extends AphrontView {
     if ($show_search) {
       $search = new PhabricatorMainMenuSearchView();
       $search->setUser($user);
+
+      $application = null;
+      $controller = $this->getController();
+      if ($controller) {
+        $application = $controller->getCurrentApplication();
+      }
+      if ($application) {
+        $search->setApplication($application);
+      }
+
       $result = $search;
 
       $pref_shortcut = PhabricatorUserPreferences::PREFERENCE_SEARCH_SHORTCUT;

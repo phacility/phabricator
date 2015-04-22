@@ -161,4 +161,10 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
     );
   }
 
+  public function getApplicationSearchDocumentTypes() {
+    return array(
+      PhabricatorRepositoryCommitPHIDType::TYPECONST,
+    );
+  }
+
 }
