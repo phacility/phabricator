@@ -78,6 +78,7 @@ abstract class HeraldAdapter {
   const ACTION_FLAG         = 'flag';
   const ACTION_ASSIGN_TASK  = 'assigntask';
   const ACTION_ADD_PROJECTS = 'addprojects';
+  const ACTION_REMOVE_PROJECTS = 'removeprojects';
   const ACTION_ADD_REVIEWERS = 'addreviewers';
   const ACTION_ADD_BLOCKING_REVIEWERS = 'addblockingreviewers';
   const ACTION_APPLY_BUILD_PLANS = 'applybuildplans';
@@ -798,6 +799,7 @@ abstract class HeraldAdapter {
     if (($object instanceof PhabricatorProjectInterface)) {
       if ($rule_type == HeraldRuleTypeConfig::RULE_TYPE_GLOBAL) {
         $actions[] = self::ACTION_ADD_PROJECTS;
+        $actions[] = self::ACTION_REMOVE_PROJECTS;
       }
     }
 
@@ -817,6 +819,7 @@ abstract class HeraldAdapter {
           self::ACTION_FLAG         => pht('Mark with flag'),
           self::ACTION_ASSIGN_TASK  => pht('Assign task to'),
           self::ACTION_ADD_PROJECTS => pht('Add projects'),
+          self::ACTION_REMOVE_PROJECTS => pht('Remove projects'),
           self::ACTION_ADD_REVIEWERS => pht('Add reviewers'),
           self::ACTION_ADD_BLOCKING_REVIEWERS => pht('Add blocking reviewers'),
           self::ACTION_APPLY_BUILD_PLANS => pht('Run build plans'),
@@ -833,7 +836,6 @@ abstract class HeraldAdapter {
           self::ACTION_AUDIT        => pht('Trigger an Audit by me'),
           self::ACTION_FLAG         => pht('Mark with flag'),
           self::ACTION_ASSIGN_TASK  => pht('Assign task to me'),
-          self::ACTION_ADD_PROJECTS => pht('Add projects'),
           self::ACTION_ADD_REVIEWERS => pht('Add me as a reviewer'),
           self::ACTION_ADD_BLOCKING_REVIEWERS =>
             pht('Add me as a blocking reviewer'),
@@ -999,6 +1001,7 @@ abstract class HeraldAdapter {
         case self::ACTION_FLAG:
           return self::VALUE_FLAG_COLOR;
         case self::ACTION_ADD_PROJECTS:
+        case self::ACTION_REMOVE_PROJECTS:
           return self::VALUE_PROJECT;
       }
     } else {
@@ -1010,6 +1013,7 @@ abstract class HeraldAdapter {
         case self::ACTION_NOTHING:
           return self::VALUE_NONE;
         case self::ACTION_ADD_PROJECTS:
+        case self::ACTION_REMOVE_PROJECTS:
           return self::VALUE_PROJECT;
         case self::ACTION_FLAG:
           return self::VALUE_FLAG_COLOR;
@@ -1521,6 +1525,7 @@ abstract class HeraldAdapter {
 
     switch ($action) {
       case self::ACTION_ADD_PROJECTS:
+      case self::ACTION_REMOVE_PROJECTS:
         return $this->applyProjectsEffect($effect);
       case self::ACTION_FLAG:
         return $this->applyFlagEffect($effect);
@@ -1548,7 +1553,11 @@ abstract class HeraldAdapter {
    */
   private function applyProjectsEffect(HeraldEffect $effect) {
 
-    $kind = '+';
+    if ($effect->getAction() == self::ACTION_ADD_PROJECTS) {
+      $kind = '+';
+    } else {
+      $kind = '-';
+    }
 
     $project_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
     $project_phids = $effect->getTarget();
