@@ -105,7 +105,7 @@ JX.install('Tokenizer', {
 
       JX.DOM.listen(
         focus,
-        ['click', 'focus', 'blur', 'keydown', 'keypress', 'paste'],
+        ['click', 'focus', 'blur', 'keydown', 'keypress', 'input'],
         null,
         JX.bind(this, this.handleEvent));
 
