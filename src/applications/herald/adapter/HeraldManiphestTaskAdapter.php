@@ -5,7 +5,6 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
   private $task;
   private $ccPHIDs = array();
   private $assignPHID;
-  private $projectPHIDs = array();
 
   public function getAdapterApplicationClass() {
     return 'PhabricatorManiphestApplication';
@@ -59,14 +58,6 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
   }
   public function getAssignPHID() {
     return $this->assignPHID;
-  }
-
-  public function setProjectPHIDs(array $project_phids) {
-    $this->projectPHIDs = $project_phids;
-    return $this;
-  }
-  public function getProjectPHIDs() {
-    return $this->projectPHIDs;
   }
 
   public function getAdapterContentName() {
@@ -180,15 +171,6 @@ final class HeraldManiphestTaskAdapter extends HeraldAdapter {
             $effect,
             true,
             pht('Assigned task.'));
-          break;
-        case self::ACTION_ADD_PROJECTS:
-          foreach ($effect->getTarget() as $phid) {
-            $this->projectPHIDs[] = $phid;
-          }
-          $result[] = new HeraldApplyTranscript(
-            $effect,
-            true,
-            pht('Added projects.'));
           break;
         default:
           $result[] = $this->applyStandardEffect($effect);

@@ -525,18 +525,6 @@ final class ManiphestTransactionEditor
         ->setNewValue($assign_phid);
     }
 
-    $project_phids = $adapter->getProjectPHIDs();
-    if ($project_phids) {
-      $project_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
-      $xactions[] = id(new ManiphestTransaction())
-        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-        ->setMetadataValue('edge:type', $project_type)
-        ->setNewValue(
-          array(
-            '+' => array_fuse($project_phids),
-          ));
-    }
-
     return $xactions;
   }
 

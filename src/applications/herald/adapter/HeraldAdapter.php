@@ -243,6 +243,22 @@ abstract class HeraldAdapter {
     return $this->queuedTransactions;
   }
 
+  protected function newTransaction() {
+    $object = $this->getObject();
+
+    if (!($object instanceof PhabricatorApplicationTransactionInterface)) {
+      throw new Exception(
+        pht(
+          'Unable to build a new transaction for adapter object; it does '.
+          'not implement "%s".',
+          'PhabricatorApplicationTransactionInterface'));
+    }
+
+    return $object->getApplicationTransactionTemplate();
+  }
+
+
+
 
   /**
    * NOTE: You generally should not override this; it exists to support legacy
@@ -1482,7 +1498,21 @@ abstract class HeraldAdapter {
   protected function applyStandardEffect(HeraldEffect $effect) {
     $action = $effect->getAction();
 
+    $rule_type = $effect->getRule()->getRuleType();
+    $supported = $this->getActions($rule_type);
+    $supported = array_fuse($supported);
+    if (empty($supported[$action])) {
+      throw new Exception(
+        pht(
+          'Adapter "%s" does not support action "%s" for rule type "%s".',
+          get_class($this),
+          $action,
+          $rule_type));
+    }
+
     switch ($action) {
+      case self::ACTION_ADD_PROJECTS:
+        return $this->applyProjectsEffect($effect);
       case self::ACTION_FLAG:
         return $this->applyFlagEffect($effect);
       case self::ACTION_EMAIL:
@@ -1501,6 +1531,32 @@ abstract class HeraldAdapter {
     }
 
     return $result;
+  }
+
+
+  /**
+   * @task apply
+   */
+  private function applyProjectsEffect(HeraldEffect $effect) {
+
+    $kind = '+';
+
+    $project_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
+    $project_phids = $effect->getTarget();
+    $xaction = $this->newTransaction()
+      ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
+      ->setMetadataValue('edge:type', $project_type)
+      ->setNewValue(
+        array(
+          $kind => array_fuse($project_phids),
+        ));
+
+    $this->queueTransaction($xaction);
+
+    return new HeraldApplyTranscript(
+      $effect,
+      true,
+      pht('Added projects.'));
   }
 
 
