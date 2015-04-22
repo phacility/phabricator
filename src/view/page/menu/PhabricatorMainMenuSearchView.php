@@ -147,7 +147,7 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
       }
 
       $items[] = array(
-        'icon' => 'fa-search',
+        'icon' => 'fa-certificate',
         'name' => $query_name,
         'value' => $query_key,
       );

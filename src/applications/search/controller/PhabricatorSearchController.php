@@ -59,7 +59,8 @@ final class PhabricatorSearchController
           if ($types) {
             $saved = id(new PhabricatorSavedQuery())
               ->setEngineClassName(get_class($engine))
-              ->setParameter('types', $types);
+              ->setParameter('types', $types)
+              ->setParameter('statuses', array('open'));
           }
         }
       }
