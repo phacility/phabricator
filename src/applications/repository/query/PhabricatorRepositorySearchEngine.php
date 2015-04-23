@@ -20,7 +20,10 @@ final class PhabricatorRepositorySearchEngine
     $saved->setParameter('hosted', $request->getStr('hosted'));
     $saved->setParameter('types', $request->getArr('types'));
     $saved->setParameter('name', $request->getStr('name'));
-    $saved->setParameter('anyProjectPHIDs', $request->getArr('anyProjects'));
+
+    $saved->setParameter(
+      'projects',
+      $this->readProjectsFromRequest($request, 'projects'));
 
     return $saved;
   }
@@ -60,10 +63,9 @@ final class PhabricatorRepositorySearchEngine
       $query->withNameContains($name);
     }
 
-    $any_project_phids = $saved->getParameter('anyProjectPHIDs');
-    if ($any_project_phids) {
-      $query->withAnyProjects($any_project_phids);
-    }
+    $adjusted = clone $saved;
+    $adjusted->setParameter('projects', $this->readProjectTokens($saved));
+    $this->setQueryProjects($query, $adjusted);
 
     return $query;
   }
@@ -76,7 +78,7 @@ final class PhabricatorRepositorySearchEngine
     $types = $saved_query->getParameter('types', array());
     $types = array_fuse($types);
     $name = $saved_query->getParameter('name');
-    $any_project_phids = $saved_query->getParameter('anyProjectPHIDs', array());
+    $projects = $this->readProjectTokens($saved_query);
 
     $form
       ->appendChild(
@@ -91,10 +93,10 @@ final class PhabricatorRepositorySearchEngine
           ->setValue($name))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorProjectDatasource())
-          ->setName('anyProjects')
-          ->setLabel(pht('In Any Project'))
-          ->setValue($any_project_phids))
+          ->setDatasource(new PhabricatorProjectLogicalDatasource())
+          ->setName('projects')
+          ->setLabel(pht('Projects'))
+          ->setValue($projects))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setName('status')
@@ -264,6 +266,17 @@ final class PhabricatorRepositorySearchEngine
     }
 
     return $list;
+  }
+
+  private function readProjectTokens(PhabricatorSavedQuery $saved) {
+    $projects = $saved->getParameter('projects', array());
+
+    $any = $saved->getParameter('anyProjectPHIDs', array());
+    foreach ($any as $project) {
+      $projects[] = 'any('.$project.')';
+    }
+
+    return $projects;
   }
 
 }

@@ -8,7 +8,7 @@
 return array(
   'names' => array(
     'core.pkg.css' => '9a9b59ca',
-    'core.pkg.js' => '80671b76',
+    'core.pkg.js' => '348d5193',
     'darkconsole.pkg.js' => '8ab24e01',
     'differential.pkg.css' => '3500921f',
     'differential.pkg.js' => 'c0506961',
@@ -222,7 +222,7 @@ return array(
     'rsrc/externals/javelin/lib/__tests__/URI.js' => '1e45fda9',
     'rsrc/externals/javelin/lib/__tests__/behavior.js' => '1ea62783',
     'rsrc/externals/javelin/lib/behavior.js' => '61cbc29a',
-    'rsrc/externals/javelin/lib/control/tokenizer/Tokenizer.js' => '3ff74d77',
+    'rsrc/externals/javelin/lib/control/tokenizer/Tokenizer.js' => 'ab5f468d',
     'rsrc/externals/javelin/lib/control/typeahead/Typeahead.js' => '70baed2f',
     'rsrc/externals/javelin/lib/control/typeahead/normalizer/TypeaheadNormalizer.js' => 'e6e25838',
     'rsrc/externals/javelin/lib/control/typeahead/source/TypeaheadCompositeSource.js' => '503e17fd',
@@ -689,7 +689,7 @@ return array(
     'javelin-scrollbar' => 'eaa5b321',
     'javelin-sound' => '949c0fe5',
     'javelin-stratcom' => '6c53634d',
-    'javelin-tokenizer' => '3ff74d77',
+    'javelin-tokenizer' => 'ab5f468d',
     'javelin-typeahead' => '70baed2f',
     'javelin-typeahead-composite-source' => '503e17fd',
     'javelin-typeahead-normalizer' => 'e6e25838',
@@ -1079,12 +1079,6 @@ return array(
       'javelin-behavior',
       'javelin-dom',
       'phortune-credit-card-form',
-    ),
-    '3ff74d77' => array(
-      'javelin-dom',
-      'javelin-util',
-      'javelin-stratcom',
-      'javelin-install',
     ),
     '40a6a403' => array(
       'javelin-install',
@@ -1668,6 +1662,12 @@ return array(
       'javelin-dom',
       'javelin-util',
       'phabricator-prefab',
+    ),
+    'ab5f468d' => array(
+      'javelin-dom',
+      'javelin-util',
+      'javelin-stratcom',
+      'javelin-install',
     ),
     'b1a59974' => array(
       'javelin-behavior',
