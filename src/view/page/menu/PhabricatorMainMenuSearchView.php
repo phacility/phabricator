@@ -115,7 +115,7 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
     );
 
     $application_value = null;
-    $application_icon = 'fa-file-o';
+    $application_icon = 'fa-dot-circle-o';
     $application = $this->getApplication();
     if ($application) {
       $application_value = get_class($application);
