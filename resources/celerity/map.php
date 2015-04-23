@@ -469,7 +469,7 @@ return array(
     'rsrc/js/core/behavior-form.js' => '5c54cbf3',
     'rsrc/js/core/behavior-gesture.js' => '3ab51e2c',
     'rsrc/js/core/behavior-global-drag-and-drop.js' => '3f6075ff',
-    'rsrc/js/core/behavior-high-security-warning.js' => '8fc1c918',
+    'rsrc/js/core/behavior-high-security-warning.js' => 'a464fe03',
     'rsrc/js/core/behavior-history-install.js' => '7ee2b591',
     'rsrc/js/core/behavior-hovercard.js' => 'f36e01af',
     'rsrc/js/core/behavior-keyboard-pager.js' => 'a8da01f0',
@@ -595,7 +595,7 @@ return array(
     'javelin-behavior-fancy-datepicker' => 'c51ae228',
     'javelin-behavior-global-drag-and-drop' => '3f6075ff',
     'javelin-behavior-herald-rule-editor' => '7ebaeed3',
-    'javelin-behavior-high-security-warning' => '8fc1c918',
+    'javelin-behavior-high-security-warning' => 'a464fe03',
     'javelin-behavior-history-install' => '7ee2b591',
     'javelin-behavior-icon-composer' => '8ef9ab58',
     'javelin-behavior-launch-icon-composer' => '48086888',
@@ -1526,11 +1526,6 @@ return array(
       'javelin-dom',
       'javelin-stratcom',
     ),
-    '8fc1c918' => array(
-      'javelin-behavior',
-      'javelin-uri',
-      'phabricator-notification',
-    ),
     '9007c197' => array(
       'javelin-behavior',
       'javelin-dom',
@@ -1638,6 +1633,11 @@ return array(
       'javelin-dom',
       'javelin-vector',
       'javelin-install',
+    ),
+    'a464fe03' => array(
+      'javelin-behavior',
+      'javelin-uri',
+      'phabricator-notification',
     ),
     'a80d0378' => array(
       'javelin-behavior',

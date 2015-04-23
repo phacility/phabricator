@@ -215,21 +215,9 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
     Javelin::initBehavior('device');
 
-    if ($user->hasSession()) {
-      $hisec = ($user->getSession()->getHighSecurityUntil() - time());
-      if ($hisec > 0) {
-        $remaining_time = phutil_format_relative_time($hisec);
-        Javelin::initBehavior(
-          'high-security-warning',
-          array(
-            'uri' => '/auth/session/downgrade/',
-            'message' => pht(
-              'Your session is in high security mode. When you '.
-              'finish using it, click here to leave.',
-              $remaining_time),
-          ));
-      }
-    }
+    Javelin::initBehavior(
+      'high-security-warning',
+      $this->getHighSecurityWarningConfig());
 
     if ($console) {
       require_celerity_resource('aphront-dark-console-css');
@@ -547,6 +535,26 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     );
   }
 
+  private function getHighSecurityWarningConfig() {
+    $user = $this->getRequest()->getUser();
+
+    $show = false;
+    if ($user->hasSession()) {
+      $hisec = ($user->getSession()->getHighSecurityUntil() - time());
+      if ($hisec > 0) {
+        $show = true;
+      }
+    }
+
+    return array(
+      'show' => $show,
+      'uri' => '/auth/session/downgrade/',
+      'message' => pht(
+        'Your session is in high security mode. When you '.
+        'finish using it, click here to leave.'),
+        );
+  }
+
   private function renderFooter() {
     if (!$this->getShowChrome()) {
       return null;
@@ -628,6 +636,8 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
           $controller);
     }
 
+    $hisec_warning_config = $this->getHighSecurityWarningConfig();
+
     $console_config = null;
     $console = $this->getConsole();
     if ($console) {
@@ -641,6 +651,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       ),
       'globalDragAndDrop' => $controller->isGlobalDragAndDropUploadEnabled(),
       'aphlictDropdowns' => $rendered_dropdowns,
+      'hisecWarningConfig' => $hisec_warning_config,
       'consoleConfig' => $console_config,
     ) + $this->buildAphlictListenConfigData();
   }

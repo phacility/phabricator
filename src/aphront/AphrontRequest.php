@@ -539,8 +539,9 @@ final class AphrontRequest {
    *
    * @return  dict<string, string>  Original request parameters.
    */
-  public function getPassthroughRequestParameters() {
-    return self::flattenData($this->getPassthroughRequestData());
+  public function getPassthroughRequestParameters($include_quicksand = false) {
+    return self::flattenData(
+      $this->getPassthroughRequestData($include_quicksand));
   }
 
   /**
@@ -548,11 +549,14 @@ final class AphrontRequest {
    *
    * @return dict<string, wild> Request data, with magic filtered out.
    */
-  public function getPassthroughRequestData() {
+  public function getPassthroughRequestData($include_quicksand = false) {
     $data = $this->getRequestData();
 
     // Remove magic parameters like __dialog__ and __ajax__.
     foreach ($data as $key => $value) {
+      if ($include_quicksand && $key == self::TYPE_QUICKSAND) {
+        continue;
+      }
       if (!strncmp($key, '__', 2)) {
         unset($data[$key]);
       }
