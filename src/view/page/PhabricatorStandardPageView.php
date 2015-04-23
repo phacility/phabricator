@@ -605,6 +605,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
   private function buildQuicksandConfig() {
     $viewer = $this->getRequest()->getUser();
+    $controller = $this->getController();
 
     $dropdown_query = id(new AphlictDropdownDataQuery())
       ->setViewer($viewer);
@@ -624,7 +625,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       $rendered_dropdowns[$application_class] =
         $application->buildMainMenuExtraNodes(
           $viewer,
-          $this->getController());
+          $controller);
     }
 
     $console_config = null;
@@ -638,6 +639,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
         $dropdown_query->getNotificationData(),
         $dropdown_query->getConpherenceData(),
       ),
+      'globalDragAndDrop' => $controller->isGlobalDragAndDropUploadEnabled(),
       'aphlictDropdowns' => $rendered_dropdowns,
       'consoleConfig' => $console_config,
     ) + $this->buildAphlictListenConfigData();

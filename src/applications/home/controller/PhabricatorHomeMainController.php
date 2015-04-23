@@ -2,19 +2,18 @@
 
 final class PhabricatorHomeMainController extends PhabricatorHomeController {
 
-  private $only;
   private $minipanels = array();
 
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->only = idx($data, 'only');
+  public function isGlobalDragAndDropUploadEnabled() {
+    return true;
   }
 
-  public function processRequest() {
-    $user = $this->getRequest()->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $user = $request->getUser();
 
     $dashboard = PhabricatorDashboardInstall::getDashboard(
       $user,
@@ -42,7 +41,7 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
       $content = $this->buildMainResponse($projects);
     }
 
-    if (!$this->only) {
+    if (!$request->getURIData('only')) {
       $nav = $this->buildNav();
       $nav->appendChild(
         array(
