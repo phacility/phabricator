@@ -55,7 +55,7 @@ final class ManiphestTaskSearchEngine
 
     $saved->setParameter(
       'subscriberPHIDs',
-      $this->readPHIDsFromRequest($request, 'subscribers'));
+      $this->readSubscribersFromRequest($request, 'subscribers'));
 
     $saved->setParameter(
       'statuses',
@@ -111,12 +111,21 @@ final class ManiphestTaskSearchEngine
     $query = id(new ManiphestTaskQuery())
       ->needProjectPHIDs(true);
 
-    $author_phids = $saved->getParameter('authorPHIDs');
+    $viewer = $this->requireViewer();
+
+    $datasource = id(new PhabricatorTypeaheadUserParameterizedDatasource())
+      ->setViewer($viewer);
+
+    $author_phids = $saved->getParameter('authorPHIDs', array());
+    $author_phids = $datasource->evaluateTokens($author_phids);
     if ($author_phids) {
       $query->withAuthors($author_phids);
     }
 
-    $subscriber_phids = $saved->getParameter('subscriberPHIDs');
+    $datasource = id(new PhabricatorMetaMTAMailableFunctionDatasource())
+      ->setViewer($viewer);
+    $subscriber_phids = $saved->getParameter('subscriberPHIDs', array());
+    $subscriber_phids = $datasource->evaluateTokens($subscriber_phids);
     if ($subscriber_phids) {
       $query->withSubscribers($subscriber_phids);
     }
@@ -274,13 +283,13 @@ final class ManiphestTaskSearchEngine
           ->setValue($projects))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorPeopleDatasource())
+          ->setDatasource(new PhabricatorTypeaheadUserParameterizedDatasource())
           ->setName('authors')
           ->setLabel(pht('Authors'))
           ->setValue($author_phids))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorMetaMTAMailableDatasource())
+          ->setDatasource(new PhabricatorMetaMTAMailableFunctionDatasource())
           ->setName('subscribers')
           ->setLabel(pht('Subscribers'))
           ->setValue($subscriber_phids))

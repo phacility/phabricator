@@ -41,6 +41,7 @@ final class PhabricatorProjectMembersDatasource
       $result
         ->setTokenType(PhabricatorTypeaheadTokenView::TYPE_FUNCTION)
         ->setIcon('fa-users')
+        ->setColor(null)
         ->setPHID('members('.$result->getPHID().')')
         ->setDisplayName(pht('Members: %s', $result->getDisplayName()))
         ->setName($result->getName().' members');
