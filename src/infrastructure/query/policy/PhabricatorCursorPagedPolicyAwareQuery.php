@@ -22,6 +22,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   private $orderVector;
   private $builtinOrder;
   private $edgeLogicConstraints = array();
+  private $edgeLogicConstraintsAreValid = false;
 
   protected function getPageCursors(array $page) {
     return array(
@@ -1261,6 +1262,26 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
 
 
   /**
+   * Convenience method for specifying edge logic constraints with a list of
+   * PHIDs.
+   *
+   * @param const Edge constant.
+   * @param const Constraint operator.
+   * @param list<phid> List of PHIDs.
+   * @return this
+   * @task edgelogic
+   */
+  public function withEdgeLogicPHIDs($edge_type, $operator, array $phids) {
+    $constraints = array();
+    foreach ($phids as $phid) {
+      $constraints[] = new PhabricatorQueryConstraint($operator, $phid);
+    }
+
+    return $this->withEdgeLogicConstraints($edge_type, $constraints);
+  }
+
+
+  /**
    * @task edgelogic
    */
   public function withEdgeLogicConstraints($edge_type, array $constraints) {
@@ -1274,6 +1295,8 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       }
     }
 
+    $this->edgeLogicConstraintsAreValid = false;
+
     return $this;
   }
 
@@ -1283,6 +1306,8 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    */
   public function buildEdgeLogicSelectClause(AphrontDatabaseConnection $conn) {
     $select = array();
+
+    $this->validateEdgeLogicConstraints();
 
     foreach ($this->edgeLogicConstraints as $type => $constraints) {
       foreach ($constraints as $operator => $list) {
@@ -1505,6 +1530,83 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    */
   private function buildEdgeLogicTableAliasCount($alias) {
     return $alias.'_count';
+  }
+
+
+  /**
+   * Select certain edge logic constraint values.
+   *
+   * @task edgelogic
+   */
+  protected function getEdgeLogicValues(
+    array $edge_types,
+    array $operators) {
+
+    $values = array();
+
+    $constraint_lists = $this->edgeLogicConstraints;
+    if ($edge_types) {
+      $constraint_lists = array_select_keys($constraint_lists, $edge_types);
+    }
+
+    foreach ($constraint_lists as $type => $constraints) {
+      if ($operators) {
+        $constraints = array_select_keys($constraints, $operators);
+      }
+      foreach ($constraints as $operator => $list) {
+        foreach ($list as $constraint) {
+          $values[] = $constraint->getValue();
+        }
+      }
+    }
+
+    return $values;
+  }
+
+
+  /**
+   * Validate edge logic constraints for the query.
+   *
+   * @return this
+   * @task edgelogic
+   */
+  private function validateEdgeLogicConstraints() {
+    if ($this->edgeLogicConstraintsAreValid) {
+      return $this;
+    }
+
+    // This should probably be more modular, eventually, but we only do
+    // project-based edge logic today.
+
+    $project_phids = $this->getEdgeLogicValues(
+      array(
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+      ),
+      array(
+        PhabricatorQueryConstraint::OPERATOR_AND,
+        PhabricatorQueryConstraint::OPERATOR_OR,
+        PhabricatorQueryConstraint::OPERATOR_NOT,
+      ));
+    if ($project_phids) {
+      $projects = id(new PhabricatorProjectQuery())
+        ->setViewer($this->getViewer())
+        ->setParentQuery($this)
+        ->withPHIDs($project_phids)
+        ->execute();
+      $projects = mpull($projects, null, 'getPHID');
+      foreach ($project_phids as $phid) {
+        if (empty($projects[$phid])) {
+          throw new PhabricatorEmptyQueryException(
+            pht(
+              'This query is constrained by a project you do not have '.
+              'permission to see.'));
+        }
+      }
+    }
+
+    $this->edgeLogicConstraintsAreValid = true;
+
+    return $this;
   }
 
 

@@ -56,7 +56,6 @@ final class PhabricatorProjectBoardViewController
     $column_query = id(new PhabricatorProjectColumnQuery())
       ->setViewer($viewer)
       ->withProjectPHIDs(array($project->getPHID()));
-
     if (!$show_hidden) {
       $column_query->withStatuses(
         array(PhabricatorProjectColumn::STATUS_ACTIVE));
@@ -160,7 +159,10 @@ final class PhabricatorProjectBoardViewController
     $task_query = $engine->buildQueryFromSavedQuery($saved);
 
     $tasks = $task_query
-      ->addWithAllProjects(array($project->getPHID()))
+      ->withEdgeLogicPHIDs(
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+        PhabricatorQueryConstraint::OPERATOR_AND,
+        array($project->getPHID()))
       ->setOrderBy(ManiphestTaskQuery::ORDER_PRIORITY)
       ->setViewer($viewer)
       ->execute();

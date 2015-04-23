@@ -11,12 +11,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   private $authorPHIDs         = array();
   private $ownerPHIDs          = array();
   private $includeUnowned      = null;
-  private $projectPHIDs        = array();
-  private $xprojectPHIDs       = array();
   private $subscriberPHIDs     = array();
-  private $anyProjectPHIDs     = array();
-  private $anyUserProjectPHIDs = array();
-  private $includeNoProject    = null;
   private $dateCreatedAfter;
   private $dateCreatedBefore;
   private $dateModifiedAfter;
@@ -57,7 +52,6 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   private $needProjectPHIDs;
   private $blockingTasks;
   private $blockedTasks;
-  private $projectPolicyCheckFailed = false;
 
   public function withAuthors(array $authors) {
     $this->authorPHIDs = $authors;
@@ -86,39 +80,6 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       }
     }
     $this->ownerPHIDs = $owners;
-    return $this;
-  }
-
-  public function withAllProjects(array $projects) {
-    $this->includeNoProject = false;
-    foreach ($projects as $k => $phid) {
-      if ($phid == ManiphestTaskOwner::PROJECT_NO_PROJECT) {
-        $this->includeNoProject = true;
-        unset($projects[$k]);
-      }
-    }
-    $this->projectPHIDs = $projects;
-    return $this;
-  }
-
-  /**
-   * Add an additional "all projects" constraint to existing filters.
-   *
-   * This is used by boards to supplement queries.
-   *
-   * @param list<phid> List of project PHIDs to add to any existing constraint.
-   * @return this
-   */
-  public function addWithAllProjects(array $projects) {
-    if ($this->projectPHIDs === null) {
-      $this->projectPHIDs = array();
-    }
-
-    return $this->withAllProjects(array_merge($this->projectPHIDs, $projects));
-  }
-
-  public function withoutProjects(array $projects) {
-    $this->xprojectPHIDs = $projects;
     return $this;
   }
 
@@ -165,16 +126,6 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   public function setOrderBy($order) {
     $this->orderBy = $order;
-    return $this;
-  }
-
-  public function withAnyProjects(array $projects) {
-    $this->anyProjectPHIDs = $projects;
-    return $this;
-  }
-
-  public function withAnyUserProjects(array $users) {
-    $this->anyUserProjectPHIDs = $users;
     return $this;
   }
 
@@ -241,27 +192,6 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   }
 
   protected function willExecute() {
-    // Make sure the user can see any projects specified in this
-    // query FIRST.
-    if ($this->projectPHIDs) {
-      $projects = id(new PhabricatorProjectQuery())
-        ->setViewer($this->getViewer())
-        ->withPHIDs($this->projectPHIDs)
-        ->execute();
-      $projects = mpull($projects, null, 'getPHID');
-      foreach ($this->projectPHIDs as $index => $phid) {
-        $project = idx($projects, $phid);
-        if (!$project) {
-          unset($this->projectPHIDs[$index]);
-          continue;
-        }
-      }
-      if (!$this->projectPHIDs) {
-        $this->projectPolicyCheckFailed = true;
-      }
-      $this->projectPHIDs = array_values($this->projectPHIDs);
-    }
-
     // If we already have an order vector, use it as provided.
     // TODO: This is a messy hack to make setOrderVector() stronger than
     // setPriority().
@@ -325,11 +255,6 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   }
 
   protected function loadPage() {
-
-    if ($this->projectPolicyCheckFailed) {
-      throw new PhabricatorEmptyQueryException();
-    }
-
     $task_dao = new ManiphestTask();
     $conn = $task_dao->establishConnection('r');
 
@@ -341,10 +266,6 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     $where[] = $this->buildDependenciesWhereClause($conn);
     $where[] = $this->buildAuthorWhereClause($conn);
     $where[] = $this->buildOwnerWhereClause($conn);
-    $where[] = $this->buildProjectWhereClause($conn);
-    $where[] = $this->buildAnyProjectWhereClause($conn);
-    $where[] = $this->buildAnyUserProjectWhereClause($conn);
-    $where[] = $this->buildXProjectWhereClause($conn);
     $where[] = $this->buildFullTextWhereClause($conn);
 
     if ($this->dateCreatedAfter) {
@@ -407,11 +328,6 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
     $where = $this->formatWhereClause($where);
 
-    $count = '';
-    if (count($this->projectPHIDs) > 1) {
-      $count = ', COUNT(project.dst) projectCount';
-    }
-
     $group_column = '';
     switch ($this->groupBy) {
       case self::GROUP_PROJECT:
@@ -423,9 +339,8 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
     $rows = queryfx_all(
       $conn,
-      '%Q %Q %Q FROM %T task %Q %Q %Q %Q %Q %Q',
+      '%Q %Q FROM %T task %Q %Q %Q %Q %Q %Q',
       $this->buildSelectClause($conn),
-      $count,
       $group_column,
       $task_dao->getTableName(),
       $this->buildJoinClause($conn),
@@ -689,83 +604,10 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     return '('.implode(') OR (', $parts).')';
   }
 
-  private function buildProjectWhereClause(AphrontDatabaseConnection $conn) {
-    if (!$this->projectPHIDs && !$this->includeNoProject) {
-      return null;
-    }
-
-    $parts = array();
-    if ($this->projectPHIDs) {
-      $parts[] = qsprintf(
-        $conn,
-        'project.dst in (%Ls)',
-        $this->projectPHIDs);
-    }
-    if ($this->includeNoProject) {
-      $parts[] = qsprintf(
-        $conn,
-        'project.dst IS NULL');
-    }
-
-    return '('.implode(') OR (', $parts).')';
-  }
-
-  private function buildAnyProjectWhereClause(AphrontDatabaseConnection $conn) {
-    if (!$this->anyProjectPHIDs) {
-      return null;
-    }
-
-    return qsprintf(
-      $conn,
-      'anyproject.dst IN (%Ls)',
-      $this->anyProjectPHIDs);
-  }
-
-  private function buildAnyUserProjectWhereClause(
-    AphrontDatabaseConnection $conn) {
-    if (!$this->anyUserProjectPHIDs) {
-      return null;
-    }
-
-    $projects = id(new PhabricatorProjectQuery())
-      ->setViewer($this->getViewer())
-      ->withMemberPHIDs($this->anyUserProjectPHIDs)
-      ->execute();
-    $any_user_project_phids = mpull($projects, 'getPHID');
-    if (!$any_user_project_phids) {
-      throw new PhabricatorEmptyQueryException();
-    }
-
-    return qsprintf(
-      $conn,
-      'anyproject.dst IN (%Ls)',
-      $any_user_project_phids);
-  }
-
-  private function buildXProjectWhereClause(AphrontDatabaseConnection $conn) {
-    if (!$this->xprojectPHIDs) {
-      return null;
-    }
-
-    return qsprintf(
-      $conn,
-      'xproject.dst IS NULL');
-  }
-
   protected function buildJoinClauseParts(AphrontDatabaseConnection $conn_r) {
     $edge_table = PhabricatorEdgeConfig::TABLE_NAME_EDGE;
 
     $joins = array();
-
-    if ($this->projectPHIDs || $this->includeNoProject) {
-      $joins[] = qsprintf(
-        $conn_r,
-        '%Q JOIN %T project ON project.src = task.phid
-          AND project.type = %d',
-        ($this->includeNoProject ? 'LEFT' : ''),
-        $edge_table,
-        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
-    }
 
     if ($this->shouldJoinBlockingTasks()) {
       $joins[] = qsprintf(
@@ -786,26 +628,6 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         $edge_table,
         ManiphestTaskDependsOnTaskEdgeType::EDGECONST,
         id(new ManiphestTask())->getTableName());
-    }
-
-    if ($this->anyProjectPHIDs || $this->anyUserProjectPHIDs) {
-      $joins[] = qsprintf(
-        $conn_r,
-        'JOIN %T anyproject ON anyproject.src = task.phid
-          AND anyproject.type = %d',
-        $edge_table,
-        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST);
-    }
-
-    if ($this->xprojectPHIDs) {
-      $joins[] = qsprintf(
-        $conn_r,
-        'LEFT JOIN %T xproject ON xproject.src = task.phid
-          AND xproject.type = %d
-          AND xproject.dst IN (%Ls)',
-        $edge_table,
-        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
-        $this->xprojectPHIDs);
     }
 
     if ($this->subscriberPHIDs) {
@@ -853,9 +675,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   }
 
   protected function buildGroupClause(AphrontDatabaseConnection $conn_r) {
-    $joined_multiple_rows = (count($this->projectPHIDs) > 1) ||
-                            (count($this->anyProjectPHIDs) > 1) ||
-                            $this->shouldJoinBlockingTasks() ||
+    $joined_multiple_rows = $this->shouldJoinBlockingTasks() ||
                             $this->shouldJoinBlockedTasks() ||
                             ($this->shouldGroupQueryResultRows());
 
@@ -894,33 +714,32 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
    *                    construction.
    */
   private function getIgnoreGroupedProjectPHIDs() {
-    $phids = array();
-
-    if ($this->projectPHIDs) {
-      $phids[] = $this->projectPHIDs;
-    }
-
-    if (count($this->anyProjectPHIDs) == 1) {
-      $phids[] = $this->anyProjectPHIDs;
-    }
-
-    // Maybe we should also exclude the "excludeProjectPHIDs"? It won't
+    // Maybe we should also exclude the "OPERATOR_NOT" PHIDs? It won't
     // impact the results, but we might end up with a better query plan.
     // Investigate this on real data? This is likely very rare.
 
-    return array_mergev($phids);
-  }
+    $edge_types = array(
+      PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+    );
 
-  // TODO: Remove this when moving fully to edge logic.
-  protected function buildHavingClauseParts(AphrontDatabaseConnection $conn) {
-    $having = parent::buildHavingClauseParts($conn);
-    if (count($this->projectPHIDs) > 1) {
-      $having[] = qsprintf(
-        $conn,
-        'projectCount = %d',
-        count($this->projectPHIDs));
+    $phids = array();
+
+    $phids[] = $this->getEdgeLogicValues(
+      $edge_types,
+      array(
+        PhabricatorQueryConstraint::OPERATOR_AND,
+      ));
+
+    $any = $this->getEdgeLogicValues(
+      $edge_types,
+      array(
+        PhabricatorQueryConstraint::OPERATOR_OR,
+      ));
+    if (count($any) == 1) {
+      $phids[] = $any;
     }
-    return $having;
+
+    return array_mergev($phids);
   }
 
   protected function getResultCursor($result) {

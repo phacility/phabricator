@@ -179,7 +179,10 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
         ->setViewer($user)
         ->withStatuses(ManiphestTaskStatus::getOpenStatusConstants())
         ->withPriorities(array($needs_triage))
-        ->withAnyProjects(mpull($projects, 'getPHID'))
+        ->withEdgeLogicPHIDs(
+          PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+          PhabricatorQueryConstraint::OPERATOR_OR,
+          mpull($projects, 'getPHID'))
         ->needProjectPHIDs(true)
         ->setLimit(10);
       $tasks = $task_query->execute();
