@@ -233,7 +233,12 @@
 
 .device .phabricator-main-menu-search
   button.phabricator-main-menu-search-dropdown .caret {
-    margin-top: 9px;
+    margin-top: 3px;
+}
+
+button.phabricator-main-menu-search-dropdown .caret:before {
+  content: "\f107";
+  font-family: FontAwesome;
 }
 
 .phabricator-main-menu-search button.phabricator-main-menu-search-dropdown
@@ -243,15 +248,11 @@
 
 .phabricator-main-menu-search-dropdown .caret {
   position: absolute;
-  right: 4px;
+  right: 13px;
   top: 3px;
-  border-top-color: rgba(255,255,255,.8);
+  border: none;
+  margin-top: 1px;
 }
-
-.device-desktop .phabricator-main-menu-search-dropdown:hover .caret {
-  border-top-color: #fff;
-}
-
 
 .phabricator-main-menu-search button:hover {
   color: #fff;
