@@ -265,8 +265,8 @@ final class ManiphestBatchEditController extends ManiphestController {
             continue 2;
           }
           $value = head($value);
-          $no_owner = ManiphestNoOwnerDatasource::FUNCTION_TOKEN;
-          if ($value === ManiphestNoOwnerDatasource::FUNCTION_TOKEN) {
+          $no_owner = PhabricatorPeopleNoOwnerDatasource::FUNCTION_TOKEN;
+          if ($value === $no_owner) {
             $value = null;
           }
           break;

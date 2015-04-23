@@ -31,10 +31,6 @@ final class PhabricatorSearchApplicationSearchEngine
       $this->readUsersFromRequest($request, 'ownerPHIDs'));
 
     $saved->setParameter(
-      'withUnowned',
-      $this->readBoolFromRequest($request, 'withUnowned'));
-
-    $saved->setParameter(
       'subscriberPHIDs',
       $this->readPHIDsFromRequest($request, 'subscriberPHIDs'));
 
@@ -46,8 +42,34 @@ final class PhabricatorSearchApplicationSearchEngine
   }
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
-    $query = id(new PhabricatorSearchDocumentQuery())
-      ->withSavedQuery($saved);
+    $query = new PhabricatorSearchDocumentQuery();
+
+    // Convert the saved query into a resolved form (without typeahead
+    // functions) which the fulltext search engines can execute.
+    $config = clone $saved;
+    $viewer = $this->requireViewer();
+
+    $datasource = id(new PhabricatorPeopleOwnerDatasource())
+      ->setViewer($viewer);
+    $owner_phids = $this->readOwnerPHIDs($config);
+    $owner_phids = $datasource->evaluateTokens($owner_phids);
+    foreach ($owner_phids as $key => $phid) {
+      if ($phid == PhabricatorPeopleNoOwnerDatasource::FUNCTION_TOKEN) {
+        $config->setParameter('withUnowned', true);
+        unset($owner_phids[$key]);
+      }
+    }
+    $config->setParameter('ownerPHIDs', $owner_phids);
+
+
+    $datasource = id(new PhabricatorTypeaheadUserParameterizedDatasource())
+      ->setViewer($viewer);
+    $author_phids = $config->getParameter('authorPHIDs', array());
+    $author_phids = $datasource->evaluateTokens($author_phids);
+    $config->setParameter('authorPHIDs', $author_phids);
+
+    $query->withSavedQuery($config);
+
     return $query;
   }
 
@@ -62,11 +84,9 @@ final class PhabricatorSearchApplicationSearchEngine
     $project_value = null;
 
     $author_phids = $saved->getParameter('authorPHIDs', array());
-    $owner_phids = $saved->getParameter('ownerPHIDs', array());
+    $owner_phids = $this->readOwnerPHIDs($saved);
     $subscriber_phids = $saved->getParameter('subscriberPHIDs', array());
     $project_phids = $saved->getParameter('projectPHIDs', array());
-
-    $with_unowned = $saved->getParameter('withUnowned', array());
 
     $status_values = $saved->getParameter('statuses', array());
     $status_values = array_fuse($status_values);
@@ -114,26 +134,19 @@ final class PhabricatorSearchApplicationSearchEngine
         id(new AphrontFormTokenizerControl())
           ->setName('authorPHIDs')
           ->setLabel('Authors')
-          ->setDatasource(new PhabricatorPeopleDatasource())
+          ->setDatasource(new PhabricatorTypeaheadUserParameterizedDatasource())
           ->setValue($author_phids))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setName('ownerPHIDs')
           ->setLabel('Owners')
-          ->setDatasource(new ManiphestOwnerDatasource())
+          ->setDatasource(new PhabricatorPeopleOwnerDatasource())
           ->setValue($owner_phids))
-      ->appendChild(
-        id(new AphrontFormCheckboxControl())
-          ->addCheckbox(
-            'withUnowned',
-            1,
-            pht('Show only unowned documents.'),
-            $with_unowned))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setName('subscriberPHIDs')
           ->setLabel('Subscribers')
-          ->setDatasource(new PhabricatorPeopleDatasource())
+          ->setDatasource(new PhabricatorMetaMTAMailableDatasource())
           ->setValue($subscriber_phids))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
@@ -240,6 +253,17 @@ final class PhabricatorSearchApplicationSearchEngine
     }
 
     return $results;
+  }
+
+  private function readOwnerPHIDs(PhabricatorSavedQuery $saved) {
+    $owner_phids = $saved->getParameter('ownerPHIDs', array());
+
+    // This was an old checkbox from before typeahead functions.
+    if ($saved->getParameter('withUnowned')) {
+      $owner_phids[] = PhabricatorPeopleNoOwnerDatasource::FUNCTION_TOKEN;
+    }
+
+    return $owner_phids;
   }
 
 }

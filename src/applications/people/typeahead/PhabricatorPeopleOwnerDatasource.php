@@ -1,6 +1,6 @@
 <?php
 
-final class ManiphestOwnerDatasource
+final class PhabricatorPeopleOwnerDatasource
   extends PhabricatorTypeaheadCompositeDatasource {
 
   public function getBrowseTitle() {
@@ -14,7 +14,7 @@ final class ManiphestOwnerDatasource
   public function getComponentDatasources() {
     return array(
       new PhabricatorViewerDatasource(),
-      new ManiphestNoOwnerDatasource(),
+      new PhabricatorPeopleNoOwnerDatasource(),
       new PhabricatorPeopleDatasource(),
       new PhabricatorProjectMembersDatasource(),
     );

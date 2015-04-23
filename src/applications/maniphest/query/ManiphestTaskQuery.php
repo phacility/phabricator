@@ -75,7 +75,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   }
 
   public function withOwners(array $owners) {
-    $no_owner = ManiphestNoOwnerDatasource::FUNCTION_TOKEN;
+    $no_owner = PhabricatorPeopleNoOwnerDatasource::FUNCTION_TOKEN;
 
     $this->includeUnowned = false;
     foreach ($owners as $k => $phid) {

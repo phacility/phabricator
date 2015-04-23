@@ -1,6 +1,6 @@
 <?php
 
-final class ManiphestNoOwnerDatasource
+final class PhabricatorPeopleNoOwnerDatasource
   extends PhabricatorTypeaheadDatasource {
 
   const FUNCTION_TOKEN = 'none()';
@@ -14,7 +14,7 @@ final class ManiphestNoOwnerDatasource
   }
 
   public function getDatasourceApplicationClass() {
-    return 'PhabricatorManiphestApplication';
+    return 'PhabricatorPeopleApplication';
   }
 
   public function getDatasourceFunctions() {

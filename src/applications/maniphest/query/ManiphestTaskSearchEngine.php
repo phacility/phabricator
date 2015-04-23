@@ -137,7 +137,7 @@ final class ManiphestTaskSearchEngine
       $query->withSubscribers($subscriber_phids);
     }
 
-    $datasource = id(new ManiphestOwnerDatasource())
+    $datasource = id(new PhabricatorPeopleOwnerDatasource())
       ->setViewer($this->requireViewer());
 
     $assigned_phids = $this->readAssignedPHIDs($saved);
@@ -311,7 +311,7 @@ final class ManiphestTaskSearchEngine
     $form
       ->appendControl(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource(new ManiphestOwnerDatasource())
+          ->setDatasource(new PhabricatorPeopleOwnerDatasource())
           ->setName('assigned')
           ->setLabel(pht('Assigned To'))
           ->setValue($assigned_phids))
@@ -560,7 +560,7 @@ final class ManiphestTaskSearchEngine
     // typeaheads, and is retained for compatibility. We could remove it by
     // migrating old saved queries.
     if ($saved->getParameter('withUnassigned')) {
-      $assigned_phids[] = ManiphestNoOwnerDatasource::FUNCTION_TOKEN;
+      $assigned_phids[] = PhabricatorPeopleNoOwnerDatasource::FUNCTION_TOKEN;
     }
 
     return $assigned_phids;
