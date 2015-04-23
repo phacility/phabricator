@@ -403,23 +403,13 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         $this->subpriorityMax);
     }
 
-    $where[] = $this->buildPagingClause($conn);
+    $where[] = $this->buildWhereClauseParts($conn);
 
     $where = $this->formatWhereClause($where);
 
-    $having = '';
     $count = '';
-
     if (count($this->projectPHIDs) > 1) {
-      // We want to treat the query as an intersection query, not a union
-      // query. We sum the project count and require it be the same as the
-      // number of projects we're searching for.
-
       $count = ', COUNT(project.dst) projectCount';
-      $having = qsprintf(
-        $conn,
-        'HAVING projectCount = %d',
-        count($this->projectPHIDs));
     }
 
     $group_column = '';
@@ -433,14 +423,15 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
     $rows = queryfx_all(
       $conn,
-      'SELECT task.* %Q %Q FROM %T task %Q %Q %Q %Q %Q %Q',
+      '%Q %Q %Q FROM %T task %Q %Q %Q %Q %Q %Q',
+      $this->buildSelectClause($conn),
       $count,
       $group_column,
       $task_dao->getTableName(),
-      $this->buildJoinsClause($conn),
+      $this->buildJoinClause($conn),
       $where,
       $this->buildGroupClause($conn),
-      $having,
+      $this->buildHavingClause($conn),
       $this->buildOrderClause($conn),
       $this->buildLimitClause($conn));
 
@@ -761,7 +752,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       'xproject.dst IS NULL');
   }
 
-  private function buildJoinsClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn_r) {
     $edge_table = PhabricatorEdgeConfig::TABLE_NAME_EDGE;
 
     $joins = array();
@@ -856,9 +847,9 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
         break;
     }
 
-    $joins[] = $this->buildApplicationSearchJoinClause($conn_r);
+    $joins[] = parent::buildJoinClauseParts($conn_r);
 
-    return implode(' ', $joins);
+    return $joins;
   }
 
   protected function buildGroupClause(AphrontDatabaseConnection $conn_r) {
@@ -866,7 +857,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
                             (count($this->anyProjectPHIDs) > 1) ||
                             $this->shouldJoinBlockingTasks() ||
                             $this->shouldJoinBlockedTasks() ||
-                            ($this->getApplicationSearchMayJoinMultipleRows());
+                            ($this->shouldGroupQueryResultRows());
 
     $joined_project_name = ($this->groupBy == self::GROUP_PROJECT);
 
@@ -918,6 +909,18 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     // Investigate this on real data? This is likely very rare.
 
     return array_mergev($phids);
+  }
+
+  // TODO: Remove this when moving fully to edge logic.
+  protected function buildHavingClauseParts(AphrontDatabaseConnection $conn) {
+    $having = parent::buildHavingClauseParts($conn);
+    if (count($this->projectPHIDs) > 1) {
+      $having[] = qsprintf(
+        $conn,
+        'projectCount = %d',
+        count($this->projectPHIDs));
+    }
+    return $having;
   }
 
   protected function getResultCursor($result) {

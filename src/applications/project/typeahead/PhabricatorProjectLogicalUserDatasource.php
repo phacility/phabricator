@@ -42,6 +42,7 @@ final class PhabricatorProjectLogicalUserDatasource
   protected function didLoadResults(array $results) {
     foreach ($results as $result) {
       $result
+        ->setColor(null)
         ->setTokenType(PhabricatorTypeaheadTokenView::TYPE_FUNCTION)
         ->setIcon('fa-asterisk')
         ->setPHID('projects('.$result->getPHID().')')
@@ -85,6 +86,7 @@ final class PhabricatorProjectLogicalUserDatasource
 
     $tokens = $this->renderTokens($phids);
     foreach ($tokens as $token) {
+      $token->setColor(null);
       if ($token->isInvalid()) {
         $token
           ->setValue(pht("User's Projects: Invalid User"));

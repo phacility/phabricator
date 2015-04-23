@@ -89,24 +89,8 @@ final class ManiphestTaskSearchEngine
     $saved->setParameter('fulltext', $request->getStr('fulltext'));
 
     $saved->setParameter(
-      'allProjectPHIDs',
-      $this->readPHIDsFromRequest($request, 'allProjects'));
-
-    $saved->setParameter(
-      'withNoProject',
-      $request->getBool('withNoProject'));
-
-    $saved->setParameter(
-      'anyProjectPHIDs',
-      $this->readPHIDsFromRequest($request, 'anyProjects'));
-
-    $saved->setParameter(
-      'excludeProjectPHIDs',
-      $this->readPHIDsFromRequest($request, 'excludeProjects'));
-
-    $saved->setParameter(
-      'userProjectPHIDs',
-      $this->readUsersFromRequest($request, 'userProjects'));
+      'projects',
+      $this->readProjectsFromRequest($request, 'projects'));
 
     $saved->setParameter('createdStart', $request->getStr('createdStart'));
     $saved->setParameter('createdEnd', $request->getStr('createdEnd'));
@@ -183,30 +167,9 @@ final class ManiphestTaskSearchEngine
       $query->withFullTextSearch($fulltext);
     }
 
-    $with_no_project = $saved->getParameter('withNoProject');
-    if ($with_no_project) {
-      $query->withAllProjects(array(ManiphestTaskOwner::PROJECT_NO_PROJECT));
-    } else {
-      $project_phids = $saved->getParameter('allProjectPHIDs');
-      if ($project_phids) {
-        $query->withAllProjects($project_phids);
-      }
-    }
-
-    $any_project_phids = $saved->getParameter('anyProjectPHIDs');
-    if ($any_project_phids) {
-      $query->withAnyProjects($any_project_phids);
-    }
-
-    $exclude_project_phids = $saved->getParameter('excludeProjectPHIDs');
-    if ($exclude_project_phids) {
-      $query->withoutProjects($exclude_project_phids);
-    }
-
-    $user_project_phids = $saved->getParameter('userProjectPHIDs');
-    if ($user_project_phids) {
-      $query->withAnyUserProjects($user_project_phids);
-    }
+    $projects = $this->readProjectTokens($saved);
+    $adjusted = id(clone $saved)->setParameter('projects', $projects);
+    $this->setQueryProjects($query, $adjusted);
 
     $start = $this->parseDateTime($saved->getParameter('createdStart'));
     $end = $this->parseDateTime($saved->getParameter('createdEnd'));
@@ -242,21 +205,9 @@ final class ManiphestTaskSearchEngine
     $assigned_phids = $this->readAssignedPHIDs($saved);
 
     $author_phids = $saved->getParameter('authorPHIDs', array());
-    $all_project_phids = $saved->getParameter(
-      'allProjectPHIDs',
-      array());
-    $any_project_phids = $saved->getParameter(
-      'anyProjectPHIDs',
-      array());
-    $exclude_project_phids = $saved->getParameter(
-      'excludeProjectPHIDs',
-      array());
-    $user_project_phids = $saved->getParameter(
-      'userProjectPHIDs',
-      array());
-    $subscriber_phids = $saved->getParameter('subscriberPHIDs', array());
+    $projects = $this->readProjectTokens($saved);
 
-    $with_no_projects = $saved->getParameter('withNoProject');
+    $subscriber_phids = $saved->getParameter('subscriberPHIDs', array());
 
     $statuses = $saved->getParameter('statuses', array());
     $statuses = array_fuse($statuses);
@@ -317,41 +268,10 @@ final class ManiphestTaskSearchEngine
           ->setValue($assigned_phids))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorProjectDatasource())
-          ->setName('allProjects')
-          ->setLabel(pht('In All Projects'))
-          ->setValue($all_project_phids));
-
-    if (!$this->getIsBoardView()) {
-      $form
-        ->appendChild(
-          id(new AphrontFormCheckboxControl())
-            ->addCheckbox(
-              'withNoProject',
-              1,
-              pht('Show only tasks with no projects.'),
-              $with_no_projects));
-    }
-
-    $form
-      ->appendControl(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorProjectDatasource())
-          ->setName('anyProjects')
-          ->setLabel(pht('In Any Project'))
-          ->setValue($any_project_phids))
-      ->appendControl(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorProjectDatasource())
-          ->setName('excludeProjects')
-          ->setLabel(pht('Not In Projects'))
-          ->setValue($exclude_project_phids))
-      ->appendControl(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorPeopleDatasource())
-          ->setName('userProjects')
-          ->setLabel(pht('In Users\' Projects'))
-          ->setValue($user_project_phids))
+          ->setDatasource(new PhabricatorProjectLogicalDatasource())
+          ->setName('projects')
+          ->setLabel(pht('Projects'))
+          ->setValue($projects))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setDatasource(new PhabricatorPeopleDatasource())
@@ -564,6 +484,37 @@ final class ManiphestTaskSearchEngine
     }
 
     return $assigned_phids;
+  }
+
+  private function readProjectTokens(PhabricatorSavedQuery $saved) {
+    $projects = $saved->getParameter('projects', array());
+
+    $all = $saved->getParameter('allProjectPHIDs', array());
+    foreach ($all as $phid) {
+      $projects[] = $phid;
+    }
+
+    $any = $saved->getParameter('anyProjectPHIDs', array());
+    foreach ($any as $phid) {
+      $projects[] = 'any('.$phid.')';
+    }
+
+    $not = $saved->getParameter('excludeProjectPHIDs', array());
+    foreach ($not as $phid) {
+      $projects[] = 'not('.$phid.')';
+    }
+
+    $users = $saved->getParameter('userProjectPHIDs', array());
+    foreach ($users as $phid) {
+      $projects[] = 'projects('.$phid.')';
+    }
+
+    $no = $saved->getParameter('withNoProject');
+    if ($no) {
+      $projects[] = 'null()';
+    }
+
+    return $projects;
   }
 
 }

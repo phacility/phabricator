@@ -85,7 +85,8 @@ final class PhabricatorProjectLogicalOrNotDatasource
     foreach ($results as $result) {
       $result
         ->setTokenType(PhabricatorTypeaheadTokenView::TYPE_FUNCTION)
-        ->setIcon('fa-asterisk');
+        ->setIcon('fa-asterisk')
+        ->setColor(null);
 
       if ($return_any) {
         $return[] = id(clone $result)
@@ -134,6 +135,7 @@ final class PhabricatorProjectLogicalOrNotDatasource
 
     $tokens = $this->renderTokens($phids);
     foreach ($tokens as $token) {
+      $token->setColor(null);
       if ($token->isInvalid()) {
         if ($function == 'any') {
           $token->setValue(pht('In Any: Invalid Project'));
