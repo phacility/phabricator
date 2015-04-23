@@ -46,10 +46,14 @@ final class PhabricatorTypeaheadFunctionHelpController
       'more powerful queries. This document explains functions available '.
       'for the selected control.'.
       "\n\n".
+      'For general help with search, see the [[ %s | Search User Guide ]] in '.
+      'the documentation.'.
+      "\n\n".
       'Note that different controls support //different// functions '.
       '(depending on what the control is doing), so these specific functions '.
       'may not work everywhere. You can always check the help for a control '.
-      'to review which functions are available for that control.');
+      'to review which functions are available for that control.',
+      PhabricatorEnv::getDoclink('Search User Guide'));
 
     $table = array();
 

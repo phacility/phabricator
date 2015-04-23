@@ -163,13 +163,11 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
       'href' => '/search/query/advanced/',
     );
 
-    /* TODO: Write this.
     $items[] = array(
       'icon' => 'fa-book',
       'name' => pht('User Guide: Search'),
-      'href' => PhabricatorEnv::getDoclink('User Guide: Search'),
+      'href' => PhabricatorEnv::getDoclink('Search User Guide'),
     );
-    */
 
     $scope_key = PhabricatorUserPreferences::PREFERENCE_SEARCH_SCOPE;
     $current_value = $viewer->loadPreferences()->getPreference(
