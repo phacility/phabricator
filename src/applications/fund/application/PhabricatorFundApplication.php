@@ -62,4 +62,10 @@ final class PhabricatorFundApplication extends PhabricatorApplication {
     );
   }
 
+  public function getApplicationSearchDocumentTypes() {
+    return array(
+      FundInitiativePHIDType::TYPECONST,
+    );
+  }
+
 }

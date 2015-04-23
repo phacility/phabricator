@@ -84,19 +84,24 @@ final class PhabricatorPhortuneApplication extends PhabricatorApplication {
           'edit/(?:(?P<id>\d+)/)?' => 'PhortuneMerchantEditController',
           'orders/(?P<merchantID>\d+)/(?:query/(?P<queryKey>[^/]+)/)?'
             => 'PhortuneCartListController',
-          '(?P<merchantID>\d+)/cart/(?P<id>\d+)/' => array(
-            '' => 'PhortuneCartViewController',
-            '(?P<action>cancel|refund)/' => 'PhortuneCartCancelController',
-            'update/' => 'PhortuneCartUpdateController',
-            'accept/' => 'PhortuneCartAcceptController',
-          ),
-          '(?P<merchantID>\d+)/subscription/' => array(
-            '(?:query/(?P<queryKey>[^/]+)/)?'
-              => 'PhortuneSubscriptionListController',
-            'view/(?P<id>\d+)/'
-              => 'PhortuneSubscriptionViewController',
-            'order/(?P<subscriptionID>\d+)/'
-              => 'PhortuneCartListController',
+          '(?P<merchantID>\d+)/' => array(
+            'cart/(?P<id>\d+)/' => array(
+              '' => 'PhortuneCartViewController',
+              '(?P<action>cancel|refund)/' => 'PhortuneCartCancelController',
+              'update/' => 'PhortuneCartUpdateController',
+              'accept/' => 'PhortuneCartAcceptController',
+            ),
+            'subscription/' => array(
+              '(?:query/(?P<queryKey>[^/]+)/)?'
+                => 'PhortuneSubscriptionListController',
+              'view/(?P<id>\d+)/'
+                => 'PhortuneSubscriptionViewController',
+              'order/(?P<subscriptionID>\d+)/'
+                => 'PhortuneCartListController',
+            ),
+            'invoice/' => array(
+              'new/' => 'PhortuneMerchantInvoiceCreateController',
+            ),
           ),
           '(?P<id>\d+)/' => 'PhortuneMerchantViewController',
         ),

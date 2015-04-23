@@ -596,14 +596,17 @@ final class DifferentialRevisionQuery
   private function buildSelectStatement(AphrontDatabaseConnection $conn_r) {
     $table = new DifferentialRevision();
 
-    $select = qsprintf(
+    $select = $this->buildSelectClause($conn_r);
+
+    $from = qsprintf(
       $conn_r,
-      'SELECT r.* FROM %T r',
+      'FROM %T r',
       $table->getTableName());
 
     $joins = $this->buildJoinsClause($conn_r);
     $where = $this->buildWhereClause($conn_r);
     $group_by = $this->buildGroupByClause($conn_r);
+    $having = $this->buildHavingClause($conn_r);
 
     $this->buildingGlobalOrder = false;
     $order_by = $this->buildOrderClause($conn_r);
@@ -612,11 +615,13 @@ final class DifferentialRevisionQuery
 
     return qsprintf(
       $conn_r,
-      '(%Q %Q %Q %Q %Q %Q)',
+      '(%Q %Q %Q %Q %Q %Q %Q %Q)',
       $select,
+      $from,
       $joins,
       $where,
       $group_by,
+      $having,
       $order_by,
       $limit);
   }
@@ -684,16 +689,16 @@ final class DifferentialRevisionQuery
         DifferentialRevision::TABLE_COMMIT);
     }
 
-    $joins = implode(' ', $joins);
+    $joins[] = $this->buildJoinClauseParts($conn_r);
 
-    return $joins;
+    return $this->formatJoinClause($joins);
   }
 
 
   /**
    * @task internal
    */
-  private function buildWhereClause($conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->pathIDs) {
@@ -839,7 +844,7 @@ final class DifferentialRevisionQuery
           "Unknown revision status filter constant '{$this->status}'!");
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
+    $where[] = $this->buildWhereClauseParts($conn_r);
     return $this->formatWhereClause($where);
   }
 
@@ -1159,6 +1164,10 @@ final class DifferentialRevisionQuery
 
   public function getQueryApplicationClass() {
     return 'PhabricatorDifferentialApplication';
+  }
+
+  protected function getPrimaryTableAlias() {
+    return 'r';
   }
 
 }

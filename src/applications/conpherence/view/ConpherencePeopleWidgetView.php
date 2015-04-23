@@ -9,12 +9,17 @@ final class ConpherencePeopleWidgetView extends ConpherenceWidgetView {
     $conpherence = $this->getConpherence();
     $participants = $conpherence->getParticipants();
     $handles = $conpherence->getHandles();
-    $handles = msort($handles, 'getName');
     $head_handles = array_select_keys($handles, array($user->getPHID()));
+    $handle_list = mpull($handles, 'getName');
+    natcasesort($handle_list);
+    $handles = mpull($handles, null, 'getName');
+    $handles = array_select_keys($handles, $handle_list);
+    $head_handles = mpull($head_handles, null, 'getName');
     $handles = $head_handles + $handles;
 
     $body = array();
-    foreach ($handles as $user_phid => $handle) {
+    foreach ($handles as $handle) {
+      $user_phid = $handle->getPHID();
       $remove_html = '';
       if ($user_phid == $user->getPHID()) {
         $icon = id(new PHUIIconView())
@@ -25,7 +30,7 @@ final class ConpherencePeopleWidgetView extends ConpherenceWidgetView {
             'class' => 'remove',
             'sigil' => 'remove-person',
             'meta' => array(
-              'remove_person' => $handle->getPHID(),
+              'remove_person' => $user_phid,
               'action' => 'remove_person',
             ),
           ),

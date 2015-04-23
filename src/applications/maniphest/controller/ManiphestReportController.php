@@ -411,7 +411,10 @@ final class ManiphestReportController extends ManiphestController {
       $handles = $this->loadViewerHandles($phids);
       $project_handle = $handles[$project_phid];
 
-      $query->withAnyProjects($phids);
+      $query->withEdgeLogicPHIDs(
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+        PhabricatorQueryConstraint::OPERATOR_OR,
+        $phids);
     }
 
     $tasks = $query->execute();

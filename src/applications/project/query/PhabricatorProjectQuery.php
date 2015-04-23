@@ -240,7 +240,7 @@ final class PhabricatorProjectQuery
     return $projects;
   }
 
-  private function buildWhereClause($conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->status != self::STATUS_ANY) {
@@ -328,7 +328,7 @@ final class PhabricatorProjectQuery
     return $this->formatWhereClause($where);
   }
 
-  private function buildGroupClause($conn_r) {
+  protected function buildGroupClause(AphrontDatabaseConnection $conn_r) {
     if ($this->memberPHIDs || $this->nameTokens) {
       return 'GROUP BY p.id';
     } else {
@@ -336,7 +336,7 @@ final class PhabricatorProjectQuery
     }
   }
 
-  private function buildJoinClause($conn_r) {
+  protected function buildJoinClause(AphrontDatabaseConnection $conn_r) {
     $joins = array();
 
     if (!$this->needMembers !== null) {

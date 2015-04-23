@@ -133,4 +133,10 @@ final class PhabricatorProjectApplication extends PhabricatorApplication {
     );
   }
 
+  public function getApplicationSearchDocumentTypes() {
+    return array(
+      PhabricatorProjectProjectPHIDType::TYPECONST,
+    );
+  }
+
 }

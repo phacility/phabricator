@@ -6,6 +6,7 @@ final class PhabricatorActionView extends AphrontView {
   private $icon;
   private $href;
   private $disabled;
+  private $label;
   private $workflow;
   private $renderAsForm;
   private $download;
@@ -36,6 +37,7 @@ final class PhabricatorActionView extends AphrontView {
     $this->objectURI = $object_uri;
     return $this;
   }
+
   public function getObjectURI() {
     return $this->objectURI;
   }
@@ -82,6 +84,11 @@ final class PhabricatorActionView extends AphrontView {
 
   public function setName($name) {
     $this->name = $name;
+    return $this;
+  }
+
+  public function setLabel($label) {
+    $this->label = $label;
     return $this;
   }
 
@@ -173,8 +180,13 @@ final class PhabricatorActionView extends AphrontView {
 
     $classes = array();
     $classes[] = 'phabricator-action-view';
+
     if ($this->disabled) {
       $classes[] = 'phabricator-action-view-disabled';
+    }
+
+    if ($this->label) {
+      $classes[] = 'phabricator-action-view-label';
     }
 
     if ($this->selected) {

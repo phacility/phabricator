@@ -143,4 +143,86 @@ JX.behavior('phabricator-search-typeahead', function(config) {
     typeahead.setPlaceholder('');
     typeahead.updatePlaceHolder();
   });
+
+  // TODO: Quicksand needs to update the application search input as we change
+  // applications; we should register a listener.
+  // TODO: Quicksand also needs to update the application search icon on the
+  // button itself and in the menu.
+
+  // Implement the scope selector menu for the global search.
+  JX.Stratcom.listen('click', 'global-search-dropdown', function(e) {
+    var data = e.getNodeData('global-search-dropdown');
+    var button = e.getNode('global-search-dropdown');
+    if (data.menu) {
+      return;
+    }
+
+    e.kill();
+
+    function updateValue(spec) {
+      if (data.value == spec.value) {
+        return;
+      }
+
+      // Swap out the icon.
+      var icon = JX.DOM.find(button, 'span', 'global-search-dropdown-icon');
+      JX.DOM.alterClass(icon, data.icon, false);
+      data.icon = spec.icon;
+      JX.DOM.alterClass(icon, data.icon, true);
+
+      // Update the value.
+      data.value = spec.value;
+
+      // Update the form input.
+      var frame = button.parentNode;
+      var input = JX.DOM.find(frame, 'input', 'global-search-dropdown-input');
+      input.value = data.value;
+
+      new JX.Request(config.scopeUpdateURI)
+        .setData({value: data.value})
+        .send();
+    }
+
+    var menu = new JX.PHUIXDropdownMenu(button)
+      .setAlign('left');
+    data.menu = menu;
+
+    menu.listen('open', function() {
+      var list = new JX.PHUIXActionListView();
+
+      for (var ii = 0; ii < data.items.length; ii++) {
+        var spec = data.items[ii];
+        var item = new JX.PHUIXActionView()
+          .setName(spec.name)
+          .setIcon(spec.icon);
+
+        if (spec.value) {
+          if (spec.value == data.value) {
+            item.setSelected(true);
+          }
+
+          var handler = function(spec, e) {
+            e.prevent();
+            menu.close();
+            updateValue(spec);
+          };
+
+          item.setHandler(JX.bind(null, handler, spec));
+        } else if (spec.href) {
+          item.setHref(spec.href);
+          item.setHandler(function() { menu.close(); });
+        } else {
+          item.setLabel(true);
+        }
+
+        list.addItem(item);
+      }
+
+      menu.setContent(list.getNode());
+    });
+
+    menu.open();
+  });
+
+
 });

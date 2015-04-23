@@ -10,7 +10,6 @@ final class PhabricatorRepositoryQuery
   private $uuids;
   private $nameContains;
   private $remoteURIs;
-  private $anyProjectPHIDs;
   private $datasourceQuery;
 
   private $numericIdentifiers;
@@ -99,11 +98,6 @@ final class PhabricatorRepositoryQuery
     return $this;
   }
 
-  public function withAnyProjects(array $projects) {
-    $this->anyProjectPHIDs = $projects;
-    return $this;
-  }
-
   public function withDatasourceQuery($query) {
     $this->datasourceQuery = $query;
     return $this;
@@ -163,10 +157,13 @@ final class PhabricatorRepositoryQuery
 
     $data = queryfx_all(
       $conn_r,
-      'SELECT * FROM %T r %Q %Q %Q %Q',
+      '%Q FROM %T r %Q %Q %Q %Q %Q %Q',
+      $this->buildSelectClause($conn_r),
       $table->getTableName(),
-      $this->buildJoinsClause($conn_r),
+      $this->buildJoinClause($conn_r),
       $this->buildWhereClause($conn_r),
+      $this->buildGroupClause($conn_r),
+      $this->buildHavingClause($conn_r),
       $this->buildOrderClause($conn_r),
       $this->buildLimitClause($conn_r));
 
@@ -390,35 +387,49 @@ final class PhabricatorRepositoryQuery
     return $map;
   }
 
-  private function buildJoinsClause(AphrontDatabaseConnection $conn_r) {
-    $joins = array();
-
-    $join_summary_table = $this->needCommitCounts ||
-                          $this->needMostRecentCommits;
-
-    $vector = $this->getOrderVector();
-    if ($vector->containsKey('committed') ||
-        $vector->containsKey('size')) {
-      $join_summary_table = true;
+  protected function buildSelectClause(AphrontDatabaseConnection $conn) {
+    $parts = $this->buildSelectClauseParts($conn);
+    if ($this->shouldJoinSummaryTable()) {
+      $parts[] = 's.*';
     }
+    return $this->formatSelectClause($parts);
+  }
 
-    if ($join_summary_table) {
+  protected function buildJoinClause(AphrontDatabaseConnection $conn_r) {
+    $joins = $this->buildJoinClauseParts($conn_r);
+
+    if ($this->shouldJoinSummaryTable()) {
       $joins[] = qsprintf(
         $conn_r,
         'LEFT JOIN %T s ON r.id = s.repositoryID',
         PhabricatorRepository::TABLE_SUMMARY);
     }
 
-    if ($this->anyProjectPHIDs) {
-      $joins[] = qsprintf(
-        $conn_r,
-        'JOIN edge e ON e.src = r.phid');
-    }
-
-    return implode(' ', $joins);
+    return $this->formatJoinClause($joins);
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  private function shouldJoinSummaryTable() {
+    if ($this->needCommitCounts) {
+      return true;
+    }
+
+    if ($this->needMostRecentCommits) {
+      return true;
+    }
+
+    $vector = $this->getOrderVector();
+    if ($vector->containsKey('committed')) {
+      return true;
+    }
+
+    if ($vector->containsKey('size')) {
+      return true;
+    }
+
+    return false;
+  }
+
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->ids) {
@@ -490,13 +501,6 @@ final class PhabricatorRepositoryQuery
         $conn_r,
         'name LIKE %~',
         $this->nameContains);
-    }
-
-    if ($this->anyProjectPHIDs) {
-      $where[] = qsprintf(
-        $conn_r,
-        'e.dst IN (%Ls)',
-        $this->anyProjectPHIDs);
     }
 
     if (strlen($this->datasourceQuery)) {

@@ -10,6 +10,10 @@ final class PhabricatorTypeaheadMonogramDatasource
     return false;
   }
 
+  public function getBrowseTitle() {
+    return pht('Browse Objects');
+  }
+
   public function getPlaceholderText() {
     return pht('Type an object name...');
   }

@@ -8,6 +8,10 @@ final class DiffusionArcanistProjectDatasource
     return false;
   }
 
+  public function getBrowseTitle() {
+    return pht('Browse Arcanist Projects');
+  }
+
   public function getPlaceholderText() {
     return pht('Type an arcanist project name...');
   }

@@ -206,20 +206,20 @@ abstract class PhabricatorInlineCommentController
         $edit_dialog = $this->buildEditDialog();
 
         if ($this->getOperation() == 'reply') {
-          $inline = $this->loadComment($this->getCommentID());
-
           $edit_dialog->setTitle(pht('Reply to Inline Comment'));
-          $changeset = $inline->getChangesetID();
-          $is_new = $inline->getIsNewFile();
-          $number = $inline->getLineNumber();
-          $length = $inline->getLineLength();
         } else {
           $edit_dialog->setTitle(pht('New Inline Comment'));
-          $changeset = $this->getChangesetID();
-          $is_new = $this->getIsNewFile();
-          $number = $this->getLineNumber();
-          $length = $this->getLineLength();
         }
+
+        // NOTE: We read the values from the client (the display values), not
+        // the values from the database (the original values) when replying.
+        // In particular, when replying to a ghost comment which was moved
+        // across diffs and then moved backward to the most recent visible
+        // line, we want to reply on the display line (which exists), not on
+        // the comment's original line (which may not exist in this changeset).
+        $is_new = $this->getIsNewFile();
+        $number = $this->getLineNumber();
+        $length = $this->getLineLength();
 
         $edit_dialog->addHiddenInput('op', 'create');
         $edit_dialog->addHiddenInput('is_new', $is_new);
@@ -261,14 +261,11 @@ abstract class PhabricatorInlineCommentController
           pht('Failed to load comment "%s".', $reply_phid));
       }
 
-      if ($reply_comment->getChangesetID() != $this->getChangesetID()) {
-        throw new Exception(
-          pht(
-            'Comment "%s" belongs to wrong changeset (%s vs %s).',
-            $reply_phid,
-            $reply_comment->getChangesetID(),
-            $this->getChangesetID()));
-      }
+      // NOTE: It's fine to reply to a comment from a different changeset, so
+      // the reply comment may not appear on the same changeset that the new
+      // comment appears on. This is expected in the case of ghost comments.
+      // We currently put the new comment on the visible changeset, not the
+      // original comment's changeset.
     }
   }
 

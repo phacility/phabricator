@@ -42,7 +42,7 @@ final class ConpherenceParticipantCountQuery
     return ipull($rows, 'count', 'participantPHID');
   }
 
-  private function buildWhereClause($conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->participantPHIDs) {

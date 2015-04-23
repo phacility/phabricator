@@ -4,9 +4,12 @@
  * A query class which uses cursor-based paging. This paging is much more
  * performant than offset-based paging in the presence of policy filtering.
  *
+ * @task clauses Building Query Clauses
  * @task appsearch Integration with ApplicationSearch
+ * @task customfield Integration with CustomField
  * @task paging Paging
  * @task order Result Ordering
+ * @task edgelogic Working with Edge Logic
  */
 abstract class PhabricatorCursorPagedPolicyAwareQuery
   extends PhabricatorPolicyAwareQuery {
@@ -18,6 +21,8 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   private $internalPaging;
   private $orderVector;
   private $builtinOrder;
+  private $edgeLogicConstraints = array();
+  private $edgeLogicConstraintsAreValid = false;
 
   protected function getPageCursors(array $page) {
     return array(
@@ -175,9 +180,133 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   }
 
 
+/* -(  Building Query Clauses  )--------------------------------------------- */
+
+
+  /**
+   * @task clauses
+   */
+  protected function buildSelectClause(AphrontDatabaseConnection $conn) {
+    $parts = $this->buildSelectClauseParts($conn);
+    return $this->formatSelectClause($parts);
+  }
+
+
+  /**
+   * @task clauses
+   */
+  protected function buildSelectClauseParts(AphrontDatabaseConnection $conn) {
+    $select = array();
+
+    $alias = $this->getPrimaryTableAlias();
+    if ($alias) {
+      $select[] = qsprintf($conn, '%T.*', $alias);
+    } else {
+      $select[] = '*';
+    }
+
+    $select[] = $this->buildEdgeLogicSelectClause($conn);
+
+    return $select;
+  }
+
+
+  /**
+   * @task clauses
+   */
+  protected function buildJoinClause(AphrontDatabaseConnection $conn) {
+    $joins = $this->buildJoinClauseParts($conn);
+    return $this->formatJoinClause($joins);
+  }
+
+
+  /**
+   * @task clauses
+   */
+  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
+    $joins = array();
+    $joins[] = $this->buildEdgeLogicJoinClause($conn);
+    return $joins;
+  }
+
+
+  /**
+   * @task clauses
+   */
+  protected function buildWhereClause(AphrontDatabaseConnection $conn) {
+    $where = $this->buildWhereClauseParts($conn);
+    return $this->formatWhereClause($where);
+  }
+
+
+  /**
+   * @task clauses
+   */
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn) {
+    $where = array();
+    $where[] = $this->buildPagingClause($conn);
+    $where[] = $this->buildEdgeLogicWhereClause($conn);
+    return $where;
+  }
+
+
+  /**
+   * @task clauses
+   */
+  protected function buildHavingClause(AphrontDatabaseConnection $conn) {
+    $having = $this->buildHavingClauseParts($conn);
+    return $this->formatHavingClause($having);
+  }
+
+
+  /**
+   * @task clauses
+   */
+  protected function buildHavingClauseParts(AphrontDatabaseConnection $conn) {
+    $having = array();
+    $having[] = $this->buildEdgeLogicHavingClause($conn);
+    return $having;
+  }
+
+
+  /**
+   * @task clauses
+   */
+  protected function buildGroupClause(AphrontDatabaseConnection $conn) {
+    if (!$this->shouldGroupQueryResultRows()) {
+      return '';
+    }
+
+    return qsprintf(
+      $conn,
+      'GROUP BY %Q',
+      $this->getApplicationSearchObjectPHIDColumn());
+  }
+
+
+  /**
+   * @task clauses
+   */
+  protected function shouldGroupQueryResultRows() {
+    if ($this->shouldGroupEdgeLogicResultRows()) {
+      return true;
+    }
+
+    if ($this->getApplicationSearchMayJoinMultipleRows()) {
+      return true;
+    }
+
+    return false;
+  }
+
+
+
 /* -(  Paging  )------------------------------------------------------------- */
 
 
+  /**
+   * @task paging
+   */
   protected function buildPagingClause(AphrontDatabaseConnection $conn) {
     $orderable = $this->getOrderableColumns();
     $vector = $this->getOrderVector();
@@ -228,13 +357,20 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
       ));
   }
 
+
+  /**
+   * @task paging
+   */
   protected function getPagingValueMap($cursor, array $keys) {
-    // TODO: This is a hack to make this work with existing classes for now.
     return array(
       'id' => $cursor,
     );
   }
 
+
+  /**
+   * @task paging
+   */
   protected function loadCursorObject($cursor) {
     $query = newv(get_class($this), array())
       ->setViewer($this->getPagingViewer())
@@ -253,6 +389,10 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     return $object;
   }
 
+
+  /**
+   * @task paging
+   */
   protected function willExecuteCursorQuery(
     PhabricatorCursorPagedPolicyAwareQuery $query) {
     return;
@@ -295,6 +435,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
    * @param list<map> Column description dictionaries.
    * @param map Additional constuction options.
    * @return string Query clause.
+   * @task paging
    */
   final protected function buildPagingClauseFromMultipleColumns(
     AphrontDatabaseConnection $conn,
@@ -1082,6 +1223,13 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     return implode(' ', $joins);
   }
 
+
+/* -(  Integration with CustomField  )--------------------------------------- */
+
+
+  /**
+   * @task customfield
+   */
   protected function getPagingValueMapForCustomFields(
     PhabricatorCustomFieldInterface $object) {
 
@@ -1100,9 +1248,366 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
     return $map;
   }
 
+
+  /**
+   * @task customfield
+   */
   protected function isCustomFieldOrderKey($key) {
     $prefix = 'custom:';
     return !strncmp($key, $prefix, strlen($prefix));
   }
+
+
+/* -(  Edge Logic  )--------------------------------------------------------- */
+
+
+  /**
+   * Convenience method for specifying edge logic constraints with a list of
+   * PHIDs.
+   *
+   * @param const Edge constant.
+   * @param const Constraint operator.
+   * @param list<phid> List of PHIDs.
+   * @return this
+   * @task edgelogic
+   */
+  public function withEdgeLogicPHIDs($edge_type, $operator, array $phids) {
+    $constraints = array();
+    foreach ($phids as $phid) {
+      $constraints[] = new PhabricatorQueryConstraint($operator, $phid);
+    }
+
+    return $this->withEdgeLogicConstraints($edge_type, $constraints);
+  }
+
+
+  /**
+   * @task edgelogic
+   */
+  public function withEdgeLogicConstraints($edge_type, array $constraints) {
+    assert_instances_of($constraints, 'PhabricatorQueryConstraint');
+
+    $constraints = mgroup($constraints, 'getOperator');
+    foreach ($constraints as $operator => $list) {
+      foreach ($list as $item) {
+        $value = $item->getValue();
+        $this->edgeLogicConstraints[$edge_type][$operator][$value] = $item;
+      }
+    }
+
+    $this->edgeLogicConstraintsAreValid = false;
+
+    return $this;
+  }
+
+
+  /**
+   * @task edgelogic
+   */
+  public function buildEdgeLogicSelectClause(AphrontDatabaseConnection $conn) {
+    $select = array();
+
+    $this->validateEdgeLogicConstraints();
+
+    foreach ($this->edgeLogicConstraints as $type => $constraints) {
+      foreach ($constraints as $operator => $list) {
+        $alias = $this->getEdgeLogicTableAlias($operator, $type);
+        switch ($operator) {
+          case PhabricatorQueryConstraint::OPERATOR_AND:
+            if (count($list) > 1) {
+              $select[] = qsprintf(
+                $conn,
+                'COUNT(DISTINCT(%T.dst)) %T',
+                $alias,
+                $this->buildEdgeLogicTableAliasCount($alias));
+            }
+            break;
+          default:
+            break;
+        }
+      }
+    }
+
+    return $select;
+  }
+
+
+  /**
+   * @task edgelogic
+   */
+  public function buildEdgeLogicJoinClause(AphrontDatabaseConnection $conn) {
+    $edge_table = PhabricatorEdgeConfig::TABLE_NAME_EDGE;
+    $phid_column = $this->getApplicationSearchObjectPHIDColumn();
+
+    $joins = array();
+    foreach ($this->edgeLogicConstraints as $type => $constraints) {
+
+      $op_null = PhabricatorQueryConstraint::OPERATOR_NULL;
+      $has_null = isset($constraints[$op_null]);
+
+      foreach ($constraints as $operator => $list) {
+        $alias = $this->getEdgeLogicTableAlias($operator, $type);
+        switch ($operator) {
+          case PhabricatorQueryConstraint::OPERATOR_NOT:
+            $joins[] = qsprintf(
+              $conn,
+              'LEFT JOIN %T %T ON %Q = %T.src AND %T.type = %d
+                AND %T.dst IN (%Ls)',
+              $edge_table,
+              $alias,
+              $phid_column,
+              $alias,
+              $alias,
+              $type,
+              $alias,
+              mpull($list, 'getValue'));
+            break;
+          case PhabricatorQueryConstraint::OPERATOR_AND:
+          case PhabricatorQueryConstraint::OPERATOR_OR:
+            // If we're including results with no matches, we have to degrade
+            // this to a LEFT join. We'll use WHERE to select matching rows
+            // later.
+            if ($has_null) {
+              $join_type = 'LEFT';
+            } else {
+              $join_type = '';
+            }
+
+            $joins[] = qsprintf(
+              $conn,
+              '%Q JOIN %T %T ON %Q = %T.src AND %T.type = %d
+                AND %T.dst IN (%Ls)',
+              $join_type,
+              $edge_table,
+              $alias,
+              $phid_column,
+              $alias,
+              $alias,
+              $type,
+              $alias,
+              mpull($list, 'getValue'));
+            break;
+          case PhabricatorQueryConstraint::OPERATOR_NULL:
+            $joins[] = qsprintf(
+              $conn,
+              'LEFT JOIN %T %T ON %Q = %T.src AND %T.type = %d',
+              $edge_table,
+              $alias,
+              $phid_column,
+              $alias,
+              $alias,
+              $type);
+            break;
+        }
+      }
+    }
+
+    return $joins;
+  }
+
+
+  /**
+   * @task edgelogic
+   */
+  public function buildEdgeLogicWhereClause(AphrontDatabaseConnection $conn) {
+    $where = array();
+
+    foreach ($this->edgeLogicConstraints as $type => $constraints) {
+
+      $full = array();
+      $null = array();
+
+      $op_null = PhabricatorQueryConstraint::OPERATOR_NULL;
+      $has_null = isset($constraints[$op_null]);
+
+      foreach ($constraints as $operator => $list) {
+        $alias = $this->getEdgeLogicTableAlias($operator, $type);
+        switch ($operator) {
+          case PhabricatorQueryConstraint::OPERATOR_NOT:
+            $full[] = qsprintf(
+              $conn,
+              '%T.dst IS NULL',
+              $alias);
+            break;
+          case PhabricatorQueryConstraint::OPERATOR_AND:
+          case PhabricatorQueryConstraint::OPERATOR_OR:
+            if ($has_null) {
+              $full[] = qsprintf(
+                $conn,
+                '%T.dst IS NOT NULL',
+                $alias);
+            }
+            break;
+          case PhabricatorQueryConstraint::OPERATOR_NULL:
+            $null[] = qsprintf(
+              $conn,
+              '%T.dst IS NULL',
+              $alias);
+            break;
+        }
+      }
+
+      if ($full && $null) {
+        $full = $this->formatWhereSubclause($full);
+        $null = $this->formatWhereSubclause($null);
+        $where[] = qsprintf($conn, '(%Q OR %Q)', $full, $null);
+      } else if ($full) {
+        foreach ($full as $condition) {
+          $where[] = $condition;
+        }
+      } else if ($null) {
+        foreach ($null as $condition) {
+          $where[] = $condition;
+        }
+      }
+    }
+
+    return $where;
+  }
+
+
+  /**
+   * @task edgelogic
+   */
+  public function buildEdgeLogicHavingClause(AphrontDatabaseConnection $conn) {
+    $having = array();
+
+    foreach ($this->edgeLogicConstraints as $type => $constraints) {
+      foreach ($constraints as $operator => $list) {
+        $alias = $this->getEdgeLogicTableAlias($operator, $type);
+        switch ($operator) {
+          case PhabricatorQueryConstraint::OPERATOR_AND:
+            if (count($list) > 1) {
+              $having[] = qsprintf(
+                $conn,
+                '%T = %d',
+                $this->buildEdgeLogicTableAliasCount($alias),
+                count($list));
+            }
+            break;
+        }
+      }
+    }
+
+    return $having;
+  }
+
+
+  /**
+   * @task edgelogic
+   */
+  public function shouldGroupEdgeLogicResultRows() {
+    foreach ($this->edgeLogicConstraints as $type => $constraints) {
+      foreach ($constraints as $operator => $list) {
+        switch ($operator) {
+          case PhabricatorQueryConstraint::OPERATOR_NOT:
+          case PhabricatorQueryConstraint::OPERATOR_AND:
+          case PhabricatorQueryConstraint::OPERATOR_OR:
+            if (count($list) > 1) {
+              return true;
+            }
+            break;
+          case PhabricatorQueryConstraint::OPERATOR_NULL:
+            return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+
+  /**
+   * @task edgelogic
+   */
+  private function getEdgeLogicTableAlias($operator, $type) {
+    return 'edgelogic_'.$operator.'_'.$type;
+  }
+
+
+  /**
+   * @task edgelogic
+   */
+  private function buildEdgeLogicTableAliasCount($alias) {
+    return $alias.'_count';
+  }
+
+
+  /**
+   * Select certain edge logic constraint values.
+   *
+   * @task edgelogic
+   */
+  protected function getEdgeLogicValues(
+    array $edge_types,
+    array $operators) {
+
+    $values = array();
+
+    $constraint_lists = $this->edgeLogicConstraints;
+    if ($edge_types) {
+      $constraint_lists = array_select_keys($constraint_lists, $edge_types);
+    }
+
+    foreach ($constraint_lists as $type => $constraints) {
+      if ($operators) {
+        $constraints = array_select_keys($constraints, $operators);
+      }
+      foreach ($constraints as $operator => $list) {
+        foreach ($list as $constraint) {
+          $values[] = $constraint->getValue();
+        }
+      }
+    }
+
+    return $values;
+  }
+
+
+  /**
+   * Validate edge logic constraints for the query.
+   *
+   * @return this
+   * @task edgelogic
+   */
+  private function validateEdgeLogicConstraints() {
+    if ($this->edgeLogicConstraintsAreValid) {
+      return $this;
+    }
+
+    // This should probably be more modular, eventually, but we only do
+    // project-based edge logic today.
+
+    $project_phids = $this->getEdgeLogicValues(
+      array(
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+      ),
+      array(
+        PhabricatorQueryConstraint::OPERATOR_AND,
+        PhabricatorQueryConstraint::OPERATOR_OR,
+        PhabricatorQueryConstraint::OPERATOR_NOT,
+      ));
+    if ($project_phids) {
+      $projects = id(new PhabricatorProjectQuery())
+        ->setViewer($this->getViewer())
+        ->setParentQuery($this)
+        ->withPHIDs($project_phids)
+        ->execute();
+      $projects = mpull($projects, null, 'getPHID');
+      foreach ($project_phids as $phid) {
+        if (empty($projects[$phid])) {
+          throw new PhabricatorEmptyQueryException(
+            pht(
+              'This query is constrained by a project you do not have '.
+              'permission to see.'));
+        }
+      }
+    }
+
+    $this->edgeLogicConstraintsAreValid = true;
+
+    return $this;
+  }
+
 
 }

@@ -29,10 +29,6 @@
   background: #fff;
 }
 
-.page-has-warning .conpherence-durable-column {
-  top: 32px;
-}
-
 .conpherence-durable-column .loading-mask {
   position: absolute;
   top: 90px;

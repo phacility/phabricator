@@ -32,7 +32,7 @@ final class ConpherenceFulltextQuery
     return $rows;
   }
 
-  private function buildWhereClause($conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->threadPHIDs !== null) {

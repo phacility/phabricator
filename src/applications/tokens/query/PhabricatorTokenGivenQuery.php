@@ -37,7 +37,7 @@ final class PhabricatorTokenGivenQuery
     return $table->loadAllFromArray($rows);
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->authorPHIDs) {

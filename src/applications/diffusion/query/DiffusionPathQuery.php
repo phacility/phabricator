@@ -23,7 +23,7 @@ final class DiffusionPathQuery {
     return ipull($results, null, 'id');
   }
 
-  private function buildWhereClause($conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->pathIDs) {

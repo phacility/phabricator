@@ -177,21 +177,27 @@ JX.install('Prefab', {
 
         var icon;
         var type;
+        var color;
         if (result) {
           icon = result.icon;
           value = result.displayName;
           type = result.tokenType;
+          color = result.color;
         } else {
-          icon = config.icons[key];
-          type = config.types[key];
+          icon = (config.icons || {})[key];
+          type = (config.types || {})[key];
+          color = (config.colors || {})[key];
         }
 
         if (icon) {
           icon = JX.Prefab._renderIcon(icon);
         }
 
-        if (type) {
-          JX.DOM.alterClass(container, 'jx-tokenizer-token-' + type, true);
+        type = type || 'object';
+        JX.DOM.alterClass(container, 'jx-tokenizer-token-' + type, true);
+
+        if (color) {
+          JX.DOM.alterClass(container, color, true);
         }
 
         return [icon, value];
@@ -292,8 +298,9 @@ JX.install('Prefab', {
         closed: closed,
         type: fields[5],
         sprite: fields[10],
-        tokenType: fields[11],
-        unique: fields[12] || false
+        color: fields[11],
+        tokenType: fields[12],
+        unique: fields[13] || false
       };
     },
 

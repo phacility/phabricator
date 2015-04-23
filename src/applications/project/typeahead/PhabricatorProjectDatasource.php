@@ -3,6 +3,10 @@
 final class PhabricatorProjectDatasource
   extends PhabricatorTypeaheadDatasource {
 
+  public function getBrowseTitle() {
+    return pht('Browse Projects');
+  }
+
   public function getPlaceholderText() {
     return pht('Type a project name...');
   }
@@ -63,7 +67,8 @@ final class PhabricatorProjectDatasource
         ->setDisplayType('Project')
         ->setURI('/tag/'.$proj->getPrimarySlug().'/')
         ->setPHID($proj->getPHID())
-        ->setIcon($proj->getIcon().' '.$proj->getColor())
+        ->setIcon($proj->getIcon())
+        ->setColor($proj->getColor())
         ->setPriorityType('proj')
         ->setClosed($closed);
 

@@ -61,7 +61,7 @@ JX.behavior('durable-column', function(config, statics) {
     }
   }
 
-  function _toggleColumn(explicit) {
+  function _toggleColumn() {
     userVisible = !userVisible;
     _updateColumnVisibility();
 
@@ -100,7 +100,8 @@ JX.behavior('durable-column', function(config, statics) {
 
   scrollbar = new JX.Scrollbar(_getColumnScrollNode());
 
-  JX.Quicksand.start();
+  JX.Quicksand.setFrame(userVisible ? quick : null);
+  JX.Quicksand.start(config.quicksandConfig);
 
   /* Conpherence Thread Manager configuration - lots of display
    * callbacks.
@@ -338,6 +339,14 @@ JX.behavior('durable-column', function(config, statics) {
           node.placeholderStorage = '';
         }
       }
+    });
+
+  JX.Stratcom.listen(
+    'quicksand-redraw',
+    null,
+    function (e) {
+      var new_data = e.getData().newResponse;
+      JX.Title.setTitle(new_data.title);
     });
 
   _updateColumnVisibility();

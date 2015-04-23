@@ -1,7 +1,11 @@
 <?php
 
 final class PhabricatorProjectMembersDatasource
-  extends PhabricatorTypeaheadDatasource {
+  extends PhabricatorTypeaheadCompositeDatasource {
+
+  public function getBrowseTitle() {
+    return pht('Browse Members');
+  }
 
   public function getPlaceholderText() {
     return pht('Type members(<project>)...');
@@ -11,38 +15,39 @@ final class PhabricatorProjectMembersDatasource
     return 'PhabricatorProjectApplication';
   }
 
-  public function loadResults() {
-    $viewer = $this->getViewer();
-    $raw_query = $this->getRawQuery();
+  public function getComponentDatasources() {
+    return array(
+      new PhabricatorProjectDatasource(),
+    );
+  }
 
-    $pattern = $raw_query;
-    if (self::isFunctionToken($raw_query)) {
-      $function = $this->parseFunction($raw_query, $allow_partial = true);
-      if ($function) {
-        $pattern = head($function['argv']);
-      }
-    }
+  public function getDatasourceFunctions() {
+    return array(
+      'members' => array(
+        'name' => pht('Members: ...'),
+        'arguments' => pht('project'),
+        'summary' => pht('Find results for members of a project.'),
+        'description' => pht(
+          'This function allows you to find results for any of the members '.
+          'of a project:'.
+          "\n\n".
+          '> members(frontend)'),
+      ),
+    );
+  }
 
-    // Allow users to type "#qa" or "qa" to find "Quality Assurance".
-    $pattern = ltrim($pattern, '#');
-    $tokens = self::tokenizeString($pattern);
-
-    $query = $this->newQuery();
-    if ($tokens) {
-      $query->withNameTokens($tokens);
-    }
-    $projects = $this->executeQuery($query);
-
-    $results = array();
-    foreach ($projects as $project) {
-      $results[] = $this->buildProjectResult($project);
+  protected function didLoadResults(array $results) {
+    foreach ($results as $result) {
+      $result
+        ->setTokenType(PhabricatorTypeaheadTokenView::TYPE_FUNCTION)
+        ->setIcon('fa-users')
+        ->setColor(null)
+        ->setPHID('members('.$result->getPHID().')')
+        ->setDisplayName(pht('Members: %s', $result->getDisplayName()))
+        ->setName($result->getName().' members');
     }
 
     return $results;
-  }
-
-  protected function canEvaluateFunction($function) {
-    return ($function == 'members');
   }
 
   protected function evaluateFunction($function, array $argv_list) {
@@ -73,51 +78,24 @@ final class PhabricatorProjectMembersDatasource
       $phids[] = head($argv);
     }
 
-    $projects = $this->newQuery()
-      ->withPHIDs($phids)
-      ->execute();
-    $projects = mpull($projects, null, 'getPHID');
+    $tokens = $this->renderTokens($phids);
+    foreach ($tokens as $token) {
+      // Remove any project color on this token.
+      $token->setColor(null);
 
-    $tokens = array();
-    foreach ($phids as $phid) {
-      $project = idx($projects, $phid);
-      if ($project) {
-        $result = $this->buildProjectResult($project);
-        $tokens[] = PhabricatorTypeaheadTokenView::newFromTypeaheadResult(
-          $result);
+      if ($token->isInvalid()) {
+        $token
+          ->setValue(pht('Members: Invalid Project'));
       } else {
-        $tokens[] = $this->newInvalidToken(pht('Members: Invalid Project'));
+        $token
+          ->setIcon('fa-users')
+          ->setTokenType(PhabricatorTypeaheadTokenView::TYPE_FUNCTION)
+          ->setKey('members('.$token->getKey().')')
+          ->setValue(pht('Members: %s', $token->getValue()));
       }
     }
 
     return $tokens;
-  }
-
-  private function newQuery() {
-    return id(new PhabricatorProjectQuery())
-      ->setViewer($this->getViewer())
-      ->needImages(true)
-      ->needSlugs(true);
-  }
-
-  private function buildProjectResult(PhabricatorProject $project) {
-    $closed = null;
-    if ($project->isArchived()) {
-      $closed = pht('Archived');
-    }
-
-    $all_strings = mpull($project->getSlugs(), 'getSlug');
-    $all_strings[] = 'members';
-    $all_strings[] = $project->getName();
-    $all_strings = implode(' ', $all_strings);
-
-    return $this->newFunctionResult()
-      ->setName($all_strings)
-      ->setDisplayName(pht('Members: %s', $project->getName()))
-      ->setURI('/tag/'.$project->getPrimarySlug().'/')
-      ->setPHID('members('.$project->getPHID().')')
-      ->setIcon('fa-users')
-      ->setClosed($closed);
   }
 
 }

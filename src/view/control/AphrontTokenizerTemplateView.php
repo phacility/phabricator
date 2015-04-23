@@ -69,18 +69,14 @@ final class AphrontTokenizerTemplateView extends AphrontView {
       $content);
 
     $icon = id(new PHUIIconView())
-      ->setIconFont('fa-list-ul');
+      ->setIconFont('fa-search');
 
-    // TODO: This thing is ugly and the ugliness is not intentional.
-    // We have to give it text or PHUIButtonView collapses. It should likely
-    // just be an icon and look more integrated into the input.
     $browse = id(new PHUIButtonView())
       ->setTag('a')
       ->setIcon($icon)
-      ->addSigil('tokenizer-browse')
+      ->addClass('tokenizer-browse-button')
       ->setColor(PHUIButtonView::GREY)
-      ->setSize(PHUIButtonView::SMALL)
-      ->setText(pht('Browse...'));
+      ->addSigil('tokenizer-browse');
 
     $classes = array();
     $classes[] = 'jx-tokenizer-frame';
@@ -90,29 +86,15 @@ final class AphrontTokenizerTemplateView extends AphrontView {
     }
 
     $frame = javelin_tag(
-      'table',
+      'div',
       array(
         'class' => implode(' ', $classes),
         'sigil' => 'tokenizer-frame',
       ),
-      phutil_tag(
-        'tr',
-        array(
-        ),
-        array(
-          phutil_tag(
-            'td',
-            array(
-              'class' => 'jx-tokenizer-frame-input',
-            ),
-            $container),
-          phutil_tag(
-            'td',
-            array(
-              'class' => 'jx-tokenizer-frame-browse',
-            ),
-            $browse),
-        )));
+      array(
+        $container,
+        $browse,
+      ));
 
     return $frame;
   }

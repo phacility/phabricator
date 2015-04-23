@@ -121,7 +121,7 @@ final class ConpherenceThreadQuery
     return $conpherences;
   }
 
-  private function buildGroupClause($conn_r) {
+  protected function buildGroupClause(AphrontDatabaseConnection $conn_r) {
     if ($this->participantPHIDs !== null) {
       return 'GROUP BY conpherence_thread.id';
     } else {
@@ -129,7 +129,7 @@ final class ConpherenceThreadQuery
     }
   }
 
-  private function buildJoinClause($conn_r) {
+  protected function buildJoinClause(AphrontDatabaseConnection $conn_r) {
     $joins = array();
 
     if ($this->participantPHIDs !== null) {
@@ -163,7 +163,7 @@ final class ConpherenceThreadQuery
     return false;
   }
 
-  protected function buildWhereClause($conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     $where[] = $this->buildPagingClause($conn_r);

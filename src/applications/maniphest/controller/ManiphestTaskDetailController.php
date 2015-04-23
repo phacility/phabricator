@@ -182,6 +182,10 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $draft_text = null;
     }
 
+    $projects_source = new PhabricatorProjectDatasource();
+    $users_source = new PhabricatorPeopleDatasource();
+    $mailable_source = new PhabricatorMetaMTAMailableDatasource();
+
     $comment_form = new AphrontFormView();
     $comment_form
       ->setUser($user)
@@ -209,7 +213,8 @@ final class ManiphestTaskDetailController extends ManiphestController {
           ->setControlID('assign_to')
           ->setControlStyle('display: none')
           ->setID('assign-tokenizer')
-          ->setDisableBehavior(true))
+          ->setDisableBehavior(true)
+          ->setDatasource($users_source))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('CCs'))
@@ -217,7 +222,8 @@ final class ManiphestTaskDetailController extends ManiphestController {
           ->setControlID('ccs')
           ->setControlStyle('display: none')
           ->setID('cc-tokenizer')
-          ->setDisableBehavior(true))
+          ->setDisableBehavior(true)
+          ->setDatasource($mailable_source))
       ->appendChild(
         id(new AphrontFormSelectControl())
           ->setLabel(pht('Priority'))
@@ -233,7 +239,8 @@ final class ManiphestTaskDetailController extends ManiphestController {
           ->setControlID('projects')
           ->setControlStyle('display: none')
           ->setID('projects-tokenizer')
-          ->setDisableBehavior(true))
+          ->setDisableBehavior(true)
+          ->setDatasource($projects_source))
       ->appendChild(
         id(new AphrontFormFileControl())
           ->setLabel(pht('File'))
@@ -259,10 +266,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ManiphestTransaction::TYPE_PRIORITY       => 'priority',
       PhabricatorTransactions::TYPE_EDGE        => 'projects',
     );
-
-    $projects_source = new PhabricatorProjectDatasource();
-    $users_source = new PhabricatorPeopleDatasource();
-    $mailable_source = new PhabricatorMetaMTAMailableDatasource();
 
     $tokenizer_map = array(
       PhabricatorTransactions::TYPE_EDGE => array(

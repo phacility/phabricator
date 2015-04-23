@@ -79,7 +79,10 @@ final class ManiphestQueryConduitAPIMethod extends ManiphestConduitAPIMethod {
 
     $projects = $request->getValue('projectPHIDs');
     if ($projects) {
-      $query->withAllProjects($projects);
+      $query->withEdgeLogicPHIDs(
+        PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+        PhabricatorQueryConstraint::OPERATOR_AND,
+        $projects);
     }
 
     $ccs = $request->getValue('ccPHIDs');

@@ -3,6 +3,10 @@
 final class DiffusionRepositoryDatasource
   extends PhabricatorTypeaheadDatasource {
 
+  public function getBrowseTitle() {
+    return pht('Browse Repositories');
+  }
+
   public function getPlaceholderText() {
     return pht('Type a repository name...');
   }

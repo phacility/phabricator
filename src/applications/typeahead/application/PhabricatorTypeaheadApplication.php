@@ -11,6 +11,8 @@ final class PhabricatorTypeaheadApplication extends PhabricatorApplication {
       '/typeahead/' => array(
         '(?P<action>browse|class)/(?:(?P<class>\w+)/)?'
           => 'PhabricatorTypeaheadModularDatasourceController',
+        'help/(?P<class>\w+)/'
+          => 'PhabricatorTypeaheadFunctionHelpController',
       ),
     );
   }

@@ -73,6 +73,25 @@
   color: {$darkgreytext};
 }
 
+.phabricator-action-view-label .phabricator-action-view-item {
+  font-size: 13px;
+  font-weight: bold;
+  color: {$bluetext};
+  padding: 4px 8px 6px 8px;
+  display: block;
+  -webkit-font-smoothing: antialiased;
+}
+
+.device-desktop li.phabricator-action-view-label:hover
+  .phabricator-action-view-item {
+    background-color: #fff;
+    color: {$bluetext};
+}
+
+.phabricator-action-view + .phabricator-action-view-label {
+  padding-top: 8px;
+}
+
 .phabricator-action-view-icon {
   width: 14px;
   height: 14px;

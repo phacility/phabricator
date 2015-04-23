@@ -1,20 +1,23 @@
 <?php
 
-final class PhabricatorTypeaheadUserParameterizedDatasource
+final class PhabricatorPeopleOwnerDatasource
   extends PhabricatorTypeaheadCompositeDatasource {
 
+  public function getBrowseTitle() {
+    return pht('Browse Owners');
+  }
+
   public function getPlaceholderText() {
-    return pht('Type a username or selector...');
+    return pht('Type a username or function...');
   }
 
   public function getComponentDatasources() {
-    $sources = array(
+    return array(
       new PhabricatorViewerDatasource(),
+      new PhabricatorPeopleNoOwnerDatasource(),
       new PhabricatorPeopleDatasource(),
       new PhabricatorProjectMembersDatasource(),
     );
-
-    return $sources;
   }
 
 }

@@ -244,15 +244,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
       Javelin::initBehavior(
         'dark-console',
-        array(
-          // NOTE: We use a generic label here to prevent input reflection
-          // and mitigate compression attacks like BREACH. See discussion in
-          // T3684.
-          'uri' => pht('Main Request'),
-          'selected' => $user ? $user->getConsoleTab() : null,
-          'visible'  => $user ? (int)$user->getConsoleVisible() : true,
-          'headers' => $headers,
-        ));
+        $this->getConsoleConfig());
 
       // Change this to initBehavior when there is some behavior to initialize
       require_celerity_resource('javelin-behavior-error-log');
@@ -287,7 +279,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       $user = $request->getUser();
       if ($user) {
         $monospaced = $user->loadPreferences()->getPreference(
-            PhabricatorUserPreferences::PREFERENCE_MONOSPACED);
+          PhabricatorUserPreferences::PREFERENCE_MONOSPACED);
       }
     }
 
@@ -295,12 +287,19 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
     $font_css = null;
     if (!empty($monospaced)) {
+      // We can't print this normally because escaping quotation marks will
+      // break the CSS. Instead, filter it strictly and then mark it as safe.
+      $monospaced = new PhutilSafeHTML(
+        PhabricatorUserPreferences::filterMonospacedCSSRule(
+          $monospaced));
+
       $font_css = hsprintf(
         '<style type="text/css">'.
         '.PhabricatorMonospaced, '.
         '.phabricator-remarkup .remarkup-code-block '.
           '.remarkup-code { font: %s !important; } '.
-        '</style>', $monospaced);
+        '</style>',
+        $monospaced);
     }
 
     return hsprintf(
@@ -392,7 +391,9 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
         'class' => 'phabricator-standard-page',
       ),
       array(
+        $developer_warning,
         $header_chrome,
+        $setup_warning,
         phutil_tag(
           'div',
           array(
@@ -408,6 +409,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       $durable_column = id(new ConpherenceDurableColumnView())
         ->setSelectedConpherence(null)
         ->setUser($user)
+        ->setQuicksandConfig($this->buildQuicksandConfig())
         ->setVisible($is_visible)
         ->setInitialLoad(true);
     }
@@ -422,8 +424,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
         'class' => implode(' ', $classes),
       ),
       array(
-        $developer_warning,
-        $setup_warning,
         $main_page,
         $durable_column,
       ));
@@ -460,11 +460,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
           $client_uri->setDomain($this_host->getDomain());
         }
 
-        $subscriptions = $this->pageObjects;
-        if ($user) {
-          $subscriptions[] = $user->getPHID();
-        }
-
         if ($request->isHTTPS()) {
           $client_uri->setProtocol('wss');
         } else {
@@ -475,9 +470,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
           'aphlict-listen',
           array(
             'websocketURI'  => (string)$client_uri,
-            'pageObjects'   => array_fill_keys($this->pageObjects, true),
-            'subscriptions' => $subscriptions,
-          ));
+          ) + $this->buildAphlictListenConfigData());
       }
     }
 
@@ -530,6 +523,28 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       return null;
     }
     return $this->getRequest()->getApplicationConfiguration()->getConsole();
+  }
+
+  private function getConsoleConfig() {
+    $user = $this->getRequest()->getUser();
+
+    $headers = array();
+    if (DarkConsoleXHProfPluginAPI::isProfilerStarted()) {
+      $headers[DarkConsoleXHProfPluginAPI::getProfilerHeader()] = 'page';
+    }
+    if (DarkConsoleServicesPlugin::isQueryAnalyzerRequested()) {
+      $headers[DarkConsoleServicesPlugin::getQueryAnalyzerHeader()] = true;
+    }
+
+    return array(
+      // NOTE: We use a generic label here to prevent input reflection
+      // and mitigate compression attacks like BREACH. See discussion in
+      // T3684.
+      'uri' => pht('Main Request'),
+      'selected' => $user ? $user->getConsoleTab() : null,
+      'visible'  => $user ? (int)$user->getConsoleVisible() : true,
+      'headers' => $headers,
+    );
   }
 
   private function renderFooter() {
@@ -585,6 +600,57 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
     return array(
       'content' => hsprintf('%s', $response),
+    ) + $this->buildQuicksandConfig();
+  }
+
+  private function buildQuicksandConfig() {
+    $viewer = $this->getRequest()->getUser();
+
+    $dropdown_query = id(new AphlictDropdownDataQuery())
+      ->setViewer($viewer);
+    $dropdown_query->execute();
+
+    $rendered_dropdowns = array();
+    $applications = array(
+      'PhabricatorHelpApplication',
+    );
+    foreach ($applications as $application_class) {
+      if (!PhabricatorApplication::isClassInstalledForViewer(
+        $application_class,
+        $viewer)) {
+        continue;
+      }
+      $application = PhabricatorApplication::getByClass($application_class);
+      $rendered_dropdowns[$application_class] =
+        $application->buildMainMenuExtraNodes(
+          $viewer,
+          $this->getController());
+    }
+
+    $console_config = null;
+    $console = $this->getConsole();
+    if ($console) {
+      $console_config = $this->getConsoleConfig();
+    }
+    return array(
+      'title' => $this->getTitle(),
+      'aphlictDropdownData' => array(
+        $dropdown_query->getNotificationData(),
+        $dropdown_query->getConpherenceData(),
+      ),
+      'aphlictDropdowns' => $rendered_dropdowns,
+      'consoleConfig' => $console_config,
+    ) + $this->buildAphlictListenConfigData();
+  }
+
+  private function buildAphlictListenConfigData() {
+    $user = $this->getRequest()->getUser();
+    $subscriptions = $this->pageObjects;
+    $subscriptions[] = $user->getPHID();
+
+    return array(
+      'pageObjects'   => array_fill_keys($this->pageObjects, true),
+      'subscriptions' => $subscriptions,
     );
   }
 

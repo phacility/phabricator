@@ -7,6 +7,10 @@ final class LegalpadDocumentDatasource extends PhabricatorTypeaheadDatasource {
     return false;
   }
 
+  public function getBrowseTitle() {
+    return pht('Browse Documents');
+  }
+
   public function getPlaceholderText() {
     return pht('Type a document name...');
   }

@@ -51,48 +51,22 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
     }
 
     $datasource = $this->datasource;
-    if ($datasource) {
-      $datasource->setViewer($this->getUser());
+    if (!$datasource) {
+      throw new Exception(
+        pht('You must set a datasource to use a TokenizerControl.'));
     }
+    $datasource->setViewer($this->getUser());
 
     $placeholder = null;
     if (!strlen($this->placeholder)) {
-      if ($datasource) {
-        $placeholder = $datasource->getPlaceholderText();
-      }
-    } else {
-      $placeholder = $this->placeholder;
+      $placeholder = $datasource->getPlaceholderText();
     }
 
-    $tokens = array();
     $values = nonempty($this->getValue(), array());
-    foreach ($values as $value) {
-      if (isset($handles[$value])) {
-        $token = PhabricatorTypeaheadTokenView::newFromHandle($handles[$value]);
-      } else {
-        $token = null;
-        if ($datasource) {
-          $function = $datasource->parseFunction($value);
-          if ($function) {
-            $token_list = $datasource->renderFunctionTokens(
-              $function['name'],
-              array($function['argv']));
-            $token = head($token_list);
-          }
-        }
+    $tokens = $datasource->renderTokens($values);
 
-        if (!$token) {
-          $name = pht('Invalid Function: %s', $value);
-          $token = $datasource->newInvalidToken($name);
-        }
-
-        $type = $token->getTokenType();
-        if ($type == PhabricatorTypeaheadTokenView::TYPE_INVALID) {
-          $token->setKey($value);
-        }
-      }
+    foreach ($tokens as $token) {
       $token->setInputName($this->getName());
-      $tokens[] = $token;
     }
 
     $template = new AphrontTokenizerTemplateView();
@@ -105,17 +79,10 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
       $username = $this->user->getUsername();
     }
 
-    $datasource_uri = null;
-    $browse_uri = null;
-    if ($datasource) {
-      $datasource->setViewer($this->getUser());
-
-      $datasource_uri = $datasource->getDatasourceURI();
-
-      $browse_uri = $datasource->getBrowseURI();
-      if ($browse_uri) {
-        $template->setBrowseURI($browse_uri);
-      }
+    $datasource_uri = $datasource->getDatasourceURI();
+    $browse_uri = $datasource->getBrowseURI();
+    if ($browse_uri) {
+      $template->setBrowseURI($browse_uri);
     }
 
     if (!$this->disableBehavior) {
@@ -125,6 +92,7 @@ final class AphrontFormTokenizerControl extends AphrontFormControl {
         'value' => mpull($tokens, 'getValue', 'getKey'),
         'icons' => mpull($tokens, 'getIcon', 'getKey'),
         'types' => mpull($tokens, 'getTokenType', 'getKey'),
+        'colors' => mpull($tokens, 'getColor', 'getKey'),
         'limit' => $this->limit,
         'username' => $username,
         'placeholder' => $placeholder,

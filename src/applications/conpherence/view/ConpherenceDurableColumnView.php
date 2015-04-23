@@ -9,6 +9,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
   private $visible;
   private $initialLoad = false;
   private $policyObjects;
+  private $quicksandConfig = array();
 
   public function setConpherences(array $conpherences) {
     assert_instances_of($conpherences, 'ConpherenceThread');
@@ -78,6 +79,15 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
     return $this->policyObjects;
   }
 
+  public function setQuicksandConfig(array $config) {
+    $this->quicksandConfig = $config;
+    return $this;
+  }
+
+  public function getQuicksandConfig() {
+    return $this->quicksandConfig;
+  }
+
   protected function getTagAttributes() {
     if ($this->getVisible()) {
       $style = null;
@@ -106,6 +116,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
       array(
         'visible' => $this->getVisible(),
         'settingsURI' => '/settings/adjust/?key='.$column_key,
+        'quicksandConfig' => $this->getQuicksandConfig(),
       ));
 
     $policies = array();

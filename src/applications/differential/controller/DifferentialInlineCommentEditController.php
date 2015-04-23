@@ -39,13 +39,17 @@ final class DifferentialInlineCommentEditController
 
   protected function loadComment($id) {
     return id(new DifferentialInlineCommentQuery())
+      ->setViewer($this->getViewer())
       ->withIDs(array($id))
+      ->withDeletedDrafts(true)
       ->executeOne();
   }
 
   protected function loadCommentByPHID($phid) {
     return id(new DifferentialInlineCommentQuery())
+      ->setViewer($this->getViewer())
       ->withPHIDs(array($phid))
+      ->withDeletedDrafts(true)
       ->executeOne();
   }
 

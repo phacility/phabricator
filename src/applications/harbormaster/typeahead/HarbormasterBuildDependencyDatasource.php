@@ -8,6 +8,10 @@ final class HarbormasterBuildDependencyDatasource
     return false;
   }
 
+  public function getBrowseTitle() {
+    return pht('Browse Dependencies');
+  }
+
   public function getPlaceholderText() {
     return pht('Type another build step name...');
   }

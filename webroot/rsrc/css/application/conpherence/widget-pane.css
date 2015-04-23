@@ -16,6 +16,11 @@
   -webkit-overflow-scrolling: touch;
 }
 
+.page-has-warning .conpherence-widget-pane,
+.page-had-warning .loading .widgets-loading-mask {
+  top: 110px;
+}
+
 .device .conpherence-widget-pane,
 .device .loading .widgets-loading-mask {
   top: 44px;
@@ -80,6 +85,10 @@
 .device-desktop .conpherence-widget-pane .widgets-body {
   top: 108px;
   width: 240px;
+}
+
+.device-desktop .page-has-warning .conpherence-widget-pane .widgets-body {
+  top: 142px;
 }
 
 /* files widget */

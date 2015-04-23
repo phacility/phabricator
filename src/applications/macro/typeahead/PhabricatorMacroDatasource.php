@@ -6,6 +6,10 @@ final class PhabricatorMacroDatasource extends PhabricatorTypeaheadDatasource {
     return pht('Type a macro name...');
   }
 
+  public function getBrowseTitle() {
+    return pht('Browse Macros');
+  }
+
   public function getDatasourceApplicationClass() {
     return 'PhabricatorMacroApplication';
   }

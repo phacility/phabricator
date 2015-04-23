@@ -190,7 +190,7 @@ final class PhrictionDocumentQuery
     return $documents;
   }
 
-  private function buildJoinClause(AphrontDatabaseConnection $conn) {
+  protected function buildJoinClause(AphrontDatabaseConnection $conn) {
     $join = '';
 
     if ($this->getOrderVector()->containsKey('updated')) {

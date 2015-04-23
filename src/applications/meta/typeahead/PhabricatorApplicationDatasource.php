@@ -3,6 +3,10 @@
 final class PhabricatorApplicationDatasource
   extends PhabricatorTypeaheadDatasource {
 
+  public function getBrowseTitle() {
+    return pht('Browse Applications');
+  }
+
   public function getPlaceholderText() {
     return pht('Type an application name...');
   }

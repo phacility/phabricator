@@ -50,8 +50,7 @@ final class PhabricatorTypeaheadModularDatasourceController
         ->setViewer($viewer)
         ->setQuery($query)
         ->setRawQuery($raw_query)
-        ->setLimit($limit);
-
+        ->setLimit($limit + 1);
 
       if ($is_browse) {
         if (!$composite->isBrowsable()) {
@@ -74,7 +73,7 @@ final class PhabricatorTypeaheadModularDatasourceController
         // If this is a request for a specific token after the user clicks
         // "Select", return the token in wire format so it can be added to
         // the tokenizer.
-        if ($select_phid) {
+        if ($select_phid !== null) {
           $map = mpull($results, null, 'getPHID');
           $token = idx($map, $select_phid);
           if (!$token) {
@@ -223,11 +222,32 @@ final class PhabricatorTypeaheadModularDatasourceController
           $frame,
         );
 
+        $function_help = null;
+        if ($source->getAllDatasourceFunctions()) {
+          $reference_uri = '/typeahead/help/'.get_class($source).'/';
+
+          $reference_link = phutil_tag(
+            'a',
+            array(
+              'href' => $reference_uri,
+              'target' => '_blank',
+            ),
+            pht('Reference: Advanced Functions'));
+
+          $function_help = array(
+            id(new PHUIIconView())
+              ->setIconFont('fa-book'),
+            ' ',
+            $reference_link,
+          );
+        }
+
         return $this->newDialog()
           ->setWidth(AphrontDialogView::WIDTH_FORM)
           ->setRenderDialogAsDiv(true)
-          ->setTitle(get_class($source)) // TODO: Provide nice names.
+          ->setTitle($source->getBrowseTitle())
           ->appendChild($browser)
+          ->addFooter($function_help)
           ->addCancelButton('/', pht('Close'));
       }
 
@@ -248,8 +268,7 @@ final class PhabricatorTypeaheadModularDatasourceController
     // format to make it easier to debug typeahead output.
 
     foreach ($sources as $key => $source) {
-      // This can happen with composite sources like user or project, as well
-      // generic ones like NoOwner
+      // This can happen with composite or generic sources.
       if (!$source->getDatasourceApplicationClass()) {
         continue;
       }

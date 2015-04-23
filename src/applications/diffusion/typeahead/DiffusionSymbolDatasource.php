@@ -9,6 +9,10 @@ final class DiffusionSymbolDatasource
     return false;
   }
 
+  public function getBrowseTitle() {
+    return pht('Browse Symbols');
+  }
+
   public function getPlaceholderText() {
     return pht('Type a symbol name...');
   }

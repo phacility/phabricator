@@ -111,7 +111,7 @@ final class ReleephProductQuery
     return $products;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->active !== null) {

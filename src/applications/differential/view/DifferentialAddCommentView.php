@@ -67,6 +67,9 @@ final class DifferentialAddCommentView extends AphrontView {
       'resign' => pht('Suggest Reviewers'),
     );
 
+    $mailable_source = new PhabricatorMetaMTAMailableDatasource();
+    $reviewer_source = new PhabricatorProjectOrUserDatasource();
+
     $form = new AphrontFormView();
     $form
       ->setWorkflow(true)
@@ -88,7 +91,8 @@ final class DifferentialAddCommentView extends AphrontView {
           ->setControlID('add-reviewers')
           ->setControlStyle($enable_reviewers ? null : 'display: none')
           ->setID('add-reviewers-tokenizer')
-          ->setDisableBehavior(true))
+          ->setDisableBehavior(true)
+          ->setDatasource($reviewer_source))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Add Subscribers'))
@@ -96,7 +100,8 @@ final class DifferentialAddCommentView extends AphrontView {
           ->setControlID('add-ccs')
           ->setControlStyle($enable_ccs ? null : 'display: none')
           ->setID('add-ccs-tokenizer')
-          ->setDisableBehavior(true))
+          ->setDisableBehavior(true)
+          ->setDatasource($mailable_source))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
           ->setName('comment')
@@ -107,9 +112,6 @@ final class DifferentialAddCommentView extends AphrontView {
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Submit')));
-
-    $mailable_source = new PhabricatorMetaMTAMailableDatasource();
-    $reviewer_source = new PhabricatorProjectOrUserDatasource();
 
     Javelin::initBehavior(
       'differential-add-reviewers-and-ccs',

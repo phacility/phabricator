@@ -10,6 +10,7 @@ final class PhabricatorTypeaheadTokenView
 
   private $key;
   private $icon;
+  private $color;
   private $inputName;
   private $value;
   private $tokenType = self::TYPE_OBJECT;
@@ -20,6 +21,7 @@ final class PhabricatorTypeaheadTokenView
     return id(new PhabricatorTypeaheadTokenView())
       ->setKey($result->getPHID())
       ->setIcon($result->getIcon())
+      ->setColor($result->getColor())
       ->setValue($result->getDisplayName())
       ->setTokenType($result->getTokenType());
   }
@@ -30,14 +32,20 @@ final class PhabricatorTypeaheadTokenView
     $token = id(new PhabricatorTypeaheadTokenView())
       ->setKey($handle->getPHID())
       ->setValue($handle->getFullName())
-      ->setIcon(rtrim($handle->getIcon().' '.$handle->getIconColor()));
+      ->setIcon($handle->getIcon());
 
     if ($handle->isDisabled() ||
         $handle->getStatus() == PhabricatorObjectHandleStatus::STATUS_CLOSED) {
       $token->setTokenType(self::TYPE_DISABLED);
+    } else {
+      $token->setColor($handle->getTagColor());
     }
 
     return $token;
+  }
+
+  public function isInvalid() {
+    return ($this->getTokenType() == self::TYPE_INVALID);
   }
 
   public function setKey($key) {
@@ -76,6 +84,15 @@ final class PhabricatorTypeaheadTokenView
     return $this->icon;
   }
 
+  public function setColor($color) {
+    $this->color = $color;
+    return $this;
+  }
+
+  public function getColor() {
+    return $this->color;
+  }
+
   public function setValue($value) {
     $this->value = $value;
     return $this;
@@ -107,6 +124,8 @@ final class PhabricatorTypeaheadTokenView
         break;
     }
 
+    $classes[] = $this->getColor();
+
     return array(
       'class' => $classes,
     );
@@ -126,7 +145,7 @@ final class PhabricatorTypeaheadTokenView
         phutil_tag(
           'span',
           array(
-            'class' => 'phui-icon-view phui-font-fa bluetext '.$icon,
+            'class' => 'phui-icon-view phui-font-fa '.$icon,
           )),
         $value,
       );

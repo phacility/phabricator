@@ -79,7 +79,7 @@ JX.install('Tokenizer', {
       this._tokenMap = {};
 
       try {
-        this._frame = JX.DOM.findAbove(this._orig, 'table', 'tokenizer-frame');
+        this._frame = JX.DOM.findAbove(this._orig, 'div', 'tokenizer-frame');
       } catch (e) {
         // Ignore, this tokenizer doesn't have a frame.
       }
@@ -465,8 +465,12 @@ JX.install('Tokenizer', {
       new JX.Workflow(uri, {exclude: JX.keys(this.getTokens()).join(',')})
         .setHandler(
           JX.bind(this, function(r) {
-            this._typeahead.getDatasource().addResult(r.token);
-            this.addToken(r.key);
+            var source = this._typeahead.getDatasource();
+
+            source.addResult(r.token);
+            var result = source.getResult(r.key);
+
+            this.addToken(r.key, result.name);
             this.focus();
           }))
         .start();

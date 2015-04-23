@@ -12,6 +12,10 @@ final class PhabricatorConpherenceThreadPHIDType extends PhabricatorPHIDType {
     return new ConpherenceThread();
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorConpherenceApplication';
+  }
+
   protected function buildQueryForObjects(
     PhabricatorObjectQuery $query,
     array $phids) {
