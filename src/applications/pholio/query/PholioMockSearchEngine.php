@@ -34,7 +34,7 @@ final class PholioMockSearchEngine extends PhabricatorApplicationSearchEngine {
       ->needImages(true)
       ->needTokenCounts(true);
 
-    $datasource = id(new PhabricatorTypeaheadUserParameterizedDatasource())
+    $datasource = id(new PhabricatorPeopleUserFunctionDatasource())
       ->setViewer($this->requireViewer());
 
     $author_phids = $saved->getParameter('authorPHIDs', array());
@@ -72,7 +72,7 @@ final class PholioMockSearchEngine extends PhabricatorApplicationSearchEngine {
     $form
       ->appendControl(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorTypeaheadUserParameterizedDatasource())
+          ->setDatasource(new PhabricatorPeopleUserFunctionDatasource())
           ->setName('authors')
           ->setLabel(pht('Authors'))
           ->setValue($author_phids))

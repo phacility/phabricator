@@ -62,7 +62,7 @@ final class PhabricatorSearchApplicationSearchEngine
     $config->setParameter('ownerPHIDs', $owner_phids);
 
 
-    $datasource = id(new PhabricatorTypeaheadUserParameterizedDatasource())
+    $datasource = id(new PhabricatorPeopleUserFunctionDatasource())
       ->setViewer($viewer);
     $author_phids = $config->getParameter('authorPHIDs', array());
     $author_phids = $datasource->evaluateTokens($author_phids);
@@ -142,7 +142,7 @@ final class PhabricatorSearchApplicationSearchEngine
         id(new AphrontFormTokenizerControl())
           ->setName('authorPHIDs')
           ->setLabel('Authors')
-          ->setDatasource(new PhabricatorTypeaheadUserParameterizedDatasource())
+          ->setDatasource(new PhabricatorPeopleUserFunctionDatasource())
           ->setValue($author_phids))
       ->appendControl(
         id(new AphrontFormTokenizerControl())

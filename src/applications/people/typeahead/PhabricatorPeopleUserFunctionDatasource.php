@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorTypeaheadUserParameterizedDatasource
+final class PhabricatorPeopleUserFunctionDatasource
   extends PhabricatorTypeaheadCompositeDatasource {
 
   public function getBrowseTitle() {

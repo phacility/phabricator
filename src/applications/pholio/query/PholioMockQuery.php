@@ -182,7 +182,7 @@ final class PholioMockQuery
     return 'PhabricatorPholioApplication';
   }
 
-  public function getPrimaryTableAlias() {
+  protected function getPrimaryTableAlias() {
     return 'mock';
   }
 

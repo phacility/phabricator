@@ -113,7 +113,7 @@ final class ManiphestTaskSearchEngine
 
     $viewer = $this->requireViewer();
 
-    $datasource = id(new PhabricatorTypeaheadUserParameterizedDatasource())
+    $datasource = id(new PhabricatorPeopleUserFunctionDatasource())
       ->setViewer($viewer);
 
     $author_phids = $saved->getParameter('authorPHIDs', array());
@@ -265,7 +265,7 @@ final class ManiphestTaskSearchEngine
           ->setValue($projects))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorTypeaheadUserParameterizedDatasource())
+          ->setDatasource(new PhabricatorPeopleUserFunctionDatasource())
           ->setName('authors')
           ->setLabel(pht('Authors'))
           ->setValue($author_phids))
