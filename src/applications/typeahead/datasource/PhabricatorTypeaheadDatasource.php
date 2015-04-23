@@ -229,6 +229,24 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
       }
     }
 
+    // Give special non-function tokens which are also not PHIDs (like statuses
+    // and priorities) an opportunity to render.
+    $type_unknown = PhabricatorPHIDConstants::PHID_TYPE_UNKNOWN;
+    $special = array();
+    foreach ($values as $key => $value) {
+      if (phid_get_type($value) == $type_unknown) {
+        $special[$key] = $value;
+      }
+    }
+
+    if ($special) {
+      $special_tokens = $this->renderSpecialTokens($special);
+      foreach ($special_tokens as $key => $token) {
+        $tokens[$key] = $token;
+        unset($phids[$key]);
+      }
+    }
+
     if ($phids) {
       $handles = $this->getViewer()->loadHandles($phids);
       foreach ($phids as $key => $phid) {
@@ -263,6 +281,10 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
     }
 
     return array_select_keys($tokens, array_keys($values));
+  }
+
+  protected function renderSpecialTokens(array $values) {
+    return array();
   }
 
 /* -(  Token Functions  )---------------------------------------------------- */
@@ -424,12 +446,13 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
   }
 
   protected function renderTokensFromResults(array $results, array $values) {
-    $results = array_select_keys($results, $values);
-
     $tokens = array();
-    foreach ($results as $result) {
-      $tokens[] = PhabricatorTypeaheadTokenView::newFromTypeaheadResult(
-        $result);
+    foreach ($values as $key => $value) {
+      if (empty($results[$value])) {
+        continue;
+      }
+      $tokens[$key] = PhabricatorTypeaheadTokenView::newFromTypeaheadResult(
+        $results[$value]);
     }
 
     return $tokens;

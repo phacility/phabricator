@@ -20,7 +20,8 @@ final class ManiphestTaskStatusDatasource
     return $this->filterResultsAgainstTokens($results);
   }
 
-  public function renderTokens(array $values) {
+
+  protected function renderSpecialTokens(array $values) {
     return $this->renderTokensFromResults($this->buildResults(), $values);
   }
 

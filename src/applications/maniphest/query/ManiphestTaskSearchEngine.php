@@ -139,7 +139,10 @@ final class ManiphestTaskSearchEngine
       $query->withOwners($assigned_phids);
     }
 
+    $datasource = id(new ManiphestTaskStatusFunctionDatasource())
+      ->setViewer($this->requireViewer());
     $statuses = $saved->getParameter('statuses');
+    $statuses = $datasource->evaluateTokens($statuses);
     if ($statuses) {
       $query->withStatuses($statuses);
     }
@@ -274,7 +277,7 @@ final class ManiphestTaskSearchEngine
           ->setValue($subscriber_phids))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource(new ManiphestTaskStatusDatasource())
+          ->setDatasource(new ManiphestTaskStatusFunctionDatasource())
           ->setLabel(pht('Statuses'))
           ->setName('statuses')
           ->setValue($statuses))
