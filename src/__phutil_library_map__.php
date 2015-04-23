@@ -2038,6 +2038,7 @@ phutil_register_library_map(array(
     'PhabricatorMetaMTAMailSection' => 'applications/metamta/view/PhabricatorMetaMTAMailSection.php',
     'PhabricatorMetaMTAMailTestCase' => 'applications/metamta/storage/__tests__/PhabricatorMetaMTAMailTestCase.php',
     'PhabricatorMetaMTAMailableDatasource' => 'applications/metamta/typeahead/PhabricatorMetaMTAMailableDatasource.php',
+    'PhabricatorMetaMTAMailableFunctionDatasource' => 'applications/metamta/typeahead/PhabricatorMetaMTAMailableFunctionDatasource.php',
     'PhabricatorMetaMTAMailgunReceiveController' => 'applications/metamta/controller/PhabricatorMetaMTAMailgunReceiveController.php',
     'PhabricatorMetaMTAMailingList' => 'applications/mailinglists/storage/PhabricatorMetaMTAMailingList.php',
     'PhabricatorMetaMTAMemberQuery' => 'applications/metamta/query/PhabricatorMetaMTAMemberQuery.php',
@@ -5392,6 +5393,7 @@ phutil_register_library_map(array(
     'PhabricatorMetaMTAMailBodyTestCase' => 'PhabricatorTestCase',
     'PhabricatorMetaMTAMailTestCase' => 'PhabricatorTestCase',
     'PhabricatorMetaMTAMailableDatasource' => 'PhabricatorTypeaheadCompositeDatasource',
+    'PhabricatorMetaMTAMailableFunctionDatasource' => 'PhabricatorTypeaheadCompositeDatasource',
     'PhabricatorMetaMTAMailgunReceiveController' => 'PhabricatorMetaMTAController',
     'PhabricatorMetaMTAMailingList' => array(
       'PhabricatorMetaMTADAO',

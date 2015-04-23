@@ -32,7 +32,7 @@ final class PhabricatorSearchApplicationSearchEngine
 
     $saved->setParameter(
       'subscriberPHIDs',
-      $this->readPHIDsFromRequest($request, 'subscriberPHIDs'));
+      $this->readSubscribersFromRequest($request, 'subscriberPHIDs'));
 
     $saved->setParameter(
       'projectPHIDs',
@@ -67,6 +67,14 @@ final class PhabricatorSearchApplicationSearchEngine
     $author_phids = $config->getParameter('authorPHIDs', array());
     $author_phids = $datasource->evaluateTokens($author_phids);
     $config->setParameter('authorPHIDs', $author_phids);
+
+
+    $datasource = id(new PhabricatorMetaMTAMailableFunctionDatasource())
+      ->setViewer($viewer);
+    $subscriber_phids = $config->getParameter('subscriberPHIDs', array());
+    $subscriber_phids = $datasource->evaluateTokens($subscriber_phids);
+    $config->setParameter('subscriberPHIDs', $subscriber_phids);
+
 
     $query->withSavedQuery($config);
 
@@ -146,7 +154,7 @@ final class PhabricatorSearchApplicationSearchEngine
         id(new AphrontFormTokenizerControl())
           ->setName('subscriberPHIDs')
           ->setLabel('Subscribers')
-          ->setDatasource(new PhabricatorMetaMTAMailableDatasource())
+          ->setDatasource(new PhabricatorMetaMTAMailableFunctionDatasource())
           ->setValue($subscriber_phids))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
