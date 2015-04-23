@@ -125,8 +125,6 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
     $relationship_map = array(
       PhabricatorSearchRelationship::RELATIONSHIP_AUTHOR =>
         $query->getParameter('authorPHIDs', array()),
-      PhabricatorSearchRelationship::RELATIONSHIP_OWNER =>
-        $query->getParameter('ownerPHIDs', array()),
       PhabricatorSearchRelationship::RELATIONSHIP_SUBSCRIBER =>
         $query->getParameter('subscriberPHIDs', array()),
       PhabricatorSearchRelationship::RELATIONSHIP_PROJECT =>
@@ -153,6 +151,14 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
 
     if ($query->getParameter('withUnowned')) {
       $relationship_map[$rel_unowned] = true;
+    }
+
+    $rel_owner = PhabricatorSearchRelationship::RELATIONSHIP_OWNER;
+    if ($query->getParameter('withAnyOwner')) {
+      $relationship_map[$rel_owner] = true;
+    } else {
+      $owner_phids = $query->getParameter('ownerPHIDs', array());
+      $relationship_map[$rel_owner] = $owner_phids;
     }
 
     foreach ($relationship_map as $field => $param) {

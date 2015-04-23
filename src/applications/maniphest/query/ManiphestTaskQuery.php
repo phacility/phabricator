@@ -10,7 +10,8 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   private $taskPHIDs           = array();
   private $authorPHIDs         = array();
   private $ownerPHIDs          = array();
-  private $includeUnowned      = null;
+  private $noOwner;
+  private $anyOwner;
   private $subscriberPHIDs     = array();
   private $dateCreatedAfter;
   private $dateCreatedBefore;
@@ -70,11 +71,16 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
 
   public function withOwners(array $owners) {
     $no_owner = PhabricatorPeopleNoOwnerDatasource::FUNCTION_TOKEN;
+    $any_owner = PhabricatorPeopleAnyOwnerDatasource::FUNCTION_TOKEN;
 
-    $this->includeUnowned = false;
     foreach ($owners as $k => $phid) {
       if ($phid === $no_owner || $phid === null) {
-        $this->includeUnowned = true;
+        $this->noOwner = true;
+        unset($owners[$k]);
+        break;
+      }
+      if ($phid === $any_owner) {
+        $this->anyOwner = true;
         unset($owners[$k]);
         break;
       }
@@ -512,31 +518,32 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
   }
 
   private function buildOwnerWhereClause(AphrontDatabaseConnection $conn) {
-    if (!$this->ownerPHIDs) {
-      if ($this->includeUnowned === null) {
-        return null;
-      } else if ($this->includeUnowned) {
-        return qsprintf(
-          $conn,
-          'task.ownerPHID IS NULL');
-      } else {
-        return qsprintf(
-          $conn,
-          'task.ownerPHID IS NOT NULL');
-      }
+    $subclause = array();
+
+    if ($this->noOwner) {
+      $subclause[] = qsprintf(
+        $conn,
+        'task.ownerPHID IS NULL');
     }
 
-    if ($this->includeUnowned) {
-      return qsprintf(
+    if ($this->anyOwner) {
+      $subclause[] = qsprintf(
         $conn,
-        'task.ownerPHID IN (%Ls) OR task.ownerPHID IS NULL',
-        $this->ownerPHIDs);
-    } else {
-      return qsprintf(
+        'task.ownerPHID IS NOT NULL');
+    }
+
+    if ($this->ownerPHIDs) {
+      $subclause[] = qsprintf(
         $conn,
         'task.ownerPHID IN (%Ls)',
         $this->ownerPHIDs);
     }
+
+    if (!$subclause) {
+      return '';
+    }
+
+    return '('.implode(') OR (', $subclause).')';
   }
 
   private function buildFullTextWhereClause(AphrontDatabaseConnection $conn) {
