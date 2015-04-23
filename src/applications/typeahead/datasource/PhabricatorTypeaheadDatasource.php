@@ -423,4 +423,16 @@ abstract class PhabricatorTypeaheadDatasource extends Phobject {
     return nonempty(last($this->functionStack), null);
   }
 
+  protected function renderTokensFromResults(array $results, array $values) {
+    $results = array_select_keys($results, $values);
+
+    $tokens = array();
+    foreach ($results as $result) {
+      $tokens[] = PhabricatorTypeaheadTokenView::newFromTypeaheadResult(
+        $result);
+    }
+
+    return $tokens;
+  }
+
 }

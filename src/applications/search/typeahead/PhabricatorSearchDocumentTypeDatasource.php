@@ -21,16 +21,7 @@ final class PhabricatorSearchDocumentTypeDatasource
   }
 
   public function renderTokens(array $values) {
-    $results = $this->buildResults();
-    $results = array_select_keys($results, $values);
-
-    $tokens = array();
-    foreach ($results as $result) {
-      $tokens[] = PhabricatorTypeaheadTokenView::newFromTypeaheadResult(
-        $result);
-    }
-
-    return $tokens;
+    return $this->renderTokensFromResults($this->buildResults(), $values);
   }
 
   private function buildResults() {

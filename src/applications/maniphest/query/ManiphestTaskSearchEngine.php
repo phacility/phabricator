@@ -219,28 +219,7 @@ final class ManiphestTaskSearchEngine
     $subscriber_phids = $saved->getParameter('subscriberPHIDs', array());
 
     $statuses = $saved->getParameter('statuses', array());
-    $statuses = array_fuse($statuses);
-    $status_control = id(new AphrontFormCheckboxControl())
-      ->setLabel(pht('Status'));
-    foreach (ManiphestTaskStatus::getTaskStatusMap() as $status => $name) {
-      $status_control->addCheckbox(
-        'statuses[]',
-        $status,
-        $name,
-        isset($statuses[$status]));
-    }
-
     $priorities = $saved->getParameter('priorities', array());
-    $priorities = array_fuse($priorities);
-    $priority_control = id(new AphrontFormCheckboxControl())
-      ->setLabel(pht('Priority'));
-    foreach (ManiphestTaskPriority::getTaskPriorityMap() as $pri => $name) {
-      $priority_control->addCheckbox(
-        'priorities[]',
-        $pri,
-        $name,
-        isset($priorities[$pri]));
-    }
 
     $blocking_control = id(new AphrontFormSelectControl())
       ->setLabel(pht('Blocking'))
@@ -293,13 +272,23 @@ final class ManiphestTaskSearchEngine
           ->setName('subscribers')
           ->setLabel(pht('Subscribers'))
           ->setValue($subscriber_phids))
+      ->appendControl(
+        id(new AphrontFormTokenizerControl())
+          ->setDatasource(new ManiphestTaskStatusDatasource())
+          ->setLabel(pht('Statuses'))
+          ->setName('statuses')
+          ->setValue($statuses))
+      ->appendControl(
+        id(new AphrontFormTokenizerControl())
+          ->setDatasource(new ManiphestTaskPriorityDatasource())
+          ->setLabel(pht('Priorities'))
+          ->setName('priorities')
+          ->setValue($priorities))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('fulltext')
           ->setLabel(pht('Contains Words'))
           ->setValue($saved->getParameter('fulltext')))
-      ->appendChild($status_control)
-      ->appendChild($priority_control)
       ->appendChild($blocking_control)
       ->appendChild($blocked_control);
 
