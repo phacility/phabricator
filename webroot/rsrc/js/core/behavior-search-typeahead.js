@@ -212,7 +212,7 @@ JX.behavior('phabricator-search-typeahead', function(config) {
           item.setHref(spec.href);
           item.setHandler(function() { menu.close(); });
         } else {
-          item.setDisabled(true);
+          item.setLabel(true);
         }
 
         list.addItem(item);
