@@ -50,19 +50,6 @@ JX.behavior('dark-console', function(config, statics) {
   }
 
   var root = statics.root || setup_console();
-  JX.Stratcom.listen(
-    'quicksand-redraw',
-    null,
-    function (e) {
-      e.kill();
-      var data = e.getData().newResponse;
-      console.log(data);
-      if (data.consoleConfig) {
-        console.log('hey');
-        root = setup_console();
-        //add_request(data.consoleConfig);
-      }
-    });
 
   config.key = config.key || root.getAttribute('data-console-key');
 
