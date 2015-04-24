@@ -8,7 +8,7 @@
 return array(
   'names' => array(
     'core.pkg.css' => '9a9b59ca',
-    'core.pkg.js' => '493cc6e6',
+    'core.pkg.js' => '6f7446de',
     'darkconsole.pkg.js' => '8ab24e01',
     'differential.pkg.css' => '3500921f',
     'differential.pkg.js' => '890046d3',
@@ -468,7 +468,7 @@ return array(
     'rsrc/js/core/behavior-file-tree.js' => '88236f00',
     'rsrc/js/core/behavior-form.js' => '5c54cbf3',
     'rsrc/js/core/behavior-gesture.js' => '3ab51e2c',
-    'rsrc/js/core/behavior-global-drag-and-drop.js' => '3f6075ff',
+    'rsrc/js/core/behavior-global-drag-and-drop.js' => 'c203e6ee',
     'rsrc/js/core/behavior-high-security-warning.js' => 'a464fe03',
     'rsrc/js/core/behavior-history-install.js' => '7ee2b591',
     'rsrc/js/core/behavior-hovercard.js' => 'f36e01af',
@@ -486,7 +486,7 @@ return array(
     'rsrc/js/core/behavior-reorder-applications.js' => '76b9fc3e',
     'rsrc/js/core/behavior-reveal-content.js' => '60821bc7',
     'rsrc/js/core/behavior-scrollbar.js' => '834a1173',
-    'rsrc/js/core/behavior-search-typeahead.js' => 'c5172d25',
+    'rsrc/js/core/behavior-search-typeahead.js' => '048330fa',
     'rsrc/js/core/behavior-select-on-click.js' => '4e3e79a6',
     'rsrc/js/core/behavior-toggle-class.js' => 'e566f52c',
     'rsrc/js/core/behavior-tokenizer.js' => 'b3a4b884',
@@ -593,7 +593,7 @@ return array(
     'javelin-behavior-durable-column' => '657c2b50',
     'javelin-behavior-error-log' => '6882e80a',
     'javelin-behavior-fancy-datepicker' => 'c51ae228',
-    'javelin-behavior-global-drag-and-drop' => '3f6075ff',
+    'javelin-behavior-global-drag-and-drop' => 'c203e6ee',
     'javelin-behavior-herald-rule-editor' => '7ebaeed3',
     'javelin-behavior-high-security-warning' => 'a464fe03',
     'javelin-behavior-history-install' => '7ee2b591',
@@ -628,7 +628,7 @@ return array(
     'javelin-behavior-phabricator-oncopy' => '2926fff2',
     'javelin-behavior-phabricator-remarkup-assist' => 'e32d14ab',
     'javelin-behavior-phabricator-reveal-content' => '60821bc7',
-    'javelin-behavior-phabricator-search-typeahead' => 'c5172d25',
+    'javelin-behavior-phabricator-search-typeahead' => '048330fa',
     'javelin-behavior-phabricator-show-older-transactions' => 'dbbf48b6',
     'javelin-behavior-phabricator-tooltips' => '3ee3408b',
     'javelin-behavior-phabricator-transaction-comment-form' => '9f7309fb',
@@ -844,6 +844,16 @@ return array(
   'requires' => array(
     '029a133d' => array(
       'aphront-dialog-view-css',
+    ),
+    '048330fa' => array(
+      'javelin-behavior',
+      'javelin-typeahead-ondemand-source',
+      'javelin-typeahead',
+      'javelin-dom',
+      'javelin-uri',
+      'javelin-util',
+      'javelin-stratcom',
+      'phabricator-prefab',
     ),
     '05270951' => array(
       'javelin-util',
@@ -1087,13 +1097,6 @@ return array(
       'javelin-behavior',
       'javelin-dom',
       'phortune-credit-card-form',
-    ),
-    '3f6075ff' => array(
-      'javelin-behavior',
-      'javelin-dom',
-      'javelin-uri',
-      'javelin-mask',
-      'phabricator-drag-and-drop-file-upload',
     ),
     '40a6a403' => array(
       'javelin-install',
@@ -1755,15 +1758,12 @@ return array(
       'javelin-dom',
       'javelin-vector',
     ),
-    'c5172d25' => array(
+    'c203e6ee' => array(
       'javelin-behavior',
-      'javelin-typeahead-ondemand-source',
-      'javelin-typeahead',
       'javelin-dom',
       'javelin-uri',
-      'javelin-util',
-      'javelin-stratcom',
-      'phabricator-prefab',
+      'javelin-mask',
+      'phabricator-drag-and-drop-file-upload',
     ),
     'c51ae228' => array(
       'javelin-behavior',

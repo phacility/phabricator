@@ -98,8 +98,6 @@ JX.behavior('global-drag-and-drop', function(config, statics) {
     'quicksand-redraw',
     null,
     function (e) {
-      e.kill();
-
       var data = e.getData();
       var toggle = data.newResponse.globalDragAndDrop;
       statics.enabled = toggle;

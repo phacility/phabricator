@@ -649,6 +649,19 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       $upload_enabled = $controller->isGlobalDragAndDropUploadEnabled();
     }
 
+    $application_class = null;
+    $application_search_icon = null;
+    $controller = $this->getController();
+    if ($controller) {
+      $application = $controller->getCurrentApplication();
+      if ($application) {
+        $application_class = get_class($application);
+        if ($application->getApplicationSearchDocumentTypes()) {
+          $application_search_icon = $application->getFontIcon();
+        }
+      }
+    }
+
     return array(
       'title' => $this->getTitle(),
       'aphlictDropdownData' => array(
@@ -659,6 +672,8 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       'aphlictDropdowns' => $rendered_dropdowns,
       'hisecWarningConfig' => $hisec_warning_config,
       'consoleConfig' => $console_config,
+      'applicationClass' => $application_class,
+      'applicationSearchIcon' => $application_search_icon,
     ) + $this->buildAphlictListenConfigData();
   }
 
