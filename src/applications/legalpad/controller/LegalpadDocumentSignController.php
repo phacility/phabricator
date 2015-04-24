@@ -22,9 +22,13 @@ final class LegalpadDocumentSignController extends LegalpadController {
       return new Aphront404Response();
     }
 
-    list($signer_phid, $signature_data) = $this->readSignerInformation(
+    $information = $this->readSignerInformation(
       $document,
       $request);
+    if ($information instanceof AphrontResponse) {
+      return $information;
+    }
+    list($signer_phid, $signature_data) = $information;
 
     $signature = null;
 
