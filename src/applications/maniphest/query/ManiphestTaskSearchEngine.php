@@ -141,13 +141,13 @@ final class ManiphestTaskSearchEngine
 
     $datasource = id(new ManiphestTaskStatusFunctionDatasource())
       ->setViewer($this->requireViewer());
-    $statuses = $saved->getParameter('statuses');
+    $statuses = $saved->getParameter('statuses', array());
     $statuses = $datasource->evaluateTokens($statuses);
     if ($statuses) {
       $query->withStatuses($statuses);
     }
 
-    $priorities = $saved->getParameter('priorities');
+    $priorities = $saved->getParameter('priorities', array());
     if ($priorities) {
       $query->withPriorities($priorities);
     }
