@@ -643,13 +643,19 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     if ($console) {
       $console_config = $this->getConsoleConfig();
     }
+
+    $upload_enabled = false;
+    if ($controller) {
+      $upload_enabled = $controller->isGlobalDragAndDropUploadEnabled();
+    }
+
     return array(
       'title' => $this->getTitle(),
       'aphlictDropdownData' => array(
         $dropdown_query->getNotificationData(),
         $dropdown_query->getConpherenceData(),
       ),
-      'globalDragAndDrop' => $controller->isGlobalDragAndDropUploadEnabled(),
+      'globalDragAndDrop' => $upload_enabled,
       'aphlictDropdowns' => $rendered_dropdowns,
       'hisecWarningConfig' => $hisec_warning_config,
       'consoleConfig' => $console_config,
