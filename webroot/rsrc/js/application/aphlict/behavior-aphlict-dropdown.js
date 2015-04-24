@@ -138,7 +138,8 @@ JX.behavior('aphlict-dropdown', function(config, statics) {
       }
 
       if (e.getNode('tag:a')) {
-        // User clicked a link, just follow the link.
+        // User clicked a link. Hide the menu, then follow the link.
+        set_visible(null);
         return;
       }
 
@@ -154,6 +155,7 @@ JX.behavior('aphlict-dropdown', function(config, statics) {
       if (href) {
         JX.$U(href).go();
         e.kill();
+        set_visible(null);
       }
     });
 

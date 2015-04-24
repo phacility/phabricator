@@ -8,7 +8,7 @@
 return array(
   'names' => array(
     'core.pkg.css' => '9a9b59ca',
-    'core.pkg.js' => '6f7446de',
+    'core.pkg.js' => '59d01bb7',
     'darkconsole.pkg.js' => '8ab24e01',
     'differential.pkg.css' => '3500921f',
     'differential.pkg.js' => '890046d3',
@@ -350,7 +350,7 @@ return array(
     'rsrc/image/texture/table_header_hover.png' => '038ec3b9',
     'rsrc/image/texture/table_header_tall.png' => 'd56b434f',
     'rsrc/js/application/aphlict/Aphlict.js' => '30a6303c',
-    'rsrc/js/application/aphlict/behavior-aphlict-dropdown.js' => 'ee37f73a',
+    'rsrc/js/application/aphlict/behavior-aphlict-dropdown.js' => '0323afdd',
     'rsrc/js/application/aphlict/behavior-aphlict-listen.js' => 'b1a59974',
     'rsrc/js/application/aphlict/behavior-aphlict-status.js' => 'ea681761',
     'rsrc/js/application/auth/behavior-persona-login.js' => '9414ff18',
@@ -550,7 +550,7 @@ return array(
     'inline-comment-summary-css' => 'eb5f8e8c',
     'javelin-aphlict' => '30a6303c',
     'javelin-behavior' => '61cbc29a',
-    'javelin-behavior-aphlict-dropdown' => 'ee37f73a',
+    'javelin-behavior-aphlict-dropdown' => '0323afdd',
     'javelin-behavior-aphlict-listen' => 'b1a59974',
     'javelin-behavior-aphlict-status' => 'ea681761',
     'javelin-behavior-aphront-basic-tokenizer' => 'b3a4b884',
@@ -844,6 +844,16 @@ return array(
   'requires' => array(
     '029a133d' => array(
       'aphront-dialog-view-css',
+    ),
+    '0323afdd' => array(
+      'javelin-behavior',
+      'javelin-request',
+      'javelin-stratcom',
+      'javelin-vector',
+      'javelin-dom',
+      'javelin-uri',
+      'javelin-behavior-device',
+      'phabricator-title',
     ),
     '048330fa' => array(
       'javelin-behavior',
@@ -1939,16 +1949,6 @@ return array(
       'javelin-dom',
       'javelin-stratcom',
       'javelin-vector',
-    ),
-    'ee37f73a' => array(
-      'javelin-behavior',
-      'javelin-request',
-      'javelin-stratcom',
-      'javelin-vector',
-      'javelin-dom',
-      'javelin-uri',
-      'javelin-behavior-device',
-      'phabricator-title',
     ),
     'efe49472' => array(
       'javelin-install',
