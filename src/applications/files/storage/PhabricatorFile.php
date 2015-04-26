@@ -209,7 +209,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
     $file = id(new PhabricatorFile())->loadOneWhere(
       'name = %s AND contentHash = %s LIMIT 1',
-      self::normalizeFileName(idx($params, 'name')),
+      idx($params, 'name'),
       self::hashFileContent($data));
 
     if (!$file) {
@@ -692,7 +692,8 @@ final class PhabricatorFile extends PhabricatorFileDAO
   }
 
   private function getCDNURI($token) {
-    $name = phutil_escape_uri($this->getName());
+    $name = self::normalizeFileName($this->getName());
+    $name = phutil_escape_uri($name);
 
     $parts = array();
     $parts[] = 'file';
@@ -1210,7 +1211,6 @@ final class PhabricatorFile extends PhabricatorFileDAO
    */
   private function readPropertiesFromParameters(array $params) {
     $file_name = idx($params, 'name');
-    $file_name = self::normalizeFileName($file_name);
     $this->setName($file_name);
 
     $author_phid = idx($params, 'authorPHID');
