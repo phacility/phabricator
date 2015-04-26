@@ -76,9 +76,8 @@ abstract class PhabricatorProjectController extends PhabricatorController {
     if (PhabricatorApplication::isClassInstalledForViewer($class, $viewer)) {
       $phid = $project->getPHID();
       $query_uri = urisprintf(
-        '/maniphest/?statuses=%s&allProjects=%s#R',
-        implode(',', ManiphestTaskStatus::getOpenStatusConstants()),
-      $phid);
+        '/maniphest/?statuses=open()&projects=%s#R',
+        $phid);
       $nav->addIcon(null, pht('Open Tasks'), 'fa-anchor', null, $query_uri);
     }
 
