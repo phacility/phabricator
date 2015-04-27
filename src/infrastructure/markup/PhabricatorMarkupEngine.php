@@ -353,6 +353,14 @@ final class PhabricatorMarkupEngine {
       ));
   }
 
+  /**
+   * @task engine
+   */
+  public static function newCalendarMarkupEngine() {
+    return self::newMarkupEngine(array(
+    ));
+  }
+
 
   /**
    * @task engine

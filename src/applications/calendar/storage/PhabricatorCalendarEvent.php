@@ -1,8 +1,8 @@
 <?php
 
-final class PhabricatorCalendarEvent
-  extends PhabricatorCalendarDAO
-  implements PhabricatorPolicyInterface {
+final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
+  implements PhabricatorPolicyInterface,
+  PhabricatorMarkupInterface {
 
   protected $userPHID;
   protected $dateFrom;
@@ -56,6 +56,10 @@ final class PhabricatorCalendarEvent
       PhabricatorCalendarEventPHIDType::TYPECONST);
   }
 
+  public function getMonogram() {
+    return 'E'.$this->getID();
+  }
+
   public function getTerseSummary(PhabricatorUser $viewer) {
     $until = phabricator_date($this->dateTo, $viewer);
     if ($this->status == PhabricatorCalendarEvent::STATUS_SPORADIC) {
@@ -95,6 +99,52 @@ final class PhabricatorCalendarEvent
     return parent::save();
   }
 
+/* -(  Markup Interface  )--------------------------------------------------- */
+
+
+  /**
+   * @task markup
+   */
+  public function getMarkupFieldKey($field) {
+    $hash = PhabricatorHash::digest($this->getMarkupText($field));
+    $id = $this->getID();
+    return "calendar:T{$id}:{$field}:{$hash}";
+  }
+
+
+  /**
+   * @task markup
+   */
+  public function getMarkupText($field) {
+    return $this->getDescription();
+  }
+
+
+  /**
+   * @task markup
+   */
+  public function newMarkupEngine($field) {
+    return PhabricatorMarkupEngine::newCalendarMarkupEngine();
+  }
+
+
+  /**
+   * @task markup
+   */
+  public function didMarkupText(
+    $field,
+    $output,
+    PhutilMarkupEngine $engine) {
+    return $output;
+  }
+
+
+  /**
+   * @task markup
+   */
+  public function shouldUseMarkupCache($field) {
+    return (bool)$this->getID();
+  }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 

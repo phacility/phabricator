@@ -1492,6 +1492,7 @@ phutil_register_library_map(array(
     'PhabricatorCalendarEventViewController' => 'applications/calendar/controller/PhabricatorCalendarEventViewController.php',
     'PhabricatorCalendarHoliday' => 'applications/calendar/storage/PhabricatorCalendarHoliday.php',
     'PhabricatorCalendarHolidayTestCase' => 'applications/calendar/storage/__tests__/PhabricatorCalendarHolidayTestCase.php',
+    'PhabricatorCalendarRemarkupRule' => 'applications/calendar/remarkup/PhabricatorCalendarRemarkupRule.php',
     'PhabricatorCalendarViewController' => 'applications/calendar/controller/PhabricatorCalendarViewController.php',
     'PhabricatorCampfireProtocolAdapter' => 'infrastructure/daemon/bot/adapter/PhabricatorCampfireProtocolAdapter.php',
     'PhabricatorCelerityApplication' => 'applications/celerity/application/PhabricatorCelerityApplication.php',
@@ -4799,6 +4800,7 @@ phutil_register_library_map(array(
     'PhabricatorCalendarEvent' => array(
       'PhabricatorCalendarDAO',
       'PhabricatorPolicyInterface',
+      'PhabricatorMarkupInterface',
     ),
     'PhabricatorCalendarEventDeleteController' => 'PhabricatorCalendarController',
     'PhabricatorCalendarEventEditController' => 'PhabricatorCalendarController',
@@ -4810,6 +4812,7 @@ phutil_register_library_map(array(
     'PhabricatorCalendarEventViewController' => 'PhabricatorCalendarController',
     'PhabricatorCalendarHoliday' => 'PhabricatorCalendarDAO',
     'PhabricatorCalendarHolidayTestCase' => 'PhabricatorTestCase',
+    'PhabricatorCalendarRemarkupRule' => 'PhabricatorObjectRemarkupRule',
     'PhabricatorCalendarViewController' => 'PhabricatorCalendarController',
     'PhabricatorCampfireProtocolAdapter' => 'PhabricatorBotBaseStreamingProtocolAdapter',
     'PhabricatorCelerityApplication' => 'PhabricatorApplication',
