@@ -16,9 +16,15 @@ final class DiffusionCachedResolveRefsQuery
   extends DiffusionLowLevelQuery {
 
   private $refs;
+  private $types;
 
   public function withRefs(array $refs) {
     $this->refs = $refs;
+    return $this;
+  }
+
+  public function withTypes(array $types) {
+    $this->types = $types;
     return $this;
   }
 
@@ -37,6 +43,10 @@ final class DiffusionCachedResolveRefsQuery
         break;
       default:
         throw new Exception('Unsupported repository type!');
+    }
+
+    if ($this->types !== null) {
+      $result = $this->filterRefsByType($result, $this->types);
     }
 
     return $result;

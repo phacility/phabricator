@@ -718,17 +718,21 @@ abstract class DiffusionRequest {
   }
 
   private function queryStableCommit() {
+    $types = array();
     if ($this->symbolicCommit) {
       $ref = $this->symbolicCommit;
     } else {
       if ($this->supportsBranches()) {
         $ref = $this->getResolvableBranchName($this->getBranch());
+        $types = array(
+          PhabricatorRepositoryRefCursor::TYPE_BRANCH,
+        );
       } else {
         $ref = 'HEAD';
       }
     }
 
-    $results = $this->resolveRefs(array($ref));
+    $results = $this->resolveRefs(array($ref), $types);
 
     $matches = idx($results, $ref, array());
     if (!$matches) {
@@ -790,12 +794,17 @@ abstract class DiffusionRequest {
     return $branch;
   }
 
-  private function resolveRefs(array $refs) {
+  private function resolveRefs(array $refs, array $types) {
     // First, try to resolve refs from fast cache sources.
-    $cached_results = id(new DiffusionCachedResolveRefsQuery())
+    $cached_query = id(new DiffusionCachedResolveRefsQuery())
       ->setRepository($this->getRepository())
-      ->withRefs($refs)
-      ->execute();
+      ->withRefs($refs);
+
+    if ($types) {
+      $cached_query->withTypes($types);
+    }
+
+    $cached_results = $cached_query->execute();
 
     // Throw away all the refs we resolved. Hopefully, we'll throw away
     // everything here.
@@ -813,6 +822,7 @@ abstract class DiffusionRequest {
         $this,
         'diffusion.resolverefs',
         array(
+          'types' => $types,
           'refs' => $refs,
         ));
     } else {
