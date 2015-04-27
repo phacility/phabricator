@@ -163,8 +163,7 @@ final class PhabricatorCalendarEventEditController
     if ($this->isCreate()) {
       $submit->addCancelButton($this->getApplicationURI());
     } else {
-      $submit->addCancelButton(
-        $this->getApplicationURI('event/view/'.$status->getID().'/'));
+      $submit->addCancelButton('/E'.$status->getID());
     }
 
     if ($request->isAjax()) {
