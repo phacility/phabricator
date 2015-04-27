@@ -66,18 +66,32 @@ final class DiffusionRefTableController extends DiffusionController {
           $type = idx($cache, 'type');
         }
 
-        $identifier = idx($vcs, 'identifier');
-        if ($identifier !== null) {
-          $identifier = DiffusionView::linkCommit(
+        $hash = idx($vcs, 'identifier');
+        if ($hash !== null) {
+          $hash = DiffusionView::linkCommit(
             $repository,
-            $identifier);
+            $hash);
         }
 
-        $cache_identifier = idx($cache, 'identifier');
-        if ($cache_identifier !== null) {
-          $cache_identifier = DiffusionView::linkCommit(
+        $cached_hash = idx($cache, 'identifier');
+        if ($cached_hash !== null) {
+          $cache_hash = DiffusionView::linkCommit(
             $repository,
-            $cache_identifier);
+            $cached_hash);
+        }
+
+        $closed = idx($vcs, 'closed', false);
+        if (!$vcs) {
+          $state = null;
+        } else {
+          $state = $closed ? pht('Closed') : pht('Open');
+        }
+
+        $cached_closed = idx($cache, 'closed', false);
+        if (!$cache) {
+          $cached_state = null;
+        } else {
+          $cached_state = $cached_closed ? pht('Closed') : pht('Open');
         }
 
         $alternate = idx($vcs, 'alternate');
@@ -90,8 +104,10 @@ final class DiffusionRefTableController extends DiffusionController {
         $rows[] = array(
           $ref,
           $type,
-          $identifier,
-          $cache_identifier,
+          $hash,
+          $cached_hash,
+          $state,
+          $cached_state,
           $alternate,
         );
       }
@@ -102,8 +118,10 @@ final class DiffusionRefTableController extends DiffusionController {
         array(
           pht('Ref'),
           pht('Type'),
-          pht('Identifier'),
-          pht('Cached'),
+          pht('Hash'),
+          pht('Cached Hash'),
+          pht('State'),
+          pht('Cached State'),
           pht('Alternate'),
         ));
 

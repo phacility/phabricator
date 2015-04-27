@@ -140,15 +140,72 @@ final class DiffusionLowLevelResolveRefsQuery
   private function resolveMercurialRefs() {
     $repository = $this->getRepository();
 
+    // First, pull all of the branch heads in the repository. Doing this in
+    // bulk is much faster than querying each individual head if we're
+    // checking even a small number of refs.
     $futures = array();
-    foreach ($this->refs as $ref) {
+    $futures['all'] = $repository->getLocalCommandFuture(
+      'log --template=%s --rev %s',
+      '{node} {branch}\\n',
+      hgsprintf('head()'));
+    $futures['open'] = $repository->getLocalCommandFuture(
+      'log --template=%s --rev %s',
+      '{node} {branch}\\n',
+      hgsprintf('head() and not closed()'));
+
+
+    $map = array();
+    foreach (new FutureIterator($futures) as $key => $future) {
+      list($stdout) = $future->resolvex();
+      $lines = phutil_split_lines($stdout, $retain_endings = false);
+      foreach ($lines as $idx => $line) {
+        list($node, $branch) = explode(' ', $line, 2);
+        $map[$branch]['nodes'][] = $node;
+        if ($key == 'open') {
+          $map[$branch]['open'] = true;
+        }
+      }
+    }
+
+    $results = array();
+    $unresolved = $this->refs;
+    foreach ($unresolved as $key => $ref) {
+      if (!isset($map[$ref])) {
+        continue;
+      }
+
+      $is_closed = !idx($map[$ref], 'open', false);
+      foreach ($map[$ref]['nodes'] as $node) {
+        $results[$ref][$node] = array(
+          'type' => 'branch',
+          'identifier' => $node,
+          'closed' => $is_closed,
+        );
+      }
+
+      unset($unresolved[$key]);
+    }
+
+    // Strip the node keys off the result list.
+    foreach ($results as $ref => $result_list) {
+      $results[$ref] = array_values($result_list);
+    }
+
+    if (!$unresolved) {
+      return $results;
+    }
+
+    // If we still have unresolved refs (which might be things like "tip"),
+    // try to resolve them individually.
+
+    $futures = array();
+    foreach ($unresolved as $ref) {
       $futures[$ref] = $repository->getLocalCommandFuture(
         'log --template=%s --rev %s',
         '{node}',
         hgsprintf('%s', $ref));
     }
 
-    $results = array();
     foreach (new FutureIterator($futures) as $ref => $future) {
       try {
         list($stdout) = $future->resolvex();
