@@ -351,6 +351,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     $branches = $this->callConduitWithDiffusionRequest(
       'diffusion.branchquery',
       array(
+        'closed' => false,
         'limit' => $limit + 1,
       ));
     if (!$branches) {

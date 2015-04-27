@@ -756,12 +756,32 @@ abstract class DiffusionRequest {
   }
 
   private function chooseBestRefMatch($ref, array $results) {
-    // TODO: Do a better job of selecting the best match.
-    $match = head($results);
+    // First, filter out less-desirable matches.
+    $candidates = array();
+    foreach ($results as $result) {
+      // Exclude closed heads.
+      if ($result['type'] == 'branch') {
+        if (idx($result, 'closed')) {
+          continue;
+        }
+      }
+
+      $candidates[] = $result;
+    }
+
+    // If we filtered everything, undo the filtering.
+    if (!$candidates) {
+      $candidates = $results;
+    }
+
+    // TODO: Do a better job of selecting the best match?
+    $match = head($candidates);
 
     // After choosing the best alternative, save all the alternatives so the
     // UI can show them to the user.
-    $this->refAlternatives = $results;
+    if (count($candidates) > 1) {
+      $this->refAlternatives = $candidates;
+    }
 
     return $match;
   }
