@@ -75,7 +75,7 @@ final class DiffusionRefTableController extends DiffusionController {
 
         $cached_hash = idx($cache, 'identifier');
         if ($cached_hash !== null) {
-          $cache_hash = DiffusionView::linkCommit(
+          $cached_hash = DiffusionView::linkCommit(
             $repository,
             $cached_hash);
         }

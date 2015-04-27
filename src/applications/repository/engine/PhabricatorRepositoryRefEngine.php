@@ -19,6 +19,8 @@ final class PhabricatorRepositoryRefEngine
 
     $repository = $this->getRepository();
 
+    $branches_may_close = false;
+
     $vcs = $repository->getVersionControlSystem();
     switch ($vcs) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_SVN:
@@ -31,6 +33,7 @@ final class PhabricatorRepositoryRefEngine
         $branches = $this->loadMercurialBranchPositions($repository);
         $bookmarks = $this->loadMercurialBookmarkPositions($repository);
         $tags = array();
+        $branches_may_close = true;
         break;
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         $branches = $this->loadGitBranchPositions($repository);
@@ -86,6 +89,51 @@ final class PhabricatorRepositoryRefEngine
 
       $this->newRefs = array();
       $this->deadRefs = array();
+    }
+
+    if ($branches && $branches_may_close) {
+      $this->updateBranchStates($repository, $branches);
+    }
+  }
+
+  private function updateBranchStates(
+    PhabricatorRepository $repository,
+    array $branches) {
+
+    assert_instances_of($branches, 'DiffusionRepositoryRef');
+
+    $all_cursors = id(new PhabricatorRepositoryRefCursorQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withRepositoryPHIDs(array($repository->getPHID()))
+      ->execute();
+
+    $state_map = array();
+    $type_branch = PhabricatorRepositoryRefCursor::TYPE_BRANCH;
+    foreach ($all_cursors as $cursor) {
+      if ($cursor->getRefType() !== $type_branch) {
+        continue;
+      }
+      $raw_name = $cursor->getRefNameRaw();
+      $hash = $cursor->getCommitIdentifier();
+
+      $state_map[$raw_name][$hash] = $cursor;
+    }
+
+    foreach ($branches as $branch) {
+      $cursor = idx($state_map, $branch->getShortName(), array());
+      $cursor = idx($cursor, $branch->getCommitIdentifier());
+      if (!$cursor) {
+        continue;
+      }
+
+      $fields = $branch->getRawFields();
+
+      $cursor_state = (bool)$cursor->getIsClosed();
+      $branch_state = (bool)idx($fields, 'closed');
+
+      if ($cursor_state != $branch_state) {
+        $cursor->setIsClosed((int)$branch_state)->save();
+      }
     }
   }
 

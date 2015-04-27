@@ -16,29 +16,57 @@ final class DiffusionLowLevelMercurialBranchesQuery
   protected function executeQuery() {
     $repository = $this->getRepository();
 
+    $specs = array();
     if ($this->contains !== null) {
-      $spec = hgsprintf('(descendants(%s) and head())', $this->contains);
+      $specs['all'] = hgsprintf(
+        '(descendants(%s) and head())',
+        $this->contains);
+      $specs['open'] = hgsprintf(
+        '(descendants(%s) and head() and not closed())',
+        $this->contains);
     } else {
-      $spec = hgsprintf('head()');
+      $specs['all'] = hgsprintf('head()');
+      $specs['open'] = hgsprintf('head() and not closed()');
     }
 
-    list($stdout) = $repository->execxLocalCommand(
-      'log --template %s --rev %s',
-      '{node}\1{branch}\2',
-      $spec);
+    $futures = array();
+    foreach ($specs as $key => $spec) {
+      $futures[$key] = $repository->getLocalCommandFuture(
+        'log --template %s --rev %s',
+        '{node}\1{branch}\2',
+        $spec);
+    }
 
     $branches = array();
+    $open = array();
+    foreach (new FutureIterator($futures) as $key => $future) {
+      list($stdout) = $future->resolvex();
 
-    $lines = explode("\2", $stdout);
-    $lines = array_filter($lines);
-    foreach ($lines as $line) {
-      list($node, $branch) = explode("\1", $line);
-      $branches[] = id(new DiffusionRepositoryRef())
-        ->setShortName($branch)
-        ->setCommitIdentifier($node);
+      $lines = explode("\2", $stdout);
+      $lines = array_filter($lines);
+      foreach ($lines as $line) {
+        list($node, $branch) = explode("\1", $line);
+        $id = $node.'/'.$branch;
+        if (empty($branches[$id])) {
+          $branches[$id] = id(new DiffusionRepositoryRef())
+            ->setShortName($branch)
+            ->setCommitIdentifier($node);
+        }
+
+        if ($key == 'open') {
+          $open[$id] = true;
+        }
+      }
     }
 
-    return $branches;
+    foreach ($branches as $id => $branch) {
+      $branch->setRawFields(
+        array(
+          'closed' => (empty($open[$id])),
+        ));
+    }
+
+    return array_values($branches);
   }
 
 }
