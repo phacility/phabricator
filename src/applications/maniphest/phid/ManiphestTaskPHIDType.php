@@ -5,7 +5,7 @@ final class ManiphestTaskPHIDType extends PhabricatorPHIDType {
   const TYPECONST = 'TASK';
 
   public function getTypeName() {
-    return pht('Task');
+    return pht('Maniphest Task');
   }
 
   public function getPHIDTypeApplicationClass() {

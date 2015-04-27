@@ -5,7 +5,7 @@ final class PhrictionDocumentPHIDType extends PhabricatorPHIDType {
   const TYPECONST = 'WIKI';
 
   public function getTypeName() {
-    return pht('Wiki Document');
+    return pht('Phriction Wiki Document');
   }
 
   public function getPHIDTypeApplicationClass() {

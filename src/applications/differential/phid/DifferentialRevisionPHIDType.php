@@ -5,7 +5,7 @@ final class DifferentialRevisionPHIDType extends PhabricatorPHIDType {
   const TYPECONST = 'DREV';
 
   public function getTypeName() {
-    return pht('Revision');
+    return pht('Differential Revision');
   }
 
   public function getPHIDTypeApplicationClass() {

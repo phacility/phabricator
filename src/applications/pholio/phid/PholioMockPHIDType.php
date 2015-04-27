@@ -5,7 +5,7 @@ final class PholioMockPHIDType extends PhabricatorPHIDType {
   const TYPECONST = 'MOCK';
 
   public function getTypeName() {
-    return pht('Mock');
+    return pht('Pholio Mock');
   }
 
   public function getPHIDTypeApplicationClass() {

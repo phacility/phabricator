@@ -5,7 +5,7 @@ final class PassphraseCredentialPHIDType extends PhabricatorPHIDType {
   const TYPECONST = 'CDTL';
 
   public function getTypeName() {
-    return pht('Credential');
+    return pht('Passphrase Credential');
   }
 
   public function newObject() {
