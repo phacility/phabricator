@@ -2,8 +2,11 @@
 
 final class PhabricatorFileUploadController extends PhabricatorFileController {
 
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function isGlobalDragAndDropUploadEnabled() {
+    return true;
+  }
+
+  public function handleRequest(AphrontRequest $request) {
     $viewer = $request->getUser();
 
     $file = PhabricatorFile::initializeNewFile();

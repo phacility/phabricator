@@ -112,12 +112,23 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
   final public function execute(PhutilArgumentParser $args) {
     $this->args = $args;
 
+    $viewer = $this->getUser();
+    $have_diffusion = PhabricatorApplication::isClassInstalledForViewer(
+      'PhabricatorDiffusionApplication',
+      $viewer);
+    if (!$have_diffusion) {
+      throw new Exception(
+        pht(
+          'You do not have permission to access the Diffusion application, '.
+          'so you can not interact with repositories over SSH.'));
+    }
+
     $repository = $this->identifyRepository();
     $this->setRepository($repository);
 
     $is_cluster_request = $this->getIsClusterRequest();
     $uri = $repository->getAlmanacServiceURI(
-      $this->getUser(),
+      $viewer,
       $is_cluster_request,
       array(
         'ssh',

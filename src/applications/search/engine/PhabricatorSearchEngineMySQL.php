@@ -231,7 +231,14 @@ final class PhabricatorSearchEngineMySQL extends PhabricatorSearchEngine {
         true);
     }
 
-    if ($query->getParameter('withUnowned')) {
+    if ($query->getParameter('withAnyOwner')) {
+      $join[] = $this->joinRelationship(
+        $conn_r,
+        $query,
+        'withAnyOwner',
+        PhabricatorSearchRelationship::RELATIONSHIP_OWNER,
+        true);
+    } else if ($query->getParameter('withUnowned')) {
       $join[] = $this->joinRelationship(
         $conn_r,
         $query,

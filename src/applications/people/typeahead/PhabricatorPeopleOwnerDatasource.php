@@ -15,6 +15,7 @@ final class PhabricatorPeopleOwnerDatasource
     return array(
       new PhabricatorViewerDatasource(),
       new PhabricatorPeopleNoOwnerDatasource(),
+      new PhabricatorPeopleAnyOwnerDatasource(),
       new PhabricatorPeopleDatasource(),
       new PhabricatorProjectMembersDatasource(),
     );

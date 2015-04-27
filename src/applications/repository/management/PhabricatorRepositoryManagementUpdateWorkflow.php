@@ -56,7 +56,21 @@ final class PhabricatorRepositoryManagementUpdateWorkflow
       $lock_name = 'repository.update:'.$repository->getID();
       $lock = PhabricatorGlobalLock::newLock($lock_name);
 
-      $lock->lock();
+      try {
+        $lock->lock();
+      } catch (PhutilLockException $ex) {
+        throw new PhutilProxyException(
+          pht(
+            'Another process is currently holding the update lock for '.
+            'repository "%s". Repositories may only be updated by one '.
+            'process at a time. This can happen if you are running multiple '.
+            'copies of the daemons. This can also happen if you manually '.
+            'update a repository while the daemons are also updating it '.
+            '(in this case, just try again in a few moments).',
+            $repository->getMonogram()),
+          $ex);
+      }
+
       try {
         $no_discovery = $args->getArg('no-discovery');
 

@@ -57,6 +57,10 @@ abstract class PhabricatorController extends AphrontController {
     return false;
   }
 
+  public function isGlobalDragAndDropUploadEnabled() {
+    return false;
+  }
+
   public function willBeginExecution() {
     $request = $this->getRequest();
 

@@ -215,21 +215,9 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
     Javelin::initBehavior('device');
 
-    if ($user->hasSession()) {
-      $hisec = ($user->getSession()->getHighSecurityUntil() - time());
-      if ($hisec > 0) {
-        $remaining_time = phutil_format_relative_time($hisec);
-        Javelin::initBehavior(
-          'high-security-warning',
-          array(
-            'uri' => '/auth/session/downgrade/',
-            'message' => pht(
-              'Your session is in high security mode. When you '.
-              'finish using it, click here to leave.',
-              $remaining_time),
-          ));
-      }
-    }
+    Javelin::initBehavior(
+      'high-security-warning',
+      $this->getHighSecurityWarningConfig());
 
     if ($console) {
       require_celerity_resource('aphront-dark-console-css');
@@ -547,6 +535,26 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     );
   }
 
+  private function getHighSecurityWarningConfig() {
+    $user = $this->getRequest()->getUser();
+
+    $show = false;
+    if ($user->hasSession()) {
+      $hisec = ($user->getSession()->getHighSecurityUntil() - time());
+      if ($hisec > 0) {
+        $show = true;
+      }
+    }
+
+    return array(
+      'show' => $show,
+      'uri' => '/auth/session/downgrade/',
+      'message' => pht(
+        'Your session is in high security mode. When you '.
+        'finish using it, click here to leave.'),
+        );
+  }
+
   private function renderFooter() {
     if (!$this->getShowChrome()) {
       return null;
@@ -605,6 +613,7 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
   private function buildQuicksandConfig() {
     $viewer = $this->getRequest()->getUser();
+    $controller = $this->getController();
 
     $dropdown_query = id(new AphlictDropdownDataQuery())
       ->setViewer($viewer);
@@ -624,22 +633,47 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       $rendered_dropdowns[$application_class] =
         $application->buildMainMenuExtraNodes(
           $viewer,
-          $this->getController());
+          $controller);
     }
+
+    $hisec_warning_config = $this->getHighSecurityWarningConfig();
 
     $console_config = null;
     $console = $this->getConsole();
     if ($console) {
       $console_config = $this->getConsoleConfig();
     }
+
+    $upload_enabled = false;
+    if ($controller) {
+      $upload_enabled = $controller->isGlobalDragAndDropUploadEnabled();
+    }
+
+    $application_class = null;
+    $application_search_icon = null;
+    $controller = $this->getController();
+    if ($controller) {
+      $application = $controller->getCurrentApplication();
+      if ($application) {
+        $application_class = get_class($application);
+        if ($application->getApplicationSearchDocumentTypes()) {
+          $application_search_icon = $application->getFontIcon();
+        }
+      }
+    }
+
     return array(
       'title' => $this->getTitle(),
       'aphlictDropdownData' => array(
         $dropdown_query->getNotificationData(),
         $dropdown_query->getConpherenceData(),
       ),
+      'globalDragAndDrop' => $upload_enabled,
       'aphlictDropdowns' => $rendered_dropdowns,
+      'hisecWarningConfig' => $hisec_warning_config,
       'consoleConfig' => $console_config,
+      'applicationClass' => $application_class,
+      'applicationSearchIcon' => $application_search_icon,
     ) + $this->buildAphlictListenConfigData();
   }
 

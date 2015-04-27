@@ -72,6 +72,13 @@ final class PhabricatorMainMenuView extends AphrontView {
         phutil_implode_html(' ', $aural));
     }
 
+    $applications = PhabricatorApplication::getAllInstalledApplications();
+    foreach ($applications as $application) {
+      $menus[] = $application->buildMainMenuExtraNodes(
+        $user,
+        $this->getController());
+    }
+
     $application_menu = $this->renderApplicationMenu();
     $classes = array();
     $classes[] = 'phabricator-main-menu';
@@ -475,13 +482,6 @@ final class PhabricatorMainMenuView extends AphrontView {
       $notification_dropdown,
       $message_notification_dropdown,
     );
-
-    $applications = PhabricatorApplication::getAllInstalledApplications();
-    foreach ($applications as $application) {
-      $dropdowns[] = $application->buildMainMenuExtraNodes(
-        $this->getUser(),
-        $this->getController());
-    }
 
     return array(
       array(

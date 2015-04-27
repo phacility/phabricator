@@ -2,6 +2,8 @@
 
 final class PhabricatorMainMenuSearchView extends AphrontView {
 
+  const DEFAULT_APPLICATION_ICON = 'fa-dot-circle-o';
+
   private $id;
   private $application;
 
@@ -27,6 +29,8 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
     $target_id = celerity_generate_unique_node_id();
     $search_id = $this->getID();
     $button_id = celerity_generate_unique_node_id();
+    $selector_id = celerity_generate_unique_node_id();
+    $application_id = celerity_generate_unique_node_id();
 
     $input = phutil_tag(
       'input',
@@ -51,11 +55,15 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
     Javelin::initBehavior(
       'phabricator-search-typeahead',
       array(
-        'id'          => $target_id,
-        'input'       => $search_id,
-        'button'      => $button_id,
-        'src'         => $search_datasource->getDatasourceURI(),
-        'limit'       => 10,
+        'id' => $target_id,
+        'input' => $search_id,
+        'button' => $button_id,
+        'selectorID' => $selector_id,
+        'applicationID' => $application_id,
+        'defaultApplicationIcon' => self::DEFAULT_APPLICATION_ICON,
+        'appScope' => PhabricatorSearchController::SCOPE_CURRENT_APPLICATION,
+        'src' => $search_datasource->getDatasourceURI(),
+        'limit' => 10,
         'placeholder' => pht('Search'),
         'scopeUpdateURI' => '/settings/adjust/?key='.$scope_key,
       ));
@@ -75,7 +83,7 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
       ),
       pht('Search'));
 
-    $selector = $this->buildModeSelector();
+    $selector = $this->buildModeSelector($selector_id, $application_id);
 
     $form = phabricator_form(
       $user,
@@ -100,7 +108,7 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
     return $form;
   }
 
-  private function buildModeSelector() {
+  private function buildModeSelector($selector_id, $application_id) {
     $viewer = $this->getUser();
 
     $items = array();
@@ -115,7 +123,7 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
     );
 
     $application_value = null;
-    $application_icon = 'fa-dot-circle-o';
+    $application_icon = self::DEFAULT_APPLICATION_ICON;
     $application = $this->getApplication();
     if ($application) {
       $application_value = get_class($application);
@@ -183,6 +191,7 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
     }
 
     $selector = id(new PHUIButtonView())
+      ->setID($selector_id)
       ->addClass('phabricator-main-menu-search-dropdown')
       ->addSigil('global-search-dropdown')
       ->setMetadata(
@@ -210,6 +219,7 @@ final class PhabricatorMainMenuSearchView extends AphrontView {
       'input',
       array(
         'type' => 'hidden',
+        'id' => $application_id,
         'sigil' => 'global-search-dropdown-app',
         'name' => 'search:application',
         'value' => $application_value,

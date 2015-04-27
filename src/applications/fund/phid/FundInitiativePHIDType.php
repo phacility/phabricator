@@ -5,7 +5,7 @@ final class FundInitiativePHIDType extends PhabricatorPHIDType {
   const TYPECONST = 'FITV';
 
   public function getTypeName() {
-    return pht('Initiative');
+    return pht('Fund Initiative');
   }
 
   public function newObject() {

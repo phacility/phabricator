@@ -58,6 +58,10 @@ final class PhabricatorSearchApplicationSearchEngine
         $config->setParameter('withUnowned', true);
         unset($owner_phids[$key]);
       }
+      if ($phid == PhabricatorPeopleAnyOwnerDatasource::FUNCTION_TOKEN) {
+        $config->setParameter('withAnyOwner', true);
+        unset($owner_phids[$key]);
+      }
     }
     $config->setParameter('ownerPHIDs', $owner_phids);
 
