@@ -183,9 +183,13 @@ final class PhabricatorCalendarEventEditController
     $nav = $this->buildSideNavView($status);
     $nav->selectFilter($filter);
 
-    $crumbs = $this
-      ->buildApplicationCrumbs()
-      ->addTextCrumb($page_title);
+    $crumbs = $this->buildApplicationCrumbs();
+
+    if (!$this->isCreate()) {
+      $crumbs->addTextCrumb('E'.$status->getId(), '/E'.$status->getId());
+    }
+
+    $crumbs->addTextCrumb($page_title);
 
     $nav->appendChild(
       array(

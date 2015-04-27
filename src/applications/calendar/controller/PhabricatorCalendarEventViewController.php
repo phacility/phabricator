@@ -25,9 +25,9 @@ final class PhabricatorCalendarEventViewController
       return new Aphront404Response();
     }
 
-    $title = pht('Event %d', $event->getID());
+    $title = 'E'.$event->getID();
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($title);
+    $crumbs->addTextCrumb($title, '/E'.$event->getID());
 
     $header = $this->buildHeaderView($event);
     $actions = $this->buildActionView($event);
