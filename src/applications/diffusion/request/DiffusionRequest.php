@@ -28,6 +28,7 @@ abstract class DiffusionRequest {
   private $initFromConduit = true;
   private $user;
   private $branchObject = false;
+  private $refAlternatives;
 
   abstract public function supportsBranches();
   abstract protected function isStableCommit($symbol);
@@ -528,6 +529,7 @@ abstract class DiffusionRequest {
       case 'tags':
       case 'branches':
       case 'lint':
+      case 'refs':
         $req_callsign = true;
         break;
       case 'branch':
@@ -559,6 +561,7 @@ abstract class DiffusionRequest {
       case 'branches':
       case 'lint':
       case 'pathtree':
+      case 'refs':
         $uri = "/diffusion/{$callsign}{$action}/{$path}{$commit}{$line}";
         break;
       case 'branch':
@@ -728,16 +731,39 @@ abstract class DiffusionRequest {
     $results = $this->resolveRefs(array($ref));
 
     $matches = idx($results, $ref, array());
-    if (count($matches) !== 1) {
-      $message = pht('Ref "%s" is ambiguous or does not exist.', $ref);
+    if (!$matches) {
+      $message = pht(
+        'Ref "%s" does not exist in this repository.',
+        $ref);
       throw id(new DiffusionRefNotFoundException($message))
         ->setRef($ref);
     }
 
-    $match = head($matches);
+    if (count($matches) > 1) {
+      $match = $this->chooseBestRefMatch($ref, $matches);
+    } else {
+      $match = head($matches);
+    }
 
     $this->stableCommit = $match['identifier'];
     $this->symbolicType = $match['type'];
+  }
+
+  public function getRefAlternatives() {
+    // Make sure we've resolved the reference into a stable commit first.
+    $this->getStableCommit();
+    return $this->refAlternatives;
+  }
+
+  private function chooseBestRefMatch($ref, array $results) {
+    // TODO: Do a better job of selecting the best match.
+    $match = head($results);
+
+    // After choosing the best alternative, save all the alternatives so the
+    // UI can show them to the user.
+    $this->refAlternatives = $results;
+
+    return $match;
   }
 
   protected function getResolvableBranchName($branch) {

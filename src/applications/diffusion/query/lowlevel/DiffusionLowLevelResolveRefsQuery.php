@@ -45,6 +45,8 @@ final class DiffusionLowLevelResolveRefsQuery
   private function resolveGitRefs() {
     $repository = $this->getRepository();
 
+    // TODO: When refs are ambiguous (for example, tags and branches with
+    // the same name) this will only resolve one of them.
     $future = $repository->getLocalCommandFuture('cat-file --batch-check');
     $future->write(implode("\n", $this->refs));
     list($stdout) = $future->resolvex();
