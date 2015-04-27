@@ -35,7 +35,7 @@
 }
 
 .phui-font-source-sans .phabricator-remarkup h2.remarkup-header {
-  padding: 8px 24px 8px 0;
+  padding: 24px 24px 8px 0;
   border-bottom: 1px solid {$thinblueborder};
   font-size: 20px;
   font-weight: 400;
