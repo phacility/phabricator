@@ -9,7 +9,7 @@ return array(
   'names' => array(
     'core.pkg.css' => '9a9b59ca',
     'core.pkg.js' => '59d01bb7',
-    'darkconsole.pkg.js' => '8ab24e01',
+    'darkconsole.pkg.js' => '6d16ff19',
     'differential.pkg.css' => '3500921f',
     'differential.pkg.js' => '890046d3',
     'diffusion.pkg.css' => '591664fa',
@@ -460,7 +460,7 @@ return array(
     'rsrc/js/core/behavior-autofocus.js' => '7319e029',
     'rsrc/js/core/behavior-choose-control.js' => '6153c708',
     'rsrc/js/core/behavior-crop.js' => 'fa0f4fc2',
-    'rsrc/js/core/behavior-dark-console.js' => '08883e8b',
+    'rsrc/js/core/behavior-dark-console.js' => '87987821',
     'rsrc/js/core/behavior-device.js' => 'a205cf28',
     'rsrc/js/core/behavior-drag-and-drop-textarea.js' => '6d49590e',
     'rsrc/js/core/behavior-error-log.js' => '6882e80a',
@@ -567,7 +567,7 @@ return array(
     'javelin-behavior-conpherence-pontificate' => '21ba5861',
     'javelin-behavior-conpherence-widget-pane' => '93568464',
     'javelin-behavior-countdown-timer' => 'e4cc26b3',
-    'javelin-behavior-dark-console' => '08883e8b',
+    'javelin-behavior-dark-console' => '87987821',
     'javelin-behavior-dashboard-async-panel' => '469c0d9e',
     'javelin-behavior-dashboard-move-panels' => '82439934',
     'javelin-behavior-dashboard-query-panel-select' => '453c5375',
@@ -896,14 +896,6 @@ return array(
       'javelin-dom',
       'javelin-uri',
       'phabricator-file-upload',
-    ),
-    '08883e8b' => array(
-      'javelin-behavior',
-      'javelin-stratcom',
-      'javelin-util',
-      'javelin-dom',
-      'javelin-request',
-      'phabricator-keyboard-shortcut',
     ),
     '0a3f3021' => array(
       'javelin-behavior',
@@ -1482,6 +1474,14 @@ return array(
     '86a13f7f' => array(
       'aphront-typeahead-control-css',
       'phui-tag-view-css',
+    ),
+    87987821 => array(
+      'javelin-behavior',
+      'javelin-stratcom',
+      'javelin-util',
+      'javelin-dom',
+      'javelin-request',
+      'phabricator-keyboard-shortcut',
     ),
     '87cb6b51' => array(
       'javelin-behavior',
