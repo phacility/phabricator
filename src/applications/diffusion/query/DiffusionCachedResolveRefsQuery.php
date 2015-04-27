@@ -96,7 +96,7 @@ final class DiffusionCachedResolveRefsQuery
 
     $cursors = queryfx_all(
       $conn_r,
-      'SELECT refNameHash, refType, commitIdentifier FROM %T
+      'SELECT refNameHash, refType, commitIdentifier, isClosed FROM %T
         WHERE repositoryPHID = %s AND refNameHash IN (%Ls)',
       id(new PhabricatorRepositoryRefCursor())->getTableName(),
       $repository->getPHID(),
@@ -107,6 +107,7 @@ final class DiffusionCachedResolveRefsQuery
         $results[$name_hashes[$cursor['refNameHash']]][] = array(
           'type' => $cursor['refType'],
           'identifier' => $cursor['commitIdentifier'],
+          'closed' => (bool)$cursor['isClosed'],
         );
 
         // TODO: In Git, we don't store (and thus don't return) the hash

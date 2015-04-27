@@ -143,52 +143,30 @@ final class DiffusionLowLevelResolveRefsQuery
     // First, pull all of the branch heads in the repository. Doing this in
     // bulk is much faster than querying each individual head if we're
     // checking even a small number of refs.
-    $futures = array();
-    $futures['all'] = $repository->getLocalCommandFuture(
-      'log --template=%s --rev %s',
-      '{node} {branch}\\n',
-      hgsprintf('head()'));
-    $futures['open'] = $repository->getLocalCommandFuture(
-      'log --template=%s --rev %s',
-      '{node} {branch}\\n',
-      hgsprintf('head() and not closed()'));
+    $branches = id(new DiffusionLowLevelMercurialBranchesQuery())
+      ->setRepository($repository)
+      ->executeQuery();
 
-
-    $map = array();
-    foreach (new FutureIterator($futures) as $key => $future) {
-      list($stdout) = $future->resolvex();
-      $lines = phutil_split_lines($stdout, $retain_endings = false);
-      foreach ($lines as $idx => $line) {
-        list($node, $branch) = explode(' ', $line, 2);
-        $map[$branch]['nodes'][] = $node;
-        if ($key == 'open') {
-          $map[$branch]['open'] = true;
-        }
-      }
-    }
+    $branches = mgroup($branches, 'getShortName');
 
     $results = array();
     $unresolved = $this->refs;
     foreach ($unresolved as $key => $ref) {
-      if (!isset($map[$ref])) {
+      if (empty($branches[$ref])) {
         continue;
       }
 
-      $is_closed = !idx($map[$ref], 'open', false);
-      foreach ($map[$ref]['nodes'] as $node) {
-        $results[$ref][$node] = array(
+      foreach ($branches[$ref] as $branch) {
+        $fields = $branch->getRawFields();
+
+        $results[$ref][] = array(
           'type' => 'branch',
-          'identifier' => $node,
-          'closed' => $is_closed,
+          'identifier' => $branch->getCommitIdentifier(),
+          'closed' => idx($fields, 'closed', false),
         );
       }
 
       unset($unresolved[$key]);
-    }
-
-    // Strip the node keys off the result list.
-    foreach ($results as $ref => $result_list) {
-      $results[$ref] = array_values($result_list);
     }
 
     if (!$unresolved) {
