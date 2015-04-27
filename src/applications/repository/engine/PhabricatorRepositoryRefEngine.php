@@ -262,15 +262,36 @@ final class PhabricatorRepositoryRefEngine
     switch ($vcs) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_MERCURIAL:
         if ($all_closing_heads) {
-          $escheads = array();
+          $parts = array();
           foreach ($all_closing_heads as $head) {
-            $escheads[] = hgsprintf('%s', $head);
+            $parts[] = hgsprintf('%s', $head);
           }
-          $escheads = implode(' or ', $escheads);
+
+          // See T5896. Mercurial can not parse an "X or Y or ..." rev list
+          // with more than about 300 items, because it exceeds the maximum
+          // allowed recursion depth. Split all the heads into chunks of
+          // 256, and build a query like this:
+          //
+          //   ((1 or 2 or ... or 255) or (256 or 257 or ... 511))
+          //
+          // If we have more than 65535 heads, we'll do that again:
+          //
+          //   (((1 or ...) or ...) or ((65536 or ...) or ...))
+
+          $chunk_size = 256;
+          while (count($parts) > $chunk_size) {
+            $chunks = array_chunk($parts, $chunk_size);
+            foreach ($chunks as $key => $chunk) {
+              $chunks[$key] = '('.implode(' or ', $chunk).')';
+            }
+            $parts = array_values($chunks);
+          }
+          $parts = '('.implode(' or ', $parts).')';
+
           list($stdout) = $this->getRepository()->execxLocalCommand(
             'log --template %s --rev %s',
             '{node}\n',
-            hgsprintf('%s', $new_head).' - ('.$escheads.')');
+            hgsprintf('%s', $new_head).' - '.$parts);
         } else {
           list($stdout) = $this->getRepository()->execxLocalCommand(
             'log --template %s --rev %s',
