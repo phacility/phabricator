@@ -27,7 +27,7 @@ JX.behavior('policy-control', function(config) {
       list.addItem(
         new JX.PHUIXActionView()
           .setName(config.labels[group])
-          .setDisabled(true));
+          .setLabel(true));
 
       for (var jj = 0; jj < config.order[group].length; jj++) {
         var phid = config.order[group][jj];
