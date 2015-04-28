@@ -41,6 +41,7 @@
 .phui-font-source-sans .phabricator-remarkup h5.remarkup-header,
 .phui-font-source-sans .phabricator-remarkup h6.remarkup-header {
   color: {$bluetext};
+  font-weight: 600;
 }
 
 .phui-font-source-sans .phabricator-remarkup h2.remarkup-header {

@@ -18,12 +18,12 @@
 @font-face {
   font-family: 'Source Sans Pro';
   font-style: normal;
-  font-weight: 700;
-  src: local('Source Sans Pro Bold'),
-       local('SourceSansPro-Bold'),
-       url(/rsrc/externals/font/sourcesans/SourceSansPro-Bold.woff2)
+  font-weight: 600;
+  src: local('Source Sans Pro Semibold'),
+       local('SourceSansPro-Semibold'),
+       url(/rsrc/externals/font/sourcesans/SourceSansPro-Semibold.woff2)
         format('woff2'),
-       url(/rsrc/externals/font/sourcesans/SourceSansProBold.woff)
+       url(/rsrc/externals/font/sourcesans/SourceSansPro-Semibold.woff)
         format('woff');
 }
 
@@ -45,10 +45,10 @@
     font-weight: 700;
     font-style: italic;
     font-stretch: normal;
-    src: local('Source Sans Pro Bold It'),
-         local('SourceSansPro-BoldIt'),
-         url(/rsrc/externals/font/sourcesans/SourceSansPro-BoldIt.woff2)
+    src: local('Source Sans Pro Semibold It'),
+         local('SourceSansPro-SemiboldIt'),
+         url(/rsrc/externals/font/sourcesans/SourceSansPro-SemiboldIt.woff2)
           format('woff'),
-         url(/rsrc/externals/font/sourcesans/SourceSansPro-BoldIt.woff)
+         url(/rsrc/externals/font/sourcesans/SourceSansPro-SemiboldIt.woff)
           format('woff');
 }
