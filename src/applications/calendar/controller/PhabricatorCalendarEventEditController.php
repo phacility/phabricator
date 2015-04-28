@@ -30,13 +30,13 @@ final class PhabricatorCalendarEventEditController
       ->setInitialTime(AphrontFormDateControl::TIME_END_OF_DAY);
 
     if ($this->isCreate()) {
-      $status       = new PhabricatorCalendarEvent();
-      $end_value    = $end_time->readValueFromRequest($request);
-      $start_value  = $start_time->readValueFromRequest($request);
+      $status = PhabricatorCalendarEvent::initializeNewCalendarEvent($user);
+      $end_value = $end_time->readValueFromRequest($request);
+      $start_value = $start_time->readValueFromRequest($request);
       $submit_label = pht('Create');
-      $filter       = 'status/create/';
-      $page_title   = pht('Create Event');
-      $redirect     = 'created';
+      $filter = 'status/create/';
+      $page_title = pht('Create Event');
+      $redirect = 'created';
     } else {
       $status = id(new PhabricatorCalendarEventQuery())
         ->setViewer($user)
@@ -61,6 +61,7 @@ final class PhabricatorCalendarEventEditController
 
     $errors = array();
     if ($request->isFormPost()) {
+      $xactions    = array();
       $type        = $request->getInt('status');
       $start_value = $start_time->readValueFromRequest($request);
       $end_value   = $end_time->readValueFromRequest($request);
@@ -73,39 +74,33 @@ final class PhabricatorCalendarEventEditController
         $errors[] = pht('Invalid end time; reset to default.');
       }
       if (!$errors) {
-        try {
-          $status
-            ->setUserPHID($user->getPHID())
-            ->setStatus($type)
-            ->setDateFrom($start_value)
-            ->setDateTo($end_value)
-            ->setDescription($description)
-            ->save();
-        } catch (PhabricatorCalendarEventInvalidEpochException $e) {
-          $errors[] = pht('Start must be before end.');
-        }
-      }
+        $xactions[] = id(new PhabricatorCalendarEventTransaction())
+          ->setTransactionType(
+            PhabricatorCalendarEventTransaction::TYPE_START_DATE)
+          ->setNewValue($start_value);
 
-      if (!$errors) {
-        $uri = new PhutilURI($this->getApplicationURI());
-        $uri->setQueryParams(
-          array(
-            'month'   => phabricator_format_local_time($status->getDateFrom(),
-                                                       $user,
-                                                       'm'),
-            'year'    => phabricator_format_local_time($status->getDateFrom(),
-                                                       $user,
-                                                       'Y'),
-            $redirect => true,
-          ));
-        if ($request->isAjax()) {
-          $response = id(new AphrontAjaxResponse())
-            ->setContent(array('redirect_uri' => $uri));
-        } else {
-          $response = id(new AphrontRedirectResponse())
-            ->setURI($uri);
-        }
-        return $response;
+        $xactions[] = id(new PhabricatorCalendarEventTransaction())
+          ->setTransactionType(
+            PhabricatorCalendarEventTransaction::TYPE_END_DATE)
+          ->setNewValue($end_value);
+
+        $xactions[] = id(new PhabricatorCalendarEventTransaction())
+          ->setTransactionType(
+            PhabricatorCalendarEventTransaction::TYPE_STATUS)
+          ->setNewValue($type);
+
+        $xactions[] = id(new PhabricatorCalendarEventTransaction())
+          ->setTransactionType(
+            PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION)
+          ->setNewValue($description);
+
+        $editor = id(new PhabricatorCalendarEventEditor())
+          ->setActor($user)
+          ->setContentSourceFromRequest($request)
+          ->setContinueOnNoEffect(true);
+
+        $xactions = $editor->applyTransactions($status, $xactions);
+        return id(new AphrontRedirectResponse())->setURI('/E'.$status->getID());
       }
     }
 

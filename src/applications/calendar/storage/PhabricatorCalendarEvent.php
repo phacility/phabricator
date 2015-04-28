@@ -2,7 +2,8 @@
 
 final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   implements PhabricatorPolicyInterface,
-  PhabricatorMarkupInterface {
+  PhabricatorMarkupInterface,
+  PhabricatorApplicationTransactionInterface {
 
   protected $userPHID;
   protected $dateFrom;
@@ -12,6 +13,16 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   const STATUS_AWAY = 1;
   const STATUS_SPORADIC = 2;
+
+  public static function initializeNewCalendarEvent(PhabricatorUser $actor) {
+    $app = id(new PhabricatorApplicationQuery())
+      ->setViewer($actor)
+      ->withClasses(array('PhabricatorCalendarApplication'))
+      ->executeOne();
+
+    return id(new PhabricatorCalendarEvent())
+      ->setUserPHID($actor->getPHID());
+  }
 
   private static $statusTexts = array(
     self::STATUS_AWAY => 'away',
@@ -84,6 +95,17 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       $user_phids);
 
     return mpull($statuses, null, 'getUserPHID');
+  }
+
+  public static function getNameForStatus($value) {
+    switch ($value) {
+      case self::STATUS_AWAY:
+        return pht('Away');
+      case self::STATUS_SPORADIC:
+        return pht('Sporadic');
+      default:
+        return pht('Unknown');
+    }
   }
 
   /**
@@ -171,6 +193,28 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   public function describeAutomaticCapability($capability) {
     return null;
+  }
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhabricatorCalendarEventEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhabricatorCalendarEventTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
   }
 
 }

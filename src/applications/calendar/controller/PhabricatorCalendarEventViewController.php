@@ -29,6 +29,10 @@ final class PhabricatorCalendarEventViewController
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($title, '/E'.$event->getID());
 
+    $timeline = $this->buildTransactionTimeline(
+      $event,
+      new PhabricatorCalendarEventTransactionQuery());
+
     $header = $this->buildHeaderView($event);
     $actions = $this->buildActionView($event);
     $properties = $this->buildPropertyView($event);
@@ -42,6 +46,7 @@ final class PhabricatorCalendarEventViewController
       array(
         $crumbs,
         $box,
+        $timeline,
       ),
       array(
         'title' => $title,
