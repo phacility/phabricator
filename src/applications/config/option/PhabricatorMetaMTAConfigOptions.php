@@ -81,7 +81,7 @@ EODOC
     $herald_hints_description = $this->deformat(pht(<<<EODOC
 You can disable the Herald hints in email if users prefer smaller messages.
 These are the links under the header "WHY DID I GET THIS EMAIL?". If you set
-this to true, they will not appear in any mail. Users can still navigate to
+this to `false`, they will not appear in any mail. Users can still navigate to
 the links via the web interface.
 EODOC
 ));
