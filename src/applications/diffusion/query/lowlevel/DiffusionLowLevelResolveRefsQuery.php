@@ -204,6 +204,10 @@ final class DiffusionLowLevelResolveRefsQuery
           // unclear how to best do that. For now, treat it as a miss instead.
           continue;
         }
+        if (preg_match('/unknown revision/', $ex->getStdErr())) {
+          // No matches for this ref.
+          continue;
+        }
         throw $ex;
       }
 

@@ -755,7 +755,12 @@ abstract class DiffusionRequest {
 
   public function getRefAlternatives() {
     // Make sure we've resolved the reference into a stable commit first.
-    $this->getStableCommit();
+    try {
+      $this->getStableCommit();
+    } catch (DiffusionRefNotFoundException $ex) {
+      // If we have a bad reference, just return the empty set of
+      // alternatives.
+    }
     return $this->refAlternatives;
   }
 
