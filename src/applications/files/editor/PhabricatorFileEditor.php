@@ -17,16 +17,30 @@ final class PhabricatorFileEditor
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
 
+    $types[] = PhabricatorFileTransaction::TYPE_NAME;
+
     return $types;
   }
 
   protected function getCustomTransactionOldValue(
     PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {}
+    PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
+      case PhabricatorFileTransaction::TYPE_NAME:
+        return $object->getName();
+    }
+  }
 
   protected function getCustomTransactionNewValue(
     PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {}
+    PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
+      case PhabricatorFileTransaction::TYPE_NAME:
+        return $xaction->getNewValue();
+    }
+  }
 
   protected function applyCustomInternalTransaction(
     PhabricatorLiskDAO $object,
@@ -35,6 +49,9 @@ final class PhabricatorFileEditor
     switch ($xaction->getTransactionType()) {
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
         $object->setViewPolicy($xaction->getNewValue());
+        break;
+      case PhabricatorFileTransaction::TYPE_NAME:
+        $object->setName($xaction->getNewValue());
         break;
     }
   }
@@ -96,5 +113,35 @@ final class PhabricatorFileEditor
   protected function supportsSearch() {
     return false;
   }
+
+  protected function validateTransaction(
+    PhabricatorLiskDAO $object,
+    $type,
+    array $xactions) {
+
+    $errors = parent::validateTransaction($object, $type, $xactions);
+
+    switch ($type) {
+      case PhabricatorFileTransaction::TYPE_NAME:
+        $missing = $this->validateIsEmptyTextField(
+          $object->getName(),
+          $xactions);
+
+        if ($missing) {
+          $error = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Required'),
+            pht('File name is required.'),
+            nonempty(last($xactions), null));
+
+          $error->setIsMissingFieldError(true);
+          $errors[] = $error;
+        }
+        break;
+    }
+
+    return $errors;
+  }
+
 
 }

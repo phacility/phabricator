@@ -132,6 +132,32 @@
     padding-bottom: 4px;
 }
 
+/* - Ghost Comment ------------------------------------------------------------
+
+  Comments from older or newer versions of the changeset.
+
+*/
+
+.differential-inline-comment.inline-comment-ghost {
+  border: 1px solid {$lightgreyborder};
+  opacity: 0.75;
+}
+
+.differential-inline-comment.inline-comment-ghost
+  .differential-inline-comment-head {
+    border-bottom: 1px solid {$lightgreyborder};
+    background-color: {$lightgreybackground};
+}
+
+.differential-inline-comment.inline-comment-ghost
+  .button.simple {
+  border-color: {$lightgreyborder};
+}
+
+.differential-inline-comment.inline-comment-ghost
+  .button.simple .phui-icon-view {
+  color: {$lightgreytext};
+}
 
 /* - New/Edit Inline Comment --------------------------------------------------
 
@@ -350,7 +376,7 @@
 }
 
 .differential-inline-comment.inline-state-is-draft .inline-draft-text {
-    display: inline-block;
+  display: inline-block;
 }
 
 .inline-state-is-draft .differential-inline-done-label {

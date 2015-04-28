@@ -247,6 +247,13 @@ EOMAIL
 OKAY {$emdash}{$trailing_space}
 Sent from Mailbox
 EOMAIL
+,
+<<<EOMAIL
+OKAY
+
+{$emdash}
+Sent from Mailbox
+EOMAIL
     );
   }
 

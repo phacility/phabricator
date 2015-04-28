@@ -205,4 +205,10 @@ EOTEXT
     );
   }
 
+  public function getApplicationSearchDocumentTypes() {
+    return array(
+      DifferentialRevisionPHIDType::TYPECONST,
+    );
+  }
+
 }

@@ -55,7 +55,8 @@ final class PhabricatorProjectSearchEngine
 
     $name = $saved->getParameter('name');
     if (strlen($name)) {
-      $query->withDatasourceQuery($name);
+      $tokens = PhabricatorTypeaheadDatasource::tokenizeString($name);
+      $query->withNameTokens($tokens);
     }
 
     $icons = $saved->getParameter('icons');

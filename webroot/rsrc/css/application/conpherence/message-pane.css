@@ -56,14 +56,25 @@
   right: 241px;
   top: 76px;
   bottom: 172px;
+  overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
 
+.page-has-warning .conpherence-message-pane .conpherence-messages {
+  top: 110px;
+}
+
+.conpherence-messages.jx-scrollbar-frame {
+  overflow-y: hidden;
+}
+
+.conpherence-messages .jx-scrollbar-content > .conpherence-edited:first-child,
 .conpherence-messages > .conpherence-edited:first-child {
   padding-top: 20px;
 }
 
+.conpherence-messages > .jx-scrollbar-content .conpherence-edited:last-child,
 .conpherence-messages > .conpherence-edited:last-child {
   padding-bottom: 20px;
 }
@@ -75,7 +86,7 @@
 .device .conpherence-message-pane .conpherence-messages {
   left: 0;
   right: 0;
-  bottom: 3em;
+  bottom: 52px;
   width: 100%;
   box-shadow: none;
 }
@@ -124,15 +135,14 @@
 }
 
 .device .conpherence-message-pane .remarkup-assist-bar {
-  height: 0px;
+  display: none;
 }
 
 .device .conpherence-message-pane .phui-form-view {
   left: 0;
   right: 0;
-  background-color: #d8dce2;
-  height: 38px;
-  width: 100%;
+  height: 34px;
+  width: auto;
 }
 
 .conpherence-layout .conpherence-message-pane .phui-form-view
@@ -141,47 +151,91 @@
   width: 100%;
 }
 
-.conpherence-message-pane .phabricator-transaction-view {
+.conpherence-message-pane .conpherence-transaction-view {
+  padding: 2px 0px;
   margin: 4px 12px;
   background-size: 35px;
   min-height: auto;
 }
 
-.device-phone .conpherence-message-pane .phabricator-transaction-view {
-  margin: 0 10px 0 0;
+.device-phone .conpherence-message-pane .conpherence-transaction-view {
+  margin: 0 8px;
 }
 
-.conpherence-message-pane .phabricator-transaction-detail {
+.conpherence-message-pane .conpherence-transaction-image {
+  float: left;
+  border-radius: 3px;
+  height: 35px;
+  width: 35px;
+  background-size: 35px;
+  position: absolute;
+  top: 5px;
+}
+
+.device-phone .conpherence-message-pane .conpherence-transaction-image {
+  display: none;
+}
+
+.conpherence-message-pane .conpherence-comment.anchor-target,
+.conpherence-message-pane .conpherence-edited.anchor-target {
+  background: {$lightyellow};
+}
+
+.conpherence-message-pane .conpherence-comment.anchor-target {
+  margin: 4px 8px 4px 8px;
+  padding: 2px 4px 2px 4px;
+}
+
+.conpherence-message-pane .conpherence-edited.anchor-target {
+  margin: 0px 8px 0px 8px;
+  padding: 0px 4px 0px 4px;
+}
+
+.conpherence-message-pane .conpherence-transaction-detail {
   border-width: 0;
   margin-left: 45px;
 }
 
-.conpherence-message-pane .date-marker {
-  border-top: 1px solid #d7d7d7;
-  margin: 12px 12px 4px;
+.device-phone .conpherence-message-pane .conpherence-transaction-detail {
+  margin: 0;
+}
+
+.conpherence-message-pane .conpherence-transaction-view.date-marker {
+  padding: 0;
+  margin: 20px 12px 4px;
   min-height: auto;
 }
 
-.device-phone .conpherence-message-pane .date-marker {
-  margin: 5px 0;
+.device-phone .conpherence-message-pane
+.conpherence-transaction-view.date-marker {
+  margin: 12px 0 4px;
 }
 
-.conpherence-message-pane .date-marker .date {
-  position: relative;
-  top: -11px;
-  left: 40px;
-  background-color: #FFF;
-  color: {$darkbluetext};
-  font-size: 13px;
-  padding: 0px 5px;
-  font-weight: bold;
+.device-tablet .conpherence-message-pane
+  .conpherence-transaction-view.date-marker {
+    padding-left: 37px;
 }
 
-.device-phone .conpherence-message-pane .phabricator-transaction-detail {
-  min-height: auto;
+.conpherence-message-pane .conpherence-transaction-view.date-marker
+  .date {
+    left: 40px;
+    font-size: 13px;
+    padding: 0px 4px;
 }
 
-.conpherence-message-pane .conpherence-edited .phabricator-transaction-content {
+.device .conpherence-message-pane .conpherence-transaction-view.date-marker
+  .date {
+    color: {$lightbluetext};
+    left: 4px;
+}
+
+.device-phone .conpherence-message-pane .conpherence-edited {
+  min-height: none;
+  color: {$lightgreytext};
+  margin: 0 8px;
+}
+
+.conpherence-message-pane .conpherence-edited .conpherence-transaction-content {
   color: {$lightgreytext};
   font-size: 13px;
   margin: 0;
@@ -197,43 +251,48 @@
 }
 
 .conpherence-message-pane .conpherence-edited + .conpherence-comment {
-  margin-top: 20px;
+  margin-top: 16px;
 }
 
-.conpherence-message-pane .conpherence-edited .phabricator-transaction-header {
+.conpherence-transaction-view.conpherence-edited +
+  .conpherence-transaction-view.date-marker {
+    margin-top: 24px;
+}
+
+.conpherence-message-pane .conpherence-edited .conpherence-transaction-header {
   float: right;
 }
 
-.device-phone .conpherence-message-pane .conpherence-edited {
-  color: {$lightgreytext};
-  margin: 0 10px;
-}
-
 .conpherence-message-pane .conpherence-edited
-  .phabricator-transaction-content a {
+  .conpherence-transaction-content a {
   color: {$darkbluetext};
 }
 
-.device-phone .conpherence-message-pane .conpherence-edited
-  .phabricator-transaction-content {
-  padding: 0 0 5px 35px;
+.device-phone .conpherence-message-pane .conpherence-transaction-info {
+  display: none;
 }
 
-.conpherence-message-pane .phabricator-transaction-info,
+.conpherence-message-pane .conpherence-transaction-info,
+.conpherence-message-pane .anchor-link,
 .conpherence-message-pane .phabricator-content-source-view {
   color: {$lightbluetext};
   line-height: 16px;
   font-size: 12px;
 }
 
-.conpherence-message-pane .phabricator-transaction-header,
-.conpherence-message-pane .phabricator-transaction-info,
-.conpherence-message-pane .phabricator-transaction-content {
+.conpherence-message-pane .conpherence-transaction-info {
+  float: right;
+}
+
+.conpherence-message-pane .conpherence-transaction-header,
+.conpherence-message-pane .conpherence-transaction-info,
+.conpherence-message-pane .anchor-link,
+.conpherence-message-pane .conpherence-transaction-content {
   background: none;
   padding: 0;
 }
 
-.conpherence-message-pane .phabricator-transaction-content {
+.conpherence-message-pane .conpherence-transaction-content {
   padding: 2px 0 8px 0;
 }
 
@@ -253,9 +312,9 @@
 }
 
 .device .conpherence-message-pane .remarkup-assist-textarea {
-  margin: 0px 0px;
-  padding: 8px;
-  width: 97%;
+  margin: 0;
+  padding: 8px 68px 8px 8px;
+  width: 100%;
   height: 34px;
   resize: none;
 }
@@ -264,22 +323,15 @@
   outline: none;
 }
 
-.device .conpherence-message-pane .aphront-form-control {
-  padding: 0 8px 0 0;
-  float: left;
+.device .conpherence-message-pane .aphront-form-control-submit {
+  padding: 0;
+  position: absolute;
+  top: 7px;
+  right: 13px;
 }
 
 .device .conpherence-message-pane .aphront-form-control-textarea {
   float: left;
-  height: 2em;
-}
-.device-tablet .conpherence-message-pane .aphront-form-control-textarea {
-  width: 76%;
-}
-.device-phone .conpherence-message-pane .aphront-form-control-textarea {
-  width: 60%;
-}
-
-.device .conpherence-message-pane .aphront-form-control-submit button {
-  margin: 7px 0 0 0;
+  height: 24px;
+  width: 100%;
 }

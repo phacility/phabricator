@@ -280,44 +280,6 @@ final class DifferentialRevision extends DifferentialDAO
     return $this;
   }
 
-  public function loadInlineComments(
-    array &$changesets) {
-    assert_instances_of($changesets, 'DifferentialChangeset');
-
-    $inline_comments = array();
-
-    $inline_comments = id(new DifferentialInlineCommentQuery())
-      ->withRevisionIDs(array($this->getID()))
-      ->withNotDraft(true)
-      ->execute();
-
-    $load_changesets = array();
-    foreach ($inline_comments as $inline) {
-      $changeset_id = $inline->getChangesetID();
-      if (isset($changesets[$changeset_id])) {
-        continue;
-      }
-      $load_changesets[$changeset_id] = true;
-    }
-
-    $more_changesets = array();
-    if ($load_changesets) {
-      $changeset_ids = array_keys($load_changesets);
-      $more_changesets += id(new DifferentialChangeset())
-        ->loadAllWhere(
-          'id IN (%Ld)',
-          $changeset_ids);
-    }
-
-    if ($more_changesets) {
-      $changesets += $more_changesets;
-      $changesets = msort($changesets, 'getSortKey');
-    }
-
-    return $inline_comments;
-  }
-
-
   public function getCapabilities() {
     return array(
       PhabricatorPolicyCapability::CAN_VIEW,
@@ -516,6 +478,7 @@ final class DifferentialRevision extends DifferentialDAO
   public function willRenderTimeline(
     PhabricatorApplicationTransactionView $timeline,
     AphrontRequest $request) {
+    $viewer = $request->getViewer();
 
     $render_data = $timeline->getRenderData();
     $left = $request->getInt('left', idx($render_data, 'left'));
@@ -529,14 +492,46 @@ final class DifferentialRevision extends DifferentialDAO
     $left_diff = $diffs[$left];
     $right_diff = $diffs[$right];
 
-    $changesets = id(new DifferentialChangesetQuery())
-      ->setViewer($request->getUser())
-      ->withDiffs(array($right_diff))
-      ->execute();
-    // NOTE: this mutates $changesets to include changesets for all inline
-    // comments...!
-    $inlines = $this->loadInlineComments($changesets);
-    $changesets = mpull($changesets, null, 'getID');
+    $old_ids = $request->getStr('old', idx($render_data, 'old'));
+    $new_ids = $request->getStr('new', idx($render_data, 'new'));
+    $old_ids = array_filter(explode(',', $old_ids));
+    $new_ids = array_filter(explode(',', $new_ids));
+
+    $type_inline = DifferentialTransaction::TYPE_INLINE;
+    $changeset_ids = array_merge($old_ids, $new_ids);
+    $inlines = array();
+    foreach ($timeline->getTransactions() as $xaction) {
+      if ($xaction->getTransactionType() == $type_inline) {
+        $inlines[] = $xaction->getComment();
+        $changeset_ids[] = $xaction->getComment()->getChangesetID();
+      }
+    }
+
+    if ($changeset_ids) {
+      $changesets = id(new DifferentialChangesetQuery())
+        ->setViewer($request->getUser())
+        ->withIDs($changeset_ids)
+        ->execute();
+      $changesets = mpull($changesets, null, 'getID');
+    } else {
+      $changesets = array();
+    }
+
+    foreach ($inlines as $key => $inline) {
+      $inlines[$key] = DifferentialInlineComment::newFromModernComment(
+        $inline);
+    }
+
+    $query = id(new DifferentialInlineCommentQuery())
+      ->setViewer($viewer);
+
+    // NOTE: This is a bit sketchy: this method adjusts the inlines as a
+    // side effect, which means it will ultimately adjust the transaction
+    // comments and affect timeline rendering.
+    $query->adjustInlinesForChangesets(
+      $inlines,
+      array_select_keys($changesets, $old_ids),
+      array_select_keys($changesets, $new_ids));
 
     return $timeline
       ->setChangesets($changesets)
@@ -568,18 +563,6 @@ final class DifferentialRevision extends DifferentialDAO
         'DELETE FROM %T WHERE revisionID = %d',
         self::TABLE_COMMIT,
         $this->getID());
-
-      try {
-        $inlines = id(new DifferentialInlineCommentQuery())
-          ->withRevisionIDs(array($this->getID()))
-          ->execute();
-        foreach ($inlines as $inline) {
-          $inline->delete();
-        }
-      } catch (PhabricatorEmptyQueryException $ex) {
-        // TODO: There's still some funky legacy wrapping going on here, and
-        // we might catch a raw query exception.
-      }
 
       // we have to do paths a little differentally as they do not have
       // an id or phid column for delete() to act on

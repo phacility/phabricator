@@ -10,7 +10,7 @@ final class ManiphestUpdateConduitAPIMethod extends ManiphestConduitAPIMethod {
     return 'Update an existing Maniphest task.';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
       'ERR-BAD-TASK'          => 'No such maniphest task exists.',
       'ERR-INVALID-PARAMETER' => 'Missing or malformed parameter.',
@@ -18,11 +18,11 @@ final class ManiphestUpdateConduitAPIMethod extends ManiphestConduitAPIMethod {
     );
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return $this->getTaskFields($is_new = false);
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
   }
 

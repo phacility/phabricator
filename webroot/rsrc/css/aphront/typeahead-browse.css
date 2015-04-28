@@ -1,0 +1,66 @@
+/**
+ * @provides typeahead-browse-css
+ */
+
+.typeahead-browse-more,
+.typeahead-browse-hard-limit {
+  display: block;
+  padding: 8px;
+  margin: 4px 6px 6px;
+  text-align: center;
+}
+
+.typeahead-browse-more {
+  background: {$lightblue};
+  border: 1px solid {$lightblueborder};
+  color: {$blue};
+}
+
+.typeahead-browse-more.loading {
+  opacity: 0.8;
+}
+
+.typeahead-browse-hard-limit {
+  background: {$lightgreybackground};
+  border: 1px solid {$lightgreyborder};
+  color: {$lightgreytext};
+}
+
+.typeahead-browse-frame {
+  overflow-x: hidden;
+  overflow-y: auto;
+  height: 260px;
+  border: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$blueborder};
+}
+
+.typeahead-browse-frame.loading {
+  opacity: 0.8;
+}
+
+.typeahead-browse-header {
+  padding: 0 0 8px 0;
+}
+
+input.typeahead-browse-input {
+  margin: 0;
+  width: 100%;
+}
+
+.typeahead-browse-item {
+  padding: 2px 0;
+}
+
+.typeahead-browse-item + .typeahead-browse-item {
+  border-top: 1px solid {$thinblueborder};
+}
+
+.typeahead-browse-item button {
+  float: right;
+  margin: 2px 6px;
+}
+
+.typeahead-browse-item a.jx-tokenizer-token {
+  margin-top: 1px;
+  margin-left: 6px;
+}

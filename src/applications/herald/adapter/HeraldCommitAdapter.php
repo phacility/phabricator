@@ -26,6 +26,10 @@ final class HeraldCommitAdapter extends HeraldAdapter {
     return 'PhabricatorDiffusionApplication';
   }
 
+  protected function newObject() {
+    return new PhabricatorRepositoryCommit();
+  }
+
   public function getObject() {
     return $this->commit;
   }
@@ -493,9 +497,6 @@ final class HeraldCommitAdapter extends HeraldAdapter {
             true,
             pht('Great success at doing nothing.'));
           break;
-        case self::ACTION_EMAIL:
-          $result[] = $this->applyEmailEffect($effect);
-          break;
         case self::ACTION_ADD_CC:
           foreach ($effect->getTarget() as $phid) {
             if (empty($this->addCCPHIDs[$phid])) {
@@ -529,20 +530,8 @@ final class HeraldCommitAdapter extends HeraldAdapter {
             true,
             pht('Applied build plans.'));
           break;
-        case self::ACTION_FLAG:
-          $result[] = parent::applyFlagEffect(
-            $effect,
-            $this->commit->getPHID());
-          break;
         default:
-          $custom_result = parent::handleCustomHeraldEffect($effect);
-          if ($custom_result === null) {
-            throw new Exception(pht(
-              "No rules to handle action '%s'.",
-              $action));
-          }
-
-          $result[] = $custom_result;
+          $result[] = $this->applyStandardEffect($effect);
           break;
       }
     }

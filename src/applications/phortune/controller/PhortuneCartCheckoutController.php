@@ -209,6 +209,8 @@ final class PhortuneCartCheckoutController
       ->appendChild($form)
       ->appendChild($provider_form);
 
+    $description_box = $this->renderCartDescription($cart);
+
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Checkout'));
     $crumbs->addTextCrumb($title);
@@ -217,6 +219,7 @@ final class PhortuneCartCheckoutController
       array(
         $crumbs,
         $cart_box,
+        $description_box,
         $payment_box,
       ),
       array(

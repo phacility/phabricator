@@ -10,18 +10,14 @@ final class TokenGiveConduitAPIMethod extends TokenConduitAPIMethod {
     return pht('Give or change a token.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'tokenPHID'   => 'phid|null',
       'objectPHID'  => 'phid',
     );
   }
 
-  public function defineErrorTypes() {
-    return array();
-  }
-
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'void';
   }
 

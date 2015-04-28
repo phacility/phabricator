@@ -19,18 +19,14 @@ final class DiffusionGetCommitsConduitAPIMethod
     return pht('Obsoleted by diffusion.querycommits.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'commits' => 'required list<string>',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty list<dict<string, wild>>';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

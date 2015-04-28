@@ -76,6 +76,7 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
           'diff/'                       => 'DiffusionDiffController',
           'tags/(?P<dblob>.*)'          => 'DiffusionTagListController',
           'branches/(?P<dblob>.*)'      => 'DiffusionBranchTableController',
+          'refs/(?P<dblob>.*)'          => 'DiffusionRefTableController',
           'lint/(?P<dblob>.*)'          => 'DiffusionLintController',
           'commit/(?P<commit>[a-z0-9]+)/branches/'
             => 'DiffusionCommitBranchesController',
@@ -158,6 +159,12 @@ final class PhabricatorDiffusionApplication extends PhabricatorApplication {
           'This page documents the commands you can use to interact with '.
           'commits and audits in Diffusion.'),
       ),
+    );
+  }
+
+  public function getApplicationSearchDocumentTypes() {
+    return array(
+      PhabricatorRepositoryCommitPHIDType::TYPECONST,
     );
   }
 

@@ -40,6 +40,17 @@ JX.install('PhabricatorDragAndDropFileUpload', {
   members : {
     _node : null,
     _depth : 0,
+    _isEnabled: false,
+
+    setIsEnabled: function(bool) {
+      this._isEnabled = bool;
+      return this;
+    },
+
+    getIsEnabled: function() {
+      return this._isEnabled;
+    },
+
     _updateDepth : function(delta) {
       if (this._depth === 0 && delta > 0) {
         this.invoke('didBeginDrag');
@@ -53,6 +64,7 @@ JX.install('PhabricatorDragAndDropFileUpload', {
     },
 
     start : function() {
+
 
       // TODO: move this to JX.DOM.contains()?
       function contains(container, child) {
@@ -73,6 +85,9 @@ JX.install('PhabricatorDragAndDropFileUpload', {
         'click',
         null,
         JX.bind(this, function (e) {
+          if (!this.getIsEnabled()) {
+            return;
+          }
           if (this._depth) {
             e.kill();
             // Force depth to 0.
@@ -87,6 +102,10 @@ JX.install('PhabricatorDragAndDropFileUpload', {
         'dragenter',
         null,
         JX.bind(this, function(e) {
+          if (!this.getIsEnabled()) {
+            return;
+          }
+
           if (contains(this._node, e.getTarget())) {
             this._updateDepth(1);
           }
@@ -97,6 +116,10 @@ JX.install('PhabricatorDragAndDropFileUpload', {
         'dragleave',
         null,
         JX.bind(this, function(e) {
+          if (!this.getIsEnabled()) {
+            return;
+          }
+
           if (contains(this._node, e.getTarget())) {
             this._updateDepth(-1);
           }
@@ -106,18 +129,26 @@ JX.install('PhabricatorDragAndDropFileUpload', {
         this._node,
         'dragover',
         null,
-        function(e) {
+        JX.bind(this, function(e) {
+          if (!this.getIsEnabled()) {
+            return;
+          }
+
           // NOTE: We must set this, or Chrome refuses to drop files from the
           // download shelf.
           e.getRawEvent().dataTransfer.dropEffect = 'copy';
           e.kill();
-        });
+        }));
 
       JX.DOM.listen(
         this._node,
         'drop',
         null,
         JX.bind(this, function(e) {
+          if (!this.getIsEnabled()) {
+            return;
+          }
+
           e.kill();
 
           var files = e.getRawEvent().dataTransfer.files;
@@ -135,6 +166,10 @@ JX.install('PhabricatorDragAndDropFileUpload', {
           'paste',
           null,
           JX.bind(this, function(e) {
+            if (!this.getIsEnabled()) {
+              return;
+            }
+
             var clipboard = e.getRawEvent().clipboardData;
             if (!clipboard) {
               return;
@@ -168,6 +203,8 @@ JX.install('PhabricatorDragAndDropFileUpload', {
             }
           }));
       }
+
+      this.setIsEnabled(true);
     },
 
     _sendRequest : function(spec) {

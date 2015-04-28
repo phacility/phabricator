@@ -81,7 +81,13 @@
 }
 
 .phabricator-menu-button-icon.phui-icon-view {
-  font-size: 24px;
+  font-size: 20px;
+  height: 20px;
+  width: 20px;
+  color: rgba(255,255,255,.8);
+  text-align: center;
+  vertical-align: middle;
+  line-height: 24px;
 }
 
 .phabricator-expand-application-menu,
@@ -148,16 +154,15 @@
   font-size: 13px;
   border-width: 2px;
   border-color: rgba(0,0,0,.6);
-  border-radius: 3px 0 0 3px;
+  border-radius: 3px;
   background-color: rgba(0,0,0,.5);
   opacity: .8;
   height: 28px;
   line-height: 12px;
   box-shadow: 0px 1px 1px rgba(128, 128, 128, 0.25);
-  padding: 6px;
+  padding: 6px 30px 6px 6px;
   float: left;
-  width: 175px;
-  left: 0;
+  width: 205px;
 }
 
 .phabricator-main-menu.main-header-dark .phabricator-main-menu-search input {
@@ -169,6 +174,7 @@
   height: 32px;
   font-size: 15px;
   width: 100%;
+  padding-left: 50px;
 }
 
 .phabricator-main-menu .phabricator-main-menu-search input:focus {
@@ -192,14 +198,60 @@
   box-shadow: none;
   text-shadow: none;
   min-width: 0;
-  height: 28px;
-  width: 30px;
-  top: 8px;
-  right: -7px;
+  height: 24px;
+  width: 28px;
+  top: 10px;
+  right: -6px;
   margin: 0 8px 0 0;
   padding: 0;
-  border-bottom-left-radius: 0;
-  border-top-left-radius: 0;
+  border-radius: 0;
+}
+
+.phabricator-main-menu-search button.phabricator-main-menu-search-dropdown {
+  position: absolute;
+  right: auto;
+  left: -45px;
+  width: 40px;
+  background: transparent;
+}
+
+.device-desktop .phabricator-main-menu-search
+  button.phabricator-main-menu-search-dropdown:hover .phui-icon-view {
+    color: #fff;
+}
+
+.device .phabricator-main-menu-search
+  button.phabricator-main-menu-search-dropdown {
+    left: 2px;
+    background: #000;
+}
+
+.device .phabricator-main-menu-search
+  button.phabricator-main-menu-search-dropdown .phui-icon-view {
+    margin-top: 2px;
+  }
+
+.device .phabricator-main-menu-search
+  button.phabricator-main-menu-search-dropdown .caret {
+    margin-top: 3px;
+}
+
+button.phabricator-main-menu-search-dropdown .caret:before {
+  content: "\f107";
+  font-family: FontAwesome;
+}
+
+.phabricator-main-menu-search button.phabricator-main-menu-search-dropdown
+  .phui-icon-view {
+  color: rgba(255,255,255,.8);
+}
+
+.phabricator-main-menu-search-dropdown .caret {
+  position: absolute;
+  right: 13px;
+  top: 3px;
+  border: none;
+  margin-top: 1px;
 }
 
 .phabricator-main-menu-search button:hover {
@@ -209,13 +261,15 @@
 .device .phabricator-main-menu-search button {
   top: 6px;
   border-radius: 0;
+  height: 28px;
+  right: -6px;
 }
 
 .phabricator-main-menu-search-target div.jx-typeahead-results {
-  background: #ffffff;
+  background: #fff;
   word-wrap: break-word;
   overflow-y: auto;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+  box-shadow: {$dropshadow};
   border: {$blueborder};
   border-radius: 3px;
   margin-left: 40px;
@@ -497,7 +551,7 @@
   background: #fff;
   top: 38px;
   padding: 2px;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+  box-shadow: {$dropshadow};
   border: {$blueborder};
   border-radius: 3px;
 }

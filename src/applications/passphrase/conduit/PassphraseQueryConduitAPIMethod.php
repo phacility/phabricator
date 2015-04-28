@@ -11,7 +11,7 @@ final class PassphraseQueryConduitAPIMethod
     return pht('Query credentials.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'ids'           => 'optional list<int>',
       'phids'         => 'optional list<phid>',
@@ -20,12 +20,8 @@ final class PassphraseQueryConduitAPIMethod
     ) + $this->getPagerParamTypes();
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'list<dict>';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

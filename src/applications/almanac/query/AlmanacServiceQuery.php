@@ -75,7 +75,7 @@ final class AlmanacServiceQuery
     return $table->loadAllFromArray($data);
   }
 
-  protected function buildJoinClause($conn_r) {
+  protected function buildJoinClause(AphrontDatabaseConnection $conn_r) {
     $joins = array();
 
     if ($this->devicePHIDs !== null) {
@@ -88,7 +88,7 @@ final class AlmanacServiceQuery
     return implode(' ', $joins);
   }
 
-  protected function buildWhereClause($conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->ids !== null) {
@@ -190,6 +190,35 @@ final class AlmanacServiceQuery
     }
 
     return parent::didFilterPage($services);
+  }
+
+  public function getOrderableColumns() {
+    return parent::getOrderableColumns() + array(
+      'name' => array(
+        'table' => 'service',
+        'column' => 'name',
+        'type' => 'string',
+        'unique' => true,
+        'reverse' => true,
+      ),
+    );
+  }
+
+  protected function getValueMap($cursor, array $keys) {
+    $service = $this->loadCursorObject($cursor);
+    return array(
+      'id' => $service->getID(),
+      'name' => $service->getServiceName(),
+    );
+  }
+
+  public function getBuiltinOrders() {
+    return array(
+      'name' => array(
+        'vector' => array('name'),
+        'name' => pht('Service Name'),
+      ),
+    ) + parent::getBuiltinOrders();
   }
 
 }

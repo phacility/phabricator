@@ -11,20 +11,15 @@ final class FileUploadHashConduitAPIMethod extends FileConduitAPIMethod {
     return 'Upload a file to the server using content hash.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'hash' => 'required nonempty string',
       'name' => 'required nonempty string',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'phid or null';
-  }
-
-  public function defineErrorTypes() {
-    return array(
-    );
   }
 
   protected function execute(ConduitAPIRequest $request) {

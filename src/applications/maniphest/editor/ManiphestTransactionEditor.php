@@ -525,18 +525,6 @@ final class ManiphestTransactionEditor
         ->setNewValue($assign_phid);
     }
 
-    $project_phids = $adapter->getProjectPHIDs();
-    if ($project_phids) {
-      $project_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
-      $xactions[] = id(new ManiphestTransaction())
-        ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
-        ->setMetadataValue('edge:type', $project_type)
-        ->setNewValue(
-          array(
-            '+' => array_fuse($project_phids),
-          ));
-    }
-
     return $xactions;
   }
 
@@ -612,12 +600,13 @@ final class ManiphestTransactionEditor
 
     $query = id(new ManiphestTaskQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->setOrderBy(ManiphestTaskQuery::ORDER_PRIORITY)
       ->withPriorities(array($priority))
       ->setLimit(1);
 
     if ($is_end) {
-      $query->setReversePaging(true);
+      $query->setOrderVector(array('-priority', '-subpriority', '-id'));
+    } else {
+      $query->setOrderVector(array('priority', 'subpriority', 'id'));
     }
 
     $result = $query->executeOne();
@@ -643,7 +632,8 @@ final class ManiphestTransactionEditor
    */
   public static function getAdjacentSubpriority(
     ManiphestTask $dst,
-    $is_after) {
+    $is_after,
+    $allow_recursion = true) {
 
     $query = id(new ManiphestTaskQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
@@ -665,30 +655,45 @@ final class ManiphestTransactionEditor
     // If we find an adjacent task, we average the two subpriorities and
     // return the result.
     if ($adjacent) {
+      $epsilon = 0.01;
+
       // If the adjacent task has a subpriority that is identical or very
       // close to the task we're looking at, we're going to move it and all
       // tasks with the same subpriority a little farther down the subpriority
       // scale.
-      if (abs($adjacent->getSubpriority() - $base) < 0.01) {
+      if ($allow_recursion &&
+          (abs($adjacent->getSubpriority() - $base) < $epsilon)) {
         $conn_w = $adjacent->establishConnection('w');
 
-        // Get all of the tasks with the same subpriority as the adjacent
+        $min = ($adjacent->getSubpriority() - ($epsilon));
+        $max = ($adjacent->getSubpriority() + ($epsilon));
+
+        // Get all of the tasks with the similar subpriorities to the adjacent
         // task, including the adjacent task itself.
-        $shift_base = $adjacent->getSubpriority();
-        $shift_all = id(new ManiphestTaskQuery())
+        $query = id(new ManiphestTaskQuery())
           ->setViewer(PhabricatorUser::getOmnipotentUser())
-          ->setOrderBy(ManiphestTaskQuery::ORDER_PRIORITY)
           ->withPriorities(array($adjacent->getPriority()))
-          ->withSubpriorities(array($shift_base))
-          ->setReversePaging(!$is_after)
-          ->execute();
+          ->withSubpriorityBetween($min, $max);
+
+        if (!$is_after) {
+          $query->setOrderVector(array('-priority', '-subpriority', '-id'));
+        } else {
+          $query->setOrderVector(array('priority', 'subpriority', 'id'));
+        }
+
+        $shift_all = $query->execute();
         $shift_last = last($shift_all);
+
+        // Select the most extreme subpriority in the result set as the
+        // base value.
+        $shift_base = head($shift_all)->getSubpriority();
 
         // Find the subpriority before or after the task at the end of the
         // block.
         list($shift_pri, $shift_sub) = self::getAdjacentSubpriority(
           $shift_last,
-          $is_after);
+          $is_after,
+          $allow_recursion = false);
 
         $delta = ($shift_sub - $shift_base);
         $count = count($shift_all);

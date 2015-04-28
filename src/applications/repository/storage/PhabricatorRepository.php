@@ -544,9 +544,22 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
     // trusted, Mercurial prints out a warning to stdout, twice, after Feb 2011.
     //
     // http://selenic.com/pipermail/mercurial-devel/2011-February/028541.html
+    //
+    // After Jan 2015, it may also fail to write to a revision branch cache.
+
+    $ignore = array(
+      'ignoring untrusted configuration option',
+      "couldn't write revision branch cache:",
+    );
+
+    foreach ($ignore as $key => $pattern) {
+      $ignore[$key] = preg_quote($pattern, '/');
+    }
+
+    $ignore = '('.implode('|', $ignore).')';
 
     $lines = preg_split('/(?<=\n)/', $stdout);
-    $regex = '/ignoring untrusted configuration option .*\n$/';
+    $regex = '/'.$ignore.'.*\n$/';
 
     foreach ($lines as $key => $line) {
       $lines[$key] = preg_replace($regex, '', $line);

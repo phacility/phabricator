@@ -19,7 +19,11 @@ final class RepositoryQueryConduitAPIMethod
     return pht('Query repositories.');
   }
 
-  public function defineParamTypes() {
+  public function newQueryObject() {
+    return new PhabricatorRepositoryQuery();
+  }
+
+  protected function defineParamTypes() {
     return array(
       'ids' => 'optional list<int>',
       'phids' => 'optional list<phid>',
@@ -30,18 +34,12 @@ final class RepositoryQueryConduitAPIMethod
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'list<dict>';
   }
 
-  public function defineErrorTypes() {
-    return array(
-    );
-  }
-
   protected function execute(ConduitAPIRequest $request) {
-    $query = id(new PhabricatorRepositoryQuery())
-      ->setViewer($request->getUser());
+    $query = $this->newQueryForRequest($request);
 
     $ids = $request->getValue('ids', array());
     if ($ids) {
@@ -73,7 +71,8 @@ final class RepositoryQueryConduitAPIMethod
       $query->withUUIDs($uuids);
     }
 
-    $repositories = $query->execute();
+    $pager = $this->newPager($request);
+    $repositories = $query->executeWithCursorPager($pager);
 
     $results = array();
     foreach ($repositories as $repository) {

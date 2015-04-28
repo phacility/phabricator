@@ -34,8 +34,18 @@
   line-height: 1.3em;
 }
 
+.phui-font-source-sans .phabricator-remarkup h1.remarkup-header,
+.phui-font-source-sans .phabricator-remarkup h2.remarkup-header,
+.phui-font-source-sans .phabricator-remarkup h3.remarkup-header,
+.phui-font-source-sans .phabricator-remarkup h4.remarkup-header,
+.phui-font-source-sans .phabricator-remarkup h5.remarkup-header,
+.phui-font-source-sans .phabricator-remarkup h6.remarkup-header {
+  color: {$bluetext};
+  font-weight: 600;
+}
+
 .phui-font-source-sans .phabricator-remarkup h2.remarkup-header {
-  padding: 8px 24px 8px 0;
+  padding: 24px 24px 8px 0;
   border-bottom: 1px solid {$thinblueborder};
   font-size: 20px;
   font-weight: 400;

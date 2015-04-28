@@ -11,12 +11,13 @@ final class DiffusionBranchQueryConduitAPIMethod
     return pht('Determine what branches exist for a repository.');
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'list<dict>';
   }
 
   protected function defineCustomParamTypes() {
     return array(
+      'closed' => 'optional bool',
       'limit' => 'optional int',
       'offset' => 'optional int',
       'contains' => 'optional string',
@@ -94,6 +95,16 @@ final class DiffusionBranchQueryConduitAPIMethod
     foreach ($refs as $key => $ref) {
       if (!$repository->shouldTrackBranch($ref->getShortName())) {
         unset($refs[$key]);
+      }
+    }
+
+    $with_closed = $request->getValue('closed');
+    if ($with_closed !== null) {
+      foreach ($refs as $key => $ref) {
+        $fields = $ref->getRawFields();
+        if (idx($fields, 'closed') != $with_closed) {
+          unset($refs[$key]);
+        }
       }
     }
 

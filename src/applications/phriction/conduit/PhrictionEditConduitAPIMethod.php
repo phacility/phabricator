@@ -10,7 +10,7 @@ final class PhrictionEditConduitAPIMethod extends PhrictionConduitAPIMethod {
     return pht('Update a Phriction document.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'slug'          => 'required string',
       'title'         => 'optional string',
@@ -19,13 +19,8 @@ final class PhrictionEditConduitAPIMethod extends PhrictionConduitAPIMethod {
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
-  }
-
-  public function defineErrorTypes() {
-    return array(
-    );
   }
 
   protected function execute(ConduitAPIRequest $request) {

@@ -961,8 +961,8 @@ final class PhabricatorAuditEditor
 
     // not every code path loads the repository so tread carefully
     // TODO: They should, and then we should simplify this.
-    if ($object->getRepository($assert_attached = false)) {
-      $repository = $object->getRepository();
+    $repository = $object->getRepository($assert_attached = false);
+    if ($repository != PhabricatorLiskDAO::ATTACHABLE) {
       if (!$repository->shouldPublish()) {
         return false;
       }

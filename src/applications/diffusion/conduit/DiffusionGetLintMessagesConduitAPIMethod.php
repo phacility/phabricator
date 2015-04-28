@@ -15,7 +15,7 @@ final class DiffusionGetLintMessagesConduitAPIMethod
     return 'Get lint messages for existing code.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'arcanistProject' => 'required string',
       'branch'          => 'optional string',
@@ -24,12 +24,8 @@ final class DiffusionGetLintMessagesConduitAPIMethod
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'list<dict>';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

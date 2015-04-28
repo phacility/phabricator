@@ -26,18 +26,18 @@ final class DifferentialGetDiffConduitAPIMethod
                'or diff id.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'revision_id' => 'optional id',
       'diff_id'     => 'optional id',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
       'ERR_BAD_DIFF'        => 'No such diff exists.',
     );

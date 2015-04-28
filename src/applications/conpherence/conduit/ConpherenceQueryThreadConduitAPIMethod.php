@@ -15,7 +15,7 @@ final class ConpherenceQueryThreadConduitAPIMethod
       'updated conpherences for the logged in user.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'ids' => 'optional array<int>',
       'phids' => 'optional array<phids>',
@@ -24,12 +24,8 @@ final class ConpherenceQueryThreadConduitAPIMethod
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

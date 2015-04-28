@@ -677,6 +677,9 @@ final class DiffusionCommitController extends DiffusionController {
 
     $actions = $this->getAuditActions($commit, $audit_requests);
 
+    $mailable_source = new PhabricatorMetaMTAMailableDatasource();
+    $auditor_source = new DiffusionAuditorDatasource();
+
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->setAction('/audit/addcomment/')
@@ -694,7 +697,8 @@ final class DiffusionCommitController extends DiffusionController {
           ->setControlID('add-auditors')
           ->setControlStyle('display: none')
           ->setID('add-auditors-tokenizer')
-          ->setDisableBehavior(true))
+          ->setDisableBehavior(true)
+          ->setDatasource($auditor_source))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
           ->setLabel(pht('Add CCs'))
@@ -702,7 +706,8 @@ final class DiffusionCommitController extends DiffusionController {
           ->setControlID('add-ccs')
           ->setControlStyle('display: none')
           ->setID('add-ccs-tokenizer')
-          ->setDisableBehavior(true))
+          ->setDisableBehavior(true)
+          ->setDatasource($mailable_source))
       ->appendChild(
         id(new PhabricatorRemarkupControl())
           ->setLabel(pht('Comments'))
@@ -717,9 +722,6 @@ final class DiffusionCommitController extends DiffusionController {
     $header = new PHUIHeaderView();
     $header->setHeader(
       $is_serious ? pht('Audit Commit') : pht('Creative Accounting'));
-
-    $mailable_source = new PhabricatorMetaMTAMailableDatasource();
-    $auditor_source = new DiffusionAuditorDatasource();
 
     Javelin::initBehavior(
       'differential-add-reviewers-and-ccs',

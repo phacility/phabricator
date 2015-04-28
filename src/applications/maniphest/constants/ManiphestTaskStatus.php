@@ -85,14 +85,16 @@ final class ManiphestTaskStatus extends ManiphestConstants {
   public static function renderFullDescription($status) {
     if (self::isOpenStatus($status)) {
       $color = 'status';
-      $icon = 'fa-square-o bluegrey';
+      $icon_color = 'bluegrey';
     } else {
       $color = 'status-dark';
-      $icon = 'fa-check-square-o';
+      $icon_color = '';
     }
 
+    $icon = self::getStatusIcon($status);
+
     $img = id(new PHUIIconView())
-      ->setIconFont($icon);
+      ->setIconFont($icon.' '.$icon_color);
 
     $tag = phutil_tag(
       'span',
@@ -166,7 +168,16 @@ final class ManiphestTaskStatus extends ManiphestConstants {
   }
 
   public static function getStatusIcon($status) {
-    return self::getStatusAttribute($status, 'transaction.icon');
+    $icon = self::getStatusAttribute($status, 'transaction.icon');
+    if ($icon) {
+      return $icon;
+    }
+
+    if (self::isOpenStatus($status)) {
+      return 'fa-square-o';
+    } else {
+      return 'fa-check-square-o';
+    }
   }
 
   public static function getStatusPrefixMap() {

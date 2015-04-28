@@ -1,5 +1,16 @@
 <?php
 
+/**
+ * IMPORTANT: If you use this, make sure to implement
+ *
+ *   public function isGlobalDragAndDropUploadEnabled() {
+ *     return true;
+ *   }
+ *
+ * on the controller(s) that render this class...! This is necessary
+ * to make sure Quicksand works properly with the javascript in this
+ * UI.
+ */
 final class PhabricatorGlobalUploadTargetView extends AphrontView {
 
   private $showIfSupportedID;
@@ -19,7 +30,7 @@ final class PhabricatorGlobalUploadTargetView extends AphrontView {
       return null;
     }
 
-    $instructions_id = celerity_generate_unique_node_id();
+    $instructions_id = 'phabricator-global-drag-and-drop-upload-instructions';
 
     require_celerity_resource('global-drag-and-drop-css');
 

@@ -11,7 +11,7 @@ final class DifferentialUpdateRevisionConduitAPIMethod
     return pht('Update a Differential revision.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'id'        => 'required revisionid',
       'diffid'    => 'required diffid',
@@ -20,11 +20,11 @@ final class DifferentialUpdateRevisionConduitAPIMethod
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
       'ERR_BAD_DIFF' => 'Bad diff ID.',
       'ERR_BAD_REVISION' => 'Bad revision ID.',

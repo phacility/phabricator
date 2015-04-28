@@ -15,6 +15,10 @@ final class PhabricatorPeopleDatasource
     return $this;
   }
 
+  public function getBrowseTitle() {
+    return pht('Browse Users');
+  }
+
   public function getPlaceholderText() {
     return pht('Type a username...');
   }
@@ -25,63 +29,16 @@ final class PhabricatorPeopleDatasource
 
   public function loadResults() {
     $viewer = $this->getViewer();
-    $raw_query = $this->getRawQuery();
+    $tokens = $this->getTokens();
 
-    $results = array();
+    $query = id(new PhabricatorPeopleQuery())
+      ->setOrderVector(array('username'));
 
-    $users = array();
-    if (strlen($raw_query)) {
-      // This is an arbitrary limit which is just larger than any limit we
-      // actually use in the application.
-
-      // TODO: The datasource should pass this in the query.
-      $limit = 15;
-
-      $user_table = new PhabricatorUser();
-      $conn_r = $user_table->establishConnection('r');
-      $ids = queryfx_all(
-        $conn_r,
-        'SELECT id FROM %T WHERE username LIKE %>
-          ORDER BY username ASC LIMIT %d',
-        $user_table->getTableName(),
-        $raw_query,
-        $limit);
-      $ids = ipull($ids, 'id');
-
-      if (count($ids) < $limit) {
-        // If we didn't find enough username hits, look for real name hits.
-        // We need to pull the entire pagesize so that we end up with the
-        // right number of items if this query returns many duplicate IDs
-        // that we've already selected.
-
-        $realname_ids = queryfx_all(
-          $conn_r,
-          'SELECT DISTINCT userID FROM %T WHERE token LIKE %>
-            ORDER BY token ASC LIMIT %d',
-          PhabricatorUser::NAMETOKEN_TABLE,
-          $raw_query,
-          $limit);
-        $realname_ids = ipull($realname_ids, 'userID');
-        $ids = array_merge($ids, $realname_ids);
-
-        $ids = array_unique($ids);
-        $ids = array_slice($ids, 0, $limit);
-      }
-
-      // Always add the logged-in user because some tokenizers autosort them
-      // first. They'll be filtered out on the client side if they don't
-      // match the query.
-      if ($viewer->getID()) {
-        $ids[] = $viewer->getID();
-      }
-
-      if ($ids) {
-        $users = id(new PhabricatorPeopleQuery())
-          ->setViewer($viewer)
-          ->withIDs($ids)
-          ->execute();
-      }
+    if ($tokens) {
+      $query->withNameTokens($tokens);
     }
+
+    $users = $this->executeQuery($query);
 
     if ($this->enrichResults && $users) {
       $phids = mpull($users, 'getPHID');
@@ -91,6 +48,7 @@ final class PhabricatorPeopleDatasource
         ->execute();
     }
 
+    $results = array();
     foreach ($users as $user) {
       $closed = null;
       if ($user->getIsDisabled()) {

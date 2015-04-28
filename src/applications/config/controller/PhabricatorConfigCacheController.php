@@ -40,7 +40,6 @@ final class PhabricatorConfigCacheController
     $this->renderCommonProperties($properties, $cache);
 
     return id(new PHUIObjectBoxView())
-      ->setFormErrors($this->renderIssues($cache->getIssues()))
       ->setHeaderText(pht('Opcode Cache'))
       ->addPropertyList($properties);
   }
@@ -144,20 +143,6 @@ final class PhabricatorConfigCacheController
         pht('%s', new PhutilNumber($entry_count)));
     }
 
-  }
-
-  private function renderIssues(array $issues) {
-    $result = array();
-    foreach ($issues as $issue) {
-      $title = $issue['title'];
-      $body = $issue['body'];
-      $result[] = array(
-        phutil_tag('strong', array(), $title.':'),
-        ' ',
-        $body,
-      );
-    }
-    return $result;
   }
 
   private function renderYes($info) {

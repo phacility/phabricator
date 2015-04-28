@@ -18,7 +18,7 @@ final class ConduitConnectConduitAPIMethod extends ConduitAPIMethod {
     return 'Connect a session-based client.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'client'              => 'required string',
       'clientVersion'       => 'required int',
@@ -30,11 +30,11 @@ final class ConduitConnectConduitAPIMethod extends ConduitAPIMethod {
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'dict<string, any>';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
       'ERR-BAD-VERSION' =>
         'Client/server version mismatch. Upgrade your server or downgrade '.

@@ -11,7 +11,7 @@ final class FileUploadChunkConduitAPIMethod
     return pht('Upload a chunk of file data to the server.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'filePHID' => 'phid',
       'byteStart' => 'int',
@@ -20,12 +20,8 @@ final class FileUploadChunkConduitAPIMethod
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'void';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

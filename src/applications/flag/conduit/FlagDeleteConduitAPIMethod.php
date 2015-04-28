@@ -10,18 +10,18 @@ final class FlagDeleteConduitAPIMethod extends FlagConduitAPIMethod {
     return 'Clear a flag.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'id'         => 'optional id',
       'objectPHID' => 'optional phid',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'dict | null';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
       'ERR_NOT_FOUND'  => 'Bad flag ID.',
       'ERR_WRONG_USER' => 'You are not the creator of this flag.',

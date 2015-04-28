@@ -93,12 +93,20 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
   private function buildSpec(PhabricatorSavedQuery $query) {
     $spec = array();
     $filter = array();
+    $title_spec = array();
 
     if (strlen($query->getParameter('query'))) {
       $spec[] = array(
         'simple_query_string' => array(
           'query'  => $query->getParameter('query'),
           'fields' => array( 'field.corpus' ),
+        ),
+      );
+
+      $title_spec = array(
+        'simple_query_string' => array(
+          'query'  => $query->getParameter('query'),
+          'fields' => array('title'),
         ),
       );
     }
@@ -117,8 +125,6 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
     $relationship_map = array(
       PhabricatorSearchRelationship::RELATIONSHIP_AUTHOR =>
         $query->getParameter('authorPHIDs', array()),
-      PhabricatorSearchRelationship::RELATIONSHIP_OWNER =>
-        $query->getParameter('ownerPHIDs', array()),
       PhabricatorSearchRelationship::RELATIONSHIP_SUBSCRIBER =>
         $query->getParameter('subscriberPHIDs', array()),
       PhabricatorSearchRelationship::RELATIONSHIP_PROJECT =>
@@ -145,6 +151,14 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
 
     if ($query->getParameter('withUnowned')) {
       $relationship_map[$rel_unowned] = true;
+    }
+
+    $rel_owner = PhabricatorSearchRelationship::RELATIONSHIP_OWNER;
+    if ($query->getParameter('withAnyOwner')) {
+      $relationship_map[$rel_owner] = true;
+    } else {
+      $owner_phids = $query->getParameter('ownerPHIDs', array());
+      $relationship_map[$rel_owner] = $owner_phids;
     }
 
     foreach ($relationship_map as $field => $param) {
@@ -174,6 +188,9 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
 
     if ($spec) {
       $spec = array('query' => array('bool' => array('must' => $spec)));
+      if ($title_spec) {
+        $spec['query']['bool']['should'] = $title_spec;
+      }
     }
 
     if ($filter) {

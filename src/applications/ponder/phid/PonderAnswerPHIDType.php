@@ -5,7 +5,7 @@ final class PonderAnswerPHIDType extends PhabricatorPHIDType {
   const TYPECONST = 'ANSW';
 
   public function getTypeName() {
-    return pht('Answer');
+    return pht('Ponder Answer');
   }
 
   public function newObject() {

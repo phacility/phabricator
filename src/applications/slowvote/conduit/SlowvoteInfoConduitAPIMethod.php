@@ -10,17 +10,17 @@ final class SlowvoteInfoConduitAPIMethod extends SlowvoteConduitAPIMethod {
     return 'Retrieve an array of information about a poll.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'poll_id' => 'required id',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
       'ERR_BAD_POLL' => 'No such poll exists',
     );

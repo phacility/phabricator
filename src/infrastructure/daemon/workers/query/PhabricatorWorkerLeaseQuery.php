@@ -122,7 +122,7 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
         $conn_w,
         'SELECT id, leaseOwner FROM %T %Q %Q %Q',
         $task_table->getTableName(),
-        $this->buildWhereClause($conn_w, $phase),
+        $this->buildCustomWhereClause($conn_w, $phase),
         $this->buildOrderClause($conn_w, $phase),
         $this->buildLimitClause($conn_w, $limit - $leased));
 
@@ -206,7 +206,10 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
     return $tasks;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_w, $phase) {
+  protected function buildCustomWhereClause(
+    AphrontDatabaseConnection $conn_w,
+    $phase) {
+
     $where = array();
 
     switch ($phase) {

@@ -120,20 +120,11 @@ final class AlmanacServiceViewController
       ->withServicePHIDs(array($service->getPHID()))
       ->execute();
 
-    $phids = array();
-    foreach ($bindings as $binding) {
-      $phids[] = $binding->getServicePHID();
-      $phids[] = $binding->getDevicePHID();
-      $phids[] = $binding->getInterface()->getNetworkPHID();
-    }
-    $handles = $this->loadViewerHandles($phids);
-
     $table = id(new AlmanacBindingTableView())
       ->setNoDataString(
         pht('This service has not been bound to any device interfaces yet.'))
       ->setUser($viewer)
-      ->setBindings($bindings)
-      ->setHandles($handles);
+      ->setBindings($bindings);
 
     $header = id(new PHUIHeaderView())
       ->setHeader(pht('Service Bindings'))

@@ -117,7 +117,7 @@ final class PHUICalendarListView extends AphrontTagView {
       array(
         'sigil' => 'has-tooltip',
         'class' => 'phui-calendar-item-link',
-        'href' => '/calendar/event/view/'.$event->getEventID().'/',
+        'href' => '/E'.$event->getEventID(),
         'meta'  => array(
           'tip'  => $tip,
           'size' => 200,

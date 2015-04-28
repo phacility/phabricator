@@ -7,7 +7,6 @@ abstract class PhabricatorApplicationTransactionQuery
   private $objectPHIDs;
   private $authorPHIDs;
   private $transactionTypes;
-  private $reversePaging = true;
 
   private $needComments = true;
   private $needHandles  = true;
@@ -16,15 +15,6 @@ abstract class PhabricatorApplicationTransactionQuery
 
   protected function buildMoreWhereClauses(AphrontDatabaseConnection $conn_r) {
     return array();
-  }
-
-  public function setReversePaging($bool) {
-    $this->reversePaging = $bool;
-    return $this;
-  }
-
-  protected function getReversePaging() {
-    return $this->reversePaging;
   }
 
   public function withPHIDs(array $phids) {
@@ -152,7 +142,7 @@ abstract class PhabricatorApplicationTransactionQuery
     return $xactions;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->phids) {

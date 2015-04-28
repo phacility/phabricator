@@ -14,7 +14,7 @@ final class FeedPublishConduitAPIMethod extends FeedConduitAPIMethod {
     return 'Publish a story to the feed.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'type' => 'required string',
       'data' => 'required dict',
@@ -22,12 +22,7 @@ final class FeedPublishConduitAPIMethod extends FeedConduitAPIMethod {
     );
   }
 
-  public function defineErrorTypes() {
-    return array(
-    );
-  }
-
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty phid';
   }
 

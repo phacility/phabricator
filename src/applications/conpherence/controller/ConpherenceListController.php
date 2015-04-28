@@ -100,6 +100,7 @@ final class ConpherenceListController extends ConpherenceController {
         } else {
           $thread = ConpherenceThread::initializeNewThread($user);
           $thread->attachHandles(array());
+          $thread->attachTransactions(array());
           $thread->makeEphemeral();
           $layout->setHeader(
             $this->buildHeaderPaneContent($thread, array()));

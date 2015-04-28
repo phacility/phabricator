@@ -35,6 +35,7 @@ final class PhrictionDocumentController
     $core_content = '';
     $move_notice = '';
     $properties = null;
+    $content = null;
 
     if (!$document) {
 
@@ -196,6 +197,10 @@ final class PhrictionDocumentController
       ->setPolicyObject($document)
       ->setHeader($page_title);
 
+    if ($content) {
+      $header->setEpoch($content->getDateCreated());
+    }
+
     $prop_list = null;
     if ($properties) {
       $prop_list = new PHUIPropertyGroupView();
@@ -205,7 +210,6 @@ final class PhrictionDocumentController
     $actions->setID($action_id);
 
     $page_content = id(new PHUIDocumentView())
-      ->setOffset(true)
       ->setFontKit(PHUIDocumentView::FONT_SOURCE_SANS)
       ->setHeader($header)
       ->setActionListID($action_id)
@@ -218,20 +222,11 @@ final class PhrictionDocumentController
           $core_content,
         ));
 
-    $core_page = phutil_tag(
-      'div',
-        array(
-          'class' => 'phriction-offset',
-        ),
-        array(
-          $page_content,
-          $children,
-        ));
-
     return $this->buildApplicationPage(
       array(
         $crumbs->render(),
-        $core_page,
+        $page_content,
+        $children,
       ),
       array(
         'pageObjects' => array($document->getPHID()),
@@ -253,17 +248,6 @@ final class PhrictionDocumentController
     $view->addProperty(
       pht('Last Author'),
       $viewer->renderHandle($content->getAuthorPHID()));
-
-    $age = time() - $content->getDateCreated();
-    $age = floor($age / (60 * 60 * 24));
-    if ($age < 1) {
-      $when = pht('Today');
-    } else if ($age == 1) {
-      $when = pht('Yesterday');
-    } else {
-      $when = pht('%d Days Ago', $age);
-    }
-    $view->addProperty(pht('Last Updated'), $when);
 
     return $view;
   }
@@ -442,7 +426,6 @@ final class PhrictionDocumentController
     );
 
     return id(new PHUIDocumentView())
-      ->setOffset(true)
       ->appendChild($content);
   }
 

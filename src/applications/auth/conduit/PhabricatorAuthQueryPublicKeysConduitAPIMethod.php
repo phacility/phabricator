@@ -11,7 +11,7 @@ final class PhabricatorAuthQueryPublicKeysConduitAPIMethod
     return pht('Query public keys.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'ids' => 'optional list<id>',
       'objectPHIDs' => 'optional list<phid>',
@@ -19,12 +19,8 @@ final class PhabricatorAuthQueryPublicKeysConduitAPIMethod
     ) + self::getPagerParamTypes();
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'result-set';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

@@ -9,7 +9,7 @@ final class PhabricatorProjectQuery
   private $slugs;
   private $phrictionSlugs;
   private $names;
-  private $datasourceQuery;
+  private $nameTokens;
   private $icons;
   private $colors;
 
@@ -60,8 +60,8 @@ final class PhabricatorProjectQuery
     return $this;
   }
 
-  public function withDatasourceQuery($string) {
-    $this->datasourceQuery = $string;
+  public function withNameTokens(array $tokens) {
+    $this->nameTokens = array_values($tokens);
     return $this;
   }
 
@@ -95,16 +95,27 @@ final class PhabricatorProjectQuery
     return $this;
   }
 
-  protected function getPagingColumn() {
-    return 'name';
+  protected function getDefaultOrderVector() {
+    return array('name');
   }
 
-  protected function getPagingValue($result) {
-    return $result->getName();
+  public function getOrderableColumns() {
+    return array(
+      'name' => array(
+        'table' => $this->getPrimaryTableAlias(),
+        'column' => 'name',
+        'reverse' => true,
+        'type' => 'string',
+        'unique' => true,
+      ),
+    );
   }
 
-  protected function getReversePaging() {
-    return true;
+  protected function getPagingValueMap($cursor, array $keys) {
+    $project = $this->loadCursorObject($cursor);
+    return array(
+      'name' => $project->getName(),
+    );
   }
 
   protected function loadPage() {
@@ -229,7 +240,7 @@ final class PhabricatorProjectQuery
     return $projects;
   }
 
-  private function buildWhereClause($conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->status != self::STATUS_ANY) {
@@ -317,15 +328,15 @@ final class PhabricatorProjectQuery
     return $this->formatWhereClause($where);
   }
 
-  private function buildGroupClause($conn_r) {
-    if ($this->memberPHIDs || $this->datasourceQuery) {
+  protected function buildGroupClause(AphrontDatabaseConnection $conn_r) {
+    if ($this->memberPHIDs || $this->nameTokens) {
       return 'GROUP BY p.id';
     } else {
       return $this->buildApplicationSearchGroupClause($conn_r);
     }
   }
 
-  private function buildJoinClause($conn_r) {
+  protected function buildJoinClause(AphrontDatabaseConnection $conn_r) {
     $joins = array();
 
     if (!$this->needMembers !== null) {
@@ -352,23 +363,18 @@ final class PhabricatorProjectQuery
         id(new PhabricatorProjectSlug())->getTableName());
     }
 
-    if ($this->datasourceQuery !== null) {
-      $tokens = PhabricatorTypeaheadDatasource::tokenizeString(
-        $this->datasourceQuery);
-      if (!$tokens) {
-        throw new PhabricatorEmptyQueryException();
+    if ($this->nameTokens !== null) {
+      foreach ($this->nameTokens as $key => $token) {
+        $token_table = 'token_'.$key;
+        $joins[] = qsprintf(
+          $conn_r,
+          'JOIN %T %T ON %T.projectID = p.id AND %T.token LIKE %>',
+          PhabricatorProject::TABLE_DATASOURCE_TOKEN,
+          $token_table,
+          $token_table,
+          $token_table,
+          $token);
       }
-
-      $likes = array();
-      foreach ($tokens as $token) {
-        $likes[] = qsprintf($conn_r, 'token.token LIKE %>', $token);
-      }
-
-      $joins[] = qsprintf(
-        $conn_r,
-        'JOIN %T token ON token.projectID = p.id AND (%Q)',
-        PhabricatorProject::TABLE_DATASOURCE_TOKEN,
-        '('.implode(') OR (', $likes).')');
     }
 
     $joins[] = $this->buildApplicationSearchJoinClause($conn_r);
@@ -380,8 +386,8 @@ final class PhabricatorProjectQuery
     return 'PhabricatorProjectApplication';
   }
 
-  protected function getApplicationSearchObjectPHIDColumn() {
-    return 'p.phid';
+  protected function getPrimaryTableAlias() {
+    return 'p';
   }
 
 }

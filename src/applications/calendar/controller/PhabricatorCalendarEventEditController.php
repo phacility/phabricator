@@ -14,8 +14,11 @@ final class PhabricatorCalendarEventEditController
   }
 
   public function processRequest() {
-    $request  = $this->getRequest();
-    $user     = $request->getUser();
+    $request = $this->getRequest();
+    $user = $request->getUser();
+    $error_name = true;
+    $validation_exception = null;
+
 
     $start_time = id(new AphrontFormDateControl())
       ->setUser($user)
@@ -30,15 +33,15 @@ final class PhabricatorCalendarEventEditController
       ->setInitialTime(AphrontFormDateControl::TIME_END_OF_DAY);
 
     if ($this->isCreate()) {
-      $status       = new PhabricatorCalendarEvent();
-      $end_value    = $end_time->readValueFromRequest($request);
-      $start_value  = $start_time->readValueFromRequest($request);
+      $event = PhabricatorCalendarEvent::initializeNewCalendarEvent($user);
+      $end_value = $end_time->readValueFromRequest($request);
+      $start_value = $start_time->readValueFromRequest($request);
       $submit_label = pht('Create');
-      $filter       = 'status/create/';
-      $page_title   = pht('Create Event');
-      $redirect     = 'created';
+      $filter = 'event/create/';
+      $page_title = pht('Create Event');
+      $redirect = 'created';
     } else {
-      $status = id(new PhabricatorCalendarEventQuery())
+      $event = id(new PhabricatorCalendarEventQuery())
         ->setViewer($user)
         ->withIDs(array($this->id))
         ->requireCapabilities(
@@ -47,23 +50,25 @@ final class PhabricatorCalendarEventEditController
             PhabricatorPolicyCapability::CAN_EDIT,
           ))
         ->executeOne();
-      if (!$status) {
+      if (!$event) {
         return new Aphront404Response();
       }
 
-      $end_time->setValue($status->getDateTo());
-      $start_time->setValue($status->getDateFrom());
+      $end_time->setValue($event->getDateTo());
+      $start_time->setValue($event->getDateFrom());
       $submit_label = pht('Update');
-      $filter       = 'event/edit/'.$status->getID().'/';
+      $filter       = 'event/edit/'.$event->getID().'/';
       $page_title   = pht('Update Event');
       $redirect     = 'updated';
     }
 
     $errors = array();
     if ($request->isFormPost()) {
-      $type        = $request->getInt('status');
+      $xactions = array();
+      $name = $request->getStr('name');
+      $type = $request->getInt('status');
       $start_value = $start_time->readValueFromRequest($request);
-      $end_value   = $end_time->readValueFromRequest($request);
+      $end_value = $end_time->readValueFromRequest($request);
       $description = $request->getStr('description');
 
       if ($start_time->getError()) {
@@ -73,39 +78,45 @@ final class PhabricatorCalendarEventEditController
         $errors[] = pht('Invalid end time; reset to default.');
       }
       if (!$errors) {
-        try {
-          $status
-            ->setUserPHID($user->getPHID())
-            ->setStatus($type)
-            ->setDateFrom($start_value)
-            ->setDateTo($end_value)
-            ->setDescription($description)
-            ->save();
-        } catch (PhabricatorCalendarEventInvalidEpochException $e) {
-          $errors[] = pht('Start must be before end.');
-        }
-      }
+        $xactions[] = id(new PhabricatorCalendarEventTransaction())
+          ->setTransactionType(
+            PhabricatorCalendarEventTransaction::TYPE_NAME)
+          ->setNewValue($name);
 
-      if (!$errors) {
-        $uri = new PhutilURI($this->getApplicationURI());
-        $uri->setQueryParams(
-          array(
-            'month'   => phabricator_format_local_time($status->getDateFrom(),
-                                                       $user,
-                                                       'm'),
-            'year'    => phabricator_format_local_time($status->getDateFrom(),
-                                                       $user,
-                                                       'Y'),
-            $redirect => true,
-          ));
-        if ($request->isAjax()) {
-          $response = id(new AphrontAjaxResponse())
-            ->setContent(array('redirect_uri' => $uri));
-        } else {
-          $response = id(new AphrontRedirectResponse())
-            ->setURI($uri);
+        $xactions[] = id(new PhabricatorCalendarEventTransaction())
+          ->setTransactionType(
+            PhabricatorCalendarEventTransaction::TYPE_START_DATE)
+          ->setNewValue($start_value);
+
+        $xactions[] = id(new PhabricatorCalendarEventTransaction())
+          ->setTransactionType(
+            PhabricatorCalendarEventTransaction::TYPE_END_DATE)
+          ->setNewValue($end_value);
+
+        $xactions[] = id(new PhabricatorCalendarEventTransaction())
+          ->setTransactionType(
+            PhabricatorCalendarEventTransaction::TYPE_STATUS)
+          ->setNewValue($type);
+
+        $xactions[] = id(new PhabricatorCalendarEventTransaction())
+          ->setTransactionType(
+            PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION)
+          ->setNewValue($description);
+
+        $editor = id(new PhabricatorCalendarEventEditor())
+          ->setActor($user)
+          ->setContentSourceFromRequest($request)
+          ->setContinueOnNoEffect(true);
+
+        try {
+          $xactions = $editor->applyTransactions($event, $xactions);
+          $response = id(new AphrontRedirectResponse());
+          return $response->setURI('/E'.$event->getID());
+        } catch (PhabricatorApplicationTransactionValidationException $ex) {
+          $validation_exception = $ex;
+          $error_name = $ex
+            ->getShortMessage(PhabricatorCalendarEventTransaction::TYPE_NAME);
         }
-        return $response;
       }
     }
 
@@ -116,82 +127,66 @@ final class PhabricatorCalendarEventEditController
         ->setErrors($errors);
     }
 
+    $name = id(new AphrontFormTextControl())
+      ->setLabel(pht('Name'))
+      ->setName('name')
+      ->setValue($event->getName())
+      ->setError($error_name);
+
     $status_select = id(new AphrontFormSelectControl())
       ->setLabel(pht('Status'))
       ->setName('status')
-      ->setValue($status->getStatus())
-      ->setOptions($status->getStatusOptions());
+      ->setValue($event->getStatus())
+      ->setOptions($event->getStatusOptions());
 
     $description = id(new AphrontFormTextAreaControl())
       ->setLabel(pht('Description'))
       ->setName('description')
-      ->setValue($status->getDescription());
+      ->setValue($event->getDescription());
 
-    if ($request->isAjax()) {
-      $dialog = id(new AphrontDialogView())
-        ->setUser($user)
-        ->setTitle($page_title)
-        ->setWidth(AphrontDialogView::WIDTH_FORM);
-      if ($this->isCreate()) {
-        $dialog->setSubmitURI($this->getApplicationURI('event/create/'));
-      } else {
-        $dialog->setSubmitURI(
-          $this->getApplicationURI('event/edit/'.$status->getID().'/'));
-      }
-      $form = new PHUIFormLayoutView();
-      if ($error_view) {
-        $form->appendChild($error_view);
-      }
-    } else {
-      $form = id(new AphrontFormView())
-        ->setUser($user);
-    }
-
-    $form
+    $form = id(new AphrontFormView())
+      ->setUser($user)
+      ->appendChild($name)
       ->appendChild($status_select)
       ->appendChild($start_time)
       ->appendChild($end_time)
       ->appendChild($description);
 
-    if ($request->isAjax()) {
-      $dialog->addSubmitButton($submit_label);
-      $submit = $dialog;
-    } else {
-      $submit = id(new AphrontFormSubmitControl())
-        ->setValue($submit_label);
-    }
+    $submit = id(new AphrontFormSubmitControl())
+      ->setValue($submit_label);
     if ($this->isCreate()) {
       $submit->addCancelButton($this->getApplicationURI());
     } else {
-      $submit->addCancelButton(
-        $this->getApplicationURI('event/view/'.$status->getID().'/'));
+      $submit->addCancelButton('/E'.$event->getID());
     }
 
-    if ($request->isAjax()) {
-      $dialog->appendChild($form);
-      return id(new AphrontDialogResponse())
-        ->setDialog($dialog);
-    }
     $form->appendChild($submit);
-
-
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($page_title)
       ->setFormErrors($errors)
       ->setForm($form);
 
-    $nav = $this->buildSideNavView($status);
+    $nav = $this->buildSideNavView($event);
     $nav->selectFilter($filter);
 
-    $crumbs = $this
-      ->buildApplicationCrumbs()
-      ->addTextCrumb($page_title);
+    $crumbs = $this->buildApplicationCrumbs();
+
+    if (!$this->isCreate()) {
+      $crumbs->addTextCrumb('E'.$event->getId(), '/E'.$event->getId());
+    }
+
+    $crumbs->addTextCrumb($page_title);
+
+    $object_box = id(new PHUIObjectBoxView())
+      ->setHeaderText($page_title)
+      ->setValidationException($validation_exception)
+      ->appendChild($form);
 
     $nav->appendChild(
       array(
         $crumbs,
-        $form_box,
+        $object_box,
       ));
 
     return $this->buildApplicationPage(

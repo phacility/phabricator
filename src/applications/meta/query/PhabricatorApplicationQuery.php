@@ -170,4 +170,10 @@ final class PhabricatorApplicationQuery
     return null;
   }
 
+  protected function getResultCursor($object) {
+    // TODO: This won't work, but doesn't matter until we write more than 100
+    // applications. Since we only have about 70, just avoid fataling for now.
+    return null;
+  }
+
 }

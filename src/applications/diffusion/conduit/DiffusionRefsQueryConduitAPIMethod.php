@@ -12,7 +12,7 @@ final class DiffusionRefsQueryConduitAPIMethod
       'Query a git repository for ref information at a specific commit.';
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'array';
   }
 

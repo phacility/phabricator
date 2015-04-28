@@ -17,7 +17,7 @@ final class ReleephWorkGetCommitMessageConduitAPIMethod
       'a ReleephRequest commit message.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     $action_const = $this->formatStringConstants(array('pick', 'revert'));
 
     return array(
@@ -26,12 +26,8 @@ final class ReleephWorkGetCommitMessageConduitAPIMethod
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'dict<string, string>';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

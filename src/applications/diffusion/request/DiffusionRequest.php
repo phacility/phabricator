@@ -28,6 +28,7 @@ abstract class DiffusionRequest {
   private $initFromConduit = true;
   private $user;
   private $branchObject = false;
+  private $refAlternatives;
 
   abstract public function supportsBranches();
   abstract protected function isStableCommit($symbol);
@@ -528,6 +529,7 @@ abstract class DiffusionRequest {
       case 'tags':
       case 'branches':
       case 'lint':
+      case 'refs':
         $req_callsign = true;
         break;
       case 'branch':
@@ -559,6 +561,7 @@ abstract class DiffusionRequest {
       case 'branches':
       case 'lint':
       case 'pathtree':
+      case 'refs':
         $uri = "/diffusion/{$callsign}{$action}/{$path}{$commit}{$line}";
         break;
       case 'branch':
@@ -715,41 +718,98 @@ abstract class DiffusionRequest {
   }
 
   private function queryStableCommit() {
+    $types = array();
     if ($this->symbolicCommit) {
       $ref = $this->symbolicCommit;
     } else {
       if ($this->supportsBranches()) {
         $ref = $this->getResolvableBranchName($this->getBranch());
+        $types = array(
+          PhabricatorRepositoryRefCursor::TYPE_BRANCH,
+        );
       } else {
         $ref = 'HEAD';
       }
     }
 
-    $results = $this->resolveRefs(array($ref));
+    $results = $this->resolveRefs(array($ref), $types);
 
     $matches = idx($results, $ref, array());
-    if (count($matches) !== 1) {
-      $message = pht('Ref "%s" is ambiguous or does not exist.', $ref);
+    if (!$matches) {
+      $message = pht(
+        'Ref "%s" does not exist in this repository.',
+        $ref);
       throw id(new DiffusionRefNotFoundException($message))
         ->setRef($ref);
     }
 
-    $match = head($matches);
+    if (count($matches) > 1) {
+      $match = $this->chooseBestRefMatch($ref, $matches);
+    } else {
+      $match = head($matches);
+    }
 
     $this->stableCommit = $match['identifier'];
     $this->symbolicType = $match['type'];
+  }
+
+  public function getRefAlternatives() {
+    // Make sure we've resolved the reference into a stable commit first.
+    try {
+      $this->getStableCommit();
+    } catch (DiffusionRefNotFoundException $ex) {
+      // If we have a bad reference, just return the empty set of
+      // alternatives.
+    }
+    return $this->refAlternatives;
+  }
+
+  private function chooseBestRefMatch($ref, array $results) {
+    // First, filter out less-desirable matches.
+    $candidates = array();
+    foreach ($results as $result) {
+      // Exclude closed heads.
+      if ($result['type'] == 'branch') {
+        if (idx($result, 'closed')) {
+          continue;
+        }
+      }
+
+      $candidates[] = $result;
+    }
+
+    // If we filtered everything, undo the filtering.
+    if (!$candidates) {
+      $candidates = $results;
+    }
+
+    // TODO: Do a better job of selecting the best match?
+    $match = head($candidates);
+
+    // After choosing the best alternative, save all the alternatives so the
+    // UI can show them to the user.
+    if (count($candidates) > 1) {
+      $this->refAlternatives = $candidates;
+    }
+
+    return $match;
   }
 
   protected function getResolvableBranchName($branch) {
     return $branch;
   }
 
-  private function resolveRefs(array $refs) {
+  private function resolveRefs(array $refs, array $types) {
     // First, try to resolve refs from fast cache sources.
-    $cached_results = id(new DiffusionCachedResolveRefsQuery())
+    $cached_query = id(new DiffusionCachedResolveRefsQuery())
       ->setRepository($this->getRepository())
-      ->withRefs($refs)
-      ->execute();
+      ->withRefs($refs);
+
+    if ($types) {
+      $cached_query->withTypes($types);
+    }
+
+    $cached_results = $cached_query->execute();
 
     // Throw away all the refs we resolved. Hopefully, we'll throw away
     // everything here.
@@ -767,6 +827,7 @@ abstract class DiffusionRequest {
         $this,
         'diffusion.resolverefs',
         array(
+          'types' => $types,
           'refs' => $refs,
         ));
     } else {

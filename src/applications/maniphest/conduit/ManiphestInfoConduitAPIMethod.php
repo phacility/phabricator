@@ -10,17 +10,17 @@ final class ManiphestInfoConduitAPIMethod extends ManiphestConduitAPIMethod {
     return 'Retrieve information about a Maniphest task, given its id.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'task_id' => 'required id',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
       'ERR_BAD_TASK' => 'No such maniphest task exists',
     );

@@ -442,7 +442,7 @@ table.aphront-form-control-checkbox-layout th {
   background-color: white;
   border: 1px solid {$lightblueborder};
   border-bottom: 1px solid {$blueborder};
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+  box-shadow: {$dropshadow};
   border-radius: 3px;
 }
 
@@ -453,7 +453,7 @@ table.aphront-form-control-checkbox-layout th {
 .phui-form-divider hr {
   height: 1px;
   border: 0;
-  background: #c0c0c0;
+  background: {$thinblueborder};
   width: 85%;
   margin: 15px auto;
 }
@@ -487,7 +487,6 @@ table.aphront-form-control-checkbox-layout th {
 .device-desktop .text-with-submit-control-submit {
   width: 180px;
 }
-
 
 .aphront-form-choose-table td {
   vertical-align: middle;

@@ -6,11 +6,8 @@ final class DifferentialChangesetViewController extends DifferentialController {
     return true;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
-
-    $author_phid = $viewer->getPHID();
 
     $rendering_reference = $request->getStr('ref');
     $parts = explode('/', $rendering_reference);
@@ -68,6 +65,8 @@ final class DifferentialChangesetViewController extends DifferentialController {
       }
     }
 
+    $old = array();
+    $new = array();
     if (!$vs) {
       $right = $changeset;
       $left  = null;
@@ -78,6 +77,9 @@ final class DifferentialChangesetViewController extends DifferentialController {
       $left_new = false;
 
       $render_cache_key = $right->getID();
+
+      $old[] = $changeset;
+      $new[] = $changeset;
     } else if ($vs == -1) {
       $right = null;
       $left = $changeset;
@@ -88,6 +90,9 @@ final class DifferentialChangesetViewController extends DifferentialController {
       $left_new = true;
 
       $render_cache_key = null;
+
+      $old[] = $changeset;
+      $new[] = $changeset;
     } else {
       $right = $changeset;
       $left = $vs_changeset;
@@ -98,6 +103,9 @@ final class DifferentialChangesetViewController extends DifferentialController {
       $left_new = true;
 
       $render_cache_key = null;
+
+      $new[] = $left;
+      $new[] = $right;
     }
 
     if ($left) {
@@ -162,10 +170,33 @@ final class DifferentialChangesetViewController extends DifferentialController {
       $parser->setOriginals($left, $right);
     }
 
+    $diff = $changeset->getDiff();
+    $revision_id = $diff->getRevisionID();
+
+    $can_mark = false;
+    $object_owner_phid = null;
+    $revision = null;
+    if ($revision_id) {
+      $revision = id(new DifferentialRevisionQuery())
+        ->setViewer($viewer)
+        ->withIDs(array($revision_id))
+        ->executeOne();
+      if ($revision) {
+        $can_mark = ($revision->getAuthorPHID() == $viewer->getPHID());
+        $object_owner_phid = $revision->getAuthorPHID();
+      }
+    }
+
     // Load both left-side and right-side inline comments.
-    $inlines = $this->loadInlineComments(
-      array($left_source, $right_source),
-      $author_phid);
+    if ($revision) {
+      $query = id(new DifferentialInlineCommentQuery())
+        ->setViewer($viewer)
+        ->withRevisionPHIDs(array($revision->getPHID()));
+      $inlines = $query->execute();
+      $inlines = $query->adjustInlinesForChangesets($inlines, $old, $new);
+    } else {
+      $inlines = array();
+    }
 
     if ($left_new) {
       $inlines = array_merge(
@@ -201,22 +232,6 @@ final class DifferentialChangesetViewController extends DifferentialController {
     }
 
     $engine->process();
-
-    $diff = $changeset->getDiff();
-    $revision_id = $diff->getRevisionID();
-
-    $can_mark = false;
-    $object_owner_phid = null;
-    if ($revision_id) {
-      $revision = id(new DifferentialRevisionQuery())
-        ->setViewer($viewer)
-        ->withIDs(array($revision_id))
-        ->executeOne();
-      if ($revision) {
-        $can_mark = ($revision->getAuthorPHID() == $viewer->getPHID());
-        $object_owner_phid = $revision->getAuthorPHID();
-      }
-    }
 
     $parser
       ->setUser($viewer)
@@ -279,17 +294,6 @@ final class DifferentialChangesetViewController extends DifferentialController {
         'title' => pht('Changeset View'),
         'device' => false,
       ));
-  }
-
-  private function loadInlineComments(array $changeset_ids, $author_phid) {
-    $changeset_ids = array_unique(array_filter($changeset_ids));
-    if (!$changeset_ids) {
-      return;
-    }
-
-    return id(new DifferentialInlineCommentQuery())
-      ->withViewerAndChangesetIDs($author_phid, $changeset_ids)
-      ->execute();
   }
 
   private function buildRawFileResponse(

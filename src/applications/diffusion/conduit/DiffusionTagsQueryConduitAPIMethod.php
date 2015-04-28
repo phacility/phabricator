@@ -11,7 +11,7 @@ final class DiffusionTagsQueryConduitAPIMethod
     return pht('Retrieve information about tags in a repository.');
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'array';
   }
 

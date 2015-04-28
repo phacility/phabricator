@@ -11,7 +11,7 @@ final class FileAllocateConduitAPIMethod
     return pht('Prepare to upload a file.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'name' => 'string',
       'contentLength' => 'int',
@@ -20,12 +20,8 @@ final class FileAllocateConduitAPIMethod
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'map<string, wild>';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

@@ -5,6 +5,7 @@ final class PhabricatorAuditInlineComment
 
   private $proxy;
   private $syntheticAuthor;
+  private $isGhost;
 
   public function __construct() {
     $this->proxy = new PhabricatorAuditTransactionComment();
@@ -306,6 +307,15 @@ final class PhabricatorAuditInlineComment
 
   public function getFixedState() {
     return $this->proxy->getFixedState();
+  }
+
+  public function setIsGhost($is_ghost) {
+    $this->isGhost = $is_ghost;
+    return $this;
+  }
+
+  public function getIsGhost() {
+    return $this->isGhost;
   }
 
 

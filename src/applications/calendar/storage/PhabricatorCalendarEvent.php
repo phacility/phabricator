@@ -1,9 +1,11 @@
 <?php
 
-final class PhabricatorCalendarEvent
-  extends PhabricatorCalendarDAO
-  implements PhabricatorPolicyInterface {
+final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
+  implements PhabricatorPolicyInterface,
+  PhabricatorMarkupInterface,
+  PhabricatorApplicationTransactionInterface {
 
+  protected $name;
   protected $userPHID;
   protected $dateFrom;
   protected $dateTo;
@@ -12,6 +14,16 @@ final class PhabricatorCalendarEvent
 
   const STATUS_AWAY = 1;
   const STATUS_SPORADIC = 2;
+
+  public static function initializeNewCalendarEvent(PhabricatorUser $actor) {
+    $app = id(new PhabricatorApplicationQuery())
+      ->setViewer($actor)
+      ->withClasses(array('PhabricatorCalendarApplication'))
+      ->executeOne();
+
+    return id(new PhabricatorCalendarEvent())
+      ->setUserPHID($actor->getPHID());
+  }
 
   private static $statusTexts = array(
     self::STATUS_AWAY => 'away',
@@ -38,6 +50,7 @@ final class PhabricatorCalendarEvent
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
+        'name' => 'text',
         'dateFrom' => 'epoch',
         'dateTo' => 'epoch',
         'status' => 'uint32',
@@ -54,6 +67,10 @@ final class PhabricatorCalendarEvent
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
       PhabricatorCalendarEventPHIDType::TYPECONST);
+  }
+
+  public function getMonogram() {
+    return 'E'.$this->getID();
   }
 
   public function getTerseSummary(PhabricatorUser $viewer) {
@@ -82,6 +99,17 @@ final class PhabricatorCalendarEvent
     return mpull($statuses, null, 'getUserPHID');
   }
 
+  public static function getNameForStatus($value) {
+    switch ($value) {
+      case self::STATUS_AWAY:
+        return pht('Away');
+      case self::STATUS_SPORADIC:
+        return pht('Sporadic');
+      default:
+        return pht('Unknown');
+    }
+  }
+
   /**
    * Validates data and throws exceptions for non-sensical status
    * windows
@@ -95,6 +123,52 @@ final class PhabricatorCalendarEvent
     return parent::save();
   }
 
+/* -(  Markup Interface  )--------------------------------------------------- */
+
+
+  /**
+   * @task markup
+   */
+  public function getMarkupFieldKey($field) {
+    $hash = PhabricatorHash::digest($this->getMarkupText($field));
+    $id = $this->getID();
+    return "calendar:T{$id}:{$field}:{$hash}";
+  }
+
+
+  /**
+   * @task markup
+   */
+  public function getMarkupText($field) {
+    return $this->getDescription();
+  }
+
+
+  /**
+   * @task markup
+   */
+  public function newMarkupEngine($field) {
+    return PhabricatorMarkupEngine::newCalendarMarkupEngine();
+  }
+
+
+  /**
+   * @task markup
+   */
+  public function didMarkupText(
+    $field,
+    $output,
+    PhutilMarkupEngine $engine) {
+    return $output;
+  }
+
+
+  /**
+   * @task markup
+   */
+  public function shouldUseMarkupCache($field) {
+    return (bool)$this->getID();
+  }
 
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
@@ -121,6 +195,28 @@ final class PhabricatorCalendarEvent
 
   public function describeAutomaticCapability($capability) {
     return null;
+  }
+
+/* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
+
+
+  public function getApplicationTransactionEditor() {
+    return new PhabricatorCalendarEventEditor();
+  }
+
+  public function getApplicationTransactionObject() {
+    return $this;
+  }
+
+  public function getApplicationTransactionTemplate() {
+    return new PhabricatorCalendarEventTransaction();
+  }
+
+  public function willRenderTimeline(
+    PhabricatorApplicationTransactionView $timeline,
+    AphrontRequest $request) {
+
+    return $timeline;
   }
 
 }

@@ -2,19 +2,18 @@
 
 final class PhabricatorHomeMainController extends PhabricatorHomeController {
 
-  private $only;
   private $minipanels = array();
 
   public function shouldAllowPublic() {
     return true;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->only = idx($data, 'only');
+  public function isGlobalDragAndDropUploadEnabled() {
+    return true;
   }
 
-  public function processRequest() {
-    $user = $this->getRequest()->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $user = $request->getUser();
 
     $dashboard = PhabricatorDashboardInstall::getDashboard(
       $user,
@@ -42,7 +41,7 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
       $content = $this->buildMainResponse($projects);
     }
 
-    if (!$this->only) {
+    if (!$request->getURIData('only')) {
       $nav = $this->buildNav();
       $nav->appendChild(
         array(
@@ -149,8 +148,7 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
     }
 
     $href = urisprintf(
-      '/maniphest/?statuses=%s&priorities=%s#R',
-      implode(',', ManiphestTaskStatus::getOpenStatusConstants()),
+      '/maniphest/?statuses=open()&priorities=%s#R',
       $unbreak_now);
     $title = pht('Unbreak Now!');
     $panel = new PHUIObjectBoxView();
@@ -179,7 +177,10 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
         ->setViewer($user)
         ->withStatuses(ManiphestTaskStatus::getOpenStatusConstants())
         ->withPriorities(array($needs_triage))
-        ->withAnyProjects(mpull($projects, 'getPHID'))
+        ->withEdgeLogicPHIDs(
+          PhabricatorProjectObjectHasProjectEdgeType::EDGECONST,
+          PhabricatorQueryConstraint::OPERATOR_OR,
+          mpull($projects, 'getPHID'))
         ->needProjectPHIDs(true)
         ->setLimit(10);
       $tasks = $task_query->execute();
@@ -197,8 +198,7 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
 
     $title = pht('Needs Triage');
     $href = urisprintf(
-      '/maniphest/?statuses=%s&priorities=%s&userProjects=%s#R',
-      implode(',', ManiphestTaskStatus::getOpenStatusConstants()),
+      '/maniphest/?statuses=open()&priorities=%s&projects=projects(%s)#R',
       $needs_triage,
       $user->getPHID());
     $panel = new PHUIObjectBoxView();
@@ -288,7 +288,7 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
     }
 
     $title = pht('Assigned Tasks');
-    $href = '/maniphest';
+    $href = '/maniphest/query/assigned/';
     $panel = new PHUIObjectBoxView();
     $panel->setHeader($this->renderSectionHeader($title, $href));
     $panel->appendChild($this->buildTaskListView($tasks));

@@ -17,7 +17,6 @@ final class PhrictionDocumentQuery
   const STATUS_OPEN     = 'status-open';
   const STATUS_NONSTUB  = 'status-nonstub';
 
-  private $order        = 'order-created';
   const ORDER_CREATED   = 'order-created';
   const ORDER_UPDATED   = 'order-updated';
   const ORDER_HIERARCHY = 'order-hierarchy';
@@ -63,7 +62,20 @@ final class PhrictionDocumentQuery
   }
 
   public function setOrder($order) {
-    $this->order = $order;
+    switch ($order) {
+      case self::ORDER_CREATED:
+        $this->setOrderVector(array('id'));
+        break;
+      case self::ORDER_UPDATED:
+        $this->setOrderVector(array('updated'));
+        break;
+      case self::ORDER_HIERARCHY:
+        $this->setOrderVector(array('depth', 'title', 'updated'));
+        break;
+      default:
+        throw new Exception(pht('Unknown order "%s".', $order));
+    }
+
     return $this;
   }
 
@@ -71,19 +83,13 @@ final class PhrictionDocumentQuery
     $table = new PhrictionDocument();
     $conn_r = $table->establishConnection('r');
 
-    if ($this->order == self::ORDER_HIERARCHY) {
-      $order_clause = $this->buildHierarchicalOrderClause($conn_r);
-    } else {
-      $order_clause = $this->buildOrderClause($conn_r);
-    }
-
     $rows = queryfx_all(
       $conn_r,
       'SELECT d.* FROM %T d %Q %Q %Q %Q',
       $table->getTableName(),
       $this->buildJoinClause($conn_r),
       $this->buildWhereClause($conn_r),
-      $order_clause,
+      $this->buildOrderClause($conn_r),
       $this->buildLimitClause($conn_r));
 
     $documents = $table->loadAllFromArray($rows);
@@ -184,15 +190,17 @@ final class PhrictionDocumentQuery
     return $documents;
   }
 
-  private function buildJoinClause(AphrontDatabaseConnection $conn) {
+  protected function buildJoinClause(AphrontDatabaseConnection $conn) {
     $join = '';
-    if ($this->order == self::ORDER_HIERARCHY) {
+
+    if ($this->getOrderVector()->containsKey('updated')) {
       $content_dao = new PhrictionContent();
       $join = qsprintf(
         $conn,
         'JOIN %T c ON d.contentID = c.id',
         $content_dao->getTableName());
     }
+
     return $join;
   }
   protected function buildWhereClause(AphrontDatabaseConnection $conn) {
@@ -271,47 +279,58 @@ final class PhrictionDocumentQuery
     return $this->formatWhereClause($where);
   }
 
-  private function buildHierarchicalOrderClause(
-    AphrontDatabaseConnection $conn_r) {
+  public function getOrderableColumns() {
+    return parent::getOrderableColumns() + array(
+      'depth' => array(
+        'table' => 'd',
+        'column' => 'depth',
+        'reverse' => true,
+        'type' => 'int',
+      ),
+      'title' => array(
+        'table' => 'c',
+        'column' => 'title',
+        'reverse' => true,
+        'type' => 'string',
+      ),
+      'updated' => array(
+        'table' => 'd',
+        'column' => 'contentID',
+        'type' => 'int',
+        'unique' => true,
+      ),
+    );
+  }
 
-    if ($this->getBeforeID()) {
-      return qsprintf(
-        $conn_r,
-        'ORDER BY d.depth, c.title, %Q %Q',
-        $this->getPagingColumn(),
-        $this->getReversePaging() ? 'DESC' : 'ASC');
-    } else {
-      return qsprintf(
-        $conn_r,
-        'ORDER BY d.depth, c.title, %Q %Q',
-        $this->getPagingColumn(),
-        $this->getReversePaging() ? 'ASC' : 'DESC');
+  protected function getPagingValueMap($cursor, array $keys) {
+    $document = $this->loadCursorObject($cursor);
+
+    $map = array(
+      'id' => $document->getID(),
+      'depth' => $document->getDepth(),
+      'updated' => $document->getContentID(),
+    );
+
+    foreach ($keys as $key) {
+      switch ($key) {
+        case 'title':
+          $map[$key] = $document->getContent()->getTitle();
+          break;
+      }
+    }
+
+    return $map;
+  }
+
+  protected function willExecuteCursorQuery(
+    PhabricatorCursorPagedPolicyAwareQuery $query) {
+    $vector = $this->getOrderVector();
+
+    if ($vector->containsKey('title')) {
+      $query->needContent(true);
     }
   }
 
-  protected function getPagingColumn() {
-    switch ($this->order) {
-      case self::ORDER_CREATED:
-      case self::ORDER_HIERARCHY:
-        return 'd.id';
-      case self::ORDER_UPDATED:
-        return 'd.contentID';
-      default:
-        throw new Exception("Unknown order '{$this->order}'!");
-    }
-  }
-
-  protected function getPagingValue($result) {
-    switch ($this->order) {
-      case self::ORDER_CREATED:
-      case self::ORDER_HIERARCHY:
-        return $result->getID();
-      case self::ORDER_UPDATED:
-        return $result->getContentID();
-      default:
-        throw new Exception("Unknown order '{$this->order}'!");
-    }
-  }
 
   public function getQueryApplicationClass() {
     return 'PhabricatorPhrictionApplication';

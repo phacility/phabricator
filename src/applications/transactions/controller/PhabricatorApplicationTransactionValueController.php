@@ -118,7 +118,7 @@ final class PhabricatorApplicationTransactionValueController
       if ($handle_phids) {
         $value = $this->getViewer()
           ->renderHandleList($handle_phids)
-          ->setInline(true);
+          ->setAsInline(true);
       } else {
         $value = $rule['value'];
       }

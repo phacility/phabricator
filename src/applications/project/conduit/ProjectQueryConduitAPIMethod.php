@@ -10,7 +10,7 @@ final class ProjectQueryConduitAPIMethod extends ProjectConduitAPIMethod {
     return 'Execute searches for Projects.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
 
     $statuses = array(
       PhabricatorProjectQuery::STATUS_ANY,
@@ -36,12 +36,8 @@ final class ProjectQueryConduitAPIMethod extends ProjectConduitAPIMethod {
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'list';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

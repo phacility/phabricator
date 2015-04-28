@@ -199,7 +199,7 @@ abstract class DiffusionBrowseController extends DiffusionController {
       ->withPath($repository->getID(), $path_id)
       ->withStatus(DifferentialRevisionQuery::STATUS_OPEN)
       ->withUpdatedEpochBetween($recent, null)
-      ->setOrder(DifferentialRevisionQuery::ORDER_PATH_MODIFIED)
+      ->setOrder(DifferentialRevisionQuery::ORDER_MODIFIED)
       ->setLimit(10)
       ->needRelationships(true)
       ->needFlags(true)

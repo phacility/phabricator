@@ -59,10 +59,14 @@ final class PholioMockQuery
 
     $data = queryfx_all(
       $conn_r,
-      'SELECT * FROM %T %Q %Q %Q',
+      '%Q FROM %T mock %Q %Q %Q %Q %Q %Q',
+      $this->buildSelectClause($conn_r),
       $table->getTableName(),
+      $this->buildJoinClause($conn_r),
       $this->buildWhereClause($conn_r),
+      $this->buildGroupClause($conn_r),
       $this->buildOrderClause($conn_r),
+      $this->buildHavingClause($conn_r),
       $this->buildLimitClause($conn_r));
 
     $mocks = $table->loadAllFromArray($data);
@@ -82,36 +86,36 @@ final class PholioMockQuery
     return $mocks;
   }
 
-  private function buildWhereClause(AphrontDatabaseConnection $conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
-    $where[] = $this->buildPagingClause($conn_r);
+    $where[] = $this->buildWhereClauseParts($conn_r);
 
-    if ($this->ids) {
+    if ($this->ids !== null) {
       $where[] = qsprintf(
         $conn_r,
-        'id IN (%Ld)',
+        'mock.id IN (%Ld)',
         $this->ids);
     }
 
-    if ($this->phids) {
+    if ($this->phids !== null) {
       $where[] = qsprintf(
         $conn_r,
-        'phid IN (%Ls)',
+        'mock.phid IN (%Ls)',
         $this->phids);
     }
 
-    if ($this->authorPHIDs) {
+    if ($this->authorPHIDs !== null) {
       $where[] = qsprintf(
         $conn_r,
-        'authorPHID in (%Ls)',
+        'mock.authorPHID in (%Ls)',
         $this->authorPHIDs);
     }
 
-    if ($this->statuses) {
+    if ($this->statuses !== null) {
       $where[] = qsprintf(
         $conn_r,
-        'status IN (%Ls)',
+        'mock.status IN (%Ls)',
         $this->statuses);
     }
 
@@ -176,6 +180,10 @@ final class PholioMockQuery
 
   public function getQueryApplicationClass() {
     return 'PhabricatorPholioApplication';
+  }
+
+  protected function getPrimaryTableAlias() {
+    return 'mock';
   }
 
 }

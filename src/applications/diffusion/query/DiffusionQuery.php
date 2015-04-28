@@ -63,7 +63,7 @@ abstract class DiffusionQuery extends PhabricatorQuery {
     // If the method we're calling doesn't actually take some of the implicit
     // parameters we derive from the DiffusionRequest, omit them.
     $method_object = ConduitAPIMethod::getConduitMethod($method);
-    $method_params = $method_object->defineParamTypes();
+    $method_params = $method_object->getParamTypes();
     foreach ($core_params as $key => $value) {
       if (empty($method_params[$key])) {
         unset($core_params[$key]);

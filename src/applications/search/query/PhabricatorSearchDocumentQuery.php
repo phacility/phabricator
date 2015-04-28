@@ -69,7 +69,7 @@ final class PhabricatorSearchDocumentQuery
     return 'PhabricatorSearchApplication';
   }
 
-  protected function getPagingValue($result) {
+  protected function getResultCursor($result) {
     throw new Exception(
       pht(
         'This query does not support cursor paging; it must be offset '.

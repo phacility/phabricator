@@ -19,20 +19,15 @@ final class DifferentialGetRevisionCommentsConduitAPIMethod
     return 'Retrieve Differential Revision Comments.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'ids' => 'required list<int>',
       'inlines' => 'optional bool (deprecated)',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty list<dict<string, wild>>';
-  }
-
-  public function defineErrorTypes() {
-    return array(
-    );
   }
 
   protected function execute(ConduitAPIRequest $request) {

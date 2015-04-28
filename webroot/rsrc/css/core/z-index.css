@@ -10,6 +10,12 @@
   z-index: 1;
 }
 
+.device .phabricator-action-list-view.phabricator-action-list-toggle,
+.device-desktop .phui-document-content
+  .phabricator-action-list-view.phabricator-action-list-toggle {
+  z-index: 1;
+}
+
 .device-desktop .phui-timeline-minor-event .phui-timeline-image {
   z-index: 2;
 }
@@ -58,6 +64,10 @@
   z-index: 4;
 }
 
+.setup-warning-callout {
+  z-index: 5;
+}
+
 .loading .messages-loading-mask,
 .loading .widgets-loading-mask {
   z-index: 5;
@@ -80,7 +90,6 @@
   z-index: 6;
 }
 
-.setup-warning-callout,
 .aphront-developer-error-callout {
   z-index: 6;
 }

@@ -20,18 +20,18 @@ final class UserRemoveStatusConduitAPIMethod extends UserConduitAPIMethod {
       'Calendar application.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'fromEpoch' => 'required int',
       'toEpoch' => 'required int',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'int';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
       'ERR-BAD-EPOCH' => "'toEpoch' must be bigger than 'fromEpoch'.",
     );

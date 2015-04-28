@@ -20,13 +20,7 @@ final class PhabricatorUsersPolicyRule extends PhabricatorPolicyRule {
   }
 
   public function getValueControlTemplate() {
-    $users_datasource = new PhabricatorPeopleDatasource();
-
-    return array(
-      'markup' => new AphrontTokenizerTemplateView(),
-      'uri' => $users_datasource->getDatasourceURI(),
-      'placeholder' => $users_datasource->getPlaceholderText(),
-    );
+    return $this->getDatasourceTemplate(new PhabricatorPeopleDatasource());
   }
 
   public function getRuleOrder() {

@@ -49,15 +49,13 @@ final class ManiphestTaskSearchEngine
       'assignedPHIDs',
       $this->readUsersFromRequest($request, 'assigned'));
 
-    $saved->setParameter('withUnassigned', $request->getBool('withUnassigned'));
-
     $saved->setParameter(
       'authorPHIDs',
       $this->readUsersFromRequest($request, 'authors'));
 
     $saved->setParameter(
       'subscriberPHIDs',
-      $this->readPHIDsFromRequest($request, 'subscribers'));
+      $this->readSubscribersFromRequest($request, 'subscribers'));
 
     $saved->setParameter(
       'statuses',
@@ -91,24 +89,8 @@ final class ManiphestTaskSearchEngine
     $saved->setParameter('fulltext', $request->getStr('fulltext'));
 
     $saved->setParameter(
-      'allProjectPHIDs',
-      $this->readPHIDsFromRequest($request, 'allProjects'));
-
-    $saved->setParameter(
-      'withNoProject',
-      $request->getBool('withNoProject'));
-
-    $saved->setParameter(
-      'anyProjectPHIDs',
-      $this->readPHIDsFromRequest($request, 'anyProjects'));
-
-    $saved->setParameter(
-      'excludeProjectPHIDs',
-      $this->readPHIDsFromRequest($request, 'excludeProjects'));
-
-    $saved->setParameter(
-      'userProjectPHIDs',
-      $this->readUsersFromRequest($request, 'userProjects'));
+      'projects',
+      $this->readProjectsFromRequest($request, 'projects'));
 
     $saved->setParameter('createdStart', $request->getStr('createdStart'));
     $saved->setParameter('createdEnd', $request->getStr('createdEnd'));
@@ -129,32 +111,43 @@ final class ManiphestTaskSearchEngine
     $query = id(new ManiphestTaskQuery())
       ->needProjectPHIDs(true);
 
-    $author_phids = $saved->getParameter('authorPHIDs');
+    $viewer = $this->requireViewer();
+
+    $datasource = id(new PhabricatorPeopleUserFunctionDatasource())
+      ->setViewer($viewer);
+
+    $author_phids = $saved->getParameter('authorPHIDs', array());
+    $author_phids = $datasource->evaluateTokens($author_phids);
     if ($author_phids) {
       $query->withAuthors($author_phids);
     }
 
-    $subscriber_phids = $saved->getParameter('subscriberPHIDs');
+    $datasource = id(new PhabricatorMetaMTAMailableFunctionDatasource())
+      ->setViewer($viewer);
+    $subscriber_phids = $saved->getParameter('subscriberPHIDs', array());
+    $subscriber_phids = $datasource->evaluateTokens($subscriber_phids);
     if ($subscriber_phids) {
       $query->withSubscribers($subscriber_phids);
     }
 
-    $with_unassigned = $saved->getParameter('withUnassigned');
-    if ($with_unassigned) {
-      $query->withOwners(array(null));
-    } else {
-      $assigned_phids = $saved->getParameter('assignedPHIDs', array());
-      if ($assigned_phids) {
-        $query->withOwners($assigned_phids);
-      }
+    $datasource = id(new PhabricatorPeopleOwnerDatasource())
+      ->setViewer($this->requireViewer());
+
+    $assigned_phids = $this->readAssignedPHIDs($saved);
+    $assigned_phids = $datasource->evaluateTokens($assigned_phids);
+    if ($assigned_phids) {
+      $query->withOwners($assigned_phids);
     }
 
-    $statuses = $saved->getParameter('statuses');
+    $datasource = id(new ManiphestTaskStatusFunctionDatasource())
+      ->setViewer($this->requireViewer());
+    $statuses = $saved->getParameter('statuses', array());
+    $statuses = $datasource->evaluateTokens($statuses);
     if ($statuses) {
       $query->withStatuses($statuses);
     }
 
-    $priorities = $saved->getParameter('priorities');
+    $priorities = $saved->getParameter('priorities', array());
     if ($priorities) {
       $query->withPriorities($priorities);
     }
@@ -186,30 +179,9 @@ final class ManiphestTaskSearchEngine
       $query->withFullTextSearch($fulltext);
     }
 
-    $with_no_project = $saved->getParameter('withNoProject');
-    if ($with_no_project) {
-      $query->withAllProjects(array(ManiphestTaskOwner::PROJECT_NO_PROJECT));
-    } else {
-      $project_phids = $saved->getParameter('allProjectPHIDs');
-      if ($project_phids) {
-        $query->withAllProjects($project_phids);
-      }
-    }
-
-    $any_project_phids = $saved->getParameter('anyProjectPHIDs');
-    if ($any_project_phids) {
-      $query->withAnyProjects($any_project_phids);
-    }
-
-    $exclude_project_phids = $saved->getParameter('excludeProjectPHIDs');
-    if ($exclude_project_phids) {
-      $query->withoutProjects($exclude_project_phids);
-    }
-
-    $user_project_phids = $saved->getParameter('userProjectPHIDs');
-    if ($user_project_phids) {
-      $query->withAnyUserProjects($user_project_phids);
-    }
+    $projects = $this->readProjectTokens($saved);
+    $adjusted = id(clone $saved)->setParameter('projects', $projects);
+    $this->setQueryProjects($query, $adjusted);
 
     $start = $this->parseDateTime($saved->getParameter('createdStart'));
     $end = $this->parseDateTime($saved->getParameter('createdEnd'));
@@ -242,48 +214,15 @@ final class ManiphestTaskSearchEngine
     AphrontFormView $form,
     PhabricatorSavedQuery $saved) {
 
-    $assigned_phids = $saved->getParameter('assignedPHIDs', array());
+    $assigned_phids = $this->readAssignedPHIDs($saved);
+
     $author_phids = $saved->getParameter('authorPHIDs', array());
-    $all_project_phids = $saved->getParameter(
-      'allProjectPHIDs',
-      array());
-    $any_project_phids = $saved->getParameter(
-      'anyProjectPHIDs',
-      array());
-    $exclude_project_phids = $saved->getParameter(
-      'excludeProjectPHIDs',
-      array());
-    $user_project_phids = $saved->getParameter(
-      'userProjectPHIDs',
-      array());
+    $projects = $this->readProjectTokens($saved);
+
     $subscriber_phids = $saved->getParameter('subscriberPHIDs', array());
 
-    $with_unassigned = $saved->getParameter('withUnassigned');
-    $with_no_projects = $saved->getParameter('withNoProject');
-
     $statuses = $saved->getParameter('statuses', array());
-    $statuses = array_fuse($statuses);
-    $status_control = id(new AphrontFormCheckboxControl())
-      ->setLabel(pht('Status'));
-    foreach (ManiphestTaskStatus::getTaskStatusMap() as $status => $name) {
-      $status_control->addCheckbox(
-        'statuses[]',
-        $status,
-        $name,
-        isset($statuses[$status]));
-    }
-
     $priorities = $saved->getParameter('priorities', array());
-    $priorities = array_fuse($priorities);
-    $priority_control = id(new AphrontFormCheckboxControl())
-      ->setLabel(pht('Priority'));
-    foreach (ManiphestTaskPriority::getTaskPriorityMap() as $pri => $name) {
-      $priority_control->addCheckbox(
-        'priorities[]',
-        $pri,
-        $name,
-        isset($priorities[$pri]));
-    }
 
     $blocking_control = id(new AphrontFormSelectControl())
       ->setLabel(pht('Blocking'))
@@ -314,73 +253,45 @@ final class ManiphestTaskSearchEngine
     $form
       ->appendControl(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorPeopleDatasource())
+          ->setDatasource(new PhabricatorPeopleOwnerDatasource())
           ->setName('assigned')
           ->setLabel(pht('Assigned To'))
           ->setValue($assigned_phids))
-      ->appendChild(
-        id(new AphrontFormCheckboxControl())
-          ->addCheckbox(
-            'withUnassigned',
-            1,
-            pht('Show only unassigned tasks.'),
-            $with_unassigned))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorProjectDatasource())
-          ->setName('allProjects')
-          ->setLabel(pht('In All Projects'))
-          ->setValue($all_project_phids));
-
-    if (!$this->getIsBoardView()) {
-      $form
-        ->appendChild(
-          id(new AphrontFormCheckboxControl())
-            ->addCheckbox(
-              'withNoProject',
-              1,
-              pht('Show only tasks with no projects.'),
-              $with_no_projects));
-    }
-
-    $form
+          ->setDatasource(new PhabricatorProjectLogicalDatasource())
+          ->setName('projects')
+          ->setLabel(pht('Projects'))
+          ->setValue($projects))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorProjectDatasource())
-          ->setName('anyProjects')
-          ->setLabel(pht('In Any Project'))
-          ->setValue($any_project_phids))
-      ->appendControl(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorProjectDatasource())
-          ->setName('excludeProjects')
-          ->setLabel(pht('Not In Projects'))
-          ->setValue($exclude_project_phids))
-      ->appendControl(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorPeopleDatasource())
-          ->setName('userProjects')
-          ->setLabel(pht('In Users\' Projects'))
-          ->setValue($user_project_phids))
-      ->appendControl(
-        id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorPeopleDatasource())
+          ->setDatasource(new PhabricatorPeopleUserFunctionDatasource())
           ->setName('authors')
           ->setLabel(pht('Authors'))
           ->setValue($author_phids))
       ->appendControl(
         id(new AphrontFormTokenizerControl())
-          ->setDatasource(new PhabricatorMetaMTAMailableDatasource())
+          ->setDatasource(new PhabricatorMetaMTAMailableFunctionDatasource())
           ->setName('subscribers')
           ->setLabel(pht('Subscribers'))
           ->setValue($subscriber_phids))
+      ->appendControl(
+        id(new AphrontFormTokenizerControl())
+          ->setDatasource(new ManiphestTaskStatusFunctionDatasource())
+          ->setLabel(pht('Statuses'))
+          ->setName('statuses')
+          ->setValue($statuses))
+      ->appendControl(
+        id(new AphrontFormTokenizerControl())
+          ->setDatasource(new ManiphestTaskPriorityDatasource())
+          ->setLabel(pht('Priorities'))
+          ->setName('priorities')
+          ->setValue($priorities))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setName('fulltext')
           ->setLabel(pht('Contains Words'))
           ->setValue($saved->getParameter('fulltext')))
-      ->appendChild($status_control)
-      ->appendChild($priority_control)
       ->appendChild($blocking_control)
       ->appendChild($blocked_control);
 
@@ -561,6 +472,50 @@ final class ManiphestTaskSearchEngine
       ->setCanEditPriority($can_edit_priority)
       ->setCanBatchEdit($can_bulk_edit)
       ->setShowBatchControls($this->showBatchControls);
+  }
+
+  private function readAssignedPHIDs(PhabricatorSavedQuery $saved) {
+    $assigned_phids = $saved->getParameter('assignedPHIDs', array());
+
+    // This may be present in old saved queries from before parameterized
+    // typeaheads, and is retained for compatibility. We could remove it by
+    // migrating old saved queries.
+    if ($saved->getParameter('withUnassigned')) {
+      $assigned_phids[] = PhabricatorPeopleNoOwnerDatasource::FUNCTION_TOKEN;
+    }
+
+    return $assigned_phids;
+  }
+
+  private function readProjectTokens(PhabricatorSavedQuery $saved) {
+    $projects = $saved->getParameter('projects', array());
+
+    $all = $saved->getParameter('allProjectPHIDs', array());
+    foreach ($all as $phid) {
+      $projects[] = $phid;
+    }
+
+    $any = $saved->getParameter('anyProjectPHIDs', array());
+    foreach ($any as $phid) {
+      $projects[] = 'any('.$phid.')';
+    }
+
+    $not = $saved->getParameter('excludeProjectPHIDs', array());
+    foreach ($not as $phid) {
+      $projects[] = 'not('.$phid.')';
+    }
+
+    $users = $saved->getParameter('userProjectPHIDs', array());
+    foreach ($users as $phid) {
+      $projects[] = 'projects('.$phid.')';
+    }
+
+    $no = $saved->getParameter('withNoProject');
+    if ($no) {
+      $projects[] = 'null()';
+    }
+
+    return $projects;
   }
 
 }

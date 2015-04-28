@@ -95,37 +95,37 @@
 }
 
 .phabricator-remarkup h1.remarkup-header {
-  font-size: 1.625em;
+  font-size: 24px;
   line-height: 1.625em;
-  margin: 8px 0;
+  margin: 16px 0 4px;
 }
 
 .phabricator-remarkup h2.remarkup-header {
-  font-size: 1.5em;
+  font-size: 20px;
   line-height: 1.5em;
-  margin: 8px 0;
+  margin: 16px 0 4px;
 }
 
 .phabricator-remarkup h3.remarkup-header {
-  font-size: 1.375em;
+  font-size: 18px;
   line-height: 1.375em;
-  margin: 8px 0;
+  margin: 16px 0 4px;
 }
 
 .phabricator-remarkup h4.remarkup-header {
-  font-size: 1.25em;
+  font-size: 15px;
   line-height: 1.25em;
-  margin: 8px 0;
+  margin: 8px 0 4px;
 }
 
 .phabricator-remarkup h5.remarkup-header {
-  font-size: 1.125em;
+  font-size: 14px;
   line-height: 1.125em;
   margin: 4px 0;
 }
 
 .phabricator-remarkup h6.remarkup-header {
-  font-size: 1em;
+  font-size: 13px;
   line-height: 1em;
   margin: 4px 0;
 }
@@ -235,8 +235,8 @@
 }
 
 .phabricator-remarkup-toc-header {
-  font-size: 13px;
-  line-height: 12px;
+  font-size: 14px;
+  line-height: 13px;
   color: {$darkbluetext};
   font-weight: bold;
   margin-bottom: 4px;
@@ -320,6 +320,12 @@
 .phabricator-remarkup table.remarkup-table td {
   background: #ffffff;
   padding: 3px 6px;
+}
+
+body div.phabricator-remarkup.remarkup-has-toc
+  .phabricator-remarkup-toc + .remarkup-header {
+  margin-top: 0;
+  padding-top: 0;
 }
 
 .phabricator-remarkup p:first-child,

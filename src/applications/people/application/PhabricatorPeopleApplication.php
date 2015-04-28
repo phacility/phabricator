@@ -192,4 +192,10 @@ final class PhabricatorPeopleApplication extends PhabricatorApplication {
     return $items;
   }
 
+  public function getApplicationSearchDocumentTypes() {
+    return array(
+      PhabricatorPeopleUserPHIDType::TYPECONST,
+    );
+  }
+
 }

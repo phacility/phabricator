@@ -53,6 +53,7 @@ final class HeraldRuleViewController extends HeraldController {
     $timeline = $this->buildTransactionTimeline(
       $rule,
       new HeraldTransactionQuery());
+    $timeline->setShouldTerminate(true);
 
     return $this->buildApplicationPage(
       array(

@@ -79,4 +79,10 @@ final class PhabricatorPonderApplication extends PhabricatorApplication {
     );
   }
 
+  public function getApplicationSearchDocumentTypes() {
+    return array(
+      PonderQuestionPHIDType::TYPECONST,
+    );
+  }
+
 }

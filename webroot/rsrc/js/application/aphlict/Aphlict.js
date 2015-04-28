@@ -49,6 +49,20 @@ JX.install('Aphlict', {
       JX.Leader.call(JX.bind(this, this._begin));
     },
 
+    setSubscriptions: function(subscriptions) {
+      this._subscriptions = subscriptions;
+      JX.Leader.broadcast(
+        null,
+        {type: 'aphlict.subscribe', data: this._subscriptions});
+    },
+
+    clearSubscriptions: function(subscriptions) {
+      this._subscriptions = null;
+      JX.Leader.broadcast(
+        null,
+        {type: 'aphlict.unsubscribe', data: subscriptions});
+    },
+
     getStatus: function() {
       return this._status;
     },

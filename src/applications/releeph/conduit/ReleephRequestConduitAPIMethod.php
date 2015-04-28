@@ -10,7 +10,7 @@ final class ReleephRequestConduitAPIMethod extends ReleephConduitAPIMethod {
     return 'Request a commit or diff to be picked to a branch.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'branchPHID'  => 'required string',
       'things'      => 'required list<string>',
@@ -18,11 +18,11 @@ final class ReleephRequestConduitAPIMethod extends ReleephConduitAPIMethod {
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'dict<string, wild>';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
       'ERR_BRANCH'      => 'Unknown Releeph branch.',
       'ERR_FIELD_PARSE' => 'Unable to parse a Releeph field.',

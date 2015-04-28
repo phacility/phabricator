@@ -18,6 +18,7 @@ final class PhabricatorRepositoryRefCursor extends PhabricatorRepositoryDAO
   protected $refNameRaw;
   protected $refNameEncoding;
   protected $commitIdentifier;
+  protected $isClosed = 0;
 
   private $repository = self::ATTACHABLE;
 
@@ -35,6 +36,7 @@ final class PhabricatorRepositoryRefCursor extends PhabricatorRepositoryDAO
         // T6203/NULLABILITY
         // This probably should not be nullable; refNameRaw is not nullable.
         'refNameEncoding' => 'text16?',
+        'isClosed' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_cursor' => array(

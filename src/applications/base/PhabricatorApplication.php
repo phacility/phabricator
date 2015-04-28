@@ -582,4 +582,8 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
     }
   }
 
+  public function getApplicationSearchDocumentTypes() {
+    return array();
+  }
+
 }

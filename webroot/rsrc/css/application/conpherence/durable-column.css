@@ -141,7 +141,7 @@
 }
 
 .conpherence-durable-column-transactions
-  .phabricator-transaction-view.conpherence-edited {
+  .conpherence-transaction-view.conpherence-edited {
     color: {$lightgreytext};
     font-size: 12px;
     margin: 0;
@@ -149,11 +149,11 @@
 }
 
 .conpherence-durable-column-transactions .conpherence-edited
-  .phabricator-transaction-header {
+  .conpherence-transaction-header {
     display: none;
 }
 
-.conpherence-durable-column-transactions .phabricator-transaction-view {
+.conpherence-durable-column-transactions .conpherence-transaction-view {
   background: none;
   margin: 0;
   padding: 4px 0;
@@ -161,57 +161,55 @@
 }
 
 .conpherence-durable-column-transactions
-  .phabricator-transaction-view
+  .conpherence-transaction-view
   .conpherence-message {
   word-wrap: break-word;
 }
 
-.conpherence-durable-column-transactions .phabricator-transaction-detail {
+.conpherence-durable-column-transactions .conpherence-transaction-detail {
   border: 0;
   margin: 0;
 }
 
-.conpherence-durable-column-transactions .phabricator-transaction-detail
-.phabricator-transaction-header {
+.conpherence-durable-column-transactions .conpherence-transaction-detail
+.conpherence-transaction-header {
   background: none;
   padding: 0 0 2px 0;
 }
 
-.conpherence-durable-column-transactions .date-marker {
-  border-top: 1px solid {$thinblueborder};
+.conpherence-durable-column-transactions
+.conpherence-transaction-view.date-marker {
   margin: 20px 0px 8px;
 }
 
-.conpherence-durable-column-transactions .date-marker .date {
-  position: relative;
-  top: -11px;
+.conpherence-durable-column-transactions
+.conpherence-transaction-view.date-marker .date {
   left: 0;
-  background-color: #fff;
-  color: {$darkbluetext};
-  font-weight: bold;
   font-size: 12px;
   padding: 0 6px 0 0;
 }
 
-.conpherence-durable-column-transactions .phabricator-transaction-detail
-.phabricator-transaction-header .phabricator-transaction-info {
+.conpherence-durable-column-transactions .conpherence-transaction-detail
+.conpherence-transaction-header .conpherence-transaction-info,
+.conpherence-transaction-header .epoch-link {
   color: {$lightbluetext};
   float: none;
   font-size: 12px;
 }
 
-.conpherence-durable-column-transactions .phabricator-transaction-detail
-.phabricator-transaction-header .phui-link-person {
+.conpherence-durable-column-transactions .conpherence-transaction-detail
+.conpherence-transaction-header .phui-link-person {
   margin: 0 8px 0 0;
 }
 
-.conpherence-durable-column-transactions .phabricator-transaction-detail
-.phabricator-transaction-content .phui-link-person {
+.conpherence-durable-column-transactions .conpherence-transaction-detail
+.conpherence-transaction-content .phui-link-person {
   color: {$darkbluetext};
 }
 
-.conpherence-durable-column-transactions .phabricator-transaction-detail
-.phabricator-transaction-content {
+.conpherence-durable-column-transactions .conpherence-transaction-detail
+.conpherence-transaction-content {
+  background: #fff;
   padding: 0 0 8px 0;
 }
 

@@ -11,7 +11,7 @@ final class DifferentialCreateRevisionConduitAPIMethod
     return pht('Create a new Differential revision.');
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       // TODO: Arcanist passes this; prevent fatals after D4191 until Conduit
       // version 7 or newer.
@@ -21,11 +21,11 @@ final class DifferentialCreateRevisionConduitAPIMethod
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty dict';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
       'ERR_BAD_DIFF' => 'Bad diff ID.',
     );

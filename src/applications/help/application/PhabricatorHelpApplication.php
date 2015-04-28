@@ -35,34 +35,42 @@ final class PhabricatorHelpApplication extends PhabricatorApplication {
     }
 
     $items = array();
+
+    $help_id = celerity_generate_unique_node_id();
+
+    Javelin::initBehavior(
+      'aphlict-dropdown',
+      array(
+        'bubbleID' => $help_id,
+        'dropdownID' => 'phabricator-help-menu',
+        'applicationClass' => 'PhabricatorHelpApplication',
+        'local' => true,
+        'desktop' => true,
+        'right' => true,
+      ));
+
+    $item = id(new PHUIListItemView())
+      ->setIcon('fa-life-ring')
+      ->addClass('core-menu-item')
+      ->setID($help_id)
+      ->setOrder(200);
+
+    $hide = true;
     if ($application) {
+      $help_name = pht('%s Help', $application->getName());
+        $item
+          ->setName($help_name)
+          ->setHref('/help/documentation/'.get_class($application).'/')
+          ->setAural($help_name);
       $help_items = $application->getHelpMenuItems($user);
       if ($help_items) {
-        $help_id = celerity_generate_unique_node_id();
-
-        Javelin::initBehavior(
-          'aphlict-dropdown',
-          array(
-            'bubbleID' => $help_id,
-            'dropdownID' => 'phabricator-help-menu',
-            'local' => true,
-            'desktop' => true,
-            'right' => true,
-          ));
-
-        $help_name = pht('%s Help', $application->getName());
-
-        $item = id(new PHUIListItemView())
-          ->setName($help_name)
-          ->setIcon('fa-life-ring')
-          ->setHref('/help/documentation/'.get_class($application).'/')
-          ->addClass('core-menu-item')
-          ->setID($help_id)
-          ->setAural($help_name)
-          ->setOrder(200);
-        $items[] = $item;
+        $hide = false;
       }
     }
+    if ($hide) {
+      $item->setStyle('display: none');
+    }
+    $items[] = $item;
 
     return $items;
   }
@@ -71,23 +79,20 @@ final class PhabricatorHelpApplication extends PhabricatorApplication {
     PhabricatorUser $viewer,
     PhabricatorController $controller = null) {
 
-    if (!$controller) {
-      return null;
+    $application = null;
+    if ($controller) {
+      $application = $controller->getCurrentApplication();
     }
 
-    $application = $controller->getCurrentApplication();
-    if (!$application) {
-      return null;
-    }
-
-    $help_items = $application->getHelpMenuItems($viewer);
-    if (!$help_items) {
-      return null;
-    }
-
-    $view = new PHUIListView();
-    foreach ($help_items as $item) {
-      $view->addMenuItem($item);
+    $view = null;
+    if ($application) {
+      $help_items = $application->getHelpMenuItems($viewer);
+      if ($help_items) {
+        $view = new PHUIListView();
+        foreach ($help_items as $item) {
+          $view->addMenuItem($item);
+        }
+      }
     }
 
     return phutil_tag(

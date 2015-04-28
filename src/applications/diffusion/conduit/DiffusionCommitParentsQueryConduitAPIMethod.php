@@ -12,7 +12,7 @@ final class DiffusionCommitParentsQueryConduitAPIMethod
       "Get the commit identifiers for a commit's parent or parents.");
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'list<string>';
   }
 

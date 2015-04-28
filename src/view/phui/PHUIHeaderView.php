@@ -17,6 +17,7 @@ final class PHUIHeaderView extends AphrontView {
   private $actionLinks = array();
   private $buttonBar = null;
   private $policyObject;
+  private $epoch;
 
   public function setHeader($header) {
     $this->header = $header;
@@ -105,6 +106,21 @@ final class PHUIHeaderView extends AphrontView {
       ));
 
     return $this->addProperty(self::PROPERTY_STATUS, $tag);
+  }
+
+  public function setEpoch($epoch) {
+    $age = time() - $epoch;
+    $age = floor($age / (60 * 60 * 24));
+    if ($age < 1) {
+      $when = pht('Today');
+    } else if ($age == 1) {
+      $when = pht('Yesterday');
+    } else {
+      $when = pht('%d Days Ago', $age);
+    }
+
+    $this->setStatus('fa-clock-o bluegrey', null, pht('Updated %s', $when));
+    return $this;
   }
 
   public function render() {

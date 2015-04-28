@@ -32,8 +32,15 @@ final class PhabricatorCalendarApplication extends PhabricatorApplication {
     return true;
   }
 
+  public function getRemarkupRules() {
+    return array(
+      new PhabricatorCalendarRemarkupRule(),
+    );
+  }
+
   public function getRoutes() {
     return array(
+      '/E(?P<id>[1-9]\d*)' => 'PhabricatorCalendarEventViewController',
       '/calendar/' => array(
         '' => 'PhabricatorCalendarViewController',
         'all/' => 'PhabricatorCalendarBrowseController',
@@ -46,8 +53,6 @@ final class PhabricatorCalendarApplication extends PhabricatorApplication {
             => 'PhabricatorCalendarEventEditController',
           'delete/(?P<id>[1-9]\d*)/'
             => 'PhabricatorCalendarEventDeleteController',
-          'view/(?P<id>[1-9]\d*)/'
-            => 'PhabricatorCalendarEventViewController',
         ),
       ),
     );

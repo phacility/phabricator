@@ -153,6 +153,17 @@ final class PhabricatorPasteEditor
     );
   }
 
+  public function getMailTagsMap() {
+    return array(
+      PhabricatorPasteTransaction::MAILTAG_CONTENT =>
+        pht('Paste title, language or text changes.'),
+      PhabricatorPasteTransaction::MAILTAG_COMMENT =>
+        pht('Someone comments on a paste.'),
+      PhabricatorPasteTransaction::MAILTAG_OTHER =>
+        pht('Other paste activity not listed above occurs.'),
+    );
+  }
+
   protected function buildReplyHandler(PhabricatorLiskDAO $object) {
     return id(new PasteReplyHandler())
       ->setMailReceiver($object);

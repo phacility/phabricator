@@ -183,6 +183,11 @@ JX.install('ConpherenceThreadManager', {
     _shouldUpdateDOM: function(r) {
       if (this._updating &&
           this._updating.threadPHID == this._loadedThreadPHID) {
+
+        if (r.non_update) {
+          return false;
+        }
+
         // we have a different, more current update in progress so
         // return early
         if (r.latest_transaction_id < this._updating.knownID) {
@@ -282,6 +287,11 @@ JX.install('ConpherenceThreadManager', {
     },
 
     sendMessage: function(form, params) {
+      // don't bother sending up text if there is nothing to submit
+      var textarea = JX.DOM.find(form, 'textarea');
+      if (!textarea.value.length) {
+        return;
+      }
       params = this._getParams(params);
 
       var keep_enabled = true;
@@ -292,6 +302,8 @@ JX.install('ConpherenceThreadManager', {
             this._markUpdated(r);
 
             this._didSendMessageCallback(r);
+          } else if (r.non_update) {
+            this._didSendMessageCallback(r, true);
           }
         }));
       this.syncWorkflow(workflow, 'finally');

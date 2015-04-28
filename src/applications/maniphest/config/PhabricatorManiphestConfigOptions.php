@@ -117,7 +117,7 @@ final class PhabricatorManiphestConfigOptions
       'duplicate' => array(
         'name' => pht('Duplicate'),
         'name.full' => pht('Closed, Duplicate'),
-        'transaction.icon' => 'fa-times',
+        'transaction.icon' => 'fa-files-o',
         'special' => ManiphestTaskStatus::SPECIAL_DUPLICATE,
         'closed' => true,
       ),

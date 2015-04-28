@@ -10,17 +10,17 @@ final class FileDownloadConduitAPIMethod extends FileConduitAPIMethod {
     return 'Download a file from the server.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'phid' => 'required phid',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty base64-bytes';
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
       'ERR-BAD-PHID' => 'No such file exists.',
     );

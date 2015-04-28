@@ -7,7 +7,7 @@ abstract class ManiphestConduitAPIMethod extends ConduitAPIMethod {
       'PhabricatorManiphestApplication');
   }
 
-  public function defineErrorTypes() {
+  protected function defineErrorTypes() {
     return array(
       'ERR-INVALID-PARAMETER' => 'Missing or malformed parameter.',
     );

@@ -31,6 +31,13 @@ abstract class PhabricatorPHIDType {
   }
 
   public function getTypeIcon() {
+    // Default to the application icon if the type doesn't specify one.
+    $application_class = $this->getPHIDTypeApplicationClass();
+    if ($application_class) {
+      $application = newv($application_class, array());
+      return $application->getFontIcon();
+    }
+
     return null;
   }
 

@@ -15,18 +15,14 @@ final class ReleephWorkGetBranchCommitMessageConduitAPIMethod
     return 'Get a commit message for committing a Releeph branch.';
   }
 
-  public function defineParamTypes() {
+  protected function defineParamTypes() {
     return array(
       'branchPHID'  => 'required string',
     );
   }
 
-  public function defineReturnType() {
+  protected function defineReturnType() {
     return 'nonempty string';
-  }
-
-  public function defineErrorTypes() {
-    return array();
   }
 
   protected function execute(ConduitAPIRequest $request) {

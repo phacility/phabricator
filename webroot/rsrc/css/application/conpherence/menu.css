@@ -11,6 +11,10 @@
   background: #fff;
 }
 
+.page-has-warning .conpherence-layout {
+  top: 76px;
+}
+
 .conpherence-layout .conpherence-no-threads {
   text-align: center;
   position: fixed;

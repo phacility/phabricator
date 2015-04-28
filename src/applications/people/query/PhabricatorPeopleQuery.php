@@ -15,6 +15,7 @@ final class PhabricatorPeopleQuery
   private $isDisabled;
   private $isApproved;
   private $nameLike;
+  private $nameTokens;
 
   private $needPrimaryEmail;
   private $needProfile;
@@ -81,6 +82,11 @@ final class PhabricatorPeopleQuery
     return $this;
   }
 
+  public function withNameTokens(array $tokens) {
+    $this->nameTokens = array_values($tokens);
+    return $this;
+  }
+
   public function needPrimaryEmail($need) {
     $this->needPrimaryEmail = $need;
     return $this;
@@ -111,7 +117,7 @@ final class PhabricatorPeopleQuery
       $table->getTableName(),
       $this->buildJoinsClause($conn_r),
       $this->buildWhereClause($conn_r),
-      $this->buildApplicationSearchGroupClause($conn_r),
+      $this->buildGroupClause($conn_r),
       $this->buildOrderClause($conn_r),
       $this->buildLimitClause($conn_r));
 
@@ -180,6 +186,16 @@ final class PhabricatorPeopleQuery
     return $users;
   }
 
+  protected function buildGroupClause(AphrontDatabaseConnection $conn) {
+    if ($this->nameTokens) {
+      return qsprintf(
+        $conn,
+        'GROUP BY user.id');
+    } else {
+      return $this->buildApplicationSearchGroupClause($conn);
+    }
+  }
+
   private function buildJoinsClause($conn_r) {
     $joins = array();
 
@@ -191,13 +207,27 @@ final class PhabricatorPeopleQuery
         $email_table->getTableName());
     }
 
+    if ($this->nameTokens) {
+      foreach ($this->nameTokens as $key => $token) {
+        $token_table = 'token_'.$key;
+        $joins[] = qsprintf(
+          $conn_r,
+          'JOIN %T %T ON %T.userID = user.id AND %T.token LIKE %>',
+          PhabricatorUser::NAMETOKEN_TABLE,
+          $token_table,
+          $token_table,
+          $token_table,
+          $token);
+      }
+    }
+
     $joins[] = $this->buildApplicationSearchJoinClause($conn_r);
 
     $joins = implode(' ', $joins);
     return  $joins;
   }
 
-  private function buildWhereClause($conn_r) {
+  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
     $where = array();
 
     if ($this->usernames !== null) {
@@ -288,16 +318,33 @@ final class PhabricatorPeopleQuery
     return $this->formatWhereClause($where);
   }
 
-  protected function getPagingColumn() {
-    return 'user.id';
-  }
-
-  protected function getApplicationSearchObjectPHIDColumn() {
-    return 'user.phid';
+  protected function getPrimaryTableAlias() {
+    return 'user';
   }
 
   public function getQueryApplicationClass() {
     return 'PhabricatorPeopleApplication';
   }
+
+  public function getOrderableColumns() {
+    return parent::getOrderableColumns() + array(
+      'username' => array(
+        'table' => 'user',
+        'column' => 'username',
+        'type' => 'string',
+        'reverse' => true,
+        'unique' => true,
+      ),
+    );
+  }
+
+  protected function getPagingValueMap($cursor, array $keys) {
+    $user = $this->loadCursorObject($cursor);
+    return array(
+      'id' => $user->getID(),
+      'username' => $user->getUsername(),
+    );
+  }
+
 
 }

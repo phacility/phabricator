@@ -3,6 +3,10 @@
 final class PhabricatorApplicationDatasource
   extends PhabricatorTypeaheadDatasource {
 
+  public function getBrowseTitle() {
+    return pht('Browse Applications');
+  }
+
   public function getPlaceholderText() {
     return pht('Type an application name...');
   }
@@ -37,7 +41,7 @@ final class PhabricatorApplicationDatasource
         ->setImageSprite('phabricator-search-icon '.$img);
     }
 
-    return $results;
+    return $this->filterResultsAgainstTokens($results);
   }
 
 }

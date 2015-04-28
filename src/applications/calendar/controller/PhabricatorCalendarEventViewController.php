@@ -25,9 +25,14 @@ final class PhabricatorCalendarEventViewController
       return new Aphront404Response();
     }
 
-    $title = pht('Event %d', $event->getID());
+    $title = 'E'.$event->getID();
+    $page_title = $title.' '.$event->getName();
     $crumbs = $this->buildApplicationCrumbs();
-    $crumbs->addTextCrumb($title);
+    $crumbs->addTextCrumb($title, '/E'.$event->getID());
+
+    $timeline = $this->buildTransactionTimeline(
+      $event,
+      new PhabricatorCalendarEventTransactionQuery());
 
     $header = $this->buildHeaderView($event);
     $actions = $this->buildActionView($event);
@@ -42,9 +47,10 @@ final class PhabricatorCalendarEventViewController
       array(
         $crumbs,
         $box,
+        $timeline,
       ),
       array(
-        'title' => $title,
+        'title' => $page_title,
       ));
   }
 
@@ -53,7 +59,7 @@ final class PhabricatorCalendarEventViewController
 
     return id(new PHUIHeaderView())
       ->setUser($viewer)
-      ->setHeader($event->getTerseSummary($viewer))
+      ->setHeader($event->getName())
       ->setPolicyObject($event);
   }
 
