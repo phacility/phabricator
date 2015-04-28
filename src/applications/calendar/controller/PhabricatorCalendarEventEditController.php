@@ -40,6 +40,7 @@ final class PhabricatorCalendarEventEditController
       $filter = 'event/create/';
       $page_title = pht('Create Event');
       $redirect = 'created';
+      $subscribers = array();
     } else {
       $event = id(new PhabricatorCalendarEventQuery())
         ->setViewer($user)
@@ -60,6 +61,9 @@ final class PhabricatorCalendarEventEditController
       $filter       = 'event/edit/'.$event->getID().'/';
       $page_title   = pht('Update Event');
       $redirect     = 'updated';
+
+      $subscribers = PhabricatorSubscribersQuery::loadSubscribersForPHID(
+        $event->getPHID());
     }
 
     $errors = array();
@@ -70,6 +74,7 @@ final class PhabricatorCalendarEventEditController
       $start_value = $start_time->readValueFromRequest($request);
       $end_value = $end_time->readValueFromRequest($request);
       $description = $request->getStr('description');
+      $subscribers = $request->getArr('subscribers');
 
       if ($start_time->getError()) {
         $errors[] = pht('Invalid start time; reset to default.');
@@ -97,6 +102,11 @@ final class PhabricatorCalendarEventEditController
           ->setTransactionType(
             PhabricatorCalendarEventTransaction::TYPE_STATUS)
           ->setNewValue($type);
+
+        $xactions[] = id(new PhabricatorCalendarEventTransaction())
+          ->setTransactionType(
+            PhabricatorTransactions::TYPE_SUBSCRIBERS)
+          ->setNewValue(array('=' => array_fuse($subscribers)));
 
         $xactions[] = id(new PhabricatorCalendarEventTransaction())
           ->setTransactionType(
@@ -144,12 +154,21 @@ final class PhabricatorCalendarEventEditController
       ->setName('description')
       ->setValue($event->getDescription());
 
+    $subscribers = id(new AphrontFormTokenizerControl())
+      ->setLabel(pht('Subscribers'))
+      ->setName('subscribers')
+      ->setValue($subscribers)
+      ->setUser($user)
+      ->setDatasource(new PhabricatorMetaMTAMailableDatasource());
+
+
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->appendChild($name)
       ->appendChild($status_select)
       ->appendChild($start_time)
       ->appendChild($end_time)
+      ->appendControl($subscribers)
       ->appendChild($description);
 
     $submit = id(new AphrontFormSubmitControl())

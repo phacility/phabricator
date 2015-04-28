@@ -3,7 +3,8 @@
 final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   implements PhabricatorPolicyInterface,
   PhabricatorMarkupInterface,
-  PhabricatorApplicationTransactionInterface {
+  PhabricatorApplicationTransactionInterface,
+  PhabricatorSubscribableInterface {
 
   protected $name;
   protected $userPHID;
@@ -29,6 +30,11 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     self::STATUS_AWAY => 'away',
     self::STATUS_SPORADIC => 'sporadic',
   );
+
+  public function setTextStatus($status) {
+    $statuses = array_flip(self::$statusTexts);
+    return $this->setStatus($statuses[$status]);
+  }
 
   public function getTextStatus() {
     return self::$statusTexts[$this->status];
@@ -82,9 +88,15 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     }
   }
 
-  public function setTextStatus($status) {
-    $statuses = array_flip(self::$statusTexts);
-    return $this->setStatus($statuses[$status]);
+  public static function getNameForStatus($value) {
+    switch ($value) {
+      case self::STATUS_AWAY:
+        return pht('Away');
+      case self::STATUS_SPORADIC:
+        return pht('Sporadic');
+      default:
+        return pht('Unknown');
+    }
   }
 
   public function loadCurrentStatuses($user_phids) {
@@ -97,17 +109,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       $user_phids);
 
     return mpull($statuses, null, 'getUserPHID');
-  }
-
-  public static function getNameForStatus($value) {
-    switch ($value) {
-      case self::STATUS_AWAY:
-        return pht('Away');
-      case self::STATUS_SPORADIC:
-        return pht('Sporadic');
-      default:
-        return pht('Unknown');
-    }
   }
 
   /**
@@ -219,4 +220,18 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return $timeline;
   }
 
+/* -(  PhabricatorSubscribableInterface  )----------------------------------- */
+
+
+  public function isAutomaticallySubscribed($phid) {
+    return ($phid == $this->getUserPHID());
+  }
+
+  public function shouldShowSubscribersProperty() {
+    return true;
+  }
+
+  public function shouldAllowSubscription($phid) {
+    return true;
+  }
 }

@@ -171,7 +171,7 @@ final class PhabricatorCalendarEventSearchEngine
     $list = new PHUIObjectItemListView();
     foreach ($events as $event) {
       if ($event->getUserPHID() == $viewer->getPHID()) {
-        $href = $this->getApplicationURI('/event/edit/'.$event->getID().'/');
+        $href = '/E'.$event->getID();
       } else {
         $from  = $event->getDateFrom();
         $month = phabricator_format_local_time($from, $viewer, 'm');
