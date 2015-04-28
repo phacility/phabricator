@@ -144,4 +144,14 @@ final class PhabricatorCalendarEventEditor
 
     return $errors;
   }
+
+  protected function getMailTo(PhabricatorLiskDAO $object) {
+    return array($object->getUserPHID());
+  }
+
+  protected function shouldPublishFeedStory(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return true;
+  }
 }

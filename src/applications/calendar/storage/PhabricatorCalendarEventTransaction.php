@@ -127,10 +127,17 @@ final class PhabricatorCalendarEventTransaction
     $old = $this->getOldValue();
     $new = $this->getNewValue();
 
+    $viewer = $this->getViewer();
+
     $type = $this->getTransactionType();
     switch ($type) {
       case self::TYPE_NAME:
-        if ($old) {
+        if ($old === null) {
+          return pht(
+            '%s created %s',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        } else {
           return pht(
             '%s changed the name of %s from %s to %s.',
             $this->renderHandleLink($author_phid),
@@ -141,33 +148,43 @@ final class PhabricatorCalendarEventTransaction
         break;
       case self::TYPE_START_DATE:
         if ($old) {
+          $old = phabricator_datetime($old, $viewer);
+          $new = phabricator_datetime($new, $viewer);
           return pht(
-            '%s edited the start date of this event from %s to %s.',
+            '%s changed the start date of %s from %s to %s.',
             $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid),
             $old,
             $new);
         }
         break;
       case self::TYPE_END_DATE:
         if ($old) {
+          $old = phabricator_datetime($old, $viewer);
+          $new = phabricator_datetime($new, $viewer);
           return pht(
-            '%s edited the end date of this event from %s to %s.',
+            '%s edited the end date of %s from %s to %s.',
             $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid),
             $old,
             $new);
         }
         break;
       case self::TYPE_STATUS:
+        $old_name = PhabricatorCalendarEvent::getNameForStatus($old);
+        $new_name = PhabricatorCalendarEvent::getNameForStatus($new);
         return pht(
-          '%s updated the event status from %s to %s.',
+          '%s updated the status of %s from %s to %s.',
           $this->renderHandleLink($author_phid),
-          $old,
-          $new);
+          $this->renderHandleLink($object_phid),
+          $old_name,
+          $new_name);
         break;
       case self::TYPE_DESCRIPTION:
         return pht(
-          "%s updated the event's description.",
-          $this->renderHandleLink($author_phid));
+          '%s updated the description of %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid));
         break;
     }
 
