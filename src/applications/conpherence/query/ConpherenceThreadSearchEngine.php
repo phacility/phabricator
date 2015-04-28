@@ -18,6 +18,8 @@ final class ConpherenceThreadSearchEngine
       'participantPHIDs',
       $this->readUsersFromRequest($request, 'participants'));
 
+    $saved->setParameter('fulltext', $request->getStr('fulltext'));
+
     $saved->setParameter(
       'threadType',
       $request->getStr('threadType'));
@@ -32,6 +34,11 @@ final class ConpherenceThreadSearchEngine
     $participant_phids = $saved->getParameter('participantPHIDs', array());
     if ($participant_phids && is_array($participant_phids)) {
       $query->withParticipantPHIDs($participant_phids);
+    }
+
+    $fulltext = $saved->getParameter('fulltext');
+    if (strlen($fulltext)) {
+      $query->withFulltext($fulltext);
     }
 
     $thread_type = $saved->getParameter('threadType');
@@ -57,6 +64,7 @@ final class ConpherenceThreadSearchEngine
     PhabricatorSavedQuery $saved) {
 
     $participant_phids = $saved->getParameter('participantPHIDs', array());
+    $fulltext = $saved->getParameter('fulltext');
 
     $form
       ->appendControl(
@@ -65,6 +73,11 @@ final class ConpherenceThreadSearchEngine
           ->setName('participants')
           ->setLabel(pht('Participants'))
           ->setValue($participant_phids))
+      ->appendControl(
+        id(new AphrontFormTextControl())
+          ->setName('fulltext')
+          ->setLabel(pht('Contains Words'))
+          ->setValue($fulltext))
       ->appendControl(
         id(new AphrontFormSelectControl())
         ->setLabel(pht('Type'))
