@@ -5,7 +5,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   PhabricatorMarkupInterface,
   PhabricatorApplicationTransactionInterface,
   PhabricatorSubscribableInterface,
-  PhabricatorTokenReceiverInterface {
+  PhabricatorTokenReceiverInterface,
+  PhabricatorMentionableInterface {
 
   protected $name;
   protected $userPHID;
