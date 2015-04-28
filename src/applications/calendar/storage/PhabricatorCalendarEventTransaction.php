@@ -43,7 +43,6 @@ final class PhabricatorCalendarEventTransaction
   public function shouldHide() {
     $old = $this->getOldValue();
     switch ($this->getTransactionType()) {
-      case self::TYPE_NAME:
       case self::TYPE_START_DATE:
       case self::TYPE_END_DATE:
       case self::TYPE_STATUS:
@@ -76,7 +75,11 @@ final class PhabricatorCalendarEventTransaction
     $type = $this->getTransactionType();
     switch ($type) {
       case self::TYPE_NAME:
-        if ($old) {
+        if ($old === null) {
+          return pht(
+            '%s created this event.',
+            $this->renderHandleLink($author_phid));
+        } else {
           return pht(
             '%s changed the name of this event from %s to %s.',
             $this->renderHandleLink($author_phid),

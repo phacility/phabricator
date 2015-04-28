@@ -102,10 +102,6 @@ final class PhabricatorCalendarEventViewController
       ->setUser($viewer)
       ->setObject($event);
 
-    // $properties->addProperty(
-    //   pht('Name'),
-    //   $event->getName());
-
     $properties->addProperty(
       pht('Starts'),
       phabricator_datetime($event->getDateFrom(), $viewer));
