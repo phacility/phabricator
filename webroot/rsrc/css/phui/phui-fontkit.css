@@ -40,14 +40,14 @@
 .phui-font-source-sans .phabricator-remarkup h4.remarkup-header,
 .phui-font-source-sans .phabricator-remarkup h5.remarkup-header,
 .phui-font-source-sans .phabricator-remarkup h6.remarkup-header {
-  color: {$bluetext};
+  color: {$darkbluetext};
   font-weight: 600;
 }
 
 .phui-font-source-sans .phabricator-remarkup h2.remarkup-header {
   padding: 24px 24px 8px 0;
   border-bottom: 1px solid {$thinblueborder};
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 400;
   color: {$bluetext};
   margin: 0 0 16px;
@@ -87,7 +87,8 @@
 }
 
 .phui-font-source-sans a.atom-ref,
-.phui-font-source-sans a.remarkup-link {
+.phui-font-source-sans a.remarkup-link,
+.phui-font-source-sans a.phriction-link {
   color: {$blue};
 }
 
