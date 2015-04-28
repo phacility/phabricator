@@ -17,6 +17,7 @@ final class ConpherenceThreadQuery
   private $afterTransactionID;
   private $beforeTransactionID;
   private $transactionLimit;
+  private $fulltext;
 
   public function needFilePHIDs($need_file_phids) {
     $this->needFilePHIDs = $need_file_phids;
@@ -82,6 +83,11 @@ final class ConpherenceThreadQuery
     return $this->transactionLimit;
   }
 
+  public function withFulltext($query) {
+    $this->fulltext = $query;
+    return $this;
+  }
+
   protected function loadPage() {
     $table = new ConpherenceThread();
     $conn_r = $table->establishConnection('r');
@@ -122,7 +128,7 @@ final class ConpherenceThreadQuery
   }
 
   protected function buildGroupClause(AphrontDatabaseConnection $conn_r) {
-    if ($this->participantPHIDs !== null) {
+    if ($this->participantPHIDs !== null || strlen($this->fulltext)) {
       return 'GROUP BY conpherence_thread.id';
     } else {
       return $this->buildApplicationSearchGroupClause($conn_r);
@@ -149,6 +155,12 @@ final class ConpherenceThreadQuery
         $viewer->getPHID());
     }
 
+    if (strlen($this->fulltext)) {
+      $joins[] = qsprintf(
+        $conn_r,
+        'JOIN %T idx ON idx.threadPHID = conpherence_thread.phid',
+        id(new ConpherenceIndex())->getTableName());
+    }
 
     $joins[] = $this->buildApplicationSearchJoinClause($conn_r);
     return implode(' ', $joins);
@@ -194,6 +206,13 @@ final class ConpherenceThreadQuery
         $conn_r,
         'conpherence_thread.isRoom = %d',
         (int)$this->isRoom);
+    }
+
+    if (strlen($this->fulltext)) {
+      $where[] = qsprintf(
+        $conn_r,
+        'MATCH(idx.corpus) AGAINST (%s IN BOOLEAN MODE)',
+        $this->fulltext);
     }
 
     $viewer = $this->getViewer();

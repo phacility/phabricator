@@ -29,10 +29,10 @@ final class PhabricatorCalendarEventPHIDType extends PhabricatorPHIDType {
       $event = $objects[$phid];
 
       $id = $event->getID();
-      $name = pht('Event %d', $id);
+      $name = $event->getName();
 
       $handle
-        ->setName(pht('Event %d', $id))
+        ->setName($name)
         ->setFullName(pht('E%d: %s', $id, $name))
         ->setURI('/E'.$id);
     }

@@ -89,6 +89,7 @@ final class PhabricatorCalendarEventEditor
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_EDGE:
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         return;
     }
 
@@ -108,6 +109,7 @@ final class PhabricatorCalendarEventEditor
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_EDGE:
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         return;
     }
 
@@ -141,5 +143,15 @@ final class PhabricatorCalendarEventEditor
     }
 
     return $errors;
+  }
+
+  protected function getMailTo(PhabricatorLiskDAO $object) {
+    return array($object->getUserPHID());
+  }
+
+  protected function shouldPublishFeedStory(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return true;
   }
 }

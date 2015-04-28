@@ -4807,6 +4807,7 @@ phutil_register_library_map(array(
       'PhabricatorPolicyInterface',
       'PhabricatorMarkupInterface',
       'PhabricatorApplicationTransactionInterface',
+      'PhabricatorSubscribableInterface',
     ),
     'PhabricatorCalendarEventDeleteController' => 'PhabricatorCalendarController',
     'PhabricatorCalendarEventEditController' => 'PhabricatorCalendarController',

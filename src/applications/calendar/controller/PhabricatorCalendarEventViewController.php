@@ -69,7 +69,8 @@ final class PhabricatorCalendarEventViewController
 
     $actions = id(new PhabricatorActionListView())
       ->setObjectURI($this->getApplicationURI('event/'.$id.'/'))
-      ->setUser($viewer);
+      ->setUser($viewer)
+      ->setObject($event);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $viewer,
@@ -109,6 +110,8 @@ final class PhabricatorCalendarEventViewController
     $properties->addProperty(
       pht('Ends'),
       phabricator_datetime($event->getDateTo(), $viewer));
+
+    $properties->invokeWillRenderEvent();
 
     $properties->addSectionHeader(
       pht('Description'),

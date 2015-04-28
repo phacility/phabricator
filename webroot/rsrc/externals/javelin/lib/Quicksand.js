@@ -68,6 +68,10 @@ JX.install('Quicksand', {
     },
 
 
+    getCurrentPageID: function() {
+      return JX.Quicksand._id;
+    },
+
     /**
      * Respond to the user clicking a link.
      *
@@ -234,7 +238,9 @@ JX.install('Quicksand', {
         null,
         {
           newResponse: self._responses[self._current],
+          newResponseID: self._current,
           oldResponse: self._responses[self._onpage],
+          oldResponseID: self._onpage,
           fromServer: from_server
         });
       self._onpage = self._current;
