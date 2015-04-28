@@ -5,6 +5,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   PhabricatorMarkupInterface,
   PhabricatorApplicationTransactionInterface {
 
+  protected $name;
   protected $userPHID;
   protected $dateFrom;
   protected $dateTo;
@@ -49,6 +50,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return array(
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_COLUMN_SCHEMA => array(
+        'name' => 'text',
         'dateFrom' => 'epoch',
         'dateTo' => 'epoch',
         'status' => 'uint32',

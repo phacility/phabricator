@@ -3,6 +3,7 @@
 final class PhabricatorCalendarEventTransaction
   extends PhabricatorApplicationTransaction {
 
+  const TYPE_NAME = 'calendar.name';
   const TYPE_START_DATE = 'calendar.startdate';
   const TYPE_END_DATE = 'calendar.enddate';
   const TYPE_STATUS = 'calendar.status';
@@ -27,6 +28,7 @@ final class PhabricatorCalendarEventTransaction
     $phids = parent::getRequiredHandlePHIDs();
 
     switch ($this->getTransactionType()) {
+      case self::TYPE_NAME:
       case self::TYPE_START_DATE:
       case self::TYPE_END_DATE:
       case self::TYPE_STATUS:
@@ -41,6 +43,7 @@ final class PhabricatorCalendarEventTransaction
   public function shouldHide() {
     $old = $this->getOldValue();
     switch ($this->getTransactionType()) {
+      case self::TYPE_NAME:
       case self::TYPE_START_DATE:
       case self::TYPE_END_DATE:
       case self::TYPE_STATUS:
@@ -52,6 +55,7 @@ final class PhabricatorCalendarEventTransaction
 
   public function getIcon() {
     switch ($this->getTransactionType()) {
+      case self::TYPE_NAME:
       case self::TYPE_START_DATE:
       case self::TYPE_END_DATE:
       case self::TYPE_STATUS:
@@ -71,6 +75,15 @@ final class PhabricatorCalendarEventTransaction
 
     $type = $this->getTransactionType();
     switch ($type) {
+      case self::TYPE_NAME:
+        if ($old) {
+          return pht(
+            '%s changed the name of this event from %s to %s.',
+            $this->renderHandleLink($author_phid),
+            $old,
+            $new);
+        }
+        break;
       case self::TYPE_START_DATE:
         if ($old) {
           return pht(
@@ -113,6 +126,16 @@ final class PhabricatorCalendarEventTransaction
 
     $type = $this->getTransactionType();
     switch ($type) {
+      case self::TYPE_NAME:
+        if ($old) {
+          return pht(
+            '%s changed the name of %s from %s to %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid),
+            $old,
+            $new);
+        }
+        break;
       case self::TYPE_START_DATE:
         if ($old) {
           return pht(
@@ -153,6 +176,7 @@ final class PhabricatorCalendarEventTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
+      case self::TYPE_NAME:
       case self::TYPE_START_DATE:
       case self::TYPE_END_DATE:
       case self::TYPE_STATUS:
@@ -191,6 +215,9 @@ final class PhabricatorCalendarEventTransaction
   public function getMailTags() {
     $tags = array();
     switch ($this->getTransactionType()) {
+      case self::TYPE_NAME:
+        $tags[] = self::MAILTAG_CONTENT;
+        break;
       case self::TYPE_START_DATE:
         $tags[] = self::MAILTAG_CONTENT;
         break;

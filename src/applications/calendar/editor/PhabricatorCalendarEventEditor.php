@@ -14,6 +14,7 @@ final class PhabricatorCalendarEventEditor
   public function getTransactionTypes() {
     $types = parent::getTransactionTypes();
 
+    $types[] = PhabricatorCalendarEventTransaction::TYPE_NAME;
     $types[] = PhabricatorCalendarEventTransaction::TYPE_START_DATE;
     $types[] = PhabricatorCalendarEventTransaction::TYPE_END_DATE;
     $types[] = PhabricatorCalendarEventTransaction::TYPE_STATUS;
@@ -29,6 +30,8 @@ final class PhabricatorCalendarEventEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
     switch ($xaction->getTransactionType()) {
+      case PhabricatorCalendarEventTransaction::TYPE_NAME:
+        return $object->getName();
       case PhabricatorCalendarEventTransaction::TYPE_START_DATE:
         return $object->getDateFrom();
       case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
@@ -51,6 +54,7 @@ final class PhabricatorCalendarEventEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case PhabricatorCalendarEventTransaction::TYPE_NAME:
       case PhabricatorCalendarEventTransaction::TYPE_START_DATE:
       case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
       case PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION:
@@ -67,6 +71,9 @@ final class PhabricatorCalendarEventEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case PhabricatorCalendarEventTransaction::TYPE_NAME:
+        $object->setName($xaction->getNewValue());
+        return;
       case PhabricatorCalendarEventTransaction::TYPE_START_DATE:
         $object->setDateFrom($xaction->getNewValue());
         return;
@@ -93,6 +100,7 @@ final class PhabricatorCalendarEventEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
+      case PhabricatorCalendarEventTransaction::TYPE_NAME:
       case PhabricatorCalendarEventTransaction::TYPE_START_DATE:
       case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
       case PhabricatorCalendarEventTransaction::TYPE_STATUS:
@@ -104,5 +112,34 @@ final class PhabricatorCalendarEventEditor
     }
 
     return parent::applyCustomExternalTransaction($object, $xaction);
+  }
+
+  protected function validateTransaction(
+    PhabricatorLiskDAO $object,
+    $type,
+    array $xactions) {
+
+    $errors = parent::validateTransaction($object, $type, $xactions);
+
+    switch ($type) {
+      case PhabricatorCalendarEventTransaction::TYPE_NAME:
+        $missing = $this->validateIsEmptyTextField(
+          $object->getName(),
+          $xactions);
+
+        if ($missing) {
+          $error = new PhabricatorApplicationTransactionValidationError(
+            $type,
+            pht('Required'),
+            pht('Event name is required.'),
+            nonempty(last($xactions), null));
+
+          $error->setIsMissingFieldError(true);
+          $errors[] = $error;
+        }
+        break;
+    }
+
+    return $errors;
   }
 }

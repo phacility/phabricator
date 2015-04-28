@@ -26,6 +26,7 @@ final class PhabricatorCalendarEventViewController
     }
 
     $title = 'E'.$event->getID();
+    $page_title = $title.' '.$event->getName();
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($title, '/E'.$event->getID());
 
@@ -49,7 +50,7 @@ final class PhabricatorCalendarEventViewController
         $timeline,
       ),
       array(
-        'title' => $title,
+        'title' => $page_title,
       ));
   }
 
@@ -58,7 +59,7 @@ final class PhabricatorCalendarEventViewController
 
     return id(new PHUIHeaderView())
       ->setUser($viewer)
-      ->setHeader($event->getTerseSummary($viewer))
+      ->setHeader($event->getName())
       ->setPolicyObject($event);
   }
 
@@ -100,6 +101,10 @@ final class PhabricatorCalendarEventViewController
     $properties = id(new PHUIPropertyListView())
       ->setUser($viewer)
       ->setObject($event);
+
+    // $properties->addProperty(
+    //   pht('Name'),
+    //   $event->getName());
 
     $properties->addProperty(
       pht('Starts'),
