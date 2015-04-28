@@ -4,7 +4,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   implements PhabricatorPolicyInterface,
   PhabricatorMarkupInterface,
   PhabricatorApplicationTransactionInterface,
-  PhabricatorSubscribableInterface {
+  PhabricatorSubscribableInterface,
+  PhabricatorTokenReceiverInterface {
 
   protected $name;
   protected $userPHID;
@@ -233,5 +234,12 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   public function shouldAllowSubscription($phid) {
     return true;
+  }
+
+/* -(  PhabricatorTokenReceiverInterface  )---------------------------------- */
+
+
+  public function getUsersToNotifyOfTokenGiven() {
+    return array($this->getUserPHID());
   }
 }
