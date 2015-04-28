@@ -69,6 +69,20 @@
   margin: 12px 0 12px 30px;
 }
 
+.phabricator-remarkup ol ol.remarkup-list {
+  list-style: upper-alpha;
+}
+
+
+.phabricator-remarkup ol ol ol.remarkup-list {
+  list-style: lower-alpha;
+}
+
+
+.phabricator-remarkup ol ol ol ol.remarkup-list {
+  list-style: lower-roman;
+}
+
 .phabricator-remarkup ul.remarkup-list-with-checkmarks {
   list-style: none;
   margin-left: 18px;
