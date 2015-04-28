@@ -601,14 +601,15 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       $foot);
   }
 
-  public function renderForQuicksand() {
+  public function renderForQuicksand(array $extra_config) {
     parent::willRenderPage();
     $response = $this->renderPageBodyContent();
     $response = $this->willSendResponse($response);
 
     return array(
       'content' => hsprintf('%s', $response),
-    ) + $this->buildQuicksandConfig();
+    ) + $this->buildQuicksandConfig()
+      + $extra_config;
   }
 
   private function buildQuicksandConfig() {

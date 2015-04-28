@@ -38,7 +38,6 @@ JX.behavior('dark-console', function(config, statics) {
       'quicksand-redraw',
       null,
       function (e) {
-        e.kill();
         var data = e.getData();
         var new_console;
         if (data.fromServer) {

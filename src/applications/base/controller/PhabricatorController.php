@@ -3,6 +3,7 @@
 abstract class PhabricatorController extends AphrontController {
 
   private $handles;
+  private $extraQuicksandConfig = array();
 
   public function shouldRequireLogin() {
     return true;
@@ -59,6 +60,15 @@ abstract class PhabricatorController extends AphrontController {
 
   public function isGlobalDragAndDropUploadEnabled() {
     return false;
+  }
+
+  public function addExtraQuicksandConfig($config) {
+    $this->extraQuicksandConfig += $config;
+    return $this;
+  }
+
+  private function getExtraQuicksandConfig() {
+    return $this->extraQuicksandConfig;
   }
 
   public function willBeginExecution() {
@@ -294,7 +304,8 @@ abstract class PhabricatorController extends AphrontController {
   private function buildPageResponse($page) {
     if ($this->getRequest()->isQuicksand()) {
       $response = id(new AphrontAjaxResponse())
-        ->setContent($page->renderForQuicksand());
+        ->setContent($page->renderForQuicksand(
+          $this->getExtraQuicksandConfig()));
     } else {
       $response = id(new AphrontWebpageResponse())
         ->setContent($page->render());
