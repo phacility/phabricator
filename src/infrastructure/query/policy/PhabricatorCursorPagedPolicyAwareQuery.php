@@ -226,6 +226,7 @@ abstract class PhabricatorCursorPagedPolicyAwareQuery
   protected function buildJoinClauseParts(AphrontDatabaseConnection $conn) {
     $joins = array();
     $joins[] = $this->buildEdgeLogicJoinClause($conn);
+    $joins[] = $this->buildApplicationSearchJoinClause($conn);
     return $joins;
   }
 
