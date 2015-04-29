@@ -16,8 +16,10 @@ final class PhabricatorCalendarEventEditController
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
+    $user_phid = $user->getPHID();
     $error_name = true;
     $validation_exception = null;
+    $invitees = null;
 
     $start_time = id(new AphrontFormDateControl())
       ->setUser($user)
@@ -40,6 +42,9 @@ final class PhabricatorCalendarEventEditController
       $page_title = pht('Create Event');
       $redirect = 'created';
       $subscribers = array();
+      $invitees = array(
+        $user_phid => PhabricatorCalendarEventInvitee::STATUS_ATTENDING,
+      );
     } else {
       $event = id(new PhabricatorCalendarEventQuery())
         ->setViewer($user)
@@ -112,6 +117,14 @@ final class PhabricatorCalendarEventEditController
             PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION)
           ->setNewValue($description);
 
+        if ($invitees) {
+          $xactions[] = id(new PhabricatorCalendarEventTransaction())
+            ->setTransactionType(
+              PhabricatorCalendarEventTransaction::TYPE_INVITE)
+            ->setNewValue($invitees);
+        }
+
+
         $editor = id(new PhabricatorCalendarEventEditor())
           ->setActor($user)
           ->setContentSourceFromRequest($request)
@@ -159,7 +172,6 @@ final class PhabricatorCalendarEventEditController
       ->setValue($subscribers)
       ->setUser($user)
       ->setDatasource(new PhabricatorMetaMTAMailableDatasource());
-
 
     $form = id(new AphrontFormView())
       ->setUser($user)

@@ -121,4 +121,26 @@ final class PhabricatorCalendarEventQuery
     return 'PhabricatorCalendarApplication';
   }
 
+
+  protected function willFilterPage(array $events) {
+    $phids = array();
+
+    foreach ($events as $event) {
+      $phids[] = $event->getPHID();
+    }
+
+    $invitees = id(new PhabricatorCalendarEventInviteeQuery())
+      ->setViewer($this->getViewer())
+      ->withEventPHIDs($phids)
+      ->execute();
+    $invitees = mgroup($invitees, 'getEventPHID');
+
+    foreach ($events as $event) {
+      $event_invitees = idx($invitees, $event->getPHID(), array());
+      $event->attachInvitees($event_invitees);
+    }
+
+    return $events;
+  }
+
 }

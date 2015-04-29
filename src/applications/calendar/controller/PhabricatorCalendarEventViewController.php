@@ -127,6 +127,20 @@ final class PhabricatorCalendarEventViewController
       pht('Ends'),
       phabricator_datetime($event->getDateTo(), $viewer));
 
+    $invitees = $event->getInvitees();
+    $invitee_list = new PHUIStatusListView();
+    foreach ($invitees as $invitee) {
+      $item = new PHUIStatusItemView();
+      $invitee_phid = $invitee->getInviteePHID();
+      $target = $viewer->renderHandle($invitee_phid);
+      $item->setTarget($target);
+      $invitee_list->addItem($item);
+    }
+
+    $properties->addProperty(
+      pht('Invitees'),
+      $invitee_list);
+
     $properties->invokeWillRenderEvent();
 
     $properties->addSectionHeader(

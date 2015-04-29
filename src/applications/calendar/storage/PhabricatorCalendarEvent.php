@@ -18,6 +18,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   protected $description;
   protected $isCancelled;
 
+  private $invitees = self::ATTACHABLE;
+
   const STATUS_AWAY = 1;
   const STATUS_SPORADIC = 2;
 
@@ -116,6 +118,15 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       $user_phids);
 
     return mpull($statuses, null, 'getUserPHID');
+  }
+
+  public function getInvitees() {
+    return $this->assertAttached($this->invitees);
+  }
+
+  public function attachInvitees(array $invitees) {
+    $this->invitees = $invitees;
+    return $this;
   }
 
   /**
