@@ -55,21 +55,70 @@ final class DiffusionLowLevelResolveRefsQuery
   private function resolveGitRefs() {
     $repository = $this->getRepository();
 
-    // TODO: When refs are ambiguous (for example, tags and branches with
-    // the same name) this will only resolve one of them.
+    $unresolved = array_fuse($this->refs);
+    $results = array();
+
+    // First, resolve branches and tags.
+    $ref_map = id(new DiffusionLowLevelGitRefQuery())
+      ->setRepository($repository)
+      ->withIsTag(true)
+      ->withIsOriginBranch(true)
+      ->execute();
+    $ref_map = mgroup($ref_map, 'getShortName');
+
+    $tag_prefix = 'refs/tags/';
+    foreach ($unresolved as $ref) {
+      if (empty($ref_map[$ref])) {
+        continue;
+      }
+
+      foreach ($ref_map[$ref] as $result) {
+        $fields = $result->getRawFields();
+        $objectname = idx($fields, 'refname');
+        if (!strncmp($objectname, $tag_prefix, strlen($tag_prefix))) {
+          $type = 'tag';
+        } else {
+          $type = 'branch';
+        }
+
+        $info = array(
+          'type' => $type,
+          'identifier' => $result->getCommitIdentifier(),
+        );
+
+        if ($type == 'tag') {
+          $alternate = idx($fields, 'objectname');
+          if ($alternate) {
+            $info['alternate'] = $alternate;
+          }
+        }
+
+        $results[$ref][] = $info;
+      }
+
+      unset($unresolved[$ref]);
+    }
+
+    // If we resolved everything, we're done.
+    if (!$unresolved) {
+      return $results;
+    }
+
+    // Try to resolve anything else. This stuff either doesn't exist or is
+    // some ref like "HEAD^^^".
     $future = $repository->getLocalCommandFuture('cat-file --batch-check');
-    $future->write(implode("\n", $this->refs));
+    $future->write(implode("\n", $unresolved));
     list($stdout) = $future->resolvex();
 
     $lines = explode("\n", rtrim($stdout, "\n"));
-    if (count($lines) !== count($this->refs)) {
+    if (count($lines) !== count($unresolved)) {
       throw new Exception('Unexpected line count from `git cat-file`!');
     }
 
     $hits = array();
     $tags = array();
 
-    $lines = array_combine($this->refs, $lines);
+    $lines = array_combine($unresolved, $lines);
     foreach ($lines as $ref => $line) {
       $parts = explode(' ', $line);
       if (count($parts) < 2) {
