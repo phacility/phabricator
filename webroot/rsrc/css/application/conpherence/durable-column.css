@@ -207,6 +207,23 @@
   color: {$darkbluetext};
 }
 
+.conpherence-durable-column-transactions
+.conpherence-transaction-detail
+.conpherence-transaction-content
+.phui-pinboard-item-view {
+  width: 273px;
+}
+
+.conpherence-durable-column-transactions
+.conpherence-transaction-detail
+.conpherence-transaction-content
+.phui-pinboard-item-view
+.phui-pinboard-item-image-link
+img {
+  width: 265px;
+  height: 199px;
+}
+
 .conpherence-durable-column-transactions .conpherence-transaction-detail
 .conpherence-transaction-content {
   background: #fff;
