@@ -158,9 +158,8 @@
   background-color: rgba(0,0,0,.5);
   opacity: .8;
   height: 28px;
-  line-height: 12px;
   box-shadow: 0px 1px 1px rgba(128, 128, 128, 0.25);
-  padding: 6px 30px 6px 6px;
+  padding: 3px 30px 3px 6px;
   float: left;
   width: 205px;
 }
