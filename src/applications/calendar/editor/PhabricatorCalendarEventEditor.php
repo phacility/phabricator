@@ -19,6 +19,7 @@ final class PhabricatorCalendarEventEditor
     $types[] = PhabricatorCalendarEventTransaction::TYPE_END_DATE;
     $types[] = PhabricatorCalendarEventTransaction::TYPE_STATUS;
     $types[] = PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION;
+    $types[] = PhabricatorCalendarEventTransaction::TYPE_CANCEL;
 
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
@@ -44,6 +45,8 @@ final class PhabricatorCalendarEventEditor
         return (int)$status;
       case PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION:
         return $object->getDescription();
+      case PhabricatorCalendarEventTransaction::TYPE_CANCEL:
+        return $object->getIsCancelled();
     }
 
     return parent::getCustomTransactionOldValue($object, $xaction);
@@ -58,6 +61,7 @@ final class PhabricatorCalendarEventEditor
       case PhabricatorCalendarEventTransaction::TYPE_START_DATE:
       case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
       case PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION:
+      case PhabricatorCalendarEventTransaction::TYPE_CANCEL:
         return $xaction->getNewValue();
       case PhabricatorCalendarEventTransaction::TYPE_STATUS:
         return (int)$xaction->getNewValue();
@@ -86,6 +90,9 @@ final class PhabricatorCalendarEventEditor
       case PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION:
         $object->setDescription($xaction->getNewValue());
         return;
+      case PhabricatorCalendarEventTransaction::TYPE_CANCEL:
+        $object->setIsCancelled((int)$xaction->getNewValue());
+        return;
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_EDGE:
@@ -106,6 +113,7 @@ final class PhabricatorCalendarEventEditor
       case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
       case PhabricatorCalendarEventTransaction::TYPE_STATUS:
       case PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION:
+      case PhabricatorCalendarEventTransaction::TYPE_CANCEL:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_EDGE:

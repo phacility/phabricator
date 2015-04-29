@@ -34,6 +34,10 @@ final class PhabricatorCalendarEventSearchEngine
       'creatorPHIDs',
       $this->readUsersFromRequest($request, 'creators'));
 
+    $saved->setParameter(
+      'isCancelled',
+      $request->getStr('isCancelled'));
+
     return $saved;
   }
 
@@ -73,6 +77,16 @@ final class PhabricatorCalendarEventSearchEngine
       $query->withCreatorPHIDs($creator_phids);
     }
 
+    $is_cancelled = $saved->getParameter('isCancelled');
+    switch ($is_cancelled) {
+      case 'active':
+        $query->withIsCancelled(false);
+        break;
+      case 'cancelled':
+        $query->withIsCancelled(true);
+        break;
+    }
+
     return $query;
   }
 
@@ -83,9 +97,15 @@ final class PhabricatorCalendarEventSearchEngine
     $range_start = $saved->getParameter('rangeStart');
     $range_end = $saved->getParameter('rangeEnd');
     $upcoming = $saved->getParameter('upcoming');
+    $is_cancelled = $saved->getParameter('isCancelled', 'active');
 
     $invited_phids = $saved->getParameter('invitedPHIDs', array());
     $creator_phids = $saved->getParameter('creatorPHIDs', array());
+    $resolution_types = array(
+      'active' => pht('Active Events Only'),
+      'cancelled' => pht('Cancelled Events Only'),
+      'both' => pht('Both Cancelled and Active Events'),
+    );
 
     $form
       ->appendControl(
@@ -120,7 +140,13 @@ final class PhabricatorCalendarEventSearchEngine
             'upcoming',
             1,
             pht('Show only upcoming events.'),
-            $upcoming));
+            $upcoming))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setLabel(pht('Cancelled Events'))
+          ->setName('isCancelled')
+          ->setValue($is_cancelled)
+          ->setOptions($resolution_types));
   }
 
   protected function getURI($path) {

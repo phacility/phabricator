@@ -19,7 +19,6 @@ final class PhabricatorCalendarEventEditController
     $error_name = true;
     $validation_exception = null;
 
-
     $start_time = id(new AphrontFormDateControl())
       ->setUser($user)
       ->setName('start')

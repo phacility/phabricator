@@ -6,6 +6,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   PhabricatorApplicationTransactionInterface,
   PhabricatorSubscribableInterface,
   PhabricatorTokenReceiverInterface,
+  PhabricatorDestructibleInterface,
   PhabricatorMentionableInterface,
   PhabricatorFlaggableInterface {
 
@@ -15,6 +16,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   protected $dateTo;
   protected $status;
   protected $description;
+  protected $isCancelled;
 
   const STATUS_AWAY = 1;
   const STATUS_SPORADIC = 2;
@@ -26,7 +28,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->executeOne();
 
     return id(new PhabricatorCalendarEvent())
-      ->setUserPHID($actor->getPHID());
+      ->setUserPHID($actor->getPHID())
+      ->setIsCancelled(0);
   }
 
   private static $statusTexts = array(
@@ -64,6 +67,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         'dateTo' => 'epoch',
         'status' => 'uint32',
         'description' => 'text',
+        'isCancelled' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'userPHID_dateFrom' => array(
@@ -243,5 +247,16 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   public function getUsersToNotifyOfTokenGiven() {
     return array($this->getUserPHID());
+  }
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+    $this->delete();
+    $this->saveTransaction();
   }
 }

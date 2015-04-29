@@ -56,16 +56,22 @@ final class PhabricatorCalendarEventViewController
 
   private function buildHeaderView(PhabricatorCalendarEvent $event) {
     $viewer = $this->getRequest()->getUser();
+    $is_cancelled = $event->getIsCancelled();
+    $icon = $is_cancelled ? ('fa-times') : ('fa-calendar');
+    $color = $is_cancelled ? ('grey') : ('green');
+    $status = $is_cancelled ? ('Cancelled') : ('Active');
 
     return id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setHeader($event->getName())
+      ->setStatus($icon, $color, $status)
       ->setPolicyObject($event);
   }
 
   private function buildActionView(PhabricatorCalendarEvent $event) {
     $viewer = $this->getRequest()->getUser();
     $id = $event->getID();
+    $is_cancelled = $event->getIsCancelled();
 
     $actions = id(new PhabricatorActionListView())
       ->setObjectURI($this->getApplicationURI('event/'.$id.'/'))
@@ -85,13 +91,23 @@ final class PhabricatorCalendarEventViewController
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
-    $actions->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Cancel Event'))
-        ->setIcon('fa-times')
-        ->setHref($this->getApplicationURI("event/delete/{$id}/"))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(true));
+    if ($is_cancelled) {
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Reinstate Event'))
+          ->setIcon('fa-plus')
+          ->setHref($this->getApplicationURI("event/cancel/{$id}/"))
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(true));
+    } else {
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Cancel Event'))
+          ->setIcon('fa-times')
+          ->setHref($this->getApplicationURI("event/cancel/{$id}/"))
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(true));
+    }
 
     return $actions;
   }

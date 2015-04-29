@@ -9,6 +9,7 @@ final class PhabricatorCalendarEventQuery
   private $rangeEnd;
   private $invitedPHIDs;
   private $creatorPHIDs;
+  private $isCancelled;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -33,6 +34,11 @@ final class PhabricatorCalendarEventQuery
 
   public function withCreatorPHIDs(array $phids) {
     $this->creatorPHIDs = $phids;
+    return $this;
+  }
+
+  public function withIsCancelled($is_cancelled) {
+    $this->isCancelled = $is_cancelled;
     return $this;
   }
 
@@ -97,6 +103,13 @@ final class PhabricatorCalendarEventQuery
         $conn_r,
         'userPHID IN (%Ls)',
         $this->creatorPHIDs);
+    }
+
+    if ($this->isCancelled !== null) {
+      $where[] = qsprintf(
+        $conn_r,
+        'isCancelled = %d',
+        (int)$this->isCancelled);
     }
 
     $where[] = $this->buildPagingClause($conn_r);
