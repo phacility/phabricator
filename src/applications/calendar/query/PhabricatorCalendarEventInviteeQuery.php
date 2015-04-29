@@ -59,28 +59,28 @@ final class PhabricatorCalendarEventInviteeQuery
         $this->ids);
     }
 
-    if ($this->eventPHIDs) {
+    if ($this->eventPHIDs !== null) {
       $where[] = qsprintf(
         $conn_r,
         'eventPHID IN (%Ls)',
         $this->eventPHIDs);
     }
 
-    if ($this->inviteePHIDs) {
+    if ($this->inviteePHIDs !== null) {
       $where[] = qsprintf(
         $conn_r,
         'inviteePHID IN (%Ls)',
         $this->inviteePHIDs);
     }
 
-    if ($this->inviterPHIDs) {
+    if ($this->inviterPHIDs !== null) {
       $where[] = qsprintf(
         $conn_r,
         'inviterPHID IN (%Ls)',
         $this->inviterPHIDs);
     }
 
-    if ($this->statuses) {
+    if ($this->statuses !== null) {
       $where[] = qsprintf(
         $conn_r,
         'status = %d',
