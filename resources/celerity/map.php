@@ -205,7 +205,7 @@ return array(
     'rsrc/externals/javelin/lib/JSON.js' => '69adf288',
     'rsrc/externals/javelin/lib/Leader.js' => '331b1611',
     'rsrc/externals/javelin/lib/Mask.js' => '8a41885b',
-    'rsrc/externals/javelin/lib/Quicksand.js' => '51aeb01d',
+    'rsrc/externals/javelin/lib/Quicksand.js' => '7ba665f5',
     'rsrc/externals/javelin/lib/Request.js' => '94b750d2',
     'rsrc/externals/javelin/lib/Resource.js' => '44959b73',
     'rsrc/externals/javelin/lib/Routable.js' => 'b3e7d692',
@@ -675,7 +675,7 @@ return array(
     'javelin-leader' => '331b1611',
     'javelin-magical-init' => '3010e992',
     'javelin-mask' => '8a41885b',
-    'javelin-quicksand' => '51aeb01d',
+    'javelin-quicksand' => '7ba665f5',
     'javelin-reactor' => '2b8de964',
     'javelin-reactor-dom' => 'c90a04fc',
     'javelin-reactor-node-calmer' => '76f4ebed',
@@ -1190,9 +1190,6 @@ return array(
       'javelin-dom',
       'javelin-reactor-dom',
     ),
-    '51aeb01d' => array(
-      'javelin-install',
-    ),
     '54b612ba' => array(
       'javelin-color',
       'javelin-install',
@@ -1415,6 +1412,9 @@ return array(
       'javelin-dom',
       'javelin-stratcom',
       'javelin-util',
+    ),
+    '7ba665f5' => array(
+      'javelin-install',
     ),
     '7cbe244b' => array(
       'javelin-install',

@@ -51,6 +51,7 @@ JX.install('Quicksand', {
 
       self._started = true;
       var path = self._getRelativeURI(window.location);
+      self._id = window.history.state || 0;
       var id = self._id;
       self._history.push({path: path, id: id});
 
@@ -155,7 +156,7 @@ JX.install('Quicksand', {
       var id = ++self._id;
 
       self._history.push({path: path, id: id});
-      JX.History.push(path, {quicksand: id});
+      JX.History.push(path, id);
 
       self._cursor = (self._history.length - 1);
       self._responses[id] = null;
@@ -262,7 +263,7 @@ JX.install('Quicksand', {
       var self = JX.Quicksand;
 
       var data = e.getData();
-      data.state = (data.state && data.state.quicksand) || null;
+      data.state = data.state || null;
 
       // Check if we're going back to the first page we started Quicksand on.
       // We don't have a state value, but can look at the path.
