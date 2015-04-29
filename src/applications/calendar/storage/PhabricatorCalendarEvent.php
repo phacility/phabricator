@@ -31,7 +31,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
     return id(new PhabricatorCalendarEvent())
       ->setUserPHID($actor->getPHID())
-      ->setIsCancelled(0);
+      ->setIsCancelled(0)
+      ->attachInvitees(array());
   }
 
   private static $statusTexts = array(

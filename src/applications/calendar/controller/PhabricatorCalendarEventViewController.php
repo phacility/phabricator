@@ -130,9 +130,13 @@ final class PhabricatorCalendarEventViewController
     $invitees = $event->getInvitees();
     $invitee_list = new PHUIStatusListView();
     foreach ($invitees as $invitee) {
+      if ($invitee->isUninvited()) {
+        continue;
+      }
       $item = new PHUIStatusItemView();
       $invitee_phid = $invitee->getInviteePHID();
       $target = $viewer->renderHandle($invitee_phid);
+      $item->setNote($invitee->getStatus());
       $item->setTarget($target);
       $invitee_list->addItem($item);
     }

@@ -38,6 +38,14 @@ final class PhabricatorCalendarEventInvitee extends PhabricatorCalendarDAO
     ) + parent::getConfiguration();
   }
 
+  public function isUninvited() {
+    if ($this->getStatus() == self::STATUS_UNINVITED) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
 /* -(  PhabricatorPolicyInterface  )----------------------------------------- */
 
 
