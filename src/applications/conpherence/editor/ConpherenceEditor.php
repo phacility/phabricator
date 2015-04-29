@@ -497,8 +497,8 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     $phid = $object->getPHID();
 
     return id(new PhabricatorMetaMTAMail())
-      ->setSubject("E{$id}: {$title}")
-      ->addHeader('Thread-Topic', "E{$id}: {$phid}");
+      ->setSubject("Z{$id}: {$title}")
+      ->addHeader('Thread-Topic', "Z{$id}: {$phid}");
   }
 
   protected function getMailTo(PhabricatorLiskDAO $object) {
