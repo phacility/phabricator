@@ -88,7 +88,8 @@
 
 .phui-font-source-sans a.atom-ref,
 .phui-font-source-sans a.remarkup-link,
-.phui-font-source-sans a.phriction-link {
+.phui-font-source-sans a.phriction-link,
+.phui-font-source-sans a.phabricator-remarkup-embed-layout-link {
   color: {$blue};
 }
 
