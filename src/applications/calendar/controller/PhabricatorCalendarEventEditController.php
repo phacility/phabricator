@@ -37,7 +37,6 @@ final class PhabricatorCalendarEventEditController
       $end_value = $end_time->readValueFromRequest($request);
       $start_value = $start_time->readValueFromRequest($request);
       $submit_label = pht('Create');
-      $filter = 'event/create/';
       $page_title = pht('Create Event');
       $redirect = 'created';
       $subscribers = array();
@@ -59,9 +58,7 @@ final class PhabricatorCalendarEventEditController
       $end_time->setValue($event->getDateTo());
       $start_time->setValue($event->getDateFrom());
       $submit_label = pht('Update');
-      $filter       = 'event/edit/'.$event->getID().'/';
       $page_title   = pht('Update Event');
-      $redirect     = 'updated';
 
       $subscribers = PhabricatorSubscribersQuery::loadSubscribersForPHID(
         $event->getPHID());
@@ -245,9 +242,6 @@ final class PhabricatorCalendarEventEditController
       ->setFormErrors($errors)
       ->setForm($form);
 
-    $nav = $this->buildSideNavView($event);
-    $nav->selectFilter($filter);
-
     $crumbs = $this->buildApplicationCrumbs();
 
     if (!$this->isCreate()) {
@@ -261,14 +255,11 @@ final class PhabricatorCalendarEventEditController
       ->setValidationException($validation_exception)
       ->appendChild($form);
 
-    $nav->appendChild(
+    return $this->buildApplicationPage(
       array(
         $crumbs,
         $object_box,
-      ));
-
-    return $this->buildApplicationPage(
-      $nav,
+        ),
       array(
         'title' => $page_title,
       ));

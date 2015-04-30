@@ -10,7 +10,6 @@ abstract class PhabricatorCalendarController extends PhabricatorController {
     $nav->addLabel(pht('Calendar'));
     $nav->addFilter('/', pht('My Events'));
     $nav->addFilter('all/', pht('View All'));
-    $nav->addFilter('event/create/', pht('Create Event'));
 
     if ($status && $status->getID()) {
       $nav->addFilter('event/edit/'.$status->getID().'/', pht('Edit Event'));
