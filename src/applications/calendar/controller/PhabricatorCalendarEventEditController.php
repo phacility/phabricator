@@ -138,6 +138,14 @@ final class PhabricatorCalendarEventEditController
             PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION)
           ->setNewValue($description);
 
+        $xactions[] = id(new PhabricatorCalendarEventTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
+          ->setNewValue($request->getStr('viewPolicy'));
+
+        $xactions[] = id(new PhabricatorCalendarEventTransaction())
+          ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
+          ->setNewValue($request->getStr('editPolicy'));
+
         $editor = id(new PhabricatorCalendarEventEditor())
           ->setActor($user)
           ->setContentSourceFromRequest($request)
@@ -179,6 +187,23 @@ final class PhabricatorCalendarEventEditController
       ->setName('description')
       ->setValue($event->getDescription());
 
+    $current_policies = id(new PhabricatorPolicyQuery())
+      ->setViewer($user)
+      ->setObject($event)
+      ->execute();
+    $view_policies = id(new AphrontFormPolicyControl())
+      ->setUser($user)
+      ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
+      ->setPolicyObject($event)
+      ->setPolicies($current_policies)
+      ->setName('viewPolicy');
+    $edit_policies = id(new AphrontFormPolicyControl())
+      ->setUser($user)
+      ->setCapability(PhabricatorPolicyCapability::CAN_EDIT)
+      ->setPolicyObject($event)
+      ->setPolicies($current_policies)
+      ->setName('editPolicy');
+
     $subscribers = id(new AphrontFormTokenizerControl())
       ->setLabel(pht('Subscribers'))
       ->setName('subscribers')
@@ -199,6 +224,8 @@ final class PhabricatorCalendarEventEditController
       ->appendChild($status_select)
       ->appendChild($start_time)
       ->appendChild($end_time)
+      ->appendControl($view_policies)
+      ->appendControl($edit_policies)
       ->appendControl($subscribers)
       ->appendControl($invitees)
       ->appendChild($description);

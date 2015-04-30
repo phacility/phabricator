@@ -18,6 +18,9 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   protected $description;
   protected $isCancelled;
 
+  protected $viewPolicy;
+  protected $editPolicy;
+
   private $invitees = self::ATTACHABLE;
 
   const STATUS_AWAY = 1;
@@ -32,6 +35,8 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return id(new PhabricatorCalendarEvent())
       ->setUserPHID($actor->getPHID())
       ->setIsCancelled(0)
+      ->setViewPolicy($actor->getPHID())
+      ->setEditPolicy($actor->getPHID())
       ->attachInvitees(array());
   }
 
@@ -224,18 +229,37 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   public function getPolicy($capability) {
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
-        return PhabricatorPolicies::getMostOpenPolicy();
+        return $this->getViewPolicy();
       case PhabricatorPolicyCapability::CAN_EDIT:
-        return $this->getUserPHID();
+        return $this->getEditPolicy();
     }
   }
 
   public function hasAutomaticCapability($capability, PhabricatorUser $viewer) {
+    // The owner of a task can always view and edit it.
+    $user_phid = $this->getUserPHID();
+    if ($user_phid) {
+      $viewer_phid = $viewer->getPHID();
+      if ($viewer_phid == $user_phid) {
+        return true;
+      }
+    }
+
+    if ($capability == PhabricatorPolicyCapability::CAN_VIEW) {
+      $status = $this->getUserInviteStatus($viewer->getPHID());
+      if ($status == PhabricatorCalendarEventInvitee::STATUS_INVITED ||
+        $status == PhabricatorCalendarEventInvitee::STATUS_ATTENDING ||
+        $status == PhabricatorCalendarEventInvitee::STATUS_DECLINED) {
+        return true;
+      }
+    }
+
     return false;
   }
 
   public function describeAutomaticCapability($capability) {
-    return null;
+    return pht('The owner of an event can always view and edit it,
+      and invitees can always view it.');
   }
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
