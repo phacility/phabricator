@@ -191,35 +191,23 @@ final class PhabricatorCalendarEventSearchEngine
     PhabricatorSavedQuery $query,
     array $handles) {
     assert_instances_of($events, 'PhabricatorCalendarEvent');
-
     $viewer = $this->requireViewer();
-
     $list = new PHUIObjectItemListView();
     foreach ($events as $event) {
-      if ($event->getUserPHID() == $viewer->getPHID()) {
-        $href = '/E'.$event->getID();
-      } else {
-        $from  = $event->getDateFrom();
-        $month = phabricator_format_local_time($from, $viewer, 'm');
-        $year  = phabricator_format_local_time($from, $viewer, 'Y');
-        $uri   = new PhutilURI($this->getApplicationURI());
-        $uri->setQueryParams(
-          array(
-            'month' => $month,
-            'year'  => $year,
-          ));
-        $href = (string) $uri;
-      }
+      $href = '/E'.$event->getID();
       $from = phabricator_datetime($event->getDateFrom(), $viewer);
       $to   = phabricator_datetime($event->getDateTo(), $viewer);
       $creator_handle = $handles[$event->getUserPHID()];
+
+      $name = (strlen($event->getName())) ?
+        $event->getName() : $event->getTerseSummary($viewer);
 
       $color = ($event->getStatus() == PhabricatorCalendarEvent::STATUS_AWAY)
         ? 'red'
         : 'yellow';
 
       $item = id(new PHUIObjectItemView())
-        ->setHeader($event->getTerseSummary($viewer))
+        ->setHeader($name)
         ->setHref($href)
         ->setBarColor($color)
         ->addByline(pht('Creator: %s', $creator_handle->renderLink()))
