@@ -72,6 +72,7 @@ final class PhabricatorCalendarEventViewController
     $viewer = $this->getRequest()->getUser();
     $id = $event->getID();
     $is_cancelled = $event->getIsCancelled();
+    $is_attending = $event->getIsUserAttending($viewer->getPHID());
 
     $actions = id(new PhabricatorActionListView())
       ->setObjectURI($this->getApplicationURI('event/'.$id.'/'))
@@ -90,6 +91,22 @@ final class PhabricatorCalendarEventViewController
         ->setHref($this->getApplicationURI("event/edit/{$id}/"))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
+
+    if ($is_attending) {
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Decline Event'))
+          ->setIcon('fa-user-times')
+          ->setHref($this->getApplicationURI("event/join/{$id}/"))
+          ->setWorkflow(true));
+    } else {
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Join Event'))
+          ->setIcon('fa-user-plus')
+          ->setHref($this->getApplicationURI("event/join/{$id}/"))
+          ->setWorkflow(true));
+    }
 
     if ($is_cancelled) {
       $actions->addAction(

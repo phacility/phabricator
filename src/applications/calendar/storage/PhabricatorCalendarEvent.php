@@ -130,6 +130,27 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return $this;
   }
 
+  public function getUserInviteStatus($phid) {
+    $invitees = $this->getInvitees();
+    $invitees = mpull($invitees, null, 'getInviteePHID');
+
+    $invited = idx($invitees, $phid);
+    if (!$invited) {
+      return PhabricatorCalendarEventInvitee::STATUS_UNINVITED;
+    }
+    $invited = $invited->getStatus();
+    return $invited;
+  }
+
+  public function getIsUserAttending($phid) {
+    $attending_status = PhabricatorCalendarEventInvitee::STATUS_ATTENDING;
+
+    $old_status = $this->getUserInviteStatus($phid);
+    $is_attending = ($old_status == $attending_status);
+
+    return $is_attending;
+  }
+
   /**
    * Validates data and throws exceptions for non-sensical status
    * windows

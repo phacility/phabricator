@@ -66,8 +66,10 @@ final class PhabricatorCalendarEventTransaction
       case self::TYPE_STATUS:
       case self::TYPE_DESCRIPTION:
       case self::TYPE_CANCEL:
-      case self::TYPE_INVITE:
         return 'fa-pencil';
+        break;
+      case self::TYPE_INVITE:
+        return 'fa-user-plus';
         break;
     }
     return parent::getIcon();
