@@ -215,4 +215,8 @@ final class PhabricatorCalendarEventEditor
     array $xactions) {
     return true;
   }
+
+  protected function supportsSearch() {
+    return true;
+  }
 }
