@@ -6,6 +6,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   PhabricatorApplicationTransactionInterface,
   PhabricatorSubscribableInterface,
   PhabricatorTokenReceiverInterface,
+  PhabricatorDestructibleInterface,
   PhabricatorMentionableInterface,
   PhabricatorFlaggableInterface {
 
@@ -15,6 +16,9 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   protected $dateTo;
   protected $status;
   protected $description;
+  protected $isCancelled;
+
+  private $invitees = self::ATTACHABLE;
 
   const STATUS_AWAY = 1;
   const STATUS_SPORADIC = 2;
@@ -26,7 +30,9 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->executeOne();
 
     return id(new PhabricatorCalendarEvent())
-      ->setUserPHID($actor->getPHID());
+      ->setUserPHID($actor->getPHID())
+      ->setIsCancelled(0)
+      ->attachInvitees(array());
   }
 
   private static $statusTexts = array(
@@ -64,6 +70,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         'dateTo' => 'epoch',
         'status' => 'uint32',
         'description' => 'text',
+        'isCancelled' => 'bool',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'userPHID_dateFrom' => array(
@@ -112,6 +119,36 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       $user_phids);
 
     return mpull($statuses, null, 'getUserPHID');
+  }
+
+  public function getInvitees() {
+    return $this->assertAttached($this->invitees);
+  }
+
+  public function attachInvitees(array $invitees) {
+    $this->invitees = $invitees;
+    return $this;
+  }
+
+  public function getUserInviteStatus($phid) {
+    $invitees = $this->getInvitees();
+    $invitees = mpull($invitees, null, 'getInviteePHID');
+
+    $invited = idx($invitees, $phid);
+    if (!$invited) {
+      return PhabricatorCalendarEventInvitee::STATUS_UNINVITED;
+    }
+    $invited = $invited->getStatus();
+    return $invited;
+  }
+
+  public function getIsUserAttending($phid) {
+    $attending_status = PhabricatorCalendarEventInvitee::STATUS_ATTENDING;
+
+    $old_status = $this->getUserInviteStatus($phid);
+    $is_attending = ($old_status == $attending_status);
+
+    return $is_attending;
   }
 
   /**
@@ -243,5 +280,16 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   public function getUsersToNotifyOfTokenGiven() {
     return array($this->getUserPHID());
+  }
+
+/* -(  PhabricatorDestructibleInterface  )----------------------------------- */
+
+
+  public function destroyObjectPermanently(
+    PhabricatorDestructionEngine $engine) {
+
+    $this->openTransaction();
+    $this->delete();
+    $this->saveTransaction();
   }
 }

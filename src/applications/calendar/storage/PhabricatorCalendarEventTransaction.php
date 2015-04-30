@@ -8,6 +8,8 @@ final class PhabricatorCalendarEventTransaction
   const TYPE_END_DATE = 'calendar.enddate';
   const TYPE_STATUS = 'calendar.status';
   const TYPE_DESCRIPTION = 'calendar.description';
+  const TYPE_CANCEL = 'calendar.cancel';
+  const TYPE_INVITE = 'calendar.invite';
 
   const MAILTAG_CONTENT = 'calendar-content';
   const MAILTAG_OTHER = 'calendar-other';
@@ -33,6 +35,8 @@ final class PhabricatorCalendarEventTransaction
       case self::TYPE_END_DATE:
       case self::TYPE_STATUS:
       case self::TYPE_DESCRIPTION:
+      case self::TYPE_CANCEL:
+      case self::TYPE_INVITE:
         $phids[] = $this->getObjectPHID();
         break;
     }
@@ -47,6 +51,8 @@ final class PhabricatorCalendarEventTransaction
       case self::TYPE_END_DATE:
       case self::TYPE_STATUS:
       case self::TYPE_DESCRIPTION:
+      case self::TYPE_CANCEL:
+      case self::TYPE_INVITE:
         return ($old === null);
     }
     return parent::shouldHide();
@@ -59,7 +65,11 @@ final class PhabricatorCalendarEventTransaction
       case self::TYPE_END_DATE:
       case self::TYPE_STATUS:
       case self::TYPE_DESCRIPTION:
+      case self::TYPE_CANCEL:
         return 'fa-pencil';
+        break;
+      case self::TYPE_INVITE:
+        return 'fa-user-plus';
         break;
     }
     return parent::getIcon();
@@ -113,6 +123,23 @@ final class PhabricatorCalendarEventTransaction
       case self::TYPE_DESCRIPTION:
         return pht(
           "%s updated the event's description.",
+          $this->renderHandleLink($author_phid));
+        break;
+      case self::TYPE_CANCEL:
+        if ($new) {
+          return pht(
+            '%s cancelled this event.',
+            $this->renderHandleLink($author_phid));
+          break;
+        } else {
+          return pht(
+            '%s reinstated this event.',
+            $this->renderHandleLink($author_phid));
+          break;
+        }
+      case self::TYPE_INVITE:
+        return pht(
+          "%s updated the event's invitee list.",
           $this->renderHandleLink($author_phid));
         break;
     }
@@ -186,6 +213,26 @@ final class PhabricatorCalendarEventTransaction
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
         break;
+      case self::TYPE_CANCEL:
+        if ($new) {
+          return pht(
+            '%s cancelled %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+          break;
+        } else {
+          return pht(
+            '%s reinstated %s.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+          break;
+        }
+      case self::TYPE_INVITE:
+        return pht(
+          '%s updated the invitee list of %s.',
+          $this->renderHandleLink($author_phid),
+          $this->renderHandleLink($object_phid));
+        break;
     }
 
     return parent::getTitleForFeed();
@@ -201,6 +248,8 @@ final class PhabricatorCalendarEventTransaction
       case self::TYPE_END_DATE:
       case self::TYPE_STATUS:
       case self::TYPE_DESCRIPTION:
+      case self::TYPE_CANCEL:
+      case self::TYPE_INVITE:
         return PhabricatorTransactions::COLOR_GREEN;
     }
 
@@ -248,6 +297,12 @@ final class PhabricatorCalendarEventTransaction
         $tags[] = self::MAILTAG_OTHER;
         break;
       case self::TYPE_DESCRIPTION:
+        $tags[] = self::MAILTAG_CONTENT;
+        break;
+      case self::TYPE_CANCEL:
+        $tags[] = self::MAILTAG_CONTENT;
+        break;
+      case self::TYPE_INVITE:
         $tags[] = self::MAILTAG_CONTENT;
         break;
     }

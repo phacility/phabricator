@@ -56,16 +56,51 @@ final class PhabricatorCalendarEventViewController
 
   private function buildHeaderView(PhabricatorCalendarEvent $event) {
     $viewer = $this->getRequest()->getUser();
+    $id = $event->getID();
 
-    return id(new PHUIHeaderView())
+    $is_cancelled = $event->getIsCancelled();
+    $icon = $is_cancelled ? ('fa-times') : ('fa-calendar');
+    $color = $is_cancelled ? ('grey') : ('green');
+    $status = $is_cancelled ? ('Cancelled') : ('Active');
+
+    $invite_status = $event->getUserInviteStatus($viewer->getPHID());
+    $status_invited = PhabricatorCalendarEventInvitee::STATUS_INVITED;
+    $is_invite_pending = ($invite_status == $status_invited);
+
+    $header = id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setHeader($event->getName())
+      ->setStatus($icon, $color, $status)
       ->setPolicyObject($event);
+
+    if ($is_invite_pending) {
+      $decline_button = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setIcon(id(new PHUIIconView())
+          ->setIconFont('fa-times grey'))
+        ->setHref($this->getApplicationURI("/event/decline/{$id}/"))
+        ->setWorkflow(true)
+        ->setText(pht('Decline'));
+
+      $accept_button = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setIcon(id(new PHUIIconView())
+          ->setIconFont('fa-check green'))
+        ->setHref($this->getApplicationURI("/event/accept/{$id}/"))
+        ->setWorkflow(true)
+        ->setText(pht('Accept'));
+
+      $header->addActionLink($decline_button)
+        ->addActionLink($accept_button);
+    }
+    return $header;
   }
 
   private function buildActionView(PhabricatorCalendarEvent $event) {
     $viewer = $this->getRequest()->getUser();
     $id = $event->getID();
+    $is_cancelled = $event->getIsCancelled();
+    $is_attending = $event->getIsUserAttending($viewer->getPHID());
 
     $actions = id(new PhabricatorActionListView())
       ->setObjectURI($this->getApplicationURI('event/'.$id.'/'))
@@ -85,13 +120,39 @@ final class PhabricatorCalendarEventViewController
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
-    $actions->addAction(
-      id(new PhabricatorActionView())
-        ->setName(pht('Cancel Event'))
-        ->setIcon('fa-times')
-        ->setHref($this->getApplicationURI("event/delete/{$id}/"))
-        ->setDisabled(!$can_edit)
-        ->setWorkflow(true));
+    if ($is_attending) {
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Decline Event'))
+          ->setIcon('fa-user-times')
+          ->setHref($this->getApplicationURI("event/join/{$id}/"))
+          ->setWorkflow(true));
+    } else {
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Join Event'))
+          ->setIcon('fa-user-plus')
+          ->setHref($this->getApplicationURI("event/join/{$id}/"))
+          ->setWorkflow(true));
+    }
+
+    if ($is_cancelled) {
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Reinstate Event'))
+          ->setIcon('fa-plus')
+          ->setHref($this->getApplicationURI("event/cancel/{$id}/"))
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(true));
+    } else {
+      $actions->addAction(
+        id(new PhabricatorActionView())
+          ->setName(pht('Cancel Event'))
+          ->setIcon('fa-times')
+          ->setHref($this->getApplicationURI("event/cancel/{$id}/"))
+          ->setDisabled(!$can_edit)
+          ->setWorkflow(true));
+    }
 
     return $actions;
   }
@@ -110,6 +171,24 @@ final class PhabricatorCalendarEventViewController
     $properties->addProperty(
       pht('Ends'),
       phabricator_datetime($event->getDateTo(), $viewer));
+
+    $invitees = $event->getInvitees();
+    $invitee_list = new PHUIStatusListView();
+    foreach ($invitees as $invitee) {
+      if ($invitee->isUninvited()) {
+        continue;
+      }
+      $item = new PHUIStatusItemView();
+      $invitee_phid = $invitee->getInviteePHID();
+      $target = $viewer->renderHandle($invitee_phid);
+      $item->setNote($invitee->getStatus())
+        ->setTarget($target);
+      $invitee_list->addItem($item);
+    }
+
+    $properties->addProperty(
+      pht('Invitees'),
+      $invitee_list);
 
     $properties->invokeWillRenderEvent();
 

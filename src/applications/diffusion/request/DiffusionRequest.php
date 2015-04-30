@@ -723,7 +723,7 @@ abstract class DiffusionRequest {
       $ref = $this->symbolicCommit;
     } else {
       if ($this->supportsBranches()) {
-        $ref = $this->getResolvableBranchName($this->getBranch());
+        $ref = $this->getBranch();
         $types = array(
           PhabricatorRepositoryRefCursor::TYPE_BRANCH,
         );
@@ -793,10 +793,6 @@ abstract class DiffusionRequest {
     }
 
     return $match;
-  }
-
-  protected function getResolvableBranchName($branch) {
-    return $branch;
   }
 
   private function resolveRefs(array $refs, array $types) {

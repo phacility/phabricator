@@ -16,9 +16,9 @@ final class PhabricatorCalendarEventEditController
   public function processRequest() {
     $request = $this->getRequest();
     $user = $request->getUser();
+    $user_phid = $user->getPHID();
     $error_name = true;
     $validation_exception = null;
-
 
     $start_time = id(new AphrontFormDateControl())
       ->setUser($user)
@@ -41,6 +41,7 @@ final class PhabricatorCalendarEventEditController
       $page_title = pht('Create Event');
       $redirect = 'created';
       $subscribers = array();
+      $invitees = array($user_phid);
     } else {
       $event = id(new PhabricatorCalendarEventQuery())
         ->setViewer($user)
@@ -64,6 +65,15 @@ final class PhabricatorCalendarEventEditController
 
       $subscribers = PhabricatorSubscribersQuery::loadSubscribersForPHID(
         $event->getPHID());
+
+      $invitees = array();
+      foreach ($event->getInvitees() as $invitee) {
+        if ($invitee->isUninvited()) {
+          continue;
+        } else {
+          $invitees[] = $invitee->getInviteePHID();
+        }
+      }
     }
 
     $errors = array();
@@ -75,6 +85,16 @@ final class PhabricatorCalendarEventEditController
       $end_value = $end_time->readValueFromRequest($request);
       $description = $request->getStr('description');
       $subscribers = $request->getArr('subscribers');
+
+      $invitees = $request->getArr('invitees');
+      $new_invitees = $this->getNewInviteeList($invitees, $event);
+      $status_attending = PhabricatorCalendarEventInvitee::STATUS_ATTENDING;
+      if ($this->isCreate()) {
+        $status = idx($new_invitees, $user->getPHID());
+        if ($status) {
+          $new_invitees[$user->getPHID()] = $status_attending;
+        }
+      }
 
       if ($start_time->getError()) {
         $errors[] = pht('Invalid start time; reset to default.');
@@ -107,6 +127,11 @@ final class PhabricatorCalendarEventEditController
           ->setTransactionType(
             PhabricatorTransactions::TYPE_SUBSCRIBERS)
           ->setNewValue(array('=' => array_fuse($subscribers)));
+
+        $xactions[] = id(new PhabricatorCalendarEventTransaction())
+          ->setTransactionType(
+            PhabricatorCalendarEventTransaction::TYPE_INVITE)
+          ->setNewValue($new_invitees);
 
         $xactions[] = id(new PhabricatorCalendarEventTransaction())
           ->setTransactionType(
@@ -161,6 +186,12 @@ final class PhabricatorCalendarEventEditController
       ->setUser($user)
       ->setDatasource(new PhabricatorMetaMTAMailableDatasource());
 
+    $invitees = id(new AphrontFormTokenizerControl())
+      ->setLabel(pht('Invitees'))
+      ->setName('invitees')
+      ->setValue($invitees)
+      ->setUser($user)
+      ->setDatasource(new PhabricatorMetaMTAMailableDatasource());
 
     $form = id(new AphrontFormView())
       ->setUser($user)
@@ -169,6 +200,7 @@ final class PhabricatorCalendarEventEditController
       ->appendChild($start_time)
       ->appendChild($end_time)
       ->appendControl($subscribers)
+      ->appendControl($invitees)
       ->appendChild($description);
 
     $submit = id(new AphrontFormSubmitControl())
@@ -213,6 +245,33 @@ final class PhabricatorCalendarEventEditController
       array(
         'title' => $page_title,
       ));
+  }
+
+
+  public function getNewInviteeList(array $phids, $event) {
+    $invitees = $event->getInvitees();
+    $invitees = mpull($invitees, null, 'getInviteePHID');
+    $invited_status = PhabricatorCalendarEventInvitee::STATUS_INVITED;
+    $uninvited_status = PhabricatorCalendarEventInvitee::STATUS_UNINVITED;
+    $phids = array_fuse($phids);
+
+    $new = array();
+    foreach ($phids as $phid) {
+      $old_status = $event->getUserInviteStatus($phid);
+      if ($old_status != $uninvited_status) {
+        continue;
+      }
+      $new[$phid] = $invited_status;
+    }
+
+    foreach ($invitees as $invitee) {
+      $deleted_invitee = !idx($phids, $invitee->getInviteePHID());
+      if ($deleted_invitee) {
+        $new[$invitee->getInviteePHID()] = $uninvited_status;
+      }
+    }
+
+    return $new;
   }
 
 }
