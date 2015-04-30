@@ -405,3 +405,64 @@
 .differential-inline-undo a {
   font-weight: bold;
 }
+
+/* - Spooky Ghost UI -----------------------------------------------------------
+
+  Hide your codez.
+
+*/
+
+.inline-comment-ghost .differential-inline-comment-head {
+  padding-left: 40px;
+  padding-bottom: 0;
+}
+
+.inline-comment-ghost .inline-head-left {
+  padding: 4px 0;
+}
+
+.ghost-icon {
+  background: {$darkgreybackground};
+  float: left;
+  margin-right: 8px;
+  padding: 2px 4px 1px 2px;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.ghost-icon .phui-icon-view {
+  padding: 7px;
+  font-size: 15px;
+  color: {$lightbluetext};
+}
+
+.device-desktop .ghost-icon .phui-icon-view:hover {
+  color: {$sky};
+}
+
+.inline-comment-ghost .differential-inline-comment-content {
+  display: none;
+}
+
+.inline-comment-ghost.ghost-is-expanded .differential-inline-comment-content {
+  display: block;
+}
+
+.differential-inline-comment.inline-comment-ghost
+  .differential-inline-comment-head {
+    border-bottom-color: transparent;
+    position: relative;
+}
+
+.differential-inline-comment.inline-comment-ghost.ghost-is-expanded
+  .differential-inline-comment-head {
+    border-bottom-color: {$thinblueborder};
+    position: relative;
+}
+
+.differential-inline-comment.inline-comment-ghost
+  .differential-inline-done-label {
+    border-color: {$lightgreyborder};
+    color: {$lightgreytext};
+}

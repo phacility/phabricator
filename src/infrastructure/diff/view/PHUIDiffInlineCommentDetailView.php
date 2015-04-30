@@ -124,25 +124,37 @@ final class PHUIDiffInlineCommentDetailView
 
     $ghost_tag = null;
     $ghost = $inline->getIsGhost();
+    $ghost_id = null;
     if ($ghost) {
       if ($ghost['new']) {
-        $ghost_text = pht('Newer Comment');
+        $ghosticon = 'fa-fast-forward';
+        $reason = pht('Click to view forward comment.');
       } else {
-        $ghost_text = pht('Older Comment');
+        $ghosticon = 'fa-fast-backward';
+        $reason = pht('Click to view previous comment.');
       }
+      $ghost_id = celerity_generate_unique_node_id();
 
-      $ghost_tag = id(new PHUITagView())
-        ->setType(PHUITagView::TYPE_SHADE)
-        ->setName($ghost_text)
-        ->setSlimShady(true)
-        ->setShade(PHUITagView::COLOR_BLUE)
+      $ghost_icon = id(new PHUIIconView())
+        ->setIconFont($ghosticon)
         ->addSigil('has-tooltip')
         ->setMetadata(
           array(
-            'tip' => $ghost['reason'],
+            'tip' => $reason,
             'size' => 300,
-          ))
-        ->addClass('mml');
+          ));
+      $ghost_tag = javelin_tag(
+        'a',
+        array(
+          'class' => 'ghost-icon',
+          'sigil' => 'jx-toggle-class',
+          'meta'  => array(
+            'map' => array(
+              $ghost_id => 'ghost-is-expanded',
+            ),
+          ),
+        ),
+        $ghost_icon);
       $classes[] = 'inline-comment-ghost';
     }
 
@@ -397,6 +409,7 @@ final class PHUIDiffInlineCommentDetailView
         'class' => $classes,
         'sigil' => $sigil,
         'meta'  => $metadata,
+        'id'    => $ghost_id,
       ),
       array(
         phutil_tag_div('differential-inline-comment-head grouped', array(
