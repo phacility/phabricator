@@ -37,7 +37,7 @@
   background: #EBECEE;
 }
 
-.conpherence-show-older-messages {
+.conpherence-show-more-messages {
   display: block;
   background: #e0e3ec;
   margin: 10px;
@@ -46,7 +46,7 @@
   color: {$bluetext};
 }
 
-.conpherence-show-older-messages-loading {
+.conpherence-show-more-messages-loading {
   font-style: italic;
 }
 

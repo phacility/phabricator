@@ -254,9 +254,10 @@ JX.install('ConpherenceThreadManager', {
       this.syncWorkflow(workflow, params.stage);
     },
 
-    loadThreadByID: function(thread_id) {
+    loadThreadByID: function(thread_id, force_reload) {
       if (this.isThreadLoaded() &&
-          this.isThreadIDLoaded(thread_id)) {
+          this.isThreadIDLoaded(thread_id) &&
+          !force_reload) {
         return;
       }
 
@@ -277,6 +278,10 @@ JX.install('ConpherenceThreadManager', {
         JX.Stratcom.invoke('notification-panel-update', null, {});
 
         this._didLoadThreadCallback(r);
+
+        if (force_reload) {
+          JX.Stratcom.invoke('hashchange');
+        }
       });
 
       // should this be sync'd too?

@@ -463,7 +463,8 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
       $full_display = false);
     $messages = ConpherenceTransactionRenderer::renderMessagePaneContent(
       $data['transactions'],
-      $data['oldest_transaction_id']);
+      $data['oldest_transaction_id'],
+      $data['newest_transaction_id']);
 
     return $messages;
   }
