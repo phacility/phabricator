@@ -5,8 +5,14 @@ final class PhabricatorCalendarEventJoinController
 
   private $id;
 
+  const ACTION_ACCEPT = 'accept';
+  const ACTION_DECLINE = 'decline';
+  const ACTION_JOIN = 'join';
+
   public function handleRequest(AphrontRequest $request) {
     $this->id = $request->getURIData('id');
+    $action = $request->getURIData('action');
+
     $request = $this->getRequest();
     $viewer = $request->getViewer();
     $declined_status = PhabricatorCalendarEventInvitee::STATUS_DECLINED;
@@ -54,7 +60,8 @@ final class PhabricatorCalendarEventJoinController
       }
     }
 
-    if (!$is_attending) {
+    if (($action == self::ACTION_JOIN && !$is_attending)
+      || $action == self::ACTION_ACCEPT) {
       $title = pht('Join Event');
       $paragraph = pht('Would you like to join this event?');
       $submit = pht('Join');

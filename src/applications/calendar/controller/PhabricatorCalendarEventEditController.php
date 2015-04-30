@@ -65,6 +65,7 @@ final class PhabricatorCalendarEventEditController
 
       $subscribers = PhabricatorSubscribersQuery::loadSubscribersForPHID(
         $event->getPHID());
+
       $invitees = array();
       foreach ($event->getInvitees() as $invitee) {
         if ($invitee->isUninvited()) {
@@ -84,12 +85,12 @@ final class PhabricatorCalendarEventEditController
       $end_value = $end_time->readValueFromRequest($request);
       $description = $request->getStr('description');
       $subscribers = $request->getArr('subscribers');
+
       $invitees = $request->getArr('invitees');
       $new_invitees = $this->getNewInviteeList($invitees, $event);
-
+      $status_attending = PhabricatorCalendarEventInvitee::STATUS_ATTENDING;
       if ($this->isCreate()) {
         $status = idx($new_invitees, $user->getPHID());
-        $status_attending = PhabricatorCalendarEventInvitee::STATUS_ATTENDING;
         if ($status) {
           $new_invitees[$user->getPHID()] = $status_attending;
         }
@@ -256,12 +257,9 @@ final class PhabricatorCalendarEventEditController
 
     $new = array();
     foreach ($phids as $phid) {
-      $old_invitee = idx($invitees, $phid);
-      if ($old_invitee) {
-        $old_status = $old_invitee->getStatus();
-        if ($old_status != $uninvited_status) {
-          continue;
-        }
+      $old_status = $event->getUserInviteStatus($phid);
+      if ($old_status != $uninvited_status) {
+        continue;
       }
       $new[$phid] = $invited_status;
     }

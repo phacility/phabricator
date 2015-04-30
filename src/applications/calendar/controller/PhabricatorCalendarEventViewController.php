@@ -56,16 +56,44 @@ final class PhabricatorCalendarEventViewController
 
   private function buildHeaderView(PhabricatorCalendarEvent $event) {
     $viewer = $this->getRequest()->getUser();
+    $id = $event->getID();
+
     $is_cancelled = $event->getIsCancelled();
     $icon = $is_cancelled ? ('fa-times') : ('fa-calendar');
     $color = $is_cancelled ? ('grey') : ('green');
     $status = $is_cancelled ? ('Cancelled') : ('Active');
 
-    return id(new PHUIHeaderView())
+    $invite_status = $event->getUserInviteStatus($viewer->getPHID());
+    $status_invited = PhabricatorCalendarEventInvitee::STATUS_INVITED;
+    $is_invite_pending = ($invite_status == $status_invited);
+
+    $header = id(new PHUIHeaderView())
       ->setUser($viewer)
       ->setHeader($event->getName())
       ->setStatus($icon, $color, $status)
       ->setPolicyObject($event);
+
+    if ($is_invite_pending) {
+      $decline_button = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setIcon(id(new PHUIIconView())
+          ->setIconFont('fa-times grey'))
+        ->setHref($this->getApplicationURI("/event/decline/{$id}/"))
+        ->setWorkflow(true)
+        ->setText(pht('Decline'));
+
+      $accept_button = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setIcon(id(new PHUIIconView())
+          ->setIconFont('fa-check green'))
+        ->setHref($this->getApplicationURI("/event/accept/{$id}/"))
+        ->setWorkflow(true)
+        ->setText(pht('Accept'));
+
+      $header->addActionLink($decline_button)
+        ->addActionLink($accept_button);
+    }
+    return $header;
   }
 
   private function buildActionView(PhabricatorCalendarEvent $event) {
@@ -153,8 +181,8 @@ final class PhabricatorCalendarEventViewController
       $item = new PHUIStatusItemView();
       $invitee_phid = $invitee->getInviteePHID();
       $target = $viewer->renderHandle($invitee_phid);
-      $item->setNote($invitee->getStatus());
-      $item->setTarget($target);
+      $item->setNote($invitee->getStatus())
+        ->setTarget($target);
       $invitee_list->addItem($item);
     }
 
