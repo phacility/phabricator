@@ -77,6 +77,15 @@ final class PhabricatorCalendarEventEditController
     }
 
     $errors = array();
+    $name = $event->getName();
+    $description = $event->getDescription();
+    $type = $event->getStatus();
+
+    $current_policies = id(new PhabricatorPolicyQuery())
+      ->setViewer($user)
+      ->setObject($event)
+      ->execute();
+
     if ($request->isFormPost()) {
       $xactions = array();
       $name = $request->getStr('name');
@@ -85,6 +94,8 @@ final class PhabricatorCalendarEventEditController
       $end_value = $end_time->readValueFromRequest($request);
       $description = $request->getStr('description');
       $subscribers = $request->getArr('subscribers');
+      $edit_policy = $request->getStr('editPolicy');
+      $view_policy = $request->getStr('viewPolicy');
 
       $invitees = $request->getArr('invitees');
       $new_invitees = $this->getNewInviteeList($invitees, $event);
@@ -159,7 +170,13 @@ final class PhabricatorCalendarEventEditController
           $validation_exception = $ex;
           $error_name = $ex
             ->getShortMessage(PhabricatorCalendarEventTransaction::TYPE_NAME);
+
+          $event->setViewPolicy($view_policy);
+          $event->setEditPolicy($edit_policy);
         }
+      } else {
+        $event->setViewPolicy($view_policy);
+        $event->setEditPolicy($edit_policy);
       }
     }
 
@@ -173,24 +190,20 @@ final class PhabricatorCalendarEventEditController
     $name = id(new AphrontFormTextControl())
       ->setLabel(pht('Name'))
       ->setName('name')
-      ->setValue($event->getName())
+      ->setValue($name)
       ->setError($error_name);
 
     $status_select = id(new AphrontFormSelectControl())
       ->setLabel(pht('Status'))
       ->setName('status')
-      ->setValue($event->getStatus())
+      ->setValue($type)
       ->setOptions($event->getStatusOptions());
 
     $description = id(new AphrontFormTextAreaControl())
       ->setLabel(pht('Description'))
       ->setName('description')
-      ->setValue($event->getDescription());
+      ->setValue($description);
 
-    $current_policies = id(new PhabricatorPolicyQuery())
-      ->setViewer($user)
-      ->setObject($event)
-      ->execute();
     $view_policies = id(new AphrontFormPolicyControl())
       ->setUser($user)
       ->setCapability(PhabricatorPolicyCapability::CAN_VIEW)
