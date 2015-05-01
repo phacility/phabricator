@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => '82833797',
+    'core.pkg.css' => 'b3250cbe',
     'core.pkg.js' => '59d01bb7',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '3500921f',
@@ -117,7 +117,7 @@ return array(
     'rsrc/css/font/phui-font-icon-base.css' => '3dad2ae3',
     'rsrc/css/layout/phabricator-filetree-view.css' => 'fccf9f82',
     'rsrc/css/layout/phabricator-hovercard-view.css' => '44394670',
-    'rsrc/css/layout/phabricator-side-menu-view.css' => '7e8c6341',
+    'rsrc/css/layout/phabricator-side-menu-view.css' => 'c1db9e9c',
     'rsrc/css/layout/phabricator-source-code-view.css' => '2ceee894',
     'rsrc/css/phui/calendar/phui-calendar-day.css' => 'de035c8a',
     'rsrc/css/phui/calendar/phui-calendar-list.css' => 'c1d0ca59',
@@ -747,7 +747,7 @@ return array(
     'phabricator-remarkup-css' => '0037bdbf',
     'phabricator-search-results-css' => '15c71110',
     'phabricator-shaped-request' => '7cbe244b',
-    'phabricator-side-menu-view-css' => '7e8c6341',
+    'phabricator-side-menu-view-css' => 'c1db9e9c',
     'phabricator-slowvote-css' => '266df6a1',
     'phabricator-source-code-view-css' => '2ceee894',
     'phabricator-standard-page-view' => 'd3e1abe9',
