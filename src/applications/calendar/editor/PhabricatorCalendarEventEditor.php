@@ -22,6 +22,7 @@ final class PhabricatorCalendarEventEditor
     $types[] = PhabricatorCalendarEventTransaction::TYPE_CANCEL;
     $types[] = PhabricatorCalendarEventTransaction::TYPE_INVITE;
 
+    $types[] = PhabricatorTransactions::TYPE_COMMENT;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
 
@@ -119,6 +120,7 @@ final class PhabricatorCalendarEventEditor
         $object->setIsCancelled((int)$xaction->getNewValue());
         return;
       case PhabricatorCalendarEventTransaction::TYPE_INVITE:
+      case PhabricatorTransactions::TYPE_COMMENT:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_EDGE:
@@ -167,6 +169,7 @@ final class PhabricatorCalendarEventEditor
             ->save();
         }
         return;
+      case PhabricatorTransactions::TYPE_COMMENT:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_EDGE:
