@@ -41,6 +41,7 @@ final class PhabricatorCalendarEventEditController
       $redirect = 'created';
       $subscribers = array();
       $invitees = array($user_phid);
+      $cancel_uri = $this->getApplicationURI();
     } else {
       $event = id(new PhabricatorCalendarEventQuery())
         ->setViewer($user)
@@ -71,6 +72,8 @@ final class PhabricatorCalendarEventEditController
           $invitees[] = $invitee->getInviteePHID();
         }
       }
+
+      $cancel_uri = '/'.$event->getMonogram();
     }
 
     $errors = array();
@@ -227,13 +230,19 @@ final class PhabricatorCalendarEventEditController
       ->appendControl($invitees)
       ->appendChild($description);
 
-    $submit = id(new AphrontFormSubmitControl())
-      ->setValue($submit_label);
-    if ($this->isCreate()) {
-      $submit->addCancelButton($this->getApplicationURI());
-    } else {
-      $submit->addCancelButton('/E'.$event->getID());
+
+    if ($request->isAjax()) {
+      return $this->newDialog()
+        ->setTitle($page_title)
+        ->setWidth(AphrontDialogView::WIDTH_FULL)
+        ->appendForm($form)
+        ->addCancelButton($cancel_uri)
+        ->addSubmitButton($submit_label);
     }
+
+    $submit = id(new AphrontFormSubmitControl())
+      ->addCancelButton($cancel_uri)
+      ->setValue($submit_label);
 
     $form->appendChild($submit);
 
