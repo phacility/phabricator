@@ -58,7 +58,14 @@ abstract class AphrontApplicationConfiguration {
    * @phutil-external-symbol class PhabricatorStartup
    */
   public static function runHTTPRequest(AphrontHTTPSink $sink) {
+    $multimeter = MultimeterControl::newInstance();
+    $multimeter->setEventContext('<http-init>');
+    $multimeter->setEventViewer('<none>');
+
     PhabricatorEnv::initializeWebEnvironment();
+
+    $multimeter->setSampleRate(
+      PhabricatorEnv::getEnvConfig('debug.sample-rate'));
 
     $debug_time_limit = PhabricatorEnv::getEnvConfig('debug.time-limit');
     if ($debug_time_limit) {
@@ -134,6 +141,8 @@ abstract class AphrontApplicationConfiguration {
       ));
 
     $access_log->write();
+
+    $multimeter->saveEvents();
 
     DarkConsoleXHProfPluginAPI::saveProfilerSample($access_log);
 

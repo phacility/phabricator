@@ -144,6 +144,9 @@ final class CelerityStaticResourceResponse {
     $uri = $this->getURI($map, $name);
     $type = $map->getResourceTypeForName($name);
 
+    $event_type = MultimeterEvent::TYPE_STATIC_RESOURCE;
+    MultimeterControl::getInstance()->newEvent($event_type, 'rsrc.'.$name, 1);
+
     switch ($type) {
       case 'css':
         return phutil_tag(
