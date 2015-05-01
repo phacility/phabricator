@@ -128,10 +128,10 @@ final class PHUIDiffInlineCommentDetailView
     if ($ghost) {
       if ($ghost['new']) {
         $ghosticon = 'fa-fast-forward';
-        $reason = pht('Click to view forward comment.');
+        $reason = pht('View forward comment');
       } else {
         $ghosticon = 'fa-fast-backward';
-        $reason = pht('Click to view previous comment.');
+        $reason = pht('View previous comment');
       }
       $ghost_id = celerity_generate_unique_node_id();
 
@@ -248,7 +248,7 @@ final class PHUIDiffInlineCommentDetailView
       $links[] = javelin_tag(
         'a',
         array(
-          'class' => 'button simple',
+          'class' => 'button simple msl',
           'meta'        => array(
             'anchor' => $anchor_name,
           ),
@@ -323,18 +323,24 @@ final class PHUIDiffInlineCommentDetailView
             pht('Done'),
           ));
       } else {
-        $done_button = id(new PHUIButtonView())
-          ->setTag('a')
-          ->setColor(PHUIButtonView::SIMPLE)
-          ->addClass('mml');
         if ($is_done) {
-          $done_button->setIconFont('fa-check');
-          $done_button->setText(pht('Done'));
-          $done_button->addClass('button-done');
+          $icon = id(new PHUIIconView())->setIconFont('fa-check sky msr');
+          $label = pht('Done');
+          $class = 'button-done';
         } else {
-          $done_button->addClass('button-not-done');
-          $done_button->setText(pht('Not Done'));
+          $icon = null;
+          $label = pht('Not Done');
+          $class = 'button-not-done';
         }
+        $done_button = phutil_tag(
+          'div',
+          array(
+            'class' => 'done-label '.$class,
+          ),
+          array(
+            $icon,
+            $label,
+          ));
       }
     }
 
@@ -397,10 +403,10 @@ final class PHUIDiffInlineCommentDetailView
       ),
       array(
         $anchor,
-        $links,
-        $nextprev,
-        $action_buttons,
         $done_button,
+        $links,
+        $action_buttons,
+        $nextprev,
       ));
 
     $markup = javelin_tag(
