@@ -8,6 +8,10 @@ final class PhabricatorCalendarEventPHIDType extends PhabricatorPHIDType {
     return pht('Event');
   }
 
+  public function getPHIDTypeApplicationClass() {
+    return 'PhabricatorCalendarApplication';
+  }
+
   public function newObject() {
     return new PhabricatorCalendarEvent();
   }
