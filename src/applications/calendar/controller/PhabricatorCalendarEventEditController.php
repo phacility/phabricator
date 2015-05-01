@@ -18,24 +18,14 @@ final class PhabricatorCalendarEventEditController
     $user = $request->getUser();
     $user_phid = $user->getPHID();
     $error_name = true;
+    $error_start_date = true;
+    $error_end_date = true;
     $validation_exception = null;
-
-    $start_time = id(new AphrontFormDateControl())
-      ->setUser($user)
-      ->setName('start')
-      ->setLabel(pht('Start'))
-      ->setInitialTime(AphrontFormDateControl::TIME_START_OF_DAY);
-
-    $end_time = id(new AphrontFormDateControl())
-      ->setUser($user)
-      ->setName('end')
-      ->setLabel(pht('End'))
-      ->setInitialTime(AphrontFormDateControl::TIME_END_OF_DAY);
 
     if ($this->isCreate()) {
       $event = PhabricatorCalendarEvent::initializeNewCalendarEvent($user);
-      $end_value = $end_time->readValueFromRequest($request);
-      $start_value = $start_time->readValueFromRequest($request);
+      $end_value = AphrontFormDateControlValue::newFromEpoch($user, time());
+      $start_value = AphrontFormDateControlValue::newFromEpoch($user, time());
       $submit_label = pht('Create');
       $page_title = pht('Create Event');
       $redirect = 'created';
@@ -56,8 +46,13 @@ final class PhabricatorCalendarEventEditController
         return new Aphront404Response();
       }
 
-      $end_time->setValue($event->getDateTo());
-      $start_time->setValue($event->getDateFrom());
+      $end_value = AphrontFormDateControlValue::newFromEpoch(
+        $user,
+        $event->getDateTo());
+      $start_value = AphrontFormDateControlValue::newFromEpoch(
+        $user,
+        $event->getDateFrom());
+
       $submit_label = pht('Update');
       $page_title   = pht('Update Event');
 
@@ -76,7 +71,6 @@ final class PhabricatorCalendarEventEditController
       $cancel_uri = '/'.$event->getMonogram();
     }
 
-    $errors = array();
     $name = $event->getName();
     $description = $event->getDescription();
     $type = $event->getStatus();
@@ -90,8 +84,13 @@ final class PhabricatorCalendarEventEditController
       $xactions = array();
       $name = $request->getStr('name');
       $type = $request->getInt('status');
-      $start_value = $start_time->readValueFromRequest($request);
-      $end_value = $end_time->readValueFromRequest($request);
+
+      $start_value = AphrontFormDateControlValue::newFromRequest(
+        $request,
+        'start');
+      $end_value = AphrontFormDateControlValue::newFromRequest(
+        $request,
+        'end');
       $description = $request->getStr('description');
       $subscribers = $request->getArr('subscribers');
       $edit_policy = $request->getStr('editPolicy');
@@ -107,84 +106,70 @@ final class PhabricatorCalendarEventEditController
         }
       }
 
-      if ($start_time->getError()) {
-        $errors[] = pht('Invalid start time; reset to default.');
-      }
-      if ($end_time->getError()) {
-        $errors[] = pht('Invalid end time; reset to default.');
-      }
-      if (!$errors) {
-        $xactions[] = id(new PhabricatorCalendarEventTransaction())
-          ->setTransactionType(
-            PhabricatorCalendarEventTransaction::TYPE_NAME)
-          ->setNewValue($name);
+      $xactions[] = id(new PhabricatorCalendarEventTransaction())
+        ->setTransactionType(
+          PhabricatorCalendarEventTransaction::TYPE_NAME)
+        ->setNewValue($name);
 
-        $xactions[] = id(new PhabricatorCalendarEventTransaction())
-          ->setTransactionType(
-            PhabricatorCalendarEventTransaction::TYPE_START_DATE)
-          ->setNewValue($start_value);
+      $xactions[] = id(new PhabricatorCalendarEventTransaction())
+        ->setTransactionType(
+          PhabricatorCalendarEventTransaction::TYPE_START_DATE)
+        ->setNewValue($start_value);
 
-        $xactions[] = id(new PhabricatorCalendarEventTransaction())
-          ->setTransactionType(
-            PhabricatorCalendarEventTransaction::TYPE_END_DATE)
-          ->setNewValue($end_value);
+      $xactions[] = id(new PhabricatorCalendarEventTransaction())
+        ->setTransactionType(
+          PhabricatorCalendarEventTransaction::TYPE_END_DATE)
+        ->setNewValue($end_value);
 
-        $xactions[] = id(new PhabricatorCalendarEventTransaction())
-          ->setTransactionType(
-            PhabricatorCalendarEventTransaction::TYPE_STATUS)
-          ->setNewValue($type);
+      $xactions[] = id(new PhabricatorCalendarEventTransaction())
+        ->setTransactionType(
+          PhabricatorCalendarEventTransaction::TYPE_STATUS)
+        ->setNewValue($type);
 
-        $xactions[] = id(new PhabricatorCalendarEventTransaction())
-          ->setTransactionType(
-            PhabricatorTransactions::TYPE_SUBSCRIBERS)
-          ->setNewValue(array('=' => array_fuse($subscribers)));
+      $xactions[] = id(new PhabricatorCalendarEventTransaction())
+        ->setTransactionType(
+          PhabricatorTransactions::TYPE_SUBSCRIBERS)
+        ->setNewValue(array('=' => array_fuse($subscribers)));
 
-        $xactions[] = id(new PhabricatorCalendarEventTransaction())
-          ->setTransactionType(
-            PhabricatorCalendarEventTransaction::TYPE_INVITE)
-          ->setNewValue($new_invitees);
+      $xactions[] = id(new PhabricatorCalendarEventTransaction())
+        ->setTransactionType(
+          PhabricatorCalendarEventTransaction::TYPE_INVITE)
+        ->setNewValue($new_invitees);
 
-        $xactions[] = id(new PhabricatorCalendarEventTransaction())
-          ->setTransactionType(
-            PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION)
-          ->setNewValue($description);
+      $xactions[] = id(new PhabricatorCalendarEventTransaction())
+        ->setTransactionType(
+          PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION)
+        ->setNewValue($description);
 
-        $xactions[] = id(new PhabricatorCalendarEventTransaction())
-          ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
-          ->setNewValue($request->getStr('viewPolicy'));
+      $xactions[] = id(new PhabricatorCalendarEventTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_VIEW_POLICY)
+        ->setNewValue($request->getStr('viewPolicy'));
 
-        $xactions[] = id(new PhabricatorCalendarEventTransaction())
-          ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
-          ->setNewValue($request->getStr('editPolicy'));
+      $xactions[] = id(new PhabricatorCalendarEventTransaction())
+        ->setTransactionType(PhabricatorTransactions::TYPE_EDIT_POLICY)
+        ->setNewValue($request->getStr('editPolicy'));
 
-        $editor = id(new PhabricatorCalendarEventEditor())
-          ->setActor($user)
-          ->setContentSourceFromRequest($request)
-          ->setContinueOnNoEffect(true);
+      $editor = id(new PhabricatorCalendarEventEditor())
+        ->setActor($user)
+        ->setContentSourceFromRequest($request)
+        ->setContinueOnNoEffect(true);
 
-        try {
-          $xactions = $editor->applyTransactions($event, $xactions);
-          $response = id(new AphrontRedirectResponse());
-          return $response->setURI('/E'.$event->getID());
-        } catch (PhabricatorApplicationTransactionValidationException $ex) {
-          $validation_exception = $ex;
-          $error_name = $ex
-            ->getShortMessage(PhabricatorCalendarEventTransaction::TYPE_NAME);
+      try {
+        $xactions = $editor->applyTransactions($event, $xactions);
+        $response = id(new AphrontRedirectResponse());
+        return $response->setURI('/E'.$event->getID());
+      } catch (PhabricatorApplicationTransactionValidationException $ex) {
+        $validation_exception = $ex;
+        $error_name = $ex->getShortMessage(
+            PhabricatorCalendarEventTransaction::TYPE_NAME);
+        $error_start_date = $ex->getShortMessage(
+            PhabricatorCalendarEventTransaction::TYPE_START_DATE);
+        $error_end_date = $ex->getShortMessage(
+            PhabricatorCalendarEventTransaction::TYPE_END_DATE);
 
-          $event->setViewPolicy($view_policy);
-          $event->setEditPolicy($edit_policy);
-        }
-      } else {
         $event->setViewPolicy($view_policy);
         $event->setEditPolicy($edit_policy);
       }
-    }
-
-    $error_view = null;
-    if ($errors) {
-      $error_view = id(new PHUIInfoView())
-        ->setTitle(pht('Status can not be set!'))
-        ->setErrors($errors);
     }
 
     $name = id(new AphrontFormTextControl())
@@ -198,6 +183,20 @@ final class PhabricatorCalendarEventEditController
       ->setName('status')
       ->setValue($type)
       ->setOptions($event->getStatusOptions());
+
+    $start_control = id(new AphrontFormDateControl())
+      ->setUser($user)
+      ->setName('start')
+      ->setLabel(pht('Start'))
+      ->setError($error_start_date)
+      ->setValue($start_value);
+
+    $end_control = id(new AphrontFormDateControl())
+      ->setUser($user)
+      ->setName('end')
+      ->setLabel(pht('End'))
+      ->setError($error_end_date)
+      ->setValue($end_value);
 
     $description = id(new AphrontFormTextAreaControl())
       ->setLabel(pht('Description'))
@@ -235,8 +234,8 @@ final class PhabricatorCalendarEventEditController
       ->setUser($user)
       ->appendChild($name)
       ->appendChild($status_select)
-      ->appendChild($start_time)
-      ->appendChild($end_time)
+      ->appendChild($start_control)
+      ->appendChild($end_control)
       ->appendControl($view_policies)
       ->appendControl($edit_policies)
       ->appendControl($subscribers)
@@ -261,7 +260,6 @@ final class PhabricatorCalendarEventEditController
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText($page_title)
-      ->setFormErrors($errors)
       ->setForm($form);
 
     $crumbs = $this->buildApplicationCrumbs();

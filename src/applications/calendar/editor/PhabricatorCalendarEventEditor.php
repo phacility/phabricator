@@ -83,14 +83,15 @@ final class PhabricatorCalendarEventEditor
     PhabricatorApplicationTransaction $xaction) {
     switch ($xaction->getTransactionType()) {
       case PhabricatorCalendarEventTransaction::TYPE_NAME:
-      case PhabricatorCalendarEventTransaction::TYPE_START_DATE:
-      case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
       case PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION:
       case PhabricatorCalendarEventTransaction::TYPE_CANCEL:
       case PhabricatorCalendarEventTransaction::TYPE_INVITE:
         return $xaction->getNewValue();
       case PhabricatorCalendarEventTransaction::TYPE_STATUS:
         return (int)$xaction->getNewValue();
+      case PhabricatorCalendarEventTransaction::TYPE_START_DATE:
+      case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
+        return $xaction->getNewValue()->getEpoch();
     }
 
     return parent::getCustomTransactionNewValue($object, $xaction);
@@ -202,6 +203,19 @@ final class PhabricatorCalendarEventEditor
 
           $error->setIsMissingFieldError(true);
           $errors[] = $error;
+        }
+        break;
+      case PhabricatorCalendarEventTransaction::TYPE_START_DATE:
+      case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
+        foreach ($xactions as $xaction) {
+          $date_value = $xaction->getNewValue();
+          if (!$date_value->isValid()) {
+            $errors[] = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              pht('Invalid date.'),
+              $xaction);
+          }
         }
         break;
     }

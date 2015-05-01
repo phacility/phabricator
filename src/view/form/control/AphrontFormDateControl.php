@@ -10,6 +10,7 @@ final class AphrontFormDateControl extends AphrontFormControl {
   private $valueYear;
   private $valueTime;
   private $allowNull;
+  private $continueOnInvalidDate = false;
 
   public function setAllowNull($allow_null) {
     $this->allowNull = $allow_null;
@@ -84,6 +85,16 @@ final class AphrontFormDateControl extends AphrontFormControl {
   }
 
   public function setValue($epoch) {
+    if ($epoch instanceof AphrontFormDateControlValue) {
+      $this->continueOnInvalidDate = true;
+      $this->valueYear  = $epoch->getValueYear();
+      $this->valueMonth = $epoch->getValueMonth();
+      $this->valueDay   = $epoch->getValueDay();
+      $this->valueTime  = $epoch->getValueTime();
+
+      return parent::setValue($epoch->getEpoch());
+    }
+
     $result = parent::setValue($epoch);
 
     if ($epoch === null) {
@@ -165,7 +176,7 @@ final class AphrontFormDateControl extends AphrontFormControl {
   protected function renderInput() {
 
     $disabled = null;
-    if ($this->getValue() === null) {
+    if ($this->getValue() === null && !$this->continueOnInvalidDate) {
       $this->setValue($this->getInitialValue());
       if ($this->allowNull) {
         $disabled = 'disabled';
