@@ -33,6 +33,15 @@ final class MultimeterSampleController extends MultimeterController {
 
     $with = array();
     foreach ($group_map as $key => $column) {
+
+      // Don't let non-admins filter by viewers, this feels a little too
+      // invasive of privacy.
+      if ($key == 'viewer') {
+        if (!$viewer->getIsAdmin()) {
+          continue;
+        }
+      }
+
       $with[$key] = $request->getStrList($key);
       if ($with[$key]) {
         $where[] = qsprintf(
@@ -58,6 +67,16 @@ final class MultimeterSampleController extends MultimeterController {
       implode(', ', array_select_keys($group_map, $group)));
 
     $this->loadDimensions($data);
+    $phids = array();
+    foreach ($data as $row) {
+      $viewer_name = $this->getViewerDimension($row['eventViewerID'])
+        ->getName();
+      $viewer_phid = $this->getEventViewerPHID($viewer_name);
+      if ($viewer_phid) {
+        $phids[] = $viewer_phid;
+      }
+    }
+    $handles = $viewer->loadHandles($phids);
 
     $rows = array();
     foreach ($data as $row) {
@@ -75,13 +94,23 @@ final class MultimeterSampleController extends MultimeterController {
       }
 
       if (isset($group['viewer'])) {
-        $viewer_col = $this->getViewerDimension($row['eventViewerID'])
-          ->getName();
-        if (!$with['viewer']) {
-          $viewer_col = $this->renderSelectionLink(
-            'viewer',
-            $row['eventViewerID'],
-            $viewer_col);
+        if ($viewer->getIsAdmin()) {
+          $viewer_col = $this->getViewerDimension($row['eventViewerID'])
+            ->getName();
+
+          $viewer_phid = $this->getEventViewerPHID($viewer_col);
+          if ($viewer_phid) {
+            $viewer_col = $handles[$viewer_phid]->getName();
+          }
+
+          if (!$with['viewer']) {
+            $viewer_col = $this->renderSelectionLink(
+              'viewer',
+              $row['eventViewerID'],
+              $viewer_col);
+          }
+        } else {
+          $viewer_col = phutil_tag('em', array(), pht('(Masked)'));
         }
       } else {
         $viewer_col = $this->renderGroupingLink($group, 'viewer');
@@ -148,8 +177,14 @@ final class MultimeterSampleController extends MultimeterController {
         MultimeterEvent::formatResourceCost(
           $viewer,
           $row['eventType'],
+          $row['totalCost'] / $row['N']),
+        MultimeterEvent::formatResourceCost(
+          $viewer,
+          $row['eventType'],
           $row['totalCost']),
-        $row['sampleRate'],
+        ($row['N'] == 1)
+          ? $row['sampleRate']
+          : '-',
         phabricator_datetime($row['epoch'], $viewer),
       );
     }
@@ -164,6 +199,7 @@ final class MultimeterSampleController extends MultimeterController {
           pht('Host'),
           pht('Type'),
           pht('Label'),
+          pht('Avg'),
           pht('Cost'),
           pht('Rate'),
           pht('Epoch'),
@@ -177,6 +213,7 @@ final class MultimeterSampleController extends MultimeterController {
           null,
           null,
           'wide',
+          'n',
           'n',
           'n',
           null,
@@ -279,6 +316,13 @@ final class MultimeterSampleController extends MultimeterController {
       'request' => 'requestKey',
       'label' => 'eventLabelID',
     );
+  }
+
+  private function getEventViewerPHID($viewer_name) {
+    if (!strncmp($viewer_name, 'user.', 5)) {
+      return substr($viewer_name, 5);
+    }
+    return null;
   }
 
 }

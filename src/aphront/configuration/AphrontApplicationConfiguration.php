@@ -125,7 +125,11 @@ abstract class AphrontApplicationConfiguration {
 
     $processing_exception = null;
     try {
-      $response = $application->processRequest($request, $access_log, $sink);
+      $response = $application->processRequest(
+        $request,
+        $access_log,
+        $sink,
+        $multimeter);
       $response_code = $response->getHTTPResponseCode();
     } catch (Exception $ex) {
       $processing_exception = $ex;
@@ -139,6 +143,11 @@ abstract class AphrontApplicationConfiguration {
         'c' => $response_code,
         'T' => PhabricatorStartup::getMicrosecondsSinceStart(),
       ));
+
+    $multimeter->newEvent(
+      MultimeterEvent::TYPE_REQUEST_TIME,
+      $multimeter->getEventContext(),
+      PhabricatorStartup::getMicrosecondsSinceStart());
 
     $access_log->write();
 
@@ -171,16 +180,19 @@ abstract class AphrontApplicationConfiguration {
   public function processRequest(
     AphrontRequest $request,
     PhutilDeferredLog $access_log,
-    AphrontHTTPSink $sink) {
+    AphrontHTTPSink $sink,
+    MultimeterControl $multimeter) {
 
     $this->setRequest($request);
 
     list($controller, $uri_data) = $this->buildController();
 
+    $controller_class = get_class($controller);
     $access_log->setData(
       array(
-        'C' => get_class($controller),
+        'C' => $controller_class,
       ));
+    $multimeter->setEventContext('web.'.$controller_class);
 
     $request->setURIMap($uri_data);
     $controller->setRequest($request);
@@ -198,6 +210,7 @@ abstract class AphrontApplicationConfiguration {
             'u' => $request->getUser()->getUserName(),
             'P' => $request->getUser()->getPHID(),
           ));
+        $multimeter->setEventViewer('user.'.$request->getUser()->getPHID());
       }
 
       if (!$response) {

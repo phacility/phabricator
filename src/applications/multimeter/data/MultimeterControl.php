@@ -149,6 +149,10 @@ final class MultimeterControl {
     return $this;
   }
 
+  public function getEventContext() {
+    return $this->eventContext;
+  }
+
   public function setEventViewer($viewer) {
     $this->eventViewer = $viewer;
     return $this;

@@ -3,6 +3,7 @@
 final class MultimeterEvent extends MultimeterDAO {
 
   const TYPE_STATIC_RESOURCE = 0;
+  const TYPE_REQUEST_TIME = 1;
 
   protected $eventType;
   protected $eventLabelID;
@@ -29,6 +30,8 @@ final class MultimeterEvent extends MultimeterDAO {
     switch ($type) {
       case self::TYPE_STATIC_RESOURCE:
         return pht('Static Resource');
+      case self::TYPE_REQUEST_TIME:
+        return pht('Web Request');
     }
 
     return pht('Unknown ("%s")', $type);
@@ -42,6 +45,8 @@ final class MultimeterEvent extends MultimeterDAO {
     switch ($type) {
       case self::TYPE_STATIC_RESOURCE:
         return pht('%s Req', new PhutilNumber($cost));
+      case self::TYPE_REQUEST_TIME:
+        return pht('%s us', new PhutilNumber($cost));
     }
 
     return pht('%s Unit(s)', new PhutilNumber($cost));
