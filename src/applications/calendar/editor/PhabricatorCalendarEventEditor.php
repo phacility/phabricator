@@ -209,10 +209,6 @@ final class PhabricatorCalendarEventEditor
     return $errors;
   }
 
-  protected function getMailTo(PhabricatorLiskDAO $object) {
-    return array($object->getUserPHID());
-  }
-
   protected function shouldPublishFeedStory(
     PhabricatorLiskDAO $object,
     array $xactions) {
@@ -222,4 +218,88 @@ final class PhabricatorCalendarEventEditor
   protected function supportsSearch() {
     return true;
   }
+
+  protected function shouldSendMail(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $xactions = mfilter($xactions, 'shouldHide', true);
+    return $xactions;
+  }
+
+  protected function getMailSubjectPrefix() {
+    return pht('[Calendar]');
+  }
+
+  protected function getMailTo(PhabricatorLiskDAO $object) {
+    $phids = array();
+
+    if ($object->getUserPHID()) {
+      $phids[] = $object->getUserPHID();
+    }
+    $phids[] = $this->getActingAsPHID();
+
+    $invitees = $object->getInvitees();
+    foreach ($invitees as $phid => $status) {
+      if ($status === PhabricatorCalendarEventInvitee::STATUS_ATTENDING
+        || $status === PhabricatorCalendarEventInvitee::STATUS_INVITED) {
+        $phids[] = $phid;
+      }
+    }
+
+    $phids = array_unique($phids);
+    return $phids;
+  }
+
+  public function getMailTagsMap() {
+    return array(
+      PhabricatorCalendarEventTransaction::MAILTAG_CONTENT =>
+        pht(
+          "An event's name, status, invite list, ".
+          "and description changes."),
+      PhabricatorCalendarEventTransaction::MAILTAG_RESCHEDULE =>
+        pht(
+          "An event's start and end date ".
+          "and cancellation status changes."),
+      PhabricatorCalendarEventTransaction::MAILTAG_OTHER =>
+        pht('Other event activity not listed above occurs.'),
+    );
+  }
+
+  protected function buildReplyHandler(PhabricatorLiskDAO $object) {
+    return id(new PhabricatorCalendarReplyHandler())
+      ->setMailReceiver($object);
+  }
+
+  protected function buildMailTemplate(PhabricatorLiskDAO $object) {
+    $id = $object->getID();
+    $name = $object->getName();
+
+    return id(new PhabricatorMetaMTAMail())
+      ->setSubject("E{$id}: {$name}")
+      ->addHeader('Thread-Topic', "E{$id}: ".$object->getName());
+  }
+
+  protected function buildMailBody(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $description = $object->getDescription();
+    $body = parent::buildMailBody($object, $xactions);
+
+    if (strlen($description)) {
+      $body->addTextSection(
+        pht('EVENT DESCRIPTION'),
+        $object->getDescription());
+    }
+
+    $body->addLinkSection(
+      pht('EVENT DETAIL'),
+      PhabricatorEnv::getProductionURI('/E'.$object->getID()));
+
+
+    return $body;
+  }
+
+
 }

@@ -17,6 +17,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   protected $status;
   protected $description;
   protected $isCancelled;
+  protected $mailKey;
 
   protected $viewPolicy;
   protected $editPolicy;
@@ -38,6 +39,17 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setViewPolicy($actor->getPHID())
       ->setEditPolicy($actor->getPHID())
       ->attachInvitees(array());
+  }
+
+  public function save() {
+    if ($this->getDateTo() <= $this->getDateFrom()) {
+      throw new PhabricatorCalendarEventInvalidEpochException();
+    }
+
+    if (!$this->mailKey) {
+      $this->mailKey = Filesystem::readRandomCharacters(20);
+    }
+    return parent::save();
   }
 
   private static $statusTexts = array(
@@ -76,6 +88,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         'status' => 'uint32',
         'description' => 'text',
         'isCancelled' => 'bool',
+        'mailKey' => 'bytes20',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'userPHID_dateFrom' => array(
@@ -154,19 +167,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     $is_attending = ($old_status == $attending_status);
 
     return $is_attending;
-  }
-
-  /**
-   * Validates data and throws exceptions for non-sensical status
-   * windows
-   */
-  public function save() {
-
-    if ($this->getDateTo() <= $this->getDateFrom()) {
-      throw new PhabricatorCalendarEventInvalidEpochException();
-    }
-
-    return parent::save();
   }
 
 /* -(  Markup Interface  )--------------------------------------------------- */

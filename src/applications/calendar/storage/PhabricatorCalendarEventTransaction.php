@@ -11,6 +11,8 @@ final class PhabricatorCalendarEventTransaction
   const TYPE_CANCEL = 'calendar.cancel';
   const TYPE_INVITE = 'calendar.invite';
 
+
+  const MAILTAG_RESCHEDULE = 'calendar-reschedule';
   const MAILTAG_CONTENT = 'calendar-content';
   const MAILTAG_OTHER = 'calendar-other';
 
@@ -442,25 +444,15 @@ final class PhabricatorCalendarEventTransaction
     $tags = array();
     switch ($this->getTransactionType()) {
       case self::TYPE_NAME:
+      case self::TYPE_STATUS:
+      case self::TYPE_DESCRIPTION:
+      case self::TYPE_INVITE:
         $tags[] = self::MAILTAG_CONTENT;
         break;
       case self::TYPE_START_DATE:
-        $tags[] = self::MAILTAG_CONTENT;
-        break;
       case self::TYPE_END_DATE:
-        $tags[] = self::MAILTAG_CONTENT;
-        break;
-      case self::TYPE_STATUS:
-        $tags[] = self::MAILTAG_OTHER;
-        break;
-      case self::TYPE_DESCRIPTION:
-        $tags[] = self::MAILTAG_CONTENT;
-        break;
       case self::TYPE_CANCEL:
-        $tags[] = self::MAILTAG_CONTENT;
-        break;
-      case self::TYPE_INVITE:
-        $tags[] = self::MAILTAG_CONTENT;
+        $tags[] = self::MAILTAG_RESCHEDULE;
         break;
     }
     return $tags;
