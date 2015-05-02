@@ -42,7 +42,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
   public function save() {
-    if ($this->getDateTo() <= $this->getDateFrom()) {
+    if ($this->getDateTo() < $this->getDateFrom()) {
       throw new PhabricatorCalendarEventInvalidEpochException();
     }
 

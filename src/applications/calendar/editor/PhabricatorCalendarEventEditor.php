@@ -147,16 +147,8 @@ final class PhabricatorCalendarEventEditor
       case PhabricatorCalendarEventTransaction::TYPE_INVITE:
         $map = $xaction->getNewValue();
         $phids = array_keys($map);
-        $invitees = array();
-
-        if ($map) {
-          $invitees = id(new PhabricatorCalendarEventInviteeQuery())
-            ->setViewer($this->getActor())
-            ->withEventPHIDs(array($object->getPHID()))
-            ->withInviteePHIDs($phids)
-            ->execute();
-          $invitees = mpull($invitees, null, 'getInviteePHID');
-        }
+        $invitees = $object->getInvitees();
+        $invitees = mpull($invitees, null, 'getInviteePHID');
 
         foreach ($phids as $phid) {
           $invitee = idx($invitees, $phid);
@@ -165,10 +157,12 @@ final class PhabricatorCalendarEventEditor
               ->setEventPHID($object->getPHID())
               ->setInviteePHID($phid)
               ->setInviterPHID($this->getActingAsPHID());
+            $invitees[] = $invitee;
           }
           $invitee->setStatus($map[$phid])
             ->save();
         }
+        $object->attachInvitees($invitees);
         return;
       case PhabricatorTransactions::TYPE_COMMENT:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
@@ -254,14 +248,16 @@ final class PhabricatorCalendarEventEditor
     $phids[] = $this->getActingAsPHID();
 
     $invitees = $object->getInvitees();
-    foreach ($invitees as $phid => $status) {
+    foreach ($invitees as $invitee) {
+      $status = $invitee->getStatus();
       if ($status === PhabricatorCalendarEventInvitee::STATUS_ATTENDING
         || $status === PhabricatorCalendarEventInvitee::STATUS_INVITED) {
-        $phids[] = $phid;
+        $phids[] = $invitee->getInviteePHID();
       }
     }
 
     $phids = array_unique($phids);
+
     return $phids;
   }
 

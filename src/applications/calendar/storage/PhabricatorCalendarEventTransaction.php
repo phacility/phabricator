@@ -11,7 +11,6 @@ final class PhabricatorCalendarEventTransaction
   const TYPE_CANCEL = 'calendar.cancel';
   const TYPE_INVITE = 'calendar.invite';
 
-
   const MAILTAG_RESCHEDULE = 'calendar-reschedule';
   const MAILTAG_CONTENT = 'calendar-content';
   const MAILTAG_OTHER = 'calendar-other';
