@@ -278,7 +278,7 @@
   border: 1px solid {$sh-yellowborder};
   border-radius: 3px;
   display: inline-block;
-  padding: 3px 8px 4px;
+  padding: 4px 8px 5px;
   cursor: pointer;
 }
 
