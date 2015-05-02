@@ -175,6 +175,34 @@ final class PhabricatorCalendarEventEditor
     return parent::applyCustomExternalTransaction($object, $xaction);
   }
 
+  protected function validateAllTransactions(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    $start_date_xaction = PhabricatorCalendarEventTransaction::TYPE_START_DATE;
+    $end_date_xaction = PhabricatorCalendarEventTransaction::TYPE_END_DATE;
+    $start_date = $object->getDateFrom();
+    $end_date = $object->getDateTo();
+    $errors = array();
+
+    foreach ($xactions as $xaction) {
+      if ($xaction->getTransactionType() == $start_date_xaction) {
+        $start_date = $xaction->getNewValue()->getEpoch();
+      } else if ($xaction->getTransactionType() == $end_date_xaction) {
+        $end_date = $xaction->getNewValue()->getEpoch();
+      }
+    }
+    if ($start_date > $end_date) {
+      $type = PhabricatorCalendarEventTransaction::TYPE_END_DATE;
+      $errors[] = new PhabricatorApplicationTransactionValidationError(
+        $type,
+        pht('Invalid'),
+        pht('End date must be after start date.'),
+        null);
+    }
+
+    return $errors;
+  }
+
   protected function validateTransaction(
     PhabricatorLiskDAO $object,
     $type,

@@ -42,10 +42,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   }
 
   public function save() {
-    if ($this->getDateTo() < $this->getDateFrom()) {
-      throw new PhabricatorCalendarEventInvalidEpochException();
-    }
-
     if (!$this->mailKey) {
       $this->mailKey = Filesystem::readRandomCharacters(20);
     }

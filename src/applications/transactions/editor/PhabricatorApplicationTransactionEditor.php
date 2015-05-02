@@ -639,6 +639,7 @@ abstract class PhabricatorApplicationTransactionEditor
         $errors[] = $this->validateTransaction($object, $type, $type_xactions);
       }
 
+      $errors[] = $this->validateAllTransactions($object, $xactions);
       $errors = array_mergev($errors);
 
       $continue_on_missing = $this->getContinueOnMissingFields();
@@ -1822,6 +1823,12 @@ abstract class PhabricatorApplicationTransactionEditor
     array $xactions) {
 
     return clone $object;
+  }
+
+  protected function validateAllTransactions(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return array();
   }
 
   /**
