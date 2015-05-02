@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => '5e307332',
+    'core.pkg.css' => '7dcee248',
     'core.pkg.js' => '59d01bb7',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => '3500921f',
@@ -18,7 +18,7 @@ return array(
     'maniphest.pkg.js' => 'df4aa49f',
     'rsrc/css/aphront/aphront-bars.css' => '231ac33c',
     'rsrc/css/aphront/dark-console.css' => '6378ef3d',
-    'rsrc/css/aphront/dialog-view.css' => '9fddf890',
+    'rsrc/css/aphront/dialog-view.css' => '9b32db0a',
     'rsrc/css/aphront/lightbox-attachment.css' => '7acac05d',
     'rsrc/css/aphront/list-filter-view.css' => 'b2161041',
     'rsrc/css/aphront/multi-column.css' => 'fd18389d',
@@ -503,7 +503,7 @@ return array(
     'almanac-css' => 'dbb9b3af',
     'aphront-bars' => '231ac33c',
     'aphront-dark-console-css' => '6378ef3d',
-    'aphront-dialog-view-css' => '9fddf890',
+    'aphront-dialog-view-css' => '9b32db0a',
     'aphront-list-filter-view-css' => 'b2161041',
     'aphront-multi-column-view-css' => 'fd18389d',
     'aphront-pager-view-css' => '2e3539af',
