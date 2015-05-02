@@ -3,6 +3,9 @@
 final class PhabricatorCalendarEventSearchEngine
   extends PhabricatorApplicationSearchEngine {
 
+  private $calendarYear;
+  private $calendarMonth;
+
   public function getResultTypeDescription() {
     return pht('Calendar Events');
   }
@@ -47,6 +50,7 @@ final class PhabricatorCalendarEventSearchEngine
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new PhabricatorCalendarEventQuery());
+    $viewer = $this->requireViewer();
 
     $min_range = null;
     $max_range = null;
@@ -57,6 +61,33 @@ final class PhabricatorCalendarEventSearchEngine
 
     if ($saved->getParameter('rangeEnd')) {
       $max_range = $saved->getParameter('rangeEnd');
+    }
+
+    if ($saved->getParameter('display') == 'month') {
+      list($start_month, $start_year) = $this->getDisplayMonthAndYear($saved);
+      $start_day = 1;
+
+      $end_year = ($start_month == 12) ? $start_year + 1 : $start_year;
+      $end_month = ($start_month == 12) ? 1 : $start_month + 1;
+      $end_day = 1;
+
+      $calendar_start = AphrontFormDateControlValue::newFromParts(
+        $viewer,
+        $start_year,
+        $start_month,
+        $start_day)->getEpoch();
+      $calendar_end = AphrontFormDateControlValue::newFromParts(
+        $viewer,
+        $end_year,
+        $end_month,
+        $end_day)->getEpoch();
+
+      if (!$min_range || ($min_range < $calendar_start)) {
+        $min_range = $calendar_start;
+      }
+      if (!$max_range || ($max_range > $calendar_end)) {
+        $max_range = $calendar_end;
+      }
     }
 
     if ($saved->getParameter('upcoming')) {
@@ -178,6 +209,13 @@ final class PhabricatorCalendarEventSearchEngine
     return $names;
   }
 
+  public function setCalendarYearAndMonth($year, $month) {
+    $this->calendarYear = $year;
+    $this->calendarMonth = $month;
+
+    return $this;
+  }
+
   public function buildSavedQueryFromBuiltin($query_key) {
     $query = $this->newSavedQuery();
     $query->setQueryKey($query_key);
@@ -252,25 +290,21 @@ final class PhabricatorCalendarEventSearchEngine
     $viewer = $this->requireViewer();
     $now = time();
 
-    $epoch   = $query->getParameter('rangeStart');
-    if (!$epoch) {
-      $epoch = $query->getParameter('rangeEnd');
-      if (!$epoch) {
-        $epoch = time();
-      }
-    }
-
-    $year  = phabricator_format_local_time($epoch, $viewer, 'Y');
-    $month = phabricator_format_local_time($epoch, $viewer, 'm');
+    list($start_month, $start_year) = $this->getDisplayMonthAndYear($query);
 
     $now_year  = phabricator_format_local_time($now, $viewer, 'Y');
     $now_month = phabricator_format_local_time($now, $viewer, 'm');
     $now_day   = phabricator_format_local_time($now, $viewer, 'j');
 
-    if ($month == $now_month && $year == $now_year) {
-      $month_view = new PHUICalendarMonthView($month, $year, $now_day);
+    if ($start_month == $now_month && $start_year == $now_year) {
+      $month_view = new PHUICalendarMonthView(
+        $start_month,
+        $start_year,
+        $now_day);
     } else {
-      $month_view = new PHUICalendarMonthView($month, $year);
+      $month_view = new PHUICalendarMonthView(
+        $start_month,
+        $start_year);
     }
 
     $month_view->setUser($viewer);
@@ -309,9 +343,37 @@ final class PhabricatorCalendarEventSearchEngine
       $month_view->addEvent($event);
     }
 
+    $month_view->setBrowseURI(
+      $this->getURI('query/'.$query->getQueryKey().'/'));
+
     return $month_view;
+  }
 
+  private function getDisplayMonthAndYear(
+    PhabricatorSavedQuery $query) {
+    $viewer = $this->requireViewer();
 
+    // get month/year from url
+    if ($this->calendarYear && $this->calendarMonth) {
+      $start_year = $this->calendarYear;
+      $start_month = $this->calendarMonth;
+    } else {
+      $epoch = $query->getParameter('rangeStart');
+      if (!$epoch) {
+        $epoch = $query->getParameter('rangeEnd');
+        if (!$epoch) {
+          $epoch = time();
+        }
+      }
+      $start_year  = phabricator_format_local_time($epoch, $viewer, 'Y');
+      $start_month = phabricator_format_local_time($epoch, $viewer, 'm');
+    }
+
+    return array($start_month, $start_year);
+  }
+
+  public function getPageSize(PhabricatorSavedQuery $saved) {
+    return $saved->getParameter('limit', 1000);
   }
 
 }
