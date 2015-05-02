@@ -415,7 +415,7 @@
 }
 
 .ghost-icon .phui-icon-view {
-  padding: 7px;
+  padding: 7px 7px 8px;
   font-size: 15px;
   color: {$lightbluetext};
 }
