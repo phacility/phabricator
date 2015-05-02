@@ -38,6 +38,10 @@ final class PhabricatorCalendarEventSearchEngine
       'isCancelled',
       $request->getStr('isCancelled'));
 
+    $saved->setParameter(
+      'display',
+      $request->getStr('display'));
+
     return $saved;
   }
 
@@ -98,6 +102,7 @@ final class PhabricatorCalendarEventSearchEngine
     $range_end = $saved->getParameter('rangeEnd');
     $upcoming = $saved->getParameter('upcoming');
     $is_cancelled = $saved->getParameter('isCancelled', 'active');
+    $display = $saved->getParameter('display', 'month');
 
     $invited_phids = $saved->getParameter('invitedPHIDs', array());
     $creator_phids = $saved->getParameter('creatorPHIDs', array());
@@ -105,6 +110,10 @@ final class PhabricatorCalendarEventSearchEngine
       'active' => pht('Active Events Only'),
       'cancelled' => pht('Cancelled Events Only'),
       'both' => pht('Both Cancelled and Active Events'),
+    );
+    $display_options = array(
+      'month' => pht('Month View'),
+      'list' => pht('List View'),
     );
 
     $form
@@ -146,17 +155,24 @@ final class PhabricatorCalendarEventSearchEngine
           ->setLabel(pht('Cancelled Events'))
           ->setName('isCancelled')
           ->setValue($is_cancelled)
-          ->setOptions($resolution_types));
+          ->setOptions($resolution_types))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setLabel(pht('Display Options'))
+          ->setName('display')
+          ->setValue($display)
+          ->setOptions($display_options));
   }
 
   protected function getURI($path) {
-    return '/calendar/event/'.$path;
+    return '/calendar/'.$path;
   }
 
   protected function getBuiltinQueryNames() {
     $names = array(
+      'month' => pht('Month View'),
       'upcoming' => pht('Upcoming Events'),
-      'all'      => pht('All Events'),
+      'all' => pht('All Events'),
     );
 
     return $names;
@@ -167,6 +183,8 @@ final class PhabricatorCalendarEventSearchEngine
     $query->setQueryKey($query_key);
 
     switch ($query_key) {
+      case 'month':
+        return $query->setParameter('display', 'month');
       case 'upcoming':
         return $query->setParameter('upcoming', true);
       case 'all':
@@ -190,6 +208,11 @@ final class PhabricatorCalendarEventSearchEngine
     array $events,
     PhabricatorSavedQuery $query,
     array $handles) {
+
+    if ($query->getParameter('display') == 'month') {
+      return $this->buildCalendarView($events, $query, $handles);
+    }
+
     assert_instances_of($events, 'PhabricatorCalendarEvent');
     $viewer = $this->requireViewer();
     $list = new PHUIObjectItemListView();
@@ -220,6 +243,75 @@ final class PhabricatorCalendarEventSearchEngine
     }
 
     return $list;
+  }
+
+  private function buildCalendarView(
+    array $statuses,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+    $viewer = $this->requireViewer();
+    $now = time();
+
+    $epoch   = $query->getParameter('rangeStart');
+    if (!$epoch) {
+      $epoch = $query->getParameter('rangeEnd');
+      if (!$epoch) {
+        $epoch = time();
+      }
+    }
+
+    $year  = phabricator_format_local_time($epoch, $viewer, 'Y');
+    $month = phabricator_format_local_time($epoch, $viewer, 'm');
+
+    $now_year  = phabricator_format_local_time($now, $viewer, 'Y');
+    $now_month = phabricator_format_local_time($now, $viewer, 'm');
+    $now_day   = phabricator_format_local_time($now, $viewer, 'j');
+
+    if ($month == $now_month && $year == $now_year) {
+      $month_view = new PHUICalendarMonthView($month, $year, $now_day);
+    } else {
+      $month_view = new PHUICalendarMonthView($month, $year);
+    }
+
+    $month_view->setUser($viewer);
+
+    $phids = mpull($statuses, 'getUserPHID');
+
+    /* Assign Colors */
+    $unique = array_unique($phids);
+    $allblue = false;
+    $calcolors = CalendarColors::getColors();
+    if (count($unique) > count($calcolors)) {
+      $allblue = true;
+    }
+    $i = 0;
+    $eventcolor = array();
+    foreach ($unique as $phid) {
+      if ($allblue) {
+        $eventcolor[$phid] = CalendarColors::COLOR_SKY;
+      } else {
+        $eventcolor[$phid] = $calcolors[$i];
+      }
+      $i++;
+    }
+
+    foreach ($statuses as $status) {
+      $event = new AphrontCalendarEventView();
+      $event->setEpochRange($status->getDateFrom(), $status->getDateTo());
+
+      $name_text = $handles[$status->getUserPHID()]->getName();
+      $status_text = $status->getHumanStatus();
+      $event->setUserPHID($status->getUserPHID());
+      $event->setDescription(pht('%s (%s)', $name_text, $status_text));
+      $event->setName($status_text);
+      $event->setEventID($status->getID());
+      $event->setColor($eventcolor[$status->getUserPHID()]);
+      $month_view->addEvent($event);
+    }
+
+    return $month_view;
+
+
   }
 
 }

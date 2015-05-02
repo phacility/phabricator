@@ -2,27 +2,6 @@
 
 abstract class PhabricatorCalendarController extends PhabricatorController {
 
-
-  protected function buildSideNavView(PhabricatorCalendarEvent $status = null) {
-    $nav = new AphrontSideNavFilterView();
-    $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
-
-    $nav->addLabel(pht('Calendar'));
-    $nav->addFilter('/', pht('My Events'));
-    $nav->addFilter('all/', pht('View All'));
-
-    if ($status && $status->getID()) {
-      $nav->addFilter('event/edit/'.$status->getID().'/', pht('Edit Event'));
-    }
-    $nav->addFilter('event/', pht('Upcoming Events'));
-
-    return $nav;
-  }
-
-  public function buildApplicationMenu() {
-    return $this->buildSideNavView()->getMenu();
-  }
-
   protected function buildApplicationCrumbs() {
     $crumbs = parent::buildApplicationCrumbs();
 
