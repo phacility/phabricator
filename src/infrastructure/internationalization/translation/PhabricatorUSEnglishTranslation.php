@@ -735,6 +735,23 @@ final class PhabricatorUSEnglishTranslation
         ),
       ),
 
+      '%s changed %s hashtag(s), added %d: %s; removed %d: %s.' =>
+        '%s changed hashtags for %s, added %4$s; removed %6$s.',
+
+      '%s added %d %s hashtag(s): %s.' => array(
+        array(
+          '%s added a hashtag to %3$s: %4$s.',
+          '%s added hashtags to %3$s: %4$s.',
+        ),
+      ),
+
+      '%s removed %d %s hashtag(s): %s.' => array(
+        array(
+          '%s removed a hashtag from %3$s: %4$s.',
+          '%s removed hashtags from %3$s: %4$s.',
+        ),
+      ),
+
       '%d User(s) Need Approval' => array(
         '%d User Needs Approval',
         '%d Users Need Approval',
@@ -947,6 +964,23 @@ final class PhabricatorUSEnglishTranslation
 
       '%s edited %s edge(s) for %s, added %s: %s; removed %s: %s.' =>
         '%s edited edges for %3$s, added: %5$s; removed %7$s.',
+
+      '%s added %s member(s) for %s: %s.' => array(
+        array(
+          '%s added a member for %3$s: %4$s.',
+          '%s added members for %3$s: %4$s.',
+        ),
+      ),
+
+      '%s removed %s member(s) for %s: %s.' => array(
+        array(
+          '%s removed a member for %3$s: %4$s.',
+          '%s removed members for %3$s: %4$s.',
+        ),
+      ),
+
+      '%s edited %s member(s) for %s, added %s: %s; removed %s: %s.' =>
+        '%s edited members for %3$s, added: %5$s; removed %7$s.',
 
       '%d related link(s):' => array(
         'Related link:',
