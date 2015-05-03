@@ -45,20 +45,6 @@ final class PhabricatorRepositoryArcanistProject
       PhabricatorRepositoryArcanistProjectPHIDType::TYPECONST);
   }
 
-  public function delete() {
-    $this->openTransaction();
-
-      queryfx(
-        $this->establishConnection('w'),
-        'DELETE FROM %T WHERE arcanistProjectID = %d',
-        id(new PhabricatorRepositorySymbol())->getTableName(),
-        $this->getID());
-
-      $result = parent::delete();
-    $this->saveTransaction();
-    return $result;
-  }
-
   public function getRepository() {
     return $this->assertAttached($this->repository);
   }

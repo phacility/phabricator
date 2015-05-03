@@ -8,7 +8,7 @@ final class DiffusionFindSymbolsConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return 'Retrieve Diffusion symbol information.';
+    return pht('Retrieve Diffusion symbol information.');
   }
 
   protected function defineParamTypes() {
@@ -51,7 +51,6 @@ final class DiffusionFindSymbolsConduitAPIMethod
     }
 
     $query->needPaths(true);
-    $query->needArcanistProjects(true);
     $query->needRepositories(true);
 
     $results = $query->execute();
