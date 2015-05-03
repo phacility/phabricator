@@ -202,6 +202,10 @@ final class PhabricatorCalendarEventViewController
     }
 
     $properties->addProperty(
+      pht('Host'),
+      $viewer->renderHandle($event->getUserPHID()));
+
+    $properties->addProperty(
       pht('Invitees'),
       $invitee_list);
 
