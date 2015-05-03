@@ -65,6 +65,12 @@ final class PhabricatorManiphestConfigOptions
       'open' => array(
         'name' => pht('Open'),
         'special' => ManiphestTaskStatus::SPECIAL_DEFAULT,
+        'prefixes' => array(
+          'open',
+          'opens',
+          'reopen',
+          'reopens',
+        ),
       ),
       'resolved' => array(
         'name' => pht('Resolved'),
