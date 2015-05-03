@@ -5,6 +5,7 @@ final class PhabricatorCalendarEventSearchEngine
 
   private $calendarYear;
   private $calendarMonth;
+  private $calendarDay;
 
   public function getResultTypeDescription() {
     return pht('Calendar Events');
@@ -144,6 +145,7 @@ final class PhabricatorCalendarEventSearchEngine
     );
     $display_options = array(
       'month' => pht('Month View'),
+      'day' => pht('Day View (beta)'),
       'list' => pht('List View'),
     );
 
@@ -249,6 +251,8 @@ final class PhabricatorCalendarEventSearchEngine
 
     if ($query->getParameter('display') == 'month') {
       return $this->buildCalendarView($events, $query, $handles);
+    } else if ($query->getParameter('display') == 'day') {
+      return $this->buildCalendarDayView($events, $query, $handles);
     }
 
     assert_instances_of($events, 'PhabricatorCalendarEvent');
@@ -349,6 +353,34 @@ final class PhabricatorCalendarEventSearchEngine
     return $month_view;
   }
 
+  private function buildCalendarDayView(
+    array $statuses,
+    PhabricatorSavedQuery $query,
+    array $handles) {
+    $viewer = $this->requireViewer();
+    list($start_month, $start_year, $start_day) =
+      $this->getDisplayMonthAndYearAndDay($query);
+
+    $day_view = new PHUICalendarDayView(
+      $start_month,
+      $start_year,
+      $start_day);
+
+    $day_view->setUser($viewer);
+
+    $phids = mpull($statuses, 'getUserPHID');
+
+    foreach ($statuses as $status) {
+      $event = new AphrontCalendarDayEventView();
+      $event->setEpochRange($status->getDateFrom(), $status->getDateTo());
+
+      $event->setName($status->getName());
+      $day_view->addEvent($event);
+    }
+
+    return $day_view;
+  }
+
   private function getDisplayMonthAndYear(
     PhabricatorSavedQuery $query) {
     $viewer = $this->requireViewer();
@@ -370,6 +402,28 @@ final class PhabricatorCalendarEventSearchEngine
     }
 
     return array($start_month, $start_year);
+  }
+
+  private function getDisplayMonthAndYearAndDay(
+    PhabricatorSavedQuery $query) {
+    $viewer = $this->requireViewer();
+    if ($this->calendarYear && $this->calendarMonth && $this->calendarDay) {
+      $start_year = $this->calendarYear;
+      $start_month = $this->calendarMonth;
+      $start_day = $this->calendarDay;
+    } else {
+      $epoch = $query->getParameter('rangeStart');
+      if (!$epoch) {
+        $epoch = $query->getParameter('rangeEnd');
+        if (!$epoch) {
+          $epoch = time();
+        }
+      }
+      $start_year = phabricator_format_local_time($epoch, $viewer, 'Y');
+      $start_month = phabricator_format_local_time($epoch, $viewer, 'm');
+      $start_day = phabricator_format_local_time($epoch, $viewer, 'd');
+    }
+    return array($start_year, $start_month, $start_day);
   }
 
   public function getPageSize(PhabricatorSavedQuery $saved) {
