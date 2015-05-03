@@ -73,6 +73,13 @@ return array(
     'javelin-websocket',
     'javelin-behavior-dashboard-async-panel',
     'javelin-behavior-dashboard-tab-panel',
+    'javelin-quicksand',
+    'javelin-behavior-quicksand-blacklist',
+    'javelin-behavior-high-security-warning',
+    'javelin-scrollbar',
+    'javelin-behavior-scrollbar',
+    'javelin-behavior-durable-column',
+    'conpherence-thread-manager',
   ),
   'core.pkg.css' => array(
     'phabricator-core-css',
@@ -133,6 +140,7 @@ return array(
     'phabricator-dashboard-css',
     'aphront-multi-column-view-css',
     'phui-action-header-view-css',
+    'conpherence-durable-column-view',
   ),
   'differential.pkg.css' => array(
     'differential-core-view-css',
@@ -146,6 +154,7 @@ return array(
     'phabricator-object-selector-css',
     'phabricator-content-source-view-css',
     'inline-comment-summary-css',
+    'phui-inline-comment-view-css',
   ),
   'differential.pkg.js' => array(
     'phabricator-drag-and-drop-file-upload',
@@ -168,6 +177,7 @@ return array(
     'javelin-behavior-differential-toggle-files',
     'javelin-behavior-differential-user-select',
     'javelin-behavior-aphront-more',
+    'changeset-view-manager',
   ),
   'diffusion.pkg.css' => array(
     'diffusion-icons-css',

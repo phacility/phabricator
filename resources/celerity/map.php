@@ -7,11 +7,11 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => '7dcee248',
-    'core.pkg.js' => '59d01bb7',
+    'core.pkg.css' => 'd445f9b8',
+    'core.pkg.js' => '3331b919',
     'darkconsole.pkg.js' => 'e7393ebb',
-    'differential.pkg.css' => '3500921f',
-    'differential.pkg.js' => '890046d3',
+    'differential.pkg.css' => '0a253fbe',
+    'differential.pkg.js' => '3cfa26f9',
     'diffusion.pkg.css' => '591664fa',
     'diffusion.pkg.js' => '0115b37c',
     'maniphest.pkg.css' => '68d4dd3d',
@@ -2089,6 +2089,7 @@ return array(
       'phabricator-dashboard-css',
       'aphront-multi-column-view-css',
       'phui-action-header-view-css',
+      'conpherence-durable-column-view',
     ),
     'core.pkg.js' => array(
       'javelin-util',
@@ -2162,6 +2163,13 @@ return array(
       'javelin-websocket',
       'javelin-behavior-dashboard-async-panel',
       'javelin-behavior-dashboard-tab-panel',
+      'javelin-quicksand',
+      'javelin-behavior-quicksand-blacklist',
+      'javelin-behavior-high-security-warning',
+      'javelin-scrollbar',
+      'javelin-behavior-scrollbar',
+      'javelin-behavior-durable-column',
+      'conpherence-thread-manager',
     ),
     'darkconsole.pkg.js' => array(
       'javelin-behavior-dark-console',
@@ -2179,6 +2187,7 @@ return array(
       'phabricator-object-selector-css',
       'phabricator-content-source-view-css',
       'inline-comment-summary-css',
+      'phui-inline-comment-view-css',
     ),
     'differential.pkg.js' => array(
       'phabricator-drag-and-drop-file-upload',
@@ -2199,6 +2208,7 @@ return array(
       'javelin-behavior-differential-toggle-files',
       'javelin-behavior-differential-user-select',
       'javelin-behavior-aphront-more',
+      'changeset-view-manager',
     ),
     'diffusion.pkg.css' => array(
       'diffusion-icons-css',
