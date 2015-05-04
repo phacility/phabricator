@@ -53,16 +53,8 @@ final class PhabricatorCalendarEventSearchEngine
     $query = id(new PhabricatorCalendarEventQuery());
     $viewer = $this->requireViewer();
 
-    $min_range = null;
-    $max_range = null;
-
-    if ($saved->getParameter('rangeStart')) {
-      $min_range = $saved->getParameter('rangeStart');
-    }
-
-    if ($saved->getParameter('rangeEnd')) {
-      $max_range = $saved->getParameter('rangeEnd');
-    }
+    $min_range = $this->getDateFrom($saved)->getEpoch();
+    $max_range = $this->getDateTo($saved)->getEpoch();
 
     if ($saved->getParameter('display') == 'month') {
       list($start_month, $start_year) = $this->getDisplayMonthAndYear($saved);
@@ -130,8 +122,31 @@ final class PhabricatorCalendarEventSearchEngine
     AphrontFormView $form,
     PhabricatorSavedQuery $saved) {
 
-    $range_start = $saved->getParameter('rangeStart');
-    $range_end = $saved->getParameter('rangeEnd');
+    $range_start = $this->getDateFrom($saved);
+    $e_start = null;
+
+    $range_end = $this->getDateTo($saved);
+    $e_end = null;
+
+    if (!$range_start->isValid()) {
+      $this->addError(pht('Start date is not valid.'));
+      $e_start = pht('Invalid');
+    }
+
+    if (!$range_end->isValid()) {
+      $this->addError(pht('End date is not valid.'));
+      $e_end = pht('Invalid');
+    }
+
+    $start_epoch = $range_start->getEpoch();
+    $end_epoch = $range_end->getEpoch();
+
+    if ($start_epoch && $end_epoch && ($start_epoch > $end_epoch)) {
+      $this->addError(pht('End date must be after start date.'));
+      $e_start = pht('Invalid');
+      $e_end = pht('Invalid');
+    }
+
     $upcoming = $saved->getParameter('upcoming');
     $is_cancelled = $saved->getParameter('isCancelled', 'active');
     $display = $saved->getParameter('display', 'month');
@@ -167,14 +182,14 @@ final class PhabricatorCalendarEventSearchEngine
           ->setLabel(pht('Occurs After'))
           ->setUser($this->requireViewer())
           ->setName('rangeStart')
-          ->setAllowNull(true)
+          ->setError($e_start)
           ->setValue($range_start))
       ->appendChild(
         id(new AphrontFormDateControl())
           ->setLabel(pht('Occurs Before'))
           ->setUser($this->requireViewer())
           ->setName('rangeEnd')
-          ->setAllowNull(true)
+          ->setError($e_end)
           ->setValue($range_end))
       ->appendChild(
         id(new AphrontFormCheckboxControl())
@@ -391,9 +406,9 @@ final class PhabricatorCalendarEventSearchEngine
       $start_year = $this->calendarYear;
       $start_month = $this->calendarMonth;
     } else {
-      $epoch = $query->getParameter('rangeStart');
+      $epoch = $this->getDateFrom($query)->getEpoch();
       if (!$epoch) {
-        $epoch = $query->getParameter('rangeEnd');
+        $epoch = $this->getDateTo($query)->getEpoch();
         if (!$epoch) {
           $epoch = time();
         }
@@ -429,6 +444,32 @@ final class PhabricatorCalendarEventSearchEngine
 
   public function getPageSize(PhabricatorSavedQuery $saved) {
     return $saved->getParameter('limit', 1000);
+  }
+
+  private function getDateFrom(PhabricatorSavedQuery $saved) {
+    return $this->getDate($saved, 'rangeStart');
+  }
+
+  private function getDateTo(PhabricatorSavedQuery $saved) {
+    return $this->getDate($saved, 'rangeEnd');
+  }
+
+  private function getDate(PhabricatorSavedQuery $saved, $key) {
+    $viewer = $this->requireViewer();
+
+    $wild = $saved->getParameter($key);
+    if ($wild) {
+      $value = AphrontFormDateControlValue::newFromWild($viewer, $wild);
+    } else {
+      $value = AphrontFormDateControlValue::newFromEpoch(
+        $viewer,
+        PhabricatorTime::getNow());
+      $value->setEnabled(false);
+    }
+
+    $value->setOptional(true);
+
+    return $value;
   }
 
 }
