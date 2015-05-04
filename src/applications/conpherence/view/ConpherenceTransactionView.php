@@ -256,6 +256,8 @@ final class ConpherenceTransactionView extends AphrontView {
         $content = $transaction->getTitle();
         break;
       case ConpherenceTransactionType::TYPE_TITLE:
+      case ConpherenceTransactionType::TYPE_PICTURE:
+      case ConpherenceTransactionType::TYPE_PICTURE_CROP:
       case ConpherenceTransactionType::TYPE_PARTICIPANTS:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:

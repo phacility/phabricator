@@ -8,6 +8,7 @@ final class ConpherenceThread extends ConpherenceDAO
     PhabricatorDestructibleInterface {
 
   protected $title;
+  protected $imagePHIDs = array();
   protected $isRoom = 0;
   protected $messageCount;
   protected $recentParticipantPHIDs = array();
@@ -21,7 +22,7 @@ final class ConpherenceThread extends ConpherenceDAO
   private $handles = self::ATTACHABLE;
   private $filePHIDs = self::ATTACHABLE;
   private $widgetData = self::ATTACHABLE;
-  private $images = array();
+  private $images = self::ATTACHABLE;
 
   public static function initializeNewThread(PhabricatorUser $sender) {
     return id(new ConpherenceThread())
@@ -29,6 +30,7 @@ final class ConpherenceThread extends ConpherenceDAO
       ->setTitle('')
       ->attachParticipants(array())
       ->attachFilePHIDs(array())
+      ->attachImages(array())
       ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
       ->setEditPolicy(PhabricatorPolicies::POLICY_USER)
       ->setJoinPolicy(PhabricatorPolicies::POLICY_USER);
@@ -42,6 +44,7 @@ final class ConpherenceThread extends ConpherenceDAO
       ->setTitle('')
       ->attachParticipants(array())
       ->attachFilePHIDs(array())
+      ->attachImages(array())
       ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
       ->setEditPolicy($creator->getPHID())
       ->setJoinPolicy(PhabricatorPolicies::POLICY_USER);
@@ -52,6 +55,7 @@ final class ConpherenceThread extends ConpherenceDAO
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
         'recentParticipantPHIDs' => self::SERIALIZATION_JSON,
+        'imagePHIDs' => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'title' => 'text255?',
@@ -87,6 +91,34 @@ final class ConpherenceThread extends ConpherenceDAO
 
   public function getMonogram() {
     return 'Z'.$this->getID();
+  }
+
+  public function getImagePHID($size) {
+    $image_phids = $this->getImagePHIDs();
+    return idx($image_phids, $size);
+  }
+  public function setImagePHID($phid, $size) {
+    $image_phids = $this->getImagePHIDs();
+    $image_phids[$size] = $phid;
+    return $this->setImagePHIDs($image_phids);
+  }
+
+  public function getImage($size) {
+    $images = $this->getImages();
+    return idx($images, $size);
+  }
+  public function setImage(PhabricatorFile $file, $size) {
+    $files = $this->getImages();
+    $files[$size] = $file;
+    return $this->attachImages($files);
+  }
+  public function attachImages(array $files) {
+    assert_instances_of($files, 'PhabricatorFile');
+    $this->images = $files;
+    return $this;
+  }
+  private function getImages() {
+    return $this->assertAttached($this->images);
   }
 
   public function attachParticipants(array $participants) {
@@ -157,6 +189,16 @@ final class ConpherenceThread extends ConpherenceDAO
     return $this->assertAttached($this->widgetData);
   }
 
+  public function loadImageURI($size) {
+    $file = $this->getImage($size);
+
+    if ($file) {
+      return $file->getBestURI();
+    }
+
+    return PhabricatorUser::getDefaultProfileImageURI();
+  }
+
   public function getDisplayData(PhabricatorUser $user) {
     if ($this->hasAttachedTransactions()) {
       $transactions = $this->getTransactions();
@@ -201,7 +243,10 @@ final class ConpherenceThread extends ConpherenceDAO
     }
 
     $img_src = null;
-    if ($lucky_handle) {
+    $size = ConpherenceImageData::SIZE_CROP;
+    if ($this->getImagePHID($size)) {
+      $img_src = $this->getImage($size)->getBestURI();
+    } else if ($lucky_handle) {
       $img_src = $lucky_handle->getImageURI();
     }
 

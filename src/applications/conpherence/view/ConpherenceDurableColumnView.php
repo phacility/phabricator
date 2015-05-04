@@ -412,7 +412,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
       array(
         'name' => $rename_label,
         'disabled' => !$can_edit,
-        'href' => '/conpherence/update/'.$conpherence->getID().'/',
+        'href' => '/conpherence/update/'.$conpherence->getID().'/?nopic',
         'icon' => 'fa-pencil',
         'key' => ConpherenceUpdateActions::METADATA,
       ),

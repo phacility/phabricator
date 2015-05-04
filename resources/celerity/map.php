@@ -356,6 +356,7 @@ return array(
     'rsrc/js/application/auth/behavior-persona-login.js' => '9414ff18',
     'rsrc/js/application/config/behavior-reorder-fields.js' => '14a827de',
     'rsrc/js/application/conpherence/ConpherenceThreadManager.js' => '6709c934',
+    'rsrc/js/application/conpherence/behavior-drag-and-drop-photo.js' => 'cf86d16a',
     'rsrc/js/application/conpherence/behavior-durable-column.js' => '657c2b50',
     'rsrc/js/application/conpherence/behavior-menu.js' => '804b0773',
     'rsrc/js/application/conpherence/behavior-pontificate.js' => '21ba5861',
@@ -561,6 +562,7 @@ return array(
     'javelin-behavior-audit-preview' => 'd835b03a',
     'javelin-behavior-choose-control' => '6153c708',
     'javelin-behavior-config-reorder-fields' => '14a827de',
+    'javelin-behavior-conpherence-drag-and-drop-photo' => 'cf86d16a',
     'javelin-behavior-conpherence-menu' => '804b0773',
     'javelin-behavior-conpherence-pontificate' => '21ba5861',
     'javelin-behavior-conpherence-widget-pane' => '93568464',
@@ -1788,6 +1790,12 @@ return array(
       'javelin-dom',
       'javelin-stratcom',
       'phabricator-phtize',
+    ),
+    'cf86d16a' => array(
+      'javelin-behavior',
+      'javelin-dom',
+      'javelin-workflow',
+      'phabricator-drag-and-drop-file-upload',
     ),
     'd19198c8' => array(
       'javelin-install',

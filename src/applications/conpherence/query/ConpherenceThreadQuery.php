@@ -11,6 +11,8 @@ final class ConpherenceThreadQuery
   private $isRoom;
   private $needParticipants;
   private $needWidgetData;
+  private $needCropPics;
+  private $needOrigPics;
   private $needTransactions;
   private $needParticipantCache;
   private $needFilePHIDs;
@@ -36,6 +38,16 @@ final class ConpherenceThreadQuery
 
   public function needWidgetData($need_widget_data) {
     $this->needWidgetData = $need_widget_data;
+    return $this;
+  }
+
+  public function needCropPics($need) {
+    $this->needCropPics = $need;
+    return $this;
+  }
+
+  public function needOrigPics($need_widget_data) {
+    $this->needOrigPics = $need_widget_data;
     return $this;
   }
 
@@ -121,6 +133,15 @@ final class ConpherenceThreadQuery
       }
       if ($this->needWidgetData) {
         $this->loadWidgetData($conpherences);
+      }
+      if ($this->needOrigPics || $this->needCropPics) {
+        $this->initImages($conpherences);
+      }
+      if ($this->needOrigPics) {
+        $this->loadOrigPics($conpherences);
+      }
+      if ($this->needCropPics) {
+        $this->loadCropPics($conpherences);
       }
     }
 
@@ -390,6 +411,50 @@ final class ConpherenceThreadQuery
         'files_authors' => $files_authors,
       );
       $conpherence->attachWidgetData($widget_data);
+    }
+
+    return $this;
+  }
+
+  private function loadOrigPics(array $conpherences) {
+    return $this->loadPics(
+      $conpherences,
+      ConpherenceImageData::SIZE_ORIG);
+  }
+
+  private function loadCropPics(array $conpherences) {
+    return $this->loadPics(
+      $conpherences,
+      ConpherenceImageData::SIZE_CROP);
+  }
+
+  private function initImages($conpherences) {
+    foreach ($conpherences as $conpherence) {
+      $conpherence->attachImages(array());
+    }
+  }
+
+  private function loadPics(array $conpherences, $size) {
+    $conpherence_pic_phids = array();
+    foreach ($conpherences as $conpherence) {
+      $phid = $conpherence->getImagePHID($size);
+      if ($phid) {
+        $conpherence_pic_phids[$conpherence->getPHID()] = $phid;
+      }
+    }
+
+    if (!$conpherence_pic_phids) {
+      return $this;
+    }
+
+    $files = id(new PhabricatorFileQuery())
+      ->setViewer($this->getViewer())
+      ->withPHIDs($conpherence_pic_phids)
+      ->execute();
+    $files = mpull($files, null, 'getPHID');
+
+    foreach ($conpherence_pic_phids as $conpherence_phid => $pic_phid) {
+      $conpherences[$conpherence_phid]->setImage($files[$pic_phid], $size);
     }
 
     return $this;
