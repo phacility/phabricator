@@ -179,6 +179,22 @@ final class AphrontFormDateControlValue extends Phobject {
       return null;
     }
 
+    $colloquial = array(
+      'elevenses' => '11:00 AM',
+      'morning tea' => '11:00 AM',
+      'noon' => '12:00 PM',
+      'high noon' => '12:00 PM',
+      'lunch' => '12:00 PM',
+      'tea time' => '3:00 PM',
+      'witching hour' => '12:00 AM',
+      'midnight' => '12:00 AM',
+    );
+
+    $normalized = phutil_utf8_strtolower($time);
+    if (isset($colloquial[$normalized])) {
+      $time = $colloquial[$normalized];
+    }
+
     try {
       $date = new DateTime("{$year}-{$month}-{$day} {$time}", $zone);
       $value = $date->format('U');
