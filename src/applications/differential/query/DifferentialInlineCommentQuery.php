@@ -148,6 +148,13 @@ final class DifferentialInlineCommentQuery
     assert_instances_of($new, 'DifferentialChangeset');
 
     $viewer = $this->getViewer();
+
+    $pref = $viewer->loadPreferences()->getPreference(
+      PhabricatorUserPreferences::PREFERENCE_DIFF_GHOSTS);
+    if ($pref == 'disabled') {
+      return $inlines;
+    }
+
     $all = array_merge($old, $new);
 
     $changeset_ids = mpull($inlines, 'getChangesetID');
