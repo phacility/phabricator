@@ -26,7 +26,7 @@ final class PhabricatorMentionRemarkupRule extends PhutilRemarkupRule {
       $text);
   }
 
-  protected function markupMention($matches) {
+  protected function markupMention(array $matches) {
     $engine = $this->getEngine();
 
     if ($engine->isTextMode()) {

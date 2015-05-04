@@ -15,7 +15,7 @@ final class PhabricatorMemeRemarkupRule extends PhutilRemarkupRule {
       $text);
   }
 
-  public function markupMeme($matches) {
+  public function markupMeme(array $matches) {
     if (!$this->isFlatText($matches[0])) {
       return $matches[0];
     }

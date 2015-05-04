@@ -12,7 +12,11 @@ final class PholioRemarkupRule extends PhabricatorObjectRemarkupRule {
     return '[1-9]\d*(?:/[1-9]\d*/?)?';
   }
 
-  protected function getObjectHref($object, $handle, $id) {
+  protected function getObjectHref(
+    $object,
+    PhabricatorObjectHandle $handle,
+    $id) {
+
     $href = $handle->getURI();
 
     // If the ID has a `M123/456` component, link to that specific image.
@@ -51,7 +55,11 @@ final class PholioRemarkupRule extends PhabricatorObjectRemarkupRule {
     return $results;
   }
 
-  protected function renderObjectEmbed($object, $handle, $options) {
+  protected function renderObjectEmbed(
+    $object,
+    PhabricatorObjectHandle $handle,
+    $options) {
+
     $embed_mock = id(new PholioMockEmbedView())
       ->setMock($object);
 
