@@ -26,6 +26,11 @@ final class PhabricatorConduitAPIController
     $log->setMethod($method);
     $metadata = array();
 
+    $multimeter = MultimeterControl::getInstance();
+    if ($multimeter) {
+      $multimeter->setEventContext('api.'.$method);
+    }
+
     try {
 
       list($metadata, $params) = $this->decodeConduitParams($request, $method);
