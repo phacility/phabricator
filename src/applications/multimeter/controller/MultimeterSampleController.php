@@ -56,7 +56,10 @@ final class MultimeterSampleController extends MultimeterController {
 
     $data = queryfx_all(
       $conn,
-      'SELECT *, count(*) N, SUM(sampleRate * resourceCost) as totalCost
+      'SELECT *,
+          count(*) AS N,
+          SUM(sampleRate * resourceCost) AS totalCost,
+          SUM(sampleRate * resourceCost) / SUM(sampleRate) AS averageCost
         FROM %T
         WHERE %Q
         GROUP BY %Q
@@ -177,7 +180,7 @@ final class MultimeterSampleController extends MultimeterController {
         MultimeterEvent::formatResourceCost(
           $viewer,
           $row['eventType'],
-          $row['totalCost'] / $row['N']),
+          $row['averageCost']),
         MultimeterEvent::formatResourceCost(
           $viewer,
           $row['eventType'],
