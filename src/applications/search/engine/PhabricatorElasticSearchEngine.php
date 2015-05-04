@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
+final class PhabricatorElasticSearchEngine extends PhabricatorSearchEngine {
   private $uri;
   private $index;
   private $timeout;
