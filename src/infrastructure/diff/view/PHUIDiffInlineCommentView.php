@@ -13,4 +13,8 @@ abstract class PHUIDiffInlineCommentView extends AphrontView {
     return $this;
   }
 
+  public function getScaffoldCellID() {
+    return null;
+  }
+
 }

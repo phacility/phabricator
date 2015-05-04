@@ -2,9 +2,8 @@
  * @provides phui-inline-comment-view-css
  */
 
-.differential-comment-list .anchor-target {
-  background-color: #ffffdd;
-  border-color: #ffff00;
+.differential-diff td.anchor-target {
+  background: {$lightyellow};
 }
 
 /*  In the document, the anchor is positioned inside the inline comment, but

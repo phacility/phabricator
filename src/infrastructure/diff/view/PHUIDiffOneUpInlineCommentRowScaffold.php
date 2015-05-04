@@ -19,6 +19,7 @@ final class PHUIDiffOneUpInlineCommentRowScaffold
     $attrs = array(
       'colspan' => 3,
       'class' => 'right3',
+      'id' => $inline->getScaffoldCellID(),
     );
 
     $cells = array(

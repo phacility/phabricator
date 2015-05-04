@@ -71,8 +71,23 @@ final class PHUIDiffInlineCommentDetailView
     return $this->objectOwnerPHID;
   }
 
-  public function render() {
+  public function getAnchorName() {
+    $inline = $this->inlineComment;
+    if ($inline->getID()) {
+      return 'inline-'.$inline->getID();
+    }
+    return null;
+  }
 
+  public function getScaffoldCellID() {
+    $anchor = $this->getAnchorName();
+    if ($anchor) {
+      return 'anchor-'.$anchor;
+    }
+    return null;
+  }
+
+  public function render() {
     require_celerity_resource('phui-inline-comment-view-css');
     $inline = $this->inlineComment;
 
@@ -218,7 +233,7 @@ final class PHUIDiffInlineCommentDetailView
       }
     }
 
-    $anchor_name = 'inline-'.$inline->getID();
+    $anchor_name = $this->getAnchorName();
 
     if ($this->editable && !$this->preview) {
       $edit_button = id(new PHUIButtonView())
