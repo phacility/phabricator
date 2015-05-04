@@ -428,9 +428,9 @@ final class PhabricatorCalendarEventSearchEngine
       $start_month = $this->calendarMonth;
       $start_day = $this->calendarDay;
     } else {
-      $epoch = $query->getParameter('rangeStart');
+      $epoch = $this->getDateFrom($query)->getEpoch();
       if (!$epoch) {
-        $epoch = $query->getParameter('rangeEnd');
+        $epoch = $this->getDateTo($query)->getEpoch();
         if (!$epoch) {
           $epoch = time();
         }
