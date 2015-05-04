@@ -375,6 +375,7 @@ final class PhabricatorCalendarEventSearchEngine
       $event->setEpochRange($status->getDateFrom(), $status->getDateTo());
 
       $event->setName($status->getName());
+      $event->setURI('/'.$status->getMonogram());
       $day_view->addEvent($event);
     }
 

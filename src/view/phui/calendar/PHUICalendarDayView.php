@@ -34,20 +34,32 @@ final class PHUICalendarDayView extends AphrontView {
       $cell_time = phutil_tag(
         'td',
         array('class' => 'phui-calendar-day-hour'),
-        $hour->format('g:i A'));
+        $hour->format('g A'));
 
-      $event_boxes = array();
+      $events = array();
+      $hour_start = $hour->format('U');
+      $hour_end = id(clone $hour)->modify('+1 hour')->format('U');
       foreach ($this->events as $event) {
-        if ($event->getEpochStart() >= $hour->format('U')
-          && $event->getEpochStart() < $hour->modify('+1 hour')->format('U')) {
-          $event_boxes[] = $this->drawEvent($event);
+        if ($event->getEpochStart() >= $hour_start
+          && $event->getEpochStart() < $hour_end) {
+          $events[] = $event;
         }
+      }
+
+      $count_events = count($events);
+      $event_boxes = array();
+      $n = 0;
+      foreach ($events as $event) {
+        $offset = (($n / $count_events) * 100).'%';
+        $width = ((1 / $count_events) * 100).'%';
+        $event_boxes[] = $this->drawEvent($event, $offset, $width);
+        $n++;
       }
 
       // events starting in time slot
       $cell_event = phutil_tag(
         'td',
-        array(),
+        array('class' => 'phui-calendar-day-events'),
         $event_boxes);
 
 
@@ -72,15 +84,24 @@ final class PHUICalendarDayView extends AphrontView {
 
   }
 
-  private function drawEvent(AphrontCalendarDayEventView $event) {
+  private function drawEvent(
+    AphrontCalendarDayEventView $event,
+    $offset,
+    $width) {
     $name = phutil_tag(
-      'div',
-      array(),
+      'a',
+      array(
+        'class' => 'phui-calendar-day-event-link',
+        'href' => $event->getURI(),
+      ),
       $event->getName());
 
     $div = phutil_tag(
       'div',
-      array('class' => 'phui-calendar-day-event'),
+      array(
+        'class' => 'phui-calendar-day-event',
+        'style' => 'left: '.$offset.'; width: '.$width.';',
+      ),
       $name);
 
     return $div;

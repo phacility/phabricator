@@ -2,10 +2,10 @@
 
 final class AphrontCalendarDayEventView extends AphrontView {
 
-  private $event;
   private $epochStart;
   private $epochEnd;
   private $name;
+  private $uri;
 
   public function setName($name) {
     $this->name = $name;
@@ -14,6 +14,15 @@ final class AphrontCalendarDayEventView extends AphrontView {
 
   public function getName() {
     return $this->name;
+  }
+
+  public function setURI($uri) {
+    $this->uri = $uri;
+    return $this;
+  }
+
+  public function getURI() {
+    return $this->uri;
   }
 
   public function setEpochRange($start, $end) {

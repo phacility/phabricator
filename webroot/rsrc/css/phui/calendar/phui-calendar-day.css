@@ -9,27 +9,41 @@
 
 .phui-calendar-day-hour {
   width: 60px;
-  font-size: 10px;
+  color: {$lightgreytext};
+  text-align: right;
+  padding: 4px 4px;
+  border-right: 1px solid {$lightgreyborder};
 }
 
 .phui-calendar-day-view tr {
-  width: 100%;
   height: 60px;
-  border: 1px solid {$lightgreyborder};
 }
 
 .phui-calendar-day-view td {
   position: relative;
 }
 
+.phui-calendar-day-view tr + tr td.phui-calendar-day-events {
+  border-top: 1px solid {$lightgreyborder};
+}
+
 .phui-calendar-day-view td div.phui-calendar-day-event {
   width: 100%;
-  background-color: {$darkgreybackground};
   position: absolute;
   top: 0;
   bottom: 0;
 }
 
-.phui-calendar-day-view td div.phui-calendar-day-event div {
-  padding: 4px;
+.phui-calendar-day-event-link {
+  padding: 8px;
+  border: 1px solid {$blueborder};
+  background-color: {$bluebackground};
+  margin: 4px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  text-decoration: none;
+  color: {$greytext};
 }
