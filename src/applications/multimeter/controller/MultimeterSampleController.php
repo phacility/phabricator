@@ -84,6 +84,15 @@ final class MultimeterSampleController extends MultimeterController {
     $rows = array();
     foreach ($data as $row) {
 
+      if ($row['N'] == 1) {
+        $events_col = $row['id'];
+      } else {
+        $events_col = $this->renderGroupingLink(
+          $group,
+          'id',
+          pht('%s Events', new PhutilNumber($row['N'])));
+      }
+
       if (isset($group['request'])) {
         $request_col = $row['requestKey'];
         if (!$with['request']) {
@@ -168,9 +177,7 @@ final class MultimeterSampleController extends MultimeterController {
       }
 
       $rows[] = array(
-        ($row['N'] == 1)
-          ? $row['id']
-          : pht('%s Events', new PhutilNumber($row['N'])),
+        $events_col,
         $request_col,
         $viewer_col,
         $context_col,
@@ -209,7 +216,7 @@ final class MultimeterSampleController extends MultimeterController {
         ))
       ->setColumnClasses(
         array(
-          'n',
+          null,
           null,
           null,
           null,
@@ -241,6 +248,7 @@ final class MultimeterSampleController extends MultimeterController {
       'viewer' => pht('By Viewer'),
       'request' => pht('By Request'),
       'label' => pht('By Label'),
+      'id' => pht('By ID'),
     );
 
     $parts = array();
@@ -264,9 +272,13 @@ final class MultimeterSampleController extends MultimeterController {
       ));
   }
 
-  private function renderGroupingLink(array $group, $key) {
+  private function renderGroupingLink(array $group, $key, $name = null) {
     $group[] = $key;
     $uri = $this->getGroupURI($group);
+
+    if ($name === null) {
+      $name = pht('(All)');
+    }
 
     return phutil_tag(
       'a',
@@ -274,7 +286,7 @@ final class MultimeterSampleController extends MultimeterController {
         'href' => $uri,
         'style' => 'font-weight: bold',
       ),
-      pht('(All)'));
+      $name);
   }
 
   private function getGroupURI(array $group, $wipe = false) {
@@ -318,6 +330,7 @@ final class MultimeterSampleController extends MultimeterController {
       'viewer' => 'eventViewerID',
       'request' => 'requestKey',
       'label' => 'eventLabelID',
+      'id' => 'id',
     );
   }
 
