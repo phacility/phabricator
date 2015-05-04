@@ -6,6 +6,7 @@ final class PhortuneCartListController
   private $merchant;
   private $account;
   private $subscription;
+  private $engine;
 
   public function handleRequest(AphrontRequest $request) {
     $viewer = $this->getViewer();
@@ -14,7 +15,8 @@ final class PhortuneCartListController
     $account_id = $request->getURIData('accountID');
     $subscription_id = $request->getURIData('subscriptionID');
 
-    $engine = new PhortuneCartSearchEngine();
+    $engine = id(new PhortuneCartSearchEngine())
+      ->setViewer($viewer);
 
     if ($merchant_id) {
       $merchant = id(new PhortuneMerchantQuery())
@@ -65,6 +67,8 @@ final class PhortuneCartListController
       $engine->setSubscription($subscription);
     }
 
+    $this->engine = $engine;
+
     $controller = id(new PhabricatorApplicationSearchController())
       ->setQueryKey($request->getURIData('queryKey'))
       ->setSearchEngine($engine)
@@ -79,9 +83,7 @@ final class PhortuneCartListController
     $nav = new AphrontSideNavFilterView();
     $nav->setBaseURI(new PhutilURI($this->getApplicationURI()));
 
-    id(new PhortuneCartSearchEngine())
-      ->setViewer($viewer)
-      ->addNavigationItems($nav->getMenu());
+    $this->engine->addNavigationItems($nav->getMenu());
 
     $nav->selectFilter(null);
 
