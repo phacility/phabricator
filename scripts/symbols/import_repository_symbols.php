@@ -35,20 +35,21 @@ $args->parse(
         'be part of a single transaction.'),
     ),
     array(
-      'name'      => 'more',
+      'name'      => 'callsign',
       'wildcard'  => true,
     ),
   ));
 
-$more = $args->getArg('more');
-if (count($more) !== 1) {
+$callsigns = $args->getArg('callsign');
+if (count($callsigns) !== 1) {
   $args->printHelpAndExit();
 }
 
-$callsign   = head($more);
-$repository = id(new PhabricatorRepository())->loadOneWhere(
-  'callsign = %s',
-  $callsign);
+$callsign = head($callsigns);
+$repository = id(new PhabricatorRepositoryQuery())
+  ->setViewer(PhabricatorUser::getOmnipotentUser())
+  ->withCallsigns($callsigns)
+  ->executeOne();
 
 if (!$repository) {
   echo pht("Repository '%s' does not exist.", $callsign);
