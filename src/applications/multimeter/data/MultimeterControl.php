@@ -91,6 +91,8 @@ final class MultimeterControl {
       throw new Exception(pht('Call setSampleRate() before saving events!'));
     }
 
+    $this->addServiceEvents();
+
     // Don't sample any of this stuff.
     $this->pauseMultimeter();
 
@@ -191,7 +193,7 @@ final class MultimeterControl {
       if (isset($map[$name])) {
         continue;
       }
-      $need[] = $name;
+      $need[$name] = $name;
     }
 
     foreach ($need as $name) {
@@ -202,6 +204,89 @@ final class MultimeterControl {
     }
 
     return $map;
+  }
+
+  private function addServiceEvents() {
+    $events = PhutilServiceProfiler::getInstance()->getServiceCallLog();
+    foreach ($events as $event) {
+      $type = idx($event, 'type');
+      switch ($type) {
+        case 'exec':
+          $this->newEvent(
+            MultimeterEvent::TYPE_EXEC_TIME,
+            $label = $this->getLabelForCommandEvent($event['command']),
+            (1000000 * $event['duration']));
+          break;
+      }
+    }
+  }
+
+  private function getLabelForCommandEvent($command) {
+    $argv = preg_split('/\s+/', $command);
+
+    $bin = array_shift($argv);
+    $bin = basename($bin);
+    $bin = trim($bin, '"\'');
+
+    // It's important to avoid leaking details about command parameters,
+    // because some may be sensitive. Given this, it's not trivial to
+    // determine which parts of a command are arguments and which parts are
+    // flags.
+
+    // Rather than try too hard for now, just whitelist some workflows that we
+    // know about and record everything else generically. Overall, this will
+    // produce labels like "pygmentize" or "git log", discarding all flags and
+    // arguments.
+
+    $workflows = array(
+      'git' => array(
+        'log' => true,
+        'for-each-ref' => true,
+        'pull' => true,
+        'clone' => true,
+        'fetch' => true,
+        'cat-file' => true,
+        'init' => true,
+        'config' => true,
+        'remote' => true,
+        'rev-parse' => true,
+        'diff' => true,
+        'ls-tree' => true,
+      ),
+      'svn' => array(
+        'log' => true,
+        'diff' => true,
+      ),
+      'hg' => array(
+        'log' => true,
+        'locate' => true,
+        'pull' => true,
+        'clone' => true,
+        'init' => true,
+        'diff' => true,
+        'cat' => true,
+      ),
+      'svnadmin' => array(
+        'create' => true,
+      ),
+    );
+
+    $workflow = null;
+    $candidates = idx($workflows, $bin);
+    if ($candidates) {
+      foreach ($argv as $arg) {
+        if (isset($candidates[$arg])) {
+          $workflow = $arg;
+          break;
+        }
+      }
+    }
+
+    if ($workflow) {
+      return 'bin.'.$bin.' '.$workflow;
+    } else {
+      return 'bin.'.$bin;
+    }
   }
 
 }
