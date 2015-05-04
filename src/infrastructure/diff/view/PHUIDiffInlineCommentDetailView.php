@@ -128,12 +128,11 @@ final class PHUIDiffInlineCommentDetailView
     if ($ghost) {
       if ($ghost['new']) {
         $ghosticon = 'fa-fast-forward';
-        $reason = pht('View forward comment');
+        $reason = pht('View on forward revision');
       } else {
         $ghosticon = 'fa-fast-backward';
-        $reason = pht('View previous comment');
+        $reason = pht('View on previous revision');
       }
-      $ghost_id = celerity_generate_unique_node_id();
 
       $ghost_icon = id(new PHUIIconView())
         ->setIconFont($ghosticon)
@@ -143,16 +142,12 @@ final class PHUIDiffInlineCommentDetailView
             'tip' => $reason,
             'size' => 300,
           ));
-      $ghost_tag = javelin_tag(
+      $ghost_tag = phutil_tag(
         'a',
         array(
           'class' => 'ghost-icon',
-          'sigil' => 'jx-toggle-class',
-          'meta'  => array(
-            'map' => array(
-              $ghost_id => 'ghost-is-expanded',
-            ),
-          ),
+          'href' => $ghost['href'],
+          'target' => '_blank',
         ),
         $ghost_icon);
       $classes[] = 'inline-comment-ghost';
@@ -415,7 +410,6 @@ final class PHUIDiffInlineCommentDetailView
         'class' => $classes,
         'sigil' => $sigil,
         'meta'  => $metadata,
-        'id'    => $ghost_id,
       ),
       array(
         phutil_tag_div('differential-inline-comment-head grouped', array(

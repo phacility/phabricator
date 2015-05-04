@@ -47,7 +47,7 @@
   font-weight:  bold;
   color: {$darkbluetext};
   border-bottom: 1px solid {$sh-lightyellowborder};
-  padding: 4px 5px 2px 12px;
+  padding: 4px 5px 4px 12px;
   background-color: {$sh-yellowbackground};
 }
 
@@ -415,7 +415,7 @@
 }
 
 .ghost-icon .phui-icon-view {
-  padding: 7px 7px 8px;
+  padding: 8px 7px;
   font-size: 15px;
   color: {$lightbluetext};
 }
@@ -424,23 +424,8 @@
   color: {$sky};
 }
 
-.inline-comment-ghost .differential-inline-comment-content {
-  display: none;
-}
-
-.inline-comment-ghost.ghost-is-expanded .differential-inline-comment-content {
-  display: block;
-}
-
 .differential-inline-comment.inline-comment-ghost
   .differential-inline-comment-head {
-    border-bottom-color: transparent;
-    position: relative;
-}
-
-.differential-inline-comment.inline-comment-ghost.ghost-is-expanded
-  .differential-inline-comment-head {
-    border-bottom-color: {$thinblueborder};
     position: relative;
 }
 
