@@ -25,6 +25,7 @@ abstract class PhabricatorCustomFieldMonogramParser
       $prefix_regex.
       $infix_regex.
       '((?:'.$monogram_pattern.'[,\s]*)+)'.
+      '(?:\band\s+('.$monogram_pattern.'))?'.
       $suffix_regex.
       '(?:$|\b)'.
       '/';
@@ -42,12 +43,18 @@ abstract class PhabricatorCustomFieldMonogramParser
 
     $results = array();
     foreach ($matches as $set) {
+      $monograms = array_filter(preg_split('/[,\s]+/', $set[3][0]));
+
+      if (isset($set[4]) && $set[4][0]) {
+        $monograms[] = $set[4][0];
+      }
+
       $results[] = array(
         'match' => $set[0][0],
         'prefix' => $set[1][0],
         'infix' => $set[2][0],
-        'monograms' => array_filter(preg_split('/[,\s]+/', $set[3][0])),
-        'suffix' => idx(idx($set, 4, array()), 0, ''),
+        'monograms' => $monograms,
+        'suffix' => idx(idx($set, 5, array()), 0, ''),
         'offset' => $set[0][1],
       );
     }

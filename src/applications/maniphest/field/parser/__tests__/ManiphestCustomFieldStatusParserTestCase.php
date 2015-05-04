@@ -60,6 +60,16 @@ final class ManiphestCustomFieldStatusParserTestCase
           'offset' => 0,
         ),
       ),
+      'Fixes T123, T456, and T789.' => array(
+        array(
+          'match' => 'Fixes T123, T456, and T789',
+          'prefix' => 'Fixes',
+          'infix' => '',
+          'monograms' => array('T123', 'T456', 'T789'),
+          'suffix' => '',
+          'offset' => 0,
+        ),
+      ),
     );
 
     foreach ($map as $input => $expect) {
