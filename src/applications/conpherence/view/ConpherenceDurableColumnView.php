@@ -251,7 +251,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
         array(),
         array(
           $icon,
-          $data['js_title'],
+          $data['title'],
         ));
       $image = $data['image'];
       Javelin::initBehavior('phabricator-tooltips');
@@ -265,7 +265,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
             'meta' => array(
               'threadID' => $conpherence->getID(),
               'threadTitle' => hsprintf('%s', $thread_title),
-              'tip' => $data['js_title'],
+              'tip' => $data['title'],
               'align' => 'S',
             ),
           ),
