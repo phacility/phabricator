@@ -40,7 +40,11 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
     return $result;
   }
 
-  protected function getObjectHref($object, $handle, $id) {
+  protected function getObjectHref(
+    $object,
+    PhabricatorObjectHandle $handle,
+    $id) {
+
     return $handle->getURI();
   }
 
