@@ -387,6 +387,7 @@ final class PhabricatorCalendarEventSearchEngine
 
     foreach ($statuses as $status) {
       $event = new AphrontCalendarDayEventView();
+      $event->setEventID($status->getID());
       $event->setEpochRange($status->getDateFrom(), $status->getDateTo());
 
       $event->setName($status->getName());

@@ -27,57 +27,74 @@ final class PHUICalendarDayView extends AphrontView {
     $header_text = $day_of_week.', '.$header_text;
     $day_box->setHeaderText($header_text);
     $hours = $this->getHoursOfDay();
+    $hourly_events = array();
     $rows = array();
 
+    // sort events into buckets by their start time
+    // pretend no events overlap
     foreach ($hours as $hour) {
-      // time slot
-      $cell_time = phutil_tag(
-        'td',
-        array('class' => 'phui-calendar-day-hour'),
-        $hour->format('g A'));
-
       $events = array();
       $hour_start = $hour->format('U');
       $hour_end = id(clone $hour)->modify('+1 hour')->format('U');
       foreach ($this->events as $event) {
-        // check if start date is in hour slot
         if ($event->getEpochStart() >= $hour_start
           && $event->getEpochStart() < $hour_end) {
           $events[] = $event;
         }
       }
-
       $count_events = count($events);
-      $event_boxes = array();
       $n = 0;
-      // draw all events that start in this hour
-      // all times as epochs
       foreach ($events as $event) {
         $event_start = $event->getEpochStart();
         $event_end = $event->getEpochEnd();
 
-        $offset = (($n / $count_events) * 100).'%';
-        $width = ((1 / $count_events) * 100).'%';
         $top = ((($event_start - $hour_start) / ($hour_end - $hour_start))
           * 100).'%';
         $height = ((($event_end - $event_start) / ($hour_end - $hour_start))
           * 100).'%';
 
-        $event_boxes[] = $this->drawEvent(
-          $event,
-          $offset,
-          $width,
-          $top,
-          $height);
+        $hourly_events[$event->getEventID()] = array(
+          'hour' => $hour,
+          'event' => $event,
+          'offset' => '0',
+          'width' => '100%',
+          'top' => $top,
+          'height' => $height,
+        );
+
         $n++;
       }
+    }
 
-      // events starting in time slot
+    $clusters = $this->findClusters();
+    foreach ($clusters as $cluster) {
+      $hourly_events = $this->updateEventsFromCluster(
+        $cluster,
+        $hourly_events);
+    }
+
+    // actually construct table
+    foreach ($hours as $hour) {
+      $drawn_hourly_events = array();
+      $cell_time = phutil_tag(
+        'td',
+        array('class' => 'phui-calendar-day-hour'),
+        $hour->format('g A'));
+
+      foreach ($hourly_events as $hourly_event) {
+        if ($hourly_event['hour'] == $hour) {
+          $drawn_hourly_events[] = $this->drawEvent(
+            $hourly_event['event'],
+            $hourly_event['offset'],
+            $hourly_event['width'],
+            $hourly_event['top'],
+            $hourly_event['height']);
+        }
+      }
       $cell_event = phutil_tag(
         'td',
         array('class' => 'phui-calendar-day-events'),
-        $event_boxes);
-
+        $drawn_hourly_events);
 
       $row = phutil_tag(
         'tr',
@@ -98,6 +115,25 @@ final class PHUICalendarDayView extends AphrontView {
     $day_box->appendChild($table);
     return $day_box;
 
+  }
+
+  private function updateEventsFromCluster($cluster, $hourly_events) {
+    $cluster_size = count($cluster);
+
+    $n = 0;
+    foreach ($cluster as $cluster_member) {
+      $event_id = $cluster_member->getEventID();
+      $offset = (($n / $cluster_size) * 100).'%';
+      $width = ((1 / $cluster_size) * 100).'%';
+
+      if (isset($hourly_events[$event_id])) {
+        $hourly_events[$event_id]['offset'] = $offset;
+        $hourly_events[$event_id]['width'] = $width;
+      }
+      $n++;
+    }
+
+    return $hourly_events;
   }
 
   private function drawEvent(
@@ -170,5 +206,40 @@ final class PHUICalendarDayView extends AphrontView {
     $date = new DateTime("{$year}-{$month}-{$day} ", $timezone);
 
     return $date;
+  }
+
+  private function findClusters() {
+    $events = msort($this->events, 'getEpochStart');
+    $clusters = array();
+
+
+    foreach ($events as $event) {
+      $destination_cluster_key = null;
+      $event_start = $event->getEpochStart();
+      $event_end = $event->getEpochEnd();
+
+      foreach ($clusters as $key => $cluster) {
+        foreach ($cluster as $clustered_event) {
+          $compare_event_start = $clustered_event->getEpochStart();
+          $compare_event_end = $clustered_event->getEpochEnd();
+
+          if ($event_start < $compare_event_end
+            && $event_end > $compare_event_start) {
+            $destination_cluster_key = $key;
+            break;
+          }
+        }
+      }
+
+      if ($destination_cluster_key !== null) {
+        $clusters[$destination_cluster_key][] = $event;
+      } else {
+        $next_cluster = array();
+        $next_cluster[] = $event;
+        $clusters[] = $next_cluster;
+      }
+    }
+
+    return $clusters;
   }
 }

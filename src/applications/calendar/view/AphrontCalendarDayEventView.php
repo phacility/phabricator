@@ -2,10 +2,20 @@
 
 final class AphrontCalendarDayEventView extends AphrontView {
 
+  private $eventID;
   private $epochStart;
   private $epochEnd;
   private $name;
   private $uri;
+
+  public function setEventID($event_id) {
+    $this->eventID = $event_id;
+    return $this;
+  }
+
+  public function getEventID() {
+    return $this->eventID;
+  }
 
   public function setName($name) {
     $this->name = $name;
