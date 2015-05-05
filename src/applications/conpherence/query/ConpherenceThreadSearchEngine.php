@@ -174,8 +174,7 @@ final class ConpherenceThreadSearchEngine
     $list->setUser($viewer);
     foreach ($conpherences as $conpherence) {
       $created = phabricator_date($conpherence->getDateCreated(), $viewer);
-      $data = $conpherence->getDisplayData($viewer);
-      $title = $data['title'];
+      $title = $conpherence->getDisplayTitle($viewer);
 
       if ($conpherence->getIsRoom()) {
         $icon_name = $conpherence->getPolicyIconName($policy_objects);
