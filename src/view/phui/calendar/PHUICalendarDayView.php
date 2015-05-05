@@ -253,95 +253,28 @@ final class PHUICalendarDayView extends AphrontView {
     return $included_datetimes;
   }
 
-  private function getNumberOfDaysInMonth($month, $year) {
-    $user = $this->user;
-    $timezone = new DateTimeZone($user->getTimezoneIdentifier());
-
-    list($next_year, $next_month) = $this->getNextYearAndMonth($month, $year);
-
-    $end_date = new DateTime("{$next_year}-{$next_month}-01", $timezone);
-    $end_epoch = $end_date->format('U');
-
-    $days = 0;
-    for ($day = 1; $day <= 31; $day++) {
-      $day_date = new DateTime("{$year}-{$month}-{$day}", $timezone);
-      $day_epoch = $day_date->format('U');
-      if ($day_epoch >= $end_epoch) {
-        break;
-      } else {
-        $days++;
-      }
-    }
-
-    return $days;
-  }
-
   private function getPrevDay() {
-    $day = $this->day;
-    $month = $this->month;
-    $year = $this->year;
-
-    $prev_year = $year;
-    $prev_month = $month;
-    $prev_day = $day - 1;
-    if ($prev_day == 0) {
-      $prev_month--;
-      if ($prev_month == 0) {
-        $prev_year--;
-        $prev_month = 12;
-      }
-      $prev_day = $this->getNumberOfDaysInMonth($prev_month, $prev_year);
-    }
-
-    return array($prev_year, $prev_month, $prev_day);
+    $prev = $this->getDateTime();
+    $prev->modify('-1 day');
+    return array(
+      $prev->format('Y'),
+      $prev->format('m'),
+      $prev->format('d'),
+    );
   }
 
   private function getNextDay() {
-    $day = $this->day;
-    $month = $this->month;
-    $year = $this->year;
-
-    $next_year = $year;
-    $next_month = $month;
-    $next_day = $day + 1;
-    $days_in_month = $this->getNumberOfDaysInMonth($month, $year);
-    if ($next_day > $days_in_month) {
-      $next_day = 1;
-      $next_month++;
-    }
-    if ($next_month == 13) {
-      $next_year++;
-      $next_month = 1;
-    }
-
-    return array($next_year, $next_month, $next_day);
-  }
-
-  private function getNextYearAndMonth($month, $year) {
-    $next_year = $year;
-    $next_month = $month + 1;
-    if ($next_month == 13) {
-      $next_year = $year + 1;
-      $next_month = 1;
-    }
-
-    return array($next_year, $next_month);
-  }
-
-  private function getPrevYearAndMonth($month, $year) {
-    $prev_year = $year;
-    $prev_month = $month - 1;
-    if ($prev_month == 0) {
-      $prev_year = $year - 1;
-      $prev_month = 12;
-    }
-
-    return array($prev_year, $prev_month);
+    $next = $this->getDateTime();
+    $next->modify('+1 day');
+    return array(
+      $next->format('Y'),
+      $next->format('m'),
+      $next->format('d'),
+    );
   }
 
   private function getDateTime() {
     $user = $this->user;
-
     $timezone = new DateTimeZone($user->getTimezoneIdentifier());
 
     $day = $this->day;
