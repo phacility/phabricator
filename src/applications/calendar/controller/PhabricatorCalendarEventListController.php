@@ -10,10 +10,11 @@ final class PhabricatorCalendarEventListController
   public function handleRequest(AphrontRequest $request) {
     $year = $request->getURIData('year');
     $month = $request->getURIData('month');
+    $day = $request->getURIData('day');
     $engine = new PhabricatorCalendarEventSearchEngine();
 
     if ($month && $year) {
-      $engine->setCalendarYearAndMonth($year, $month);
+      $engine->setCalendarYearAndMonthAndDay($year, $month, $day);
     }
 
     $controller = id(new PhabricatorApplicationSearchController())

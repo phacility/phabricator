@@ -57,7 +57,8 @@ final class PhabricatorCalendarEventSearchEngine
     $max_range = $this->getDateTo($saved)->getEpoch();
 
     if ($saved->getParameter('display') == 'month') {
-      list($start_month, $start_year) = $this->getDisplayMonthAndYear($saved);
+      list($start_year, $start_month) =
+        $this->getDisplayYearAndMonthAndDay($saved);
       $start_day = 1;
 
       $end_year = ($start_month == 12) ? $start_year + 1 : $start_year;
@@ -226,9 +227,10 @@ final class PhabricatorCalendarEventSearchEngine
     return $names;
   }
 
-  public function setCalendarYearAndMonth($year, $month) {
+  public function setCalendarYearAndMonthAndDay($year, $month, $day = null) {
     $this->calendarYear = $year;
     $this->calendarMonth = $month;
+    $this->calendarDay = $day;
 
     return $this;
   }
@@ -309,7 +311,8 @@ final class PhabricatorCalendarEventSearchEngine
     $viewer = $this->requireViewer();
     $now = time();
 
-    list($start_month, $start_year) = $this->getDisplayMonthAndYear($query);
+    list($start_year, $start_month) =
+      $this->getDisplayYearAndMonthAndDay($query);
 
     $now_year  = phabricator_format_local_time($now, $viewer, 'Y');
     $now_month = phabricator_format_local_time($now, $viewer, 'm');
@@ -373,12 +376,12 @@ final class PhabricatorCalendarEventSearchEngine
     PhabricatorSavedQuery $query,
     array $handles) {
     $viewer = $this->requireViewer();
-    list($start_month, $start_year, $start_day) =
-      $this->getDisplayMonthAndYearAndDay($query);
+    list($start_year, $start_month, $start_day) =
+      $this->getDisplayYearAndMonthAndDay($query);
 
     $day_view = new PHUICalendarDayView(
-      $start_month,
       $start_year,
+      $start_month,
       $start_day);
 
     $day_view->setUser($viewer);
@@ -395,39 +398,19 @@ final class PhabricatorCalendarEventSearchEngine
       $day_view->addEvent($event);
     }
 
+    $day_view->setBrowseURI(
+      $this->getURI('query/'.$query->getQueryKey().'/'));
+
     return $day_view;
   }
 
-  private function getDisplayMonthAndYear(
+  private function getDisplayYearAndMonthAndDay(
     PhabricatorSavedQuery $query) {
     $viewer = $this->requireViewer();
-
-    // get month/year from url
     if ($this->calendarYear && $this->calendarMonth) {
       $start_year = $this->calendarYear;
       $start_month = $this->calendarMonth;
-    } else {
-      $epoch = $this->getDateFrom($query)->getEpoch();
-      if (!$epoch) {
-        $epoch = $this->getDateTo($query)->getEpoch();
-        if (!$epoch) {
-          $epoch = time();
-        }
-      }
-      $start_year  = phabricator_format_local_time($epoch, $viewer, 'Y');
-      $start_month = phabricator_format_local_time($epoch, $viewer, 'm');
-    }
-
-    return array($start_month, $start_year);
-  }
-
-  private function getDisplayMonthAndYearAndDay(
-    PhabricatorSavedQuery $query) {
-    $viewer = $this->requireViewer();
-    if ($this->calendarYear && $this->calendarMonth && $this->calendarDay) {
-      $start_year = $this->calendarYear;
-      $start_month = $this->calendarMonth;
-      $start_day = $this->calendarDay;
+      $start_day = $this->calendarDay ? $this->calendarDay : 1;
     } else {
       $epoch = $this->getDateFrom($query)->getEpoch();
       if (!$epoch) {
