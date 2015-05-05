@@ -561,7 +561,7 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     $body = parent::buildMailBody($object, $xactions);
     $body->addLinkSection(
       pht('CONPHERENCE DETAIL'),
-      PhabricatorEnv::getProductionURI('/conpherence/'.$object->getID().'/'));
+      PhabricatorEnv::getProductionURI('/'.$object->getMonogram()));
 
     return $body;
   }
