@@ -3,13 +3,7 @@
 final class PhabricatorPolicyEditController
   extends PhabricatorPolicyController {
 
-  private $phid;
-
-  public function willProcessRequest(array $data) {
-    $this->phid = idx($data, 'phid');
-  }
-
-  public function processRequest() {
+  public function handleRequest(AphrontRequest $request) {
     $request = $this->getRequest();
     $viewer = $request->getUser();
 
@@ -29,10 +23,11 @@ final class PhabricatorPolicyEditController
       'value' => null,
     );
 
-    if ($this->phid) {
+    $phid = $request->getURIData('phid');
+    if ($phid) {
       $policies = id(new PhabricatorPolicyQuery())
         ->setViewer($viewer)
-        ->withPHIDs(array($this->phid))
+        ->withPHIDs(array($phid))
         ->execute();
       if (!$policies) {
         return new Aphront404Response();
@@ -208,10 +203,18 @@ final class PhabricatorPolicyEditController
         'defaultRule' => $default_rule,
       ));
 
+    $title = pht('Custom Policy');
+
+    $key = $request->getStr('capability');
+    if ($key) {
+      $capability = PhabricatorPolicyCapability::getCapabilityByKey($key);
+      $title = pht('Custom "%s" Policy', $capability->getCapabilityName());
+    }
+
     $dialog = id(new AphrontDialogView())
       ->setWidth(AphrontDialogView::WIDTH_FULL)
       ->setUser($viewer)
-      ->setTitle(pht('Edit Policy'))
+      ->setTitle($title)
       ->appendChild($form)
       ->addSubmitButton(pht('Save Policy'))
       ->addCancelButton('#');
