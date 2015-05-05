@@ -191,7 +191,7 @@ final class PhabricatorWorkerLeaseQuery extends PhabricatorQuery {
     foreach ($data as $row) {
       $tasks[$row['id']]->setServerTime($row['_serverTime']);
       if ($row['_taskData']) {
-        $task_data = json_decode($row['_taskData'], true);
+        $task_data = phutil_json_decode($row['_taskData']);
       } else {
         $task_data = null;
       }

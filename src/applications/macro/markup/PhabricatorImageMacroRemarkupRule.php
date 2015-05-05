@@ -13,7 +13,7 @@ final class PhabricatorImageMacroRemarkupRule extends PhutilRemarkupRule {
       $text);
   }
 
-  public function markupImageMacro($matches) {
+  public function markupImageMacro(array $matches) {
     if ($this->macros === null) {
       $this->macros = array();
 

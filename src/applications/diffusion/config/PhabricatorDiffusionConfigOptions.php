@@ -60,7 +60,7 @@ final class PhabricatorDiffusionConfigOptions
           ))
         ->setDescription(pht('Controls whether Author can Close Audits.')),
 
-      $this->newOption('bugtraq.url', 'string', '')
+      $this->newOption('bugtraq.url', 'string', null)
         ->addExample('https://bugs.php.net/%BUGID%', pht('PHP bugs'))
         ->addExample('/%BUGID%', pht('Local Maniphest URL'))
         ->setDescription(pht(

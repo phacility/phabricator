@@ -178,15 +178,17 @@ final class PhabricatorProjectSearchEngine
 
   private function getStatusOptions() {
     return array(
-      'active' => pht('Show Only Active Projects'),
-      'all'    => pht('Show All Projects'),
+      'active'   => pht('Show Only Active Projects'),
+      'archived' => pht('Show Only Archived Projects'),
+      'all'      => pht('Show All Projects'),
     );
   }
 
   private function getStatusValues() {
     return array(
-      'active' => PhabricatorProjectQuery::STATUS_ACTIVE,
-      'all' => PhabricatorProjectQuery::STATUS_ANY,
+      'active'   => PhabricatorProjectQuery::STATUS_ACTIVE,
+      'archived' => PhabricatorProjectQuery::STATUS_ARCHIVED,
+      'all'      => PhabricatorProjectQuery::STATUS_ANY,
     );
   }
 

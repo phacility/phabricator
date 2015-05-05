@@ -8,6 +8,7 @@ final class ConpherenceThread extends ConpherenceDAO
     PhabricatorDestructibleInterface {
 
   protected $title;
+  protected $imagePHIDs = array();
   protected $isRoom = 0;
   protected $messageCount;
   protected $recentParticipantPHIDs = array();
@@ -21,7 +22,7 @@ final class ConpherenceThread extends ConpherenceDAO
   private $handles = self::ATTACHABLE;
   private $filePHIDs = self::ATTACHABLE;
   private $widgetData = self::ATTACHABLE;
-  private $images = array();
+  private $images = self::ATTACHABLE;
 
   public static function initializeNewThread(PhabricatorUser $sender) {
     return id(new ConpherenceThread())
@@ -29,6 +30,7 @@ final class ConpherenceThread extends ConpherenceDAO
       ->setTitle('')
       ->attachParticipants(array())
       ->attachFilePHIDs(array())
+      ->attachImages(array())
       ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
       ->setEditPolicy(PhabricatorPolicies::POLICY_USER)
       ->setJoinPolicy(PhabricatorPolicies::POLICY_USER);
@@ -42,6 +44,7 @@ final class ConpherenceThread extends ConpherenceDAO
       ->setTitle('')
       ->attachParticipants(array())
       ->attachFilePHIDs(array())
+      ->attachImages(array())
       ->setViewPolicy(PhabricatorPolicies::POLICY_USER)
       ->setEditPolicy($creator->getPHID())
       ->setJoinPolicy(PhabricatorPolicies::POLICY_USER);
@@ -52,6 +55,7 @@ final class ConpherenceThread extends ConpherenceDAO
       self::CONFIG_AUX_PHID => true,
       self::CONFIG_SERIALIZATION => array(
         'recentParticipantPHIDs' => self::SERIALIZATION_JSON,
+        'imagePHIDs' => self::SERIALIZATION_JSON,
       ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'title' => 'text255?',
@@ -87,6 +91,34 @@ final class ConpherenceThread extends ConpherenceDAO
 
   public function getMonogram() {
     return 'Z'.$this->getID();
+  }
+
+  public function getImagePHID($size) {
+    $image_phids = $this->getImagePHIDs();
+    return idx($image_phids, $size);
+  }
+  public function setImagePHID($phid, $size) {
+    $image_phids = $this->getImagePHIDs();
+    $image_phids[$size] = $phid;
+    return $this->setImagePHIDs($image_phids);
+  }
+
+  public function getImage($size) {
+    $images = $this->getImages();
+    return idx($images, $size);
+  }
+  public function setImage(PhabricatorFile $file, $size) {
+    $files = $this->getImages();
+    $files[$size] = $file;
+    return $this->attachImages($files);
+  }
+  public function attachImages(array $files) {
+    assert_instances_of($files, 'PhabricatorFile');
+    $this->images = $files;
+    return $this;
+  }
+  private function getImages() {
+    return $this->assertAttached($this->images);
   }
 
   public function attachParticipants(array $participants) {
@@ -157,18 +189,85 @@ final class ConpherenceThread extends ConpherenceDAO
     return $this->assertAttached($this->widgetData);
   }
 
-  public function getDisplayData(PhabricatorUser $user) {
+  public function loadImageURI($size) {
+    $file = $this->getImage($size);
+
+    if ($file) {
+      return $file->getBestURI();
+    }
+
+    return PhabricatorUser::getDefaultProfileImageURI();
+  }
+
+
+  /**
+   * Get the thread's display title for a user.
+   *
+   * If a thread doesn't have a title set, this will return a string describing
+   * recent participants.
+   *
+   * @param PhabricatorUser Viewer.
+   * @return string Thread title.
+   */
+  public function getDisplayTitle(PhabricatorUser $viewer) {
+    $title = $this->getTitle();
+    if (strlen($title)) {
+      return $title;
+    }
+
+    return $this->getRecentParticipantsString($viewer);
+  }
+
+
+  /**
+   * Get recent participants (other than the viewer) as a string.
+   *
+   * For example, this method might return "alincoln, htaft, gwashington...".
+   *
+   * @param PhabricatorUser Viewer.
+   * @return string Description of other participants.
+   */
+  private function getRecentParticipantsString(PhabricatorUser $viewer) {
+    $handles = $this->getHandles();
+    $phids = $this->getOtherRecentParticipantPHIDs($viewer);
+
+    $limit = 3;
+    $more = (count($phids) > $limit);
+    $phids = array_slice($phids, 0, $limit);
+
+    $names = array_select_keys($handles, $phids);
+    $names = mpull($names, 'getName');
+    $names = implode(', ', $names);
+
+    if ($more) {
+      $names = $names.'...';
+    }
+
+    return $names;
+  }
+
+
+  /**
+   * Get PHIDs for recent participants who are not the viewer.
+   *
+   * @param PhabricatorUser Viewer.
+   * @return list<phid> Participants who are not the viewer.
+   */
+  private function getOtherRecentParticipantPHIDs(PhabricatorUser $viewer) {
+    $phids = $this->getRecentParticipantPHIDs();
+    $phids = array_fuse($phids);
+    unset($phids[$viewer->getPHID()]);
+    return array_values($phids);
+  }
+
+
+  public function getDisplayData(PhabricatorUser $viewer) {
+    $handles = $this->getHandles();
+
     if ($this->hasAttachedTransactions()) {
       $transactions = $this->getTransactions();
     } else {
       $transactions = array();
-    }
-    $set_title = $this->getTitle();
-
-    if ($set_title) {
-      $title_mode = 'title';
-    } else {
-      $title_mode = 'recent';
     }
 
     if ($transactions) {
@@ -177,22 +276,7 @@ final class ConpherenceThread extends ConpherenceDAO
       $subtitle_mode = 'recent';
     }
 
-    $recent_phids = $this->getRecentParticipantPHIDs();
-    $handles = $this->getHandles();
-    // Luck has little to do with it really; most recent participant who
-    // isn't the user....
-    $lucky_phid = null;
-    $lucky_index = null;
-    $recent_title = null;
-    foreach ($recent_phids as $index => $phid) {
-      if ($phid == $user->getPHID()) {
-        continue;
-      }
-      $lucky_phid = $phid;
-      break;
-    }
-    reset($recent_phids);
-
+    $lucky_phid = head($this->getOtherRecentParticipantPHIDs($viewer));
     if ($lucky_phid) {
       $lucky_handle = $handles[$lucky_phid];
     } else {
@@ -201,40 +285,11 @@ final class ConpherenceThread extends ConpherenceDAO
     }
 
     $img_src = null;
-    if ($lucky_handle) {
+    $size = ConpherenceImageData::SIZE_CROP;
+    if ($this->getImagePHID($size)) {
+      $img_src = $this->getImage($size)->getBestURI();
+    } else if ($lucky_handle) {
       $img_src = $lucky_handle->getImageURI();
-    }
-
-    if ($title_mode == 'recent' || $subtitle_mode == 'recent') {
-      $count = 0;
-      $final = false;
-      foreach ($recent_phids as $phid) {
-        if ($phid == $user->getPHID()) {
-          continue;
-        }
-        $handle = $handles[$phid];
-        if ($recent_title) {
-          if ($final) {
-            $recent_title .= '...';
-            break;
-          } else {
-            $recent_title .= ', ';
-          }
-        }
-        $recent_title .= $handle->getName();
-        $count++;
-        $final = $count == 3;
-      }
-    }
-
-    switch ($title_mode) {
-      case 'recent':
-        $title = $recent_title;
-        $js_title = $recent_title;
-        break;
-      case 'title':
-        $title = $js_title = $this->getTitle();
-        break;
     }
 
     $message_title = null;
@@ -262,18 +317,18 @@ final class ConpherenceThread extends ConpherenceDAO
     }
     switch ($subtitle_mode) {
       case 'recent':
-        $subtitle = $recent_title;
+        $subtitle = $this->getRecentParticipantsString($viewer);
         break;
       case 'message':
         if ($message_title) {
           $subtitle = $message_title;
         } else {
-          $subtitle = $recent_title;
+          $subtitle = $this->getRecentParticipantsString($viewer);
         }
         break;
     }
 
-    $user_participation = $this->getParticipantIfExists($user->getPHID());
+    $user_participation = $this->getParticipantIfExists($viewer->getPHID());
     if ($user_participation) {
       $user_seen_count = $user_participation->getSeenMessageCount();
     } else {
@@ -281,9 +336,10 @@ final class ConpherenceThread extends ConpherenceDAO
     }
     $unread_count = $this->getMessageCount() - $user_seen_count;
 
+    $title = $this->getDisplayTitle($viewer);
+
     return array(
       'title' => $title,
-      'js_title' => $js_title,
       'subtitle' => $subtitle,
       'unread_count' => $unread_count,
       'epoch' => $this->getDateModified(),

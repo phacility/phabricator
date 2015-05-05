@@ -42,11 +42,9 @@ final class PhabricatorCalendarApplication extends PhabricatorApplication {
     return array(
       '/E(?P<id>[1-9]\d*)' => 'PhabricatorCalendarEventViewController',
       '/calendar/' => array(
-        '' => 'PhabricatorCalendarViewController',
-        'all/' => 'PhabricatorCalendarBrowseController',
+        '(?:query/(?P<queryKey>[^/]+)/(?:(?P<year>\d+)/(?P<month>\d+)/)?)?'
+          => 'PhabricatorCalendarEventListController',
         'event/' => array(
-          '(?:query/(?P<queryKey>[^/]+)/)?'
-            => 'PhabricatorCalendarEventListController',
           'create/'
             => 'PhabricatorCalendarEventEditController',
           'edit/(?P<id>[1-9]\d*)/'
@@ -55,6 +53,8 @@ final class PhabricatorCalendarApplication extends PhabricatorApplication {
             => 'PhabricatorCalendarEventCancelController',
           '(?P<action>join|decline|accept)/(?P<id>[1-9]\d*)/'
             => 'PhabricatorCalendarEventJoinController',
+          'comment/(?P<id>[1-9]\d*)/'
+            => 'PhabricatorCalendarEventCommentController',
         ),
       ),
     );
@@ -70,6 +70,20 @@ final class PhabricatorCalendarApplication extends PhabricatorApplication {
     $items[] = $item;
 
     return $items;
+  }
+
+  public function getMailCommandObjects() {
+    return array(
+      'event' => array(
+        'name' => pht('Email Commands: Events'),
+        'header' => pht('Interacting with Calendar Events'),
+        'object' => new PhabricatorCalendarEvent(),
+        'summary' => pht(
+          'This page documents the commands you can use to interact with '.
+          'events in Calendar. These commands work when creating new tasks '.
+          'via email and when replying to existing tasks.'),
+      ),
+    );
   }
 
 }

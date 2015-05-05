@@ -52,9 +52,12 @@ final class PhabricatorPolicyEditController
     $errors = array();
     if ($request->isFormPost()) {
       $data = $request->getStr('rules');
-      $data = @json_decode($data, true);
-      if (!is_array($data)) {
-        throw new Exception('Failed to JSON decode rule data!');
+      try {
+        $data = phutil_json_decode($data);
+      } catch (PhutilJSONParserException $ex) {
+        throw new PhutilProxyException(
+          pht('Failed to JSON decode rule data!'),
+          $ex);
       }
 
       $rule_data = array();

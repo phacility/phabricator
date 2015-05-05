@@ -7,9 +7,9 @@ final class PhabricatorDefaultSearchEngineSelector
     if (self::shouldUseElasticSearch()) {
       $elastic_host = PhabricatorEnv::getEnvConfig('search.elastic.host');
       $elastic_index = PhabricatorEnv::getEnvConfig('search.elastic.namespace');
-      return new PhabricatorSearchEngineElastic($elastic_host, $elastic_index);
+      return new PhabricatorElasticSearchEngine($elastic_host, $elastic_index);
     }
-    return new PhabricatorSearchEngineMySQL();
+    return new PhabricatorMySQLSearchEngine();
   }
 
   public static function shouldUseElasticSearch() {

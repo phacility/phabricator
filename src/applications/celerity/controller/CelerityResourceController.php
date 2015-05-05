@@ -101,8 +101,15 @@ abstract class CelerityResourceController extends PhabricatorController {
     $response->setMimeType($type_map[$type]);
 
     // NOTE: This is a piece of magic required to make WOFF fonts work in
-    // Firefox. Possibly we should generalize this.
-    if ($type == 'woff' || $type == 'woff2') {
+    // Firefox and IE. Possibly we should generalize this more.
+
+    $cross_origin_types = array(
+      'woff' => true,
+      'woff2' => true,
+      'eot' => true,
+    );
+
+    if (isset($cross_origin_types[$type])) {
       // We could be more tailored here, but it's not currently trivial to
       // generate a comprehensive list of valid origins (an install may have
       // arbitrarily many Phame blogs, for example), and we lose nothing by

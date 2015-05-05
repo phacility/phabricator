@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
+final class PhabricatorElasticSearchEngine extends PhabricatorSearchEngine {
   private $uri;
   private $index;
   private $timeout;
@@ -397,12 +397,13 @@ final class PhabricatorSearchEngineElastic extends PhabricatorSearchEngine {
       return null;
     }
 
-    $body = json_decode($body, true);
-    if (!is_array($body)) {
-      throw new Exception('elasticsearch server returned invalid JSON!');
+    try {
+      return phutil_json_decode($body);
+    } catch (PhutilJSONParserException $ex) {
+      throw new PhutilProxyException(
+        pht('ElasticSearch server returned invalid JSON!'),
+        $ex);
     }
-
-    return $body;
   }
 
 }

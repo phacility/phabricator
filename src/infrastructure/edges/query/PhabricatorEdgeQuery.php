@@ -201,7 +201,7 @@ final class PhabricatorEdgeQuery extends PhabricatorQuery {
             $data_ids);
           foreach ($data_rows as $row) {
             $data_map[$row['id']] = idx(
-              json_decode($row['data'], true),
+              phutil_json_decode($row['data']),
               'data');
           }
         }

@@ -124,7 +124,7 @@ abstract class PhabricatorBotBaseStreamingProtocolAdapter
       $message = substr($buffer, 0, $until + 1);
       $buffer = substr($buffer, $until + 2);
 
-      $m_obj = json_decode($message, true);
+      $m_obj = phutil_json_decode($message);
       if ($message = $this->processMessage($m_obj)) {
         return $message;
       }
@@ -149,7 +149,7 @@ abstract class PhabricatorBotBaseStreamingProtocolAdapter
 
     $output = trim($output);
     if (strlen($output)) {
-      return json_decode($output, true);
+      return phutil_json_decode($output);
     }
 
     return true;
@@ -165,6 +165,6 @@ abstract class PhabricatorBotBaseStreamingProtocolAdapter
 
   abstract protected function buildStreamingUrl($channel);
 
-  abstract protected function processMessage($raw_object);
+  abstract protected function processMessage(array $raw_object);
 
 }

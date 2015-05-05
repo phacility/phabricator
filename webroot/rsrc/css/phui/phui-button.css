@@ -26,19 +26,17 @@ button,
 a.button,
 a.button:visited,
 input[type="submit"] {
-  background-color: #3477ad;
+  background-color: {$blue};
+  border: 1px solid {$blue};
   color: white;
-  border: 1px solid #19558D;
   cursor: pointer;
   font-weight: bold;
   font-size: 13px;
   display: inline-block;
-  padding: 3px 12px 4px;
+  padding: 4px 14px 5px;
   text-align: center;
   white-space: nowrap;
   border-radius: 3px;
-  background-image: linear-gradient(to bottom, #3b86c4, #2b628f);
-  background-image: -webkit-linear-gradient(top, #3b86c4, #2b628f);
 }
 
 /* Buttons with images (full size only) */
@@ -50,24 +48,11 @@ a.icon:visited {
   text-indent: 29px;
 }
 
-button.black,
-a.black,
-a.black:visited {
-  background-color: #383838;
-  background-image: linear-gradient(to bottom, #505d65, #2d373c);
-  background-image: -webkit-linear-gradient(top, #505d65, #2d373c);
-  border: 1px solid {$darkgreytext};
-  border-bottom-color: #000;
-}
-
 button.green,
 a.green,
 a.green:visited {
-  background-color: #348e20;
-  background-image: linear-gradient(to bottom, #4e9b33, #158009);
-  background-image: -webkit-linear-gradient(top, #4e9b33, #158009);
-  border: 1px solid #3b6e22;
-  border-bottom-color: #2c5a15;
+  background-color: {$green};
+  border-color: {$green};
 }
 
 button.grey,
@@ -75,11 +60,8 @@ input[type="submit"].grey,
 a.grey,
 a.grey:visited {
   background-color: {$lightgreybackground};
-  background-image: linear-gradient(to bottom, #ffffff, #e6e6e6);
-  background-image: -webkit-linear-gradient(top, #ffffff, #e6e6e6);
   border-color: {$lightgreyborder};
   color: {$darkgreytext};
-  border-bottom-color: {$greyborder};
 }
 
 button.simple,
@@ -102,19 +84,6 @@ button[disabled] {
   opacity: 0.5;
 }
 
-body button:active,
-body a.button:active {
-  box-shadow: inset 0 0 4px rgba(0,0,0,.4);
-}
-
-button.grey:active,
-a.grey:active,
-button.grey_active,
-a.button.phuix-dropdown-open {
-  background-color: #7d7d7d;
-  box-shadow: inset 0 0 4px rgba(0,0,0,.2);
-}
-
 a.phuix-dropdown-open {
   color: {$greytext};
 }
@@ -122,7 +91,17 @@ a.phuix-dropdown-open {
 a.button:hover,
 button:hover {
   text-decoration: none;
-  box-shadow: inset 0 0 5px rgba(0,0,0,.4);
+  background-color: {$sky};
+}
+
+a.button.grey:hover,
+button.grey:hover {
+  background-color: #fff;
+}
+
+a.button.green:hover,
+button.green:hover {
+  background-color: #0DAD48;
 }
 
 a.button.simple:hover,
@@ -142,12 +121,6 @@ a.button.simple .phui-icon-view {
 a.button.simple.phuix-dropdown-open {
   background-color: #fff;
   box-shadow: none;
-}
-
-a.button.grey:hover,
-button.grey:hover {
-  text-decoration: none;
-  box-shadow: inset 0 0 4px rgba(0,0,0,.2);
 }
 
 body a.button.disabled:hover,
@@ -280,7 +253,7 @@ a.toggle-fixed {
 
 .dropdown .caret {
   margin-top: 7px;
-  margin-left: 4px;
+  margin-left: 6px;
 }
 
 .small.dropdown .caret {
@@ -299,12 +272,12 @@ a.toggle-fixed {
 .button .phui-icon-view {
   display: inline-block;
   position: absolute;
-  top: 5px;
-  left: 10px;
+  top: 6px;
+  left: 12px;
 }
 
 .phui-button-bar .button .phui-icon-view {
-  left: 9px;
+  left: 11px;
 }
 
 .button.has-icon .phui-button-text {

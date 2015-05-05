@@ -109,15 +109,8 @@ JX.behavior('fancy-datepicker', function() {
   };
 
   var redraw_inputs = function() {
-    var inputs = get_inputs();
     var disabled = JX.Stratcom.getData(root).disabled;
-    for (var k in inputs) {
-      if (disabled) {
-        inputs[k].setAttribute('disabled', 'disabled');
-      } else {
-        inputs[k].removeAttribute('disabled');
-      }
-    }
+    JX.DOM.alterClass(root, 'datepicker-disabled', disabled);
 
     var box = JX.DOM.scry(root, 'input', 'calendar-enable');
     if (box.length) {

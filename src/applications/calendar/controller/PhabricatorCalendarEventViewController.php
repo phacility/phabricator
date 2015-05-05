@@ -43,11 +43,26 @@ final class PhabricatorCalendarEventViewController
       ->setHeader($header)
       ->addPropertyList($properties);
 
+    $is_serious = PhabricatorEnv::getEnvConfig('phabricator.serious-business');
+    $add_comment_header = $is_serious
+      ? pht('Add Comment')
+      : pht('Add To Plate');
+    $draft = PhabricatorDraft::newFromUserAndKey($viewer, $event->getPHID());
+    $add_comment_form = id(new PhabricatorApplicationTransactionCommentView())
+      ->setUser($viewer)
+      ->setObjectPHID($event->getPHID())
+      ->setDraft($draft)
+      ->setHeaderText($add_comment_header)
+      ->setAction(
+        $this->getApplicationURI('/event/comment/'.$event->getID().'/'))
+      ->setSubmitButtonName(pht('Add Comment'));
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $box,
         $timeline,
+        $add_comment_form,
       ),
       array(
         'title' => $page_title,
@@ -185,6 +200,10 @@ final class PhabricatorCalendarEventViewController
         ->setTarget($target);
       $invitee_list->addItem($item);
     }
+
+    $properties->addProperty(
+      pht('Host'),
+      $viewer->renderHandle($event->getUserPHID()));
 
     $properties->addProperty(
       pht('Invitees'),

@@ -11,8 +11,9 @@ final class DiffusionLastModifiedController extends DiffusionController {
     $viewer = $request->getUser();
 
     $paths = $request->getStr('paths');
-    $paths = json_decode($paths, true);
-    if (!is_array($paths)) {
+    try {
+      $paths = phutil_json_decode($paths);
+    } catch (PhutilJSONParserException $ex) {
       return new Aphront400Response();
     }
 

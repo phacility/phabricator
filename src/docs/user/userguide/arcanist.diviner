@@ -66,8 +66,6 @@ Arcanist has some advanced features as well, you can:
   - execute Conduit method calls with ##arc call-conduit##
   - create or update libphutil libraries with ##arc liberate##
   - activate tab completion with ##arc shell-complete##
-  - install arc as a pre-commit hook with ##arc svn-hook-pre-commit## or
-    ##arc git-hook-pre-receive##
   - ...or extend Arcanist and add new commands.
 
 Except where otherwise noted, these workflows are generally agnostic to the

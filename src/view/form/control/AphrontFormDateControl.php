@@ -10,6 +10,8 @@ final class AphrontFormDateControl extends AphrontFormControl {
   private $valueYear;
   private $valueTime;
   private $allowNull;
+  private $continueOnInvalidDate = false;
+  private $isDisabled;
 
   public function setAllowNull($allow_null) {
     $this->allowNull = $allow_null;
@@ -84,6 +86,18 @@ final class AphrontFormDateControl extends AphrontFormControl {
   }
 
   public function setValue($epoch) {
+    if ($epoch instanceof AphrontFormDateControlValue) {
+      $this->continueOnInvalidDate = true;
+      $this->valueYear  = $epoch->getValueYear();
+      $this->valueMonth = $epoch->getValueMonth();
+      $this->valueDay   = $epoch->getValueDay();
+      $this->valueTime  = $epoch->getValueTime();
+      $this->allowNull = $epoch->getOptional();
+      $this->isDisabled = $epoch->isDisabled();
+
+      return parent::setValue($epoch->getEpoch());
+    }
+
     $result = parent::setValue($epoch);
 
     if ($epoch === null) {
@@ -165,11 +179,15 @@ final class AphrontFormDateControl extends AphrontFormControl {
   protected function renderInput() {
 
     $disabled = null;
-    if ($this->getValue() === null) {
+    if ($this->getValue() === null && !$this->continueOnInvalidDate) {
       $this->setValue($this->getInitialValue());
       if ($this->allowNull) {
         $disabled = 'disabled';
       }
+    }
+
+    if ($this->isDisabled) {
+      $disabled = 'disabled';
     }
 
     $min_year = $this->getMinYear();
@@ -216,7 +234,6 @@ final class AphrontFormDateControl extends AphrontFormControl {
       array(
         'name' => $this->getDayInputName(),
         'sigil' => 'day-input',
-        'disabled' => $disabled,
       ));
 
     $months_sel = AphrontFormSelectControl::renderSelectTag(
@@ -225,7 +242,6 @@ final class AphrontFormDateControl extends AphrontFormControl {
       array(
         'name' => $this->getMonthInputName(),
         'sigil' => 'month-input',
-        'disabled' => $disabled,
       ));
 
     $years_sel = AphrontFormSelectControl::renderSelectTag(
@@ -234,7 +250,6 @@ final class AphrontFormDateControl extends AphrontFormControl {
       array(
         'name'  => $this->getYearInputName(),
         'sigil' => 'year-input',
-        'disabled' => $disabled,
       ));
 
     $cicon = id(new PHUIIconView())
@@ -257,16 +272,21 @@ final class AphrontFormDateControl extends AphrontFormControl {
         'value' => $this->getTimeInputValue(),
         'type'  => 'text',
         'class' => 'aphront-form-date-time-input',
-        'disabled' => $disabled,
       ),
       '');
 
     Javelin::initBehavior('fancy-datepicker', array());
 
+    $classes = array();
+    $classes[] = 'aphront-form-date-container';
+    if ($disabled) {
+      $classes[] = 'datepicker-disabled';
+    }
+
     return javelin_tag(
       'div',
       array(
-        'class' => 'aphront-form-date-container',
+        'class' => implode(' ', $classes),
         'sigil' => 'phabricator-date-control',
         'meta'  => array(
           'disabled' => (bool)$disabled,

@@ -403,6 +403,19 @@ final class PhabricatorProjectTransactionEditor
     return parent::requireCapabilities($object, $xaction);
   }
 
+  /**
+   * Note: this is implemented for Feed purposes.
+   */
+  protected function getMailTo(PhabricatorLiskDAO $object) {
+    return array();
+  }
+
+  protected function shouldPublishFeedStory(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return true;
+  }
+
   protected function supportsSearch() {
     return true;
   }

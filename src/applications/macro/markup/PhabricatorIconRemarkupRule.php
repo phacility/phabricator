@@ -13,7 +13,7 @@ final class PhabricatorIconRemarkupRule extends PhutilRemarkupRule {
       $text);
   }
 
-  public function markupIcon($matches) {
+  public function markupIcon(array $matches) {
     $engine = $this->getEngine();
     $text_mode = $engine->isTextMode();
     $mail_mode = $engine->isHTMLMailMode();
@@ -72,7 +72,6 @@ final class PhabricatorIconRemarkupRule extends PhutilRemarkupRule {
 
     $icon_view = id(new PHUIIconView())
       ->setIconFont('fa-'.$icon, $color);
-
 
     return $this->getEngine()->storeText($icon_view);
   }

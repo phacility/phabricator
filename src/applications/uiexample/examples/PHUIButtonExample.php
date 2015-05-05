@@ -14,7 +14,7 @@ final class PHUIButtonExample extends PhabricatorUIExample {
     $request = $this->getRequest();
     $user = $request->getUser();
 
-    $colors = array('', 'green', 'grey', 'black', 'disabled');
+    $colors = array('', 'green', 'grey', 'disabled');
     $sizes = array('', 'small');
     $tags = array('a', 'button');
 
@@ -69,7 +69,6 @@ final class PHUIButtonExample extends PhabricatorUIExample {
    $colors = array(null,
      PHUIButtonView::GREEN,
      PHUIButtonView::GREY,
-     PHUIButtonView::BLACK,
      PHUIButtonView::DISABLED,
     );
    $sizes = array(null, PHUIButtonView::SMALL);

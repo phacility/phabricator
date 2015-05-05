@@ -446,6 +446,18 @@ table.aphront-form-control-checkbox-layout th {
   border-radius: 3px;
 }
 
+/* When the activation checkbox for the control is toggled off, visually
+disable the individual controls. We don't actually use the "disabled" property
+because we still want the values to submit. This is just a visual hint that
+the controls won't be used. The controls themselves are still live, work
+properly, and submit values. */
+.datepicker-disabled select,
+.datepicker-disabled .calendar-button,
+.datepicker-disabled input[type="text"] {
+  opacity: 0.5;
+}
+
+
 .login-to-comment {
   margin: 12px;
 }

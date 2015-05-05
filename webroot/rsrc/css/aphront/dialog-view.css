@@ -21,7 +21,7 @@
 
 .aphront-dialog-head .phui-action-header {
   border-bottom: 1px solid {$lightblueborder};
-  padding: 4px 16px;
+  padding: 8px 16px;
   white-space: nowrap;
 }
 
@@ -74,8 +74,8 @@
 }
 
 .jx-mask {
-  opacity: .75;
-  background: #fff;
+  opacity: .7;
+  background: #292f33;
   position: fixed;
   top: 0;
   left: 0;
@@ -84,8 +84,8 @@
 }
 
 .jx-dark-mask {
-  background: #000000;
-  opacity:    0.9;
+  background: #292f33;
+  opacity: 0.95;
 }
 
 .aphront-exception-dialog {

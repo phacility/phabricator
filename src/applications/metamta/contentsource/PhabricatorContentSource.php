@@ -32,7 +32,7 @@ final class PhabricatorContentSource {
   }
 
   public static function newFromSerialized($serialized) {
-    $dict = json_decode($serialized, true);
+    $dict = phutil_json_decode($serialized);
     if (!is_array($dict)) {
       $dict = array();
     }

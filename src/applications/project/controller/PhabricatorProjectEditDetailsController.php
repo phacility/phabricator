@@ -77,16 +77,14 @@ final class PhabricatorProjectEditDetailsController
       $v_icon = $request->getStr('icon');
       $v_locked = $request->getInt('is_membership_locked', 0);
 
-      $xactions = $field_list->buildFieldTransactionsFromRequest(
-        new PhabricatorProjectTransaction(),
-        $request);
-
       $type_name = PhabricatorProjectTransaction::TYPE_NAME;
       $type_slugs = PhabricatorProjectTransaction::TYPE_SLUGS;
       $type_edit = PhabricatorTransactions::TYPE_EDIT_POLICY;
       $type_icon = PhabricatorProjectTransaction::TYPE_ICON;
       $type_color = PhabricatorProjectTransaction::TYPE_COLOR;
       $type_locked = PhabricatorProjectTransaction::TYPE_LOCKED;
+
+      $xactions = array();
 
       $xactions[] = id(new PhabricatorProjectTransaction())
         ->setTransactionType($type_name)
@@ -119,6 +117,12 @@ final class PhabricatorProjectEditDetailsController
       $xactions[] = id(new PhabricatorProjectTransaction())
         ->setTransactionType($type_locked)
         ->setNewValue($v_locked);
+
+      $xactions = array_merge(
+        $xactions,
+        $field_list->buildFieldTransactionsFromRequest(
+          new PhabricatorProjectTransaction(),
+          $request));
 
       $editor = id(new PhabricatorProjectTransactionEditor())
         ->setActor($viewer)

@@ -140,13 +140,21 @@ final class DifferentialInlineCommentQuery
   public function adjustInlinesForChangesets(
     array $inlines,
     array $old,
-    array $new) {
+    array $new,
+    DifferentialRevision $revision) {
 
     assert_instances_of($inlines, 'DifferentialInlineComment');
     assert_instances_of($old, 'DifferentialChangeset');
     assert_instances_of($new, 'DifferentialChangeset');
 
     $viewer = $this->getViewer();
+
+    $pref = $viewer->loadPreferences()->getPreference(
+      PhabricatorUserPreferences::PREFERENCE_DIFF_GHOSTS);
+    if ($pref == 'disabled') {
+      return $inlines;
+    }
+
     $all = array_merge($old, $new);
 
     $changeset_ids = mpull($inlines, 'getChangesetID');
@@ -302,6 +310,11 @@ final class DifferentialInlineCommentQuery
       // If we found a changeset to port this comment to, bring it forward
       // or backward and mark it.
       if ($target_id) {
+        $diff_id = $changeset->getDiffID();
+        $inline_id = $inline->getID();
+        $revision_id = $revision->getID();
+        $href = "/D{$revision_id}?id={$diff_id}#inline-{$inline_id}";
+
         $inline
           ->makeEphemeral(true)
           ->setChangesetID($target_id)
@@ -309,6 +322,7 @@ final class DifferentialInlineCommentQuery
             array(
               'new' => $is_new,
               'reason' => $reason,
+              'href' => $href,
             ));
 
         $results[] = $inline;

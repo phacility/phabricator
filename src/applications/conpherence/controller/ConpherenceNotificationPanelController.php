@@ -17,6 +17,7 @@ final class ConpherenceNotificationPanelController
       $conpherences = id(new ConpherenceThreadQuery())
         ->setViewer($user)
         ->withPHIDs(array_keys($participant_data))
+        ->needCropPics(true)
         ->needTransactions(true)
         ->setTransactionLimit(3 * 5)
         ->needParticipantCache(true)

@@ -24,25 +24,25 @@ final class DiffusionSymbolController extends DiffusionController {
       $query->setLanguage($request->getStr('lang'));
     }
 
-    if ($request->getStr('projects')) {
-      $phids = $request->getStr('projects');
+    if ($request->getStr('repositories')) {
+      $phids = $request->getStr('repositories');
       $phids = explode(',', $phids);
       $phids = array_filter($phids);
 
       if ($phids) {
-        $projects = id(new PhabricatorRepositoryArcanistProject())
-          ->loadAllWhere(
-            'phid IN (%Ls)',
-            $phids);
-        $projects = mpull($projects, 'getID');
-        if ($projects) {
-          $query->setProjectIDs($projects);
+        $repos = id(new PhabricatorRepositoryQuery())
+          ->setViewer($request->getUser())
+          ->withPHIDs($phids)
+          ->execute();
+
+        $repos = mpull($repos, 'getPHID');
+        if ($repos) {
+          $query->withRepositoryPHIDs($repos);
         }
       }
     }
 
     $query->needPaths(true);
-    $query->needArcanistProjects(true);
     $query->needRepositories(true);
 
     $symbols = $query->execute();
@@ -73,13 +73,6 @@ final class DiffusionSymbolController extends DiffusionController {
 
     $rows = array();
     foreach ($symbols as $symbol) {
-      $project = $symbol->getArcanistProject();
-      if ($project) {
-        $project_name = $project->getName();
-      } else {
-        $project_name = '-';
-      }
-
       $file = $symbol->getPath();
       $line = $symbol->getLineNumber();
 
@@ -110,7 +103,7 @@ final class DiffusionSymbolController extends DiffusionController {
         $symbol->getSymbolContext(),
         $symbol->getSymbolName(),
         $symbol->getSymbolLanguage(),
-        $project_name,
+        $repo->getMonogram(),
         $location,
       );
     }
@@ -122,7 +115,7 @@ final class DiffusionSymbolController extends DiffusionController {
         pht('Context'),
         pht('Name'),
         pht('Language'),
-        pht('Project'),
+        pht('Repository'),
         pht('File'),
       ));
     $table->setColumnClasses(

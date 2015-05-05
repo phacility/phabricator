@@ -52,11 +52,13 @@ final class PHUIDiffTwoUpInlineCommentRowScaffold
 
     $left_attrs = array(
       'class' => 'left',
+      'id' => ($left_side ? $left_side->getScaffoldCellID() : null),
     );
 
     $right_attrs = array(
       'colspan' => 3,
       'class' => 'right3',
+      'id' => ($right_side ? $right_side->getScaffoldCellID() : null),
     );
 
     $cells = array(

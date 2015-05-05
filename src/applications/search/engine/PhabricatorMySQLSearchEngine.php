@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorSearchEngineMySQL extends PhabricatorSearchEngine {
+final class PhabricatorMySQLSearchEngine extends PhabricatorSearchEngine {
 
   public function reindexAbstractDocument(
     PhabricatorSearchAbstractDocument $doc) {

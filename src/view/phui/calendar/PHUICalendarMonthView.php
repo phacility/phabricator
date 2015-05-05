@@ -205,14 +205,11 @@ final class PHUICalendarMonthView extends AphrontView {
     // check for a browseURI, which means we need "fancy" prev / next UI
     $uri = $this->getBrowseURI();
     if ($uri) {
-      $uri = new PhutilURI($uri);
       list($prev_year, $prev_month) = $this->getPrevYearAndMonth();
-      $query = array('year' => $prev_year, 'month' => $prev_month);
-      $prev_uri = (string) $uri->setQueryParams($query);
+      $prev_uri = $uri.$prev_year.'/'.$prev_month.'/';
 
       list($next_year, $next_month) = $this->getNextYearAndMonth();
-      $query = array('year' => $next_year, 'month' => $next_month);
-      $next_uri = (string) $uri->setQueryParams($query);
+      $next_uri = $uri.$next_year.'/'.$next_month.'/';
 
       $button_bar = new PHUIButtonBarView();
 

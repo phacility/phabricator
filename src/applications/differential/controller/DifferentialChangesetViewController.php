@@ -193,7 +193,11 @@ final class DifferentialChangesetViewController extends DifferentialController {
         ->setViewer($viewer)
         ->withRevisionPHIDs(array($revision->getPHID()));
       $inlines = $query->execute();
-      $inlines = $query->adjustInlinesForChangesets($inlines, $old, $new);
+      $inlines = $query->adjustInlinesForChangesets(
+        $inlines,
+        $old,
+        $new,
+        $revision);
     } else {
       $inlines = array();
     }
