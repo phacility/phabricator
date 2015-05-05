@@ -86,7 +86,7 @@ final class DifferentialSetDiffPropertyConduitAPIMethod
   protected function execute(ConduitAPIRequest $request) {
     $diff_id = $request->getValue('diff_id');
     $name = $request->getValue('name');
-    $data = phutil_json_decode($request->getValue('data'));
+    $data = json_decode($request->getValue('data'), true);
 
     self::updateDiffProperty($diff_id, $name, $data);
 
