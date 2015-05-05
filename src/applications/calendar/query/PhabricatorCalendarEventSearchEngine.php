@@ -52,35 +52,35 @@ final class PhabricatorCalendarEventSearchEngine
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new PhabricatorCalendarEventQuery());
     $viewer = $this->requireViewer();
+    $timezone = new DateTimeZone($viewer->getTimezoneIdentifier());
 
     $min_range = $this->getDateFrom($saved)->getEpoch();
     $max_range = $this->getDateTo($saved)->getEpoch();
 
-    if ($saved->getParameter('display') == 'month') {
-      list($start_year, $start_month) =
+    if ($saved->getParameter('display') == 'month' ||
+      $saved->getParameter('display') == 'day') {
+      list($start_year, $start_month, $start_day) =
         $this->getDisplayYearAndMonthAndDay($saved);
-      $start_day = 1;
 
-      $end_year = ($start_month == 12) ? $start_year + 1 : $start_year;
-      $end_month = ($start_month == 12) ? 1 : $start_month + 1;
-      $end_day = 1;
+      $start_day = new DateTime(
+        "{$start_year}-{$start_month}-{$start_day}",
+        $timezone);
+      $next = clone $start_day;
 
-      $calendar_start = AphrontFormDateControlValue::newFromParts(
-        $viewer,
-        $start_year,
-        $start_month,
-        $start_day)->getEpoch();
-      $calendar_end = AphrontFormDateControlValue::newFromParts(
-        $viewer,
-        $end_year,
-        $end_month,
-        $end_day)->getEpoch();
-
-      if (!$min_range || ($min_range < $calendar_start)) {
-        $min_range = $calendar_start;
+      if ($saved->getParameter('display') == 'month') {
+        $next->modify('+1 month');
+      } else if ($saved->getParameter('display') == 'day') {
+        $next->modify('+1 day');
       }
-      if (!$max_range || ($max_range > $calendar_end)) {
-        $max_range = $calendar_end;
+
+      $display_start = $start_day->format('U');
+      $display_end = $next->format('U');
+
+      if (!$min_range || ($min_range < $display_start)) {
+        $min_range = $display_start;
+      }
+      if (!$max_range || ($max_range > $display_end)) {
+        $max_range = $display_end;
       }
     }
 
