@@ -11,7 +11,7 @@ final class PhabricatorCustomFieldConfigOptionType
     $errors = array();
     $storage_value = $request->getStr('value');
 
-    $in_value = json_decode($storage_value, true);
+    $in_value = phutil_json_decode($storage_value);
     if (!is_array($in_value)) {
       $in_value = array();
     }

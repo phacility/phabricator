@@ -17,9 +17,12 @@ final class DifferentialParseRenderTestCase extends PhabricatorTestCase {
       $opt_file = $dir.$file.'.options';
       if (Filesystem::pathExists($opt_file)) {
         $options = Filesystem::readFile($opt_file);
-        $options = json_decode($options, true);
-        if (!is_array($options)) {
-          throw new Exception("Invalid options file: {$opt_file}.");
+        try {
+          $options = phutil_json_decode($options);
+        } catch (PhutilJSONParserException $ex) {
+          throw new PhutilProxyException(
+            pht('Invalid options file: %s.', $opt_file),
+            $ex);
         }
       } else {
         $options = array();

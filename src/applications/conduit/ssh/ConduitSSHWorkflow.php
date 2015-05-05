@@ -26,13 +26,17 @@ final class ConduitSSHWorkflow extends PhabricatorSSHWorkflow {
     $method = head($methodv);
 
     $json = $this->readAllInput();
-    $raw_params = json_decode($json, true);
-    if (!is_array($raw_params)) {
-      throw new Exception('Invalid JSON input.');
+    $raw_params = null;
+    try {
+      $raw_params = phutil_json_decode($json);
+    } catch (PhutilJSONParserException $ex) {
+      throw new PhutilProxyException(
+        pht('Invalid JSON input.'),
+        $ex);
     }
 
     $params = idx($raw_params, 'params', '[]');
-    $params = json_decode($params, true);
+    $params = phutil_json_decode($params);
     $metadata = idx($params, '__conduit__', array());
     unset($params['__conduit__']);
 

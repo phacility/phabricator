@@ -94,20 +94,23 @@ final class PhortunePaymentMethodCreateController
 
       if (!$errors) {
         $client_token_raw = $request->getStr('token');
-        $client_token = json_decode($client_token_raw, true);
-        if (!is_array($client_token)) {
+        $client_token = null;
+        try {
+          $client_token = phutil_json_decode($client_token_raw);
+        } catch (PhutilJSONParserException $ex) {
           $errors[] = pht(
             'There was an error decoding token information submitted by the '.
             'client. Expected a JSON-encoded token dictionary, received: %s.',
             nonempty($client_token_raw, pht('nothing')));
-        } else {
-          if (!$provider->validateCreatePaymentMethodToken($client_token)) {
-            $errors[] = pht(
-              'There was an error with the payment token submitted by the '.
-              'client. Expected a valid dictionary, received: %s.',
-              $client_token_raw);
-          }
         }
+
+        if (!$provider->validateCreatePaymentMethodToken($client_token)) {
+          $errors[] = pht(
+            'There was an error with the payment token submitted by the '.
+            'client. Expected a valid dictionary, received: %s.',
+            $client_token_raw);
+        }
+
         if (!$errors) {
           $errors = $provider->createPaymentMethodFromRequest(
             $request,
@@ -215,8 +218,10 @@ final class PhortunePaymentMethodCreateController
 
     $errors = array();
 
-    $client_errors = json_decode($client_errors_raw, true);
-    if (!is_array($client_errors)) {
+    $client_errors = null;
+    try {
+      $client_errors = phutil_json_decode($client_errors_raw);
+    } catch (PhutilJSONParserException $ex) {
       $errors[] = pht(
         'There was an error decoding error information submitted by the '.
         'client. Expected a JSON-encoded list of error codes, received: %s.',

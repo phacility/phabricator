@@ -39,7 +39,7 @@ final class DifferentialReleephRequestFieldSpecification {
 
   public function setValueFromStorage($json) {
     if ($json) {
-      $dict = json_decode($json, true);
+      $dict = phutil_json_decode($json);
       $this->releephAction = idx($dict, 'releephAction');
       $this->releephPHIDs = idx($dict, 'releephPHIDs');
     }

@@ -647,12 +647,15 @@ final class PhabricatorConduitAPIController
     // entire param dictionary JSON encoded.
     $params_json = $request->getStr('params');
     if (strlen($params_json)) {
-      $params = json_decode($params_json, true);
-      if (!is_array($params)) {
-        throw new Exception(
-          "Invalid parameter information was passed to method ".
-          "'{$method}', could not decode JSON serialization. Data: ".
-          $params_json);
+      $params = null;
+      try {
+        $params = phutil_json_decode($params_json);
+      } catch (PhutilJSONParserException $ex) {
+        throw new PhutilProxyException(
+          pht(
+            "Invalid parameter information was passed to method '%s'",
+            $method),
+          $ex);
       }
 
       $metadata = idx($params, '__conduit__', array());

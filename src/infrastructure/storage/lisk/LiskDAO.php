@@ -1637,7 +1637,7 @@ abstract class LiskDAO {
             break;
           case self::SERIALIZATION_JSON:
             if ($deserialize) {
-              $data[$col] = json_decode($data[$col], true);
+              $data[$col] = phutil_json_decode($data[$col]);
             } else {
               $data[$col] = json_encode($data[$col]);
             }

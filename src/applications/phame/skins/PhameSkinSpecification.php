@@ -93,15 +93,18 @@ final class PhameSkinSpecification {
   }
 
   private static function loadSkinSpecification($path) {
-
     $config_path = $path.DIRECTORY_SEPARATOR.'skin.json';
     $config = array();
     if (Filesystem::pathExists($config_path)) {
       $config = Filesystem::readFile($config_path);
-      $config = json_decode($config, true);
-      if (!is_array($config)) {
-        throw new Exception(
-          "Skin configuration file '{$config_path}' is not a valid JSON file.");
+      try {
+        $config = phutil_json_decode($config);
+      } catch (PhutilJSONParserException $ex) {
+        throw new PhutilProxyException(
+          pht(
+            "Skin configuration file '%s' is not a valid JSON file.",
+            $config_path),
+          $ex);
       }
       $type = idx($config, 'type', self::TYPE_BASIC);
     } else {

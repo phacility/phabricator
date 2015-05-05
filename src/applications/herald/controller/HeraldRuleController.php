@@ -258,7 +258,15 @@ final class HeraldRuleController extends HeraldController {
       $errors[] = pht('Rule must have a name.');
     }
 
-    $data = json_decode($request->getStr('rule'), true);
+    $data = null;
+    try {
+      $data = phutil_json_decode($request->getStr('rule'));
+    } catch (PhutilJSONParserException $ex) {
+      throw new PhutilProxyException(
+        pht('Failed to decode rule data.'),
+        $ex);
+    }
+
     if (!is_array($data) ||
         !$data['conditions'] ||
         !$data['actions']) {

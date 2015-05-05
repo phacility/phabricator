@@ -120,9 +120,13 @@ final class PhabricatorMailImplementationMailgunAdapter
 
     list($body) = $future->resolvex();
 
-    $response = json_decode($body, true);
-    if (!is_array($response)) {
-      throw new Exception("Failed to JSON decode response: {$body}");
+    $response = null;
+    try {
+      $response = phutil_json_decode($body);
+    } catch (PhutilJSONParserException $ex) {
+      throw new PhutilProxyException(
+        pht('Failed to JSON decode response.'),
+        $ex);
     }
 
     if (!idx($response, 'id')) {

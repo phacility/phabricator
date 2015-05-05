@@ -23,9 +23,12 @@ final class PhabricatorBot extends PhabricatorDaemon {
     }
 
     $json_raw = Filesystem::readFile($argv[0]);
-    $config = json_decode($json_raw, true);
-    if (!is_array($config)) {
-      throw new Exception("File '{$argv[0]}' is not valid JSON!");
+    try {
+      $config = phutil_json_decode($json_raw);
+    } catch (PhutilJSONParserException $ex) {
+      throw new PhutilProxyException(
+        pht("File '%s' is not valid JSON!", $argv[0]),
+        $ex);
     }
 
     $nick                   = idx($config, 'nick', 'phabot');

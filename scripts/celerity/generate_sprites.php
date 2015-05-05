@@ -53,7 +53,7 @@ foreach ($sheets as $name => $sheet) {
   if (!$args->getArg('force')) {
     if (Filesystem::pathExists($manifest_path)) {
       $data = Filesystem::readFile($manifest_path);
-      $data = json_decode($data, true);
+      $data = phutil_json_decode($data);
       if (!$sheet->needsRegeneration($data)) {
         continue;
       }
