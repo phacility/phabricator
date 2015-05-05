@@ -22,6 +22,7 @@ final class PHUIObjectItemView extends AphrontTagView {
   private $state;
   private $fontIcon;
   private $imageIcon;
+  private $titleText;
 
   const AGE_FRESH = 'fresh';
   const AGE_STALE = 'stale';
@@ -96,6 +97,15 @@ final class PHUIObjectItemView extends AphrontTagView {
   public function setSubHead($subhead) {
     $this->subhead = $subhead;
     return $this;
+  }
+
+  public function setTitleText($title_text) {
+    $this->titleText = $title_text;
+    return $this;
+  }
+
+  public function getTitleText() {
+    return $this->titleText;
   }
 
   public function getHeader() {
@@ -329,12 +339,19 @@ final class PHUIObjectItemView extends AphrontTagView {
       );
     }
 
+    $title_text = null;
+    if ($this->titleText) {
+      $title_text = $this->titleText;
+    } else if ($this->href) {
+      $title_text = $this->header;
+    }
+
     $header_link = phutil_tag(
       $this->href ? 'a' : 'div',
       array(
         'href' => $this->href,
         'class' => 'phui-object-item-link',
-        'title' => ($this->href) ? $this->header : null,
+        'title' => $title_text,
       ),
       $this->header);
 
