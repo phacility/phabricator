@@ -101,7 +101,7 @@ Storage Engines
 Phabricator supports several different file storage engines:
 
 | Engine | Setup | Cost | Notes |
-|========|=======|======|=======|
+|--------|-------|------|-------|
 | MySQL  | Automatic | Free | May not scale well. |
 | Local Disk | Easy | Free | Does not scale well. |
 | Amazon S3 | Easy | Cheap | Scales well. |
