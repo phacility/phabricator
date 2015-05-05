@@ -187,23 +187,33 @@ final class PhabricatorCalendarEventViewController
       pht('Ends'),
       phabricator_datetime($event->getDateTo(), $viewer));
 
-    $invitees = $event->getInvitees();
-    $invitee_list = new PHUIStatusListView();
-    foreach ($invitees as $invitee) {
-      if ($invitee->isUninvited()) {
-        continue;
-      }
-      $item = new PHUIStatusItemView();
-      $invitee_phid = $invitee->getInviteePHID();
-      $target = $viewer->renderHandle($invitee_phid);
-      $item->setNote($invitee->getStatus())
-        ->setTarget($target);
-      $invitee_list->addItem($item);
-    }
-
     $properties->addProperty(
       pht('Host'),
       $viewer->renderHandle($event->getUserPHID()));
+
+    $invitees = $event->getInvitees();
+    foreach ($invitees as $key => $invitee) {
+      if ($invitee->isUninvited()) {
+        unset($invitees[$key]);
+      }
+    }
+
+    if ($invitees) {
+      $invitee_list = new PHUIStatusListView();
+      foreach ($invitees as $invitee) {
+        $item = new PHUIStatusItemView();
+        $invitee_phid = $invitee->getInviteePHID();
+        $target = $viewer->renderHandle($invitee_phid);
+        $item->setNote($invitee->getStatus())
+          ->setTarget($target);
+        $invitee_list->addItem($item);
+      }
+    } else {
+      $invitee_list = phutil_tag(
+        'em',
+        array(),
+        pht('None'));
+    }
 
     $properties->addProperty(
       pht('Invitees'),
