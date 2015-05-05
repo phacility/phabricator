@@ -24,7 +24,8 @@ final class DiffusionMergedCommitsQueryConduitAPIMethod
   }
 
   private function getLimit(ConduitAPIRequest $request) {
-    return $request->getValue('limit', PHP_INT_MAX);
+    // TODO: Paginate this sensibly at some point.
+    return $request->getValue('limit', 4096);
   }
 
   protected function getGitResult(ConduitAPIRequest $request) {
