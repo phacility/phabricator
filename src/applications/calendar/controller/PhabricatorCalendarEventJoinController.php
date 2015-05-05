@@ -35,11 +35,23 @@ final class PhabricatorCalendarEventJoinController
     if ($request->isFormPost()) {
       $new_status = null;
 
-      if ($is_attending) {
-        $new_status = array($viewer->getPHID() => $declined_status);
-      } else {
-        $new_status = array($viewer->getPHID() => $attending_status);
+      switch ($action) {
+        case self::ACTION_ACCEPT:
+          $new_status = $attending_status;
+          break;
+        case self::ACTION_JOIN:
+          if ($is_attending) {
+            $new_status = $declined_status;
+          } else {
+            $new_status = $attending_status;
+          }
+          break;
+        case self::ACTION_DECLINE:
+          $new_status = $declined_status;
+          break;
       }
+
+      $new_status = array($viewer->getPHID() => $new_status);
 
       $xaction = id(new PhabricatorCalendarEventTransaction())
         ->setTransactionType(

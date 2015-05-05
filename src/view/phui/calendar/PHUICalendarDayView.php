@@ -5,11 +5,20 @@ final class PHUICalendarDayView extends AphrontView {
   private $day;
   private $month;
   private $year;
+  private $browseURI;
   private $events = array();
 
   public function addEvent(AphrontCalendarDayEventView $event) {
     $this->events[] = $event;
     return $this;
+  }
+
+  public function setBrowseURI($browse_uri) {
+    $this->browseURI = $browse_uri;
+    return $this;
+  }
+  private function getBrowseURI() {
+    return $this->browseURI;
   }
 
   public function __construct($year, $month, $day = null) {
@@ -21,11 +30,6 @@ final class PHUICalendarDayView extends AphrontView {
   public function render() {
     require_celerity_resource('phui-calendar-day-css');
 
-    $day_box = new PHUIObjectBoxView();
-    $day_of_week = $this->getDayOfWeek();
-    $header_text = $this->getDateTime()->format('F j, Y');
-    $header_text = $day_of_week.', '.$header_text;
-    $day_box->setHeaderText($header_text);
     $hours = $this->getHoursOfDay();
     $hourly_events = array();
     $rows = array();
@@ -112,9 +116,64 @@ final class PHUICalendarDayView extends AphrontView {
         $rows,
       ));
 
-    $day_box->appendChild($table);
-    return $day_box;
+    $header = $this->renderDayViewHeader();
 
+    $day_box = (new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->appendChild($table);
+
+    return $day_box;
+  }
+
+  private function renderDayViewHeader() {
+    $button_bar = null;
+
+    // check for a browseURI, which means we need "fancy" prev / next UI
+    $uri = $this->getBrowseURI();
+    if ($uri) {
+      list($prev_year, $prev_month, $prev_day) = $this->getPrevDay();
+      $prev_uri = $uri.$prev_year.'/'.$prev_month.'/'.$prev_day.'/';
+
+      list($next_year, $next_month, $next_day) = $this->getNextDay();
+      $next_uri = $uri.$next_year.'/'.$next_month.'/'.$next_day.'/';
+
+      $button_bar = new PHUIButtonBarView();
+
+      $left_icon = id(new PHUIIconView())
+          ->setIconFont('fa-chevron-left bluegrey');
+      $left = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setColor(PHUIButtonView::GREY)
+        ->setHref($prev_uri)
+        ->setTitle(pht('Previous Day'))
+        ->setIcon($left_icon);
+
+      $right_icon = id(new PHUIIconView())
+          ->setIconFont('fa-chevron-right bluegrey');
+      $right = id(new PHUIButtonView())
+        ->setTag('a')
+        ->setColor(PHUIButtonView::GREY)
+        ->setHref($next_uri)
+        ->setTitle(pht('Next Day'))
+        ->setIcon($right_icon);
+
+      $button_bar->addButton($left);
+      $button_bar->addButton($right);
+
+    }
+
+    $day_of_week = $this->getDayOfWeek();
+    $header_text = $this->getDateTime()->format('F j, Y');
+    $header_text = $day_of_week.', '.$header_text;
+
+    $header = id(new PHUIHeaderView())
+      ->setHeader($header_text);
+
+    if ($button_bar) {
+      $header->setButtonBar($button_bar);
+    }
+
+    return $header;
   }
 
   private function updateEventsFromCluster($cluster, $hourly_events) {
@@ -192,6 +251,92 @@ final class PHUICalendarDayView extends AphrontView {
     }
 
     return $included_datetimes;
+  }
+
+  private function getNumberOfDaysInMonth($month, $year) {
+    $user = $this->user;
+    $timezone = new DateTimeZone($user->getTimezoneIdentifier());
+
+    list($next_year, $next_month) = $this->getNextYearAndMonth($month, $year);
+
+    $end_date = new DateTime("{$next_year}-{$next_month}-01", $timezone);
+    $end_epoch = $end_date->format('U');
+
+    $days = 0;
+    for ($day = 1; $day <= 31; $day++) {
+      $day_date = new DateTime("{$year}-{$month}-{$day}", $timezone);
+      $day_epoch = $day_date->format('U');
+      if ($day_epoch >= $end_epoch) {
+        break;
+      } else {
+        $days++;
+      }
+    }
+
+    return $days;
+  }
+
+  private function getPrevDay() {
+    $day = $this->day;
+    $month = $this->month;
+    $year = $this->year;
+
+    $prev_year = $year;
+    $prev_month = $month;
+    $prev_day = $day - 1;
+    if ($prev_day == 0) {
+      $prev_month--;
+      if ($prev_month == 0) {
+        $prev_year--;
+        $prev_month = 12;
+      }
+      $prev_day = $this->getNumberOfDaysInMonth($prev_month, $prev_year);
+    }
+
+    return array($prev_year, $prev_month, $prev_day);
+  }
+
+  private function getNextDay() {
+    $day = $this->day;
+    $month = $this->month;
+    $year = $this->year;
+
+    $next_year = $year;
+    $next_month = $month;
+    $next_day = $day + 1;
+    $days_in_month = $this->getNumberOfDaysInMonth($month, $year);
+    if ($next_day > $days_in_month) {
+      $next_day = 1;
+      $next_month++;
+    }
+    if ($next_month == 13) {
+      $next_year++;
+      $next_month = 1;
+    }
+
+    return array($next_year, $next_month, $next_day);
+  }
+
+  private function getNextYearAndMonth($month, $year) {
+    $next_year = $year;
+    $next_month = $month + 1;
+    if ($next_month == 13) {
+      $next_year = $year + 1;
+      $next_month = 1;
+    }
+
+    return array($next_year, $next_month);
+  }
+
+  private function getPrevYearAndMonth($month, $year) {
+    $prev_year = $year;
+    $prev_month = $month - 1;
+    if ($prev_month == 0) {
+      $prev_year = $year - 1;
+      $prev_month = 12;
+    }
+
+    return array($prev_year, $prev_month);
   }
 
   private function getDateTime() {

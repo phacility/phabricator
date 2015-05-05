@@ -200,11 +200,36 @@ final class PhabricatorCalendarEventViewController
 
     if ($invitees) {
       $invitee_list = new PHUIStatusListView();
+
+      $icon_invited = PHUIStatusItemView::ICON_OPEN;
+      $icon_attending = PHUIStatusItemView::ICON_ACCEPT;
+      $icon_declined = PHUIStatusItemView::ICON_REJECT;
+
+      $status_invited = PhabricatorCalendarEventInvitee::STATUS_INVITED;
+      $status_attending = PhabricatorCalendarEventInvitee::STATUS_ATTENDING;
+      $status_declined = PhabricatorCalendarEventInvitee::STATUS_DECLINED;
+
+      $icon_map = array(
+        $status_invited => $icon_invited,
+        $status_attending => $icon_attending,
+        $status_declined => $icon_declined,
+      );
+
+      $icon_color_map = array(
+        $status_invited => null,
+        $status_attending => 'green',
+        $status_declined => 'red',
+      );
+
       foreach ($invitees as $invitee) {
         $item = new PHUIStatusItemView();
         $invitee_phid = $invitee->getInviteePHID();
+        $status = $invitee->getStatus();
         $target = $viewer->renderHandle($invitee_phid);
-        $item->setNote($invitee->getStatus())
+        $icon = $icon_map[$status];
+        $icon_color = $icon_color_map[$status];
+
+        $item->setIcon($icon, $icon_color)
           ->setTarget($target);
         $invitee_list->addItem($item);
       }
