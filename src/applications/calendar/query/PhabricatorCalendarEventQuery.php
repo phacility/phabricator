@@ -64,8 +64,8 @@ final class PhabricatorCalendarEventQuery
     if ($this->inviteePHIDs !== null) {
       $parts[] = qsprintf(
         $conn_r,
-        'JOIN %T invitee ON invitee.eventPHID = event.phid'.
-        'AND invitee.status != %s',
+        'JOIN %T invitee ON invitee.eventPHID = event.phid
+          AND invitee.status != %s',
         id(new PhabricatorCalendarEventInvitee())->getTableName(),
         PhabricatorCalendarEventInvitee::STATUS_UNINVITED);
     }
