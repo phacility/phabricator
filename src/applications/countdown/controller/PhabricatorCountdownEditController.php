@@ -12,11 +12,6 @@ final class PhabricatorCountdownEditController
 
     $request = $this->getRequest();
     $user = $request->getUser();
-    $epoch_control = id(new AphrontFormDateControl())
-      ->setUser($user)
-      ->setName('epoch')
-      ->setLabel(pht('End Date'))
-      ->setInitialTime(AphrontFormDateControl::TIME_END_OF_DAY);
 
     if ($this->id) {
       $page_title = pht('Edit Countdown');
@@ -32,42 +27,46 @@ final class PhabricatorCountdownEditController
       if (!$countdown) {
         return new Aphront404Response();
       }
+      $date_value = AphrontFormDateControlValue::newFromEpoch(
+        $user,
+        $countdown->getEpoch());
     } else {
       $page_title = pht('Create Countdown');
       $countdown = PhabricatorCountdown::initializeNewCountdown($user);
+      $date_value = AphrontFormDateControlValue::newFromEpoch($user, time());
     }
-    $epoch_control->setValue($countdown->getEpoch());
 
-    $e_text = true;
     $errors = array();
+    $e_text = true;
+    $e_epoch = null;
+
+    $v_text = $countdown->getTitle();
+
     if ($request->isFormPost()) {
-      $title = $request->getStr('title');
-      $epoch = $epoch_control->readValueFromRequest($request);
+      $v_text = $request->getStr('title');
+      $date_value = AphrontFormDateControlValue::newFromRequest(
+        $request,
+        'epoch');
       $view_policy = $request->getStr('viewPolicy');
 
       $e_text = null;
-      if (!strlen($title)) {
+      if (!strlen($v_text)) {
         $e_text = pht('Required');
         $errors[] = pht('You must give the countdown a name.');
       }
-      if (!$epoch) {
+      if (!$date_value->isValid()) {
+        $e_epoch = pht('Invalid');
         $errors[] = pht('You must give the countdown a valid end date.');
       }
 
       if (!count($errors)) {
-        $countdown->setTitle($title);
-        $countdown->setEpoch($epoch);
+        $countdown->setTitle($v_text);
+        $countdown->setEpoch($date_value->getEpoch());
         $countdown->setViewPolicy($view_policy);
         $countdown->save();
         return id(new AphrontRedirectResponse())
           ->setURI('/countdown/'.$countdown->getID().'/');
       }
-    }
-
-    if ($countdown->getEpoch()) {
-      $display_epoch = phabricator_datetime($countdown->getEpoch(), $user);
-    } else {
-      $display_epoch = $request->getStr('epoch');
     }
 
     $crumbs = $this->buildApplicationCrumbs();
@@ -94,10 +93,16 @@ final class PhabricatorCountdownEditController
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Title'))
-          ->setValue($countdown->getTitle())
+          ->setValue($v_text)
           ->setName('title')
           ->setError($e_text))
-      ->appendChild($epoch_control)
+      ->appendChild(
+        id(new AphrontFormDateControl())
+          ->setUser($user)
+          ->setName('epoch')
+          ->setLabel(pht('End Date'))
+          ->setError($e_epoch)
+          ->setValue($date_value))
       ->appendChild(
         id(new AphrontFormPolicyControl())
           ->setUser($user)
