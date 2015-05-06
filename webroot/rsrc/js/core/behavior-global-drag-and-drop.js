@@ -90,17 +90,18 @@ JX.behavior('global-drag-and-drop', function(config, statics) {
       statics.pending--;
       statics.errors = true;
     });
+
+    JX.Stratcom.listen(
+      'quicksand-redraw',
+      null,
+      function (e) {
+        var data = e.getData();
+        var toggle = data.newResponse.globalDragAndDrop;
+        statics.enabled = toggle;
+        statics.drop.setIsEnabled(toggle);
+      });
   }
 
   statics.init = statics.init || init();
 
-  JX.Stratcom.listen(
-    'quicksand-redraw',
-    null,
-    function (e) {
-      var data = e.getData();
-      var toggle = data.newResponse.globalDragAndDrop;
-      statics.enabled = toggle;
-      statics.drop.setIsEnabled(toggle);
-    });
 });
