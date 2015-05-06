@@ -418,9 +418,7 @@ final class DifferentialHunkParser {
     $old_lines = array();
     $new_lines = array();
     foreach ($hunks as $hunk) {
-
-      $lines = $hunk->getChanges();
-      $lines = phutil_split_lines($lines);
+      $lines = $hunk->getSplitLines();
 
       $line_type_map = array();
       $line_text = array();
@@ -514,22 +512,32 @@ final class DifferentialHunkParser {
     // Put changes side by side.
     $olds = array();
     $news = array();
+    $olds_cursor = -1;
+    $news_cursor = -1;
     foreach ($changeset_hunks as $hunk) {
       $n_old = $hunk->getOldOffset();
       $n_new = $hunk->getNewOffset();
-      $changes = phutil_split_lines($hunk->getChanges());
+      $changes = $hunk->getSplitLines();
       foreach ($changes as $line) {
         $diff_type = $line[0]; // Change type in diff of diffs.
         $orig_type = $line[1]; // Change type in the original diff.
         if ($diff_type == ' ') {
           // Use the same key for lines that are next to each other.
-          $key = max(last_key($olds), last_key($news)) + 1;
+          if ($olds_cursor > $news_cursor) {
+            $key = $olds_cursor + 1;
+          } else {
+            $key = $news_cursor + 1;
+          }
           $olds[$key] = null;
           $news[$key] = null;
+          $olds_cursor = $key;
+          $news_cursor = $key;
         } else if ($diff_type == '-') {
           $olds[] = array($n_old, $orig_type);
+          $olds_cursor++;
         } else if ($diff_type == '+') {
           $news[] = array($n_new, $orig_type);
+          $news_cursor++;
         }
         if (($diff_type == '-' || $diff_type == ' ') && $orig_type != '-') {
           $n_old++;
@@ -660,11 +668,15 @@ final class DifferentialHunkParser {
     $offsets = array();
     $n = 1;
     foreach ($hunks as $hunk) {
-      for ($i = 0; $i < $hunk->getNewLen(); $i++) {
-        $offsets[$n] = $hunk->getNewOffset() + $i;
+      $new_length = $hunk->getNewLen();
+      $new_offset = $hunk->getNewOffset();
+
+      for ($i = 0; $i < $new_length; $i++) {
+        $offsets[$n] = $new_offset + $i;
         $n++;
       }
     }
+
     return $offsets;
   }
 }
