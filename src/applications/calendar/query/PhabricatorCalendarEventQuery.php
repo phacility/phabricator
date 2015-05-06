@@ -7,7 +7,7 @@ final class PhabricatorCalendarEventQuery
   private $phids;
   private $rangeBegin;
   private $rangeEnd;
-  private $invitedPHIDs;
+  private $inviteePHIDs;
   private $creatorPHIDs;
   private $isCancelled;
 
@@ -28,7 +28,7 @@ final class PhabricatorCalendarEventQuery
   }
 
   public function withInvitedPHIDs(array $phids) {
-    $this->invitedPHIDs = $phids;
+    $this->inviteePHIDs = $phids;
     return $this;
   }
 
@@ -48,13 +48,28 @@ final class PhabricatorCalendarEventQuery
 
     $data = queryfx_all(
       $conn_r,
-      'SELECT * FROM %T %Q %Q %Q',
+      'SELECT event.* FROM %T event %Q %Q %Q %Q %Q',
       $table->getTableName(),
+      $this->buildJoinClause($conn_r),
       $this->buildWhereClause($conn_r),
+      $this->buildGroupClause($conn_r),
       $this->buildOrderClause($conn_r),
       $this->buildLimitClause($conn_r));
 
     return $table->loadAllFromArray($data);
+  }
+
+  protected function buildJoinClauseParts(AphrontDatabaseConnection $conn_r) {
+    $parts = parent::buildJoinClauseParts($conn_r);
+    if ($this->inviteePHIDs !== null) {
+      $parts[] = qsprintf(
+        $conn_r,
+        'JOIN %T invitee ON invitee.eventPHID = event.phid'.
+        'AND invitee.status != %s',
+        id(new PhabricatorCalendarEventInvitee())->getTableName(),
+        PhabricatorCalendarEventInvitee::STATUS_UNINVITED);
+    }
+    return $parts;
   }
 
   protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
@@ -63,58 +78,70 @@ final class PhabricatorCalendarEventQuery
     if ($this->ids) {
       $where[] = qsprintf(
         $conn_r,
-        'id IN (%Ld)',
+        'event.id IN (%Ld)',
         $this->ids);
     }
 
     if ($this->phids) {
       $where[] = qsprintf(
         $conn_r,
-        'phid IN (%Ls)',
+        'event.phid IN (%Ls)',
         $this->phids);
     }
 
     if ($this->rangeBegin) {
       $where[] = qsprintf(
         $conn_r,
-        'dateTo >= %d',
+        'event.dateTo >= %d',
         $this->rangeBegin);
     }
 
     if ($this->rangeEnd) {
       $where[] = qsprintf(
         $conn_r,
-        'dateFrom <= %d',
+        'event.dateFrom <= %d',
         $this->rangeEnd);
     }
 
-    // TODO: Currently, the creator is always the only invitee, but you can
-    // query them separately since this won't always be true.
-
-    if ($this->invitedPHIDs) {
+    if ($this->inviteePHIDs !== null) {
       $where[] = qsprintf(
         $conn_r,
-        'userPHID IN (%Ls)',
-        $this->invitedPHIDs);
+        'invitee.inviteePHID IN (%Ls)',
+        $this->inviteePHIDs);
     }
 
     if ($this->creatorPHIDs) {
       $where[] = qsprintf(
         $conn_r,
-        'userPHID IN (%Ls)',
+        'event.userPHID IN (%Ls)',
         $this->creatorPHIDs);
     }
 
     if ($this->isCancelled !== null) {
       $where[] = qsprintf(
         $conn_r,
-        'isCancelled = %d',
+        'event.isCancelled = %d',
         (int)$this->isCancelled);
     }
 
     $where[] = $this->buildPagingClause($conn_r);
 
     return $this->formatWhereClause($where);
+  }
+
+  protected function getPrimaryTableAlias() {
+    return 'event';
+  }
+
+  protected function shouldGroupQueryResultRows() {
+    if ($this->inviteePHIDs !== null) {
+      return true;
+    }
+    return parent::shouldGroupQueryResultRows();
+  }
+
+  protected function getApplicationSearchObjectPHIDColumn() {
+    return 'event.phid';
   }
 
   public function getQueryApplicationClass() {
