@@ -4,6 +4,7 @@
 
 .phui-object-box {
   position: relative;
+  padding: 12px 12px 4px 12px;
 }
 
 div.phui-object-box.phui-object-box-flush {
@@ -11,8 +12,8 @@ div.phui-object-box.phui-object-box-flush {
 }
 
 .phui-object-box .phui-header-shell {
-  padding: 4px 5px 4px 12px;
-  border-bottom: 1px solid {$lightblueborder};
+  padding: 0 5px 4px 4px;
+  border-bottom: 1px solid {$thinblueborder};
   border-top: none;
 }
 
@@ -21,8 +22,8 @@ div.phui-object-box.phui-object-box-flush {
 }
 
 .phui-object-box .phui-header-shell h1 {
-  text-shadow: 0 1px #fff;
-  padding: 8px 0;
+  padding: 0 0 8px 0;
+  font-weight: normal;
 }
 
 .phui-object-box .phui-header-shell + .phui-info-view {

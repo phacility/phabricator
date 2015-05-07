@@ -104,7 +104,6 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
       $revision_panel = null;
     }
 
-    require_celerity_resource('homepage-panel-css');
     $home = phutil_tag(
       'div',
       array(

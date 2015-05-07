@@ -23,7 +23,7 @@
      element extend off the bottom of the screen to prevent this. */
   bottom: -480px;
   width: 204px;
-  background: #dbdde0;
+  background: #fff;
   border-right: 1px solid {$hovergrey};
 }
 

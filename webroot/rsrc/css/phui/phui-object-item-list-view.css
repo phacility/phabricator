@@ -39,7 +39,6 @@ ul.phui-object-item-list-view {
   border-color: {$lightgreyborder};
   margin: 5px 0;
   overflow: hidden;
-  border-left-width: 4px;
   background: #fff;
   margin-bottom: 4px;
 }
@@ -249,7 +248,7 @@ ul.phui-object-item-list-view {
   border-right: none;
 }
 
-.phui-object-box .phui-object-list-stackable:last-child
+.phui-object-box .phui-object-item:last-child
   .phui-object-item-frame {
   border-bottom: none;
 }

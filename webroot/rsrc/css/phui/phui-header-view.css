@@ -3,11 +3,14 @@
  */
 
 .phui-header-shell {
-  background-color: #e0e3ec;
   border-width: 1px 0;
   border-style: solid;
   border-color: {$hovergrey};
   overflow: hidden;
+}
+
+.phui-header-shell.sprite-gradient.gradient-white-header {
+  background: transparent;
 }
 
 body .phui-header-shell.phui-header-no-backgound {
@@ -38,7 +41,7 @@ body .phui-header-shell.phui-bleed-header
 
 .phui-header-view {
   padding: 16px;
-  font-size: 15px;
+  font-size: 16px;
   color: {$darkbluetext};
   position: relative;
 }
