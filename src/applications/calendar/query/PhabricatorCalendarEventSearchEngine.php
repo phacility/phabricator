@@ -70,7 +70,7 @@ final class PhabricatorCalendarEventSearchEngine
       if ($saved->getParameter('display') == 'month') {
         $next->modify('+1 month');
       } else if ($saved->getParameter('display') == 'day') {
-        $next->modify('+1 day');
+        $next->modify('+6 day');
       }
 
       $display_start = $start_day->format('U');
@@ -447,7 +447,7 @@ final class PhabricatorCalendarEventSearchEngine
     } else {
       $value = AphrontFormDateControlValue::newFromEpoch(
         $viewer,
-        PhabricatorTime::getNow());
+        PhabricatorTime::getTodayMidnightDateTime($viewer)->format('U'));
       $value->setEnabled(false);
     }
 

@@ -117,12 +117,155 @@ final class PHUICalendarDayView extends AphrontView {
       ));
 
     $header = $this->renderDayViewHeader();
+    $sidebar = $this->renderSidebar();
 
-    $day_box = (new PHUIObjectBoxView())
+    $table_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->appendChild($table);
 
-    return $day_box;
+    $column1 = phutil_tag(
+      'div',
+        array(
+          'class' => 'pm',
+        ),
+        $sidebar);
+
+    $column2 = phutil_tag(
+      'div',
+        array(
+          'class' => 'pm',
+        ),
+        $table_box);
+
+    $layout = id(new AphrontMultiColumnView())
+      ->addColumn($column1, 'third')
+      ->addColumn($column2, 'thirds')
+      ->setFluidLayout(true)
+      ->setGutter(AphrontMultiColumnView::GUTTER_MEDIUM);
+
+    $wrap = phutil_tag(
+      'div',
+        array(
+          'class' => 'ml',
+        ),
+        $layout);
+
+    return phutil_tag(
+      'div',
+        array(),
+        array(
+          $wrap,
+        ));
+  }
+
+  private function renderSidebar() {
+    $this->events = msort($this->events, 'getEpochStart');
+    $week_of_boxes = $this->getWeekOfBoxes();
+    $filled_boxes = array();
+
+    foreach ($week_of_boxes as $box) {
+      $start = $box['start'];
+      $end = id(clone $start)->modify('+1 day');
+
+      $box = $box['box'];
+      $box_events = array();
+
+      foreach ($this->events as $event) {
+        if ($event->getEpochStart() >= $start->format('U') &&
+        $event->getEpochStart() < $end->format('U')) {
+          $box_events[] = $event;
+        }
+      }
+      $filled_boxes[] = $this->renderSidebarBox($box_events, $box);
+    }
+
+    return $filled_boxes;
+  }
+
+  private function renderSidebarBox($events, $box) {
+    $user = $this->user;
+    $rows = array();
+
+    foreach ($events as $key => $event) {
+      $uri = $event->getURI();
+      $name = $event->getName();
+      $time = id(AphrontFormDateControlValue::newFromEpoch(
+        $user,
+        $event->getEpochStart()))
+      ->getValueTime();
+
+      $name = phutil_tag(
+        'a',
+        array(
+          'href' => $uri,
+        ),
+        $name);
+
+      $name = phutil_tag(
+        'td',
+        array(
+          'class' => 'calendar-day-sidebar-column-name',
+        ),
+        $name);
+
+      $time = phutil_tag(
+        'td',
+        array(
+          'class' => 'calendar-day-sidebar-column-time',
+        ),
+        $time);
+
+      $rows[] = phutil_tag(
+        'tr',
+        array(
+          'class' => 'calendar-day-sidebar-row',
+        ),
+        array(
+          $name,
+          $time,
+        ));
+    }
+
+    $table = phutil_tag(
+      'table',
+      array(
+        'class' => 'calendar-day-sidebar-today-table',
+      ),
+      $rows);
+
+    $box->appendChild($table);
+    return $box;
+  }
+
+  private function getWeekOfBoxes() {
+    $sidebar_day_boxes = array();
+
+    $display_start_day = $this->getDateTime();
+    $display_end_day = id(clone $display_start_day)->modify('+6 day');
+
+    $box_start_time = clone $display_start_day;
+
+    $today_time = PhabricatorTime::getTodayMidnightDateTime($this->user);
+    $tomorrow_time = clone $today_time;
+    $tomorrow_time->modify('+1 day');
+
+    while ($box_start_time <= $display_end_day) {
+      if ($box_start_time == $today_time) {
+        $title = pht('Today');
+      } else if ($box_start_time == $tomorrow_time) {
+        $title = pht('Tomorrow');
+      } else {
+        $title = $box_start_time->format('l');
+      }
+
+      $sidebar_day_boxes[] = array(
+        'box' => id(new PHUIObjectBoxView())->setHeaderText($title),
+        'start' => clone $box_start_time,
+        );
+
+      $box_start_time->modify('+1 day');
+    }
+    return $sidebar_day_boxes;
   }
 
   private function renderDayViewHeader() {
@@ -289,7 +432,6 @@ final class PHUICalendarDayView extends AphrontView {
   private function findClusters() {
     $events = msort($this->events, 'getEpochStart');
     $clusters = array();
-
 
     foreach ($events as $event) {
       $destination_cluster_key = null;

@@ -7,6 +7,29 @@
   width: 100%;
 }
 
+.calendar-day-sidebar-today-table {
+  width: 100%;
+  margin: 8px 0;
+}
+
+.calendar-day-sidebar-column-name {
+  text-align: left;
+  color: {$bluetext};
+  width: 60%;
+  padding: 4px 16px;
+}
+
+.calendar-day-sidebar-column-name a {
+  color: {$bluetext};
+}
+
+.calendar-day-sidebar-column-time {
+  color: {$bluetext};
+  text-align: right;
+  width: 40%;
+  padding: 4px 16px;
+}
+
 .phui-calendar-day-hour {
   width: 60px;
   color: {$lightgreytext};
