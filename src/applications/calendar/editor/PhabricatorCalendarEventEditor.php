@@ -21,6 +21,7 @@ final class PhabricatorCalendarEventEditor
     $types[] = PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION;
     $types[] = PhabricatorCalendarEventTransaction::TYPE_CANCEL;
     $types[] = PhabricatorCalendarEventTransaction::TYPE_INVITE;
+    $types[] = PhabricatorCalendarEventTransaction::TYPE_ALL_DAY;
 
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
@@ -49,6 +50,8 @@ final class PhabricatorCalendarEventEditor
         return $object->getDescription();
       case PhabricatorCalendarEventTransaction::TYPE_CANCEL:
         return $object->getIsCancelled();
+      case PhabricatorCalendarEventTransaction::TYPE_ALL_DAY:
+        return $object->getIsAllDay();
       case PhabricatorCalendarEventTransaction::TYPE_INVITE:
         $map = $xaction->getNewValue();
         $phids = array_keys($map);
@@ -86,6 +89,7 @@ final class PhabricatorCalendarEventEditor
       case PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION:
       case PhabricatorCalendarEventTransaction::TYPE_CANCEL:
       case PhabricatorCalendarEventTransaction::TYPE_INVITE:
+      case PhabricatorCalendarEventTransaction::TYPE_ALL_DAY:
         return $xaction->getNewValue();
       case PhabricatorCalendarEventTransaction::TYPE_STATUS:
         return (int)$xaction->getNewValue();
@@ -120,6 +124,9 @@ final class PhabricatorCalendarEventEditor
       case PhabricatorCalendarEventTransaction::TYPE_CANCEL:
         $object->setIsCancelled((int)$xaction->getNewValue());
         return;
+      case PhabricatorCalendarEventTransaction::TYPE_ALL_DAY:
+        $object->setIsAllDay((int)$xaction->getNewValue());
+        return;
       case PhabricatorCalendarEventTransaction::TYPE_INVITE:
       case PhabricatorTransactions::TYPE_COMMENT:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
@@ -143,6 +150,7 @@ final class PhabricatorCalendarEventEditor
       case PhabricatorCalendarEventTransaction::TYPE_STATUS:
       case PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION:
       case PhabricatorCalendarEventTransaction::TYPE_CANCEL:
+      case PhabricatorCalendarEventTransaction::TYPE_ALL_DAY:
         return;
       case PhabricatorCalendarEventTransaction::TYPE_INVITE:
         $map = $xaction->getNewValue();

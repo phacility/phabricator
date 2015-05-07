@@ -9,6 +9,7 @@ final class PhabricatorCalendarEventTransaction
   const TYPE_STATUS = 'calendar.status';
   const TYPE_DESCRIPTION = 'calendar.description';
   const TYPE_CANCEL = 'calendar.cancel';
+  const TYPE_ALL_DAY = 'calendar.allday';
   const TYPE_INVITE = 'calendar.invite';
 
   const MAILTAG_RESCHEDULE = 'calendar-reschedule';
@@ -37,6 +38,7 @@ final class PhabricatorCalendarEventTransaction
       case self::TYPE_STATUS:
       case self::TYPE_DESCRIPTION:
       case self::TYPE_CANCEL:
+      case self::TYPE_ALL_DAY:
         $phids[] = $this->getObjectPHID();
         break;
       case self::TYPE_INVITE:
@@ -58,6 +60,7 @@ final class PhabricatorCalendarEventTransaction
       case self::TYPE_STATUS:
       case self::TYPE_DESCRIPTION:
       case self::TYPE_CANCEL:
+      case self::TYPE_ALL_DAY:
       case self::TYPE_INVITE:
         return ($old === null);
     }
@@ -71,6 +74,7 @@ final class PhabricatorCalendarEventTransaction
       case self::TYPE_END_DATE:
       case self::TYPE_STATUS:
       case self::TYPE_DESCRIPTION:
+      case self::TYPE_ALL_DAY:
       case self::TYPE_CANCEL:
         return 'fa-pencil';
         break;

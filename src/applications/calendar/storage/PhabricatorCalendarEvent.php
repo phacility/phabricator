@@ -17,6 +17,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   protected $status;
   protected $description;
   protected $isCancelled;
+  protected $isAllDay;
   protected $mailKey;
 
   protected $viewPolicy;
@@ -84,6 +85,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         'status' => 'uint32',
         'description' => 'text',
         'isCancelled' => 'bool',
+        'isAllDay' => 'bool',
         'mailKey' => 'bytes20',
       ),
       self::CONFIG_KEY_SCHEMA => array(
