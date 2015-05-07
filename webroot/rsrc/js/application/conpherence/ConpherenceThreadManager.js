@@ -164,15 +164,19 @@ JX.install('ConpherenceThreadManager', {
             // Message event for something we already know about.
             return;
           }
-          // If we're currently updating, wait for the update to complete.
+
           // If this notification tells us about a message which is newer than
-          // the newest one we know to exist, keep track of it so we can
-          // update once the in-flight update finishes.
+          // the newest one we know to exist, update our latest knownID so we
+          // can properly update later.
           if (this._updating &&
               this._updating.threadPHID == this._loadedThreadPHID) {
             if (message.messageID > this._updating.knownID) {
               this._updating.knownID = message.messageID;
-              return;
+              // We're currently updating, so wait for the update to complete.
+              // this.syncWorkflow has us covered in this case.
+              if (this._updating.active) {
+                return;
+              }
             }
           }
 
@@ -226,7 +230,8 @@ JX.install('ConpherenceThreadManager', {
     syncWorkflow: function(workflow, stage) {
       this._updating = {
         threadPHID: this._loadedThreadPHID,
-        knownID: this._latestTransactionID
+        knownID: this._latestTransactionID,
+        active: true
       };
       workflow.listen(stage, JX.bind(this, function() {
         // TODO - do we need to handle if we switch threads somehow?
@@ -235,6 +240,7 @@ JX.install('ConpherenceThreadManager', {
         if (need_sync) {
           return this._updateThread();
         }
+        this._updating.active = false;
       }));
       workflow.start();
     },
