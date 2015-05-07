@@ -1,141 +1,136 @@
 {
-  "version" : 1,
-  "sprites" : {
-    "login-Amazon"       : {
-      "name" : "login-Amazon",
-      "rule" : ".login-Amazon",
-      "hash" : "5961e41c525ef46c88558616fcf23272"
+  "version": 1,
+  "sprites": {
+    "login-Amazon": {
+      "name": "login-Amazon",
+      "rule": ".login-Amazon",
+      "hash": "5961e41c525ef46c88558616fcf23272"
     },
-    "login-Asana"        : {
-      "name" : "login-Asana",
-      "rule" : ".login-Asana",
-      "hash" : "30df492eab339fa64c9ae9b21bb46a18"
+    "login-Asana": {
+      "name": "login-Asana",
+      "rule": ".login-Asana",
+      "hash": "30df492eab339fa64c9ae9b21bb46a18"
     },
-    "login-Balanced"     : {
-      "name" : "login-Balanced",
-      "rule" : ".login-Balanced",
-      "hash" : "46bbf6e8329889b1ad55a96beacfd2f3"
+    "login-Bitbucket": {
+      "name": "login-Bitbucket",
+      "rule": ".login-Bitbucket",
+      "hash": "899182cf1ca35891b64aaa5426bf623a"
     },
-    "login-Bitbucket"    : {
-      "name" : "login-Bitbucket",
-      "rule" : ".login-Bitbucket",
-      "hash" : "899182cf1ca35891b64aaa5426bf623a"
+    "login-Disqus": {
+      "name": "login-Disqus",
+      "rule": ".login-Disqus",
+      "hash": "5f46ac50a5d9d13245971c298f49e13b"
     },
-    "login-Disqus"       : {
-      "name" : "login-Disqus",
-      "rule" : ".login-Disqus",
-      "hash" : "5f46ac50a5d9d13245971c298f49e13b"
+    "login-Dropbox": {
+      "name": "login-Dropbox",
+      "rule": ".login-Dropbox",
+      "hash": "572ab36301762414365b68c0bc185ac5"
     },
-    "login-Dropbox"      : {
-      "name" : "login-Dropbox",
-      "rule" : ".login-Dropbox",
-      "hash" : "572ab36301762414365b68c0bc185ac5"
+    "login-Facebook": {
+      "name": "login-Facebook",
+      "rule": ".login-Facebook",
+      "hash": "2b1511f5b4d12076dd9086d1bb187b28"
     },
-    "login-Facebook"     : {
-      "name" : "login-Facebook",
-      "rule" : ".login-Facebook",
-      "hash" : "2b1511f5b4d12076dd9086d1bb187b28"
+    "login-Generic": {
+      "name": "login-Generic",
+      "rule": ".login-Generic",
+      "hash": "60d75c38668ffd6eea91a40e66186601"
     },
-    "login-Generic"      : {
-      "name" : "login-Generic",
-      "rule" : ".login-Generic",
-      "hash" : "60d75c38668ffd6eea91a40e66186601"
+    "login-Github": {
+      "name": "login-Github",
+      "rule": ".login-Github",
+      "hash": "633696beb8c1eaac642ce4955be917d8"
     },
-    "login-Github"       : {
-      "name" : "login-Github",
-      "rule" : ".login-Github",
-      "hash" : "633696beb8c1eaac642ce4955be917d8"
+    "login-Google": {
+      "name": "login-Google",
+      "rule": ".login-Google",
+      "hash": "b7d3962a31df1e6c13e0a3c97c08f11d"
     },
-    "login-Google"       : {
-      "name" : "login-Google",
-      "rule" : ".login-Google",
-      "hash" : "b7d3962a31df1e6c13e0a3c97c08f11d"
+    "login-HTTP": {
+      "name": "login-HTTP",
+      "rule": ".login-HTTP",
+      "hash": "6fcf0f666c0f6f1e1cd8f397b41ed176"
     },
-    "login-HTTP"         : {
-      "name" : "login-HTTP",
-      "rule" : ".login-HTTP",
-      "hash" : "6fcf0f666c0f6f1e1cd8f397b41ed176"
+    "login-Jira": {
+      "name": "login-Jira",
+      "rule": ".login-Jira",
+      "hash": "0ddadec77a95c1efc398886252ebeda9"
     },
-    "login-Jira"         : {
-      "name" : "login-Jira",
-      "rule" : ".login-Jira",
-      "hash" : "0ddadec77a95c1efc398886252ebeda9"
+    "login-LDAP": {
+      "name": "login-LDAP",
+      "rule": ".login-LDAP",
+      "hash": "5b4e01ddf35cd40c8f061c90abc89b6c"
     },
-    "login-LDAP"         : {
-      "name" : "login-LDAP",
-      "rule" : ".login-LDAP",
-      "hash" : "5b4e01ddf35cd40c8f061c90abc89b6c"
+    "login-Linkedin": {
+      "name": "login-Linkedin",
+      "rule": ".login-Linkedin",
+      "hash": "0dd89825046fa4fd0fe402aa2cd55fd1"
     },
-    "login-Linkedin"     : {
-      "name" : "login-Linkedin",
-      "rule" : ".login-Linkedin",
-      "hash" : "0dd89825046fa4fd0fe402aa2cd55fd1"
+    "login-MediaWiki": {
+      "name": "login-MediaWiki",
+      "rule": ".login-MediaWiki",
+      "hash": "51c7e71ab0e44126e72d8a130779b02c"
     },
-    "login-MediaWiki"    : {
-      "name" : "login-MediaWiki",
-      "rule" : ".login-MediaWiki",
-      "hash" : "51c7e71ab0e44126e72d8a130779b02c"
+    "login-Openid": {
+      "name": "login-Openid",
+      "rule": ".login-Openid",
+      "hash": "9267ffbb8d4e6dee409c4d8fa2d50c0a"
     },
-    "login-Openid"       : {
-      "name" : "login-Openid",
-      "rule" : ".login-Openid",
-      "hash" : "9267ffbb8d4e6dee409c4d8fa2d50c0a"
+    "login-PayPal": {
+      "name": "login-PayPal",
+      "rule": ".login-PayPal",
+      "hash": "60dc511206dd2923418fa07f84bf2db3"
     },
-    "login-PayPal"       : {
-      "name" : "login-PayPal",
-      "rule" : ".login-PayPal",
-      "hash" : "60dc511206dd2923418fa07f84bf2db3"
+    "login-Persona": {
+      "name": "login-Persona",
+      "rule": ".login-Persona",
+      "hash": "949faf7bf5ed377c06aa480da1f42b74"
     },
-    "login-Persona"      : {
-      "name" : "login-Persona",
-      "rule" : ".login-Persona",
-      "hash" : "949faf7bf5ed377c06aa480da1f42b74"
+    "login-Phabricator": {
+      "name": "login-Phabricator",
+      "rule": ".login-Phabricator",
+      "hash": "fad258eb347a1ccf5800b0ee2d8e6e49"
     },
-    "login-Phabricator"  : {
-      "name" : "login-Phabricator",
-      "rule" : ".login-Phabricator",
-      "hash" : "fad258eb347a1ccf5800b0ee2d8e6e49"
+    "login-Stripe": {
+      "name": "login-Stripe",
+      "rule": ".login-Stripe",
+      "hash": "6a71ba00ed2325012650b4bf63bb064d"
     },
-    "login-Stripe"       : {
-      "name" : "login-Stripe",
-      "rule" : ".login-Stripe",
-      "hash" : "6a71ba00ed2325012650b4bf63bb064d"
+    "login-TestPayment": {
+      "name": "login-TestPayment",
+      "rule": ".login-TestPayment",
+      "hash": "9783485db2b5f5035265f4e6d2bc6cd0"
     },
-    "login-TestPayment"  : {
-      "name" : "login-TestPayment",
-      "rule" : ".login-TestPayment",
-      "hash" : "9783485db2b5f5035265f4e6d2bc6cd0"
+    "login-TwitchTV": {
+      "name": "login-TwitchTV",
+      "rule": ".login-TwitchTV",
+      "hash": "dbaa3f5e58fceb86598b2951fc5f9508"
     },
-    "login-TwitchTV"     : {
-      "name" : "login-TwitchTV",
-      "rule" : ".login-TwitchTV",
-      "hash" : "dbaa3f5e58fceb86598b2951fc5f9508"
+    "login-Twitter": {
+      "name": "login-Twitter",
+      "rule": ".login-Twitter",
+      "hash": "0b64983507a720b365474b778a966bab"
     },
-    "login-Twitter"      : {
-      "name" : "login-Twitter",
-      "rule" : ".login-Twitter",
-      "hash" : "0b64983507a720b365474b778a966bab"
+    "login-WePay": {
+      "name": "login-WePay",
+      "rule": ".login-WePay",
+      "hash": "7dd33f6271e948b86df5a642d504c995"
     },
-    "login-WePay"        : {
-      "name" : "login-WePay",
-      "rule" : ".login-WePay",
-      "hash" : "7dd33f6271e948b86df5a642d504c995"
+    "login-WordPressCOM": {
+      "name": "login-WordPressCOM",
+      "rule": ".login-WordPressCOM",
+      "hash": "c22a183bfb1e46deeab864223ec48db9"
     },
-    "login-WordPressCOM" : {
-      "name" : "login-WordPressCOM",
-      "rule" : ".login-WordPressCOM",
-      "hash" : "c22a183bfb1e46deeab864223ec48db9"
-    },
-    "login-Yahoo"        : {
-      "name" : "login-Yahoo",
-      "rule" : ".login-Yahoo",
-      "hash" : "1cc6fceee294045fe6d1c1d3aa31d2c1"
+    "login-Yahoo": {
+      "name": "login-Yahoo",
+      "rule": ".login-Yahoo",
+      "hash": "1cc6fceee294045fe6d1c1d3aa31d2c1"
     }
   },
-  "scales"  : [
+  "scales": [
     1,
     2
   ],
-  "header"  : "\/**\n * @provides sprite-login-css\n * @generated\n *\/\n\n.sprite-login {\n  background-image: url(\/rsrc\/image\/sprite-login.png);\n  background-repeat: no-repeat;\n}\n\n@media\nonly screen and (min-device-pixel-ratio: 1.5),\nonly screen and (-webkit-min-device-pixel-ratio: 1.5) {\n  .sprite-login {\n    background-image: url(\/rsrc\/image\/sprite-login-X2.png);\n    background-size: {X}px {Y}px;\n  }\n}\n",
-  "type"    : "standard"
+  "header": "\/**\n * @provides sprite-login-css\n * @generated\n *\/\n\n.sprite-login {\n  background-image: url(\/rsrc\/image\/sprite-login.png);\n  background-repeat: no-repeat;\n}\n\n@media\nonly screen and (min-device-pixel-ratio: 1.5),\nonly screen and (-webkit-min-device-pixel-ratio: 1.5) {\n  .sprite-login {\n    background-image: url(\/rsrc\/image\/sprite-login-X2.png);\n    background-size: {X}px {Y}px;\n  }\n}\n",
+  "type": "standard"
 }
