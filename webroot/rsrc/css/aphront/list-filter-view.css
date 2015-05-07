@@ -3,14 +3,13 @@
  */
 
 .aphront-list-filter-wrap {
-  border-left: 1px solid {$lightblueborder};
-  border-right: 1px solid {$lightblueborder};
-  border-bottom: 1px solid {$blueborder};
+  border: 1px solid {$lightblueborder};
   margin: 0 16px;
+  background: #fff;
+  border-radius: 3px;
 }
 
 .aphront-list-filter-view {
-  background: #fff;
   padding: 0;
 }
 

@@ -43,8 +43,8 @@
   overflow-y: auto;
   top: 0;
   bottom: 0;
-  background: #dbdde0;
-  border-right: 1px solid {$hovergrey}
+  background: #f7f7f7;
+  border-right: 1px solid {$lightblueborder}
 }
 
 .conpherence-menu-pane .phui-list-item-view.hidden {
@@ -88,16 +88,7 @@
   -webkit-overflow-scrolling: touch;
 }
 
-.conpherence-layout .phabricator-nav-column-background {
-  display: block;
-}
-
-.device .phabricator-nav-column-background {
-  top: 44px;
-}
-
-.device .conpherence-role-thread .conpherence-menu-pane,
-.device .conpherence-role-thread .phabricator-nav-column-background {
+.device .conpherence-role-thread .conpherence-menu-pane {
   display: none;
 }
 
@@ -126,7 +117,7 @@
 }
 
 .conpherence-menu .conpherence-selected {
-  background: {$hovergrey};
+  background: rgba(0,0,0,0.05);
   border-left: 3px solid {$sky};
 }
 
@@ -136,7 +127,7 @@
 
 .device-desktop .conpherence-menu
  .conpherence-selected.conpherence-menu-item-view:hover {
-  background-color: {$hoverselectedgrey};
+  background-color: rgba(0,0,0,0.05);
 }
 
 .conpherence-menu .loading {
@@ -144,7 +135,7 @@
 }
 
 .device-desktop .conpherence-menu .conpherence-menu-item-view:hover {
-  background-color: {$hovergrey};
+  background-color: rgba(0,0,0,0.05);
 }
 
 .conpherence-menu .conpherence-menu-item-view .conpherence-menu-item-image {

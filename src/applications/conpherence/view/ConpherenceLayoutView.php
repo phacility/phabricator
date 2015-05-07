@@ -108,13 +108,6 @@ final class ConpherenceLayoutView extends AphrontView {
         javelin_tag(
           'div',
           array(
-            'class' => 'phabricator-nav-column-background',
-            'sigil' => 'phabricator-nav-column-background',
-          ),
-          ''),
-        javelin_tag(
-          'div',
-          array(
             'id' => 'conpherence-menu-pane',
             'class' => 'conpherence-menu-pane phabricator-side-menu',
             'sigil' => 'conpherence-menu-pane',
