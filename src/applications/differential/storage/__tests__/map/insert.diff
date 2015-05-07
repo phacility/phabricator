@@ -1,0 +1,14 @@
+diff --git a/alphabet b/alphabet
+index f2b41ef..755b349 100644
+--- a/alphabet
++++ b/alphabet
+@@ -8,6 +8,9 @@ g
+ h
+ i
+ j
++j1
++j2
++j3
+ k
+ l
+ n

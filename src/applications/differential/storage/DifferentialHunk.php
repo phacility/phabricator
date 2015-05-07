@@ -117,7 +117,7 @@ abstract class DifferentialHunk extends DifferentialDAO
     return $this->splitLines;
   }
 
-  private function getStructuredLines() {
+  public function getStructuredLines() {
     if ($this->structuredLines === null) {
       $lines = $this->getSplitLines();
 
