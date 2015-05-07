@@ -9,6 +9,16 @@ final class AphrontCalendarEventView extends AphrontView {
   private $description;
   private $eventID;
   private $color;
+  private $uri;
+
+  public function setURI($uri) {
+    $this->uri = $uri;
+    return $this;
+  }
+
+  public function getURI() {
+    return $this->uri;
+  }
 
   public function setEventID($event_id) {
     $this->eventID = $event_id;

@@ -10,6 +10,7 @@ abstract class DifferentialHunk extends DifferentialDAO
   protected $newLen;
 
   private $changeset;
+  private $splitLines;
   private $structuredLines;
   private $structuredFiles = array();
 
@@ -109,9 +110,16 @@ abstract class DifferentialHunk extends DifferentialDAO
     return $this->structuredFiles[$kind];
   }
 
+  public function getSplitLines() {
+    if ($this->splitLines === null) {
+      $this->splitLines = phutil_split_lines($this->getChanges());
+    }
+    return $this->splitLines;
+  }
+
   private function getStructuredLines() {
     if ($this->structuredLines === null) {
-      $lines = phutil_split_lines($this->getChanges());
+      $lines = $this->getSplitLines();
 
       $structured = array();
       foreach ($lines as $line) {
@@ -154,13 +162,20 @@ abstract class DifferentialHunk extends DifferentialDAO
   }
 
   final private function makeContent($include) {
+    $lines = $this->getSplitLines();
     $results = array();
-    $lines = explode("\n", $this->getChanges());
 
+    $include_map = array();
+    for ($ii = 0; $ii < strlen($include); $ii++) {
+      $include_map[$include[$ii]] = true;
+    }
 
-    $n = (strpos($include, '+') !== false ?
-      $this->newOffset :
-      $this->oldOffset);
+    if (isset($include_map['+'])) {
+      $n = $this->newOffset;
+    } else {
+      $n = $this->oldOffset;
+    }
+
     $use_next_newline = false;
     foreach ($lines as $line) {
       if (!isset($line[0])) {
@@ -171,14 +186,14 @@ abstract class DifferentialHunk extends DifferentialDAO
         if ($use_next_newline) {
           $results[last_key($results)] = rtrim(end($results), "\n");
         }
-      } else if (strpos($include, $line[0]) === false) {
+      } else if (empty($include_map[$line[0]])) {
         $use_next_newline = false;
       } else {
         $use_next_newline = true;
-        $results[$n] = substr($line, 1)."\n";
+        $results[$n] = substr($line, 1);
       }
 
-      if ($line[0] == ' ' || strpos($include, $line[0]) !== false) {
+      if ($line[0] == ' ' || isset($include_map[$line[0]])) {
         $n++;
       }
     }

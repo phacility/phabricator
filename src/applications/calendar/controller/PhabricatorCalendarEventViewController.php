@@ -76,7 +76,7 @@ final class PhabricatorCalendarEventViewController
     $is_cancelled = $event->getIsCancelled();
     $icon = $is_cancelled ? ('fa-times') : ('fa-calendar');
     $color = $is_cancelled ? ('grey') : ('green');
-    $status = $is_cancelled ? ('Cancelled') : ('Active');
+    $status = $is_cancelled ? pht('Cancelled') : pht('Active');
 
     $invite_status = $event->getUserInviteStatus($viewer->getPHID());
     $status_invited = PhabricatorCalendarEventInvitee::STATUS_INVITED;

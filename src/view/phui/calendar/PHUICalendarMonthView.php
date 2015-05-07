@@ -251,31 +251,21 @@ final class PHUICalendarMonthView extends AphrontView {
   }
 
   private function getNextYearAndMonth() {
-    $month = $this->month;
-    $year = $this->year;
-
-    $next_year = $year;
-    $next_month = $month + 1;
-    if ($next_month == 13) {
-      $next_year = $year + 1;
-      $next_month = 1;
-    }
-
-    return array($next_year, $next_month);
+    $next = $this->getDateTime();
+    $next->modify('+1 month');
+    return array(
+      $next->format('Y'),
+      $next->format('m'),
+    );
   }
 
   private function getPrevYearAndMonth() {
-    $month = $this->month;
-    $year = $this->year;
-
-    $prev_year = $year;
-    $prev_month = $month - 1;
-    if ($prev_month == 0) {
-      $prev_year = $year - 1;
-      $prev_month = 12;
-    }
-
-    return array($prev_year, $prev_month);
+    $prev = $this->getDateTime();
+    $prev->modify('-1 month');
+    return array(
+      $prev->format('Y'),
+      $prev->format('m'),
+    );
   }
 
   /**
@@ -313,4 +303,15 @@ final class PHUICalendarMonthView extends AphrontView {
     return $days;
   }
 
+  private function getDateTime() {
+    $user = $this->user;
+    $timezone = new DateTimeZone($user->getTimezoneIdentifier());
+
+    $month = $this->month;
+    $year = $this->year;
+
+    $date = new DateTime("{$year}-{$month}-01 ", $timezone);
+
+    return $date;
+  }
 }

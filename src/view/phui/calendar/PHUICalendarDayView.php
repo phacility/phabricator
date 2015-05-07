@@ -8,7 +8,7 @@ final class PHUICalendarDayView extends AphrontView {
   private $browseURI;
   private $events = array();
 
-  public function addEvent(AphrontCalendarDayEventView $event) {
+  public function addEvent(AphrontCalendarEventView $event) {
     $this->events[] = $event;
     return $this;
   }
@@ -117,12 +117,101 @@ final class PHUICalendarDayView extends AphrontView {
       ));
 
     $header = $this->renderDayViewHeader();
+    $sidebar = $this->renderSidebar();
 
-    $day_box = (new PHUIObjectBoxView())
+    $table_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($table);
+      ->appendChild($table)
+      ->setFlush(true);
 
-    return $day_box;
+    $layout = id(new AphrontMultiColumnView())
+      ->addColumn($sidebar, 'third')
+      ->addColumn($table_box, 'thirds')
+      ->setFluidLayout(true)
+      ->setGutter(AphrontMultiColumnView::GUTTER_MEDIUM);
+
+    return phutil_tag(
+      'div',
+        array(
+          'class' => 'ml',
+        ),
+        $layout);
+  }
+
+  private function renderSidebar() {
+    $this->events = msort($this->events, 'getEpochStart');
+    $week_of_boxes = $this->getWeekOfBoxes();
+    $filled_boxes = array();
+
+    foreach ($week_of_boxes as $weekly_box) {
+      $start = $weekly_box['start'];
+      $end = id(clone $start)->modify('+1 day');
+
+      $box_events = array();
+
+      foreach ($this->events as $event) {
+        if ($event->getEpochStart() >= $start->format('U') &&
+        $event->getEpochStart() < $end->format('U')) {
+          $box_events[] = $event;
+        }
+      }
+      $filled_boxes[] = $this->renderSidebarBox(
+        $box_events,
+        $weekly_box['title']);
+    }
+
+    return $filled_boxes;
+  }
+
+  private function renderSidebarBox($events, $title) {
+    $widget = new PHUICalendarWidgetView();
+
+    $list = id(new PHUICalendarListView())
+      ->setUser($this->user);
+
+    if (count($events) == 0) {
+      $list->showBlankState(true);
+    } else {
+      foreach ($events as $event) {
+        $list->addEvent($event);
+      }
+    }
+
+    $widget
+      ->setCalendarList($list)
+      ->setHeader($title);
+    return $widget;
+  }
+
+  private function getWeekOfBoxes() {
+    $sidebar_day_boxes = array();
+
+    $display_start_day = $this->getDateTime();
+    $display_end_day = id(clone $display_start_day)->modify('+6 day');
+
+    $box_start_time = clone $display_start_day;
+
+    $today_time = PhabricatorTime::getTodayMidnightDateTime($this->user);
+    $tomorrow_time = clone $today_time;
+    $tomorrow_time->modify('+1 day');
+
+    while ($box_start_time <= $display_end_day) {
+      if ($box_start_time == $today_time) {
+        $title = pht('Today');
+      } else if ($box_start_time == $tomorrow_time) {
+        $title = pht('Tomorrow');
+      } else {
+        $title = $box_start_time->format('l');
+      }
+
+      $sidebar_day_boxes[] = array(
+        'title' => $title,
+        'start' => clone $box_start_time,
+        );
+
+      $box_start_time->modify('+1 day');
+    }
+    return $sidebar_day_boxes;
   }
 
   private function renderDayViewHeader() {
@@ -196,7 +285,7 @@ final class PHUICalendarDayView extends AphrontView {
   }
 
   private function drawEvent(
-    AphrontCalendarDayEventView $event,
+    AphrontCalendarEventView $event,
     $offset,
     $width,
     $top,
@@ -253,95 +342,28 @@ final class PHUICalendarDayView extends AphrontView {
     return $included_datetimes;
   }
 
-  private function getNumberOfDaysInMonth($month, $year) {
-    $user = $this->user;
-    $timezone = new DateTimeZone($user->getTimezoneIdentifier());
-
-    list($next_year, $next_month) = $this->getNextYearAndMonth($month, $year);
-
-    $end_date = new DateTime("{$next_year}-{$next_month}-01", $timezone);
-    $end_epoch = $end_date->format('U');
-
-    $days = 0;
-    for ($day = 1; $day <= 31; $day++) {
-      $day_date = new DateTime("{$year}-{$month}-{$day}", $timezone);
-      $day_epoch = $day_date->format('U');
-      if ($day_epoch >= $end_epoch) {
-        break;
-      } else {
-        $days++;
-      }
-    }
-
-    return $days;
-  }
-
   private function getPrevDay() {
-    $day = $this->day;
-    $month = $this->month;
-    $year = $this->year;
-
-    $prev_year = $year;
-    $prev_month = $month;
-    $prev_day = $day - 1;
-    if ($prev_day == 0) {
-      $prev_month--;
-      if ($prev_month == 0) {
-        $prev_year--;
-        $prev_month = 12;
-      }
-      $prev_day = $this->getNumberOfDaysInMonth($prev_month, $prev_year);
-    }
-
-    return array($prev_year, $prev_month, $prev_day);
+    $prev = $this->getDateTime();
+    $prev->modify('-1 day');
+    return array(
+      $prev->format('Y'),
+      $prev->format('m'),
+      $prev->format('d'),
+    );
   }
 
   private function getNextDay() {
-    $day = $this->day;
-    $month = $this->month;
-    $year = $this->year;
-
-    $next_year = $year;
-    $next_month = $month;
-    $next_day = $day + 1;
-    $days_in_month = $this->getNumberOfDaysInMonth($month, $year);
-    if ($next_day > $days_in_month) {
-      $next_day = 1;
-      $next_month++;
-    }
-    if ($next_month == 13) {
-      $next_year++;
-      $next_month = 1;
-    }
-
-    return array($next_year, $next_month, $next_day);
-  }
-
-  private function getNextYearAndMonth($month, $year) {
-    $next_year = $year;
-    $next_month = $month + 1;
-    if ($next_month == 13) {
-      $next_year = $year + 1;
-      $next_month = 1;
-    }
-
-    return array($next_year, $next_month);
-  }
-
-  private function getPrevYearAndMonth($month, $year) {
-    $prev_year = $year;
-    $prev_month = $month - 1;
-    if ($prev_month == 0) {
-      $prev_year = $year - 1;
-      $prev_month = 12;
-    }
-
-    return array($prev_year, $prev_month);
+    $next = $this->getDateTime();
+    $next->modify('+1 day');
+    return array(
+      $next->format('Y'),
+      $next->format('m'),
+      $next->format('d'),
+    );
   }
 
   private function getDateTime() {
     $user = $this->user;
-
     $timezone = new DateTimeZone($user->getTimezoneIdentifier());
 
     $day = $this->day;
@@ -356,7 +378,6 @@ final class PHUICalendarDayView extends AphrontView {
   private function findClusters() {
     $events = msort($this->events, 'getEpochStart');
     $clusters = array();
-
 
     foreach ($events as $event) {
       $destination_cluster_key = null;
