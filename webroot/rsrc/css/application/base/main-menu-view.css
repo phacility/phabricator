@@ -64,7 +64,7 @@
 }
 
 .device-desktop .phabricator-main-menu-brand:hover {
-  background-color: rgba(0,0,0,.33);
+  background-color: rgba(55,55,55,.1);
   cursor: hand;
 }
 
@@ -509,7 +509,7 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 
 .device-desktop .phabricator-application-menu
  .core-menu-item.phui-list-item-view:hover {
-  background-color: rgba(0,0,0,.1);
+  background-color: rgba(55,55,55,.1);
   border-radius: 3px;
 }
 
