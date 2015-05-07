@@ -205,7 +205,10 @@ JX.install('ConpherenceThreadManager', {
     _markUpdated: function(r) {
       this._updating.knownID = r.latest_transaction_id;
       this._latestTransactionID = r.latest_transaction_id;
-      JX.Stratcom.invoke('notification-panel-update', null, {});
+      JX.Stratcom.invoke(
+        'conpherence-redraw-aphlict',
+        null,
+        r.aphlictDropdownData);
     },
 
     _updateThread: function() {
@@ -298,7 +301,10 @@ JX.install('ConpherenceThreadManager', {
         this._latestTransactionID = r.latestTransactionID;
         this._canEditLoadedThread = r.canEdit;
 
-        JX.Stratcom.invoke('notification-panel-update', null, {});
+        JX.Stratcom.invoke(
+          'conpherence-redraw-aphlict',
+          null,
+          r.aphlictDropdownData);
 
         this._didLoadThreadCallback(r);
 

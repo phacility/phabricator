@@ -94,6 +94,9 @@ final class ConpherenceViewController extends
     $content['title'] = $title = $d_data['title'];
 
     if ($request->isAjax()) {
+      $dropdown_query = id(new AphlictDropdownDataQuery())
+        ->setViewer($user);
+      $dropdown_query->execute();
       $content['threadID'] = $conpherence->getID();
       $content['threadPHID'] = $conpherence->getPHID();
       $content['latestTransactionID'] = $data['latest_transaction_id'];
@@ -101,6 +104,10 @@ final class ConpherenceViewController extends
         $user,
         $conpherence,
         PhabricatorPolicyCapability::CAN_EDIT);
+      $content['aphlictDropdownData'] = array(
+        $dropdown_query->getNotificationData(),
+        $dropdown_query->getConpherenceData(),
+      );
       return id(new AphrontAjaxResponse())->setContent($content);
     }
 

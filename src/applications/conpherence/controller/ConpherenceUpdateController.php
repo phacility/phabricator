@@ -543,8 +543,10 @@ final class ConpherenceUpdateController
           break;
       }
     }
-
     $data = $conpherence->getDisplayData($user);
+    $dropdown_query = id(new AphlictDropdownDataQuery())
+      ->setViewer($user);
+    $dropdown_query->execute();
     $content = array(
       'non_update' => $non_update,
       'transactions' => hsprintf('%s', $rendered_transactions),
@@ -555,6 +557,10 @@ final class ConpherenceUpdateController
       'header' => $header,
       'file_widget' => $file_widget,
       'people_widget' => $people_widget,
+      'aphlictDropdownData' => array(
+        $dropdown_query->getNotificationData(),
+        $dropdown_query->getConpherenceData(),
+      ),
     );
 
     return $content;
