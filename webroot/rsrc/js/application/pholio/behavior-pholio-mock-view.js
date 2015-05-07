@@ -233,6 +233,10 @@ JX.behavior('pholio-mock-view', function(config, statics) {
   }
 
   function redraw_inlines(id) {
+    if (!statics.enabled) {
+      return;
+    }
+
     if (!active_image) {
       return;
     }
@@ -306,6 +310,10 @@ JX.behavior('pholio-mock-view', function(config, statics) {
   }
 
   function redraw_selection() {
+    if (!statics.enabled) {
+      return;
+    }
+
     var classes = ['pholio-mock-reticle-selection'];
     selection_reticle = selection_reticle || render_reticle(classes, '');
 
