@@ -123,7 +123,7 @@ final class PHUICalendarListView extends AphrontTagView {
           'size' => 200,
         ),
       ),
-      $description);
+      $event->getName());
 
     return $anchor;
   }

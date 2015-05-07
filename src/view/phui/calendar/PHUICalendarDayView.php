@@ -8,7 +8,7 @@ final class PHUICalendarDayView extends AphrontView {
   private $browseURI;
   private $events = array();
 
-  public function addEvent(AphrontCalendarDayEventView $event) {
+  public function addEvent(AphrontCalendarEventView $event) {
     $this->events[] = $event;
     return $this;
   }
@@ -121,41 +121,21 @@ final class PHUICalendarDayView extends AphrontView {
 
     $table_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($table);
-
-    $column1 = phutil_tag(
-      'div',
-        array(
-          'class' => 'pm',
-        ),
-        $sidebar);
-
-    $column2 = phutil_tag(
-      'div',
-        array(
-          'class' => 'pm',
-        ),
-        $table_box);
+      ->appendChild($table)
+      ->setFlush(true);
 
     $layout = id(new AphrontMultiColumnView())
-      ->addColumn($column1, 'third')
-      ->addColumn($column2, 'thirds')
+      ->addColumn($sidebar, 'third')
+      ->addColumn($table_box, 'thirds')
       ->setFluidLayout(true)
       ->setGutter(AphrontMultiColumnView::GUTTER_MEDIUM);
 
-    $wrap = phutil_tag(
+    return phutil_tag(
       'div',
         array(
           'class' => 'ml',
         ),
         $layout);
-
-    return phutil_tag(
-      'div',
-        array(),
-        array(
-          $wrap,
-        ));
   }
 
   private function renderSidebar() {
@@ -163,11 +143,10 @@ final class PHUICalendarDayView extends AphrontView {
     $week_of_boxes = $this->getWeekOfBoxes();
     $filled_boxes = array();
 
-    foreach ($week_of_boxes as $box) {
-      $start = $box['start'];
+    foreach ($week_of_boxes as $weekly_box) {
+      $start = $weekly_box['start'];
       $end = id(clone $start)->modify('+1 day');
 
-      $box = $box['box'];
       $box_events = array();
 
       foreach ($this->events as $event) {
@@ -176,65 +155,32 @@ final class PHUICalendarDayView extends AphrontView {
           $box_events[] = $event;
         }
       }
-      $filled_boxes[] = $this->renderSidebarBox($box_events, $box);
+      $filled_boxes[] = $this->renderSidebarBox(
+        $box_events,
+        $weekly_box['title']);
     }
 
     return $filled_boxes;
   }
 
-  private function renderSidebarBox($events, $box) {
-    $user = $this->user;
-    $rows = array();
+  private function renderSidebarBox($events, $title) {
+    $widget = new PHUICalendarWidgetView();
 
-    foreach ($events as $key => $event) {
-      $uri = $event->getURI();
-      $name = $event->getName();
-      $time = id(AphrontFormDateControlValue::newFromEpoch(
-        $user,
-        $event->getEpochStart()))
-      ->getValueTime();
+    $list = id(new PHUICalendarListView())
+      ->setUser($this->user);
 
-      $name = phutil_tag(
-        'a',
-        array(
-          'href' => $uri,
-        ),
-        $name);
-
-      $name = phutil_tag(
-        'td',
-        array(
-          'class' => 'calendar-day-sidebar-column-name',
-        ),
-        $name);
-
-      $time = phutil_tag(
-        'td',
-        array(
-          'class' => 'calendar-day-sidebar-column-time',
-        ),
-        $time);
-
-      $rows[] = phutil_tag(
-        'tr',
-        array(
-          'class' => 'calendar-day-sidebar-row',
-        ),
-        array(
-          $name,
-          $time,
-        ));
+    if (count($events) == 0) {
+      $list->showBlankState(true);
+    } else {
+      foreach ($events as $event) {
+        $list->addEvent($event);
+      }
     }
 
-    $table = phutil_tag(
-      'table',
-      array(
-        'class' => 'calendar-day-sidebar-today-table',
-      ),
-      $rows);
-
-    $box->appendChild($table);
-    return $box;
+    $widget
+      ->setCalendarList($list)
+      ->setHeader($title);
+    return $widget;
   }
 
   private function getWeekOfBoxes() {
@@ -259,7 +205,7 @@ final class PHUICalendarDayView extends AphrontView {
       }
 
       $sidebar_day_boxes[] = array(
-        'box' => id(new PHUIObjectBoxView())->setHeaderText($title),
+        'title' => $title,
         'start' => clone $box_start_time,
         );
 
@@ -339,7 +285,7 @@ final class PHUICalendarDayView extends AphrontView {
   }
 
   private function drawEvent(
-    AphrontCalendarDayEventView $event,
+    AphrontCalendarEventView $event,
     $offset,
     $width,
     $top,
