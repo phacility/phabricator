@@ -27,7 +27,6 @@ final class PhabricatorMainMenuView extends AphrontView {
     $user = $this->user;
 
     require_celerity_resource('phabricator-main-menu-view');
-    require_celerity_resource('sprite-main-header-css');
 
     $header_id = celerity_generate_unique_node_id();
     $menus = array();
@@ -82,8 +81,6 @@ final class PhabricatorMainMenuView extends AphrontView {
     $application_menu = $this->renderApplicationMenu();
     $classes = array();
     $classes[] = 'phabricator-main-menu';
-    $classes[] = 'sprite-main-header';
-    $classes[] = 'main-header-'.PhabricatorEnv::getEnvConfig('ui.header-color');
 
     return phutil_tag(
       'div',
@@ -161,7 +158,7 @@ final class PhabricatorMainMenuView extends AphrontView {
         'meta'  => array(
           'map' => array(
             $header_id => 'phabricator-application-menu-expanded',
-            $button_id => 'white',
+            $button_id => 'sky',
           ),
         ),
       ),
@@ -224,7 +221,7 @@ final class PhabricatorMainMenuView extends AphrontView {
         'meta'  => array(
           'map' => array(
             $header_id => 'phabricator-search-menu-expanded',
-            $button_id => 'white',
+            $button_id => 'sky',
           ),
         ),
       ),
