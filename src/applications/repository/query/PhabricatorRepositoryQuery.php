@@ -429,8 +429,8 @@ final class PhabricatorRepositoryQuery
     return false;
   }
 
-  protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {
-    $where = array();
+  protected function buildWhereClauseParts(AphrontDatabaseConnection $conn_r) {
+    $where = parent::buildWhereClauseParts($conn_r);
 
     if ($this->ids) {
       $where[] = qsprintf(
@@ -518,12 +518,8 @@ final class PhabricatorRepositoryQuery
         $callsign);
     }
 
-    $where[] = $this->buildPagingClause($conn_r);
-
-    return $this->formatWhereClause($where);
+    return $where;
   }
-
-
 
   public function getQueryApplicationClass() {
     return 'PhabricatorDiffusionApplication';
