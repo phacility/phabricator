@@ -9,8 +9,8 @@
 }
 
 .phabricator-chromeless-page .phabricator-standard-page {
-  background:           transparent;
-  border-width:         0px;
+  background: transparent;
+  border-width: 0px;
 }
 
 .phabricator-standard-page-footer {
@@ -56,18 +56,6 @@
   background: #ffffd3;
   position: absolute;
   border: 1px solid #999900;
-}
-
-.workflow-header {
-  background: #efefef;
-  padding: 6px 2em;
-  text-align: right;
-  margin-bottom: 6px;
-  border-bottom: 1px solid #dfdfdf;
-}
-
-.workflow-header button {
-  float: right;
 }
 
 a.handle-status-closed {

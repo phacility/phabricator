@@ -13,11 +13,13 @@
 .phabricator-main-menu {
   background-repeat: repeat-x;
   position: relative;
-  min-height: 44px;
+  min-height: 43px;
+  background: #ebecee;
+  border-bottom: 1px solid {$hovergrey};
 }
 
 .device-desktop .phabricator-main-menu {
-  height: 44px;
+  height: 43px;
   padding-right: 4px;
 }
 
@@ -84,7 +86,7 @@
   font-size: 20px;
   height: 20px;
   width: 20px;
-  color: rgba(255,255,255,.8);
+  color: {$bluetext};
   text-align: center;
   vertical-align: middle;
   line-height: 24px;
@@ -147,26 +149,20 @@
   box-shadow: none;
   transition: none;
 
-  color: {$lightgreytext};
+  color: {$bluetext};
   width: 100%;
   right: 0;
   position: absolute;
   font-size: 13px;
-  border-width: 2px;
-  border-color: rgba(0,0,0,.6);
+  border-width: 1px;
+  border-color: {$blueborder};
   border-radius: 3px;
-  background-color: rgba(0,0,0,.5);
+  background-color: #fff;
   opacity: .8;
   height: 28px;
-  box-shadow: 0px 1px 1px rgba(128, 128, 128, 0.25);
   padding: 3px 30px 3px 6px;
   float: left;
   width: 205px;
-}
-
-.phabricator-main-menu.main-header-dark .phabricator-main-menu-search input {
-  background-color: rgba(150,150,150,.5);
-  border-color: #333;
 }
 
 .device .phabricator-main-menu-search input {
@@ -185,13 +181,13 @@
 }
 
 .phabricator-main-menu-search input.jx-typeahead-placeholder {
-  color: #fff;
+  color: {$bluetext};
 }
 
 .phabricator-main-menu-search button {
-  color: rgba(255,255,255,.8);
+  color: {$bluetext};
   position: absolute;
-  background: #000;
+  background: {$lightgreybackground};
   border: none;
   outline: none;
   box-shadow: none;
@@ -216,7 +212,7 @@
 
 .device-desktop .phabricator-main-menu-search
   button.phabricator-main-menu-search-dropdown:hover .phui-icon-view {
-    color: #fff;
+    color: {$sky};
 }
 
 .device .phabricator-main-menu-search
@@ -238,11 +234,12 @@
 button.phabricator-main-menu-search-dropdown .caret:before {
   content: "\f107";
   font-family: FontAwesome;
+  color: {$bluetext};
 }
 
 .phabricator-main-menu-search button.phabricator-main-menu-search-dropdown
   .phui-icon-view {
-  color: rgba(255,255,255,.8);
+  color: {$bluetext};
 }
 
 .phabricator-main-menu-search-dropdown .caret {
@@ -254,7 +251,7 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 }
 
 .phabricator-main-menu-search button:hover {
-  color: #fff;
+  color: {$sky};
 }
 
 .device .phabricator-main-menu-search button {
@@ -346,8 +343,7 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 }
 
 .alert-notifications .phui-icon-view {
-  color: rgba(200,200,200, .4);
-  text-shadow: 0px -1px 0px rgba(0, 0, 0, 0.1);
+  color: {$lightbluetext};
 }
 
 .device-desktop .alert-notifications:hover {
@@ -356,7 +352,7 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 }
 
 .device-desktop .alert-notifications:hover .phui-icon-view {
-  color: #fff;
+  color: {$sky};
 }
 
 .phabricator-main-menu-alert-icon,
@@ -365,7 +361,7 @@ button.phabricator-main-menu-search-dropdown .caret:before {
   height: 18px;
   float: left;
   padding: 8px 6px 8px 4px;
-  color: white;
+  color: {$sky};
   font-size: 18px;
   line-height: 20px;
   text-align: right;
@@ -378,7 +374,7 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 
 .phabricator-main-menu-alert-count,
 .phabricator-main-menu-message-count {
-  color: #fff;
+  color: {$sky};
   text-align: center;
   display: none;
   float: left;
@@ -393,7 +389,7 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 
 .alert-unread .phabricator-main-menu-alert-icon,
 .message-unread .phabricator-main-menu-message-icon  {
-  color: #fff;
+  color: {$sky};
 }
 
 .alert-unread .phabricator-main-menu-alert-count,
@@ -486,7 +482,7 @@ button.phabricator-main-menu-search-dropdown .caret:before {
   font-size: 20px;
   height: 20px;
   width: 20px;
-  color: rgba(255,255,255,.8);
+  color: {$bluetext};
   margin: 8px;
   text-align: center;
   vertical-align: middle;
@@ -503,7 +499,7 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 .device-desktop .phabricator-application-menu
   .core-menu-item.phui-list-item-view:hover
   .phui-list-item-icon.phui-font-fa {
-    color: #fff;
+    color: {$sky};
   }
 
 .device-desktop .phabricator-application-menu
@@ -513,7 +509,7 @@ button.phabricator-main-menu-search-dropdown .caret:before {
 
 .device-desktop .phabricator-application-menu
  .core-menu-item.phui-list-item-view:hover {
-  background-color: rgba(0,0,0,.33);
+  background-color: rgba(0,0,0,.1);
   border-radius: 3px;
 }
 
