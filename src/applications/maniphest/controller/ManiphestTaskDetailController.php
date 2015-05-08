@@ -350,10 +350,6 @@ final class ManiphestTaskDetailController extends ManiphestController {
       ->setHeader($header)
       ->addPropertyList($properties);
 
-    if ($info_view) {
-      $object_box->setInfoView($info_view);
-    }
-
     if ($description) {
       $object_box->addPropertyList($description);
     }
@@ -361,6 +357,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
     return $this->buildApplicationPage(
       array(
         $crumbs,
+        $info_view,
         $object_box,
         $timeline,
         $comment_box,

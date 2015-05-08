@@ -55,32 +55,32 @@ h1.phui-info-view-head {
 
 .phui-info-severity-error,
 .phui-info-severity-error a.button {
-  border-color: {$red};
-  background: {$lightred};
+  border-color: {$sh-redborder};
+  background: {$sh-redbackground};
 }
 
 .phui-info-severity-error a.button {
-  color: {$red};
+  color: {$sh-redtext};
 }
 
 .phui-info-severity-warning,
 .phui-info-severity-warning a.button {
-  border-color: {$yellow};
-  background: {$lightyellow};
+  border-color: {$sh-yellowborder};
+  background: {$sh-yellowbackground};
 }
 
 .phui-info-severity-warning a.button {
-  color: #bc7837;
+  color: {$sh-yellowtext};
 }
 
 .phui-info-severity-notice,
 .phui-info-severity-notice a.button {
-  border-color: {$blue};
-  background: {$lightblue};
+  border-color: {$sh-blueborder};
+  background: {$sh-bluebackground};
 }
 
 .phui-info-severity-notice a.button {
-  color: {$blue};
+  color: {$sh-bluetext};
 }
 
 .phui-info-severity-nodata,
@@ -95,32 +95,22 @@ h1.phui-info-view-head {
 
 .phui-info-severity-success,
 .phui-info-severity-success a.button {
-  border-color: {$green};
-  background: {$lightgreen};
+  border-color: {$sh-greenborder};
+  background: {$sh-greenbackground};
 }
 
 .phui-info-severity-success a.button {
-  color: {$green};
+  color: {$sh-greentext};
 }
 
 .legalpad .phui-info-view {
   margin: 0;
-  border-width: 0 0 1px 0;
-  border-bottom: 1px solid {$lightblueborder};
+  border-radius: 0;
+  border-width: 0;
 }
 
 .aphront-dialog-body .phui-info-view {
   margin: 0 0 8px 0;
-}
-
-.aphront-dialog-body .phui-info-view .phui-info-view-list {
-  margin: 0 0 0 16px;
-  list-style: disc;
-}
-
-.phui-object-box .phui-info-severity-warning,
-.aphront-dialog-body .phui-info-severity-warning {
-  color: #bc7837;
 }
 
 .phui-crumbs-view + .phui-info-view {
