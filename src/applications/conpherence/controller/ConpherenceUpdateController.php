@@ -251,7 +251,7 @@ final class ConpherenceUpdateController
           case 'redirect':
           default:
             return id(new AphrontRedirectResponse())
-              ->setURI($this->getApplicationURI($conpherence->getID().'/'));
+              ->setURI('/'.$conpherence->getMonogram());
             break;
         }
       }

@@ -5,6 +5,10 @@ final class ConpherenceViewController extends
 
   const OLDER_FETCH_LIMIT = 5;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
 
@@ -138,7 +142,7 @@ final class ConpherenceViewController extends
       $conpherence,
       PhabricatorPolicyCapability::CAN_JOIN);
     $participating = $conpherence->getParticipantIfExists($user->getPHID());
-    if (!$can_join && !$participating) {
+    if (!$can_join && !$participating && $user->isLoggedIn()) {
       return null;
     }
     $draft = PhabricatorDraft::newFromUserAndKey(
@@ -147,9 +151,20 @@ final class ConpherenceViewController extends
     if ($participating) {
       $action = ConpherenceUpdateActions::MESSAGE;
       $button_text = pht('Send');
-    } else {
+    } else if ($user->isLoggedIn()) {
       $action = ConpherenceUpdateActions::JOIN_ROOM;
       $button_text = pht('Join');
+    } else {
+      // user not logged in so give them a login button.
+      $login_href = id(new PhutilURI('/auth/start/'))
+        ->setQueryParam('next', '/'.$conpherence->getMonogram());
+      return id(new PHUIFormLayoutView())
+        ->addClass('login-to-participate')
+        ->appendChild(
+          id(new PHUIButtonView())
+          ->setTag('a')
+          ->setText(pht('Login to Participate'))
+          ->setHref((string)$login_href));
     }
     $update_uri = $this->getApplicationURI('update/'.$conpherence->getID().'/');
 
@@ -157,10 +172,10 @@ final class ConpherenceViewController extends
 
     $form =
       id(new AphrontFormView())
+      ->setUser($user)
       ->setAction($update_uri)
       ->addSigil('conpherence-pontificate')
       ->setWorkflow(true)
-      ->setUser($user)
       ->addHiddenInput('action', $action)
       ->appendChild(
         id(new PhabricatorRemarkupControl())

@@ -36,9 +36,8 @@ final class ConpherenceNewRoomController extends ConpherenceController {
           ->setActor($user)
           ->applyTransactions($conpherence, $xactions);
 
-        $uri = $this->getApplicationURI($conpherence->getID());
         return id(new AphrontRedirectResponse())
-                    ->setURI($uri);
+          ->setURI('/'.$conpherence->getMonogram());
       } catch (PhabricatorApplicationTransactionValidationException $ex) {
         $validation_exception = $ex;
 

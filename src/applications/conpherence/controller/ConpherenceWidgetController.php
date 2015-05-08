@@ -13,6 +13,10 @@ final class ConpherenceWidgetController extends ConpherenceController {
     return $this->userPreferences;
   }
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $request = $this->getRequest();
     $user = $request->getUser();
@@ -26,6 +30,9 @@ final class ConpherenceWidgetController extends ConpherenceController {
       ->withIDs(array($conpherence_id))
       ->needWidgetData(true)
       ->executeOne();
+    if (!$conpherence) {
+      return new Aphront404Response();
+    }
     $this->setConpherence($conpherence);
 
     $this->setUserPreferences($user->loadPreferences());
@@ -138,8 +145,11 @@ final class ConpherenceWidgetController extends ConpherenceController {
         PhabricatorPolicyCapability::CAN_JOIN);
       if ($can_join) {
         $text = pht('Settings are available after joining the room.');
-      } else {
+      } else if ($viewer->isLoggedIn()) {
         $text = pht('Settings not applicable to rooms you can not join.');
+      } else {
+        $text = pht(
+          'Settings are available after logging in and joining the room.');
       }
       return phutil_tag(
         'div',
