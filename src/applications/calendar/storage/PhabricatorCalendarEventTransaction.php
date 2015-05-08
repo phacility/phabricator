@@ -132,6 +132,16 @@ final class PhabricatorCalendarEventTransaction
         return pht(
           "%s updated the event's description.",
           $this->renderHandleLink($author_phid));
+      case self::TYPE_ALL_DAY:
+        if ($new) {
+          return pht(
+            '%s made this an all day event.',
+            $this->renderHandleLink($author_phid));
+        } else {
+          return pht(
+            '%s converted this from an all day event.',
+            $this->renderHandleLink($author_phid));
+        }
       case self::TYPE_CANCEL:
         if ($new) {
           return pht(
@@ -291,6 +301,18 @@ final class PhabricatorCalendarEventTransaction
           '%s updated the description of %s.',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
+      case self::TYPE_ALL_DAY:
+        if ($new) {
+          return pht(
+            '%s made %s an all day event.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        } else {
+          return pht(
+            '%s converted %s from an all day event.',
+            $this->renderHandleLink($author_phid),
+            $this->renderHandleLink($object_phid));
+        }
       case self::TYPE_CANCEL:
         if ($new) {
           return pht(
