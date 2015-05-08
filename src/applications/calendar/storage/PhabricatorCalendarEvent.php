@@ -24,6 +24,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   protected $editPolicy;
 
   private $invitees = self::ATTACHABLE;
+  private $appliedViewer;
 
   const STATUS_AWAY = 1;
   const STATUS_SPORADIC = 2;
@@ -37,15 +38,112 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return id(new PhabricatorCalendarEvent())
       ->setUserPHID($actor->getPHID())
       ->setIsCancelled(0)
+      ->setIsAllDay(0)
       ->setViewPolicy($actor->getPHID())
       ->setEditPolicy($actor->getPHID())
-      ->attachInvitees(array());
+      ->attachInvitees(array())
+      ->applyViewerTimezone($actor);
+  }
+
+  public function applyViewerTimezone(PhabricatorUser $viewer) {
+    if ($this->appliedViewer) {
+      throw new Exception(pht('Viewer timezone is already applied!'));
+    }
+
+    $this->appliedViewer = $viewer;
+
+    if (!$this->getIsAllDay()) {
+      return $this;
+    }
+
+    $zone = $viewer->getTimeZone();
+
+
+    $this->setDateFrom(
+      $this->getDateEpochForTimeZone(
+        $this->getDateFrom(),
+        new DateTimeZone('GMT+12'),
+        'Y-m-d',
+        null,
+        $zone));
+
+    $this->setDateTo(
+      $this->getDateEpochForTimeZone(
+        $this->getDateTo(),
+        new DateTimeZone('GMT-12'),
+        'Y-m-d 23:59:59',
+        '-1 day',
+        $zone));
+
+    return $this;
+  }
+
+
+  public function removeViewerTimezone(PhabricatorUser $viewer) {
+    if (!$this->appliedViewer) {
+      throw new Exception(pht('Viewer timezone is not applied!'));
+    }
+
+    if ($viewer->getPHID() != $this->appliedViewer->getPHID()) {
+      throw new Exception(pht('Removed viewer must match applied viewer!'));
+    }
+
+    $this->appliedViewer = null;
+
+    if (!$this->getIsAllDay()) {
+      return $this;
+    }
+
+    $zone = $viewer->getTimeZone();
+
+    $this->setDateFrom(
+      $this->getDateEpochForTimeZone(
+        $this->getDateFrom(),
+        $zone,
+        'Y-m-d',
+        null,
+        new DateTimeZone('GMT+12')));
+
+    $this->setDateTo(
+      $this->getDateEpochForTimeZone(
+        $this->getDateTo(),
+        $zone,
+        'Y-m-d',
+        '+1 day',
+        new DateTimeZone('GMT-12')));
+
+    return $this;
+  }
+
+  private function getDateEpochForTimeZone(
+    $epoch,
+    $src_zone,
+    $format,
+    $adjust,
+    $dst_zone) {
+
+    $src = new DateTime('@'.$epoch);
+    $src->setTimeZone($src_zone);
+
+    if (strlen($adjust)) {
+      $adjust = ' '.$adjust;
+    }
+
+    $dst = new DateTime($src->format($format).$adjust, $dst_zone);
+    return $dst->format('U');
   }
 
   public function save() {
+    if ($this->appliedViewer) {
+      throw new Exception(
+        pht(
+          'Can not save event with viewer timezone still applied!'));
+    }
+
     if (!$this->mailKey) {
       $this->mailKey = Filesystem::readRandomCharacters(20);
     }
+
     return parent::save();
   }
 

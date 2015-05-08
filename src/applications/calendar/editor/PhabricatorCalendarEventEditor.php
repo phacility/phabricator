@@ -183,6 +183,16 @@ final class PhabricatorCalendarEventEditor
     return parent::applyCustomExternalTransaction($object, $xaction);
   }
 
+  protected function didApplyInternalEffects(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    $object->removeViewerTimezone($this->requireActor());
+
+    return $xactions;
+  }
+
+
   protected function validateAllTransactions(
     PhabricatorLiskDAO $object,
     array $xactions) {

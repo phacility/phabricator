@@ -682,6 +682,10 @@ EOBODY;
     }
   }
 
+  public function getTimeZone() {
+    return new DateTimeZone($this->getTimezoneIdentifier());
+  }
+
   public function __toString() {
     return $this->getUsername();
   }

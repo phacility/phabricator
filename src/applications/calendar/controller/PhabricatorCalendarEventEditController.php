@@ -74,6 +74,7 @@ final class PhabricatorCalendarEventEditController
     $name = $event->getName();
     $description = $event->getDescription();
     $type = $event->getStatus();
+    $is_all_day = $event->getIsAllDay();
 
     $current_policies = id(new PhabricatorPolicyQuery())
       ->setViewer($user)
@@ -95,6 +96,7 @@ final class PhabricatorCalendarEventEditController
       $subscribers = $request->getArr('subscribers');
       $edit_policy = $request->getStr('editPolicy');
       $view_policy = $request->getStr('viewPolicy');
+      $is_all_day = $request->getStr('isAllDay');
 
       $invitees = $request->getArr('invitees');
       $new_invitees = $this->getNewInviteeList($invitees, $event);
@@ -110,6 +112,11 @@ final class PhabricatorCalendarEventEditController
         ->setTransactionType(
           PhabricatorCalendarEventTransaction::TYPE_NAME)
         ->setNewValue($name);
+
+      $xactions[] = id(new PhabricatorCalendarEventTransaction())
+        ->setTransactionType(
+          PhabricatorCalendarEventTransaction::TYPE_ALL_DAY)
+        ->setNewValue($is_all_day);
 
       $xactions[] = id(new PhabricatorCalendarEventTransaction())
         ->setTransactionType(
@@ -184,6 +191,13 @@ final class PhabricatorCalendarEventEditController
       ->setValue($type)
       ->setOptions($event->getStatusOptions());
 
+    $all_day_select = id(new AphrontFormCheckboxControl())
+      ->addCheckbox(
+        'isAllDay',
+        1,
+        pht('All Day Event'),
+        $is_all_day);
+
     $start_control = id(new AphrontFormDateControl())
       ->setUser($user)
       ->setName('start')
@@ -234,6 +248,7 @@ final class PhabricatorCalendarEventEditController
       ->setUser($user)
       ->appendChild($name)
       ->appendChild($status_select)
+      ->appendChild($all_day_select)
       ->appendChild($start_control)
       ->appendChild($end_control)
       ->appendControl($view_policies)
