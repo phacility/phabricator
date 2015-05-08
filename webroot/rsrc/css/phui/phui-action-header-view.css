@@ -8,14 +8,13 @@
 }
 
 .phui-action-header-title {
-  color: {$darkgreytext};
+  color: #000;
   float: left;
-  font-size: 14px;
-  font-weight: bold;
+  font-size: 15px;
+  font-weight: normal;
   line-height: 15px;
-  padding: 8px 0;
+  padding: 12px 0;
   white-space: nowrap;
-  -webkit-font-smoothing: antialiased;
 }
 
 .gradient-lightblue-header .phui-action-header-title {
@@ -46,7 +45,7 @@
 }
 
 .phui-action-header-link {
-  color: {$darkgreytext};
+  color: #000;
 }
 
 .phui-action-header.gradient-white-header {

@@ -48,9 +48,7 @@ ul.phui-object-item-list-view {
 }
 
 .phui-object-item-frame {
-  border-style: solid;
-  border-color: {$lightgreyborder};
-  border-width: 1px 1px 1px 0;
+  border: 1px solid {$lightgreyborder};
   position: relative;
   min-height: 33px;
   overflow: hidden;
@@ -232,7 +230,6 @@ ul.phui-object-item-list-view {
 .phui-object-item-list-view.phui-object-list-stackable
   .phui-object-item {
   margin: -1px 0 0 0;
-  border-left-width: 1px;
   background: #fff;
 }
 
@@ -349,54 +346,6 @@ ul.phui-object-item-icons {
   margin-right: 4px;
 }
 
-
-/* - Bar Colors ----------------------------------------------------------------
-
-  Colors for the left-hand border bars, used to indicate object status or other
-  attributes.
-
-*/
-
-.phui-object-item-bar-color-red {
-  border-left-color: {$red};
-}
-
-.phui-object-item-bar-color-orange {
-  border-left-color: {$orange};
-}
-
-.phui-object-item-bar-color-yellow {
-  border-left-color: {$yellow};
-}
-
-.phui-object-item-bar-color-green {
-  border-left-color: {$green};
-}
-
-.phui-object-item-bar-color-sky {
-  border-left-color: {$sky};
-}
-
-.phui-object-item-bar-color-blue {
-  border-left-color: {$blue};
-}
-
-.phui-object-item-bar-color-indigo {
-  border-left-color: {$indigo};
-}
-
-.phui-object-item-bar-color-violet {
-  border-left-color: {$violet};
-}
-
-.phui-object-item-bar-color-grey {
-  border-left-color: #bdc3c7;
-}
-
-.phui-object-item-bar-color-black {
-  border-left-color: #333333;
-}
-
 /* - Disabled ------------------------------------------------------------------
 
   Disabled/inactive objects.
@@ -430,7 +379,6 @@ ul.phui-object-item-icons {
 
 .phui-object-item.phui-object-item-highlighted {
   background: {$lightyellow};
-  border-left-color: {$yellow};
 }
 
 .phui-object-item-highlighted .phui-object-item-frame {
@@ -439,7 +387,6 @@ ul.phui-object-item-icons {
 
 .phui-object-item-selected {
   background: {$lightblue};
-  border-left-color: {$blue};
 }
 
 .phui-object-item-selected .phui-object-item-frame {
@@ -646,7 +593,7 @@ ul.phui-object-item-icons {
   padding: 0;
   border-left: 1px solid {$lightblueborder};
   border-right: 1px solid {$lightblueborder};
-  border-bottom: 1px solid {$blueborder};
+  border-bottom: 1px solid {$lightblueborder};
   margin-bottom: -1px;
 }
 
@@ -655,7 +602,6 @@ ul.phui-object-item-icons {
   margin: 0;
   background-image: none;
   background-color: #fff;
-  border-left-width: 4px;
 }
 
 .dashboard-panel .phui-object-item-frame,

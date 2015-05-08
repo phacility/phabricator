@@ -77,11 +77,5 @@
 .dashboard-panel .dashboard-box {
   padding: 12px;
   background: #fff;
-  border-left: 1px solid {$lightblueborder};
-  border-right: 1px solid {$lightblueborder};
-  border-bottom: 1px solid {$blueborder};
-}
-
-.dashboard-panel .sprite-gradient .phui-action-header-title {
-  padding: 10px 4px;
+  border: 1px solid {$lightblueborder};
 }

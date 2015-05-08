@@ -4,12 +4,10 @@
 
 .phui-info-view {
   border-style: solid;
-  border-left-width: 4px;
-}
-
-.phui-info-view {
+  border-width: 1px;
   margin: 16px;
   padding: 12px;
+  border-radius: 3px;
 }
 
 .device-phone .phui-info-view {
@@ -21,7 +19,7 @@
 }
 
 .phui-info-view-body {
-  line-height: 1.45em;
+  line-height: 1.6em;
 }
 
 .phui-info-view-actions {
@@ -40,7 +38,8 @@
 
 h1.phui-info-view-head {
   font-weight: bold;
-  font-size: 15px;
+  font-size: 14px;
+  line-height: 1.2em;
 }
 
 .phui-info-view-list {
@@ -111,9 +110,7 @@ h1.phui-info-view-head {
 }
 
 .aphront-dialog-body .phui-info-view {
-  margin: -16px -16px 16px -16px;
-  border-width: 0 0 1px 0;
-  border-bottom: 1px solid {$lightblueborder};
+  margin: 0 0 8px 0;
 }
 
 .aphront-dialog-body .phui-info-view .phui-info-view-list {
@@ -121,24 +118,9 @@ h1.phui-info-view-head {
   list-style: disc;
 }
 
-.phui-object-box .phui-info-severity-error,
-.aphront-dialog-body .phui-info-severity-error {
-  color: {$red};
-}
-
 .phui-object-box .phui-info-severity-warning,
 .aphront-dialog-body .phui-info-severity-warning {
   color: #bc7837;
-}
-
-.phui-object-box .phui-info-severity-notice,
-.aphront-dialog-body .phui-info-severity-notice {
-  color: {$blue};
-}
-
-.phui-object-box .phui-info-severity-success,
-.aphront-dialog-body .phui-info-severity-success {
-  color: {$green};
 }
 
 .phui-crumbs-view + .phui-info-view {

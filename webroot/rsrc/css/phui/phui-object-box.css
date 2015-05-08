@@ -26,10 +26,6 @@ div.phui-object-box.phui-object-box-flush {
   font-weight: normal;
 }
 
-.phui-object-box .phui-header-tall.phui-header-shell h1 {
-  font-weight: bold;
-}
-
 .phui-object-box .phui-header-shell + .phui-info-view {
   margin: 0;
   border-width: 0;

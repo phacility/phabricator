@@ -25,7 +25,7 @@ final class PHUIDocumentView extends AphrontTagView {
   }
 
   public function setHeader(PHUIHeaderView $header) {
-    $header->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTBLUE);
+    $header->setHeaderColor(PHUIActionHeaderView::HEADER_WHITE);
     $this->header = $header;
     return $this;
   }

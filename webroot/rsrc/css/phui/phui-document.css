@@ -4,12 +4,16 @@
 
 .phui-document-view {
   margin-bottom: 16px;
+  border-radius: 3px;
   position: relative;
+}
+
+.phui-document-content {
+  border-radius: 3px;
 }
 
 .device-desktop .phui-document-view {
   border: 1px solid {$lightblueborder};
-  border-bottom: 1px solid {$blueborder};
   max-width: 960px;
   margin: 16px auto;
 }
@@ -74,7 +78,7 @@
 
 .phui-document-content .phui-header-shell {
   border-top: none;
-  border-bottom: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$thinblueborder};
 }
 
 .phui-document-content
@@ -90,20 +94,20 @@
   font-size: 15px;
 }
 
-.phui-document-content .phui-header-view {
-  color: {$darkbluetext};
-  text-shadow: 0 1px 2px #fff;
+.phui-document-content h1.phui-header-view {
+  font-weight: normal;
+  color: #000;
 }
 
 .phui-document-content .phui-property-list-container {
-  border-color: #dde8ef;
+  border-color: {$thinblueborder};
 }
 
 .phui-document-content .phui-property-list-view {
   border: none;
   box-shadow: none;
   margin: 0;
-  background-color: #f6f7f8;
+  background-color: {$lightgreybackground};
 }
 
 .phui-document-content {

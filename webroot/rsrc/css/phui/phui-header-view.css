@@ -42,7 +42,7 @@ body .phui-header-shell.phui-bleed-header
 .phui-header-view {
   padding: 16px;
   font-size: 15px;
-  color: {$darkbluetext};
+  color: #000;
   position: relative;
 }
 

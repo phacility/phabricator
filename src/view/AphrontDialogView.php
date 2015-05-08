@@ -12,7 +12,7 @@ final class AphrontDialogView extends AphrontView {
   private $class;
   private $renderAsForm = true;
   private $formID;
-  private $headerColor = PHUIActionHeaderView::HEADER_LIGHTBLUE;
+  private $headerColor = PHUIActionHeaderView::HEADER_WHITE;
   private $footers = array();
   private $isStandalone;
   private $method = 'POST';
