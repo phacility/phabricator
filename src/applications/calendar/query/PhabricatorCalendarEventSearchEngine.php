@@ -392,9 +392,14 @@ final class PhabricatorCalendarEventSearchEngine
     $phids = mpull($statuses, 'getUserPHID');
 
     foreach ($statuses as $status) {
+      if ($status->getIsCancelled()) {
+        continue;
+      }
+
       $event = new AphrontCalendarEventView();
       $event->setEventID($status->getID());
       $event->setEpochRange($status->getDateFrom(), $status->getDateTo());
+      $event->setIsAllDay($status->getIsAllDay());
 
       $event->setName($status->getName());
       $event->setURI('/'.$status->getMonogram());

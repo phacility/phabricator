@@ -7,6 +7,9 @@ final class PHUICalendarDayView extends AphrontView {
   private $year;
   private $browseURI;
   private $events = array();
+  private $todayEvents = array();
+
+  private $allDayEvents = array();
 
   public function addEvent(AphrontCalendarEventView $event) {
     $this->events[] = $event;
@@ -34,43 +37,62 @@ final class PHUICalendarDayView extends AphrontView {
     $hourly_events = array();
     $rows = array();
 
+    $all_day_events = $this->getAllDayEvents();
+
     // sort events into buckets by their start time
     // pretend no events overlap
     foreach ($hours as $hour) {
-      $events = array();
+      $current_hour_events = array();
       $hour_start = $hour->format('U');
       $hour_end = id(clone $hour)->modify('+1 hour')->format('U');
-      foreach ($this->events as $event) {
-        if ($event->getEpochStart() >= $hour_start
-          && $event->getEpochStart() < $hour_end) {
-          $events[] = $event;
+
+      if ($hour == $this->getDateTime()) {
+        foreach ($all_day_events as $all_day_event) {
+          $all_day_start = $all_day_event->getEpochStart();
+          $all_day_end = $all_day_event->getEpochEnd();
+          $day_end = id(clone $hour)->modify('+1 day')->format('U') - 1;
+
+          if ($all_day_start < $day_end && $all_day_end > $hour_start) {
+
+            $current_hour_events[] = $all_day_event;
+            $this->todayEvents[] = $all_day_event;
+          }
         }
       }
-      $count_events = count($events);
-      $n = 0;
-      foreach ($events as $event) {
+      foreach ($this->events as $event) {
+          if ($event->getIsAllDay()) {
+            continue;
+          }
+        if ($event->getEpochStart() >= $hour_start
+          && $event->getEpochStart() < $hour_end) {
+          $current_hour_events[] = $event;
+          $this->todayEvents[] = $event;
+        }
+      }
+      foreach ($current_hour_events as $event) {
         $event_start = $event->getEpochStart();
         $event_end = $event->getEpochEnd();
 
-        $top = ((($event_start - $hour_start) / ($hour_end - $hour_start))
-          * 100).'%';
-        $height = ((($event_end - $event_start) / ($hour_end - $hour_start))
-          * 100).'%';
+        $top = (($event_start - $hour_start) / ($hour_end - $hour_start))
+          * 100;
+        $top = max(0, $top);
+
+        $height = (($event_end - $event_start) / ($hour_end - $hour_start))
+          * 100;
+        $height = min(2400, $height);
 
         $hourly_events[$event->getEventID()] = array(
           'hour' => $hour,
           'event' => $event,
           'offset' => '0',
           'width' => '100%',
-          'top' => $top,
-          'height' => $height,
+          'top' => $top.'%',
+          'height' => $height.'%',
         );
-
-        $n++;
       }
     }
 
-    $clusters = $this->findClusters();
+    $clusters = $this->findTodayClusters();
     foreach ($clusters as $cluster) {
       $hourly_events = $this->updateEventsFromCluster(
         $cluster,
@@ -138,26 +160,46 @@ final class PHUICalendarDayView extends AphrontView {
         $layout);
   }
 
+  private function getAllDayEvents() {
+    $all_day_events = array();
+
+    foreach ($this->events as $event) {
+      if ($event->getIsAllDay()) {
+        $all_day_events[] = $event;
+      }
+    }
+
+    $all_day_events = array_values(msort($all_day_events, 'getEpochStart'));
+
+    return $all_day_events;
+  }
+
   private function renderSidebar() {
     $this->events = msort($this->events, 'getEpochStart');
     $week_of_boxes = $this->getWeekOfBoxes();
     $filled_boxes = array();
 
-    foreach ($week_of_boxes as $weekly_box) {
-      $start = $weekly_box['start'];
-      $end = id(clone $start)->modify('+1 day');
+    foreach ($week_of_boxes as $day_box) {
+      $box_start = $day_box['start'];
+      $box_end = id(clone $box_start)->modify('+1 day');
+
+      $box_start = $box_start->format('U');
+      $box_end = $box_end->format('U');
 
       $box_events = array();
 
       foreach ($this->events as $event) {
-        if ($event->getEpochStart() >= $start->format('U') &&
-        $event->getEpochStart() < $end->format('U')) {
+        $event_start = $event->getEpochStart();
+        $event_end = $event->getEpochEnd();
+
+        if ($event_start < $box_end && $event_end > $box_start) {
           $box_events[] = $event;
         }
       }
+
       $filled_boxes[] = $this->renderSidebarBox(
         $box_events,
-        $weekly_box['title']);
+        $day_box['title']);
     }
 
     return $filled_boxes;
@@ -267,7 +309,6 @@ final class PHUICalendarDayView extends AphrontView {
 
   private function updateEventsFromCluster($cluster, $hourly_events) {
     $cluster_size = count($cluster);
-
     $n = 0;
     foreach ($cluster as $cluster_member) {
       $event_id = $cluster_member->getEventID();
@@ -375,8 +416,8 @@ final class PHUICalendarDayView extends AphrontView {
     return $date;
   }
 
-  private function findClusters() {
-    $events = msort($this->events, 'getEpochStart');
+  private function findTodayClusters() {
+    $events = msort($this->todayEvents, 'getEpochStart');
     $clusters = array();
 
     foreach ($events as $event) {
