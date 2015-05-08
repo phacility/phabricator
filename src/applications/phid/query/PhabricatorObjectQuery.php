@@ -104,16 +104,6 @@ final class PhabricatorObjectQuery
   }
 
   private function loadObjectsByPHID(array $types, array $phids) {
-    // Don't try to load PHIDs which are already "in flight"; this prevents us
-    // from recursing indefinitely if policy checks or edges form a loop. We
-    // will decline to load the corresponding objects.
-    $in_flight = $this->getPHIDsInFlight();
-    foreach ($phids as $key => $phid) {
-      if (isset($in_flight[$phid])) {
-        unset($phids[$key]);
-      }
-    }
-
     $results = array();
 
     $workspace = $this->getObjectsFromWorkspace($phids);
@@ -129,16 +119,25 @@ final class PhabricatorObjectQuery
       return $results;
     }
 
-    $this->putPHIDsInFlight($phids);
-
     $groups = array();
     foreach ($phids as $phid) {
       $type = phid_get_type($phid);
       $groups[$type][] = $phid;
     }
 
+    $in_flight = $this->getPHIDsInFlight();
     foreach ($groups as $type => $group) {
-      if (isset($types[$type])) {
+      // Don't try to load PHIDs which are already "in flight"; this prevents
+      // us from recursing indefinitely if policy checks or edges form a loop.
+      // We will decline to load the corresponding objects.
+      foreach ($group as $key => $phid) {
+        if (isset($in_flight[$phid])) {
+          unset($group[$key]);
+        }
+      }
+
+      if ($group && isset($types[$type])) {
+        $this->putPHIDsInFlight($group);
         $objects = $types[$type]->loadObjects($this, $group);
         $results += mpull($objects, null, 'getPHID');
       }
