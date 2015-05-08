@@ -62,7 +62,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     $this->setDateFrom(
       $this->getDateEpochForTimeZone(
         $this->getDateFrom(),
-        new DateTimeZone('GMT+12'),
+        new DateTimeZone('Pacific/Kiritimati'),
         'Y-m-d',
         null,
         $zone));
@@ -70,7 +70,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     $this->setDateTo(
       $this->getDateEpochForTimeZone(
         $this->getDateTo(),
-        new DateTimeZone('GMT-12'),
+        new DateTimeZone('Pacific/Midway'),
         'Y-m-d 23:59:59',
         '-1 day',
         $zone));
@@ -102,7 +102,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         $zone,
         'Y-m-d',
         null,
-        new DateTimeZone('GMT+12')));
+        new DateTimeZone('Pacific/Kiritimati')));
 
     $this->setDateTo(
       $this->getDateEpochForTimeZone(
@@ -110,7 +110,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         $zone,
         'Y-m-d',
         '+1 day',
-        new DateTimeZone('GMT-12')));
+        new DateTimeZone('Pacific/Midway')));
 
     return $this;
   }
