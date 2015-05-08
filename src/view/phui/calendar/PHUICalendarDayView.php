@@ -35,30 +35,32 @@ final class PHUICalendarDayView extends AphrontView {
 
     $hours = $this->getHoursOfDay();
     $hourly_events = array();
-    $rows = array();
+
+    $first_event_hour = null;
 
     $all_day_events = $this->getAllDayEvents();
+    $today_all_day_events = array();
 
-    // sort events into buckets by their start time
-    // pretend no events overlap
+    $day_start = $this->getDateTime();
+    $day_end = id(clone $day_start)->modify('+1 day');
+
+    $day_start = $day_start->format('U');
+    $day_end = $day_end->format('U');
+
+    foreach ($all_day_events as $all_day_event) {
+      $all_day_start = $all_day_event->getEpochStart();
+      $all_day_end = $all_day_event->getEpochEnd();
+
+      if ($all_day_start < $day_end && $all_day_end > $day_start) {
+        $today_all_day_events[] = $all_day_event;
+      }
+    }
+
     foreach ($hours as $hour) {
       $current_hour_events = array();
       $hour_start = $hour->format('U');
       $hour_end = id(clone $hour)->modify('+1 hour')->format('U');
 
-      if ($hour == $this->getDateTime()) {
-        foreach ($all_day_events as $all_day_event) {
-          $all_day_start = $all_day_event->getEpochStart();
-          $all_day_end = $all_day_event->getEpochEnd();
-          $day_end = id(clone $hour)->modify('+1 day')->format('U') - 1;
-
-          if ($all_day_start < $day_end && $all_day_end > $hour_start) {
-
-            $current_hour_events[] = $all_day_event;
-            $this->todayEvents[] = $all_day_event;
-          }
-        }
-      }
       foreach ($this->events as $event) {
           if ($event->getIsAllDay()) {
             continue;
@@ -81,6 +83,10 @@ final class PHUICalendarDayView extends AphrontView {
           * 100;
         $height = min(2400, $height);
 
+        if ($first_event_hour === null) {
+          $first_event_hour = $hour;
+        }
+
         $hourly_events[$event->getEventID()] = array(
           'hour' => $hour,
           'event' => $event,
@@ -99,8 +105,17 @@ final class PHUICalendarDayView extends AphrontView {
         $hourly_events);
     }
 
-    // actually construct table
+    $rows = array();
+
     foreach ($hours as $hour) {
+      $early_hours = array(8);
+      if ($first_event_hour) {
+        $early_hours[] = $first_event_hour->format('G');
+      }
+      if ($hour->format('G') < min($early_hours)) {
+        continue;
+      }
+
       $drawn_hourly_events = array();
       $cell_time = phutil_tag(
         'td',
@@ -109,6 +124,7 @@ final class PHUICalendarDayView extends AphrontView {
 
       foreach ($hourly_events as $hourly_event) {
         if ($hourly_event['hour'] == $hour) {
+
           $drawn_hourly_events[] = $this->drawEvent(
             $hourly_event['event'],
             $hourly_event['offset'],
@@ -133,16 +149,20 @@ final class PHUICalendarDayView extends AphrontView {
     $table = phutil_tag(
       'table',
       array('class' => 'phui-calendar-day-view'),
-      array(
-        '',
-        $rows,
-      ));
+      $rows);
+
+    $all_day_event_box = new PHUIBoxView();
+    foreach ($today_all_day_events as $all_day_event) {
+      $all_day_event_box->appendChild(
+        $this->drawAllDayEvent($all_day_event));
+    }
 
     $header = $this->renderDayViewHeader();
     $sidebar = $this->renderSidebar();
 
     $table_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
+      ->appendChild($all_day_event_box)
       ->appendChild($table)
       ->setFlush(true);
 
@@ -170,7 +190,6 @@ final class PHUICalendarDayView extends AphrontView {
     }
 
     $all_day_events = array_values(msort($all_day_events, 'getEpochStart'));
-
     return $all_day_events;
   }
 
@@ -323,6 +342,35 @@ final class PHUICalendarDayView extends AphrontView {
     }
 
     return $hourly_events;
+  }
+
+  private function drawAllDayEvent(AphrontCalendarEventView $event) {
+    $name = phutil_tag(
+      'a',
+      array(
+        'class' => 'all-day',
+        'href' => $event->getURI(),
+      ),
+      $event->getName());
+
+    $all_day_label = phutil_tag(
+      'span',
+      array(
+        'class' => 'phui-calendar-all-day-label',
+      ),
+      pht('All Day'));
+
+    $div = phutil_tag(
+      'div',
+      array(
+        'class' => 'phui-calendar-day-event',
+      ),
+      array(
+        $all_day_label,
+        $name,
+      ));
+
+    return $div;
   }
 
   private function drawEvent(
