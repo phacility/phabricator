@@ -11,10 +11,16 @@ final class AphrontFormDateControl extends AphrontFormControl {
   private $valueTime;
   private $allowNull;
   private $continueOnInvalidDate = false;
+  private $isTimeDisabled;
   private $isDisabled;
 
   public function setAllowNull($allow_null) {
     $this->allowNull = $allow_null;
+    return $this;
+  }
+
+  public function setIsTimeDisabled($is_disabled) {
+    $this->isTimeDisabled = $is_disabled;
     return $this;
   }
 
@@ -282,6 +288,9 @@ final class AphrontFormDateControl extends AphrontFormControl {
     if ($disabled) {
       $classes[] = 'datepicker-disabled';
     }
+    if ($this->isTimeDisabled) {
+      $classes[] = 'no-time';
+    }
 
     return javelin_tag(
       'div',
@@ -291,6 +300,7 @@ final class AphrontFormDateControl extends AphrontFormControl {
         'meta'  => array(
           'disabled' => (bool)$disabled,
         ),
+        'id' => $this->getID(),
       ),
       array(
         $checkbox,

@@ -457,6 +457,10 @@ properly, and submit values. */
   opacity: 0.5;
 }
 
+.aphront-form-date-container.no-time .aphront-form-date-time-input{
+  display: none;
+}
+
 
 .login-to-comment {
   margin: 12px;

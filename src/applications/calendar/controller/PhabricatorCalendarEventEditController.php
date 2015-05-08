@@ -179,6 +179,16 @@ final class PhabricatorCalendarEventEditController
       }
     }
 
+    $all_day_id = celerity_generate_unique_node_id();
+    $start_date_id = celerity_generate_unique_node_id();
+    $end_date_id = celerity_generate_unique_node_id();
+
+    Javelin::initBehavior('event-all-day', array(
+      'allDayID' => $all_day_id,
+      'startDateID' => $start_date_id,
+      'endDateID' => $end_date_id,
+    ));
+
     $name = id(new AphrontFormTextControl())
       ->setLabel(pht('Name'))
       ->setName('name')
@@ -191,26 +201,31 @@ final class PhabricatorCalendarEventEditController
       ->setValue($type)
       ->setOptions($event->getStatusOptions());
 
-    $all_day_select = id(new AphrontFormCheckboxControl())
+    $all_day_checkbox = id(new AphrontFormCheckboxControl())
       ->addCheckbox(
         'isAllDay',
         1,
         pht('All Day Event'),
-        $is_all_day);
+        $is_all_day,
+        $all_day_id);
 
     $start_control = id(new AphrontFormDateControl())
       ->setUser($user)
       ->setName('start')
       ->setLabel(pht('Start'))
       ->setError($error_start_date)
-      ->setValue($start_value);
+      ->setValue($start_value)
+      ->setID($start_date_id)
+      ->setIsTimeDisabled($is_all_day);
 
     $end_control = id(new AphrontFormDateControl())
       ->setUser($user)
       ->setName('end')
       ->setLabel(pht('End'))
       ->setError($error_end_date)
-      ->setValue($end_value);
+      ->setValue($end_value)
+      ->setID($end_date_id)
+      ->setIsTimeDisabled($is_all_day);
 
     $description = id(new AphrontFormTextAreaControl())
       ->setLabel(pht('Description'))
@@ -248,7 +263,7 @@ final class PhabricatorCalendarEventEditController
       ->setUser($user)
       ->appendChild($name)
       ->appendChild($status_select)
-      ->appendChild($all_day_select)
+      ->appendChild($all_day_checkbox)
       ->appendChild($start_control)
       ->appendChild($end_control)
       ->appendControl($view_policies)
