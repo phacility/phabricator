@@ -179,13 +179,31 @@ final class PhabricatorCalendarEventViewController
       ->setUser($viewer)
       ->setObject($event);
 
-    $properties->addProperty(
-      pht('Starts'),
-      phabricator_datetime($event->getDateFrom(), $viewer));
+    if ($event->getIsAllDay()) {
+      $date_start = phabricator_date($event->getDateFrom(), $viewer);
+      $date_end = phabricator_date($event->getDateTo(), $viewer);
 
-    $properties->addProperty(
-      pht('Ends'),
-      phabricator_datetime($event->getDateTo(), $viewer));
+      if ($date_start == $date_end) {
+        $properties->addProperty(
+          pht('Time'),
+          phabricator_date($event->getDateFrom(), $viewer));
+      } else {
+        $properties->addProperty(
+          pht('Starts'),
+          phabricator_date($event->getDateFrom(), $viewer));
+        $properties->addProperty(
+          pht('Ends'),
+          phabricator_date($event->getDateTo(), $viewer));
+      }
+    } else {
+      $properties->addProperty(
+        pht('Starts'),
+        phabricator_datetime($event->getDateFrom(), $viewer));
+
+      $properties->addProperty(
+        pht('Ends'),
+        phabricator_datetime($event->getDateTo(), $viewer));
+    }
 
     $properties->addProperty(
       pht('Host'),
