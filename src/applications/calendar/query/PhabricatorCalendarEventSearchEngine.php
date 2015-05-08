@@ -220,6 +220,7 @@ final class PhabricatorCalendarEventSearchEngine
   protected function getBuiltinQueryNames() {
     $names = array(
       'month' => pht('Month View'),
+      'day' => pht('Day View'),
       'upcoming' => pht('Upcoming Events'),
       'all' => pht('All Events'),
     );
@@ -242,6 +243,8 @@ final class PhabricatorCalendarEventSearchEngine
     switch ($query_key) {
       case 'month':
         return $query->setParameter('display', 'month');
+      case 'day':
+        return $query->setParameter('display', 'day');
       case 'upcoming':
         return $query->setParameter('upcoming', true);
       case 'all':
