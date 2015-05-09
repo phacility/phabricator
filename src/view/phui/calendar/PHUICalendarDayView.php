@@ -1,6 +1,8 @@
 <?php
 
 final class PHUICalendarDayView extends AphrontView {
+  private $rangeStart;
+  private $rangeEnd;
 
   private $day;
   private $month;
@@ -24,7 +26,16 @@ final class PHUICalendarDayView extends AphrontView {
     return $this->browseURI;
   }
 
-  public function __construct($year, $month, $day = null) {
+  public function __construct(
+    $range_start,
+    $range_end,
+    $year,
+    $month,
+    $day = null) {
+
+    $this->rangeStart = $range_start;
+    $this->rangeEnd = $range_end;
+
     $this->day = $day;
     $this->month = $month;
     $this->year = $year;
@@ -45,7 +56,7 @@ final class PHUICalendarDayView extends AphrontView {
     $day_end = id(clone $day_start)->modify('+1 day');
 
     $day_start = $day_start->format('U');
-    $day_end = $day_end->format('U');
+    $day_end = $day_end->format('U') - 1;
 
     foreach ($all_day_events as $all_day_event) {
       $all_day_start = $all_day_event->getEpochStart();
@@ -160,10 +171,32 @@ final class PHUICalendarDayView extends AphrontView {
     $header = $this->renderDayViewHeader();
     $sidebar = $this->renderSidebar();
 
+    $errors = array();
+
+    $range_start_epoch = $this->rangeStart->getEpoch();
+    $range_end_epoch = $this->rangeEnd->getEpoch();
+
+    if (($range_start_epoch != null &&
+        $range_start_epoch < $day_end &&
+        $range_start_epoch > $day_start) ||
+      ($range_end_epoch != null &&
+        $range_end_epoch < $day_end &&
+        $range_end_epoch > $day_start)) {
+      $errors[] = pht('Part of the day is out of range');
+    }
+
+    if (($this->rangeEnd->getEpoch() != null &&
+        $this->rangeEnd->getEpoch() < $day_start) ||
+      ($this->rangeStart->getEpoch() != null &&
+        $this->rangeStart->getEpoch() > $day_end)) {
+      $errors[] = pht('Day is out of query range');
+    }
+
     $table_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->appendChild($all_day_event_box)
       ->appendChild($table)
+      ->setFormErrors($errors)
       ->setFlush(true);
 
     $layout = id(new AphrontMultiColumnView())
@@ -277,8 +310,6 @@ final class PHUICalendarDayView extends AphrontView {
 
   private function renderDayViewHeader() {
     $button_bar = null;
-
-    // check for a browseURI, which means we need "fancy" prev / next UI
     $uri = $this->getBrowseURI();
     if ($uri) {
       list($prev_year, $prev_month, $prev_day) = $this->getPrevDay();
@@ -312,9 +343,8 @@ final class PHUICalendarDayView extends AphrontView {
 
     }
 
-    $day_of_week = $this->getDayOfWeek();
-    $header_text = $this->getDateTime()->format('F j, Y');
-    $header_text = $day_of_week.', '.$header_text;
+    $display_day = $this->getDateTime();
+    $header_text = $display_day->format('l, F j, Y');
 
     $header = id(new PHUIHeaderView())
       ->setHeader($header_text);
@@ -400,12 +430,6 @@ final class PHUICalendarDayView extends AphrontView {
       $name);
 
     return $div;
-  }
-
-  private function getDayOfWeek() {
-    $date = $this->getDateTime();
-    $day_of_week = $date->format('l');
-    return $day_of_week;
   }
 
   // returns DateTime of each hour in the day

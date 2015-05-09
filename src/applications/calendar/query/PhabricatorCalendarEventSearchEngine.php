@@ -383,6 +383,8 @@ final class PhabricatorCalendarEventSearchEngine
       $this->getDisplayYearAndMonthAndDay($query);
 
     $day_view = new PHUICalendarDayView(
+      $this->getDateFrom($query),
+      $this->getDateTo($query),
       $start_year,
       $start_month,
       $start_day);
