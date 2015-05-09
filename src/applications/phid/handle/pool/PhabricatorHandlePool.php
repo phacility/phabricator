@@ -61,12 +61,17 @@ final class PhabricatorHandlePool extends Phobject {
 
     // If we need any handles, bulk load everything in the queue.
     if ($need) {
+      // Clear the list of PHIDs that need to be loaded before performing the
+      // actual fetch. This prevents us from looping if we need to reenter the
+      // HandlePool while loading handles.
+      $fetch_phids = array_keys($this->unloadedPHIDs);
+      $this->unloadedPHIDs = array();
+
       $handles = id(new PhabricatorHandleQuery())
         ->setViewer($this->getViewer())
-        ->withPHIDs(array_keys($this->unloadedPHIDs))
+        ->withPHIDs($fetch_phids)
         ->execute();
       $this->handles += $handles;
-      $this->unloadedPHIDs = array();
     }
 
     return array_select_keys($this->handles, $phids);
