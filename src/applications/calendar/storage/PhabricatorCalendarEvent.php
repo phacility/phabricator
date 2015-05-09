@@ -71,7 +71,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       $this->getDateEpochForTimeZone(
         $this->getDateTo(),
         new DateTimeZone('Pacific/Midway'),
-        'Y-m-d 23:59:59',
+        'Y-m-d 23:59:00',
         '-1 day',
         $zone));
 

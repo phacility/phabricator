@@ -51,7 +51,7 @@ final class PhabricatorCalendarEventEditor
       case PhabricatorCalendarEventTransaction::TYPE_CANCEL:
         return $object->getIsCancelled();
       case PhabricatorCalendarEventTransaction::TYPE_ALL_DAY:
-        return $object->getIsAllDay();
+        return (int)$object->getIsAllDay();
       case PhabricatorCalendarEventTransaction::TYPE_INVITE:
         $map = $xaction->getNewValue();
         $phids = array_keys($map);
@@ -89,8 +89,9 @@ final class PhabricatorCalendarEventEditor
       case PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION:
       case PhabricatorCalendarEventTransaction::TYPE_CANCEL:
       case PhabricatorCalendarEventTransaction::TYPE_INVITE:
-      case PhabricatorCalendarEventTransaction::TYPE_ALL_DAY:
         return $xaction->getNewValue();
+      case PhabricatorCalendarEventTransaction::TYPE_ALL_DAY:
+        return (int)$xaction->getNewValue();
       case PhabricatorCalendarEventTransaction::TYPE_STATUS:
         return (int)$xaction->getNewValue();
       case PhabricatorCalendarEventTransaction::TYPE_START_DATE:
