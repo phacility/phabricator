@@ -168,11 +168,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     );
   }
 
-  public function getHumanStatus() {
-    $options = $this->getStatusOptions();
-    return $options[$this->status];
-  }
-
   protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,

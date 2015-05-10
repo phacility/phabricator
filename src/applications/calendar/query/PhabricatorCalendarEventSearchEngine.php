@@ -284,15 +284,12 @@ final class PhabricatorCalendarEventSearchEngine
       $to   = phabricator_datetime($event->getDateTo(), $viewer);
       $creator_handle = $handles[$event->getUserPHID()];
 
-      $name = (strlen($event->getName())) ?
-        $event->getName() : $event->getTerseSummary($viewer);
-
       $color = ($event->getStatus() == PhabricatorCalendarEvent::STATUS_AWAY)
         ? 'red'
         : 'yellow';
 
       $item = id(new PHUIObjectItemView())
-        ->setHeader($name)
+        ->setHeader($event->getName())
         ->setHref($href)
         ->setBarColor($color)
         ->addByline(pht('Creator: %s', $creator_handle->renderLink()))
