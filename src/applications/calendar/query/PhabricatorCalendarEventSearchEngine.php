@@ -323,11 +323,15 @@ final class PhabricatorCalendarEventSearchEngine
 
     if ($start_month == $now_month && $start_year == $now_year) {
       $month_view = new PHUICalendarMonthView(
+        $this->getDateFrom($query),
+        $this->getDateTo($query),
         $start_month,
         $start_year,
         $now_day);
     } else {
       $month_view = new PHUICalendarMonthView(
+        $this->getDateFrom($query),
+        $this->getDateTo($query),
         $start_month,
         $start_year);
     }

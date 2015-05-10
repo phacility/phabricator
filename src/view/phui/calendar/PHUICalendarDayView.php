@@ -170,33 +170,13 @@ final class PHUICalendarDayView extends AphrontView {
 
     $header = $this->renderDayViewHeader();
     $sidebar = $this->renderSidebar();
-
-    $errors = array();
-
-    $range_start_epoch = $this->rangeStart->getEpoch();
-    $range_end_epoch = $this->rangeEnd->getEpoch();
-
-    if (($range_start_epoch != null &&
-        $range_start_epoch < $day_end &&
-        $range_start_epoch > $day_start) ||
-      ($range_end_epoch != null &&
-        $range_end_epoch < $day_end &&
-        $range_end_epoch > $day_start)) {
-      $errors[] = pht('Part of the day is out of range');
-    }
-
-    if (($this->rangeEnd->getEpoch() != null &&
-        $this->rangeEnd->getEpoch() < $day_start) ||
-      ($this->rangeStart->getEpoch() != null &&
-        $this->rangeStart->getEpoch() > $day_end)) {
-      $errors[] = pht('Day is out of query range');
-    }
+    $warnings = $this->getQueryRangeWarning();
 
     $table_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
       ->appendChild($all_day_event_box)
       ->appendChild($table)
-      ->setFormErrors($errors)
+      ->setFormErrors($warnings)
       ->setFlush(true);
 
     $layout = id(new AphrontMultiColumnView())
@@ -224,6 +204,35 @@ final class PHUICalendarDayView extends AphrontView {
 
     $all_day_events = array_values(msort($all_day_events, 'getEpochStart'));
     return $all_day_events;
+  }
+
+  private function getQueryRangeWarning() {
+    $errors = array();
+
+    $range_start_epoch = $this->rangeStart->getEpoch();
+    $range_end_epoch = $this->rangeEnd->getEpoch();
+
+    $day_start = $this->getDateTime();
+    $day_end = id(clone $day_start)->modify('+1 day');
+
+    $day_start = $day_start->format('U');
+    $day_end = $day_end->format('U') - 1;
+
+    if (($range_start_epoch != null &&
+        $range_start_epoch < $day_end &&
+        $range_start_epoch > $day_start) ||
+      ($range_end_epoch != null &&
+        $range_end_epoch < $day_end &&
+        $range_end_epoch > $day_start)) {
+      $errors[] = pht('Part of the day is out of range');
+    }
+
+    if (($this->rangeEnd->getEpoch() != null &&
+        $this->rangeEnd->getEpoch() < $day_start) ||
+      ($this->rangeStart->getEpoch() != null &&
+        $this->rangeStart->getEpoch() > $day_end)) {
+      $errors[] = pht('Day is out of query range');
+    }
   }
 
   private function renderSidebar() {
