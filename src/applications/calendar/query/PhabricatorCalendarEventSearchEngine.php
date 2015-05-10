@@ -363,7 +363,7 @@ final class PhabricatorCalendarEventSearchEngine
       $event->setEpochRange($status->getDateFrom(), $status->getDateTo());
 
       $name_text = $handles[$status->getUserPHID()]->getName();
-      $status_text = $status->getHumanStatus();
+      $status_text = $status->getName();
       $event->setUserPHID($status->getUserPHID());
       $event->setDescription(pht('%s (%s)', $name_text, $status_text));
       $event->setName($status_text);
