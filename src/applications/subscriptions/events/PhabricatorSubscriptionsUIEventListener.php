@@ -21,6 +21,7 @@ final class PhabricatorSubscriptionsUIEventListener
 
   private function handleActionEvent($event) {
     $user = $event->getUser();
+    $user_phid = $user->getPHID();
     $object = $event->getValue('object');
 
     if (!$object || !$object->getPHID()) {
@@ -33,12 +34,12 @@ final class PhabricatorSubscriptionsUIEventListener
       return;
     }
 
-    if (!$object->shouldAllowSubscription($user->getPHID())) {
+    if (!$object->shouldAllowSubscription($user_phid)) {
       // This object doesn't allow the viewer to subscribe.
       return;
     }
 
-    if ($object->isAutomaticallySubscribed($user->getPHID())) {
+    if ($user_phid && $object->isAutomaticallySubscribed($user_phid)) {
       $sub_action = id(new PhabricatorActionView())
         ->setWorkflow(true)
         ->setDisabled(true)
@@ -50,15 +51,14 @@ final class PhabricatorSubscriptionsUIEventListener
       $subscribed = false;
       if ($user->isLoggedIn()) {
         $src_phid = $object->getPHID();
-        $dst_phid = $user->getPHID();
         $edge_type = PhabricatorObjectHasSubscriberEdgeType::EDGECONST;
 
         $edges = id(new PhabricatorEdgeQuery())
           ->withSourcePHIDs(array($src_phid))
           ->withEdgeTypes(array($edge_type))
-          ->withDestinationPHIDs(array($user->getPHID()))
+          ->withDestinationPHIDs(array($user_phid))
           ->execute();
-        $subscribed = isset($edges[$src_phid][$edge_type][$dst_phid]);
+        $subscribed = isset($edges[$src_phid][$edge_type][$user_phid]);
       }
 
       if ($subscribed) {
