@@ -73,8 +73,14 @@ JX.behavior('durable-column', function(config, statics) {
   }
 
   function _drawColumn(visible) {
-    JX.DOM.alterClass(document.body, 'with-durable-column', visible);
-    JX.DOM.alterClass(document.body, 'with-durable-margin', !!margin);
+    JX.DOM.alterClass(
+      document.body,
+      'with-durable-column',
+      visible);
+    JX.DOM.alterClass(
+      document.body,
+      'with-durable-margin',
+      visible && !!margin);
 
     var column = _getColumnNode();
     if (visible) {
