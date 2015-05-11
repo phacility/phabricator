@@ -1794,6 +1794,7 @@ phutil_register_library_map(array(
     'PhabricatorEventListener' => 'infrastructure/events/PhabricatorEventListener.php',
     'PhabricatorEventType' => 'infrastructure/events/constant/PhabricatorEventType.php',
     'PhabricatorExampleEventListener' => 'infrastructure/events/PhabricatorExampleEventListener.php',
+    'PhabricatorExtendedPolicyInterface' => 'applications/policy/interface/PhabricatorExtendedPolicyInterface.php',
     'PhabricatorExtendingPhabricatorConfigOptions' => 'applications/config/option/PhabricatorExtendingPhabricatorConfigOptions.php',
     'PhabricatorExtensionsSetupCheck' => 'applications/config/check/PhabricatorExtensionsSetupCheck.php',
     'PhabricatorExternalAccount' => 'applications/people/storage/PhabricatorExternalAccount.php',
@@ -3668,6 +3669,7 @@ phutil_register_library_map(array(
       'DifferentialDAO',
       'PhabricatorTokenReceiverInterface',
       'PhabricatorPolicyInterface',
+      'PhabricatorExtendedPolicyInterface',
       'PhabricatorFlaggableInterface',
       'PhrequentTrackableInterface',
       'HarbormasterBuildableInterface',
@@ -5698,7 +5700,10 @@ phutil_register_library_map(array(
     'PhabricatorPolicyPHIDTypePolicy' => 'PhabricatorPHIDType',
     'PhabricatorPolicyQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorPolicyTestCase' => 'PhabricatorTestCase',
-    'PhabricatorPolicyTestObject' => 'PhabricatorPolicyInterface',
+    'PhabricatorPolicyTestObject' => array(
+      'PhabricatorPolicyInterface',
+      'PhabricatorExtendedPolicyInterface',
+    ),
     'PhabricatorPolicyType' => 'PhabricatorPolicyConstants',
     'PhabricatorPonderApplication' => 'PhabricatorApplication',
     'PhabricatorProject' => array(
