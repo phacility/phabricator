@@ -29,9 +29,11 @@ JX.behavior('durable-column', function(config, statics) {
   var loadThreadID = null;
   var scrollbar = null;
 
-  var columnWidth = 300;
+  var margin = JX.Scrollbar.getScrollbarControlMargin();
+
+  var columnWidth = (300 + margin);
   // This is the smallest window size where we'll enable the column.
-  var minimumViewportWidth = 768;
+  var minimumViewportWidth = (768 - margin);
 
   var quick = JX.$('phabricator-standard-page-body');
 
@@ -72,6 +74,8 @@ JX.behavior('durable-column', function(config, statics) {
 
   function _drawColumn(visible) {
     JX.DOM.alterClass(document.body, 'with-durable-column', visible);
+    JX.DOM.alterClass(document.body, 'with-durable-margin', !!margin);
+
     var column = _getColumnNode();
     if (visible) {
       JX.DOM.show(column);
