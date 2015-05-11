@@ -88,12 +88,19 @@ final class ConpherenceColumnViewController extends
         PhabricatorPolicyCapability::CAN_EDIT);
     }
 
+    $dropdown_query = id(new AphlictDropdownDataQuery())
+      ->setViewer($user);
+    $dropdown_query->execute();
     $response = array(
       'content' => hsprintf('%s', $durable_column),
       'threadID' => $conpherence_id,
       'threadPHID' => $conpherence_phid,
       'latestTransactionID' => $latest_transaction_id,
       'canEdit' => $can_edit,
+      'aphlictDropdownData' => array(
+        $dropdown_query->getNotificationData(),
+        $dropdown_query->getConpherenceData(),
+      ),
     );
 
     return id(new AphrontAjaxResponse())->setContent($response);

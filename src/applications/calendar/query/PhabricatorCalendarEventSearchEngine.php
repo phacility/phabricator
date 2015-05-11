@@ -220,6 +220,7 @@ final class PhabricatorCalendarEventSearchEngine
   protected function getBuiltinQueryNames() {
     $names = array(
       'month' => pht('Month View'),
+      'day' => pht('Day View'),
       'upcoming' => pht('Upcoming Events'),
       'all' => pht('All Events'),
     );
@@ -242,6 +243,8 @@ final class PhabricatorCalendarEventSearchEngine
     switch ($query_key) {
       case 'month':
         return $query->setParameter('display', 'month');
+      case 'day':
+        return $query->setParameter('display', 'day');
       case 'upcoming':
         return $query->setParameter('upcoming', true);
       case 'all':
@@ -281,15 +284,12 @@ final class PhabricatorCalendarEventSearchEngine
       $to   = phabricator_datetime($event->getDateTo(), $viewer);
       $creator_handle = $handles[$event->getUserPHID()];
 
-      $name = (strlen($event->getName())) ?
-        $event->getName() : $event->getTerseSummary($viewer);
-
       $color = ($event->getStatus() == PhabricatorCalendarEvent::STATUS_AWAY)
         ? 'red'
         : 'yellow';
 
       $item = id(new PHUIObjectItemView())
-        ->setHeader($name)
+        ->setHeader($event->getName())
         ->setHref($href)
         ->setBarColor($color)
         ->addByline(pht('Creator: %s', $creator_handle->renderLink()))
@@ -320,11 +320,15 @@ final class PhabricatorCalendarEventSearchEngine
 
     if ($start_month == $now_month && $start_year == $now_year) {
       $month_view = new PHUICalendarMonthView(
+        $this->getDateFrom($query),
+        $this->getDateTo($query),
         $start_month,
         $start_year,
         $now_day);
     } else {
       $month_view = new PHUICalendarMonthView(
+        $this->getDateFrom($query),
+        $this->getDateTo($query),
         $start_month,
         $start_year);
     }
@@ -356,7 +360,7 @@ final class PhabricatorCalendarEventSearchEngine
       $event->setEpochRange($status->getDateFrom(), $status->getDateTo());
 
       $name_text = $handles[$status->getUserPHID()]->getName();
-      $status_text = $status->getHumanStatus();
+      $status_text = $status->getName();
       $event->setUserPHID($status->getUserPHID());
       $event->setDescription(pht('%s (%s)', $name_text, $status_text));
       $event->setName($status_text);
@@ -380,6 +384,8 @@ final class PhabricatorCalendarEventSearchEngine
       $this->getDisplayYearAndMonthAndDay($query);
 
     $day_view = new PHUICalendarDayView(
+      $this->getDateFrom($query),
+      $this->getDateTo($query),
       $start_year,
       $start_month,
       $start_day);
@@ -389,9 +395,14 @@ final class PhabricatorCalendarEventSearchEngine
     $phids = mpull($statuses, 'getUserPHID');
 
     foreach ($statuses as $status) {
+      if ($status->getIsCancelled()) {
+        continue;
+      }
+
       $event = new AphrontCalendarEventView();
       $event->setEventID($status->getID());
       $event->setEpochRange($status->getDateFrom(), $status->getDateTo());
+      $event->setIsAllDay($status->getIsAllDay());
 
       $event->setName($status->getName());
       $event->setURI('/'.$status->getMonogram());

@@ -1,6 +1,8 @@
 <?php
 
 final class PHUICalendarMonthView extends AphrontView {
+  private $rangeStart;
+  private $rangeEnd;
 
   private $day;
   private $month;
@@ -40,7 +42,16 @@ final class PHUICalendarMonthView extends AphrontView {
     return $this;
   }
 
-  public function __construct($month, $year, $day = null) {
+  public function __construct(
+    $range_start,
+    $range_end,
+    $month,
+    $year,
+    $day = null) {
+
+    $this->rangeStart = $range_start;
+    $this->rangeEnd = $range_end;
+
     $this->day = $day;
     $this->month = $month;
     $this->year = $year;
@@ -188,9 +199,12 @@ final class PHUICalendarMonthView extends AphrontView {
         phutil_implode_html("\n", $table),
       ));
 
+    $warnings = $this->getQueryRangeWarning();
+
     $box = id(new PHUIObjectBoxView())
       ->setHeader($this->renderCalendarHeader($first))
-      ->appendChild($table);
+      ->appendChild($table)
+      ->setFormErrors($warnings);
     if ($this->error) {
       $box->setInfoView($this->error);
 
@@ -248,6 +262,37 @@ final class PHUICalendarMonthView extends AphrontView {
     }
 
     return $header;
+  }
+
+  private function getQueryRangeWarning() {
+    $errors = array();
+
+    $range_start_epoch = $this->rangeStart->getEpoch();
+    $range_end_epoch = $this->rangeEnd->getEpoch();
+
+    $month_start = $this->getDateTime();
+    $month_end = id(clone $month_start)->modify('+1 month');
+
+    $month_start = $month_start->format('U');
+    $month_end = $month_end->format('U') - 1;
+
+    if (($range_start_epoch != null &&
+        $range_start_epoch < $month_end &&
+        $range_start_epoch > $month_start) ||
+      ($range_end_epoch != null &&
+        $range_end_epoch < $month_end &&
+        $range_end_epoch > $month_start)) {
+      $errors[] = pht('Part of the month is out of range');
+    }
+
+    if (($this->rangeEnd->getEpoch() != null &&
+        $this->rangeEnd->getEpoch() < $month_start) ||
+      ($this->rangeStart->getEpoch() != null &&
+        $this->rangeStart->getEpoch() > $month_end)) {
+      $errors[] = pht('Month is out of query range');
+    }
+
+    return $errors;
   }
 
   private function getNextYearAndMonth() {

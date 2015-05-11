@@ -323,6 +323,7 @@ final class DifferentialInlineCommentQuery
               'new' => $is_new,
               'reason' => $reason,
               'href' => $href,
+              'originalID' => $changeset->getID(),
             ));
 
         $results[] = $inline;
@@ -345,6 +346,107 @@ final class DifferentialInlineCommentQuery
       if (!isset($keep_map[$changeset_id][$is_new])) {
         unset($results[$key]);
         continue;
+      }
+    }
+
+    // Adjust inline line numbers to account for content changes across
+    // updates and rebases.
+    $plan = array();
+    $need = array();
+    foreach ($results as $inline) {
+      $ghost = $inline->getIsGhost();
+      if (!$ghost) {
+        // If this isn't a "ghost" inline, ignore it.
+        continue;
+      }
+
+      $src_id = $ghost['originalID'];
+      $dst_id = $inline->getChangesetID();
+
+      $xforms = array();
+
+      // If the comment is on the right, transform it through the inverse map
+      // back to the left.
+      if ($inline->getIsNewFile()) {
+        $xforms[] = array($src_id, $src_id, true);
+      }
+
+      // Transform it across rebases.
+      $xforms[] = array($src_id, $dst_id, false);
+
+      // If the comment is on the right, transform it back onto the right.
+      if ($inline->getIsNewFile()) {
+        $xforms[] = array($dst_id, $dst_id, false);
+      }
+
+      $key = array();
+      foreach ($xforms as $xform) {
+        list($u, $v, $inverse) = $xform;
+
+        $short = $u.'/'.$v;
+        $need[$short] = array($u, $v);
+
+        $part = $u.($inverse ? '<' : '>').$v;
+        $key[] = $part;
+      }
+      $key = implode(',', $key);
+
+      if (empty($plan[$key])) {
+        $plan[$key] = array(
+          'xforms' => $xforms,
+          'inlines' => array(),
+        );
+      }
+
+      $plan[$key]['inlines'][] = $inline;
+    }
+
+    if ($need) {
+      $maps = DifferentialLineAdjustmentMap::loadMaps($need);
+    } else {
+      $maps = array();
+    }
+
+    foreach ($plan as $step) {
+      $xforms = $step['xforms'];
+
+      $chain = null;
+      foreach ($xforms as $xform) {
+        list($u, $v, $inverse) = $xform;
+        $map = idx(idx($maps, $u, array()), $v);
+        if (!$map) {
+          continue 2;
+        }
+
+        if ($inverse) {
+          $map = DifferentialLineAdjustmentMap::newInverseMap($map);
+        } else {
+          $map = clone $map;
+        }
+
+        if ($chain) {
+          $chain->addMapToChain($map);
+        } else {
+          $chain = $map;
+        }
+      }
+
+      foreach ($step['inlines'] as $inline) {
+        $head_line = $inline->getLineNumber();
+        $tail_line = ($head_line + $inline->getLineLength());
+
+        $head_info = $chain->mapLine($head_line, false);
+        $tail_info = $chain->mapLine($tail_line, true);
+
+        list($head_deleted, $head_offset, $head_line) = $head_info;
+        list($tail_deleted, $tail_offset, $tail_line) = $tail_info;
+
+        if ($head_offset !== false) {
+          $inline->setLineNumber($head_line + 1 + $head_offset);
+        } else {
+          $inline->setLineNumber($head_line);
+          $inline->setLineLength($tail_line - $head_line);
+        }
       }
     }
 

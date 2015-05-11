@@ -24,6 +24,7 @@ final class PhabricatorHandleList
 
   private $handlePool;
   private $phids;
+  private $count;
   private $handles;
   private $cursor;
   private $map;
@@ -35,6 +36,7 @@ final class PhabricatorHandleList
 
   public function setPHIDs(array $phids) {
     $this->phids = $phids;
+    $this->count = count($phids);
     return $this;
   }
 
@@ -119,7 +121,7 @@ final class PhabricatorHandleList
   }
 
   public function valid() {
-    return isset($this->phids[$this->cursor]);
+    return ($this->cursor < $this->count);
   }
 
 
@@ -165,7 +167,7 @@ final class PhabricatorHandleList
 
 
   public function count() {
-    return count($this->phids);
+    return $this->count;
   }
 
 }

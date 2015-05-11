@@ -4,6 +4,7 @@
  *           javelin-util
  *           javelin-stratcom
  *           javelin-install
+ *           javelin-aphlict
  *           javelin-workflow
  *           javelin-router
  *           javelin-behavior-device
@@ -204,7 +205,10 @@ JX.install('ConpherenceThreadManager', {
     _markUpdated: function(r) {
       this._updating.knownID = r.latest_transaction_id;
       this._latestTransactionID = r.latest_transaction_id;
-      JX.Stratcom.invoke('notification-panel-update', null, {});
+      JX.Stratcom.invoke(
+        'conpherence-redraw-aphlict',
+        null,
+        r.aphlictDropdownData);
     },
 
     _updateThread: function() {
@@ -277,11 +281,30 @@ JX.install('ConpherenceThreadManager', {
       params = this._getParams(params);
 
       var handler = JX.bind(this, function(r) {
+        var client = JX.Aphlict.getInstance();
+        if (client) {
+          var old_subs = client.getSubscriptions();
+          var new_subs = [];
+          for (var ii = 0; ii < old_subs.length; ii++) {
+            if (old_subs[ii] == this._loadedThreadPHID) {
+              continue;
+            } else {
+              new_subs.push(old_subs[ii]);
+            }
+          }
+          new_subs.push(r.threadPHID);
+          client.clearSubscriptions(client.getSubscriptions());
+          client.setSubscriptions(new_subs);
+        }
         this._loadedThreadID = r.threadID;
         this._loadedThreadPHID = r.threadPHID;
         this._latestTransactionID = r.latestTransactionID;
         this._canEditLoadedThread = r.canEdit;
-        JX.Stratcom.invoke('notification-panel-update', null, {});
+
+        JX.Stratcom.invoke(
+          'conpherence-redraw-aphlict',
+          null,
+          r.aphlictDropdownData);
 
         this._didLoadThreadCallback(r);
 

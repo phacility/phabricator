@@ -2,6 +2,10 @@
 
 final class ConpherenceRoomListController extends ConpherenceController {
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
 

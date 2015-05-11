@@ -10,6 +10,7 @@ final class AphrontCalendarEventView extends AphrontView {
   private $eventID;
   private $color;
   private $uri;
+  private $isAllDay;
 
   public function setURI($uri) {
     $this->uri = $uri;
@@ -81,13 +82,15 @@ final class AphrontCalendarEventView extends AphrontView {
     }
   }
 
-  public function getAllDay() {
-    $time = (60 * 60 * 22);
-    if (($this->getEpochEnd() - $this->getEpochStart()) >= $time) {
-      return true;
-    }
-    return false;
+  public function setIsAllDay($is_all_day) {
+    $this->isAllDay = $is_all_day;
+    return $this;
   }
+
+  public function getIsAllDay() {
+    return $this->isAllDay;
+  }
+
 
   public function getMultiDay() {
     $nextday = strtotime('12:00 AM Tomorrow', $this->getEpochStart());

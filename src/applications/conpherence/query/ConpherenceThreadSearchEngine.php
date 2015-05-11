@@ -149,32 +149,48 @@ final class ConpherenceThreadSearchEngine
       $viewer,
       $conpherences);
 
+    $engines = array();
+
     $fulltext = $query->getParameter('fulltext');
     if (strlen($fulltext) && $conpherences) {
       $context = $this->loadContextMessages($conpherences, $fulltext);
 
       $author_phids = array();
-      foreach ($context as $messages) {
+      foreach ($context as $phid => $messages) {
+        $conpherence = $conpherences[$phid];
+
+        $engine = id(new PhabricatorMarkupEngine())
+          ->setViewer($viewer)
+          ->setContextObject($conpherence);
+
         foreach ($messages as $group) {
           foreach ($group as $message) {
             $xaction = $message['xaction'];
             if ($xaction) {
               $author_phids[] = $xaction->getAuthorPHID();
+              $engine->addObject(
+                $xaction->getComment(),
+                PhabricatorApplicationTransactionComment::MARKUP_FIELD_COMMENT);
             }
           }
         }
+        $engine->process();
+
+        $engines[$phid] = $engine;
       }
 
       $handles = $viewer->loadHandles($author_phids);
+      $handles = iterator_to_array($handles);
     } else {
       $context = array();
     }
 
     $list = new PHUIObjectItemListView();
     $list->setUser($viewer);
-    foreach ($conpherences as $conpherence) {
+    foreach ($conpherences as $conpherence_phid => $conpherence) {
       $created = phabricator_date($conpherence->getDateCreated(), $viewer);
       $title = $conpherence->getDisplayTitle($viewer);
+      $monogram = $conpherence->getMonogram();
 
       if ($conpherence->getIsRoom()) {
         $icon_name = $conpherence->getPolicyIconName($policy_objects);
@@ -186,7 +202,7 @@ final class ConpherenceThreadSearchEngine
       $item = id(new PHUIObjectItemView())
         ->setObjectName($conpherence->getMonogram())
         ->setHeader($title)
-        ->setHref('/conpherence/'.$conpherence->getID().'/')
+        ->setHref('/'.$conpherence->getMonogram())
         ->setObject($conpherence)
         ->addIcon('none', $created)
         ->addIcon(
@@ -201,43 +217,37 @@ final class ConpherenceThreadSearchEngine
               phabricator_datetime($conpherence->getDateModified(), $viewer)),
           ));
 
-      $messages = idx($context, $conpherence->getPHID());
+      $messages = idx($context, $conpherence_phid);
       if ($messages) {
-
-        // TODO: This is egregiously under-designed.
-
         foreach ($messages as $group) {
           $rows = array();
-          $rowc = array();
           foreach ($group as $message) {
             $xaction = $message['xaction'];
             if (!$xaction) {
               continue;
             }
 
-            $rowc[] = ($message['match'] ? 'highlighted' : null);
-            $rows[] = array(
-              $handles->renderHandle($xaction->getAuthorPHID()),
-              $xaction->getComment()->getContent(),
-              phabricator_datetime($xaction->getDateCreated(), $viewer),
-            );
+            $history_href = '/'.$monogram.'#'.$xaction->getID();
+
+            $view = id(new ConpherenceTransactionView())
+              ->setUser($viewer)
+              ->setHandles($handles)
+              ->setMarkupEngine($engines[$conpherence_phid])
+              ->setConpherenceThread($conpherence)
+              ->setConpherenceTransaction($xaction)
+              ->setEpoch($xaction->getDateCreated(), $history_href)
+              ->addClass('conpherence-fulltext-result');
+
+            if ($message['match']) {
+              $view->addClass('conpherence-fulltext-match');
+            }
+
+            $rows[] = $view;
           }
-          $table = id(new AphrontTableView($rows))
-            ->setHeaders(
-              array(
-                pht('User'),
-                pht('Message'),
-                pht('At'),
-              ))
-            ->setRowClasses($rowc)
-            ->setColumnClasses(
-              array(
-                '',
-                'wide',
-              ));
+
           $box = id(new PHUIBoxView())
-            ->appendChild($table)
-            ->addMargin(PHUI::MARGIN_SMALL);
+            ->appendChild($rows)
+            ->addClass('conpherence-fulltext-results');
           $item->appendChild($box);
         }
       }
@@ -362,8 +372,12 @@ final class ConpherenceThreadSearchEngine
     $groups = array();
     foreach ($hits as $thread_phid => $rows) {
       $rows = ipull($rows, null, 'transactionPHID');
+      $done = array();
       foreach ($rows as $phid => $row) {
-        unset($rows[$phid]);
+        if (isset($done[$phid])) {
+          continue;
+        }
+        $done[$phid] = true;
 
         $group = array();
 
@@ -381,7 +395,7 @@ final class ConpherenceThreadSearchEngine
 
           if (isset($rows[$prev])) {
             $match = true;
-            unset($rows[$prev]);
+            $done[$prev] = true;
           } else {
             $match = false;
           }
@@ -411,7 +425,7 @@ final class ConpherenceThreadSearchEngine
 
           if (isset($rows[$next])) {
             $match = true;
-            unset($rows[$next]);
+            $done[$next] = true;
           } else {
             $match = false;
           }
@@ -451,6 +465,9 @@ final class ConpherenceThreadSearchEngine
       foreach ($group as $key => $list) {
         foreach ($list as $lkey => $item) {
           $xaction = idx($xactions, $item['phid']);
+          if ($xaction->shouldHide()) {
+            continue;
+          }
           $groups[$thread_phid][$key][$lkey]['xaction'] = $xaction;
         }
       }

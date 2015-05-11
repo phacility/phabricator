@@ -569,6 +569,11 @@ abstract class PhabricatorApplicationTransactionEditor
     return $xaction;
   }
 
+  protected function didApplyInternalEffects(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return $xactions;
+  }
 
   protected function applyFinalEffects(
     PhabricatorLiskDAO $object,
@@ -730,6 +735,8 @@ abstract class PhabricatorApplicationTransactionEditor
       foreach ($xactions as $xaction) {
         $this->applyInternalEffects($object, $xaction);
       }
+
+      $xactions = $this->didApplyInternalEffects($object, $xactions);
 
       $object->save();
 

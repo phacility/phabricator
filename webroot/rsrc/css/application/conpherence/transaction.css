@@ -25,3 +25,22 @@
   color: {$darkbluetext};
   font-weight: bold;
 }
+
+.conpherence-fulltext-results {
+  margin: 0 8px 8px;
+  background: {$lightgreybackground};
+  border: 1px solid {$lightgreyborder};
+}
+
+.conpherence-fulltext-result {
+  margin: 0 0 1px;
+  padding: 8px;
+}
+
+.conpherence-fulltext-match {
+  background: {$lightyellow};
+}
+
+.conpherence-fulltext-results .epoch-link {
+  float: right;
+}

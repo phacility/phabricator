@@ -56,7 +56,13 @@ final class PhabricatorCalendarEventQuery
       $this->buildOrderClause($conn_r),
       $this->buildLimitClause($conn_r));
 
-    return $table->loadAllFromArray($data);
+    $events = $table->loadAllFromArray($data);
+
+    foreach ($events as $event) {
+      $event->applyViewerTimezone($this->getViewer());
+    }
+
+    return $events;
   }
 
   protected function buildJoinClauseParts(AphrontDatabaseConnection $conn_r) {

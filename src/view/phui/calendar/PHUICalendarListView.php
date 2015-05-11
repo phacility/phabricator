@@ -37,7 +37,7 @@ final class PHUICalendarListView extends AphrontTagView {
     foreach ($events as $event) {
       $color = $event->getColor();
 
-      if ($event->getAllDay()) {
+      if ($event->getIsAllDay()) {
         $timelabel = pht('All Day');
       } else {
         $timelabel = phabricator_time(
