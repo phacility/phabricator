@@ -586,7 +586,7 @@ final class PhabricatorMarkupEngine {
     //  - Hopefully don't return too much text. We don't explicitly limit
     //    this right now.
 
-    $blocks = preg_split("/\n *\n\s*/", trim($corpus));
+    $blocks = preg_split("/\n *\n\s*/", $corpus);
 
     $best = null;
     foreach ($blocks as $block) {
