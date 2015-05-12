@@ -13,6 +13,8 @@ final class PhabricatorFileTransformController
     // NOTE: This is a public/CDN endpoint, and permission to see files is
     // controlled by knowing the secret key, not by authentication.
 
+    $is_regenerate = $request->getBool('regenerate');
+
     $source_phid = $request->getURIData('phid');
     $file = id(new PhabricatorFileQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
@@ -35,7 +37,11 @@ final class PhabricatorFileTransformController
         $transform);
 
     if ($xform) {
-      return $this->buildTransformedFileResponse($xform);
+      if ($is_regenerate) {
+        $this->destroyTransform($xform);
+      } else {
+        return $this->buildTransformedFileResponse($xform);
+      }
     }
 
     $type = $file->getMimeType();
@@ -57,10 +63,12 @@ final class PhabricatorFileTransformController
         try {
           $xformed_file = $xforms[$transform]->applyTransform($file);
         } catch (Exception $ex) {
-          // TODO: Provide a diagnostic mode to surface these to the viewer.
-
           // In normal transform mode, we ignore failures and generate a
-          // default transform instead.
+          // default transform below. If we're explicitly regenerating the
+          // thumbnail, rethrow the exception.
+          if ($is_regenerate) {
+            throw $ex;
+          }
         }
       }
 
@@ -163,6 +171,24 @@ final class PhabricatorFileTransformController
   private function executeThumbTransform(PhabricatorFile $file, $x, $y) {
     $xformer = new PhabricatorImageTransformer();
     return $xformer->executeThumbTransform($file, $x, $y);
+  }
+
+  private function destroyTransform(PhabricatorTransformedFile $xform) {
+    $file = id(new PhabricatorFileQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withPHIDs(array($xform->getTransformedPHID()))
+      ->executeOne();
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+
+    if (!$file) {
+      $xform->delete();
+    } else {
+      $engine = new PhabricatorDestructionEngine();
+      $engine->destroyObject($file);
+    }
+
+    unset($unguarded);
   }
 
 }

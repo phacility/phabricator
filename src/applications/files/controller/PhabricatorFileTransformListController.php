@@ -58,12 +58,13 @@ final class PhabricatorFileTransformListController
 
       if ($xform->canApplyTransform($file)) {
         $can_apply = pht('Yes');
+
         $view_href = $file->getURIForTransform($xform);
-        if ($dst_phid) {
-          $view_text = pht('View Transform');
-        } else {
-          $view_text = pht('Generate Transform');
-        }
+        $view_href = new PhutilURI($view_href);
+        $view_href->setQueryParam('regenerate', 'true');
+
+        $view_text = pht('Regenerate');
+
         $view_link = phutil_tag(
           'a',
           array(
