@@ -784,24 +784,12 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return $this->getTransformedURI('thumb-profile');
   }
 
-  public function getThumb60x45URI() {
-    return $this->getTransformedURI('thumb-60x45');
-  }
-
-  public function getThumb160x120URI() {
-    return $this->getTransformedURI('thumb-160x120');
-  }
-
   public function getPreview100URI() {
     return $this->getTransformedURI('preview-100');
   }
 
   public function getPreview220URI() {
     return $this->getTransformedURI('preview-220');
-  }
-
-  public function getThumb220x165URI() {
-    return $this->getTransfomredURI('thumb-220x165');
   }
 
   public function getThumb280x210URI() {

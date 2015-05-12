@@ -3,43 +3,36 @@
 final class PhabricatorFileTransformController
   extends PhabricatorFileController {
 
-  private $transform;
-  private $phid;
-  private $key;
-
   public function shouldRequireLogin() {
     return false;
   }
 
-  public function willProcessRequest(array $data) {
-    $this->transform = $data['transform'];
-    $this->phid      = $data['phid'];
-    $this->key       = $data['key'];
-  }
-
-  public function processRequest() {
-    $viewer = $this->getRequest()->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $viewer = $this->getViewer();
 
     // NOTE: This is a public/CDN endpoint, and permission to see files is
     // controlled by knowing the secret key, not by authentication.
 
+    $source_phid = $request->getURIData('phid');
     $file = id(new PhabricatorFileQuery())
       ->setViewer(PhabricatorUser::getOmnipotentUser())
-      ->withPHIDs(array($this->phid))
+      ->withPHIDs(array($source_phid))
       ->executeOne();
     if (!$file) {
       return new Aphront404Response();
     }
 
-    if (!$file->validateSecretKey($this->key)) {
+    $secret_key = $request->getURIData('key');
+    if (!$file->validateSecretKey($secret_key)) {
       return new Aphront403Response();
     }
 
+    $transform = $request->getURIData('transform');
     $xform = id(new PhabricatorTransformedFile())
       ->loadOneWhere(
         'originalPHID = %s AND transform = %s',
-        $this->phid,
-        $this->transform);
+        $source_phid,
+        $transform);
 
     if ($xform) {
       return $this->buildTransformedFileResponse($xform);
@@ -48,34 +41,25 @@ final class PhabricatorFileTransformController
     $type = $file->getMimeType();
 
     if (!$file->isViewableInBrowser() || !$file->isTransformableImage()) {
-      return $this->buildDefaultTransformation($file);
+      return $this->buildDefaultTransformation($file, $transform);
     }
 
     // We're essentially just building a cache here and don't need CSRF
     // protection.
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
 
-    switch ($this->transform) {
+    switch ($transform) {
       case 'thumb-profile':
         $xformed_file = $this->executeThumbTransform($file, 50, 50);
         break;
       case 'thumb-280x210':
         $xformed_file = $this->executeThumbTransform($file, 280, 210);
         break;
-      case 'thumb-220x165':
-        $xformed_file = $this->executeThumbTransform($file, 220, 165);
-        break;
       case 'preview-100':
         $xformed_file = $this->executePreviewTransform($file, 100);
         break;
       case 'preview-220':
         $xformed_file = $this->executePreviewTransform($file, 220);
-        break;
-      case 'thumb-160x120':
-        $xformed_file = $this->executeThumbTransform($file, 160, 120);
-        break;
-      case 'thumb-60x45':
-        $xformed_file = $this->executeThumbTransform($file, 60, 45);
         break;
       default:
         return new Aphront400Response();
@@ -85,16 +69,18 @@ final class PhabricatorFileTransformController
       return new Aphront400Response();
     }
 
-    $xform = new PhabricatorTransformedFile();
-    $xform->setOriginalPHID($this->phid);
-    $xform->setTransform($this->transform);
-    $xform->setTransformedPHID($xformed_file->getPHID());
-    $xform->save();
+    $xform = id(new PhabricatorTransformedFile())
+      ->setOriginalPHID($source_phid)
+      ->setTransform($transform)
+      ->setTransformedPHID($xformed_file->getPHID())
+      ->save();
 
     return $this->buildTransformedFileResponse($xform);
   }
 
-  private function buildDefaultTransformation(PhabricatorFile $file) {
+  private function buildDefaultTransformation(
+    PhabricatorFile $file,
+    $transform) {
     static $regexps = array(
       '@application/zip@'     => 'zip',
       '@image/@'              => 'image',
@@ -111,15 +97,9 @@ final class PhabricatorFileTransformController
       }
     }
 
-    switch ($this->transform) {
+    switch ($transform) {
       case 'thumb-280x210':
         $suffix = '280x210';
-        break;
-      case 'thumb-160x120':
-        $suffix = '160x120';
-        break;
-      case 'thumb-60x45':
-        $suffix = '60x45';
         break;
       case 'preview-100':
         $suffix = '.p100';
