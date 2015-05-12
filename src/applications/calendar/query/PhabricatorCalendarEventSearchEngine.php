@@ -57,8 +57,8 @@ final class PhabricatorCalendarEventSearchEngine
     $min_range = $this->getDateFrom($saved)->getEpoch();
     $max_range = $this->getDateTo($saved)->getEpoch();
 
-    if ($saved->getParameter('display') == 'month' ||
-      $saved->getParameter('display') == 'day') {
+    if ($this->isMonthView($saved) ||
+      $this->isDayView($saved)) {
       list($start_year, $start_month, $start_day) =
         $this->getDisplayYearAndMonthAndDay($saved);
 
@@ -67,9 +67,9 @@ final class PhabricatorCalendarEventSearchEngine
         $timezone);
       $next = clone $start_day;
 
-      if ($saved->getParameter('display') == 'month') {
+      if ($this->isMonthView($saved)) {
         $next->modify('+1 month');
-      } else if ($saved->getParameter('display') == 'day') {
+      } else if ($this->isDayView($saved)) {
         $next->modify('+6 day');
       }
 
@@ -269,9 +269,9 @@ final class PhabricatorCalendarEventSearchEngine
     PhabricatorSavedQuery $query,
     array $handles) {
 
-    if ($query->getParameter('display') == 'month') {
+    if ($this->isMonthView($query)) {
       return $this->buildCalendarView($events, $query, $handles);
-    } else if ($query->getParameter('display') == 'day') {
+    } else if ($this->isDayView($query)) {
       return $this->buildCalendarDayView($events, $query, $handles);
     }
 
@@ -358,6 +358,7 @@ final class PhabricatorCalendarEventSearchEngine
     foreach ($statuses as $status) {
       $event = new AphrontCalendarEventView();
       $event->setEpochRange($status->getDateFrom(), $status->getDateTo());
+      $event->setIsAllDay($status->getIsAllDay());
 
       $name_text = $handles[$status->getUserPHID()]->getName();
       $status_text = $status->getName();
@@ -430,9 +431,14 @@ final class PhabricatorCalendarEventSearchEngine
           $epoch = time();
         }
       }
+      if ($this->isMonthView($query)) {
+        $day = 1;
+      } else {
+        $day = phabricator_format_local_time($epoch, $viewer, 'd');
+      }
       $start_year = phabricator_format_local_time($epoch, $viewer, 'Y');
       $start_month = phabricator_format_local_time($epoch, $viewer, 'm');
-      $start_day = phabricator_format_local_time($epoch, $viewer, 'd');
+      $start_day = $day;
     }
     return array($start_year, $start_month, $start_day);
   }
@@ -467,4 +473,23 @@ final class PhabricatorCalendarEventSearchEngine
     return $value;
   }
 
+  private function isMonthView(PhabricatorSavedQuery $query) {
+    if ($this->isDayView($query)) {
+      return false;
+    }
+    if ($query->getParameter('display') == 'month') {
+      return true;
+    }
+  }
+
+  private function isDayView(PhabricatorSavedQuery $query) {
+    if ($query->getParameter('display') == 'day') {
+      return true;
+    }
+    if ($this->calendarDay) {
+      return true;
+    }
+
+    return false;
+  }
 }
