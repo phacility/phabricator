@@ -71,4 +71,20 @@ final class PhabricatorFileThumbnailTransform
     }
   }
 
+  public function getDefaultTransform(PhabricatorFile $file) {
+    $x = (int)$this->dstX;
+    $y = (int)$this->dstY;
+    $name = 'image-'.$x.'x'.nonempty($y, $x).'.png';
+
+    $params = array(
+      'name' => $name,
+      'canCDN' => true,
+    );
+
+    $root = dirname(phutil_get_library_root('phabricator'));
+    $data = Filesystem::readFile($root.'/resources/builtin/'.$name);
+
+    return PhabricatorFile::newFromFileData($data, $params);
+  }
+
 }

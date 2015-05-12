@@ -54,7 +54,18 @@ final class PhabricatorFileTransformController
     if (isset($xforms[$transform])) {
       $xform = $xforms[$transform];
       if ($xform->canApplyTransform($file)) {
-        $xformed_file = $xforms[$transform]->applyTransform($file);
+        try {
+          $xformed_file = $xforms[$transform]->applyTransform($file);
+        } catch (Exception $ex) {
+          // TODO: Provide a diagnostic mode to surface these to the viewer.
+
+          // In normal transform mode, we ignore failures and generate a
+          // default transform instead.
+        }
+      }
+
+      if (!$xformed_file) {
+        $xformed_file = $xform->getDefaultTransform($file);
       }
     }
 
