@@ -75,7 +75,7 @@ final class PHUICalendarMonthView extends AphrontView {
     $empty_cell = array(
         'list' => null,
         'date' => null,
-        'class' => 'phui-calendar-empty',
+        'class' => null,
       );
 
     for ($ii = 0; $ii < $empty; $ii++) {
@@ -90,10 +90,6 @@ final class PHUICalendarMonthView extends AphrontView {
       $holiday = idx($this->holidays, $day->format('Y-m-d'));
       $class = 'phui-calendar-month-day';
       $weekday = $day->format('w');
-
-      if ($day_number == $this->day) {
-        $class .= ' phui-calendar-today';
-      }
 
       if ($holiday || $weekday == 0 || $weekday == 6) {
         $class .= ' phui-calendar-not-work-day';
@@ -188,16 +184,33 @@ final class PHUICalendarMonthView extends AphrontView {
               'href' => $uri,
             ),
             $cell_day->format('j'));
+
         } else {
           $cell_day = null;
         }
+
+        if ($cell['date'] && $cell['date']->format('j') == $this->day) {
+          $today_class = 'phui-calendar-today-slot phui-calendar-today';
+        } else {
+          $today_class = 'phui-calendar-today-slot';
+        }
+
+        $today_slot = phutil_tag (
+          'div',
+          array(
+            'class' => $today_class,
+          ),
+          null);
 
         $cells[] = phutil_tag(
           'td',
           array(
             'class' => 'phui-calendar-date-number-container '.$class,
           ),
-          $cell_day);
+          array(
+            $cell_day,
+            $today_slot,
+          ));
       }
       $table[] = phutil_tag('tr', array(), $cells);
     }

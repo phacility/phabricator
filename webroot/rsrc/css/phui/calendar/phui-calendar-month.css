@@ -32,14 +32,10 @@ table.phui-calendar-view .phui-calendar-event-list {
 
 table.phui-calendar-view a.phui-calendar-date-number {
   color: {$lightgreytext};
-  border-color: {$thinblueborder};
-  border-style: solid;
-  border-width: 1px 0 0 1px;
-  padding: 4px;
+  padding: 0 4px;
   display: inline-block;
   min-width: 16px;
   text-align: center;
-  background-color: #ffffff;
 }
 
 table.phui-calendar-view td.phui-calendar-date-number-container {
@@ -53,12 +49,16 @@ table.phui-calendar-view td.phui-calendar-date-number-container {
   background-color: {$lightgreybackground};
 }
 
-.phui-calendar-today {
-  background-color: {$lightgreen};
+.phui-calendar-today-slot {
+  display: block;
+  width: 100%;
+  height: 4px;
+  padding: 0;
+  margin: 0;
 }
 
-.phui-calendar-empty {
-  background-color: {$greybackground};
+.phui-calendar-today-slot.phui-calendar-today {
+  background-color: {$lightblueborder};
 }
 
 .phui-calendar-event-empty {
