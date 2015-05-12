@@ -110,8 +110,8 @@ final class PhabricatorEmbedFileRemarkupRule
           $attrs['src'] = $file->getPreview220URI();
           $dimensions =
             PhabricatorImageTransformer::getPreviewDimensions($file, 220);
-          $attrs['width'] = $dimensions['sdx'];
-          $attrs['height'] = $dimensions['sdy'];
+          $attrs['width'] = $dimensions['dx'];
+          $attrs['height'] = $dimensions['dy'];
           $image_class = 'phabricator-remarkup-embed-image';
           break;
       }
