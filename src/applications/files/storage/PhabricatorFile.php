@@ -784,14 +784,6 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return PhabricatorEnv::getCDNURI($path);
   }
 
-  public function getProfileThumbURI() {
-    return $this->getTransformedURI('thumb-profile');
-  }
-
-  public function getThumb280x210URI() {
-    return $this->getTransformedURI('thumb-280x210');
-  }
-
   public function isViewableInBrowser() {
     return ($this->getViewableMimeType() !== null);
   }

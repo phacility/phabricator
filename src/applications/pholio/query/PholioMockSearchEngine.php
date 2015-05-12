@@ -141,15 +141,22 @@ final class PholioMockSearchEngine extends PhabricatorApplicationSearchEngine {
 
     $viewer = $this->requireViewer();
 
+    $xform = PhabricatorFileTransform::getTransformByKey(
+      PhabricatorFileThumbnailTransform::TRANSFORM_PINBOARD);
+
     $board = new PHUIPinboardView();
     foreach ($mocks as $mock) {
+
+      $image = $mock->getCoverFile();
+      $image_uri = $image->getURIForTransform($xform);
+      list($x, $y) = $xform->getTransformedDimensions($image);
 
       $header = 'M'.$mock->getID().' '.$mock->getName();
       $item = id(new PHUIPinboardItemView())
         ->setHeader($header)
         ->setURI('/M'.$mock->getID())
-        ->setImageURI($mock->getCoverFile()->getThumb280x210URI())
-        ->setImageSize(280, 210)
+        ->setImageURI($image_uri)
+        ->setImageSize($x, $y)
         ->setDisabled($mock->isClosed())
         ->addIconCount('fa-picture-o', count($mock->getImages()))
         ->addIconCount('fa-trophy', $mock->getTokenCount());

@@ -20,21 +20,6 @@ final class PhabricatorImageTransformer {
       ));
   }
 
-  public function executeThumbTransform(
-    PhabricatorFile $file,
-    $x,
-    $y) {
-
-    $image = $this->crudelyScaleTo($file, $x, $y);
-
-    return PhabricatorFile::newFromFileData(
-      $image,
-      array(
-        'name' => 'thumb-'.$file->getName(),
-        'canCDN' => true,
-      ));
-  }
-
   public function executeProfileTransform(
     PhabricatorFile $file,
     $x,
@@ -120,21 +105,6 @@ final class PhabricatorImageTransformer {
       $w, $h,
       $orig_w, $orig_h);
 
-    return self::saveImageDataInAnyFormat($dst, $file->getMimeType());
-  }
-
-
-  /**
-   * Very crudely scale an image up or down to an exact size.
-   */
-  private function crudelyScaleTo(PhabricatorFile $file, $dx, $dy) {
-    $scaled = $this->applyScaleWithImagemagick($file, $dx, $dy);
-
-    if ($scaled != null) {
-      return $scaled;
-    }
-
-    $dst = $this->applyScaleTo($file, $dx, $dy);
     return self::saveImageDataInAnyFormat($dst, $file->getMimeType());
   }
 

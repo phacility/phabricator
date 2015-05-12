@@ -42,13 +42,20 @@ abstract class PhabricatorFileImageTransform extends PhabricatorFileTransform {
     $dst_w, $dst_h,
     $src_x, $src_y,
     $src_w, $src_h,
-    $use_w, $use_h) {
+    $use_w, $use_h,
+    $scale_up) {
 
-    // Figure out the effective destination width, height, and offsets. We
-    // never want to scale images up, so if we're copying a very small source
-    // image we're just going to center it in the destination image.
-    $cpy_w = min($dst_w, $src_w, $use_w);
-    $cpy_h = min($dst_h, $src_h, $use_h);
+    // Figure out the effective destination width, height, and offsets.
+    $cpy_w = min($dst_w, $use_w);
+    $cpy_h = min($dst_h, $use_h);
+
+    // If we aren't scaling up, and are copying a very small source image,
+    // we're just going to center it in the destination image.
+    if (!$scale_up) {
+      $cpy_w = min($cpy_w, $src_w);
+      $cpy_h = min($cpy_h, $src_h);
+    }
+
     $off_x = ($dst_w - $cpy_w) / 2;
     $off_y = ($dst_h - $cpy_h) / 2;
 
@@ -58,11 +65,18 @@ abstract class PhabricatorFileImageTransform extends PhabricatorFileTransform {
       $argv[] = '-shave';
       $argv[] = $src_x.'x'.$src_y;
       $argv[] = '-resize';
-      $argv[] = $dst_w.'x'.$dst_h.'>';
+
+      if ($scale_up) {
+        $argv[] = $dst_w.'x'.$dst_h;
+      } else {
+        $argv[] = $dst_w.'x'.$dst_h.'>';
+      }
+
       $argv[] = '-bordercolor';
       $argv[] = 'rgba(255, 255, 255, 0)';
       $argv[] = '-border';
       $argv[] = $off_x.'x'.$off_y;
+
       return $this->applyImagemagick($argv);
     }
 
@@ -117,7 +131,13 @@ abstract class PhabricatorFileImageTransform extends PhabricatorFileTransform {
    * @param string Raw file data.
    */
   protected function newFileFromData($data) {
-    $name = $this->getTransformKey().'-'.$this->file->getName();
+    if ($this->file) {
+      $name = $this->file->getName();
+    } else {
+      $name = 'default.png';
+    }
+
+    $name = $this->getTransformKey().'-'.$name;
 
     return PhabricatorFile::newFromFileData(
       $data,

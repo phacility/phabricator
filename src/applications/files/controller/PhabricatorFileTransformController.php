@@ -44,50 +44,33 @@ final class PhabricatorFileTransformController
       }
     }
 
-    $type = $file->getMimeType();
-
-    if (!$file->isViewableInBrowser() || !$file->isTransformableImage()) {
-      return $this->buildDefaultTransformation($file, $transform);
+    $xforms = PhabricatorFileTransform::getAllTransforms();
+    if (!isset($xforms[$transform])) {
+      return new Aphront404Response();
     }
+
+    $xform = $xforms[$transform];
 
     // We're essentially just building a cache here and don't need CSRF
     // protection.
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
 
     $xformed_file = null;
-
-    $xforms = PhabricatorFileTransform::getAllTransforms();
-    if (isset($xforms[$transform])) {
-      $xform = $xforms[$transform];
-      if ($xform->canApplyTransform($file)) {
-        try {
-          $xformed_file = $xforms[$transform]->applyTransform($file);
-        } catch (Exception $ex) {
-          // In normal transform mode, we ignore failures and generate a
-          // default transform below. If we're explicitly regenerating the
-          // thumbnail, rethrow the exception.
-          if ($is_regenerate) {
-            throw $ex;
-          }
+    if ($xform->canApplyTransform($file)) {
+      try {
+        $xformed_file = $xforms[$transform]->applyTransform($file);
+      } catch (Exception $ex) {
+        // In normal transform mode, we ignore failures and generate a
+        // default transform below. If we're explicitly regenerating the
+        // thumbnail, rethrow the exception.
+        if ($is_regenerate) {
+          throw $ex;
         }
-      }
-
-      if (!$xformed_file) {
-        $xformed_file = $xform->getDefaultTransform($file);
       }
     }
 
     if (!$xformed_file) {
-      switch ($transform) {
-        case 'thumb-profile':
-          $xformed_file = $this->executeThumbTransform($file, 50, 50);
-          break;
-        case 'thumb-280x210':
-          $xformed_file = $this->executeThumbTransform($file, 280, 210);
-          break;
-        default:
-          return new Aphront400Response();
-      }
+      $xformed_file = $xform->getDefaultTransform($file);
     }
 
     if (!$xformed_file) {
@@ -101,40 +84,6 @@ final class PhabricatorFileTransformController
       ->save();
 
     return $this->buildTransformedFileResponse($xform);
-  }
-
-  private function buildDefaultTransformation(
-    PhabricatorFile $file,
-    $transform) {
-    static $regexps = array(
-      '@application/zip@'     => 'zip',
-      '@image/@'              => 'image',
-      '@application/pdf@'     => 'pdf',
-      '@.*@'                  => 'default',
-    );
-
-    $type = $file->getMimeType();
-    $prefix = 'default';
-    foreach ($regexps as $regexp => $implied_prefix) {
-      if (preg_match($regexp, $type)) {
-        $prefix = $implied_prefix;
-        break;
-      }
-    }
-
-    switch ($transform) {
-      case 'thumb-280x210':
-        $suffix = '280x210';
-        break;
-      default:
-        throw new Exception('Unsupported transformation type!');
-    }
-
-    $path = celerity_get_resource_uri(
-      "rsrc/image/icon/fatcow/thumbnails/{$prefix}{$suffix}.png");
-
-    return id(new AphrontRedirectResponse())
-      ->setURI($path);
   }
 
   private function buildTransformedFileResponse(
@@ -152,11 +101,6 @@ final class PhabricatorFileTransformController
     // which would save the client a roundtrip, but is slightly more complex.
 
     return $file->getRedirectResponse();
-  }
-
-  private function executeThumbTransform(PhabricatorFile $file, $x, $y) {
-    $xformer = new PhabricatorImageTransformer();
-    return $xformer->executeThumbTransform($file, $x, $y);
   }
 
   private function destroyTransform(PhabricatorTransformedFile $xform) {

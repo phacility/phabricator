@@ -89,13 +89,17 @@ final class PhabricatorAuthAccountView extends AphrontView {
         $account_uri);
     }
 
-    $image_uri = $account->getProfileImageFile()->getProfileThumbURI();
+    $image_file = $account->getProfileImageFile();
+    $xform = PhabricatorFileTransform::getTransformByKey(
+      PhabricatorFileThumbnailTransform::TRANSFORM_PROFILE);
+    $image_uri = $image_file->getURIForTransform($xform);
+    list($x, $y) = $xform->getTransformedDimensions($image_file);
 
     return phutil_tag(
       'div',
       array(
         'class' => 'auth-account-view',
-        'style' => 'background-image: url('.$image_uri.')',
+        'style' => 'background-image: url('.$image_uri.');',
       ),
       $content);
   }

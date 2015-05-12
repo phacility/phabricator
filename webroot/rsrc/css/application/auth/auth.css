@@ -28,6 +28,7 @@
   border: 1px solid {$lightblueborder};
   background-repeat: no-repeat;
   background-position: 4px 4px;
+  background-size: 50px 50px;
   padding: 4px 4px 4px 62px;
   min-height: 50px;
   border-radius: 2px;
