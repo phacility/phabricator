@@ -31,13 +31,14 @@ abstract class PhabricatorFileImageTransform extends PhabricatorFileTransform {
   protected function applyCropAndScale(
     $dst_w, $dst_h,
     $src_x, $src_y,
-    $src_w, $src_h) {
+    $src_w, $src_h,
+    $use_w, $use_h) {
 
     // Figure out the effective destination width, height, and offsets. We
     // never want to scale images up, so if we're copying a very small source
     // image we're just going to center it in the destination image.
-    $cpy_w = min($dst_w, $src_w);
-    $cpy_h = min($dst_h, $src_h);
+    $cpy_w = min($dst_w, $src_w, $use_w);
+    $cpy_h = min($dst_h, $src_h, $use_h);
     $off_x = ($dst_w - $cpy_w) / 2;
     $off_y = ($dst_h - $cpy_h) / 2;
 
