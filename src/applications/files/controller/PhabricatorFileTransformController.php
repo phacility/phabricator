@@ -85,12 +85,6 @@ final class PhabricatorFileTransformController
         case 'thumb-280x210':
           $xformed_file = $this->executeThumbTransform($file, 280, 210);
           break;
-        case 'preview-100':
-          $xformed_file = $this->executePreviewTransform($file, 100);
-          break;
-        case 'preview-220':
-          $xformed_file = $this->executePreviewTransform($file, 220);
-          break;
         default:
           return new Aphront400Response();
       }
@@ -132,9 +126,6 @@ final class PhabricatorFileTransformController
       case 'thumb-280x210':
         $suffix = '280x210';
         break;
-      case 'preview-100':
-        $suffix = '.p100';
-        break;
       default:
         throw new Exception('Unsupported transformation type!');
     }
@@ -161,11 +152,6 @@ final class PhabricatorFileTransformController
     // which would save the client a roundtrip, but is slightly more complex.
 
     return $file->getRedirectResponse();
-  }
-
-  private function executePreviewTransform(PhabricatorFile $file, $size) {
-    $xformer = new PhabricatorImageTransformer();
-    return $xformer->executePreviewTransform($file, $size);
   }
 
   private function executeThumbTransform(PhabricatorFile $file, $x, $y) {

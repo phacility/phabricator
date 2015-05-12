@@ -51,20 +51,6 @@ final class PhabricatorImageTransformer {
       ));
   }
 
-  public function executePreviewTransform(
-    PhabricatorFile $file,
-    $size) {
-
-    $image = $this->generatePreview($file, $size);
-
-    return PhabricatorFile::newFromFileData(
-      $image,
-      array(
-        'name' => 'preview-'.$file->getName(),
-        'canCDN' => true,
-      ));
-  }
-
   public function executeConpherenceTransform(
     PhabricatorFile $file,
     $top,
@@ -188,37 +174,6 @@ final class PhabricatorImageTransformer {
 
   }
 
-  public static function getPreviewDimensions(PhabricatorFile $file, $size) {
-    $metadata = $file->getMetadata();
-    $x = idx($metadata, PhabricatorFile::METADATA_IMAGE_WIDTH);
-    $y = idx($metadata, PhabricatorFile::METADATA_IMAGE_HEIGHT);
-
-    if (!$x || !$y) {
-      $data = $file->loadFileData();
-      $src = imagecreatefromstring($data);
-
-      $x = imagesx($src);
-      $y = imagesy($src);
-    }
-
-    $scale = min($size / $x, $size / $y, 1);
-
-    $dx = max($size / 4, $scale * $x);
-    $dy = max($size / 4, $scale * $y);
-
-    $sdx = $scale * $x;
-    $sdy = $scale * $y;
-
-    return array(
-      'x' => $x,
-      'y' => $y,
-      'dx' => $dx,
-      'dy' => $dy,
-      'sdx' => $sdx,
-      'sdy' => $sdy,
-    );
-  }
-
   public static function getScaleForCrop(
     PhabricatorFile $file,
     $des_width,
@@ -239,31 +194,6 @@ final class PhabricatorImageTransformer {
     }
 
     return $scale;
-  }
-
-  private function generatePreview(PhabricatorFile $file, $size) {
-    $data = $file->loadFileData();
-    $src = imagecreatefromstring($data);
-
-    $dimensions = self::getPreviewDimensions($file, $size);
-    $x = $dimensions['x'];
-    $y = $dimensions['y'];
-    $dx = $dimensions['dx'];
-    $dy = $dimensions['dy'];
-    $sdx = $dimensions['sdx'];
-    $sdy = $dimensions['sdy'];
-
-    $dst = $this->getBlankDestinationFile($dx, $dy);
-
-    imagecopyresampled(
-      $dst,
-      $src,
-      ($dx - $sdx) / 2, ($dy - $sdy) / 2,
-      0, 0,
-      $sdx, $sdy,
-      $x, $y);
-
-    return self::saveImageDataInAnyFormat($dst, $file->getMimeType());
   }
 
   private function applyMemeToFile(

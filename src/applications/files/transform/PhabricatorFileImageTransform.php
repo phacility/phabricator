@@ -8,6 +8,16 @@ abstract class PhabricatorFileImageTransform extends PhabricatorFileTransform {
   private $imageX;
   private $imageY;
 
+  /**
+   * Get an estimate of the transformed dimensions of a file.
+   *
+   * @param PhabricatorFile File to transform.
+   * @return list<int, int>|null Width and height, if available.
+   */
+  public function getTransformedDimensions(PhabricatorFile $file) {
+    return null;
+  }
+
   public function canApplyTransform(PhabricatorFile $file) {
     if (!$file->isViewableImage()) {
       return false;

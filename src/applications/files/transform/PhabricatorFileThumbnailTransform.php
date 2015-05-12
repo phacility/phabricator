@@ -65,6 +65,59 @@ final class PhabricatorFileThumbnailTransform
     $dst_x = $this->dstX;
     $dst_y = $this->dstY;
 
+    $dimensions = $this->computeDimensions(
+      $src_x,
+      $src_y,
+      $dst_x,
+      $dst_y);
+
+    $copy_x = $dimensions['copy_x'];
+    $copy_y = $dimensions['copy_y'];
+    $use_x = $dimensions['use_x'];
+    $use_y = $dimensions['use_y'];
+    $dst_x = $dimensions['dst_x'];
+    $dst_y = $dimensions['dst_y'];
+
+    return $this->applyCropAndScale(
+      $dst_x,
+      $dst_y,
+      ($src_x - $copy_x) / 2,
+      ($src_y - $copy_y) / 2,
+      $copy_x,
+      $copy_y,
+      $use_x,
+      $use_y);
+  }
+
+
+  public function getTransformedDimensions(PhabricatorFile $file) {
+    $dst_x = $this->dstX;
+    $dst_y = $this->dstY;
+
+    // If this is transform has fixed dimensions, we can trivially predict
+    // the dimensions of the transformed file.
+    if ($dst_y !== null) {
+      return array($dst_x, $dst_y);
+    }
+
+    $src_x = $file->getImageWidth();
+    $src_y = $file->getImageHeight();
+
+    if (!$src_x || !$src_y) {
+      return null;
+    }
+
+    $dimensions = $this->computeDimensions(
+      $src_x,
+      $src_y,
+      $dst_x,
+      $dst_y);
+
+    return array($dimensions['dst_x'], $dimensions['dst_y']);
+  }
+
+
+  private function computeDimensions($src_x, $src_y, $dst_x, $dst_y) {
     if ($dst_y === null) {
       // If we only have one dimension, it represents a maximum dimension.
       // The other dimension of the transform is scaled appropriately, except
@@ -115,16 +168,16 @@ final class PhabricatorFileThumbnailTransform
       $use_y = $dst_y;
     }
 
-    return $this->applyCropAndScale(
-      $dst_x,
-      $dst_y,
-      ($src_x - $copy_x) / 2,
-      ($src_y - $copy_y) / 2,
-      $copy_x,
-      $copy_y,
-      $use_x,
-      $use_y);
+    return array(
+      'copy_x' => $copy_x,
+      'copy_y' => $copy_y,
+      'use_x' => $use_x,
+      'use_y' => $use_y,
+      'dst_x' => $dst_x,
+      'dst_y' => $dst_y,
+    );
   }
+
 
   public function getDefaultTransform(PhabricatorFile $file) {
     $x = (int)$this->dstX;

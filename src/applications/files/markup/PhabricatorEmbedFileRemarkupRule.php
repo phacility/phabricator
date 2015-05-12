@@ -107,11 +107,17 @@ final class PhabricatorEmbedFileRemarkupRule
           break;
         case 'thumb':
         default:
-          $attrs['src'] = $file->getPreview220URI();
-          $dimensions =
-            PhabricatorImageTransformer::getPreviewDimensions($file, 220);
-          $attrs['width'] = $dimensions['dx'];
-          $attrs['height'] = $dimensions['dy'];
+          $preview_key = PhabricatorFileThumbnailTransform::TRANSFORM_PREVIEW;
+          $xform = PhabricatorFileTransform::getTransformByKey($preview_key);
+          $attrs['src'] = $file->getURIForTransform($xform);
+
+          $dimensions = $xform->getTransformedDimensions($file);
+          if ($dimensions) {
+            list($x, $y) = $dimensions;
+            $attrs['width'] = $x;
+            $attrs['height'] = $y;
+          }
+
           $image_class = 'phabricator-remarkup-embed-image';
           break;
       }

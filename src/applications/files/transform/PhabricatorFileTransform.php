@@ -45,4 +45,18 @@ abstract class PhabricatorFileTransform extends Phobject {
     return $map;
   }
 
+  public static function getTransformByKey($key) {
+    $all = self::getAllTransforms();
+
+    $xform = idx($all, $key);
+    if (!$xform) {
+      throw new Exception(
+        pht(
+          'No file transform with key "%s" exists.',
+          $key));
+    }
+
+    return $xform;
+  }
+
 }
