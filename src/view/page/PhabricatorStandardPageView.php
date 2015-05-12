@@ -97,15 +97,27 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       return false;
     }
 
+    if ($this->isQuicksandBlacklistURI()) {
+      return false;
+    }
+
+    return true;
+  }
+
+  private function isQuicksandBlacklistURI() {
+    $request = $this->getRequest();
+    if (!$request) {
+      return false;
+    }
+
     $patterns = $this->getQuicksandURIPatternBlacklist();
     $path = $request->getRequestURI()->getPath();
     foreach ($patterns as $pattern) {
       if (preg_match('(^'.$pattern.'$)', $path)) {
-        return false;
+        return true;
       }
     }
-
-    return true;
+    return false;
   }
 
   public function getDurableColumnVisible() {
@@ -365,13 +377,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       }
     }
 
-    Javelin::initBehavior(
-      'scrollbar',
-      array(
-        'nodeID' => 'phabricator-standard-page',
-        'isMainContent' => true,
-      ));
-
     $main_page = phutil_tag(
       'div',
       array(
@@ -601,14 +606,15 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       $foot);
   }
 
-  public function renderForQuicksand() {
+  public function renderForQuicksand(array $extra_config) {
     parent::willRenderPage();
     $response = $this->renderPageBodyContent();
     $response = $this->willSendResponse($response);
 
     return array(
       'content' => hsprintf('%s', $response),
-    ) + $this->buildQuicksandConfig();
+    ) + $this->buildQuicksandConfig()
+      + $extra_config;
   }
 
   private function buildQuicksandConfig() {

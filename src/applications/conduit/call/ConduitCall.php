@@ -150,5 +150,9 @@ final class ConduitCall {
     return $method;
   }
 
+  public function getMethodImplementation() {
+    return $this->handler;
+  }
+
 
 }

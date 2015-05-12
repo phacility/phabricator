@@ -47,7 +47,7 @@ final class DifferentialRevisionPHIDType extends PhabricatorPHIDType {
   }
 
   public function canLoadNamedObject($name) {
-    return preg_match('/^D\d*[1-9]\d*$/i', $name);
+    return preg_match('/^D[1-9]\d*$/i', $name);
   }
 
   public function loadNamedObjects(

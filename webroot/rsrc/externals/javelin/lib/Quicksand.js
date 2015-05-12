@@ -25,7 +25,7 @@
 JX.install('Quicksand', {
 
   statics: {
-    _id: 0,
+    _id: null,
     _onpage: 0,
     _cursor: 0,
     _current: 0,
@@ -51,7 +51,9 @@ JX.install('Quicksand', {
 
       self._started = true;
       var path = self._getRelativeURI(window.location);
+      self._id = window.history.state || 0;
       var id = self._id;
+      self._onpage = id;
       self._history.push({path: path, id: id});
 
       self._responses[id] = first_response;
@@ -67,6 +69,14 @@ JX.install('Quicksand', {
       return self;
     },
 
+
+    getCurrentPageID: function() {
+      var self = JX.Quicksand;
+      if (self._id === null) {
+        self._id = window.history.state || 0;
+      }
+      return self._id;
+    },
 
     /**
      * Respond to the user clicking a link.
@@ -151,7 +161,7 @@ JX.install('Quicksand', {
       var id = ++self._id;
 
       self._history.push({path: path, id: id});
-      JX.History.push(path, {quicksand: id});
+      JX.History.push(path, id);
 
       self._cursor = (self._history.length - 1);
       self._responses[id] = null;
@@ -234,7 +244,9 @@ JX.install('Quicksand', {
         null,
         {
           newResponse: self._responses[self._current],
+          newResponseID: self._current,
           oldResponse: self._responses[self._onpage],
+          oldResponseID: self._onpage,
           fromServer: from_server
         });
       self._onpage = self._current;
@@ -256,7 +268,7 @@ JX.install('Quicksand', {
       var self = JX.Quicksand;
 
       var data = e.getData();
-      data.state = (data.state && data.state.quicksand) || null;
+      data.state = data.state || null;
 
       // Check if we're going back to the first page we started Quicksand on.
       // We don't have a state value, but can look at the path.

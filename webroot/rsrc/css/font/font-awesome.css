@@ -15,7 +15,7 @@
   font-weight: normal;
   font-style: normal;
 }
-.phui-font-fa {
+.phui-font-fa:before {
   font-family: FontAwesome;
 }
 /* makes the font 33% larger relative to the icon container */

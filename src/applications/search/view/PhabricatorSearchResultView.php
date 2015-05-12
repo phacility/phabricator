@@ -31,12 +31,12 @@ final class PhabricatorSearchResultView extends AphrontView {
 
     $type_name = nonempty($handle->getTypeName(), pht('Document'));
 
-    $title = $this->emboldenQuery($handle->getFullName());
-    if ($handle->getStatus() == PhabricatorObjectHandleStatus::STATUS_CLOSED) {
-    }
+    $raw_title = $handle->getFullName();
+    $title = $this->emboldenQuery($raw_title);
 
     $item = id(new PHUIObjectItemView())
       ->setHeader($title)
+      ->setTitleText($raw_title)
       ->setHref($handle->getURI())
       ->setImageURI($handle->getImageURI())
       ->addAttribute($type_name);
@@ -110,6 +110,9 @@ final class PhabricatorSearchResultView extends AphrontView {
     $buf = '';
     $pos = 0;
     $is_bold = false;
+
+    // Make sure this is UTF8 because phutil_utf8v() will explode if it isn't.
+    $str = phutil_utf8ize($str);
     foreach (phutil_utf8v($str) as $chr) {
       if ($bold[$pos] != $is_bold) {
         if (strlen($buf)) {

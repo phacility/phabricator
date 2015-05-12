@@ -4,6 +4,7 @@
  *           javelin-util
  *           javelin-stratcom
  *           javelin-install
+ *           javelin-aphlict
  *           javelin-workflow
  *           javelin-router
  *           javelin-behavior-device
@@ -164,15 +165,19 @@ JX.install('ConpherenceThreadManager', {
             // Message event for something we already know about.
             return;
           }
-          // If we're currently updating, wait for the update to complete.
+
           // If this notification tells us about a message which is newer than
-          // the newest one we know to exist, keep track of it so we can
-          // update once the in-flight update finishes.
+          // the newest one we know to exist, update our latest knownID so we
+          // can properly update later.
           if (this._updating &&
               this._updating.threadPHID == this._loadedThreadPHID) {
             if (message.messageID > this._updating.knownID) {
               this._updating.knownID = message.messageID;
-              return;
+              // We're currently updating, so wait for the update to complete.
+              // this.syncWorkflow has us covered in this case.
+              if (this._updating.active) {
+                return;
+              }
             }
           }
 
@@ -200,7 +205,10 @@ JX.install('ConpherenceThreadManager', {
     _markUpdated: function(r) {
       this._updating.knownID = r.latest_transaction_id;
       this._latestTransactionID = r.latest_transaction_id;
-      JX.Stratcom.invoke('notification-panel-update', null, {});
+      JX.Stratcom.invoke(
+        'conpherence-redraw-aphlict',
+        null,
+        r.aphlictDropdownData);
     },
 
     _updateThread: function() {
@@ -226,7 +234,8 @@ JX.install('ConpherenceThreadManager', {
     syncWorkflow: function(workflow, stage) {
       this._updating = {
         threadPHID: this._loadedThreadPHID,
-        knownID: this._latestTransactionID
+        knownID: this._latestTransactionID,
+        active: true
       };
       workflow.listen(stage, JX.bind(this, function() {
         // TODO - do we need to handle if we switch threads somehow?
@@ -235,6 +244,7 @@ JX.install('ConpherenceThreadManager', {
         if (need_sync) {
           return this._updateThread();
         }
+        this._updating.active = false;
       }));
       workflow.start();
     },
@@ -254,9 +264,10 @@ JX.install('ConpherenceThreadManager', {
       this.syncWorkflow(workflow, params.stage);
     },
 
-    loadThreadByID: function(thread_id) {
+    loadThreadByID: function(thread_id, force_reload) {
       if (this.isThreadLoaded() &&
-          this.isThreadIDLoaded(thread_id)) {
+          this.isThreadIDLoaded(thread_id) &&
+          !force_reload) {
         return;
       }
 
@@ -270,13 +281,36 @@ JX.install('ConpherenceThreadManager', {
       params = this._getParams(params);
 
       var handler = JX.bind(this, function(r) {
+        var client = JX.Aphlict.getInstance();
+        if (client) {
+          var old_subs = client.getSubscriptions();
+          var new_subs = [];
+          for (var ii = 0; ii < old_subs.length; ii++) {
+            if (old_subs[ii] == this._loadedThreadPHID) {
+              continue;
+            } else {
+              new_subs.push(old_subs[ii]);
+            }
+          }
+          new_subs.push(r.threadPHID);
+          client.clearSubscriptions(client.getSubscriptions());
+          client.setSubscriptions(new_subs);
+        }
         this._loadedThreadID = r.threadID;
         this._loadedThreadPHID = r.threadPHID;
         this._latestTransactionID = r.latestTransactionID;
         this._canEditLoadedThread = r.canEdit;
-        JX.Stratcom.invoke('notification-panel-update', null, {});
+
+        JX.Stratcom.invoke(
+          'conpherence-redraw-aphlict',
+          null,
+          r.aphlictDropdownData);
 
         this._didLoadThreadCallback(r);
+
+        if (force_reload) {
+          JX.Stratcom.invoke('hashchange');
+        }
       });
 
       // should this be sync'd too?

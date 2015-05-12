@@ -23,9 +23,12 @@ final class PhabricatorBot extends PhabricatorDaemon {
     }
 
     $json_raw = Filesystem::readFile($argv[0]);
-    $config = json_decode($json_raw, true);
-    if (!is_array($config)) {
-      throw new Exception("File '{$argv[0]}' is not valid JSON!");
+    try {
+      $config = phutil_json_decode($json_raw);
+    } catch (PhutilJSONParserException $ex) {
+      throw new PhutilProxyException(
+        pht("File '%s' is not valid JSON!", $argv[0]),
+        $ex);
     }
 
     $nick                   = idx($config, 'nick', 'phabot');
@@ -50,8 +53,7 @@ final class PhabricatorBot extends PhabricatorDaemon {
 
     $conduit_uri = idx($config, 'conduit.uri');
     if ($conduit_uri) {
-      $conduit_user = idx($config, 'conduit.user');
-      $conduit_cert = idx($config, 'conduit.cert');
+      $conduit_token = idx($config, 'conduit.token');
 
       // Normalize the path component of the URI so users can enter the
       // domain without the "/api/" part.
@@ -61,16 +63,23 @@ final class PhabricatorBot extends PhabricatorDaemon {
       $conduit_uri = (string)$conduit_uri->setPath('/api/');
 
       $conduit = new ConduitClient($conduit_uri);
-      $response = $conduit->callMethodSynchronous(
-        'conduit.connect',
-        array(
-          'client'            => 'PhabricatorBot',
-          'clientVersion'     => '1.0',
-          'clientDescription' => php_uname('n').':'.$nick,
-          'host'              => $conduit_host,
-          'user'              => $conduit_user,
-          'certificate'       => $conduit_cert,
-        ));
+      if ($conduit_token) {
+        $conduit->setConduitToken($conduit_token);
+      } else {
+        $conduit_user = idx($config, 'conduit.user');
+        $conduit_cert = idx($config, 'conduit.cert');
+
+        $response = $conduit->callMethodSynchronous(
+          'conduit.connect',
+          array(
+            'client'            => 'PhabricatorBot',
+            'clientVersion'     => '1.0',
+            'clientDescription' => php_uname('n').':'.$nick,
+            'host'              => $conduit_host,
+            'user'              => $conduit_user,
+            'certificate'       => $conduit_cert,
+          ));
+      }
 
       $this->conduit = $conduit;
     }

@@ -26,7 +26,7 @@ final class PhabricatorBotFlowdockProtocolAdapter
     return $url;
   }
 
-  protected function processMessage($m_obj) {
+  protected function processMessage(array $m_obj) {
     $command = null;
     switch ($m_obj['event']) {
       case 'message':

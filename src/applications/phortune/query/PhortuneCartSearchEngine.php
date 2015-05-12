@@ -55,15 +55,7 @@ final class PhortuneCartSearchEngine
 
   public function buildQueryFromSavedQuery(PhabricatorSavedQuery $saved) {
     $query = id(new PhortuneCartQuery())
-      ->needPurchases(true)
-      ->withStatuses(
-        array(
-          PhortuneCart::STATUS_PURCHASING,
-          PhortuneCart::STATUS_CHARGED,
-          PhortuneCart::STATUS_HOLD,
-          PhortuneCart::STATUS_REVIEW,
-          PhortuneCart::STATUS_PURCHASED,
-        ));
+      ->needPurchases(true);
 
     $viewer = $this->requireViewer();
 
@@ -107,6 +99,19 @@ final class PhortuneCartSearchEngine
       $query->withSubscriptionPHIDs(array($subscription->getPHID()));
     }
 
+    if ($saved->getParameter('invoices')) {
+      $query->withInvoices(true);
+    } else {
+      $query->withStatuses(
+        array(
+          PhortuneCart::STATUS_PURCHASING,
+          PhortuneCart::STATUS_CHARGED,
+          PhortuneCart::STATUS_HOLD,
+          PhortuneCart::STATUS_REVIEW,
+          PhortuneCart::STATUS_PURCHASED,
+        ));
+    }
+
     return $query;
   }
 
@@ -118,9 +123,9 @@ final class PhortuneCartSearchEngine
     $merchant = $this->getMerchant();
     $account = $this->getAccount();
     if ($merchant) {
-      return '/phortune/merchant/'.$merchant->getID().'/order/'.$path;
+      return '/phortune/merchant/orders/'.$merchant->getID().'/'.$path;
     } else if ($account) {
-      return '/phortune/'.$account->getID().'/order/';
+      return '/phortune/'.$account->getID().'/order/'.$path;
     } else {
       return '/phortune/order/'.$path;
     }
@@ -128,7 +133,8 @@ final class PhortuneCartSearchEngine
 
   protected function getBuiltinQueryNames() {
     $names = array(
-      'all' => pht('All Orders'),
+      'all' => pht('Order History'),
+      'invoices' => pht('Unpaid Invoices'),
     );
 
     return $names;
@@ -142,6 +148,8 @@ final class PhortuneCartSearchEngine
     switch ($query_key) {
       case 'all':
         return $query;
+      case 'invoices':
+        return $query->setParameter('invoices', true);
     }
 
     return parent::buildSavedQueryFromBuiltin($query_key);
@@ -180,12 +188,6 @@ final class PhortuneCartSearchEngine
 
       $rows[] = array(
         $cart->getID(),
-        phutil_tag(
-          'a',
-          array(
-            'href' => $href,
-          ),
-          $cart->getName()),
         $handles[$cart->getPHID()]->renderLink(),
         $handles[$merchant->getPHID()]->renderLink(),
         $handles[$cart->getAuthorPHID()]->renderLink(),

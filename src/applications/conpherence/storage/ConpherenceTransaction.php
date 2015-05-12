@@ -32,12 +32,11 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
       case ConpherenceTransactionType::TYPE_PARTICIPANTS:
         return ($old === null);
       case ConpherenceTransactionType::TYPE_TITLE:
+      case ConpherenceTransactionType::TYPE_PICTURE:
       case ConpherenceTransactionType::TYPE_DATE_MARKER:
         return false;
       case ConpherenceTransactionType::TYPE_FILES:
         return true;
-      // we used to have them so just always hide
-      case ConpherenceTransactionType::TYPE_PICTURE:
       case ConpherenceTransactionType::TYPE_PICTURE_CROP:
         return true;
     }
@@ -56,6 +55,7 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
+      case ConpherenceTransactionType::TYPE_PICTURE:
         if ($this->getObject()->getIsRoom()) {
           return $this->getRoomTitle();
         } else {
@@ -144,6 +144,11 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
         }
         return $title;
         break;
+      case ConpherenceTransactionType::TYPE_PICTURE:
+        return pht(
+          '%s updated the room image.',
+          $this->renderHandleLink($author_phid));
+        break;
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
         return pht(
           '%s changed the visibility of this room from "%s" to "%s".',
@@ -195,6 +200,11 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
         }
         return $title;
         break;
+      case ConpherenceTransactionType::TYPE_PICTURE:
+        return pht(
+          '%s updated the room image.',
+          $this->renderHandleLink($author_phid));
+        break;
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
         return pht(
           '%s changed the visibility of this thread from "%s" to "%s".',
@@ -228,6 +238,7 @@ final class ConpherenceTransaction extends PhabricatorApplicationTransaction {
     $phids[] = $this->getAuthorPHID();
     switch ($this->getTransactionType()) {
       case ConpherenceTransactionType::TYPE_TITLE:
+      case ConpherenceTransactionType::TYPE_PICTURE:
       case ConpherenceTransactionType::TYPE_FILES:
       case ConpherenceTransactionType::TYPE_DATE_MARKER:
         break;

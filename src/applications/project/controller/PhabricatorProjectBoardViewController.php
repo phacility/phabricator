@@ -265,15 +265,17 @@ final class PhabricatorProjectBoardViewController
       ->setUser($viewer)
       ->setID($board_id);
 
+    $behavior_config = array(
+      'boardID' => $board_id,
+      'projectPHID' => $project->getPHID(),
+      'moveURI' => $this->getApplicationURI('move/'.$project->getID().'/'),
+      'createURI' => '/maniphest/task/create/',
+      'order' => $this->sortKey,
+    );
     $this->initBehavior(
       'project-boards',
-      array(
-        'boardID' => $board_id,
-        'projectPHID' => $project->getPHID(),
-        'moveURI' => $this->getApplicationURI('move/'.$project->getID().'/'),
-        'createURI' => '/maniphest/task/create/',
-        'order' => $this->sortKey,
-      ));
+      $behavior_config);
+    $this->addExtraQuickSandConfig(array('boardConfig' => $behavior_config));
 
     $this->handles = ManiphestTaskListView::loadTaskHandles($viewer, $tasks);
 
@@ -340,10 +342,6 @@ final class PhabricatorProjectBoardViewController
       $board->addPanel($panel);
     }
 
-    Javelin::initBehavior(
-      'boards-dropdown',
-      array());
-
     $sort_menu = $this->buildSortMenu(
       $viewer,
       $sort_key);
@@ -385,6 +383,7 @@ final class PhabricatorProjectBoardViewController
       array(
         'title' => pht('%s Board', $project->getName()),
         'showFooter' => false,
+        'pageObjects' => array($project->getPHID()),
       ));
   }
 

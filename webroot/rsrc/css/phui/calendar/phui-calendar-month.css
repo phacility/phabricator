@@ -17,40 +17,36 @@ tr.phui-calendar-day-of-week-header th {
 }
 
 table.phui-calendar-view td {
-  border: 1px solid #dfdfdf;
+  border: solid #dfdfdf;
+  border-width: 1px 1px 0 1px;
   width: 14.2857%; /* This is one seventh, approximately. */
 }
 
-table.phui-calendar-view td div.phui-calendar-day {
+table.phui-calendar-view tr td:first-child {
+  border-left-width: 0px;
+}
+
+table.phui-calendar-view .phui-calendar-event-list {
   min-height: 125px;
-  position: relative;
 }
 
-.phui-calendar-holiday {
-  color: {$greytext};
-  padding: .5em;
-  max-height: 1em;
-  overflow: hidden;
-}
-
-table.phui-calendar-view td.phui-calendar-month-weekstart {
-  border-left: none;
-}
-
-.phui-calendar-date-number {
-  font-weight: normal;
+table.phui-calendar-view a.phui-calendar-date-number {
   color: {$lightgreytext};
-  padding: 4px;
   border-color: {$thinblueborder};
   border-style: solid;
-  border-width: 0 0 1px 1px;
-  position: absolute;
-  background: #ffffff;
-  width: 16px;
-  height: 16px;
+  border-width: 1px 0 0 1px;
+  padding: 4px;
+  display: inline-block;
+  min-width: 16px;
   text-align: center;
-  top: 0;
-  right: 0;
+  background-color: #ffffff;
+}
+
+table.phui-calendar-view td.phui-calendar-date-number-container {
+  font-weight: normal;
+  color: {$lightgreytext};
+  border-width: 0 1px 0 1px;
+  text-align: right;
 }
 
 .phui-calendar-not-work-day {
@@ -71,11 +67,30 @@ table.phui-calendar-view td.phui-calendar-month-weekstart {
 }
 
 .phui-calendar-view .phui-calendar-list {
-  padding: 8px;
+  padding: 1px;
+}
+
+.phui-calendar-list-item.all-day span {
+  padding: 0;
+  margin: 0;
+}
+
+.phui-calendar-view .phui-calendar-list li.phui-calendar-list-item.all-day {
+  margin: 0;
+  padding: 4px 8px;
+  background-color: {$lightpink};
+}
+
+li.phui-calendar-list-item.all-day:first-child {
+  margin-top: 0;
+}
+
+.phui-calendar-view .phui-calendar-list li {
+  margin: 0 8px;
 }
 
 .phui-calendar-view .phui-calendar-list li:first-child {
-  margin-right: 16px;
+  margin-top: 8px;
 }
 
 .phui-calendar-view .phui-calendar-list-dot {
@@ -93,6 +108,10 @@ table.phui-calendar-view td.phui-calendar-month-weekstart {
   margin-left: 10px;
   white-space: normal;
   word-break: break-word;
+}
+
+li.phui-calendar-list-item.all-day .phui-calendar-list-title a{
+  color: {$pink};
 }
 
 .phui-calendar-view .phui-calendar-list-time {

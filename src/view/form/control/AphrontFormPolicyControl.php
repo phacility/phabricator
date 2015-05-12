@@ -179,6 +179,7 @@ final class AphrontFormPolicyControl extends AphrontFormControl {
         'icons' => $icons,
         'labels' => $labels,
         'value' => $this->getValue(),
+        'capability' => $this->capability,
         'customPlaceholder' => $this->getCustomPolicyPlaceholder(),
       ));
 

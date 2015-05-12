@@ -21,16 +21,23 @@ final class PhabricatorConduitAPIController
     $method = $this->method;
 
     $api_request = null;
+    $method_implementation = null;
 
     $log = new PhabricatorConduitMethodCallLog();
     $log->setMethod($method);
     $metadata = array();
+
+    $multimeter = MultimeterControl::getInstance();
+    if ($multimeter) {
+      $multimeter->setEventContext('api.'.$method);
+    }
 
     try {
 
       list($metadata, $params) = $this->decodeConduitParams($request, $method);
 
       $call = new ConduitCall($method, $params);
+      $method_implementation = $call->getMethodImplementation();
 
       $result = null;
 
@@ -146,7 +153,8 @@ final class PhabricatorConduitAPIController
         return $this->buildHumanReadableResponse(
           $method,
           $api_request,
-          $response->toDictionary());
+          $response->toDictionary(),
+          $method_implementation);
       case 'json':
       default:
         return id(new AphrontJSONResponse())
@@ -520,7 +528,8 @@ final class PhabricatorConduitAPIController
   private function buildHumanReadableResponse(
     $method,
     ConduitAPIRequest $request = null,
-    $result = null) {
+    $result = null,
+    ConduitAPIMethod $method_implementation = null) {
 
     $param_rows = array();
     $param_rows[] = array('Method', $this->renderAPIValue($method));
@@ -569,11 +578,20 @@ final class PhabricatorConduitAPIController
       ->addTextCrumb($method, $method_uri)
       ->addTextCrumb(pht('Call'));
 
+    $example_panel = null;
+    if ($request && $method_implementation) {
+      $params = $request->getAllParameters();
+      $example_panel = $this->renderExampleBox(
+        $method_implementation,
+        $params);
+    }
+
     return $this->buildApplicationPage(
       array(
         $crumbs,
         $param_panel,
         $result_panel,
+        $example_panel,
       ),
       array(
         'title' => pht('Method Call Result'),
@@ -642,12 +660,15 @@ final class PhabricatorConduitAPIController
     // entire param dictionary JSON encoded.
     $params_json = $request->getStr('params');
     if (strlen($params_json)) {
-      $params = json_decode($params_json, true);
-      if (!is_array($params)) {
-        throw new Exception(
-          "Invalid parameter information was passed to method ".
-          "'{$method}', could not decode JSON serialization. Data: ".
-          $params_json);
+      $params = null;
+      try {
+        $params = phutil_json_decode($params_json);
+      } catch (PhutilJSONParserException $ex) {
+        throw new PhutilProxyException(
+          pht(
+            "Invalid parameter information was passed to method '%s'",
+            $method),
+          $ex);
       }
 
       $metadata = idx($params, '__conduit__', array());

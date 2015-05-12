@@ -42,9 +42,8 @@ final class ConpherenceNewController extends ConpherenceController {
           }
         }
       } else {
-        $uri = $this->getApplicationURI($conpherence->getID());
         return id(new AphrontRedirectResponse())
-          ->setURI($uri);
+          ->setURI('/'.$conpherence->getMonogram());
       }
     } else {
       $participant_prefill = $request->getStr('participant');

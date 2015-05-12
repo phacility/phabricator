@@ -154,9 +154,11 @@ final class DiffusionLintSaveRunner {
         $files);
 
       foreach (new LinesOfALargeExecFuture($future) as $json) {
-        $paths = json_decode($json, true);
-        if (!is_array($paths)) {
-          fprintf(STDERR, "Invalid JSON: {$json}\n");
+        $paths = null;
+        try {
+          $paths = phutil_json_decode($json);
+        } catch (PhutilJSONParserException $ex) {
+          fprintf(STDERR, pht("Invalid JSON: %s\n", $json));
           continue;
         }
 

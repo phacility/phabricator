@@ -2,10 +2,6 @@
  * @provides differential-revision-comment-css
  */
 
-.differential-comment-list {
-  margin: 0 16px;
-}
-
 /*  Spooky haunted panel which floats on the bottom of the screen.
     Haunt modes are:
 

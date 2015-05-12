@@ -120,6 +120,8 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     $types[] = ConpherenceTransactionType::TYPE_TITLE;
     $types[] = ConpherenceTransactionType::TYPE_PARTICIPANTS;
     $types[] = ConpherenceTransactionType::TYPE_FILES;
+    $types[] = ConpherenceTransactionType::TYPE_PICTURE;
+    $types[] = ConpherenceTransactionType::TYPE_PICTURE_CROP;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
     $types[] = PhabricatorTransactions::TYPE_EDIT_POLICY;
     $types[] = PhabricatorTransactions::TYPE_JOIN_POLICY;
@@ -134,6 +136,10 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     switch ($xaction->getTransactionType()) {
       case ConpherenceTransactionType::TYPE_TITLE:
         return $object->getTitle();
+      case ConpherenceTransactionType::TYPE_PICTURE:
+        return $object->getImagePHID(ConpherenceImageData::SIZE_ORIG);
+      case ConpherenceTransactionType::TYPE_PICTURE_CROP:
+        return $object->getImagePHID(ConpherenceImageData::SIZE_CROP);
       case ConpherenceTransactionType::TYPE_PARTICIPANTS:
         if ($this->getIsNewObject()) {
           return array();
@@ -150,7 +156,11 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
 
     switch ($xaction->getTransactionType()) {
       case ConpherenceTransactionType::TYPE_TITLE:
+      case ConpherenceTransactionType::TYPE_PICTURE_CROP:
         return $xaction->getNewValue();
+      case ConpherenceTransactionType::TYPE_PICTURE:
+        $file = $xaction->getNewValue();
+        return $file->getPHID();
       case ConpherenceTransactionType::TYPE_PARTICIPANTS:
       case ConpherenceTransactionType::TYPE_FILES:
         return $this->getPHIDTransactionNewValue($xaction);
@@ -242,6 +252,16 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
         break;
       case ConpherenceTransactionType::TYPE_TITLE:
         $object->setTitle($xaction->getNewValue());
+        break;
+      case ConpherenceTransactionType::TYPE_PICTURE:
+        $object->setImagePHID(
+          $xaction->getNewValue(),
+          ConpherenceImageData::SIZE_ORIG);
+        break;
+      case ConpherenceTransactionType::TYPE_PICTURE_CROP:
+        $object->setImagePHID(
+          $xaction->getNewValue(),
+          ConpherenceImageData::SIZE_CROP);
         break;
       case ConpherenceTransactionType::TYPE_PARTICIPANTS:
         if (!$this->getIsNewObject()) {
@@ -497,8 +517,8 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     $phid = $object->getPHID();
 
     return id(new PhabricatorMetaMTAMail())
-      ->setSubject("E{$id}: {$title}")
-      ->addHeader('Thread-Topic', "E{$id}: {$phid}");
+      ->setSubject("Z{$id}: {$title}")
+      ->addHeader('Thread-Topic', "Z{$id}: {$phid}");
   }
 
   protected function getMailTo(PhabricatorLiskDAO $object) {
@@ -541,7 +561,7 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     $body = parent::buildMailBody($object, $xactions);
     $body->addLinkSection(
       pht('CONPHERENCE DETAIL'),
-      PhabricatorEnv::getProductionURI('/conpherence/'.$object->getID().'/'));
+      PhabricatorEnv::getProductionURI('/'.$object->getMonogram()));
 
     return $body;
   }
@@ -576,6 +596,20 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     );
   }
 
+  protected function extractFilePHIDsFromCustomTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
+      case ConpherenceTransactionType::TYPE_PICTURE:
+          return array($xaction->getNewValue()->getPHID());
+      case ConpherenceTransactionType::TYPE_PICTURE_CROP:
+          return array($xaction->getNewValue());
+    }
+
+    return parent::extractFilePHIDsFromCustomTransaction($object, $xaction);
+  }
+
   protected function validateTransaction(
     PhabricatorLiskDAO $object,
     $type,
@@ -606,6 +640,21 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
 
           $error->setIsMissingFieldError(true);
           $errors[] = $error;
+        }
+        break;
+      case ConpherenceTransactionType::TYPE_PICTURE:
+        foreach ($xactions as $xaction) {
+          $file = $xaction->getNewValue();
+          if (!$file->isTransformableImage()) {
+            $detail = pht('This server only supports these image formats: %s.',
+              implode(', ', PhabricatorFile::getTransformableImageFormats()));
+            $error = new PhabricatorApplicationTransactionValidationError(
+              $type,
+              pht('Invalid'),
+              $detail,
+              last($xactions));
+            $errors[] = $error;
+          }
         }
         break;
       case ConpherenceTransactionType::TYPE_PARTICIPANTS:

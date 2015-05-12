@@ -26,7 +26,7 @@ final class PhabricatorBotObjectNameHandler extends PhabricatorBotHandler {
 
         $pattern =
           '@'.
-          '(?<!/)(?:^|\b)'.
+          '(?<![/:#-])(?:^|\b)'.
           '(R2D2)'.
           '(?:\b|$)'.
           '@';
@@ -41,9 +41,11 @@ final class PhabricatorBotObjectNameHandler extends PhabricatorBotHandler {
           }
         }
 
+        // Use a negative lookbehind to prevent matching "/D123", "#D123",
+        // ":D123", etc.
         $pattern =
           '@'.
-          '(?<!/)(?:^|\b)'. // Negative lookbehind prevent matching "/D123".
+          '(?<![/:#-])(?:^|\b)'.
           '([A-Z])(\d+)'.
           '(?:\b|$)'.
           '@';
@@ -158,15 +160,12 @@ final class PhabricatorBotObjectNameHandler extends PhabricatorBotHandler {
 
         if ($commit_names) {
           $commits = $this->getConduit()->callMethodSynchronous(
-            'diffusion.getcommits',
+            'diffusion.querycommits',
             array(
-              'commits' => $commit_names,
+              'names' => $commit_names,
             ));
-          foreach ($commits as $commit) {
-            if (isset($commit['error'])) {
-              continue;
-            }
-            $output[$commit['commitPHID']] = $commit['uri'];
+          foreach ($commits['data'] as $commit) {
+            $output[$commit['phid']] = $commit['uri'];
           }
         }
 

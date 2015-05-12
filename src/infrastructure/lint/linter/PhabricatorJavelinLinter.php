@@ -138,12 +138,6 @@ final class PhabricatorJavelinLinter extends ArcanistLinter {
       }
     }
 
-    if ($this->getEngine()->getCommitHookMode()) {
-      // Don't do the dependency checks in commit-hook mode because we won't
-      // have an available working copy.
-      return;
-    }
-
     $external_classes = array();
     foreach ($uses as $symbol => $line) {
       $parts = explode('.', $symbol);

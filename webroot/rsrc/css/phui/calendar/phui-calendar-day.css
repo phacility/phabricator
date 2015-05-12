@@ -1,3 +1,72 @@
 /**
  * @provides phui-calendar-day-css
  */
+
+.phui-calendar-day-view {
+  overflow: scroll;
+  width: 100%;
+}
+
+.phui-calendar-day-hour {
+  width: 60px;
+  color: {$lightgreytext};
+  text-align: right;
+  padding: 4px 4px;
+  border-right: 1px solid {$lightgreyborder};
+}
+
+.phui-calendar-day-view tr {
+  height: 60px;
+}
+
+.phui-calendar-day-view td {
+  position: relative;
+}
+
+.phui-calendar-day-view tr + tr td.phui-calendar-day-events {
+  border-top: 1px solid {$lightgreyborder};
+}
+
+.phui-calendar-day-view td div.phui-calendar-day-event {
+  width: 100%;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  min-height: 30px;
+}
+
+.phui-calendar-day-event-link {
+  padding: 8px;
+  border: 1px solid {$blueborder};
+  background-color: {$bluebackground};
+  margin: 0 4px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  text-decoration: none;
+  color: {$greytext};
+}
+
+.day-view-all-day {
+  border: 1px solid {$blueborder};
+  height: 12px;
+  margin: 0;
+  display: block;
+  padding: 8px;
+  background-color: {$bluebackground};
+  text-decoration: none;
+  color: {$greytext};
+}
+
+.phui-calendar-day-event + .phui-calendar-day-event .day-view-all-day {
+  border-top-style: none;
+  border-top-width: 0;
+}
+
+.phui-calendar-all-day-label {
+  color: {$greytext};
+  float: right;
+  margin: 8px 8px 0 0;
+}

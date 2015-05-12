@@ -1163,9 +1163,14 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       $projects = id(new PhabricatorRepositoryArcanistProject())
         ->loadAllWhere('repositoryID = %d', $this->getID());
       foreach ($projects as $project) {
-        // note each project deletes its PhabricatorRepositorySymbols
         $project->delete();
       }
+
+      queryfx(
+        $this->establishConnection('w'),
+        'DELETE FROM %T WHERE repositoryPHID = %s',
+        id(new PhabricatorRepositorySymbol())->getTableName(),
+        $this->getPHID());
 
       $commits = id(new PhabricatorRepositoryCommit())
         ->loadAllWhere('repositoryID = %d', $this->getID());

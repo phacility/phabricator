@@ -1,6 +1,8 @@
 <?php
 
 final class PHUICalendarMonthView extends AphrontView {
+  private $rangeStart;
+  private $rangeEnd;
 
   private $day;
   private $month;
@@ -40,7 +42,16 @@ final class PHUICalendarMonthView extends AphrontView {
     return $this;
   }
 
-  public function __construct($month, $year, $day = null) {
+  public function __construct(
+    $range_start,
+    $range_end,
+    $month,
+    $year,
+    $day = null) {
+
+    $this->rangeStart = $range_start;
+    $this->rangeEnd = $range_end;
+
     $this->day = $day;
     $this->month = $month;
     $this->year = $year;
@@ -61,14 +72,14 @@ final class PHUICalendarMonthView extends AphrontView {
     $empty = $first->format('w');
 
     $markup = array();
-
-    $empty_box = phutil_tag(
-      'div',
-      array('class' => 'phui-calendar-day phui-calendar-empty'),
-      '');
+    $empty_cell = array(
+        'list' => null,
+        'date' => null,
+        'class' => 'phui-calendar-empty',
+      );
 
     for ($ii = 0; $ii < $empty; $ii++) {
-      $markup[] = $empty_box;
+      $markup[] = $empty_cell;
     }
 
     $show_events = array();
@@ -77,7 +88,7 @@ final class PHUICalendarMonthView extends AphrontView {
       $day_number = $day->format('j');
 
       $holiday = idx($this->holidays, $day->format('Y-m-d'));
-      $class = 'phui-calendar-day';
+      $class = 'phui-calendar-month-day';
       $weekday = $day->format('w');
 
       if ($day_number == $this->day) {
@@ -91,8 +102,8 @@ final class PHUICalendarMonthView extends AphrontView {
       $day->setTime(0, 0, 0);
       $epoch_start = $day->format('U');
 
-      $day->modify('+1 day');
-      $epoch_end = $day->format('U');
+
+      $epoch_end = id(clone $day)->modify('+1 day')->format('U');
 
       if ($weekday == 0) {
         $show_events = array();
@@ -105,6 +116,7 @@ final class PHUICalendarMonthView extends AphrontView {
       }
 
       $list_events = array();
+      $all_day_events = array();
       foreach ($events as $event) {
         if ($event->getEpochStart() >= $epoch_end) {
           // This list is sorted, so we can stop looking.
@@ -112,57 +124,80 @@ final class PHUICalendarMonthView extends AphrontView {
         }
         if ($event->getEpochStart() < $epoch_end &&
             $event->getEpochEnd() > $epoch_start) {
-          $list_events[] = $event;
+          if ($event->getIsAllDay()) {
+            $all_day_events[] = $event;
+          } else {
+            $list_events[] = $event;
+          }
         }
       }
 
       $list = new PHUICalendarListView();
       $list->setUser($this->user);
+      foreach ($all_day_events as $item) {
+        $list->addEvent($item);
+      }
       foreach ($list_events as $item) {
         $list->addEvent($item);
       }
 
-      $holiday_markup = null;
-      if ($holiday) {
-        $name = $holiday->getName();
-        $holiday_markup = phutil_tag(
-          'div',
-          array(
-            'class' => 'phui-calendar-holiday',
-            'title' => $name,
-          ),
-          $name);
-      }
-
-      $markup[] = phutil_tag_div(
-        $class,
-        array(
-          phutil_tag_div('phui-calendar-date-number', $day_number),
-          $holiday_markup,
-          $list,
-        ));
+      $markup[] = array(
+        'list' => $list,
+        'date' => $day,
+        'class' => $class,
+        );
     }
 
     $table = array();
     $rows = array_chunk($markup, 7);
+
     foreach ($rows as $row) {
       $cells = array();
       while (count($row) < 7) {
-        $row[] = $empty_box;
+        $row[] = $empty_cell;
       }
-      $j = 0;
       foreach ($row as $cell) {
-        if ($j == 0) {
-          $cells[] = phutil_tag(
-            'td',
+        $cell_list = $cell['list'];
+        $class = $cell['class'];
+        $cells[] = phutil_tag(
+          'td',
+          array(
+            'class' => 'phui-calendar-month-event-list '.$class,
+          ),
+          $cell_list);
+      }
+      $table[] = phutil_tag('tr', array(), $cells);
+
+      $cells = array();
+      foreach ($row as $cell) {
+        $class = $cell['class'];
+
+        if ($cell['date']) {
+          $cell_day = $cell['date'];
+
+          $uri = $this->getBrowseURI();
+          $date = $cell['date'];
+          $uri = $uri.$date->format('Y').'/'.
+            $date->format('m').'/'.
+            $date->format('d').'/';
+
+          $cell_day = phutil_tag(
+            'a',
             array(
-              'class' => 'phui-calendar-month-weekstart',
+              'class' => 'phui-calendar-date-number',
+              'href' => $uri,
             ),
-            $cell);
+            $cell_day->format('j'));
         } else {
-          $cells[] = phutil_tag('td', array(), $cell);
+          $cell_day = null;
         }
-        $j++;
+
+        $cells[] = phutil_tag(
+          'td',
+          array(
+            'class' => 'phui-calendar-date-number-container '.$class,
+          ),
+          $cell_day);
       }
       $table[] = phutil_tag('tr', array(), $cells);
     }
@@ -188,9 +223,12 @@ final class PHUICalendarMonthView extends AphrontView {
         phutil_implode_html("\n", $table),
       ));
 
+    $warnings = $this->getQueryRangeWarning();
+
     $box = id(new PHUIObjectBoxView())
       ->setHeader($this->renderCalendarHeader($first))
-      ->appendChild($table);
+      ->appendChild($table)
+      ->setFormErrors($warnings);
     if ($this->error) {
       $box->setInfoView($this->error);
 
@@ -205,14 +243,11 @@ final class PHUICalendarMonthView extends AphrontView {
     // check for a browseURI, which means we need "fancy" prev / next UI
     $uri = $this->getBrowseURI();
     if ($uri) {
-      $uri = new PhutilURI($uri);
       list($prev_year, $prev_month) = $this->getPrevYearAndMonth();
-      $query = array('year' => $prev_year, 'month' => $prev_month);
-      $prev_uri = (string) $uri->setQueryParams($query);
+      $prev_uri = $uri.$prev_year.'/'.$prev_month.'/';
 
       list($next_year, $next_month) = $this->getNextYearAndMonth();
-      $query = array('year' => $next_year, 'month' => $next_month);
-      $next_uri = (string) $uri->setQueryParams($query);
+      $next_uri = $uri.$next_year.'/'.$next_month.'/';
 
       $button_bar = new PHUIButtonBarView();
 
@@ -253,32 +288,53 @@ final class PHUICalendarMonthView extends AphrontView {
     return $header;
   }
 
-  private function getNextYearAndMonth() {
-    $month = $this->month;
-    $year = $this->year;
+  private function getQueryRangeWarning() {
+    $errors = array();
 
-    $next_year = $year;
-    $next_month = $month + 1;
-    if ($next_month == 13) {
-      $next_year = $year + 1;
-      $next_month = 1;
+    $range_start_epoch = $this->rangeStart->getEpoch();
+    $range_end_epoch = $this->rangeEnd->getEpoch();
+
+    $month_start = $this->getDateTime();
+    $month_end = id(clone $month_start)->modify('+1 month');
+
+    $month_start = $month_start->format('U');
+    $month_end = $month_end->format('U') - 1;
+
+    if (($range_start_epoch != null &&
+        $range_start_epoch < $month_end &&
+        $range_start_epoch > $month_start) ||
+      ($range_end_epoch != null &&
+        $range_end_epoch < $month_end &&
+        $range_end_epoch > $month_start)) {
+      $errors[] = pht('Part of the month is out of range');
     }
 
-    return array($next_year, $next_month);
+    if (($this->rangeEnd->getEpoch() != null &&
+        $this->rangeEnd->getEpoch() < $month_start) ||
+      ($this->rangeStart->getEpoch() != null &&
+        $this->rangeStart->getEpoch() > $month_end)) {
+      $errors[] = pht('Month is out of query range');
+    }
+
+    return $errors;
+  }
+
+  private function getNextYearAndMonth() {
+    $next = $this->getDateTime();
+    $next->modify('+1 month');
+    return array(
+      $next->format('Y'),
+      $next->format('m'),
+    );
   }
 
   private function getPrevYearAndMonth() {
-    $month = $this->month;
-    $year = $this->year;
-
-    $prev_year = $year;
-    $prev_month = $month - 1;
-    if ($prev_month == 0) {
-      $prev_year = $year - 1;
-      $prev_month = 12;
-    }
-
-    return array($prev_year, $prev_month);
+    $prev = $this->getDateTime();
+    $prev->modify('-1 month');
+    return array(
+      $prev->format('Y'),
+      $prev->format('m'),
+    );
   }
 
   /**
@@ -316,4 +372,15 @@ final class PHUICalendarMonthView extends AphrontView {
     return $days;
   }
 
+  private function getDateTime() {
+    $user = $this->user;
+    $timezone = new DateTimeZone($user->getTimezoneIdentifier());
+
+    $month = $this->month;
+    $year = $this->year;
+
+    $date = new DateTime("{$year}-{$month}-01 ", $timezone);
+
+    return $date;
+  }
 }

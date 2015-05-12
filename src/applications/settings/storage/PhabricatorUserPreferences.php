@@ -31,6 +31,7 @@ final class PhabricatorUserPreferences extends PhabricatorUserDAO {
 
   const PREFERENCE_DIFF_UNIFIED         = 'diff-unified';
   const PREFERENCE_DIFF_FILETREE        = 'diff-filetree';
+  const PREFERENCE_DIFF_GHOSTS = 'diff-ghosts';
 
   const PREFERENCE_CONPH_NOTIFICATIONS = 'conph-notifications';
   const PREFERENCE_CONPHERENCE_COLUMN = 'conpherence-column';

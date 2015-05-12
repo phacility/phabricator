@@ -6,7 +6,12 @@ final class ProjectRemarkupRule extends PhabricatorObjectRemarkupRule {
     return '#';
   }
 
-  protected function renderObjectRef($object, $handle, $anchor, $id) {
+  protected function renderObjectRef(
+    $object,
+    PhabricatorObjectHandle $handle,
+    $anchor,
+    $id) {
+
     if ($this->getEngine()->isTextMode()) {
       return '#'.$id;
     }

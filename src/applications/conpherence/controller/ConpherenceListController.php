@@ -25,6 +25,10 @@ final class ConpherenceListController extends ConpherenceController {
     return $mode;
   }
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
     $title = pht('Conpherence');
@@ -138,6 +142,7 @@ final class ConpherenceListController extends ConpherenceController {
       $conpherences = id(new ConpherenceThreadQuery())
         ->setViewer($user)
         ->withPHIDs($conpherence_phids)
+        ->needCropPics(true)
         ->needParticipantCache(true)
         ->execute();
 

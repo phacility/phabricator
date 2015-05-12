@@ -58,4 +58,15 @@ final class PhabricatorTime {
     return $timestamp;
   }
 
+  public static function getTodayMidnightDateTime($viewer) {
+    $timezone = new DateTimeZone($viewer->getTimezoneIdentifier());
+    $today = new DateTime('@'.time());
+    $today->setTimeZone($timezone);
+    $year = $today->format('Y');
+    $month = $today->format('m');
+    $day = $today->format('d');
+    $today = new DateTime("{$year}-{$month}-{$day}", $timezone);
+    return $today;
+  }
+
 }

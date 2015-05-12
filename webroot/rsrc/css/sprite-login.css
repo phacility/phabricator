@@ -13,7 +13,7 @@ only screen and (min-device-pixel-ratio: 1.5),
 only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   .sprite-login {
     background-image: url(/rsrc/image/sprite-login-X2.png);
-    background-size: 175px 210px;
+    background-size: 175px 175px;
   }
 }
 
@@ -26,98 +26,94 @@ only screen and (-webkit-min-device-pixel-ratio: 1.5) {
   background-position: -35px 0px;
 }
 
-.login-Balanced {
+.login-Bitbucket {
   background-position: -70px 0px;
 }
 
-.login-Bitbucket {
+.login-Disqus {
   background-position: -105px 0px;
 }
 
-.login-Disqus {
+.login-Dropbox {
   background-position: -140px 0px;
 }
 
-.login-Dropbox {
+.login-Facebook {
   background-position: 0px -35px;
 }
 
-.login-Facebook {
+.login-Generic {
   background-position: -35px -35px;
 }
 
-.login-Generic {
+.login-Github {
   background-position: -70px -35px;
 }
 
-.login-Github {
+.login-Google {
   background-position: -105px -35px;
 }
 
-.login-Google {
+.login-HTTP {
   background-position: -140px -35px;
 }
 
-.login-HTTP {
+.login-Jira {
   background-position: 0px -70px;
 }
 
-.login-Jira {
+.login-LDAP {
   background-position: -35px -70px;
 }
 
-.login-LDAP {
+.login-Linkedin {
   background-position: -70px -70px;
 }
 
-.login-Linkedin {
+.login-MediaWiki {
   background-position: -105px -70px;
 }
 
-.login-MediaWiki {
+.login-Openid {
   background-position: -140px -70px;
 }
 
-.login-Openid {
+.login-PayPal {
   background-position: 0px -105px;
 }
 
-.login-PayPal {
+.login-Persona {
   background-position: -35px -105px;
 }
 
-.login-Persona {
+.login-Phabricator {
   background-position: -70px -105px;
 }
 
-.login-Phabricator {
+.login-Stripe {
   background-position: -105px -105px;
 }
 
-.login-Stripe {
+.login-TestPayment {
   background-position: -140px -105px;
 }
 
-.login-TestPayment {
+.login-TwitchTV {
   background-position: 0px -140px;
 }
 
-.login-TwitchTV {
+.login-Twitter {
   background-position: -35px -140px;
 }
 
-.login-Twitter {
+.login-WePay {
   background-position: -70px -140px;
 }
 
-.login-WePay {
+.login-WordPressCOM {
   background-position: -105px -140px;
 }
 
-.login-WordPressCOM {
-  background-position: -140px -140px;
-}
-
 .login-Yahoo {
-  background-position: 0px -175px;
+  background-position: -140px -140px;
 }

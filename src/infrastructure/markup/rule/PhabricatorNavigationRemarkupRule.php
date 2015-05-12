@@ -13,7 +13,7 @@ final class PhabricatorNavigationRemarkupRule extends PhutilRemarkupRule {
       $text);
   }
 
-  public function markupNavigation($matches) {
+  public function markupNavigation(array $matches) {
     if (!$this->isFlatText($matches[0])) {
       return $matches[0];
     }

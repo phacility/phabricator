@@ -20,6 +20,7 @@ final class PhabricatorDiffPreferencesSettingsPanel
     $preferences = $user->loadPreferences();
 
     $pref_unified = PhabricatorUserPreferences::PREFERENCE_DIFF_UNIFIED;
+    $pref_ghosts = PhabricatorUserPreferences::PREFERENCE_DIFF_GHOSTS;
     $pref_filetree = PhabricatorUserPreferences::PREFERENCE_DIFF_FILETREE;
 
     if ($request->isFormPost()) {
@@ -35,6 +36,9 @@ final class PhabricatorDiffPreferencesSettingsPanel
 
       $unified = $request->getStr($pref_unified);
       $preferences->setPreference($pref_unified, $unified);
+
+      $ghosts = $request->getStr($pref_ghosts);
+      $preferences->setPreference($pref_ghosts, $ghosts);
 
       $preferences->save();
       return id(new AphrontRedirectResponse())
@@ -59,6 +63,16 @@ final class PhabricatorDiffPreferencesSettingsPanel
             array(
               'default' => pht('On Small Screens'),
               'unified' => pht('Always'),
+            )))
+      ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setLabel(pht('Show Older Inlines'))
+          ->setName($pref_ghosts)
+          ->setValue($preferences->getPreference($pref_ghosts))
+          ->setOptions(
+            array(
+              'default' => pht('Enabled'),
+              'disabled' => pht('Disabled'),
             )))
       ->appendChild(
         id(new AphrontFormSelectControl())

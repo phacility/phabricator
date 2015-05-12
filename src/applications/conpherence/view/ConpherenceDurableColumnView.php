@@ -251,7 +251,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
         array(),
         array(
           $icon,
-          $data['js_title'],
+          $data['title'],
         ));
       $image = $data['image'];
       Javelin::initBehavior('phabricator-tooltips');
@@ -265,7 +265,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
             'meta' => array(
               'threadID' => $conpherence->getID(),
               'threadTitle' => hsprintf('%s', $thread_title),
-              'tip' => $data['js_title'],
+              'tip' => $data['title'],
               'align' => 'S',
             ),
           ),
@@ -412,7 +412,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
       array(
         'name' => $rename_label,
         'disabled' => !$can_edit,
-        'href' => '/conpherence/update/'.$conpherence->getID().'/',
+        'href' => '/conpherence/update/'.$conpherence->getID().'/?nopic',
         'icon' => 'fa-pencil',
         'key' => ConpherenceUpdateActions::METADATA,
       ),
@@ -463,7 +463,8 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
       $full_display = false);
     $messages = ConpherenceTransactionRenderer::renderMessagePaneContent(
       $data['transactions'],
-      $data['oldest_transaction_id']);
+      $data['oldest_transaction_id'],
+      $data['newest_transaction_id']);
 
     return $messages;
   }

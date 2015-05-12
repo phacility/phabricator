@@ -2,8 +2,20 @@
  * @provides conpherence-durable-column-view
  */
 
-.with-durable-column .phabricator-standard-page {
+.with-durable-column .phabricator-standard-page-body {
   margin-right: 300px;
+}
+
+.with-durable-margin .phabricator-standard-page-body {
+  margin-right: 312px;
+}
+
+.with-durable-column .phabricator-main-menu {
+  padding-right: 304px;
+}
+
+.with-durable-margin .phabricator-main-menu {
+  padding-right: 316px;
 }
 
 .with-durable-column
@@ -20,13 +32,22 @@
   right: 300px;
 }
 
+.with-durable-margin .global-upload-mask {
+  right: 312px;
+}
+
 .conpherence-durable-column {
-  position: absolute;
+  position: fixed;
   top: 0;
   bottom: 0;
   right: 0;
   width: 300px;
   background: #fff;
+}
+
+.with-durable-margin .conpherence-durable-column {
+  right: 12px;
+  box-shadow: 1px 0px 2px rgba(0, 0, 0, 0.10);
 }
 
 .conpherence-durable-column .loading-mask {
@@ -126,6 +147,10 @@
   border-left: 1px solid {$lightblueborder};
 }
 
+.with-durable-margin .conpherence-durable-column-body {
+  border-right: 1px solid {$lightblueborder};
+}
+
 .conpherence-durable-column-main {
   position: absolute;
   top: 46px;
@@ -205,6 +230,23 @@
 .conpherence-durable-column-transactions .conpherence-transaction-detail
 .conpherence-transaction-content .phui-link-person {
   color: {$darkbluetext};
+}
+
+.conpherence-durable-column-transactions
+.conpherence-transaction-detail
+.conpherence-transaction-content
+.phui-pinboard-item-view {
+  width: 273px;
+}
+
+.conpherence-durable-column-transactions
+.conpherence-transaction-detail
+.conpherence-transaction-content
+.phui-pinboard-item-view
+.phui-pinboard-item-image-link
+img {
+  width: 265px;
+  height: 199px;
 }
 
 .conpherence-durable-column-transactions .conpherence-transaction-detail

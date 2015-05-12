@@ -22,7 +22,7 @@ final class PHUICalendarListView extends AphrontTagView {
   protected function getTagAttributes() {
     require_celerity_resource('phui-calendar-css');
     require_celerity_resource('phui-calendar-list-css');
-    return array('class' => 'phui-calendar-day-list');
+    return array('class' => 'phui-calendar-event-list');
   }
 
   protected function getTagContent() {
@@ -30,27 +30,28 @@ final class PHUICalendarListView extends AphrontTagView {
       return '';
     }
 
-    $events = msort($this->events, 'getEpochStart');
-
     $singletons = array();
     $allday = false;
-    foreach ($events as $event) {
+    foreach ($this->events as $event) {
       $color = $event->getColor();
+      $start_epoch = $event->getEpochStart();
 
-      if ($event->getAllDay()) {
+      if ($event->getIsAllDay()) {
         $timelabel = pht('All Day');
+        $dot = null;
       } else {
         $timelabel = phabricator_time(
           $event->getEpochStart(),
           $this->getUser());
+
+        $dot = phutil_tag(
+          'span',
+          array(
+            'class' => 'phui-calendar-list-dot',
+          ),
+          '');
       }
 
-      $dot = phutil_tag(
-        'span',
-        array(
-          'class' => 'phui-calendar-list-dot',
-        ),
-        '');
       $title = phutil_tag(
         'span',
         array(
@@ -64,10 +65,15 @@ final class PHUICalendarListView extends AphrontTagView {
         ),
         $timelabel);
 
+      $class = 'phui-calendar-list-item phui-calendar-'.$color;
+      if ($event->getIsAllDay()) {
+        $class = $class.' all-day';
+      }
+
       $singletons[] = phutil_tag(
         'li',
         array(
-          'class' => 'phui-calendar-list-item phui-calendar-'.$color,
+          'class' => $class,
           ),
         array(
           $dot,
@@ -112,18 +118,20 @@ final class PHUICalendarListView extends AphrontTagView {
       $description = pht('(%s)', $event->getName());
     }
 
+    $class = 'phui-calendar-item-link';
+
     $anchor = javelin_tag(
       'a',
       array(
         'sigil' => 'has-tooltip',
-        'class' => 'phui-calendar-item-link',
-        'href' => '/calendar/event/view/'.$event->getEventID().'/',
+        'class' => $class,
+        'href' => '/E'.$event->getEventID(),
         'meta'  => array(
           'tip'  => $tip,
           'size' => 200,
         ),
       ),
-      $description);
+      $event->getName());
 
     return $anchor;
   }

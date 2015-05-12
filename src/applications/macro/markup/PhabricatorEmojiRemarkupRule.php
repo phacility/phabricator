@@ -13,7 +13,7 @@ final class PhabricatorEmojiRemarkupRule extends PhutilRemarkupRule {
       $text);
   }
 
-  public function markupEmoji($matches) {
+  public function markupEmoji(array $matches) {
     if (!$this->isFlatText($matches[0])) {
       return $matches[0];
     }

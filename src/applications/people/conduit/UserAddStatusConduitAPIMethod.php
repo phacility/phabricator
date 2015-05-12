@@ -50,17 +50,13 @@ final class UserAddStatusConduitAPIMethod extends UserConduitAPIMethod {
     $status      = $request->getValue('status');
     $description = $request->getValue('description', '');
 
-    try {
-      id(new PhabricatorCalendarEvent())
-        ->setUserPHID($user_phid)
-        ->setDateFrom($from)
-        ->setDateTo($to)
-        ->setTextStatus($status)
-        ->setDescription($description)
-        ->save();
-    } catch (PhabricatorCalendarEventInvalidEpochException $e) {
-      throw new ConduitException('ERR-BAD-EPOCH');
-    }
+    id(new PhabricatorCalendarEvent())
+      ->setUserPHID($user_phid)
+      ->setDateFrom($from)
+      ->setDateTo($to)
+      ->setTextStatus($status)
+      ->setDescription($description)
+      ->save();
   }
 
 }

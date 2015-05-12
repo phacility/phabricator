@@ -26,9 +26,15 @@
 }
 
 .phabricator-remarkup .remarkup-code-header {
-  padding: 4px 1px;
+  padding: 2px 8px;
   font-size: 13px;
   font-weight: bold;
+  background: {$sh-yellowbackground};
+  display: inline-block;
+}
+
+.phabricator-remarkup .code-block-counterexample .remarkup-code-header {
+  background-color: {$sh-redbackground};
 }
 
 .phabricator-remarkup .remarkup-code-block pre {
@@ -42,8 +48,8 @@
 }
 
 .phabricator-remarkup pre.remarkup-counterexample {
-  border: 1px solid {$red};
-  background-color: {$lightred};
+  border: 1px solid {$sh-lightredborder};
+  background-color: {$sh-redbackground};
 }
 
 .phabricator-remarkup tt.remarkup-monospaced {
@@ -67,6 +73,20 @@
 .phabricator-remarkup ol.remarkup-list {
   list-style: decimal;
   margin: 12px 0 12px 30px;
+}
+
+.phabricator-remarkup ol ol.remarkup-list {
+  list-style: upper-alpha;
+}
+
+
+.phabricator-remarkup ol ol ol.remarkup-list {
+  list-style: lower-alpha;
+}
+
+
+.phabricator-remarkup ol ol ol ol.remarkup-list {
+  list-style: lower-roman;
 }
 
 .phabricator-remarkup ul.remarkup-list-with-checkmarks {
@@ -95,37 +115,37 @@
 }
 
 .phabricator-remarkup h1.remarkup-header {
-  font-size: 1.625em;
+  font-size: 24px;
   line-height: 1.625em;
-  margin: 8px 0;
+  margin: 24px 0 4px;
 }
 
 .phabricator-remarkup h2.remarkup-header {
-  font-size: 1.5em;
+  font-size: 20px;
   line-height: 1.5em;
-  margin: 8px 0;
+  margin: 20px 0 4px;
 }
 
 .phabricator-remarkup h3.remarkup-header {
-  font-size: 1.375em;
+  font-size: 18px;
   line-height: 1.375em;
-  margin: 8px 0;
+  margin: 20px 0 4px;
 }
 
 .phabricator-remarkup h4.remarkup-header {
-  font-size: 1.25em;
+  font-size: 15px;
   line-height: 1.25em;
-  margin: 8px 0;
+  margin: 12px 0 4px;
 }
 
 .phabricator-remarkup h5.remarkup-header {
-  font-size: 1.125em;
+  font-size: 14px;
   line-height: 1.125em;
-  margin: 4px 0;
+  margin: 8px 0 4px;
 }
 
 .phabricator-remarkup h6.remarkup-header {
-  font-size: 1em;
+  font-size: 13px;
   line-height: 1em;
   margin: 4px 0;
 }
@@ -322,6 +342,12 @@
   padding: 3px 6px;
 }
 
+body div.phabricator-remarkup.remarkup-has-toc
+  .phabricator-remarkup-toc + .remarkup-header {
+  margin-top: 0;
+  padding-top: 0;
+}
+
 .phabricator-remarkup p:first-child,
 .phabricator-remarkup ul.remarkup-list:first-child,
 .phabricator-remarkup ol.remarkup-list:first-child,
@@ -496,4 +522,9 @@ var.remarkup-assist-textarea {
 
 .remarkup-nav-sequence-arrow {
   color: {$lightgreytext};
+}
+
+.phabricator-remarkup hr {
+  background: {$thinblueborder};
+  margin: 24px 0;
 }

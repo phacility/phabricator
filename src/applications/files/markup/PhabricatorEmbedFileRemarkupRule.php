@@ -28,7 +28,11 @@ final class PhabricatorEmbedFileRemarkupRule
     return $objects;
   }
 
-  protected function renderObjectEmbed($object, $handle, $options) {
+  protected function renderObjectEmbed(
+    $object,
+    PhabricatorObjectHandle $handle,
+    $options) {
+
     $options = $this->getFileOptions($options) + array(
       'name' => $object->getName(),
     );

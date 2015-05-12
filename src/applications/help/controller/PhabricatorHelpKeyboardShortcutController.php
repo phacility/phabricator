@@ -12,8 +12,9 @@ final class PhabricatorHelpKeyboardShortcutController
     $user = $request->getUser();
 
     $keys = $request->getStr('keys');
-    $keys = json_decode($keys, true);
-    if (!is_array($keys)) {
+    try {
+      $keys = phutil_json_decode($keys);
+    } catch (PhutilJSONParserException $ex) {
       return new Aphront400Response();
     }
 
