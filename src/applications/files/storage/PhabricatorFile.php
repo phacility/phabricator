@@ -760,6 +760,10 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return (string) $uri;
   }
 
+  public function getURIForTransform(PhabricatorFileTransform $transform) {
+    return $this->getTransformedURI($transform->getTransformKey());
+  }
+
   private function getTransformedURI($transform) {
     $parts = array();
     $parts[] = 'file';

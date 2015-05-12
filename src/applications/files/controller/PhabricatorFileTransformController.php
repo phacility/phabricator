@@ -48,21 +48,33 @@ final class PhabricatorFileTransformController
     // protection.
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
 
-    switch ($transform) {
-      case 'thumb-profile':
-        $xformed_file = $this->executeThumbTransform($file, 50, 50);
-        break;
-      case 'thumb-280x210':
-        $xformed_file = $this->executeThumbTransform($file, 280, 210);
-        break;
-      case 'preview-100':
-        $xformed_file = $this->executePreviewTransform($file, 100);
-        break;
-      case 'preview-220':
-        $xformed_file = $this->executePreviewTransform($file, 220);
-        break;
-      default:
-        return new Aphront400Response();
+    $xformed_file = null;
+
+    $xforms = PhabricatorFileTransform::getAllTransforms();
+    if (isset($xforms[$transform])) {
+      $xform = $xforms[$transform];
+      if ($xform->canApplyTransform($file)) {
+        $xformed_file = $xforms[$transform]->applyTransform($file);
+      }
+    }
+
+    if (!$xformed_file) {
+      switch ($transform) {
+        case 'thumb-profile':
+          $xformed_file = $this->executeThumbTransform($file, 50, 50);
+          break;
+        case 'thumb-280x210':
+          $xformed_file = $this->executeThumbTransform($file, 280, 210);
+          break;
+        case 'preview-100':
+          $xformed_file = $this->executePreviewTransform($file, 100);
+          break;
+        case 'preview-220':
+          $xformed_file = $this->executePreviewTransform($file, 220);
+          break;
+        default:
+          return new Aphront400Response();
+      }
     }
 
     if (!$xformed_file) {

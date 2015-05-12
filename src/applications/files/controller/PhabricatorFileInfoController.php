@@ -170,6 +170,12 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
         ->setWorkflow(true)
         ->setDisabled(!$can_edit));
 
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('View Transforms'))
+        ->setIcon('fa-crop')
+        ->setHref($this->getApplicationURI("/transforms/{$id}/")));
+
     return $view;
   }
 
@@ -266,7 +272,6 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
         pht('Attached To'),
         $user->renderHandleList($phids));
     }
-
 
     if ($file->isViewableImage()) {
       $image = phutil_tag(
