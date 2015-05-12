@@ -4,15 +4,9 @@ final class PHUICalendarListView extends AphrontTagView {
 
   private $events = array();
   private $blankState;
-  private $isDayView = false;
 
   public function addEvent(AphrontCalendarEventView $event) {
     $this->events[] = $event;
-    return $this;
-  }
-
-  public function setIsDayView($is_day_view) {
-    $this->isDayView = $is_day_view;
     return $this;
   }
 

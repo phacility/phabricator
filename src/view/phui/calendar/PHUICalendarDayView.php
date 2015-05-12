@@ -268,7 +268,8 @@ final class PHUICalendarDayView extends AphrontView {
   }
 
   private function renderSidebarBox($events, $title) {
-    $widget = new PHUICalendarWidgetView();
+    $widget = id(new PHUICalendarWidgetView())
+      ->addClass('calendar-day-view-sidebar');
 
     $list = id(new PHUICalendarListView())
       ->setUser($this->user);
@@ -276,7 +277,8 @@ final class PHUICalendarDayView extends AphrontView {
     if (count($events) == 0) {
       $list->showBlankState(true);
     } else {
-      foreach ($events as $event) {
+      $sorted_events = msort($events, 'getEpochStart');
+      foreach ($sorted_events as $event) {
         $list->addEvent($event);
       }
     }
@@ -388,7 +390,7 @@ final class PHUICalendarDayView extends AphrontView {
     $name = phutil_tag(
       'a',
       array(
-        'class' => 'all-day',
+        'class' => 'day-view-all-day',
         'href' => $event->getURI(),
       ),
       $event->getName());
