@@ -42,7 +42,19 @@ abstract class PhabricatorFileImageTransform extends PhabricatorFileTransform {
     $off_x = ($dst_w - $cpy_w) / 2;
     $off_y = ($dst_h - $cpy_h) / 2;
 
-    // TODO: Support imagemagick for animated GIFs.
+    if ($this->shouldUseImagemagick()) {
+      $argv = array();
+      $argv[] = '-coalesce';
+      $argv[] = '-shave';
+      $argv[] = $src_x.'x'.$src_y;
+      $argv[] = '-resize';
+      $argv[] = $dst_w.'x'.$dst_h.'>';
+      $argv[] = '-bordercolor';
+      $argv[] = 'rgba(255, 255, 255, 0)';
+      $argv[] = '-border';
+      $argv[] = $off_x.'x'.$off_y;
+      return $this->applyImagemagick($argv);
+    }
 
     $src = $this->getImage();
     $dst = $this->newEmptyImage($dst_w, $dst_h);
@@ -68,6 +80,22 @@ abstract class PhabricatorFileImageTransform extends PhabricatorFileTransform {
     $data = PhabricatorImageTransformer::saveImageDataInAnyFormat(
       $dst,
       $this->file->getMimeType());
+
+    return $this->newFileFromData($data);
+  }
+
+  protected function applyImagemagick(array $argv) {
+    $tmp = new TempFile();
+    Filesystem::writeFile($tmp, $this->getData());
+
+    $out = new TempFile();
+
+    $future = new ExecFuture('convert %s %Ls %s', $tmp, $argv, $out);
+    // Don't spend more than 10 seconds resizing; just fail if it takes longer
+    // than that.
+    $future->setTimeout(10)->resolvex();
+
+    $data = Filesystem::readFile($out);
 
     return $this->newFileFromData($data);
   }
@@ -297,6 +325,24 @@ abstract class PhabricatorFileImageTransform extends PhabricatorFileTransform {
 
     $this->image = $image;
     return $this->image;
+  }
+
+  private function shouldUseImagemagick() {
+    if (!PhabricatorEnv::getEnvConfig('files.enable-imagemagick')) {
+      return false;
+    }
+
+    if ($this->file->getMimeType() != 'image/gif') {
+      return false;
+    }
+
+    // Don't try to preserve the animation in huge GIFs.
+    list($x, $y) = $this->getImageDimensions();
+    if (($x * $y) > (512 * 512)) {
+      return false;
+    }
+
+    return true;
   }
 
 }
