@@ -30,6 +30,7 @@ JX.install('ConpherenceThreadManager', {
     _canEditLoadedThread: null,
     _updating:  null,
     _minimalDisplay: false,
+    _messagesRootCallback: JX.bag,
     _willLoadThreadCallback: JX.bag,
     _didLoadThreadCallback: JX.bag,
     _didUpdateThreadCallback:  JX.bag,
@@ -96,6 +97,11 @@ JX.install('ConpherenceThreadManager', {
 
     setMinimalDisplay: function(bool) {
       this._minimalDisplay = bool;
+      return this;
+    },
+
+    setMessagesRootCallback: function(callback) {
+      this._messagesRootCallback = callback;
       return this;
     },
 
@@ -183,6 +189,52 @@ JX.install('ConpherenceThreadManager', {
 
           this._updateThread();
         }));
+
+      JX.Stratcom.listen(
+        'click',
+        'show-older-messages',
+        JX.bind(this, function(e) {
+          e.kill();
+          var data = e.getNodeData('show-older-messages');
+
+          var node = e.getNode('show-older-messages');
+          JX.DOM.setContent(node, 'Loading...');
+          JX.DOM.alterClass(
+            node,
+            'conpherence-show-more-messages-loading',
+            true);
+
+          new JX.Workflow(this._getMoreMessagesURI(), data)
+            .setHandler(JX.bind(this, function(r) {
+              JX.DOM.remove(node);
+              var messages = JX.$H(r.messages);
+              JX.DOM.prependContent(
+                this._messagesRootCallback(),
+                messages);
+            })).start();
+        }));
+      JX.Stratcom.listen(
+        'click',
+        'show-newer-messages',
+        JX.bind(this, function(e) {
+          e.kill();
+          var data = e.getNodeData('show-newer-messages');
+          var node = e.getNode('show-newer-messages');
+          JX.DOM.setContent(node, 'Loading...');
+          JX.DOM.alterClass(
+            node,
+            'conpherence-show-more-messages-loading',
+            true);
+
+          new JX.Workflow(this._getMoreMessagesURI(), data)
+          .setHandler(JX.bind(this, function(r) {
+            JX.DOM.remove(node);
+            var messages = JX.$H(r.messages);
+            JX.DOM.appendContent(
+              this._messagesRootCallback(),
+              JX.$H(messages));
+          })).start();
+        }));
     },
 
     _shouldUpdateDOM: function(r) {
@@ -216,9 +268,7 @@ JX.install('ConpherenceThreadManager', {
         action: 'load',
       });
 
-      var uri = '/conpherence/update/' + this._loadedThreadID + '/';
-
-      var workflow = new JX.Workflow(uri)
+      var workflow = new JX.Workflow(this._getUpdateURI())
         .setData(params)
         .setHandler(JX.bind(this, function(r) {
           if (this._shouldUpdateDOM(r)) {
@@ -350,9 +400,8 @@ JX.install('ConpherenceThreadManager', {
       var data = e.getNodeData('tag:form');
 
       if (!data.preview) {
-        var uri = '/conpherence/update/' + this._loadedThreadID + '/';
         data.preview = new JX.PhabricatorShapedRequest(
-          uri,
+          this._getUpdateURI(),
           JX.bag,
           JX.bind(this, function () {
             var data = JX.DOM.convertFormToDictionary(form);
@@ -362,6 +411,14 @@ JX.install('ConpherenceThreadManager', {
           }));
       }
       data.preview.trigger();
+    },
+
+    _getUpdateURI: function() {
+      return '/conpherence/update/' + this._loadedThreadID + '/';
+    },
+
+    _getMoreMessagesURI: function() {
+      return '/conpherence/' + this._loadedThreadID + '/';
     }
   },
 

@@ -119,6 +119,9 @@ JX.behavior('durable-column', function(config, statics) {
 
   var threadManager = new JX.ConpherenceThreadManager();
   threadManager.setMinimalDisplay(true);
+  threadManager.setMessagesRootCallback(function() {
+    return _getColumnMessagesNode();
+  });
   threadManager.setLoadThreadURI('/conpherence/columnview/');
   threadManager.setWillLoadThreadCallback(function() {
     _markLoading(true);
