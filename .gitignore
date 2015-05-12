@@ -29,8 +29,8 @@
 # Users can link binaries here
 /support/bin/*
 
-# User extensions
-/src/extensions/*
+# User extensions (tracked on Benchling fork)
+# /src/extensions/*
 
 # NPM local packages
 /support/aphlict/server/node_modules/
