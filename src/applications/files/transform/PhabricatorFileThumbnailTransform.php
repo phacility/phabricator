@@ -43,6 +43,16 @@ final class PhabricatorFileThumbnailTransform
     return $this->key;
   }
 
+  protected function getFileProperties() {
+    $properties = array();
+    switch ($this->key) {
+      case self::TRANSFORM_PROFILE:
+        $properties['profile'] = true;
+        break;
+    }
+    return $properties;
+  }
+
   public function generateTransforms() {
     return array(
       id(new PhabricatorFileThumbnailTransform())

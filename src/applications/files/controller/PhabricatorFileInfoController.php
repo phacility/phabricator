@@ -247,6 +247,12 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
 
     $finfo->addProperty(pht('Builtin'), $builtin_string);
 
+    $is_profile = $file->getIsProfileImage()
+      ? pht('Yes')
+      : pht('No');
+
+    $finfo->addProperty(pht('Profile'), $is_profile);
+
     $storage_properties = new PHUIPropertyListView();
     $box->addPropertyList($storage_properties, pht('Storage'));
 

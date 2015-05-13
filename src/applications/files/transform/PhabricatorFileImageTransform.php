@@ -38,6 +38,10 @@ abstract class PhabricatorFileImageTransform extends PhabricatorFileTransform {
     $this->imageY = null;
   }
 
+  protected function getFileProperties() {
+    return array();
+  }
+
   protected function applyCropAndScale(
     $dst_w, $dst_h,
     $src_x, $src_y,
@@ -144,7 +148,7 @@ abstract class PhabricatorFileImageTransform extends PhabricatorFileTransform {
       array(
         'name' => $name,
         'canCDN' => true,
-      ));
+      ) + $this->getFileProperties());
   }
 
 

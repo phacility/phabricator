@@ -15,6 +15,18 @@ abstract class PhabricatorFileTransform extends Phobject {
     return array($this);
   }
 
+  public function executeTransform(PhabricatorFile $file) {
+    if ($this->canApplyTransform($file)) {
+      try {
+        return $this->applyTransform($file);
+      } catch (Exception $ex) {
+        // Ignore.
+      }
+    }
+
+    return $this->getDefaultTransform($file);
+  }
+
   public static function getAllTransforms() {
     static $map;
 

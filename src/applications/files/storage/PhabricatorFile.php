@@ -34,6 +34,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
   const METADATA_CAN_CDN = 'canCDN';
   const METADATA_BUILTIN = 'builtin';
   const METADATA_PARTIAL = 'partial';
+  const METADATA_PROFILE = 'profile';
 
   protected $name;
   protected $mimeType;
@@ -1112,6 +1113,15 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return $this;
   }
 
+  public function getIsProfileImage() {
+    return idx($this->metadata, self::METADATA_PROFILE);
+  }
+
+  public function setIsProfileImage($value) {
+    $this->metadata[self::METADATA_PROFILE] = $value;
+    return $this;
+  }
+
   protected function generateOneTimeToken() {
     $key = Filesystem::readRandomCharacters(16);
 
@@ -1213,6 +1223,11 @@ final class PhabricatorFile extends PhabricatorFileDAO
       $this->setBuiltinName($builtin);
     }
 
+    $profile = idx($params, 'profile');
+    if ($profile) {
+      $this->setIsProfileImage(true);
+    }
+
     $mime_type = idx($params, 'mime-type');
     if ($mime_type) {
       $this->setMimeType($mime_type);
@@ -1278,6 +1293,9 @@ final class PhabricatorFile extends PhabricatorFileDAO
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
         if ($this->isBuiltin()) {
+          return PhabricatorPolicies::getMostOpenPolicy();
+        }
+        if ($this->getIsProfileImage()) {
           return PhabricatorPolicies::getMostOpenPolicy();
         }
         return $this->getViewPolicy();
