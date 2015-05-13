@@ -26,10 +26,10 @@ final class PhabricatorSlowvoteTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case PhabricatorSlowvoteTransaction::TYPE_DESCRIPTION:
-      case PhabricatorSlowvoteTransaction::TYPE_RESPONSES:
-      case PhabricatorSlowvoteTransaction::TYPE_SHUFFLE:
-      case PhabricatorSlowvoteTransaction::TYPE_CLOSE:
+      case self::TYPE_DESCRIPTION:
+      case self::TYPE_RESPONSES:
+      case self::TYPE_SHUFFLE:
+      case self::TYPE_CLOSE:
         return ($old === null);
     }
 
@@ -43,7 +43,7 @@ final class PhabricatorSlowvoteTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case PhabricatorSlowvoteTransaction::TYPE_QUESTION:
+      case self::TYPE_QUESTION:
         if ($old === null) {
           return pht(
             '%s created this poll.',
@@ -56,16 +56,16 @@ final class PhabricatorSlowvoteTransaction
             $new);
         }
         break;
-      case PhabricatorSlowvoteTransaction::TYPE_DESCRIPTION:
+      case self::TYPE_DESCRIPTION:
         return pht(
           '%s updated the description for this poll.',
           $this->renderHandleLink($author_phid));
-      case PhabricatorSlowvoteTransaction::TYPE_RESPONSES:
+      case self::TYPE_RESPONSES:
         // TODO: This could be more detailed
         return pht(
           '%s changed who can see the responses.',
           $this->renderHandleLink($author_phid));
-      case PhabricatorSlowvoteTransaction::TYPE_SHUFFLE:
+      case self::TYPE_SHUFFLE:
         if ($new) {
           return pht(
             '%s made poll responses appear in a random order.',
@@ -76,7 +76,7 @@ final class PhabricatorSlowvoteTransaction
             $this->renderHandleLink($author_phid));
         }
         break;
-      case PhabricatorSlowvoteTransaction::TYPE_CLOSE:
+      case self::TYPE_CLOSE:
         if ($new) {
           return pht(
             '%s closed this poll.',
@@ -98,18 +98,18 @@ final class PhabricatorSlowvoteTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case PhabricatorSlowvoteTransaction::TYPE_QUESTION:
+      case self::TYPE_QUESTION:
         if ($old === null) {
           return 'fa-plus';
         } else {
           return 'fa-pencil';
         }
-      case PhabricatorSlowvoteTransaction::TYPE_DESCRIPTION:
-      case PhabricatorSlowvoteTransaction::TYPE_RESPONSES:
+      case self::TYPE_DESCRIPTION:
+      case self::TYPE_RESPONSES:
         return 'fa-pencil';
-      case PhabricatorSlowvoteTransaction::TYPE_SHUFFLE:
+      case self::TYPE_SHUFFLE:
         return 'fa-refresh';
-      case PhabricatorSlowvoteTransaction::TYPE_CLOSE:
+      case self::TYPE_CLOSE:
         if ($new) {
           return 'fa-ban';
         } else {
@@ -126,11 +126,11 @@ final class PhabricatorSlowvoteTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case PhabricatorSlowvoteTransaction::TYPE_QUESTION:
-      case PhabricatorSlowvoteTransaction::TYPE_DESCRIPTION:
-      case PhabricatorSlowvoteTransaction::TYPE_RESPONSES:
-      case PhabricatorSlowvoteTransaction::TYPE_SHUFFLE:
-      case PhabricatorSlowvoteTransaction::TYPE_CLOSE:
+      case self::TYPE_QUESTION:
+      case self::TYPE_DESCRIPTION:
+      case self::TYPE_RESPONSES:
+      case self::TYPE_SHUFFLE:
+      case self::TYPE_CLOSE:
         return PhabricatorTransactions::COLOR_BLUE;
     }
 
@@ -139,7 +139,7 @@ final class PhabricatorSlowvoteTransaction
 
   public function hasChangeDetails() {
     switch ($this->getTransactionType()) {
-      case PhabricatorSlowvoteTransaction::TYPE_DESCRIPTION:
+      case self::TYPE_DESCRIPTION:
         return true;
     }
     return parent::hasChangeDetails();

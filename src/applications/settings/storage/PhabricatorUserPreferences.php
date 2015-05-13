@@ -74,14 +74,14 @@ final class PhabricatorUserPreferences extends PhabricatorUserDAO {
   }
 
   public function getPinnedApplications(array $apps, PhabricatorUser $viewer) {
-    $pref_pinned = PhabricatorUserPreferences::PREFERENCE_APP_PINNED;
+    $pref_pinned = self::PREFERENCE_APP_PINNED;
     $pinned = $this->getPreference($pref_pinned);
 
     if ($pinned) {
       return $pinned;
     }
 
-    $pref_tiles = PhabricatorUserPreferences::PREFERENCE_APP_TILES;
+    $pref_tiles = self::PREFERENCE_APP_TILES;
     $tiles = $this->getPreference($pref_tiles, array());
     $full_tile = 'full';
 

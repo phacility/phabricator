@@ -407,7 +407,7 @@ final class ConpherenceThread extends ConpherenceDAO
     PhabricatorUser $viewer,
     array $conpherences) {
 
-    assert_instances_of($conpherences, 'ConpherenceThread');
+    assert_instances_of($conpherences, __CLASS__);
 
     $grouped = mgroup($conpherences, 'getIsRoom');
     $rooms = idx($grouped, 1, array());

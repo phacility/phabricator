@@ -21,7 +21,7 @@ final class PhabricatorProjectColumnTransaction
     $author_handle = $this->renderHandleLink($this->getAuthorPHID());
 
     switch ($this->getTransactionType()) {
-      case PhabricatorProjectColumnTransaction::TYPE_NAME:
+      case self::TYPE_NAME:
         if ($old === null) {
           return pht(
             '%s created this column.',
@@ -44,7 +44,7 @@ final class PhabricatorProjectColumnTransaction
               $author_handle);
           }
         }
-      case PhabricatorProjectColumnTransaction::TYPE_LIMIT:
+      case self::TYPE_LIMIT:
         if (!$old) {
           return pht(
             '%s set the point limit for this column to %s.',
@@ -62,7 +62,7 @@ final class PhabricatorProjectColumnTransaction
             $new);
         }
 
-      case PhabricatorProjectColumnTransaction::TYPE_STATUS:
+      case self::TYPE_STATUS:
         switch ($new) {
           case PhabricatorProjectColumn::STATUS_ACTIVE:
             return pht(

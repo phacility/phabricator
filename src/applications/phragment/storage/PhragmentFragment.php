@@ -256,7 +256,7 @@ final class PhragmentFragment extends PhragmentDAO
             $mappings[$path],
             array('name' => basename($path)));
         }
-        PhragmentFragment::createFromFile(
+        self::createFromFile(
           $viewer,
           $file,
           $base_path.'/'.$path,

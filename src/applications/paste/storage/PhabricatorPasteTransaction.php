@@ -67,7 +67,7 @@ final class PhabricatorPasteTransaction
 
     $type = $this->getTransactionType();
     switch ($type) {
-      case PhabricatorPasteTransaction::TYPE_CONTENT:
+      case self::TYPE_CONTENT:
         if ($old === null) {
           return pht(
             '%s created this paste.',
@@ -78,13 +78,13 @@ final class PhabricatorPasteTransaction
             $this->renderHandleLink($author_phid));
         }
         break;
-      case PhabricatorPasteTransaction::TYPE_TITLE:
+      case self::TYPE_TITLE:
         return pht(
           '%s updated the paste\'s title to "%s".',
           $this->renderHandleLink($author_phid),
           $new);
         break;
-      case PhabricatorPasteTransaction::TYPE_LANGUAGE:
+      case self::TYPE_LANGUAGE:
         return pht(
           "%s updated the paste's language.",
           $this->renderHandleLink($author_phid));
@@ -103,7 +103,7 @@ final class PhabricatorPasteTransaction
 
     $type = $this->getTransactionType();
     switch ($type) {
-      case PhabricatorPasteTransaction::TYPE_CONTENT:
+      case self::TYPE_CONTENT:
         if ($old === null) {
           return pht(
             '%s created %s.',
@@ -116,13 +116,13 @@ final class PhabricatorPasteTransaction
             $this->renderHandleLink($object_phid));
         }
         break;
-      case PhabricatorPasteTransaction::TYPE_TITLE:
+      case self::TYPE_TITLE:
         return pht(
           '%s updated the title for %s.',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
         break;
-      case PhabricatorPasteTransaction::TYPE_LANGUAGE:
+      case self::TYPE_LANGUAGE:
         return pht(
           '%s updated the language for %s.',
           $this->renderHandleLink($author_phid),

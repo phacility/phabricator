@@ -38,7 +38,7 @@ final class FundInitiativeTransaction
 
     $type = $this->getTransactionType();
     switch ($type) {
-      case FundInitiativeTransaction::TYPE_MERCHANT:
+      case self::TYPE_MERCHANT:
         if ($old) {
           $phids[] = $old;
         }
@@ -46,7 +46,7 @@ final class FundInitiativeTransaction
           $phids[] = $new;
         }
         break;
-      case FundInitiativeTransaction::TYPE_REFUND:
+      case self::TYPE_REFUND:
         $phids[] = $this->getMetadataValue(self::PROPERTY_BACKER);
         break;
     }
@@ -63,7 +63,7 @@ final class FundInitiativeTransaction
 
     $type = $this->getTransactionType();
     switch ($type) {
-      case FundInitiativeTransaction::TYPE_NAME:
+      case self::TYPE_NAME:
         if ($old === null) {
           return pht(
             '%s created this initiative.',
@@ -76,15 +76,15 @@ final class FundInitiativeTransaction
             $new);
         }
         break;
-      case FundInitiativeTransaction::TYPE_RISKS:
+      case self::TYPE_RISKS:
         return pht(
           '%s edited the risks for this initiative.',
           $this->renderHandleLink($author_phid));
-      case FundInitiativeTransaction::TYPE_DESCRIPTION:
+      case self::TYPE_DESCRIPTION:
         return pht(
           '%s edited the description of this initiative.',
           $this->renderHandleLink($author_phid));
-      case FundInitiativeTransaction::TYPE_STATUS:
+      case self::TYPE_STATUS:
         switch ($new) {
           case FundInitiative::STATUS_OPEN:
             return pht(
@@ -96,14 +96,14 @@ final class FundInitiativeTransaction
               $this->renderHandleLink($author_phid));
         }
         break;
-      case FundInitiativeTransaction::TYPE_BACKER:
+      case self::TYPE_BACKER:
         $amount = $this->getMetadataValue(self::PROPERTY_AMOUNT);
         $amount = PhortuneCurrency::newFromString($amount);
         return pht(
           '%s backed this initiative with %s.',
           $this->renderHandleLink($author_phid),
           $amount->formatForDisplay());
-      case FundInitiativeTransaction::TYPE_REFUND:
+      case self::TYPE_REFUND:
         $amount = $this->getMetadataValue(self::PROPERTY_AMOUNT);
         $amount = PhortuneCurrency::newFromString($amount);
 
@@ -114,7 +114,7 @@ final class FundInitiativeTransaction
           $this->renderHandleLink($author_phid),
           $amount->formatForDisplay(),
           $this->renderHandleLink($backer_phid));
-      case FundInitiativeTransaction::TYPE_MERCHANT:
+      case self::TYPE_MERCHANT:
         if ($old === null) {
           return pht(
             '%s set this initiative to pay to %s.',
@@ -142,7 +142,7 @@ final class FundInitiativeTransaction
 
     $type = $this->getTransactionType();
     switch ($type) {
-      case FundInitiativeTransaction::TYPE_NAME:
+      case self::TYPE_NAME:
         if ($old === null) {
           return pht(
             '%s created %s.',
@@ -156,12 +156,12 @@ final class FundInitiativeTransaction
             $this->renderHandleLink($object_phid));
         }
         break;
-      case FundInitiativeTransaction::TYPE_DESCRIPTION:
+      case self::TYPE_DESCRIPTION:
         return pht(
           '%s updated the description for %s.',
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid));
-      case FundInitiativeTransaction::TYPE_STATUS:
+      case self::TYPE_STATUS:
         switch ($new) {
           case FundInitiative::STATUS_OPEN:
             return pht(
@@ -175,7 +175,7 @@ final class FundInitiativeTransaction
               $this->renderHandleLink($object_phid));
         }
         break;
-      case FundInitiativeTransaction::TYPE_BACKER:
+      case self::TYPE_BACKER:
         $amount = $this->getMetadataValue(self::PROPERTY_AMOUNT);
         $amount = PhortuneCurrency::newFromString($amount);
         return pht(
@@ -183,7 +183,7 @@ final class FundInitiativeTransaction
           $this->renderHandleLink($author_phid),
           $this->renderHandleLink($object_phid),
           $amount->formatForDisplay());
-      case FundInitiativeTransaction::TYPE_REFUND:
+      case self::TYPE_REFUND:
         $amount = $this->getMetadataValue(self::PROPERTY_AMOUNT);
         $amount = PhortuneCurrency::newFromString($amount);
 
@@ -223,8 +223,8 @@ final class FundInitiativeTransaction
   public function shouldHide() {
     $old = $this->getOldValue();
     switch ($this->getTransactionType()) {
-      case FundInitiativeTransaction::TYPE_DESCRIPTION:
-      case FundInitiativeTransaction::TYPE_RISKS:
+      case self::TYPE_DESCRIPTION:
+      case self::TYPE_RISKS:
         return ($old === null);
     }
     return parent::shouldHide();
@@ -232,8 +232,8 @@ final class FundInitiativeTransaction
 
   public function hasChangeDetails() {
     switch ($this->getTransactionType()) {
-      case FundInitiativeTransaction::TYPE_DESCRIPTION:
-      case FundInitiativeTransaction::TYPE_RISKS:
+      case self::TYPE_DESCRIPTION:
+      case self::TYPE_RISKS:
         return ($this->getOldValue() !== null);
     }
 

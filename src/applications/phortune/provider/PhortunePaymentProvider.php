@@ -118,7 +118,7 @@ abstract class PhortunePaymentProvider {
 
   public static function getAllProviders() {
     return id(new PhutilSymbolLoader())
-      ->setAncestorClass('PhortunePaymentProvider')
+      ->setAncestorClass(__CLASS__)
       ->loadObjects();
   }
 

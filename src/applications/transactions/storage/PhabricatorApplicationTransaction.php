@@ -1073,7 +1073,7 @@ abstract class PhabricatorApplicationTransaction
   }
 
   public function attachTransactionGroup(array $group) {
-    assert_instances_of($group, 'PhabricatorApplicationTransaction');
+    assert_instances_of($group, __CLASS__);
     $this->transactionGroup = $group;
     return $this;
   }
@@ -1165,7 +1165,7 @@ abstract class PhabricatorApplicationTransaction
       }
 
       $old_target = $xaction->getRenderingTarget();
-      $new_target = PhabricatorApplicationTransaction::TARGET_TEXT;
+      $new_target = self::TARGET_TEXT;
       $xaction->setRenderingTarget($new_target);
 
       if ($publisher->getRenderWithImpliedContext()) {

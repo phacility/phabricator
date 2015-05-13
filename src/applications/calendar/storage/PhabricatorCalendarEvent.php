@@ -200,7 +200,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   public function getTerseSummary(PhabricatorUser $viewer) {
     $until = phabricator_date($this->dateTo, $viewer);
-    if ($this->status == PhabricatorCalendarEvent::STATUS_SPORADIC) {
+    if ($this->status == self::STATUS_SPORADIC) {
       return pht('Sporadic until %s', $until);
     } else {
       return pht('Away until %s', $until);

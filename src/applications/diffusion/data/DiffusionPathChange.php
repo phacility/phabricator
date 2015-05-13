@@ -119,7 +119,7 @@ final class DiffusionPathChange {
   }
 
   final public static function convertToArcanistChanges(array $changes) {
-    assert_instances_of($changes, 'DiffusionPathChange');
+    assert_instances_of($changes, __CLASS__);
     $direct = array();
     $result = array();
     foreach ($changes as $path) {
@@ -145,7 +145,7 @@ final class DiffusionPathChange {
   final public static function convertToDifferentialChangesets(
     PhabricatorUser $user,
     array $changes) {
-    assert_instances_of($changes, 'DiffusionPathChange');
+    assert_instances_of($changes, __CLASS__);
     $arcanist_changes = self::convertToArcanistChanges($changes);
     $diff = DifferentialDiff::newEphemeralFromRawChanges(
       $arcanist_changes);

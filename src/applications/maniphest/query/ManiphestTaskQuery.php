@@ -754,7 +754,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
     $id = $result->getID();
 
     if ($this->groupBy == self::GROUP_PROJECT) {
-      return rtrim($id.'.'.$result->getGroupByProjectPHID(), '.');;
+      return rtrim($id.'.'.$result->getGroupByProjectPHID(), '.');
     }
 
     return $id;

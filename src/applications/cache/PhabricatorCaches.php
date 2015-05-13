@@ -270,7 +270,7 @@ final class PhabricatorCaches {
   }
 
   private static function addNamespaceToCaches(array $caches) {
-    $namespace = PhabricatorCaches::getNamespace();
+    $namespace = self::getNamespace();
     if (!$namespace) {
       return $caches;
     }

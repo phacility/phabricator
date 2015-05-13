@@ -113,7 +113,7 @@ abstract class PhabricatorSetupCheck {
 
   final public static function runAllChecks() {
     $symbols = id(new PhutilSymbolLoader())
-      ->setAncestorClass('PhabricatorSetupCheck')
+      ->setAncestorClass(__CLASS__)
       ->setConcreteOnly(true)
       ->selectAndLoadSymbols();
 

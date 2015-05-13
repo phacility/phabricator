@@ -215,7 +215,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
     if (!$file) {
       $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-      $file = PhabricatorFile::newFromFileData($data, $params);
+      $file = self::newFromFileData($data, $params);
       unset($unguarded);
     }
 
@@ -236,7 +236,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
       $copy_of_byte_size = $file->getByteSize();
       $copy_of_mime_type = $file->getMimeType();
 
-      $new_file = PhabricatorFile::initializeNewFile();
+      $new_file = self::initializeNewFile();
 
       $new_file->setByteSize($copy_of_byte_size);
 
@@ -262,7 +262,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
     $length,
     array $params) {
 
-    $file = PhabricatorFile::initializeNewFile();
+    $file = self::initializeNewFile();
 
     $file->setByteSize($length);
 
@@ -316,7 +316,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
       throw new Exception(pht('No valid storage engines are available!'));
     }
 
-    $file = PhabricatorFile::initializeNewFile();
+    $file = self::initializeNewFile();
 
     $data_handle = null;
     $engine_identifier = null;
@@ -1017,7 +1017,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
       );
 
       $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-        $file = PhabricatorFile::newFromFileData($data, $params);
+        $file = self::newFromFileData($data, $params);
         $xform = id(new PhabricatorTransformedFile())
           ->setOriginalPHID(PhabricatorPHIDConstants::PHID_VOID)
           ->setTransform('builtin:'.$name)

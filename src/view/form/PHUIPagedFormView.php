@@ -152,7 +152,7 @@ final class PHUIPagedFormView extends AphrontView {
 
     $is_attempt_complete = false;
     if ($this->prevPage) {
-      $prev_index = $this->getPageIndex($selected->getKey()) - 1;;
+      $prev_index = $this->getPageIndex($selected->getKey()) - 1;
       $index = max(0, $prev_index);
       $selected = $this->getPageByIndex($index);
     } else if ($this->nextPage) {

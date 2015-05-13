@@ -242,7 +242,7 @@ final class PhabricatorFileComposeController
     }
 
     $dialog_id = celerity_generate_unique_node_id();
-    $color_input_id = celerity_generate_unique_node_id();;
+    $color_input_id = celerity_generate_unique_node_id();
     $icon_input_id = celerity_generate_unique_node_id();
     $preview_id = celerity_generate_unique_node_id();
 

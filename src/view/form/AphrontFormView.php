@@ -126,7 +126,10 @@ final class AphrontFormView extends AphrontView {
     $layout = $this->buildLayoutView();
 
     if (!$this->user) {
-      throw new Exception(pht('You must pass the user to AphrontFormView.'));
+      throw new Exception(
+        pht(
+          'You must pass the user to %s.',
+          __CLASS__));
     }
 
     $sigils = $this->sigils;
