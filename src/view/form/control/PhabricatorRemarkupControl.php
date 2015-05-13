@@ -24,11 +24,7 @@ final class PhabricatorRemarkupControl extends AphrontFormTextAreaControl {
 
     $viewer = $this->getUser();
     if (!$viewer) {
-      throw new Exception(
-        pht(
-          'Call %s before rendering a %s!',
-          'setUser()',
-          __CLASS__));
+      throw new PhutilInvalidStateException('setUser');
     }
 
     // We need to have this if previews render images, since Ajax can not

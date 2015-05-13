@@ -17,7 +17,7 @@ final class PholioMockEmbedView extends AphrontView {
 
   public function render() {
     if (!$this->mock) {
-      throw new Exception('Call setMock() before render()!');
+      throw new PhutilInvalidStateException('setMock');
     }
     $mock = $this->mock;
 

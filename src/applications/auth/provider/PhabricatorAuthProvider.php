@@ -15,8 +15,7 @@ abstract class PhabricatorAuthProvider {
 
   public function getProviderConfig() {
     if ($this->providerConfig === null) {
-      throw new Exception(
-        'Call attachProviderConfig() before getProviderConfig()!');
+      throw new PhutilInvalidStateException('attachProviderConfig');
     }
     return $this->providerConfig;
   }

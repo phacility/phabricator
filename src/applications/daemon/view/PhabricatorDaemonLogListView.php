@@ -14,7 +14,7 @@ final class PhabricatorDaemonLogListView extends AphrontView {
     $rows = array();
 
     if (!$this->user) {
-      throw new Exception('Call setUser() before rendering!');
+      throw new PhutilInvalidStateException('setUser');
     }
 
     $env_hash = PhabricatorEnv::calculateEnvironmentHash();

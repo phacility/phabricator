@@ -227,7 +227,7 @@ final class PhabricatorFileDataController extends PhabricatorFileController {
 
   private function getFile() {
     if (!$this->file) {
-      throw new Exception(pht('Call loadFile() before getFile()!'));
+      throw new PhutilInvalidStateException('loadFile');
     }
     return $this->file;
   }

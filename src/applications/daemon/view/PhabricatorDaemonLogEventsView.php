@@ -27,7 +27,7 @@ final class PhabricatorDaemonLogEventsView extends AphrontView {
     $rows = array();
 
     if (!$this->user) {
-      throw new Exception('Call setUser() before rendering!');
+      throw new PhutilInvalidStateException('setUser');
     }
 
     foreach ($this->events as $event) {

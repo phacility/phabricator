@@ -33,7 +33,7 @@ abstract class PhabricatorApplicationSearchEngine {
 
   protected function requireViewer() {
     if (!$this->viewer) {
-      throw new Exception('Call setViewer() before using an engine!');
+      throw new PhutilInvalidStateException('setViewer');
     }
     return $this->viewer;
   }
