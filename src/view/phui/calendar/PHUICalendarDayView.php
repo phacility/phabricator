@@ -84,7 +84,7 @@ final class PHUICalendarDayView extends AphrontView {
       }
       foreach ($current_hour_events as $event) {
         $event_start = $event->getEpochStart();
-        $event_end = $event->getEpochEnd();
+        $event_end = min($event->getEpochEnd(), $day_end);
 
         $top = (($event_start - $hour_start) / ($hour_end - $hour_start))
           * 100;
@@ -233,6 +233,7 @@ final class PHUICalendarDayView extends AphrontView {
         $this->rangeStart->getEpoch() > $day_end)) {
       $errors[] = pht('Day is out of query range');
     }
+    return $errors;
   }
 
   private function renderSidebar() {
@@ -267,7 +268,8 @@ final class PHUICalendarDayView extends AphrontView {
   }
 
   private function renderSidebarBox($events, $title) {
-    $widget = new PHUICalendarWidgetView();
+    $widget = id(new PHUICalendarWidgetView())
+      ->addClass('calendar-day-view-sidebar');
 
     $list = id(new PHUICalendarListView())
       ->setUser($this->user);
@@ -275,7 +277,8 @@ final class PHUICalendarDayView extends AphrontView {
     if (count($events) == 0) {
       $list->showBlankState(true);
     } else {
-      foreach ($events as $event) {
+      $sorted_events = msort($events, 'getEpochStart');
+      foreach ($sorted_events as $event) {
         $list->addEvent($event);
       }
     }
@@ -387,7 +390,7 @@ final class PHUICalendarDayView extends AphrontView {
     $name = phutil_tag(
       'a',
       array(
-        'class' => 'all-day',
+        'class' => 'day-view-all-day',
         'href' => $event->getURI(),
       ),
       $event->getName());
@@ -503,8 +506,8 @@ final class PHUICalendarDayView extends AphrontView {
 
     foreach ($events as $event) {
       $destination_cluster_key = null;
-      $event_start = $event->getEpochStart();
-      $event_end = $event->getEpochEnd();
+      $event_start = $event->getEpochStart() - (30 * 60);
+      $event_end = $event->getEpochEnd() + (30 * 60);
 
       foreach ($clusters as $key => $cluster) {
         foreach ($cluster as $clustered_event) {

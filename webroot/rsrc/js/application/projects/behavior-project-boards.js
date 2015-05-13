@@ -249,6 +249,9 @@ JX.behavior('project-boards', function(config, statics) {
     for (ii = 0; ii < lists.length; ii++) {
       lists[ii].setGroup(lists);
     }
+  }
+
+  function setup() {
 
     JX.Stratcom.listen(
       'click',
@@ -336,6 +339,9 @@ JX.behavior('project-boards', function(config, statics) {
           statics.boardID = new_config.boardID;
         }
         update_statics(new_config);
+        if (data.fromServer) {
+          init_board();
+        }
       });
     return true;
   }
@@ -345,7 +351,8 @@ JX.behavior('project-boards', function(config, statics) {
     var current_page_id = JX.Quicksand.getCurrentPageID();
     statics.boardConfigCache = {};
     statics.boardConfigCache[current_page_id] = config;
-    statics.setup = init_board();
+    init_board();
+    statics.setup = setup();
   }
 
 });

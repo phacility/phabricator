@@ -49,7 +49,7 @@
   color: {$greytext};
 }
 
-.all-day {
+.day-view-all-day {
   border: 1px solid {$blueborder};
   height: 12px;
   margin: 0;
@@ -60,7 +60,7 @@
   color: {$greytext};
 }
 
-.phui-calendar-day-event + .phui-calendar-day-event .all-day {
+.phui-calendar-day-event + .phui-calendar-day-event .day-view-all-day {
   border-top-style: none;
   border-top-width: 0;
 }

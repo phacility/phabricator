@@ -44,7 +44,13 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
     PhabricatorObjectHandle $handle,
     $id) {
 
-    return $handle->getURI();
+    $uri = $handle->getURI();
+
+    if ($this->getEngine()->getConfig('uri.full')) {
+      $uri = PhabricatorEnv::getURI($uri);
+    }
+
+    return $uri;
   }
 
   protected function renderObjectRefForAnyMedia (

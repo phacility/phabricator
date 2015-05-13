@@ -72,14 +72,16 @@ final class PHUICalendarMonthView extends AphrontView {
     $empty = $first->format('w');
 
     $markup = array();
-
-    $empty_box = phutil_tag(
-      'div',
-      array('class' => 'phui-calendar-day phui-calendar-empty'),
-      '');
+    $empty_cell = array(
+        'list' => null,
+        'date' => null,
+        'uri' => null,
+        'count' => 0,
+        'class' => null,
+      );
 
     for ($ii = 0; $ii < $empty; $ii++) {
-      $markup[] = $empty_box;
+      $markup[] = $empty_cell;
     }
 
     $show_events = array();
@@ -88,12 +90,8 @@ final class PHUICalendarMonthView extends AphrontView {
       $day_number = $day->format('j');
 
       $holiday = idx($this->holidays, $day->format('Y-m-d'));
-      $class = 'phui-calendar-day';
+      $class = 'phui-calendar-month-day';
       $weekday = $day->format('w');
-
-      if ($day_number == $this->day) {
-        $class .= ' phui-calendar-today';
-      }
 
       if ($holiday || $weekday == 0 || $weekday == 6) {
         $class .= ' phui-calendar-not-work-day';
@@ -102,8 +100,8 @@ final class PHUICalendarMonthView extends AphrontView {
       $day->setTime(0, 0, 0);
       $epoch_start = $day->format('U');
 
-      $day->modify('+1 day');
-      $epoch_end = $day->format('U');
+
+      $epoch_end = id(clone $day)->modify('+1 day')->format('U');
 
       if ($weekday == 0) {
         $show_events = array();
@@ -116,6 +114,7 @@ final class PHUICalendarMonthView extends AphrontView {
       }
 
       $list_events = array();
+      $all_day_events = array();
       foreach ($events as $event) {
         if ($event->getEpochStart() >= $epoch_end) {
           // This list is sorted, so we can stop looking.
@@ -123,57 +122,157 @@ final class PHUICalendarMonthView extends AphrontView {
         }
         if ($event->getEpochStart() < $epoch_end &&
             $event->getEpochEnd() > $epoch_start) {
-          $list_events[] = $event;
+          if ($event->getIsAllDay()) {
+            $all_day_events[] = $event;
+          } else {
+            $list_events[] = $event;
+          }
         }
       }
 
       $list = new PHUICalendarListView();
       $list->setUser($this->user);
+      foreach ($all_day_events as $item) {
+        $list->addEvent($item);
+      }
       foreach ($list_events as $item) {
         $list->addEvent($item);
       }
 
-      $holiday_markup = null;
-      if ($holiday) {
-        $name = $holiday->getName();
-        $holiday_markup = phutil_tag(
-          'div',
-          array(
-            'class' => 'phui-calendar-holiday',
-            'title' => $name,
-          ),
-          $name);
-      }
+      $uri = $this->getBrowseURI();
+      $uri = $uri.$day->format('Y').'/'.
+        $day->format('m').'/'.
+        $day->format('d').'/';
 
-      $markup[] = phutil_tag_div(
-        $class,
-        array(
-          phutil_tag_div('phui-calendar-date-number', $day_number),
-          $holiday_markup,
-          $list,
-        ));
+      $markup[] = array(
+        'list' => $list,
+        'date' => $day,
+        'uri' => $uri,
+        'count' => count($all_day_events) + count($list_events),
+        'class' => $class,
+        );
     }
 
     $table = array();
     $rows = array_chunk($markup, 7);
+
     foreach ($rows as $row) {
       $cells = array();
+      $event_count_badge = null;
+
       while (count($row) < 7) {
-        $row[] = $empty_box;
+        $row[] = $empty_cell;
       }
-      $j = 0;
       foreach ($row as $cell) {
-        if ($j == 0) {
-          $cells[] = phutil_tag(
-            'td',
+        $cell_list = $cell['list'];
+        $class = $cell['class'];
+        $uri = $cell['uri'];
+        $count = $cell['count'];
+
+        $event_count = null;
+        if ($count > 0) {
+          $event_count = phutil_tag(
+            'div',
             array(
-              'class' => 'phui-calendar-month-weekstart',
+              'class' => 'phui-calendar-month-count-badge',
             ),
-            $cell);
-        } else {
-          $cells[] = phutil_tag('td', array(), $cell);
+            $count);
         }
-        $j++;
+
+        $event_count_badge = phutil_tag(
+          'div',
+          array(
+            'class' => 'phui-calendar-month-event-count',
+          ),
+          $event_count);
+
+        $cell_day_secret_link = phutil_tag(
+          'a',
+          array(
+            'class' => 'phui-calendar-month-secret-link',
+            'href' => $uri,
+          ),
+          null);
+
+        $cell_div = phutil_tag(
+          'div',
+          array(
+            'class' => 'phui-calendar-month-cell-div',
+          ),
+          array(
+            $cell_day_secret_link,
+            $event_count_badge,
+            $cell_list,
+          ));
+
+        $cells[] = phutil_tag(
+          'td',
+          array(
+            'class' => 'phui-calendar-month-event-list '.$class,
+          ),
+          $cell_div);
+      }
+      $table[] = phutil_tag('tr', array(), $cells);
+
+      $cells = array();
+      foreach ($row as $cell) {
+        $class = $cell['class'];
+        $cell_day_secret_link = null;
+
+        if ($cell['date']) {
+          $cell_day = $cell['date'];
+          $uri = $cell['uri'];
+
+          $cell_day_secret_link = phutil_tag(
+            'a',
+            array(
+              'class' => 'phui-calendar-month-secret-link',
+              'href' => $uri,
+            ),
+            null);
+
+          $cell_day = phutil_tag(
+            'a',
+            array(
+              'class' => 'phui-calendar-date-number',
+              'href' => $uri,
+            ),
+            $cell_day->format('j'));
+
+        } else {
+          $cell_day = null;
+        }
+
+        if ($cell['date'] && $cell['date']->format('j') == $this->day) {
+          $today_class = 'phui-calendar-today-slot phui-calendar-today';
+        } else {
+          $today_class = 'phui-calendar-today-slot';
+        }
+
+        $today_slot = phutil_tag (
+          'div',
+          array(
+            'class' => $today_class,
+          ),
+          null);
+
+        $cell_div = phutil_tag(
+          'div',
+          array(
+            'class' => 'phui-calendar-month-cell-div',
+          ),
+          array(
+            $cell_day_secret_link,
+            $cell_day,
+            $today_slot,
+          ));
+
+        $cells[] = phutil_tag(
+          'td',
+          array(
+            'class' => 'phui-calendar-date-number-container '.$class,
+          ),
+          $cell_div);
       }
       $table[] = phutil_tag('tr', array(), $cells);
     }

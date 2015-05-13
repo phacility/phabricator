@@ -69,4 +69,10 @@ final class PhabricatorPhameApplication extends PhabricatorApplication {
     );
   }
 
+  public function getQuicksandURIPatternBlacklist() {
+    return array(
+      '/phame/live/.*',
+    );
+  }
+
 }

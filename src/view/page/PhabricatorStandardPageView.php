@@ -377,15 +377,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
       }
     }
 
-    if (!$this->isQuicksandBlacklistURI()) {
-      Javelin::initBehavior(
-        'scrollbar',
-        array(
-          'nodeID' => 'phabricator-standard-page',
-          'isMainContent' => true,
-        ));
-    }
-
     $main_page = phutil_tag(
       'div',
       array(
