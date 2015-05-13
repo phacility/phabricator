@@ -141,14 +141,14 @@ abstract class PhabricatorFileImageTransform extends PhabricatorFileTransform {
       $name = 'default.png';
     }
 
-    $name = $this->getTransformKey().'-'.$name;
+    $defaults = array(
+      'canCDN' => true,
+      'name' => $this->getTransformKey().'-'.$name,
+    );
 
-    return PhabricatorFile::newFromFileData(
-      $data,
-      array(
-        'name' => $name,
-        'canCDN' => true,
-      ) + $this->getFileProperties());
+    $properties = $this->getFileProperties() + $defaults;
+
+    return PhabricatorFile::newFromFileData($data, $properties);
   }
 
 

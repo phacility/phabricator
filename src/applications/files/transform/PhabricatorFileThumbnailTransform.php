@@ -48,6 +48,7 @@ final class PhabricatorFileThumbnailTransform
     switch ($this->key) {
       case self::TRANSFORM_PROFILE:
         $properties['profile'] = true;
+        $properties['name'] = 'profile';
         break;
     }
     return $properties;
@@ -185,8 +186,8 @@ final class PhabricatorFileThumbnailTransform
         $scale = $scale_y;
       }
 
-      $copy_x = $dst_x / $scale_x;
-      $copy_y = $dst_y / $scale_x;
+      $copy_x = $dst_x / $scale;
+      $copy_y = $dst_y / $scale;
 
       if (!$scale_up) {
         $copy_x = min($src_x, $copy_x);

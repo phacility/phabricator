@@ -148,26 +148,55 @@ final class PhabricatorPeopleQuery
     }
 
     if ($this->needProfileImage) {
-      $user_profile_file_phids = mpull($users, 'getProfileImagePHID');
-      $user_profile_file_phids = array_filter($user_profile_file_phids);
-      if ($user_profile_file_phids) {
-        $files = id(new PhabricatorFileQuery())
-          ->setParentQuery($this)
-          ->setViewer($this->getViewer())
-          ->withPHIDs($user_profile_file_phids)
-          ->execute();
-        $files = mpull($files, null, 'getPHID');
-      } else {
-        $files = array();
-      }
+      $rebuild = array();
       foreach ($users as $user) {
-        $image_phid = $user->getProfileImagePHID();
-        if (isset($files[$image_phid])) {
-          $profile_image_uri = $files[$image_phid]->getBestURI();
-        } else {
-          $profile_image_uri = PhabricatorUser::getDefaultProfileImageURI();
+        $image_uri = $user->getProfileImageCache();
+        if ($image_uri) {
+          // This user has a valid cache, so we don't need to fetch any
+          // data or rebuild anything.
+
+          $user->attachProfileImageURI($image_uri);
+          continue;
         }
-        $user->attachProfileImageURI($profile_image_uri);
+
+        // This user's cache is invalid or missing, so we're going to rebuild
+        // it.
+        $rebuild[] = $user;
+      }
+
+      if ($rebuild) {
+        $file_phids = mpull($rebuild, 'getProfileImagePHID');
+        $file_phids = array_filter($file_phids);
+
+        if ($file_phids) {
+          // NOTE: We're using the omnipotent user here because older profile
+          // images do not have the 'profile' flag, so they may not be visible
+          // to the executing viewer. At some point, we could migrate to add
+          // this flag and then use the real viewer, or just use the real
+          // viewer after enough time has passed to limit the impact of old
+          // data. The consequence of missing here is that we cache a default
+          // image when a real image exists.
+          $files = id(new PhabricatorFileQuery())
+            ->setParentQuery($this)
+            ->setViewer(PhabricatorUser::getOmnipotentUser())
+            ->withPHIDs($file_phids)
+            ->execute();
+          $files = mpull($files, null, 'getPHID');
+        } else {
+          $files = array();
+        }
+
+        foreach ($rebuild as $user) {
+          $image_phid = $user->getProfileImagePHID();
+          if (isset($files[$image_phid])) {
+            $image_uri = $files[$image_phid]->getBestURI();
+          } else {
+            $image_uri = PhabricatorUser::getDefaultProfileImageURI();
+          }
+
+          $user->writeProfileImageCache($image_uri);
+          $user->attachProfileImageURI($image_uri);
+        }
       }
     }
 
