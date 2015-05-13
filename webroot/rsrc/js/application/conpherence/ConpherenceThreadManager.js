@@ -27,6 +27,8 @@ JX.install('ConpherenceThreadManager', {
     _loadedThreadID: null,
     _loadedThreadPHID: null,
     _latestTransactionID: null,
+    _transactionIDMap: null,
+    _transactionCache: null,
     _canEditLoadedThread: null,
     _updating:  null,
     _minimalDisplay: false,
@@ -80,6 +82,59 @@ JX.install('ConpherenceThreadManager', {
 
     setLatestTransactionID: function(id) {
       this._latestTransactionID = id;
+      return this;
+    },
+
+    _updateTransactionIDMap: function(transactions) {
+      var loaded_id = this.getLoadedThreadID();
+      if (!this._transactionIDMap[loaded_id]) {
+        this._transactionIDMap[this._loadedThreadID] = {};
+      }
+      var loaded_transaction_ids = this._transactionIDMap[loaded_id];
+      var transaction;
+      for (var ii = 0; ii < transactions.length; ii++) {
+        transaction = transactions[ii];
+        loaded_transaction_ids[JX.Stratcom.getData(transaction).id] = 1;
+      }
+      this._transactionIDMap[this._loadedThreadID] = loaded_transaction_ids;
+      return this;
+    },
+
+    _updateTransactionCache: function(transactions) {
+      var transaction;
+      for (var ii = 0; ii < transactions.length; ii++) {
+        transaction = transactions[ii];
+        this._transactionCache[JX.Stratcom.getData(transaction).id] =
+          transaction;
+      }
+      return this;
+    },
+
+    _getLoadedTransactions: function() {
+      var loaded_id = this.getLoadedThreadID();
+      var loaded_tx_ids = JX.keys(this._transactionIDMap[loaded_id]);
+      loaded_tx_ids.sort(function (a, b) {
+        var x = parseFloat(a);
+        var y = parseFloat(b);
+        if (x > y) {
+          return 1;
+        }
+        if (x < y) {
+          return -1;
+        }
+        return 0;
+      });
+      var transactions = [];
+      for (var ii = 0; ii < loaded_tx_ids.length; ii++) {
+        transactions.push(this._transactionCache[loaded_tx_ids[ii]]);
+      }
+      return transactions;
+    },
+
+    _deleteTransactionCaches: function(id) {
+      delete this._transactionCache[id];
+      delete this._transactionIDMap[this._loadedThreadID][id];
+
       return this;
     },
 
@@ -151,6 +206,10 @@ JX.install('ConpherenceThreadManager', {
     },
 
     start: function() {
+
+      this._transactionIDMap = {};
+      this._transactionCache = {};
+
       JX.Stratcom.listen(
         'aphlict-server-message',
         null,
@@ -206,11 +265,9 @@ JX.install('ConpherenceThreadManager', {
 
           new JX.Workflow(this._getMoreMessagesURI(), data)
             .setHandler(JX.bind(this, function(r) {
+              this._deleteTransactionCaches(JX.Stratcom.getData(node).id);
               JX.DOM.remove(node);
-              var messages = JX.$H(r.messages);
-              JX.DOM.prependContent(
-                this._messagesRootCallback(),
-                messages);
+              this._updateTransactions(r);
             })).start();
         }));
       JX.Stratcom.listen(
@@ -228,11 +285,9 @@ JX.install('ConpherenceThreadManager', {
 
           new JX.Workflow(this._getMoreMessagesURI(), data)
           .setHandler(JX.bind(this, function(r) {
+            this._deleteTransactionCaches(JX.Stratcom.getData(node).id);
             JX.DOM.remove(node);
-            var messages = JX.$H(r.messages);
-            JX.DOM.appendContent(
-              this._messagesRootCallback(),
-              JX.$H(messages));
+            this._updateTransactions(r);
           })).start();
         }));
     },
@@ -254,13 +309,25 @@ JX.install('ConpherenceThreadManager', {
       return true;
     },
 
-    _markUpdated: function(r) {
+    _updateDOM: function(r) {
+      this._updateTransactions(r);
+
       this._updating.knownID = r.latest_transaction_id;
       this._latestTransactionID = r.latest_transaction_id;
       JX.Stratcom.invoke(
         'conpherence-redraw-aphlict',
         null,
         r.aphlictDropdownData);
+    },
+
+    _updateTransactions: function(r) {
+      var new_transactions = JX.$H(r.transactions).getFragment().childNodes;
+      this._updateTransactionIDMap(new_transactions);
+      this._updateTransactionCache(new_transactions);
+
+      var transactions = this._getLoadedTransactions();
+
+      JX.DOM.setContent(this._messagesRootCallback(), transactions);
     },
 
     _updateThread: function() {
@@ -272,8 +339,7 @@ JX.install('ConpherenceThreadManager', {
         .setData(params)
         .setHandler(JX.bind(this, function(r) {
           if (this._shouldUpdateDOM(r)) {
-            this._markUpdated(r);
-
+            this._updateDOM(r);
             this._didUpdateThreadCallback(r);
           }
         }));
@@ -306,8 +372,7 @@ JX.install('ConpherenceThreadManager', {
         .setData(params)
         .setHandler(JX.bind(this, function(r) {
           if (this._shouldUpdateDOM(r)) {
-            this._markUpdated(r);
-
+            this._updateDOM(r);
             this._didUpdateWorkflowCallback(r);
           }
         }));
@@ -357,6 +422,13 @@ JX.install('ConpherenceThreadManager', {
           r.aphlictDropdownData);
 
         this._didLoadThreadCallback(r);
+        var messages_root = this._messagesRootCallback();
+        var messages = JX.DOM.scry(
+          messages_root,
+          'div',
+          'conpherence-transaction-view');
+        this._updateTransactionIDMap(messages);
+        this._updateTransactionCache(messages);
 
         if (force_reload) {
           JX.Stratcom.invoke('hashchange');
@@ -383,8 +455,7 @@ JX.install('ConpherenceThreadManager', {
       var workflow = JX.Workflow.newFromForm(form, params, keep_enabled)
         .setHandler(JX.bind(this, function(r) {
           if (this._shouldUpdateDOM(r)) {
-            this._markUpdated(r);
-
+            this._updateDOM(r);
             this._didSendMessageCallback(r);
           } else if (r.non_update) {
             this._didSendMessageCallback(r, true);

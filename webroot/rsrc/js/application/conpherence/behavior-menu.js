@@ -36,7 +36,7 @@ JX.behavior('conpherence-menu', function(config) {
   });
   threadManager.setDidLoadThreadCallback(function(r) {
     var header = JX.$H(r.header);
-    var messages = JX.$H(r.messages);
+    var messages = JX.$H(r.transactions);
     var form = JX.$H(r.form);
     var root = JX.DOM.find(document, 'div', 'conpherence-layout');
     var header_root = JX.DOM.find(root, 'div', 'conpherence-header-pane');
@@ -51,7 +51,6 @@ JX.behavior('conpherence-menu', function(config) {
   });
 
   threadManager.setDidUpdateThreadCallback(function(r) {
-    JX.DOM.appendContent(scrollbar.getContentNode(), JX.$H(r.transactions));
     _scrollMessageWindow();
   });
 
@@ -73,14 +72,13 @@ JX.behavior('conpherence-menu', function(config) {
       } catch (ex) {
         // Ignore; maybe no files widget
       }
-      JX.DOM.appendContent(scrollbar.getContentNode(), JX.$H(r.transactions));
-      _scrollMessageWindow();
-
       if (fileWidget) {
         JX.DOM.setContent(
           fileWidget,
           JX.$H(r.file_widget));
       }
+
+      _scrollMessageWindow();
       textarea.value = '';
     }
     markThreadLoading(false);
