@@ -88,10 +88,6 @@ table.phui-calendar-view td.phui-calendar-date-number-container {
   text-align: right;
 }
 
-.phui-calendar-not-work-day {
-  background-color: {$lightgreybackground};
-}
-
 .phui-calendar-today-slot {
   display: block;
   width: 100%;

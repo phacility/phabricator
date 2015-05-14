@@ -105,12 +105,36 @@ final class PHUICalendarListView extends AphrontTagView {
 
     Javelin::initBehavior('phabricator-tooltips');
 
-    if ($event->getMultiDay()) {
-      $tip = pht('%s, Until: %s', $event->getName(),
-        phabricator_date($event->getEpochEnd(), $this->getUser()));
+    $start = id(AphrontFormDateControlValue::newFromEpoch(
+      $this->getUser(),
+      $event->getEpochStart()));
+    $end = id(AphrontFormDateControlValue::newFromEpoch(
+      $this->getUser(),
+      $event->getEpochEnd()));
+
+    if ($event->getIsAllDay()) {
+      if ($start->getValueDay() == $end->getValueDay()) {
+        $tip = pht('All day');
+      } else {
+        $tip = pht(
+          'All day, %s - %s',
+          $start->getValueAsFormat('M j, Y'),
+          $end->getValueAsFormat('M j, Y'));
+      }
     } else {
-      $tip = pht('%s, Until: %s', $event->getName(),
-        phabricator_time($event->getEpochEnd(), $this->getUser()));
+      if ($start->getValueDay() == $end->getValueDay() &&
+        $start->getValueMonth() == $end->getValueMonth() &&
+        $start->getValueYear() == $end->getValueYear()) {
+        $tip = pht(
+          '%s - %s',
+          $start->getValueAsFormat('g:i A'),
+          $end->getValueAsFormat('g:i A'));
+      } else {
+        $tip = pht(
+          '%s - %s',
+          $start->getValueAsFormat('M j, Y, g:i A'),
+          $end->getValueAsFormat('M j, Y, g:i A'));
+      }
     }
 
     $description = $event->getDescription();

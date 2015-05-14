@@ -157,6 +157,13 @@ final class AphrontFormDateControlValue extends Phobject {
     );
   }
 
+  public function getValueAsFormat($format) {
+    return phabricator_format_local_time(
+      $this->getEpoch(),
+      $this->viewer,
+      $format);
+  }
+
   private function formatTime($epoch, $format) {
     return phabricator_format_local_time(
       $epoch,
