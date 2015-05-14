@@ -330,6 +330,16 @@ JX.install('ConpherenceThreadManager', {
       JX.DOM.setContent(this._messagesRootCallback(), transactions);
     },
 
+    cacheCurrentTransactions: function() {
+      var root = this._messagesRootCallback();
+      var transactions = JX.DOM.scry(
+        root ,
+        'div',
+        'conpherence-transaction-view');
+      this._updateTransactionIDMap(transactions);
+      this._updateTransactionCache(transactions);
+    },
+
     _updateThread: function() {
       var params = this._getParams({
         action: 'load',
@@ -422,13 +432,7 @@ JX.install('ConpherenceThreadManager', {
           r.aphlictDropdownData);
 
         this._didLoadThreadCallback(r);
-        var messages_root = this._messagesRootCallback();
-        var messages = JX.DOM.scry(
-          messages_root,
-          'div',
-          'conpherence-transaction-view');
-        this._updateTransactionIDMap(messages);
-        this._updateTransactionCache(messages);
+        this.cacheCurrentTransactions();
 
         if (force_reload) {
           JX.Stratcom.invoke('hashchange');

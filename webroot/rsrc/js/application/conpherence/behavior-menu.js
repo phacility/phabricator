@@ -191,6 +191,7 @@ JX.behavior('conpherence-menu', function(config) {
       threadManager.setLoadedThreadPHID(config.selectedThreadPHID);
       threadManager.setLatestTransactionID(config.latestTransactionID);
       threadManager.setCanEditLoadedThread(config.canEditSelectedThread);
+      threadManager.cacheCurrentTransactions();
       _scrollMessageWindow();
       _focusTextarea();
     } else {
