@@ -56,13 +56,7 @@ final class PHUICalendarMonthView extends AphrontView {
     }
 
     $events = msort($this->events, 'getEpochStart');
-
     $days = $this->getDatesInMonth();
-
-    require_celerity_resource('phui-calendar-month-css');
-
-    $first = reset($days);
-    $empty = $first->format('w');
 
     $cell_lists = array();
     $empty_cell = array(
@@ -72,6 +66,13 @@ final class PHUICalendarMonthView extends AphrontView {
         'count' => 0,
         'class' => null,
       );
+
+    require_celerity_resource('phui-calendar-month-css');
+
+    $first = reset($days);
+    $start_of_week = 0;
+
+    $empty = $first->format('w');
 
     for ($ii = 0; $ii < $empty; $ii++) {
       $cell_lists[] = $empty_cell;
@@ -409,22 +410,41 @@ final class PHUICalendarMonthView extends AphrontView {
     $month = $this->month;
     $year = $this->year;
 
-    // Get the year and month numbers of the following month, so we can
-    // determine when this month ends.
     list($next_year, $next_month) = $this->getNextYearAndMonth();
-
     $end_date = new DateTime("{$next_year}-{$next_month}-01", $timezone);
-    $end_epoch = $end_date->format('U');
+
+    $start_of_week = 0;
+    $end_of_week = 6 - $start_of_week;
+    $days_in_month = id(clone $end_date)->modify('-1 day')->format('d');
+
+    $first_month_day_date = new DateTime("{$year}-{$month}-01", $timezone);
+    $last_month_day_date = id(clone $end_date)->modify('-1 day');
+
+    $first_weekday_of_month = $first_month_day_date->format('w');
+    $last_weekday_of_month = $last_month_day_date->format('w');
+
+    $num_days_display = $days_in_month;
+    if ($start_of_week < $first_weekday_of_month) {
+      $num_days_display += $first_weekday_of_month;
+    }
+    if ($end_of_week > $last_weekday_of_month) {
+      $num_days_display += (6 - $last_weekday_of_month);
+      $end_date->modify('+'.(6 - $last_weekday_of_month).' days');
+    }
 
     $days = array();
-    for ($day = 1; $day <= 31; $day++) {
-      $day_date = new DateTime("{$year}-{$month}-{$day}", $timezone);
+    $day_date = id(clone $first_month_day_date)
+      ->modify('-'.$first_weekday_of_month.' days');
+
+    for ($day = 1; $day <= $num_days_display; $day++) {
       $day_epoch = $day_date->format('U');
+      $end_epoch = $end_date->format('U');
       if ($day_epoch >= $end_epoch) {
         break;
       } else {
-        $days[] = $day_date;
+        $days[] = clone $day_date;
       }
+      $day_date->modify('+1 day');
     }
 
     return $days;
