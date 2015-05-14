@@ -67,6 +67,7 @@ final class PhabricatorProjectProfileController
       $nav,
       array(
         'title' => $project->getName(),
+        'pageObjects' => array($project->getPHID()),
       ));
   }
 

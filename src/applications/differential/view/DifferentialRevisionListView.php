@@ -57,10 +57,9 @@ final class DifferentialRevisionListView extends AphrontView {
   }
 
   public function render() {
-
     $user = $this->user;
     if (!$user) {
-      throw new Exception('Call setUser() before render()!');
+      throw new PhutilInvalidStateException('setUser');
     }
 
     $fresh = PhabricatorEnv::getEnvConfig('differential.days-fresh');

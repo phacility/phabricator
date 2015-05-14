@@ -20,7 +20,7 @@ final class NuanceItem
   public static function initializeNewItem(PhabricatorUser $user) {
     return id(new NuanceItem())
       ->setDateNuanced(time())
-      ->setStatus(NuanceItem::STATUS_OPEN);
+      ->setStatus(self::STATUS_OPEN);
   }
 
   protected function getConfiguration() {

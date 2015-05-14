@@ -133,8 +133,7 @@ final class PhabricatorApplicationTransactionCommentEditor
     }
 
     if (!$this->getContentSource()) {
-      throw new Exception(
-        'Call setContentSource() before applyEdit()!');
+      throw new PhutilInvalidStateException('applyEdit');
     }
 
     $actor = $this->requireActor();

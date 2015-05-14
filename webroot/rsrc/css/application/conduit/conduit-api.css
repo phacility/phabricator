@@ -1,0 +1,16 @@
+/**
+ * @provides conduit-api-css
+ */
+.conduit-api-example-code {
+  margin: 16px;
+  white-space: pre;
+  color: {$darkgreytext};
+}
+
+.conduit-api-example-code strong {
+  color: {$red};
+}
+
+.conduit-api-example-code strong.real {
+  color: {$blue};
+}

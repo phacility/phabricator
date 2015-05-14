@@ -74,7 +74,7 @@ final class PHUIDocumentView extends AphrontTagView {
 
     if ($this->offset) {
       $classes[] = 'phui-document-offset';
-    };
+    }
 
     if ($this->fluid) {
       $classes[] = 'phui-document-fluid';

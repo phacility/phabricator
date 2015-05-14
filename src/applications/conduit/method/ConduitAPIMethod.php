@@ -100,9 +100,9 @@ abstract class ConduitAPIMethod
     $name = $this->getAPIMethodName();
 
     $map = array(
-      ConduitAPIMethod::METHOD_STATUS_STABLE      => 0,
-      ConduitAPIMethod::METHOD_STATUS_UNSTABLE    => 1,
-      ConduitAPIMethod::METHOD_STATUS_DEPRECATED  => 2,
+      self::METHOD_STATUS_STABLE      => 0,
+      self::METHOD_STATUS_UNSTABLE    => 1,
+      self::METHOD_STATUS_DEPRECATED  => 2,
     );
     $ord = idx($map, $this->getMethodStatus(), 0);
 

@@ -28,10 +28,9 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
   protected function loadHandles(array $objects) {
     $phids = mpull($objects, 'getPHID');
 
-    $handles = id(new PhabricatorHandleQuery($phids))
-      ->withPHIDs($phids)
-      ->setViewer($this->getEngine()->getConfig('viewer'))
-      ->execute();
+    $viewer = $this->getEngine()->getConfig('viewer');
+    $handles = $viewer->loadHandles($phids);
+    $handles = iterator_to_array($handles);
 
     $result = array();
     foreach ($objects as $id => $object) {
@@ -45,7 +44,13 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
     PhabricatorObjectHandle $handle,
     $id) {
 
-    return $handle->getURI();
+    $uri = $handle->getURI();
+
+    if ($this->getEngine()->getConfig('uri.full')) {
+      $uri = PhabricatorEnv::getURI($uri);
+    }
+
+    return $uri;
   }
 
   protected function renderObjectRefForAnyMedia (

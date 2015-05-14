@@ -38,8 +38,8 @@ final class PhabricatorSMS
     // and ProviderSMSID are totally garbage data before a send it attempted.
     return id(new PhabricatorSMS())
       ->setBody($body)
-      ->setSendStatus(PhabricatorSMS::STATUS_UNSENT)
-      ->setProviderShortName(PhabricatorSMS::SHORTNAME_PLACEHOLDER)
+      ->setSendStatus(self::STATUS_UNSENT)
+      ->setProviderShortName(self::SHORTNAME_PLACEHOLDER)
       ->setProviderSMSID(Filesystem::readRandomCharacters(40));
   }
 
@@ -70,6 +70,6 @@ final class PhabricatorSMS
 
   public function hasBeenSentAtLeastOnce() {
     return ($this->getProviderShortName() !=
-      PhabricatorSMS::SHORTNAME_PLACEHOLDER);
+      self::SHORTNAME_PLACEHOLDER);
   }
 }

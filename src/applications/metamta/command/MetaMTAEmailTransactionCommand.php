@@ -91,7 +91,7 @@ abstract class MetaMTAEmailTransactionCommand extends Phobject {
   }
 
   public static function getCommandMap(array $commands) {
-    assert_instances_of($commands, 'MetaMTAEmailTransactionCommand');
+    assert_instances_of($commands, __CLASS__);
 
     $map = array();
     foreach ($commands as $command) {

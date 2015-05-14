@@ -54,6 +54,10 @@ body {
      breaks lots of things and prevents you from using landscape to see more
      columns in source code views. */
   -webkit-text-size-adjust: none;
+
+  /* Prevent content from resizing abruptly when shifting between scrollable
+     and unscrollable pages. */
+  overflow-y: scroll;
 }
 
 textarea {

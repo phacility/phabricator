@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * @task image-cache Profile Image Cache
  * @task factors Multi-Factor Authentication
  * @task handles Managing Handles
  */
@@ -24,6 +25,7 @@ final class PhabricatorUser
   protected $passwordSalt;
   protected $passwordHash;
   protected $profileImagePHID;
+  protected $profileImageCache;
   protected $timezoneIdentifier = '';
 
   protected $consoleEnabled = 0;
@@ -142,6 +144,7 @@ final class PhabricatorUser
         'isApproved' => 'uint32',
         'accountSecret' => 'bytes64',
         'isEnrolledInMultiFactor' => 'bool',
+        'profileImageCache' => 'text255?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
@@ -159,6 +162,9 @@ final class PhabricatorUser
         'key_approved' => array(
           'columns' => array('isApproved'),
         ),
+      ),
+      self::CONFIG_NO_MUTATE => array(
+        'profileImageCache' => true,
       ),
     ) + parent::getConfiguration();
   }
@@ -682,6 +688,10 @@ EOBODY;
     }
   }
 
+  public function getTimeZone() {
+    return new DateTimeZone($this->getTimezoneIdentifier());
+  }
+
   public function __toString() {
     return $this->getUsername();
   }
@@ -714,6 +724,72 @@ EOBODY;
    */
   public function getAuthorities() {
     return $this->authorities;
+  }
+
+
+/* -(  Profile Image Cache  )------------------------------------------------ */
+
+
+  /**
+   * Get this user's cached profile image URI.
+   *
+   * @return string|null Cached URI, if a URI is cached.
+   * @task image-cache
+   */
+  public function getProfileImageCache() {
+    $version = $this->getProfileImageVersion();
+
+    $parts = explode(',', $this->profileImageCache, 2);
+    if (count($parts) !== 2) {
+      return null;
+    }
+
+    if ($parts[0] !== $version) {
+      return null;
+    }
+
+    return $parts[1];
+  }
+
+
+  /**
+   * Generate a new cache value for this user's profile image.
+   *
+   * @return string New cache value.
+   * @task image-cache
+   */
+  public function writeProfileImageCache($uri) {
+    $version = $this->getProfileImageVersion();
+    $cache = "{$version},{$uri}";
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+    queryfx(
+      $this->establishConnection('w'),
+      'UPDATE %T SET profileImageCache = %s WHERE id = %d',
+      $this->getTableName(),
+      $cache,
+      $this->getID());
+    unset($unguarded);
+  }
+
+
+  /**
+   * Get a version identifier for a user's profile image.
+   *
+   * This version will change if the image changes, or if any of the
+   * environment configuration which goes into generating a URI changes.
+   *
+   * @return string Cache version.
+   * @task image-cache
+   */
+  private function getProfileImageVersion() {
+    $parts = array(
+      PhabricatorEnv::getCDNURI('/'),
+      PhabricatorEnv::getEnvConfig('cluster.instance'),
+      $this->getProfileImagePHID(),
+    );
+    $parts = serialize($parts);
+    return PhabricatorHash::digestForIndex($parts);
   }
 
 

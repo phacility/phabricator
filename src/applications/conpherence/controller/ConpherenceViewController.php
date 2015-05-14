@@ -5,6 +5,10 @@ final class ConpherenceViewController extends
 
   const OLDER_FETCH_LIMIT = 5;
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
 
@@ -75,7 +79,7 @@ final class ConpherenceViewController extends
     if ($before_transaction_id || $after_transaction_id) {
       $header = null;
       $form = null;
-      $content = array('messages' => $messages);
+      $content = array('transactions' => $messages);
     } else {
       $policy_objects = id(new PhabricatorPolicyQuery())
         ->setViewer($user)
@@ -85,7 +89,7 @@ final class ConpherenceViewController extends
       $form = $this->renderFormContent();
       $content = array(
         'header' => $header,
-        'messages' => $messages,
+        'transactions' => $messages,
         'form' => $form,
       );
     }
@@ -94,6 +98,9 @@ final class ConpherenceViewController extends
     $content['title'] = $title = $d_data['title'];
 
     if ($request->isAjax()) {
+      $dropdown_query = id(new AphlictDropdownDataQuery())
+        ->setViewer($user);
+      $dropdown_query->execute();
       $content['threadID'] = $conpherence->getID();
       $content['threadPHID'] = $conpherence->getPHID();
       $content['latestTransactionID'] = $data['latest_transaction_id'];
@@ -101,6 +108,10 @@ final class ConpherenceViewController extends
         $user,
         $conpherence,
         PhabricatorPolicyCapability::CAN_EDIT);
+      $content['aphlictDropdownData'] = array(
+        $dropdown_query->getNotificationData(),
+        $dropdown_query->getConpherenceData(),
+      );
       return id(new AphrontAjaxResponse())->setContent($content);
     }
 
@@ -131,7 +142,7 @@ final class ConpherenceViewController extends
       $conpherence,
       PhabricatorPolicyCapability::CAN_JOIN);
     $participating = $conpherence->getParticipantIfExists($user->getPHID());
-    if (!$can_join && !$participating) {
+    if (!$can_join && !$participating && $user->isLoggedIn()) {
       return null;
     }
     $draft = PhabricatorDraft::newFromUserAndKey(
@@ -140,9 +151,20 @@ final class ConpherenceViewController extends
     if ($participating) {
       $action = ConpherenceUpdateActions::MESSAGE;
       $button_text = pht('Send');
-    } else {
+    } else if ($user->isLoggedIn()) {
       $action = ConpherenceUpdateActions::JOIN_ROOM;
       $button_text = pht('Join');
+    } else {
+      // user not logged in so give them a login button.
+      $login_href = id(new PhutilURI('/auth/start/'))
+        ->setQueryParam('next', '/'.$conpherence->getMonogram());
+      return id(new PHUIFormLayoutView())
+        ->addClass('login-to-participate')
+        ->appendChild(
+          id(new PHUIButtonView())
+          ->setTag('a')
+          ->setText(pht('Login to Participate'))
+          ->setHref((string)$login_href));
     }
     $update_uri = $this->getApplicationURI('update/'.$conpherence->getID().'/');
 
@@ -150,10 +172,10 @@ final class ConpherenceViewController extends
 
     $form =
       id(new AphrontFormView())
+      ->setUser($user)
       ->setAction($update_uri)
       ->addSigil('conpherence-pontificate')
       ->setWorkflow(true)
-      ->setUser($user)
       ->addHiddenInput('action', $action)
       ->appendChild(
         id(new PhabricatorRemarkupControl())

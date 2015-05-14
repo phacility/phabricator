@@ -46,7 +46,7 @@ final class PhabricatorConduitTokenQuery
       $this->buildOrderClause($conn_r),
       $this->buildLimitClause($conn_r));
 
-    return $table->loadAllFromArray($data);;
+    return $table->loadAllFromArray($data);
   }
 
   protected function buildWhereClause(AphrontDatabaseConnection $conn_r) {

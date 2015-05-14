@@ -25,6 +25,10 @@ final class ConpherenceListController extends ConpherenceController {
     return $mode;
   }
 
+  public function shouldAllowPublic() {
+    return true;
+  }
+
   public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
     $title = pht('Conpherence');

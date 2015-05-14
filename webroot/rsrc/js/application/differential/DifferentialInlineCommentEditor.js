@@ -33,7 +33,7 @@ JX.install('DifferentialInlineCommentEditor', {
         on_right : this.getOnRight(),
         id : this.getID(),
         number : this.getLineNumber(),
-        is_new : this.getIsNew(),
+        is_new : (this.getIsNew() ? 1 : 0),
         length : this.getLength(),
         changesetID : this.getChangesetID(),
         text : this.getText() || '',

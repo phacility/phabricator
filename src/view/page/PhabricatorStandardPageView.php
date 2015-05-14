@@ -3,7 +3,6 @@
 /**
  * This is a standard Phabricator page with menus, Javelin, DarkConsole, and
  * basic styles.
- *
  */
 final class PhabricatorStandardPageView extends PhabricatorBarePageView {
 
@@ -160,7 +159,8 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     if (!$this->getRequest()) {
       throw new Exception(
         pht(
-          'You must set the Request to render a PhabricatorStandardPageView.'));
+          'You must set the Request to render a %s.',
+          __CLASS__));
     }
 
     $console = $this->getConsole();
@@ -375,15 +375,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
             ),
             pht('You have %d unresolved setup issue(s)...', count($open))));
       }
-    }
-
-    if (!$this->isQuicksandBlacklistURI()) {
-      Javelin::initBehavior(
-        'scrollbar',
-        array(
-          'nodeID' => 'phabricator-standard-page',
-          'isMainContent' => true,
-        ));
     }
 
     $main_page = phutil_tag(

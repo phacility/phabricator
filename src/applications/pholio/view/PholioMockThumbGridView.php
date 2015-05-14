@@ -114,28 +114,34 @@ final class PholioMockThumbGridView extends AphrontView {
   private function renderThumbnail(PholioImage $image) {
     $thumbfile = $image->getFile();
 
+    $preview_key = PhabricatorFileThumbnailTransform::TRANSFORM_THUMBGRID;
+    $xform = PhabricatorFileTransform::getTransformByKey($preview_key);
+
+    $attributes = array(
+      'class' => 'pholio-mock-thumb-grid-image',
+      'src' => $thumbfile->getURIForTransform($xform),
+    );
+
     if ($image->getFile()->isViewableImage()) {
-      $dimensions = PhabricatorImageTransformer::getPreviewDimensions(
-        $thumbfile,
-        100);
+      $dimensions = $xform->getTransformedDimensions($thumbfile);
+      if ($dimensions) {
+        list($x, $y) = $dimensions;
+        $attributes += array(
+          'width' => $x,
+          'height' => $y,
+          'style' => 'top: '.floor((100 - $y) / 2).'px',
+        );
+      }
     } else {
       // If this is a PDF or a text file or something, we'll end up using a
       // generic thumbnail which is always sized correctly.
-      $dimensions = array(
-        'sdx' => 100,
-        'sdy' => 100,
+      $attributes += array(
+        'width' => 100,
+        'height' => 100,
       );
     }
 
-    $tag = phutil_tag(
-      'img',
-      array(
-        'width' => $dimensions['sdx'],
-        'height' => $dimensions['sdy'],
-        'src' => $thumbfile->getPreview100URI(),
-        'class' => 'pholio-mock-thumb-grid-image',
-        'style' => 'top: '.floor((100 - $dimensions['sdy'] ) / 2).'px',
-    ));
+    $tag = phutil_tag('img', $attributes);
 
     $classes = array('pholio-mock-thumb-grid-item');
     if ($image->getIsObsolete()) {

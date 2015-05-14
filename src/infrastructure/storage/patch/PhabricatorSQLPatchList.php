@@ -38,7 +38,7 @@ abstract class PhabricatorSQLPatchList {
 
   final public static function buildAllPatches() {
     $patch_lists = id(new PhutilSymbolLoader())
-      ->setAncestorClass('PhabricatorSQLPatchList')
+      ->setAncestorClass(__CLASS__)
       ->setConcreteOnly(true)
       ->selectAndLoadSymbols();
 

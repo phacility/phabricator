@@ -17,7 +17,7 @@ final class PholioMockEmbedView extends AphrontView {
 
   public function render() {
     if (!$this->mock) {
-      throw new Exception('Call setMock() before render()!');
+      throw new PhutilInvalidStateException('setMock');
     }
     $mock = $this->mock;
 
@@ -28,25 +28,29 @@ final class PholioMockEmbedView extends AphrontView {
         $this->mock->getImages(), array_flip($this->images));
     }
 
+    $xform = PhabricatorFileTransform::getTransformByKey(
+      PhabricatorFileThumbnailTransform::TRANSFORM_PINBOARD);
+
     if ($images_to_show) {
-      foreach ($images_to_show as $image) {
-        $thumbfile = $image->getFile();
-        $thumbnail = $thumbfile->getThumb280x210URI();
-      }
+      $image = head($images_to_show);
+      $thumbfile = $image->getFile();
       $header = 'M'.$mock->getID().' '.$mock->getName().
         ' (#'.$image->getID().')';
       $uri = '/M'.$this->mock->getID().'/'.$image->getID().'/';
     } else {
-      $thumbnail = $mock->getCoverFile()->getThumb280x210URI();
+      $thumbfile = $mock->getCoverFile();
       $header = 'M'.$mock->getID().' '.$mock->getName();
       $uri = '/M'.$this->mock->getID();
     }
+
+    $thumbnail = $thumbfile->getURIForTransform($xform);
+    list($x, $y) = $xform->getTransformedDimensions($thumbfile);
 
     $item = id(new PHUIPinboardItemView())
       ->setHeader($header)
       ->setURI($uri)
       ->setImageURI($thumbnail)
-      ->setImageSize(280, 210)
+      ->setImageSize($x, $y)
       ->setDisabled($mock->isClosed())
       ->addIconCount('fa-picture-o', count($mock->getImages()))
       ->addIconCount('fa-trophy', $mock->getTokenCount());

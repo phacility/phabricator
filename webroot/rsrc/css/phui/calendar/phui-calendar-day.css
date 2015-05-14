@@ -48,3 +48,25 @@
   text-decoration: none;
   color: {$greytext};
 }
+
+.day-view-all-day {
+  border: 1px solid {$blueborder};
+  height: 12px;
+  margin: 0;
+  display: block;
+  padding: 8px;
+  background-color: {$bluebackground};
+  text-decoration: none;
+  color: {$greytext};
+}
+
+.phui-calendar-day-event + .phui-calendar-day-event .day-view-all-day {
+  border-top-style: none;
+  border-top-width: 0;
+}
+
+.phui-calendar-all-day-label {
+  color: {$greytext};
+  float: right;
+  margin: 8px 8px 0 0;
+}

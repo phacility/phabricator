@@ -46,6 +46,9 @@ final class PhabricatorDestructionEngine extends Phobject {
         $template = $object->getApplicationTransactionTemplate();
         $this->destroyTransactions($template, $object_phid);
       }
+
+      $this->destroyWorkerTasks($object_phid);
+      $this->destroyNotifications($object_phid);
     }
 
     // Nuke any Herald transcripts of the object, because they may contain
@@ -94,7 +97,28 @@ final class PhabricatorDestructionEngine extends Phobject {
     foreach ($xactions as $xaction) {
       $this->destroyObject($xaction);
     }
+  }
 
+  private function destroyWorkerTasks($object_phid) {
+    $tasks = id(new PhabricatorWorkerActiveTask())->loadAllWhere(
+      'objectPHID = %s',
+      $object_phid);
+
+    foreach ($tasks as $task) {
+      $task->archiveTask(
+        PhabricatorWorkerArchiveTask::RESULT_CANCELLED,
+        0);
+    }
+  }
+
+  private function destroyNotifications($object_phid) {
+    $notifications = id(new PhabricatorFeedStoryNotification())->loadAllWhere(
+      'primaryObjectPHID = %s',
+      $object_phid);
+
+    foreach ($notifications as $notification) {
+      $notification->delete();
+    }
   }
 
 }

@@ -266,6 +266,8 @@ abstract class PhabricatorInlineCommentController
       // comment appears on. This is expected in the case of ghost comments.
       // We currently put the new comment on the visible changeset, not the
       // original comment's changeset.
+
+      $this->isNewFile = $reply_comment->getIsNewFile();
     }
   }
 

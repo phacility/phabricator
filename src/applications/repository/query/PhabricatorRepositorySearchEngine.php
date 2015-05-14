@@ -201,7 +201,7 @@ final class PhabricatorRepositorySearchEngine
     array $handles) {
     assert_instances_of($repositories, 'PhabricatorRepository');
 
-    $viewer = $this->requireViewer();;
+    $viewer = $this->requireViewer();
 
     $list = new PHUIObjectItemListView();
     foreach ($repositories as $repository) {

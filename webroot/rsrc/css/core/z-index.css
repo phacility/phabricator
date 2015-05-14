@@ -81,7 +81,6 @@
   z-index: 5;
 }
 
-.conpherence-durable-column-header,
 .phabricator-main-menu {
   z-index: 6;
 }
@@ -90,8 +89,12 @@
   z-index: 6;
 }
 
-.jx-scrollbar-bar {
+.conpherence-durable-column {
   z-index: 7;
+}
+
+.jx-scrollbar-bar {
+  z-index: 8;
 }
 
 .differential-haunt-mode-1 .differential-add-comment-panel,

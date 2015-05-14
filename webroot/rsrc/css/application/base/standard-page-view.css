@@ -114,27 +114,6 @@ a.handle-disabled {
   margin: 2px 2px -2px 0;
 }
 
-.main-page-frame {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  left: 0;
-  overflow: hidden;
-}
-
-.phabricator-standard-page {
-  /* If we don't activate JX.Scrollbar because the default scrollbars are
-     satisfactory, make sure the page still has sensible behavior. These
-     settings will be overwritten by .jx-scrollbar-frame if JX.Scrollbar
-     activates. */
-  position: relative;
-  height: 100%;
-  overflow-y: scroll;
-
-  -webkit-overflow-scrolling: touch;
-}
-
 .jx-scrollbar-frame {
   position: relative;
   overflow: hidden;

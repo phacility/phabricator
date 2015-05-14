@@ -604,17 +604,9 @@ final class PhabricatorAuthRegisterController
       return null;
     }
 
-    try {
-      $xformer = new PhabricatorImageTransformer();
-      return $xformer->executeProfileTransform(
-        $file,
-        $width = 50,
-        $min_height = 50,
-        $max_height = 50);
-    } catch (Exception $ex) {
-      phlog($ex);
-      return null;
-    }
+    $xform = PhabricatorFileTransform::getTransformByKey(
+      PhabricatorFileThumbnailTransform::TRANSFORM_PROFILE);
+    return $xform->executeTransform($file);
   }
 
   protected function renderError($message) {

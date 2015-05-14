@@ -650,7 +650,7 @@ final class AphrontRequest {
    * safe.
    */
   public function isProxiedClusterRequest() {
-    return (bool)AphrontRequest::getHTTPHeader('X-Phabricator-Cluster');
+    return (bool)self::getHTTPHeader('X-Phabricator-Cluster');
   }
 
 

@@ -93,22 +93,33 @@ JX.behavior('aphlict-dropdown', function(config, statics) {
       if (!data.fromServer) {
         return;
       }
-      var updated = false;
       var new_data = data.newResponse.aphlictDropdownData;
-      for (var ii = 0; ii < new_data.length; ii++) {
-        if (new_data[ii].countType != config.countType) {
-          continue;
-        }
-        if (!new_data[ii].isInstalled) {
-          continue;
-        }
-        updated = true;
-        _updateCount(parseInt(new_data[ii].count));
-      }
-      if (updated) {
-        dirty = true;
-      }
+      update_counts(new_data);
     });
+
+  JX.Stratcom.listen(
+    'conpherence-redraw-aphlict',
+    null,
+    function (e) {
+      update_counts(e.getData());
+    });
+
+  function update_counts(new_data) {
+    var updated = false;
+    for (var ii = 0; ii < new_data.length; ii++) {
+      if (new_data[ii].countType != config.countType) {
+        continue;
+      }
+      if (!new_data[ii].isInstalled) {
+        continue;
+      }
+      updated = true;
+      _updateCount(parseInt(new_data[ii].count));
+    }
+    if (updated) {
+      dirty = true;
+    }
+  }
 
   function set_visible(menu, icon) {
     if (menu) {

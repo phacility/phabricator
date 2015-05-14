@@ -29,9 +29,11 @@ JX.behavior('durable-column', function(config, statics) {
   var loadThreadID = null;
   var scrollbar = null;
 
-  var columnWidth = 300;
+  var margin = JX.Scrollbar.getScrollbarControlMargin();
+
+  var columnWidth = (300 + margin);
   // This is the smallest window size where we'll enable the column.
-  var minimumViewportWidth = 768;
+  var minimumViewportWidth = (768 - margin);
 
   var quick = JX.$('phabricator-standard-page-body');
 
@@ -71,7 +73,15 @@ JX.behavior('durable-column', function(config, statics) {
   }
 
   function _drawColumn(visible) {
-    JX.DOM.alterClass(document.body, 'with-durable-column', visible);
+    JX.DOM.alterClass(
+      document.body,
+      'with-durable-column',
+      visible);
+    JX.DOM.alterClass(
+      document.body,
+      'with-durable-margin',
+      visible && !!margin);
+
     var column = _getColumnNode();
     if (visible) {
       JX.DOM.show(column);
@@ -109,6 +119,9 @@ JX.behavior('durable-column', function(config, statics) {
 
   var threadManager = new JX.ConpherenceThreadManager();
   threadManager.setMinimalDisplay(true);
+  threadManager.setMessagesRootCallback(function() {
+    return _getColumnMessagesNode();
+  });
   threadManager.setLoadThreadURI('/conpherence/columnview/');
   threadManager.setWillLoadThreadCallback(function() {
     _markLoading(true);
@@ -146,7 +159,6 @@ JX.behavior('durable-column', function(config, statics) {
       return;
     }
     var messages = _getColumnMessagesNode();
-    JX.DOM.appendContent(messages, JX.$H(r.transactions));
     scrollbar.scrollTo(messages.scrollHeight);
   });
 
@@ -155,7 +167,6 @@ JX.behavior('durable-column', function(config, statics) {
   });
   threadManager.setDidUpdateWorkflowCallback(function(r) {
     var messages = _getColumnMessagesNode();
-    JX.DOM.appendContent(messages, JX.$H(r.transactions));
     scrollbar.scrollTo(messages.scrollHeight);
     JX.DOM.setContent(_getColumnTitleNode(), r.conpherence_title);
   });

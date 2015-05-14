@@ -361,7 +361,7 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
 
   public static function getByClass($class_name) {
     $selected = null;
-    $applications = PhabricatorApplication::getAllApplications();
+    $applications = self::getAllApplications();
 
     foreach ($applications as $application) {
       if (get_class($application) == $class_name) {

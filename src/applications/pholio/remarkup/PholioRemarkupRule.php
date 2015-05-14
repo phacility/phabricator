@@ -25,6 +25,10 @@ final class PholioRemarkupRule extends PhabricatorObjectRemarkupRule {
       $href = $href.'/'.$id[1].'/';
     }
 
+    if ($this->getEngine()->getConfig('uri.full')) {
+      $href = PhabricatorEnv::getURI($href);
+    }
+
     return $href;
   }
 

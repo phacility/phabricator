@@ -55,18 +55,12 @@ final class PhabricatorApplicationSearchController
 
     $engine = $this->getSearchEngine();
     if (!$engine) {
-      throw new Exception(
-        pht(
-          'Call %s before delegating to this controller!',
-          'setEngine()'));
+      throw new PhutilInvalidStateException('setEngine');
     }
 
     $nav = $this->getNavigation();
     if (!$nav) {
-      throw new Exception(
-        pht(
-          'Call %s before delegating to this controller!',
-          'setNavigation()'));
+      throw new PhutilInvalidStateException('setNavigation');
     }
 
     $engine->setViewer($this->getRequest()->getUser());

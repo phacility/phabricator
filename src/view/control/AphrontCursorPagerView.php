@@ -92,8 +92,7 @@ final class AphrontCursorPagerView extends AphrontView {
 
   public function getFirstPageURI() {
     if (!$this->uri) {
-      throw new Exception(
-        pht('You must call setURI() before you can call getFirstPageURI().'));
+      throw new PhutilInvalidStateException('setURI');
     }
 
     if (!$this->afterID && !($this->beforeID && $this->moreResults)) {
@@ -107,8 +106,7 @@ final class AphrontCursorPagerView extends AphrontView {
 
   public function getPrevPageURI() {
     if (!$this->uri) {
-      throw new Exception(
-        pht('You must call setURI() before you can call getPrevPageURI().'));
+      throw new PhutilInvalidStateException('getPrevPageURI');
     }
 
     if (!$this->prevPageID) {
@@ -122,8 +120,7 @@ final class AphrontCursorPagerView extends AphrontView {
 
   public function getNextPageURI() {
     if (!$this->uri) {
-      throw new Exception(
-        pht('You must call setURI() before you can call getNextPageURI().'));
+      throw new PhutilInvalidStateException('setURI');
     }
 
     if (!$this->nextPageID) {
@@ -137,8 +134,7 @@ final class AphrontCursorPagerView extends AphrontView {
 
   public function render() {
     if (!$this->uri) {
-      throw new Exception(
-        pht('You must call setURI() before you can call render().'));
+      throw new PhutilInvalidStateException('setURI');
     }
 
     $links = array();

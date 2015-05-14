@@ -42,8 +42,11 @@ final class PHUIRemarkupPreviewPanel extends AphrontTagView {
     );
 
     if (empty($skins[$skin])) {
-      $valid = implode(', ', array_keys($skins));
-      throw new Exception("Invalid skin '{$skin}'. Valid skins are: {$valid}.");
+      throw new Exception(
+        pht(
+          "Invalid skin '%s'. Valid skins are: %s.",
+          $skin,
+          implode(', ', array_keys($skins))));
     }
 
     $this->skin = $skin;
@@ -69,10 +72,10 @@ final class PHUIRemarkupPreviewPanel extends AphrontTagView {
 
   protected function getTagContent() {
     if ($this->previewURI === null) {
-      throw new Exception('Call setPreviewURI() before rendering!');
+      throw new PhutilInvalidStateException('setPreviewURI');
     }
     if ($this->controlID === null) {
-      throw new Exception('Call setControlID() before rendering!');
+      throw new PhutilInvalidStateException('setControlID');
     }
 
     $preview_id = celerity_generate_unique_node_id();

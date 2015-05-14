@@ -285,10 +285,9 @@ final class ConpherenceThreadQuery
         $conpherence->$method();
     }
     $flat_phids = array_mergev($handle_phids);
-    $handles = id(new PhabricatorHandleQuery())
-      ->setViewer($this->getViewer())
-      ->withPHIDs($flat_phids)
-      ->execute();
+    $viewer = $this->getViewer();
+    $handles = $viewer->loadHandles($flat_phids);
+    $handles = iterator_to_array($handles);
     foreach ($handle_phids as $conpherence_phid => $phids) {
       $conpherence = $conpherences[$conpherence_phid];
       $conpherence->attachHandles(

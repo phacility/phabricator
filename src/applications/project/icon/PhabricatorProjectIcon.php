@@ -44,7 +44,7 @@ final class PhabricatorProjectIcon extends Phobject {
   }
 
   public static function renderIconForChooser($icon) {
-    $project_icons = PhabricatorProjectIcon::getIconMap();
+    $project_icons = self::getIconMap();
 
     return phutil_tag(
       'span',

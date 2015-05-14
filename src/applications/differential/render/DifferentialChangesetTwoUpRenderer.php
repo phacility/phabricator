@@ -278,6 +278,7 @@ final class DifferentialChangesetTwoUpRenderer
 
                 $scaffold->addInlineView($companion);
                 unset($new_comments[$n_num][$key]);
+                break;
               }
             }
           }

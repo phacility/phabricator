@@ -113,6 +113,14 @@
   right: 241px;
 }
 
+.conpherence-message-pane .phui-form-view.login-to-participate {
+  height: 28px;
+}
+
+.conpherence-message-pane .login-to-participate a.button {
+  float: right;
+}
+
 .conpherence-message-pane .aphront-form-control-submit button,
 .conpherence-message-pane .aphront-form-control-submit a.button {
   margin-top: 6px;
@@ -154,7 +162,7 @@
 .conpherence-message-pane .conpherence-transaction-view {
   padding: 2px 0px;
   margin: 4px 12px;
-  background-size: 35px;
+  background-size: 100%;
   min-height: auto;
 }
 
