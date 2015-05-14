@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * @task availability Availability
  * @task image-cache Profile Image Cache
  * @task factors Multi-Factor Authentication
  * @task handles Managing Handles
@@ -45,7 +46,7 @@ final class PhabricatorUser
 
   private $profileImage = self::ATTACHABLE;
   private $profile = null;
-  private $status = self::ATTACHABLE;
+  private $availability = self::ATTACHABLE;
   private $preferences = null;
   private $omnipotent = false;
   private $customFields = self::ATTACHABLE;
@@ -658,19 +659,6 @@ EOBODY;
     return celerity_get_resource_uri('/rsrc/image/avatar.png');
   }
 
-  public function attachStatus(PhabricatorCalendarEvent $status) {
-    $this->status = $status;
-    return $this;
-  }
-
-  public function getStatus() {
-    return $this->assertAttached($this->status);
-  }
-
-  public function hasStatus() {
-    return $this->status !== self::ATTACHABLE;
-  }
-
   public function attachProfileImageURI($uri) {
     $this->profileImage = $uri;
     return $this;
@@ -724,6 +712,53 @@ EOBODY;
    */
   public function getAuthorities() {
     return $this->authorities;
+  }
+
+
+/* -(  Availability  )------------------------------------------------------- */
+
+
+  /**
+   * @task availability
+   */
+  public function attachAvailability($availability) {
+    $this->availability = $availability;
+    return $this;
+  }
+
+
+  /**
+   * Get the timestamp the user is away until, if they are currently away.
+   *
+   * @return int|null Epoch timestamp, or `null` if the user is not away.
+   * @task availability
+   */
+  public function getAwayUntil() {
+    $availability = $this->availability;
+
+    $this->assertAttached($availability);
+    if (!$availability) {
+      return null;
+    }
+
+    return idx($availability, 'until');
+  }
+
+
+  /**
+   * Describe the user's availability.
+   *
+   * @param PhabricatorUser Viewing user.
+   * @return string Human-readable description of away status.
+   * @task availability
+   */
+  public function getAvailabilityDescription(PhabricatorUser $viewer) {
+    $until = $this->getAwayUntil();
+    if ($until) {
+      return pht('Away until %s', phabricator_datetime($until, $viewer));
+    } else {
+      return pht('Available');
+    }
   }
 
 

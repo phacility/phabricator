@@ -6,9 +6,7 @@ abstract class UserConduitAPIMethod extends ConduitAPIMethod {
     return PhabricatorApplication::getByClass('PhabricatorPeopleApplication');
   }
 
-  protected function buildUserInformationDictionary(
-    PhabricatorUser $user,
-    PhabricatorCalendarEvent $current_status = null) {
+  protected function buildUserInformationDictionary(PhabricatorUser $user) {
 
     $roles = array();
     if ($user->getIsDisabled()) {
@@ -48,9 +46,12 @@ abstract class UserConduitAPIMethod extends ConduitAPIMethod {
       'roles'        => $roles,
     );
 
-    if ($current_status) {
-      $return['currentStatus'] = $current_status->getTextStatus();
-      $return['currentStatusUntil'] = $current_status->getDateTo();
+    // TODO: Modernize this once we have a more long-term view of what the
+    // data looks like.
+    $until = $user->getAwayUntil();
+    if ($until) {
+      $return['currentStatus'] = 'away';
+      $return['currentStatusUntil'] = $until;
     }
 
     return $return;

@@ -218,18 +218,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     }
   }
 
-  public function loadCurrentStatuses($user_phids) {
-    if (!$user_phids) {
-      return array();
-    }
-
-    $statuses = $this->loadAllWhere(
-      'userPHID IN (%Ls) AND UNIX_TIMESTAMP() BETWEEN dateFrom AND dateTo',
-      $user_phids);
-
-    return mpull($statuses, null, 'getUserPHID');
-  }
-
   public function getInvitees() {
     return $this->assertAttached($this->invitees);
   }

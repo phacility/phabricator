@@ -27,7 +27,7 @@ final class PhabricatorPeopleUserPHIDType extends PhabricatorPHIDType {
     return id(new PhabricatorPeopleQuery())
       ->withPHIDs($phids)
       ->needProfileImage(true)
-      ->needStatus(true);
+      ->needAvailability(true);
   }
 
   public function loadHandles(
@@ -48,18 +48,9 @@ final class PhabricatorPeopleUserPHIDType extends PhabricatorPHIDType {
       if (!$user->isUserActivated()) {
         $availability = PhabricatorObjectHandle::AVAILABILITY_DISABLED;
       } else {
-        if ($user->hasStatus()) {
-          // NOTE: This first call returns an event; then we get the event
-          // status.
-          $status = $user->getStatus()->getStatus();
-          switch ($status) {
-            case PhabricatorCalendarEvent::STATUS_AWAY:
-              $availability = PhabricatorObjectHandle::AVAILABILITY_NONE;
-              break;
-            case PhabricatorCalendarEvent::STATUS_SPORADIC:
-              $availability = PhabricatorObjectHandle::AVAILABILITY_PARTIAL;
-              break;
-          }
+        $until = $user->getAwayUntil();
+        if ($until) {
+          $availability = PhabricatorObjectHandle::AVAILABILITY_NONE;
         }
       }
 
