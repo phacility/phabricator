@@ -15,9 +15,9 @@ final class PhabricatorPolicies extends PhabricatorPolicyConstants {
    */
   public static function getMostOpenPolicy() {
     if (PhabricatorEnv::getEnvConfig('policy.allow-public')) {
-      return PhabricatorPolicies::POLICY_PUBLIC;
+      return self::POLICY_PUBLIC;
     } else {
-      return PhabricatorPolicies::POLICY_USER;
+      return self::POLICY_USER;
     }
   }
 

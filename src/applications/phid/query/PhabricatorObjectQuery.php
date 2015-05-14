@@ -78,7 +78,7 @@ final class PhabricatorObjectQuery
 
   public function getNamedResults() {
     if ($this->namedResults === null) {
-      throw new Exception('Call execute() before getNamedResults()!');
+      throw new PhutilInvalidStateException('execute');
     }
     return $this->namedResults;
   }

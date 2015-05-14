@@ -91,6 +91,8 @@ final class PhabricatorFilesApplication extends PhabricatorApplication {
           '(?P<phid>[^/]+)/'.
           '(?P<key>[^/]+)/'
           => 'PhabricatorFileTransformController',
+        'transforms/(?P<id>[1-9]\d*)/' =>
+          'PhabricatorFileTransformListController',
         'uploaddialog/' => 'PhabricatorFileUploadDialogController',
         'download/(?P<phid>[^/]+)/' => 'PhabricatorFileDialogController',
       ),

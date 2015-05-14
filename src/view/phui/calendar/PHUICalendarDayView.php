@@ -55,14 +55,14 @@ final class PHUICalendarDayView extends AphrontView {
     $day_start = $this->getDateTime();
     $day_end = id(clone $day_start)->modify('+1 day');
 
-    $day_start = $day_start->format('U');
-    $day_end = $day_end->format('U') - 1;
+    $day_start_epoch = $day_start->format('U');
+    $day_end_epoch = $day_end->format('U') - 1;
 
     foreach ($all_day_events as $all_day_event) {
       $all_day_start = $all_day_event->getEpochStart();
       $all_day_end = $all_day_event->getEpochEnd();
 
-      if ($all_day_start < $day_end && $all_day_end > $day_start) {
+      if ($all_day_start < $day_end_epoch && $all_day_end > $day_start_epoch) {
         $today_all_day_events[] = $all_day_event;
       }
     }
@@ -73,18 +73,22 @@ final class PHUICalendarDayView extends AphrontView {
       $hour_end = id(clone $hour)->modify('+1 hour')->format('U');
 
       foreach ($this->events as $event) {
-          if ($event->getIsAllDay()) {
-            continue;
-          }
-        if ($event->getEpochStart() >= $hour_start
-          && $event->getEpochStart() < $hour_end) {
+        if ($event->getIsAllDay()) {
+          continue;
+        }
+        if (($hour == $day_start &&
+          $event->getEpochStart() <= $hour_start &&
+          $event->getEpochEnd() > $day_start_epoch) ||
+          ($event->getEpochStart() >= $hour_start
+          && $event->getEpochStart() < $hour_end)) {
           $current_hour_events[] = $event;
           $this->todayEvents[] = $event;
         }
       }
       foreach ($current_hour_events as $event) {
-        $event_start = $event->getEpochStart();
-        $event_end = min($event->getEpochEnd(), $day_end);
+        $day_start_epoch = $this->getDateTime()->format('U');
+        $event_start = max($event->getEpochStart(), $day_start_epoch);
+        $event_end = min($event->getEpochEnd(), $day_end_epoch);
 
         $top = (($event_start - $hour_start) / ($hour_end - $hour_start))
           * 100;

@@ -119,6 +119,9 @@ JX.behavior('durable-column', function(config, statics) {
 
   var threadManager = new JX.ConpherenceThreadManager();
   threadManager.setMinimalDisplay(true);
+  threadManager.setMessagesRootCallback(function() {
+    return _getColumnMessagesNode();
+  });
   threadManager.setLoadThreadURI('/conpherence/columnview/');
   threadManager.setWillLoadThreadCallback(function() {
     _markLoading(true);
@@ -156,7 +159,6 @@ JX.behavior('durable-column', function(config, statics) {
       return;
     }
     var messages = _getColumnMessagesNode();
-    JX.DOM.appendContent(messages, JX.$H(r.transactions));
     scrollbar.scrollTo(messages.scrollHeight);
   });
 
@@ -165,7 +167,6 @@ JX.behavior('durable-column', function(config, statics) {
   });
   threadManager.setDidUpdateWorkflowCallback(function(r) {
     var messages = _getColumnMessagesNode();
-    JX.DOM.appendContent(messages, JX.$H(r.transactions));
     scrollbar.scrollTo(messages.scrollHeight);
     JX.DOM.setContent(_getColumnTitleNode(), r.conpherence_title);
   });

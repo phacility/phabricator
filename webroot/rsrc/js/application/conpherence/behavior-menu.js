@@ -28,12 +28,15 @@ JX.behavior('conpherence-menu', function(config) {
 
   // TODO - move more logic into the ThreadManager
   var threadManager = new JX.ConpherenceThreadManager();
+  threadManager.setMessagesRootCallback(function() {
+    return scrollbar.getContentNode();
+  });
   threadManager.setWillLoadThreadCallback(function() {
     markThreadLoading(true);
   });
   threadManager.setDidLoadThreadCallback(function(r) {
     var header = JX.$H(r.header);
-    var messages = JX.$H(r.messages);
+    var messages = JX.$H(r.transactions);
     var form = JX.$H(r.form);
     var root = JX.DOM.find(document, 'div', 'conpherence-layout');
     var header_root = JX.DOM.find(root, 'div', 'conpherence-header-pane');
@@ -48,7 +51,6 @@ JX.behavior('conpherence-menu', function(config) {
   });
 
   threadManager.setDidUpdateThreadCallback(function(r) {
-    JX.DOM.appendContent(scrollbar.getContentNode(), JX.$H(r.transactions));
     _scrollMessageWindow();
   });
 
@@ -70,14 +72,13 @@ JX.behavior('conpherence-menu', function(config) {
       } catch (ex) {
         // Ignore; maybe no files widget
       }
-      JX.DOM.appendContent(scrollbar.getContentNode(), JX.$H(r.transactions));
-      _scrollMessageWindow();
-
       if (fileWidget) {
         JX.DOM.setContent(
           fileWidget,
           JX.$H(r.file_widget));
       }
+
+      _scrollMessageWindow();
       textarea.value = '';
     }
     markThreadLoading(false);
@@ -190,6 +191,7 @@ JX.behavior('conpherence-menu', function(config) {
       threadManager.setLoadedThreadPHID(config.selectedThreadPHID);
       threadManager.setLatestTransactionID(config.latestTransactionID);
       threadManager.setCanEditLoadedThread(config.canEditSelectedThread);
+      threadManager.cacheCurrentTransactions();
       _scrollMessageWindow();
       _focusTextarea();
     } else {
@@ -413,56 +415,6 @@ JX.behavior('conpherence-menu', function(config) {
         }
       }))
       .start();
-  });
-
-  var _oldLoadingTransactionID = null;
-  JX.Stratcom.listen('click', 'show-older-messages', function(e) {
-    e.kill();
-    var data = e.getNodeData('show-older-messages');
-    if (data.oldest_transaction_id == _oldLoadingTransactionID) {
-      return;
-    }
-    _oldLoadingTransactionID = data.oldest_transaction_id;
-
-    var node = e.getNode('show-older-messages');
-    JX.DOM.setContent(node, 'Loading...');
-    JX.DOM.alterClass(node, 'conpherence-show-more-messages-loading', true);
-
-    var conf_id = _thread.selected;
-    var messages_root = scrollbar.getContentNode();
-    new JX.Workflow(config.baseURI + conf_id + '/', data)
-    .setHandler(function(r) {
-      JX.DOM.remove(node);
-      var messages = JX.$H(r.messages);
-      JX.DOM.prependContent(
-        messages_root,
-        JX.$H(messages));
-    }).start();
-  });
-
-  var _newLoadingTransactionID = null;
-  JX.Stratcom.listen('click', 'show-newer-messages', function(e) {
-    e.kill();
-    var data = e.getNodeData('show-newer-messages');
-    if (data.newest_transaction_id == _newLoadingTransactionID) {
-      return;
-    }
-    _newLoadingTransactionID = data.newest_transaction_id;
-
-    var node = e.getNode('show-newer-messages');
-    JX.DOM.setContent(node, 'Loading...');
-    JX.DOM.alterClass(node, 'conpherence-show-more-messages-loading', true);
-
-    var conf_id = _thread.selected;
-    var messages_root = scrollbar.getContentNode();
-    new JX.Workflow(config.baseURI + conf_id + '/', data)
-    .setHandler(function(r) {
-      JX.DOM.remove(node);
-      var messages = JX.$H(r.messages);
-      JX.DOM.appendContent(
-        messages_root,
-        JX.$H(messages));
-    }).start();
   });
 
   /**

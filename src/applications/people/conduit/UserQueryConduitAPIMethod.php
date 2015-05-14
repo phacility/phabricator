@@ -43,7 +43,8 @@ final class UserQueryConduitAPIMethod extends UserConduitAPIMethod {
 
     $query = id(new PhabricatorPeopleQuery())
       ->setViewer($request->getUser())
-      ->needProfileImage(true);
+      ->needProfileImage(true)
+      ->needAvailability(true);
 
     if ($usernames) {
       $query->withUsernames($usernames);
@@ -68,14 +69,9 @@ final class UserQueryConduitAPIMethod extends UserConduitAPIMethod {
     }
     $users = $query->execute();
 
-    $statuses = id(new PhabricatorCalendarEvent())->loadCurrentStatuses(
-      mpull($users, 'getPHID'));
-
     $results = array();
     foreach ($users as $user) {
-      $results[] = $this->buildUserInformationDictionary(
-        $user,
-        idx($statuses, $user->getPHID()));
+      $results[] = $this->buildUserInformationDictionary($user);
     }
     return $results;
   }

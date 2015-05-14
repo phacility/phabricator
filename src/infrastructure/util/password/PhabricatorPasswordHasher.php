@@ -213,7 +213,7 @@ abstract class PhabricatorPasswordHasher extends Phobject {
    */
   public static function getAllHashers() {
     $objects = id(new PhutilSymbolLoader())
-      ->setAncestorClass('PhabricatorPasswordHasher')
+      ->setAncestorClass(__CLASS__)
       ->loadObjects();
 
     $map = array();
@@ -404,7 +404,7 @@ abstract class PhabricatorPasswordHasher extends Phobject {
     }
 
     try {
-      $current_hasher = PhabricatorPasswordHasher::getHasherForHash($hash);
+      $current_hasher = self::getHasherForHash($hash);
       return $current_hasher->getHumanReadableName();
     } catch (Exception $ex) {
       $info = self::parseHashFromStorage($hash);
@@ -421,7 +421,7 @@ abstract class PhabricatorPasswordHasher extends Phobject {
    */
   public static function getBestAlgorithmName() {
     try {
-      $best_hasher = PhabricatorPasswordHasher::getBestHasher();
+      $best_hasher = self::getBestHasher();
       return $best_hasher->getHumanReadableName();
     } catch (Exception $ex) {
       return pht('Unknown');

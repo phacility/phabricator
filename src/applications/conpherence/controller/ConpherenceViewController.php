@@ -79,7 +79,7 @@ final class ConpherenceViewController extends
     if ($before_transaction_id || $after_transaction_id) {
       $header = null;
       $form = null;
-      $content = array('messages' => $messages);
+      $content = array('transactions' => $messages);
     } else {
       $policy_objects = id(new PhabricatorPolicyQuery())
         ->setViewer($user)
@@ -89,7 +89,7 @@ final class ConpherenceViewController extends
       $form = $this->renderFormContent();
       $content = array(
         'header' => $header,
-        'messages' => $messages,
+        'transactions' => $messages,
         'form' => $form,
       );
     }

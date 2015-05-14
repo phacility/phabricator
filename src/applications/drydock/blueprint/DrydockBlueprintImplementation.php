@@ -377,7 +377,7 @@ abstract class DrydockBlueprintImplementation {
     if ($list === null) {
       $blueprints = id(new PhutilSymbolLoader())
         ->setType('class')
-        ->setAncestorClass('DrydockBlueprintImplementation')
+        ->setAncestorClass(__CLASS__)
         ->setConcreteOnly(true)
         ->selectAndLoadSymbols();
       $list = ipull($blueprints, 'name', 'name');

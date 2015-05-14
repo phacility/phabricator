@@ -43,7 +43,7 @@ final class PhabricatorHelpApplication extends PhabricatorApplication {
       array(
         'bubbleID' => $help_id,
         'dropdownID' => 'phabricator-help-menu',
-        'applicationClass' => 'PhabricatorHelpApplication',
+        'applicationClass' => __CLASS__,
         'local' => true,
         'desktop' => true,
         'right' => true,

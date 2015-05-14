@@ -35,7 +35,7 @@ final class PhabricatorHash extends Phobject {
     }
 
     for ($ii = 0; $ii < 1000; $ii++) {
-      $result = PhabricatorHash::digest($result, $salt);
+      $result = self::digest($result, $salt);
     }
 
     return $result;
@@ -113,7 +113,7 @@ final class PhabricatorHash extends Phobject {
     // who can control the inputs from intentionally using the hashed form
     // of a string to cause a collision.
 
-    $hash = PhabricatorHash::digestForIndex($string);
+    $hash = self::digestForIndex($string);
 
     $prefix = substr($string, 0, ($length - ($min_length - 1)));
 

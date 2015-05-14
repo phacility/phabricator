@@ -170,6 +170,12 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
         ->setWorkflow(true)
         ->setDisabled(!$can_edit));
 
+    $view->addAction(
+      id(new PhabricatorActionView())
+        ->setName(pht('View Transforms'))
+        ->setIcon('fa-crop')
+        ->setHref($this->getApplicationURI("/transforms/{$id}/")));
+
     return $view;
   }
 
@@ -241,6 +247,12 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
 
     $finfo->addProperty(pht('Builtin'), $builtin_string);
 
+    $is_profile = $file->getIsProfileImage()
+      ? pht('Yes')
+      : pht('No');
+
+    $finfo->addProperty(pht('Profile'), $is_profile);
+
     $storage_properties = new PHUIPropertyListView();
     $box->addPropertyList($storage_properties, pht('Storage'));
 
@@ -266,7 +278,6 @@ final class PhabricatorFileInfoController extends PhabricatorFileController {
         pht('Attached To'),
         $user->renderHandleList($phids));
     }
-
 
     if ($file->isViewableImage()) {
       $image = phutil_tag(

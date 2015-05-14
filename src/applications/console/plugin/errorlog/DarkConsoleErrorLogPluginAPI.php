@@ -12,7 +12,7 @@ final class DarkConsoleErrorLogPluginAPI {
     // reenter autoloaders).
     PhutilReadableSerializer::printableValue(null);
     PhutilErrorHandler::setErrorListener(
-      array('DarkConsoleErrorLogPluginAPI', 'handleErrors'));
+      array(__CLASS__, 'handleErrors'));
   }
 
   public static function enableDiscardMode() {

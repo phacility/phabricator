@@ -34,8 +34,7 @@ final class PhortuneSubscriptionCart
 
     $subscription = $this->getSubscription();
     if (!$subscription) {
-      throw new Exception(
-        pht('Call setSubscription() before building a cart!'));
+      throw new PhutilInvalidStateException('setSubscription');
     }
 
     $cart->setMetadataValue('subscriptionPHID', $subscription->getPHID());

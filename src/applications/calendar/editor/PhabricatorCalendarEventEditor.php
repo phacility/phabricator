@@ -17,7 +17,6 @@ final class PhabricatorCalendarEventEditor
     $types[] = PhabricatorCalendarEventTransaction::TYPE_NAME;
     $types[] = PhabricatorCalendarEventTransaction::TYPE_START_DATE;
     $types[] = PhabricatorCalendarEventTransaction::TYPE_END_DATE;
-    $types[] = PhabricatorCalendarEventTransaction::TYPE_STATUS;
     $types[] = PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION;
     $types[] = PhabricatorCalendarEventTransaction::TYPE_CANCEL;
     $types[] = PhabricatorCalendarEventTransaction::TYPE_INVITE;
@@ -40,12 +39,6 @@ final class PhabricatorCalendarEventEditor
         return $object->getDateFrom();
       case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
         return $object->getDateTo();
-      case PhabricatorCalendarEventTransaction::TYPE_STATUS:
-        $status = $object->getStatus();
-        if ($status === null) {
-          return null;
-        }
-        return (int)$status;
       case PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION:
         return $object->getDescription();
       case PhabricatorCalendarEventTransaction::TYPE_CANCEL:
@@ -55,16 +48,7 @@ final class PhabricatorCalendarEventEditor
       case PhabricatorCalendarEventTransaction::TYPE_INVITE:
         $map = $xaction->getNewValue();
         $phids = array_keys($map);
-        $invitees = array();
-
-        if ($map && !$this->getIsNewObject()) {
-          $invitees = id(new PhabricatorCalendarEventInviteeQuery())
-            ->setViewer($this->getActor())
-            ->withEventPHIDs(array($object->getPHID()))
-            ->withInviteePHIDs($phids)
-            ->execute();
-          $invitees = mpull($invitees, null, 'getInviteePHID');
-        }
+        $invitees = mpull($object->getInvitees(), null, 'getInviteePHID');
 
         $old = array();
         foreach ($phids as $phid) {
@@ -92,8 +76,6 @@ final class PhabricatorCalendarEventEditor
         return $xaction->getNewValue();
       case PhabricatorCalendarEventTransaction::TYPE_ALL_DAY:
         return (int)$xaction->getNewValue();
-      case PhabricatorCalendarEventTransaction::TYPE_STATUS:
-        return (int)$xaction->getNewValue();
       case PhabricatorCalendarEventTransaction::TYPE_START_DATE:
       case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
         return $xaction->getNewValue()->getEpoch();
@@ -115,9 +97,6 @@ final class PhabricatorCalendarEventEditor
         return;
       case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
         $object->setDateTo($xaction->getNewValue());
-        return;
-      case PhabricatorCalendarEventTransaction::TYPE_STATUS:
-        $object->setStatus($xaction->getNewValue());
         return;
       case PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION:
         $object->setDescription($xaction->getNewValue());
@@ -148,7 +127,6 @@ final class PhabricatorCalendarEventEditor
       case PhabricatorCalendarEventTransaction::TYPE_NAME:
       case PhabricatorCalendarEventTransaction::TYPE_START_DATE:
       case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
-      case PhabricatorCalendarEventTransaction::TYPE_STATUS:
       case PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION:
       case PhabricatorCalendarEventTransaction::TYPE_CANCEL:
       case PhabricatorCalendarEventTransaction::TYPE_ALL_DAY:
@@ -189,6 +167,55 @@ final class PhabricatorCalendarEventEditor
     array $xactions) {
 
     $object->removeViewerTimezone($this->requireActor());
+
+    return $xactions;
+  }
+
+  protected function applyFinalEffects(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+
+    // Clear the availability caches for users whose availability is affected
+    // by this edit.
+
+    $invalidate_all = false;
+    $invalidate_phids = array();
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case PhabricatorCalendarEventTransaction::TYPE_START_DATE:
+        case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
+        case PhabricatorCalendarEventTransaction::TYPE_CANCEL:
+        case PhabricatorCalendarEventTransaction::TYPE_ALL_DAY:
+          // For these kinds of changes, we need to invalidate the availabilty
+          // caches for all attendees.
+          $invalidate_all = true;
+          break;
+        case PhabricatorCalendarEventTransaction::TYPE_INVITE:
+          foreach ($xaction->getNewValue() as $phid => $ignored) {
+            $invalidate_phids[$phid] = $phid;
+          }
+          break;
+      }
+    }
+
+    $phids = mpull($object->getInvitees(), 'getInviteePHID');
+    $phids = array_fuse($phids);
+
+    if (!$invalidate_all) {
+      $phids = array_select_keys($phids, $invalidate_phids);
+    }
+
+    if ($phids) {
+      $user = new PhabricatorUser();
+      $conn_w = $user->establishConnection('w');
+      queryfx(
+        $conn_w,
+        'UPDATE %T SET availabilityCacheTTL = NULL
+          WHERE phid IN (%Ls) AND availabilityCacheTTL >= %d',
+        $user->getTableName(),
+        $phids,
+        $object->getDateFromForCache());
+    }
 
     return $xactions;
   }

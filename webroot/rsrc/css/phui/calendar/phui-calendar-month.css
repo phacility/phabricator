@@ -22,24 +22,63 @@ table.phui-calendar-view td {
   width: 14.2857%; /* This is one seventh, approximately. */
 }
 
+.phui-calendar-month-cell-div {
+  position: relative;
+}
+
+.phui-calendar-month-event-list .phui-calendar-month-cell-div {
+  min-height: 125px;
+}
+
+.device .phui-calendar-month-event-list .phui-calendar-month-cell-div {
+  min-height: 32px;
+}
+
+a.phui-calendar-month-secret-link {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  outline: 0;
+}
+
 table.phui-calendar-view tr td:first-child {
   border-left-width: 0px;
 }
 
-table.phui-calendar-view .phui-calendar-event-list {
-  min-height: 125px;
+.device table.phui-calendar-view .phui-calendar-event-list {
+  display: none;
+}
+
+.phui-calendar-month-event-count {
+  display: none;
+}
+
+.device .phui-calendar-month-event-count {
+  display: block;
+  text-align: center;
+  padding-top: 8px;
+}
+
+.phui-calendar-month-event-count .phui-calendar-month-count-badge {
+  border: 1px solid {$lightgreyborder};
+  color: {$lightgreytext};
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  text-align: center;
+  vertical-align: middle;
+  padding: 4px 2px 0px 2px;
+  margin: 0 auto;
 }
 
 table.phui-calendar-view a.phui-calendar-date-number {
   color: {$lightgreytext};
-  border-color: {$thinblueborder};
-  border-style: solid;
-  border-width: 1px 0 0 1px;
-  padding: 4px;
+  padding: 0 4px;
   display: inline-block;
   min-width: 16px;
   text-align: center;
-  background-color: #ffffff;
 }
 
 table.phui-calendar-view td.phui-calendar-date-number-container {
@@ -49,16 +88,16 @@ table.phui-calendar-view td.phui-calendar-date-number-container {
   text-align: right;
 }
 
-.phui-calendar-not-work-day {
-  background-color: {$lightgreybackground};
+.phui-calendar-today-slot {
+  display: block;
+  width: 100%;
+  height: 4px;
+  padding: 0;
+  margin: 0;
 }
 
-.phui-calendar-today {
-  background-color: {$lightgreen};
-}
-
-.phui-calendar-empty {
-  background-color: {$greybackground};
+.phui-calendar-today-slot.phui-calendar-today {
+  background-color: {$lightblueborder};
 }
 
 .phui-calendar-event-empty {
@@ -79,6 +118,8 @@ table.phui-calendar-view td.phui-calendar-date-number-container {
   margin: 0;
   padding: 4px 8px;
   background-color: {$lightpink};
+  display: block;
+  float: none;
 }
 
 li.phui-calendar-list-item.all-day:first-child {
@@ -87,6 +128,9 @@ li.phui-calendar-list-item.all-day:first-child {
 
 .phui-calendar-view .phui-calendar-list li {
   margin: 0 8px;
+  display: inline-block;
+  float: left;
+  clear: both;
 }
 
 .phui-calendar-view .phui-calendar-list li:first-child {

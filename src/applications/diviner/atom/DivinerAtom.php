@@ -95,16 +95,14 @@ final class DivinerAtom {
 
   public function getDocblockText() {
     if ($this->docblockText === null) {
-      throw new Exception(
-        pht('Call %s before %s!', 'setDocblockRaw()', 'getDocblockText()'));
+      throw new PhutilInvalidStateException('setDocblockRaw');
     }
     return $this->docblockText;
   }
 
   public function getDocblockMeta() {
     if ($this->docblockMeta === null) {
-      throw new Exception(
-        pht('Call %s before %s!', 'setDocblockRaw()', 'getDocblockMeta()'));
+      throw new PhutilInvalidStateException('setDocblockRaw');
     }
     return $this->docblockMeta;
   }

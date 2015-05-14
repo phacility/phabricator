@@ -218,7 +218,11 @@ final class ConpherenceWidgetController extends ConpherenceController {
     $conpherence = $this->getConpherence();
     $participants = $conpherence->getParticipants();
     $widget_data = $conpherence->getWidgetData();
-    $statuses = $widget_data['statuses'];
+
+    // TODO: This panel is built around an outdated notion of events and isn't
+    // invitee-aware.
+
+    $statuses = $widget_data['events'];
     $handles = $conpherence->getHandles();
     $content = array();
     $layout = id(new AphrontMultiColumnView())
@@ -312,7 +316,7 @@ final class ConpherenceWidgetController extends ConpherenceController {
             $content[] = phutil_tag(
               'div',
               array(
-                'class' => 'user-status '.$status->getTextStatus().$top_border,
+                'class' => 'user-status '.$top_border,
               ),
               array(
                 phutil_tag(
@@ -327,7 +331,7 @@ final class ConpherenceWidgetController extends ConpherenceController {
                     'class' => 'description',
                   ),
                   array(
-                    $status->getTerseSummary($user),
+                    $status->getName(),
                     phutil_tag(
                       'div',
                       array(
@@ -359,9 +363,7 @@ final class ConpherenceWidgetController extends ConpherenceController {
           if ($status) {
             $inner_layout[] = phutil_tag(
               'div',
-              array(
-                'class' => $status->getTextStatus(),
-              ),
+              array(),
               '');
           } else {
             $inner_layout[] = phutil_tag(

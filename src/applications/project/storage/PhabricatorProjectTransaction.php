@@ -28,12 +28,12 @@ final class PhabricatorProjectTransaction
 
     $req_phids = array();
     switch ($this->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_MEMBERS:
+      case self::TYPE_MEMBERS:
         $add = array_diff($new, $old);
         $rem = array_diff($old, $new);
         $req_phids = array_merge($add, $rem);
         break;
-      case PhabricatorProjectTransaction::TYPE_IMAGE:
+      case self::TYPE_IMAGE:
         $req_phids[] = $old;
         $req_phids[] = $new;
         break;
@@ -48,7 +48,7 @@ final class PhabricatorProjectTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_STATUS:
+      case self::TYPE_STATUS:
         if ($old == 0) {
           return 'red';
         } else {
@@ -64,25 +64,25 @@ final class PhabricatorProjectTransaction
     $new = $this->getNewValue();
 
     switch ($this->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_STATUS:
+      case self::TYPE_STATUS:
         if ($old == 0) {
           return 'fa-ban';
         } else {
           return 'fa-check';
         }
-      case PhabricatorProjectTransaction::TYPE_LOCKED:
+      case self::TYPE_LOCKED:
         if ($new) {
           return 'fa-lock';
         } else {
           return 'fa-unlock';
         }
-      case PhabricatorProjectTransaction::TYPE_ICON:
+      case self::TYPE_ICON:
         return $new;
-      case PhabricatorProjectTransaction::TYPE_IMAGE:
+      case self::TYPE_IMAGE:
         return 'fa-photo';
-      case PhabricatorProjectTransaction::TYPE_MEMBERS:
+      case self::TYPE_MEMBERS:
         return 'fa-user';
-      case PhabricatorProjectTransaction::TYPE_SLUGS:
+      case self::TYPE_SLUGS:
         return 'fa-tag';
     }
     return parent::getIcon();
@@ -94,7 +94,7 @@ final class PhabricatorProjectTransaction
     $author_handle = $this->renderHandleLink($this->getAuthorPHID());
 
     switch ($this->getTransactionType()) {
-      case PhabricatorProjectTransaction::TYPE_NAME:
+      case self::TYPE_NAME:
         if ($old === null) {
           return pht(
             '%s created this project.',
@@ -106,7 +106,7 @@ final class PhabricatorProjectTransaction
             $old,
             $new);
         }
-      case PhabricatorProjectTransaction::TYPE_STATUS:
+      case self::TYPE_STATUS:
         if ($old == 0) {
           return pht(
             '%s archived this project.',
@@ -116,7 +116,7 @@ final class PhabricatorProjectTransaction
             '%s activated this project.',
             $author_handle);
         }
-      case PhabricatorProjectTransaction::TYPE_IMAGE:
+      case self::TYPE_IMAGE:
         // TODO: Some day, it would be nice to show the images.
         if (!$old) {
           return pht(
@@ -135,19 +135,19 @@ final class PhabricatorProjectTransaction
             $this->renderHandleLink($new));
         }
 
-      case PhabricatorProjectTransaction::TYPE_ICON:
+      case self::TYPE_ICON:
         return pht(
           '%s set this project\'s icon to %s.',
           $author_handle,
           PhabricatorProjectIcon::getLabel($new));
 
-      case PhabricatorProjectTransaction::TYPE_COLOR:
+      case self::TYPE_COLOR:
         return pht(
           '%s set this project\'s color to %s.',
           $author_handle,
           PHUITagView::getShadeName($new));
 
-      case PhabricatorProjectTransaction::TYPE_LOCKED:
+      case self::TYPE_LOCKED:
         if ($new) {
           return pht(
             '%s locked this project\'s membership.',
@@ -158,7 +158,7 @@ final class PhabricatorProjectTransaction
             $author_handle);
         }
 
-      case PhabricatorProjectTransaction::TYPE_SLUGS:
+      case self::TYPE_SLUGS:
         $add = array_diff($new, $old);
         $rem = array_diff($old, $new);
 
@@ -184,7 +184,7 @@ final class PhabricatorProjectTransaction
               $this->renderSlugList($rem));
         }
 
-      case PhabricatorProjectTransaction::TYPE_MEMBERS:
+      case self::TYPE_MEMBERS:
         $add = array_diff($new, $old);
         $rem = array_diff($old, $new);
 

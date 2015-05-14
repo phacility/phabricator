@@ -65,7 +65,7 @@ abstract class PhabricatorCustomField {
           "object of class '{$obj_class}'.");
       }
 
-      $fields = PhabricatorCustomField::buildFieldList(
+      $fields = self::buildFieldList(
         $base_class,
         $spec,
         $object);

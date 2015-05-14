@@ -970,8 +970,7 @@ abstract class PhabricatorApplicationTransactionEditor
     array $xactions) {
 
     if (!$this->getContentSource()) {
-      throw new Exception(
-        'Call setContentSource() before applyTransactions()!');
+      throw new PhutilInvalidStateException('setContentSource');
     }
 
     // Do a bunch of sanity checks that the incoming transactions are fresh.

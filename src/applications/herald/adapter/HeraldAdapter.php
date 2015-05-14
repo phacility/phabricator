@@ -1083,7 +1083,7 @@ abstract class HeraldAdapter {
   public static function getEnabledAdapterMap(PhabricatorUser $viewer) {
     $map = array();
 
-    $adapters = HeraldAdapter::getAllAdapters();
+    $adapters = self::getAllAdapters();
     foreach ($adapters as $adapter) {
       if (!$adapter->isAvailableToUser($viewer)) {
         continue;

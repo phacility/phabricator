@@ -11,7 +11,7 @@ final class PhabricatorConfigSchemaQuery extends Phobject {
 
   protected function getAPI() {
     if (!$this->api) {
-      throw new Exception(pht('Call setAPI() before issuing a query!'));
+      throw new PhutilInvalidStateException('setAPI');
     }
     return $this->api;
   }

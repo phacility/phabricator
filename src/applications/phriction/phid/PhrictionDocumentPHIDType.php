@@ -42,7 +42,7 @@ final class PhrictionDocumentPHIDType extends PhabricatorPHIDType {
       $handle->setURI(PhrictionDocument::getSlugURI($slug));
 
       if ($status != PhrictionDocumentStatus::STATUS_EXISTS) {
-        $handle->setStatus(PhabricatorObjectHandleStatus::STATUS_CLOSED);
+        $handle->setStatus(PhabricatorObjectHandle::STATUS_CLOSED);
       }
     }
   }

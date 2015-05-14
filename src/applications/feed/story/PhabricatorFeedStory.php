@@ -48,7 +48,7 @@ abstract class PhabricatorFeedStory
       try {
         $ok =
           class_exists($class) &&
-          is_subclass_of($class, 'PhabricatorFeedStory');
+          is_subclass_of($class, __CLASS__);
       } catch (PhutilMissingSymbolException $ex) {
         $ok = false;
       }

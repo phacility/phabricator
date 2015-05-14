@@ -88,7 +88,7 @@ final class PhabricatorEnv {
 
     // Force a valid timezone. If both PHP and Phabricator configuration are
     // invalid, use UTC.
-    $tz = PhabricatorEnv::getEnvConfig('phabricator.timezone');
+    $tz = self::getEnvConfig('phabricator.timezone');
     if ($tz) {
       @date_default_timezone_set($tz);
     }
@@ -102,7 +102,7 @@ final class PhabricatorEnv {
     $phabricator_path = dirname(phutil_get_library_root('phabricator'));
     $support_path = $phabricator_path.'/support/bin';
     $env_path = $support_path.PATH_SEPARATOR.$env_path;
-    $append_dirs = PhabricatorEnv::getEnvConfig('environment.append-paths');
+    $append_dirs = self::getEnvConfig('environment.append-paths');
     if (!empty($append_dirs)) {
       $append_path = implode(PATH_SEPARATOR, $append_dirs);
       $env_path = $env_path.PATH_SEPARATOR.$append_path;
@@ -116,7 +116,7 @@ final class PhabricatorEnv {
 
     // If an instance identifier is defined, write it into the environment so
     // it's available to subprocesses.
-    $instance = PhabricatorEnv::getEnvConfig('cluster.instance');
+    $instance = self::getEnvConfig('cluster.instance');
     if (strlen($instance)) {
       putenv('PHABRICATOR_INSTANCE='.$instance);
       $_ENV['PHABRICATOR_INSTANCE'] = $instance;
@@ -139,7 +139,7 @@ final class PhabricatorEnv {
       $translations = PhutilTranslation::getTranslationMapForLocale(
         $locale_code);
 
-      $override = PhabricatorEnv::getEnvConfig('translation.override');
+      $override = self::getEnvConfig('translation.override');
       if (!is_array($override)) {
         $override = array();
       }
@@ -178,7 +178,7 @@ final class PhabricatorEnv {
     // If the install overrides the database adapter, we might need to load
     // the database adapter class before we can push on the database config.
     // This config is locked and can't be edited from the web UI anyway.
-    foreach (PhabricatorEnv::getEnvConfig('load-libraries') as $library) {
+    foreach (self::getEnvConfig('load-libraries') as $library) {
       phutil_load_library($library);
     }
 
@@ -809,7 +809,7 @@ final class PhabricatorEnv {
   }
 
   public static function isClusterAddress($address) {
-    $cluster_addresses = PhabricatorEnv::getEnvConfig('cluster.addresses');
+    $cluster_addresses = self::getEnvConfig('cluster.addresses');
     if (!$cluster_addresses) {
       throw new Exception(
         pht(

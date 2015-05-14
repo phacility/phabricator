@@ -19,7 +19,7 @@ final class DifferentialLocalCommitsView extends AphrontView {
   public function render() {
     $user = $this->user;
     if (!$user) {
-      throw new Exception('Call setUser() before render()-ing this view.');
+      throw new PhutilInvalidStateException('setUser');
     }
 
     $local = $this->localCommits;

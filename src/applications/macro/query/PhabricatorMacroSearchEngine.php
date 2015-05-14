@@ -179,14 +179,18 @@ final class PhabricatorMacroSearchEngine
     assert_instances_of($macros, 'PhabricatorFileImageMacro');
     $viewer = $this->requireViewer();
 
+    $xform = PhabricatorFileTransform::getTransformByKey(
+      PhabricatorFileThumbnailTransform::TRANSFORM_PINBOARD);
+
     $pinboard = new PHUIPinboardView();
     foreach ($macros as $macro) {
       $file = $macro->getFile();
 
       $item = new PHUIPinboardItemView();
       if ($file) {
-        $item->setImageURI($file->getThumb280x210URI());
-        $item->setImageSize(280, 210);
+        $item->setImageURI($file->getURIForTransform($xform));
+        list($x, $y) = $xform->getTransformedDimensions($file);
+        $item->setImageSize($x, $y);
       }
 
       if ($macro->getDateCreated()) {

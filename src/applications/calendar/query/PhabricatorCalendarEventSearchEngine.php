@@ -76,11 +76,33 @@ final class PhabricatorCalendarEventSearchEngine
       $display_start = $start_day->format('U');
       $display_end = $next->format('U');
 
+      // 0 = Sunday is always the start of the week, for now
+      $start_of_week = 0;
+      $end_of_week = 6 - $start_of_week;
+
+      $first_of_month = $start_day->format('w');
+      $last_of_month = id(clone $next)->modify('-1 day')->format('w');
+
       if (!$min_range || ($min_range < $display_start)) {
         $min_range = $display_start;
+
+        if ($this->isMonthView($saved) &&
+          $first_of_month > $start_of_week) {
+          $min_range = id(clone $start_day)
+            ->modify('-'.$first_of_month.' days')
+            ->format('U');
+        }
       }
       if (!$max_range || ($max_range > $display_end)) {
         $max_range = $display_end;
+
+        if ($this->isMonthView($saved) &&
+          $last_of_month < $end_of_week) {
+          $max_range = id(clone $next)
+            ->modify('+'.(6 - $first_of_month).' days')
+            ->format('U');
+        }
+
       }
     }
 

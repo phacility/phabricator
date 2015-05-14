@@ -136,7 +136,7 @@ final class PhortuneCart extends PhortuneDAO
         }
 
         $charge->save();
-        $this->setStatus(PhortuneCart::STATUS_PURCHASING)->save();
+        $this->setStatus(self::STATUS_PURCHASING)->save();
 
       $this->endReadLocking();
     $this->saveTransaction();

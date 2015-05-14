@@ -169,9 +169,13 @@ abstract class PhabricatorPHIDType {
           $that_class = $original[$type];
           $this_class = get_class($object);
           throw new Exception(
-            "Two PhabricatorPHIDType classes ({$that_class}, {$this_class}) ".
-            "both handle PHID type '{$type}'. A type may be handled by only ".
-            "one class.");
+            pht(
+              "Two %s classes (%s, %s) both handle PHID type '%s'. ".
+              "A type may be handled by only one class.",
+              __CLASS__,
+              $that_class,
+              $this_class,
+              $type));
         }
 
         $original[$type] = get_class($object);
