@@ -31,7 +31,7 @@ table.phui-calendar-view td {
 }
 
 .device .phui-calendar-month-event-list .phui-calendar-month-cell-div {
-  min-height: 60px;
+  min-height: 32px;
 }
 
 a.phui-calendar-month-secret-link {
@@ -58,7 +58,7 @@ table.phui-calendar-view tr td:first-child {
 .device .phui-calendar-month-event-count {
   display: block;
   text-align: center;
-  padding-top: 12px;
+  padding-top: 8px;
 }
 
 .phui-calendar-month-event-count .phui-calendar-month-count-badge {
@@ -69,7 +69,7 @@ table.phui-calendar-view tr td:first-child {
   border-radius: 50%;
   text-align: center;
   vertical-align: middle;
-  padding: 5px 3px 0px 3px;
+  padding: 4px 2px 0px 2px;
   margin: 0 auto;
 }
 
