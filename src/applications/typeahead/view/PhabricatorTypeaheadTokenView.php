@@ -35,7 +35,7 @@ final class PhabricatorTypeaheadTokenView
       ->setIcon($handle->getIcon());
 
     if ($handle->isDisabled() ||
-        $handle->getStatus() == PhabricatorObjectHandleStatus::STATUS_CLOSED) {
+        $handle->getStatus() == PhabricatorObjectHandle::STATUS_CLOSED) {
       $token->setTokenType(self::TYPE_DISABLED);
     } else {
       $token->setColor($handle->getTagColor());

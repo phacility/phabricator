@@ -41,7 +41,7 @@ final class DifferentialRevisionPHIDType extends PhabricatorPHIDType {
       $handle->setFullName("D{$id}: {$title}");
 
       if ($revision->isClosed()) {
-        $handle->setStatus(PhabricatorObjectHandleStatus::STATUS_CLOSED);
+        $handle->setStatus(PhabricatorObjectHandle::STATUS_CLOSED);
       }
     }
   }

@@ -43,11 +43,28 @@ final class PhabricatorPeopleUserPHIDType extends PhabricatorPHIDType {
       $handle->setURI('/p/'.$user->getUsername().'/');
       $handle->setFullName($user->getFullName());
       $handle->setImageURI($user->getProfileImageURI());
-      $handle->setDisabled(!$user->isUserActivated());
-      if ($user->hasStatus()) {
-        $status = $user->getStatus();
-        $handle->setStatus($status->getTextStatus());
-        $handle->setTitle($status->getTerseSummary($query->getViewer()));
+
+      $availability = null;
+      if (!$user->isUserActivated()) {
+        $availability = PhabricatorObjectHandle::AVAILABILITY_DISABLED;
+      } else {
+        if ($user->hasStatus()) {
+          // NOTE: This first call returns an event; then we get the event
+          // status.
+          $status = $user->getStatus()->getStatus();
+          switch ($status) {
+            case PhabricatorCalendarEvent::STATUS_AWAY:
+              $availability = PhabricatorObjectHandle::AVAILABILITY_NONE;
+              break;
+            case PhabricatorCalendarEvent::STATUS_SPORADIC:
+              $availability = PhabricatorObjectHandle::AVAILABILITY_PARTIAL;
+              break;
+          }
+        }
+      }
+
+      if ($availability) {
+        $handle->setAvailability($availability);
       }
     }
   }

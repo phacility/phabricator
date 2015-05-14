@@ -36,7 +36,7 @@ final class PhabricatorDashboardPanelPHIDType extends PhabricatorPHIDType {
       $handle->setURI("/{$monogram}");
 
       if ($panel->getIsArchived()) {
-        $handle->setStatus(PhabricatorObjectHandleStatus::STATUS_CLOSED);
+        $handle->setStatus(PhabricatorObjectHandle::STATUS_CLOSED);
       }
     }
   }

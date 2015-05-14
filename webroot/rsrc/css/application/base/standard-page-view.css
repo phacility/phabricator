@@ -80,23 +80,23 @@ a.handle-status-closed:hover {
   color: #19558D;
 }
 
-a.handle-disabled,
-a.handle-status-away,
-a.handle-status-sporadic {
+a.handle-availability-disabled,
+a.handle-availability-none,
+a.handle-availability-partial {
   padding-left: 11px;
   background-repeat: no-repeat;
   background-position: -4px center;
 }
 
-a.handle-status-away {
+a.handle-availability-none {
   background-image: url(/rsrc/image/icon/fatcow/bullet_red.png);
 }
 
-a.handle-status-sporadic {
+a.handle-availability-partial {
   background-image: url(/rsrc/image/icon/fatcow/bullet_orange.png);
 }
 
-a.handle-disabled {
+a.handle-availability-disabled {
   background-image: url(/rsrc/image/icon/fatcow/bullet_black.png);
 }
 
