@@ -27,6 +27,8 @@ final class PhabricatorUser
   protected $passwordHash;
   protected $profileImagePHID;
   protected $profileImageCache;
+  protected $availabilityCache;
+  protected $availabilityCacheTTL;
   protected $timezoneIdentifier = '';
 
   protected $consoleEnabled = 0;
@@ -146,6 +148,8 @@ final class PhabricatorUser
         'accountSecret' => 'bytes64',
         'isEnrolledInMultiFactor' => 'bool',
         'profileImageCache' => 'text255?',
+        'availabilityCache' => 'text255?',
+        'availabilityCacheTTL' => 'uint32?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
@@ -166,6 +170,8 @@ final class PhabricatorUser
       ),
       self::CONFIG_NO_MUTATE => array(
         'profileImageCache' => true,
+        'availabilityCache' => true,
+        'availabilityCacheTTL' => true,
       ),
     ) + parent::getConfiguration();
   }
@@ -721,7 +727,7 @@ EOBODY;
   /**
    * @task availability
    */
-  public function attachAvailability($availability) {
+  public function attachAvailability(array $availability) {
     $this->availability = $availability;
     return $this;
   }
@@ -759,6 +765,50 @@ EOBODY;
     } else {
       return pht('Available');
     }
+  }
+
+
+  /**
+   * Get cached availability, if present.
+   *
+   * @return wild|null Cache data, or null if no cache is available.
+   * @task availability
+   */
+  public function getAvailabilityCache() {
+    $now = PhabricatorTime::getNow();
+    if ($this->availabilityCacheTTL <= $now) {
+      return null;
+    }
+
+    try {
+      return phutil_json_decode($this->availabilityCache);
+    } catch (Exception $ex) {
+      return null;
+    }
+  }
+
+
+  /**
+   * Write to the availability cache.
+   *
+   * @param wild Availability cache data.
+   * @param int|null Cache TTL.
+   * @return this
+   * @task availability
+   */
+  public function writeAvailabilityCache(array $availability, $ttl) {
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+    queryfx(
+      $this->establishConnection('w'),
+      'UPDATE %T SET availabilityCache = %s, availabilityCacheTTL = %nd
+        WHERE id = %d',
+      $this->getTableName(),
+      json_encode($availability),
+      $ttl,
+      $this->getID());
+    unset($unguarded);
+
+    return $this;
   }
 
 

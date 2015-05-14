@@ -55,16 +55,7 @@ final class PhabricatorCalendarEventEditor
       case PhabricatorCalendarEventTransaction::TYPE_INVITE:
         $map = $xaction->getNewValue();
         $phids = array_keys($map);
-        $invitees = array();
-
-        if ($map && !$this->getIsNewObject()) {
-          $invitees = id(new PhabricatorCalendarEventInviteeQuery())
-            ->setViewer($this->getActor())
-            ->withEventPHIDs(array($object->getPHID()))
-            ->withInviteePHIDs($phids)
-            ->execute();
-          $invitees = mpull($invitees, null, 'getInviteePHID');
-        }
+        $invitees = mpull($object->getInvitees(), null, 'getInviteePHID');
 
         $old = array();
         foreach ($phids as $phid) {
@@ -189,6 +180,53 @@ final class PhabricatorCalendarEventEditor
     array $xactions) {
 
     $object->removeViewerTimezone($this->requireActor());
+
+    return $xactions;
+  }
+
+  protected function applyFinalEffects($object, array $xactions) {
+
+    // Clear the availability caches for users whose availability is affected
+    // by this edit.
+
+    $invalidate_all = false;
+    $invalidate_phids = array();
+    foreach ($xactions as $xaction) {
+      switch ($xaction->getTransactionType()) {
+        case PhabricatorCalendarEventTransaction::TYPE_START_DATE:
+        case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
+        case PhabricatorCalendarEventTransaction::TYPE_CANCEL:
+        case PhabricatorCalendarEventTransaction::TYPE_ALL_DAY:
+          // For these kinds of changes, we need to invalidate the availabilty
+          // caches for all attendees.
+          $invalidate_all = true;
+          break;
+        case PhabricatorCalendarEventTransaction::TYPE_INVITE:
+          foreach ($xaction->getNewValue() as $phid => $ignored) {
+            $invalidate_phids[$phid] = $phid;
+          }
+          break;
+      }
+    }
+
+    $phids = mpull($object->getInvitees(), 'getInviteePHID');
+    $phids = array_fuse($phids);
+
+    if (!$invalidate_all) {
+      $phids = array_select_keys($phids, $invalidate_phids);
+    }
+
+    if ($phids) {
+      $user = new PhabricatorUser();
+      $conn_w = $user->establishConnection('w');
+      queryfx(
+        $conn_w,
+        'UPDATE %T SET availabilityCacheTTL = NULL
+          WHERE phid IN (%Ls) AND availabilityCacheTTL >= %d',
+        $user->getTableName(),
+        $phids,
+        $object->getDateFromForCache());
+    }
 
     return $xactions;
   }

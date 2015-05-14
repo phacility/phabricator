@@ -201,8 +201,16 @@ final class PhabricatorPeopleQuery
     }
 
     if ($this->needAvailability) {
-      // TODO: Add caching.
-      $rebuild = $users;
+      $rebuild = array();
+      foreach ($users as $user) {
+        $cache = $user->getAvailabilityCache();
+        if ($cache !== null) {
+          $user->attachAvailability($cache);
+        } else {
+          $rebuild[] = $user;
+        }
+      }
+
       if ($rebuild) {
         $this->rebuildAvailabilityCache($rebuild);
       }
@@ -405,11 +413,6 @@ final class PhabricatorPeopleQuery
       }
     }
 
-    // Margin between meetings: pretend meetings start earlier than they do
-    // so we mark you away for the entire time if you have a series of
-    // back-to-back meetings, even if they don't strictly overlap.
-    $margin = phutil_units('15 minutes in seconds');
-
     foreach ($rebuild as $phid => $user) {
       $events = idx($map, $phid, array());
 
@@ -419,7 +422,7 @@ final class PhabricatorPeopleQuery
         // because of an event, we check again for events after that one ends.
         while (true) {
           foreach ($events as $event) {
-            $from = ($event->getDateFrom() - $margin);
+            $from = $event->getDateFromForCache();
             $to = $event->getDateTo();
             if (($from <= $cursor) && ($to > $cursor)) {
               $cursor = $to;
@@ -436,15 +439,16 @@ final class PhabricatorPeopleQuery
         );
         $availability_ttl = $cursor;
       } else {
-        $availability = null;
+        $availability = array(
+          'until' => null,
+        );
         $availability_ttl = $max_range;
       }
 
       // Never TTL the cache to longer than the maximum range we examined.
       $availability_ttl = min($availability_ttl, $max_range);
 
-      // TODO: Write the cache.
-
+      $user->writeAvailabilityCache($availability, $availability_ttl);
       $user->attachAvailability($availability);
     }
   }

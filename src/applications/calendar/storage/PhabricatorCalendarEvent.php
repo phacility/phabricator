@@ -147,6 +147,19 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return parent::save();
   }
 
+  /**
+   * Get the event start epoch for evaluating invitee availability.
+   *
+   * When assessing availability, we pretend events start earlier than they
+   * really. This allows us to mark users away for the entire duration of a
+   * series of back-to-back meetings, even if they don't strictly overlap.
+   *
+   * @return int Event start date for availability caches.
+   */
+  public function getDateFromForCache() {
+    return ($this->getDateFrom() - phutil_units('15 minutes in seconds'));
+  }
+
   private static $statusTexts = array(
     self::STATUS_AWAY => 'away',
     self::STATUS_SPORADIC => 'sporadic',
