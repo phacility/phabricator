@@ -17,7 +17,6 @@ final class PhabricatorCalendarEventEditor
     $types[] = PhabricatorCalendarEventTransaction::TYPE_NAME;
     $types[] = PhabricatorCalendarEventTransaction::TYPE_START_DATE;
     $types[] = PhabricatorCalendarEventTransaction::TYPE_END_DATE;
-    $types[] = PhabricatorCalendarEventTransaction::TYPE_STATUS;
     $types[] = PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION;
     $types[] = PhabricatorCalendarEventTransaction::TYPE_CANCEL;
     $types[] = PhabricatorCalendarEventTransaction::TYPE_INVITE;
@@ -40,12 +39,6 @@ final class PhabricatorCalendarEventEditor
         return $object->getDateFrom();
       case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
         return $object->getDateTo();
-      case PhabricatorCalendarEventTransaction::TYPE_STATUS:
-        $status = $object->getStatus();
-        if ($status === null) {
-          return null;
-        }
-        return (int)$status;
       case PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION:
         return $object->getDescription();
       case PhabricatorCalendarEventTransaction::TYPE_CANCEL:
@@ -83,8 +76,6 @@ final class PhabricatorCalendarEventEditor
         return $xaction->getNewValue();
       case PhabricatorCalendarEventTransaction::TYPE_ALL_DAY:
         return (int)$xaction->getNewValue();
-      case PhabricatorCalendarEventTransaction::TYPE_STATUS:
-        return (int)$xaction->getNewValue();
       case PhabricatorCalendarEventTransaction::TYPE_START_DATE:
       case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
         return $xaction->getNewValue()->getEpoch();
@@ -106,9 +97,6 @@ final class PhabricatorCalendarEventEditor
         return;
       case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
         $object->setDateTo($xaction->getNewValue());
-        return;
-      case PhabricatorCalendarEventTransaction::TYPE_STATUS:
-        $object->setStatus($xaction->getNewValue());
         return;
       case PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION:
         $object->setDescription($xaction->getNewValue());
@@ -139,7 +127,6 @@ final class PhabricatorCalendarEventEditor
       case PhabricatorCalendarEventTransaction::TYPE_NAME:
       case PhabricatorCalendarEventTransaction::TYPE_START_DATE:
       case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
-      case PhabricatorCalendarEventTransaction::TYPE_STATUS:
       case PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION:
       case PhabricatorCalendarEventTransaction::TYPE_CANCEL:
       case PhabricatorCalendarEventTransaction::TYPE_ALL_DAY:
@@ -184,7 +171,9 @@ final class PhabricatorCalendarEventEditor
     return $xactions;
   }
 
-  protected function applyFinalEffects($object, array $xactions) {
+  protected function applyFinalEffects(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
 
     // Clear the availability caches for users whose availability is affected
     // by this edit.

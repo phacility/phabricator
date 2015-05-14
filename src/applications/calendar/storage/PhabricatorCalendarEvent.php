@@ -14,7 +14,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   protected $userPHID;
   protected $dateFrom;
   protected $dateTo;
-  protected $status;
   protected $description;
   protected $isCancelled;
   protected $isAllDay;
@@ -25,9 +24,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   private $invitees = self::ATTACHABLE;
   private $appliedViewer;
-
-  const STATUS_AWAY = 1;
-  const STATUS_SPORADIC = 2;
 
   public static function initializeNewCalendarEvent(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -160,27 +156,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return ($this->getDateFrom() - phutil_units('15 minutes in seconds'));
   }
 
-  private static $statusTexts = array(
-    self::STATUS_AWAY => 'away',
-    self::STATUS_SPORADIC => 'sporadic',
-  );
-
-  public function setTextStatus($status) {
-    $statuses = array_flip(self::$statusTexts);
-    return $this->setStatus($statuses[$status]);
-  }
-
-  public function getTextStatus() {
-    return self::$statusTexts[$this->status];
-  }
-
-  public function getStatusOptions() {
-    return array(
-      self::STATUS_AWAY     => pht('Away'),
-      self::STATUS_SPORADIC => pht('Sporadic'),
-    );
-  }
-
   protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID => true,
@@ -188,7 +163,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         'name' => 'text',
         'dateFrom' => 'epoch',
         'dateTo' => 'epoch',
-        'status' => 'uint32',
         'description' => 'text',
         'isCancelled' => 'bool',
         'isAllDay' => 'bool',
@@ -209,26 +183,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   public function getMonogram() {
     return 'E'.$this->getID();
-  }
-
-  public function getTerseSummary(PhabricatorUser $viewer) {
-    $until = phabricator_date($this->dateTo, $viewer);
-    if ($this->status == self::STATUS_SPORADIC) {
-      return pht('Sporadic until %s', $until);
-    } else {
-      return pht('Away until %s', $until);
-    }
-  }
-
-  public static function getNameForStatus($value) {
-    switch ($value) {
-      case self::STATUS_AWAY:
-        return pht('Away');
-      case self::STATUS_SPORADIC:
-        return pht('Sporadic');
-      default:
-        return pht('Unknown');
-    }
   }
 
   public function getInvitees() {
