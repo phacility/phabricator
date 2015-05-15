@@ -3101,6 +3101,7 @@ phutil_register_library_map(array(
     'ProjectQueryConduitAPIMethod' => 'applications/project/conduit/ProjectQueryConduitAPIMethod.php',
     'ProjectRemarkupRule' => 'applications/project/remarkup/ProjectRemarkupRule.php',
     'ProjectRemarkupRuleTestCase' => 'applications/project/remarkup/__tests__/ProjectRemarkupRuleTestCase.php',
+    'ProjectReplyHandler' => 'applications/project/mail/ProjectReplyHandler.php',
     'QueryFormattingTestCase' => 'infrastructure/storage/__tests__/QueryFormattingTestCase.php',
     'ReleephAuthorFieldSpecification' => 'applications/releeph/field/specification/ReleephAuthorFieldSpecification.php',
     'ReleephBranch' => 'applications/releeph/storage/ReleephBranch.php',
@@ -6670,6 +6671,7 @@ phutil_register_library_map(array(
     'ProjectQueryConduitAPIMethod' => 'ProjectConduitAPIMethod',
     'ProjectRemarkupRule' => 'PhabricatorObjectRemarkupRule',
     'ProjectRemarkupRuleTestCase' => 'PhabricatorTestCase',
+    'ProjectReplyHandler' => 'PhabricatorApplicationTransactionReplyHandler',
     'QueryFormattingTestCase' => 'PhabricatorTestCase',
     'ReleephAuthorFieldSpecification' => 'ReleephFieldSpecification',
     'ReleephBranch' => array(

@@ -840,6 +840,8 @@ abstract class PhabricatorApplicationTransactionEditor
     // subscribers to pick up changes caused by Herald (or by other side effects
     // in various transaction phases).
     $this->loadSubscribers($object);
+    // Hook for other edges that may need (re-)loading
+    $this->loadEdges($object, $xactions);
 
     $this->loadHandles($xactions);
 
@@ -963,6 +965,12 @@ abstract class PhabricatorApplicationTransactionEditor
     } else {
       $this->subscribers = array();
     }
+  }
+
+  protected function loadEdges(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return;
   }
 
   private function validateEditParameters(
