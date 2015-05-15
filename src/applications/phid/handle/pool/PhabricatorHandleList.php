@@ -158,8 +158,9 @@ final class PhabricatorHandleList
   private function raiseImmutableException() {
     throw new Exception(
       pht(
-        'Trying to mutate a PhabricatorHandleList, but this is not permitted; '.
-        'handle lists are immutable.'));
+        'Trying to mutate a %s, but this is not permitted; '.
+        'handle lists are immutable.',
+        __CLASS__));
   }
 
 

@@ -41,7 +41,6 @@ final class PHUIInfoView extends AphrontView {
   }
 
   final public function render() {
-
     require_celerity_resource('phui-info-view-css');
 
     $errors = $this->errors;

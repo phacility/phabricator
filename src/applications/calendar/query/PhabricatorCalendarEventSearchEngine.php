@@ -76,11 +76,33 @@ final class PhabricatorCalendarEventSearchEngine
       $display_start = $start_day->format('U');
       $display_end = $next->format('U');
 
+      // 0 = Sunday is always the start of the week, for now
+      $start_of_week = 0;
+      $end_of_week = 6 - $start_of_week;
+
+      $first_of_month = $start_day->format('w');
+      $last_of_month = id(clone $next)->modify('-1 day')->format('w');
+
       if (!$min_range || ($min_range < $display_start)) {
         $min_range = $display_start;
+
+        if ($this->isMonthView($saved) &&
+          $first_of_month > $start_of_week) {
+          $min_range = id(clone $start_day)
+            ->modify('-'.$first_of_month.' days')
+            ->format('U');
+        }
       }
       if (!$max_range || ($max_range > $display_end)) {
         $max_range = $display_end;
+
+        if ($this->isMonthView($saved) &&
+          $last_of_month < $end_of_week) {
+          $max_range = id(clone $next)
+            ->modify('+'.(6 - $first_of_month).' days')
+            ->format('U');
+        }
+
       }
     }
 
@@ -337,25 +359,9 @@ final class PhabricatorCalendarEventSearchEngine
 
     $phids = mpull($statuses, 'getUserPHID');
 
-    /* Assign Colors */
-    $unique = array_unique($phids);
-    $allblue = false;
-    $calcolors = CalendarColors::getColors();
-    if (count($unique) > count($calcolors)) {
-      $allblue = true;
-    }
-    $i = 0;
-    $eventcolor = array();
-    foreach ($unique as $phid) {
-      if ($allblue) {
-        $eventcolor[$phid] = CalendarColors::COLOR_SKY;
-      } else {
-        $eventcolor[$phid] = $calcolors[$i];
-      }
-      $i++;
-    }
-
     foreach ($statuses as $status) {
+      $viewer_is_invited = $status->getIsUserInvited($viewer->getPHID());
+
       $event = new AphrontCalendarEventView();
       $event->setEpochRange($status->getDateFrom(), $status->getDateTo());
       $event->setIsAllDay($status->getIsAllDay());
@@ -366,7 +372,7 @@ final class PhabricatorCalendarEventSearchEngine
       $event->setDescription(pht('%s (%s)', $name_text, $status_text));
       $event->setName($status_text);
       $event->setEventID($status->getID());
-      $event->setColor($eventcolor[$status->getUserPHID()]);
+      $event->setViewerIsInvited($viewer_is_invited);
       $month_view->addEvent($event);
     }
 
@@ -400,10 +406,13 @@ final class PhabricatorCalendarEventSearchEngine
         continue;
       }
 
+      $viewer_is_invited = $status->getIsUserInvited($viewer->getPHID());
+
       $event = new AphrontCalendarEventView();
       $event->setEventID($status->getID());
       $event->setEpochRange($status->getDateFrom(), $status->getDateTo());
       $event->setIsAllDay($status->getIsAllDay());
+      $event->setViewerIsInvited($viewer_is_invited);
 
       $event->setName($status->getName());
       $event->setURI('/'.$status->getMonogram());

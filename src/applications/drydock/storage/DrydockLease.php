@@ -149,7 +149,7 @@ final class DrydockLease extends DrydockDAO
   }
 
   public static function waitForLeases(array $leases) {
-    assert_instances_of($leases, 'DrydockLease');
+    assert_instances_of($leases, __CLASS__);
 
     $task_ids = array_filter(mpull($leases, 'getTaskID'));
 

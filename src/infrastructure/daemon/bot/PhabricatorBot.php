@@ -19,7 +19,11 @@ final class PhabricatorBot extends PhabricatorDaemon {
   protected function run() {
     $argv = $this->getArgv();
     if (count($argv) !== 1) {
-      throw new Exception('usage: PhabricatorBot <json_config_file>');
+      throw new Exception(
+        pht(
+          'Usage: %s %s',
+          __CLASS__,
+          '<json_config_file>'));
     }
 
     $json_raw = Filesystem::readFile($argv[0]);
@@ -72,7 +76,7 @@ final class PhabricatorBot extends PhabricatorDaemon {
         $response = $conduit->callMethodSynchronous(
           'conduit.connect',
           array(
-            'client'            => 'PhabricatorBot',
+            'client'            => __CLASS__,
             'clientVersion'     => '1.0',
             'clientDescription' => php_uname('n').':'.$nick,
             'host'              => $conduit_host,

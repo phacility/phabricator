@@ -56,7 +56,7 @@ final class PhabricatorSubscriptionsEditor extends PhabricatorEditor {
 
   public function save() {
     if (!$this->object) {
-      throw new Exception('Call setObject() before save()!');
+      throw new PhutilInvalidStateException('setObject');
     }
     $actor = $this->requireActor();
 

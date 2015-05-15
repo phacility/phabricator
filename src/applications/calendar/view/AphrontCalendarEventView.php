@@ -8,7 +8,7 @@ final class AphrontCalendarEventView extends AphrontView {
   private $epochEnd;
   private $description;
   private $eventID;
-  private $color;
+  private $viewerIsInvited;
   private $uri;
   private $isAllDay;
 
@@ -27,6 +27,14 @@ final class AphrontCalendarEventView extends AphrontView {
   }
   public function getEventID() {
     return $this->eventID;
+  }
+
+  public function setViewerIsInvited($viewer_is_invited) {
+    $this->viewerIsInvited = $viewer_is_invited;
+    return $this;
+  }
+  public function getViewerIsInvited() {
+    return $this->viewerIsInvited;
   }
 
   public function setUserPHID($user_phid) {
@@ -68,18 +76,6 @@ final class AphrontCalendarEventView extends AphrontView {
 
   public function getDescription() {
     return $this->description;
-  }
-
-  public function setColor($color) {
-    $this->color = $color;
-    return $this;
-  }
-  public function getColor() {
-    if ($this->color) {
-      return $this->color;
-    } else {
-      return CalendarColors::COLOR_SKY;
-    }
   }
 
   public function setIsAllDay($is_all_day) {

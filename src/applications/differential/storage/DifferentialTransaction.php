@@ -568,7 +568,7 @@ final class DifferentialTransaction extends PhabricatorApplicationTransaction {
               'this revision.');
         }
         break;
-      case DifferentialTransaction::TYPE_ACTION:
+      case self::TYPE_ACTION:
         switch ($this->getNewValue()) {
           case DifferentialAction::ACTION_CLOSE:
             return pht('This revision is already closed.');

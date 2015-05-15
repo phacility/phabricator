@@ -159,7 +159,6 @@ JX.behavior('durable-column', function(config, statics) {
       return;
     }
     var messages = _getColumnMessagesNode();
-    JX.DOM.appendContent(messages, JX.$H(r.transactions));
     scrollbar.scrollTo(messages.scrollHeight);
   });
 
@@ -168,7 +167,6 @@ JX.behavior('durable-column', function(config, statics) {
   });
   threadManager.setDidUpdateWorkflowCallback(function(r) {
     var messages = _getColumnMessagesNode();
-    JX.DOM.appendContent(messages, JX.$H(r.transactions));
     scrollbar.scrollTo(messages.scrollHeight);
     JX.DOM.setContent(_getColumnTitleNode(), r.conpherence_title);
   });

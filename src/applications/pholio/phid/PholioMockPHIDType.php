@@ -40,7 +40,7 @@ final class PholioMockPHIDType extends PhabricatorPHIDType {
       $handle->setFullName("M{$id}: {$name}");
 
       if ($mock->isClosed()) {
-        $handle->setStatus(PhabricatorObjectHandleStatus::STATUS_CLOSED);
+        $handle->setStatus(PhabricatorObjectHandle::STATUS_CLOSED);
       }
     }
   }

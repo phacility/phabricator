@@ -68,12 +68,9 @@ final class PhabricatorProjectEditPictureController
             'This server only supports these image formats: %s.',
             implode(', ', $supported_formats));
         } else {
-          $xformer = new PhabricatorImageTransformer();
-          $xformed = $xformer->executeProfileTransform(
-            $file,
-            $width = 50,
-            $min_height = 50,
-            $max_height = 50);
+          $xform = PhabricatorFileTransform::getTransformByKey(
+            PhabricatorFileThumbnailTransform::TRANSFORM_PROFILE);
+          $xformed = $xform->executeTransform($file);
         }
       }
 

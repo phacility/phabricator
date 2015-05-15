@@ -88,7 +88,7 @@ final class HarbormasterBuildable extends HarbormasterDAO
     if ($buildable) {
       return $buildable;
     }
-    $buildable = HarbormasterBuildable::initializeNewBuildable($actor)
+    $buildable = self::initializeNewBuildable($actor)
       ->setBuildablePHID($buildable_object_phid)
       ->setContainerPHID($container_object_phid);
     $buildable->save();
@@ -116,7 +116,7 @@ final class HarbormasterBuildable extends HarbormasterDAO
       return;
     }
 
-    $buildable = HarbormasterBuildable::createOrLoadExisting(
+    $buildable = self::createOrLoadExisting(
       PhabricatorUser::getOmnipotentUser(),
       $phid,
       $container_phid);

@@ -1,0 +1,5 @@
+ALTER TABLE {$NAMESPACE}_user.user
+  ADD availabilityCache VARCHAR(255) COLLATE {$COLLATE_TEXT};
+
+ALTER TABLE {$NAMESPACE}_user.user
+  ADD availabilityCacheTTL INT UNSIGNED;

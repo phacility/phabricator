@@ -14,7 +14,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   protected $userPHID;
   protected $dateFrom;
   protected $dateTo;
-  protected $status;
   protected $description;
   protected $isCancelled;
   protected $isAllDay;
@@ -25,9 +24,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   private $invitees = self::ATTACHABLE;
   private $appliedViewer;
-
-  const STATUS_AWAY = 1;
-  const STATUS_SPORADIC = 2;
 
   public static function initializeNewCalendarEvent(PhabricatorUser $actor) {
     $app = id(new PhabricatorApplicationQuery())
@@ -147,25 +143,17 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return parent::save();
   }
 
-  private static $statusTexts = array(
-    self::STATUS_AWAY => 'away',
-    self::STATUS_SPORADIC => 'sporadic',
-  );
-
-  public function setTextStatus($status) {
-    $statuses = array_flip(self::$statusTexts);
-    return $this->setStatus($statuses[$status]);
-  }
-
-  public function getTextStatus() {
-    return self::$statusTexts[$this->status];
-  }
-
-  public function getStatusOptions() {
-    return array(
-      self::STATUS_AWAY     => pht('Away'),
-      self::STATUS_SPORADIC => pht('Sporadic'),
-    );
+  /**
+   * Get the event start epoch for evaluating invitee availability.
+   *
+   * When assessing availability, we pretend events start earlier than they
+   * really. This allows us to mark users away for the entire duration of a
+   * series of back-to-back meetings, even if they don't strictly overlap.
+   *
+   * @return int Event start date for availability caches.
+   */
+  public function getDateFromForCache() {
+    return ($this->getDateFrom() - phutil_units('15 minutes in seconds'));
   }
 
   protected function getConfiguration() {
@@ -175,7 +163,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         'name' => 'text',
         'dateFrom' => 'epoch',
         'dateTo' => 'epoch',
-        'status' => 'uint32',
         'description' => 'text',
         'isCancelled' => 'bool',
         'isAllDay' => 'bool',
@@ -196,38 +183,6 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
 
   public function getMonogram() {
     return 'E'.$this->getID();
-  }
-
-  public function getTerseSummary(PhabricatorUser $viewer) {
-    $until = phabricator_date($this->dateTo, $viewer);
-    if ($this->status == PhabricatorCalendarEvent::STATUS_SPORADIC) {
-      return pht('Sporadic until %s', $until);
-    } else {
-      return pht('Away until %s', $until);
-    }
-  }
-
-  public static function getNameForStatus($value) {
-    switch ($value) {
-      case self::STATUS_AWAY:
-        return pht('Away');
-      case self::STATUS_SPORADIC:
-        return pht('Sporadic');
-      default:
-        return pht('Unknown');
-    }
-  }
-
-  public function loadCurrentStatuses($user_phids) {
-    if (!$user_phids) {
-      return array();
-    }
-
-    $statuses = $this->loadAllWhere(
-      'userPHID IN (%Ls) AND UNIX_TIMESTAMP() BETWEEN dateFrom AND dateTo',
-      $user_phids);
-
-    return mpull($statuses, null, 'getUserPHID');
   }
 
   public function getInvitees() {
@@ -258,6 +213,16 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     $is_attending = ($old_status == $attending_status);
 
     return $is_attending;
+  }
+
+  public function getIsUserInvited($phid) {
+    $uninvited_status = PhabricatorCalendarEventInvitee::STATUS_UNINVITED;
+    $declined_status = PhabricatorCalendarEventInvitee::STATUS_DECLINED;
+    $status = $this->getUserInviteStatus($phid);
+    if ($status == $uninvited_status || $status == $declined_status) {
+      return false;
+    }
+    return true;
   }
 
 /* -(  Markup Interface  )--------------------------------------------------- */

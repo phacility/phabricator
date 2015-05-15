@@ -49,7 +49,6 @@ final class PhabricatorPholioApplication extends PhabricatorApplication {
         'inline/' => array(
           '(?:(?P<id>\d+)/)?' => 'PholioInlineController',
           'list/(?P<id>\d+)/' => 'PholioInlineListController',
-          'thumb/(?P<imageid>\d+)/' => 'PholioInlineThumbController',
         ),
         'image/' => array(
           'upload/' => 'PholioImageUploadController',

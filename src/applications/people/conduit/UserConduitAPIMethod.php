@@ -8,7 +8,8 @@ abstract class UserConduitAPIMethod extends ConduitAPIMethod {
 
   protected function buildUserInformationDictionary(
     PhabricatorUser $user,
-    PhabricatorCalendarEvent $current_status = null) {
+    $with_email = false,
+    $with_availability = false) {
 
     $roles = array();
     if ($user->getIsDisabled()) {
@@ -42,15 +43,23 @@ abstract class UserConduitAPIMethod extends ConduitAPIMethod {
       'phid'         => $user->getPHID(),
       'userName'     => $user->getUserName(),
       'realName'     => $user->getRealName(),
-      'primaryEmail' => $email,
       'image'        => $user->getProfileImageURI(),
       'uri'          => PhabricatorEnv::getURI('/p/'.$user->getUsername().'/'),
       'roles'        => $roles,
     );
 
-    if ($current_status) {
-      $return['currentStatus'] = $current_status->getTextStatus();
-      $return['currentStatusUntil'] = $current_status->getDateTo();
+    if ($with_email) {
+      $return['primaryEmail'] = $email;
+    }
+
+    if ($with_availability) {
+      // TODO: Modernize this once we have a more long-term view of what the
+      // data looks like.
+      $until = $user->getAwayUntil();
+      if ($until) {
+        $return['currentStatus'] = 'away';
+        $return['currentStatusUntil'] = $until;
+      }
     }
 
     return $return;

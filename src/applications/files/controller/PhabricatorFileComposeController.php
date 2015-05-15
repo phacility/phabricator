@@ -58,7 +58,7 @@ final class PhabricatorFileComposeController
       }
 
       $root = dirname(phutil_get_library_root('phabricator'));
-      $icon_file = $root.'/resources/sprite/projects_1x/'.$icon.'.png';
+      $icon_file = $root.'/resources/sprite/projects_2x/'.$icon.'.png';
       $icon_data = Filesystem::readFile($icon_file);
 
 
@@ -68,6 +68,7 @@ final class PhabricatorFileComposeController
         $data,
         array(
           'name' => 'project.png',
+          'profile' => true,
           'canCDN' => true,
         ));
 
@@ -241,7 +242,7 @@ final class PhabricatorFileComposeController
     }
 
     $dialog_id = celerity_generate_unique_node_id();
-    $color_input_id = celerity_generate_unique_node_id();;
+    $color_input_id = celerity_generate_unique_node_id();
     $icon_input_id = celerity_generate_unique_node_id();
     $preview_id = celerity_generate_unique_node_id();
 
@@ -325,10 +326,10 @@ final class PhabricatorFileComposeController
     $color_string = idx($map, $color, '#ff00ff');
     $color_const = hexdec(trim($color_string, '#'));
 
-    $canvas = imagecreatetruecolor(50, 50);
+    $canvas = imagecreatetruecolor(100, 100);
     imagefill($canvas, 0, 0, $color_const);
 
-    imagecopy($canvas, $icon_img, 0, 0, 0, 0, 50, 50);
+    imagecopy($canvas, $icon_img, 0, 0, 0, 0, 100, 100);
 
     return PhabricatorImageTransformer::saveImageDataInAnyFormat(
       $canvas,

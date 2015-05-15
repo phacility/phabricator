@@ -122,8 +122,7 @@ final class PhabricatorConfigOption
       return $this->enumOptions;
     }
 
-    throw new Exception(
-      'Call setEnumOptions() before trying to access them!');
+    throw new PhutilInvalidStateException('setEnumOptions');
   }
 
   public function setKey($key) {

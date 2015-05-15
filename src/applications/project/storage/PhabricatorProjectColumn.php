@@ -111,7 +111,7 @@ final class PhabricatorProjectColumn
         ->setMetadata(
           array(
             'tip' => $text,
-          ));;
+          ));
     }
 
     return null;

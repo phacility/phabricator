@@ -29,7 +29,10 @@ final class UserWhoAmIConduitAPIMethod extends UserConduitAPIMethod {
       ->withPHIDs(array($request->getUser()->getPHID()))
       ->executeOne();
 
-    return $this->buildUserInformationDictionary($person);
+    return $this->buildUserInformationDictionary(
+      $person,
+      $with_email = true,
+      $with_availability = false);
   }
 
 }

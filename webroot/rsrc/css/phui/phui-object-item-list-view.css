@@ -599,7 +599,7 @@ ul.phui-object-item-icons {
 .phui-object-item-image {
   width: 40px;
   height: 40px;
-  background-size: 40px;
+  background-size: 100%;
   margin: 6px;
   position: absolute;
   background-color: {$lightbluebackground};

@@ -6,7 +6,6 @@ final class PhabricatorCalendarEventTransaction
   const TYPE_NAME = 'calendar.name';
   const TYPE_START_DATE = 'calendar.startdate';
   const TYPE_END_DATE = 'calendar.enddate';
-  const TYPE_STATUS = 'calendar.status';
   const TYPE_DESCRIPTION = 'calendar.description';
   const TYPE_CANCEL = 'calendar.cancel';
   const TYPE_ALL_DAY = 'calendar.allday';
@@ -35,7 +34,6 @@ final class PhabricatorCalendarEventTransaction
       case self::TYPE_NAME:
       case self::TYPE_START_DATE:
       case self::TYPE_END_DATE:
-      case self::TYPE_STATUS:
       case self::TYPE_DESCRIPTION:
       case self::TYPE_CANCEL:
       case self::TYPE_ALL_DAY:
@@ -57,7 +55,6 @@ final class PhabricatorCalendarEventTransaction
     switch ($this->getTransactionType()) {
       case self::TYPE_START_DATE:
       case self::TYPE_END_DATE:
-      case self::TYPE_STATUS:
       case self::TYPE_DESCRIPTION:
       case self::TYPE_CANCEL:
       case self::TYPE_ALL_DAY:
@@ -72,7 +69,6 @@ final class PhabricatorCalendarEventTransaction
       case self::TYPE_NAME:
       case self::TYPE_START_DATE:
       case self::TYPE_END_DATE:
-      case self::TYPE_STATUS:
       case self::TYPE_DESCRIPTION:
       case self::TYPE_ALL_DAY:
       case self::TYPE_CANCEL:
@@ -120,14 +116,6 @@ final class PhabricatorCalendarEventTransaction
             $this->renderHandleLink($author_phid));
         }
         break;
-      case self::TYPE_STATUS:
-        $old_name = PhabricatorCalendarEvent::getNameForStatus($old);
-        $new_name = PhabricatorCalendarEvent::getNameForStatus($new);
-        return pht(
-          '%s updated the event status from %s to %s.',
-          $this->renderHandleLink($author_phid),
-          $old_name,
-          $new_name);
       case self::TYPE_DESCRIPTION:
         return pht(
           "%s updated the event's description.",
@@ -287,15 +275,6 @@ final class PhabricatorCalendarEventTransaction
             $new);
         }
         break;
-      case self::TYPE_STATUS:
-        $old_name = PhabricatorCalendarEvent::getNameForStatus($old);
-        $new_name = PhabricatorCalendarEvent::getNameForStatus($new);
-        return pht(
-          '%s updated the status of %s from %s to %s.',
-          $this->renderHandleLink($author_phid),
-          $this->renderHandleLink($object_phid),
-          $old_name,
-          $new_name);
       case self::TYPE_DESCRIPTION:
         return pht(
           '%s updated the description of %s.',
@@ -430,7 +409,6 @@ final class PhabricatorCalendarEventTransaction
       case self::TYPE_NAME:
       case self::TYPE_START_DATE:
       case self::TYPE_END_DATE:
-      case self::TYPE_STATUS:
       case self::TYPE_DESCRIPTION:
       case self::TYPE_CANCEL:
       case self::TYPE_INVITE:
@@ -469,7 +447,6 @@ final class PhabricatorCalendarEventTransaction
     $tags = array();
     switch ($this->getTransactionType()) {
       case self::TYPE_NAME:
-      case self::TYPE_STATUS:
       case self::TYPE_DESCRIPTION:
       case self::TYPE_INVITE:
         $tags[] = self::MAILTAG_CONTENT;

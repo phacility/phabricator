@@ -10,6 +10,7 @@ final class CalendarColors extends CalendarConstants {
   const COLOR_SKY = 'sky';
   const COLOR_INDIGO = 'indigo';
   const COLOR_VIOLET = 'violet';
+  const COLOR_GREY = 'grey';
 
   public static function getColors() {
     return array(
@@ -21,6 +22,7 @@ final class CalendarColors extends CalendarConstants {
       self::COLOR_INDIGO,
       self::COLOR_RED,
       self::COLOR_YELLOW,
+      self::COLOR_GREY,
     );
   }
 

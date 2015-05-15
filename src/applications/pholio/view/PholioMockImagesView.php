@@ -68,8 +68,11 @@ final class PholioMockImagesView extends AphrontView {
 
     // TODO: We could maybe do a better job with tailoring this, which is the
     // image shown on the review stage.
-    $nonimage_uri = celerity_get_resource_uri(
-      'rsrc/image/icon/fatcow/thumbnails/default.p100.png');
+    $default_name = 'image-100x100.png';
+    $builtins = PhabricatorFile::loadBuiltins(
+      $this->getUser(),
+      array($default_name));
+    $default = $builtins[$default_name];
 
     $engine = id(new PhabricatorMarkupEngine())
       ->setViewer($this->getUser());
@@ -97,7 +100,7 @@ final class PholioMockImagesView extends AphrontView {
         'fullURI' => $file->getBestURI(),
         'stageURI' => ($file->isViewableImage()
           ? $file->getBestURI()
-          : $nonimage_uri),
+          : $default->getBestURI()),
         'pageURI' => $this->getImagePageURI($image, $mock),
         'downloadURI' => $file->getDownloadURI(),
         'historyURI' => $history_uri,

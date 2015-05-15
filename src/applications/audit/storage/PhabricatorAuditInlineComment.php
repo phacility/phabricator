@@ -115,7 +115,7 @@ final class PhabricatorAuditInlineComment
   private static function buildProxies(array $inlines) {
     $results = array();
     foreach ($inlines as $key => $inline) {
-      $results[$key] = PhabricatorAuditInlineComment::newFromModernComment(
+      $results[$key] = self::newFromModernComment(
         $inline);
     }
     return $results;

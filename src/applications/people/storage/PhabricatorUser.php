@@ -1,6 +1,8 @@
 <?php
 
 /**
+ * @task availability Availability
+ * @task image-cache Profile Image Cache
  * @task factors Multi-Factor Authentication
  * @task handles Managing Handles
  */
@@ -24,6 +26,9 @@ final class PhabricatorUser
   protected $passwordSalt;
   protected $passwordHash;
   protected $profileImagePHID;
+  protected $profileImageCache;
+  protected $availabilityCache;
+  protected $availabilityCacheTTL;
   protected $timezoneIdentifier = '';
 
   protected $consoleEnabled = 0;
@@ -43,7 +48,7 @@ final class PhabricatorUser
 
   private $profileImage = self::ATTACHABLE;
   private $profile = null;
-  private $status = self::ATTACHABLE;
+  private $availability = self::ATTACHABLE;
   private $preferences = null;
   private $omnipotent = false;
   private $customFields = self::ATTACHABLE;
@@ -142,6 +147,9 @@ final class PhabricatorUser
         'isApproved' => 'uint32',
         'accountSecret' => 'bytes64',
         'isEnrolledInMultiFactor' => 'bool',
+        'profileImageCache' => 'text255?',
+        'availabilityCache' => 'text255?',
+        'availabilityCacheTTL' => 'uint32?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
@@ -159,6 +167,11 @@ final class PhabricatorUser
         'key_approved' => array(
           'columns' => array('isApproved'),
         ),
+      ),
+      self::CONFIG_NO_MUTATE => array(
+        'profileImageCache' => true,
+        'availabilityCache' => true,
+        'availabilityCacheTTL' => true,
       ),
     ) + parent::getConfiguration();
   }
@@ -652,19 +665,6 @@ EOBODY;
     return celerity_get_resource_uri('/rsrc/image/avatar.png');
   }
 
-  public function attachStatus(PhabricatorCalendarEvent $status) {
-    $this->status = $status;
-    return $this;
-  }
-
-  public function getStatus() {
-    return $this->assertAttached($this->status);
-  }
-
-  public function hasStatus() {
-    return $this->status !== self::ATTACHABLE;
-  }
-
   public function attachProfileImageURI($uri) {
     $this->profileImage = $uri;
     return $this;
@@ -718,6 +718,163 @@ EOBODY;
    */
   public function getAuthorities() {
     return $this->authorities;
+  }
+
+
+/* -(  Availability  )------------------------------------------------------- */
+
+
+  /**
+   * @task availability
+   */
+  public function attachAvailability(array $availability) {
+    $this->availability = $availability;
+    return $this;
+  }
+
+
+  /**
+   * Get the timestamp the user is away until, if they are currently away.
+   *
+   * @return int|null Epoch timestamp, or `null` if the user is not away.
+   * @task availability
+   */
+  public function getAwayUntil() {
+    $availability = $this->availability;
+
+    $this->assertAttached($availability);
+    if (!$availability) {
+      return null;
+    }
+
+    return idx($availability, 'until');
+  }
+
+
+  /**
+   * Describe the user's availability.
+   *
+   * @param PhabricatorUser Viewing user.
+   * @return string Human-readable description of away status.
+   * @task availability
+   */
+  public function getAvailabilityDescription(PhabricatorUser $viewer) {
+    $until = $this->getAwayUntil();
+    if ($until) {
+      return pht('Away until %s', phabricator_datetime($until, $viewer));
+    } else {
+      return pht('Available');
+    }
+  }
+
+
+  /**
+   * Get cached availability, if present.
+   *
+   * @return wild|null Cache data, or null if no cache is available.
+   * @task availability
+   */
+  public function getAvailabilityCache() {
+    $now = PhabricatorTime::getNow();
+    if ($this->availabilityCacheTTL <= $now) {
+      return null;
+    }
+
+    try {
+      return phutil_json_decode($this->availabilityCache);
+    } catch (Exception $ex) {
+      return null;
+    }
+  }
+
+
+  /**
+   * Write to the availability cache.
+   *
+   * @param wild Availability cache data.
+   * @param int|null Cache TTL.
+   * @return this
+   * @task availability
+   */
+  public function writeAvailabilityCache(array $availability, $ttl) {
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+    queryfx(
+      $this->establishConnection('w'),
+      'UPDATE %T SET availabilityCache = %s, availabilityCacheTTL = %nd
+        WHERE id = %d',
+      $this->getTableName(),
+      json_encode($availability),
+      $ttl,
+      $this->getID());
+    unset($unguarded);
+
+    return $this;
+  }
+
+
+/* -(  Profile Image Cache  )------------------------------------------------ */
+
+
+  /**
+   * Get this user's cached profile image URI.
+   *
+   * @return string|null Cached URI, if a URI is cached.
+   * @task image-cache
+   */
+  public function getProfileImageCache() {
+    $version = $this->getProfileImageVersion();
+
+    $parts = explode(',', $this->profileImageCache, 2);
+    if (count($parts) !== 2) {
+      return null;
+    }
+
+    if ($parts[0] !== $version) {
+      return null;
+    }
+
+    return $parts[1];
+  }
+
+
+  /**
+   * Generate a new cache value for this user's profile image.
+   *
+   * @return string New cache value.
+   * @task image-cache
+   */
+  public function writeProfileImageCache($uri) {
+    $version = $this->getProfileImageVersion();
+    $cache = "{$version},{$uri}";
+
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+    queryfx(
+      $this->establishConnection('w'),
+      'UPDATE %T SET profileImageCache = %s WHERE id = %d',
+      $this->getTableName(),
+      $cache,
+      $this->getID());
+    unset($unguarded);
+  }
+
+
+  /**
+   * Get a version identifier for a user's profile image.
+   *
+   * This version will change if the image changes, or if any of the
+   * environment configuration which goes into generating a URI changes.
+   *
+   * @return string Cache version.
+   * @task image-cache
+   */
+  private function getProfileImageVersion() {
+    $parts = array(
+      PhabricatorEnv::getCDNURI('/'),
+      PhabricatorEnv::getEnvConfig('cluster.instance'),
+      $this->getProfileImagePHID(),
+    );
+    $parts = serialize($parts);
+    return PhabricatorHash::digestForIndex($parts);
   }
 
 

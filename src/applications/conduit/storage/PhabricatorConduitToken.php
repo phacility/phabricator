@@ -65,7 +65,7 @@ final class PhabricatorConduitToken
     // to expire) so generate a new token.
 
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-      $token = PhabricatorConduitToken::initializeNewToken(
+      $token = self::initializeNewToken(
         $user->getPHID(),
         self::TYPE_CLUSTER);
       $token->save();

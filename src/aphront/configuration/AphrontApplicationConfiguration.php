@@ -62,6 +62,11 @@ abstract class AphrontApplicationConfiguration {
     $multimeter->setEventContext('<http-init>');
     $multimeter->setEventViewer('<none>');
 
+    // Build a no-op write guard for the setup phase. We'll replace this with a
+    // real write guard later on, but we need to survive setup and build a
+    // request object first.
+    $write_guard = new AphrontWriteGuard('id');
+
     PhabricatorEnv::initializeWebEnvironment();
 
     $multimeter->setSampleRate(
@@ -108,6 +113,11 @@ abstract class AphrontApplicationConfiguration {
     $application->willBuildRequest();
     $request = $application->buildRequest();
 
+    // Now that we have a request, convert the write guard into one which
+    // actually checks CSRF tokens.
+    $write_guard->dispose();
+    $write_guard = new AphrontWriteGuard(array($request, 'validateCSRF'));
+
     // Build the server URI implied by the request headers. If an administrator
     // has not configured "phabricator.base-uri" yet, we'll use this to generate
     // links.
@@ -120,8 +130,6 @@ abstract class AphrontApplicationConfiguration {
       array(
         'U' => (string)$request->getRequestURI()->getPath(),
       ));
-
-    $write_guard = new AphrontWriteGuard(array($request, 'validateCSRF'));
 
     $processing_exception = null;
     try {

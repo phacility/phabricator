@@ -34,6 +34,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
   const METADATA_CAN_CDN = 'canCDN';
   const METADATA_BUILTIN = 'builtin';
   const METADATA_PARTIAL = 'partial';
+  const METADATA_PROFILE = 'profile';
 
   protected $name;
   protected $mimeType;
@@ -214,7 +215,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
     if (!$file) {
       $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-      $file = PhabricatorFile::newFromFileData($data, $params);
+      $file = self::newFromFileData($data, $params);
       unset($unguarded);
     }
 
@@ -235,7 +236,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
       $copy_of_byte_size = $file->getByteSize();
       $copy_of_mime_type = $file->getMimeType();
 
-      $new_file = PhabricatorFile::initializeNewFile();
+      $new_file = self::initializeNewFile();
 
       $new_file->setByteSize($copy_of_byte_size);
 
@@ -261,7 +262,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
     $length,
     array $params) {
 
-    $file = PhabricatorFile::initializeNewFile();
+    $file = self::initializeNewFile();
 
     $file->setByteSize($length);
 
@@ -315,7 +316,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
       throw new Exception(pht('No valid storage engines are available!'));
     }
 
-    $file = PhabricatorFile::initializeNewFile();
+    $file = self::initializeNewFile();
 
     $data_handle = null;
     $engine_identifier = null;
@@ -760,6 +761,10 @@ final class PhabricatorFile extends PhabricatorFileDAO
     return (string) $uri;
   }
 
+  public function getURIForTransform(PhabricatorFileTransform $transform) {
+    return $this->getTransformedURI($transform->getTransformKey());
+  }
+
   private function getTransformedURI($transform) {
     $parts = array();
     $parts[] = 'file';
@@ -778,34 +783,6 @@ final class PhabricatorFile extends PhabricatorFileDAO
     $path = $path.'/';
 
     return PhabricatorEnv::getCDNURI($path);
-  }
-
-  public function getProfileThumbURI() {
-    return $this->getTransformedURI('thumb-profile');
-  }
-
-  public function getThumb60x45URI() {
-    return $this->getTransformedURI('thumb-60x45');
-  }
-
-  public function getThumb160x120URI() {
-    return $this->getTransformedURI('thumb-160x120');
-  }
-
-  public function getPreview100URI() {
-    return $this->getTransformedURI('preview-100');
-  }
-
-  public function getPreview220URI() {
-    return $this->getTransformedURI('preview-220');
-  }
-
-  public function getThumb220x165URI() {
-    return $this->getTransfomredURI('thumb-220x165');
-  }
-
-  public function getThumb280x210URI() {
-    return $this->getTransformedURI('thumb-280x210');
   }
 
   public function isViewableInBrowser() {
@@ -1040,7 +1017,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
       );
 
       $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
-        $file = PhabricatorFile::newFromFileData($data, $params);
+        $file = self::newFromFileData($data, $params);
         $xform = id(new PhabricatorTransformedFile())
           ->setOriginalPHID(PhabricatorPHIDConstants::PHID_VOID)
           ->setTransform('builtin:'.$name)
@@ -1133,6 +1110,15 @@ final class PhabricatorFile extends PhabricatorFileDAO
 
   public function setBuiltinName($name) {
     $this->metadata[self::METADATA_BUILTIN] = $name;
+    return $this;
+  }
+
+  public function getIsProfileImage() {
+    return idx($this->metadata, self::METADATA_PROFILE);
+  }
+
+  public function setIsProfileImage($value) {
+    $this->metadata[self::METADATA_PROFILE] = $value;
     return $this;
   }
 
@@ -1237,6 +1223,11 @@ final class PhabricatorFile extends PhabricatorFileDAO
       $this->setBuiltinName($builtin);
     }
 
+    $profile = idx($params, 'profile');
+    if ($profile) {
+      $this->setIsProfileImage(true);
+    }
+
     $mime_type = idx($params, 'mime-type');
     if ($mime_type) {
       $this->setMimeType($mime_type);
@@ -1302,6 +1293,9 @@ final class PhabricatorFile extends PhabricatorFileDAO
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
         if ($this->isBuiltin()) {
+          return PhabricatorPolicies::getMostOpenPolicy();
+        }
+        if ($this->getIsProfileImage()) {
           return PhabricatorPolicies::getMostOpenPolicy();
         }
         return $this->getViewPolicy();

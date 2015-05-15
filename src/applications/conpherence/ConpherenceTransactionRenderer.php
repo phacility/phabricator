@@ -90,6 +90,7 @@ final class ConpherenceTransactionRenderer {
         if ($previous_day != $current_day) {
           $date_marker_transaction->setDateCreated(
             $transaction->getDateCreated());
+          $date_marker_transaction->setID($previous_transaction->getID());
           $rendered_transactions[] = $date_marker_transaction_view->render();
         }
       }
@@ -144,6 +145,15 @@ final class ConpherenceTransactionRenderer {
           ),
         ),
         pht('Show Older Messages'));
+      $oldscrollbutton = javelin_tag(
+        'div',
+        array(
+          'sigil' => 'conpherence-transaction-view',
+          'meta' => array(
+            'id' => $oldest_transaction_id - 0.5,
+          ),
+        ),
+        $oldscrollbutton);
     }
 
     $newscrollbutton = '';
@@ -160,6 +170,15 @@ final class ConpherenceTransactionRenderer {
           ),
         ),
         pht('Show Newer Messages'));
+      $newscrollbutton = javelin_tag(
+        'div',
+        array(
+          'sigil' => 'conpherence-transaction-view',
+          'meta' => array(
+            'id' => $newest_transaction_id + 0.5,
+          ),
+        ),
+        $newscrollbutton);
     }
 
     return hsprintf(
