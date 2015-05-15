@@ -46,6 +46,12 @@ body .phui-header-shell.phui-bleed-header
   position: relative;
 }
 
+.phui-object-box .phui-header-tall h1.phui-header-view,
+.phui-document-view .phui-header-tall h1.phui-header-view {
+  font-size: 18px;
+  font-weight: 500;
+}
+
 .phui-header-view a,
 .phui-header-view a.simple {
   color: {$darkbluetext};

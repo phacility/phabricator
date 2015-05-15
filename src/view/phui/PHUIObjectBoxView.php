@@ -15,6 +15,7 @@ final class PHUIObjectBoxView extends AphrontView {
   private $sigils = array();
   private $metadata;
   private $actionListID;
+  private $objectList;
 
   private $tabs = array();
   private $propertyLists = array();
@@ -135,6 +136,11 @@ final class PHUIObjectBoxView extends AphrontView {
 
   public function setFlush($flush) {
     $this->flush = $flush;
+    return $this;
+  }
+
+  public function setObjectList($list) {
+    $this->objectList = $list;
     return $this;
   }
 
@@ -311,6 +317,10 @@ final class PHUIObjectBoxView extends AphrontView {
 
     if ($this->metadata !== null) {
       $content->setMetadata($this->metadata);
+    }
+
+    if ($this->objectList) {
+      $content->appendChild($this->objectList);
     }
 
     return $content;

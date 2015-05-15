@@ -17,9 +17,10 @@ ul.phui-object-item-list-view {
 
 .phui-object-item-list-view.phui-object-list-flush {
   padding: 0;
+  margin: 0;
 }
 
-.phui-object-box .phui-object-list-flush .phui-object-item,
+.phui-object-box .phui-object-item-list-view .phui-object-item,
 .homepage-panel .phui-object-list-flush .phui-object-item {
   margin: 0;
 }
@@ -60,6 +61,12 @@ ul.phui-object-item-list-view {
 
 .phui-object-box .phui-object-list-flush .phui-object-item {
   margin: 0;
+}
+
+.phui-object-item-status-icon {
+  font-weight: bold;
+  padding: 0 8px;
+  font-size: 16px;
 }
 
 .phui-object-item-name {
@@ -134,6 +141,12 @@ ul.phui-object-item-list-view {
   display: table-row;
 }
 
+.phui-object-item-col0 {
+  width: 24px;
+  display: table-cell;
+  vertical-align: middle;
+}
+
 .phui-object-item-col1 {
   display: table-cell;
   vertical-align: top;
@@ -159,12 +172,11 @@ ul.phui-object-item-list-view {
 
 .phui-object-item-actions {
   position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
+  right: 4px;
+  top: 4px;
+  bottom: 4px;
   vertical-align: middle;
   text-align: right;
-  border-left: 1px solid {$lightgreyborder};
 }
 
 .phui-object-item-actions .phui-list-item-view {
@@ -173,11 +185,6 @@ ul.phui-object-item-list-view {
   width: 24px;
   display: inline-block;
   position: relative;
-}
-
-.phui-object-item-actions .phui-list-item-view +
-.phui-list-item-view {
-  border-right: 1px solid #d6d6e9;
 }
 
 .phui-object-item-actions .phui-list-item-href {
@@ -189,6 +196,7 @@ ul.phui-object-item-list-view {
 
 .device-desktop .phui-object-item-actions .phui-list-item-href:hover {
   background: {$hoverblue};
+  border-radius: 3px;
 }
 
 .phui-object-item-actions .phui-list-item-icon {
@@ -221,27 +229,21 @@ ul.phui-object-item-list-view {
 }
 
 
-/* - Stackable List ------------------------------------------------------------
+/* - Object Box List -----------------------------------------------------------
 
-  Tighter, stacking list.
+  Tighter, stacking list when inside an Object Box
 
 */
 
-.phui-object-item-list-view.phui-object-list-stackable
-  .phui-object-item {
-  margin: -1px 0 0 0;
-  background: #fff;
-}
-
-.phui-object-box .phui-object-list-stackable {
+.phui-object-box .phui-object-item-list-view {
   padding: 0;
 }
 
-.phui-object-box .phui-object-list-stackable .phui-object-item {
+.phui-object-box .phui-object-item-list-view {
   border: none;
 }
 
-.phui-object-box .phui-object-list-stackable .phui-object-item-frame {
+.phui-object-box .phui-object-item-frame {
   border-right: none;
 }
 
@@ -346,15 +348,66 @@ ul.phui-object-item-icons {
   margin-right: 4px;
 }
 
+/* - Bar Colors ----------------------------------------------------------------
+  Colors for the left-hand border bars, used to indicate object status or other
+  attributes.
+*/
+
+.phui-workboard-view .phui-object-item {
+  border-left-width: 4px;
+}
+
+.phui-object-item {
+  border-left-width: 0;
+}
+
+.phui-object-item-bar-color-red {
+  border-left-color: {$red};
+}
+
+.phui-object-item-bar-color-orange {
+  border-left-color: {$orange};
+}
+
+.phui-object-item-bar-color-yellow {
+  border-left-color: {$yellow};
+}
+
+.phui-object-item-bar-color-green {
+  border-left-color: {$green};
+}
+
+.phui-object-item-bar-color-sky {
+  border-left-color: {$sky};
+}
+
+.phui-object-item-bar-color-blue {
+  border-left-color: {$blue};
+}
+
+.phui-object-item-bar-color-indigo {
+  border-left-color: {$indigo};
+}
+
+.phui-object-item-bar-color-violet {
+  border-left-color: {$violet};
+}
+
+.phui-object-item-bar-color-grey {
+  border-left-color: #bdc3c7;
+}
+
+.phui-object-item-bar-color-black {
+  border-left-color: #333333;
+}
+
+
 /* - Disabled ------------------------------------------------------------------
 
   Disabled/inactive objects.
 
 */
 
-.phui-object-item-disabled {
-  border-left-color: #d7d7d7;
-}
 
 .phui-object-item-disabled .phui-object-item-link,
 .phui-object-item-disabled .phui-object-item-link a {
@@ -378,19 +431,19 @@ ul.phui-object-item-icons {
 */
 
 .phui-object-item.phui-object-item-highlighted {
-  background: {$lightyellow};
+  background: {$sh-yellowbackground};
 }
 
 .phui-object-item-highlighted .phui-object-item-frame {
-  border-color: {$yellow};
+  border-color: {$sh-yellowborder};
 }
 
 .phui-object-item-selected {
-  background: {$lightblue};
+  background: {$sh-bluebackground};
 }
 
 .phui-object-item-selected .phui-object-item-frame {
-  border-color: {$blue};
+  border-color: {$sh-blueborder};
 }
 
 
@@ -495,26 +548,14 @@ ul.phui-object-item-icons {
 
 .drag-ghost {
   position: relative;
-  border: 1px dashed #fff;
-  background: rgba(255,255,255,.5);
+  background: {$lightgreybackground};
   margin-bottom: 4px;
-}
-
-.phui-object-list-stackable .drag-ghost {
-  background: {$hoverblue};
-  margin: 0;
-  border: none;
-  border-top: 1px solid {$lightgreyborder}
 }
 
 .drag-dragging {
   position: relative;
-  opacity: 0.85;
-}
-
-.phui-object-box .phui-object-list-stackable .drag-dragging
- .phui-object-item-frame {
-  border-bottom: 1px solid {$lightgreyborder};
+  background: {$sh-bluebackground};
+  opacity: 0.9;
 }
 
 .drag-sending {
@@ -598,14 +639,14 @@ ul.phui-object-item-icons {
 }
 
 .dashboard-panel .phui-object-item-list-view .phui-object-item,
-.phui-object-box .phui-object-item-list-view.phui-object-list-flush {
+.phui-object-box .phui-object-item-list-view {
   margin: 0;
   background-image: none;
   background-color: #fff;
 }
 
 .dashboard-panel .phui-object-item-frame,
-.phui-object-box .phui-object-list-flush .phui-object-item-frame {
+.phui-object-box .phui-object-item-list-view .phui-object-item-frame {
   border: none;
   border-bottom: 1px solid {$thinblueborder};
 }

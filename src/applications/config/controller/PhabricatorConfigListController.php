@@ -22,7 +22,7 @@ final class PhabricatorConfigListController
 
     $apps = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Applications Configuration'))
-      ->appendChild($apps_list);
+      ->setObjectList($apps_list);
 
     $nav->appendChild(
       array(
@@ -47,7 +47,6 @@ final class PhabricatorConfigListController
     assert_instances_of($groups, 'PhabricatorApplicationConfigOptions');
 
     $list = new PHUIObjectItemListView();
-    $list->setStackable(true);
     $groups = msort($groups, 'getName');
     foreach ($groups as $group) {
       if ($group->getGroup() == $type) {

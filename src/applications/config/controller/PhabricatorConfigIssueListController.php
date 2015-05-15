@@ -76,7 +76,6 @@ final class PhabricatorConfigIssueListController
   private function buildIssueList(array $issues, $group) {
     assert_instances_of($issues, 'PhabricatorSetupIssue');
     $list = new PHUIObjectItemListView();
-    $list->setStackable(true);
     $ignored_items = array();
     $items = 0;
 

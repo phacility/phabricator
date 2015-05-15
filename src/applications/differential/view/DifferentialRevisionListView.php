@@ -165,19 +165,24 @@ final class DifferentialRevisionListView extends AphrontView {
 
       switch ($status) {
         case ArcanistDifferentialRevisionStatus::NEEDS_REVIEW:
+          $item->setStatusIcon('fa-square-o black', pht('Needs Review'));
           break;
         case ArcanistDifferentialRevisionStatus::NEEDS_REVISION:
+          $item->setStatusIcon('fa-refresh red', pht('Needs Revision'));
+          break;
         case ArcanistDifferentialRevisionStatus::CHANGES_PLANNED:
-          $item->setBarColor('red');
+          $item->setStatusIcon('fa-headphones red', pht('Changes Planned'));
           break;
         case ArcanistDifferentialRevisionStatus::ACCEPTED:
-          $item->setBarColor('green');
+          $item->setStatusIcon('fa-check green', pht('Accepted'));
           break;
         case ArcanistDifferentialRevisionStatus::CLOSED:
           $item->setDisabled(true);
+          $item->setStatusIcon('fa-check-square-o black', pht('Closed'));
           break;
         case ArcanistDifferentialRevisionStatus::ABANDONED:
-          $item->setBarColor('black');
+          $item->setDisabled(true);
+          $item->setStatusIcon('fa-plane black', pht('Abandoned'));
           break;
       }
 

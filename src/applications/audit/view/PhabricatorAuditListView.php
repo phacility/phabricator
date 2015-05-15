@@ -148,7 +148,6 @@ final class PhabricatorAuditListView extends AphrontView {
         ->setObjectName($commit_name)
         ->setHeader($commit_desc)
         ->setHref($commit_link)
-        ->setBarColor($status_color)
         ->addAttribute($status_text)
         ->addAttribute($reasons)
         ->addIcon('none', $committed)
@@ -156,6 +155,10 @@ final class PhabricatorAuditListView extends AphrontView {
 
       if (!empty($auditors)) {
         $item->addByLine(pht('Auditors: %s', $auditors));
+      }
+
+      if ($status_color) {
+        $item->setStatusIcon('fa-exclamation-triangle '.$status_color);
       }
 
       $list->addItem($item);

@@ -129,8 +129,7 @@ final class PhabricatorProjectMembersEditController
       PhabricatorPolicyCapability::CAN_EDIT);
 
     $list = id(new PHUIObjectItemListView())
-      ->setNoDataString(pht('This project does not have any members.'))
-      ->setStackable(true);
+      ->setNoDataString(pht('This project does not have any members.'));
 
     foreach ($handles as $handle) {
       $remove_uri = $this->getApplicationURI(
@@ -155,7 +154,7 @@ final class PhabricatorProjectMembersEditController
 
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Members'))
-      ->appendChild($list);
+      ->setObjectList($list);
 
     return $box;
   }

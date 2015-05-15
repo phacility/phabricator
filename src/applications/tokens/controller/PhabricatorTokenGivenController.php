@@ -39,7 +39,6 @@ final class PhabricatorTokenGivenController extends PhabricatorTokenController {
     }
 
     $list = new PHUIObjectItemListView();
-    $list->setStackable(true);
     foreach ($tokens_given as $token_given) {
       $handle = $handles[$token_given->getObjectPHID()];
       $token = idx($tokens, $token_given->getTokenPHID());
@@ -62,7 +61,7 @@ final class PhabricatorTokenGivenController extends PhabricatorTokenController {
 
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->appendChild($list);
+      ->setObjectList($list);
 
     $nav = $this->buildSideNav();
     $nav->setCrumbs(
