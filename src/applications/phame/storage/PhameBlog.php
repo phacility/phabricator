@@ -16,9 +16,6 @@ final class PhameBlog extends PhameDAO
   protected $editPolicy;
   protected $joinPolicy;
 
-  private $bloggerPHIDs = self::ATTACHABLE;
-  private $bloggers = self::ATTACHABLE;
-
   static private $requestBlog;
 
   protected function getConfiguration() {
@@ -55,6 +52,15 @@ final class PhameBlog extends PhameDAO
   public function generatePHID() {
     return PhabricatorPHID::generateNewPHID(
       PhabricatorPhameBlogPHIDType::TYPECONST);
+  }
+
+  public static function initializeNewBlog(PhabricatorUser $actor) {
+    $blog = id(new PhameBlog())
+      ->setCreatorPHID($actor->getPHID())
+      ->setViewPolicy(PhabricatorPolicies::getMostOpenPolicy())
+      ->setEditPolicy(PhabricatorPolicies::POLICY_USER)
+      ->setJoinPolicy(PhabricatorPolicies::POLICY_USER);
+    return $blog;
   }
 
   public function getSkinRenderer(AphrontRequest $request) {
@@ -155,22 +161,6 @@ final class PhameBlog extends PhameDAO
     }
 
     return null;
-  }
-
-  public function getBloggerPHIDs() {
-    return $this->assertAttached($this->bloggerPHIDs);
-  }
-
-  public function attachBloggers(array $bloggers) {
-    assert_instances_of($bloggers, 'PhabricatorObjectHandle');
-
-    $this->bloggers = $bloggers;
-
-    return $this;
-  }
-
-  public function getBloggers() {
-    return $this->assertAttached($this->bloggers);
   }
 
   public function getSkin() {
