@@ -391,10 +391,15 @@ final class PHUICalendarDayView extends AphrontView {
   }
 
   private function drawAllDayEvent(AphrontCalendarEventView $event) {
+    $class = 'day-view-all-day';
+    if ($event->getViewerIsInvited()) {
+      $class = $class.' viewer-invited-day-event';
+    }
+
     $name = phutil_tag(
       'a',
       array(
-        'class' => 'day-view-all-day',
+        'class' => $class,
         'href' => $event->getURI(),
       ),
       $event->getName());
@@ -425,10 +430,16 @@ final class PHUICalendarDayView extends AphrontView {
     $width,
     $top,
     $height) {
+
+    $class = 'phui-calendar-day-event-link';
+    if ($event->getViewerIsInvited()) {
+      $class =  $class.' viewer-invited-day-event';
+    }
+
     $name = phutil_tag(
       'a',
       array(
-        'class' => 'phui-calendar-day-event-link',
+        'class' => $class,
         'href' => $event->getURI(),
       ),
       $event->getName());

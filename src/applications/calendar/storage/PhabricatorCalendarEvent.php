@@ -215,6 +215,16 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
     return $is_attending;
   }
 
+  public function getIsUserInvited($phid) {
+    $uninvited_status = PhabricatorCalendarEventInvitee::STATUS_UNINVITED;
+    $declined_status = PhabricatorCalendarEventInvitee::STATUS_DECLINED;
+    $status = $this->getUserInviteStatus($phid);
+    if ($status == $uninvited_status || $status == $declined_status) {
+      return false;
+    }
+    return true;
+  }
+
 /* -(  Markup Interface  )--------------------------------------------------- */
 
 

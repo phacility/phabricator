@@ -73,6 +73,11 @@ table.phui-calendar-view tr td:first-child {
   margin: 0 auto;
 }
 
+.phui-calendar-month-count-badge.viewer-invited-day-badge {
+  border-color: {$green};
+  color: {$green};
+}
+
 table.phui-calendar-view a.phui-calendar-date-number {
   color: {$lightgreytext};
   padding: 0 4px;
@@ -116,10 +121,16 @@ table.phui-calendar-view td.phui-calendar-date-number-container {
 
 .phui-calendar-view .phui-calendar-list li.phui-calendar-list-item.all-day {
   margin: 0;
-  padding: 4px 8px;
-  background-color: {$lightpink};
+  padding: 4px 4px 0px 4px;
+  background-color: {$darkgreybackground};
   display: block;
   float: none;
+}
+
+.phui-calendar-view
+.phui-calendar-list
+li.phui-calendar-viewer-invited.all-day {
+  background-color: {$lightgreen};
 }
 
 li.phui-calendar-list-item.all-day:first-child {
@@ -155,7 +166,11 @@ li.phui-calendar-list-item.all-day:first-child {
 }
 
 li.phui-calendar-list-item.all-day .phui-calendar-list-title a{
-  color: {$pink};
+  color: {$greytext};
+}
+
+li.phui-calendar-viewer-invited.all-day .phui-calendar-list-title a{
+  color: {$green};
 }
 
 .phui-calendar-view .phui-calendar-list-time {

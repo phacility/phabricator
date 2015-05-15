@@ -33,7 +33,6 @@ final class PHUICalendarListView extends AphrontTagView {
     $singletons = array();
     $allday = false;
     foreach ($this->events as $event) {
-      $color = $event->getColor();
       $start_epoch = $event->getEpochStart();
 
       if ($event->getIsAllDay()) {
@@ -65,7 +64,10 @@ final class PHUICalendarListView extends AphrontTagView {
         ),
         $timelabel);
 
-      $class = 'phui-calendar-list-item phui-calendar-'.$color;
+      $class = 'phui-calendar-list-item';
+      if ($event->getViewerIsInvited()) {
+        $class = $class.' phui-calendar-viewer-invited';
+      }
       if ($event->getIsAllDay()) {
         $class = $class.' all-day';
       }
@@ -142,7 +144,7 @@ final class PHUICalendarListView extends AphrontTagView {
       $description = pht('(%s)', $event->getName());
     }
 
-    $class = 'phui-calendar-item-link';
+    $class = 'phui-calendar-item';
 
     $anchor = javelin_tag(
       'a',
@@ -158,5 +160,14 @@ final class PHUICalendarListView extends AphrontTagView {
       $event->getName());
 
     return $anchor;
+  }
+
+  public function getIsViewerInvitedOnList() {
+    foreach ($this->events as $event) {
+      if ($event->getViewerIsInvited()) {
+        return true;
+      }
+    }
+    return false;
   }
 }

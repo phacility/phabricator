@@ -178,7 +178,9 @@ final class PHUICalendarMonthView extends AphrontView {
     $uri = $event_list['uri'];
     $count = $event_list['count'];
 
-    $event_count_badge = $this->getEventCountBadge($count);
+    $viewer_is_invited = $list->getIsViewerInvitedOnList();
+
+    $event_count_badge = $this->getEventCountBadge($count, $viewer_is_invited);
     $cell_day_secret_link = $this->getHiddenDayLink($uri);
 
     $cell_data_div = phutil_tag(
@@ -252,13 +254,19 @@ final class PHUICalendarMonthView extends AphrontView {
       $cell_div);
   }
 
-  private function getEventCountBadge($count) {
+  private function getEventCountBadge($count, $viewer_is_invited) {
+    $class = 'phui-calendar-month-count-badge';
+
+    if ($viewer_is_invited) {
+      $class = $class.' viewer-invited-day-badge';
+    }
+
     $event_count = null;
     if ($count > 0) {
       $event_count = phutil_tag(
         'div',
         array(
-          'class' => 'phui-calendar-month-count-badge',
+          'class' => $class,
         ),
         $count);
     }

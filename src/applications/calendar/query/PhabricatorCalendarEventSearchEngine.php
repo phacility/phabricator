@@ -359,25 +359,9 @@ final class PhabricatorCalendarEventSearchEngine
 
     $phids = mpull($statuses, 'getUserPHID');
 
-    /* Assign Colors */
-    $unique = array_unique($phids);
-    $allblue = false;
-    $calcolors = CalendarColors::getColors();
-    if (count($unique) > count($calcolors)) {
-      $allblue = true;
-    }
-    $i = 0;
-    $eventcolor = array();
-    foreach ($unique as $phid) {
-      if ($allblue) {
-        $eventcolor[$phid] = CalendarColors::COLOR_SKY;
-      } else {
-        $eventcolor[$phid] = $calcolors[$i];
-      }
-      $i++;
-    }
-
     foreach ($statuses as $status) {
+      $viewer_is_invited = $status->getIsUserInvited($viewer->getPHID());
+
       $event = new AphrontCalendarEventView();
       $event->setEpochRange($status->getDateFrom(), $status->getDateTo());
       $event->setIsAllDay($status->getIsAllDay());
@@ -388,7 +372,7 @@ final class PhabricatorCalendarEventSearchEngine
       $event->setDescription(pht('%s (%s)', $name_text, $status_text));
       $event->setName($status_text);
       $event->setEventID($status->getID());
-      $event->setColor($eventcolor[$status->getUserPHID()]);
+      $event->setViewerIsInvited($viewer_is_invited);
       $month_view->addEvent($event);
     }
 
@@ -422,10 +406,13 @@ final class PhabricatorCalendarEventSearchEngine
         continue;
       }
 
+      $viewer_is_invited = $status->getIsUserInvited($viewer->getPHID());
+
       $event = new AphrontCalendarEventView();
       $event->setEventID($status->getID());
       $event->setEpochRange($status->getDateFrom(), $status->getDateTo());
       $event->setIsAllDay($status->getIsAllDay());
+      $event->setViewerIsInvited($viewer_is_invited);
 
       $event->setName($status->getName());
       $event->setURI('/'.$status->getMonogram());
