@@ -16,6 +16,10 @@ tr.phui-calendar-day-of-week-header th {
   background: {$lightgreybackground};
 }
 
+tr.phui-calendar-day-of-week-header th.weekend-day-header {
+  background: {$greybackground};
+}
+
 .device tr.phui-calendar-day-of-week-header th .long-weekday-name {
   display: none;
 }

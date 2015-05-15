@@ -294,17 +294,21 @@ final class PHUICalendarMonthView extends AphrontView {
       'tr',
       array('class' => 'phui-calendar-day-of-week-header'),
       array(
-        $this->getDayHeader(pht('Sun'), pht('Sunday')),
+        $this->getDayHeader(pht('Sun'), pht('Sunday'), true),
         $this->getDayHeader(pht('Mon'), pht('Monday')),
         $this->getDayHeader(pht('Tue'), pht('Tuesday')),
         $this->getDayHeader(pht('Wed'), pht('Wednesday')),
         $this->getDayHeader(pht('Thu'), pht('Thursday')),
         $this->getDayHeader(pht('Fri'), pht('Friday')),
-        $this->getDayHeader(pht('Sat'), pht('Saturday')),
+        $this->getDayHeader(pht('Sat'), pht('Saturday'), true),
       ));
   }
 
-  private function getDayHeader($short, $long) {
+  private function getDayHeader($short, $long, $is_weekend = false) {
+    $class = null;
+    if ($is_weekend) {
+      $class = 'weekend-day-header';
+    }
     $day = array();
     $day[] = phutil_tag(
       'span',
@@ -320,7 +324,9 @@ final class PHUICalendarMonthView extends AphrontView {
       $short);
     return phutil_tag(
       'th',
-      array(),
+      array(
+        'class' => $class,
+      ),
       $day);
   }
 
