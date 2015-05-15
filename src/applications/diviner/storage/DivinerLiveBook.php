@@ -91,7 +91,7 @@ final class DivinerLiveBook extends DivinerDAO
 
     $this->openTransaction();
       $atoms = id(new DivinerAtomQuery())
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->setViewer($engine->getViewer())
         ->withBookPHIDs(array($this->getPHID()))
         ->withIncludeGhosts(true)
         ->withIncludeUndocumentable(true)

@@ -221,7 +221,7 @@ final class AlmanacService
     PhabricatorDestructionEngine $engine) {
 
     $bindings = id(new AlmanacBindingQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->setViewer($engine->getViewer())
       ->withServicePHIDs(array($this->getPHID()))
       ->execute();
     foreach ($bindings as $binding) {

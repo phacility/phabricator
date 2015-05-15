@@ -172,7 +172,7 @@ final class PhabricatorPaste extends PhabricatorPasteDAO
 
     if ($this->filePHID) {
       $file = id(new PhabricatorFileQuery())
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->setViewer($engine->getViewer())
         ->withPHIDs(array($this->filePHID))
         ->executeOne();
       if ($file) {
