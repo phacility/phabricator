@@ -96,7 +96,7 @@ table.phui-calendar-view tr td:first-child {
 
 table.phui-calendar-view a.phui-calendar-date-number {
   color: {$lightgreytext};
-  padding: 0 4px;
+  padding: 4px;
   display: inline-block;
   min-width: 16px;
   text-align: center;
@@ -111,10 +111,19 @@ table.phui-calendar-view td.phui-calendar-date-number-container {
 
 .phui-calendar-today-slot {
   display: block;
-  width: 100%;
   height: 4px;
-  padding: 0;
-  margin: 0;
+  position: absolute;
+  left: 0;
+  right: -1px;
+  bottom: 0;
+}
+
+.phui-calendar-today-slot.last-weekday {
+  right: 0px;
+}
+
+.phui-calendar-today-slot.phui-calendar-this-week {
+  background-color: {$blueborder};
 }
 
 .phui-calendar-today-slot.phui-calendar-today {

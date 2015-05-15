@@ -228,6 +228,15 @@ final class PHUICalendarMonthView extends AphrontView {
       $today_class = 'phui-calendar-today-slot';
     }
 
+    if ($this->isDateInCurrentWeek($date)) {
+      $today_class .= ' phui-calendar-this-week';
+    }
+
+    $last_week_day = 6;
+    if ($date->format('w') == $last_week_day) {
+      $today_class .= ' last-weekday';
+    }
+
     $today_slot = phutil_tag (
       'div',
       array(
@@ -252,6 +261,16 @@ final class PHUICalendarMonthView extends AphrontView {
         'class' => 'phui-calendar-date-number-container '.$class,
       ),
       $cell_div);
+  }
+
+  private function isDateInCurrentWeek($date) {
+    list($week_start_date, $week_end_date) = $this->getThisWeekRange();
+
+    if ($date->format('U') < $week_end_date->format('U') &&
+      $date->format('U') >= $week_start_date->format('U')) {
+      return true;
+    }
+    return false;
   }
 
   private function getEventCountBadge($count, $viewer_is_invited) {
@@ -482,6 +501,34 @@ final class PHUICalendarMonthView extends AphrontView {
     }
 
     return $days;
+  }
+
+  private function getTodayMidnight() {
+    $viewer = $this->getUser();
+    $today = new DateTime('@'.time());
+    $today->setTimeZone($viewer->getTimeZone());
+    $today->setTime(0, 0, 0);
+
+    return $today;
+  }
+
+  private function getThisWeekRange() {
+    $week_start = 0;
+    $week_end = 6;
+
+    $today = $this->getTodayMidnight();
+    $date_weekday = $today->format('w');
+
+    $days_from_week_start = $date_weekday - $week_start;
+    $days_to_week_end = $week_end - $date_weekday + 1;
+
+    $modify = '-'.$days_from_week_start.' days';
+    $week_start_date = id(clone $today)->modify($modify);
+
+    $modify = '+'.$days_to_week_end.' days';
+    $week_end_date = id(clone $today)->modify($modify);
+
+    return array($week_start_date, $week_end_date);
   }
 
   private function getDateTime() {
