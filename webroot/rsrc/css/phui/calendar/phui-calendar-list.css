@@ -52,6 +52,7 @@
 
 .phui-calendar-list-item .phui-calendar-list-time {
   position: absolute;
+  top: 0;
   width: 60px;
   right: 0;
   top: 0;

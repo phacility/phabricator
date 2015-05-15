@@ -139,9 +139,6 @@ li.phui-calendar-list-item.all-day:first-child {
 
 .phui-calendar-view .phui-calendar-list li {
   margin: 0 8px;
-  display: inline-block;
-  float: left;
-  clear: both;
 }
 
 .phui-calendar-view .phui-calendar-list li:first-child {
@@ -160,9 +157,16 @@ li.phui-calendar-list-item.all-day:first-child {
 
 .phui-calendar-view .phui-calendar-list-title {
   width: auto;
-  margin-left: 10px;
   white-space: normal;
   word-break: break-word;
+}
+
+li.phui-calendar-list-item .phui-calendar-list-title a {
+  text-align: left;
+  padding-left: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 li.phui-calendar-list-item.all-day .phui-calendar-list-title a{
@@ -173,6 +177,18 @@ li.phui-calendar-viewer-invited.all-day .phui-calendar-list-title a{
   color: {$green};
 }
 
-.phui-calendar-view .phui-calendar-list-time {
-  display: none;
+.phui-calendar-view li.phui-calendar-list-item .phui-calendar-list-time {
+  position: absolute;
+  width: 60px;
+  right: 0;
+  top: 1px;
+  color: {$lightgreytext};
+  text-align: right;
+}
+
+.phui-calendar-view
+li.phui-calendar-list-item.all-day
+.phui-calendar-list-time  {
+  top: 4px;
+  right: 8px;
 }
