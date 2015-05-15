@@ -11,12 +11,17 @@ foreach ($iterator as $event) {
   if (strlen($event->getName()) == 0) {
     echo "Renaming event {$id}...\n";
     $viewer = PhabricatorUser::getOmnipotentUser();
-    $handle = id(new PhabricatorHandleQuery())
+
+    // NOTE: This uses PeopleQuery directly, instead of HandleQuery, to avoid
+    // performing cache fills as a side effect; the caches were added by a
+    // later patch. See T8209.
+    $user = id(new PhabricatorPeopleQuery())
       ->setViewer($viewer)
       ->withPHIDs(array($event->getUserPHID()))
       ->executeOne();
-    if ($handle->isComplete()) {
-      $new_name = $handle->getName();
+
+    if ($user) {
+      $new_name = $user->getUsername();
     } else {
       $new_name = pht('Unnamed Event');
     }
