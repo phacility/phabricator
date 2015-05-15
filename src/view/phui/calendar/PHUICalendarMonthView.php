@@ -294,14 +294,34 @@ final class PHUICalendarMonthView extends AphrontView {
       'tr',
       array('class' => 'phui-calendar-day-of-week-header'),
       array(
-        phutil_tag('th', array(), pht('Sun')),
-        phutil_tag('th', array(), pht('Mon')),
-        phutil_tag('th', array(), pht('Tue')),
-        phutil_tag('th', array(), pht('Wed')),
-        phutil_tag('th', array(), pht('Thu')),
-        phutil_tag('th', array(), pht('Fri')),
-        phutil_tag('th', array(), pht('Sat')),
+        $this->getDayHeader(pht('Sun'), pht('Sunday')),
+        $this->getDayHeader(pht('Mon'), pht('Monday')),
+        $this->getDayHeader(pht('Tue'), pht('Tuesday')),
+        $this->getDayHeader(pht('Wed'), pht('Wednesday')),
+        $this->getDayHeader(pht('Thu'), pht('Thursday')),
+        $this->getDayHeader(pht('Fri'), pht('Friday')),
+        $this->getDayHeader(pht('Sat'), pht('Saturday')),
       ));
+  }
+
+  private function getDayHeader($short, $long) {
+    $day = array();
+    $day[] = phutil_tag(
+      'span',
+      array(
+        'class' => 'long-weekday-name',
+      ),
+      $long);
+    $day[] = phutil_tag(
+      'span',
+      array(
+        'class' => 'short-weekday-name',
+      ),
+      $short);
+    return phutil_tag(
+      'th',
+      array(),
+      $day);
   }
 
   private function renderCalendarHeader(DateTime $date) {

@@ -10,10 +10,22 @@
 
 tr.phui-calendar-day-of-week-header th {
   text-align: center;
-  font-size: 11px;
+  font-size: 13px;
   padding: 3px;
   color: {$lightbluetext};
   background: {$lightgreybackground};
+}
+
+.device tr.phui-calendar-day-of-week-header th .long-weekday-name {
+  display: none;
+}
+
+tr.phui-calendar-day-of-week-header th .short-weekday-name {
+  display: none;
+}
+
+.device tr.phui-calendar-day-of-week-header th .short-weekday-name {
+  display: inline;
 }
 
 table.phui-calendar-view td {
