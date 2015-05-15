@@ -303,17 +303,12 @@ final class PhabricatorCalendarEventSearchEngine
     foreach ($events as $event) {
       $href = '/E'.$event->getID();
       $from = phabricator_datetime($event->getDateFrom(), $viewer);
-      $to   = phabricator_datetime($event->getDateTo(), $viewer);
+      $to = phabricator_datetime($event->getDateTo(), $viewer);
       $creator_handle = $handles[$event->getUserPHID()];
-
-      $color = ($event->getStatus() == PhabricatorCalendarEvent::STATUS_AWAY)
-        ? 'red'
-        : 'yellow';
 
       $item = id(new PHUIObjectItemView())
         ->setHeader($event->getName())
         ->setHref($href)
-        ->setBarColor($color)
         ->addByline(pht('Creator: %s', $creator_handle->renderLink()))
         ->addAttribute(pht('From %s to %s', $from, $to))
         ->addAttribute(id(new PhutilUTF8StringTruncator())
