@@ -2,19 +2,12 @@
 
 final class PhamePostViewController extends PhameController {
 
-  private $id;
-
-  public function willProcessRequest(array $data) {
-    $this->id = $data['id'];
-  }
-
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
 
     $post = id(new PhamePostQuery())
       ->setViewer($user)
-      ->withIDs(array($this->id))
+      ->withIDs(array($request->getURIData('id')))
       ->executeOne();
 
     if (!$post) {
@@ -65,7 +58,10 @@ final class PhamePostViewController extends PhameController {
     $nav->appendChild(
       array(
         $object_box,
-      ));
+        $this->buildTransactionTimeline(
+          $post,
+          new PhamePostTransactionQuery()),
+        ));
 
     return $this->buildApplicationPage(
       $nav,
@@ -78,10 +74,10 @@ final class PhamePostViewController extends PhameController {
     PhamePost $post,
     PhabricatorUser $user) {
 
-    $actions = id(new PhabricatorActionListView())
-      ->setObject($post)
-      ->setObjectURI($this->getRequest()->getRequestURI())
-      ->setUser($user);
+      $actions = id(new PhabricatorActionListView())
+        ->setObject($post)
+        ->setObjectURI($this->getRequest()->getRequestURI())
+        ->setUser($user);
 
     $can_edit = PhabricatorPolicyFilter::hasCapability(
       $user,
