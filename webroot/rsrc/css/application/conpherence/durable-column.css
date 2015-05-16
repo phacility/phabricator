@@ -46,8 +46,7 @@
 }
 
 .with-durable-margin .conpherence-durable-column {
-  right: 12px;
-  box-shadow: 1px 0px 2px rgba(0, 0, 0, 0.10);
+  border-right: 12px solid {$lightgreybackground};
 }
 
 .conpherence-durable-column .loading-mask {
@@ -74,6 +73,11 @@
   padding-right: 4px;
 }
 
+.conpherence-durable-column-header {
+  border-left: 1px solid {$lightblueborder};
+  border-right: 1px solid {$lightblueborder};
+}
+
 .conpherence-durable-column-header-text {
   float: left;
   padding: 13px 0 12px 12px;
@@ -84,11 +88,10 @@
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
-  border-left: 1px solid {$lightblueborder};
 }
 
 .conpherence-durable-column-header-text .phui-icon-view {
-  color: rgba(255, 255, 255, 0.8);
+  color: {$bluetext};
 }
 
 .conpherence-durable-column-icon-bar {
@@ -208,6 +211,7 @@
 .conpherence-transaction-view.date-marker .date {
   left: 0;
   font-size: 12px;
+  top: -14px;
   padding: 0 6px 0 0;
 }
 
