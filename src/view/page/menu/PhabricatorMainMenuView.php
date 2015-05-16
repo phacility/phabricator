@@ -81,6 +81,7 @@ final class PhabricatorMainMenuView extends AphrontView {
     $application_menu = $this->renderApplicationMenu();
     $classes = array();
     $classes[] = 'phabricator-main-menu';
+    $classes[] = 'phabricator-main-menu-background';
 
     return phutil_tag(
       'div',

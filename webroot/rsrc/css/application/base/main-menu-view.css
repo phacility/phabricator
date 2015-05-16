@@ -11,8 +11,10 @@
 */
 
 .phabricator-main-menu {
-  background-repeat: repeat-x;
   position: relative;
+}
+
+.phabricator-main-menu-background {
   min-height: 43px;
   background: #ebecee;
   border-bottom: 1px solid {$hovergrey};

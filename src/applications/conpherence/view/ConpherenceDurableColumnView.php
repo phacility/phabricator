@@ -138,8 +138,7 @@ final class ConpherenceDurableColumnView extends AphrontTagView {
 
     $classes = array();
     $classes[] = 'conpherence-durable-column-header';
-    $classes[] = 'sprite-main-header';
-    $classes[] = 'main-header-'.PhabricatorEnv::getEnvConfig('ui.header-color');
+    $classes[] = 'phabricator-main-menu-background';
 
     $loading_mask = phutil_tag(
       'div',
