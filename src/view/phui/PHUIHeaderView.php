@@ -18,6 +18,7 @@ final class PHUIHeaderView extends AphrontTagView {
   private $buttonBar = null;
   private $policyObject;
   private $epoch;
+  private $actionIcons = array();
 
   public function setHeader($header) {
     $this->header = $header;
@@ -76,6 +77,11 @@ final class PHUIHeaderView extends AphrontTagView {
 
   public function addActionLink(PHUIButtonView $button) {
     $this->actionLinks[] = $button;
+    return $this;
+  }
+
+  public function addActionIcon(PHUIIconView $action) {
+    $this->actionIcons[] = $action;
     return $this;
   }
 
@@ -198,6 +204,25 @@ final class PHUIHeaderView extends AphrontTagView {
         ),
         $this->buttonBar);
     }
+
+    if ($this->actionIcons) {
+      $action_list = array();
+      foreach ($this->actionIcons as $icon) {
+        $action_list[] = phutil_tag(
+          'li',
+          array(
+            'class' => 'phui-header-list-icon',
+          ),
+          $icon);
+      }
+      $header[] = phutil_tag(
+        'ul',
+          array(
+            'class' => 'phui-header-icon-list',
+          ),
+          $action_list);
+    }
+
     $header[] = $this->header;
 
     if ($this->objectName) {

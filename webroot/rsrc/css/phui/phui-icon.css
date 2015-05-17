@@ -36,4 +36,5 @@
 
 a.phui-icon-view:hover {
   text-decoration: none;
+  color: {$sky};
 }

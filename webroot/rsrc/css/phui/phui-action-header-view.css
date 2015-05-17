@@ -83,24 +83,3 @@
   font-weight: normal;
   color: {$lightgreytext};
 }
-
-/* - Dashboards ------------------------------------------------------------ */
-
-.dashboard-panel .phui-action-header.gradient-grey-header,
-.dashboard-panel .phui-action-header.gradient-lightblue-header {
-  border: 1px solid {$lightblueborder};
-  border-bottom: 1px solid {$thinblueborder};
-}
-
-.dashboard-panel .phui-action-header.gradient-white-header {
-  border: 1px solid {$lightblueborder};
-  border-bottom: 1px solid {$thinblueborder};
-  border-top-right-radius: 3px;
-  border-top-left-radius: 3px;
-}
-
-.dashboard-panel .phui-action-header.gradient-white-header
- .phui-action-header-icon-list {
-  padding-top: 6px;
-  padding-right: 6px;
-}

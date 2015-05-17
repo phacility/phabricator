@@ -154,16 +154,14 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
         $header = null;
         break;
       case self::HEADER_MODE_EDIT:
-        $header = id(new PHUIActionHeaderView())
-          ->setHeaderTitle($title)
-          ->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTBLUE);
+        $header = id(new PHUIHeaderView())
+          ->setHeader($title);
         $header = $this->addPanelHeaderActions($header);
         break;
       case self::HEADER_MODE_NORMAL:
       default:
-        $header = id(new PHUIActionHeaderView())
-          ->setHeaderTitle($title)
-          ->setHeaderColor(PHUIActionHeaderView::HEADER_LIGHTBLUE);
+        $header = id(new PHUIHeaderView())
+          ->setHeaderTitle($title);
         break;
     }
     $icon = id(new PHUIIconView())
@@ -187,20 +185,14 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
     if (!$id) {
       $id = celerity_generate_unique_node_id();
     }
-    return javelin_tag(
-      'div',
-      array(
-        'id' => $id,
-        'sigil' => 'dashboard-panel',
-        'meta' => array(
-          'objectPHID' => $panel->getPHID(),
-        ),
-        'class' => 'dashboard-panel',
-      ),
-      array(
-        $header,
-        $content,
-      ));
+    $box = id(new PHUIObjectBoxView())
+      ->setHeader($header)
+      ->appendChild($content)
+      ->setID($id)
+      ->addSigil('dashboard-panel')
+      ->setMetadata(array('objectPHID' => $panel->getPHID()));
+
+    return phutil_tag_div('dashboard-pane', $box);
   }
 
 
@@ -212,16 +204,14 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
         $header = null;
         break;
       case self::HEADER_MODE_EDIT:
-        $header = id(new PHUIActionHeaderView())
-          ->setHeaderTitle($panel->getName())
-          ->setHeaderColor(PHUIActionHeaderView::HEADER_WHITE);
+        $header = id(new PHUIHeaderView())
+          ->setHeader($panel->getName());
         $header = $this->addPanelHeaderActions($header);
         break;
       case self::HEADER_MODE_NORMAL:
       default:
-        $header = id(new PHUIActionHeaderView())
-          ->setHeaderTitle($panel->getName())
-          ->setHeaderColor(PHUIActionHeaderView::HEADER_WHITE);
+        $header = id(new PHUIHeaderView())
+          ->setHeader($panel->getName());
         $panel_type = $panel->getImplementation();
         $header = $panel_type->adjustPanelHeader(
           $this->getViewer(),
@@ -234,7 +224,7 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
   }
 
   private function addPanelHeaderActions(
-    PHUIActionHeaderView $header) {
+    PHUIHeaderView $header) {
     $panel = $this->getPanel();
 
     $dashboard_id = $this->getDashboardID();
@@ -247,7 +237,7 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
       ->setIconFont('fa-pencil')
       ->setWorkflow(true)
       ->setHref((string) $edit_uri);
-    $header->addAction($action_edit);
+    $header->addActionIcon($action_edit);
 
     if ($dashboard_id) {
       $uri = id(new PhutilURI(
@@ -257,7 +247,7 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
         ->setIconFont('fa-trash-o')
         ->setHref((string) $uri)
         ->setWorkflow(true);
-      $header->addAction($action_remove);
+      $header->addActionIcon($action_remove);
     }
     return $header;
   }

@@ -146,3 +146,12 @@ body.device-phone .phui-header-view {
 .device .phui-header-action-links .phui-mobile-menu {
   display: inline-block;
 }
+
+.phui-header-icon-list {
+  float: right;
+}
+
+.phui-header-icon-list .phui-header-list-icon {
+  margin: 0 4px;
+  float: right;
+}

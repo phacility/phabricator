@@ -69,3 +69,33 @@ div.phui-object-box.phui-object-box-flush {
 .phui-box-border.phui-object-box-lightviolet .phui-action-header {
   border-bottom: 1px solid {$lightvioletborder};
 }
+
+/* - Double Object Box Override --------------------------------------------- */
+
+.phui-object-box .phui-object-box {
+  padding: 0;
+}
+
+.phui-object-box .phui-box-border {
+  border-width: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.phui-object-box .phui-object-box .phui-header-shell h1 {
+  background-color: {$lightgreybackground};
+  padding: 8px 12px;
+  font-size: 13px;
+  margin: 0;
+  color: {$bluetext};
+  font-weight: 500;
+}
+
+.phui-object-box .phui-object-box .phui-header-shell {
+  margin: 0;
+  padding: 0;
+}
+
+.phui-box-border + .phui-box-border {
+  border-top: 1px solid {$thinblueborder};
+}

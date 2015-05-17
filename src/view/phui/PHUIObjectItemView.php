@@ -422,7 +422,7 @@ final class PHUIObjectItemView extends AphrontTagView {
 
     if ($this->handleIcons) {
       $handle_bar = array();
-      foreach ($this->handleIcon as $handleicon) {
+      foreach ($this->handleIcons as $handleicon) {
         $handle_bar[] =
           $this->renderHandleIcon($handleicon['icon'], $handleicon['label']);
       }

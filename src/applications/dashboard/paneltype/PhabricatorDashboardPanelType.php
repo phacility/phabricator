@@ -41,7 +41,7 @@ abstract class PhabricatorDashboardPanelType extends Phobject {
     PhabricatorUser $viewer,
     PhabricatorDashboardPanel $panel,
     PhabricatorDashboardPanelRenderingEngine $engine,
-    PHUIActionHeaderView $header) {
+    PHUIHeaderView $header) {
     return $header;
   }
 

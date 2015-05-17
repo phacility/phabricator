@@ -191,6 +191,7 @@ final class CelerityResourceTransformer {
       'lightblue'     => '#daeaf3',
       'sky'           => '#3498db',
       'lightsky'      => '#ddeef9',
+      'fire'          => '#fa4b2a',
       'indigo'        => '#6e5cb6',
       'lightindigo'   => '#eae6f7',
       'pink'          => '#da49be',
