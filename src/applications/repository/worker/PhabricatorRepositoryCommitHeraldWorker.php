@@ -68,6 +68,7 @@ final class PhabricatorRepositoryCommitHeraldWorker
     if ($reverts) {
       $reverted_commits = id(new DiffusionCommitQuery())
         ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->withRepository($repository)
         ->withIdentifiers($reverts)
         ->execute();
       $reverted_commit_phids = mpull($reverted_commits, 'getPHID', 'getPHID');
