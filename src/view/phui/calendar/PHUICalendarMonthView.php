@@ -62,8 +62,6 @@ final class PHUICalendarMonthView extends AphrontView {
 
     require_celerity_resource('phui-calendar-month-css');
 
-    $first = reset($days);
-
     foreach ($days as $day) {
       $day_number = $day->format('j');
 
@@ -144,7 +142,7 @@ final class PHUICalendarMonthView extends AphrontView {
     $warnings = $this->getQueryRangeWarning();
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeader($this->renderCalendarHeader($first))
+      ->setHeader($this->renderCalendarHeader($this->getDateTime()))
       ->appendChild($table)
       ->setFormErrors($warnings);
     if ($this->error) {
@@ -469,6 +467,7 @@ final class PHUICalendarMonthView extends AphrontView {
     $year = $this->year;
 
     list($next_year, $next_month) = $this->getNextYearAndMonth();
+
     $end_date = new DateTime("{$next_year}-{$next_month}-01", $timezone);
 
     list($start_of_week, $end_of_week) = $this->getWeekStartAndEnd();
@@ -481,12 +480,14 @@ final class PHUICalendarMonthView extends AphrontView {
     $first_weekday_of_month = $first_month_day_date->format('w');
     $last_weekday_of_month = $last_month_day_date->format('w');
 
+    $day_date = id(clone $first_month_day_date);
+
     $num_days_display = $days_in_month;
     if ($start_of_week !== $first_weekday_of_month) {
       $interim_start_num = ($first_weekday_of_month + 7 - $start_of_week) % 7;
       $num_days_display += $interim_start_num;
-      $day_date = id(clone $first_month_day_date)
-        ->modify('-'.$interim_start_num.' days');
+
+      $day_date->modify('-'.$interim_start_num.' days');
     }
     if ($end_of_week !== $last_weekday_of_month) {
       $interim_end_day_num = ($end_of_week - $last_weekday_of_month + 7) % 7;
