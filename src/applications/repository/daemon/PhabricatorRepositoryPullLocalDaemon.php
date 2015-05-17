@@ -150,7 +150,8 @@ final class PhabricatorRepositoryPullLocalDaemon
           if (!$repository) {
             $this->log(
               pht('Repository %s is no longer pullable; skipping.', $id));
-            break;
+            unset($queue[$id]);
+            continue;
           }
 
           $monogram = $repository->getMonogram();
