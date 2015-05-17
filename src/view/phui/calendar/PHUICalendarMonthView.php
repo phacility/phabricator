@@ -189,6 +189,7 @@ final class PHUICalendarMonthView extends AphrontView {
     $class = $event_list['class'];
     $date = $event_list['date'];
     $cell_day_secret_link = null;
+    $week_number = null;
 
     if ($date) {
       $uri = $event_list['uri'];
@@ -201,6 +202,16 @@ final class PHUICalendarMonthView extends AphrontView {
           'href' => $uri,
         ),
         $date->format('j'));
+
+      if ($date->format('w') == 1) {
+        $week_number = phutil_tag(
+          'a',
+          array(
+            'class' => 'phui-calendar-week-number',
+            'href' => $uri,
+          ),
+          $date->format('W'));
+      }
     } else {
       $cell_day = null;
     }
@@ -234,6 +245,7 @@ final class PHUICalendarMonthView extends AphrontView {
       ),
       array(
         $cell_day_secret_link,
+        $week_number,
         $cell_day,
         $today_slot,
       ));

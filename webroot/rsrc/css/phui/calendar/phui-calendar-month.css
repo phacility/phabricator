@@ -94,6 +94,15 @@ table.phui-calendar-view tr td:first-child {
   color: {$green};
 }
 
+table.phui-calendar-view a.phui-calendar-week-number {
+  color: {$lightgreyborder};
+  padding: 4px;
+  display: inline-block;
+  min-width: 16px;
+  text-align: center;
+  float: left;
+}
+
 table.phui-calendar-view a.phui-calendar-date-number {
   color: {$lightgreytext};
   padding: 4px;
