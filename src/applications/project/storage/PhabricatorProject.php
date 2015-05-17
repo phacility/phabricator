@@ -275,6 +275,10 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   }
 
   public function save() {
+    if (!$this->getMailKey()) {
+      $this->setMailKey(Filesystem::readRandomCharacters(20));
+    }
+
     $this->openTransaction();
       $result = parent::save();
       $this->updateDatasourceTokens();
