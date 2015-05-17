@@ -3,9 +3,7 @@
  */
 
 .phui-header-shell {
-  border-width: 1px 0;
-  border-style: solid;
-  border-color: {$hovergrey};
+  border-bottom: 1px solid {$hovergrey};
   overflow: hidden;
 }
 
@@ -52,8 +50,7 @@ body .phui-header-shell.phui-bleed-header
   font-weight: 500;
 }
 
-.phui-header-view a,
-.phui-header-view a.simple {
+.phui-header-view > a {
   color: {$darkbluetext};
 }
 
