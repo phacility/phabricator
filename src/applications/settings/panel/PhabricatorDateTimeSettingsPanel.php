@@ -19,6 +19,7 @@ final class PhabricatorDateTimeSettingsPanel extends PhabricatorSettingsPanel {
     $username = $user->getUsername();
 
     $pref_time = PhabricatorUserPreferences::PREFERENCE_TIME_FORMAT;
+    $pref_week_start = PhabricatorUserPreferences::PREFERENCE_WEEK_START_DAY;
     $preferences = $user->loadPreferences();
 
     $errors = array();
@@ -30,7 +31,12 @@ final class PhabricatorDateTimeSettingsPanel extends PhabricatorSettingsPanel {
         $errors[] = pht('The selected timezone is not a valid timezone.');
       }
 
-      $preferences->setPreference($pref_time, $request->getStr($pref_time));
+      $preferences->setPreference(
+        $pref_time,
+        $request->getStr($pref_time));
+      $preferences->setPreference(
+        $pref_week_start,
+        $request->getStr($pref_week_start));
 
       if (!$errors) {
         $preferences->save();
@@ -73,6 +79,14 @@ final class PhabricatorDateTimeSettingsPanel extends PhabricatorSettingsPanel {
             pht('Format used when rendering a time of day.'))
           ->setValue($preferences->getPreference($pref_time)))
       ->appendChild(
+        id(new AphrontFormSelectControl())
+          ->setLabel(pht('Week Starts On'))
+          ->setOptions($this->getWeekDays())
+          ->setName($pref_week_start)
+          ->setCaption(
+            pht('Calendar weeks will start with this day.'))
+          ->setValue($preferences->getPreference($pref_week_start, 0)))
+      ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Save Account Settings')));
 
@@ -84,6 +98,18 @@ final class PhabricatorDateTimeSettingsPanel extends PhabricatorSettingsPanel {
 
     return array(
       $form_box,
+    );
+  }
+
+  private function getWeekDays() {
+    return array(
+      pht('Sunday'),
+      pht('Monday'),
+      pht('Tuesday'),
+      pht('Wednesday'),
+      pht('Thursday'),
+      pht('Friday'),
+      pht('Saturday'),
     );
   }
 }
