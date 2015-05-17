@@ -1,7 +1,6 @@
 <?php
 
-final class PhabricatorIRCProtocolAdapter
-  extends PhabricatorBaseProtocolAdapter {
+final class PhabricatorIRCProtocolAdapter extends PhabricatorProtocolAdapter {
 
   private $socket;
 
