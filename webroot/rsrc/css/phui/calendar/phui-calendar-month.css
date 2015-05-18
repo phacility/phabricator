@@ -98,7 +98,7 @@ table.phui-calendar-view a.phui-calendar-week-number {
   color: {$lightgreyborder};
   padding: 4px;
   display: inline-block;
-  min-width: 16px;
+  width: 16px;
   text-align: center;
   float: left;
 }
@@ -107,8 +107,13 @@ table.phui-calendar-view a.phui-calendar-date-number {
   color: {$lightgreytext};
   padding: 4px;
   display: inline-block;
-  min-width: 16px;
+  width: 16px;
   text-align: center;
+}
+
+.device table.phui-calendar-view a.phui-calendar-week-number,
+.device table.phui-calendar-view a.phui-calendar-date-number {
+  width: 12px;
 }
 
 table.phui-calendar-view td.phui-calendar-date-number-container {
