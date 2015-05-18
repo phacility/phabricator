@@ -7,7 +7,7 @@
  */
 return array(
   'names' => array(
-    'core.pkg.css' => 'a1c3a5c8',
+    'core.pkg.css' => '869d9929',
     'core.pkg.js' => 'f3e08b38',
     'darkconsole.pkg.js' => 'e7393ebb',
     'differential.pkg.css' => 'bb338e4b',
@@ -154,7 +154,7 @@ return array(
     'rsrc/css/sprite-gradient.css' => '4bdb98a7',
     'rsrc/css/sprite-login.css' => 'a3526809',
     'rsrc/css/sprite-main-header.css' => '28d01b0b',
-    'rsrc/css/sprite-menu.css' => '3f052fdc',
+    'rsrc/css/sprite-menu.css' => '02aa815a',
     'rsrc/css/sprite-projects.css' => 'b0d9e24f',
     'rsrc/css/sprite-tokens.css' => '1706b943',
     'rsrc/externals/font/fontawesome/fontawesome-webfont.eot' => '5fb6fb0e',
@@ -307,8 +307,8 @@ return array(
     'rsrc/image/sprite-login-X2.png' => 'a15918f0',
     'rsrc/image/sprite-login.png' => '8cee4f6e',
     'rsrc/image/sprite-main-header.png' => '39419fa6',
-    'rsrc/image/sprite-menu-X2.png' => '829263b7',
-    'rsrc/image/sprite-menu.png' => '055fbcc9',
+    'rsrc/image/sprite-menu-X2.png' => 'e8655658',
+    'rsrc/image/sprite-menu.png' => 'e7e02f73',
     'rsrc/image/sprite-projects-X2.png' => '8c91c839',
     'rsrc/image/sprite-projects.png' => 'ef9dc9b5',
     'rsrc/image/sprite-tokens-X2.png' => 'b4776580',
@@ -808,7 +808,7 @@ return array(
     'sprite-gradient-css' => '4bdb98a7',
     'sprite-login-css' => 'a3526809',
     'sprite-main-header-css' => '28d01b0b',
-    'sprite-menu-css' => '3f052fdc',
+    'sprite-menu-css' => '02aa815a',
     'sprite-projects-css' => 'b0d9e24f',
     'sprite-tokens-css' => '1706b943',
     'syntax-highlighting-css' => '6b7b24d9',

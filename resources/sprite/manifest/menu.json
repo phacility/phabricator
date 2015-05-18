@@ -4,12 +4,12 @@
     "eye": {
       "name": "eye",
       "rule": ".phabricator-main-menu-eye",
-      "hash": "4bcf36f0a4d6bdf7b987e578db3f4c22"
+      "hash": "8848ce0f1d60278ba13a306805107d62"
     },
     "logo": {
       "name": "logo",
       "rule": ".phabricator-main-menu-logo",
-      "hash": "1efe86fd2071d41951395d0f6d23b8c3"
+      "hash": "346032db9e1dbaafc9574664b9581b03"
     }
   },
   "scales": [
