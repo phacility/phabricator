@@ -12,15 +12,15 @@ final class DiffusionGetLintMessagesConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return 'Get lint messages for existing code.';
+    return pht('Get lint messages for existing code.');
   }
 
   protected function defineParamTypes() {
     return array(
-      'arcanistProject' => 'required string',
-      'branch'          => 'optional string',
-      'commit'          => 'optional string',
-      'files'           => 'required list<string>',
+      'repositoryPHID' => 'required phid',
+      'branch'         => 'required string',
+      'commit'         => 'optional string',
+      'files'          => 'required list<string>',
     );
   }
 
@@ -29,25 +29,31 @@ final class DiffusionGetLintMessagesConduitAPIMethod
   }
 
   protected function execute(ConduitAPIRequest $request) {
-    $project = id(new PhabricatorRepositoryArcanistProject())->loadOneWhere(
-      'name = %s',
-      $request->getValue('arcanistProject'));
-    if (!$project || !$project->getRepositoryID()) {
-      return array();
+    $viewer = $request->getUser();
+
+    $repository_phid = $request->getValue('repositoryPHID');
+    $repository = id(new PhabricatorRepositoryQuery())
+      ->setViewer($viewer)
+      ->withPHIDs(array($repository_phid))
+      ->executeOne();
+
+    if (!$repository) {
+      throw new Exception(
+        pht('No repository exists with PHID "%s".', $repository_phid));
     }
 
     $branch_name = $request->getValue('branch');
     if ($branch_name == '') {
       $repository = id(new PhabricatorRepositoryQuery())
         ->setViewer($request->getUser())
-        ->withIDs(array($project->getRepositoryID()))
+        ->withIDs(array($repository->getID()))
         ->executeOne();
       $branch_name = $repository->getDefaultArcanistBranch();
     }
 
     $branch = id(new PhabricatorRepositoryBranch())->loadOneWhere(
       'repositoryID = %d AND name = %s',
-      $project->getRepositoryID(),
+      $repository->getID(),
       $branch_name);
     if (!$branch || !$branch->getLintCommit()) {
       return array();
