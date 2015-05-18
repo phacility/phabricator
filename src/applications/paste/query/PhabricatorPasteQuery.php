@@ -90,7 +90,7 @@ final class PhabricatorPasteQuery
     }
 
     if ($this->needContent) {
-      $this->loadContent($pastes);
+      $pastes = $this->loadContent($pastes);
     }
 
     return $pastes;
@@ -205,29 +205,46 @@ final class PhabricatorPasteQuery
     $caches = $cache->getKeys($keys);
 
     $need_raw = array();
-    foreach ($pastes as $key => $paste) {
+    $have_cache = array();
+    foreach ($pastes as $paste) {
       $key = $this->getContentCacheKey($paste);
       if (isset($caches[$key])) {
         $paste->attachContent(phutil_safe_html($caches[$key]));
+        $have_cache[$paste->getPHID()] = true;
       } else {
         $need_raw[$key] = $paste;
       }
     }
 
     if (!$need_raw) {
-      return;
+      return $pastes;
     }
 
     $write_data = array();
 
-    $need_raw = $this->loadRawContent($need_raw);
-    foreach ($need_raw as $key => $paste) {
+    $have_raw = $this->loadRawContent($need_raw);
+    $have_raw = mpull($have_raw, null, 'getPHID');
+    foreach ($pastes as $key => $paste) {
+      $paste_phid = $paste->getPHID();
+      if (isset($have_cache[$paste_phid])) {
+        continue;
+      }
+
+      if (empty($have_raw[$paste_phid])) {
+        unset($pastes[$key]);
+        continue;
+      }
+
       $content = $this->buildContent($paste);
       $paste->attachContent($content);
       $write_data[$this->getContentCacheKey($paste)] = (string)$content;
     }
 
-    $cache->setKeys($write_data);
+    if ($write_data) {
+      $cache->setKeys($write_data);
+    }
+
+    return $pastes;
   }
 
   private function buildContent(PhabricatorPaste $paste) {
