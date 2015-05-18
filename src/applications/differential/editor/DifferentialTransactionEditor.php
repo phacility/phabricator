@@ -220,7 +220,6 @@ final class DifferentialTransactionEditor
         } else {
           $object->setRepositoryPHID($diff->getRepositoryPHID());
         }
-        $object->setArcanistProjectPHID($diff->getArcanistProjectPHID());
         $object->attachActiveDiff($diff);
 
         // TODO: Update the `diffPHID` once we add that.

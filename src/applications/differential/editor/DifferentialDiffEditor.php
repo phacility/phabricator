@@ -234,8 +234,7 @@ final class DifferentialDiffEditor
       ->setSourceControlPath(idx($dict, 'sourceControlPath'))
       ->setSourceControlBaseRevision(idx($dict, 'sourceControlBaseRevision'))
       ->setLintStatus(idx($dict, 'lintStatus'))
-      ->setUnitStatus(idx($dict, 'unitStatus'))
-      ->setArcanistProjectPHID(idx($dict, 'arcanistProjectPHID'));
+      ->setUnitStatus(idx($dict, 'unitStatus'));
 
     return $diff;
   }
