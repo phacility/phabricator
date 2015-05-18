@@ -396,6 +396,10 @@ final class PhabricatorUser
     return substr(PhabricatorHash::digest($vec), 0, $len);
   }
 
+  public function getUserProfile() {
+    return $this->assertAttached($this->profile);
+  }
+
   public function attachUserProfile(PhabricatorUserProfile $profile) {
     $this->profile = $profile;
     return $this;
