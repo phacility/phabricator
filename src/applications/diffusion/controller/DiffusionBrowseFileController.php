@@ -266,32 +266,20 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
 
       $id = celerity_generate_unique_node_id();
 
-      $projects = $drequest->loadArcanistProjects();
-      $langs = array();
-      foreach ($projects as $project) {
-        $ls = $project->getSymbolIndexLanguages();
-        if (!$ls) {
-          continue;
-        }
-        $dep_projects = $project->getSymbolIndexProjects();
-        $dep_projects[] = $project->getPHID();
-        foreach ($ls as $lang) {
-          if (!isset($langs[$lang])) {
-            $langs[$lang] = array();
-          }
-          $langs[$lang] += $dep_projects + array($project);
-        }
-      }
+      $repo = $drequest->getRepository();
+      $symbol_repos = $repo->getSymbolSources();
+      $symbol_repos[] = $repo;
 
       $lang = last(explode('.', $drequest->getPath()));
-
-      if (isset($langs[$lang])) {
+      $repo_languages = $repo->getSymbolLanguages();
+      $repo_languages = array_fill_keys($repo_languages, true);
+      if (empty($repo_languages) || isset($repo_languages[$lang])) {
         Javelin::initBehavior(
           'repository-crossreference',
           array(
             'container' => $id,
             'lang' => $lang,
-            'projects' => $langs[$lang],
+            'repositories' => $symbol_repos,
           ));
       }
 

@@ -146,10 +146,11 @@ final class DiffusionSymbolQuery extends PhabricatorOffsetPagedQuery {
         $this->loadPaths($symbols);
       }
       if ($this->needRepositories) {
-        $this->loadRepositories($symbols);
+        $symbols = $this->loadRepositories($symbols);
       }
 
     }
+
 
     return $symbols;
   }
@@ -249,10 +250,16 @@ final class DiffusionSymbolQuery extends PhabricatorOffsetPagedQuery {
       ->execute();
     $repos = mpull($repos, null, 'getPHID');
 
+    $visible = array();
     foreach ($symbols as $symbol) {
       $repository = idx($repos, $symbol->getRepositoryPHID());
-      $symbol->attachRepository($repository);
+      // repository is null mean "user can't view repo", so hide the symbol
+      if ($repository) {
+        $symbol->attachRepository($repository);
+        $visible[] = $symbol;
+      }
     }
+    return $visible;
   }
 
 }

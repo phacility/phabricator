@@ -128,7 +128,7 @@ final class DiffusionSymbolController extends DiffusionController {
         '',
       ));
     $table->setNoDataString(
-      pht('No matching symbol could be found in any indexed project.'));
+      pht('No matching symbol could be found in any indexed repository.'));
 
     $panel = new PHUIObjectBoxView();
     $panel->setHeaderText(pht('Similar Symbols'));

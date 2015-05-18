@@ -1778,6 +1778,17 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
   }
 
 
+/* -(  Symbols  )-------------------------------------------------------------*/
+
+  public function getSymbolSources() {
+    return $this->getDetail('symbol-sources');
+  }
+
+  public function getSymbolLanguages() {
+    return $this->getDetail('symbol-languages');
+  }
+
+
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */
 
 
