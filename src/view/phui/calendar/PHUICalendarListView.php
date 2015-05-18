@@ -79,8 +79,8 @@ final class PHUICalendarListView extends AphrontTagView {
           ),
         array(
           $dot,
-          $title,
           $time,
+          $title,
         ));
     }
 

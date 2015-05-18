@@ -154,6 +154,7 @@ table.phui-calendar-view td.phui-calendar-date-number-container {
 }
 
 .phui-calendar-view .phui-calendar-list li.phui-calendar-list-item.all-day {
+  height: 20px;
   margin: 0;
   padding: 4px 4px 0px 4px;
   background-color: {$darkgreybackground};
@@ -180,24 +181,36 @@ li.phui-calendar-list-item.all-day:first-child {
 }
 
 .phui-calendar-view .phui-calendar-list-dot {
+  position: relative;
+  display: inline-block;
+  float: left;
   width: 3px;
   height: 3px;
   margin-right: 4px;
   border-radius: 10px;
-  position: absolute;
   top: 5px;
   left: 0;
+  display: none;
 }
 
-.phui-calendar-view .phui-calendar-list-title {
-  width: auto;
-  white-space: normal;
-  word-break: break-word;
+.phui-calendar-view li.phui-calendar-list-item {
+  padding: 0;
+}
+
+.phui-calendar-view li.phui-calendar-list-item .phui-calendar-list-title {
+  position: relative;
+  /*float: right;*/
+  display: inline-block;
+  width: 120px;
+  padding: 0;
+  line-height: 18px;
+  vertical-align: center;
 }
 
 li.phui-calendar-list-item .phui-calendar-list-title a {
-  text-align: left;
-  padding-left: 8px;
+  padding: 0;
+  vertical-align: top;
+  line-height: 16px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -205,6 +218,8 @@ li.phui-calendar-list-item .phui-calendar-list-title a {
 
 li.phui-calendar-list-item.all-day .phui-calendar-list-title a{
   color: {$greytext};
+  margin: 0;
+  padding: 0;
 }
 
 li.phui-calendar-viewer-invited.all-day .phui-calendar-list-title a{
@@ -212,17 +227,16 @@ li.phui-calendar-viewer-invited.all-day .phui-calendar-list-title a{
 }
 
 .phui-calendar-view li.phui-calendar-list-item .phui-calendar-list-time {
-  position: absolute;
+  position: relative;
+  display: inline-block;
+  float: left;
+  padding: 0;
+  line-height: 18px;
   width: 60px;
-  right: 0;
-  top: 1px;
   color: {$lightgreytext};
-  text-align: right;
+  text-align: left;
 }
 
-.phui-calendar-view
-li.phui-calendar-list-item.all-day
-.phui-calendar-list-time  {
-  top: 4px;
-  right: 8px;
+li.phui-calendar-list-item.all-day .phui-calendar-list-time{
+  margin: 0 0 0 4px;
 }
