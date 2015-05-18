@@ -418,7 +418,7 @@ final class PhabricatorAuditEditor
     $message = $data->getCommitMessage();
 
     $matches = null;
-    if (!preg_match('/^Auditors:\s*(.*)$/im', $message, $matches)) {
+    if (!preg_match('/^Auditors?:\s*(.*)$/im', $message, $matches)) {
       return array();
     }
 

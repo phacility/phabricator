@@ -91,7 +91,7 @@ final class PhabricatorFileChunk extends PhabricatorFileDAO
     $data_phid = $this->getDataFilePHID();
     if ($data_phid) {
       $data_file = id(new PhabricatorFileQuery())
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->setViewer($engine->getViewer())
         ->withPHIDs(array($data_phid))
         ->executeOne();
       if ($data_file) {

@@ -59,24 +59,8 @@ final class PHUICalendarMonthView extends AphrontView {
     $days = $this->getDatesInMonth();
 
     $cell_lists = array();
-    $empty_cell = array(
-        'list' => null,
-        'date' => null,
-        'uri' => null,
-        'count' => 0,
-        'class' => null,
-      );
 
     require_celerity_resource('phui-calendar-month-css');
-
-    $first = reset($days);
-    $start_of_week = 0;
-
-    $empty = $first->format('w');
-
-    for ($ii = 0; $ii < $empty; $ii++) {
-      $cell_lists[] = $empty_cell;
-    }
 
     foreach ($days as $day) {
       $day_number = $day->format('j');
@@ -133,9 +117,6 @@ final class PHUICalendarMonthView extends AphrontView {
 
     foreach ($cell_lists_by_week as $week_of_cell_lists) {
       $cells = array();
-      while (count($week_of_cell_lists) < 7) {
-        $week_of_cell_lists[] = $empty_cell;
-      }
       foreach ($week_of_cell_lists as $cell_list) {
         $cells[] = $this->getEventListCell($cell_list);
       }
@@ -161,7 +142,7 @@ final class PHUICalendarMonthView extends AphrontView {
     $warnings = $this->getQueryRangeWarning();
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeader($this->renderCalendarHeader($first))
+      ->setHeader($this->renderCalendarHeader($this->getDateTime()))
       ->appendChild($table)
       ->setFormErrors($warnings);
     if ($this->error) {
@@ -206,6 +187,7 @@ final class PHUICalendarMonthView extends AphrontView {
     $class = $event_list['class'];
     $date = $event_list['date'];
     $cell_day_secret_link = null;
+    $week_number = null;
 
     if ($date) {
       $uri = $event_list['uri'];
@@ -218,6 +200,16 @@ final class PHUICalendarMonthView extends AphrontView {
           'href' => $uri,
         ),
         $date->format('j'));
+
+      if ($date->format('w') == 1) {
+        $week_number = phutil_tag(
+          'a',
+          array(
+            'class' => 'phui-calendar-week-number',
+            'href' => $uri,
+          ),
+          $date->format('W'));
+      }
     } else {
       $cell_day = null;
     }
@@ -226,6 +218,15 @@ final class PHUICalendarMonthView extends AphrontView {
       $today_class = 'phui-calendar-today-slot phui-calendar-today';
     } else {
       $today_class = 'phui-calendar-today-slot';
+    }
+
+    if ($this->isDateInCurrentWeek($date)) {
+      $today_class .= ' phui-calendar-this-week';
+    }
+
+    $last_week_day = 6;
+    if ($date->format('w') == $last_week_day) {
+      $today_class .= ' last-weekday';
     }
 
     $today_slot = phutil_tag (
@@ -242,6 +243,7 @@ final class PHUICalendarMonthView extends AphrontView {
       ),
       array(
         $cell_day_secret_link,
+        $week_number,
         $cell_day,
         $today_slot,
       ));
@@ -252,6 +254,16 @@ final class PHUICalendarMonthView extends AphrontView {
         'class' => 'phui-calendar-date-number-container '.$class,
       ),
       $cell_div);
+  }
+
+  private function isDateInCurrentWeek($date) {
+    list($week_start_date, $week_end_date) = $this->getThisWeekRange();
+
+    if ($date->format('U') < $week_end_date->format('U') &&
+      $date->format('U') >= $week_start_date->format('U')) {
+      return true;
+    }
+    return false;
   }
 
   private function getEventCountBadge($count, $viewer_is_invited) {
@@ -290,18 +302,54 @@ final class PHUICalendarMonthView extends AphrontView {
   }
 
   private function getDayNamesHeader() {
+    list($week_start, $week_end) = $this->getWeekStartAndEnd();
+
+    $weekday_names = array(
+      $this->getDayHeader(pht('Sun'), pht('Sunday'), true),
+      $this->getDayHeader(pht('Mon'), pht('Monday')),
+      $this->getDayHeader(pht('Tue'), pht('Tuesday')),
+      $this->getDayHeader(pht('Wed'), pht('Wednesday')),
+      $this->getDayHeader(pht('Thu'), pht('Thursday')),
+      $this->getDayHeader(pht('Fri'), pht('Friday')),
+      $this->getDayHeader(pht('Sat'), pht('Saturday'), true),
+    );
+
+    $sorted_weekday_names = array();
+
+    for ($i = $week_start; $i < ($week_start + 7); $i++) {
+      $sorted_weekday_names[] = $weekday_names[$i % 7];
+    }
+
     return phutil_tag(
       'tr',
       array('class' => 'phui-calendar-day-of-week-header'),
+      $sorted_weekday_names);
+  }
+
+  private function getDayHeader($short, $long, $is_weekend = false) {
+    $class = null;
+    if ($is_weekend) {
+      $class = 'weekend-day-header';
+    }
+    $day = array();
+    $day[] = phutil_tag(
+      'span',
       array(
-        phutil_tag('th', array(), pht('Sun')),
-        phutil_tag('th', array(), pht('Mon')),
-        phutil_tag('th', array(), pht('Tue')),
-        phutil_tag('th', array(), pht('Wed')),
-        phutil_tag('th', array(), pht('Thu')),
-        phutil_tag('th', array(), pht('Fri')),
-        phutil_tag('th', array(), pht('Sat')),
-      ));
+        'class' => 'long-weekday-name',
+      ),
+      $long);
+    $day[] = phutil_tag(
+      'span',
+      array(
+        'class' => 'short-weekday-name',
+      ),
+      $short);
+    return phutil_tag(
+      'th',
+      array(
+        'class' => $class,
+      ),
+      $day);
   }
 
   private function renderCalendarHeader(DateTime $date) {
@@ -419,10 +467,11 @@ final class PHUICalendarMonthView extends AphrontView {
     $year = $this->year;
 
     list($next_year, $next_month) = $this->getNextYearAndMonth();
+
     $end_date = new DateTime("{$next_year}-{$next_month}-01", $timezone);
 
-    $start_of_week = 0;
-    $end_of_week = 6 - $start_of_week;
+    list($start_of_week, $end_of_week) = $this->getWeekStartAndEnd();
+
     $days_in_month = id(clone $end_date)->modify('-1 day')->format('d');
 
     $first_month_day_date = new DateTime("{$year}-{$month}-01", $timezone);
@@ -431,18 +480,22 @@ final class PHUICalendarMonthView extends AphrontView {
     $first_weekday_of_month = $first_month_day_date->format('w');
     $last_weekday_of_month = $last_month_day_date->format('w');
 
+    $day_date = id(clone $first_month_day_date);
+
     $num_days_display = $days_in_month;
-    if ($start_of_week < $first_weekday_of_month) {
-      $num_days_display += $first_weekday_of_month;
+    if ($start_of_week !== $first_weekday_of_month) {
+      $interim_start_num = ($first_weekday_of_month + 7 - $start_of_week) % 7;
+      $num_days_display += $interim_start_num;
+
+      $day_date->modify('-'.$interim_start_num.' days');
     }
-    if ($end_of_week > $last_weekday_of_month) {
-      $num_days_display += (6 - $last_weekday_of_month);
-      $end_date->modify('+'.(6 - $last_weekday_of_month).' days');
+    if ($end_of_week !== $last_weekday_of_month) {
+      $interim_end_day_num = ($end_of_week - $last_weekday_of_month + 7) % 7;
+      $num_days_display += $interim_end_day_num;
+      $end_date->modify('+'.$interim_end_day_num.' days');
     }
 
     $days = array();
-    $day_date = id(clone $first_month_day_date)
-      ->modify('-'.$first_weekday_of_month.' days');
 
     for ($day = 1; $day <= $num_days_display; $day++) {
       $day_epoch = $day_date->format('U');
@@ -456,6 +509,43 @@ final class PHUICalendarMonthView extends AphrontView {
     }
 
     return $days;
+  }
+
+  private function getTodayMidnight() {
+    $viewer = $this->getUser();
+    $today = new DateTime('@'.time());
+    $today->setTimeZone($viewer->getTimeZone());
+    $today->setTime(0, 0, 0);
+
+    return $today;
+  }
+
+  private function getThisWeekRange() {
+    list($week_start, $week_end) = $this->getWeekStartAndEnd();
+
+    $today = $this->getTodayMidnight();
+    $date_weekday = $today->format('w');
+
+    $days_from_week_start = ($date_weekday + 7 - $week_start) % 7;
+    $days_to_week_end = 7 - $days_from_week_start;
+
+    $modify = '-'.$days_from_week_start.' days';
+    $week_start_date = id(clone $today)->modify($modify);
+
+    $modify = '+'.$days_to_week_end.' days';
+    $week_end_date = id(clone $today)->modify($modify);
+
+    return array($week_start_date, $week_end_date);
+  }
+
+  private function getWeekStartAndEnd() {
+    $preferences = $this->user->loadPreferences();
+    $pref_week_start = PhabricatorUserPreferences::PREFERENCE_WEEK_START_DAY;
+
+    $week_start = $preferences->getPreference($pref_week_start, 0);
+    $week_end = ($week_start + 6) % 7;
+
+    return array($week_start, $week_end);
   }
 
   private function getDateTime() {

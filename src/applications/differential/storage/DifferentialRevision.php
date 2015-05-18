@@ -550,7 +550,7 @@ final class DifferentialRevision extends DifferentialDAO
 
     $this->openTransaction();
       $diffs = id(new DifferentialDiffQuery())
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->setViewer($engine->getViewer())
         ->withRevisionIDs(array($this->getID()))
         ->execute();
       foreach ($diffs as $diff) {

@@ -104,8 +104,9 @@ final class PhabricatorFileTransformController
   }
 
   private function destroyTransform(PhabricatorTransformedFile $xform) {
+    $engine = new PhabricatorDestructionEngine();
     $file = id(new PhabricatorFileQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->setViewer($engine->getViewer())
       ->withPHIDs(array($xform->getTransformedPHID()))
       ->executeOne();
 
@@ -114,7 +115,6 @@ final class PhabricatorFileTransformController
     if (!$file) {
       $xform->delete();
     } else {
-      $engine = new PhabricatorDestructionEngine();
       $engine->destroyObject($file);
     }
 

@@ -1,7 +1,7 @@
 <?php
 
-abstract class PhabricatorBotBaseStreamingProtocolAdapter
-  extends PhabricatorBaseProtocolAdapter {
+abstract class PhabricatorStreamingProtocolAdapter
+  extends PhabricatorProtocolAdapter {
 
   protected $readHandles;
   protected $multiHandle;

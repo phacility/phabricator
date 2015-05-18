@@ -4,6 +4,10 @@ final class PhabricatorDestructionEngine extends Phobject {
 
   private $rootLogID;
 
+  public function getViewer() {
+    return PhabricatorUser::getOmnipotentUser();
+  }
+
   public function destroyObject(PhabricatorDestructibleInterface $object) {
     $log = id(new PhabricatorSystemDestructionLog())
       ->setEpoch(time())

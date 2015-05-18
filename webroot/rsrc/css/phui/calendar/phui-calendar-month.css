@@ -10,10 +10,26 @@
 
 tr.phui-calendar-day-of-week-header th {
   text-align: center;
-  font-size: 11px;
+  font-size: 13px;
   padding: 3px;
   color: {$lightbluetext};
   background: {$lightgreybackground};
+}
+
+tr.phui-calendar-day-of-week-header th.weekend-day-header {
+  background: {$greybackground};
+}
+
+.device tr.phui-calendar-day-of-week-header th .long-weekday-name {
+  display: none;
+}
+
+tr.phui-calendar-day-of-week-header th .short-weekday-name {
+  display: none;
+}
+
+.device tr.phui-calendar-day-of-week-header th .short-weekday-name {
+  display: inline;
 }
 
 table.phui-calendar-view td {
@@ -78,9 +94,18 @@ table.phui-calendar-view tr td:first-child {
   color: {$green};
 }
 
+table.phui-calendar-view a.phui-calendar-week-number {
+  color: {$lightgreyborder};
+  padding: 4px;
+  display: inline-block;
+  min-width: 16px;
+  text-align: center;
+  float: left;
+}
+
 table.phui-calendar-view a.phui-calendar-date-number {
   color: {$lightgreytext};
-  padding: 0 4px;
+  padding: 4px;
   display: inline-block;
   min-width: 16px;
   text-align: center;
@@ -95,10 +120,19 @@ table.phui-calendar-view td.phui-calendar-date-number-container {
 
 .phui-calendar-today-slot {
   display: block;
-  width: 100%;
   height: 4px;
-  padding: 0;
-  margin: 0;
+  position: absolute;
+  left: 0;
+  right: -1px;
+  bottom: 0;
+}
+
+.phui-calendar-today-slot.last-weekday {
+  right: 0px;
+}
+
+.phui-calendar-today-slot.phui-calendar-this-week {
+  background-color: {$blueborder};
 }
 
 .phui-calendar-today-slot.phui-calendar-today {

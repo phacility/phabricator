@@ -33,7 +33,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $diffs = id(new DifferentialDiffQuery())
       ->setViewer($request->getUser())
       ->withRevisionIDs(array($this->revisionID))
-      ->needArcanistProjects(true)
       ->execute();
     $diffs = array_reverse($diffs, $preserve_keys = true);
 
@@ -260,14 +259,14 @@ final class DifferentialRevisionViewController extends DifferentialController {
       'whitespace',
       DifferentialChangesetParser::WHITESPACE_IGNORE_MOST);
 
-    $arc_project = $target->getArcanistProject();
-    if ($arc_project) {
-      list($symbol_indexes, $project_phids) = $this->buildSymbolIndexes(
-        $arc_project,
+    $repository = $revision->getRepository();
+    if ($repository) {
+      list($symbol_indexes, $repository_phids) = $this->buildSymbolIndexes(
+        $repository,
         $visible_changesets);
     } else {
       $symbol_indexes = array();
-      $project_phids = null;
+      $repository_phids = null;
     }
 
     $revision_detail->setActions($actions);
@@ -307,12 +306,12 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ),
       $comment_view);
 
-    if ($arc_project) {
+    if ($repository) {
       Javelin::initBehavior(
         'repository-crossreference',
         array(
           'section' => $wrap_id,
-          'projects' => $project_phids,
+          'repositories' => $repository_phids,
         ));
     }
 
@@ -750,35 +749,33 @@ final class DifferentialRevisionViewController extends DifferentialController {
   }
 
   private function buildSymbolIndexes(
-    PhabricatorRepositoryArcanistProject $arc_project,
+    PhabricatorRepository $repository,
     array $visible_changesets) {
     assert_instances_of($visible_changesets, 'DifferentialChangeset');
 
     $engine = PhabricatorSyntaxHighlighter::newEngine();
 
-    $langs = $arc_project->getSymbolIndexLanguages();
-    if (!$langs) {
-      return array(array(), array());
-    }
+    $langs = $repository->getSymbolLanguages();
+    $langs = nonempty($langs, array());
 
     $symbol_indexes = array();
 
-    $project_phids = array_merge(
-      array($arc_project->getPHID()),
-      nonempty($arc_project->getSymbolIndexProjects(), array()));
+    $repository_phids = array_merge(
+      array($repository->getPHID()),
+      nonempty($repository->getSymbolSources(), array()));
 
     $indexed_langs = array_fill_keys($langs, true);
     foreach ($visible_changesets as $key => $changeset) {
       $lang = $engine->getLanguageFromFilename($changeset->getFilename());
-      if (isset($indexed_langs[$lang])) {
+      if (empty($indexed_langs) || isset($indexed_langs[$lang])) {
         $symbol_indexes[$key] = array(
-          'lang'      => $lang,
-          'projects'  => $project_phids,
+          'lang'         => $lang,
+          'repositories' => $repository_phids,
         );
       }
     }
 
-    return array($symbol_indexes, $project_phids);
+    return array($symbol_indexes, $repository_phids);
   }
 
   private function loadOtherRevisions(

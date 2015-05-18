@@ -76,8 +76,6 @@ final class PhameBlogEditor
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
         $object->setJoinPolicy($xaction->getNewValue());
         return;
-      case PhabricatorTransactions::TYPE_COMMENT:
-        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -95,7 +93,6 @@ final class PhameBlogEditor
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
-      case PhabricatorTransactions::TYPE_COMMENT:
         return;
     }
 
