@@ -38,7 +38,12 @@ foreach ($raw_projects_data as $project_row) {
     idx($project_row, 'name', '???'));
 
   $symbol_index_projects = $project_row['symbolIndexProjects'];
-  $symbol_index_projects = phutil_json_decode($symbol_index_projects);
+  $symbol_index_projects = nonempty($symbol_index_projects, '[]');
+  try {
+    $symbol_index_projects = phutil_json_decode($symbol_index_projects);
+  } catch (PhutilJSONParserException $ex) {
+    continue;
+  }
 
   $sources = $repo->getDetail('symbol-sources', array());
   foreach ($symbol_index_projects as $index_project) {
@@ -50,7 +55,12 @@ foreach ($raw_projects_data as $project_row) {
   $repo->setDetail('symbol-sources', $sources);
 
   $languages = $project_row['symbolIndexLanguages'];
-  $languages = phutil_json_decode($languages);
+  $languages = nonempty($languages, '[]');
+  try {
+    $languages = phutil_json_decode($languages);
+  } catch (PhutilJSONParserException $ex) {
+    continue;
+  }
 
   $languages = array_merge(
     $repo->getDetail('symbol-languages', array()),
