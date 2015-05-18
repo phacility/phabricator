@@ -3,7 +3,7 @@
  */
 
 .phui-header-shell {
-  border-bottom: 1px solid {$hovergrey};
+  border-bottom: 1px solid {$thinblueborder};
   overflow: hidden;
 }
 
@@ -38,9 +38,10 @@ body .phui-header-shell.phui-bleed-header
 }
 
 .phui-header-view {
-  padding: 16px;
+  padding: 12px 4px 16px;
   font-size: 15px;
-  color: #000;
+  color: {$darkbluetext};
+  font-weight: 500;
   position: relative;
 }
 
@@ -123,8 +124,11 @@ body.device-phone .phui-header-view {
 }
 
 .phui-header-subheader .phui-header-status-dark {
-  color: {$indigo};
-  text-shadow: 0 1px #fff;
+  color: {$sh-indigotext};
+  background-color: {$sh-indigobackground};
+  padding: 2px 8px;
+  border-radius: 3px;
+  margin-right: 8px;
 }
 
 .phui-header-subheader .phui-header-status-dark .phui-icon-view {
@@ -132,11 +136,19 @@ body.device-phone .phui-header-view {
 }
 
 .phui-header-subheader .phui-header-status-red {
-  color: {$red};
+  color: {$sh-redtext};
+  background-color: {$sh-redbackground};
+  padding: 2px 8px;
+  border-radius: 3px;
+  margin-right: 8px;
 }
 
 .phui-header-subheader .phui-header-status-green {
-  color: {$green};
+  color: {$sh-greentext};
+  background-color: {$sh-greenbackground};
+  padding: 2px 8px;
+  border-radius: 3px;
+  margin-right: 8px;
 }
 
 .phui-header-action-links .phui-mobile-menu {
@@ -154,4 +166,8 @@ body.device-phone .phui-header-view {
 .phui-header-icon-list .phui-header-list-icon {
   margin: 0 4px;
   float: right;
+}
+
+.phui-header-icon-list .phui-header-list-icon .phui-icon-view {
+  font-size: 15px;
 }

@@ -46,8 +46,9 @@
   border: 0;
 }
 
-.conpherence-widget-pane .widgets-header {
-  border-bottom: 1px solid {$thinblueborder};
+.conpherence-widget-pane .widgets-header .phui-header-view {
+  padding: 8px;
+  font-size: 14px;
 }
 
 .device .conpherence-widget-pane .widgets-header {
@@ -58,7 +59,7 @@
   float: none;
   height: 0px;
   width: 0px;
-  margin-right: 0px;
+  margin: 7px 0 0 4px;
   border-top-color: #000;
 }
 

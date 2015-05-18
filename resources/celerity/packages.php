@@ -139,7 +139,6 @@ return array(
     'phabricator-feed-css',
     'phabricator-dashboard-css',
     'aphront-multi-column-view-css',
-    'phui-action-header-view-css',
     'conpherence-durable-column-view',
   ),
   'differential.pkg.css' => array(

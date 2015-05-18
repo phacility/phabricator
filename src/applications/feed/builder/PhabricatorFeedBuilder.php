@@ -57,8 +57,8 @@ final class PhabricatorFeedBuilder {
             phutil_tag_div('phabricator-feed-story-date-separator'));
         }
         $last_date = $date;
-        $header = new PHUIActionHeaderView();
-        $header->setHeaderTitle($date);
+        $header = new PHUIHeaderView();
+        $header->setHeader($date);
 
         $null_view->appendChild($header);
       }

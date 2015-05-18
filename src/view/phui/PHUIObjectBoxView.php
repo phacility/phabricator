@@ -154,14 +154,9 @@ final class PHUIObjectBoxView extends AphrontView {
 
     require_celerity_resource('phui-object-box-css');
 
-
-    // TODO: (redesign-2015) For now going to override this by hand instead of hunting
-    // down all call sites. This is mostly to prove the design will work
-    // then do the legwork before re-merging to master.
+    $header_color = null;
     if ($this->headerColor) {
       $header_color = $this->headerColor;
-    } else {
-      $header_color = PHUIActionHeaderView::HEADER_WHITE;
     }
 
     if ($this->header) {

@@ -12,7 +12,6 @@ final class AphrontDialogView extends AphrontView {
   private $class;
   private $renderAsForm = true;
   private $formID;
-  private $headerColor = PHUIActionHeaderView::HEADER_WHITE;
   private $footers = array();
   private $isStandalone;
   private $method = 'POST';
@@ -128,11 +127,6 @@ final class AphrontDialogView extends AphrontView {
 
   public function setWidth($width) {
     $this->width = $width;
-    return $this;
-  }
-
-  public function setHeaderColor($color) {
-    $this->headerColor = $color;
     return $this;
   }
 
@@ -300,9 +294,8 @@ final class AphrontDialogView extends AphrontView {
       );
     }
 
-    $header = new PHUIActionHeaderView();
-    $header->setHeaderTitle($this->title);
-    $header->setHeaderColor($this->headerColor);
+    $header = new PHUIHeaderView();
+    $header->setHeader($this->title);
 
     $footer = null;
     if ($this->footers) {

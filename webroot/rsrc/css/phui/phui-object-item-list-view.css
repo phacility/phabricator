@@ -612,10 +612,9 @@ ul.phui-object-item-icons {
 .dashboard-pane .phui-object-item-list-header {
   font-size: 13px;
   color: {$bluetext};
-  background: {$lightgreybackground};
   border-top: 1px solid {$thinblueborder};
   border-bottom: 1px solid {$thinblueborder};
-  padding: 8px 12px;
+  padding: 8px 4px;
   font-weight: 500;
 }
 

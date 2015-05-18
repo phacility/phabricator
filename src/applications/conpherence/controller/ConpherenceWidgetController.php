@@ -68,17 +68,22 @@ final class ConpherenceWidgetController extends ConpherenceController {
       ->setHref($this->getWidgetURI())
       ->setMetadata(array('widget' => null))
       ->addSigil('conpherence-widget-adder');
+    $header = javelin_tag(
+      'a',
+      array(
+        'href' => '#',
+        'sigil' => 'widgets-selector',
+      ),
+      pht('Participants'));
+
     $widgets[] = phutil_tag(
       'div',
       array(
         'class' => 'widgets-header',
       ),
-      id(new PHUIActionHeaderView())
-      ->setHeaderTitle(pht('Participants'))
-      ->setHeaderHref('#')
-      ->setDropdown(true)
-      ->addAction($new_icon)
-      ->addHeaderSigil('widgets-selector'));
+      id(new PHUIHeaderView())
+      ->setHeader($header)
+      ->addActionIcon($new_icon));
     $user = $this->getRequest()->getUser();
     // now the widget bodies
     $widgets[] = javelin_tag(

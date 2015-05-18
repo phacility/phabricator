@@ -9,14 +9,14 @@
 .device-desktop .phui-workboard-view-shadow {
   overflow-x: auto;
   position: absolute;
-  top: 120px;
+  top: 110px;
   bottom: 0;
   left: 0;
   right: 0;
 }
 
 .device-desktop .page-has-warning .phui-workboard-view-shadow {
-  top: 148px;
+  top: 138px;
 }
 
 .phui-workboard-view-shadow::-webkit-scrollbar {
@@ -89,4 +89,18 @@
 .device-tablet .project-board-wrapper {
   margin-left: 8px;
   margin-right: 8px;
+}
+
+.project-board-header {
+  margin: 8px 12px;
+}
+
+.project-board-header .phui-header-view {
+  font-size: 18px;
+}
+
+.project-board-header .phui-header-subheader {
+  display: inline-block;
+  margin: 0;
+  padding: 0 8px;
 }

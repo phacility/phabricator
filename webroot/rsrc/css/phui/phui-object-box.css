@@ -23,7 +23,6 @@ div.phui-object-box.phui-object-box-flush {
 
 .phui-object-box .phui-header-shell h1 {
   padding: 0 0 8px 0;
-  font-weight: normal;
 }
 
 .phui-object-box .phui-header-shell + .phui-info-view {
@@ -39,7 +38,7 @@ div.phui-object-box.phui-object-box-flush {
   border-bottom: 1px solid {$greenborder};
 }
 
-.phui-box-border.phui-object-box-lightgreen .phui-action-header {
+.phui-box-border.phui-object-box-lightgreen .phui-header-shell {
   border-bottom: 1px solid {$lightgreenborder};
 }
 
@@ -48,7 +47,7 @@ div.phui-object-box.phui-object-box-flush {
   border-bottom: 1px solid {$blueborder};
 }
 
-.phui-box-border.phui-object-box-lightblue .phui-action-header {
+.phui-box-border.phui-object-box-lightblue .phui-header-shell {
   border-bottom: 1px solid {$lightblueborder};
 }
 
@@ -57,7 +56,7 @@ div.phui-object-box.phui-object-box-flush {
   border-bottom: 1px solid {$redborder};
 }
 
-.phui-box-border.phui-object-box-lightred .phui-action-header {
+.phui-box-border.phui-object-box-lightred .phui-header-shell {
   border-bottom: 1px solid {$lightredborder};
 }
 
@@ -66,7 +65,7 @@ div.phui-object-box.phui-object-box-flush {
   border-bottom: 1px solid {$violetborder};
 }
 
-.phui-box-border.phui-object-box-lightviolet .phui-action-header {
+.phui-box-border.phui-object-box-lightviolet .phui-header-shell {
   border-bottom: 1px solid {$lightvioletborder};
 }
 
@@ -83,8 +82,7 @@ div.phui-object-box.phui-object-box-flush {
 }
 
 .phui-object-box .phui-object-box .phui-header-shell h1 {
-  background-color: {$lightgreybackground};
-  padding: 8px 12px;
+  padding: 8px 4px;
   font-size: 13px;
   margin: 0;
   color: {$bluetext};

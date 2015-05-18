@@ -161,7 +161,7 @@ final class PhabricatorDashboardPanelRenderingEngine extends Phobject {
       case self::HEADER_MODE_NORMAL:
       default:
         $header = id(new PHUIHeaderView())
-          ->setHeaderTitle($title);
+          ->setHeader($title);
         break;
     }
     $icon = id(new PHUIIconView())

@@ -8,6 +8,10 @@
   position: relative;
 }
 
+.phui-document-view .phui-header-shell {
+  padding: 0 12px;
+}
+
 .phui-document-content {
   border-radius: 3px;
 }

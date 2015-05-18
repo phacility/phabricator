@@ -12,18 +12,9 @@
   overflow-x: auto;
 }
 
-.phabricator-feed-frame .phui-action-header-title {
-  font-size: 16px;
-  margin-bottom: 5px;
-}
-
 .device-desktop .phabricator-feed-frame {
   max-width: 600px;
   margin: 16px;
-}
-
-.phabricator-feed-frame .phui-action-header {
-  padding: 0;
 }
 
 .phabricator-feed-story-date-separator {
@@ -59,36 +50,36 @@
   max-width: none;
 }
 
-.dashboard-pane .phabricator-feed-frame .phui-action-header {
-  background: #f7f7f7;
+.dashboard-pane .phabricator-feed-frame .phui-header-shell {
+  padding: 0;
 }
 
-.dashboard-pane .phabricator-feed-frame .phui-action-header-title {
+.dashboard-pane .phabricator-feed-frame .phui-header-view {
   font-size: 13px;
-  margin-left: 12px;
+  margin-left: 4px;
   padding: 8px 0;
   margin-bottom: 0;
   color: {$bluetext};
-  font-weight: bold;
+  font-weight: 500;
 }
 
 .dashboard-pane .phabricator-feed-frame .phui-feed-story {
   border: none;
   border-bottom: 1px solid {$thinblueborder};
-  margin: 0 8px;
+  margin: 0;
 }
 
 .dashboard-pane .phabricator-feed-frame .phui-feed-story-head {
-  padding: 12px 0;
+  padding: 12px 4px;
 }
 
 .dashboard-pane .phabricator-feed-frame .phui-feed-story-body {
-  margin: 12px 0;
+  margin: 12px 4px;
 }
 
 .dashboard-pane .phabricator-feed-frame .phui-feed-story-foot {
   background: #fff;
-  padding: 12px 0;
+  padding: 12px 4px;
 }
 
 .dashboard-pane .phabricator-feed-frame

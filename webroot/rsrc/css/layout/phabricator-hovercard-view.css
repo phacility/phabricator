@@ -29,14 +29,14 @@
   border-bottom: 1px solid {$thinblueborder};
 }
 
-.phabricator-hovercard-head .phui-action-header {
-  border-top-right-radius: 3px;
-  border-top-left-radius: 3px;
+.phabricator-hovercard-head .phui-header-view {
+  padding: 8px;
 }
 
 .phabricator-hovercard-head .phui-tag-type-state {
-  color: {$bluetext};
+  color: {$darkbluetext};
   text-shadow: none;
+  font-weight: normal;
 }
 
 .phabricator-hovercard-tags {

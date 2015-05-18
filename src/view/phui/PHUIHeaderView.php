@@ -11,6 +11,7 @@ final class PHUIHeaderView extends AphrontTagView {
   private $imageURL = null;
   private $subheader;
   private $headerColor;
+  private $headerIcon;
   private $noBackground;
   private $bleedHeader;
   private $properties = array();
@@ -62,6 +63,11 @@ final class PHUIHeaderView extends AphrontTagView {
 
   public function setHeaderColor($color) {
     $this->headerColor = $color;
+    return $this;
+  }
+
+  public function setHeaderIcon($icon) {
+    $this->headerIcon = $icon;
     return $this;
   }
 
@@ -148,8 +154,7 @@ final class PHUIHeaderView extends AphrontTagView {
     }
 
     if ($this->headerColor) {
-      $classes[] = 'sprite-gradient';
-      $classes[] = 'gradient-'.$this->headerColor.'-header';
+      $classes[] = 'phui-header-'.$this->headerColor;
     }
 
     if ($this->properties || $this->policyObject || $this->subheader) {
@@ -205,15 +210,25 @@ final class PHUIHeaderView extends AphrontTagView {
         $this->buttonBar);
     }
 
-    if ($this->actionIcons) {
+    if ($this->actionIcons || $this->tags) {
       $action_list = array();
-      foreach ($this->actionIcons as $icon) {
+      if ($this->actionIcons) {
+        foreach ($this->actionIcons as $icon) {
+          $action_list[] = phutil_tag(
+            'li',
+            array(
+              'class' => 'phui-header-list-icon',
+            ),
+            $icon);
+        }
+      }
+      if ($this->tags) {
         $action_list[] = phutil_tag(
           'li',
           array(
-            'class' => 'phui-header-list-icon',
+            'class' => 'phui-header-list-icon phui-header-tags',
           ),
-          $icon);
+          array_interleave(' ', $this->tags));
       }
       $header[] = phutil_tag(
         'ul',
@@ -223,6 +238,11 @@ final class PHUIHeaderView extends AphrontTagView {
           $action_list);
     }
 
+    if ($this->headerIcon) {
+      $icon = id(new PHUIIconView())
+        ->setIconFont($this->headerIcon);
+      $header[] = $icon;
+    }
     $header[] = $this->header;
 
     if ($this->objectName) {
@@ -235,16 +255,6 @@ final class PHUIHeaderView extends AphrontTagView {
           ),
           $this->objectName),
         ' ');
-    }
-
-    if ($this->tags) {
-      $header[] = ' ';
-      $header[] = phutil_tag(
-        'span',
-        array(
-          'class' => 'phui-header-tags',
-        ),
-        array_interleave(' ', $this->tags));
     }
 
     if ($this->subheader) {

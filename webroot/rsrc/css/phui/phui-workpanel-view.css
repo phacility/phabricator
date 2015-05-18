@@ -2,14 +2,23 @@
  * @provides phui-workpanel-view-css
  */
 
-.phui-workpanel-view .phui-action-header {
-  border: 1px solid #b3b5b6;
+.phui-workpanel-view .phui-header-shell {
+  border: 1px solid {$lightblueborder};
   border-top-left-radius: 3px;
   border-top-right-radius: 3px;
+  background-color: #fff;
 }
 
-.phui-workpanel-view .phui-action-header .phui-action-header-title {
-  padding: 8px 0;
+.phui-workpanel-view .phui-header-shell .phui-header-view {
+  padding: 8px;
+  font-size: 14px;
+}
+
+.phui-workpanel-view .phui-header-shell .phui-header-subheader {
+  padding: 0 4px;
+  margin: 0;
+  display: inline-block;
+  color: {$lightgreytext};
 }
 
 .device-phone .phui-workboard-view {
