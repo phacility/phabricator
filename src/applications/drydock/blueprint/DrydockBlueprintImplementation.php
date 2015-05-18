@@ -353,7 +353,7 @@ abstract class DrydockBlueprintImplementation {
   public static function writeLog(
     DrydockResource $resource = null,
     DrydockLease $lease = null,
-    $message) {
+    $message = null) {
 
     $log = id(new DrydockLog())
       ->setEpoch(time())

@@ -78,9 +78,9 @@ final class PhragmentFragment extends PhragmentDAO
   public static function createFromFile(
     PhabricatorUser $viewer,
     PhabricatorFile $file = null,
-    $path,
-    $view_policy,
-    $edit_policy) {
+    $path = null,
+    $view_policy = null,
+    $edit_policy = null) {
 
     $fragment = id(new PhragmentFragment());
     $fragment->setPath($path);
