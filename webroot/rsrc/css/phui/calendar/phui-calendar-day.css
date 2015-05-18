@@ -2,6 +2,14 @@
  * @provides phui-calendar-day-css
  */
 
+.device .phui-day-view-column {
+  display: none;
+}
+
+.device .phui-calendar-list-container {
+  width: 100%;
+}
+
 .phui-calendar-day-view {
   overflow: scroll;
   width: 100%;

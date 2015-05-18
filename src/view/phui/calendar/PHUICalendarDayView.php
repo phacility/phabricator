@@ -185,7 +185,7 @@ final class PHUICalendarDayView extends AphrontView {
 
     $layout = id(new AphrontMultiColumnView())
       ->addColumn($sidebar, 'third')
-      ->addColumn($table_box, 'thirds')
+      ->addColumn($table_box, 'thirds phui-day-view-column')
       ->setFluidLayout(true)
       ->setGutter(AphrontMultiColumnView::GUTTER_MEDIUM);
 
