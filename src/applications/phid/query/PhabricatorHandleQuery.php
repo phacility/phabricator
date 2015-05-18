@@ -3,11 +3,24 @@
 final class PhabricatorHandleQuery
   extends PhabricatorCursorPagedPolicyAwareQuery {
 
+  private $objectCapabilities;
   private $phids = array();
 
   public function withPHIDs(array $phids) {
     $this->phids = $phids;
     return $this;
+  }
+
+  public function requireObjectCapabilities(array $capabilities) {
+    $this->objectCapabilities = $capabilities;
+    return $this;
+  }
+
+  protected function getRequiredObjectCapabilities() {
+    if ($this->objectCapabilities) {
+      return $this->objectCapabilities;
+    }
+    return $this->getRequiredCapabilities();
   }
 
   protected function loadPage() {
@@ -20,6 +33,7 @@ final class PhabricatorHandleQuery
 
     $object_query = id(new PhabricatorObjectQuery())
       ->withPHIDs($phids)
+      ->requireCapabilities($this->getRequiredObjectCapabilities())
       ->setViewer($this->getViewer());
 
     $objects = $object_query->execute();

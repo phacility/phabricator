@@ -3,38 +3,22 @@
 final class PhabricatorSearchAttachController
   extends PhabricatorSearchBaseController {
 
-  private $phid;
-  private $type;
-  private $action;
-
-  const ACTION_ATTACH       = 'attach';
-  const ACTION_MERGE        = 'merge';
-  const ACTION_DEPENDENCIES = 'dependencies';
-  const ACTION_BLOCKS       = 'blocks';
-  const ACTION_EDGE         = 'edge';
-
-  public function willProcessRequest(array $data) {
-    $this->phid = $data['phid'];
-    $this->type = $data['type'];
-    $this->action = idx($data, 'action', self::ACTION_ATTACH);
-  }
-
-  public function processRequest() {
-
-    $request = $this->getRequest();
-    $user = $request->getUser();
+  public function handleRequest(AphrontRequest $request) {
+    $user        = $request->getUser();
+    $phid        = $request->getURIData('phid');
+    $attach_type = $request->getURIData('type');
+    $action      = $request->getURIData('action', self::ACTION_ATTACH);
 
     $handle = id(new PhabricatorHandleQuery())
       ->setViewer($user)
-      ->withPHIDs(array($this->phid))
+      ->withPHIDs(array($phid))
       ->executeOne();
 
     $object_type = $handle->getType();
-    $attach_type = $this->type;
 
     $object = id(new PhabricatorObjectQuery())
       ->setViewer($user)
-      ->withPHIDs(array($this->phid))
+      ->withPHIDs(array($phid))
       ->executeOne();
 
     if (!$object) {
@@ -42,7 +26,7 @@ final class PhabricatorSearchAttachController
     }
 
     $edge_type = null;
-    switch ($this->action) {
+    switch ($action) {
       case self::ACTION_EDGE:
       case self::ACTION_DEPENDENCIES:
       case self::ACTION_BLOCKS:
@@ -66,7 +50,7 @@ final class PhabricatorSearchAttachController
         }
 
         $old_phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
-          $this->phid,
+          $phid,
           $edge_type);
         $add_phids = $phids;
         $rem_phids = array_diff($old_phids, $add_phids);
@@ -100,7 +84,7 @@ final class PhabricatorSearchAttachController
     } else {
       if ($edge_type) {
         $phids = PhabricatorEdgeQuery::loadDestinationPHIDs(
-          $this->phid,
+          $phid,
           $edge_type);
       } else {
         // This is a merge.
@@ -108,7 +92,7 @@ final class PhabricatorSearchAttachController
       }
     }
 
-    $strings = $this->getStrings();
+    $strings = $this->getStrings($attach_type, $action);
 
     $handles = $this->loadViewerHandles($phids);
 
@@ -116,11 +100,11 @@ final class PhabricatorSearchAttachController
     $obj_dialog
       ->setUser($user)
       ->setHandles($handles)
-      ->setFilters($this->getFilters($strings))
+      ->setFilters($this->getFilters($strings, $attach_type))
       ->setSelectedFilter($strings['selected'])
-      ->setExcluded($this->phid)
+      ->setExcluded($phid)
       ->setCancelURI($handle->getURI())
-      ->setSearchURI('/search/select/'.$attach_type.'/')
+      ->setSearchURI('/search/select/'.$attach_type.'/'.$action.'/')
       ->setTitle($strings['title'])
       ->setHeader($strings['header'])
       ->setButtonText($strings['button'])
@@ -148,6 +132,11 @@ final class PhabricatorSearchAttachController
 
     $targets = id(new ManiphestTaskQuery())
       ->setViewer($user)
+      ->requireCapabilities(
+        array(
+          PhabricatorPolicyCapability::CAN_VIEW,
+          PhabricatorPolicyCapability::CAN_EDIT,
+        ))
       ->withPHIDs(array_keys($phids))
       ->needSubscriberPHIDs(true)
       ->needProjectPHIDs(true)
@@ -208,8 +197,8 @@ final class PhabricatorSearchAttachController
     return $response;
   }
 
-  private function getStrings() {
-    switch ($this->type) {
+  private function getStrings($attach_type, $action) {
+    switch ($attach_type) {
       case DifferentialRevisionPHIDType::TYPECONST:
         $noun = 'Revisions';
         $selected = 'created';
@@ -228,7 +217,7 @@ final class PhabricatorSearchAttachController
         break;
     }
 
-    switch ($this->action) {
+    switch ($action) {
       case self::ACTION_EDGE:
       case self::ACTION_ATTACH:
         $dialog_title = "Manage Attached {$noun}";
@@ -268,8 +257,8 @@ final class PhabricatorSearchAttachController
     );
   }
 
-  private function getFilters(array $strings) {
-    if ($this->type == PholioMockPHIDType::TYPECONST) {
+  private function getFilters(array $strings, $attach_type) {
+    if ($attach_type == PholioMockPHIDType::TYPECONST) {
       $filters = array(
         'created' => 'Created By Me',
         'all' => 'All '.$strings['target_plural_noun'],
