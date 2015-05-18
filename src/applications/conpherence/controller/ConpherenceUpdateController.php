@@ -528,14 +528,14 @@ final class ConpherenceUpdateController
             ->setUser($this->getRequest()->getUser())
             ->setConpherence($conpherence)
             ->setUpdateURI($widget_uri);
-          $file_widget = $file_widget->render();
+          $file_widget = hsprintf('%s', $file_widget->render());
           break;
         case ConpherenceUpdateActions::ADD_PERSON:
           $people_widget = id(new ConpherencePeopleWidgetView())
             ->setUser($user)
             ->setConpherence($conpherence)
             ->setUpdateURI($widget_uri);
-          $people_widget = $people_widget->render();
+          $people_widget = hsprintf('%s', $people_widget->render());
           break;
         case ConpherenceUpdateActions::REMOVE_PERSON:
         case ConpherenceUpdateActions::NOTIFICATIONS:
