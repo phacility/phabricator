@@ -43,11 +43,15 @@
 }
 
 .phui-calendar-list-title {
-  width: 200px;
-  display: inline-block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+ width: 200px;
+ display: inline-block;
+ overflow: hidden;
+ text-overflow: ellipsis;
+ white-space: nowrap;
+}
+
+.phui-calendar-viewer-invited .phui-calendar-list-title {
+  font-weight: bold;
 }
 
 .phui-calendar-list-item .phui-calendar-list-time {

@@ -72,16 +72,23 @@ final class PHUICalendarListView extends AphrontTagView {
         $class = $class.' all-day';
       }
 
-      $singletons[] = phutil_tag(
-        'li',
+      $content = phutil_tag(
+        'a',
         array(
-          'class' => $class,
-          ),
+          'href' => '/E'.$event->getEventID(),
+        ),
         array(
           $dot,
           $time,
           $title,
         ));
+
+      $singletons[] = phutil_tag(
+        'li',
+        array(
+          'class' => $class,
+        ),
+        $content);
     }
 
     if (empty($singletons)) {
@@ -147,11 +154,10 @@ final class PHUICalendarListView extends AphrontTagView {
     $class = 'phui-calendar-item';
 
     $anchor = javelin_tag(
-      'a',
+      'span',
       array(
         'sigil' => 'has-tooltip',
         'class' => $class,
-        'href' => '/E'.$event->getEventID(),
         'meta'  => array(
           'tip'  => $tip,
           'size' => 200,

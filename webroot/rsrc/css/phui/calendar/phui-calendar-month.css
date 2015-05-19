@@ -151,6 +151,7 @@ table.phui-calendar-view td.phui-calendar-date-number-container {
 
 .phui-calendar-view .phui-calendar-list {
   padding: 1px;
+  width: auto;
 }
 
 .phui-calendar-list-item.all-day span {
@@ -160,8 +161,6 @@ table.phui-calendar-view td.phui-calendar-date-number-container {
 
 .phui-calendar-view .phui-calendar-list li.phui-calendar-list-item.all-day {
   height: 20px;
-  margin: 0;
-  padding: 4px 4px 0px 4px;
   background-color: {$darkgreybackground};
   display: block;
   float: none;
@@ -173,21 +172,24 @@ li.phui-calendar-viewer-invited.all-day {
   background-color: {$lightgreen};
 }
 
-li.phui-calendar-list-item.all-day:first-child {
-  margin-top: 0;
-}
-
 .phui-calendar-view .phui-calendar-list li {
-  margin: 0 8px;
+  padding: 0px 4px;
 }
 
-.phui-calendar-view .phui-calendar-list li:first-child {
-  margin-top: 8px;
+.phui-calendar-view .phui-calendar-list li a {
+  display: block;
+  overflow: hidden;
+  position: relative;
+}
+
+.phui-calendar-view li.phui-calendar-list-item {
+  white-space: nowrap;
+  width: auto;
 }
 
 .phui-calendar-view .phui-calendar-list-dot {
   position: relative;
-  display: inline-block;
+  display: block;
   float: left;
   width: 3px;
   height: 3px;
@@ -198,37 +200,18 @@ li.phui-calendar-list-item.all-day:first-child {
   display: none;
 }
 
-.phui-calendar-view li.phui-calendar-list-item {
-  padding: 0;
-}
-
 .phui-calendar-view li.phui-calendar-list-item .phui-calendar-list-title {
-  position: relative;
-  /*float: right;*/
-  display: inline-block;
-  width: 120px;
-  padding: 0;
-  line-height: 18px;
-  vertical-align: center;
-}
-
-li.phui-calendar-list-item .phui-calendar-list-title a {
-  padding: 0;
-  vertical-align: top;
-  line-height: 16px;
-  overflow: hidden;
+  width: auto;
+  position: absolute;
+  right: 0;
+  left: 60px;
   text-overflow: ellipsis;
+  overflow: hidden;
   white-space: nowrap;
 }
 
-li.phui-calendar-list-item.all-day .phui-calendar-list-title a{
-  color: {$greytext};
-  margin: 0;
-  padding: 0;
-}
-
-li.phui-calendar-viewer-invited.all-day .phui-calendar-list-title a{
-  color: {$green};
+li.all-day {
+  line-height: 18px;
 }
 
 .phui-calendar-view li.phui-calendar-list-item .phui-calendar-list-time {
@@ -240,8 +223,4 @@ li.phui-calendar-viewer-invited.all-day .phui-calendar-list-title a{
   width: 60px;
   color: {$lightgreytext};
   text-align: left;
-}
-
-li.phui-calendar-list-item.all-day .phui-calendar-list-time{
-  margin: 0 0 0 4px;
 }
