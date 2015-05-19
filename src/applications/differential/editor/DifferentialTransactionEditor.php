@@ -195,7 +195,6 @@ final class DifferentialTransactionEditor
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         $object->setEditPolicy($xaction->getNewValue());
         return;
-      case PhabricatorTransactions::TYPE_COMMENT:
       case DifferentialTransaction::TYPE_INLINE:
         return;
       case DifferentialTransaction::TYPE_UPDATE:
@@ -577,7 +576,6 @@ final class DifferentialTransactionEditor
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         return;
-      case PhabricatorTransactions::TYPE_COMMENT:
       case DifferentialTransaction::TYPE_ACTION:
         return;
       case DifferentialTransaction::TYPE_INLINE:

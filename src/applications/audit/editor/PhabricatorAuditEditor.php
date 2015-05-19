@@ -115,7 +115,6 @@ final class PhabricatorAuditEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_COMMENT:
       case PhabricatorAuditActionConstants::ACTION:
       case PhabricatorAuditActionConstants::INLINE:
       case PhabricatorAuditActionConstants::ADD_AUDITORS:
@@ -131,7 +130,6 @@ final class PhabricatorAuditEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_COMMENT:
       case PhabricatorAuditActionConstants::ACTION:
       case PhabricatorAuditTransaction::TYPE_COMMIT:
         return;

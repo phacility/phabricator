@@ -108,7 +108,6 @@ final class PhabricatorCalendarEventEditor
         $object->setIsAllDay((int)$xaction->getNewValue());
         return;
       case PhabricatorCalendarEventTransaction::TYPE_INVITE:
-      case PhabricatorTransactions::TYPE_COMMENT:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         return;
@@ -149,7 +148,6 @@ final class PhabricatorCalendarEventEditor
         }
         $object->attachInvitees($invitees);
         return;
-      case PhabricatorTransactions::TYPE_COMMENT:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         return;

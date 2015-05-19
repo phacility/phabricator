@@ -247,9 +247,6 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
 
     $make_author_recent_participant = true;
     switch ($xaction->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_COMMENT:
-        $object->setMessageCount((int)$object->getMessageCount() + 1);
-        break;
       case ConpherenceTransactionType::TYPE_TITLE:
         $object->setTitle($xaction->getNewValue());
         break;
@@ -294,6 +291,19 @@ final class ConpherenceEditor extends PhabricatorApplicationTransactionEditor {
     if ($make_author_recent_participant) {
       $this->makeAuthorMostRecentParticipant($object, $xaction);
     }
+  }
+
+  protected function applyBuiltinInternalTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_COMMENT:
+        $object->setMessageCount((int)$object->getMessageCount() + 1);
+        break;
+    }
+
+    return parent::applyBuiltinInternalTransaction($object, $xaction);
   }
 
   private function makeAuthorMostRecentParticipant(

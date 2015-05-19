@@ -88,8 +88,6 @@ final class PhabricatorPasteEditor
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         $object->setEditPolicy($xaction->getNewValue());
         return;
-      case PhabricatorTransactions::TYPE_COMMENT:
-        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -105,7 +103,6 @@ final class PhabricatorPasteEditor
       case PhabricatorPasteTransaction::TYPE_LANGUAGE:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
-      case PhabricatorTransactions::TYPE_COMMENT:
         return;
     }
 
