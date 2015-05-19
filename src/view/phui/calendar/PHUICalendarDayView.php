@@ -276,7 +276,8 @@ final class PHUICalendarDayView extends AphrontView {
       ->addClass('calendar-day-view-sidebar');
 
     $list = id(new PHUICalendarListView())
-      ->setUser($this->user);
+      ->setUser($this->user)
+      ->setView('day');
 
     if (count($events) == 0) {
       $list->showBlankState(true);

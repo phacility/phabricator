@@ -11,6 +11,7 @@ final class AphrontCalendarEventView extends AphrontView {
   private $viewerIsInvited;
   private $uri;
   private $isAllDay;
+  private $icon;
 
   public function setURI($uri) {
     $this->uri = $uri;
@@ -85,6 +86,15 @@ final class AphrontCalendarEventView extends AphrontView {
 
   public function getIsAllDay() {
     return $this->isAllDay;
+  }
+
+  public function setIcon($icon) {
+    $this->icon = $icon;
+    return $this;
+  }
+
+  public function getIcon() {
+    return $this->icon;
   }
 
 

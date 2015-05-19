@@ -4,6 +4,16 @@ final class PHUICalendarListView extends AphrontTagView {
 
   private $events = array();
   private $blankState;
+  private $view;
+
+  private function getView() {
+    return $this->view;
+  }
+
+  public function setView($view) {
+    $this->view = $view;
+    return $this;
+  }
 
   public function addEvent(AphrontCalendarEventView $event) {
     $this->events[] = $event;
@@ -37,26 +47,28 @@ final class PHUICalendarListView extends AphrontTagView {
 
       if ($event->getIsAllDay()) {
         $timelabel = pht('All Day');
-        $dot = null;
       } else {
         $timelabel = phabricator_time(
           $event->getEpochStart(),
           $this->getUser());
-
-        $dot = phutil_tag(
-          'span',
-          array(
-            'class' => 'phui-calendar-list-dot',
-          ),
-          '');
       }
+
+      if ($event->getViewerIsInvited()) {
+        $icon_color = 'green';
+      } else {
+        $icon_color = null;
+      }
+
+      $dot = id(new PHUIIconView())
+        ->setIconFont($event->getIcon(), $icon_color)
+        ->addClass('phui-calendar-list-item-icon');
 
       $title = phutil_tag(
         'span',
         array(
           'class' => 'phui-calendar-list-title',
         ),
-        $this->renderEventLink($event, $allday));
+        $this->getEventTitle($event, $allday));
       $time = phutil_tag(
         'span',
         array(
@@ -72,10 +84,18 @@ final class PHUICalendarListView extends AphrontTagView {
         $class = $class.' all-day';
       }
 
-      $content = phutil_tag(
+      $tip = $this->getEventTooltip($event);
+      $tip_align = ($this->getView() == 'day') ? 'E' : 'N';
+      $content = javelin_tag(
         'a',
         array(
           'href' => '/E'.$event->getEventID(),
+          'sigil' => 'has-tooltip',
+          'meta'  => array(
+            'tip'  => $tip,
+            'size' => 200,
+            'align' => $tip_align,
+          ),
         ),
         array(
           $dot,
@@ -110,8 +130,17 @@ final class PHUICalendarListView extends AphrontTagView {
     return $list;
   }
 
-  private function renderEventLink($event) {
+  private function getEventTitle($event) {
+    $class = 'phui-calendar-item';
+    return phutil_tag(
+      'span',
+      array(
+        'class' => $class,
+      ),
+      $event->getName());
+  }
 
+  private function getEventTooltip(AphrontCalendarEventView $event) {
     Javelin::initBehavior('phabricator-tooltips');
 
     $start = id(AphrontFormDateControlValue::newFromEpoch(
@@ -145,27 +174,7 @@ final class PHUICalendarListView extends AphrontTagView {
           $end->getValueAsFormat('M j, Y, g:i A'));
       }
     }
-
-    $description = $event->getDescription();
-    if (strlen($description) == 0) {
-      $description = pht('(%s)', $event->getName());
-    }
-
-    $class = 'phui-calendar-item';
-
-    $anchor = javelin_tag(
-      'span',
-      array(
-        'sigil' => 'has-tooltip',
-        'class' => $class,
-        'meta'  => array(
-          'tip'  => $tip,
-          'size' => 200,
-        ),
-      ),
-      $event->getName());
-
-    return $anchor;
+    return $tip;
   }
 
   public function getIsViewerInvitedOnList() {
