@@ -27,6 +27,7 @@ final class PhabricatorConfigIssueListController
     if ($important) {
       $setup_issues[] = id(new PHUIObjectBoxView())
         ->setHeaderText(pht('Important Setup Issues'))
+        ->setColor(PHUIObjectBoxView::COLOR_RED)
         ->appendChild($important);
     }
 

@@ -3,7 +3,7 @@
 final class PHUIObjectBoxView extends AphrontView {
 
   private $headerText;
-  private $headerColor;
+  private $color;
   private $formErrors = null;
   private $formSaved = false;
   private $infoView;
@@ -19,6 +19,11 @@ final class PHUIObjectBoxView extends AphrontView {
 
   private $tabs = array();
   private $propertyLists = array();
+
+  const COLOR_RED = 'red';
+  const COLOR_BLUE = 'blue';
+  const COLOR_GREEN = 'green';
+  const COLOR_YELLOW = 'yellow';
 
   public function addSigil($sigil) {
     $this->sigils[] = $sigil;
@@ -87,8 +92,8 @@ final class PHUIObjectBoxView extends AphrontView {
     return $this;
   }
 
-  public function setHeaderColor($color) {
-    $this->headerColor = $color;
+  public function setColor($color) {
+    $this->color = $color;
     return $this;
   }
 
@@ -154,19 +159,10 @@ final class PHUIObjectBoxView extends AphrontView {
 
     require_celerity_resource('phui-object-box-css');
 
-    $header_color = null;
-    if ($this->headerColor) {
-      $header_color = $this->headerColor;
-    }
-
-    $header = null;
-    if ($this->header) {
-      $header = $this->header;
-      $header->setHeaderColor($header_color);
-    } else if ($this->headerText) {
+    $header = $this->header;
+    if ($this->headerText) {
       $header = id(new PHUIHeaderView())
-        ->setHeader($this->headerText)
-        ->setHeaderColor($header_color);
+        ->setHeader($this->headerText);
     }
 
     if ($this->actionListID) {
@@ -293,6 +289,10 @@ final class PHUIObjectBoxView extends AphrontView {
       ->addMargin(PHUI::MARGIN_LARGE_RIGHT)
       ->addClass('phui-object-box');
 
+    if ($this->color) {
+      $content->addClass('phui-object-box-'.$this->color);
+    }
+
     if ($this->tabs) {
       $content->addSigil('phui-object-box');
       $content->setMetadata(
@@ -304,8 +304,6 @@ final class PHUIObjectBoxView extends AphrontView {
     if ($this->flush) {
       $content->addClass('phui-object-box-flush');
     }
-
-    $content->addClass('phui-object-box-'.$header_color);
 
     foreach ($this->sigils as $sigil) {
       $content->addSigil($sigil);

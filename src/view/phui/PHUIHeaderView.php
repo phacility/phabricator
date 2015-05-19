@@ -10,7 +10,6 @@ final class PHUIHeaderView extends AphrontTagView {
   private $image;
   private $imageURL = null;
   private $subheader;
-  private $headerColor;
   private $headerIcon;
   private $noBackground;
   private $bleedHeader;
@@ -58,11 +57,6 @@ final class PHUIHeaderView extends AphrontTagView {
 
   public function setBleedHeader($bleed) {
     $this->bleedHeader = $bleed;
-    return $this;
-  }
-
-  public function setHeaderColor($color) {
-    $this->headerColor = $color;
     return $this;
   }
 
@@ -151,10 +145,6 @@ final class PHUIHeaderView extends AphrontTagView {
 
     if ($this->bleedHeader) {
       $classes[] = 'phui-bleed-header';
-    }
-
-    if ($this->headerColor) {
-      $classes[] = 'phui-header-'.$this->headerColor;
     }
 
     if ($this->properties || $this->policyObject || $this->subheader) {

@@ -33,40 +33,42 @@ div.phui-object-box.phui-object-box-flush {
   margin: 8px 8px 0 8px;
 }
 
-.phui-box-border.phui-object-box-lightgreen {
-  border: 1px solid {$lightgreenborder};
-  border-bottom: 1px solid {$greenborder};
+/* - Object Box Colors ------------------------------------------------------ */
+
+.phui-box-border.phui-object-box-green {
+  border: 1px solid {$green};
 }
 
-.phui-box-border.phui-object-box-lightgreen .phui-header-shell {
-  border-bottom: 1px solid {$lightgreenborder};
+.phui-box-border.phui-object-box-green .phui-header-view {
+  color: {$green};
 }
 
-.phui-box-border.phui-object-box-lightblue {
-  border: 1px solid {$lightblueborder};
-  border-bottom: 1px solid {$blueborder};
+.phui-box-border.phui-object-box-green .phui-header-shell {
+  border-bottom-color: {$lightgreen};
 }
 
-.phui-box-border.phui-object-box-lightblue .phui-header-shell {
-  border-bottom: 1px solid {$lightblueborder};
+.phui-box-border.phui-object-box-blue {
+  border: 1px solid {$blue};
 }
 
-.phui-box-border.phui-object-box-lightred {
-  border: 1px solid {$lightredborder};
-  border-bottom: 1px solid {$redborder};
+.phui-box-border.phui-object-box-blue .phui-header-view {
+  color: {$blue};
 }
 
-.phui-box-border.phui-object-box-lightred .phui-header-shell {
-  border-bottom: 1px solid {$lightredborder};
+.phui-box-border.phui-object-box-blue .phui-header-shell {
+  border-bottom-color: {$lightblue};
 }
 
-.phui-box-border.phui-object-box-lightviolet {
-  border: 1px solid {$lightvioletborder};
-  border-bottom: 1px solid {$violetborder};
+.phui-box-border.phui-object-box-red {
+  border: 1px solid {$red};
 }
 
-.phui-box-border.phui-object-box-lightviolet .phui-header-shell {
-  border-bottom: 1px solid {$lightvioletborder};
+.phui-box-border.phui-object-box-red .phui-header-view {
+  color: {$red};
+}
+
+.phui-box-border.phui-object-box-red .phui-header-shell {
+  border-bottom-color: {$lightred};
 }
 
 /* - Double Object Box Override --------------------------------------------- */

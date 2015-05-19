@@ -98,11 +98,6 @@
   font-size: 15px;
 }
 
-.phui-document-content h1.phui-header-view {
-  font-weight: normal;
-  color: #000;
-}
-
 .phui-document-content .phui-property-list-container {
   border-color: {$thinblueborder};
 }
