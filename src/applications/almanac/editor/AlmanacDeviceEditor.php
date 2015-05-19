@@ -57,7 +57,6 @@ final class AlmanacDeviceEditor
       case AlmanacDeviceTransaction::TYPE_INTERFACE:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
-      case PhabricatorTransactions::TYPE_EDGE:
         return;
     }
 
@@ -72,7 +71,6 @@ final class AlmanacDeviceEditor
       case AlmanacDeviceTransaction::TYPE_NAME:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
-      case PhabricatorTransactions::TYPE_EDGE:
         return;
       case AlmanacDeviceTransaction::TYPE_INTERFACE:
         $old = $xaction->getOldValue();

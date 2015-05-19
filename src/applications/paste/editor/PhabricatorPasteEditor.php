@@ -90,7 +90,6 @@ final class PhabricatorPasteEditor
         return;
       case PhabricatorTransactions::TYPE_COMMENT:
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
-      case PhabricatorTransactions::TYPE_EDGE:
         return;
     }
 
@@ -109,7 +108,6 @@ final class PhabricatorPasteEditor
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_COMMENT:
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
-      case PhabricatorTransactions::TYPE_EDGE:
         return;
     }
 

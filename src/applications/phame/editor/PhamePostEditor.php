@@ -64,8 +64,6 @@ final class PhamePostEditor
         return $object->setBody($xaction->getNewValue());
       case PhamePostTransaction::TYPE_COMMENTS_WIDGET:
         return $object->setCommentsWidget($xaction->getNewValue());
-      case PhabricatorTransactions::TYPE_EDGE:
-        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -80,7 +78,6 @@ final class PhamePostEditor
       case PhamePostTransaction::TYPE_PHAME_TITLE:
       case PhamePostTransaction::TYPE_BODY:
       case PhamePostTransaction::TYPE_COMMENTS_WIDGET:
-      case PhabricatorTransactions::TYPE_EDGE:
         return;
     }
 

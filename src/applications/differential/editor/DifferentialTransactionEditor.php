@@ -199,8 +199,6 @@ final class DifferentialTransactionEditor
       case PhabricatorTransactions::TYPE_COMMENT:
       case DifferentialTransaction::TYPE_INLINE:
         return;
-      case PhabricatorTransactions::TYPE_EDGE:
-        return;
       case DifferentialTransaction::TYPE_UPDATE:
         if (!$this->getIsCloseByCommit()) {
           switch ($object->getStatus()) {
@@ -581,7 +579,6 @@ final class DifferentialTransactionEditor
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         return;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
-      case PhabricatorTransactions::TYPE_EDGE:
       case PhabricatorTransactions::TYPE_COMMENT:
       case DifferentialTransaction::TYPE_ACTION:
         return;

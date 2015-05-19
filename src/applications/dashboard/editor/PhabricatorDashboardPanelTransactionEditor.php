@@ -68,8 +68,6 @@ final class PhabricatorDashboardPanelTransactionEditor
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
         $object->setEditPolicy($xaction->getNewValue());
         return;
-      case PhabricatorTransactions::TYPE_EDGE:
-        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -84,7 +82,6 @@ final class PhabricatorDashboardPanelTransactionEditor
       case PhabricatorDashboardPanelTransaction::TYPE_ARCHIVE:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
-      case PhabricatorTransactions::TYPE_EDGE:
         return;
     }
 

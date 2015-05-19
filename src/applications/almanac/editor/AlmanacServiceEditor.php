@@ -63,7 +63,6 @@ final class AlmanacServiceEditor
         return;
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
-      case PhabricatorTransactions::TYPE_EDGE:
         return;
     }
 
@@ -78,7 +77,6 @@ final class AlmanacServiceEditor
       case AlmanacServiceTransaction::TYPE_NAME:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
-      case PhabricatorTransactions::TYPE_EDGE:
         return;
       case AlmanacServiceTransaction::TYPE_LOCK:
         $service = id(new AlmanacServiceQuery())

@@ -103,7 +103,6 @@ final class PhabricatorProjectTransactionEditor
         $object->setIsMembershipLocked($xaction->getNewValue());
         return;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
-      case PhabricatorTransactions::TYPE_EDGE:
         return;
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
         $object->setViewPolicy($xaction->getNewValue());
@@ -170,6 +169,20 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorProjectTransaction::TYPE_COLOR:
       case PhabricatorProjectTransaction::TYPE_LOCKED:
         return;
+     }
+
+    return parent::applyCustomExternalTransaction($object, $xaction);
+  }
+
+  protected function applyBuiltinExternalTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    $old = $xaction->getOldValue();
+    $new = $xaction->getNewValue();
+
+    switch ($xaction->getTransactionType()) {
+
       case PhabricatorTransactions::TYPE_EDGE:
         $edge_type = $xaction->getMetadataValue('edge:type');
         switch ($edge_type) {
@@ -225,7 +238,7 @@ final class PhabricatorProjectTransactionEditor
         return;
     }
 
-    return parent::applyCustomExternalTransaction($object, $xaction);
+    return parent::applyBuiltinExternalTransaction($object, $xaction);
   }
 
   protected function validateTransaction(

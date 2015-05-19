@@ -402,6 +402,7 @@ abstract class PhabricatorApplicationTransactionEditor
         $field = $this->getCustomFieldForTransaction($object, $xaction);
         return $field->applyApplicationTransactionInternalEffects($xaction);
       case PhabricatorTransactions::TYPE_INLINESTATE:
+      case PhabricatorTransactions::TYPE_EDGE:
         return $this->applyBuiltinInternalTransaction($object, $xaction);
     }
 
@@ -493,7 +494,7 @@ abstract class PhabricatorApplicationTransactionEditor
         }
 
         $editor->save();
-        break;
+        return $this->applyBuiltinExternalTransaction($object, $xaction);
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $field = $this->getCustomFieldForTransaction($object, $xaction);
         return $field->applyApplicationTransactionExternalEffects($xaction);
