@@ -58,7 +58,7 @@
   text-shadow: none;
 
   border-radius: 0;
-  color: #18559D;
+  color: {$anchor};
   font: inherit;
   display: inline;
   min-width: 0;

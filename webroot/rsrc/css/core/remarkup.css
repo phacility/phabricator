@@ -62,7 +62,7 @@
 /* NOTE: You can currently produce this with [[link | `name`]]. Restore the
    link color. */
 .phabricator-remarkup a tt.remarkup-monospaced {
-  color: #18559d;
+  color: {$anchor};
 }
 
 .phabricator-remarkup ul.remarkup-list {

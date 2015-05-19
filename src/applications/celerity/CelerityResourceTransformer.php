@@ -178,6 +178,9 @@ final class CelerityResourceTransformer {
       // Drop Shadow
       'dropshadow' => '0 1px 6px rgba(0, 0, 0, .25)',
 
+      // Anchors
+      'anchor' => '#136CB2',
+
       // Base Colors
       'red'           => '#c0392b',
       'lightred'      => '#f4dddb',

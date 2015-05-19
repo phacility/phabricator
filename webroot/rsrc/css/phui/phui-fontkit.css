@@ -89,13 +89,6 @@
   font-size: 12px;
 }
 
-.phui-font-source-sans a.atom-ref,
-.phui-font-source-sans a.remarkup-link,
-.phui-font-source-sans a.phriction-link,
-.phui-font-source-sans a.phabricator-remarkup-embed-layout-link {
-  color: {$blue};
-}
-
 body .phui-font-source-sans
   .phui-header-shell.phui-bleed-header .phui-header-view {
   font-size: 18px;

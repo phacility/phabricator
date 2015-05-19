@@ -86,7 +86,7 @@
 }
 
 .phabricator-notification-header .phabricator-notification-clear-all {
-  color: #18559D;
+  color: {$anchor};
   float: right;
   font-weight: normal;
 }
