@@ -438,61 +438,10 @@ abstract class PhabricatorApplicationTransactionEditor
         $this->subscribers = $subscribers;
         return $this->applyBuiltinExternalTransaction($object, $xaction);
 
-      case PhabricatorTransactions::TYPE_EDGE:
-        if ($this->getIsInverseEdgeEditor()) {
-          // If we're writing an inverse edge transaction, don't actually
-          // do anything. The initiating editor on the other side of the
-          // transaction will take care of the edge writes.
-          break;
-        }
-
-        $old = $xaction->getOldValue();
-        $new = $xaction->getNewValue();
-        $src = $object->getPHID();
-        $const = $xaction->getMetadataValue('edge:type');
-
-        $type = PhabricatorEdgeType::getByConstant($const);
-        if ($type->shouldWriteInverseTransactions()) {
-          $this->applyInverseEdgeTransactions(
-            $object,
-            $xaction,
-            $type->getInverseEdgeConstant());
-        }
-
-        foreach ($new as $dst_phid => $edge) {
-          $new[$dst_phid]['src'] = $src;
-        }
-
-        $editor = new PhabricatorEdgeEditor();
-
-        foreach ($old as $dst_phid => $edge) {
-          if (!empty($new[$dst_phid])) {
-            if ($old[$dst_phid]['data'] === $new[$dst_phid]['data']) {
-              continue;
-            }
-          }
-          $editor->removeEdge($src, $const, $dst_phid);
-        }
-
-        foreach ($new as $dst_phid => $edge) {
-          if (!empty($old[$dst_phid])) {
-            if ($old[$dst_phid]['data'] === $new[$dst_phid]['data']) {
-              continue;
-            }
-          }
-
-          $data = array(
-            'data' => $edge['data'],
-          );
-
-          $editor->addEdge($src, $const, $dst_phid, $data);
-        }
-
-        $editor->save();
-        return $this->applyBuiltinExternalTransaction($object, $xaction);
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $field = $this->getCustomFieldForTransaction($object, $xaction);
         return $field->applyApplicationTransactionExternalEffects($xaction);
+      case PhabricatorTransactions::TYPE_EDGE:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
@@ -547,7 +496,61 @@ abstract class PhabricatorApplicationTransactionEditor
   protected function applyBuiltinExternalTransaction(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
-    return;
+
+    switch ($xaction->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_EDGE:
+        if ($this->getIsInverseEdgeEditor()) {
+          // If we're writing an inverse edge transaction, don't actually
+          // do anything. The initiating editor on the other side of the
+          // transaction will take care of the edge writes.
+          break;
+        }
+
+        $old = $xaction->getOldValue();
+        $new = $xaction->getNewValue();
+        $src = $object->getPHID();
+        $const = $xaction->getMetadataValue('edge:type');
+
+        $type = PhabricatorEdgeType::getByConstant($const);
+        if ($type->shouldWriteInverseTransactions()) {
+          $this->applyInverseEdgeTransactions(
+            $object,
+            $xaction,
+            $type->getInverseEdgeConstant());
+        }
+
+        foreach ($new as $dst_phid => $edge) {
+          $new[$dst_phid]['src'] = $src;
+        }
+
+        $editor = new PhabricatorEdgeEditor();
+
+        foreach ($old as $dst_phid => $edge) {
+          if (!empty($new[$dst_phid])) {
+            if ($old[$dst_phid]['data'] === $new[$dst_phid]['data']) {
+              continue;
+            }
+          }
+          $editor->removeEdge($src, $const, $dst_phid);
+        }
+
+        foreach ($new as $dst_phid => $edge) {
+          if (!empty($old[$dst_phid])) {
+            if ($old[$dst_phid]['data'] === $new[$dst_phid]['data']) {
+              continue;
+            }
+          }
+
+          $data = array(
+            'data' => $edge['data'],
+          );
+
+          $editor->addEdge($src, $const, $dst_phid, $data);
+        }
+
+        $editor->save();
+        break;
+    }
   }
 
   /**
