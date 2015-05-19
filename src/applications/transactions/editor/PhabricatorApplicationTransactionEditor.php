@@ -401,6 +401,7 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $field = $this->getCustomFieldForTransaction($object, $xaction);
         return $field->applyApplicationTransactionInternalEffects($xaction);
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
       case PhabricatorTransactions::TYPE_INLINESTATE:
       case PhabricatorTransactions::TYPE_EDGE:
         return $this->applyBuiltinInternalTransaction($object, $xaction);
@@ -441,8 +442,8 @@ abstract class PhabricatorApplicationTransactionEditor
           $xaction->getOldValue(),
           $xaction->getNewValue()));
         $this->subscribers = $subscribers;
+        return $this->applyBuiltinExternalTransaction($object, $xaction);
 
-        break;
       case PhabricatorTransactions::TYPE_EDGE:
         if ($this->getIsInverseEdgeEditor()) {
           // If we're writing an inverse edge transaction, don't actually
