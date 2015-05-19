@@ -200,7 +200,7 @@ final class PhabricatorAuditEditor
             $state,
             $phid);
         }
-        return;
+        break;
     }
 
     return parent::applyBuiltinExternalTransaction($object, $xaction);

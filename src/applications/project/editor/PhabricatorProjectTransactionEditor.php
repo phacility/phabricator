@@ -163,11 +163,7 @@ final class PhabricatorProjectTransactionEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
 
-    $old = $xaction->getOldValue();
-    $new = $xaction->getNewValue();
-
     switch ($xaction->getTransactionType()) {
-
       case PhabricatorTransactions::TYPE_EDGE:
         $edge_type = $xaction->getMetadataValue('edge:type');
         switch ($edge_type) {
@@ -220,7 +216,7 @@ final class PhabricatorProjectTransactionEditor
             }
             break;
         }
-        return;
+        break;
     }
 
     return parent::applyBuiltinExternalTransaction($object, $xaction);

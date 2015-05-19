@@ -609,7 +609,7 @@ final class DifferentialTransactionEditor
             $state,
             $phid);
         }
-        return;
+        break;
     }
 
     return parent::applyBuiltinExternalTransaction($object, $xaction);
