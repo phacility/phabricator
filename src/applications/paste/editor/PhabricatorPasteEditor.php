@@ -82,12 +82,6 @@ final class PhabricatorPasteEditor
       case PhabricatorPasteTransaction::TYPE_LANGUAGE:
         $object->setLanguage($xaction->getNewValue());
         return;
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-        $object->setViewPolicy($xaction->getNewValue());
-        return;
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
-        $object->setEditPolicy($xaction->getNewValue());
-        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -101,8 +95,6 @@ final class PhabricatorPasteEditor
       case PhabricatorPasteTransaction::TYPE_CONTENT:
       case PhabricatorPasteTransaction::TYPE_TITLE:
       case PhabricatorPasteTransaction::TYPE_LANGUAGE:
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
         return;
     }
 
