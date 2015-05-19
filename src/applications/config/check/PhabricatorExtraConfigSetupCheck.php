@@ -252,6 +252,10 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
 
       'style.monospace' => $monospace_reason,
       'style.monospace.windows' => $monospace_reason,
+
+      'search.engine-selector' => pht(
+        'Phabricator now automatically discovers available search engines '.
+        'at runtime.'),
     );
 
     return $ancient_config;

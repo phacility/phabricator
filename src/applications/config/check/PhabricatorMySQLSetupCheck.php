@@ -116,7 +116,8 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
     }
 
     $stopword_file = self::loadRawConfigValue('ft_stopword_file');
-    if (!PhabricatorDefaultSearchEngineSelector::shouldUseElasticSearch()) {
+
+    if ($this->shouldUseMySQLSearchEngine()) {
       if ($stopword_file === null) {
         $summary = pht(
           'Your version of MySQL does not support configuration of a '.
@@ -190,7 +191,7 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
 
     $min_len = self::loadRawConfigValue('ft_min_word_len');
     if ($min_len >= 4) {
-      if (!PhabricatorDefaultSearchEngineSelector::shouldUseElasticSearch()) {
+      if ($this->shouldUseMySQLSearchEngine()) {
         $namespace = PhabricatorEnv::getEnvConfig('storage.default-namespace');
 
         $summary = pht(
@@ -235,8 +236,7 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
 
     $bool_syntax = self::loadRawConfigValue('ft_boolean_syntax');
     if ($bool_syntax != ' |-><()~*:""&^') {
-      if (!PhabricatorDefaultSearchEngineSelector::shouldUseElasticSearch()) {
-
+      if ($this->shouldUseMySQLSearchEngine()) {
         $summary = pht(
           'MySQL is configured to search on fulltext indexes using "OR" by '.
           'default. Using "AND" is usually the desired behaviour.');
@@ -338,6 +338,11 @@ final class PhabricatorMySQLSetupCheck extends PhabricatorSetupCheck {
         ->setMessage($message);
     }
 
+  }
+
+  protected function shouldUseMySQLSearchEngine() {
+    $search_engine = PhabricatorSearchEngine::loadEngine();
+    return $search_engine instanceof PhabricatorMySQLSearchEngine;
   }
 
 }

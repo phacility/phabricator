@@ -74,7 +74,7 @@ final class PhabricatorSearchDocumentQuery
       ->setParameter('offset', $this->getOffset())
       ->setParameter('limit', $this->getRawResultLimit());
 
-    $engine = PhabricatorSearchEngineSelector::newSelector()->newEngine();
+    $engine = PhabricatorSearchEngine::loadEngine();
 
     return $engine->executeSearch($query);
   }

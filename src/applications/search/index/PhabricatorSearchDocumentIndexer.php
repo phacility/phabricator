@@ -69,7 +69,7 @@ abstract class PhabricatorSearchDocumentIndexer extends Phobject {
         $this->indexProjects($document, $object);
       }
 
-      $engine = PhabricatorSearchEngineSelector::newSelector()->newEngine();
+      $engine = PhabricatorSearchEngine::loadEngine();
       try {
         $engine->reindexAbstractDocument($document);
       } catch (Exception $ex) {
