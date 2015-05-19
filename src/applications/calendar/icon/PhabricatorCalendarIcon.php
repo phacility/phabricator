@@ -5,22 +5,22 @@ final class PhabricatorCalendarIcon extends Phobject {
   public static function getIconMap() {
     return
       array(
-        'fa-briefcase' => pht('Briefcase'),
-        'fa-tags' => pht('Tag'),
-        'fa-folder' => pht('Folder'),
-        'fa-users' => pht('Team'),
-        'fa-bug' => pht('Bug'),
-        'fa-trash-o' => pht('Garbage'),
-        'fa-calendar' => pht('Deadline'),
-        'fa-flag-checkered' => pht('Goal'),
-        'fa-envelope' => pht('Communication'),
-        'fa-truck' => pht('Release'),
-        'fa-lock' => pht('Policy'),
-        'fa-umbrella' => pht('An Umbrella'),
-        'fa-cloud' => pht('The Cloud'),
-        'fa-building' => pht('Company'),
-        'fa-credit-card' => pht('Accounting'),
-        'fa-flask' => pht('Experimental'),
+        'fa-calendar' => pht('Default'),
+        'fa-glass' => pht('Party'),
+        'fa-plane' => pht('Travel'),
+        'fa-plus-square' => pht('Health / Appointment'),
+        'fa-rocket' => pht('Sabatical / Leave'),
+        'fa-home' => pht('Working From Home'),
+        'fa-tree' => pht('Holiday'),
+        'fa-gamepad' => pht('Staycation'),
+        'fa-coffee' => pht('Coffee Meeting'),
+        'fa-film' => pht('Movie'),
+        'fa-users' => pht('Meeting'),
+        'fa-cutlery' => pht('Meal'),
+        'fa-paw' => pht('Pet Activity'),
+        'fa-institution' => pht('Official Business'),
+        'fa-bus' => pht('Field Trip'),
+        'fa-microphone' => pht('Conference'),
       );
   }
 

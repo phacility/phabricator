@@ -17,10 +17,13 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
   protected $description;
   protected $isCancelled;
   protected $isAllDay;
+  protected $icon;
   protected $mailKey;
 
   protected $viewPolicy;
   protected $editPolicy;
+
+  const DEFAULT_ICON = 'fa-calendar';
 
   private $invitees = self::ATTACHABLE;
   private $appliedViewer;
@@ -35,6 +38,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
       ->setUserPHID($actor->getPHID())
       ->setIsCancelled(0)
       ->setIsAllDay(0)
+      ->setIcon(self::DEFAULT_ICON)
       ->setViewPolicy($actor->getPHID())
       ->setEditPolicy($actor->getPHID())
       ->attachInvitees(array())
@@ -166,6 +170,7 @@ final class PhabricatorCalendarEvent extends PhabricatorCalendarDAO
         'description' => 'text',
         'isCancelled' => 'bool',
         'isAllDay' => 'bool',
+        'icon' => 'text32',
         'mailKey' => 'bytes20',
       ),
       self::CONFIG_KEY_SCHEMA => array(
