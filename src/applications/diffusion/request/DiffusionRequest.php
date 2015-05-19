@@ -22,7 +22,6 @@ abstract class DiffusionRequest {
   protected $repository;
   protected $repositoryCommit;
   protected $repositoryCommitData;
-  protected $arcanistProjects;
 
   private $isClusterRequest = false;
   private $initFromConduit = true;
@@ -399,16 +398,6 @@ abstract class DiffusionRequest {
       $this->repositoryCommit = $commit;
     }
     return $this->repositoryCommit;
-  }
-
-  public function loadArcanistProjects() {
-    if (empty($this->arcanistProjects)) {
-      $projects = id(new PhabricatorRepositoryArcanistProject())->loadAllWhere(
-        'repositoryID = %d',
-        $this->getRepository()->getID());
-      $this->arcanistProjects = $projects;
-    }
-    return $this->arcanistProjects;
   }
 
   public function loadCommitData() {
