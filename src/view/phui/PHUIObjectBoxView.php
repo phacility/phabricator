@@ -159,10 +159,11 @@ final class PHUIObjectBoxView extends AphrontView {
       $header_color = $this->headerColor;
     }
 
+    $header = null;
     if ($this->header) {
       $header = $this->header;
       $header->setHeaderColor($header_color);
-    } else {
+    } else if ($this->headerText) {
       $header = id(new PHUIHeaderView())
         ->setHeader($this->headerText)
         ->setHeaderColor($header_color);
