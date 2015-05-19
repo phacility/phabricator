@@ -92,7 +92,7 @@ final class PhabricatorOwnersDetailController
       $path_link = phutil_tag(
         'a',
         array(
-          'href' => (string) $href,
+          'href' => (string)$href,
         ),
         $path->getPath());
       $path_links[] = hsprintf(

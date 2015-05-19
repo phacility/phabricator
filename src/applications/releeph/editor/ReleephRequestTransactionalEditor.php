@@ -114,7 +114,7 @@ final class ReleephRequestTransactionalEditor
         break;
 
       case ReleephRequestTransaction::TYPE_MANUAL_IN_BRANCH:
-        $object->setInBranch((int) $new);
+        $object->setInBranch((int)$new);
         break;
     }
   }

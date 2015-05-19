@@ -38,7 +38,7 @@ final class LiskDAOSet {
    * The main purpose of this method is to break cyclic dependency.
    * It removes all objects from this set and all subsets created by it.
    */
-  final public function clearSet() {
+  public function clearSet() {
     $this->daos = array();
     $this->relatives = array();
     foreach ($this->subsets as $set) {

@@ -199,7 +199,7 @@ final class LegalpadDocumentSignController extends LegalpadController {
           $next_uri = '/'.$document->getMonogram();
           if ($document->getRequireSignature()) {
             $request_uri = $request->getRequestURI();
-            $next_uri = (string) $request_uri;
+            $next_uri = (string)$request_uri;
           }
         } else {
           $this->sendVerifySignatureEmail(

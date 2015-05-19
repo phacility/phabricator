@@ -51,7 +51,7 @@ final class PhabricatorProjectTransactionEditor
       case PhabricatorProjectTransaction::TYPE_COLOR:
         return $object->getColor();
       case PhabricatorProjectTransaction::TYPE_LOCKED:
-        return (int) $object->getIsMembershipLocked();
+        return (int)$object->getIsMembershipLocked();
     }
 
     return parent::getCustomTransactionOldValue($object, $xaction);

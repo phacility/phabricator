@@ -166,7 +166,7 @@ abstract class HeraldAdapter {
     throw new Exception(pht('You must setIsNewObject to a boolean first!'));
   }
   public function setIsNewObject($new) {
-    $this->isNewObject = (bool) $new;
+    $this->isNewObject = (bool)$new;
     return $this;
   }
 
@@ -681,9 +681,9 @@ abstract class HeraldAdapter {
         }
         return $result;
       case self::CONDITION_HAS_BIT:
-        return (($condition_value & $field_value) === (int) $condition_value);
+        return (($condition_value & $field_value) === (int)$condition_value);
       case self::CONDITION_NOT_BIT:
-        return (($condition_value & $field_value) !== (int) $condition_value);
+        return (($condition_value & $field_value) !== (int)$condition_value);
       default:
         throw new HeraldInvalidConditionException(
           "Unknown condition '{$condition_type}'.");

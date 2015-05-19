@@ -112,7 +112,7 @@ final class PhabricatorOAuthServer {
     $authorization_code->setClientPHID($client->getPHID());
     $authorization_code->setClientSecret($client->getSecret());
     $authorization_code->setUserPHID($this->getUser()->getPHID());
-    $authorization_code->setRedirectURI((string) $redirect_uri);
+    $authorization_code->setRedirectURI((string)$redirect_uri);
     $authorization_code->save();
 
     return $authorization_code;

@@ -177,7 +177,7 @@ final class ReleephWorkNextRequestConduitAPIMethod
     foreach ($releeph_requests as $rq) {
       // TODO: it's likely that relying on the `id` column to provide
       // trunk-commit-order is thoroughly broken.
-      $ordinal = (int) $rq->loadPhabricatorRepositoryCommit()->getID();
+      $ordinal = (int)$rq->loadPhabricatorRepositoryCommit()->getID();
       $surrogate[$ordinal] = $rq;
     }
     ksort($surrogate);

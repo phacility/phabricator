@@ -550,7 +550,7 @@ final class ConpherenceUpdateController
     $content = array(
       'non_update' => $non_update,
       'transactions' => hsprintf('%s', $rendered_transactions),
-      'conpherence_title' => (string) $data['title'],
+      'conpherence_title' => (string)$data['title'],
       'latest_transaction_id' => $new_latest_transaction_id,
       'nav_item' => $nav_item,
       'conpherence_phid' => $conpherence->getPHID(),

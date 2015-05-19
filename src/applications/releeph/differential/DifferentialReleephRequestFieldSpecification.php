@@ -180,7 +180,7 @@ final class DifferentialReleephRequestFieldSpecification {
           "Releeph request token '{$token}'!");
       }
 
-      $id = (int) $match[1];
+      $id = (int)$match[1];
       $releeph_request = id(new ReleephRequest())->load($id);
 
       if (!$releeph_request) {
