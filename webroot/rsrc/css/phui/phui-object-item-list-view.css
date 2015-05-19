@@ -73,7 +73,7 @@ ul.phui-object-item-list-view {
 }
 
 .phui-object-item-name {
-  font-weight: bold;
+  font-weight: 500;
   padding: 8px 8px 0;
   white-space: nowrap;
   word-wrap: break-word;
@@ -84,6 +84,7 @@ ul.phui-object-item-list-view {
 .device-phone .phui-object-item-name {
   overflow: normal;
   white-space: normal;
+  font-weight: bold;
 }
 
 .phui-object-item-link {
@@ -323,7 +324,7 @@ ul.phui-object-item-icons {
 .phui-object-item-icon {
   vertical-align: middle;
   font-size: 12px;
-  color: {$lightgreytext};
+  color: {$greytext};
   text-align: right;
   white-space: nowrap;
   overflow: hidden;
@@ -437,7 +438,8 @@ ul.phui-object-item-icons {
   background: {$sh-yellowbackground};
 }
 
-.phui-object-item-highlighted .phui-object-item-frame {
+ul.phui-object-item-list-view .phui-object-item-highlighted
+  .phui-object-item-frame {
   border-color: {$sh-yellowborder};
 }
 
@@ -445,7 +447,8 @@ ul.phui-object-item-icons {
   background: {$sh-bluebackground};
 }
 
-.phui-object-item-selected .phui-object-item-frame {
+ul.phui-object-item-list-view .phui-object-item-selected
+  .phui-object-item-frame {
   border-color: {$sh-blueborder};
 }
 
@@ -525,7 +528,7 @@ ul.phui-object-item-icons {
   padding: 0 10px;
   margin: 4px 0 8px;
   font-size: 12px;
-  color: {$lightgreytext};
+  color: {$greytext};
   text-align: right;
 }
 
