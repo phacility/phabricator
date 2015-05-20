@@ -144,45 +144,6 @@ final class CeleritySpriteGenerator {
     return $sheet;
   }
 
-  public function buildGradientSheet() {
-    $gradients = $this->getDirectoryList('gradients');
-
-    $template = new PhutilSprite();
-
-    $unusual_heights = array(
-      'breadcrumbs'     => 31,
-      'grey-header'     => 70,
-      'dark-grey-header' => 70,
-      'lightblue-header' => 240,
-      'lightgreen-header' => 240,
-      'lightviolet-header' => 240,
-      'lightred-header' => 240,
-    );
-
-    $sprites = array();
-    foreach ($gradients as $gradient) {
-      $path = $this->getPath('gradients/'.$gradient.'.png');
-      $sprite = id(clone $template)
-        ->setName('gradient-'.$gradient)
-        ->setSourceFile($path)
-        ->setTargetCSS('.gradient-'.$gradient);
-
-      $sprite->setSourceSize(4, idx($unusual_heights, $gradient, 26));
-
-      $sprites[] = $sprite;
-    }
-
-    $sheet = $this->buildSheet(
-      'gradient',
-      false,
-      PhutilSpriteSheet::TYPE_REPEAT_X);
-    foreach ($sprites as $sprite) {
-      $sheet->addSprite($sprite);
-    }
-
-    return $sheet;
-  }
-
   public function buildMainHeaderSheet() {
     $gradients = $this->getDirectoryList('main_header');
     $template = new PhutilSprite();

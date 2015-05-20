@@ -391,13 +391,13 @@ final class PhrictionDocumentController
 
     $list = array();
     foreach ($children_dicts as $child) {
-      $list[] = hsprintf('<li>');
+      $list[] = hsprintf('<li class="remarkup-list-item">');
       $list[] = $this->renderChildDocumentLink($child);
       $grand = idx($grandchildren_dicts, $child['slug'], array());
       if ($grand) {
-        $list[] = hsprintf('<ul>');
+        $list[] = hsprintf('<ul class="remarkup-list">');
         foreach ($grand as $grandchild) {
-          $list[] = hsprintf('<li>');
+          $list[] = hsprintf('<li class="remarkup-list-item">');
           $list[] = $this->renderChildDocumentLink($grandchild);
           $list[] = hsprintf('</li>');
         }
@@ -406,27 +406,30 @@ final class PhrictionDocumentController
       $list[] = hsprintf('</li>');
     }
     if ($more_children) {
-      $list[] = phutil_tag('li', array(), pht('More...'));
+      $list[] = phutil_tag(
+        'li',
+        array(
+          'class' => 'remarkup-list-item',
+        ),
+        pht('More...'));
     }
 
-    $content = array(
-      phutil_tag(
-        'div',
-        array(
-          'class' => 'phriction-children-header '.
-            'sprite-gradient gradient-lightblue-header',
-        ),
-        pht('Document Hierarchy')),
-      phutil_tag(
-        'div',
-        array(
-          'class' => 'phriction-children',
-        ),
-        phutil_tag('ul', array(), $list)),
-    );
+    $header = id(new PHUIHeaderView())
+      ->setHeader(pht('Document Hierarchy'));
 
     return id(new PHUIDocumentView())
-      ->appendChild($content);
+      ->setHeader($header)
+      ->appendChild(phutil_tag(
+        'div',
+        array(
+          'class' => 'phabricator-remarkup',
+        ),
+        phutil_tag(
+          'ul',
+          array(
+            'class' => 'remarkup-list',
+          ),
+          $list)));
   }
 
   private function renderChildDocumentLink(array $info) {

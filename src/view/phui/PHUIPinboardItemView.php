@@ -46,16 +46,14 @@ final class PHUIPinboardItemView extends AphrontView {
     require_celerity_resource('phui-pinboard-view-css');
     $header = null;
     if ($this->header) {
+      $header_color = null;
       if ($this->disabled) {
-        $header_color = 'gradient-lightgrey-header';
-      } else {
-        $header_color = 'gradient-lightblue-header';
+        $header_color = 'phui-pinboard-disabled';
       }
       $header = phutil_tag(
         'div',
         array(
-          'class' => 'phui-pinboard-item-header '.
-            'sprite-gradient '.$header_color,
+          'class' => 'phui-pinboard-item-header '.$header_color,
         ),
         phutil_tag('a', array('href' => $this->uri), $this->header));
     }

@@ -170,7 +170,6 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     require_celerity_resource('phui-button-css');
     require_celerity_resource('phui-spacing-css');
     require_celerity_resource('phui-form-css');
-    require_celerity_resource('sprite-gradient-css');
     require_celerity_resource('phabricator-standard-page-view');
     require_celerity_resource('conpherence-durable-column-view');
 

@@ -7,10 +7,6 @@
   overflow: hidden;
 }
 
-.phui-header-shell.sprite-gradient.gradient-white-header {
-  background: transparent;
-}
-
 body .phui-header-shell.phui-header-no-backgound {
   background-color: transparent;
   border: none;
