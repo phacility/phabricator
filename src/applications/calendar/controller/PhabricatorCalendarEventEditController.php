@@ -23,8 +23,8 @@ final class PhabricatorCalendarEventEditController
 
     if ($this->isCreate()) {
       $event = PhabricatorCalendarEvent::initializeNewCalendarEvent($user);
-      $end_value = AphrontFormDateControlValue::newFromEpoch($user, time());
-      $start_value = AphrontFormDateControlValue::newFromEpoch($user, time());
+      list($start_value, $end_value) = $this->getDefaultTimeValues($user);
+
       $submit_label = pht('Create');
       $page_title = pht('Create Event');
       $redirect = 'created';
@@ -347,6 +347,24 @@ final class PhabricatorCalendarEventEditController
     }
 
     return $new;
+  }
+
+  private function getDefaultTimeValues($user) {
+    $start = new DateTime('@'.time());
+    $start->setTimeZone($user->getTimeZone());
+
+    $start->setTime($start->format('H'), 0, 0);
+    $start->modify('+1 hour');
+    $end = id(clone $start)->modify('+1 hour');
+
+    $start_value = AphrontFormDateControlValue::newFromEpoch(
+      $user,
+      $start->format('U'));
+    $end_value = AphrontFormDateControlValue::newFromEpoch(
+      $user,
+      $end->format('U'));
+
+    return array($start_value, $end_value);
   }
 
 }
