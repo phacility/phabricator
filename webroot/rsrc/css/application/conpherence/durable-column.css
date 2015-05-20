@@ -75,7 +75,65 @@
 }
 
 .conpherence-durable-column-header .phabricator-application-menu {
+  display: block;
+  float: right;
   padding-right: 4px;
+  width: 36px;
+}
+.conpherence-durable-column-header
+.phabricator-application-menu .phui-list-item-view.core-menu-item {
+  display: block;
+}
+.conpherence-durable-column-header
+.phabricator-application-menu .phui-list-item-name {
+  display: none;
+}
+.conpherence-durable-column-header
+.phabricator-application-menu .phui-list-item-view {
+  float: left;
+  position: relative;
+  width: 36px;
+  height: 36px;
+  margin-top: 4px;
+}
+.conpherence-durable-column-header
+.phabricator-application-menu .phui-list-item-href {
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+.conpherence-durable-column-header
+.phabricator-dark-menu .phui-list-item-type-link {
+  background: transparent;
+}
+.device-desktop
+.conpherence-durable-column-header
+.phabricator-application-menu
+.core-menu-item.phui-list-item-view:hover
+.phui-list-item-icon.phui-font-fa {
+  color: #fff;
+}
+.conpherence-durable-column-header
+.phabricator-application-menu
+.phui-list-item-view.core-menu-item {
+  display: block;
+}
+.device-desktop
+.conpherence-durable-column-header
+.phabricator-application-menu
+.core-menu-item.phui-list-item-view:hover {
+  background-color: rgba(0,0,0,.33);
+  border-radius: 3px;
+}
+.conpherence-durable-column-header
+.phabricator-application-menu .phui-list-item-icon.phui-font-fa {
+  font-size: 20px;
+  height: 20px;
+  width: 20px;
+  color: rgba(255,255,255,.8);
+  margin: 8px;
+  text-align: center;
+  vertical-align: middle;
 }
 
 .conpherence-durable-column-header-text {

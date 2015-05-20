@@ -83,7 +83,7 @@ class PhabricatorApplicationTransactionCommentView extends AphrontView {
     $user = $this->getUser();
     if (!$user->isLoggedIn()) {
       $uri = id(new PhutilURI('/login/'))
-        ->setQueryParam('next', (string) $this->getRequestURI());
+        ->setQueryParam('next', (string)$this->getRequestURI());
       return id(new PHUIObjectBoxView())
         ->setFlush(true)
         ->setHeaderText(pht('Add Comment'))

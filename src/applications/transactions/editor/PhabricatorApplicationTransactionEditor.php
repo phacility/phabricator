@@ -388,20 +388,16 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_BUILDABLE:
       case PhabricatorTransactions::TYPE_TOKEN:
         return;
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-        $object->setViewPolicy($xaction->getNewValue());
-        break;
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
-        $object->setEditPolicy($xaction->getNewValue());
-        break;
-      case PhabricatorTransactions::TYPE_JOIN_POLICY:
-        $object->setJoinPolicy($xaction->getNewValue());
-        break;
-
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $field = $this->getCustomFieldForTransaction($object, $xaction);
         return $field->applyApplicationTransactionInternalEffects($xaction);
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+      case PhabricatorTransactions::TYPE_EDIT_POLICY:
+      case PhabricatorTransactions::TYPE_JOIN_POLICY:
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
       case PhabricatorTransactions::TYPE_INLINESTATE:
+      case PhabricatorTransactions::TYPE_EDGE:
+      case PhabricatorTransactions::TYPE_COMMENT:
         return $this->applyBuiltinInternalTransaction($object, $xaction);
     }
 
@@ -440,8 +436,68 @@ abstract class PhabricatorApplicationTransactionEditor
           $xaction->getOldValue(),
           $xaction->getNewValue()));
         $this->subscribers = $subscribers;
+        return $this->applyBuiltinExternalTransaction($object, $xaction);
 
+      case PhabricatorTransactions::TYPE_CUSTOMFIELD:
+        $field = $this->getCustomFieldForTransaction($object, $xaction);
+        return $field->applyApplicationTransactionExternalEffects($xaction);
+      case PhabricatorTransactions::TYPE_EDGE:
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+      case PhabricatorTransactions::TYPE_EDIT_POLICY:
+      case PhabricatorTransactions::TYPE_JOIN_POLICY:
+      case PhabricatorTransactions::TYPE_INLINESTATE:
+      case PhabricatorTransactions::TYPE_COMMENT:
+        return $this->applyBuiltinExternalTransaction($object, $xaction);
+    }
+
+    return $this->applyCustomExternalTransaction($object, $xaction);
+  }
+
+  protected function applyCustomInternalTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+    $type = $xaction->getTransactionType();
+    throw new Exception(
+      "Transaction type '{$type}' is missing an internal apply ".
+      "implementation!");
+  }
+
+  protected function applyCustomExternalTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+    $type = $xaction->getTransactionType();
+    throw new Exception(
+      "Transaction type '{$type}' is missing an external apply ".
+      "implementation!");
+  }
+
+  // TODO: Write proper documentation for these hooks. These are like the
+  // "applyCustom" hooks, except that implementation is optional, so you do
+  // not need to handle all of the builtin transaction types. See T6403. These
+  // are not completely implemented.
+
+  protected function applyBuiltinInternalTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+        $object->setViewPolicy($xaction->getNewValue());
         break;
+      case PhabricatorTransactions::TYPE_EDIT_POLICY:
+        $object->setEditPolicy($xaction->getNewValue());
+        break;
+      case PhabricatorTransactions::TYPE_JOIN_POLICY:
+        $object->setJoinPolicy($xaction->getNewValue());
+        break;
+    }
+  }
+
+  protected function applyBuiltinExternalTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
       case PhabricatorTransactions::TYPE_EDGE:
         if ($this->getIsInverseEdgeEditor()) {
           // If we're writing an inverse edge transaction, don't actually
@@ -494,49 +550,7 @@ abstract class PhabricatorApplicationTransactionEditor
 
         $editor->save();
         break;
-      case PhabricatorTransactions::TYPE_CUSTOMFIELD:
-        $field = $this->getCustomFieldForTransaction($object, $xaction);
-        return $field->applyApplicationTransactionExternalEffects($xaction);
-      case PhabricatorTransactions::TYPE_INLINESTATE:
-        return $this->applyBuiltinExternalTransaction($object, $xaction);
     }
-
-    return $this->applyCustomExternalTransaction($object, $xaction);
-  }
-
-  protected function applyCustomInternalTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-    $type = $xaction->getTransactionType();
-    throw new Exception(
-      "Transaction type '{$type}' is missing an internal apply ".
-      "implementation!");
-  }
-
-  protected function applyCustomExternalTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-    $type = $xaction->getTransactionType();
-    throw new Exception(
-      "Transaction type '{$type}' is missing an external apply ".
-      "implementation!");
-  }
-
-  // TODO: Write proper documentation for these hooks. These are like the
-  // "applyCustom" hooks, except that implementation is optional, so you do
-  // not need to handle all of the builtin transaction types. See T6403. These
-  // are not completely implemented.
-
-  protected function applyBuiltinInternalTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-    return;
-  }
-
-  protected function applyBuiltinExternalTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-    return;
   }
 
   /**

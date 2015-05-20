@@ -90,7 +90,7 @@ final class PhabricatorMetaMTAReceivedMail extends PhabricatorMetaMTADAO {
     return $this->loadPHIDsFromAddresses($addresses);
   }
 
-  final public function loadCCPHIDs() {
+  public function loadCCPHIDs() {
     return $this->loadPHIDsFromAddresses($this->getCCAddresses());
   }
 

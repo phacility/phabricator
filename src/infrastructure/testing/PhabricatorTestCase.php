@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
+abstract class PhabricatorTestCase extends PhutilTestCase {
 
   const NAMESPACE_PREFIX = 'phabricator_unittest_';
 
@@ -164,14 +164,6 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
     $name = self::NAMESPACE_PREFIX.$bytes;
 
     return new PhabricatorStorageFixtureScopeGuard($name);
-  }
-
-  protected function getLink($method) {
-    $phabricator_project = 'PHID-APRJ-3f1fc779edeab89b2171';
-    return
-      'https://secure.phabricator.com/diffusion/symbol/'.$method.
-      '/?lang=php&projects='.$phabricator_project.
-      '&jump=true&context='.get_class($this);
   }
 
   /**

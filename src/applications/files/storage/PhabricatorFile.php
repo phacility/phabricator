@@ -758,7 +758,7 @@ final class PhabricatorFile extends PhabricatorFileDAO
   public function getDownloadURI() {
     $uri = id(new PhutilURI($this->getViewURI()))
       ->setQueryParam('download', true);
-    return (string) $uri;
+    return (string)$uri;
   }
 
   public function getURIForTransform(PhabricatorFileTransform $transform) {

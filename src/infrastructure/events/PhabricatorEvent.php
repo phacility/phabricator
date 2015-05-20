@@ -6,10 +6,6 @@ final class PhabricatorEvent extends PhutilEvent {
   private $aphrontRequest;
   private $conduitRequest;
 
-  public function __construct($type, array $data = array()) {
-    parent::__construct($type, $data);
-  }
-
   public function setUser(PhabricatorUser $user) {
     $this->user = $user;
     return $this;

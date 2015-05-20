@@ -13,7 +13,7 @@ final class PhabricatorSearchManagementInitWorkflow
   public function execute(PhutilArgumentParser $args) {
     $console = PhutilConsole::getConsole();
 
-    $engine = PhabricatorSearchEngineSelector::newSelector()->newEngine();
+    $engine = PhabricatorSearchEngine::loadEngine();
 
     $work_done = false;
     if (!$engine->indexExists()) {

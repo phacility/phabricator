@@ -1,6 +1,6 @@
 <?php
 
-final class DiffusionURITestCase extends ArcanistPhutilTestCase {
+final class DiffusionURITestCase extends PhutilTestCase {
 
   public function testBlobDecode() {
     $map = array(

@@ -364,6 +364,7 @@ final class PhabricatorCalendarEventSearchEngine
       $event = new AphrontCalendarEventView();
       $event->setEpochRange($status->getDateFrom(), $status->getDateTo());
       $event->setIsAllDay($status->getIsAllDay());
+      $event->setIcon($status->getIcon());
 
       $name_text = $handles[$status->getUserPHID()]->getName();
       $status_text = $status->getName();
@@ -411,6 +412,7 @@ final class PhabricatorCalendarEventSearchEngine
       $event->setEventID($status->getID());
       $event->setEpochRange($status->getDateFrom(), $status->getDateTo());
       $event->setIsAllDay($status->getIsAllDay());
+      $event->setIcon($status->getIcon());
       $event->setViewerIsInvited($viewer_is_invited);
 
       $event->setName($status->getName());

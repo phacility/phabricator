@@ -8,7 +8,6 @@
 
 .phui-calendar-viewer-invited a {
   color: {$green};
-  font-weight: bold;
 }
 
 .phui-calendar-red a {

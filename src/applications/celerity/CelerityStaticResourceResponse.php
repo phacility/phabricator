@@ -33,14 +33,16 @@ final class CelerityStaticResourceResponse {
   }
 
   /**
-   * Register a behavior for initialization. NOTE: if $config is empty,
-   * a behavior will execute only once even if it is initialized multiple times.
-   * If $config is nonempty, the behavior will be invoked once for each config.
+   * Register a behavior for initialization.
+   *
+   * NOTE: If `$config` is empty, a behavior will execute only once even if it
+   * is initialized multiple times. If `$config` is nonempty, the behavior will
+   * be invoked once for each configuration.
    */
   public function initBehavior(
     $behavior,
     array $config = array(),
-    $source_name) {
+    $source_name = null) {
 
     $this->requireResource('javelin-behavior-'.$behavior, $source_name);
 

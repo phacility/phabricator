@@ -62,9 +62,6 @@ final class DifferentialDiffEditor
         $dict = $this->diffDataDict;
         $this->updateDiffFromDict($object, $dict);
         return;
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-        $object->setViewPolicy($xaction->getNewValue());
-        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -76,7 +73,6 @@ final class DifferentialDiffEditor
 
     switch ($xaction->getTransactionType()) {
       case DifferentialDiffTransaction::TYPE_DIFF_CREATE:
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
         return;
     }
 

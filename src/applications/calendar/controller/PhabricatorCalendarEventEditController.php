@@ -13,8 +13,7 @@ final class PhabricatorCalendarEventEditController
     return !$this->id;
   }
 
-  public function processRequest() {
-    $request = $this->getRequest();
+  public function handleRequest(AphrontRequest $request) {
     $user = $request->getUser();
     $user_phid = $user->getPHID();
     $error_name = true;
@@ -74,6 +73,7 @@ final class PhabricatorCalendarEventEditController
     $name = $event->getName();
     $description = $event->getDescription();
     $is_all_day = $event->getIsAllDay();
+    $icon = $event->getIcon();
 
     $current_policies = id(new PhabricatorPolicyQuery())
       ->setViewer($user)
@@ -95,6 +95,7 @@ final class PhabricatorCalendarEventEditController
       $edit_policy = $request->getStr('editPolicy');
       $view_policy = $request->getStr('viewPolicy');
       $is_all_day = $request->getStr('isAllDay');
+      $icon = $request->getStr('icon');
 
       $invitees = $request->getArr('invitees');
       $new_invitees = $this->getNewInviteeList($invitees, $event);
@@ -115,6 +116,11 @@ final class PhabricatorCalendarEventEditController
         ->setTransactionType(
           PhabricatorCalendarEventTransaction::TYPE_ALL_DAY)
         ->setNewValue($is_all_day);
+
+      $xactions[] = id(new PhabricatorCalendarEventTransaction())
+        ->setTransactionType(
+          PhabricatorCalendarEventTransaction::TYPE_ICON)
+        ->setNewValue($icon);
 
       $xactions[] = id(new PhabricatorCalendarEventTransaction())
         ->setTransactionType(
@@ -246,6 +252,20 @@ final class PhabricatorCalendarEventEditController
       ->setUser($user)
       ->setDatasource(new PhabricatorMetaMTAMailableDatasource());
 
+    if ($this->isCreate()) {
+      $icon_uri = $this->getApplicationURI('icon/');
+    } else {
+      $icon_uri = $this->getApplicationURI('icon/'.$event->getID().'/');
+    }
+    $icon_display = PhabricatorCalendarIcon::renderIconForChooser($icon);
+    $icon = id(new AphrontFormChooseButtonControl())
+      ->setLabel(pht('Icon'))
+      ->setName('icon')
+      ->setDisplayValue($icon_display)
+      ->setButtonText(pht('Choose Icon...'))
+      ->setChooseURI($icon_uri)
+      ->setValue($icon);
+
     $form = id(new AphrontFormView())
       ->setUser($user)
       ->appendChild($name)
@@ -256,7 +276,8 @@ final class PhabricatorCalendarEventEditController
       ->appendControl($edit_policies)
       ->appendControl($subscribers)
       ->appendControl($invitees)
-      ->appendChild($description);
+      ->appendChild($description)
+      ->appendChild($icon);
 
 
     if ($request->isAjax()) {

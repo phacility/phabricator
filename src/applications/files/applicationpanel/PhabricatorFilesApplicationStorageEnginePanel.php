@@ -61,8 +61,6 @@ final class PhabricatorFilesApplicationStorageEnginePanel
       );
     }
 
-    $table =
-
     $table = id(new AphrontTableView($rows))
       ->setNoDataString(pht('No storage engines available.'))
       ->setHeaders(

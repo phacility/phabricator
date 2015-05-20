@@ -21,6 +21,7 @@ final class PhabricatorCalendarEventEditor
     $types[] = PhabricatorCalendarEventTransaction::TYPE_CANCEL;
     $types[] = PhabricatorCalendarEventTransaction::TYPE_INVITE;
     $types[] = PhabricatorCalendarEventTransaction::TYPE_ALL_DAY;
+    $types[] = PhabricatorCalendarEventTransaction::TYPE_ICON;
 
     $types[] = PhabricatorTransactions::TYPE_COMMENT;
     $types[] = PhabricatorTransactions::TYPE_VIEW_POLICY;
@@ -45,6 +46,8 @@ final class PhabricatorCalendarEventEditor
         return $object->getIsCancelled();
       case PhabricatorCalendarEventTransaction::TYPE_ALL_DAY:
         return (int)$object->getIsAllDay();
+      case PhabricatorCalendarEventTransaction::TYPE_ICON:
+        return $object->getIcon();
       case PhabricatorCalendarEventTransaction::TYPE_INVITE:
         $map = $xaction->getNewValue();
         $phids = array_keys($map);
@@ -73,6 +76,7 @@ final class PhabricatorCalendarEventEditor
       case PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION:
       case PhabricatorCalendarEventTransaction::TYPE_CANCEL:
       case PhabricatorCalendarEventTransaction::TYPE_INVITE:
+      case PhabricatorCalendarEventTransaction::TYPE_ICON:
         return $xaction->getNewValue();
       case PhabricatorCalendarEventTransaction::TYPE_ALL_DAY:
         return (int)$xaction->getNewValue();
@@ -107,12 +111,10 @@ final class PhabricatorCalendarEventEditor
       case PhabricatorCalendarEventTransaction::TYPE_ALL_DAY:
         $object->setIsAllDay((int)$xaction->getNewValue());
         return;
+      case PhabricatorCalendarEventTransaction::TYPE_ICON:
+        $object->setIcon($xaction->getNewValue());
+        return;
       case PhabricatorCalendarEventTransaction::TYPE_INVITE:
-      case PhabricatorTransactions::TYPE_COMMENT:
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
-      case PhabricatorTransactions::TYPE_EDGE:
-      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         return;
     }
 
@@ -130,6 +132,7 @@ final class PhabricatorCalendarEventEditor
       case PhabricatorCalendarEventTransaction::TYPE_DESCRIPTION:
       case PhabricatorCalendarEventTransaction::TYPE_CANCEL:
       case PhabricatorCalendarEventTransaction::TYPE_ALL_DAY:
+      case PhabricatorCalendarEventTransaction::TYPE_ICON:
         return;
       case PhabricatorCalendarEventTransaction::TYPE_INVITE:
         $map = $xaction->getNewValue();
@@ -150,12 +153,6 @@ final class PhabricatorCalendarEventEditor
             ->save();
         }
         $object->attachInvitees($invitees);
-        return;
-      case PhabricatorTransactions::TYPE_COMMENT:
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
-      case PhabricatorTransactions::TYPE_EDGE:
-      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         return;
     }
 
@@ -182,6 +179,8 @@ final class PhabricatorCalendarEventEditor
     $invalidate_phids = array();
     foreach ($xactions as $xaction) {
       switch ($xaction->getTransactionType()) {
+        case PhabricatorCalendarEventTransaction::TYPE_ICON:
+          break;
         case PhabricatorCalendarEventTransaction::TYPE_START_DATE:
         case PhabricatorCalendarEventTransaction::TYPE_END_DATE:
         case PhabricatorCalendarEventTransaction::TYPE_CANCEL:
@@ -340,7 +339,7 @@ final class PhabricatorCalendarEventEditor
       PhabricatorCalendarEventTransaction::MAILTAG_CONTENT =>
         pht(
           "An event's name, status, invite list, ".
-          "and description changes."),
+          "icon, and description changes."),
       PhabricatorCalendarEventTransaction::MAILTAG_RESCHEDULE =>
         pht(
           "An event's start and end date ".

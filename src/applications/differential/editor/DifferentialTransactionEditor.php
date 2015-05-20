@@ -71,10 +71,6 @@ final class DifferentialTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-        return $object->getViewPolicy();
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
-        return $object->getEditPolicy();
       case DifferentialTransaction::TYPE_ACTION:
         return null;
       case DifferentialTransaction::TYPE_INLINE:
@@ -95,8 +91,6 @@ final class DifferentialTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case DifferentialTransaction::TYPE_ACTION:
       case DifferentialTransaction::TYPE_UPDATE:
         return $xaction->getNewValue();
@@ -189,17 +183,7 @@ final class DifferentialTransactionEditor
     $status_abandoned = ArcanistDifferentialRevisionStatus::ABANDONED;
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-        $object->setViewPolicy($xaction->getNewValue());
-        return;
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
-        $object->setEditPolicy($xaction->getNewValue());
-        return;
-      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
-      case PhabricatorTransactions::TYPE_COMMENT:
       case DifferentialTransaction::TYPE_INLINE:
-        return;
-      case PhabricatorTransactions::TYPE_EDGE:
         return;
       case DifferentialTransaction::TYPE_UPDATE:
         if (!$this->getIsCloseByCommit()) {
@@ -577,12 +561,6 @@ final class DifferentialTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
-        return;
-      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
-      case PhabricatorTransactions::TYPE_EDGE:
-      case PhabricatorTransactions::TYPE_COMMENT:
       case DifferentialTransaction::TYPE_ACTION:
         return;
       case DifferentialTransaction::TYPE_INLINE:
@@ -631,7 +609,7 @@ final class DifferentialTransactionEditor
             $state,
             $phid);
         }
-        return;
+        break;
     }
 
     return parent::applyBuiltinExternalTransaction($object, $xaction);

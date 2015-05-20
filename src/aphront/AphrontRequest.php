@@ -28,44 +28,44 @@ final class AphrontRequest {
   private $applicationConfiguration;
   private $uriData;
 
-  final public function __construct($host, $path) {
+  public function __construct($host, $path) {
     $this->host = $host;
     $this->path = $path;
   }
 
-  final public function setURIMap(array $uri_data) {
+  public function setURIMap(array $uri_data) {
     $this->uriData = $uri_data;
     return $this;
   }
 
-  final public function getURIMap() {
+  public function getURIMap() {
     return $this->uriData;
   }
 
-  final public function getURIData($key, $default = null) {
+  public function getURIData($key, $default = null) {
     return idx($this->uriData, $key, $default);
   }
 
-  final public function setApplicationConfiguration(
+  public function setApplicationConfiguration(
     $application_configuration) {
     $this->applicationConfiguration = $application_configuration;
     return $this;
   }
 
-  final public function getApplicationConfiguration() {
+  public function getApplicationConfiguration() {
     return $this->applicationConfiguration;
   }
 
-  final public function setPath($path) {
+  public function setPath($path) {
     $this->path = $path;
     return $this;
   }
 
-  final public function getPath() {
+  public function getPath() {
     return $this->path;
   }
 
-  final public function getHost() {
+  public function getHost() {
     // The "Host" header may include a port number, or may be a malicious
     // header in the form "realdomain.com:ignored@evil.com". Invoke the full
     // parser to extract the real domain correctly. See here for coverage of
@@ -83,7 +83,7 @@ final class AphrontRequest {
   /**
    * @task data
    */
-  final public function setRequestData(array $request_data) {
+  public function setRequestData(array $request_data) {
     $this->requestData = $request_data;
     return $this;
   }
@@ -92,7 +92,7 @@ final class AphrontRequest {
   /**
    * @task data
    */
-  final public function getRequestData() {
+  public function getRequestData() {
     return $this->requestData;
   }
 
@@ -100,7 +100,7 @@ final class AphrontRequest {
   /**
    * @task data
    */
-  final public function getInt($name, $default = null) {
+  public function getInt($name, $default = null) {
     if (isset($this->requestData[$name])) {
       return (int)$this->requestData[$name];
     } else {
@@ -112,7 +112,7 @@ final class AphrontRequest {
   /**
    * @task data
    */
-  final public function getBool($name, $default = null) {
+  public function getBool($name, $default = null) {
     if (isset($this->requestData[$name])) {
       if ($this->requestData[$name] === 'true') {
         return true;
@@ -130,7 +130,7 @@ final class AphrontRequest {
   /**
    * @task data
    */
-  final public function getStr($name, $default = null) {
+  public function getStr($name, $default = null) {
     if (isset($this->requestData[$name])) {
       $str = (string)$this->requestData[$name];
       // Normalize newline craziness.
@@ -148,7 +148,7 @@ final class AphrontRequest {
   /**
    * @task data
    */
-  final public function getArr($name, $default = array()) {
+  public function getArr($name, $default = array()) {
     if (isset($this->requestData[$name]) &&
         is_array($this->requestData[$name])) {
       return $this->requestData[$name];
@@ -161,7 +161,7 @@ final class AphrontRequest {
   /**
    * @task data
    */
-  final public function getStrList($name, $default = array()) {
+  public function getStrList($name, $default = array()) {
     if (!isset($this->requestData[$name])) {
       return $default;
     }
@@ -174,36 +174,36 @@ final class AphrontRequest {
   /**
    * @task data
    */
-  final public function getExists($name) {
+  public function getExists($name) {
     return array_key_exists($name, $this->requestData);
   }
 
-  final public function getFileExists($name) {
+  public function getFileExists($name) {
     return isset($_FILES[$name]) &&
            (idx($_FILES[$name], 'error') !== UPLOAD_ERR_NO_FILE);
   }
 
-  final public function isHTTPGet() {
+  public function isHTTPGet() {
     return ($_SERVER['REQUEST_METHOD'] == 'GET');
   }
 
-  final public function isHTTPPost() {
+  public function isHTTPPost() {
     return ($_SERVER['REQUEST_METHOD'] == 'POST');
   }
 
-  final public function isAjax() {
+  public function isAjax() {
     return $this->getExists(self::TYPE_AJAX) && !$this->isQuicksand();
   }
 
-  final public function isWorkflow() {
+  public function isWorkflow() {
     return $this->getExists(self::TYPE_WORKFLOW) && !$this->isQuicksand();
   }
 
-  final public function isQuicksand() {
+  public function isQuicksand() {
     return $this->getExists(self::TYPE_QUICKSAND);
   }
 
-  final public function isConduit() {
+  public function isConduit() {
     return $this->getExists(self::TYPE_CONDUIT);
   }
 
@@ -215,7 +215,7 @@ final class AphrontRequest {
     return 'X-Phabricator-Csrf';
   }
 
-  final public function validateCSRF() {
+  public function validateCSRF() {
     $token_name = self::getCSRFTokenName();
     $token = $this->getStr($token_name);
 
@@ -281,7 +281,7 @@ final class AphrontRequest {
     return true;
   }
 
-  final public function isFormPost() {
+  public function isFormPost() {
     $post = $this->getExists(self::TYPE_FORM) &&
             !$this->getExists(self::TYPE_HISEC) &&
             $this->isHTTPPost();
@@ -293,7 +293,7 @@ final class AphrontRequest {
     return $this->validateCSRF();
   }
 
-  final public function isFormOrHisecPost() {
+  public function isFormOrHisecPost() {
     $post = $this->getExists(self::TYPE_FORM) &&
             $this->isHTTPPost();
 
@@ -305,12 +305,12 @@ final class AphrontRequest {
   }
 
 
-  final public function setCookiePrefix($prefix) {
+  public function setCookiePrefix($prefix) {
     $this->cookiePrefix = $prefix;
     return $this;
   }
 
-  final private function getPrefixedCookieName($name) {
+  private function getPrefixedCookieName($name) {
     if (strlen($this->cookiePrefix)) {
       return $this->cookiePrefix.'_'.$name;
     } else {
@@ -318,7 +318,7 @@ final class AphrontRequest {
     }
   }
 
-  final public function getCookie($name, $default = null) {
+  public function getCookie($name, $default = null) {
     $name = $this->getPrefixedCookieName($name);
     $value = idx($_COOKIE, $name, $default);
 
@@ -337,7 +337,7 @@ final class AphrontRequest {
     return $value;
   }
 
-  final public function clearCookie($name) {
+  public function clearCookie($name) {
     $this->setCookieWithExpiration($name, '', time() - (60 * 60 * 24 * 30));
     unset($_COOKIE[$name]);
   }
@@ -390,7 +390,7 @@ final class AphrontRequest {
    *
    * @task cookie
    */
-  final public function canSetCookies() {
+  public function canSetCookies() {
     return (bool)$this->getCookieDomainURI();
   }
 
@@ -405,7 +405,7 @@ final class AphrontRequest {
    * @return this
    * @task cookie
    */
-  final public function setCookie($name, $value) {
+  public function setCookie($name, $value) {
     $far_future = time() + (60 * 60 * 24 * 365 * 5);
     return $this->setCookieWithExpiration($name, $value, $far_future);
   }
@@ -421,7 +421,7 @@ final class AphrontRequest {
    * @return this
    * @task cookie
    */
-  final public function setTemporaryCookie($name, $value) {
+  public function setTemporaryCookie($name, $value) {
     return $this->setCookieWithExpiration($name, $value, 0);
   }
 
@@ -435,7 +435,7 @@ final class AphrontRequest {
    * @return this
    * @task cookie
    */
-  final private function setCookieWithExpiration(
+  private function setCookieWithExpiration(
     $name,
     $value,
     $expire) {
@@ -485,31 +485,31 @@ final class AphrontRequest {
     return $this;
   }
 
-  final public function setUser($user) {
+  public function setUser($user) {
     $this->user = $user;
     return $this;
   }
 
-  final public function getUser() {
+  public function getUser() {
     return $this->user;
   }
 
-  final public function getViewer() {
+  public function getViewer() {
     return $this->user;
   }
 
-  final public function getRequestURI() {
+  public function getRequestURI() {
     $get = $_GET;
     unset($get['__path__']);
     $path = phutil_escape_uri($this->getPath());
     return id(new PhutilURI($path))->setQueryParams($get);
   }
 
-  final public function isDialogFormPost() {
+  public function isDialogFormPost() {
     return $this->isFormPost() && $this->getStr('__dialog__');
   }
 
-  final public function getRemoteAddr() {
+  public function getRemoteAddr() {
     return $_SERVER['REMOTE_ADDR'];
   }
 

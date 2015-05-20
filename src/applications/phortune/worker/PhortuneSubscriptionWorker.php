@@ -15,6 +15,13 @@ final class PhortuneSubscriptionWorker extends PhabricatorWorker {
       return;
     }
 
+    $currency = $subscription->getCostForBillingPeriodAsCurrency(
+      $last_epoch,
+      $next_epoch);
+    if (!$currency->isPositive()) {
+      return;
+    }
+
     $account = $subscription->getAccount();
     $merchant = $subscription->getMerchant();
 
@@ -47,10 +54,6 @@ final class PhortuneSubscriptionWorker extends PhabricatorWorker {
     $cart = $account->newCart($actor, $cart_implementation, $merchant);
 
     $purchase = $cart->newPurchase($actor, $product);
-
-    $currency = $subscription->getCostForBillingPeriodAsCurrency(
-      $last_epoch,
-      $next_epoch);
 
     $purchase
       ->setBasePriceAsCurrency($currency)

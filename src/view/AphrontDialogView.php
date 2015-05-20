@@ -174,7 +174,7 @@ final class AphrontDialogView extends AphrontView {
     return $this;
   }
 
-  final public function render() {
+  public function render() {
     require_celerity_resource('aphront-dialog-view-css');
 
     $buttons = array();

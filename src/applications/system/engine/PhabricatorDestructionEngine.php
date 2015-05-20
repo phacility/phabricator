@@ -116,13 +116,14 @@ final class PhabricatorDestructionEngine extends Phobject {
   }
 
   private function destroyNotifications($object_phid) {
-    $notifications = id(new PhabricatorFeedStoryNotification())->loadAllWhere(
-      'primaryObjectPHID = %s',
-      $object_phid);
+    $table = id(new PhabricatorFeedStoryNotification());
+    $conn_w = $table->establishConnection('w');
 
-    foreach ($notifications as $notification) {
-      $notification->delete();
-    }
+    queryfx(
+      $conn_w,
+      'DELETE FROM %T WHERE primaryObjectPHID = %s',
+      $table->getTableName(),
+      $object_phid);
   }
 
 }

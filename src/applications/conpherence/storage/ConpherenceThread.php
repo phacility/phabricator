@@ -231,9 +231,14 @@ final class ConpherenceThread extends ConpherenceDAO
     $handles = $this->getHandles();
     $phids = $this->getOtherRecentParticipantPHIDs($viewer);
 
-    $limit = 3;
-    $more = (count($phids) > $limit);
-    $phids = array_slice($phids, 0, $limit);
+    if (count($phids) == 0) {
+      $phids[] = $viewer->getPHID();
+      $more = false;
+    } else {
+      $limit = 3;
+      $more = (count($phids) > $limit);
+      $phids = array_slice($phids, 0, $limit);
+    }
 
     $names = array_select_keys($handles, $phids);
     $names = mpull($names, 'getName');

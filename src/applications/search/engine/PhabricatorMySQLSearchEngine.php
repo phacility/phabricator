@@ -2,12 +2,24 @@
 
 final class PhabricatorMySQLSearchEngine extends PhabricatorSearchEngine {
 
+  public function getEngineIdentifier() {
+    return 'mysql';
+  }
+
+  public function getEnginePriority() {
+    return 100;
+  }
+
+  public function isEnabled() {
+    return true;
+  }
+
   public function reindexAbstractDocument(
     PhabricatorSearchAbstractDocument $doc) {
 
     $phid = $doc->getPHID();
     if (!$phid) {
-      throw new Exception('Document has no PHID!');
+      throw new Exception(pht('Document has no PHID!'));
     }
 
     $store = new PhabricatorSearchDocument();
@@ -31,7 +43,7 @@ final class PhabricatorMySQLSearchEngine extends PhabricatorSearchEngine {
       queryfx(
         $conn_w,
         'INSERT INTO %T (phid, phidType, field, auxPHID, corpus) '.
-        ' VALUES (%s, %s, %s, %ns, %s)',
+        'VALUES (%s, %s, %s, %ns, %s)',
         $field_dao->getTableName(),
         $phid,
         $doc->getDocumentType(),
@@ -63,9 +75,9 @@ final class PhabricatorMySQLSearchEngine extends PhabricatorSearchEngine {
     if ($sql) {
       queryfx(
         $conn_w,
-        'INSERT INTO %T'.
-        ' (phid, relatedPHID, relation, relatedType, relatedTime) '.
-        ' VALUES %Q',
+        'INSERT INTO %T '.
+        '(phid, relatedPHID, relation, relatedType, relatedTime) '.
+        'VALUES %Q',
         $rship_dao->getTableName(),
         implode(', ', $sql));
     }

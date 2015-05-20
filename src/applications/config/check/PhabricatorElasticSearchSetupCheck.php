@@ -1,14 +1,15 @@
 <?php
 
-final class PhabricatorElasticSetupCheck extends PhabricatorSetupCheck {
+final class PhabricatorElasticSearchSetupCheck extends PhabricatorSetupCheck {
 
   public function getDefaultGroup() {
     return self::GROUP_OTHER;
   }
 
   protected function executeChecks() {
-    if (PhabricatorDefaultSearchEngineSelector::shouldUseElasticSearch()) {
-      $engine = PhabricatorSearchEngineSelector::newSelector()->newEngine();
+    if ($this->shouldUseElasticSearchEngine()) {
+      $engine = new PhabricatorElasticSearchEngine();
+
       if (!$engine->indexExists()) {
         $summary = pht(
           'You enabled Elasticsearch but the index does not exist.');
@@ -40,4 +41,10 @@ final class PhabricatorElasticSetupCheck extends PhabricatorSetupCheck {
       }
     }
   }
+
+  protected function shouldUseElasticSearchEngine() {
+    $search_engine = PhabricatorSearchEngine::loadEngine();
+    return $search_engine instanceof PhabricatorElasticSearchEngine;
+  }
+
 }
