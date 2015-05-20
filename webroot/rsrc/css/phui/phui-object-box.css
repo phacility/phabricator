@@ -37,6 +37,14 @@ div.phui-object-box.phui-object-box-flush {
   margin: 12px 0 0 0;
 }
 
+.phui-object-box.phui-object-box-collapsed
+  .phui-header-shell + .phui-info-view {
+  margin: 0;
+  border-radius: 0;
+  border: 0;
+  border-bottom: 1px solid {$thinblueborder};
+}
+
 .device-phone .phui-object-box {
   margin: 8px 8px 0 8px;
 }

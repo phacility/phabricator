@@ -250,6 +250,7 @@ final class DifferentialChangesetListView extends AphrontView {
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
+      ->setCollapsed(true)
       ->appendChild($content);
 
     return $object_box;

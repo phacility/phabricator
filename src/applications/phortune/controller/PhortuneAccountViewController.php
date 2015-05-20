@@ -175,7 +175,7 @@ final class PhortuneAccountViewController extends PhortuneController {
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($list);
+      ->setObjectList($list);
   }
 
   private function buildInvoicesSection(
@@ -207,7 +207,7 @@ final class PhortuneAccountViewController extends PhortuneController {
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($table);
+      ->setTable($table);
   }
 
   private function buildPurchaseHistorySection(PhortuneAccount $account) {
@@ -258,7 +258,7 @@ final class PhortuneAccountViewController extends PhortuneController {
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($table);
+      ->setTable($table);
   }
 
   private function buildChargeHistorySection(PhortuneAccount $account) {
@@ -302,7 +302,7 @@ final class PhortuneAccountViewController extends PhortuneController {
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($table);
+      ->setTable($table);
   }
 
   private function buildSubscriptionsSection(PhortuneAccount $account) {
@@ -338,7 +338,7 @@ final class PhortuneAccountViewController extends PhortuneController {
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($table);
+      ->setTable($table);
   }
 
   protected function buildApplicationCrumbs() {

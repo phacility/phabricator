@@ -94,7 +94,7 @@ final class PhabricatorPasswordAuthProvider extends PhabricatorAuthProvider {
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($table);
+      ->setTable($table);
   }
 
   public function getDescriptionForCreate() {

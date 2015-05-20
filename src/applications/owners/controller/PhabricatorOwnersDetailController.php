@@ -129,7 +129,7 @@ final class PhabricatorOwnersDetailController
         ->setText(pht('Edit Package')));
 
     $panel->setHeader($header);
-    $panel->appendChild($table);
+    $panel->setTable($table);
 
     $key = 'package/'.$package->getID();
     $this->setSideNavFilter($key);

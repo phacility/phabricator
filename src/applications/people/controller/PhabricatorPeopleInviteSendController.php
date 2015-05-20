@@ -163,7 +163,7 @@ final class PhabricatorPeopleInviteSendController
             ->setErrors($confirm_errors)
             ->setSeverity($severity))
         ->setHeaderText(pht('Confirm Invites'))
-        ->appendChild($invite_table)
+        ->setTable($invite_table)
         ->appendChild($confirm_form);
     }
 
@@ -203,7 +203,7 @@ final class PhabricatorPeopleInviteSendController
           ? pht('Revise Invites')
           : pht('Invite Users'))
       ->setFormErrors($errors)
-      ->appendChild($form);
+      ->setForm($form);
 
     return $this->buildApplicationPage(
       array(

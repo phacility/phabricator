@@ -188,6 +188,6 @@ final class PhabricatorPeopleLogSearchEngine
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('User Activity Logs'))
-      ->appendChild($table);
+      ->setTable($table);
   }
 }

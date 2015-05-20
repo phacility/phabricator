@@ -284,7 +284,7 @@ final class LegalpadDocumentSignatureSearchEngine
 
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($table);
+      ->setTable($table);
 
     if (!$this->document) {
       $policy_notice = id(new PHUIInfoView())

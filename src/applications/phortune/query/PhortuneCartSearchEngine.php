@@ -229,6 +229,6 @@ final class PhortuneCartSearchEngine
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText($header)
-      ->appendChild($table);
+      ->setTable($table);
   }
 }

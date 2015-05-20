@@ -341,7 +341,7 @@ final class ManiphestTaskDetailController extends ManiphestController {
       $comment_box = id(new PHUIObjectBoxView())
         ->setFlush(true)
         ->setHeaderText($comment_header)
-        ->appendChild($comment_form);
+        ->setForm($comment_form);
       $timeline->setQuoteTargetID('transaction-comments');
       $timeline->setQuoteRef($object_name);
     }

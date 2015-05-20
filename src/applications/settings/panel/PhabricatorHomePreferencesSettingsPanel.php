@@ -188,7 +188,7 @@ final class PhabricatorHomePreferencesSettingsPanel
 
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($list);
+      ->setObjectList($list);
 
     return $box;
   }

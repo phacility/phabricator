@@ -120,7 +120,7 @@ final class PhortuneAccountEditController extends PhortuneController {
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
       ->setValidationException($validation_exception)
-      ->appendChild($form);
+      ->setForm($form);
 
     return $this->buildApplicationPage(
       array(

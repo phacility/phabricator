@@ -330,7 +330,7 @@ final class PhabricatorOwnersListController
 
     $panel = new PHUIObjectBoxView();
     $panel->setHeaderText($header);
-    $panel->appendChild($table);
+    $panel->setTable($table);
 
     return $panel;
   }

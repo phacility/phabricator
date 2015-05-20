@@ -50,7 +50,7 @@ final class PhortuneMerchantViewController
 
     $box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($properties);
+      ->addPropertyList($properties);
 
     $timeline = $this->buildTransactionTimeline(
       $merchant,
@@ -293,7 +293,7 @@ final class PhortuneMerchantViewController
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($provider_list);
+      ->setObjectList($provider_list);
   }
 
 

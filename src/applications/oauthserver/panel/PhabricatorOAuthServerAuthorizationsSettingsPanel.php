@@ -135,7 +135,7 @@ final class PhabricatorOAuthServerAuthorizationsSettingsPanel
 
     $panel = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($table);
+      ->setTable($table);
 
     return $panel;
   }

@@ -149,7 +149,7 @@ final class PhrictionDiffController extends PhrictionController {
           'a',
           array(
             'href' => $uri->alter('l', $l - 1)->alter('r', $r - 1),
-            'class' => 'button',
+            'class' => 'button simple',
           ),
           pht("\xC2\xAB Previous Change"));
       } else {
@@ -168,7 +168,7 @@ final class PhrictionDiffController extends PhrictionController {
           'a',
           array(
             'href' => $uri->alter('l', $l + 1)->alter('r', $r + 1),
-            'class' => 'button',
+            'class' => 'button simple',
           ),
           pht("Next Change \xC2\xBB"));
       } else {
@@ -206,6 +206,7 @@ final class PhrictionDiffController extends PhrictionController {
 
     $object_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
+      ->setCollapsed(true)
       ->appendChild($output);
 
     return $this->buildApplicationPage(

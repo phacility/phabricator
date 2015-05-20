@@ -28,25 +28,25 @@ final class PhabricatorConfigIssueListController
       $setup_issues[] = id(new PHUIObjectBoxView())
         ->setHeaderText(pht('Important Setup Issues'))
         ->setColor(PHUIObjectBoxView::COLOR_RED)
-        ->appendChild($important);
+        ->setObjectList($important);
     }
 
     if ($php) {
       $setup_issues[] = id(new PHUIObjectBoxView())
         ->setHeaderText(pht('PHP Setup Issues'))
-        ->appendChild($php);
+        ->setObjectList($php);
     }
 
     if ($mysql) {
       $setup_issues[] = id(new PHUIObjectBoxView())
         ->setHeaderText(pht('MySQL Setup Issues'))
-        ->appendChild($mysql);
+        ->setObjectList($mysql);
     }
 
     if ($other) {
       $setup_issues[] = id(new PHUIObjectBoxView())
         ->setHeaderText(pht('Other Setup Issues'))
-        ->appendChild($other);
+        ->setObjectList($other);
     }
 
     if (empty($setup_issues)) {

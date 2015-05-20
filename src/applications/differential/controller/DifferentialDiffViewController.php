@@ -130,7 +130,7 @@ final class DifferentialDiffViewController extends DifferentialController {
     $prop_box = id(new PHUIObjectBoxView())
       ->setHeader($property_head)
       ->addPropertyList($property_view)
-      ->appendChild($form);
+      ->setForm($form);
 
     return $this->buildApplicationPage(
       array(

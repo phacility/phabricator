@@ -83,7 +83,7 @@ final class PhabricatorRepositoryListController
       $header->addActionLink($button);
     }
     $panel->setHeader($header);
-    $panel->appendChild($table);
+    $panel->setTable($table);
 
     $projects = id(new PhabricatorRepositoryArcanistProject())->loadAll();
 
@@ -145,7 +145,7 @@ final class PhabricatorRepositoryListController
 
     $project_panel = new PHUIObjectBoxView();
     $project_panel->setHeaderText(pht('Arcanist Projects'));
-    $project_panel->appendChild($project_table);
+    $project_panel->setTable($project_table);
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb(pht('Repository List'));

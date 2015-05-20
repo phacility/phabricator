@@ -86,7 +86,7 @@ final class PhabricatorConduitConsoleController
 
     $form_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Call Method'))
-      ->appendChild($form);
+      ->setForm($form);
 
     $content = array();
 
@@ -129,7 +129,7 @@ final class PhabricatorConduitConsoleController
           ));
       $content[] = id(new PHUIObjectBoxView())
         ->setHeaderText(pht('Builtin Orders'))
-        ->appendChild($table);
+        ->setTable($table);
 
       $columns = $query->getOrderableColumns();
 
@@ -154,7 +154,7 @@ final class PhabricatorConduitConsoleController
           ));
       $content[] = id(new PHUIObjectBoxView())
         ->setHeaderText(pht('Column Orders'))
-        ->appendChild($table);
+        ->setTable($table);
     }
 
     $crumbs = $this->buildApplicationCrumbs();

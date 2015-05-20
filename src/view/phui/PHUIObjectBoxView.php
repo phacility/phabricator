@@ -150,7 +150,7 @@ final class PHUIObjectBoxView extends AphrontView {
     $this->objectList = $list;
     return $this;
   }
-  
+
   public function setTable($table) {
     $this->collapsed = true;
     $this->table = $table;
@@ -306,7 +306,7 @@ final class PHUIObjectBoxView extends AphrontView {
     if ($this->color) {
       $content->addClass('phui-object-box-'.$this->color);
     }
-    
+
     if ($this->collapsed) {
       $content->addClass('phui-object-box-collapsed');
     }

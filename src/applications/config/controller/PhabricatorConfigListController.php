@@ -18,7 +18,7 @@ final class PhabricatorConfigListController
 
     $core = id(new PHUIObjectBoxView())
       ->setHeaderText($title)
-      ->appendChild($core_list);
+      ->setObjectList($core_list);
 
     $apps = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Applications Configuration'))

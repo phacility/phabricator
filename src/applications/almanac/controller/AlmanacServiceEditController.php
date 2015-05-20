@@ -238,7 +238,7 @@ final class AlmanacServiceEditController
     $box = id(new PHUIObjectBoxView())
       ->setFormErrors($errors)
       ->setHeaderText($title)
-      ->appendChild($form);
+      ->setForm($form);
 
     return $this->buildApplicationPage(
       array(

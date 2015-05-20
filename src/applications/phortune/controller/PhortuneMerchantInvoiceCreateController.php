@@ -231,7 +231,7 @@ final class PhortuneMerchantInvoiceCreateController
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('New Invoice'))
       ->setFormErrors($errors)
-      ->appendChild($form);
+      ->setForm($form);
 
     return $this->buildApplicationPage(
       array(

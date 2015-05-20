@@ -139,7 +139,7 @@ final class AlmanacDeviceViewController
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($table);
+      ->setTable($table);
   }
 
   private function buildSSHKeysTable(AlmanacDevice $device) {
@@ -200,7 +200,7 @@ final class AlmanacDeviceViewController
 
     return id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($table);
+      ->setTable($table);
 
 
   }
@@ -249,7 +249,7 @@ final class AlmanacDeviceViewController
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Bound Services'))
-      ->appendChild($table);
+      ->setTable($table);
   }
 
 

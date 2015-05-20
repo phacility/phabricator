@@ -160,6 +160,6 @@ final class PhortuneSubscriptionSearchEngine
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText($header)
-      ->appendChild($table);
+      ->setTable($table);
   }
 }

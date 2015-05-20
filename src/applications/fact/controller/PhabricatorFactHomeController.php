@@ -53,7 +53,7 @@ final class PhabricatorFactHomeController extends PhabricatorFactController {
 
     $panel = new PHUIObjectBoxView();
     $panel->setHeaderText(pht('Facts'));
-    $panel->appendChild($table);
+    $panel->setTable($table);
 
     $chart_form = $this->buildChartForm();
 
