@@ -385,12 +385,11 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_BUILDABLE:
-      case PhabricatorTransactions::TYPE_TOKEN:
-        return;
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $field = $this->getCustomFieldForTransaction($object, $xaction);
         return $field->applyApplicationTransactionInternalEffects($xaction);
+      case PhabricatorTransactions::TYPE_BUILDABLE:
+      case PhabricatorTransactions::TYPE_TOKEN:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
@@ -408,9 +407,6 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
     switch ($xaction->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_BUILDABLE:
-      case PhabricatorTransactions::TYPE_TOKEN:
-        return;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         $subeditor = id(new PhabricatorSubscriptionsEditor())
           ->setObject($object)
@@ -442,6 +438,8 @@ abstract class PhabricatorApplicationTransactionEditor
         $field = $this->getCustomFieldForTransaction($object, $xaction);
         return $field->applyApplicationTransactionExternalEffects($xaction);
       case PhabricatorTransactions::TYPE_EDGE:
+      case PhabricatorTransactions::TYPE_BUILDABLE:
+      case PhabricatorTransactions::TYPE_TOKEN:
       case PhabricatorTransactions::TYPE_VIEW_POLICY:
       case PhabricatorTransactions::TYPE_EDIT_POLICY:
       case PhabricatorTransactions::TYPE_JOIN_POLICY:
@@ -471,11 +469,17 @@ abstract class PhabricatorApplicationTransactionEditor
       "implementation!");
   }
 
-  // TODO: Write proper documentation for these hooks. These are like the
-  // "applyCustom" hooks, except that implementation is optional, so you do
-  // not need to handle all of the builtin transaction types. See T6403. These
-  // are not completely implemented.
-
+  /**
+   * @{class:PhabricatorTransactions} provides many built-in transactions
+   * which should not require much - if any - code in specific applications.
+   *
+   * This method is a hook for the exceedingly-rare cases where you may need
+   * to do **additional** work for built-in transactions. Developers should
+   * extend this method, making sure to return the parent implementation
+   * regardless of handling any transactions.
+   *
+   * See also @{method:applyBuiltinExternalTransaction}.
+   */
   protected function applyBuiltinInternalTransaction(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
@@ -493,6 +497,9 @@ abstract class PhabricatorApplicationTransactionEditor
     }
   }
 
+  /**
+   * See @{method::applyBuiltinInternalTransaction}.
+   */
   protected function applyBuiltinExternalTransaction(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
