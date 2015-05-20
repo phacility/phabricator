@@ -297,57 +297,6 @@ EOTEXT
         '[Maniphest]')
         ->setDescription(pht('Subject prefix for Maniphest mail.')),
       $this->newOption(
-        'metamta.maniphest.public-create-email',
-        'string',
-        null)
-        ->setLocked(true)
-        ->setLockedMessage(pht(
-          'This configuration is deprecated. See description for details.'))
-        ->setSummary(pht('DEPRECATED - Allow filing bugs via email.'))
-        ->setDescription(
-          pht(
-            'This config has been deprecated in favor of [[ '.
-            '/applications/view/PhabricatorManiphestApplication/ | '.
-            'application settings ]], which allow for multiple email '.
-            'addresses and other functionality.'."\n\n".
-            'You can configure an email address like '.
-            '"bugs@phabricator.example.com" which will automatically create '.
-            'Maniphest tasks when users send email to it. This relies on the '.
-            '"From" address to authenticate users, so it is is not completely '.
-            'secure. To set this up, enter a complete email address like '.
-            '"bugs@phabricator.example.com" and then configure mail to that '.
-            'address so it routed to Phabricator (if you\'ve already '.
-            'configured reply handlers, you\'re probably already done). See '.
-            '"Configuring Inbound Email" in the documentation for more '.
-            'information.')),
-      $this->newOption(
-        'metamta.maniphest.default-public-author',
-        'string',
-        null)
-        ->setLocked(true)
-        ->setLockedMessage(pht(
-          'This configuration is deprecated. See description for details.'))
-        ->setSummary(pht(
-          'DEPRECATED - Username anonymous bugs are filed under.'))
-        ->setDescription(
-          pht(
-            'This config has been deprecated in favor of [[ '.
-            '/applications/view/PhabricatorManiphestApplication/ | '.
-            'application settings ]], which allow for multiple email '.
-            'addresses each with its own default author, and other '.
-            'functionality.'."\n\n".
-            'If you enable `metamta.maniphest.public-create-email` and create '.
-            'an email address like "bugs@phabricator.example.com", it will '.
-            'default to rejecting mail which doesn\'t come from a known user. '.
-            'However, you might want to let anyone send email to this '.
-            'address; to do so, set a default author here (a Phabricator '.
-            'username). A typical use of this might be to create a "System '.
-            'Agent" user called "bugs" and use that name here. If you specify '.
-            'a valid username, mail will always be accepted and used to '.
-            'create a task, even if the sender is not a system user. The '.
-            'original email address will be stored in an `From Email` field '.
-            'on the task.')),
-      $this->newOption(
         'maniphest.priorities.unbreak-now',
         'int',
         100)

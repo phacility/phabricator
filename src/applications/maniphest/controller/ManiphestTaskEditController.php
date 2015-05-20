@@ -684,19 +684,7 @@ final class ManiphestTaskEditController extends ManiphestController {
       'tokenizerID' => $project_tokenizer_id,
     ));
 
-    $description_control = new PhabricatorRemarkupControl();
-    // "Upsell" creating tasks via email in create flows if the instance is
-    // configured for this awesomeness.
-    $email_create = PhabricatorEnv::getEnvConfig(
-      'metamta.maniphest.public-create-email');
-    if (!$task->getID() && $email_create) {
-      $email_hint = pht(
-        'You can also create tasks by sending an email to: %s',
-        phutil_tag('tt', array(), $email_create));
-      $description_control->setCaption($email_hint);
-    }
-
-    $description_control
+    $description_control = id(new PhabricatorRemarkupControl())
       ->setLabel(pht('Description'))
       ->setName('description')
       ->setID('description-textarea')
@@ -705,7 +693,6 @@ final class ManiphestTaskEditController extends ManiphestController {
 
     $form
       ->appendChild($description_control);
-
 
     if ($request->isAjax()) {
       $dialog = id(new AphrontDialogView())

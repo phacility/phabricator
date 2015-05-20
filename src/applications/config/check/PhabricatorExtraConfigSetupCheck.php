@@ -171,6 +171,10 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'Phabricator no longer supports global customization of monospaced '.
       'fonts.');
 
+    $public_mail_reason = pht(
+      'Inbound mail addresses are now configured for each application '.
+      'in the Applications tool.');
+
     $ancient_config += array(
       'phid.external-loaders' =>
         pht(
@@ -256,6 +260,11 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'search.engine-selector' => pht(
         'Phabricator now automatically discovers available search engines '.
         'at runtime.'),
+
+      'metamta.files.public-create-email' => $public_mail_reason,
+      'metamta.maniphest.public-create-email' => $public_mail_reason,
+      'metamta.maniphest.default-public-author' => $public_mail_reason,
+      'metamta.paste.public-create-email' => $public_mail_reason,
     );
 
     return $ancient_config;
