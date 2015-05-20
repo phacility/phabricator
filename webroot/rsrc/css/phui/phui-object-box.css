@@ -7,6 +7,14 @@
   padding: 12px 12px 4px 12px;
 }
 
+.phui-object-box.phui-object-box-collapsed {
+  padding: 12px 0 0 0;
+}
+
+.phui-object-box.phui-object-box-collapsed .phui-header-shell {
+  padding: 0 4px 4px 16px;
+}
+
 div.phui-object-box.phui-object-box-flush {
   margin-top: 0;
 }

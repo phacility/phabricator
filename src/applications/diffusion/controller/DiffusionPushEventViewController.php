@@ -43,7 +43,7 @@ final class DiffusionPushEventViewController
 
     $commits_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Pushed Commits'))
-      ->appendChild($commits_table);
+      ->setTable($commits_table);
 
     $logs = $event->getLogs();
 
@@ -54,7 +54,7 @@ final class DiffusionPushEventViewController
 
     $update_box = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('All Pushed Updates'))
-      ->appendChild($updates_table);
+      ->setTable($updates_table);
 
     return $this->buildApplicationPage(
       array(

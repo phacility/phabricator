@@ -251,8 +251,8 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Table of Contents'))
+      ->setTable($table)
       ->appendChild($anchor)
-      ->appendChild($table)
       ->appendChild($buttons);
   }
 

@@ -397,7 +397,7 @@ final class DiffusionRepositoryController extends DiffusionController {
 
     $header->addActionLink($button);
     $panel->setHeader($header);
-    $panel->appendChild($table);
+    $panel->setTable($table);
 
     return $panel;
   }
@@ -572,7 +572,7 @@ final class DiffusionRepositoryController extends DiffusionController {
       ->setHeader(pht('Recent Commits'))
       ->addActionLink($button);
     $panel->setHeader($header);
-    $panel->appendChild($history_table);
+    $panel->setTable($history_table);
 
     return $panel;
   }
@@ -658,7 +658,7 @@ final class DiffusionRepositoryController extends DiffusionController {
       $browse_panel->appendChild($form_box);
     }
 
-    $browse_panel->appendChild($browse_table);
+    $browse_panel->setTable($browse_table);
 
     return $browse_panel;
   }

@@ -103,7 +103,7 @@ final class DiffusionBrowseSearchController extends DiffusionBrowseController {
 
     $box = id(new PHUIObjectBoxView())
       ->setHeaderText($header)
-      ->appendChild($table);
+      ->setTable($table);
 
     $pager_box = id(new PHUIBoxView())
       ->addMargin(PHUI::MARGIN_LARGE)

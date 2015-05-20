@@ -59,7 +59,7 @@ final class DiffusionHistoryController extends DiffusionController {
 
     $history_panel = new PHUIObjectBoxView();
     $history_panel->setHeaderText(pht('History'));
-    $history_panel->appendChild($history_table);
+    $history_panel->setTable($history_table);
 
     $content[] = $history_panel;
 

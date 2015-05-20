@@ -261,7 +261,7 @@ final class DiffusionCommitController extends DiffusionController {
         $header->addActionLink($button);
       }
 
-      $change_panel->appendChild($change_table);
+      $change_panel->setTable($change_table);
       $change_panel->setHeader($header);
 
       $content[] = $change_panel;
@@ -918,7 +918,7 @@ final class DiffusionCommitController extends DiffusionController {
 
     $panel = new PHUIObjectBoxView();
     $panel->setHeaderText(pht('Merged Changes'));
-    $panel->appendChild($history_table);
+    $panel->setTable($history_table);
     if ($caption) {
       $panel->setInfoView($caption);
     }

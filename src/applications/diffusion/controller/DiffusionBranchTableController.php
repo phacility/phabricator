@@ -47,7 +47,7 @@ final class DiffusionBranchTableController extends DiffusionController {
 
       $panel = id(new PHUIObjectBoxView())
         ->setHeaderText(pht('Branches'))
-        ->appendChild($view);
+        ->setTable($view);
 
       $content = $panel;
     }

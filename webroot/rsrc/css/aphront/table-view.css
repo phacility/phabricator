@@ -208,7 +208,7 @@ span.single-display-line-content {
 }
 
 .aphront-table-view tr.alt-highlighted {
-  background: #fcf2bb;
+  background: {$sh-yellowbackground};
 }
 
 .aphront-table-view tr.no-data td {

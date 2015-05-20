@@ -16,6 +16,8 @@ final class PHUIObjectBoxView extends AphrontView {
   private $metadata;
   private $actionListID;
   private $objectList;
+  private $table;
+  private $collapsed = false;
 
   private $tabs = array();
   private $propertyLists = array();
@@ -146,6 +148,17 @@ final class PHUIObjectBoxView extends AphrontView {
 
   public function setObjectList($list) {
     $this->objectList = $list;
+    return $this;
+  }
+  
+  public function setTable($table) {
+    $this->collapsed = true;
+    $this->table = $table;
+    return $this;
+  }
+
+  public function setCollapsed($collapsed) {
+    $this->collapsed = $collapsed;
     return $this;
   }
 
@@ -280,6 +293,7 @@ final class PHUIObjectBoxView extends AphrontView {
           $tabs,
           $tab_lists,
           $property_lists,
+          $this->table,
           $this->renderChildren(),
         ))
       ->setBorder(true)
@@ -291,6 +305,10 @@ final class PHUIObjectBoxView extends AphrontView {
 
     if ($this->color) {
       $content->addClass('phui-object-box-'.$this->color);
+    }
+    
+    if ($this->collapsed) {
+      $content->addClass('phui-object-box-collapsed');
     }
 
     if ($this->tabs) {
