@@ -17,7 +17,6 @@
   background: #ffffff;
   border-radius: 3px;
   border: 1px solid {$lightblueborder};
-  border-bottom: 1px solid {$blueborder};
   text-align: left;
   width: 288px;
 }
@@ -27,7 +26,11 @@
 }
 
 .device-desktop .phui-pinboard-item-view:hover {
-  box-shadow: {$dropshadow};
+  border-color: {$blue};
+}
+
+.device-desktop .phui-pinboard-item-view:hover .phui-pinboard-item-header a {
+  color: {$blue};
 }
 
 /* On phones, show a single column of items. */
@@ -42,13 +45,13 @@
   font-weight: bold;
   border-top-left-radius: 3px;
   border-top-right-radius: 3px;
-  border-bottom: 1px solid {$lightblueborder};
+  border-bottom: 1px solid {$thinblueborder};
   white-space: nowrap;
   overflow: hidden;
 }
 
 .phui-pinboard-item-header a {
-  color: {$bluetext};
+  color: {$darkbluetext};
 }
 
 .phui-pinboard-item-image-link {

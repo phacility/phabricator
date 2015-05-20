@@ -100,8 +100,6 @@ return array(
     'aphront-tooltip-css',
     'phabricator-flag-css',
     'phui-info-view-css',
-
-    'sprite-gradient-css',
     'sprite-menu-css',
 
     'phabricator-main-menu-view',
