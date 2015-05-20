@@ -270,9 +270,19 @@ final class AphrontFormDateControl extends AphrontFormControl {
       ),
       $cicon);
 
+    $values = $this->getTimeTypeaheadValues();
+
+    $time_id = celerity_generate_unique_node_id();
+    Javelin::initBehavior('time-typeahead', array(
+      'timeID' => $time_id,
+      'timeValues' => $values,
+      ));
+
+
     $time_sel = javelin_tag(
       'input',
       array(
+        'autocomplete' => 'off',
         'name'  => $this->getTimeInputName(),
         'sigil' => 'time-input',
         'value' => $this->getTimeInputValue(),
@@ -280,6 +290,14 @@ final class AphrontFormDateControl extends AphrontFormControl {
         'class' => 'aphront-form-date-time-input',
       ),
       '');
+
+    $time_div = javelin_tag(
+      'div',
+      array(
+        'id' => $time_id,
+        'class' => 'aphront-form-date-time-input-container',
+      ),
+      $time_sel);
 
     Javelin::initBehavior('fancy-datepicker', array());
 
@@ -308,7 +326,7 @@ final class AphrontFormDateControl extends AphrontFormControl {
         $months_sel,
         $years_sel,
         $cal_icon,
-        $time_sel,
+        $time_div,
       ));
   }
 
@@ -357,6 +375,24 @@ final class AphrontFormDateControl extends AphrontFormControl {
     }
 
     return $value;
+  }
+
+  private function getTimeTypeaheadValues() {
+    $times = array();
+    $am_pm_list = array('AM', 'PM');
+
+    foreach ($am_pm_list as $am_pm) {
+      for ($hour = 0; $hour < 12; $hour++) {
+        $actual_hour = ($hour == 0) ? 12 : $hour;
+        $times[] = $actual_hour.':00 '.$am_pm;
+        $times[] = $actual_hour.':30 '.$am_pm;
+      }
+    }
+
+    foreach ($times as $key => $time) {
+      $times[$key] = array($key, $time);
+    }
+    return $times;
   }
 
 }
