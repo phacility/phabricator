@@ -113,6 +113,26 @@ final class DiffusionSymbolQuery extends PhabricatorOffsetPagedQuery {
   }
 
 
+/* -(  Specialized Query  )-------------------------------------------------- */
+
+  public function existsSymbolsInRepository($repository_phid) {
+    $this
+      ->withRepositoryPHIDs(array($repository_phid))
+      ->setLimit(1);
+
+    $symbol = new PhabricatorRepositorySymbol();
+    $conn_r = $symbol->establishConnection('r');
+
+    $data = queryfx_all(
+      $conn_r,
+      'SELECT * FROM %T %Q %Q',
+      $symbol->getTableName(),
+      $this->buildWhereClause($conn_r),
+      $this->buildLimitClause($conn_r));
+
+    return (!empty($data));
+  }
+
 /* -(  Executing the Query  )------------------------------------------------ */
 
 

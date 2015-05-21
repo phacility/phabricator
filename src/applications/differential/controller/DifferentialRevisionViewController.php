@@ -261,12 +261,11 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     $repository = $revision->getRepository();
     if ($repository) {
-      list($symbol_indexes, $repository_phids) = $this->buildSymbolIndexes(
+      $symbol_indexes = $this->buildSymbolIndexes(
         $repository,
         $visible_changesets);
     } else {
       $symbol_indexes = array();
-      $repository_phids = null;
     }
 
     $revision_detail->setActions($actions);
@@ -305,15 +304,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
         'id' => $wrap_id,
       ),
       $comment_view);
-
-    if ($repository) {
-      Javelin::initBehavior(
-        'repository-crossreference',
-        array(
-          'section' => $wrap_id,
-          'repositories' => $repository_phids,
-        ));
-    }
 
     $changeset_view = new DifferentialChangesetListView();
     $changeset_view->setChangesets($changesets);
@@ -758,11 +748,22 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $langs = $repository->getSymbolLanguages();
     $langs = nonempty($langs, array());
 
+    $sources = $repository->getSymbolSources();
+    $sources = nonempty($sources, array());
+
     $symbol_indexes = array();
+
+    if ($langs && $sources) {
+      $have_symbols = id(new DiffusionSymbolQuery())
+          ->existsSymbolsInRepository($repository->getPHID());
+      if (!$have_symbols) {
+        return $symbol_indexes;
+      }
+    }
 
     $repository_phids = array_merge(
       array($repository->getPHID()),
-      nonempty($repository->getSymbolSources(), array()));
+      $sources);
 
     $indexed_langs = array_fill_keys($langs, true);
     foreach ($visible_changesets as $key => $changeset) {
@@ -775,7 +776,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       }
     }
 
-    return array($symbol_indexes, $repository_phids);
+    return $symbol_indexes;
   }
 
   private function loadOtherRevisions(

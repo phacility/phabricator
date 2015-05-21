@@ -267,13 +267,28 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
       $id = celerity_generate_unique_node_id();
 
       $repo = $drequest->getRepository();
-      $symbol_repos = $repo->getSymbolSources();
+      $symbol_repos = nonempty($repo->getSymbolSources(), array());
       $symbol_repos[] = $repo;
 
       $lang = last(explode('.', $drequest->getPath()));
       $repo_languages = $repo->getSymbolLanguages();
+      $repo_languages = nonempty($repo_languages, array());
       $repo_languages = array_fill_keys($repo_languages, true);
-      if (empty($repo_languages) || isset($repo_languages[$lang])) {
+
+      $needs_symbols = true;
+      if ($repo_languages && $symbol_repos) {
+        $have_symbols = id(new DiffusionSymbolQuery())
+            ->existsSymbolsInRepository($repo->getPHID());
+        if (!$have_symbols) {
+          $needs_symbols = false;
+        }
+      }
+
+      if ($needs_symbols && $repo_languages) {
+        $needs_symbols = isset($repo_languages[$lang]);
+      }
+
+      if ($needs_symbols) {
         Javelin::initBehavior(
           'repository-crossreference',
           array(
