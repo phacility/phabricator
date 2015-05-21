@@ -6,6 +6,11 @@ final class PhabricatorElasticSearchEngine extends PhabricatorSearchEngine {
   private $index;
   private $timeout;
 
+  public function __construct() {
+    $this->uri = PhabricatorEnv::getEnvConfig('search.elastic.host');
+    $this->index = PhabricatorEnv::getEnvConfig('search.elastic.namespace');
+  }
+
   public function getEngineIdentifier() {
     return 'elasticsearch';
   }
@@ -15,7 +20,7 @@ final class PhabricatorElasticSearchEngine extends PhabricatorSearchEngine {
   }
 
   public function isEnabled() {
-    return (bool)PhabricatorEnv::getEnvConfig('search.elastic.host');
+    return (bool)$this->uri;
   }
 
   public function setURI($uri) {
