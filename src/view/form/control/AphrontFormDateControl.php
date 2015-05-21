@@ -13,6 +13,7 @@ final class AphrontFormDateControl extends AphrontFormControl {
   private $continueOnInvalidDate = false;
   private $isTimeDisabled;
   private $isDisabled;
+  private $endDateID;
 
   public function setAllowNull($allow_null) {
     $this->allowNull = $allow_null;
@@ -21,6 +22,11 @@ final class AphrontFormDateControl extends AphrontFormControl {
 
   public function setIsTimeDisabled($is_disabled) {
     $this->isTimeDisabled = $is_disabled;
+    return $this;
+  }
+
+  public function setEndDateID($value) {
+    $this->endDateID = $value;
     return $this;
   }
 
@@ -274,7 +280,8 @@ final class AphrontFormDateControl extends AphrontFormControl {
 
     $time_id = celerity_generate_unique_node_id();
     Javelin::initBehavior('time-typeahead', array(
-      'timeID' => $time_id,
+      'startTimeID' => $time_id,
+      'endTimeID' => $this->endDateID,
       'timeValues' => $values,
       ));
 

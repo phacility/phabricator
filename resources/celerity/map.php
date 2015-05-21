@@ -466,7 +466,7 @@ return array(
     'rsrc/js/core/behavior-scrollbar.js' => '834a1173',
     'rsrc/js/core/behavior-search-typeahead.js' => '048330fa',
     'rsrc/js/core/behavior-select-on-click.js' => '4e3e79a6',
-    'rsrc/js/core/behavior-time-typeahead.js' => '3416cef7',
+    'rsrc/js/core/behavior-time-typeahead.js' => '8bfbb401',
     'rsrc/js/core/behavior-toggle-class.js' => '5d7c9f33',
     'rsrc/js/core/behavior-tokenizer.js' => 'b3a4b884',
     'rsrc/js/core/behavior-tooltip.js' => '3ee3408b',
@@ -641,7 +641,7 @@ return array(
     'javelin-behavior-slowvote-embed' => '887ad43f',
     'javelin-behavior-stripe-payment-form' => '3f5d6dbf',
     'javelin-behavior-test-payment-form' => 'fc91ab6c',
-    'javelin-behavior-time-typeahead' => '3416cef7',
+    'javelin-behavior-time-typeahead' => '8bfbb401',
     'javelin-behavior-toggle-class' => '5d7c9f33',
     'javelin-behavior-typeahead-browse' => '635de1ec',
     'javelin-behavior-typeahead-search' => '93d0c9e3',
@@ -1040,14 +1040,6 @@ return array(
     ),
     '331b1611' => array(
       'javelin-install',
-    ),
-    '3416cef7' => array(
-      'javelin-behavior',
-      'javelin-util',
-      'javelin-dom',
-      'javelin-stratcom',
-      'javelin-vector',
-      'javelin-typeahead-static-source',
     ),
     '3975b470' => array(
       'javelin-behavior',
@@ -1494,6 +1486,14 @@ return array(
       'javelin-util',
       'javelin-request',
       'javelin-typeahead-source',
+    ),
+    '8bfbb401' => array(
+      'javelin-behavior',
+      'javelin-util',
+      'javelin-dom',
+      'javelin-stratcom',
+      'javelin-vector',
+      'javelin-typeahead-static-source',
     ),
     '8ce821c5' => array(
       'phabricator-notification',

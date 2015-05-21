@@ -21,6 +21,10 @@ final class PhabricatorCalendarEventEditController
     $error_end_date = true;
     $validation_exception = null;
 
+    $all_day_id = celerity_generate_unique_node_id();
+    $start_date_id = celerity_generate_unique_node_id();
+    $end_date_id = null;
+
     if ($this->isCreate()) {
       $event = PhabricatorCalendarEvent::initializeNewCalendarEvent($user);
       list($start_value, $end_value) = $this->getDefaultTimeValues($user);
@@ -31,6 +35,7 @@ final class PhabricatorCalendarEventEditController
       $subscribers = array();
       $invitees = array($user_phid);
       $cancel_uri = $this->getApplicationURI();
+      $end_date_id = celerity_generate_unique_node_id();
     } else {
       $event = id(new PhabricatorCalendarEventQuery())
         ->setViewer($user)
@@ -178,10 +183,6 @@ final class PhabricatorCalendarEventEditController
       }
     }
 
-    $all_day_id = celerity_generate_unique_node_id();
-    $start_date_id = celerity_generate_unique_node_id();
-    $end_date_id = celerity_generate_unique_node_id();
-
     Javelin::initBehavior('event-all-day', array(
       'allDayID' => $all_day_id,
       'startDateID' => $start_date_id,
@@ -209,7 +210,8 @@ final class PhabricatorCalendarEventEditController
       ->setError($error_start_date)
       ->setValue($start_value)
       ->setID($start_date_id)
-      ->setIsTimeDisabled($is_all_day);
+      ->setIsTimeDisabled($is_all_day)
+      ->setEndDateID($end_date_id);
 
     $end_control = id(new AphrontFormDateControl())
       ->setUser($user)
