@@ -105,7 +105,7 @@ final class DifferentialChangeType {
       self::TYPE_MESSAGE    => pht('Commit Message'),
       self::TYPE_CHILD      => pht('Contents Modified'),
     );
-    return idx($types, coalesce($type, '?'), 'Unknown');
+    return idx($types, coalesce($type, '?'), pht('Unknown'));
   }
 
 }

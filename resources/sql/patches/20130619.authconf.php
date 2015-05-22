@@ -60,11 +60,11 @@ foreach ($config_map as $provider_class => $spec) {
     $enabled_default);
 
   if (!$enabled) {
-    echo pht("Skipping %s (not enabled).\n", $provider_class);
+    echo pht('Skipping %s (not enabled).', $provider_class)."\n";
     // This provider was not previously enabled, so we can skip migrating it.
     continue;
   } else {
-    echo pht("Migrating %s...\n", $provider_class);
+    echo pht('Migrating %s...', $provider_class)."\n";
   }
 
   $registration_key = idx($spec, 'registration');
@@ -161,4 +161,4 @@ foreach ($config_map as $provider_class => $spec) {
   $config->save();
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

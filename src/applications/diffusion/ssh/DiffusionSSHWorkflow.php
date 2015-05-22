@@ -154,8 +154,7 @@ abstract class DiffusionSSHWorkflow extends PhabricatorSSHWorkflow {
     if (!preg_match($regex, $path, $matches)) {
       throw new Exception(
         pht(
-          'Unrecognized repository path "%s". Expected a path like '.
-          '"%s".',
+          'Unrecognized repository path "%s". Expected a path like "%s".',
           $path,
           '/diffusion/X/'));
     }

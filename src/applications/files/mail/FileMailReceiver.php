@@ -3,8 +3,8 @@
 final class FileMailReceiver extends PhabricatorObjectMailReceiver {
 
   public function isEnabled() {
-    $app_class = 'PhabricatorFilesApplication';
-    return PhabricatorApplication::isClassInstalled($app_class);
+    return PhabricatorApplication::isClassInstalled(
+      'PhabricatorFilesApplication');
   }
 
   protected function getObjectPattern() {

@@ -3,18 +3,18 @@
 final class PhabricatorGestureUIExample extends PhabricatorUIExample {
 
   public function getName() {
-    return 'Gestures';
+    return pht('Gestures');
   }
 
   public function getDescription() {
-    return hsprintf(
-      'Use <tt>touchable</tt> to listen for gesture events. Note that you '.
+    return pht(
+      'Use %s to listen for gesture events. Note that you '.
       'must be in device mode for this to work (you can narrow your browser '.
-      'window if you are on a desktop).');
+      'window if you are on a desktop).',
+      phutil_tag('tt', array(), 'touchable'));
   }
 
   public function renderExample() {
-
     $id = celerity_generate_unique_node_id();
 
     Javelin::initBehavior(

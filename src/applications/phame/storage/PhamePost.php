@@ -155,8 +155,9 @@ final class PhamePost extends PhameDAO
 
   public static function getVisibilityOptionsForSelect() {
     return array(
-      self::VISIBILITY_DRAFT     => 'Draft: visible only to me.',
-      self::VISIBILITY_PUBLISHED => 'Published: visible to the whole world.',
+      self::VISIBILITY_DRAFT     => pht('Draft: visible only to me.'),
+      self::VISIBILITY_PUBLISHED => pht(
+        'Published: visible to the whole world.'),
     );
   }
 
@@ -217,8 +218,7 @@ final class PhamePost extends PhameDAO
   }
 
   public function describeAutomaticCapability($capability) {
-    return pht(
-      'The author of a blog post can always view and edit it.');
+    return pht('The author of a blog post can always view and edit it.');
   }
 
 

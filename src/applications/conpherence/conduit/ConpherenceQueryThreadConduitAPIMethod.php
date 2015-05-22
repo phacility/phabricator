@@ -9,10 +9,10 @@ final class ConpherenceQueryThreadConduitAPIMethod
 
   public function getMethodDescription() {
     return pht(
-      'Query for conpherence threads for the logged in user. '.
-      'You can query by ids or phids for specific conpherence threads. '.
-      'Otherwise, specify limit and offset to query the most recently '.
-      'updated conpherences for the logged in user.');
+      'Query for Conpherence threads for the logged in user. You can query '.
+      'by IDs or PHIDs for specific Conpherence threads. Otherwise, specify '.
+      'limit and offset to query the most recently updated Conpherences for '.
+      'the logged in user.');
   }
 
   protected function defineParamTypes() {

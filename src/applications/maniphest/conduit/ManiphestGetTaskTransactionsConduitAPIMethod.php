@@ -8,7 +8,7 @@ final class ManiphestGetTaskTransactionsConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return 'Retrieve Maniphest Task Transactions.';
+    return pht('Retrieve Maniphest task transactions.');
   }
 
   protected function defineParamTypes() {

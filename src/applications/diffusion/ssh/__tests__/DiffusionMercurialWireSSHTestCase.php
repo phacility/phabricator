@@ -50,7 +50,7 @@ final class DiffusionMercurialWireSSHTestCase extends PhabricatorTestCase {
 
     $this->assertTrue(
       ($caught instanceof Exception),
-      "No extra messages for '{$file}'.");
+      pht("No extra messages for '%s'.", $file));
   }
 
 }

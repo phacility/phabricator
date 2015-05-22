@@ -55,8 +55,8 @@ final class PhabricatorAuthenticationConfigOptions
             "registration, you can disable the queue to reduce administrative ".
             "overhead.\n\n".
             "NOTE: Before you disable the queue, make sure ".
-            "{{auth.email-domains}} is configured correctly for your ".
-            "install!")),
+            "{{auth.email-domains}} is configured correctly ".
+            "for your install!")),
       $this->newOption('auth.email-domains', 'list<string>', array())
         ->setSummary(pht('Only allow registration from particular domains.'))
         ->setDescription(
@@ -89,8 +89,7 @@ final class PhabricatorAuthenticationConfigOptions
           ))
         ->setSummary(
           pht(
-            'Determines whether or not basic account information is '.
-            'editable.'))
+            'Determines whether or not basic account information is editable.'))
         ->setDescription(
           pht(
             'Is basic account information (email, real name, profile '.

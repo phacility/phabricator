@@ -73,7 +73,7 @@ final class ReleephProductCreateController extends ReleephProductController {
       ->setName('arcPrID')
       ->setValue($arc_pr_id)
       ->setCaption(pht(
-        'If your Arc project isn\'t listed, associate it with a repository %s',
+        "If your Arc project isn't listed, associate it with a repository %s.",
         phutil_tag(
           'a',
           array(
@@ -100,8 +100,8 @@ final class ReleephProductCreateController extends ReleephProductController {
           ->setName('trunkBranch')
           ->setValue($trunk_branch)
           ->setError($e_trunk_branch)
-          ->setCaption(pht('The development branch, '.
-              'from which requests will be picked.')))
+          ->setCaption(pht(
+            'The development branch, from which requests will be picked.')))
       ->appendChild($branch_name_preview)
       ->appendChild(
         id(new AphrontFormSubmitControl())

@@ -85,12 +85,12 @@ class PHUIFormPageView extends AphrontView {
     $name = $control->getName();
 
     if (!strlen($name)) {
-      throw new Exception('Form control has no name!');
+      throw new Exception(pht('Form control has no name!'));
     }
 
     if (isset($this->controls[$name])) {
       throw new Exception(
-        "Form page contains duplicate control with name '{$name}'!");
+        pht("Form page contains duplicate control with name '%s'!", $name));
     }
 
     $this->controls[$name] = $control;
@@ -106,7 +106,7 @@ class PHUIFormPageView extends AphrontView {
 
   public function getControl($name) {
     if (empty($this->controls[$name])) {
-      throw new Exception("No page control '{$name}'!");
+      throw new Exception(pht("No page control '%s'!", $name));
     }
     return $this->controls[$name];
   }
@@ -117,7 +117,7 @@ class PHUIFormPageView extends AphrontView {
 
   public function setPagedFormView(PHUIPagedFormView $view, $key) {
     if ($this->key) {
-      throw new Exception('This page is already part of a form!');
+      throw new Exception(pht('This page is already part of a form!'));
     }
     $this->form = $view;
     $this->key = $key;

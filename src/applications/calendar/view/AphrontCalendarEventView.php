@@ -107,7 +107,7 @@ final class AphrontCalendarEventView extends AphrontView {
   }
 
   public function render() {
-    throw new Exception('Events are only rendered indirectly.');
+    throw new Exception(pht('Events are only rendered indirectly.'));
   }
 
 }

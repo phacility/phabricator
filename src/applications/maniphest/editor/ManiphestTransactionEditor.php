@@ -167,14 +167,18 @@ final class ManiphestTransactionEditor
         $board_phid = idx($xaction->getNewValue(), 'projectPHID');
         if (!$board_phid) {
           throw new Exception(
-            pht("Expected 'projectPHID' in column transaction."));
+            pht(
+              "Expected '%s' in column transaction.",
+              'projectPHID'));
         }
 
         $old_phids = idx($xaction->getOldValue(), 'columnPHIDs', array());
         $new_phids = idx($xaction->getNewValue(), 'columnPHIDs', array());
         if (count($new_phids) !== 1) {
           throw new Exception(
-            pht("Expected exactly one 'columnPHIDs' in column transaction."));
+            pht(
+              "Expected exactly one '%s' in column transaction.",
+              'columnPHIDs'));
         }
 
         $columns = id(new PhabricatorProjectColumnQuery())

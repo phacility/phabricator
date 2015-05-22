@@ -5,12 +5,12 @@ $table_name = id(new ManiphestCustomFieldStorage())->getTableName();
 
 $rows = new LiskRawMigrationIterator($conn_w, 'maniphest_taskauxiliarystorage');
 
-echo "Migrating custom storage for Maniphest fields...\n";
+echo pht('Migrating custom storage for Maniphest fields...')."\n";
 foreach ($rows as $row) {
   $phid = $row['taskPHID'];
   $name = $row['name'];
 
-  echo "Migrating {$phid} / {$name}...\n";
+  echo pht('Migrating %s / %s...', $phid, $name)."\n";
 
   queryfx(
     $conn_w,
@@ -22,4 +22,4 @@ foreach ($rows as $row) {
     $row['value']);
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

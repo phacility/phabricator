@@ -7,7 +7,7 @@ final class FileDownloadConduitAPIMethod extends FileConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Download a file from the server.';
+    return pht('Download a file from the server.');
   }
 
   protected function defineParamTypes() {
@@ -22,7 +22,7 @@ final class FileDownloadConduitAPIMethod extends FileConduitAPIMethod {
 
   protected function defineErrorTypes() {
     return array(
-      'ERR-BAD-PHID' => 'No such file exists.',
+      'ERR-BAD-PHID' => pht('No such file exists.'),
     );
   }
 

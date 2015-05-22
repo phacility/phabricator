@@ -8,7 +8,7 @@ final class ArcanistProjectInfoConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return 'Get information about Arcanist projects.';
+    return pht('Get information about Arcanist projects.');
   }
 
   protected function defineParamTypes() {
@@ -23,7 +23,7 @@ final class ArcanistProjectInfoConduitAPIMethod
 
   protected function defineErrorTypes() {
     return array(
-      'ERR-BAD-ARCANIST-PROJECT' => 'No such project exists.',
+      'ERR-BAD-ARCANIST-PROJECT' => pht('No such project exists.'),
     );
   }
 

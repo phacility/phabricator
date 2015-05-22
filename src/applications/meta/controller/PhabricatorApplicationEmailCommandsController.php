@@ -42,36 +42,21 @@ final class PhabricatorApplicationEmailCommandsController
       "\n\n".
       'In most cases, you can reply to email you receive from Phabricator '.
       'to leave comments. You can also use **mail commands** to take a '.
-      'greater range of actions (like claming a task or requesting changes '.
+      'greater range of actions (like claiming a task or requesting changes '.
       'to a revision) without needing to log in to the web UI.'.
       "\n\n".
       'Mail commands are keywords which start with an exclamation point, '.
       'like `!claim`. Some commands may take parameters, like '.
-      '`!assign alincoln`.'.
-      "\n\n".
+      "`!assign alincoln`.\n\n".
       'To use mail commands, write one command per line at the beginning '.
       'or end of your mail message. For example, you could write this in a '.
       'reply to task email to claim the task:'.
-      "\n\n".
-
-      "```\n".
-      "!claim\n".
-      "\n".
-      "I'll take care of this.\n".
-      "```\n".
-
-      "\n\n".
+      "\n\n```\n!claim\n\nI'll take care of this.\n```\n\n\n".
       "When Phabricator receives your mail, it will process any commands ".
       "first, then post the remaining message body as a comment. You can ".
       "execute multiple commands at once:".
-      "\n\n".
-
-      "```\n".
-      "!assign alincoln\n".
-      "!close\n".
-      "\n".
-      "I just talked to @alincoln, and he showed me that he fixed this.\n".
-      "```\n",
+      "\n\n```\n!assign alincoln\n!close\n\nI just talked to @alincoln, ".
+      "and he showed me that he fixed this.\n```\n",
       PhabricatorEnv::getDoclink('Configuring Inbound Email'));
 
     $content[] = '= '.$spec['header'];

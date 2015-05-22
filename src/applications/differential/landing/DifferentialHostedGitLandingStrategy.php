@@ -14,13 +14,17 @@ final class DifferentialHostedGitLandingStrategy
     try {
       $this->commitRevisionToWorkspace($revision, $workspace, $viewer);
     } catch (Exception $e) {
-      throw new PhutilProxyException('Failed to commit patch', $e);
+      throw new PhutilProxyException(
+        pht('Failed to commit patch.'),
+        $e);
     }
 
     try {
       $this->pushWorkspaceRepository($repository, $workspace, $viewer);
     } catch (Exception $e) {
-      throw new PhutilProxyException('Failed to push changes upstream', $e);
+      throw new PhutilProxyException(
+        pht('Failed to push changes upstream.'),
+        $e);
     }
   }
 
@@ -45,7 +49,7 @@ final class DifferentialHostedGitLandingStrategy
       ."0000000000000000000000000000000000000000.."
       ."0000000000000000000000000000000000000000\n";
     if (strpos($raw_diff, $missing_binary) !== false) {
-      throw new Exception('Patch is missing content for a binary file');
+      throw new Exception(pht('Patch is missing content for a binary file'));
     }
 
     $future = $workspace->execFutureLocal('apply --index -');

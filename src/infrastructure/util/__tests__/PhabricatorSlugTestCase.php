@@ -40,7 +40,7 @@ final class PhabricatorSlugTestCase extends PhabricatorTestCase {
       $this->assertEqual(
         $normal,
         PhabricatorSlug::normalize($slug),
-        "Normalization of '{$slug}'");
+        pht("Normalization of '%s'", $slug));
     }
   }
 
@@ -55,7 +55,7 @@ final class PhabricatorSlugTestCase extends PhabricatorTestCase {
       $this->assertEqual(
         $ancestry,
         PhabricatorSlug::getAncestry($slug),
-        "Ancestry of '{$slug}'");
+        pht("Ancestry of '%s'", $slug));
     }
   }
 
@@ -71,7 +71,7 @@ final class PhabricatorSlugTestCase extends PhabricatorTestCase {
       $this->assertEqual(
         $depth,
         PhabricatorSlug::getDepth($slug),
-        "Depth of '{$slug}'");
+        pht("Depth of '%s'", $slug));
     }
   }
 }

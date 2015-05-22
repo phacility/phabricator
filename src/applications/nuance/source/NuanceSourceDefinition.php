@@ -15,7 +15,7 @@ abstract class NuanceSourceDefinition extends Phobject {
   public function requireActor() {
     $actor = $this->getActor();
     if (!$actor) {
-      throw new Exception('You must "setActor()" first!');
+      throw new PhutilInvalidStateException('setActor');
     }
     return $actor;
   }
@@ -31,7 +31,7 @@ abstract class NuanceSourceDefinition extends Phobject {
   public function requireSourceObject() {
     $source = $this->getSourceObject();
     if (!$source) {
-      throw new Exception('You must "setSourceObject()" first!');
+      throw new PhutilInvalidStateException('setSourceObject');
     }
     return $source;
   }
@@ -75,11 +75,12 @@ abstract class NuanceSourceDefinition extends Phobject {
         $name = $definition->getName();
         if (isset($definitions[$key])) {
           $conflict = $definitions[$key];
-          throw new Exception(sprintf(
-            'Defintion %s conflicts with definition %s. This is a programming '.
-            'error.',
-            $conflict,
-            $name));
+          throw new Exception(
+            pht(
+              'Definition %s conflicts with definition %s. This is a '.
+              'programming error.',
+              $conflict,
+              $name));
         }
       }
       $definitions = $objects;

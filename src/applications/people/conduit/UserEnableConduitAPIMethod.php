@@ -7,7 +7,7 @@ final class UserEnableConduitAPIMethod extends UserConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Re-enable specified users (admin only).';
+    return pht('Re-enable specified users (admin only).');
   }
 
   protected function defineParamTypes() {
@@ -22,8 +22,8 @@ final class UserEnableConduitAPIMethod extends UserConduitAPIMethod {
 
   protected function defineErrorTypes() {
     return array(
-      'ERR-PERMISSIONS' => 'Only admins can call this method.',
-      'ERR-BAD-PHID' => 'Non existent user PHID.',
+      'ERR-PERMISSIONS' => pht('Only admins can call this method.'),
+      'ERR-BAD-PHID' => pht('Non existent user PHID.'),
     );
   }
 

@@ -147,8 +147,9 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
 
     $markup_reason = pht(
       'Custom remarkup rules are now added by subclassing '.
-      'PhabricatorRemarkupCustomInlineRule or '.
-      'PhabricatorRemarkupCustomBlockRule.');
+      '%s or %s.',
+      'PhabricatorRemarkupCustomInlineRule',
+      'PhabricatorRemarkupCustomBlockRule');
 
     $session_reason = pht(
       'Sessions now expire and are garbage collected rather than having an '.
@@ -178,24 +179,26 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
     $ancient_config += array(
       'phid.external-loaders' =>
         pht(
-          'External loaders have been replaced. Extend `PhabricatorPHIDType` '.
-          'to implement new PHID and handle types.'),
+          'External loaders have been replaced. Extend `%s` '.
+          'to implement new PHID and handle types.',
+          'PhabricatorPHIDType'),
       'maniphest.custom-task-extensions-class' =>
         pht(
-          'Maniphest fields are now loaded automatically. You can configure '.
-          'them with `maniphest.fields`.'),
+          'Maniphest fields are now loaded automatically. '.
+          'You can configure them with `%s`.',
+          'maniphest.fields'),
       'maniphest.custom-fields' =>
         pht(
-          'Maniphest fields are now defined in '.
-          '`maniphest.custom-field-definitions`. Existing definitions have '.
-          'been migrated.'),
+          'Maniphest fields are now defined in `%s`. '.
+          'Existing definitions have been migrated.',
+          'maniphest.custom-field-definitions'),
       'differential.custom-remarkup-rules' => $markup_reason,
       'differential.custom-remarkup-block-rules' => $markup_reason,
       'auth.sshkeys.enabled' => pht(
         'SSH keys are now actually useful, so they are always enabled.'),
       'differential.anonymous-access' => pht(
-        'Phabricator now has meaningful global access controls. See '.
-        '`policy.allow-public`.'),
+        'Phabricator now has meaningful global access controls. See `%s`.',
+        'policy.allow-public'),
       'celerity.resource-path' => pht(
         'An alternate resource map is no longer supported. Instead, use '.
         'multiple maps. See T4222.'),
@@ -211,9 +214,10 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
       'differential.show-test-plan-field' => $differential_field_reason,
       'differential.field-selector' => $differential_field_reason,
       'phabricator.show-beta-applications' => pht(
-        'This option has been renamed to `phabricator.show-prototypes` '.
-        'to emphasize the unfinished nature of many prototype applications. '.
-        'Your existing setting has been migrated.'),
+        'This option has been renamed to `%s` to emphasize the '.
+        'unfinished nature of many prototype applications. '.
+        'Your existing setting has been migrated.',
+        'phabricator.show-prototypes'),
       'notification.user' => pht(
         'The notification server no longer requires root permissions. Start '.
         'the server as the user you want it to run under.'),
@@ -223,10 +227,12 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
         'The translation implementation has changed and providers are no '.
         'longer used or supported.'),
       'config.mask' => pht(
-        'Use `config.hide` instead of this option.'),
+        'Use `%s` instead of this option.',
+        'config.hide'),
       'phd.start-taskmasters' => pht(
         'Taskmasters now use an autoscaling pool. You can configure the '.
-        'pool size with `phd.taskmasters`.'),
+        'pool size with `%s`.',
+        'phd.taskmasters'),
       'storage.engine-selector' => pht(
         'Phabricator now automatically discovers available storage engines '.
         'at runtime.'),
@@ -234,8 +240,8 @@ final class PhabricatorExtraConfigSetupCheck extends PhabricatorSetupCheck {
         'Phabricator now supports arbitrarily large files. Consult the '.
         'documentation for configuration details.'),
       'security.allow-outbound-http' => pht(
-        'This option has been replaced with the more granular option '.
-        '`security.outbound-blacklist`.'),
+        'This option has been replaced with the more granular option `%s`.',
+        'security.outbound-blacklist'),
       'metamta.reply.show-hints' => pht(
         'Phabricator no longer shows reply hints in mail.'),
 

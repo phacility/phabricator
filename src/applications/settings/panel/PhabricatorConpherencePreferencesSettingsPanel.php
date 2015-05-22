@@ -49,9 +49,10 @@ final class PhabricatorConpherencePreferencesSettingsPanel
                 => pht('Notifications Only'),
             ))
           ->setCaption(
-            pht('Should Conpherence send emails for updates or '.
-                'notifications only? This global setting can be overridden '.
-                'on a per-thread basis within Conpherence.')))
+            pht(
+              'Should Conpherence send emails for updates or '.
+              'notifications only? This global setting can be overridden '.
+              'on a per-thread basis within Conpherence.')))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Save Preferences')));

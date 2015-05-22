@@ -3,18 +3,18 @@
 $table = new PhabricatorAuthSSHKey();
 $conn_w = $table->establishConnection('w');
 
-echo "Updating SSH public key indexes...\n";
+echo pht('Updating SSH public key indexes...')."\n";
 
 $keys = new LiskMigrationIterator($table);
 foreach ($keys as $key) {
   $id = $key->getID();
 
-  echo "Updating key {$id}...\n";
+  echo pht('Updating key %d...', $id)."\n";
 
   try {
     $hash = $key->toPublicKey()->getHash();
   } catch (Exception $ex) {
-    echo "Key has bad format! Removing key.\n";
+    echo pht('Key has bad format! Removing key.')."\n";
     queryfx(
       $conn_w,
       'DELETE FROM %T WHERE id = %d',
@@ -30,7 +30,7 @@ foreach ($keys as $key) {
     $hash,
     $key->getID());
   if ($collision) {
-    echo "Key is a duplicate! Removing key.\n";
+    echo pht('Key is a duplicate! Removing key.')."\n";
     queryfx(
       $conn_w,
       'DELETE FROM %T WHERE id = %d',
@@ -47,4 +47,4 @@ foreach ($keys as $key) {
     $key->getID());
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

@@ -73,8 +73,10 @@ final class DifferentialCommitMessageParser {
     if (!$key_title || !$key_summary || ($label_map === null)) {
       throw new Exception(
         pht(
-          'Expected labelMap, summaryKey and titleKey to be set before '.
-          'parsing a corpus.'));
+          'Expected %s, %s and %s to be set before parsing a corpus.',
+          'labelMap',
+          'summaryKey',
+          'titleKey'));
     }
 
     $label_regexp = $this->buildLabelRegexp($label_map);

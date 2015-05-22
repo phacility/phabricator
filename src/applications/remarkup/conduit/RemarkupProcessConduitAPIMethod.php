@@ -11,7 +11,7 @@ final class RemarkupProcessConduitAPIMethod extends ConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Process text through remarkup in phabricator context.';
+    return pht('Process text through remarkup in Phabricator context.');
   }
 
   protected function defineReturnType() {
@@ -20,8 +20,8 @@ final class RemarkupProcessConduitAPIMethod extends ConduitAPIMethod {
 
   protected function defineErrorTypes() {
     return array(
-      'ERR-NO-CONTENT' => 'Content may not be empty.',
-      'ERR-INVALID-ENGINE' => 'Invalid markup engine.',
+      'ERR-NO-CONTENT' => pht('Content may not be empty.'),
+      'ERR-INVALID-ENGINE' => pht('Invalid markup engine.'),
     );
   }
 

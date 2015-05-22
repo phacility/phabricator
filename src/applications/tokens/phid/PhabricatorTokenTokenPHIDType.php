@@ -30,7 +30,7 @@ final class PhabricatorTokenTokenPHIDType extends PhabricatorPHIDType {
 
       $name = $token->getName();
 
-      $handle->setName("{$name} Token");
+      $handle->setName(pht('%s Token', $name));
     }
   }
 

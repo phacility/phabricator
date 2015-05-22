@@ -278,7 +278,8 @@ EOTEXT
             '     commands in email.'.
             "\n\n".
             'You can choose which priority is the default for newly created '.
-            'tasks with `maniphest.default-priority`.')),
+            'tasks with `%s`.',
+            'maniphest.default-priority')),
       $this->newOption('maniphest.statuses', $status_type, $status_defaults)
         ->setSummary(pht('Configure Maniphest task statuses.'))
         ->setDescription($status_description)
@@ -289,8 +290,9 @@ EOTEXT
           pht(
             'Choose a default priority for newly created tasks. You can '.
             'review and adjust available priorities by using the '.
-            '{{maniphest.priorities}} configuration option. The default value '.
-            '(`90`) corresponds to the default "Needs Triage" priority.')),
+            '%s configuration option. The default value (`90`) '.
+            'corresponds to the default "Needs Triage" priority.',
+            'maniphest.priorities')),
       $this->newOption(
         'metamta.maniphest.subject-prefix',
         'string',
@@ -305,7 +307,8 @@ EOTEXT
           pht(
             'Temporary setting. If set, this priority is used to populate the '.
             '"Unbreak Now" panel on the home page. You should adjust this if '.
-            'you adjust priorities using `maniphest.priorities`.')),
+            'you adjust priorities using `%s`.',
+            'maniphest.priorities')),
       $this->newOption(
         'maniphest.priorities.needs-triage',
         'int',
@@ -315,7 +318,8 @@ EOTEXT
           pht(
             'Temporary setting. If set, this priority is used to populate the '.
             '"Needs Triage" panel on the home page. You should adjust this if '.
-            'you adjust priorities using `maniphest.priorities`.')),
+            'you adjust priorities using `%s`.',
+            'maniphest.priorities')),
 
     );
   }

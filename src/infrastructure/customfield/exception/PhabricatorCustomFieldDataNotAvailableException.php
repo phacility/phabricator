@@ -1,16 +1,15 @@
 <?php
 
-final class PhabricatorCustomFieldDataNotAvailableException
-  extends Exception {
+final class PhabricatorCustomFieldDataNotAvailableException extends Exception {
 
   public function __construct(PhabricatorCustomField $field) {
-    $key = $field->getFieldKey();
-    $name = $field->getFieldName();
-    $class = get_class($field);
-
     parent::__construct(
-      "Custom field '{$name}' (with key '{$key}', of class '{$class}') is ".
-      "attempting to access data which is not available in this context.");
+      pht(
+        "Custom field '%s' (with key '%s', of class '%s') is attempting ".
+        "to access data which is not available in this context.",
+        $field->getFieldName(),
+        $field->getFieldKey(),
+        get_class($field)));
   }
 
 }

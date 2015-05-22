@@ -161,7 +161,7 @@ final class PhameBlogViewController extends PhameController {
       id(new PhabricatorActionView())
         ->setIcon('fa-pencil')
         ->setHref($this->getApplicationURI('blog/edit/'.$blog->getID().'/'))
-        ->setName('Edit Blog')
+        ->setName(pht('Edit Blog'))
         ->setDisabled(!$can_edit)
         ->setWorkflow(!$can_edit));
 
@@ -169,7 +169,7 @@ final class PhameBlogViewController extends PhameController {
       id(new PhabricatorActionView())
         ->setIcon('fa-times')
         ->setHref($this->getApplicationURI('blog/delete/'.$blog->getID().'/'))
-        ->setName('Delete Blog')
+        ->setName(pht('Delete Blog'))
         ->setDisabled(!$can_edit)
         ->setWorkflow(true));
 

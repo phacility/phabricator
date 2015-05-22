@@ -5,7 +5,7 @@ final class FileReplyHandler
 
   public function validateMailReceiver($mail_receiver) {
     if (!($mail_receiver instanceof PhabricatorFile)) {
-      throw new Exception('Mail receiver is not a PhabricatorFile.');
+      throw new Exception(pht('Mail receiver is not a %s.', 'PhabricatorFile'));
     }
   }
 

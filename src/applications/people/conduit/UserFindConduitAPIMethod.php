@@ -11,11 +11,11 @@ final class UserFindConduitAPIMethod extends UserConduitAPIMethod {
   }
 
   public function getMethodStatusDescription() {
-    return pht('Obsoleted by "user.query".');
+    return pht('Obsoleted by "%s".', 'user.query');
   }
 
   public function getMethodDescription() {
-    return pht('Lookup PHIDs by username. Obsoleted by "user.query".');
+    return pht('Lookup PHIDs by username. Obsoleted by "%s".', 'user.query');
   }
 
   protected function defineParamTypes() {

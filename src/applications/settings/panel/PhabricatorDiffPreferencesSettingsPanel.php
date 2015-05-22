@@ -85,10 +85,11 @@ final class PhabricatorDiffPreferencesSettingsPanel
               1 => pht('Enable Filetree'),
             ))
           ->setCaption(
-            pht('When looking at a revision or commit, enable a sidebar '.
-                'showing affected files. You can press %s to show or hide '.
-                'the sidebar.',
-                phutil_tag('tt', array(), 'f'))))
+            pht(
+              'When looking at a revision or commit, enable a sidebar '.
+              'showing affected files. You can press %s to show or hide '.
+              'the sidebar.',
+              phutil_tag('tt', array(), 'f'))))
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->setValue(pht('Save Preferences')));

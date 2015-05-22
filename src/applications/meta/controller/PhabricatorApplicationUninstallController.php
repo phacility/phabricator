@@ -31,8 +31,8 @@ final class PhabricatorApplicationUninstallController
       'phabricator.show-prototypes');
 
     $dialog = id(new AphrontDialogView())
-               ->setUser($user)
-               ->addCancelButton($view_uri);
+      ->setUser($user)
+      ->addCancelButton($view_uri);
 
     if ($selected->isPrototype() && !$prototypes_enabled) {
       $dialog
@@ -52,14 +52,18 @@ final class PhabricatorApplicationUninstallController
 
     if ($this->action == 'install') {
       if ($selected->canUninstall()) {
-        $dialog->setTitle('Confirmation')
-               ->appendChild(
-                 'Install '.$selected->getName().' application?')
-               ->addSubmitButton('Install');
+        $dialog
+          ->setTitle('Confirmation')
+          ->appendChild(
+            pht(
+              'Install %s application?',
+              $selected->getName()))
+          ->addSubmitButton('Install');
 
       } else {
-        $dialog->setTitle('Information')
-               ->appendChild('You cannot install an installed application.');
+        $dialog
+          ->setTitle('Information')
+          ->appendChild(pht('You cannot install an installed application.'));
       }
     } else {
       if ($selected->canUninstall()) {
@@ -86,10 +90,12 @@ final class PhabricatorApplicationUninstallController
             ->addSubmitButton(pht('Uninstall'));
         }
       } else {
-        $dialog->setTitle('Information')
-               ->appendChild(
-                 'This application cannot be uninstalled,
-                 because it is required for Phabricator to work.');
+        $dialog
+          ->setTitle(pht('Information'))
+          ->appendChild(
+            pht(
+              'This application cannot be uninstalled, '.
+              'because it is required for Phabricator to work.'));
       }
     }
     return id(new AphrontDialogResponse())->setDialog($dialog);

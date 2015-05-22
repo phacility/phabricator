@@ -101,7 +101,7 @@ final class PhragmentVersionController extends PhragmentController {
 
     foreach ($previous_versions as $previous_version) {
       $item = id(new PHUIObjectItemView());
-      $item->setHeader('Version '.$previous_version->getSequence());
+      $item->setHeader(pht('Version %s', $previous_version->getSequence()));
       $item->setHref($previous_version->getURI());
       $item->addAttribute(phabricator_datetime(
         $previous_version->getDateCreated(),
@@ -117,8 +117,8 @@ final class PhragmentVersionController extends PhragmentController {
     }
 
     $item = id(new PHUIObjectItemView());
-    $item->setHeader('Prior to Version 0');
-    $item->addAttribute('Prior to any content (empty file)');
+    $item->setHeader(pht('Prior to Version 0'));
+    $item->addAttribute(pht('Prior to any content (empty file)'));
     $item->addAction(id(new PHUIListItemView())
       ->setIcon('fa-file-o')
       ->setName(pht('Get Patch'))

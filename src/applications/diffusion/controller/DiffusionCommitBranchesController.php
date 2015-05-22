@@ -39,6 +39,6 @@ final class DiffusionCommitBranchesController extends DiffusionController {
     }
 
     return id(new AphrontAjaxResponse())
-      ->setContent($branch_links ? implode(', ', $branch_links) : 'None');
+      ->setContent($branch_links ? implode(', ', $branch_links) : pht('None'));
   }
 }

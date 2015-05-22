@@ -30,7 +30,7 @@ abstract class PhabricatorEventListener extends PhutilEventListener {
 
   protected function addActionMenuItems(PhutilEvent $event, $items) {
     if ($event->getType() !== PhabricatorEventType::TYPE_UI_DIDRENDERACTIONS) {
-      throw new Exception('Not an action menu event!');
+      throw new Exception(pht('Not an action menu event!'));
     }
 
     if (!$items) {

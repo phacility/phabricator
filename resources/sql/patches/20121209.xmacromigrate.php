@@ -1,6 +1,6 @@
 <?php
 
-echo 'Giving image macros PHIDs';
+echo pht('Giving image macros PHIDs');
 $table = new PhabricatorFileImageMacro();
 $table->openTransaction();
 
@@ -20,4 +20,4 @@ foreach (new LiskMigrationIterator($table) as $macro) {
 }
 
 $table->saveTransaction();
-echo "\nDone.\n";
+echo "\n".pht('Done.')."\n";

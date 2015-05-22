@@ -90,15 +90,24 @@ final class PhabricatorSSHPassthruCommand extends Phobject {
     $error_channel = $this->errorChannel;
 
     if (!$command_channel) {
-      throw new Exception('Set a command channel before calling execute()!');
+      throw new Exception(
+        pht(
+          'Set a command channel before calling %s!',
+          __FUNCTION__.'()'));
     }
 
     if (!$io_channel) {
-      throw new Exception('Set an IO channel before calling execute()!');
+      throw new Exception(
+        pht(
+          'Set an IO channel before calling %s!',
+          __FUNCTION__.'()'));
     }
 
     if (!$error_channel) {
-      throw new Exception('Set an error channel before calling execute()!');
+      throw new Exception(
+        pht(
+          'Set an error channel before calling %s!',
+          __FUNCTION__.'()'));
     }
 
     $channels = array($command_channel, $io_channel, $error_channel);

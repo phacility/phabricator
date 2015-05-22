@@ -54,7 +54,7 @@ final class PholioMockImagesView extends AphrontView {
 
   public function getBehaviorConfig() {
     if (!$this->getMock()) {
-      throw new Exception('Call setMock() before getBehaviorConfig()!');
+      throw new PhutilInvalidStateException('setMock');
     }
 
     if ($this->behaviorConfig === null) {
@@ -158,7 +158,7 @@ final class PholioMockImagesView extends AphrontView {
 
   public function render() {
     if (!$this->getMock()) {
-      throw new Exception('Call setMock() before render()!');
+      throw new PhutilInvalidStateException('setMock');
     }
     $mock = $this->getMock();
 

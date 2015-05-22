@@ -58,7 +58,7 @@ final class DiffusionPathValidateController extends DiffusionController {
       if ($branch) {
         $message = pht('Not found in %s', $branch);
       } else {
-        $message = pht('Not found at HEAD');
+        $message = pht('Not found at %s', 'HEAD');
       }
     } else {
       $message = pht('OK');

@@ -3,12 +3,13 @@
 final class PHUIPropertyListExample extends PhabricatorUIExample {
 
   public function getName() {
-    return 'Property List';
+    return pht('Property List');
   }
 
   public function getDescription() {
-    return hsprintf(
-      'Use <tt>PHUIPropertyListView</tt> to render object properties.');
+    return pht(
+      'Use %s to render object properties.',
+      phutil_tag('tt', array(), 'PHUIPropertyListView'));
   }
 
   public function renderExample() {
@@ -16,15 +17,15 @@ final class PHUIPropertyListExample extends PhabricatorUIExample {
     $user = $request->getUser();
 
     $details1 = id(new PHUIListItemView())
-      ->setName('Details')
+      ->setName(pht('Details'))
       ->setSelected(true);
 
     $details2 = id(new PHUIListItemView())
-      ->setName('Rainbow Info')
+      ->setName(pht('Rainbow Info'))
       ->setStatusColor(PHUIListItemView::STATUS_WARN);
 
     $details3 = id(new PHUIListItemView())
-      ->setName('Pasta Haiku')
+      ->setName(pht('Pasta Haiku'))
       ->setStatusColor(PHUIListItemView::STATUS_FAIL);
 
     $statustabs = id(new PHUIListView())
@@ -55,28 +56,29 @@ final class PHUIPropertyListExample extends PhabricatorUIExample {
 
 
     $view2 = new PHUIPropertyListView();
-    $view2->addSectionHeader('Colors of the Rainbow');
+    $view2->addSectionHeader(pht('Colors of the Rainbow'));
 
-    $view2->addProperty('R', 'Red');
-    $view2->addProperty('O', 'Orange');
-    $view2->addProperty('Y', 'Yellow');
-    $view2->addProperty('G', 'Green');
-    $view2->addProperty('B', 'Blue');
-    $view2->addProperty('I', 'Indigo');
-    $view2->addProperty('V', 'Violet');
+    $view2->addProperty('R', pht('Red'));
+    $view2->addProperty('O', pht('Orange'));
+    $view2->addProperty('Y', pht('Yellow'));
+    $view2->addProperty('G', pht('Green'));
+    $view2->addProperty('B', pht('Blue'));
+    $view2->addProperty('I', pht('Indigo'));
+    $view2->addProperty('V', pht('Violet'));
 
 
     $view3 = new PHUIPropertyListView();
-    $view3->addSectionHeader('Haiku About Pasta');
+    $view3->addSectionHeader(pht('Haiku About Pasta'));
 
     $view3->addTextContent(
       hsprintf(
-        'this is a pasta<br />'.
-        'haiku. it is very bad.<br />'.
-        'what did you expect?'));
+        '%s<br />%s<br />%s',
+        pht('this is a pasta'),
+        pht('haiku. it is very bad.'),
+        pht('what did you expect?')));
 
     $object_box1 = id(new PHUIObjectBoxView())
-      ->setHeaderText('PHUIPropertyListView Stackered')
+      ->setHeaderText(pht('%s Stackered', 'PHUIPropertyListView'))
       ->addPropertyList($view, $details1)
       ->addPropertyList($view2, $details2)
       ->addPropertyList($view3, $details3);
@@ -85,20 +87,23 @@ final class PHUIPropertyListExample extends PhabricatorUIExample {
 
     $edge_cases_view->addProperty(
       pht('Description'),
-      pht('These layouts test UI edge cases in the element. This block '.
-          'tests wrapping and overflow behavior.'));
+      pht(
+        'These layouts test UI edge cases in the element. This block '.
+        'tests wrapping and overflow behavior.'));
 
     $edge_cases_view->addProperty(
       pht('A Very Very Very Very Very Very Very Very Very Long Property Label'),
-      pht('This property label and property value are quite long. They '.
-          'demonstrate the wrapping behavior of the element, or lack thereof '.
-          'if something terrible has happened.'));
+      pht(
+        'This property label and property value are quite long. They '.
+        'demonstrate the wrapping behavior of the element, or lack thereof '.
+        'if something terrible has happened.'));
 
     $edge_cases_view->addProperty(
       pht('AVeryVeryVeryVeryVeryVeryVeryVeryVeryVeryLongUnbrokenPropertyLabel'),
-      pht('Thispropertylabelandpropertyvaluearequitelongandhave'.
-          'nospacestheydemonstratetheoverflowbehavioroftheelement'.
-          'orlackthereof.'));
+      pht(
+        'Thispropertylabelandpropertyvaluearequitelongandhave'.
+        'nospacestheydemonstratetheoverflowbehavioroftheelement'.
+        'orlackthereof.'));
 
 
     $edge_cases_view->addProperty(
@@ -122,7 +127,7 @@ final class PHUIPropertyListExample extends PhabricatorUIExample {
       pht('Smith'));
 
     $object_box2 = id(new PHUIObjectBoxView())
-      ->setHeaderText('Some Bad Examples')
+      ->setHeaderText(pht('Some Bad Examples'))
       ->addPropertyList($edge_cases_view);
 
     return array(

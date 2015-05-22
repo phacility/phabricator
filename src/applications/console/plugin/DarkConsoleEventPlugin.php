@@ -3,11 +3,11 @@
 final class DarkConsoleEventPlugin extends DarkConsolePlugin {
 
   public function getName() {
-    return 'Events';
+    return pht('Events');
   }
 
   public function getDescription() {
-    return 'Information about Phabricator events and event listeners.';
+    return pht('Information about Phabricator events and event listeners.');
   }
 
   public function generateData() {
@@ -51,8 +51,8 @@ final class DarkConsoleEventPlugin extends DarkConsolePlugin {
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
-        'Internal ID',
-        'Listener Class',
+        pht('Internal ID'),
+        pht('Listener Class'),
       ));
     $table->setColumnClasses(
       array(
@@ -71,7 +71,7 @@ final class DarkConsoleEventPlugin extends DarkConsolePlugin {
     foreach ($data['events'] as $event) {
       $rows[] = array(
         $event['type'],
-        $event['stopped'] ? 'STOPPED' : null,
+        $event['stopped'] ? pht('STOPPED') : null,
       );
     }
 
@@ -82,8 +82,8 @@ final class DarkConsoleEventPlugin extends DarkConsolePlugin {
       ));
     $table->setHeaders(
       array(
-        'Event Type',
-        'Stopped',
+        pht('Event Type'),
+        pht('Stopped'),
       ));
 
     $out[] = $table->render();

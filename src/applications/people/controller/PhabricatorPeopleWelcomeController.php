@@ -40,9 +40,7 @@ final class PhabricatorPeopleWelcomeController
           'The email contains a link to log in to their account. Sending '.
           'another copy of the email can be useful if the original was lost '.
           'or never sent.'))
-      ->appendParagraph(
-        pht(
-          'The email will identify you as the sender.'))
+      ->appendParagraph(pht('The email will identify you as the sender.'))
       ->addSubmitButton(pht('Send Email'))
       ->addCancelButton($profile_uri);
   }

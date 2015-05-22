@@ -4,7 +4,7 @@
 require_once dirname(dirname(__FILE__)).'/__init_script__.php';
 
 $args = new PhutilArgumentParser($argv);
-$args->setTagline('regenerate CSS sprite sheets');
+$args->setTagline(pht('regenerate CSS sprite sheets'));
 $args->setSynopsis(<<<EOHELP
 **sprites**
     Rebuild CSS sprite sheets.
@@ -16,7 +16,7 @@ $args->parse(
   array(
     array(
       'name'  => 'force',
-      'help'  => 'Force regeneration even if sources have not changed.',
+      'help'  => pht('Force regeneration even if sources have not changed.'),
     ),
   ));
 
@@ -39,8 +39,10 @@ list($err) = exec_manual('optipng');
 if ($err) {
   $have_optipng = false;
   echo phutil_console_format(
-    "<bg:red> WARNING </bg> `optipng` not found in PATH.\n".
-    "Sprites will not be optimized! Install `optipng`!\n");
+    "<bg:red> %s </bg> %s\n%s\n",
+    pht('WARNING'),
+    pht('`%s` not found in PATH.', 'optipng'),
+    pht('Sprites will not be optimized! Install `%s`!', 'optipng'));
 } else {
   $have_optipng = true;
 }
@@ -75,10 +77,10 @@ foreach ($sheets as $name => $sheet) {
     $sheet->generateImage($full_path, $scale);
 
     if ($have_optipng) {
-      echo "Optimizing...\n";
+      echo pht('Optimizing...')."\n";
       phutil_passthru('optipng -o7 -clobber %s', $full_path);
     }
   }
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

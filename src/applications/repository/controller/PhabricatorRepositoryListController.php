@@ -25,7 +25,7 @@ final class PhabricatorRepositoryListController
           ),
           pht('View in Diffusion'));
       } else {
-        $diffusion_link = phutil_tag('em', array(), 'Not Tracked');
+        $diffusion_link = phutil_tag('em', array(), pht('Not Tracked'));
       }
 
       $rows[] = array(

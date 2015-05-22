@@ -5,7 +5,7 @@ $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 
 $args = new PhutilArgumentParser($argv);
-$args->setTagline('emit a test event');
+$args->setTagline(pht('emit a test event'));
 $args->setSynopsis(<<<EOHELP
 **emit_test_event.php** [--listen listener] ...
   Emit a test event after installing any specified __listener__s.
@@ -23,12 +23,12 @@ $args->parse(
 
 $console = PhutilConsole::getConsole();
 foreach ($args->getArg('listen') as $listener) {
-  $console->writeOut("Installing '%s'...\n", $listener);
+  $console->writeOut("%s\n", pht("Installing '%s'...", $listener));
   newv($listener, array())->register();
 }
 
 
-$console->writeOut("Emitting event...\n");
+$console->writeOut("%s\n", pht('Emitting event...'));
 
 PhutilEventEngine::dispatchEvent(
   new PhabricatorEvent(
@@ -37,5 +37,5 @@ PhutilEventEngine::dispatchEvent(
       'time' => time(),
     )));
 
-$console->writeOut("Done.\n");
+$console->writeOut("%s\n", pht('Done.'));
 exit(0);

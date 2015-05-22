@@ -249,21 +249,24 @@ final class AphrontRequest {
       // in developer mode.
       if (PhabricatorEnv::getEnvConfig('phabricator.developer-mode')) {
         // TODO: Clean this up, see T1921.
-        $more_info[] =
-          "To avoid this error, use phabricator_form() to construct forms. ".
-          "If you are already using phabricator_form(), make sure the form ".
-          "'action' uses a relative URI (i.e., begins with a '/'). Forms ".
-          "using absolute URIs do not include CSRF tokens, to prevent ".
-          "leaking tokens to external sites.\n\n".
-          "If this page performs writes which do not require CSRF ".
-          "protection (usually, filling caches or logging), you can use ".
-          "AphrontWriteGuard::beginScopedUnguardedWrites() to temporarily ".
-          "bypass CSRF protection while writing. You should use this only ".
-          "for writes which can not be protected with normal CSRF ".
+        $more_info[] = pht(
+          "To avoid this error, use %s to construct forms. If you are already ".
+          "using %s, make sure the form 'action' uses a relative URI (i.e., ".
+          "begins with a '%s'). Forms using absolute URIs do not include CSRF ".
+          "tokens, to prevent leaking tokens to external sites.\n\n".
+          "If this page performs writes which do not require CSRF protection ".
+          "(usually, filling caches or logging), you can use %s to ".
+          "temporarily bypass CSRF protection while writing. You should use ".
+          "this only for writes which can not be protected with normal CSRF ".
           "mechanisms.\n\n".
-          "Some UI elements (like PhabricatorActionListView) also have ".
-          "methods which will allow you to render links as forms (like ".
-          "setRenderAsForm(true)).";
+          "Some UI elements (like %s) also have methods which will allow you ".
+          "to render links as forms (like %s).",
+          'phabricator_form()',
+          'phabricator_form()',
+          '/',
+          'AphrontWriteGuard::beginScopedUnguardedWrites()',
+          'PhabricatorActionListView',
+          'setRenderAsForm(true)');
       }
 
       // This should only be able to happen if you load a form, pull your
@@ -272,10 +275,10 @@ final class AphrontRequest {
       // is incredibly confusing otherwise.
       throw new AphrontCSRFException(
         pht(
-          "You are trying to save some data to Phabricator, but the request ".
-          "your browser made included an incorrect token. Reload the page ".
-          "and try again. You may need to clear your cookies.\n\n%s",
-          implode("\n", $more_info)));
+          'You are trying to save some data to Phabricator, but the request '.
+          'your browser made included an incorrect token. Reload the page '.
+          'and try again. You may need to clear your cookies.')."\n\n".
+          implode("\n", $more_info));
     }
 
     return true;

@@ -126,7 +126,7 @@ final class FundInitiativeEditor
           ->withPHIDs(array($xaction->getNewValue()))
           ->executeOne();
         if (!$backer) {
-          throw new Exception(pht('Unable to load FundBacker!'));
+          throw new Exception(pht('Unable to load %s!', 'FundBacker'));
         }
 
         $subx = array();

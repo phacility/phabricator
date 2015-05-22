@@ -124,13 +124,15 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
       switch ($follow) {
         case 'first':
           $notice->appendChild(
-            pht('Unable to continue tracing the history of this file because '.
-            'this commit is the first commit in the repository.'));
+            pht(
+              'Unable to continue tracing the history of this file because '.
+              'this commit is the first commit in the repository.'));
           break;
         case 'created':
           $notice->appendChild(
-            pht('Unable to continue tracing the history of this file because '.
-            'this commit created the file.'));
+            pht(
+              'Unable to continue tracing the history of this file because '.
+              'this commit created the file.'));
           break;
       }
       $content[] = $notice;
@@ -142,7 +144,8 @@ final class DiffusionBrowseFileController extends DiffusionBrowseController {
       $notice->setSeverity(PHUIInfoView::SEVERITY_NOTICE);
       $notice->setTitle(pht('File Renamed'));
       $notice->appendChild(
-        pht("File history passes through a rename from '%s' to '%s'.",
+        pht(
+          "File history passes through a rename from '%s' to '%s'.",
           $drequest->getPath(), $renamed));
       $content[] = $notice;
     }

@@ -7,7 +7,7 @@ final class ConduitQueryConduitAPIMethod extends ConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Returns the parameters of the Conduit methods.';
+    return pht('Returns the parameters of the Conduit methods.');
   }
 
   protected function defineParamTypes() {

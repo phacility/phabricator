@@ -1,6 +1,6 @@
 <?php
 
-echo "Migrating differential.revisionPHID to edges...\n";
+echo pht('Migrating %s to edges...', 'differential.revisionPHID')."\n";
 $commit_table = new PhabricatorRepositoryCommit();
 $data_table = new PhabricatorRepositoryCommitData();
 $editor = new PhabricatorEdgeEditor();
@@ -30,4 +30,4 @@ foreach (new LiskMigrationIterator($commit_table) as $commit) {
 
 echo '.';
 $editor->save();
-echo "\nDone.\n";
+echo "\n".pht('Done.')."\n";

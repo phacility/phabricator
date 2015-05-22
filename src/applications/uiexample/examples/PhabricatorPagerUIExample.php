@@ -3,17 +3,17 @@
 final class PhabricatorPagerUIExample extends PhabricatorUIExample {
 
   public function getName() {
-    return 'Pager';
+    return pht('Pager');
   }
 
   public function getDescription() {
-    return hsprintf(
-      'Use <tt>AphrontPagerView</tt> to create a control which allows '.
-      'users to paginate through large amounts of content.');
+    return pht(
+      'Use %s to create a control which allows '.
+      'users to paginate through large amounts of content.',
+      phutil_tag('tt', array(), 'AphrontPagerView'));
   }
 
   public function renderExample() {
-
     $request = $this->getRequest();
 
     $offset = (int)$request->getInt('offset');
@@ -37,9 +37,10 @@ final class PhabricatorPagerUIExample extends PhabricatorUIExample {
     $panel->appendChild($table);
 
     $panel->appendChild(hsprintf(
-      '<p class="phabricator-ui-example-note">'.
-        'Use <tt>AphrontPagerView</tt> to render a pager element.'.
-      '</p>'));
+      '<p class="phabricator-ui-example-note">%s</p>',
+      pht(
+        'Use %s to render a pager element.',
+        phutil_tag('tt', array(), 'AphrontPagerView'))));
 
     $pager = new AphrontPagerView();
     $pager->setPageSize($page_size);
@@ -49,9 +50,8 @@ final class PhabricatorPagerUIExample extends PhabricatorUIExample {
     $panel->appendChild($pager);
 
     $panel->appendChild(hsprintf(
-      '<p class="phabricator-ui-example-note">'.
-        'You can show more or fewer pages of surrounding context.'.
-      '</p>'));
+      '<p class="phabricator-ui-example-note">%s</p>',
+      pht('You can show more or fewer pages of surrounding context.')));
 
     $many_pages_pager = new AphrontPagerView();
     $many_pages_pager->setPageSize($page_size);
@@ -62,11 +62,12 @@ final class PhabricatorPagerUIExample extends PhabricatorUIExample {
     $panel->appendChild($many_pages_pager);
 
     $panel->appendChild(hsprintf(
-      '<p class="phabricator-ui-example-note">'.
+      '<p class="phabricator-ui-example-note">%s</p>',
+      pht(
         'When it is prohibitively expensive or complex to attain a complete '.
         'count of the items, you can select one extra item and set '.
-        '<tt>hasMorePages(true)</tt> if it exists, creating an inexact pager.'.
-      '</p>'));
+        '%s if it exists, creating an inexact pager.',
+        phutil_tag('tt', array(), 'hasMorePages(true)'))));
 
     $inexact_pager = new AphrontPagerView();
     $inexact_pager->setPageSize($page_size);

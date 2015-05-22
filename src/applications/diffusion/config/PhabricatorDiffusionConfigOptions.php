@@ -35,9 +35,10 @@ final class PhabricatorDiffusionConfigOptions
             pht('Attach Patches'),
             pht('Do Not Attach Patches'),
           ))
-        ->setDescription(pht(
-          'Set this to true if you want patches to be attached to commit '.
-          'notifications from Diffusion.')),
+        ->setDescription(
+          pht(
+            'Set this to true if you want patches to be attached to commit '.
+            'notifications from Diffusion.')),
       $this->newOption('metamta.diffusion.inline-patches', 'int', 0)
         ->setSummary(pht('Include patches in Diffusion mail as body text.'))
         ->setDescription(
@@ -63,10 +64,11 @@ final class PhabricatorDiffusionConfigOptions
       $this->newOption('bugtraq.url', 'string', null)
         ->addExample('https://bugs.php.net/%BUGID%', pht('PHP bugs'))
         ->addExample('/%BUGID%', pht('Local Maniphest URL'))
-        ->setDescription(pht(
-          'URL of external bug tracker used by Diffusion. %s will be '.
+        ->setDescription(
+          pht(
+            'URL of external bug tracker used by Diffusion. %s will be '.
             'substituted by the bug ID.',
-          '%BUGID%')),
+            '%BUGID%')),
       $this->newOption('bugtraq.logregex', 'list<regex>', array())
         ->addExample(array('/\B#([1-9]\d*)\b/'), pht('Issue #123'))
         ->addExample(
@@ -74,8 +76,9 @@ final class PhabricatorDiffusionConfigOptions
           pht('Issue #123, #456'))
         ->addExample(array('/(?<!#)\b(T[1-9]\d*)\b/'), pht('Task T123'))
         ->addExample('/[A-Z]{2,}-\d+/', pht('JIRA-1234'))
-        ->setDescription(pht(
-          'Regular expression to link external bug tracker. See '.
+        ->setDescription(
+          pht(
+            'Regular expression to link external bug tracker. See '.
             'http://tortoisesvn.net/docs/release/TortoiseSVN_en/'.
             'tsvn-dug-bugtracker.html for further explanation.')),
       $this->newOption('diffusion.allow-http-auth', 'bool', false)

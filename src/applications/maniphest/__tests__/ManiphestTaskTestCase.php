@@ -11,9 +11,9 @@ final class ManiphestTaskTestCase extends PhabricatorTestCase {
   public function testTaskReordering() {
     $viewer = $this->generateNewTestUser();
 
-    $t1 = $this->newTask($viewer, 'Task 1');
-    $t2 = $this->newTask($viewer, 'Task 2');
-    $t3 = $this->newTask($viewer, 'Task 3');
+    $t1 = $this->newTask($viewer, pht('Task 1'));
+    $t2 = $this->newTask($viewer, pht('Task 2'));
+    $t3 = $this->newTask($viewer, pht('Task 3'));
 
     $auto_base = min(mpull(array($t1, $t2, $t3), 'getID'));
 
@@ -95,7 +95,7 @@ final class ManiphestTaskTestCase extends PhabricatorTestCase {
 
     $t = array();
     for ($ii = 1; $ii < 10; $ii++) {
-      $t[$ii] = $this->newTask($viewer, "Task Block {$ii}");
+      $t[$ii] = $this->newTask($viewer, pht('Task Block %d', $ii));
 
       // This makes sure this test remains meaningful if we begin assigning
       // subpriorities when tasks are created.
@@ -124,7 +124,7 @@ final class ManiphestTaskTestCase extends PhabricatorTestCase {
     $this->assertEqual(
       9,
       count($subpri),
-      'Expected subpriorities to be distributed.');
+      pht('Expected subpriorities to be distributed.'));
   }
 
   private function newTask(PhabricatorUser $viewer, $title) {

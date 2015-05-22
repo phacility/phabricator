@@ -52,7 +52,7 @@ final class PhortuneCurrency extends Phobject {
       case 'USD':
         break;
       default:
-        throw new Exception("Unsupported currency '{$currency}'!");
+        throw new Exception(pht("Unsupported currency '%s'!", $currency));
     }
 
     return self::newFromValueAndCurrency($value, $currency);
@@ -121,7 +121,7 @@ final class PhortuneCurrency extends Phobject {
   }
 
   private static function throwFormatException($string) {
-    throw new Exception("Invalid currency format ('{$string}').");
+    throw new Exception(pht("Invalid currency format ('%s').", $string));
   }
 
   private function throwUnlikeCurrenciesException(PhortuneCurrency $other) {

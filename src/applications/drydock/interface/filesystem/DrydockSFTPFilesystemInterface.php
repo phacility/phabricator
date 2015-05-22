@@ -17,7 +17,7 @@ final class DrydockSFTPFilesystemInterface extends DrydockFilesystemInterface {
 
     if ($credential->getProvidesType() !==
       PassphraseCredentialTypeSSHPrivateKey::PROVIDES_TYPE) {
-      throw new Exception('Only private key credentials are supported.');
+      throw new Exception(pht('Only private key credentials are supported.'));
     }
 
     $this->passphraseSSHKey = PassphraseSSHKey::loadFromPHID(

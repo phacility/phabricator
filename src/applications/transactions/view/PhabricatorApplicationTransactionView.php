@@ -194,7 +194,7 @@ class PhabricatorApplicationTransactionView extends AphrontView {
 
   public function render() {
     if (!$this->getObjectPHID()) {
-      throw new Exception('Call setObjectPHID() before render()!');
+      throw new PhutilInvalidStateException('setObjectPHID');
     }
 
     $view = $this->buildPHUITimelineView();
@@ -208,8 +208,7 @@ class PhabricatorApplicationTransactionView extends AphrontView {
 
   public function buildPHUITimelineView($with_hiding = true) {
     if (!$this->getObjectPHID()) {
-      throw new Exception(
-        'Call setObjectPHID() before buildPHUITimelineView()!');
+      throw new PhutilInvalidStateException('setObjectPHID');
     }
 
     $view = new PHUITimelineView();

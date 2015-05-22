@@ -28,7 +28,8 @@ final class PhabricatorAuthManagementUntrustOAuthClientWorkflow
     if (!$id) {
       throw new PhutilArgumentUsageException(
         pht(
-          'Specify an OAuth client id with --id.'));
+          'Specify an OAuth client ID with %s.',
+          '--id'));
     }
 
     $client = id(new PhabricatorOAuthServerClientQuery())
@@ -39,7 +40,7 @@ final class PhabricatorAuthManagementUntrustOAuthClientWorkflow
     if (!$client) {
       throw new PhutilArgumentUsageException(
         pht(
-          'Failed to find an OAuth client with id %s.', $id));
+          'Failed to find an OAuth client with ID %s.', $id));
     }
 
     if (!$client->getIsTrusted()) {

@@ -89,7 +89,7 @@ final class DifferentialDiffCreateController extends DifferentialController {
         'href' => $arcanist_href,
         'target' => '_blank',
       ),
-      'Learn More');
+      pht('Learn More'));
 
     $cancel_uri = $this->getApplicationURI();
 

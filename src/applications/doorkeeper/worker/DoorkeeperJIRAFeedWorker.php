@@ -34,7 +34,9 @@ final class DoorkeeperJIRAFeedWorker extends DoorkeeperFeedWorker {
       $object->getPHID(),
       PhabricatorJiraIssueHasObjectEdgeType::EDGECONST);
     if (!$jira_issue_phids) {
-      $this->log("Story is about an object with no linked JIRA issues.\n");
+      $this->log(
+        "%s\n",
+        pht('Story is about an object with no linked JIRA issues.'));
       return;
     }
 
@@ -44,13 +46,17 @@ final class DoorkeeperJIRAFeedWorker extends DoorkeeperFeedWorker {
       ->execute();
 
     if (!$xobjs) {
-      $this->log("Story object has no corresponding external JIRA objects.\n");
+      $this->log(
+        "%s\n",
+        pht('Story object has no corresponding external JIRA objects.'));
       return;
     }
 
     $try_users = $this->findUsersToPossess();
     if (!$try_users) {
-      $this->log("No users to act on linked JIRA objects.\n");
+      $this->log(
+        "%s\n",
+        pht('No users to act on linked JIRA objects.'));
       return;
     }
 
@@ -89,9 +95,11 @@ final class DoorkeeperJIRAFeedWorker extends DoorkeeperFeedWorker {
           } catch (HTTPFutureResponseStatus $ex) {
             phlog($ex);
             $this->log(
-              "Failed to update object %s using user %s.\n",
-              $xobj->getObjectID(),
-              $account->getUserPHID());
+              "%s\n",
+              pht(
+                'Failed to update object %s using user %s.',
+                $xobj->getObjectID(),
+                $account->getUserPHID()));
           }
         }
       }
@@ -113,7 +121,7 @@ final class DoorkeeperJIRAFeedWorker extends DoorkeeperFeedWorker {
       $provider = PhabricatorJIRAAuthProvider::getJIRAProvider();
       if (!$provider) {
         throw new PhabricatorWorkerPermanentFailureException(
-          'No JIRA provider configured.');
+          pht('No JIRA provider configured.'));
       }
       $this->provider = $provider;
     }

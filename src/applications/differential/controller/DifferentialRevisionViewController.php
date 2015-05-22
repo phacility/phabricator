@@ -38,7 +38,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
 
     if (!$diffs) {
       throw new Exception(
-        'This revision has no diffs. Something has gone quite wrong.');
+        pht('This revision has no diffs. Something has gone quite wrong.'));
     }
 
     $revision->attachActiveDiff(last($diffs));
@@ -151,7 +151,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     if (count($changesets) > $limit && !$large) {
       $count = count($changesets);
       $warning = new PHUIInfoView();
-      $warning->setTitle('Very Large Diff');
+      $warning->setTitle(pht('Very Large Diff'));
       $warning->setSeverity(PHUIInfoView::SEVERITY_WARNING);
       $warning->appendChild(hsprintf(
         '%s <strong>%s</strong>',
@@ -328,7 +328,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $changeset_view->setRepository($repository);
     }
     $changeset_view->setSymbolIndexes($symbol_indexes);
-    $changeset_view->setTitle('Diff '.$target->getID());
+    $changeset_view->setTitle(pht('Diff %s', $target->getID()));
 
     $diff_history = id(new DifferentialRevisionUpdateHistoryView())
       ->setUser($user)

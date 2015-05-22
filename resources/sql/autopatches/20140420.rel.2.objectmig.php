@@ -4,11 +4,11 @@ $pull_table = new ReleephRequest();
 $table_name = $pull_table->getTableName();
 $conn_w = $pull_table->establishConnection('w');
 
-echo "Setting object PHIDs for requests...\n";
+echo pht('Setting object PHIDs for requests...')."\n";
 foreach (new LiskMigrationIterator($pull_table) as $pull) {
   $id = $pull->getID();
 
-  echo "Migrating pull request {$id}...\n";
+  echo pht('Migrating pull request %d...', $id)."\n";
   if ($pull->getRequestedObjectPHID()) {
     // We already have a valid PHID, so skip this request.
     continue;
@@ -42,4 +42,4 @@ foreach (new LiskMigrationIterator($pull_table) as $pull) {
     $id);
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

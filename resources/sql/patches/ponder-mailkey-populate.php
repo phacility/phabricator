@@ -1,13 +1,13 @@
 <?php
 
-echo "Populating Questions with mail keys...\n";
+echo pht('Populating Questions with mail keys...')."\n";
 $table = new PonderQuestion();
 $table->openTransaction();
 
 foreach (new LiskMigrationIterator($table) as $question) {
   $id = $question->getID();
 
-  echo "Question {$id}: ";
+  echo pht('Question %d: ', $id);
   if (!$question->getMailKey()) {
     queryfx(
       $question->establishConnection('w'),
@@ -15,11 +15,11 @@ foreach (new LiskMigrationIterator($table) as $question) {
       $question->getTableName(),
       Filesystem::readRandomCharacters(20),
       $id);
-    echo "Generated Key\n";
+    echo pht('Generated Key')."\n";
   } else {
     echo "-\n";
   }
 }
 
 $table->saveTransaction();
-echo "Done.\n";
+echo pht('Done.')."\n";

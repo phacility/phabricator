@@ -5,7 +5,7 @@ $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 
 $args = new PhutilArgumentParser($argv);
-$args->setTagline('manage Phabricator storage and schemata');
+$args->setTagline(pht('manage Phabricator storage and schemata'));
 $args->setSynopsis(<<<EOHELP
 **storage** __workflow__ [__options__]
 Manage Phabricator database storage and schema versioning.
@@ -34,35 +34,38 @@ try {
       array(
         'name'    => 'force',
         'short'   => 'f',
-        'help'    => 'Do not prompt before performing dangerous operations.',
+        'help'    => pht(
+          'Do not prompt before performing dangerous operations.'),
       ),
       array(
         'name'    => 'user',
         'short'   => 'u',
         'param'   => 'username',
         'default' => $default_user,
-        'help'    => "Connect with __username__ instead of the configured ".
-                     "default ('{$default_user}').",
+        'help'    => pht(
+          "Connect with __username__ instead of the configured default ('%s').",
+          $default_user),
       ),
       array(
         'name'    => 'password',
         'short'   => 'p',
         'param'   => 'password',
-        'help'    => 'Use __password__ instead of the configured default.',
+        'help'    => pht('Use __password__ instead of the configured default.'),
       ),
       array(
         'name'    => 'namespace',
         'param'   => 'name',
         'default' => $default_namespace,
-        'help'    => "Use namespace __namespace__ instead of the configured ".
-                     "default ('{$default_namespace}'). This is an advanced ".
-                     "feature used by unit tests; you should not normally ".
-                     "use this flag.",
+        'help'    => pht(
+          "Use namespace __namespace__ instead of the configured ".
+          "default ('%s'). This is an advanced feature used by unit tests; ".
+          "you should not normally use this flag.",
+          $default_namespace),
       ),
       array(
         'name'  => 'dryrun',
-        'help'  => 'Do not actually change anything, just show what would be '.
-                   'changed.',
+        'help'  => pht(
+          'Do not actually change anything, just show what would be changed.'),
       ),
       array(
         'name' => 'disable-utf8mb4',
@@ -93,23 +96,23 @@ try {
     'SELECT 1');
 } catch (AphrontQueryException $ex) {
   $message = phutil_console_format(
+    "**%s**\n\n%s\n\n%s\n\n%s\n\n**%s**: %s\n",
+    pht('MySQL Credentials Not Configured'),
     pht(
-      "**MySQL Credentials Not Configured**\n\n".
-      "Unable to connect to MySQL using the configured credentials. ".
-      "You must configure standard credentials before you can upgrade ".
-      "storage. Run these commands to set up credentials:\n".
-      "\n".
-      "  phabricator/ $ ./bin/config set mysql.host __host__\n".
-      "  phabricator/ $ ./bin/config set mysql.user __username__\n".
-      "  phabricator/ $ ./bin/config set mysql.pass __password__\n".
-      "\n".
-      "These standard credentials are separate from any administrative ".
-      "credentials provided to this command with __--user__ or ".
-      "__--password__, and must be configured correctly before you can ".
-      "proceed.\n".
-      "\n".
-      "**Raw MySQL Error**: %s\n",
-      $ex->getMessage()));
+      'Unable to connect to MySQL using the configured credentials. '.
+      'You must configure standard credentials before you can upgrade '.
+      'storage. Run these commands to set up credentials:'),
+    "  phabricator/ $ ./bin/config set mysql.host __host__\n".
+    "  phabricator/ $ ./bin/config set mysql.user __username__\n".
+    "  phabricator/ $ ./bin/config set mysql.pass __password__",
+    pht(
+      'These standard credentials are separate from any administrative '.
+      'credentials provided to this command with __%s__ or '.
+      '__%s__, and must be configured correctly before you can proceed.',
+      '--user',
+      '--password'),
+    pht('Raw MySQL Error'),
+    $ex->getMessage());
 
   echo phutil_console_wrap($message);
 
@@ -141,14 +144,16 @@ try {
     'SELECT 1');
 } catch (AphrontQueryException $ex) {
   $message = phutil_console_format(
+    "**%s**\n\n%s\n\n**%s**: %s\n",
+    pht('Bad Administrative Credentials'),
     pht(
-      "**Bad Administrative Credentials**\n\n".
-      "Unable to connnect to MySQL using the administrative credentials ".
-      "provided with the __--user__ and __--password__ flags. Check that ".
-      "you have entered them correctly.\n".
-      "\n".
-      "**Raw MySQL Error**: %s\n",
-      $ex->getMessage()));
+      'Unable to connect to MySQL using the administrative credentials '.
+      'provided with the __%s__ and __%s__ flags. Check that '.
+      'you have entered them correctly.',
+      '--user',
+      '--password'),
+    pht('Raw MySQL Error'),
+    $ex->getMessage());
 
   echo phutil_console_wrap($message);
 

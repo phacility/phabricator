@@ -6,7 +6,7 @@ final class PhabricatorSearchManagementIndexWorkflow
   protected function didConstruct() {
     $this
       ->setName('index')
-      ->setSynopsis('Build or rebuild search indexes.')
+      ->setSynopsis(pht('Build or rebuild search indexes.'))
       ->setExamples(
         "**index** D123\n".
         "**index** --type DREV\n".
@@ -15,18 +15,19 @@ final class PhabricatorSearchManagementIndexWorkflow
         array(
           array(
             'name' => 'all',
-            'help' => 'Reindex all documents.',
+            'help' => pht('Reindex all documents.'),
           ),
           array(
             'name'  => 'type',
             'param' => 'TYPE',
-            'help'  => 'PHID type to reindex, like "TASK" or "DREV".',
+            'help'  => pht('PHID type to reindex, like "TASK" or "DREV".'),
           ),
           array(
             'name' => 'background',
-            'help' => 'Instead of indexing in this process, queue tasks for '.
-                      'the daemons. This can improve performance, but makes '.
-                      'it more difficult to debug search indexing.',
+            'help' => pht(
+              'Instead of indexing in this process, queue tasks for '.
+              'the daemons. This can improve performance, but makes '.
+              'it more difficult to debug search indexing.'),
           ),
           array(
             'name'      => 'objects',
@@ -45,11 +46,16 @@ final class PhabricatorSearchManagementIndexWorkflow
 
     if ($obj_names && ($is_all || $is_type)) {
       throw new PhutilArgumentUsageException(
-        "You can not name objects to index alongside the '--all' or '--type' ".
-        "flags.");
+        pht(
+          "You can not name objects to index alongside the '%s' or '%s' flags.",
+          '--all',
+          '--type'));
     } else if (!$obj_names && !($is_all || $is_type)) {
       throw new PhutilArgumentUsageException(
-        "Provide one of '--all', '--type' or a list of object names.");
+        pht(
+          "Provide one of '%s', '%s' or a list of object names.",
+          '--all',
+          '--type'));
     }
 
     if ($obj_names) {
@@ -59,7 +65,7 @@ final class PhabricatorSearchManagementIndexWorkflow
     }
 
     if (!$phids) {
-      throw new PhutilArgumentUsageException('Nothing to index!');
+      throw new PhutilArgumentUsageException(pht('Nothing to index!'));
     }
 
     if ($args->getArg('background')) {
@@ -73,8 +79,8 @@ final class PhabricatorSearchManagementIndexWorkflow
       $console->writeOut(
         "%s\n",
         pht(
-          'Run this workflow with "--background" to queue tasks for the '.
-          'daemon workers.'));
+          'Run this workflow with "%s" to queue tasks for the daemon workers.',
+          '--background'));
     }
 
     $groups = phid_group_by_type($phids);
@@ -106,7 +112,9 @@ final class PhabricatorSearchManagementIndexWorkflow
     foreach ($names as $name) {
       if (empty($objects[$name])) {
         throw new PhutilArgumentUsageException(
-          "'{$name}' is not the name of a known object.");
+          pht(
+            "'%s' is not the name of a known object.",
+            $name));
       }
     }
 

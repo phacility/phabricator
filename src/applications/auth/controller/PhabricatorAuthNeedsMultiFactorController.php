@@ -40,7 +40,7 @@ final class PhabricatorAuthNeedsMultiFactorController
             pht(
               'Multi-factor authentication helps secure your account by '.
               'making it more difficult for attackers to gain access or '.
-              'take senstive actions.'),
+              'take sensitive actions.'),
             pht(
               'To learn more about multi-factor authentication, click the '.
               '%s button below.',

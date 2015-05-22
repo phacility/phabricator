@@ -3,11 +3,13 @@
 final class PHUIButtonExample extends PhabricatorUIExample {
 
   public function getName() {
-    return 'Buttons';
+    return pht('Buttons');
   }
 
   public function getDescription() {
-    return hsprintf('Use <tt>&lt;button&gt;</tt> to render buttons.');
+    return pht(
+      'Use %s to render buttons.',
+      phutil_tag('tt', array(), '&lt;button&gt;'));
   }
 
   public function renderExample() {
@@ -79,7 +81,7 @@ final class PHUIButtonExample extends PhabricatorUIExample {
         ->setColor($color)
         ->setSize($size)
         ->setTag('a')
-        ->setText('Clicky');
+        ->setText(pht('Clicky'));
       $column[$key][] = hsprintf('<br /><br />');
      }
    }
@@ -87,7 +89,7 @@ final class PHUIButtonExample extends PhabricatorUIExample {
      $column[2][] = id(new PHUIButtonView())
         ->setColor($color)
         ->setTag('button')
-        ->setText('Button')
+        ->setText(pht('Button'))
         ->setDropdown(true);
       $column[2][] = hsprintf('<br /><br />');
    }
@@ -110,7 +112,7 @@ final class PHUIButtonExample extends PhabricatorUIExample {
     );
     foreach ($icons as $text => $icon) {
       $image = id(new PHUIIconView())
-          ->setIconFont($icon);
+        ->setIconFont($icon);
       $column[] = id(new PHUIButtonView())
         ->setTag('a')
         ->setColor(PHUIButtonView::GREY)
@@ -160,14 +162,14 @@ final class PHUIButtonExample extends PhabricatorUIExample {
     $icons = array('Asana', 'Github', 'Facebook', 'Google', 'LDAP');
     foreach ($icons as $icon) {
       $image = id(new PHUIIconView())
-          ->setSpriteSheet(PHUIIconView::SPRITE_LOGIN)
-          ->setSpriteIcon($icon);
+        ->setSpriteSheet(PHUIIconView::SPRITE_LOGIN)
+        ->setSpriteIcon($icon);
       $column[] = id(new PHUIButtonView())
         ->setTag('a')
         ->setSize(PHUIButtonView::BIG)
         ->setColor(PHUIButtonView::GREY)
         ->setIcon($image)
-        ->setText('Login or Register')
+        ->setText(pht('Login or Register'))
         ->setSubtext($icon)
         ->addClass(PHUI::MARGIN_MEDIUM_RIGHT);
     }
@@ -187,13 +189,13 @@ final class PHUIButtonExample extends PhabricatorUIExample {
       ->setHeader('PHUIButtonView');
 
     $head3 = id(new PHUIHeaderView())
-      ->setHeader('Icon Buttons');
+      ->setHeader(pht('Icon Buttons'));
 
     $head4 = id(new PHUIHeaderView())
-      ->setHeader('Simple Buttons');
+      ->setHeader(pht('Simple Buttons'));
 
     $head5 = id(new PHUIHeaderView())
-      ->setHeader('Big Icon Buttons');
+      ->setHeader(pht('Big Icon Buttons'));
 
     $wrap1 = id(new PHUIBoxView())
       ->appendChild($layout1)
@@ -215,8 +217,17 @@ final class PHUIButtonExample extends PhabricatorUIExample {
       ->appendChild($layout5)
       ->addMargin(PHUI::MARGIN_LARGE);
 
-    return array($head1, $wrap1, $head2, $wrap2, $head3, $wrap3,
-      $head4, $wrap4, $head5, $wrap5,
+    return array(
+      $head1,
+      $wrap1,
+      $head2,
+      $wrap2,
+      $head3,
+      $wrap3,
+      $head4,
+      $wrap4,
+      $head5,
+      $wrap5,
     );
   }
 }

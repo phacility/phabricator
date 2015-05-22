@@ -1,6 +1,6 @@
 <?php
 
-echo "Migrating Differential unsubscribed users to edges...\n";
+echo pht('Migrating Differential unsubscribed users to edges...')."\n";
 $table = new DifferentialRevision();
 $table->openTransaction();
 
@@ -29,4 +29,4 @@ foreach ($revs as $rev) {
 }
 
 $table->saveTransaction();
-echo "Done.\n";
+echo pht('Done.')."\n";

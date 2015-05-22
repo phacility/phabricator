@@ -28,7 +28,7 @@ final class DiffusionMercurialWireProtocol {
     );
 
     if (!isset($commands[$command])) {
-      throw new Exception("Unknown Mercurial command '{$command}!");
+      throw new Exception(pht("Unknown Mercurial command '%s!", $command));
     }
 
     return $commands[$command];
@@ -65,7 +65,7 @@ final class DiffusionMercurialWireProtocol {
       // on the side of caution and throw if we don't get any data here. This
       // either indicates a mangled command from the client or a programming
       // error in our code.
-      throw new Exception("Expected nonempty 'cmds' specification!");
+      throw new Exception(pht("Expected nonempty '%s' specification!", 'cmds'));
     }
 
     // For "batch" we get a "cmds" argument like:

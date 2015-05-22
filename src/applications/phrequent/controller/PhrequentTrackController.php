@@ -49,8 +49,7 @@ final class PhrequentTrackController
           return $this->newDialog()
             ->setTitle(pht('Not Tracking Time'))
             ->appendParagraph(
-              pht(
-                'You are not currently tracking time on this object.'))
+              pht('You are not currently tracking time on this object.'))
             ->addCancelButton($done_uri);
         }
         break;
@@ -93,8 +92,7 @@ final class PhrequentTrackController
         if ($this->isStoppingTracking()) {
           $min_time = $current_timer->getDateStarted();
           if ($min_time > $timestamp->getEpoch()) {
-            $errors[] = pht(
-              'Stop time must be after start time.');
+            $errors[] = pht('Stop time must be after start time.');
             $e_date = pht('Invalid');
           }
         }

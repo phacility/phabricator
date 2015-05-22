@@ -22,8 +22,8 @@ final class DifferentialGitSVNIDField
 
   public function getFieldDescription() {
     return pht(
-      'Parses the "git-svn-id" field which Git/SVN can inject into commit '.
-      'messages.');
+      'Parses the "%s" field which Git/SVN can inject into commit messages.',
+      'git-svn-id');
   }
 
   public function canDisableField() {

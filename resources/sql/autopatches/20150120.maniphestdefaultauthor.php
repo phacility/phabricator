@@ -1,7 +1,7 @@
 <?php
 
 $key = 'metamta.maniphest.default-public-author';
-echo "Migrating `$key` to new application email infrastructure...\n";
+echo pht("Migrating `%s` to new application email infrastructure...\n", $key);
 $value = PhabricatorEnv::getEnvConfigIfExists($key);
 $maniphest = new PhabricatorManiphestApplication();
 $config_key =
@@ -19,4 +19,4 @@ if ($value) {
   }
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

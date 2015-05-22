@@ -8,7 +8,7 @@ final class DifferentialCreateDiffConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return 'Create a new Differential diff.';
+    return pht('Create a new Differential diff.');
   }
 
   protected function defineParamTypes() {

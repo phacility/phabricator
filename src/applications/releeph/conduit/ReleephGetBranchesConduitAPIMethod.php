@@ -7,7 +7,7 @@ final class ReleephGetBranchesConduitAPIMethod extends ReleephConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Return information about all active Releeph branches.';
+    return pht('Return information about all active Releeph branches.');
   }
 
   protected function defineParamTypes() {

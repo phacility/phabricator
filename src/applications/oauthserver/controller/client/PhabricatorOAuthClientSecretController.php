@@ -50,11 +50,11 @@ final class PhabricatorOAuthClientSecretController
 
     if ($is_serious) {
       $body = pht(
-        'The secret associated with this oauth application will be shown in '.
+        'The secret associated with this OAuth application will be shown in '.
         'plain text on your screen.');
     } else {
       $body = pht(
-        'The secret associated with this oauth application will be shown in '.
+        'The secret associated with this OAuth application will be shown in '.
         'plain text on your screen. Before continuing, wrap your arms around '.
         'your monitor to create a human shield, keeping it safe from prying '.
         'eyes. Protect company secrets!');

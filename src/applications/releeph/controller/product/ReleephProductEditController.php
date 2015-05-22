@@ -104,7 +104,7 @@ final class ReleephProductEditController extends ReleephProductController {
         if ($template_errors) {
           $e_branch_template = pht('Whoopsies!');
           foreach ($template_errors as $template_error) {
-            $errors[] = "Template error: {$template_error}";
+            $errors[] = pht('Template error: %s', $template_error);
           }
         }
       }
@@ -171,7 +171,7 @@ final class ReleephProductEditController extends ReleephProductController {
     $branch_template_input = id(new AphrontFormTextControl())
       ->setName('branchTemplate')
       ->setValue($branch_template)
-      ->setLabel('Branch Template')
+      ->setLabel(pht('Branch Template'))
       ->setError($e_branch_template)
       ->setCaption(
         pht("Leave this blank to use your installation's default."));

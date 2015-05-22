@@ -23,7 +23,7 @@ final class PhabricatorEventEngine {
       }
     }
 
-    // Add builtin listeners.
+    // Add built-in listeners.
     $listeners[] = new DarkConsoleEventPluginAPI();
 
     // Add application listeners.

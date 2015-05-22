@@ -101,7 +101,7 @@ final class ProjectRemarkupRuleTestCase extends PhabricatorTestCase {
         ),
       ),
 
-      'This is \'#urgent\'.' => array(
+      "This is '#urgent'." => array(
         'embed' => array(),
         'ref' => array(
           array(

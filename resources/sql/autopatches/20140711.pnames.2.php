@@ -1,11 +1,11 @@
 <?php
 
-echo "Updating project datasource tokens...\n";
+echo pht('Updating project datasource tokens...')."\n";
 
 foreach (new LiskMigrationIterator(new PhabricatorProject()) as $project) {
   $name = $project->getName();
-  echo "Updating project '{$name}'...\n";
+  echo pht("Updating project '%d'...", $name)."\n";
   $project->updateDatasourceTokens();
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

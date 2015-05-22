@@ -43,11 +43,13 @@ abstract class PackageMail extends PhabricatorMail {
   final protected function renderRepoSubSection($repository_phid, $paths) {
     $handles = $this->getHandles();
     $section = array();
-    $section[] = '  In repository '.$handles[$repository_phid]->getName().
+    $section[] = '  '.
+      pht('In repository %s', $handles[$repository_phid]->getName()).
       ' - '.PhabricatorEnv::getProductionURI($handles[$repository_phid]
       ->getURI());
     foreach ($paths as $path => $excluded) {
-      $section[] = '    '.($excluded ? 'Excluded' : 'Included').' '.$path;
+      $section[] = '    '.
+        ($excluded ? pht('Excluded') : pht('Included')).' '.$path;
     }
 
     return implode("\n", $section);
@@ -94,7 +96,7 @@ abstract class PackageMail extends PhabricatorMail {
       strtolower($this->getVerb()).' '.$this->renderPackageTitle().'.';
     $section[] = '';
 
-    $section[] = 'PACKAGE DETAIL';
+    $section[] = pht('PACKAGE DETAIL');
     $section[] = '  '.PhabricatorEnv::getProductionURI(
       '/owners/package/'.$package->getID().'/');
 
@@ -102,14 +104,14 @@ abstract class PackageMail extends PhabricatorMail {
   }
 
   protected function renderDescriptionSection() {
-    return "PACKAGE DESCRIPTION\n".
-      '  '.$this->getPackage()->getDescription();
+    return pht('PACKAGE DESCRIPTION')."\n  ".
+      $this->getPackage()->getDescription();
   }
 
   protected function renderPrimaryOwnerSection() {
     $handles = $this->getHandles();
-    return "PRIMARY OWNER\n".
-      '  '.$handles[$this->getPackage()->getPrimaryOwnerPHID()]->getName();
+    return pht('PRIMARY OWNER')."\n  ".
+      $handles[$this->getPackage()->getPrimaryOwnerPHID()]->getName();
   }
 
   protected function renderOwnersSection() {
@@ -122,18 +124,19 @@ abstract class PackageMail extends PhabricatorMail {
     $owners = mpull($owners, 'getUserPHID');
     $owners = array_select_keys($handles, $owners);
     $owners = mpull($owners, 'getName');
-    return "OWNERS\n".
-      '  '.implode(', ', $owners);
+    return pht('OWNERS')."\n  ".implode(', ', $owners);
   }
 
   protected function renderAuditingEnabledSection() {
-    return "AUDITING ENABLED STATUS\n".
-      '  '.($this->getPackage()->getAuditingEnabled() ? 'Enabled' : 'Disabled');
+    return pht('AUDITING ENABLED STATUS')."\n  ".
+      ($this->getPackage()->getAuditingEnabled()
+        ? pht('Enabled')
+        : pht('Disabled'));
   }
 
   protected function renderPathsSection() {
     $section = array();
-    $section[] = 'PATHS';
+    $section[] = pht('PATHS');
     foreach ($this->paths as $repository_phid => $paths) {
       $section[] = $this->renderRepoSubSection($repository_phid, $paths);
     }

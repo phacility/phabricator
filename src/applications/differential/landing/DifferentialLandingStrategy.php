@@ -64,7 +64,9 @@ abstract class DifferentialLandingStrategy {
     try {
       return DifferentialGetWorkingCopy::getCleanGitWorkspace($repository);
     } catch (Exception $e) {
-      throw new PhutilProxyException('Failed to allocate a workspace', $e);
+      throw new PhutilProxyException(
+        pht('Failed to allocate a workspace.'),
+        $e);
     }
   }
 
@@ -76,7 +78,9 @@ abstract class DifferentialLandingStrategy {
       return DifferentialGetWorkingCopy::getCleanMercurialWorkspace(
         $repository);
     } catch (Exception $e) {
-      throw new PhutilProxyException('Failed to allocate a workspace', $e);
+      throw new PhutilProxyException(
+        pht('Failed to allocate a workspace.'),
+        $e);
     }
   }
 

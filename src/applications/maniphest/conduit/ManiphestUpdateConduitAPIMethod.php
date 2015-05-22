@@ -7,14 +7,14 @@ final class ManiphestUpdateConduitAPIMethod extends ManiphestConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Update an existing Maniphest task.';
+    return pht('Update an existing Maniphest task.');
   }
 
   protected function defineErrorTypes() {
     return array(
-      'ERR-BAD-TASK'          => 'No such maniphest task exists.',
-      'ERR-INVALID-PARAMETER' => 'Missing or malformed parameter.',
-      'ERR-NO-EFFECT'         => 'Update has no effect.',
+      'ERR-BAD-TASK'          => pht('No such Maniphest task exists.'),
+      'ERR-INVALID-PARAMETER' => pht('Missing or malformed parameter.'),
+      'ERR-NO-EFFECT'         => pht('Update has no effect.'),
     );
   }
 
@@ -31,7 +31,11 @@ final class ManiphestUpdateConduitAPIMethod extends ManiphestConduitAPIMethod {
     $phid = $request->getValue('phid');
 
     if (($id && $phid) || (!$id && !$phid)) {
-      throw new Exception("Specify exactly one of 'id' and 'phid'.");
+      throw new Exception(
+        pht(
+          "Specify exactly one of '%s' and '%s'.",
+          'id',
+          'phid'));
     }
 
     $query = id (new ManiphestTaskQuery())

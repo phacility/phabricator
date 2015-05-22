@@ -22,7 +22,7 @@ final class AphlictDropdownDataQuery {
 
   public function getNotificationData() {
     if ($this->notificationData === null) {
-      throw new Exception('You must execute() first!');
+      throw new Exception(pht('You must %s first!', 'execute()'));
     }
     return $this->notificationData;
   }
@@ -34,7 +34,7 @@ final class AphlictDropdownDataQuery {
 
   public function getConpherenceData() {
     if ($this->conpherenceData === null) {
-      throw new Exception('You must execute() first!');
+      throw new Exception(pht('You must %s first!', 'execute()'));
     }
     return $this->conpherenceData;
   }

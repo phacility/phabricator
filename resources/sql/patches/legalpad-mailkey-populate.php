@@ -1,13 +1,13 @@
 <?php
 
-echo "Populating Legalpad Documents with mail keys...\n";
+echo pht('Populating Legalpad Documents with mail keys...')."\n";
 $table = new LegalpadDocument();
 $table->openTransaction();
 
 foreach (new LiskMigrationIterator($table) as $document) {
   $id = $document->getID();
 
-  echo "Document {$id}: ";
+  echo pht('Document %s: ', $id);
   if (!$document->getMailKey()) {
     queryfx(
       $document->establishConnection('w'),
@@ -15,11 +15,11 @@ foreach (new LiskMigrationIterator($table) as $document) {
       $document->getTableName(),
       Filesystem::readRandomCharacters(20),
       $id);
-    echo "Generated Key\n";
+    echo pht('Generated Key')."\n";
   } else {
     echo "-\n";
   }
 }
 
 $table->saveTransaction();
-echo "Done.\n";
+echo pht('Done.')."\n";

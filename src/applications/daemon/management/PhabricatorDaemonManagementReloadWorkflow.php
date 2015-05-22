@@ -10,7 +10,8 @@ final class PhabricatorDaemonManagementReloadWorkflow
         pht(
           'Gracefully restart daemon processes in-place to pick up changes '.
           'to source. This will not disrupt running jobs. This is an '.
-          'advanced workflow; most installs should use __phd restart__.'))
+          'advanced workflow; most installs should use __%s__.',
+          'phd restart'))
       ->setArguments(
         array(
           array(

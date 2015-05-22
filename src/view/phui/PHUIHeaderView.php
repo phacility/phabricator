@@ -239,7 +239,7 @@ final class PHUIHeaderView extends AphrontTagView {
             $property_list[] = $property;
           break;
           default:
-            throw new Exception('Incorrect Property Passed');
+            throw new Exception(pht('Incorrect Property Passed'));
           break;
         }
       }

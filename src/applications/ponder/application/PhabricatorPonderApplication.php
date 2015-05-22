@@ -29,8 +29,8 @@ final class PhabricatorPonderApplication extends PhabricatorApplication {
   }
 
   public function loadStatus(PhabricatorUser $user) {
-    // replace with "x new unanswered questions" or some such
-    // make sure to use self::formatStatusCount and friends...!
+    // Replace with "x new unanswered questions" or some such
+    // make sure to use `self::formatStatusCount` and friends...!
     $status = array();
 
     return $status;

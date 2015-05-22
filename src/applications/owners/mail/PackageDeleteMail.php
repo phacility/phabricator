@@ -3,7 +3,7 @@
 final class PackageDeleteMail extends PackageMail {
 
   protected function getVerb() {
-    return 'Deleted';
+    return pht('Deleted');
   }
 
   protected function isNewThread() {

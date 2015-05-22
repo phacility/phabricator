@@ -7,7 +7,7 @@ final class FlagDeleteConduitAPIMethod extends FlagConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Clear a flag.';
+    return pht('Clear a flag.');
   }
 
   protected function defineParamTypes() {
@@ -23,9 +23,9 @@ final class FlagDeleteConduitAPIMethod extends FlagConduitAPIMethod {
 
   protected function defineErrorTypes() {
     return array(
-      'ERR_NOT_FOUND'  => 'Bad flag ID.',
-      'ERR_WRONG_USER' => 'You are not the creator of this flag.',
-      'ERR_NEED_PARAM' => 'Must pass an id or an objectPHID.',
+      'ERR_NOT_FOUND'  => pht('Bad flag ID.'),
+      'ERR_WRONG_USER' => pht('You are not the creator of this flag.'),
+      'ERR_NEED_PARAM' => pht('Must pass an id or an objectPHID.'),
     );
   }
 

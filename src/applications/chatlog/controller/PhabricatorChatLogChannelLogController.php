@@ -29,9 +29,9 @@ final class PhabricatorChatLogChannelLogController
       ->withChannelIDs(array($this->channelID));
 
     $channel = id(new PhabricatorChatLogChannelQuery())
-              ->setViewer($user)
-              ->withIDs(array($this->channelID))
-              ->executeOne();
+      ->setViewer($user)
+      ->withIDs(array($this->channelID))
+      ->executeOne();
 
     if (!$channel) {
       return new Aphront404Response();

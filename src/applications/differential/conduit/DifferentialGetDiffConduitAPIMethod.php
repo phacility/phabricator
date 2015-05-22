@@ -24,8 +24,8 @@ final class DifferentialGetDiffConduitAPIMethod
 
   public function getMethodDescription() {
     return pht(
-      'Load the content of a diff from Differential by revision id '.
-      'or diff id.');
+      'Load the content of a diff from Differential by revision ID '.
+      'or diff ID.');
   }
 
   protected function defineParamTypes() {
@@ -41,7 +41,7 @@ final class DifferentialGetDiffConduitAPIMethod
 
   protected function defineErrorTypes() {
     return array(
-      'ERR_BAD_DIFF'        => 'No such diff exists.',
+      'ERR_BAD_DIFF' => pht('No such diff exists.'),
     );
   }
 

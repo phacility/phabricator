@@ -5,7 +5,7 @@ $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 
 $args = new PhutilArgumentParser($argv);
-$args->setTagline('manage drydock software resources');
+$args->setTagline(pht('manage drydock software resources'));
 $args->setSynopsis(<<<EOSYNOPSIS
 **drydock** __commmand__ [__options__]
     Manage Drydock stuff. NEW AND EXPERIMENTAL.

@@ -198,8 +198,7 @@ final class PhortuneSubscriptionWorker extends PhabricatorWorker {
 
     if (!$last_epoch || !$this_epoch) {
       throw new PhabricatorWorkerPermanentFailureException(
-        pht(
-          'Subscription is missing billing period information.'));
+        pht('Subscription is missing billing period information.'));
     }
 
     $period_length = ($this_epoch - $last_epoch);

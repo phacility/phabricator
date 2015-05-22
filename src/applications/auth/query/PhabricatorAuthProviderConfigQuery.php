@@ -88,7 +88,7 @@ final class PhabricatorAuthProviderConfigQuery
           'isEnabled = 1');
         break;
       default:
-        throw new Exception("Unknown status '{$status}'!");
+        throw new Exception(pht("Unknown status '%s'!", $status));
     }
 
     $where[] = $this->buildPagingClause($conn_r);

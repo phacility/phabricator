@@ -22,7 +22,7 @@ final class PhrictionInfoConduitAPIMethod extends PhrictionConduitAPIMethod {
 
   protected function defineErrorTypes() {
     return array(
-      'ERR-BAD-DOCUMENT' => 'No such document exists.',
+      'ERR-BAD-DOCUMENT' => pht('No such document exists.'),
     );
   }
 

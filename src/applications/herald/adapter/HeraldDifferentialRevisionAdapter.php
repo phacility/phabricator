@@ -305,7 +305,8 @@ final class HeraldDifferentialRevisionAdapter
       $effect->setAction(self::ACTION_ADD_CC);
       $effect->setTarget(array_keys($this->explicitCCs));
       $effect->setReason(
-        pht('CCs provided explicitly by revision author or carried over '.
+        pht(
+          'CCs provided explicitly by revision author or carried over '.
         'from a previous version of the revision.'));
       $result[] = new HeraldApplyTranscript(
         $effect,
@@ -346,8 +347,9 @@ final class HeraldDifferentialRevisionAdapter
               $result[] = new HeraldApplyTranscript(
                 $effect,
                 true,
-                pht('Added these addresses to CC list. '.
-                'Others could not be added.'));
+                pht(
+                  'Added these addresses to CC list. '.
+                  'Others could not be added.'));
             }
             $result[] = new HeraldApplyTranscript(
               $failed,

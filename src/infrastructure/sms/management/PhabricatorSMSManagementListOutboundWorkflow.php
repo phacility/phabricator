@@ -6,17 +6,16 @@ final class PhabricatorSMSManagementListOutboundWorkflow
   protected function didConstruct() {
     $this
       ->setName('list-outbound')
-      ->setSynopsis('List outbound sms messages sent by Phabricator.')
-      ->setExamples(
-        '**list-outbound**')
+      ->setSynopsis(pht('List outbound SMS messages sent by Phabricator.'))
+      ->setExamples('**list-outbound**')
       ->setArguments(
         array(
           array(
             'name'    => 'limit',
             'param'   => 'N',
             'default' => 100,
-            'help'    =>
-              'Show a specific number of sms messages (default 100).',
+            'help'    => pht(
+              'Show a specific number of SMS messages (default 100).'),
           ),
         ));
   }
@@ -30,15 +29,15 @@ final class PhabricatorSMSManagementListOutboundWorkflow
       $args->getArg('limit'));
 
     if (!$sms_messages) {
-      $console->writeErr("%s\n", pht('No sent sms.'));
+      $console->writeErr("%s\n", pht('No sent SMS.'));
       return 0;
     }
 
     $table = id(new PhutilConsoleTable())
       ->setShowHeader(false)
-      ->addColumn('id',     array('title' => 'ID'))
-      ->addColumn('status', array('title' => 'Status'))
-      ->addColumn('recv',   array('title' => 'Recipient'));
+      ->addColumn('id',     array('title' => pht('ID')))
+      ->addColumn('status', array('title' => pht('Status')))
+      ->addColumn('recv',   array('title' => pht('Recipient')));
 
     foreach (array_reverse($sms_messages) as $sms) {
       $table->addRow(array(

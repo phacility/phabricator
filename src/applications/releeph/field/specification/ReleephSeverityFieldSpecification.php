@@ -38,12 +38,15 @@ final class ReleephSeverityFieldSpecification
   }
 
   public function getDescriptionForLevel($level) {
-    static $descriptions = array(
-      self::HOTFIX =>
-        'Needs merging and fixing right now.',
-      self::RELEASE =>
-        'Required for the currently rolling release.',
-    );
+    static $descriptions;
+
+    if ($descriptions === null) {
+      $descriptions = array(
+        self::HOTFIX => pht('Needs merging and fixing right now.'),
+        self::RELEASE => pht('Required for the currently rolling release.'),
+      );
+    }
+
     return idx($descriptions, $level);
   }
 

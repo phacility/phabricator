@@ -7,7 +7,7 @@ final class ManiphestQueryConduitAPIMethod extends ManiphestConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Execute complex searches for Maniphest tasks.';
+    return pht('Execute complex searches for Maniphest tasks.');
   }
 
   protected function defineParamTypes() {

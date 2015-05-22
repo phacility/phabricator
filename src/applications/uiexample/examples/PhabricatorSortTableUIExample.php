@@ -3,11 +3,11 @@
 final class PhabricatorSortTableUIExample extends PhabricatorUIExample {
 
   public function getName() {
-    return 'Sortable Tables';
+    return pht('Sortable Tables');
   }
 
   public function getDescription() {
-    return 'Using sortable tables.';
+    return pht('Using sortable tables.');
   }
 
   public function renderExample() {
@@ -66,11 +66,11 @@ final class PhabricatorSortTableUIExample extends PhabricatorUIExample {
     $table = new AphrontTableView($rows);
     $table->setHeaders(
       array(
-        'Make',
-        'Model',
-        'Year',
-        'Price',
-        'Color',
+        pht('Make'),
+        pht('Model'),
+        pht('Year'),
+        pht('Price'),
+        pht('Color'),
       ));
     $table->setColumnClasses(
       array(
@@ -88,7 +88,7 @@ final class PhabricatorSortTableUIExample extends PhabricatorUIExample {
       $orders);
 
     $panel = new PHUIObjectBoxView();
-    $panel->setHeaderText('Sortable Table of Vehicles');
+    $panel->setHeaderText(pht('Sortable Table of Vehicles'));
     $panel->appendChild($table);
 
     return $panel;

@@ -819,8 +819,9 @@ final class DiffusionRepositoryEditMainController
               ->setTarget(
                 pht('Missing Binary %s', phutil_tag('tt', array(), $binary)))
               ->setNote(pht(
-                  'Unable to find this binary in `environment.append-paths`. '.
+                  'Unable to find this binary in `%s`. '.
                   'You need to configure %s and include %s.',
+                  'environment.append-paths',
                   $this->getEnvConfigLink(),
                   $path)));
           }

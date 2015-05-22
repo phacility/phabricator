@@ -487,7 +487,7 @@ final class ManiphestTaskQuery extends PhabricatorCursorPagedPolicyAwareQuery {
       default:
         $constant = idx($map, $this->status);
         if (!$constant) {
-          throw new Exception("Unknown status query '{$this->status}'!");
+          throw new Exception(pht("Unknown status query '%s'!", $this->status));
         }
         return qsprintf(
           $conn,

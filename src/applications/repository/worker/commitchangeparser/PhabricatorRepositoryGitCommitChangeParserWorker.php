@@ -127,7 +127,7 @@ final class PhabricatorRepositoryGitCommitChangeParserWorker
         // NOTE: "U" (unmerged) and "X" (unknown) statuses are also possible
         // in theory but shouldn't appear here.
         default:
-          throw new Exception("Failed to parse line '{$line}'.");
+          throw new Exception(pht("Failed to parse line '%s'.", $line));
       }
 
       $changes[$change_path] = array(

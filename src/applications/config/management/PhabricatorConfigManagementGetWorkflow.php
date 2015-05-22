@@ -7,7 +7,7 @@ final class PhabricatorConfigManagementGetWorkflow
     $this
       ->setName('get')
       ->setExamples('**get** __key__')
-      ->setSynopsis('Get a local configuration value.')
+      ->setSynopsis(pht('Get a local configuration value.'))
       ->setArguments(
         array(
           array(
@@ -23,21 +23,23 @@ final class PhabricatorConfigManagementGetWorkflow
     $argv = $args->getArg('args');
     if (count($argv) == 0) {
       throw new PhutilArgumentUsageException(
-        'Specify a configuration key to get.');
+        pht('Specify a configuration key to get.'));
     }
 
     $key = $argv[0];
 
     if (count($argv) > 1) {
       throw new PhutilArgumentUsageException(
-        'Too many arguments: expected one key.');
+        pht('Too many arguments: expected one key.'));
     }
 
     $options = PhabricatorApplicationConfigOptions::loadAllOptions();
     if (empty($options[$key])) {
       throw new PhutilArgumentUsageException(
-        "No such configuration key '{$key}'! Use `config list` to list all ".
-        "keys.");
+        pht(
+          "No such configuration key '%s'! Use `%s` to list all keys.",
+          $key,
+          'config list'));
     }
 
     $values = array();

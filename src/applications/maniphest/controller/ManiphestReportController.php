@@ -172,7 +172,7 @@ final class ManiphestReportController extends ManiphestController {
       if ($week_bucket != $last_week) {
         if ($week) {
           $rows[] = $this->formatBurnRow(
-            'Week of '.phabricator_date($last_week_epoch, $user),
+            pht('Week of %s', phabricator_date($last_week_epoch, $user)),
             $week);
           $rowc[] = 'week';
         }
@@ -607,8 +607,8 @@ final class ManiphestReportController extends ManiphestController {
       array(
         'sigil' => 'has-tooltip',
         'meta'  => array(
-          'tip' => pht('Oldest open task, excluding those with Low or '.
-                   'Wishlist priority.'),
+          'tip' => pht(
+            'Oldest open task, excluding those with Low or Wishlist priority.'),
           'size' => 200,
         ),
       ),

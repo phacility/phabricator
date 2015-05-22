@@ -3,28 +3,28 @@
 final class PHUITextExample extends PhabricatorUIExample {
 
   public function getName() {
-    return 'Text';
+    return pht('Text');
   }
 
   public function getDescription() {
-    return 'Simple styles for displaying text.';
+    return pht('Simple styles for displaying text.');
   }
 
   public function renderExample() {
 
-    $color1 = 'This is RED. ';
-    $color2 = 'This is ORANGE. ';
-    $color3 = 'This is YELLOW. ';
-    $color4 = 'This is GREEN. ';
-    $color5 = 'This is BLUE. ';
-    $color6 = 'This is INDIGO. ';
-    $color7 = 'This is VIOLET. ';
-    $color8 = 'This is WHITE. ';
-    $color9 = 'This is BLACK. ';
+    $color1 = pht('This is RED.');
+    $color2 = pht('This is ORANGE.');
+    $color3 = pht('This is YELLOW.');
+    $color4 = pht('This is GREEN.');
+    $color5 = pht('This is BLUE.');
+    $color6 = pht('This is INDIGO.');
+    $color7 = pht('This is VIOLET.');
+    $color8 = pht('This is WHITE.');
+    $color9 = pht('This is BLACK.');
 
-    $text1 = 'This is BOLD. ';
-    $text2 = 'This is Uppercase. ';
-    $text3 = 'This is Stricken.';
+    $text1 = pht('This is BOLD.');
+    $text2 = pht('This is Uppercase.');
+    $text3 = pht('This is Stricken.');
 
     $content =
       array(
@@ -72,7 +72,7 @@ final class PHUITextExample extends PhabricatorUIExample {
 
     $layout1 = id(new PHUIBoxView())
       ->appendChild($content)
-            ->setBorder(true)
+      ->setBorder(true)
       ->addPadding(PHUI::PADDING_MEDIUM);
 
     $head1 = id(new PHUIHeaderView())

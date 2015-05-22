@@ -56,8 +56,10 @@ final class PhabricatorPolicyQuery
   protected function loadPage() {
     if ($this->object && $this->phids) {
       throw new Exception(
-        'You can not issue a policy query with both setObject() and '.
-        'setPHIDs().');
+        pht(
+          'You can not issue a policy query with both %s and %s.',
+          'setObject()',
+          'setPHIDs()'));
     } else if ($this->object) {
       $phids = $this->loadObjectPolicyPHIDs();
     } else {
@@ -128,7 +130,7 @@ final class PhabricatorPolicyQuery
 
   public static function getGlobalPolicy($policy) {
     if (!self::isGlobalPolicy($policy)) {
-      throw new Exception("Policy '{$policy}' is not a global policy!");
+      throw new Exception(pht("Policy '%s' is not a global policy!", $policy));
     }
     return idx(self::getGlobalPolicies(), $policy);
   }

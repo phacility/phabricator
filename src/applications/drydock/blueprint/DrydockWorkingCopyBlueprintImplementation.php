@@ -37,7 +37,9 @@ final class DrydockWorkingCopyBlueprintImplementation
     $repository_id = $lease->getAttribute('repositoryID');
     if (!$repository_id) {
       throw new Exception(
-        "Lease is missing required 'repositoryID' attribute.");
+        pht(
+          "Lease is missing required '%s' attribute.",
+          'repositoryID'));
     }
 
     $repository = id(new PhabricatorRepositoryQuery())
@@ -47,14 +49,16 @@ final class DrydockWorkingCopyBlueprintImplementation
 
     if (!$repository) {
       throw new Exception(
-        "Repository '{$repository_id}' does not exist!");
+        pht(
+          "Repository '%s' does not exist!",
+          $repository_id));
     }
 
     switch ($repository->getVersionControlSystem()) {
       case PhabricatorRepositoryType::REPOSITORY_TYPE_GIT:
         break;
       default:
-        throw new Exception('Unsupported VCS!');
+        throw new Exception(pht('Unsupported VCS!'));
     }
 
     // TODO: Policy stuff here too.
@@ -108,7 +112,7 @@ final class DrydockWorkingCopyBlueprintImplementation
           ->getInterface($type);
     }
 
-    throw new Exception("No interface of type '{$type}'.");
+    throw new Exception(pht("No interface of type '%s'.", $type));
   }
 
 }

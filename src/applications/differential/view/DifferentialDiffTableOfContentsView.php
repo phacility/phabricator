@@ -137,9 +137,9 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
         ($changeset->getOldProperties() === $changeset->getNewProperties())
           ? ''
           : phutil_tag(
-              'span',
-              array('title' => pht('Properties Changed')),
-              'M');
+            'span',
+            array('title' => pht('Properties Changed')),
+            'M');
 
       $fname = $changeset->getFilename();
       $cov  = $this->renderCoverage($coverage, $fname);
@@ -246,8 +246,8 @@ final class DifferentialDiffTableOfContentsView extends AphrontView {
         false,
       ));
     $anchor = id(new PhabricatorAnchorView())
-        ->setAnchorName('toc')
-        ->setNavigationMarker(true);
+      ->setAnchorName('toc')
+      ->setNavigationMarker(true);
 
     return id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Table of Contents'))

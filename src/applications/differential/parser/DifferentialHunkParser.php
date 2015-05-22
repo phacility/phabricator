@@ -35,9 +35,7 @@ final class DifferentialHunkParser {
   }
   public function getVisibleLinesMask() {
     if ($this->visibleLinesMask === null) {
-      throw new Exception(
-        'You must generateVisibileLinesMask before accessing this data.'
-      );
+      throw new PhutilInvalidStateException('generateVisibileLinesMask');
     }
     return $this->visibleLinesMask;
   }
@@ -48,9 +46,7 @@ final class DifferentialHunkParser {
   }
   public function getIntraLineDiffs() {
     if ($this->intraLineDiffs === null) {
-      throw new Exception(
-        'You must generateIntraLineDiffs before accessing this data.'
-      );
+      throw new PhutilInvalidStateException('generateIntraLineDiffs');
     }
     return $this->intraLineDiffs;
   }
@@ -61,9 +57,7 @@ final class DifferentialHunkParser {
   }
   public function getNewLines() {
     if ($this->newLines === null) {
-      throw new Exception(
-        'You must parseHunksForLineData before accessing this data.'
-      );
+      throw new PhutilInvalidStateException('parseHunksForLineData');
     }
     return $this->newLines;
   }
@@ -74,9 +68,7 @@ final class DifferentialHunkParser {
   }
   public function getOldLines() {
     if ($this->oldLines === null) {
-      throw new Exception(
-        'You must parseHunksForLineData before accessing this data.'
-      );
+      throw new PhutilInvalidStateException('parseHunksForLineData');
     }
     return $this->oldLines;
   }
@@ -132,8 +124,9 @@ final class DifferentialHunkParser {
   private function getWhitespaceMode() {
     if ($this->whitespaceMode === null) {
       throw new Exception(
-        'You must setWhitespaceMode before accessing this data.'
-      );
+        pht(
+          'You must %s before accessing this data.',
+          'setWhitespaceMode'));
     }
     return $this->whitespaceMode;
   }
@@ -173,7 +166,7 @@ final class DifferentialHunkParser {
 
   private function getHasChanges($filter) {
     if ($filter !== 'any' && $filter !== 'text') {
-      throw new Exception("Unknown change filter '{$filter}'.");
+      throw new Exception(pht("Unknown change filter '%s'.", $filter));
     }
 
     $old = $this->getOldLines();

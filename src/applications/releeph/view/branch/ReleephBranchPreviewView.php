@@ -34,7 +34,9 @@ final class ReleephBranchPreviewView extends AphrontFormControl {
     foreach ($required_params as $param_name) {
       if (idx($all_params, $param_name) === null) {
         throw new Exception(
-          "'{$param_name}' is not set as either a static or dynamic!");
+          pht(
+            "'%s' is not set as either a static or dynamic!",
+            $param_name));
       }
     }
 

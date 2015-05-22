@@ -42,7 +42,7 @@ final class DiffusionLowLevelResolveRefsQuery
         $result = $this->resolveSubversionRefs();
         break;
       default:
-        throw new Exception('Unsupported repository type!');
+        throw new Exception(pht('Unsupported repository type!'));
     }
 
     if ($this->types !== null) {
@@ -112,7 +112,10 @@ final class DiffusionLowLevelResolveRefsQuery
 
     $lines = explode("\n", rtrim($stdout, "\n"));
     if (count($lines) !== count($unresolved)) {
-      throw new Exception('Unexpected line count from `git cat-file`!');
+      throw new Exception(
+        pht(
+          'Unexpected line count from `%s`!',
+          'git cat-file'));
     }
 
     $hits = array();
@@ -122,7 +125,11 @@ final class DiffusionLowLevelResolveRefsQuery
     foreach ($lines as $ref => $line) {
       $parts = explode(' ', $line);
       if (count($parts) < 2) {
-        throw new Exception("Failed to parse `git cat-file` output: {$line}");
+        throw new Exception(
+          pht(
+            'Failed to parse `%s` output: %s',
+            'git cat-file',
+            $line));
       }
       list($identifier, $type) = $parts;
 
@@ -143,7 +150,10 @@ final class DiffusionLowLevelResolveRefsQuery
           break;
         default:
           throw new Exception(
-            "Unexpected object type from `git cat-file`: {$line}");
+            pht(
+              'Unexpected object type from `%s`: %s',
+              'git cat-file',
+              $line));
       }
 
       $hits[] = array(
@@ -177,7 +187,10 @@ final class DiffusionLowLevelResolveRefsQuery
         $alternate = $identifier;
         $identifier = idx($tag_map, $ref);
         if (!$identifier) {
-          throw new Exception("Failed to look up tag '{$ref}'!");
+          throw new Exception(
+            pht(
+              "Failed to look up tag '%s'!",
+              $ref));
         }
       }
 

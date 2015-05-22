@@ -19,7 +19,7 @@ final class DiffusionMercurialRequest extends DiffusionRequest {
       return $this->repository->getDefaultBranch();
     }
 
-    throw new Exception('Unable to determine branch!');
+    throw new Exception(pht('Unable to determine branch!'));
   }
 
 }

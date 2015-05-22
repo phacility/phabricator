@@ -290,7 +290,7 @@ final class ReleephRequest extends ReleephDAO
   }
 
   public function setStatus($value) {
-    throw new Exception('`status` is now deprecated!');
+    throw new Exception(pht('`%s` is now deprecated!', 'status'));
   }
 
 /* -(  PhabricatorApplicationTransactionInterface  )------------------------- */

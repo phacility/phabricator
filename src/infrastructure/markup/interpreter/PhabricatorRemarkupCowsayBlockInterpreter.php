@@ -10,7 +10,9 @@ final class PhabricatorRemarkupCowsayBlockInterpreter
   public function markupContent($content, array $argv) {
     if (!Filesystem::binaryExists('cowsay')) {
       return $this->markupError(
-        pht('Unable to locate the `cowsay` binary. Install cowsay.'));
+        pht(
+          'Unable to locate the `%s` binary. Install cowsay.',
+          'cowsay'));
     }
 
     $bin = idx($argv, 'think') ? 'cowthink' : 'cowsay';

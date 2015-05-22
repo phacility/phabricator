@@ -172,7 +172,7 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
     }
 
     if (count($results) > 1) {
-      throw new Exception('Expected a single result!');
+      throw new Exception(pht('Expected a single result!'));
     }
 
     if (!$results) {
@@ -191,7 +191,7 @@ abstract class PhabricatorPolicyAwareQuery extends PhabricatorOffsetPagedQuery {
    */
   final public function execute() {
     if (!$this->viewer) {
-      throw new Exception('Call setViewer() before execute()!');
+      throw new PhutilInvalidStateException('setViewer');
     }
 
     $parent_query = $this->getParentQuery();

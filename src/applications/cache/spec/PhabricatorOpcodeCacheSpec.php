@@ -35,14 +35,14 @@ final class PhabricatorOpcodeCacheSpec extends PhabricatorCacheSpec {
       $slam_defense = ini_get('apc.slam_defense');
 
       if (!$write_lock || $slam_defense) {
-        $summary = pht(
-          'Adjust APC settings to quiet unnecessary errors.');
+        $summary = pht('Adjust APC settings to quiet unnecessary errors.');
 
         $message = pht(
           'Some versions of APC may emit unnecessary errors into the '.
           'error log under the current APC settings. To resolve this, '.
-          'enable "apc.write_lock" and disable "apc.slam_defense" in '.
-          'your PHP configuration.');
+          'enable "%s" and disable "%s" in your PHP configuration.',
+          'apc.write_lock',
+          'apc.slam_defense');
 
         $this
           ->newIssue('extension.apc.write-lock')
@@ -58,36 +58,40 @@ final class PhabricatorOpcodeCacheSpec extends PhabricatorCacheSpec {
       $is_stat_enabled = ini_get('apc.stat');
       if ($is_stat_enabled && !$is_dev) {
         $summary = pht(
-          '"apc.stat" is currently enabled, but should probably be disabled.');
+          '"%s" is currently enabled, but should probably be disabled.',
+          'apc.stat');
 
         $message = pht(
-          'The "apc.stat" setting is currently enabled in your PHP '.
-          'configuration. In production mode, "apc.stat" should be '.
-          'disabled. This will improve performance slightly.');
+          'The "%s" setting is currently enabled in your PHP configuration. '.
+          'In production mode, "%s" should be disabled. '.
+          'This will improve performance slightly.',
+          'apc.stat',
+          'apc.stat');
 
         $this
           ->newIssue('extension.apc.stat-enabled')
-          ->setShortName(pht('"apc.stat" Enabled'))
-          ->setName(pht('"apc.stat" Enabled in Production'))
+          ->setShortName(pht('"%s" Enabled', 'apc.stat'))
+          ->setName(pht('"%s" Enabled in Production', 'apc.stat'))
           ->setSummary($summary)
           ->setMessage($message)
           ->addPHPConfig('apc.stat')
           ->addPhabricatorConfig('phabricator.developer-mode');
       } else if (!$is_stat_enabled && $is_dev) {
         $summary = pht(
-          '"apc.stat" is currently disabled, but should probably be enabled.');
+          '"%s" is currently disabled, but should probably be enabled.',
+          'apc.stat');
 
         $message = pht(
-          'The "apc.stat" setting is currently disabled in your PHP '.
-          'configuration, but Phabricator is running in development mode. '.
-          'This option should normally be enabled in development so you do '.
-          'not need to restart your webserver after making changes to the '.
-          'code.');
+          'The "%s" setting is currently disabled in your PHP configuration, '.
+          'but Phabricator is running in development mode. This option should '.
+          'normally be enabled in development so you do not need to restart '.
+          'your webserver after making changes to the code.',
+          'apc.stat');
 
         $this
           ->newIssue('extension.apc.stat-disabled')
-          ->setShortName(pht('"apc.stat" Disabled'))
-          ->setName(pht('"apc.stat" Disabled in Development'))
+          ->setShortName(pht('"%s" Disabled', 'apc.stat'))
+          ->setName(pht('"%s" Disabled in Development', 'apc.stat'))
           ->setSummary($summary)
           ->setMessage($message)
           ->addPHPConfig('apc.stat')
@@ -128,8 +132,9 @@ final class PhabricatorOpcodeCacheSpec extends PhabricatorCacheSpec {
         $message = pht(
           'In development, OPcache should be configured to always reload '.
           'code so the webserver does not need to be restarted after making '.
-          'changes. To do this, enable "opcache.validate_timestamps" and '.
-          'set "opcache.revalidate_freq" to 0.');
+          'changes. To do this, enable "%s" and set "%s" to 0.',
+          'opcache.validate_timestamps',
+          'opcache.revalidate_freq');
 
         $this
           ->newIssue('extension.opcache.devmode')
@@ -141,14 +146,13 @@ final class PhabricatorOpcodeCacheSpec extends PhabricatorCacheSpec {
           ->addPHPConfig('opcache.revalidate_freq')
           ->addPhabricatorConfig('phabricator.developer-mode');
       } else if (!$is_dev && $validate) {
-        $summary = pht(
-          'OPcache is not configured ideally for production.');
+        $summary = pht('OPcache is not configured ideally for production.');
 
         $message = pht(
           'In production, OPcache should be configured to never '.
           'revalidate code. This will slightly improve performance. '.
-          'To do this, disable "opcache.validate_timestamps" in your PHP '.
-          'configuration.');
+          'To do this, disable "%s" in your PHP configuration.',
+          'opcache.validate_timestamps');
 
         $this
           ->newIssue('extension.opcache.production')
@@ -166,8 +170,9 @@ final class PhabricatorOpcodeCacheSpec extends PhabricatorCacheSpec {
       $message = pht(
         'The PHP "Zend OPcache" extension is installed, but not enabled in '.
         'your PHP configuration. Enabling it will dramatically improve '.
-        'Phabricator performance. Edit the "opcache.enable" setting to '.
-        'enable the extension.');
+        'Phabricator performance. Edit the "%s" setting to '.
+        'enable the extension.',
+        'opcache.enable');
 
       $this->newIssue('extension.opcache.enable')
         ->setShortName(pht('OPcache Disabled'))

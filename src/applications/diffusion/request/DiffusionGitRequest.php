@@ -17,7 +17,7 @@ final class DiffusionGitRequest extends DiffusionRequest {
     if ($this->repository) {
       return $this->repository->getDefaultBranch();
     }
-    throw new Exception('Unable to determine branch!');
+    throw new Exception(pht('Unable to determine branch!'));
   }
 
 }

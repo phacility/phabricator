@@ -15,21 +15,21 @@ final class PhabricatorDataNotAttachedException extends Exception {
     if (is_array($frame)) {
       $method = idx($frame, 'function');
       if (preg_match('/^get[A-Z]/', $method)) {
-        $via = " (via {$method}())";
+        $via = ' '.pht('(via %s)', "{$method}()");
       }
     }
 
-    $class = get_class($object);
-
-    $message =
-      "Attempting to access attached data on {$class}{$via}, but the data is ".
-      "not actually attached. Before accessing attachable data on an object, ".
-      "you must load and attach it.\n\n".
-      "Data is normally attached by calling the corresponding needX() ".
-      "method on the Query class when the object is loaded. You can also ".
-      "call the corresponding attachX() method explicitly.";
-
-    parent::__construct($message);
+    parent::__construct(
+      pht(
+        "Attempting to access attached data on %s, but the data is not ".
+        "actually attached. Before accessing attachable data on an object, ".
+        "you must load and attach it.\n\n".
+        "Data is normally attached by calling the corresponding %s method on ".
+        "the Query class when the object is loaded. You can also call the ".
+        "corresponding %s method explicitly.",
+        get_class($object).$via,
+        'needX()',
+        'attachX()'));
   }
 
 }

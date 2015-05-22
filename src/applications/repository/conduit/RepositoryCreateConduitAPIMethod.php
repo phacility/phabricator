@@ -12,7 +12,7 @@ final class RepositoryCreateConduitAPIMethod
   }
 
   public function getMethodStatusDescription() {
-    return 'Repository methods are new and subject to change.';
+    return pht('Repository methods are new and subject to change.');
   }
 
   public function getMethodDescription() {
@@ -48,12 +48,10 @@ final class RepositoryCreateConduitAPIMethod
 
   protected function defineErrorTypes() {
     return array(
-      'ERR-DUPLICATE'   =>
-        'Duplicate repository callsign.',
-      'ERR-BAD-CALLSIGN' =>
-        'Callsign is required and must be ALL UPPERCASE LETTERS.',
-      'ERR-UNKNOWN-REPOSITORY-VCS' =>
-        'Unknown repository VCS type.',
+      'ERR-DUPLICATE' => pht('Duplicate repository callsign.'),
+      'ERR-BAD-CALLSIGN' => pht(
+        'Callsign is required and must be ALL UPPERCASE LETTERS.'),
+      'ERR-UNKNOWN-REPOSITORY-VCS' => pht('Unknown repository VCS type.'),
     );
   }
 

@@ -109,8 +109,7 @@ final class DifferentialParseRenderTestCase extends PhabricatorTestCase {
       } else if ($type == 'two') {
         $cparser->setRenderer(new DifferentialChangesetTwoUpTestRenderer());
       } else {
-        throw new Exception(
-          pht('Unknown renderer type "%s"!', $type));
+        throw new Exception(pht('Unknown renderer type "%s"!', $type));
       }
 
       $parsers[] = $cparser;

@@ -63,7 +63,7 @@ final class PhabricatorRepositoryArcanistProjectEditController
       ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton('/repository/')
-          ->setValue('Save'));
+          ->setValue(pht('Save')));
 
     $panel = new PHUIObjectBoxView();
     $panel->setHeaderText(pht('Edit Arcanist Project'));

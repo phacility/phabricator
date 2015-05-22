@@ -139,8 +139,10 @@ abstract class HeraldAdapter {
 
         if (array_key_exists($key, $this->customActions)) {
           throw new Exception(
-            'More than one Herald custom action implementation '.
-            'handles the action key: \''.$key.'\'.');
+            pht(
+              "More than one Herald custom action implementation ".
+              "handles the action key: '%s'.",
+              $key));
         }
 
         $this->customActions[$key] = $action;
@@ -163,7 +165,10 @@ abstract class HeraldAdapter {
       return $this->isNewObject;
     }
 
-    throw new Exception(pht('You must setIsNewObject to a boolean first!'));
+    throw new Exception(
+      pht(
+        'You must %s to a boolean first!',
+        'setIsNewObject()'));
   }
   public function setIsNewObject($new) {
     $this->isNewObject = (bool)$new;
@@ -206,8 +211,7 @@ abstract class HeraldAdapter {
           return $this->getCustomFieldValue($field_name);
         }
 
-        throw new Exception(
-          "Unknown field '{$field_name}'!");
+        throw new Exception(pht("Unknown field '%s'!", $field_name));
     }
   }
 
@@ -536,7 +540,9 @@ abstract class HeraldAdapter {
           return $this->getCustomFieldConditions($field);
         }
         throw new Exception(
-          "This adapter does not define conditions for field '{$field}'!");
+          pht(
+            "This adapter does not define conditions for field '%s'!",
+            $field));
     }
   }
 
@@ -572,25 +578,25 @@ abstract class HeraldAdapter {
       case self::CONDITION_IS_ANY:
         if (!is_array($condition_value)) {
           throw new HeraldInvalidConditionException(
-            'Expected condition value to be an array.');
+            pht('Expected condition value to be an array.'));
         }
         $condition_value = array_fuse($condition_value);
         return isset($condition_value[$field_value]);
       case self::CONDITION_IS_NOT_ANY:
         if (!is_array($condition_value)) {
           throw new HeraldInvalidConditionException(
-            'Expected condition value to be an array.');
+            pht('Expected condition value to be an array.'));
         }
         $condition_value = array_fuse($condition_value);
         return !isset($condition_value[$field_value]);
       case self::CONDITION_INCLUDE_ALL:
         if (!is_array($field_value)) {
           throw new HeraldInvalidConditionException(
-            'Object produced non-array value!');
+            pht('Object produced non-array value!'));
         }
         if (!is_array($condition_value)) {
           throw new HeraldInvalidConditionException(
-            'Expected condition value to be an array.');
+            pht('Expected condition value to be an array.'));
         }
 
         $have = array_select_keys(array_fuse($field_value), $condition_value);
@@ -621,7 +627,7 @@ abstract class HeraldAdapter {
           $result = @preg_match($condition_value.'S', $value);
           if ($result === false) {
             throw new HeraldInvalidConditionException(
-              'Regular expression is not valid!');
+              pht('Regular expression is not valid!'));
           }
           if ($result) {
             return true;
@@ -652,13 +658,13 @@ abstract class HeraldAdapter {
           $key_matches = @preg_match($key_regexp, $key);
           if ($key_matches === false) {
             throw new HeraldInvalidConditionException(
-              'First regular expression is invalid!');
+              pht('First regular expression is invalid!'));
           }
           if ($key_matches) {
             $value_matches = @preg_match($value_regexp, $value);
             if ($value_matches === false) {
               throw new HeraldInvalidConditionException(
-                'Second regular expression is invalid!');
+                pht('Second regular expression is invalid!'));
             }
             if ($value_matches) {
               return true;
@@ -671,7 +677,7 @@ abstract class HeraldAdapter {
         $rule = $engine->getRule($condition_value);
         if (!$rule) {
           throw new HeraldInvalidConditionException(
-            'Condition references a rule which does not exist!');
+            pht('Condition references a rule which does not exist!'));
         }
 
         $is_not = ($condition_type == self::CONDITION_NOT_RULE);
@@ -686,7 +692,7 @@ abstract class HeraldAdapter {
         return (($condition_value & $field_value) !== (int)$condition_value);
       default:
         throw new HeraldInvalidConditionException(
-          "Unknown condition '{$condition_type}'.");
+          pht("Unknown condition '%s'.", $condition_type));
     }
   }
 
@@ -846,7 +852,7 @@ abstract class HeraldAdapter {
         );
         break;
       default:
-        throw new Exception("Unknown rule type '{$rule_type}'!");
+        throw new Exception(pht("Unknown rule type '%s'!", $rule_type));
     }
 
     $custom_actions = $this->getCustomActionsForRuleType($rule_type);
@@ -984,7 +990,7 @@ abstract class HeraldAdapter {
       case self::CONDITION_NOT_RULE:
         return self::VALUE_RULE;
       default:
-        throw new Exception("Unknown condition '{$condition}'.");
+        throw new Exception(pht("Unknown condition '%s'.", $condition));
     }
   }
 
@@ -1041,7 +1047,7 @@ abstract class HeraldAdapter {
       return $custom_action->getActionType();
     }
 
-    throw new Exception("Unknown or invalid action '".$action."'.");
+    throw new Exception(pht("Unknown or invalid action '%s'.", $action));
   }
 
 

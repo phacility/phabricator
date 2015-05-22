@@ -33,8 +33,9 @@ final class PhabricatorCountdownDeleteController
         ->setURI('/countdown/');
     }
 
-    $inst = pht('Are you sure you want to delete the countdown %s?',
-            $countdown->getTitle());
+    $inst = pht(
+      'Are you sure you want to delete the countdown %s?',
+      $countdown->getTitle());
 
     $dialog = new AphrontDialogView();
     $dialog->setUser($request->getUser());

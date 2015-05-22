@@ -134,7 +134,7 @@ abstract class AphrontFormControl extends AphrontView {
 
   public function setFormPage(PHUIFormPageView $page) {
     if ($this->formPage) {
-      throw new Exception('This control is already a member of a page!');
+      throw new Exception(pht('This control is already a member of a page!'));
     }
     $this->formPage = $page;
     return $this;
@@ -142,7 +142,7 @@ abstract class AphrontFormControl extends AphrontView {
 
   public function getFormPage() {
     if ($this->formPage === null) {
-      throw new Exception('This control does not have a page!');
+      throw new Exception(pht('This control does not have a page!'));
     }
     return $this->formPage;
   }

@@ -147,8 +147,12 @@ final class PhabricatorCustomFieldList extends Phobject {
           break;
         default:
           throw new Exception(
-            "Unknown field property view style '{$style}'; valid styles are ".
-            "'block' and 'property'.");
+            pht(
+              "Unknown field property view style '%s'; valid styles are ".
+              "'%s' and '%s'.",
+              $style,
+              'block',
+              'property'));
       }
     }
     $fields = $head + $tail;

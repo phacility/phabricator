@@ -5,7 +5,7 @@ $root = dirname(dirname(dirname(__FILE__)));
 require_once $root.'/scripts/__init_script__.php';
 
 $args = new PhutilArgumentParser($argv);
-$args->setTagline('manage configuration');
+$args->setTagline(pht('manage configuration'));
 $args->setSynopsis(<<<EOSYNOPSIS
 **config** __command__ [__options__]
     Manage Phabricator configuration.
