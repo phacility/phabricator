@@ -19,16 +19,10 @@
 }
 
 .aphront-dialog-head {
-  padding: 4px 12px 0 12px;
+  padding: 12px 12px 0 12px;
   background: #fff;
   border-top-left-radius: 3px;
   border-top-right-radius: 3px;
-}
-
-.aphront-dialog-head .phui-action-header {
-  border-bottom: 1px solid {$thinblueborder};
-  padding: 0 0 4px 0;
-  white-space: nowrap;
 }
 
 .aphront-dialog-flush .aphront-dialog-body {
@@ -107,11 +101,6 @@
 
 .aphront-access-dialog {
   width: 50%;
-}
-
-.aphront-dialog-view ul {
-  margin: 12px 24px;
-  list-style: circle;
 }
 
 .aphront-policy-rejection {

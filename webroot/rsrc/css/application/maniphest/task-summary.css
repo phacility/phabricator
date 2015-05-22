@@ -7,24 +7,6 @@
   display: none;
 }
 
-.maniphest-task-group-header {
-  font-size: 16px;
-  font-weight: normal;
-  color: {$darkbluetext};
-  padding: 0 0 8px 0;
-}
-
-.maniphest-total-result-count {
-  text-align: right;
-  padding: 5px 20px 0 0;
-  font-size: 11px;
-  color: {$greytext};
-}
-
-.device-phone .maniphest-total-result-count {
-  padding-right: 5px;
-}
-
 .maniphest-batch-editor-layout {
   width: 100%;
 }
@@ -53,19 +35,4 @@
 
 .maniphest-board-link {
   color: {$bluetext};
-}
-
-/* - Dashboards ------------------------------------------------------------ */
-
-.dashboard-panel .maniphest-list-container {
-  padding: 0;
-}
-
-.dashboard-panel .maniphest-task-group + .maniphest-task-group {
-  padding-top: 0;
-}
-
-.dashboard-panel .maniphest-task-group-header {
-  border-left: 1px solid {$lightblueborder};
-  border-right: 1px solid {$lightblueborder};
 }
