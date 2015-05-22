@@ -10,6 +10,7 @@ final class PHUICalendarDayView extends AphrontView {
   private $browseURI;
   private $events = array();
   private $todayEvents = array();
+  private $jsTodayEvents = array();
 
   private $allDayEvents = array();
 
@@ -45,6 +46,7 @@ final class PHUICalendarDayView extends AphrontView {
     require_celerity_resource('phui-calendar-day-css');
 
     $hours = $this->getHoursOfDay();
+    $js_hourly_events = array();
     $hourly_events = array();
 
     $first_event_hour = null;
@@ -83,6 +85,11 @@ final class PHUICalendarDayView extends AphrontView {
           && $event->getEpochStart() < $hour_end)) {
           $current_hour_events[] = $event;
           $this->todayEvents[] = $event;
+          $this->jsTodayEvents[] = array(
+            'eventStartEpoch' => $event->getEpochStart(),
+            'eventEndEpoch' => $event->getEpochEnd(),
+            'eventName' => $event->getName(),
+          );
         }
       }
       foreach ($current_hour_events as $event) {
@@ -101,6 +108,17 @@ final class PHUICalendarDayView extends AphrontView {
         if ($first_event_hour === null) {
           $first_event_hour = $hour;
         }
+
+        $js_hourly_events[$event->getEventID()] = array(
+          'eventStartEpoch' => $event->getEpochStart(),
+          'eventEndEpoch' => $event->getEpochEnd(),
+          'eventName' => $event->getName(),
+          'hour' => $hour,
+          'offset' => '0',
+          'width' => '100%',
+          'top' => $top.'%',
+          'height' => $height.'%',
+        );
 
         $hourly_events[$event->getEventID()] = array(
           'hour' => $hour,
@@ -175,6 +193,13 @@ final class PHUICalendarDayView extends AphrontView {
     $header = $this->renderDayViewHeader();
     $sidebar = $this->renderSidebar();
     $warnings = $this->getQueryRangeWarning();
+
+    Javelin::initBehavior(
+      'day-view',
+      array(
+        'todayEvents' => $this->jsTodayEvents,
+        'hourlyEvents' => $js_hourly_events,
+      ));
 
     $table_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
