@@ -319,8 +319,12 @@ final class PhabricatorHomeMainController extends PhabricatorHomeController {
         'href' => $href,
       ),
       $title);
+    $icon = id(new PHUIIconView())
+      ->setIconFont('fa-search')
+      ->setHref($href);
     $header = id(new PHUIHeaderView())
-      ->setHeader($title);
+      ->setHeader($title)
+      ->addActionIcon($icon);
     return $header;
   }
 
