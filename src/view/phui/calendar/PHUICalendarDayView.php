@@ -46,6 +46,15 @@ final class PHUICalendarDayView extends AphrontView {
     require_celerity_resource('phui-calendar-day-css');
 
     $hours = $this->getHoursOfDay();
+    $js_hours = array();
+
+    foreach ($hours as $hour) {
+      $js_hours[] = array(
+        'hour' => $hour->format('G'),
+        'hour_meridian' => $hour->format('g A'),
+      );
+    }
+
     $js_hourly_events = array();
     $hourly_events = array();
 
@@ -90,6 +99,8 @@ final class PHUICalendarDayView extends AphrontView {
             'eventEndEpoch' => $event->getEpochEnd(),
             'eventName' => $event->getName(),
             'eventID' => $event->getEventID(),
+            'viewerIsInvited' => $event->getViewerIsInvited(),
+            'uri' => $event->getURI(),
           );
         }
       }
@@ -115,7 +126,9 @@ final class PHUICalendarDayView extends AphrontView {
           'eventEndEpoch' => $event->getEpochEnd(),
           'eventName' => $event->getName(),
           'eventID' => $event->getEventID(),
-          'hour' => $hour,
+          'viewerIsInvited' => $event->getViewerIsInvited(),
+          'uri' => $event->getURI(),
+          'hour' => $hour->format('G'),
           'offset' => '0',
           'width' => '100%',
           'top' => $top.'%',
@@ -201,6 +214,8 @@ final class PHUICalendarDayView extends AphrontView {
       array(
         'todayEvents' => $this->jsTodayEvents,
         'hourlyEvents' => $js_hourly_events,
+        'hours' => $js_hours,
+        'firstEventHour' => $first_event_hour->format('G'),
       ));
 
     $table_box = id(new PHUIObjectBoxView())

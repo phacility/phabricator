@@ -4,6 +4,8 @@
 
 
 JX.behavior('day-view', function(config) {
+  var hours = config.hours;
+  var first_event_hour = config.firstEventHour;
   var hourly_events = config.hourlyEvents;
   var today_events = config.todayEvents;
 
@@ -78,8 +80,103 @@ JX.behavior('day-view', function(config) {
     return hourly_events;
   }
 
+  function drawEvent(
+    start,
+    end,
+    name,
+    viewerIsInvited,
+    uri,
+    id,
+    offset,
+    width,
+    top,
+    height) {
+
+    var link_class = 'phui-calendar-day-event-link';
+    if (viewerIsInvited) {
+      link_class = link_class + ' viewer-invited-day-event';
+    }
+
+    var name_link = JX.$N(
+      'a',
+      {
+        className : link_class,
+        href: uri
+      },
+      name);
+
+    var div = JX.$N(
+      'div',
+      {
+        className: 'phui-calendar-day-event',
+        style: {
+          left: offset,
+          width: width,
+          top: top,
+          height: height
+        }
+      },
+      name_link);
+
+    return div;
+  }
+
+  function drawRows() {
+    var rows = [];
+    var early_hours = [8];
+    if (first_event_hour) {
+      early_hours.push(first_event_hour);
+    }
+    var min_early_hour = Math.min(early_hours[0], early_hours[1]);
+
+
+    for(var i=0; i < hours.length; i++) {
+      if (hours[i]['hour'] < min_early_hour) {
+        continue;
+      }
+      var drawn_hourly_events = [];
+      var cell_time = JX.$N(
+        'td',
+        {className: 'phui-calendar-day-hour'},
+        hours[i]['hour_meridian']);
+
+      for (var j=0; j < hourly_events.length; j++) {
+        if (hourly_events[j]['hour'] == hours[i]['hour']) {
+          drawn_hourly_events.push(
+            drawEvent(
+              hourly_events[j]['eventStartEpoch'],
+              hourly_events[j]['eventEndEpoch'],
+              hourly_events[j]['eventName'],
+              hourly_events[j]['eventID'],
+              hourly_events[j]['viewerIsInvited'],
+              hourly_events[j]['hour'],
+              hourly_events[j]['offset'],
+              hourly_events[j]['width'],
+              hourly_events[j]['top'],
+              hourly_events[j]['height']
+            )
+          );
+        }
+      }
+
+      var cell_event = JX.$N(
+        'td',
+        {
+          className: 'phui-calendar-day-events'
+        },
+        drawn_hourly_events);
+      var row = JX.$N(
+        'tr',
+        {},
+        [cell_time, cell_event]);
+      rows.push(row);
+    }
+    return rows;
+  }
+
   var today_clusters = findTodayClusters();
   for(var i=0; i < today_clusters.length; i++) {
     hourly_events = updateEventsFromCluster(today_clusters[i], hourly_events);
   }
+  var rows = drawRows();
 });
