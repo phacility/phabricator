@@ -49,13 +49,8 @@
   border-bottom: 1px solid {$thinblueborder};
   font-size: 22px;
   font-weight: 400;
-  color: {$bluetext};
+  color: {$darkbluetext};
   margin: 0 0 16px;
-}
-
-.phui-font-source-sans .phabricator-remarkup ol li.remarkup-list-item,
-.phui-font-source-sans .phabricator-remarkup ul li.remarkup-list-item {
-  margin-bottom: 4px;
 }
 
 .phui-font-source-sans .phabricator-remarkup tt.remarkup-monospaced {
@@ -90,8 +85,13 @@
 }
 
 body .phui-font-source-sans
+  .phui-header-shell.phui-bleed-header {
+    padding: 0;
+  }
+
+body .phui-font-source-sans
   .phui-header-shell.phui-bleed-header .phui-header-view {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: normal;
 }
 
