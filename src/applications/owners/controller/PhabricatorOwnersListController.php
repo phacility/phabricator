@@ -196,7 +196,6 @@ final class PhabricatorOwnersListController
 
     $crumbs = $this->buildApplicationCrumbs();
     $crumbs->addTextCrumb($header);
-    $crumbs->setBorder(true);
 
     $nav = $this->buildSideNavView();
     $nav->appendChild($crumbs);

@@ -191,7 +191,6 @@ final class PhabricatorChatLogChannelLogController
 
     $crumbs = $this
       ->buildApplicationCrumbs()
-      ->setBorder(true)
       ->addTextCrumb($channel->getChannelName(), $uri);
 
     $form = id(new AphrontFormView())

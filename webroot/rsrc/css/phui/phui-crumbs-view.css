@@ -80,7 +80,7 @@
 
 .device-desktop .phui-crumbs-view a:hover,
 .device-desktop .phui-crumbs-view a:hover .phui-icon-view {
-  color: {$sky};
+  color: {$blue};
   text-decoration: none;
 }
 
@@ -99,6 +99,10 @@ a.phui-crumbs-action .phui-icon-view {
 
 .phui-crumb-divider {
   margin: 2px 8px;
+}
+
+.phui-crumbs-view.phui-crumbs-border {
+  border-bottom: 1px solid {$thinblueborder};
 }
 
 body .phui-crumbs-view + .phui-object-box {

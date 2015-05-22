@@ -52,7 +52,6 @@ final class ManiphestReportController extends ManiphestController {
     $nav->appendChild($core);
     $nav->setCrumbs(
       $this->buildApplicationCrumbs()
-        ->setBorder(true)
         ->addTextCrumb(pht('Reports')));
 
     return $this->buildApplicationPage(
