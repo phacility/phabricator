@@ -46,7 +46,7 @@
   border: 0;
 }
 
-.conpherence-widget-pane .widgets-header .phui-header-view {
+.conpherence-widget-pane .widgets-header .phui-header-shell {
   padding: 8px;
   font-size: 14px;
 }
@@ -84,7 +84,7 @@
 }
 
 .device-desktop .conpherence-widget-pane .widgets-body {
-  top: 108px;
+  top: 111px;
   width: 240px;
 }
 

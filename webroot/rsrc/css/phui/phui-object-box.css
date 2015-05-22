@@ -12,25 +12,11 @@
 }
 
 .phui-object-box.phui-object-box-collapsed .phui-header-shell {
-  padding: 0 4px 4px 16px;
+  padding: 0 8px 12px 16px;
 }
 
 div.phui-object-box.phui-object-box-flush {
   margin-top: 0;
-}
-
-.phui-object-box .phui-header-shell {
-  padding: 0 5px 4px 4px;
-  border-bottom: 1px solid {$thinblueborder};
-  border-top: none;
-}
-
-.phui-object-box .phui-header-image {
-  margin: 1px 8px -7px -7px;
-}
-
-.phui-object-box .phui-header-shell h1 {
-  padding: 0 0 8px 0;
 }
 
 .phui-object-box .phui-header-shell + .phui-info-view {

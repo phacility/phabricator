@@ -470,7 +470,7 @@ final class DiffusionRepositoryController extends DiffusionController {
     $header->addActionLink($button);
 
     $panel->setHeader($header);
-    $panel->appendChild($view);
+    $panel->setTable($view);
 
     return $panel;
   }
@@ -653,14 +653,15 @@ final class DiffusionRepositoryController extends DiffusionController {
             ->setID('locate-input')
             ->setLabel(pht('Locate File')));
       $form_box = id(new PHUIBoxView())
-        ->addClass('diffusion-locate-file-view')
         ->appendChild($form->buildLayoutView());
-      $browse_panel->appendChild($form_box);
+      $locate_panel = id(new PHUIObjectBoxView())
+        ->setHeaderText('Locate File')
+        ->appendChild($form_box);
     }
 
     $browse_panel->setTable($browse_table);
 
-    return $browse_panel;
+    return array($locate_panel, $browse_panel);
   }
 
   private function renderCloneCommand(

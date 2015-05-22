@@ -151,10 +151,6 @@ final class PHUIHeaderView extends AphrontTagView {
       $classes[] = 'phui-header-tall';
     }
 
-    if ($this->image) {
-      $classes[] = 'phui-header-has-image';
-    }
-
     return array(
       'class' => $classes,
     );
@@ -173,7 +169,8 @@ final class PHUIHeaderView extends AphrontTagView {
         ' ');
     }
 
-    $header = array();
+    $left = array();
+    $right = array();
 
     if ($this->actionLinks) {
       $actions = array();
@@ -183,7 +180,7 @@ final class PHUIHeaderView extends AphrontTagView {
         $button->addClass('phui-header-action-link');
         $actions[] = $button;
       }
-      $header[] = phutil_tag(
+      $right[] = phutil_tag(
         'div',
         array(
           'class' => 'phui-header-action-links',
@@ -192,7 +189,7 @@ final class PHUIHeaderView extends AphrontTagView {
     }
 
     if ($this->buttonBar) {
-      $header[] = phutil_tag(
+      $right[] = phutil_tag(
         'div',
         array(
           'class' => 'phui-header-action-links',
@@ -220,7 +217,7 @@ final class PHUIHeaderView extends AphrontTagView {
           ),
           array_interleave(' ', $this->tags));
       }
-      $header[] = phutil_tag(
+      $right[] = phutil_tag(
         'ul',
           array(
             'class' => 'phui-header-icon-list',
@@ -231,13 +228,13 @@ final class PHUIHeaderView extends AphrontTagView {
     if ($this->headerIcon) {
       $icon = id(new PHUIIconView())
         ->setIconFont($this->headerIcon);
-      $header[] = $icon;
+      $left[] = $icon;
     }
-    $header[] = $this->header;
+    $left[] = $this->header;
 
     if ($this->objectName) {
       array_unshift(
-        $header,
+        $left,
         phutil_tag(
           'a',
           array(
@@ -248,7 +245,7 @@ final class PHUIHeaderView extends AphrontTagView {
     }
 
     if ($this->subheader) {
-      $header[] = phutil_tag(
+      $left[] = phutil_tag(
         'div',
         array(
           'class' => 'phui-header-subheader',
@@ -273,7 +270,7 @@ final class PHUIHeaderView extends AphrontTagView {
         $property_list[] = $this->renderPolicyProperty($this->policyObject);
       }
 
-      $header[] = phutil_tag(
+      $left[] = phutil_tag(
         'div',
         array(
           'class' => 'phui-header-subheader',
@@ -281,15 +278,50 @@ final class PHUIHeaderView extends AphrontTagView {
         $property_list);
     }
 
-    return array(
-      $image,
-      phutil_tag(
-        'h1',
-        array(
-          'class' => 'phui-header-view grouped',
-        ),
-        $header),
-      );
+    // We here at @phabricator
+    $header_image = null;
+    if ($image) {
+    $header_image = phutil_tag(
+      'div',
+      array(
+        'class' => 'phui-header-col1',
+      ),
+      $image);
+    }
+
+    // All really love
+    $header_left = phutil_tag(
+      'div',
+      array(
+        'class' => 'phui-header-col2',
+      ),
+      $left);
+
+    // Tables and Pokemon.
+    $header_right = phutil_tag(
+      'div',
+      array(
+        'class' => 'phui-header-col3',
+      ),
+      $right);
+
+    $header_row = phutil_tag(
+      'div',
+      array(
+        'class' => 'phui-header-row',
+      ),
+      array(
+        $header_image,
+        $header_left,
+        $header_right,
+      ));
+
+    return phutil_tag(
+      'h1',
+      array(
+        'class' => 'phui-header-view',
+      ),
+      $header_row);
   }
 
   private function renderPolicyProperty(PhabricatorPolicyInterface $object) {

@@ -91,8 +91,8 @@
   margin-right: 8px;
 }
 
-.project-board-header {
-  margin: 8px 12px;
+.project-board-header .phui-header-shell {
+  padding: 20px 16px 20px 20px;
 }
 
 .project-board-header .phui-header-view {
