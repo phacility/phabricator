@@ -28,7 +28,7 @@ final class PhabricatorAuditEditor
     } else {
       $name = $this->getActor()->getUsername();
     }
-    return array('Added by '.$name.'.');
+    return array(pht('Added by %s.', $name));
   }
 
   public function setRawPatch($patch) {
@@ -115,9 +115,6 @@ final class PhabricatorAuditEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_COMMENT:
-      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
-      case PhabricatorTransactions::TYPE_EDGE:
       case PhabricatorAuditActionConstants::ACTION:
       case PhabricatorAuditActionConstants::INLINE:
       case PhabricatorAuditActionConstants::ADD_AUDITORS:
@@ -133,9 +130,6 @@ final class PhabricatorAuditEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_COMMENT:
-      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
-      case PhabricatorTransactions::TYPE_EDGE:
       case PhabricatorAuditActionConstants::ACTION:
       case PhabricatorAuditTransaction::TYPE_COMMIT:
         return;
@@ -206,7 +200,7 @@ final class PhabricatorAuditEditor
             $state,
             $phid);
         }
-        return;
+        break;
     }
 
     return parent::applyBuiltinExternalTransaction($object, $xaction);
@@ -418,7 +412,7 @@ final class PhabricatorAuditEditor
     $message = $data->getCommitMessage();
 
     $matches = null;
-    if (!preg_match('/^Auditors:\s*(.*)$/im', $message, $matches)) {
+    if (!preg_match('/^Auditors?:\s*(.*)$/im', $message, $matches)) {
       return array();
     }
 
@@ -438,7 +432,7 @@ final class PhabricatorAuditEditor
     }
 
     foreach ($phids as $phid) {
-      $this->addAuditReason($phid, 'Requested by Author');
+      $this->addAuditReason($phid, pht('Requested by Author'));
     }
     return id(new PhabricatorAuditTransaction())
       ->setTransactionType(PhabricatorAuditActionConstants::ADD_AUDITORS)

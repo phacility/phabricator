@@ -26,14 +26,17 @@ abstract class ReleephFieldSelector {
       $field = idx($map, $class);
       if (!$field) {
         throw new Exception(
-          "Tried to select a in instance of '{$class}' but that field ".
-          "is not configured for this project!");
+          pht(
+            "Tried to select a in instance of '%s' but that field ".
+            "is not configured for this project!",
+            $class));
       }
 
       if (idx($result, $class)) {
         throw new Exception(
-          "You have asked to select the field '{$class}' ".
-          "more than once!");
+          pht(
+            "You have asked to select the field '%s' more than once!",
+            $class));
       }
 
       $result[$class] = $field;

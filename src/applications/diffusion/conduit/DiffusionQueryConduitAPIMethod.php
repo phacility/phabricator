@@ -13,7 +13,7 @@ abstract class DiffusionQueryConduitAPIMethod
 
   public function getMethodStatusDescription() {
     return pht(
-      'See T2784 - migrating diffusion working copy calls to conduit methods. '.
+      'See T2784 - migrating Diffusion working copy calls to conduit methods. '.
       'Until that task is completed (and possibly after) these methods are '.
       'unstable.');
   }

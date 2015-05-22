@@ -13,7 +13,10 @@ final class FundInitiativeIndexer
       ->withPHIDs(array($phid))
       ->executeOne();
     if (!$object) {
-      throw new Exception("Unable to load object by phid '{$phid}'!");
+      throw new Exception(
+        pht(
+          "Unable to load object by PHID '%s'!",
+          $phid));
     }
     return $object;
   }

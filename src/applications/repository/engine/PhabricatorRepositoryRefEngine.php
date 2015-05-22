@@ -397,7 +397,7 @@ final class PhabricatorRepositoryRefEngine
         $class = 'PhabricatorRepositoryMercurialCommitMessageParserWorker';
         break;
       default:
-        throw new Exception("Unknown repository type '{$vcs}'!");
+        throw new Exception(pht("Unknown repository type '%s'!", $vcs));
     }
 
     $all_commits = queryfx_all(

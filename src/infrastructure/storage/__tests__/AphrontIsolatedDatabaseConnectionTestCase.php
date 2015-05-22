@@ -30,11 +30,11 @@ final class AphrontIsolatedDatabaseConnectionTestCase
     queryfx($conn, 'INSERT');
     $id2 = $conn->getInsertID();
 
-    $this->assertTrue((bool)$id1, 'ID1 exists.');
-    $this->assertTrue((bool)$id2, 'ID2 exists.');
+    $this->assertTrue((bool)$id1, pht('ID1 exists.'));
+    $this->assertTrue((bool)$id2, pht('ID2 exists.'));
     $this->assertTrue(
       $id1 != $id2,
-      "IDs '{$id1}' and '{$id2}' are distinct.");
+      pht("IDs '%s' and '%s' are distinct.", $id1, $id2));
   }
 
   public function testDeletePermitted() {
@@ -133,7 +133,7 @@ final class AphrontIsolatedDatabaseConnectionTestCase
       $this->assertEqual(
         null,
         $row,
-        'Expect fake row to exist only in isolation.');
+        pht('Expect fake row to exist only in isolation.'));
     } catch (AphrontConnectionQueryException $ex) {
       // If we can't connect to the database, conclude that the isolated
       // connection actually is isolated. Philosophically, this perhaps allows

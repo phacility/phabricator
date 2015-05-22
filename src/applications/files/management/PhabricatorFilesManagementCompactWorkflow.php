@@ -34,8 +34,9 @@ final class PhabricatorFilesManagementCompactWorkflow
     if (!$iterator) {
       throw new PhutilArgumentUsageException(
         pht(
-          'Either specify a list of files to compact, or use `--all` '.
-          'to compact all files.'));
+          'Either specify a list of files to compact, or use `%s` '.
+          'to compact all files.',
+          '--all'));
     }
 
     $is_dry_run = $args->getArg('dry-run');

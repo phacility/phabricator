@@ -27,7 +27,7 @@ final class PhabricatorNotificationClearController
     $dialog->setUser($user);
     $dialog->addCancelButton('/notification/');
     if ($chrono_key) {
-      $dialog->setTitle('Really mark all notifications as read?');
+      $dialog->setTitle(pht('Really mark all notifications as read?'));
       $dialog->addHiddenInput('chronoKey', $chrono_key);
 
       $is_serious =
@@ -45,9 +45,8 @@ final class PhabricatorNotificationClearController
 
       $dialog->addSubmitButton(pht('Mark All Read'));
     } else {
-      $dialog->setTitle('No notifications to mark as read.');
-      $dialog->appendChild(pht(
-        'You have no unread notifications.'));
+      $dialog->setTitle(pht('No notifications to mark as read.'));
+      $dialog->appendChild(pht('You have no unread notifications.'));
     }
 
     return id(new AphrontDialogResponse())->setDialog($dialog);

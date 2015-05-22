@@ -9,16 +9,16 @@ $conn_w = $table->establishConnection('w');
 
 $xaccount = new PhabricatorExternalAccount();
 
-echo "Migrating LDAP to ExternalAccount...\n";
+echo pht('Migrating LDAP to %s...', 'ExternalAccount')."\n";
 
 $rows = queryfx_all($conn_w, 'SELECT * FROM %T', $table_name);
 foreach ($rows as $row) {
-  echo "Migrating row ID #".$row['id'].".\n";
+  echo pht('Migrating row ID #%d.', $row['id'])."\n";
   $user = id(new PhabricatorUser())->loadOneWhere(
     'id = %d',
     $row['userID']);
   if (!$user) {
-    echo "Bad user ID!\n";
+    echo pht('Bad user ID!')."\n";
     continue;
   }
 
@@ -38,4 +38,4 @@ foreach ($rows as $row) {
   }
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

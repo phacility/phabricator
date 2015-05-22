@@ -3,11 +3,14 @@
 final class DarkConsoleRequestPlugin extends DarkConsolePlugin {
 
   public function getName() {
-    return 'Request';
+    return pht('Request');
   }
 
   public function getDescription() {
-    return 'Information about $_REQUEST and $_SERVER.';
+    return pht(
+      'Information about %s and %s.',
+      '$_REQUEST',
+      '$_SERVER');
   }
 
   public function generateData() {
@@ -47,7 +50,7 @@ final class DarkConsoleRequestPlugin extends DarkConsolePlugin {
         if (isset($mask[$key])) {
           $rows[] = array(
             $key,
-            phutil_tag('em', array(), '(Masked)'),
+            phutil_tag('em', array(), pht('(Masked)')),
           );
         } else {
           $rows[] = array(

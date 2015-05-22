@@ -30,11 +30,7 @@ final class PhabricatorFileTransformController
     }
 
     $transform = $request->getURIData('transform');
-    $xform = id(new PhabricatorTransformedFile())
-      ->loadOneWhere(
-        'originalPHID = %s AND transform = %s',
-        $source_phid,
-        $transform);
+    $xform = $this->loadTransform($source_phid, $transform);
 
     if ($xform) {
       if ($is_regenerate) {
@@ -80,8 +76,20 @@ final class PhabricatorFileTransformController
     $xform = id(new PhabricatorTransformedFile())
       ->setOriginalPHID($source_phid)
       ->setTransform($transform)
-      ->setTransformedPHID($xformed_file->getPHID())
-      ->save();
+      ->setTransformedPHID($xformed_file->getPHID());
+
+    try {
+      $xform->save();
+    } catch (AphrontDuplicateKeyQueryException $ex) {
+      // If we collide when saving, we've raced another endpoint which was
+      // transforming the same file. Just throw our work away and use that
+      // transform instead.
+      $this->destroyTransform($xform);
+      $xform = $this->loadTransform($source_phid, $transform);
+      if (!$xform) {
+        return new Aphront404Response();
+      }
+    }
 
     return $this->buildTransformedFileResponse($xform);
   }
@@ -104,21 +112,30 @@ final class PhabricatorFileTransformController
   }
 
   private function destroyTransform(PhabricatorTransformedFile $xform) {
+    $engine = new PhabricatorDestructionEngine();
     $file = id(new PhabricatorFileQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->setViewer($engine->getViewer())
       ->withPHIDs(array($xform->getTransformedPHID()))
       ->executeOne();
 
     $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
 
     if (!$file) {
-      $xform->delete();
+      if ($xform->getID()) {
+        $xform->delete();
+      }
     } else {
-      $engine = new PhabricatorDestructionEngine();
       $engine->destroyObject($file);
     }
 
     unset($unguarded);
+  }
+
+  private function loadTransform($source_phid, $transform) {
+    return id(new PhabricatorTransformedFile())->loadOneWhere(
+      'originalPHID = %s AND transform = %s',
+      $source_phid,
+      $transform);
   }
 
 }

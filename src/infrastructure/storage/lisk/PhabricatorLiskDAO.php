@@ -42,7 +42,7 @@ abstract class PhabricatorLiskDAO extends LiskDAO {
       $namespace = self::getDefaultStorageNamespace();
     }
     if (!strlen($namespace)) {
-      throw new Exception('No storage namespace configured!');
+      throw new Exception(pht('No storage namespace configured!'));
     }
     return $namespace;
   }

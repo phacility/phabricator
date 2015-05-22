@@ -34,7 +34,7 @@ final class PhabricatorFeedBuilder {
 
   public function buildView() {
     if (!$this->user) {
-      throw new Exception('Call setUser() before buildView()!');
+      throw new PhutilInvalidStateException('setUser');
     }
 
     $user = $this->user;

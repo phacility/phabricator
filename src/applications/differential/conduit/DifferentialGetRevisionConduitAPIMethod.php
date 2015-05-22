@@ -12,11 +12,11 @@ final class DifferentialGetRevisionConduitAPIMethod
   }
 
   public function getMethodStatusDescription() {
-    return "Replaced by 'differential.query'.";
+    return pht("Replaced by '%s'.", 'differential.query');
   }
 
   public function getMethodDescription() {
-    return 'Load the content of a revision from Differential.';
+    return pht('Load the content of a revision from Differential.');
   }
 
   protected function defineParamTypes() {
@@ -31,7 +31,7 @@ final class DifferentialGetRevisionConduitAPIMethod
 
   protected function defineErrorTypes() {
     return array(
-      'ERR_BAD_REVISION'    => 'No such revision exists.',
+      'ERR_BAD_REVISION' => pht('No such revision exists.'),
     );
   }
 
@@ -56,7 +56,6 @@ final class DifferentialGetRevisionConduitAPIMethod
       ->setViewer($request->getUser())
       ->withRevisionIDs(array($revision_id))
       ->needChangesets(true)
-      ->needArcanistProjects(true)
       ->execute();
     $diff_dicts = mpull($diffs, 'getDiffDict');
 

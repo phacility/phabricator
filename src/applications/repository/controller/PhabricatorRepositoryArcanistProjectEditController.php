@@ -34,13 +34,6 @@ final class PhabricatorRepositoryArcanistProjectEditController
     asort($repos);
 
     if ($request->isFormPost()) {
-
-      $indexed = $request->getStrList('symbolIndexLanguages');
-      $indexed = array_map('strtolower', $indexed);
-      $project->setSymbolIndexLanguages($indexed);
-
-      $project->setSymbolIndexProjects($request->getArr('symbolIndexProjects'));
-
       $repo_id = $request->getInt('repository', 0);
       if (isset($repos[$repo_id])) {
         $project->setRepositoryID($repo_id);
@@ -49,19 +42,6 @@ final class PhabricatorRepositoryArcanistProjectEditController
         return id(new AphrontRedirectResponse())
           ->setURI('/repository/');
       }
-    }
-
-    $langs = $project->getSymbolIndexLanguages();
-    if ($langs) {
-      $langs = implode(', ', $langs);
-    } else {
-      $langs = null;
-    }
-
-    if ($project->getSymbolIndexProjects()) {
-      $uses = $project->getSymbolIndexProjects();
-    } else {
-      $uses = array();
     }
 
     $form = id(new AphrontFormView())
@@ -81,23 +61,9 @@ final class PhabricatorRepositoryArcanistProjectEditController
           ->setName('repository')
           ->setValue($project->getRepositoryID()))
       ->appendChild(
-        id(new AphrontFormTextControl())
-          ->setLabel(pht('Indexed Languages'))
-          ->setName('symbolIndexLanguages')
-          ->setCaption(pht(
-            'Separate with commas, for example: %s',
-            phutil_tag('tt', array(), 'php, py')))
-          ->setValue($langs))
-      ->appendControl(
-        id(new AphrontFormTokenizerControl())
-          ->setLabel(pht('Uses Symbols From'))
-          ->setName('symbolIndexProjects')
-          ->setDatasource(new DiffusionArcanistProjectDatasource())
-          ->setValue($uses))
-      ->appendChild(
         id(new AphrontFormSubmitControl())
           ->addCancelButton('/repository/')
-          ->setValue('Save'));
+          ->setValue(pht('Save')));
 
     $panel = new PHUIObjectBoxView();
     $panel->setHeaderText(pht('Edit Arcanist Project'));

@@ -5,21 +5,21 @@ final class LiskIsolationTestCase extends PhabricatorTestCase {
   public function testIsolatedWrites() {
     $dao = new LiskIsolationTestDAO();
 
-    $this->assertEqual(null, $dao->getID(), 'Expect no ID.');
-    $this->assertEqual(null, $dao->getPHID(), 'Expect no PHID.');
+    $this->assertEqual(null, $dao->getID(), pht('Expect no ID.'));
+    $this->assertEqual(null, $dao->getPHID(), pht('Expect no PHID.'));
 
     $dao->save(); // Effects insert
 
     $id = $dao->getID();
     $phid = $dao->getPHID();
 
-    $this->assertTrue((bool)$id, 'Expect ID generated.');
-    $this->assertTrue((bool)$phid, 'Expect PHID generated.');
+    $this->assertTrue((bool)$id, pht('Expect ID generated.'));
+    $this->assertTrue((bool)$phid, pht('Expect PHID generated.'));
 
     $dao->save(); // Effects update
 
-    $this->assertEqual($id, $dao->getID(), 'Expect ID unchanged.');
-    $this->assertEqual($phid, $dao->getPHID(), 'Expect PHID unchanged.');
+    $this->assertEqual($id, $dao->getID(), pht('Expect ID unchanged.'));
+    $this->assertEqual($phid, $dao->getPHID(), pht('Expect PHID unchanged.'));
   }
 
   public function testEphemeral() {
@@ -50,8 +50,10 @@ final class LiskIsolationTestCase extends PhabricatorTestCase {
       $method->invoke($dao, 'r');
 
       $this->assertFailure(
-        'LiskIsolationTestDAO did not throw an exception when instructed to '.
-        'explicitly connect to an external database.');
+        pht(
+          '%s did not throw an exception when instructed to '.
+          'explicitly connect to an external database.',
+          'LiskIsolationTestDAO'));
     } catch (LiskIsolationTestDAOException $ex) {
       // Expected, pass.
     }
@@ -66,17 +68,17 @@ final class LiskIsolationTestCase extends PhabricatorTestCase {
     $this->assertEqual(
       null,
       $dao->getName(),
-      'getName() on empty object');
+      pht('%s on empty object', 'getName()'));
 
     $this->assertEqual(
       $dao,
       $dao->setName('x'),
-      'setName() returns $this');
+      pht('%s returns %s', 'setName()', '$this'));
 
     $this->assertEqual(
       'y',
       $dao->setName('y')->getName(),
-      'setName() has an effect');
+      pht('%s has an effect', 'setName()'));
 
     $ex = null;
     try {
@@ -86,7 +88,7 @@ final class LiskIsolationTestCase extends PhabricatorTestCase {
     }
     $this->assertTrue(
       (bool)$ex,
-      'Typoing "get" should throw.');
+      pht('Typoing "%s" should throw.', 'get'));
 
     $ex = null;
     try {
@@ -96,7 +98,7 @@ final class LiskIsolationTestCase extends PhabricatorTestCase {
     }
     $this->assertTrue(
       (bool)$ex,
-      'Typoing "set" should throw.');
+      pht('Typoing "%s" should throw.', 'set'));
 
     $ex = null;
     try {
@@ -106,7 +108,7 @@ final class LiskIsolationTestCase extends PhabricatorTestCase {
     }
     $this->assertTrue(
       (bool)$ex,
-      'Made up method should throw.');
+      pht('Made up method should throw.'));
   }
 
 }

@@ -1,6 +1,6 @@
 <?php
 
-final class DifferentialAdjustmentMapTestCase extends ArcanistPhutilTestCase {
+final class DifferentialAdjustmentMapTestCase extends PhutilTestCase {
 
   public function testBasicMaps() {
     $change_map = array(

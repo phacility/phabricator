@@ -50,8 +50,7 @@ EOJSON;
     return array(
       $this->newOption('ui.header-color', 'enum', 'dark')
         ->setDescription(
-          pht(
-            'Sets the color of the main header.'))
+          pht('Sets the color of the main header.'))
         ->setEnumOptions($options),
       $this->newOption('ui.footer-items', 'list<wild>', array())
         ->setSummary(

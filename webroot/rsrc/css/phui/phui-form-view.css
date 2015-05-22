@@ -330,9 +330,22 @@ table.aphront-form-control-checkbox-layout th {
   font-size: 16px;
 }
 
+.aphront-form-date-container .aphront-form-date-time-input-container {
+  position: relative;
+  display: inline-block;
+  width: 7em;
+}
+
 .aphront-form-date-container input.aphront-form-date-time-input {
   width: 7em;
-  display: inline;
+}
+
+.aphront-form-date-time-input-container div.jx-typeahead-results a.jx-result {
+  border: none;
+}
+
+.phui-time-typeahead-value {
+  padding: 4px;
 }
 
 .fancy-datepicker {

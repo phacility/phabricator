@@ -26,32 +26,6 @@ final class PhabricatorNotificationBuilder {
     // nowhere sensible for the notification to link to, and no reasonable way
     // to unambiguously clear it.
 
-    // Each notification emits keys it can aggregate on. For instance, if this
-    // story is "a updated T123", it might emit a key like this:
-    //
-    //   task:phid123:unread => PhabricatorFeedStoryManiphestAggregate
-    //
-    // All the unread notifications about the task with PHID "phid123" will
-    // emit the same key, telling us we can aggregate them into a single
-    // story of type "PhabricatorFeedStoryManiphestAggregate", which could
-    // read like "a and b updated T123".
-    //
-    // A story might be able to aggregate in multiple ways. Although this is
-    // unlikely for stories in a notification context, stories in a feed context
-    // can also aggregate by actor:
-    //
-    //   task:phid123   => PhabricatorFeedStoryManiphestAggregate
-    //   actor:user123  => PhabricatorFeedStoryActorAggregate
-    //
-    // This means the story can either become "a and b updated T123" or
-    // "a updated T123 and T456". When faced with multiple possibilities, it's
-    // our job to choose the best aggregation.
-    //
-    // For now, we use a simple greedy algorithm and repeatedly select the
-    // aggregate story which consumes the largest number of individual stories
-    // until no aggregate story exists that consumes more than one story.
-
-
     // Build up a map of all the possible aggregations.
 
     $chronokey_map = array();

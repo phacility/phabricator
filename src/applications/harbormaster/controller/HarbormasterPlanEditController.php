@@ -75,7 +75,7 @@ final class HarbormasterPlanEditController extends HarbormasterPlanController {
       ->setUser($viewer)
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Plan Name')
+          ->setLabel(pht('Plan Name'))
           ->setName('name')
           ->setError($e_name)
           ->setValue($v_name));

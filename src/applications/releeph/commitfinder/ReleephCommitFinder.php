@@ -37,13 +37,17 @@ final class ReleephCommitFinder {
         ->executeOne();
       if (!$diff_rev) {
         throw new ReleephCommitFinderException(
-          "{$partial_string} does not refer to an existing diff.");
+          pht(
+            '%s does not refer to an existing diff.',
+            $partial_string));
       }
       $commit_phids = $diff_rev->getCommitPHIDs();
 
       if (!$commit_phids) {
         throw new ReleephCommitFinderException(
-          "{$partial_string} has no commits associated with it yet.");
+          pht(
+            '%s has no commits associated with it yet.',
+            $partial_string));
       }
 
       $this->objectPHID = $diff_rev->getPHID();
@@ -64,10 +68,11 @@ final class ReleephCommitFinder {
       $partial_string, $matches)) {
       $callsign = $matches['callsign'];
       if ($callsign != $repository->getCallsign()) {
-        throw new ReleephCommitFinderException(sprintf(
-          '%s is in a different repository to this Releeph project (%s).',
-          $partial_string,
-          $repository->getCallsign()));
+        throw new ReleephCommitFinderException(
+          pht(
+            '%s is in a different repository to this Releeph project (%s).',
+            $partial_string,
+            $repository->getCallsign()));
       } else {
         $dr_data = $matches;
       }
@@ -82,7 +87,10 @@ final class ReleephCommitFinder {
       $dr_data['user'] = $this->getUser();
       $dr = DiffusionRequest::newFromDictionary($dr_data);
     } catch (Exception $ex) {
-      $message = "No commit matches {$partial_string}: ".$ex->getMessage();
+      $message = pht(
+        'No commit matches %s: %s',
+        $partial_string,
+        $ex->getMessage());
       throw new ReleephCommitFinderException($message);
     }
 
@@ -90,7 +98,9 @@ final class ReleephCommitFinder {
 
     if (!$phabricator_repository_commit) {
       throw new ReleephCommitFinderException(
-        "The commit {$partial_string} doesn't exist in this repository.");
+        pht(
+          "The commit %s doesn't exist in this repository.",
+          $partial_string));
     }
 
     // When requesting a single commit, if it has an associated review we

@@ -201,11 +201,12 @@ final class PhabricatorDifferentialConfigOptions
           ))
         ->setSummary(pht('Allows any user to reopen a closed revision.'))
         ->setDescription(
-          pht('If you set this to true, any user can reopen a revision so '.
-              'long as it has been closed. This can be useful if a revision '.
-              'is accidentally closed or if a developer changes his or her '.
-              'mind after closing a revision. If it is false, reopening '.
-              'is not allowed.')),
+          pht(
+            'If you set this to true, any user can reopen a revision so '.
+            'long as it has been closed. This can be useful if a revision '.
+            'is accidentally closed or if a developer changes his or her '.
+            'mind after closing a revision. If it is false, reopening '.
+            'is not allowed.')),
       $this->newOption('differential.close-on-accept', 'bool', false)
         ->setBoolOptions(
           array(
@@ -242,8 +243,9 @@ final class PhabricatorDifferentialConfigOptions
           pht("After this many days, a revision will be considered 'stale'."))
         ->setDescription(
           pht(
-            "Similar to `differential.days-fresh` but marks stale revisions. ".
-            "If the revision is even older than it is when marked as 'old'.")),
+            "Similar to `%s` but marks stale revisions. ".
+            "If the revision is even older than it is when marked as 'old'.",
+            'differential.days-fresh')),
       $this->newOption(
         'metamta.differential.subject-prefix',
         'string',

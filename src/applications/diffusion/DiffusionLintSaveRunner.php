@@ -58,17 +58,31 @@ final class DiffusionLintSaveRunner {
       }
     }
 
-    $project_id = $working_copy->getProjectID();
-    $project = id(new PhabricatorRepositoryArcanistProject())
-      ->loadOneWhere('name = %s', $project_id);
-    if (!$project || !$project->getRepositoryID()) {
-      throw new Exception("Couldn't find repository for {$project_id}.");
+    $callsign = $configuration_manager->getConfigFromAnySource(
+      'repository.callsign');
+    $uuid = $api->getRepositoryUUID();
+    $remote_uri = $api->getRemoteURI();
+
+    $repository_query = id(new PhabricatorRepositoryQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser());
+
+    if ($callsign) {
+      $repository_query->withCallsigns(array($callsign));
+    } else if ($uuid) {
+      $repository_query->withUUIDs(array($uuid));
+    } else if ($remote_uri) {
+      $repository_query->withRemoteURIs(array($remote_uri));
     }
 
+    $repository = $repository_query->executeOne();
     $branch_name = $api->getBranchName();
 
+    if (!$repository) {
+      throw new Exception(pht('No repository was found.'));
+    }
+
     $this->branch = PhabricatorRepositoryBranch::loadOrCreateBranch(
-      $project->getRepositoryID(),
+      $repository->getID(),
       $branch_name);
     $this->conn = $this->branch->establishConnection('w');
 
@@ -158,7 +172,7 @@ final class DiffusionLintSaveRunner {
         try {
           $paths = phutil_json_decode($json);
         } catch (PhutilJSONParserException $ex) {
-          fprintf(STDERR, pht("Invalid JSON: %s\n", $json));
+          fprintf(STDERR, pht('Invalid JSON: %s', $json)."\n");
           continue;
         }
 

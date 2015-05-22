@@ -22,22 +22,6 @@ final class DifferentialRepositoryLookup extends Phobject {
     $viewer = $this->viewer;
     $diff = $this->diff;
 
-    // Look for an explicit Arcanist project.
-    if ($diff->getArcanistProjectPHID()) {
-      $project = id(new PhabricatorRepositoryArcanistProject())->loadOneWhere(
-        'phid = %s',
-        $diff->getArcanistProjectPHID());
-      if ($project && $project->getRepositoryID()) {
-        $repositories = id(new PhabricatorRepositoryQuery())
-          ->setViewer($viewer)
-          ->withIDs(array($project->getRepositoryID()))
-          ->execute();
-        if ($repositories) {
-          return head($repositories);
-        }
-      }
-    }
-
     // Look for a repository UUID.
     if ($diff->getRepositoryUUID()) {
       $repositories = id(new PhabricatorRepositoryQuery())

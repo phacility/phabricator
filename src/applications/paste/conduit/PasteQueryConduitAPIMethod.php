@@ -7,7 +7,7 @@ final class PasteQueryConduitAPIMethod extends PasteConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Query Pastes.';
+    return pht('Query Pastes.');
   }
 
   protected function defineParamTypes() {

@@ -5,7 +5,8 @@ final class PhabricatorMacroReplyHandler
 
   public function validateMailReceiver($mail_receiver) {
     if (!($mail_receiver instanceof PhabricatorFileImageMacro)) {
-      throw new Exception('Mail receiver is not a PhabricatorFileImageMacro!');
+      throw new Exception(
+        pht('Mail receiver is not a %s!', 'PhabricatorFileImageMacro'));
     }
   }
 

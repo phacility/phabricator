@@ -209,8 +209,6 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
       case PholioTransactionType::TYPE_STATUS:
         $object->setStatus($xaction->getNewValue());
         break;
-      case PhabricatorTransactions::TYPE_EDGE:
-        return;
     }
   }
 
@@ -262,24 +260,22 @@ final class PholioMockEditor extends PhabricatorApplicationTransactionEditor {
         break;
       case PholioTransactionType::TYPE_IMAGE_NAME:
         $image = $this->getImageForXaction($object, $xaction);
-        $value = (string) head($xaction->getNewValue());
+        $value = (string)head($xaction->getNewValue());
         $image->setName($value);
         $image->save();
         break;
       case PholioTransactionType::TYPE_IMAGE_DESCRIPTION:
         $image = $this->getImageForXaction($object, $xaction);
-        $value = (string) head($xaction->getNewValue());
+        $value = (string)head($xaction->getNewValue());
         $image->setDescription($value);
         $image->save();
         break;
       case PholioTransactionType::TYPE_IMAGE_SEQUENCE:
         $image = $this->getImageForXaction($object, $xaction);
-        $value = (int) head($xaction->getNewValue());
+        $value = (int)head($xaction->getNewValue());
         $image->setSequence($value);
         $image->save();
         break;
-      case PhabricatorTransactions::TYPE_EDGE:
-        return;
     }
   }
 

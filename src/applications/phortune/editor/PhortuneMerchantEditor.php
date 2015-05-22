@@ -59,9 +59,6 @@ final class PhortuneMerchantEditor
       case PhortuneMerchantTransaction::TYPE_DESCRIPTION:
         $object->setDescription($xaction->getNewValue());
         return;
-      case PhabricatorTransactions::TYPE_EDGE:
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-        return;
     }
 
     return parent::applyCustomInternalTransaction($object, $xaction);
@@ -74,8 +71,6 @@ final class PhortuneMerchantEditor
     switch ($xaction->getTransactionType()) {
       case PhortuneMerchantTransaction::TYPE_NAME:
       case PhortuneMerchantTransaction::TYPE_DESCRIPTION:
-      case PhabricatorTransactions::TYPE_EDGE:
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
         return;
     }
 

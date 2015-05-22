@@ -12,7 +12,7 @@ final class PhabricatorTime {
 
     $ok = date_default_timezone_set($timezone);
     if (!$ok) {
-      throw new Exception("Invalid timezone '{$timezone}'!");
+      throw new Exception(pht("Invalid timezone '%s'!", $timezone));
     }
 
     self::$stack[] = array(

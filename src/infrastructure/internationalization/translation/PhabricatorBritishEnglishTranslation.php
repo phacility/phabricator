@@ -9,8 +9,8 @@ final class PhabricatorBritishEnglishTranslation
 
   protected function getTranslations() {
     return array(
-      '%s set this project\'s color to %s.' =>
-        '%s set this project\'s colour to %s.',
+      "%s set this project's color to %s." =>
+        "%s set this project's colour to %s.",
       'Basic Colors' =>
         'Basic Colours',
       'Choose Icon and Color...' =>

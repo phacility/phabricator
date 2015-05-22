@@ -45,8 +45,9 @@ final class DifferentialBranchField
   public function getProTips() {
     return array(
       pht(
-        'In Git and Mercurial, use a branch like "T123" to automatically '.
-        'associate changes with the corresponding task.'),
+        'In Git and Mercurial, use a branch like "%s" to automatically '.
+        'associate changes with the corresponding task.',
+        'T123'),
     );
   }
 

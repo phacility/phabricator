@@ -697,7 +697,10 @@ final class DiffusionCommitHookEngine extends Phobject {
   private function findMercurialChangegroupRefUpdates() {
     $hg_node = getenv('HG_NODE');
     if (!$hg_node) {
-      throw new Exception(pht('Expected HG_NODE in environment!'));
+      throw new Exception(
+        pht(
+          'Expected %s in environment!',
+          'HG_NODE'));
     }
 
     // NOTE: We need to make sure this is passed to subprocesses, or they won't

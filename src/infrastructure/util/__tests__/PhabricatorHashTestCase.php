@@ -14,7 +14,7 @@ final class PhabricatorHashTestCase extends PhabricatorTestCase {
       $this->assertEqual(
         $expect,
         PhabricatorHash::digestForIndex($input),
-        "Input: {$input}");
+        pht('Input: %s', $input));
     }
 
     // Test that the encoding produces 6 bits of entropy per byte.
@@ -35,7 +35,7 @@ final class PhabricatorHashTestCase extends PhabricatorTestCase {
     $this->assertEqual(
       (1 << 6),
       count($seen),
-      "Distinct characters in hash of: {$input}");
+      pht('Distinct characters in hash of: %s', $input));
   }
 
 }

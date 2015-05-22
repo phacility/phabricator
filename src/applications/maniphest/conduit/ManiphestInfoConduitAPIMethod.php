@@ -7,7 +7,7 @@ final class ManiphestInfoConduitAPIMethod extends ManiphestConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Retrieve information about a Maniphest task, given its id.';
+    return pht('Retrieve information about a Maniphest task, given its ID.');
   }
 
   protected function defineParamTypes() {
@@ -22,7 +22,7 @@ final class ManiphestInfoConduitAPIMethod extends ManiphestConduitAPIMethod {
 
   protected function defineErrorTypes() {
     return array(
-      'ERR_BAD_TASK' => 'No such maniphest task exists',
+      'ERR_BAD_TASK' => pht('No such Maniphest task exists.'),
     );
   }
 

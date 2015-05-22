@@ -86,7 +86,7 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
 
     $href = $this->getObjectHref($object, $handle, $id);
     $text = $this->getObjectNamePrefix().$id;
-    $status_closed = PhabricatorObjectHandleStatus::STATUS_CLOSED;
+    $status_closed = PhabricatorObjectHandle::STATUS_CLOSED;
 
     if ($anchor) {
       $href = $href.'#'.$anchor;
@@ -126,7 +126,7 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
 
     $name = $handle->getFullName();
     $href = $handle->getURI();
-    $status_closed = PhabricatorObjectHandleStatus::STATUS_CLOSED;
+    $status_closed = PhabricatorObjectHandle::STATUS_CLOSED;
     $attr = array(
       'phid' => $handle->getPHID(),
       'closed'  => ($handle->getStatus() == $status_closed),
@@ -140,7 +140,7 @@ abstract class PhabricatorObjectRemarkupRule extends PhutilRemarkupRule {
     $href,
     PhabricatorObjectHandle $handle) {
 
-    $status_closed = PhabricatorObjectHandleStatus::STATUS_CLOSED;
+    $status_closed = PhabricatorObjectHandle::STATUS_CLOSED;
     $strikethrough = $handle->getStatus() == $status_closed ?
       'text-decoration: line-through;' :
       'text-decoration: none;';

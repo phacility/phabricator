@@ -35,11 +35,11 @@ final class DiffusionMercurialServeSSHWorkflow
     $args = $this->getArgs();
 
     if (!$args->getArg('stdio')) {
-      throw new Exception('Expected `hg ... --stdio`!');
+      throw new Exception(pht('Expected `%s`!', 'hg ... --stdio'));
     }
 
     if ($args->getArg('command') !== array('serve')) {
-      throw new Exception('Expected `hg ... serve`!');
+      throw new Exception(pht('Expected `%s`!', 'hg ... serve'));
     }
 
     if ($this->shouldProxy()) {

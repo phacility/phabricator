@@ -26,12 +26,21 @@ final class PhabricatorPeopleHovercardEventListener
       return;
     }
 
-    $profile = $user->loadUserProfile();
+    // Reload to get availability.
+    $user = id(new PhabricatorPeopleQuery())
+      ->setViewer($viewer)
+      ->withIDs(array($user->getID()))
+      ->needAvailability(true)
+      ->needProfile(true)
+      ->executeOne();
 
     $hovercard->setTitle($user->getUsername());
-    $hovercard->setDetail(pht('%s - %s.', $user->getRealname(),
-      nonempty($profile->getTitle(),
-        pht('No title was found befitting of this rare specimen'))));
+    $profile = $user->getUserProfile();
+    $detail = $user->getRealName();
+    if ($profile->getTitle()) {
+      $detail .= ' - '.$profile->getTitle().'.';
+    }
+    $hovercard->setDetail($detail);
 
     if ($user->getIsDisabled()) {
       $hovercard->addField(pht('Account'), pht('Disabled'));
@@ -40,22 +49,14 @@ final class PhabricatorPeopleHovercardEventListener
     } else if (PhabricatorApplication::isClassInstalledForViewer(
         'PhabricatorCalendarApplication',
         $viewer)) {
-      $statuses = id(new PhabricatorCalendarEvent())->loadCurrentStatuses(
-        array($user->getPHID()));
-      if ($statuses) {
-        $current_status = reset($statuses);
-        $dateto = phabricator_datetime($current_status->getDateTo(), $user);
-        $hovercard->addField(pht('Status'),
-          $current_status->getDescription());
-        $hovercard->addField(pht('Until'),
-          $dateto);
-      } else {
-        $hovercard->addField(pht('Status'), pht('Available'));
-      }
+      $hovercard->addField(
+        pht('Status'),
+        $user->getAvailabilityDescription($viewer));
     }
 
-    $hovercard->addField(pht('User since'),
-      phabricator_date($user->getDateCreated(), $user));
+    $hovercard->addField(
+      pht('User Since'),
+      phabricator_date($user->getDateCreated(), $viewer));
 
     if ($profile->getBlurb()) {
       $hovercard->addField(pht('Blurb'),

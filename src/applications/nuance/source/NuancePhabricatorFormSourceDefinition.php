@@ -20,7 +20,7 @@ final class NuancePhabricatorFormSourceDefinition
     PhabricatorApplicationTransactionValidationException $ex = null) {
 
     /* TODO - add a box to allow for custom fields to be defined here, so that
-     * these NuanceSource objects made from this defintion can be used to
+     * these NuanceSource objects made from this definition can be used to
      * capture arbitrary data */
 
     return $form;

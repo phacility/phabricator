@@ -3,11 +3,11 @@
 final class PHUIColorPalletteExample extends PhabricatorUIExample {
 
   public function getName() {
-    return 'Colors';
+    return pht('Colors');
   }
 
   public function getDescription() {
-    return 'A Standard Palette of Colors for use.';
+    return pht('A Standard Palette of Colors for use.');
   }
 
   public function renderExample() {
@@ -99,7 +99,7 @@ final class PHUIColorPalletteExample extends PhabricatorUIExample {
         'href' => 'http://color.hailpixel.com/#'.implode(',', $url),
         'class' => 'button grey mlb',
       ),
-      'Color Palette');
+      pht('Color Palette'));
 
     $wrap1 = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Greys'))

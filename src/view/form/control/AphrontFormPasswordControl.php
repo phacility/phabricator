@@ -17,12 +17,12 @@ final class AphrontFormPasswordControl extends AphrontFormControl {
     return phutil_tag(
       'input',
       array(
-        'type'      => 'password',
-        'name'      => $this->getName(),
-        'value'     => $this->getValue(),
-        'disabled'  => $this->getDisabled() ? 'disabled' : null,
+        'type'         => 'password',
+        'name'         => $this->getName(),
+        'value'        => $this->getValue(),
+        'disabled'     => $this->getDisabled() ? 'disabled' : null,
         'autocomplete' => ($this->disableAutocomplete ? 'off' : null),
-        'id'        => $this->getID(),
+        'id'           => $this->getID(),
       ));
   }
 

@@ -29,7 +29,7 @@ JX.behavior('repository-crossreference', function(config) {
               var symbol = target.textContent || target.innerText;
               var query = {
                 lang : lang,
-                projects : config.projects.join(','),
+                repositories : config.repositories.join(','),
                 jump : true
               };
               if (map[target.className]) {

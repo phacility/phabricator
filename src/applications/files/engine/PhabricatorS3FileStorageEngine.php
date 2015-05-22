@@ -136,7 +136,9 @@ final class PhabricatorS3FileStorageEngine
     $bucket = PhabricatorEnv::getEnvConfig('storage.s3.bucket');
     if (!$bucket) {
       throw new PhabricatorFileStorageConfigurationException(
-        "No 'storage.s3.bucket' specified!");
+        pht(
+          "No '%s' specified!",
+          'storage.s3.bucket'));
     }
     return $bucket;
   }
@@ -157,7 +159,10 @@ final class PhabricatorS3FileStorageEngine
 
     if (!$access_key || !$secret_key) {
       throw new PhabricatorFileStorageConfigurationException(
-        "Specify 'amazon-s3.access-key' and 'amazon-s3.secret-key'!");
+        pht(
+          "Specify '%s' and '%s'!",
+          'amazon-s3.access-key',
+          'amazon-s3.secret-key'));
     }
 
     if ($endpoint !== null) {

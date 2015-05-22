@@ -22,7 +22,7 @@ final class PhabricatorRepositoryCommitSearchIndexer
       ->withIDs(array($commit->getRepositoryID()))
       ->executeOne();
     if (!$repository) {
-      throw new Exception('No such repository!');
+      throw new Exception(pht('No such repository!'));
     }
 
     $title = 'r'.$repository->getCallsign().$commit->getCommitIdentifier().

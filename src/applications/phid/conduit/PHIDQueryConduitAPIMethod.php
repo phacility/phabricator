@@ -7,7 +7,7 @@ final class PHIDQueryConduitAPIMethod extends PHIDConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Retrieve information about arbitrary PHIDs.';
+    return pht('Retrieve information about arbitrary PHIDs.');
   }
 
   protected function defineParamTypes() {

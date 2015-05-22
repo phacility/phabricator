@@ -8,8 +8,8 @@ final class DiffusionMergedCommitsQueryConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return
-      'Merged commit information for a specific commit in a repository.';
+    return pht(
+      'Merged commit information for a specific commit in a repository.');
   }
 
   protected function defineReturnType() {

@@ -14,6 +14,11 @@ final class PhabricatorProjectTransaction
   // NOTE: This is deprecated, members are just a normal edge now.
   const TYPE_MEMBERS    = 'project:members';
 
+  const MAILTAG_METADATA = 'project-metadata';
+  const MAILTAG_MEMBERS  = 'project-members';
+  const MAILTAG_WATCHERS = 'project-watchers';
+  const MAILTAG_OTHER    = 'project-other';
+
   public function getApplicationName() {
     return 'project';
   }
@@ -106,6 +111,8 @@ final class PhabricatorProjectTransaction
             $old,
             $new);
         }
+        break;
+
       case self::TYPE_STATUS:
         if ($old == 0) {
           return pht(
@@ -116,47 +123,53 @@ final class PhabricatorProjectTransaction
             '%s activated this project.',
             $author_handle);
         }
+        break;
+
       case self::TYPE_IMAGE:
         // TODO: Some day, it would be nice to show the images.
         if (!$old) {
           return pht(
-            '%s set this project\'s image to %s.',
+            "%s set this project's image to %s.",
             $author_handle,
             $this->renderHandleLink($new));
         } else if (!$new) {
           return pht(
-            '%s removed this project\'s image.',
+            "%s removed this project's image.",
             $author_handle);
         } else {
           return pht(
-            '%s updated this project\'s image from %s to %s.',
+            "%s updated this project's image from %s to %s.",
             $author_handle,
             $this->renderHandleLink($old),
             $this->renderHandleLink($new));
         }
+        break;
 
       case self::TYPE_ICON:
         return pht(
-          '%s set this project\'s icon to %s.',
+          "%s set this project's icon to %s.",
           $author_handle,
           PhabricatorProjectIcon::getLabel($new));
+        break;
 
       case self::TYPE_COLOR:
         return pht(
-          '%s set this project\'s color to %s.',
+          "%s set this project's color to %s.",
           $author_handle,
           PHUITagView::getShadeName($new));
+        break;
 
       case self::TYPE_LOCKED:
         if ($new) {
           return pht(
-            '%s locked this project\'s membership.',
+            "%s locked this project's membership.",
             $author_handle);
         } else {
           return pht(
-            '%s unlocked this project\'s membership.',
+            "%s unlocked this project's membership.",
             $author_handle);
         }
+        break;
 
       case self::TYPE_SLUGS:
         $add = array_diff($new, $old);
@@ -183,6 +196,7 @@ final class PhabricatorProjectTransaction
               count($rem),
               $this->renderSlugList($rem));
         }
+        break;
 
       case self::TYPE_MEMBERS:
         $add = array_diff($new, $old);
@@ -221,6 +235,7 @@ final class PhabricatorProjectTransaction
               $this->renderHandleList($rem));
           }
         }
+        break;
     }
 
     return parent::getTitle();
@@ -339,10 +354,41 @@ final class PhabricatorProjectTransaction
             $object_handle,
             $this->renderSlugList($rem));
         }
-
     }
 
     return parent::getTitleForFeed();
+  }
+
+  public function getMailTags() {
+    $tags = array();
+    switch ($this->getTransactionType()) {
+      case self::TYPE_NAME:
+      case self::TYPE_SLUGS:
+      case self::TYPE_IMAGE:
+      case self::TYPE_ICON:
+      case self::TYPE_COLOR:
+        $tags[] = self::MAILTAG_METADATA;
+        break;
+      case PhabricatorTransactions::TYPE_EDGE:
+        $type = $this->getMetadata('edge:type');
+        $type = head($type);
+        $type_member = PhabricatorProjectProjectHasMemberEdgeType::EDGECONST;
+        $type_watcher = PhabricatorObjectHasWatcherEdgeType::EDGECONST;
+        if ($type == $type_member) {
+          $tags[] = self::MAILTAG_MEMBERS;
+        } else if ($type == $type_watcher) {
+          $tags[] = self::MAILTAG_WATCHERS;
+        } else {
+          $tags[] = self::MAILTAG_OTHER;
+        }
+        break;
+      case self::TYPE_STATUS:
+      case self::TYPE_LOCKED:
+      default:
+        $tags[] = self::MAILTAG_OTHER;
+        break;
+    }
+    return $tags;
   }
 
   private function renderSlugList($slugs) {

@@ -389,7 +389,10 @@ final class PhabricatorEnv {
       self::$cache[$key] = $result[$key];
       return $result[$key];
     } else {
-      throw new Exception("No config value specified for key '{$key}'.");
+      throw new Exception(
+        pht(
+          "No config value specified for key '%s'.",
+          $key));
     }
   }
 
@@ -507,7 +510,9 @@ final class PhabricatorEnv {
 
     if (!$base_uri) {
       throw new Exception(
-        "Define 'phabricator.base-uri' in your configuration to continue.");
+        pht(
+          "Define '%s' in your configuration to continue.",
+          'phabricator.base-uri'));
     }
 
     return $base_uri;
@@ -553,8 +558,9 @@ final class PhabricatorEnv {
     if ($stack_key !== $key) {
       self::$sourceStack->pushSource($source);
       throw new Exception(
-        'Scoped environments were destroyed in a diffent order than they '.
-        'were initialized.');
+        pht(
+          'Scoped environments were destroyed in a different order than they '.
+          'were initialized.'));
     }
   }
 

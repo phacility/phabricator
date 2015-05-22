@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * @task availability Availability
  * @task image-cache Profile Image Cache
  * @task factors Multi-Factor Authentication
  * @task handles Managing Handles
@@ -26,6 +27,8 @@ final class PhabricatorUser
   protected $passwordHash;
   protected $profileImagePHID;
   protected $profileImageCache;
+  protected $availabilityCache;
+  protected $availabilityCacheTTL;
   protected $timezoneIdentifier = '';
 
   protected $consoleEnabled = 0;
@@ -45,7 +48,7 @@ final class PhabricatorUser
 
   private $profileImage = self::ATTACHABLE;
   private $profile = null;
-  private $status = self::ATTACHABLE;
+  private $availability = self::ATTACHABLE;
   private $preferences = null;
   private $omnipotent = false;
   private $customFields = self::ATTACHABLE;
@@ -145,6 +148,8 @@ final class PhabricatorUser
         'accountSecret' => 'bytes64',
         'isEnrolledInMultiFactor' => 'bool',
         'profileImageCache' => 'text255?',
+        'availabilityCache' => 'text255?',
+        'availabilityCacheTTL' => 'uint32?',
       ),
       self::CONFIG_KEY_SCHEMA => array(
         'key_phid' => null,
@@ -165,6 +170,8 @@ final class PhabricatorUser
       ),
       self::CONFIG_NO_MUTATE => array(
         'profileImageCache' => true,
+        'availabilityCache' => true,
+        'availabilityCacheTTL' => true,
       ),
     ) + parent::getConfiguration();
   }
@@ -177,8 +184,9 @@ final class PhabricatorUser
   public function setPassword(PhutilOpaqueEnvelope $envelope) {
     if (!$this->getPHID()) {
       throw new Exception(
-        'You can not set a password for an unsaved user because their PHID '.
-        'is a salt component in the password hash.');
+        pht(
+          'You can not set a password for an unsaved user because their PHID '.
+          'is a salt component in the password hash.'));
     }
 
     if (!strlen($envelope->openEnvelope())) {
@@ -365,7 +373,7 @@ final class PhabricatorUser
           }
           break;
         default:
-          throw new Exception('Unknown CSRF token format!');
+          throw new Exception(pht('Unknown CSRF token format!'));
       }
     }
 
@@ -387,6 +395,10 @@ final class PhabricatorUser
     $vec = $vec.$key.$time_block;
 
     return substr(PhabricatorHash::digest($vec), 0, $len);
+  }
+
+  public function getUserProfile() {
+    return $this->assertAttached($this->profile);
   }
 
   public function attachUserProfile(PhabricatorUserProfile $profile) {
@@ -414,7 +426,7 @@ final class PhabricatorUser
   public function loadPrimaryEmailAddress() {
     $email = $this->loadPrimaryEmail();
     if (!$email) {
-      throw new Exception('User has no primary email address!');
+      throw new Exception(pht('User has no primary email address!'));
     }
     return $email->getAddress();
   }
@@ -553,36 +565,31 @@ final class PhabricatorUser
       $this->loadPrimaryEmail(),
       PhabricatorAuthSessionEngine::ONETIME_WELCOME);
 
-    $body = <<<EOBODY
-Welcome to Phabricator!
-
-{$admin_username} ({$admin_realname}) has created an account for you.
-
-  Username: {$user_username}
-
-To login to Phabricator, follow this link and set a password:
-
-  {$uri}
-
-After you have set a password, you can login in the future by going here:
-
-  {$base_uri}
-
-EOBODY;
+    $body = pht(
+      "Welcome to Phabricator!\n\n".
+      "%s (%s) has created an account for you.\n\n".
+      "  Username: %s\n\n".
+      "To login to Phabricator, follow this link and set a password:\n\n".
+      "  %s\n\n".
+      "After you have set a password, you can login in the future by ".
+      "going here:\n\n".
+      "  %s\n",
+      $admin_username,
+      $admin_realname,
+      $user_username,
+      $uri,
+      $base_uri);
 
     if (!$is_serious) {
-      $body .= <<<EOBODY
-
-Love,
-Phabricator
-
-EOBODY;
+      $body .= sprintf(
+        "\n%s\n",
+        pht("Love,\nPhabricator"));
     }
 
     $mail = id(new PhabricatorMetaMTAMail())
       ->addTos(array($this->getPHID()))
       ->setForceDelivery(true)
-      ->setSubject('[Phabricator] Welcome to Phabricator')
+      ->setSubject(pht('[Phabricator] Welcome to Phabricator'))
       ->setBody($body)
       ->saveAndSend();
   }
@@ -602,31 +609,36 @@ EOBODY;
         $this,
         null,
         PhabricatorAuthSessionEngine::ONETIME_USERNAME);
-      $password_instructions = <<<EOTXT
-If you use a password to login, you'll need to reset it before you can login
-again. You can reset your password by following this link:
-
-  {$uri}
-
-And, of course, you'll need to use your new username to login from now on. If
-you use OAuth to login, nothing should change.
-
-EOTXT;
+      $password_instructions = sprintf(
+        "%s\n\n  %s\n\n%s\n",
+        pht(
+          "If you use a password to login, you'll need to reset it ".
+          "before you can login again. You can reset your password by ".
+          "following this link:"),
+        $uri,
+        pht(
+          "And, of course, you'll need to use your new username to login ".
+          "from now on. If you use OAuth to login, nothing should change."));
     }
 
-    $body = <<<EOBODY
-{$admin_username} ({$admin_realname}) has changed your Phabricator username.
-
-  Old Username: {$old_username}
-  New Username: {$new_username}
-
-{$password_instructions}
-EOBODY;
+    $body = sprintf(
+      "%s\n\n  %s\n  %s\n\n%s",
+      pht(
+        '%s (%s) has changed your Phabricator username.',
+        $admin_username,
+        $admin_realname),
+      pht(
+        'Old Username: %s',
+        $old_username),
+      pht(
+        'New Username: %s',
+        $new_username),
+      $password_instructions);
 
     $mail = id(new PhabricatorMetaMTAMail())
       ->addTos(array($this->getPHID()))
       ->setForceDelivery(true)
-      ->setSubject('[Phabricator] Username Changed')
+      ->setSubject(pht('[Phabricator] Username Changed'))
       ->setBody($body)
       ->saveAndSend();
   }
@@ -656,19 +668,6 @@ EOBODY;
 
   public static function getDefaultProfileImageURI() {
     return celerity_get_resource_uri('/rsrc/image/avatar.png');
-  }
-
-  public function attachStatus(PhabricatorCalendarEvent $status) {
-    $this->status = $status;
-    return $this;
-  }
-
-  public function getStatus() {
-    return $this->assertAttached($this->status);
-  }
-
-  public function hasStatus() {
-    return $this->status !== self::ATTACHABLE;
   }
 
   public function attachProfileImageURI($uri) {
@@ -724,6 +723,97 @@ EOBODY;
    */
   public function getAuthorities() {
     return $this->authorities;
+  }
+
+
+/* -(  Availability  )------------------------------------------------------- */
+
+
+  /**
+   * @task availability
+   */
+  public function attachAvailability(array $availability) {
+    $this->availability = $availability;
+    return $this;
+  }
+
+
+  /**
+   * Get the timestamp the user is away until, if they are currently away.
+   *
+   * @return int|null Epoch timestamp, or `null` if the user is not away.
+   * @task availability
+   */
+  public function getAwayUntil() {
+    $availability = $this->availability;
+
+    $this->assertAttached($availability);
+    if (!$availability) {
+      return null;
+    }
+
+    return idx($availability, 'until');
+  }
+
+
+  /**
+   * Describe the user's availability.
+   *
+   * @param PhabricatorUser Viewing user.
+   * @return string Human-readable description of away status.
+   * @task availability
+   */
+  public function getAvailabilityDescription(PhabricatorUser $viewer) {
+    $until = $this->getAwayUntil();
+    if ($until) {
+      return pht('Away until %s', phabricator_datetime($until, $viewer));
+    } else {
+      return pht('Available');
+    }
+  }
+
+
+  /**
+   * Get cached availability, if present.
+   *
+   * @return wild|null Cache data, or null if no cache is available.
+   * @task availability
+   */
+  public function getAvailabilityCache() {
+    $now = PhabricatorTime::getNow();
+    if ($this->availabilityCacheTTL <= $now) {
+      return null;
+    }
+
+    try {
+      return phutil_json_decode($this->availabilityCache);
+    } catch (Exception $ex) {
+      return null;
+    }
+  }
+
+
+  /**
+   * Write to the availability cache.
+   *
+   * @param wild Availability cache data.
+   * @param int|null Cache TTL.
+   * @return this
+   * @task availability
+   */
+  public function writeAvailabilityCache(array $availability, $ttl) {
+    $unguarded = AphrontWriteGuard::beginScopedUnguardedWrites();
+    queryfx(
+      $this->establishConnection('w'),
+      'UPDATE %T SET availabilityCache = %s, availabilityCacheTTL = %nd
+        WHERE id = %d',
+      $this->getTableName(),
+      json_encode($availability),
+      $ttl,
+      $this->getID());
+    unset($unguarded);
+
+    return $this;
   }
 
 

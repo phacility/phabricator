@@ -13,8 +13,11 @@ abstract class DiffusionView extends AphrontView {
     return $this->diffusionRequest;
   }
 
-  final public function linkChange($change_type, $file_type, $path = null,
-                                   $commit_identifier = null) {
+  final public function linkChange(
+    $change_type,
+    $file_type,
+    $path = null,
+    $commit_identifier = null) {
 
     $text = DifferentialChangeType::getFullNameForChangeType($change_type);
     if ($change_type == DifferentialChangeType::TYPE_CHILD) {

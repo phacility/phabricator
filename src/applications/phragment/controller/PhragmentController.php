@@ -201,12 +201,16 @@ abstract class PhragmentController extends PhabricatorController {
       return id(new PHUIInfoView())
         ->setTitle(pht('security.alternate-file-domain must be configured!'))
         ->setSeverity(PHUIInfoView::SEVERITY_ERROR)
-        ->appendChild(phutil_tag('p', array(), pht(
-          'Because Phragment generates files (such as ZIP archives and '.
-          'patches) as they are requested, it requires that you configure '.
-          'the `security.alternate-file-domain` option. This option on it\'s '.
-          'own will also provide additional security when serving files '.
-          'across Phabricator.')));
+        ->appendChild(
+          phutil_tag(
+            'p',
+            array(),
+            pht(
+              "Because Phragment generates files (such as ZIP archives and ".
+              "patches) as they are requested, it requires that you configure ".
+              "the `%s` option. This option on it's own will also provide ".
+              "additional security when serving files across Phabricator.",
+              'security.alternate-file-domain')));
     }
     return null;
   }

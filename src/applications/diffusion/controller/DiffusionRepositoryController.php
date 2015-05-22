@@ -60,8 +60,7 @@ final class DiffusionRepositoryController extends DiffusionController {
         }
       } else {
         $empty_title = pht('Empty Repository');
-        $empty_message = pht(
-          'This repository does not have any commits yet.');
+        $empty_message = pht('This repository does not have any commits yet.');
       }
     }
 
@@ -391,9 +390,9 @@ final class DiffusionRepositoryController extends DiffusionController {
     $button->setTag('a');
     $button->setIcon($icon);
     $button->setHref($drequest->generateURI(
-            array(
-              'action' => 'branches',
-            )));
+      array(
+        'action' => 'branches',
+      )));
 
     $header->addActionLink($button);
     $panel->setHeader($header);

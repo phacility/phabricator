@@ -170,7 +170,7 @@ final class PhabricatorMacroQuery
       case self::STATUS_ANY:
         break;
       default:
-        throw new Exception("Unknown status '{$this->status}'!");
+        throw new Exception(pht("Unknown status '%s'!", $this->status));
     }
 
     if ($this->dateCreatedAfter) {
@@ -201,7 +201,7 @@ final class PhabricatorMacroQuery
         ->execute();
 
       if (empty($flags)) {
-        throw new PhabricatorEmptyQueryException('No matching flags.');
+        throw new PhabricatorEmptyQueryException(pht('No matching flags.'));
       } else {
         $where[] = qsprintf(
           $conn,

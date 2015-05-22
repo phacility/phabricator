@@ -260,8 +260,7 @@ final class PhortuneProviderEditController
       ->setUser($viewer)
       ->addHiddenInput('merchantID', $merchant->getID())
       ->appendRemarkupInstructions(
-        pht(
-          'Choose the type of payment provider to add:'))
+        pht('Choose the type of payment provider to add:'))
       ->appendChild($panel_classes)
       ->appendChild(
         id(new AphrontFormSubmitControl())

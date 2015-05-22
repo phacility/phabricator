@@ -68,7 +68,8 @@ final class HarbormasterBuildLog extends HarbormasterDAO
 
   public function start() {
     if ($this->getLive()) {
-      throw new Exception('Live logging has already started for this log.');
+      throw new Exception(
+        pht('Live logging has already started for this log.'));
     }
 
     $this->setLive(1);
@@ -79,7 +80,8 @@ final class HarbormasterBuildLog extends HarbormasterDAO
 
   public function append($content) {
     if (!$this->getLive()) {
-      throw new Exception('Start logging before appending data to the log.');
+      throw new Exception(
+        pht('Start logging before appending data to the log.'));
     }
     if (strlen($content) === 0) {
       return;
@@ -143,7 +145,7 @@ final class HarbormasterBuildLog extends HarbormasterDAO
 
   public function finalize($start = 0) {
     if (!$this->getLive()) {
-      throw new Exception('Start logging before finalizing it.');
+      throw new Exception(pht('Start logging before finalizing it.'));
     }
 
     // TODO: Encode the log contents in a gzipped format.
@@ -201,7 +203,7 @@ final class HarbormasterBuildLog extends HarbormasterDAO
 
   public function describeAutomaticCapability($capability) {
     return pht(
-      'Users must be able to see a build target to view it\'s build log.');
+      "Users must be able to see a build target to view it's build log.");
   }
 
 

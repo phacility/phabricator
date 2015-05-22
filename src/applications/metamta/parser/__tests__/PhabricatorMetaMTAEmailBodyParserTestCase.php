@@ -254,6 +254,13 @@ OKAY
 {$emdash}
 Sent from Mailbox
 EOMAIL
+,
+<<<EOMAIL
+OKAY
+
+2015-05-06 11:21 GMT-07:00 Someone <someone@somewhere.com>:
+> ...
+EOMAIL
     );
   }
 

@@ -42,9 +42,13 @@ final class PhameSkinSpecification {
             $that_dir = $specs[$name]->getRootDirectory();
             $this_dir = $spec->getRootDirectory();
             throw new Exception(
-              "Two skins have the same name ('{$name}'), in '{$this_dir}' and ".
-              "'{$that_dir}'. Rename one or adjust your 'phame.skins' ".
-              "configuration.");
+              pht(
+                "Two skins have the same name ('%s'), in '%s' and '%s'. ".
+                "Rename one or adjust your '%s' configuration.",
+                $name,
+                $this_dir,
+                $that_dir,
+                'phame.skins'));
           }
 
           $specs[$name] = $spec;
@@ -124,7 +128,7 @@ final class PhameSkinSpecification {
         $spec->addPhutilLibrary($path.DIRECTORY_SEPARATOR.'src');
         break;
       default:
-        throw new Exception('Unknown skin type!');
+        throw new Exception(pht('Unknown skin type!'));
     }
 
     $spec->setType($type);

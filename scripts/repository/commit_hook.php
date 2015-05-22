@@ -61,7 +61,9 @@ if ($repository->isGit() || $repository->isHg()) {
   $username = getenv(DiffusionCommitHookEngine::ENV_USER);
   if (!strlen($username)) {
     throw new Exception(
-      pht('usage: %s should be defined!', DiffusionCommitHookEngine::ENV_USER));
+      pht(
+        'Usage: %s should be defined!',
+        DiffusionCommitHookEngine::ENV_USER));
   }
 
   if ($repository->isHg()) {

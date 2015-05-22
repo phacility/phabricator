@@ -316,8 +316,7 @@ final class DifferentialRevision extends DifferentialDAO
 
     switch ($capability) {
       case PhabricatorPolicyCapability::CAN_VIEW:
-        $description[] = pht(
-          "A revision's reviewers can always view it.");
+        $description[] = pht("A revision's reviewers can always view it.");
         $description[] = pht(
           'If a revision belongs to a repository, other users must be able '.
           'to view the repository in order to view the revision.');
@@ -550,7 +549,7 @@ final class DifferentialRevision extends DifferentialDAO
 
     $this->openTransaction();
       $diffs = id(new DifferentialDiffQuery())
-        ->setViewer(PhabricatorUser::getOmnipotentUser())
+        ->setViewer($engine->getViewer())
         ->withRevisionIDs(array($this->getID()))
         ->execute();
       foreach ($diffs as $diff) {

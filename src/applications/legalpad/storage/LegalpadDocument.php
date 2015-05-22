@@ -202,8 +202,7 @@ final class LegalpadDocument extends LegalpadDAO
   }
 
   public function describeAutomaticCapability($capability) {
-    return pht(
-      'The author of a document can always view and edit it.');
+    return pht('The author of a document can always view and edit it.');
   }
 
 

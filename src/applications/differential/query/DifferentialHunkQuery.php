@@ -95,7 +95,9 @@ final class DifferentialHunkQuery
 
     if (!$this->changesets) {
       throw new Exception(
-        pht('You must load hunks via changesets, with withChangesets()!'));
+        pht(
+          'You must load hunks via changesets, with %s!',
+          'withChangesets()'));
     }
 
     $where[] = qsprintf(

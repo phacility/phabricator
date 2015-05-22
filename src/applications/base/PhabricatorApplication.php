@@ -32,7 +32,7 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
   public abstract function getName();
 
   public function getShortDescription() {
-    return $this->getName().' Application';
+    return pht('%s Application', $this->getName());
   }
 
   public function isInstalled() {
@@ -254,7 +254,7 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
   }
 
   public function getAppEmailBlurb() {
-    throw new Exception('Not Implemented.');
+    throw new PhutilMethodNotImplementedException();
   }
 
 
@@ -371,7 +371,7 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
     }
 
     if (!$selected) {
-      throw new Exception("No application '{$class_name}'!");
+      throw new Exception(pht("No application '%s'!", $class_name));
     }
 
     return $selected;
@@ -531,7 +531,7 @@ abstract class PhabricatorApplication implements PhabricatorPolicyInterface {
   private function getCustomCapabilitySpecification($capability) {
     $custom = $this->getCustomCapabilities();
     if (!isset($custom[$capability])) {
-      throw new Exception("Unknown capability '{$capability}'!");
+      throw new Exception(pht("Unknown capability '%s'!", $capability));
     }
     return $custom[$capability];
   }

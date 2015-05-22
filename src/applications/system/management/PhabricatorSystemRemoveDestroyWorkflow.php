@@ -54,23 +54,81 @@ final class PhabricatorSystemRemoveDestroyWorkflow
       }
     }
 
+    $banner = <<<EOBANNER
+                                  uuuuuuu
+                               uu###########uu
+                            uu#################uu
+                           u#####################u
+                          u#######################u
+                         u#########################u
+                         u#########################u
+                         u######"   "###"   "######u
+                         "####"      u#u       ####"
+                          ###u       u#u       u###
+                          ###u      u###u      u###
+                           "####uu###   ###uu####"
+                            "#######"   "#######"
+                              u#######u#######u
+                               u#"#"#"#"#"#"#u
+                    uuu        ##u# # # # #u##       uuu
+                   u####        #####u#u#u###       u####
+                    #####uu      "#########"     uu######
+                  u###########uu    """""    uuuu##########
+                  ####"""##########uuu   uu#########"""###"
+                   """      ""###########uu ""#"""
+                             uuuu ""##########uuu
+                    u###uuu#########uu ""###########uuu###
+                    ##########""""           ""###########"
+                     "#####"                      ""####""
+                       ###"                         ####"
+
+EOBANNER;
+
+
+    $console->writeOut("\n\n<fg:red>%s</fg>\n\n", $banner);
+
     $console->writeOut(
-      "<bg:red>**%s**</bg>\n\n",
-      pht(' IMPORTANT: OBJECTS WILL BE PERMANENTLY DESTROYED! '));
+      "<bg:red>** %s **</bg> %s\n\n%s\n\n".
+      "<bg:red>** %s **</bg> %s\n\n%s\n\n",
+      pht('IMPORTANT'),
+      pht('DATA WILL BE PERMANENTLY DESTROYED'),
+      phutil_console_wrap(
+        pht(
+          'Objects will be permanently destroyed. There is no way to '.
+          'undo this operation or ever retrieve this data unless you '.
+          'maintain external backups.')),
+      pht('IMPORTANT'),
+      pht('DELETING OBJECTS OFTEN BREAKS THINGS'),
+      phutil_console_wrap(
+        pht(
+          'Destroying objects may cause related objects to stop working, '.
+          'and may leave scattered references to objects which no longer '.
+          'exist. In most cases, it is much better to disable or archive '.
+          'objects instead of destroying them. This risk is greatest when '.
+          'deleting complex or highly connected objects like repositories, '.
+          'projects and users.'.
+          "\n\n".
+          'These tattered edges are an expected consquence of destroying '.
+          'objects, and the Phabricator upstream will not help you fix '.
+          'them. We strongly recomend disabling or archiving objects '.
+          'instead.')));
+
+    $phids = mpull($named_objects, 'getPHID');
+    $handles = PhabricatorUser::getOmnipotentUser()->loadHandles($phids);
 
     $console->writeOut(
       pht(
-        "There is no way to undo this operation or ever retrieve this data.".
-        "\n\n".
-        "These %s object(s) will be **completely destroyed forever**:".
-        "\n\n",
-        new PhutilNumber(count($named_objects))));
+        'These %s object(s) will be destroyed forever:',
+        new PhutilNumber(count($named_objects)))."\n\n");
 
     foreach ($named_objects as $object_name => $object) {
+      $phid = $object->getPHID();
+
       $console->writeOut(
-        "    - %s (%s)\n",
+        "    - %s (%s) %s\n",
         $object_name,
-        get_class($object));
+        get_class($object),
+        $handles[$phid]->getFullName());
     }
 
     $force = $args->getArg('force');

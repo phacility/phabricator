@@ -66,7 +66,7 @@ return array(
     'phabricator-draggable-list',
     'javelin-behavior-phabricator-transaction-list',
     'javelin-behavior-phabricator-show-older-transactions',
-    'javelin-behavior-phui-timeline-dropdown-menu',
+    'javelin-behavior-phui-dropdown-menu',
     'javelin-behavior-doorkeeper-tag',
     'phabricator-title',
     'javelin-leader',

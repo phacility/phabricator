@@ -20,7 +20,7 @@ final class PhabricatorPeopleQuery
   private $needPrimaryEmail;
   private $needProfile;
   private $needProfileImage;
-  private $needStatus;
+  private $needAvailability;
 
   public function withIDs(array $ids) {
     $this->ids = $ids;
@@ -102,8 +102,8 @@ final class PhabricatorPeopleQuery
     return $this;
   }
 
-  public function needStatus($need) {
-    $this->needStatus = $need;
+  public function needAvailability($need) {
+    $this->needAvailability = $need;
     return $this;
   }
 
@@ -200,15 +200,19 @@ final class PhabricatorPeopleQuery
       }
     }
 
-    if ($this->needStatus) {
-      $user_list = mpull($users, null, 'getPHID');
-      $statuses = id(new PhabricatorCalendarEvent())->loadCurrentStatuses(
-        array_keys($user_list));
-      foreach ($user_list as $phid => $user) {
-        $status = idx($statuses, $phid);
-        if ($status) {
-          $user->attachStatus($status);
+    if ($this->needAvailability) {
+      $rebuild = array();
+      foreach ($users as $user) {
+        $cache = $user->getAvailabilityCache();
+        if ($cache !== null) {
+          $user->attachAvailability($cache);
+        } else {
+          $rebuild[] = $user;
         }
+      }
+
+      if ($rebuild) {
+        $this->rebuildAvailabilityCache($rebuild);
       }
     }
 
@@ -375,5 +379,78 @@ final class PhabricatorPeopleQuery
     );
   }
 
+  private function rebuildAvailabilityCache(array $rebuild) {
+    $rebuild = mpull($rebuild, null, 'getPHID');
+
+    // Limit the window we look at because far-future events are largely
+    // irrelevant and this makes the cache cheaper to build and allows it to
+    // self-heal over time.
+    $min_range = PhabricatorTime::getNow();
+    $max_range = $min_range + phutil_units('72 hours in seconds');
+
+    $events = id(new PhabricatorCalendarEventQuery())
+      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->withInvitedPHIDs(array_keys($rebuild))
+      ->withIsCancelled(false)
+      ->withDateRange($min_range, $max_range)
+      ->execute();
+
+    // Group all the events by invited user. Only examine events that users
+    // are actually attending.
+    $map = array();
+    foreach ($events as $event) {
+      foreach ($event->getInvitees() as $invitee) {
+        if (!$invitee->isAttending()) {
+          continue;
+        }
+
+        $invitee_phid = $invitee->getInviteePHID();
+        if (!isset($rebuild[$invitee_phid])) {
+          continue;
+        }
+
+        $map[$invitee_phid][] = $event;
+      }
+    }
+
+    foreach ($rebuild as $phid => $user) {
+      $events = idx($map, $phid, array());
+
+      $cursor = $min_range;
+      if ($events) {
+        // Find the next time when the user has no meetings. If we move forward
+        // because of an event, we check again for events after that one ends.
+        while (true) {
+          foreach ($events as $event) {
+            $from = $event->getDateFromForCache();
+            $to = $event->getDateTo();
+            if (($from <= $cursor) && ($to > $cursor)) {
+              $cursor = $to;
+              continue 2;
+            }
+          }
+          break;
+        }
+      }
+
+      if ($cursor > $min_range) {
+        $availability = array(
+          'until' => $cursor,
+        );
+        $availability_ttl = $cursor;
+      } else {
+        $availability = array(
+          'until' => null,
+        );
+        $availability_ttl = $max_range;
+      }
+
+      // Never TTL the cache to longer than the maximum range we examined.
+      $availability_ttl = min($availability_ttl, $max_range);
+
+      $user->writeAvailabilityCache($availability, $availability_ttl);
+      $user->attachAvailability($availability);
+    }
+  }
 
 }

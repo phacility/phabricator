@@ -185,7 +185,7 @@ final class PHUICalendarDayView extends AphrontView {
 
     $layout = id(new AphrontMultiColumnView())
       ->addColumn($sidebar, 'third')
-      ->addColumn($table_box, 'thirds')
+      ->addColumn($table_box, 'thirds phui-day-view-column')
       ->setFluidLayout(true)
       ->setGutter(AphrontMultiColumnView::GUTTER_MEDIUM);
 
@@ -276,7 +276,8 @@ final class PHUICalendarDayView extends AphrontView {
       ->addClass('calendar-day-view-sidebar');
 
     $list = id(new PHUICalendarListView())
-      ->setUser($this->user);
+      ->setUser($this->user)
+      ->setView('day');
 
     if (count($events) == 0) {
       $list->showBlankState(true);
@@ -391,10 +392,15 @@ final class PHUICalendarDayView extends AphrontView {
   }
 
   private function drawAllDayEvent(AphrontCalendarEventView $event) {
+    $class = 'day-view-all-day';
+    if ($event->getViewerIsInvited()) {
+      $class = $class.' viewer-invited-day-event';
+    }
+
     $name = phutil_tag(
       'a',
       array(
-        'class' => 'day-view-all-day',
+        'class' => $class,
         'href' => $event->getURI(),
       ),
       $event->getName());
@@ -425,10 +431,16 @@ final class PHUICalendarDayView extends AphrontView {
     $width,
     $top,
     $height) {
+
+    $class = 'phui-calendar-day-event-link';
+    if ($event->getViewerIsInvited()) {
+      $class =  $class.' viewer-invited-day-event';
+    }
+
     $name = phutil_tag(
       'a',
       array(
-        'class' => 'phui-calendar-day-event-link',
+        'class' => $class,
         'href' => $event->getURI(),
       ),
       $event->getName());

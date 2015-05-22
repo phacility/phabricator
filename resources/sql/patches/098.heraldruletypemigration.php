@@ -1,6 +1,6 @@
 <?php
 
-echo "Checking for rules that can be converted to 'personal'. ";
+echo pht("Checking for rules that can be converted to 'personal'.")."\n";
 $table = new HeraldRule();
 $table->openTransaction();
 $table->beginReadLocking();
@@ -41,11 +41,11 @@ foreach ($rules as $rule) {
         $rule->getRuleType(),
         $rule->getID());
 
-      echo "Setting rule '".$rule->getName()."' to personal. ";
+      echo pht("Setting rule '%s' to personal.", $rule->getName())."\n";
     }
   }
 }
 
 $table->endReadLocking();
 $table->saveTransaction();
-echo "Done.\n";
+echo pht('Done.')."\n";

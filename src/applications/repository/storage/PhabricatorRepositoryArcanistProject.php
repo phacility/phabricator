@@ -9,19 +9,12 @@ final class PhabricatorRepositoryArcanistProject
   protected $name;
   protected $repositoryID;
 
-  protected $symbolIndexLanguages = array();
-  protected $symbolIndexProjects  = array();
-
   private $repository = self::ATTACHABLE;
 
   protected function getConfiguration() {
     return array(
       self::CONFIG_AUX_PHID   => true,
       self::CONFIG_TIMESTAMPS => false,
-      self::CONFIG_SERIALIZATION => array(
-        'symbolIndexLanguages' => self::SERIALIZATION_JSON,
-        'symbolIndexProjects'  => self::SERIALIZATION_JSON,
-      ),
       self::CONFIG_COLUMN_SCHEMA => array(
         'name' => 'text128',
         'repositoryID' => 'id?',

@@ -9,7 +9,9 @@ abstract class PhabricatorFilesManagementWorkflow
     if ($args->getArg('all')) {
       if ($names) {
         throw new PhutilArgumentUsageException(
-          'Specify either a list of files or `--all`, but not both.');
+          pht(
+            'Specify either a list of files or `%s`, but not both.',
+            '--all'));
       }
       return new LiskMigrationIterator(new PhabricatorFile());
     }
@@ -33,7 +35,9 @@ abstract class PhabricatorFilesManagementWorkflow
     foreach ($names as $name) {
       if (empty($files[$name])) {
         throw new PhutilArgumentUsageException(
-          "No file '{$name}' exists!");
+          pht(
+            "No file '%s' exists!",
+            $name));
       }
     }
 

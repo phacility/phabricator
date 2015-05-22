@@ -11,10 +11,10 @@ $status_map = array(
 
 $conn_w = id(new ManiphestTask())->establishConnection('w');
 
-echo "Migrating tasks to new status constants...\n";
+echo pht('Migrating tasks to new status constants...')."\n";
 foreach (new LiskMigrationIterator(new ManiphestTask()) as $task) {
   $id = $task->getID();
-  echo "Migrating T{$id}...\n";
+  echo pht('Migrating %s...', "T{$id}")."\n";
 
   $status = $task->getStatus();
   if (isset($status_map[$status])) {
@@ -27,13 +27,13 @@ foreach (new LiskMigrationIterator(new ManiphestTask()) as $task) {
   }
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";
 
 
-echo "Migrating task transactions to new status constants...\n";
+echo pht('Migrating task transactions to new status constants...')."\n";
 foreach (new LiskMigrationIterator(new ManiphestTransaction()) as $xaction) {
   $id = $xaction->getID();
-  echo "Migrating {$id}...\n";
+  echo pht('Migrating %d...', $id)."\n";
 
   if ($xaction->getTransactionType() == ManiphestTransaction::TYPE_STATUS) {
     $old = $xaction->getOldValue();
@@ -55,14 +55,14 @@ foreach (new LiskMigrationIterator(new ManiphestTransaction()) as $xaction) {
       $id);
   }
 }
-echo "Done.\n";
+echo pht('Done.')."\n";
 
 $conn_w = id(new PhabricatorSavedQuery())->establishConnection('w');
 
-echo "Migrating searches to new status constants...\n";
+echo pht('Migrating searches to new status constants...')."\n";
 foreach (new LiskMigrationIterator(new PhabricatorSavedQuery()) as $query) {
   $id = $query->getID();
-  echo "Migrating {$id}...\n";
+  echo pht('Migrating %d...', $id)."\n";
 
   if ($query->getEngineClassName() !== 'ManiphestTaskSearchEngine') {
     continue;
@@ -91,4 +91,4 @@ foreach (new LiskMigrationIterator(new PhabricatorSavedQuery()) as $query) {
     }
   }
 }
-echo "Done.\n";
+echo pht('Done.')."\n";

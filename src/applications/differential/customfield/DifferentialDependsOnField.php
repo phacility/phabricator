@@ -45,7 +45,8 @@ final class DifferentialDependsOnField
     return array(
       pht(
         'Create a dependency between revisions by writing '.
-        '"Depends on D123" in your summary.'),
+        '"%s" in your summary.',
+        'Depends on D123'),
     );
   }
 

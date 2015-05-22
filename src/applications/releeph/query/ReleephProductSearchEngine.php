@@ -74,7 +74,7 @@ final class ReleephProductSearchEngine
   private function getActiveOptions() {
     return array(
       'all'       => pht('Active and Inactive Products'),
-      'active'    => pht('Active Prodcuts'),
+      'active'    => pht('Active Products'),
       'inactive'  => pht('Inactive Products'),
     );
   }

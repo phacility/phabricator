@@ -114,7 +114,7 @@ final class ReleephRequestTransactionalEditor
         break;
 
       case ReleephRequestTransaction::TYPE_MANUAL_IN_BRANCH:
-        $object->setInBranch((int) $new);
+        $object->setInBranch((int)$new);
         break;
     }
   }
@@ -299,10 +299,13 @@ final class ReleephRequestTransactionalEditor
         $type = $xaction->getTransactionType();
         $new = $xaction->getNewValue();
         phlog(
-          "Unknown discovery action '{$action}' ".
-          "for xaction of type {$type} ".
-          "with new value {$new} ".
-          "mentioning RQ{$id}!");
+          pht(
+            "Unknown discovery action '%s' for xaction of type %s ".
+            "with new value %s mentioning %s!",
+            $action,
+            $type,
+            $new,
+            'RQ'.$id));
         break;
     }
   }

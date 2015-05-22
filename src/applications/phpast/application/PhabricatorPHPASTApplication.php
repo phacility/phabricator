@@ -15,7 +15,7 @@ final class PhabricatorPHPASTApplication extends PhabricatorApplication {
   }
 
   public function getShortDescription() {
-    return 'Visual PHP Parser';
+    return pht('Visual PHP Parser');
   }
 
   public function getTitleGlyph() {

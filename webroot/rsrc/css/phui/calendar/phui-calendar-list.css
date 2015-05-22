@@ -29,34 +29,44 @@
 
 .phui-calendar-list-item {
   position: relative;
+  line-height: 18px;
+  height: 18px;
 }
 
-.phui-calendar-list-dot {
-  position: relative;
-  display: inline-block;
-  width: 5px;
-  height: 5px;
-  margin-right: 6px;
-  top: -5px;
-  border-radius: 10px;
-  border: 1px solid transparent;
+.phui-calendar-list-item a {
+  display: block;
+  width: auto;
+  min-height: 18px;
+}
+
+.phui-calendar-list-item-icon {
+  position: absolute;
+  left: 0;
+  top: 3px;
 }
 
 .phui-calendar-list-title {
-  width: 200px;
-  display: inline-block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+ width: 200px;
+ overflow: hidden;
+ text-overflow: ellipsis;
+ white-space: nowrap;
+ position: absolute;
+ left: 20px;
+ top: 0;
+}
+
+.phui-calendar-viewer-invited .phui-calendar-list-title {
+  font-weight: bold;
 }
 
 .phui-calendar-list-item .phui-calendar-list-time {
   position: absolute;
+  top: 0;
   width: 60px;
   right: 0;
-  top: 0;
   color: {$lightgreytext};
   text-align: right;
+  line-height: 20px;
 }
 
 .phui-calendar-list-item-empty {

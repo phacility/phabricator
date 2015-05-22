@@ -26,7 +26,10 @@ final class PhabricatorBotSymbolHandler extends PhabricatorBotHandler {
         $default_uri = $this->getURI('/diffusion/symbol/'.$symbol.'/');
 
         if (count($results) > 1) {
-          $response = "Multiple symbols named '{$symbol}': {$default_uri}";
+          $response = pht(
+            "Multiple symbols named '%s': %s",
+            $symbol,
+            $default_uri);
         } else if (count($results) == 1) {
           $result = head($results);
           $response =
@@ -35,7 +38,7 @@ final class PhabricatorBotSymbolHandler extends PhabricatorBotHandler {
             '('.$result['language'].'): '.
             nonempty($result['uri'], $default_uri);
         } else {
-          $response = "No symbol '{$symbol}' found anywhere.";
+          $response = pht("No symbol '%s' found anywhere.", $symbol);
         }
 
         $this->replyTo($message, $response);

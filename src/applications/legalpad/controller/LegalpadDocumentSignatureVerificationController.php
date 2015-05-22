@@ -38,9 +38,7 @@ final class LegalpadDocumentSignatureVerificationController
     if ($signature->isVerified()) {
       return $this->newDialog()
         ->setTitle(pht('Signature Already Verified'))
-        ->appendParagraph(
-          pht(
-            'This signature has already been verified.'))
+        ->appendParagraph(pht('This signature has already been verified.'))
         ->addCancelButton('/', pht('Okay'));
     }
 

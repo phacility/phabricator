@@ -387,7 +387,7 @@ final class HeraldCommitAdapter extends HeraldAdapter {
             $lines[] = $hunk->makeChanges();
             break;
           default:
-            throw new Exception("Unknown content selection '{$type}'!");
+            throw new Exception(pht("Unknown content selection '%s'!", $type));
         }
       }
       $result[$change->getFilename()] = implode("\n", $lines);

@@ -4,11 +4,11 @@ final class AphrontURIMapper {
 
   private $map;
 
-  final public function __construct(array $map) {
+  public function __construct(array $map) {
     $this->map = $map;
   }
 
-  final public function mapPath($path) {
+  public function mapPath($path) {
     $map = $this->map;
     foreach ($map as $rule => $value) {
       list($controller, $data) = $this->tryRule($rule, $value, $path);
@@ -25,7 +25,7 @@ final class AphrontURIMapper {
     return array(null, null);
   }
 
-  final private function tryRule($rule, $value, $path) {
+  private function tryRule($rule, $value, $path) {
     $match = null;
     $pattern = '#^'.$rule.(is_array($value) ? '' : '$').'#';
     if (!preg_match($pattern, $path, $match)) {

@@ -31,7 +31,7 @@ final class NuanceQueueViewController extends NuanceController {
     }
 
     $crumbs = $this->buildApplicationCrumbs();
-    $title = 'TODO';
+    $title = pht('TODO');
 
     return $this->buildApplicationPage(
       $crumbs,

@@ -14,14 +14,14 @@ $tables = array(
   id(new HarbormasterBuildTarget())->getTableName(),
 );
 
-echo "Renaming Harbormaster classes...\n";
+echo pht('Renaming Harbormaster classes...')."\n";
 
 $conn_w = id(new HarbormasterBuildStep())->establishConnection('w');
 foreach ($names as $name) {
   $old = $name;
   $new = 'Harbormaster'.$name;
 
-  echo "Renaming {$old} -> {$new}...\n";
+  echo pht('Renaming %s -> %s...', $old, $new)."\n";
   foreach ($tables as $table) {
     queryfx(
       $conn_w,
@@ -32,4 +32,4 @@ foreach ($names as $name) {
   }
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

@@ -52,6 +52,10 @@ your Phabricator install as an origin (make sure you point it at the primary
 domain name of your install, not just a load balancer or instance). You do not
 need to set up a new domain name, which makes setup a bit more straightforward.
 
+Most settings can be left at their default values, but you should change
+the **Allowed HTTP Methods** setting from `GET, HEAD` to
+`GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE`.
+
 Once configured, accessing the distribution's domain name should return a
 Phabricator error page indicating that Phabricator does not recognize the
 domain. If you see this page, it means you've configured things correctly.

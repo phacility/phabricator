@@ -3,12 +3,13 @@
 final class PHUIObjectItemListExample extends PhabricatorUIExample {
 
   public function getName() {
-    return 'Object Item List';
+    return pht('Object Item List');
   }
 
   public function getDescription() {
-    return hsprintf(
-      'Use <tt>PHUIObjectItemListView</tt> to render lists of objects.');
+    return pht(
+      'Use %s to render lists of objects.',
+      hsprintf('<tt>PHUIObjectItemListView</tt>'));
   }
 
   public function renderExample() {
@@ -116,9 +117,10 @@ final class PHUIObjectItemListExample extends PhabricatorUIExample {
         ->setStatusIcon('fa-check blue'));
     $list->addItem(
       id(new PHUIObjectItemView())
-        ->setHeader(pht(
-          'The human cardiovascular system includes the heart, lungs, and '.
-          'some other parts; most of these parts are pretty squishy'))
+        ->setHeader(
+          pht(
+            'The human cardiovascular system includes the heart, lungs, and '.
+            'some other parts; most of these parts are pretty squishy.'))
         ->addHandleIcon($handle, pht('You have a cardiovascular system!'))
         ->setStatusIcon('fa-check indigo'));
 
@@ -382,7 +384,7 @@ final class PHUIObjectItemListExample extends PhabricatorUIExample {
         ->setState(PHUIObjectItemView::STATE_BUILD));
 
     $box = id(new PHUIObjectBoxView())
-      ->setHeaderText('State Icons')
+      ->setHeaderText(pht('State Icons'))
       ->setObjectList($list);
 
     $out[] = array($box);

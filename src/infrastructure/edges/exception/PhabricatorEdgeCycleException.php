@@ -12,7 +12,10 @@ final class PhabricatorEdgeCycleException extends Exception {
     $cycle_list = implode(', ', $cycle);
 
     parent::__construct(
-      "Graph cycle detected (type={$cycle_edge_type}, cycle={$cycle_list}).");
+      pht(
+        'Graph cycle detected (type=%s, cycle=%s).',
+        $cycle_edge_type,
+        $cycle_list));
   }
 
   public function getCycle() {

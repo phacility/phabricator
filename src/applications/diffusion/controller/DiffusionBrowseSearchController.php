@@ -33,7 +33,9 @@ final class DiffusionBrowseSearchController extends DiffusionBrowseController {
       array(
         'title' => array(
           nonempty(basename($drequest->getPath()), '/'),
-          $drequest->getRepository()->getCallsign().' Repository',
+          pht(
+            '%s Repository',
+            $drequest->getRepository()->getCallsign()),
         ),
       ));
   }

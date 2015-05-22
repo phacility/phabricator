@@ -83,7 +83,8 @@ final class DiffusionSubversionServeSSHWorkflow
       if (!$exec_channel->isOpenForReading()) {
         throw new Exception(
           pht(
-            'svnserve subprocess exited before emitting a protocol frame.'));
+            '%s subprocess exited before emitting a protocol frame.',
+            'svnserve'));
       }
     }
 
@@ -141,7 +142,7 @@ final class DiffusionSubversionServeSSHWorkflow
 
     $args = $this->getArgs();
     if (!$args->getArg('tunnel')) {
-      throw new Exception('Expected `svnserve -t`!');
+      throw new Exception(pht('Expected `%s`!', 'svnserve -t'));
     }
 
     if ($this->shouldProxy()) {
@@ -350,8 +351,9 @@ final class DiffusionSubversionServeSSHWorkflow
     if ($proto !== 'svn+ssh') {
       throw new Exception(
         pht(
-          'Protocol for URI "%s" MUST be "svn+ssh".',
-          $uri_string));
+          'Protocol for URI "%s" MUST be "%s".',
+          $uri_string,
+          'svn+ssh'));
     }
     $path = $uri->getPath();
 
@@ -360,7 +362,8 @@ final class DiffusionSubversionServeSSHWorkflow
     if (preg_match('(/\\.\\./)', $path)) {
       throw new Exception(
         pht(
-          'String "/../" is invalid in path specification "%s".',
+          'String "%s" is invalid in path specification "%s".',
+          '/../',
           $uri_string));
     }
 

@@ -354,13 +354,25 @@ final class ConpherenceThreadQuery
       $this->getViewer());
     $start_epoch = $epochs['start_epoch'];
     $end_epoch = $epochs['end_epoch'];
-    $statuses = id(new PhabricatorCalendarEventQuery())
-      ->setViewer($this->getViewer())
-      ->withInvitedPHIDs($participant_phids)
-      ->withDateRange($start_epoch, $end_epoch)
-      ->execute();
 
-    $statuses = mgroup($statuses, 'getUserPHID');
+    if ($participant_phids) {
+      $events = id(new PhabricatorCalendarEventQuery())
+        ->setViewer($this->getViewer())
+        ->withInvitedPHIDs($participant_phids)
+        ->withIsCancelled(false)
+        ->withDateRange($start_epoch, $end_epoch)
+        ->execute();
+      $events = mpull($events, null, 'getPHID');
+    } else {
+      $events = null;
+    }
+
+    $invitees = array();
+    foreach ($events as $event_phid => $event) {
+      foreach ($event->getInvitees() as $invitee) {
+        $invitees[$invitee->getInviteePHID()][$event_phid] = true;
+      }
+    }
 
     // attached files
     $files = array();
@@ -382,9 +394,16 @@ final class ConpherenceThreadQuery
 
     foreach ($conpherences as $phid => $conpherence) {
       $participant_phids = array_keys($conpherence->getParticipants());
-      $statuses = array_select_keys($statuses, $participant_phids);
-      $statuses = array_mergev($statuses);
-      $statuses = msort($statuses, 'getDateFrom');
+      $widget_data = array();
+
+      $event_phids = array();
+      $participant_invites = array_select_keys($invitees, $participant_phids);
+      foreach ($participant_invites as $invite_set) {
+        $event_phids += $invite_set;
+      }
+      $thread_events = array_select_keys($events, array_keys($event_phids));
+      $thread_events = msort($thread_events, 'getDateFrom');
+      $widget_data['events'] = $thread_events;
 
       $conpherence_files = array();
       $files_authors = array();
@@ -404,11 +423,11 @@ final class ConpherenceThreadQuery
         }
         $files_authors[$curr_phid] = $current_author;
       }
-      $widget_data = array(
-        'statuses' => $statuses,
+      $widget_data += array(
         'files' => $conpherence_files,
         'files_authors' => $files_authors,
       );
+
       $conpherence->attachWidgetData($widget_data);
     }
 

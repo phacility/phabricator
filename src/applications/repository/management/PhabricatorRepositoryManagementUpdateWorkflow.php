@@ -27,11 +27,11 @@ final class PhabricatorRepositoryManagementUpdateWorkflow
         array(
           array(
             'name'        => 'verbose',
-            'help'        => 'Show additional debugging information.',
+            'help'        => pht('Show additional debugging information.'),
           ),
           array(
             'name'        => 'no-discovery',
-            'help'        => 'Do not perform discovery.',
+            'help'        => pht('Do not perform discovery.'),
           ),
           array(
             'name'        => 'repos',

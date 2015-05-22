@@ -213,8 +213,9 @@ final class HarbormasterStepEditController extends HarbormasterController {
 
     $rows = array();
     $rows[] = pht(
-      'The following variables can be used in most fields. To reference '.
-      'a variable, use `${name}` in a field.');
+      'The following variables can be used in most fields. '.
+      'To reference a variable, use `%s` in a field.',
+      '${name}');
     $rows[] = pht('| Variable | Description |');
     $rows[] = '|---|---|';
     foreach ($variables as $name => $description) {

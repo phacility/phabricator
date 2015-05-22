@@ -7,16 +7,16 @@ $viewer = PhabricatorUser::getOmnipotentUser();
 $map = array();
 foreach (new LiskMigrationIterator($table) as $repository) {
   $callsign = $repository->getCallsign();
-  echo "Examining repository {$callsign}...\n";
+  echo pht('Examining repository %s...', $callsign)."\n";
 
   if ($repository->getCredentialPHID()) {
-    echo "...already has a Credential.\n";
+    echo pht('...already has a Credential.')."\n";
     continue;
   }
 
   $raw_uri = $repository->getRemoteURI();
   if (!$raw_uri) {
-    echo "...no remote URI.\n";
+    echo pht('...no remote URI.')."\n";
     continue;
   }
 
@@ -50,12 +50,12 @@ foreach (new LiskMigrationIterator($table) as $repository) {
   }
 
   if (!$username || !$secret) {
-    echo "...no credentials set.\n";
+    echo pht('...no credentials set.')."\n";
     continue;
   }
 
   $map[$type][$username][$secret][] = $repository;
-  echo "...will migrate.\n";
+  echo pht('...will migrate.')."\n";
 }
 
 $passphrase = new PassphraseSecret();
@@ -76,7 +76,7 @@ foreach ($map as $credential_type => $credential_usernames) {
           ->setMaximumGlyphs(128)
           ->truncateString($signs));
 
-      echo "Creating: {$name}...\n";
+      echo pht('Creating: %s...', $name)."\n";
 
       $secret = id(new PassphraseSecret())
         ->setSecretData($secret_plaintext)
@@ -136,4 +136,4 @@ foreach ($map as $credential_type => $credential_usernames) {
 $table->saveTransaction();
 $passphrase->saveTransaction();
 
-echo "Done.\n";
+echo pht('Done.')."\n";

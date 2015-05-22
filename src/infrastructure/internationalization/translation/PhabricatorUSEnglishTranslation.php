@@ -1067,6 +1067,17 @@ final class PhabricatorUSEnglishTranslation
         ),
       ),
 
+      'These %s object(s) will be destroyed forever:' => array(
+        'This object will be destroyed forever:',
+        'These objects will be destroyed forever:',
+      ),
+
+      'Are you absolutely certain you want to destroy these %s '.
+      'object(s)?' => array(
+        'Are you absolutely certain you want to destroy this object?',
+        'Are you absolutely certain you want to destroy these objects?',
+      ),
+
     );
   }
 

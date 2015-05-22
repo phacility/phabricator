@@ -143,8 +143,7 @@ final class FundInitiative extends FundDAO
   }
 
   public function describeAutomaticCapability($capability) {
-    return pht(
-      'The owner of an initiative can always view and edit it.');
+    return pht('The owner of an initiative can always view and edit it.');
   }
 
 

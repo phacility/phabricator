@@ -33,13 +33,12 @@ final class DifferentialRevisionViewController extends DifferentialController {
     $diffs = id(new DifferentialDiffQuery())
       ->setViewer($request->getUser())
       ->withRevisionIDs(array($this->revisionID))
-      ->needArcanistProjects(true)
       ->execute();
     $diffs = array_reverse($diffs, $preserve_keys = true);
 
     if (!$diffs) {
       throw new Exception(
-        'This revision has no diffs. Something has gone quite wrong.');
+        pht('This revision has no diffs. Something has gone quite wrong.'));
     }
 
     $revision->attachActiveDiff(last($diffs));
@@ -152,7 +151,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
     if (count($changesets) > $limit && !$large) {
       $count = count($changesets);
       $warning = new PHUIInfoView();
-      $warning->setTitle('Very Large Diff');
+      $warning->setTitle(pht('Very Large Diff'));
       $warning->setSeverity(PHUIInfoView::SEVERITY_WARNING);
       $warning->appendChild(hsprintf(
         '%s <strong>%s</strong>',
@@ -260,14 +259,13 @@ final class DifferentialRevisionViewController extends DifferentialController {
       'whitespace',
       DifferentialChangesetParser::WHITESPACE_IGNORE_MOST);
 
-    $arc_project = $target->getArcanistProject();
-    if ($arc_project) {
-      list($symbol_indexes, $project_phids) = $this->buildSymbolIndexes(
-        $arc_project,
+    $repository = $revision->getRepository();
+    if ($repository) {
+      $symbol_indexes = $this->buildSymbolIndexes(
+        $repository,
         $visible_changesets);
     } else {
       $symbol_indexes = array();
-      $project_phids = null;
     }
 
     $revision_detail->setActions($actions);
@@ -307,15 +305,6 @@ final class DifferentialRevisionViewController extends DifferentialController {
       ),
       $comment_view);
 
-    if ($arc_project) {
-      Javelin::initBehavior(
-        'repository-crossreference',
-        array(
-          'section' => $wrap_id,
-          'projects' => $project_phids,
-        ));
-    }
-
     $changeset_view = new DifferentialChangesetListView();
     $changeset_view->setChangesets($changesets);
     $changeset_view->setVisibleChangesets($visible_changesets);
@@ -339,7 +328,7 @@ final class DifferentialRevisionViewController extends DifferentialController {
       $changeset_view->setRepository($repository);
     }
     $changeset_view->setSymbolIndexes($symbol_indexes);
-    $changeset_view->setTitle('Diff '.$target->getID());
+    $changeset_view->setTitle(pht('Diff %s', $target->getID()));
 
     $diff_history = id(new DifferentialRevisionUpdateHistoryView())
       ->setUser($user)
@@ -750,35 +739,44 @@ final class DifferentialRevisionViewController extends DifferentialController {
   }
 
   private function buildSymbolIndexes(
-    PhabricatorRepositoryArcanistProject $arc_project,
+    PhabricatorRepository $repository,
     array $visible_changesets) {
     assert_instances_of($visible_changesets, 'DifferentialChangeset');
 
     $engine = PhabricatorSyntaxHighlighter::newEngine();
 
-    $langs = $arc_project->getSymbolIndexLanguages();
-    if (!$langs) {
-      return array(array(), array());
-    }
+    $langs = $repository->getSymbolLanguages();
+    $langs = nonempty($langs, array());
+
+    $sources = $repository->getSymbolSources();
+    $sources = nonempty($sources, array());
 
     $symbol_indexes = array();
 
-    $project_phids = array_merge(
-      array($arc_project->getPHID()),
-      nonempty($arc_project->getSymbolIndexProjects(), array()));
+    if ($langs && $sources) {
+      $have_symbols = id(new DiffusionSymbolQuery())
+          ->existsSymbolsInRepository($repository->getPHID());
+      if (!$have_symbols) {
+        return $symbol_indexes;
+      }
+    }
+
+    $repository_phids = array_merge(
+      array($repository->getPHID()),
+      $sources);
 
     $indexed_langs = array_fill_keys($langs, true);
     foreach ($visible_changesets as $key => $changeset) {
       $lang = $engine->getLanguageFromFilename($changeset->getFilename());
-      if (isset($indexed_langs[$lang])) {
+      if (empty($indexed_langs) || isset($indexed_langs[$lang])) {
         $symbol_indexes[$key] = array(
-          'lang'      => $lang,
-          'projects'  => $project_phids,
+          'lang'         => $lang,
+          'repositories' => $repository_phids,
         );
       }
     }
 
-    return array($symbol_indexes, $project_phids);
+    return $symbol_indexes;
   }
 
   private function loadOtherRevisions(

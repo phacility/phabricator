@@ -15,7 +15,7 @@ final class AphrontFormCheckboxControl extends AphrontFormControl {
       'value'   => $value,
       'label'   => $label,
       'checked' => $checked,
-      'id' => $id,
+      'id'      => $id,
     );
     return $this;
   }

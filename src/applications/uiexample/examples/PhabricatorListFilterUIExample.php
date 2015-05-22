@@ -3,13 +3,14 @@
 final class PhabricatorListFilterUIExample extends PhabricatorUIExample {
 
   public function getName() {
-    return 'ListFilter';
+    return pht('ListFilter');
   }
 
   public function getDescription() {
-    return hsprintf(
-      'Use <tt>AphrontListFilterView</tt> to layout controls for filtering '.
-      'and manipulating lists of objects.');
+    return pht(
+      'Use %s to layout controls for filtering '.
+      'and manipulating lists of objects.',
+      phutil_tag('tt', array(), 'AphrontListFilterView'));
   }
 
   public function renderExample() {
@@ -21,10 +22,10 @@ final class PhabricatorListFilterUIExample extends PhabricatorUIExample {
     $form
       ->appendChild(
         id(new AphrontFormTextControl())
-          ->setLabel('Query'))
+          ->setLabel(pht('Query')))
       ->appendChild(
         id(new AphrontFormSubmitControl())
-          ->setValue('Search'));
+          ->setValue(pht('Search')));
 
     $filter->appendChild($form);
 

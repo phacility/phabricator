@@ -18,7 +18,7 @@ final class CelerityResourceGraph extends AbstractDirectedGraph {
     return $edges;
   }
 
-  final public function setResourceGraph(array $graph) {
+  public function setResourceGraph(array $graph) {
     $this->resourceGraph = $graph;
     $this->graphSet = true;
     return $this;

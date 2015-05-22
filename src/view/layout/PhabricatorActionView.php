@@ -139,7 +139,9 @@ final class PhabricatorActionView extends AphrontView {
       if ($this->renderAsForm) {
         if (!$this->user) {
           throw new Exception(
-            'Call setUser() when rendering an action as a form.');
+            pht(
+              'Call %s when rendering an action as a form.',
+              'setUser()'));
         }
 
         $item = javelin_tag(
@@ -155,7 +157,7 @@ final class PhabricatorActionView extends AphrontView {
             'action'    => $this->getHref(),
             'method'    => 'POST',
             'sigil'     => $sigils,
-            'meta' => $this->metadata,
+            'meta'      => $this->metadata,
           ),
           $item);
       } else {

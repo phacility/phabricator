@@ -92,7 +92,7 @@ final class PonderQuestionQuery
             PonderQuestionStatus::STATUS_CLOSED);
           break;
         default:
-          throw new Exception("Unknown status query '{$this->status}'!");
+          throw new Exception(pht("Unknown status query '%s'!", $this->status));
       }
     }
 

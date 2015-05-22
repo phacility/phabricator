@@ -15,7 +15,7 @@ final class PhabricatorInfrastructureTestCase extends PhabricatorTestCase {
     $this->assertEqual(
       count($all),
       count($installed),
-      'In test cases, all applications should default to installed.');
+      pht('In test cases, all applications should default to installed.'));
   }
 
   public function testRejectMySQLNonUTF8Queries() {

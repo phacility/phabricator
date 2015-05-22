@@ -7,9 +7,9 @@ final class ReleephProjectInfoConduitAPIMethod extends ReleephConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return
+    return pht(
       'Fetch information about all Releeph projects '.
-      'for a given Arcanist project.';
+      'for a given Arcanist project.');
   }
 
   protected function defineParamTypes() {
@@ -24,9 +24,9 @@ final class ReleephProjectInfoConduitAPIMethod extends ReleephConduitAPIMethod {
 
   protected function defineErrorTypes() {
     return array(
-      'ERR_UNKNOWN_ARC' =>
+      'ERR_UNKNOWN_ARC' => pht(
         "The given Arcanist project name doesn't exist in the ".
-        "installation of Phabricator you are accessing.",
+        "installation of Phabricator you are accessing."),
     );
   }
 
@@ -38,8 +38,10 @@ final class ReleephProjectInfoConduitAPIMethod extends ReleephConduitAPIMethod {
       if (!$arc_project) {
         throw id(new ConduitException('ERR_UNKNOWN_ARC'))
           ->setErrorDescription(
-            "Unknown Arcanist project '{$arc_project_name}': ".
-            "are you using the correct Conduit URI?");
+            pht(
+              "Unknown Arcanist project '%s': ".
+              "are you using the correct Conduit URI?",
+              $arc_project_name));
       }
 
       $releeph_projects = id(new ReleephProject())

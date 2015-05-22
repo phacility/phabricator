@@ -152,19 +152,25 @@ final class DiffusionRepositoryEditBasicController
 
   private function getReadmeInstructions() {
     return pht(<<<EOTEXT
-You can also create a `README` file at the repository root (or in any
+You can also create a `%s` file at the repository root (or in any
 subdirectory) to provide information about the repository. These formats are
 supported:
 
-| File Name       | Rendered As... |
-|-----------------|----------------|
-| `README`          | Plain Text |
-| `README.txt`      | Plain Text |
-| `README.remarkup` | Remarkup |
-| `README.md`       | Remarkup |
-| `README.rainbow`  | \xC2\xA1Fiesta! |
+| File Name | Rendered As...  |
+|-----------|-----------------|
+| `%s`      | Plain Text      |
+| `%s`      | Plain Text      |
+| `%s`      | Remarkup        |
+| `%s`      | Remarkup        |
+| `%s`      | \xC2\xA1Fiesta! |
 EOTEXT
-);
+  ,
+  'README',
+  'README',
+  'README.txt',
+  'README.remarkup',
+  'README.md',
+  'README.rainbow');
   }
 
 }

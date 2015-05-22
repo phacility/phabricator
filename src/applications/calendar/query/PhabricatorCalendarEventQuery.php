@@ -42,6 +42,30 @@ final class PhabricatorCalendarEventQuery
     return $this;
   }
 
+  protected function getDefaultOrderVector() {
+    return array('start', 'id');
+  }
+
+  public function getOrderableColumns() {
+    return array(
+      'start' => array(
+        'table' => $this->getPrimaryTableAlias(),
+        'column' => 'dateFrom',
+        'reverse' => true,
+        'type' => 'int',
+        'unique' => false,
+      ),
+    ) + parent::getOrderableColumns();
+  }
+
+  protected function getPagingValueMap($cursor, array $keys) {
+    $event = $this->loadCursorObject($cursor);
+    return array(
+      'start' => $event->getDateFrom(),
+      'id' => $event->getID(),
+    );
+  }
+
   protected function loadPage() {
     $table = new PhabricatorCalendarEvent();
     $conn_r = $table->establishConnection('r');

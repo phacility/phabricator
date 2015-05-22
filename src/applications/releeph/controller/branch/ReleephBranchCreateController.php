@@ -94,17 +94,16 @@ final class ReleephBranchCreateController extends ReleephProductController {
           ->setLabel(pht('Symbolic Name'))
           ->setName('symbolicName')
           ->setValue($symbolic_name)
-          ->setCaption(pht('Mutable alternate name, for easy reference, '.
-              '(e.g. "LATEST")')))
+          ->setCaption(pht(
+            'Mutable alternate name, for easy reference, (e.g. "LATEST")')))
       ->appendChild(
         id(new AphrontFormTextControl())
           ->setLabel(pht('Cut point'))
           ->setName('cutPoint')
           ->setValue($cut_point)
           ->setError($e_cut)
-          ->setCaption(
-              pht('A commit ID for your repo type, or a '.
-              'Diffusion ID like "rE123"')))
+          ->setCaption(pht(
+            'A commit ID for your repo type, or a Diffusion ID like "rE123"')))
       ->appendChild($branch_date_control)
       ->appendChild(
         id(new AphrontFormSubmitControl())

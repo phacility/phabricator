@@ -62,12 +62,17 @@ abstract class PhabricatorWorkerTask extends PhabricatorWorkerDAO {
 
     if (!class_exists($class)) {
       throw new PhabricatorWorkerPermanentFailureException(
-        "Task class '{$class}' does not exist!");
+        pht(
+          "Task class '%s' does not exist!",
+          $class));
     }
 
     if (!is_subclass_of($class, 'PhabricatorWorker')) {
       throw new PhabricatorWorkerPermanentFailureException(
-        "Task class '{$class}' does not extend PhabricatorWorker.");
+        pht(
+          "Task class '%s' does not extend %s.",
+          $class,
+          'PhabricatorWorker'));
     }
 
     return newv($class, array($this->getData()));

@@ -7,9 +7,7 @@ final class PhabricatorAuthManagementStripWorkflow
     $this
       ->setName('strip')
       ->setExamples('**strip** [--user username] [--type type]')
-      ->setSynopsis(
-        pht(
-          'Remove multi-factor authentication from an account.'))
+      ->setSynopsis(pht('Remove multi-factor authentication from an account.'))
       ->setArguments(
         array(
           array(
@@ -50,13 +48,17 @@ final class PhabricatorAuthManagementStripWorkflow
     if ($usernames && $all_users) {
       throw new PhutilArgumentUsageException(
         pht(
-          'Specify either specific users with --user, or all users with '.
-          '--all-users, but not both.'));
+          'Specify either specific users with %s, or all users with '.
+          '%s, but not both.',
+          '--user',
+          '--all-users'));
     } else if (!$usernames && !$all_users) {
       throw new PhutilArgumentUsageException(
         pht(
-          'Use --user to specify which user to strip factors from, or '.
-          '--all-users to strip factors from all users.'));
+          'Use %s to specify which user to strip factors from, or '.
+          '%s to strip factors from all users.',
+          '--user',
+          '--all-users'));
     } else if ($usernames) {
       $users = id(new PhabricatorPeopleQuery())
         ->setViewer($this->getViewer())

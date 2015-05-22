@@ -14,12 +14,12 @@ final class PhabricatorAuditActionConstants {
 
   public static function getActionNameMap() {
     $map = array(
-      self::COMMENT => pht('Comment'),
-      self::CONCERN => pht("Raise Concern \xE2\x9C\x98"),
-      self::ACCEPT  => pht("Accept Commit \xE2\x9C\x94"),
-      self::RESIGN  => pht('Resign from Audit'),
-      self::CLOSE   => pht('Close Audit'),
-      self::ADD_CCS => pht('Add CCs'),
+      self::COMMENT      => pht('Comment'),
+      self::CONCERN      => pht("Raise Concern \xE2\x9C\x98"),
+      self::ACCEPT       => pht("Accept Commit \xE2\x9C\x94"),
+      self::RESIGN       => pht('Resign from Audit'),
+      self::CLOSE        => pht('Close Audit'),
+      self::ADD_CCS      => pht('Add CCs'),
       self::ADD_AUDITORS => pht('Add Auditors'),
     );
 
@@ -28,20 +28,20 @@ final class PhabricatorAuditActionConstants {
 
   public static function getActionName($constant) {
     $map = self::getActionNameMap();
-    return idx($map, $constant, 'Unknown');
+    return idx($map, $constant, pht('Unknown'));
   }
 
   public static function getActionPastTenseVerb($action) {
-    static $map = array(
-      self::COMMENT => 'commented on',
-      self::CONCERN => 'raised a concern with',
-      self::ACCEPT  => 'accepted',
-      self::RESIGN  => 'resigned from',
-      self::CLOSE   => 'closed',
-      self::ADD_CCS => 'added CCs to',
-      self::ADD_AUDITORS => 'added auditors to',
+    $map = array(
+      self::COMMENT      => pht('commented on'),
+      self::CONCERN      => pht('raised a concern with'),
+      self::ACCEPT       => pht('accepted'),
+      self::RESIGN       => pht('resigned from'),
+      self::CLOSE        => pht('closed'),
+      self::ADD_CCS      => pht('added CCs to'),
+      self::ADD_AUDITORS => pht('added auditors to'),
     );
-    return idx($map, $action, 'updated');
+    return idx($map, $action, pht('updated'));
   }
 
 }

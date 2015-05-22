@@ -2,7 +2,7 @@
 
 /**
  * The default one-for-all hovercard. We may derive from this one to create
- * more specialized ones
+ * more specialized ones.
  */
 final class PhabricatorHovercardView extends AphrontView {
 

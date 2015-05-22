@@ -42,7 +42,7 @@ final class PhabricatorCalendarEventPHIDType extends PhabricatorPHIDType {
         ->setURI('/E'.$id);
 
       if ($is_cancelled) {
-        $handle->setStatus(PhabricatorObjectHandleStatus::STATUS_CLOSED);
+        $handle->setStatus(PhabricatorObjectHandle::STATUS_CLOSED);
       }
     }
   }

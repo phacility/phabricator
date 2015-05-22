@@ -71,7 +71,7 @@ final class DiffusionRepositoryCreateController
         $cancel_uri = $this->getApplicationURI('new/');
         break;
       default:
-        throw new Exception('Invalid edit operation!');
+        throw new Exception(pht('Invalid edit operation!'));
     }
 
     $form = id(new PHUIPagedFormView())
@@ -483,7 +483,7 @@ final class DiffusionRepositoryCreateController
         $is_mercurial = true;
         break;
       default:
-        throw new Exception('Unsupported VCS!');
+        throw new Exception(pht('Unsupported VCS!'));
     }
 
     $has_local = ($is_git || $is_mercurial);
@@ -527,7 +527,7 @@ final class DiffusionRepositoryCreateController
         "repository, use the //Import Only// option at the end of this ".
         "workflow.)");
     } else {
-      throw new Exception('Unsupported VCS!');
+      throw new Exception(pht('Unsupported VCS!'));
     }
 
     $page->addRemarkupInstructions($instructions, 'remoteURI');
@@ -623,7 +623,7 @@ final class DiffusionRepositoryCreateController
           $remote_uri),
         'credential');
     } else {
-      throw new Exception('Unknown URI protocol!');
+      throw new Exception(pht('Unknown URI protocol!'));
     }
 
     if ($provides_type) {
@@ -734,8 +734,7 @@ final class DiffusionRepositoryCreateController
         ->setAdjustFormPageCallback(array($this, 'adjustPolicyPage'))
         ->setUser($viewer)
         ->addRemarkupInstructions(
-          pht(
-            'Select access policies for this repository.'))
+          pht('Select access policies for this repository.'))
         ->addControl($view_policy)
         ->addControl($edit_policy)
         ->addControl($push_policy);

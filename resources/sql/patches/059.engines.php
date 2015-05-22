@@ -15,17 +15,18 @@ if (!$tables) {
   return;
 }
 
-echo "There are ".count($tables)." tables using the MyISAM engine. These will ".
-     "now be converted to InnoDB. This process may take a few minutes, please ".
-     "be patient.\n";
+echo pht(
+  "There are %d tables using the MyISAM engine. These will now be converted ".
+  "to InnoDB. This process may take a few minutes, please be patient.\n",
+  count($tables));
 
 foreach ($tables as $table) {
   $name = $table['db'].'.'.$table['tbl'];
-  echo "Converting {$name}...\n";
+  echo pht('Converting %s...', $name)."\n";
   queryfx(
     $conn,
     'ALTER TABLE %T.%T ENGINE=InnoDB',
     $table['db'],
     $table['tbl']);
 }
-echo "Done!\n";
+echo pht('Done!')."\n";

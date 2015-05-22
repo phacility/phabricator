@@ -1,18 +1,49 @@
 <?php
 
 final class PhabricatorElasticSearchEngine extends PhabricatorSearchEngine {
+
   private $uri;
   private $index;
   private $timeout;
 
-  public function __construct($uri, $index) {
+  public function __construct() {
+    $this->uri = PhabricatorEnv::getEnvConfig('search.elastic.host');
+    $this->index = PhabricatorEnv::getEnvConfig('search.elastic.namespace');
+  }
+
+  public function getEngineIdentifier() {
+    return 'elasticsearch';
+  }
+
+  public function getEnginePriority() {
+    return 10;
+  }
+
+  public function isEnabled() {
+    return (bool)$this->uri;
+  }
+
+  public function setURI($uri) {
     $this->uri = $uri;
+    return $this;
+  }
+
+  public function setIndex($index) {
     $this->index = $index;
+    return $this;
   }
 
   public function setTimeout($timeout) {
     $this->timeout = $timeout;
     return $this;
+  }
+
+  public function getURI() {
+    return $this->uri;
+  }
+
+  public function getIndex() {
+    return $this->index;
   }
 
   public function getTimeout() {
@@ -99,7 +130,7 @@ final class PhabricatorElasticSearchEngine extends PhabricatorSearchEngine {
       $spec[] = array(
         'simple_query_string' => array(
           'query'  => $query->getParameter('query'),
-          'fields' => array( 'field.corpus' ),
+          'fields' => array('field.corpus'),
         ),
       );
 

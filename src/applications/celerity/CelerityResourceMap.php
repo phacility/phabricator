@@ -43,7 +43,8 @@ final class CelerityResourceMap {
       if (empty($resources_list[$name])) {
         throw new Exception(
           pht(
-            'No resource source exists with name "%s"!', $name));
+            'No resource source exists with name "%s"!',
+            $name));
       }
 
       $instance = new CelerityResourceMap($resources_list[$name]);

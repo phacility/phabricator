@@ -3,7 +3,7 @@
 /**
  * Defines the api for protocol adapters for @{class:PhabricatorBot}
  */
-abstract class PhabricatorBaseProtocolAdapter {
+abstract class PhabricatorProtocolAdapter {
 
   private $config;
 

@@ -3,15 +3,14 @@
 final class PHUIImageMaskExample extends PhabricatorUIExample {
 
   public function getName() {
-    return 'Image Masks';
+    return pht('Image Masks');
   }
 
   public function getDescription() {
-    return 'Display images with crops.';
+    return pht('Display images with crops.');
   }
 
   public function renderExample() {
-
     $image = celerity_get_resource_uri('/rsrc/image/examples/hero.png');
     $display_height = 100;
     $display_width = 200;

@@ -33,14 +33,16 @@ final class CelerityStaticResourceResponse {
   }
 
   /**
-   * Register a behavior for initialization. NOTE: if $config is empty,
-   * a behavior will execute only once even if it is initialized multiple times.
-   * If $config is nonempty, the behavior will be invoked once for each config.
+   * Register a behavior for initialization.
+   *
+   * NOTE: If `$config` is empty, a behavior will execute only once even if it
+   * is initialized multiple times. If `$config` is nonempty, the behavior will
+   * be invoked once for each configuration.
    */
   public function initBehavior(
     $behavior,
     array $config = array(),
-    $source_name) {
+    $source_name = null) {
 
     $this->requireResource('javelin-behavior-'.$behavior, $source_name);
 
@@ -242,10 +244,15 @@ final class CelerityStaticResourceResponse {
   public static function renderInlineScript($data) {
     if (stripos($data, '</script>') !== false) {
       throw new Exception(
-        'Literal </script> is not allowed inside inline script.');
+        pht(
+          'Literal %s is not allowed inside inline script.',
+          '</script>'));
     }
     if (strpos($data, '<!') !== false) {
-      throw new Exception('Literal <! is not allowed inside inline script.');
+      throw new Exception(
+        pht(
+          'Literal %s is not allowed inside inline script.',
+          '<!'));
     }
     // We don't use <![CDATA[ ]]> because it is ignored by HTML parsers. We
     // would need to send the document with XHTML content type.

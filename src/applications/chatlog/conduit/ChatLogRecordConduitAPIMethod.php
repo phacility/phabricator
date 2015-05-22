@@ -11,7 +11,7 @@ final class ChatLogRecordConduitAPIMethod extends ChatLogConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Record chatter.';
+    return pht('Record chatter.');
   }
 
   protected function defineParamTypes() {

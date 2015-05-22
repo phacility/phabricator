@@ -17,6 +17,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   protected $profileImagePHID;
   protected $icon;
   protected $color;
+  protected $mailKey;
 
   protected $viewPolicy;
   protected $editPolicy;
@@ -142,6 +143,7 @@ final class PhabricatorProject extends PhabricatorProjectDAO
         'profileImagePHID' => 'phid?',
         'icon' => 'text32',
         'color' => 'text32',
+        'mailKey' => 'bytes20',
 
         // T6203/NULLABILITY
         // These are definitely wrong and should always exist.
@@ -273,6 +275,10 @@ final class PhabricatorProject extends PhabricatorProjectDAO
   }
 
   public function save() {
+    if (!$this->getMailKey()) {
+      $this->setMailKey(Filesystem::readRandomCharacters(20));
+    }
+
     $this->openTransaction();
       $result = parent::save();
       $this->updateDatasourceTokens();

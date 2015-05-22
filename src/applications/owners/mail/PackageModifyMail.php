@@ -29,7 +29,7 @@ final class PackageModifyMail extends PackageMail {
   }
 
   protected function getVerb() {
-    return 'Modified';
+    return pht('Modified');
   }
 
   protected function isNewThread() {
@@ -80,10 +80,10 @@ final class PackageModifyMail extends PackageMail {
     }
 
     $section = array();
-    $section[] = 'PRIMARY OWNER CHANGE';
-    $section[] = '  Old owner: '.
+    $section[] = pht('PRIMARY OWNER CHANGE');
+    $section[] = '  '.pht('Old owner:').' '.
       $handles[$old_primary_owner_phid]->getName();
-    $section[] = '  New owner: '.
+    $section[] = '  '.pht('New owner:').' '.
       $handles[$primary_owner_phid]->getName();
 
     return implode("\n", $section);
@@ -98,7 +98,7 @@ final class PackageModifyMail extends PackageMail {
     if ($add_owners) {
       $add_owners = array_select_keys($handles, $add_owners);
       $add_owners = mpull($add_owners, 'getName');
-      $section[] = 'ADDED OWNERS';
+      $section[] = pht('ADDED OWNERS');
       $section[] = '  '.implode(', ', $add_owners);
     }
 
@@ -108,7 +108,7 @@ final class PackageModifyMail extends PackageMail {
       }
       $remove_owners = array_select_keys($handles, $remove_owners);
       $remove_owners = mpull($remove_owners, 'getName');
-      $section[] = 'REMOVED OWNERS';
+      $section[] = pht('REMOVED OWNERS');
       $section[] = '  '.implode(', ', $remove_owners);
     }
 
@@ -128,18 +128,18 @@ final class PackageModifyMail extends PackageMail {
     }
 
     $section = array();
-    $section[] = 'AUDITING ENABLED STATUS CHANGE';
-    $section[] = '  Old value: '.
-      ($old_auditing_enabled ? 'Enabled' : 'Disabled');
-    $section[] = '  New value: '.
-      ($auditing_enabled ? 'Enabled' : 'Disabled');
+    $section[] = pht('AUDITING ENABLED STATUS CHANGE');
+    $section[] = '  '.pht('Old value:').' '.
+      ($old_auditing_enabled ? pht('Enabled') : pht('Disabled'));
+    $section[] = '  '.pht('New value:').' '.
+      ($auditing_enabled ? pht('Enabled') : pht('Disabled'));
     return implode("\n", $section);
   }
 
   protected function renderPathsSection() {
     $section = array();
     if ($this->addPaths) {
-      $section[] = 'ADDED PATHS';
+      $section[] = pht('ADDED PATHS');
       foreach ($this->addPaths as $repository_phid => $paths) {
         $section[] = $this->renderRepoSubSection($repository_phid, $paths);
       }
@@ -149,7 +149,7 @@ final class PackageModifyMail extends PackageMail {
       if ($this->addPaths) {
         $section[] = '';
       }
-      $section[] = 'REMOVED PATHS';
+      $section[] = pht('REMOVED PATHS');
       foreach ($this->removePaths as $repository_phid => $paths) {
         $section[] = $this->renderRepoSubSection($repository_phid, $paths);
       }

@@ -8,8 +8,8 @@ final class DiffusionRefsQueryConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return
-      'Query a git repository for ref information at a specific commit.';
+    return pht(
+      'Query a git repository for ref information at a specific commit.');
   }
 
   protected function defineReturnType() {

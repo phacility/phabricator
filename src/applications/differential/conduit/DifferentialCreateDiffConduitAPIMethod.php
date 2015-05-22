@@ -8,11 +8,10 @@ final class DifferentialCreateDiffConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return 'Create a new Differential diff.';
+    return pht('Create a new Differential diff.');
   }
 
   protected function defineParamTypes() {
-
     $vcs_const = $this->formatStringConstants(
       array(
         'svn',
@@ -40,7 +39,7 @@ final class DifferentialCreateDiffConduitAPIMethod
       'sourceControlPath'         => 'required string',
       'sourceControlBaseRevision' => 'required string',
       'creationMethod'            => 'optional string',
-      'arcanistProject'           => 'optional string',
+      'arcanistProject'           => 'deprecated',
       'lintStatus'                => 'required '.$status_const,
       'unitStatus'                => 'required '.$status_const,
       'repositoryPHID'            => 'optional phid',
@@ -82,21 +81,6 @@ final class DifferentialCreateDiffConduitAPIMethod
         $repository_phid = $repository->getPHID();
         $repository_uuid = $repository->getUUID();
       }
-    }
-
-    $project_name = $request->getValue('arcanistProject');
-    $project_phid = null;
-    if ($project_name) {
-      $arcanist_project = id(new PhabricatorRepositoryArcanistProject())
-        ->loadOneWhere(
-          'name = %s',
-          $project_name);
-      if (!$arcanist_project) {
-        $arcanist_project = new PhabricatorRepositoryArcanistProject();
-        $arcanist_project->setName($project_name);
-        $arcanist_project->save();
-      }
-      $project_phid = $arcanist_project->getPHID();
     }
 
     switch ($request->getValue('lintStatus')) {
@@ -156,7 +140,6 @@ final class DifferentialCreateDiffConduitAPIMethod
       'sourceControlPath' => $request->getValue('sourceControlPath'),
       'sourceControlBaseRevision' =>
         $request->getValue('sourceControlBaseRevision'),
-      'arcanistProjectPHID' => $project_phid,
       'lintStatus' => $lint_status,
       'unitStatus' => $unit_status,
     );

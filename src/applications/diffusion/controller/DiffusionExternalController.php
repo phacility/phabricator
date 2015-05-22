@@ -75,9 +75,11 @@ final class DiffusionExternalController extends DiffusionController {
         ->appendChild(phutil_tag(
           'p',
           array(),
-          pht('This external (%s) does not appear in any tracked '.
-          'repository. It may exist in an untracked repository that '.
-          'Diffusion does not know about.', $desc)));
+          pht(
+            'This external (%s) does not appear in any tracked '.
+            'repository. It may exist in an untracked repository that '.
+            'Diffusion does not know about.',
+            $desc)));
     } else if (count($commits) == 1) {
       $commit = head($commits);
       $repo = $repositories[$commit->getRepositoryID()];

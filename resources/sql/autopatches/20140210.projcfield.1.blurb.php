@@ -5,10 +5,9 @@ $table_name = id(new PhabricatorProjectCustomFieldStorage())->getTableName();
 
 $rows = new LiskRawMigrationIterator($conn_w, 'project_profile');
 
-echo "Migrating project descriptions to custom storage...\n";
+echo pht('Migrating project descriptions to custom storage...')."\n";
 foreach ($rows as $row) {
   $phid = $row['projectPHID'];
-  echo "Migrating {$phid}...\n";
 
   $desc = $row['blurb'];
   if (strlen($desc)) {
@@ -23,4 +22,4 @@ foreach ($rows as $row) {
   }
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

@@ -1,6 +1,6 @@
 <?php
 
-echo "Moving Slowvote comments to transactions...\n";
+echo pht('Moving Slowvote comments to transactions...')."\n";
 
 $viewer = PhabricatorUser::getOmnipotentUser();
 
@@ -20,14 +20,14 @@ foreach ($comments as $comment) {
   $date_created = $comment['dateCreated'];
   $date_modified = $comment['dateModified'];
 
-  echo "Migrating comment {$id}.\n";
+  echo pht('Migrating comment %d.', $id)."\n";
 
   $poll = id(new PhabricatorSlowvoteQuery())
     ->setViewer($viewer)
     ->withIDs(array($poll_id))
     ->executeOne();
   if (!$poll) {
-    echo "No poll.\n";
+    echo pht('No poll.')."\n";
     continue;
   }
 
@@ -36,7 +36,7 @@ foreach ($comments as $comment) {
     ->withPHIDs(array($author_phid))
     ->executeOne();
   if (!$user) {
-    echo "No user.\n";
+    echo pht('No user.')."\n";
     continue;
   }
 
@@ -98,4 +98,4 @@ foreach ($comments as $comment) {
 
 $conn_w->saveTransaction();
 
-echo "Done.\n";
+echo pht('Done.')."\n";

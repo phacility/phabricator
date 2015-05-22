@@ -17,17 +17,18 @@ final class PhabricatorSubscriptionsSubscribeEmailCommand
 
   public function getCommandDescription() {
     return pht(
-      'Add one or more subscribers to the object. You can add users '.
-      'by providing their usernames, or add projects by adding their '.
-      'hashtags. For example, use `!subscribe alincoln #ios` to add the '.
-      'user `alincoln` and the project with hashtag `#ios` as subscribers.'.
+      'Add one or more subscribers to the object. You can add users by '.
+      'providing their usernames, or add projects by adding their hashtags. '.
+      'For example, use `%s` to add the user `alincoln` and the project with '.
+      'hashtag `#ios` as subscribers.'.
       "\n\n".
       'Subscribers which are invalid or unrecognized will be ignored. This '.
       'command has no effect if you do not specify any subscribers.'.
       "\n\n".
       'Users who are CC\'d on the email itself are also automatically '.
       'subscribed if Phabricator knows which accounts are linked to their '.
-      'email addresses.');
+      'email addresses.',
+      '!subscribe alincoln #ios');
   }
 
   public function getCommandAliases() {

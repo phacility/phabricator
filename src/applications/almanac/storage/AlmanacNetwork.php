@@ -103,7 +103,7 @@ final class AlmanacNetwork
     PhabricatorDestructionEngine $engine) {
 
     $interfaces = id(new AlmanacInterfaceQuery())
-      ->setViewer(PhabricatorUser::getOmnipotentUser())
+      ->setViewer($engine->getViewer())
       ->withNetworkPHIDs(array($this->getPHID()))
       ->execute();
 

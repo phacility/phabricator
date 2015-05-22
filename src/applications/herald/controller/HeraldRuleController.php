@@ -270,7 +270,7 @@ final class HeraldRuleController extends HeraldController {
     if (!is_array($data) ||
         !$data['conditions'] ||
         !$data['actions']) {
-      throw new Exception('Failed to decode rule data.');
+      throw new Exception(pht('Failed to decode rule data.'));
     }
 
     $conditions = array();

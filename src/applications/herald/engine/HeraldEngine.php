@@ -81,8 +81,9 @@ final class HeraldEngine {
             ->setRuleName($rule->getName())
             ->setRuleOwner($rule->getAuthorPHID())
             ->setReason(
-              'This rule is only supposed to be repeated a single time, '.
-              'and it has already been applied.');
+              pht(
+                'This rule is only supposed to be repeated a single time, '.
+                'and it has already been applied.'));
           $this->transcript->addRuleTranscript($xscript);
           $rule_matches = false;
         } else {
@@ -99,9 +100,11 @@ final class HeraldEngine {
           $xscript->setRuleID($rule_id);
           $xscript->setResult(false);
           $xscript->setReason(
-            "Rules {$names} are recursively dependent upon one another! ".
-            "Don't do this! You have formed an unresolvable cycle in the ".
-            "dependency graph!");
+            pht(
+              "Rules %s are recursively dependent upon one another! ".
+              "Don't do this! You have formed an unresolvable cycle in the ".
+              "dependency graph!",
+              $names));
           $xscript->setRuleName($rules[$rule_id]->getName());
           $xscript->setRuleOwner($rules[$rule_id]->getAuthorPHID());
           $this->transcript->addRuleTranscript($xscript);
@@ -272,13 +275,13 @@ final class HeraldEngine {
         $match = $this->doesConditionMatch($rule, $condition, $object);
 
         if (!$all && $match) {
-          $reason = 'Any condition matched.';
+          $reason = pht('Any condition matched.');
           $result = true;
           break;
         }
 
         if ($all && !$match) {
-          $reason = 'Not all conditions matched.';
+          $reason = pht('Not all conditions matched.');
           $result = false;
           break;
         }
@@ -286,10 +289,10 @@ final class HeraldEngine {
 
       if ($result === null) {
         if ($all) {
-          $reason = 'All conditions matched.';
+          $reason = pht('All conditions matched.');
           $result = true;
         } else {
-          $reason = 'No conditions matched.';
+          $reason = pht('No conditions matched.');
           $result = false;
         }
       }

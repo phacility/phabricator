@@ -159,7 +159,8 @@ final class PhabricatorStandardPageView extends PhabricatorBarePageView {
     if (!$this->getRequest()) {
       throw new Exception(
         pht(
-          'You must set the Request to render a %s.',
+          'You must set the %s to render a %s.',
+          'Request',
           __CLASS__));
     }
 

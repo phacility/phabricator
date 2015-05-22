@@ -62,6 +62,10 @@ final class DiffusionRepositoryEditMainController
     $encoding_properties =
       $this->buildEncodingProperties($repository, $encoding_actions);
 
+    $symbols_actions = $this->buildSymbolsActions($repository);
+    $symbols_properties =
+      $this->buildSymbolsProperties($repository, $symbols_actions);
+
     $hosting_properties = $this->buildHostingProperties(
       $repository,
       $this->buildHostingActions($repository));
@@ -156,6 +160,10 @@ final class DiffusionRepositoryEditMainController
     $boxes[] = id(new PHUIObjectBoxView())
       ->setHeaderText(pht('Text Encoding'))
       ->addPropertyList($encoding_properties);
+
+    $boxes[] = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Symbols'))
+      ->addPropertyList($symbols_properties);
 
     if ($branches_properties) {
       $boxes[] = id(new PHUIObjectBoxView())
@@ -811,8 +819,9 @@ final class DiffusionRepositoryEditMainController
               ->setTarget(
                 pht('Missing Binary %s', phutil_tag('tt', array(), $binary)))
               ->setNote(pht(
-                  'Unable to find this binary in `environment.append-paths`. '.
+                  'Unable to find this binary in `%s`. '.
                   'You need to configure %s and include %s.',
+                  'environment.append-paths',
                   $this->getEnvConfigLink(),
                   $path)));
           }
@@ -1185,6 +1194,53 @@ final class DiffusionRepositoryEditMainController
     }
 
     return $mirror_list;
+  }
+
+  private function buildSymbolsActions(PhabricatorRepository $repository) {
+    $viewer = $this->getRequest()->getUser();
+
+    $view = id(new PhabricatorActionListView())
+      ->setObjectURI($this->getRequest()->getRequestURI())
+      ->setUser($viewer);
+
+    $edit = id(new PhabricatorActionView())
+      ->setIcon('fa-pencil')
+      ->setName(pht('Edit Symbols'))
+      ->setHref(
+        $this->getRepositoryControllerURI($repository, 'edit/symbol/'));
+    $view->addAction($edit);
+
+    return $view;
+  }
+
+  private function buildSymbolsProperties(
+    PhabricatorRepository $repository,
+    PhabricatorActionListView $actions) {
+
+    $viewer = $this->getRequest()->getUser();
+
+    $view = id(new PHUIPropertyListView())
+      ->setUser($viewer)
+      ->setActionList($actions);
+
+    $languages = $repository->getSymbolLanguages();
+
+    if ($languages) {
+      $languages = implode(', ', $languages);
+    } else {
+      $languages = phutil_tag('em', array(), pht('Any'));
+    }
+    $view->addProperty(pht('Languages'), $languages);
+
+    $sources = $repository->getSymbolSources();
+    if ($sources) {
+      $handles = $viewer->loadHandles($sources);
+      $sources = $handles->renderList();
+    } else {
+      $sources = phutil_tag('em', array(), pht('This Repository Only'));
+    }
+    $view->addProperty(pht('Use Symbols From'), $sources);
+    return $view;
   }
 
   private function getEnvConfigLink() {

@@ -9,7 +9,7 @@ final class PhabricatorPHID {
 
   public static function generateNewPHID($type, $subtype = null) {
     if (!$type) {
-      throw new Exception('Can not generate PHID with no type.');
+      throw new Exception(pht('Can not generate PHID with no type.'));
     }
 
     if ($subtype === null) {

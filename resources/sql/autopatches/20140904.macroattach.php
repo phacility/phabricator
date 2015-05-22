@@ -4,7 +4,7 @@ $table = new PhabricatorFileImageMacro();
 foreach (new LiskMigrationIterator($table) as $macro) {
   $name = $macro->getName();
 
-  echo "Linking macro '{$name}'...\n";
+  echo pht("Linking macro '%s'...", $name)."\n";
 
   $editor = new PhabricatorEdgeEditor();
 
@@ -16,11 +16,11 @@ foreach (new LiskMigrationIterator($table) as $macro) {
     foreach ($phids as $phid) {
       $editor->addEdge(
         $macro->getPHID(),
-        PhabricatorObjectHasFileEdgeType::EDGECONST ,
+        PhabricatorObjectHasFileEdgeType::EDGECONST,
         $phid);
     }
     $editor->save();
   }
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

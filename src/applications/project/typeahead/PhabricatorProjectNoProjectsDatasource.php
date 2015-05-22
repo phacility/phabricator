@@ -21,12 +21,11 @@ final class PhabricatorProjectNoProjectsDatasource
         'name' => pht('Not In Any Projects'),
         'summary' => pht('Find results which are not in any projects.'),
         'description' => pht(
-          'This function matches results which are not associated with any '.
-          'projects. It is usually most often used to find objects which '.
-          'might have slipped through the cracks and not been organized '.
-          'properly.'.
-          "\n\n".
-          "> null()"),
+          "This function matches results which are not associated with any ".
+          "projects. It is usually most often used to find objects which ".
+          "might have slipped through the cracks and not been organized ".
+          "properly.\n\n%s",
+          '> null()'),
       ),
     );
   }

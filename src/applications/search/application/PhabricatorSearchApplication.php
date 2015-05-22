@@ -32,7 +32,7 @@ final class PhabricatorSearchApplication extends PhabricatorApplication {
         '(?:query/(?P<queryKey>[^/]+)/)?' => 'PhabricatorSearchController',
         'attach/(?P<phid>[^/]+)/(?P<type>\w+)/(?:(?P<action>\w+)/)?'
           => 'PhabricatorSearchAttachController',
-        'select/(?P<type>\w+)/'
+        'select/(?P<type>\w+)/(?:(?P<action>\w+)/)?'
           => 'PhabricatorSearchSelectController',
         'index/(?P<phid>[^/]+)/' => 'PhabricatorSearchIndexController',
         'hovercard/(?P<mode>retrieve|test)/'

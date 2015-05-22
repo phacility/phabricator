@@ -27,9 +27,7 @@ final class PhabricatorUserEditorTestCase extends PhabricatorTestCase {
     $email = $prefix.'@evil.com@example.com';
 
     try {
-      $this->registerUser(
-        'PhabricatorUserEditorTestCaseInvalid',
-        $email);
+      $this->registerUser('PhabricatorUserEditorTestCaseInvalid', $email);
     } catch (Exception $ex) {
       $caught = $ex;
     }

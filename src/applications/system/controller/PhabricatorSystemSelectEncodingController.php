@@ -15,9 +15,11 @@ final class PhabricatorSystemSelectEncodingController
         ->setTitle(pht('No Encoding Support'))
         ->appendParagraph(
           pht(
-            'This system does not have the "mbstring" extension installed, '.
-            'so character encodings are not supported. Install "mbstring" to '.
-            'enable support.'))
+            'This system does not have the "%s" extension installed, '.
+            'so character encodings are not supported. Install "%s" to '.
+            'enable support.',
+            'mbstring',
+            'mbstring'))
         ->addCancelButton('/');
     }
 

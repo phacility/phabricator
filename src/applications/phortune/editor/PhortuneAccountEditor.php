@@ -49,8 +49,6 @@ final class PhortuneAccountEditor
       case PhortuneAccountTransaction::TYPE_NAME:
         $object->setName($xaction->getNewValue());
         return;
-      case PhabricatorTransactions::TYPE_EDGE:
-        return;
     }
     return parent::applyCustomInternalTransaction($object, $xaction);
   }
@@ -60,8 +58,6 @@ final class PhortuneAccountEditor
     PhabricatorApplicationTransaction $xaction) {
     switch ($xaction->getTransactionType()) {
       case PhortuneAccountTransaction::TYPE_NAME:
-        return;
-      case PhabricatorTransactions::TYPE_EDGE:
         return;
     }
     return parent::applyCustomExternalTransaction($object, $xaction);

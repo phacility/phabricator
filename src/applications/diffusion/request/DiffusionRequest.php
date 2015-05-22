@@ -22,7 +22,6 @@ abstract class DiffusionRequest {
   protected $repository;
   protected $repositoryCommit;
   protected $repositoryCommitData;
-  protected $arcanistProjects;
 
   private $isClusterRequest = false;
   private $initFromConduit = true;
@@ -63,13 +62,22 @@ abstract class DiffusionRequest {
   final public static function newFromDictionary(array $data) {
     if (isset($data['repository']) && isset($data['callsign'])) {
       throw new Exception(
-        "Specify 'repository' or 'callsign', but not both.");
+        pht(
+          "Specify '%s' or '%s', but not both.",
+          'repository',
+          'callsign'));
     } else if (!isset($data['repository']) && !isset($data['callsign'])) {
       throw new Exception(
-        "One of 'repository' and 'callsign' is required.");
+        pht(
+          "One of '%s' and '%s' is required.",
+          'repository',
+          'callsign'));
     } else if (isset($data['callsign']) && empty($data['user'])) {
       throw new Exception(
-        "Parameter 'user' is required if 'callsign' is provided.");
+        pht(
+          "Parameter '%s' is required if '%s' is provided.",
+          'user',
+          'callsign'));
     }
 
     if (isset($data['repository'])) {
@@ -148,7 +156,7 @@ abstract class DiffusionRequest {
       ->executeOne();
 
     if (!$repository) {
-      throw new Exception("No such repository '{$callsign}'.");
+      throw new Exception(pht("No such repository '%s'.", $callsign));
     }
 
     return self::newFromRepository($repository);
@@ -175,7 +183,7 @@ abstract class DiffusionRequest {
     $class = idx($map, $repository->getVersionControlSystem());
 
     if (!$class) {
-      throw new Exception('Unknown version control system!');
+      throw new Exception(pht('Unknown version control system!'));
     }
 
     $object = new $class();
@@ -208,7 +216,9 @@ abstract class DiffusionRequest {
       $user = idx($data, 'user');
       if (!$user) {
         throw new Exception(
-          'You must provide a PhabricatorUser in the dictionary!');
+          pht(
+            'You must provide a %s in the dictionary!',
+            'PhabricatorUser'));
       }
       $this->setUser($user);
     }
@@ -401,16 +411,6 @@ abstract class DiffusionRequest {
     return $this->repositoryCommit;
   }
 
-  public function loadArcanistProjects() {
-    if (empty($this->arcanistProjects)) {
-      $projects = id(new PhabricatorRepositoryArcanistProject())->loadAllWhere(
-        'repositoryID = %d',
-        $this->getRepository()->getID());
-      $this->arcanistProjects = $projects;
-    }
-    return $this->arcanistProjects;
-  }
-
   public function loadCommitData() {
     if (empty($this->repositoryCommitData)) {
       $commit = $this->loadCommit();
@@ -420,7 +420,7 @@ abstract class DiffusionRequest {
       if (!$data) {
         $data = new PhabricatorRepositoryCommitData();
         $data->setCommitMessage(
-          '(This commit has not been fully parsed yet.)');
+          pht('(This commit has not been fully parsed yet.)'));
       }
       $this->repositoryCommitData = $data;
     }
@@ -544,12 +544,16 @@ abstract class DiffusionRequest {
 
     if ($req_callsign && !strlen($callsign)) {
       throw new Exception(
-        "Diffusion URI action '{$action}' requires callsign!");
+        pht(
+          "Diffusion URI action '%s' requires callsign!",
+          $action));
     }
 
     if ($req_commit && !strlen($commit)) {
       throw new Exception(
-        "Diffusion URI action '{$action}' requires commit!");
+        pht(
+          "Diffusion URI action '%s' requires commit!",
+          $action));
     }
 
     switch ($action) {
@@ -587,7 +591,7 @@ abstract class DiffusionRequest {
         $uri = "/r{$callsign}{$commit}";
         break;
       default:
-        throw new Exception("Unknown Diffusion URI action '{$action}'!");
+        throw new Exception(pht("Unknown Diffusion URI action '%s'!", $action));
     }
 
     if ($action == 'rendering-ref') {
@@ -674,7 +678,7 @@ abstract class DiffusionRequest {
       // Prevent any hyjinx since we're ultimately shipping this to the
       // filesystem under a lot of workflows.
       if ($part == '..') {
-        throw new Exception('Invalid path URI.');
+        throw new Exception(pht('Invalid path URI.'));
       }
     }
 
@@ -700,21 +704,27 @@ abstract class DiffusionRequest {
     $host = php_uname('n');
     $callsign = $this->getRepository()->getCallsign();
     throw new DiffusionSetupException(
-      "The clone of this repository ('{$callsign}') on the local machine ".
-      "('{$host}') could not be read. Ensure that the repository is in a ".
-      "location where the web server has read permissions.");
+      pht(
+        "The clone of this repository ('%s') on the local machine ('%s') ".
+        "could not be read. Ensure that the repository is in a ".
+        "location where the web server has read permissions.",
+        $callsign,
+        $host));
   }
 
   protected function raiseCloneException() {
     $host = php_uname('n');
     $callsign = $this->getRepository()->getCallsign();
     throw new DiffusionSetupException(
-      "The working copy for this repository ('{$callsign}') hasn't been ".
-      "cloned yet on this machine ('{$host}'). Make sure you've started the ".
-      "Phabricator daemons. If this problem persists for longer than a clone ".
-      "should take, check the daemon logs (in the Daemon Console) to see if ".
-      "there were errors cloning the repository. Consult the 'Diffusion User ".
-      "Guide' in the documentation for help setting up repositories.");
+      pht(
+        "The working copy for this repository ('%s') hasn't been cloned yet ".
+        "on this machine ('%s'). Make sure you've started the Phabricator ".
+        "daemons. If this problem persists for longer than a clone should ".
+        "take, check the daemon logs (in the Daemon Console) to see if there ".
+        "were errors cloning the repository. Consult the 'Diffusion User ".
+        "Guide' in the documentation for help setting up repositories.",
+        $callsign,
+        $host));
   }
 
   private function queryStableCommit() {

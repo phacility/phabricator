@@ -16,9 +16,6 @@ final class PhameBlog extends PhameDAO
   protected $editPolicy;
   protected $joinPolicy;
 
-  private $bloggerPHIDs = self::ATTACHABLE;
-  private $bloggers = self::ATTACHABLE;
-
   static private $requestBlog;
 
   protected function getConfiguration() {
@@ -57,6 +54,15 @@ final class PhameBlog extends PhameDAO
       PhabricatorPhameBlogPHIDType::TYPECONST);
   }
 
+  public static function initializeNewBlog(PhabricatorUser $actor) {
+    $blog = id(new PhameBlog())
+      ->setCreatorPHID($actor->getPHID())
+      ->setViewPolicy(PhabricatorPolicies::getMostOpenPolicy())
+      ->setEditPolicy(PhabricatorPolicies::POLICY_USER)
+      ->setJoinPolicy(PhabricatorPolicies::POLICY_USER);
+    return $blog;
+  }
+
   public function getSkinRenderer(AphrontRequest $request) {
     $spec = PhameSkinSpecification::loadOneSkinSpecification(
       $this->getSkin());
@@ -68,8 +74,9 @@ final class PhameBlog extends PhameDAO
 
     if (!$spec) {
       throw new Exception(
-        'This blog has an invalid skin, and the default skin failed to '.
-        'load.');
+        pht(
+          'This blog has an invalid skin, and the default skin failed to '.
+          'load.'));
     }
 
     $skin = newv($spec->getSkinClass(), array());
@@ -155,22 +162,6 @@ final class PhameBlog extends PhameDAO
     }
 
     return null;
-  }
-
-  public function getBloggerPHIDs() {
-    return $this->assertAttached($this->bloggerPHIDs);
-  }
-
-  public function attachBloggers(array $bloggers) {
-    assert_instances_of($bloggers, 'PhabricatorObjectHandle');
-
-    $this->bloggers = $bloggers;
-
-    return $this;
-  }
-
-  public function getBloggers() {
-    return $this->assertAttached($this->bloggers);
   }
 
   public function getSkin() {

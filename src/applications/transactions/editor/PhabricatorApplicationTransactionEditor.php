@@ -257,7 +257,10 @@ abstract class PhabricatorApplicationTransactionEditor
       case PhabricatorTransactions::TYPE_EDGE:
         $edge_type = $xaction->getMetadataValue('edge:type');
         if (!$edge_type) {
-          throw new Exception("Edge transaction has no 'edge:type'!");
+          throw new Exception(
+            pht(
+              "Edge transaction has no '%s'!",
+              'edge:type'));
         }
 
         $old_edges = array();
@@ -312,13 +315,13 @@ abstract class PhabricatorApplicationTransactionEditor
   protected function getCustomTransactionOldValue(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
-    throw new Exception('Capability not supported!');
+    throw new Exception(pht('Capability not supported!'));
   }
 
   protected function getCustomTransactionNewValue(
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
-    throw new Exception('Capability not supported!');
+    throw new Exception(pht('Capability not supported!'));
   }
 
   protected function transactionHasEffect(
@@ -385,23 +388,18 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorApplicationTransaction $xaction) {
 
     switch ($xaction->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_BUILDABLE:
-      case PhabricatorTransactions::TYPE_TOKEN:
-        return;
-      case PhabricatorTransactions::TYPE_VIEW_POLICY:
-        $object->setViewPolicy($xaction->getNewValue());
-        break;
-      case PhabricatorTransactions::TYPE_EDIT_POLICY:
-        $object->setEditPolicy($xaction->getNewValue());
-        break;
-      case PhabricatorTransactions::TYPE_JOIN_POLICY:
-        $object->setJoinPolicy($xaction->getNewValue());
-        break;
-
       case PhabricatorTransactions::TYPE_CUSTOMFIELD:
         $field = $this->getCustomFieldForTransaction($object, $xaction);
         return $field->applyApplicationTransactionInternalEffects($xaction);
+      case PhabricatorTransactions::TYPE_BUILDABLE:
+      case PhabricatorTransactions::TYPE_TOKEN:
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+      case PhabricatorTransactions::TYPE_EDIT_POLICY:
+      case PhabricatorTransactions::TYPE_JOIN_POLICY:
+      case PhabricatorTransactions::TYPE_SUBSCRIBERS:
       case PhabricatorTransactions::TYPE_INLINESTATE:
+      case PhabricatorTransactions::TYPE_EDGE:
+      case PhabricatorTransactions::TYPE_COMMENT:
         return $this->applyBuiltinInternalTransaction($object, $xaction);
     }
 
@@ -412,9 +410,6 @@ abstract class PhabricatorApplicationTransactionEditor
     PhabricatorLiskDAO $object,
     PhabricatorApplicationTransaction $xaction) {
     switch ($xaction->getTransactionType()) {
-      case PhabricatorTransactions::TYPE_BUILDABLE:
-      case PhabricatorTransactions::TYPE_TOKEN:
-        return;
       case PhabricatorTransactions::TYPE_SUBSCRIBERS:
         $subeditor = id(new PhabricatorSubscriptionsEditor())
           ->setObject($object)
@@ -440,8 +435,81 @@ abstract class PhabricatorApplicationTransactionEditor
           $xaction->getOldValue(),
           $xaction->getNewValue()));
         $this->subscribers = $subscribers;
+        return $this->applyBuiltinExternalTransaction($object, $xaction);
 
+      case PhabricatorTransactions::TYPE_CUSTOMFIELD:
+        $field = $this->getCustomFieldForTransaction($object, $xaction);
+        return $field->applyApplicationTransactionExternalEffects($xaction);
+      case PhabricatorTransactions::TYPE_EDGE:
+      case PhabricatorTransactions::TYPE_BUILDABLE:
+      case PhabricatorTransactions::TYPE_TOKEN:
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+      case PhabricatorTransactions::TYPE_EDIT_POLICY:
+      case PhabricatorTransactions::TYPE_JOIN_POLICY:
+      case PhabricatorTransactions::TYPE_INLINESTATE:
+      case PhabricatorTransactions::TYPE_COMMENT:
+        return $this->applyBuiltinExternalTransaction($object, $xaction);
+    }
+
+    return $this->applyCustomExternalTransaction($object, $xaction);
+  }
+
+  protected function applyCustomInternalTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+    $type = $xaction->getTransactionType();
+    throw new Exception(
+      pht(
+        "Transaction type '%s' is missing an internal apply implementation!",
+        $type));
+  }
+
+  protected function applyCustomExternalTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+    $type = $xaction->getTransactionType();
+    throw new Exception(
+      pht(
+        "Transaction type '%s' is missing an external apply implementation!",
+        $type));
+  }
+
+  /**
+   * @{class:PhabricatorTransactions} provides many built-in transactions
+   * which should not require much - if any - code in specific applications.
+   *
+   * This method is a hook for the exceedingly-rare cases where you may need
+   * to do **additional** work for built-in transactions. Developers should
+   * extend this method, making sure to return the parent implementation
+   * regardless of handling any transactions.
+   *
+   * See also @{method:applyBuiltinExternalTransaction}.
+   */
+  protected function applyBuiltinInternalTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
+      case PhabricatorTransactions::TYPE_VIEW_POLICY:
+        $object->setViewPolicy($xaction->getNewValue());
         break;
+      case PhabricatorTransactions::TYPE_EDIT_POLICY:
+        $object->setEditPolicy($xaction->getNewValue());
+        break;
+      case PhabricatorTransactions::TYPE_JOIN_POLICY:
+        $object->setJoinPolicy($xaction->getNewValue());
+        break;
+    }
+  }
+
+  /**
+   * See @{method::applyBuiltinInternalTransaction}.
+   */
+  protected function applyBuiltinExternalTransaction(
+    PhabricatorLiskDAO $object,
+    PhabricatorApplicationTransaction $xaction) {
+
+    switch ($xaction->getTransactionType()) {
       case PhabricatorTransactions::TYPE_EDGE:
         if ($this->getIsInverseEdgeEditor()) {
           // If we're writing an inverse edge transaction, don't actually
@@ -494,49 +562,7 @@ abstract class PhabricatorApplicationTransactionEditor
 
         $editor->save();
         break;
-      case PhabricatorTransactions::TYPE_CUSTOMFIELD:
-        $field = $this->getCustomFieldForTransaction($object, $xaction);
-        return $field->applyApplicationTransactionExternalEffects($xaction);
-      case PhabricatorTransactions::TYPE_INLINESTATE:
-        return $this->applyBuiltinExternalTransaction($object, $xaction);
     }
-
-    return $this->applyCustomExternalTransaction($object, $xaction);
-  }
-
-  protected function applyCustomInternalTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-    $type = $xaction->getTransactionType();
-    throw new Exception(
-      "Transaction type '{$type}' is missing an internal apply ".
-      "implementation!");
-  }
-
-  protected function applyCustomExternalTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-    $type = $xaction->getTransactionType();
-    throw new Exception(
-      "Transaction type '{$type}' is missing an external apply ".
-      "implementation!");
-  }
-
-  // TODO: Write proper documentation for these hooks. These are like the
-  // "applyCustom" hooks, except that implementation is optional, so you do
-  // not need to handle all of the builtin transaction types. See T6403. These
-  // are not completely implemented.
-
-  protected function applyBuiltinInternalTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-    return;
-  }
-
-  protected function applyBuiltinExternalTransaction(
-    PhabricatorLiskDAO $object,
-    PhabricatorApplicationTransaction $xaction) {
-    return;
   }
 
   /**
@@ -840,6 +866,8 @@ abstract class PhabricatorApplicationTransactionEditor
     // subscribers to pick up changes caused by Herald (or by other side effects
     // in various transaction phases).
     $this->loadSubscribers($object);
+    // Hook for other edges that may need (re-)loading
+    $this->loadEdges($object, $xactions);
 
     $this->loadHandles($xactions);
 
@@ -965,6 +993,12 @@ abstract class PhabricatorApplicationTransactionEditor
     }
   }
 
+  protected function loadEdges(
+    PhabricatorLiskDAO $object,
+    array $xactions) {
+    return;
+  }
+
   private function validateEditParameters(
     PhabricatorLiskDAO $object,
     array $xactions) {
@@ -984,27 +1018,28 @@ abstract class PhabricatorApplicationTransactionEditor
       if ($xaction->getPHID() || $xaction->getID()) {
         throw new PhabricatorApplicationTransactionStructureException(
           $xaction,
-          pht(
-            'You can not apply transactions which already have IDs/PHIDs!'));
+          pht('You can not apply transactions which already have IDs/PHIDs!'));
       }
       if ($xaction->getObjectPHID()) {
         throw new PhabricatorApplicationTransactionStructureException(
           $xaction,
           pht(
-            'You can not apply transactions which already have objectPHIDs!'));
+            'You can not apply transactions which already have %s!',
+            'objectPHIDs'));
       }
       if ($xaction->getAuthorPHID()) {
         throw new PhabricatorApplicationTransactionStructureException(
           $xaction,
           pht(
-            'You can not apply transactions which already have authorPHIDs!'));
+            'You can not apply transactions which already have %s!',
+            'authorPHIDs'));
       }
       if ($xaction->getCommentPHID()) {
         throw new PhabricatorApplicationTransactionStructureException(
           $xaction,
           pht(
-            'You can not apply transactions which already have '.
-            'commentPHIDs!'));
+            'You can not apply transactions which already have %s!',
+            'commentPHIDs'));
       }
       if ($xaction->getCommentVersion() !== 0) {
         throw new PhabricatorApplicationTransactionStructureException(
@@ -1021,16 +1056,17 @@ abstract class PhabricatorApplicationTransactionEditor
         throw new PhabricatorApplicationTransactionStructureException(
           $xaction,
           pht(
-            'This transaction is supposed to have an oldValue set, but '.
-            'it does not!'));
+            'This transaction is supposed to have an %s set, but it does not!',
+            'oldValue'));
       }
 
       if ($has_value && !$expect_value) {
         throw new PhabricatorApplicationTransactionStructureException(
           $xaction,
           pht(
-            'This transaction should generate its oldValue automatically, '.
-            'but has already had one set!'));
+            'This transaction should generate its %s automatically, '.
+            'but has already had one set!',
+            'oldValue'));
       }
 
       $type = $xaction->getTransactionType();
@@ -1468,8 +1504,13 @@ abstract class PhabricatorApplicationTransactionEditor
 
     if ($new) {
       throw new Exception(
-        "Invalid 'new' value for PHID transaction. Value should contain only ".
-        "keys '+' (add PHIDs), '-' (remove PHIDs) and '=' (set PHIDS).");
+        pht(
+          "Invalid '%s' value for PHID transaction. Value should contain only ".
+          "keys '%s' (add PHIDs), '%' (remove PHIDs) and '%s' (set PHIDS).",
+          'new',
+          '+',
+          '-',
+          '='));
     }
 
     $result = array();
@@ -1511,8 +1552,13 @@ abstract class PhabricatorApplicationTransactionEditor
 
     if ($new) {
       throw new Exception(
-        "Invalid 'new' value for Edge transaction. Value should contain only ".
-        "keys '+' (add edges), '-' (remove edges) and '=' (set edges).");
+        pht(
+          "Invalid '%s' value for Edge transaction. Value should contain only ".
+          "keys '%s' (add edges), '%s' (remove edges) and '%s' (set edges).",
+          'new',
+          '+',
+          '-',
+          '='));
     }
 
     $old = $xaction->getOldValue();
@@ -1563,13 +1609,17 @@ abstract class PhabricatorApplicationTransactionEditor
     foreach ($list as $key => $item) {
       if (phid_get_type($key) === PhabricatorPHIDConstants::PHID_TYPE_UNKNOWN) {
         throw new Exception(
-          "Edge transactions must have destination PHIDs as in edge ".
-          "lists (found key '{$key}').");
+          pht(
+            "Edge transactions must have destination PHIDs as in edge ".
+            "lists (found key '%s').",
+            $key));
       }
       if (!is_array($item) && $item !== $key) {
         throw new Exception(
-          "Edge transactions must have PHIDs or edge specs as values ".
-          "(found value '{$item}').");
+          pht(
+            "Edge transactions must have PHIDs or edge specs as values ".
+            "(found value '%s').",
+            $item));
       }
     }
   }
@@ -1602,8 +1652,7 @@ abstract class PhabricatorApplicationTransactionEditor
           default:
             throw new Exception(
               pht(
-                'Transaction edge specification contains unexpected key '.
-                '"%s".',
+                'Transaction edge specification contains unexpected key "%s".',
                 $key));
         }
       }
@@ -1618,9 +1667,12 @@ abstract class PhabricatorApplicationTransactionEditor
       if ($edge['type'] != $edge_type) {
         $this_type = $edge['type'];
         throw new Exception(
-          "Edge transaction includes edge of type '{$this_type}', but ".
-          "transaction is of type '{$edge_type}'. Each edge transaction must ".
-          "alter edges of only one type.");
+          pht(
+            "Edge transaction includes edge of type '%s', but ".
+            "transaction is of type '%s'. Each edge transaction ".
+            "must alter edges of only one type.",
+            $this_type,
+            $edge_type));
       }
     }
 
@@ -1812,11 +1864,12 @@ abstract class PhabricatorApplicationTransactionEditor
           $errors[] = new PhabricatorApplicationTransactionValidationError(
             $transaction_type,
             pht('Invalid'),
-            pht('The selected %s policy excludes you. Choose a %s policy '.
-                'which allows you to %s the object.',
-            $capability,
-            $capability,
-            $capability));
+            pht(
+              'The selected %s policy excludes you. Choose a %s policy '.
+              'which allows you to %s the object.',
+              $capability,
+              $capability,
+              $capability));
         }
       }
     }
@@ -2119,14 +2172,14 @@ abstract class PhabricatorApplicationTransactionEditor
    * @task mail
    */
   protected function buildReplyHandler(PhabricatorLiskDAO $object) {
-    throw new Exception('Capability not supported.');
+    throw new Exception(pht('Capability not supported.'));
   }
 
   /**
    * @task mail
    */
   protected function getMailSubjectPrefix() {
-    throw new Exception('Capability not supported.');
+    throw new Exception(pht('Capability not supported.'));
   }
 
 
@@ -2168,7 +2221,7 @@ abstract class PhabricatorApplicationTransactionEditor
    * @task mail
    */
   protected function buildMailTemplate(PhabricatorLiskDAO $object) {
-    throw new Exception('Capability not supported.');
+    throw new Exception(pht('Capability not supported.'));
   }
 
 
@@ -2176,7 +2229,7 @@ abstract class PhabricatorApplicationTransactionEditor
    * @task mail
    */
   protected function getMailTo(PhabricatorLiskDAO $object) {
-    throw new Exception('Capability not supported.');
+    throw new Exception(pht('Capability not supported.'));
   }
 
 
@@ -2233,7 +2286,7 @@ abstract class PhabricatorApplicationTransactionEditor
     }
 
     if (!$has_support) {
-      throw new Exception('Capability not supported.');
+      throw new Exception(pht('Capability not supported.'));
     }
 
     return array_mergev($phids);
@@ -2455,7 +2508,7 @@ abstract class PhabricatorApplicationTransactionEditor
   protected function buildHeraldAdapter(
     PhabricatorLiskDAO $object,
     array $xactions) {
-    throw new Exception('No herald adapter specified.');
+    throw new Exception(pht('No herald adapter specified.'));
   }
 
   private function setHeraldAdapter(HeraldAdapter $adapter) {
@@ -2517,7 +2570,9 @@ abstract class PhabricatorApplicationTransactionEditor
     $field_key = $xaction->getMetadataValue('customfield:key');
     if (!$field_key) {
       throw new Exception(
-        "Custom field transaction has no 'customfield:key'!");
+        pht(
+        "Custom field transaction has no '%s'!",
+        'customfield:key'));
     }
 
     $field = PhabricatorCustomField::getObjectField(
@@ -2527,14 +2582,20 @@ abstract class PhabricatorApplicationTransactionEditor
 
     if (!$field) {
       throw new Exception(
-        "Custom field transaction has invalid 'customfield:key'; field ".
-        "'{$field_key}' is disabled or does not exist.");
+        pht(
+          "Custom field transaction has invalid '%s'; field '%s' ".
+          "is disabled or does not exist.",
+          'customfield:key',
+          $field_key));
     }
 
     if (!$field->shouldAppearInApplicationTransactions()) {
       throw new Exception(
-        "Custom field transaction '{$field_key}' does not implement ".
-        "integration for ApplicationTransactions.");
+        pht(
+          "Custom field transaction '%s' does not implement ".
+          "integration for %s.",
+          $field_key,
+          'ApplicationTransactions'));
     }
 
     $field->setViewer($this->getActor());

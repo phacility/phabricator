@@ -168,6 +168,4 @@ final class DiffusionHistoryController extends DiffusionController {
     return $view;
   }
 
-
-
 }

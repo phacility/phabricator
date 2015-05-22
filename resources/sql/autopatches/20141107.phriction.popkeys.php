@@ -3,7 +3,7 @@
 $table = new PhrictionDocument();
 $conn_w = $table->establishConnection('w');
 
-echo "Populating Phriction mailkeys.\n";
+echo pht('Populating Phriction mailkeys.')."\n";
 
 foreach (new LiskMigrationIterator($table) as $doc) {
   $id = $doc->getID();
@@ -12,10 +12,10 @@ foreach (new LiskMigrationIterator($table) as $doc) {
   if ((strlen($key) == 20) && (strpos($key, "\0") === false)) {
     // To be valid, keys must have length 20 and not contain any null bytes.
     // See T6487.
-    echo "Document has valid mailkey.\n";
+    echo pht('Document has valid mailkey.')."\n";
     continue;
   } else {
-    echo "Populating mailkey for document {$id}...\n";
+    echo pht('Populating mailkey for document %d...', $id)."\n";
     $mail_key = Filesystem::readRandomCharacters(20);
     queryfx(
       $conn_w,
@@ -26,4 +26,4 @@ foreach (new LiskMigrationIterator($table) as $doc) {
   }
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

@@ -12,7 +12,7 @@ final class ReleephWorkGetBranchConduitAPIMethod
   }
 
   public function getMethodDescription() {
-    return 'Return information to help checkout / cut a Releeph branch.';
+    return pht('Return information to help checkout / cut a Releeph branch.');
   }
 
   protected function defineParamTypes() {

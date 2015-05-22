@@ -21,10 +21,25 @@ JX.behavior('differential-feedback-preview', function(config) {
 
   var callback = function(r) {
     var preview = JX.$(config.preview);
-    JX.DOM.setContent(preview, JX.$H(r));
-    JX.Stratcom.invoke('differential-preview-update', null, {
-      container: preview
-    });
+    var data = getdata();
+    var hide = true;
+    for (var field in data) {
+      if (field == 'action') {
+        continue;
+      }
+      if (data[field]) {
+        hide = false;
+      }
+    }
+    if (hide) {
+      JX.DOM.hide(preview);
+    } else {
+      JX.DOM.setContent(preview, JX.$H(r));
+      JX.Stratcom.invoke('differential-preview-update', null, {
+        container: preview
+      });
+      JX.DOM.show(preview);
+    }
   };
 
   var getdata = function() {

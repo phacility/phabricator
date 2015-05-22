@@ -10,7 +10,7 @@ final class PhabricatorTokenCountQuery
     return $this;
   }
 
-  final public function execute() {
+  public function execute() {
     $table = new PhabricatorTokenCount();
     $conn_r = $table->establishConnection('r');
 

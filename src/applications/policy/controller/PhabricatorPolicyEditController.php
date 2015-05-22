@@ -63,12 +63,12 @@ final class PhabricatorPolicyEditController
           case 'deny':
             break;
           default:
-            throw new Exception("Invalid action '{$action}'!");
+            throw new Exception(pht("Invalid action '%s'!", $action));
         }
 
         $rule_class = idx($rule, 'rule');
         if (empty($rules[$rule_class])) {
-          throw new Exception("Invalid rule class '{$rule_class}'!");
+          throw new Exception(pht("Invalid rule class '%s'!", $rule_class));
         }
 
         $rule_obj = $rules[$rule_class];
@@ -163,8 +163,7 @@ final class PhabricatorPolicyEditController
                 'mustcapture' => true,
               ),
               pht('New Rule')))
-          ->setDescription(
-            pht('These rules are processed in order.'))
+          ->setDescription(pht('These rules are processed in order.'))
           ->setContent(javelin_tag(
             'table',
             array(

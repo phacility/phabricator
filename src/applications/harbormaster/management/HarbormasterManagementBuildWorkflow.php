@@ -11,9 +11,9 @@ final class HarbormasterManagementBuildWorkflow
       ->setArguments(
         array(
           array(
-            'name' => 'plan',
-            'param' => 'id',
-            'help' => pht('ID of build plan to run.'),
+            'name'        => 'plan',
+            'param'       => 'id',
+            'help'        => pht('ID of build plan to run.'),
           ),
           array(
             'name'        => 'buildable',
@@ -50,7 +50,9 @@ final class HarbormasterManagementBuildWorkflow
     $plan_id = $args->getArg('plan');
     if (!$plan_id) {
       throw new PhutilArgumentUsageException(
-        pht('Use --plan to specify a build plan to run.'));
+        pht(
+          'Use %s to specify a build plan to run.',
+          '--plan'));
     }
 
     $plan = id(new HarbormasterBuildPlanQuery())

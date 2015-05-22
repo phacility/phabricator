@@ -29,12 +29,12 @@ final class ManiphestPriorityEmailCommand
     $table = implode("\n", $table);
 
     return pht(
-      'To change the priority of a task, specify the desired priority, like '.
-      '`!priority high`. This table shows the configured names for priority '.
-      'levels.'.
+      "To change the priority of a task, specify the desired priority, like ".
+      "`%s`. This table shows the configured names for priority levels.".
       "\n\n%s\n\n".
-      'If you specify an invalid priority, the command is ignored. This '.
-      'command has no effect if you do not specify a priority.',
+      "If you specify an invalid priority, the command is ignored. This ".
+      "command has no effect if you do not specify a priority.",
+      '!priority high',
       $table);
   }
 

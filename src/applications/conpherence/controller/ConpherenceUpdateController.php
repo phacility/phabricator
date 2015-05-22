@@ -208,7 +208,7 @@ final class ConpherenceUpdateController
           $response_mode = 'ajax';
           break;
         default:
-          throw new Exception('Unknown action: '.$action);
+          throw new Exception(pht('Unknown action: %s', $action));
           break;
       }
 
@@ -528,14 +528,14 @@ final class ConpherenceUpdateController
             ->setUser($this->getRequest()->getUser())
             ->setConpherence($conpherence)
             ->setUpdateURI($widget_uri);
-          $file_widget = $file_widget->render();
+          $file_widget = hsprintf('%s', $file_widget->render());
           break;
         case ConpherenceUpdateActions::ADD_PERSON:
           $people_widget = id(new ConpherencePeopleWidgetView())
             ->setUser($user)
             ->setConpherence($conpherence)
             ->setUpdateURI($widget_uri);
-          $people_widget = $people_widget->render();
+          $people_widget = hsprintf('%s', $people_widget->render());
           break;
         case ConpherenceUpdateActions::REMOVE_PERSON:
         case ConpherenceUpdateActions::NOTIFICATIONS:
@@ -550,7 +550,7 @@ final class ConpherenceUpdateController
     $content = array(
       'non_update' => $non_update,
       'transactions' => hsprintf('%s', $rendered_transactions),
-      'conpherence_title' => (string) $data['title'],
+      'conpherence_title' => (string)$data['title'],
       'latest_transaction_id' => $new_latest_transaction_id,
       'nav_item' => $nav_item,
       'conpherence_phid' => $conpherence->getPHID(),

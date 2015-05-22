@@ -264,6 +264,12 @@ final class PhabricatorCalendarEventViewController
 
     $properties->invokeWillRenderEvent();
 
+    $icon_display = PhabricatorCalendarIcon::renderIconForChooser(
+      $event->getIcon());
+    $properties->addProperty(
+      pht('Icon'),
+      $icon_display);
+
     $properties->addSectionHeader(
       pht('Description'),
       PHUIPropertyListView::ICON_SUMMARY);

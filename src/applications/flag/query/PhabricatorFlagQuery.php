@@ -115,7 +115,8 @@ final class PhabricatorFlagQuery
       case self::GROUP_NONE:
         break;
       default:
-        throw new Exception("Unknown groupBy parameter: $this->groupBy");
+        throw new Exception(
+          pht('Unknown groupBy parameter: %s', $this->groupBy));
         break;
     }
 

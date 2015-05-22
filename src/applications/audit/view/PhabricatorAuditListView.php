@@ -59,7 +59,7 @@ final class PhabricatorAuditListView extends AphrontView {
   private function getHandle($phid) {
     $handle = idx($this->handles, $phid);
     if (!$handle) {
-      throw new Exception("No handle for '{$phid}'!");
+      throw new Exception(pht("No handle for '%s'!", $phid));
     }
     return $handle;
   }
@@ -98,7 +98,11 @@ final class PhabricatorAuditListView extends AphrontView {
   public function buildList() {
     $user = $this->getUser();
     if (!$user) {
-      throw new Exception('you must setUser() before buildList()!');
+      throw new Exception(
+        pht(
+          'You must %s before %s!',
+          'setUser()',
+          __FUNCTION__.'()'));
     }
     $rowc = array();
 
@@ -142,7 +146,12 @@ final class PhabricatorAuditListView extends AphrontView {
         $status_text = null;
         $status_color = null;
       }
-      $author_name = $commit->getCommitData()->getAuthorName();
+      $author_phid = $commit->getAuthorPHID();
+      if ($author_phid) {
+        $author_name = $this->getHandle($author_phid)->renderLink();
+      } else {
+        $author_name = $commit->getCommitData()->getAuthorName();
+      }
 
       $item = id(new PHUIObjectItemView())
         ->setObjectName($commit_name)

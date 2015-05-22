@@ -251,8 +251,7 @@ final class PonderQuestion extends PonderDAO
 
 
   public function describeAutomaticCapability($capability) {
-    return pht(
-      'The user who asked a question can always view and edit it.');
+    return pht('The user who asked a question can always view and edit it.');
   }
 
 

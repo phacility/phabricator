@@ -3,11 +3,13 @@
 final class PhabricatorTooltipUIExample extends PhabricatorUIExample {
 
   public function getName() {
-    return 'Tooltips';
+    return pht('Tooltips');
   }
 
   public function getDescription() {
-    return hsprintf('Use <tt>JX.Tooltip</tt> to create tooltips.');
+    return pht(
+      'Use %s to create tooltips.',
+      phutil_tag('tt', array(), 'JX.Tooltip'));
   }
 
   public function renderExample() {

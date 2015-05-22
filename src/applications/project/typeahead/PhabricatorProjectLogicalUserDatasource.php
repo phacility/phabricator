@@ -28,13 +28,12 @@ final class PhabricatorProjectLogicalUserDatasource
         'arguments' => pht('username'),
         'summary' => pht("Find results in any of a user's projects."),
         'description' => pht(
-          'This function allows you to find results associated with any '.
-          'of the projects a specified user is a member of. For example, '.
-          'this will find results associated with all of the projects '.
-          '`alincoln` is a member of:'.
-          "\n\n".
-          '> projects(alincoln)'.
-          "\n\n"),
+          "This function allows you to find results associated with any ".
+          "of the projects a specified user is a member of. For example, ".
+          "this will find results associated with all of the projects ".
+          "`%s` is a member of:\n\n%s\n\n",
+          'alincoln',
+          '> projects(alincoln)'),
       ),
     );
   }

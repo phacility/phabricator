@@ -5,7 +5,7 @@ final class PonderQuestionReplyHandler
 
   public function validateMailReceiver($mail_receiver) {
     if (!($mail_receiver instanceof PonderQuestion)) {
-      throw new Exception('Mail receiver is not a PonderQuestion!');
+      throw new Exception(pht('Mail receiver is not a %s!', 'PonderQuestion'));
     }
   }
 

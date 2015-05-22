@@ -20,7 +20,8 @@ final class FileCreateMailReceiver extends PhabricatorMailReceiver {
     if (empty($attachment_phids)) {
       throw new PhabricatorMetaMTAReceivedMailProcessingException(
         MetaMTAReceivedMailStatus::STATUS_UNHANDLED_EXCEPTION,
-        'Ignoring email to create files that did not include attachments.');
+        pht(
+          'Ignoring email to create files that did not include attachments.'));
     }
     $first_phid = head($attachment_phids);
     $mail->setRelatedPHID($first_phid);

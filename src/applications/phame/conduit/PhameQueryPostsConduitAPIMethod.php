@@ -7,7 +7,7 @@ final class PhameQueryPostsConduitAPIMethod extends PhameConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Query phame posts.';
+    return pht('Query phame posts.');
   }
 
   public function getMethodStatus() {

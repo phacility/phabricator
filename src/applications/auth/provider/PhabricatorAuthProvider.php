@@ -195,7 +195,7 @@ abstract class PhabricatorAuthProvider {
 
   protected function loadOrCreateAccount($account_id) {
     if (!strlen($account_id)) {
-      throw new Exception('loadOrCreateAccount(...): empty account ID!');
+      throw new Exception(pht('Empty account ID!'));
     }
 
     $adapter = $this->getAdapter();
@@ -203,14 +203,18 @@ abstract class PhabricatorAuthProvider {
 
     if (!strlen($adapter->getAdapterType())) {
       throw new Exception(
-        "AuthAdapter (of class '{$adapter_class}') has an invalid ".
-        "implementation: no adapter type.");
+        pht(
+          "AuthAdapter (of class '%s') has an invalid implementation: ".
+          "no adapter type.",
+          $adapter_class));
     }
 
     if (!strlen($adapter->getAdapterDomain())) {
       throw new Exception(
-        "AuthAdapter (of class '{$adapter_class}') has an invalid ".
-        "implementation: no adapter domain.");
+        pht(
+          "AuthAdapter (of class '%s') has an invalid implementation: ".
+          "no adapter domain.",
+          $adapter_class));
     }
 
     $account = id(new PhabricatorExternalAccount())->loadOneWhere(

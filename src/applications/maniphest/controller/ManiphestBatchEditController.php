@@ -213,7 +213,7 @@ final class ManiphestBatchEditController extends ManiphestController {
     $xactions = array();
     foreach ($actions as $action) {
       if (empty($type_map[$action['action']])) {
-        throw new Exception("Unknown batch edit action '{$action}'!");
+        throw new Exception(pht("Unknown batch edit action '%s'!", $action));
       }
 
       $type = $type_map[$action['action']];

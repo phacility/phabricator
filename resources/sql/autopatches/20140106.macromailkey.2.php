@@ -1,6 +1,6 @@
 <?php
 
-echo "Adding mailkeys to macros.\n";
+echo pht('Adding mailkeys to macros.')."\n";
 
 $table = new PhabricatorFileImageMacro();
 $conn_w = $table->establishConnection('w');
@@ -8,7 +8,7 @@ $iterator = new LiskMigrationIterator($table);
 foreach ($iterator as $macro) {
   $id = $macro->getID();
 
-  echo "Populating macro {$id}...\n";
+  echo pht('Populating macro %d...', $id)."\n";
 
   if (!$macro->getMailKey()) {
     queryfx(
@@ -20,4 +20,4 @@ foreach ($iterator as $macro) {
   }
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

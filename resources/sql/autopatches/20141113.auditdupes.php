@@ -3,7 +3,7 @@
 $table = new PhabricatorRepositoryAuditRequest();
 $conn_w = $table->establishConnection('w');
 
-echo "Removing duplicate Audit requests...\n";
+echo pht('Removing duplicate Audit requests...')."\n";
 $seen_audit_map = array();
 foreach (new LiskMigrationIterator($table) as $request) {
   $commit_phid = $request->getCommitPHID();
@@ -19,4 +19,4 @@ foreach (new LiskMigrationIterator($table) as $request) {
   $seen_audit_map[$commit_phid][$auditor_phid] = 1;
 }
 
-echo "Done.\n";
+echo pht('Done.')."\n";

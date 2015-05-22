@@ -87,8 +87,8 @@ final class PhabricatorUserLog extends PhabricatorUserDAO
 
   public static function initializeNewLog(
     PhabricatorUser $actor = null,
-    $object_phid,
-    $action) {
+    $object_phid = null,
+    $action = null) {
 
     $log = new PhabricatorUserLog();
 

@@ -200,7 +200,7 @@ final class PhortuneCartCheckoutController
       $provider_form = new PHUIFormLayoutView();
       $provider_form->appendChild(
         id(new AphrontFormMarkupControl())
-          ->setLabel('Pay With')
+          ->setLabel(pht('Pay With'))
           ->setValue($one_time_options));
     }
 

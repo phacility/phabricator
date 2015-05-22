@@ -76,7 +76,10 @@ final class PhabricatorGitGraphStream
       }
     }
 
-    throw new Exception("No such commit '{$commit}' in repository!");
+    throw new Exception(
+      pht(
+        "No such commit '%s' in repository!",
+        $commit));
   }
 
   private function isParsed($commit) {

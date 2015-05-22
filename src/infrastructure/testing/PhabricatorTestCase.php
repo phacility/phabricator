@@ -1,6 +1,6 @@
 <?php
 
-abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
+abstract class PhabricatorTestCase extends PhutilTestCase {
 
   const NAMESPACE_PREFIX = 'phabricator_unittest_';
 
@@ -138,8 +138,10 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
       unset($this->env);
     } catch (Exception $ex) {
       throw new Exception(
-        'Some test called PhabricatorEnv::beginScopedEnv(), but is still '.
-        'holding a reference to the scoped environment!');
+        pht(
+          'Some test called %s, but is still holding '.
+          'a reference to the scoped environment!',
+          'PhabricatorEnv::beginScopedEnv()'));
     }
   }
 
@@ -164,14 +166,6 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
     $name = self::NAMESPACE_PREFIX.$bytes;
 
     return new PhabricatorStorageFixtureScopeGuard($name);
-  }
-
-  protected function getLink($method) {
-    $phabricator_project = 'PHID-APRJ-3f1fc779edeab89b2171';
-    return
-      'https://secure.phabricator.com/diffusion/symbol/'.$method.
-      '/?lang=php&projects='.$phabricator_project.
-      '&jump=true&context='.get_class($this);
   }
 
   /**
@@ -216,8 +210,9 @@ abstract class PhabricatorTestCase extends ArcanistPhutilTestCase {
   public static function assertExecutingUnitTests() {
     if (!self::$testsAreRunning) {
       throw new Exception(
-        'Executing test code outside of test execution! This code path can '.
-        'only be run during unit tests.');
+        pht(
+          'Executing test code outside of test execution! This code path can '.
+          'only be run during unit tests.'));
     }
   }
 

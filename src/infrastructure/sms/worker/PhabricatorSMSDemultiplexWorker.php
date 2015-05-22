@@ -1,7 +1,6 @@
 <?php
 
-final class PhabricatorSMSDemultiplexWorker
-  extends PhabricatorSMSWorker {
+final class PhabricatorSMSDemultiplexWorker extends PhabricatorSMSWorker {
 
   protected function doWork() {
     $viewer = PhabricatorUser::getOmnipotentUser();

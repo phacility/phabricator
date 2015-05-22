@@ -175,8 +175,7 @@ final class PhortuneCartCancelController
 
     if ($is_refund) {
       $title = pht('Refund Order?');
-      $body = pht(
-        'Really refund this order?');
+      $body = pht('Really refund this order?');
       $button = pht('Refund Order');
       $cancel_text = pht('Cancel');
 
@@ -193,8 +192,7 @@ final class PhortuneCartCancelController
 
     } else {
       $title = pht('Cancel Order?');
-      $body = pht(
-        'Really cancel this order? Any payment will be refunded.');
+      $body = pht('Really cancel this order? Any payment will be refunded.');
       $button = pht('Cancel Order');
 
       // Don't give the user a "Cancel" button in response to a "Cancel?"

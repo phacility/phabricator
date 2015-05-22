@@ -1,6 +1,6 @@
 <?php
 
-echo 'Giving countdowns PHIDs';
+echo pht('Giving countdowns PHIDs');
 $table = new PhabricatorCountdown();
 $table->openTransaction();
 
@@ -20,4 +20,4 @@ foreach (new LiskMigrationIterator($table) as $countdown) {
 }
 
 $table->saveTransaction();
-echo "\nDone.\n";
+echo "\n".pht('Done.')."\n";

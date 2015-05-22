@@ -11,7 +11,7 @@ final class ReleephWorkCanPushConduitAPIMethod extends ReleephConduitAPIMethod {
   }
 
   public function getMethodDescription() {
-    return 'Return whether the conduit user is allowed to push.';
+    return pht('Return whether the conduit user is allowed to push.');
   }
 
   protected function defineParamTypes() {

@@ -16,8 +16,8 @@ final class PhabricatorOAuthServerAuthorizationsSettingsPanel
   }
 
   public function isEnabled() {
-    $app_name = 'PhabricatorOAuthServerApplication';
-    return PhabricatorApplication::isClassInstalled($app_name);
+    return PhabricatorApplication::isClassInstalled(
+      'PhabricatorOAuthServerApplication');
   }
 
   public function processRequest(AphrontRequest $request) {
@@ -108,8 +108,7 @@ final class PhabricatorOAuthServerAuthorizationsSettingsPanel
 
     $table = new AphrontTableView($rows);
     $table->setNoDataString(
-      pht(
-        "You haven't authorized any OAuth applications."));
+      pht("You haven't authorized any OAuth applications."));
 
     $table->setRowClasses($rowc);
     $table->setHeaders(

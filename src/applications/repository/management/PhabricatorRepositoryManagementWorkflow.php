@@ -19,7 +19,7 @@ abstract class PhabricatorRepositoryManagementWorkflow
     foreach ($callsigns as $callsign) {
       if (empty($repos[$callsign])) {
         throw new PhutilArgumentUsageException(
-          "No repository with callsign '{$callsign}' exists!");
+          pht("No repository with callsign '%s' exists!", $callsign));
       }
     }
 

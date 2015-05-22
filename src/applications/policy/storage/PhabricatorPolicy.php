@@ -56,17 +56,21 @@ final class PhabricatorPolicy
 
     if (!$handle) {
       throw new Exception(
-        "Policy identifier is an object PHID ('{$policy_identifier}'), but no ".
-        "object handle was provided. A handle must be provided for object ".
-        "policies.");
+        pht(
+          "Policy identifier is an object PHID ('%s'), but no object handle ".
+          "was provided. A handle must be provided for object policies.",
+          $policy_identifier));
     }
 
     $handle_phid = $handle->getPHID();
     if ($policy_identifier != $handle_phid) {
       throw new Exception(
-        "Policy identifier is an object PHID ('{$policy_identifier}'), but ".
-        "the provided handle has a different PHID ('{$handle_phid}'). The ".
-        "handle must correspond to the policy identifier.");
+        pht(
+          "Policy identifier is an object PHID ('%s'), but the provided ".
+          "handle has a different PHID ('%s'). The handle must correspond ".
+          "to the policy identifier.",
+          $policy_identifier,
+          $handle_phid));
     }
 
     $policy = id(new PhabricatorPolicy())

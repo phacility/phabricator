@@ -67,7 +67,7 @@ final class LiskFixtureTestCase extends PhabricatorTestCase {
 
       $this->assertTrue(
         ($loaded !== null),
-        'Reads inside transactions should have transaction visibility.');
+        pht('Reads inside transactions should have transaction visibility.'));
 
       LiskDAO::beginIsolateAllLiskEffectsToTransactions();
     } catch (Exception $ex) {

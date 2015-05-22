@@ -102,8 +102,6 @@ final class PhabricatorSlowvoteEditor
       case PhabricatorSlowvoteTransaction::TYPE_CLOSE:
         $object->setIsClosed((int)$xaction->getNewValue());
         break;
-      case PhabricatorTransactions::TYPE_EDGE:
-        return;
     }
   }
 
