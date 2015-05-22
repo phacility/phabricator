@@ -89,6 +89,7 @@ final class PHUICalendarDayView extends AphrontView {
             'eventStartEpoch' => $event->getEpochStart(),
             'eventEndEpoch' => $event->getEpochEnd(),
             'eventName' => $event->getName(),
+            'eventID' => $event->getEventID(),
           );
         }
       }
@@ -109,10 +110,11 @@ final class PHUICalendarDayView extends AphrontView {
           $first_event_hour = $hour;
         }
 
-        $js_hourly_events[$event->getEventID()] = array(
+        $js_hourly_events[] = array(
           'eventStartEpoch' => $event->getEpochStart(),
           'eventEndEpoch' => $event->getEpochEnd(),
           'eventName' => $event->getName(),
+          'eventID' => $event->getEventID(),
           'hour' => $hour,
           'offset' => '0',
           'width' => '100%',

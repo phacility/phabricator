@@ -55,5 +55,31 @@ JX.behavior('day-view', function(config) {
     return clusters;
   }
 
+  function updateEventsFromCluster(cluster, hourly_events) {
+    var cluster_size = cluster.length;
+    var n = 0;
+    for(var i=0; i < cluster.length; i++) {
+      var cluster_member = cluster[i];
+
+      var event_id = cluster_member.eventID;
+      var offset = ((n / cluster_size) * 100) + '%';
+      var width = ((1 / cluster_size) * 100) + '%';
+
+      for (var j=0; j < hourly_events.length; j++) {
+        if (hourly_events[j].eventID == event_id) {
+
+          hourly_events[j]['offset'] = offset;
+          hourly_events[j]['width'] = width;
+        }
+      }
+      n++;
+    }
+
+    return hourly_events;
+  }
+
   var today_clusters = findTodayClusters();
+  for(var i=0; i < today_clusters.length; i++) {
+    hourly_events = updateEventsFromCluster(today_clusters[i], hourly_events);
+  }
 });
