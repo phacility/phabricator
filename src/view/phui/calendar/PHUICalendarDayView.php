@@ -9,7 +9,6 @@ final class PHUICalendarDayView extends AphrontView {
   private $year;
   private $browseURI;
   private $events = array();
-  private $todayEvents = array();
   private $jsTodayEvents = array();
 
   private $allDayEvents = array();
@@ -55,13 +54,12 @@ final class PHUICalendarDayView extends AphrontView {
       );
     }
 
-    $js_hourly_events = array();
-    $hourly_events = array();
-
     $first_event_hour = null;
 
+    $js_hourly_events = array();
+    $js_today_all_day_events = array();
+
     $all_day_events = $this->getAllDayEvents();
-    $today_all_day_events = array();
 
     $day_start = $this->getDateTime();
     $day_end = id(clone $day_start)->modify('+1 day');
@@ -74,7 +72,12 @@ final class PHUICalendarDayView extends AphrontView {
       $all_day_end = $all_day_event->getEpochEnd();
 
       if ($all_day_start < $day_end_epoch && $all_day_end > $day_start_epoch) {
-        $today_all_day_events[] = $all_day_event;
+        $js_today_all_day_events[] = array(
+          'name' => $all_day_event->getName(),
+          'id' => $all_day_event->getEventID(),
+          'viewerIsInvited' => $all_day_event->getViewerIsInvited(),
+          'uri' => $all_day_event->getURI(),
+        );
       }
     }
 
@@ -93,7 +96,6 @@ final class PHUICalendarDayView extends AphrontView {
           ($event->getEpochStart() >= $hour_start
           && $event->getEpochStart() < $hour_end)) {
           $current_hour_events[] = $event;
-          $this->todayEvents[] = $event;
           $this->jsTodayEvents[] = array(
             'eventStartEpoch' => $event->getEpochStart(),
             'eventEndEpoch' => $event->getEpochEnd(),
@@ -134,94 +136,36 @@ final class PHUICalendarDayView extends AphrontView {
           'top' => $top.'%',
           'height' => $height.'%',
         );
-
-        $hourly_events[$event->getEventID()] = array(
-          'hour' => $hour,
-          'event' => $event,
-          'offset' => '0',
-          'width' => '100%',
-          'top' => $top.'%',
-          'height' => $height.'%',
-        );
       }
-    }
-
-    $clusters = $this->findTodayClusters();
-    foreach ($clusters as $cluster) {
-      $hourly_events = $this->updateEventsFromCluster(
-        $cluster,
-        $hourly_events);
-    }
-
-    $rows = array();
-
-    foreach ($hours as $hour) {
-      $early_hours = array(8);
-      if ($first_event_hour) {
-        $early_hours[] = $first_event_hour->format('G');
-      }
-      if ($hour->format('G') < min($early_hours)) {
-        continue;
-      }
-
-      $drawn_hourly_events = array();
-      $cell_time = phutil_tag(
-        'td',
-        array('class' => 'phui-calendar-day-hour'),
-        $hour->format('g A'));
-
-      foreach ($hourly_events as $hourly_event) {
-        if ($hourly_event['hour'] == $hour) {
-
-          $drawn_hourly_events[] = $this->drawEvent(
-            $hourly_event['event'],
-            $hourly_event['offset'],
-            $hourly_event['width'],
-            $hourly_event['top'],
-            $hourly_event['height']);
-        }
-      }
-      $cell_event = phutil_tag(
-        'td',
-        array('class' => 'phui-calendar-day-events'),
-        $drawn_hourly_events);
-
-      $row = phutil_tag(
-        'tr',
-        array(),
-        array($cell_time, $cell_event));
-
-      $rows[] = $row;
-    }
-
-    $table = phutil_tag(
-      'table',
-      array('class' => 'phui-calendar-day-view'),
-      $rows);
-
-    $all_day_event_box = new PHUIBoxView();
-    foreach ($today_all_day_events as $all_day_event) {
-      $all_day_event_box->appendChild(
-        $this->drawAllDayEvent($all_day_event));
     }
 
     $header = $this->renderDayViewHeader();
     $sidebar = $this->renderSidebar();
     $warnings = $this->getQueryRangeWarning();
 
+    $table_id = celerity_generate_unique_node_id();
+
+    $table_wrapper = phutil_tag(
+      'div',
+      array(
+        'id' => $table_id,
+      ),
+      '');
+
     Javelin::initBehavior(
       'day-view',
       array(
+        'allDayEvents' => $js_today_all_day_events,
         'todayEvents' => $this->jsTodayEvents,
         'hourlyEvents' => $js_hourly_events,
         'hours' => $js_hours,
         'firstEventHour' => $first_event_hour->format('G'),
+        'tableID' => $table_id,
       ));
 
     $table_box = id(new PHUIObjectBoxView())
       ->setHeader($header)
-      ->appendChild($all_day_event_box)
-      ->appendChild($table)
+      ->appendChild($table_wrapper)
       ->setFormErrors($warnings)
       ->setFlush(true);
 
@@ -431,75 +375,6 @@ final class PHUICalendarDayView extends AphrontView {
     }
 
     return $hourly_events;
-  }
-
-  private function drawAllDayEvent(AphrontCalendarEventView $event) {
-    $class = 'day-view-all-day';
-    if ($event->getViewerIsInvited()) {
-      $class = $class.' viewer-invited-day-event';
-    }
-
-    $name = phutil_tag(
-      'a',
-      array(
-        'class' => $class,
-        'href' => $event->getURI(),
-      ),
-      $event->getName());
-
-    $all_day_label = phutil_tag(
-      'span',
-      array(
-        'class' => 'phui-calendar-all-day-label',
-      ),
-      pht('All Day'));
-
-    $div = phutil_tag(
-      'div',
-      array(
-        'class' => 'phui-calendar-day-event',
-      ),
-      array(
-        $all_day_label,
-        $name,
-      ));
-
-    return $div;
-  }
-
-  private function drawEvent(
-    AphrontCalendarEventView $event,
-    $offset,
-    $width,
-    $top,
-    $height) {
-
-    $class = 'phui-calendar-day-event-link';
-    if ($event->getViewerIsInvited()) {
-      $class =  $class.' viewer-invited-day-event';
-    }
-
-    $name = phutil_tag(
-      'a',
-      array(
-        'class' => $class,
-        'href' => $event->getURI(),
-      ),
-      $event->getName());
-
-    $div = phutil_tag(
-      'div',
-      array(
-        'class' => 'phui-calendar-day-event',
-        'style' => 'left: '.$offset
-          .'; width: '.$width
-          .'; top: '.$top
-          .'; height: '.$height
-          .';',
-      ),
-      $name);
-
-    return $div;
   }
 
   // returns DateTime of each hour in the day
