@@ -68,7 +68,7 @@ ul.phui-object-item-list-view {
 
 .phui-object-item-status-icon {
   font-weight: bold;
-  padding: 0 8px;
+  padding: 3px;
   font-size: 16px;
 }
 
@@ -115,7 +115,7 @@ ul.phui-object-item-list-view {
   top: 0;
   bottom: 0;
   left: 0;
-  width: 17px;
+  width: 16px;
   background: url('/rsrc/image/texture/grip.png') center center no-repeat;
 }
 
@@ -124,7 +124,7 @@ ul.phui-object-item-list-view {
 }
 
 .phui-object-item-grippable .phui-object-item-frame {
-  padding-left: 11px;
+  padding-left: 16px;
 }
 
 .device .phui-object-item-grippable .phui-object-item-frame {
@@ -147,7 +147,7 @@ ul.phui-object-item-list-view {
 }
 
 .phui-object-item-col0 {
-  width: 24px;
+  width: 20px;
   display: table-cell;
   vertical-align: middle;
 }
@@ -673,7 +673,7 @@ ul.phui-object-item-list-view .phui-object-item-selected
 .phui-object-item-image-icon {
   width: 30px;
   height: 30px;
-  margin: 4px;
+  margin: 4px 0;
   position: absolute;
 }
 

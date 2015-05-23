@@ -9,8 +9,12 @@
   background-position: 94px;
 }
 
+.device .phui-timeline-view {
+  padding: 0 8px;
+}
+
 .device-tablet .phui-timeline-view {
-  background-position: 31px;
+  background-position: 24px;
 }
 
 .device-phone .phui-timeline-view {
