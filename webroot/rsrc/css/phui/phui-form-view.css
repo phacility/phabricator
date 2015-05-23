@@ -6,6 +6,10 @@
   padding: 16px;
 }
 
+.device-phone .phui-object-box .phui-form-view {
+  padding: 0;
+}
+
 .phui-form-view.phui-form-full-width {
   padding: 0;
 }

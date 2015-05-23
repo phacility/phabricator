@@ -152,6 +152,11 @@ ul.phui-object-item-list-view {
   vertical-align: middle;
 }
 
+.device-phone .phui-object-item-col0 {
+  vertical-align: top;
+  padding-top: 8px;
+}
+
 .phui-object-item-col1 {
   display: table-cell;
   vertical-align: top;

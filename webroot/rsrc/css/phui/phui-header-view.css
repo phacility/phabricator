@@ -48,7 +48,7 @@ body .phui-header-shell.phui-bleed-header {
 body .phui-header-shell.phui-bleed-header
   .phui-header-view {
   padding: 8px 24px 8px 0;
-  color: {$bluetext};
+  color: {$darkbluetext};
 }
 
 .phui-header-shell + .phabricator-form-view {
@@ -64,6 +64,10 @@ body .phui-header-shell.phui-bleed-header
   color: #000;
   font-weight: 500;
   position: relative;
+}
+
+.device-phone .phui-header-view {
+  font-size: 14px;
 }
 
 .phui-object-box .phui-header-tall h1.phui-header-view,
@@ -99,10 +103,6 @@ body .phui-header-shell.phui-bleed-header
   margin: 0 4px;
   font-weight: normal;
   color: {$lightbluetext};
-}
-
-body.device-phone .phui-header-view {
-  padding: 12px 8px;
 }
 
 .phui-header-tags {

@@ -263,6 +263,8 @@ final class ManiphestTaskResultListView extends ManiphestView {
       ->setHeaderText(pht('Batch Task Editor'))
       ->appendChild($editor);
 
-    return $box;
+    $content = phutil_tag_div('maniphest-batch-editor', $box);
+
+    return $content;
   }
 }

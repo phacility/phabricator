@@ -1,8 +1,7 @@
 /**
  * @provides maniphest-task-summary-css
  */
-
-.device-phone .maniphest-task-batch,
+.device-phone .maniphest-batch-editor,
 .device-phone .maniphest-task-updated {
   display: none;
 }

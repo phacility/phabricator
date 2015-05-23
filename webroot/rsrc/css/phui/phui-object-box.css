@@ -11,8 +11,16 @@
   padding: 12px 0 0 0;
 }
 
+.device-phone .phui-object-box.phui-object-box-collapsed {
+  padding: 8px 0 0 0;
+}
+
 .phui-object-box.phui-object-box-collapsed .phui-header-shell {
   padding: 0 8px 12px 16px;
+}
+
+.device-phone .phui-object-box.phui-object-box-collapsed .phui-header-shell {
+  padding: 0 8px 8px;
 }
 
 div.phui-object-box.phui-object-box-flush {
@@ -32,7 +40,12 @@ div.phui-object-box.phui-object-box-flush {
 }
 
 .device-phone .phui-object-box {
-  margin: 8px 8px 0 8px;
+  margin: 8px;
+  padding: 8px 8px 4px 8px;
+}
+
+.device-phone .phui-object-box .phui-header-shell {
+  padding-bottom: 8px;
 }
 
 /* - Object Box Colors ------------------------------------------------------ */
