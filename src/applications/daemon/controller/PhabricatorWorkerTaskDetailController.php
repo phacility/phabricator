@@ -141,7 +141,7 @@ final class PhabricatorWorkerTaskDetailController
       $expires);
 
     if ($task->isArchived()) {
-      $duration = pht('%d us', number_format($task->getDuration()));
+      $duration = pht('%s us', new PhutilNumber($task->getDuration()));
     } else {
       $duration = phutil_tag('em', array(), pht('Not Completed'));
     }

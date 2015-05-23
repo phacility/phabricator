@@ -50,7 +50,7 @@ final class PhabricatorDaemonConsoleController
       $rows[] = array(
         $class,
         number_format($info['n']),
-        pht('%d us', number_format((int)($info['duration'] / $info['n']))),
+        pht('%s us', new PhutilNumber((int)($info['duration'] / $info['n']))),
       );
     }
 

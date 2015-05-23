@@ -198,7 +198,7 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
       $summary[] = array(
         $type,
         number_format($counts[$type]),
-        pht('%d us', number_format((int)(1000000 * $totals[$type]))),
+        pht('%s us', new PhutilNumber((int)(1000000 * $totals[$type]))),
         sprintf('%.1f%%', 100 * $totals[$type] / $page_total),
       );
     }
@@ -258,10 +258,12 @@ final class DarkConsoleServicesPlugin extends DarkConsolePlugin {
           break;
       }
 
+      $offset = ($row['begin'] - $data['start']);
+
       $rows[] = array(
         $row['type'],
-        pht('+%d ms', number_format(1000 * ($row['begin'] - $data['start']))),
-        pht('%d us', number_format(1000000 * $row['duration'])),
+        pht('+%s ms', new PhutilNumber(1000 * $offset)),
+        pht('%s us', new PhutilNumber(1000000 * $row['duration'])),
         $info,
         $analysis,
       );
