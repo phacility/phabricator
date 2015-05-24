@@ -121,8 +121,8 @@ final class PHUIPinboardItemView extends AphrontView {
         'class' => implode(' ', $classes),
       ),
       array(
-        $header,
         $image,
+        $header,
         $content,
         $icons,
       ));
