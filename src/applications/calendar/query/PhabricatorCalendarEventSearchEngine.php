@@ -390,12 +390,13 @@ final class PhabricatorCalendarEventSearchEngine
     list($start_year, $start_month, $start_day) =
       $this->getDisplayYearAndMonthAndDay($query);
 
-    $day_view = new PHUICalendarDayView(
+    $day_view = id(new PHUICalendarDayView(
       $this->getDateFrom($query),
       $this->getDateTo($query),
       $start_year,
       $start_month,
-      $start_day);
+      $start_day))
+      ->setQuery($query->getQueryKey());
 
     $day_view->setUser($viewer);
 
@@ -408,7 +409,13 @@ final class PhabricatorCalendarEventSearchEngine
 
       $viewer_is_invited = $status->getIsUserInvited($viewer->getPHID());
 
+      $can_edit = PhabricatorPolicyFilter::hasCapability(
+        $viewer,
+        $status,
+        PhabricatorPolicyCapability::CAN_EDIT);
+
       $event = new AphrontCalendarEventView();
+      $event->setCanEdit($can_edit);
       $event->setEventID($status->getID());
       $event->setEpochRange($status->getDateFrom(), $status->getDateTo());
       $event->setIsAllDay($status->getIsAllDay());

@@ -211,6 +211,19 @@ final class AphrontFormDateControlValue extends Phobject {
     return $value;
   }
 
+  public function getDateTime() {
+    $epoch = $this->getEpoch();
+    $date = null;
+
+    if ($epoch) {
+      $zone = $this->getTimezone();
+      $date = new DateTime('@'.$epoch);
+      $date->setTimeZone($zone);
+    }
+
+    return $date;
+  }
+
   private function getTimezone() {
     if ($this->zone) {
       return $this->zone;

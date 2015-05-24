@@ -8,6 +8,7 @@ final class PHUICalendarDayView extends AphrontView {
   private $month;
   private $year;
   private $browseURI;
+  private $query;
   private $events = array();
 
   private $allDayEvents = array();
@@ -23,6 +24,14 @@ final class PHUICalendarDayView extends AphrontView {
   }
   private function getBrowseURI() {
     return $this->browseURI;
+  }
+
+  public function setQuery($query) {
+    $this->query = $query;
+    return $this;
+  }
+  private function getQuery() {
+    return $this->query;
   }
 
   public function __construct(
@@ -128,6 +137,7 @@ final class PHUICalendarDayView extends AphrontView {
           'width' => '100%',
           'top' => $top.'px',
           'height' => $height.'px',
+          'canEdit' => $event->getCanEdit(),
         );
       }
     }
@@ -148,6 +158,10 @@ final class PHUICalendarDayView extends AphrontView {
     Javelin::initBehavior(
       'day-view',
       array(
+        'year' => $first_event_hour->format('Y'),
+        'month' => $first_event_hour->format('m'),
+        'day' => $first_event_hour->format('d'),
+        'query' => $this->getQuery(),
         'allDayEvents' => $js_today_all_day_events,
         'todayEvents' => $js_today_events,
         'hours' => $js_hours,

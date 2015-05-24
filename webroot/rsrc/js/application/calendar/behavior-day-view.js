@@ -100,10 +100,15 @@ JX.behavior('day-view', function(config) {
       },
       name);
 
+    var class_name = 'phui-calendar-day-event';
+    if (e.canEdit) {
+      class_name = class_name + ' can-drag';
+    }
+
     var div = JX.$N(
       'div',
       {
-        className: 'phui-calendar-day-event',
+        className: class_name,
         sigil: sigil,
         meta: {eventID: eventID, record: e, uri: uri},
         style: {
@@ -169,7 +174,11 @@ JX.behavior('day-view', function(config) {
       var cell_event = JX.$N(
         'td',
         {
-          className: 'phui-calendar-day-events'
+          meta: {
+            time: hours[i]['hour_meridian']
+          },
+          className: 'phui-calendar-day-events',
+          sigil: 'phui-calendar-day-event-cell'
         });
 
       var row = JX.$N(
@@ -194,6 +203,11 @@ JX.behavior('day-view', function(config) {
     JX.DOM.setContent(hourly_events_wrapper, drawn_hourly_events);
 
   }
+
+  var year = config.year;
+  var month = config.month;
+  var day = config.day;
+  var query = config.query;
 
   var hours = config.hours;
   var first_event_hour = config.firstEventHour;
@@ -234,6 +248,10 @@ JX.behavior('day-view', function(config) {
     if (!e.isNormalMouseEvent()) {
       return;
     }
+    var data = e.getNodeData('phui-calendar-day-event');
+    if (!data.record.canEdit) {
+      return;
+    }
     e.kill();
     dragging = e.getNode('phui-calendar-day-event');
     JX.DOM.alterClass(dragging, 'phui-drag', true);
@@ -264,12 +282,13 @@ JX.behavior('day-view', function(config) {
     dragging.style.top = new_top + 'px';
   });
   JX.Stratcom.listen('mouseup', null, function(){
-    var data = JX.Stratcom.getData(dragging);
-    var record = data.record;
-
     if (!dragging) {
       return;
     }
+
+    var data = JX.Stratcom.getData(dragging);
+    var record = data.record;
+
     if (new_top == offset_top) {
       var now = new Date();
       if (now.getTime() - click_time.getTime() < 250) {
@@ -302,6 +321,25 @@ JX.behavior('day-view', function(config) {
     if (e.isNormalClick()) {
       e.kill();
     }
+  });
+
+  JX.DOM.listen(table, 'click', 'phui-calendar-day-event-cell', function(e){
+    if (!e.isNormalClick()) {
+      return;
+    }
+    var data = e.getNodeData('phui-calendar-day-event-cell');
+    var time = data.time;
+    new JX.Workflow(
+      '/calendar/event/create/',
+      {
+        year: year,
+        month: month,
+        day: day,
+        time: time,
+        next: 'day',
+        query: query
+      })
+      .start();
   });
 
   var hourly_events_wrapper = JX.$N(
