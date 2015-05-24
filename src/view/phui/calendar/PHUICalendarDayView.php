@@ -9,7 +9,6 @@ final class PHUICalendarDayView extends AphrontView {
   private $year;
   private $browseURI;
   private $events = array();
-  private $jsTodayEvents = array();
 
   private $allDayEvents = array();
 
@@ -44,8 +43,11 @@ final class PHUICalendarDayView extends AphrontView {
   public function render() {
     require_celerity_resource('phui-calendar-day-css');
 
+    $viewer = $this->getUser();
+
     $hours = $this->getHoursOfDay();
     $js_hours = array();
+    $js_today_events = array();
 
     foreach ($hours as $hour) {
       $js_hours[] = array(
@@ -55,10 +57,7 @@ final class PHUICalendarDayView extends AphrontView {
     }
 
     $first_event_hour = null;
-
-    $js_hourly_events = array();
     $js_today_all_day_events = array();
-
     $all_day_events = $this->getAllDayEvents();
 
     $day_start = $this->getDateTime();
@@ -81,60 +80,54 @@ final class PHUICalendarDayView extends AphrontView {
       }
     }
 
-    foreach ($hours as $hour) {
-      $current_hour_events = array();
-      $hour_start = $hour->format('U');
-      $hour_end = id(clone $hour)->modify('+1 hour')->format('U');
+    $this->events = msort($this->events, 'getEpochStart');
 
-      foreach ($this->events as $event) {
-        if ($event->getIsAllDay()) {
-          continue;
-        }
-        if (($hour == $day_start &&
-          $event->getEpochStart() <= $hour_start &&
-          $event->getEpochEnd() > $day_start_epoch) ||
-          ($event->getEpochStart() >= $hour_start
-          && $event->getEpochStart() < $hour_end)) {
-          $current_hour_events[] = $event;
-          $this->jsTodayEvents[] = array(
-            'eventStartEpoch' => $event->getEpochStart(),
-            'eventEndEpoch' => $event->getEpochEnd(),
-            'eventName' => $event->getName(),
-            'eventID' => $event->getEventID(),
-            'viewerIsInvited' => $event->getViewerIsInvited(),
-            'uri' => $event->getURI(),
-          );
-        }
+    if (!$this->events) {
+      $first_event_hour = $this->getDateTime()->setTime(8, 0, 0);
+    }
+
+    foreach ($this->events as $event) {
+      if ($event->getIsAllDay()) {
+        continue;
       }
-      foreach ($current_hour_events as $event) {
-        $day_start_epoch = $this->getDateTime()->format('U');
+      if ($event->getEpochStart() <= $day_end_epoch &&
+        $event->getEpochEnd() > $day_start_epoch) {
+
+        if ($first_event_hour === null) {
+          $first_event_hour = new DateTime('@'.$event->getEpochStart());
+          $first_event_hour->setTimeZone($viewer->getTimeZone());
+          $eight_am = $this->getDateTime()->setTime(8, 0, 0);
+          if ($eight_am->format('U') < $first_event_hour->format('U')) {
+            $first_event_hour = clone $eight_am;
+          }
+        }
+
         $event_start = max($event->getEpochStart(), $day_start_epoch);
         $event_end = min($event->getEpochEnd(), $day_end_epoch);
 
-        $top = (($event_start - $hour_start) / ($hour_end - $hour_start))
-          * 100;
+        $day_duration = ($day_end_epoch - $first_event_hour->format('U')) / 60;
+
+        $top = (($event_start - $first_event_hour->format('U'))
+          / ($day_end_epoch - $first_event_hour->format('U')))
+          * $day_duration;
         $top = max(0, $top);
 
-        $height = (($event_end - $event_start) / ($hour_end - $hour_start))
-          * 100;
-        $height = min(2400, $height);
+        $height = (($event_end - $event_start)
+          / ($day_end_epoch - $first_event_hour->format('U')))
+          * $day_duration;
+        $height = min($day_duration, $height);
 
-        if ($first_event_hour === null) {
-          $first_event_hour = $hour;
-        }
-
-        $js_hourly_events[] = array(
+        $js_today_events[] = array(
           'eventStartEpoch' => $event->getEpochStart(),
           'eventEndEpoch' => $event->getEpochEnd(),
           'eventName' => $event->getName(),
           'eventID' => $event->getEventID(),
           'viewerIsInvited' => $event->getViewerIsInvited(),
           'uri' => $event->getURI(),
-          'hour' => $hour->format('G'),
           'offset' => '0',
           'width' => '100%',
-          'top' => $top.'%',
-          'height' => $height.'%',
+          'top' => $top.'px',
+          'height' => $height.'px',
         );
       }
     }
@@ -156,10 +149,10 @@ final class PHUICalendarDayView extends AphrontView {
       'day-view',
       array(
         'allDayEvents' => $js_today_all_day_events,
-        'todayEvents' => $this->jsTodayEvents,
-        'hourlyEvents' => $js_hourly_events,
+        'todayEvents' => $js_today_events,
         'hours' => $js_hours,
         'firstEventHour' => $first_event_hour->format('G'),
+        'firstEventHourEpoch' => $first_event_hour->format('U'),
         'tableID' => $table_id,
       ));
 

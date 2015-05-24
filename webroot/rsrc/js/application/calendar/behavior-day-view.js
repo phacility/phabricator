@@ -4,13 +4,6 @@
 
 
 JX.behavior('day-view', function(config) {
-  var hours = config.hours;
-  var first_event_hour = config.firstEventHour;
-  var hourly_events = config.hourlyEvents;
-  var today_events = config.todayEvents;
-  var today_all_day_events = config.allDayEvents;
-  var table_wrapper = JX.$(config.tableID);
-
 
   function findTodayClusters() {
     var events = today_events.sort(function(x, y){
@@ -23,8 +16,8 @@ JX.behavior('day-view', function(config) {
       var today_event = events[i];
 
       var destination_cluster_index = null;
-      var event_start = today_event.eventStartEpoch - (30*60);
-      var event_end = today_event.eventEndEpoch + (30*60);
+      var event_start = today_event.eventStartEpoch - (60);
+      var event_end = today_event.eventEndEpoch + (60);
 
       for (var j=0; j < clusters.length; j++) {
         var cluster = clusters[j];
@@ -59,7 +52,7 @@ JX.behavior('day-view', function(config) {
     return clusters;
   }
 
-  function updateEventsFromCluster(cluster, hourly_events) {
+  function updateEventsFromCluster(cluster) {
     var cluster_size = cluster.length;
     var n = 0;
     for(var i=0; i < cluster.length; i++) {
@@ -69,28 +62,30 @@ JX.behavior('day-view', function(config) {
       var offset = ((n / cluster_size) * 100) + '%';
       var width = ((1 / cluster_size) * 100) + '%';
 
-      for (var j=0; j < hourly_events.length; j++) {
-        if (hourly_events[j].eventID == event_id) {
+      for (var j=0; j < today_events.length; j++) {
+        if (today_events[j].eventID == event_id) {
 
-          hourly_events[j]['offset'] = offset;
-          hourly_events[j]['width'] = width;
+          today_events[j]['offset'] = offset;
+          today_events[j]['width'] = width;
         }
       }
       n++;
     }
 
-    return hourly_events;
+    return today_events;
   }
 
-  function drawEvent(hourly_event) {
-    var name = hourly_event['eventName'];
-    var viewerIsInvited = hourly_event['viewerIsInvited'];
-    var offset = hourly_event['offset'];
-    var width = hourly_event['width'];
-    var top = hourly_event['top'];
-    var height = hourly_event['height'];
-    var uri = hourly_events['uri'];
+  function drawEvent(e) {
+    var name = e['eventName'];
+    var eventID = e['eventID'];
+    var viewerIsInvited = e['viewerIsInvited'];
+    var offset = e['offset'];
+    var width = e['width'];
+    var top = e['top'];
+    var height = e['height'];
+    var uri = e['uri'];
 
+    var sigil = 'phui-calendar-day-event';
     var link_class = 'phui-calendar-day-event-link';
 
     if (viewerIsInvited) {
@@ -109,6 +104,8 @@ JX.behavior('day-view', function(config) {
       'div',
       {
         className: 'phui-calendar-day-event',
+        sigil: sigil,
+        meta: {eventID: eventID, record: e, uri: uri},
         style: {
           left: offset,
           width: width,
@@ -145,7 +142,7 @@ JX.behavior('day-view', function(config) {
 
     var div_all_day = JX.$N(
       'div',
-      {className: 'phui-calendar-day-event'},
+      {className: 'phui-calendar-day-event all-day'},
       [all_day_label, name]);
 
     return div_all_day;
@@ -164,24 +161,17 @@ JX.behavior('day-view', function(config) {
       if (hours[i]['hour'] < min_early_hour) {
         continue;
       }
-      var drawn_hourly_events = [];
       var cell_time = JX.$N(
         'td',
         {className: 'phui-calendar-day-hour'},
         hours[i]['hour_meridian']);
 
-      for (var j=0; j < hourly_events.length; j++) {
-        if (hourly_events[j]['hour'] == hours[i]['hour']) {
-          drawn_hourly_events.push(drawEvent(hourly_events[j]));
-        }
-      }
-
       var cell_event = JX.$N(
         'td',
         {
           className: 'phui-calendar-day-events'
-        },
-        drawn_hourly_events);
+        });
+
       var row = JX.$N(
         'tr',
         {},
@@ -191,10 +181,26 @@ JX.behavior('day-view', function(config) {
     return rows;
   }
 
-  var today_clusters = findTodayClusters();
-  for(var i=0; i < today_clusters.length; i++) {
-    hourly_events = updateEventsFromCluster(today_clusters[i], hourly_events);
+  function clusterAndDrawEvents() {
+    var today_clusters = findTodayClusters();
+    for(var i=0; i < today_clusters.length; i++) {
+      today_events = updateEventsFromCluster(today_clusters[i]);
+    }
+    var drawn_hourly_events = [];
+    for (i=0; i < today_events.length; i++) {
+      drawn_hourly_events.push(drawEvent(today_events[i]));
+    }
+
+    JX.DOM.setContent(hourly_events_wrapper, drawn_hourly_events);
+
   }
+
+  var hours = config.hours;
+  var first_event_hour = config.firstEventHour;
+  var first_event_hour_epoch = parseInt(config.firstEventHourEpoch, 10);
+  var today_events = config.todayEvents;
+  var today_all_day_events = config.allDayEvents;
+  var table_wrapper = JX.$(config.tableID);
   var rows = drawRows();
 
   var all_day_events = [];
@@ -211,5 +217,108 @@ JX.behavior('day-view', function(config) {
     {className: 'phui-calendar-day-view'},
     rows);
 
-  JX.DOM.setContent(table_wrapper, [all_day_events, table]);
+  var dragging = false;
+  var origin = null;
+
+  var offset_top = null;
+  var new_top = null;
+
+  var click_time = null;
+
+  JX.DOM.listen(
+    table_wrapper,
+    'mousedown',
+    'phui-calendar-day-event',
+    function(e){
+
+    if (!e.isNormalMouseEvent()) {
+      return;
+    }
+    e.kill();
+    dragging = e.getNode('phui-calendar-day-event');
+    JX.DOM.alterClass(dragging, 'phui-drag', true);
+
+    click_time = new Date();
+
+    origin = JX.$V(e);
+
+    var outer = JX.Vector.getPos(table);
+    var inner = JX.Vector.getPos(dragging);
+
+    offset_top = inner.y - outer.y;
+    new_top = offset_top;
+
+    dragging.style.top = offset_top + 'px';
+  });
+  JX.Stratcom.listen('mousemove', null, function(e){
+    if (!dragging) {
+      return;
+    }
+    var cursor = JX.$V(e);
+
+    new_top = cursor.y - origin.y + offset_top;
+    new_top = Math.min(new_top, 1320);
+    new_top = Math.max(new_top, 0);
+    new_top = Math.floor(new_top/15) * 15;
+
+    dragging.style.top = new_top + 'px';
+  });
+  JX.Stratcom.listen('mouseup', null, function(){
+    var data = JX.Stratcom.getData(dragging);
+    var record = data.record;
+
+    if (!dragging) {
+      return;
+    }
+    if (new_top == offset_top) {
+      var now = new Date();
+      if (now.getTime() - click_time.getTime() < 250) {
+        JX.$U(record.uri).go();
+      }
+
+      JX.DOM.alterClass(dragging, 'phui-drag', false);
+      dragging = false;
+      return;
+    }
+    var new_time = first_event_hour_epoch + (new_top * 60);
+    var id = data.eventID;
+    var duration = record.eventEndEpoch - record.eventStartEpoch;
+    record.eventStartEpoch = new_time;
+    record.eventEndEpoch = new_time + duration;
+    record.top = new_top + 'px';
+
+    new JX.Workflow(
+      '/calendar/event/drag/' + id + '/',
+      {start: new_time})
+      .start();
+
+    JX.DOM.alterClass(dragging, 'phui-drag', false);
+    dragging = false;
+
+    clusterAndDrawEvents();
+  });
+
+  JX.DOM.listen(table_wrapper, 'click', 'phui-calendar-day-event', function(e){
+    if (e.isNormalClick()) {
+      e.kill();
+    }
+  });
+
+  var hourly_events_wrapper = JX.$N(
+    'div',
+    {style: {
+      position: 'absolute',
+      left: '69px',
+      right: 0
+    }});
+
+  clusterAndDrawEvents();
+
+  var daily_wrapper = JX.$N(
+    'div',
+    {style: {position: 'relative'}},
+    [hourly_events_wrapper, table]);
+
+  JX.DOM.setContent(table_wrapper, [all_day_events, daily_wrapper]);
+
 });

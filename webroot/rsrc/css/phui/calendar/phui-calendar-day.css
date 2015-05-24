@@ -35,7 +35,11 @@
   border-top: 1px solid {$lightgreyborder};
 }
 
-.phui-calendar-day-view td div.phui-calendar-day-event {
+.phui-drag {
+  opacity: .25;
+}
+
+div.phui-calendar-day-event {
   width: 100%;
   position: absolute;
   top: 0;
@@ -43,11 +47,15 @@
   min-height: 30px;
 }
 
+div.phui-calendar-day-event.all-day {
+  position: relative;
+}
+
 .phui-calendar-day-event-link {
   padding: 8px;
   border: 1px solid {$greyborder};
   background-color: {$darkgreybackground};
-  margin: 0 4px;
+  margin: 0 1px;
   position: absolute;
   left: 0;
   right: 0;
