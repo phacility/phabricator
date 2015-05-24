@@ -200,6 +200,12 @@ final class PhabricatorApplicationSearchController
 
     $nav->appendChild($filter_view);
 
+    if ($named_query) {
+      $title = $named_query->getQueryName();
+    } else {
+      $title = pht('Advanced Search');
+    }
+
     if ($run_query) {
       $nav->appendChild(
         $anchor = id(new PhabricatorAnchorView())
@@ -227,7 +233,15 @@ final class PhabricatorApplicationSearchController
             $saved_query);
         }
 
-        $nav->appendChild($list);
+        $box = id(new PHUIObjectBoxView())
+          ->setHeaderText($title);
+
+        if ($list instanceof AphrontTableView) {
+          $box->setTable($list);
+        } else {
+          $box->setObjectList($list);
+        }
+        $nav->appendChild($box);
 
         // TODO: This is a bit hacky.
         if ($list instanceof PHUIObjectItemListView) {
@@ -258,12 +272,6 @@ final class PhabricatorApplicationSearchController
 
     if ($errors) {
       $nav->appendChild($errors);
-    }
-
-    if ($named_query) {
-      $title = $named_query->getQueryName();
-    } else {
-      $title = pht('Advanced Search');
     }
 
     $crumbs = $parent
@@ -353,7 +361,12 @@ final class PhabricatorApplicationSearchController
 
     $nav->selectFilter('query/edit');
     $nav->setCrumbs($crumbs);
-    $nav->appendChild($list);
+
+    $box = id(new PHUIObjectBoxView())
+      ->setHeaderText(pht('Saved Queries'))
+      ->setObjectList($list);
+
+    $nav->appendChild($box);
 
     return $parent->buildApplicationPage(
       $nav,

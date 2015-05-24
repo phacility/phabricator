@@ -6,6 +6,10 @@
   display: none;
 }
 
+.maniphest-batch-editor {
+  border-top: 1px solid {$thinblueborder};
+}
+
 .maniphest-batch-editor-layout {
   width: 100%;
 }

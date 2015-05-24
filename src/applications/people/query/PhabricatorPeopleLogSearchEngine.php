@@ -186,8 +186,6 @@ final class PhabricatorPeopleLogSearchEngine
       $table->setSearchBaseURI($this->getApplicationURI('logs/'));
     }
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('User Activity Logs'))
-      ->setTable($table);
+    return $table;
   }
 }

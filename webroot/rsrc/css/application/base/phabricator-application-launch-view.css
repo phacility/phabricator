@@ -89,7 +89,7 @@ div.phabricator-application-launch-container {
 }
 
 .phabricator-application-attention-count {
-  color: {$sky};
+  color: {$fire};
 }
 
 a.phabricator-application-launch-phone-only {

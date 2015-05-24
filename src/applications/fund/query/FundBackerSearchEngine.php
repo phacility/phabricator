@@ -141,9 +141,7 @@ final class FundBackerSearchEngine
           'right',
         ));
 
-    return id(new PHUIObjectBoxView())
-      ->setHeaderText(pht('Backers'))
-      ->setTable($table);
+    return $table;
   }
 
 }

@@ -15,6 +15,14 @@
   border-bottom: 1px solid {$blueborder};
 }
 
+.aphront-table-view td.aphront-table-notice {
+  padding: 12px 16px;
+  font-size: 13px;
+  color: {$blue};
+  font-weight: bold;
+  border-bottom: 1px solid {$thinblueborder};
+}
+
 .aphront-table-view tr.alt {
   background: {$lightgreybackground};
 }

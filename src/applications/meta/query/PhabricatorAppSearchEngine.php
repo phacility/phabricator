@@ -207,7 +207,6 @@ final class PhabricatorAppSearchEngine
       }
 
       $list = new PHUIObjectItemListView();
-      $list->addClass('phui-object-item-launcher-list');
 
       foreach ($applications as $application) {
         $icon = $application->getFontIcon();
