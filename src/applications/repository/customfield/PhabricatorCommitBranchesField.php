@@ -7,6 +7,14 @@ final class PhabricatorCommitBranchesField
     return 'diffusion:branches';
   }
 
+  public function getFieldName() {
+    return pht('Branches');
+  }
+
+  public function getFieldDescription() {
+    return pht('Shows branches a commit appears on in email.');
+  }
+
   public function shouldAppearInTransactionMail() {
     return true;
   }

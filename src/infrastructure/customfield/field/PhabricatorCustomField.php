@@ -105,7 +105,18 @@ abstract class PhabricatorCustomField {
   /**
    * @task apps
    */
-  public static function buildFieldList($base_class, array $spec, $object) {
+  public static function buildFieldList(
+    $base_class,
+    array $spec,
+    $object,
+    array $options = array()) {
+
+    PhutilTypeSpec::checkMap(
+      $options,
+      array(
+        'withDisabled' => 'optional bool',
+      ));
+
     $field_objects = id(new PhutilSymbolLoader())
       ->setAncestorClass($base_class)
       ->loadObjects();
@@ -135,13 +146,16 @@ abstract class PhabricatorCustomField {
 
     $fields = array_select_keys($fields, array_keys($spec)) + $fields;
 
-    foreach ($spec as $key => $config) {
-      if (empty($fields[$key])) {
-        continue;
-      }
-      if (!empty($config['disabled'])) {
-        if ($fields[$key]->canDisableField()) {
-          unset($fields[$key]);
+    if (empty($options['withDisabled'])) {
+      foreach ($fields as $key => $field) {
+        $config = idx($spec, $key, array()) + array(
+          'disabled' => $field->shouldDisableByDefault(),
+        );
+
+        if (!empty($config['disabled'])) {
+          if ($field->canDisableField()) {
+            unset($fields[$key]);
+          }
         }
       }
     }

@@ -7,6 +7,14 @@ final class PhabricatorCommitMergedCommitsField
     return 'diffusion:mergedcommits';
   }
 
+  public function getFieldName() {
+    return pht('Merged Commits');
+  }
+
+  public function getFieldDescription() {
+    return pht('For merge commits, shows merged changes in email.');
+  }
+
   public function shouldDisableByDefault() {
     return true;
   }

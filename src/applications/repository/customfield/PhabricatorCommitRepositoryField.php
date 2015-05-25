@@ -7,6 +7,14 @@ final class PhabricatorCommitRepositoryField
     return 'diffusion:repository';
   }
 
+  public function getFieldName() {
+    return pht('Repository');
+  }
+
+  public function getFieldDescription() {
+    return pht('Shows repository in email.');
+  }
+
   public function shouldDisableByDefault() {
     return true;
   }

@@ -7,6 +7,14 @@ final class PhabricatorCommitTagsField
     return 'diffusion:tags';
   }
 
+  public function getFieldName() {
+    return pht('Tags');
+  }
+
+  public function getFieldDescription() {
+    return pht('Shows commit tags in email.');
+  }
+
   public function shouldAppearInTransactionMail() {
     return true;
   }

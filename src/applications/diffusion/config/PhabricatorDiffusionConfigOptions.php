@@ -145,9 +145,7 @@ final class PhabricatorDiffusionConfigOptions
           id(new PhabricatorRepositoryCommit())
             ->getCustomFieldBaseClass())
         ->setDescription(
-          pht(
-            "Select and reorder diffusion fields.\n\n".
-            "These will primarily show up in Mail Notifications.")),
+          pht('Select and reorder Diffusion fields.')),
     );
   }
 

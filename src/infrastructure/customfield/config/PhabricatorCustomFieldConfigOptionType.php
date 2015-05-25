@@ -34,20 +34,16 @@ final class PhabricatorCustomFieldConfigOptionType
       $field_spec = PhabricatorEnv::getEnvConfig($option->getKey());
     }
 
-    // Get all of the fields (including disabled fields) by querying for them
-    // with a faux spec where no fields are disabled.
-    $faux_spec = $field_spec;
-    foreach ($faux_spec as $key => $spec) {
-      unset($faux_spec[$key]['disabled']);
-    }
-
     // TODO: We might need to build a real object here eventually.
     $faux_object = null;
 
     $fields = PhabricatorCustomField::buildFieldList(
       $field_base_class,
-      $faux_spec,
-      $faux_object);
+      $field_spec,
+      $faux_object,
+      array(
+        'withDisabled' => true,
+      ));
 
     $list_id = celerity_generate_unique_node_id();
     $input_id = celerity_generate_unique_node_id();
@@ -63,7 +59,8 @@ final class PhabricatorCustomFieldConfigOptionType
         ->addAttribute($field->getFieldDescription())
         ->setHeader($field->getFieldName());
 
-      $is_disabled = !empty($field_spec[$key]['disabled']);
+      $spec = idx($field_spec, $key, array());
+      $is_disabled = idx($spec, 'disabled', $field->shouldDisableByDefault());
 
       $disabled_item = clone $item;
       $enabled_item = clone $item;
