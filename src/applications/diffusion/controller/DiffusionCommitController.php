@@ -240,10 +240,10 @@ final class DiffusionCommitController extends DiffusionController {
 
       $change_panel = new PHUIObjectBoxView();
       $header = new PHUIHeaderView();
-      $header->setHeader(pht('Changes (%d', number_format($count)));
+      $header->setHeader(pht('Changes (%s)', new PhutilNumber($count)));
       $change_panel->setID('toc');
-      if ($count > self::CHANGES_LIMIT && !$show_all_details) {
 
+      if ($count > self::CHANGES_LIMIT && !$show_all_details) {
         $icon = id(new PHUIIconView())
           ->setIconFont('fa-files-o');
 

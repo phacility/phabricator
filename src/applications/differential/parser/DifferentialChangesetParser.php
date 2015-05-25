@@ -906,11 +906,10 @@ final class DifferentialChangesetParser {
         $shield = $renderer->renderShield(
           pht('This file was completely deleted.'));
       } else if ($this->changeset->getAffectedLineCount() > 2500) {
-        $lines = number_format($this->changeset->getAffectedLineCount());
         $shield = $renderer->renderShield(
           pht(
             'This file has a very large number of changes (%s lines).',
-            $lines));
+            new PhutilNumber($this->changeset->getAffectedLineCount())));
       }
     }
 

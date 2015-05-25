@@ -241,8 +241,8 @@ final class PhabricatorRepositoryManagementReparseWorkflow
         '**NOTE**: This script will queue tasks to reparse the data. Once the '.
         'tasks have been queued, you need to run Taskmaster daemons to '.
         'execute them.'."\n\n".
-        "QUEUEING TASKS (%d Commits):",
-        number_format(count($commits))));
+        "QUEUEING TASKS (%s Commits):",
+        new PhutilNumber(count($commits))));
     }
 
     $progress = new PhutilConsoleProgressBar();
