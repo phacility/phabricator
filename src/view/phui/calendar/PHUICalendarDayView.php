@@ -103,8 +103,16 @@ final class PHUICalendarDayView extends AphrontView {
         $event->getEpochEnd() > $day_start_epoch) {
 
         if ($first_event_hour === null) {
-          $first_event_hour = new DateTime('@'.$event->getEpochStart());
-          $first_event_hour->setTimeZone($viewer->getTimeZone());
+          $first_event_hour = PhabricatorTime::getDateTimeFromEpoch(
+            $event->getEpochStart(),
+            $viewer);
+
+          $midnight = $this->getDateTime()->setTime(0, 0, 0);
+
+          if ($first_event_hour->format('U') < $midnight->format('U')) {
+            $first_event_hour = clone $midnight;
+          }
+
           $eight_am = $this->getDateTime()->setTime(8, 0, 0);
           if ($eight_am->format('U') < $first_event_hour->format('U')) {
             $first_event_hour = clone $eight_am;

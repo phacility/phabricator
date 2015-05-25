@@ -72,4 +72,10 @@ final class PhabricatorTime {
     return $today;
   }
 
+  public static function getDateTimeFromEpoch($epoch, PhabricatorUser $viewer) {
+    $datetime = new DateTime('@'.$epoch);
+    $datetime->setTimeZone($viewer->getTimeZone());
+    return $datetime;
+  }
+
 }
