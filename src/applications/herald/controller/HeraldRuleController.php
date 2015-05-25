@@ -626,7 +626,6 @@ final class HeraldRuleController extends HeraldController {
       'taskpriority' => new ManiphestTaskPriorityDatasource(),
       'taskstatus' => new ManiphestTaskStatusDatasource(),
       'buildplan' => new HarbormasterBuildPlanDatasource(),
-      'arcanistprojects' => new DiffusionArcanistProjectDatasource(),
       'package' => new PhabricatorOwnersPackageDatasource(),
       'project' => new PhabricatorProjectDatasource(),
       'user' => new PhabricatorPeopleDatasource(),

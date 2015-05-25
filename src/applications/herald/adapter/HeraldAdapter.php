@@ -42,7 +42,6 @@ abstract class HeraldAdapter {
   const FIELD_APPLICATION_EMAIL      = 'applicaton-email';
   const FIELD_TASK_PRIORITY          = 'taskpriority';
   const FIELD_TASK_STATUS            = 'taskstatus';
-  const FIELD_ARCANIST_PROJECT       = 'arcanist-project';
   const FIELD_PUSHER_IS_COMMITTER    = 'pusher-is-committer';
   const FIELD_PATH                   = 'path';
 
@@ -100,7 +99,6 @@ abstract class HeraldAdapter {
   const VALUE_BUILD_PLAN      = 'buildplan';
   const VALUE_TASK_PRIORITY   = 'taskpriority';
   const VALUE_TASK_STATUS     = 'taskstatus';
-  const VALUE_ARCANIST_PROJECT  = 'arcanistprojects';
   const VALUE_LEGAL_DOCUMENTS   = 'legaldocuments';
   const VALUE_APPLICATION_EMAIL = 'applicationemail';
 
@@ -385,7 +383,6 @@ abstract class HeraldAdapter {
       self::FIELD_APPLICATION_EMAIL => pht('Receiving email address'),
       self::FIELD_TASK_PRIORITY => pht('Task priority'),
       self::FIELD_TASK_STATUS => pht('Task status'),
-      self::FIELD_ARCANIST_PROJECT => pht('Arcanist Project'),
       self::FIELD_PUSHER_IS_COMMITTER => pht('Pusher same as committer'),
       self::FIELD_PATH => pht('Path'),
     ) + $this->getCustomFieldNameMap();
@@ -441,7 +438,6 @@ abstract class HeraldAdapter {
       case self::FIELD_PUSHER:
       case self::FIELD_TASK_PRIORITY:
       case self::FIELD_TASK_STATUS:
-      case self::FIELD_ARCANIST_PROJECT:
         return array(
           self::CONDITION_IS_ANY,
           self::CONDITION_IS_NOT_ANY,
@@ -946,8 +942,6 @@ abstract class HeraldAdapter {
             return self::VALUE_TASK_PRIORITY;
           case self::FIELD_TASK_STATUS:
             return self::VALUE_TASK_STATUS;
-          case self::FIELD_ARCANIST_PROJECT:
-            return self::VALUE_ARCANIST_PROJECT;
           default:
             return self::VALUE_USER;
         }
