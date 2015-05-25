@@ -20,6 +20,21 @@ final class PhabricatorDiffusionConfigOptions
   }
 
   public function getOptions() {
+    $custom_field_type = 'custom:PhabricatorCustomFieldConfigOptionType';
+
+    $fields = array(
+      new PhabricatorCommitBranchesField(),
+      new PhabricatorCommitTagsField(),
+      new PhabricatorCommitMergedCommitsField(),
+    );
+
+    $default_fields = array();
+    foreach ($fields as $field) {
+      $default_fields[$field->getFieldKey()] = array(
+        'disabled' => $field->shouldDisableByDefault(),
+      );
+    }
+
     return array(
       $this->newOption(
         'metamta.diffusion.subject-prefix',
@@ -124,6 +139,13 @@ final class PhabricatorDiffusionConfigOptions
             'from web traffic (for example, if you use different SSH and '.
             'web load balancers), you can set the SSH hostname here. This '.
             'is an advanced option.')),
+      $this->newOption('diffusion.fields', $custom_field_type, $default_fields)
+        ->setCustomData(
+          id(new PhabricatorRepositoryCommit())
+          ->getCustomFieldBaseClass())
+        ->setDescription(pht(
+          "Select and reorder diffusion fields.\n\n".
+          "These will primarily show up in Mail Notifications.")),
     );
   }
 

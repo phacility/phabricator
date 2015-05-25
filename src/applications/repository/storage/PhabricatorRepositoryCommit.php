@@ -349,9 +349,7 @@ final class PhabricatorRepositoryCommit
 
 
   public function getCustomFieldSpecificationForRole($role) {
-    // TODO: We could make this configurable eventually, but just use the
-    // defaults for now.
-    return array();
+    return PhabricatorEnv::getEnvConfig('diffusion.fields');
   }
 
   public function getCustomFieldBaseClass() {
