@@ -135,6 +135,7 @@ final class PhabricatorRepository extends PhabricatorRepositoryDAO
       'isActive'    => $this->isTracked(),
       'isHosted'    => $this->isHosted(),
       'isImporting' => $this->isImporting(),
+      'encoding'    => $this->getDetail('encoding'),
     );
   }
 
