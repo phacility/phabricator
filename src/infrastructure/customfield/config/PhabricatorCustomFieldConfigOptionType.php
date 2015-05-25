@@ -12,9 +12,6 @@ final class PhabricatorCustomFieldConfigOptionType
     $storage_value = $request->getStr('value');
 
     $in_value = phutil_json_decode($storage_value);
-    if (!is_array($in_value)) {
-      $in_value = array();
-    }
 
     // When we submit from JS, we submit a list (since maps are not guaranteed
     // to retain order). Convert it into a map for storage (since it's far more
@@ -113,7 +110,7 @@ final class PhabricatorCustomFieldConfigOptionType
         'id' => $input_id,
         'type' => 'hidden',
         'name' => 'value',
-        'value' => json_encode($display_value),
+        'value' => '',
       ));
 
     Javelin::initBehavior(
