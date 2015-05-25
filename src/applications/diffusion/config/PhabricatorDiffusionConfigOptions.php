@@ -23,6 +23,7 @@ final class PhabricatorDiffusionConfigOptions
     $custom_field_type = 'custom:PhabricatorCustomFieldConfigOptionType';
 
     $fields = array(
+      new PhabricatorCommitRepositoryField(),
       new PhabricatorCommitBranchesField(),
       new PhabricatorCommitTagsField(),
       new PhabricatorCommitMergedCommitsField(),
@@ -142,10 +143,11 @@ final class PhabricatorDiffusionConfigOptions
       $this->newOption('diffusion.fields', $custom_field_type, $default_fields)
         ->setCustomData(
           id(new PhabricatorRepositoryCommit())
-          ->getCustomFieldBaseClass())
-        ->setDescription(pht(
-          "Select and reorder diffusion fields.\n\n".
-          "These will primarily show up in Mail Notifications.")),
+            ->getCustomFieldBaseClass())
+        ->setDescription(
+          pht(
+            "Select and reorder diffusion fields.\n\n".
+            "These will primarily show up in Mail Notifications.")),
     );
   }
 
