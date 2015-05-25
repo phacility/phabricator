@@ -7,13 +7,14 @@ final class PhabricatorCommitBranchesField
     return 'diffusion:branches';
   }
 
-  public function shouldAppearInApplicationTransactions() {
+  public function shouldAppearInTransactionMail() {
     return true;
   }
 
-  public function buildApplicationTransactionMailBody(
-    PhabricatorApplicationTransaction $xaction,
-    PhabricatorMetaMTAMailBody $body) {
+  public function updateTransactionMailBody(
+    PhabricatorMetaMTAMailBody $body,
+    PhabricatorApplicationTransactionEditor $editor,
+    array $xactions) {
 
     $params = array(
       'contains' => $this->getObject()->getCommitIdentifier(),
