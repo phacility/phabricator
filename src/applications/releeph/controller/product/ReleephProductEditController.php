@@ -15,7 +15,6 @@ final class ReleephProductEditController extends ReleephProductController {
     $product = id(new ReleephProductQuery())
       ->setViewer($viewer)
       ->withIDs(array($this->productID))
-      ->needArcanistProjects(true)
       ->requireCapabilities(
         array(
           PhabricatorPolicyCapability::CAN_VIEW,
@@ -48,7 +47,7 @@ final class ReleephProductEditController extends ReleephProductController {
       $test_paths = $product->getDetail('testPaths', array());
     }
 
-    $arc_project_id = $product->getArcanistProjectID();
+    $repository_phid = $product->getRepositoryPHID();
 
     if ($request->isFormPost()) {
       $pusher_phids = $request->getArr('pushers');
@@ -92,8 +91,9 @@ final class ReleephProductEditController extends ReleephProductController {
         ->setDetail('branchTemplate', $branch_template)
         ->setDetail('testPaths', $test_paths);
 
-      $fake_commit_handle =
-        ReleephBranchTemplate::getFakeCommitHandleFor($arc_project_id, $viewer);
+      $fake_commit_handle = ReleephBranchTemplate::getFakeCommitHandleFor(
+        $repository_phid,
+        $viewer);
 
       if ($branch_template) {
         list($branch_name, $template_errors) = id(new ReleephBranchTemplate())
@@ -136,9 +136,9 @@ final class ReleephProductEditController extends ReleephProductController {
             $product->getRepository()->getName()))
       ->appendChild(
         id(new AphrontFormStaticControl())
-          ->setLabel(pht('Arc Project'))
+          ->setLabel(pht('Repository'))
           ->setValue(
-            $product->getArcanistProject()->getName()))
+            $product->getRepository()->getName()))
       ->appendChild(
         id(new AphrontFormStaticControl())
           ->setLabel(pht('Releeph Project PHID'))
@@ -179,7 +179,7 @@ final class ReleephProductEditController extends ReleephProductController {
     $branch_template_preview = id(new ReleephBranchPreviewView())
       ->setLabel(pht('Preview'))
       ->addControl('template', $branch_template_input)
-      ->addStatic('arcProjectID', $arc_project_id)
+      ->addStatic('repositoryPHID', $repository_phid)
       ->addStatic('isSymbolic', false)
       ->addStatic('projectName', $product->getName());
 

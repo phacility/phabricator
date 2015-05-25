@@ -25,19 +25,18 @@ final class ReleephRequestDifferentialCreateController
     }
     $this->revision = $diff_rev;
 
-    $arc_project = id(new PhabricatorRepositoryArcanistProject())
-      ->loadOneWhere('phid = %s', $this->revision->getArcanistProjectPHID());
+    $repository = $this->revision->getRepository();
 
     $projects = id(new ReleephProject())->loadAllWhere(
-      'arcanistProjectID = %d AND isActive = 1',
-      $arc_project->getID());
+      'repositoryPHID = %s AND isActive = 1',
+      $repository->getPHID());
     if (!$projects) {
       throw new Exception(
         pht(
-          "%s belongs to the '%s' Arcanist project, ".
+          "%s belongs to the '%s' repository, ".
           "which is not part of any Releeph project!",
           'D'.$this->revision->getID(),
-          $arc_project->getName()));
+          $repository->getMonogram()));
     }
 
     $branches = id(new ReleephBranch())->loadAllWhere(
