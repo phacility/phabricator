@@ -2387,8 +2387,6 @@ phutil_register_library_map(array(
     'PhabricatorRepositoriesSetupCheck' => 'applications/config/check/PhabricatorRepositoriesSetupCheck.php',
     'PhabricatorRepository' => 'applications/repository/storage/PhabricatorRepository.php',
     'PhabricatorRepositoryArcanistProject' => 'applications/repository/storage/PhabricatorRepositoryArcanistProject.php',
-    'PhabricatorRepositoryArcanistProjectDeleteController' => 'applications/repository/controller/PhabricatorRepositoryArcanistProjectDeleteController.php',
-    'PhabricatorRepositoryArcanistProjectEditController' => 'applications/repository/controller/PhabricatorRepositoryArcanistProjectEditController.php',
     'PhabricatorRepositoryArcanistProjectPHIDType' => 'applications/repository/phid/PhabricatorRepositoryArcanistProjectPHIDType.php',
     'PhabricatorRepositoryArcanistProjectQuery' => 'applications/repository/query/PhabricatorRepositoryArcanistProjectQuery.php',
     'PhabricatorRepositoryAuditRequest' => 'applications/repository/storage/PhabricatorRepositoryAuditRequest.php',
@@ -5832,8 +5830,6 @@ phutil_register_library_map(array(
       'PhabricatorPolicyInterface',
       'PhabricatorDestructibleInterface',
     ),
-    'PhabricatorRepositoryArcanistProjectDeleteController' => 'PhabricatorRepositoryController',
-    'PhabricatorRepositoryArcanistProjectEditController' => 'PhabricatorRepositoryController',
     'PhabricatorRepositoryArcanistProjectPHIDType' => 'PhabricatorPHIDType',
     'PhabricatorRepositoryArcanistProjectQuery' => 'PhabricatorCursorPagedPolicyAwareQuery',
     'PhabricatorRepositoryAuditRequest' => array(
