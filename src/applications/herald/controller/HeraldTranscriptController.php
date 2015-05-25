@@ -380,7 +380,10 @@ final class HeraldTranscriptController extends HeraldController {
         $item->setState(PHUIObjectItemView::STATE_FAIL);
       }
 
-      $rule = idx($action_names, $apply_xscript->getAction(), pht('Unknown'));
+      $rule = idx(
+        $action_names,
+        $apply_xscript->getAction(),
+        pht('Unknown Action "%s"', $apply_xscript->getAction()));
 
       $item->setHeader(pht('%s: %s', $rule, $target));
       $item->addAttribute($apply_xscript->getReason());

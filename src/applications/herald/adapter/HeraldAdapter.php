@@ -1203,7 +1203,15 @@ abstract class HeraldAdapter {
     $rule_global = HeraldRuleTypeConfig::RULE_TYPE_GLOBAL;
 
     $action_type = $action->getAction();
-    $action_name = idx($this->getActionNameMap($rule_global), $action_type);
+
+    $default = $this->isHeraldCustomKey($action_type)
+      ? pht('(Unknown Custom Action "%s") equals', $action_type)
+      : pht('(Unknown Action "%s") equals', $action_type);
+
+    $action_name = idx(
+      $this->getActionNameMap($rule_global),
+      $action_type,
+      $default);
 
     $target = $this->renderActionTargetAsText($action, $handles);
 
@@ -1525,7 +1533,9 @@ abstract class HeraldAdapter {
     $supported = $this->getActions($rule_type);
     $supported = array_fuse($supported);
     if (empty($supported[$action])) {
-      throw new Exception(
+      return new HeraldApplyTranscript(
+        $effect,
+        false,
         pht(
           'Adapter "%s" does not support action "%s" for rule type "%s".',
           get_class($this),
@@ -1548,7 +1558,9 @@ abstract class HeraldAdapter {
     $result = $this->handleCustomHeraldEffect($effect);
 
     if (!$result) {
-      throw new Exception(
+      return new HeraldApplyTranscript(
+        $effect,
+        false,
         pht(
           'No custom action exists to handle rule action "%s".',
           $action));

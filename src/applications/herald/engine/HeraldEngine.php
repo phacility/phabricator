@@ -272,6 +272,16 @@ final class HeraldEngine {
       $result = false;
     } else {
       foreach ($conditions as $condition) {
+        try {
+          $object->getHeraldField($condition->getFieldName());
+        } catch (Exception $ex) {
+          $reason = pht(
+            'Field "%s" does not exist!',
+            $condition->getFieldName());
+          $result = false;
+          break;
+        }
+
         $match = $this->doesConditionMatch($rule, $condition, $object);
 
         if (!$all && $match) {
