@@ -90,10 +90,7 @@ final class PHUICalendarDayView extends AphrontView {
     }
 
     $this->events = msort($this->events, 'getEpochStart');
-
-    if (!$this->events) {
-      $first_event_hour = $this->getDateTime()->setTime(8, 0, 0);
-    }
+    $first_event_hour = $this->getDateTime()->setTime(8, 0, 0);
 
     foreach ($this->events as $event) {
       if ($event->getIsAllDay()) {
