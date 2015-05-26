@@ -184,14 +184,14 @@ final class AphrontFormDateControl extends AphrontFormControl {
         'sigil' => 'date-input',
         'value' => $this->getDateInputValue(),
         'type'  => 'text',
-        'class' => 'aphront-form-date-time-input',
+        'class' => 'aphront-form-date-input',
       ),
       '');
 
     $date_div = javelin_tag(
       'div',
       array(
-        'class' => 'aphront-form-date-time-input-container',
+        'class' => 'aphront-form-date-input-container',
       ),
       $date_sel);
 
@@ -225,7 +225,7 @@ final class AphrontFormDateControl extends AphrontFormControl {
         'sigil' => 'time-input',
         'value' => $this->getTimeInputValue(),
         'type'  => 'text',
-        'class' => 'aphront-form-date-time-input',
+        'class' => 'aphront-form-time-input',
       ),
       '');
 
@@ -233,7 +233,7 @@ final class AphrontFormDateControl extends AphrontFormControl {
       'div',
       array(
         'id' => $time_id,
-        'class' => 'aphront-form-date-time-input-container',
+        'class' => 'aphront-form-time-input-container',
       ),
       $time_sel);
 
