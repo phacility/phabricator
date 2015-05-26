@@ -64,7 +64,9 @@ JX.behavior('fancy-datepicker', function() {
     JX.DOM.remove(picker);
     picker = null;
     JX.DOM.alterClass(root, 'picker-open', false);
-    e.kill();
+    if (e) {
+      e.kill();
+    }
 
     root = null;
   };
@@ -167,6 +169,11 @@ JX.behavior('fancy-datepicker', function() {
     if (isNaN(written_date.getTime())) {
       return new Date();
     } else {
+      //year 01 should be 2001, not 1901
+      if (written_date.getYear() < 70) {
+        value_y += 2000;
+        written_date = new Date(value_y, value_m-1, value_d);
+      }
       return written_date;
     }
   }
@@ -253,6 +260,11 @@ JX.behavior('fancy-datepicker', function() {
       if (!data.value) {
         return;
       }
+
+      var valid_date = getValidDate();
+      value_y = valid_date.getYear() + 1900;
+      value_m = valid_date.getMonth() + 1;
+      value_d = valid_date.getDate();
 
       var p = data.value.split(':');
       switch (p[0]) {
