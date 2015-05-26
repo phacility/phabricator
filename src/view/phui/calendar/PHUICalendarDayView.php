@@ -91,6 +91,7 @@ final class PHUICalendarDayView extends AphrontView {
 
     $this->events = msort($this->events, 'getEpochStart');
     $first_event_hour = $this->getDateTime()->setTime(8, 0, 0);
+    $midnight = $this->getDateTime()->setTime(0, 0, 0);
 
     foreach ($this->events as $event) {
       if ($event->getIsAllDay()) {
@@ -99,21 +100,17 @@ final class PHUICalendarDayView extends AphrontView {
       if ($event->getEpochStart() <= $day_end_epoch &&
         $event->getEpochEnd() > $day_start_epoch) {
 
-        if ($first_event_hour === null) {
+        if ($event->getEpochStart() < $midnight->format('U') &&
+          $event->getEpochEnd() > $midnight->format('U')) {
+          $first_event_hour = clone $midnight;
+        }
+
+        if ($event->getEpochStart() < $first_event_hour->format('U') &&
+          $event->getEpochStart() > $midnight->format('U')) {
           $first_event_hour = PhabricatorTime::getDateTimeFromEpoch(
             $event->getEpochStart(),
             $viewer);
-
-          $midnight = $this->getDateTime()->setTime(0, 0, 0);
-
-          if ($first_event_hour->format('U') < $midnight->format('U')) {
-            $first_event_hour = clone $midnight;
-          }
-
-          $eight_am = $this->getDateTime()->setTime(8, 0, 0);
-          if ($eight_am->format('U') < $first_event_hour->format('U')) {
-            $first_event_hour = clone $eight_am;
-          }
+          $first_event_hour->setTime($first_event_hour->format('h'), 0, 0);
         }
 
         $event_start = max($event->getEpochStart(), $day_start_epoch);
